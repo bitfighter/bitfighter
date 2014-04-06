@@ -960,7 +960,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    // 019b: Nothing to update
 
    // 020:
-   if(previousVersion < VERSION_020)
+   if(previousVersion < VERSION_019d)
    {
       // VerboseHelpMessages was removed
       GameSettings::iniFile.deleteKey("Settings", "VerboseHelpMessages");

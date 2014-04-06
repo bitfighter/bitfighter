@@ -1975,8 +1975,8 @@ void HostMenuUserInterface::saveSettings()
    settings->setHostName (getMenuItem(OPT_NAME)->getValue(),  true);
    settings->setHostDescr(getMenuItem(OPT_DESCR)->getValue(), true);
 
-   settings->getIniSettings()->mSettings.setVal(IniKey::AllowGetMap,   getMenuItem(OPT_GETMAP)->getIntValue() != 0);
-   settings->getIniSettings()->mSettings.setVal(IniKey::GameRecording, getMenuItem(OPT_RECORD)->getIntValue() != 0);
+   settings->getIniSettings()->mSettings.setVal<YesNo>(IniKey::AllowGetMap,   getMenuItem(OPT_GETMAP)->getIntValue() ? Yes : No);
+   settings->getIniSettings()->mSettings.setVal<YesNo>(IniKey::GameRecording, getMenuItem(OPT_RECORD)->getIntValue() ? Yes : No);
 
    saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
 }
