@@ -594,7 +594,7 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
 }
 
 
-// Only called while loading keys from the INI
+// Only called while loading keys from the INI; Note that this function might not be able to be modernized!
 void setDefaultEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
 #define EDITOR_BINDING(editorEnumVal, b, c, defaultEditorKeyboardBinding)                                       \
@@ -636,6 +636,7 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
 }
 
 
+// Note that this function might not be able to be modernized!
 static void writeEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section)
 {
    string key;
