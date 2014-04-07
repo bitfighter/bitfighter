@@ -14,7 +14,9 @@ namespace Zap
 {
 
 class ServerGame;
+#ifndef ZAP_DEDICATED
 class ClientGame;
+#endif
 
 // Singleton class for keeping track of various Game objects
 class GameManager
@@ -30,7 +32,9 @@ public:
 
 private:
    static ServerGame *mServerGame;
+#ifndef ZAP_DEDICATED
    static Vector<ClientGame *> mClientGames;
+#endif
 
    static HostingModePhase mHostingModePhase;
 
@@ -45,10 +49,12 @@ public:
    static void idleServerGame(U32 timeDelta);
 
    // ClientGame related
+#ifndef ZAP_DEDICATED
    static const Vector<ClientGame *> *getClientGames();
    static void addClientGame(ClientGame *clientGame);
    static void deleteClientGame(S32 index);     // Delete specified game
    static void deleteClientGames();             // Delete all games
+#endif
 
    static void idleClientGames(U32 timeDelta);
 
