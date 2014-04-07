@@ -256,7 +256,9 @@ void shutdownBitfighter();    // Forward declaration
 // If there are no client games, delete it and return to the OS.
 void checkIfServerGameIsShuttingDown(U32 timeDelta)
 {
+#ifndef ZAP_DEDICATED
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+#endif
    ServerGame *serverGame = GameManager::getServerGame();
 
    string shutdownReason;

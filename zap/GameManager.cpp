@@ -19,7 +19,9 @@ namespace Zap
 
 // Declare statics
 ServerGame *GameManager::mServerGame = NULL;
-Vector<ClientGame *> GameManager::mClientGames;
+#ifndef ZAP_DEDICATED
+   Vector<ClientGame *> GameManager::mClientGames;
+#endif
 GameManager::HostingModePhase GameManager::mHostingModePhase = GameManager::NotHosting;
 
 
@@ -69,7 +71,7 @@ void GameManager::idleServerGame(U32 timeDelta)
 
 /////
 
-
+#ifndef ZAP_DEDICATED
 const Vector<ClientGame *> *GameManager::getClientGames()
 {
    return &mClientGames;
@@ -92,6 +94,7 @@ void GameManager::addClientGame(ClientGame *clientGame)
 {
    mClientGames.push_back(clientGame);
 }
+#endif
 
 
 void GameManager::idleClientGames(U32 timeDelta)
@@ -101,7 +104,6 @@ void GameManager::idleClientGames(U32 timeDelta)
       mClientGames[i]->idle(timeDelta);
 #endif
 }
-
 
 void GameManager::idle(U32 timeDelta)
 {
