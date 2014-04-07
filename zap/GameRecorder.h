@@ -15,13 +15,14 @@
 namespace Zap {
 
 class ServerGame;
+class WriteBufferThread;
 
 class GameRecorderServer : public GameConnection
 {
    typedef GhostConnection Parent;
 
 private:
-   FILE *mFile;
+   WriteBufferThread *mWriter;
    ServerGame *mGame;
    TNL::NetObject mNetObj;
    U32 mMilliSeconds;
