@@ -90,13 +90,11 @@ public:
          {
 
             fwrite(&buffer[threadPos], 1, lastPos - threadPos, f);
-            printf("%i\n", lastPos - threadPos);
             threadPos = 0;
          }
          else if(currPos1 > threadPos)
          {
             fwrite(&buffer[threadPos], 1, currPos1 - threadPos, f);
-            printf("%i\n", currPos1 - threadPos);
             threadPos = currPos1;
          }
          else
