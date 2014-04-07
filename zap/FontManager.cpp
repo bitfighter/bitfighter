@@ -361,7 +361,7 @@ F32 FontManager::getStrokeFontStringLength(const SFG_StrokeFont *font, const cha
    F32 length = 0.0;
    F32 lineLength = 0.0;
 
-   while(char c = *string++)
+   while(unsigned char c = *string++)
       if(c < font->Quantity )
       {
          if(c == '\n')  // EOL; reset the length of this line 
