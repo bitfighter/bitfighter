@@ -12,6 +12,9 @@
 #include "InputModeEnum.h"
 #include "InputCodeEnum.h"
 
+#include "Color.h"
+#include "tnlVector.h"
+
 using namespace TNL;
 using namespace Zap::UI;
 
@@ -35,6 +38,13 @@ struct OverlayMenuItem
    const char *help;          // An additional bit of help text, also displayed on menu
    const Color *helpColor;    // Pointer to color with which to render the item
    const Color *buttonOverrideColor;
+};
+
+
+struct HelperMenuLegendItem {
+   HelperMenuLegendItem(const string &itemText, const Color &itemColor) : text(itemText), color(itemColor) { }
+   string text;
+   Color color;
 };
 
 
@@ -67,7 +77,7 @@ private:
    // Some render helpers
    void drawMenuItems(const OverlayMenuItem *items, S32 count, S32 yPos, S32 bottom, bool newItems, S32 horizOffset);
    void renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &baseColor, InputMode inputMode);
-   void renderLegend(S32 xPos, S32 yPos, const char **legendtext, const Color **legendColors, S32 legendCount);
+   void renderLegend(S32 xPos, S32 yPos, const Vector<HelperMenuLegendItem> &legend);
 
    virtual bool getActivationKeyClosesHelper();
 
@@ -80,7 +90,7 @@ protected:
    void drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, 
                      const OverlayMenuItem *prevItems, S32 prevCount,
                      S32 widthOfButtons, S32 widthOfTextBlock,
-                     const char **legendText = NULL, const Color **legendColors = NULL, S32 legendCount = 0);
+                     const Vector<HelperMenuLegendItem> *legend = NULL);
 
    ClientGame *getGame() const;
 

@@ -116,7 +116,7 @@ extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, 
                               const OverlayMenuItem *prevItems, S32 prevCount,
                               S32 widthOfButtons, S32 widthOfTextBlock,
-                              const char **legendText, const Color **legendColors, S32 legendCount)
+                              const Vector<HelperMenuLegendItem> *legend)
 {
    glPushMatrix();
    glTranslate(getInsideEdge(), 0, 0);
@@ -130,15 +130,13 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
       if(items[i].showOnMenu)
          displayItems++;
 
-   bool hasLegend = legendCount > 0;
-
    const S32 grayLineBuffer = 10;
 
    // Height of menu parts
    const S32 topPadding        = MENU_PADDING;
    const S32 titleHeight       = TITLE_FONT_SIZE + grayLineBuffer ;
    const S32 itemsHeight       = displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + MENU_PADDING + grayLineBuffer;
-   const S32 legendHeight      = (hasLegend ? MENU_LEGEND_FONT_SIZE + MENU_FONT_SPACING : 0); 
+   const S32 legendHeight      = (legend ? MENU_LEGEND_FONT_SIZE + MENU_FONT_SPACING : 0); 
    const S32 instructionHeight = MENU_LEGEND_FONT_SIZE;
    const S32 bottomPadding     = MENU_PADDING;
 
@@ -196,8 +194,8 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    // of the bottom fo the menu, newBottom is the target bottom location after the transition has ocurred.
    yPos += menuBottom - newBottom;
 
-   if(hasLegend)
-      renderLegend(grayLineCenter, yPos - legendHeight - 3, legendText, legendColors, legendCount);
+   if(legend)
+      renderLegend(grayLineCenter, yPos - legendHeight - 3, *legend);
 
    yPos += legendHeight;
 
@@ -333,23 +331,25 @@ void HelperMenu::renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &base
 }
 
 
-void HelperMenu::renderLegend(S32 x, S32 y, const char **legendText, const Color **legendColors, S32 legendCount)
+void HelperMenu::renderLegend(S32 x, S32 y, const Vector<HelperMenuLegendItem> &legend)
 {
+   const S32 SPACE_BETWEEN_LEGEND_ITEMS = 7;
+
    S32 width = 0;
    y += MENU_FONT_SPACING;
 
-   const S32 SPACE_BETWEEN_LEGEND_ITEMS = 7;
-
    // First, get the total width so we can center poperly
-   for(S32 i = 0; i < legendCount; i++)
-      width += getStringWidth(MENU_LEGEND_FONT_SIZE, legendText[i]) + SPACE_BETWEEN_LEGEND_ITEMS;
+   for(S32 i = 0; i < legend.size(); i++)
+      width += getStringWidth(MENU_LEGEND_FONT_SIZE, legend[i].text.c_str()) + SPACE_BETWEEN_LEGEND_ITEMS;
+
+   width -= SPACE_BETWEEN_LEGEND_ITEMS;
 
    x -= width / 2;
 
-   for(S32 i = 0; i < legendCount; i++)
+   for(S32 i = 0; i < legend.size(); i++)
    {
-      glColor(legendColors[i]);
-      x += drawStringAndGetWidth(x, y, MENU_LEGEND_FONT_SIZE, legendText[i]) + SPACE_BETWEEN_LEGEND_ITEMS;
+      glColor(legend[i].color);
+      x += drawStringAndGetWidth(x, y, MENU_LEGEND_FONT_SIZE, legend[i].text.c_str()) + SPACE_BETWEEN_LEGEND_ITEMS;
    }
 }
 

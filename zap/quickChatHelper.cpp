@@ -20,10 +20,6 @@
 namespace Zap
 {
 
-static const char  *quickChatLegendText[]   = { "Team Message",         "Global Message"         };
-static const Color *quickChatLegendColors[] = { &Colors::teamChatColor, &Colors::globalChatColor };
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -92,12 +88,17 @@ void QuickChatHelper::render()
       return;
    }
 
+   static const HelperMenuLegendItem legendItems[] = { HelperMenuLegendItem("Team Message",   Colors::teamChatColor  ), 
+                                                       HelperMenuLegendItem("Global Message", Colors::globalChatColor) };
+
+   static const Vector<HelperMenuLegendItem> legend(legendItems, ARRAYSIZE(legendItems));
+
    // Protect against an empty oldMenuItems list, as will happen when this is called at the top level
    const OverlayMenuItem *oldItem = oldMenuItems->size() > 0 ? &oldMenuItems->get(0) : NULL;
    drawItemMenu("QuickChat menu", &menuItems->get(0), menuItems->size(), 
                 oldItem, oldMenuItems->size(), 
                 mQuickChatButtonsWidth, mQuickChatItemsDisplayWidth,
-                quickChatLegendText, quickChatLegendColors, ARRAYSIZE(quickChatLegendText));
+                &legend);
 }
 
 
