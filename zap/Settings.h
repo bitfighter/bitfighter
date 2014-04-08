@@ -100,11 +100,12 @@ public:
    static string toString(S32 val);
    static string toString(U32 val);
    static string toString(F32 val);
-   static string toString(YesNo yesNo);
-   static string toString(RelAbs relAbs);
-   static string toString(DisplayMode displayMode);
-   static string toString(ColorEntryMode colorMode);
-   static string toString(GoalZoneFlashStyle flashStyle);
+   static string toString(MessageType val);
+   static string toString(YesNo val);
+   static string toString(RelAbs val);
+   static string toString(DisplayMode val);
+   static string toString(ColorEntryMode val);
+   static string toString(GoalZoneFlashStyle val);
    static string toString(const Color &color);
 };
 

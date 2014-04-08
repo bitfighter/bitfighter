@@ -298,11 +298,11 @@ void CTFGameType::onGameOver()
             continue;
 
          // Test for tie
-         if(static_cast<Team*>(getGame()->getTeam(i))->getScore() == getLeadingScore())
+         if(static_cast<Team *>(getGame()->getTeam(i))->getScore() == getLeadingScore())
             tiedGame = true;
 
          // Test for exists 1 team with winning score minus 1
-         if(static_cast<Team*>(getGame()->getTeam(i))->getScore() == getLeadingScore() - 1)
+         if(static_cast<Team *>(getGame()->getTeam(i))->getScore() == getLeadingScore() - 1)
             secondPlaceIsMinusOne = true;
       }
 

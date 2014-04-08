@@ -187,6 +187,20 @@ enum RelAbs {
 };
 
 
+#define MESSAGE_TYPE_TABLE \
+MESSAGE_TYPE_ITEM(GlobalMessageType,  "Global"  ) \
+MESSAGE_TYPE_ITEM(TeamMessageType,    "Team"    ) \
+MESSAGE_TYPE_ITEM(CommandMessageType, "Command" ) \
+MESSAGE_TYPE_ITEM(PrivateMessageType, "Private" ) \
+
+// Gernerate an enum
+enum MessageType {
+#define MESSAGE_TYPE_ITEM(enumVal, b) enumVal,
+    MESSAGE_TYPE_TABLE
+#undef MESSAGE_TYPE_ITEM
+};
+
+
 };
 
 #endif /* _CONFIG_ENUM_H_ */

@@ -686,6 +686,32 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 }
 
 
+static void insertQuickChatMessageSection(CIniFile *ini, S32 group, MessageType messageType, 
+                                   InputCode keyCode, InputCode buttonCode, 
+                                   const string &caption)
+{
+   const string key = "QuickChatMessagesGroup" + itos(group);
+
+   ini->SetValue(key, "Key", InputCodeManager::inputCodeToString(keyCode));
+   ini->SetValue(key, "Button", InputCodeManager::inputCodeToString(buttonCode));
+   ini->SetValue(key, "MessageType", Evaluator::toString(messageType));
+   ini->SetValue(key, "Caption", caption);
+}
+
+
+static void insertQuickChatMessage(CIniFile *ini, S32 group, S32 messageId, MessageType messageType, 
+                                   InputCode keyCode, InputCode buttonCode, 
+                                   const string &caption, const string &message)
+{
+   const string key = "QuickChatMessagesGroup" + itos(group) + "_Message" + itos(messageId);
+
+   ini->SetValue(key, "Key", InputCodeManager::inputCodeToString(keyCode));
+   ini->SetValue(key, "Button", InputCodeManager::inputCodeToString(buttonCode));
+   ini->SetValue(key, "MessageType", Evaluator::toString(messageType));
+   ini->SetValue(key, "Caption", caption);
+   ini->SetValue(key, "Message", message);
+}
+
 /*  INI file looks a little like this:
    [QuickChatMessagesGroup1]
    Key=F
@@ -838,7 +864,7 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
       addComment(" ");
       addComment(" Note that you can also use the QuickChat functionality to create shortcuts to commonly run /commands");
       addComment(" by setting the MessageType to \"Command\".  For example, if you define a QuickChat message to be");
-      addComment(" \"addbots 2\" (without quotes, and without a slash), and the MessageType to \"Command\" (also");
+      addComment(" \"addbots 2\" (without quotes), and the MessageType to \"Command\" (also");
       addComment(" without quotes), 2 robots will be added to the game when you press the appropriate keys.  You can");
       addComment(" use this functionality to assign commonly used commands to joystick buttons or short keyboard");
       addComment(" sequences.");
@@ -856,328 +882,67 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
          return;
    }
 
-   ini->SetValue("QuickChatMessagesGroup1", "Key", InputCodeManager::inputCodeToString(KEY_G));
-   ini->SetValue("QuickChatMessagesGroup1", "Button", InputCodeManager::inputCodeToString(BUTTON_6));
-   ini->SetValue("QuickChatMessagesGroup1", "Caption", "Global");
-   ini->SetValue("QuickChatMessagesGroup1", "MessageType", "Global");
+   insertQuickChatMessageSection(ini, 1, GlobalMessageType, KEY_G, BUTTON_6, "Global");
+      insertQuickChatMessage(ini, 1, 1, GlobalMessageType, KEY_A, BUTTON_1,    "No Problem",            "No Problemo.");
+      insertQuickChatMessage(ini, 1, 2, GlobalMessageType, KEY_T, BUTTON_2,    "Thanks",                "Thanks.");
+      insertQuickChatMessage(ini, 1, 3, GlobalMessageType, KEY_X, KEY_UNKNOWN, "You idiot!",            "You idiot!");
+      insertQuickChatMessage(ini, 1, 4, GlobalMessageType, KEY_E, BUTTON_3,    "Duh",                   "Duh.");
+      insertQuickChatMessage(ini, 1, 5, GlobalMessageType, KEY_C, KEY_UNKNOWN, "Crap",                  "Ah Crap!");
+      insertQuickChatMessage(ini, 1, 6, GlobalMessageType, KEY_D, BUTTON_4,    "Damnit",                "Dammit!");
+      insertQuickChatMessage(ini, 1, 7, GlobalMessageType, KEY_S, BUTTON_5,    "Shazbot",               "Shazbot!");
+      insertQuickChatMessage(ini, 1, 8, GlobalMessageType, KEY_Z, BUTTON_6,    "Doh",                   "Doh!");
 
-      ini->SetValue("QuickChatMessagesGroup1_Message1", "Key", InputCodeManager::inputCodeToString(KEY_A));
-      ini->SetValue("QuickChatMessagesGroup1_Message1", "Button", InputCodeManager::inputCodeToString(BUTTON_1));
-      ini->SetValue("QuickChatMessagesGroup1_Message1", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup1_Message1", "Caption", "No Problem");
-      ini->SetValue("QuickChatMessagesGroup1_Message1", "Message", "No Problemo.");
+   insertQuickChatMessageSection(ini, 2, TeamMessageType, KEY_D, BUTTON_5, "Defense");
+      insertQuickChatMessage(ini, 2, 1, TeamMessageType, KEY_G, KEY_UNKNOWN,   "Defend Our Base",       "Defend our base.");
+      insertQuickChatMessage(ini, 2, 2, TeamMessageType, KEY_D, BUTTON_1,      "Defending Base",        "Defending our base.");
+      insertQuickChatMessage(ini, 2, 3, TeamMessageType, KEY_Q, BUTTON_2,      "Is Base Clear?",        "Is our base clear?");
+      insertQuickChatMessage(ini, 2, 4, TeamMessageType, KEY_C, BUTTON_3,      "Base Clear",            "Base is secured.");
+      insertQuickChatMessage(ini, 2, 5, TeamMessageType, KEY_T, BUTTON_4,      "Base Taken",            "Base is taken.");
+      insertQuickChatMessage(ini, 2, 6, TeamMessageType, KEY_N, BUTTON_5,      "Need More Defense",     "We need more defense.");
+      insertQuickChatMessage(ini, 2, 7, TeamMessageType, KEY_E, BUTTON_6,      "Enemy Attacking Base",  "The enemy is attacking our base.");
+      insertQuickChatMessage(ini, 2, 8, TeamMessageType, KEY_A, KEY_UNKNOWN,   "Attacked",              "We are being attacked.");
 
-      ini->SetValue("QuickChatMessagesGroup1_Message2", "Key", InputCodeManager::inputCodeToString(KEY_T));
-      ini->SetValue("QuickChatMessagesGroup1_Message2", "Button", InputCodeManager::inputCodeToString(BUTTON_2));
-      ini->SetValue("QuickChatMessagesGroup1_Message2", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup1_Message2", "Caption", "Thanks");
-      ini->SetValue("QuickChatMessagesGroup1_Message2", "Message", "Thanks.");
+   insertQuickChatMessageSection(ini, 3, TeamMessageType, KEY_F, BUTTON_4, "Flag");
+      insertQuickChatMessage(ini, 3, 1, TeamMessageType, KEY_F, BUTTON_1,      "Get enemy flag",        "Get the enemy flag.");
+      insertQuickChatMessage(ini, 3, 2, TeamMessageType, KEY_R, BUTTON_2,      "Return our flag",       "Return our flag to base.");
+      insertQuickChatMessage(ini, 3, 3, TeamMessageType, KEY_S, BUTTON_3,      "Flag secure",           "Our flag is secure.");
+      insertQuickChatMessage(ini, 3, 4, TeamMessageType, KEY_H, BUTTON_4,      "Have enemy flag",       "I have the enemy flag.");
+      insertQuickChatMessage(ini, 3, 5, TeamMessageType, KEY_E, BUTTON_5,      "Enemy has flag",        "The enemy has our flag!");
+      insertQuickChatMessage(ini, 3, 6, TeamMessageType, KEY_G, BUTTON_6,      "Flag gone",             "Our flag is not in the base!");
 
-      ini->SetValue("QuickChatMessagesGroup1_Message3", "Key", InputCodeManager::inputCodeToString(KEY_X));
-      ini->SetValue("QuickChatMessagesGroup1_Message3", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup1_Message3", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup1_Message3", "Caption", "You idiot!");
-      ini->SetValue("QuickChatMessagesGroup1_Message3", "Message", "You idiot!");
+   insertQuickChatMessageSection(ini, 4, TeamMessageType, KEY_S, KEY_UNKNOWN, "Incoming Enemies - Direction");
+      insertQuickChatMessage(ini, 4, 1, TeamMessageType, KEY_S, KEY_UNKNOWN,   "Incoming South",        "*** INCOMING SOUTH ***");
+      insertQuickChatMessage(ini, 4, 2, TeamMessageType, KEY_E, KEY_UNKNOWN,   "Incoming East",         "*** INCOMING EAST  ***");
+      insertQuickChatMessage(ini, 4, 3, TeamMessageType, KEY_W, KEY_UNKNOWN,   "Incoming West",         "*** INCOMING WEST  ***");
+      insertQuickChatMessage(ini, 4, 4, TeamMessageType, KEY_N, KEY_UNKNOWN,   "Incoming North",        "*** INCOMING NORTH ***");
+      insertQuickChatMessage(ini, 4, 5, TeamMessageType, KEY_V, KEY_UNKNOWN,   "Incoming Enemies",      "Incoming enemies!");
 
-      ini->SetValue("QuickChatMessagesGroup1_Message4", "Key", InputCodeManager::inputCodeToString(KEY_E));
-      ini->SetValue("QuickChatMessagesGroup1_Message4", "Button", InputCodeManager::inputCodeToString(BUTTON_3));
-      ini->SetValue("QuickChatMessagesGroup1_Message4", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup1_Message4", "Caption", "Duh");
-      ini->SetValue("QuickChatMessagesGroup1_Message4", "Message", "Duh.");
+   insertQuickChatMessageSection(ini, 5, TeamMessageType, KEY_V, BUTTON_3, "Quick");
+      insertQuickChatMessage(ini, 5, 1, TeamMessageType, KEY_J, KEY_UNKNOWN,   "Capture the objective", "Capture the objective.");
+      insertQuickChatMessage(ini, 5, 2, TeamMessageType, KEY_O, KEY_UNKNOWN,   "Go on the offensive",   "Go on the offensive.");
+      insertQuickChatMessage(ini, 5, 3, TeamMessageType, KEY_A, BUTTON_1,      "Attack!",               "Attack!");
+      insertQuickChatMessage(ini, 5, 4, TeamMessageType, KEY_W, BUTTON_2,      "Wait for signal",       "Wait for my signal to attack.");
+      insertQuickChatMessage(ini, 5, 5, TeamMessageType, KEY_V, BUTTON_3,      "Help!",                 "Help!");
+      insertQuickChatMessage(ini, 5, 6, TeamMessageType, KEY_E, BUTTON_4,      "Regroup",               "Regroup.");
+      insertQuickChatMessage(ini, 5, 7, TeamMessageType, KEY_G, BUTTON_5,      "Going offense",         "Going offense.");
+      insertQuickChatMessage(ini, 5, 8, TeamMessageType, KEY_Z, BUTTON_6,      "Move out",              "Move out.");
 
-      ini->SetValue("QuickChatMessagesGroup1_Message5", "Key", InputCodeManager::inputCodeToString(KEY_C));
-      ini->SetValue("QuickChatMessagesGroup1_Message5", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup1_Message5", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup1_Message5", "Caption", "Crap");
-      ini->SetValue("QuickChatMessagesGroup1_Message5", "Message", "Ah Crap!");
+   insertQuickChatMessageSection(ini, 6, TeamMessageType, KEY_R, BUTTON_2, "Reponses");
+      insertQuickChatMessage(ini, 6, 1, TeamMessageType, KEY_A, BUTTON_1,      "Acknowledge",           "Acknowledged.");
+      insertQuickChatMessage(ini, 6, 2, TeamMessageType, KEY_N, BUTTON_2,      "No",                    "No.");
+      insertQuickChatMessage(ini, 6, 3, TeamMessageType, KEY_Y, BUTTON_3,      "Yes",                   "Yes.");
+      insertQuickChatMessage(ini, 6, 4, TeamMessageType, KEY_S, BUTTON_4,      "Sorry",                 "Sorry.");
+      insertQuickChatMessage(ini, 6, 5, TeamMessageType, KEY_T, BUTTON_5,      "Thanks",                "Thanks.");
+      insertQuickChatMessage(ini, 6, 6, TeamMessageType, KEY_D, BUTTON_6,      "Don't know",            "I don't know.");
 
-      ini->SetValue("QuickChatMessagesGroup1_Message6", "Key", InputCodeManager::inputCodeToString(KEY_D));
-      ini->SetValue("QuickChatMessagesGroup1_Message6", "Button", InputCodeManager::inputCodeToString(BUTTON_4));
-      ini->SetValue("QuickChatMessagesGroup1_Message6", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup1_Message6", "Caption", "Damnit");
-      ini->SetValue("QuickChatMessagesGroup1_Message6", "Message", "Dammit!");
-
-      ini->SetValue("QuickChatMessagesGroup1_Message7", "Key", InputCodeManager::inputCodeToString(KEY_S));
-      ini->SetValue("QuickChatMessagesGroup1_Message7", "Button", InputCodeManager::inputCodeToString(BUTTON_5));
-      ini->SetValue("QuickChatMessagesGroup1_Message7", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup1_Message7", "Caption", "Shazbot");
-      ini->SetValue("QuickChatMessagesGroup1_Message7", "Message", "Shazbot!");
-
-      ini->SetValue("QuickChatMessagesGroup1_Message8", "Key", InputCodeManager::inputCodeToString(KEY_Z));
-      ini->SetValue("QuickChatMessagesGroup1_Message8", "Button", InputCodeManager::inputCodeToString(BUTTON_6));
-      ini->SetValue("QuickChatMessagesGroup1_Message8", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup1_Message8", "Caption", "Doh");
-      ini->SetValue("QuickChatMessagesGroup1_Message8", "Message", "Doh!");
-
-   ini->SetValue("QuickChatMessagesGroup2", "Key", InputCodeManager::inputCodeToString(KEY_D));
-   ini->SetValue("QuickChatMessagesGroup2", "Button", InputCodeManager::inputCodeToString(BUTTON_5));
-   ini->SetValue("QuickChatMessagesGroup2", "MessageType", "Team");
-   ini->SetValue("QuickChatMessagesGroup2", "Caption", "Defense");
-
-      ini->SetValue("QuickChatMessagesGroup2_Message1", "Key", InputCodeManager::inputCodeToString(KEY_G));
-      ini->SetValue("QuickChatMessagesGroup2_Message1", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup2_Message1", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup2_Message1", "Caption", "Defend Our Base");
-      ini->SetValue("QuickChatMessagesGroup2_Message1", "Message", "Defend our base.");
-
-      ini->SetValue("QuickChatMessagesGroup2_Message2", "Key", InputCodeManager::inputCodeToString(KEY_D));
-      ini->SetValue("QuickChatMessagesGroup2_Message2", "Button", InputCodeManager::inputCodeToString(BUTTON_1));
-      ini->SetValue("QuickChatMessagesGroup2_Message2", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup2_Message2", "Caption", "Defending Base");
-      ini->SetValue("QuickChatMessagesGroup2_Message2", "Message", "Defending our base.");
-
-      ini->SetValue("QuickChatMessagesGroup2_Message3", "Key", InputCodeManager::inputCodeToString(KEY_Q));
-      ini->SetValue("QuickChatMessagesGroup2_Message3", "Button", InputCodeManager::inputCodeToString(BUTTON_2));
-      ini->SetValue("QuickChatMessagesGroup2_Message3", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup2_Message3", "Caption", "Is Base Clear?");
-      ini->SetValue("QuickChatMessagesGroup2_Message3", "Message", "Is our base clear?");
-
-      ini->SetValue("QuickChatMessagesGroup2_Message4", "Key", InputCodeManager::inputCodeToString(KEY_C));
-      ini->SetValue("QuickChatMessagesGroup2_Message4", "Button", InputCodeManager::inputCodeToString(BUTTON_3));
-      ini->SetValue("QuickChatMessagesGroup2_Message4", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup2_Message4", "Caption", "Base Clear");
-      ini->SetValue("QuickChatMessagesGroup2_Message4", "Message", "Base is secured.");
-
-      ini->SetValue("QuickChatMessagesGroup2_Message5", "Key", InputCodeManager::inputCodeToString(KEY_T));
-      ini->SetValue("QuickChatMessagesGroup2_Message5", "Button", InputCodeManager::inputCodeToString(BUTTON_4));
-      ini->SetValue("QuickChatMessagesGroup2_Message5", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup2_Message5", "Caption", "Base Taken");
-      ini->SetValue("QuickChatMessagesGroup2_Message5", "Message", "Base is taken.");
-
-      ini->SetValue("QuickChatMessagesGroup2_Message6", "Key", InputCodeManager::inputCodeToString(KEY_N));
-      ini->SetValue("QuickChatMessagesGroup2_Message6", "Button", InputCodeManager::inputCodeToString(BUTTON_5));
-      ini->SetValue("QuickChatMessagesGroup2_Message6", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup2_Message6", "Caption", "Need More Defense");
-      ini->SetValue("QuickChatMessagesGroup2_Message6", "Message", "We need more defense.");
-
-      ini->SetValue("QuickChatMessagesGroup2_Message7", "Key", InputCodeManager::inputCodeToString(KEY_E));
-      ini->SetValue("QuickChatMessagesGroup2_Message7", "Button", InputCodeManager::inputCodeToString(BUTTON_6));
-      ini->SetValue("QuickChatMessagesGroup2_Message7", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup2_Message7", "Caption", "Enemy Attacking Base");
-      ini->SetValue("QuickChatMessagesGroup2_Message7", "Message", "The enemy is attacking our base.");
-
-      ini->SetValue("QuickChatMessagesGroup2_Message8", "Key", InputCodeManager::inputCodeToString(KEY_A));
-      ini->SetValue("QuickChatMessagesGroup2_Message8", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup2_Message8", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup2_Message8", "Caption", "Attacked");
-      ini->SetValue("QuickChatMessagesGroup2_Message8", "Message", "We are being attacked.");
-
-   ini->SetValue("QuickChatMessagesGroup3", "Key", InputCodeManager::inputCodeToString(KEY_F));
-   ini->SetValue("QuickChatMessagesGroup3", "Button", InputCodeManager::inputCodeToString(BUTTON_4));
-   ini->SetValue("QuickChatMessagesGroup3", "MessageType", "Team");
-   ini->SetValue("QuickChatMessagesGroup3", "Caption", "Flag");
-
-      ini->SetValue("QuickChatMessagesGroup3_Message1", "Key", InputCodeManager::inputCodeToString(KEY_F));
-      ini->SetValue("QuickChatMessagesGroup3_Message1", "Button", InputCodeManager::inputCodeToString(BUTTON_1));
-      ini->SetValue("QuickChatMessagesGroup3_Message1", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup3_Message1", "Caption", "Get enemy flag");
-      ini->SetValue("QuickChatMessagesGroup3_Message1", "Message", "Get the enemy flag.");
-
-      ini->SetValue("QuickChatMessagesGroup3_Message2", "Key", InputCodeManager::inputCodeToString(KEY_R));
-      ini->SetValue("QuickChatMessagesGroup3_Message2", "Button", InputCodeManager::inputCodeToString(BUTTON_2));
-      ini->SetValue("QuickChatMessagesGroup3_Message2", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup3_Message2", "Caption", "Return our flag");
-      ini->SetValue("QuickChatMessagesGroup3_Message2", "Message", "Return our flag to base.");
-
-      ini->SetValue("QuickChatMessagesGroup3_Message3", "Key", InputCodeManager::inputCodeToString(KEY_S));
-      ini->SetValue("QuickChatMessagesGroup3_Message3", "Button", InputCodeManager::inputCodeToString(BUTTON_3));
-      ini->SetValue("QuickChatMessagesGroup3_Message3", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup3_Message3", "Caption", "Flag secure");
-      ini->SetValue("QuickChatMessagesGroup3_Message3", "Message", "Our flag is secure.");
-
-      ini->SetValue("QuickChatMessagesGroup3_Message4", "Key", InputCodeManager::inputCodeToString(KEY_H));
-      ini->SetValue("QuickChatMessagesGroup3_Message4", "Button", InputCodeManager::inputCodeToString(BUTTON_4));
-      ini->SetValue("QuickChatMessagesGroup3_Message4", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup3_Message4", "Caption", "Have enemy flag");
-      ini->SetValue("QuickChatMessagesGroup3_Message4", "Message", "I have the enemy flag.");
-
-      ini->SetValue("QuickChatMessagesGroup3_Message5", "Key", InputCodeManager::inputCodeToString(KEY_E));
-      ini->SetValue("QuickChatMessagesGroup3_Message5", "Button", InputCodeManager::inputCodeToString(BUTTON_5));
-      ini->SetValue("QuickChatMessagesGroup3_Message5", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup3_Message5", "Caption", "Enemy has flag");
-      ini->SetValue("QuickChatMessagesGroup3_Message5", "Message", "The enemy has our flag!");
-
-      ini->SetValue("QuickChatMessagesGroup3_Message6", "Key", InputCodeManager::inputCodeToString(KEY_G));
-      ini->SetValue("QuickChatMessagesGroup3_Message6", "Button", InputCodeManager::inputCodeToString(BUTTON_6));
-      ini->SetValue("QuickChatMessagesGroup3_Message6", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup3_Message6", "Caption", "Flag gone");
-      ini->SetValue("QuickChatMessagesGroup3_Message6", "Message", "Our flag is not in the base!");
-
-   ini->SetValue("QuickChatMessagesGroup4", "Key", InputCodeManager::inputCodeToString(KEY_S));
-   ini->SetValue("QuickChatMessagesGroup4", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-   ini->SetValue("QuickChatMessagesGroup4", "MessageType", "Team");
-   ini->SetValue("QuickChatMessagesGroup4", "Caption", "Incoming Enemies - Direction");
-
-      ini->SetValue("QuickChatMessagesGroup4_Message1", "Key", InputCodeManager::inputCodeToString(KEY_S));
-      ini->SetValue("QuickChatMessagesGroup4_Message1", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup4_Message1", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup4_Message1", "Caption", "Incoming South");
-      ini->SetValue("QuickChatMessagesGroup4_Message1", "Message", "*** INCOMING SOUTH ***");
-
-      ini->SetValue("QuickChatMessagesGroup4_Message2", "Key", InputCodeManager::inputCodeToString(KEY_E));
-      ini->SetValue("QuickChatMessagesGroup4_Message2", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup4_Message2", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup4_Message2", "Caption", "Incoming East");
-      ini->SetValue("QuickChatMessagesGroup4_Message2", "Message", "*** INCOMING EAST  ***");
-
-      ini->SetValue("QuickChatMessagesGroup4_Message3", "Key", InputCodeManager::inputCodeToString(KEY_W));
-      ini->SetValue("QuickChatMessagesGroup4_Message3", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup4_Message3", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup4_Message3", "Caption", "Incoming West");
-      ini->SetValue("QuickChatMessagesGroup4_Message3", "Message", "*** INCOMING WEST  ***");
-
-      ini->SetValue("QuickChatMessagesGroup4_Message4", "Key", InputCodeManager::inputCodeToString(KEY_N));
-      ini->SetValue("QuickChatMessagesGroup4_Message4", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup4_Message4", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup4_Message4", "Caption", "Incoming North");
-      ini->SetValue("QuickChatMessagesGroup4_Message4", "Message", "*** INCOMING NORTH ***");
-
-      ini->SetValue("QuickChatMessagesGroup4_Message5", "Key", InputCodeManager::inputCodeToString(KEY_V));
-      ini->SetValue("QuickChatMessagesGroup4_Message5", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup4_Message5", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup4_Message5", "Caption", "Incoming Enemies");
-      ini->SetValue("QuickChatMessagesGroup4_Message5", "Message", "Incoming enemies!");
-
-   ini->SetValue("QuickChatMessagesGroup5", "Key", InputCodeManager::inputCodeToString(KEY_V));
-   ini->SetValue("QuickChatMessagesGroup5", "Button", InputCodeManager::inputCodeToString(BUTTON_3));
-   ini->SetValue("QuickChatMessagesGroup5", "MessageType", "Team");
-   ini->SetValue("QuickChatMessagesGroup5", "Caption", "Quick");
-
-      ini->SetValue("QuickChatMessagesGroup5_Message1", "Key", InputCodeManager::inputCodeToString(KEY_J));
-      ini->SetValue("QuickChatMessagesGroup5_Message1", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup5_Message1", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup5_Message1", "Caption", "Capture the objective");
-      ini->SetValue("QuickChatMessagesGroup5_Message1", "Message", "Capture the objective.");
-
-      ini->SetValue("QuickChatMessagesGroup5_Message2", "Key", InputCodeManager::inputCodeToString(KEY_O));
-      ini->SetValue("QuickChatMessagesGroup5_Message2", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup5_Message2", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup5_Message2", "Caption", "Go on the offensive");
-      ini->SetValue("QuickChatMessagesGroup5_Message2", "Message", "Go on the offensive.");
-
-      ini->SetValue("QuickChatMessagesGroup5_Message3", "Key", InputCodeManager::inputCodeToString(KEY_A));
-      ini->SetValue("QuickChatMessagesGroup5_Message3", "Button", InputCodeManager::inputCodeToString(BUTTON_1));
-      ini->SetValue("QuickChatMessagesGroup5_Message3", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup5_Message3", "Caption", "Attack!");
-      ini->SetValue("QuickChatMessagesGroup5_Message3", "Message", "Attack!");
-
-      ini->SetValue("QuickChatMessagesGroup5_Message4", "Key", InputCodeManager::inputCodeToString(KEY_W));
-      ini->SetValue("QuickChatMessagesGroup5_Message4", "Button", InputCodeManager::inputCodeToString(BUTTON_2));
-      ini->SetValue("QuickChatMessagesGroup5_Message4", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup5_Message4", "Caption", "Wait for signal");
-      ini->SetValue("QuickChatMessagesGroup5_Message4", "Message", "Wait for my signal to attack.");
-
-      ini->SetValue("QuickChatMessagesGroup5_Message5", "Key", InputCodeManager::inputCodeToString(KEY_V));
-      ini->SetValue("QuickChatMessagesGroup5_Message5", "Button", InputCodeManager::inputCodeToString(BUTTON_3));
-      ini->SetValue("QuickChatMessagesGroup5_Message5", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup5_Message5", "Caption", "Help!");
-      ini->SetValue("QuickChatMessagesGroup5_Message5", "Message", "Help!");
-
-      ini->SetValue("QuickChatMessagesGroup5_Message6", "Key", InputCodeManager::inputCodeToString(KEY_E));
-      ini->SetValue("QuickChatMessagesGroup5_Message6", "Button", InputCodeManager::inputCodeToString(BUTTON_4));
-      ini->SetValue("QuickChatMessagesGroup5_Message6", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup5_Message6", "Caption", "Regroup");
-      ini->SetValue("QuickChatMessagesGroup5_Message6", "Message", "Regroup.");
-
-      ini->SetValue("QuickChatMessagesGroup5_Message7", "Key", InputCodeManager::inputCodeToString(KEY_G));
-      ini->SetValue("QuickChatMessagesGroup5_Message7", "Button", InputCodeManager::inputCodeToString(BUTTON_5));
-      ini->SetValue("QuickChatMessagesGroup5_Message7", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup5_Message7", "Caption", "Going offense");
-      ini->SetValue("QuickChatMessagesGroup5_Message7", "Message", "Going offense.");
-
-      ini->SetValue("QuickChatMessagesGroup5_Message8", "Key", InputCodeManager::inputCodeToString(KEY_Z));
-      ini->SetValue("QuickChatMessagesGroup5_Message8", "Button", InputCodeManager::inputCodeToString(BUTTON_6));
-      ini->SetValue("QuickChatMessagesGroup5_Message8", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup5_Message8", "Caption", "Move out");
-      ini->SetValue("QuickChatMessagesGroup5_Message8", "Message", "Move out.");
-
-   ini->SetValue("QuickChatMessagesGroup6", "Key", InputCodeManager::inputCodeToString(KEY_R));
-   ini->SetValue("QuickChatMessagesGroup6", "Button", InputCodeManager::inputCodeToString(BUTTON_2));
-   ini->SetValue("QuickChatMessagesGroup6", "MessageType", "Team");
-   ini->SetValue("QuickChatMessagesGroup6", "Caption", "Reponses");
-
-      ini->SetValue("QuickChatMessagesGroup6_Message1", "Key", InputCodeManager::inputCodeToString(KEY_A));
-      ini->SetValue("QuickChatMessagesGroup6_Message1", "Button", InputCodeManager::inputCodeToString(BUTTON_1));
-      ini->SetValue("QuickChatMessagesGroup6_Message1", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup6_Message1", "Caption", "Acknowledge");
-      ini->SetValue("QuickChatMessagesGroup6_Message1", "Message", "Acknowledged.");
-
-      ini->SetValue("QuickChatMessagesGroup6_Message2", "Key", InputCodeManager::inputCodeToString(KEY_N));
-      ini->SetValue("QuickChatMessagesGroup6_Message2", "Button", InputCodeManager::inputCodeToString(BUTTON_2));
-      ini->SetValue("QuickChatMessagesGroup6_Message2", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup6_Message2", "Caption", "No");
-      ini->SetValue("QuickChatMessagesGroup6_Message2", "Message", "No.");
-
-      ini->SetValue("QuickChatMessagesGroup6_Message3", "Key", InputCodeManager::inputCodeToString(KEY_Y));
-      ini->SetValue("QuickChatMessagesGroup6_Message3", "Button", InputCodeManager::inputCodeToString(BUTTON_3));
-      ini->SetValue("QuickChatMessagesGroup6_Message3", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup6_Message3", "Caption", "Yes");
-      ini->SetValue("QuickChatMessagesGroup6_Message3", "Message", "Yes.");
-
-      ini->SetValue("QuickChatMessagesGroup6_Message4", "Key", InputCodeManager::inputCodeToString(KEY_S));
-      ini->SetValue("QuickChatMessagesGroup6_Message4", "Button", InputCodeManager::inputCodeToString(BUTTON_4));
-      ini->SetValue("QuickChatMessagesGroup6_Message4", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup6_Message4", "Caption", "Sorry");
-      ini->SetValue("QuickChatMessagesGroup6_Message4", "Message", "Sorry.");
-
-      ini->SetValue("QuickChatMessagesGroup6_Message5", "Key", InputCodeManager::inputCodeToString(KEY_T));
-      ini->SetValue("QuickChatMessagesGroup6_Message5", "Button", InputCodeManager::inputCodeToString(BUTTON_5));
-      ini->SetValue("QuickChatMessagesGroup6_Message5", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup6_Message5", "Caption", "Thanks");
-      ini->SetValue("QuickChatMessagesGroup6_Message5", "Message", "Thanks.");
-
-      ini->SetValue("QuickChatMessagesGroup6_Message6", "Key", InputCodeManager::inputCodeToString(KEY_D));
-      ini->SetValue("QuickChatMessagesGroup6_Message6", "Button", InputCodeManager::inputCodeToString(BUTTON_6));
-      ini->SetValue("QuickChatMessagesGroup6_Message6", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup6_Message6", "Caption", "Don't know");
-      ini->SetValue("QuickChatMessagesGroup6_Message6", "Message", "I don't know.");
-
-   ini->SetValue("QuickChatMessagesGroup7", "Key", InputCodeManager::inputCodeToString(KEY_T));
-   ini->SetValue("QuickChatMessagesGroup7", "Button", InputCodeManager::inputCodeToString(BUTTON_1));
-   ini->SetValue("QuickChatMessagesGroup7", "MessageType", "Global");
-   ini->SetValue("QuickChatMessagesGroup7", "Caption", "Taunts");
-
-      ini->SetValue("QuickChatMessagesGroup7_Message1", "Key", InputCodeManager::inputCodeToString(KEY_R));
-      ini->SetValue("QuickChatMessagesGroup7_Message1", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup7_Message1", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup7_Message1", "Caption", "Rawr");
-      ini->SetValue("QuickChatMessagesGroup7_Message1", "Message", "RAWR!");
-
-      ini->SetValue("QuickChatMessagesGroup7_Message2", "Key", InputCodeManager::inputCodeToString(KEY_C));
-      ini->SetValue("QuickChatMessagesGroup7_Message2", "Button", InputCodeManager::inputCodeToString(BUTTON_1));
-      ini->SetValue("QuickChatMessagesGroup7_Message2", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup7_Message2", "Caption", "Come get some!");
-      ini->SetValue("QuickChatMessagesGroup7_Message2", "Message", "Come get some!");
-
-      ini->SetValue("QuickChatMessagesGroup7_Message3", "Key", InputCodeManager::inputCodeToString(KEY_D));
-      ini->SetValue("QuickChatMessagesGroup7_Message3", "Button", InputCodeManager::inputCodeToString(BUTTON_2));
-      ini->SetValue("QuickChatMessagesGroup7_Message3", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup7_Message3", "Caption", "Dance!");
-      ini->SetValue("QuickChatMessagesGroup7_Message3", "Message", "Dance!");
-
-      ini->SetValue("QuickChatMessagesGroup7_Message4", "Key", InputCodeManager::inputCodeToString(KEY_X));
-      ini->SetValue("QuickChatMessagesGroup7_Message4", "Button", InputCodeManager::inputCodeToString(BUTTON_3));
-      ini->SetValue("QuickChatMessagesGroup7_Message4", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup7_Message4", "Caption", "Missed me!");
-      ini->SetValue("QuickChatMessagesGroup7_Message4", "Message", "Missed me!");
-
-      ini->SetValue("QuickChatMessagesGroup7_Message5", "Key", InputCodeManager::inputCodeToString(KEY_W));
-      ini->SetValue("QuickChatMessagesGroup7_Message5", "Button", InputCodeManager::inputCodeToString(BUTTON_4));
-      ini->SetValue("QuickChatMessagesGroup7_Message5", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup7_Message5", "Caption", "I've had worse...");
-      ini->SetValue("QuickChatMessagesGroup7_Message5", "Message", "I've had worse...");
-
-      ini->SetValue("QuickChatMessagesGroup7_Message6", "Key", InputCodeManager::inputCodeToString(KEY_Q));
-      ini->SetValue("QuickChatMessagesGroup7_Message6", "Button", InputCodeManager::inputCodeToString(BUTTON_5));
-      ini->SetValue("QuickChatMessagesGroup7_Message6", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup7_Message6", "Caption", "How'd THAT feel?");
-      ini->SetValue("QuickChatMessagesGroup7_Message6", "Message", "How'd THAT feel?");
-
-      ini->SetValue("QuickChatMessagesGroup7_Message7", "Key", InputCodeManager::inputCodeToString(KEY_E));
-      ini->SetValue("QuickChatMessagesGroup7_Message7", "Button", InputCodeManager::inputCodeToString(BUTTON_6));
-      ini->SetValue("QuickChatMessagesGroup7_Message7", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup7_Message7", "Caption", "Yoohoo!");
-      ini->SetValue("QuickChatMessagesGroup7_Message7", "Message", "Yoohoo!");
+   insertQuickChatMessageSection(ini, 7, GlobalMessageType, KEY_T, BUTTON_1, "Taunts");
+      insertQuickChatMessage(ini, 7, 1, GlobalMessageType, KEY_R, KEY_UNKNOWN, "Rawr",                  "RAWR!");
+      insertQuickChatMessage(ini, 7, 2, GlobalMessageType, KEY_C, BUTTON_1,    "Come get some!",        "Come get some!");
+      insertQuickChatMessage(ini, 7, 3, GlobalMessageType, KEY_D, BUTTON_2,    "Dance!",                "Dance!"); 
+      insertQuickChatMessage(ini, 7, 4, GlobalMessageType, KEY_X, BUTTON_3,    "Missed me!",            "Missed me!");
+      insertQuickChatMessage(ini, 7, 5, GlobalMessageType, KEY_W, BUTTON_4,    "I've had worse...",     "I've had worse...");
+      insertQuickChatMessage(ini, 7, 6, GlobalMessageType, KEY_Q, BUTTON_5,    "How'd THAT feel?",      "How'd THAT feel?");
+      insertQuickChatMessage(ini, 7, 7, GlobalMessageType, KEY_E, BUTTON_6,    "Yoohoo!",               "Yoohoo!");
 }
 
 
@@ -1240,8 +1005,10 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    for(S32 i = 0; i < ARRAYSIZE(sections); i++)
       loadSettings(ini, iniSettings, sections[i]);
 
+   // These two sections can be modernized, the remainder maybe not
    loadSoundSettings(ini, settings, iniSettings);
    loadGeneralSettings(ini, iniSettings);
+
    loadLoadoutPresets(ini, settings);
    loadPluginBindings(ini, iniSettings);
 
