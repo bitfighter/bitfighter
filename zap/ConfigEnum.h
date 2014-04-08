@@ -188,8 +188,8 @@ enum RelAbs {
 
 
 #define MESSAGE_TYPE_TABLE \
-MESSAGE_TYPE_ITEM(GlobalMessageType,  "Global"  ) \
 MESSAGE_TYPE_ITEM(TeamMessageType,    "Team"    ) \
+MESSAGE_TYPE_ITEM(GlobalMessageType,  "Global"  ) \
 MESSAGE_TYPE_ITEM(CommandMessageType, "Command" ) \
 MESSAGE_TYPE_ITEM(PrivateMessageType, "Private" ) \
 

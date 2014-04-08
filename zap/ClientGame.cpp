@@ -939,7 +939,7 @@ void ClientGame::sendChat(bool isGlobal, const StringPtr &message)
 void ClientGame::sendChatSTE(bool global, const StringTableEntry &message) const
 {
    if(getGameType())
-      getGameType()->c2sSendChatSTE(global, message);;
+      getGameType()->c2sSendChatSTE(global, message);
 }
 
 

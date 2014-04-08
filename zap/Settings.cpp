@@ -62,8 +62,9 @@ Evaluator::fromString(const string &val) { TNLAssert(false, "Specialize me!"); r
 template<> string             Evaluator::fromString(const string &val) { return val;                                    }
 template<> S32                Evaluator::fromString(const string &val) { return atoi(val.c_str());                      }
 template<> U32                Evaluator::fromString(const string &val) { return atoi(val.c_str());                      }
-template<> F32                Evaluator::fromString(const string &val) { return (F32)atof(val.c_str());                 }
 template<> U16                Evaluator::fromString(const string &val) { return atoi(val.c_str());                      }
+template<> F32                Evaluator::fromString(const string &val) { return (F32)atof(val.c_str());                 }
+template<> MessageType        Evaluator::fromString(const string &val) { return messageTypeEnumParser.getVal(val);      }
 template<> DisplayMode        Evaluator::fromString(const string &val) { return displayModeEnumParser.getVal(val);      }
 template<> YesNo              Evaluator::fromString(const string &val) { return yesNoEnumParser.getVal(val);            }
 template<> RelAbs             Evaluator::fromString(const string &val) { return relativeAbsoluteEnumParser.getVal(val); }

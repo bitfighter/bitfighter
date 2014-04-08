@@ -32,10 +32,10 @@ QuickChatNode::QuickChatNode() : caption(""), msg("")
    depth = 0;        // This is a beginning or ending node
    inputCode  = KEY_UNKNOWN;
    buttonCode = KEY_UNKNOWN;
-   teamOnly    = false;
-   commandOnly = false;
+   messageType = TeamMessageType;
    isMsgItem   = false;
 }
+
 
 // Destructor
 QuickChatNode::~QuickChatNode()
@@ -197,7 +197,7 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
          item.showOnMenu = true;
          item.name = nodeTree[walk].caption.c_str();
          item.help = "";
-         item.itemColor = nodeTree[walk].teamOnly ? &Colors::teamChatColor : &Colors::globalChatColor;
+         item.itemColor = (nodeTree[walk].messageType == TeamMessageType) ? &Colors::teamChatColor : &Colors::globalChatColor;
          item.buttonOverrideColor = item.itemColor;
 
          menuItems->push_back(item);
@@ -245,11 +245,10 @@ bool QuickChatHelper::processInputCode(InputCode inputCode)
          {
             exitHelper();
 
-            if(nodeTree[mCurNode].commandOnly)
+            if(nodeTree[mCurNode].messageType == CommandMessageType)
                getGame()->runCommand(nodeTree[mCurNode].msg.c_str());
-
             else
-               getGame()->sendChatSTE(!nodeTree[mCurNode].teamOnly, nodeTree[mCurNode].msg.c_str());
+               getGame()->sendChatSTE(nodeTree[mCurNode].messageType == GlobalMessageType, nodeTree[mCurNode].msg.c_str());
 
             // Because we've run off the end of the menu tree, which is how we know we hit a terminal node and not the parent
             // of yet more items, we need to restore the menus for the menu closing transition animation.  Finally,

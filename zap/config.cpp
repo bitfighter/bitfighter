@@ -762,9 +762,9 @@ static void loadQuickChatMessages(CIniFile *ini)
       node.depth = 1;   // This is a top-level message node
       node.inputCode =  InputCodeManager::stringToInputCode(ini->GetValue(messages[i], "Key", "A").c_str());
       node.buttonCode = InputCodeManager::stringToInputCode(ini->GetValue(messages[i], "Button", "Button 1").c_str());
-      string str1 = lcase(ini->GetValue(messages[i], "MessageType", "Team"));      // lcase for case insensitivity
-      node.teamOnly = str1 == "team";
-      node.commandOnly = str1 == "command";
+
+      node.messageType = Evaluator::fromString<MessageType>(ini->GetValue(messages[i], "MessageType"));
+
       node.caption = ini->GetValue(messages[i], "Caption", "Caption");
       node.msg = ini->GetValue(messages[i], "Message", "Message");
       node.isMsgItem = true;
@@ -800,9 +800,8 @@ static void loadQuickChatMessages(CIniFile *ini)
       node.depth = 1;      // This is a group node
       node.inputCode =  InputCodeManager::stringToInputCode(ini->GetValue(groups[i], "Key", "A").c_str());
       node.buttonCode = InputCodeManager::stringToInputCode(ini->GetValue(groups[i], "Button", "Button 1").c_str());
-      string str1 = lcase(ini->GetValue(groups[i], "MessageType", "Team"));      // lcase for case insensitivity
-      node.teamOnly = str1 == "team";
-      node.commandOnly = str1 == "command";
+      node.messageType = Evaluator::fromString<MessageType>(ini->GetValue(groups[i], "MessageType"));
+
       node.caption = ini->GetValue(groups[i], "Caption", "Caption");
       node.msg = "";
       node.isMsgItem = false;
@@ -811,11 +810,10 @@ static void loadQuickChatMessages(CIniFile *ini)
       for(S32 j = messages.size()-1; j >= 0; j--)
       {
          node.depth = 2;   // This is a message node
-         node.inputCode =  InputCodeManager::stringToInputCode(ini->GetValue(messages[j], "Key", "A").c_str());
-         node.buttonCode = InputCodeManager::stringToInputCode(ini->GetValue(messages[j], "Button", "Button 1").c_str());
-         str1 = lcase(ini->GetValue(messages[j], "MessageType", "Team"));      // lcase for case insensitivity
-         node.teamOnly = str1 == "team";
-         node.commandOnly = str1 == "command";
+         node.inputCode   = InputCodeManager::stringToInputCode(ini->GetValue(messages[j], "Key", "A").c_str());
+         node.buttonCode  = InputCodeManager::stringToInputCode(ini->GetValue(messages[j], "Button", "Button 1").c_str());
+         node.messageType = Evaluator::fromString<MessageType>(ini->GetValue(messages[j], "MessageType"));
+
          node.caption = ini->GetValue(messages[j], "Caption", "Caption");
          node.msg = ini->GetValue(messages[j], "Message", "Message");
          node.isMsgItem = true;

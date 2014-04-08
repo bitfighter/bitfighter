@@ -24,8 +24,7 @@ struct QuickChatNode
    U32 depth;
    InputCode inputCode;
    InputCode buttonCode;
-   bool teamOnly;
-   bool commandOnly;
+   MessageType messageType;
    string caption;
    string msg;
    bool isMsgItem;         // False for groups, true for messages
