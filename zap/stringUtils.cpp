@@ -953,7 +953,7 @@ bool isHex(const string &str)
 
 
 // Helper functions to customize behavior of wrapString to match one of the sigs below
-static F32 getCharCount(const string &chunk, S32 dummy)    { return chunk.size();                                 }
+static F32 getCharCount(const string &chunk, S32 dummy)    { return (F32)chunk.size();                                 }
 #if !defined(ZAP_DEDICATED) && !defined(BF_MASTER)
 static F32 getLineWidth(const string &chunk, S32 fontSize) { return getStringWidth((F32)fontSize, chunk.c_str()); }
 #endif

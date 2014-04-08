@@ -133,10 +133,8 @@ GameRecorderPlayback::GameRecorderPlayback(ClientGame *game, const char *filenam
       while(true)
       {
          U8 data[3];
-         data[0] = 0;
-         data[1] = 0;
-         data[2] = 0;
-         fread(data, 1, 3, mFile);
+         if(fread(data, 1, 3, mFile) != 3)
+            break;
          U32 size = (U32(data[1] & 63) << 8) + data[0];
          U32 milli = S32((U32(data[1] >> 6) << 8) + data[2]);
          if(size == 0)
@@ -239,14 +237,16 @@ void GameRecorderPlayback::processMoreData(U32 MilliSeconds)
          mPacketRecvBytesTotal += mSizeToRead;
          mPacketRecvCount++;
 
-         fread(data, 1, mSizeToRead, mFile);
-         BitStream bstream(data, mSizeToRead);
-         GhostConnection::readPacket(&bstream);
+         if(fread(data, 1, mSizeToRead, mFile) == mSizeToRead)
+         {
+            BitStream bstream(data, mSizeToRead);
+            GhostConnection::readPacket(&bstream);
+         }
          mSizeToRead = 0;
       }
 
-      data[2] = data[1] = data[0] = 0;
-      fread(data, 1, 3, mFile);
+      if(fread(data, 1, 3, mFile) != 3)
+         break; // Could not read 3 bytes
 
       U32 size = (U32(data[1] & 63) << 8) + data[0];
       U32 milli = S32((U32(data[1] >> 6) << 8) + data[2]);

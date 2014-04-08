@@ -395,7 +395,7 @@ static void loadSettings(CIniFile *ini, IniSettings *iniSettings, const string &
 static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 {
    // New school
-   for(S32 i = 0; i < ARRAYSIZE(sections); i++)
+   for(U32 i = 0; i < ARRAYSIZE(sections); i++)
       loadSettings(ini, iniSettings, sections[i]);
 
    string section = "Settings";
@@ -997,7 +997,7 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
 
    ini->ReadFile();                             // Read the INI file
 
-   for(S32 i = 0; i < ARRAYSIZE(sections); i++)
+   for(U32 i = 0; i < ARRAYSIZE(sections); i++)
       loadSettings(ini, iniSettings, sections[i]);
 
    // These two sections can be modernized, the remainder maybe not
@@ -1078,7 +1078,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    TNLAssert(ARRAYSIZE(sections) == ARRAYSIZE(headerComments), "Mismatch!");
    static const string HorizontalLine = "----------------";
 
-   for(S32 i = 0; i < ARRAYSIZE(sections); i++)
+   for(U32 i = 0; i < ARRAYSIZE(sections); i++)
    {
       ini->addSection(sections[i]);
 
