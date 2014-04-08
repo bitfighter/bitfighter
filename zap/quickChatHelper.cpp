@@ -33,7 +33,6 @@ QuickChatNode::QuickChatNode() : caption(""), msg("")
    inputCode  = KEY_UNKNOWN;
    buttonCode = KEY_UNKNOWN;
    messageType = TeamMessageType;
-   isMsgItem   = false;
 }
 
 

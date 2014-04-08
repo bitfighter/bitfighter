@@ -767,7 +767,6 @@ static void loadQuickChatMessages(CIniFile *ini)
 
       node.caption = ini->GetValue(messages[i], "Caption", "Caption");
       node.msg = ini->GetValue(messages[i], "Message", "Message");
-      node.isMsgItem = true;
       QuickChatHelper::nodeTree.push_back(node);
    }
 
@@ -804,7 +803,6 @@ static void loadQuickChatMessages(CIniFile *ini)
 
       node.caption = ini->GetValue(groups[i], "Caption", "Caption");
       node.msg = "";
-      node.isMsgItem = false;
       QuickChatHelper::nodeTree.push_back(node);
 
       for(S32 j = messages.size()-1; j >= 0; j--)
@@ -816,7 +814,6 @@ static void loadQuickChatMessages(CIniFile *ini)
 
          node.caption = ini->GetValue(messages[j], "Caption", "Caption");
          node.msg = ini->GetValue(messages[j], "Message", "Message");
-         node.isMsgItem = true;
          QuickChatHelper::nodeTree.push_back(node);
       }
    }
