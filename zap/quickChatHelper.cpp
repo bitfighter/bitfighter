@@ -86,8 +86,6 @@ void QuickChatHelper::render()
 
    if(menuItems->size() == 0)    // Nothing to render, let's go home
    {
-      TNLAssert(menuItems->size() > 0, "Should have some items here!");
-
       glColor(Colors::red); 
       drawString(0, yPos, MENU_FONT_SIZE, "No messages here (misconfiguration?)");
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
