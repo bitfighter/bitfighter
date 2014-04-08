@@ -89,16 +89,15 @@ void QuickChatHelper::render()
       glColor(Colors::red); 
       drawString(0, yPos, MENU_FONT_SIZE, "No messages here (misconfiguration?)");
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
+      return;
    }
-   else
-   {
-      // Protect against an empty oldMenuItems list, as will happen when this is called at the top level
-      const OverlayMenuItem *oldItem = oldMenuItems->size() > 0 ? &oldMenuItems->get(0) : NULL;
-      drawItemMenu("QuickChat menu", &menuItems->get(0), menuItems->size(), 
-                   oldItem, oldMenuItems->size(), 
-                   mQuickChatButtonsWidth, mQuickChatItemsDisplayWidth,
-                   quickChatLegendText, quickChatLegendColors, ARRAYSIZE(quickChatLegendText));
-   }
+
+   // Protect against an empty oldMenuItems list, as will happen when this is called at the top level
+   const OverlayMenuItem *oldItem = oldMenuItems->size() > 0 ? &oldMenuItems->get(0) : NULL;
+   drawItemMenu("QuickChat menu", &menuItems->get(0), menuItems->size(), 
+                oldItem, oldMenuItems->size(), 
+                mQuickChatButtonsWidth, mQuickChatItemsDisplayWidth,
+                quickChatLegendText, quickChatLegendColors, ARRAYSIZE(quickChatLegendText));
 }
 
 
