@@ -63,6 +63,17 @@ QuickChatHelper::~QuickChatHelper()
 HelperMenu::HelperMenuType QuickChatHelper::getType() { return QuickChatHelperType; }
 
 
+static const Color *getColor(MessageType messageType)
+{
+   if(messageType == TeamMessageType)   return &Colors::teamChatColor;
+   if(messageType == GlobalMessageType) return &Colors::globalChatColor;
+
+   TNLAssert(messageType == CommandMessageType, "Unexpected messageType!");
+
+   return &Colors::cmdChatColor;
+}  
+
+
 // Returns true if there was something to render, false if our current chat tree position has nothing to render.  This can happen
 // when a chat tree has a bunch of keyboard only items and we're in joystick mode... if no items are drawn, there's no point
 // in remaining in QuickChat mode, is there?
@@ -88,8 +99,11 @@ void QuickChatHelper::render()
       return;
    }
 
-   static const HelperMenuLegendItem legendItems[] = { HelperMenuLegendItem("Team Message",   Colors::teamChatColor  ), 
-                                                       HelperMenuLegendItem("Global Message", Colors::globalChatColor) };
+
+   static const HelperMenuLegendItem legendItems[] = { HelperMenuLegendItem("Team Message",   *getColor(TeamMessageType)), 
+                                                       HelperMenuLegendItem("Global Message", *getColor(GlobalMessageType)),
+                                                       HelperMenuLegendItem("Command",        *getColor(CommandMessageType))
+                                                     };
 
    static const Vector<HelperMenuLegendItem> legend(legendItems, ARRAYSIZE(legendItems));
 
@@ -194,7 +208,7 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
          item.showOnMenu = true;
          item.name = nodeTree[walk].caption.c_str();
          item.help = "";
-         item.itemColor = (nodeTree[walk].messageType == TeamMessageType) ? &Colors::teamChatColor : &Colors::globalChatColor;
+         item.itemColor = getColor(nodeTree[walk].messageType);
          item.buttonOverrideColor = item.itemColor;
 
          menuItems->push_back(item);
