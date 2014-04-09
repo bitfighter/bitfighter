@@ -832,6 +832,8 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
    if(ini->numSectionComments(section) == 0)
    {
       addComment("----------------");
+      addComment(" WARNING!  Do not edit this section while Bitfighter is running... your changes will be clobbered!");
+      addComment("----------------");
       addComment(" The structure of the QuickChatMessages sections is a bit complicated.  The structure reflects the");
       addComment(" way the messages are displayed in the QuickChat menu, so make sure you are familiar with that before");
       addComment(" you start modifying these items. Messages are grouped, and each group has a Caption (short name");
