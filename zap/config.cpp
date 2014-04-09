@@ -741,11 +741,10 @@ static void loadQuickChatMessages(CIniFile *ini)
 
    QuickChatHelper::nodeTree.push_back(emptyNode);
 
-   // Read QuickChat messages -- first search for keys matching "QuickChatMessagesGroup123"
    S32 keys = ini->GetNumSections();
    Vector<string> groups;
 
-   // Next, read any top-level messages
+   // Read any top-level messages (those starting with "QuickChat_Message")
    Vector<string> messages;
    for(S32 i = 0; i < keys; i++)
    {
@@ -770,6 +769,7 @@ static void loadQuickChatMessages(CIniFile *ini)
       QuickChatHelper::nodeTree.push_back(node);
    }
 
+   // Now search for groups, which have keys matching "QuickChatMessagesGroup123"
    for(S32 i = 0; i < keys; i++)
    {
       string keyName = ini->getSectionName(i);
@@ -801,11 +801,11 @@ static void loadQuickChatMessages(CIniFile *ini)
       node.buttonCode = InputCodeManager::stringToInputCode(ini->GetValue(groups[i], "Button", "Button 1").c_str());
       node.messageType = Evaluator::fromString<MessageType>(ini->GetValue(groups[i], "MessageType"));
 
-      node.caption = ini->GetValue(groups[i], "Caption", "Caption");
+      node.caption = ini->GetValue(groups[i], "Caption", "Caption") + " >";
       node.msg = "";
       QuickChatHelper::nodeTree.push_back(node);
 
-      for(S32 j = messages.size()-1; j >= 0; j--)
+      for(S32 j = messages.size() - 1; j >= 0; j--)
       {
          node.depth = 2;   // This is a message node
          node.inputCode   = InputCodeManager::stringToInputCode(ini->GetValue(messages[j], "Key", "A").c_str());
@@ -836,10 +836,12 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
       addComment("----------------");
       addComment(" The structure of the QuickChatMessages sections is a bit complicated.  The structure reflects the");
       addComment(" way the messages are displayed in the QuickChat menu, so make sure you are familiar with that before");
-      addComment(" you start modifying these items. Messages are grouped, and each group has a Caption (short name");
+      addComment(" you start modifying these items. ");
+      addComment(" ");
+      addComment(" Messages are grouped, and each group has a Caption (short name");
       addComment(" shown on screen), a Key (the shortcut key used to select the group), and a Button (a shortcut button");
       addComment(" used when in joystick mode).  If the Button is \"Undefined key\", then that item will not be shown");
-      addComment(" in joystick mode, unless the  setting is true.  Groups can be defined in");
+      addComment(" in joystick mode, unless the setting is true.  Groups can be defined in");
       addComment(" any order, but will be displayed sorted by [section] name.  Groups are designated by the");
       addComment(" [QuickChatMessagesGroupXXX] sections, where XXX is a unique suffix, usually a number.");
       addComment(" ");
@@ -849,22 +851,21 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
       addComment(" Caption serve the same purposes as in the group definitions. Message is the actual message text that");
       addComment(" is sent, and MessageType should be either \"Team\" or \"Global\", depending on which users the");
       addComment(" message should be sent to.  You can mix Team and Global messages in the same section, but it may be");
-      addComment(" less confusing not to do so.");
+      addComment(" less confusing not to do so.  MessageType can also be \"Command\", in which case the message will be");
+      addComment(" sent to the server, as if it were a /command; see below for more details.");
       addComment(" ");
-      addComment(" Messages can also be added to the top-tier of items, by specifying a section like");
-      addComment(" [QuickChat_MessageZZZ].");
+      addComment(" Messages can also be added to the top-tier of items, by specifying a section like [QuickChat_MessageZZZ].");
       addComment(" ");
-      addComment(" Note that no quotes are required around Messages or Captions, and if included, they will be sent as");
+      addComment(" Note that quotes are not required around Messages or Captions, and if included, they will be sent as");
       addComment(" part of the message. Also, if you bullocks things up too badly, simply delete all QuickChatMessage");
-      addComment(" sections, and they will be regenerated the next time you run the game (though your modifications");
-      addComment(" will be lost).");
+      addComment(" sections, along with this section and all comments, and a clean set of commands will be regenerated"); 
+      addComment(" the next time you run the game (though your modifications will be lost, obviously).");
       addComment(" ");
       addComment(" Note that you can also use the QuickChat functionality to create shortcuts to commonly run /commands");
       addComment(" by setting the MessageType to \"Command\".  For example, if you define a QuickChat message to be");
-      addComment(" \"addbots 2\" (without quotes), and the MessageType to \"Command\" (also");
-      addComment(" without quotes), 2 robots will be added to the game when you press the appropriate keys.  You can");
-      addComment(" use this functionality to assign commonly used commands to joystick buttons or short keyboard");
-      addComment(" sequences.");
+      addComment(" \"addbots 2\" (without quotes, and without a leading \"/\"), and the MessageType to \"Command\" (also");
+      addComment(" without quotes), 2 robots will be added to the game when you select the appropriate message.  You can");
+      addComment(" use this functionality to assign commonly used commands to joystick buttons or short key sequences.");
       addComment("----------------");
    }
 
