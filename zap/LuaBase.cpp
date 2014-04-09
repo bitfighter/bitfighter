@@ -378,9 +378,7 @@ bool luaIsPoint(lua_State *L, S32 index)
 
    // convert relative stack index to absolute
    if(index < 0)
-   {
-      index = lua_gettop(L) + index + 1;
-   }
+      index = index + lua_gettop(L) + 1;
 
    lua_pushstring(L, "x");    // table, ..., x
    lua_rawget(L, index);      // table, ..., float (or nil?)
