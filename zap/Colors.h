@@ -95,9 +95,11 @@ namespace Colors
 
    const Color EDITOR_WALL_FILL_COLOR(.5f, .5f, 1.0f);
 
-
+   // Special named colors
    const Color NexusOpenColor(0, 0.7, 0);
    const Color NexusClosedColor(0.85, 0.3, 0);
+   const Color DefaultWallFillColor(0, 0, 0.15);
+   const Color DefaultWallOutlineColor(Colors::blue);
    const Color ErrorMessageTextColor(Colors::paleRed);
    const Color NeutralTeamColor(Colors::gray80);         // Objects that are neutral (on team -1)
    const Color HostileTeamColor(Colors::gray50);         // Objects that are "hostile-to-all" (on team -2)
