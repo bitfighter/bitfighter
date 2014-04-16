@@ -11,6 +11,7 @@
 #include "gameType.h"
 #include "ServerGame.h"
 #include "stringUtils.h"
+#include "RenderUtils.h"
 
 #include "ClientGame.h"
 #include "UIManager.h"
@@ -194,10 +195,15 @@ void GameRecorderPlayback::updateSpectate()
    const Vector<RefPtr<ClientInfo> > &infos = *(mGame->getClientInfos());
 
    if(mClientInfoSpectating.isNull() && infos.size() != 0)
-      mClientInfoSpectating = infos[0];
+   {
+      mClientInfoSpectating = mGame->findClientInfo(mClientInfoSpectatingName);
+      if(mClientInfoSpectating.isNull())
+         mClientInfoSpectating = infos[0];
+   }
    
    if(mClientInfoSpectating.isValid())
    {
+      mClientInfoSpectatingName = mClientInfoSpectating->getName();
       Ship *ship = mClientInfoSpectating->getShip();
       setControlObject(ship);
 
@@ -456,7 +462,7 @@ const F32 btn_y = 510;
 const F32 btn_w = 20;
 const F32 btn_h = 20;
 
-const F32 btn_spectate_name_x = 350; // fast forward
+const F32 btn_spectate_name_x = 400;
 
 const F32 buttons_lines[] = {
    btn0_x + btn_w/3  , btn_y            , btn0_x            , btn_y,
@@ -602,6 +608,8 @@ void PlaybackGameUserInterface::render()
       renderVertexArray(vertex, 2, GL_LINES);
 
       renderVertexArray(buttons_lines, sizeof(buttons_lines) / (sizeof(buttons_lines[0]) * 2), GL_LINES);
+
+      drawString(btn_spectate_name_x, btn_y, 15, mPlaybackConnection->mClientInfoSpectatingName.getString());
    }
 }
 

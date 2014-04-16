@@ -26,9 +26,10 @@ class GameRecorderPlayback : public GameConnection
    S32 mMilliSeconds;
    U32 mSizeToRead;
    SafePtr<ClientInfo> mClientInfoSpectating;
+public:
+   StringTableEntry mClientInfoSpectatingName;
    bool mIsButtonHeldDown;
 
-public:
    U32 mTotalTime;
    U32 mCurrentTime;
 
