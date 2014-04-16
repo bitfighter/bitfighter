@@ -197,6 +197,7 @@ public:
 
 
    // Team related
+   S32 getCurrentTeamIndex();
    void changePlayerTeam(const StringTableEntry &playerName, S32 teamIndex) const;
    void changeOwnTeam(S32 teamIndex) const;
    void switchTeams();     // User selected Switch Teams meunu item
