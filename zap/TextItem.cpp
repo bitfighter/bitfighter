@@ -16,6 +16,10 @@
 #include "stringUtils.h"
 #include "RenderUtils.h"
 
+#ifndef ZAP_DEDICATED
+#include "ClientGame.h"
+#endif
+
 #include <cmath>
 
 
@@ -95,15 +99,12 @@ void TextItem::newObjectFromDock(F32 gridSize)
 void TextItem::render()
 {
 #ifndef ZAP_DEDICATED
-   ClientInfo *clientInfo = getGame()->getLocalRemoteClientInfo();
+   S32 ourTeam = static_cast<ClientGame*>(getGame())->getCurrentTeamIndex();
 
    // Don't render opposing team's text items if we are in a game... but in editor preview mode, where
    // we don't have a connection to the server, text will be rendered normally
-   if(clientInfo)
-   {
-      if(clientInfo->getTeamIndex() != getTeam() && getTeam() != TEAM_NEUTRAL)
-         return;
-   }
+   if(ourTeam != getTeam() && ourTeam != TEAM_NEUTRAL)
+      return;
 
    renderTextItem(getVert(0), getVert(1), mSize, mText, getColor());
 #endif

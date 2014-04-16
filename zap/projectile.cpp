@@ -1015,14 +1015,14 @@ void Mine::renderItem(const Point &pos)
 
    Ship *ship = getGame()->getLocalPlayerShip();
 
-   ClientInfo *clientInfo = getGame()->getLocalRemoteClientInfo();
+   S32 ourTeam = static_cast<ClientGame*>(getGame())->getCurrentTeamIndex();
 
-   if(clientInfo)
+   if(ourTeam != TEAM_NEUTRAL)
    {
       armed = mArmed;
 
       // Can see mine if laid by teammate in team game OR you laid it yourself
-      if( (clientInfo->getTeamIndex() == getTeam() && getGame()->isTeamGame()) ||
+      if( (ourTeam == getTeam() && getGame()->isTeamGame()) ||
             mIsOwnedByLocalClient)
          visible = true;
 
@@ -1247,14 +1247,13 @@ void SpyBug::renderItem(const Point &pos)
 
    Ship *ship = getGame()->getLocalPlayerShip();
 
-   // Used for getting team, ship can be NULL when idle
-   ClientInfo *clientInfo = getGame()->getLocalRemoteClientInfo();
+   S32 ourTeam = static_cast<ClientGame*>(getGame())->getCurrentTeamIndex();
 
-   if(clientInfo)
+   if(ourTeam != TEAM_NEUTRAL)
    {
       // Can see bug if laid by teammate in team game OR
       // you laid it yourself OR spyBug is neutral
-      if( ((clientInfo->getTeamIndex() == getTeam()) && getGame()->isTeamGame())   ||
+      if( (ourTeam == getTeam() && getGame()->isTeamGame())   ||
             mIsOwnedByLocalClient || getTeam() == TEAM_NEUTRAL)
          visible = true;
 
