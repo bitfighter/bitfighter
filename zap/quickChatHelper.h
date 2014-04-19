@@ -19,6 +19,8 @@ using namespace std;
 namespace Zap
 {
 
+class CIniFile;
+
 struct QuickChatNode
 {
    U32 depth;
@@ -28,7 +30,10 @@ struct QuickChatNode
    string caption;
    string msg;
 
-   QuickChatNode();        // Constructor
+   // Constructors
+   QuickChatNode();
+   QuickChatNode(S32 depth, const CIniFile *ini, const string &key, bool isGroup);
+
    virtual ~QuickChatNode();
 };
 

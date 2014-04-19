@@ -756,18 +756,7 @@ static void loadQuickChatMessages(CIniFile *ini)
    messages.sort(alphaSort);
 
    for(S32 i = messages.size() - 1; i >= 0; i--)
-   {
-      QuickChatNode node;
-      node.depth = 1;   // This is a top-level message node
-      node.inputCode =  InputCodeManager::stringToInputCode(ini->GetValue(messages[i], "Key", "A").c_str());
-      node.buttonCode = InputCodeManager::stringToInputCode(ini->GetValue(messages[i], "Button", "Button 1").c_str());
-
-      node.messageType = Evaluator::fromString<MessageType>(ini->GetValue(messages[i], "MessageType"));
-
-      node.caption = ini->GetValue(messages[i], "Caption", "Caption");
-      node.msg = ini->GetValue(messages[i], "Message", "Message");
-      QuickChatHelper::nodeTree.push_back(node);
-   }
+      QuickChatHelper::nodeTree.push_back(QuickChatNode(1, ini, messages[i], true));
 
    // Now search for groups, which have keys matching "QuickChatMessagesGroup123"
    for(S32 i = 0; i < keys; i++)
@@ -783,7 +772,7 @@ static void loadQuickChatMessages(CIniFile *ini)
    // quickChat render functions were designed to work with the messages sorted in reverse.  Rather than
    // reenigneer those, let's just iterate backwards and leave the render functions alone.
 
-   for(S32 i = groups.size()-1; i >= 0; i--)
+   for(S32 i = groups.size() - 1; i >= 0; i--)
    {
       Vector<string> messages;
       for(S32 j = 0; j < keys; j++)
@@ -795,27 +784,10 @@ static void loadQuickChatMessages(CIniFile *ini)
 
       messages.sort(alphaSort);
 
-      QuickChatNode node;
-      node.depth = 1;      // This is a group node
-      node.inputCode =  InputCodeManager::stringToInputCode(ini->GetValue(groups[i], "Key", "A").c_str());
-      node.buttonCode = InputCodeManager::stringToInputCode(ini->GetValue(groups[i], "Button", "Button 1").c_str());
-      node.messageType = Evaluator::fromString<MessageType>(ini->GetValue(groups[i], "MessageType"));
-
-      node.caption = ini->GetValue(groups[i], "Caption", "Caption") + " >";
-      node.msg = "";
-      QuickChatHelper::nodeTree.push_back(node);
+      QuickChatHelper::nodeTree.push_back(QuickChatNode(1, ini, groups[i], true));
 
       for(S32 j = messages.size() - 1; j >= 0; j--)
-      {
-         node.depth = 2;   // This is a message node
-         node.inputCode   = InputCodeManager::stringToInputCode(ini->GetValue(messages[j], "Key", "A").c_str());
-         node.buttonCode  = InputCodeManager::stringToInputCode(ini->GetValue(messages[j], "Button", "Button 1").c_str());
-         node.messageType = Evaluator::fromString<MessageType>(ini->GetValue(messages[j], "MessageType"));
-
-         node.caption = ini->GetValue(messages[j], "Caption", "Caption");
-         node.msg = ini->GetValue(messages[j], "Message", "Message");
-         QuickChatHelper::nodeTree.push_back(node);
-      }
+         QuickChatHelper::nodeTree.push_back(QuickChatNode(2, ini, messages[j], false));
    }
 
    // Add final node.  Last verse, same as the first.

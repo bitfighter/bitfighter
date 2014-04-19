@@ -11,6 +11,7 @@
 #include "Colors.h"
 
 #include "JoystickRender.h"
+#include "IniFile.h"
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
@@ -23,12 +24,26 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-QuickChatNode::QuickChatNode() : caption(""), msg("")
+// Constructors
+QuickChatNode::QuickChatNode()
 {
    depth = 0;        // This is a beginning or ending node
    inputCode  = KEY_UNKNOWN;
    buttonCode = KEY_UNKNOWN;
    messageType = TeamMessageType;
+}
+
+
+QuickChatNode::QuickChatNode(S32 depth, const CIniFile *ini, const string &key, bool isGroup)
+{
+   this->depth = depth;
+   inputCode  = InputCodeManager::stringToInputCode(ini->GetValue(key, "Key", "A").c_str());
+   buttonCode = InputCodeManager::stringToInputCode(ini->GetValue(key, "Button", "Button 1").c_str());
+   messageType = Evaluator::fromString<MessageType>(ini->GetValue(key, "MessageType"));
+
+   caption = ini->GetValue(key, "Caption", "Caption") + (isGroup ? ">" : "");
+   if(!isGroup)
+      msg = ini->GetValue(key, "Message", "Message");
 }
 
 
