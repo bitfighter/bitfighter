@@ -565,10 +565,10 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
    //          getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(InputCodeManager::BINDING_SELWEAP1), 
    //                       KEY_1));
 
-#define BINDING(enumVal, b, savedInIni, d, defaultKeyboardBinding, f)                                             \
-      if(savedInIni)                                                                                              \
-         inputCodeManager->setBinding(enumVal, InputModeKeyboard,                            						   \
-            getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(enumVal), 						\
+#define BINDING(enumVal, b, savedInIni, d, defaultKeyboardBinding, f)                           \
+      if(savedInIni)                                                                            \
+         inputCodeManager->setBinding(enumVal, InputModeKeyboard,                            	\
+            getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(enumVal), \
                          defaultKeyboardBinding));
     BINDING_TABLE
 #undef BINDING
