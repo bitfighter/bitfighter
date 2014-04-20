@@ -45,11 +45,11 @@ struct FolderManager
 {
    // Constructors
    FolderManager();
-   virtual ~FolderManager();
-
    FolderManager(const string &levelDir,    const string &robotDir,  const string &sfxDir,        const string &musicDir, 
                  const string &iniDir,      const string &logDir,    const string &screenshotDir, const string &luaDir,
                  const string &rootDataDir, const string &pluginDir, const string &fontsDir,      const string &recordDir);
+
+   virtual ~FolderManager();     // Destructor
 
    string levelDir;
    string robotDir;
