@@ -718,6 +718,7 @@ static void insertQuickChatMessage(CIniFile *ini, S32 group, S32 messageId, Mess
    ini->SetValue(key, "Message", message);
 }
 
+
 /*  INI file looks a little like this:
    [QuickChatMessagesGroup1]
    Key=F
@@ -1187,6 +1188,7 @@ static void writePasswordSection_helper(CIniFile *ini, string section)
    }
 }
 
+
 static void writePasswordSection(CIniFile *ini)
 {
    writePasswordSection_helper(ini, "SavedLevelChangePasswords");
@@ -1209,14 +1211,14 @@ static void writeINIHeader(CIniFile *ini)
       //ini->headerComment(" key=value");
 
       string headerComments =
-      "Bitfighter configuration file\n"
-      "=============================\n"
-      "This file is intended to be user-editable, but some settings here may be overwritten by the game. "
-      "If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.\n"
-      "\n"
-      "First, some basic terminology:\n"
-      "\t[section]\n"
-      "\tkey=value\n";
+         "Bitfighter configuration file\n"
+         "=============================\n"
+         "This file is intended to be user-editable, but some settings here may be overwritten by the game. "
+         "If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.\n"
+         "\n"
+         "First, some basic terminology:\n"
+         "\t[section]\n"
+         "\tkey=value\n";
 
       Vector<string> lines = wrapString(headerComments, 100);
 
@@ -1651,6 +1653,7 @@ CmdLineSettings::CmdLineSettings()
 {
    init();
 }
+
 
 // Destructor
 CmdLineSettings::~CmdLineSettings()
