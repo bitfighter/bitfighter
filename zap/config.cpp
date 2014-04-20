@@ -686,16 +686,25 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 }
 
 
+static void insertQuickChatMessageCommonBits(CIniFile *ini, const string &key, 
+                                   MessageType messageType, 
+                                   InputCode keyCode, InputCode buttonCode, 
+                                   const string &caption)
+{
+   ini->SetValue(key, "Key", InputCodeManager::inputCodeToString(keyCode));
+   ini->SetValue(key, "Button", InputCodeManager::inputCodeToString(buttonCode));
+   ini->SetValue(key, "MessageType", Evaluator::toString(messageType));
+   ini->SetValue(key, "Caption", caption);
+}
+
+
 static void insertQuickChatMessageSection(CIniFile *ini, S32 group, MessageType messageType, 
                                    InputCode keyCode, InputCode buttonCode, 
                                    const string &caption)
 {
    const string key = "QuickChatMessagesGroup" + itos(group);
 
-   ini->SetValue(key, "Key", InputCodeManager::inputCodeToString(keyCode));
-   ini->SetValue(key, "Button", InputCodeManager::inputCodeToString(buttonCode));
-   ini->SetValue(key, "MessageType", Evaluator::toString(messageType));
-   ini->SetValue(key, "Caption", caption);
+   insertQuickChatMessageCommonBits(ini, key, messageType, keyCode, buttonCode, caption);
 }
 
 
@@ -705,10 +714,7 @@ static void insertQuickChatMessage(CIniFile *ini, S32 group, S32 messageId, Mess
 {
    const string key = "QuickChatMessagesGroup" + itos(group) + "_Message" + itos(messageId);
 
-   ini->SetValue(key, "Key", InputCodeManager::inputCodeToString(keyCode));
-   ini->SetValue(key, "Button", InputCodeManager::inputCodeToString(buttonCode));
-   ini->SetValue(key, "MessageType", Evaluator::toString(messageType));
-   ini->SetValue(key, "Caption", caption);
+   insertQuickChatMessageCommonBits(ini, key, messageType, keyCode, buttonCode, caption);
    ini->SetValue(key, "Message", message);
 }
 
