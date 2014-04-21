@@ -41,7 +41,7 @@ QuickChatNode::QuickChatNode(S32 depth, const CIniFile *ini, const string &key, 
    buttonCode = InputCodeManager::stringToInputCode(ini->GetValue(key, "Button", "Button 1").c_str());
    messageType = Evaluator::fromString<MessageType>(ini->GetValue(key, "MessageType"));
 
-   caption = ini->GetValue(key, "Caption", "Caption") + (isGroup ? ">" : "");
+   caption = ini->GetValue(key, "Caption", "Caption") + (isGroup ? " >" : "");
    if(!isGroup)
       msg = ini->GetValue(key, "Message", "Message");
 }
