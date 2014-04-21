@@ -19,6 +19,7 @@
 
 #include "gameObjectRender.h"
 
+#include "Intervals.h"
 #include "stringUtils.h"   // For itos
 #include "MathUtils.h"     // For radiansToDegrees
 #include "GeomUtils.h"
@@ -80,9 +81,9 @@ Ship::~Ship()
 
 void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos)
 {
-   static const U32 ModuleSecondaryTimerDelay = 500;
-   static const U32 SpyBugPlacementTimerDelay = 800;
-   static const U32 IdleRechargeCycleTimerDelay = 2000;
+   static const U32 ModuleSecondaryTimerDelay = 500;  // ms
+   static const U32 SpyBugPlacementTimerDelay = 800;  // ms
+   static const U32 IdleRechargeCycleTimerDelay = TWO_SECONDS;
 
    mObjectTypeNumber = PlayerShipTypeNumber;
    mFireTimer = 0;
@@ -98,7 +99,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos)
    mSpyBugPlacementTimer.setPeriod(SpyBugPlacementTimerDelay);
    mSensorEquipZoomTimer.setPeriod(SensorZoomTime);
    mFastRechargeTimer.reset(IdleRechargeCycleTimerDelay, IdleRechargeCycleTimerDelay);
-   mSendSpawnEffectTimer.setPeriod(300);
+   mSendSpawnEffectTimer.setPeriod(300);  // ms
 
    mNetFlags.set(Ghostable);
 
