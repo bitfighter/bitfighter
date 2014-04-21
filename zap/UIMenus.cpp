@@ -1654,7 +1654,7 @@ void RobotOptionsMenuUserInterface::saveSettings()
    // Save our minimum players, get the correct index of the appropriate menu item
    GameSettings *settings = getGame()->getSettings();
 
-   settings->getIniSettings()->mSettings.setVal(IniKey::AddRobots,          getMenuItem(0)->getIntValue() == 1);
+   settings->getIniSettings()->mSettings.setVal(IniKey::AddRobots,          YesNo(getMenuItem(0)->getIntValue() == 1)); 
    settings->getIniSettings()->mSettings.setVal(IniKey::MinBalancedPlayers, getMenuItem(1)->getIntValue());
 
    saveSettingsToINI(&GameSettings::iniFile, settings);
