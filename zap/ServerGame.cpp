@@ -1704,7 +1704,7 @@ void ServerGame::updateStatusOnMaster()
 // Returns true if things went well, false if we couldn't find any levels to host
 bool ServerGame::startHosting()
 {
-   if(!mLevelSource->isEmptyLevelDirOk() && mSettings->getFolderManager()->levelDir == "")   // No leveldir, no hosting!
+   if(!mLevelSource->isEmptyLevelDirOk() && mSettings->getFolderManager()->getLevelDir().empty())   // No leveldir, no hosting!
       return false;
 
    S32 levelCount = mLevelSource->getLevelCount();

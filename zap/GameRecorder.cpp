@@ -159,7 +159,7 @@ GameRecorderServer::GameRecorderServer(ServerGame *game)
    mPackUnpackShipEnergyMeter = true;
 
    {
-      const string &dir = game->getSettings()->getFolderManager()->recordDir;
+      const string &dir = game->getSettings()->getFolderManager()->getRecordDir();
       mFileName = newRecordingFileName(dir, game->getGameType()->getLevelName(), game->getSettings()->getHostName()) +
             "." + buildGameRecorderExtension();
       string filename = joindir(dir, mFileName);

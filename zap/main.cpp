@@ -913,7 +913,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    {
       // Remove game.ogg  from music folder, if it exists...
       FolderManager *folderManager = settings->getFolderManager();
-      const char *offendingFile = joindir(folderManager->musicDir, "game.ogg").c_str();
+      const char *offendingFile = joindir(folderManager->getMusicDir(), "game.ogg").c_str();
       
       removeFile(offendingFile);
    }
@@ -954,7 +954,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
 
       // Remove item_select.lua plugin, it was superseded by filter.lua
       FolderManager *folderManager = settings->getFolderManager();
-      const char *offendingFile = joindir(folderManager->pluginDir, "item_select.lua").c_str();
+      const char *offendingFile = joindir(folderManager->getPluginDir(), "item_select.lua").c_str();
 
       removeFile(offendingFile);
    }
@@ -1137,16 +1137,16 @@ int main(int argc, char **argv)
 
    // Before we go any further, we should get our log files in order.  We know where they'll be, as the 
    // only way to specify a non-standard location is via the command line, which we've now read.
-   setupLogging(folderManager->logDir);
+   setupLogging(folderManager->getLogDir());
 
    InputCodeManager::initializeKeyNames();      // Used by loadSettingsFromINI()
 
    // Load our primary settings file
-   GameSettings::iniFile.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));
+   GameSettings::iniFile.SetPath(joindir(folderManager->getIniDir(), "bitfighter.ini"));
    loadSettingsFromINI(&GameSettings::iniFile, settings.get());
 
    // Load the user settings file
-   GameSettings::userPrefs.SetPath(joindir(folderManager->iniDir, "usersettings.ini"));
+   GameSettings::userPrefs.SetPath(joindir(folderManager->getIniDir(), "usersettings.ini"));
    IniSettings::loadUserSettingsFromINI(&GameSettings::userPrefs, settings.get());
 
    // Time to check if there is an online update (for any relevant platforms)
@@ -1159,7 +1159,7 @@ int main(int argc, char **argv)
       checkIfThisIsAnUpdate(settings.get(), isStandalone);
 
    // Load Lua stuff
-   LuaScriptRunner::setScriptingDir(folderManager->luaDir);    // Get this out of the way, shall we?
+   LuaScriptRunner::setScriptingDir(folderManager->getLuaDir());    // Get this out of the way, shall we?
    LuaScriptRunner::startLua();                                // Create single "L" instance which all scripts will use
    // TODO: What should we do if this fails?  Quit the game?
 
@@ -1170,8 +1170,8 @@ int main(int argc, char **argv)
    settings->runCmdLineDirectives();            // If we specified a directive on the cmd line, like -help, attend to that now
 
    // Even dedicated server needs sound these days
-   SoundSystem::init(settings->getIniSettings()->sfxSet, folderManager->sfxDir, 
-                     folderManager->musicDir, settings->getIniSettings()->getMusicVolLevel());  
+   SoundSystem::init(settings->getIniSettings()->sfxSet, folderManager->getSfxDir(), 
+                     folderManager->getMusicDir(), settings->getIniSettings()->getMusicVolLevel());  
    
    if(settings->isDedicatedServer())
    {

@@ -41,16 +41,9 @@ class GameSettings;
 struct CmdLineSettings;
 
 
-struct FolderManager 
+class FolderManager 
 {
-   // Constructors
-   FolderManager();
-   FolderManager(const string &levelDir,    const string &robotDir,  const string &sfxDir,        const string &musicDir, 
-                 const string &iniDir,      const string &logDir,    const string &screenshotDir, const string &luaDir,
-                 const string &rootDataDir, const string &pluginDir, const string &fontsDir,      const string &recordDir);
-
-   virtual ~FolderManager();     // Destructor
-
+private:
    string levelDir;
    string robotDir;
    string sfxDir;
@@ -63,6 +56,29 @@ struct FolderManager
    string pluginDir;
    string fontsDir;
    string recordDir;
+
+public:
+   // Constructors
+   FolderManager();
+   FolderManager(const string &levelDir,    const string &robotDir,  const string &sfxDir,        const string &musicDir, 
+                 const string &iniDir,      const string &logDir,    const string &screenshotDir, const string &luaDir,
+                 const string &rootDataDir, const string &pluginDir, const string &fontsDir,      const string &recordDir);
+
+   virtual ~FolderManager();     // Destructor
+
+   string getLevelDir() const;
+   string getIniDir() const;
+   string getRecordDir() const;
+   string getFontsDir() const;
+   string getScreenshotDir() const;
+   string getSfxDir() const;
+   string getRobotDir() const;
+   string getMusicDir() const;
+   string getRootDataDir() const;
+   string getLogDir() const;
+   string getPluginDir() const;
+   string getLuaDir() const;
+
 
    void resolveDirs(GameSettings *settings);                                  
    void resolveDirs(const string &root);

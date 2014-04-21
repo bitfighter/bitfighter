@@ -288,7 +288,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
 
 
    string filename = mServerGame->getCurrentLevelFileName();
-   filename = strictjoindir(mSettings->getFolderManager()->levelDir, filename);
+   filename = strictjoindir(mSettings->getFolderManager()->getLevelDir(), filename);
    if(!TransferLevelFile(filename.c_str()))
       s2cDisplayErrorMessage("!!! Server Error, unable to download");
    return;
@@ -568,7 +568,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
       FolderManager *folderManager = mSettings->getFolderManager();
       string folder = folderManager->resolveLevelDir(param.getString());
 
-      if(folderManager->levelDir == folder)
+      if(folderManager->getLevelDir() == folder)
       {
          s2cDisplayErrorMessage("!!! Specified folder is already the current level folder");
          return;
@@ -602,7 +602,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
       LevelSourcePtr levelSource = LevelSourcePtr(newLevelSource);
 
       // Folder contains some valid levels -- save it!
-      folderManager->levelDir = folder;
+      folderManager->getLevelDir() = folder;
 
       // Send the new list of levels to all levelchangers
       for(S32 i = 0; i < mServerGame->getClientCount(); i++)
@@ -1387,9 +1387,9 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
    string filename = (isServer ? UploadPrefix : DownloadPrefix) + titleName + ".level";
    string filenameLevelgen = (isServer ? UploadPrefix : DownloadPrefix) + titleName + ".levelgen";
 
-   string fullFilename = strictjoindir(folderManager->levelDir, filename);
+   string fullFilename = strictjoindir(folderManager->getLevelDir(), filename);
    levelInfo.filename  = filename;
-   levelInfo.folder    = folderManager->levelDir;
+   levelInfo.folder    = folderManager->getLevelDir();
 
    FILE *f = fopen(fullFilename.c_str(), "wb");
    if(f)
@@ -1444,7 +1444,7 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
 
       if(levelgensize != 0)  // next, write levelgen if we have one.
       {
-         string str1 = strictjoindir(folderManager->levelDir, filenameLevelgen);
+         string str1 = strictjoindir(folderManager->getLevelDir(), filenameLevelgen);
          f = fopen(str1.c_str(), "wb");
          if(f)
          {
@@ -1480,7 +1480,7 @@ void GameConnection::ReceivedRecordedGameplay(const U8 *filedata, U32 filedatasi
 
 #ifndef ZAP_DEDICATED
 
-   const string &dir = mClientGame->getSettings()->getFolderManager()->recordDir;
+   const string &dir = mClientGame->getSettings()->getFolderManager()->getRecordDir();
    string filename = string(mServerName.getString()) + "_" + mFileName;
    filename = joindir(dir, makeFilenameFromString(filename.c_str(), true));
 
@@ -1569,13 +1569,13 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestRecordedGameplay, (StringPtr file), 
 {
    if(file.getString()[0] != 0)
    {
-      string filePath = joindir(mServerGame->getSettings()->getFolderManager()->recordDir, file.getString());
+      string filePath = joindir(mServerGame->getSettings()->getFolderManager()->getRecordDir(), file.getString());
       TransferRecordedGameplay(filePath.c_str());
    }
    else
    {
       Vector<string> levels;
-      const string &dir = mServerGame->getSettings()->getFolderManager()->recordDir;
+      const string &dir = mServerGame->getSettings()->getFolderManager()->getRecordDir();
       getFilesFromFolder(dir, levels);
 		GameRecorderServer *g = mServerGame->getGameRecorder();
 		if(g)
@@ -1662,7 +1662,7 @@ bool GameConnection::TransferLevelFile(const char *filename)
       if(levelInfo.mScriptFileName.c_str()[0] != 0)
       {
          FolderManager *folderManager = mSettings->getFolderManager();
-         string filename1 = strictjoindir(folderManager->levelDir, levelInfo.mScriptFileName);
+         string filename1 = strictjoindir(folderManager->getLevelDir(), levelInfo.mScriptFileName);
          f = fopen(filename1.c_str(), "rb");
 
          if(!f)

@@ -141,41 +141,42 @@ static S32 totLen;
 
 static void initFoldersBlock(FolderManager *folderManager, S32 textsize)
 {
+   const string levelDir = folderManager->getLevelDir();
    names.push_back("Level Dir:");
-   vals.push_back(folderManager->levelDir == "" ? "<<Unresolvable>>" : folderManager->levelDir.c_str());
+   vals.push_back(levelDir.empty() ? "<<Unresolvable>>" : levelDir.c_str());
 
    names.push_back("");
    vals.push_back("");
 
    names.push_back("INI Dir:");
-   vals.push_back(folderManager->iniDir.c_str());
+   vals.push_back(folderManager->getIniDir().c_str());
       
    names.push_back("Log Dir:");
-   vals.push_back(folderManager->logDir.c_str());
+   vals.push_back(folderManager->getLogDir().c_str());
       
    names.push_back("Lua Dir:");
-   vals.push_back(folderManager->luaDir.c_str());
+   vals.push_back(folderManager->getLuaDir().c_str());
       
    names.push_back("Robot Dir:");
-   vals.push_back(folderManager->robotDir.c_str());
+   vals.push_back(folderManager->getRobotDir().c_str());
       
    names.push_back("Screenshot Dir:");
-   vals.push_back(folderManager->screenshotDir.c_str());
+   vals.push_back(folderManager->getScreenshotDir().c_str());
       
    names.push_back("SFX Dir:");
-   vals.push_back(folderManager->sfxDir.c_str());
+   vals.push_back(folderManager->getSfxDir().c_str());
 
    names.push_back("Music Dir:");
-   vals.push_back(folderManager->musicDir.c_str());
+   vals.push_back(folderManager->getMusicDir().c_str());
 
    names.push_back("Fonts Dir:");
-   vals.push_back(folderManager->fontsDir.c_str());
+   vals.push_back(folderManager->getFontsDir().c_str());
 
    names.push_back("");
    vals.push_back("");
 
    names.push_back("Root Data Dir:");
-   vals.push_back(folderManager->rootDataDir == "" ? "None specified" : folderManager->rootDataDir.c_str());
+   vals.push_back(folderManager->getRootDataDir() == "" ? "None specified" : folderManager->getRootDataDir().c_str());
 
    longestName = findLongestString((F32)textsize, &names);
    nameWidth   = getStringWidth(textsize, names[longestName]);

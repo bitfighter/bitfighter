@@ -105,7 +105,7 @@ void ScreenShooter::restoreViewportToWindow(GameSettings *settings)
 // Much was copied directly.
 void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings, string filename)
 {
-   string folder = settings->getFolderManager()->screenshotDir;
+   string folder = settings->getFolderManager()->getScreenshotDir();
 
    // Let's find a filename to use
    makeSureFolderExists(folder);

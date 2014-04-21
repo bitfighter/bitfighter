@@ -585,7 +585,7 @@ void EditorUserInterface::loadLevel()
    cleanUp();
 
    FolderManager *folderManager = game->getSettings()->getFolderManager();
-   string fileName = joindir(folderManager->levelDir, filename).c_str();
+   string fileName = joindir(folderManager->getLevelDir(), filename).c_str();
 
 
    // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
@@ -927,7 +927,7 @@ void EditorUserInterface::onPluginExecuted(const Vector<string> &args)
 
 void EditorUserInterface::showCouldNotFindScriptMessage(const string &scriptName)
 {
-   string pluginDir = getGame()->getSettings()->getFolderManager()->pluginDir;
+   string pluginDir = getGame()->getSettings()->getFolderManager()->getPluginDir();
 
    Vector<string> messages;
    messages.push_back("Plugin not Found");
@@ -1253,7 +1253,7 @@ void EditorUserInterface::onActivate()
 
    FolderManager *folderManager = settings->getFolderManager();
 
-   if(folderManager->levelDir == "")      // Never did resolve a leveldir... no editing for you!
+   if(folderManager->getLevelDir().empty())      // Never did resolve a leveldir... no editing for you!
    {
       getUIManager()->reactivatePrevUI();     // Must come before the error msg, so it will become the previous UI when that one exits
 
@@ -5035,7 +5035,7 @@ bool EditorUserInterface::doSaveLevel(const string &saveName, bool showFailMessa
    {
       FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
 
-      string fileName = joindir(folderManager->levelDir, saveName);
+      string fileName = joindir(folderManager->getLevelDir(), saveName);
       if(!writeFile(fileName, getLevelText()))
          throw(SaveException("Could not open file for writing"));
    }
@@ -5116,7 +5116,8 @@ void EditorUserInterface::testLevelStart()
       Vector<string> levelList;
       levelList.push_back(TestFileName);
 
-      LevelSourcePtr levelSource = LevelSourcePtr(new FolderLevelSource(levelList, getGame()->getSettings()->getFolderManager()->levelDir));
+      LevelSourcePtr levelSource = LevelSourcePtr(
+            new FolderLevelSource(levelList, getGame()->getSettings()->getFolderManager()->getLevelDir()));
 
       getGame()->setGameType(NULL); // Prevents losing seconds on game timer (test level from editor, save, and reload level)
 
@@ -5173,7 +5174,7 @@ void EditorMenuUserInterface::onActivate()
 void EditorUserInterface::findPlugins()
 {
    mPluginInfos.clear();
-   string dirName = getGame()->getSettings()->getFolderManager()->pluginDir;
+   string dirName = getGame()->getSettings()->getFolderManager()->getPluginDir();
    Vector<string> plugins;
    string extension = ".lua";
    getFilesFromFolder(dirName, plugins, &extension, 1);

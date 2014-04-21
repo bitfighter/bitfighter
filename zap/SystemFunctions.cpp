@@ -89,7 +89,7 @@ void abortHosting_noLevels(ServerGame *serverGame)
    if(serverGame->isDedicated())  
    {
       FolderManager *folderManager = serverGame->getSettings()->getFolderManager();
-      const char *levelDir = folderManager->levelDir.c_str();
+      const char *levelDir = folderManager->getLevelDir().c_str();
 
       logprintf(LogConsumer::LogError,     "No levels found in folder %s.  Cannot host a game.", levelDir);
       logprintf(LogConsumer::ServerFilter, "No levels found in folder %s.  Cannot host a game.", levelDir);
@@ -106,7 +106,7 @@ void abortHosting_noLevels(ServerGame *serverGame)
       ErrorMessageUserInterface *errUI = uiManager->getUI<ErrorMessageUserInterface>();
 
       FolderManager *folderManager = serverGame->getSettings()->getFolderManager();
-      string levelDir = folderManager->levelDir;
+      string levelDir = folderManager->getLevelDir();
 
       errUI->reset();
       errUI->setTitle("HOUSTON, WE HAVE A PROBLEM");

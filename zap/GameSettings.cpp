@@ -163,7 +163,7 @@ CIniFile GameSettings::userPrefs("dummy");               // Our INI file.  Real 
 // Constructor
 GameSettings::GameSettings()
 {
-   mBanList = new BanList(getFolderManager()->iniDir);
+   mBanList = new BanList(getFolderManager()->getIniDir());
    mLoadoutPresets.resize(LoadoutPresetCount);   // Make sure we have the right number of slots available
 }
 
@@ -527,7 +527,7 @@ string GameSettings::getlevelLoc()
 	}
 	else
 	{
-		 return getFolderManager()->levelDir;
+		 return getFolderManager()->getLevelDir();
 	}
 	return "";
 }
@@ -539,11 +539,11 @@ LevelSource *GameSettings::chooseLevelSource(Game *game)
 	if(isUsingPlaylist())
 	{
 		printf("isUsingPlaylist, and returned playlist object\n");
-		return new FileListLevelSource(getPlaylist(), getFolderManager()->levelDir);
+		return new FileListLevelSource(getPlaylist(), getFolderManager()->getLevelDir());
 	}
 	else
 	{
-		return new FolderLevelSource(getLevelList(), getFolderManager()->levelDir);
+		return new FolderLevelSource(getLevelList(), getFolderManager()->getLevelDir());
 	}
 }
 
@@ -644,7 +644,7 @@ Vector<string> *GameSettings::getSpecifiedLevels()
 // This is the generic way to get a list of levels we'll be playing with, the one used in the ordinary course of events
 Vector<string> GameSettings::getLevelList()
 {
-   return getLevelList(getFolderManager()->levelDir, false);
+   return getLevelList(getFolderManager()->getLevelDir(), false);
 }
 
 
@@ -693,7 +693,7 @@ Vector<string> GameSettings::getLevelList(const string &levelDir, bool ignoreCmd
 Vector<string> GameSettings::getPlaylist()
 {
    // Build our level list by reading the playlist
-   return FileListLevelSource::findAllFilesInPlaylist(getPlaylistFile(), GameSettings::getFolderManager()->levelDir);
+   return FileListLevelSource::findAllFilesInPlaylist(getPlaylistFile(), GameSettings::getFolderManager()->getLevelDir());
 }
 
 
@@ -900,7 +900,7 @@ void GameSettings::onFinishedLoading()
 
    // If there is nothing in the INI, write a good default to the INI
    if(mIniSettings.mSettings.getVal<string>(IniKey::LevelDir) == "")    
-      mIniSettings.mSettings.setVal(IniKey::LevelDir, getFolderManager()->levelDir);
+      mIniSettings.mSettings.setVal(IniKey::LevelDir, getFolderManager()->getLevelDir());
 
    // Now we turn to the size and position of the game window
    // First, figure out what display mode to start in...

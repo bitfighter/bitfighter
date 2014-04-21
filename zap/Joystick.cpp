@@ -480,7 +480,7 @@ U32 Joystick::getJoystickIndex(const string &joystickType)
 void Joystick::loadJoystickPresets(GameSettings *settings)
 {
    // Load up the joystick presets INI
-   joystickPresetsINI.SetPath(joindir(settings->getFolderManager()->iniDir, "joystick_presets.ini"));
+   joystickPresetsINI.SetPath(joindir(settings->getFolderManager()->getIniDir(), "joystick_presets.ini"));
    joystickPresetsINI.ReadFile();
 
    // Loop through each section (each section is a joystick) and parse

@@ -307,7 +307,7 @@ void PlaybackSelectUserInterface::onActivate()
 //mLevels
    mMenuTitle = "Choose Recorded Game";
 
-   const string &dir = getGame()->getSettings()->getFolderManager()->recordDir;
+   const string &dir = getGame()->getSettings()->getFolderManager()->getRecordDir();
 
    S32 oldIndex = selectedIndex;
 
@@ -342,7 +342,7 @@ void PlaybackSelectUserInterface::onActivate()
 
 void PlaybackSelectUserInterface::processSelection(U32 index)
 {
-   string file = joindir(getGame()->getSettings()->getFolderManager()->recordDir, mLevels[index]);
+   string file = joindir(getGame()->getSettings()->getFolderManager()->getRecordDir(), mLevels[index]);
    GameRecorderPlayback *gc = new GameRecorderPlayback(getGame(), file.c_str());
    if(!gc->isValid())
    {

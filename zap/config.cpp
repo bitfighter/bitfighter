@@ -1361,6 +1361,21 @@ static string resolutionHelper(const string &cmdLineDir, const string &rootDataD
 extern string gSqlite;
 struct CmdLineSettings;
 
+// Getters
+string FolderManager::getLevelDir()      const { return levelDir;      }
+string FolderManager::getIniDir()        const { return iniDir;        }
+string FolderManager::getRecordDir()     const { return recordDir;     }
+string FolderManager::getRobotDir()      const { return robotDir;      }
+string FolderManager::getFontsDir()      const { return fontsDir;      }
+string FolderManager::getScreenshotDir() const { return screenshotDir; }
+string FolderManager::getSfxDir()        const { return sfxDir;        }
+string FolderManager::getMusicDir()      const { return musicDir;      }
+string FolderManager::getRootDataDir()   const { return rootDataDir;   }
+string FolderManager::getLogDir()        const { return logDir;        }
+string FolderManager::getPluginDir()     const { return pluginDir;     }
+string FolderManager::getLuaDir()        const { return luaDir;        }
+
+
 // Doesn't handle leveldir -- that one is handled separately, later, because it requires input from the INI file
 void FolderManager::resolveDirs(GameSettings *settings)
 {

@@ -53,7 +53,7 @@ BfFont::BfFont(const string &fontFile, GameSettings *settings)
       return;
    }
 
-   string file = settings->getFolderManager()->fontsDir + getFileSeparator() + fontFile;
+   string file = settings->getFolderManager()->getFontsDir() + getFileSeparator() + fontFile;
 
    mStashFontId = sth_add_font(FontManager::getStash(), file.c_str());
 

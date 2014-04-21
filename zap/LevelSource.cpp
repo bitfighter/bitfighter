@@ -477,7 +477,7 @@ string FileListLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameO
 
    LevelInfo *levelInfo = &mLevelInfos[index];
 
-	string filename = FolderManager::findLevelFile(GameSettings::getFolderManager()->levelDir, levelInfo->filename);
+	string filename = FolderManager::findLevelFile(GameSettings::getFolderManager()->getLevelDir(), levelInfo->filename);
 
 	if(filename == "")
 	{

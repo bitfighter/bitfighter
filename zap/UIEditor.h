@@ -39,7 +39,7 @@ class LuaLevelGenerator;
 class PluginMenuUI;
 class SimpleTextEntryMenuUI;
 
-struct FolderManager;
+class FolderManager;
 
 
 ////////////////////////////////////////

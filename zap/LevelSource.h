@@ -63,7 +63,7 @@ public:
 
 class GridDatabase;
 class Game;
-struct FolderManager;
+class FolderManager;
 
 class LevelSource
 {

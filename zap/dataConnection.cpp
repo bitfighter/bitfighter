@@ -53,11 +53,11 @@ static string getFullFilename(const FolderManager *configDirs, string filename, 
 static string getOutputFolder(FolderManager *folderManager, FileType filetype)
 {
    if(filetype == BOT_TYPE) 
-      return folderManager->robotDir;
+      return folderManager->getRobotDir();
    else if(filetype == LEVEL_TYPE) 
-      return folderManager->levelDir;
+      return folderManager->getLevelDir();
    else if(filetype == LEVELGEN_TYPE) 
-      return folderManager->levelDir;
+      return folderManager->getLevelDir();
    else return "";
 }
 
