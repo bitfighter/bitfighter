@@ -92,6 +92,8 @@ protected:
    Point mSpawnPoint;      // Where ship or robot spawned.  Will only be valid on server, client doesn't currently get this.
 
    virtual void initialize(const Point &pos);   // Some initialization code needed by both bots and ships
+   virtual void doClassSpecificInitialization(const Point &pos);
+
    void initialize(ClientInfo *clientInfo, S32 team, const Point &pos);
 
    bool processArguments(S32 argc, const char **argv, Game *game);
@@ -295,12 +297,11 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    virtual void onPositionChanged(GhostConnection *connection);
+   virtual void onChangedClientTeam();
 
    void updateInterpolation();
 
    F32 getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips);
-
-   virtual bool isRobot();
 
    BfObject *isInZone(U8 zoneType) const; // Return whether the ship is currently in a zone of the specified type, and which one
    BfObject *isInAnyZone() const;         // Return whether the ship is currently in any zone, and which one

@@ -116,10 +116,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos)
    setTeam(team);
    mass = 1.0;            // Ship's mass, not used
 
-   if(!isRobot())              // Robots will run this during their own initialization; no need to run it twice!
-      initialize(pos);
-   else
-      mHasExploded = false;    // Client needs this false for unpackUpdate
+   doClassSpecificInitialization(pos);
 
    mZones1IsCurrent = true;
 
@@ -135,6 +132,13 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos)
       mLoadout = clientInfo->getOldLoadout();
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Is overidden in Robot
+void Ship::doClassSpecificInitialization(const Point &pos)
+{
+   initialize(pos);
 }
 
 
@@ -1707,10 +1711,19 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }  // unpackUpdate
 
 
+// Overridden by Robot
 void Ship::onPositionChanged(GhostConnection *connection)
 {
    mCurrentMove.time = (U32)connection->getOneWayTime();
    processMove(ActualState);
+}
+
+
+// Overridden by Robot
+void Ship::onChangedClientTeam()
+{
+   // If we've just died, this will keep a second copy of ourselves from appearing
+   getClientInfo()->respawnTimer.clear(); 
 }
 
 
@@ -2363,13 +2376,6 @@ void Ship::removeMountedItem(MountableItem *item)
          mMountedItems.erase_fast(i);
          return;
       }
-}
-
-
-// Overridden in Robot
-bool Ship::isRobot()
-{
-   return false;
 }
 
 

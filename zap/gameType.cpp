@@ -2222,10 +2222,7 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
             obj->setOwner(NULL);
       }
 
-      if(ship->isRobot())              // Players get a new ship, robots reuse the same object
-         ship->setChangeTeamMask();
-      else
-         client->respawnTimer.clear(); // If we've just died, this will keep a second copy of ourselves from appearing
+      ship->onChangedClientTeam();
 
       ship->kill();           // Destroy the old ship
    }

@@ -45,6 +45,7 @@ public:
    virtual ~Robot();                      // Destructor
 
    void initialize(const Point &pos);
+   void doClassSpecificInitialization(const Point &pos);
 
    void kill();
 
@@ -65,9 +66,8 @@ public:
    // Some informational functions
    F32 getAnglePt(Point point);
 
-   bool isRobot();
-
    void onPositionChanged(GhostConnection *connection);
+   void onChangedClientTeam();
 
    const char *getErrorMessagePrefix();
 

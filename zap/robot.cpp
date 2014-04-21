@@ -147,6 +147,13 @@ void Robot::initialize(const Point &pos)
 } 
 
 
+// Overrides method in Ship
+void Robot::doClassSpecificInitialization(const Point &pos)
+{
+   mHasExploded = false;    // Client needs this false for unpackUpdate
+}
+
+
 const char *Robot::getErrorMessagePrefix() { return "***ROBOT ERROR***"; }
 
 
@@ -523,16 +530,17 @@ void Robot::clearMove()
 }
 
 
-bool Robot::isRobot()
-{
-   return true;
-}
-
-
 // Overrides Ship method
 void Robot::onPositionChanged(GhostConnection *connection)
 {
    // Do nothing
+}
+
+
+// Overrides Ship method
+void Robot::onChangedClientTeam()
+{
+   setChangeTeamMask();
 }
 
 
