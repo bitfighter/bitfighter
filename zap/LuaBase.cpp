@@ -400,11 +400,11 @@ Point luaToPoint(lua_State *L, S32 index)
 {
    // A 'point' should be on the stack
    lua_getfield(L, index, "x");  // ... point, ..., x
-   F32 x = lua_tonumber(L, -1);
+   F32 x = (F32)lua_tonumber(L, -1);
    lua_pop(L, 1);
 
    lua_getfield(L, index, "y");  // ... point, ..., y
-   F32 y = lua_tonumber(L, -1);
+   F32 y = (F32)lua_tonumber(L, -1);
    lua_pop(L, 1);
 
    return Point(x, y);
@@ -627,14 +627,14 @@ F32 getFloat(lua_State *L, S32 index)
 F32 getCheckedFloat(lua_State *L, S32 index, const char *methodName)
 {
    checkForNumber(L, index, methodName);
-   return (F32) lua_tonumber(L, index);
+   return (F32)lua_tonumber(L, index);
 }
 
 
 // Return a bool at the specified index
 bool getBool(lua_State *L, S32 index)
 {
-    return (bool) lua_toboolean(L, index);
+    return (bool)lua_toboolean(L, index);
 }
 
 
@@ -644,7 +644,7 @@ bool getCheckedBool(lua_State *L, S32 index, const char *methodName, bool defaul
    if(!lua_isboolean(L, index))
       return defaultVal;
    // else
-   return (bool) lua_toboolean(L, index);
+   return (bool)lua_toboolean(L, index);
 }
 
 
