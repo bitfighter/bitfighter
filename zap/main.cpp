@@ -1158,10 +1158,13 @@ int main(int argc, char **argv)
    if(!isFirstLaunchEver)
       checkIfThisIsAnUpdate(settings.get(), isStandalone);
 
-   // Load Lua stuff
+   // Start Lua, or die trying
    LuaScriptRunner::setScriptingDir(folderManager->getLuaDir());  // Get this out of the way, shall we?
-   LuaScriptRunner::startLua();                                   // Create single "L" instance which all scripts will use
-   // TODO: What should we do if this fails?  Quit the game?
+   if(!LuaScriptRunner::startLua())                               // Create single "L" instance which all scripts will use
+   {
+      logprintf(LogConsumer::LogFatalError, "FATAL ERROR! Could not start Lua interpreter; cannot continue.");
+      exitToOs(1);
+   }
 
    setupLogging(settings->getIniSettings());    // Turns various logging options on and off
 
