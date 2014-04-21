@@ -3143,9 +3143,9 @@ GAMETYPE_RPC_C2S(GameType, c2sClearScriptCache, (), ())
    if(!clientInfo->isAdmin())    // Error message handled client-side
       return;  
 
-   clientInfo->getConnection()->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Script cache cleared; scripts will be reloaded on next use");
+   clientInfo->getConnection()->s2cDisplayMessage(
+         GameConnection::ColorRed, SFXNone, "Script cache cleared; scripts will be reloaded on next use");
 }
-
 
 
 GAMETYPE_RPC_C2S(GameType, c2sTriggerTeamChange, (StringTableEntry playerName, S32 teamIndex), (playerName, teamIndex))
