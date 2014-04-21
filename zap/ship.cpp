@@ -116,8 +116,6 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos)
    setTeam(team);
    mass = 1.0;            // Ship's mass, not used
 
-   // Name will be unique across all clients, but client and server may disagree on this name if the server has modified it to make it unique
-
    if(!isRobot())              // Robots will run this during their own initialization; no need to run it twice!
       initialize(pos);
    else
