@@ -3137,11 +3137,12 @@ GAMETYPE_RPC_C2S(GameType, c2sGlobalMutePlayer, (StringTableEntry playerName), (
 
 GAMETYPE_RPC_C2S(GameType, c2sClearScriptCache, (), ())
 {
-   LuaScriptRunner::clearScriptCache();
    ClientInfo *clientInfo = ((GameConnection *) getRPCSourceConnection())->getClientInfo();
 
    if(!clientInfo->isAdmin())    // Error message handled client-side
       return;  
+
+   LuaScriptRunner::clearScriptCache();
 
    clientInfo->getConnection()->s2cDisplayMessage(
          GameConnection::ColorRed, SFXNone, "Script cache cleared; scripts will be reloaded on next use");
