@@ -763,7 +763,7 @@ static void loadQuickChatMessages(CIniFile *ini)
    messages.sort(alphaSort);
 
    for(S32 i = messages.size() - 1; i >= 0; i--)
-      QuickChatHelper::nodeTree.push_back(QuickChatNode(1, ini, messages[i], true));
+      QuickChatHelper::nodeTree.push_back(QuickChatNode(1, ini, messages[i], false));
 
    // Now search for groups, which have keys matching "QuickChatMessagesGroup123"
    for(S32 i = 0; i < keys; i++)
