@@ -58,7 +58,7 @@ QuickChatNode::~QuickChatNode()
 ////////////////////////////////////////
 
 
-Vector<QuickChatNode> QuickChatHelper::nodeTree;      // Holds our tree of QuickChat groups and messages, as defined in the INI file
+Vector<QuickChatNode> QuickChatHelper::nodeTree;   // Holds our tree of QuickChat groups and messages, from the INI file
 
 QuickChatHelper::QuickChatHelper() :
    mQuickChatItemsDisplayWidth( getWidthOfItems() )
@@ -139,7 +139,6 @@ void QuickChatHelper::onActivated()
    // Before we activate the helper, we need to tell it what its width will be
    setExpectedWidth(getTotalDisplayWidth(mQuickChatButtonsWidth, mQuickChatItemsDisplayWidth));
    Parent::onActivated();
-
 
    mMenuItems1.clear();
    mMenuItems2.clear();
