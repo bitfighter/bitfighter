@@ -459,11 +459,8 @@ void LuaScriptRunner::loadCompileSaveHelper(const string &scriptName, const char
 }
 
 
-/**
- * Load a script from the scripting directory by basename (e.g. "my_script.lua")
- *
- * Throws LuaException when there's an error compiling or running the script
- */
+// Load a script from the scripting directory by basename (e.g. "my_script.lua").
+// Throws LuaException when there's an error compiling or running the script.
 void LuaScriptRunner::loadCompileRunHelper(const string &scriptName)
 {
    loadCompileScript(joindir(mScriptingDir, scriptName).c_str());
