@@ -477,7 +477,7 @@ bool EnergyItem::pickup(Ship *ship)
    // And tell the client to do the same.  Note that we are handling energy with a s2c because it is possible to be
    // traveling so fast that the EnergyItem goes out of scope before there is a chance to use the pack/unpack mechanisms
    // to get the energy credit to the client.  s2c will work regardless.
-   if(!ship->isRobot() && ship->getControllingClient() != NULL)
+   if(ship->getControllingClient() != NULL)
       ship->getControllingClient()->s2cCreditEnergy(EnergyItemFillip);
 
    return true;

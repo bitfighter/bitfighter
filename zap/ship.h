@@ -89,10 +89,10 @@ protected:
 
    LoadoutTracker mLoadout;
 
-   Point mSpawnPoint;                        // Where ship or robot spawned.  Will only be valid on server, client doesn't currently get this.
+   Point mSpawnPoint;      // Where ship or robot spawned.  Will only be valid on server, client doesn't currently get this.
 
-   void initialize(const Point &pos);        // Some initialization code needed by both bots and ships
-   void initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot);
+   virtual void initialize(const Point &pos);   // Some initialization code needed by both bots and ships
+   void initialize(ClientInfo *clientInfo, S32 team, const Point &pos);
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toLevelCode() const;
@@ -197,9 +197,9 @@ public:
    bool shouldRender() const;
 
    // Constructor
-   Ship(ClientInfo *clientInfo, S32 team, const Point &p, bool isRobot = false);   // Standard constructor   
-   explicit Ship(lua_State *L = NULL);                                             // Combined Lua / C++ default constructor
-   virtual ~Ship();                                                                // Destructor
+   Ship(ClientInfo *clientInfo, S32 team, const Point &p);   // Standard constructor   
+   explicit Ship(lua_State *L = NULL);                       // Combined Lua / C++ default constructor
+   virtual ~Ship();                                          // Destructor
                                              
    bool isServerCopyOf(const Ship &r) const; // Kind of like an equality comparitor, but accounting for differences btwn client and server
 
@@ -294,11 +294,13 @@ public:
    void findClientInfoFromName();
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
+   virtual void onPositionChanged(GhostConnection *connection);
+
    void updateInterpolation();
 
    F32 getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips);
 
-   bool isRobot();
+   virtual bool isRobot();
 
    BfObject *isInZone(U8 zoneType) const; // Return whether the ship is currently in a zone of the specified type, and which one
    BfObject *isInAnyZone() const;         // Return whether the ship is currently in any zone, and which one

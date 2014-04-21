@@ -38,7 +38,7 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
  * @param [scriptName] The bot script to use. Defaults to the server's default bot.
  * @param [scriptArg] Zero or more string arguments to pass to the script.
  */
-Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),   
+Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0)),   
                              LuaScriptRunner() 
 {
    if(L)
@@ -125,37 +125,25 @@ Robot::~Robot()
 
 // Reset everything on the robot back to the factory settings -- runs only when bot is spawning in GameType::spawnRobot()
 // Only runs on server!
-bool Robot::initialize(Point &pos)
+void Robot::initialize(const Point &pos)
 {
    TNLAssert(!isGhost(), "Server only, dude!");
 
-   try
-   {
-      flightPlan.clear();
+   Parent::initialize(pos);
 
-      mCurrentZone = U16_MAX;   // Correct value will be calculated upon first request
+   flightPlan.clear();
 
-      Parent::initialize(pos);
+   mCurrentZone = U16_MAX;   // Correct value will be calculated upon first request
+   // Robots added via robot.new() get intialized.  If the robot is added in a script's main() 
+   // function, the bot will be reinitialized when the game starts.  This check avoids that.
+   if(!isCollisionEnabled())
+      enableCollision();
 
-      // Robots added via robot.new() get intialized.  If the robot is added in a script's main() 
-      // function, the bot will be reinitialized when the game starts.  This check avoids that.
-      if(!isCollisionEnabled())
-         enableCollision();
+   // WarpPositionMask triggers the spinny spawning visual effect
+   setMaskBits(RespawnMask | HealthMask        | LoadoutMask         | PositionMask | 
+               MoveMask    | ModulePrimaryMask | ModuleSecondaryMask | WarpPositionMask);      // Send lots to the client
 
-      // WarpPositionMask triggers the spinny spawning visual effect
-      setMaskBits(RespawnMask | HealthMask        | LoadoutMask         | PositionMask | 
-                  MoveMask    | ModulePrimaryMask | ModuleSecondaryMask | WarpPositionMask);      // Send lots to the client
-
-      EventManager::get()->update();   // Ensure registrations made during bot initialization are ready to go
-   }
-   catch(LuaException &e)
-   {
-      logError("Robot error during spawn: %s.  Shutting robot down.", e.what());
-      clearStack(L);
-      return false;
-   }
-
-   return true;
+   EventManager::get()->update();   // Ensure registrations made during bot initialization are ready to go
 } 
 
 
@@ -538,6 +526,13 @@ void Robot::clearMove()
 bool Robot::isRobot()
 {
    return true;
+}
+
+
+// Overrides Ship method
+void Robot::onPositionChanged(GhostConnection *connection)
+{
+   // Do nothing
 }
 
 

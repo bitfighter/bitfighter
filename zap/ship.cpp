@@ -45,9 +45,9 @@ TNL_IMPLEMENT_NETOBJECT(Ship);
 // Note that on client, we use all default values set in declaration; on the server, these values will be provided
 // Most of these values are set in the initial packet set from the server (see packUpdate() below)
 // Also, the following is also run by robot's constructor
-Ship::Ship(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot) : MoveObject(pos, (F32)CollisionRadius), mSpawnPoint(pos)
+Ship::Ship(ClientInfo *clientInfo, S32 team, const Point &pos) : MoveObject(pos, (F32)CollisionRadius), mSpawnPoint(pos)
 {
-   initialize(clientInfo, team, pos, isRobot);
+   initialize(clientInfo, team, pos);
 }
 
 
@@ -60,7 +60,7 @@ Ship::Ship(lua_State *L) : MoveObject(Point(0,0), (F32)CollisionRadius)
       return;
    }
 
-   initialize(NULL, TEAM_NEUTRAL, Point(0,0), false);
+   initialize(NULL, TEAM_NEUTRAL, Point(0,0));
 }
 
 
@@ -78,7 +78,7 @@ Ship::~Ship()
 }
 
 
-void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot)
+void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos)
 {
    static const U32 ModuleSecondaryTimerDelay = 500;
    static const U32 SpyBugPlacementTimerDelay = 800;
@@ -117,9 +117,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
 
    // Name will be unique across all clients, but client and server may disagree on this name if the server has modified it to make it unique
 
-   mIsRobot = isRobot;
-
-   if(!isRobot)               // Robots will run this during their own initialization; no need to run it twice!
+   if(!isRobot())              // Robots will run this during their own initialization; no need to run it twice!
       initialize(pos);
    else
       mHasExploded = false;    // Client needs this false for unpackUpdate
@@ -1492,6 +1490,7 @@ void Ship::findClientInfoFromName()
       mClientInfo->setShip(this);
 }
 
+
 // Any changes here need to be reflected in Ship::packUpdate
 void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
@@ -1666,12 +1665,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    setActualAngle(mCurrentMove.angle);
 
-
-   if(positionChanged && !isRobot() )
-   {
-      mCurrentMove.time = (U32) connection->getOneWayTime();
-      processMove(ActualState);
-   }
+   if(positionChanged)
+      onPositionChanged(connection);
 
    if(shipwarped)
    {
@@ -1711,6 +1706,13 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 #endif
 }  // unpackUpdate
+
+
+void Ship::onPositionChanged(GhostConnection *connection)
+{
+   mCurrentMove.time = (U32)connection->getOneWayTime();
+   processMove(ActualState);
+}
 
 
 F32 Ship::getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips)
@@ -2365,9 +2367,10 @@ void Ship::removeMountedItem(MountableItem *item)
 }
 
 
+// Overridden in Robot
 bool Ship::isRobot()
 {
-   return mIsRobot;
+   return false;
 }
 
 

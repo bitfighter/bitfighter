@@ -44,7 +44,7 @@ public:
    explicit Robot(lua_State *L = NULL);   // Combined Lua / C++ default constructor
    virtual ~Robot();                      // Destructor
 
-   bool initialize(Point &pos);
+   void initialize(const Point &pos);
 
    void kill();
 
@@ -66,6 +66,8 @@ public:
    F32 getAnglePt(Point point);
 
    bool isRobot();
+
+   void onPositionChanged(GhostConnection *connection);
 
    const char *getErrorMessagePrefix();
 
