@@ -40,7 +40,6 @@ namespace Zap
 
 // Declare and Initialize statics:
 lua_State *LuaScriptRunner::L = NULL;
-bool  LuaScriptRunner::mScriptingDirSet = false;
 string LuaScriptRunner::mScriptingDir;
 
 deque<string> LuaScriptRunner::mCachedScripts;
@@ -95,14 +94,6 @@ LuaScriptRunner::~LuaScriptRunner()
 
 
 const char *LuaScriptRunner::getErrorMessagePrefix() { return "SCRIPT"; }
-
-
-// Static method setting static vars
-void LuaScriptRunner::setScriptingDir(const string &scriptingDir)
-{
-   mScriptingDir = scriptingDir;
-   mScriptingDirSet = true;
-}
 
 
 lua_State *LuaScriptRunner::getL()
@@ -379,10 +370,11 @@ bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
 
 
 // Start Lua and get everything configured
-bool LuaScriptRunner::startLua()
+bool LuaScriptRunner::startLua(const string &scriptingDir)
 {
-   TNLAssert(!L,               "L should not have been created yet!");
-   TNLAssert(mScriptingDirSet, "Must set scripting folder before starting Lua interpreter!");
+   TNLAssert(!L, "L should not have been created yet!");
+
+   mScriptingDir = scriptingDir;
 
    // Prepare the Lua global environment
    try 

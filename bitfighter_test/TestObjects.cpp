@@ -209,7 +209,7 @@ TEST_F(ObjectTest, LuaSanity)
 
    // TODO: Should not need this... we start an L somewhere in one of the tests and never shut it down
    if(!LuaScriptRunner::getL())
-      ASSERT_TRUE(LuaScriptRunner::startLua());
+      ASSERT_TRUE(LuaScriptRunner::startLua((clientGame->getSettings()->getFolderManager()->getLuaDir())));
       
    lua_State *L = LuaScriptRunner::getL();
 

@@ -1160,8 +1160,7 @@ int main(int argc, char **argv)
       checkIfThisIsAnUpdate(settings.get(), isStandalone);
 
    // Start Lua, or die trying
-   LuaScriptRunner::setScriptingDir(folderManager->getLuaDir());  // Get this out of the way, shall we?
-   if(!LuaScriptRunner::startLua())                               // Create single "L" instance which all scripts will use
+   if(!LuaScriptRunner::startLua(folderManager->getLuaDir()))  // Create single "L" instance which all scripts will use
    {
       logprintf(LogConsumer::LogFatalError, "Could not start Lua interpreter; Exiting.");
       exitToOs(1);

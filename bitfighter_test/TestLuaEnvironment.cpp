@@ -31,8 +31,7 @@ protected:
       settings = serverGame->getSettingsPtr();
 
       // Set-up our environment
-      LuaScriptRunner::setScriptingDir(settings->getFolderManager()->luaDir);
-      ASSERT_TRUE(LuaScriptRunner::startLua());
+      ASSERT_TRUE(LuaScriptRunner::startLua(settings->getFolderManager()->getLuaDir()));
 
       // Set up a levelgen object, with no script
       levelgen = new LuaLevelGenerator(serverGame);
