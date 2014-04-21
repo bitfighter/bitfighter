@@ -1159,8 +1159,8 @@ int main(int argc, char **argv)
       checkIfThisIsAnUpdate(settings.get(), isStandalone);
 
    // Load Lua stuff
-   LuaScriptRunner::setScriptingDir(folderManager->getLuaDir());    // Get this out of the way, shall we?
-   LuaScriptRunner::startLua();                                // Create single "L" instance which all scripts will use
+   LuaScriptRunner::setScriptingDir(folderManager->getLuaDir());  // Get this out of the way, shall we?
+   LuaScriptRunner::startLua();                                   // Create single "L" instance which all scripts will use
    // TODO: What should we do if this fails?  Quit the game?
 
    setupLogging(settings->getIniSettings());    // Turns various logging options on and off
