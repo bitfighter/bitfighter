@@ -28,10 +28,6 @@ class Robot : public Ship, public LuaScriptRunner
    typedef Ship Parent;
 
 private:
-   static const S32 RobotRespawnDelay = 1500;
-
-   string message;
-
    U16 mCurrentZone;                // Zone robot is currently in
 
    LuaPlayerInfo *mPlayerInfo;      // Player info object describing the robot
