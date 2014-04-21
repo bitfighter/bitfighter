@@ -503,7 +503,8 @@ bool LuaScriptRunner::prepareEnvironment()
 {
    if(!L)
    {
-      logprintf(LogConsumer::LogError, "%s %s.", getErrorMessagePrefix(), "Lua interpreter doesn't exist.  Aborting environment setup");
+      logprintf(LogConsumer::LogError, "%s %s.", getErrorMessagePrefix(), 
+                "Lua interpreter doesn't exist.  Aborting environment setup");
       return false;
    }
 
