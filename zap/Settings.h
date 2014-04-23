@@ -191,7 +191,7 @@ public:
    {
       S32 key = mKeyLookup.find(indexType)->second;
       AbstractSetting<IndexType> *absSet = mSettings[key];
-      TNLAssert((dynamic_cast<Setting<DataType, IndexType> *>(absSet)), "Expected setting!");
+      TNLAssert((dynamic_cast<Setting<DataType, IndexType> *>(absSet)), "Expected setting -- passing wrong type for value?");
 
       static_cast<Setting<DataType, IndexType> *>(absSet)->setValue(value);
    }
