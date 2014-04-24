@@ -1132,13 +1132,13 @@ S32 GameType::getTeamBasedGameWinner(const Game *game) const
 
    for(S32 i = 1; i < game->getTeamCount(); i++)
    {
-      if(((Team *)(game->getTeam(i)))->getScore() == winningScore)
+      if(game->getTeam(i)->getScore() == winningScore)
          tied = true;
 
-      else if(((Team *)(game->getTeam(i)))->getScore() > winningScore)
+      else if(game->getTeam(i)->getScore() > winningScore)
       {
          teamWinner = i;
-         winningScore = ((Team *)(game->getTeam(i)))->getScore();
+         winningScore = game->getTeam(i)->getScore();
          tied = false;
       }
    }

@@ -58,6 +58,8 @@ public:
    virtual S32 getPlayerBotCount() const = 0; 
    virtual S32 getPlayerCount() const = 0;      
    virtual S32 getBotCount() const = 0;
+
+   virtual S32 getScore() const;
 };
 
 
@@ -100,7 +102,7 @@ public:
   
    StringTableEntry getName() const;
 
-   S32 getScore();
+   S32 getScore() const;
    void setScore(S32 score);
    void addScore(S32 score);
 

@@ -124,6 +124,12 @@ void AbstractTeam::alterBlue(F32 amt)
 }
 
 
+S32 AbstractTeam::getScore() const
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -173,7 +179,7 @@ StringTableEntry Team::getName() const
 }
 
 
-S32 Team::getScore()
+S32 Team::getScore() const
 {
    return mScore;
 }
