@@ -24,6 +24,9 @@ TEST(GameTypeTests, Lookups)
 
    // Bad input
    EXPECT_EQ(NoGameType, GameType::getGameTypeIdFromName("FunkyGameType"));
+   EXPECT_EQ(NoGameType, GameType::getGameTypeIdFromName(""));
+   EXPECT_EQ(NoGameType, GameType::getGameTypeIdFromName("\0"));
+   EXPECT_EQ(NoGameType, GameType::getGameTypeIdFromName("\0EVIL\0"));
 }
 
 };
