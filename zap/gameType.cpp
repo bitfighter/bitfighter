@@ -1075,8 +1075,9 @@ void GameType::achievementAchieved(U8 achievement, const StringTableEntry &playe
 }
 
 
-static Vector<StringTableEntry> messageVals;     // Reusable container
+static const S32 NO_WINNER = -1;
 
+static Vector<StringTableEntry> messageVals;     // Reusable container
 
 // Handle the end-of-game...  handles all games... not in any subclasses
 // Can be overridden for any game-specific game over stuff
@@ -1091,48 +1092,22 @@ void GameType::onGameOver()
 
    if(isTeamGame())   // Team game -> find top team
    {
-      S32 teamWinner = 0;
-      S32 winningScore = ((Team *)(mGame->getTeam(0)))->getScore();
-      for(S32 i = 1; i < mGame->getTeamCount(); i++)
-      {
-         if(((Team *)(mGame->getTeam(i)))->getScore() == winningScore)
-            tied = true;
-         else if(((Team *)(mGame->getTeam(i)))->getScore() > winningScore)
-         {
-            teamWinner = i;
-            winningScore = ((Team *)(mGame->getTeam(i)))->getScore();
-            tied = false;
-         }
-      }
-      if(!tied)
+      S32 winner = getTeamBasedGameWinner(mGame);
+
+      if(winner != NO_WINNER)
       {
          messageVals.push_back(teamString);
-         messageVals.push_back(mGame->getTeam(teamWinner)->getName());
+         messageVals.push_back(mGame->getTeam(winner)->getName());
       }
    }
    else                    // Individual game -> find player with highest score
    {
-      S32 clientCount = mGame->getClientCount();
+      const ClientInfo *winningClient = getIndividualGameWinner(mGame);
 
-      if(clientCount)
+      if(!winningClient)
       {
-         ClientInfo *winningClient = mGame->getClientInfo(0);
-
-         for(S32 i = 1; i < clientCount; i++)
-         {
-            ClientInfo *clientInfo = mGame->getClientInfo(i);
-
-            tied = (clientInfo->getScore() == winningClient->getScore());     // TODO: I think this logic is wrong -- what if scores are in the order 4 5 5 4 will still be tied?
-
-            if(!tied && clientInfo->getScore() > winningClient->getScore())
-               winningClient = clientInfo;
-         }
-
-         if(!tied)
-         {
-            messageVals.push_back(emptyString);
-            messageVals.push_back(winningClient->getName());
-         }
+         messageVals.push_back(emptyString);
+         messageVals.push_back(winningClient->getName());
       }
    }
 
@@ -1143,6 +1118,61 @@ void GameType::onGameOver()
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, tieMessage);
    else
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, winMessage, messageVals);
+}
+
+
+// Team game -> find top team; returns NO_WINNER if tied
+S32 GameType::getTeamBasedGameWinner(const Game *game) const
+{
+   S32 teamWinner = 0;
+   S32 winningScore = ((Team *)(game->getTeam(0)))->getScore();
+
+   bool tied = true;
+
+
+   for(S32 i = 1; i < game->getTeamCount(); i++)
+   {
+      if(((Team *)(game->getTeam(i)))->getScore() == winningScore)
+         tied = true;
+
+      else if(((Team *)(game->getTeam(i)))->getScore() > winningScore)
+      {
+         teamWinner = i;
+         winningScore = ((Team *)(game->getTeam(i)))->getScore();
+         tied = false;
+      }
+   }
+
+   return tied ? NO_WINNER : teamWinner;
+}
+
+
+// Returns NULL if tied
+ClientInfo *GameType::getIndividualGameWinner(const Game *game) const
+{
+   S32 clientCount = game->getClientCount();
+
+   ClientInfo *winningClient;
+
+   bool tied = true;
+
+   if(clientCount)
+   {
+      winningClient = game->getClientInfo(0);
+
+      for(S32 i = 1; i < clientCount; i++)
+      {
+         ClientInfo *clientInfo = game->getClientInfo(i);
+
+         // TODO: I think the following logic is wrong -- what if scores are in the order 4 5 5 4 will still be tied?
+         tied = (clientInfo->getScore() == winningClient->getScore());     
+
+         if(!tied && clientInfo->getScore() > winningClient->getScore())
+            winningClient = clientInfo;
+      }
+   }
+
+   return tied ? NULL : winningClient;
 }
 
 
@@ -1852,10 +1882,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
    }
    // Fire scoring event for non-team games
    else
-   {
       EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, playerPoints, teamIndex + 1, playerInfo);
-   }
-
 
    // End game if max score has been reached
    if(newScore >= mWinningScore)
