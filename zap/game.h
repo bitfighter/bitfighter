@@ -416,6 +416,10 @@ public:
    void removeTeam(S32 teamIndex);
    void clearTeams();
 
+   // Find winners!
+   S32 getTeamBasedGameWinner() const;             // Find winner of a team-based game
+   ClientInfo *getIndividualGameWinner() const;    // Find winner of a non-team based game
+   
    void setTeamHasFlag(S32 teamIndex, bool hasFlag);
    void clearTeamHasFlagList();
 

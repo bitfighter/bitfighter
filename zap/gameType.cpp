@@ -1092,7 +1092,7 @@ void GameType::onGameOver()
 
    if(isTeamGame())   // Team game -> find top team
    {
-      S32 winner = getTeamBasedGameWinner(mGame);
+      S32 winner = mGame->getTeamBasedGameWinner();
 
       if(winner != NO_WINNER)
       {
@@ -1100,9 +1100,9 @@ void GameType::onGameOver()
          messageVals.push_back(mGame->getTeam(winner)->getName());
       }
    }
-   else                    // Individual game -> find player with highest score
+   else              // Individual game -> find player with highest score
    {
-      const ClientInfo *winningClient = getIndividualGameWinner(mGame);
+      const ClientInfo *winningClient = mGame->getIndividualGameWinner();
 
       if(!winningClient)
       {
@@ -1118,61 +1118,6 @@ void GameType::onGameOver()
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, tieMessage);
    else
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, winMessage, messageVals);
-}
-
-
-// Team game -> find top team; returns NO_WINNER if tied
-S32 GameType::getTeamBasedGameWinner(const Game *game) const
-{
-   S32 teamWinner = 0;
-   S32 winningScore = ((Team *)(game->getTeam(0)))->getScore();
-
-   bool tied = true;
-
-
-   for(S32 i = 1; i < game->getTeamCount(); i++)
-   {
-      if(game->getTeam(i)->getScore() == winningScore)
-         tied = true;
-
-      else if(game->getTeam(i)->getScore() > winningScore)
-      {
-         teamWinner = i;
-         winningScore = game->getTeam(i)->getScore();
-         tied = false;
-      }
-   }
-
-   return tied ? NO_WINNER : teamWinner;
-}
-
-
-// Returns NULL if tied
-ClientInfo *GameType::getIndividualGameWinner(const Game *game) const
-{
-   S32 clientCount = game->getClientCount();
-
-   ClientInfo *winningClient;
-
-   bool tied = true;
-
-   if(clientCount)
-   {
-      winningClient = game->getClientInfo(0);
-
-      for(S32 i = 1; i < clientCount; i++)
-      {
-         ClientInfo *clientInfo = game->getClientInfo(i);
-
-         // TODO: I think the following logic is wrong -- what if scores are in the order 4 5 5 4 will still be tied?
-         tied = (clientInfo->getScore() == winningClient->getScore());     
-
-         if(!tied && clientInfo->getScore() > winningClient->getScore())
-            winningClient = clientInfo;
-      }
-   }
-
-   return tied ? NULL : winningClient;
 }
 
 

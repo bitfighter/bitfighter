@@ -320,9 +320,6 @@ public:
    void achievementAchieved(U8 achievement, const StringTableEntry &playerName);
 
    virtual void onGameOver();
-   // Some helpers to determine winners... public for test access
-   S32 getTeamBasedGameWinner(const Game *game) const;
-   ClientInfo *getIndividualGameWinner(const Game *game) const;
 
    void serverAddClient(ClientInfo *clientInfo);         
 

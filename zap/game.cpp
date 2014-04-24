@@ -492,6 +492,63 @@ AbstractTeam *Game::getTeam(S32 team)             const { return mActiveTeamMana
 bool          Game::getTeamHasFlag(S32 teamIndex) const { return mActiveTeamManager->getTeamHasFlag(teamIndex); }
 
 
+// Find winner of a team-based game.
+// Team game -> find top team; returns -1 if tied; if only one team, game will always be tied.
+S32 Game::getTeamBasedGameWinner() const
+{
+   S32 teamWinner = 0;
+   S32 winningScore = getTeam(0)->getScore();
+
+   bool tied = true;
+
+   for(S32 i = 1; i < getTeamCount(); i++)
+   {
+      if(getTeam(i)->getScore() == winningScore)
+         tied = true;
+
+      else if(getTeam(i)->getScore() > winningScore)
+      {
+         teamWinner = i;
+         winningScore = getTeam(i)->getScore();
+         tied = false;
+      }
+   }
+
+   return tied ? -1 : teamWinner;
+}
+
+
+// Find winner of a non-team based game.
+// Returns NULL if tied; with one player, will always be tied.
+ClientInfo *Game::getIndividualGameWinner() const
+{
+   S32 clientCount = getClientCount();
+
+   ClientInfo *winningClient;
+
+   bool tied = true;
+
+   if(clientCount)
+   {
+      winningClient = getClientInfo(0);
+
+      for(S32 i = 1; i < clientCount; i++)
+      {
+         ClientInfo *clientInfo = getClientInfo(i);
+
+         // TODO: I think the following logic is wrong -- what if scores are in the order 4 5 5 4 will still be tied?
+         tied = (clientInfo->getScore() == winningClient->getScore());     
+
+         if(!tied && clientInfo->getScore() > winningClient->getScore())
+            winningClient = clientInfo;
+      }
+   }
+
+   return tied ? NULL : winningClient;
+}
+
+
+
 S32 Game::getTeamIndexFromTeamName(const char *teamName) const 
 { 
    for(S32 i = 0; i < mActiveTeamManager->getTeamCount(); i++)
