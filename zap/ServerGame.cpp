@@ -1094,6 +1094,7 @@ Vector<Vector<S32> > ServerGame::getCategorizedPlayerCountsByTeam() const
 }
 
 
+// This will NOT delete clientInfo... caller is responsible for cleanup!
 void ServerGame::addClient(ClientInfo *clientInfo)
 {
    TNLAssert(!clientInfo->isRobot(), "This only gets called for players");

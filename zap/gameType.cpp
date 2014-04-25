@@ -631,7 +631,14 @@ void GameType::idle_server(U32 deltaT)
 
    // If game time has expired... game is over, man, it's over
    if(!isTimeUnlimited() && mEndingGamePlay <= mTotalGamePlay)
+   {
+      // Check if we have a clear winner...
+
+      // ...if so, end the game...
       gameOverManGameOver();
+
+      // ...otherwise, it's SUDDEN DEATH!
+   }
 }
 
 
@@ -1200,6 +1207,8 @@ void GameType::onAddedToGame(Game *game)
 // This ClientInfo should be a FullClientInfo in every case
 bool GameType::spawnShip(ClientInfo *clientInfo)
 {
+   TNLAssert(dynamic_cast<FullClientInfo *>(clientInfo), "Was expecting a FullCleintInfo!");
+
    // Check if player is "on hold" due to inactivity; if so, delay spawn and alert client.  Never delays bots.
    // Note, if we know that this is the beginning of a new level, we can save a wee bit of bandwidth by passing
    // NULL as first arg to setSpawnDelayed(), but we don't check this currently, and it's probably not worth doing
