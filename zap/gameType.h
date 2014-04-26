@@ -220,8 +220,6 @@ public:
 
    static Vector<string> getGameTypeNames();
 
-   bool mHaveSoccer;                // Does level have soccer balls? used to determine weather or not to send s2cSoccerCollide
-
    bool mBotZoneCreationFailed;
 
    // Some games have extra game parameters.  We need to create a structure to communicate those parameters to the editor so

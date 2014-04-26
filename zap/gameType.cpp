@@ -94,7 +94,6 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(THREE_SECONDS), mG
    mLevelHasPredeployedFlags = false;
    mLevelHasFlagSpawns = false;
    mShowAllBots = false;
-   mHaveSoccer = false;
    mBotZoneCreationFailed = false;
 
    mMinRecPlayers = 0;
