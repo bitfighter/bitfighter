@@ -523,7 +523,8 @@ void GameUserInterface::render()
          drawCenteredString(310, 16, GameConnection::getConnectionStateString(getGame()->getConnectionToServer()->getConnectionState()));
 
       glColor(Colors::white);
-      drawCenteredString(346, 20, "Press <ESC> to abort");
+      static const SymbolString msg("Press [[ESC]] to abort", NULL, ErrorMsgContext, 20, false, AlignmentCenter);
+      msg.render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 366));
 
       return;
    }
