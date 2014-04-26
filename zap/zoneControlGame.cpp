@@ -401,9 +401,10 @@ S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent sco
 }
 
 
-void ZoneControlGameType::onGameOver()
+bool ZoneControlGameType::onGameOver()
 {
-   Parent::onGameOver();
+   if(!Parent::onGameOver())
+      return false;
 
    const S32 zoneCount = getGame()->getGameObjDatabase()->getObjectCount(GoalZoneTypeNumber);
 
@@ -420,6 +421,8 @@ void ZoneControlGameType::onGameOver()
    {
       achievementAchieved(BADGE_ZONE_CONTROLLER, mPossibleZcBadgeAchiever->getName());
    }
+
+   return true;
 }
 
 

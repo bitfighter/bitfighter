@@ -95,6 +95,7 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(THREE_SECONDS), mG
    mLevelHasFlagSpawns = false;
    mShowAllBots = false;
    mBotZoneCreationFailed = false;
+   mOvertime = false;
 
    mMinRecPlayers = 0;
    mMaxRecPlayers = 0;
@@ -628,16 +629,9 @@ void GameType::idle_server(U32 deltaT)
    // Process any pending Robot events
    EventManager::get()->update();
 
-   // If game time has expired... game is over, man, it's over
-   if(!isTimeUnlimited() && mEndingGamePlay <= mTotalGamePlay)
-   {
-      // Check if we have a clear winner...
-
-      // ...if so, end the game...
+   // If game time has expired... game is over, man, it's over (unless we get pushed into overtime)
+   if(!isTimeUnlimited() && mTotalGamePlay >= mEndingGamePlay)
       gameOverManGameOver();
-
-      // ...otherwise, it's SUDDEN DEATH!
-   }
 }
 
 
@@ -765,8 +759,9 @@ void GameType::gameOverManGameOver()
    if(mGameOver)     // Only do this once
       return;
 
-   onGameOver();                         // Call game-specific end-of-game code
-   // onGameOver() goes before mGameOver = true; so win messages won't get blocked, part of preving messages going away too fast
+   // Call game-specific end-of-game code
+   if(!onGameOver())    
+      return;     // (I guess the game wasn't really over!)
 
    mBetweenLevels = true;
    mGameOver = true;                     // Show scores at end of game
@@ -1087,8 +1082,9 @@ static Vector<StringTableEntry> messageVals;     // Reusable container
 
 // Handle the end-of-game...  handles all games... not in any subclasses
 // Can be overridden for any game-specific game over stuff
+// Returns true if there is a winner, false if there is a tie
 // Server only
-void GameType::onGameOver()
+bool GameType::onGameOver()
 {
    static StringTableEntry teamString("Team ");
    static StringTableEntry emptyString;
@@ -1098,7 +1094,7 @@ void GameType::onGameOver()
 
    if(isTeamGame())   // Team game -> find top team
    {
-      S32 winner = mGame->getTeamBasedGameWinner();
+      S32 winner = mGame->getTeamBasedGameWinner().second;
 
       if(winner == NO_WINNER)
          tied = true;
@@ -1110,11 +1106,14 @@ void GameType::onGameOver()
    }
    else              // Individual game -> find player with highest score
    {
-      const ClientInfo *winningClient = mGame->getIndividualGameWinner();
+      IndividualGameResults results = mGame->getIndividualGameWinner();
+      
+      GameEndStatus status = results.first;
+      const ClientInfo *winningClient = results.second;
 
-      if(!winningClient)
+      if(status == Tied)
          tied = true;
-      else
+      else if(status == OnlyOnePlayerOrTeam)
       {
          messageVals.push_back(emptyString);
          messageVals.push_back(winningClient->getName());
@@ -1123,14 +1122,27 @@ void GameType::onGameOver()
 
    if(tied)
    {
-      static StringTableEntry tieMessage("The game ended in a tie.");
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, tieMessage);
+      startOvertime();     // SUDDEN DEATH OVERTIME!!!!
+      return false;
    }
-   else
-   {
-      static StringTableEntry winMessage("%e0%e1 wins the game!");
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, winMessage, messageVals);
-   }
+
+   static StringTableEntry winMessage("%e0%e1 wins the game!");
+   broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, winMessage, messageVals);
+
+   return true;
+}
+
+
+// Runs on server and client
+void GameType::startOvertime()
+{
+   mOvertime = true;
+
+   if(isServer())
+      s2cSetOvertime();    // Tell the clients
+
+   // In Bitmatch, extend clock by 20 seconds
+   mEndingGamePlay += TWENTY_SECONDS;    
 }
 
 
@@ -1147,6 +1159,14 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetGameOver, (bool gameOver), (gameOver
       static_cast<ClientGame *>(mGame)->setEnteringGameOverScoreboardPhase();
 
 #endif
+}
+
+
+// Tells the client that we have entered overtime
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetOvertime, (), (),
+                            NetClassGroupGameMask, RPCGuaranteed, RPCToGhost, 0)
+{
+   startOvertime();
 }
 
 
@@ -2553,7 +2573,9 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
       s2cAddWalls(mWalls[i].verts, mWalls[i].width, mWalls[i].solid);
 
    broadcastNewRemainingTime();
-   s2cSetGameOver(mGameOver);
+   s2cSetGameOver(mGameOver);    // TODO: Is this really needed?
+   TNLAssert(!mGameOver, "Is this ever true here?");     // If this assert never trips... then we can get rid of the s2c above.  4/26/2014
+
    s2cSyncMessagesComplete(theConnection->getGhostingSequence());
 
    NetObject::setRPCDestConnection(NULL);             // Set RPCs to go to all players
@@ -3696,6 +3718,12 @@ HelpItem GameType::getGameStartInlineHelpItem() const { return isTeamGame() ? Te
 bool GameType::isFlagGame()          const { return false; }
 bool GameType::canBeTeamGame()       const { return true;  }
 bool GameType::canBeIndividualGame() const { return true;  }
+
+
+bool GameType::isOvertime() const
+{
+   return mOvertime;
+}
 
 
 bool GameType::teamHasFlag(S32 teamIndex) const

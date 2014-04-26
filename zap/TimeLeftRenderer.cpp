@@ -46,7 +46,9 @@ Point TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible,
    corner.y = mScreenInfo->getGameCanvasHeight() - corner.y - TimeLeftIndicatorMargin;    // Height
 
    // Some game types *ahem* Nexus *ahem* require an extra line for the scoreboard... a "special" if you will
-   const S32 timeLeftSpecialHeight = gameType->renderTimeLeftSpecial((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin), timeTop, render);
+   const S32 timeLeftSpecialHeight = gameType->renderTimeLeftSpecial(
+                  (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin), timeTop, render);
+
    timeTop  -= timeLeftSpecialHeight;
    corner.y += timeLeftSpecialHeight;
 
@@ -120,10 +122,12 @@ S32 TimeLeftRenderer::renderHeadlineScores(const Game *game, S32 ypos) const
 }
 
 
-// Try to mitigate some of the weirdness that comes from TTF hinting when trying to
-// right-align text
+// Try to mitigate some of the weirdness that comes from TTF hinting when trying to right-align text
 static void drawStringDigitByDigit(S32 x, S32 y, S32 textsize, const string &s)
 {
+   // Note for the well-intentioned cast-killer... if you try to make i an unsigned int to avoid the cast,
+   // this loop will crash, as i will be decremented below 0, and, well... bring on the velocoraptor.  
+   // See http://xkcd.com/292/ for clarification.
    for(S32 i = (S32)s.length() - 1; i >= 0; i--)
       x -= drawStringr(x, y, textsize, s.substr(i, 1).c_str());
 }
@@ -209,8 +213,10 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
    {
       glColor(winnerColor);
 
-      drawStringDigitByDigit((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - topOneFixFactor, ypos - firstNameOffset, textsize, topScoreStr);
-      drawStringr           ((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth,        ypos - firstNameOffset, textsize, topName);
+      drawStringDigitByDigit((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - topOneFixFactor, 
+                             ypos - firstNameOffset, textsize, topScoreStr);
+      drawStringr           ((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth,        
+                             ypos - firstNameOffset, textsize, topName);
 
       // Render bottom score if we have one
       if(renderTwoNames)
@@ -220,8 +226,10 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
          else
             glColor(loserColor);
 
-         drawStringDigitByDigit((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - botOneFixFactor, ypos, textsize, botScoreStr);
-         drawStringr           ((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth,        ypos, textsize, botName);
+         drawStringDigitByDigit((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - botOneFixFactor, 
+                                ypos, textsize, botScoreStr);
+         drawStringr           ((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth,        
+                                ypos, textsize, botName);
       }
    }
 
@@ -258,7 +266,8 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
          timeWidth += w0;
    }
 
-   const S32 grayLinePos = (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - timeWidth - grayLineHorizPadding;  // Where the vertical gray line is drawn
+   // grayLinePos --> Where the vertical gray line is drawn
+   const S32 grayLinePos = (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - timeWidth - grayLineHorizPadding;  
    const S32 smallTextRPos = grayLinePos - grayLineHorizPadding;                // Right-align the stacked text here
    
    // Left and top coordinates of the time display
@@ -280,7 +289,7 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
       wb = drawStringfr(smallTextRPos, timeTop + TimeTextSize - siSize - stwSizeBonus, siSize + stwSizeBonus, 
                         itos(gameType->getWinningScore()).c_str()); 
 
-      glColor(Colors::white);
+      glColor(gameType->isOvertime() ? Colors::red : Colors::white);
       if(gameType->isTimeUnlimited())  
          drawString(timeLeft, timeTop, TimeTextSize, "Unlim.");
       else

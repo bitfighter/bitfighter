@@ -6,6 +6,7 @@
 #include "TestUtils.h"
 
 #include "ServerGame.h"
+#include "GameTypesEnum.h"
 #include "gameConnection.h"
 #include "gtest/gtest.h"
 
@@ -28,23 +29,24 @@ TEST(GameTest, Winners)
    ClientInfo *player1 = game->getClientInfo(0);         // gamePair comes with one client by default
    ASSERT_EQ(0, player1->getScore());                    // Check that starting score is 0, just in case
 
-   // With one player, game will be tied; this is not important behavior, but is documented
-   EXPECT_EQ(NULL, game->getIndividualGameWinner());    
+   EXPECT_EQ(OnlyOnePlayerOrTeam, game->getIndividualGameWinner().first);    
 
    gamePair.addClient("Player 2");
    ClientInfo *player2 = game->findClientInfo("Player 2");
    ASSERT_EQ(0, player2->getScore());                    // Check that starting score is 0, just in case
 
-   EXPECT_EQ(NULL, game->getIndividualGameWinner());     // Scores: 0,0
+   EXPECT_EQ(Tied, game->getIndividualGameWinner().first);        // Scores: 0,0
 
    player1->setScore(5);
-   EXPECT_EQ(player1, game->getIndividualGameWinner());  // Scores 5,0
+   EXPECT_EQ(HasWinner, game->getIndividualGameWinner().first);   // Scores 5,0
+   EXPECT_EQ(player1,   game->getIndividualGameWinner().second); 
 
    player2->setScore(6);
-   EXPECT_EQ(player2, game->getIndividualGameWinner());  // Scores 5,6
+   EXPECT_EQ(HasWinner, game->getIndividualGameWinner().first);   // Scores 5,6
+   EXPECT_EQ(player2,   game->getIndividualGameWinner().second);
 
    player1->setScore(6);
-   EXPECT_EQ(NULL, game->getIndividualGameWinner());     // Scores: 6,6
+   EXPECT_EQ(Tied, game->getIndividualGameWinner().first);        // Scores: 6,6
 
    gamePair.addClient("Player 3");
    ClientInfo *player3 = game->findClientInfo("Player 3");
@@ -56,23 +58,26 @@ TEST(GameTest, Winners)
    player2->setScore(5);
    player3->setScore(5);
    player4->setScore(4);
-   EXPECT_EQ(NULL, game->getIndividualGameWinner());     // Scores: 4,5,5,4 <-- scenario of concern in comments
+   EXPECT_EQ(Tied, game->getIndividualGameWinner().first);        // Scores: 4,5,5,4 <-- scenario of concern in comments
 
    player3->setScore(6);
-   EXPECT_EQ(player3, game->getIndividualGameWinner());  // Scores: 4,5,6,4
+   EXPECT_EQ(HasWinner, game->getIndividualGameWinner().first);   // Scores: 4,5,6,4
+   EXPECT_EQ(player3,   game->getIndividualGameWinner().second);
 
    player1->setScore(4);
    player2->setScore(4);
    player3->setScore(4);
    player4->setScore(4);
-   EXPECT_EQ(NULL, game->getIndividualGameWinner());     // Scores: 4,4,4,4
+   EXPECT_EQ(Tied, game->getIndividualGameWinner().first);        // Scores: 4,4,4,4
 
    player1->setScore(6);
-   EXPECT_EQ(player1, game->getIndividualGameWinner());  // Scores: 6,4,4,4
+   EXPECT_EQ(HasWinner, game->getIndividualGameWinner().first);   // Scores: 6,4,4,4
+   EXPECT_EQ(player1,   game->getIndividualGameWinner().second);    
 
    player1->setScore(4);
    player4->setScore(6);
-   EXPECT_EQ(player4, game->getIndividualGameWinner());  // Scores: 4,4,4,6
+   EXPECT_EQ(HasWinner, game->getIndividualGameWinner().first);   // Scores: 4,4,4,6
+   EXPECT_EQ(player4,   game->getIndividualGameWinner().second);    
 }
 
 

@@ -44,12 +44,17 @@ class Zone;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-
 class GameType : public NetObject
 {
    typedef NetObject Parent;
 
+public:
    static const S32 TeamNotSpecified = -99999;
+
+   enum ScoringGroup {
+      IndividualScore,
+      TeamScore
+   };
 
 private:
    Game *mGame;
@@ -80,6 +85,8 @@ private:
    bool mEngineerUnrestrictedEnabled;
    bool mBotsAllowed;
 
+   bool mOvertime;                  // True when we're in overtime/extended play, false during the normal game
+
    // Info about current level
    string mLevelName;
    string mLevelDescription;
@@ -104,7 +111,7 @@ protected:
    Timer mScoreboardUpdateTimer;
 
    U32 mTotalGamePlay;  // Continuously counts up and never goes down. Used for syncing and gameplay stats. In Milliseconds.
-   U32 mEndingGamePlay; // Game over when mTotalGamePlay reaches mEndingGamePlay, 0 = no time limit. In Milliseconds.
+   U32 mEndingGamePlay; // Game over when mTotalGamePlay >= mEndingGamePlay, 0 = no time limit. In Milliseconds.
 
    Timer mGameTimeUpdateTimer;         // Timer for when to send clients a game clock update
                        
@@ -144,6 +151,8 @@ public:
    virtual bool canBeTeamGame() const;
    virtual bool canBeIndividualGame() const;
    virtual bool teamHasFlag(S32 teamIndex) const;
+
+   bool isOvertime() const;
 
    virtual void onFlagMounted(S32 teamIndex);         // A flag was picked up by a ship on the specified team
 
@@ -198,9 +207,9 @@ public:
    enum
    {
       RespawnDelay = 1500,
-      SwitchTeamsDelay = 60000,   // Time between team switches (ms) -->  60000 = 1 minute
-      naScore = -99999,           // Score representing a nonsesical event
-      NO_FLAG = -1,               // Constant used for ship not having a flag
+      SwitchTeamsDelay = ONE_MINUTE,   // Time between team switches
+      naScore = -99999,                // Score representing a nonsesical event
+      NO_FLAG = -1,                    // Constant used for ship not having a flag
    };
 
    const Vector<WallRec> *getBarrierList();
@@ -234,11 +243,6 @@ public:
       S32 maxval;    // Max value for this param
    };
 
-   enum ScoringGroup
-   {
-      IndividualScore,
-      TeamScore,
-   };
 
    virtual S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
    static string getScoringEventDescr(ScoringEvent event);
@@ -309,7 +313,9 @@ public:
 
    void achievementAchieved(U8 achievement, const StringTableEntry &playerName);
 
-   virtual void onGameOver();
+   virtual bool onGameOver();
+   virtual void startOvertime();             // If game ends in a tie, start overtime
+
 
    void serverAddClient(ClientInfo *clientInfo);         
 
@@ -379,6 +385,8 @@ public:
    TNL_DECLARE_RPC(c2sSyncMessagesComplete, (U32 sequence));
 
    TNL_DECLARE_RPC(s2cSetGameOver, (bool gameOver));
+   TNL_DECLARE_RPC(s2cSetOvertime, ());
+
    TNL_DECLARE_RPC(s2cSetNewTimeRemaining, (U32 timeEndingInMs));
    TNL_DECLARE_RPC(s2cChangeScoreToWin, (U32 score, StringTableEntry changer));
 

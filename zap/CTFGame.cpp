@@ -273,9 +273,10 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
 }
 
 
-void CTFGameType::onGameOver()
+bool CTFGameType::onGameOver()
 {
-   Parent::onGameOver();
+   if(Parent::onGameOver())
+      return false;
 
    // Check if we got the Last-Second Win badge
    if(mLastWinBadgeAchievable &&                                           // Badge was possibly achieved (some flag scored in last second)
@@ -310,6 +311,8 @@ void CTFGameType::onGameOver()
       if(!tiedGame && secondPlaceIsMinusOne)
          achievementAchieved(BADGE_LAST_SECOND_WIN, mPossibleLastWinBadgeAchiever->getName());
    }
+
+   return true;
 }
 
 

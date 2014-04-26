@@ -6,6 +6,11 @@
 #ifndef _GAMETYPESENUM_H_
 #define _GAMETYPESENUM_H_
 
+#include "tnlTypes.h"
+#include <utility>
+
+using namespace TNL;
+
 namespace Zap
 {     
 /**
@@ -76,7 +81,21 @@ namespace Zap
          ScoringEventsCount
    };
 
+
+enum GameEndStatus {
+   HasWinner,
+   Tied,
+   OnlyOnePlayerOrTeam
 };
+
+
+class ClientInfo;
+
+typedef std::pair<GameEndStatus, ClientInfo *> IndividualGameResults;
+typedef std::pair<GameEndStatus, S32>          TeamGameResults;
+
+
+}
 
 
 #endif

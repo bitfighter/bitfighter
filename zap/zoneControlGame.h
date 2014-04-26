@@ -50,7 +50,7 @@ public:
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
-   void onGameOver();
+   bool onGameOver();
 
    TNL_DECLARE_CLASS(ZoneControlGameType);
 };

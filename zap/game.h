@@ -417,8 +417,8 @@ public:
    void clearTeams();
 
    // Find winners!
-   S32 getTeamBasedGameWinner() const;             // Find winner of a team-based game
-   ClientInfo *getIndividualGameWinner() const;    // Find winner of a non-team based game
+   TeamGameResults       getTeamBasedGameWinner()  const;   // Find winner of a team-based game
+   IndividualGameResults getIndividualGameWinner() const;   // Find winner of a non-team based game
    
    void setTeamHasFlag(S32 teamIndex, bool hasFlag);
    void clearTeamHasFlagList();

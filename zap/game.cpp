@@ -492,63 +492,62 @@ AbstractTeam *Game::getTeam(S32 team)             const { return mActiveTeamMana
 bool          Game::getTeamHasFlag(S32 teamIndex) const { return mActiveTeamManager->getTeamHasFlag(teamIndex); }
 
 
-// Find winner of a team-based game.
-// Team game -> find top team; returns -1 if tied; if only one team, game will always be tied.
-S32 Game::getTeamBasedGameWinner() const
+// Find winner of a team-based game
+TeamGameResults Game::getTeamBasedGameWinner() const
 {
-   S32 teamWinner = 0;
+   S32 teamCount = getTeamCount();
+
+   if(teamCount == 1)
+      return TeamGameResults(OnlyOnePlayerOrTeam, 0);
+
+   S32 winningTeam = 0;
    S32 winningScore = getTeam(0)->getScore();
 
-   bool tied = true;
+   GameEndStatus status = HasWinner;
 
-   for(S32 i = 1; i < getTeamCount(); i++)
+   for(S32 i = 1; i < teamCount; i++)
    {
       if(getTeam(i)->getScore() == winningScore)
-         tied = true;
+         status = Tied;
 
       else if(getTeam(i)->getScore() > winningScore)
       {
-         teamWinner = i;
+         winningTeam = i;
          winningScore = getTeam(i)->getScore();
-         tied = false;
+         status = HasWinner;
       }
    }
 
-   return tied ? -1 : teamWinner;
+   return TeamGameResults(status, winningTeam);
 }
 
 
-// Find winner of a non-team based game.
-// Returns NULL if tied; with one player, will always be tied.
-ClientInfo *Game::getIndividualGameWinner() const
+// Find winner of a non-team based game
+IndividualGameResults Game::getIndividualGameWinner() const
 {
    S32 clientCount = getClientCount();
 
-   ClientInfo *winningClient;
+   if(clientCount == 1)
+      return IndividualGameResults(OnlyOnePlayerOrTeam, getClientInfo(0));
 
-   bool tied = true;
+   ClientInfo *winningClient = getClientInfo(0);
+   GameEndStatus status = HasWinner;
 
-   if(clientCount > 1)
+   for(S32 i = 1; i < clientCount; i++)
    {
-      winningClient = getClientInfo(0);
-      tied = false;
+      ClientInfo *clientInfo = getClientInfo(i);
 
-      for(S32 i = 1; i < clientCount; i++)
+      if(clientInfo->getScore() == winningClient->getScore())
+         status = Tied;
+
+      else if(clientInfo->getScore() > winningClient->getScore())
       {
-         ClientInfo *clientInfo = getClientInfo(i);
-
-         if(clientInfo->getScore() == winningClient->getScore())
-            tied = true;
-
-         else if(clientInfo->getScore() > winningClient->getScore())
-         {
-            winningClient = clientInfo;
-            tied = false;
-         }
+         winningClient = clientInfo;
+         status = HasWinner;
       }
    }
 
-   return tied ? NULL : winningClient;
+   return IndividualGameResults(status, winningClient);
 }
 
 
