@@ -34,7 +34,7 @@ private:
 public:
    static const S32 TimeLeftIndicatorMargin = 7;
 
-   TimeLeftRenderer();
+   TimeLeftRenderer();     // Constructor
 
    Point render(const GameType *gameType, bool scoreboardVisible, bool render) const;
 };
