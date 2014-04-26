@@ -1111,20 +1111,23 @@ void GameType::onGameOver()
    {
       const ClientInfo *winningClient = mGame->getIndividualGameWinner();
 
-      if(!winningClient)
+      if(winningClient)
       {
          messageVals.push_back(emptyString);
          messageVals.push_back(winningClient->getName());
       }
    }
 
-   static StringTableEntry tieMessage("The game ended in a tie.");
-   static StringTableEntry winMessage("%e0%e1 wins the game!");
-
    if(tied)
+   {
+      static StringTableEntry tieMessage("The game ended in a tie.");
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, tieMessage);
+   }
    else
+   {
+      static StringTableEntry winMessage("%e0%e1 wins the game!");
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, winMessage, messageVals);
+   }
 }
 
 
