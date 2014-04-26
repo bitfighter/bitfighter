@@ -2747,7 +2747,6 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBots,
 
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, messageVals);
    }
-
 }
 
 
