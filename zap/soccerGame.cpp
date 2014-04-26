@@ -105,7 +105,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
 
    // Print the message and emit the text effect
    getGame()->displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());
-   getGame()->emitTextEffect(txtEffect, *getTeamColor(scorerTeam), scorePos);
+   getGame()->emitTextEffect(txtEffect, *getTeamColor(scorerTeam), scorePos, true);
 }
 
 

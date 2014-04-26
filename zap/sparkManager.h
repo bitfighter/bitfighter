@@ -49,12 +49,13 @@ class FxManager
       Color color;
       Point pos;
       Point vel;
+      bool relative;
       F32 size;
       F32 growthRate;
       S32 ttl;    // Milliseconds
       
       void idle(U32 timeDelta);
-      void render() const;
+      void render(const Point &centerOffset) const;
    };
 
    Vector<TextEffect> mTextEffects;
@@ -78,11 +79,11 @@ public:
    void emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2, U32 count);
    void emitBlast(const Point &pos, U32 size);
    void emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation);
-   void emitTextEffect(const string &text, const Color &color, const Point &pos);
+   void emitTextEffect(const string &text, const Color &color, const Point &pos, bool relative);
    void emitTeleportInEffect(const Point &pos, U32 type);
 
    void idle(U32 timeDelta);
-   void render(S32 renderPass, F32 commanderZoomFraction) const;
+   void render(S32 renderPass, F32 commanderZoomFraction, const Point &centerOffset) const;
    void clearSparks();
 };
 

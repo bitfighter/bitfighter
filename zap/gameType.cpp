@@ -667,7 +667,7 @@ void GameType::launchKillStreakTextEffects(const ClientInfo *clientInfo) const
    else if(killStreak % 5 == 0)
       msg = itos(killStreak) + "! Hang in there!";
 
-   mGame->emitTextEffect(msg, Colors::yellow, ship->getRenderPos() + Point(0, -150));
+   mGame->emitTextEffect(msg, Colors::yellow, ship->getRenderPos() + Point(0, -150), true);
 }
 
 
@@ -1147,13 +1147,30 @@ bool GameType::onGameOver()
 // Runs on server and client
 void GameType::startOvertime()
 {
-   mOvertime = true;
-
    if(isServer())
       s2cSetOvertime();    // Tell the clients
 
+   onOvertimeStarted();
+
+   mOvertime = true;
+}
+
+
+// Handle any gameType specific overtime actions/settings... should be overridded by various gameTypes
+// Will be called at the beginning of each overtime period if overtime is extended.  
+// On first call, mOvertime will be false; mOvertime will be true on subsequent calls.
+void GameType::onOvertimeStarted()
+{
    // In Bitmatch, extend clock by 20 seconds
    mEndingGamePlay += TWENTY_SECONDS;    
+
+   // And release a text effect to notify players
+   if(isClient())
+   {
+      Ship *ship = getGame()->getLocalPlayerShip();
+      if(ship)
+         mGame->emitTextEffect("OVERTIME PERIOD!", Colors::red, Point(0, 0), false);
+   }
 }
 
 
@@ -3535,7 +3552,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAchievementMessage,
 
    Ship *ship = mGame->findShip(clientName);
    if(ship)
-      mGame->emitTextEffect(textEffectText, Colors::yellow, ship->getRenderPos() + Point(0, 150));
+      mGame->emitTextEffect(textEffectText, Colors::yellow, ship->getRenderPos() + Point(0, 150), true);
 }
 
 

@@ -319,7 +319,7 @@ public:
    virtual Point worldToScreenPoint(const Point *p, S32 canvasWidth, S32 canvasHeight) const;
    virtual F32 getCommanderZoomFraction() const;
    virtual void renderBasicInterfaceOverlay() const;
-   virtual void emitTextEffect(const string &text, const Color &color, const Point &pos) const;
+   virtual void emitTextEffect(const string &text, const Color &color, const Point &pos, bool releative) const;
 
    U32 getTimeUnconnectedToMaster();
    virtual void onConnectedToMaster();

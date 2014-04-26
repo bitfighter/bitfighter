@@ -314,7 +314,8 @@ public:
    void achievementAchieved(U8 achievement, const StringTableEntry &playerName);
 
    virtual bool onGameOver();
-   virtual void startOvertime();             // If game ends in a tie, start overtime
+   void startOvertime();                     // If game ends in a tie, start overtime
+   virtual void onOvertimeStarted();         // Handle GameType specific overtime settings  
 
 
    void serverAddClient(ClientInfo *clientInfo);         

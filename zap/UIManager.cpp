@@ -814,9 +814,9 @@ void UIManager::emitDebrisChunk(const Vector<Point> &points, const Color &color,
 }
 
 
-void UIManager::emitTextEffect(const string &text, const Color &color, const Point &pos)
+void UIManager::emitTextEffect(const string &text, const Color &color, const Point &pos, bool relative)
 {
-   getUI<GameUserInterface>()->emitTextEffect(text, color, pos);
+   getUI<GameUserInterface>()->emitTextEffect(text, color, pos, relative);
 }
 
 

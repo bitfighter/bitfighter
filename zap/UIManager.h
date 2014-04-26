@@ -233,7 +233,7 @@ public:
    void emitBlast(const Point &pos, U32 size);
    void emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2);
    void emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation);
-   void emitTextEffect(const string &text, const Color &color, const Point &pos);
+   void emitTextEffect(const string &text, const Color &color, const Point &pos, bool relative);
    void emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType);
    void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
    void emitTeleportInEffect(const Point &pos, U32 type);

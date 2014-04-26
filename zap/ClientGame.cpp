@@ -308,9 +308,10 @@ void ClientGame::emitDebrisChunk(const Vector<Point> &points, const Color &color
 }
 
 
-void ClientGame::emitTextEffect(const string &text, const Color &color, const Point &pos) const
+// If relative is true, pos represents a fixed offset from the center of the screen.  If false, it is absolute world coords.
+void ClientGame::emitTextEffect(const string &text, const Color &color, const Point &pos, bool relative) const
 {
-   getUIManager()->emitTextEffect(text, color, pos);
+   getUIManager()->emitTextEffect(text, color, pos, relative);
 }
 
 

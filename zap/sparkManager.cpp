@@ -9,6 +9,7 @@
 #include "gameObjectRender.h"
 #include "Colors.h"
 #include "config.h"
+#include "Intervals.h"
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
@@ -141,22 +142,34 @@ void FxManager::TextEffect::idle(U32 timeDelta)
    F32 dTsecs = F32(timeDelta) * 0.001f;     // Convert timeDelta to seconds
 
    pos += vel * dTsecs;
+
    if(size < MAX_TEXTEFFECT_SIZE)
       size += growthRate * dTsecs;
+
+   if(size > MAX_TEXTEFFECT_SIZE)
+      size = MAX_TEXTEFFECT_SIZE;
 
    ttl -= timeDelta;
 }
 
 
-void FxManager::TextEffect::render() const
+void FxManager::TextEffect::render(const Point &centerOffset) const
 {
    F32 alpha = 1;
-   if(ttl < 300)
-      alpha = F32(ttl) / 300.f;     // Fade as item nears the end of its life
+
+   static const F32 FadeTime = 300;
+
+   if(ttl < FadeTime)
+      alpha = ttl / FadeTime;     // Fade as item nears the end of its life
+
    glColor(color, alpha);
-   //glLineWidth(size);
+
    glPushMatrix();
-      glTranslate(pos);
+      if(!relative)
+         glTranslate(centerOffset + pos);
+      else
+         glTranslate(pos);
+
       glScale(size / MAX_TEXTEFFECT_SIZE);  // We'll draw big and scale down
       FontManager::pushFontContext(TextEffectContext);
          drawStringc(0.0f, 0.0f, 120.0f, text.c_str());
@@ -182,18 +195,20 @@ void FxManager::emitDebrisChunk(const Vector<Point> &points, const Color &color,
 }
 
 
-void FxManager::emitTextEffect(const string &text, const Color &color, const Point &pos)
+// Specify relative = true for in-game position relative to ship, = false if pos represents screen coords
+void FxManager::emitTextEffect(const string &text, const Color &color, const Point &pos, bool relative)
 {
    TextEffect textEffect;
 
-   textEffect.text  = text;
-   textEffect.color = color;
-   textEffect.pos   = pos;
+   textEffect.text     = text;
+   textEffect.color    = color;
+   textEffect.pos      = pos;
+   textEffect.relative = relative;
 
    textEffect.vel  = Point(0,-130);
    textEffect.size = 0;
    textEffect.growthRate = 20;
-   textEffect.ttl = 1500;
+   textEffect.ttl = TWO_SECONDS;
 
    mTextEffects.push_back(textEffect);
 }
@@ -247,7 +262,6 @@ void FxManager::idle(U32 timeDelta)
          }
       }
 
-
    // Kill off any old debris chunks, advance the others
    for(S32 i = 0; i < mDebrisChunks.size(); i++)
    {
@@ -260,7 +274,6 @@ void FxManager::idle(U32 timeDelta)
          mDebrisChunks[i].idle(timeDelta);
    }
 
-
    // Same for our TextEffects
    for(S32 i = 0; i < mTextEffects.size(); i++)
    {
@@ -272,7 +285,6 @@ void FxManager::idle(U32 timeDelta)
       else
          mTextEffects[i].idle(timeDelta);
    }
-
 
    for(TeleporterEffect **walk = &teleporterEffects; *walk; )
    {
@@ -289,7 +301,7 @@ void FxManager::idle(U32 timeDelta)
 }
 
 
-void FxManager::render(S32 renderPass, F32 commanderZoomFraction) const
+void FxManager::render(S32 renderPass, F32 commanderZoomFraction, const Point &centerOffset) const
 {
    // The teleporter effects should render under the ships and such
    if(renderPass == 0)
@@ -334,7 +346,7 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction) const
          mDebrisChunks[i].render();
 
       for(S32 i = 0; i < mTextEffects.size(); i++)
-         mTextEffects[i].render();
+         mTextEffects[i].render(centerOffset);
    }
 }
 

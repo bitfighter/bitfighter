@@ -486,9 +486,9 @@ void GameUserInterface::emitDebrisChunk(const Vector<Point> &points, const Color
 }
 
 
-void GameUserInterface::emitTextEffect(const string &text, const Color &color, const Point &pos)
+void GameUserInterface::emitTextEffect(const string &text, const Color &color, const Point &pos, bool relative)
 {
-   mFxManager.emitTextEffect(text, color, pos);
+   mFxManager.emitTextEffect(text, color, pos, relative);
 }
 
 
@@ -516,7 +516,8 @@ void GameUserInterface::render()
    if(!getGame()->isConnectedToServer())
    {
       glColor(Colors::white);
-      drawCenteredString(260, 30, "Connecting to server...");
+      static const SymbolString connecting("Connecting to server...", NULL, ErrorMsgContext, 30, false, AlignmentCenter);
+      connecting.render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 290));
 
       glColor(Colors::green);
       if(getGame()->getConnectionToServer())
@@ -566,13 +567,13 @@ void GameUserInterface::render()
    renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
 
    mFpsRenderer.render(DisplayManager::getScreenInfo()->getGameCanvasWidth());     // Display running average FPS
-   mConnectionStatsRenderer.render(getGame()->getConnectionToServer());     // Display running average FPS
+   mConnectionStatsRenderer.render(getGame()->getConnectionToServer());    
 
    GameType *gameType = getGame()->getGameType();
 
    if(gameType)
-      gameType->renderInterfaceOverlay(DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
-
+      gameType->renderInterfaceOverlay(DisplayManager::getScreenInfo()->getGameCanvasWidth(), 
+                                       DisplayManager::getScreenInfo()->getGameCanvasHeight());
    renderLevelInfo();
    
    renderShutdownMessage();
@@ -912,7 +913,8 @@ void GameUserInterface::renderReticle() const
    if(!shouldRender)
       return;
 
-   Point offsetMouse = mMousePoint + Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
+   Point offsetMouse = mMousePoint + Point(DisplayManager::getScreenInfo()->getGameCanvasWidth()  * 0.5f, 
+                                           DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f);
 
    F32 vertices[] = {
       // Center cross-hairs
@@ -1003,7 +1005,8 @@ void GameUserInterface::onMouseMoved()
          return;
 
       Point o = ship->getRenderPos();  // To avoid taking address of temporary
-      Point p = worldToScreenPoint(&o, DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
+      Point p = worldToScreenPoint(&o, DisplayManager::getScreenInfo()->getGameCanvasWidth(), 
+                                       DisplayManager::getScreenInfo()->getGameCanvasHeight());
 
       mCurrentMove.angle = atan2(mMousePoint.y + DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - p.y, 
                                  mMousePoint.x + DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2 - p.x);
@@ -2801,7 +2804,7 @@ void GameUserInterface::renderGameNormal()
       for(S32 j = 0; j < renderObjects.size(); j++)
          renderObjects[j]->renderLayer(i);
 
-      mFxManager.render(i, getCommanderZoomFraction());
+      mFxManager.render(i, getCommanderZoomFraction(), mShipPos);
    }
 
    S32 team = NONE;

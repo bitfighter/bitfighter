@@ -1628,7 +1628,7 @@ void Game::renderBasicInterfaceOverlay() const
 }
 
 
-void Game::emitTextEffect(const string &text, const Color &color, const Point &pos) const
+void Game::emitTextEffect(const string &text, const Color &color, const Point &pos, bool relative) const
 {
    TNLAssert(false, "Not implemented for this class!");
 }
