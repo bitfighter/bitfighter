@@ -22,9 +22,9 @@ namespace Zap {
 namespace UI {
 
 
-const S32 timeTextSize = 30;
-const S32 bigScoreTextSize = 28;
-const S32 bigScoreTextGap = 5;
+static const S32 TimeTextSize     = 30;
+static const S32 BigScoreTextSize = 28;
+static const S32 BigScoreTextGap  =  5;
 
 // Constructor
 TimeLeftRenderer::TimeLeftRenderer()
@@ -74,7 +74,7 @@ S32 TimeLeftRenderer::renderTeamScores(const GameType *gameType, S32 bottom, boo
    Game *game = gameType->getGame();
 //   bool core = gameType->getGameTypeId() == CoreGame;
 
-   S32 ypos = bottom - bigScoreTextSize;      
+   S32 ypos = bottom - BigScoreTextSize;      
 
    S32 maxWidth = render ? renderHeadlineScores(game, ypos) : 0;   // Use max score width to vertically align symbols
    S32 xpos = (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth - 18;
@@ -86,10 +86,10 @@ S32 TimeLeftRenderer::renderTeamScores(const GameType *gameType, S32 bottom, boo
       if(render)
          gameType->renderScoreboardOrnament(i, xpos, ypos);
 
-      ypos -= (bigScoreTextSize + bigScoreTextGap);
+      ypos -= (BigScoreTextSize + BigScoreTextGap);
    }
 
-   return bottom - ypos - (bigScoreTextSize + bigScoreTextGap);
+   return bottom - ypos - (BigScoreTextSize + BigScoreTextGap);
 }
 
 
@@ -111,10 +111,10 @@ S32 TimeLeftRenderer::renderHeadlineScores(const Game *game, S32 ypos) const
       // This is a total hack based on visual inspection trying to get scores ending in 1 to align with others
       // in a way that is nice.  This is totally font dependent, sadly...
 
-      S32 width = drawStringfr((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin), ypos, bigScoreTextSize, "%d", score);
+      S32 width = drawStringfr((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin), ypos, BigScoreTextSize, "%d", score);
       maxWidth = max(maxWidth, width);
 
-      ypos -= bigScoreTextSize + bigScoreTextGap;
+      ypos -= BigScoreTextSize + BigScoreTextGap;
    }
 
    return maxWidth;
@@ -239,8 +239,8 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
    const S32 grayLineVertPadding = -1;
 
    // Precalc some widths we'll need from time to time
-   static const U32 w0     = getStringWidth(timeTextSize, "0");
-   static const U32 wUnlim = getStringWidth(timeTextSize, "Unlim.");
+   static const U32 w0     = getStringWidth(TimeTextSize, "0");
+   static const U32 wUnlim = getStringWidth(TimeTextSize, "Unlim.");
 
    U32 timeWidth;
    if(gameType->isTimeUnlimited())
@@ -252,7 +252,7 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
       U32 minsRemaining = gameType->getRemainingGameTimeInMs() / (60 * 1000);
       const U32 tenSecsRemaining = gameType->getRemainingGameTimeInMs() / 1000 % 60 / 10;
       string timestr = itos(minsRemaining) + ":" + itos(tenSecsRemaining);
-      timeWidth = getStringWidth(timeTextSize, timestr.c_str()) + w0;
+      timeWidth = getStringWidth(TimeTextSize, timestr.c_str()) + w0;
 
       // Add a little extra for the leading 0 that's drawn for one digit times
       if(minsRemaining < 10)
@@ -264,7 +264,7 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
    
    // Left and top coordinates of the time display
    const S32 timeLeft = (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - timeWidth;
-   const S32 timeTop  = mScreenInfo->getGameCanvasHeight() - timeTextSize - TimeLeftIndicatorMargin;
+   const S32 timeTop  = mScreenInfo->getGameCanvasHeight() - TimeTextSize - TimeLeftIndicatorMargin;
 
    S32 wt, wb;    // Width of top and bottom items respectively
 
@@ -278,14 +278,14 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
 
       glColor(Colors::red);
       // Align with bottom of time
-      wb = drawStringfr(smallTextRPos, timeTop + timeTextSize - siSize - stwSizeBonus, siSize + stwSizeBonus, 
+      wb = drawStringfr(smallTextRPos, timeTop + TimeTextSize - siSize - stwSizeBonus, siSize + stwSizeBonus, 
                         itos(gameType->getWinningScore()).c_str()); 
 
       glColor(Colors::white);
       if(gameType->isTimeUnlimited())  
-         drawString(timeLeft, timeTop, timeTextSize, "Unlim.");
+         drawString(timeLeft, timeTop, TimeTextSize, "Unlim.");
       else
-         drawTime(timeLeft, timeTop, timeTextSize, gameType->getRemainingGameTimeInMs());
+         drawTime(timeLeft, timeTop, TimeTextSize, gameType->getRemainingGameTimeInMs());
    }
    else
    {
@@ -301,7 +301,7 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
    {
       glColor(Colors::gray40);
       drawHorizLine(farLeftCoord, (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin), timeTop - grayLineVertPadding);
-      drawVertLine(grayLinePos, timeTop + visualVerticalTextAlignmentHackyFacty, timeTop + timeTextSize);
+      drawVertLine(grayLinePos, timeTop + visualVerticalTextAlignmentHackyFacty, timeTop + TimeTextSize);
    }
 
    // Adjusting this topCord will control how much space above the horiz gray line there is before the flags or other junk is drawn
