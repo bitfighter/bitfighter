@@ -528,19 +528,23 @@ ClientInfo *Game::getIndividualGameWinner() const
 
    bool tied = true;
 
-   if(clientCount)
+   if(clientCount > 1)
    {
       winningClient = getClientInfo(0);
+      tied = false;
 
       for(S32 i = 1; i < clientCount; i++)
       {
          ClientInfo *clientInfo = getClientInfo(i);
 
-         // TODO: I think the following logic is wrong -- what if scores are in the order 4 5 5 4 will still be tied?
-         tied = (clientInfo->getScore() == winningClient->getScore());     
+         if(clientInfo->getScore() == winningClient->getScore())
+            tied = true;
 
-         if(!tied && clientInfo->getScore() > winningClient->getScore())
+         else if(clientInfo->getScore() > winningClient->getScore())
+         {
             winningClient = clientInfo;
+            tied = false;
+         }
       }
    }
 
