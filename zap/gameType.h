@@ -73,7 +73,7 @@ private:
    S32 mSecondLeadingPlayerScore;   // Score of mLeadingPlayer
 
    bool mCanSwitchTeams;            // Player can switch teams when this is true, not when it is false
-   bool mBetweenLevels;             // We'll need to prohibit certain things (like team changes) when game is in an "intermediate" state
+   bool mBetweenLevels;             // We need to prohibit certain things (like team changes) when game is in an "intermediate" state
    bool mGameOver;                  // Set to true when an end condition is met
 
    bool mEngineerEnabled;
@@ -118,6 +118,9 @@ protected:
    static const S32 MaxMenuScore;
 
 public:
+   explicit GameType(S32 winningScore = 8);  // Constructor
+   virtual ~GameType();                      // Destructor
+
    static const S32 MAX_GAME_TIME = S32_MAX;
 
    static const S32 FirstTeamNumber = -2;                               // First team is "Hostile to All" with index -2
@@ -170,7 +173,6 @@ public:
    S32 getRenderingOffset() const;
    /////
    
-
    S32 getLeadingScore() const;
    S32 getLeadingTeam() const;
    S32 getLeadingPlayerScore() const;
@@ -201,7 +203,6 @@ public:
       NO_FLAG = -1,               // Constant used for ship not having a flag
    };
 
-
    const Vector<WallRec> *getBarrierList();
 
    S32 mObjectsExpected;            // Count of objects we expect to get with this level (for display purposes only)
@@ -222,13 +223,6 @@ public:
    bool mHaveSoccer;                // Does level have soccer balls? used to determine weather or not to send s2cSoccerCollide
 
    bool mBotZoneCreationFailed;
-
-   enum
-   {
-      MaxPing = 999,
-      DefaultGameTime = 10 * 60 * 1000,
-      DefaultWinningScore = 8,
-   };
 
    // Some games have extra game parameters.  We need to create a structure to communicate those parameters to the editor so
    // it can make an intelligent decision about how to handle them.  Note that, for now, all such parameters are assumed to be S32.
@@ -252,12 +246,11 @@ public:
    static string getScoringEventDescr(ScoringEvent event);
 
    // Static vectors used for constructing update RPCs
+   static const S32 MaxPing = 999;
+
    static Vector<RangedU32<0, MaxPing> > mPingTimes;
    static Vector<SignedInt<24> > mScores;
    static Vector<SignedFloat<8> > mRatings;
-
-   explicit GameType(S32 winningScore = DefaultWinningScore);    // Constructor
-   virtual ~GameType();                                 // Destructor
 
    virtual void addToGame(Game *game, GridDatabase *database);
 
@@ -272,7 +265,6 @@ public:
 
    virtual bool processSpecialsParam(const char *param);
    virtual string getSpecialsLine();
-
 
    string getLevelName() const;
    void setLevelName(const StringTableEntry &levelName);

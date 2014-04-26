@@ -105,7 +105,7 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(THREE_SECONDS), mG
    mBotsAllowed = true;
 
    mTotalGamePlay = 0;
-   mEndingGamePlay = DefaultGameTime;
+   mEndingGamePlay = EIGHT_MINUTES;
 
    mObjectsExpected = 0;
    mGame = NULL;
