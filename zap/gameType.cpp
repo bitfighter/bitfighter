@@ -1101,7 +1101,9 @@ void GameType::onGameOver()
    {
       S32 winner = mGame->getTeamBasedGameWinner();
 
-      if(winner != NO_WINNER)
+      if(winner == NO_WINNER)
+         tied = true;
+      else
       {
          messageVals.push_back(teamString);
          messageVals.push_back(mGame->getTeam(winner)->getName());
@@ -1111,7 +1113,9 @@ void GameType::onGameOver()
    {
       const ClientInfo *winningClient = mGame->getIndividualGameWinner();
 
-      if(winningClient)
+      if(!winningClient)
+         tied = true;
+      else
       {
          messageVals.push_back(emptyString);
          messageVals.push_back(winningClient->getName());
