@@ -520,11 +520,15 @@ void GameUserInterface::render()
 
       glColor(Colors::green);
       if(getGame()->getConnectionToServer())
-         drawCenteredString(310, 16, GameConnection::getConnectionStateString(getGame()->getConnectionToServer()->getConnectionState()));
+      {
+         SymbolString stat(GameConnection::getConnectionStateString(getGame()->getConnectionToServer()->getConnectionState()), 
+                           NULL, ErrorMsgContext, 16, false, AlignmentCenter);
+         stat.render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 326));
+      }
 
       glColor(Colors::white);
-      static const SymbolString msg("Press [[ESC]] to abort", NULL, ErrorMsgContext, 20, false, AlignmentCenter);
-      msg.render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 366));
+      static const SymbolString pressEsc("Press [[ESC]] to abort", NULL, ErrorMsgContext, 20, false, AlignmentCenter);
+      pressEsc.render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 366));
 
       return;
    }
