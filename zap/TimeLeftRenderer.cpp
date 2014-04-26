@@ -72,7 +72,6 @@ Point TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible,
 S32 TimeLeftRenderer::renderTeamScores(const GameType *gameType, S32 bottom, bool render) const
 {
    Game *game = gameType->getGame();
-//   bool core = gameType->getGameTypeId() == CoreGame;
 
    S32 ypos = bottom - BigScoreTextSize;      
 
