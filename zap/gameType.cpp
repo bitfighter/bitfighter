@@ -1273,9 +1273,6 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
                zone->collide(newShip);
          } 
       }
-
-
-      //clientInfo->resetActiveLoadout();      // Why?
    }
 
    Teleporter::checkAllTeleporters(clientInfo->getShip());
