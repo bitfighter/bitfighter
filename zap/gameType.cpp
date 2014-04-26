@@ -2760,7 +2760,6 @@ GAMETYPE_RPC_C2S(GameType, c2sSetWinningScore, (U32 score), (score))
    if(!clientInfo->isLevelChanger())
       return;  // Error message handled client-side
 
-
    if(score <= 0)    // i.e. score is invalid
       return;  // Error message handled client-side
 
