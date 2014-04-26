@@ -1076,8 +1076,6 @@ void GameType::achievementAchieved(U8 achievement, const StringTableEntry &playe
 }
 
 
-static const S32 NO_WINNER = -1;
-
 static Vector<StringTableEntry> messageVals;     // Reusable container
 
 // Handle the end-of-game...  handles all games... not in any subclasses
@@ -1090,16 +1088,23 @@ bool GameType::onGameOver()
    static StringTableEntry emptyString;
 
    bool tied = false;
+   bool onlyOne = false;
    messageVals.clear();
 
    if(isTeamGame())   // Team game -> find top team
    {
-      S32 winner = mGame->getTeamBasedGameWinner().second;
+      TeamGameResults results = mGame->getTeamBasedGameWinner();
 
-      if(winner == NO_WINNER)
+      if(results.first == Tied)
          tied = true;
+
+      else if(results.first == OnlyOnePlayerOrTeam)
+         onlyOne = true;
+
       else
       {
+         S32 winner = mGame->getTeamBasedGameWinner().second;
+
          messageVals.push_back(teamString);
          messageVals.push_back(mGame->getTeam(winner)->getName());
       }
@@ -1113,7 +1118,11 @@ bool GameType::onGameOver()
 
       if(status == Tied)
          tied = true;
-      else if(status == OnlyOnePlayerOrTeam)
+
+      else if(results.first == OnlyOnePlayerOrTeam)
+         onlyOne = true;
+
+      else
       {
          messageVals.push_back(emptyString);
          messageVals.push_back(winningClient->getName());
@@ -1126,9 +1135,11 @@ bool GameType::onGameOver()
       return false;
    }
 
+   if(onlyOne)             // No messages for solo games
+      return true;
+
    static StringTableEntry winMessage("%e0%e1 wins the game!");
    broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, winMessage, messageVals);
-
    return true;
 }
 
