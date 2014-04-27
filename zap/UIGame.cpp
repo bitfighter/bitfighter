@@ -492,6 +492,11 @@ void GameUserInterface::emitTextEffect(const string &text, const Color &color, c
 }
 
 
+void GameUserInterface::emitDelayedTextEffect(U32 delay, const string &text, const Color &color, const Point &pos, bool relative)
+{
+   mFxManager.emitDelayedTextEffect(delay, text, color, pos, relative);
+}
+
 void GameUserInterface::emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType)
 {
    mFxManager.emitSpark(pos, vel, color, ttl, sparkType);

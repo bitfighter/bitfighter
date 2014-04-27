@@ -1634,6 +1634,11 @@ void Game::emitTextEffect(const string &text, const Color &color, const Point &p
 }
 
 
+void Game::emitDelayedTextEffect(U32 delay, const string &text, const Color &color, const Point &pos, bool relative) const
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
+
 string Game::getPlayerName() const
 {
    TNLAssert(false, "Not implemented for this class!");

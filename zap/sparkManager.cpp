@@ -141,6 +141,14 @@ void FxManager::TextEffect::idle(U32 timeDelta)
 {
    F32 dTsecs = F32(timeDelta) * 0.001f;     // Convert timeDelta to seconds
 
+   if(timeDelta > delay)
+      delay = 0;
+   else
+      delay -= timeDelta;
+
+   if(delay > 0)
+      return;
+
    pos += vel * dTsecs;
 
    if(size < MAX_TEXTEFFECT_SIZE)
@@ -149,7 +157,10 @@ void FxManager::TextEffect::idle(U32 timeDelta)
    if(size > MAX_TEXTEFFECT_SIZE)
       size = MAX_TEXTEFFECT_SIZE;
 
-   ttl -= timeDelta;
+   if(timeDelta > ttl)
+      ttl = 0;
+   else
+      ttl -= timeDelta;
 }
 
 
@@ -175,7 +186,6 @@ void FxManager::TextEffect::render(const Point &centerOffset) const
          drawStringc(0.0f, 0.0f, 120.0f, text.c_str());
       FontManager::popFontContext();
    glPopMatrix();
-   //glLineWidth(gDefaultLineWidth);
 }
 
 
@@ -198,6 +208,13 @@ void FxManager::emitDebrisChunk(const Vector<Point> &points, const Color &color,
 // Specify relative = true for in-game position relative to ship, = false if pos represents screen coords
 void FxManager::emitTextEffect(const string &text, const Color &color, const Point &pos, bool relative)
 {
+   emitDelayedTextEffect(0, text, color, pos, relative);
+}
+
+
+// Delay is in ms
+void FxManager::emitDelayedTextEffect(U32 delay, const string &text, const Color &color, const Point &pos, bool relative)
+{
    TextEffect textEffect;
 
    textEffect.text     = text;
@@ -209,6 +226,7 @@ void FxManager::emitTextEffect(const string &text, const Color &color, const Poi
    textEffect.size = 0;
    textEffect.growthRate = 20;
    textEffect.ttl = TWO_SECONDS;
+   textEffect.delay = delay;
 
    mTextEffects.push_back(textEffect);
 }
@@ -245,7 +263,7 @@ void FxManager::idle(U32 timeDelta)
             theSpark->pos += theSpark->vel * dTsecs;
             if ((SparkType) j == SparkTypePoint)
             {
-               if(theSpark->ttl > 1000)
+               if(theSpark->ttl > ONE_SECOND)
                   theSpark->alpha = 1;
                else
                   theSpark->alpha = F32(theSpark->ttl) / 1000.f;
@@ -262,7 +280,7 @@ void FxManager::idle(U32 timeDelta)
          }
       }
 
-   // Kill off any old debris chunks, advance the others
+   // Kill off any old debris chunks, idle the others
    for(S32 i = 0; i < mDebrisChunks.size(); i++)
    {
       if(mDebrisChunks[i].ttl < (S32)timeDelta)
@@ -277,7 +295,7 @@ void FxManager::idle(U32 timeDelta)
    // Same for our TextEffects
    for(S32 i = 0; i < mTextEffects.size(); i++)
    {
-      if(mTextEffects[i].ttl < (S32)timeDelta)
+      if(mTextEffects[i].delay == 0 && mTextEffects[i].ttl < timeDelta)
       {
          mTextEffects.erase_fast(i);
          i--;

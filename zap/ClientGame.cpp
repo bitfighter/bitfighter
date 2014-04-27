@@ -315,6 +315,14 @@ void ClientGame::emitTextEffect(const string &text, const Color &color, const Po
 }
 
 
+// If relative is true, pos represents a fixed offset from the center of the screen.  If false, it is absolute world coords.
+// Delay is in ms
+void ClientGame::emitDelayedTextEffect(U32 delay, const string &text, const Color &color, const Point &pos, bool relative) const
+{
+   getUIManager()->emitDelayedTextEffect(delay, text, color, pos, relative);
+}
+
+
 void ClientGame::emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType)
 {
    getUIManager()->emitSpark(pos, vel, color, ttl, sparkType);

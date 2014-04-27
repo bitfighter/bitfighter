@@ -1167,9 +1167,11 @@ void GameType::onOvertimeStarted()
    // And release a text effect to notify players
    if(isClient())
    {
-      Ship *ship = getGame()->getLocalPlayerShip();
-      if(ship)
-         mGame->emitTextEffect("OVERTIME PERIOD!", Colors::red, Point(0, 0), false);
+      // The 750 ms delay of the second TextEffect makes a nice two-tiered effect
+      mGame->emitTextEffect("GAME EXTENDED!", Colors::red, Point(0, 0), false);
+      mGame->emitDelayedTextEffect(750, "+20 SECONDS", Colors::red, Point(0, 0), false);
+
+      // TODO: Need a SFX here
    }
 }
 

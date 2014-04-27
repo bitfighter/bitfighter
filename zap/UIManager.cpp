@@ -820,6 +820,12 @@ void UIManager::emitTextEffect(const string &text, const Color &color, const Poi
 }
 
 
+void UIManager::emitDelayedTextEffect(U32 delay, const string &text, const Color &color, const Point &pos, bool relative)
+{
+   getUI<GameUserInterface>()->emitDelayedTextEffect(delay, text, color, pos, relative);
+}
+
+
 void UIManager::emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType)
 {
    getUI<GameUserInterface>()->emitSpark(pos, vel, color, ttl, sparkType);
