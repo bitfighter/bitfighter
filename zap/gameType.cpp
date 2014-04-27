@@ -1168,8 +1168,9 @@ void GameType::onOvertimeStarted()
    if(isClient())
    {
       // The 750 ms delay of the second TextEffect makes a nice two-tiered effect
-      mGame->emitTextEffect("GAME EXTENDED!", Colors::red, Point(0, 0), false);
-      mGame->emitDelayedTextEffect(750, "+20 SECONDS", Colors::red, Point(0, 0), false);
+      string msg = mOvertime ? "MORE OVERTIME!" : "OVERTIME!";
+      mGame->emitTextEffect(msg, Colors::red, Point(0,0), false);
+      mGame->emitDelayedTextEffect(750, "+20 SECONDS", Colors::red, Point(0,0), false);
 
       // TODO: Need a SFX here
    }
