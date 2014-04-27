@@ -3048,7 +3048,10 @@ void GameUserInterface::renderGameCommander()
 
    getUIManager()->getUI<GameUserInterface>()->renderEngineeredItemDeploymentMarker(ship);
 
+
    glPopMatrix();
+
+   mFxManager.renderCommander();
 
    // Render current ship's energy
    if(ship)

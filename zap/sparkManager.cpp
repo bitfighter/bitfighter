@@ -164,7 +164,7 @@ void FxManager::TextEffect::idle(U32 timeDelta)
 }
 
 
-void FxManager::TextEffect::render(F32 commanderZoomFraction, const Point &centerOffset) const
+void FxManager::TextEffect::render(const Point &centerOffset) const
 {
    F32 alpha = 1;
 
@@ -184,7 +184,7 @@ void FxManager::TextEffect::render(F32 commanderZoomFraction, const Point &cente
 
       glScale(size / MAX_TEXTEFFECT_SIZE);  // We'll draw big and scale down
       FontManager::pushFontContext(TextEffectContext);
-         drawStringc(0.0f, 0.0f, 120.0f, text.c_str());
+         drawStringc(0, 0, 120, text.c_str());
       FontManager::popFontContext();
 
    glPopMatrix();
@@ -323,6 +323,8 @@ void FxManager::idle(U32 timeDelta)
 
 void FxManager::render(S32 renderPass, F32 commanderZoomFraction, const Point &centerOffset) const
 {
+   TNLAssert(commanderZoomFraction == 0, "If this never trips, we can remove this param!");  // 28-Apr-2014 Wat
+
    // The teleporter effects should render under the ships and such
    if(renderPass == 0)
    {
@@ -366,8 +368,21 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction, const Point &c
          mDebrisChunks[i].render();
 
       for(S32 i = 0; i < mTextEffects.size(); i++)
-         mTextEffects[i].render(commanderZoomFraction, centerOffset);
+         mTextEffects[i].render(centerOffset);
    }
+}
+
+
+// When the commander's map is shown, only render TextEffects that are not relative.  When we are rendering here, 
+// there have not been any screen transofrmations, so coordinates are "raw".
+void FxManager::renderCommander() const
+{
+   static const Point center(DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2,
+                             DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2);
+
+   for(S32 i = 0; i < mTextEffects.size(); i++)
+      if(!mTextEffects[i].relative)
+         mTextEffects[i].render(center);
 }
 
 
@@ -549,12 +564,10 @@ void FxTrail::reset()
 
 Point FxTrail::getLastPos()
 {
-   if(mNodes.size())
-   {
+   if(mNodes.size() > 0)
       return mNodes[0].pos;
-   }
-   else
-      return Point(0,0);
+
+   return Point(0,0);
 }
 
 
@@ -577,14 +590,11 @@ void FxTrail::unregisterTrail()
       if(w == this)
       {
          if(p)
-         {
             p->mNext = w->mNext;
-         }
          else
-         {
             mHead = w->mNext;
-         }
       }
+
       p = w;
       w = w->mNext;
    }
