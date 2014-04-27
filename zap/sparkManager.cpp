@@ -164,7 +164,7 @@ void FxManager::TextEffect::idle(U32 timeDelta)
 }
 
 
-void FxManager::TextEffect::render(const Point &centerOffset) const
+void FxManager::TextEffect::render(F32 commanderZoomFraction, const Point &centerOffset) const
 {
    F32 alpha = 1;
 
@@ -176,15 +176,17 @@ void FxManager::TextEffect::render(const Point &centerOffset) const
    glColor(color, alpha);
 
    glPushMatrix();
-      if(!relative)
-         glTranslate(centerOffset + pos);
-      else
+
+      if(relative)
          glTranslate(pos);
+      else
+         glTranslate(centerOffset + pos);
 
       glScale(size / MAX_TEXTEFFECT_SIZE);  // We'll draw big and scale down
       FontManager::pushFontContext(TextEffectContext);
          drawStringc(0.0f, 0.0f, 120.0f, text.c_str());
       FontManager::popFontContext();
+
    glPopMatrix();
 }
 
@@ -364,7 +366,7 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction, const Point &c
          mDebrisChunks[i].render();
 
       for(S32 i = 0; i < mTextEffects.size(); i++)
-         mTextEffects[i].render(centerOffset);
+         mTextEffects[i].render(commanderZoomFraction, centerOffset);
    }
 }
 

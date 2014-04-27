@@ -56,7 +56,7 @@ class FxManager
       U32 delay;        // Delay before effect will be shown, in ms
       
       void idle(U32 timeDelta);
-      void render(const Point &centerOffset) const;
+      void render(F32 commanderZoomFraction, const Point &centerOffset) const;
    };
 
    Vector<TextEffect> mTextEffects;
