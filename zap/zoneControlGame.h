@@ -51,6 +51,7 @@ public:
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
    bool onGameOver();
+   void onOvertimeStarted();
 
    TNL_DECLARE_CLASS(ZoneControlGameType);
 };

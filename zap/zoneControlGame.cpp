@@ -426,6 +426,12 @@ bool ZoneControlGameType::onGameOver()
 }
 
 
+void ZoneControlGameType::onOvertimeStarted()
+{
+   startSuddenDeath();
+}
+
+
 GameTypeId ZoneControlGameType::getGameTypeId() const { return ZoneControlGame; }
 const char *ZoneControlGameType::getShortName() const { return "ZC"; }
 

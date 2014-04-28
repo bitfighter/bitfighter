@@ -203,6 +203,13 @@ void RetrieveGameType::majorScoringEventOcurred(S32 team)
    mGlowingZoneTeam = team;
 }
 
+
+void RetrieveGameType::onOvertimeStarted()
+{
+   startSuddenDeath();
+}
+
+
 // Same code as in HTF, CTF
 void RetrieveGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo)
 {

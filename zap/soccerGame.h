@@ -31,6 +31,8 @@ public:
    void scoreGoal(Ship *ship, const StringTableEntry &lastPlayerTouchName, S32 lastPlayerTouchTeam, const Point &scorePos, S32 goalTeamIndex, S32 score);
    void updateSoccerScore(Ship *ship, S32 scoringTeam, ScoringEvent scoringEvent, S32 score);   // Helper function to make sure the two-arg version of updateScore doesn't get a null ship
 
+   void onOvertimeStarted();
+
    void setBall(SoccerBallItem *theBall);
    void renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const;
 

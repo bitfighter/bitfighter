@@ -187,6 +187,13 @@ void SoccerGameType::scoreGoal(Ship *ship, const StringTableEntry &scorerName, S
 }
 
 
+// In Soccer games, we'll enter sudden death... next score wins
+void SoccerGameType::onOvertimeStarted()
+{
+   startSuddenDeath();
+}
+
+
 // Runs on client
 void SoccerGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const
 {
