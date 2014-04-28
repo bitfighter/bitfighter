@@ -440,6 +440,13 @@ void UIManager::onGameOver()
 }
 
 
+void UIManager::onGameReallyAndTrulyOver()
+{
+   if(mUis[getTypeInfo<GameUserInterface>()])
+      getUI<GameUserInterface>()->onGameReallyAndTrulyOver();    // Closes helpers and such
+}
+
+
 void UIManager::displayMessage(const Color &msgColor, const char *format, ...)
 {
    va_list args;

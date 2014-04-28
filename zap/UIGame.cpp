@@ -119,9 +119,21 @@ GameUserInterface::~GameUserInterface()
 
 void GameUserInterface::onPlayerJoined()     { mHelperManager.onPlayerJoined();     }
 void GameUserInterface::onPlayerQuit()       { mHelperManager.onPlayerQuit();       }
-void GameUserInterface::onGameOver()         { mHelperManager.onGameOver();         }
 void GameUserInterface::quitEngineerHelper() { mHelperManager.quitEngineerHelper(); }  // When ship dies engineering
 void GameUserInterface::exitHelper()         { mHelperManager.exitHelper();         }
+
+
+void GameUserInterface::onGameOver()         
+{ 
+   mHelperManager.onGameOver();         
+}
+
+
+// This event gets run after the scoreboard display is finished
+void GameUserInterface::onGameReallyAndTrulyOver()         
+{ 
+   mFxManager.onGameReallyAndTrulyOver();
+}
 
 
 void GameUserInterface::setAnnouncement(const string &message)

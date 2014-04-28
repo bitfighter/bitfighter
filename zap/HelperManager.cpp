@@ -54,6 +54,7 @@ void HelperManager::onPlayerQuit()
 }
 
 
+// Gets run when end-of-game scoreboard first appears
 void HelperManager::onGameOver()
 {
    if(mHelperStack.contains(&mTeamShuffleHelper))   // Exit Shuffle helper to keep things from getting too crashy

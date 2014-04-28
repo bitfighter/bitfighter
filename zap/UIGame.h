@@ -396,20 +396,18 @@ public:
    Point worldToScreenPoint(const Point *point,  S32 canvasWidth, S32 canvasHeight) const;
    void toggleCommanderMap();
 
-   void onActivate();                 // Gets run when interface is first activated
-   void onReactivate();               // Gets run when interface is subsequently reactivated
+   void onActivate();                  // Gets run when interface is first activated
+   void onReactivate();                // Gets run when interface is subsequently reactivated
 
    void onPlayerJoined();
    void onPlayerQuit();
-   void onGameOver();
+   void onGameOver();                  // Scoreboard display begins
+   void onGameReallyAndTrulyOver();    // After scoreboard display is finished
 
    void pregameSetup(bool engineerEnabled);
    void setSelectedEngineeredObject(U32 objectType);
 
    void quitEngineerHelper();
-
-   //ofstream mOutputFile;            // For saving downloaded levels
-   //FILE *mOutputFile;               // For saving downloaded levels
 
    bool onKeyDown(InputCode inputCode);
    void onKeyUp(InputCode inputCode);

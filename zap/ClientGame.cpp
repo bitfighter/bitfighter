@@ -1040,7 +1040,7 @@ void ClientGame::onGameReallyAndTrulyOver()
    getGameObjDatabase()->removeEverythingFromDatabase();    
 
    // Inform the UI
-   getUIManager()->onGameOver();
+   getUIManager()->onGameReallyAndTrulyOver();
 }
 
 

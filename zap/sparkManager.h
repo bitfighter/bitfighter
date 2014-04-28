@@ -88,6 +88,8 @@ public:
    void render(S32 renderPass, F32 commanderZoomFraction, const Point &centerOffset) const;
    void renderScreenEffects() const;
    void clearSparks();
+   void onGameReallyAndTrulyOver();
+
 };
 
 class FxTrail

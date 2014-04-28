@@ -168,7 +168,8 @@ public:
    void displayMessage(const Color &msgColor, const char *format, ...);
 
    void onGameStarting();
-   void onGameOver();
+   void onGameOver();                  // Scoreboard display begins
+   void onGameReallyAndTrulyOver();    // After scoreboard display is finished
 
    // Sounds and music
    SFXHandle playSoundEffect(U32 profileIndex, const Point &position) const;

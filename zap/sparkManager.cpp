@@ -473,6 +473,16 @@ void FxManager::clearSparks()
 }
 
 
+// Clear out any lingering textEffects, runs at the end of a level
+void FxManager::onGameReallyAndTrulyOver()
+{
+   clearSparks();
+   mDebrisChunks.clear();
+   mTextEffects.clear();
+   mScreenTextEffects.clear();
+}
+
+
 //-----------------------------------------------------------------------------
 
 FxTrail::FxTrail(U32 dropFrequency, U32 len)
