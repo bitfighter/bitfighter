@@ -86,6 +86,7 @@ private:
    bool mBotsAllowed;
 
    bool mOvertime;                  // True when we're in overtime/extended play, false during the normal game
+   bool mSuddenDeath;               // True when we're in sudden death and next score wins (only possible in some GameTypes)
 
    // Info about current level
    string mLevelName;
@@ -313,9 +314,10 @@ public:
 
    void achievementAchieved(U8 achievement, const StringTableEntry &playerName);
 
-   virtual bool onGameOver();
+   bool onGameOver();
    void startOvertime();                     // If game ends in a tie, start overtime
    virtual void onOvertimeStarted();         // Handle GameType specific overtime settings  
+   void startSuddenDeath();
 
 
    void serverAddClient(ClientInfo *clientInfo);         
@@ -351,6 +353,7 @@ public:
    virtual const Color *getTeamColor(const BfObject *object) const; // Get the color of a team, based on object
            const Color *getTeamColor(S32 team)               const; // Get the color of a team, based on index
 
+   bool isSuddenDeath() const;
 
    //S32 getTeam(const StringTableEntry &playerName);   // Given a player's name, return their team
 

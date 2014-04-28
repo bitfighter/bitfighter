@@ -245,13 +245,19 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
    const S32 grayLineHorizPadding = 4;
    const S32 grayLineVertPadding = -1;
 
+   static const char *SuddenDeathMsg = "SUDDEN DEATH";
+   static const char *UnlimMsg       = "Unlim.";
+
    // Precalc some widths we'll need from time to time
-   static const U32 w0     = getStringWidth(TimeTextSize, "0");
-   static const U32 wUnlim = getStringWidth(TimeTextSize, "Unlim.");
+   static const U32 w0        = getStringWidth(TimeTextSize, "0");
+   static const U32 wUnlim    = getStringWidth(TimeTextSize, UnlimMsg);
+   static const U32 wSudDeath = getStringWidth(TimeTextSize, SuddenDeathMsg);
 
    U32 timeWidth;
    if(gameType->isTimeUnlimited())
       timeWidth = wUnlim;
+   else if(gameType->isSuddenDeath())
+      timeWidth = wSudDeath;
    else
    {
       // Get the width of the minutes and 10 seconds digit(s)
@@ -291,7 +297,9 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
 
       glColor(gameType->isOvertime() ? Colors::red : Colors::white);
       if(gameType->isTimeUnlimited())  
-         drawString(timeLeft, timeTop, TimeTextSize, "Unlim.");
+         drawString(timeLeft, timeTop, TimeTextSize, UnlimMsg);
+      else if(gameType->isSuddenDeath())
+         drawString(timeLeft, timeTop, TimeTextSize, SuddenDeathMsg);
       else
          drawTime(timeLeft, timeTop, TimeTextSize, gameType->getRemainingGameTimeInMs());
    }

@@ -96,6 +96,7 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(THREE_SECONDS), mG
    mShowAllBots = false;
    mBotZoneCreationFailed = false;
    mOvertime = false;
+   mSuddenDeath = false;
 
    mMinRecPlayers = 0;
    mMaxRecPlayers = 0;
@@ -630,7 +631,7 @@ void GameType::idle_server(U32 deltaT)
    EventManager::get()->update();
 
    // If game time has expired... game is over, man, it's over (unless we get pushed into overtime)
-   if(!isTimeUnlimited() && mTotalGamePlay >= mEndingGamePlay)
+   if(!isTimeUnlimited() && !mSuddenDeath && mTotalGamePlay >= mEndingGamePlay)
       gameOverManGameOver();
 }
 
@@ -1129,14 +1130,14 @@ bool GameType::onGameOver()
       }
    }
 
+   if(onlyOne)             // No messages for solo games
+      return true;
+
    if(tied)
    {
       startOvertime();     // SUDDEN DEATH OVERTIME!!!!
       return false;
    }
-
-   if(onlyOne)             // No messages for solo games
-      return true;
 
    static StringTableEntry winMessage("%e0%e1 wins the game!");
    broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, winMessage, messageVals);
@@ -1159,9 +1160,10 @@ void GameType::startOvertime()
 // Handle any gameType specific overtime actions/settings... should be overridded by various gameTypes
 // Will be called at the beginning of each overtime period if overtime is extended.  
 // On first call, mOvertime will be false; mOvertime will be true on subsequent calls.
+//
+// In Bitmatch (and Rabbit) games, we'll just add 20 seconds to game clock in event of a tie
 void GameType::onOvertimeStarted()
 {
-   // In Bitmatch, extend clock by 20 seconds
    mEndingGamePlay += TWENTY_SECONDS;    
 
    // And release a text effect to notify players
@@ -1174,6 +1176,30 @@ void GameType::onOvertimeStarted()
 
       // TODO: Need a SFX here
    }
+}
+
+
+// Several GameTypes enter a period of sudden death in the event of a tie... next score wins
+void GameType::startSuddenDeath()
+{
+   mSuddenDeath = true;
+   mEndingGamePlay += ONE_MINUTE;      // By extending game for one minute, we'll retrigger overtime message after a minute
+
+   // And release a text effect to notify players
+   if(isClient())
+   {
+      // The 750 ms delay of the second TextEffect makes a nice two-tiered effect
+      mGame->emitTextEffect("SUDDEN DEATH!", Colors::red, Point(0,0), false);
+      getGame()->emitDelayedTextEffect(750, "NEXT SCORE WINS", Colors::red, Point(0,0), false);
+
+      // TODO: Need a SFX here
+   }
+}
+
+
+bool GameType::isSuddenDeath() const
+{
+   return mSuddenDeath;
 }
 
 
@@ -1893,7 +1919,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
       EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, playerPoints, teamIndex + 1, playerInfo);
 
    // End game if max score has been reached
-   if(newScore >= mWinningScore)
+   if(newScore >= mWinningScore || mOvertime)
       gameOverManGameOver();
 }
 
@@ -3852,10 +3878,12 @@ U32 GameType::getTotalGameTime() const
    return mEndingGamePlay / 1000;
 }
 
+
 U32 GameType::getTotalGameTimeInMs() const
 {
    return mEndingGamePlay;
 }
+
 
 // Return total time played, new gametype starts at 0 and constantly count up while playing, it doesn't matter what the time limit is.
 U32 GameType::getTotalGamePlayedInMs() const

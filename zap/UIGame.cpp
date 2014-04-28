@@ -133,6 +133,7 @@ void GameUserInterface::onGameOver()
 void GameUserInterface::onGameReallyAndTrulyOver()         
 { 
    mFxManager.onGameReallyAndTrulyOver();
+   mHelperManager.onGameOver();         
 }
 
 
