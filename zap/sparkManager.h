@@ -49,7 +49,6 @@ class FxManager
       Color color;
       Point pos;
       Point vel;
-      bool relative;
       F32 size;
       F32 growthRate;
       U32 ttl;          // Time to live, in ms
@@ -60,6 +59,7 @@ class FxManager
    };
 
    Vector<TextEffect> mTextEffects;
+   Vector<TextEffect> mScreenTextEffects;
 
    struct TeleporterEffect;
    TeleporterEffect *teleporterEffects;
@@ -86,7 +86,7 @@ public:
 
    void idle(U32 timeDelta);
    void render(S32 renderPass, F32 commanderZoomFraction, const Point &centerOffset) const;
-   void renderCommander() const;
+   void renderScreenEffects() const;
    void clearSparks();
 };
 

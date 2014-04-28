@@ -1251,7 +1251,7 @@ Rect Game::computeBarrierExtents()
 }
 
 
-Point Game::computePlayerVisArea(Ship *ship) const
+Point Game::computePlayerVisArea(const Ship *ship) const
 {
    F32 fraction = ship->getSensorZoomFraction();
 

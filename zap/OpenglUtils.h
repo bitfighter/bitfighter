@@ -47,6 +47,7 @@ extern void renderLine(const Vector<Point> *points);
 
 extern void setFont(FontId fontId);
 
+extern void glScale(const Point &scaleFactor);
 extern void glScale(F32 scaleFactor);
 extern void glScale(F32 xScaleFactor, F32 yScaleFactor);
 extern void glTranslate(const Point &pos);

@@ -2760,16 +2760,14 @@ void GameUserInterface::renderGameNormal()
 
    glPushMatrix();
 
-   // Put (0,0) at the center of the screen
-   glTranslate(DisplayManager::getScreenInfo()->getGameCanvasWidth()  * 0.5f, 
-               DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f);       
+   static const Point center(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2,
+                             DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
+
+   glTranslate(center);       // Put (0,0) at the center of the screen
 
    // These scaling factors are different when changing the visible area by equiping the sensor module
-   F32 scaleFactX = (DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2) / visExt.x;
-   F32 scaleFactY = (DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2) / visExt.y;
-
-   glScale(scaleFactX, scaleFactY);
-   glTranslate(-mShipPos.x, -mShipPos.y);
+   glScale(center.x / visExt.x, center.y / visExt.y);
+   glTranslate(mShipPos * -1);
 
    renderStars(mStars, mStarColors, NumStars, 1.0, mShipPos, visExt * 2);
 
@@ -2831,6 +2829,10 @@ void GameUserInterface::renderGameNormal()
    // Render current ship's energy
    if(ship)
       UI::EnergyGaugeRenderer::render(ship->mEnergy);   
+
+   // Render any screen-linked special effects, outside the matrix transformations
+   mFxManager.renderScreenEffects();
+
 
    //renderOverlayMap();     // Draw a floating overlay map
 }
@@ -3048,14 +3050,15 @@ void GameUserInterface::renderGameCommander()
 
    getUIManager()->getUI<GameUserInterface>()->renderEngineeredItemDeploymentMarker(ship);
 
-
    glPopMatrix();
 
-   mFxManager.renderCommander();
 
    // Render current ship's energy
    if(ship)
       UI::EnergyGaugeRenderer::render(ship->mEnergy);   
+
+   // Render any screen-linked special effects, outside the matrix transformations
+   mFxManager.renderScreenEffects();
 }
 
 

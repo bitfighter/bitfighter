@@ -313,7 +313,7 @@ public:
    void computeWorldObjectExtents();
    Rect computeBarrierExtents();
 
-   Point computePlayerVisArea(Ship *ship) const;
+   Point computePlayerVisArea(const Ship *ship) const;
    F32 getRenderScale(bool sensorActive) const;
 
    virtual Point worldToScreenPoint(const Point *p, S32 canvasWidth, S32 canvasHeight) const;

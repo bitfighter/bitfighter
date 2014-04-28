@@ -177,12 +177,9 @@ void FxManager::TextEffect::render(const Point &centerOffset) const
 
    glPushMatrix();
 
-      if(relative)
-         glTranslate(pos);
-      else
-         glTranslate(centerOffset + pos);
-
+      glTranslate(pos);
       glScale(size / MAX_TEXTEFFECT_SIZE);  // We'll draw big and scale down
+
       FontManager::pushFontContext(TextEffectContext);
          drawStringc(0, 0, 120, text.c_str());
       FontManager::popFontContext();
@@ -222,7 +219,6 @@ void FxManager::emitDelayedTextEffect(U32 delay, const string &text, const Color
    textEffect.text     = text;
    textEffect.color    = color;
    textEffect.pos      = pos;
-   textEffect.relative = relative;
 
    textEffect.vel  = Point(0,-130);
    textEffect.size = 0;
@@ -230,7 +226,10 @@ void FxManager::emitDelayedTextEffect(U32 delay, const string &text, const Color
    textEffect.ttl = TWO_SECONDS;
    textEffect.delay = delay;
 
-   mTextEffects.push_back(textEffect);
+   if(relative)
+      mTextEffects.push_back(textEffect);
+   else
+      mScreenTextEffects.push_back(textEffect);
 }
 
 
@@ -306,6 +305,20 @@ void FxManager::idle(U32 timeDelta)
          mTextEffects[i].idle(timeDelta);
    }
 
+
+   // Same for our ScreenTextEffects
+   for(S32 i = 0; i < mScreenTextEffects.size(); i++)
+   {
+      if(mScreenTextEffects[i].delay == 0 && mScreenTextEffects[i].ttl < timeDelta)
+      {
+         mScreenTextEffects.erase_fast(i);
+         i--;
+      }
+      else
+         mScreenTextEffects[i].idle(timeDelta);
+   }
+
+
    for(TeleporterEffect **walk = &teleporterEffects; *walk; )
    {
       TeleporterEffect *temp = *walk;
@@ -373,16 +386,18 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction, const Point &c
 }
 
 
-// When the commander's map is shown, only render TextEffects that are not relative.  When we are rendering here, 
-// there have not been any screen transofrmations, so coordinates are "raw".
-void FxManager::renderCommander() const
+void FxManager::renderScreenEffects() const
 {
-   static const Point center(DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2,
-                             DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2);
+   static const Point center(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2,
+                             DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
+   glPushMatrix();
+   glTranslate(center);
+   glScale(0.6667f); 
 
-   for(S32 i = 0; i < mTextEffects.size(); i++)
-      if(!mTextEffects[i].relative)
-         mTextEffects[i].render(center);
+   for(S32 i = 0; i < mScreenTextEffects.size(); i++)
+      mScreenTextEffects[i].render(center);
+
+   glPopMatrix();
 }
 
 

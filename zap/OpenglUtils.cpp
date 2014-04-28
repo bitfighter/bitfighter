@@ -67,6 +67,12 @@ void glColor(F32 c, float alpha)
 }
 
 
+void glScale(const Point &scaleFactor)
+{
+    glScalef(scaleFactor.x, scaleFactor.y, 1);
+}
+
+
 void glScale(F32 scaleFactor)
 {
     glScalef(scaleFactor, scaleFactor, 1);
