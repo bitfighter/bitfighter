@@ -1846,6 +1846,9 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
    S32 playerPoints = getEventScore(IndividualScore, scoringEvent, data);
    S32 teamPoints = getEventScore(TeamScore, scoringEvent, data);
 
+   if(playerPoints == 0 && teamPoints == 0)
+      return;
+
    // Grab our LuaPlayerInfo for the Lua event if it exists
    LuaPlayerInfo *playerInfo = NULL;
    if(player != NULL)
@@ -1919,7 +1922,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
       EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, playerPoints, teamIndex + 1, playerInfo);
 
    // End game if max score has been reached
-   if(newScore >= mWinningScore || mOvertime)
+   if(newScore >= mWinningScore || mSuddenDeath)
       gameOverManGameOver();
 }
 

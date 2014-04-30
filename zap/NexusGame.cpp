@@ -32,14 +32,14 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cSetNexusTimer, (S32 nextChangeTime
                             NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
    mNexusChangeAtTime = nextChangeTime;
-   mNexusIsOpen = isOpen;
+   mNexusIsOpen       = isOpen;
 }
 
 
 TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cSendNexusTimes, (S32 nexusClosedTime, S32 nexusOpenTime), (nexusClosedTime, nexusOpenTime),                                            NetClassGroupGameMask, RPCGuaranteed, RPCToGhost, 0)
 {
    mNexusClosedTime = nexusClosedTime;
-   mNexusOpenTime = nexusOpenTime;
+   mNexusOpenTime   = nexusOpenTime;
 }
 
 
@@ -138,7 +138,7 @@ string NexusGameType::toLevelCode() const
 
 // Returns time left in current Nexus cycle -- if we're open, this will be the time until Nexus closes; if we're closed,
 // it will return the time until Nexus opens
-// Client only
+// Runs on client and server
 S32 NexusGameType::getNexusTimeLeftMs() const
 {
    return mNexusChangeAtTime == 0 ? 0 : (mNexusChangeAtTime - getTotalGamePlayedInMs());
@@ -147,7 +147,7 @@ S32 NexusGameType::getNexusTimeLeftMs() const
 
 bool NexusGameType::nexusShouldChange()
 {
-   if(mNexusChangeAtTime == 0)     
+   if(mNexusChangeAtTime == 0)   // Ain't never gonna change!
       return false;
 
    return getNexusTimeLeftMs() <= 0;
@@ -330,38 +330,50 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusZone, s2cFlagsReturned, (), (), NetClassGroupGa
 
 // The nexus is open.  A ship has entered it.  Now what?
 // Runs on server only
-void NexusGameType::shipTouchNexus(Ship *ship, NexusZone *theNexus)
+void NexusGameType::shipTouchNexus(Ship *ship, NexusZone *nexus)
 {
    FlagItem *flag = findFirstFlag(ship);
 
    if(!flag)      // findFirstFlag can return NULL
       return;
 
-   updateScore(ship, ReturnFlagsToNexus, flag->getFlagCount());
-
    S32 flagsReturned = flag->getFlagCount();
-   ClientInfo *scorer = ship->getClientInfo();
 
-   if(flagsReturned > 0 && scorer)
+   if(flagsReturned == 0)
+      return;
+
+   updateScore(ship, ReturnFlagsToNexus, flagsReturned);
+   nexus->s2cFlagsReturned();       // Alert the Nexus that someone has returned flags to it
+
+   ClientInfo *clientInfo = ship->getClientInfo();
+
+   if(clientInfo)          // Should always be true!!
    {
-      if(!isGameOver())  // Avoid flooding messages on game over.
-         s2cNexusMessage(NexusMsgScore, scorer->getName().getString(), flag->getFlagCount(), 
-                      getEventScore(TeamScore, ReturnFlagsToNexus, flag->getFlagCount()) );
-      theNexus->s2cFlagsReturned();    // Alert the Nexus that someone has returned flags to it
+      if(!isGameOver())    // Avoid flooding messages at end of game
+      {
+         S32 score = getEventScore(TeamScore, ReturnFlagsToNexus, flag->getFlagCount());
+         s2cNexusMessage(NexusMsgScore, clientInfo->getName().getString(), flag->getFlagCount(), score);
+      }
 
       // See if this event qualifies for an achievement
       if(flagsReturned >= 25 &&                                   // Return 25+ flags
-         scorer && scorer->isAuthenticated() &&                   // Player must be authenticated
+         clientInfo && clientInfo->isAuthenticated() &&           // Player must be authenticated
          getGame()->getPlayerCount() >= 4 &&                      // Game must have 4+ human players
          getGame()->getAuthenticatedPlayerCount() >= 2 &&         // Two of whom must be authenticated
          !hasFlagSpawns() && !hasPredeployedFlags() &&            // Level can have no flag spawns, nor any predeployed flags
-         !scorer->hasBadge(BADGE_TWENTY_FIVE_FLAGS))              // Player doesn't already have the badge
+         !clientInfo->hasBadge(BADGE_TWENTY_FIVE_FLAGS))          // Player doesn't already have the badge
       {
-         achievementAchieved(BADGE_TWENTY_FIVE_FLAGS, scorer->getName());
+         achievementAchieved(BADGE_TWENTY_FIVE_FLAGS, clientInfo->getName());
       }
    }
 
    flag->changeFlagCount(0);
+}
+
+
+bool NexusGameType::isNexusOpen() const
+{
+   return mNexusIsOpen || isOvertime();
 }
 
 
@@ -373,11 +385,30 @@ void NexusGameType::onGhostAvailable(GhostConnection *theConnection)
    NetObject::setRPCDestConnection(theConnection);
 
    s2cSendNexusTimes(mNexusClosedTime, mNexusOpenTime);     // Send info about Nexus hours of business
-   s2cSetNexusTimer(mNexusChangeAtTime, mNexusIsOpen);      // Send info about current state of Nexus
+   s2cSetNexusTimer(mNexusChangeAtTime, isNexusOpen());      // Send info about current state of Nexus
    
    NetObject::setRPCDestConnection(NULL);
 }
 
+
+// In Nexus, we'll add 20 seconds, and permanently open the Nexus
+void NexusGameType::onOvertimeStarted()
+{
+   mEndingGamePlay += TWENTY_SECONDS;    
+   openNexus(0);
+
+   // And release a text effect to notify players
+   if(isClient())
+   {
+      // The 750 ms delay of the second TextEffect makes a nice two-tiered effect
+      string msg = isOvertime() ? "MORE OVERTIME!" : "OVERTIME!";
+      getGame()->emitTextEffect(msg, Colors::red, Point(0,0), false);
+      getGame()->emitDelayedTextEffect(750,  "+20 SECONDS", Colors::red, Point(0,0), false);
+      getGame()->emitDelayedTextEffect(1500, "NEXUS IS OPEN!", Colors::red, Point(0,0), false);
+
+      // TODO: Need a SFX here
+   }
+}
 
 // Emit a flag in a random direction at a random speed.
 // Server only.
@@ -423,28 +454,31 @@ static U32 getNextChangeTime(U32 changeTime, S32 duration)
 void NexusGameType::idle_client(U32 deltaT)
 {
 #ifndef ZAP_DEDICATED
-   if(!mNexusIsOpen && nexusShouldChange())         // Nexus has just opened
+   if(!isOvertime())
    {
-      if(!isGameOver())
+      if(!mNexusIsOpen && nexusShouldChange())         // Nexus has just opened
       {
-         getGame()->displayMessage(Color(0.6f, 1, 0.8f), "The Nexus is now OPEN!");
-         getGame()->playSoundEffect(SFXFlagSnatch);
+         if(!isGameOver())
+         {
+            getGame()->displayMessage(Color(0.6f, 1, 0.8f), "The Nexus is now OPEN!");
+            getGame()->playSoundEffect(SFXFlagSnatch);
+         }
+
+         mNexusIsOpen = true;
+         mNexusChangeAtTime = getNextChangeTime(mNexusChangeAtTime, mNexusOpenTime);
       }
 
-      mNexusIsOpen = true;
-      mNexusChangeAtTime = getNextChangeTime(mNexusChangeAtTime, mNexusOpenTime);
-   }
-
-   else if(mNexusIsOpen && nexusShouldChange())       // Nexus has just closed
-   {
-      if(!isGameOver())
+      else if(mNexusIsOpen && nexusShouldChange())       // Nexus has just closed
       {
-         getGame()->displayMessage(Color(0.6f, 1, 0.8f), "The Nexus is now CLOSED!");
-         getGame()->playSoundEffect(SFXFlagDrop);
-      }
+         if(!isGameOver())
+         {
+            getGame()->displayMessage(Color(0.6f, 1, 0.8f), "The Nexus is now CLOSED!");
+            getGame()->playSoundEffect(SFXFlagDrop);
+         }
 
-      mNexusIsOpen = false;
-      mNexusChangeAtTime = getNextChangeTime(mNexusChangeAtTime, mNexusClosedTime);
+         mNexusIsOpen = false;
+         mNexusChangeAtTime = getNextChangeTime(mNexusChangeAtTime, mNexusClosedTime);
+      }
    }
 
    for(S32 i = 0; i < mYardSaleWaypoints.size();)
@@ -460,7 +494,7 @@ void NexusGameType::idle_client(U32 deltaT)
 
 void NexusGameType::idle_server(U32 deltaT)
 {
-   if(nexusShouldChange())
+   if(nexusShouldChange() && !isOvertime())
    {
       if(mNexusIsOpen) 
          closeNexus(mNexusChangeAtTime);
@@ -498,6 +532,9 @@ void NexusGameType::openNexus(S32 timeNexusOpened)
 // Server only
 void NexusGameType::closeNexus(S32 timeNexusClosed)
 {
+   if(isOvertime())     // Can't close Nexus during overtime
+      return;
+
    mNexusIsOpen = false;
    mNexusChangeAtTime = getNextChangeTime(timeNexusClosed, mNexusClosedTime);
 
@@ -621,8 +658,8 @@ S32 NexusGameType::renderTimeLeftSpecial(S32 right, S32 bottom, bool render) con
    {
       glColor(mNexusIsOpen ? Colors::NexusOpenColor : Colors::NexusClosedColor);      // Display timer in appropriate color
 
-      if(mNexusIsOpen && mNexusOpenTime == 0)
-         drawStringfr(x, y - size, size, "Nexus never closes");
+      if(isOvertime() || (mNexusIsOpen && mNexusOpenTime == 0))
+         drawStringfr(x, y - size, size, "Nexus open until end of game");
       else if(!mNexusIsOpen && mNexusClosedTime == 0)
          drawStringfr(x, y - size, size, "Nexus never opens");
       else if(!mNexusIsOpen && !isTimeUnlimited() && getRemainingGameTimeInMs() <= getNexusTimeLeftMs())
@@ -1066,7 +1103,7 @@ void NexusZone::render()
    if(gameType && gameType->getGameTypeId() == NexusGame)
       nexusGameType = static_cast<NexusGameType *>(gameType);
 
-   bool isOpen = nexusGameType && nexusGameType->mNexusIsOpen;
+   bool isOpen = nexusGameType && nexusGameType->isNexusOpen();
    F32 glowFraction = gameType ? gameType->mZoneGlowTimer.getFraction() : 0;
 
    renderNexus(getOutline(), getFill(), getCentroid(), getLabelAngle(), isOpen, glowFraction);
@@ -1116,7 +1153,7 @@ bool NexusZone::collide(BfObject *hitObject)
    if(gameType && gameType->getGameTypeId() == NexusGame)
       nexusGameType = static_cast<NexusGameType *>(getGame()->getGameType());
 
-   if(nexusGameType && nexusGameType->mNexusIsOpen)      // Is the nexus open?
+   if(nexusGameType && nexusGameType->isNexusOpen())      // Is the nexus open?
       nexusGameType->shipTouchNexus(theShip, this);
 
    return false;
@@ -1173,7 +1210,7 @@ S32 NexusZone::lua_isOpen(lua_State *L)
    GameType *gameType = mGame->getGameType();
 
    if(gameType->getGameTypeId() == NexusGame)
-      return returnBool(L, static_cast<NexusGameType *>(gameType)->mNexusIsOpen);
+      return returnBool(L, static_cast<NexusGameType *>(gameType)->isNexusOpen());
    else
       return returnBool(L, false);     // If not a Nexus game, Nexus will never be open
 }  

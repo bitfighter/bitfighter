@@ -25,6 +25,8 @@ private:
    S32 mNexusOpenTime;        // Time Nexus remains open, in milliseconds
    S32 mNexusChangeAtTime;    // When the next Nexus status change will occur  --> needs to be able go be negative
 
+   bool mNexusIsOpen;         // Is the nexus open?
+
    struct YardSaleWaypoint
    {
       Timer timeLeft;
@@ -48,11 +50,11 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toLevelCode() const;
 
-   bool mNexusIsOpen;               // Is the nexus open?
-   S32 getNexusTimeLeftMs() const;    // Get time until the nexus changes state in MilliSeconds
-
+   S32 getNexusTimeLeftMs() const;     // Get time until the nexus changes state in MilliSeconds
 
    bool isSpawnWithLoadoutGame();
+
+   void onOvertimeStarted();
 
    void shipTouchFlag(Ship *ship, FlagItem *flag);
 
@@ -86,6 +88,8 @@ public:
 
    void controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject);
    bool spawnShip(ClientInfo *clientInfo);
+
+   bool isNexusOpen() const;
 
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;
