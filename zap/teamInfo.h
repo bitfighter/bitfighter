@@ -93,8 +93,14 @@ private:
    Vector<Point> mItemSpawnPoints;
    Vector<FlagSpawn *> mFlagSpawns;    // List of places for team flags to spawn
 
+   void initialize();
+
 public:
-   Team();              // Constructor
+   // Constructors
+   Team();                                                
+   Team(const char *name, const Color &color);            
+   Team(const char *name, F32 r, F32 g, F32 b, S32 score);
+
    virtual ~Team();     // Destructor
 
    void setName(const char *name);

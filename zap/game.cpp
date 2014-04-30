@@ -434,7 +434,7 @@ S32 Game::getTeamIndex(const StringTableEntry &playerName)
 }
 
 
-// The following just delegate their work to the TeamManager
+// The following just delegate their work to the TeamManager.  TeamManager will handle cleanup of any added teams.
 void Game::removeTeam(S32 teamIndex)                  { mActiveTeamManager->removeTeam(teamIndex);    }
 void Game::addTeam(AbstractTeam *team)                { mActiveTeamManager->addTeam(team);            }
 void Game::addTeam(AbstractTeam *team, S32 index)     { mActiveTeamManager->addTeam(team, index);     }

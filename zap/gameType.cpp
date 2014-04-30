@@ -1615,11 +1615,7 @@ bool GameType::makeSureTeamCountIsNotZero()
 {
    if(mGame->getTeamCount() == 0) 
    {
-      Team *team = new Team;           // Will be deleted by TeamManager
-      team->setName("Missing Team");
-      team->setColor(Colors::blue);
-      mGame->addTeam(team);
-
+      mGame->addTeam(new Team("Missing Team", Colors::blue));     // Will be deleted by TeamManager
       return true;
    }
 
@@ -2461,13 +2457,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g,
    if(firstTeam)
       mGame->clearTeams();
 
-   Team *team = new Team;           // Will be deleted by TeamManager
-
-   team->setName(teamName);
-   team->setColor(r,g,b);
-   team->setScore(score);
-
-   mGame->addTeam(team);
+   mGame->addTeam(new Team(teamName, r, g, b, score));   // Team will be deleted by TeamManager
 }
 
 

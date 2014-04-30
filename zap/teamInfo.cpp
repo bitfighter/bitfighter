@@ -134,15 +134,33 @@ S32 AbstractTeam::getScore() const
 ////////////////////////////////////////
 
 
-// Constructor
+// Default constructor
 Team::Team()
 {
-   mPlayerCount = 0;
-   mBotCount = 0;
-   mScore = 0;
-   mRating = 0;
+   initialize();
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Constructor
+Team::Team(const char *name, const Color &color)
+{
+   initialize();
+
+   setName(name);
+   setColor(color);
+}
+
+
+// Constructor
+Team::Team(const char *name, F32 r, F32 g, F32 b, S32 score)
+{
+   initialize();
+
+   setName(name);
+   setColor(r, g, b);
+   setScore(score);
 }
 
 
@@ -150,6 +168,13 @@ Team::Team()
 Team::~Team()
 {
    LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void Team::initialize()
+{
+   clearStats();
+   mScore = 0;
 }
 
 
