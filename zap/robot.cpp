@@ -96,24 +96,27 @@ Robot::~Robot()
       return;
    }
 
-   dismountAll();  // fixes dropping CTF flag without ClientInfo...
-
    // Server only from here on down
-   if(getGame())  // can be NULL if this robot was never added to game (bad / missing robot file)
+
+   dismountAll();
+
+   Game *game = getGame();
+
+   if(game)       // Can be NULL if this robot was never added to game (bad / missing robot file)
    {
       EventManager::get()->fireEvent(this, EventManager::PlayerLeftEvent, getPlayerInfo());
 
-      if(getGame()->getGameType())
-         getGame()->getGameType()->serverRemoveClient(mClientInfo);
+      if(game->getGameType())
+         game->getGameType()->removeClient(mClientInfo);
 
-      getGame()->removeBot(this);
-      logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot %s terminated (%d bots left)", mScriptName.c_str(), getGame()->getRobotCount());
+      game->removeBot(this);
+      logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot %s terminated (%d bots left)", mScriptName.c_str(), game->getRobotCount());
    }
 
    delete mPlayerInfo;
    if(mClientInfo.isValid())
    {
-      getGame()->removeFromClientList(mClientInfo.getPointer());
+      game->removeFromClientList(mClientInfo.getPointer());
 	   delete mClientInfo.getPointer();
    }
 

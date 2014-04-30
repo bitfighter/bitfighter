@@ -2349,9 +2349,9 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
 }
 
 
-// Remove a client from the game
+// Player quit -- remove client from the game
 // Server only
-void GameType::serverRemoveClient(ClientInfo *clientInfo)
+void GameType::removeClient(ClientInfo *clientInfo)
 {
    if(clientInfo->getConnection())
    {
@@ -2371,6 +2371,7 @@ void GameType::serverRemoveClient(ClientInfo *clientInfo)
 
    static_cast<ServerGame *>(getGame())->suspendIfNoActivePlayers();
 }
+
 
 void GameType::setTimeRemaining(U32 timeLeft, bool isUnlimited)
 {

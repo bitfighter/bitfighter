@@ -1133,7 +1133,7 @@ void ServerGame::addClient(ClientInfo *clientInfo)
 void ServerGame::removeClient(ClientInfo *clientInfo)
 {
    if(mGameType.isValid())
-      mGameType->serverRemoveClient(clientInfo);
+      mGameType->removeClient(clientInfo);
 
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
