@@ -33,7 +33,7 @@ namespace TNL {
 /// BitStream objects.
 namespace HuffmanStringProcessor
 {
-   static const S32 MAX_SENDABLE_LINE_LENGTH = 255;
+   static const U32 MAX_SENDABLE_LINE_LENGTH = 255;
    /// Reads a Huffman compressed string out of a BitStream.
    bool readHuffBuffer(BitStream* pStream, char* out_pBuffer);
 

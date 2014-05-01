@@ -183,7 +183,7 @@ SenderStatus DataSender::initialize(DataSendable *connection, FolderManager *fol
    // Allocate a buffer
    //char *buffer = new char[MAX_CHUNK_LEN + 1];      // 255 for data, + 1 for terminator
    char buffer[MAX_CHUNK_LEN + 1];      // 255 for data, + 1 for terminator
-   S32 size;
+   U32 size;
 
    // We'll read the file in 255 char chunks; this is the largest string we can send, and we want to be as large as possible to get
    // maximum benefit of the string compression that occurs during the transmission process.
@@ -200,15 +200,15 @@ SenderStatus DataSender::initialize(DataSendable *connection, FolderManager *fol
    file.close();
    */
 
-   const S32 MAX_LEVEL_FILE_LENGTH = 256 * 1024;     // 256K -- Need some limit to avoid overflowing server; arbitrary value
+   const U32 MAX_LEVEL_FILE_LENGTH = 256 * 1024;     // 256K -- Need some limit to avoid overflowing server; arbitrary value
 
-   size = (S32) fread(buffer, 1, MAX_CHUNK_LEN, file);
+   size = fread(buffer, 1, MAX_CHUNK_LEN, file);
 
    while(size > 0 && mLines.size() * MAX_CHUNK_LEN < MAX_LEVEL_FILE_LENGTH)
    {
        buffer[size] = 0;           // Null terminate
        mLines.push_back(buffer);
-       size = (S32) fread(buffer, 1, MAX_CHUNK_LEN, file);
+       size = fread(buffer, 1, MAX_CHUNK_LEN, file);
    }
 
    fclose(file);
