@@ -101,13 +101,13 @@ bool HTFGameType::saveMenuItem(const MenuItem *menuItem, const string &key)
 
 void HTFGameType::setFlagScore(S32 pointsPerMinute)
 {
-   mFlagScoreTime = U32((1.0f / F32(pointsPerMinute)) * 60 * 1000);   // Convert to ms per point
+   mFlagScoreTime = U32(F32(ONE_MINUTE) / pointsPerMinute);   // Convert to ms per point
 }
 
 
 S32 HTFGameType::getFlagScore() const
 {
-   return S32(1.0f / (F32(mFlagScoreTime) / (60 * 1000)));            // Convert to points per minute
+   return S32(F32(ONE_MINUTE) / mFlagScoreTime);  // Convert to points per minute
 }
 
 
