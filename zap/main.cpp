@@ -66,6 +66,8 @@
 
 #include "GameManager.h"
 
+#include "StackTracer.h"
+
 using namespace TNL;
 
 #ifndef ZAP_DEDICATED
@@ -1064,6 +1066,11 @@ static bool thisProgramHasCreatedConsoleWindow()
    return false;
 }
 #endif
+
+
+// Get the StackTracer up and running, ready to handle all our crash tracing needs!
+StackTracer stackTracer;
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////

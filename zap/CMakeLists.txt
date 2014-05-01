@@ -93,6 +93,8 @@ set(SHARED_SOURCES
 	SoundSystem.cpp
 	Spawn.cpp
 	speedZone.cpp
+	StackTracer.cpp
+	StackWalker.cpp
 	statistics.cpp
 	stringUtils.cpp
 	SystemFunctions.cpp

@@ -127,6 +127,7 @@ void AbstractTeam::alterBlue(F32 amt)
 S32 AbstractTeam::getScore() const
 {
    TNLAssert(false, "Not implemented for this class!");
+   return 0;
 }
 
 
