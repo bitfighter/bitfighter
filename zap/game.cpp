@@ -229,6 +229,19 @@ S32 Game::getPlayerCount() const
 }
 
 
+// Return the number of human players on a given team (does not include bots, used for testing)
+S32 Game::getPlayerCount(S32 teamIndex) const
+{
+   S32 playerCount = 0;
+
+   for(S32 i = 0; i < mClientInfos.size(); i++)
+      if(mClientInfos[i]->getTeamIndex() == teamIndex)
+         playerCount++;
+
+   return playerCount;
+}
+
+
 S32 Game::getAuthenticatedPlayerCount() const
 {
    S32 count = 0;

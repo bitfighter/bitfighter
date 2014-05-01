@@ -270,6 +270,8 @@ public:
 
    S32 getClientCount() const;                                    // Total number of players, human and robot
    S32 getPlayerCount() const;                                    // Returns number of human players
+   S32 getPlayerCount(S32 teamIndex) const;                       // Returns number of human players on specified team
+
    S32 getAuthenticatedPlayerCount() const;                       // Number of authenticated human players
    S32 getRobotCount() const;                                     // Returns number of bots
 
