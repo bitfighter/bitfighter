@@ -1161,7 +1161,7 @@ void GameType::startOvertime()
 // Will be called at the beginning of each overtime period if overtime is extended.  
 // On first call, mOvertime will be false; mOvertime will be true on subsequent calls.
 //
-// In Bitmatch (and Rabbit) games, we'll just add 20 seconds to game clock in event of a tie
+// In Bitmatch (and other) games, we'll just add 20 seconds to game clock in event of a tie.  Other games will override this.
 void GameType::onOvertimeStarted()
 {
    mEndingGamePlay += TWENTY_SECONDS;    
@@ -2366,6 +2366,12 @@ void GameType::removeClient(ClientInfo *clientInfo)
    // Note that we do not need to delete clientConnection... TNL handles that, and the destructor gets runs shortly after we get here
 
    static_cast<ServerGame *>(getGame())->suspendIfNoActivePlayers();
+
+   // If we are in overtime, check to make sure there are at least two players/teams left... if not, crown a winner and end the game!
+   if(mOvertime)
+   {
+      // Do something!!
+   }
 }
 
 
@@ -2457,7 +2463,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g,
    if(firstTeam)
       mGame->clearTeams();
 
-   mGame->addTeam(new Team(teamName, r, g, b, score));   // Team will be deleted by TeamManager
+   mGame->addTeam(new Team(teamName.getString(), r, g, b, score));   // Team will be deleted by TeamManager
 }
 
 
