@@ -21,7 +21,7 @@ TEST(GameTest, AspectRatio)
 }
 
 
-TEST(GameTest, Winners)
+TEST(GameTest, IndividualGameWinners)
 {
    GamePair gamePair;
    ServerGame *game = gamePair.server;
@@ -78,6 +78,28 @@ TEST(GameTest, Winners)
    player4->setScore(6);
    EXPECT_EQ(HasWinner, game->getIndividualGameWinner().first);   // Scores: 4,4,4,6
    EXPECT_EQ(player4,   game->getIndividualGameWinner().second);    
+}
+
+
+TEST(GameTest, TeamGameWinners)
+{
+   GamePair gamePair;
+   ServerGame *game = gamePair.server;
+
+   ASSERT_EQ(1, game->getTeamCount()) << "Expect game to start off with one team!";
+   EXPECT_EQ(OnlyOnePlayerOrTeam, game->getTeamBasedGameWinner().first);  
+   ASSERT_EQ(0, game->getTeam(0)->getScore());
+   ASSERT_EQ(1, game->getPlayerCount(0));
+
+   // Add a second team -- game will handle cleanup
+   ASSERT_EQ(2, game->getTeamCount()) << "Expect game to start off with one team!";
+   ASSERT_EQ(0, game->getTeam(1)->getScore());
+
+   // This following situation is actually undefined... there are no players yet, so how can we have a winner??
+   //EXPECT_EQ(Tied, game->getTeamBasedGameWinner().first);  // Scores: 0,0
+
+
+
 }
 
 
