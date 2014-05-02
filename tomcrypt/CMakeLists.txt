@@ -311,7 +311,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/headers)
 
 set_target_properties(tomcrypt
 	PROPERTIES
-	COMPILE_DEFINITIONS "LTC_SOURCE"
+	COMPILE_DEFINITIONS "LTC_SOURCE;LTC_NO_ROLC"
 )
 
 set_source_files_properties(
