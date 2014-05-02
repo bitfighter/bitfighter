@@ -79,7 +79,7 @@ void CIniFile::ReadFile()
 
    f.open(y.c_str(), ios::in);
 
-   if(!f.fail())    // This is true if the file cannot be opened or something... in which case we don't want to read the file!
+   if(!f.fail())     // This is true if the file cannot be opened or something... in which case we don't want to read the file!
    {
       while(getline(f, line))
          if(line.length() > 2)                   // Anything shorter can't be useful...  
@@ -255,8 +255,6 @@ bool CIniFile::SetValue(S32 const sectionId, S32 const valueID, const string &va
 bool CIniFile::SetValue(const string &section, const string &key, const string &value, bool const create)
 {
    S32 sectionId = findSection(section);
-
-   TNLAssert(key != "LevelDir" || value != "", "Blank LevelDir?");
 
    if(sectionId == noID) 
    {
