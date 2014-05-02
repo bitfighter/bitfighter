@@ -15,8 +15,9 @@
 #endif
 
 #ifndef BF_NO_AUDIO
-#  include "../openal/alInclude.h"
-#  include "../alure/AL/alure.h"
+#  include <alc.h>
+#  include <al.h>
+#  include <AL/alure.h>
 #else
    class alureStream;
 #endif

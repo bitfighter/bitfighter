@@ -11,7 +11,7 @@
 #include "Md5Utils.h"
 
 #include "stringUtils.h"               // For lcase
-#include "../libtomcrypt/mycrypt.h"
+#include <tomcrypt.h>
 
 #include "tnlTypes.h"
 

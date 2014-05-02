@@ -29,7 +29,7 @@
 #include "tnlNetBase.h"
 #include "tnlHuffmanStringProcessor.h"
 #include "tnlSymmetricCipher.h"
-#include "../libtomcrypt/mycrypt.h"
+#include <tomcrypt.h>
 
 #include <math.h>
 

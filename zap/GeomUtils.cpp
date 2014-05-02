@@ -32,7 +32,7 @@
 
 #include "../recast/Recast.h"
 #include "../recast/RecastAlloc.h"
-#include "../clipper/clipper.hpp"
+#include <clipper.hpp>
 #include "../poly2tri/poly2tri.h"
 
 #include "tnlVector.h"
