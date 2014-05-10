@@ -30,7 +30,7 @@ set(SHARED_SOURCES
 	gameStats.cpp
 	gameType.cpp
 	gameWeapons.cpp
-    GameManager.cpp
+	GameManager.cpp
 	Geometry.cpp
 	GeomObject.cpp
 	GeomUtils.cpp
@@ -81,6 +81,7 @@ set(SHARED_SOURCES
 	Spawn.cpp
 	speedZone.cpp
 	StackTracer.cpp
+	StackWalker.cpp
 	statistics.cpp
 	stringUtils.cpp
 	SystemFunctions.cpp
