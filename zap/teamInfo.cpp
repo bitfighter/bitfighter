@@ -139,8 +139,6 @@ S32 AbstractTeam::getScore() const
 Team::Team()
 {
    initialize();
-
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -176,6 +174,8 @@ void Team::initialize()
 {
    clearStats();
    mScore = 0;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
