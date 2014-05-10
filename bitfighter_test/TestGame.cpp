@@ -8,6 +8,7 @@
 #include "ServerGame.h"
 #include "GameTypesEnum.h"
 #include "gameConnection.h"
+#include "Colors.h"
 #include "gtest/gtest.h"
 
 namespace Zap
@@ -92,6 +93,7 @@ TEST(GameTest, TeamGameWinners)
    ASSERT_EQ(1, game->getPlayerCount(0));
 
    // Add a second team -- game will handle cleanup
+   game->addTeam(new Team("Team 2", Colors::green));
    ASSERT_EQ(2, game->getTeamCount()) << "Expect game to start off with one team!";
    ASSERT_EQ(0, game->getTeam(1)->getScore());
 
