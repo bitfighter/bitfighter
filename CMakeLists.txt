@@ -1,9 +1,10 @@
 project (bitfighter)
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
-if(MSVC)
+# Use appropriate platform alterations
+if(WIN32)
 	include(${CMAKE_SOURCE_DIR}/cmake/Platform/Win32.cmake)
 elseif(APPLE)
 	include(${CMAKE_SOURCE_DIR}/cmake/Platform/Apple.cmake)
@@ -28,7 +29,7 @@ endif()
 #
 
 # Default to NO for Linux
-option(USE_SDL2 "Force usage of SDL2" NO)
+option(USE_SDL2 "Force usage of SDL2" YES)
 option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
 
 # Search for our dependencies
@@ -133,14 +134,13 @@ if(NOT ALURE_FOUND)
 	set(ALURE_LIBRARIES alure)
 endif()
 
-set(LUA_LIB lua-vec)
-set(LUA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lua/lua-vec/src")
 if(LUAJIT_FOUND)
 	set(LUA_LIB ${LUAJIT_LIBRARIES})
 	set(LUA_INCLUDE_DIR ${LUAJIT_INCLUDE_DIR})
 elseif(USE_LUAJIT)
+	# Use internal LuaJIT
 	set(LUA_LIB luajit)
-	set(LUA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lua/luajit/src")
+	set(LUA_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lua/luajit/src)
 endif()
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/lua/${LUA_LIB}")

@@ -16,16 +16,11 @@ set(LUAJIT_SEARCH_PATHS
 	/opt
 )
 
-if(LUAJIT_INCLUDE_DIR)
-	# Already in cache, be silent
-	set(LUAJIT_FIND_QUIETLY TRUE)
-endif()
-
 
 find_path(LUAJIT_INCLUDE_DIR 
 	NAMES lua.h
 	HINTS ENV LUAJITDIR
-	PATH_SUFFIXES include include/luajit luajit luajit-2.0
+	PATH_SUFFIXES include include/luajit luajit luajit-2.0 luajit/src
 	PATHS ${LUAJIT_SEARCH_PATHS}
 )
 

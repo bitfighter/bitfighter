@@ -186,8 +186,18 @@ file(GLOB OTHER_HEADERS
 	${CMAKE_SOURCE_DIR}/poly2tri/sweep/*.h
 )
 
+BF_PLATFORM_SET_EXTRA_SOURCES()
 
-# libraries used by both client and server
+
+#
+# Libraries
+#
+
+BF_PLATFORM_SET_EXTRA_LIBS()
+
+message(STATUS "EXTRA_LIBS: ${EXTRA_LIBS}")
+
+# Libraries used by both client and server
 set(SHARED_LIBS
 	${CMAKE_THREAD_LIBS_INIT}
 	${LUA_LIB}
@@ -218,9 +228,15 @@ set(CLIENT_LIBS
 	${VORBISFILE_LIBRARIES}
 )
 
-##
-## Full client build
-##
+BF_PLATFORM_APPEND_LIBS()
+
+
+#
+# Full client build
+# 
+
+BF_PLATFORM_ADD_DEFINITIONS()
+
 add_executable(bitfighter
 	${SHARED_SOURCES}
 	${CLIENT_SOURCES}
@@ -243,6 +259,7 @@ target_link_libraries(bitfighter
 
 include_directories(SYSTEM
 	${OPENAL_INCLUDE_DIR}
+	${ALURE_INCLUDE_DIR}
 	${GL_INCLUDE_DIR}
 	${PNG_INCLUDE_DIR}
 	${SDL_INCLUDE_DIR}
@@ -267,9 +284,9 @@ if(USE_GLES AND SDL2_FOUND)
 endif()
 
 
-##
-## Dedicated server build
-##
+#
+# Dedicated server build
+# 
 add_executable(bitfighterd
 	EXCLUDE_FROM_ALL
 	${SHARED_SOURCES}
@@ -303,9 +320,9 @@ include_directories(
 )
 
 
-##
-## Test runner executable
-##
+#
+# Test runner executable
+# 
 option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and create 'coverage' target" NO)
 
 set(TEST_SOURCES
@@ -401,9 +418,9 @@ if(BITFIGHTER_COVERAGE)
 endif()
 
 
-##
-## Settings for all targets
-##
+#
+# Settings for all targets
+# 
 
 # You can only call 'set_target_properties' once for each properties-target combination, therefore
 # we'll build up a list and call 'set_target_properties' at the end
@@ -411,9 +428,16 @@ set(ALL_DEBUG_DEFS
 	"TNL_DEBUG"
 )
 
+BF_PLATFORM_SET_TARGET_PROPERTIES()
+
 set_target_properties(bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_DEBUG "${ALL_DEBUG_DEFS}")
+
 if(EXISTS ${CMAKE_SOURCE_DIR}/bitfighter_test)
 	set_target_properties(test PROPERTIES COMPILE_DEFINITIONS_DEBUG "${ALL_DEBUG_DEFS}")
 endif()
 
-bf_platform_install()
+BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES()
+
+BF_PLATFORM_INSTALL()
+
+BF_PLATFORM_CREATE_PACKAGES()

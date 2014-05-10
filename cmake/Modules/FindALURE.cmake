@@ -23,7 +23,7 @@ endif()
 
 
 find_path(ALURE_INCLUDE_DIR 
-	NAMES alure.h
+	NAMES AL/alure.h
 	HINTS ENV ALUREDIR
 	PATH_SUFFIXES include include/alure AL include/AL alure ALURE
 	PATHS ${ALURE_SEARCH_PATHS}

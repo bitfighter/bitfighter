@@ -1,18 +1,16 @@
-# Define the Linux data dir if not defined in a packaging build script already
-if(MINGW)
-	set(BF_LINK_FLAGS "-Wl,--as-needed -static-libgcc")
-else()
-	set(BF_LINK_FLAGS "-Wl,--as-needed")
-endif()
+## Global project configuration
 
-find_package(VorbisFile)
+#
+# Linker flags
+# 
+set(BF_LINK_FLAGS "-Wl,--as-needed")
 
-if(MINGW)
-	set(CMAKE_RC_COMPILER_INIT windres)
-	enable_language(RC)
-	set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -i <SOURCE> -o <OBJECT>")
-endif()
+# Only link in what is absolutely necessary
+set(CMAKE_EXE_LINKER_FLAGS ${BF_LINK_FLAGS})
 
+# 
+# Compiler specific flags
+# 
 set(CMAKE_C_FLAGS_DEBUG "-g -Wall")
 set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELEASE} -g")
@@ -20,9 +18,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELEASE} -g")
 
-# Only link in what is absolutely necessary
-set(CMAKE_EXE_LINKER_FLAGS ${BF_LINK_FLAGS})
-
+# Define the Linux data dir if not defined in a packaging build script already
 if("${CMAKE_SYSTEM}" MATCHES "Linux")
 	if(NOT LINUX_DATA_DIR)
 		set(LINUX_DATA_DIR "/usr/share")
@@ -33,12 +29,56 @@ if("${CMAKE_SYSTEM}" MATCHES "Linux")
 	# Quotes need to be a part of the definition or the compiler won't understand
 	add_definitions(-DLINUX_DATA_DIR="${LINUX_DATA_DIR}")
 endif()
-set(EXTRA_LIBS dl m)
-add_definitions(-iquote ${CMAKE_SOURCE_DIR}/zap)
+
+
+#
+# Library searching and dependencies
+# 
+find_package(VorbisFile)
+
+## End Global project configuration
+
+
+## Sub-project configuration
+
+function(BF_PLATFORM_SET_EXTRA_SOURCES)
+	# Do nothing!
+endfunction()
+
+
+function(BF_PLATFORM_SET_EXTRA_LIBS)
+	set(EXTRA_LIBS dl m PARENT_SCOPE)
+endfunction()
+
+
+function(BF_PLATFORM_APPEND_LIBS)
+	# Do nothing!
+endfunction()
+
+
+function(BF_PLATFORM_ADD_DEFINITIONS)
+	add_definitions(-iquote ${CMAKE_SOURCE_DIR}/zap)
+endfunction()
+
+
+function(BF_PLATFORM_SET_TARGET_PROPERTIES)
+	# Do nothing!
+endfunction()
+
+
+function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES)
+	# Do nothing!
+endfunction()
+
 
 function(BF_PLATFORM_INSTALL)
 	install(TARGETS bitfighter RUNTIME DESTINATION bin)
 	install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource/
 		DESTINATION share/games/bitfighter/
 	)
+endfunction()
+
+
+function(BF_PLATFORM_CREATE_PACKAGES)
+	# Do nothing!
 endfunction()

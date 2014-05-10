@@ -1,4 +1,5 @@
-function(BF_SET_SEARCH_PATHS)
+# This is only used in OSX and Windows since we have in-tree compiled libraries
+function(SHARED_SET_LIBRARY_SEARCH_PATHS)
 	# Always use SDL2 on OSX or Windows
 	set(USE_SDL2 1)
 
@@ -19,11 +20,4 @@ function(BF_SET_SEARCH_PATHS)
 	
 	# zlib
 	set(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/zlib")
-endfunction()
-
-function(BF_COPY_RESOURCES)
-	add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD 
-		COMMAND ${RES_COPY_CMD}
-		COMMAND ${LIB_COPY_CMD}
-	)
 endfunction()
