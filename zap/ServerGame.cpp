@@ -1094,8 +1094,8 @@ Vector<Vector<S32> > ServerGame::getCategorizedPlayerCountsByTeam() const
 }
 
 
-// ClientInfos will be stored as RefPtrs, so they will be deleted when all refs are removed.  In other words,
-// ServerGame will manage cleanup.
+// ClientInfos will be stored as RefPtrs, so they will be deleted when all refs are removed... 
+// In other words, ServerGame will manage cleanup.
 void ServerGame::addClient(ClientInfo *clientInfo)
 {
    TNLAssert(!clientInfo->isRobot(), "This only gets called for players");
