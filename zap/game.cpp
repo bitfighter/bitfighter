@@ -501,7 +501,7 @@ void Game::teleporterDestroyed(Teleporter *teleporter)
 
 
 S32           Game::getTeamCount()                const { return mActiveTeamManager->getTeamCount();            } 
-AbstractTeam *Game::getTeam(S32 team)             const { return mActiveTeamManager->getTeam(team);             }
+AbstractTeam *Game::getTeam(S32 teamIndex)        const { return mActiveTeamManager->getTeam(teamIndex);        }
 bool          Game::getTeamHasFlag(S32 teamIndex) const { return mActiveTeamManager->getTeamHasFlag(teamIndex); }
 
 
