@@ -60,6 +60,7 @@ public:
    virtual S32 getBotCount() const = 0;
 
    virtual S32 getScore() const;
+   virtual void setScore(S32 score);
 };
 
 
