@@ -16,7 +16,7 @@
 #include "tnlLog.h"
 
 #include "../recast/RecastAlloc.h"
-#include "../clipper/clipper.hpp"
+#include <clipper.hpp>
 
 #include <vector>
 #include <math.h>

@@ -15,9 +15,9 @@
 // Need to include lua headers this way --> wrap them in a simpler looking .h file...
 
 extern "C" {
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 }
 
 #endif   // _LUA_INC_H_

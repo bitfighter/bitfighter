@@ -6,7 +6,8 @@
 #ifndef _STACK_TRACER_H_
 #define _STACK_TRACER_H_
 
-#include "TNLTypes.h"
+#include "tnlTypes.h"
+#include "tnlPlatform.h"
 
 
 using namespace TNL;

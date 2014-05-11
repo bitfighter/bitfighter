@@ -64,40 +64,8 @@ static inline void printStackTrace(FILE *out = stderr, U32 max_frames = 63)
       char* end_offset   = NULL;
  
       // Find parentheses and +address offset surrounding the mangled name
-#ifdef TNL_OS_MAC_OSX
-      // OSX style stack trace
-      for(char *p = symbollist[i]; *p; ++p)
-      {
-         if((*p == '_') && ( *(p-1) == ' '))
-            begin_name = p-1;
-         else if(*p == '+')
-            begin_offset = p-1;
-      }
- 
-      if(begin_name && begin_offset && (begin_name < begin_offset))
-      {
-         *begin_name++   = '\0';
-         *begin_offset++ = '\0';
- 
-         // mangled name is now in [begin_name, begin_offset) and caller
-         // offset in [begin_offset, end_offset). now apply
-         // __cxa_demangle():
-         S32 status;
-         char* ret = abi::__cxa_demangle(begin_name, &funcname[0],
-                                         &funcnamesize, &status);
-         if(status == 0) 
-         {
-            funcname = ret; // use possibly realloc()-ed string
-            fprintf(out, "  %-30s %-40s %s\n",
-                        symbollist[i], funcname, begin_offset);
-         } else {
-            // demangling failed. Output function name as a C function with
-            // no arguments.
-            fprintf out, "  %-30s %-38s() %s\n",
-                        symbollist[i], begin_name, begin_offset);
-         }
- 
-#else // !TNL_OS_MAC_OSX - but is posix
+#ifndef TNL_OS_MAC_OSX
+      // !TNL_OS_MAC_OSX - but is posix
       // not OSX style
       // ./module(function+0x15c) [0x8048a6d]
       for(char *p = symbollist[i]; *p; ++p)
@@ -110,7 +78,7 @@ static inline void printStackTrace(FILE *out = stderr, U32 max_frames = 63)
             end_offset = p;
       }
  
-      if(begin_name && end_offset && (begin_name &lt; end_offset))
+      if(begin_name && end_offset && (begin_name < end_offset))
       {
          *begin_name++   = '\0';
          *end_offset++   = '\0';
@@ -138,8 +106,9 @@ static inline void printStackTrace(FILE *out = stderr, U32 max_frames = 63)
             fprintf(out, "  %-30s ( %-40s    %-6s) %s\n",
                     symbollist[i], fname, "", end_offset);
          }
+      } else
 #endif  // !TNL_OS_MAC_OSX - but is posix
-      } else {
+      {
          // cCouldn't parse the line? print the whole line.
          fprintf(out, "  %-40s\n", symbollist[i]);
       }

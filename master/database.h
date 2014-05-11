@@ -13,7 +13,7 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include "tnlNonce.h"
-#include "../sqlite/sqlite3.h"
+#include <sqlite3.h>
 #include <string>
 
 

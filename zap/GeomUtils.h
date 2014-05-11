@@ -36,7 +36,7 @@
 #include <vector>
 
 #include "tnlTypes.h"
-#include "../clipper/clipper.hpp"
+#include <clipper.hpp>
 
 struct rcPolyMesh;
 struct lua_State;

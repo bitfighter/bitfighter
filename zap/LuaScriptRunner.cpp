@@ -22,7 +22,7 @@
 
 #include "stringUtils.h"
 
-#include "../clipper/clipper.hpp"
+#include <clipper.hpp>
 
 #include "tnlLog.h"            // For logprintf
 #include "tnlRandom.h"

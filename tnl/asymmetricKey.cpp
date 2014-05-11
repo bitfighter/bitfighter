@@ -26,7 +26,7 @@
 
 #include "tnlAsymmetricKey.h"
 #include "tnlRandom.h"
-#include "../libtomcrypt/mycrypt.h"
+#include <tomcrypt.h>
 #include "tnlLog.h"
 
 #define crypto_key            ecc_key

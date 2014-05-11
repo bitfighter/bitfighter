@@ -21,7 +21,7 @@ set(MASTER_SOURCES
 	../zap/stringUtils.cpp
 	../zap/Timer.cpp
 	../zap/WeaponInfo.cpp
-	../sqlite/sqlite3.c
+	${SQLITE3_SOURCE_FILES}
 )
 
 set(MASTER_PHPBB_SOURCES

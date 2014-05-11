@@ -33,7 +33,7 @@
 #include "tnlNetObject.h"
 #include "tnlClientPuzzle.h"
 #include "tnlCertificate.h"
-#include "../libtomcrypt/mycrypt.h"
+#include <tomcrypt.h>
 
 namespace TNL {
 

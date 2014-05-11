@@ -8,7 +8,7 @@
 
 #include "tnlBitStream.h"
 #include "tnlLog.h"
-#include "boost/smart_ptr/shared_ptr.hpp"
+#include <boost/smart_ptr/shared_ptr.hpp>
 
 #ifdef TNL_OS_WIN32
 #  include <windows.h>   // For ARRAYSIZE
