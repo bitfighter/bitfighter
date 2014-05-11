@@ -40,6 +40,9 @@ find_package(VorbisFile)
 
 
 ## Sub-project configuration
+#
+# Note that any variable adjustment from the parent CMakeLists.txt will
+# need to be re-set with the PARENT_SCOPE option
 
 function(BF_PLATFORM_SET_EXTRA_SOURCES)
 	# Do nothing!

@@ -196,8 +196,6 @@ BF_PLATFORM_SET_EXTRA_SOURCES()
 
 BF_PLATFORM_SET_EXTRA_LIBS()
 
-message(STATUS "EXTRA_LIBS: ${EXTRA_LIBS}")
-
 # Libraries used by both client and server
 set(SHARED_LIBS
 	${CMAKE_THREAD_LIBS_INIT}
