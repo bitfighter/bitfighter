@@ -91,8 +91,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
 // Constructor
 NexusGameType::NexusGameType() : GameType(100)
 {
-   mNexusClosedTime = 60 * 1000;
-   mNexusOpenTime = 15 * 1000;
+   mNexusClosedTime = ONE_MINUTE;
+   mNexusOpenTime = FIFTEEN_SECONDS;
    mNexusIsOpen = false;
    mNexusChangeAtTime = 0;
 }
