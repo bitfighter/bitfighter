@@ -1527,11 +1527,11 @@ void ServerGame::processVoting(U32 timeDelta)
             }
 
             if(!WaitingToVote)
-               mVoteTimer = timeDelta + 1;  // no more waiting when everyone have voted.
+               mVoteTimer = timeDelta + 1;   // No more waiting when everyone have voted
          }
          mVoteTimer -= timeDelta;
       }
-      else                        // Vote ends
+      else                                   // Vote ends
       {
          S32 voteYes = 0;
          S32 voteNo = 0;
@@ -1570,7 +1570,7 @@ void ServerGame::processVoting(U32 timeDelta)
                case VoteAddTime:
                   if(mGameType)
                   {
-                     mGameType->extendGameTime(mVoteNumber);                           // Increase "official time"
+                     mGameType->extendGameTime(mVoteNumber);      // Increase "official time"
                      mGameType->broadcastNewRemainingTime();   
                   }
                   break;   
@@ -1605,7 +1605,7 @@ void ServerGame::processVoting(U32 timeDelta)
                   break;
 
                case VoteResetScore:
-                  if(mGameType && mGameType->getGameTypeId() != CoreGame) // No changing score in Core
+                  if(mGameType && mGameType->getGameTypeId() != CoreGame)  // No changing score in Core
                   {
                      // Reset player scores
                      for(S32 i = 0; i < getClientCount(); i++)
