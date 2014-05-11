@@ -85,6 +85,7 @@ namespace Zap
 enum GameEndStatus {
    HasWinner,
    Tied,
+   TiedByTeamsWithNoPlayers,
    OnlyOnePlayerOrTeam
 };
 

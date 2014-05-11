@@ -506,28 +506,58 @@ bool          Game::getTeamHasFlag(S32 teamIndex) const { return mActiveTeamMana
 
 
 // Find winner of a team-based game
+// Team with the most points wins.
+// If multple teams are tied for most points, a tie is declared.
+// If multiple teams are tied for most points, but only one has players, that team is declared the winner.
+// If multiple teams are tied for most points, but none have players, those teams are declared winners by tie.
+// Bots are considered players for this purpose.
 TeamGameResults Game::getTeamBasedGameWinner() const
 {
    S32 teamCount = getTeamCount();
+   countTeamPlayers();
+
+   TNLAssert(teamCount > 0, "Expect at least one team here!");
+   if(teamCount == 0)
+      return TeamGameResults(OnlyOnePlayerOrTeam, 0);
 
    if(teamCount == 1)
       return TeamGameResults(OnlyOnePlayerOrTeam, 0);
 
-   S32 winningTeam = 0;
-   S32 winningScore = getTeam(0)->getScore();
+   S32 winningTeam = -1;
+   S32 winningScore = S32_MIN;
+   S32 winningTeamsWithPlayers = 0;
 
    GameEndStatus status = HasWinner;
 
-   for(S32 i = 1; i < teamCount; i++)
+   for(S32 i = 0; i < teamCount; i++)
    {
       if(getTeam(i)->getScore() == winningScore)
-         status = Tied;
+      {
+         if(getTeam(i)->getPlayerBotCount() > 0)
+         {
+            // Is this the first team with players with the high score?
+            if(winningTeamsWithPlayers == 0)
+            {
+               winningTeam = i;
+               status = HasWinner;
+            }
+            else
+               status = Tied;
+
+            winningTeamsWithPlayers++;
+         }
+
+         // If no other teams with this score has players, then we can call it a tie
+         else if(winningTeamsWithPlayers == 0)
+            status = TiedByTeamsWithNoPlayers;
+      }
 
       else if(getTeam(i)->getScore() > winningScore)
       {
          winningTeam = i;
          winningScore = getTeam(i)->getScore();
          status = HasWinner;
+         winningTeamsWithPlayers = (getTeam(i)->getPlayerBotCount() == 0) ? 0 : 1;
       }
    }
 
