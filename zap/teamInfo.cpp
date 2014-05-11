@@ -131,7 +131,7 @@ S32 AbstractTeam::getScore() const
 }
 
 
-void Team::setScore(S32 score)
+void AbstractTeam::setScore(S32 score)
 {
    TNLAssert(false, "Not implemented for this class!");
 }
@@ -249,7 +249,7 @@ S32 Team::getPlayerCount() const
 
 S32 Team::getBotCount() const
 {
-   TNLAssert(mBotCount >= 0, "No on expects the Spanish Inquisition!");
+   TNLAssert(mBotCount >= 0, "No one expects the Spanish Inquisition!");
    return mBotCount;
 }
 
