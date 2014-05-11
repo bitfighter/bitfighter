@@ -309,6 +309,13 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/encauth/ocb/ocb_encrypt.c
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/headers)
 
+# ranlib on OSX is really 'libtool'.  To mimic the correct behavior of ranlib fortun
+# static libraries we need to use 'ranlib -c'
+if(APPLE)
+	SET(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -c <TARGET>")
+endif()
+
+
 set_target_properties(tomcrypt
 	PROPERTIES
 	COMPILE_DEFINITIONS "LTC_SOURCE;LTC_NO_ROLC"
