@@ -76,9 +76,6 @@ endif()
 # Library searching and dependencies
 #
 
-# From Shared.cmake
-#SHARED_SET_LIBRARY_SEARCH_PATHS()
-
 # Always use SDL2 on OSX or Windows
 set(USE_SDL2 YES)
 set(USE_LUAJIT YES)
@@ -111,10 +108,15 @@ find_package(VorbisFile)
 
 
 ## Sub-project configuration
+#
+# Note that any variable adjustment from the parent CMakeLists.txt will
+# need to be re-set with the PARENT_SCOPE option
+
 function(BF_PLATFORM_SET_EXTRA_SOURCES)
 	if(NOT XCOMPILE)
 		# Add icon resource in Visual Studio
 		list(APPEND CLIENT_SOURCES ZAP.rc)
+		set(CLIENT_SOURCES ${CLIENT_SOURCES} PARENT_SCOPE)
 	endif()
 endfunction()
 
