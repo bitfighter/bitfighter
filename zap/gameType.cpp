@@ -1165,7 +1165,7 @@ void GameType::startOvertime()
 }
 
 
-// Handle any gameType specific overtime actions/settings... should be overridded by various gameTypes
+// Handle any gameType specific overtime actions/settings... is overridden by various gameTypes.
 // Will be called at the beginning of each overtime period if overtime is extended.  
 // On first call, mOvertime will be false; mOvertime will be true on subsequent calls.
 //
