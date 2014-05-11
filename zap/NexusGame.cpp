@@ -165,6 +165,7 @@ void NexusGameType::addNexus(NexusZone *nexus)
    mNexus.push_back(nexus);
 }
 
+
 // Count flags on a ship.  This function assumes that all carried flags are NexusFlags, each of which can represent multiple flags
 // (see getFlagCount()).  This code will support a ship having several flags, but in practice, each ship will have exactly one.
 static S32 getMountedFlagCount(Ship *ship)
@@ -409,6 +410,7 @@ void NexusGameType::onOvertimeStarted()
       // TODO: Need a SFX here
    }
 }
+
 
 // Emit a flag in a random direction at a random speed.
 // Server only.
