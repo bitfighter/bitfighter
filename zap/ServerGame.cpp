@@ -1618,12 +1618,12 @@ void ServerGame::processVoting(U32 timeDelta)
                      // Reset team scores
                      for(S32 i = 0; i < getTeamCount(); i++)
                      {
-                        // broadcast it to the clients
+                        // Broadcast it to the clients
                         if(((Team*)getTeam(i))->getScore() != 0)
                            mGameType->s2cSetTeamScore(i, 0);
 
                         // Set the score internally...
-                        ((Team*)getTeam(i))->setScore(0);
+                        getTeam(i)->setScore(0);
                      }
                   }
                   break;

@@ -2474,7 +2474,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSetTeamScore, (RangedU32<0, Game::MAX_TEAMS> teamI
    if(teamIndex >= U32(mGame->getTeamCount()))
       return;
    
-   ((Team *)mGame->getTeam(teamIndex))->setScore(score);
+   mGame->getTeam(teamIndex)->setScore(score);
    updateLeadingTeamAndScore();    
 }
 
@@ -2895,7 +2895,7 @@ GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
          s2cSetTeamScore(i, 0);
 
       // Set the score internally...
-      ((Team *)mGame->getTeam(i))->setScore(0);
+      mGame->getTeam(i)->setScore(0);
    }
 
    StringTableEntry msg("%e0 has reset the score of the game");
