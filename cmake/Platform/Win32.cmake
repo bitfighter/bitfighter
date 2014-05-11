@@ -1,5 +1,3 @@
-include("${CMAKE_SOURCE_DIR}/cmake/Platform/Shared.cmake")
-
 ## Global project configuration
 
 #
