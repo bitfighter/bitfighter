@@ -6,7 +6,7 @@
 #include "TestUtils.h"
 
 #include "ServerGame.h"
-#include "GameTypesEnum.h"
+#include "gameType.h"
 #include "gameConnection.h"
 #include "Colors.h"
 #include "gtest/gtest.h"
@@ -87,14 +87,20 @@ TEST(GameTest, TeamGameWinners)
    GamePair gamePair;
    ServerGame *game = gamePair.server;
 
+   // We'll also test GameType::onGameOver() while we're here... that fn will return true when
+   // the game has concluded, false if there is a need for overtime.
+   GameType *gameType = game->getGameType();
+
    S32 index1 = 0;
    S32 index2 = 1;
    S32 index3 = 2;
 
    ASSERT_EQ(1, game->getTeamCount()) << "Expect game to start off with one team!";
+
    EXPECT_EQ(OnlyOnePlayerOrTeam, game->getTeamBasedGameWinner().first);  
    ASSERT_EQ(0, game->getTeam(0)->getScore());
    ASSERT_EQ(1, game->getPlayerCount(0));
+   EXPECT_TRUE(gameType->onGameOver());
 
    gamePair.removeClient(0);
 
@@ -104,6 +110,7 @@ TEST(GameTest, TeamGameWinners)
    ASSERT_EQ(0, game->getTeam(1)->getScore());
 
    EXPECT_EQ(TiedByTeamsWithNoPlayers, game->getTeamBasedGameWinner().first); // Scores: 0,0, no players
+   EXPECT_TRUE(gameType->onGameOver());
 
    // One player, on first team, score 0,0
    S32 teamIndex = index1;
@@ -112,8 +119,10 @@ TEST(GameTest, TeamGameWinners)
    ASSERT_EQ(0, game->getTeam(teamIndex)->getScore());
    EXPECT_EQ(HasWinner, game->getTeamBasedGameWinner().first);       // Scores: 0,0  -- tied, but only first team has players
    EXPECT_EQ(teamIndex, game->getTeamBasedGameWinner().second); 
+   EXPECT_TRUE(gameType->onGameOver());
    gamePair.removeClient("Player 1");
    EXPECT_EQ(TiedByTeamsWithNoPlayers, game->getTeamBasedGameWinner().first);      // Scores: 0,0
+   EXPECT_TRUE(gameType->onGameOver());
 
    // One player, on second team, score 0,0
    teamIndex = index2;
@@ -122,28 +131,33 @@ TEST(GameTest, TeamGameWinners)
    ASSERT_EQ(0, game->getTeam(teamIndex)->getScore());
    EXPECT_EQ(HasWinner, game->getTeamBasedGameWinner().first);       // Scores: 0,0  -- tied, but only second team has players
    EXPECT_EQ(teamIndex, game->getTeamBasedGameWinner().second); 
+   EXPECT_TRUE(gameType->onGameOver());
 
    // One player each on teams 1 and 2, score 0,0
    teamIndex = index1;
    gamePair.addClient("Player 1", teamIndex);
    EXPECT_EQ(Tied, game->getTeamBasedGameWinner().first);      // Scores: 0,0  -- tied
+   EXPECT_FALSE(gameType->onGameOver());
 
    // One player each on teams 1 and 2, score 0,1
    team1->setScore(0);
    team2->setScore(1);
    EXPECT_EQ(HasWinner, game->getTeamBasedGameWinner().first); 
    EXPECT_EQ(index2, game->getTeamBasedGameWinner().second);
+   EXPECT_TRUE(gameType->onGameOver());
 
    // One player each on teams 1 and 2, score 1,0
    team1->setScore(0);
    team2->setScore(1);
    EXPECT_EQ(HasWinner, game->getTeamBasedGameWinner().first); 
    EXPECT_EQ(index2, game->getTeamBasedGameWinner().second);
+   EXPECT_TRUE(gameType->onGameOver());
 
    // One player each on teams 1 and 2, score 1,1
    team1->setScore(1);
    team2->setScore(1);
    EXPECT_EQ(Tied, game->getTeamBasedGameWinner().first); 
+   EXPECT_FALSE(gameType->onGameOver());
 
    // Add a third team with 1 player... game still tied at 1,1,0
    game->addTeam(new Team("Team 3", Colors::yellow));
@@ -151,20 +165,24 @@ TEST(GameTest, TeamGameWinners)
    gamePair.addClient("Player 3", index3);
    AbstractTeam *team3 = game->getTeam(index3);
    EXPECT_EQ(Tied, game->getTeamBasedGameWinner().first); 
+   EXPECT_FALSE(gameType->onGameOver());
 
    // Three way tie: 1,1,1
    team3->setScore(1);
    EXPECT_EQ(Tied, game->getTeamBasedGameWinner().first); 
+   EXPECT_FALSE(gameType->onGameOver());
 
    // Clear winner: 1,1,2
    team3->setScore(2);
    EXPECT_EQ(HasWinner, game->getTeamBasedGameWinner().first); 
    EXPECT_EQ(index3, game->getTeamBasedGameWinner().second);
+   EXPECT_TRUE(gameType->onGameOver());
 
    // Clear winner: 4,1,2
    team1->setScore(4);
    EXPECT_EQ(HasWinner, game->getTeamBasedGameWinner().first); 
    EXPECT_EQ(index1, game->getTeamBasedGameWinner().second);
+   EXPECT_TRUE(gameType->onGameOver());
 
    // Player 2 quits, leaving team 2 without players; score still 4,1,2
    gamePair.removeClient("Player 2");
@@ -173,16 +191,19 @@ TEST(GameTest, TeamGameWinners)
 
    EXPECT_EQ(HasWinner, game->getTeamBasedGameWinner().first); 
    EXPECT_EQ(index1, game->getTeamBasedGameWinner().second);
+   EXPECT_TRUE(gameType->onGameOver());
 
    // Score 4,5,2
    team2->setScore(5);
    EXPECT_EQ(HasWinner, game->getTeamBasedGameWinner().first); 
    EXPECT_EQ(index2, game->getTeamBasedGameWinner().second);      // <-- should team 2 win??
+   EXPECT_TRUE(gameType->onGameOver());
 
    // Score 5,5,2
    team1->setScore(5);
    EXPECT_EQ(HasWinner, game->getTeamBasedGameWinner().first); 
    EXPECT_EQ(index1, game->getTeamBasedGameWinner().second);      // Tied, but team 1 is declared winner
+   EXPECT_TRUE(gameType->onGameOver());
 
    // Score 0,5,5
    team1->setScore(0);
@@ -190,19 +211,21 @@ TEST(GameTest, TeamGameWinners)
    team3->setScore(5);
    EXPECT_EQ(HasWinner, game->getTeamBasedGameWinner().first); 
    EXPECT_EQ(index3, game->getTeamBasedGameWinner().second);      // Tied, but team 3 is declared winner
+   EXPECT_TRUE(gameType->onGameOver());
 
    // Score 5,0,5
    team1->setScore(5);
    team2->setScore(0);
    team3->setScore(5);
    EXPECT_EQ(Tied, game->getTeamBasedGameWinner().first); 
+   EXPECT_FALSE(gameType->onGameOver());
 
    // Score 5,5,5
    team1->setScore(5);
    team2->setScore(5);
    team3->setScore(5);
    EXPECT_EQ(Tied, game->getTeamBasedGameWinner().first); 
-
+   EXPECT_FALSE(gameType->onGameOver());
 }
 
 

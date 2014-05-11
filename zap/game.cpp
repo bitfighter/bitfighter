@@ -505,7 +505,7 @@ AbstractTeam *Game::getTeam(S32 teamIndex)        const { return mActiveTeamMana
 bool          Game::getTeamHasFlag(S32 teamIndex) const { return mActiveTeamManager->getTeamHasFlag(teamIndex); }
 
 
-// Find winner of a team-based game
+// Find winner of a team-based game.
 // Team with the most points wins.
 // If multple teams are tied for most points, a tie is declared.
 // If multiple teams are tied for most points, but only one has players, that team is declared the winner.

@@ -1079,9 +1079,10 @@ void GameType::achievementAchieved(U8 achievement, const StringTableEntry &playe
 
 static Vector<StringTableEntry> messageVals;     // Reusable container
 
-// Handle the end-of-game...  handles all games... not in any subclasses
-// Can be overridden for any game-specific game over stuff
-// Returns true if there is a winner, false if there is a tie
+// Handle the end-of-game...  handles all games... not in any subclasses.
+// Can be overridden for any game-specific game over stuff.
+// Returns true if there is a winner and the game can really be over, 
+// or false if there is a tie and requires overtime.
 // Server only
 bool GameType::onGameOver()
 {
@@ -1102,7 +1103,14 @@ bool GameType::onGameOver()
       else if(results.first == OnlyOnePlayerOrTeam)
          onlyOne = true;
 
-      else
+      else if(results.first == TiedByTeamsWithNoPlayers)    // Game is tied, but no overtime
+      {
+         static StringTableEntry tieMessage("The game ended in a tie.");
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, tieMessage);
+         return true;
+      }
+
+      else           // We have an unambiguous winner!
       {
          S32 winner = mGame->getTeamBasedGameWinner().second;
 
