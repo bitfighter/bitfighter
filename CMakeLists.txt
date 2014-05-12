@@ -12,6 +12,7 @@ elseif(UNIX)
 	include(${CMAKE_SOURCE_DIR}/cmake/Platform/Linux.cmake)
 endif()
 
+
 # No creating project files in-source.  Bad, evil things happen
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" _insource)
 if (_insource)
@@ -19,10 +20,12 @@ if (_insource)
 	message(FATAL_ERROR "Remove the file CMakeCache.txt in ${CMAKE_SOURCE_DIR} first.")
 endif()
 
+
 # Default to Release for a build type
 if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
+
 
 #
 # CMake options
@@ -40,8 +43,12 @@ if(USE_SDL2)
 	if(SDL2_FOUND)
 		set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
 		set(SDL_LIBRARY ${SDL2_LIBRARY})
+	else()
+		message(STATUS "SDL2 not found.  Attempting to find SDL 1.2...")
 	endif()
-else()
+endif()
+
+if(NOT USE_SDL2 OR NOT SDL2_FOUND)
 	find_package(SDL)
 	
 	# SDL_LIBRARY and SDL_INCLUDE_DIR are set by the FindSDL module
@@ -140,7 +147,11 @@ if(LUAJIT_FOUND)
 elseif(USE_LUAJIT)
 	# Use internal LuaJIT
 	set(LUA_LIB luajit)
-	set(LUA_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lua/luajit/src)
+	set(LUA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lua/luajit/src")
+else()
+	# Failing that, use the slow one
+	set(LUA_LIB lua-vec)
+	set(LUA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lua/lua-vec/src")
 endif()
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/lua/${LUA_LIB}")

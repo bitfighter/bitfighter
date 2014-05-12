@@ -11,12 +11,8 @@ set(CMAKE_EXE_LINKER_FLAGS ${BF_LINK_FLAGS})
 # 
 # Compiler specific flags
 # 
-set(CMAKE_C_FLAGS_DEBUG "-g -Wall")
-set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELEASE} -g")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELEASE} -g")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
 
 # Define the Linux data dir if not defined in a packaging build script already
 if("${CMAKE_SYSTEM}" MATCHES "Linux")
