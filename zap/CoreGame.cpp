@@ -1032,7 +1032,7 @@ void CoreItem::degradeAllPanels(F32 amount)
 
    // Apply damage to each panel... get them almost dead, but just hold back a tiny bit
    for(S32 i = 0; i < CORE_PANELS; i++)
-      damagePanel(i, mStartingPanelHealth * amount, F32_SMALLEST);
+      damagePanel(i, mStartingPanelHealth * amount, F32_MIN);
 }
 
 

@@ -37,7 +37,6 @@
 #endif
 
 #include <stdlib.h>
-#include <cfloat>
 
 //inline void* operator new(size_t size, void* ptr) { return ptr; }
 #include <new>
@@ -249,7 +248,6 @@ static const U32 U32_MAX = U32(0xFFFFFFFF);                       ///< Constant 
 
 static const F32 F32_MIN = F32(1.175494351e-38F);                 ///< Constant Min Limit F32
 static const F32 F32_MAX = F32(3.402823466e+38F);                 ///< Constant Max Limit F32
-static const F32 F32_SMALLEST = FLT_MIN;
 
 static const S64 S64_MIN = S64(0x8000000000000000LL);             ///< Constant Min Limit S64
 static const S64 S64_MAX = S64(0x7FFFFFFFFFFFFFFFLL);             ///< Constant Max Limit S64
