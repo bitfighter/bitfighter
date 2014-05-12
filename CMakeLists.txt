@@ -43,8 +43,12 @@ if(USE_SDL2)
 	if(SDL2_FOUND)
 		set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
 		set(SDL_LIBRARY ${SDL2_LIBRARY})
+	else()
+		message(STATUS "SDL2 not found.  Attempting to find SDL 1.2...")
 	endif()
-else()
+endif()
+
+if(NOT USE_SDL2 OR NOT SDL2_FOUND)
 	find_package(SDL)
 	
 	# SDL_LIBRARY and SDL_INCLUDE_DIR are set by the FindSDL module
