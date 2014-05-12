@@ -61,6 +61,7 @@ public:
 
    virtual S32 getScore() const;
    virtual void setScore(S32 score);
+   virtual void addScore(S32 score);
 };
 
 

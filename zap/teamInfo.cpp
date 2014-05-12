@@ -137,6 +137,12 @@ void AbstractTeam::setScore(S32 score)
 }
 
 
+void AbstractTeam::addScore(S32 score)
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 

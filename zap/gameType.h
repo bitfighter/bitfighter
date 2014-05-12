@@ -409,7 +409,7 @@ public:
    void updateScore(Ship *ship, ScoringEvent event, S32 data = 0);              
    void updateScore(ClientInfo *clientInfo, ScoringEvent scoringEvent, S32 data = 0); 
    void updateScore(S32 team, ScoringEvent event, S32 data = 0);
-   virtual void updateScore(ClientInfo *player, S32 team, ScoringEvent event, S32 data = 0); // Core uses their own updateScore
+   virtual void updateScore(ClientInfo *player, S32 team, ScoringEvent event, S32 data = 0); // Core uses its own updateScore
 
    void updateLeadingTeamAndScore();   // Sets mLeadingTeamScore and mLeadingTeam
    void updateLeadingPlayerAndScore(); // Sets mLeadingTeamScore and mLeadingTeam

@@ -22,10 +22,12 @@ namespace Zap {
 
 using namespace LuaArgs;
 
+
 CoreGameType::CoreGameType() : GameType(0)  // Winning score hard-coded to 0
 {
    // Do nothing
 }
+
 
 CoreGameType::~CoreGameType()
 {
@@ -67,6 +69,20 @@ void CoreGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) con
             renderObjectiveArrow(coreItem, canvasWidth, canvasHeight);
    }
 #endif
+}
+
+
+void CoreGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
+{
+   Parent::idle(path, deltaT);
+
+   if(isServer()) 
+      if(isOvertime())
+      {
+         static const F32 OvertimeDegradeRate = 0.01f;      // 1 % per second
+         for(S32 i = 0; i < mCores.size(); i++)
+            mCores[i]->degradeAllPanels(OvertimeDegradeRate * deltaT / 1000);
+      }
 }
 
 
@@ -126,6 +142,7 @@ void CoreGameType::removeCore(CoreItem *core)
 }
 
 
+// Overrides GameType function
 void CoreGameType::updateScore(ClientInfo *player, S32 team, ScoringEvent event, S32 data)
 {
    if(isGameOver()) // Game play ended, no changing score
@@ -140,14 +157,15 @@ void CoreGameType::updateScore(ClientInfo *player, S32 team, ScoringEvent event,
 
    if((event == OwnCoreDestroyed || event == EnemyCoreDestroyed) && U32(team) < U32(getGame()->getTeamCount()))
    {
-      ((Team *)getGame()->getTeam(team))->addScore(-1); // Count down when a core is destoryed
+      getGame()->getTeam(team)->addScore(-1);      // Count down when a core is destoryed
       S32 numberOfTeamsHaveSomeCores = 0;
-      s2cSetTeamScore(team, ((Team *)(getGame()->getTeam(team)))->getScore());     // Broadcast result
+
+      s2cSetTeamScore(team, getGame()->getTeam(team)->getScore());     // Broadcast result
+
       for(S32 i = 0; i < getGame()->getTeamCount(); i++)
-      {
-         if(((Team *)getGame()->getTeam(i))->getScore() != 0)
+         if(getGame()->getTeam(i)->getScore() != 0)
             numberOfTeamsHaveSomeCores++;
-      }
+
       if(numberOfTeamsHaveSomeCores <= 1)
          gameOverManGameOver();
    }
@@ -212,14 +230,28 @@ void CoreGameType::score(ClientInfo *destroyer, S32 coreOwningTeam, S32 score)
          updateScore(NULL, coreOwningTeam, OwnCoreDestroyed, score);
       }
    }
-   else
+   else     // No or unknown destroyer
    {
-      e.push_back(getGame()->getTeamName(coreOwningTeam));
+      static StringTableEntry killString("Something destroyed a %e0 Core!");
 
-      static StringTableEntry capString("Something destroyed a %e0 Core!");
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
+      e.push_back(getGame()->getTeamName(coreOwningTeam));
+      
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, killString, e);
 
       updateScore(NULL, coreOwningTeam, EnemyCoreDestroyed, score);
+   }
+}
+
+
+// In Core games, we'll enter sudden death... next score wins
+void CoreGameType::onOvertimeStarted()
+{
+   startSuddenDeath();
+
+   if(isClient())
+   {
+      // Augment messages shown by startSuddenDeath()
+      getGame()->emitDelayedTextEffect(1500, "CORES WEAKEN!", Colors::red, Point(0,0), false);
    }
 }
 
@@ -389,7 +421,8 @@ void CoreGameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) c
 // Render some attributes when item is selected but not being edited
 void CoreItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
-   keys.push_back("Health");   values.push_back(itos(S32(mStartingHealth * DamageReductionRatio + 0.5)));
+   keys.push_back("Health");   
+   values.push_back(itos(S32(mStartingHealth * DamageReductionRatio + 0.5)));
 }
 
 
@@ -498,51 +531,64 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    S32 hit = (S32) (combinedAngle / PANEL_ANGLE);
 
    if(mPanelHealth[hit] > 0)
-   {
-      mPanelHealth[hit] -= theInfo->damageAmount / DamageReductionRatio;
-
-      if(mPanelHealth[hit] < 0)
-         mPanelHealth[hit] = 0;
-
-      setMaskBits(PanelDamagedMask << hit);
-   }
-
-   // Determine if Core is destroyed by checking all the panel healths
-   bool coreDestroyed = false;
-
-   if(mPanelHealth[hit] == 0)
-   {
-      coreDestroyed = true;
-      for(S32 i = 0; i < CORE_PANELS; i++)
-         if(mPanelHealth[i] > 0)
+      if(damagePanel(hit, theInfo->damageAmount / DamageReductionRatio))
+         if(checkIfCoreIsDestroyed())
          {
-            coreDestroyed = false;
-            break;
+            coreDestroyed(theInfo);
+            return;
          }
-   }
-
-   if(coreDestroyed)
-   {
-      // We've scored!
-      GameType *gameType = getGame()->getGameType();
-      if(gameType)
-      {
-         ClientInfo *destroyer = theInfo->damagingObject->getOwner();
-         if(gameType->getGameTypeId() == CoreGame)
-            static_cast<CoreGameType*>(gameType)->score(destroyer, getTeam(), CoreGameType::DestroyedCoreScore);
-      }
-
-      mHasExploded = true;
-      deleteObject(ExplosionCount * ExplosionInterval);  // Must wait for triggered explosions
-      setMaskBits(ExplodedMask);                         
-      disableCollision();
-
-      return;
-   }
 
    // Reset the attacked warning timer if we're not healing
    if(theInfo->damageAmount > 0)
       mAttackedWarningTimer.reset(CoreAttackedWarningDuration);
+}
+
+
+// Damage specified panel.  Health will not fall below minHealth, which defaults to 0.
+// Returns true if panel was destroyed
+bool CoreItem::damagePanel(S32 panelIndex, F32 damage, F32 minHealth)
+{
+   // This check needed to avoid healing panel if minHealth > 0
+   if(mPanelHealth[panelIndex] == 0)
+      return false;
+
+   mPanelHealth[panelIndex] -= damage;
+
+   if(mPanelHealth[panelIndex] < minHealth)
+      mPanelHealth[panelIndex] = minHealth;
+
+   setMaskBits(PanelDamagedMask << panelIndex);
+
+   return mPanelHealth[panelIndex] == 0;
+}
+
+
+// Returns true if all panels are at 0 health
+bool CoreItem::checkIfCoreIsDestroyed() const
+{
+   for(S32 i = 0; i < CORE_PANELS; i++)
+      if(mPanelHealth[i] > 0)
+         return false;  
+
+   return true;      // Core is dead!
+}
+
+
+void CoreItem::coreDestroyed(const DamageInfo *damageInfo)
+{
+   // We've scored!  But this only matters in a Core game...
+   GameType *gameType = getGame()->getGameType();
+   if(gameType && gameType->getGameTypeId() == CoreGame)
+   {
+      ClientInfo *destroyer = damageInfo->damagingObject->getOwner();
+
+      static_cast<CoreGameType*>(gameType)->score(destroyer, getTeam(), CoreGameType::DestroyedCoreScore);
+   }
+
+   mHasExploded = true;
+   deleteObject(ExplosionCount * ExplosionInterval);  // Must wait for triggered explosions
+   setMaskBits(ExplodedMask);                         
+   disableCollision();
 }
 
 
@@ -960,7 +1006,8 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string CoreItem::toLevelCode() const
 {
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + ftos(mStartingHealth * DamageReductionRatio) + " " + geomToLevelCode();
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + 
+                 ftos(mStartingHealth * DamageReductionRatio) + " " + geomToLevelCode();
 }
 
 
@@ -976,6 +1023,19 @@ bool CoreItem::collide(BfObject *otherObject)
 }
 
 
+// Degrade all panels that are still alive by specified amount (expressed as a fraction, not as an absolute amount).
+// This damage will not kill a core, but will weaken it to a trivially killed state.
+void CoreItem::degradeAllPanels(F32 amount)
+{
+   if(mHasExploded)
+      return;
+
+   // Apply damage to each panel... get them almost dead, but just hold back a tiny bit
+   for(S32 i = 0; i < CORE_PANELS; i++)
+      damagePanel(i, mStartingPanelHealth * amount, F32_SMALLEST);
+}
+
+
 #ifndef ZAP_DEDICATED
 // Client only
 void CoreItem::onItemExploded(Point pos)
@@ -986,6 +1046,7 @@ void CoreItem::onItemExploded(Point pos)
    // Start with an explosion at the center.  See idle() for other called explosions
    doExplosion(pos);
 }
+
 
 void CoreItem::onGeomChanged()
 {

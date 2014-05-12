@@ -32,6 +32,9 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toLevelCode() const;
 
+   void idle(BfObject::IdleCallPath path, U32 deltaT);
+
+
    bool isTeamCoreBeingAttacked(S32 teamIndex) const;
 
    // Runs on client
@@ -44,6 +47,8 @@ public:
    void updateScore(ClientInfo *player, S32 team, ScoringEvent event, S32 data = 0);
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
    void score(ClientInfo *destroyer, S32 coreOwningTeam, S32 score);
+
+   void onOvertimeStarted();
 
 
 #ifndef ZAP_DEDICATED
@@ -140,6 +145,8 @@ public:
    const Vector<Point> *getCollisionPoly() const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(BfObject *otherObject);
+   void degradeAllPanels(F32 amount);
+
 
    bool isBeingAttacked();
 
@@ -161,6 +168,10 @@ public:
 #endif
 
    void damageObject(DamageInfo *theInfo);
+   bool damagePanel(S32 panelIndex, F32 damage, F32 minHealth = 0);
+   bool checkIfCoreIsDestroyed() const;
+   void coreDestroyed(const DamageInfo *damageInfo);
+
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
 
 #ifndef ZAP_DEDICATED

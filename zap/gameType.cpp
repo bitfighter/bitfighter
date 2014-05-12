@@ -1837,7 +1837,7 @@ void GameType::updateScore(Ship *ship, ScoringEvent scoringEvent, S32 data)
 }
 
 
-// Handle both individual scores and team scores
+// Handle both individual scores and team scores; overridden by CoreGameType
 // Runs on server only
 void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scoringEvent, S32 data)
 {
