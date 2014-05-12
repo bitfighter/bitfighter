@@ -143,7 +143,11 @@ if(LUAJIT_FOUND)
 elseif(USE_LUAJIT)
 	# Use internal LuaJIT
 	set(LUA_LIB luajit)
-	set(LUA_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lua/luajit/src)
+	set(LUA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lua/luajit/src")
+else()
+	# Failing that, use the slow one
+	set(LUA_LIB lua-vec)
+	set(LUA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lua/lua-vec/src")
 endif()
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/lua/${LUA_LIB}")
