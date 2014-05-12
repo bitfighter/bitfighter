@@ -12,6 +12,7 @@ elseif(UNIX)
 	include(${CMAKE_SOURCE_DIR}/cmake/Platform/Linux.cmake)
 endif()
 
+
 # No creating project files in-source.  Bad, evil things happen
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" _insource)
 if (_insource)
@@ -19,10 +20,12 @@ if (_insource)
 	message(FATAL_ERROR "Remove the file CMakeCache.txt in ${CMAKE_SOURCE_DIR} first.")
 endif()
 
+
 # Default to Release for a build type
 if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
+
 
 #
 # CMake options
