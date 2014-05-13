@@ -35,7 +35,11 @@ endif()
 option(USE_SDL2 "Force usage of SDL2" YES)
 option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
 
-# Search for our dependencies
+
+#
+# Library searching and dependencies
+#
+
 # SDL2 is default and should be found on all platforms except possibly Linux
 if(USE_SDL2)
 	find_package(SDL2)
@@ -49,12 +53,12 @@ if(USE_SDL2)
 endif()
 
 if(NOT USE_SDL2 OR NOT SDL2_FOUND)
-	find_package(SDL)
-	
 	# SDL_LIBRARY and SDL_INCLUDE_DIR are set by the FindSDL module
+	find_package(SDL)
 endif()
 
-# Searches for opengl and gnables gles if gl isnt found in the system.
+
+# Searches for OpenGL and enables GLES if GL isnt found in the system
 message(STATUS "Determining system GL provider")
 if(NOT USE_GLES)
 	message(STATUS "Atempting to use standard OpenGL")
@@ -73,17 +77,22 @@ if(USE_GLES OR NOT USE_STANDARD_GL)
 	set(GL_INCLUDE_DIR ${OPENGLES_INCLUDE_DIR})
 endif()
 
-find_package(ModPlug)
+
+# Other needed libraries that don't have in-tree fallback options
+find_package(Threads REQUIRED)
+find_package(PNG)
 find_package(MySQL)
 find_package(OGG)
-find_package(OpenAL)
-find_package(PNG)
 find_package(Speex)
-find_package(Threads REQUIRED)
 find_package(Vorbis)
-find_package(ALURE)
+find_package(ModPlug)
+find_package(OpenAL)
 
-# Look for a system lib, but fall back to the in-tree version
+
+# Now look for libraries that have an in-tree fallback option
+# Many of these may have special overrides to properly adapt to the in-tree versions
+
+# Special function to look for a system lib, but fall back to the in-tree version
 function(FIND_WITH_FALLBACK packageName capsName dirName)
 	find_package(${packageName})
 	if( NOT ${capsName}_FOUND )
@@ -98,57 +107,68 @@ function(FIND_WITH_FALLBACK packageName capsName dirName)
 	set(${capsName}_LIBRARIES "${${capsName}_LIBRARIES}" PARENT_SCOPE)
 endfunction()
 
-# Disable certain sub-projects based on dependency search
-set(COMPILE_ALURE 1)
-set(COMPILE_ZAP 1)
 
-if(NOT OPENAL_FOUND OR NOT VORBIS_FOUND OR NOT MODPLUG_FOUND)
-	set(COMPILE_ALURE 0)
+# ALURE
+find_with_fallback(ALURE ALURE alure)
+if(NOT ALURE_FOUND)
+	if(NOT OPENAL_FOUND OR NOT VORBIS_FOUND OR NOT MODPLUG_FOUND)
+		message(WARNING "Audio system components are missing.  Bitfighter will be compiled without audio")
+		add_definitions(-DBF_NO_AUDIO)
+	else()
+		if(NOT WIN32)  # ALURE is not compiled on Windows presently
+			message(STATUS "Using in-tree ALURE")
+			add_subdirectory(alure)
+		endif()
+	endif()
 endif()
 
-if( NOT COMPILE_ALURE OR (NOT SDL2_FOUND AND NOT SDL_FOUND) )
-	set(COMPILE_ZAP 0)
-endif()
 
+# sqlite3
 find_with_fallback(Sqlite SQLITE3 sqlite)
-find_with_fallback(TomCrypt TOMCRYPT tomcrypt)
-find_with_fallback(Boost BOOST boost)
-find_with_fallback(Clipper CLIPPER clipper)
-find_with_fallback(LuaJit LUAJIT lua)
-
-# Special-case fallback settings
-if(NOT CLIPPER_FOUND)
-	add_subdirectory(clipper)
-endif()
-
-if(NOT TOMCRYPT_FOUND)
-	set(TOMCRYPT_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/tomcrypt/src/headers")
-	add_subdirectory(tomcrypt)
-endif()
-
 if(NOT SQLITE3_FOUND)
-	set(SQLITE3_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/sqlite")
+	message(STATUS "Using in-tree sqlite3")
 	set(SQLITE3_LIBRARIES "")
 	set(SQLITE3_FILES "${CMAKE_SOURCE_DIR}/sqlite/sqlite3.c")
 endif()
 
+
+# libtomcrypt
+find_with_fallback(TomCrypt TOMCRYPT tomcrypt)
+if(NOT TOMCRYPT_FOUND)
+	message(STATUS "Using in-tree libtomcrypt")
+	set(TOMCRYPT_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/tomcrypt/src/headers")
+	add_subdirectory(tomcrypt)
+endif()
+
+
+# Boost
+find_with_fallback(Boost BOOST boost)
 if(NOT BOOST_FOUND)
+	message(STATUS "Using in-tree Boost c++ headers")
 	set(BOOST_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/boost")
 endif()
 
-if(NOT ALURE_FOUND)
-	set(ALURE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/alure")
-	set(ALURE_LIBRARIES alure)
+
+# Clipper
+find_with_fallback(Clipper CLIPPER clipper)
+if(NOT CLIPPER_FOUND)
+	message(STATUS "Using in-tree Clipper")
+	add_subdirectory(clipper)
 endif()
 
+
+# LuaJIT / Lua
+find_with_fallback(LuaJit LUAJIT lua)
 if(LUAJIT_FOUND)
 	set(LUA_LIB ${LUAJIT_LIBRARIES})
 	set(LUA_INCLUDE_DIR ${LUAJIT_INCLUDE_DIR})
 elseif(USE_LUAJIT)
+	message(STATUS "Using in-tree LuaJIT")
 	# Use internal LuaJIT
 	set(LUA_LIB luajit)
 	set(LUA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lua/luajit/src")
 else()
+	message(STATUS "Using in-tree Lua.  Bitfighter will run scripts much slower than with LuaJIT")
 	# Failing that, use the slow one
 	set(LUA_LIB lua-vec)
 	set(LUA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lua/lua-vec/src")
@@ -158,13 +178,19 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/lua/${LUA_LIB}")
 	add_subdirectory("${CMAKE_SOURCE_DIR}/lua/${LUA_LIB}")
 endif()
 
-# Add our sub-projects
+
+# Other internal-only sub-projects
 add_subdirectory(tnl)
 add_subdirectory(master)
 
-if(NOT WIN32 AND COMPILE_ALURE AND NOT ALURE_FOUND)  # ALURE is not compiled on Windows presently
-	add_subdirectory(alure)
+
+# Disable certain sub-projects based on dependency search
+set(COMPILE_ZAP 1)
+
+if(NOT SDL2_FOUND AND NOT SDL_FOUND)
+	set(COMPILE_ZAP 0)
 endif()
+
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/mysql++")
 	add_subdirectory(mysql++)
