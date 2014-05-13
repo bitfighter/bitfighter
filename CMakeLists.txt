@@ -115,10 +115,9 @@ if(NOT ALURE_FOUND)
 		message(WARNING "Audio system components are missing.  Bitfighter will be compiled without audio")
 		add_definitions(-DBF_NO_AUDIO)
 	else()
-		if(NOT WIN32)  # ALURE is not compiled on Windows presently
-			message(STATUS "Using in-tree ALURE")
-			add_subdirectory(alure)
-		endif()
+		message(STATUS "Using in-tree ALURE")
+		add_definitions(-DALURE_STATIC_LIBRARY)
+		add_subdirectory(alure)
 	endif()
 endif()
 

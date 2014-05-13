@@ -1,5 +1,13 @@
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/exe)
-set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+# Most ALURE platform-specific settings are included in config.h
+
+if(WIN32)
+	add_definitions(-D_WIN32)
+endif()
+
+if(NOT WIN32)
+	set(EXTRA_LIBS dl)
+endif()
+
 set(ALURE_SOURCES
 	buffer.cpp
 	streamdec.cpp
@@ -24,4 +32,5 @@ include_directories(
 target_link_libraries(alure 
 	${MODPLUG_LIBRARIES}
 	${VORBIS_LIBRARIES}
-	dl)
+	${EXTRA_LIBS}
+)
