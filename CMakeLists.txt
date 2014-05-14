@@ -31,9 +31,9 @@ endif()
 # CMake options
 #
 
-# Default to NO for Linux
-option(USE_SDL2 "Force usage of SDL2" YES)
+option(USE_SDL2 "Use SDL2" YES)
 option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
+option(USE_LUAJIT "Use LuaJIT; compiling in-tree sources if needed" YES)
 
 
 #

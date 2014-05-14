@@ -74,10 +74,6 @@ endif()
 # Library searching and dependencies
 #
 
-# Always use SDL2 on OSX or Windows
-set(USE_SDL2 YES)
-set(USE_LUAJIT YES)
-
 # Set some search paths
 set(SDL2_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libsdl)
 set(OGG_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libogg)
