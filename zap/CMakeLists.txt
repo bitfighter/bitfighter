@@ -42,6 +42,7 @@ set(SHARED_SOURCES
 	InputCode.cpp
 	item.cpp
 	LevelDatabase.cpp
+	LevelInfoDatabase.cpp
 	LevelSource.cpp
 	LineItem.cpp
 	LoadoutTracker.cpp
@@ -337,9 +338,10 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestINISettings.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestInputCode.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestIntegration.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelInfoDatabase.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelLoader.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelSource.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelMenuSelectUserInterface.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelSource.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLoadoutIndicator.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLoadoutTracker.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLuaEnvironment.cpp

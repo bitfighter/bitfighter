@@ -53,6 +53,7 @@ public:
    virtual ~LevelInfo();
 
    const char *getLevelTypeName();
+   void writeToStream(ostream &stream, const string &hash) const;
    void ensureLevelInfoHasValidName();
 };
 
@@ -95,7 +96,10 @@ public:
    bool populateLevelInfoFromSource(const string &sourceName, S32 levelInfoIndex);
 
    static Vector<string> findAllLevelFilesInFolder(const string &levelDir);
-   static void getLevelInfoFromCodeChunk(const string &code, LevelInfo &levelInfo);     // Populates levelInfo
+
+   // The following populate levelInfo
+   static bool getLevelInfoFromDatabase(const string &hash, LevelInfo &levelInfo);
+   static void getLevelInfoFromCodeChunk(const string &code, LevelInfo &levelInfo);     
 };
 
 

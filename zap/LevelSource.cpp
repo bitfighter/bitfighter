@@ -72,6 +72,13 @@ void LevelInfo::initialize()
 }
 
 
+void LevelInfo::writeToStream(ostream &stream, const string &hash) const
+{
+   stream << hash          << ",\"" << mLevelName.getString() << "\"," << GameType::getGameTypeName(mLevelType) << "," 
+          << minRecPlayers << ","   << maxRecPlayers          << ","   << mScriptFileName                       << '\n'; 
+}
+
+
 const char *LevelInfo::getLevelTypeName()
 {
    return GameType::getGameTypeName(mLevelType);
@@ -123,9 +130,16 @@ static void stripQuotes(string &str)      // not const; will be modified!
 }
 
 
+// Static method
+bool LevelSource::getLevelInfoFromDatabase(const string &hash, LevelInfo &levelInfo)
+{
+   return false;
+}
+
+
 // Parse through the chunk of data passed in and find parameters to populate levelInfo with
 // This is only used on the server to provide quick level information without having to load the level
-// (like with playlists or menus)
+// (like with playlists or menus).  Static method.
 void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &levelInfo)
 {
    istringstream stream(code);
@@ -140,13 +154,11 @@ void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &level
    static const S32 scriptLen        = strlen("Script");
 
    std::size_t pos;
-   S32 lines = 0;
 
    // Iterate until we've either exhausted all the lines, or found everything we're looking for
-   while(lines < 20 && getline(stream, line) && (
+   while(getline(stream, line) && (
          !foundGameType || !foundLevelName || !foundMinPlayers || !foundMaxPlayers || !foundScriptName))
    {
-      lines++;
       // Check for GameType
       if(!foundGameType)
       {
