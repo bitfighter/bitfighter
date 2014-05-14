@@ -624,7 +624,6 @@ void setupLogging(const string &logDir)
 
    gServerLog.init(joindir(logDir, "bitfighter_server.log"), "a");
    gServerLog.setMsgTypes(LogConsumer::AllErrorTypes | LogConsumer::ServerFilter | LogConsumer::StatisticsFilter); 
-   gStdoutLog.logprintf("Welcome to Bitfighter!");
 }
 
 
@@ -1271,6 +1270,9 @@ int main(int argc, char **argv)
          FreeConsole();
 #endif
    }
+
+   // We made it!
+   gStdoutLog.logprintf("Welcome to Bitfighter!");
 
    dedicatedServerLoop();              // Loop forever, running the idle command endlessly
 
