@@ -724,9 +724,7 @@ void Game::parseLevelLine(const char *line, GridDatabase *database, const string
    }
 
    for(U32 i = 0; i < argc; i++)
-   {
       argv[i] = args[i].c_str();
-   }
 
    try
    {
@@ -752,7 +750,8 @@ void Game::loadLevelFromString(const string &contents, GridDatabase* database, c
 
 bool Game::loadLevelFromFile(const string &filename, GridDatabase *database)
 {
-   string contents = readFile(filename);
+   string contents;
+   readFile(filename, contents);
    if(contents == "")
       return false;
 

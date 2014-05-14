@@ -33,7 +33,8 @@ LevelDatabaseUploadThread::LevelDatabaseUploadThread(ClientGame* game)
    else
       editor->queueSetLingeringMessage("Uploading New Level to Pleiades [[SPINNER]]");
 
-   string fileData = readFile(joindir(mGame->getSettings()->getFolderManager()->getScreenshotDir(), UploadScreenshotFilename + string(".png")));
+   string fileData;
+   readFile(joindir(mGame->getSettings()->getFolderManager()->getScreenshotDir(), UploadScreenshotFilename + string(".png")), fileData);
 
    username = mGame->getPlayerName();
    user_password = mGame->getPlayerPassword();
@@ -46,9 +47,7 @@ LevelDatabaseUploadThread::LevelDatabaseUploadThread(ClientGame* game)
    levelgenFilename = mGame->getScriptName();
 
    if(levelgenFilename != "")
-   {
-      levelgen = readFile(mGame->getSettings()->getFolderManager()->findLevelGenScript(levelgenFilename));
-   }
+      readFile(mGame->getSettings()->getFolderManager()->findLevelGenScript(levelgenFilename), levelgen);
 
    uploadrequest = HttpRequest::LevelDatabaseBaseUrl + UploadRequest;
 }

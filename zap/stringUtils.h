@@ -134,8 +134,9 @@ string writeLevelString(const char *in);
 string chopComment(const string &line);
 
 
-bool writeFile(const string& path, const string& contents, bool append = false);
-const string readFile(const string& path);
+bool writeFile(const string &path, const string &contents, bool append = false);
+void readFile(const string &path, string &contents);
+
 
 string getExecutableDir();
 
