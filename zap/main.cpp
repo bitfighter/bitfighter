@@ -1137,6 +1137,7 @@ int main(int argc, char **argv)
    //else
    //   printf("Standalone run detected\n");
 
+   settings->setExecutablePath(string(argv[0]));
    settings->readCmdLineParams(argVector);      // Read cmd line params, needed to resolve folder locations
    settings->resolveDirs();                     // Figures out where all our folders are (except leveldir)
 

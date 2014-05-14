@@ -130,6 +130,8 @@ private:
    // Store params read from the cmd line
    Vector<string> mCmdLineParams[CmdLineParams::PARAM_COUNT];
 
+   static string mExecutablePath;
+
    // User settings storage
    UserSettingsMap mUserSettings;
 
@@ -161,6 +163,7 @@ public:
 
    static const U16 DEFAULT_GAME_PORT = 28000;
 
+   void setExecutablePath(const string &executablePath);
 
    void readCmdLineParams(const Vector<string> &argv);
    void resolveDirs();

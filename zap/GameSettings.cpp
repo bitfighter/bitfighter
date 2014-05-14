@@ -141,13 +141,13 @@ DirectiveInfo directiveDefs[] = {
 
 // These correspond to tier above
 const char *helpTitles[] = {
-   "Player-oriented options",
-   "Options for hosting",
-   "Specifying levels",
-   "Specifying folders\nAll of the following options can be specified with either a relative or absolute path. They are primarily intended to make installation on certain Linux platforms more flexible; they are not meant for daily use by average users.\nIn most cases, -rootdatadir is the only parameter in this section you will need.",
-   "Developer-oriented options",
-   "Advanced server management commands",
-   "Other commands",
+   "Player-oriented options:",
+   "Options for hosting:",
+   "Specifying levels:",
+   "Specifying folders:\n\nAll of the following options can be specified with either a relative or absolute path. They are primarily intended to make installation on certain Linux platforms more flexible; they are not meant for daily use by average users.\nIn most cases, -rootdatadir is the only parameter in this section you will need.",
+   "Developer-oriented options:",
+   "Advanced server management commands:",
+   "Other commands:",
 };
 
 
@@ -162,6 +162,7 @@ S32 GameSettings::UseJoystickNumber = 0;
 CIniFile GameSettings::iniFile("dummy");                 // Our INI file.  Real filename will be supplied later.
 CIniFile GameSettings::userPrefs("dummy");               // Our INI file.  Real filename will be supplied later.
 
+string GameSettings::mExecutablePath = "bitfighter";     // Default executable name, will be overwritten
 
 // Constructor
 GameSettings::GameSettings()
@@ -193,6 +194,12 @@ static const string *choose(const string &firstChoice, const string &secondChoic
 static const string *choose(const string &firstChoice, const string &secondChoice, const string &thirdChoice)
 {
    return choose(firstChoice, *choose(secondChoice, thirdChoice));
+}
+
+
+void GameSettings::setExecutablePath(const string &executablePath)
+{
+   mExecutablePath = executablePath;
 }
 
 
@@ -1143,6 +1150,11 @@ static void printHelpEntry(const string &paramName, const string &paramString, c
 
 void GameSettings::showHelp(GameSettings *settings, const Vector<string> &words)
 {
+   // Header
+   printf("Usage: %s [OPTIONS]\n\nRun %s, a 2-D multiplayer space-combat game.\n\nOptions:\n\n"
+         "The following options can be specified on the command-line.",
+         mExecutablePath.c_str(), ZAP_GAME_NAME);
+
    for(S32 i = 0; i < S32(ARRAYSIZE(helpTitles)); i++)
    {
       // Make an initial sweep through to check on the sizes of things, to ensure we get the indention right
