@@ -54,6 +54,7 @@ BfFont::BfFont(const string &fontFile, GameSettings *settings)
 {
    mIsStrokeFont = false;
    mStrokeFont = NULL;     // Stroke font only
+   mStashFontId = 0;
 
    TNLAssert(FontManager::getStash(), "Invalid font stash!");
 
