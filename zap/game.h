@@ -344,8 +344,6 @@ public:
    virtual void kickSingleBotFromLargestTeamWithBots();
    virtual void balanceTeams();
 
-
-
    void loadLevelFromString(const string &contents, GridDatabase *database, const string& filename = "");
    bool loadLevelFromFile(const string &filename, GridDatabase *database);
    void parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName);

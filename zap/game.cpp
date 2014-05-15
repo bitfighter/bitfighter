@@ -705,7 +705,6 @@ void Game::resetLevelInfo()
 
 
 // Each line of the file is handled separately by processLevelLoadLine in game.cpp or UIEditor.cpp
-
 void Game::parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName)
 {
    Vector<string> args = parseString(string(line));
@@ -748,6 +747,7 @@ void Game::loadLevelFromString(const string &contents, GridDatabase* database, c
 }
 
 
+// Load level stored in filename into database
 bool Game::loadLevelFromFile(const string &filename, GridDatabase *database)
 {
    string contents;
@@ -771,10 +771,8 @@ bool Game::loadLevelFromFile(const string &filename, GridDatabase *database)
 // Used by ServerGame and the editor
 void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName)
 {
-   if(argc == 0 || !strcmp(argv[0], "#"))
-   {
+   if(argc == 0 || !strcmp(argv[0], "#"))    // Blank line or a comment
       return;
-   }
 
    S32 strlenCmd = (S32) strlen(argv[0]);
 
@@ -825,13 +823,9 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
    {
       U32 id = atoi(argv[1]);
       if(id == 0)
-      {
          logprintf(LogConsumer::LogLevelError, "Invalid LevelDatabaseId specified");
-      }
       else
-      {
          setLevelDatabaseId(id);
-      }
       return;
    }
 
@@ -938,7 +932,8 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
       else
       {
          if(!validArgs)
-            logprintf(LogConsumer::LogLevelError, "Invalid arguments in object \"%s\" in level \"%s\"", objName.c_str(), levelFileName.c_str());
+            logprintf(LogConsumer::LogLevelError, "Invalid arguments in object \"%s\" in level \"%s\"", 
+                                                  objName.c_str(), levelFileName.c_str());
 
          delete object.getPointer();
       }
