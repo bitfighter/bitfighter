@@ -1362,6 +1362,5 @@ const UserSettings *GameSettings::getUserSettings(const string &name)
 }
 
 
-
 };
 
