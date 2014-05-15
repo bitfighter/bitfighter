@@ -466,7 +466,7 @@ string InputCodeManager::normalizeInputString(const string &inputString)
 }
 
 
-// A valid input string will consist of one or modifiers, seperated by "+", followed by a valid inputCode.
+// A valid input string will consist of one or modifiers, separated by "+", followed by a valid inputCode.
 // Modifier order and case are significant!!  Use normalizeInputString to get case and modifiers fixed up.
 bool InputCodeManager::isValidInputString(const string &inputString)
 {
