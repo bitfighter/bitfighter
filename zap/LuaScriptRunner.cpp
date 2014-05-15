@@ -22,7 +22,7 @@
 
 #include "stringUtils.h"
 
-#include "../clipper/clipper.hpp"
+#include <clipper.hpp>
 
 #include "tnlLog.h"            // For logprintf
 #include "tnlRandom.h"
@@ -40,7 +40,6 @@ namespace Zap
 
 // Declare and Initialize statics:
 lua_State *LuaScriptRunner::L = NULL;
-bool  LuaScriptRunner::mScriptingDirSet = false;
 string LuaScriptRunner::mScriptingDir;
 
 deque<string> LuaScriptRunner::mCachedScripts;
@@ -95,14 +94,6 @@ LuaScriptRunner::~LuaScriptRunner()
 
 
 const char *LuaScriptRunner::getErrorMessagePrefix() { return "SCRIPT"; }
-
-
-// Static method setting static vars
-void LuaScriptRunner::setScriptingDir(const string &scriptingDir)
-{
-   mScriptingDir = scriptingDir;
-   mScriptingDirSet = true;
-}
 
 
 lua_State *LuaScriptRunner::getL()
@@ -191,7 +182,7 @@ bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, Sc
 void LuaScriptRunner::pushStackTracer()
 {
    // _stackTracer is a function included in lua_helper_functions that manages the stack trace; it should ALWAYS be present.
-   if(!loadFunction(L, getScriptId(), "_stackTracer"))       
+   if(!loadFunction(L, getScriptId(), "_stackTracer"))
       throw LuaException("Method _stackTracer() could not be found!\n"
                          "Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
 }
@@ -379,10 +370,11 @@ bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
 
 
 // Start Lua and get everything configured
-bool LuaScriptRunner::startLua()
+bool LuaScriptRunner::startLua(const string &scriptingDir)
 {
-   TNLAssert(!L,               "L should not have been created yet!");
-   TNLAssert(mScriptingDirSet, "Must set scripting folder before starting Lua interpreter!");
+   TNLAssert(!L, "L should not have been created yet!");
+
+   mScriptingDir = scriptingDir;
 
    // Prepare the Lua global environment
    try 
@@ -393,7 +385,7 @@ bool LuaScriptRunner::startLua()
       if(!L)
          throw LuaException("Could not instantiate the Lua interpreter.");
 
-      configureNewLuaInstance();    // Throws any errors it encounters
+      configureNewLuaInstance(L);   // Throws any errors it encounters
 
       return true;
    }
@@ -411,17 +403,17 @@ bool LuaScriptRunner::startLua()
 }
 
 
-// Prepare a new Lua environment ("L") for use -- only called from startLua() above, which has catch block, so we can throw errors
-void LuaScriptRunner::configureNewLuaInstance()
+// Prepare a new Lua environment ("L") for use -- called from startLua(), and testing.
+// This function will throw errors.  (Well, hopefully it won't, but it could!)
+void LuaScriptRunner::configureNewLuaInstance(lua_State *L)
 {
-   lua_atpanic(L, luaPanicked);  // Register our panic function 
+   lua_atpanic(L, luaPanicked);  // Register our panic function
 
 #ifdef USE_PROFILER
    init_profiler(L);
 #endif
 
    luaL_openlibs(L);    // Load the standard libraries
-   luaopen_vec(L);      // For vector math (lua-vec)
 
    // This allows the safe use of 'require' in our scripts
    setModulePath();
@@ -438,10 +430,14 @@ void LuaScriptRunner::configureNewLuaInstance()
    // Immediately execute the lua helper functions (these are global and need to be loaded before sandboxing)
    loadCompileRunHelper("lua_helper_functions.lua");
 
+   // Load our vector library
+   loadCompileRunHelper("luavec.lua");
+
    // Load our helper functions and store copies of the compiled code in the registry where we can use them for starting new scripts
    loadCompileSaveHelper("robot_helper_functions.lua",    ROBOT_HELPER_FUNCTIONS_KEY);
    loadCompileSaveHelper("levelgen_helper_functions.lua", LEVELGEN_HELPER_FUNCTIONS_KEY);
    loadCompileSaveHelper("timer.lua", SCRIPT_TIMER_KEY);
+
 
    // Perform sandboxing now
    // Only code executed before this point can access dangerous functions
@@ -455,11 +451,8 @@ void LuaScriptRunner::loadCompileSaveHelper(const string &scriptName, const char
 }
 
 
-/**
- * Load a script from the scripting directory by basename (e.g. "my_script.lua")
- *
- * Throws LuaException when there's an error compiling or running the script
- */
+// Load a script from the scripting directory by basename (e.g. "my_script.lua").
+// Throws LuaException when there's an error compiling or running the script.
 void LuaScriptRunner::loadCompileRunHelper(const string &scriptName)
 {
    loadCompileScript(joindir(mScriptingDir, scriptName).c_str());
@@ -510,7 +503,8 @@ bool LuaScriptRunner::prepareEnvironment()
 {
    if(!L)
    {
-      logprintf(LogConsumer::LogError, "%s %s.", getErrorMessagePrefix(), "Lua interpreter doesn't exist.  Aborting environment setup");
+      logprintf(LogConsumer::LogError, "%s %s.", getErrorMessagePrefix(), 
+                "Lua interpreter doesn't exist.  Aborting environment setup");
       return false;
    }
 
@@ -1136,7 +1130,8 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
    // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
    // We expect that when we find something that is not a number, the stack will only contain our fillTable.  If the stack
    // is empty at that point, we'll add a table, and warn the user that they are using a less efficient method.
-   while(lua_isnumber(L, -1))
+   // Note that even if stack is empty, lua_isnumber will return a value... which makes no sense!
+   while(lua_gettop(L) > 0 && lua_isnumber(L, -1))
    {
       U8 typenum = (U8)lua_tointeger(L, -1);
 
@@ -1153,9 +1148,7 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
    const Vector<DatabaseObject *> * results;
 
    if(types.size() == 0)
-   {
       results = mLuaGridDatabase->findObjects_fast();
-   }
    else
    {
       mLuaGridDatabase->findObjects(types, fillVector);
@@ -1216,7 +1209,7 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
 
    // We expect the stack to look like this: -- [fillTable], objType1, objType2, ...
    // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
-   while(lua_isnumber(L, -1))
+   while(lua_gettop(L) > 0 && lua_isnumber(L, -1))
    {
       U8 typenum = (U8)lua_tointeger(L, -1);
 

@@ -13,7 +13,6 @@
 #include "LuaScriptRunner.h"     // Parent class
 #include "InputCode.h"           // For InputCodeManager and associated enums
 #include "oglconsole.h"
-#include "lua.h"
 #include "tnlTypes.h"
 
 

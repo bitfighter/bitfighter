@@ -27,7 +27,7 @@
 #include "tnlThread.h"
 #include "tnlNonce.h"
 
-#include "boost/smart_ptr/shared_ptr.hpp"
+#include <boost/smart_ptr/shared_ptr.hpp>
 
 #include <string>
 

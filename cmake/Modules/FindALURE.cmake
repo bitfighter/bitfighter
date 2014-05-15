@@ -23,19 +23,18 @@ endif()
 
 
 find_path(ALURE_INCLUDE_DIR 
-	NAMES alure.h
+	NAMES AL/alure.h
 	HINTS ENV ALUREDIR
-	PATH_SUFFIXES include include/alure AL alure
+	PATH_SUFFIXES include include/alure AL include/AL alure ALURE
 	PATHS ${ALURE_SEARCH_PATHS}
 )
 
 find_library(ALURE_LIBRARY NAMES 
 	NAMES alure libalure alure32 libalure32 ALURE32
 	HINTS ENV ALUREDIR
-	PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
+	PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64 lib/x86_64-linux-gnu x86_64-linux-gnu
 	PATHS ${ALURE_SEARCH_PATHS}
 )
-
 
 if(ALURE_LIBRARY)
 	set(ALURE_LIBRARIES ${ALURE_LIBRARY})

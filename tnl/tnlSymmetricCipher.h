@@ -31,7 +31,7 @@
 #include "tnlNetBase.h"
 #endif
 
-#include "../libtomcrypt/mycrypt.h"
+#include <tomcrypt.h>
 #undef MD5 // mycrypt_custom.h defines this, clashing with the MD5 class
 
 namespace TNL

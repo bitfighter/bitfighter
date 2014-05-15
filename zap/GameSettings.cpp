@@ -15,6 +15,8 @@
 #include "tnlTypes.h"         // For TNL_OS_WIN32 def
 #include "tnlLog.h"           // For logprintf
 
+#include "version.h"
+
 #ifdef TNL_OS_WIN32 
 #  include <windows.h>        // For ARRAYSIZE def
 #endif
@@ -133,6 +135,7 @@ DirectiveInfo directiveDefs[] = {
 // Other commands
 { "rules",   NO_PARAMETERS,  SHOW_RULES,        6, GameSettings::showRules,      "",  "Print a list of \"rules of the game\" and other possibly useful data", "" },
 { "help",    NO_PARAMETERS,  HELP,              6, GameSettings::showHelp,       "",  "Display this message", "" },
+{ "version", NO_PARAMETERS,  VERSION,           6, GameSettings::showVersion,    "",  "Print version information", "" },
 
 };
 
@@ -782,6 +785,11 @@ void GameSettings::readCmdLineParams(const Vector<string> &argv)
       bool found = false;
 
       string arg = argv[argPtr];
+
+      // Hack to turn double dashes into single dashes to be Linux-friendly
+      if(arg.substr(0, 2) == "--")
+         arg = arg.substr(1);
+
       argPtr++;      // Advance argPtr to location of first parameter argument
 
       // Mac adds on a 'Process Serial Number' to every application launched from a .app bundle
@@ -1325,6 +1333,19 @@ const UserSettings *GameSettings::getUserSettings(const string &name)
 
    return &i->second;
 }
+
+
+void GameSettings::showVersion(GameSettings *settings, const Vector<string> &words)
+{
+#ifdef TNL_DEBUG
+   printf("%s %s\nBuild: %d\nClient-Server protocol: %d\nMaster protocol: %d\n",
+         ZAP_GAME_NAME, ZAP_GAME_RELEASE, BUILD_VERSION, CS_PROTOCOL_VERSION, MASTER_PROTOCOL_VERSION);
+#else
+   printf("%s %s\n", ZAP_GAME_NAME, ZAP_GAME_RELEASE);
+#endif
+}
+
+
 
 
 

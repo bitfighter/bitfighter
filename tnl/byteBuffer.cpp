@@ -25,7 +25,7 @@
 //------------------------------------------------------------------------------------
 
 #include "tnlByteBuffer.h"
-#include "../libtomcrypt/mycrypt.h"
+#include <tomcrypt.h>
 
 namespace TNL {
 

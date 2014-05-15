@@ -627,7 +627,6 @@ void setupLogging(const string &logDir)
 
    gServerLog.init(joindir(logDir, "bitfighter_server.log"), "a");
    gServerLog.setMsgTypes(LogConsumer::AllErrorTypes | LogConsumer::ServerFilter | LogConsumer::StatisticsFilter); 
-   gStdoutLog.logprintf("Welcome to Bitfighter!");
 }
 
 
@@ -1152,8 +1151,7 @@ int main(int argc, char **argv)
       checkIfThisIsAnUpdate(settings.get(), isStandalone);
 
    // Load Lua stuff
-   LuaScriptRunner::setScriptingDir(folderManager->luaDir);    // Get this out of the way, shall we?
-   LuaScriptRunner::startLua();                                // Create single "L" instance which all scripts will use
+   LuaScriptRunner::startLua(folderManager->luaDir);  // Create single "L" instance which all scripts will use
    // TODO: What should we do if this fails?  Quit the game?
 
    setupLogging(settings->getIniSettings());    // Turns various logging options on and off
@@ -1254,6 +1252,9 @@ int main(int argc, char **argv)
          FreeConsole();
 #endif
    }
+
+   // We made it!
+   gStdoutLog.logprintf("Welcome to Bitfighter!");
 
    dedicatedServerLoop();              // Loop forever, running the idle command endlessly
 

@@ -6,7 +6,7 @@
 #ifndef HTTPREQUEST_H_
 #define HTTPREQUEST_H_
 
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include <tnl.h>
 #include <tnlNetBase.h>
 #include <tnlUDP.h>

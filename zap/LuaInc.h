@@ -3,20 +3,21 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#ifndef _LUA_H_
-#define _LUA_H_
+#ifndef _LUA_INC_H_
+#define _LUA_INC_H_
 
-// Turn on lua_assert in our debug builds
+// Turn on Lua asserts and the C API checking for help with debugging
 #ifdef TNL_DEBUG
-#  define lua_assert
+#  define LUA_USE_ASSERT
+#  define LUA_USE_APICHECK
 #endif
 
 // Need to include lua headers this way --> wrap them in a simpler looking .h file...
 
 extern "C" {
-#include "../lua/lua-vec/src/lua.h"  
-#include "../lua/lua-vec/src/lualib.h"
-#include "../lua/lua-vec/src/lauxlib.h"
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 }
 
-#endif   // _LUA_H_
+#endif   // _LUA_INC_H_

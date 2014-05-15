@@ -26,7 +26,7 @@
 
 //my includes
 #include "md5wrapper.h"
-#include "../libtomcrypt/mycrypt.h"
+#include <tomcrypt.h>
 
 
 

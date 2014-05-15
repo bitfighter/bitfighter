@@ -18,6 +18,7 @@
 #include "FontOrbitronMedium.h"
 
 #include "../fontstash/stb_truetype.h"
+#include <tnlPlatform.h>
 
 #include <string>
 
@@ -39,6 +40,15 @@ BfFont::BfFont(const ::SFG_StrokeFont *strokeFont)
 }
 
 
+const char *BfFont::SystemFontDirectories[] = {
+#ifdef TNL_OS_LINUX
+   "/usr/share/fonts/truetype/droid",
+   "/usr/share/fonts/truetype/play",
+   "/usr/share/fonts/truetype/ocr-a"
+#endif
+};
+
+
 // TTF font constructor
 BfFont::BfFont(const string &fontFile, GameSettings *settings)
 {
@@ -53,9 +63,15 @@ BfFont::BfFont(const string &fontFile, GameSettings *settings)
       return;
    }
 
-   string file = settings->getFolderManager()->fontsDir + getFileSeparator() + fontFile;
+   for(S32 i = 0; i < sizeof(SystemFontDirectories) / sizeof(SystemFontDirectories[0]) && mStashFontId <= 0; i++) {
+      string file = string(SystemFontDirectories[i]) + getFileSeparator() + fontFile;
+      mStashFontId = sth_add_font(FontManager::getStash(), file.c_str());
+   }
 
-   mStashFontId = sth_add_font(FontManager::getStash(), file.c_str());
+   if(mStashFontId <= 0) {
+      string file = settings->getFolderManager()->fontsDir + getFileSeparator() + fontFile;
+      mStashFontId = sth_add_font(FontManager::getStash(), file.c_str());
+   }
 
    TNLAssert(mStashFontId > 0, "Invalid font id!");
 

@@ -3,19 +3,6 @@
 # See LICENSE.txt for full copyright information
 #------------------------------------------------------------------------------
 
-# Define the Linux data dir if not defined in a packaging build script already
-if("${CMAKE_SYSTEM}" MATCHES "Linux")
-	if(NOT LINUX_DATA_DIR)
-		set(LINUX_DATA_DIR "/usr/share")
-	endif()
-
-	message(STATUS "LINUX_DATA_DIR: ${LINUX_DATA_DIR}.  Change this by invoking cmake with -DLINUX_DATA_DIR=<SOME_DIRECTORY>")
-
-	# Quotes need to be a part of the definition or the compiler won't understand
-	add_definitions(-DLINUX_DATA_DIR="${LINUX_DATA_DIR}")
-endif()
-
-
 set(SHARED_SOURCES
 	BanList.cpp
 	barrier.cpp
@@ -43,7 +30,7 @@ set(SHARED_SOURCES
 	gameStats.cpp
 	gameType.cpp
 	gameWeapons.cpp
-    GameManager.cpp
+	GameManager.cpp
 	Geometry.cpp
 	GeomObject.cpp
 	GeomUtils.cpp
@@ -104,17 +91,16 @@ set(SHARED_SOURCES
 	WeaponInfo.cpp
 	Zone.cpp
 	zoneControlGame.cpp
-	../clipper/clipper.cpp
-	../master/database.cpp
-	../master/masterInterface.cpp
-	../recast/RecastAlloc.cpp
-	../recast/RecastMesh.cpp
-	../sqlite/sqlite3.c
-	../poly2tri/common/shapes.cc
-	../poly2tri/sweep/advancing_front.cc
-	../poly2tri/sweep/cdt.cc
-	../poly2tri/sweep/sweep.cc
-	../poly2tri/sweep/sweep_context.cc
+	${SQLITE3_FILES}
+	${CMAKE_SOURCE_DIR}/master/database.cpp
+	${CMAKE_SOURCE_DIR}/master/masterInterface.cpp
+	${CMAKE_SOURCE_DIR}/recast/RecastAlloc.cpp
+	${CMAKE_SOURCE_DIR}/recast/RecastMesh.cpp
+	${CMAKE_SOURCE_DIR}/poly2tri/common/shapes.cc
+	${CMAKE_SOURCE_DIR}/poly2tri/sweep/advancing_front.cc
+	${CMAKE_SOURCE_DIR}/poly2tri/sweep/cdt.cc
+	${CMAKE_SOURCE_DIR}/poly2tri/sweep/sweep.cc
+	${CMAKE_SOURCE_DIR}/poly2tri/sweep/sweep_context.cc
 )
 
 set(CLIENT_SOURCES 
@@ -182,48 +168,48 @@ set(CLIENT_SOURCES
 	UITeamDefMenu.cpp
 	VideoSystem.cpp
 	voiceCodec.cpp
-	../fontstash/stb_truetype.c
-	../fontstash/fontstash.c
+	${CMAKE_SOURCE_DIR}/fontstash/stb_truetype.c
+	${CMAKE_SOURCE_DIR}/fontstash/fontstash.c
 )
 
 file(GLOB BITFIGHTER_HEADERS *.h)
 
 file(GLOB OTHER_HEADERS
-	../other/*.h 
-	../fontstash/*.h 
-	../clipper/*.h* 
-	../recast/*.h 
-	../sqlite/*.h
-	../poly2tri/*.h
-	../poly2tri/common/*.h
-	../poly2tri/sweep/*.h
+	${CLIPPER_INCLUDE_DIR}/*.h* 
+	${CMAKE_SOURCE_DIR}/other/*.h 
+	${CMAKE_SOURCE_DIR}/fontstash/*.h 
+	${CMAKE_SOURCE_DIR}/recast/*.h 
+	${CMAKE_SOURCE_DIR}/sqlite/*.h
+	${CMAKE_SOURCE_DIR}/poly2tri/*.h
+	${CMAKE_SOURCE_DIR}/poly2tri/common/*.h
+	${CMAKE_SOURCE_DIR}/poly2tri/sweep/*.h
 )
 
-if(WIN32 AND NOT XCOMPILE)
-	# Add icon resource in Visual Studio
-	list(APPEND CLIENT_SOURCES ZAP.rc)
-endif()
-
-if(APPLE)
-	list(APPEND SHARED_SOURCES Directory.mm)
-endif()
+BF_PLATFORM_SET_EXTRA_SOURCES()
 
 
-# Library stuff
-if(WIN32)
-	set(EXTRA_LIBS ws2_32 winmm)
-else()
-	set(EXTRA_LIBS dl m)
-endif()
+#
+# Libraries
+#
 
-# libraries used by both client and server
+BF_PLATFORM_SET_EXTRA_LIBS()
+
+# Libraries used by both client and server
 set(SHARED_LIBS
 	${CMAKE_THREAD_LIBS_INIT}
-	lua-vec
+	${LUA_LIB}
 	tnl
-	tomcrypt
+	${SQLITE3_LIBRARIES}
 	${EXTRA_LIBS}
 )
+
+if(CLIPPER_LIBRARIES)
+	set(SHARED_LIBS ${SHARED_LIBS} ${CLIPPER_LIBRARIES})
+endif()
+
+if(TOMCRYPT_LIBRARIES)
+	set(SHARED_LIBS ${SHARED_LIBS} ${TOMCRYPT_LIBRARIES})
+endif()
 
 # libraries used only on the client
 set(CLIENT_LIBS
@@ -239,62 +225,65 @@ set(CLIENT_LIBS
 	${VORBISFILE_LIBRARIES}
 )
 
+BF_PLATFORM_APPEND_LIBS()
 
-if(APPLE)
-	list(APPEND CLIENT_LIBS ${SPARKLE_LIBRARIES})
+
+#
+# Full client build
+# 
+
+BF_PLATFORM_ADD_DEFINITIONS()
+
+add_executable(bitfighter
+	${SHARED_SOURCES}
+	${CLIENT_SOURCES}
+	${BITFIGHTER_HEADERS}
+	${OTHER_HEADERS}
+	main.cpp
+)
+
+add_dependencies(bitfighter
+	alure
+	${LUA_LIB}
+	tnl
+	tomcrypt
+)
+
+target_link_libraries(bitfighter
+	${CLIENT_LIBS}
+	${SHARED_LIBS}
+)
+
+include_directories(SYSTEM
+	${OPENAL_INCLUDE_DIR}
+	${ALURE_INCLUDE_DIR}
+	${GL_INCLUDE_DIR}
+	${PNG_INCLUDE_DIR}
+	${SDL_INCLUDE_DIR}
+	${SPEEX_INCLUDE_DIR}
+	${SPARKLE_INCLUDE_DIR}
+	${LUA_INCLUDE_DIR}
+	${TOMCRYPT_INCLUDE_DIR}
+	${CLIPPER_INCLUDE_DIR}
+	${ALURE_INCLUDE_DIR}
+	${SQLITE3_INCLUDE_DIR}
+)
+
+# Where to put the executable
+set_target_properties(bitfighter PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe)
+
+if(USE_GLES AND SDL2_FOUND)
+	get_property(CLIENT_DEFS TARGET bitfighter PROPERTY COMPILE_DEFINITIONS)
+	set_target_properties(bitfighter
+		PROPERTIES
+		COMPILE_DEFINITIONS "${CLIENT_DEFS};BF_USE_GLES"
+	)
 endif()
 
 
-##
-## Full client build
-##
-if(SDL_FOUND OR SDL2_FOUND)
-	add_executable(bitfighter
-		${SHARED_SOURCES}
-		${CLIENT_SOURCES}
-		${BITFIGHTER_HEADERS}
-		${OTHER_HEADERS}
-		main.cpp
-	)
-
-	add_dependencies(bitfighter
-		alure
-		lua-vec
-		tnl
-		tomcrypt
-	)
-
-	target_link_libraries(bitfighter
-		${CLIENT_LIBS}
-		${SHARED_LIBS}
-	)
-
-	include_directories(
-		${OPENAL_INCLUDE_DIR}
-		${GL_INCLUDE_DIR}
-		${PNG_INCLUDE_DIR}
-		${SDL_INCLUDE_DIR}
-		${SPEEX_INCLUDE_DIR}
-		${SPARKLE_INCLUDE_DIR}
-	)
-
-	# Where to put the executable
-	set_target_properties(bitfighter PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe)
-	
-	if(USE_GLES AND SDL2_FOUND)
-
-		get_property(CLIENT_DEFS TARGET bitfighter PROPERTY COMPILE_DEFINITIONS)
-		set_target_properties(bitfighter
-			PROPERTIES
-			COMPILE_DEFINITIONS "${CLIENT_DEFS};BF_USE_GLES"
-		)
-	endif()
-endif()
-
-
-##
-## Dedicated server build
-##
+#
+# Dedicated server build
+# 
 add_executable(bitfighterd
 	EXCLUDE_FROM_ALL
 	${SHARED_SOURCES}
@@ -303,7 +292,7 @@ add_executable(bitfighterd
 
 add_dependencies(bitfighterd
 	tnl
-	lua-vec
+	${LUA_LIB}
 	tomcrypt
 )
 
@@ -324,13 +313,13 @@ set_target_properties(bitfighterd
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/tnl
-	${CMAKE_SOURCE_DIR}/boost
+	${BOOST_INCLUDE_DIR}
 )
 
 
-##
-## Test runner executable
-##
+#
+# Test runner executable
+# 
 option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and create 'coverage' target" NO)
 
 set(TEST_SOURCES
@@ -370,36 +359,34 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/master/GameJoltConnector.cpp
 )
 
-add_executable(test EXCLUDE_FROM_ALL
-	${CLIENT_SOURCES}
-	${SHARED_SOURCES}
-	${TEST_SOURCES}
-	${BITFIGHTER_HEADERS}
-)
+if(EXISTS ${CMAKE_SOURCE_DIR}/bitfighter_test)
+	add_executable(test EXCLUDE_FROM_ALL
+		${CLIENT_SOURCES}
+		${SHARED_SOURCES}
+		${TEST_SOURCES}
+		${BITFIGHTER_HEADERS}
+	)
 
-target_link_libraries(test
-	${SHARED_LIBS}
-	${CLIENT_LIBS}
-	gtest
-)
+	target_link_libraries(test
+		${SHARED_LIBS}
+		${CLIENT_LIBS}
+		gtest
+	)
 
-add_dependencies(test
-	alure
-	lua-vec
-	tnl
-	tomcrypt
-	gtest
-)
+	add_dependencies(test
+		alure
+		${LUA_LIB}
+		tnl
+		tomcrypt
+		gtest
+	)
 
-if(NOT MSVC)
-	add_definitions(-iquote ${CMAKE_SOURCE_DIR}/zap)
+	set_target_properties(test
+		PROPERTIES
+		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe
+		COMPILE_DEFINITIONS BITFIGHTER_TEST
+	)
 endif()
-
-set_target_properties(test
-	PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe
-	COMPILE_DEFINITIONS BITFIGHTER_TEST
-)
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/gtest/include
@@ -419,15 +406,15 @@ if(BITFIGHTER_COVERAGE)
       COMMAND lcov --capture --directory ${CMAKE_SOURCE_DIR} --output-file ${CMAKE_SOURCE_DIR}/build/coverage.info
       COMMAND lcov --extract ${CMAKE_SOURCE_DIR}/build/coverage.info --output-file ${CMAKE_SOURCE_DIR}/build/coverage.info ${CMAKE_SOURCE_DIR}/zap/*
       COMMAND genhtml ${CMAKE_SOURCE_DIR}/build/coverage.info --output-directory ${CMAKE_SOURCE_DIR}/build/cov
-      DEPENDS test alure lua-vec tnl tomcrypt
+      DEPENDS test alure ${LUA_LIB} tnl tomcrypt
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build 
    )
 endif()
 
 
-##
-## Settings for all targets
-##
+#
+# Settings for all targets
+# 
 
 # You can only call 'set_target_properties' once for each properties-target combination, therefore
 # we'll build up a list and call 'set_target_properties' at the end
@@ -435,49 +422,16 @@ set(ALL_DEBUG_DEFS
 	"TNL_DEBUG"
 )
 
-if(WIN32)
-	# Install windows libraries and resources
-	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/resource/ resDir)
-	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lib/ libDir)
-	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
-	
-	if(MSYS OR CYGWIN OR XCOMPILE)
-		set(RES_COPY_CMD cp -r ${resDir}* ${exeDir})
-		set(LIB_COPY_CMD cp ${libDir}*.dll ${exeDir})
-	else()
-		set(RES_COPY_CMD xcopy /e /d /y ${resDir}* ${exeDir})
-		set(LIB_COPY_CMD xcopy /d /y ${libDir}*.dll ${exeDir})
-	endif()
-	
-	add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD 
-		COMMAND ${RES_COPY_CMD}
-		COMMAND ${LIB_COPY_CMD}
-	)
+BF_PLATFORM_SET_TARGET_PROPERTIES()
+
+set_target_properties(bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_DEBUG "${ALL_DEBUG_DEFS}")
+
+if(EXISTS ${CMAKE_SOURCE_DIR}/bitfighter_test)
+	set_target_properties(test PROPERTIES COMPILE_DEFINITIONS_DEBUG "${ALL_DEBUG_DEFS}")
 endif()
 
-# Visual Studio only settings
-if(MSVC)
-	# Work around the "Debug", "Release", etc. directories Visual Studio tries to add
-	foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
-		string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
-		set_target_properties(test bitfighterd bitfighter 
-			PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_SOURCE_DIR}/exe
-		)
-	endforeach()
-	
-	# separate output name "bitfighter_debug.exe" for debug build, to avoid conflicts with debug/release build
-	set_target_properties(test bitfighterd bitfighter PROPERTIES DEBUG_POSTFIX "_debug")
+BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES()
 
-	# Set some linker flags to use console mode in debug build, etc..
-	# Always use SUBSYSTEM:CONSOLE; hiding the console window is controlled in zap/main.cpp near the bottom of main()
-	# Allows console to stay visible if ran from typing in command window.
-	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
-	set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
-	
-	# Set more compiler flags for console on appropriate targets
-	list(APPEND ALL_DEBUG_DEFS "_CONSOLE")
-endif()
+BF_PLATFORM_INSTALL()
 
-set_target_properties(test bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_DEBUG "${ALL_DEBUG_DEFS}")
+BF_PLATFORM_CREATE_PACKAGES()

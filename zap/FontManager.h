@@ -75,6 +75,7 @@ private:
    S32 mStashFontId;
 
    const SFG_StrokeFont *mStrokeFont;     // Will be NULL for TTF fonts
+   static const char *SystemFontDirectories[];
 
 public:
    BfFont(const ::SFG_StrokeFont *strokeFont);              // Stroke font constructor

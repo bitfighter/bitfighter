@@ -1670,7 +1670,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
       ini->sectionComment(section, " JoystickLinuxUseOldDeviceSystem - Force SDL to add the older /dev/input/js0 device to the enumerated joystick list.  No effect on Windows/Mac systems");
       ini->sectionComment(section, " AlwaysStartInKeyboardMode - Change to 'Yes' to always start the game in keyboard mode (don't auto-select the joystick)");
-      ini->sectionComment(section, " MasterServerAddressList - Comma seperated list of Address of master server, in form: IP:67.18.11.66:25955,IP:myMaster.org:25955 (tries all listed, only connects to one at a time)");
+      ini->sectionComment(section, " MasterServerAddressList - Comma separated list of Address of master server, in form: IP:67.18.11.66:25955,IP:myMaster.org:25955 (tries all listed, only connects to one at a time)");
       ini->sectionComment(section, " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
       ini->sectionComment(section, " Nickname - Specify the nickname to use for autologin, or clear to disable autologin");
       ini->sectionComment(section, " Password - Password to use for autologin, if your nickname has been reserved in the forums");

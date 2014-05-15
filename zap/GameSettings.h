@@ -74,6 +74,7 @@ enum ParamId {
    SHOW_RULES,
    SHOW_LUA_CLASSES,
    HELP,
+   VERSION,
 
    PARAM_COUNT
 };
@@ -273,6 +274,7 @@ public:
    static void sendRes(GameSettings *settings, const Vector<string> &words);
    static void showRules(GameSettings *settings, const Vector<string> &words);
    static void showHelp(GameSettings *settings, const Vector<string> &words);
+   static void showVersion(GameSettings *settings, const Vector<string> &words);
 
    static Vector<string> DetectedJoystickNameList;   // List of joysticks we found attached to this machine
 
