@@ -10,7 +10,7 @@ Homepage: http://bitfighter.org
 
 Package: bitfighter
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libsdl2-2.0-0, zlib1g, libpng12-0, libopenal1, libvorbis0a, libspeex1, libmodplug1, libtomcrypt0, libalure1, libluajit-5.1-2, libpolyclipping16, libsqlite3-0, fonts-play, fonts-droid, fonts-ocr-a
+Depends: ${shlibs:Depends}, ${misc:Depends}, libsdl2-2.0-0, zlib1g, libpng12-0, libopenal1, libvorbis0a, libspeex1, libmodplug1, libtomcrypt0, libalure1, libluajit-5.1-2, libpolyclipping16, libsqlite3-0, fonts-play, fonts-droid, fonts-ocr-a, bitfighter-data
 Description: Fast-paced two dimensional online space shooter
  Bitfighter is a fast-paced two-dimensional online space
  shooter. It aims for intuitive gameplay and an approachable learning curve
@@ -25,3 +25,11 @@ Description: Fast-paced two dimensional online space shooter
   * Voice chat
   * Built-in server hosting
   * Joystick support
+
+Package: bitfighter-data
+Architecture: all
+Description: Resource and data files for bitfighter
+ Bitfighter is a fast-paced two-dimensional online space
+ shooter. It aims for intuitive gameplay and an approachable learning curve
+ so that it is both friendly to newcomers and interesting to experienced
+ players.
