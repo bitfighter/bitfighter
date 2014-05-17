@@ -114,6 +114,7 @@ if(NOT ALURE_FOUND)
 	if(NOT OPENAL_FOUND OR NOT VORBIS_FOUND OR NOT MODPLUG_FOUND)
 		message(WARNING "Audio system components are missing.  Bitfighter will be compiled without audio")
 		add_definitions(-DBF_NO_AUDIO)
+		set(OPENAL_INCLUDE_DIR "")
 	else()
 		message(STATUS "Using in-tree ALURE")
 		add_definitions(-DALURE_STATIC_LIBRARY)
@@ -178,26 +179,22 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/lua/${LUA_LIB}")
 endif()
 
 
+# mysql++ is for compiling master
+if(EXISTS "${CMAKE_SOURCE_DIR}/mysql++")
+	add_subdirectory(mysql++)
+endif()
+
+
+# gtest is for compiling the bitfighter_test suite
+if(EXISTS "${CMAKE_SOURCE_DIR}/gtest")
+	add_subdirectory(gtest)
+endif()
+
+
 # Other internal-only sub-projects
 add_subdirectory(tnl)
 add_subdirectory(master)
 
 
-# Disable certain sub-projects based on dependency search
-set(COMPILE_ZAP 1)
-
-if(NOT SDL2_FOUND AND NOT SDL_FOUND)
-	set(COMPILE_ZAP 0)
-endif()
-
-
-if(EXISTS "${CMAKE_SOURCE_DIR}/mysql++")
-	add_subdirectory(mysql++)
-endif()
-
-if(COMPILE_ZAP)
-	add_subdirectory(zap)
-	if(EXISTS "${CMAKE_SOURCE_DIR}/gtest")
-		add_subdirectory(gtest)
-	endif()
-endif()
+# Our main sources!
+add_subdirectory(zap)

@@ -131,26 +131,26 @@ function(BF_PLATFORM_ADD_DEFINITIONS)
 endfunction()
 
 
-function(BF_PLATFORM_SET_TARGET_PROPERTIES)
+function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 	if(MSVC)
 		# Work around the "Debug", "Release", etc. directories Visual Studio tries to add
 		foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
 			string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
-			set_target_properties(test bitfighterd bitfighter 
+			set_target_properties(${targetName}
 				PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_SOURCE_DIR}/exe
 			)
 		endforeach()
 		
 		# Separate output name "bitfighter_debug.exe" for debug build, to avoid conflicts with debug/release build
-		set_target_properties(test bitfighterd bitfighter PROPERTIES DEBUG_POSTFIX "_debug")
+		set_target_properties(${targetName} PROPERTIES DEBUG_POSTFIX "_debug")
 
 		# Set some linker flags to use console mode in debug build, etc..
 		# Always use SUBSYSTEM:CONSOLE; hiding the console window is controlled in zap/main.cpp near the bottom of main()
 		# Allows console to stay visible if ran from typing in command window.
-		set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-		set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-		set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
-		set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
+		set_target_properties(${targetName} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+		set_target_properties(${targetName} PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
+		set_target_properties(${targetName} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
+		set_target_properties(${targetName} PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
 		
 		# Set more compiler flags for console on appropriate targets
 		list(APPEND ALL_DEBUG_DEFS "_CONSOLE")
@@ -158,7 +158,7 @@ function(BF_PLATFORM_SET_TARGET_PROPERTIES)
 endfunction()
 
 
-function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES)
+function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	# The trailing slash is necessary to do here for proper native path translation
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/resource/ resDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lib/ libDir)
@@ -175,18 +175,18 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES)
 	endif()
 	
 	# Copy resources
-	add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD 
+	add_custom_command(TARGET ${targetName} POST_BUILD 
 		COMMAND ${RES_COPY_CMD}
 		COMMAND ${LIB_COPY_CMD}
 	)
 endfunction()
 
 
-function(BF_PLATFORM_INSTALL)
+function(BF_PLATFORM_INSTALL targetName)
 	# Do nothing!
 endfunction()
 
 
-function(BF_PLATFORM_CREATE_PACKAGES)
+function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	# Do nothing!
 endfunction()

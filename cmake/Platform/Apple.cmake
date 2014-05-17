@@ -89,7 +89,7 @@ function(BF_PLATFORM_ADD_DEFINITIONS)
 endfunction()
 
 
-function(BF_PLATFORM_SET_TARGET_PROPERTIES)
+function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 	# Setup OSX Bundle
 	
 	# We need this variable in both scopes
@@ -97,10 +97,10 @@ function(BF_PLATFORM_SET_TARGET_PROPERTIES)
 	set(OSX_BUILD_RESOURCE_DIR "${OSX_BUILD_RESOURCE_DIR}" PARENT_SCOPE)
 	
 	# Specify output to be a .app
-	set_target_properties(bitfighter PROPERTIES MACOSX_BUNDLE TRUE)
+	set_target_properties(${targetName} PROPERTIES MACOSX_BUNDLE TRUE)
 	
 	# Use a custom plist
-	set_target_properties(bitfighter PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${OSX_BUILD_RESOURCE_DIR}/Bitfighter-Info.plist)
+	set_target_properties(${targetName} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${OSX_BUILD_RESOURCE_DIR}/Bitfighter-Info.plist)
 	
 	# Set up our bundle plist variables
 	set(MACOSX_BUNDLE_NAME "Bitfighter")
@@ -113,12 +113,12 @@ function(BF_PLATFORM_SET_TARGET_PROPERTIES)
 
 	# Special flags needed because of LuaJIT on 64 bit OSX
 	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-		set_target_properties(bitfighterd bitfighter PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
+		set_target_properties(${targetName} PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
 	endif()
 endfunction()
 
 
-function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES)
+function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	# The trailing slash is necessary to do here for proper native path translation
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/resource/ resDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lib/ libDir)
@@ -144,7 +144,7 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES)
 	set(COPY_RES_4 cp -rp ${exeDir}/../notifier/bitfighter_notifier.py ${resourcesDir})
 	set(COPY_RES_5 cp -rp ${exeDir}/../notifier/redship18.png ${resourcesDir})
 	
-	add_custom_command(TARGET bitfighterd bitfighter POST_BUILD 
+	add_custom_command(TARGET ${targetName} POST_BUILD 
 		COMMAND ${COPY_RES_1}
 		COMMAND ${COPY_RES_2}
 		COMMAND ${COPY_RES_3}
@@ -154,13 +154,13 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES)
 	
 	# 64-bit OSX needs to use shared LuaJIT library
 	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-		add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD
+		add_custom_command(TARGET ${targetName} POST_BUILD
 			COMMAND cp -rp ${luaLibDir}libluajit.dylib ${frameworksDir}
 		)
 	endif()
 	
 	# Copy resources
-	add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD 
+	add_custom_command(TARGET ${targetName} POST_BUILD 
 		COMMAND ${RES_COPY_CMD}
 		COMMAND ${LIB_COPY_CMD}
 	)
@@ -169,12 +169,12 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES)
 endfunction()
 
 
-function(BF_PLATFORM_INSTALL)
+function(BF_PLATFORM_INSTALL targetName)
 	# Do nothing!
 endfunction()
 
 
-function(BF_PLATFORM_CREATE_PACKAGES)
+function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	add_custom_target(dmg)
 	# TODO:  build DMG
 	#set_target_properties(dmg PROPERTIES POST_INSTALL_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/CreateMacBundle.cmake)
