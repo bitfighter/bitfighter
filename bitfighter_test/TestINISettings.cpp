@@ -3,8 +3,8 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "config.h"
 #include "gtest/gtest.h"
+#include "../zap/config.h"  // Multiple 'config.h' ??
 
 namespace Zap
 {

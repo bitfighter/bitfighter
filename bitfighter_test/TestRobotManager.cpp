@@ -137,7 +137,7 @@ static void setTeams(GamePair &gamePair, const string &teamConfig)
       gamePair.server->addTeam(new Team());
 
    for(S32 i = 0; i < words.size(); i++)           // Iterate over teams
-      for(std::size_t j = 0; j < words[i].size(); j++)     // Iterate over chars
+      for(U32 j = 0; j < words[i].size(); j++)     // Iterate over chars
       {
          if(words[i][j] == 'H')
             gamePair.addClient("Human " + itos(i) + " " + itos(j), i);
