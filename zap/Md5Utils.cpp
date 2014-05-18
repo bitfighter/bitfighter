@@ -11,7 +11,6 @@
 #include "Md5Utils.h"
 
 #include "stringUtils.h"               // For lcase
-#include <tomcrypt.h>
 
 #include "tnlTypes.h"
 
@@ -47,6 +46,7 @@ static string hash(const string &text)
 {
    unsigned char outBuffer[16] = "";
    hash_state md;
+
    md5_init(&md);
    md5_process(&md, (unsigned char*)text.c_str(), (unsigned int)text.length());
    md5_done(&md, outBuffer);
@@ -98,6 +98,34 @@ string getHashFromFile(const string &filename)
    md5_done(&md, digest);
  	fclose (file);
 
+	return convToString(digest);
+}
+
+
+// Constructor
+IncrementalHasher::IncrementalHasher()
+{
+   // Init md5
+   md5_init(&mHashState);
+}
+
+
+// Add another line of content to the hash
+void IncrementalHasher::add(const string &line)
+{
+   // The (bitwise) contents of the string don't change if the characters
+   // are interpreted as unsigned chars instead of signed chars, so we can
+   // use a reinterpret_cast to get our string of unsigned chars.
+
+   md5_process(&mHashState, reinterpret_cast<const unsigned char *>(line.c_str()), line.length);
+}
+
+
+// Return the final computed hash
+string IncrementalHasher::getHash()
+{
+   U8 digest[16];
+   md5_done(&mHashState, digest);
 	return convToString(digest);
 }
 
