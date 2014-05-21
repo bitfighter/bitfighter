@@ -27,17 +27,17 @@ EditorTeam::EditorTeam(const TeamPreset &preset)
 }
 
 
-void EditorTeam::initialize()
-{
-   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
-   mHexColorEditor.mMaxLen = 6;     // rrggbb
-}
-
-
 // Destructor
 EditorTeam::~EditorTeam()
 {
    // Do nothing
+}
+
+
+void EditorTeam::initialize()
+{
+   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
+   mHexColorEditor.mMaxLen = 6;     // rrggbb
 }
 
 
@@ -67,36 +67,17 @@ void EditorTeam::setColor(const Color &color)
 }
 
 
-
 void EditorTeam::setName(const char *name)
 {
    mNameEditor.setString(name);
 }
 
 
+// Returns a STE to make signatures match
 StringTableEntry EditorTeam::getName() const
 {
    return StringTableEntry(mNameEditor.c_str());
 }
-
-
-S32 EditorTeam::getPlayerBotCount() const
-{
-   return 0;
-}
-
-
-S32 EditorTeam::getPlayerCount() const
-{
-   return 0;
-}
-
-
-S32 EditorTeam::getBotCount() const
-{
-   return 0;
-}   
-
 
 
 };

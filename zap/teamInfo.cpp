@@ -68,6 +68,27 @@ StringTableEntry AbstractTeam::getName() const
 }
 
 
+S32 AbstractTeam::getPlayerBotCount() const
+{
+   TNLAssert(false, "Not implemented for this class!");
+   return 0;
+}
+
+
+S32 AbstractTeam::getPlayerCount() const
+{
+   TNLAssert(false, "Not implemented for this class!");
+   return 0;
+}
+
+
+S32 AbstractTeam::getBotCount() const
+{
+   TNLAssert(false, "Not implemented for this class!");
+   return 0;
+}   
+
+
 void AbstractTeam::setTeamIndex(S32 index)
 {
    mTeamIndex = index;

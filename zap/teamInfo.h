@@ -59,9 +59,9 @@ public:
    void alterGreen(F32 amt);
    void alterBlue(F32 amt);
 
-   virtual S32 getPlayerBotCount() const = 0; 
-   virtual S32 getPlayerCount() const = 0;      
-   virtual S32 getBotCount() const = 0;
+   virtual S32 getPlayerBotCount() const; 
+   virtual S32 getPlayerCount() const;      
+   virtual S32 getBotCount() const;
 
    virtual S32 getScore() const;
    virtual void setScore(S32 score);
