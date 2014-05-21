@@ -29,7 +29,7 @@ private:
    Color mColor;
 
 protected:
-   
+   StringTableEntry mName;
    S32 mTeamIndex;           // Team index of this team according to the level file and game
 
 public:
@@ -43,8 +43,12 @@ public:
 
    const Color *getColor() const;
 
-   virtual void setName(const char *name) = 0;
-   virtual StringTableEntry getName() const = 0;
+   void setName(StringTableEntry name);
+   virtual void setName(const char *name);
+   virtual StringTableEntry getName();
+   
+  
+   StringTableEntry getName() const;
 
    void setTeamIndex(S32 index);
 
@@ -84,8 +88,6 @@ class FlagSpawn;
 class Team : public AbstractTeam
 {  
 private:
-   StringTableEntry mName;
-
    S32 mPlayerCount;      // Number of human players --> Needs to be computed before use, not dynamically tracked (see countTeamPlayers())
    S32 mBotCount;         // Number of robot players --> Needs to be computed before use, not dynamically tracked
 
@@ -104,11 +106,6 @@ public:
    Team(const char *name, F32 r, F32 g, F32 b, S32 score);
 
    virtual ~Team();     // Destructor
-
-   void setName(const char *name);
-   void setName(StringTableEntry name);
-  
-   StringTableEntry getName() const;
 
    S32 getScore() const;
    void setScore(S32 score);

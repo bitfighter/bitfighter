@@ -50,6 +50,24 @@ const Color *AbstractTeam::getColor() const
 }
 
 
+void AbstractTeam::setName(const char *name)
+{
+   mName.set(name);
+}
+
+
+void AbstractTeam::setName(StringTableEntry name)
+{
+   mName = name;
+}
+
+
+StringTableEntry AbstractTeam::getName() const
+{
+   return mName;
+}
+
+
 void AbstractTeam::setTeamIndex(S32 index)
 {
    mTeamIndex = index;
@@ -196,24 +214,6 @@ void Team::clearStats()
    mPlayerCount = 0;
    mBotCount = 0;
    mRating = 0;
-}
-
-
-void Team::setName(const char *name)
-{
-   mName.set(name);
-}
-
-
-void Team::setName(StringTableEntry name)
-{
-   mName = name;
-}
-
-
-StringTableEntry Team::getName() const
-{
-   return mName;
 }
 
 
