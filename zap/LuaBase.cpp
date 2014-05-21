@@ -252,7 +252,7 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
             return true;
          }
          else if lua_istable(L, stackPos)    // We have a table: should either contain an array of points or numbers
-            return true;     // for now...  // TODO: Check!
+            return true;     // for now...   // TODO: Check!
 
          return false;
 

@@ -114,7 +114,8 @@ void GridDatabase::copyObjects(const GridDatabase *source)
 }
 
 
-// This is private
+// Adds an object to the database; checks to ensure object is not added twice.
+// Private function
 void GridDatabase::addToDatabase(DatabaseObject *theObject)
 {
    TNLAssert(theObject->mDatabase != this, "Already added to database, trying to add to same database again!");
