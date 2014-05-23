@@ -5,6 +5,9 @@
 
 #include "StackTracer.h"
 
+#ifndef BF_NO_STACKTRACE
+
+
 #ifdef TNL_OS_WIN32
 #  include "StackWalker.h"
 #else
@@ -178,3 +181,5 @@ StackTracer::StackTracer()
 
 
 }
+
+#endif // BF_NO_STACKTRACE

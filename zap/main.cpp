@@ -1067,8 +1067,10 @@ static bool thisProgramHasCreatedConsoleWindow()
 #endif
 
 
+#ifndef BF_NO_STACKTRACE
 // Get the StackTracer up and running, ready to handle all our crash tracing needs!
 StackTracer stackTracer;
+#endif
 
 
 ////////////////////////////////////////
