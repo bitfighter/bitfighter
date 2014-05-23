@@ -193,6 +193,7 @@ endif()
 
 # Other internal-only sub-projects
 add_subdirectory(tnl)
+add_subdirectory(tnlping)
 add_subdirectory(master)
 
 
