@@ -1,28 +1,7 @@
-//-----------------------------------------------------------------------------------
-//
-//   Torque Network Library - TNL Network program reachability tester
-//   Copyright (C) 2004 GarageGames.com, Inc.
-//   For more information see http://www.opentnl.org
-//
-//   This program is free software; you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation; either version 2 of the License, or
-//   (at your option) any later version.
-//
-//   For use in products that are not compatible with the terms of the GNU 
-//   General Public License, alternative licensing options are available 
-//   from GarageGames.com.
-//
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-//
-//   You should have received a copy of the GNU General Public License
-//   along with this program; if not, write to the Free Software
-//   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Copyright Chris Eykamp
+// See LICENSE.txt for full copyright information
+//------------------------------------------------------------------------------
 
 #include "tnl.h"
 #include "tnlNetInterface.h"
@@ -38,9 +17,12 @@ int main(int argc, const char **argv)
 {
    if(argc < 2)
    {
-      printf("Usage: tnlping <remoteAddress> [sourceAddress]");
+      printf("Usage: tnlping <remoteAddress> [sourceAddress]\n\n"
+      "Example 1: Simple usage expecting port 28000\n   tnlping 192.168.1.2\n\n"
+      "Example 2: Advanced usage with specific port\n   tnlping 192.168.1.2:28001\n\n");
       return 1;
    }
+   
    U8 randData[sizeof(U32) + sizeof(S64)];
    *((U32 *) randData) = Platform::getRealMilliseconds();
    *((S64 *) (randData + sizeof(U32))) = Platform::getHighPrecisionTimerValue();
@@ -76,7 +58,7 @@ int main(int argc, const char **argv)
             theNonce.read(&incoming);
             if(packetType == NetInterface::ConnectChallengeResponse && theNonce == clientNonce)
             {
-               printf("TNL Service is UP (pingtime = %d)", Platform::getRealMilliseconds() - time);
+               printf("TNL Service is UP (pingtime = %d)\n", Platform::getRealMilliseconds() - time);
                return 0;
             }
          }
@@ -85,6 +67,8 @@ int main(int argc, const char **argv)
             break;
       }
    }
-   printf("TNL Service is DOWN.");
+   
+   printf("TNL Service is DOWN\n");
+   
    return 1;
 }
