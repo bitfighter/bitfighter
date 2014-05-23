@@ -711,11 +711,11 @@ const char *gGameObjectInfo[] = {
    /* 24 */   "Test Item",     "Bouncy ball",
    /* 25 */   "Resource Item", "Use with engineer module",
    /* 26 */   "Soccer Ball",   "Push into enemy goal in Soccer game",
-   /* 27 */   "Core",          "Kill the enemy's; defend yours OR DIE!",
+   /* 27 */   "Core",          "Blast the enemy's; defend yours OR LOSE!",
    /* 28 */   "GoFast",        "Makes ship go fast"
 };
 
-static U32 GameObjectCount = ARRAYSIZE(gGameObjectInfo) / 2;   
+static U32 GameObjectCount = ARRAYSIZE(gGameObjectInfo) / 2;
 
 
 void InstructionsUserInterface::renderPageObjectDesc(U32 index)

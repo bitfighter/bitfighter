@@ -479,14 +479,14 @@ string FileListLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameO
 
 	string filename = FolderManager::findLevelFile(GameSettings::getFolderManager()->getLevelDir(), levelInfo->filename);
 
-	if(filename == "")
+	if(filename.empty())
 	{
 		logprintf("Unable to find level file \"%s\".  Skipping...", levelInfo->filename.c_str());
 		return "";
 	}
 
 	if(game->loadLevelFromFile(filename, gameObjectDatabase))
-	   return Md5::getHashFromFile(filename);   
+      return Md5::getHashFromFile(filename);
 	else
 	{
 		logprintf("Unable to process level file \"%s\".  Skipping...", levelInfo->filename.c_str());
@@ -504,12 +504,12 @@ Vector<string> FileListLevelSource::findAllFilesInPlaylist(const string &fileNam
    for(S32 i = 0; i < lines.size(); i++)
 	{
       string filename = trim(chopComment(lines[i]));
-      if(filename == "")    // Probably a comment or blank line
+      if(filename.empty())    // Probably a comment or blank line
          continue;
 
       string fullFileName = FolderManager::findLevelFile(levelDir, filename);
 
-      if(fullFileName == "")
+      if(fullFileName.empty())
       {
          logprintf("Unable to find level file \"%s\".  Skipping...", filename.c_str());
          continue;

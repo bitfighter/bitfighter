@@ -92,16 +92,16 @@
    HELP_TABLE_ITEM(RateThisLevel,                UnknownTypeNumber,             true,  false, Any,        PacedLow,  ARRAYDEF({ "Like this level?  Rate it with [[ToggleRating]].", NULL }))                                 \
                                                                                                                                                                                                                              \
    /* GameType specific help items shown at beginning of game */                                                                                                                                                             \
-   HELP_TABLE_ITEM(BMGameStartItem,              UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Bitmatch game.  Kill everyone!", NULL }))                                         \
+   HELP_TABLE_ITEM(BMGameStartItem,              UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Bitmatch game.  Blast everyone!", NULL }))                                         \
    HELP_TABLE_ITEM(TeamBMGameStartItem,          UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a team-based Bitmatch game.",                                                             \
-                                                                                                                                "Kill everyone not on your team!", NULL }))                                                  \
+                                                                                                                                "Blast everyone not on your team!", NULL }))                                                  \
    HELP_TABLE_ITEM(CoreGameStartItem,            UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Core game.",                                                                      \
-                                                                                                                                "Kill enemy cores and defend your own.", NULL }))                                            \
+                                                                                                                                "Blast enemy cores and defend your own.", NULL }))                                            \
    HELP_TABLE_ITEM(CTFGameStartItem,             UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Capture the Flag game.",                                                          \
                                                                                                                                 "Touch the enemy flag to yours to score.", NULL }))                                          \
    HELP_TABLE_ITEM(HTFGameStartItem,             UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Hold the Flag game.",                                                             \
                                                                                                                                 "Keep enemy flags in your capture zones ([[GOAL_ICON]]) for points.", NULL }))               \
-   HELP_TABLE_ITEM(NexGameStartItem,             UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Nexus game.  Kill players, collect their flags,",                                 \
+   HELP_TABLE_ITEM(NexGameStartItem,             UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Nexus game.  Blast players, collect their flags,",                                 \
                                                                                                                                 "and return them to the Nexus ([[NEXUS_ICON]]) when it turns green.", NULL }))                                \
    HELP_TABLE_ITEM(RabGameStartItem,             UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a Rabbit game.  You get points by holding the flag.", NULL }))                      \
    HELP_TABLE_ITEM(TeamRabGameStartItem,         UnknownTypeNumber,             true,  false, Any,        GameStart, ARRAYDEF({ "This is a team Rabbit game.",                                                               \
@@ -116,13 +116,13 @@
                                                                                                                                                                                                                              \
    /* Some GameType specific help items */                                                                                                                                                                                   \
    HELP_TABLE_ITEM(RabLocalPlayerGrabbedFlagItem, UnknownTypeNumber,            true,  false, Any,        Now,       ARRAYDEF({ "You have the flag (carrot)!  Keep it as long as you can!", NULL }))                         \
-   HELP_TABLE_ITEM(RabOtherPlayerGrabbedFlagItem, UnknownTypeNumber,            true,  false, Any,        Now,       ARRAYDEF({ "Another player grabbed the flag (carrot)!  KILL THEM!", NULL }))                            \
+   HELP_TABLE_ITEM(RabOtherPlayerGrabbedFlagItem, UnknownTypeNumber,            true,  false, Any,        Now,       ARRAYDEF({ "Another player grabbed the flag (carrot)!  ZAP THEM!", NULL }))                            \
 
 
 using namespace TNL;
 using namespace std;
 
-namespace Zap { 
+namespace Zap {
 
    enum HelpItem {
 #define HELP_TABLE_ITEM(value, b, c, d, e, f, g) value,

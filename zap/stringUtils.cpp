@@ -981,7 +981,7 @@ Vector<string> doWrapString(const string &str, S32 wrapWidth, F32(*widthCalculat
       {
          wrappedLines.push_back((wrappedLines.size() > 0 ? indentPrefix : "") + str.substr(start, i - start));
          start = i + 1;
-         potentialBreakPoint = start + 1;  
+         potentialBreakPoint = start + 1;
       }
 
       else if(str[i] == ' ')

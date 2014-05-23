@@ -17,13 +17,13 @@ namespace Zap
  * @luaenum GameType(1,2)
  * The GameType enum represets the different types of game.
  */
-//                 Enum              ClassName             LuaEnum     GameType Name     TeamGame  Game Instructions                
+//                 Enum              ClassName             LuaEnum     GameType Name     TeamGame  Game Instructions
 #define GAME_TYPE_TABLE \
-   GAME_TYPE_ITEM( BitmatchGame,    "GameType",            "Bitmatch", "Bitmatch",         false, "Simple combat game -- kill as many players as you can.  Also has a team variant where you can work together to rack up kills." )                                                \
-   GAME_TYPE_ITEM( NexusGame,       "NexusGameType",       "Nexus",    "Nexus",            false, "Kill other players and grab their flags.  Bring them to the Nexus when it is open to score.  Points grow geometricaly, so one big score is worth more than two smaller ones." ) \
-   GAME_TYPE_ITEM( RabbitGame,      "RabbitGameType",      "Rabbit",   "Rabbit",           false, "Grab the flag and hold on to it as long as you can.  Get the flag by killing the player who has it can getting it before other players do." )                                   \
+   GAME_TYPE_ITEM( BitmatchGame,    "GameType",            "Bitmatch", "Bitmatch",         false, "Simple combat game -- blast as many players as you can.  Also has a team variant where you can work together to rack up kills." )                                                \
+   GAME_TYPE_ITEM( NexusGame,       "NexusGameType",       "Nexus",    "Nexus",            false, "Blast other players and grab their flags.  Bring them to the Nexus when it is open to score.  Points grow geometricaly, so one big score is worth more than two smaller ones." ) \
+   GAME_TYPE_ITEM( RabbitGame,      "RabbitGameType",      "Rabbit",   "Rabbit",           false, "Grab the flag and hold on to it as long as you can.  Get the flag by zapping the player who has it and getting it before other players do." )                                   \
    GAME_TYPE_ITEM( CTFGame,         "CTFGameType",         "CTF",      "Capture the Flag", true,  "Capture the enemy flag and touch it to your own flag to score.  You can also recapture a stolen flag by flying over it." )                                                      \
-   GAME_TYPE_ITEM( CoreGame,        "CoreGameType",        "Core",     "Core",             true,  "Win by killing all the enemy cores before they kill yours." )                                                                                                                   \
+   GAME_TYPE_ITEM( CoreGame,        "CoreGameType",        "Core",     "Core",             true,  "Win by zapping all the enemy cores before they blast yours." )                                                                                                                   \
    GAME_TYPE_ITEM( HTFGame,         "HTFGameType",         "HTF",      "Hold the Flag",    true,  "Capture enemy flags and return them to your goals; the longer you hold them there, the more points you'll rack up." )                                                           \
    GAME_TYPE_ITEM( RetrieveGame,    "RetrieveGameType",    "Retrieve", "Retrieve",         true,  "Capture enemy flags and return them to your capture zone.  When all your zones are full, your points are locked in." )                                                          \
    GAME_TYPE_ITEM( SoccerGame,      "SoccerGameType",      "Soccer",   "Soccer",           true,  "Push or shoot the ball into an enemy goal zone." )                                                                                                                              \
