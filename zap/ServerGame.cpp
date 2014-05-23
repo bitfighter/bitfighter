@@ -1720,7 +1720,7 @@ bool ServerGame::startHosting()
       logprintf(LogConsumer::ServerFilter, "\t%s [%s]", getLevelNameFromIndex(i).getString(), 
                 mLevelSource->getLevelFileName(i).c_str());
 
-   if(!levelCount)            // No levels loaded... we'll crash if we try to start a game       
+   if(levelCount == 0)        // No levels loaded... we'll crash if we try to start a game       
       return false;      
 
    GameManager::setHostingModePhase(GameManager::NotHosting);
