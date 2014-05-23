@@ -133,6 +133,20 @@ pair<Vector<string>, Vector<LevelInfo> > getLevels()
 }
 
 
+string getGenericHeader()
+{
+   return "GameType 8 15\n"
+          "LevelName \"Bitmatch01\"\n"
+          "LevelDescription \"\"\n"
+          "LevelCredits \n"
+          "GridSize 255\n"
+          "Team Blue 0 0 1\n"
+          "Specials\n"
+          "MinPlayers\n"
+          "MaxPlayers\n";
+}
+
+
 // Botspec looks like this:
 // BBB BB  for 2 teams with 3 bots on first team, 2 on second
 // Use 0 for a team with no bots

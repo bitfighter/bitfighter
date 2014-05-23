@@ -9,14 +9,11 @@
 
 #include "gtest/gtest.h"
 
-#include "tnlNetObject.h"
-#include "tnlGhostConnection.h"
-#include "tnlPlatform.h"
-
 #include "BfObject.h"
 #include "gameType.h"
 #include "ServerGame.h"
 #include "ClientGame.h"
+#include "Level.h"
 #include "SystemFunctions.h"
 
 #include "LuaScriptRunner.h"
@@ -26,6 +23,11 @@
 #include "RenderUtils.h"
 
 #include "TestUtils.h"
+
+#include "tnlNetObject.h"
+#include "tnlGhostConnection.h"
+#include "tnlPlatform.h"
+
 
 #include <string>
 #include <cmath>
@@ -40,12 +42,15 @@ using namespace std;
 class ObjectTest : public testing::Test
 {
    public:
+      // argv will be a single header directive followed by a bunch of garbage
       static void process(ServerGame *game, S32 argc, const char **argv)
       {
+         string err;
+
          for(S32 j = 1; j <= argc; j++)
          {
-            game->cleanUp();
-            game->processLevelLoadLine(j, 0, argv, game->getGameObjDatabase(), "some_non_existing_filename.level");
+            Level level;
+            level.processLevelLoadLine(j, 0, argv, err);
          }
       }
 };

@@ -120,14 +120,14 @@ private:
 
    SymbolString mLingeringMessage;
 
-   Vector<boost::shared_ptr<GridDatabase> > mUndoItems;  // Undo/redo history 
-   Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
-   Point mSnapDelta;                            // For tracking how far from the snap point our cursor is
+   Vector<boost::shared_ptr<Level> > mUndoItems;   // Undo/redo history 
+   Point mMoveOrigin;                              // Point representing where items were moved "from" for figuring out how far they moved
+   Point mSnapDelta;                               // For tracking how far from the snap point our cursor is
    Vector<Point> mMoveOrigins;
 
-   boost::shared_ptr<GridDatabase> mEditorDatabase;
+   boost::shared_ptr<Level> mLevel;
 
-   void setDatabase(boost::shared_ptr<GridDatabase> database);
+   void setLevel(boost::shared_ptr<Level> level);
 
    Vector<boost::shared_ptr<BfObject> > mDockItems;    // Items sitting in the dock
 
@@ -312,7 +312,7 @@ public:
    explicit EditorUserInterface(ClientGame *game);    // Constructor
    virtual ~EditorUserInterface();                    // Destructor
 
-   GridDatabase *getDatabase() const;        // Need external access to this in one static function
+   Level *getLevel() const;           // Need external access to this in one static function
 
    void setLevelFileName(string name);
    void setLevelGenScriptName(string name);

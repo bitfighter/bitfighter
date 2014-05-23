@@ -21,6 +21,8 @@ string getLevelCode1();
 string getLevelCodeForTestingEngineer1();
 string getLevelCodeForEmptyLevelWithBots(const string &botspec);
 
+string getGenericHeader();
+
 pair<Vector<string>, Vector<LevelInfo> > getLevels();
 
 };

@@ -7,6 +7,9 @@
 #include "gameLoader.h"
 #include "gameType.h"
 #include "ServerGame.h"
+#include "Level.h"
+
+#include "LevelFilesForTesting.h"
 
 #include "gtest/gtest.h"
 
@@ -20,17 +23,7 @@ class LevelLoaderTest: public testing::Test
 
 TEST_F(LevelLoaderTest, longLine)
 {
-   U32 TEST_POINTS = 0xFFF;            //0xFFFF takes a wicked long time to run
-
-   Address addr;
-   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
-   LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(""));
-
-   ServerGame serverGame(addr, settings, levelSource, false, false);
-   GridDatabase *db = serverGame.getGameObjDatabase();
-
-   GameType gt;
-   gt.addToGame(&serverGame, serverGame.getGameObjDatabase());
+   U32 TEST_POINTS = 0xFFF;      //0xFFFF takes a wicked long time to run
 
    Vector<Point> geom;    
    geom.resize(TEST_POINTS);     // Preallocate for speed
@@ -40,13 +33,13 @@ TEST_F(LevelLoaderTest, longLine)
    WallItem wall;
    wall.GeomObject::setGeom(geom);
 
-   serverGame.unsuspendGame(false);
+   string code =  getGenericHeader() + wall.toLevelCode();
 
-   EXPECT_EQ(0, serverGame.getGameObjDatabase()->findObjects_fast()->size());
-   string code = serverGame.toLevelCode() + wall.toLevelCode();
-   serverGame.loadLevelFromString(code, db);
+   Level level;
+   EXPECT_EQ(0, level.findObjects_fast()->size());
+   level.loadLevelFromString(code);
 
-   const Vector<DatabaseObject*> *objects = db->findObjects_fast();
+   const Vector<DatabaseObject*> *objects = level.findObjects_fast();
    EXPECT_EQ(TEST_POINTS - 1, objects->size());
 }
 

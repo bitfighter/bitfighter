@@ -7,6 +7,9 @@
 #include "ServerGame.h"
 #include "EngineeredItem.h"
 
+#include "Level.h"
+
+#include "LevelFilesForTesting.h"
 #include "TestUtils.h"
 
 #include "gtest/gtest.h"
@@ -17,18 +20,12 @@
 namespace Zap
 {
 
-TEST(ServerGameTest, ProcessEmptyLevelLine)
+TEST(ServerGameTest, LoadLevelWithEmptyLevelLine)
 {
-   Address addr;
-   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
-   LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(""));
-
-   ServerGame g(addr, settings, levelSource, false, false);
-   GameType gt;
-   gt.addToGame(&g, g.getGameObjDatabase());
+   Level level;
 
    // Empty level lines caused crashes at one point
-   g.loadLevelFromString(g.toLevelCode() + "\r\n\r\n", g.getGameObjDatabase());
+   level.loadLevelFromString(getGenericHeader() + "\r\n\r\n");
 }
 
 
