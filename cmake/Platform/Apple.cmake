@@ -6,11 +6,43 @@
 set(OSX_DEPLOY_TARGET $ENV{MACOSX_DEPLOYMENT_TARGET})
 
 message(STATUS "MACOSX_DEPLOYMENT_TARGET: ${OSX_DEPLOY_TARGET}")
+
 # MACOSX_DEPLOYMENT_TARGET must be set in the environment to compile properly
 if(NOT OSX_DEPLOY_TARGET)
 	message(FATAL_ERROR "MACOSX_DEPLOYMENT_TARGET environment variable not set.  Set this like so: 'export MACOSX_DEPLOYMENT_TARGET=10.6'")
 endif()
 
+
+# Make sure the compiling architecture is set
+if(${OSX_DEPLOY_TARGET} VERSION_LESS "10.4")
+	message(FATAL_ERROR "Bitfighter cannot be compiled on OSX earlier than 10.4")
+elseif(${OSX_DEPLOY_TARGET} VERSION_LESS "10.6")
+	if(NOT CMAKE_OSX_ARCHITECTURES)
+		message(FATAL_ERROR "You must set CMAKE_OSX_ARCHITECTURES to either 'ppc' or 'i386'")
+	endif()
+else()
+	set(CMAKE_OSX_ARCHITECTURES "x86_64")
+endif()
+
+message(STATUS "Compiling for OSX architectures: ${CMAKE_OSX_ARCHITECTURES}")
+
+
+# Set the proper SDK for compiling
+if(OSX_DEPLOY_TARGET VERSION_EQUAL "10.4")
+	set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.4u.sdk/")
+	
+	# OSX 10.4 doesn't have execinfo.h for the StackTracer
+	add_definitions(-DBF_NO_STACKTRACE)
+	
+	# LuaJIT will not compile on 10.4 ppc - it requires GCC >= 4.3
+	if(CMAKE_OSX_ARCHITECTURES STREQUAL "ppc")
+		set(USE_LUAJIT NO)
+	endif()
+else()
+	string(REGEX REPLACE "([0-9]+.[0-9]+).[0-9]+" "\\1" SDK_VERSION ${OSX_DEPLOY_TARGET})
+	
+	set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX${SDK_VERSION}.sdk/")
+endif()
 
 #
 # Linker flags
@@ -112,7 +144,7 @@ function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 	
 
 	# Special flags needed because of LuaJIT on 64 bit OSX
-	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+	if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
 		set_target_properties(${targetName} PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
 	endif()
 endfunction()
@@ -153,7 +185,7 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	)
 	
 	# 64-bit OSX needs to use shared LuaJIT library
-	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+	if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
 		add_custom_command(TARGET ${targetName} POST_BUILD
 			COMMAND cp -rp ${luaLibDir}libluajit.dylib ${frameworksDir}
 		)

@@ -1,6 +1,20 @@
 project (bitfighter)
 cmake_minimum_required (VERSION 2.8)
 
+
+#
+# CMake options
+#
+
+option(USE_SDL2 "Use SDL2" YES)
+option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
+option(USE_LUAJIT "Use LuaJIT; compiling in-tree sources if needed" YES)
+
+
+#
+# CMake system management
+#
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
 # Use appropriate platform alterations
@@ -25,15 +39,6 @@ endif()
 if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
-
-
-#
-# CMake options
-#
-
-option(USE_SDL2 "Use SDL2" YES)
-option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
-option(USE_LUAJIT "Use LuaJIT; compiling in-tree sources if needed" YES)
 
 
 #
