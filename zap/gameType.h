@@ -213,8 +213,6 @@ public:
       NO_FLAG = -1,                    // Constant used for ship not having a flag
    };
 
-   const Vector<WallRec> *getBarrierList();
-
    S32 mObjectsExpected;            // Count of objects we expect to get with this level (for display purposes only)
 
    void broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, const StringTableEntry &formatString);

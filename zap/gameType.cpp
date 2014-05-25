@@ -4008,12 +4008,6 @@ bool GameType::levelHasLoadoutZone()
 }
 
 
-const Vector<WallRec> *GameType::getBarrierList()
-{
-   return &mWalls;
-}
-
-
 // Send a message to all clients
 void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, const StringTableEntry &message)
 {
