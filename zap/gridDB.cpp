@@ -791,6 +791,70 @@ DatabaseObject *GridDatabase::getObjectByIndex(S32 index) const
 } 
 
 
+void GridDatabase::updateExtents(DatabaseObject *object, const Rect &newExtents)
+{
+   // Remove from the extents database for current extents...
+   //gridDB->removeFromDatabase(this, mExtent);    // old extent
+   // ...and re-add for the new extent
+   //gridDB->addToDatabase(this, extents);
+
+
+   S32 minxold, minyold, maxxold, maxyold;
+   S32 minx, miny, maxx, maxy;
+
+   Rect oldExtents = object->getExtent();
+
+   minxold = S32(oldExtents.min.x) >> GridDatabase::BucketWidthBitShift;
+   minyold = S32(oldExtents.min.y) >> GridDatabase::BucketWidthBitShift;
+   maxxold = S32(oldExtents.max.x) >> GridDatabase::BucketWidthBitShift;
+   maxyold = S32(oldExtents.max.y) >> GridDatabase::BucketWidthBitShift;
+
+   minx    = S32(newExtents.min.x) >> GridDatabase::BucketWidthBitShift;
+   miny    = S32(newExtents.min.y) >> GridDatabase::BucketWidthBitShift;
+   maxx    = S32(newExtents.max.x) >> GridDatabase::BucketWidthBitShift;
+   maxy    = S32(newExtents.max.y) >> GridDatabase::BucketWidthBitShift;
+
+   // Don't do anything if the buckets haven't changed...
+   if((minxold - minx) | (minyold - miny) | (maxxold - maxx) | (maxyold - maxy))
+   {
+      // They are different... remove and readd to database, but don't touch mAllObjects
+      if(U32(maxx - minx) >= BucketRowCount)        maxx    = minx    + BucketRowCount - 1;
+      if(U32(maxy - miny) >= BucketRowCount)        maxy    = miny    + BucketRowCount - 1;
+      if(U32(maxxold >= minxold) + BucketRowCount)  maxxold = minxold + BucketRowCount - 1;
+      if(U32(maxyold >= minyold) + BucketRowCount)  maxyold = minyold + BucketRowCount - 1;
+
+
+      // Don't use x <= maxx, it will endless loop if maxx = S32_MAX and x overflows
+      // Instead, use maxx - x >= 0, it will better handle overflows and avoid endless loop (MIN_S32 - MAX_S32 = +1)
+
+      // Remove from the extents database for current extents...
+      for(S32 x = minxold; maxxold - x >= 0; x++)
+         for(S32 y = minyold; maxyold - y >= 0; y++)
+            for(GridDatabase::BucketEntry **walk = &mBuckets[x & BucketMask][y & BucketMask]; 
+                                 *walk; walk = &((*walk)->nextInBucket))
+               if((*walk)->theObject == object)
+               {
+                  GridDatabase::BucketEntry *rem = *walk;
+                  *walk = rem->nextInBucket;
+                  mChunker->free(rem);
+                  break;
+               }
+      // ...and re-add for the new extent
+      for(S32 x = minx; maxx - x >= 0; x++)
+         for(S32 y = miny; maxy - y >= 0; y++)
+         {
+            GridDatabase::BucketEntry *be = mChunker->alloc();
+            be->theObject = object;
+            be->nextInBucket = mBuckets[x & BucketMask][y & BucketMask];
+            mBuckets[x & BucketMask][y & BucketMask] = be;
+         }
+   }
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 void DatabaseObject::addToDatabase(GridDatabase *database)
 {
    TNLAssert(mExtentSet, "Extent has not been set on this object!");    // Sanity check
@@ -884,60 +948,7 @@ void DatabaseObject::setExtent(const Rect &extents)
 
    if(gridDB)
    {
-      // Remove from the extents database for current extents...
-      //gridDB->removeFromDatabase(this, mExtent);    // old extent
-      // ...and re-add for the new extent
-      //gridDB->addToDatabase(this, extents);
-
-
-      S32 minxold, minyold, maxxold, maxyold;
-      S32 minx, miny, maxx, maxy;
-
-      minxold = S32(mExtent.min.x) >> GridDatabase::BucketWidthBitShift;
-      minyold = S32(mExtent.min.y) >> GridDatabase::BucketWidthBitShift;
-      maxxold = S32(mExtent.max.x) >> GridDatabase::BucketWidthBitShift;
-      maxyold = S32(mExtent.max.y) >> GridDatabase::BucketWidthBitShift;
-
-      minx    = S32(extents.min.x) >> GridDatabase::BucketWidthBitShift;
-      miny    = S32(extents.min.y) >> GridDatabase::BucketWidthBitShift;
-      maxx    = S32(extents.max.x) >> GridDatabase::BucketWidthBitShift;
-      maxy    = S32(extents.max.y) >> GridDatabase::BucketWidthBitShift;
-
-      // Don't do anything if the buckets haven't changed...
-      if((minxold - minx) | (minyold - miny) | (maxxold - maxx) | (maxyold - maxy))
-      {
-         // They are different... remove and readd to database, but don't touch gridDB->mAllObjects
-         if(U32(maxx - minx) >= gridDB->BucketRowCount)        maxx    = minx    + gridDB->BucketRowCount - 1;
-         if(U32(maxy - miny) >= gridDB->BucketRowCount)        maxy    = miny    + gridDB->BucketRowCount - 1;
-         if(U32(maxxold >= minxold) + gridDB->BucketRowCount)  maxxold = minxold + gridDB->BucketRowCount - 1;
-         if(U32(maxyold >= minyold) + gridDB->BucketRowCount)  maxyold = minyold + gridDB->BucketRowCount - 1;
-
-
-         // Don't use x <= maxx, it will endless loop if maxx = S32_MAX and x overflows
-         // Instead, use maxx - x >= 0, it will better handle overflows and avoid endless loop (MIN_S32 - MAX_S32 = +1)
-
-         // Remove from the extents database for current extents...
-         for(S32 x = minxold; maxxold - x >= 0; x++)
-            for(S32 y = minyold; maxyold - y >= 0; y++)
-               for(GridDatabase::BucketEntry **walk = &gridDB->mBuckets[x & gridDB->BucketMask][y & gridDB->BucketMask]; 
-                                   *walk; walk = &((*walk)->nextInBucket))
-                  if((*walk)->theObject == this)
-                  {
-                     GridDatabase::BucketEntry *rem = *walk;
-                     *walk = rem->nextInBucket;
-                     gridDB->mChunker->free(rem);
-                     break;
-                  }
-         // ...and re-add for the new extent
-         for(S32 x = minx; maxx - x >= 0; x++)
-            for(S32 y = miny; maxy - y >= 0; y++)
-            {
-               GridDatabase::BucketEntry *be = gridDB->mChunker->alloc();
-               be->theObject = this;
-               be->nextInBucket = gridDB->mBuckets[x & gridDB->BucketMask][y & gridDB->BucketMask];
-               gridDB->mBuckets[x & gridDB->BucketMask][y & gridDB->BucketMask] = be;
-            }
-      }
+      gridDB->updateExtents(this, extents);
    }
 
    mExtent.set(extents);

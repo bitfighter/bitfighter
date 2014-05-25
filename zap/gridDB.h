@@ -162,6 +162,8 @@ public:
 
    
    Rect getExtents();      // Get the combined extents of every object in the database
+   void updateExtents(DatabaseObject *object, const Rect &newExtents);
+
 
    WallSegmentManager *getWallSegmentManager() const;      
 
