@@ -31,8 +31,8 @@ class DatabaseObject : public GeomObject
 
    typedef GeomObject Parent;
 
-friend class GridDatabase;
-friend class EditorObjectDatabase;
+   friend class GridDatabase;
+   friend class EditorObjectDatabase;
 
 private:
    U32 mLastQueryId;
