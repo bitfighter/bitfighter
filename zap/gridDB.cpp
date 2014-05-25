@@ -116,39 +116,39 @@ void GridDatabase::copyObjects(const GridDatabase *source)
 
 // Adds an object to the database; checks to ensure object is not added twice.
 // Private function
-void GridDatabase::addToDatabase(DatabaseObject *theObject)
+void GridDatabase::addToDatabase(DatabaseObject *object)
 {
-   TNLAssert(theObject->mDatabase != this, "Already added to database, trying to add to same database again!");
-   TNLAssert(!theObject->mDatabase,        "Already added to database, trying to add to different database!");
-   TNLAssert(theObject->getExtentSet(),    "Object extents were never set!");
+   TNLAssert(object->mDatabase != this, "Already added to database, trying to add to same database again!");
+   TNLAssert(!object->mDatabase,        "Already added to database, trying to add to different database!");
+   TNLAssert(object->getExtentSet(),    "Object extents were never set!");
 
-   if(theObject->mDatabase)      // Should never happen
+   if(object->mDatabase)      // Should never happen
       return;
 
-   theObject->mDatabase = this;
+   object->mDatabase = this;
 
    static IntRect bins;
-   fillBins(theObject->getExtent(), bins);
+   fillBins(object->getExtent(), bins);
 
    for(S32 x = bins.minx; bins.maxx - x >= 0; x++)
       for(S32 y = bins.miny; bins.maxy - y >= 0; y++)
       {
          BucketEntry *be = mChunker->alloc();
-         be->theObject = theObject;
+         be->theObject = object;
          be->nextInBucket = mBuckets[x & BucketMask][y & BucketMask];
          mBuckets[x & BucketMask][y & BucketMask] = be;
       }
 
    // Add the object to our non-spatial "database" as well
-   mAllObjects.push_back(theObject);
+   mAllObjects.push_back(object);
 
-   U8 type = theObject->getObjectTypeNumber();
+   U8 type = object->getObjectTypeNumber();
    if(type == GoalZoneTypeNumber)
-      mGoalZones.push_back(theObject);
+      mGoalZones.push_back(object);
    else if(type == FlagTypeNumber)
-      mFlags.push_back(theObject);
+      mFlags.push_back(object);
    else if(type == SpyBugTypeNumber)
-      mSpyBugs.push_back(theObject);
+      mSpyBugs.push_back(object);
    
    //sortObjects(mAllObjects);  // problem: Barriers in-game don't have mGeometry (it is NULL)
 }
@@ -284,7 +284,7 @@ const Vector<DatabaseObject *> *GridDatabase::findObjects_fast(U8 typeNumber) co
       return &mSpyBugs;
 
    TNLAssert(false, "This type not currently supported!  Sorry dude!");
-   return NULL;  // this line gets rid of compile warning "Not all control paths return a value"
+   return NULL;
 }
 
 
@@ -457,9 +457,9 @@ void GridDatabase::dumpObjects()
       for(S32 y = 0; y < BucketRowCount; y++)
          for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
          {
-            DatabaseObject *theObject = walk->theObject;
-            logprintf("Found object in (%d,%d) with extents %s", x, y, theObject->getExtent().toString().c_str());
-            logprintf("Obj coords: %s", static_cast<BfObject *>(theObject)->getPos().toString().c_str());
+            DatabaseObject *object = walk->theObject;
+            logprintf("Found object in (%d,%d) with extents %s", x, y, object->getExtent().toString().c_str());
+            logprintf("Obj coords: %s", static_cast<BfObject *>(object)->getPos().toString().c_str());
          }
 }
 
