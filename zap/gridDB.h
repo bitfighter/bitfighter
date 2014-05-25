@@ -121,7 +121,6 @@ public:
    BucketEntry *mBuckets[BucketRowCount][BucketRowCount];
 
    explicit GridDatabase(bool createWallSegmentManager = true);   // Constructor
-   // GridDatabase::GridDatabase(const GridDatabase &source);
    virtual ~GridDatabase();                                       // Destructor
 
 
