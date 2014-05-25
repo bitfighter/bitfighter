@@ -801,7 +801,6 @@ void GridDatabase::updateExtents(DatabaseObject *object, const Rect &newExtents)
    // removeFromDatabase();    
    // addToDatabase();
 
-
    S32 minxold, minyold, maxxold, maxyold;
    S32 minx, miny, maxx, maxy;
 
