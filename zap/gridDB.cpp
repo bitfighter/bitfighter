@@ -464,6 +464,17 @@ void GridDatabase::dumpObjects()
 }
 
 
+// Return the first non-UnknownType object, or -1 if none are found
+static S32 findFirstNonUnknownTypeObject(const Vector<DatabaseObject *> &allObjects)
+{
+   for(S32 i = 0; i < allObjects.size(); i++)
+      if(allObjects[i]->getObjectTypeNumber() != UnknownTypeNumber)
+         return i;
+
+   return -1;
+}
+
+
 // Get the extents of every object in the database
 Rect GridDatabase::getExtents()
 {
@@ -473,6 +484,7 @@ Rect GridDatabase::getExtents()
    Rect rect;
 
    // Think we can delete from HERE...   inserted this comment 27-Jan-2012  #########################################
+   // To the best of my knowledge, the assert below has never fired 5/24/2014 -Wat
 
    // All this rigamarole is to make world extent correct for levels that do not overlap (0,0)
    // The problem is that the GameType is treated as an object, and has the extent (0,0), and
@@ -482,15 +494,7 @@ Rect GridDatabase::getExtents()
    // of (0,0) that are assigned by the constructor.
 
 
-   S32 first = -1;
-
-   // Look for first non-UnknownType object
-   for(S32 i = 0; i < mAllObjects.size() && first == -1; i++)
-      if(mAllObjects[i]->getObjectTypeNumber() != UnknownTypeNumber)
-      {
-         rect = mAllObjects[i]->getExtent();
-         first = i;
-      }
+   S32 first = findFirstNonUnknownTypeObject(mAllObjects);
 
    TNLAssert(first == 0, "I think this should never happen -- how would an object with UnknownTypeNumber get in the database?? \
                           if it does, please document it and remove this assert, along withthe rect = line below -Wat");
