@@ -797,10 +797,9 @@ DatabaseObject *GridDatabase::getObjectByIndex(S32 index) const
 
 void GridDatabase::updateExtents(DatabaseObject *object, const Rect &newExtents)
 {
-   // Remove from the extents database for current extents...
-   //gridDB->removeFromDatabase(this, mExtent);    // old extent
-   // ...and re-add for the new extent
-   //gridDB->addToDatabase(this, extents);
+   // Does the equivalent of the following, but more efficiently:
+   // removeFromDatabase();    
+   // addToDatabase();
 
 
    S32 minxold, minyold, maxxold, maxyold;
@@ -808,15 +807,15 @@ void GridDatabase::updateExtents(DatabaseObject *object, const Rect &newExtents)
 
    Rect oldExtents = object->getExtent();
 
-   minxold = S32(oldExtents.min.x) >> GridDatabase::BucketWidthBitShift;
-   minyold = S32(oldExtents.min.y) >> GridDatabase::BucketWidthBitShift;
-   maxxold = S32(oldExtents.max.x) >> GridDatabase::BucketWidthBitShift;
-   maxyold = S32(oldExtents.max.y) >> GridDatabase::BucketWidthBitShift;
+   minxold = S32(oldExtents.min.x) >> BucketWidthBitShift;
+   minyold = S32(oldExtents.min.y) >> BucketWidthBitShift;
+   maxxold = S32(oldExtents.max.x) >> BucketWidthBitShift;
+   maxyold = S32(oldExtents.max.y) >> BucketWidthBitShift;
 
-   minx    = S32(newExtents.min.x) >> GridDatabase::BucketWidthBitShift;
-   miny    = S32(newExtents.min.y) >> GridDatabase::BucketWidthBitShift;
-   maxx    = S32(newExtents.max.x) >> GridDatabase::BucketWidthBitShift;
-   maxy    = S32(newExtents.max.y) >> GridDatabase::BucketWidthBitShift;
+   minx    = S32(newExtents.min.x) >> BucketWidthBitShift;
+   miny    = S32(newExtents.min.y) >> BucketWidthBitShift;
+   maxx    = S32(newExtents.max.x) >> BucketWidthBitShift;
+   maxy    = S32(newExtents.max.y) >> BucketWidthBitShift;
 
    // Don't do anything if the buckets haven't changed...
    if((minxold - minx) | (minyold - miny) | (maxxold - maxx) | (maxyold - maxy))
