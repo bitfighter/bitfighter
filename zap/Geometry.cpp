@@ -949,7 +949,7 @@ static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 grid
    // Make sure we don't crash with firstCoord = 0; argc = 7; or some uneven number
    for(S32 i = firstCoord; i < argc - 1; i += 2)
    {
-      // If we are loading legacy levels (earlier than 019), then they used a gridsize multiplier.
+      // If we are loading legacy levels (earlier than 019), then we have a gridsize multiplier
       if(gridSize != 1.f)
          p.set( (F32) (atof(argv[i]) * gridSize), (F32) (atof(argv[i+1]) * gridSize ) );
       else
@@ -972,7 +972,6 @@ static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 grid
 }
 
 
-// For walls at least, this is client (i.e. editor) only; walls processed in ServerGame::processPseudoItem() on server
 void PolylineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
 {
     readPolyBounds(argc, argv, firstCoord, gridSize, true, mPolyBounds, mVertSelected);      // Fills mPolyBounds
