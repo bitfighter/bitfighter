@@ -24,6 +24,7 @@ static void initialize()
    if(levelCodes.size() > 0)
       return;
 
+   // levelCodes[0]
    levelCodes.push_back(
       "GameType 10 8\n"
       "LevelName \"Test Level\"\n"                             // Has quotes

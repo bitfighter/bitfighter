@@ -79,6 +79,16 @@ void checkTeleporter(Teleporter *teleporter, Point *pts, S32 pointCount)
    }
 }
 
+
+static void checkMetadata(Game *game)
+{
+   EXPECT_STREQ("Bluey", game->getTeam(0)->getName().getString());                           // Team name
+   EXPECT_EQ   ("Test Level", game->getGameType()->getLevelName());                          // Quoted in level file
+   EXPECT_STREQ("This is a basic test level", game->getGameType()->getLevelDescription());   // Quoted in level file
+   EXPECT_STREQ("level creator", game->getGameType()->getLevelCredits()->getString());       // Not quoted in level file
+}
+
+
 // This test needs to be greatly expanded -- we should be testing all sorts of items here!
 // Things to test: other objects, comments, long names, missing lines, duplicate lines, garbage lines, ids
 TEST(IntegrationTest, LevelReadingAndItemPropagation)
@@ -91,7 +101,22 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
    // Idle for a while
    GamePair::idle(10, 5);
 
+   
+   // First test the ServerGame
    Vector<DatabaseObject *> fillVector;
+   serverGame->getGameObjDatabase()->findObjects(TestItemTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size()) << "Looks like objects aren't being read properly by the server!";
+   EXPECT_TRUE(fillVector[0]->getCentroid() == Point(255, 255));
+
+   // BarrierMaker 40 -1 -1 -1 1
+   fillVector.clear();
+   serverGame->getGameObjDatabase()->findObjects(BarrierTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size()) << "BarrierMaker items not being processed by the server!";
+   Barrier *barrier = dynamic_cast<Barrier *>(fillVector[0]);
+   ASSERT_TRUE(barrier);
+   ASSERT_EQ("-255, -255 | -255, 255", barrier->mPoints[0].toString() + " | " + barrier->mPoints[1].toString());
+   ASSERT_EQ(40, barrier->mWidth);
+
 
    // Test level item propagation
    // TestItem (placed @ 1,1)
@@ -116,10 +141,12 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
       EXPECT_EQ(10, static_cast<RepairItem *>(fillVector[0])->getRepopDelay()); // <=== repopDelay is not sent to the client; on client will always be default
 
       // Wall (placed @ -1,-1 ==> -1,1  thickness = 40)
+      // BarrierMaker 40 -1 -1 -1 1
       fillVector.clear();
       clientGame->getGameObjDatabase()->findObjects(BarrierTypeNumber, fillVector);
       ASSERT_EQ(1, fillVector.size());
-      Barrier *barrier = static_cast<Barrier *>(fillVector[0]);
+      Barrier *barrier = dynamic_cast<Barrier *>(fillVector[0]);
+      ASSERT_TRUE(barrier);
       EXPECT_EQ("-255, -255 | -255, 255", barrier->mPoints[0].toString() + " | " + barrier->mPoints[1].toString());
       EXPECT_EQ(40, barrier->mWidth);
 
@@ -247,14 +274,15 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
 
    /////
    // Test metadata propagation
+   {
+      SCOPED_TRACE("metadata propagation server game"); 
+      checkMetadata(serverGame);
+   }
+
    for(S32 i = 0; i < clientGames->size(); i++)
    {
-      ClientGame *clientGame = clientGames->get(i);
-      SCOPED_TRACE("metadata propagation i = " + itos(i)); 
-      EXPECT_STREQ("Bluey", clientGame->getTeam(0)->getName().getString());                           // Team name
-      EXPECT_EQ   ("Test Level", clientGame->getGameType()->getLevelName());                          // Quoted in level file
-      EXPECT_STREQ("This is a basic test level", clientGame->getGameType()->getLevelDescription());   // Quoted in level file
-      EXPECT_STREQ("level creator", clientGame->getGameType()->getLevelCredits()->getString());       // Not quoted in level file
+      SCOPED_TRACE("metadata propagation client i = " + itos(i)); 
+      checkMetadata(clientGames->get(i));
    }
 }   
 
