@@ -3806,17 +3806,20 @@ bool GameType::doTeamHasFlag(S32 teamIndex) const
 
 
 // Server only
-void GameType::updateWhichTeamsHaveFlags()
+void GameType::updateTeamFlagPossessionStatus(S32 teamIndex)
 {
-   getGame()->clearTeamHasFlagList();
+   getGame()->setTeamHasFlag(teamIndex, false);
 
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
    for(S32 i = 0; i < flags->size(); i++)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
-      if(flag->isMounted() && flag->getMount())
-         getGame()->setTeamHasFlag(flag->getMount()->getTeam(), true);
+      if(flag->isMounted() && flag->getMount() && flag->getMount()->getTeam() == teamIndex)
+      {
+         getGame()->setTeamHasFlag(teamIndex, true);
+         break;
+      }
    }
 
    notifyClientsWhoHasTheFlag();
@@ -4227,7 +4230,7 @@ void GameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode
 { 
    TNLAssert(isServer(), "Should not run on client!");
    if(item->getObjectTypeNumber() == FlagTypeNumber)
-      updateWhichTeamsHaveFlags();
+      updateTeamFlagPossessionStatus(ship->getTeam());
 }
 
 

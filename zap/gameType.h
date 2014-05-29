@@ -121,7 +121,7 @@ protected:
 
    void notifyClientsWhoHasTheFlag();           // Notify the clients when flag status changes... only called by some game types (server only)
    bool doTeamHasFlag(S32 teamIndex) const;     // Do the actual work of figuring out if the specified team has the flag  (server only)
-   void updateWhichTeamsHaveFlags();
+   void updateTeamFlagPossessionStatus(S32 teamIndex);
 
    static const S32 MaxMenuScore;
 
