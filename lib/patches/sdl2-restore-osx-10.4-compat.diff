@@ -1,46 +1,6 @@
-diff -r 70b305e09b4e build-scripts/g++-fat.sh
---- a/build-scripts/g++-fat.sh	Sat Oct 05 00:29:57 2013 -0400
-+++ b/build-scripts/g++-fat.sh	Sat Oct 05 11:06:26 2013 -0600
-@@ -7,13 +7,15 @@
- DEVELOPER="`xcode-select -print-path`/Platforms/MacOSX.platform/Developer"
- 
- # Intel 32-bit compiler flags (10.6 runtime compatibility)
--GCC_COMPILE_X86="g++ -arch i386 -mmacosx-version-min=10.5 \
-+GCC_COMPILE_X86="g++ -arch i386 -mmacosx-version-min=10.6 \
-+-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
- -I/usr/local/include"
- 
--GCC_LINK_X86="-mmacosx-version-min=10.5"
-+GCC_LINK_X86="-mmacosx-version-min=10.6"
- 
- # Intel 64-bit compiler flags (10.6 runtime compatibility)
- GCC_COMPILE_X64="g++ -arch x86_64 -mmacosx-version-min=10.6 \
-+-DMAC_OS_X_VERSION_MIN_REQUIRED=1050 \
- -I/usr/local/include"
- 
- GCC_LINK_X64="-mmacosx-version-min=10.6"
-diff -r 70b305e09b4e build-scripts/gcc-fat.sh
---- a/build-scripts/gcc-fat.sh	Sat Oct 05 00:29:57 2013 -0400
-+++ b/build-scripts/gcc-fat.sh	Sat Oct 05 11:06:26 2013 -0600
-@@ -6,11 +6,12 @@
- 
- DEVELOPER="`xcode-select -print-path`/Platforms/MacOSX.platform/Developer"
- 
--# Intel 32-bit compiler flags (10.5 runtime compatibility)
--GCC_COMPILE_X86="gcc -arch i386 -mmacosx-version-min=10.5 \
-+# Intel 32-bit compiler flags (10.6 runtime compatibility)
-+GCC_COMPILE_X86="gcc -arch i386 -mmacosx-version-min=10.6 \
-+-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
- -I/usr/local/include"
- 
--GCC_LINK_X86="-mmacosx-version-min=10.5"
-+GCC_LINK_X86="-mmacosx-version-min=10.6"
- 
- # Intel 64-bit compiler flags (10.6 runtime compatibility)
- GCC_COMPILE_X64="gcc -arch x86_64 -mmacosx-version-min=10.6 \
-diff -r 70b305e09b4e include/SDL_config_macosx.h
---- a/include/SDL_config_macosx.h	Sat Oct 05 00:29:57 2013 -0400
-+++ b/include/SDL_config_macosx.h	Sat Oct 05 11:06:26 2013 -0600
+diff -r b9663c77f5c9 include/SDL_config_macosx.h
+--- a/include/SDL_config_macosx.h	Wed Oct 23 20:58:31 2013 -0700
++++ b/include/SDL_config_macosx.h	Fri May 30 12:58:49 2014 -0600
 @@ -36,7 +36,10 @@
  #endif
  
@@ -52,9 +12,9 @@ diff -r 70b305e09b4e include/SDL_config_macosx.h
  #define HAVE_SYS_TYPES_H    1
  #define HAVE_STDIO_H    1
  #define STDC_HEADERS    1
-diff -r 70b305e09b4e include/SDL_platform.h
---- a/include/SDL_platform.h	Sat Oct 05 00:29:57 2013 -0400
-+++ b/include/SDL_platform.h	Sat Oct 05 11:06:26 2013 -0600
+diff -r b9663c77f5c9 include/SDL_platform.h
+--- a/include/SDL_platform.h	Wed Oct 23 20:58:31 2013 -0700
++++ b/include/SDL_platform.h	Fri May 30 12:58:49 2014 -0600
 @@ -83,12 +83,6 @@
  /* if not compiling for iPhone */
  #undef __MACOSX__
@@ -68,9 +28,9 @@ diff -r 70b305e09b4e include/SDL_platform.h
  #endif /* TARGET_OS_IPHONE */
  #endif /* defined(__APPLE__) */
  
-diff -r 70b305e09b4e src/audio/coreaudio/SDL_coreaudio.h
---- a/src/audio/coreaudio/SDL_coreaudio.h	Sat Oct 05 00:29:57 2013 -0400
-+++ b/src/audio/coreaudio/SDL_coreaudio.h	Sat Oct 05 11:06:26 2013 -0600
+diff -r b9663c77f5c9 src/audio/coreaudio/SDL_coreaudio.h
+--- a/src/audio/coreaudio/SDL_coreaudio.h	Wed Oct 23 20:58:31 2013 -0700
++++ b/src/audio/coreaudio/SDL_coreaudio.h	Fri May 30 12:58:49 2014 -0600
 @@ -32,6 +32,9 @@
  #if MACOSX_COREAUDIO
  #include <CoreAudio/CoreAudio.h>
@@ -81,9 +41,9 @@ diff -r 70b305e09b4e src/audio/coreaudio/SDL_coreaudio.h
  #else
  #include <AudioToolbox/AudioToolbox.h>
  #endif
-diff -r 70b305e09b4e src/video/cocoa/SDL_cocoaclipboard.m
---- a/src/video/cocoa/SDL_cocoaclipboard.m	Sat Oct 05 00:29:57 2013 -0400
-+++ b/src/video/cocoa/SDL_cocoaclipboard.m	Sat Oct 05 11:06:26 2013 -0600
+diff -r b9663c77f5c9 src/video/cocoa/SDL_cocoaclipboard.m
+--- a/src/video/cocoa/SDL_cocoaclipboard.m	Wed Oct 23 20:58:31 2013 -0700
++++ b/src/video/cocoa/SDL_cocoaclipboard.m	Fri May 30 12:58:49 2014 -0600
 @@ -28,6 +28,7 @@
  static NSString *
  GetTextFormat(_THIS)
@@ -102,9 +62,9 @@ diff -r 70b305e09b4e src/video/cocoa/SDL_cocoaclipboard.m
  }
  
  int
-diff -r 70b305e09b4e src/video/cocoa/SDL_cocoakeyboard.m
---- a/src/video/cocoa/SDL_cocoakeyboard.m	Sat Oct 05 00:29:57 2013 -0400
-+++ b/src/video/cocoa/SDL_cocoakeyboard.m	Sat Oct 05 11:06:26 2013 -0600
+diff -r b9663c77f5c9 src/video/cocoa/SDL_cocoakeyboard.m
+--- a/src/video/cocoa/SDL_cocoakeyboard.m	Wed Oct 23 20:58:31 2013 -0700
++++ b/src/video/cocoa/SDL_cocoakeyboard.m	Fri May 30 12:58:49 2014 -0600
 @@ -172,9 +172,14 @@
      return nil;
  }
@@ -224,9 +184,9 @@ diff -r 70b305e09b4e src/video/cocoa/SDL_cocoakeyboard.m
  }
  
  void
-diff -r 70b305e09b4e src/video/cocoa/SDL_cocoamodes.m
---- a/src/video/cocoa/SDL_cocoamodes.m	Sat Oct 05 00:29:57 2013 -0400
-+++ b/src/video/cocoa/SDL_cocoamodes.m	Sat Oct 05 11:06:26 2013 -0600
+diff -r b9663c77f5c9 src/video/cocoa/SDL_cocoamodes.m
+--- a/src/video/cocoa/SDL_cocoamodes.m	Wed Oct 23 20:58:31 2013 -0700
++++ b/src/video/cocoa/SDL_cocoamodes.m	Fri May 30 12:58:49 2014 -0600
 @@ -30,9 +30,6 @@
  /* we need this for ShowMenuBar() and HideMenuBar(). */
  #include <Carbon/Carbon.h>
@@ -362,9 +322,9 @@ diff -r 70b305e09b4e src/video/cocoa/SDL_cocoamodes.m
      #if MAC_OS_X_VERSION_MIN_REQUIRED < 1060
      if (!IS_SNOW_LEOPARD_OR_LATER(_this)) {
          return CGDisplaySwitchToMode(display, (CFDictionaryRef) mode);
-diff -r 70b305e09b4e src/video/cocoa/SDL_cocoashape.m
---- a/src/video/cocoa/SDL_cocoashape.m	Sat Oct 05 00:29:57 2013 -0400
-+++ b/src/video/cocoa/SDL_cocoashape.m	Sat Oct 05 11:06:26 2013 -0600
+diff -r b9663c77f5c9 src/video/cocoa/SDL_cocoashape.m
+--- a/src/video/cocoa/SDL_cocoashape.m	Wed Oct 23 20:58:31 2013 -0700
++++ b/src/video/cocoa/SDL_cocoashape.m	Fri May 30 12:58:49 2014 -0600
 @@ -33,11 +33,9 @@
  Cocoa_CreateShaper(SDL_Window* window) {
      SDL_WindowData* windata = (SDL_WindowData*)window->driverdata;
@@ -380,9 +340,9 @@ diff -r 70b305e09b4e src/video/cocoa/SDL_cocoashape.m
      SDL_WindowShaper* result = result = malloc(sizeof(SDL_WindowShaper));
      result->window = window;
      result->mode.mode = ShapeModeDefault;
-diff -r 70b305e09b4e src/video/cocoa/SDL_cocoavideo.h
---- a/src/video/cocoa/SDL_cocoavideo.h	Sat Oct 05 00:29:57 2013 -0400
-+++ b/src/video/cocoa/SDL_cocoavideo.h	Sat Oct 05 11:06:26 2013 -0600
+diff -r b9663c77f5c9 src/video/cocoa/SDL_cocoavideo.h
+--- a/src/video/cocoa/SDL_cocoavideo.h	Wed Oct 23 20:58:31 2013 -0700
++++ b/src/video/cocoa/SDL_cocoavideo.h	Fri May 30 12:58:49 2014 -0600
 @@ -39,6 +39,16 @@
  #include "SDL_cocoaopengl.h"
  #include "SDL_cocoawindow.h"
@@ -400,9 +360,9 @@ diff -r 70b305e09b4e src/video/cocoa/SDL_cocoavideo.h
  /* Private display data */
  
  @class SDLTranslatorResponder;
-diff -r 70b305e09b4e src/video/cocoa/SDL_cocoawindow.h
---- a/src/video/cocoa/SDL_cocoawindow.h	Sat Oct 05 00:29:57 2013 -0400
-+++ b/src/video/cocoa/SDL_cocoawindow.h	Sat Oct 05 11:06:26 2013 -0600
+diff -r b9663c77f5c9 src/video/cocoa/SDL_cocoawindow.h
+--- a/src/video/cocoa/SDL_cocoawindow.h	Wed Oct 23 20:58:31 2013 -0700
++++ b/src/video/cocoa/SDL_cocoawindow.h	Fri May 30 12:58:49 2014 -0600
 @@ -27,7 +27,12 @@
  
  typedef struct SDL_WindowData SDL_WindowData;
@@ -416,10 +376,28 @@ diff -r 70b305e09b4e src/video/cocoa/SDL_cocoawindow.h
      SDL_WindowData *_data;
      BOOL observingVisible;
      BOOL wasCtrlLeft;
-diff -r 70b305e09b4e src/video/cocoa/SDL_cocoawindow.m
---- a/src/video/cocoa/SDL_cocoawindow.m	Sat Oct 05 00:29:57 2013 -0400
-+++ b/src/video/cocoa/SDL_cocoawindow.m	Sat Oct 05 11:06:26 2013 -0600
-@@ -100,9 +100,11 @@
+diff -r b9663c77f5c9 src/video/cocoa/SDL_cocoawindow.m
+--- a/src/video/cocoa/SDL_cocoawindow.m	Wed Oct 23 20:58:31 2013 -0700
++++ b/src/video/cocoa/SDL_cocoawindow.m	Fri May 30 12:58:49 2014 -0600
+@@ -53,9 +53,17 @@
+ {
+     NSMutableArray *contexts = data->nscontexts;
+     @synchronized (contexts) {
++#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1050
+         for (SDLOpenGLContext *context in contexts) {
+             [context scheduleUpdate];
+         }
++#else
++        NSEnumerator *e = [contexts objectEnumerator];
++        SDLOpenGLContext *context;
++        while (context = [e nextObject]) {
++            [context scheduleUpdate];
++        }
++#endif
+     }
+ }
+ 
+@@ -100,9 +108,11 @@
  
      [view setNextResponder:self];
  
@@ -431,7 +409,7 @@ diff -r 70b305e09b4e src/video/cocoa/SDL_cocoawindow.m
  }
  
  - (void)observeValueForKeyPath:(NSString *)keyPath
-@@ -501,6 +503,7 @@
+@@ -501,6 +511,7 @@
  
  - (void)handleTouches:(cocoaTouchType)type withEvent:(NSEvent *)event
  {
@@ -439,7 +417,7 @@ diff -r 70b305e09b4e src/video/cocoa/SDL_cocoawindow.m
      NSSet *touches = 0;
      NSEnumerator *enumerator;
      NSTouch *touch;
-@@ -549,6 +552,7 @@
+@@ -549,6 +560,7 @@
  
          touch = (NSTouch*)[enumerator nextObject];
      }
@@ -447,7 +425,7 @@ diff -r 70b305e09b4e src/video/cocoa/SDL_cocoawindow.m
  }
  
  @end
-@@ -993,6 +997,8 @@
+@@ -993,6 +1005,8 @@
  void
  Cocoa_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered)
  {
@@ -456,7 +434,7 @@ diff -r 70b305e09b4e src/video/cocoa/SDL_cocoawindow.m
      NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
      NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
      if ([nswindow respondsToSelector:@selector(setStyleMask:)]) {
-@@ -1002,6 +1008,7 @@
+@@ -1002,6 +1016,7 @@
          }
      }
      [pool release];
@@ -464,3 +442,22 @@ diff -r 70b305e09b4e src/video/cocoa/SDL_cocoawindow.m
  }
  
  void
+@@ -1175,10 +1190,18 @@
+         }
+ 
+         NSArray *contexts = [[data->nscontexts copy] autorelease];
++#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1050
+         for (SDLOpenGLContext *context in contexts) {
+             /* Calling setWindow:NULL causes the context to remove itself from the context list. */            
+             [context setWindow:NULL];
+         }
++#else
++        NSEnumerator *e = [contexts objectEnumerator];
++        SDLOpenGLContext *context;
++        while (context = [e nextObject]) {
++            [context setWindow:NULL];
++        }
++#endif
+         [data->nscontexts release];
+ 
+         SDL_free(data);

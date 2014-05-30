@@ -1,0 +1,186 @@
+diff -r b9663c77f5c9 Xcode/SDL/SDL.xcodeproj/project.pbxproj
+--- a/Xcode/SDL/SDL.xcodeproj/project.pbxproj	Wed Oct 23 20:58:31 2013 -0700
++++ b/Xcode/SDL/SDL.xcodeproj/project.pbxproj	Fri May 30 12:55:31 2014 -0600
+@@ -2723,14 +2723,23 @@
+ 		00CFA622106A567900758660 /* Release */ = {
+ 			isa = XCBuildConfiguration;
+ 			buildSettings = {
++				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+ 				DYLIB_COMPATIBILITY_VERSION = 1;
+ 				DYLIB_CURRENT_VERSION = 1;
+ 				FRAMEWORK_VERSION = A;
++				GCC_ALTIVEC_EXTENSIONS = YES;
++				GCC_MODEL_TUNING = "";
++				GCC_VERSION = "";
+ 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
+ 				INFOPLIST_FILE = "Info-Framework.plist";
+-				INSTALL_PATH = "@rpath";
++				INSTALL_PATH = "@executable_path/../Frameworks";
++				MACOSX_DEPLOYMENT_TARGET = 10.6;
++				OTHER_CFLAGS = "";
+ 				OTHER_LDFLAGS = "-liconv";
+ 				PRODUCT_NAME = SDL2;
++				SDKROOT = macosx10.6;
++				SEPARATE_STRIP = YES;
++				VALID_ARCHS = x86_64;
+ 				WRAPPER_EXTENSION = framework;
+ 			};
+ 			name = Release;
+@@ -2780,11 +2789,23 @@
+ 				DYLIB_COMPATIBILITY_VERSION = 1;
+ 				DYLIB_CURRENT_VERSION = 1;
+ 				FRAMEWORK_VERSION = A;
++				GCC_VERSION = 4.0;
++				GCC_VERSION_i386 = 4.0;
++				GCC_VERSION_ppc = 4.0;
++				GCC_VERSION_x86_64 = 4.2;
+ 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
+ 				INFOPLIST_FILE = "Info-Framework.plist";
+-				INSTALL_PATH = "@rpath";
++				INSTALL_PATH = "@executable_path/../Frameworks";
++				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
++				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
++				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
++				MAC_OS_X_VERSION_MAX_ALLOWED_i386 = 1040;
++				MAC_OS_X_VERSION_MAX_ALLOWED_ppc = 1040;
++				MAC_OS_X_VERSION_MAX_ALLOWED_x86_64 = 1060;
++				ONLY_ACTIVE_ARCH = YES;
+ 				OTHER_LDFLAGS = "-liconv";
+ 				PRODUCT_NAME = SDL2;
++				SDKROOT = "";
+ 				WRAPPER_EXTENSION = framework;
+ 			};
+ 			name = Debug;
+@@ -2813,6 +2834,92 @@
+ 			};
+ 			name = Debug;
+ 		};
++		73B0AEED1938EC5D00BACA3D /* Release-10.4 */ = {
++			isa = XCBuildConfiguration;
++			buildSettings = {
++				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
++				DEPLOYMENT_POSTPROCESSING = YES;
++				GCC_ALTIVEC_EXTENSIONS = YES;
++				GCC_AUTO_VECTORIZATION = YES;
++				GCC_ENABLE_SSE3_EXTENSIONS = YES;
++				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
++				GCC_OPTIMIZATION_LEVEL = 3;
++				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
++				MACOSX_DEPLOYMENT_TARGET = 10.5;
++				SDKROOT = macosx;
++				STRIP_STYLE = "non-global";
++			};
++			name = "Release-10.4";
++		};
++		73B0AEEE1938EC5D00BACA3D /* Release-10.4 */ = {
++			isa = XCBuildConfiguration;
++			buildSettings = {
++				ARCHS = (
++					ppc,
++					i386,
++				);
++				DYLIB_COMPATIBILITY_VERSION = 1;
++				DYLIB_CURRENT_VERSION = 1;
++				FRAMEWORK_VERSION = A;
++				GCC_ALTIVEC_EXTENSIONS = YES;
++				GCC_VERSION = 4.0;
++				HEADER_SEARCH_PATHS = /usr/X11R6/include;
++				INFOPLIST_FILE = "Info-Framework.plist";
++				INSTALL_PATH = "@executable_path/../Frameworks";
++				MACOSX_DEPLOYMENT_TARGET = 10.4;
++				OTHER_CFLAGS = "-DMAC_OS_X_VERSION_MAX_ALLOWED=1040";
++				OTHER_LDFLAGS = "-liconv";
++				PRODUCT_NAME = SDL2;
++				SDKROOT = macosx10.4;
++				SEPARATE_STRIP = YES;
++				VALID_ARCHS = "i386 ppc ppc64 ppc7400 ppc970";
++				WRAPPER_EXTENSION = framework;
++			};
++			name = "Release-10.4";
++		};
++		73B0AEEF1938EC5D00BACA3D /* Release-10.4 */ = {
++			isa = XCBuildConfiguration;
++			buildSettings = {
++				GCC_PREPROCESSOR_DEFINITIONS = (
++					"$(GCC_PREPROCESSOR_DEFINITIONS)",
++					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
++					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
++					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
++					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
++				);
++				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
++				HEADER_SEARCH_PATHS = /usr/X11R6/include;
++				PRODUCT_NAME = SDL2;
++				SKIP_INSTALL = YES;
++			};
++			name = "Release-10.4";
++		};
++		73B0AEF01938EC5D00BACA3D /* Release-10.4 */ = {
++			isa = XCBuildConfiguration;
++			buildSettings = {
++				EXECUTABLE_PREFIX = lib;
++				GCC_PREPROCESSOR_DEFINITIONS = (
++					"$(GCC_PREPROCESSOR_DEFINITIONS)",
++					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
++					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
++					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
++					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
++				);
++				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
++				HEADER_SEARCH_PATHS = /usr/X11R6/include;
++				INSTALL_PATH = "@rpath";
++				PRODUCT_NAME = SDL2;
++				SKIP_INSTALL = YES;
++			};
++			name = "Release-10.4";
++		};
++		73B0AEF11938EC5D00BACA3D /* Release-10.4 */ = {
++			isa = XCBuildConfiguration;
++			buildSettings = {
++				PRODUCT_NAME = "Standard DMG";
++			};
++			name = "Release-10.4";
++		};
+ 		DB31407517554B71006C0E22 /* Debug */ = {
+ 			isa = XCBuildConfiguration;
+ 			buildSettings = {
+@@ -2859,6 +2966,7 @@
+ 			buildConfigurations = (
+ 				00CFA628106A568900758660 /* Debug */,
+ 				00CFA622106A567900758660 /* Release */,
++				73B0AEEE1938EC5D00BACA3D /* Release-10.4 */,
+ 			);
+ 			defaultConfigurationIsVisible = 0;
+ 			defaultConfigurationName = Debug;
+@@ -2868,6 +2976,7 @@
+ 			buildConfigurations = (
+ 				00CFA629106A568900758660 /* Debug */,
+ 				00CFA623106A567900758660 /* Release */,
++				73B0AEEF1938EC5D00BACA3D /* Release-10.4 */,
+ 			);
+ 			defaultConfigurationIsVisible = 0;
+ 			defaultConfigurationName = Debug;
+@@ -2877,6 +2986,7 @@
+ 			buildConfigurations = (
+ 				00CFA62B106A568900758660 /* Debug */,
+ 				00CFA625106A567900758660 /* Release */,
++				73B0AEF11938EC5D00BACA3D /* Release-10.4 */,
+ 			);
+ 			defaultConfigurationIsVisible = 0;
+ 			defaultConfigurationName = Debug;
+@@ -2886,6 +2996,7 @@
+ 			buildConfigurations = (
+ 				00CFA627106A568900758660 /* Debug */,
+ 				00CFA621106A567900758660 /* Release */,
++				73B0AEED1938EC5D00BACA3D /* Release-10.4 */,
+ 			);
+ 			defaultConfigurationIsVisible = 0;
+ 			defaultConfigurationName = Debug;
+@@ -2895,6 +3006,7 @@
+ 			buildConfigurations = (
+ 				DB31407517554B71006C0E22 /* Debug */,
+ 				DB31407617554B71006C0E22 /* Release */,
++				73B0AEF01938EC5D00BACA3D /* Release-10.4 */,
+ 			);
+ 			defaultConfigurationIsVisible = 0;
+ 			defaultConfigurationName = Debug;
