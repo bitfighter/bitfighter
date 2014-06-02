@@ -31,12 +31,20 @@ if(MINGW)
 	set(CMAKE_EXE_LINKER_FLAGS ${BF_LINK_FLAGS})
 endif()
 
+if(XCOMPILE)
+	# Disable LuaJIT for cross-compile (for now)
+	set(USE_LUAJIT NO)
+	
+	# StackWalker has too much black magic for mingw
+	add_definitions(-DBF_NO_STACKTRACE)
+endif()
+
 
 # 
 # Compiler specific flags
 # 
 if(MSVC)
-	# Using /MT avoids linking against the stupid MSVC runtime libraries
+	# Using /MT avoids dynamically linking against the stupid MSVC runtime libraries
 	set(CompilerFlags
 		CMAKE_CXX_FLAGS
 		CMAKE_CXX_FLAGS_DEBUG

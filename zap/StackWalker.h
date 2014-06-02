@@ -35,6 +35,8 @@
 // #pragma once is supported starting with _MCS_VER 1000, 
 // so we need not to check the version (because we only support _MSC_VER >= 1100)!
 
+#ifndef BF_NO_STACKTRACE
+
 #include "tnlTypes.h"
 
 #ifdef TNL_OS_WIN32
@@ -220,3 +222,5 @@ protected:
 
 
 #endif
+
+#endif // BF_NO_STACKTRACE
