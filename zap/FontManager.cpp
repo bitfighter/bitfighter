@@ -45,6 +45,8 @@ const char *BfFont::SystemFontDirectories[] = {
    "/usr/share/fonts/truetype/droid",
    "/usr/share/fonts/truetype/play",
    "/usr/share/fonts/truetype/ocr-a"
+#else
+   ""
 #endif
 };
 
