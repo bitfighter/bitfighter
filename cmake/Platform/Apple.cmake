@@ -149,7 +149,7 @@ function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 	set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${BITFIGHTER_RELEASE})
 	
 	# Special flags needed because of LuaJIT on 64 bit OSX
-	if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+	if(USE_LUAJIT AND CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
 		set_target_properties(${targetName} PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
 	endif()
 endfunction()
@@ -190,7 +190,7 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	)
 	
 	# 64-bit OSX needs to use shared LuaJIT library
-	if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+	if(USE_LUAJIT AND CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
 		add_custom_command(TARGET ${targetName} POST_BUILD
 			COMMAND cp -rp ${luaLibDir}libluajit.dylib ${frameworksDir}
 		)
@@ -204,7 +204,16 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	
 	# Thin out our installed frameworks by running 'lipo' to clean out the unwanted 
 	# architectures and removing any header files
-	set(THIN_FRAMEWORKS ${CMAKE_SOURCE_DIR}/build/osx/tools/thin_frameworks.sh ${CMAKE_OSX_ARCHITECTURES} ${exeDir}/${targetName}.app)
+	if(NOT LIPO_COMMAND)
+		set(LIPO_COMMAND lipo)
+	endif()
+	
+	# This can happen when cross-compiling x86_64
+	if(NOT CMAKE_OSX_ARCHITECTURES)
+		set(CMAKE_OSX_ARCHITECTURES "x86_64")
+	endif()
+	
+	set(THIN_FRAMEWORKS ${CMAKE_SOURCE_DIR}/build/osx/tools/thin_frameworks.sh ${LIPO_COMMAND} ${CMAKE_OSX_ARCHITECTURES} ${exeDir}/${targetName}.app)
 	
 	add_custom_command(TARGET ${targetName} POST_BUILD
 		COMMAND ${THIN_FRAMEWORKS}

@@ -3,8 +3,14 @@
 # Thins all of our frameworks according to the given architecture and
 # cleans up any header files to reduce size
 
-arch="$1"
-appdir="$2"
+if [ "x$3" = "x" ]; then
+  echo "Usage: $0 LIPO_COMMAND ARCHITECTURE APP_DIR"
+  exit 1
+fi
+
+lipo="$1"
+arch="$2"
+appdir="$3"
 
 echo "=> Thinning out installed frameworks for: $arch"
 
@@ -22,7 +28,7 @@ do
   
   pushd "$fw_dir/Versions/A" 1>/dev/null
   cp "$fw_name" "$fw_name".orig
-  lipo "$fw_name".orig -extract ${arch} -output "$fw_name"
+  "$lipo" "$fw_name".orig -extract ${arch} -output "$fw_name"
   rm "$fw_name".orig
   popd 1>/dev/null
 done
