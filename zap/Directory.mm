@@ -76,19 +76,13 @@ void checkForUpdates()
 
 // Used for setting -rootdatadir; corresponds to the location from which most 
 // resources will be loaded
-void getUserDataPath(std::string &fillPath)
+void getApplicationSupportPath(std::string &fillPath)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
-#ifdef TNL_OS_MAC_OSX
     // OSX used the Application Support directory
     NSArray *appSupportPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-    NSString *bundleName = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"];
-    fillPath = std::string([[NSString stringWithFormat:@"%@/%@", [appSupportPaths objectAtIndex:0], bundleName] UTF8String]);
-#else // TNL_OS_IOS
-    // iOS uses the resources straight from the bundle
-    getAppResourcePath(fillPath);  
-#endif
+    fillPath = std::string([[NSString stringWithFormat:@"%@", [appSupportPaths objectAtIndex:0]] UTF8String]);
     
     [pool release];
 }
