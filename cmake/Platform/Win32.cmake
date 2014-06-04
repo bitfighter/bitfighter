@@ -25,7 +25,7 @@ endif()
 
 if(MINGW)
 	# MinGW won't statically compile in Microsofts c/c++ library routines
-	set(BF_LINK_FLAGS "-Wl,--as-needed -static-libgcc")
+	set(BF_LINK_FLAGS "-Wl,--as-needed -static-libgcc -static-libstdc++")
 	
 	# Only link in what is absolutely necessary
 	set(CMAKE_EXE_LINKER_FLAGS ${BF_LINK_FLAGS})
