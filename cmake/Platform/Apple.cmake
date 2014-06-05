@@ -148,10 +148,6 @@ function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 	set(MACOSX_BUNDLE_VERSION ${BITFIGHTER_BUILD_VERSION})
 	set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${BITFIGHTER_RELEASE})
 	
-	# TODO figure out deployment targets
-	set(MACOSX_DEPLOYMENT_TARGET "10.6")
-	
-
 	# Special flags needed because of LuaJIT on 64 bit OSX
 	if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
 		set_target_properties(${targetName} PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
@@ -167,8 +163,8 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
 	
 	# Create extra dirs in the .app
-	set(frameworksDir "${exeDir}/bitfighter.app/Contents/Frameworks")
-	set(resourcesDir "${exeDir}/bitfighter.app/Contents/Resources")
+	set(frameworksDir "${exeDir}/${targetName}.app/Contents/Frameworks")
+	set(resourcesDir "${exeDir}/${targetName}.app/Contents/Resources")
 	execute_process(COMMAND mkdir -p ${frameworksDir})
 	execute_process(COMMAND mkdir -p ${resourcesDir})
 	
@@ -206,7 +202,13 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 		COMMAND ${LIB_COPY_CMD}
 	)
 	
-	# TODO - run lipo on the frameworks to clean out unwanted architectures
+	# Thin out our installed frameworks by running 'lipo' to clean out the unwanted 
+	# architectures and removing any header files
+	set(THIN_FRAMEWORKS ${CMAKE_SOURCE_DIR}/build/osx/tools/thin_frameworks.sh ${CMAKE_OSX_ARCHITECTURES} ${exeDir}/${targetName}.app)
+	
+	add_custom_command(TARGET ${targetName} POST_BUILD
+		COMMAND ${THIN_FRAMEWORKS}
+	)
 endfunction()
 
 
