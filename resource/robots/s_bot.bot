@@ -24,27 +24,27 @@ profiles = {
         difficulty = 0.5,
         aggression = 0.5,
         defense = 0,
-        speed = 1,
+        speed = 1.0,
         accuracy = 0.90,
-        orbitalDirectionThreshold = 0.25
+        dodging = 0.25
     },
     {
         name = "Meany",
         difficulty = 1.0,
         aggression = 1.0,
         defense = 0,
-        speed = 1,
+        speed = 1.0,
         accuracy = 1.0,
-        orbitalDirectionThreshold = 0.25
+        dodging = 1.0
     },
     {
         name = "Barnside",
         difficulty = 0.5,
         aggression = 1.0,
         defense = 0,
-        speed = 0.75,
+        speed = 0.5,
         accuracy = 0.1,
-        orbitalDirectionThreshold = 0.25
+        dodging = 0.1
     }
 }
 
@@ -71,12 +71,12 @@ function main()
     profileIndex = math.random(#profiles)
     profile = profiles[profileIndex]
 
-    difficulty                = profile["difficulty"]
-    agression                 = profile["aggression"]
-    defense                   = profile["defense"]
-    speed                     = profile["speed"]
-    accuracy                  = profile["accuracy"]
-    orbitalDirectionThreshold = profile["orbitalDirectionThreshold"]
+    difficulty    = profile["difficulty"]
+    aggression    = profile["aggression"]
+    defense       = profile["defense"]
+    speed         = profile["speed"]
+    accuracy      = profile["accuracy"]
+    dodging       = profile["dodging"]
 
     -- Set up other variables
     botRadius = bot:getRad()
@@ -219,11 +219,12 @@ function shield()
     end
 
     -- Set ratio
-    shieldTickCount = shieldTickCount / averageShieldMaxTicks
+    local shieldTickRatio = shieldTickCount / averageShieldMaxTicks
 
     -- Reverse orbital direction if our shielding ratio is greater than the 
-    -- threshold
-    if(shieldTickCount > orbitalDirectionThreshold) then
+    -- dodging threshold - this means the bot will appear to strafe more if
+    -- 'dodging' is higher
+    if(shieldTickRatio > 1 - dodging) then
         myOrbitalDirection = -myOrbitalDirection
         
         -- Reset shielding average if we had to change direction
@@ -294,8 +295,9 @@ function gotoAndOrbitPosition(pt)
     end
 end
 
--- Returns true if it found an enemy to fight
-function attackNearbyEnemies(target, agressionLevel)
+
+-- TODO Use aggression in a different manner since I have no idea what this is doing
+function setAggressiveAttackTarget(target, aggression)
     if target ~= nil then
         local targetPos = target:getPos()
       
@@ -309,14 +311,11 @@ function attackNearbyEnemies(target, agressionLevel)
       
         --advantage is between -1 and 1, -1 meaning an extreme disadvantage and 1 meaning an extreme advantage
         local advantage = (myPow - otherPow) / math.max(myPow, otherPow)
-        if(advantage  / 2 + .5  >agressionLevel) then
-            --orbitPoint(targetPos, myOrbitalDirection, botRadius * 9, 2)
+        
+        if((advantage * 0.5) + .5 > 1 - aggression) then
             prevtarget = targetPos
-            return(false)      -- was true
-        else
         end
     end
-    return(false)
 end
 
 
@@ -549,8 +548,7 @@ function onTick(deltaTime)
 
     local closestEnemy = bot:findClosestEnemy()
     
-    -- attackNearbyEnemies returns true if there is an enemy to fight, false if the bot can do something else
-    attackNearbyEnemies(closestEnemy, 1 - agression)
+    setAggressiveAttackTarget(closestEnemy, aggression)
     doObjective(closestEnemy)   -- Set bot's objective
 
     goInDirection()             -- Move the ship
