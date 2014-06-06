@@ -254,6 +254,7 @@ endif()
 include(bitfighterd.cmake)
 
 if(COMPILE_CLIENT)
+	include(bitfighter_client.cmake)
 	include(bitfighter.cmake)
 	
 	# The test suite requires the client dependencies

@@ -3,39 +3,23 @@
 # 
 
 add_executable(bitfighter
-	${SHARED_SOURCES}
-	${CLIENT_SOURCES}
-	${BITFIGHTER_HEADERS}
-	${OTHER_HEADERS}
 	main.cpp
 )
 
 add_dependencies(bitfighter
-	alure
-	${LUA_LIB}
-	tnl
-	tomcrypt
+	bitfighter_client
 )
 
 target_link_libraries(bitfighter
-	${CLIENT_LIBS}
-	${SHARED_LIBS}
+	${BF_CLIENT_LIBRARY_BEFORE_FLAGS}
+	bitfighter_client
+	${BF_CLIENT_LIBRARY_AFTER_FLAGS}
 )
-
 
 # Where to put the executable
 set_target_properties(bitfighter PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe)
 
-if(USE_GLES)
-	get_property(CLIENT_DEFS TARGET bitfighter PROPERTY COMPILE_DEFINITIONS)
-	set_target_properties(bitfighter
-		PROPERTIES
-		COMPILE_DEFINITIONS "${CLIENT_DEFS};BF_USE_GLES"
-	)
-endif()
-
 set_target_properties(bitfighter PROPERTIES COMPILE_DEFINITIONS_DEBUG "TNL_DEBUG")
-
 
 BF_PLATFORM_SET_TARGET_PROPERTIES(bitfighter)
 

@@ -51,12 +51,13 @@ endif()
 # Linker flags
 # 
 
-
-
 # 
 # Compiler specific flags
 # 
 if(CMAKE_COMPILER_IS_GNUCC)
+	set(BF_CLIENT_LIBRARY_BEFORE_FLAGS "-Wl,-whole-archive")
+	set(BF_CLIENT_LIBRARY_AFTER_FLAGS "-Wl,-no-whole-archive")
+	
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
 endif()

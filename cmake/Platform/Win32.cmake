@@ -4,6 +4,9 @@
 # Linker flags
 # 
 if(MSVC)
+	set(BF_CLIENT_LIBRARY_BEFORE_FLAGS "/OPT:NOREF")
+	set(BF_CLIENT_LIBRARY_AFTER_FLAGS "/OPT:REF")
+	
 	# Using the following NODEFAULTLIB to fix LNK4098 warning and some linker errors
 	set(CMAKE_EXE_LINKER_FLAGS_DEBUG          "${CMAKE_EXE_LINKER_FLAGS_DEBUG}          /NODEFAULTLIB:libc.lib;libcmt.lib;msvcrt.lib;libcd.lib;msvcrtd.lib")
 	set(CMAKE_EXE_LINKER_FLAGS_RELEASE        "${CMAKE_EXE_LINKER_FLAGS_RELEASE}        /NODEFAULTLIB:libc.lib;msvcrt.lib;libcd.lib;libcmtd.lib;msvcrtd.lib")
@@ -24,6 +27,9 @@ if(MSVC)
 endif()
 
 if(MINGW)
+	set(BF_CLIENT_LIBRARY_BEFORE_FLAGS "-Wl,-whole-archive")
+	set(BF_CLIENT_LIBRARY_AFTER_FLAGS "-Wl,-no-whole-archive")
+
 	# MinGW won't statically compile in Microsofts c/c++ library routines
 	set(BF_LINK_FLAGS "-Wl,--as-needed -static-libgcc -static-libstdc++")
 	

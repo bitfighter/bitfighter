@@ -45,23 +45,18 @@ set(TEST_SOURCES
 
 
 add_executable(test EXCLUDE_FROM_ALL
-	${CLIENT_SOURCES}
-	${SHARED_SOURCES}
 	${TEST_SOURCES}
-	${BITFIGHTER_HEADERS}
 )
 
 target_link_libraries(test
-	${SHARED_LIBS}
-	${CLIENT_LIBS}
+	${BF_CLIENT_LIBRARY_BEFORE_FLAGS}
+	bitfighter_client
+	${BF_CLIENT_LIBRARY_AFTER_FLAGS}
 	gtest
 )
 
 add_dependencies(test
-	alure
-	${LUA_LIB}
-	tnl
-	tomcrypt
+	bitfighter_client
 	gtest
 )
 

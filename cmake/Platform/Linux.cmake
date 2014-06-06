@@ -3,6 +3,9 @@
 #
 # Linker flags
 # 
+set(BF_CLIENT_LIBRARY_BEFORE_FLAGS "-Wl,-whole-archive")
+set(BF_CLIENT_LIBRARY_AFTER_FLAGS "-Wl,-no-whole-archive")
+
 set(BF_LINK_FLAGS "-Wl,--as-needed")
 
 # Only link in what is absolutely necessary
