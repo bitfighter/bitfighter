@@ -103,6 +103,11 @@ set(SHARED_SOURCES
 	${CMAKE_SOURCE_DIR}/poly2tri/sweep/cdt.cc
 	${CMAKE_SOURCE_DIR}/poly2tri/sweep/sweep.cc
 	${CMAKE_SOURCE_DIR}/poly2tri/sweep/sweep_context.cc
+	# these are needed by the test runner, but must be linked in the same unit
+	# as the rest of the netclasses because of the way TNL instatiates netclasses
+	${CMAKE_SOURCE_DIR}/master/master.cpp
+	${CMAKE_SOURCE_DIR}/master/MasterServerConnection.cpp
+	${CMAKE_SOURCE_DIR}/master/GameJoltConnector.cpp
 )
 
 set(CLIENT_SOURCES 

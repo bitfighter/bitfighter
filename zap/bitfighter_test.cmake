@@ -37,10 +37,6 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSymbolStrings.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestUtils.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
-	${CMAKE_SOURCE_DIR}/master/master.cpp
-	${CMAKE_SOURCE_DIR}/master/MasterServerConnection.cpp
-	${CMAKE_SOURCE_DIR}/master/MasterServerConnection.cpp
-	${CMAKE_SOURCE_DIR}/master/GameJoltConnector.cpp
 )
 
 
