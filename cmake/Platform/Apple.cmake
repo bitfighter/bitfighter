@@ -55,7 +55,7 @@ endif()
 # Compiler specific flags
 # 
 if(CMAKE_COMPILER_IS_GNUCC)
-	set(BF_CLIENT_LIBRARY_BEFORE_FLAGS "-Wl,-all_load")
+	set(BF_CLIENT_LIBRARY_BEFORE_FLAGS "-Wl,-force_load")
 	set(BF_CLIENT_LIBRARY_AFTER_FLAGS "")
 	
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
