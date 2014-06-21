@@ -5,12 +5,13 @@
 
 #include "TestUtils.h"
 
-#include "../zap/gameType.h"
-#include "../zap/ServerGame.h"
-#include "../zap/ClientGame.h"
-#include "../zap/ChatCommands.h"
-#include "../zap/UIGame.h"
-#include "../zap/UIManager.h"
+#include "gameType.h"
+#include "ServerGame.h"
+#include "ClientGame.h"
+#include "ChatCommands.h"
+#include "UIGame.h"
+#include "UIManager.h"
+#include "Level.h"
 
 #include "gtest/gtest.h"
 

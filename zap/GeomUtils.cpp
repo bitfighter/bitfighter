@@ -2068,7 +2068,7 @@ S32 lua_offsetPolygons(lua_State *L)
 {
    checkArgList(L, "Geom", "offsetPolygons");
 
-   F32 amount = lua_tonumber(L, 1);
+   F32 amount = (F32)lua_tonumber(L, 1);     // lua_tonumber returns a double
    Vector<Vector<Point> > input = getPolygons(L, 2);
 
    lua_pop(L, 2);

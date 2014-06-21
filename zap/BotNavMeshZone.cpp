@@ -582,6 +582,76 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, Vector<Bot
 }
 
 
+inline F32 getTriangleArea(const Point &p1, const Point &p2, const Point &p3)
+{
+   F32 area = ((p2.x - p1.x) * (p3.y - p1.y) - (p3.x - p1.x) * (p2.y - p1.y)) / 2;
+   return (area > 0.0) ? area : -area;
+}
+
+
+
+// Server only
+// Use the Triangle library to create zones.  Aggregate triangles with Recast
+// Static method
+S32 BotNavMeshZone::calcLevelSize(const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList,
+                                  const Vector<pair<Point, const Vector<Point> *> > &teleporterData)
+{
+#define LOG_TIMER
+#ifdef LOG_TIMER
+   U32 starttime = Platform::getRealMilliseconds();
+#endif
+
+   Rect bounds(worldExtents);      // Modifiable copy
+
+   bounds.expandToInt(Point(LevelZoneBuffer, LevelZoneBuffer));      // Provide a little breathing room
+
+   // Make sure level isn't too big for zone generation, which uses 16 bit ints
+   if(bounds.getHeight() >= (F32)U16_MAX || bounds.getWidth() >= (F32)U16_MAX)
+   {
+      logprintf(LogConsumer::LogLevelError, "Level too big for zone generation! (max allowed dimension is %d)", U16_MAX);
+      return false;
+   }
+
+   Vector<F32> holes;
+   PolyTree solution;
+
+   Vector<DatabaseObject *> empty;
+
+   // Merge bot zone buffers from barriers; we'll ignore turrets and forcefields to simplify things a bit.
+   // The Clipper library is the work horse here.  Its output is essential for the
+   // triangulation.  The output contains the upscaled Clipper points (you will need to downscale)
+   if(!mergeBotZoneBuffers(barrierList, empty, empty, (F32)BufferRadius, solution))
+      return -1;
+
+#ifdef LOG_TIMER
+   U32 done1 = Platform::getRealMilliseconds();
+#endif
+
+   // Tessellate!
+   // This will downscale the Clipper output and use poly2tri to triangulate
+   Vector<Point> outputTriangles;  // Every 3 points is a triangle
+   if(!Triangulate::processComplex(outputTriangles, bounds, solution))
+      return false;
+
+#ifdef LOG_TIMER
+   U32 done2 = Platform::getRealMilliseconds();
+#endif
+
+   F32 area = 0;
+   for(S32 i = 0; i < outputTriangles.size(); i+=3)
+      area += getTriangleArea(outputTriangles[i], outputTriangles[i+1], outputTriangles[i+2]);
+
+
+#ifdef LOG_TIMER
+   logprintf("Timings: %d %d", done1-starttime, done2-done1);
+#endif
+
+   logprintf("Area %d", (S32)(area/10000));
+
+   return (S32)area;
+}
+
+
 // Only runs on server
 // TODO can be combined with buildBotNavMeshZoneConnectionsRecastStyle() ?
 void BotNavMeshZone::buildBotNavMeshZoneConnections(const Vector<BotNavMeshZone *> *allZones)

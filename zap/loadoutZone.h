@@ -22,7 +22,7 @@ public:
    LoadoutZone *clone() const;
 
    void render();
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    void onAddedToGame(Game *theGame);
 
    const Vector<Point> *getCollisionPoly() const;     // More precise boundary for precise collision detection

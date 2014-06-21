@@ -6,6 +6,7 @@
 #include "item.h"
 #include "game.h"
 #include "gameConnection.h"
+#include "Level.h"
 
 #include "gameObjectRender.h"
 #include "Colors.h"
@@ -45,14 +46,14 @@ bool Item::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const
 
 
 // Server only  --> Assumes first two params are x and y location; subclasses may read additional params
-bool Item::processArguments(S32 argc, const char **argv, Game *game)
+bool Item::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 2)
       return false;
 
    Point pos;
    pos.read(argv);
-   pos *= game->getLegacyGridSize();
+   pos *= level->getLegacyGridSize();
 
    setPos(pos);      // Needed by game
 
@@ -169,7 +170,7 @@ void Item::setRadius(F32 radius)
 void Item::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
-   drawFilledSquare(pos, 10, &Colors::cyan);
+   drawFilledSquare(pos, 10, Colors::cyan);
 #endif
 }
 

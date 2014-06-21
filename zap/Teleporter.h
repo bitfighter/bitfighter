@@ -121,7 +121,7 @@ public:
 
    static bool checkDeploymentPosition(const Point &position, const GridDatabase *gb, const Ship *ship);
 
-   virtual bool processArguments(S32 argc, const char **argv, Game *game);
+   virtual bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
    Rect calcExtents();
 
@@ -158,7 +158,7 @@ public:
 
 
    ///// Editor Methods
-   Color getEditorRenderColor();
+   const Color &getEditorRenderColor() const;
 
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 

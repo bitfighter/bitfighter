@@ -126,8 +126,6 @@ public:
 
    static S32 getExpLevel(S32 gamesPlayed);
 
-
-
    UIManager *getUIManager() const;
 
    void toggleShowAllObjectOutlines();
@@ -179,13 +177,14 @@ public:
    void activatePlayerMenuUi();
    void renderBasicInterfaceOverlay() const;
 
-
    void onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool playAlert, bool showMessage);
    void onPlayerQuit(const StringTableEntry &name);
 
-   void setSpawnDelayed(bool spawnDelayed);
+   bool isGameOver() const;
+
+   void setSpawnDelayed(bool spawnDelayed) const;
    bool isSpawnDelayed() const;
-   void undelaySpawn();
+   void undelaySpawn() const;
 
    // Chat related
    void sendChat(bool isGlobal, const StringPtr &message);
@@ -257,6 +256,8 @@ public:
 
    void setHighScores(const Vector<StringTableEntry> &groupNames, const Vector<string> &names, const Vector<string> &scores) const;
 
+   void setPlayerScore(S32 index, S32 score);
+
    string getRemoteLevelDownloadFilename() const;
    void setRemoteLevelDownloadFilename(const string &filename);
 
@@ -304,12 +305,8 @@ public:
    S32 getBotCount() const;
    GridDatabase *getBotZoneDatabase() const;
 
-
-   // For loading levels in editor
-   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id);
-
    void addPolyWall(BfObject *polyWall, GridDatabase *database);     // Add polyWall item to game
-   void addWallItem(BfObject *wallItem, GridDatabase *database);     // Add wallItem item to game
+   void addWallItem(WallItem *wallItem, GridDatabase *database);     // Add wallItem item to game
 
    Ship *getLocalPlayerShip() const;
 
@@ -320,6 +317,7 @@ public:
    void resetInGameHelpMessages();
 
    void setGameType(GameType *gameType);
+   void setLevel(Level *level);
 };
 
 

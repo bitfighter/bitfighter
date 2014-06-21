@@ -17,7 +17,7 @@ class SimpleLine : public BfObject
    typedef BfObject Parent;
 
 private:
-   virtual Color getEditorRenderColor() = 0;
+   virtual const Color &getEditorRenderColor() const = 0;
 
 protected:
    virtual S32 getDockRadius();                       // Size of object on dock

@@ -118,7 +118,7 @@ TEST_F(ObjectTest, GhostingSanity)
       ghostingRecords[i].client = false;
    }
 
-   // Create our pair of connected games
+   // Create a pair of connected games
    GamePair gamePair;
    ClientGame *clientGame = gamePair.getClient(0);
    ServerGame *serverGame = gamePair.server;
@@ -218,6 +218,8 @@ TEST_F(ObjectTest, LuaSanity)
       
    lua_State *L = LuaScriptRunner::getL();
 
+   ASSERT_EQ(1, serverGame->getTeamCount()) << "Need a team here or else the bfobj->lua_setTeam() below will fail!";
+
    // Create one of each type of registered NetClass
    for(U32 i = 0; i < classCount; i++)
    {
@@ -230,16 +232,18 @@ TEST_F(ObjectTest, LuaSanity)
       if(bfobj && bfobj->hasGeometry())
       {
          // First, add some geometry
-         bfobj->setExtent(Rect(0,0,1,1));
+         bfobj->setExtent(Rect(0,0, 1,1));
          bfobj->GeomObject::setGeom(geom);
 
-         // LUA testing
+         // Lua testing
          lua_pushinteger(L, 1);
-         bfobj->lua_setTeam(L);
+         bfobj->lua_setTeam(L);     // Assign bfobj to team 1 (first team, lua uses 1-index arrays)
          lua_pop(L, 1);
-         lua_pushinteger(L, -2);
-         bfobj->lua_setTeam(L);
+
+         lua_pushinteger(L, TEAM_HOSTILE);
+         bfobj->lua_setTeam(L);     
          lua_pop(L, 1);
+
          luaPushPoint(L, 2.3f, 4.3f);
          bfobj->lua_setPos(L);
          lua_pop(L, 1);

@@ -14,6 +14,9 @@
 #include "tnlVector.h"
 #include "tnlNetObject.h"
 
+#include "gtest/gtest.h"
+
+
 namespace Zap
 {
 
@@ -25,14 +28,10 @@ class Barrier : public BfObject
 {
    typedef BfObject Parent;
 
-public:
-   // Constructor
-   Barrier(const Vector<Point> &points = Vector<Point>(), F32 width = DEFAULT_BARRIER_WIDTH, bool solid = false);
-   virtual ~Barrier();
-
+private:
    Vector<Point> mPoints;  // The points of the barrier --> if only two, first will be start, second end of an old-school segment
 
-   bool mSolid;            // True if this represents a polywall
+   bool mIsPolywall;       // True if this represents a polywall
 
    // By precomputing and storing, we should ease the rendering cost
    Vector<Point> mRenderFillGeometry;        // Actual geometry used for rendering fill
@@ -40,13 +39,21 @@ public:
 
    F32 mWidth;
 
+public:
+   // Constructor
+   Barrier(const Vector<Point> &points = Vector<Point>(), F32 width = DEFAULT_BARRIER_WIDTH, bool solid = false);
+   virtual ~Barrier();
+
+
    static const S32 MIN_BARRIER_WIDTH = 1;         // Clipper doesn't much like 0 width walls
-   static const S32 MAX_BARRIER_WIDTH = 2500;      // Geowar has walls at least 350 units wide, so going lower will break at least one level
+   static const S32 MAX_BARRIER_WIDTH = 2500;      // Geowar has walls 350+ units wide, so going lower will break at least one level
 
    static const S32 DEFAULT_BARRIER_WIDTH = 50;    // The default width of the barrier in game units
 
    static Vector<Point> mRenderLineSegments;       // The clipped line segments representing this barrier
    Vector<Point> mBotZoneBufferLineSegments;       // The line segments representing a buffered barrier
+
+   static void constructWalls(Game *game, const Vector<Point> &verts, bool isPolywall, F32 width);
 
    void renderLayer(S32 layerIndex);                                          // Renders barrier fill barrier-by-barrier
    static void renderEdges(const GameSettings *settings, S32 layerIndex);     // Renders all edges in one pass
@@ -70,6 +77,9 @@ public:
 
    static void prepareRenderingGeometry(Game *game);
    static void clearRenderItems();
+
+   // Test access
+   FRIEND_TEST(IntegrationTest, LevelReadingAndItemPropagation);
 };
 
 
@@ -83,20 +93,22 @@ class PolyWall;
 // I feel as if this should be a parent class for both WallItem and PolyWall, but I can't quite seem to
 // get it to work...
 
-struct WallRec
-{
-   Vector<F32> verts;
-   F32 width;
-   bool solid;
-
-public:
-   WallRec(F32 width, bool solid, const Vector<F32> &verts);   // Constructor
-   explicit WallRec(const WallItem *wallItem);                          // Constructor
-   explicit WallRec(const PolyWall *polyWall);                          // Constructor
-
-   void constructWalls(Game *theGame) const;
-};
- 
+//struct WallRec
+//{
+//   Vector<Point> verts;
+//   F32 width;
+//   bool solid;
+//
+//   void constructVertices(const GeomObject *source, bool dedupe);    // Helper for constructors
+//
+//public:
+//   WallRec(F32 width, bool solid, const Vector<Point> &verts); // Constructor -- used on Client after receiving wall points
+//   explicit WallRec(const WallItem *wallItem);                 // Constructor -- used on Server
+//   explicit WallRec(const PolyWall *polyWall);                 // Constructor -- used on Server
+//
+//   void constructWalls(Game *theGame) const;
+//};
+// 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -115,7 +127,7 @@ public:
    virtual ~WallItem();                      // Destructor
    WallItem *clone() const;
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
    Vector<Point> extendedEndPoints;
@@ -145,7 +157,7 @@ public:
    bool canBeNeutral();
    F32 getEditorRadius(F32 currentScale);        // Basically, the size of our hit target for vertices
 
-   const Color *getEditorRenderColor() const;    // Unselected wall spine color
+   const Color &getEditorRenderColor() const;    // Unselected wall spine color
 
    void scale(const Point &center, F32 scale);
 
@@ -192,7 +204,7 @@ public:
 
    PolyWall *clone() const;
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
 
    void renderDock();
 
@@ -203,9 +215,6 @@ public:
    virtual void onGeomChanged();
    virtual void onItemDragging();
    virtual void onAddedToGame(Game *game);
-
-
-   void addToGame(Game *game, GridDatabase *database);
 
 
    /////

@@ -4,10 +4,12 @@
 //------------------------------------------------------------------------------
 
 #include "BfObject.h"
+
 #include "gameObjectRender.h"    // For drawHollowSquare
 #include "gameConnection.h"
 #include "game.h"
 #include "ClientInfo.h"
+#include "Level.h"
 #include "moveObject.h"
 #include "TeamConstants.h"
 
@@ -538,7 +540,7 @@ void BfObject::setGeom(lua_State *L, S32 stackIndex)
 }
 
 
-const Color *BfObject::getColor() const
+const Color &BfObject::getColor() const
 { 
    return mGame->getObjTeamColor(this);
 }
@@ -563,7 +565,7 @@ bool BfObject::canAddToEditor() { return true; }
 void BfObject::addToGame(Game *game, GridDatabase *database)
 {   
    TNLAssert(mGame == NULL, "Error: Object already in a game in BfObject::addToGame.");
-   TNLAssert(game != NULL,  "Error: thefGame is NULL in BfObject::addToGame.");
+   TNLAssert(game != NULL,  "Error: Adding to a NULL game in BfObject::addToGame.");
 
    mGame = game;
    if(database)
@@ -589,16 +591,17 @@ void BfObject::removeFromGame(bool deleteObject)
 }
 
 
-bool BfObject::processArguments(S32 argc, const char**argv, Game *game)
+bool BfObject::processArguments(S32 argc, const char **argv, Level *level)
 {
    logprintf(LogConsumer::LogError, "Missing processArguments for %s", getClassName());
    return false;
 }
 
 
+// Make sure the database extents are in sync with where the object actually is
 void BfObject::updateExtentInDatabase()
 {
-   setExtent(calcExtents());    // Make sure the database extents are in sync with where the object actually is
+   setExtent(calcExtents());    
 }
 
 
@@ -649,8 +652,9 @@ void BfObject::renderAndLabelHighlightedVertices(F32 currentScale)
    for(S32 i = 0; i < getVertCount(); i++)
       if(vertSelected(i) || isVertexLitUp(i) || ((isSelected() || isLitUp())  && getVertCount() == 1))
       {
-         const Color *color = (vertSelected(i) || (isSelected() && getGeomType() == geomPoint)) ? 
-                                &Colors::EDITOR_SELECT_COLOR : &Colors::EDITOR_HIGHLIGHT_COLOR;
+         const Color &color = (vertSelected(i) || (isSelected() && getGeomType() == geomPoint)) ? 
+                                Colors::EDITOR_SELECT_COLOR : 
+                                Colors::EDITOR_HIGHLIGHT_COLOR;
 
          Point center = getVert(i) + getEditorSelectionOffset(currentScale);
 
@@ -671,7 +675,7 @@ Point BfObject::getDockLabelPos()
 void BfObject::highlightDockItem()
 {
 #ifndef ZAP_DEDICATED
-   drawHollowSquare(getPos(), (F32)getDockRadius(), &Colors::EDITOR_HIGHLIGHT_COLOR);
+   drawHollowSquare(getPos(), (F32)getDockRadius(), Colors::EDITOR_HIGHLIGHT_COLOR);
 #endif
 }
 
@@ -1284,6 +1288,12 @@ void BfObject::onGhostAddBeforeUpdate(GhostConnection *theConnection)
 #endif
 }
 
+
+// Overrides method in tnlNetObject.
+// onGhostAdd is called on the client side of a connection after
+// the constructor and after the first call to unpackUpdate (the
+// initial call).  Returning true signifies no error - returning
+// false causes the connection to abort.
 bool BfObject::onGhostAdd(GhostConnection *theConnection)
 {
 #ifndef ZAP_DEDICATED

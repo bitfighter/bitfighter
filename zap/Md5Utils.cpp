@@ -117,7 +117,7 @@ void IncrementalHasher::add(const string &line)
    // are interpreted as unsigned chars instead of signed chars, so we can
    // use a reinterpret_cast to get our string of unsigned chars.
 
-   md5_process(&mHashState, reinterpret_cast<const unsigned char *>(line.c_str()), line.length);
+   md5_process(&mHashState, reinterpret_cast<const unsigned char *>(line.c_str()), line.length());
 }
 
 

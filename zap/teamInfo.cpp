@@ -17,6 +17,95 @@ namespace Zap
 {
 
 // Constructor
+TeamInfo::TeamInfo() : 
+   mColor(Colors::blue), 
+   mName("Blue")
+{
+   // Do nothing
+}
+
+
+// Destructor
+TeamInfo::~TeamInfo()
+{
+   // Do nothing
+}
+
+
+// Read team from level file params
+// Team Blue 0 0 1
+bool TeamInfo::processArguments(S32 argc, const char **argv)
+{
+   if(argc < 5)         // Not enough arguments!
+      return false;
+
+   setName(argv[1]);
+   
+   Color color;
+   color.read(argv + 2);
+
+   setColor(color);     // Do not set mColor directly, or overrides won't fire
+
+   return true;
+}
+
+
+string TeamInfo::toLevelCode() const
+{
+   return string("Team ") + writeLevelString(getName().getString()) + " " + mColor.toRGBString();
+}
+
+
+void TeamInfo::setName(const char *name)
+{
+   mName.set(name);
+}
+
+
+void TeamInfo::setName(const StringTableEntry &name)
+{
+   mName = name;
+}
+
+
+// Don't access mName directly... EditorTeam overrides this method
+StringTableEntry TeamInfo::getName() const
+{
+   return mName;
+}
+
+
+// Overridden in EditorTeam
+void TeamInfo::setColor(const Color &color)
+{
+   mColor.set(color);
+}
+
+
+const Color &TeamInfo::getColor() const
+{
+   return mColor;
+}
+
+
+// Overridden in EditorTeam
+void TeamInfo::setColor(F32 r, F32 g, F32 b)
+{
+   mColor.set(r,g,b);
+}
+
+
+void TeamInfo::setColor(const Color *color)
+{
+   mColor.set(color);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+// Constructor
 AbstractTeam::AbstractTeam()
 {
    mTeamIndex = -1;
@@ -27,44 +116,6 @@ AbstractTeam::AbstractTeam()
 AbstractTeam::~AbstractTeam()
 {
    // Do nothing
-}
-
-
-// Overridden in EditorTeam
-void AbstractTeam::setColor(F32 r, F32 g, F32 b)
-{
-   mColor.set(r,g,b);
-}
-
-
-// Overridden in EditorTeam
-void AbstractTeam::setColor(const Color &color)
-{
-   mColor.set(color);
-}
-
-
-const Color *AbstractTeam::getColor() const
-{
-   return &mColor;
-}
-
-
-void AbstractTeam::setName(const char *name)
-{
-   mName.set(name);
-}
-
-
-void AbstractTeam::setName(StringTableEntry name)
-{
-   mName = name;
-}
-
-
-StringTableEntry AbstractTeam::getName() const
-{
-   return mName;
 }
 
 
@@ -92,29 +143,6 @@ S32 AbstractTeam::getBotCount() const
 void AbstractTeam::setTeamIndex(S32 index)
 {
    mTeamIndex = index;
-}
-
-
-// Read team from level file params
-bool AbstractTeam::processArguments(S32 argc, const char **argv)
-{
-   if(argc < 5)               // Not enough arguments!
-      return false;
-
-   setName(argv[1]);
-   
-   Color color;
-   color.read(argv + 2);
-
-   setColor(color);
-
-   return true;
-}
-
-
-string AbstractTeam::toLevelCode() const
-{
-   return string("Team ") + writeLevelString(getName().getString()) + " " + mColor.toRGBString();
 }
 
 
@@ -160,6 +188,13 @@ void AbstractTeam::alterBlue(F32 amt)
       color.b = 1;
 
    setColor(color);     // Do not set mColor directly, or overrides won't fire
+}
+
+
+void AbstractTeam::set(const TeamInfo &teamInfo)
+{
+   setName(teamInfo.getName());
+   setColor(teamInfo.getColor());
 }
 
 
@@ -214,6 +249,14 @@ Team::Team(const char *name, F32 r, F32 g, F32 b, S32 score)
 }
 
 
+Team::Team(const TeamInfo &teamInfo)
+{
+   initialize();
+   setName(teamInfo.getName());
+   setColor(teamInfo.getColor());
+}
+
+
 // Destructor
 Team::~Team()
 {
@@ -223,7 +266,7 @@ Team::~Team()
 
 void Team::initialize()
 {
-   clearStats();
+   clearStats();     // Sets mPlayerCount, mBotCount, and mRating
    mScore = 0;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -348,7 +391,7 @@ S32 Team::lua_getIndex(lua_State *L)
  */
 S32 Team::lua_getName(lua_State *L)
 {
-   return returnString(L, mName.getString());
+   return returnString(L, getName().getString());
 }
 
 
@@ -440,26 +483,32 @@ TeamManager::~TeamManager()
 }
 
 
-S32 TeamManager::getTeamCount()
+S32 TeamManager::getTeamCount() const
 {
    return mTeams.size();
 }
 
 
-const Color *TeamManager::getTeamColor(S32 index) const
+const Color &TeamManager::getTeamColor(S32 index) const
 {
    if(index == TEAM_NEUTRAL)
-      return &Colors::NeutralTeamColor;
+      return Colors::NeutralTeamColor;
    else if(index == TEAM_HOSTILE)
-      return &Colors::HostileTeamColor;
+      return Colors::HostileTeamColor;
    else if((U32)index < (U32)mTeams.size())     // Using U32 lets us handle goofball negative team numbers without explicitly checking for them
       return mTeams[index]->getColor();
    else
-      return &Colors::magenta;                  // Use a rare color to let user know an object has an out of range team number
+      return Colors::magenta;                  // Use a rare color to let user know an object has an out of range team number
 }
 
 
-AbstractTeam *TeamManager::getTeam(S32 teamIndex)
+StringTableEntry TeamManager::getTeamName(S32 index) const
+{
+   return mTeams[index]->getName();
+}
+
+
+AbstractTeam *TeamManager::getTeam(S32 teamIndex) const
 {
    return mTeams[teamIndex];
 }
@@ -484,8 +533,7 @@ void TeamManager::addTeam(AbstractTeam *team)
 
 void TeamManager::addTeam(AbstractTeam *team, S32 index)
 {
-   mTeams.insert(index);
-   mTeams[index] = team;
+   mTeams.insert(index, team);
    mTeamHasFlagList.resize(mTeams.size());
    mTeamHasFlagList[index] = false;
 
@@ -495,20 +543,21 @@ void TeamManager::addTeam(AbstractTeam *team, S32 index)
 
 bool TeamManager::getTeamHasFlag(S32 teamIndex) const
 {
-   return mTeamHasFlagList[teamIndex] != 0;
+   if(teamIndex >= 0)
+      return mTeamHasFlagList[teamIndex] != 0;
+
+   return false;     // Neutral and Hostile teams never "have" the flag
 }
 
 
 void TeamManager::setTeamHasFlag(S32 teamIndex, bool hasFlag)
 {
-   mTeamHasFlagList[teamIndex] = hasFlag ? 1 : 0;
-}
+   TNLAssert(teamIndex < getTeamCount(), "Invalid teamIndex!");
 
-
-void TeamManager::clearTeamHasFlagList()
-{
-   for(S32 i = 0; i < mTeamHasFlagList.size(); i++)
-      mTeamHasFlagList[i] = 0;
+   // Note that ship could be on Neutral or Hostile teams... technically speaking, not all ships
+   // are attached to players
+   if(teamIndex >= 0)
+      mTeamHasFlagList[teamIndex] = hasFlag ? 1 : 0;
 }
 
 

@@ -184,6 +184,11 @@ TEST(GameTest, TeamGameWinners)
    EXPECT_EQ(index1, game->getTeamBasedGameWinner().second);
    EXPECT_TRUE(gameType->onGameOver());
 
+   /*FileLogConsumer gMainLog;
+    gMainLog.init(joindir("f:/tmp", "bitfighter.log"), "w");
+   gMainLog.setMsgType(LogConsumer::LogEventConnection,    true);
+*/
+
    // Player 2 quits, leaving team 2 without players; score still 4,1,2
    gamePair.removeClient("Player 2");
    game->countTeamPlayers();

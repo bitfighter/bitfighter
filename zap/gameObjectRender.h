@@ -35,7 +35,8 @@ class WallItem;
 
 //////////
 // Primitives
-extern void drawFilledCircle(const Point &pos, F32 radius, const Color *color = NULL);
+extern void drawFilledCircle(const Point &pos, F32 radius);
+extern void drawFilledCircle(const Point &pos, F32 radius, const Color &color);
 extern void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end);
 extern void drawCentroidMark(const Point &pos, F32 radius);
 
@@ -73,8 +74,13 @@ extern void drawHollowArc(const Point &center, F32 innerRadius, F32 outerRadius,
 
 extern void drawSquare(const Point &pos, F32 radius, bool filled = false);
 extern void drawSquare(const Point &pos, S32 radius, bool filled = false);
-extern void drawHollowSquare(const Point &pos, F32 radius, const Color *color = NULL);
-extern void drawFilledSquare(const Point &pos, F32 radius, const Color *color = NULL);
+
+extern void drawHollowSquare(const Point &pos, F32 radius, const Color &color);
+extern void drawHollowSquare(const Point &pos, F32 radius);
+
+extern void drawFilledSquare(const Point &pos, F32 radius, const Color &color);
+extern void drawFilledSquare(const Point &pos, F32 radius);
+
 
 extern void renderSmallSolidVertex(F32 currentScale, const Point &pos, bool snapping);
 
@@ -83,7 +89,7 @@ extern void renderVertex(char style, const Point &v, S32 number,           F32 s
 extern void renderVertex(char style, const Point &v, S32 number,           F32 scale, F32 alpha);
 extern void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F32 alpha);
 
-void renderLine(const Vector<Point> *points, const Color *color);
+extern void renderLine(const Vector<Point> *points, const Color &color);
 
 extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 extern void drawVertLine (S32 x,  S32 y1, S32 y2);
@@ -92,7 +98,7 @@ extern void drawVertLine (F32 x,  F32 y1, F32 y2);
 
 extern void drawFadingHorizontalLine(S32 x1, S32 x2, S32 yPos, const Color &color);
 
-extern void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *letterColor, char letter);
+extern void renderSquareItem(const Point &pos, const Color &c, F32 alpha, const Color &letterColor, char letter);
 
 extern void drawCircle(const Point &center, F32 radius, const Color *color = NULL, F32 alpha = 1.0);
 extern void drawCircle(F32 radius, const Color *color = NULL, F32 alpha = 1.0);
@@ -107,12 +113,13 @@ extern F32 renderCenteredString(const Point &pos, S32 size, const char *string);
 extern F32 renderCenteredString(const Point &pos, F32 size, const char *string);
 
 // Renders the core ship, good for instructions and such
-extern void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
+extern void renderShip(ShipShape::ShipShapeType shapeType, const Color &shipColor, F32 alpha, F32 thrusts[], 
+                       F32 health, F32 radius, U32 sensorTime,
                        bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
 
 // Renders the ship and all the fixins
 extern void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
-                       F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, F32 alpha, 
+                       F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color &color, F32 alpha, 
                        U32 renderTime, const string &shipName, F32 nameScale, F32 warpInScale, bool isLocalShip, bool isBusy, 
                        bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
                        bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
@@ -134,21 +141,21 @@ extern void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 c
 extern void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentScale);
 extern void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate = 0);
 
-extern void renderFlag(const Point &pos, const Color *flagColor);
-extern void renderFlag(const Point &pos, F32 scale, const Color *flagColor);
-extern void renderFlag(F32 x, F32 y, const Color *flagColor);
-extern void renderFlag(const Color *flagColor);
-extern void renderFlag(const Point &pos, const Color *flagColor, const Color *mastColor, F32 alpha);
+extern void renderFlag(const Point &pos, const Color &flagColor, F32 alpha = 1);
+extern void renderFlag(const Point &pos, F32 scale, const Color &flagColor);
+extern void renderFlag(F32 x, F32 y, const Color &flagColor);
+extern void renderFlag(const Color &flagColor);
+extern void renderFlag(const Point &pos, const Color &flagColor, const Color &mastColor, F32 alpha);
 extern void doRenderFlag(F32 x, F32 y, F32 scale, const Color *flagColor, const Color *mastColor, F32 alpha);
 
 
 //extern void renderFlag(Point pos, Color c, F32 timerFraction);
 extern void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha);
-extern void renderFlagSpawn(const Point &pos, F32 currentScale, const Color *color);
+extern void renderFlagSpawn(const Point &pos, F32 currentScale, const Color &color);
 
-extern void renderZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill);   
+extern void renderZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill);   
 
-extern void renderLoadoutZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill, 
+extern void renderLoadoutZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill, 
                               const Point &centroid, F32 angle, F32 scaleFact = 1);
 
 extern void renderLoadoutZoneIcon(const Point &center, S32 outerRadius, F32 angleRadians = 0.0f);
@@ -159,12 +166,12 @@ extern void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> 
 class NeighboringZone;
 extern void renderNavMeshBorders(const Vector<NeighboringZone> &borders);
 
-extern void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alphaFrac, Point cameraPos, Point visibleExtent);
+extern void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alphaFrac, const Point &cameraPos, const Point &visibleExtent);
 
-extern void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color *outlineColor, 
+extern void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color &outlineColor, 
                                S32 canvasWidth, S32 canvasHeight, F32 alphaMod, F32 highlightAlpha);
 
-extern void renderScoreboardOrnamentTeamFlags(S32 xpos, S32 ypos, const Color *color, bool teamHasFlag);
+extern void renderScoreboardOrnamentTeamFlags(S32 xpos, S32 ypos, const Color &color, bool teamHasFlag);
 
 
 // Some things we use internally, but also need from UIEditorInstructions for consistency
@@ -174,10 +181,10 @@ extern const F32 BORDER_WIDTH;
 extern float gDefaultLineWidth;
 
 extern void renderPolygonOutline(const Vector<Point> *outline);
-extern void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color *outlineColor, F32 alpha = 1, F32 lineThickness = gDefaultLineWidth);
-extern void renderPolygonFill(const Vector<Point> *fillPoints, const Color *fillColor = NULL, F32 alpha = 1);
+extern void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color &outlineColor, F32 alpha = 1, F32 lineThickness = gDefaultLineWidth);
+extern void renderPolygonFill(const Vector<Point> *fillPoints, const Color &fillColor, F32 alpha = 1);
 extern void renderPolygon(const Vector<Point> *fillPoints, const Vector<Point> *outlinePoints,
-                          const Color *fillColor, const Color *outlineColor, F32 alpha = 1);
+                          const Color &fillColor, const Color &outlineColor, F32 alpha = 1);
 
 extern void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill);     // No label version
 extern void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle,
@@ -237,23 +244,23 @@ void renderResourceItem(const Vector<Point> &points, F32 alpha = 1);
 //void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);
 
 struct PanelGeom;
-void renderCore(const Point &pos, const Color *coreColor, U32 time, 
+void renderCore(const Point &pos, const Color &coreColor, U32 time, 
                 PanelGeom *panelGeom, F32 panelHealth[10], F32 panelStartingHealth);
 
-void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width);
+void renderCoreSimple(const Point &pos, const Color &coreColor, S32 width);
 
 void renderSoccerBall(const Point &pos, F32 size);
 void renderSoccerBall(const Point &pos);
 
-void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color *color);
+void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color &color);
 
 // Editor support items
 extern void renderPolyLineVertices(BfObject *obj, bool snapping, F32 currentScale);
 extern void renderGrid(F32 curentScale, const Point &offset, const Point &origin, F32 gridSize, bool fadeLines, bool showMinorGridLines);
 
-extern void renderForceFieldProjector(const Point &pos, const Point &normal, const Color *teamColor, bool enabled, S32 healRate);
-extern void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, const Color *teamColor, bool enabled, S32 healRate = 0);
-extern void renderForceField(Point start, Point end, const Color *c, bool fieldUp, F32 scale = 1);
+extern void renderForceFieldProjector(const Point &pos, const Point &normal, const Color &teamColor, bool enabled, S32 healRate);
+extern void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, const Color &teamColor, bool enabled, S32 healRate = 0);
+extern void renderForceField(Point start, Point end, const Color &c, bool fieldUp, F32 scale = 1);
 
 extern void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask = 1023);
 extern void renderBitfighterLogo(const Point &pos, F32 size, U32 letterMask = 1023);
@@ -267,11 +274,14 @@ extern void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Po
                         const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha);
 
 
-extern void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const Color *color, 
+extern void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const Color &color, 
+                              F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+
+extern void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, 
                               F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
 extern void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha);
-extern void renderSpawn(const Point &pos, F32 scale, const Color *color);
+extern void renderSpawn(const Point &pos, F32 scale, const Color &color);
 extern void renderFlightPlan(const Point &from, const Point &to, const Vector<Point> &flightPlan);
 extern void renderHeavysetArrow(const Point &pos, const Point &dest, const Color &color, bool isSelected, bool isLitUp);
 extern void renderTeleporterEditorObject(const Point &pos, S32 radius, const Color &color);

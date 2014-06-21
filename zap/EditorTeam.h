@@ -28,6 +28,7 @@ private:
    LineEditor mHexColorEditor;
 
    void initialize();
+   void onColorChanged();
 
 public:
    EditorTeam();                                   // Constructor
@@ -42,6 +43,7 @@ public:
 
    void setColor(F32 r, F32 g, F32 b);
    void setColor(const Color &color);
+   void setColor(const Color *color);
 };
 
 }

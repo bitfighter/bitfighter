@@ -6,6 +6,7 @@
 #include "gameWeapons.h"
 #include "projectile.h"
 #include "game.h"
+#include "Level.h"
 
 #include "Colors.h"
 

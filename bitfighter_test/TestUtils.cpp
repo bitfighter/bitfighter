@@ -4,13 +4,14 @@
 //------------------------------------------------------------------------------
 
 #include "TestUtils.h"
-#include "../zap/gameType.h"
-#include "../zap/GameManager.h"
-#include "../zap/ServerGame.h"
-#include "../zap/ClientGame.h"
-#include "../zap/FontManager.h"
-#include "../zap/UIManager.h"
-#include "../zap/SystemFunctions.h"
+#include "gameType.h"
+#include "GameManager.h"
+#include "ServerGame.h"
+#include "ClientGame.h"
+#include "FontManager.h"
+#include "UIManager.h"
+#include "SystemFunctions.h"
+#include "Level.h"
 
 #include "../zap/stringUtils.h"
 #include "gtest/gtest.h"
@@ -39,7 +40,7 @@ ClientGame *newClientGame(const GameSettingsPtr &settings)
    FontManager::initialize(settings.get(), false);   
    ClientGame *game = new ClientGame(addr, settings, new UIManager());    // ClientGame destructor will clean up UIManager
 
-   game->addTeam(new Team());     // Teams will be deleted by ClientGame destructor
+   //game->addTeam(new Team());     // Teams will be deleted by ClientGame destructor
 
    return game;
 }
@@ -52,7 +53,11 @@ ServerGame *newServerGame()
    GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
    LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(""));
 
+   Level *level = new Level();
+   level->loadLevelFromString("");
+
    ServerGame *game = new ServerGame(addr, settings, levelSource, false, false);
+   game->setLevel(level);
    game->addTeam(new Team());    // Team will be cleaned up when game is deleted
 
    return game;
@@ -177,7 +182,7 @@ void GamePair::removeClient(S32 index)
 
    clientGame->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
-   this->idle(10, 5);      // Let things propagate
+   this->idle(10, 5);      // Let things 
 
    GameManager::deleteClientGame(index);
 }
@@ -207,7 +212,7 @@ void GamePair::addBotClient(const string &name, S32 teamIndex)
 {
    ServerGame *server = GameManager::getServerGame();
 
-   server->addBot(Vector<const char *>(), ClientInfo::ClassRobotAddedByAutoleveler);
+   server->addBot(Vector<string>(), ClientInfo::ClassRobotAddedByAutoleveler);
    // Get most recently added clientInfo
    ClientInfo *clientInfo = server->getClientInfo(server->getClientInfos()->size() - 1);
    ASSERT_TRUE(clientInfo->isRobot()) << "This is supposed to be a robot!";

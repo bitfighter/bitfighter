@@ -52,8 +52,10 @@ public:
    void renderLayer(S32 layerIndex);
    void idle(IdleCallPath path);
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
-   bool processArguments(S32 argc, const char **argv, Game *game, string &errorMessage);
+   bool processArguments(S32 argc, const char **argv, Level *level);
+   bool processArguments(const Vector<string> &args, Game *game, string &errorMessage);
+   bool processArguments(const string &args, Game *game);
+
    void onAddedToGame(Game *);
 
    S32 getCurrentZone();

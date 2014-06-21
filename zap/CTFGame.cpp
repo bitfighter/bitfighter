@@ -5,6 +5,7 @@
 
 #include "CTFGame.h"
 #include "flagItem.h"
+#include "Level.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"

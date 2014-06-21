@@ -57,10 +57,9 @@ TEST(ServerGameTest, KillStreakTests)
 
 TEST(ServerGameTest, LittleStory) 
 {
-   ServerGame *serverGame = newServerGame();
-
-   GameType *gt = new GameType();    // Will be deleted in serverGame destructor
-   gt->addToGame(serverGame, serverGame->getGameObjDatabase());
+   // Use GamePair to our serverGame set up properly.  We don't care about clients here.
+   GamePair gamePair("", 0);      
+   ServerGame *serverGame = gamePair.server;
 
    ASSERT_TRUE(serverGame->isSuspended());    // ServerGame starts suspended
    serverGame->unsuspendGame(false);         
@@ -104,16 +103,14 @@ TEST(ServerGameTest, LittleStory)
       }
    }
    ASSERT_TRUE(shipDeleted);     // Ship was killed, and object was cleaned up
-
-   delete serverGame;
 }
 
 
 TEST(ServerGameTest, LoadoutManagementTests)
 {
-   ServerGame *serverGame = newServerGame();
-   GameType *gt = new GameType();    // Cleaned up by database
-   gt->addToGame(serverGame, serverGame->getGameObjDatabase());
+   // Use GamePair to our serverGame set up properly.  We don't care about clients here.
+   GamePair gamePair("", 0);      
+   ServerGame *serverGame = gamePair.server;
 
    Ship *s = new Ship();             // Cleaned up by database
    s->addToGame(serverGame, serverGame->getGameObjDatabase());
@@ -133,7 +130,7 @@ TEST(ServerGameTest, LoadoutManagementTests)
    EXPECT_EQ(s->getActiveWeapon(), WeaponSeeker);                              // Mine not in loadout, should select first weap (Seeker)
 
    // Tests to ensure that resource items get dropped when changing loadout away from engineer.  We'll also add a flag
-   // and verify that the flag is not similarly dropped.  These cleaned up by database.
+   // and verify that the flag is not similarly dropped.  These objects will be cleaned up by the database.
    ResourceItem *r = new ResourceItem();
    FlagItem     *f = new FlagItem();
 
@@ -157,8 +154,6 @@ TEST(ServerGameTest, LoadoutManagementTests)
    s->setLoadout(LoadoutTracker("Turbo,Shield,Triple,Mine,Bouncer"), true);    // Ship does not have engineer
    EXPECT_FALSE(s->isCarryingItem(ResourceItemTypeNumber));
    EXPECT_TRUE(s->isCarryingItem(FlagTypeNumber));
-
-   delete serverGame;
 }
 
 

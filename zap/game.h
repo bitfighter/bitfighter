@@ -109,6 +109,7 @@ class Ship;
 struct UserInterfaceData;
 class WallSegmentManager;
 class Robot;
+class Level;
 
 class AbstractTeam;
 class Team;
@@ -174,25 +175,8 @@ struct WallRec;
 class Game
 {
 private:
-   F32 mLegacyGridSize;
-   U32 mLevelFormat;      // Version of level file loaded.  Used for legacy analyses
-   bool mHasLevelFormat;
-
-   static const U32 CurrentLevelFormat;
-
    U32 mTimeUnconnectedToMaster;          // Time that we've been disconnected to the master
    bool mHaveTriedToConnectToMaster;
-
-   TeamManager *mActiveTeamManager;
-
-   // Functions for handling individual level parameters read in processLevelParam; some may be game-specific
-   virtual void onReadTeamParam(S32 argc, const char **argv);
-   void onReadTeamChangeParam(S32 argc, const char **argv);
-   void onReadSpecialsParam(S32 argc, const char **argv);
-   void onReadScriptParam(S32 argc, const char **argv);
-   void onReadLevelNameParam(S32 argc, const char **argv);
-   void onReadLevelDescriptionParam(S32 argc, const char **argv);
-   void onReadLevelCreditsParam(S32 argc, const char **argv);
 
    S32 mPlayerCount;     // Humans only, please!
    S32 mRobotCount;
@@ -220,7 +204,7 @@ protected:
       DeleteRef(BfObject *o = NULL, U32 d = 0);
    };
 
-   boost::shared_ptr<GridDatabase> mGameObjDatabase;                // Database for all normal objects
+   boost::shared_ptr<Level> mLevel;
 
    Vector<DeleteRef> mPendingDeleteObjects;
    Vector<SafePtr<BfObject> > mScopeAlwaysList;
@@ -235,8 +219,6 @@ protected:
    // Not really a queue, but good enough for now!
    SafePtr<AnonymousMasterServerConnection> mAnonymousMasterServerConnection;
 
-   SafePtr<GameType> mGameType;
-
    bool mGameSuspended;       // True if we're in "suspended animation" mode
 
    GameSettingsPtr mSettings;
@@ -247,10 +229,6 @@ protected:
    // but the info in these records will only be managed by the server.  E.g. if the local client's name changes, the client's record
    // should not be updated directly, but rather by notifying the server, and having the server notify us.
    Vector<RefPtr<ClientInfo> > mClientInfos;
-
-   TeamManager mTeamManager;
-
-   virtual AbstractTeam *getNewTeam() = 0;
 
 public:
    static const S32 MAX_TEAMS = 9;           // Max teams allowed -- careful changing this; used for RPC ranges
@@ -266,8 +244,6 @@ public:
    Game(const Address &theBindAddress, GameSettingsPtr settings); // Constructor
    virtual ~Game();                                               // Destructor
 
-   void setActiveTeamManager(TeamManager *teamManager);
-
    S32 getClientCount() const;                                    // Total number of players, human and robot
    S32 getPlayerCount() const;                                    // Returns number of human players
    S32 getPlayerCount(S32 teamIndex) const;                       // Returns number of human players on specified team
@@ -281,10 +257,6 @@ public:
    void removeFromClientList(const StringTableEntry &name);       // Client side
    void removeFromClientList(ClientInfo *clientInfo);             // Server side
    void clearClientList();
-
-   void setAddTarget();
-   void clearAddTarget();
-   static Game *getAddTarget();
 
    bool isSuspended() const;
 
@@ -307,7 +279,7 @@ public:
    
    const Rect *getWorldExtents() const;
 
-   virtual const Color *getTeamColor(S32 teamId) const;
+   virtual const Color &getTeamColor(S32 teamId) const;
 
    virtual void setPreviousLevelName(const string &name);
 
@@ -321,7 +293,7 @@ public:
    virtual F32 getCommanderZoomFraction() const;
    virtual void renderBasicInterfaceOverlay() const;
    virtual void emitTextEffect(const string &text, const Color &color, const Point &pos, bool releative) const;
-   virtual void emitDelayedTextEffect(U32 delay, const string &text, const Color &color, const Point &pos, bool releative) const;
+   virtual void emitDelayedTextEffect(U32 delay, const string &text, const Color &color, const Point &pos, bool relative) const;
 
    U32 getTimeUnconnectedToMaster();
    virtual void onConnectedToMaster();
@@ -338,26 +310,26 @@ public:
    virtual void deleteBot(S32 i);                         // Delete by index
    virtual void deleteBotFromTeam(S32 teamIndex);         // Delete by teamIndex
    virtual void deleteAllBots();                          // Delete 'em all, let God sort 'em out!
-   virtual string addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass);
+   virtual string addBot(const Vector<string> &args, ClientInfo::ClientClass clientClass);
    virtual void moreBots();
    virtual void fewerBots();
    virtual void kickSingleBotFromLargestTeamWithBots();
    virtual void balanceTeams();
 
-   void loadLevelFromString(const string &contents, GridDatabase *database, const string& filename = "");
-   bool loadLevelFromFile(const string &filename, GridDatabase *database);
-   void parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName);
+   S32 getPlayerScore(S32 index) const;
+   virtual void setPlayerScore(S32 index, S32 score);
 
-   void processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName);  
-   bool processLevelParam(S32 argc, const char **argv);
+   virtual AbstractTeam *getNewTeam() = 0;
+
+   virtual void setLevel(Level *level) = 0;
+
    string toLevelCode() const;
 
-   virtual bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id) = 0;
-
    virtual void addPolyWall(BfObject *polyWall, GridDatabase *database);     
-   virtual void addWallItem(BfObject *wallItem, GridDatabase *database);     
+   virtual void addWallItem(WallItem *wallItem, GridDatabase *database);     
 
-   void addWall(const WallRec &barrier);
+   virtual const Vector<WallItem *>     &getWallList() const;
+   virtual const Vector<PolyWall *> &getPolyWallList() const;
 
    virtual void deleteLevelGen(LuaLevelGenerator *levelgen) = 0; 
 
@@ -386,7 +358,7 @@ public:
    void processAnonymousMasterConnection();
 
    GameNetInterface *getNetInterface();
-   virtual GridDatabase *getGameObjDatabase();
+   Level *getGameObjDatabase();
 
    const Vector<SafePtr<BfObject> > &getScopeAlwaysList();
 
@@ -421,7 +393,6 @@ public:
    IndividualGameResults getIndividualGameWinner() const;   // Find winner of a non-team based game
    
    void setTeamHasFlag(S32 teamIndex, bool hasFlag);
-   void clearTeamHasFlagList();
 
    F32 getShipAccelModificationFactor(const Ship *ship) const;
    void teleporterDestroyed(Teleporter *teleporter);
@@ -450,13 +421,12 @@ public:
 
    virtual string getPlayerName() const;
 
-   // A couple of statics to keep gServerGame out of some classes
-   static const GridDatabase *getServerGameObjectDatabase();
+   static const Level *getServerGameObjectDatabase();
 
    // Passthroughs to GameType
    void onFlagMounted(S32 teamIndex);
    void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);
-   const Color *getObjTeamColor(const BfObject *obj) const;
+   const Color &getObjTeamColor(const BfObject *obj) const;
    bool objectCanDamageObject(BfObject *damager, BfObject *victim) const;
    void releaseFlag(const Point &pos, const Point &vel = Point(0,0), const S32 count = 1) const;
    S32 getRenderTime() const;
@@ -477,7 +447,7 @@ public:
 
    S32 getRemainingGameTime() const;        // In seconds
 
-   void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName);
+   void updateClientChangedName(ClientInfo *clientInfo, const StringTableEntry &newName);
    bool objectCanDamageObject(BfObject *damager, BfObject *victim);
 
    virtual SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f) const = 0;

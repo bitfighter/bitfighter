@@ -4,8 +4,11 @@
 //------------------------------------------------------------------------------
 
 #include "LineItem.h"
+
+#include "Level.h"
 #include "game.h"
 #include "ship.h"
+#include "OpenglUtils.h"
 #include "gameObjectRender.h"    // For renderPolyLineVertices()
 #include "stringUtils.h"         // For itos
 #include "tnlGhostConnection.h"
@@ -120,19 +123,18 @@ bool LineItem::shouldRender() const
 void LineItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
 #ifndef ZAP_DEDICATED
-   const Color *color = NULL;       // HACK!  Should pass desired color into renderEditor instead of using NULL here
+   if(isSelected() || isLitUp())           
+      renderLine(getOutline());
+   else
+      renderLine(getOutline(), getEditorRenderColor());
 
-   if(!isSelected() && !isLitUp())           
-      color = getEditorRenderColor();
-
-   renderLine(getOutline(), color);
    if(renderVertices)
       renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
 #endif
 }
 
 
-const Color *LineItem::getEditorRenderColor() 
+const Color &LineItem::getEditorRenderColor() const
 { 
    return getColor(); 
 }
@@ -147,7 +149,7 @@ S32 LineItem::getRenderSortValue()
 
 // Create objects from parameters stored in level file
 // LineItem <team> <width> <x> <y> ...
-bool LineItem::processArguments(S32 argc, const char **argv, Game *game)
+bool LineItem::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 6)
       return false;
@@ -164,7 +166,7 @@ bool LineItem::processArguments(S32 argc, const char **argv, Game *game)
    else
       mGlobal = false;
 
-   readGeom(argc, argv, firstCoord, game->getLegacyGridSize());
+   readGeom(argc, argv, firstCoord, level->getLegacyGridSize());
 
    computeExtent();
 

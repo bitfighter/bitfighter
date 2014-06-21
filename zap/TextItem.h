@@ -41,7 +41,7 @@ public:
    void render();
    S32 getRenderSortValue();
 
-   bool processArguments(S32 argc, const char **argv, Game *game);  // Create objects from parameters stored in level file
+   bool processArguments(S32 argc, const char **argv, Level *level);  // Create objects from parameters stored in level file
    string toLevelCode() const;
    void setGeom(const Vector<Point> &points);
    void setGeom(const Point &pos, const Point &dest);
@@ -62,7 +62,7 @@ public:
 
    ///// Editor Methods
 
-   Color getEditorRenderColor();
+   const Color &getEditorRenderColor() const;
 
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
    F32 getSize();

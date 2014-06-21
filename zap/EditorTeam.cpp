@@ -56,14 +56,28 @@ LineEditor *EditorTeam::getHexColorEditor()
 void EditorTeam::setColor(F32 r, F32 g, F32 b)
 {
    Parent::setColor(r, g, b);
-   mHexColorEditor.setString(getColor()->toHexString());
+   onColorChanged();
 }
 
 
 void EditorTeam::setColor(const Color &color)
 {
-   Parent::setColor(color);
-   mHexColorEditor.setString(getColor()->toHexString());
+   TeamInfo::setColor(color);    // TeamInfo is grandparent class
+   onColorChanged();
+}
+
+
+void EditorTeam::setColor(const Color *color)
+{
+   TeamInfo::setColor(color);    // TeamInfo is grandparent class
+   onColorChanged();
+}
+
+
+// Gets called when the color is changed
+void EditorTeam::onColorChanged()
+{
+   mHexColorEditor.setString(getColor().toHexString());
 }
 
 

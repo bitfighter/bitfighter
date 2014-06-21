@@ -5,9 +5,10 @@
 
 #include "NexusGame.h"
 
-#include "stringUtils.h"      // For ftos et al
+#include "Level.h"
 
 #include "Colors.h"
+#include "stringUtils.h"      // For ftos et al
 
 #ifndef ZAP_DEDICATED
 #  include "gameObjectRender.h"
@@ -104,7 +105,7 @@ NexusGameType::~NexusGameType()
 }
 
 
-bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
+bool NexusGameType::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc > 0)
    {
@@ -112,14 +113,14 @@ bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
 
       if(argc > 1)
       {
-         mNexusClosedTime = S32(atof(argv[1]) * 60.f * 1000.f + 0.5); // Time until nexus opens, specified in minutes (0.5 converts truncation into rounding)
+         mNexusClosedTime = S32(atof(argv[1]) * 60 * 1000 + 0.5f); // Time until nexus opens, specified in minutes (0.5 converts truncation into rounding)
 
          if(argc > 2)
          {
-            mNexusOpenTime = S32(atof(argv[2]) * 1000.f);     // Time nexus remains open, specified in seconds
+            mNexusOpenTime = S32(atof(argv[2]) * 1000);     // Time nexus remains open, specified in seconds
 
             if(argc > 3)
-               setWinningScore(atoi(argv[3]));                // Winning score
+               setWinningScore(atoi(argv[3]));              // Winning score
          }
       }
    }
@@ -131,8 +132,8 @@ bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
 
 string NexusGameType::toLevelCode() const
 {
-   return string(getClassName()) + " " + getRemainingGameTimeInMinutesString() + " " + ftos(F32(mNexusClosedTime) / (60.f * 1000.f)) + " " + 
-                                         ftos(F32(mNexusOpenTime) / 1000.f, 3)  + " " + itos(getWinningScore());
+   return string(getClassName()) + " " + getRemainingGameTimeInMinutesString()  + " " + ftos(F32(mNexusClosedTime) / (60.f * 1000.f)) + 
+                                   " " + ftos(F32(mNexusOpenTime) / 1000.f, 3)  + " " + itos(getWinningScore());
 }
 
 
@@ -695,9 +696,9 @@ void NexusGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) co
    Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
 
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
-      renderObjectiveArrow(mYardSaleWaypoints[i].pos, &Colors::white, canvasWidth, canvasHeight);
+      renderObjectiveArrow(mYardSaleWaypoints[i].pos, Colors::white, canvasWidth, canvasHeight);
 
-   const Color *color = mNexusIsOpen ? &Colors::NexusOpenColor : &Colors::NexusClosedColor;
+   const Color &color = mNexusIsOpen ? Colors::NexusOpenColor : Colors::NexusClosedColor;
 
    for(S32 i = 0; i < mNexus.size(); i++)
       renderObjectiveArrow(mNexus[i], color, canvasWidth, canvasHeight);
@@ -830,7 +831,7 @@ void NexusFlagItem::renderItemAlpha(const Point &pos, F32 alpha)
    if(mIsMounted)
       offset.set(15, -15);
 
-   renderFlag(pos + offset, getColor(), NULL, alpha);
+   renderFlag(pos + offset, getColor(), alpha);
 
    if(mIsMounted && mFlagCount > 0)
    {
@@ -1004,7 +1005,7 @@ NexusZone *NexusZone::clone() const
 // If there are 2 or 4 params, this is an Zap! rectangular format object
 // If there are more, this is a Bitfighter polygonal format object
 // Note parallel code in EditorUserInterface::processLevelLoadLine
-bool NexusZone::processArguments(S32 argc2, const char **argv2, Game *game)
+bool NexusZone::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    // Need to handle or ignore arguments that starts with letters,
    // so a possible future version can add parameters without compatibility problem.
@@ -1020,7 +1021,8 @@ bool NexusZone::processArguments(S32 argc2, const char **argv2, Game *game)
       if((c < 'a' || c > 'z') && (c < 'A' || c > 'Z'))
       {
          if(argc < Geometry::MAX_POLY_POINTS * 2)
-         {  argv[argc] = argv2[i];
+         {  
+            argv[argc] = argv2[i];
             argc++;
          }
       }
@@ -1030,11 +1032,12 @@ bool NexusZone::processArguments(S32 argc2, const char **argv2, Game *game)
       return false;
 
    if(argc <= 4)     // Archaic Zap! format
-      processArguments_ArchaicZapFormat(argc, argv, game->getLegacyGridSize());
+   {
+      processArguments_ArchaicZapFormat(argc, argv, level->getLegacyGridSize());
+      return true;
+   }
    else              // Sleek, modern Bitfighter format
-      return Parent::processArguments(argc, argv, game);
-
-   return true;
+      return Parent::processArguments(argc, argv, level);
 }
 
 

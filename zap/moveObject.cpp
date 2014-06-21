@@ -11,6 +11,7 @@
 #include "game.h"
 #include "gameConnection.h"
 #include "ship.h"
+#include "Level.h"
 
 #include "Colors.h"
 #include "GeomUtils.h"
@@ -80,11 +81,12 @@ MoveObject::~MoveObject()
 }
 
 
-bool MoveObject::processArguments(S32 argc, const char **argv, Game *game)
+bool MoveObject::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 2)
       return false;
-   else if(!Parent::processArguments(argc, argv, game))
+
+   else if(!Parent::processArguments(argc, argv, level))
       return false;
 
    setInitialPosVelAng(getPos(), Point(0,0), 0);
@@ -1608,7 +1610,7 @@ void Asteroid::onItemExploded(Point pos)
 }
 
 
-bool Asteroid::processArguments(S32 argc2, const char **argv2, Game *game)
+bool Asteroid::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    S32 argc = 0;
    const char *argv[8];                // 8 is ok for now..
@@ -1634,7 +1636,7 @@ bool Asteroid::processArguments(S32 argc2, const char **argv2, Game *game)
    setRadius(getAsteroidRadius(mSizeLeft));
    setMass(getAsteroidMass(mSizeLeft));
 
-   return Parent::processArguments(argc, argv, game);
+   return Parent::processArguments(argc, argv, level);
 }
 
 

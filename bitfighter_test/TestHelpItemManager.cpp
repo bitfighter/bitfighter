@@ -8,6 +8,7 @@
 #include "HelpItemManager.h"
 #include "ClientGame.h"
 #include "gameType.h"
+#include "Level.h"
 
 namespace Zap
 {
@@ -15,17 +16,22 @@ namespace Zap
 class HelpItemManagerTest : public testing::Test
 {
 public:
-   ClientGame* game;
-   GameType* gameType;
+   ClientGame *game;
+   GameType *gameType;
    HelpItem helpItem;
    UI::HelpItemManager himgr;
 
-   HelpItemManagerTest()
-   : game(newClientGame()), himgr(UI::HelpItemManager(game->getSettings()))
+   HelpItemManagerTest() :
+      game(newClientGame()), 
+      himgr(UI::HelpItemManager(game->getSettings()))
    {
-      // Need to add a gameType because gameType is where the game timer is managed
-      GameType *gameType = new GameType();    // Will be deleted in game destructor
+      // Need a Level to hold a GameType
+      game->setLevel(new Level());           // Level will be cleaned up by game
+
+      // Need to add a GameType because GameType is where the game timer is managed
+      GameType *gameType = new GameType();   // Will be deleted in game destructor
       gameType->addToGame(game, game->getGameObjDatabase());
+      game->addTeam(new Team());             // Cleanup handled by game
    }
 
 
@@ -222,7 +228,7 @@ TEST_F(HelpItemManagerTest, highPriorityClobberingBug)
    himgr.addInlineHelpItem(ControlsModulesItem);
    checkQueues(2, 0, 0);                       // Two high priority items queued, none displayed
 
-   himgr.idle(himgr.InitialDelayPeriod, game);        // Wait past the intial delay period; first item will be displayed
+   himgr.idle(himgr.InitialDelayPeriod, game); // Wait past the intial delay period; first item will be displayed
    checkQueues(1, 0, 1, ControlsKBItem);       // One item queued, one displayed
 
    idleUntilItemExpiredMinusOne();
@@ -237,7 +243,7 @@ TEST_F(HelpItemManagerTest, highPriorityClobberingBug)
 
    lastRollupPeriod = himgr.getRollupPeriod(0);
 
-   idleUntilItemExpired();                 // Clear the decks
+   idleUntilItemExpired();         // Clear the decks
    checkQueues(0, 0, 0);
    checkQueues(0, 0, 0);
 
@@ -251,16 +257,16 @@ TEST_F(HelpItemManagerTest, highPriorityClobberingBug)
    himgr.addInlineHelpItem(CmdrsMapItem);
    checkQueues(0, 2, 0);  // Both items should be queued, but none displayed
 
-   idleRemainderOfFullCycle(lastRollupPeriod); // Cycle is completed, ready for a new item
-   checkQueues(0, 1, 1, AddBotsItem);                // No bots are in game ==> AddBotsItem should be displayed
+   idleRemainderOfFullCycle(lastRollupPeriod);  // Cycle is completed, ready for a new item
+   checkQueues(0, 1, 1, AddBotsItem);           // No bots are in game ==> AddBotsItem should be displayed
 
    // Reset
    idleFullCycle();
-   checkQueues(0, 0, 1, CmdrsMapItem);               // One item displayed, none in the queues
+   checkQueues(0, 0, 1, CmdrsMapItem);          // One item displayed, none in the queues
    idleFullCycleMinusOne();
-   checkQueues(0, 0, 0);                             // No items dispalyed, queues are empty
+   checkQueues(0, 0, 0);                        // No items dispalyed, queues are empty
 
-   himgr.clearAlreadySeenList();    // Allows us to add the same items again
+   himgr.clearAlreadySeenList();                // Allows us to add the same items again
 
    // Add the same two items again
    himgr.addInlineHelpItem(AddBotsItem);

@@ -4,6 +4,8 @@
 //------------------------------------------------------------------------------
 
 #include "HTFGame.h"
+
+#include "Level.h"
 #include "goalZone.h"
 #include "gameObjectRender.h"
 
@@ -32,12 +34,12 @@ HTFGameType::~HTFGameType()
 }
 
 
-bool HTFGameType::processArguments(S32 argc, const char **argv, Game *game)
+bool HTFGameType::processArguments(S32 argc, const char **argv, Level *level)
 {
    if (argc < 2)
       return false;
 
-   if(!Parent::processArguments(argc, argv, game))
+   if(!Parent::processArguments(argc, argv, level))
       return false;
 
    // Third arg is points-per-minute

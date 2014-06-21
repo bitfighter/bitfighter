@@ -24,7 +24,7 @@ public:
 
    SlipZone *clone() const;
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
 
    void render();
    S32 getRenderSortValue();

@@ -1185,13 +1185,14 @@ void PlayerMenuItem::activatedWithShortcutKey()
 ////////////////////////////////////
 
 TeamMenuItem::TeamMenuItem(S32 index, AbstractTeam *team, void (*callback)(ClientGame *, U32), InputCode inputCode, bool isCurrent) :
-               MenuItem(index, team->getName().getString(), callback, "", inputCode, KEY_UNKNOWN)
+   MenuItem(index, team->getName().getString(), callback, "", inputCode, KEY_UNKNOWN)
 {
+   mSelectedColor   = team->getColor();
+   mUnselectedColor = team->getColor();
    mTeam = team;
    mIsCurrent = isCurrent;
-   mUnselectedColor = *team->getColor();
-   mSelectedColor = *team->getColor();
 }
+
 
 // Destructor
 TeamMenuItem::~TeamMenuItem()

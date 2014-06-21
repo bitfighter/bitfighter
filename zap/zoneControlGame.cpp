@@ -8,6 +8,7 @@
 #include "goalZone.h"
 #include "gameObjectRender.h"
 #include "game.h"
+#include "Level.h"
 
 
 namespace Zap
@@ -302,11 +303,11 @@ void ZoneControlGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeig
             else if(zone->didRecentlyChangeTeam() && zone->getTeam() != TEAM_NEUTRAL && zone->getTeam() != ship->getTeam())
             {
                // Render a blinky arrow for a recently captured zone
-               Color c = *zone->getColor();
+               Color c = zone->getColor();
 
                if(zone->isFlashing())
                   c *= 0.7f;
-               renderObjectiveArrow(zone, &c, canvasWidth, canvasHeight);
+               renderObjectiveArrow(zone, c, canvasWidth, canvasHeight);
             }
          }
    }

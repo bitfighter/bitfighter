@@ -6,6 +6,7 @@
 #include "Zone.h"
 
 #include "game.h"
+#include "Level.h"
 #include "Colors.h"
 #include "GeomUtils.h"
 
@@ -59,14 +60,14 @@ void Zone::render()
 
 void Zone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
-   renderZone(&Colors::white, getOutline(), getFill());
+   renderZone(Colors::white, getOutline(), getFill());
    PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled);
 }
 
 
 void Zone::renderDock()
 {
-   renderZone(&Colors::white, getOutline(), getFill());
+   renderZone(Colors::white, getOutline(), getFill());
 }
 
 
@@ -77,7 +78,7 @@ S32 Zone::getRenderSortValue()
 
 
 // Create objects from parameters stored in level file
-bool Zone::processArguments(S32 argc2, const char **argv2, Game *game)
+bool Zone::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    // Need to handle or ignore arguments that starts with letters,
    // so a possible future version can add parameters without compatibility problem.
@@ -93,7 +94,8 @@ bool Zone::processArguments(S32 argc2, const char **argv2, Game *game)
       if((c < 'a' || c > 'z') && (c < 'A' || c > 'Z'))
       {
          if(argc < Geometry::MAX_POLY_POINTS * 2 + 1)
-         {  argv[argc] = argv2[i];
+         {  
+            argv[argc] = argv2[i];
             argc++;
          }
       }
@@ -102,7 +104,7 @@ bool Zone::processArguments(S32 argc2, const char **argv2, Game *game)
    if(argc < 6)
       return false;
 
-   readGeom(argc, argv, 0, game->getLegacyGridSize());
+   readGeom(argc, argv, 0, level->getLegacyGridSize());
    updateExtentInDatabase();
 
    // Make sure our Zone doesn't have invalid geometry

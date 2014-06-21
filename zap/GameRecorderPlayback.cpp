@@ -19,6 +19,7 @@
 #include "DisplayManager.h"
 #include "OpenglUtils.h"
 #include "Cursor.h"
+#include "Level.h"
 
 #include "version.h"
 

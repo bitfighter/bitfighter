@@ -29,7 +29,7 @@ public:
    CoreGameType();            // Constructor
    virtual ~CoreGameType();   // Destructor
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
    void idle(BfObject::IdleCallPath path, U32 deltaT);
@@ -184,7 +184,7 @@ public:
 
    void idle(BfObject::IdleCallPath path);
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
    TNL_DECLARE_CLASS(CoreItem);

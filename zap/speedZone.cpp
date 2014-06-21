@@ -4,6 +4,8 @@
 //------------------------------------------------------------------------------
 
 #include "speedZone.h"
+
+#include "Level.h"
 #include "game.h"
 #include "BfObject.h"
 #include "gameType.h"
@@ -187,7 +189,7 @@ void SpeedZone::render()
 }
 
 
-Color SpeedZone::getEditorRenderColor()
+const Color &SpeedZone::getEditorRenderColor() const
 {
    return Colors::red;
 }
@@ -262,7 +264,7 @@ const Vector<Point> *SpeedZone::getCollisionPoly() const
 
 
 // Create objects from parameters stored in level file
-bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
+bool SpeedZone::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    S32 argc = 0;
    const char *argv[8];                // 8 is ok, SpeedZone only supports 4 numbered args
@@ -298,10 +300,10 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
    Point start, end;
 
    start.read(argv);
-   start *= game->getLegacyGridSize();
+   start *= level->getLegacyGridSize();
 
    end.read(argv + 2);
-   end *= game->getLegacyGridSize();
+   end *= level->getLegacyGridSize();
 
    // Save the points we read into our geometry
    setVert(start, 0);

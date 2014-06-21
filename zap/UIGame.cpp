@@ -34,6 +34,7 @@
 #include "SoundSystem.h"
 #include "FontManager.h"
 #include "Intervals.h"
+#include "Level.h"
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
@@ -1256,6 +1257,12 @@ void GameUserInterface::setActiveWeapon(U32 weaponIndex)
 }
 
 
+void GameUserInterface::updateLeadingPlayerAndScore()
+{
+   mTimeLeftRenderer.updateLeadingPlayerAndScore(getGame());
+}
+
+
 // Used?
 void GameUserInterface::setModulePrimary(ShipModule module, bool isActive)
 {
@@ -1279,7 +1286,7 @@ S32 GameUserInterface::getLoadoutIndicatorWidth() const
 bool GameUserInterface::scoreboardIsVisible() const
 {
    // GameType can be NULL when first starting up
-   return mInScoreboardMode || (getGame()->getGameType() && getGame()->getGameType()->isGameOver());
+   return mInScoreboardMode || getGame()->isGameOver();
 }
 
 
@@ -2386,10 +2393,10 @@ void GameUserInterface::renderTeamName(S32 index, S32 left, S32 right, S32 top) 
    static const S32 teamFontSize = 24;
 
    // First the box
-   const Color *teamColor = getGame()->getTeamColor(index);
+   const Color &teamColor = getGame()->getTeamColor(index);
    const S32 headerBoxHeight = teamFontSize + 2 * Gap;
 
-   drawFilledFancyBox(left, top, right, top + headerBoxHeight, 10, *teamColor, 0.6f, *teamColor);
+   drawFilledFancyBox(left, top, right, top + headerBoxHeight, 10, teamColor, 0.6f, teamColor);
 
    // Then the team name & score
    FontManager::pushFontContext(ScoreboardHeadlineContext);
@@ -2912,7 +2919,7 @@ void GameUserInterface::renderInlineHelpItemOutlines(S32 playerTeam, F32 alpha) 
       offsetPolygons(polygons, outlines, HIGHLIGHTED_OBJECT_BUFFER_WIDTH);
 
       for(S32 j = 0; j < outlines.size(); j++)
-         renderPolygonOutline(&outlines[j], &Colors::green, alpha);
+         renderPolygonOutline(&outlines[j], Colors::green, alpha);
    }
 }
 
@@ -2997,7 +3004,7 @@ void GameUserInterface::renderGameCommander()
       if(gameType)
       {
          playerTeam = ship->getTeam();
-         Color teamColor = *ship->getColor();
+         const Color &teamColor = ship->getColor();
 
          for(S32 i = 0; i < renderObjects.size(); i++)
          {

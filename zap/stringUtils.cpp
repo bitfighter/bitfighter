@@ -830,7 +830,7 @@ string chopComment(const string &line)
 
 string writeLevelString(const char *in)
 {
-   int c=0;
+   S32 c = 0;
    while(in[c] != 0 && in[c] != '\"' && in[c] != '#' && in[c] != ' ')
       c++;
    if(in[c] == 0 && c != 0)

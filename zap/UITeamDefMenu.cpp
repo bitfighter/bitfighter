@@ -135,8 +135,8 @@ void TeamDefUserInterface::onActivate()
    {
       EditorTeam *team = ui->getTeam(i);
 
-      ui->mOldTeams[i].color = *team->getColor();
-      ui->mOldTeams[i].name = team->getName().getString();
+      ui->mOldTeams[i].setColor(team->getColor());
+      ui->mOldTeams[i].setName(team->getName().getString());
    }
 
    // Display an intitial message to users
@@ -201,7 +201,6 @@ void TeamDefUserInterface::render()
    if(selectedIndex >= size)
       selectedIndex = 0;
 
-
    // Draw the fixed teams
    glColor(Colors::NeutralTeamColor);
    drawCenteredStringf(yStart, fontsize, "Neutral Team (can't change)");
@@ -224,7 +223,7 @@ void TeamDefUserInterface::render()
          
          string colorstr;
 
-         const Color *color = ui->getGame()->getTeamColor(j);
+         const Color &color = ui->getGame()->getTeamColor(j);
 
          if(mColorEntryMode == ColorEntryModeHex)
             colorstr = "#" + ui->getTeam(j)->getHexColorEditor()->getString();
@@ -239,9 +238,9 @@ void TeamDefUserInterface::render()
             else
                TNLAssert(false, "Unknown entry mode!");
 
-            colorstr = "(" + itos(S32(color->r * multiplier + 0.5)) + ", " + 
-                             itos(S32(color->g * multiplier + 0.5)) + ", " +
-                             itos(S32(color->b * multiplier + 0.5)) + ")";
+            colorstr = "(" + itos(S32(color.r * multiplier + 0.5)) + ", " + 
+                             itos(S32(color.g * multiplier + 0.5)) + ", " +
+                             itos(S32(color.b * multiplier + 0.5)) + ")";
          }
          
          static const string spacer1 = "  ";
@@ -451,7 +450,7 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
    else if(inputCode == KEY_C)  // Want a mouse button?   || inputCode == MOUSE_LEFT)
    {
       UIColorPicker *uiCol = getUIManager()->getUI<UIColorPicker>();
-      *((Color *)uiCol) = *(ui->getTeam(selectedIndex)->getColor());
+      uiCol->set(ui->getTeam(selectedIndex)->getColor());
       getUIManager()->activate(uiCol);
    }
 
@@ -521,8 +520,8 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
 void TeamDefUserInterface::startEditing()
 {
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
-   origName = ui->getTeam(selectedIndex)->getName().getString();
-   origColor.set(*ui->getTeam(selectedIndex)->getColor());
+   origName  = ui->getTeam(selectedIndex)->getName().getString();
+   origColor = ui->getTeam(selectedIndex)->getColor();
 }
 
 void TeamDefUserInterface::doneEditingColor()

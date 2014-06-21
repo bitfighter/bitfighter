@@ -7,6 +7,7 @@
 #include "SlipZone.h"
 
 #include "game.h"
+#include "Level.h"
 #include "gameObjectRender.h"
 #include "LuaBase.h"
 
@@ -70,7 +71,7 @@ S32 SlipZone::getRenderSortValue()
 }
 
 
-bool SlipZone::processArguments(S32 argc2, const char **argv2, Game *game)
+bool SlipZone::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    // Need to handle or ignore arguments that starts with letters,
    // so a possible future version can add parameters without compatibility problem.
@@ -86,7 +87,8 @@ bool SlipZone::processArguments(S32 argc2, const char **argv2, Game *game)
       if((c < 'a' || c > 'z') && (c < 'A' || c > 'Z'))
       {
 			if(argc < Geometry::MAX_POLY_POINTS * 2 + 1)
-         {  argv[argc] = argv2[i];
+         {  
+            argv[argc] = argv2[i];
             argc++;
          }
       }
@@ -95,13 +97,13 @@ bool SlipZone::processArguments(S32 argc2, const char **argv2, Game *game)
    if(argc < 6)
       return false;
 
-   if(argc & 1)   // Odd number of arg count (7,9,11) to allow optional slipAmount arg
+   if(argc & 1)   // Odd number of arg count (7, 9, 11) to allow optional slipAmount arg
    {
       slipAmount = (F32)atof(argv[0]);
-      readGeom(argc, argv, 1, game->getLegacyGridSize());
+      readGeom(argc, argv, 1, level->getLegacyGridSize());
    }
-   else           // Even number of arg count (6,8,10)
-      readGeom(argc, argv, 0, game->getLegacyGridSize());
+   else           // Even number of arg count (6, 8, 10)
+      readGeom(argc, argv, 0, level->getLegacyGridSize());
 
    updateExtentInDatabase();
 

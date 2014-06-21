@@ -221,7 +221,8 @@ void EngineerHelper::renderDeploymentMarker(const Ship *ship)
          EngineerModuleDeployer::findDeployPoint(ship, item, deployPosition, deployNormal))
    {
       EngineerModuleDeployer deployer;
-      bool canDeploy = deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, item);
+      Level *level = getGame()->getGameObjDatabase();
+      bool canDeploy = deployer.canCreateObjectAtLocation(level, ship, item);
 
       switch(engineerItemInfo[mSelectedIndex].itemIndex)
       {

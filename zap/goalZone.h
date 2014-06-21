@@ -39,7 +39,7 @@ public:
 
    GoalZone *clone() const;
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

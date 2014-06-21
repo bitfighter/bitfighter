@@ -171,6 +171,8 @@ public:
    void onGameOver();                  // Scoreboard display begins
    void onGameReallyAndTrulyOver();    // After scoreboard display is finished
 
+   void updateLeadingPlayerAndScore();
+
    // Sounds and music
    SFXHandle playSoundEffect(U32 profileIndex, const Point &position) const;
    SFXHandle playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain) const;

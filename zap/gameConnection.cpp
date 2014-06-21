@@ -1052,7 +1052,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cTouchdownScored,
    if(gt)
    {
       gt->majorScoringEventOcurred(team);
-      mClientGame->emitTextEffect("Touchdown!", *gt->getTeamColor(team), scorePos, true);
+      mClientGame->emitTextEffect("Touchdown!", gt->getTeamColor(team), scorePos, true);
    }
 #endif
 }

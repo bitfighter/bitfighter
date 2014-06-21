@@ -44,7 +44,7 @@ public:
 
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const;
 
-   virtual bool processArguments(S32 argc, const char **argv, Game *game);
+   virtual bool processArguments(S32 argc, const char **argv, Level *level);
 
    virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);

@@ -35,7 +35,7 @@ public:
    PickupItem(float radius = 1, S32 repopDelay = 20);   // Constructor
    virtual ~PickupItem();                               // Destructor
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
    void onAddedToGame(Game *game);

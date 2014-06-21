@@ -427,6 +427,12 @@ void UIManager::onPlayerQuit(const char *name)
 }
 
 
+void UIManager::updateLeadingPlayerAndScore()
+{
+   getUI<GameUserInterface>()->updateLeadingPlayerAndScore();
+}
+
+
 void UIManager::onGameStarting()
 {
    getUI<GameUserInterface>()->onGameStarting();

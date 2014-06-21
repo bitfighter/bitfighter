@@ -4,9 +4,11 @@
 //------------------------------------------------------------------------------
 
 #include "luaLevelGenerator.h"
+
 #include "gameLoader.h"
 #include "game.h"
 #include "barrier.h"             // For PolyWall def
+#include "Level.h"
 
 #include "stringUtils.h"         // fileExists
 
@@ -24,9 +26,9 @@ LuaLevelGenerator::LuaLevelGenerator(Game *game, const string &scriptName, const
    TNLAssert(scriptName == "" || fileExists(scriptName), "Files should be checked before we get here -- something has gone wrong!");
 
    if(gridDatabase == NULL)
-   {
       gridDatabase = game->getGameObjDatabase();
-   }
+
+   TNLAssert(gridDatabase, "Need a valid GridDatabase here!");
 
    mScriptName = scriptName;
    mScriptArgs = scriptArgs;

@@ -47,7 +47,7 @@ public:
    NexusGameType();           // Constructor
    virtual ~NexusGameType();
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
    S32 getNexusTimeLeftMs() const;     // Get time until the nexus changes state in MilliSeconds
@@ -185,7 +185,7 @@ public:
 
    NexusZone *clone() const;
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
 
    void onAddedToGame(Game *theGame);
    void idle(BfObject::IdleCallPath path);

@@ -4,10 +4,13 @@
 //------------------------------------------------------------------------------
 
 #include "TestUtils.h"
-#include "../zap/ServerGame.h"
-#include "../zap/gameType.h"
-#include "../zap/luaLevelGenerator.h"
-#include "../zap/SystemFunctions.h"
+
+#include "ServerGame.h"
+#include "gameType.h"
+#include "Level.h"
+#include "luaLevelGenerator.h"
+#include "SystemFunctions.h"
+
 #include "gtest/gtest.h"
 
 namespace Zap
@@ -24,14 +27,23 @@ protected:
    lua_State *L;
 
    LuaLevelGenerator *levelgen;
+   GamePair pair;
+
+   LuaEnvironmentTest() 
+   {
+      int x = 0;
+   }
 
 
-   virtual void SetUp() {
-      serverGame = newServerGame();
+   virtual void SetUp() 
+   {
+      serverGame = pair.server;
       settings = serverGame->getSettingsPtr();
 
-      // Set-up our environment
-      ASSERT_TRUE(LuaScriptRunner::startLua(settings->getFolderManager()->getLuaDir()));
+      ASSERT_TRUE(serverGame->getGameObjDatabase()->findObjects_fast()->size() == 0) << "Database should be empty on a new level!";
+
+      // Check that the environment was set up during construction of GamePair
+      ASSERT_TRUE(LuaScriptRunner::getL());
 
       // Set up a levelgen object, with no script
       levelgen = new LuaLevelGenerator(serverGame);
@@ -41,17 +53,13 @@ protected:
 
       // Grab our Lua state
       L = LuaScriptRunner::getL();
-      ASSERT_TRUE(L);
    }
 
 
    virtual void TearDown()
    {
       delete levelgen;
-
       LuaScriptRunner::shutdown();
-
-      delete serverGame;
    }
 
 
@@ -59,14 +67,14 @@ protected:
    {
       return LuaScriptRunner::loadFunction(L, levelgen->getScriptId(), functionName.c_str());
    }
-
 };
 
 
 TEST_F(LuaEnvironmentTest, sanityCheck)
 {
-   // Test exception throwing
-   EXPECT_FALSE(levelgen->runString("a = b.b"));
+   // Test exception throwing -- for some reason, test triggers SEH exception if code is passed directly
+   string code = "a = b.b";      // Illegal code
+   EXPECT_FALSE(levelgen->runString(code));
 }
 
 
@@ -124,10 +132,13 @@ TEST_F(LuaEnvironmentTest, immutability)
 
 TEST_F(LuaEnvironmentTest, findAllObjects)
 {
+   EXPECT_TRUE(levelgen->runString("t = { }"));
+   EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t)"));
+   ASSERT_TRUE(levelgen->runString("assert(#t == 0)"));
+
    EXPECT_TRUE(levelgen->runString("bf:addItem(ResourceItem.new(point.new(0,0)))"));
    EXPECT_TRUE(levelgen->runString("bf:addItem(ResourceItem.new(point.new(300,300)))"));
    EXPECT_TRUE(levelgen->runString("bf:addItem(TestItem.new(point.new(200,200)))"));
-
 
    EXPECT_TRUE(levelgen->runString("t = { }"));
    EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t)"));

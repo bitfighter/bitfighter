@@ -67,7 +67,7 @@ Int<BADGE_COUNT> ClientInfo::getBadges()
 
 bool ClientInfo::hasBadge(MeritBadges badge)
 {
-   return mBadges & BIT(badge);
+   return mBadges &BIT(badge);
 }
 
 
@@ -303,6 +303,7 @@ S32 ClientInfo::getTeamIndex()
 
 void ClientInfo::setTeamIndex(S32 teamIndex)
 {
+   TNLAssert(teamIndex < mGame->getTeamCount(), "Team does not exist!");
    mTeamIndex = teamIndex;
 }
 
@@ -395,18 +396,18 @@ LuaPlayerInfo *ClientInfo::getPlayerInfo()
 bool ClientInfo::sEngineerDeployObject(U32 objectType)
 {
    Ship *ship = getShip();
-   if(!ship)                                    // Not a good sign...
-      return false;                             // ...bail
+   if(!ship)                                       // Not a good sign...
+      return false;                                // ...bail
 
-   GameType *gameType = ship->getGame()->getGameType();
+   Game *game = ship->getGame();
 
-   if(!gameType->isEngineerEnabled())          // Something fishy going on here...
-      return false;                            // ...bail
+   if(!game->getGameType()->isEngineerEnabled())   // Something fishy going on here...
+      return false;                                // ...bail
 
    EngineerModuleDeployer deployer;
 
    // Check if we can create the engineer object; if not, return false
-   if(!deployer.canCreateObjectAtLocation(ship->getGame()->getGameObjDatabase(), ship, objectType))
+   if(!deployer.canCreateObjectAtLocation(game->getGameObjDatabase(), ship, objectType))
    {
       if(!isRobot())
          getConnection()->s2cDisplayErrorMessage(deployer.getErrorMessage().c_str());
@@ -461,7 +462,7 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
       if(!isRobot())
          getConnection()->s2cEngineerResponseEvent(responseEvent);
 
-      gameType->broadcastMessage(GameConnection::ColorInfo, SFXNone, msg, e);
+      game->getGameType()->broadcastMessage(GameConnection::ColorInfo, SFXNone, msg, e);
 
       // Finally, deduct energy cost
       S32 energyCost = ModuleInfo::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();

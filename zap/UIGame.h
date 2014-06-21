@@ -362,6 +362,8 @@ public:
    void setShowingInGameHelp(bool showing);
    void resetInGameHelpMessages();
 
+   void updateLeadingPlayerAndScore();
+
    bool isShowingDebugShipCoords() const;
 
    // FxManager passthroughs

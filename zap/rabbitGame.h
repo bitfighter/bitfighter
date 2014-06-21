@@ -37,7 +37,7 @@ public:
    RabbitGameType();  // Constructor
    virtual ~RabbitGameType();
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
 #ifndef ZAP_DEDICATED
@@ -59,7 +59,7 @@ public:
    bool teamHasFlag(S32 teamIndex) const;
    void onFlagMounted(S32 teamIndex);
 
-   const Color *getTeamColor(const BfObject *object) const;
+   const Color &getTeamColor(const BfObject *object) const;
 
    void onFlagHeld(Ship *ship);
    void onFlaggerDead(Ship *killerShip);

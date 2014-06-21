@@ -39,7 +39,7 @@ public:
    AbstractSpawn(const AbstractSpawn &copy);                // Copy constructor
    virtual ~AbstractSpawn();                                // Destructor
    
-   virtual bool processArguments(S32 argc, const char **argv, Game *game);
+   virtual bool processArguments(S32 argc, const char **argv, Level *level);
 
    virtual void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
 
@@ -89,7 +89,7 @@ public:
    const char *getClassName() const;
 
    string toLevelCode() const;
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
 
    S32 getDefaultRespawnTime();    // Somewhat meaningless in this context
 
@@ -199,7 +199,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-static const S32 TeamNotSpecified = -99999;
+static const S32 TeamNotSpecified = S32_MIN;
 
 class FlagSpawn : public ItemSpawn
 {
@@ -237,7 +237,7 @@ public:
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
    void renderDock();
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
    ///// Lua interface

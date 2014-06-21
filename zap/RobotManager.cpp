@@ -8,6 +8,7 @@
 #include "ClientInfo.h"
 #include "robot.h"
 #include "ServerGame.h"
+#include "Level.h"
 
 #include "MathUtils.h"
 
@@ -56,7 +57,7 @@ void RobotManager::balanceTeams()
 
    // Evaluate team counts
    Vector<Vector<S32> > botCounts = mGame->getCategorizedPlayerCountsByTeam();
-   S32 teamCount = mGame->getTeamCount();
+   S32 teamCount = botCounts.size();
    TNLAssert(botCounts.size() == teamCount, "Problem!");
 
    // First figure out how many "players" we have.  This is basically everyone except bots added by the autoleveler.
@@ -97,7 +98,7 @@ void RobotManager::balanceTeams()
       // Add bots
       else if(teamSize < playersNeededPerTeam)
       {
-         Vector<const char *> noArgs;
+         Vector<string> noArgs;
 
          for(S32 j = teamSize; j < playersNeededPerTeam; j++)
             addBot(noArgs, ClientInfo::ClassRobotAddedByAutoleveler, i);
@@ -119,12 +120,12 @@ S32 RobotManager::getMaxPlayersPerBalancedTeam(S32 players, S32 teams)
 }
 
 
-string RobotManager::addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass, S32 teamIndex)
+string RobotManager::addBot(const Vector<string> &args, ClientInfo::ClientClass clientClass, S32 teamIndex)
 {
    Robot *robot = new Robot();
 
    string errorMessage;
-   if(!robot->processArguments(args.size(), (const char **)args.address(), mGame, errorMessage))
+   if(!robot->processArguments(args, mGame, errorMessage))
    {
       delete robot;
       return "!!! " + errorMessage;
@@ -239,12 +240,12 @@ void RobotManager::moreBots()
    // If teams all have the same number of players, neededBotCount will be 0 ==> add a bot to each team
    if(neededBotCount == 0)       
       for(S32 i = 0; i < teamCount; i++)
-         addBot(Vector<const char *>(), ClientInfo::ClassRobotAddedByAutoleveler);
+         addBot(Vector<string>(), ClientInfo::ClassRobotAddedByAutoleveler);
 
    // Otherwise, add neededBotCount bots to bring all the teams up to the same number of players as on the biggest team
    else
       for(S32 i = 0; i < neededBotCount; i++)
-         addBot(Vector<const char *>(), ClientInfo::ClassRobotAddedByAutoleveler);
+         addBot(Vector<string>(), ClientInfo::ClassRobotAddedByAutoleveler);
    mAutoLevelTeams = true;
    mManagerActive = true;
    mTargetPlayerCount = findMinPlayers(mGame->getPlayerCount() + mGame->getRobotCount(), teamCount);

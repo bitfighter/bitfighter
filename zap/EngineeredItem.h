@@ -47,7 +47,8 @@ protected:
    Vector<Point> mCollisionPolyPoints;    // Used on server, also used for rendering on client -- computed when item is added to game
    void computeObjectGeometry();          // Populates mCollisionPolyPoints
 
-   void findMountPoint(Game *game, const Point &pos);     // Figure out where to mount this item during construction
+   // Figure out where to mount this item during construction... and move it there
+   void findMountPoint(const GridDatabase *database, const Point &pos);     
 
 
    WallSegment *mMountSeg;    // Segment we're mounted to in the editor (don't care in the game)
@@ -64,7 +65,7 @@ public:
    EngineeredItem(S32 team = TEAM_NEUTRAL, const Point &anchorPoint = Point(0,0), const Point &anchorNormal = Point(1,0));  // Constructor
    virtual ~EngineeredItem();                                                                                               // Destructor
 
-   virtual bool processArguments(S32 argc, const char **argv, Game *game);
+   virtual bool processArguments(S32 argc, const char **argv, Level *level);
 
    virtual void onAddedToGame(Game *theGame);
 
@@ -108,12 +109,12 @@ public:
    void getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const;
 
    // Figure out where to put our turrets and forcefield projectors.  Will return NULL if no mount points found.
-   static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
+   static DatabaseObject *findAnchorPointAndNormal(const GridDatabase *db, const Point &pos, F32 snapDist, 
                                                    const Vector<S32> *excludedWallList,
                                                    bool format, Point &anchor, Point &normal);
 
    // Pass NULL if there is no excludedWallList
-   static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
+   static DatabaseObject *findAnchorPointAndNormal(const GridDatabase *db, const Point &pos, F32 snapDist, 
                                                    const Vector<S32> *excludedWallList,
                                                    bool format, TestFunc testFunc, Point &anchor, Point &normal);
 
@@ -314,7 +315,7 @@ public:
 
    WeaponType mWeaponFireType;
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
    static const S32 defaultRespawnTime = 0;
@@ -386,7 +387,7 @@ private:
 
 public:
    // Check potential deployment position
-   bool canCreateObjectAtLocation(const GridDatabase *database, const Ship *ship, U32 objectType);
+   bool canCreateObjectAtLocation(const Level *level, const Ship *ship, U32 objectType);
 
    bool deployEngineeredItem(ClientInfo *clientInfo, U32 objectType);  // Deploy!
    string getErrorMessage();

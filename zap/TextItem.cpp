@@ -7,17 +7,16 @@
 
 #include "game.h"
 #include "ship.h"
-#include "stringUtils.h"
+#include "Level.h"
 
 #include "gameObjectRender.h"    // For renderTextItem()
-
 #include "Colors.h"
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
+#  include "ClientGame.h"
 #endif
 
 #include <cmath>
@@ -130,7 +129,7 @@ bool TextItem::canBeHostile() { return true; }
 bool TextItem::canBeNeutral() { return true; }
 
 
-Color TextItem::getEditorRenderColor()
+const Color &TextItem::getEditorRenderColor() const
 {
    return Colors::blue;
 }
@@ -181,7 +180,7 @@ S32 TextItem::getRenderSortValue()
 
 // Create objects from parameters stored in level file
 // Entry looks like: TextItem 0 50 10 10 11 11 Message goes here
-bool TextItem::processArguments(S32 argc, const char **argv, Game *game)
+bool TextItem::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 7)
       return false;
@@ -191,10 +190,10 @@ bool TextItem::processArguments(S32 argc, const char **argv, Game *game)
    Point pos, dir;
 
    pos.read(argv + 1);
-   pos *= game->getLegacyGridSize();
+   pos *= level->getLegacyGridSize();
 
    dir.read(argv + 3);
-   dir *= game->getLegacyGridSize();
+   dir *= level->getLegacyGridSize();
 
    setSize((F32)atof(argv[5]));
 

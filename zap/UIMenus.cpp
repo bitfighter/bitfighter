@@ -2621,7 +2621,7 @@ void PlayerMenuUserInterface::render()
 
       PlayerMenuItem *newItem = new PlayerMenuItem(i, clientInfo->getName().getString(), playerSelectedCallback, 
                                                    InputCodeManager::stringToInputCode(c), pt);
-      newItem->setUnselectedColor(*getGame()->getTeamColor(clientInfo->getTeamIndex()));
+      newItem->setUnselectedColor(getGame()->getTeamColor(clientInfo->getTeamIndex()));
 
       addMenuItem(newItem);
    }

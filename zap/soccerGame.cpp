@@ -6,6 +6,7 @@
 #include "soccerGame.h"
 
 #include "gameNetInterface.h"
+#include "Level.h"
 #include "projectile.h"
 #include "goalZone.h"
 #include "Spawn.h"      // For AbstractSpawn def
@@ -105,7 +106,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
 
    // Print the message and emit the text effect
    getGame()->displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());
-   getGame()->emitTextEffect(txtEffect, *getTeamColor(scorerTeam), scorePos, true);
+   getGame()->emitTextEffect(txtEffect, getTeamColor(scorerTeam), scorePos, true);
 }
 
 
@@ -349,7 +350,7 @@ SoccerBallItem *SoccerBallItem::clone() const
 }
 
 
-bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
+bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    S32 argc = 0;
    const char *argv[16];
@@ -368,14 +369,14 @@ bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
       }
    }
 
-   if(!Parent::processArguments(argc, argv, game))
+   if(!Parent::processArguments(argc, argv, level))
       return false;
 
    mInitialPos = getActualPos();
 
    // Add a spawn point at the ball's starting location
    FlagSpawn *spawn = new FlagSpawn(mInitialPos, 0);
-   spawn->addToGame(game, game->getGameObjDatabase());
+   level->addToDatabase(spawn);
 
    return true;
 }
@@ -435,7 +436,7 @@ bool SoccerBallItem::canBeHostile() { return false; }
 bool SoccerBallItem::canBeNeutral() { return false; }
 
 
-const Color *SoccerBallItem::getColor() const
+const Color &SoccerBallItem::getColor() const
 { 
    return getGame()->getTeamColor(TEAM_NEUTRAL);
 }

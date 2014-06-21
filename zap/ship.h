@@ -96,7 +96,7 @@ protected:
 
    void initialize(ClientInfo *clientInfo, S32 team, const Point &pos);
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
 public:

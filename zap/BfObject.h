@@ -207,6 +207,7 @@ class ClientGame;
 class EditorAttributeMenuUI;
 class WallSegment;
 class ClientInfo;
+class Level;
 
 class BfObject : public DatabaseObject, public NetObject, public EditorObject
 {
@@ -358,7 +359,7 @@ public:
 
    virtual void setPos(const Point &point);
 
-   const Color *getColor() const;      // Get object's team's color
+   const Color &getColor() const;      // Get object's team's color
 
    // These methods used to be in EditorObject, but we'll need to know about them as we add
    // the ability to manipulate objects more using Lua
@@ -381,7 +382,7 @@ public:
 
    virtual void removeFromGame(bool deleteObject);
 
-   virtual bool processArguments(S32 argc, const char**argv, Game *game);
+   virtual bool processArguments(S32 argc, const char **argv, Level *level);
    virtual string toLevelCode() const;    // Generates levelcode line for object
    string appendId(const string &objName) const;
 

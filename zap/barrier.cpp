@@ -9,6 +9,7 @@
 #include "BotNavMeshZone.h"         // For BufferRadius
 #include "gameObjectRender.h"
 #include "game.h"
+#include "Level.h"
 #include "Colors.h"
 #include "stringUtils.h"
 #include "GeomUtils.h"
@@ -27,100 +28,105 @@ using namespace LuaArgs;
 
 Vector<Point> Barrier::mRenderLineSegments;
 
-
-
-// Constructor
-WallRec::WallRec(F32 width, bool solid, const Vector<F32> &verts)
-{
-   this->width = width;
-   this->solid = solid;
-
-   this->verts.resize(verts.size());
-
-   for(S32 i = 0; i < verts.size(); i++)
-      this->verts[i] = verts[i];
-}
-
-
-// Constructor
-WallRec::WallRec(const WallItem *wallItem)
-{
-   width = (F32)wallItem->getWidth();
-   solid = false;
-
-   for(S32 i = 0; i < wallItem->getVertCount(); i++)
-   {
-      verts.push_back(wallItem->getVert(i).x);
-      verts.push_back(wallItem->getVert(i).y);
-   }
-}
-
-
-// Constructor
-WallRec::WallRec(const PolyWall *polyWall)
-{
-   width = 1;      // Doesn't really matter... will be ignored
-   solid = true;
-
-   for(S32 i = 0; i < polyWall->getVertCount(); i++)
-   {
-      verts.push_back(polyWall->getVert(i).x);
-      verts.push_back(polyWall->getVert(i).y);
-   }
-}
-
-
-// Runs on server or on client, never in editor
-// Generates a list of barriers, which are then added to the game one-by-one
-// Barriers will either be a simple 2-point segment, or a longer list of vertices defining a polygon
-void WallRec::constructWalls(Game *game) const
-{
-   Vector<Point> vec = floatsToPoints(verts);
-
-   if(vec.size() < 2)
-      return;
-
-   if(solid)   // This is a polywall
-   {
-      if(vec.first() == vec.last())      // Does our barrier form a closed loop?
-         vec.erase(vec.size() - 1);      // If so, remove last vertex
-
-      Barrier *b = new Barrier(vec, width, true);
-      b->addToGame(game, game->getGameObjDatabase());
-   }
-   else        // This is a standard series of segments
-   {
-      // First, fill a vector with barrier segments
-      Vector<Point> barrierEnds;
-      constructBarrierEndPoints(&vec, width, barrierEnds);
-
-      Vector<Point> pts;
-      // Then add individual segments to the game
-      for(S32 i = 0; i < barrierEnds.size(); i += 2)
-      {
-         pts.clear();
-         pts.push_back(barrierEnds[i]);
-         pts.push_back(barrierEnds[i+1]);
-
-         Barrier *b = new Barrier(pts, width, false);    // false = not solid
-         b->addToGame(game, game->getGameObjDatabase());
-      }
-   }
-}
+//
+//// Constructor -- used on client after receiving a list of wall points from server.
+//// Note that collinear points will have already been removed.
+//WallRec::WallRec(F32 width, bool solid, const Vector<Point> &verts)
+//{
+//   this->width = width;
+//   this->solid = solid;
+//
+//   this->verts.resize(verts.size());
+//
+//   for(S32 i = 0; i < verts.size(); i++)
+//      this->verts[i] = verts[i];
+//}
+//
+//
+//// Constructor -- used on server
+//WallRec::WallRec(const WallItem *wallItem)
+//{
+//   width = (F32)wallItem->getWidth();
+//   solid = false;
+//
+//   constructVertices(wallItem, false);
+//}
+//
+//
+//// Constructor -- used on server
+//WallRec::WallRec(const PolyWall *polyWall)
+//{
+//   width = 1;      // Doesn't really matter... will be ignored
+//   solid = true;
+//
+//   constructVertices(polyWall, true);
+//}
+//
+//
+//// Helper for constructors above -- copy vertices and remove collinear points.
+//// Also, if dedupe is true, will remove the last point if it is the same as the first.
+//void WallRec::constructVertices(const GeomObject *source, bool dedupe)
+//{
+//   S32 size = source->getVertCount();
+//
+//   // Check if first and last vertices are the same -- if so, skip last one
+//   if(dedupe && source->getVert(size - 1) == source->getVert(0))
+//      size--;     
+//
+//   verts.reserve(size);
+//
+//   for(S32 i = 0; i < size; i++)
+//      verts.push_back(source->getVert(i));
+//
+//   removeCollinearPoints(verts, false);   // Remove collinear points to make rendering nicer
+//}
+//
+//
+//// Runs on server or on client, never in editor
+//// Generates a list of barriers, which are then added to the game one-by-one
+//// Barriers will either be a simple 2-point segment, or a longer list of vertices defining a polygon
+//void WallRec::constructWalls(Game *game) const
+//{
+//   if(verts.size() < 2)
+//      return;
+//
+//   if(solid)   // This is a polywall
+//   {
+//      Barrier *b = new Barrier(verts, width, true);
+//      b->addToGame(game, game->getGameObjDatabase());
+//   }
+//   else        // This is a standard series of segments
+//   {
+//      // First, fill a vector with barrier segments
+//      Vector<Point> barrierEnds;
+//      constructBarrierEndPoints(&verts, width, barrierEnds);
+//
+//      Vector<Point> pts;
+//      // Then add individual segments to the game
+//      for(S32 i = 0; i < barrierEnds.size(); i += 2)
+//      {
+//         pts.clear();
+//         pts.push_back(barrierEnds[i]);
+//         pts.push_back(barrierEnds[i+1]);
+//
+//         Barrier *b = new Barrier(pts, width, false);    // false = not solid
+//         b->addToGame(game, game->getGameObjDatabase());
+//      }
+//   }
+//}
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 // Constructor --> gets called from constructBarriers above
-Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
+Barrier::Barrier(const Vector<Point> &points, F32 width, bool isPolywall)
 {
    mObjectTypeNumber = BarrierTypeNumber;
    mPoints = points;
 
-   if(points.size() < 2)      // Invalid barrier!
+   if(points.size() < (isPolywall ? 3 : 2))      // Invalid barrier!
    {
-      //delete this;    // Sam: cannot "delete this" in constructor, as "new" still returns non-NULL address
       logprintf(LogConsumer::LogWarning, "Invalid barrier detected (has only one point).  Disregarding...");
       return;
    }
@@ -138,9 +144,9 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    setExtent(extent);
 
-   mSolid = solid;
+   mIsPolywall = isPolywall;
 
-   if(mSolid)  // Polywall
+   if(isPolywall)
    {
       if(isWoundClockwise(mPoints))         // All walls must be CCW to clip correctly
          mPoints.reverse();
@@ -172,6 +178,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
    GeomObject::setGeom(*mRenderOutlineGeometry);
 }
 
+
 // Destructor
 Barrier::~Barrier()
 {
@@ -182,7 +189,7 @@ Barrier::~Barrier()
 // Processes mPoints and fills polyPoints 
 const Vector<Point> *Barrier::getCollisionPoly() const
 {
-   if(mSolid)
+   if(mIsPolywall)
       return &mPoints;
    else
       return &mRenderFillGeometry;
@@ -195,11 +202,47 @@ bool Barrier::collide(BfObject *otherObject)
 }
 
 
+// Adds walls to the game database -- used when playing games, but not in the editor
+// On client, is called when a wall object is sent from the server.
+// static method
+void Barrier::constructWalls(Game *game, const Vector<Point> &verts, bool isPolywall, F32 width)
+{
+   if(verts.size() < (isPolywall ? 3 : 2))      // Enough verts?
+      return;
+
+   if(isPolywall)   
+   {
+      Barrier *b = new Barrier(verts, width, true);
+      b->addToGame(game, game->getGameObjDatabase());
+   }
+   else        // This is a standard series of segments
+   {
+      // First, fill a vector with barrier segments
+      Vector<Point> barrierEnds;
+      constructBarrierEndPoints(&verts, width, barrierEnds);
+
+
+      Vector<Point> pts;      // Reusable container
+
+      // Add individual segments to the game
+      for(S32 i = 0; i < barrierEnds.size(); i += 2)
+      {
+         pts.clear();
+         pts.push_back(barrierEnds[i]);
+         pts.push_back(barrierEnds[i+1]);
+
+         Barrier *b = new Barrier(pts, width, false);    // false = not solid
+         b->addToGame(game, game->getGameObjDatabase());
+      }
+   }
+}
+
+
 // Server only -- fills points
 void Barrier::getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const
 {
    // Use a clipper library to buffer polywalls; should be counter-clockwise by here
-   if(mSolid)
+   if(mIsPolywall)
       offsetPolygon(&mPoints, points, bufferRadius);
 
    // If a barrier, do our own buffer
@@ -297,7 +340,7 @@ void Barrier::renderLayer(S32 layerIndex)
    static const Color fillColor(getGame()->getSettings()->getWallFillColor());
 
    if(layerIndex == 0)           // First pass: draw the fill
-      renderWallFill(&mRenderFillGeometry, fillColor, mSolid);
+      renderWallFill(&mRenderFillGeometry, fillColor, mIsPolywall);
 #endif
 }
 
@@ -364,16 +407,19 @@ WallItem *WallItem::clone() const
 
 // Client (i.e. editor) only; walls processed in ServerGame::processPseudoItem() on server
 // BarrierMaker <width> <x> <y> <x> <y> ...
-bool WallItem::processArguments(S32 argc, const char **argv, Game *game)
+bool WallItem::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 6)         // "BarrierMaker" keyword, width, and two or more x,y pairs
       return false;
 
    setWidth(atoi(argv[1]));
 
-   readGeom(argc, argv, 2, game->getLegacyGridSize());
+   readGeom(argc, argv, 2, level->getLegacyGridSize());
 
    updateExtentInDatabase();
+
+   if(getVertCount() < 2)
+      return false;
 
    return true;
 }
@@ -457,11 +503,10 @@ void WallItem::render()
 void WallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
 #ifndef ZAP_DEDICATED
-   const Color *color = NULL;
-   if(!isSelected() && !isLitUp())
-      color = getEditorRenderColor();
-
-   renderWallOutline(this, getOutline(), color, currentScale, snappingToWallCornersEnabled, renderVertices);
+   if(isSelected() || isLitUp())
+      renderWallOutline(this, getOutline(), currentScale, snappingToWallCornersEnabled, renderVertices);
+   else
+      renderWallOutline(this, getOutline(), getEditorRenderColor(), currentScale, snappingToWallCornersEnabled, renderVertices);
 #endif
 }
 
@@ -469,6 +514,7 @@ void WallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled,
 void WallItem::processEndPoints()
 {
 #ifndef ZAP_DEDICATED
+   // Extend wall endpoints for nicer rendering
    constructBarrierEndPoints(getOutline(), (F32)getWidth(), extendedEndPoints);     // Fills extendedEndPoints
 #endif
 }
@@ -501,9 +547,9 @@ bool WallItem::canBeHostile() { return false; }
 bool WallItem::canBeNeutral() { return false; }
 
 
-const Color *WallItem::getEditorRenderColor() const
+const Color &WallItem::getEditorRenderColor() const
 {
-   return &Colors::gray50;    // Color of wall spine in editor
+   return Colors::gray50;    // Color of wall spine in editor
 }
 
 
@@ -557,12 +603,6 @@ void WallItem::setSelected(bool selected)
 void WallItem::addToGame(Game *game, GridDatabase *database)
 {
    Parent::addToGame(game, database);
-
-   // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
-   // is convenient to transmit to the clients
-   game->addWall(WallRec(this));
-
-   onAddedToGame(game);
 }
 
 
@@ -719,26 +759,26 @@ void PolyWall::renderDock()
 {
    static const Color wallOutlineColor(getGame()->getSettings()->getWallOutlineColor());
 
-   renderPolygonFill(getFill(), &Colors::EDITOR_WALL_FILL_COLOR);
-   renderPolygonOutline(getOutline(), &wallOutlineColor);
+   renderPolygonFill(getFill(), Colors::EDITOR_WALL_FILL_COLOR);
+   renderPolygonOutline(getOutline(), wallOutlineColor);
 }
 
 
-bool PolyWall::processArguments(S32 argc, const char **argv, Game *game)
+bool PolyWall::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 7)            // Need "Polywall" keyword, and at least 3 points
       return false;
 
    S32 offset = 0;
 
-   if(!stricmp(argv[0], "BarrierMakerS"))
-   {
-      logprintf(LogConsumer::LogLevelError, "BarrierMakerS has been deprecated.  Please use PolyWall instead.");
+   if(stricmp(argv[0], "BarrierMakerS") == 0)
       offset = 1;
-   }
 
-   readGeom(argc, argv, 1 + offset, game->getLegacyGridSize());
+   readGeom(argc, argv, 1 + offset, level->getLegacyGridSize());
    updateExtentInDatabase();
+
+   if(getVertCount() < 3)     // Need at least 3 vertices for a polywall!
+      return false;
 
    return true;
 }
@@ -782,21 +822,10 @@ void PolyWall::onGeomChanged()
 }
 
 
-void PolyWall::addToGame(Game *game, GridDatabase *database)
-{
-   Parent::addToGame(game, database);
-
-   // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
-   // is convenient to transmit to the clients
-   game->addWall(WallRec(this));
-
-   onAddedToGame(game);
-}
-
-
 void PolyWall::onItemDragging()
 {
-   // Do nothing -- this is here to override PolygonObject::onItemDragging(), onGeomChanged() should only be called after move is complete
+   // Do nothing -- this is here to override PolygonObject::onItemDragging(), 
+   //               onGeomChanged() should only be called after move is complete
 }
 
 

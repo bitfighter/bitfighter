@@ -39,7 +39,7 @@ public:
 
    S32 getRenderSortValue();
 
-   bool processArguments(S32 argc, const char **argv, Game *game);   // Create objects from parameters stored in level file
+   bool processArguments(S32 argc, const char **argv, Level *level); // Create objects from parameters stored in level file
    void onAddedToGame(Game *theGame);
    virtual void onGhostAvailable(GhostConnection *connection);
    virtual void onGhostAddBeforeUpdate(GhostConnection *connection);
@@ -60,7 +60,7 @@ public:
    // Editor methods
    string toLevelCode() const;
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
-   virtual const Color *getEditorRenderColor();
+   virtual const Color &getEditorRenderColor() const;
 
 
    // Thickness-related

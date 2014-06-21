@@ -43,6 +43,7 @@ static void initialize()
    );
    levelInfos.push_back(LevelInfo("Test Level", BitmatchGame, 0, 0, "" ));
 
+   // levelCodes[1]
    // This level has a spawn in a LoadoutZone, with a ResourceItem directly south of the spawn
    levelCodes.push_back(
       "GameType 10 92\n"

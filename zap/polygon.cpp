@@ -62,7 +62,8 @@ extern F32 gLineWidth3;
 void PolygonObject::renderPolyHighlight()
 {
 #ifndef ZAP_DEDICATED
-   renderPolygonOutline(getOutline(), isSelected() ? &Colors::EDITOR_SELECT_COLOR : &Colors::EDITOR_HIGHLIGHT_COLOR, 1, gLineWidth3);
+   const Color &color = isSelected() ? Colors::EDITOR_SELECT_COLOR : Colors::EDITOR_HIGHLIGHT_COLOR;
+   renderPolygonOutline(getOutline(), color, 1, gLineWidth3);
 #endif
 }
 

@@ -6,6 +6,7 @@
 #include "Spawn.h"
 
 #include "game.h"
+#include "Level.h"
 
 #include "stringUtils.h"         // For itos()
 #include "gameObjectRender.h"    // For renderSquareItem(), renderFlag(), drawCircle()
@@ -67,14 +68,14 @@ F32 AbstractSpawn::getEditorRadius(F32 currentScale)
 
 
 // Looking for <x> <y> {spawn-time}
-bool AbstractSpawn::processArguments(S32 argc, const char **argv, Game *game)
+bool AbstractSpawn::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 2)
       return false;
 
    Point pos;
    pos.read(argv);
-   pos *= game->getLegacyGridSize();
+   pos *= level->getLegacyGridSize();
 
    setPos(pos);
 
@@ -200,7 +201,7 @@ Spawn *Spawn::clone() const
 
 
 // Spawn <team> <x> <y>
-bool Spawn::processArguments(S32 argc, const char **argv, Game *game)
+bool Spawn::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 3)
       return false;
@@ -208,7 +209,7 @@ bool Spawn::processArguments(S32 argc, const char **argv, Game *game)
    S32 teamIndex = atoi(argv[0]);
    setTeam(teamIndex);
 
-   Parent::processArguments(argc - 1, argv + 1, game);
+   Parent::processArguments(argc - 1, argv + 1, level);
 
    return true;
 }
@@ -633,14 +634,14 @@ void FlagSpawn::initialize()
 
 
 // FlagSpawn <team> <x> <y> {spawn time}
-bool FlagSpawn::processArguments(S32 argc, const char **argv, Game *game)
+bool FlagSpawn::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 3)
       return false;
 
    setTeam(atoi(argv[0]));
    
-   return Parent::processArguments(argc - 1, argv + 1, game);     // then read the rest of the args
+   return Parent::processArguments(argc - 1, argv + 1, level);    // Read the rest of the args
 }
 
 

@@ -11,6 +11,7 @@
 #include "Colors.h"
 #include "Teleporter.h"
 #include "speedZone.h"
+#include "Level.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
@@ -204,7 +205,7 @@ void Ship::initialize(const Point &pos)
 }
 
 
-bool Ship::processArguments(S32 argc, const char **argv, Game *game)
+bool Ship::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc != 3)
       return false;
@@ -212,7 +213,7 @@ bool Ship::processArguments(S32 argc, const char **argv, Game *game)
    Point pos;
 
    pos.read(argv + 1);
-   pos *= game->getLegacyGridSize();
+   pos *= level->getLegacyGridSize();
 
    for(U32 i = 0; i < MoveStateCount; i++)
    {
@@ -2240,7 +2241,7 @@ void Ship::renderLayer(S32 layerIndex)
    const Point vel(mCurrentMove.x, mCurrentMove.y);
 
    ///// Info about how to render the ship; color, alpha, angle, etc.
-   const Color *color   = clientGame->getGameType()->getTeamColor(this);
+   const Color &color   = clientGame->getGameType()->getTeamColor(this);
    const F32 alpha      = getShipVisibility(localShip);
    const F32 angle      = getRenderAngle();
    const F32 deltaAngle = getAngleDiff(mLastProcessStateAngle, angle);     // Change in angle since we were last here

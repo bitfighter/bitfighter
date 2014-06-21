@@ -5,16 +5,17 @@
 
 #include "robot.h"
 
+#include "Level.h"
 #include "playerInfo.h"          // For RobotPlayerInfo constructor
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 #include "gameObjectRender.h"
 #include "GameSettings.h"
 
-#include "MathUtils.h"           // For findLowestRootIninterval()
-#include "GeomUtils.h"
-
 #include "ServerGame.h"
 #include "GameManager.h"
+
+#include "MathUtils.h"           // For findLowestRootIninterval()
+#include "GeomUtils.h"
 
 
 #define hypot _hypot    // Kill some warnings
@@ -335,46 +336,71 @@ void Robot::kill()
 }
 
 
-// Need this, as this may come from level or levelgen
-bool Robot::processArguments(S32 argc, const char **argv, Game *game)
+// Called by Level when it is added to a game
+bool Robot::processArguments(const string &argString, Game *game)
 {
+   Vector<string> args = parseString(argString);
+
    string errorMessage;
 
-   bool retcode = processArguments(argc, argv, game, errorMessage);
+   bool retcode = processArguments(args, game, errorMessage);
 
    if(errorMessage != "")
    {
-      string line;
-      
-      for(S32 i = 0; i < argc; i++)
-      {
-         if(i > 0)
-            line += " ";
-         line += argv[i];
-      }
-
       if(GameManager::getServerGame())
          logprintf(LogConsumer::LogLevelError, "Levelcode error in level %s, line \"%s\":\n\t%s",
-                   GameManager::getServerGame()->getCurrentLevelFileName().c_str(), line.c_str(), errorMessage.c_str());
+                   GameManager::getServerGame()->getCurrentLevelFileName().c_str(), argString.c_str(), errorMessage.c_str());
       else
          logprintf(LogConsumer::LogLevelError, "Levelcode error, line \"%s\":\n\t%s",
-                   line.c_str(), errorMessage.c_str());
+                   argString.c_str(), errorMessage.c_str());
    }
 
    return retcode;
 }
 
 
-// Expect [team] [bot script file] [bot args]
-bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &errorMessage)
+// Need this, as this may come from level or levelgen
+bool Robot::processArguments(S32 argc, const char **argv, Level *level)
+{
+   return true;
+
+   //string errorMessage;
+
+   //bool retcode = processArguments(argc, argv, level->getLegacyGridSize(), errorMessage);
+
+   //if(errorMessage != "")
+   //{
+   //   string line;
+   //   
+   //   for(S32 i = 0; i < argc; i++)
+   //   {
+   //      if(i > 0)
+   //         line += " ";
+   //      line += argv[i];
+   //   }
+
+   //   if(GameManager::getServerGame())
+   //      logprintf(LogConsumer::LogLevelError, "Levelcode error in level %s, line \"%s\":\n\t%s",
+   //                GameManager::getServerGame()->getCurrentLevelFileName().c_str(), line.c_str(), errorMessage.c_str());
+   //   else
+   //      logprintf(LogConsumer::LogLevelError, "Levelcode error, line \"%s\":\n\t%s",
+   //                line.c_str(), errorMessage.c_str());
+   //}
+
+   //return retcode;
+}
+
+
+// Expect args to look like this: [team] [bot script file] [bot args]
+bool Robot::processArguments(const Vector<string> &args, Game *game, string &errorMessage)
 {
    S32 team;
 
-   if(argc <= 1)
+   if(args.size() <= 1)
       team = NO_TEAM;   
    else
    {
-      team = atoi(argv[0]);
+      team = atoi(args[0].c_str());
 
       if(team != NO_TEAM && (team < 0 || team >= game->getTeamCount()))
       {
@@ -387,8 +413,8 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
    
    string scriptName;
 
-   if(argc >= 2)
-      scriptName = argv[1];
+   if(args.size() >= 2)
+      scriptName = args[1];
    else
       scriptName = game->getSettings()->getIniSettings()->mSettings.getVal<string>(IniKey::DefaultRobotScript);
 
@@ -406,8 +432,8 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
    // Collect our arguments to be passed into the args table in the robot (starting with the robot name)
    // Need to make a copy or containerize argv[i] somehow, because otherwise new data will get written
    // to the string location subsequently, and our vals will change from under us.  That's bad!
-   for(S32 i = 2; i < argc; i++)        // Does nothing if we have no args
-      mScriptArgs.push_back(string(argv[i]));
+   for(S32 i = 2; i < args.size(); i++)        // Does nothing if we have no args
+      mScriptArgs.push_back(args[i]);
 
    // I'm not sure this goes here, but it needs to be set early in setting up the Robot, but after
    // the constructor

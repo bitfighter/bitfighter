@@ -12,6 +12,7 @@
 #include "ServerGame.h"
 #include "robot.h"
 #include "Spawn.h"
+#include "Level.h"
 #include "loadoutZone.h"      // For LoadoutZone
 #include "LineEditorFilterEnum.h"
 #include "game.h"
@@ -28,6 +29,7 @@
 
 #include "Colors.h"
 
+#include "GeomUtils.h"
 #include "stringUtils.h"
 
 #include "tnlThread.h"
@@ -83,10 +85,6 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(THREE_SECONDS), mG
    mWinningScore = winningScore;
    mLeadingTeam = -1;
    mLeadingTeamScore = 0;
-   mLeadingPlayer = -1;
-   mLeadingPlayerScore = 0;
-   mSecondLeadingPlayer = -1;
-   mSecondLeadingPlayerScore = 0;
    mCanSwitchTeams = true;       // Players can switch right away
    mZoneGlowTimer.setPeriod(mZoneGlowTime);
    mGlowingZoneTeam = -1;        // By default, all zones glow
@@ -98,11 +96,12 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(THREE_SECONDS), mG
    mOvertime = false;
    mSuddenDeath = false;
 
+   mEngineerEnabled = false;
+   mEngineerUnrestrictedEnabled = false;
+
    mMinRecPlayers = 0;
    mMaxRecPlayers = 0;
 
-   mEngineerEnabled = false;
-   mEngineerUnrestrictedEnabled = false;
    mBotsAllowed = true;
 
    mTotalGamePlay = 0;
@@ -121,7 +120,7 @@ GameType::~GameType()
 }
 
 
-bool GameType::processArguments(S32 argc, const char **argv, Game *game)
+bool GameType::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc > 0)      // First arg is game length, in minutes
       setGameTime(F32(atof(argv[0]) * 60));
@@ -139,17 +138,7 @@ string GameType::toLevelCode() const
 }
 
 
-// GameType object is the first to be added when a new game starts... 
-// therefore, this is a reasonable signifier that a new game is starting up.  I think.
-// Server only?
-void GameType::addToGame(Game *game, GridDatabase *database)
-{
-   mGame = game;
-   game->setGameType(this);
-}
-
-
-// Client only -- only gets run once per level (not once per object)
+// Client only -- gets run when GameType object has been created on the client, once per level (obviously)
 bool GameType::onGhostAdd(GhostConnection *theConnection)
 {
 #ifndef ZAP_DEDICATED
@@ -163,6 +152,22 @@ bool GameType::onGhostAdd(GhostConnection *theConnection)
    TNLAssert(false, "Should only be client here!");
    return false;
 #endif
+}
+
+
+// GameType object is the first to be added when a new game starts... 
+// therefore, this is a reasonable signifier that a new game is starting up.  I think.
+// Runs on both client and server.
+void GameType::addToGame(Game *game, Level *level)
+{
+   mGame = game;
+
+   // On server, GameType is added to the Level as the level is being read from the LevelSource.  On the client, the
+   // GameType is sent by the server, and here is where we add it to the level.
+   TNLAssert( game->isServer() ||  level, "On the client, we expect a level to be passed...");
+   TNLAssert(!game->isServer() || !level, "But not on the server!");
+   if(level)
+      level->setGameType(this);
 }
 
 
@@ -300,7 +305,7 @@ bool GameType::saveMenuItem(const MenuItem *menuItem, const string &key)
    else if(key == "Max Players")
       setMaxRecPlayers(menuItem->getIntValue());
    else if(key == "Allow Engr")
-      setEngineerEnabled(menuItem->getIntValue());
+      mEngineerEnabled = (bool)menuItem->getIntValue();
    else if(key == "Allow Robots")
       setBotsAllowed(menuItem->getIntValue());
    else
@@ -310,16 +315,17 @@ bool GameType::saveMenuItem(const MenuItem *menuItem, const string &key)
 }
 #endif
 
+
 bool GameType::processSpecialsParam(const char *param)
 {
-   if(!stricmp(param, "Engineer"))
-      setEngineerEnabled(true);
-   else if(!stricmp(param, "EngineerUnrestricted"))
+   if(stricmp(param, "Engineer") == 0)
+      mEngineerEnabled = true;
+   else if(stricmp(param, "EngineerUnrestricted") == 0)
    {
-      setEngineerEnabled(true);
-      setEngineerUnrestrictedEnabled(true);
+      mEngineerEnabled = true;
+      mEngineerUnrestrictedEnabled = true;
    }
-   else if(!stricmp(param, "NoBots"))
+   else if(stricmp(param, "NoBots") == 0)
       setBotsAllowed(false);
    else
       return false;
@@ -328,13 +334,14 @@ bool GameType::processSpecialsParam(const char *param)
 }
 
 
+// Create the Specials line for writing to a level file
 string GameType::getSpecialsLine()
 {
    string specialsLine = "Specials";
 
-   if(isEngineerEnabled())
+   if(mEngineerEnabled)
    {
-      if(isEngineerUnrestrictedEnabled())
+      if(mEngineerUnrestrictedEnabled)
          specialsLine += " EngineerUnrestricted";
       else
          specialsLine += " Engineer";
@@ -370,6 +377,30 @@ void GameType::setScript(const Vector<string> &args)
    mScriptArgs.clear();       // Clear out any args from a previous Script line
    for(S32 i = 1; i < args.size(); i++)
       mScriptArgs.push_back(args[i]);
+}
+
+
+bool GameType::isEngineerEnabled() const
+{
+   return mEngineerEnabled;
+}
+
+
+void GameType::setEngineerEnabled(bool enabled)
+{
+   mEngineerEnabled = enabled;
+}
+
+
+bool GameType::isEngineerUnrestrictedEnabled() const
+{
+   return mEngineerUnrestrictedEnabled;
+}
+
+
+void GameType::setEngineerUnrestrictedEnabled(bool enabled)
+{
+   mEngineerUnrestrictedEnabled = enabled;
 }
 
 
@@ -689,7 +720,7 @@ void GameType::renderObjectiveArrow(const BfObject *target, S32 canvasWidth, S32
 
 // Client only -- all objective arrow drawing is funneled through here or the other 
 // renderObjectiveArrow() method we have (below)
-void GameType::renderObjectiveArrow(const BfObject *target, const Color *color, 
+void GameType::renderObjectiveArrow(const BfObject *target, const Color &color, 
                                     S32 canvasWidth, S32 canvasHeight, F32 alphaMod) const
 {
    if(!target)
@@ -738,7 +769,7 @@ void GameType::renderObjectiveArrow(const BfObject *target, const Color *color,
 }
 
 
-void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color *outlineColor, 
+void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color &outlineColor, 
                                     S32 canvasWidth, S32 canvasHeight, F32 alphaMod) const
 {
    Ship *ship = getGame()->getLocalPlayerShip();
@@ -807,9 +838,9 @@ VersionedGameStats GameType::getGameStats()
    {
       TeamStats *teamStats = &gameStats->teamStats[i];
 
-      const Color *color = mGame->getTeamColor(i);
-      teamStats->intColor = color->toU32();
-      teamStats->hexColor = color->toHexString();
+      const Color &color = mGame->getTeamColor(i);
+      teamStats->intColor = color.toU32();
+      teamStats->hexColor = color.toHexString();
 
       teamStats->name = mGame->getTeam(i)->getName().getString();
       teamStats->score = ((Team *)(mGame->getTeam(i)))->getScore();
@@ -1257,14 +1288,6 @@ bool GameType::isTeamGame() const
 }
 
 
-// Only runs on server
-void GameType::addWall(const WallRec &wall, Game *game)
-{
-   mWalls.push_back(wall);       // Add wall to our list of walls
-   wall.constructWalls(game);    // Build it!
-}
-
-
 // Runs on server, after level has been loaded from a file.  Can be overridden, but isn't.
 void GameType::onLevelLoaded()
 {
@@ -1632,14 +1655,14 @@ bool GameType::makeSureTeamCountIsNotZero()
 
 
 // This method can be overridden by other game types that handle colors differently
-const Color *GameType::getTeamColor(const BfObject *object) const
+const Color &GameType::getTeamColor(const BfObject *object) const
 {
    return getTeamColor(object->getTeam());
 }
 
 
 // This method can be overridden by other game types that handle colors differently
-const Color *GameType::getTeamColor(S32 teamIndex) const
+const Color &GameType::getTeamColor(S32 teamIndex) const
 {
    return mGame->getTeamColor(teamIndex);
 }
@@ -1951,44 +1974,6 @@ void GameType::updateLeadingTeamAndScore()
 }
 
 
-// Sets mLeadingTeamScore and mLeadingTeam; runs on client only
-void GameType::updateLeadingPlayerAndScore()
-{
-   mLeadingPlayerScore = S32_MIN;
-   mLeadingPlayer = -1;
-   mSecondLeadingPlayerScore = S32_MIN;
-   mSecondLeadingPlayer = -1;
-
-   // Find the leading player
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
-   {
-      // Check to make sure client hasn't disappeared somehow
-      if(!mGame->getClientInfo(i))
-         continue;
-
-      S32 score = mGame->getClientInfo(i)->getScore();
-
-      if(score > mLeadingPlayerScore)
-      {
-         // Demote leading player to 2nd place
-         mSecondLeadingPlayerScore = mLeadingPlayerScore;
-         mSecondLeadingPlayer = mLeadingPlayer;
-
-         mLeadingPlayerScore = score;
-         mLeadingPlayer = i;
-
-         continue;
-      }
-
-      if(score > mSecondLeadingPlayerScore)
-      {
-         mSecondLeadingPlayerScore = score;
-         mSecondLeadingPlayer = i;
-      }
-   }
-}
-
-
 // Different signature for more common usage
 void GameType::updateScore(ClientInfo *clientInfo, ScoringEvent event, S32 data)
 {
@@ -2140,7 +2125,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringP
    mWinningScore     = teamScoreLimit;
    mObjectsExpected  = objectCount;
 
-   mEngineerEnabled             = engineerEnabled;
+   mEngineerEnabled = engineerEnabled;
    mEngineerUnrestrictedEnabled = engineerAbuseEnabled;
 
    // Need to send this to the client because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
@@ -2385,8 +2370,6 @@ void GameType::removeClient(ClientInfo *clientInfo)
 
 void GameType::setTimeRemaining(U32 timeLeft, bool isUnlimited)
 {
-   //TNLAssert(getGame()->isServer(), "This should only run on the server!");
-
    if(isUnlimited)
       mEndingGamePlay = 0;
    else
@@ -2439,7 +2422,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTab
 
 // Tell all clients name has changed, and update server side name
 // Server only
-void GameType::updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName)
+void GameType::updateClientChangedName(ClientInfo *clientInfo, const StringTableEntry &newName)
 {
    logprintf(LogConsumer::LogConnection, "Name changed from %s to %s", clientInfo->getName().getString(), newName.getString());
 
@@ -2456,9 +2439,6 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
    clientGame->onPlayerQuit(name);
-
-   updateLeadingPlayerAndScore();
-
 #endif
 }
 
@@ -2489,12 +2469,8 @@ GAMETYPE_RPC_S2C(GameType, s2cSetTeamScore, (RangedU32<0, Game::MAX_TEAMS> teamI
 
 GAMETYPE_RPC_S2C(GameType, s2cSetPlayerScore, (U16 index, S32 score), (index, score))
 {
-   TNLAssert(index < U32(mGame->getClientCount()), "player index out of range");
-
-   if(index < U32(mGame->getClientCount()))
-      mGame->getClientInfo(index)->setScore(score);
-
-   updateLeadingPlayerAndScore();
+   TNLAssert((S32)index < mGame->getClientCount(), "Player index out of range!");
+   mGame->setPlayerScore((S32)index, score);
 }
 
 
@@ -2510,7 +2486,7 @@ GAMETYPE_RPC_S2C(GameType, s2cChangeScoreToWin, (U32 winningScore, StringTableEn
 {
    mWinningScore = winningScore;
 
-   mGame->displayMessage(Color(0.6f, 1, 0.8f) /*Nuclear green */, 
+   mGame->displayMessage(Color(0.6f, 1, 0.8f) /* Nuclear green */, 
                "%s changed the winning score to %d.", changer.getString(), mWinningScore);
 }
 
@@ -2592,15 +2568,17 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 {
    NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
 
-   s2cSetLevelInfo(mLevelName, mLevelDescription.c_str(), "music name here", mWinningScore, mLevelCredits, mGame->mObjectsLoaded, 
-                   mLevelHasLoadoutZone, mEngineerEnabled, mEngineerUnrestrictedEnabled, mGame->getLevelDatabaseId());
+   s2cSetLevelInfo(mLevelName, mLevelDescription.c_str(), "music name here", mWinningScore, mLevelCredits, 
+                   mGame->mObjectsLoaded, mLevelHasLoadoutZone, mEngineerEnabled, 
+                   mEngineerUnrestrictedEnabled, mGame->getLevelDatabaseId());
 
    for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
-      Team *team = (Team *)mGame->getTeam(i);
-      const Color *color = team->getColor();
+      StringTableEntry name   = mGame->getTeamName(i);
+      const Color      &color = mGame->getTeamColor(i);
+      const S32        score  = mGame->getTeam(i)->getScore();
 
-      s2cAddTeam(team->getName(), color->r, color->g, color->b, team->getScore(), i == 0);
+      s2cAddTeam(name.getString(), color.r, color.g, color.b, score, i == 0);
    }
 
    notifyClientsWhoHasTheFlag();
@@ -2624,18 +2602,19 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
          s2cClientJoinedTeam(clientInfo->getName(), team, false);
    }
 
-   //for(S32 i = 0; i < Robot::getBotCount(); i++)  //Robot is part of mClientList
-   //{
-   //   s2cAddClient(Robot::robots[i]->getName(), false, false, true, false);
-   //   s2cClientJoinedTeam(Robot::robots[i]->getName(), Robot::robots[i]->getTeam());
-   //}
+   Vector<Point> v;
+   s2cAddWalls(v, 0, false);     // Sending an empty list clears the barriers
 
-   // Sending an empty list clears the barriers
-   Vector<F32> v;
-   s2cAddWalls(v, 0, false);
+   Vector<WallItem *> walls = mGame->getWallList();
 
-   for(S32 i = 0; i < mWalls.size(); i++)
-      s2cAddWalls(mWalls[i].verts, mWalls[i].width, mWalls[i].solid);
+   for(S32 i = 0; i < walls.size(); i++)
+      s2cAddWalls(*walls[i]->getOutline(), (F32)walls[i]->getWidth(), false);
+
+   Vector<PolyWall *> polyWalls = mGame->getPolyWallList();
+
+   for(S32 i = 0; i < polyWalls.size(); i++)
+      s2cAddWalls(*polyWalls[i]->getOutline(), 1, true);
+
 
    broadcastNewRemainingTime();
    s2cSetGameOver(mGameOver);    // TODO: Is this really needed?
@@ -2654,14 +2633,10 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    mBetweenLevels = false;
    c2sSyncMessagesComplete(sequence);     // Tells server we're ready to go!
 
-   TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
+   TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check  Jun 2014 Wat
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
    clientGame->doneLoadingLevel();
-
-   // Prepare scoreboard
-   updateLeadingPlayerAndScore();
-
 #endif
 }
 
@@ -2679,16 +2654,16 @@ GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
 
 
 // Gets called multiple times as barriers are added
-TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAddWalls, (Vector<F32> verts, F32 width, bool solid), (verts, width, solid), NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAddWalls, 
+                            (Vector<Point> verts, F32 width, bool isPolywall), 
+                            (              verts,     width,      isPolywall), 
+                            NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
 {
    // Empty wall deletes all existing walls
    if(!verts.size())
       mGame->deleteObjects((TestFunc)isWallType);
    else
-   {
-      WallRec wall(width, solid, verts);
-      wall.constructWalls(mGame);
-   }
+      Barrier::constructWalls(mGame, verts, isPolywall, width);
 }
 
 
@@ -2770,13 +2745,13 @@ bool GameType::addBotFromClient(Vector<StringTableEntry> args)
 
    else     // Adding bots is OK!!  Let's get on with it!!
    {
-      Vector<const char *> args_char(args.size());
+      Vector<string> args_str(args.size());
 
       // The first arg = team number, the second arg = robot script filename, the rest of args get passed as script arguments
       for(S32 i = 0; i < args.size(); i++)
-         args_char.push_back(args[i].getString());
+         args_str.push_back(args[i].getString());
 
-      string errorMessage = getGame()->addBot(args_char, ClientInfo::ClassRobotAddedByAddbots);
+      string errorMessage = getGame()->addBot(args_str, ClientInfo::ClassRobotAddedByAddbots);
 
       if(errorMessage == "")     // Success!!
       {
@@ -2890,9 +2865,10 @@ GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
    // Reset player scores
    for(S32 i = 0; i < serverGame->getClientCount(); i++)
    {
-      if(mGame->getClientInfo(i)->getScore() != 0)
+      if(mGame->getPlayerScore(i) != 0)
          s2cSetPlayerScore(i, 0);
-      mGame->getClientInfo(i)->setScore(0);
+
+      mGame->setPlayerScore(i, 0);
    }
 
    // Reset team scores
@@ -3902,6 +3878,7 @@ U32 GameType::getTotalGamePlayedInMs() const
    return mTotalGamePlay;
 }
 
+
 // Return time remaining in seconds; currently used for Lua on the server, and display purposes on the client
 S32 GameType::getRemainingGameTime() const         
 {
@@ -3959,31 +3936,6 @@ S32 GameType::getLeadingScore() const
 S32 GameType::getLeadingTeam() const
 {
    return mLeadingTeam;
-}
-
-
-S32 GameType::getLeadingPlayerScore() const
-{
-   TNLAssert(mLeadingPlayer < mGame->getClientCount(), "mLeadingPlayer out of range");
-   return mLeadingPlayerScore;
-}
-
-
-S32 GameType::getLeadingPlayer() const
-{
-   return mLeadingPlayer;
-}
-
-
-S32 GameType::getSecondLeadingPlayerScore() const
-{
-   return mSecondLeadingPlayerScore;
-}
-
-
-S32 GameType::getSecondLeadingPlayer() const
-{
-   return mSecondLeadingPlayer;
 }
 
 
@@ -4129,9 +4081,9 @@ void GameType::setLevelDescription(const string &levelDescription)
 }
 
 
-const StringTableEntry *GameType::getLevelCredits() const
+string GameType::getLevelCredits() const
 {
-   return &mLevelCredits;
+   return mLevelCredits.getString();
 }
 
 
@@ -4162,30 +4114,6 @@ S32 GameType::getMaxRecPlayers()
 void GameType::setMaxRecPlayers(S32 maxPlayers)
 {
    mMaxRecPlayers = maxPlayers;
-}
-
-
-bool GameType::isEngineerEnabled()
-{
-   return mEngineerEnabled;
-}
-
-
-void GameType::setEngineerEnabled(bool enabled)
-{
-   mEngineerEnabled = enabled;
-}
-
-
-bool GameType::isEngineerUnrestrictedEnabled()
-{
-   return mEngineerUnrestrictedEnabled;
-}
-
-
-void GameType::setEngineerUnrestrictedEnabled(bool enabled)
-{
-   mEngineerUnrestrictedEnabled = enabled;
 }
 
 

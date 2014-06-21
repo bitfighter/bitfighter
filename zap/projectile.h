@@ -242,7 +242,7 @@ public:
 
    static const S32 SPY_BUG_RANGE = 300;     // How far can a spy bug see?
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    void onAddedToGame(Game *theGame);
 
    bool collide(BfObject *otherObj);

@@ -4,12 +4,14 @@
 //------------------------------------------------------------------------------
 
 #include "rabbitGame.h"
-#include "Colors.h"
+
+#include "Level.h"
 
 #ifndef ZAP_DEDICATED
 #  include "UIMenuItems.h"
 #endif
 
+#include "Colors.h"
 #include "stringUtils.h"
 
 
@@ -90,12 +92,12 @@ RabbitGameType::~RabbitGameType()
 }
 
 
-bool RabbitGameType::processArguments(S32 argc, const char **argv, Game *game)
+bool RabbitGameType::processArguments(S32 argc, const char **argv, Level *level)
 {
-   if (argc != 4)
+   if(argc != 4)
       return false;
 
-   if(!Parent::processArguments(argc, argv, game))
+   if(!Parent::processArguments(argc, argv, level))
       return false;
 
    mFlagReturnTimer = atoi(argv[2]) * 1000;
@@ -203,28 +205,29 @@ bool RabbitGameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
 }
 
 
-const Color *RabbitGameType::getTeamColor(const BfObject *object) const
+const Color &RabbitGameType::getTeamColor(const BfObject *object) const
 {
    // Neutral flags are orange in Rabbit
    if(object->getObjectTypeNumber() == FlagTypeNumber && object->getTeam() == TEAM_NEUTRAL)
-      return &Colors::orange50;  
+      return Colors::orange50;  
 
    // In team game, ships use team color
    if(isShipType(object->getObjectTypeNumber()) && !isTeamGame())
    {
       Ship *localShip = getGame()->getLocalPlayerShip();    // (can return NULL)
+
       if(localShip)
       {
          if(object == localShip)                            // Players always appear green to themselves
-            return &Colors::green;
+            return Colors::green;
 
          const Ship *ship = static_cast<const Ship *>(object);
 
          if(shipHasFlag(ship) || shipHasFlag(localShip))    // If a ship has the flag, it's red; if we have the flag, others are red
-            return &Colors::red;
+            return Colors::red;
       }
 
-      return &Colors::green;                                // All others are green
+      return Colors::green;                                // All others are green
    }
 
    return Parent::getTeamColor(object);

@@ -13,7 +13,8 @@
 #include "UITeamDefMenu.h"
 #include "UIManager.h"
 
-#include "gridDB.h"
+#include "Level.h"
+
 #include "WallSegmentManager.h"
 
 #include "ClientGame.h"  
@@ -65,8 +66,6 @@
 #include <set>
 
 
-using namespace boost;
-
 namespace Zap
 {
 
@@ -79,7 +78,7 @@ const F32 MIN_SCALE = .02f;         // Most zoomed-out scale
 const F32 MAX_SCALE = 10.0f;        // Most zoomed-in scale
 const F32 STARTING_SCALE = 0.5;
 
-static GridDatabase *mLoadTarget;
+static Level *mLoadTarget;
 
 const string EditorUserInterface::UnnamedFile = "unnamed_file";      // When a file has no name, this is its name!
 
@@ -144,7 +143,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mHitVertex = NONE;
    mEdgeHit   = NONE;
 
-   mEditorDatabase = boost::shared_ptr<GridDatabase>(new GridDatabase());
+   mLevel = boost::shared_ptr<Level>(new Level());
 
    setNeedToSave(false);
 
@@ -168,9 +167,9 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 }
 
 
-GridDatabase *EditorUserInterface::getDatabase() const
+Level *EditorUserInterface::getLevel() const
 { 
-   return mEditorDatabase.get();
+   return mLevel.get();
 }  
 
 
@@ -180,10 +179,10 @@ F32 EditorUserInterface::getGridSize() const
 }
 
 
-void EditorUserInterface::setDatabase(boost::shared_ptr<GridDatabase> database)
+void EditorUserInterface::setLevel(boost::shared_ptr<Level> level)
 {
-   TNLAssert(database.get(), "Database should not be NULL!");
-   mEditorDatabase = boost::dynamic_pointer_cast<GridDatabase>(database);
+   TNLAssert(level.get(), "Level should not be NULL!");
+   mLevel = boost::dynamic_pointer_cast<Level>(level);
 }
 
 
@@ -191,7 +190,6 @@ void EditorUserInterface::setDatabase(boost::shared_ptr<GridDatabase> database)
 void EditorUserInterface::onQuitted()
 {
    cleanUp();
-   getGame()->clearAddTarget();
 }
 
 
@@ -322,11 +320,11 @@ void EditorUserInterface::saveUndoState(bool forceSelectionOfTargetObject)
    }
 
 
-   GridDatabase *newDB = new GridDatabase();    // Make a copy
+   Level *newLevel = new Level();    // Make a copy
 
-   newDB->copyObjects(getDatabase());
+   newLevel->copyObjects(getLevel());
 
-   mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<GridDatabase>(newDB);  
+   mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<Level>(newLevel);  
 
    mLastUndoIndex++;
    mLastRedoIndex = mLastUndoIndex;
@@ -386,11 +384,11 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    mLastUndoIndex--;
 
-   setDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
-   GridDatabase *database = getDatabase();
-   mLoadTarget = database;
+   setLevel(mUndoItems[mLastUndoIndex % UNDO_STATES]);
+   Level *level = getLevel();
+   mLoadTarget = level;
 
-   rebuildEverything(database);    // Well, rebuild segments from walls at least
+   rebuildEverything(level);    // Well, rebuild segments from walls at least
 
    onSelectionChanged();
 
@@ -415,7 +413,7 @@ void EditorUserInterface::redo()
 
       if(mLastRedoIndex == mLastUndoIndex && getItemSelectedCount() == 1)
       {
-         const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+         const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
          for(S32 i = 0; i < objList->size(); i++)
          {
@@ -429,16 +427,16 @@ void EditorUserInterface::redo()
          }
       }
 
-      setDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
-      GridDatabase *database = mUndoItems[mLastUndoIndex % UNDO_STATES].get();
-      mLoadTarget = database;
+      setLevel(mUndoItems[mLastUndoIndex % UNDO_STATES]);
+      Level *level = mUndoItems[mLastUndoIndex % UNDO_STATES].get();
+      mLoadTarget = level;
 
       // Act II:
       if(selectedItem != NONE)
       {
-         clearSelection(getDatabase());
+         clearSelection(getLevel());
 
-         BfObject *obj = findObjBySerialNumber(getDatabase(), selectedItem);
+         BfObject *obj = findObjBySerialNumber(getLevel(), selectedItem);
 
          if(obj)
             obj->setSelected(true);
@@ -447,7 +445,7 @@ void EditorUserInterface::redo()
 
       TNLAssert(mUndoItems[mLastUndoIndex % UNDO_STATES], "null!");
 
-      rebuildEverything(database);  // Needed?  Yes, for now, but theoretically no, because we should be restoring everything fully reconstituted...
+      rebuildEverything(level);     // Needed?  Yes, for now, but theoretically no, because we should be restoring everything fully reconstituted...
       onSelectionChanged();
       validateLevel();
 
@@ -554,7 +552,7 @@ void EditorUserInterface::cleanUp()
    clearUndoHistory();     // Clear up a little memory
    mDockItems.clear();     // Free a little more -- dock will be rebuilt when editor restarts
    
-   mLoadTarget = getDatabase();
+   mLoadTarget = getLevel();
    mLoadTarget->removeEverythingFromDatabase();    // Deletes all objects
 
    mRobotLines.clear();    // Clear our special Robot lines
@@ -589,9 +587,16 @@ void EditorUserInterface::loadLevel()
 
 
    // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
-   bool levelLoaded = game->loadLevelFromFile(fileName, mLoadTarget);
 
-   if(!game->getGameType())  // make sure we have GameType
+   Level *level = new Level();
+   bool ok = level->loadLevelFromFile(fileName);
+
+   if(ok)
+      game->setLevel(level);
+   else
+      delete level;
+
+   if(!game->getGameType())         // Make sure we have GameType
    {
       GameType *gameType = new GameType;
       gameType->addToGame(game, mLoadTarget);   
@@ -599,7 +604,7 @@ void EditorUserInterface::loadLevel()
 
    makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
 
-   if(levelLoaded)   
+   if(ok)   
    {
       // Loaded a level!
       validateTeams();                 // Make sure every item has a valid team
@@ -660,7 +665,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
       
    mLevelGenDatabase.removeEverythingFromDatabase();    // Don't want to delete these objects... we just handed them off to the database!
 
-   rebuildEverything(getDatabase());
+   rebuildEverything(getLevel());
 
    mLastUndoStateWasBarrierWidthChange = false;
 }
@@ -668,7 +673,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
 
 void EditorUserInterface::addToEditor(BfObject *obj)
 {
-   obj->addToGame(getGame(), getDatabase());     
+   obj->addToGame(getGame(), getLevel());     
    obj->onGeomChanged();                        // Generic way to get PolyWalls to build themselves after being dragged from the dock
 }
 
@@ -761,8 +766,8 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
       if(obj->getVertCount() < 2)      // Invalid item; delete  --> aren't 1 point walls already excluded, making this check redundant?
          database->removeFromDatabase(obj, true);
 
-      if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
-         dynamic_cast<WallItem *>(obj)->processEndPoints();
+      if(obj->getObjectTypeNumber() == WallItemTypeNumber)
+         static_cast<WallItem *>(obj)->processEndPoints();
    }
 
    // Also find any teleporters and make sure their destinations are in order.  Teleporters with no dests will be deleted.
@@ -918,7 +923,7 @@ void EditorUserInterface::onPluginExecuted(const Vector<string> &args)
    if(!mPluginRunner->runMain(args))
       setSaveMessage("Plugin Error: press [/] for details", false);
 
-   rebuildEverything(getDatabase());
+   rebuildEverything(getLevel());
    findSnapVertex();
 
    mPluginRunner.reset();
@@ -1031,10 +1036,10 @@ void EditorUserInterface::validateLevel()
    for(S32 i = 0; i < teamCount; i++)      // Initialize vector
       foundSpawn[i] = false;
 
-   GridDatabase *gridDatabase = getDatabase();
+   Level *level = getLevel();
       
    fillVector.clear();
-   gridDatabase->findObjects(ShipSpawnTypeNumber, fillVector);
+   level->findObjects(ShipSpawnTypeNumber, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -1047,12 +1052,12 @@ void EditorUserInterface::validateLevel()
          foundSpawn[team] = true;
    }
 
-   bool foundSoccerBall = gridDatabase->hasObjectOfType(SoccerBallItemTypeNumber);
-   bool foundNexus      = gridDatabase->hasObjectOfType(NexusTypeNumber);
-   bool foundFlags      = gridDatabase->hasObjectOfType(FlagTypeNumber);
+   bool foundSoccerBall = level->hasObjectOfType(SoccerBallItemTypeNumber);
+   bool foundNexus      = level->hasObjectOfType(NexusTypeNumber);
+   bool foundFlags      = level->hasObjectOfType(FlagTypeNumber);
 
-   bool foundTeamFlags      = hasTeamFlags (gridDatabase);
-   bool foundTeamFlagSpawns = hasTeamSpawns(gridDatabase);
+   bool foundTeamFlags      = hasTeamFlags (level);
+   bool foundTeamFlagSpawns = hasTeamSpawns(level);
 
    // "Unversal errors" -- levelgens can't (yet) change gametype
 
@@ -1092,7 +1097,7 @@ void EditorUserInterface::validateLevel()
          foundSpawn[i] = false;
 
       fillVector.clear();
-      gridDatabase->findObjects(CoreTypeNumber, fillVector);
+      level->findObjects(CoreTypeNumber, fillVector);
       for(S32 i = 0; i < fillVector.size(); i++)
       {
          CoreItem *core = static_cast<CoreItem *>(fillVector[i]);
@@ -1108,7 +1113,7 @@ void EditorUserInterface::validateLevel()
 
 void EditorUserInterface::validateTeams()
 {
-   validateTeams(getDatabase()->findObjects_fast());
+   validateTeams(getLevel()->findObjects_fast());
 }
 
 
@@ -1154,7 +1159,8 @@ void EditorUserInterface::teamsHaveChanged()
       {
          EditorTeam *team = getTeam(i);
 
-         if(mOldTeams[i].color != *team->getColor() || mOldTeams[i].name != team->getName().getString()) // Color(s) or names(s) have changed
+         if(mOldTeams[i].getColor() != team->getColor() || 
+            mOldTeams[i].getName()  != team->getName().getString()) // Color(s) or names(s) have changed
          {
             teamsChanged = true;
             break;
@@ -1195,7 +1201,7 @@ string EditorUserInterface::getLevelFileName()
 
 void EditorUserInterface::onSelectionChanged()
 {
-   GridDatabase *database = getDatabase();
+   GridDatabase *database = getLevel();
    WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 
    wallSegmentManager->clearSelected();
@@ -1219,7 +1225,7 @@ void EditorUserInterface::onSelectionChanged()
 
 void EditorUserInterface::onBeforeRunScriptFromConsole()
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    // Use selection as a marker -- will have to change in future
    for(S32 i = 0; i < objList->size(); i++)
@@ -1232,7 +1238,7 @@ void EditorUserInterface::onBeforeRunScriptFromConsole()
 
 void EditorUserInterface::onAfterRunScriptFromConsole()
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    // Since all our original objects were marked as selected before the script was run, and since the objects generated by
    // the script are not selected, if we invert the selection, our script items will now be selected.
@@ -1242,7 +1248,7 @@ void EditorUserInterface::onAfterRunScriptFromConsole()
       obj->setSelected(!obj->isSelected());
    }
 
-   rebuildEverything(getDatabase());
+   rebuildEverything(getLevel());
    onSelectionChanged();
 }
 
@@ -1328,10 +1334,7 @@ void EditorUserInterface::onActivateReactivate()
 {
    mDraggingObjects = false;
    mUp = mDown = mLeft = mRight = mIn = mOut = false;
-   getGame()->setAddTarget();    // When a Lua script does an addToGame(), objects should be added to this game
    mDockItemHit = NULL;
-
-   getGame()->setActiveTeamManager(&mTeamManager);
 
    Cursor::enableCursor();
 }
@@ -1462,7 +1465,7 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
    if(mouseOnDock() && !snapWhileOnDock) 
       return p;      // No snapping!
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    Point snapPoint(p);
 
@@ -1715,7 +1718,7 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
          Point pos = editorObj->getPos();
          pos *= mCurrentScale;
          pos += mCurrentOffset;
-         renderSpyBugVisibleRange(pos, *editorObj->getColor(), mCurrentScale);
+         renderSpyBugVisibleRange(pos, editorObj->getColor(), mCurrentScale);
       }
 
       setDefaultBlendFunction();
@@ -1737,7 +1740,7 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
          Point pos = editorObj->getPos();
          pos *= mCurrentScale;
          pos += mCurrentOffset;
-         renderTurretFiringRange(pos, *editorObj->getColor(), mCurrentScale);
+         renderTurretFiringRange(pos, editorObj->getColor(), mCurrentScale);
       }
    }
 }
@@ -1811,7 +1814,7 @@ void EditorUserInterface::renderInfoPanel()
    if(mSnapObject)
       pos = mSnapObject->getVert(mSnapVertexIndex);
    else
-      pos = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos));
+      pos = snapPoint(getLevel(), convertCanvasToLevelCoord(mMousePos));
 
 
    glColor(Colors::white);
@@ -1890,7 +1893,7 @@ void EditorUserInterface::renderItemInfoPanel()
    else
    {
       // Cycle through all our objects to find the selected ones
-      const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+      const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
       for(S32 i = 0; i < objList->size(); i++)
       {
@@ -1979,7 +1982,7 @@ void EditorUserInterface::renderReferenceShip()
       glTranslate(mMousePos);
       glScale(mCurrentScale);
       glRotate(90);
-      renderShip(ShipShape::Normal, &Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
+      renderShip(ShipShape::Normal, Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
       glRotate(-90);
 
       // Draw collision circle
@@ -2008,7 +2011,7 @@ static F32 getRenderingAlpha(bool isScriptItem)
 
 void EditorUserInterface::render()
 {
-   GridDatabase *editorDb = getDatabase();
+   GridDatabase *editorDb = getLevel();
    mInfoMsg = "";
 
    mouseIgnore = false;                // Avoid freezing effect from too many mouseMoved events without a render in between (sam)
@@ -2018,7 +2021,7 @@ void EditorUserInterface::render()
       renderTurretAndSpyBugRanges(editorDb);    // Render range of all turrets and spybugs in editorDb
    else
       renderGrid(mCurrentScale, mCurrentOffset, convertLevelToCanvasCoord(Point(0,0)), 
-                 mGridSize, mSnapContext == FULL_SNAPPING, showMinorGridLines());
+                 (F32)mGridSize, mSnapContext == FULL_SNAPPING, showMinorGridLines());
 
    glPushMatrix();
       glTranslate(getCurrentOffset());
@@ -2186,7 +2189,7 @@ void EditorUserInterface::renderWallsAndPolywalls(GridDatabase *database, const 
 void EditorUserInterface::renderObjectsUnderConstruction()
 {
    // Add a vert (and deleted it later) to help show what this item would look like if the user placed the vert in the current location
-   mNewItem->addVert(snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos)));
+   mNewItem->addVert(snapPoint(getLevel(), convertCanvasToLevelCoord(mMousePos)));
    glLineWidth(gLineWidth3);
 
    if(mCreatingPoly) // Wall
@@ -2378,7 +2381,7 @@ If wall thickness is changed, steps 3-5 need to be repeated
 // Mark all objects in database as unselected
 void EditorUserInterface::clearSelection(GridDatabase *database)
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2391,7 +2394,7 @@ void EditorUserInterface::clearSelection(GridDatabase *database)
 // Mark everything as selected
 void EditorUserInterface::selectAll(GridDatabase *database)
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2419,14 +2422,14 @@ bool EditorUserInterface::anyItemsSelected(const GridDatabase *database) const
 // Copy selection to the clipboard
 void EditorUserInterface::copySelection()
 {
-   GridDatabase *database = getDatabase();
+   GridDatabase *database = getLevel();
 
    if(!anyItemsSelected(database))
       return;
 
    mClipboard.clear();     
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2454,7 +2457,7 @@ void EditorUserInterface::pasteSelection()
 
    saveUndoState();           // So we can undo the paste
 
-   GridDatabase *database = getDatabase();
+   GridDatabase *database = getLevel();
    clearSelection(database);  // Only the pasted items should be selected when we're done
 
    Point pastePos = snapPoint(database, convertCanvasToLevelCoord(mMousePos));
@@ -2478,7 +2481,7 @@ void EditorUserInterface::pasteSelection()
       copiedObjects.push_back(newObject);
    }
 
-   getDatabase()->addToDatabase(copiedObjects);
+   getLevel()->addToDatabase(copiedObjects);
 
    // TODO: Need to do something here to snap pasted turrets that are not already snapped to something else
 
@@ -2487,7 +2490,7 @@ void EditorUserInterface::pasteSelection()
 
    onSelectionChanged();
 
-   resnapAllEngineeredItems(getDatabase(), false);  // True would work?
+   resnapAllEngineeredItems(getLevel(), false);  // True would work?
 
    validateLevel();
    setNeedToSave(true);
@@ -2498,7 +2501,7 @@ void EditorUserInterface::pasteSelection()
 // Expand or contract selection by scale (i.e. resize)
 void EditorUserInterface::scaleSelection(F32 scale)
 {
-   GridDatabase *database = getDatabase();
+   GridDatabase *database = getLevel();
 
    if(!anyItemsSelected(database) || scale < .01 || scale == 1)    // Apply some sanity checks; limits here are arbitrary
       return;
@@ -2540,7 +2543,7 @@ void EditorUserInterface::scaleSelection(F32 scale)
 
 bool EditorUserInterface::canRotate() const
 {
-   return !mDraggingObjects && anyItemsSelected(getDatabase());
+   return !mDraggingObjects && anyItemsSelected(getLevel());
 }
 
 
@@ -2552,7 +2555,7 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
 
    saveUndoState();
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    Point center(0,0);
 
@@ -2600,7 +2603,7 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
 
 void EditorUserInterface::setSelectionId(S32 id)
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2658,7 +2661,7 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
    }
 
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2700,7 +2703,7 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 void EditorUserInterface::flipSelectionHorizontal()
 {
    Point min, max;
-   getDatabase()->computeSelectionMinMax(min, max);
+   getLevel()->computeSelectionMinMax(min, max);
    F32 centerX = (min.x + max.x) / 2;
 
    flipSelection(centerX, true);
@@ -2710,7 +2713,7 @@ void EditorUserInterface::flipSelectionHorizontal()
 void EditorUserInterface::flipSelectionVertical()
 {
    Point min, max;
-   getDatabase()->computeSelectionMinMax(min, max);
+   getLevel()->computeSelectionMinMax(min, max);
    F32 centerY = (min.y + max.y) / 2;
 
    flipSelection(centerY, false);
@@ -2722,7 +2725,7 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
    if(!canRotate())
       return;
 
-   GridDatabase *database = getDatabase();
+   GridDatabase *database = getLevel();
 
    saveUndoState();
 
@@ -2730,7 +2733,7 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
    database->computeSelectionMinMax(min, max);
 //   F32 centerX = (min.x + max.x) / 2;
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    bool modifiedWalls = false;
    WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
@@ -2773,7 +2776,7 @@ void EditorUserInterface::findHitItemAndEdge()
    const Rect cursorRect((mMousePos - mCurrentOffset) / mCurrentScale, 50); 
 
    fillVector.clear();
-   GridDatabase *editorDb = getDatabase();
+   GridDatabase *editorDb = getLevel();
    editorDb->findObjects((TestFunc)isAnyObjectType, fillVector, cursorRect);
 
    Point mouse = convertCanvasToLevelCoord(mMousePos);      // Figure out where the mouse is in level coords
@@ -2901,7 +2904,7 @@ bool EditorUserInterface::checkForWallHit(const Point &point, DatabaseObject *ob
       // This code does a less efficient but more thorough job finding a wall that matches the segment we hit... if the above assert
       // keeps going off, and we can't fix it, this code here should take care of the problem.  But using it is an admission of failure.
 
-      const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+      const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
       for(S32 i = 0; i < objList->size(); i++)
       {
@@ -3072,9 +3075,9 @@ void EditorUserInterface::onMouseDragged()
    // want to factor that offset into our calculations.  For point items (and vertices), we don't really care about any slop
    // in the selection, and we just want the damn thing where we put it.
    if(mSnapObject->getGeomType() == geomPoint || (mHitItem && mHitItem->anyVertsSelected()))
-      mSnapDelta = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos)) - mMoveOrigin;
+      mSnapDelta = snapPoint(getLevel(), convertCanvasToLevelCoord(mMousePos)) - mMoveOrigin;
    else  // larger items
-      mSnapDelta = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
+      mSnapDelta = snapPoint(getLevel(), convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
 
    translateSelectedItems(mMoveOrigins, mSnapDelta, lastSnapDelta);  // Nudge all selected objects by incremental move amount
    snapSelectedEngineeredItems(mSnapDelta);                          // Snap all selected engr. objects if possible
@@ -3087,7 +3090,7 @@ void EditorUserInterface::onMouseDragged_StartDragging(const bool needToSaveUndo
       saveUndoState(true);       // Save undo state before we clear the selection
 
    mMoveOrigin = mSnapObject->getVert(mSnapVertexIndex);
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
 #ifdef TNL_OS_MAC_OSX 
    bool ctrlDown = InputCodeManager::getState(KEY_META);
@@ -3151,7 +3154,7 @@ void EditorUserInterface::onMouseDragged_CopyAndDrag(const Vector<DatabaseObject
    }
 
    // Now add copied objects to our database; these were marked as selected when they were created
-   getDatabase()->addToDatabase(copiedObjects);
+   getLevel()->addToDatabase(copiedObjects);
 
    // Running onGeomChanged causes any copied walls to have a full body while we're dragging them 
    for(S32 i = 0; i < copiedObjects.size(); i++)
@@ -3161,7 +3164,7 @@ void EditorUserInterface::onMouseDragged_CopyAndDrag(const Vector<DatabaseObject
 
 void EditorUserInterface::translateSelectedItems(const Vector<Point> &origins, const Point &offset, const Point &lastOffset)
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    //mMoveOrigins[i].set(objList->get(i)->getPos());
    TNLAssert(mMoveOrigins.size() == objList->size(), "Expected these to be the same size!");
@@ -3202,9 +3205,9 @@ void EditorUserInterface::translateSelectedItems(const Vector<Point> &origins, c
 
 void EditorUserInterface::snapSelectedEngineeredItems(const Point &cumulativeOffset)
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
-   WallSegmentManager *wallSegmentManager = getDatabase()->getWallSegmentManager();
+   WallSegmentManager *wallSegmentManager = getLevel()->getWallSegmentManager();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -3223,7 +3226,7 @@ BfObject *EditorUserInterface::copyDockItem(BfObject *source)
 {
    // Instantiate object so we are essentially dragging a non-dock item
    BfObject *newObject = source->newCopy();
-   newObject->newObjectFromDock(mGridSize);     // Do things particular to creating an object that came from dock
+   newObject->newObjectFromDock((F32)mGridSize);     // Do things particular to creating an object that came from dock
 
    return newObject;
 }
@@ -3240,7 +3243,7 @@ void EditorUserInterface::startDraggingDockItem()
    Point pos = convertCanvasToLevelCoord(mMousePos) - item->getInitialPlacementOffset(mGridSize);
    item->moveTo(pos);
       
-   GridDatabase *database = getDatabase();
+   GridDatabase *database = getLevel();
 
    addToEditor(item); 
 //   database->dumpObjects();
@@ -3256,7 +3259,7 @@ void EditorUserInterface::startDraggingDockItem()
    // we'll manually set mHitItem based on the selected item, which will always be the one we just added.
    // TODO: Still needed?
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    mEdgeHit = NONE;
    for(S32 i = 0; i < objList->size(); i++)
@@ -3320,7 +3323,7 @@ void EditorUserInterface::findSnapVertex()
       return;
    } 
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    // Otherwise, we don't have a selected hitItem -- look for a selected vertex
    for(S32 i = 0; i < objList->size(); i++)
@@ -3352,7 +3355,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 
    bool deleted = false, deletedWall = false;
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = objList->size() - 1; i >= 0; i--)  // Reverse to avoid having to have i-- in middle of loop
    {
@@ -3429,7 +3432,7 @@ void EditorUserInterface::changeBarrierWidth(S32 amt)
       saveUndoState(); 
 
    fillVector2.clear();    // fillVector gets modified in some child function, so use our secondary reusable container
-   getDatabase()->findObjects((TestFunc)isWallItemType, fillVector2);
+   getLevel()->findObjects((TestFunc)isWallItemType, fillVector2);
 
    for(S32 i = 0; i < fillVector2.size(); i++)
    {
@@ -3448,9 +3451,9 @@ void EditorUserInterface::splitBarrier()
 {
    bool split = false;
 
-   GridDatabase *database = getDatabase();
+   GridDatabase *database = getLevel();
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -3523,9 +3526,9 @@ void EditorUserInterface::joinBarrier()
 {
    BfObject *joinedObj = NULL;
 
-   GridDatabase *database = getDatabase();
+   GridDatabase *database = getLevel();
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size()-1; i++)
    {
@@ -3565,7 +3568,7 @@ BfObject *EditorUserInterface::doMergePolygons(BfObject *firstItem, S32 firstIte
 
    saveUndoState();
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    inputPolygons.push_back(firstItem->getOutline());
 
@@ -3615,7 +3618,7 @@ BfObject *EditorUserInterface::doMergePolygons(BfObject *firstItem, S32 firstIte
 
 BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, S32 firstItemIndex)
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
    BfObject *joinedObj = NULL;
 
    for(S32 i = firstItemIndex + 1; i < objList->size(); i++)              // Compare against remaining objects
@@ -3695,10 +3698,10 @@ BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, S32 firstItemIn
 
 void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
 {
-   GridDatabase *database = getDatabase();
+   GridDatabase *database = getLevel();
    WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 
-   BfObject *obj = static_cast<BfObject *>(getDatabase()->findObjects_fast()->get(itemIndex));
+   BfObject *obj = static_cast<BfObject *>(getLevel()->findObjects_fast()->get(itemIndex));
 
    if(isWallType(obj->getObjectTypeNumber()))
    {
@@ -3742,7 +3745,7 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
    if(mDraggingObjects)     // No inserting when items are being dragged!
       return;
 
-   GridDatabase *database = getDatabase();
+   GridDatabase *database = getLevel();
 
    clearSelection(database);
    saveUndoState();
@@ -3775,7 +3778,7 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
 
 void EditorUserInterface::centerView(bool isScreenshot)
 {
-   Rect extents = getDatabase()->getExtents();
+   Rect extents = getLevel()->getExtents();
    Rect levelgenDbExtents = mLevelGenDatabase.getExtents();
 
    if(levelgenDbExtents.getWidth() > 0 || levelgenDbExtents.getHeight() > 0)
@@ -4048,7 +4051,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
 	else if(inputString == getEditorBindingString(settings, BINDING_JOIN_SELECTION))          // Join selected barrier segments or polygons
       joinBarrier();                                                                        
 	else if(inputString == getEditorBindingString(settings, BINDING_SELECT_EVERYTHING))       // Select everything
-      selectAll(getDatabase());                                                             
+      selectAll(getLevel());                                                             
 	else if(inputString == getEditorBindingString(settings, BINDING_RESIZE_SELECTION))        // Resize selection
       startSimpleTextEntryMenu(SimpleTextEntryScale);                                       
 	else if(inputString == getEditorBindingString(settings, BINDING_CUT_SELECTION))           // Cut selection
@@ -4167,7 +4170,7 @@ void EditorUserInterface::onMouseClicked_left()
       switch(mDockMode)
       {
          case DOCKMODE_ITEMS:
-      clearSelection(getDatabase());
+      clearSelection(getLevel());
       mDraggingDockItem = mDockItemHit;      // Could be NULL
 
       if(mDraggingDockItem)
@@ -4223,7 +4226,7 @@ void EditorUserInterface::onMouseClicked_left()
          // Note that in the case of a point item, we want to skip this step, as we don't select individual vertices.
          if(mVertexEditMode && !spaceDown && mHitVertex != NONE && mHitItem && mHitItem->isSelected() && mHitItem->getGeomType() != geomPoint)
          {
-            clearSelection(getDatabase());
+            clearSelection(getLevel());
             mHitItem->selectVert(mHitVertex);
             onSelectionChanged();
          }
@@ -4234,7 +4237,7 @@ void EditorUserInterface::onMouseClicked_left()
          }
          else if(mHitItem && mHitItem->getGeomType() == geomPoint)  // Hit a point item
          {
-            clearSelection(getDatabase());
+            clearSelection(getLevel());
             mHitItem->setSelected(true);
             onSelectionChanged();
          }
@@ -4242,21 +4245,21 @@ void EditorUserInterface::onMouseClicked_left()
          {        // (braces required)
             if(!(mHitItem->vertSelected(mHitVertex)))
             {
-               clearSelection(getDatabase());
+               clearSelection(getLevel());
                mHitItem->selectVert(mHitVertex);
                onSelectionChanged();
             }
          }
          else if(mHitItem)                                                          // Hit a non-point item, but not a vertex
          {
-            clearSelection(getDatabase());
+            clearSelection(getLevel());
             mHitItem->setSelected(true);
             onSelectionChanged();
          }
          else     // Clicked off in space.  Starting to draw a bounding rectangle?
          {
             mDragSelecting = true;
-            clearSelection(getDatabase());
+            clearSelection(getLevel());
             onSelectionChanged();
          }
       }
@@ -4277,7 +4280,7 @@ void EditorUserInterface::onMouseClicked_right()
    {
       if(mNewItem->getVertCount() < Geometry::MAX_POLY_POINTS)    // Limit number of points in a polygon/polyline
       {
-         mNewItem->addVert(snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos)));
+         mNewItem->addVert(snapPoint(getLevel(), convertCanvasToLevelCoord(mMousePos)));
          mNewItem->onGeomChanging();
       }
          
@@ -4286,7 +4289,7 @@ void EditorUserInterface::onMouseClicked_right()
 
    saveUndoState(true);             // Save undo state before we clear the selection
 
-   clearSelection(getDatabase());   // Unselect anything currently selected
+   clearSelection(getLevel());   // Unselect anything currently selected
    onSelectionChanged();
 
    // Can only add new vertices by clicking on item's edge, not it's interior (for polygons, that is)
@@ -4295,7 +4298,7 @@ void EditorUserInterface::onMouseClicked_right()
       if(mHitItem->getVertCount() >= Geometry::MAX_POLY_POINTS)     // Polygon full -- can't add more
          return;
 
-      Point newVertex = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos));   // adding vertex w/ right-mouse
+      Point newVertex = snapPoint(getLevel(), convertCanvasToLevelCoord(mMousePos));   // adding vertex w/ right-mouse
 
       mAddingVertex = true;
 
@@ -4329,7 +4332,7 @@ void EditorUserInterface::onMouseClicked_right()
 
       mNewItem->initializeEditor();
       mNewItem->setTeam(mCurrentTeam);
-      mNewItem->addVert(snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos)));
+      mNewItem->addVert(snapPoint(getLevel(), convertCanvasToLevelCoord(mMousePos)));
    }
 }
 
@@ -4375,7 +4378,7 @@ void idEntryCallback(string text, BfObject *object)
 
    if(id != 0)
    {
-      const Vector<DatabaseObject *> *objList = clientGame->getUIManager()->getUI<EditorUserInterface>()->getDatabase()->findObjects_fast();
+      const Vector<DatabaseObject *> *objList = clientGame->getUIManager()->getUI<EditorUserInterface>()->getLevel()->findObjects_fast();
 
       for(S32 i = 0; i < objList->size(); i++)
       {
@@ -4412,7 +4415,7 @@ void idEntryCallback(string text, BfObject *object)
 void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType)
 {
    // No items selected?  Abort!
-   if(!anyItemsSelected(getDatabase()))
+   if(!anyItemsSelected(getLevel()))
       return;
 
    string menuTitle = "Some Interesting Title";
@@ -4426,7 +4429,7 @@ void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType
 
 
    // Find first selected item, and work with that
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    S32 selectedIndex = NONE;
    BfObject *selectedObject = NULL;
@@ -4455,7 +4458,7 @@ void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType
          callback = idEntryCallback;
 
          // We need to assure that we only assign an ID to ONE object
-         const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+         const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
          // Unselect all objects but our first selected one
          for(S32 i = 0; i < objList->size(); i++)
@@ -4545,7 +4548,7 @@ void EditorUserInterface::doneWithSimpleTextEntryMenu(SimpleTextEntryMenuUI *men
 
 void EditorUserInterface::startAttributeEditor()
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -4586,7 +4589,7 @@ void EditorUserInterface::doneEditingAttributes(EditorAttributeMenuUI *editor, B
 {
    object->onAttrsChanged();
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    // Find any other selected items of the same type of the item we just edited, and update their attributes too
    for(S32 i = 0; i < objList->size(); i++)
@@ -4659,7 +4662,7 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
 
             fillVector.clear();
 
-            getDatabase()->findObjects(fillVector);
+            getLevel()->findObjects(fillVector);
 
 
             for(S32 i = 0; i < fillVector.size(); i++)
@@ -4718,7 +4721,7 @@ void EditorUserInterface::onFinishedDragging()
       // Only delete items in normal dock mode
       if(mDockMode == DOCKMODE_ITEMS)
       {
-         const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+         const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
          bool deletedSomething = false, deletedWall = false;
 
          for(S32 i = 0; i < objList->size(); i++)    //  Delete all selected items
@@ -4763,7 +4766,7 @@ void EditorUserInterface::onFinishedDragging()
       {
          bool wallMoved = false;
 
-         const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+         const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
          for(S32 i = 0; i < objList->size(); i++)
          {
@@ -4777,7 +4780,7 @@ void EditorUserInterface::onFinishedDragging()
          }
 
          if(wallMoved)
-            resnapAllEngineeredItems(getDatabase(), true);
+            resnapAllEngineeredItems(getLevel(), true);
 
          setNeedToSave(true);
          autoSave();
@@ -4805,7 +4808,7 @@ bool EditorUserInterface::mouseOnDock()
 
 S32 EditorUserInterface::getItemSelectedCount()
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    S32 count = 0;
 
@@ -4823,7 +4826,7 @@ S32 EditorUserInterface::getItemSelectedCount()
 
 bool EditorUserInterface::anythingSelected() const
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -4992,7 +4995,7 @@ string EditorUserInterface::getLevelText()
       result += mRobotLines[i] + "\n";
 
    // Write out all level items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 j = 0; j < 2; j++)
    {
@@ -5358,8 +5361,7 @@ void uploadToDbCallback(ClientGame *game, U32 unused)
    }
 
 
-   if(strcmp(game->getClientInfo()->getName().getString(),
-         game->getGameType()->getLevelCredits()->getString()) != 0)
+   if(game->getClientInfo()->getName().getString() != game->getGameType()->getLevelCredits())
    {
       editor->setSaveMessage("Failed: Level author must match your username", false);
       return;

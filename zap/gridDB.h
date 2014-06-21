@@ -25,10 +25,10 @@ typedef bool (*TestFunc)(U8);
 // Interface for dealing with objects that can be in our spatial database.
 class  GridDatabase;
 class EditorObjectDatabase;
+class Level;
 
 class DatabaseObject : public GeomObject
 {
-
    typedef GeomObject Parent;
 
    friend class GridDatabase;
@@ -57,7 +57,6 @@ public:
 
    void setExtent(const Rect &extentRect);
    
-
    virtual const Vector<Point> *getCollisionPoly() const;
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const;
 

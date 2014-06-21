@@ -232,7 +232,7 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, U32 joysti
       case Joystick::ButtonShapeRound:
       default:
          //shapeCircle.render(center);
-         drawCircle(center, buttonHalfHeight);
+         drawCircle(center, (F32)buttonHalfHeight);
          break;
    }
 

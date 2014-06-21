@@ -10,6 +10,7 @@
 #include "WallSegmentManager.h"
 #include "Teleporter.h"
 #include "gameType.h"
+#include "Level.h"
 
 #include "projectile.h"
 
@@ -69,15 +70,15 @@ void Engineerable::setResource(MountableItem *resource)
 }
 
 
-void Engineerable::releaseResource(const Point &releasePos, GridDatabase *database)
+void Engineerable::releaseResource(const Point &releasePos, Level *level)
 {
-   if(!mResource) {
+   if(!mResource) 
       return;
-   }
-   mResource->addToDatabase(database);
+
+   mResource->addToDatabase(level);
    mResource->setPosVelAng(releasePos, Point(), 0);               // Reset velocity of resource item to 0,0
 
-   TNLAssert(dynamic_cast<ServerGame*>(mResource->getGame()), "Null ServerGame");
+   TNLAssert(dynamic_cast<ServerGame*>(mResource->getGame()), "NULL ServerGame");
    static_cast<ServerGame*>(mResource->getGame())->onObjectAdded(mResource);
 }
 
@@ -132,7 +133,7 @@ string EngineerModuleDeployer::checkResourcesAndEnergy(const Ship *ship)
 
 // Returns "" if location is OK, otherwise returns an error message
 // Runs on client and server
-bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameObjectDatabase, const Ship *ship, U32 objectType)
+bool EngineerModuleDeployer::canCreateObjectAtLocation(const Level *level, const Ship *ship, U32 objectType)
 {
    string msg;
 
@@ -157,15 +158,15 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
    {
       case EngineeredTurret:
          bounds = Turret::getTurretGeometry(mDeployPosition, mDeployNormal);   
-         goodDeploymentPosition = EngineeredItem::checkDeploymentPosition(bounds, gameObjectDatabase);
+         goodDeploymentPosition = EngineeredItem::checkDeploymentPosition(bounds, level);
          break;
       case EngineeredForceField:
          bounds = ForceFieldProjector::getForceFieldProjectorGeometry(mDeployPosition, mDeployNormal);
-         goodDeploymentPosition = EngineeredItem::checkDeploymentPosition(bounds, gameObjectDatabase);
+         goodDeploymentPosition = EngineeredItem::checkDeploymentPosition(bounds, level);
          break;
       case EngineeredTeleporterEntrance:
       case EngineeredTeleporterExit:
-         goodDeploymentPosition = Teleporter::checkDeploymentPosition(mDeployPosition, gameObjectDatabase, ship);
+         goodDeploymentPosition = Teleporter::checkDeploymentPosition(mDeployPosition, level, ship);
          break;
       default:    // will never happen
          TNLAssert(false, "Bad objectType");
@@ -193,7 +194,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
    // Now we can find the point where the forcefield would end if this were a valid position
    Point forceFieldEnd;
    DatabaseObject *terminatingWallObject;
-   ForceField::findForceFieldEnd(gameObjectDatabase, forceFieldStart, mDeployNormal, forceFieldEnd, &terminatingWallObject);
+   ForceField::findForceFieldEnd(level, forceFieldStart, mDeployNormal, forceFieldEnd, &terminatingWallObject);
 
    bool collision = false;
 
@@ -204,7 +205,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
    Vector<Point> candidateForceFieldGeom = ForceField::computeGeom(forceFieldStart, forceFieldEnd);
 
    fillVector.clear();
-   gameObjectDatabase->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
+   level->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -224,7 +225,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
       // one could intersect the end of the other.
       fillVector.clear();
       queryRect.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));
-      gameObjectDatabase->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
+      level->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
 
       // Reusable containers for holding geom of any forcefields we might need to check for intersection with our candidate
       Point start, end;
@@ -252,11 +253,11 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
 
    /// Part TWO - preventative abuse measures
 
-   // First thing first, is abusive engineer allowed?  If so, let's get out of here
+   // First thing first, is abusive engineer allowed?  If so, let's get out of here.
    if(ship->getGame()->getGameType()->isEngineerUnrestrictedEnabled())
       return true;
 
-   // Continuing on..  let's check to make sure that forcefield doesn't come within a ship's
+   // Continuing on...  let's check to make sure that forcefield doesn't come within a ship's
    // width of a wall; this should really squelch the forcefield abuse
    bool wallTooClose = false;
    fillVector.clear();
@@ -278,7 +279,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
    queryRect = Rect(collisionPoly);
 
    // Search for wall segments within query
-   gameObjectDatabase->findObjects(isWallType, fillVector, queryRect);
+   level->findObjects(isWallType, fillVector, queryRect);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -305,7 +306,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
    // part two.  We can excluded engineered turrets because they can be destroyed
    bool turretInTheWay = false;
    fillVector.clear();
-   gameObjectDatabase->findObjects(TurretTypeNumber, fillVector, queryRect);
+   level->findObjects(TurretTypeNumber, fillVector, queryRect);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -447,26 +448,25 @@ EngineeredItem::~EngineeredItem()
 }
 
 
-bool EngineeredItem::processArguments(S32 argc, const char **argv, Game *game)
+bool EngineeredItem::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 3)
       return false;
 
    setTeam(atoi(argv[0]));
    mOriginalTeam = getTeam();
+
    if(mOriginalTeam == TEAM_NEUTRAL)      // Neutral object starts with no health and can be repaired and claimed by anyone
       mHealth = 0;
    
    Point pos;
    pos.read(argv + 1);
-   pos *= game->getLegacyGridSize();
+   pos *= level->getLegacyGridSize();
 
    if(argc >= 4)
-   {
       setHealRate(atoi(argv[3]));
-   }
 
-   findMountPoint(game, pos);
+   findMountPoint(level, pos);
 
    return true;
 }
@@ -538,7 +538,7 @@ void EngineeredItem::fillAttributesVectors(Vector<string> &keys, Vector<string> 
 
 // This is used for both positioning items in-game and for snapping them to walls in the editor --> static method
 // Polulates anchor and normal
-DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
+DatabaseObject *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
                                                          const Vector<S32> *excludedWallList,
                                                          bool format, Point &anchor, Point &normal)
 {
@@ -547,7 +547,7 @@ DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeD
 
 
 // Static function
-DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
+DatabaseObject *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
                                                          const Vector<S32> *excludedWallList,
                                                          bool format, TestFunc testFunc, Point &anchor, Point &normal)
 {
@@ -661,7 +661,7 @@ bool EngineeredItem::isEnabled()
 
 void EngineeredItem::damageObject(DamageInfo *di)
 {
-   // Don't do self damage.  This is more complicated than it should probably be..
+   // Don't do self damage.  This is more complicated than it should probably be.
    BfObject *damagingObject = di->damagingObject;
 
    U8 damagingObjectType = UnknownTypeNumber;
@@ -746,9 +746,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
       onDestroyed();
 
       if(mResource.isValid())
-      {
          releaseResource(getPos() + mAnchorNormal * mResource->getRadius(), getGame()->getGameObjDatabase());
-      }
 
       deleteObject(500);
    }
@@ -820,11 +818,23 @@ Vector<Point> EngineeredItem::getObjectGeometry(const Point &anchor, const Point
 void EngineeredItem::setPos(lua_State *L, S32 stackIndex)
 {
    Parent::setPos(L, stackIndex);
-   findMountPoint(Game::getAddTarget(), getPos());
+
+   // Find a database that will contain objects we could snap to.  If object is already in a database,
+   // that is our first choice.  Otherwise, we'll see if there is one associated with the game, because
+   // that is where we'll likely end up.  Otherwise, it's no snapping today.
+   GridDatabase *database = NULL;
+   if(getDatabase())       
+      database = getDatabase();
+   else if(getGame() && getGame()->getGameObjDatabase())
+      database = getGame()->getGameObjDatabase();
+
+   if(database)
+      findMountPoint(database, getPos());
 }
 
 
 void EngineeredItem::setPos(const Point &p)
+
 {
    Parent::setPos(p);
 
@@ -1027,12 +1037,12 @@ static const F32 MAX_SNAP_DISTANCE = 100.0f;    // Max distance to look for a mo
 
 // Figure out where to mount this item during construction; mountToWall() is similar, but used in editor.  
 // findDeployPoint() is version used during deployment of engineerered item.
-void EngineeredItem::findMountPoint(Game *game, const Point &pos)
+void EngineeredItem::findMountPoint(const GridDatabase *database, const Point &pos)
 {
    Point normal, anchor;
 
    // Anchor objects to the correct point
-   if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, MAX_SNAP_DISTANCE, NULL, true, anchor, normal))
+   if(!findAnchorPointAndNormal(database, pos, MAX_SNAP_DISTANCE, NULL, true, anchor, normal))
    {
       setPos(pos);               // Found no mount point, but for editor, needs to set the position
       mAnchorNormal.set(1,0);
@@ -1301,7 +1311,7 @@ S32 EngineeredItem::lua_setGeom(lua_State *L)
 {
    S32 retVal = Parent::lua_setGeom(L);
 
-   findMountPoint(Game::getAddTarget(), getPos());
+   findMountPoint(getGame()->getGameObjDatabase(), getPos());
 
    return retVal;
 }
@@ -1337,7 +1347,7 @@ ForceFieldProjector::ForceFieldProjector(lua_State *L) : Parent(TEAM_NEUTRAL, Po
          setTeam(L, 2);
       }
 
-      findMountPoint(Game::getAddTarget(), getPos());
+      findMountPoint(getGame()->getGameObjDatabase(), getPos());
    }
 
    initialize();
@@ -1345,7 +1355,8 @@ ForceFieldProjector::ForceFieldProjector(lua_State *L) : Parent(TEAM_NEUTRAL, Po
 
 
 // Constructor for when projector is built with engineer
-ForceFieldProjector::ForceFieldProjector(S32 team, const Point &anchorPoint, const Point &anchorNormal) : Parent(team, anchorPoint, anchorNormal)
+ForceFieldProjector::ForceFieldProjector(S32 team, const Point &anchorPoint, const Point &anchorNormal) : 
+   Parent(team, anchorPoint, anchorNormal)
 {
    initialize();
 }
@@ -1507,7 +1518,7 @@ void ForceFieldProjector::render()
 
 void ForceFieldProjector::renderDock()
 {
-   renderSquareItem(getPos(), getColor(), 1, &Colors::white, '>');
+   renderSquareItem(getPos(), getColor(), 1, Colors::white, '>');
 }
 
 
@@ -1515,7 +1526,7 @@ void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCorn
 {
 #ifndef ZAP_DEDICATED
    F32 scaleFact = 1;
-   const Color *color = getColor();
+   const Color &color = getColor();
 
    if(mSnapped)
    {
@@ -1807,7 +1818,7 @@ Vector<Point> ForceField::computeGeom(const Point &start, const Point &end, F32 
 
 
 // Pass in a database containing walls or wallsegments
-bool ForceField::findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal,  
+bool ForceField::findForceFieldEnd(const GridDatabase *database, const Point &start, const Point &normal,  
                                    Point &end, DatabaseObject **collObj)
 {
    F32 time;
@@ -1815,7 +1826,7 @@ bool ForceField::findForceFieldEnd(const GridDatabase *db, const Point &start, c
 
    end.set(start.x + normal.x * MAX_FORCEFIELD_LENGTH, start.y + normal.y * MAX_FORCEFIELD_LENGTH);
 
-   *collObj = db->findObjectLOS((TestFunc)isWallType, ActualState, start, end, time, n);
+   *collObj = database->findObjectLOS((TestFunc)isWallType, ActualState, start, end, time, n);
 
    if(*collObj)
    {
@@ -1921,13 +1932,15 @@ Turret *Turret::clone() const
 }
 
 
-bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
+bool Turret::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    S32 argc1 = 0;
    const char *argv1[32];
+
    for(S32 i = 0; i < argc2; i++)
    {
       char firstChar = argv2[i][0];
+
       if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z'))  // starts with a letter
       {
          if(!strncmp(argv2[i], "W=", 2))  // W= is in 015a
@@ -1948,12 +1961,13 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
             argc1++;
          }
       }
-      
    }
 
-   bool returnBool = EngineeredItem::processArguments(argc1, argv1, game);
+   if (!EngineeredItem::processArguments(argc1, argv1, level))
+      return false;
+
    mCurrentAngle = mAnchorNormal.ATAN2();
-   return returnBool;
+   return true;
 }
 
 
@@ -2029,13 +2043,13 @@ void Turret::onAddedToGame(Game *theGame)
 
 void Turret::render()
 {
-   renderTurret(*(getColor()), getPos(), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle, mHealRate);
+   renderTurret(getColor(), getPos(), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle, mHealRate);
 }
 
 
 void Turret::renderDock()
 {
-   renderSquareItem(getPos(), getColor(), 1, &Colors::white, 'T');
+   renderSquareItem(getPos(), getColor(), 1, Colors::white, 'T');
 }
 
 

@@ -4,6 +4,8 @@
 //------------------------------------------------------------------------------
 
 #include "projectile.h"
+
+#include "Level.h"
 #include "ship.h"
 #include "game.h"
 #include "gameConnection.h"
@@ -1145,7 +1147,7 @@ SpyBug *SpyBug::clone() const
 }
 
 
-bool SpyBug::processArguments(S32 argc, const char **argv, Game *game)
+bool SpyBug::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 3)
       return false;
@@ -1153,10 +1155,7 @@ bool SpyBug::processArguments(S32 argc, const char **argv, Game *game)
    setTeam(atoi(argv[0]));
 
    // Strips off first arg from argv, so the parent gets the straight coordinate pair it's expecting
-   if(!Parent::processArguments(2, &argv[1], game))    
-      return false;
-
-   return true;
+   return Parent::processArguments(2, &argv[1], level);
 }
 
 
@@ -1266,14 +1265,14 @@ void SpyBug::renderItem(const Point &pos)
       visible = true;      // We get here in editor when in preview mode
 
 
-   renderSpyBug(pos, *getColor(), visible, true);
+   renderSpyBug(pos, getColor(), visible, true);
 #endif
 }
 
 
 void SpyBug::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
-   renderSpyBug(getPos(), *getColor(), true, true);
+   renderSpyBug(getPos(), getColor(), true, true);
 }
 
 

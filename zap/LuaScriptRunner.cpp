@@ -12,6 +12,7 @@
 #include "game.h"
 #include "ServerGame.h"
 #include "GeomUtils.h"
+#include "barrier.h"
 
 #include "GameTypesEnum.h"
 #include "TeamConstants.h"
@@ -1283,7 +1284,7 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
          if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
             mLuaGame->addPolyWall(obj, mLuaGridDatabase);
          else if(obj->getObjectTypeNumber() == WallItemTypeNumber)
-            mLuaGame->addWallItem(obj, mLuaGridDatabase);
+            mLuaGame->addWallItem(static_cast<WallItem *>(obj), mLuaGridDatabase);
          else
             obj->addToGame(mLuaGame, mLuaGridDatabase);
       }

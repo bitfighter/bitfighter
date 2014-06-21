@@ -23,7 +23,7 @@ public:
    HTFGameType();    // Constructor
    virtual ~HTFGameType();
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
 #ifndef ZAP_DEDICATED

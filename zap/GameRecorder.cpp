@@ -10,6 +10,7 @@
 #include "ServerGame.h"
 #include "stringUtils.h"
 #include "tnlThread.h"
+#include "Level.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"

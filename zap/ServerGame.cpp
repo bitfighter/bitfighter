@@ -18,6 +18,7 @@
 #include "BotNavMeshZone.h"      // For zone clearing code
 #include "LevelSource.h"
 #include "LevelDatabase.h"
+#include "Level.h"
 
 #include "gameObjectRender.h"
 #include "stringUtils.h"
@@ -54,9 +55,6 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
    mVoteType = VoteLevelChange;  // Arbitrary
    mLevelLoadIndex = 0;
    mShutdownOriginator = NULL;
-
-   setAddTarget();               // When we do an addToGame, objects should be added to ServerGame
-
 
    // Stupid C++ spec doesn't allow ternary logic with static const if there is no definition
    // Workaround is to add '+' to force a read of the value
@@ -118,8 +116,6 @@ ServerGame::~ServerGame()
       getConnectionToMaster()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
    cleanUp();
-
-   clearAddTarget();
 
    instantiated = false;
 
@@ -407,51 +403,50 @@ StringTableEntry ServerGame::getCurrentLevelTypeName()
 }
 
 
-bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id)
-{
-   if(!stricmp(argv[0], "BarrierMaker"))
-   {
-      // Use WallItem's ProcessGeometry method to read the points; this will let us put us all our error handling
-      // and geom processing in our place.
-      WallItem wallItem;
-      if(wallItem.processArguments(argc, argv, this))    // Returns true if wall was successfully processed
-         addWallItem(&wallItem, NULL);
-   }
-   else if(!stricmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
-   {
-      PolyWall polywall;
-      if(polywall.processArguments(argc, argv, this))    // Returns true if wall was successfully processed
-         addPolyWall(&polywall, NULL);
-
-   }
-
-   else 
-      return false;
-
-   return true;
-}
-
-
-void ServerGame::addPolyWall(BfObject *polyWall, GridDatabase *unused)
-{
-   Parent::addPolyWall(polyWall, getGameObjDatabase());
-
-   // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
-   // is convenient to transmit to the clients
-   //WallRec wallRec(polyWall);
-   //getGameType()->addWall(wallRec, this);
-}
+//bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id)
+//{
+//   if(!stricmp(argv[0], "BarrierMaker"))
+//   {
+//      // Use WallItem's ProcessGeometry method to read the points; this will let us put us all our error handling
+//      // and geom processing in our place.
+//      WallItem wallItem;
+//      if(wallItem.processArguments(argc, argv, this))    // Returns true if wall was successfully processed
+//         addWallItem(&wallItem, NULL);
+//   }
+//   else if(!stricmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
+//   {
+//      PolyWall polywall;
+//      if(polywall.processArguments(argc, argv, this))    // Returns true if wall was successfully processed
+//         addPolyWall(&polywall, NULL);
+//   }
+//
+//   else 
+//      return false;
+//
+//   return true;
+//}
 
 
-void ServerGame::addWallItem(BfObject *wallItem, GridDatabase *unused)
-{
-   Parent::addWallItem(wallItem, getGameObjDatabase());
+//void ServerGame::addPolyWall(BfObject *polyWall, GridDatabase *unused)
+//{
+//   Parent::addPolyWall(polyWall, getGameObjDatabase());
+//
+//   // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
+//   // is convenient to transmit to the clients
+//   //WallRec wallRec(polyWall);
+//   //getGameType()->addWall(wallRec, this);
+//}
 
-   // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
-   // is convenient to transmit to the clients
-   //WallRec wallRec(wallItem);
-   //getGameType()->addWall(wallRec, this);
-}
+
+//void ServerGame::addWallItem(BfObject *wallItem, GridDatabase *unused)
+//{
+//   Parent::addWallItem(wallItem, getGameObjDatabase());
+//
+//   // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
+//   // is convenient to transmit to the clients
+//   //WallRec wallRec(wallItem);
+//   //getGameType()->addWall(wallRec, this);
+//}
 
 
 // Sort by order in which players should be added to teams
@@ -495,13 +490,17 @@ static S32 QSORT_CALLBACK AddOrderSort(RefPtr<ClientInfo> *a, RefPtr<ClientInfo>
 // function respects meta-indices, and otherwise expects an absolute index.
 void ServerGame::cycleLevel(S32 nextLevel)
 {
+   // End of previous level...
    if(mGameRecorderServer)
    {
       delete mGameRecorderServer;
       mGameRecorderServer = NULL;
    }
 
-   cleanUp();
+   // If mLevel is NULL, it's our first time here, and there won't be anything to clean up
+   if(mLevel)
+      cleanUp();
+
    mLevelSwitchTimer.clear();
    mScopeAlwaysList.clear();
 
@@ -517,8 +516,9 @@ void ServerGame::cycleLevel(S32 nextLevel)
       clientInfo->clearKillStreak();   // Clear any rampage the players have going... sorry, lads!
    }
 
-   mRobotManager.onLevelChanged();
+   // Beginning of next level...
 
+   mRobotManager.onLevelChanged();
 
    bool loaded = false;
 
@@ -572,7 +572,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    ////// This block could easily be moved off somewhere else   
    fillVector.clear();
-   getGameObjDatabase()->findObjects(TeleporterTypeNumber, fillVector);
+   mLevel->findObjects(TeleporterTypeNumber, fillVector);
 
    Vector<pair<Point, const Vector<Point> *> > teleporterData(fillVector.size());
    pair<Point, const Vector<Point> *> teldat;
@@ -607,36 +607,33 @@ void ServerGame::cycleLevel(S32 nextLevel)
    triangulate = !isDedicated();
 #endif
 
-   mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(mBotZoneDatabase, &mAllZones,
-                                                                          getWorldExtents(), barrierList, turretList,
-                                                                          forceFieldProjectorList, teleporterData, triangulate);
+   TNLAssert(getGameType(), "Expect to have a GameType here!");
+   getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(mBotZoneDatabase, &mAllZones,
+                                                                              getWorldExtents(), barrierList, turretList,
+                                                                              forceFieldProjectorList, teleporterData, triangulate);
    // Clear team info for all clients
    resetAllClientTeams();
 
    // Reset loadouts now that we have GameType set up
    for(S32 i = 0; i < getClientCount(); i++)
       getClientInfo(i)->resetLoadout(levelHasLoadoutZone());
-  
 
    // Now add players to the gameType, from highest rating to lowest in an attempt to create ratings-based teams
    // Sorting also puts idle players at the end of the list, regardless of their rating
    mClientInfos.sort(AddOrderSort);
 
-   if(mGameType.isValid())
+   // Backwards!  So the lowest scorer goes on the larger team (if there is uneven teams)
+   for(S32 i = getClientCount() - 1; i > -1; i--)
    {
-      // Backwards!  So the lowest scorer goes on the larger team (if there is uneven teams)
-      for(S32 i = getClientCount() - 1; i > -1; i--)
-      {
-         ClientInfo *clientInfo = getClientInfo(i);   // Could be a robot when level have "Robot" line, or a levelgen adds one
+      ClientInfo *clientInfo = getClientInfo(i);   // Could be a robot when level have "Robot" line, or a levelgen adds one
          
-         mGameType->serverAddClient(clientInfo);
+      getGameType()->serverAddClient(clientInfo);
 
-         GameConnection *connection = clientInfo->getConnection();
-         if(connection)
-         {
-            connection->setObjectMovedThisGame(false);
-            connection->activateGhosting();                 // Tell clients we're done sending objects and are ready to start playing
-         }
+      GameConnection *connection = clientInfo->getConnection();
+      if(connection)
+      {
+         connection->setObjectMovedThisGame(false);
+         connection->activateGhosting();                 // Tell clients we're done sending objects and are ready to start playing
       }
    }
 
@@ -700,15 +697,15 @@ void ServerGame::sendLevelStatsToMaster()
    bool hasLevelGen = getGameType()->getScriptName() != "";
 
    // Construct the info now, to be later sent, sending later avoids overloading the master with too much data
-   mSendLevelInfoDelayNetInfo = masterConn->s2mSendLevelInfo_construct(mLevelFileHash, mGameType->getLevelName(), 
-                                mGameType->getLevelCredits()->getString(), 
+   mSendLevelInfoDelayNetInfo = masterConn->s2mSendLevelInfo_construct(mLevelFileHash, mLevel->getLevelName(), 
+                                mLevel->getLevelCredits(), 
                                 getCurrentLevelTypeName(),
                                 hasLevelGen, 
                                 (U8)teamCountU8, 
-                                mGameType->getWinningScore(), 
+                                mLevel->getWinningScore(), 
                                 getRemainingGameTime());
 
-   mSendLevelInfoDelayCount.reset(6000);  // set time left to send
+   mSendLevelInfoDelayCount.reset(SIX_SECONDS);  // Set time left to send
 
    mSentHashes.push_back(mLevelFileHash);
 }
@@ -987,28 +984,83 @@ inline string getPathFromFilename(const string &filename)
 
 bool ServerGame::loadLevel()
 {
-   resetLevelInfo();    // Resets info about the level, not a LevelInfo...  In case you were wondering.
+   resetLevelInfo();    // Resets info about the level, not a LevelInfo...  in case you were wondering
 
    mObjectsLoaded = 0;
    setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);
 
-   mLevelFileHash = mLevelSource->loadLevel(mCurrentLevelIndex, this, getGameObjDatabase());
+   mLevel = boost::shared_ptr<Level>(mLevelSource->getLevel(mCurrentLevelIndex));
+   TNLAssert(!mLevel->getAddedToGame(), "Can't reuse Levels!");
 
-   // Empty hash means file was not loaded.  Danger Will Robinson!
-   if(mLevelFileHash == "")
+   // NULL level means file was not loaded.  Danger Will Robinson!
+   if(!mLevel)
    {
-      logprintf(LogConsumer::LogError, "Error: Cannot load %s", mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
+      logprintf(LogConsumer::LogError, "Error: Cannot load %s", 
+                                        mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
       return false;
    }
 
-   // We should have a gameType by the time we get here... but in case we don't, we'll add a default one now
-   if(!getGameType())
+   mLevel->onAddedToServerGame(this);     // Gets the TeamManager up and running and populated, adds bots
+
+   const Vector<DatabaseObject *> objects = *mLevel->findObjects_fast();
+   for(S32 i = 0; i < objects.size(); i++)
    {
-      logprintf(LogConsumer::LogWarning, "Warning: Missing GameType parameter in %s (defaulting to Bitmatch)", mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
-      GameType *gameType = new GameType;
-      gameType->addToGame(this, getGameObjDatabase());
+      BfObject *object = static_cast<BfObject *>(objects[i]);
+
+      // Mark the item as being a ghost (client copy of a server object) so that the object will not trigger server-side tests
+      // The only time this code is run on the client is when loading into the editor.
+      if(!isServer())
+         object->markAsGhost();
+
+      object->addToGame(this, NULL);
    }
-   
+
+
+   const Vector<WallItem *> &walls = mLevel->getWallList();
+
+   for(S32 i = 0; i < walls.size(); i++)
+   {
+      addWallItem(walls[i], NULL);     // Not sure we want this --> maybe just Barrier::constructWalls(this, *wallItem->getOutline(), false, wallItem->getWidth());
+
+                  // Use WallItem's ProcessGeometry method to read the points; this will let us put us all our error handling
+         // and geom processing in our place.
+         //WallItem wallItem;
+         //if(wallItem.processArguments(argc, argv, this))    // Returns true if wall was successfully processed
+         //   addWallItem(&wallItem, NULL);
+   }
+
+
+   mLevel->addBots(this);
+
+//In editor:
+//   for each wall/polywall:
+//            //   wallItem->initializeEditor();        // Only runs unselectVerts
+//
+//   otherwise run addWallItem/addPolywallItem
+//
+//   for each mRobotLine:
+//      getUIManager()->readRobotLine(robotLine);
+//
+//
+//
+//computeWorldObjectExtents(); 
+//
+//Add teams:
+//         AbstractTeam *team = getNewTeam();
+//         if(team->processArguments(argc, argv))
+//            addTeam(team);
+//
+//Process team change lines
+//         S32 teamNumber = atoi(argv[1]);   // Team number to change
+//
+//         if(teamNumber >= 0 && teamNumber < getTeamCount())
+//         {
+//            AbstractTeam *team = getNewTeam();
+//            team->processArguments(argc-1, argv+1);          // skip one arg
+//            replaceTeam(team, teamNumber);
+//         }
+
+
    // Levelgens:
    // Run level's levelgen script (if any)
    runLevelGenScript(getGameType()->getScriptName());
@@ -1031,6 +1083,18 @@ bool ServerGame::loadLevel()
    getGameType()->onLevelLoaded();
 
    return true;
+}
+
+
+const Vector<WallItem *> &ServerGame::getWallList() const
+{
+   return mLevel->getWallList();
+}
+
+
+const Vector<PolyWall *> &ServerGame::getPolyWallList() const
+{
+   return mPolyWallList;
 }
 
 
@@ -1112,13 +1176,9 @@ void ServerGame::addClient(ClientInfo *clientInfo)
             mShutdownOriginator.isNull() ? StringTableEntry() : mShutdownOriginator->getClientInfo()->getName(), 
             "Sorry -- server shutting down", false);
 
-   TNLAssert(mGameType, "No gametype?");     // Added 12/20/2013 by wat to try to understand if this ever happens
-   if(mGameType.isValid())
-   {
-      mGameType->serverAddClient(clientInfo);
-      addToClientList(clientInfo);
-   }
-   // Else... what?
+   TNLAssert(getGameType(), "No gametype?");     // Added 12/20/2013 by wat to try to understand if this ever happens
+   getGameType()->serverAddClient(clientInfo);
+   addToClientList(clientInfo);
 
    mRobotManager.balanceTeams();
    
@@ -1132,8 +1192,8 @@ void ServerGame::addClient(ClientInfo *clientInfo)
 
 void ServerGame::removeClient(ClientInfo *clientInfo)
 {
-   if(mGameType.isValid())
-      mGameType->removeClient(clientInfo);
+   TNLAssert(getGameType(), "Expect GameType here!");
+   getGameType()->removeClient(clientInfo);
 
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
@@ -1154,7 +1214,7 @@ void ServerGame::startAllBots()
 }
 
 
-string ServerGame::addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass)
+string ServerGame::addBot(const Vector<string> &args, ClientInfo::ClientClass clientClass)
 {
    return mRobotManager.addBot(args, clientClass);
 }
@@ -1206,12 +1266,6 @@ void ServerGame::deleteBot(S32 i)
 {
    mRobotManager.deleteBot(i);
 }
-
-
-//void ServerGame::deleteBotFromTeam(S32 teamIndex)
-//{
-//   mRobotManager.deleteBotFromTeam(teamIndex);
-//}
 
 
 void ServerGame::deleteAllBots()
@@ -1294,7 +1348,6 @@ void ServerGame::idle(U32 timeDelta)
       this->getConnectionToMaster()->postNetEvent(mSendLevelInfoDelayNetInfo);
       mSendLevelInfoDelayNetInfo = NULL; // we can now let it free memory
    }
-
 
    // If there are no players on the server, we can enter "suspended animation" mode, but not during the first half-second of hosting.
    // This will prevent locally hosted game from immediately suspending for a frame, giving the local client a chance to 
@@ -1384,7 +1437,7 @@ void ServerGame::idle(U32 timeDelta)
       botControlTickTimer.reset();
    }
    
-   const Vector<DatabaseObject *> *gameObjects = mGameObjDatabase->findObjects_fast();
+   const Vector<DatabaseObject *> *gameObjects = mLevel->findObjects_fast();
 
    // Visit each game object, handling moves and running its idle method
    for(S32 i = gameObjects->size() - 1; i >= 0; i--)
@@ -1403,8 +1456,8 @@ void ServerGame::idle(U32 timeDelta)
       obj->idle(BfObject::ServerIdleMainLoop);
    }
 
-   if(mGameType)
-      mGameType->idle(BfObject::ServerIdleMainLoop, timeDelta);
+   TNLAssert(getGameType(), "Expect a GameType here!");
+   getGameType()->idle(BfObject::ServerIdleMainLoop, timeDelta);
 
    processDeleteList(timeDelta);
 
@@ -1437,6 +1490,14 @@ void ServerGame::idle(U32 timeDelta)
 
    // Update to other clients right after idling everything else, so clients get more up to date information
    mNetInterface->processConnections(); 
+}
+
+
+// For now...
+void ServerGame::setLevel(Level *level)
+{
+   mLevel = boost::shared_ptr<Level>(level);
+   mLevel->onAddedToServerGame(this);
 }
 
 
@@ -1556,6 +1617,9 @@ void ServerGame::processVoting(U32 timeDelta)
          bool votePass = (voteYes     * settings.getVal<YesNo>(IniKey::VoteYesStrength) + 
                           voteNo      * settings.getVal<YesNo>(IniKey::VoteNoStrength)  + 
                           voteNothing * settings.getVal<YesNo>(IniKey::VoteNothingStrength)) > 0;
+
+         TNLAssert(getGameType(), "Expect GameType here!");
+
          if(votePass)
          {
             mVoteTimer = 0;
@@ -1563,57 +1627,44 @@ void ServerGame::processVoting(U32 timeDelta)
             {
                case VoteLevelChange:
                   mNextLevel = mVoteNumber;
-                  if(mGameType)
-                     mGameType->gameOverManGameOver();
+                  getGameType()->gameOverManGameOver();
                   break;
 
                case VoteAddTime:
-                  if(mGameType)
-                  {
-                     mGameType->extendGameTime(mVoteNumber);      // Increase "official time"
-                     mGameType->broadcastNewRemainingTime();   
-                  }
+                  getGameType()->extendGameTime(mVoteNumber);      // Increase "official time"
+                  getGameType()->broadcastNewRemainingTime();   
                   break;   
 
                case VoteSetTime:
-                  if(mGameType)
-                  {
-                     mGameType->extendGameTime(S32(mVoteNumber - mGameType->getRemainingGameTimeInMs()));
-                     mGameType->broadcastNewRemainingTime();                                   
-                  }
+                  getGameType()->extendGameTime(S32(mVoteNumber - getGameType()->getRemainingGameTimeInMs()));
+                  getGameType()->broadcastNewRemainingTime();                                   
                   break;
 
                case VoteSetScore:
-                  if(mGameType)
-                  {
-                     mGameType->setWinningScore(mVoteNumber);
-                     mGameType->s2cChangeScoreToWin(mVoteNumber, mVoteClientName);     // Broadcast score to clients
-                  }
+                  getGameType()->setWinningScore(mVoteNumber);
+                  getGameType()->s2cChangeScoreToWin(mVoteNumber, mVoteClientName);     // Broadcast score to clients
                   break;
 
                case VoteChangeTeam:
-                  if(mGameType)
+                  for(S32 i = 0; i < getClientCount(); i++)
                   {
-                     for(S32 i = 0; i < getClientCount(); i++)
-                     {
-                        ClientInfo *clientInfo = getClientInfo(i);
+                     ClientInfo *clientInfo = getClientInfo(i);
 
-                        if(clientInfo->getName() == mVoteClientName)
-                           mGameType->changeClientTeam(clientInfo, mVoteNumber);
-                     }
+                     if(clientInfo->getName() == mVoteClientName)
+                        getGameType()->changeClientTeam(clientInfo, mVoteNumber);
                   }
                   break;
 
                case VoteResetScore:
-                  if(mGameType && mGameType->getGameTypeId() != CoreGame)  // No changing score in Core
+                  if(getGameType()->getGameTypeId() != CoreGame)  // No changing score in Core
                   {
                      // Reset player scores
                      for(S32 i = 0; i < getClientCount(); i++)
                         // Broadcast any updated scores to the clients, and reset them to 0
-                        if(getClientInfo(i)->getScore() != 0)
+                        if(getPlayerScore(i) != 0)
                         {
-                           mGameType->s2cSetPlayerScore(i, 0);
-                           getClientInfo(i)->setScore(0);
+                           getGameType()->s2cSetPlayerScore(i, 0);
+                           setPlayerScore(i, 0);
                         }
 
                      // Reset team scores
@@ -1621,7 +1672,7 @@ void ServerGame::processVoting(U32 timeDelta)
                         // Broadcast any updated scores to the clients, and reset them to 0
                         if(getTeam(i)->getScore() != 0)
                         {
-                           mGameType->s2cSetTeamScore(i, 0);
+                           getGameType()->s2cSetTeamScore(i, 0);
                            getTeam(i)->setScore(0);
                         }
                   }

@@ -23,7 +23,7 @@ public:
 
    virtual void render();
    S32 getRenderSortValue();
-   virtual bool processArguments(S32 argc, const char **argv, Game *game);
+   virtual bool processArguments(S32 argc, const char **argv, Level *level);
 
    virtual const Vector<Point> *getCollisionPoly() const;     // More precise boundary for precise collision detection
    virtual bool collide(BfObject *hitObject);

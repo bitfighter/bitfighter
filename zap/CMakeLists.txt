@@ -23,7 +23,6 @@ set(SHARED_SOURCES
 	flagItem.cpp
 	game.cpp
 	gameConnection.cpp
-	gameLoader.cpp
 	gameNetInterface.cpp
 	GameRecorder.cpp
 	GameSettings.cpp
@@ -41,8 +40,10 @@ set(SHARED_SOURCES
 	IniFile.cpp
 	InputCode.cpp
 	item.cpp
+	Level.cpp
 	LevelDatabase.cpp
 	LevelInfoDatabase.cpp
+	LevelLoadException.cpp
 	LevelSource.cpp
 	LineItem.cpp
 	LoadoutTracker.cpp

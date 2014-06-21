@@ -67,6 +67,8 @@ private:
    SafePtr<GameConnection> mSuspendor;    // Player requesting suspension if game suspended by request
    Timer mTimeToSuspend;
 
+   Vector<PolyWall *> mPolyWallList;      // List of polyWalls to be sent to the client
+
    GameRecorderServer *mGameRecorderServer;
 public:
    static const U32 PreSuspendSettlingPeriod = TWO_SECONDS;
@@ -90,7 +92,6 @@ private:
    void processSimulatedStutter(U32 timeDelta);
 
    string getLevelFileNameFromIndex(S32 indx);
-
 
    void resetAllClientTeams();                        // Resets all player team assignments
 
@@ -164,15 +165,16 @@ public:
    void deleteLevelGen(LuaLevelGenerator *levelgen);     // Add misbehaved levelgen to the kill list
    Vector<Vector<S32> > getCategorizedPlayerCountsByTeam() const;
 
-   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id);
-
-   void addPolyWall(BfObject *polyWall, GridDatabase *database);
-   void addWallItem(BfObject *wallItem, GridDatabase *database);
+   void setLevel(Level *level);
 
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
    void sendLevelStatsToMaster();
 
    void onConnectedToMaster();
+
+   const Vector<WallItem *> &getWallList() const;
+   const Vector<PolyWall *> &getPolyWallList() const;
+
 
    /////
    // Bot related
@@ -183,12 +185,11 @@ public:
    void balanceTeams();
 
    Robot *getBot(S32 index);
-   string addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass);
+   string addBot(const Vector<string> &args, ClientInfo::ClientClass clientClass);
    void addBot(Robot *robot);
    void removeBot(Robot *robot);
    void deleteBot(const StringTableEntry &name);
    void deleteBot(S32 i);
-   //void deleteBotFromTeam(S32 teamIndex);
    void deleteAllBots();
    Robot *findBot(const char *id);
    void moreBots();

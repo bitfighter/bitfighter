@@ -8,6 +8,7 @@
 #include "config.h"           // For FolderManager
 #include "gameType.h"
 #include "GameSettings.h"
+#include "Level.h"
 
 #include "Md5Utils.h"
 #include "stringUtils.h"
@@ -362,27 +363,30 @@ bool MultiLevelSource::loadLevels(FolderManager *folderManager)
 
 
 // Load specified level, put results in gameObjectDatabase.  Return md5 hash of level
-string MultiLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameObjectDatabase)
+Level *MultiLevelSource::getLevel(S32 index) const
 {
    TNLAssert(index >= 0 && index < mLevelInfos.size(), "Index out of bounds!");
 
-   LevelInfo *levelInfo = &mLevelInfos[index];
+   const LevelInfo *levelInfo = &mLevelInfos[index];
 
    string filename = FolderManager::findLevelFile(levelInfo->folder, levelInfo->filename);
 
    if(filename == "")
    {
       logprintf("Unable to find level file \"%s\".  Skipping...", levelInfo->filename.c_str());
-      return "";
+      return NULL;
    }
 
-   if(game->loadLevelFromFile(filename, gameObjectDatabase))
-      return Md5::getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
-   else
+   Level *level = new Level();      // Deleted by Game
+
+   if(!level->loadLevelFromFile(filename))
    {
       logprintf("Unable to process level file \"%s\".  Skipping...", levelInfo->filename.c_str());
-      return "";
+      delete level;
+      return NULL;
    }
+
+   return level;
 }
 
 
@@ -394,16 +398,106 @@ string MultiLevelSource::getLevelFileDescriptor(S32 index) const
 
 
 // Populates levelInfo with data from fullFilename -- returns true if successful, false otherwise
-// Reads 4kb of file and uses what it finds there to populate the levelInfo
 bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo)
 {
 	FILE *f = fopen(fullFilename.c_str(), "rb");
 	if(!f)
    {
-      logprintf(LogConsumer::LogWarning, "Could not load level %s [%s]... Skipping...",
+      logprintf(LogConsumer::LogWarning, "Could not read level file %s [%s]... Skipping...",
                                           levelInfo.filename.c_str(), fullFilename.c_str());
       return false;
    }
+
+   Level level;
+   level.loadLevelFromFile(fullFilename);
+
+// some ideas for getting the area of a level:
+//   if(loadLevel())
+//      {
+//         loaded = true;
+//         logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
+//      }
+//      else
+//      {
+//         logprintf(LogConsumer::ServerFilter, "FAILED!");
+//
+//         if(mLevelSource->getLevelCount() > 1)
+//            removeLevel(mCurrentLevelIndex);
+//         else
+//         {
+//            // No more working levels to load...  quit?
+//            logprintf(LogConsumer::LogError, "All the levels I was asked to load are corrupt.  Exiting!");
+//
+//            mShutdownTimer.reset(1); 
+//            mShuttingDown = true;
+//            mShutdownReason = "All the levels I was asked to load are corrupt or missing; "
+//                              "Sorry dude -- hosting mode shutting down.";
+//
+//            // To avoid crashing...
+//            if(!getGameType())
+//            {
+//               GameType *gameType = new GameType();
+//               gameType->addToGame(this, getGameObjDatabase());
+//            }
+//            getGameType()->makeSureTeamCountIsNotZero();
+//
+//            return;
+//         }
+//      }
+//   }
+//
+//   computeWorldObjectExtents();                       // Compute world Extents nice and early
+//
+//   if(!mGameRecorderServer && !mShuttingDown && getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::GameRecording))
+//      mGameRecorderServer = new GameRecorderServer(this);
+//
+//
+//   ////// This block could easily be moved off somewhere else   
+//   fillVector.clear();
+//   getGameObjDatabase()->findObjects(TeleporterTypeNumber, fillVector);
+//
+//   Vector<pair<Point, const Vector<Point> *> > teleporterData(fillVector.size());
+//   pair<Point, const Vector<Point> *> teldat;
+//
+//   for(S32 i = 0; i < fillVector.size(); i++)
+//   {
+//      Teleporter *teleporter = static_cast<Teleporter *>(fillVector[i]);
+//
+//      teldat.first  = teleporter->getPos();
+//      teldat.second = teleporter->getDestList();
+//
+//      teleporterData.push_back(teldat);
+//   }
+//
+//   // Get our parameters together
+//   Vector<DatabaseObject *> barrierList;
+//   getGameObjDatabase()->findObjects((TestFunc)isWallType, barrierList, *getWorldExtents());
+//
+//   Vector<DatabaseObject *> turretList;
+//   getGameObjDatabase()->findObjects(TurretTypeNumber, turretList, *getWorldExtents());
+//
+//   Vector<DatabaseObject *> forceFieldProjectorList;
+//   getGameObjDatabase()->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList, *getWorldExtents());
+//
+//   bool triangulate;
+//
+//   // Try and load Bot Zones for this level, set flag if failed
+//   // We need to run buildBotMeshZones in order to set mAllZones properly, which is why I (sort of) disabled the use of hand-built zones in level files
+//#ifdef ZAP_DEDICATED
+//   triangulate = false;
+//#else
+//   triangulate = !isDedicated();
+//#endif
+//
+//   BotNavMeshZone::calcLevelSize(getWorldExtents(), barrierList, teleporterData);
+//
+//   ////////////////////////////
+//
+//
+
+
+
+
 
    char data[1024 * 4];  // Should be enough to fit all parameters at the beginning of level; we don't need to read everything
 	S32 size = (S32)fread(data, 1, sizeof(data), f);
@@ -411,7 +505,6 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
 
    getLevelInfoFromCodeChunk(string(data, size), levelInfo);     // Fills levelInfo with data from file
 
-   string hash = Md5::getHashFromFile(fullFilename); 
 
    levelInfo.ensureLevelInfoHasValidName();
 	return true;
@@ -462,27 +555,30 @@ FileListLevelSource::~FileListLevelSource()
 
 
 // Load specified level, put results in gameObjectDatabase.  Return md5 hash of level.
-string FileListLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameObjectDatabase)
+Level *FileListLevelSource::getLevel(S32 index) const
 {
    TNLAssert(index >= 0 && index < mLevelInfos.size(), "Index out of bounds!");
 
-   LevelInfo *levelInfo = &mLevelInfos[index];
+   const LevelInfo *levelInfo = &mLevelInfos[index];
 
 	string filename = FolderManager::findLevelFile(GameSettings::getFolderManager()->getLevelDir(), levelInfo->filename);
 
 	if(filename == "")
 	{
 		logprintf("Unable to find level file \"%s\".  Skipping...", levelInfo->filename.c_str());
-		return "";
+		return NULL;
 	}
 
-	if(game->loadLevelFromFile(filename, gameObjectDatabase))
-	   return Md5::getHashFromFile(filename);   
-	else
+   Level *level = new Level();      // Will be deleted by caller
+
+	if(!level->loadLevelFromFile(filename))
 	{
 		logprintf("Unable to process level file \"%s\".  Skipping...", levelInfo->filename.c_str());
-		return "";
+      delete level;
+		return NULL;
 	}
+
+   return level;
 }
 
 
@@ -544,10 +640,12 @@ bool StringLevelSource::populateLevelInfoFromSource(const string &fullFilename, 
 }
 
 
-string StringLevelSource::loadLevel(S32 index, Game *game, GridDatabase *gameObjectDatabase)
+Level *StringLevelSource::getLevel(S32 index) const
 {
-   game->loadLevelFromString(mLevelCode, gameObjectDatabase, "");
-   return Md5::getHashFromString(mLevelCode); 
+   Level *level = new Level();
+
+   level->loadLevelFromString(mLevelCode, "");
+   return level; 
 }
 
 

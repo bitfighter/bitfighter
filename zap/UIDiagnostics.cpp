@@ -790,7 +790,7 @@ void DiagnosticUserInterface::render()
          points.push_back(Point(x + rm2, y + rm2));
          points.push_back(Point(x + rm2, y - rm2));
          renderWallFill(&points, Colors::wallFillColor, false);
-         renderPolygonOutline(&points, &Colors::blue);
+         renderPolygonOutline(&points, Colors::blue);
          glColor(Colors::yellow);
          drawStar(Point(x,y), 5, rad * .5f, rad * .25f);
 

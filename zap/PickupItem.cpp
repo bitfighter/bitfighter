@@ -6,6 +6,7 @@
 #include "PickupItem.h"
 
 #include "game.h"
+#include "Level.h"
 #include "gameConnection.h"
 #include "ClientInfo.h"
 
@@ -94,11 +95,11 @@ void PickupItem::setRepopDelay(U32 delay)
 }
 
 
-bool PickupItem::processArguments(S32 argc, const char **argv, Game *game)
+bool PickupItem::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 2)
       return false;
-   else if(!Parent::processArguments(argc, argv, game))
+   else if(!Parent::processArguments(argc, argv, level))
       return false;
 
    if(argc == 3)

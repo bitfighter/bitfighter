@@ -6,6 +6,8 @@
 #include "gridDB.h"
 #include "moveObject.h"    // For def of ActualState
 #include "WallSegmentManager.h"
+#include "Level.h"
+
 #include "GeomUtils.h"
 
 #include "tnlLog.h"
@@ -121,6 +123,7 @@ void GridDatabase::addToDatabase(DatabaseObject *object)
    TNLAssert(object->mDatabase != this, "Already added to database, trying to add to same database again!");
    TNLAssert(!object->mDatabase,        "Already added to database, trying to add to different database!");
    TNLAssert(object->getExtentSet(),    "Object extents were never set!");
+   TNLAssert(object->getObjectTypeNumber() != WallItemTypeNumber, "Should not add wall items to the database!");
 
    if(object->mDatabase)      // Should never happen
       return;
@@ -162,6 +165,7 @@ void GridDatabase::addToDatabase(const Vector<DatabaseObject *> &objects)
 }
 
 
+// Removes and deletes all objects in database
 void GridDatabase::removeEverythingFromDatabase()
 {
    for(S32 x = 0; x < BucketRowCount; x++)
@@ -494,20 +498,21 @@ Rect GridDatabase::getExtents()
    // of (0,0) that are assigned by the constructor.
 
 
-   S32 first = findFirstNonUnknownTypeObject(mAllObjects);
+   //S32 first = findFirstNonUnknownTypeObject(mAllObjects);
 
-   TNLAssert(first == 0, "I think this should never happen -- how would an object with UnknownTypeNumber get in the database?? \
-                          if it does, please document it and remove this assert, along withthe rect = line below -Wat");
+   TNLAssert(findFirstNonUnknownTypeObject(mAllObjects) == 0, 
+             "I think this should never happen -- how would an object with UnknownTypeNumber get in the database?? \
+             if it does, please document it and remove this assert, along withthe rect = line below -Wat");
 
-   if(first == -1)      // No suitable objects found, return empty extents
-      return Rect();
+   //if(first == -1)      // No suitable objects found, return empty extents
+   //   return Rect();
 
    // ...to HERE
 
    rect = mAllObjects[0]->getExtent();
 
    // Now start unioning the extents of remaining objects.  Should be all of them.
-   for(S32 i = /*first + */1; i < mAllObjects.size(); i++)
+   for(S32 i = 1; i < mAllObjects.size(); i++)
       rect.unionRect(mAllObjects[i]->getExtent());
 
    return rect;
@@ -859,7 +864,7 @@ void GridDatabase::updateExtents(DatabaseObject *object, const Rect &newExtents)
 
 void DatabaseObject::addToDatabase(GridDatabase *database)
 {
-   TNLAssert(mExtentSet, "Extent has not been set on this object!");    // Sanity check
+   TNLAssert(mExtentSet, "Extent has not been set on this object!");    // Extent should set before adding the object
 
    if(isDatabasable())
       database->addToDatabase(this);

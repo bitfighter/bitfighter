@@ -17,12 +17,11 @@
 #include "Teleporter.h"
 #include "ServerGame.h"
 #include "gameNetInterface.h"
+#include "Level.h"
 
 #include <boost/shared_ptr.hpp>
 #include <sys/stat.h>
 #include <cmath>
-#include <fstream>
-#include <sstream>
 
 #include "../master/DatabaseAccessThread.h"
 
@@ -65,18 +64,13 @@ static Vector<DatabaseObject *> fillVector2;
 ////////////////////////////////////
 ////////////////////////////////////
 
-// Statics
-static Game *mObjectAddTarget = NULL;
+// Statics -- should this really be a static??
+//static Level *mObjectAddTarget = NULL;
 
-const U32 Game::CurrentLevelFormat = 2;
 
 // Constructor
-Game::Game(const Address &theBindAddress, GameSettingsPtr settings) : mGameObjDatabase(new GridDatabase())  // New database will be deleted by boost
+Game::Game(const Address &theBindAddress, GameSettingsPtr settings)
 {
-   mLegacyGridSize = 1.f;              // Default to 1 unless we detect LevelFormat is missing or there's a GridSize parameter
-   mLevelFormat = CurrentLevelFormat;  // Default to current format version
-   mHasLevelFormat = false;
-
    mLevelDatabaseId = 0;
    mSettings = settings;
 
@@ -96,8 +90,6 @@ Game::Game(const Address &theBindAddress, GameSettingsPtr settings) : mGameObjDa
 
    mNameToAddressThread = NULL;
 
-   mActiveTeamManager = &mTeamManager;
-
    mObjectsLoaded = 0;
 
    mSecondaryThread = new Master::DatabaseAccessThread();
@@ -115,7 +107,7 @@ Game::~Game()
 
 F32 Game::getLegacyGridSize() const
 {
-   return mLegacyGridSize;
+   return mLevel->getLegacyGridSize();
 }
 
 
@@ -137,27 +129,27 @@ void Game::setScopeAlwaysObject(BfObject *theObject)
 }
 
 
-void Game::setAddTarget()
-{
-   mObjectAddTarget = this;
-}
-
-
-// Clear the addTarget, but only if it's us -- this prevents the ServerGame destructor from wiping this out
-// after it has already been set by the editor after testing a level.
-void Game::clearAddTarget()
-{
-   if(mObjectAddTarget == this)
-      mObjectAddTarget = NULL;
-}
-
-
-// When we're adding an object and don't know where to put it... put it here!
-// Static method
-Game *Game::getAddTarget()
-{
-   return mObjectAddTarget;
-}
+//void Game::setAddTarget()
+//{
+//   mObjectAddTarget = mLevel.get();
+//}
+//
+//
+//// Clear the addTarget, but only if it's us -- this prevents the ServerGame destructor from wiping this out
+//// after it has already been set by the editor after testing a level.
+//void Game::clearAddTarget()
+//{
+//   if(mObjectAddTarget == mLevel.get())
+//      mObjectAddTarget = NULL;
+//}
+//
+//
+//// When we're adding an object and don't know where to put it... put it here!
+//// Static method
+//Level *Game::getAddTarget()
+//{
+//   return mObjectAddTarget;
+//}
 
 
 bool Game::isSuspended() const
@@ -180,7 +172,7 @@ GameSettingsPtr Game::getSettingsPtr() const
 
 S32    Game::getBotCount() const                          { TNLAssert(false, "Not implemented for this class!"); return 0; }
 Robot *Game::findBot(const char *id)                      { TNLAssert(false, "Not implemented for this class!"); return NULL; }
-string Game::addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass)     
+string Game::addBot(const Vector<string> &args, ClientInfo::ClientClass clientClass)     
                                                           { TNLAssert(false, "Not implemented for this class!"); return "";    }
 
 void   Game::kickSingleBotFromLargestTeamWithBots()  { TNLAssert(false, "Not implemented for this class!"); }
@@ -279,10 +271,8 @@ void Game::addToClientList(ClientInfo *clientInfo)
    // NOTE - This can happen when a Robot line is found in a level file.  For some reason
    // it tries to get added twice to the game
    for(S32 i = 0; i < mClientInfos.size(); i++)
-   {
       if(mClientInfos[i] == clientInfo)
          return;
-   }
 
    mClientInfos.push_back(clientInfo);
 
@@ -375,9 +365,9 @@ GameNetInterface *Game::getNetInterface()
 }
 
 
-GridDatabase *Game::getGameObjDatabase()
+Level *Game::getGameObjDatabase()
 {
-   return mGameObjDatabase.get();
+   return mLevel.get();
 }
 
 
@@ -404,37 +394,54 @@ void Game::setConnectionToMaster(MasterServerConnection *connection)
 }
 
 
-// Unused?
-//void Game::runAnonymousMasterRequest(MasterConnectionCallback callback)
-//{
-//   TNLAssert(mAnonymousMasterServerConnection.isNull(), "An anonymous master connection is still open!");
-//
-//   // Create a new anonymous connection and set a callback method
-//   // You need to make sure to remember to put terminateIfAnonymous() into the master
-//   // response RPC that this callback calls
-//   mAnonymousMasterServerConnection = new AnonymousMasterServerConnection(this);
-//   mAnonymousMasterServerConnection->setConnectionCallback(callback);
-//}
-
-
+// Retrieve the current GameType.  Should always be a valid value on the Server, can
+// be NULL on the client in the early stages of hosting before the GameType object
+// has replicated from the server.
 GameType *Game::getGameType() const
 {
-   return mGameType;    // This is a safePtr, so it can be NULL, but will never point off into space
+   TNLAssert(mLevel,                               "Should have a level by now!");
+   TNLAssert(!isServer() || mLevel->getGameType(), "ServerGame should have a GameType by now!");
+
+   return mLevel->getGameType();
+}
+
+
+S32 Game::getPlayerScore(S32 index) const
+{
+   return getClientInfo(index)->getScore();
+}
+
+
+void Game::setPlayerScore(S32 index, S32 score)
+{
+   if(index >= getClientCount())    // Could happen if server sends bad info
+      return;
+
+   getClientInfo(index)->setScore(score);
 }
 
 
 // There is a bigger need to use StringTableEntry and not const char *
-//    mainly to prevent errors on CTF neutral flag and out of range team number.
+// mainly to prevent errors on CTF neutral flag and out of range team number.
 StringTableEntry Game::getTeamName(S32 teamIndex) const
 {
    if(teamIndex >= 0 && teamIndex < getTeamCount())
-      return getTeam(teamIndex)->getName();
+      return mLevel->getTeamName(teamIndex);
    else if(teamIndex == TEAM_HOSTILE)
-      return StringTableEntry("Hostile");
+   {
+      static const StringTableEntry hostile("Hostile");
+      return hostile;
+   }
    else if(teamIndex == TEAM_NEUTRAL)
-      return StringTableEntry("Neutral");
+   {
+      static const StringTableEntry neutral("Neutral");
+      return neutral;
+   }
    else
-      return StringTableEntry("UNKNOWN");
+   {
+      static const StringTableEntry unknown("UNKNOWN"); 
+      return unknown;
+   }
 }
 
 
@@ -448,12 +455,12 @@ S32 Game::getTeamIndex(const StringTableEntry &playerName)
 
 
 // The following just delegate their work to the TeamManager.  TeamManager will handle cleanup of any added teams.
-void Game::removeTeam(S32 teamIndex)                  { mActiveTeamManager->removeTeam(teamIndex);    }
-void Game::addTeam(AbstractTeam *team)                { mActiveTeamManager->addTeam(team);            }
-void Game::addTeam(AbstractTeam *team, S32 index)     { mActiveTeamManager->addTeam(team, index);     }
-void Game::replaceTeam(AbstractTeam *team, S32 index) { mActiveTeamManager->replaceTeam(team, index); }
-void Game::clearTeams()                               { mActiveTeamManager->clearTeams();             }
-void Game::clearTeamHasFlagList()                     { mActiveTeamManager->clearTeamHasFlagList();   }
+void Game::removeTeam(S32 teamIndex)                  { mLevel->removeTeam(teamIndex);    }
+void Game::addTeam(AbstractTeam *team)                { mLevel->addTeam(team);            }
+void Game::addTeam(AbstractTeam *team, S32 index)     { mLevel->addTeam(team, index);     }
+void Game::replaceTeam(AbstractTeam *team, S32 index) { mLevel->replaceTeam(team, index); }
+void Game::clearTeams()                               { mLevel->clearTeams();             }
+
 
 
 void Game::addPolyWall(BfObject *polyWall, GridDatabase *database)
@@ -462,19 +469,32 @@ void Game::addPolyWall(BfObject *polyWall, GridDatabase *database)
 }
 
 
-void Game::addWallItem(BfObject *wallItem, GridDatabase *database)
+// Is overridden in ClientGame
+void Game::addWallItem(WallItem *wallItem, GridDatabase *database)
 {
-   wallItem->addToGame(this, database);
+   //wallItem->addToGame(this, database);
+
+   // Generate a series of 2-point wall segments, which are added to the spatial database
+   Barrier::constructWalls(this, *wallItem->getOutline(), false, (F32)wallItem->getWidth());
+   //wallItem->onAddedToGame();
 }
 
 
-// Pass through to to GameType
-void Game::addWall(const WallRec &barrier) { mGameType->addWall(barrier, this); }
+const Vector<WallItem *> &Game::getWallList() const
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
+   
+
+const Vector<PolyWall *> &Game::getPolyWallList() const
+{
+   TNLAssert(false, "Not implemented for this class!");
+}
 
 
 void Game::setTeamHasFlag(S32 teamIndex, bool hasFlag)
 {
-   mActiveTeamManager->setTeamHasFlag(teamIndex, hasFlag);
+   mLevel->setTeamHasFlag(teamIndex, hasFlag);
 }
 
 
@@ -500,9 +520,9 @@ void Game::teleporterDestroyed(Teleporter *teleporter)
 }
 
 
-S32           Game::getTeamCount()                const { return mActiveTeamManager->getTeamCount();            } 
-AbstractTeam *Game::getTeam(S32 teamIndex)        const { return mActiveTeamManager->getTeam(teamIndex);        }
-bool          Game::getTeamHasFlag(S32 teamIndex) const { return mActiveTeamManager->getTeamHasFlag(teamIndex); }
+S32           Game::getTeamCount()                const { return mLevel->getTeamCount();            } 
+AbstractTeam *Game::getTeam(S32 teamIndex)        const { return mLevel->getTeam(teamIndex);        }
+bool          Game::getTeamHasFlag(S32 teamIndex) const { return mLevel->getTeamHasFlag(teamIndex); }
 
 
 // Find winner of a team-based game.
@@ -597,7 +617,7 @@ IndividualGameResults Game::getIndividualGameWinner() const
 
 S32 Game::getTeamIndexFromTeamName(const char *teamName) const 
 { 
-   for(S32 i = 0; i < mActiveTeamManager->getTeamCount(); i++)
+   for(S32 i = 0; i < mLevel->getTeamCount(); i++)
       if(stricmp(teamName, getTeamName(i).getString()) == 0)
          return i;
 
@@ -675,9 +695,10 @@ S32 Game::findLargestTeamWithBots() const
 }
 
 
+// Only called from editor
 void Game::setGameType(GameType *gameType)
 {
-   mGameType = gameType;
+   mLevel->setGameType(gameType);
 }
 
 
@@ -697,312 +718,32 @@ void Game::onConnectedToMaster()
 // Called when ServerGame or the editor loads a level
 void Game::resetLevelInfo()
 {
-   // These data need to be reset everytime before a level loads
-   mLegacyGridSize = 1.f;
-   mLevelFormat = CurrentLevelFormat;
-   mHasLevelFormat = false;
-}
+   // ???
 
-
-// Each line of the file is handled separately by processLevelLoadLine in game.cpp or UIEditor.cpp
-void Game::parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName)
-{
-   Vector<string> args = parseString(string(line));
-   U32 argc = args.size();
-   S32 id = 0;
-   const char** argv = new const char* [argc];
-
-   if(argc >= 1)
-   {
-      std::size_t pos = args[0].find("!");
-      if(pos != string::npos)
-      {
-         id = atoi(args[0].substr(pos + 1, args[0].size() - pos - 1).c_str());
-         args[0] = args[0].substr(0, pos);
-      }
-   }
-
-   for(U32 i = 0; i < argc; i++)
-      argv[i] = args[i].c_str();
-
-   try
-   {
-      processLevelLoadLine(argc, id, (const char **) argv, database, levelFileName);
-   }
-   catch(LevelLoadException &e)
-   {
-      logprintf("Level Error: Can't parse %s: %s", line, e.what());  // TODO: fix "line" variable having hundreds of level lines
-   }
-
-   delete[] argv;
-}
-
-
-void Game::loadLevelFromString(const string &contents, GridDatabase* database, const string &filename)
-{
-   istringstream iss(contents);
-   string line;
-   while(std::getline(iss, line))
-      parseLevelLine(line.c_str(), database, filename);
-}
-
-
-// Load level stored in filename into database
-bool Game::loadLevelFromFile(const string &filename, GridDatabase *database)
-{
-   string contents;
-   readFile(filename, contents);
-   if(contents == "")
-      return false;
-
-   loadLevelFromString(contents, database, filename);
-
-#ifdef SAM_ONLY
-   // In case the level crash the game trying to load, want to know which file is the problem. 
-   logprintf("Loading %s", filename.c_str());
-#endif
-
-   return true;
-}
-
-
-// Process a single line of a level file, loaded in gameLoader.cpp
-// argc is the number of parameters on the line, argv is the params themselves
-// Used by ServerGame and the editor
-void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName)
-{
-   if(argc == 0 || !strcmp(argv[0], "#"))    // Blank line or a comment
-      return;
-
-   S32 strlenCmd = (S32) strlen(argv[0]);
-
-   // This is a legacy from the old Zap! days... we do bots differently in Bitfighter, so we'll just ignore this line if we find it.
-   if(!stricmp(argv[0], "BotsPerTeam"))
-      return;
-
-   // LevelFormat was introduced in 019 to handle significant file format changes, like
-   // with GridSize removal and the saving of real spacial coordinates.
-   //
-   // This should be the first line of the file
-   else if(!stricmp(argv[0], "LevelFormat"))
-   {
-      if(argc < 2)
-         logprintf(LogConsumer::LogLevelError, "Invalid LevelFormat provided");
-      else
-         mLevelFormat = (U32)atoi(argv[1]);
-
-      mHasLevelFormat = true;
-
-      return;
-   }
-
-   // Legacy Gridsize handling - levels used to have a 'GridSize' line that could be used to
-   // multiply all points found in the level file.  Since version 019 this is no longer used
-   // and all points are saved as the real spacial coordinates.
-   //
-   // If a level file contains this setting, we will use it to multiply all points found in
-   // the level file.  However, once it is loaded and resaved in the editor, this setting will
-   // disappear and all points will reflect their true, absolute nature.
-   else if(!stricmp(argv[0], "GridSize"))
-   {
-      // We should have properly detected the level format by the time GridSize is found
-      if(mLevelFormat == 1)
-      {
-         if(argc < 2)
-            logprintf(LogConsumer::LogLevelError, "Improperly formed GridSize parameter");
-         else
-            mLegacyGridSize = (F32)atof(argv[1]);
-      }
-      else
-         logprintf(LogConsumer::LogLevelError, "GridSize can no longer be used in level files");
-
-      return;
-   }
-
-   else if(!stricmp(argv[0], "LevelDatabaseId"))
-   {
-      U32 id = atoi(argv[1]);
-      if(id == 0)
-         logprintf(LogConsumer::LogLevelError, "Invalid LevelDatabaseId specified");
-      else
-         setLevelDatabaseId(id);
-      return;
-   }
-
-   // Parse GameType line... All game types are of form XXXXGameType
-   else if(strlenCmd >= 8 && !strcmp(argv[0] + strlenCmd - 8, "GameType"))
-   {
-      // First check to see if we have a LevelFormat line, which should have been detected
-      // by now since it's the first line of the file.  If it didn't find it, we are at
-      // version 1 and we have to set the old GridSize to 255 as default
-      //
-      // This check is performed here because every file should have a game type..  right??
-      if(!mHasLevelFormat)
-      {
-         mLevelFormat = 1;
-         mLegacyGridSize = 255.f;
-      }
-
-      if(mGameType.isValid())
-      {
-         logprintf(LogConsumer::LogLevelError, "Duplicate GameType is not allowed");
-         return;
-      }
-
-      // validateGameType() will return a valid GameType string -- either what's passed in, or the default if something bogus was specified
-      TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(argv[0]).c_str());
-
-      GameType *gt = dynamic_cast<GameType *>(theObject);
-      if(gt)
-      {
-         bool validArgs = gt->processArguments(argc - 1, argv + 1, NULL);
-         if(!validArgs)
-            logprintf(LogConsumer::LogLevelError, "GameType have incorrect parameters");
-
-         gt->addToGame(this, database);
-      }
-      else
-         logprintf(LogConsumer::LogLevelError, "Could not create a GameType");
-      
-      return;
-   }
-
-   if(getGameType() && processLevelParam(argc, argv)) 
-   {
-      // Do nothing here -- all the action is in the if statement
-   }
-   else if(getGameType() && processPseudoItem(argc, argv, levelFileName, database, id))
-   {
-      // Do nothing here -- all the action is in the if statement
-   }
-   
-   else
-   {
-      string objName;
-
-      // Convert any NexusFlagItem into FlagItem, only NexusFlagItem will show up on ship
-      if(!stricmp(argv[0], "HuntersFlagItem") || !stricmp(argv[0], "NexusFlagItem"))
-         objName = "FlagItem";
-
-      // Convert legacy Hunters* objects
-      else if(stricmp(argv[0], "HuntersNexusObject") == 0 || stricmp(argv[0], "NexusObject") == 0)
-         objName = "NexusZone";
-
-      else
-         objName = argv[0];
-
-
-      if(!getGameType())   // Must have a GameType at this point, if not, we will add one to prevent problems loading a level with missing GameType
-      {
-         logprintf(LogConsumer::LogLevelError, "First line of level is missing GameType in level \"%s\"", levelFileName.c_str());
-         GameType *gt = new GameType();
-         gt->addToGame(this, database);
-      }
-
-      TNL::Object *theObject = TNL::Object::create(objName.c_str());    // Create an object of the type specified on the line
-
-      SafePtr<BfObject> object  = dynamic_cast<BfObject *>(theObject);  // Force our new object to be a BfObject
-      BfObject *eObject = dynamic_cast<BfObject *>(theObject);
-
-
-      if(!object && !eObject)    // Well... that was a bad idea!
-      {
-         logprintf(LogConsumer::LogLevelError, "Unknown object type \"%s\" in level \"%s\"", objName.c_str(), levelFileName.c_str());
-         delete theObject;
-         return;
-      }
-
-      // Object was valid
-      bool validArgs = object->processArguments(argc - 1, argv + 1, this);
-
-      // ProcessArguments() might delete this object (this happens with multi-dest teleporters), so isValid() could be false
-      // even when the object is entirely legit
-      if(validArgs && object.isValid())  
-      {
-         object->setUserAssignedId(id, false);
-         object->addToGame(this, database);
-
-         computeWorldObjectExtents();    // Make sure this is current if we process a robot that needs this for intro code
-
-         // Mark the item as being a ghost (client copy of a server object) so that the object will not trigger server-side tests
-         // The only time this code is run on the client is when loading into the editor.
-         if(!isServer())
-            object->markAsGhost();
-      }
-      else
-      {
-         if(!validArgs)
-            logprintf(LogConsumer::LogLevelError, "Invalid arguments in object \"%s\" in level \"%s\"", 
-                                                  objName.c_str(), levelFileName.c_str());
-
-         delete object.getPointer();
-      }
-   }
-}
-
-
-// Returns true if we've handled the line (even if it handling it means that the line was bogus); returns false if
-// caller needs to create an object based on the line
-bool Game::processLevelParam(S32 argc, const char **argv)
-{
-   if(!stricmp(argv[0], "Team"))
-      onReadTeamParam(argc, argv);
-
-   // TODO: Create better way to change team details from level scripts: https://code.google.com/p/bitfighter/issues/detail?id=106
-   else if(!stricmp(argv[0], "TeamChange"))   // For level script. Could be removed when there is a better way to change team names and colors.
-      onReadTeamChangeParam(argc, argv);
-
-   else if(!stricmp(argv[0], "Specials"))
-      onReadSpecialsParam(argc, argv);
-
-   else if(!strcmp(argv[0], "Script"))
-      onReadScriptParam(argc, argv);
-
-   else if(!stricmp(argv[0], "LevelName"))
-      onReadLevelNameParam(argc, argv);
-   
-   else if(!stricmp(argv[0], "LevelDescription"))
-      onReadLevelDescriptionParam(argc, argv);
-
-   else if(!stricmp(argv[0], "LevelCredits"))
-      onReadLevelCreditsParam(argc, argv);
-   else if(!stricmp(argv[0], "MinPlayers"))     // Recommend a min number of players for this map
-   {
-      if(argc > 1)
-         getGameType()->setMinRecPlayers(atoi(argv[1]));
-   }
-   else if(!stricmp(argv[0], "MaxPlayers"))     // Recommend a max number of players for this map
-   {
-      if(argc > 1)
-         getGameType()->setMaxRecPlayers(atoi(argv[1]));
-   }
-   else
-      return false;     // Line not processed; perhaps the caller can handle it?
-
-   return true;         // Line processed; caller can ignore it
 }
 
 
 // Write out the game processed above; returns multiline string
+// TODO: Move this to GameType or Level
 string Game::toLevelCode() const
 {
    string str;
 
    GameType *gameType = getGameType();
 
-   str = "LevelFormat " + itos(CurrentLevelFormat) + "\n";
+   str = "LevelFormat " + itos(Level::CurrentLevelFormat) + "\n";
 
    str += string(gameType->toLevelCode() + "\n");
 
    str += string("LevelName ")        + writeLevelString(gameType->getLevelName().c_str()) + "\n";
    str += string("LevelDescription ") + writeLevelString(gameType->getLevelDescription()) + "\n";
-   str += string("LevelCredits ")     + writeLevelString(gameType->getLevelCredits()->getString()) + "\n";
+   str += string("LevelCredits ")     + writeLevelString(gameType->getLevelCredits().c_str()) + "\n";
 
    if(getLevelDatabaseId())
       str += string("LevelDatabaseId ") + itos(getLevelDatabaseId()) + "\n";
 
-   for(S32 i = 0; i < mActiveTeamManager->getTeamCount(); i++)
-      str += mActiveTeamManager->getTeam(i)->toLevelCode() + "\n";
+   for(S32 i = 0; i < mLevel->getTeamCount(); i++)
+      str += mLevel->getTeamLevelCode(i) + "\n";
 
    str += gameType->getSpecialsLine() + "\n";
 
@@ -1013,79 +754,6 @@ string Game::toLevelCode() const
    str += string("MaxPlayers") + (gameType->getMaxRecPlayers() > 0 ? " " + itos(gameType->getMaxRecPlayers()) : "") + "\n";
 
    return str;
-}
-
-
-// Only occurs in scripts; could be in editor or on server
-void Game::onReadTeamChangeParam(S32 argc, const char **argv)
-{
-   if(argc >= 2)   // Enough arguments?
-   {
-      S32 teamNumber = atoi(argv[1]);   // Team number to change
-
-      if(teamNumber >= 0 && teamNumber < getTeamCount())
-      {
-         AbstractTeam *team = getNewTeam();
-         team->processArguments(argc-1, argv+1);          // skip one arg
-         replaceTeam(team, teamNumber);
-      }
-   }
-}
-
-
-void Game::onReadSpecialsParam(S32 argc, const char **argv)
-{         
-   for(S32 i = 1; i < argc; i++)
-      if(!getGameType()->processSpecialsParam(argv[i]))
-         logprintf(LogConsumer::LogLevelError, "Invalid specials parameter: %s", argv[i]);
-}
-
-
-void Game::onReadScriptParam(S32 argc, const char **argv)
-{
-   Vector<string> args;
-
-   // argv[0] is always "Script"
-   for(S32 i = 1; i < argc; i++)
-      args.push_back(argv[i]);
-
-   getGameType()->setScript(args);
-}
-
-
-static string getString(S32 argc, const char **argv)
-{
-   string s;
-   for(S32 i = 1; i < argc; i++)
-   {
-      s += argv[i];
-      if(i < argc - 1)
-         s += " ";
-   }
-
-   return s;
-}
-
-
-void Game::onReadLevelNameParam(S32 argc, const char **argv)
-{
-   string s = trim(getString(argc, argv));
-
-   getGameType()->setLevelName(s.substr(0, MAX_GAME_NAME_LEN).c_str());
-}
-
-
-void Game::onReadLevelDescriptionParam(S32 argc, const char **argv)
-{
-   string s = getString(argc, argv);
-   getGameType()->setLevelDescription(s.substr(0, MAX_GAME_DESCR_LEN));
-}
-
-
-void Game::onReadLevelCreditsParam(S32 argc, const char **argv)
-{
-   string s = getString(argc, argv);
-   getGameType()->setLevelCredits(s.substr(0, MAX_GAME_DESCR_LEN).c_str());
 }
 
 
@@ -1246,7 +914,7 @@ void Game::processDeleteList(U32 timeDelta)
 void Game::deleteObjects(U8 typeNumber)
 {
    fillVector.clear();
-   mGameObjDatabase->findObjects(typeNumber, fillVector);
+   mLevel->findObjects(typeNumber, fillVector);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       BfObject *obj = static_cast<BfObject *>(fillVector[i]);
@@ -1259,7 +927,7 @@ void Game::deleteObjects(U8 typeNumber)
 void Game::deleteObjects(TestFunc testFunc)
 {
    fillVector.clear();
-   mGameObjDatabase->findObjects(testFunc, fillVector);
+   mLevel->findObjects(testFunc, fillVector);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       BfObject *obj = static_cast<BfObject *>(fillVector[i]);
@@ -1270,7 +938,7 @@ void Game::deleteObjects(TestFunc testFunc)
 
 void Game::computeWorldObjectExtents()
 {
-   mWorldExtents = mGameObjDatabase->getExtents();
+   mWorldExtents = mLevel->getExtents();
 }
 
 
@@ -1279,7 +947,7 @@ Rect Game::computeBarrierExtents()
    Rect extents;
 
    fillVector.clear();
-   mGameObjDatabase->findObjects((TestFunc)isWallType, fillVector);
+   mLevel->findObjects((TestFunc)isWallType, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
       extents.unionRect(fillVector[i]->getExtent());
@@ -1364,14 +1032,16 @@ string Game::makeUnique(const char *name)
 // Called when ClientGame and ServerGame are destructed, and new levels are loaded on the server
 void Game::cleanUp()
 {
-   mGameObjDatabase->removeEverythingFromDatabase();
-   mActiveTeamManager->clearTeams();      // Will in effect delete any teams herein
-
    // Delete any objects on the delete list
    processDeleteList(U32_MAX);
 
-   if(mGameType.isValid() && !mGameType->isGhost())
-      delete mGameType.getPointer();
+   // Manually remove the objects before wiping the level because some objects need mLevel to be set in their
+   // destructors... CoreItems, for example
+   if(mLevel)
+   {
+      mLevel->removeEverythingFromDatabase();
+      mLevel = NULL;    // mLevel is a shared_ptr, so cleanup will be handled automatically
+   }
 }
 
 
@@ -1381,33 +1051,15 @@ const Rect *Game::getWorldExtents() const
 }
 
 
-const Color *Game::getTeamColor(S32 teamId) const
+const Color &Game::getTeamColor(S32 teamId) const
 {
-   return mActiveTeamManager->getTeamColor(teamId);
+   return mLevel->getTeamColor(teamId);
 }
 
 
 void Game::setPreviousLevelName(const string &name)
 {
    // Do nothing (but will be overidded in ClientGame)
-}
-
-
-
-void Game::onReadTeamParam(S32 argc, const char **argv)
-{
-   if(getTeamCount() < MAX_TEAMS)     // Too many teams?
-   {
-      AbstractTeam *team = getNewTeam();
-      if(team->processArguments(argc, argv))
-         addTeam(team);
-   }
-}
-
-
-void Game::setActiveTeamManager(TeamManager *teamManager)
-{
-   mActiveTeamManager = teamManager;
 }
 
 
@@ -1427,137 +1079,127 @@ U32 Game::getLevelDatabaseId() const
 // Server only
 void Game::onFlagMounted(S32 teamIndex)
 {
-   if(mGameType)
-      mGameType->onFlagMounted(teamIndex);
+   getGameType()->onFlagMounted(teamIndex);
 }
 
 
 // Server only
 void Game::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode)
 {
-   if(mGameType)
-      mGameType->itemDropped(ship, item, dismountMode);
+   getGameType()->itemDropped(ship, item, dismountMode);
 }
 
 
-const Color *Game::getObjTeamColor(const BfObject *obj) const
+const Color &Game::getObjTeamColor(const BfObject *obj) const
 { 
-   return mGameType->getTeamColor(obj);
+   return getGameType()->getTeamColor(obj);
 }
 
 
 bool Game::objectCanDamageObject(BfObject *damager, BfObject *victim) const
 {
-   return mGameType ? mGameType->objectCanDamageObject(damager, victim) : false;
+   return getGameType()->objectCanDamageObject(damager, victim);
 }
 
 
 void Game::releaseFlag(const Point &pos, const Point &vel, const S32 count) const
 {
-   if(mGameType)
-      mGameType->releaseFlag(pos, vel, count);
+   getGameType()->releaseFlag(pos, vel, count);
 }
 
 
 S32 Game::getRenderTime() const
 {
-   return mGameType->getRemainingGameTimeInMs() + mGameType->getRenderingOffset();
+   return getGameType()->getRemainingGameTimeInMs() + getGameType()->getRenderingOffset();
 }
 
 
 Vector<AbstractSpawn *> Game::getSpawnPoints(TypeNumber typeNumber, S32 teamIndex)
 {
-   return mGameType->getSpawnPoints(typeNumber, teamIndex);
+   return getGameType()->getSpawnPoints(typeNumber, teamIndex);
 }
 
 
 void Game::addFlag(FlagItem *flag)
 {
-   if(mGameType)
-      mGameType->addFlag(flag);
+   getGameType()->addFlag(flag);
 }
 
 
 void Game::shipTouchFlag(Ship *ship, FlagItem *flag)
 {
-   if(mGameType)
-      mGameType->shipTouchFlag(ship, flag);
+   getGameType()->shipTouchFlag(ship, flag);
 }
 
 
 void Game::shipTouchZone(Ship *ship, GoalZone *zone)
 {
-   if(mGameType)
-      mGameType->shipTouchZone(ship, zone);
+   getGameType()->shipTouchZone(ship, zone);
 }
 
 
 bool Game::isTeamGame() const
 {
-   return mGameType->isTeamGame();
+   return getGameType()->isTeamGame();
 }
 
 
 Timer &Game::getGlowZoneTimer()
 {
-   return mGameType->mZoneGlowTimer;
+   return getGameType()->mZoneGlowTimer;
 }
 
 
 S32 Game::getGlowingZoneTeam()
 {
-   return mGameType->mGlowingZoneTeam;
+   return getGameType()->mGlowingZoneTeam;
 }
 
 
 string Game::getScriptName() const
 {
-   return mGameType->getScriptName();
+   return getGameType()->getScriptName();
 }
 
 
 bool Game::levelHasLoadoutZone()
 {
-   return mGameType && mGameType->levelHasLoadoutZone();
+   return getGameType()->levelHasLoadoutZone();
 }
 
 
 void Game::updateShipLoadout(BfObject *shipObject)
 {
-   return mGameType->updateShipLoadout(shipObject);
+   return getGameType()->updateShipLoadout(shipObject);
 }
 
 
 void Game::sendChat(const StringTableEntry &senderName, ClientInfo *senderClientInfo, const StringPtr &message, bool global, S32 teamIndex)
 {
-   if(mGameType)
-      mGameType->sendChat(senderName, senderClientInfo, message, global, teamIndex);
+   getGameType()->sendChat(senderName, senderClientInfo, message, global, teamIndex);
 }
 
 
 void Game::sendPrivateChat(const StringTableEntry &senderName, const StringTableEntry &receiverName, const StringPtr &message)
 {
-   if(mGameType)
-      mGameType->sendPrivateChat(senderName, receiverName, message);
+   getGameType()->sendPrivateChat(senderName, receiverName, message);
 }
 
 
 void Game::sendAnnouncementFromController(const StringPtr &message)
 {
-   if(mGameType)
-      mGameType->sendAnnouncementFromController(message);
+   getGameType()->sendAnnouncementFromController(message);
 }
 
 
-void Game::updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName)
+void Game::updateClientChangedName(ClientInfo *clientInfo, const StringTableEntry &newName)
 {
-   if(mGameType)
-      mGameType->updateClientChangedName(clientInfo, newName);
+   getGameType()->updateClientChangedName(clientInfo, newName);
 }
 
 
 // Static method - only used for "illegal" activities
-const GridDatabase *Game::getServerGameObjectDatabase()
+const Level *Game::getServerGameObjectDatabase()
 {
    return GameManager::getServerGame()->getGameObjDatabase();
 }
@@ -1705,8 +1347,8 @@ F32 Game::getObjectiveArrowHighlightAlpha() const
 // In seconds
 S32 Game::getRemainingGameTime() const
 {
-   if(mGameType)     // Can be NULL at the end of a game
-      return mGameType->getRemainingGameTime();
+   if(mLevel && getGameType())     // Can be NULL at the end of a game
+      return getGameType()->getRemainingGameTime();
    else
       return 0;
 }

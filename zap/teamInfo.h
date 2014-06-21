@@ -23,13 +23,40 @@ namespace Zap
 
 static const S32 MAX_NAME_LEN = 256;
 
-class AbstractTeam : public RefPtrData
+class TeamInfo
 {
-private:
-   Color mColor;
-
 protected:
    StringTableEntry mName;
+   Color mColor;
+
+public:
+   TeamInfo();          // Constructor
+   virtual ~TeamInfo(); // Destructor
+
+   bool processArguments(S32 argc, const char **argv);     // Read team info from level line
+
+   virtual void setName(const char *name);
+   void setName(const StringTableEntry &name);
+   virtual StringTableEntry getName() const;
+
+   string toLevelCode() const;
+
+   virtual void setColor(const Color &color); 
+   virtual void setColor(const Color *color);
+   virtual void setColor(F32 r, F32 g, F32 b);
+
+   const Color &getColor() const;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class AbstractTeam : public RefPtrData, public TeamInfo
+{
+   typedef TeamInfo Parent;
+
+protected:
    S32 mTeamIndex;           // Team index of this team according to the level file and game
 
 public:
@@ -38,26 +65,13 @@ public:
 
    static const S32 MAX_TEAM_NAME_LENGTH = 32;
 
-   virtual void setColor(F32 r, F32 g, F32 b);
-   virtual void setColor(const Color &color);
-
-   const Color *getColor() const;
-
-   void setName(StringTableEntry name);
-   virtual void setName(const char *name);
-   virtual StringTableEntry getName();
-   
-  
-   StringTableEntry getName() const;
-
    void setTeamIndex(S32 index);
-
-   bool processArguments(S32 argc, const char **argv);          // Read team info from level line
-   string toLevelCode() const;
 
    void alterRed(F32 amt);
    void alterGreen(F32 amt);
    void alterBlue(F32 amt);
+
+   void set(const TeamInfo &teamInfo);
 
    virtual S32 getPlayerBotCount() const; 
    virtual S32 getPlayerCount() const;      
@@ -72,21 +86,13 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-struct TeamInfo
-{
-   Color color;
-   string name;
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 class FlagSpawn;
 
 // Class for managing teams in the game
 class Team : public AbstractTeam
 {  
+   typedef AbstractTeam Parent;
+
 private:
    S32 mPlayerCount;      // Number of human players --> Needs to be computed before use, not dynamically tracked (see countTeamPlayers())
    S32 mBotCount;         // Number of robot players --> Needs to be computed before use, not dynamically tracked
@@ -104,6 +110,7 @@ public:
    Team();                                                
    Team(const char *name, const Color &color);            
    Team(const char *name, F32 r, F32 g, F32 b, S32 score);
+   Team(const TeamInfo &teamInfo);
 
    virtual ~Team();     // Destructor
 
@@ -153,10 +160,12 @@ private:
 public:
    virtual ~TeamManager();      // Destructor
 
-   const Color *getTeamColor(S32 index) const;
-   S32 getTeamCount();
+   const Color &getTeamColor(S32 index) const;
+   StringTableEntry getTeamName(S32 index) const;
 
-   AbstractTeam *getTeam(S32 teamIndex);
+   S32 getTeamCount() const;
+
+   AbstractTeam *getTeam(S32 teamIndex) const;
 
    void removeTeam(S32 teamIndex);
    void addTeam(AbstractTeam *team);
@@ -169,7 +178,6 @@ public:
    // Access to mTeamHasFlagList
    bool getTeamHasFlag(S32 teamIndex) const;
    void setTeamHasFlag(S32 teamIndex, bool hasFlag);
-   void clearTeamHasFlagList();
 };
 
 

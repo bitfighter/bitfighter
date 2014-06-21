@@ -88,7 +88,7 @@ public:
    void sendHome();
    void damageObject(DamageInfo *theInfo);
    void idle(BfObject::IdleCallPath path);
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
    void onAddedToGame(Game *game);
@@ -109,7 +109,7 @@ public:
    void renderDock();
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
-   const Color *getColor() const;
+   const Color &getColor() const;
 
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);

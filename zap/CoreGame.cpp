@@ -5,6 +5,7 @@
 
 #include "CoreGame.h"
 
+#include "Level.h"
 #include "SoundSystem.h"
 
 #ifndef ZAP_DEDICATED
@@ -35,7 +36,7 @@ CoreGameType::~CoreGameType()
 }
 
 
-bool CoreGameType::processArguments(S32 argc, const char **argv, Game *game)
+bool CoreGameType::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc > 0)
       setGameTime(F32(atof(argv[0]) * 60.0));      // Game time, stored in minutes in level file
@@ -335,6 +336,7 @@ CoreItem::~CoreItem()
    if(getGame())
    {
       GameType *gameType = getGame()->getGameType();
+
       if(gameType && gameType->getGameTypeId() == CoreGame)
          static_cast<CoreGameType *>(gameType)->removeCore(this);
    }
@@ -376,7 +378,7 @@ void CoreItem::renderDock()
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
-   renderCoreSimple(pos, &Colors::white, 10);
+   renderCoreSimple(pos, Colors::white, 10);
 #endif
 }
 
@@ -597,7 +599,8 @@ void CoreItem::doExplosion(const Point &pos)
 {
    ClientGame *game = static_cast<ClientGame *>(getGame());
 
-   Color teamColor = *(getColor());
+   const Color &teamColor = getColor();
+
    Color CoreExplosionColors[12] = {
       Colors::red,
       teamColor,
@@ -698,7 +701,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 
    // Draw debris for the panel
    S32 num = Random::readI(5, 15);
-   const Color *teamColor = getColor();
+   const Color &teamColor = getColor();
 
    Point chunkPos, chunkVel;           // Reusable containers
 
@@ -715,7 +718,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
       F32 rotationRate = Random::readF() * 4 - 2;
 
       // Every-other chunk is team color instead of panel color
-      Color chunkColor = i % 2 == 0 ? Colors::gray80 : *teamColor;
+      const Color &chunkColor = i % 2 == 0 ? Colors::gray80 : teamColor;
 
       game->emitDebrisChunk(points, chunkColor, chunkPos, chunkVel, ttl, startAngle, rotationRate);
    }
@@ -989,7 +992,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 #endif
 
 
-bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
+bool CoreItem::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 4)         // CoreItem <team> <health> <x> <y>
       return false;
@@ -997,7 +1000,7 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
    setTeam(atoi(argv[0]));
    setStartingHealth((F32)atof(argv[1]));
 
-   if(!Parent::processArguments(argc-2, argv+2, game))
+   if(!Parent::processArguments(argc - 2, argv + 2, level))
       return false;
 
    return true;

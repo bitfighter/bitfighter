@@ -15,6 +15,7 @@ namespace Zap
 // Forward declaraions
 class MountableItem;
 class GridDatabase;
+class Level;
 
 // Things you can build with Engineer
 
@@ -63,7 +64,7 @@ public:
    bool isEngineered(); // Was this engineered by a player?
 
    void setResource(MountableItem *resource);
-   void releaseResource(const Point &releasePos, GridDatabase *database);
+   void releaseResource(const Point &releasePos, Level *level);
 
    virtual void computeExtent() = 0;  // The object must have extents recomputed before being added
    virtual void onConstructed() = 0;  // Call this once the object has been added to the game

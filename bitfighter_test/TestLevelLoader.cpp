@@ -28,17 +28,18 @@ TEST_F(LevelLoaderTest, longLine)
    Vector<Point> geom;    
    geom.resize(TEST_POINTS);     // Preallocate for speed
    for(U32 i = 0; i < TEST_POINTS; i++)
-      geom[i].set(i, i % 2);
+      geom[i].set(i, i % 2);     // Creates a list of points: 0 0   1 1   2 0   3 1   4 0   5 1   6 0   7 1   8 0   9 1...
 
    WallItem wall;
    wall.GeomObject::setGeom(geom);
 
-   string code =  getGenericHeader() + wall.toLevelCode();
+   string code = getGenericHeader() + wall.toLevelCode();
 
    Level level;
    EXPECT_EQ(0, level.findObjects_fast()->size());
    level.loadLevelFromString(code);
 
+   
    const Vector<DatabaseObject*> *objects = level.findObjects_fast();
    EXPECT_EQ(TEST_POINTS - 1, objects->size());
 }

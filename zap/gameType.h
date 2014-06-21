@@ -67,22 +67,17 @@ private:
 
    bool mShowAllBots;
 
-   Vector<WallRec> mWalls;
+   bool mEngineerEnabled;
+   bool mEngineerUnrestrictedEnabled;
 
    S32 mWinningScore;               // Game over when team (or player in individual games) gets this score
    S32 mLeadingTeam;                // Team with highest score
    S32 mLeadingTeamScore;           // Score of mLeadingTeam
-   S32 mLeadingPlayer;              // Player index of mClientInfos with highest score
-   S32 mLeadingPlayerScore;         // Score of mLeadingPlayer
-   S32 mSecondLeadingPlayer;        // Player index of mClientInfos with highest score
-   S32 mSecondLeadingPlayerScore;   // Score of mLeadingPlayer
 
    bool mCanSwitchTeams;            // Player can switch teams when this is true, not when it is false
    bool mBetweenLevels;             // We need to prohibit certain things (like team changes) when game is in an "intermediate" state
    bool mGameOver;                  // Set to true when an end condition is met
 
-   bool mEngineerEnabled;
-   bool mEngineerUnrestrictedEnabled;
    bool mBotsAllowed;
 
    bool mOvertime;                  // True when we're in overtime/extended play, false during the normal game
@@ -173,24 +168,23 @@ public:
    void setGameTime(F32 timeInSeconds);
    void extendGameTime(S32 timeInMs);
 
-   U32 getTotalGameTime() const;            // In seconds
-   U32 getTotalGameTimeInMs() const;            // In milliseconds
-   U32 getTotalGamePlayedInMs() const;    // In milliseconds
-   S32 getRemainingGameTime() const;        // In seconds
-   S32 getRemainingGameTimeInMs() const;    // In ms
-   string getRemainingGameTimeInMinutesString() const;        // In seconds
+   U32 getTotalGameTime() const;                         // In seconds
+   U32 getTotalGameTimeInMs() const;                     // In milliseconds
+   U32 getTotalGamePlayedInMs() const;                   // In milliseconds
+   S32 getRemainingGameTime() const;                     // In seconds
+   S32 getRemainingGameTimeInMs() const;                 // In milliseconds
+   string getRemainingGameTimeInMinutesString() const;   // In seconds
    bool isTimeUnlimited() const;
    S32 getRenderingOffset() const;
    /////
    
    S32 getLeadingScore() const;
    S32 getLeadingTeam() const;
-   S32 getLeadingPlayerScore() const;
-   S32 getLeadingPlayer() const;
-   S32 getSecondLeadingPlayerScore() const;
-   S32 getSecondLeadingPlayer() const;
 
-   void addWall(const WallRec &barrier, Game *game);
+   bool isEngineerEnabled() const;
+   void setEngineerEnabled(bool enabled);
+   bool isEngineerUnrestrictedEnabled() const;
+   void setEngineerUnrestrictedEnabled(bool enabled);
 
    virtual bool isFlagGame() const; // Does game use flags?
    virtual S32 getFlagCount();      // Return the number of game-significant flags
@@ -253,9 +247,9 @@ public:
    static Vector<SignedInt<24> > mScores;
    static Vector<SignedFloat<8> > mRatings;
 
-   virtual void addToGame(Game *game, GridDatabase *database);
+   virtual void addToGame(Game *game, Level *level);
 
-   virtual bool processArguments(S32 argc, const char **argv, Game *game);
+   virtual bool processArguments(S32 argc, const char **argv, Level *level);
    virtual string toLevelCode() const;
 
 #ifndef ZAP_DEDICATED
@@ -273,7 +267,7 @@ public:
    const char *getLevelDescription() const;
    void setLevelDescription(const string &levelDescription);
 
-   const StringTableEntry *getLevelCredits() const;
+   string getLevelCredits() const;
    void setLevelCredits(const StringTableEntry &levelCredits);
 
    S32 getMinRecPlayers();
@@ -281,11 +275,6 @@ public:
 
    S32 getMaxRecPlayers();
    void setMaxRecPlayers(S32 maxPlayers);
-
-   bool isEngineerEnabled();
-   void setEngineerEnabled(bool enabled);
-   bool isEngineerUnrestrictedEnabled();
-   void setEngineerUnrestrictedEnabled(bool enabled);
 
    bool areBotsAllowed();
    void setBotsAllowed(bool allowed);
@@ -336,8 +325,8 @@ public:
    virtual S32 renderTimeLeftSpecial(S32 right, S32 bottom, bool render) const;
 
    void renderObjectiveArrow(const BfObject *target, S32 canvasWidth, S32 canvasHeigh) const;
-   void renderObjectiveArrow(const BfObject *target, const Color *c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod = 1.0f) const;
-   void renderObjectiveArrow(const Point &p, const Color *c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod = 1.0f) const;
+   void renderObjectiveArrow(const BfObject *target, const Color &c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod = 1.0f) const;
+   void renderObjectiveArrow(const Point &point, const Color &c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod = 1.0f) const;
 #endif
 
 
@@ -348,8 +337,8 @@ public:
 
    bool makeSureTeamCountIsNotZero();                 // Zero teams can cause crashiness
 
-   virtual const Color *getTeamColor(const BfObject *object) const; // Get the color of a team, based on object
-           const Color *getTeamColor(S32 team)               const; // Get the color of a team, based on index
+   virtual const Color &getTeamColor(const BfObject *object) const; // Get the color of a team, based on object
+           const Color &getTeamColor(S32 team)               const; // Get the color of a team, based on index
 
    bool isSuddenDeath() const;
 
@@ -373,7 +362,7 @@ public:
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringPtr levelDesc, StringPtr musicName, S32 teamScoreLimit,
                                      StringTableEntry levelCreds, S32 objectCount, 
                                      bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId));
-   TNL_DECLARE_RPC(s2cAddWalls, (Vector<F32> barrier, F32 width, bool solid));
+   TNL_DECLARE_RPC(s2cAddWalls, (Vector<Point> barrier, F32 width, bool isPolywall));
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isAuthenticated, Int<BADGE_COUNT> badges, 
                                   U16 gamesPlayed, RangedU32<0, ClientInfo::MaxKillStreakLength> killStreak,
@@ -396,8 +385,8 @@ public:
 
    TNL_DECLARE_RPC(s2cCanSwitchTeams, (bool allowed));
 
-   TNL_DECLARE_RPC(s2cRenameClient, (StringTableEntry oldName,StringTableEntry newName));
-   void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName);
+   TNL_DECLARE_RPC(s2cRenameClient, (StringTableEntry oldName, StringTableEntry newName));
+   void updateClientChangedName(ClientInfo *clientInfo, const StringTableEntry &newName);
 
    TNL_DECLARE_RPC(s2cRemoveClient, (StringTableEntry clientName));
 
@@ -410,9 +399,7 @@ public:
    virtual void updateScore(ClientInfo *player, S32 team, ScoringEvent event, S32 data = 0); // Core uses its own updateScore
 
    void updateLeadingTeamAndScore();   // Sets mLeadingTeamScore and mLeadingTeam
-   void updateLeadingPlayerAndScore(); // Sets mLeadingTeamScore and mLeadingTeam
    void updateRatings();               // Update everyone's game-normalized ratings at the end of the game
-
 
    TNL_DECLARE_RPC(s2cSetTeamScore, (RangedU32<0, Game::MAX_TEAMS> teamIndex, U32 score));
    TNL_DECLARE_RPC(s2cSetPlayerScore, (U16 index, S32 score));

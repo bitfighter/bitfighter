@@ -65,6 +65,7 @@ public:
 class GridDatabase;
 class Game;
 class FolderManager;
+class Level;
 
 class LevelSource
 {
@@ -88,7 +89,7 @@ public:
    GameTypeId      getLevelType(S32 index);
 
    virtual bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo) = 0;
-   virtual string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase) = 0;
+   virtual Level *getLevel(S32 index) const = 0;
    virtual bool loadLevels(FolderManager *folderManager);
    virtual string getLevelFileDescriptor(S32 index) const = 0;
    virtual bool isEmptyLevelDirOk() const = 0;
@@ -116,7 +117,7 @@ public:
    virtual ~MultiLevelSource();     // Destructor
 
    bool loadLevels(FolderManager *folderManager);
-   string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase);
+   Level *getLevel(S32 index) const;
    string getLevelFileDescriptor(S32 index) const;
    bool isEmptyLevelDirOk() const;
 
@@ -154,7 +155,7 @@ public:
    FileListLevelSource(const Vector<string> &levelList, const string &folder);     // Constructor
    virtual ~FileListLevelSource();                                                                                                                // Destructor
 
-   string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase);
+   Level *getLevel(S32 index) const;
 
    static Vector<string> findAllFilesInPlaylist(const string &fileName, const string &levelDir);
 };
@@ -176,7 +177,7 @@ public:
    StringLevelSource(const string &levelCode);     // Constructor
    virtual ~StringLevelSource();                   // Destructor
 
-   string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase);
+   Level *getLevel(S32 index) const;
    string getLevelFileDescriptor(S32 index) const;
    bool isEmptyLevelDirOk() const;
 

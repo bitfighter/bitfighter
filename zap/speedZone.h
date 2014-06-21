@@ -67,7 +67,7 @@ public:
    void render();
    S32 getRenderSortValue();
 
-   bool processArguments(S32 argc, const char **argv, Game *game);  // Create objects from parameters stored in level file
+   bool processArguments(S32 argc, const char **argv, Level *level);  // Create objects from parameters stored in level file
    string toLevelCode() const;
 
    void onAddedToGame(Game *game);
@@ -82,7 +82,7 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    ///// Editor methods 
-   Color getEditorRenderColor();
+   const Color &getEditorRenderColor() const;
 
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 

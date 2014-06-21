@@ -48,10 +48,10 @@ public:
 
    void initialize();      // Set inital values of things
 
-   virtual bool processArguments(S32 argc, const char **argv, Game *game);
+   virtual bool processArguments(S32 argc, const char **argv, Level *level);
    virtual string toLevelCode() const;
 
-   virtual void onAddedToGame(Game *theGame);
+   virtual void onAddedToGame(Game *game);
    virtual void renderItem(const Point &pos);
    virtual void renderItemAlpha(const Point &pos, F32 alpha);
 

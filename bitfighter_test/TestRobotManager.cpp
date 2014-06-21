@@ -160,7 +160,7 @@ TEST(RobotManagerTest, moreLessBots)
 
    settings->getIniSettings()->mSettings.setVal(IniKey::AddRobots, No);
 
-   Vector<const char *> botArgs;
+   Vector<string> emptyBotArgs;
 
    // By putting each of tese tests in a block, we can not worry too much about how to add/remove bots and players
    // for each test.  Instead, we can blow the entire gamePair away and just start clean each time.  The point of
@@ -225,10 +225,10 @@ TEST(RobotManagerTest, moreLessBots)
    gamePair.addClient("newclient2", 1);    EXPECT_EQ("HHHH HB",      getTeams(gamePair));
 
    // /addbot
-   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHH HAB",    getTeams(gamePair));
-   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHH HAAB",   getTeams(gamePair));
-   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHHA HAAB",  getTeams(gamePair));
-   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHHA HAAAB", getTeams(gamePair));
+   gamePair.server->addBot(emptyBotArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHH HAB",    getTeams(gamePair));
+   gamePair.server->addBot(emptyBotArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHH HAAB",   getTeams(gamePair));
+   gamePair.server->addBot(emptyBotArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHHA HAAB",  getTeams(gamePair));
+   gamePair.server->addBot(emptyBotArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHHA HAAAB", getTeams(gamePair));
    }
 
 
@@ -282,7 +282,7 @@ TEST(RobotManagerTest, levelsThatIncludeBots)
 
    GamePair gamePair(settings, getLevelCodeForEmptyLevelWithBots("0 BB"));
 
-   gamePair.server->cycleLevel();       EXPECT_EQ("BB LL",     getTeams(gamePair));
+   gamePair.server->cycleLevel();       EXPECT_EQ("BB LL",     getTeams(gamePair)) << "Expect 2 from level, 2 from balancer";
 
    gamePair.addClient("Cookie Jarvis"); EXPECT_EQ("HB LL",     getTeams(gamePair));
    gamePair.server->cycleLevel();       EXPECT_EQ("HB LL",     getTeams(gamePair));

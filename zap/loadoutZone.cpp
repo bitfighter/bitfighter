@@ -4,6 +4,8 @@
 //------------------------------------------------------------------------------
 
 #include "loadoutZone.h"
+
+#include "Level.h"
 #include "game.h"
 
 #include "gameObjectRender.h"
@@ -74,12 +76,12 @@ void LoadoutZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabl
 
 void LoadoutZone::renderDock()
 {
-  renderZone(getColor(), getOutline(), getFill());
+   renderZone(getColor(), getOutline(), getFill());
 }
 
 
 // Create objects from parameters stored in level file
-bool LoadoutZone::processArguments(S32 argc2, const char **argv2, Game *game)
+bool LoadoutZone::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    // Need to handle or ignore arguments that starts with letters,
    // so a possible future version can add parameters without compatibility problem.
@@ -105,7 +107,7 @@ bool LoadoutZone::processArguments(S32 argc2, const char **argv2, Game *game)
       return false;
 
    setTeam(atoi(argv[0]));     // Team is first arg
-   return Parent::processArguments(argc - 1, argv + 1, game);
+   return Parent::processArguments(argc - 1, argv + 1, level);
 }
 
 
@@ -144,6 +146,9 @@ const Vector<Point> *LoadoutZone::getCollisionPoly() const
 // Gets called on both client and server
 bool LoadoutZone::collide(BfObject *hitObject)
 {
+   // This is probably a useless assert in the long-term, but tests are crashing here due to refactor blues
+   TNLAssert(getGame(), "Expect a game here!");
+
    // Anyone can use neutral loadout zones
    if(!isGhost() &&                                                           // On the server
          (hitObject->getTeam() == getTeam() || getTeam() == TEAM_NEUTRAL) &&  // The zone is on the same team as hitObject, or it's neutral

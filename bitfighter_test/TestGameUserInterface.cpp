@@ -9,6 +9,7 @@
 #include "ServerGame.h"
 #include "gameType.h"
 #include "stringUtils.h"
+#include "Level.h"
 
 #include "TestUtils.h"
 #include "EventKeyDefs.h"
@@ -24,10 +25,10 @@ TEST(GameUserInterfaceTest, Engineer)
    InputCodeManager::initializeKeyNames();  
 
    GamePair gamePair(getLevelCodeForTestingEngineer1(), 3); // See def for description of level
-   ServerGame *serverGame       = GameManager::getServerGame();
+   ServerGame *serverGame                  = GameManager::getServerGame();
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
-   GameSettings *clientSettings = clientGames->first()->getSettings();
-   GameUserInterface *gameUI    = clientGames->first()->getUIManager()->getUI<GameUserInterface>();
+   GameSettings *clientSettings            = clientGames->first()->getSettings();
+   GameUserInterface *gameUI               = clientGames->first()->getUIManager()->getUI<GameUserInterface>();
 
    DEFINE_KEYS_AND_EVENTS(clientSettings);
 
@@ -35,12 +36,13 @@ TEST(GameUserInterfaceTest, Engineer)
    GamePair::idle(10, 5);
 
    // Verify that engineer is enabled
-   ASSERT_TRUE(serverGame->getGameType()->isEngineerEnabled());
+   ASSERT_TRUE(serverGame->getGameType()->isEngineerEnabled()) << "Engineer should be enabled on server!";
 
    for(S32 i = 0; i < clientGames->size(); i++)
    {
       SCOPED_TRACE("i = " + itos(i));
-      ASSERT_TRUE(clientGames->get(i)->getGameType()->isEngineerEnabled());
+      ASSERT_TRUE(clientGames->get(i)->getGameType())                      << "Clients should have a GameType by now!";
+      ASSERT_TRUE(clientGames->get(i)->getGameType()->isEngineerEnabled()) << "Engineer mode not propagating to clients!";
    }
 
    ASSERT_TRUE(serverGame->getClientInfo(0)->getShip()->isInZone(LoadoutZoneTypeNumber)); // Check level is as we expected

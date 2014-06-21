@@ -19,9 +19,10 @@
 #include "EditorTeam.h"
 
 #include "ServerGame.h"
-
+#include "Level.h"
 #include "LevelDatabaseRateThread.h"
 #include "LevelDatabase.h"
+#include "GameRecorderPlayback.h"
 
 #include "Colors.h"
 #include "stringUtils.h"
@@ -29,8 +30,7 @@
 #include <boost/shared_ptr.hpp>
 #include <sys/stat.h>
 #include <cmath>
-
-#include "GameRecorderPlayback.h"
+#include "boost/shared_ptr.hpp"
 
 using namespace TNL;
 
@@ -68,6 +68,9 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIM
    mUIManager = uiManager;                // Gets deleted in destructor
    mUIManager->setClientGame(this);       // Need to do this before we can use it
 
+   //mLevel = boost::shared_ptr<Level>(new Level());
+   //mLevel->onAddedToClientGame();
+
    // TODO: Make this a ref instead of a pointer
    mClientInfo = new FullClientInfo(this, NULL, mSettings->getPlayerName(), ClientInfo::ClassHuman);  // Deleted in destructor
 
@@ -102,13 +105,9 @@ ClientGame::~ClientGame()
 // Gets run when we join a game that we ourselves are hosting.  Is also used in tests for creating linked pairs of client/server games.
 void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
 {
-   // Much of the time, this may seem pointless, but if we arrive here via the editor, we need to swap out the editor's team manager for
-   // the one used by the game.  If we don't we'll clobber the editor's copy, and we'll get crashes in the team definition (F2) menu.
-   setActiveTeamManager(&mTeamManager);
-
    mClientInfo->setRole(ClientInfo::RoleOwner);       // Local connection is always owner
 
-   getUIManager()->activateGameUI();
+   mUIManager->activateGameUI();
 
    GameConnection *gameConnection = new GameConnection(this);
  
@@ -131,18 +130,13 @@ void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
 // Also get here when hosting a game
 void ClientGame::joinRemoteGame(Address remoteAddress, bool isFromMaster)
 {
-   // Much of the time, this may seem pointless, but if we arrive here via the editor, we need to swap out the editor's team manager for
-   // the one used by the game.  If we don't we'll clobber the editor's copy, and we'll get crashes in the team definition (F2) menu.
-   // Do we need this for joining a remote game?
-   setActiveTeamManager(&mTeamManager);    
-
    mClientInfo->setRole(ClientInfo::RoleNone);        // Start out with no permissions, server will upgrade if the proper pws are provided
    
    MasterServerConnection *connToMaster = getConnectionToMaster();
 
    bool useArrangedConnection = isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected;
 
-   getUIManager()->activateGameUserInterface();
+   mUIManager->activateGameUserInterface();
 
    if(useArrangedConnection)  // Request arranged connection
       connToMaster->requestArrangedConnection(remoteAddress);
@@ -170,7 +164,7 @@ void ClientGame::closeConnectionToGameServer(const char *reason)
    if(getConnectionToServer())
       getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, reason);
 
-   getUIManager()->disableLevelLoadDisplay(false);
+   mUIManager->disableLevelLoadDisplay(false);
 
    onGameReallyAndTrulyOver();  
 }
@@ -198,7 +192,7 @@ void ClientGame::onConnectedToMaster()
 {
    Parent::onConnectedToMaster();
 
-   getUIManager()->onConnectedToMaster();
+   mUIManager->onConnectedToMaster();
 
    // Clear old player list that might be there from client's lost connection to master while in game lobby
    Vector<StringTableEntry> emptyPlayerList;
@@ -256,7 +250,7 @@ void ClientGame::startLoadingLevel(bool engineerEnabled)
 {
    mObjectsLoaded = 0;                       // Reset item counter
 
-   getUIManager()->startLoadingLevel(engineerEnabled);
+   mUIManager->startLoadingLevel(engineerEnabled);
 }
 
 
@@ -265,7 +259,8 @@ void ClientGame::doneLoadingLevel()
    computeWorldObjectExtents();              // Make sure our world extents reflect all the objects we've loaded
    Barrier::prepareRenderingGeometry(this);  // Get walls ready to render
 
-   getUIManager()->doneLoadingLevel();
+   mUIManager->doneLoadingLevel();
+   mUIManager->updateLeadingPlayerAndScore();
 }
 
 
@@ -281,37 +276,35 @@ ClientInfo *ClientGame::getLocalRemoteClientInfo() const
 }
 
 
-void ClientGame::setSpawnDelayed(bool spawnDelayed)
+void ClientGame::setSpawnDelayed(bool spawnDelayed) const
 {
    if(!spawnDelayed)
-   {
-      getUIManager()->clearSparks();
-   }
+      mUIManager->clearSparks();
 }
 
 
 void ClientGame::emitBlast(const Point &pos, U32 size)
 {
-   getUIManager()->emitBlast(pos, size);
+   mUIManager->emitBlast(pos, size);
 }
 
 
 void ClientGame::emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2)
 {
-   getUIManager()->emitBurst(pos, scale, color1, color2);
+   mUIManager->emitBurst(pos, scale, color1, color2);
 }
 
 
 void ClientGame::emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation)
 {
-   getUIManager()->emitDebrisChunk(points, color, pos, vel, ttl, angle, rotation);
+   mUIManager->emitDebrisChunk(points, color, pos, vel, ttl, angle, rotation);
 }
 
 
 // If relative is true, pos represents a fixed offset from the center of the screen.  If false, it is absolute world coords.
 void ClientGame::emitTextEffect(const string &text, const Color &color, const Point &pos, bool relative) const
 {
-   getUIManager()->emitTextEffect(text, color, pos, relative);
+   mUIManager->emitTextEffect(text, color, pos, relative);
 }
 
 
@@ -319,25 +312,25 @@ void ClientGame::emitTextEffect(const string &text, const Color &color, const Po
 // Delay is in ms
 void ClientGame::emitDelayedTextEffect(U32 delay, const string &text, const Color &color, const Point &pos, bool relative) const
 {
-   getUIManager()->emitDelayedTextEffect(delay, text, color, pos, relative);
+   mUIManager->emitDelayedTextEffect(delay, text, color, pos, relative);
 }
 
 
 void ClientGame::emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType)
 {
-   getUIManager()->emitSpark(pos, vel, color, ttl, sparkType);
+   mUIManager->emitSpark(pos, vel, color, ttl, sparkType);
 }
 
 
 void ClientGame::emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors)
 {
-   getUIManager()->emitExplosion(pos, size, colorArray, numColors);
+   mUIManager->emitExplosion(pos, size, colorArray, numColors);
 }
 
 
 void ClientGame::emitTeleportInEffect(const Point &pos, U32 type)
 {
-   getUIManager()->emitTeleportInEffect(pos, type);
+   mUIManager->emitTeleportInEffect(pos, type);
 }
 
 
@@ -366,37 +359,37 @@ void ClientGame::emitShipExplosion(const Point &pos)
 
 SFXHandle ClientGame::playSoundEffect(U32 profileIndex, F32 gain) const
 {
-   return getUIManager()->playSoundEffect(profileIndex, gain);
+   return mUIManager->playSoundEffect(profileIndex, gain);
 }
 
 
 SFXHandle ClientGame::playSoundEffect(U32 profileIndex, const Point &position) const
 {
-   return getUIManager()->playSoundEffect(profileIndex, position);
+   return mUIManager->playSoundEffect(profileIndex, position);
 }
 
 
 SFXHandle ClientGame::playSoundEffect(U32 profileIndex, const Point &position, const Point &velocity, F32 gain) const
 {
-   return getUIManager()->playSoundEffect(profileIndex, position, velocity, gain);
+   return mUIManager->playSoundEffect(profileIndex, position, velocity, gain);
 }
 
 
 void ClientGame::playNextTrack() const
 {
-   getUIManager()->playNextTrack();
+   mUIManager->playNextTrack();
 }
 
 
 void ClientGame::playPrevTrack() const
 {
-   getUIManager()->playPrevTrack();
+   mUIManager->playPrevTrack();
 }
 
 
 void ClientGame::queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferPtr &p) const
 {
-   getUIManager()->queueVoiceChatBuffer(effect, p);
+   mUIManager->queueVoiceChatBuffer(effect, p);
 }
 
 S32 ClientGame::getCurrentTeamIndex()
@@ -415,7 +408,8 @@ S32 ClientGame::getCurrentTeamIndex()
 // User selected Switch Teams menu item
 void ClientGame::switchTeams()
 {
-   if(!mGameType)    // I think these GameType checks are not needed
+   TNLAssert(getGameType(), "Expect GameType here!");
+   if(!getGameType())    // I think these GameType checks are not needed
       return;
 
    // If there are only two teams, just switch teams and skip the rigamarole
@@ -426,15 +420,15 @@ void ClientGame::switchTeams()
          return;
 
       changeOwnTeam(1 - ship->getTeam());    // If two teams, team will either be 0 or 1, so "1 - team" will toggle
-      getUIManager()->reactivateGameUI();    // Jump back into the game (this option takes place immediately)
+      mUIManager->reactivateGameUI();        // Jump back into the game (this option takes place immediately)
    }
    else     // More than 2 teams, need to present menu to choose
-      getUIManager()->showMenuToChangeTeamForPlayer(getPlayerName());  
+      mUIManager->showMenuToChangeTeamForPlayer(getPlayerName());  
 }
 
 
 // User has pressed a key, finished composing that most eloquent of chat messages, or taken some other action to undelay their spawn
-void ClientGame::undelaySpawn()
+void ClientGame::undelaySpawn() const
 {
    if(!isSpawnDelayed())                        // Already undelayed, nothing to do
       return;
@@ -645,7 +639,16 @@ void ClientGame::showPreviousLevelName() const
    else
       message = "Previous level was \"" + mPreviousLevelName + "\"";
 
-   getUIManager()->displayMessage(Colors::infoColor, message.c_str());
+   mUIManager->displayMessage(Colors::infoColor, message.c_str());
+}
+
+
+// For now...
+// We'll take control of level and will delete it when we're done
+void ClientGame::setLevel(Level *level)
+{
+   mLevel = boost::shared_ptr<Level>(level);
+   mLevel->onAddedToClientGame();
 }
 
 
@@ -774,7 +777,7 @@ void ClientGame::idle(U32 timeDelta)
 
       computeWorldObjectExtents();
 
-      Move *theMove = getUIManager()->getCurrentMove();       // Get move from keyboard input
+      Move *theMove = mUIManager->getCurrentMove();       // Get move from keyboard input
 
       theMove->time = timeDelta;
 
@@ -786,7 +789,7 @@ void ClientGame::idle(U32 timeDelta)
          mConnectionToServer->addPendingMove(theMove);
          theMove->time = timeDelta;
 
-         const Vector<DatabaseObject *> *gameObjects = mGameObjDatabase->findObjects_fast();
+         const Vector<DatabaseObject *> *gameObjects = mLevel->findObjects_fast();
 
          // Visit each game object, handling moves and running its idle method
          for(S32 i = gameObjects->size() - 1; i >= 0; i--)
@@ -810,22 +813,23 @@ void ClientGame::idle(U32 timeDelta)
             }
          }
 
-         if(mGameType)
-            mGameType->idle(BfObject::ClientIdlingNotLocalShip, timeDelta);
+         // Client may be idling for a bit before a GameType object arrives from server
+         if(getGameType())
+            getGameType()->idle(BfObject::ClientIdlingNotLocalShip, timeDelta);
 
          if(localPlayerShip)
-            getUIManager()->setListenerParams(localPlayerShip->getPos(), localPlayerShip->getVel());
+            mUIManager->setListenerParams(localPlayerShip->getPos(), localPlayerShip->getVel());
 
 
          // Check to see if there are any items near the ship we need to display help for
-         if(getUIManager()->isShowingInGameHelp() && localPlayerShip != NULL)
+         if(mUIManager->isShowingInGameHelp() && localPlayerShip != NULL)
          {
             static const S32 HelpSearchRadius = 200;
             Rect searchRect = Rect(localPlayerShip->getPos(), HelpSearchRadius);
             fillVector.clear();
-            mGameObjDatabase->findObjects((TestFunc)hasRelatedHelpItem, fillVector, searchRect);
+            mLevel->findObjects((TestFunc)hasRelatedHelpItem, fillVector, searchRect);
 
-            if(getUIManager()->isShowingInGameHelp())
+            if(mUIManager->isShowingInGameHelp())
                for(S32 i = 0; i < fillVector.size(); i++)
                {
                   BfObject *obj = static_cast<BfObject *>(fillVector[i]);
@@ -845,7 +849,7 @@ void ClientGame::idle(U32 timeDelta)
 
 void ClientGame::gotServerListFromMaster(const Vector<ServerAddr> &serverList)
 {
-   getUIManager()->gotServerListFromMaster(serverList);
+   mUIManager->gotServerListFromMaster(serverList);
 }
 
 
@@ -854,14 +858,14 @@ void ClientGame::setGameType(GameType *gameType)
    Parent::setGameType(gameType);
 
    if(gameType)
-      getUIManager()->onGameTypeChanged();
+      mUIManager->onGameTypeChanged();
 }
 
 
 // Message relayed through master -- global chat system
 void ClientGame::gotGlobalChatMessage(const char *playerNick, const char *message, bool isPrivate)
 {
-   getUIManager()->gotGlobalChatMessage(playerNick, message, isPrivate, false, false);
+   mUIManager->gotGlobalChatMessage(playerNick, message, isPrivate, false, false);
 }
 
 
@@ -872,7 +876,7 @@ void ClientGame::gotChatMessage(const StringTableEntry &clientName, const String
       return;
 
    const Color *color = global ? &Colors::globalChatColor : &Colors::teamChatColor;
-   getUIManager()->onChatMessageReceived(*color, "%s: %s", clientName.getString(), message.getString());
+   mUIManager->onChatMessageReceived(*color, "%s: %s", clientName.getString(), message.getString());
 
    if(string(clientName.getString()) != getPlayerName())
       addInlineHelpItem(HowToChatItem);
@@ -886,13 +890,13 @@ void ClientGame::gotChatPM(const StringTableEntry &fromName, const StringTableEn
    Color color = Colors::yellow;
 
    if(fullClientInfo->getName() == toName && toName == fromName)      // Message sent to self
-      getUIManager()->onChatMessageReceived(color, "%s: %s", toName.getString(), message.getString());
+      mUIManager->onChatMessageReceived(color, "%s: %s", toName.getString(), message.getString());
 
    else if(fullClientInfo->getName() == toName)                       // To this player
-      getUIManager()->onChatMessageReceived(color, "from %s: %s", fromName.getString(), message.getString());
+      mUIManager->onChatMessageReceived(color, "from %s: %s", fromName.getString(), message.getString());
 
    else if(fullClientInfo->getName() == fromName)                     // From this player
-      getUIManager()->onChatMessageReceived(color, "to %s: %s", toName.getString(), message.getString());
+      mUIManager->onChatMessageReceived(color, "to %s: %s", toName.getString(), message.getString());
 
    else  
       TNLAssert(false, "Should never get here... shouldn't be able to see PM that is not from or not to you"); 
@@ -915,13 +919,13 @@ void ClientGame::gotVoiceChat(const StringTableEntry &from, const ByteBufferPtr 
 
 void ClientGame::activatePlayerMenuUi()
 {
-   getUIManager()->showPlayerActionMenu(PlayerActionChangeTeam);
+   mUIManager->showPlayerActionMenu(PlayerActionChangeTeam);
 }
 
 
 void ClientGame::renderBasicInterfaceOverlay() const
 {
-   getUIManager()->renderBasicInterfaceOverlay();
+   mUIManager->renderBasicInterfaceOverlay();
 }
 
 
@@ -934,19 +938,19 @@ void ClientGame::gameTypeIsAboutToBeDeleted()
 
 void ClientGame::setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks)
 {
-   getUIManager()->setPlayersInGlobalChat(playerNicks);
+   mUIManager->setPlayersInGlobalChat(playerNicks);
 }
 
 
 void ClientGame::playerJoinedGlobalChat(const StringTableEntry &playerNick)
 {
-   getUIManager()->playerJoinedGlobalChat(playerNick);
+   mUIManager->playerJoinedGlobalChat(playerNick);
 }
 
 
 void ClientGame::playerLeftGlobalChat(const StringTableEntry &playerNick)
 {
-   getUIManager()->playerLeftGlobalChat(playerNick);
+   mUIManager->playerLeftGlobalChat(playerNick);
 }
 
 
@@ -1006,12 +1010,18 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
          
    // Now we'll check if we need an updated scoreboard... this only needed to handle use case of user
    // holding Tab while one game transitions to the next.  Without it, ratings will be reported as 0.
-   if(isLocalClient && getUIManager()->isInScoreboardMode())
-      mGameType->c2sRequestScoreboardUpdates(true);
+   if(isLocalClient && mUIManager->isInScoreboardMode())
+      getGameType()->c2sRequestScoreboardUpdates(true);
 
-   getUIManager()->onPlayerJoined(clientInfo->getName().getString(), isLocalClient, playAlert, showMessage);
+   mUIManager->onPlayerJoined(clientInfo->getName().getString(), isLocalClient, playAlert, showMessage);
+   
+}
 
-   mGameType->updateLeadingPlayerAndScore();
+
+void ClientGame::setPlayerScore(S32 index, S32 score)
+{
+   Parent::setPlayerScore(index, score);
+   mUIManager->updateLeadingPlayerAndScore();
 }
 
 
@@ -1020,6 +1030,15 @@ void ClientGame::onPlayerQuit(const StringTableEntry &name)
 {
    removeFromClientList(name);
    mUIManager->onPlayerQuit(name.getString());
+   mUIManager->updateLeadingPlayerAndScore();
+}
+
+
+bool ClientGame::isGameOver() const
+{
+   // If we don't have a Level or a GameType, it means we've just created the ClientGame and/or haven't yet fully joined a game.
+   // In either case, we have to presume that the game is not over.  Or at least we have no reason to believe it is.
+   return mLevel && getGameType() && getGameType()->isGameOver();
 }
 
 
@@ -1027,7 +1046,7 @@ void ClientGame::onPlayerQuit(const StringTableEntry &name)
 // This begins the phase of showing the post-game scoreboard.
 void ClientGame::setEnteringGameOverScoreboardPhase()
 {
-   getUIManager()->onGameOver();
+   mUIManager->onGameOver();
 }
 
 
@@ -1036,11 +1055,11 @@ void ClientGame::onGameReallyAndTrulyOver()
 {
    clearClientList();                   // Erase all info we have about fellow clients
 
-   // Kill any objects lingering in the database, such as forcefields
-   getGameObjDatabase()->removeEverythingFromDatabase();    
+   // Kill the level
+   mLevel.reset(); 
 
    // Inform the UI
-   getUIManager()->onGameReallyAndTrulyOver();
+   mUIManager->onGameReallyAndTrulyOver();
 }
 
 
@@ -1051,7 +1070,7 @@ void ClientGame::onGameUIActivated()
    mGameSuspended = false;
    resetCommandersMap();       // Start game in regular mode
 
-   getGameObjDatabase()->removeEverythingFromDatabase();
+   //getGameObjDatabase()->removeEverythingFromDatabase();
    mClientInfo->setSpawnDelayed(false);
 
    setPreviousLevelName("");
@@ -1061,10 +1080,11 @@ void ClientGame::onGameUIActivated()
 // This gets called at the beginning of a new game
 void ClientGame::onGameStarting()
 {
-   // Shouldn't need to do this, but it will clear out forcefields lingering from level load
-   getGameObjDatabase()->removeEverythingFromDatabase();
-   getUIManager()->onGameStarting();
+   // Start with a fresh level -- this will be populated with info from the server
+   setLevel(new Level());     // Level will be cleaned up by boost
 
+   mUIManager->onGameStarting();
+   
    resetRatings();
 }
 
@@ -1133,7 +1153,7 @@ PersonalRating ClientGame::toggleLevelRating()
 
 void ClientGame::quitEngineerHelper()
 {
-   getUIManager()->quitEngineerHelper();
+   mUIManager->quitEngineerHelper();
 }
 
 
@@ -1141,48 +1161,46 @@ void ClientGame::quitEngineerHelper()
 // Data flow: Ship->ClientGame->UIManager->GameUserInterface->LoadoutIndicator
 void ClientGame::newLoadoutHasArrived(const LoadoutTracker &loadout)
 {
-   getUIManager()->newLoadoutHasArrived(loadout);
+   mUIManager->newLoadoutHasArrived(loadout);
 }
 
 
 void ClientGame::setActiveWeapon(U32 weaponIndex)
 {
-   getUIManager()->setActiveWeapon(weaponIndex);
+   mUIManager->setActiveWeapon(weaponIndex);
 }
 
 
 bool ClientGame::isShowingDebugShipCoords()
 {
-   return getUIManager()->isShowingDebugShipCoords();
+   return mUIManager->isShowingDebugShipCoords();
 }
 
 
 // Only happens when using connectArranged, part of punching through firewall
 void ClientGame::connectionToServerRejected(const char *reason)
 {
-   UIManager *uiManager = getUIManager();
-   uiManager->onConnectionToServerRejected(reason);
-
+   mUIManager->onConnectionToServerRejected(reason);
    closeConnectionToGameServer();
 }
 
 
 void ClientGame::setMOTD(const char *motd)
 {
-   getUIManager()->setMOTD(motd); 
+   mUIManager->setMOTD(motd); 
 }
 
 
 // Got some new scores from the Master... better inform the UI
 void ClientGame::setHighScores(const Vector<StringTableEntry> &groupNames, const Vector<string> &names, const Vector<string> &scores) const
 {
-   getUIManager()->setHighScores(groupNames, names, scores);
+   mUIManager->setHighScores(groupNames, names, scores);
 }
 
 
 void ClientGame::setNeedToUpgrade(bool needToUpgrade)
 {
-   getUIManager()->setNeedToUpgrade(needToUpgrade);
+   mUIManager->setNeedToUpgrade(needToUpgrade);
 }
 
    
@@ -1195,7 +1213,7 @@ void ClientGame::displayCmdChatMessage(const char *format, ...) const
    vsnprintf(message, sizeof(message), format, args); 
    va_end(args);
 
-   getUIManager()->displayMessage(Colors::cmdChatColor, message);
+   mUIManager->displayMessage(Colors::cmdChatColor, message);
 }
 
 
@@ -1208,7 +1226,7 @@ void ClientGame::displayMessage(const Color &msgColor, const char *format, ...) 
    vsnprintf(message, sizeof(message), format, args); 
    va_end(args);
     
-   getUIManager()->displayMessage(msgColor, message);
+   mUIManager->displayMessage(msgColor, message);
 }
 
 
@@ -1224,19 +1242,19 @@ void ClientGame::gotPermissionsReply(ClientInfo::ClientRole role)
       message = "You've been granted permission to change levels";
 
    // Notify the UI that the message has arrived
-   getUIManager()->gotPasswordOrPermissionsReply(this, message);
+   mUIManager->gotPasswordOrPermissionsReply(this, message);
 }
 
 
 void ClientGame::gotWrongPassword()
 {
-   getUIManager()->gotPasswordOrPermissionsReply(this, "Incorrect password");
+   mUIManager->gotPasswordOrPermissionsReply(this, "Incorrect password");
 }
 
 
 void ClientGame::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken, S32 clientId)
 {
-   getUIManager()->gotPingResponse(address, nonce, clientIdentityToken, clientId);
+   mUIManager->gotPingResponse(address, nonce, clientIdentityToken, clientId);
 }
 
 
@@ -1244,20 +1262,20 @@ void ClientGame::gotQueryResponse(const Address &address, S32 serverId,
                                   const Nonce &nonce, const char *serverName, const char *serverDescr, 
                                   U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
 {
-   getUIManager()->gotQueryResponse(address, serverId, nonce, serverName, serverDescr, playerCount, 
+   mUIManager->gotQueryResponse(address, serverId, nonce, serverName, serverDescr, playerCount, 
                                     maxPlayers, botCount, dedicated, test, passwordRequired);
 }
 
 
 void ClientGame::shutdownInitiated(U16 time, const StringTableEntry &name, const StringPtr &reason, bool originator)
 {
-   getUIManager()->shutdownInitiated(time, name, reason, originator);
+   mUIManager->shutdownInitiated(time, name, reason, originator);
 }
 
 
 void ClientGame::cancelShutdown() 
 { 
-   getUIManager()->cancelShutdown(); 
+   mUIManager->cancelShutdown(); 
 }
 
 
@@ -1297,7 +1315,7 @@ bool ClientGame::hasLevelChange(const char *failureMessage)
 S32 ClientGame::getBotCount() const
 {
    countTeamPlayers();
-   return mTeamManager.getBotCount();
+   return mLevel->getBotCount();
 }
 
 
@@ -1324,11 +1342,11 @@ void ClientGame::gotEngineerResponseEvent(EngineerResponseEvent event)
             ship->creditEnergy(-energyCost);    // Deduct energy from engineer
             ship->resetFastRecharge();
          }
-         getUIManager()->exitHelper();
+         mUIManager->exitHelper();
          break;
 
       case EngineerEventTeleporterExitBuilt:
-         getUIManager()->exitHelper();
+         mUIManager->exitHelper();
          break;
 
       case EngineerEventTeleporterEntranceBuilt:
@@ -1338,7 +1356,7 @@ void ClientGame::gotEngineerResponseEvent(EngineerResponseEvent event)
             ship->resetFastRecharge();
          }
 
-         getUIManager()->setSelectedEngineeredObject(EngineeredTeleporterExit);
+         mUIManager->setSelectedEngineeredObject(EngineeredTeleporterExit);
          break;
 
       default:
@@ -1540,19 +1558,19 @@ bool ClientGame::checkName(const string &name)
 void ClientGame::displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, 
                                    const Vector<StringTableEntry> &messages) const
 {
-   getUIManager()->displayMessageBox(title, instr, messages);
+   mUIManager->displayMessageBox(title, instr, messages);
 }
 
 
 void ClientGame::setShowingInGameHelp(bool showing)
 {
-   getUIManager()->setShowingInGameHelp(showing);
+   mUIManager->setShowingInGameHelp(showing);
 }
 
 
 void ClientGame::resetInGameHelpMessages()
 {
-   getUIManager()->resetInGameHelpMessages();
+   mUIManager->resetInGameHelpMessages();
 }
 
 
@@ -1565,13 +1583,13 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
    clearClientList();  
    unsuspendGame();
 
-   getUIManager()->onConnectionTerminated(serverAddress, reason, reasonStr);    // Let the UI know
+   mUIManager->onConnectionTerminated(serverAddress, reason, reasonStr);    // Let the UI know
 }
 
 
 void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr, bool wasFullyConnected)
 {
-   getUIManager()->onConnectionToMasterTerminated(reason, reasonStr, wasFullyConnected);    // Let the UI know
+   mUIManager->onConnectionToMasterTerminated(reason, reasonStr, wasFullyConnected);    // Let the UI know
 
    if(reason == NetConnection::ReasonDuplicateId)
       getClientInfo()->getId()->getRandom();        // Get a different ID and retry to successfully connect to master
@@ -1586,7 +1604,7 @@ void ClientGame::runCommand(const char *command)
 
 string ClientGame::getRequestedServerName()
 {
-   return getUIManager()->getLastSelectedServerName();
+   return mUIManager->getLastSelectedServerName();
 }
 
 
@@ -1626,7 +1644,7 @@ void ClientGame::displayErrorMessage(const char *format, ...) const
    vsnprintf(message, sizeof(message), format, args);
    va_end(args);
 
-   getUIManager()->displayErrorMessage(message);
+   mUIManager->displayErrorMessage(message);
 }
 
 
@@ -1640,7 +1658,7 @@ void ClientGame::displaySuccessMessage(const char *format, ...) const
    vsnprintf(message, sizeof(message), format, args);
    va_end(args);
 
-   getUIManager()->displaySuccessMessage(message);
+   mUIManager->displaySuccessMessage(message);
 }
 
 // We need to let the server know we are in cmdrs map because it needs to send extra data
@@ -1667,92 +1685,92 @@ UIManager *ClientGame::getUIManager() const
 // Only called my gameConnection when connection to game server is established
 void ClientGame::resetCommandersMap()
 {
-   getUIManager()->resetCommandersMap();
+   mUIManager->resetCommandersMap();
 }
 
 
 F32 ClientGame::getCommanderZoomFraction() const
 {
-   return getUIManager()->getCommanderZoomFraction();
+   return mUIManager->getCommanderZoomFraction();
 }
 
 
 // Called from renderObjectiveArrow() & ship's onMouseMoved() when in commander's map
 Point ClientGame::worldToScreenPoint(const Point *point, S32 canvasWidth, S32 canvasHeight) const
 {
-   return getUIManager()->worldToScreenPoint(point, canvasWidth, canvasHeight);
+   return mUIManager->worldToScreenPoint(point, canvasWidth, canvasHeight);
 }
 
 
-bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id)
-{
-   if(!stricmp(argv[0], "BarrierMaker"))
-   {
-      if(argc >= 2)
-      {
-         WallItem *wallItem = new WallItem();  
-         wallItem->initializeEditor();        // Only runs unselectVerts
-        
-         wallItem->processArguments(argc, argv, this);
-         
-         if(wallItem->getVertCount() < 2)     // Too small!  Need at least 2 points for a wall!
-            delete wallItem;
-         else
-            addWallItem(wallItem, database);
-      }
-   }
-   // TODO: Integrate code above with code above!!  EASY!!
-   else if(!stricmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
-   {
-      //if(width)      // BarrierMakerS still width, though we ignore it
-      //   barrier.width = F32(atof(argv[1]));
-      //else           // PolyWall does not have width specified
-      //   barrier.width = 1;
-
-      if(argc >= 2)
-      {
-         PolyWall *polywall = new PolyWall();  
-         
-         S32 skipArgs = 0;
-         if(!stricmp(argv[0], "BarrierMakerS"))
-         {
-            logprintf(LogConsumer::LogLevelError, "BarrierMakerS has been deprecated.  Please use PolyWall instead.");
-
-            skipArgs = 1;
-         }
-
-         polywall->initializeEditor();     // Only runs unselectVerts
-
-         polywall->processArguments(argc - skipArgs, argv + skipArgs, this);
-         
-         if(polywall->getVertCount() >= 2)
-            addPolyWall(polywall, database);
-         else
-            delete polywall;
-      }
-   }
-   else if(!stricmp(argv[0], "Robot"))
-   {
-      // For now, we'll just make a list of robots and associated params, and write that out when saving the level.  We'll leave robots as
-      // full-fledged objects on the server (instead of pseudoItems here).
-      string robotLine = "";
-
-      for(S32 i = 0; i < argc; i++)
-      {
-         if(i > 0)
-            robotLine.append(" ");
-
-         robotLine.append(argv[i]);
-      }
-
-      getUIManager()->readRobotLine(robotLine);
-   }
-      
-   else 
-      return false;
-
-   return true;
-}
+//bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id)
+//{
+//   if(!stricmp(argv[0], "BarrierMaker"))
+//   {
+//      if(argc >= 2)
+//      {
+//         WallItem *wallItem = new WallItem();  
+//         wallItem->initializeEditor();        // Only runs unselectVerts
+//        
+//         wallItem->processArguments(argc, argv, this);
+//         
+//         if(wallItem->getVertCount() < 2)     // Too small!  Need at least 2 points for a wall!
+//            delete wallItem;
+//         else
+//            addWallItem(wallItem, database);
+//      }
+//   }
+//   // TODO: Integrate code above with code above!!  EASY!!
+//   else if(!stricmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
+//   {
+//      //if(width)      // BarrierMakerS still width, though we ignore it
+//      //   barrier.width = F32(atof(argv[1]));
+//      //else           // PolyWall does not have width specified
+//      //   barrier.width = 1;
+//
+//      if(argc >= 2)
+//      {
+//         PolyWall *polywall = new PolyWall();  
+//         
+//         S32 skipArgs = 0;
+//         if(!stricmp(argv[0], "BarrierMakerS"))
+//         {
+//            logprintf(LogConsumer::LogLevelError, "BarrierMakerS has been deprecated.  Please use PolyWall instead.");
+//
+//            skipArgs = 1;
+//         }
+//
+//         polywall->initializeEditor();     // Only runs unselectVerts
+//
+//         polywall->processArguments(argc - skipArgs, argv + skipArgs, this);
+//         
+//         if(polywall->getVertCount() >= 2)
+//            addPolyWall(polywall, database);
+//         else
+//            delete polywall;
+//      }
+//   }
+//   else if(!stricmp(argv[0], "Robot"))
+//   {
+//      // For now, we'll just make a list of robots and associated params, and write that out when saving the level.  We'll leave robots as
+//      // full-fledged objects on the server (instead of pseudoItems here).
+//      string robotLine = "";
+//
+//      for(S32 i = 0; i < argc; i++)
+//      {
+//         if(i > 0)
+//            robotLine.append(" ");
+//
+//         robotLine.append(argv[i]);
+//      }
+//
+//      mUIManager->readRobotLine(robotLine);
+//   }
+//      
+//   else 
+//      return false;
+//
+//   return true;
+//}
 
 
 // Add polywall item to game
@@ -1764,12 +1782,12 @@ void ClientGame::addPolyWall(BfObject *polyWall, GridDatabase *database)
 
 
 // Add polywall item to game
-void ClientGame::addWallItem(BfObject *wallItem, GridDatabase *database)
+void ClientGame::addWallItem(WallItem *wallItem, GridDatabase *database)
 {
    Parent::addWallItem(wallItem, database);
 
    // Do we want to run onGeomChanged here instead?  If so, we can combine with addPolyWall.
-   static_cast<WallItem *>(wallItem)->processEndPoints();      
+   wallItem->processEndPoints();
 }
 
 

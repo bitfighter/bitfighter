@@ -5,6 +5,13 @@
 
 #include "Teleporter.h"
 
+#include "game.h"
+#include "ship.h"
+#include "SoundSystemEnums.h"
+#include "ClientInfo.h"
+#include "gameConnection.h"
+#include "Level.h"
+
 #include "Colors.h"
 #include "gameObjectRender.h"
 
@@ -12,11 +19,6 @@
 #include "MathUtils.h"           // For sq
 #include "GeomUtils.h"
 #include "tnlRandom.h"
-#include "game.h"
-#include "ship.h"
-#include "SoundSystemEnums.h"
-#include "ClientInfo.h"
-#include "gameConnection.h"
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
@@ -218,7 +220,7 @@ void Teleporter::onAddedToGame(Game *theGame)
 }
 
 
-bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
+bool Teleporter::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    S32 argc = 0;
    const char *argv[8];
@@ -250,43 +252,33 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
    pos.read(argv);
    dest.read(argv + 2);
 
-   pos  *= game->getLegacyGridSize();
-   dest *= game->getLegacyGridSize();
+   pos  *= level->getLegacyGridSize();
+   dest *= level->getLegacyGridSize();
 
    setVert(pos,  0);
    setVert(dest, 1);
 
    // See if we already have any teleports with this pos... if so, this is a "multi-dest" teleporter.
-   // Note that editor handles multi-dest teleporters as separate single dest items, so this only runs on server!
-   if(game->isServer())    
-   {
-      foundObjects.clear();
-      game->getGameObjDatabase()->findObjects(TeleporterTypeNumber, foundObjects, Rect(pos, 1));
+   // Note that editor handles multi-dest teleporters as separate single dest items, so multi-dest teleporters will be
+   // broken into a series of single-dest teleporters when the level is added to the editor.
+   foundObjects.clear();
+   level->findObjects(TeleporterTypeNumber, foundObjects, Rect(pos, 1));
 
-      for(S32 i = 0; i < foundObjects.size(); i++)
+   for(S32 i = 0; i < foundObjects.size(); i++)
+   {
+      Teleporter *tel = static_cast<Teleporter *>(foundObjects[i]);
+      if(tel->getOrigin().distSquared(pos) < 1)     // i.e These are really close!  Must be the same!
       {
-         Teleporter *tel = static_cast<Teleporter *>(foundObjects[i]);
-         if(tel->getOrigin().distSquared(pos) < 1)     // i.e These are really close!  Must be the same!
-         {
-            tel->addDest(dest);
+         tel->addDest(dest);
 
-            // See http://www.parashift.com/c++-faq-lite/delete-this.html for thoughts on delete this here
-            delete this;    // Since this is really part of a different teleporter, delete this one 
-            return true;    // There will only be one!
-         }
+         // See http://www.parashift.com/c++-faq-lite/delete-this.html for thoughts on delete this here
+         delete this;    // Since this is really part of a different teleporter, delete this one 
+         return true;    // There will only be one!
       }
-
-      // New teleporter origin
-      addDest(dest);
-      computeExtent(); // for ServerGame extent
    }
-#ifndef ZAP_DEDICATED
-   else     // Is client
-   {
-      addDest(dest);
-      setExtent(calcExtents()); // for editor
-   }
-#endif
+   // New teleporter origin
+   addDest(dest);
+   computeExtent(); // for ServerGame extent
 
    return true;
 }
@@ -539,6 +531,7 @@ void Teleporter::onDestroyed()
       }
    }
 }
+
 
 void Teleporter::doTeleport()
 {
@@ -911,7 +904,7 @@ void Teleporter::renderEditor(F32 currentScale, bool snappingToWallCornersEnable
 }
 
 
-Color Teleporter::getEditorRenderColor()
+const Color &Teleporter::getEditorRenderColor() const
 {
    return Colors::green;
 }

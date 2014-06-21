@@ -26,12 +26,57 @@ static const S32 TimeTextSize     = 30;
 static const S32 BigScoreTextSize = 28;
 static const S32 BigScoreTextGap  =  5;
 
+
 // Constructor
 TimeLeftRenderer::TimeLeftRenderer()
 {
    mScreenInfo = DisplayManager::getScreenInfo();
    TNLAssert(mScreenInfo != NULL, "ScreenInfo is NULL!");
+
+   mLeadingPlayer = NONE;
+   mSecondLeadingPlayer = NONE;
+   mLeadingPlayerScore = 0;
+   mSecondLeadingPlayerScore = 0;
 }
+
+
+// Sets mLeadingTeamScore and mLeadingTeam; runs on client only
+void TimeLeftRenderer::updateLeadingPlayerAndScore(const Game *game)
+{
+   mLeadingPlayerScore = S32_MIN;
+   mLeadingPlayer = NONE;
+   mSecondLeadingPlayerScore = S32_MIN;
+   mSecondLeadingPlayer = NONE;
+
+   // Find the leading player
+   for(S32 i = 0; i < game->getClientCount(); i++)
+   {
+      // Check to make sure client hasn't disappeared somehow
+      if(!game->getClientInfo(i))  
+         continue;
+
+      S32 score = game->getPlayerScore(i);
+
+      if(score > mLeadingPlayerScore)
+      {
+         // Demote leading player to 2nd place
+         mSecondLeadingPlayerScore = mLeadingPlayerScore;
+         mSecondLeadingPlayer = mLeadingPlayer;
+
+         mLeadingPlayerScore = score;
+         mLeadingPlayer = i;
+
+         continue;
+      }
+
+      if(score > mSecondLeadingPlayerScore)
+      {
+         mSecondLeadingPlayerScore = score;
+         mSecondLeadingPlayer = i;
+      }
+   }
+}
+
 
 // When render param is true, will render as expected; when false, will simply return dimensions
 Point TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible, bool render) const
@@ -144,8 +189,8 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
    // We can get here before we get the first unpackUpdate packet arrives -- if so, return
    if(clientGame->getLocalRemoteClientInfo() == NULL)
       return 0;
-
-   if(gameType->getLeadingPlayer() < 0)
+   
+   if(mLeadingPlayer == NONE)
       return 0;
 
    const S32 textsize = 12;
@@ -155,16 +200,17 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
    S32 ypos = bottom - textsize; 
 
    /// Render player score
-   bool hasSecondLeader = gameType->getSecondLeadingPlayer() >= 0;
+   bool hasSecondLeader = mSecondLeadingPlayer != NONE;
 
    const StringTableEntry localClientName = clientGame->getClientInfo()->getName();
 
    // The player is the leader if a leader is detected and it matches his name
-   bool localClientIsLeader = (localClientName == game->getClientInfo(gameType->getLeadingPlayer())->getName());
+   bool localClientIsLeader = (localClientName == game->getClientInfo(mLeadingPlayer)->getName());
 
    const char *topName, *botName;
    string topScoreStr, botScoreStr;
-   S32 topScore, botScore, topScoreLen = 0, botScoreLen = 0, topOneFixFactor = 0, botOneFixFactor = 0;
+   S32 topScore, botScore;
+   S32 topScoreLen = 0, botScoreLen = 0, topOneFixFactor = 0, botOneFixFactor = 0;
 
    const Color *winnerColor = &Colors::red;
    const Color *loserColor  = &Colors::red60;
@@ -174,8 +220,8 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
    // Slide the first entry up if there will be a second entry
    S32 firstNameOffset = renderTwoNames ? (textsize + textgap) : 0;    
 
-   topName  = game->getClientInfo(gameType->getLeadingPlayer())->getName().getString();
-   topScore = gameType->getLeadingPlayerScore();
+   topName  = game->getClientInfo(mLeadingPlayer)->getName().getString();
+   topScore = mLeadingPlayerScore;
 
    // This is a total hack based on visual inspection trying to get scores ending in 1 to align with others
    // in a way that is nice.  This is totally font dependent, sadly...
@@ -195,8 +241,8 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
       // hasSecondLeader
       else
       {
-         botName  = game->getClientInfo(gameType->getSecondLeadingPlayer())->getName().getString();
-         botScore = gameType->getSecondLeadingPlayerScore();
+         botName  = game->getClientInfo(mSecondLeadingPlayer)->getName().getString();
+         botScore = mSecondLeadingPlayerScore;
       }
 
       //botScore = (Platform::getRealMilliseconds() / 500 % 10 )* 2;

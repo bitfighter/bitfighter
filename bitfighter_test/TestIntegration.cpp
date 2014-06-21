@@ -12,6 +12,7 @@
 #include "PickupItem.h"
 #include "barrier.h"
 #include "gameType.h"
+#include "Level.h"
 
 #include "TestUtils.h"
 #include "LevelFilesForTesting.h"
@@ -85,7 +86,7 @@ static void checkMetadata(Game *game)
    EXPECT_STREQ("Bluey", game->getTeam(0)->getName().getString());                           // Team name
    EXPECT_EQ   ("Test Level", game->getGameType()->getLevelName());                          // Quoted in level file
    EXPECT_STREQ("This is a basic test level", game->getGameType()->getLevelDescription());   // Quoted in level file
-   EXPECT_STREQ("level creator", game->getGameType()->getLevelCredits()->getString());       // Not quoted in level file
+   EXPECT_EQ   ("level creator", game->getGameType()->getLevelCredits());                    // Not quoted in level file
 }
 
 
