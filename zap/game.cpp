@@ -1040,7 +1040,7 @@ void Game::cleanUp()
    if(mLevel)
    {
       mLevel->removeEverythingFromDatabase();
-      mLevel = NULL;    // mLevel is a shared_ptr, so cleanup will be handled automatically
+      mLevel.reset();    // mLevel is a shared_ptr, so cleanup will be handled automatically
    }
 }
 

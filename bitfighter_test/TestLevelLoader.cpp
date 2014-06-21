@@ -4,7 +4,6 @@
 //------------------------------------------------------------------------------
 
 #include "barrier.h"
-#include "gameLoader.h"
 #include "gameType.h"
 #include "ServerGame.h"
 #include "Level.h"

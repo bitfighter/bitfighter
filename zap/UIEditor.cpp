@@ -41,7 +41,6 @@
 #include "Intervals.h"
 #include "EditorTeam.h"
 
-#include "gameLoader.h"          // For LevelLoadException def
 #include "LevelSource.h"
 #include "LevelDatabase.h"
 

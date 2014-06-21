@@ -6,8 +6,6 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
-#include "gameLoader.h"          // Parent class
-
 #include "GameTypesEnum.h"
 #include "DismountModesEnum.h"
 #include "ClientInfo.h"          // For ClientClass enum

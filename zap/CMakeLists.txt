@@ -23,7 +23,6 @@ set(SHARED_SOURCES
 	flagItem.cpp
 	game.cpp
 	gameConnection.cpp
-	gameLoader.cpp
 	gameNetInterface.cpp
 	GameRecorder.cpp
 	GameSettings.cpp

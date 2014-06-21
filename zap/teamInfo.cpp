@@ -17,9 +17,9 @@ namespace Zap
 {
 
 // Constructor
-TeamInfo::TeamInfo() : 
-   mColor(Colors::blue), 
-   mName("Blue")
+TeamInfo::TeamInfo() :
+   mName("Blue"),
+   mColor(Colors::blue)
 {
    // Do nothing
 }

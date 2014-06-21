@@ -6,15 +6,15 @@
 #include "Level.h"
 
 #include "game.h"
-#include "GameType.h"
+#include "gameType.h"
 #include "LevelLoadException.h"
 #include "Spawn.h"
 #include "robot.h"
 
 #include "Md5Utils.h"
-#include "StringUtils.h"
+#include "stringUtils.h"
 
-#include "TNLLog.h"
+#include "tnlLog.h"
 
 #include <fstream>
 #include <sstream>
@@ -179,7 +179,7 @@ void Level::parseLevelLine(const string &line, const string &levelFileName)
    catch(LevelLoadException &e)
    {
       logprintf(LogConsumer::LogLevelError, "Level Error: Fatal error with level %s, line %s: %s", 
-                levelFileName.c_str(), line, e.what());  // TODO: fix "line" variable having hundreds of level lines
+                levelFileName.c_str(), line.c_str(), e.what());  // TODO: fix "line" variable having hundreds of level lines
    }
 
    delete[] argv;
