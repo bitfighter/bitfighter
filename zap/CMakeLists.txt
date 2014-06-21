@@ -41,7 +41,9 @@ set(SHARED_SOURCES
 	IniFile.cpp
 	InputCode.cpp
 	item.cpp
+	Level.cpp
 	LevelDatabase.cpp
+	LevelLoadException.cpp
 	LevelSource.cpp
 	LineItem.cpp
 	LoadoutTracker.cpp
