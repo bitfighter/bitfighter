@@ -1,0 +1,6 @@
+?package(bitfighter): \
+	needs="X11" \
+        section="Games/Action" \
+	icon="/usr/share/pixmaps/bitfighter.xpm" \
+        title="bitfighter" \
+        command="/usr/games/bitfighter"

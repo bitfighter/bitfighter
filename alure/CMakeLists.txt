@@ -30,6 +30,7 @@ include_directories(
 	${MODPLUG_INCLUDE_DIR}
 )
 target_link_libraries(alure 
+	${OPENAL_LIBRARY}
 	${MODPLUG_LIBRARIES}
 	${VORBIS_LIBRARIES}
 	${EXTRA_LIBS}

@@ -1,6 +1,20 @@
 project (bitfighter)
 cmake_minimum_required (VERSION 2.8)
 
+
+#
+# CMake options
+#
+
+option(USE_SDL2 "Use SDL2" YES)
+option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
+option(USE_LUAJIT "Use LuaJIT; compiling in-tree sources if needed" YES)
+
+
+#
+# CMake system management
+#
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
 # Use appropriate platform alterations
@@ -25,15 +39,6 @@ endif()
 if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
-
-
-#
-# CMake options
-#
-
-# Default to NO for Linux
-option(USE_SDL2 "Force usage of SDL2" YES)
-option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
 
 
 #
@@ -114,6 +119,7 @@ if(NOT ALURE_FOUND)
 	if(NOT OPENAL_FOUND OR NOT VORBIS_FOUND OR NOT MODPLUG_FOUND)
 		message(WARNING "Audio system components are missing.  Bitfighter will be compiled without audio")
 		add_definitions(-DBF_NO_AUDIO)
+		set(OPENAL_INCLUDE_DIR "")
 	else()
 		message(STATUS "Using in-tree ALURE")
 		add_definitions(-DALURE_STATIC_LIBRARY)
@@ -178,26 +184,23 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/lua/${LUA_LIB}")
 endif()
 
 
-# Other internal-only sub-projects
-add_subdirectory(tnl)
-add_subdirectory(master)
-
-
-# Disable certain sub-projects based on dependency search
-set(COMPILE_ZAP 1)
-
-if(NOT SDL2_FOUND AND NOT SDL_FOUND)
-	set(COMPILE_ZAP 0)
-endif()
-
-
+# mysql++ is for compiling master
 if(EXISTS "${CMAKE_SOURCE_DIR}/mysql++")
 	add_subdirectory(mysql++)
 endif()
 
-if(COMPILE_ZAP)
-	add_subdirectory(zap)
-	if(EXISTS "${CMAKE_SOURCE_DIR}/gtest")
-		add_subdirectory(gtest)
-	endif()
+
+# gtest is for compiling the bitfighter_test suite
+if(EXISTS "${CMAKE_SOURCE_DIR}/gtest")
+	add_subdirectory(gtest)
 endif()
+
+
+# Other internal-only sub-projects
+add_subdirectory(tnl)
+add_subdirectory(tnlping)
+add_subdirectory(master)
+
+
+# Our main sources!
+add_subdirectory(zap)

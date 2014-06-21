@@ -23,6 +23,7 @@ set(SHARED_SOURCES
 	flagItem.cpp
 	game.cpp
 	gameConnection.cpp
+	gameLoader.cpp
 	gameNetInterface.cpp
 	GameRecorder.cpp
 	GameSettings.cpp
@@ -40,10 +41,7 @@ set(SHARED_SOURCES
 	IniFile.cpp
 	InputCode.cpp
 	item.cpp
-	Level.cpp
 	LevelDatabase.cpp
-	LevelInfoDatabase.cpp
-	LevelLoadException.cpp
 	LevelSource.cpp
 	LineItem.cpp
 	LoadoutTracker.cpp
@@ -105,6 +103,11 @@ set(SHARED_SOURCES
 	${CMAKE_SOURCE_DIR}/poly2tri/sweep/cdt.cc
 	${CMAKE_SOURCE_DIR}/poly2tri/sweep/sweep.cc
 	${CMAKE_SOURCE_DIR}/poly2tri/sweep/sweep_context.cc
+	# these are needed by the test runner, but must be linked in the same unit
+	# as the rest of the netclasses because of the way TNL instatiates netclasses
+	${CMAKE_SOURCE_DIR}/master/master.cpp
+	${CMAKE_SOURCE_DIR}/master/MasterServerConnection.cpp
+	${CMAKE_SOURCE_DIR}/master/GameJoltConnector.cpp
 )
 
 set(CLIENT_SOURCES 
@@ -231,215 +234,72 @@ set(CLIENT_LIBS
 
 BF_PLATFORM_APPEND_LIBS()
 
-
-#
-# Full client build
-# 
-
 BF_PLATFORM_ADD_DEFINITIONS()
 
-add_executable(bitfighter
-	${SHARED_SOURCES}
-	${CLIENT_SOURCES}
-	${BITFIGHTER_HEADERS}
-	${OTHER_HEADERS}
-	main.cpp
-)
 
-add_dependencies(bitfighter
-	alure
-	${LUA_LIB}
-	tnl
-	tomcrypt
-)
+#
+# Targets
+#
 
-target_link_libraries(bitfighter
-	${CLIENT_LIBS}
-	${SHARED_LIBS}
-)
+# Disable compiling of client and test suite if certain dependencies arent met
+set(COMPILE_CLIENT YES)
+if(NOT SDL2_FOUND AND NOT SDL_FOUND)
+	set(COMPILE_CLIENT NO)
+endif()
 
-include_directories(SYSTEM
+# Tests require the test sources, which may not be available (like in a slimmed source archive)
+set(COMPILE_TEST_SUITE YES)
+if(NOT EXISTS ${CMAKE_SOURCE_DIR}/bitfighter_test)
+	set(COMPILE_TEST_SUITE NO)
+endif()
+
+
+# We should always be able to compile a dedicated server, it requires much
+# fewer dependencies
+include(bitfighterd.cmake)
+
+if(COMPILE_CLIENT)
+	include(bitfighter_client.cmake)
+	include(bitfighter.cmake)
+	
+	# The test suite requires the client dependencies
+	if(COMPILE_TEST_SUITE)
+		include(bitfighter_test.cmake)
+	endif()
+endif()
+
+
+# Build up our include directories based on the targets
+
+# Defaults for bitfighterd
+set(INCLUDE_DIRS
 	${OPENAL_INCLUDE_DIR}
 	${ALURE_INCLUDE_DIR}
-	${GL_INCLUDE_DIR}
-	${PNG_INCLUDE_DIR}
-	${SDL_INCLUDE_DIR}
-	${SPEEX_INCLUDE_DIR}
-	${SPARKLE_INCLUDE_DIR}
 	${LUA_INCLUDE_DIR}
 	${TOMCRYPT_INCLUDE_DIR}
 	${CLIPPER_INCLUDE_DIR}
-	${ALURE_INCLUDE_DIR}
 	${SQLITE3_INCLUDE_DIR}
-)
-
-# Where to put the executable
-set_target_properties(bitfighter PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe)
-
-if(USE_GLES AND SDL2_FOUND)
-	get_property(CLIENT_DEFS TARGET bitfighter PROPERTY COMPILE_DEFINITIONS)
-	set_target_properties(bitfighter
-		PROPERTIES
-		COMPILE_DEFINITIONS "${CLIENT_DEFS};BF_USE_GLES"
-	)
-endif()
-
-
-#
-# Dedicated server build
-# 
-add_executable(bitfighterd
-	EXCLUDE_FROM_ALL
-	${SHARED_SOURCES}
-	main.cpp
-)
-
-add_dependencies(bitfighterd
-	tnl
-	${LUA_LIB}
-	tomcrypt
-)
-
-target_link_libraries(bitfighterd
-	${SHARED_LIBS}
-)
-
-set_target_properties(bitfighterd
-	PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe
-)
-
-get_property(DEDICATED_DEFS TARGET bitfighterd PROPERTY COMPILE_DEFINITIONS)
-set_target_properties(bitfighterd
-	PROPERTIES
-	COMPILE_DEFINITIONS "${DEDICATED_DEFS};ZAP_DEDICATED"
-)
-
-include_directories(
-	${CMAKE_SOURCE_DIR}/tnl
 	${BOOST_INCLUDE_DIR}
-)
-
-
-#
-# Test runner executable
-# 
-option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and create 'coverage' target" NO)
-
-set(TEST_SOURCES
-	${CMAKE_SOURCE_DIR}/bitfighter_test/LevelFilesForTesting.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestColor.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestEditor.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGame.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameType.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameUserInterface.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGeomUtils.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestHelpItemManager.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestHttpRequest.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestINISettings.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestInputCode.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestIntegration.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelInfoDatabase.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelLoader.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelMenuSelectUserInterface.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelSource.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLoadoutIndicator.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLoadoutTracker.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLuaEnvironment.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMaster.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMove.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestObjects.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestPolylineGeometry.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestRenderUtils.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestRobot.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestRobotManager.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestServerGame.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSettings.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestShip.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSpawnDelay.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestStringUtils.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSymbolStrings.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/TestUtils.cpp
-	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
-	${CMAKE_SOURCE_DIR}/master/master.cpp
-	${CMAKE_SOURCE_DIR}/master/MasterServerConnection.cpp
-	${CMAKE_SOURCE_DIR}/master/MasterServerConnection.cpp
-	${CMAKE_SOURCE_DIR}/master/GameJoltConnector.cpp
-)
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/bitfighter_test)
-	add_executable(test EXCLUDE_FROM_ALL
-		${CLIENT_SOURCES}
-		${SHARED_SOURCES}
-		${TEST_SOURCES}
-		${BITFIGHTER_HEADERS}
-	)
-
-	target_link_libraries(test
-		${SHARED_LIBS}
-		${CLIENT_LIBS}
-		gtest
-	)
-
-	add_dependencies(test
-		alure
-		${LUA_LIB}
-		tnl
-		tomcrypt
-		gtest
-	)
-
-	set_target_properties(test
-		PROPERTIES
-		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe
-		COMPILE_DEFINITIONS BITFIGHTER_TEST
-	)
-endif()
-
-include_directories(
-	${CMAKE_SOURCE_DIR}/gtest/include
+	${CMAKE_SOURCE_DIR}/tnl
 	${CMAKE_SOURCE_DIR}/zap
 )
 
-# to use the coverage target, install lcov, enable BITFIGHTER_COVERAGE, and run it
-# coverage data is output to the 'cov' directory in html format.
-if(BITFIGHTER_COVERAGE)
-   set_target_properties(test
-      PROPERTIES
-      LINK_FLAGS "--coverage"
-      COMPILE_FLAGS "--coverage"
-   )
-
-   add_custom_target(coverage cd ${CMAKE_SOURCE_DIR}/exe && ${CMAKE_SOURCE_DIR}/exe/test
-      COMMAND lcov --capture --directory ${CMAKE_SOURCE_DIR} --output-file ${CMAKE_SOURCE_DIR}/build/coverage.info
-      COMMAND lcov --extract ${CMAKE_SOURCE_DIR}/build/coverage.info --output-file ${CMAKE_SOURCE_DIR}/build/coverage.info ${CMAKE_SOURCE_DIR}/zap/*
-      COMMAND genhtml ${CMAKE_SOURCE_DIR}/build/coverage.info --output-directory ${CMAKE_SOURCE_DIR}/build/cov
-      DEPENDS test alure ${LUA_LIB} tnl tomcrypt
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build 
-   )
+if(COMPILE_CLIENT)
+	list(APPEND INCLUDE_DIRS
+		${GL_INCLUDE_DIR}
+		${PNG_INCLUDE_DIR}
+		${SDL_INCLUDE_DIR}
+		${SPEEX_INCLUDE_DIR}
+		${SPARKLE_INCLUDE_DIR}
+	)
+	
+	if(COMPILE_TEST_SUITE)
+		list(APPEND INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/gtest/include)
+	endif()
 endif()
 
-
-#
-# Settings for all targets
-# 
-
-# You can only call 'set_target_properties' once for each properties-target combination, therefore
-# we'll build up a list and call 'set_target_properties' at the end
-set(ALL_DEBUG_DEFS
-	"TNL_DEBUG"
+# CMake 2.8.11 provides a target_include_directories, which is exactly what we want,
+# but we don't use it for compatibility with older CMake 2.8
+include_directories(SYSTEM
+	${INCLUDE_DIRS}
 )
-
-BF_PLATFORM_SET_TARGET_PROPERTIES()
-
-set_target_properties(bitfighterd bitfighter PROPERTIES COMPILE_DEFINITIONS_DEBUG "${ALL_DEBUG_DEFS}")
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/bitfighter_test)
-	set_target_properties(test PROPERTIES COMPILE_DEFINITIONS_DEBUG "${ALL_DEBUG_DEFS}")
-endif()
-
-BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES()
-
-BF_PLATFORM_INSTALL()
-
-BF_PLATFORM_CREATE_PACKAGES()

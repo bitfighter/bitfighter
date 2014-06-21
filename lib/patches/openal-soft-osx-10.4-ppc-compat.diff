@@ -1,0 +1,19 @@
+--- OpenAL32/Include/alMain.h.orig	2014-05-31 00:27:58.000000000 -0600
++++ OpenAL32/Include/alMain.h	2014-05-31 00:27:42.000000000 -0600
+@@ -250,6 +250,16 @@ static __inline ALboolean CompExchangePt
+ #elif defined(__APPLE__)
+ 
+ #include <libkern/OSAtomic.h>
++#include <AvailabilityMacros.h>
++
++/* OSAtomicCompareAndSwapPtrBarrier does not exist on OSX 10.4 */
++#if MAC_OS_X_VERSION_MIN_REQUIRED <= 1040
++#   ifdef __LP64__
++#       define OSAtomicCompareAndSwapPtrBarrier(a, b, c) OSAtomicCompareAndSwap64Barrier((int64_t)a, (int64_t)b, (int64_t volatile *)c)
++#   else
++#       define OSAtomicCompareAndSwapPtrBarrier(a, b, c) OSAtomicCompareAndSwap32Barrier((int32_t)a, (int32_t)b, (int32_t volatile *)c)
++#   endif
++#endif
+ 
+ typedef int32_t RefCount;
+ static __inline RefCount IncrementRef(volatile RefCount *ptr)

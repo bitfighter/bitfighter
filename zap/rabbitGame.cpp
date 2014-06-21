@@ -49,7 +49,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
 
       case RabbitMsgRabbitDead:
          getGame()->playSoundEffect(SFXShipExplode);
-         getGame()->displayMessage(Colors::red, "%s killed the rabbit!", clientName.getString());
+         getGame()->displayMessage(Colors::red, "%s zapped the rabbit!", clientName.getString());
          break;
 
       case RabbitMsgReturn:

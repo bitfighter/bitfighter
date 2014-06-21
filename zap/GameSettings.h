@@ -74,6 +74,7 @@ enum ParamId {
    SHOW_RULES,
    SHOW_LUA_CLASSES,
    HELP,
+   VERSION,
 
    PARAM_COUNT
 };
@@ -129,6 +130,8 @@ private:
    // Store params read from the cmd line
    Vector<string> mCmdLineParams[CmdLineParams::PARAM_COUNT];
 
+   static string mExecutablePath;
+
    // User settings storage
    UserSettingsMap mUserSettings;
 
@@ -160,6 +163,7 @@ public:
 
    static const U16 DEFAULT_GAME_PORT = 28000;
 
+   void setExecutablePath(const string &executablePath);
 
    void readCmdLineParams(const Vector<string> &argv);
    void resolveDirs();
@@ -273,6 +277,7 @@ public:
    static void sendRes(GameSettings *settings, const Vector<string> &words);
    static void showRules(GameSettings *settings, const Vector<string> &words);
    static void showHelp(GameSettings *settings, const Vector<string> &words);
+   static void showVersion(GameSettings *settings, const Vector<string> &words);
 
    static Vector<string> DetectedJoystickNameList;   // List of joysticks we found attached to this machine
 

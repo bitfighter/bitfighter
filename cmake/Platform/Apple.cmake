@@ -6,9 +6,44 @@
 set(OSX_DEPLOY_TARGET $ENV{MACOSX_DEPLOYMENT_TARGET})
 
 message(STATUS "MACOSX_DEPLOYMENT_TARGET: ${OSX_DEPLOY_TARGET}")
-# MACOSX_DEPLOYMENT_TARGET must be set in the environment to compile properly
-if(NOT OSX_DEPLOY_TARGET)
-	message(FATAL_ERROR "MACOSX_DEPLOYMENT_TARGET environment variable not set.  Set this like so: 'export MACOSX_DEPLOYMENT_TARGET=10.6'")
+
+
+# These mandatory variables should be set with cross-compiling
+if(NOT XCOMPILE)
+	# MACOSX_DEPLOYMENT_TARGET must be set in the environment to compile properly
+	if(NOT OSX_DEPLOY_TARGET)
+		message(FATAL_ERROR "MACOSX_DEPLOYMENT_TARGET environment variable not set.  Set this like so: 'export MACOSX_DEPLOYMENT_TARGET=10.6'")
+	endif()
+
+
+	# Make sure the compiling architecture is set
+	if(OSX_DEPLOY_TARGET VERSION_LESS "10.4")
+		message(FATAL_ERROR "Bitfighter cannot be compiled on OSX earlier than 10.4")
+	elseif(OSX_DEPLOY_TARGET VERSION_LESS "10.6")
+		if(NOT CMAKE_OSX_ARCHITECTURES)
+			message(FATAL_ERROR "You must set CMAKE_OSX_ARCHITECTURES to either 'ppc' or 'i386'")
+		endif()
+	else()
+		set(CMAKE_OSX_ARCHITECTURES "x86_64")
+	endif()
+
+
+	# Set the proper SDK for compiling
+	if(OSX_DEPLOY_TARGET VERSION_EQUAL "10.4")
+		set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.4u.sdk/")
+	else()
+		set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX${OSX_DEPLOY_TARGET}.sdk/")
+	endif()
+endif()
+
+
+message(STATUS "Compiling for OSX architectures: ${CMAKE_OSX_ARCHITECTURES}")
+
+
+# LuaJIT will not compile on 10.4 ppc - it requires GCC >= 4.3
+# Disable LuaJIT for cross-compile (for now)
+if(CMAKE_OSX_ARCHITECTURES STREQUAL "ppc" OR XCOMPILE)
+	set(USE_LUAJIT NO)
 endif()
 
 
@@ -16,24 +51,27 @@ endif()
 # Linker flags
 # 
 
-
-
 # 
 # Compiler specific flags
 # 
 if(CMAKE_COMPILER_IS_GNUCC)
+	set(BF_CLIENT_LIBRARY_BEFORE_FLAGS "-all_load")
+	set(BF_CLIENT_LIBRARY_AFTER_FLAGS "-noall_load")
+	
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
+endif()
+
+		
+if(OSX_DEPLOY_TARGET VERSION_EQUAL "10.4")
+	# OSX 10.4 doesn't have execinfo.h for the StackTracer
+	add_definitions(-DBF_NO_STACKTRACE)
 endif()
 
 
 #
 # Library searching and dependencies
 #
-
-# Always use SDL2 on OSX
-set(USE_SDL2 YES)
-set(USE_LUAJIT YES)
 
 # Set some search paths
 set(SDL2_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libsdl)
@@ -93,7 +131,7 @@ function(BF_PLATFORM_ADD_DEFINITIONS)
 endfunction()
 
 
-function(BF_PLATFORM_SET_TARGET_PROPERTIES)
+function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 	# Setup OSX Bundle
 	
 	# We need this variable in both scopes
@@ -101,28 +139,24 @@ function(BF_PLATFORM_SET_TARGET_PROPERTIES)
 	set(OSX_BUILD_RESOURCE_DIR "${OSX_BUILD_RESOURCE_DIR}" PARENT_SCOPE)
 	
 	# Specify output to be a .app
-	set_target_properties(bitfighter PROPERTIES MACOSX_BUNDLE TRUE)
+	set_target_properties(${targetName} PROPERTIES MACOSX_BUNDLE TRUE)
 	
 	# Use a custom plist
-	set_target_properties(bitfighter PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${OSX_BUILD_RESOURCE_DIR}/Bitfighter-Info.plist)
+	set_target_properties(${targetName} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${OSX_BUILD_RESOURCE_DIR}/Bitfighter-Info.plist)
 	
 	# Set up our bundle plist variables
 	set(MACOSX_BUNDLE_NAME "Bitfighter")
 	set(MACOSX_BUNDLE_VERSION ${BITFIGHTER_BUILD_VERSION})
 	set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${BITFIGHTER_RELEASE})
 	
-	# TODO figure out deployment targets
-	set(MACOSX_DEPLOYMENT_TARGET "10.6")
-	
-
 	# Special flags needed because of LuaJIT on 64 bit OSX
-	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-		set_target_properties(bitfighterd bitfighter PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
+	if(USE_LUAJIT AND CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+		set_target_properties(${targetName} PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
 	endif()
 endfunction()
 
 
-function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES)
+function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	# The trailing slash is necessary to do here for proper native path translation
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/resource/ resDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lib/ libDir)
@@ -130,8 +164,8 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
 	
 	# Create extra dirs in the .app
-	set(frameworksDir "${exeDir}/bitfighter.app/Contents/Frameworks")
-	set(resourcesDir "${exeDir}/bitfighter.app/Contents/Resources")
+	set(frameworksDir "${exeDir}/${targetName}.app/Contents/Frameworks")
+	set(resourcesDir "${exeDir}/${targetName}.app/Contents/Resources")
 	execute_process(COMMAND mkdir -p ${frameworksDir})
 	execute_process(COMMAND mkdir -p ${resourcesDir})
 	
@@ -148,7 +182,7 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES)
 	set(COPY_RES_4 cp -rp ${exeDir}/../notifier/bitfighter_notifier.py ${resourcesDir})
 	set(COPY_RES_5 cp -rp ${exeDir}/../notifier/redship18.png ${resourcesDir})
 	
-	add_custom_command(TARGET bitfighterd bitfighter POST_BUILD 
+	add_custom_command(TARGET ${targetName} POST_BUILD 
 		COMMAND ${COPY_RES_1}
 		COMMAND ${COPY_RES_2}
 		COMMAND ${COPY_RES_3}
@@ -157,28 +191,43 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES)
 	)
 	
 	# 64-bit OSX needs to use shared LuaJIT library
-	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-		add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD
+	if(USE_LUAJIT AND CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+		add_custom_command(TARGET ${targetName} POST_BUILD
 			COMMAND cp -rp ${luaLibDir}libluajit.dylib ${frameworksDir}
 		)
 	endif()
 	
 	# Copy resources
-	add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD 
+	add_custom_command(TARGET ${targetName} POST_BUILD 
 		COMMAND ${RES_COPY_CMD}
 		COMMAND ${LIB_COPY_CMD}
 	)
 	
-	# TODO - run lipo on the frameworks to clean out unwanted architectures
+	# Thin out our installed frameworks by running 'lipo' to clean out the unwanted 
+	# architectures and removing any header files
+	if(NOT LIPO_COMMAND)
+		set(LIPO_COMMAND lipo)
+	endif()
+	
+	# This can happen when cross-compiling x86_64
+	if(NOT CMAKE_OSX_ARCHITECTURES)
+		set(CMAKE_OSX_ARCHITECTURES "x86_64")
+	endif()
+	
+	set(THIN_FRAMEWORKS ${CMAKE_SOURCE_DIR}/build/osx/tools/thin_frameworks.sh ${LIPO_COMMAND} ${CMAKE_OSX_ARCHITECTURES} ${exeDir}/${targetName}.app)
+	
+	add_custom_command(TARGET ${targetName} POST_BUILD
+		COMMAND ${THIN_FRAMEWORKS}
+	)
 endfunction()
 
 
-function(BF_PLATFORM_INSTALL)
+function(BF_PLATFORM_INSTALL targetName)
 	# Do nothing!
 endfunction()
 
 
-function(BF_PLATFORM_CREATE_PACKAGES)
+function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	add_custom_target(dmg)
 	# TODO:  build DMG
 	#set_target_properties(dmg PROPERTIES POST_INSTALL_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/CreateMacBundle.cmake)

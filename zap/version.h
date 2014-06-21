@@ -13,12 +13,13 @@
 #define MASTER_PROTOCOL_VERSION 8  // Change this when releasing an incompatible cm/sm protocol (must be int)
                                    // MASTER_PROTOCOL_VERSION = 4, client 015a and older (CS_PROTOCOL_VERSION <= 32) can not connect to our new master.
 
-#define CS_PROTOCOL_VERSION 38     // Change this when releasing an incompatible cs protocol (must be int)
+#define CS_PROTOCOL_VERSION 39     // Change this when releasing an incompatible cs protocol (must be int)
 // 016 = 33 
 // 017[ab] = 35
 // 018[a] = 36
 // 019 dev = 37
 // 019 = 38
+// 020 = 39
 
 #define VERSION_016  3737
 #define VERSION_017  4252
@@ -31,21 +32,19 @@
 #define VERSION_019b 9517
 #define VERSION_019c 9708
 
-#define VERSION_019d  9710
+#define VERSION_019d 9710
+#define VERSION_020  9923
 
-#define BUILD_VERSION VERSION_019d  // Version of the game according to hg, will be unique every release (must be int)
+#define BUILD_VERSION VERSION_020   // Version of the game according to hg, will be unique every release (must be int)
                                     // Get from "hg summary"
 
-#define ZAP_GAME_RELEASE "019d"     // Change this with every release -- for display purposes only, string,
+#define ZAP_GAME_RELEASE "020"      // Change this with every release -- for display purposes only, string,
                                     // will also be used for name of installer on windows, so be careful with spaces
                                     // Used for GameRecorder.cpp, buildGameRecorderExtension
 
 // ZAP_GAME_RELEASE_LONGSTRING is used for version display at main menu
-#if BUILD_VERSION >= 9720  // Won't release too soon...
-#  define ZAP_GAME_RELEASE_LONGSTRING ("Release " ZAP_GAME_RELEASE)
-#else
-#  define ZAP_GAME_RELEASE_LONGSTRING (ZAP_GAME_RELEASE " - beta")
-#endif
+#define ZAP_GAME_RELEASE_LONGSTRING ("Release " ZAP_GAME_RELEASE)
+#define ZAP_GAME_DEV_LONGSTRING (ZAP_GAME_RELEASE " development")
 
 #endif
 

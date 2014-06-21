@@ -6,6 +6,8 @@
 #ifndef _STACK_TRACER_H_
 #define _STACK_TRACER_H_
 
+#ifndef BF_NO_STACKTRACE
+
 #include "tnlTypes.h"
 #include "tnlPlatform.h"
 
@@ -27,5 +29,7 @@ public:
 
 }
 
+#endif // BF_NO_STACKTRACE
 
-#endif
+
+#endif // _STACK_TRACER_H_

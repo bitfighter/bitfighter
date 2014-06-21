@@ -18,49 +18,93 @@
 -------------------------------------------------------------------------------
 
 
+profiles = {
+    {
+        name = "S_Bot",
+        difficulty = 0.5,
+        aggression = 0.5,
+        defense = 0,
+        speed = 1.0,
+        accuracy = 0.90,
+        dodging = 0.25
+    },
+    {
+        name = "Meany",
+        difficulty = 1.0,
+        aggression = 1.0,
+        defense = 0,
+        speed = 1.0,
+        accuracy = 1.0,
+        dodging = 1.0
+    },
+    {
+        name = "Barnside",
+        difficulty = 0.5,
+        aggression = 1.0,
+        defense = 0,
+        speed = 0.5,
+        accuracy = 0.1,
+        dodging = 0.1
+    }
+}
+
+-- Worst possible angle is multiplied by the accuracy
+WORST_ACCURACY = 0.25 * math.tau  -- quarter-circle...  really bad!
+
+
 goalPt = point.new(0,0)
 
 prevtarget = nil
 
 gotoPositionWasNil = true
- 
+
 o = point.new(0,0)
- 
+
 botPos = nil        -- Bot's location, will be updated when onTick() is run
 
 -- This function gets run once during setup.  It is the only time we can declare variables
 -- and have them be defined as globals.
 function main()
+    -- Set up this bots profile
+    
+    -- Choose a random profile (for now)
+    profileIndex = math.random(#profiles)
+    profile = profiles[profileIndex]
+
+    difficulty    = profile["difficulty"]
+    aggression    = profile["aggression"]
+    defense       = profile["defense"]
+    speed         = profile["speed"]
+    accuracy      = profile["accuracy"]
+    dodging       = profile["dodging"]
+
+    -- Set up other variables
     botRadius = bot:getRad()
     pathTimerMax = 250
     pathTimer = pathTimerMax
     dirToGo = 0
+    
     game = bf:getGameInfo()
-
-    difficulty         = tonumber(arg[1]) or .5
-    agression          = tonumber(arg[2]) or 0.5
-    defense            = tonumber(arg[3]) or 0
-    speed              = tonumber(arg[4]) or 1
-    directionThreshold = tonumber(arg[5]) or .25
-
     gameType = game:getGameType()
     
-    averageIndex = 1
-    averageMax = 20
+    averageShieldIndex = 1
+    averageShieldMaxTicks = 20
 
-    averageArray = { }
-    for i = 1, averageMax do
-        averageArray[i] = false
+    averageShieldArray = { }
+    for i = 1, averageShieldMaxTicks do
+        averageShieldArray[i] = false
     end
 
     myOrbitalDirection = 1
     myObjective = math.random(0, 10)
 end
- 
+
 
 items = { }     -- Global variable, reusable container for bf:findAllObjects.  Reusing this table avoids costs of
                 -- constructing and destructing it every time we call bf:findAllObjects().  Be sure to clear the
                 -- table before reusing it!
+
+
 function shieldSelf()
     table.clear(items)
     bot:findVisibleObjects(items, ObjType.Bullet, ObjType.Seeker, ObjType.Asteroid, ObjType.Mine)
@@ -86,9 +130,11 @@ function shieldSelf()
     end
 end
 
+
 function angleDifference(angleA, angleB)
     return (math.mod(math.mod(angleA - angleB, math.pi * 2) + math.pi * 3, math.pi * 2) - math.pi)
 end
+
 
 function fireAtObjects()
     table.clear(items)
@@ -102,8 +148,8 @@ function fireAtObjects()
         end
     end
 end
- 
- 
+
+
 -- Fires at the specified object with the specified weapon if the obj is a good target.
 -- Does not fire if object is on the same team or if there is something in the way.
 -- Returns whether it fired or not.
@@ -141,7 +187,8 @@ function fireAtObject(obj, weapon)
     -- We made it here!  We have a valid target..
     local angle = getFiringSolution(obj)
     if angle ~= nil and bot:hasWeapon(weapon) then
-        bot:setAngle(angle + math.rad((math.random()-0.5)*20*(1-difficulty)))
+        local offset = ((math.random() * 2) - 1) * WORST_ACCURACY * (1 - accuracy)
+        bot:setAngle(angle + offset)
         bot:fireWeapon(weapon)
         --logprint("bot:fireWeapon() called!");
         return(true)
@@ -149,35 +196,45 @@ function fireAtObject(obj, weapon)
     --logprint("Firing solution not found.");
     return(false)
 end
- 
- 
+
+
 function getName()
-     return("S_Bot")
+    return profile["name"] .. " [s_bot]"
 end
 
 
+-- Each tick we see if we should shield
+-- We store if we've shielded for 'averageShieldMaxTicks' ticks and average it
 function shield()
-    averageArray[averageIndex] = shieldSelf()
-    averageIndex = math.mod(averageIndex,averageMax) + 1
+    averageShieldArray[averageShieldIndex] = shieldSelf()
+    averageShieldIndex = math.mod(averageShieldIndex,averageShieldMaxTicks) + 1
 
-    local shieldPercent = 0
+    local shieldTickCount = 0
 
-    for i = 1, averageMax do
-        if(averageArray[averageIndex]) then
-            shieldPercent = shieldPercent + 1
+    -- Find ratio of ticks shielded
+    for i = 1, averageShieldMaxTicks do
+        if(averageShieldArray[averageShieldIndex]) then
+            shieldTickCount = shieldTickCount + 1
         end
     end
 
-    shieldPercent = shieldPercent / averageMax
+    -- Set ratio
+    local shieldTickRatio = shieldTickCount / averageShieldMaxTicks
 
-    if(shieldPercent > directionThreshold) then
+    -- Reverse orbital direction if our shielding ratio is greater than the 
+    -- dodging threshold - this means the bot will appear to strafe more if
+    -- 'dodging' is higher
+    if(shieldTickRatio > 1 - dodging) then
         myOrbitalDirection = -myOrbitalDirection
-        for i = 1, averageMax do
-            averageArray[i] = false
+        
+        -- Reset shielding average if we had to change direction
+        for i = 1, averageShieldMaxTicks do
+            averageShieldArray[i] = false
         end
     end
 end
- 
+
+
 function orbitPoint(pt, dir, inputDist, inputStrictness)
     local distAway = botRadius * 7
     local strictness = 2
@@ -237,9 +294,10 @@ function gotoAndOrbitPosition(pt)
         end
     end
 end
- 
--- Returns true if it found an enemy to fight
-function attackNearbyEnemies(target, agressionLevel)
+
+
+-- TODO Use aggression in a different manner since I have no idea what this is doing
+function setAggressiveAttackTarget(target, aggression)
     if target ~= nil then
         local targetPos = target:getPos()
       
@@ -253,14 +311,11 @@ function attackNearbyEnemies(target, agressionLevel)
       
         --advantage is between -1 and 1, -1 meaning an extreme disadvantage and 1 meaning an extreme advantage
         local advantage = (myPow - otherPow) / math.max(myPow, otherPow)
-        if(advantage  / 2 + .5  >agressionLevel) then
-            --orbitPoint(targetPos, myOrbitalDirection, botRadius * 9, 2)
+        
+        if((advantage * 0.5) + .5 > 1 - aggression) then
             prevtarget = targetPos
-            return(false)      -- was true
-        else
         end
     end
-    return(false)
 end
 
 
@@ -284,8 +339,8 @@ function getObjective(objType, team, onTeam)
                 currentIndex = currentIndex + 1
             end
         elseif (objType == ObjType.Flag) and 
-               ((gameType == GameType.HTF) or (gameType == GameType.Retrieve)) and 
-               item:isInCaptureZone() then
+              ((gameType == GameType.HTF) or (gameType == GameType.Retrieve)) and 
+              item:isInCaptureZone() then
                 --logprint(item:getCaptureZone():getTeamIndex());
             if item:getCaptureZone():getTeamIndex() ~= bot:getTeamIndex() then
                 itemsOnMyTeam[currentIndex] = item
@@ -478,7 +533,7 @@ function doObjective(closestEnemy)
         end
     end
 end
- 
+
 
 function goInDirection()
     bot:setThrust(speed, dirToGo)
@@ -493,8 +548,7 @@ function onTick(deltaTime)
 
     local closestEnemy = bot:findClosestEnemy()
     
-    -- attackNearbyEnemies returns true if there is an enemy to fight, false if the bot can do something else
-    attackNearbyEnemies(closestEnemy, 1 - agression)
+    setAggressiveAttackTarget(closestEnemy, aggression)
     doObjective(closestEnemy)   -- Set bot's objective
 
     goInDirection()             -- Move the ship

@@ -80,6 +80,8 @@
  *
  **********************************************************************/
 
+#ifndef BF_NO_STACKTRACE
+
 #include "tnlTypes.h"
 
 #ifdef TNL_OS_WIN32
@@ -1361,5 +1363,6 @@ void StackWalker::OnOutput(LPCSTR buffer)
 }
 
 
-
 #endif
+
+#endif // BF_NO_STACKTRACE

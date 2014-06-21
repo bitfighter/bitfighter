@@ -2,15 +2,15 @@ Source: bitfighter
 Section: games
 Priority: optional
 Maintainer: Bryan Conrad <bkconrad@gmail.com>
-Build-Depends: debhelper (>= 8.0.0), cmake, libsdl1.2-dev, zlib1g-dev, libpng12-dev, libopenal-dev, libvorbis-dev, libspeex-dev, libmodplug-dev, cmake, build-essential, libtomcrypt-dev, libalure-dev, libboost1.54-dev, libluajit-5.1-dev, libpolyclipping-dev, libsqlite3-dev
-Standards-Version: 3.9.4
+Build-Depends: debhelper (>= 8.0.0), libsdl2-dev, zlib1g-dev, libpng12-dev, libopenal-dev, libvorbis-dev, libspeex-dev, libmodplug-dev, cmake, libtomcrypt-dev, libalure-dev, libboost1.54-dev, libluajit-5.1-dev, libpolyclipping-dev, libsqlite3-dev
+Standards-Version: 3.9.5
 Homepage: http://bitfighter.org
 #Vcs-Git: git://git.debian.org/collab-maint/bitfighter.git
 #Vcs-Browser: http://git.debian.org/?p=collab-maint/bitfighter.git;a=summary
 
 Package: bitfighter
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libsdl1.2debian, zlib1g, libpng12-0, libopenal1, libvorbis0a, libspeex1, libmodplug1, libtomcrypt0, libalure1, libluajit-5.1-2, libpolyclipping16, libsqlite3-0
+Depends: ${shlibs:Depends}, ${misc:Depends}, libsdl2-2.0-0, zlib1g, libpng12-0, libopenal1, libvorbis0a, libspeex1, libmodplug1, libtomcrypt0, libalure1, libluajit-5.1-2, libpolyclipping16, libsqlite3-0, fonts-play, fonts-droid, fonts-ocr-a
 Description: Fast-paced two dimensional online space shooter
  Bitfighter is a fast-paced two-dimensional online space
  shooter. It aims for intuitive gameplay and an approachable learning curve

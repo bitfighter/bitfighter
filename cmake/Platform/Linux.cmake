@@ -3,6 +3,9 @@
 #
 # Linker flags
 # 
+set(BF_CLIENT_LIBRARY_BEFORE_FLAGS "-Wl,-whole-archive")
+set(BF_CLIENT_LIBRARY_AFTER_FLAGS "-Wl,-no-whole-archive")
+
 set(BF_LINK_FLAGS "-Wl,--as-needed")
 
 # Only link in what is absolutely necessary
@@ -60,24 +63,24 @@ function(BF_PLATFORM_ADD_DEFINITIONS)
 endfunction()
 
 
-function(BF_PLATFORM_SET_TARGET_PROPERTIES)
+function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 	# Do nothing!
 endfunction()
 
 
-function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES)
+function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	# Do nothing!
 endfunction()
 
 
-function(BF_PLATFORM_INSTALL)
-	install(TARGETS bitfighter RUNTIME DESTINATION bin)
+function(BF_PLATFORM_INSTALL targetName)
+	install(TARGETS ${targetName} RUNTIME DESTINATION bin)
 	install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource/
 		DESTINATION share/games/bitfighter/
 	)
 endfunction()
 
 
-function(BF_PLATFORM_CREATE_PACKAGES)
+function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	# Do nothing!
 endfunction()

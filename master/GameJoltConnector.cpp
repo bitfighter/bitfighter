@@ -168,7 +168,7 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
    
    // Assemble list of all connected and authenticated players
 
-   string nameList = "";  // Comma seperated list of quoted, sanitized names ready to pass to a SQL IN() function
+   string nameList = "";  // Comma separated list of quoted, sanitized names ready to pass to a SQL IN() function
    S32 nameCount = 0;
 
    for(S32 i = 0; i < clientList->size(); i++)

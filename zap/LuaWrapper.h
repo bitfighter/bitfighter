@@ -43,8 +43,8 @@ extern "C"
 {
 #endif // LUAW_NO_EXTERN_C
 
-#  include "lua.h"
-#  include "lauxlib.h"
+#  include <lua.h>
+#  include <lauxlib.h>
 
 #ifndef LUAW_NO_EXTERN_C
 }

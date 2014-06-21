@@ -624,7 +624,6 @@ void setupLogging(const string &logDir)
 
    gServerLog.init(joindir(logDir, "bitfighter_server.log"), "a");
    gServerLog.setMsgTypes(LogConsumer::AllErrorTypes | LogConsumer::ServerFilter | LogConsumer::StatisticsFilter); 
-   gStdoutLog.logprintf("Welcome to Bitfighter!");
 }
 
 
@@ -731,16 +730,21 @@ string getUserDataDir()
 #if defined(TNL_OS_LINUX)
    path = string(getenv("HOME")) + "/.bitfighter";  // TODO: migrate to XDG standards?  Too much work for now!
 
-#elif defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
-   getUserDataPath(path);  // Directory.h
+#elif defined(TNL_OS_MAC_OSX)
+   getApplicationSupportPath(path);  // Directory.h
+   path += "/Bitfighter";
 
+#elif defined(TNL_OS_IOS)
+   // iOS uses the resources straight from the bundle
+   getAppResourcePath(path);  // Directory.h
+   
 #elif defined(TNL_OS_WIN32)
    path = string(getenv("APPDATA")) + "\\Bitfighter";
 
 #else
 #  error "Path needs to be defined for this platform"
 #endif
-
+   
    return path;
 }
 
@@ -1068,8 +1072,10 @@ static bool thisProgramHasCreatedConsoleWindow()
 #endif
 
 
+#ifndef BF_NO_STACKTRACE
 // Get the StackTracer up and running, ready to handle all our crash tracing needs!
 StackTracer stackTracer;
+#endif
 
 
 ////////////////////////////////////////
@@ -1138,6 +1144,7 @@ int main(int argc, char **argv)
    //else
    //   printf("Standalone run detected\n");
 
+   settings->setExecutablePath(string(argv[0]));
    settings->readCmdLineParams(argVector);      // Read cmd line params, needed to resolve folder locations
    settings->resolveDirs();                     // Figures out where all our folders are (except leveldir)
 
@@ -1271,6 +1278,9 @@ int main(int argc, char **argv)
          FreeConsole();
 #endif
    }
+
+   // We made it!
+   gStdoutLog.logprintf("Welcome to Bitfighter!");
 
    dedicatedServerLoop();              // Loop forever, running the idle command endlessly
 

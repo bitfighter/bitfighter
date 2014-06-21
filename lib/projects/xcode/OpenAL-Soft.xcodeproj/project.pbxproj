@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		738FCBE7185AE9FA00D21F32 /* config.h in Headers */ = {isa = PBXBuildFile; fileRef = 738FCBE6185AE9FA00D21F32 /* config.h */; };
 		73DD561B1752D1C900985BFA /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73DD561A1752D1C900985BFA /* AudioUnit.framework */; };
 		73DD561F1752D1D400985BFA /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73DD561E1752D1D400985BFA /* CoreAudio.framework */; };
 		73DD56231752D1E700985BFA /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73DD56221752D1E700985BFA /* AudioToolbox.framework */; };
@@ -49,6 +50,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		738FCBE6185AE9FA00D21F32 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../config.h; sourceTree = SOURCE_ROOT; };
 		73DD561A1752D1C900985BFA /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
 		73DD561E1752D1D400985BFA /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		73DD56221752D1E700985BFA /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -138,6 +140,7 @@
 		08FB77AEFE84172EC02AAC07 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				738FCBE6185AE9FA00D21F32 /* config.h */,
 				73DD58A41753093200985BFA /* alAuxEffectSlot.c */,
 				73DD58A51753093200985BFA /* alBuffer.c */,
 				73DD58A61753093200985BFA /* alEffect.c */,
@@ -190,6 +193,7 @@
 				73DD57A6175305F200985BFA /* efx-creative.h in Headers */,
 				73DD57A7175305F200985BFA /* efx-presets.h in Headers */,
 				73DD57A8175305F200985BFA /* efx.h in Headers */,
+				738FCBE7185AE9FA00D21F32 /* config.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
