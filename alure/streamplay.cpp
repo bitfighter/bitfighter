@@ -244,6 +244,12 @@ void StopStream(alureStream *stream)
 {
 	EnterCriticalSection(&cs_StreamPlay);
 
+	if(AsyncPlayList.size() == 0)
+	{
+		LeaveCriticalSection(&cs_StreamPlay);
+		return;
+	}
+
 	std::list<AsyncPlayEntry>::iterator i = AsyncPlayList.begin(),
 	                                    end = AsyncPlayList.end();
 	while(i != end)
