@@ -7,8 +7,11 @@ add_dependencies(tnlping
 	tnl
 )
 
+BF_PLATFORM_SET_EXTRA_LIBS()
+
 target_link_libraries(tnlping
 	tnl
+	${EXTRA_LIBS}
 )
 
 set_target_properties(tnlping

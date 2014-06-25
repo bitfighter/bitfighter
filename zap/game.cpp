@@ -483,12 +483,14 @@ void Game::addWallItem(WallItem *wallItem, GridDatabase *database)
 const Vector<WallItem *> &Game::getWallList() const
 {
    TNLAssert(false, "Not implemented for this class!");
+   return NULL;
 }
    
 
 const Vector<PolyWall *> &Game::getPolyWallList() const
 {
    TNLAssert(false, "Not implemented for this class!");
+   return NULL;
 }
 
 

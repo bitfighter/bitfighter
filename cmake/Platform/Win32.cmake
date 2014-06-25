@@ -4,8 +4,9 @@
 # Linker flags
 # 
 if(MSVC)
-	set(BF_CLIENT_LIBRARY_BEFORE_FLAGS "/OPT:NOREF")
-	set(BF_CLIENT_LIBRARY_AFTER_FLAGS "/OPT:REF")
+	# set(BF_CLIENT_LIBRARY_BEFORE_FLAGS "/OPT:NOREF")
+	# Error	46	fatal error LNK1181: cannot open input file '\OPT:NOREF.obj'
+	# set(BF_CLIENT_LIBRARY_AFTER_FLAGS "/OPT:REF")
 	
 	# Using the following NODEFAULTLIB to fix LNK4098 warning and some linker errors
 	set(CMAKE_EXE_LINKER_FLAGS_DEBUG          "${CMAKE_EXE_LINKER_FLAGS_DEBUG}          /NODEFAULTLIB:libc.lib;libcmt.lib;msvcrt.lib;libcd.lib;msvcrtd.lib")

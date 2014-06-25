@@ -14,8 +14,7 @@
 #include "tnlVector.h"
 #include "tnlNetObject.h"
 
-#include "gtest/gtest.h"
-
+#include "../gtest/include/gtest/gtest.h"  // Put this as header path in cmake?
 
 namespace Zap
 {
