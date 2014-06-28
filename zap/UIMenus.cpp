@@ -17,6 +17,7 @@
 #include "UINameEntry.h"
 #include "UIManager.h"
 
+#include "Level.h"
 #include "LevelSource.h"
 #include "LevelDatabase.h"
 
@@ -908,6 +909,10 @@ static void highScoresSelectedCallback(ClientGame *game, U32 unused)
 
 static void editorSelectedCallback(ClientGame *game, U32 unused)
 {
+   // The editor needs to have a GameType to initialize.  In order to have a GameType, we need to have a Level (which holds our
+   // GameType object now).  Normally, levels come from the server, but in the case of the editor, we need to create one.  We
+   // can do that here (ugly as it may be) so that it will be ready by the time we get to the activate call below.
+   game->setLevel(new Level());
    game->setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);      // <=== Should not be here... perhaps in editor onActivate?
    game->getUIManager()->getUI<EditorUserInterface>()->setLevelFileName("");      // Reset this so we get the level entry screen
    game->getUIManager()->activate<EditorUserInterface>();
