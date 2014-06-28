@@ -3,6 +3,8 @@
 # 
 
 add_executable(bitfighter
+	$<TARGET_OBJECTS:bitfighter_client>
+	${EXTRA_EXECUTABLE_SOURCES}
 	main.cpp
 )
 
@@ -11,9 +13,8 @@ add_dependencies(bitfighter
 )
 
 target_link_libraries(bitfighter
-	${BF_CLIENT_LIBRARY_BEFORE_FLAGS}
-	bitfighter_client
-	${BF_CLIENT_LIBRARY_AFTER_FLAGS}
+	${CLIENT_LIBS}
+	${SHARED_LIBS}
 )
 
 # Where to put the executable

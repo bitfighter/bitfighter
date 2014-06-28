@@ -4,6 +4,7 @@
 add_executable(bitfighterd
 	EXCLUDE_FROM_ALL
 	${SHARED_SOURCES}
+	${EXTRA_EXECUTABLE_SOURCES}
 	main.cpp
 )
 

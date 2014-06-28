@@ -6,10 +6,14 @@
 #ifndef _STACK_TRACER_H_
 #define _STACK_TRACER_H_
 
-#ifndef BF_NO_STACKTRACE
-
 #include "tnlTypes.h"
 #include "tnlPlatform.h"
+
+#ifdef TNL_DEBUG
+#define BF_NO_STACKTRACE
+#endif
+
+#ifndef BF_NO_STACKTRACE
 
 
 using namespace TNL;

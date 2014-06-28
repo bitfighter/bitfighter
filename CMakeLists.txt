@@ -1,5 +1,5 @@
 project (bitfighter)
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.8)
 
 
 #
@@ -99,7 +99,10 @@ find_package(OpenAL)
 
 # Special function to look for a system lib, but fall back to the in-tree version
 function(FIND_WITH_FALLBACK packageName capsName dirName)
-	find_package(${packageName})
+	if(NOT FORCE_IN_TREE_${capsName})
+		find_package(${packageName})
+	endif()
+
 	if( NOT ${capsName}_FOUND )
 		set(${capsName}_LIBRARIES ${dirName})
 		set(${capsName}_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/${dirName}")

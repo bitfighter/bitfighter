@@ -3,9 +3,6 @@
 #
 # Linker flags
 # 
-set(BF_CLIENT_LIBRARY_BEFORE_FLAGS "-Wl,-whole-archive")
-set(BF_CLIENT_LIBRARY_AFTER_FLAGS "-Wl,-no-whole-archive")
-
 set(BF_LINK_FLAGS "-Wl,--as-needed")
 
 # Only link in what is absolutely necessary
@@ -44,6 +41,11 @@ find_package(VorbisFile)
 # need to be re-set with the PARENT_SCOPE option
 
 function(BF_PLATFORM_SET_EXTRA_SOURCES)
+	# Do nothing!
+endfunction()
+
+
+function(BF_PLATFORM_SET_EXTRA_EXECUTABLE_SOURCES)
 	# Do nothing!
 endfunction()
 

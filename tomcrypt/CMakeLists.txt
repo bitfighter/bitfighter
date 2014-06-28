@@ -103,6 +103,8 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/hashes/chc/chc.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/hashes/rmd256.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/hashes/sha2/sha512.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/hashes/sha2/sha256.c
+${CMAKE_CURRENT_SOURCE_DIR}/src/hashes/sha2/sha384.c
+${CMAKE_CURRENT_SOURCE_DIR}/src/hashes/sha2/sha224.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/hashes/sha1.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/hashes/md5.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/hashes/md4.c

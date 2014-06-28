@@ -37,22 +37,32 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSymbolStrings.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestUtils.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/main_test.cpp
+	
+	# 'master' classes
+	# TODO:  Some day create a libmaster
+	${CMAKE_SOURCE_DIR}/master/master.cpp
+	${CMAKE_SOURCE_DIR}/master/MasterServerConnection.cpp
+	${CMAKE_SOURCE_DIR}/master/GameJoltConnector.cpp
 )
 
 
 add_executable(test EXCLUDE_FROM_ALL
+	$<TARGET_OBJECTS:bitfighter_client>
 	${TEST_SOURCES}
 )
 
 target_link_libraries(test
-	${BF_CLIENT_LIBRARY_BEFORE_FLAGS}
-	bitfighter_client
-	${BF_CLIENT_LIBRARY_AFTER_FLAGS}
+	${CLIENT_LIBS}
+	${SHARED_LIBS}
 	gtest
 )
 
 add_dependencies(test
 	bitfighter_client
+	${LUA_LIB}
+	tnl
+	tomcrypt
+	clipper
 	gtest
 )
 
