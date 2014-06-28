@@ -99,17 +99,19 @@ find_package(OpenAL)
 
 # Special function to look for a system lib, but fall back to the in-tree version
 function(FIND_WITH_FALLBACK packageName capsName dirName)
-	find_package(${packageName})
-	if( NOT ${capsName}_FOUND )
-		set(${capsName}_LIBRARIES ${dirName})
-		set(${capsName}_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/${dirName}")
-	endif()
+	if(NOT FORCE_IN_TREE_${capsName})
+		find_package(${packageName})
+		if( NOT ${capsName}_FOUND )
+			set(${capsName}_LIBRARIES ${dirName})
+			set(${capsName}_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/${dirName}")
+		endif()
 
-	# export the results
-	set(${capsName}_FOUND "${${capsName}_FOUND}" PARENT_SCOPE)
-	set(${capsName}_INCLUDE_DIR "${${capsName}_INCLUDE_DIR}" PARENT_SCOPE)
-	set(${capsName}_LIBRARY "${${capsName}_LIBRARY}" PARENT_SCOPE)
-	set(${capsName}_LIBRARIES "${${capsName}_LIBRARIES}" PARENT_SCOPE)
+		# export the results
+		set(${capsName}_FOUND "${${capsName}_FOUND}" PARENT_SCOPE)
+		set(${capsName}_INCLUDE_DIR "${${capsName}_INCLUDE_DIR}" PARENT_SCOPE)
+		set(${capsName}_LIBRARY "${${capsName}_LIBRARY}" PARENT_SCOPE)
+		set(${capsName}_LIBRARIES "${${capsName}_LIBRARIES}" PARENT_SCOPE)
+	endif()
 endfunction()
 
 
