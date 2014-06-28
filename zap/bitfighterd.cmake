@@ -13,6 +13,7 @@ add_dependencies(bitfighterd
 	${LUA_LIB}
 	tomcrypt
 	clipper
+	poly2tri
 	sqlite
 )
 

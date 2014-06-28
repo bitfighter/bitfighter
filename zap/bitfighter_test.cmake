@@ -55,11 +55,6 @@ target_link_libraries(test
 add_dependencies(test
 	bitfighter_client
 	master_lib
-	${LUA_LIB}
-	tnl
-	tomcrypt
-	sqlite
-	clipper
 	gtest
 )
 

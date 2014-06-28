@@ -96,11 +96,6 @@ set(SHARED_SOURCES
 	zoneControlGame.cpp
 	${CMAKE_SOURCE_DIR}/recast/RecastAlloc.cpp
 	${CMAKE_SOURCE_DIR}/recast/RecastMesh.cpp
-	${CMAKE_SOURCE_DIR}/poly2tri/common/shapes.cc
-	${CMAKE_SOURCE_DIR}/poly2tri/sweep/advancing_front.cc
-	${CMAKE_SOURCE_DIR}/poly2tri/sweep/cdt.cc
-	${CMAKE_SOURCE_DIR}/poly2tri/sweep/sweep.cc
-	${CMAKE_SOURCE_DIR}/poly2tri/sweep/sweep_context.cc
 )
 
 # Extra sources that are needed by the final executable.  The existence
@@ -206,17 +201,13 @@ set(SHARED_LIBS
 	${CMAKE_THREAD_LIBS_INIT}
 	${LUA_LIB}
 	tnl
+	${TOMCRYPT_LIBRARIES}
 	${SQLITE3_LIBRARIES}
+	${CLIPPER_LIBRARIES}
+	${POLY2TRI_LIBRARIES}
 	${EXTRA_LIBS}
 )
 
-if(CLIPPER_LIBRARIES)
-	set(SHARED_LIBS ${SHARED_LIBS} ${CLIPPER_LIBRARIES})
-endif()
-
-if(TOMCRYPT_LIBRARIES)
-	set(SHARED_LIBS ${SHARED_LIBS} ${TOMCRYPT_LIBRARIES})
-endif()
 
 # libraries used only on the client
 set(CLIENT_LIBS

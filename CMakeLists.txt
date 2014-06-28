@@ -164,6 +164,14 @@ if(NOT CLIPPER_FOUND)
 endif()
 
 
+# poly2tri
+find_with_fallback(Poly2tri POLY2TRI poly2tri)
+if(NOT POLY2TRI_FOUND)
+	message(STATUS "Using in-tree poly2tri")
+	add_subdirectory(poly2tri)
+endif()
+
+
 # LuaJIT / Lua
 find_with_fallback(LuaJit LUAJIT lua)
 if(LUAJIT_FOUND)
