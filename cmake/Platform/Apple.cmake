@@ -55,9 +55,6 @@ endif()
 # Compiler specific flags
 # 
 if(CMAKE_COMPILER_IS_GNUCC)
-	set(BF_CLIENT_LIBRARY_BEFORE_FLAGS "-all_load")
-	set(BF_CLIENT_LIBRARY_AFTER_FLAGS "-noall_load")
-	
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
 endif()
@@ -112,6 +109,11 @@ find_package(Sparkle)
 function(BF_PLATFORM_SET_EXTRA_SOURCES)
 	list(APPEND SHARED_SOURCES Directory.mm)
 	set(SHARED_SOURCES ${SHARED_SOURCES} PARENT_SCOPE)
+endfunction()
+
+
+function(BF_PLATFORM_SET_EXTRA_EXECUTABLE_SOURCES)
+	# Do nothing!
 endfunction()
 
 

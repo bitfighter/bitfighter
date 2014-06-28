@@ -21,7 +21,7 @@ set(MASTER_SOURCES
 	../zap/stringUtils.cpp
 	../zap/Timer.cpp
 	../zap/WeaponInfo.cpp
-	../sqlite/sqlite3.c    # ${SQLITE3_SOURCE_FILES} doesn't work in windows?
+	${SQLITE3_FILES}
 )
 
 set(MASTER_PHPBB_SOURCES
@@ -41,13 +41,18 @@ endif()
 
 set(MASTER_DEPS tnl tomcrypt)
 
-set(MASTER_LIBS tnl tomcrypt ${CMAKE_THREAD_LIBS_INIT} ${MASTER_EXTRA_LIBS})
+set(MASTER_LIBS 
+	tnl
+	tomcrypt 
+	${SQLITE3_LIBRARIES} 
+	${CMAKE_THREAD_LIBS_INIT} 
+	${MASTER_EXTRA_LIBS}
+)
 
 set(MASTER_INCLUDES 
-	${CMAKE_SOURCE_DIR}/tnl
 	${TOMCRYPT_INCLUDE_DIR}
-	${CMAKE_SOURCE_DIR}/boost
-	${CMAKE_SOURCE_DIR}/sqlite
+	${BOOST_INCLUDE_DIR}
+	${CMAKE_SOURCE_DIR}/tnl
 )
 
 
