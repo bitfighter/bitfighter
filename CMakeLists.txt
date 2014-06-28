@@ -101,17 +101,18 @@ find_package(OpenAL)
 function(FIND_WITH_FALLBACK packageName capsName dirName)
 	if(NOT FORCE_IN_TREE_${capsName})
 		find_package(${packageName})
-		if( NOT ${capsName}_FOUND )
-			set(${capsName}_LIBRARIES ${dirName})
-			set(${capsName}_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/${dirName}")
-		endif()
-
-		# export the results
-		set(${capsName}_FOUND "${${capsName}_FOUND}" PARENT_SCOPE)
-		set(${capsName}_INCLUDE_DIR "${${capsName}_INCLUDE_DIR}" PARENT_SCOPE)
-		set(${capsName}_LIBRARY "${${capsName}_LIBRARY}" PARENT_SCOPE)
-		set(${capsName}_LIBRARIES "${${capsName}_LIBRARIES}" PARENT_SCOPE)
 	endif()
+
+	if( NOT ${capsName}_FOUND )
+		set(${capsName}_LIBRARIES ${dirName})
+		set(${capsName}_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/${dirName}")
+	endif()
+
+	# export the results
+	set(${capsName}_FOUND "${${capsName}_FOUND}" PARENT_SCOPE)
+	set(${capsName}_INCLUDE_DIR "${${capsName}_INCLUDE_DIR}" PARENT_SCOPE)
+	set(${capsName}_LIBRARY "${${capsName}_LIBRARY}" PARENT_SCOPE)
+	set(${capsName}_LIBRARIES "${${capsName}_LIBRARIES}" PARENT_SCOPE)
 endfunction()
 
 
