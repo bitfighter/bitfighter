@@ -149,8 +149,8 @@ endif()
 
 
 # Boost
-find_with_fallback(Boost BOOST boost)
-if(NOT BOOST_FOUND)
+find_with_fallback(Boost Boost boost)
+if(NOT Boost_FOUND)
 	message(STATUS "Using in-tree Boost c++ headers")
 	set(BOOST_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/boost")
 endif()
