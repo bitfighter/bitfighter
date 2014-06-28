@@ -114,14 +114,11 @@ find_package(VorbisFile)
 # need to be re-set with the PARENT_SCOPE option
 
 function(BF_PLATFORM_SET_EXTRA_SOURCES)
-	# Do nothing!
-endfunction()
-
-function(BF_PLATFORM_SET_EXTRA_EXECUTABLE_SOURCES)
 	if(NOT XCOMPILE)
-		# Add icon resource in Visual Studio
-		list(APPEND EXTRA_EXECUTABLE_SOURCES ZAP.rc)
-		set(EXTRA_EXECUTABLE_SOURCES ${EXTRA_EXECUTABLE_SOURCES} PARENT_SCOPE)
+		# Add icon resource in Visual Studio.  This must be added into the final
+		# executable
+		list(APPEND EXTRA_SOURCES ZAP.rc)
+		set(EXTRA_SOURCES ${EXTRA_SOURCES} PARENT_SCOPE)
 	endif()
 endfunction()
 

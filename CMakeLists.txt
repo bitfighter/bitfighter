@@ -135,8 +135,7 @@ endif()
 find_with_fallback(Sqlite SQLITE3 sqlite)
 if(NOT SQLITE3_FOUND)
 	message(STATUS "Using in-tree sqlite3")
-	set(SQLITE3_LIBRARIES "")
-	set(SQLITE3_FILES "${CMAKE_SOURCE_DIR}/sqlite/sqlite3.c")
+	add_subdirectory(sqlite)
 endif()
 
 

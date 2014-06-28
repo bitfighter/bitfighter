@@ -94,9 +94,6 @@ set(SHARED_SOURCES
 	WeaponInfo.cpp
 	Zone.cpp
 	zoneControlGame.cpp
-	${SQLITE3_FILES}
-	${CMAKE_SOURCE_DIR}/master/database.cpp
-	${CMAKE_SOURCE_DIR}/master/masterInterface.cpp
 	${CMAKE_SOURCE_DIR}/recast/RecastAlloc.cpp
 	${CMAKE_SOURCE_DIR}/recast/RecastMesh.cpp
 	${CMAKE_SOURCE_DIR}/poly2tri/common/shapes.cc
@@ -106,6 +103,14 @@ set(SHARED_SOURCES
 	${CMAKE_SOURCE_DIR}/poly2tri/sweep/sweep_context.cc
 )
 
+# Extra sources that are needed by the final executable.  The existence
+# of these probably suggests some problem with our code
+set(EXTRA_SOURCES
+	${CMAKE_SOURCE_DIR}/master/database.cpp
+	${CMAKE_SOURCE_DIR}/master/masterInterface.cpp
+)
+
+# Client-only classes
 set(CLIENT_SOURCES 
 	AToBScroller.cpp
 	ChatCommands.cpp
@@ -175,11 +180,6 @@ set(CLIENT_SOURCES
 	${CMAKE_SOURCE_DIR}/fontstash/fontstash.c
 )
 
-# Variable to old extra sources that must be compiled into the exe last
-# like the Windows .res file
-set(EXTRA_EXECUTABLE_SOURCES
-)
-
 file(GLOB BITFIGHTER_HEADERS *.h)
 
 file(GLOB OTHER_HEADERS
@@ -187,15 +187,12 @@ file(GLOB OTHER_HEADERS
 	${CMAKE_SOURCE_DIR}/other/*.h 
 	${CMAKE_SOURCE_DIR}/fontstash/*.h 
 	${CMAKE_SOURCE_DIR}/recast/*.h 
-	${CMAKE_SOURCE_DIR}/sqlite/*.h
 	${CMAKE_SOURCE_DIR}/poly2tri/*.h
 	${CMAKE_SOURCE_DIR}/poly2tri/common/*.h
 	${CMAKE_SOURCE_DIR}/poly2tri/sweep/*.h
 )
 
 BF_PLATFORM_SET_EXTRA_SOURCES()
-
-BF_PLATFORM_SET_EXTRA_EXECUTABLE_SOURCES()
 
 
 #

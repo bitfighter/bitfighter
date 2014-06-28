@@ -17,6 +17,7 @@ add_dependencies(bitfighter_client
 	tnl
 	tomcrypt
 	clipper
+	sqlite
 )
 
 if(USE_GLES)

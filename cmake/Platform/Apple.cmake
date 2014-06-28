@@ -112,11 +112,6 @@ function(BF_PLATFORM_SET_EXTRA_SOURCES)
 endfunction()
 
 
-function(BF_PLATFORM_SET_EXTRA_EXECUTABLE_SOURCES)
-	# Do nothing!
-endfunction()
-
-
 function(BF_PLATFORM_SET_EXTRA_LIBS)
 	set(EXTRA_LIBS dl m PARENT_SCOPE)
 endfunction()

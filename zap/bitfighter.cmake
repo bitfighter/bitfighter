@@ -4,7 +4,7 @@
 
 add_executable(bitfighter
 	$<TARGET_OBJECTS:bitfighter_client>
-	${EXTRA_EXECUTABLE_SOURCES}
+	${EXTRA_SOURCES}
 	main.cpp
 )
 

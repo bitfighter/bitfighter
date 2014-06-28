@@ -6,10 +6,13 @@
 set(MASTER_SOURCES
 	database.cpp
 	GameJoltConnector.cpp
-	main.cpp
 	master.cpp
 	masterInterface.cpp
 	MasterServerConnection.cpp
+)
+
+# Extra classes needed for the main master executable
+set(MASTER_EXTRA_SOURCES
 	../zap/ChatCheck.cpp
 	../zap/Color.cpp
 	../zap/gameStats.cpp
@@ -21,7 +24,6 @@ set(MASTER_SOURCES
 	../zap/stringUtils.cpp
 	../zap/Timer.cpp
 	../zap/WeaponInfo.cpp
-	${SQLITE3_FILES}
 )
 
 set(MASTER_PHPBB_SOURCES
@@ -39,12 +41,12 @@ else()
 endif()
 
 
-set(MASTER_DEPS tnl tomcrypt)
+set(MASTER_DEPS tnl tomcrypt sqlite)
 
 set(MASTER_LIBS 
 	tnl
 	tomcrypt 
-	${SQLITE3_LIBRARIES} 
+	${SQLITE3_LIBRARIES}
 	${CMAKE_THREAD_LIBS_INIT} 
 	${MASTER_EXTRA_LIBS}
 )
@@ -73,34 +75,45 @@ else()
 endif()
 
 
-add_executable(master
+#
+# master_lib OBJECT build
+#
+add_library(master_lib OBJECT
 	EXCLUDE_FROM_ALL
 	${MASTER_SOURCES}
 	${MASTER_PHPBB_SOURCES}
 	${MASTER_HEADERS}
 )
 
-add_dependencies(master ${MASTER_DEPS})
+add_dependencies(master_lib
+	${MASTER_DEPS}
+)
+
+#
+# master executable
+#
+add_executable(master
+	EXCLUDE_FROM_ALL
+	$<TARGET_OBJECTS:master_lib>
+	${MASTER_EXTRA_SOURCES}
+	main.cpp
+)
+
+add_dependencies(master master_lib)
 
 target_link_libraries(master ${MASTER_LIBS})
 
-set_target_properties(master
-	PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe
-)
+set_target_properties(master PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe)
+
 
 include_directories(${MASTER_INCLUDES})
 
 # Set extra compile definitions needed for the MySQL build
 if(MYSQL_FOUND AND NOT MASTER_MINIMAL)
-	set_target_properties(master
-		PROPERTIES
-		COMPILE_DEFINITIONS "BF_WRITE_TO_MYSQL;VERIFY_PHPBB3;BF_MASTER"
-	)
+	set_target_properties(master_lib master PROPERTIES COMPILE_DEFINITIONS "BF_WRITE_TO_MYSQL;VERIFY_PHPBB3;BF_MASTER")
 else()
 	# BF_MASTER workaround to prevent WeaponInfo.cpp from including BfObject
-	set_target_properties(master
-		PROPERTIES
-		COMPILE_DEFINITIONS "BF_MASTER"
-	)
+	set_target_properties(master_lib master PROPERTIES COMPILE_DEFINITIONS "BF_MASTER")
 endif()
+
+set_target_properties(master_lib master PROPERTIES COMPILE_DEFINITIONS_DEBUG "TNL_DEBUG")

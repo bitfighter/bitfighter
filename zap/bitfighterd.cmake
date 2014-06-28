@@ -4,7 +4,7 @@
 add_executable(bitfighterd
 	EXCLUDE_FROM_ALL
 	${SHARED_SOURCES}
-	${EXTRA_EXECUTABLE_SOURCES}
+	${EXTRA_SOURCES}
 	main.cpp
 )
 
@@ -12,6 +12,8 @@ add_dependencies(bitfighterd
 	tnl
 	${LUA_LIB}
 	tomcrypt
+	clipper
+	sqlite
 )
 
 target_link_libraries(bitfighterd
