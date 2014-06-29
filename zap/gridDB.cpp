@@ -123,7 +123,9 @@ void GridDatabase::addToDatabase(DatabaseObject *object)
    TNLAssert(object->mDatabase != this, "Already added to database, trying to add to same database again!");
    TNLAssert(!object->mDatabase,        "Already added to database, trying to add to different database!");
    TNLAssert(object->getExtentSet(),    "Object extents were never set!");
-   TNLAssert(object->getObjectTypeNumber() != WallItemTypeNumber, "Should not add wall items to the database!");
+
+   // WallItems should not be added to the database during a regular game, but the editor will add them...
+   //TNLAssert(object->getObjectTypeNumber() != WallItemTypeNumber, "Should not add wall items to the database!");
 
    if(object->mDatabase)      // Should never happen
       return;
