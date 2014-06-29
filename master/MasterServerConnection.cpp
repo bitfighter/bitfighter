@@ -16,7 +16,7 @@
 #include "../zap/LevelDatabase.h"
 
 
-#include "../boost/boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 using namespace DbWriter;
 

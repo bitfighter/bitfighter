@@ -20,7 +20,8 @@ WINDOWS
 
 You need the following packages to run this:
  - pywin32 - http://sourceforge.net/projects/pywin32/files/pywin32/
-   Note that the it is important to get the correct version -- see README.txt in the pywin32 downloads section for details
+   Note that it is important to get the correct version -- see README.txt in the pywin32 downloads section for details
+ 
  - systray - http://sourceforge.net/projects/pysystray/files/pysystray/
 
  This is known to work with Python 2.7
@@ -83,13 +84,18 @@ EXECUTABLE              = "bitfighter"
 
 # Different icon formats for different systems
 if sys.platform == 'win32':
-    ICON_PATH           = "redship48.ico"
+    ICON_FILE           = "redship48.ico"
 
 elif sys.platform == 'darwin':
-    ICON_PATH           = "redship18.png"
+    ICON_FILE           = "redship18.png"
 
 else:
-    ICON_PATH           = "redship48.png"
+    ICON_FILE           = "redship48.png"
+    
+
+# Adjust this variable for Linux distros
+ICON_BASE = ""
+ICON_PATH = ICON_BASE + ICON_FILE
 
 
 loggingLevel = logging.ERROR

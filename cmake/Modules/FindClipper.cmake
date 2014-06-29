@@ -1,6 +1,6 @@
 # Finds Clipper library
 #
-#  CLIPPER_INCLUDE_DIR - where to find clipper.h, etc.
+#  CLIPPER_INCLUDE_DIR - where to find clipper.hpp, etc.
 #  CLIPPER_LIBRARIES   - List of libraries when using Clipper.
 #  CLIPPER_FOUND       - True if Clipper found.
 

@@ -135,8 +135,7 @@ endif()
 find_with_fallback(Sqlite SQLITE3 sqlite)
 if(NOT SQLITE3_FOUND)
 	message(STATUS "Using in-tree sqlite3")
-	set(SQLITE3_LIBRARIES "")
-	set(SQLITE3_FILES "${CMAKE_SOURCE_DIR}/sqlite/sqlite3.c")
+	add_subdirectory(sqlite)
 endif()
 
 
@@ -150,8 +149,8 @@ endif()
 
 
 # Boost
-find_with_fallback(Boost BOOST boost)
-if(NOT BOOST_FOUND)
+find_with_fallback(Boost Boost boost)
+if(NOT Boost_FOUND)
 	message(STATUS "Using in-tree Boost c++ headers")
 	set(BOOST_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/boost")
 endif()
@@ -162,6 +161,14 @@ find_with_fallback(Clipper CLIPPER clipper)
 if(NOT CLIPPER_FOUND)
 	message(STATUS "Using in-tree Clipper")
 	add_subdirectory(clipper)
+endif()
+
+
+# poly2tri
+find_with_fallback(Poly2tri POLY2TRI poly2tri)
+if(NOT POLY2TRI_FOUND)
+	message(STATUS "Using in-tree poly2tri")
+	add_subdirectory(poly2tri)
 endif()
 
 
