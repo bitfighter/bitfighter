@@ -213,6 +213,7 @@ void Level::setGameType(GameType *gameType)
 {
    delete mGameType;
    mGameType = gameType;
+   mGameType->setLevel(this);
 }
 
 
@@ -486,7 +487,7 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
             return false;
          }
 
-         mGameType.set(gt);
+         setGameType(gt);
          return true;
       }
 

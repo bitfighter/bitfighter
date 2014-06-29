@@ -57,9 +57,10 @@ public:
    };
 
 private:
-   Game *mGame;
+   Game *mGame;                     // Game that this GameType is related to; NULL if it has not been added to a game
+   Level *mLevel;                   // Level that this GameType is related to; NULL if it is not part of a level
 
-   Point getSpawnPoint(S32 team);        // Pick a spawn point for ship or robot
+   Point getSpawnPoint(S32 team);   // Pick a spawn point for ship or robot
 
    bool mLevelHasLoadoutZone;
    bool mLevelHasPredeployedFlags;
@@ -88,11 +89,11 @@ private:
    string mLevelDescription;
    StringTableEntry mLevelCredits;
 
-   string mScriptName;                 // Name of levelgen script, if any
-   Vector<string> mScriptArgs;         // List of script params  
+   string mScriptName;              // Name of levelgen script, if any
+   Vector<string> mScriptArgs;      // List of script params  
 
-   S32 mMinRecPlayers;         // Recommended min players for this level
-   S32 mMaxRecPlayers;         // Recommended max players for this level
+   S32 mMinRecPlayers;              // Recommended min players for this level
+   S32 mMaxRecPlayers;              // Recommended max players for this level
 
    Vector<SafePtr<MoveItem> > mCacheResendItem;  // Speed up c2sResendItemStatus
 
@@ -147,6 +148,8 @@ public:
    virtual bool canBeTeamGame() const;
    virtual bool canBeIndividualGame() const;
    virtual bool teamHasFlag(S32 teamIndex) const;
+
+   void setLevel(Level *level);
 
    bool isOvertime() const;
 
