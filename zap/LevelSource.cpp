@@ -439,7 +439,7 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
 //               GameType *gameType = new GameType();
 //               gameType->addToGame(this, getGameObjDatabase());
 //            }
-//            getGameType()->makeSureTeamCountIsNotZero();
+//            mLevel->makeSureTeamCountIsNotZero();
 //
 //            return;
 //         }

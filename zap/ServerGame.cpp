@@ -557,7 +557,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
                GameType *gameType = new GameType();
                gameType->addToGame(this, getGameObjDatabase());
             }
-            getGameType()->makeSureTeamCountIsNotZero();
+            mLevel->makeSureTeamCountIsNotZero();
 
             return;
          }
@@ -1076,7 +1076,7 @@ bool ServerGame::loadLevel()
    EventManager::get()->update();
 
    // Check after script, script might add Teams
-   if(getGameType()->makeSureTeamCountIsNotZero())
+   if(mLevel->makeSureTeamCountIsNotZero())
       logprintf(LogConsumer::LogLevelError, "Warning: Missing Team in %s", 
                                             mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
 

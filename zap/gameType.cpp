@@ -156,12 +156,19 @@ bool GameType::onGhostAdd(GhostConnection *theConnection)
 }
 
 
+// We get here when we change GameType in the editor
+void GameType::addToGame(Game *game)
+{
+   mGame = game;
+}
+
+
 // GameType object is the first to be added when a new game starts... 
 // therefore, this is a reasonable signifier that a new game is starting up.  I think.
 // Runs on both client and server.
 void GameType::addToGame(Game *game, Level *level)
 {
-   mGame = game;
+   addToGame(game);
    mLevel = level;
 
    // On server, GameType is added to the Level as the level is being read from the LevelSource.  On the client, the
@@ -1299,11 +1306,11 @@ bool GameType::isTeamGame() const
 // Runs on server, after level has been loaded from a file.  Can be overridden, but isn't.
 void GameType::onLevelLoaded()
 {
+   TNLAssert(dynamic_cast<ServerGame *>(mGame), "Wrong game here!");
+
    mLevelHasLoadoutZone      = mLevel->hasObjectOfType(LoadoutZoneTypeNumber);
    mLevelHasPredeployedFlags = mLevel->hasObjectOfType(FlagTypeNumber);
    mLevelHasFlagSpawns       = mLevel->hasObjectOfType(FlagSpawnTypeNumber);
-
-   TNLAssert(dynamic_cast<ServerGame *>(mGame), "Wrong game here!");
 
    //--> bots should be started when added to game; with this line, they are started twice!
    //static_cast<ServerGame *>(mGame)->startAllBots();           // Cycle through all our bots and start them up  --> bots should be started when added to game
@@ -1646,18 +1653,6 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
          connection->objectInScope(mGame->getBot(i));  
 }
 
-
-// Zero teams will crash, returns true if we had to add a default team.  Server only.
-bool GameType::makeSureTeamCountIsNotZero()
-{
-   if(mLevel->getTeamCount() == 0) 
-   {
-      mLevel->addTeam(new Team("Missing Team", Colors::blue));     // Will be deleted by TeamManager
-      return true;
-   }
-
-   return false;
-}
 
 
 // This method can be overridden by other game types that handle colors differently

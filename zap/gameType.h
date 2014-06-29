@@ -250,6 +250,7 @@ public:
    static Vector<SignedInt<24> > mScores;
    static Vector<SignedFloat<8> > mRatings;
 
+   void addToGame(Game *game);
    virtual void addToGame(Game *game, Level *level);
 
    virtual bool processArguments(S32 argc, const char **argv, Level *level);
@@ -337,8 +338,6 @@ public:
 
    void makeRequestedLoadoutActiveIfShipIsInLoadoutZone(ClientInfo *clientInfo, const LoadoutTracker &loadout);
    void updateShipLoadout(BfObject *shipObject); // called from LoadoutZone when a Ship touches the zone
-
-   bool makeSureTeamCountIsNotZero();                 // Zero teams can cause crashiness
 
    virtual const Color &getTeamColor(const BfObject *object) const; // Get the color of a team, based on object
            const Color &getTeamColor(S32 team)               const; // Get the color of a team, based on index

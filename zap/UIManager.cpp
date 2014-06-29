@@ -174,11 +174,8 @@ void UIManager::renderPrevUI(const UserInterface *ui)
 
 void UIManager::activate(UserInterface *ui, bool save)  // save defaults to true
 {
-   if(mCurrentInterface)
-   {
-      if(save)
-         saveUI(mCurrentInterface);
-   }
+   if(mCurrentInterface && save)
+      saveUI(mCurrentInterface);
 
    mLastUI = mCurrentInterface;
    mLastWasLower = false;

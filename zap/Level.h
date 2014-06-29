@@ -104,6 +104,9 @@ public:
    void clearTeams();             
    string getTeamLevelCode(S32 index) const;
 
+   bool makeSureTeamCountIsNotZero();        // Because zero teams can cause crashiness
+
+
    S32 getBotCount() const;
 
    friend class ObjectTest;

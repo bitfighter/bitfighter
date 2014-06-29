@@ -10,6 +10,7 @@
 #include "LevelLoadException.h"
 #include "Spawn.h"
 #include "robot.h"
+#include "Colors.h"
 
 #include "Md5Utils.h"
 #include "stringUtils.h"
@@ -59,7 +60,7 @@ void Level::onAddedToServerGame(Game *game)
    TNLAssert(game->isServer(),    "Server only!");
    TNLAssert(mGameType.isValid(), "Server should have GameType by now!");
 
-   mGameType->addToGame(game, NULL);
+   mGameType->addToGame(game);
 
    for(S32 i = 0; i < mTeamInfos.size(); i++)
    {
@@ -208,12 +209,15 @@ GameType *Level::getGameType() const
 }
 
 
-// Used by editor and on client when GameType object arrives from server, and on server when loading a level
+// Used by editor and on client when GameType object arrives from server, and on server when loading a level.  
+// Note that gameType could be NULL when testing from the editor.
 void Level::setGameType(GameType *gameType)
 {
    delete mGameType;
    mGameType = gameType;
-   mGameType->setLevel(this);
+
+   if(mGameType)
+      mGameType->setLevel(this);
 }
 
 
@@ -253,6 +257,19 @@ S32 Level::getTeamCount() const
       return mTeamManager.getTeamCount();
    
    return mTeamInfos.size();
+}
+
+
+// Zero teams will crash, returns true if we had to add a team.  Server only.
+bool Level::makeSureTeamCountIsNotZero()
+{
+   if(getTeamCount() == 0) 
+   {
+      addTeam(new Team("Missing Team", Colors::blue));     // Will be deleted by TeamManager
+      return true;
+   }
+
+   return false;
 }
 
 
