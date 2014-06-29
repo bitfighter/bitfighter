@@ -213,8 +213,7 @@ GameType *Level::getGameType() const
 // Note that gameType could be NULL when testing from the editor.
 void Level::setGameType(GameType *gameType)
 {
-   delete mGameType;
-   mGameType = gameType;
+   mGameType = gameType;      // mGameType is a referenced counted pointer, so cleanup will happen automatically
 
    if(mGameType)
       mGameType->setLevel(this);
