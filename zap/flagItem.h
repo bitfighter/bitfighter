@@ -52,8 +52,8 @@ public:
    virtual string toLevelCode() const;
 
    virtual void onAddedToGame(Game *game);
-   virtual void renderItem(const Point &pos);
-   virtual void renderItemAlpha(const Point &pos, F32 alpha);
+   virtual void renderItem(const Point &pos) const;
+   virtual void renderItemAlpha(const Point &pos, F32 alpha) const;
 
    void mountToShip(Ship *theShip);
 
@@ -86,14 +86,15 @@ public:
 
    ///// Editor stuff
 
-   void renderDock();
-   F32 getEditorRadius(F32 currentScale);
+   void renderDock(const Color &color) const;
+   F32 getEditorRadius(F32 currentScale) const;
 
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();

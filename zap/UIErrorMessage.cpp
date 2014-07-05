@@ -127,7 +127,7 @@ bool AbstractMessageUserInterface::onKeyDown(InputCode inputCode)
 }
 
 
-void AbstractMessageUserInterface::render()
+void AbstractMessageUserInterface::render() const
 {
    if(mRenderUnderlyingUi && getUIManager()->getPrevUI() != this)
       getUIManager()->renderPrevUI(this);

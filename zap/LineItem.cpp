@@ -92,7 +92,7 @@ LineItem *LineItem::clone() const
 }
 
 
-void LineItem::render()
+void LineItem::render() const
 {
 #ifndef ZAP_DEDICATED
    if(shouldRender())
@@ -120,7 +120,7 @@ bool LineItem::shouldRender() const
 }
 
 
-void LineItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void LineItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    if(isSelected() || isLitUp())           
@@ -366,10 +366,10 @@ void LineItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &value
 #endif
 
 
-const char *LineItem::getOnScreenName()     { return "Line";      }
-const char *LineItem::getPrettyNamePlural() { return "LineItems"; }
-const char *LineItem::getOnDockName()       { return "LineItem";  }
-const char *LineItem::getEditorHelpString() { return "Draws a line on the map.  Visible only to team, or to all if neutral."; }
+const char *LineItem::getOnScreenName()     const  { return "Line";      }
+const char *LineItem::getPrettyNamePlural() const  { return "LineItems"; }
+const char *LineItem::getOnDockName()       const  { return "LineItem";  }
+const char *LineItem::getEditorHelpString() const  { return "Draws a line on the map.  Visible only to team, or to all if neutral."; }
 
 bool LineItem::hasTeam()      { return true; }
 bool LineItem::canBeHostile() { return true; }

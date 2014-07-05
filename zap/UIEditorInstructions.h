@@ -44,11 +44,11 @@ public:
    explicit EditorInstructionsUserInterface(ClientGame *game);      // Constructor
    virtual ~EditorInstructionsUserInterface();
 
-   void render();
-   void renderPageCommands(S32 page);
-   void renderPageWalls();
+   void render() const;
+   void renderPageCommands(S32 page) const;
+   void renderPageWalls() const;
 
-   S32 getPageCount();
+   S32 getPageCount() const;
  
    bool onKeyDown(InputCode inputCode);
 

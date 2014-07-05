@@ -183,7 +183,7 @@ void SpeedZone::generatePoints(const Point &start, const Point &end, Vector<Poin
 }
 
 
-void SpeedZone::render()
+void SpeedZone::render() const
 {
    renderSpeedZone(mPolyBounds, getGame()->getCurrentTime());
 }
@@ -195,7 +195,7 @@ const Color &SpeedZone::getEditorRenderColor() const
 }
 
 
-void SpeedZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void SpeedZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    Parent::renderEditor(currentScale, snappingToWallCornersEnabled);
    render();
@@ -554,10 +554,10 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 
 // Some properties about the item that will be needed in the editor
-const char *SpeedZone::getOnScreenName()     { return "GoFast";  }
-const char *SpeedZone::getOnDockName()       { return "GoFast";  }
-const char *SpeedZone::getPrettyNamePlural() { return "GoFasts"; }
-const char *SpeedZone::getEditorHelpString() { return "Makes ships go fast in direction of arrow. [P]"; }
+const char *SpeedZone::getOnScreenName()     const  { return "GoFast";  }
+const char *SpeedZone::getOnDockName()       const  { return "GoFast";  }
+const char *SpeedZone::getPrettyNamePlural() const  { return "GoFasts"; }
+const char *SpeedZone::getEditorHelpString() const  { return "Makes ships go fast in direction of arrow. [P]"; }
 
 bool SpeedZone::hasTeam()      { return false; }
 bool SpeedZone::canBeHostile() { return false; }

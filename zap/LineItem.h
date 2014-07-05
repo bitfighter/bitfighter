@@ -34,7 +34,7 @@ public:
    virtual ~LineItem();                      // Destructor
    LineItem *clone() const;
 
-   virtual void render();
+   virtual void render() const;
    bool shouldRender() const;
 
    S32 getRenderSortValue();
@@ -59,7 +59,7 @@ public:
    /////
    // Editor methods
    string toLevelCode() const;
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
    virtual const Color &getEditorRenderColor() const;
 
 
@@ -79,10 +79,11 @@ public:
 #endif
 
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();

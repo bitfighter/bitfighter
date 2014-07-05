@@ -45,7 +45,7 @@ protected:
 
    Point mVelocity;
 
-   virtual F32 getRadius();
+   virtual F32 getRadius() const;
 
 public:
    U32 mTimeRemaining;
@@ -77,8 +77,8 @@ public:
 
    virtual bool canAddToEditor();
 
-   void render();
-   void renderItem(const Point &pos);
+   void render() const;
+   void renderItem(const Point &pos) const;
    bool shouldRender() const;
 
 
@@ -132,7 +132,7 @@ public:
 
 
    WeaponType mWeaponType;
-   void renderItem(const Point &pos);
+   void renderItem(const Point &pos) const;
    bool shouldRender() const;
 
    void idle(IdleCallPath path);
@@ -191,7 +191,7 @@ public:
    void idle(IdleCallPath path);
 
    void damageObject(DamageInfo *damageInfo);
-   void renderItem(const Point &pos);
+   void renderItem(const Point &pos) const;
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -200,13 +200,14 @@ public:
 
    /////
    // Editor methods
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
-   void renderDock();
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
+   void renderDock(const Color &color) const;
 
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
@@ -249,7 +250,7 @@ public:
    void idle(IdleCallPath path);
 
    void damageObject(DamageInfo *damageInfo);
-   void renderItem(const Point &pos);
+   void renderItem(const Point &pos) const;
 
    bool isVisibleToPlayer(S32 playerTeam, bool isTeamGame); // client side
    bool isVisibleToPlayer(ClientInfo *clientInfo, bool isTeamGame); // server side
@@ -261,13 +262,13 @@ public:
 
    /////
    // Editor methods
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
-   void renderDock();
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
+   void renderDock(const Color &color) const;
 
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
 
    bool hasTeam();
    bool canBeHostile();
@@ -336,7 +337,7 @@ public:
 
    virtual bool canAddToEditor();
 
-   void renderItem(const Point &pos);
+   void renderItem(const Point &pos) const;
    bool shouldRender() const;
 
    void idle(IdleCallPath path);

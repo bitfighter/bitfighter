@@ -290,7 +290,7 @@ Vector<string> NexusGameType::getGameParameterMenuKeys()
 
 
 // Definitions for those items
-boost::shared_ptr<MenuItem> NexusGameType::getMenuItem(const string &key)
+boost::shared_ptr<MenuItem> NexusGameType::getMenuItem(const string &key) const
 {
    if(key == "Nexus Time to Open")
       return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem("Time for Nexus to Open:", (mNexusClosedTime + 500) / 1000, MaxMenuScore*60, "Never",
@@ -817,13 +817,13 @@ NexusFlagItem::~NexusFlagItem()
 
 //////////  Client only code:
 
-void NexusFlagItem::renderItem(const Point &pos)
+void NexusFlagItem::renderItem(const Point &pos) const
 {
    renderItemAlpha(pos, 1.0f);
 }
 
 
-void NexusFlagItem::renderItemAlpha(const Point &pos, F32 alpha)
+void NexusFlagItem::renderItemAlpha(const Point &pos, F32 alpha) const
 {
 #ifndef ZAP_DEDICATED
    Point offset;
@@ -1062,10 +1062,10 @@ void NexusZone::processArguments_ArchaicZapFormat(S32 argc, const char **argv, F
 }
 
 
-const char *NexusZone::getOnScreenName()     { return "Nexus"; }
-const char *NexusZone::getOnDockName()       { return "Nexus"; }
-const char *NexusZone::getPrettyNamePlural() { return "Nexii"; }
-const char *NexusZone::getEditorHelpString() { return "Area to bring flags in Hunter game.  Cannot be used in other games."; }
+const char *NexusZone::getOnScreenName()     const  { return "Nexus"; }
+const char *NexusZone::getOnDockName()       const  { return "Nexus"; }
+const char *NexusZone::getPrettyNamePlural() const  { return "Nexii"; }
+const char *NexusZone::getEditorHelpString() const  { return "Area to bring flags in Hunter game.  Cannot be used in other games."; }
 
 
 bool NexusZone::hasTeam()      { return false; }
@@ -1099,7 +1099,7 @@ void NexusZone::idle(BfObject::IdleCallPath path)
 }
 
 
-void NexusZone::render()
+void NexusZone::render() const
 {
 #ifndef ZAP_DEDICATED
    GameType *gameType = getGame()->getGameType();
@@ -1116,7 +1116,7 @@ void NexusZone::render()
 }
 
 
-void NexusZone::renderDock()
+void NexusZone::renderDock(const Color &color) const
 {
 #ifndef ZAP_DEDICATED
   renderNexus(getOutline(), getFill(), false, 0);
@@ -1124,7 +1124,7 @@ void NexusZone::renderDock()
 }
 
 
-void NexusZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void NexusZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    render();
    PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled);

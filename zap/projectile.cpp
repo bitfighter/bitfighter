@@ -372,7 +372,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
 }
 
 
-F32 Projectile::getRadius()
+F32 Projectile::getRadius() const
 {
    return 10;     // Or so...  currently only used for inserting objects into database and for Lua on the odd chance someone asks
 }
@@ -422,7 +422,7 @@ Point Projectile::getActualVel() const { return mVelocity; }
 
 
 // TODO: Get rid of this! (currently won't render without it)
-void Projectile::render()
+void Projectile::render() const
 {
    renderItem(getPos());
 }
@@ -431,7 +431,7 @@ void Projectile::render()
 bool Projectile::canAddToEditor() { return false; }      // No projectiles in the editor
 
 
-void Projectile::renderItem(const Point &pos)
+void Projectile::renderItem(const Point &pos) const
 {
    if(shouldRender())
       renderProjectile(pos, mType, getGame()->getCurrentTime() - getCreationTime());
@@ -746,7 +746,7 @@ bool Burst::canAddToEditor() { return false; }      // No bursts in the editor
 
 
 
-void Burst::renderItem(const Point &pos)
+void Burst::renderItem(const Point &pos) const
 {
    if(!shouldRender())
       return;
@@ -1007,7 +1007,7 @@ void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-void Mine::renderItem(const Point &pos)
+void Mine::renderItem(const Point &pos) const
 {
 #ifndef ZAP_DEDICATED
    if(!shouldRender())
@@ -1043,13 +1043,13 @@ void Mine::renderItem(const Point &pos)
 }
 
 
-void Mine::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void Mine::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    renderMine(getActualPos(), true, true);
 }
 
 
-void Mine::renderDock()
+void Mine::renderDock(const Color &color) const
 {
 #ifndef ZAP_DEDICATED
    Point pos = getActualPos();
@@ -1060,10 +1060,10 @@ void Mine::renderDock()
 }
 
 
-const char *Mine::getOnScreenName()     { return "Mine";  }
-const char *Mine::getOnDockName()       { return "Mine";  }
-const char *Mine::getPrettyNamePlural() { return "Mines"; }
-const char *Mine::getEditorHelpString() { return "Mines can be prepositioned, and are are \"hostile to all\". [M]"; }
+const char *Mine::getOnScreenName()     const  { return "Mine";  }
+const char *Mine::getOnDockName()       const  { return "Mine";  }
+const char *Mine::getPrettyNamePlural() const  { return "Mines"; }
+const char *Mine::getEditorHelpString() const  { return "Mines can be prepositioned, and are are \"hostile to all\". [M]"; }
 
 
 bool Mine::hasTeam()        { return false; }
@@ -1236,7 +1236,7 @@ void SpyBug::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-void SpyBug::renderItem(const Point &pos)
+void SpyBug::renderItem(const Point &pos) const
 {
 #ifndef ZAP_DEDICATED
    if(!shouldRender())
@@ -1270,20 +1270,20 @@ void SpyBug::renderItem(const Point &pos)
 }
 
 
-void SpyBug::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void SpyBug::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    renderSpyBug(getPos(), getColor(), true, true);
 }
 
 
-void SpyBug::renderDock()
+void SpyBug::renderDock(const Color &color) const
 {
 #ifndef ZAP_DEDICATED
    const F32 radius = 9;
 
    Point pos = getRenderPos();
 
-   drawFilledCircle(pos, radius, getColor());
+   drawFilledCircle(pos, radius, color);
 
    drawCircle(pos, radius, &Colors::gray70);
    drawLetter('S', pos, Color(getTeam() < 0 ? .5 : .7), 1);    // Use darker gray for neutral spybugs so S will show up clearer
@@ -1291,10 +1291,10 @@ void SpyBug::renderDock()
 }
 
 
-const char *SpyBug::getOnScreenName()     { return "Spy Bug";  }
-const char *SpyBug::getOnDockName()       { return "Bug";      }
-const char *SpyBug::getPrettyNamePlural() { return "Spy Bugs"; }
-const char *SpyBug::getEditorHelpString() { return "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]"; }
+const char *SpyBug::getOnScreenName()     const  { return "Spy Bug";  }
+const char *SpyBug::getOnDockName()       const  { return "Bug";      }
+const char *SpyBug::getPrettyNamePlural() const  { return "Spy Bugs"; }
+const char *SpyBug::getEditorHelpString() const  { return "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]"; }
 
 
 bool SpyBug::hasTeam()        { return true;  }
@@ -1826,7 +1826,7 @@ bool Seeker::collided(BfObject *otherObj, U32 stateIndex)
 BfObject *Seeker::getShooter() const {return mShooter; }
 
 
-void Seeker::renderItem(const Point &pos)
+void Seeker::renderItem(const Point &pos) const
 {
 #ifndef ZAP_DEDICATED
    if(!shouldRender())  

@@ -93,9 +93,9 @@ bool GeomObject::insertVert(Point vertex, S32 vertIndex)
 
 void GeomObject::setVert(const Point &pos, S32 index)    { mGeometry.getGeometry()->setVert(pos, index); }
                                                                                            
-bool GeomObject::anyVertsSelected()          {   return mGeometry.getGeometry()->anyVertsSelected();        }
-S32 GeomObject::getVertCount() const         {   return mGeometry.getGeometry()->getVertCount();            }
-S32 GeomObject::getMinVertCount() const      {   return mGeometry.getGeometry()->getMinVertCount();         }
+bool GeomObject::anyVertsSelected() const    {   return mGeometry.getGeometry()->anyVertsSelected();        }
+S32  GeomObject::getVertCount()     const    {   return mGeometry.getGeometry()->getVertCount();            }
+S32  GeomObject::getMinVertCount()  const    {   return mGeometry.getGeometry()->getMinVertCount();         }
 
 void GeomObject::clearVerts()                {   mGeometry.getGeometry()->clearVerts(); onGeomChanged();  }
 
@@ -125,12 +125,12 @@ bool GeomObject::addVert(const Point &point, bool ignoreMaxPointsLimit)
 
 
 // Vertex selection -- only needed in editor
-void GeomObject::selectVert(S32 vertIndex)   {   mGeometry.getGeometry()->selectVert(vertIndex);            }
-void GeomObject::aselectVert(S32 vertIndex)  {   mGeometry.getGeometry()->aselectVert(vertIndex);           }
-void GeomObject::unselectVert(S32 vertIndex) {   mGeometry.getGeometry()->unselectVert(vertIndex);          }
-void GeomObject::unselectVerts()             {   mGeometry.getGeometry()->unselectVerts();                  }
+void GeomObject::selectVert(S32 vertIndex)         {   mGeometry.getGeometry()->selectVert(vertIndex);            }
+void GeomObject::aselectVert(S32 vertIndex)        {   mGeometry.getGeometry()->aselectVert(vertIndex);           }
+void GeomObject::unselectVert(S32 vertIndex)       {   mGeometry.getGeometry()->unselectVert(vertIndex);          }
+void GeomObject::unselectVerts()                   {   mGeometry.getGeometry()->unselectVerts();                  }
      
-bool GeomObject::vertSelected(S32 vertIndex) {   return mGeometry.getGeometry()->vertSelected(vertIndex);   }
+bool GeomObject::vertSelected(S32 vertIndex) const {   return mGeometry.getGeometry()->vertSelected(vertIndex);   }
 
 // Geometric calculations
 Point GeomObject::getCentroid()   const {   return mGeometry.getGeometry()->getCentroid();     }

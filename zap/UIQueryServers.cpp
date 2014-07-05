@@ -655,25 +655,26 @@ void QueryServersUserInterface::idle(U32 timeDelta)
 }  // end idle
 
 
-bool QueryServersUserInterface::mouseInHeaderRow(const Point *pos)
+bool QueryServersUserInterface::mouseInHeaderRow(const Point *pos) const
 {
    return pos->y >= COLUMN_HEADER_TOP && pos->y < COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT - 1;
 }
 
 
-string QueryServersUserInterface::getLastSelectedServerName()
+string QueryServersUserInterface::getLastSelectedServerName() const
 {
    return mLastSelectedServerName;
 }
 
 
-S32 QueryServersUserInterface::getSelectedIndex()
+S32 QueryServersUserInterface::getSelectedIndex() const
 {
    if(servers.size() == 0)       // When no servers, return dummy value
       return -1;
 
    // This crazy thing can happen if the number of servers changes and suddenly there's none shown on the screen
    // Shouldn't happen anymore due to check in idle() function
+   TNLAssert(getFirstServerIndexOnCurrentPage() < servers.size(), "Index out of bounds!"); // Assert added July 2014 by Wat
    if(getFirstServerIndexOnCurrentPage() >= servers.size())
       return -1;
 
@@ -777,7 +778,7 @@ static Color getPlayerCountColor(S32 players, S32 maxPlayers)
 }
 
 
-void QueryServersUserInterface::render()
+void QueryServersUserInterface::render() const
 {
    const S32 canvasWidth =  DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
@@ -840,11 +841,12 @@ void QueryServersUserInterface::render()
    {
       // Find the selected server (it may have moved due to sort or new/removed servers)
       S32 selectedIndex = getSelectedIndex();
-      if(selectedIndex < 0 && servers.size() >= 0)
-      {
-         selectedId = servers[0].id;
-         selectedIndex = 0;
-      }
+      TNLAssert(!(selectedIndex < 0 && servers.size() >= 0), "Negative index?");   // Assert added Jul 2014 by Wat
+      //if(selectedIndex < 0 && servers.size() >= 0)
+      //{
+      //   selectedId = servers[0].id;
+      //   selectedIndex = 0;
+      //}
 
       S32 colwidth = columns[1].xStart - columns[0].xStart;    
 
@@ -854,7 +856,7 @@ void QueryServersUserInterface::render()
       for(S32 i = getFirstServerIndexOnCurrentPage(); i <= lastServer; i++)
       {
          U32 y = TOP_OF_SERVER_LIST + (i - getFirstServerIndexOnCurrentPage()) * SERVER_ENTRY_HEIGHT + 1;
-         ServerRef &s = servers[i];
+         const ServerRef &s = servers[i];
 
          if(s.isLocalServer)
          {
@@ -874,7 +876,7 @@ void QueryServersUserInterface::render()
       for(S32 i = getFirstServerIndexOnCurrentPage(); i <= lastServer; i++)
       {
          y = TOP_OF_SERVER_LIST + (i - getFirstServerIndexOnCurrentPage()) * SERVER_ENTRY_HEIGHT + 2;
-         ServerRef &s = servers[i];
+         const ServerRef &s = servers[i];
 
          if(i == selectedIndex)
          {
@@ -957,7 +959,7 @@ void QueryServersUserInterface::render()
 }
 
 
-void QueryServersUserInterface::renderTopBanner()
+void QueryServersUserInterface::renderTopBanner() const
 {
    const S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
@@ -981,7 +983,7 @@ void QueryServersUserInterface::renderTopBanner()
 }
 
 
-void QueryServersUserInterface::renderColumnHeaders()
+void QueryServersUserInterface::renderColumnHeaders() const
 {
    S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
@@ -1025,7 +1027,7 @@ void QueryServersUserInterface::renderColumnHeaders()
 }
 
 
-void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
+void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2) const
 {
    // Warning... the following section is pretty darned ugly!  We're just drawing a message box...
 
@@ -1311,7 +1313,7 @@ void QueryServersUserInterface::onMouseDragged()
 }
 
 
-S32 QueryServersUserInterface::getFirstServerIndexOnCurrentPage()
+S32 QueryServersUserInterface::getFirstServerIndexOnCurrentPage() const
 {
    return mPage * mServersPerPage;
 }
@@ -1383,7 +1385,7 @@ void QueryServersUserInterface::onMouseMoved()
 }
 
 
-S32 QueryServersUserInterface::getDividerPos()
+S32 QueryServersUserInterface::getDividerPos() const
 {
    if(mShowChat)
       return TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER;
@@ -1392,7 +1394,7 @@ S32 QueryServersUserInterface::getDividerPos()
 }
 
 
-S32 QueryServersUserInterface::getServersPerPage()
+S32 QueryServersUserInterface::getServersPerPage() const
 {
    if(mShowChat)
       return mServersPerPage;
@@ -1401,13 +1403,13 @@ S32 QueryServersUserInterface::getServersPerPage()
 }
 
 
-S32 QueryServersUserInterface::getLastPage()
+S32 QueryServersUserInterface::getLastPage() const
 {
    return (servers.size() - 1) / mServersPerPage;
 }
 
 
-bool QueryServersUserInterface::isMouseOverDivider()
+bool QueryServersUserInterface::isMouseOverDivider() const
 {
    if(!mShowChat)       // Divider is only in operation when window is split
       return false;

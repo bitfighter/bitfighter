@@ -47,9 +47,9 @@ public:
 
    void activate(ChatType chatType);
 
-   bool isCmdChat();          // Returns true if we're composing a command in the chat bar, false otherwise
+   bool isCmdChat() const;    // Returns true if we're composing a command in the chat bar, false otherwise
 
-   void render();                
+   void render() const;                
    void onActivated();  
    void activateHelp(UIManager *uiManager);
 

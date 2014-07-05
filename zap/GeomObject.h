@@ -60,7 +60,7 @@ public:
    S32 getMinVertCount() const;       // Minimum  vertices geometry needs to be viable
    S32 getVertCount() const;          // Actual number of vertices in the geometry
 
-   bool anyVertsSelected();
+   bool anyVertsSelected() const;
    void selectVert(S32 vertIndex);
    void aselectVert(S32 vertIndex);   // Select another vertex (remember cmdline ArcInfo?)
    void unselectVert(S32 vertIndex);
@@ -71,7 +71,7 @@ public:
    bool deleteVert(S32 vertIndex);
    bool insertVert(Point vertex, S32 vertIndex);
    void unselectVerts();
-   bool vertSelected(S32 vertIndex);
+   bool vertSelected(S32 vertIndex) const;
 
    // Transforming the geometry
    void rotateAboutPoint(const Point &center, F32 angle);

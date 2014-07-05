@@ -33,7 +33,7 @@ void PointObject::prepareForDock(ClientGame *game, const Point &point, S32 teamI
 }
 
 
-F32 PointObject::getRadius() { return mRadius; }
+F32 PointObject::getRadius() const  {  return mRadius;  }
 
 
 };

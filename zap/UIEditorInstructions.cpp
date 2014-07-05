@@ -288,13 +288,13 @@ void EditorInstructionsUserInterface::onActivate()
 }
 
 
-S32 EditorInstructionsUserInterface::getPageCount()
+S32 EditorInstructionsUserInterface::getPageCount() const
 {
    return 4 + mPluginPageCount;
 }
 
 
-void EditorInstructionsUserInterface::render()
+void EditorInstructionsUserInterface::render() const
 {
    FontManager::pushFontContext(HelpContext);
 
@@ -322,7 +322,7 @@ void EditorInstructionsUserInterface::render()
 
 
 // This has become rather ugly and inelegant.  But you shuold see UIInstructions.cpp!!!
-void EditorInstructionsUserInterface::renderPageCommands(S32 page)
+void EditorInstructionsUserInterface::renderPageCommands(S32 page) const
 {
    S32 y = 60;             // Is 65 in UIInstructions::render()...
 
@@ -354,7 +354,7 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
 
 
 // Draw animated creation of walls
-void EditorInstructionsUserInterface::renderPageWalls()
+void EditorInstructionsUserInterface::renderPageWalls() const
 {
    //drawStringf(400, 100, 25, "%d", mAnimStage);     // Useful to have around when things go wrong!
 

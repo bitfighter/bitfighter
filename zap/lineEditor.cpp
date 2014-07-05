@@ -28,12 +28,14 @@ LineEditor::LineEditor(U32 maxLength, string value, U32 displayedCharacters)
    mDisplayedCharacters = displayedCharacters;
 }
 
+
 LineEditor::~LineEditor()
 {
    // Do nothing
 }
 
-U32 LineEditor::length()
+
+U32 LineEditor::length() const
 {
    return (U32) mLine.length();
 }
@@ -42,9 +44,7 @@ U32 LineEditor::length()
 void LineEditor::backspacePressed()
 {
    if(mCursorOffset == 0)
-   {
       return;
-   }
 
    mLine = mLine.substr(0, mCursorOffset - 1) + mLine.substr(mCursorOffset, mLine.length() - mCursorOffset);
    mCursorOffset -= 1;
@@ -217,7 +217,7 @@ void LineEditor::completePartial(const Vector<string> *candidates, const string 
 
 
 // Draw our cursor, assuming string is drawn at x,y  (vert spacing works differently than on the angle version
-void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
+void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize) const
 {
    static const U32 chunkSize = 10;
    S32 offset;
@@ -248,7 +248,7 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
 
 
 // Draw our cursor, assuming string is drawn at x,y and cursor should be offset to the right
-void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize, S32 offset)
+void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize, S32 offset) const
 {
    if(Platform::getRealMilliseconds() / 500 % 2)
       return;

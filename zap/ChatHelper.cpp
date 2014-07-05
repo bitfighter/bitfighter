@@ -136,13 +136,14 @@ void ChatHelper::activate(ChatType chatType)
 }
 
 
-bool ChatHelper::isCmdChat()
+// Returns true if the chat message being composed looks like a command
+bool ChatHelper::isCmdChat() const
 {
    return mLineEditor.at(0) == '/' || mCurrentChatType == CmdChat;
 }
 
 
-void ChatHelper::render()
+void ChatHelper::render() const
 {
    FontManager::pushFontContext(InputContext);
    const char *promptStr;

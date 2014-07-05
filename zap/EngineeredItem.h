@@ -86,7 +86,7 @@ public:
    Point getEditorSelectionOffset(F32 currentScale);
 #endif
 
-   bool isEnabled();    // True if still active, false otherwise
+   bool isEnabled() const;    // True if still active, false otherwise
 
    void explode();
    bool isDestroyed();
@@ -206,7 +206,7 @@ public:
    static bool findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal, 
                                  Point &end, DatabaseObject **collObj);
 
-   void render();
+   void render() const;
    S32 getRenderSortValue();
 
    void getForceFieldStartAndEndPoints(Point &start, Point &end);
@@ -256,23 +256,24 @@ public:
    void onAddedToGame(Game *theGame);
    void idle(BfObject::IdleCallPath path);
 
-   void render();
+   void render() const;
    void onEnabled();
    void onDisabled();
 
    TNL_DECLARE_CLASS(ForceFieldProjector);
 
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
 
-   void renderDock();
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+   void renderDock(const Color &color) const;
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
 
    void onGeomChanged();
    void findForceFieldEnd();                      // Find end of forcefield in editor
@@ -334,9 +335,9 @@ public:
    const Vector<Point> *getCollisionPoly() const;
    const Vector<Point> *getOutline() const;
 
-   F32 getEditorRadius(F32 currentScale);
+   F32 getEditorRadius(F32 currentScale) const;
 
-   void render();
+   void render() const;
    void idle(IdleCallPath path);
    void onAddedToGame(Game *theGame);
 
@@ -347,18 +348,19 @@ public:
 
    /////
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
 
    void onGeomChanged();
 
-   void renderDock();
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+   void renderDock(const Color &color) const;
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
 
    ///// Lua interface
 	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Turret);

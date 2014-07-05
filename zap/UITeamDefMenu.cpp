@@ -156,7 +156,7 @@ void TeamDefUserInterface::idle(U32 timeDelta)
 
 
 // TODO: Clean this up a bit...  this menu was two-cols before, and some of that garbage is still here...
-void TeamDefUserInterface::render()
+void TeamDefUserInterface::render() const
 {
    const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
    const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
@@ -198,8 +198,9 @@ void TeamDefUserInterface::render()
 
    S32 size = ui->getTeamCount();
 
-   if(selectedIndex >= size)
-      selectedIndex = 0;
+   TNLAssert(selectedIndex < size, "Out of bounds!");
+   //if(selectedIndex >= size)
+   //   selectedIndex = 0;
 
    // Draw the fixed teams
    glColor(Colors::NeutralTeamColor);

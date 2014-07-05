@@ -143,7 +143,7 @@ public:
    const Vector<Point> *getEditorHitPoly() const;
 
    void idle(BfObject::IdleCallPath path);
-   void render();
+   void render() const;
 
 #ifndef ZAP_DEDICATED
    void doExplosion();
@@ -160,7 +160,7 @@ public:
    ///// Editor Methods
    const Color &getEditorRenderColor() const;
 
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
 
    void onAttrsChanging();
    void onGeomChanging();
@@ -173,10 +173,10 @@ public:
    const Vector<Point> *getDestList() const;
 
    // Some properties about the item that will be needed in the editor
-   const char *getOnScreenName();
-   const char *getOnDockName();
-   const char *getPrettyNamePlural();
-   const char *getEditorHelpString();
+   const char *getOnScreenName() const;
+   const char *getOnDockName() const;
+   const char *getPrettyNamePlural() const;
+   const char *getEditorHelpString() const;
 
    bool hasTeam();
    bool canBeHostile();

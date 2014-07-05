@@ -49,6 +49,15 @@ EngineerHelper::EngineerHelper() :
    mEngineerItemsDisplayWidth( getWidthOfItems() )
 {
    mSelectedIndex = -1;
+
+   mCurrentRenderItems = engineerItemInfo;
+   mCurrentRenderCount = ARRAYSIZE(engineerItemInfo);
+                              
+   mPrevRenderItems = NULL;
+   mPrevRenderCount = 0;
+
+   mTitle = menuTitle;
+   mLegend = NULL;
 }
 
 
@@ -97,12 +106,12 @@ void EngineerHelper::onActivated()
 }
 
 
-void EngineerHelper::render()
+void EngineerHelper::render() const
 {
    S32 yPos = MENU_TOP + MENU_PADDING;
    
    if(isMenuBeingDisplayed())    // Haven't selected an item yet, so show the menu
-      drawItemMenu(menuTitle, engineerItemInfo, ARRAYSIZE(engineerItemInfo), NULL, 0, mEngineerItemsDisplayWidth, mEngineerButtonsWidth);
+      drawItemMenu(mEngineerItemsDisplayWidth, mEngineerButtonsWidth);
 
    else     // Have selected a module, need to indicate where to deploy
    {
@@ -210,7 +219,7 @@ S32 EngineerHelper::getAnimationTime() const
 
 
 // Basically draws a red box where the ship is pointing
-void EngineerHelper::renderDeploymentMarker(const Ship *ship)
+void EngineerHelper::renderDeploymentMarker(const Ship *ship) const
 {
    static Point deployPosition, deployNormal;      // Reusable containers
 

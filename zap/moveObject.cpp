@@ -871,11 +871,11 @@ void MoveItem::setCollideable(bool isCollideable)
 }
 
 // Rendering - client only, in-game
-void MoveItem::render()                                     { renderItem(getRenderPos());                  }
+void MoveItem::render()   const                                   { renderItem(getRenderPos());                  }
 
 // Override the following to actually draw our items
-void MoveItem::renderItem(const Point &pos)                 { TNLAssert(false, "Unimplemented function!"); }
-void MoveItem::renderItemAlpha(const Point &pos, F32 alpha) { TNLAssert(false, "Unimplemented function!"); }
+void MoveItem::renderItem(const Point &pos) const                 { TNLAssert(false, "Unimplemented function!"); }
+void MoveItem::renderItemAlpha(const Point &pos, F32 alpha) const { TNLAssert(false, "Unimplemented function!"); }
 
 
 // Note that I could only get this function to run on the client, and only from unpackUpdate... so I'm not sure
@@ -1086,7 +1086,7 @@ void MountableItem::idle(BfObject::IdleCallPath path)
 
 
 // Client only, in-game
-void MountableItem::render()
+void MountableItem::render() const
 {
    // If the item is mounted, renderItem will be called from the ship it is mounted to
    if(mIsMounted)
@@ -1441,26 +1441,26 @@ bool Asteroid::shouldRender() const
 }
 
 
-void Asteroid::renderItem(const Point &pos)
+void Asteroid::renderItem(const Point &pos) const
 {
    if(shouldRender())
       renderAsteroid(pos, mDesign, mRadius / 89.f);
 }
 
 
-void Asteroid::renderDock()
+void Asteroid::renderDock(const Color &color) const
 {
    renderAsteroid(getActualPos(), 2, .1f);
 }
 
 
-const char *Asteroid::getOnScreenName()     { return "Asteroid";  }
-const char *Asteroid::getPrettyNamePlural() { return "Asteroids"; }
-const char *Asteroid::getOnDockName()       { return "Ast.";      }
-const char *Asteroid::getEditorHelpString() { return "Shootable asteroid object.  Just like the arcade game."; }
+const char *Asteroid::getOnScreenName()     const  { return "Asteroid";  }
+const char *Asteroid::getPrettyNamePlural() const  { return "Asteroids"; }
+const char *Asteroid::getOnDockName()       const  { return "Ast.";      }
+const char *Asteroid::getEditorHelpString() const  { return "Shootable asteroid object.  Just like the arcade game."; }
 
 
-F32 Asteroid::getEditorRadius(F32 currentScale)
+F32 Asteroid::getEditorRadius(F32 currentScale) const
 {
    return mRadius * currentScale;
 }
@@ -1824,7 +1824,7 @@ void TestItem::idle(BfObject::IdleCallPath path)
 }
 
 
-void TestItem::renderItem(const Point &pos)
+void TestItem::renderItem(const Point &pos) const
 {
    renderTestItem(mOutlinePoints);
 }
@@ -1837,19 +1837,19 @@ void TestItem::setOutline()
 }
 
 
-void TestItem::renderDock()
+void TestItem::renderDock(const Color &color) const
 {
    renderTestItem(getActualPos(), 8);
 }
 
 
-const char *TestItem::getOnScreenName()      {  return "TestItem";   }
-const char *TestItem::getPrettyNamePlural()  {  return "TestItems";  }
-const char *TestItem::getOnDockName()        {  return "Test";       }
-const char *TestItem::getEditorHelpString()  {  return "Bouncy object that floats around and gets in the way."; }
+const char *TestItem::getOnScreenName()     const  {  return "TestItem";   }
+const char *TestItem::getPrettyNamePlural() const  {  return "TestItems";  }
+const char *TestItem::getOnDockName()       const  {  return "Test";       }
+const char *TestItem::getEditorHelpString() const  {  return "Bouncy object that floats around and gets in the way."; }
 
 
-F32 TestItem::getEditorRadius(F32 currentScale)
+F32 TestItem::getEditorRadius(F32 currentScale) const
 {
    return getRadius() * currentScale;
 }
@@ -1950,32 +1950,32 @@ void ResourceItem::setOutline()
 }
 
 
-void ResourceItem::renderItem(const Point &pos)
+void ResourceItem::renderItem(const Point &pos) const
 {
    renderResourceItem(mOutlinePoints);
 }
 
 
-void ResourceItem::renderItemAlpha(const Point &pos, F32 alpha)
+void ResourceItem::renderItemAlpha(const Point &pos, F32 alpha) const
 {
    renderResourceItem(mOutlinePoints, alpha);
 }
 
 
-void ResourceItem::renderDock()
+void ResourceItem::renderDock(const Color &color) const
 {
    static Vector<Point> points;
    points.clear();
-   generateOutlinePoints(getActualPos(), 0.4f   , points);
+   generateOutlinePoints(getActualPos(), 0.4f, points);
 
    renderResourceItem(points);
 }
 
 
-const char *ResourceItem::getOnScreenName()     { return "ResourceItem"; }
-const char *ResourceItem::getPrettyNamePlural() { return "Resource Items"; }
-const char *ResourceItem::getOnDockName()       { return "Res."; }
-const char *ResourceItem::getEditorHelpString() { return "Small bouncy object; capture one to activate Engineer module"; }
+const char *ResourceItem::getOnScreenName()     const  { return "ResourceItem"; }
+const char *ResourceItem::getPrettyNamePlural() const  { return "Resource Items"; }
+const char *ResourceItem::getOnDockName()       const  { return "Res."; }
+const char *ResourceItem::getEditorHelpString() const  { return "Small bouncy object; capture one to activate Engineer module"; }
 
 
 bool ResourceItem::collide(BfObject *hitObject)

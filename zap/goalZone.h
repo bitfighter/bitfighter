@@ -45,7 +45,7 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    void idle(BfObject::IdleCallPath path);
-   void render();
+   void render() const;
 
    bool didRecentlyChangeTeam();
 
@@ -56,7 +56,7 @@ public:
    const Vector<Point> *getCollisionPoly() const;
    bool collide(BfObject *hitObject);
    
-   bool isFlashing();
+   bool isFlashing() const;
    void setFlashCount(S32 i);
 
    S32 getScore();
@@ -70,10 +70,10 @@ public:
 
    /////
    // Editor methods
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
 
    bool hasTeam();      
    bool canBeHostile(); 
@@ -82,8 +82,8 @@ public:
 
    string toLevelCode() const;
 
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
-   void renderDock();
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
+   void renderDock(const Color &color) const;
 
    //// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(GoalZone);

@@ -183,7 +183,7 @@ void UserInterface::renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset,
 
 // Note that title and instr can be NULL
 void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolShapePtr &instr, 
-                                           SymbolShapePtr *message, S32 msgLines, S32 vertOffset, S32 style) const
+                                     const SymbolShapePtr *message, S32 msgLines, S32 vertOffset, S32 style) const
 {
    const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
    const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
@@ -267,7 +267,7 @@ void UserInterface::drawMenuItemHighlight(S32 x1, S32 y1, S32 x2, S32 y2, bool d
 
 
 // These will be overridden in child classes if needed
-void UserInterface::render() 
+void UserInterface::render() const
 { 
    // Do nothing -- probably never even gets called
 }
@@ -288,6 +288,7 @@ void UserInterface::onMouseMoved()
 void UserInterface::onMouseDragged()  { /* Do nothing */ }
 
 
+// Static method
 InputCode UserInterface::getInputCode(GameSettings *settings, BindingNameEnum binding)
 {
    return settings->getInputCodeManager()->getBinding(binding);
@@ -329,7 +330,7 @@ bool UserInterface::checkInputCode(BindingNameEnum binding, InputCode inputCode)
 }
 
 
-const char *UserInterface::getInputCodeString(GameSettings *settings, BindingNameEnum binding)
+const char *UserInterface::getInputCodeString(GameSettings *settings, BindingNameEnum binding) const
 {
    return InputCodeManager::inputCodeToString(getInputCode(settings, binding));
 }

@@ -43,7 +43,7 @@ public:
    void setMaxLines(S32 lines);     // Display no more than this number of lines
    void setTitle(const string &title);
    void setInstr(const string &instr);
-   void render();
+   void render() const;
    void quit();
 
    void registerKey(InputCode key, void(*callback)(ClientGame *));

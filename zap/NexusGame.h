@@ -70,7 +70,7 @@ public:
 
 #ifndef ZAP_DEDICATED
    Vector<string> getGameParameterMenuKeys();
-   boost::shared_ptr<MenuItem> getMenuItem(const string &key);
+   boost::shared_ptr<MenuItem> getMenuItem(const string &key) const;
    bool saveMenuItem(const MenuItem *menuItem, const string &key);
 #endif
 
@@ -149,8 +149,8 @@ public:
    NexusFlagItem(Point pos = Point(), Point vel = Point(0,0), S32 count = 0, bool useDropDelay = false);    // Constructor
    virtual ~NexusFlagItem();                                                                                // Destructor
 
-   void renderItem(const Point &pos);
-   void renderItemAlpha(const Point &pos, F32 alpha);
+   void renderItem(const Point &pos) const;
+   void renderItemAlpha(const Point &pos, F32 alpha) const;
 
    void dismount(DismountMode dismountMode);
 
@@ -190,8 +190,8 @@ public:
    void onAddedToGame(Game *theGame);
    void idle(BfObject::IdleCallPath path);
 
-   void render();
-   void renderDock();
+   void render() const;
+   void renderDock(const Color &color) const;
 
    const Vector<Point> *getCollisionPoly() const;
    bool collide(BfObject *hitObject);
@@ -207,10 +207,10 @@ public:
 
    /////
    // Editor methods
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
 
    string toLevelCode() const;
 
@@ -218,7 +218,7 @@ public:
    bool canBeHostile();
    bool canBeNeutral();
    
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
 
    //// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(NexusZone);

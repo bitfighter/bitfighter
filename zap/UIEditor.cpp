@@ -128,7 +128,7 @@ PluginInfo::PluginInfo(string prettyName, string fileName, string description, s
 EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 {
    mWasTesting = false;
-   mouseIgnore = false;
+   mIgnoreMouseInput = false;
 
    clearSnapEnvironment();
 
@@ -194,8 +194,8 @@ void EditorUserInterface::onQuitted()
 
 void EditorUserInterface::addDockObject(BfObject *object, F32 xPos, F32 yPos)
 {
-   object->prepareForDock(getGame(), Point(xPos, yPos), mCurrentTeam);     // Prepare object   
-   mDockItems.push_back(boost::shared_ptr<BfObject>(object));          // Add item to our list of dock objects
+   object->prepareForDock(getGame(), Point(xPos, yPos), mCurrentTeam);  // Prepare object   
+   mDockItems.push_back(boost::shared_ptr<BfObject>(object));           // Add item to our list of dock objects
 }
 
 
@@ -1192,7 +1192,7 @@ void EditorUserInterface::markLevelPermanentlyDirty()
 }
 
 
-string EditorUserInterface::getLevelFileName()
+string EditorUserInterface::getLevelFileName() const
 {
    return mEditFileName != "" ? mEditFileName : UnnamedFile;
 }
@@ -1348,7 +1348,7 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
       mWasTesting = false;
       mSaveMsgTimer.clear();
 
-      getGame()->setGameType(mEditorGameType); 
+      //getGame()->setGameType(mEditorGameType); 
 
       remove("editor.tmp");      // Delete temp file
    }
@@ -1362,9 +1362,9 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
 }
 
 
-S32 EditorUserInterface::getTeamCount()
+S32 EditorUserInterface::getTeamCount() const
 {
-   return getGame()->getTeamCount();
+   return mLevel->getTeamCount();
 }
 
 
@@ -1411,13 +1411,13 @@ void EditorUserInterface::removeTeam(S32 teamIndex)
 }
 
 
-Point EditorUserInterface::convertCanvasToLevelCoord(Point p)
+Point EditorUserInterface::convertCanvasToLevelCoord(const Point &p) const
 {
    return (p - mCurrentOffset) * (1 / mCurrentScale);
 }
 
 
-Point EditorUserInterface::convertLevelToCanvasCoord(Point p, bool convert)
+Point EditorUserInterface::convertLevelToCanvasCoord(const Point &p, bool convert) const
 {
    return convert ? p * mCurrentScale + mCurrentOffset : p;
 }
@@ -1447,7 +1447,7 @@ void EditorUserInterface::onDisplayModeChange()
 }
 
 
-Point EditorUserInterface::snapPointToLevelGrid(Point const &p)
+Point EditorUserInterface::snapPointToLevelGrid(Point const &p) const
 {
    if(mSnapContext != FULL_SNAPPING)
       return p;
@@ -1459,7 +1459,7 @@ Point EditorUserInterface::snapPointToLevelGrid(Point const &p)
 }
 
 
-Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, bool snapWhileOnDock)
+Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, bool snapWhileOnDock) const
 {
    if(mouseOnDock() && !snapWhileOnDock) 
       return p;      // No snapping!
@@ -1625,7 +1625,7 @@ void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<DatabaseOb
 }
 
 
-bool EditorUserInterface::getSnapToWallCorners()
+bool EditorUserInterface::getSnapToWallCorners() const
 {
    // Allow snapping to wall corners when we're dragging items.  Disallow for all wall types other than PolyWall
    return mSnapContext != NO_SNAPPING && mDraggingObjects &&
@@ -1650,7 +1650,8 @@ static bool checkPoint(const Point &clickPoint, const Point &point, F32 &minDist
 }
 
 
-S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vector<DatabaseObject *> *edges, F32 &minDist, Point &snapPoint)
+S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vector<DatabaseObject *> *edges, 
+                                             F32 &minDist, Point &snapPoint) const
 {
    const Point *vert;
 
@@ -1672,7 +1673,7 @@ S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vect
 // Rendering routines
 
 
-bool EditorUserInterface::showMinorGridLines()
+bool EditorUserInterface::showMinorGridLines() const
 {
    return mCurrentScale >= .5;
 }
@@ -1685,7 +1686,7 @@ static S32 QSORT_CALLBACK sortByTeam(DatabaseObject **a, DatabaseObject **b)
 }
 
 
-void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
+void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb) const
 {
    fillVector = *editorDb->findObjects_fast(SpyBugTypeNumber);  // This will actually copy vector of pointers to fillVector
                                                                 // so we can sort by team, this is still faster then findObjects.
@@ -1751,7 +1752,7 @@ S32 getDockHeight()
 }
 
 
-void EditorUserInterface::renderDock()    
+void EditorUserInterface::renderDock() const  
 {
    // Render item dock down RHS of screen
    const S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
@@ -1794,7 +1795,7 @@ const S32 PANEL_SPACING = S32(PANEL_TEXT_SIZE * 1.3);
 
 static S32 PanelBottom, PanelTop, PanelLeft, PanelRight, PanelInnerMargin;
 
-void EditorUserInterface::renderInfoPanel() 
+void EditorUserInterface::renderInfoPanel() const
 {
    // Recalc dimensions in case screen mode changed
    PanelBottom = DisplayManager::getScreenInfo()->getGameCanvasHeight() - EditorUserInterface::vertMargin;
@@ -1833,7 +1834,7 @@ void EditorUserInterface::renderInfoPanel()
 }
 
 
-void EditorUserInterface::renderPanelInfoLine(S32 line, const char *format, ...)
+void EditorUserInterface::renderPanelInfoLine(S32 line, const char *format, ...) const
 {
    const S32 xpos = horizMargin + PanelInnerMargin;
 
@@ -1869,7 +1870,7 @@ static void renderAttribText(S32 xpos, S32 ypos, S32 textsize,
 
 
 // Shows selected item attributes, or, if we're hovering over dock item, shows dock item info string
-void EditorUserInterface::renderItemInfoPanel()
+void EditorUserInterface::renderItemInfoPanel() const
 {
    string attribsText, itemName, attribs;     // All intialized to ""
 
@@ -1877,7 +1878,7 @@ void EditorUserInterface::renderItemInfoPanel()
    bool multipleKindsOfObjectsSelected = false;
    bool dockItem = false;
 
-   static Vector<string> keys, values;    // Reusable containers
+   static Vector<string> keys, values;       // Reusable containers
    keys.clear();
    values.clear();
 
@@ -1921,9 +1922,6 @@ void EditorUserInterface::renderItemInfoPanel()
 
             hitCount++;
          }  // end if obj is selected
-
-         else if(obj->isLitUp() && !mouseOnDock())
-            mInfoMsg = string("Hover: ") + obj->getOnScreenName();
       }
    }
 
@@ -1972,7 +1970,7 @@ void EditorUserInterface::renderItemInfoPanel()
 }
 
 
-void EditorUserInterface::renderReferenceShip()
+void EditorUserInterface::renderReferenceShip() const
 {
    // Render ship at cursor to show scale
    static F32 thrusts[4] =  { 1, 0, 0, 0 };
@@ -2008,12 +2006,9 @@ static F32 getRenderingAlpha(bool isScriptItem)
 }
 
 
-void EditorUserInterface::render()
+void EditorUserInterface::render() const
 {
    GridDatabase *editorDb = getLevel();
-   mInfoMsg = "";
-
-   mouseIgnore = false;                // Avoid freezing effect from too many mouseMoved events without a render in between (sam)
 
    // Render bottom-most layer of our display
    if(mPreviewMode)
@@ -2130,7 +2125,7 @@ static void setColor(bool isSelected, bool isLitUp, bool isScriptItem)
 
 
 // Render objects in the specified database
-void EditorUserInterface::renderObjects(GridDatabase *database, RenderModes renderMode, bool isLevelgenOverlay)
+void EditorUserInterface::renderObjects(const GridDatabase *database, RenderModes renderMode, bool isLevelgenOverlay) const
 {
    const Vector<DatabaseObject *> *objList = database->findObjects_fast();
 
@@ -2162,7 +2157,8 @@ void EditorUserInterface::renderObjects(GridDatabase *database, RenderModes rend
 
 
 // Render walls (both normal walls and polywalls, outlines and fills) and centerlines
-void EditorUserInterface::renderWallsAndPolywalls(GridDatabase *database, const Point &offset, bool drawSelected, bool isLevelGenDatabase)
+void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, const Point &offset,
+                                                  bool drawSelected, bool isLevelGenDatabase) const
 {
    GameSettings *settings = getGame()->getSettings();
 
@@ -2185,7 +2181,7 @@ void EditorUserInterface::renderWallsAndPolywalls(GridDatabase *database, const 
 }
 
 
-void EditorUserInterface::renderObjectsUnderConstruction()
+void EditorUserInterface::renderObjectsUnderConstruction() const
 {
    // Add a vert (and deleted it later) to help show what this item would look like if the user placed the vert in the current location
    mNewItem->addVert(snapPoint(getLevel(), convertCanvasToLevelCoord(mMousePos)));
@@ -2215,7 +2211,7 @@ void EditorUserInterface::renderObjectsUnderConstruction()
 
 
 // Draw box for selecting items
-void EditorUserInterface::renderDragSelectBox()
+void EditorUserInterface::renderDragSelectBox() const
 {
    if(!mDragSelecting)   
       return;
@@ -2232,24 +2228,25 @@ static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
 static void renderDockItemLabel(const Point &pos, const char *label);
 static void renderDockItem(BfObject *object, F32 currentScale, S32 snapVertexIndex);
 
-void EditorUserInterface::renderDockItems()
-{
-   for(S32 i = 0; i < mDockItems.size(); i++)
-      renderDockItem(mDockItems[i].get(), mCurrentScale, mSnapVertexIndex);
-}
-
-
-static void renderDockItem(BfObject *object, F32 currentScale, S32 snapVertexIndex)
+static void renderDockItem(const BfObject *object, const Color &color, F32 currentScale, S32 snapVertexIndex)
 {
    glColor(Colors::EDITOR_PLAIN_COLOR);
 
-   object->renderDock();
+   object->renderDock(color);
    renderDockItemLabel(object->getDockLabelPos(), object->getOnDockName());
 
    if(object->isLitUp())
      object->highlightDockItem();
+}
 
-   object->setLitUp(false);
+
+void EditorUserInterface::renderDockItems() const
+{
+   for(S32 i = 0; i < mDockItems.size(); i++)
+      renderDockItem(mDockItems[i].get(), mLevel->getTeamColor(mCurrentTeam), mCurrentScale, mSnapVertexIndex);
+
+   for(S32 i = 0; i < mDockItems.size(); i++)
+      mDockItems[i]->setLitUp(false);
 }
 
 
@@ -2262,7 +2259,7 @@ static void renderDockItemLabel(const Point &pos, const char *label)
 }
 
 
-void EditorUserInterface::renderDockPlugins()
+void EditorUserInterface::renderDockPlugins() const
 {
    S32 hoveredPlugin = mouseOnDock() ? findHitPlugin() : -1;
    S32 maxPlugins = getDockHeight() / PLUGIN_LINE_SPACING;
@@ -2272,13 +2269,15 @@ void EditorUserInterface::renderDockPlugins()
       {
          S32 x = DisplayManager::getScreenInfo()->getGameCanvasWidth() - mDockWidth - horizMargin;
          F32 y = 1.5f * vertMargin + PLUGIN_LINE_SPACING * (i - mDockPluginScrollOffset);
+
          drawHollowRect(x + horizMargin / 3, y, x + mDockWidth - horizMargin / 3, y + PLUGIN_LINE_SPACING, Colors::white);
-         mInfoMsg = mPluginInfos[i].description;
       }
 
       glColor(Colors::white);
+
       S32 y = (S32) (1.5 * vertMargin + PLUGIN_LINE_SPACING * (i - mDockPluginScrollOffset + 0.33));
       drawString((S32) (DisplayManager::getScreenInfo()->getGameCanvasWidth() - mDockWidth - horizMargin / 2), y, DOCK_LABEL_SIZE, mPluginInfos[i].prettyName.c_str());
+
       S32 bindingWidth = getStringWidth(DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
       drawString((S32) (DisplayManager::getScreenInfo()->getGameCanvasWidth() - bindingWidth - horizMargin * 1.5), y, DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
    }
@@ -2971,19 +2970,15 @@ void EditorUserInterface::findHitItemOnDock()
 }
 
 
-S32 EditorUserInterface::findHitPlugin()
+S32 EditorUserInterface::findHitPlugin() const
 {
    S32 i;
    for(i = 0; i < mPluginInfos.size(); i++)
-   {
-      if(mMousePos.y > 1.5 * vertMargin + PLUGIN_LINE_SPACING * i &&
-         mMousePos.y < 1.5 * vertMargin + PLUGIN_LINE_SPACING * (i + 1)
-      )
-      {
+      if( mMousePos.y > 1.5 * vertMargin + PLUGIN_LINE_SPACING * i &&
+          mMousePos.y < 1.5 * vertMargin + PLUGIN_LINE_SPACING * (i + 1) )
          return i + mDockPluginScrollOffset;
-      }
-   }
-   return -1;
+
+      return -1;
 }
 
 
@@ -2991,10 +2986,10 @@ void EditorUserInterface::onMouseMoved()
 {
    Parent::onMouseMoved();
 
-   if(mouseIgnore)  // Needed to avoid freezing effect from too many mouseMoved events without a render in between
+   if(mIgnoreMouseInput)  // Needed to avoid freezing effect from too many mouseMoved events without a render in between
       return;
 
-   mouseIgnore = true;
+   mIgnoreMouseInput = true;
 
    mMousePos.set(DisplayManager::getScreenInfo()->getMousePos());
 
@@ -3803,13 +3798,13 @@ void EditorUserInterface::centerView(bool isScreenshot)
 }
 
 
-F32 EditorUserInterface::getCurrentScale()
+F32 EditorUserInterface::getCurrentScale() const
 {
    return mCurrentScale;
 }
 
 
-Point EditorUserInterface::getCurrentOffset()
+Point EditorUserInterface::getCurrentOffset() const
 {
    return mCurrentOffset;
 }
@@ -4796,7 +4791,7 @@ void EditorUserInterface::onFinishedDragging()
 }
 
 
-bool EditorUserInterface::mouseOnDock()
+bool EditorUserInterface::mouseOnDock() const
 {
    return (mMousePos.x >= DisplayManager::getScreenInfo()->getGameCanvasWidth() - mDockWidth - horizMargin &&
            mMousePos.x <= DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin &&
@@ -4842,6 +4837,8 @@ void EditorUserInterface::idle(U32 timeDelta)
 {
    Parent::idle(timeDelta);
 
+   mIgnoreMouseInput = false;    // Avoid freezing effect from too many mouseMoved events without a render in between (sam)
+
    F32 pixelsToScroll = timeDelta * (InputCodeManager::getState(KEY_SHIFT) ? 1.0f : 0.5f);    // Double speed when shift held down
 
    if(mLeft && !mRight)
@@ -4886,6 +4883,24 @@ void EditorUserInterface::idle(U32 timeDelta)
       setLingeringMessage(mLingeringMessageQueue);
       mLingeringMessageQueue = "";
    }
+
+   mInfoMsg = getInfoMsg();
+}
+
+
+string EditorUserInterface::getInfoMsg() const
+{
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
+
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(objList->get(i));
+
+      if(!obj->isSelected() && obj->isLitUp() && !mouseOnDock())
+         return string("Hover: ") + obj->getOnScreenName();
+   }
+
+   return "";
 }
 
 
@@ -4982,7 +4997,7 @@ string EditorUserInterface::getQuitLockedMessage()
 }
 
 
-string EditorUserInterface::getLevelText() 
+string EditorUserInterface::getLevelText() const
 {
    string result;
 
@@ -5121,7 +5136,7 @@ void EditorUserInterface::testLevelStart()
       LevelSourcePtr levelSource = LevelSourcePtr(
             new FolderLevelSource(levelList, getGame()->getSettings()->getFolderManager()->getLevelDir()));
 
-      getGame()->setGameType(NULL); // Prevents losing seconds on game timer (test level from editor, save, and reload level)
+      //getGame()->setGameType(NULL); // Prevents losing seconds on game timer (test level from editor, save, and reload level)
 
       initHosting(getGame()->getSettingsPtr(), levelSource, true, false);
    }

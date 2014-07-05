@@ -137,7 +137,6 @@ private:
    Move mCurrentMove;
    Move mTransformedMove;
    Point mMousePoint;
-   Point mShipPos;      // Track ship pos, so we have something if the ship disappears for whatever reason
 
    HelperManager mHelperManager;
    LoadoutIndicator mLoadoutIndicator;
@@ -187,17 +186,17 @@ private:
 
    Timer mProgressBarFadeTimer;     // For fading out progress bar after level is loaded
    bool mShowProgressBar;
-   bool mHasShipPos;                // True if mShipPos has been explicitly set
-
 
    // Some rendering routines
-   void renderScoreboard();
+   void renderScoreboard() const;
    void renderTeamScoreboard(S32 index, S32 teams, bool isTeamGame, 
                              S32 scoreboardTop, S32 sectionHeight, S32 teamHeaderHeight, S32 lineHeight) const;
    void renderScoreboardLine(const Vector<ClientInfo *> &playerScores, bool isTeamGame, S32 row, 
                              S32 x, S32 y, U32 lineHeight, S32 rightEdge, S32 *colWidths) const;
    void renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y, const S32 *colIndexWidths, bool isTeamGame) const;
    void renderTeamName(S32 index, S32 left, S32 right, S32 top) const;
+
+   Point getShipRenderPos() const;
 
 
    // Some key press/release handler helpers
@@ -329,7 +328,7 @@ public:
    void showLevelLoadDisplay(bool show, bool fade);
    void serverLoadedLevel(const string &levelName);
 
-   void render();                         // Render game screen
+   void render() const;                   // Render game screen
   
    void renderReticle() const;            // Render crosshairs
    void renderWrongModeIndicator() const;
@@ -379,8 +378,8 @@ public:
    void emitTeleportInEffect(const Point &pos, U32 type);
 
    
-   void renderBasicInterfaceOverlay();
-   void renderLevelInfo();
+   void renderBasicInterfaceOverlay() const;
+   void renderLevelInfo() const;
    bool shouldRenderLevelInfo() const;
    static void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio);
 
@@ -443,13 +442,13 @@ public:
    const HelperMenu *getActiveHelper() const;
 
 
-   void renderGameNormal();         // Render game in normal play mode
-   void renderGameCommander();      // Render game in commander's map mode
-   void renderSuspended();          // Render suspended game
+   void renderGameNormal() const;         // Render game in normal play mode
+   void renderGameCommander() const;      // Render game in commander's map mode
+   void renderSuspended() const;          // Render suspended game
 
-   void renderOverlayMap();         // Render the overlay map in normal play mode
+   void renderOverlayMap() const;         // Render the overlay map in normal play mode
 
-   void renderEngineeredItemDeploymentMarker(Ship *ship);
+   void renderEngineeredItemDeploymentMarker(Ship *ship) const;
 
    void receivedControlUpdate(bool recvd);
 

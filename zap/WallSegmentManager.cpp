@@ -236,7 +236,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
 }
 
 
-// Used above and from instructions
+// Used above and from instructions -- static method
 void WallSegmentManager::clipAllWallEdges(const Vector<DatabaseObject *> *wallSegments, Vector<Point> &wallEdges)
 {
    Vector<const Vector<Point> *> inputPolygons;

@@ -308,7 +308,7 @@ static S32 showMasterBlock(ClientGame *game, S32 textsize, S32 ypos, S32 gap, bo
 
 extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 
-void DiagnosticUserInterface::render()
+void DiagnosticUserInterface::render() const
 {
    // Draw title, subtitle, and footer
    glColor(Colors::red);

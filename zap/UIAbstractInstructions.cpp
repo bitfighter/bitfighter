@@ -96,7 +96,7 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStr
 }
 
 
-void AbstractInstructionsUserInterface::render(const char *header, S32 page, S32 pages)
+void AbstractInstructionsUserInterface::render(const char *header, S32 page, S32 pages) const
 {
    static const char* prefix = "INSTRUCTIONS - ";
    static S32 fontSize = 25;
@@ -118,15 +118,16 @@ void AbstractInstructionsUserInterface::render(const char *header, S32 page, S32
 }
 
 
-void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolStringSet &instructions, const ControlStringsEditor *cmdList)
+void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolStringSet &instructions, 
+                                                              const ControlStringsEditor *cmdList) const
 {
    const S32 headerSize = 20;
    const S32 cmdSize = 16;
    const S32 cmdGap = 10;
 
    S32 ypos = 60;
-   S32 cmdCol = horizMargin;                                                         // Action column
-   S32 descrCol = horizMargin + S32(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.25) + 55;   // Control column
+   S32 cmdCol = horizMargin;                                                                             // Action column
+   S32 descrCol = horizMargin + S32(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.25) + 55;  // Control column
 
    ypos += instructions.render(cmdCol, ypos, UI::AlignmentLeft);
 

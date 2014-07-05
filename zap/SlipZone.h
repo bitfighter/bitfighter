@@ -26,7 +26,7 @@ public:
 
    bool processArguments(S32 argc, const char **argv, Level *level);
 
-   void render();
+   void render() const;
    S32 getRenderSortValue();
 
    void onAddedToGame(Game *theGame);
@@ -38,13 +38,13 @@ public:
 
    /////
    // Editor methods
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
    string toLevelCode() const;
 
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
 
 
    TNL_DECLARE_CLASS(SlipZone);

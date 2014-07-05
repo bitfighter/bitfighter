@@ -55,8 +55,11 @@ private:
    S32 mQuickChatButtonsWidth;
 
    Vector<OverlayMenuItem> *getMenuItems(bool one);
+   const Vector<OverlayMenuItem> *getConstMenuItems(bool one) const;
+
    S32 getWidthOfItems() const;
    S32 getWidthOfButtons() const;
+   void setLegend();
 
    void updateChatMenuItems(S32 curNode);
 
@@ -68,7 +71,7 @@ public:
 
    static Vector<QuickChatNode> nodeTree;
 
-   void render();                
+   void render() const;                
    void onActivated();  
    bool processInputCode(InputCode inputCode);   
    bool isMovementDisabled() const;

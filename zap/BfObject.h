@@ -162,11 +162,11 @@ public:
    virtual ~EditorObject();   // Destructor
 
    // Messages and such for the editor
-   virtual const char *getOnScreenName();
-   virtual const char *getPrettyNamePlural();
-   virtual const char *getOnDockName();
-   virtual const char *getEditorHelpString();
-   virtual const char *getInstructionMsg(S32 attributeCount);        // Message printed below item when it is selected
+   virtual const char *getOnScreenName() const;
+   virtual const char *getPrettyNamePlural() const;
+   virtual const char *getOnDockName() const;
+   virtual const char *getEditorHelpString() const;
+   virtual const char *getInstructionMsg(S32 attributeCount) const;     // Message printed below item when it is selected
    
    // For displaying object attributes in lower-left of editor:
    virtual void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);   
@@ -174,8 +174,8 @@ public:
    // Objects can be different sizes on the dock and in the editor.  We need to draw selection boxes in both locations,
    // and these functions specify how big those boxes should be.  Override if implementing a non-standard sized item.
    // (strictly speaking, only getEditorRadius needs to be public, but it make sense to keep these together organizationally.)
-   virtual S32 getDockRadius();                    // Size of object on dock
-   virtual F32 getEditorRadius(F32 currentScale);  // Size of object in editor
+   virtual S32 getDockRadius() const;                    // Size of object on dock
+   virtual F32 getEditorRadius(F32 currentScale) const;  // Size of object in editor
 
 
    //////
@@ -189,14 +189,14 @@ public:
 
    // Track some items used in the editor
    void setSelected(bool selected);
-   bool isSelected();
+   bool isSelected() const;
    U32 getSelectedTime();
 
-   bool isLitUp();
+   bool isLitUp() const;
    void setLitUp(bool litUp);
 
    // Keep track which vertex, if any is lit up in the currently selected item
-   bool isVertexLitUp(S32 vertexIndex);
+   bool isVertexLitUp(S32 vertexIndex) const;
    void setVertexLitUp(S32 vertexIndex);
 };
 
@@ -253,7 +253,7 @@ public:
    virtual bool isMoveObject();
    virtual Point getVel() const;
 
-   U32 getCreationTime();
+   U32 getCreationTime() const;
    void setCreationTime(U32 creationTime);
 
    void deleteObject(U32 deleteTimeInterval = 0);
@@ -308,7 +308,7 @@ public:
    // Although you'd have to get around the issue of alpha blended objects - they
    // are usually rendered in a different order when sent to OpenGL
    virtual void renderLayer(S32 layerIndex);
-   virtual void render();
+   virtual void render() const;
 
    virtual void idle(IdleCallPath path);              
 
@@ -403,7 +403,7 @@ public:
 #ifndef ZAP_DEDICATED
    void renderAndLabelHighlightedVertices(F32 currentScale);      // Render selected and highlighted vertices, called from renderEditor
 #endif
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
 
 
    virtual void setSnapped(bool snapped);                  // Overridden in EngineeredItem 
@@ -415,9 +415,9 @@ public:
    virtual void newObjectFromDock(F32 gridSize);   // Called when item dragged from dock to editor -- overridden by several objects
 
    ///// Dock item rendering methods
-   virtual void renderDock();   
-   virtual Point getDockLabelPos();
-   virtual void highlightDockItem();
+   virtual void renderDock(const Color &color) const;   
+   virtual Point getDockLabelPos() const;
+   virtual void highlightDockItem() const;
 
    virtual void initializeEditor();
 

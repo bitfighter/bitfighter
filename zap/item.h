@@ -49,7 +49,7 @@ public:
    virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   F32 getRadius();
+   F32 getRadius() const;
    virtual void setRadius(F32 radius);
 
    virtual void setPos(const Point &pos);
@@ -58,15 +58,15 @@ public:
    virtual void setOutline();
    virtual const Vector<Point> *getOutline() const;   // Overridden by SpeedZones and Turrets
 
-   virtual void renderItem(const Point &pos);         // Generic renderer -- will be overridden
-   virtual void render();
+   virtual void renderItem(const Point &pos) const;   // Generic renderer -- will be overridden
+   virtual void render() const;
 
    U16 getItemId();
    void setItemId(U16 id);
 
    // Editor interface
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
-   virtual F32 getEditorRadius(F32 currentScale);
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
+   virtual F32 getEditorRadius(F32 currentScale) const;
    virtual string toLevelCode() const;
 
    virtual Rect calcExtents(); 

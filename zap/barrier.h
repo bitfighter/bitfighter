@@ -140,21 +140,21 @@ public:
 
    void changeWidth(S32 amt);
 
-   void render();
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+   void render() const;
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
 
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();          // Vertices should not be labeled
-   const char *getInstructionMsg(S32 attributeCount);
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;          // Vertices should not be labeled
+   const char *getInstructionMsg(S32 attributeCount) const;
    void fillAttributesVectors(Vector<string> &keys, Vector<string> &values); 
 
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
-   F32 getEditorRadius(F32 currentScale);        // Basically, the size of our hit target for vertices
+   F32 getEditorRadius(F32 currentScale) const;        // Basically, the size of our hit target for vertices
 
    const Color &getEditorRenderColor() const;    // Unselected wall spine color
 
@@ -205,7 +205,7 @@ public:
 
    bool processArguments(S32 argc, const char **argv, Level *level);
 
-   void renderDock();
+   void renderDock(const Color &color) const;
 
    S32 getRenderSortValue();
 
@@ -218,13 +218,13 @@ public:
 
    /////
    // Editor methods
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
    string toLevelCode() const;
 
-   F32 getEditorRadius(F32 currentScale);
+   F32 getEditorRadius(F32 currentScale) const;
 
    TNL_DECLARE_CLASS(PolyWall);
 
@@ -266,7 +266,7 @@ public:
    S32 getOwner();
    void invalidate();
 
-   bool isSelected();
+   bool isSelected() const;
    void setSelected(bool selected);
 
    void resetEdges();         // Compute basic edges from corner points

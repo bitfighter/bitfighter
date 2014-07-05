@@ -279,7 +279,7 @@ void FlagItem::removeOccupiedSpawnPoints(Vector<AbstractSpawn *> &spawnPoints) /
 }
 
 
-void FlagItem::renderItem(const Point &pos)
+void FlagItem::renderItem(const Point &pos) const
 {
    Point offset(0,0);
 
@@ -290,31 +290,31 @@ void FlagItem::renderItem(const Point &pos)
 }
 
 
-void FlagItem::renderItemAlpha(const Point &pos, F32 alpha)
+void FlagItem::renderItemAlpha(const Point &pos, F32 alpha) const
 {
    // No cloaking for normal flags!
    renderItem(pos);
 }
 
 
-void FlagItem::renderDock()
+void FlagItem::renderDock(const Color &color) const
 {
 #ifndef ZAP_DEDICATED
-   renderFlag(getActualPos(), 0.6f, getColor());
+   renderFlag(getActualPos(), 0.6f, color);
 #endif
 }
 
 
-F32 FlagItem::getEditorRadius(F32 currentScale)
+F32 FlagItem::getEditorRadius(F32 currentScale) const
 {
    return 18 * currentScale;
 }
 
 
-const char *FlagItem::getOnScreenName()     { return "Flag";  }
-const char *FlagItem::getOnDockName()       { return "Flag";  }
-const char *FlagItem::getPrettyNamePlural() { return "Flags"; }
-const char *FlagItem::getEditorHelpString() { return "Flag item, used by a variety of game types."; }
+const char *FlagItem::getOnScreenName()     const { return "Flag";  }
+const char *FlagItem::getOnDockName()       const { return "Flag";  }
+const char *FlagItem::getPrettyNamePlural() const { return "Flags"; }
+const char *FlagItem::getEditorHelpString() const { return "Flag item, used by a variety of game types."; }
 
 
 bool FlagItem::hasTeam()      { return true; }

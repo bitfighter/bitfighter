@@ -770,9 +770,14 @@ void Teleporter::idle(IdleCallPath path)
    // Client only
    if(path == ClientIdlingNotLocalShip)
    {
-      // Update Explosion Timer
+      // Handle explosions
       if(mHasExploded)
-         mExplosionTimer.update(deltaT);
+      {
+         if(mExplosionTimer.getCurrent() == 0 && !mFinalExplosionTriggered)
+            doExplosion();
+         else
+            mExplosionTimer.update(deltaT);
+      }
    }
 
    if(mTeleportCooldown.update(deltaT) && path == ServerIdleMainLoop)
@@ -780,7 +785,7 @@ void Teleporter::idle(IdleCallPath path)
 }
 
 
-void Teleporter::render()
+void Teleporter::render() const
 {
 #ifndef ZAP_DEDICATED
    // Render at a different radius depending on if a ship has just gone into the teleport
@@ -819,10 +824,6 @@ void Teleporter::render()
       else
          radiusFraction = 2 * F32(mExplosionTimer.getCurrent()) / 
                               F32(halfPeriod);
-
-      // Add ending explosion
-      if(mExplosionTimer.getCurrent() == 0 && !mFinalExplosionTriggered)
-         doExplosion();
    }
 
    if(radiusFraction != 0)
@@ -895,7 +896,7 @@ void Teleporter::doExplosion()
 #endif
 
 
-void Teleporter::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void Teleporter::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    Parent::renderEditor(currentScale, snappingToWallCornersEnabled);
@@ -938,10 +939,10 @@ void Teleporter::onGeomChanged()
 }   
 
 
-const char *Teleporter::getOnScreenName()     { return "Teleporter";    }
-const char *Teleporter::getPrettyNamePlural() { return "Teleporters"; }
-const char *Teleporter::getOnDockName()       { return "Teleporter";    }
-const char *Teleporter::getEditorHelpString() { return "Teleports ships from one place to another. [T]"; }
+const char *Teleporter::getOnScreenName()     const  { return "Teleporter";    }
+const char *Teleporter::getPrettyNamePlural() const  { return "Teleporters"; }
+const char *Teleporter::getOnDockName()       const  { return "Teleporter";    }
+const char *Teleporter::getEditorHelpString() const  { return "Teleports ships from one place to another. [T]"; }
 
 
 bool Teleporter::hasTeam()      { return false; }

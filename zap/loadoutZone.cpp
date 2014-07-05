@@ -61,22 +61,22 @@ LoadoutZone *LoadoutZone::clone() const
 }
 
 
-void LoadoutZone::render()
+void LoadoutZone::render() const
 {
    renderLoadoutZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle());
 }
 
 
-void LoadoutZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void LoadoutZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    render();
    PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled);
 }
 
 
-void LoadoutZone::renderDock()
+void LoadoutZone::renderDock(const Color &color) const
 {
-   renderZone(getColor(), getOutline(), getFill());
+   renderZone(color, getOutline(), getFill());
 }
 
 
@@ -111,10 +111,10 @@ bool LoadoutZone::processArguments(S32 argc2, const char **argv2, Level *level)
 }
 
 
-const char *LoadoutZone::getOnScreenName()     { return "Loadout";       }
-const char *LoadoutZone::getPrettyNamePlural() { return "Loadout Zones"; }
-const char *LoadoutZone::getOnDockName()       { return "Loadout";       }
-const char *LoadoutZone::getEditorHelpString() { return "Area to finalize ship modifications.  Each team should have at least one."; }
+const char *LoadoutZone::getOnScreenName()     const  { return "Loadout";       }
+const char *LoadoutZone::getPrettyNamePlural() const  { return "Loadout Zones"; }
+const char *LoadoutZone::getOnDockName()       const  { return "Loadout";       }
+const char *LoadoutZone::getEditorHelpString() const  { return "Area to finalize ship modifications.  Each team should have at least one."; }
 
 bool LoadoutZone::hasTeam()      { return true; }
 bool LoadoutZone::canBeHostile() { return true; }

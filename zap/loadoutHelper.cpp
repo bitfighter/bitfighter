@@ -52,14 +52,17 @@ static string preset1, preset2, preset3;     // Static so that the c_str() point
 // Constructor
 LoadoutHelper::LoadoutHelper()
 {
-   mCurrentIndex = 0;
-
    S32 modItemWidth  =  getMaxItemWidth(loadoutModuleMenuItems, ARRAYSIZE(loadoutModuleMenuItems));
    S32 weapItemWidth =  getMaxItemWidth(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems));
    mLoadoutItemsDisplayWidth = max(modItemWidth, weapItemWidth);
 
    mPresetItemsDisplayWidth = 0;    // Will be set in onActivated()
    mPresetButtonsWidth = 0;
+
+   reset();
+
+   mTitle = "";
+   mLegend = NULL;
 }
 
 
@@ -67,6 +70,13 @@ LoadoutHelper::LoadoutHelper()
 LoadoutHelper::~LoadoutHelper()
 {
    // Do nothing
+}
+
+
+void LoadoutHelper::reset()
+{
+   mCurrentIndex = 0;
+   setShowingPresets(false);
 }
 
 
@@ -98,6 +108,7 @@ void LoadoutHelper::rebuildPresetItems()
 
    mPresetItems = Vector<OverlayMenuItem>(presetItems, ARRAYSIZE(presetItems));
    mPresetItemsDisplayWidth = getMaxItemWidth(presetItems, ARRAYSIZE(presetItems));
+
    mPresetButtonsWidth = getButtonWidth(presetItems, ARRAYSIZE(presetItems));
 }
 
@@ -125,41 +136,28 @@ void LoadoutHelper::onActivated()
    mModuleMenuItems = Vector<OverlayMenuItem>(loadoutModuleMenuItems, ARRAYSIZE(loadoutModuleMenuItems));
    mWeaponMenuItems = Vector<OverlayMenuItem>(loadoutWeaponMenuItems, ARRAYSIZE(loadoutWeaponMenuItems));
 
-   mCurrentIndex = 0;
+   reset();
 
    mModuleMenuItems[moduleEngineerIndex].showOnMenu = mEngineerEnabled;    // Can't delete this or other arrays will become unaligned
 
    mLoadoutChanged = false;
-   mShowingPresets = false;       // Start in regular mode -- press activation key again to enter preset mode
+   setShowingPresets(false);     // Start in regular mode -- press activation key again to enter preset mode
 
    // Rebuild the text of the preset items we'll show -- user may have defined new presets since last visit
    rebuildPresetItems();         
 }
 
 
-void LoadoutHelper::render()
+// Returns true if we are currently displaying modules, false if weapons
+bool LoadoutHelper::showingModules() const
 {
-   bool showingModules = mCurrentIndex < ShipModuleCount;
+   return mCurrentIndex < ShipModuleCount;
+}
 
-   if(mShowingPresets)
-   {
-      Vector<OverlayMenuItem> &prevItems = showingModules ? mModuleMenuItems : mWeaponMenuItems;
-      drawItemMenu("Choose loadout preset:", &mPresetItems[0], mPresetItems.size(), 
-                   prevItems.address(), prevItems.size(), mPresetButtonsWidth, mPresetItemsDisplayWidth);
-   }
-   else if(showingModules)
-   {
-      char title[100];
-      dSprintf(title, sizeof(title), "Pick %d modules:", ShipModuleCount);
-      drawItemMenu(title, mModuleMenuItems.address(), mModuleMenuItems.size(), NULL, 0, mLoadoutButtonsWidth, mLoadoutItemsDisplayWidth);
-   }
-   else     // Showing weapons
-   {
-      char title[100];
-      dSprintf(title, sizeof(title), "Pick %d weapons:", ShipWeaponCount);
-      drawItemMenu(title, mWeaponMenuItems.address(), mWeaponMenuItems.size(), 
-                   &mModuleMenuItems[0], mModuleMenuItems.size(), mLoadoutButtonsWidth, mLoadoutItemsDisplayWidth);
-   }
+
+void LoadoutHelper::render() const
+{
+   drawItemMenu(mLoadoutButtonsWidth, mLoadoutItemsDisplayWidth);
 }
 
 
@@ -234,6 +232,10 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       mModule[mCurrentIndex] = ShipModule(index);
       mCurrentIndex++;
 
+      setShowingPresets(false);     // Triggers update of menu title and such
+
+      bool showingMods = showingModules();
+      
       // Check if we need to switch over to weapons
       if(mCurrentIndex == ShipModuleCount)
          resetScrollTimer();
@@ -271,9 +273,49 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 }
 
 
+// Handle phase transitions when menu changes from presets to modules to weapons
+void LoadoutHelper::setShowingPresets(bool showingPresets)
+{
+   mShowingPresets = showingPresets;
+
+   if(mShowingPresets)
+   {
+      mTitle = "Choose loadout preset:";
+      mCurrentRenderItems = mPresetItems.address();
+      mCurrentRenderCount = mPresetItems.size();
+   }
+
+   else if(showingModules())
+   {
+      char title[32];
+      dSprintf(title, sizeof(mTitle), "Pick %d modules:", ShipModuleCount);
+      mTitle = title;
+
+      mPrevRenderItems = NULL; //(showingMods ? mModuleMenuItems : mWeaponMenuItems).address();
+      mPrevRenderCount = 0; //(showingMods ? mModuleMenuItems : mWeaponMenuItems).size();
+
+      mCurrentRenderItems = mModuleMenuItems.address();
+      mCurrentRenderCount = mModuleMenuItems.size();
+   }
+
+   else     
+   {
+      char title[32];
+      dSprintf(title, sizeof(mTitle), "Pick %d weapons:", ShipWeaponCount);
+      mTitle = title;
+
+      mPrevRenderItems = mModuleMenuItems.address();
+      mPrevRenderCount = mModuleMenuItems.size();
+
+      mCurrentRenderItems = mWeaponMenuItems.address();
+      mCurrentRenderCount = mWeaponMenuItems.size();
+   }
+}
+
+
 void LoadoutHelper::activateTransitionFromLoadoutMenuToPresetMenu()
 {
-   mShowingPresets = true;
+   setShowingPresets(true);
 
    // The menu will be getting larger to accomodate the presets, which are wider than the standard 
    // loadout menu.  Here we'll calculate the width of the loadout menu and the preset menu.

@@ -52,13 +52,13 @@ SlipZone *SlipZone::clone() const
 }
 
 
-void SlipZone::render()
+void SlipZone::render() const
 {
    renderSlipZone(getOutline(), getFill(), getCentroid());
 }
 
 
-void SlipZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void SlipZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    render();
    PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled);
@@ -111,25 +111,25 @@ bool SlipZone::processArguments(S32 argc2, const char **argv2, Level *level)
 }
 
 
-const char *SlipZone::getEditorHelpString()
+const char *SlipZone::getEditorHelpString() const
 {
    return "Areas of higher than normal inertia.";
 }
 
 
-const char *SlipZone::getPrettyNamePlural()
+const char *SlipZone::getPrettyNamePlural() const
 {
    return "Inertia zones";
 }
 
 
-const char *SlipZone::getOnDockName()
+const char *SlipZone::getOnDockName() const
 {
    return "Inertia";
 }
 
 
-const char *SlipZone::getOnScreenName()
+const char *SlipZone::getOnScreenName() const
 {
    return "Inertia";
 }

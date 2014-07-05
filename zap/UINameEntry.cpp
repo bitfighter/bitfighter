@@ -57,7 +57,7 @@ static const F32 fontSizeBig = 30.0f;
 static const S32 TextEntryYPos = 325;
 
 
-F32 TextEntryUserInterface::getFontSize()
+F32 TextEntryUserInterface::getFontSize() const
 {
    F32 maxLineLength = 750.0f;      // Pixels
 
@@ -70,7 +70,7 @@ F32 TextEntryUserInterface::getFontSize()
 }
 
 
-void TextEntryUserInterface::render()
+void TextEntryUserInterface::render() const
 {
    glColor(Colors::white);
 
@@ -301,7 +301,7 @@ void LevelNameEntryUserInterface::onAccept(const char *name)
 
 extern void drawHorizLine(S32,S32,S32);
 
-void LevelNameEntryUserInterface::render()
+void LevelNameEntryUserInterface::render() const
 {
    static const S32 linesBefore = 6;
    static const S32 linesAfter = 3;
@@ -340,7 +340,7 @@ PasswordEntryUserInterface::~PasswordEntryUserInterface()
 }
 
 
-void PasswordEntryUserInterface::render()
+void PasswordEntryUserInterface::render() const
 {
    const S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
    const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();

@@ -18,18 +18,18 @@ class PolygonObject : public CentroidObject
    typedef CentroidObject Parent;
 
 private:
-   virtual Point getDockLabelPos();
+   virtual Point getDockLabelPos() const;
 
    void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
-   virtual void renderDock();
-   void highlightDockItem(); 
+   virtual void renderDock(const Color &color) const;
+   void highlightDockItem() const;
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.
    // This makes placement seem more natural.
    Point getInitialPlacementOffset(U32 gridSize) const;
 
 protected:
-    void renderPolyHighlight();
+    void renderPolyHighlight() const;
 
 public:
    PolygonObject();              // Constructor
@@ -40,7 +40,7 @@ public:
    // Item is being actively dragged
    virtual void onGeomChanged();   // Tell the geometry that things have changed
 
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
 
    /////
    // This class serves only to provide an implementation of the abstract methods in LuaItem

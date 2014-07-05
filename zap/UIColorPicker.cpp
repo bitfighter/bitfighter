@@ -115,7 +115,7 @@ const F32 colorBrightnessPointsBlue[] = {
 };
 
 
-void UIColorPicker::render()
+void UIColorPicker::render() const
 {
    glColor(Colors::green);
 

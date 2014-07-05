@@ -58,7 +58,7 @@ public:
    const char *mMenuTitle;
    const char *mMenuFooter;
 
-   void render();              // Draw the menu
+   void render() const;              // Draw the menu
    void idle(U32 timeDelta);
    bool onKeyDown(InputCode inputCode);
    void onTextInput(char ascii);

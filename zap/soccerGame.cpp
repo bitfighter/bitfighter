@@ -419,16 +419,16 @@ void SoccerBallItem::onAddedToGame(Game *game)
 }
 
 
-void SoccerBallItem::renderItem(const Point &pos)
+void SoccerBallItem::renderItem(const Point &pos) const
 {
    renderSoccerBall(pos);
 }
 
 
-const char *SoccerBallItem::getOnScreenName()     { return "Soccer Ball";  }
-const char *SoccerBallItem::getOnDockName()       { return "Ball";         }
-const char *SoccerBallItem::getPrettyNamePlural() { return "Soccer Balls"; }
-const char *SoccerBallItem::getEditorHelpString() { return "Soccer ball, can only be used in Soccer games."; }
+const char *SoccerBallItem::getOnScreenName()      const { return "Soccer Ball";  }
+const char *SoccerBallItem::getOnDockName()        const { return "Ball";         }
+const char *SoccerBallItem::getPrettyNamePlural()  const { return "Soccer Balls"; }
+const char *SoccerBallItem::getEditorHelpString()  const { return "Soccer ball, can only be used in Soccer games."; }
 
 
 bool SoccerBallItem::hasTeam()      { return false; }
@@ -442,13 +442,13 @@ const Color &SoccerBallItem::getColor() const
 }
 
 
-void SoccerBallItem::renderDock()
+void SoccerBallItem::renderDock(const Color &color) const
 {
    renderSoccerBall(getRenderPos(), 7);
 }
 
 
-void SoccerBallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void SoccerBallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    renderItem(getRenderPos());
 }

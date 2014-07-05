@@ -233,7 +233,7 @@ Vector<string> GameType::getGameParameterMenuKeys()
 
 
 // Definitions for those items
-boost::shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
+boost::shared_ptr<MenuItem> GameType::getMenuItem(const string &key) const
 {
    if(key == "Level Name")
    {

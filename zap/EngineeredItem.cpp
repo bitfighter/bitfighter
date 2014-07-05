@@ -653,7 +653,7 @@ bool EngineeredItem::isSnapped() const
 
 static const F32 disabledLevel = 0.25;
 
-bool EngineeredItem::isEnabled()
+bool EngineeredItem::isEnabled() const
 {
    return mHealth >= disabledLevel;
 }
@@ -1504,7 +1504,7 @@ void ForceFieldProjector::onAddedToGame(Game *theGame)
 }
 
 
-void ForceFieldProjector::render()
+void ForceFieldProjector::render() const
 {
 #ifndef ZAP_DEDICATED
    // We're not in editor (connected to game)
@@ -1516,13 +1516,13 @@ void ForceFieldProjector::render()
 }
 
 
-void ForceFieldProjector::renderDock()
+void ForceFieldProjector::renderDock(const Color &color) const
 {
-   renderSquareItem(getPos(), getColor(), 1, Colors::white, '>');
+   renderSquareItem(getPos(), color, 1, Colors::white, '>');
 }
 
 
-void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    F32 scaleFact = 1;
@@ -1536,15 +1536,15 @@ void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCorn
       renderForceField(forceFieldStart, forceFieldEnd, color, true, scaleFact);
    }
    else
-      renderDock();
+      renderDock(color);
 #endif
 }
 
 
-const char *ForceFieldProjector::getOnScreenName()     { return "ForceFld"; }
-const char *ForceFieldProjector::getOnDockName()       { return "ForceFld"; }
-const char *ForceFieldProjector::getPrettyNamePlural() { return "Force Field Projectors"; }
-const char *ForceFieldProjector::getEditorHelpString() { return "Creates a force field that lets only team members pass. [F]"; }
+const char *ForceFieldProjector::getOnScreenName()     const {  return "ForceFld";  }
+const char *ForceFieldProjector::getOnDockName()       const {  return "ForceFld";  }
+const char *ForceFieldProjector::getPrettyNamePlural() const {  return "Force Field Projectors";  }
+const char *ForceFieldProjector::getEditorHelpString() const {  return "Creates a force field that lets only team members pass. [F]";  }
 
 
 bool ForceFieldProjector::hasTeam() { return true; }
@@ -1844,7 +1844,7 @@ const Vector<Point> *ForceField::getCollisionPoly() const
 }
 
 
-void ForceField::render()
+void ForceField::render() const
 {
    renderForceField(mStart, mEnd, getColor(), mFieldUp);
 }
@@ -2019,7 +2019,7 @@ const Vector<Point> *Turret::getOutline() const
 }
 
 
-F32 Turret::getEditorRadius(F32 currentScale)
+F32 Turret::getEditorRadius(F32 currentScale) const
 {
    if(mSnapped)
       return 25 * currentScale;
@@ -2041,24 +2041,24 @@ void Turret::onAddedToGame(Game *theGame)
 }
 
 
-void Turret::render()
+void Turret::render() const
 {
    renderTurret(getColor(), getPos(), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle, mHealRate);
 }
 
 
-void Turret::renderDock()
+void Turret::renderDock(const Color &color) const
 {
-   renderSquareItem(getPos(), getColor(), 1, Colors::white, 'T');
+   renderSquareItem(getPos(), color, 1, Colors::white, 'T');
 }
 
 
-void Turret::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void Turret::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    if(mSnapped)
       render();
    else
-      renderDock();
+      renderDock(getColor());
 }
 
 
@@ -2226,10 +2226,10 @@ void Turret::idle(IdleCallPath path)
 }
 
 
-const char *Turret::getOnScreenName()     { return "Turret";  }
-const char *Turret::getOnDockName()       { return "Turret";  }
-const char *Turret::getPrettyNamePlural() { return "Turrets"; }
-const char *Turret::getEditorHelpString() { return "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]"; }
+const char *Turret::getOnScreenName()     const  { return "Turret";  }
+const char *Turret::getOnDockName()       const  { return "Turret";  }
+const char *Turret::getPrettyNamePlural() const  { return "Turrets"; }
+const char *Turret::getEditorHelpString() const  { return "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]"; }
 
 
 bool Turret::hasTeam()      { return true; }

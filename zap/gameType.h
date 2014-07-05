@@ -258,7 +258,7 @@ public:
 
 #ifndef ZAP_DEDICATED
    virtual Vector<string> getGameParameterMenuKeys();
-   virtual boost::shared_ptr<MenuItem> getMenuItem(const string &key);
+   virtual boost::shared_ptr<MenuItem> getMenuItem(const string &key) const;
    virtual bool saveMenuItem(const MenuItem *menuItem, const string &key);
 #endif
 

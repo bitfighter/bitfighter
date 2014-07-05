@@ -90,7 +90,7 @@ public:
    void activate();
    void reactivate();
 
-   virtual void render();
+   virtual void render() const;
    virtual void idle(U32 timeDelta);
    virtual void onActivate();
    virtual void onDeactivate(bool nextUIUsesEditorScreenMode);
@@ -109,7 +109,7 @@ public:
 
    void setInputCode(GameSettings *settings, BindingNameEnum binding, InputCode inputCode);
    bool checkInputCode(BindingNameEnum, InputCode inputCode);
-   const char *getInputCodeString(GameSettings *settings, BindingNameEnum binding);
+   const char *getInputCodeString(GameSettings *settings, BindingNameEnum binding) const;
 
    // Input event handlers
    virtual bool onKeyDown(InputCode inputCode);
@@ -122,7 +122,7 @@ public:
    void renderMessageBox(const string &title, const string &instr, const string &message, S32 vertOffset = 0, S32 style = 1) const;
 
    // New school
-   void renderMessageBox(const SymbolShapePtr &title, const SymbolShapePtr &instr, SymbolShapePtr *message, S32 msgLines, S32 vertOffset = 0, S32 style = 1) const;
+   void renderMessageBox(const SymbolShapePtr &title, const SymbolShapePtr &instr, const SymbolShapePtr *message, S32 msgLines, S32 vertOffset = 0, S32 style = 1) const;
 
    static void renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset, S32 cornerInset, const Color &fillColor, F32 fillAlpha, const Color &borderColor);
 

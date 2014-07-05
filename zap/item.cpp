@@ -154,7 +154,7 @@ void Item::setPos(lua_State *L, S32 stackIndex)
 }
 
 
-F32 Item::getRadius()
+F32 Item::getRadius() const
 {
    return mRadius;
 }
@@ -167,7 +167,7 @@ void Item::setRadius(F32 radius)
 
 
 // Provide generic item rendering; will be overridden
-void Item::renderItem(const Point &pos)
+void Item::renderItem(const Point &pos) const
 {
 #ifndef ZAP_DEDICATED
    drawFilledSquare(pos, 10, Colors::cyan);
@@ -175,19 +175,19 @@ void Item::renderItem(const Point &pos)
 }
 
 
-void Item::render()
+void Item::render() const
 {
    renderItem(getPos());
 }
 
 
-void Item::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void Item::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    renderItem(getPos());                    
 }
 
 
-F32 Item::getEditorRadius(F32 currentScale)
+F32 Item::getEditorRadius(F32 currentScale) const
 {
    return (getRadius() + 2) * currentScale;
 }

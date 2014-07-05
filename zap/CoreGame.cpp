@@ -301,7 +301,7 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
    mHasExploded = false;
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
    mCurrentExplosionNumber = 0;
-   mPanelGeom.isValid = false;
+   //mPanelGeom.isValid = false;
    mRotateSpeed = 1;
 
 
@@ -355,14 +355,14 @@ F32 CoreItem::getCoreAngle(U32 time)
 }
 
 
-void CoreItem::renderItem(const Point &pos)
+void CoreItem::renderItem(const Point &pos) const
 {
 #ifndef ZAP_DEDICATED
    if(shouldRender())
    {
       GameType *gameType = getGame()->getGameType();
       S32 time = gameType->getTotalGamePlayedInMs();
-      renderCore(pos, getColor(), time, getPanelGeom(), mPanelHealth, mStartingPanelHealth);
+      renderCore(pos, getColor(), time, &getPanelGeom(), mPanelHealth, mStartingPanelHealth);
    }
 #endif
 }
@@ -374,7 +374,7 @@ bool CoreItem::shouldRender() const
 }
 
 
-void CoreItem::renderDock()
+void CoreItem::renderDock(const Color &color) const
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
@@ -383,7 +383,7 @@ void CoreItem::renderDock()
 }
 
 
-void CoreItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void CoreItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
@@ -428,13 +428,13 @@ void CoreItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &value
 }
 
 
-const char *CoreItem::getOnScreenName()     { return "Core";  }
-const char *CoreItem::getOnDockName()       { return "Core";  }
-const char *CoreItem::getPrettyNamePlural() { return "Cores"; }
-const char *CoreItem::getEditorHelpString() { return "Core.  Destroy to score."; }
+const char *CoreItem::getOnScreenName()     const  {  return "Core";   }
+const char *CoreItem::getOnDockName()       const  {  return "Core";   }
+const char *CoreItem::getPrettyNamePlural() const  {  return "Cores";  }
+const char *CoreItem::getEditorHelpString() const  {  return "Core.  Destroy to score.";  }
 
 
-F32 CoreItem::getEditorRadius(F32 currentScale)
+F32 CoreItem::getEditorRadius(F32 currentScale) const
 {
    return CoreRadius * currentScale + 5;
 }
@@ -462,10 +462,10 @@ bool CoreItem::isPanelDamaged(S32 panelIndex)
 
 bool CoreItem::isPanelInRepairRange(const Point &origin, S32 panelIndex)
 {
-   PanelGeom *panelGeom = getPanelGeom();
+   PanelGeom panelGeom = getPanelGeom();
 
-   F32 distanceSq1 = (panelGeom->getStart(panelIndex)).distSquared(origin);
-   F32 distanceSq2 = (panelGeom->getEnd(panelIndex)).distSquared(origin);
+   F32 distanceSq1 = (panelGeom.getStart(panelIndex)).distSquared(origin);
+   F32 distanceSq2 = (panelGeom.getEnd(panelIndex)).distSquared(origin);
    S32 radiusSq = Ship::RepairRadius * Ship::RepairRadius;
 
    // Ignoring case where center is in range while endpoints are not...
@@ -519,8 +519,8 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       shotAngle = p.angleTo(theInfo->damagingObject->getPos());
 
 
-   PanelGeom *panelGeom = getPanelGeom();
-   F32 coreAngle = panelGeom->angle;
+   const PanelGeom panelGeom = getPanelGeom();
+   F32 coreAngle = panelGeom.angle;
 
    F32 combinedAngle = (shotAngle - coreAngle);
 
@@ -641,12 +641,13 @@ void CoreItem::doExplosion(const Point &pos)
 #endif
 
 
-PanelGeom *CoreItem::getPanelGeom()
+PanelGeom CoreItem::getPanelGeom() const
 {
-   if(!mPanelGeom.isValid)
-      fillPanelGeom(getPos(), getGame()->getGameType()->getTotalGamePlayedInMs() * mRotateSpeed, mPanelGeom);
+   PanelGeom panelGeom;
 
-   return &mPanelGeom;
+   fillPanelGeom(getPos(), getGame()->getGameType()->getTotalGamePlayedInMs() * mRotateSpeed, panelGeom);
+
+   return panelGeom;
 }
 
 
@@ -688,9 +689,9 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 
    Point pos = getPos();               // Center of core
 
-   PanelGeom *panelGeom = getPanelGeom();
+   const PanelGeom panelGeom = getPanelGeom();
    
-   Point dir = panelGeom->mid[panelIndex] - pos;   // Line extending from the center of the core towards the center of the panel
+   Point dir = panelGeom.mid[panelIndex] - pos;   // Line extending from the center of the core towards the center of the panel
    dir.normalize(100);
    Point cross(dir.y, -dir.x);         // Line parallel to the panel, perpendicular to dir
 
@@ -710,7 +711,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
       static const S32 MAX_CHUNK_LENGTH = 10;
       points[1].set(0, Random::readF() * MAX_CHUNK_LENGTH);
 
-      chunkPos = panelGeom->getStart(panelIndex) + (panelGeom->getEnd(panelIndex) - panelGeom->getStart(panelIndex)) * Random::readF();
+      chunkPos = panelGeom.getStart(panelIndex) + (panelGeom.getEnd(panelIndex) - panelGeom.getStart(panelIndex)) * Random::readF();
       chunkVel = dir * (Random::readF() * 10  - 3) * .2f + cross * (Random::readF() * 30  - 15) * .05f;
 
       S32 ttl = Random::readI(2500, 3000);
@@ -736,11 +737,11 @@ void CoreItem::doPanelDebris(S32 panelIndex)
       F32 angle = Random::readF() * FloatTau;
       F32 rotation = Random::readF() * 4 - 2;
 
-      game->emitDebrisChunk(points, Colors::gray20, (panelGeom->mid[i] + pos) / 2, sparkVel, ttl, angle, rotation);
+      game->emitDebrisChunk(points, Colors::gray20, (panelGeom.mid[i] + pos) / 2, sparkVel, ttl, angle, rotation);
    }
 
    // And do the sound effect
-   SoundSystem::playSoundEffect(SFXCorePanelExplode, panelGeom->mid[panelIndex]);
+   SoundSystem::playSoundEffect(SFXCorePanelExplode, panelGeom.mid[panelIndex]);
 }
 
 #endif
@@ -748,7 +749,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 
 void CoreItem::idle(BfObject::IdleCallPath path)
 {
-   mPanelGeom.isValid = false;      // Force recalculation of panel geometry next time it's needed
+   //mPanelGeom.isValid = false;      // Force recalculation of panel geometry next time it's needed
 
    // Update attack timer on the server
    if(path == ServerIdleMainLoop)
@@ -804,7 +805,7 @@ void CoreItem::idle(BfObject::IdleCallPath path)
             Point sparkEmissionPos = getPos();
             sparkEmissionPos += dir * 3;
 
-            Point dir = getPanelGeom()->mid[i] - getPos();  // Line extending from the center of the core towards the center of the panel
+            Point dir = getPanelGeom().mid[i] - getPos();  // Line extending from the center of the core towards the center of the panel
             dir.normalize(100);
             Point cross(dir.y, -dir.x);                     // Line parallel to the panel, perpendicular to dir
 
@@ -860,12 +861,12 @@ Vector<Point> CoreItem::getRepairLocations(const Point &repairOrigin)
 {
    Vector<Point> repairLocations;
 
-   PanelGeom *panelGeom = getPanelGeom();
+   const PanelGeom panelGeom = getPanelGeom();
 
    for(S32 i = 0; i < CORE_PANELS; i++)
       if(isPanelDamaged(i))
          if(isPanelInRepairRange(repairOrigin, i))
-            repairLocations.push_back(panelGeom->repair[i]);
+            repairLocations.push_back(panelGeom.repair[i]);
 
    return repairLocations;
 }
@@ -1055,8 +1056,8 @@ void CoreItem::onGeomChanged()
 {
    Parent::onGeomChanged();
 
-   GameType *gameType = getGame()->getGameType();
-   fillPanelGeom(getPos(), gameType->getTotalGamePlayedInMs() * mRotateSpeed, mPanelGeom);
+   //GameType *gameType = getGame()->getGameType();
+   //fillPanelGeom(getPos(), gameType->getTotalGamePlayedInMs() * mRotateSpeed, mPanelGeom);
 }
 #endif
 

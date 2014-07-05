@@ -170,21 +170,21 @@ private:
    Point mScrollWithMouseLocation;
 
    U32 mGridSize;                   // Our editor gridsize
-   bool showMinorGridLines();
+   bool showMinorGridLines() const;
 
    // Helper drawing methods
-   void renderTurretAndSpyBugRanges(GridDatabase *editorDb);   // Draw translucent turret & spybug ranges
-   void renderObjectsUnderConstruction();                      // Render partially constructed walls and other items that aren't yet in a db
-   void renderDock();
-   void renderInfoPanel();
-   void renderPanelInfoLine(S32 line, const char *format, ...);
+   void renderTurretAndSpyBugRanges(GridDatabase *editorDb) const;   // Draw translucent turret & spybug ranges
+   void renderObjectsUnderConstruction() const;                      // Render partially constructed walls and other items that aren't yet in a db
+   void renderDock() const;
+   void renderInfoPanel() const;
+   void renderPanelInfoLine(S32 line, const char *format, ...) const;
 
-   void renderItemInfoPanel();
+   void renderItemInfoPanel() const;
 
-   void renderReferenceShip();
-   void renderDragSelectBox();      // Render box when selecting a group of items
-   void renderDockItems();          // Render all items on the dock
-   void renderDockPlugins();
+   void renderReferenceShip() const;
+   void renderDragSelectBox() const;      // Render box when selecting a group of items
+   void renderDockItems() const;          // Render all items on the dock
+   void renderDockPlugins() const;
    void renderSaveMessage() const;
    void renderWarnings() const;
    void renderLingeringMessage() const;
@@ -237,7 +237,7 @@ private:
    bool checkForPolygonHit(const Point &point, BfObject *object);    
 
    void findHitItemOnDock();     // Sets mDockItemHit
-   S32 findHitPlugin();
+   S32 findHitPlugin() const;
 
    void findSnapVertex();
    S32 mSnapVertexIndex;
@@ -256,8 +256,11 @@ private:
 
    S32 mDockPluginScrollOffset;
    U32 mDockWidth;
-   bool mouseOnDock();                // Return whether mouse is currently over the dock
    bool mNeedToSave;                  // Have we modified the level such that we need to save?
+   bool mIgnoreMouseInput;
+
+
+   bool mouseOnDock() const;          // Return whether mouse is currently over the dock
 
    void insertNewItem(U8 itemTypeNumber);    // Insert a new object into the specified database
 
@@ -270,10 +273,11 @@ private:
    void onMouseClicked_left();
    void onMouseClicked_right();
 
-   Point convertCanvasToLevelCoord(Point p);
-   Point convertLevelToCanvasCoord(Point p, bool convert = true);
+   Point convertCanvasToLevelCoord(const Point &p) const;
+   Point convertLevelToCanvasCoord(const Point &p, bool convert = true) const;
 
    void resnapAllEngineeredItems(GridDatabase *database, bool onlyUnsnapped);
+   string getInfoMsg() const;
 
    boost::scoped_ptr<SimpleTextEntryMenuUI> mSimpleTextEntryMenu;
    boost::scoped_ptr<PluginMenuUI> mPluginMenu;      
@@ -289,9 +293,9 @@ private:
    void translateSelectedItems(const Vector<Point> &origins, const Point &offset, const Point &lastOffset);
    void snapSelectedEngineeredItems(const Point &cumulativeOffset);
 
-   void render();
-   void renderObjects(GridDatabase *database, RenderModes renderMode, bool isLevelgenOverlay);
-   void renderWallsAndPolywalls(GridDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase);
+   void render() const;
+   void renderObjects(const GridDatabase *database, RenderModes renderMode, bool isLevelgenOverlay) const;
+   void renderWallsAndPolywalls(const GridDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase) const;
 
    void autoSave();                    // Hope for the best, prepare for the worst
    bool doSaveLevel(const string &saveName, bool showFailMessages);
@@ -317,7 +321,7 @@ public:
    void setLevelFileName(string name);
    void setLevelGenScriptName(string name);
 
-   string getLevelFileName();
+   string getLevelFileName() const;
    void cleanUp();
    void loadLevel();
    U32 mAllUndoneUndoLevel;   // What undo level reflects everything back just the
@@ -337,11 +341,11 @@ public:
    string getQuitLockedMessage();
    bool isQuitLocked();
 
-   string getLevelText();
+   string getLevelText() const;
    const Vector<PluginInfo> *getPluginInfos() const;
 
-   F32 getCurrentScale();
-   Point getCurrentOffset();
+   F32 getCurrentScale() const;
+   Point getCurrentOffset() const;
 
    void clearUndoHistory();        // Wipe undo/redo history
 
@@ -351,7 +355,7 @@ public:
 
    void onQuitted();       // Releases some memory when quitting the editor
 
-   S32 getTeamCount();
+   S32 getTeamCount() const;
    EditorTeam *getTeam(S32 teamId);
 
    void addTeam(EditorTeam *team);
@@ -395,7 +399,6 @@ public:
    void onMouseDragged_CopyAndDrag(const Vector<DatabaseObject *> *objList);
    void startDraggingDockItem();
    BfObject *copyDockItem(BfObject *source);
-   bool mouseIgnore;
 
    void populateDock();                         // Load up dock with game-specific items to drag and drop
    void addDockObject(BfObject *object, F32 xPos, F32 yPos);
@@ -440,19 +443,19 @@ public:
    void onDisplayModeChange();      // Called when we shift between windowed and fullscreen mode, after change is made
 
    // Snapping related functions:
-   Point snapPoint(GridDatabase *database, Point const &p, bool snapWhileOnDock = false);
-   Point snapPointToLevelGrid(Point const &p);
+   Point snapPoint(GridDatabase *database, Point const &p, bool snapWhileOnDock = false) const;
+   Point snapPointToLevelGrid(Point const &p) const;
 
    void markSelectedObjectsAsUnsnapped(const Vector<DatabaseObject *> *objList);
    void markSelectedObjectsAsUnsnapped(const Vector<boost::shared_ptr<BfObject> > &objList);
 
 
-   bool getSnapToWallCorners();     // Returns true if wall corners are active snap targets
+   bool getSnapToWallCorners() const;     // Returns true if wall corners are active snap targets
 
    void onBeforeRunScriptFromConsole();
    void onAfterRunScriptFromConsole();
 
-   S32 checkCornersForSnap(const Point &clickPoint,  const Vector<DatabaseObject *> *edges, F32 &minDist, Point &snapPoint);
+   S32 checkCornersForSnap(const Point &clickPoint,  const Vector<DatabaseObject *> *edges, F32 &minDist, Point &snapPoint) const;
 
    void deleteItem(S32 itemIndex, bool batchMode = false);
 

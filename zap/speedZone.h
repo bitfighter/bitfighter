@@ -64,7 +64,7 @@ public:
    U32 mUnpackInit;  // Some form of counter, to know that it is a rotating speed zone.
 
    static void generatePoints(const Point &pos, const Point &dir, Vector<Point> &points, Vector<Point> &outline);
-   void render();
+   void render() const;
    S32 getRenderSortValue();
 
    bool processArguments(S32 argc, const char **argv, Level *level);  // Create objects from parameters stored in level file
@@ -84,7 +84,7 @@ public:
    ///// Editor methods 
    const Color &getEditorRenderColor() const;
 
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
 
    void onAttrsChanging();
    void onGeomChanging();
@@ -100,10 +100,11 @@ public:
 #endif
 
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();

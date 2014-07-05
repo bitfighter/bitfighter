@@ -62,7 +62,6 @@ private:
 
    S32 mPage;
    S32 mServersPerPage;
-   S32 getFirstServerIndexOnCurrentPage();
 
    Nonce mLocalServerNonce;
    Nonce mRemoteServerNonce;     // Only used when we can't contact the master
@@ -99,12 +98,15 @@ private:
 
    void recalcCurrentIndex();
 
-   // Break up the render function a little
-   void renderTopBanner();
-   void renderColumnHeaders();
-   void renderMessageBox(bool msg1, bool msg2);
+   S32 getFirstServerIndexOnCurrentPage() const;
 
-   bool mouseInHeaderRow(const Point *pos);
+
+   // Break up the render function a little
+   void renderTopBanner() const;
+   void renderColumnHeaders() const;
+   void renderMessageBox(bool msg1, bool msg2) const;
+
+   bool mouseInHeaderRow(const Point *pos) const;
 
    void addServersToPingList(const Vector<ServerAddr> &serverList); 
    void forgetServersNoLongerOnList(const Vector<ServerAddr> &serverListFromMaster);
@@ -177,10 +179,10 @@ public:
 
    Vector<ServerRef> servers;
    string mLastSelectedServerName;
-   string getLastSelectedServerName();
+   string getLastSelectedServerName() const;
 
    Vector<ColumnInfo> columns;
-   S32 getSelectedIndex();
+   S32 getSelectedIndex() const;
 
    // Functions for handling user input
    bool onKeyDown(InputCode inputCode);
@@ -189,15 +191,15 @@ public:
    void onKeyUp(InputCode inputCode);
    void onMouseDragged();
 
-   S32 getDividerPos();
-   S32 getServersPerPage();
-   S32 getLastPage();
-   bool isMouseOverDivider();
+   S32 getDividerPos() const;
+   S32 getServersPerPage() const;
+   S32 getLastPage() const;
+   bool isMouseOverDivider() const;
 
    void onActivate();            // Run when select server screeen is displayed
    void idle(U32 t);             // Idle loop
 
-   void render();                // Draw the screen
+   void render() const;          // Draw the screen
 
    // Handle responses to packets we sent
    void gotPingResponse(const Address &theAddress, const Nonce &clientNonce, U32 clientIdentityToken, S32 serverId);

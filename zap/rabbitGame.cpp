@@ -134,7 +134,7 @@ Vector<string> RabbitGameType::getGameParameterMenuKeys()
 
 
 // Definitions for those items
-boost::shared_ptr<MenuItem> RabbitGameType::getMenuItem(const string &key)
+boost::shared_ptr<MenuItem> RabbitGameType::getMenuItem(const string &key) const
 {
    if(key == "Flag Return Time")
       return boost::shared_ptr<MenuItem>(new CounterMenuItem("Flag Return Timer:", mFlagReturnTimer / 1000, 1, 1, MaxMenuScore,

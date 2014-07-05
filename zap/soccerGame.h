@@ -83,7 +83,7 @@ public:
 
    static const F32 SOCCER_BALL_RADIUS;
 
-   void renderItem(const Point &pos);
+   void renderItem(const Point &pos) const;
    void resetPlayerTouch();
    void sendHome();
    void damageObject(DamageInfo *theInfo);
@@ -98,16 +98,17 @@ public:
    TNL_DECLARE_CLASS(SoccerBallItem);
 
    ///// Editor methods
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
 
-   void renderDock();
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+   void renderDock(const Color &color) const;
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
 
    const Color &getColor() const;
 

@@ -91,19 +91,19 @@ public:
 
    bool pickup(Ship *theShip);
    void onClientPickup();
-   void renderItem(const Point &pos);
+   void renderItem(const Point &pos) const;
 
    TNL_DECLARE_CLASS(RepairItem);
 
    ///// Editor methods
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
 
-   virtual S32 getDockRadius();
-   F32 getEditorRadius(F32 currentScale);
-   void renderDock();
+   virtual S32 getDockRadius() const;
+   F32 getEditorRadius(F32 currentScale) const;
+   void renderDock(const Color &color) const;
 
    ///// Lua interface
 	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(RepairItem);
@@ -132,15 +132,15 @@ public:
 
    bool pickup(Ship *theShip);
    void onClientPickup();
-   void renderItem(const Point &pos);
+   void renderItem(const Point &pos) const;
 
    TNL_DECLARE_CLASS(EnergyItem);
 
    ///// Editor methods
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
 
    ///// Lua interface
 	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(EnergyItem);

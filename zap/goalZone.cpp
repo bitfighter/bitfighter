@@ -68,7 +68,7 @@ GoalZone *GoalZone::clone() const
 }
 
 
-void GoalZone::render()
+void GoalZone::render() const
 {
    F32 glow = getGame()->getGlowZoneTimer().getFraction();
    S32 glowingZoneTeam = getGame()->getGlowingZoneTeam();
@@ -86,7 +86,7 @@ void GoalZone::render()
 }
 
 
-void GoalZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void GoalZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    // This won't change during the game
    static const GoalZoneFlashStyle flashStyle = 
@@ -97,9 +97,9 @@ void GoalZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled,
 }
 
 
-void GoalZone::renderDock()
+void GoalZone::renderDock(const Color &color) const
 {
-  renderGoalZone(getColor(), getOutline(), getFill());
+  renderGoalZone(color, getOutline(), getFill());
 }
 
 
@@ -131,10 +131,10 @@ bool GoalZone::processArguments(S32 argc2, const char **argv2, Level *level)
 }
 
 
-const char *GoalZone::getOnScreenName()     { return "Goal";       }
-const char *GoalZone::getOnDockName()       { return "Goal";       }
-const char *GoalZone::getPrettyNamePlural() { return "Goal Zones"; }
-const char *GoalZone::getEditorHelpString() { return "Target area used in a variety of games."; }
+const char *GoalZone::getOnScreenName()     const  { return "Goal";       }
+const char *GoalZone::getOnDockName()       const  { return "Goal";       }
+const char *GoalZone::getPrettyNamePlural() const  { return "Goal Zones"; }
+const char *GoalZone::getEditorHelpString() const  { return "Target area used in a variety of games."; }
 
 bool GoalZone::hasTeam()      { return true; }
 bool GoalZone::canBeHostile() { return true; }
@@ -206,7 +206,7 @@ bool GoalZone::collide(BfObject *hitObject)
 }
 
 
-bool GoalZone::isFlashing()
+bool GoalZone::isFlashing() const
 {
    return mFlashCount & 1;
 }

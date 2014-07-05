@@ -100,7 +100,6 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
    mAnnouncement = "";
 
    mShowProgressBar = false;
-   mHasShipPos = false;
    mProgressBarFadeTimer.setPeriod(ONE_SECOND);
 
    // Transition time between regular map and commander's map; in ms, higher = slower
@@ -167,7 +166,6 @@ void GameUserInterface::onActivate()
 
    mLoadoutIndicator.reset();
    mShowProgressBar = true;               // Causes screen to be black before level is loaded
-   mHasShipPos = false;
 
    mHelperManager.reset();
 
@@ -239,7 +237,6 @@ void GameUserInterface::onGameStarting()
 {
    mDispWorldExtents.set(Point(0,0), 0);
    Barrier::clearRenderItems();
-   mHasShipPos = false;
 
    addStartingHelpItemsToQueue();      // Do this here so if the helpItem manager gets turned on, items will start displaying next game
 
@@ -367,11 +364,15 @@ void GameUserInterface::idle(U32 timeDelta)
 
    // Update some timers
    mShutdownTimer.update(timeDelta);
-   mInputModeChangeAlertDisplayTimer.update(timeDelta);
    mWrongModeMsgDisplay.update(timeDelta);
    mProgressBarFadeTimer.update(timeDelta);
    mCommanderZoomDelta.update(timeDelta);
    mLevelInfoDisplayer.idle(timeDelta);
+
+   if(shouldRenderLevelInfo())
+      mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
+   else
+      mInputModeChangeAlertDisplayTimer.update(timeDelta);
 
    if(mAnnouncementTimer.update(timeDelta))
       mAnnouncement = "";
@@ -402,15 +403,6 @@ void GameUserInterface::idle(U32 timeDelta)
 
    if(shouldCountdownHelpItemTimer())
       mHelpItemManager.idle(timeDelta, getGame());
-
-   // Update mShipPos... track this so that we can keep a fix on the ship location even if it subsequently dies
-   Ship *ship = getGame()->getLocalPlayerShip();
-
-   if(ship)
-   {
-      mShipPos.set(ship->getRenderPos());     // Get the player's ship position
-      mHasShipPos = true;
-   }
 
    // Keep ship pointed towards mouse cmdrs map zoom transition
    if(mCommanderZoomDelta.getCurrent() > 0)               
@@ -530,7 +522,7 @@ void GameUserInterface::emitTeleportInEffect(const Point &pos, U32 type)
 
 
 // Draw main game screen (client only)
-void GameUserInterface::render()
+void GameUserInterface::render() const
 {
    if(!getGame()->isConnectedToServer())
    {
@@ -766,7 +758,6 @@ void GameUserInterface::renderLostConnectionMessage() const
          renderVertexArray(vertices, 4, GL_LINES);
          glLineWidth(gDefaultLineWidth);
       }
-
    }
 }
 
@@ -1126,7 +1117,7 @@ const HelperMenu *GameUserInterface::getActiveHelper() const
 }
 
 
-void GameUserInterface::renderEngineeredItemDeploymentMarker(Ship *ship)
+void GameUserInterface::renderEngineeredItemDeploymentMarker(Ship *ship) const
 {
    mHelperManager.renderEngineeredItemDeploymentMarker(ship);
 }
@@ -2260,7 +2251,7 @@ enum ColIndex {
 };
 
 
-void GameUserInterface::renderScoreboard()
+void GameUserInterface::renderScoreboard() const
 {
    // This is probably not needed... if gameType were NULL, we'd have crashed and burned long ago
    GameType *gameType = getGame()->getGameType();
@@ -2409,7 +2400,8 @@ void GameUserInterface::renderTeamName(S32 index, S32 left, S32 right, S32 top) 
 }
 
 
-void GameUserInterface::renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y, const S32 *colIndexWidths, bool isTeamGame) const
+void GameUserInterface::renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y, 
+                                                      const S32 *colIndexWidths, bool isTeamGame) const
 {
    glColor(Colors::gray50);
 
@@ -2450,6 +2442,7 @@ void GameUserInterface::renderScoreboardLine(const Vector<ClientInfo *> &playerS
 }
 
 
+// Static method
 void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio)
 {
    // Default to vector font for badges
@@ -2491,7 +2484,7 @@ void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 s
 }
 
 
-void GameUserInterface::renderBasicInterfaceOverlay()
+void GameUserInterface::renderBasicInterfaceOverlay() const
 {
    GameType *gameType = getGame()->getGameType();
 
@@ -2529,17 +2522,14 @@ bool GameUserInterface::shouldRenderLevelInfo() const
 }
 
 
-void GameUserInterface::renderLevelInfo() 
+void GameUserInterface::renderLevelInfo() const
 {
    // Level Info requires gametype.  It can be NULL when switching levels
    if(getGame()->getGameType() == NULL)
       return;
 
    if(shouldRenderLevelInfo())
-   {
       mLevelInfoDisplayer.render();
-      mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
-   }
 }
 
 
@@ -2758,7 +2748,26 @@ static S32 QSORT_CALLBACK renderSortCompare(BfObject **a, BfObject **b)
 }
 
 
-void GameUserInterface::renderGameNormal()
+// Note: With the exception of renderCommander, this function cannot be called if ship is NULL.  If it is never
+// called with a NULL ship from renderCommander in practice, we can get rid of the caching of lastRenderPos (which will
+// fail here if we ever have more than one UIGame instance.  If the following assert never trips, we can get rid of the 
+// cached value, and perhaps the whole function itself.
+Point GameUserInterface::getShipRenderPos() const
+{
+   static Point lastRenderPos;
+
+   Ship *ship = getGame()->getLocalPlayerShip();
+
+   TNLAssert(ship, "Expected a valid ship here!");    // <== see comment above!
+
+   if(ship)
+      lastRenderPos = ship->getRenderPos();
+
+   return lastRenderPos;
+}
+
+
+void GameUserInterface::renderGameNormal() const
 {
    // Start of the level, we only show progress bar
    if(mShowProgressBar)
@@ -2773,11 +2782,6 @@ void GameUserInterface::renderGameNormal()
 
    visExt = getGame()->computePlayerVisArea(ship);
 
-   // TODO: This should not be needed here -- mPos is set elsewhere, but appears to be lagged by a frame, which 
-   //       creates a weird slightly off-center effect when moving.  This is harmless for the moment, but should be removed.
-   mShipPos.set(ship->getRenderPos());
-   mHasShipPos = true;
-
    glPushMatrix();
 
    static const Point center(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2,
@@ -2787,13 +2791,13 @@ void GameUserInterface::renderGameNormal()
 
    // These scaling factors are different when changing the visible area by equiping the sensor module
    glScale(center.x / visExt.x, center.y / visExt.y);
-   glTranslate(mShipPos * -1);
+   glTranslate(getShipRenderPos() * -1);
 
-   renderStars(mStars, mStarColors, NumStars, 1.0, mShipPos, visExt * 2);
+   renderStars(mStars, mStarColors, NumStars, 1.0, getShipRenderPos(), visExt * 2);
 
    // Render all the objects the player can see
    screenSize.set(visExt);
-   Rect extentRect(mShipPos - screenSize, mShipPos + screenSize);
+   Rect extentRect(getShipRenderPos() - screenSize, getShipRenderPos() + screenSize);
 
    // Fill rawRenderObjects with anything within extentRect (our visibility extent)
    rawRenderObjects.clear();
@@ -2827,7 +2831,7 @@ void GameUserInterface::renderGameNormal()
       for(S32 j = 0; j < renderObjects.size(); j++)
          renderObjects[j]->renderLayer(i);
 
-      mFxManager.render(i, getCommanderZoomFraction(), mShipPos);
+      mFxManager.render(i, getCommanderZoomFraction(), getShipRenderPos());
    }
 
    S32 team = NONE;
@@ -2924,7 +2928,7 @@ void GameUserInterface::renderInlineHelpItemOutlines(S32 playerTeam, F32 alpha) 
 }
 
 
-void GameUserInterface::renderGameCommander()
+void GameUserInterface::renderGameCommander() const
 {
    // Start of the level, we only show progress bar
    if(mShowProgressBar)
@@ -2951,7 +2955,6 @@ void GameUserInterface::renderGameCommander()
 
    Ship *ship = getGame()->getLocalPlayerShip();
 
-   //mShipPos = ship ? ship->getRenderPos()                 : Point(0,0);
    visSize = ship ? getGame()->computePlayerVisArea(ship) * 2 : worldExtents;
 
 
@@ -2966,8 +2969,7 @@ void GameUserInterface::renderGameCommander()
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
    glScale(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y);
 
-   // We should probably check that mHasShipPos == true, but it will hardly ever matter
-   Point offset = (mDispWorldExtents.getCenter() - mShipPos) * zoomFrac + mShipPos;
+   Point offset = (mDispWorldExtents.getCenter() - getShipRenderPos()) * zoomFrac + getShipRenderPos();
    glTranslate(-offset.x, -offset.y);
 
    // zoomFrac == 1.0 when fully zoomed out to cmdr's map
@@ -3169,7 +3171,7 @@ void GameUserInterface::renderGameCommander()
 ////////////////////////////////////////////////////////////
 
 
-void GameUserInterface::renderSuspended()
+void GameUserInterface::renderSuspended() const
 {
    glColor(Colors::yellow);
    S32 textHeight = 20;

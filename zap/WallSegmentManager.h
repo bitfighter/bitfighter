@@ -76,7 +76,7 @@ public:
    void recomputeAllWallGeometry(GridDatabase *gameDatabase);
 
    // Populate wallEdges
-   void clipAllWallEdges(const Vector<DatabaseObject *> *wallSegments, Vector<Point> &wallEdges);
+   static void clipAllWallEdges(const Vector<DatabaseObject *> *wallSegments, Vector<Point> &wallEdges);
 };
 
 

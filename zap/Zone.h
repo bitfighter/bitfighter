@@ -21,7 +21,7 @@ public:
    virtual ~Zone();              // Destructor
    Zone *clone() const;
 
-   virtual void render();
+   virtual void render() const;
    S32 getRenderSortValue();
    virtual bool processArguments(S32 argc, const char **argv, Level *level);
 
@@ -30,10 +30,10 @@ public:
 
    /////
    // Editor methods
-   virtual const char *getEditorHelpString();
-   virtual const char *getPrettyNamePlural();
-   virtual const char *getOnDockName();
-   virtual const char *getOnScreenName();
+   virtual const char *getEditorHelpString() const;
+   virtual const char *getPrettyNamePlural() const;
+   virtual const char *getOnDockName() const;
+   virtual const char *getOnScreenName() const;
 
    bool hasTeam();      
    bool canBeHostile(); 
@@ -41,8 +41,8 @@ public:
 
    virtual string toLevelCode() const;
 
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
-   virtual void renderDock();
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
+   virtual void renderDock(const Color &color) const;
 
    TNL_DECLARE_CLASS(Zone);
 

@@ -29,7 +29,7 @@ public:
    virtual ~PointObject();                 // Destructor
 
    void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
-   F32 getRadius();
+   F32 getRadius() const;
 };
 
 

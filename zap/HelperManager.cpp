@@ -289,10 +289,15 @@ void HelperManager::doExitHelper(S32 index)
 
 
 // Render potential location to deploy engineered item -- does nothing if we're not engineering
-void HelperManager::renderEngineeredItemDeploymentMarker(const Ship *ship)
+void HelperManager::renderEngineeredItemDeploymentMarker(const Ship *ship) const
 {
-   if(mHelperStack.getIndex(&mEngineerHelper) != -1)
-      mEngineerHelper.renderDeploymentMarker(ship);
+   // Look for mEngineerHelper in our list of active helpers... if it's there, render the deployment marker
+   for(S32 i = 0; i < mHelperStack.size(); i++)
+      if(&mEngineerHelper == mHelperStack[i])
+      {
+         mEngineerHelper.renderDeploymentMarker(ship);
+         return;
+      }
 }
 
 

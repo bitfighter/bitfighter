@@ -52,20 +52,20 @@ Zone *Zone::clone() const
 }
 
 
-void Zone::render()
+void Zone::render() const
 {
    // Do nothing -- zones aren't rendered in-game
 }
 
 
-void Zone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void Zone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    renderZone(Colors::white, getOutline(), getFill());
    PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled);
 }
 
 
-void Zone::renderDock()
+void Zone::renderDock(const Color &color) const
 {
    renderZone(Colors::white, getOutline(), getFill());
 }
@@ -121,10 +121,10 @@ string Zone::toLevelCode() const
 }
 
 
-const char *Zone::getOnScreenName()     { return "Zone";  }
-const char *Zone::getOnDockName()       { return "Zone";  }
-const char *Zone::getPrettyNamePlural() { return "Zones"; }
-const char *Zone::getEditorHelpString() { return "Generic area, does not appear in-game, possibly useful to scripts."; }
+const char *Zone::getOnScreenName()     const  { return "Zone";  }
+const char *Zone::getOnDockName()       const  { return "Zone";  }
+const char *Zone::getPrettyNamePlural() const  { return "Zones"; }
+const char *Zone::getEditorHelpString() const  { return "Generic area, does not appear in-game, possibly useful to scripts."; }
 
 bool Zone::hasTeam()      { return false; }
 bool Zone::canBeHostile() { return false; }

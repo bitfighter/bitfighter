@@ -64,8 +64,7 @@ static const TypeDescr typeDescriptions[] = {
 // Constructor
 InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(game),
                                                                          mLoadoutInstructions(LineGap),
-                                                                         mPageHeaders(LineGap),
-                                                                         mGameTypeInstrs(5   )
+                                                                         mPageHeaders(LineGap)
 {
    // Quick sanity check...
    TNLAssert(ARRAYSIZE(pageHeaders) == InstructionMaxPages, "pageHeaders not aligned with enum IntructionPages!!!");
@@ -236,7 +235,7 @@ void InstructionsUserInterface::initNormalKeys_page1()
 }
 
 
-void InstructionsUserInterface::render()
+void InstructionsUserInterface::render() const
 {
    static const S32 FIRST_COMMAND_PAGE = InstructionsUserInterface::InstructionAdvancedCommands;
    static const S32 FIRST_OBJ_PAGE     = InstructionsUserInterface::InstructionWeaponProjectiles;
@@ -303,10 +302,6 @@ void InstructionsUserInterface::render()
          break;
 
       case InstructionsGameTypes:
-         // JIT this, dude
-         if(mGameTypeInstrs.getItemCount() == 0)
-            initGameTypesPage();
-
          renderPageGameTypes();
          break;
 
@@ -339,7 +334,7 @@ void InstructionsUserInterface::activatePage(IntructionPages pageIndex)
 }
 
 
-bool InstructionsUserInterface::usingArrowKeys()
+bool InstructionsUserInterface::usingArrowKeys() const
 {
    GameSettings *settings = getGame()->getSettings();
 
@@ -350,7 +345,7 @@ bool InstructionsUserInterface::usingArrowKeys()
 }
 
 
-void InstructionsUserInterface::renderPage1()
+void InstructionsUserInterface::renderPage1() const
 {
    S32 starty = 65;
    S32 y;
@@ -453,7 +448,7 @@ void InstructionsUserInterface::initPageHeaders()
 }
 
 
-void InstructionsUserInterface::renderPage2()
+void InstructionsUserInterface::renderPage2() const
 {
    mLoadoutInstructions.render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 65, AlignmentCenter);    // Overall block is centered
 }
@@ -529,7 +524,7 @@ static S32 renderBadges(S32 y, S32 textSize, S32 descSize)
 }
 
 
-void InstructionsUserInterface::renderPageGameIndicators()
+void InstructionsUserInterface::renderPageGameIndicators() const
 {
    S32 y = 40;
    S32 descSize = 20;
@@ -558,7 +553,7 @@ static const char *moduleDescriptions[][2] = {
    { "Engineer: ", "Collect resources to build special objects (A)" }
 };
 
-void InstructionsUserInterface::renderModulesPage()
+void InstructionsUserInterface::renderModulesPage() const
 {
    S32 y = 40;
    S32 textsize = 20;
@@ -718,7 +713,7 @@ const char *gGameObjectInfo[] = {
 static U32 GameObjectCount = ARRAYSIZE(gGameObjectInfo) / 2;
 
 
-void InstructionsUserInterface::renderPageObjectDesc(U32 index)
+void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
 {
    U32 objectsPerPage = 6;
    U32 startIndex = index * objectsPerPage;
@@ -928,7 +923,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
 
 extern CommandInfo chatCmds[];
 
-void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
+void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) const
 {
    TNLAssert(page < COMMAND_CATEGORIES, "Page too high!");
 
@@ -1027,8 +1022,10 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 }
 
 
-void InstructionsUserInterface::initGameTypesPage()
+UI::SymbolStringSet InstructionsUserInterface::getGameTypesPage() const
 {
+   UI::SymbolStringSet gameTypeInstrs(5);
+
    S32 tabStop = 160;
    bool foundTeamGame = false;
    
@@ -1036,13 +1033,13 @@ void InstructionsUserInterface::initGameTypesPage()
 
    string header = "Bitfighter has " + itos(S32(ARRAYSIZE(typeDescriptions))) + " primary game types.";
    symbols.push_back(SymbolString::getSymbolText(header, HeaderFontSize, HelpContext, &Colors::green));
-   mGameTypeInstrs.add(SymbolString(symbols));
+   gameTypeInstrs.add(SymbolString(symbols));
 
    header = "The following games are usually played without teams:";
    symbols.clear();
    symbols.push_back(SymbolString::getSymbolText(header, HeaderFontSize, HelpContext, &Colors::yellow));
    symbols.push_back(SymbolString::getBlankSymbol(0, 10));
-   mGameTypeInstrs.add(SymbolString(symbols));
+   gameTypeInstrs.add(SymbolString(symbols));
 
    for(U32 i = 0; i < ARRAYSIZE(typeDescriptions); i++)
    {
@@ -1052,7 +1049,7 @@ void InstructionsUserInterface::initGameTypesPage()
          header = "The following games are team based:";
          symbols.push_back(SymbolString::getSymbolText(header, HeaderFontSize, HelpContext, &Colors::yellow));
          symbols.push_back(SymbolString::getBlankSymbol(0, 10));
-         mGameTypeInstrs.add(SymbolString(symbols));
+         gameTypeInstrs.add(SymbolString(symbols));
          foundTeamGame = true;
       }
 
@@ -1070,20 +1067,24 @@ void InstructionsUserInterface::initGameTypesPage()
             symbols.push_back(SymbolShapePtr(new SymbolBlank(tabStop)));
 
          symbols.push_back(SymbolString::getSymbolText(lines[j], FontSize, HelpContext, &Colors::white));
-         mGameTypeInstrs.add(SymbolString(symbols));
+         gameTypeInstrs.add(SymbolString(symbols));
       }
 
       symbols.clear();
       symbols.push_back(SymbolString::getBlankSymbol(0, 2));
-      mGameTypeInstrs.add(SymbolString(symbols));
-
+      gameTypeInstrs.add(SymbolString(symbols));
    }
+
+   return gameTypeInstrs;
 }
 
 
-void InstructionsUserInterface::renderPageGameTypes()
+void InstructionsUserInterface::renderPageGameTypes() const
 {
-   mGameTypeInstrs.render(horizMargin, 60, AlignmentLeft);
+   // JIT this, dude
+   static UI::SymbolStringSet gameTypeInstrs = getGameTypesPage();
+    
+   gameTypeInstrs.render(horizMargin, 60, AlignmentLeft);
 }
 
 

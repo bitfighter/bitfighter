@@ -28,7 +28,7 @@ protected:
    bool resetOnActivate;
    LineEditor lineEditor;
 
-   F32 getFontSize();
+   F32 getFontSize() const;
 
 
    virtual void onAccept(const char *text) = 0;
@@ -39,7 +39,7 @@ public:
    virtual ~TextEntryUserInterface();                  // Destructor
 
    virtual void onActivate();
-   virtual void render();
+   virtual void render() const;
 
    void setSecret(bool secret);
 
@@ -77,7 +77,7 @@ public:
 
    virtual void onActivate();
 
-   void render();
+   void render() const;
 };
 
 
@@ -92,7 +92,7 @@ public:
    explicit PasswordEntryUserInterface(ClientGame *game);    // Constructor
    virtual ~PasswordEntryUserInterface();
 
-   virtual void render();
+   virtual void render() const;
    virtual void onAccept(const char *text) = 0;
    virtual void onEscape() = 0;
 };

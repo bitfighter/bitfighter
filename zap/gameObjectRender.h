@@ -245,7 +245,7 @@ void renderResourceItem(const Vector<Point> &points, F32 alpha = 1);
 
 struct PanelGeom;
 void renderCore(const Point &pos, const Color &coreColor, U32 time, 
-                PanelGeom *panelGeom, F32 panelHealth[10], F32 panelStartingHealth);
+                const PanelGeom *panelGeom, const F32 panelHealth[10], F32 panelStartingHealth);
 
 void renderCoreSimple(const Point &pos, const Color &coreColor, S32 width);
 
@@ -255,7 +255,7 @@ void renderSoccerBall(const Point &pos);
 void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color &color);
 
 // Editor support items
-extern void renderPolyLineVertices(BfObject *obj, bool snapping, F32 currentScale);
+extern void renderPolyLineVertices(const BfObject *obj, bool snapping, F32 currentScale);
 extern void renderGrid(F32 curentScale, const Point &offset, const Point &origin, F32 gridSize, bool fadeLines, bool showMinorGridLines);
 
 extern void renderForceFieldProjector(const Point &pos, const Point &normal, const Color &teamColor, bool enabled, S32 healRate);
@@ -274,10 +274,10 @@ extern void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Po
                         const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha);
 
 
-extern void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const Color &color, 
+extern void renderWallOutline(const WallItem *wallItem, const Vector<Point> *outline, const Color &color, 
                               F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
-extern void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, 
+extern void renderWallOutline(const WallItem *wallItem, const Vector<Point> *outline, 
                               F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
 extern void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha);

@@ -55,13 +55,13 @@ void AbstractSpawn::setRespawnTime(S32 time)       // in seconds
 
 
 // In game radius -- these are never displayed or interacted with; radius doesn't matter
-F32 AbstractSpawn::getRadius()
+F32 AbstractSpawn::getRadius() const
 {
    return 1;      
 }
 
 
-F32 AbstractSpawn::getEditorRadius(F32 currentScale)
+F32 AbstractSpawn::getEditorRadius(F32 currentScale) const
 {
    return 12;     // Constant size, regardless of zoom
 }
@@ -222,10 +222,10 @@ string Spawn::toLevelCode() const
 }
 
 
-const char *Spawn::getOnScreenName()     { return "Spawn";        }
-const char *Spawn::getOnDockName()       { return "Spawn";        }
-const char *Spawn::getPrettyNamePlural() { return "Spawn Points"; }
-const char *Spawn::getEditorHelpString() { return "Location where ships start.  At least one per team is required. [G]"; }
+const char *Spawn::getOnScreenName()      const { return "Spawn";        }
+const char *Spawn::getOnDockName()        const { return "Spawn";        }
+const char *Spawn::getPrettyNamePlural()  const { return "Spawn Points"; }
+const char *Spawn::getEditorHelpString()  const { return "Location where ships start.  At least one per team is required. [G]"; }
 
 const char *Spawn::getClassName() const  { return "Spawn"; }
 
@@ -236,7 +236,7 @@ S32 Spawn::getDefaultRespawnTime()
 }
 
 
-void Spawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void Spawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    renderSpawn(getPos(), 1/currentScale, getColor());
@@ -244,7 +244,7 @@ void Spawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bo
 }
 
 
-void Spawn::renderDock()
+void Spawn::renderDock(const Color &color) const
 {
    renderEditor(1, false);
 }
@@ -316,8 +316,8 @@ void ItemSpawn::idle(IdleCallPath path)
 // These methods exist solely to make ItemSpawn instantiable so it can be instantiated by Lua... even though it never will
 const char *ItemSpawn::getClassName() const                                       { TNLAssert(false, "Not implemented!"); return ""; }
 S32 ItemSpawn::getDefaultRespawnTime()                                            { TNLAssert(false, "Not implemented!"); return 0;  }
-void ItemSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) { TNLAssert(false, "Not implemented!"); }
-void ItemSpawn::renderDock()                                                      { TNLAssert(false, "Not implemented!"); }
+void ItemSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const { TNLAssert(false, "Not implemented!"); }
+void ItemSpawn::renderDock(const Color &color) const                              { TNLAssert(false, "Not implemented!"); }
 
 
 /////
@@ -461,10 +461,10 @@ AsteroidSpawn *AsteroidSpawn::clone() const
 }
 
 
-const char *AsteroidSpawn::getOnScreenName()     { return "AsteroidSpawn";         }
-const char *AsteroidSpawn::getOnDockName()       { return "ASP";                   }
-const char *AsteroidSpawn::getPrettyNamePlural() { return "Asteroid Spawn Points"; }
-const char *AsteroidSpawn::getEditorHelpString() { return "Periodically spawns a new asteroid."; }
+const char *AsteroidSpawn::getOnScreenName()     const  { return "AsteroidSpawn";         }
+const char *AsteroidSpawn::getOnDockName()       const  { return "ASP";                   }
+const char *AsteroidSpawn::getPrettyNamePlural() const  { return "Asteroid Spawn Points"; }
+const char *AsteroidSpawn::getEditorHelpString() const  { return "Periodically spawns a new asteroid."; }
 
 const char *AsteroidSpawn::getClassName() const  { return "AsteroidSpawn"; }
 
@@ -536,7 +536,7 @@ void AsteroidSpawn::renderLayer(S32 layerIndex)
 }
 
 
-void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    renderAsteroidSpawnEditor(getPos(), 1/currentScale);
@@ -544,7 +544,7 @@ void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEna
 }
 
 
-void AsteroidSpawn::renderDock()
+void AsteroidSpawn::renderDock(const Color &color) const
 {
 #ifndef ZAP_DEDICATED
    renderAsteroidSpawnEditor(getPos());
@@ -679,10 +679,10 @@ void FlagSpawn::resetTimer()
 }
 
 
-const char *FlagSpawn::getOnScreenName()     { return "FlagSpawn";         }
-const char *FlagSpawn::getOnDockName()       { return "FlagSpawn";         }
-const char *FlagSpawn::getPrettyNamePlural() { return "Flag Spawn points"; }
-const char *FlagSpawn::getEditorHelpString() { return "Location where flags (or balls in Soccer) spawn after capture."; }
+const char *FlagSpawn::getOnScreenName()     const  { return "FlagSpawn";         }
+const char *FlagSpawn::getOnDockName()       const  { return "FlagSpawn";         }
+const char *FlagSpawn::getPrettyNamePlural() const  { return "Flag Spawn points"; }
+const char *FlagSpawn::getEditorHelpString() const  { return "Location where flags (or balls in Soccer) spawn after capture."; }
 
 const char *FlagSpawn::getClassName() const  { return "FlagSpawn"; }
 
@@ -693,7 +693,7 @@ S32 FlagSpawn::getDefaultRespawnTime()
 }
 
 
-void FlagSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void FlagSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
@@ -702,7 +702,7 @@ void FlagSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled
 }
 
 
-void FlagSpawn::renderDock()
+void FlagSpawn::renderDock(const Color &color) const
 {
    renderEditor(1, false);
 }

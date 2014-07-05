@@ -149,19 +149,19 @@ void MenuUserInterface::addWrappedMenuItem(boost::shared_ptr<MenuItem> menuItem)
 }
 
 
-S32 MenuUserInterface::getMenuItemCount()
+S32 MenuUserInterface::getMenuItemCount() const
 {
    return mMenuItems.size();
 }
 
 
-MenuItem *MenuUserInterface::getLastMenuItem()
+MenuItem *MenuUserInterface::getLastMenuItem() const
 {
    return mMenuItems.last().get();
 }
 
 
-MenuItem *MenuUserInterface::getMenuItem(S32 index)
+MenuItem *MenuUserInterface::getMenuItem(S32 index) const
 {
    return mMenuItems[index].get();
 }
@@ -180,38 +180,40 @@ void MenuUserInterface::idle(U32 timeDelta)
    // (i.e. we don't want to limit scrolling action only to times when user moves mouse)
    if(itemSelectedWithMouse)
       processMouse();
+
+   mFirstVisibleItem = findFirstVisibleItem();
 }
 
 
-// Return index offset to account for scrolling menus; basically caluclates index of topmost visible item
-S32 MenuUserInterface::getOffset()
+// Return index offset to account for scrolling menus; basically caluclates index of top-most visible item
+S32 MenuUserInterface::findFirstVisibleItem() const
 {
    S32 offset = 0;
 
    if(isScrollingMenu())     // Do some sort of scrolling
    {
-      // itemSelectedWithMouse basically lets users highlight the top and bottom items in a scrolling list,
+      // itemSelectedWithMouse lets users highlight the top or bottom item in a scrolling list,
       // which can't be done when using the keyboard
       if(selectedIndex - mFirstVisibleItem < (itemSelectedWithMouse ? 0 : 1))
          offset = selectedIndex - (itemSelectedWithMouse ? 0 : 1);
+
       else if( selectedIndex - mFirstVisibleItem > (mMaxMenuSize - (itemSelectedWithMouse ? 1 : 2)) )
          offset = selectedIndex - (mMaxMenuSize - (itemSelectedWithMouse ? 1 : 2));
+
       else offset = mFirstVisibleItem;
    }
 
-   mFirstVisibleItem = checkMenuIndexBounds(offset);
-
-   return mFirstVisibleItem;
+   return checkMenuIndexBounds(offset);
 }
 
 
-bool MenuUserInterface::isScrollingMenu()
+bool MenuUserInterface::isScrollingMenu() const
 {
    return mMenuItems.size() > mMaxMenuSize;
 }
 
 
-S32 MenuUserInterface::checkMenuIndexBounds(S32 index)
+S32 MenuUserInterface::checkMenuIndexBounds(S32 index) const
 {
    if(index < 0)
       return 0;
@@ -308,7 +310,7 @@ static void renderArrowBelow(S32 pos)
 
 
 // Basic menu rendering
-void MenuUserInterface::render()
+void MenuUserInterface::render() const
 {
    FontManager::pushFontContext(MenuContext);
 
@@ -345,7 +347,7 @@ void MenuUserInterface::render()
       count = mMaxMenuSize;
 
    S32 yStart = getYStart();
-   S32 offset = getOffset();
+   S32 offset = mFirstVisibleItem;
 
    S32 shrinkfact = 1;
 
@@ -431,7 +433,7 @@ void MenuUserInterface::render()
 
 
 // Calculates maximum index that the first item can have -- on non scrolling menus, this will be 0
-S32 MenuUserInterface::getMaxFirstItemIndex()
+S32 MenuUserInterface::getMaxFirstItemIndex() const
 {
    return max(mMenuItems.size() - mMaxMenuSize, 0);
 }
@@ -641,7 +643,7 @@ bool MenuUserInterface::processMenuSpecificKeys(InputCode inputCode)
 }
 
 
-S32 MenuUserInterface::getTotalMenuItemHeight()
+S32 MenuUserInterface::getTotalMenuItemHeight() const
 {
    S32 height = 0;
    for(S32 i = 0; i < mMenuItems.size(); i++)
@@ -842,7 +844,7 @@ void MenuUserInterfaceWithIntroductoryAnimation::idle(U32 timeDelta)
 }
 
 
-void MenuUserInterfaceWithIntroductoryAnimation::render()
+void MenuUserInterfaceWithIntroductoryAnimation::render() const
 {
    Parent::render();
 
@@ -994,7 +996,7 @@ void MainMenuUserInterface::setNeedToUpgrade(bool needToUpgrade)
 }
 
 
-void MainMenuUserInterface::render()
+void MainMenuUserInterface::render() const
 {
    S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
@@ -1276,7 +1278,7 @@ void InputOptionsMenuUserInterface::onActivate()
 }
 
 
-void InputOptionsMenuUserInterface::render()
+void InputOptionsMenuUserInterface::render() const
 {
    Parent::render();
 
@@ -1988,7 +1990,7 @@ void HostMenuUserInterface::saveSettings()
 }
 
 
-void HostMenuUserInterface::render()
+void HostMenuUserInterface::render() const
 {
    Parent::render();
    getUIManager()->renderLevelListDisplayer();
@@ -2482,10 +2484,10 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode)
    itemSelectedWithMouse = false;
 
    // Move the mouse to the new selection to make things "feel better"
-   MenuItemSize size = getMenuItem(getOffset())->getSize();
+   MenuItemSize size = getMenuItem(mFirstVisibleItem)->getSize();
    S32 y = getYStart();
 
-   for(S32 j = getOffset(); j < selectedIndex; j++)
+   for(S32 j = mFirstVisibleItem; j < selectedIndex; j++)
    {
       size = getMenuItem(j)->getSize();
       y += getTextSize(size) + getGap(size);
@@ -2562,6 +2564,7 @@ PlayerMenuUserInterface::PlayerMenuUserInterface(ClientGame *game) : Parent(game
    // Do nothing
 }
 
+
 // Destructor
 PlayerMenuUserInterface::~PlayerMenuUserInterface()
 {
@@ -2606,8 +2609,8 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
 }
 
 
-// By putting the menu building code in render, menus can be dynamically updated
-void PlayerMenuUserInterface::render()
+// By rebuilding everything every tick, menus can be dynamically updated
+void PlayerMenuUserInterface::idle(U32 timeDelta)
 {
    clearMenuItems();
 
@@ -2640,7 +2643,11 @@ void PlayerMenuUserInterface::render()
       mMenuTitle = "CHOOSE WHOSE TEAM TO CHANGE";
    else
       TNLAssert(false, "Unknown action!");
+}
 
+
+void PlayerMenuUserInterface::render() const
+{
    Parent::render();
 }
 
@@ -2692,8 +2699,8 @@ void TeamMenuUserInterface::processSelection(U32 index)
 }
 
 
-// By reconstructing our menu at render time, changes to teams caused by others will be reflected immediately
-void TeamMenuUserInterface::render()
+// By reconstructing our menu each tick, changes to teams caused by others will be reflected immediately
+void TeamMenuUserInterface::idle(U32 timeDelta)
 {
    clearMenuItems();
 
@@ -2726,8 +2733,6 @@ void TeamMenuUserInterface::render()
 
    // Finally, set menu title
    mMenuTitle = "TEAM TO SWITCH " + name + "TO";       // No space before the TO!
-
-   Parent::render();
 }
 
 
@@ -2735,7 +2740,6 @@ void TeamMenuUserInterface::onEscape()
 {
    getUIManager()->reactivatePrevUI();
 }
-
 
 
 };

@@ -33,7 +33,7 @@ void PolygonObject::onGeomChanged()
 }  
 
 
-void PolygonObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void PolygonObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    if(isSelected() || isLitUp())
@@ -45,13 +45,13 @@ void PolygonObject::renderEditor(F32 currentScale, bool snappingToWallCornersEna
 }
 
 
-void PolygonObject::renderDock()
+void PolygonObject::renderDock(const Color &color) const
 {
    renderEditor(1, false);
 }
 
 
-void PolygonObject::highlightDockItem() 
+void PolygonObject::highlightDockItem() const
 {   
    renderPolyHighlight(); 
 }
@@ -59,7 +59,7 @@ void PolygonObject::highlightDockItem()
 
 extern F32 gLineWidth3;
 
-void PolygonObject::renderPolyHighlight()
+void PolygonObject::renderPolyHighlight() const
 {
 #ifndef ZAP_DEDICATED
    const Color &color = isSelected() ? Colors::EDITOR_SELECT_COLOR : Colors::EDITOR_HIGHLIGHT_COLOR;
@@ -68,7 +68,7 @@ void PolygonObject::renderPolyHighlight()
 }
 
 
-Point PolygonObject::getDockLabelPos()
+Point PolygonObject::getDockLabelPos() const
 {
    static const Point labelOffset(0, -2);
 

@@ -75,7 +75,7 @@ AbstractChat::~AbstractChat()
    // Do nothing
 }
 
-Color AbstractChat::getColor(string name)
+Color AbstractChat::getColor(string name) const
 {
    if(mFromColors.count(name) == 0)    
       mFromColors[name] = getNextColor();          
@@ -164,26 +164,26 @@ bool AbstractChat::isPlayerInGlobalChat(const StringTableEntry &playerNick)
 
 // We're using a rolling "wrap-around" array, and this figures out which array index we need to retrieve a message.
 // First message has index == 0, second has index == 1, etc.
-ChatMessage AbstractChat::getMessage(U32 index)
+ChatMessage AbstractChat::getMessage(U32 index) const
 {
    return mMessages[index % MESSAGES_TO_RETAIN];
 }
 
 
-U32 AbstractChat::getMessageCount()
+U32 AbstractChat::getMessageCount() const
 {
    return mMessageCount;
 }
 
 
-bool AbstractChat::composingMessage()
+bool AbstractChat::composingMessage() const
 {
    return mLineEditor.length() > 0;
 }
 
 
 // Retrieve the next available chat text color
-Color AbstractChat::getNextColor()
+Color AbstractChat::getNextColor() const
 {
    static const Color colorList[] = {
       Color(0.55,0.55,0),     Color(1,0.55,0.55),
@@ -216,9 +216,10 @@ void AbstractChat::leaveGlobalChat()
 }
 
 
-void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)  // ypos is starting location of first message
+// ypos is starting location of first message
+void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay) const 
 {
-   // If no messages, don't waste resources on rendering
+   // If no messages, don't waste resources rendering
    if (mMessageCount == 0)
       return;
 
@@ -297,7 +298,7 @@ void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)  // ypos is 
 
 
 // Render outgoing chat message composition line
-void AbstractChat::renderMessageComposition(S32 ypos)
+void AbstractChat::renderMessageComposition(S32 ypos) const
 {
    const char *PROMPT_STR = "> ";     // For composition only
    const S32 promptWidth = getStringWidth(CHAT_FONT_SIZE, PROMPT_STR);
@@ -361,7 +362,7 @@ void AbstractChat::clearChat()
 }
 
 
-void AbstractChat::renderChatters(S32 xpos, S32 ypos)
+void AbstractChat::renderChatters(S32 xpos, S32 ypos) const
 {
    if(mPlayersInGlobalChat.size() == 0)
    {
@@ -412,7 +413,7 @@ static const S32 MENU_TITLE_SIZE    = 24;
 static const S32 TITLE_SUBTITLE_GAP = 5;
 static const S32 MENU_SUBTITLE_SIZE = 18;
 
-void ChatUserInterface::render()
+void ChatUserInterface::render() const
 {
    // If there is an underlying menu or other UI screen, render and dim it.
    //
@@ -487,7 +488,7 @@ void ChatUserInterface::render()
 }
 
 
-void ChatUserInterface::renderHeader()
+void ChatUserInterface::renderHeader() const
 {
    // Draw title, subtitle, and footer
    glColor(Colors::green);
@@ -589,7 +590,7 @@ SuspendedUserInterface::~SuspendedUserInterface()
 }
 
 
-void SuspendedUserInterface::renderHeader()
+void SuspendedUserInterface::renderHeader() const
 {
    if(getGame()->isSuspended())
    {

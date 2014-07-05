@@ -1323,7 +1323,7 @@ void renderTeleporterOutline(const Point &center, F32 radius, const Color &color
 
 
 // Render vertices of polyline; only used in the editor
-void renderPolyLineVertices(BfObject *obj, bool snapping, F32 currentScale)
+void renderPolyLineVertices(const BfObject *obj, bool snapping, F32 currentScale)
 {
    // Draw the vertices of the wall or the polygon area
    S32 verts = obj->getVertCount();
@@ -2415,7 +2415,7 @@ void renderSoccerBall(const Point &pos, F32 size)
 
 
 void renderCore(const Point &pos, const Color &coreColor, U32 time, 
-                PanelGeom *panelGeom, F32 panelHealth[], F32 panelStartingHealth)
+                const PanelGeom *panelGeom, const F32 panelHealth[], F32 panelStartingHealth)
 {
    // Draw outer polygon and inner circle
    Color baseColor = Colors::gray80;
@@ -3510,7 +3510,7 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
 }
 
 
-void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const Color &color, 
+void renderWallOutline(const WallItem *wallItem, const Vector<Point> *outline, const Color &color, 
                        F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    glColor(color);
@@ -3518,7 +3518,7 @@ void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const C
 }
 
 
-void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, 
+void renderWallOutline(const WallItem *wallItem, const Vector<Point> *outline, 
                        F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    renderLine(outline);

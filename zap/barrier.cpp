@@ -494,13 +494,13 @@ void WallItem::onAddedToGame(Game *game)
 
 
 // Only called in editor during preview mode -- basicaly prevents parent class from rendering spine of wall
-void WallItem::render()
+void WallItem::render() const
 {
    // Do nothing
 }
 
 
-void WallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void WallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    if(isSelected() || isLitUp())
@@ -528,12 +528,12 @@ Rect WallItem::calcExtents()
 }
 
 
-const char *WallItem::getOnScreenName()     { return "Wall";  }
-const char *WallItem::getOnDockName()       { return "Wall";  }
-const char *WallItem::getPrettyNamePlural() { return "Walls"; }
-const char *WallItem::getEditorHelpString() { return "Walls define the general form of your level."; }
+const char *WallItem::getOnScreenName()     const { return "Wall";  }
+const char *WallItem::getOnDockName()       const { return "Wall";  }
+const char *WallItem::getPrettyNamePlural() const { return "Walls"; }
+const char *WallItem::getEditorHelpString() const { return "Walls define the general form of your level."; }
 
-const char *WallItem::getInstructionMsg(S32 attributeCount) { return "[+] and [-] to change width"; }
+const char *WallItem::getInstructionMsg(S32 attributeCount) const { return "[+] and [-] to change width"; }
 
 
 void WallItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
@@ -554,7 +554,7 @@ const Color &WallItem::getEditorRenderColor() const
 
 
 // Size of object in editor 
-F32 WallItem::getEditorRadius(F32 currentScale)
+F32 WallItem::getEditorRadius(F32 currentScale) const
 {
    return getWallEditorRadius(currentScale);
 }
@@ -755,7 +755,7 @@ S32 PolyWall::getRenderSortValue()
 }
 
 
-void PolyWall::renderDock()
+void PolyWall::renderDock(const Color &color) const
 {
    static const Color wallOutlineColor(getGame()->getSettings()->getWallOutlineColor());
 
@@ -791,16 +791,16 @@ string PolyWall::toLevelCode() const
 
 
 // Size of object in editor 
-F32 PolyWall::getEditorRadius(F32 currentScale)
+F32 PolyWall::getEditorRadius(F32 currentScale) const
 {
    return getWallEditorRadius(currentScale);
 }
 
 
-const char *PolyWall::getOnScreenName()     { return "PolyWall";  }
-const char *PolyWall::getOnDockName()       { return "PolyWall";  }
-const char *PolyWall::getPrettyNamePlural() { return "PolyWalls"; }
-const char *PolyWall::getEditorHelpString() { return "Polygonal wall item lets you be creative with your wall design."; }
+const char *PolyWall::getOnScreenName()     const { return "PolyWall";  }
+const char *PolyWall::getOnDockName()       const { return "PolyWall";  }
+const char *PolyWall::getPrettyNamePlural() const { return "PolyWalls"; }
+const char *PolyWall::getEditorHelpString() const { return "Polygonal wall item lets you be creative with your wall design."; }
 
 
 void PolyWall::setSelected(bool selected)
@@ -1026,7 +1026,7 @@ void WallSegment::renderFill(const Point &offset, const Color &color)
 }
 
 
-bool WallSegment::isSelected()
+bool WallSegment::isSelected() const
 {
    return mSelected;
 }

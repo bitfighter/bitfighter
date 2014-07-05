@@ -78,7 +78,7 @@ void TextItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &value
 }
 
 
-const char *TextItem::getInstructionMsg(S32 attributeCount)
+const char *TextItem::getInstructionMsg(S32 attributeCount) const
 {
    return "[Enter] to edit text";
 }
@@ -95,7 +95,7 @@ void TextItem::newObjectFromDock(F32 gridSize)
 
 
 // In game rendering
-void TextItem::render()
+void TextItem::render() const
 {
 #ifndef ZAP_DEDICATED
    S32 ourTeam = static_cast<ClientGame*>(getGame())->getCurrentTeamIndex();
@@ -111,17 +111,17 @@ void TextItem::render()
 
 
 // Called by SimpleItem::renderEditor()
-void TextItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void TextItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    Parent::renderEditor(currentScale, snappingToWallCornersEnabled);
    render();
 }
 
 
-const char *TextItem::getOnScreenName()     { return "Text";      }
-const char *TextItem::getOnDockName()       { return "TextItem";  }
-const char *TextItem::getPrettyNamePlural() { return "TextItems"; }
-const char *TextItem::getEditorHelpString() { return "Draws a bit of text on the map.  Visible only to team, or to all if neutral."; }
+const char *TextItem::getOnScreenName()     const  { return "Text";      }
+const char *TextItem::getOnDockName()       const  { return "TextItem";  }
+const char *TextItem::getPrettyNamePlural() const  { return "TextItems"; }
+const char *TextItem::getEditorHelpString() const  { return "Draws a bit of text on the map.  Visible only to team, or to all if neutral."; }
 
 
 bool TextItem::hasTeam()      { return true; }

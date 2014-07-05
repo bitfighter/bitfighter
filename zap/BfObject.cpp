@@ -279,28 +279,28 @@ void EditorObject::onAttrsChanging() { /* Do nothing */ }
 void EditorObject::onAttrsChanged()  { /* Do nothing */ }
 
 
-const char *EditorObject::getEditorHelpString()
+const char *EditorObject::getEditorHelpString() const
 {
    TNLAssert(false, "getEditorHelpString method not implemented!");
    return "getEditorHelpString method not implemented!";  // better then a NULL crash in non-debug mode or continuing past the Assert
 }
 
 
-const char *EditorObject::getPrettyNamePlural()
+const char *EditorObject::getPrettyNamePlural() const
 {
    TNLAssert(false, "getPrettyNamePlural method not implemented!");
    return "getPrettyNamePlural method not implemented!";
 }
 
 
-const char *EditorObject::getOnDockName()
+const char *EditorObject::getOnDockName() const
 {
    TNLAssert(false, "getOnDockName method not implemented!");
    return "getOnDockName method not implemented!";
 }
 
 
-const char *EditorObject::getOnScreenName()
+const char *EditorObject::getOnScreenName() const
 {
    TNLAssert(false, "getOnScreenName method not implemented!");
    return "getOnScreenName method not implemented!";
@@ -308,7 +308,7 @@ const char *EditorObject::getOnScreenName()
 
 
 // Not all editor objects will implement this
-const char *EditorObject::getInstructionMsg(S32 attributeCount)
+const char *EditorObject::getInstructionMsg(S32 attributeCount) const
 {
    if(attributeCount > 0)
       return "[Enter] to edit attributes";
@@ -323,14 +323,14 @@ void EditorObject::fillAttributesVectors(Vector<string> &keys, Vector<string> &v
 }
 
 
-S32 EditorObject::getDockRadius()
+S32 EditorObject::getDockRadius() const
 {
    return 10;
 }
 
 
 
-bool EditorObject::isSelected()
+bool EditorObject::isSelected() const
 {
    return mSelected;
 }
@@ -349,7 +349,7 @@ void EditorObject::setSelected(bool selected)
 }
 
 
-bool EditorObject::isLitUp() 
+bool EditorObject::isLitUp() const 
 { 
    return mLitUp; 
 }
@@ -364,7 +364,7 @@ void EditorObject::setLitUp(bool litUp)
 }
 
 
-bool EditorObject::isVertexLitUp(S32 vertexIndex)
+bool EditorObject::isVertexLitUp(S32 vertexIndex) const
 {
    return mVertexLitUp == vertexIndex;
 }
@@ -377,7 +377,7 @@ void EditorObject::setVertexLitUp(S32 vertexIndex)
 
 
 // Size of object in editor 
-F32 EditorObject::getEditorRadius(F32 currentScale)
+F32 EditorObject::getEditorRadius(F32 currentScale) const
 {
    return 10 * currentScale;   // 10 pixels is base size
 }
@@ -542,7 +542,10 @@ void BfObject::setGeom(lua_State *L, S32 stackIndex)
 
 const Color &BfObject::getColor() const
 { 
-   return mGame->getObjTeamColor(this);
+   TNLAssert(getDatabase(), "Why do we need the color of an object not in a database?");
+   TNLAssert(dynamic_cast<Level *>(getDatabase()), "Looks like this database is not a Level!");
+
+   return static_cast<Level *>(getDatabase())->getTeamColor(getTeam());
 }
 
 
@@ -664,7 +667,7 @@ void BfObject::renderAndLabelHighlightedVertices(F32 currentScale)
 #endif
 
 
-Point BfObject::getDockLabelPos()
+Point BfObject::getDockLabelPos() const
 {
    static const Point labelOffset(0, 11);
 
@@ -672,7 +675,7 @@ Point BfObject::getDockLabelPos()
 }
 
 
-void BfObject::highlightDockItem()
+void BfObject::highlightDockItem() const
 {
 #ifndef ZAP_DEDICATED
    drawHollowSquare(getPos(), (F32)getDockRadius(), Colors::EDITOR_HIGHLIGHT_COLOR);
@@ -762,13 +765,13 @@ Point BfObject::getInitialPlacementOffset(U32 gridSize) const
 }
 
 
-void BfObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void BfObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    TNLAssert(false, "renderEditor not implemented!");
 }
 
 
-void BfObject::renderDock()
+void BfObject::renderDock(const Color &color) const
 {
    TNLAssert(false, "renderDock not implemented!");
 }
@@ -1097,7 +1100,7 @@ Point BfObject::getVel() const
 }
 
 
-U32 BfObject::getCreationTime()
+U32 BfObject::getCreationTime() const
 {
    return mCreationTime;
 }
@@ -1145,7 +1148,7 @@ void BfObject::setPrevMove(const Move &move)
 }
 
 
-void BfObject::render()
+void BfObject::render() const
 {
    // Do nothing
 }

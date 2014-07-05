@@ -364,28 +364,28 @@ void RepairItem::onClientPickup()
 }
 
 
-void RepairItem::renderItem(const Point &pos)
+void RepairItem::renderItem(const Point &pos) const
 {
    if(shouldRender())
       renderRepairItem(pos);
 }
 
 
-const char *RepairItem::getOnScreenName()     { return "Repair";       }
-const char *RepairItem::getOnDockName()       { return "Repair";       }
-const char *RepairItem::getPrettyNamePlural() { return "Repair Items"; }
-const char *RepairItem::getEditorHelpString() { return "Repairs damage to ships. [B]"; }
+const char *RepairItem::getOnScreenName()     const  { return "Repair";       }
+const char *RepairItem::getOnDockName()       const  { return "Repair";       }
+const char *RepairItem::getPrettyNamePlural() const  { return "Repair Items"; }
+const char *RepairItem::getEditorHelpString() const  { return "Repairs damage to ships. [B]"; }
 
-S32 RepairItem::getDockRadius() { return 11; }
+S32 RepairItem::getDockRadius() const  {  return 11;  }
 
 
-void RepairItem::renderDock()
+void RepairItem::renderDock(const Color &color) const
 {
    renderRepairItem(getPos(), true, 0, 1);
 }
 
 
-F32 RepairItem::getEditorRadius(F32 currentScale)
+F32 RepairItem::getEditorRadius(F32 currentScale) const
 {
    return mRadius * currentScale + 5;
 }
@@ -492,17 +492,17 @@ void EnergyItem::onClientPickup()
 }
 
 
-void EnergyItem::renderItem(const Point &pos)
+void EnergyItem::renderItem(const Point &pos) const
 {
    if(shouldRender())
       renderEnergyItem(pos);
 }
 
 
-const char *EnergyItem::getOnScreenName()     { return "Energy";       }
-const char *EnergyItem::getOnDockName()       { return "Energy";       }
-const char *EnergyItem::getPrettyNamePlural() { return "Energy Items"; }
-const char *EnergyItem::getEditorHelpString() { return "Restores energy to ships"; }
+const char *EnergyItem::getOnScreenName()     const  { return "Energy";       }
+const char *EnergyItem::getOnDockName()       const  { return "Energy";       }
+const char *EnergyItem::getPrettyNamePlural() const  { return "Energy Items"; }
+const char *EnergyItem::getEditorHelpString() const  { return "Restores energy to ships"; }
 
 
 /////

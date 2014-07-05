@@ -392,6 +392,7 @@ void PlaybackServerDownloadUserInterface::processSelection(U32 index)
 
    getGame()->getConnectionToServer()->c2sRequestRecordedGameplay(StringPtr(mLevels[index].c_str()));
    MenuItem *item = getMenuItem(index);
+
    if(item)
    {
       string downloadedstring = mLevels[index] + " (downloaded)";
@@ -592,7 +593,7 @@ void PlaybackGameUserInterface::idle(U32 timeDelta)
 }
 
 
-void PlaybackGameUserInterface::render()
+void PlaybackGameUserInterface::render() const
 {
    mGameInterface->render();
 

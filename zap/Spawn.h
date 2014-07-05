@@ -52,15 +52,15 @@ public:
 
    virtual string toLevelCode() const;
 
-   F32 getRadius();
-   F32 getEditorRadius(F32 currentScale);
+   F32 getRadius() const;
+   F32 getEditorRadius(F32 currentScale) const;
 
    bool updateTimer(U32 deltaT);
    void resetTimer();
    U32 getPeriod();     // temp debugging
 
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) = 0;
-   virtual void renderDock() = 0;
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const = 0;
+   virtual void renderDock(const Color &color) const = 0;
 };
 
 
@@ -81,10 +81,10 @@ public:
 
    Spawn *clone() const;
 
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
 
    const char *getClassName() const;
 
@@ -93,8 +93,8 @@ public:
 
    S32 getDefaultRespawnTime();    // Somewhat meaningless in this context
 
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
-   void renderDock();
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
+   void renderDock(const Color &color) const;
 
    TNL_DECLARE_CLASS(Spawn);
 
@@ -126,8 +126,8 @@ public:
    // These methods exist solely to make ItemSpawn instantiable so it can be instantiated by Lua... even though it never will
    virtual const char *getClassName() const;
    virtual S32 getDefaultRespawnTime();
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
-   virtual void renderDock();
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
+   virtual void renderDock(const Color &color) const;
 
 
    ///// Lua interface
@@ -164,10 +164,10 @@ public:
 
    AsteroidSpawn *clone() const;
 
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
 
    const char *getClassName() const;
 
@@ -180,8 +180,8 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    void renderLayer(S32 layerIndex);
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
-   void renderDock();
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
+   void renderDock(const Color &color) const;
 
    TNL_DECLARE_CLASS(AsteroidSpawn);
    TNL_DECLARE_RPC(s2cSetTimeUntilSpawn, (S32 millis));
@@ -224,18 +224,18 @@ public:
 
    void spawn();
 
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
 
    const char *getClassName() const;
 
    S32 getDefaultRespawnTime();
 
    //void spawn(Game *game);
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
-   void renderDock();
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
+   void renderDock(const Color &color) const;
 
    bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
