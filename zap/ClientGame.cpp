@@ -392,6 +392,7 @@ void ClientGame::queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferP
    mUIManager->queueVoiceChatBuffer(effect, p);
 }
 
+
 S32 ClientGame::getCurrentTeamIndex()
 {
    Ship *ship = getLocalPlayerShip(); // first try, when playing back a recorded game
@@ -404,6 +405,7 @@ S32 ClientGame::getCurrentTeamIndex()
 
    return TEAM_NEUTRAL;
 }
+
 
 // User selected Switch Teams menu item
 void ClientGame::switchTeams()
