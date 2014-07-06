@@ -274,6 +274,14 @@ bool Level::makeSureTeamCountIsNotZero()
 
 const Color &Level::getTeamColor(S32 index) const
 {
+   // Note this logic duplicated inside mTeamManager... if that is only called from here, we can remove it there
+
+   if(index == TEAM_NEUTRAL)
+      return Colors::NeutralTeamColor;
+
+   if(index == TEAM_HOSTILE)
+      return Colors::HostileTeamColor;
+
    if(mAddedToGame)
       return mTeamManager.getTeamColor(index);
    else

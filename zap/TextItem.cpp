@@ -98,12 +98,14 @@ void TextItem::newObjectFromDock(F32 gridSize)
 void TextItem::render() const
 {
 #ifndef ZAP_DEDICATED
-   S32 ourTeam = static_cast<ClientGame*>(getGame())->getCurrentTeamIndex();
+   //S32 ourTeam = static_cast<ClientGame*>(getGame())->getCurrentTeamIndex();
 
-   // Don't render opposing team's text items if we are in a game... but in editor preview mode, where
-   // we don't have a connection to the server, text will be rendered normally
-   if(ourTeam != getTeam() && ourTeam != TEAM_NEUTRAL)
-      return;
+   //// Don't render opposing team's text items if we are in a game... but in editor preview mode, where
+   //// we don't have a connection to the server, text will be rendered normally
+   //if(ourTeam != getTeam() && ourTeam != TEAM_NEUTRAL)
+   //   return;
+
+   // The above should be handled by not sending textItems to players who shouldn't see them!!!
 
    renderTextItem(getVert(0), getVert(1), mSize, mText, getColor());
 #endif

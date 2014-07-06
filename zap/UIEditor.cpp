@@ -142,8 +142,6 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mHitVertex = NONE;
    mEdgeHit   = NONE;
 
-   mLevel = boost::shared_ptr<Level>(new Level());
-
    setNeedToSave(false);
 
    mLastUndoStateWasBarrierWidthChange = false;
@@ -229,9 +227,9 @@ void EditorUserInterface::populateDock()
    addDockObject(new TextItem(), xPos, yPos);
    yPos += spacer;
 
-   if(getGame()->getGameType()->getGameTypeId() == SoccerGame)
+   if(mLevel->getGameType()->getGameTypeId() == SoccerGame)
       addDockObject(new SoccerBallItem(), xPos, yPos);
-   else if(getGame()->getGameType()->getGameTypeId() == CoreGame)
+   else if(mLevel->getGameType()->getGameTypeId() == CoreGame)
       addDockObject(new CoreItem(), xPos, yPos);
    else
       addDockObject(new FlagItem(), xPos, yPos);
@@ -263,7 +261,7 @@ void EditorUserInterface::populateDock()
    addDockObject(new LoadoutZone(), xPos, yPos);
    yPos += 25;
 
-   if(getGame()->getGameType()->getGameTypeId() == NexusGame)
+   if(mLevel->getGameType()->getGameTypeId() == NexusGame)
    {
       addDockObject(new NexusZone(), xPos, yPos);
       yPos += 25;
@@ -579,7 +577,9 @@ void EditorUserInterface::loadLevel()
 
    ClientGame *game = getGame();
 
-   cleanUp();
+   // Only clean up if we've got a level to clean up!
+   if(mLevel)
+      cleanUp();
 
    FolderManager *folderManager = game->getSettings()->getFolderManager();
    string fileName = joindir(folderManager->getLevelDir(), filename).c_str();
@@ -591,17 +591,25 @@ void EditorUserInterface::loadLevel()
    bool ok = level->loadLevelFromFile(fileName);
 
    if(ok)
-      game->setLevel(level);
+      setLevel(boost::shared_ptr<Level>(level));
    else
-      delete level;
-
-   if(!game->getGameType())         // Make sure we have GameType
    {
-      GameType *gameType = new GameType;
-      gameType->addToGame(game, mLoadTarget);   
+      delete level;
+      level = new Level();
    }
 
-   makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
+   mLoadTarget = level;
+
+   TNLAssert(mLevel->getGameType(), "Level should have GameType!");
+   TNLAssert(mLevel->getTeamCount() > 0, "Level should have at least one team!")
+
+   //if(!game->getGameType())         // Make sure we have GameType
+   //{
+   //   GameType *gameType = new GameType;
+   //   gameType->addToGame(game, mLoadTarget);   
+   //}
+
+   //makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team  --> should be handled by level loader
 
    if(ok)   
    {
@@ -680,7 +688,7 @@ void EditorUserInterface::addToEditor(BfObject *obj)
 // User has pressed Ctrl+K -- run the levelgen script and insert any resulting items into the editor in a separate database
 void EditorUserInterface::runLevelGenScript()
 {
-   GameType *gameType = getGame()->getGameType();
+   GameType *gameType = mLevel->getGameType();
    string scriptName = gameType->getScriptName();
 
    if(scriptName == "")      // No script included!!
@@ -1060,7 +1068,7 @@ void EditorUserInterface::validateLevel()
 
    // "Unversal errors" -- levelgens can't (yet) change gametype
 
-   GameType *gameType = getGame()->getGameType();
+   GameType *gameType = mLevel->getGameType();
 
    // Check for soccer ball in a a game other than SoccerGameType. Doesn't crash no more.
    if(foundSoccerBall && gameType->getGameTypeId() != SoccerGame)
@@ -1083,7 +1091,7 @@ void EditorUserInterface::validateLevel()
 
    // Errors that may be corrected by levelgen -- script could add spawns
    // Neutral spawns work for all; if there's one, then that will satisfy our need for spawns for all teams
-   if(getGame()->getGameType()->getScriptName() == "" && !foundNeutralSpawn)
+   if(mLevel->getGameType()->getScriptName() == "" && !foundNeutralSpawn)
    {
       if(TeamListToString(teamList, foundSpawn))     // Compose error message
          mLevelErrorMsgs.push_back("ERROR: Need spawn point for " + teamList);
@@ -1438,8 +1446,9 @@ void EditorUserInterface::onDisplayModeChange()
    }
 
    // Need to populate the dock here because dock items are tied to a particular screen x,y; 
-   // maybe it would be better to give them a dock x,y instead?
-   if(getGame()->getGameType())
+   // maybe it would be better to give them a dock x,y instead?  
+   // mLevel might be NULL here when we first start up the editor.
+   if(mLevel && mLevel->getGameType())
       populateDock();               // If game type has changed, items on dock will change
 
    previousXSize = DisplayManager::getScreenInfo()->getGameCanvasWidth();
@@ -5077,7 +5086,7 @@ void testLevelStart_local(ClientGame *game)
 void EditorUserInterface::testLevel()
 {
    bool gameTypeError = false;
-   if(!getGame()->getGameType())     // Not sure this could really happen anymore...  TODO: Make sure we always have a valid gametype
+   if(!mLevel->getGameType())     // Not sure this could really happen anymore...  TODO: Make sure we always have a valid gametype
       gameTypeError = true;
 
    // With all the map loading error fixes, game should never crash!
@@ -5122,7 +5131,7 @@ void EditorUserInterface::testLevelStart()
 
    Cursor::disableCursor();                           // Turn off cursor
 
-   mEditorGameType = getGame()->getGameType();        // Sock our current gametype away, will use it when we reenter the editor
+   mEditorGameType = mLevel->getGameType();           // Sock our current gametype away, will use it when we reenter the editor
 
    if(!doSaveLevel(TestFileName, true))
       getGame()->getUIManager()->reactivatePrevUI();  // Saving failed, can't test, reactivate editor
