@@ -43,6 +43,7 @@ Level::~Level()
 {
    mWallItemList.deleteAndClear();
 
+   // Clean up our GameType
    if(mGameType.isValid() && !mGameType->isGhost())
       delete mGameType.getPointer();
 }

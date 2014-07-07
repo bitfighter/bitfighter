@@ -562,9 +562,6 @@ void EditorUserInterface::cleanUp()
    mAddingVertex = false;
    clearLevelGenItems();
    mGameTypeArgs.clear();
-
-   if(game->getGameType())
-      delete game->getGameType();
 }
 
 
