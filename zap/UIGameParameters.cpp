@@ -90,7 +90,7 @@ void GameParamUserInterface::onActivate()
    clearCurrentGameTypeParams();
 
    updateMenuItems();   
-   origGameParams = getGame()->toLevelCode();   // Save a copy of the params coming in for comparison when we leave to see what changed
+   mOrigGameParams = getGame()->toLevelCode();   // Save a copy of the params coming in for comparison when we leave to see what changed
    Cursor::disableCursor();
 }
 
@@ -229,7 +229,7 @@ void GameParamUserInterface::processSelection(U32 index)
 
 bool GameParamUserInterface::anythingChanged()
 {
-   return origGameParams != getGame()->toLevelCode();
+   return mOrigGameParams != getGame()->toLevelCode();
 }
 
 

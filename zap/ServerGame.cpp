@@ -984,8 +984,6 @@ inline string getPathFromFilename(const string &filename)
 
 bool ServerGame::loadLevel()
 {
-   resetLevelInfo();    // Resets info about the level, not a LevelInfo...  in case you were wondering
-
    mObjectsLoaded = 0;
    setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);
 

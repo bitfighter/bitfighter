@@ -294,8 +294,6 @@ public:
    U32 getTimeUnconnectedToMaster();
    virtual void onConnectedToMaster();
 
-   void resetLevelInfo();
-
    // Manage bot lists
    virtual Robot *getBot(S32 index);
    virtual S32 getBotCount() const;
@@ -318,8 +316,6 @@ public:
    virtual AbstractTeam *getNewTeam() = 0;
 
    virtual void setLevel(Level *level) = 0;
-
-   string toLevelCode() const;
 
    virtual void addPolyWall(BfObject *polyWall, GridDatabase *database);     
    virtual void addWallItem(WallItem *wallItem, GridDatabase *database);     
@@ -412,6 +408,9 @@ public:
 
    virtual void setLevelDatabaseId(U32 id);
    U32 getLevelDatabaseId() const;
+
+   string toLevelCode() const;
+
    virtual GridDatabase *getBotZoneDatabase() const = 0;
 
    virtual string getPlayerName() const;

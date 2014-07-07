@@ -40,6 +40,8 @@ private:
    string mLevelHash;
    bool mAddedToGame;      // False until onAddedToGame() is called, then True
 
+   U32 mLevelDatabaseId;
+
    Vector<string> mRobotLines;
    boost::shared_ptr<Vector<TeamInfo> > mTeamInfos;
    Vector<string> mTeamChangeLines;
@@ -65,6 +67,13 @@ public:
    void loadLevelFromString(const string &contents, const string &filename = "");
    bool loadLevelFromFile(const string &filename);
    void validateLevel();
+
+   string toLevelCode() const;
+
+   U32 getLevelDatabaseId() const;
+   void setLevelDatabaseId(U32 id);
+
+
 
    const Vector<WallItem *> &getWallList() const;
 

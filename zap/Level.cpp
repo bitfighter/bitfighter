@@ -11,6 +11,7 @@
 #include "Spawn.h"
 #include "robot.h"
 #include "Colors.h"
+#include "LevelDatabase.h"
 
 #include "Md5Utils.h"
 #include "stringUtils.h"
@@ -33,6 +34,7 @@ Level::Level()
    mDatabaseId = 0; 
    mAddedToGame = false;
    mTeamInfos.reset(new Vector<TeamInfo>);      // mTeamInfos is a shared_ptr, which will handle cleanup
+   mLevelDatabaseId = LevelDatabase::NOT_IN_DATABASE;
 }
 
 
@@ -201,6 +203,52 @@ static string getString(S32 argc, const char **argv)
    }
 
    return trim(str);    // TODO: Is trim really necessary?  Write a test and find out!
+}
+
+
+// Write out the game processed above; returns multiline string
+string Level::toLevelCode() const
+{
+   string str;
+
+   GameType *gameType = getGameType();
+
+   str = "LevelFormat " + itos(Level::CurrentLevelFormat) + "\n";
+
+   str += string(gameType->toLevelCode() + "\n");
+
+   str += string("LevelName ")        + writeLevelString(gameType->getLevelName().c_str()) + "\n";
+   str += string("LevelDescription ") + writeLevelString(gameType->getLevelDescription()) + "\n";
+   str += string("LevelCredits ")     + writeLevelString(gameType->getLevelCredits().c_str()) + "\n";
+
+   if(getLevelDatabaseId())
+      str += string("LevelDatabaseId ") + itos(getLevelDatabaseId()) + "\n";
+
+   for(S32 i = 0; i < getTeamCount(); i++)
+      str += getTeamLevelCode(i) + "\n";
+
+   str += gameType->getSpecialsLine() + "\n";
+
+   if(gameType->getScriptName() != "")
+      str += "Script " + gameType->getScriptLine() + "\n";
+
+   str += string("MinPlayers") + (gameType->getMinRecPlayers() > 0 ? " " + itos(gameType->getMinRecPlayers()) : "") + "\n";
+   str += string("MaxPlayers") + (gameType->getMaxRecPlayers() > 0 ? " " + itos(gameType->getMaxRecPlayers()) : "") + "\n";
+
+   return str;
+}
+
+
+// Overridden on client
+void Level::setLevelDatabaseId(U32 id)
+{
+   mLevelDatabaseId = id;
+}
+
+
+U32 Level::getLevelDatabaseId() const
+{
+   return mLevelDatabaseId;
 }
 
 

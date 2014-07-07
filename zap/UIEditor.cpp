@@ -563,8 +563,6 @@ void EditorUserInterface::cleanUp()
    clearLevelGenItems();
    mGameTypeArgs.clear();
 
-   game->resetLevelInfo();
-
    if(game->getGameType())
       delete game->getGameType();
 }
@@ -5018,7 +5016,7 @@ string EditorUserInterface::getLevelText() const
    string result;
 
    // Write out basic game parameters, including gameType info
-   result += getGame()->toLevelCode();    // Note that this toLevelCode appends a newline char; most don't
+   result += mLevel->toLevelCode();    // Note that this toLevelCode appends a newline char; most don't
 
    // Next come the robots
    for(S32 i = 0; i < mRobotLines.size(); i++)

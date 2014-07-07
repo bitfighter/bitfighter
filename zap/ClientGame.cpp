@@ -201,7 +201,7 @@ void ClientGame::onConnectedToMaster()
    // Request ratings for current level if we don't already have them
 
    if(needsRating())
-      mConnectionToMaster->c2mRequestLevelRating(getLevelDatabaseId());
+      mConnectionToMaster->c2mRequestLevelRating(mLevel->getLevelDatabaseId());
 
    logprintf(LogConsumer::LogConnection, "Client established connection with Master Server");
 }
@@ -512,7 +512,7 @@ string ClientGame::getPlayerPassword() const { return gSettings.getPlayerPasswor
 
 bool ClientGame::isLevelInDatabase() const
 {
-   return LevelDatabase::isLevelInDatabase(getLevelDatabaseId());
+   return LevelDatabase::isLevelInDatabase(mLevel->getLevelDatabaseId());
 }
 
 

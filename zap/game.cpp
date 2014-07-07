@@ -710,48 +710,6 @@ void Game::onConnectedToMaster()
 }
 
 
-// Called when ServerGame or the editor loads a level
-void Game::resetLevelInfo()
-{
-   // ???
-
-}
-
-
-// Write out the game processed above; returns multiline string
-// TODO: Move this to GameType or Level
-string Game::toLevelCode() const
-{
-   string str;
-
-   GameType *gameType = getGameType();
-
-   str = "LevelFormat " + itos(Level::CurrentLevelFormat) + "\n";
-
-   str += string(gameType->toLevelCode() + "\n");
-
-   str += string("LevelName ")        + writeLevelString(gameType->getLevelName().c_str()) + "\n";
-   str += string("LevelDescription ") + writeLevelString(gameType->getLevelDescription()) + "\n";
-   str += string("LevelCredits ")     + writeLevelString(gameType->getLevelCredits().c_str()) + "\n";
-
-   if(getLevelDatabaseId())
-      str += string("LevelDatabaseId ") + itos(getLevelDatabaseId()) + "\n";
-
-   for(S32 i = 0; i < mLevel->getTeamCount(); i++)
-      str += mLevel->getTeamLevelCode(i) + "\n";
-
-   str += gameType->getSpecialsLine() + "\n";
-
-   if(gameType->getScriptName() != "")
-      str += "Script " + gameType->getScriptLine() + "\n";
-
-   str += string("MinPlayers") + (gameType->getMinRecPlayers() > 0 ? " " + itos(gameType->getMinRecPlayers()) : "") + "\n";
-   str += string("MaxPlayers") + (gameType->getMaxRecPlayers() > 0 ? " " + itos(gameType->getMaxRecPlayers()) : "") + "\n";
-
-   return str;
-}
-
-
 // Only used during level load process...  actually, used at all?  If so, should be combined with similar code in gameType
 // Not used during normal game load... used by tests and lua_setGameTime()
 void Game::setGameTime(F32 timeInMinutes)
@@ -827,6 +785,12 @@ void Game::checkConnectionToMaster(U32 timeDelta)
    }
 
    processAnonymousMasterConnection();
+}
+
+
+string Game::toLevelCode() const
+{
+   return mLevel->toLevelCode();
 }
 
 
@@ -1061,13 +1025,13 @@ void Game::setPreviousLevelName(const string &name)
 // Overridden on client
 void Game::setLevelDatabaseId(U32 id)
 {
-   mLevelDatabaseId = id;
+   mLevel->setLevelDatabaseId(id);
 }
 
 
 U32 Game::getLevelDatabaseId() const
 {
-   return mLevelDatabaseId;
+   return mLevel->getLevelDatabaseId();
 }
 
 
