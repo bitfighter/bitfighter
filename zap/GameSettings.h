@@ -304,6 +304,8 @@ public:
 };
 
 
+static GameSettings gSettings;
+
 typedef boost::shared_ptr<GameSettings> GameSettingsPtr;
 
 

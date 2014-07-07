@@ -1906,11 +1906,9 @@ static void startHostingCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getUI<HostMenuUserInterface>()->saveSettings();
 
-   GameSettingsPtr settings = game->getSettingsPtr();
+   LevelSourcePtr levelSource = LevelSourcePtr(gSettings.chooseLevelSource(game));
 
-   LevelSourcePtr levelSource = LevelSourcePtr(settings->chooseLevelSource(game));
-
-   initHosting(settings, levelSource, false, false);
+   initHosting(levelSource, false, false);
 }
 
 

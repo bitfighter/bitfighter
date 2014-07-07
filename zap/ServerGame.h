@@ -114,8 +114,8 @@ private:
    Vector<BotNavMeshZone *> mAllZones;
 
 public:
-   ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated);    // Constructor
-   virtual ~ServerGame();   // Destructor
+   ServerGame(const Address &address, LevelSourcePtr levelSource, bool testMode, bool dedicated);    // Constructor
+   virtual ~ServerGame();                                                                            // Destructor
 
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
 

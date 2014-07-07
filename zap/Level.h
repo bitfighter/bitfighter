@@ -13,6 +13,8 @@
 #include "tnlTypes.h"
 #include "tnlNetBase.h"
 
+#include "boost/smart_ptr/shared_ptr.hpp"
+
 #include <string>
 
 using namespace std;
@@ -39,7 +41,7 @@ private:
    bool mAddedToGame;      // False until onAddedToGame() is called, then True
 
    Vector<string> mRobotLines;
-   Vector<TeamInfo> mTeamInfos;
+   boost::shared_ptr<Vector<TeamInfo> > mTeamInfos;
    Vector<string> mTeamChangeLines;
 
    TeamManager mTeamManager;
@@ -75,6 +77,9 @@ public:
 
    void addBots(Game *game);
 
+   // These methods for giving a brain transplant to mDockItems
+   void setTeamInfosPtr(const boost::shared_ptr<Vector<TeamInfo> > &teamInfos);
+   boost::shared_ptr<Vector<TeamInfo> > getTeamInfosPtr() const;
 
 
    // Level metadata

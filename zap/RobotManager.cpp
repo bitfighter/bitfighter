@@ -16,11 +16,11 @@ namespace Zap
 {
 
 // Contsructor --> Warning: game may not be fully-formed... do not access any members/functions in this constructor
-RobotManager::RobotManager(ServerGame *game, GameSettingsPtr settings)
+RobotManager::RobotManager(ServerGame *game)
 {
    mManagerActive = true;
-   mAutoLevelTeams    = settings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::AddRobots);
-   mTargetPlayerCount = settings->getIniSettings()->mSettings.getVal<S32>(IniKey::MinBalancedPlayers);
+   mAutoLevelTeams    = gSettings.getIniSettings()->mSettings.getVal<YesNo>(IniKey::AddRobots);
+   mTargetPlayerCount = gSettings.getIniSettings()->mSettings.getVal<S32>(IniKey::MinBalancedPlayers);
    mGame = game;
 }
 

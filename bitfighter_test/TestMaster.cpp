@@ -24,9 +24,8 @@ TEST(MasterTest, Sanity)
    MasterServer master(&masterSettings);
 
    Address addr;
-   GameSettingsPtr gameSettings = GameSettingsPtr(new GameSettings());
 
-   ClientGame *clientGame = newClientGame(gameSettings);
+   ClientGame *clientGame = newClientGame();
 
 //   clientGame->setConnectionToMaster(new Zap::MasterServerConnection(clientGame)); // uses Zap::MasterServerConnection
 //   clientGame->getConnectionToMaster()->connectLocal((NetInterface*) clientGame->getNetInterface(), master.getNetInterface());

@@ -13,8 +13,6 @@
 #include "UITeamDefMenu.h"
 #include "UIManager.h"
 
-#include "Level.h"
-
 #include "WallSegmentManager.h"
 
 #include "ClientGame.h"  
@@ -180,6 +178,9 @@ void EditorUserInterface::setLevel(boost::shared_ptr<Level> level)
 {
    TNLAssert(level.get(), "Level should not be NULL!");
    mLevel = boost::dynamic_pointer_cast<Level>(level);
+
+   // Tell mDockItems to use the same team info as we use for the regular items
+   mDockItems.setTeamInfosPtr(mLevel->getTeamInfosPtr());
 }
 
 
@@ -193,13 +194,14 @@ void EditorUserInterface::onQuitted()
 void EditorUserInterface::addDockObject(BfObject *object, F32 xPos, F32 yPos)
 {
    object->prepareForDock(getGame(), Point(xPos, yPos), mCurrentTeam);  // Prepare object   
-   mDockItems.push_back(boost::shared_ptr<BfObject>(object));           // Add item to our list of dock objects
+   mDockItems.addToDatabase(object);
 }
 
 
 void EditorUserInterface::populateDock()
 {
-   mDockItems.clear();
+   // Out with the old
+   mDockItems.removeEverythingFromDatabase();
 
    F32 xPos = (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin - ITEMS_DOCK_WIDTH / 2;
    F32 yPos = 35;
@@ -284,7 +286,6 @@ void EditorUserInterface::populateDock()
 // Destructor -- unwind things in an orderly fashion.  Note that mLevelGenDatabase will clear itself as the referenced object is deleted.
 EditorUserInterface::~EditorUserInterface()
 {
-   mDockItems.clear();
    mClipboard.clear();
 
    delete mNewItem.getPointer();
@@ -546,8 +547,8 @@ void EditorUserInterface::cleanUp()
 
    game->resetRatings();
 
-   clearUndoHistory();     // Clear up a little memory
-   mDockItems.clear();     // Free a little more -- dock will be rebuilt when editor restarts
+   clearUndoHistory();                             // Clear up a little memory
+   mDockItems.removeEverythingFromDatabase();      // Free a little more -- dock will be rebuilt when editor restarts
    
    mLoadTarget = getLevel();
    mLoadTarget->removeEverythingFromDatabase();    // Deletes all objects
@@ -1179,13 +1180,7 @@ void EditorUserInterface::teamsHaveChanged()
 
    validateTeams();
 
-   // TODO: I hope we can get rid of this in future... perhaps replace with mDockItems being stored in a database, and pass the database?
-   Vector<DatabaseObject *> hackyjunk;
-   hackyjunk.resize(mDockItems.size());
-   for(S32 i = 0; i < mDockItems.size(); i++)
-      hackyjunk[i] = mDockItems[i].get();
-
-   validateTeams(&hackyjunk);
+   validateTeams(mDockItems.findObjects_fast());
 
    validateLevel();          // Revalidate level -- if teams have changed, requirements for spawns have too
    markLevelPermanentlyDirty();
@@ -2251,11 +2246,12 @@ static void renderDockItem(const BfObject *object, const Color &color, F32 curre
 
 void EditorUserInterface::renderDockItems() const
 {
-   for(S32 i = 0; i < mDockItems.size(); i++)
-      renderDockItem(mDockItems[i].get(), mLevel->getTeamColor(mCurrentTeam), mCurrentScale, mSnapVertexIndex);
-
-   for(S32 i = 0; i < mDockItems.size(); i++)
-      mDockItems[i]->setLitUp(false);
+   for(S32 i = 0; i < mDockItems.getObjectCount(); i++)
+   {
+      BfObject *bfObject = (BfObject *)mDockItems.getObjectByIndex(i);
+      renderDockItem(bfObject, mLevel->getTeamColor(mCurrentTeam), mCurrentScale, mSnapVertexIndex);
+      bfObject->setLitUp(false);    // TODO -- This should not be in render method
+   }
 }
 
 
@@ -2653,18 +2649,20 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
    }
 
    // Update all dock items to reflect new current team
-   for(S32 i = 0; i < mDockItems.size(); i++)
+   for(S32 i = 0; i < mDockItems.getObjectCount(); i++)
    {
-      if(!mDockItems[i]->hasTeam())
+      BfObject *bfObject = (BfObject *)mDockItems.getObjectByIndex(i);
+
+      if(!bfObject->hasTeam())
          continue;
 
-      if(currentTeam == TEAM_NEUTRAL && !mDockItems[i]->canBeNeutral())
+      if(currentTeam == TEAM_NEUTRAL && !bfObject->canBeNeutral())
          continue;
 
-      if(currentTeam == TEAM_HOSTILE && !mDockItems[i]->canBeHostile())
+      if(currentTeam == TEAM_HOSTILE && !bfObject->canBeHostile())
          continue;
 
-      mDockItems[i]->setTeam(currentTeam);
+      bfObject->setTeam(currentTeam);
    }
 
 
@@ -2949,31 +2947,37 @@ void EditorUserInterface::findHitItemOnDock()
 {
    mDockItemHit = NULL;
 
-   for(S32 i = mDockItems.size() - 1; i >= 0; i--)     // Go in reverse order because the code we copied did ;-)
+   for(S32 i = 0; i < mDockItems.getObjectCount(); i++)
    {
-      Point pos = mDockItems[i]->getPos();
+      BfObject *bfObject = (BfObject *)mDockItems.getObjectByIndex(i);
+
+      Point pos = bfObject->getPos();
 
       if(fabs(mMousePos.x - pos.x) < POINT_HIT_RADIUS && fabs(mMousePos.y - pos.y) < POINT_HIT_RADIUS)
       {
-         mDockItemHit = mDockItems[i].get();
+         mDockItemHit = bfObject;
          return;
       }
    }
 
    // Now check for polygon interior hits
-   for(S32 i = 0; i < mDockItems.size(); i++)
-      if(mDockItems[i]->getGeomType() == geomPolygon)
+   for(S32 i = 0; i < mDockItems.getObjectCount(); i++)
+   {
+      BfObject *bfObject = (BfObject *)mDockItems.getObjectByIndex(i);
+
+      if(bfObject->getGeomType() == geomPolygon)
       {
          Vector<Point> verts;
-         for(S32 j = 0; j < mDockItems[i]->getVertCount(); j++)
-            verts.push_back(mDockItems[i]->getVert(j));
+         for(S32 j = 0; j < bfObject->getVertCount(); j++)
+            verts.push_back(bfObject->getVert(j));
 
          if(polygonContainsPoint(verts.address(),verts.size(), mMousePos))
          {
-            mDockItemHit = mDockItems[i].get();
+            mDockItemHit = bfObject;
             return;
          }
       }
+   }
 
    return;
 }
@@ -3756,18 +3760,21 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
    BfObject *newObject = NULL;
 
    // Find a dockItem to copy
-   for(S32 i = 0; i < mDockItems.size(); i++)
-      if(mDockItems[i]->getObjectTypeNumber() == itemTypeNumber)
+   for(S32 i = 0; i < mDockItems.getObjectCount(); i++)
+   {
+      BfObject *bfObject = (BfObject *)mDockItems.getObjectByIndex(i);
+
+      if(bfObject->getObjectTypeNumber() == itemTypeNumber)
       {
-         newObject = copyDockItem(mDockItems[i].get());
+         newObject = copyDockItem(bfObject);
          break;
       }
+   }
 
    // May occur if requested item is not currently on the dock
    TNLAssert(newObject, "Couldn't create object in insertNewItem()");
    if(!newObject)
       return;
-
 
    newObject->moveTo(snapPoint(database, convertCanvasToLevelCoord(mMousePos)));
    addToEditor(newObject);    
@@ -5147,7 +5154,7 @@ void EditorUserInterface::testLevelStart()
 
       //getGame()->setGameType(NULL); // Prevents losing seconds on game timer (test level from editor, save, and reload level)
 
-      initHosting(getGame()->getSettingsPtr(), levelSource, true, false);
+      initHosting(levelSource, true, false);
    }
 }
 

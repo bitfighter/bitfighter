@@ -640,6 +640,7 @@ void BfObject::prepareForDock(ClientGame *game, const Point &point, S32 teamInde
 
    unselectVerts();
    setTeam(teamIndex);
+   setExtent(calcExtents());    // Make sure the object's extents are properly set
 }
 
 #endif

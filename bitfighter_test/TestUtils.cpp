@@ -26,8 +26,8 @@ namespace Zap
 // Create a new ClientGame with one dummy team -- be sure to delete this somewhere!
 ClientGame *newClientGame()
 {
-   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
-   return newClientGame(settings);
+   //gSettings = GameSettings();      // Reset settings to factory state
+   return newClientGame();
 }
 
 
@@ -50,13 +50,13 @@ ClientGame *newClientGame(const GameSettingsPtr &settings)
 ServerGame *newServerGame()
 {
    Address addr;
-   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
+
    LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(""));
 
    Level *level = new Level();
    level->loadLevelFromString("");
 
-   ServerGame *game = new ServerGame(addr, settings, levelSource, false, false);
+   ServerGame *game = new ServerGame(addr, levelSource, false, false);
    game->setLevel(level);
    game->addTeam(new Team());    // Team will be cleaned up when game is deleted
 
@@ -79,9 +79,7 @@ GamePair::GamePair(GameSettingsPtr settings, const string &levelCode)
 // Create a pair of games suitable for testing client/server interaction.  Provide some levelcode to get things started.
 GamePair::GamePair(const string &levelCode, S32 clientCount)
 {
-   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
-
-   initialize(settings, levelCode, clientCount);
+   initialize(levelCode, clientCount);
 }
 
 
@@ -143,10 +141,8 @@ void GamePair::idle(U32 timeDelta, U32 cycles)
 // Simulates player joining game from new client
 void GamePair::addClient(const string &name, S32 teamIndex)
 {
-   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
-
    ServerGame *server = GameManager::getServerGame();
-   ClientGame *client = newClientGame(settings);
+   ClientGame *client = newClientGame();
    GameManager::addClientGame(client);
 
    client->userEnteredLoginCredentials(name, "password", false);    // Simulates entry from NameEntryUserInterface

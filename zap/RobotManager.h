@@ -33,10 +33,10 @@ private:
    ServerGame *mGame;
 
 public:
-   RobotManager(ServerGame *game, GameSettingsPtr settings);     // Contsructor
-   virtual ~RobotManager();                                      // Destructor
+   RobotManager(ServerGame *game);  // Contsructor
+   virtual ~RobotManager();         // Destructor
 
-   void onLevelChanged();        // Called when level changes or is reset
+   void onLevelChanged();           // Called when level changes or is reset
 
    void balanceTeams();
 

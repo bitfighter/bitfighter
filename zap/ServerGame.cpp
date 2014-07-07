@@ -37,9 +37,9 @@ static bool instantiated;           // Just a little something to keep us from c
 
 
 // Constructor -- be sure to see Game constructor too!  Lots going on there!
-ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated) : 
-      Game(address, settings),
-      mRobotManager(this, settings)
+ServerGame::ServerGame(const Address &address, LevelSourcePtr levelSource, bool testMode, bool dedicated) : 
+      Game(address),
+      mRobotManager(this)
 {
    TNLAssert(!instantiated, "Only one ServerGame at a time, please!  If this trips while testing, "
       "it is probably because a test failed before another instance could be deleted.  Try disabling "
@@ -59,7 +59,7 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
    // Stupid C++ spec doesn't allow ternary logic with static const if there is no definition
    // Workaround is to add '+' to force a read of the value
    // See:  http://stackoverflow.com/questions/5446005/why-dont-static-member-variables-play-well-with-the-ternary-operator
-   mNextLevel = mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::RandomLevels) ? +RANDOM_LEVEL : +NEXT_LEVEL;
+   mNextLevel = gSettings.getIniSettings()->mSettings.getVal<YesNo>(IniKey::RandomLevels) ? +RANDOM_LEVEL : +NEXT_LEVEL;
 
    mShuttingDown = false;
 
@@ -94,7 +94,7 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
 
    mGameSuspended = true;                 // Server starts with zero players
 
-   U32 stutter = mSettings->getSimulatedStutter();
+   U32 stutter = gSettings.getSimulatedStutter();
 
    mStutterTimer.reset(1001 - stutter);   // Use 1001 to ensure timer is never set to 0
    mStutterSleepTimer.reset(stutter);
@@ -149,14 +149,14 @@ bool ServerGame::voteStart(ClientInfo *clientInfo, VoteType type, S32 number)
 {
    GameConnection *conn = clientInfo->getConnection();
 
-   if(!mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::VotingEnabled))
+   if(!gSettings.getIniSettings()->mSettings.getVal<YesNo>(IniKey::VotingEnabled))
       return false;
 
    U32 voteTimer;
    if(type == VoteChangeTeam)
-      voteTimer = mSettings->getIniSettings()->mSettings.getVal<U32>(IniKey::VoteLengthToChangeTeam) * 1000;
+      voteTimer = gSettings.getIniSettings()->mSettings.getVal<U32>(IniKey::VoteLengthToChangeTeam) * 1000;
    else
-      voteTimer = mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::VoteLength) * 1000;
+      voteTimer = gSettings.getIniSettings()->mSettings.getVal<YesNo>(IniKey::VoteLength) * 1000;
 
    if(voteTimer == 0)
       return false;
@@ -1295,7 +1295,7 @@ void ServerGame::kickSingleBotFromLargestTeamWithBots()
 
 U32 ServerGame::getMaxPlayers() const
 {
-   return mSettings->getMaxPlayers();
+   return gSettings.getMaxPlayers();
 }
 
 
@@ -1313,7 +1313,7 @@ void ServerGame::setDedicated(bool dedicated)
 
 bool ServerGame::isFull()
 {
-   return (U32) getPlayerCount() >= mSettings->getMaxPlayers();
+   return (U32) getPlayerCount() >= gSettings.getMaxPlayers();
 }
 
 
@@ -1361,7 +1361,7 @@ void ServerGame::idle(U32 timeDelta)
    mNetInterface->checkIncomingPackets();
    checkConnectionToMaster(timeDelta);                   // Connect to master server if not connected
 
-   mSettings->getBanList()->updateKickList(timeDelta);   // Unban players who's bans have expired
+   gSettings.getBanList()->updateKickList(timeDelta);   // Unban players who's bans have expired
 
    // Periodically update our status on the master, so they know what we're doing...
    if(mMasterUpdateTimer.update(timeDelta))
@@ -1378,7 +1378,7 @@ void ServerGame::idle(U32 timeDelta)
    if(isDedicated())   
    {
       // Save volume here to avoid repeated lookup; it can't change without a restart, so this will work
-      static const F32 volume = mSettings->getIniSettings()->mSettings.getVal<F32>(IniKey::AlertsVolume);
+      static const F32 volume = gSettings.getIniSettings()->mSettings.getVal<F32>(IniKey::AlertsVolume);
       SoundSystem::processAudio(volume);    
    }
 
@@ -1504,7 +1504,7 @@ void ServerGame::setLevel(Level *level)
 void ServerGame::processSimulatedStutter(U32 timeDelta)
 {
    // Simulate CPU stutter without impacting ClientGames
-   if(mSettings->getSimulatedStutter() > 0)
+   if(gSettings.getSimulatedStutter() > 0)
    {
       if(mStutterTimer.getCurrent() > 0)      
       {
@@ -1737,7 +1737,7 @@ void ServerGame::updateStatusOnMaster()
                                         getCurrentLevelTypeName(), 
                                         getRobotCount(), 
                                         getPlayerCount(), 
-                                        mSettings->getMaxPlayers(), 
+                                        gSettings.getMaxPlayers(), 
                                         mInfoFlags);
 
          mMasterUpdateTimer.reset(UpdateServerStatusTime);
@@ -1753,16 +1753,16 @@ void ServerGame::updateStatusOnMaster()
 }
 
 
-static bool missingLevelDir(const LevelSource *levelSource, const GameSettings *settings)
+static bool missingLevelDir(const LevelSource *levelSource)
 {
-   return !levelSource->isEmptyLevelDirOk() && settings->getFolderManager()->getLevelDir().empty();
+   return !levelSource->isEmptyLevelDirOk() && gSettings.getFolderManager()->getLevelDir().empty();
 }
 
 
 // Returns true if things went well, false if we couldn't find any levels to host
 bool ServerGame::startHosting()
 {
-   if(missingLevelDir(mLevelSource.get(), mSettings.get()))   // No leveldir, no hosting!
+   if(missingLevelDir(mLevelSource.get()))   // No leveldir, no hosting!
       return false;
 
    S32 levelCount = mLevelSource->getLevelCount();

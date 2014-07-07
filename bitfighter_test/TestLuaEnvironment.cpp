@@ -38,7 +38,6 @@ protected:
    virtual void SetUp() 
    {
       serverGame = pair.server;
-      settings = serverGame->getSettingsPtr();
 
       ASSERT_TRUE(serverGame->getGameObjDatabase()->findObjects_fast()->size() == 0) << "Database should be empty on a new level!";
 

@@ -27,7 +27,7 @@ class ServerGame;
 typedef boost::shared_ptr<GameSettings> GameSettingsPtr;
 
 
-extern void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicatedServer);
+extern void initHosting(LevelSourcePtr levelSource, bool testMode, bool dedicatedServer);
 extern void abortHosting_noLevels(ServerGame *serverGame);
 extern bool writeToConsole();
 extern string getInstalledDataDir();

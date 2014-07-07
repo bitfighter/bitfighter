@@ -18,6 +18,7 @@
 #include "Point.h"
 #include "Color.h"
 #include "EditorAttributeMenuItemBuilder.h"
+#include "Level.h"
 
 #include "tnlNetStringTable.h"
 
@@ -126,10 +127,9 @@ private:
    Vector<Point> mMoveOrigins;
 
    boost::shared_ptr<Level> mLevel;
+   Level mDockItems;                               // Use a level to manage items on the dock to make interactions more consistent
 
    void setLevel(boost::shared_ptr<Level> level);
-
-   Vector<boost::shared_ptr<BfObject> > mDockItems;    // Items sitting in the dock
 
    Vector<Vector<string> > mMessageBoxQueue;
 

@@ -172,7 +172,7 @@ GameSettings::GameSettings()
 }
 
 
-// Destructor
+// Destructor -- this will only get run when Bitfighter is shutting down
 GameSettings::~GameSettings()
 {
    delete mBanList;

@@ -546,7 +546,7 @@ void createClientGame(GameSettingsPtr settings)
 
       // Create a new client, and let the system figure out IP address and assign a port
       // ClientGame destructor will clean up UIManager
-      ClientGame *clientGame = new ClientGame(Address(IPProtocol, Address::Any, portNumber), settings, new UIManager());    
+      ClientGame *clientGame = new ClientGame(Address(IPProtocol, Address::Any, portNumber), new UIManager());    
 
        // Put any saved filename into the editor file entry thingy
       clientGame->getUIManager()->getUI<LevelNameEntryUserInterface>()->setString(lastEditorName);
@@ -1203,7 +1203,7 @@ int main(int argc, char **argv)
       LevelSourcePtr levelSource = LevelSourcePtr(settings->chooseLevelSource(serverGame));
 
       // Figure out what levels we'll be playing with, and start hosting  
-      initHosting(settings, levelSource, false, true);     
+      initHosting(levelSource, false, true);     
    }
    else
    {

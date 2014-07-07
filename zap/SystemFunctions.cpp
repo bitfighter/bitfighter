@@ -38,25 +38,25 @@ namespace Zap
 
 
 // Host a game (and maybe even play a bit, too!)
-void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicatedServer)
+void initHosting(LevelSourcePtr levelSource, bool testMode, bool dedicatedServer)
 {
    TNLAssert(!GameManager::getServerGame(), "Already have a ServerGame!");
 
    Address address(IPProtocol, Address::Any, GameSettings::DEFAULT_GAME_PORT);   // Equivalent to ("IP:Any:28000")
-   address.set(settings->getHostAddress());                          // May overwrite parts of address, depending on what getHostAddress contains
+   address.set(gSettings.getHostAddress());     // May overwrite parts of address, depending on what getHostAddress returns
 
-   GameManager::setServerGame(new ServerGame(address, settings, levelSource, testMode, dedicatedServer));
+   GameManager::setServerGame(new ServerGame(address, levelSource, testMode, dedicatedServer));
 
    GameManager::getServerGame()->setReadyToConnectToMaster(true);
-   Game::seedRandomNumberGenerator(settings->getHostName());
+   Game::seedRandomNumberGenerator(gSettings.getHostName());
 
    // Don't need to build our level list when in test mode because we're only running that one level stored in editor.tmp
    if(!testMode)
    {
       logprintf(LogConsumer::ServerFilter, "----------\n"
                                            "Bitfighter server started [%s]", getTimeStamp().c_str());
-      logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", settings->getHostName().c_str(), 
-                                                                            settings->getHostDescr().c_str());
+      logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", gSettings.getHostName().c_str(), 
+                                                                            gSettings.getHostDescr().c_str());
 
       logprintf(LogConsumer::ServerFilter, "Loaded %d levels:", levelSource->getLevelCount());
    }

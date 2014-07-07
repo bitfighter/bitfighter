@@ -219,8 +219,6 @@ protected:
 
    bool mGameSuspended;       // True if we're in "suspended animation" mode
 
-   GameSettingsPtr mSettings;
-
    S32 findClientIndex(const StringTableEntry &name);
 
    // On the Client, this list will track info about every player in the game.  Note that the local client will also be represented here,
@@ -239,8 +237,8 @@ public:
    static const S32 PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL = 800;    // How far player can see with sensor equipped horizontally...
    static const S32 PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL = 600;      // ...and vertically
 
-   Game(const Address &theBindAddress, GameSettingsPtr settings); // Constructor
-   virtual ~Game();                                               // Destructor
+   Game(const Address &theBindAddress); // Constructor
+   virtual ~Game();                     // Destructor
 
    S32 getClientCount() const;                                    // Total number of players, human and robot
    S32 getPlayerCount() const;                                    // Returns number of human players
@@ -401,7 +399,6 @@ public:
    void processDeleteList(U32 timeDelta);
 
    GameSettings   *getSettings() const;
-   GameSettingsPtr getSettingsPtr() const;
 
 
    void setReadyToConnectToMaster(bool ready);

@@ -32,6 +32,7 @@ Level::Level()
    mLegacyGridSize = 1; 
    mDatabaseId = 0; 
    mAddedToGame = false;
+   mTeamInfos.reset(new Vector<TeamInfo>);      // mTeamInfos is a shared_ptr, which will handle cleanup
 }
 
 
@@ -62,10 +63,10 @@ void Level::onAddedToServerGame(Game *game)
 
    mGameType->addToGame(game);
 
-   for(S32 i = 0; i < mTeamInfos.size(); i++)
+   for(S32 i = 0; i < mTeamInfos->size(); i++)
    {
       AbstractTeam *team = game->getNewTeam();  // Will be deleted by TeamManager
-      team->set(mTeamInfos[i]);
+      team->set(mTeamInfos->get(i));
       mTeamManager.addTeam(team);
    }
 
@@ -137,10 +138,10 @@ void Level::validateLevel()
    if(!mGameType)
       mGameType.set(new GameType());    // Cleaned up... where, exactly?
 
-   if(mTeamInfos.size() == 0)
+   if(mTeamInfos->size() == 0)
    {
       TeamInfo teamInfo;
-      mTeamInfos.push_back(teamInfo);
+      mTeamInfos->push_back(teamInfo);
    }
 }
 
@@ -255,7 +256,7 @@ S32 Level::getTeamCount() const
    if(mAddedToGame)
       return mTeamManager.getTeamCount();
    
-   return mTeamInfos.size();
+   return mTeamInfos->size();
 }
 
 
@@ -285,7 +286,7 @@ const Color &Level::getTeamColor(S32 index) const
    if(mAddedToGame)
       return mTeamManager.getTeamColor(index);
    else
-      return mTeamInfos[index].getColor();
+      return mTeamInfos->get(index).getColor();
 }
 
 
@@ -294,7 +295,7 @@ StringTableEntry Level::getTeamName(S32 index) const
    if(mAddedToGame)
       return mTeamManager.getTeamName(index);
    else
-      return mTeamInfos[index].getName();
+      return mTeamInfos->get(index).getName();
 }
 
 
@@ -303,7 +304,7 @@ void Level::removeTeam(S32 teamIndex)
    if(mAddedToGame)
       mTeamManager.removeTeam(teamIndex);
    else
-      mTeamInfos.erase(teamIndex);
+      mTeamInfos->erase(teamIndex);
 }
 
 
@@ -316,7 +317,7 @@ void Level::addTeam(AbstractTeam *team)
 
 void Level::addTeam(const TeamInfo &teamInfo)
 { 
-   mTeamInfos.push_back(teamInfo);
+   mTeamInfos->push_back(teamInfo);
 }
 
 
@@ -329,7 +330,7 @@ void Level::addTeam(AbstractTeam *team, S32 index)
 
 void Level::addTeam(const TeamInfo &teamInfo, S32 index)
 { 
-   mTeamInfos.insert(index, teamInfo);
+   mTeamInfos->insert(index, teamInfo);
 }
 
 
@@ -338,6 +339,18 @@ AbstractTeam *Level::getTeam(S32 teamIndex) const
    //TNLAssert(mAddedToGame, "Expected to have been added to a game by now!");
    return mTeamManager.getTeam(teamIndex);        
 }
+
+
+void Level::setTeamInfosPtr(const boost::shared_ptr<Vector<TeamInfo> > &teamInfos)
+{
+   mTeamInfos = teamInfos;
+}
+
+
+boost::shared_ptr<Vector<TeamInfo> > Level::getTeamInfosPtr() const
+{
+   return mTeamInfos;
+   }
 
 
 void Level::setTeamHasFlag(S32 teamIndex, bool hasFlag)
@@ -367,13 +380,13 @@ void Level::clearTeams()
    if(mAddedToGame)
       return mTeamManager.clearTeams();
   else
-      mTeamInfos.clear();
+      mTeamInfos->clear();
 }
 
 
 const TeamInfo &Level::getTeamInfo(S32 index) const
 {
-   return mTeamInfos[index];
+   return mTeamInfos->get(index);
 }
 
 
@@ -382,7 +395,7 @@ string Level::getTeamLevelCode(S32 index) const
    if(mAddedToGame)
       return mTeamManager.getTeam(index)->toLevelCode();
    else
-      return mTeamInfos[index].toLevelCode();
+      return mTeamInfos->get(index).toLevelCode();
 }
 
 
@@ -683,7 +696,7 @@ bool Level::processLevelParam(S32 argc, const char **argv)
 {
    if(stricmp(argv[0], "Team") == 0)
    {
-      if(mTeamInfos.size() >= Game::MAX_TEAMS)     
+      if(mTeamInfos->size() >= Game::MAX_TEAMS)     
          logprintf(LogConsumer::LogLevelError, "Level has too many teams: you can only have %d!", Game::MAX_TEAMS);
       else
       {
