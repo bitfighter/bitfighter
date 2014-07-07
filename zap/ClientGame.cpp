@@ -248,8 +248,6 @@ void ClientGame::setConnectionToServer(GameConnection *connectionToServer)
 
 void ClientGame::startLoadingLevel(bool engineerEnabled)
 {
-   mObjectsLoaded = 0;                       // Reset item counter
-
    mUIManager->startLoadingLevel(engineerEnabled);
 }
 

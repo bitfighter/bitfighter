@@ -1079,7 +1079,7 @@ BfObject *BfObject::findObjectLOS(TestFunc objectTypeTest, U32 stateIndex, const
 
 void BfObject::onAddedToGame(Game *game)
 {
-   game->mObjectsLoaded++;
+   // Do nothing
 }
 
 

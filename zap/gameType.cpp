@@ -2569,7 +2569,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
 
    s2cSetLevelInfo(mLevelName, mLevelDescription.c_str(), "music name here", mWinningScore, mLevelCredits, 
-                   mGame->mObjectsLoaded, mLevelHasLoadoutZone, mEngineerEnabled, 
+                   getObjectsLoaded(), mLevelHasLoadoutZone, mEngineerEnabled, 
                    mEngineerUnrestrictedEnabled, mGame->getLevelDatabaseId());
 
    for(S32 i = 0; i < mLevel->getTeamCount(); i++)
@@ -3960,6 +3960,12 @@ bool GameType::isSpawnWithLoadoutGame()
 bool GameType::levelHasLoadoutZone()
 {
    return mLevelHasLoadoutZone;
+}
+
+
+S32 GameType::getObjectsLoaded() const
+{
+   return mLevel->getObjectCount();
 }
 
 

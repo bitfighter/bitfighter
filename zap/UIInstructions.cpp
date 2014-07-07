@@ -909,7 +909,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                Vector<Point> speedZoneRenderPoints, outlinePoints;
                SpeedZone::generatePoints(Point(-SpeedZone::height / 2, 0), Point(1, 0), speedZoneRenderPoints, outlinePoints);
 
-               renderSpeedZone(speedZoneRenderPoints, Platform::getRealMilliseconds());
+               renderSpeedZone(speedZoneRenderPoints);
             }
             break;
 

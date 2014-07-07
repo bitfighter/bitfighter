@@ -916,7 +916,7 @@ static void editorSelectedCallback(ClientGame *game, U32 unused)
    // can do that here (ugly as it may be) so that it will be ready by the time we get to the activate call below.
    // This really feels like the wrong place for this to happen, but it has to happen before the activate, or we get a crash.
    //game->setLevel(new Level());
-   game->setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);      // <=== Should not be here... perhaps in editor onActivate?
+   //game->setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);      // <=== Should not be here... perhaps in editor onActivate?
    game->getUIManager()->getUI<EditorUserInterface>()->setLevelFileName("");      // Reset this so we get the level entry screen
    game->getUIManager()->activate<EditorUserInterface>();
 }

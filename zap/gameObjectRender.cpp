@@ -2278,7 +2278,7 @@ void renderWallEdges(const Vector<Point> &edges, const Point &offset, const Colo
 }
 
 
-void renderSpeedZone(const Vector<Point> &points, U32 time)
+void renderSpeedZone(const Vector<Point> &points)
 {
    glColor(Colors::red);
 

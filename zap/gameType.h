@@ -211,6 +211,7 @@ public:
    };
 
    S32 mObjectsExpected;            // Count of objects we expect to get with this level (for display purposes only)
+   S32 getObjectsLoaded() const;
 
    void broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, const StringTableEntry &formatString);
 

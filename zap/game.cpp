@@ -89,8 +89,6 @@ Game::Game(const Address &theBindAddress)
 
    mNameToAddressThread = NULL;
 
-   mObjectsLoaded = 0;
-
    mSecondaryThread = new Master::DatabaseAccessThread();
 }
 

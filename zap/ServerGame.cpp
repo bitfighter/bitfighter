@@ -984,10 +984,8 @@ inline string getPathFromFilename(const string &filename)
 
 bool ServerGame::loadLevel()
 {
-   mObjectsLoaded = 0;
-   setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);
-
    mLevel = boost::shared_ptr<Level>(mLevelSource->getLevel(mCurrentLevelIndex));
+
    TNLAssert(!mLevel->getAddedToGame(), "Can't reuse Levels!");
 
    // NULL level means file was not loaded.  Danger Will Robinson!

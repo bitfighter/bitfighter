@@ -228,7 +228,7 @@ void renderWallEdges(const Vector<Point> &edges, const Color &outlineColor, F32 
 void renderWallEdges(const Vector<Point> &edges, const Point &offset, const Color &outlineColor, F32 alpha = 1.0);
 
 //extern void renderSpeedZone(Point pos, Point normal, U32 time);
-void renderSpeedZone(const Vector<Point> &pts, U32 time);
+void renderSpeedZone(const Vector<Point> &pts);
 
 void renderTestItem(const Point &pos, S32 size, F32 alpha = 1);
 //void renderTestItem(const Point &pos, S32 size, F32 alpha = 1);
