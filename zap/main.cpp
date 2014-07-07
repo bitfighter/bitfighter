@@ -422,6 +422,9 @@ StdoutLogConsumer gStdoutLog;          // Logs to OS console, when there is one
 FileLogConsumer gMainLog;
 FileLogConsumer gServerLog;            // We'll apply a filter later on, in main()
 
+
+extern GameSettings gSettings;
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -439,8 +442,6 @@ FileLogConsumer gServerLog;            // We'll apply a filter later on, in main
 // 8) Video system fails to initialize
 void shutdownBitfighter()
 {
-   GameSettings *settings = NULL;
-
    // Avoid this function being called twice when we exit via methods 1-4 above
 #ifndef ZAP_DEDICATED
    if(GameManager::getClientGames()->size() == 0)
@@ -448,38 +449,27 @@ void shutdownBitfighter()
       if(GameManager::getServerGame())
          exitToOs();
 
-// Grab a pointer to settings wherever we can.  Note that all Games (client or server) currently refer to the same settings object.
 #ifndef ZAP_DEDICATED
-   if(GameManager::getClientGames()->size() > 0)
-      settings = GameManager::getClientGames()->get(0)->getSettings();
-
    GameManager::deleteClientGames();
-
 #endif
 
    if(GameManager::getServerGame())
-   {
-      settings = GameManager::getServerGame()->getSettings();
       GameManager::deleteServerGame();
-   }
-
-
-   TNLAssert(settings, "Should always have a value here!");
 
    EventManager::shutdown();
    LuaScriptRunner::shutdown();
    SoundSystem::shutdown();
 
-   if(!settings->isDedicatedServer())
+   if(!gSettings.isDedicatedServer())
    {
 #ifndef ZAP_DEDICATED
       Joystick::shutdownJoystick();
 
       // Save current window position if in windowed mode
-      if(settings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode) == DISPLAY_MODE_WINDOWED)
+      if(gSettings.getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode) == DISPLAY_MODE_WINDOWED)
       {
-         settings->getIniSettings()->winXPos = VideoSystem::getWindowPositionX();
-         settings->getIniSettings()->winYPos = VideoSystem::getWindowPositionY();
+         gSettings.getIniSettings()->winXPos = VideoSystem::getWindowPositionX();
+         gSettings.getIniSettings()->winYPos = VideoSystem::getWindowPositionY();
       }
 
       SDL_QuitSubSystem(SDL_INIT_VIDEO);
@@ -493,9 +483,7 @@ void shutdownBitfighter()
    gOglConsoleLog.setMsgTypes(LogConsumer::LogNone);
 #endif
 
-   settings->save();                                  // Write settings to bitfighter.ini
-
-   delete settings;
+   gSettings.save();                                  // Write settings to bitfighter.ini
 
    DisplayManager::cleanup();
 
