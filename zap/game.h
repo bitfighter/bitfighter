@@ -378,7 +378,6 @@ public:
    void addTeam(AbstractTeam *team, S32 index);
    void replaceTeam(AbstractTeam *team, S32 index);
    void removeTeam(S32 teamIndex);
-   void clearTeams();
 
    // Find winners!
    TeamGameResults       getTeamBasedGameWinner()  const;   // Find winner of a team-based game

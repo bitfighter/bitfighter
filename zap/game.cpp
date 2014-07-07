@@ -450,8 +450,6 @@ void Game::removeTeam(S32 teamIndex)                  { mLevel->removeTeam(teamI
 void Game::addTeam(AbstractTeam *team)                { mLevel->addTeam(team);            }
 void Game::addTeam(AbstractTeam *team, S32 index)     { mLevel->addTeam(team, index);     }
 void Game::replaceTeam(AbstractTeam *team, S32 index) { mLevel->replaceTeam(team, index); }
-void Game::clearTeams()                               { mLevel->clearTeams();             }
-
 
 
 void Game::addPolyWall(BfObject *polyWall, GridDatabase *database)

@@ -555,7 +555,7 @@ void EditorUserInterface::cleanUp()
 
    mRobotLines.clear();    // Clear our special Robot lines
 
-   game->clearTeams();
+   mLevel->clearTeams();
    
    clearSnapEnvironment();
    
@@ -1378,7 +1378,7 @@ EditorTeam *EditorUserInterface::getTeam(S32 teamId)
 
 void EditorUserInterface::clearTeams()
 {
-   getGame()->clearTeams();
+   mLevel->clearTeams();
 }
 
 
