@@ -1849,11 +1849,11 @@ Move *GameUserInterface::getCurrentMove()
       {
          GameSettings *settings = getGame()->getSettings();
 
-         mCurrentMove.x = F32((InputCodeManager::getState(getInputCode(settings, BINDING_RIGHT)) ? 1 : 0) -
-                              (InputCodeManager::getState(getInputCode(settings, BINDING_LEFT))  ? 1 : 0));
+         mCurrentMove.x = F32((InputCodeManager::getState(getInputCode(BINDING_RIGHT)) ? 1 : 0) -
+                              (InputCodeManager::getState(getInputCode(BINDING_LEFT))  ? 1 : 0));
 
-         mCurrentMove.y = F32((InputCodeManager::getState(getInputCode(settings, BINDING_DOWN))  ? 1 : 0) -
-                              (InputCodeManager::getState(getInputCode(settings, BINDING_UP))    ? 1 : 0));
+         mCurrentMove.y = F32((InputCodeManager::getState(getInputCode(BINDING_DOWN))  ? 1 : 0) -
+                              (InputCodeManager::getState(getInputCode(BINDING_UP))    ? 1 : 0));
       }
 
       // If player is moving, do not show move instructions

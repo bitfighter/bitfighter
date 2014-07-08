@@ -947,7 +947,7 @@ MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
    mNeedToUpgrade = false;           // Assume we're up-to-date until we hear from the master
    mShowedUpgradeAlert = false;      // So we don't show the upgrade message more than once
 
-   InputCode keyHelp = getInputCode(game->getSettings(), BINDING_HELP);
+   InputCode keyHelp = getInputCode(BINDING_HELP);
 
    addMenuItem(new MenuItem("JOIN LAN/INTERNET GAME", joinSelectedCallback,       "", KEY_J));
    addMenuItem(new MenuItem("HOST GAME",              hostSelectedCallback,       "", KEY_H));
@@ -2104,7 +2104,7 @@ void GameMenuUserInterface::buildMenu()
    lastInputMode = settings->getInputMode();  
 
    addMenuItem(new MenuItem("OPTIONS",      optionsSelectedCallback, "", KEY_O));
-   addMenuItem(new MenuItem("INSTRUCTIONS", helpSelectedCallback,    "", KEY_I, getInputCode(settings, BINDING_HELP)));
+   addMenuItem(new MenuItem("INSTRUCTIONS", helpSelectedCallback,    "", KEY_I, getInputCode(BINDING_HELP)));
 
 
    GameConnection *gc = (getGame())->getConnectionToServer();

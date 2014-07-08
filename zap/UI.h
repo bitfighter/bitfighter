@@ -103,13 +103,13 @@ public:
    virtual void renderMasterStatus();     // Render master server connection status
 
    // Helpers to simplify dealing with key bindings
-   static InputCode getInputCode(GameSettings *settings, BindingNameEnum binding);
-   string getEditorBindingString(GameSettings *settings, EditorBindingNameEnum binding);
-   string getSpecialBindingString(GameSettings *settings, SpecialBindingNameEnum binding);
+   static InputCode getInputCode(BindingNameEnum binding);
+   string getEditorBindingString (const GameSettings &settings, EditorBindingNameEnum  binding);
+   string getSpecialBindingString(const GameSettings &settings, SpecialBindingNameEnum binding);
 
    void setInputCode(GameSettings *settings, BindingNameEnum binding, InputCode inputCode);
    bool checkInputCode(BindingNameEnum, InputCode inputCode);
-   const char *getInputCodeString(GameSettings *settings, BindingNameEnum binding) const;
+   const char *getInputCodeString(BindingNameEnum binding) const;
 
    // Input event handlers
    virtual bool onKeyDown(InputCode inputCode);

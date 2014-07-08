@@ -138,7 +138,7 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
    if(Parent::processInputCode(inputCode))    // Check for cancel keys
       return true;
 
-   InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
+   InputCodeManager *inputCodeManager = gSettings.getInputCodeManager();
 
    if(isMenuBeingDisplayed())    // Menu is being displayed, so interpret keystrokes as menu items
    {

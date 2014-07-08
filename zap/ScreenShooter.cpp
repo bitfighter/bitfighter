@@ -67,15 +67,15 @@ void ScreenShooter::resizeViewportToCanvas(UIManager *uiManager)
 
 
 // Stolen from VideoSystem::actualizeScreenMode()
-void ScreenShooter::restoreViewportToWindow(GameSettings *settings)
+void ScreenShooter::restoreViewportToWindow()
 {
-   DisplayMode displayMode = settings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
+   DisplayMode displayMode = gSettings.getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
 
    // Set up video/window flags amd parameters and get ready to change the window
    S32 sdlWindowWidth, sdlWindowHeight;
    F64 orthoLeft, orthoRight, orthoTop, orthoBottom;
 
-   VideoSystem::getWindowParameters(settings, displayMode, sdlWindowWidth, sdlWindowHeight, orthoLeft, orthoRight, orthoTop, orthoBottom);
+   VideoSystem::getWindowParameters(&gSettings, displayMode, sdlWindowWidth, sdlWindowHeight, orthoLeft, orthoRight, orthoTop, orthoBottom);
 
    glViewport(0, 0, sdlWindowWidth, sdlWindowHeight);
 
@@ -103,9 +103,9 @@ void ScreenShooter::restoreViewportToWindow(GameSettings *settings)
 
 // Thanks to the good developers of naev for excellent code to base this off of.
 // Much was copied directly.
-void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings, string filename)
+void ScreenShooter::saveScreenshot(UIManager *uiManager, const GameSettings &settings, string filename)
 {
-   string folder = settings->getFolderManager()->getScreenshotDir();
+   string folder = settings.getFolderManager()->getScreenshotDir();
 
    // Let's find a filename to use
    makeSureFolderExists(folder);
@@ -124,9 +124,7 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings,
       }
    }
    else
-   {
       fullFilename = joindir(folder, filename + ".png");
-   }
 
    // We default to resizing the opengl viewport to the standard canvas size, unless we're
    // in the editor or our window is smaller than the canvas size
@@ -144,13 +142,13 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings,
    // If we're resizing, use the default canvas size
    if(doResize)
    {
-      width = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+      width  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
       height = DisplayManager::getScreenInfo()->getGameCanvasHeight();
    }
    // Otherwise just take the window size
    else
    {
-      width = DisplayManager::getScreenInfo()->getWindowWidth();
+      width  = DisplayManager::getScreenInfo()->getWindowWidth();
       height = DisplayManager::getScreenInfo()->getWindowHeight();
    }
 
@@ -172,7 +170,7 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings,
 
    // Change opengl viewport back to what it was
    if(doResize)
-      restoreViewportToWindow(settings);
+      restoreViewportToWindow();
 
    // Convert Data
    for (S32 i = 0; i < height; i++)

@@ -155,7 +155,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 
    mSaveMsgTimer.setPeriod(FIVE_SECONDS);    
 
-   mGridSize = game->getSettings()->getIniSettings()->mSettings.getVal<U32>(IniKey::EditorGridSize);
+   mGridSize = gSettings.getIniSettings()->mSettings.getVal<U32>(IniKey::EditorGridSize);
 
    mQuitLocked = false;
    mVertexEditMode = true;
@@ -530,22 +530,11 @@ void EditorUserInterface::setLevelFileName(string name)
 }
 
 
-void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
-{
-   if(getTeamCount() == 0)
-   {
-      EditorTeam *team = new EditorTeam(gTeamPresets[0]);
-
-      getGame()->addTeam(team);
-   }
-}
-
-
 void EditorUserInterface::cleanUp()
 {
    ClientGame *game = getGame();
 
-   game->resetRatings();
+   game->resetRatings();      // Move to mLevel?
 
    clearUndoHistory();                             // Clear up a little memory
    mDockItems.removeEverythingFromDatabase();      // Free a little more -- dock will be rebuilt when editor restarts
@@ -571,13 +560,13 @@ void EditorUserInterface::loadLevel()
    string filename = getLevelFileName();
    TNLAssert(filename != "", "Need file name here!");
 
-   ClientGame *game = getGame();
+   //ClientGame *game = getGame();
 
    // Only clean up if we've got a level to clean up!
    if(mLevel)
       cleanUp();
 
-   FolderManager *folderManager = game->getSettings()->getFolderManager();
+   FolderManager *folderManager = gSettings.getFolderManager();
    string fileName = joindir(folderManager->getLevelDir(), filename).c_str();
 
 
@@ -616,7 +605,7 @@ void EditorUserInterface::loadLevel()
    else     
    {
       // New level!
-      game->getGameType()->setLevelCredits(getGame()->getClientInfo()->getName());  // Set default author
+      mLevel->getGameType()->setLevelCredits(getGame()->getClientInfo()->getName());  // Set default author
    }
 
    //// If we have a level in the database, let's ping the database to make sure it's really still there
@@ -696,7 +685,7 @@ void EditorUserInterface::runLevelGenScript()
 
    clearLevelGenItems();      // Clear out any items from the last run
 
-   FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
+   FolderManager *folderManager = gSettings.getFolderManager();
    runScript(&mLevelGenDatabase, folderManager, scriptName, *scriptArgs);
 }
 
@@ -897,7 +886,8 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    
    mPluginMenu->addSaveAndQuitMenuItem("Run plugin", "Saves values and runs plugin");
 
-   mPluginMenu->setMenuCenterPoint(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2));  
+   mPluginMenu->setMenuCenterPoint(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 
+                                         DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2));  
 
    // Restore previous values, if available
    string key = getPluginSignature();
@@ -935,7 +925,7 @@ void EditorUserInterface::onPluginExecuted(const Vector<string> &args)
 
 void EditorUserInterface::showCouldNotFindScriptMessage(const string &scriptName)
 {
-   string pluginDir = getGame()->getSettings()->getFolderManager()->getPluginDir();
+   string pluginDir = gSettings.getFolderManager()->getPluginDir();
 
    Vector<string> messages;
    messages.push_back("Plugin not Found");
@@ -1252,9 +1242,7 @@ void EditorUserInterface::onAfterRunScriptFromConsole()
 
 void EditorUserInterface::onActivate()
 {
-   GameSettings *settings = getGame()->getSettings();
-
-   FolderManager *folderManager = settings->getFolderManager();
+   FolderManager *folderManager = gSettings.getFolderManager();
 
    if(folderManager->getLevelDir().empty())      // Never did resolve a leveldir... no editing for you!
    {
@@ -1307,7 +1295,7 @@ void EditorUserInterface::onActivate()
    mDragCopying = false;
    mJustInsertedVertex = false;
 
-   VideoSystem::actualizeScreenMode(settings, true, usesEditorScreenMode());
+   VideoSystem::actualizeScreenMode(&gSettings, true, usesEditorScreenMode());
 
    centerView();
    findPlugins();
@@ -1356,7 +1344,7 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
       mCurrentTeam = 0;
 
    if(UserInterface::getUIManager()->getPrevUI()->usesEditorScreenMode() != usesEditorScreenMode())
-      VideoSystem::actualizeScreenMode(getGame()->getSettings(), true, usesEditorScreenMode());
+      VideoSystem::actualizeScreenMode(&gSettings, true, usesEditorScreenMode());
 }
 
 
@@ -1368,8 +1356,8 @@ S32 EditorUserInterface::getTeamCount() const
 
 EditorTeam *EditorUserInterface::getTeam(S32 teamId)
 {
-   TNLAssert(dynamic_cast<EditorTeam *>(getGame()->getTeam(teamId)), "Expected a EditorTeam");
-   return static_cast<EditorTeam *>(getGame()->getTeam(teamId));
+   TNLAssert(dynamic_cast<EditorTeam *>(mLevel->getTeam(teamId)), "Expected a EditorTeam");
+   return static_cast<EditorTeam *>(mLevel->getTeam(teamId));
 }
 
 
@@ -1393,19 +1381,19 @@ void EditorUserInterface::setNeedToSave(bool needToSave)
 
 void EditorUserInterface::addTeam(EditorTeam *team)
 {
-   getGame()->addTeam(team);
+   mLevel->addTeam(team);
 }
 
 
 void EditorUserInterface::addTeam(EditorTeam *team, S32 teamIndex)
 {
-   getGame()->addTeam(team, teamIndex);
+   mLevel->addTeam(team, teamIndex);
 }
 
 
 void EditorUserInterface::removeTeam(S32 teamIndex)
 {
-   getGame()->removeTeam(teamIndex);
+   mLevel->removeTeam(teamIndex);
 }
 
 
@@ -1844,7 +1832,8 @@ void EditorUserInterface::renderPanelInfoLine(S32 line, const char *format, ...)
    vsnprintf(text, sizeof(text), format, args); 
    va_end(args);
 
-   drawString(xpos, DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - PANEL_TEXT_SIZE - line * PANEL_SPACING + 6, PANEL_TEXT_SIZE, text);
+   drawString(xpos, DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - PANEL_TEXT_SIZE - 
+                    line * PANEL_SPACING + 6, PANEL_TEXT_SIZE, text);
 }
 
 
@@ -2159,15 +2148,13 @@ void EditorUserInterface::renderObjects(const GridDatabase *database, RenderMode
 void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, const Point &offset,
                                                   bool drawSelected, bool isLevelGenDatabase) const
 {
-   GameSettings *settings = getGame()->getSettings();
-
    WallSegmentManager *wsm = database->getWallSegmentManager();
 
    // Guarantee walls are a standard color for editor screenshot uploads to the level database
-   const Color &fillColor = mNormalizedScreenshotMode ? Colors::DefaultWallFillColor:
-         mPreviewMode ? settings->getWallFillColor() : Colors::EDITOR_WALL_FILL_COLOR;
+   const Color &fillColor = mNormalizedScreenshotMode ? Colors::DefaultWallFillColor :
+         mPreviewMode ? gSettings.getWallFillColor() : Colors::EDITOR_WALL_FILL_COLOR;
 
-   const Color &outlineColor = mNormalizedScreenshotMode ? Colors::DefaultWallOutlineColor: settings->getWallOutlineColor();
+   const Color &outlineColor = mNormalizedScreenshotMode ? Colors::DefaultWallOutlineColor: gSettings.getWallOutlineColor();
 
    renderWalls(wsm->getWallSegmentDatabase(), *wsm->getWallEdgePoints(), *wsm->getSelectedWallEdgePoints(), outlineColor,
                fillColor, mCurrentScale, mDraggingObjects, drawSelected, offset, mPreviewMode, 
@@ -2189,7 +2176,7 @@ void EditorUserInterface::renderObjectsUnderConstruction() const
    if(mCreatingPoly) // Wall
       glColor(Colors::EDITOR_SELECT_COLOR);
    else              // LineItem --> Caution! we're rendering an object that doesn't exist yet; its game is NULL
-      glColor(getGame()->getTeamColor(mCurrentTeam));
+      glColor(mLevel->getTeamColor(mCurrentTeam));
 
    renderLine(mNewItem->getOutline());
 
@@ -3914,8 +3901,6 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
 
    string inputString = InputCodeManager::getCurrentInputString(inputCode);
 
-   GameSettings *settings = getGame()->getSettings();
-
    if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)       // Enter - Edit props
       startAttributeEditor();
 
@@ -3973,32 +3958,32 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       mRight = true;
    else if(inputString == "Right Arrow")  // Pan right
       mRight = true;
-	   else if(inputString == getEditorBindingString(settings, BINDING_FLIP_HORIZ))          // Flip horizontal
+	   else if(inputString == getEditorBindingString(gSettings, BINDING_FLIP_HORIZ))         // Flip horizontal
       flipSelectionHorizontal();
-	   else if(inputString == getEditorBindingString(settings, BINDING_PASTE_SELECTION))     // Paste selection
+	   else if(inputString == getEditorBindingString(gSettings, BINDING_PASTE_SELECTION))    // Paste selection
       pasteSelection();
-	   else if(inputString == getEditorBindingString(settings, BINDING_FLIP_VERTICAL))       // Flip vertical
+	   else if(inputString == getEditorBindingString(gSettings, BINDING_FLIP_VERTICAL))      // Flip vertical
       flipSelectionVertical();
    else if(inputString == "/" || inputString == "Keypad /")
       openConsole(NULL);
-	   else if(inputString == getEditorBindingString(settings, BINDING_RELOAD_LEVEL))        // Reload level
+	   else if(inputString == getEditorBindingString(gSettings, BINDING_RELOAD_LEVEL))       // Reload level
    {
       loadLevel();                        
       setSaveMessage("Reloaded " + getLevelFileName(), true);
    }
-	   else if(inputString == getEditorBindingString(settings, BINDING_REDO_ACTION))         // Redo
+	   else if(inputString == getEditorBindingString(gSettings, BINDING_REDO_ACTION))        // Redo
    {
       if(!mCreatingPolyline && !mCreatingPoly && !mDraggingObjects && !mDraggingDockItem)
          redo();
    }
-	   else if(inputString == getEditorBindingString(settings, BINDING_UNDO_ACTION))         // Undo
+	   else if(inputString == getEditorBindingString(gSettings, BINDING_UNDO_ACTION))        // Undo
    {
       if(!mCreatingPolyline && !mCreatingPoly && !mDraggingObjects && !mDraggingDockItem)
          undo(true);
    }
-	   else if(inputString == getEditorBindingString(settings, BINDING_RESET_VIEW))          // Reset veiw
+	   else if(inputString == getEditorBindingString(gSettings, BINDING_RESET_VIEW))         // Reset veiw
       centerView();
-	   else if(inputString == getEditorBindingString(settings, BINDING_LVLGEN_SCRIPT))       // Run levelgen script, or clear last results
+	   else if(inputString == getEditorBindingString(gSettings, BINDING_LVLGEN_SCRIPT))      // Run levelgen script, or clear last results
    {
       // Ctrl+R is a toggle -- we either add items or clear them
       if(mLevelGenDatabase.getObjectCount() == 0)
@@ -4008,23 +3993,23 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    }
    else if(inputString == "Shift+1" || inputString == "Shift+3")  // '!' or '#'
       startSimpleTextEntryMenu(SimpleTextEntryID);
-   else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CENTROID))     // Spin by arbitrary amount
+   else if(inputString == getEditorBindingString(gSettings, BINDING_ROTATE_CENTROID))    // Spin by arbitrary amount
    {
       if(canRotate())
          startSimpleTextEntryMenu(SimpleTextEntryRotateCentroid);
    }
-	else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_ORIGIN))      // Rotate by arbitrary amount
+	else if(inputString == getEditorBindingString(gSettings, BINDING_ROTATE_ORIGIN))      // Rotate by arbitrary amount
       startSimpleTextEntryMenu(SimpleTextEntryRotateOrigin);
-	else if(inputString == getEditorBindingString(settings, BINDING_SPIN_CCW))            // Spin CCW
+	else if(inputString == getEditorBindingString(gSettings, BINDING_SPIN_CCW))           // Spin CCW
       rotateSelection(-15.f, false);
-	else if(inputString == getEditorBindingString(settings, BINDING_SPIN_CW))             // Spin CW
+	else if(inputString == getEditorBindingString(gSettings, BINDING_SPIN_CW))            // Spin CW
       rotateSelection(15.f, false);
-	else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CCW_ORIGIN))   // Rotate CCW about origin
+	else if(inputString == getEditorBindingString(gSettings, BINDING_ROTATE_CCW_ORIGIN))  // Rotate CCW about origin
       rotateSelection(-15.f, true);
-	else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CW_ORIGIN))    // Rotate CW about origin
+	else if(inputString == getEditorBindingString(gSettings, BINDING_ROTATE_CW_ORIGIN))   // Rotate CW about origin
       rotateSelection(15.f, true);
 
-	else if(inputString == getEditorBindingString(settings, BINDING_INSERT_GEN_ITEMS))    // Insert items generated with script into editor
+	else if(inputString == getEditorBindingString(gSettings, BINDING_INSERT_GEN_ITEMS))   // Insert items generated with script into editor
       copyScriptItemsToEditor();
 
    else if(inputString == "Up Arrow" || inputString == "W" || inputString == "Shift+W")     // W or Up - Pan up
@@ -4035,7 +4020,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       mOut = true;
    else if(inputString == "Down Arrow")         // Pan down
       mDown = true;
-	   else if(inputString == getEditorBindingString(settings, BINDING_SAVE_LEVEL))           // Save
+	   else if(inputString == getEditorBindingString(gSettings, BINDING_SAVE_LEVEL))          // Save
       saveLevel(true, true);
    else if(inputString == "S"|| inputString == "Shift+S")                                    // Pan down
       mDown = true;
@@ -4049,50 +4034,50 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       changeBarrierWidth(-1);
    else if(inputString == "-" || inputString == "Keypad -")                                  // Unshifted --> by 5
       changeBarrierWidth(-5);
-	else if(inputString == getEditorBindingString(settings, BINDING_ZOOM_IN))                 // Zoom In
+	else if(inputString == getEditorBindingString(gSettings, BINDING_ZOOM_IN))                // Zoom In
       mIn = true;                                                                           
    else if(inputString == "\\")                                                              // Split barrier on selected vertex               
       splitBarrier();                                                                       
-	else if(inputString == getEditorBindingString(settings, BINDING_JOIN_SELECTION))          // Join selected barrier segments or polygons
+	else if(inputString == getEditorBindingString(gSettings, BINDING_JOIN_SELECTION))         // Join selected barrier segments or polygons
       joinBarrier();                                                                        
-	else if(inputString == getEditorBindingString(settings, BINDING_SELECT_EVERYTHING))       // Select everything
+	else if(inputString == getEditorBindingString(gSettings, BINDING_SELECT_EVERYTHING))      // Select everything
       selectAll(getLevel());                                                             
-	else if(inputString == getEditorBindingString(settings, BINDING_RESIZE_SELECTION))        // Resize selection
+	else if(inputString == getEditorBindingString(gSettings, BINDING_RESIZE_SELECTION))       // Resize selection
       startSimpleTextEntryMenu(SimpleTextEntryScale);                                       
-	else if(inputString == getEditorBindingString(settings, BINDING_CUT_SELECTION))           // Cut selection
+	else if(inputString == getEditorBindingString(gSettings, BINDING_CUT_SELECTION))          // Cut selection
    {
       copySelection();
       deleteSelection(true);
    }
-	else if(inputString == getEditorBindingString(settings, BINDING_COPY_SELECTION))          // Copy selection to clipboard
+	else if(inputString == getEditorBindingString(gSettings, BINDING_COPY_SELECTION))         // Copy selection to clipboard
       copySelection();                                                                      
-	else if(inputString == getEditorBindingString(settings, BINDING_ZOOM_OUT))                // Zoom out
+	else if(inputString == getEditorBindingString(gSettings, BINDING_ZOOM_OUT))               // Zoom out
       mOut = true;                                                                          
-	else if(inputString == getEditorBindingString(settings, BINDING_LEVEL_PARAM_EDITOR))      // Level Parameter Editor
+	else if(inputString == getEditorBindingString(gSettings, BINDING_LEVEL_PARAM_EDITOR))     // Level Parameter Editor
    {                                                                                        
       getUIManager()->activate<GameParamUserInterface>();                                   
       playBoop();                                                                           
    }                                                                                        
-	else if(inputString == getEditorBindingString(settings, BINDING_TEAM_EDITOR))             // Team Editor Menu
+	else if(inputString == getEditorBindingString(gSettings, BINDING_TEAM_EDITOR))            // Team Editor Menu
    {                                                                                        
       getUIManager()->activate<TeamDefUserInterface>();                                     
       playBoop();                                                                           
    }                                                                                        
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_TELEPORTER))        // Teleporter
-      insertNewItem(TeleporterTypeNumber);                                                  
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_SPEEDZONE))         // SpeedZone
-      insertNewItem(SpeedZoneTypeNumber);                                                   
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_SPAWN))             // Spawn
-      insertNewItem(ShipSpawnTypeNumber);                                                   
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_SPYBUG))            // Spybug
-      insertNewItem(SpyBugTypeNumber);                                                      
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_REPAIR))            // Repair
-      insertNewItem(RepairItemTypeNumber);                                                  
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_TURRET))            // Turret
-      insertNewItem(TurretTypeNumber);                                                      
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_MINE))              // Mine
-      insertNewItem(MineTypeNumber);                                                        
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_FORCEFIELD))        // Forcefield
+	else if(inputString == getEditorBindingString(gSettings, BINDING_PLACE_TELEPORTER))       // Teleporter
+      insertNewItem(TeleporterTypeNumber);                                                 
+	else if(inputString == getEditorBindingString(gSettings, BINDING_PLACE_SPEEDZONE))        // SpeedZone
+      insertNewItem(SpeedZoneTypeNumber);                                                  
+	else if(inputString == getEditorBindingString(gSettings, BINDING_PLACE_SPAWN))            // Spawn
+      insertNewItem(ShipSpawnTypeNumber);                                                  
+	else if(inputString == getEditorBindingString(gSettings, BINDING_PLACE_SPYBUG))           // Spybug
+      insertNewItem(SpyBugTypeNumber);                                                     
+	else if(inputString == getEditorBindingString(gSettings, BINDING_PLACE_REPAIR))           // Repair
+      insertNewItem(RepairItemTypeNumber);                                                 
+	else if(inputString == getEditorBindingString(gSettings, BINDING_PLACE_TURRET))           // Turret
+      insertNewItem(TurretTypeNumber);                                                     
+	else if(inputString == getEditorBindingString(gSettings, BINDING_PLACE_MINE))             // Mine
+      insertNewItem(MineTypeNumber);                                                       
+	else if(inputString == getEditorBindingString(gSettings, BINDING_PLACE_FORCEFIELD))       // Forcefield
       insertNewItem(ForceFieldProjectorTypeNumber);
    else if(inputString == "Backspace" || inputString == "Del" || inputString == "Keypad .")  // Keypad . is the keypad's del key
       deleteSelection(false);
@@ -4106,13 +4091,13 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       playBoop();
       getGame()->getUIManager()->activate<EditorMenuUserInterface>();
    }
-	else if(inputString == getEditorBindingString(settings, BINDING_NO_SNAPPING))             // No snapping to grid, but still to other things
+	else if(inputString == getEditorBindingString(gSettings, BINDING_NO_SNAPPING))            // No snapping to grid, but still to other things
       mSnapContext = NO_GRID_SNAPPING;                                                     
-	else if(inputString == getEditorBindingString(settings, BINDING_NO_GRID_SNAPPING))        // Completely disable snapping
+	else if(inputString == getEditorBindingString(gSettings, BINDING_NO_GRID_SNAPPING))       // Completely disable snapping
       mSnapContext = NO_SNAPPING;                                                          
-	else if(inputString == getEditorBindingString(settings, BINDING_PREVIEW_MODE))            // Turn on preview mode
+	else if(inputString == getEditorBindingString(gSettings, BINDING_PREVIEW_MODE))           // Turn on preview mode
       mPreviewMode = true;                                                                 
-	else if(inputString == getEditorBindingString(settings, BINDING_DOCKMODE_ITEMS))          //  Toggle dockmode Items
+	else if(inputString == getEditorBindingString(gSettings, BINDING_DOCKMODE_ITEMS))         //  Toggle dockmode Items
    {
 	  if(mDockMode == DOCKMODE_ITEMS)
 	  {
@@ -4129,7 +4114,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    {
       // Do nothing
    }
-   else if(inputString == getEditorBindingString(settings, BINDING_TOGGLE_EDIT_MODE))
+   else if(inputString == getEditorBindingString(gSettings, BINDING_TOGGLE_EDIT_MODE))
    {
       mVertexEditMode = !mVertexEditMode;
    }
@@ -4186,7 +4171,7 @@ void EditorUserInterface::onMouseClicked_left()
             S32 hitPlugin = findHitPlugin();
 
             if(hitPlugin >= 0 && hitPlugin < mPluginInfos.size())
-               runPlugin(getGame()->getSettings()->getFolderManager(), mPluginInfos[hitPlugin].fileName, Vector<string>());
+               runPlugin(gSettings.getFolderManager(), mPluginInfos[hitPlugin].fileName, Vector<string>());
 
             break;
       }
@@ -4345,13 +4330,11 @@ void EditorUserInterface::onMouseClicked_right()
 // Returns true if key was handled, false if not
 bool EditorUserInterface::checkPluginKeyBindings(string inputString)
 {
-   GameSettings *settings = getGame()->getSettings();
-
    for(S32 i = 0; i < mPluginInfos.size(); i++)
    {
       if(mPluginInfos[i].binding != "" && inputString == mPluginInfos[i].binding)
       {
-         runPlugin(settings->getFolderManager(), mPluginInfos[i].fileName, Vector<string>());
+         runPlugin(gSettings.getFolderManager(), mPluginInfos[i].fileName, Vector<string>());
          return true;
       }
    }
@@ -4376,6 +4359,7 @@ void idEntryCallback(string text, BfObject *object)
 
    // Grab ClientGame from our object
    ClientGame *clientGame = static_cast<ClientGame *>(object->getGame());
+   UIManager *uiManager = clientGame->getUIManager();
 
    // Check for duplicate IDs
    S32 id = atoi(text.c_str());
@@ -4383,7 +4367,7 @@ void idEntryCallback(string text, BfObject *object)
 
    if(id != 0)
    {
-      const Vector<DatabaseObject *> *objList = clientGame->getUIManager()->getUI<EditorUserInterface>()->getLevel()->findObjects_fast();
+      const Vector<DatabaseObject *> *objList = uiManager->getUI<EditorUserInterface>()->getLevel()->findObjects_fast();
 
       for(S32 i = 0; i < objList->size(); i++)
       {
@@ -4398,7 +4382,7 @@ void idEntryCallback(string text, BfObject *object)
    }
 
 
-   SimpleTextEntryMenuUI *ui = dynamic_cast<SimpleTextEntryMenuUI *>(clientGame->getUIManager()->getCurrentUI());
+   SimpleTextEntryMenuUI *ui = dynamic_cast<SimpleTextEntryMenuUI *>(uiManager->getCurrentUI());
    TNLAssert(ui, "Should be in SimpleTextEntryMenuUI!");
 
    SimpleTextEntryMenuItem *menuItem = static_cast<SimpleTextEntryMenuItem*>(ui->getMenuItem(0));
@@ -5061,7 +5045,7 @@ bool EditorUserInterface::doSaveLevel(const string &saveName, bool showFailMessa
 {
    try
    {
-      FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
+      FolderManager *folderManager = gSettings.getFolderManager();
 
       string fileName = joindir(folderManager->getLevelDir(), saveName);
       if(!writeFile(fileName, getLevelText()))
@@ -5145,7 +5129,7 @@ void EditorUserInterface::testLevelStart()
       levelList.push_back(TestFileName);
 
       LevelSourcePtr levelSource = LevelSourcePtr(
-            new FolderLevelSource(levelList, getGame()->getSettings()->getFolderManager()->getLevelDir()));
+            new FolderLevelSource(levelList, gSettings.getFolderManager()->getLevelDir()));
 
       //getGame()->setGameType(NULL); // Prevents losing seconds on game timer (test level from editor, save, and reload level)
 
@@ -5164,8 +5148,7 @@ void EditorUserInterface::createNormalizedScreenshot(ClientGame* game)
 
    render();
 #ifndef BF_NO_SCREENSHOTS
-   ScreenShooter::saveScreenshot(game->getUIManager(), game->getSettings(), 
-                                 LevelDatabaseUploadThread::UploadScreenshotFilename);
+   ScreenShooter::saveScreenshot(game->getUIManager(), gSettings, LevelDatabaseUploadThread::UploadScreenshotFilename);
 #endif
    mPreviewMode = false;
    mNormalizedScreenshotMode = false;
@@ -5202,13 +5185,13 @@ void EditorMenuUserInterface::onActivate()
 void EditorUserInterface::findPlugins()
 {
    mPluginInfos.clear();
-   string dirName = getGame()->getSettings()->getFolderManager()->getPluginDir();
+   string dirName = gSettings.getFolderManager()->getPluginDir();
    Vector<string> plugins;
    string extension = ".lua";
    getFilesFromFolder(dirName, plugins, &extension, 1);
 
    // Reference to original
-   Vector<PluginBinding> &bindings = getGame()->getSettings()->getIniSettings()->pluginBindings;
+   Vector<PluginBinding> &bindings = gSettings.getIniSettings()->pluginBindings;
 
    // Check for binding collision in INI.  If one is detected, set its key to empty
    for(S32 i = 0; i < bindings.size(); i++)
@@ -5426,12 +5409,11 @@ void quitEditorCallback(ClientGame *game, U32 unused)
 
 void EditorMenuUserInterface::setupMenus()
 {
-   GameSettings *settings = getGame()->getSettings();
-   InputCode keyHelp = getInputCode(settings, BINDING_HELP);
+   InputCode keyHelp = getInputCode(BINDING_HELP);
 
    clearMenuItems();
    addMenuItem(new MenuItem("RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R));
-   addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode)));
+   addMenuItem(getWindowModeMenuItem((U32)gSettings.getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode)));
    addMenuItem(new MenuItem("TEST LEVEL",       testLevelCallback,           "", KEY_T));
    addMenuItem(new MenuItem("SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
    addMenuItem(new MenuItem("EDITOR SECRETS",   activateHelpCallback,        "", KEY_E, keyHelp));
@@ -5460,6 +5442,17 @@ void EditorMenuUserInterface::setupMenus()
 void EditorMenuUserInterface::addStandardQuitItem()
 {
    addMenuItem(new MenuItem("QUIT", quitEditorCallback, "", KEY_Q, KEY_UNKNOWN));
+}
+
+
+void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
+{
+   if(getTeamCount() == 0)
+   {
+      EditorTeam *team = new EditorTeam(gTeamPresets[0]);
+
+      mLevel->addTeam(team);
+   }
 }
 
 

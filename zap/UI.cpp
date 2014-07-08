@@ -289,21 +289,21 @@ void UserInterface::onMouseDragged()  { /* Do nothing */ }
 
 
 // Static method
-InputCode UserInterface::getInputCode(GameSettings *settings, BindingNameEnum binding)
+InputCode UserInterface::getInputCode(BindingNameEnum binding)
 {
-   return settings->getInputCodeManager()->getBinding(binding);
+   return gSettings.getInputCodeManager()->getBinding(binding);
 }
 
 
-string UserInterface::getEditorBindingString(GameSettings *settings, EditorBindingNameEnum binding)
+string UserInterface::getEditorBindingString(const GameSettings &settings, EditorBindingNameEnum binding)
 {
-   return settings->getInputCodeManager()->getEditorBinding(binding);
+   return gSettings.getInputCodeManager()->getEditorBinding(binding);
 }
 
 
-string UserInterface::getSpecialBindingString(GameSettings *settings, SpecialBindingNameEnum binding)
+string UserInterface::getSpecialBindingString(const GameSettings &settings, SpecialBindingNameEnum binding)
 {
-   return settings->getInputCodeManager()->getSpecialBinding(binding);
+   return gSettings.getInputCodeManager()->getSpecialBinding(binding);
 }
 
 
@@ -315,9 +315,7 @@ void UserInterface::setInputCode(GameSettings *settings, BindingNameEnum binding
 
 bool UserInterface::checkInputCode(BindingNameEnum binding, InputCode inputCode)
 {
-   GameSettings *settings = getGame()->getSettings();
-
-   InputCode bindingCode = getInputCode(settings, binding);
+   InputCode bindingCode = getInputCode(binding);
 
    // Handle modified keys
    if(InputCodeManager::isModified(bindingCode))
@@ -326,13 +324,13 @@ bool UserInterface::checkInputCode(BindingNameEnum binding, InputCode inputCode)
 
    // Else just do a simple key check.  filterInputCode deals with the numeric keypad.
    else
-      return bindingCode == settings->getInputCodeManager()->filterInputCode(inputCode);
+      return bindingCode == gSettings.getInputCodeManager()->filterInputCode(inputCode);
 }
 
 
-const char *UserInterface::getInputCodeString(GameSettings *settings, BindingNameEnum binding) const
+const char *UserInterface::getInputCodeString(BindingNameEnum binding) const
 {
-   return InputCodeManager::inputCodeToString(getInputCode(settings, binding));
+   return InputCodeManager::inputCodeToString(getInputCode(binding));
 }
 
 
@@ -375,10 +373,10 @@ bool UserInterface::onKeyDown(InputCode inputCode)
    
 #ifndef BF_NO_SCREENSHOTS
    // Screenshot!
-   else if(inputString == getSpecialBindingString(getGame()->getSettings(), BINDING_SCREENSHOT_1) ||
-           inputString == getSpecialBindingString(getGame()->getSettings(), BINDING_SCREENSHOT_2))      
+   else if(inputString == getSpecialBindingString(gSettings, BINDING_SCREENSHOT_1) ||
+           inputString == getSpecialBindingString(gSettings, BINDING_SCREENSHOT_2))      
    {
-      ScreenShooter::saveScreenshot(getUIManager(), getGame()->getSettings());
+      ScreenShooter::saveScreenshot(getUIManager(), gSettings);
       handled = true;
    }
 #endif

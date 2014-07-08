@@ -336,12 +336,10 @@ void InstructionsUserInterface::activatePage(IntructionPages pageIndex)
 
 bool InstructionsUserInterface::usingArrowKeys() const
 {
-   GameSettings *settings = getGame()->getSettings();
-
-   return getInputCode(settings, BINDING_LEFT)  == KEY_LEFT  &&
-          getInputCode(settings, BINDING_RIGHT) == KEY_RIGHT &&
-          getInputCode(settings, BINDING_UP)    == KEY_UP    &&
-          getInputCode(settings, BINDING_DOWN)  == KEY_DOWN;
+   return getInputCode(BINDING_LEFT)  == KEY_LEFT  &&
+          getInputCode(BINDING_RIGHT) == KEY_RIGHT &&
+          getInputCode(BINDING_UP)    == KEY_UP    &&
+          getInputCode(BINDING_DOWN)  == KEY_DOWN;
 }
 
 

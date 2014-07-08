@@ -199,10 +199,10 @@ bool KeyDefMenuUserInterface::isDuplicate(S32 key, const Vector<KeyDefMenuItem> 
 
    GameSettings *settings = getGame()->getSettings();
 
-   InputCode targetInputCode = getInputCode(settings, menuItems[key].primaryControl);
+   InputCode targetInputCode = getInputCode(menuItems[key].primaryControl);
 
    for(S32 i = 0; i < size && count < 2; i++)
-      if(getInputCode(settings, menuItems[i].primaryControl) == targetInputCode)
+      if(getInputCode(menuItems[i].primaryControl) == targetInputCode)
          count++;
 
    return count >= 2;
@@ -260,7 +260,7 @@ void KeyDefMenuUserInterface::render() const
          const Color *color = dupe ? &Colors::red : NULL;
 
          JoystickRender::renderControllerButton(F32(xPos), F32(y + offset), 
-                               Joystick::SelectedPresetIndex, getInputCode(getGame()->getSettings(), menuItems[i].primaryControl), color);
+                               Joystick::SelectedPresetIndex, getInputCode(menuItems[i].primaryControl), color);
       }
    }
 

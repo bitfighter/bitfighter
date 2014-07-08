@@ -315,7 +315,7 @@ void DiagnosticUserInterface::render() const
    drawStringf(  3, 3, 25, "DIAGNOSTICS - %s", pageHeaders[mCurPage]);
    drawStringf(625, 3, 25, "PAGE %d/%d",       mCurPage + 1, NUM_PAGES);
  
-   drawCenteredStringf(571, 20, "%s - next page  ESC exits", getInputCodeString(getGame()->getSettings(), BINDING_DIAG));
+   drawCenteredStringf(571, 20, "%s - next page  ESC exits", getInputCodeString(BINDING_DIAG));
 
    glColor(0.7f);
    drawHorizLine(0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), 31);

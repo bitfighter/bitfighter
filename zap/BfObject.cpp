@@ -636,7 +636,7 @@ void BfObject::onItemDragging()  { onGeomChanged(); }
 #ifndef ZAP_DEDICATED
 void BfObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
 {
-   mGame = game;
+   //mGame = game;     // If this works, can remove game parameter
 
    unselectVerts();
    setTeam(teamIndex);
