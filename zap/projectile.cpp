@@ -1317,6 +1317,8 @@ bool SpyBug::isVisibleToPlayer(S32 playerTeam, bool isTeamGame)
    else
       return mIsOwnedByLocalClient;
 }
+
+
 // server side
 bool SpyBug::isVisibleToPlayer(ClientInfo *clientInfo, bool isTeamGame)
 {
