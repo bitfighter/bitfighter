@@ -20,7 +20,7 @@ class PolygonObject : public CentroidObject
 private:
    virtual Point getDockLabelPos() const;
 
-   void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
+   void prepareForDock(const Point &point, S32 teamIndex);
    virtual void renderDock(const Color &color) const;
    void highlightDockItem() const;
 

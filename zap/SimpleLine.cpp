@@ -76,11 +76,11 @@ void SimpleLine::renderEditor(F32 currentScale, bool snappingToWallCornersEnable
 }
 
 
-void SimpleLine::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
+void SimpleLine::prepareForDock(const Point &point, S32 teamIndex)
 {
 #ifndef ZAP_DEDICATED
    setVert(point, 0);
-   Parent::prepareForDock(game, point, teamIndex);
+   Parent::prepareForDock(point, teamIndex);
 #endif
 }
 

@@ -129,6 +129,8 @@ public:
 
    static const S32 FirstTeamNumber = -2;                               // First team is "Hostile to All" with index -2
    static const U32 gMaxTeamCount = Game::MAX_TEAMS - FirstTeamNumber;  // Number of possible teams, including Neutral and Hostile to All
+
+   GameType *clone() const;
    static string validateGameType(const string &gtype);                 // Returns a valid gameType, defaulting to base class if needed
 
    Game *getGame() const;

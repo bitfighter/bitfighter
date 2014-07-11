@@ -28,7 +28,7 @@ public:
    explicit PointObject(F32 radius = 1);   // Constructor
    virtual ~PointObject();                 // Destructor
 
-   void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
+   void prepareForDock(const Point &point, S32 teamIndex);
    F32 getRadius() const;
 };
 

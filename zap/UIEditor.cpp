@@ -144,7 +144,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 
    mLastUndoStateWasBarrierWidthChange = false;
 
-   mUndoItems.resize(UNDO_STATES);     // Create slots for all our undos... also creates a ton of empty dbs.  Maybe we should be using pointers?
+   mUndoItems.resize(UNDO_STATES);     // Create slots for all our undos, which are pointers to levels
    mAutoScrollWithMouse = false;
    mAutoScrollWithMouseReady = false;
 
@@ -193,7 +193,7 @@ void EditorUserInterface::onQuitted()
 
 void EditorUserInterface::addDockObject(BfObject *object, F32 xPos, F32 yPos)
 {
-   object->prepareForDock(getGame(), Point(xPos, yPos), mCurrentTeam);  // Prepare object   
+   object->prepareForDock(Point(xPos, yPos), mCurrentTeam);  // Prepare object   
    mDockItems.addToDatabase(object);
 }
 
@@ -317,10 +317,12 @@ void EditorUserInterface::saveUndoState(bool forceSelectionOfTargetObject)
       unselHitItem = true;
    }
 
-
+   Level *oldLevel = getLevel();
    Level *newLevel = new Level();    // Make a copy
 
    newLevel->copyObjects(getLevel());
+   newLevel->setGameType(oldLevel->getGameType()->clone());
+   newLevel->setTeamInfosPtr(oldLevel->getTeamInfosClone());
 
    mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<Level>(newLevel);  
 
@@ -383,6 +385,8 @@ void EditorUserInterface::undo(bool addToRedoStack)
    mLastUndoIndex--;
 
    setLevel(mUndoItems[mLastUndoIndex % UNDO_STATES]);
+   TNLAssert(mLevel->getGameType(), "mLevel has a NULL gameType!");
+
    Level *level = getLevel();
    mLoadTarget = level;
 
@@ -426,8 +430,7 @@ void EditorUserInterface::redo()
       }
 
       setLevel(mUndoItems[mLastUndoIndex % UNDO_STATES]);
-      Level *level = mUndoItems[mLastUndoIndex % UNDO_STATES].get();
-      mLoadTarget = level;
+      mLoadTarget = mLevel.get();
 
       // Act II:
       if(selectedItem != NONE)
@@ -443,11 +446,11 @@ void EditorUserInterface::redo()
 
       TNLAssert(mUndoItems[mLastUndoIndex % UNDO_STATES], "null!");
 
-      rebuildEverything(level);     // Needed?  Yes, for now, but theoretically no, because we should be restoring everything fully reconstituted...
+      rebuildEverything(mLevel.get()); // Needed?  Yes, for now, but theoretically no, because we should be restoring everything fully reconstituted...
       onSelectionChanged();
       validateLevel();
 
-      onMouseMoved();               // If anything gets undeleted under the mouse, make sure it's highlighted
+      onMouseMoved();                  // If anything gets undeleted under the mouse, make sure it's highlighted
    }
 }
 
@@ -504,7 +507,7 @@ void EditorUserInterface::resnapAllEngineeredItems(GridDatabase *database, bool 
 
 bool EditorUserInterface::undoAvailable()
 {
-   return mLastUndoIndex - mFirstUndoIndex != 1;
+   return (mLastUndoIndex - mFirstUndoIndex) != 1;
 }
 
 
@@ -532,9 +535,7 @@ void EditorUserInterface::setLevelFileName(string name)
 
 void EditorUserInterface::cleanUp()
 {
-   ClientGame *game = getGame();
-
-   game->resetRatings();      // Move to mLevel?
+   getGame()->resetRatings();      // Move to mLevel?
 
    clearUndoHistory();                             // Clear up a little memory
    mDockItems.removeEverythingFromDatabase();      // Free a little more -- dock will be rebuilt when editor restarts
@@ -559,8 +560,6 @@ void EditorUserInterface::loadLevel()
 {
    string filename = getLevelFileName();
    TNLAssert(filename != "", "Need file name here!");
-
-   //ClientGame *game = getGame();
 
    // Only clean up if we've got a level to clean up!
    if(mLevel)
@@ -651,7 +650,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
    {
       BfObject *obj = static_cast<BfObject *>(tempList[i]);
 
-      obj->removeFromGame(false);     // False ==> do not delete object
+      obj->removeFromGame(false);     // False ==> remove, but do not delete object
       addToEditor(obj);
    }
       
@@ -665,8 +664,8 @@ void EditorUserInterface::copyScriptItemsToEditor()
 
 void EditorUserInterface::addToEditor(BfObject *obj)
 {
-   obj->addToGame(getGame(), getLevel());     
-   obj->onGeomChanged();                        // Generic way to get PolyWalls to build themselves after being dragged from the dock
+   obj->addToDatabase(mLevel.get());
+   obj->onGeomChanged();               // Easy way to get PolyWalls to build themselves after being dragged from the dock
 }
 
 
@@ -781,7 +780,8 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
             newTel->setEndpoint(teleporter->getDest(i));
             newTel->addDest(teleporter->getDest(i));
 
-            newTel->addToGame(getGame(), database);     
+            //newTel->addToGame(getGame(), database);
+            newTel->addToDatabase(mLevel.get());
          }
 
          // Delete any destinations past the first one
@@ -896,7 +896,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
       for(S32 i = 0; i < mPluginMenuValues[key].size(); i++)
          mPluginMenu->getMenuItem(i)->setValue(mPluginMenuValues[key].get(i));
 
-   getGame()->getUIManager()->activate(mPluginMenu.get());
+   getUIManager()->activate(mPluginMenu.get());
 }
 
 
@@ -2461,7 +2461,7 @@ void EditorUserInterface::pasteSelection()
       newObject->moveTo(pastePos - offsetFromFirstPoint);
 
       // addToGame is first so setSelected and onGeomChanged have mGame (at least barriers need it)
-      newObject->addToGame(getGame(), NULL);    // Passing NULL keeps item out of any databases... will add in bulk below  
+      //newObject->addToGame(getGame(), NULL);    // Passing NULL keeps item out of any databases... will add in bulk below  
 
       copiedObjects.push_back(newObject);
    }
@@ -3118,7 +3118,7 @@ void EditorUserInterface::onMouseDragged_CopyAndDrag(const Vector<DatabaseObject
       {
          BfObject *newObject = obj->newCopy();
          newObject->setSelected(true);
-         newObject->addToGame(getGame(), NULL);    // NULL keeps object out of database... will be added in bulk below 
+         //newObject->addToGame(getGame(), NULL);    // NULL keeps object out of database... will be added in bulk below 
 
          copiedObjects.push_back(newObject);
 
@@ -4083,13 +4083,13 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       deleteSelection(false);
 	else if(checkInputCode(BINDING_HELP, inputCode))                                          // Turn on help screen
    {
-      getGame()->getUIManager()->activate<EditorInstructionsUserInterface>();
+      getUIManager()->activate<EditorInstructionsUserInterface>();
       playBoop();
    }
    else if(inputCode == KEY_ESCAPE)          // Activate the menu
    {
       playBoop();
-      getGame()->getUIManager()->activate<EditorMenuUserInterface>();
+      getUIManager()->activate<EditorMenuUserInterface>();
    }
 	else if(inputString == getEditorBindingString(gSettings, BINDING_NO_SNAPPING))            // No snapping to grid, but still to other things
       mSnapContext = NO_GRID_SNAPPING;                                                     
@@ -4994,6 +4994,7 @@ string EditorUserInterface::getQuitLockedMessage()
 
 string EditorUserInterface::getLevelText() const
 {
+   logprintf(mLevel->getGameType()->getClassName());     // {P{P
    string result;
 
    // Write out basic game parameters, including gameType info
@@ -5120,7 +5121,7 @@ void EditorUserInterface::testLevelStart()
    mEditorGameType = mLevel->getGameType();           // Sock our current gametype away, will use it when we reenter the editor
 
    if(!doSaveLevel(TestFileName, true))
-      getGame()->getUIManager()->reactivatePrevUI();  // Saving failed, can't test, reactivate editor
+      getUIManager()->reactivatePrevUI();  // Saving failed, can't test, reactivate editor
    else
    {
       mWasTesting = true;

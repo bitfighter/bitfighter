@@ -37,7 +37,7 @@ public:
    virtual void newObjectFromDock(F32 gridSize);
    virtual Point getInitialPlacementOffset(U32 gridSize) const;
 
-   void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
+   void prepareForDock(const Point &point, S32 teamIndex);
 };
 
 

@@ -634,10 +634,8 @@ void BfObject::onItemDragging()  { onGeomChanged(); }
 
 
 #ifndef ZAP_DEDICATED
-void BfObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
+void BfObject::prepareForDock(const Point &point, S32 teamIndex)
 {
-   //mGame = game;     // If this works, can remove game parameter
-
    unselectVerts();
    setTeam(teamIndex);
    setExtent(calcExtents());    // Make sure the object's extents are properly set

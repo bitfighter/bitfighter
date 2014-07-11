@@ -139,6 +139,12 @@ string GameType::toLevelCode() const
 }
 
 
+GameType *GameType::clone() const
+{
+   return new GameType(*this);
+}
+
+
 // Client only -- gets run when GameType object has been created on the client, once per level (obviously)
 bool GameType::onGhostAdd(GhostConnection *theConnection)
 {

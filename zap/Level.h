@@ -68,11 +68,11 @@ public:
    bool loadLevelFromFile(const string &filename);
    void validateLevel();
 
+   boost::shared_ptr<Vector<TeamInfo> > getTeamInfosClone() const;
    string toLevelCode() const;
 
    U32 getLevelDatabaseId() const;
    void setLevelDatabaseId(U32 id);
-
 
 
    const Vector<WallItem *> &getWallList() const;

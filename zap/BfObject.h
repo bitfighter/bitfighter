@@ -410,7 +410,7 @@ public:
 
    ///// Dock related
 #ifndef ZAP_DEDICATED
-   virtual void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
+   virtual void prepareForDock(const Point &point, S32 teamIndex);
 #endif
    virtual void newObjectFromDock(F32 gridSize);   // Called when item dragged from dock to editor -- overridden by several objects
 

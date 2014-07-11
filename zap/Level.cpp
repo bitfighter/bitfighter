@@ -207,6 +207,20 @@ static string getString(S32 argc, const char **argv)
 }
 
 
+// Return a copy of the teamInfos for this level
+boost::shared_ptr<Vector<TeamInfo> > Level::getTeamInfosClone() const
+{
+   boost::shared_ptr<Vector<TeamInfo> > teamInfos;
+   teamInfos.reset(new Vector<TeamInfo>);
+   teamInfos->reserve(mTeamInfos->size());
+
+   for(S32 i = 0; i < mTeamInfos->size(); i++)
+      teamInfos->push_back(mTeamInfos->get(i));
+
+   return teamInfos;
+}
+
+
 // Write out the game processed above; returns multiline string
 string Level::toLevelCode() const
 {

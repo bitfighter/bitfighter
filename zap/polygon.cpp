@@ -76,7 +76,7 @@ Point PolygonObject::getDockLabelPos() const
 }
 
 
-void PolygonObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
+void PolygonObject::prepareForDock(const Point &point, S32 teamIndex)
 {
 #ifndef ZAP_DEDICATED
    F32 h = 16;    // Entire height
@@ -88,7 +88,7 @@ void PolygonObject::prepareForDock(ClientGame *game, const Point &point, S32 tea
    addVert(point + Point( w, h)); 
    addVert(point + Point(-w, h)); 
 
-   Parent::prepareForDock(game, point, teamIndex);
+   Parent::prepareForDock(point, teamIndex);
 #endif
 }
 
