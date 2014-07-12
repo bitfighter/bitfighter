@@ -832,9 +832,11 @@ void Teleporter::render() const
       if(mHealth < 1.f)
          trackerCount = U32(mHealth * 75.f) + 25;
 
-      F32 zoomFraction = getGame()->getCommanderZoomFraction();
+      // When rendering from the editor, getGame() will return NULL
+      F32 zoomFraction = getGame() ? getGame()->getCommanderZoomFraction() : 1;
+
       U32 renderStyle = mEngineered ? 2 : 0;
-      renderTeleporter(getOrigin(), renderStyle, true, getGame()->getCurrentTime(), zoomFraction, radiusFraction, 
+      renderTeleporter(getOrigin(), renderStyle, true, Platform::getRealMilliseconds(), zoomFraction, radiusFraction, 
                        (F32)TELEPORTER_RADIUS, 1.0, mDestManager.getDestList(), trackerCount);
    }
 

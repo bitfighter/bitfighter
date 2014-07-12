@@ -70,16 +70,22 @@ GoalZone *GoalZone::clone() const
 
 void GoalZone::render() const
 {
-   F32 glow = getGame()->getGlowZoneTimer().getFraction();
-   S32 glowingZoneTeam = getGame()->getGlowingZoneTeam();
+   F32 glow = 0;
+   S32 glowingZoneTeam = TEAM_NEUTRAL;
 
-   // Check if to make sure that the zone matches the glow team if we're glowing
-   if(glowingZoneTeam >= 0 && glowingZoneTeam != getTeam())
-      glow = 0;
+   if(getGame())
+   {
+      glow = getGame()->getGlowZoneTimer().getFraction();
+      glowingZoneTeam = getGame()->getGlowingZoneTeam();
+
+      // Check if to make sure that the zone matches the glow team if we're glowing
+      if(glowingZoneTeam >= 0 && glowingZoneTeam != getTeam())
+         glow = 0;
+   }
 
    // This won't change during the game
    static const GoalZoneFlashStyle flashStyle = 
-            getGame()->getSettings()->getIniSettings()->mSettings.getVal<GoalZoneFlashStyle>(IniKey::GoalZoneFlashStyle);
+            gSettings.getIniSettings()->mSettings.getVal<GoalZoneFlashStyle>(IniKey::GoalZoneFlashStyle);
 
    renderGoalZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore, 
                   mFlashCount ? F32(mFlashTimer.getCurrent()) / FlashDelay : 0, flashStyle);

@@ -177,6 +177,8 @@ private:
    Timer mFuseTimer;
    void initialize(const Point &pos);
 
+   bool getMineVisible(const ClientGame *game) const;
+
 public:
    static const F32 SensorRadius;            // Radius of outer circle when mine is rendered
    static const S32 ArmedMask = Burst::FirstFreeMask;

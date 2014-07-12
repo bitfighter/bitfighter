@@ -391,7 +391,7 @@ void ClientGame::queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferP
 }
 
 
-S32 ClientGame::getCurrentTeamIndex()
+S32 ClientGame::getCurrentTeamIndex() const
 {
    Ship *ship = getLocalPlayerShip(); // first try, when playing back a recorded game
    if(ship)

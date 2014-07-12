@@ -360,7 +360,7 @@ void CoreItem::renderItem(const Point &pos) const
 #ifndef ZAP_DEDICATED
    if(shouldRender())
    {
-      GameType *gameType = getGame()->getGameType();
+      GameType *gameType = static_cast<Level *>(getDatabase())->getGameType();
       S32 time = gameType->getTotalGamePlayedInMs();
       PanelGeom panelGeom = getPanelGeom();
       renderCore(pos, getColor(), time, &panelGeom, mPanelHealth, mStartingPanelHealth);
@@ -646,7 +646,8 @@ PanelGeom CoreItem::getPanelGeom() const
 {
    PanelGeom panelGeom;
 
-   fillPanelGeom(getPos(), getGame()->getGameType()->getTotalGamePlayedInMs() * mRotateSpeed, panelGeom);
+   U32 timePlayed = getGame() ? getGame()->getGameType()->getTotalGamePlayedInMs() : Platform::getRealMilliseconds();
+   fillPanelGeom(getPos(), timePlayed * mRotateSpeed, panelGeom);
 
    return panelGeom;
 }

@@ -1007,35 +1007,40 @@ void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
+bool Mine::getMineVisible(const ClientGame *game) const
+{
+   S32 ourTeam = game->getCurrentTeamIndex();
+
+   // Neutral player see all mines -- note that we don't really have neutral players at this time.  But if we did...
+   if(ourTeam == TEAM_NEUTRAL)
+      return true;
+
+   // Can see mine if laid by teammate in team game OR you laid it yourself
+   if((ourTeam == getTeam() && game->isTeamGame()) || mIsOwnedByLocalClient)
+      return true;
+
+   // If sensor is active and you're within the detection distance
+   Ship *ship = game->getLocalPlayerShip();
+   if(ship && ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < 
+                                                         sq(ModuleInfo::SensorCloakInnerDetectionDistance))
+      return true;
+
+   return false;
+}
+
+
 void Mine::renderItem(const Point &pos) const
 {
 #ifndef ZAP_DEDICATED
    if(!shouldRender())
       return;
 
-   bool visible = false, armed = false;
+   bool visible = true, armed = true;
 
-   Ship *ship = getGame()->getLocalPlayerShip();
-
-   S32 ourTeam = static_cast<ClientGame*>(getGame())->getCurrentTeamIndex();
-
-   if(ourTeam != TEAM_NEUTRAL)
+   if(getGame())
    {
+      visible = getMineVisible(static_cast<ClientGame *>(getGame()));
       armed = mArmed;
-
-      // Can see mine if laid by teammate in team game OR you laid it yourself
-      if( (ourTeam == getTeam() && getGame()->isTeamGame()) ||
-            mIsOwnedByLocalClient)
-         visible = true;
-
-      // If sensor is active and you're within the detection distance
-      if(ship && ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(ModuleInfo::SensorCloakInnerDetectionDistance))
-         visible = true;
-   }
-   else
-   {
-      armed = true;
-      visible = true;      // We get here in editor when in preview mode
    }
 
    renderMine(pos, armed, visible);
