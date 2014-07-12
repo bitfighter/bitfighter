@@ -88,12 +88,13 @@ void GameParamUserInterface::onActivate()
    selectedIndex = 0;                          // First item selected when we begin
 
    Level *level = getUIManager()->getUI<EditorUserInterface>()->getLevel();
+   const GameType *gameType = level->getGameType();
 
    // Force rebuild of all params for current gameType; this will make sure we have the latest info if we've loaded a new level,
    // but will also preserve any values entered for gameTypes that are not current.
-   clearCurrentGameTypeParams(level->getGameType());
+   clearCurrentGameTypeParams(gameType);
 
-   updateMenuItems(level->getGameType());   
+   updateMenuItems(gameType);   
    mOrigGameParams = level->toLevelCode();   // Save a copy of the params coming in for comparison when we leave to see what changed
    Cursor::disableCursor();
 }
@@ -117,7 +118,24 @@ void GameParamUserInterface::clearCurrentGameTypeParams(const GameType *gameType
 }
 
 
-static Vector<string> gameTypes;
+static const Vector<string> buildGameTypesList()
+{
+   Vector<string> gameTypes;
+
+   gameTypes = GameType::getGameTypeNames();
+   gameTypes.sort(alphaSort);
+
+   return gameTypes;
+}
+
+
+static const Vector<string> &getGameTypes()
+{
+   static const Vector<string> gameTypes = buildGameTypesList();
+
+   return gameTypes;
+}
+
 
 static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
 {
@@ -125,7 +143,7 @@ static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
       delete game->getGameType();
 
    // Instantiate our gameType object and cast it to GameType
-   TNL::Object *theObject = TNL::Object::create(GameType::getGameTypeClassName(gameTypes[gtIndex]));
+   TNL::Object *theObject = TNL::Object::create(GameType::getGameTypeClassName(getGameTypes()[gtIndex]));
    GameType *gt = dynamic_cast<GameType *>(theObject);   
 
    gt->addToGame(game, game->getGameObjDatabase());
@@ -141,12 +159,6 @@ void GameParamUserInterface::updateMenuItems(const GameType *gameType)
 {
    TNLAssert(gameType, "Missing game type!");
 
-   if(gameTypes.size() == 0)     // Should only be run once, as these gameTypes will not change during the session
-   {
-      gameTypes = GameType::getGameTypeNames();
-      gameTypes.sort(alphaSort);
-   }
-
    clearMenuItems();
 
    // Note that on some gametypes instructions[1] is NULL
@@ -154,8 +166,8 @@ void GameParamUserInterface::updateMenuItems(const GameType *gameType)
                              (gameType->getInstructionString()[1] ?  string(" ") + gameType->getInstructionString()[1] : "");
 
    addMenuItem(new ToggleMenuItem("Game Type:",       
-                                  gameTypes,
-                                  gameTypes.getIndex(gameType->getGameTypeName()),
+                                  getGameTypes(),
+                                  getGameTypes().getIndex(gameType->getGameTypeName()),
                                   true,
                                   changeGameTypeCallback,
                                   instructs));
@@ -199,7 +211,7 @@ void GameParamUserInterface::onEscape()
 {
    getUIManager()->getUI<EditorUserInterface>()->setLevelFileName(getMenuItem(1)->getValue());  
 
-   GameType *gameType = getGame()->getGameType();
+   GameType *gameType = getUIManager()->getUI<EditorUserInterface>()->getLevel()->getGameType();
 
    const Vector<string> *keys = gameType->getGameParameterMenuKeys();
 
@@ -233,7 +245,9 @@ void GameParamUserInterface::processSelection(U32 index)
 
 bool GameParamUserInterface::anythingChanged()
 {
-   return mOrigGameParams != getGame()->toLevelCode();
+   // While we were in the menu, no items changed... the only things that could have changed would be in the level
+   // metadata and settings section.
+   return mOrigGameParams != getUIManager()->getUI<EditorUserInterface>()->getLevel()->toLevelCode();
 }
 
 
