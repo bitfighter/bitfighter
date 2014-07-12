@@ -266,26 +266,31 @@ void NexusGameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismoun
 
 
 #ifndef ZAP_DEDICATED
-// Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
-Vector<string> NexusGameType::getGameParameterMenuKeys()
+Vector<string> NexusGameType::makeParameterMenuKeys() const
 {
-   Vector<string> items = Parent::getGameParameterMenuKeys();
+   // Start with the keys from our parent (GameType)
+   Vector<string> items = *Parent::getGameParameterMenuKeys();
    
+   S32 index = items.getIndex("Win Score");
+   TNLAssert(index >= 0, "Invalid index!");     // Protect against text of Win Score being changed in parent
+
    // Remove Win Score, replace it with some Nexus specific items
-   for(S32 i = 0; i < items.size(); i++)
-      if(items[i] == "Win Score")
-      {
-         items.erase(i);      // Delete "Win Score"
+   items.erase(index);      // Delete "Win Score"
 
-         // Create slots for 3 new items, and fill them with our Nexus specific items
-         items.insert(i,     "Nexus Time to Open");
-         items.insert(i + 1, "Nexus Time Remain Open");
-         items.insert(i + 2, "Nexus Win Score");
-
-         break;
-      }
+   // Create slots for 3 new items, and fill them with our Nexus specific items
+   items.insert(index,     "Nexus Time to Open");
+   items.insert(index + 1, "Nexus Time Remain Open");
+   items.insert(index + 2, "Nexus Win Score");
 
    return items;
+}
+
+
+// Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
+const Vector<string> *NexusGameType::getGameParameterMenuKeys() const
+{
+   static const Vector<string> keys = makeParameterMenuKeys();
+   return &keys;
 }
 
 

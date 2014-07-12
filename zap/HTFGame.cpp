@@ -61,20 +61,26 @@ string HTFGameType::toLevelCode() const
 
 
 #ifndef ZAP_DEDICATED
-// Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
-Vector<string> HTFGameType::getGameParameterMenuKeys()
+Vector<string> HTFGameType::makeParameterMenuKeys() const
 {
-   Vector<string> items = Parent::getGameParameterMenuKeys();
+   // Start with the keys from our parent (GameType)
+   Vector<string> items = *Parent::getGameParameterMenuKeys();
 
-   // Use "Win Score" as an indicator of where to insert our specific menu items
-   for(S32 i = 0; i < items.size(); i++)
-      if(items[i] == "Win Score")
-      {
-         items.insert(i + 2, "Point Earn Rate");
-         break;
-      }
+   // Remove "Win Score" as that's not needed here -- win score is determined by the number of cores
+   S32 index = items.getIndex("Win Score");
+   TNLAssert(index >= 0, "Invalid index!");     // Protect against text of Win Score being changed in parent
+
+   items.insert(index + 2, "Point Earn Rate");
 
    return items;
+}
+
+
+// Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
+const Vector<string> *HTFGameType::getGameParameterMenuKeys() const
+{
+   static const Vector<string> keys = makeParameterMenuKeys();
+   return &keys;
 }
 
 

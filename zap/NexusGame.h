@@ -38,6 +38,9 @@ private:
    Vector<YardSaleWaypoint> mYardSaleWaypoints;
    Vector<SafePtr<NexusZone> > mNexus;
 
+
+   Vector<string> makeParameterMenuKeys() const;
+
    void idle_client(U32 deltaT);     // Idle for clients
    void idle_server(U32 deltaT);     // Idle for server
 
@@ -69,7 +72,7 @@ public:
    void setNewClosedTime(S32 timeInSeconds);
 
 #ifndef ZAP_DEDICATED
-   Vector<string> getGameParameterMenuKeys();
+   const Vector<string> *getGameParameterMenuKeys() const;
    boost::shared_ptr<MenuItem> getMenuItem(const string &key) const;
    bool saveMenuItem(const MenuItem *menuItem, const string &key);
 #endif

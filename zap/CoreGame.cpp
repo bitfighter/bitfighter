@@ -103,19 +103,26 @@ bool CoreGameType::isTeamCoreBeingAttacked(S32 teamIndex) const
 
 
 #ifndef ZAP_DEDICATED
-Vector<string> CoreGameType::getGameParameterMenuKeys()
+
+Vector<string> CoreGameType::makeParameterMenuKeys() const
 {
-   Vector<string> items = Parent::getGameParameterMenuKeys();
+   // Start with the keys from our parent (GameType)
+   Vector<string> items = *Parent::getGameParameterMenuKeys();
 
    // Remove "Win Score" as that's not needed here -- win score is determined by the number of cores
-   for(S32 i = 0; i < items.size(); i++)
-      if(items[i] == "Win Score")
-      {
-         items.erase(i);
-         break;
-      }
- 
+   S32 index = items.getIndex("Win Score");
+   TNLAssert(index >= 0, "Invalid index!");     // Protect against text of Win Score being changed in parent
+
+   items.erase(index);
+
    return items;
+}
+
+
+const Vector<string> *CoreGameType::getGameParameterMenuKeys() const
+{
+   static const Vector<string> keys = makeParameterMenuKeys();
+   return &keys;
 }
 #endif
 

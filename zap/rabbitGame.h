@@ -18,11 +18,13 @@ class RabbitGameType : public GameType
 {
    typedef GameType Parent;
 
+private:
    U32 mFlagReturnTimer;
    U32 mFlagScoreTimer;
 
-public:
+   Vector<string> makeParameterMenuKeys() const;
 
+public:
    enum
    {
       RabbitMsgGrab,
@@ -41,7 +43,7 @@ public:
    string toLevelCode() const;
 
 #ifndef ZAP_DEDICATED
-   Vector<string> getGameParameterMenuKeys();
+   const Vector<string> *getGameParameterMenuKeys() const;
    boost::shared_ptr<MenuItem> getMenuItem(const string &key) const;
    bool saveMenuItem(const MenuItem *menuItem, const string &key);
 #endif

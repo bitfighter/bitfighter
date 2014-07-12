@@ -115,21 +115,27 @@ string RabbitGameType::toLevelCode() const
 
 #ifndef ZAP_DEDICATED
 // Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
-Vector<string> RabbitGameType::getGameParameterMenuKeys()
+Vector<string> RabbitGameType::makeParameterMenuKeys() const
 {
-   Vector<string> items = Parent::getGameParameterMenuKeys();
-
-   // Use "Win Score" as an indicator of where to insert our Rabbit specific menu items
-   for(S32 i = 0; i < items.size(); i++)
-      if(items[i] == "Win Score")
-      {
-         items.insert(i - 1, "Flag Return Time");
-         items.insert(i + 2, "Point Earn Rate");
-
-         break;
-      }
+   // Start with the keys from our parent (GameType)
+   Vector<string> items = *Parent::getGameParameterMenuKeys();
+   
+   S32 index = items.getIndex("Win Score");
+   TNLAssert(index >= 0, "Invalid index!");     // Protect against text of Win Score being changed in parent
+   
+   // Use "Win Score" as a marker of where to insert our Rabbit specific menu items
+   items.insert(index - 1, "Flag Return Time");
+   items.insert(index + 2, "Point Earn Rate");
 
    return items;
+}
+
+
+// Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
+const Vector<string> *RabbitGameType::getGameParameterMenuKeys() const
+{
+   static const Vector<string> keys = makeParameterMenuKeys();
+   return &keys;
 }
 
 

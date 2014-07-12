@@ -62,7 +62,7 @@ private:
    virtual S32 getGap(MenuItemSize size) const;
 
    S32 getYStart() const;
-
+   void clearCurrentGameTypeParams(const GameType *gameType);
 
    typedef map<const string, boost::shared_ptr<MenuItem> > MenuItemMap;
    MenuItemMap mMenuItemMap;
@@ -75,11 +75,11 @@ public:
    S32 selectedIndex;          // Highlighted menu item
    S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
 
-   void updateMenuItems();
-   void clearCurrentGameTypeParams();
-
    void onActivate();
    void onEscape();
+
+   void updateMenuItems(const GameType *gameType);
+
 };
 
 };

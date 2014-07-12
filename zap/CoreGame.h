@@ -23,6 +23,8 @@ class CoreGameType : public GameType
 private:
    Vector<SafePtr<CoreItem> > mCores;
 
+   Vector<string> makeParameterMenuKeys() const;
+
 public:
    static const S32 DestroyedCoreScore = 1;
 
@@ -52,7 +54,7 @@ public:
 
 
 #ifndef ZAP_DEDICATED
-   Vector<string> getGameParameterMenuKeys();
+   const Vector<string> *getGameParameterMenuKeys() const;
    void renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const;
 #endif
 

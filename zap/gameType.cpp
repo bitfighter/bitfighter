@@ -219,7 +219,7 @@ GameTypeId GameType::getGameTypeIdFromName(const string &name)
 
 #ifndef ZAP_DEDICATED
 // Menu items we want to show
-Vector<string> GameType::getGameParameterMenuKeys()
+const Vector<string> *GameType::getGameParameterMenuKeys() const
 {
    static const string vals[] = {
       "Level Name",
@@ -234,7 +234,9 @@ Vector<string> GameType::getGameParameterMenuKeys()
       "Allow Robots"
    };
 
-   return Vector<string> (vals, ARRAYSIZE(vals));
+   static const Vector<string> keys(vals, ARRAYSIZE(vals));
+
+   return &keys;
 }
 
 

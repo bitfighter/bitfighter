@@ -14,21 +14,25 @@ namespace Zap
 class HTFGameType : public GameType
 {
    typedef GameType Parent;
+
+private:
    static StringTableEntry aString;
    static StringTableEntry theString;
 
    U32 mFlagScoreTime;     // Time flag is in your zone to get points for your team
 
+   Vector<string> makeParameterMenuKeys() const;
+
 public:
-   HTFGameType();    // Constructor
-   virtual ~HTFGameType();
+   HTFGameType();             // Constructor
+   virtual ~HTFGameType();    // Destructor
 
    bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
 #ifndef ZAP_DEDICATED
    // Editor menu
-   Vector<string> getGameParameterMenuKeys();
+   const Vector<string> *getGameParameterMenuKeys() const;
    boost::shared_ptr<MenuItem> getMenuItem(const string &key) const;
    bool saveMenuItem(const MenuItem *menuItem, const string &key);
 #endif
