@@ -59,6 +59,8 @@ public:
    Level();             // Constructor
    virtual ~Level();    // Destructor
 
+   Level *clone();      // Duplicate level
+
    static const U32 CurrentLevelFormat = 2;
 
    void onAddedToServerGame(Game *game);

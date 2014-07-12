@@ -49,6 +49,18 @@ Level::~Level()
 }
 
 
+Level *Level::clone()
+{
+   Level *newLevel = new Level;
+
+   newLevel->copyObjects(this);
+   newLevel->setGameType(getGameType()->clone());
+   newLevel->setTeamInfosPtr(getTeamInfosClone());
+
+   return newLevel;
+}
+
+
 string Level::getHash() const
 {
    return mLevelHash;

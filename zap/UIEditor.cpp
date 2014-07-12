@@ -318,11 +318,7 @@ void EditorUserInterface::saveUndoState(bool forceSelectionOfTargetObject)
    }
 
    Level *oldLevel = getLevel();
-   Level *newLevel = new Level();    // Make a copy
-
-   newLevel->copyObjects(getLevel());
-   newLevel->setGameType(oldLevel->getGameType()->clone());
-   newLevel->setTeamInfosPtr(oldLevel->getTeamInfosClone());
+   Level *newLevel = oldLevel->clone();    // Make a copy
 
    mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<Level>(newLevel);  
 
