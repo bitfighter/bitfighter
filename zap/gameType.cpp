@@ -2387,7 +2387,7 @@ void GameType::setTimeRemaining(U32 timeLeft, bool isUnlimited)
 // Game time has changed -- need to do an update
 void GameType::setTimeEnding(U32 timeEnding)
 {
-   TNLAssert(!getGame()->isServer(), "This should only run on the client!");
+   TNLAssert(!getGame() || !getGame()->isServer(), "This should only run on the client!");
    mEndingGamePlay = timeEnding;
 }
 

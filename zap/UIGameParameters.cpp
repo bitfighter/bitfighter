@@ -67,14 +67,10 @@ GameParamUserInterface::GameParamUserInterface(ClientGame *game) : Parent(game)
    mMenuTitle = "GAME PARAMETERS MENU";
    mMenuSubTitle = "";
    mMaxMenuSize = S32_MAX;                // We never want scrolling on this menu!
-
-   mGameSpecificParams = 0;
-   selectedIndex = 0;
-   mQuitItemIndex = 0;
-   changingItem = -1;
 }
 
 
+// Destructor
 GameParamUserInterface::~GameParamUserInterface()
 {
    // Do nothing
@@ -84,8 +80,6 @@ GameParamUserInterface::~GameParamUserInterface()
 void GameParamUserInterface::onActivate()
 {
    TNLAssert(getUIManager()->cameFrom<EditorUserInterface>(), "GameParamUserInterface should only be called from the editor!");
-
-   selectedIndex = 0;                          // First item selected when we begin
 
    Level *level = getUIManager()->getUI<EditorUserInterface>()->getLevel();
    const GameType *gameType = level->getGameType();
@@ -117,6 +111,8 @@ void GameParamUserInterface::clearCurrentGameTypeParams(const GameType *gameType
    }
 }
 
+
+extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
 
 static const Vector<string> buildGameTypesList()
 {
@@ -152,8 +148,6 @@ static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
    game->getUIManager()->getUI<GameParamUserInterface>()->updateMenuItems(game->getGameType());
 }
 
-
-extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
 
 void GameParamUserInterface::updateMenuItems(const GameType *gameType)
 {
