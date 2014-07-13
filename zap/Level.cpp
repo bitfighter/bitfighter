@@ -411,7 +411,6 @@ void Level::addTeam(const TeamInfo &teamInfo, S32 index)
 
 AbstractTeam *Level::getTeam(S32 teamIndex) const 
 { 
-   //TNLAssert(mAddedToGame, "Expected to have been added to a game by now!");
    return mTeamManager.getTeam(teamIndex);        
 }
 
@@ -425,7 +424,7 @@ void Level::setTeamInfosPtr(const boost::shared_ptr<Vector<TeamInfo> > &teamInfo
 boost::shared_ptr<Vector<TeamInfo> > Level::getTeamInfosPtr() const
 {
    return mTeamInfos;
-   }
+}
 
 
 void Level::setTeamHasFlag(S32 teamIndex, bool hasFlag)
