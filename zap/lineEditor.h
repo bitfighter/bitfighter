@@ -27,7 +27,7 @@ class LineEditor
 {
 private:
    // Don't put another string after this or you'll get a weird memory bug that will
-   // drain precious hours of your life away trying to figure out...
+   // drain precious hours of your life away trying to figure out...  <== don't worry, I don't understand this anymore either! -Wat
    string mLine;
 
    bool mMasked;
