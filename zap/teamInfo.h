@@ -30,8 +30,9 @@ protected:
    Color mColor;
 
 public:
-   TeamInfo();          // Constructor
-   virtual ~TeamInfo(); // Destructor
+   TeamInfo();                            // Constructor
+   TeamInfo(const TeamPreset &preset);    // Constructor
+   virtual ~TeamInfo();                   // Destructor
 
    bool processArguments(S32 argc, const char **argv);     // Read team info from level line
 

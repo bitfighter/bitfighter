@@ -179,6 +179,20 @@ void EditorUserInterface::setLevel(boost::shared_ptr<Level> level)
    TNLAssert(level.get(), "Level should not be NULL!");
    mLevel = boost::dynamic_pointer_cast<Level>(level);
 
+   // Do some special preparations for walls/polywalls -- the editor needs to know about wall edges and such
+   // for hit detection and mounting turrets/ffs
+   const Vector<DatabaseObject *> *objects = level->findObjects_fast();
+   for(S32 i = 0; i < objects->size(); i++)
+   {
+      DatabaseObject *obj = objects->get(i);
+
+      if(obj->getObjectTypeNumber() == WallItemTypeNumber)
+         getGame()->addWallItem(static_cast<WallItem *>(obj), mLevel.get());
+
+ /*     else if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
+         getGame()->addPolywallItem(static_cast<PolywallItem *>(obj), &mLevel);*/
+   }
+
    // Tell mDockItems to use the same team info as we use for the regular items
    mDockItems.setTeamInfosPtr(mLevel->getTeamInfosPtr());
 }
@@ -517,7 +531,7 @@ void EditorUserInterface::clearUndoHistory()
 }
 
 
-extern TeamPreset gTeamPresets[];
+extern TeamPreset TeamPresets[];
 
 void EditorUserInterface::setLevelFileName(string name)
 {
@@ -1146,10 +1160,10 @@ void EditorUserInterface::teamsHaveChanged()
    else
       for(S32 i = 0; i < getTeamCount(); i++)
       {
-         EditorTeam *team = getTeam(i);
+         TeamInfo team = getTeam(i);
 
-         if(mOldTeams[i].getColor() != team->getColor() || 
-            mOldTeams[i].getName()  != team->getName().getString()) // Color(s) or names(s) have changed
+         if(mOldTeams[i].getColor() != team.getColor() ||          // Color(s) or
+            mOldTeams[i].getName()  != team.getName().getString()) // names(s) have changed
          {
             teamsChanged = true;
             break;
@@ -1350,10 +1364,9 @@ S32 EditorUserInterface::getTeamCount() const
 }
 
 
-EditorTeam *EditorUserInterface::getTeam(S32 teamId)
+const TeamInfo &EditorUserInterface::getTeam(S32 teamId)
 {
-   TNLAssert(dynamic_cast<EditorTeam *>(mLevel->getTeam(teamId)), "Expected a EditorTeam");
-   return static_cast<EditorTeam *>(mLevel->getTeam(teamId));
+   return mLevel->getTeamInfo(teamId);
 }
 
 
@@ -1375,9 +1388,9 @@ void EditorUserInterface::setNeedToSave(bool needToSave)
 }
 
 
-void EditorUserInterface::addTeam(EditorTeam *team)
+void EditorUserInterface::addTeam(const TeamInfo &teamInfo)
 {
-   mLevel->addTeam(team);
+   mLevel->addTeam(teamInfo);
 }
 
 
@@ -5446,7 +5459,7 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 {
    if(getTeamCount() == 0)
    {
-      EditorTeam *team = new EditorTeam(gTeamPresets[0]);
+      EditorTeam *team = new EditorTeam(TeamPresets[0]);
 
       mLevel->addTeam(team);
    }

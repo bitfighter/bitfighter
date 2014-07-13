@@ -6,6 +6,7 @@
 #ifndef _UITEAMDEFMENU_H_
 #define _UITEAMDEFMENU_H_
 
+#include "game.h"    // For Game::MAX_TEAMS
 #include "UI.h"
 #include "InputModeEnum.h"
 #include "ConfigEnum.h"
@@ -41,7 +42,13 @@ private:
 
    bool mEditingTeam;         
    bool mEditingColor;
+
+   Vector<TeamInfo> *mTeamInfos;
+
    ColorEntryMode mColorEntryMode;
+
+   LineEditor mHexColorEditors[Game::MAX_TEAMS];
+   LineEditor mTeamNameEditors[Game::MAX_TEAMS];
 
    F32 getColorBase() const;
    F32 getAmount() const;

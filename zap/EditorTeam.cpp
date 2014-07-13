@@ -22,7 +22,7 @@ EditorTeam::EditorTeam(const TeamPreset &preset)
 {
    initialize();
 
-   setColor(preset.r, preset.g, preset.b);
+   setColor(preset.color);
    mNameEditor.setString(preset.name);
 }
 

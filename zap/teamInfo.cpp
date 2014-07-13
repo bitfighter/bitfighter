@@ -25,6 +25,15 @@ TeamInfo::TeamInfo() :
 }
 
 
+// Cosntructor
+TeamInfo::TeamInfo(const TeamPreset &preset) :
+   mName(preset.name),
+   mColor(preset.color)
+{
+   // Do nothing
+}
+
+
 // Destructor
 TeamInfo::~TeamInfo()
 {
