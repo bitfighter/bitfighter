@@ -595,7 +595,7 @@ void EditorUserInterface::loadLevel()
    mLoadTarget = level;
 
    TNLAssert(mLevel->getGameType(), "Level should have GameType!");
-   TNLAssert(mLevel->getTeamCount() > 0, "Level should have at least one team!")
+   TNLAssert(mLevel->getTeamCount() > 0, "Level should have at least one team!");
 
    //if(!game->getGameType())         // Make sure we have GameType
    //{
@@ -5158,7 +5158,7 @@ void EditorUserInterface::createNormalizedScreenshot(ClientGame* game)
 
    render();
 #ifndef BF_NO_SCREENSHOTS
-   ScreenShooter::saveScreenshot(game->getUIManager(), gSettings, LevelDatabaseUploadThread::UploadScreenshotFilename);
+   ScreenShooter::saveScreenshot(game->getUIManager(), LevelDatabaseUploadThread::UploadScreenshotFilename);
 #endif
    mPreviewMode = false;
    mNormalizedScreenshotMode = false;

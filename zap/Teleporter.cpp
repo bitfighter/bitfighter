@@ -767,6 +767,7 @@ void Teleporter::idle(IdleCallPath path)
    U32 deltaT = mCurrentMove.time;
    mTime += deltaT;
 
+#ifndef ZAP_DEDICATED
    // Client only
    if(path == ClientIdlingNotLocalShip)
    {
@@ -779,6 +780,7 @@ void Teleporter::idle(IdleCallPath path)
             mExplosionTimer.update(deltaT);
       }
    }
+#endif
 
    if(mTeleportCooldown.update(deltaT) && path == ServerIdleMainLoop)
       doTeleport();

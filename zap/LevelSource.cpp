@@ -561,7 +561,7 @@ Level *FileListLevelSource::getLevel(S32 index) const
 
    const LevelInfo *levelInfo = &mLevelInfos[index];
 
-	string filename = FolderManager::findLevelFile(GameSettings::getFolderManager()->getLevelDir(), levelInfo->filename);
+	string filename = FolderManager::findLevelFile(gSettings.getFolderManager()->getLevelDir(), levelInfo->filename);
 
 	if(filename == "")
 	{

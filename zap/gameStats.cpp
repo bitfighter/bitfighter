@@ -35,8 +35,6 @@ U32 calculateChecksum(BitStream &s, U32 length, U32 bitStart = 0)
 namespace Zap
 {
 
-string gSqlite = "stats";
-
 // Sorts player stats by score, high to low
 S32 QSORT_CALLBACK playerScoreSort(PlayerStats *a, PlayerStats *b)
 {
@@ -171,7 +169,7 @@ void logGameStats(VersionedGameStats *stats)
 {
    processStatsResults(&stats->gameStats);
 
-   string databasePath = gSqlite + ".db";
+   string databasePath = DbWriter::DatabaseWriter::sqliteFile;
 
    DatabaseWriter databaseWriter(databasePath.c_str());
 

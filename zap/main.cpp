@@ -423,8 +423,6 @@ FileLogConsumer gMainLog;
 FileLogConsumer gServerLog;            // We'll apply a filter later on, in main()
 
 
-extern GameSettings gSettings;
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 

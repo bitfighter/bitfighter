@@ -35,6 +35,9 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Our global static for settings
+GameSettings gSettings;
+
 
 enum ParamRequirements {
    NO_PARAMETERS,      
@@ -154,7 +157,6 @@ const char *helpTitles[] = {
 ////////////////////////////////////////
 ////////////////////////////////////////
 // Define statics
-FolderManager *GameSettings::mFolderManager = NULL;
 Vector<string> GameSettings::DetectedJoystickNameList;   // List of joysticks we found attached to this machine
 
 S32 GameSettings::UseJoystickNumber = 0;
@@ -176,11 +178,6 @@ GameSettings::GameSettings()
 GameSettings::~GameSettings()
 {
    delete mBanList;
-   if(mFolderManager)
-   {
-      delete mFolderManager;
-      mFolderManager = NULL;
-   }
 }
 
 
@@ -320,10 +317,7 @@ bool GameSettings::getSpecified(ParamId paramId)
 // Lazily initialize
 FolderManager *GameSettings::getFolderManager()
 {
-   if(!mFolderManager)
-      mFolderManager = new FolderManager();
-
-   return mFolderManager;
+   return &mFolderManager;
 }
 
 

@@ -119,7 +119,7 @@ private:
    string mLevelChangePassword;
 
    Vector<string> mLevelSkipList;      // Levels we'll never load, to create a pseudo delete function for remote server mgt  <=== does this ever get loaded???
-   static FolderManager *mFolderManager;
+   FolderManager mFolderManager;
    InputCodeManager mInputCodeManager;
 
    BanList *mBanList;                  // Our ban list
@@ -206,7 +206,7 @@ public:
    Vector<string> *getMasterServerList();
    void saveMasterAddressListInIniUnlessItCameFromCmdLine();
    
-   static FolderManager *getFolderManager();
+   FolderManager *getFolderManager();
    FolderManager getCmdLineFolderManager();    // Return a FolderManager struct populated with settings specified on cmd line
 
    BanList *getBanList();
@@ -304,7 +304,7 @@ public:
 };
 
 
-static GameSettings gSettings;
+extern GameSettings gSettings;
 
 typedef boost::shared_ptr<GameSettings> GameSettingsPtr;
 

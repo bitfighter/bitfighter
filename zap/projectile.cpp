@@ -1009,6 +1009,7 @@ void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 bool Mine::getMineVisible(const ClientGame *game) const
 {
+#ifndef ZAP_DEDICATED
    S32 ourTeam = game->getCurrentTeamIndex();
 
    // Neutral player see all mines -- note that we don't really have neutral players at this time.  But if we did...
@@ -1024,7 +1025,7 @@ bool Mine::getMineVisible(const ClientGame *game) const
    if(ship && ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < 
                                                          sq(ModuleInfo::SensorCloakInnerDetectionDistance))
       return true;
-
+#endif
    return false;
 }
 

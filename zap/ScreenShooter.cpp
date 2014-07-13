@@ -103,9 +103,9 @@ void ScreenShooter::restoreViewportToWindow()
 
 // Thanks to the good developers of naev for excellent code to base this off of.
 // Much was copied directly.
-void ScreenShooter::saveScreenshot(UIManager *uiManager, const GameSettings &settings, string filename)
+void ScreenShooter::saveScreenshot(UIManager *uiManager, string filename)
 {
-   string folder = settings.getFolderManager()->getScreenshotDir();
+   string folder = gSettings.getFolderManager()->getScreenshotDir();
 
    // Let's find a filename to use
    makeSureFolderExists(folder);
