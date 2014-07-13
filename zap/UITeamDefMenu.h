@@ -40,7 +40,7 @@ private:
    
    S32 selectedIndex;          // Highlighted menu item
 
-   bool mEditingTeam;         
+   bool mEditingName;         
    bool mEditingColor;
 
    Vector<TeamInfo> *mTeamInfos;
@@ -57,6 +57,10 @@ private:
    void startEditing();
 
    const char *getEntryMessage() const;
+
+   bool onKeyDown_editingName(InputCode inputCode);
+   bool onKeyDown_editingColor(InputCode inputCode);
+
 
 public:
    explicit TeamDefUserInterface(ClientGame *game);     // Constructor

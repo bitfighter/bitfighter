@@ -20,6 +20,7 @@
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 #include "stringUtils.h"
+#include "MathUtils.h"
 
 #include "UIColorPicker.h"
 
@@ -71,6 +72,7 @@ static SymbolString getSymbolString(const string &text, const InputCodeManager *
 } // namespace UI
 
 
+// Called by an assert in the constructor
 static bool checkNameLengths()
 {
    for(S32 i = 0; i < ARRAYSIZE(TeamPresets); i++)
@@ -129,10 +131,18 @@ static const U32 itemHeight = fontsize + 5;
 void TeamDefUserInterface::onActivate()
 {
    selectedIndex = 0;                        // First item selected when we begin
-   mEditingTeam = mEditingColor = false;     // Not editing anything by default
+   mEditingName = mEditingColor = false;     // Not editing anything by default
 
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
    mTeamInfos = ui->getLevel()->getTeamInfosPtr().get();    // Reference the current team list
+
+   // Grab team names and populate our editors
+   for(S32 i = 0; i < mTeamInfos->size(); i++)
+      mTeamNameEditors[i].setString(mTeamInfos->get(i).getName().getString());
+
+   //// Clear any unused editors -- probably unnecessary
+   //for(S32 i = mTeamInfos->size(); i < ARRAYSIZE(mTeamNameEditors); i++)
+   //   mTeamNameEditors->clear();
 
    S32 teamCount = mTeamInfos->size();
 
@@ -197,7 +207,6 @@ void TeamDefUserInterface::render() const
 
    FontManager::popFontContext();
 
-
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
    S32 size = ui->getTeamCount();
@@ -207,6 +216,7 @@ void TeamDefUserInterface::render() const
    // Draw the fixed teams
    glColor(Colors::NeutralTeamColor);
    drawCenteredStringf(yStart, fontsize, "Neutral Team (can't change)");
+
    glColor(Colors::HostileTeamColor);
    drawCenteredStringf(yStart + fontsize + fontgap, fontsize, "Hostile Team (can't change)");
 
@@ -222,7 +232,7 @@ void TeamDefUserInterface::render() const
       if(j < ui->getTeamCount())
       {
          string numstr = "Team " + itos(j + 1) + ": ";
-         string namestr = numstr + ui->getTeam(j).getName().getString();
+         string namestr = numstr + mTeamNameEditors[j].getString();
          
          string colorstr;
 
@@ -256,11 +266,10 @@ void TeamDefUserInterface::render() const
          // Draw cursor if we're editing
          if(j == selectedIndex)
          {
-            if(mEditingTeam)
+            if(mEditingName)
             {
                S32 x = getCenteredStringStartingPos(fontsize, nameColorStr.c_str()) + 
                        getStringWidth(fontsize, numstr.c_str());
-                       
 
                mTeamNameEditors[j].drawCursor(x, y, fontsize);
             }
@@ -292,6 +301,10 @@ void TeamDefUserInterface::render() const
 // Run this as we're exiting the menu
 void TeamDefUserInterface::onEscape()
 {
+   // Save the names back to the mTeamInfos
+   for(S32 i = 0; i < mTeamInfos->size(); i++)
+      mTeamInfos->get(i).setName(mTeamNameEditors[i].getString());
+
    // Make sure there is at least one team left...
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
@@ -312,7 +325,7 @@ void TeamDefUserInterface::onTextInput(char ascii)
 {
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
-   if(mEditingTeam)
+   if(mEditingName)
    {
       if(isPrintable(ascii))
          mTeamNameEditors[selectedIndex].addChar(ascii);
@@ -326,80 +339,96 @@ void TeamDefUserInterface::onTextInput(char ascii)
 }
 
 
+bool TeamDefUserInterface::onKeyDown_editingName(InputCode inputCode)
+{
+   if(inputCode == KEY_ENTER)       // Finish editing
+   {
+      mEditingName = false;
+      return true;
+   }
+   
+   if(inputCode == KEY_TAB)         // Toggle what we're editing
+   {
+      if(mColorEntryMode == ColorEntryModeHex)
+      {
+         mEditingName = false;
+         mEditingColor = true;
+      }
+      return true;
+   }
+
+   if(inputCode == KEY_ESCAPE)    // Stop editing, and restore the original value
+   {
+      cancelEditing();
+      return true;
+   }
+
+   return mTeamNameEditors[selectedIndex].handleKey(inputCode);
+}
+
+
+bool TeamDefUserInterface::onKeyDown_editingColor(InputCode inputCode)
+{
+   if(inputCode == KEY_ENTER)          // Finish editing
+   {
+      doneEditingColor();
+      return true;
+   }
+
+   if(inputCode == KEY_TAB)       // Toggle to edit name
+   {
+      doneEditingColor();
+      mEditingName = true;
+      return true;
+   }
+
+   if(inputCode == KEY_ESCAPE)    // Stop editing, and restore the original value
+   {
+      cancelEditing();
+      return true;
+   }
+
+   return mHexColorEditors[selectedIndex].handleKey(inputCode);
+}
+
+
 bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
 {
    if(Parent::onKeyDown(inputCode))
       return true;
 
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
+   Level *level = ui->getLevel();
 
    // If we're editing, need to send keypresses to editor
-   if(mEditingTeam)
-   {
-      if(inputCode == KEY_ENTER)          // Finish editing
-      {
-         mEditingTeam = false;
-      }
-      else if(inputCode == KEY_TAB)       // Toggle what we're editing
-      {
-         if(mColorEntryMode == ColorEntryModeHex)
-         {
-            mEditingTeam = false;
-            mEditingColor = true;
-         }
-      }
-      else if(inputCode == KEY_ESCAPE)    // Stop editing, and restore the original value
-      {
-         cancelEditing();
-      }
-      else
-         return mTeamNameEditors[selectedIndex].handleKey(inputCode);
-
-      return true;
-   }
+   if(mEditingName)
+      return onKeyDown_editingName(inputCode);
 
    else if(mEditingColor)
-   {
-      if(inputCode == KEY_ENTER)          // Finish editing
-      {
-         doneEditingColor();
-      }
-      else if(inputCode == KEY_TAB)       // Toggle to edit name
-      {
-         doneEditingColor();
-         mEditingTeam = true;
-      }
-
-      else if(inputCode == KEY_ESCAPE)    // Stop editing, and restore the original value
-      {
-         cancelEditing();
-      }
-      else
-      {
-         return mHexColorEditors[selectedIndex].handleKey(inputCode);
-      }
-
-      return true;
-   }
+      return onKeyDown_editingColor(inputCode);
 
    // Not editing, normal key processing follows
 
    if(inputCode == KEY_ENTER)
    {
       startEditing();
-      mEditingTeam = true;
+      mEditingName = true;
+
+      return true;
    }
 
-   else if(inputCode == KEY_H)
+   if(inputCode == KEY_H)
    {
       if(mColorEntryMode != ColorEntryModeHex)
          return true;
 
       startEditing();
       mEditingColor = true;
+
+      return true;
    }
 
-   else if(inputCode == KEY_DELETE || inputCode == KEY_MINUS)            // Del or Minus - Delete current team
+   if(inputCode == KEY_DELETE || inputCode == KEY_MINUS)            // Del or Minus - Delete current team
    {
       if(ui->getTeamCount() == 1) 
       {
@@ -411,9 +440,11 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       ui->removeTeam(selectedIndex);
       if(selectedIndex >= ui->getTeamCount())
          selectedIndex = ui->getTeamCount() - 1;
+
+      return true;
    }
   
-   else if(inputCode == KEY_INSERT || inputCode == KEY_EQUALS)           // Ins or Plus (equals) - Add new item
+   if(inputCode == KEY_INSERT || inputCode == KEY_EQUALS)           // Ins or Plus (equals) - Add new item
    {
       S32 teamCount = ui->getTeamCount();
 
@@ -427,40 +458,62 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       S32 presetIndex = teamCount % Game::MAX_TEAMS;
 
       EditorTeam *team = new EditorTeam(TeamPresets[presetIndex]);
-      ui->addTeam(team, teamCount);
+      level->addTeam(team, teamCount);
 
       selectedIndex++;
 
       if(selectedIndex < 0)      // It can happen with too many deletes
          selectedIndex = 0;
+
+      return true;
    }
 
-   else if(inputCode == KEY_R)
+   if(inputCode == KEY_R)
    {
-      //if(mColorEntryMode != ColorEntryModeHex)
-      //   ui->getTeam(selectedIndex).alterRed(getAmount());
+      if(mColorEntryMode != ColorEntryModeHex)
+      {
+         Color color = mTeamInfos->get(selectedIndex).getColor();
+         color.r = CLAMP(color.r + getAmount(), 0, 1);
+         mTeamInfos->get(selectedIndex).setColor(color); 
+      }
+
+      return true;
    }
 
-   else if(inputCode == KEY_G)
+   if(inputCode == KEY_G)
    {
-      //if(mColorEntryMode != ColorEntryModeHex)
-      //   ui->getTeam(selectedIndex).alterGreen(getAmount());
+      if(mColorEntryMode != ColorEntryModeHex)
+      {
+         Color color = mTeamInfos->get(selectedIndex).getColor();
+         color.g = CLAMP(color.g + getAmount(), 0, 1);
+         mTeamInfos->get(selectedIndex).setColor(color); 
+      }
+
+      return true;
    }
 
-   else if(inputCode == KEY_B)
+   if(inputCode == KEY_B)
    {
-      //if(mColorEntryMode != ColorEntryModeHex)
-      //   ui->getTeam(selectedIndex).alterBlue(getAmount());
+      if(mColorEntryMode != ColorEntryModeHex)
+      {
+         Color color = mTeamInfos->get(selectedIndex).getColor();
+         color.b = CLAMP(color.b + getAmount(), 0, 1);
+         mTeamInfos->get(selectedIndex).setColor(color); 
+      }
+
+      return true;
    }
 
-   else if(inputCode == KEY_C)  // Want a mouse button?   || inputCode == MOUSE_LEFT)
+   if(inputCode == KEY_C)  // Want a mouse button?   || inputCode == MOUSE_LEFT)
    {
       UIColorPicker *uiCol = getUIManager()->getUI<UIColorPicker>();
       uiCol->set(ui->getTeam(selectedIndex).getColor());
       getUIManager()->activate(uiCol);
+
+      return true;
    }
 
-   else if(inputCode == KEY_M)      // Toggle ColorEntryMode
+   if(inputCode == KEY_M)      // Toggle ColorEntryMode
    {
       mColorEntryMode = ColorEntryMode(mColorEntryMode + 1);
 
@@ -468,14 +521,17 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
          mColorEntryMode = ColorEntryMode(0);
 
       gSettings.getIniSettings()->mSettings.setVal<ColorEntryMode>(IniKey::ColorEntryMode, mColorEntryMode);
+      return true;
    }
 
-   else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)       // Quit
+   if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)       // Quit
    {
       playBoop();
       onEscape();
+      return true;
    }
-   else if(inputCode == KEY_UP || inputCode == BUTTON_DPAD_UP)        // Prev item
+
+   if(inputCode == KEY_UP || inputCode == BUTTON_DPAD_UP)        // Prev item
    {
       selectedIndex--;
       if(selectedIndex < 0)
@@ -483,43 +539,52 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       playBoop();
       Cursor::disableCursor();
 
+      return true;
    }
-   else if(inputCode == KEY_DOWN || inputCode == BUTTON_DPAD_DOWN)    // Next item
+
+   if(inputCode == KEY_DOWN || inputCode == BUTTON_DPAD_DOWN)    // Next item
    {
       selectedIndex++;
       if(selectedIndex >= ui->getTeamCount())
          selectedIndex = 0;
       playBoop();
       Cursor::disableCursor();
+
+      return true;
    }
 
    // Keys 1-9 --> use team preset
-   else if(inputCode >= KEY_1 && inputCode <= KEY_9)
+   if(inputCode >= KEY_1 && inputCode <= KEY_9)
    {
       // Replace all teams with # of teams based on presets
       if(InputCodeManager::checkModifier(KEY_ALT))
       {
          U32 count = (inputCode - KEY_1) + 1;
-         ui->clearTeams();
+         level->clearTeams();
          for(U32 i = 0; i < count; i++)
          {
             TeamInfo teamInfo(TeamPresets[i]);
-            ui->addTeam(teamInfo);
+            level->addTeam(teamInfo);
          }
+         return true;
       }
-      // Replace selection with preset of number pressed
-      else
-      {
-         U32 index = (inputCode - KEY_1);
-         mTeamNameEditors[selectedIndex].setString(TeamPresets[index].name);
-         mHexColorEditors[selectedIndex].setString(TeamPresets[index].color.toHexString());
-      }
-   }
-   else
-      return false;
 
-   // A key was handled
-   return true;
+      // Replace selection with preset of number pressed
+      U32 index = (inputCode - KEY_1);
+      mTeamNameEditors[selectedIndex].setString(TeamPresets[index].name);
+      mHexColorEditors[selectedIndex].setString(TeamPresets[index].color.toHexString());
+
+      // This would also work... not sure which is the cleaner approach
+      //level->getTeam(selectedIndex)->setColor(TeamPresets[index].color);
+      //level->getTeam(selectedIndex)->setName(TeamPresets[index].name);
+
+      mTeamInfos->get(selectedIndex).setName (TeamPresets[index].name);
+      mTeamInfos->get(selectedIndex).setColor(TeamPresets[index].color);
+
+      return true;
+   }
+
+   return false;
 }
 
 
@@ -544,12 +609,11 @@ void TeamDefUserInterface::doneEditingColor()
 }
 
 
+// User hits Escape while editing team details -- revert changes
 void TeamDefUserInterface::cancelEditing()
 {
-   mEditingTeam = false;
+   mEditingName = false;
    mEditingColor = false;
-
-   mTeamInfos = NULL;
 }
 
 
