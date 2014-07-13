@@ -11,6 +11,7 @@
 #include "version.h"
 #include "BanList.h"
 #include "Colors.h"
+#include "../master/database.h"
 
 #ifndef ZAP_DEDICATED
 #  include "quickChatHelper.h"
@@ -28,6 +29,10 @@
 #ifdef TNL_OS_WIN32
 #  include <windows.h>   // For ARRAYSIZE when using ZAP_DEDICATED
 #endif
+
+
+using namespace DbWriter;
+
 
 namespace Zap
 {
@@ -1358,7 +1363,6 @@ static string resolutionHelper(const string &cmdLineDir, const string &rootDataD
 }
 
 
-extern string gSqlite;
 struct CmdLineSettings;
 
 // Getters
@@ -1402,7 +1406,7 @@ void FolderManager::resolveDirs(GameSettings *settings)
    folderManager->sfxDir        = resolutionHelper(cmdLineDirs.sfxDir,        "", "sfx");
    folderManager->fontsDir      = resolutionHelper(cmdLineDirs.fontsDir,      "", "fonts");
 
-   gSqlite = folderManager->logDir + "stats";
+   DatabaseWriter::sqliteFile = folderManager->logDir + DatabaseWriter::sqliteFile;
 }
 
 
@@ -1424,7 +1428,7 @@ void FolderManager::resolveDirs(const string &root)
    sfxDir        = joindir("", "sfx");
    fontsDir      = joindir("", "fonts");
 
-   gSqlite = logDir + "stats";
+   DbWriter::DatabaseWriter::sqliteFile = logDir + DbWriter::DatabaseWriter::sqliteFile;
 }
 
 // Figure out where the levels are.  This is exceedingly complex.

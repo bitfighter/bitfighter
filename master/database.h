@@ -114,6 +114,8 @@ public:
    // SQLite constructor
    DatabaseWriter(const char *db);
 
+   static string sqliteFile;
+
    void selectHandler(const string &sql, S32 cols, Vector<Vector<string> > &values);
 
    void setDumpSql(bool dump);

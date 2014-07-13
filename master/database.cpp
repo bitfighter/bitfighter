@@ -27,6 +27,8 @@ using namespace Master;
 namespace DbWriter
 {
 
+string DatabaseWriter::sqliteFile = "stats.db";
+
    
 // TODO: Should we be reusing these?
 DatabaseWriter getDatabaseWriter(const MasterSettings *settings)
@@ -37,7 +39,7 @@ DatabaseWriter getDatabaseWriter(const MasterSettings *settings)
                             settings->getVal<string>(Master::IniKey::StatsDatabaseUsername).c_str(), 
                             settings->getVal<string>(Master::IniKey::StatsDatabasePassword).c_str());
    else
-      return DatabaseWriter("stats.db");
+      return DatabaseWriter(DatabaseWriter::sqliteFile.c_str());
 }
 
 

@@ -13,13 +13,6 @@
 #include "../zap/IniFile.h"      // For INI reading/writing
 
 
-
-namespace Zap
-{
-   extern string gSqlite;
-}
-
-
 namespace Master 
 {
 
@@ -79,7 +72,7 @@ void MasterSettings::loadSettingsFromINI()
 
 
    // [stats] section --> most has been modernized
-   Zap::gSqlite = ini.GetValue("stats", "sqlite_file_basename", Zap::gSqlite);
+   DbWriter::DatabaseWriter::sqliteFile = ini.GetValue("stats", "sqlite_file_basename", DbWriter::DatabaseWriter::sqliteFile);
 
 
    // [motd_clients] section
