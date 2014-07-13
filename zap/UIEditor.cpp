@@ -581,7 +581,7 @@ void EditorUserInterface::loadLevel()
    mLoadTarget = level;
 
    TNLAssert(mLevel->getGameType(), "Level should have GameType!");
-   TNLAssert(mLevel->getTeamCount() > 0, "Level should have at least one team!")
+   TNLAssert(mLevel->getTeamCount() > 0, "Level should have at least one team!");
 
    //if(!game->getGameType())         // Make sure we have GameType
    //{
