@@ -356,7 +356,7 @@ public:
    void onQuitted();       // Releases some memory when quitting the editor
 
    S32 getTeamCount() const;
-   EditorTeam *getTeam(S32 teamId);
+   const TeamInfo &getTeam(S32 teamId);
 
    void addTeam(EditorTeam *team);
    void addTeam(EditorTeam *team, S32 index);

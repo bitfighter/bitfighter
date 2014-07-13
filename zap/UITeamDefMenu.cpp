@@ -32,7 +32,7 @@ namespace Zap
 
 // Note: Do not make any of the following team names longer than MAX_TEAM_NAME_LENGTH, which is currently 32
 // Note: Make sure we have at least 9 presets below...  (instructions are wired for keys 1-9)
-TeamPreset gTeamPresets[] = {
+static const TeamPreset TeamPresets[] = {
    { "Blue",        0,     0,    1 },
    { "Red",         1,     0,    0 },
    { "Yellow",      1,     1,    0 },
@@ -46,17 +46,9 @@ TeamPreset gTeamPresets[] = {
 
 
 // Other ideas
-//Team Blue 0 0 1
-//Team Red 1 0 0
-//Team Green 0 1 0
-//Team Yellow 1 1 0
-//Team Turquoise 0 1 1
-//Team Pink 1 0 1
-//Team Orange 1 0.5 0
 //Team Black 0 0 0
 //Team White 1 1 1
 //Team Sapphire 0 0 0.7
-//Team Ruby 0.7 0 0
 //Team Emerald 0 0.7 0
 //Team Lime 0.8 1 0
 //Team DarkAngel 0 0.7 0.7
@@ -73,11 +65,20 @@ static SymbolString getSymbolString(const string &text, const InputCodeManager *
 
    SymbolString::symbolParse(inputCodeManager, text, symbols, MenuContext, size, &color);
    return SymbolString(symbols, AlignmentCenter);
-
-   //symbolStringSet.add(SymbolString(symbols, AlignmentCenter));
 }
 
+} // namespace UI
+
+
+static bool checkNameLengths()
+{
+   for(S32 i = 0; i < ARRAYSIZE(TeamPresets); i++)
+      if(strlen(TeamPresets[i].name) > AbstractTeam::MAX_TEAM_NAME_LENGTH - 1)
+         return false;
+
+   return true;
 }
+
 
 // Constructor
 TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) : 
@@ -85,8 +86,10 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) :
    mMenuSubTitle(8),
    mMenuTitle("CONFIGURE TEAMS")
 {
-   GameSettings *settings = getGame()->getSettings();
-   InputCodeManager *inputCodeManager = settings->getInputCodeManager();
+   TNLAssert(ARRAYSIZE(TeamPresets) == Game::MAX_TEAMS, "Wrong number of presets!");
+   TNLAssert(checkNameLengths(), "Team name is too long!");
+
+   InputCodeManager *inputCodeManager = gSettings.getInputCodeManager();
 
    mTopInstructions =  getSymbolString("For quick configuration, press [[Alt+1]] - [[Alt+9]] to specify number of teams",
                                              inputCodeManager, 18, Colors::menuHelpColor);
@@ -103,7 +106,7 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) :
    mBottomInstructions4 =  getSymbolString("[[Insert]] or [[+]] to insert team | [[Del]] or [[-]] to remove selected team",
                                           inputCodeManager, 16, Colors::menuHelpColor);
 
-   mColorEntryMode = settings->getIniSettings()->mSettings.getVal<ColorEntryMode>(IniKey::ColorEntryMode);
+   mColorEntryMode = gSettings.getIniSettings()->mSettings.getVal<ColorEntryMode>(IniKey::ColorEntryMode);
    mEditingColor = false;
 }
 
@@ -130,6 +133,8 @@ void TeamDefUserInterface::onActivate()
    S32 teamCount = ui->getTeamCount();
 
    ui->mOldTeams.resize(teamCount);  // Avoid unnecessary reallocations
+
+   Level *level = getUIManager()->getUI<EditorUserInterface>()->getLevel();
 
    for(S32 i = 0; i < teamCount; i++)
    {
@@ -305,6 +310,7 @@ string origName;
 Color origColor;
 extern bool isPrintable(char c);
 
+
 void TeamDefUserInterface::onTextInput(char ascii)
 {
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
@@ -372,7 +378,9 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
          cancelEditing();
       }
       else
-         return ui->getTeam(selectedIndex)->getHexColorEditor()->handleKey(inputCode);
+      {
+         return ui->getTeam(selectedIndex).getHexColorEditor()->handleKey(inputCode);
+      }
 
       return true;
    }
@@ -421,7 +429,7 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
 
       S32 presetIndex = teamCount % Game::MAX_TEAMS;
 
-      EditorTeam *team = new EditorTeam(gTeamPresets[presetIndex]);
+      EditorTeam *team = new EditorTeam(TeamPresets[presetIndex]);
       ui->addTeam(team, teamCount);
 
       selectedIndex++;
@@ -462,7 +470,7 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       if(mColorEntryMode >= ColorEntryModeCount)
          mColorEntryMode = ColorEntryMode(0);
 
-      getGame()->getSettings()->getIniSettings()->mSettings.setVal<ColorEntryMode>(IniKey::ColorEntryMode, mColorEntryMode);
+      gSettings.getIniSettings()->mSettings.setVal<ColorEntryMode>(IniKey::ColorEntryMode, mColorEntryMode);
    }
 
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)       // Quit
@@ -498,7 +506,7 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
          ui->clearTeams();
          for(U32 i = 0; i < count; i++)
          {
-            EditorTeam *team = new EditorTeam(gTeamPresets[i]);
+            EditorTeam *team = new EditorTeam(TeamPresets[i]);
             ui->addTeam(team);
          }
       }
@@ -506,8 +514,8 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       else
       {
          U32 index = (inputCode - KEY_1);
-         ui->getTeam(selectedIndex)->setName(gTeamPresets[index].name);
-         ui->getTeam(selectedIndex)->setColor(gTeamPresets[index].r, gTeamPresets[index].g, gTeamPresets[index].b);
+         ui->getTeam(selectedIndex)->setName(TeamPresets[index].name);
+         ui->getTeam(selectedIndex)->setColor(TeamPresets[index].r, TeamPresets[index].g, TeamPresets[index].b);
       }
    }
    else
