@@ -349,11 +349,9 @@ bool TeamDefUserInterface::onKeyDown_editingName(InputCode inputCode)
    
    if(inputCode == KEY_TAB)         // Toggle what we're editing
    {
-      if(mColorEntryMode == ColorEntryModeHex)
-      {
-         mEditingName = false;
-         mEditingColor = true;
-      }
+      mEditingName = false;
+      mEditingColor = true;
+
       return true;
    }
 
