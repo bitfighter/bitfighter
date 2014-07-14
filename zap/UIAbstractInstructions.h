@@ -44,7 +44,7 @@ protected:
          mWallInstr,              mWallBindings;
 
    void pack(UI::SymbolStringSet &Instrs, UI::SymbolStringSet &Bindings, 
-            const ControlStringsEditor *helpBindings, S32 bindingCount, GameSettings *settings);
+            const ControlStringsEditor *helpBindings, S32 bindingCount);
 
 public:
    explicit AbstractInstructionsUserInterface(ClientGame *clientGame);  // Constructor

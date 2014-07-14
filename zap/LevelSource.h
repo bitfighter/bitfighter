@@ -64,6 +64,7 @@ public:
 
 class GridDatabase;
 class Game;
+class GameSettings;
 class FolderManager;
 class Level;
 
@@ -150,9 +151,10 @@ class FileListLevelSource : public MultiLevelSource
 
 private:
    string playlistFile;
+   GameSettings *mGameSettings;
 
 public:
-   FileListLevelSource(const Vector<string> &levelList, const string &folder);     // Constructor
+   FileListLevelSource(const Vector<string> &levelList, const string &folder, GameSettings *settings);     // Constructor
    virtual ~FileListLevelSource();                                                                                                                // Destructor
 
    Level *getLevel(S32 index) const;

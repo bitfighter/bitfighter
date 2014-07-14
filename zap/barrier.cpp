@@ -337,7 +337,7 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vec
 void Barrier::renderLayer(S32 layerIndex)
 {
 #ifndef ZAP_DEDICATED
-   static const Color fillColor(getGame()->getSettings()->getWallFillColor());
+   static const Color fillColor(mGameSettings->getWallFillColor());
 
    if(layerIndex == 0)           // First pass: draw the fill
       renderWallFill(&mRenderFillGeometry, fillColor, mIsPolywall);
@@ -757,7 +757,7 @@ S32 PolyWall::getRenderSortValue()
 
 void PolyWall::renderDock(const Color &color) const
 {
-   static const Color wallOutlineColor(getGame()->getSettings()->getWallOutlineColor());
+   static const Color wallOutlineColor(mGameSettings->getWallOutlineColor());
 
    renderPolygonFill(getFill(), Colors::EDITOR_WALL_FILL_COLOR);
    renderPolygonOutline(getOutline(), wallOutlineColor);

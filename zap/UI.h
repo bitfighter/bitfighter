@@ -56,6 +56,7 @@ private:
    static void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool autoLineWidth = true);
 
 protected:
+   GameSettings *mGameSettings;
    bool mDisableShipKeyboardInput;                 // Disable ship movement while user is in menus
 
 public:
@@ -103,11 +104,11 @@ public:
    virtual void renderMasterStatus();     // Render master server connection status
 
    // Helpers to simplify dealing with key bindings
-   static InputCode getInputCode(BindingNameEnum binding);
-   string getEditorBindingString (const GameSettings &settings, EditorBindingNameEnum  binding);
-   string getSpecialBindingString(const GameSettings &settings, SpecialBindingNameEnum binding);
+   static InputCode getInputCode(GameSettings *settings, BindingNameEnum binding);
+   string getEditorBindingString (EditorBindingNameEnum  binding);
+   string getSpecialBindingString(SpecialBindingNameEnum binding);
 
-   void setInputCode(GameSettings *settings, BindingNameEnum binding, InputCode inputCode);
+   void setInputCode(BindingNameEnum binding, InputCode inputCode);
    bool checkInputCode(BindingNameEnum, InputCode inputCode);
    const char *getInputCodeString(BindingNameEnum binding) const;
 

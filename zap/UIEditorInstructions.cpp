@@ -38,7 +38,6 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
                                                                                      mAnimTimer(ONE_SECOND),
                                                                                      mConsoleInstructions(10)
 {
-   GameSettings *settings = getGame()->getSettings();
    mCurPage = 0;
    mAnimStage = 0;
 
@@ -137,14 +136,11 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    };
 
 
-   pack(keysInstrLeft1,  keysBindingsLeft1, 
-        controls1Left, ARRAYSIZE(controls1Left), settings);
+   pack(keysInstrLeft1,  keysBindingsLeft1, controls1Left, ARRAYSIZE(controls1Left));
 
-   pack(keysInstrRight1, keysBindingsRight1, 
-        controls1Right, ARRAYSIZE(controls1Right), settings);
+   pack(keysInstrRight1, keysBindingsRight1, controls1Right, ARRAYSIZE(controls1Right));
 
-   pack(keysInstrLeft2,  keysBindingsLeft2, 
-        controls2Left, ARRAYSIZE(controls2Left), settings);
+   pack(keysInstrLeft2,  keysBindingsLeft2, controls2Left, ARRAYSIZE(controls2Left));
 
 
    S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
@@ -175,8 +171,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
       { "Team Editor",        "[[TeamEditor]]" }
    };
 
-   pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, 
-   helpBindLeft, ARRAYSIZE(helpBindLeft), settings);
+   pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, helpBindLeft, ARRAYSIZE(helpBindLeft));
    
    ControlStringsEditor helpBindRight[] = 
    {
@@ -184,8 +179,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
       { "Universal Chat",     "[[OutOfGameChat]]"       }
    };
 
-   pack(mSpecialKeysInstrRight, mSpecialKeysBindingsRight, 
-        helpBindRight, ARRAYSIZE(helpBindRight), settings);
+   pack(mSpecialKeysInstrRight, mSpecialKeysBindingsRight, helpBindRight, ARRAYSIZE(helpBindRight));
 
 
    ControlStringsEditor wallInstructions[] =
@@ -198,10 +192,10 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
       { "[[BULLET]] Change wall thickness with [[+]] & [[-]] (use [[Shift]] for smaller changes)", "" }
    };
 
-   pack(mWallInstr, mWallBindings, wallInstructions, ARRAYSIZE(wallInstructions), settings);
+   pack(mWallInstr, mWallBindings, wallInstructions, ARRAYSIZE(wallInstructions));
 
    symbols.clear();
-   SymbolString::symbolParse(settings->getInputCodeManager(), "Open the console by pressing [[/]]", 
+   SymbolString::symbolParse(mGameSettings->getInputCodeManager(), "Open the console by pressing [[/]]",
                              symbols, HelpContext, FontSize, true, &Colors::green, keyColor);
 
    mConsoleInstructions.add(SymbolString(symbols));
@@ -224,19 +218,19 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
       UI::SymbolStringSet pluginSymbolSet(10);
 
       symbols.clear();
-      SymbolString::symbolParse(settings->getInputCodeManager(), "Plugins are scripts that can manipuate items in the editor.",
+      SymbolString::symbolParse(mGameSettings->getInputCodeManager(), "Plugins are scripts that can manipuate items in the editor.",
                                 symbols, HelpContext, FontSize, true, &Colors::green, keyColor);
       pluginSymbolSet.add(SymbolString(symbols));
 
       symbols.clear();
-      SymbolString::symbolParse(settings->getInputCodeManager(), "See the Bitfighter wiki for info on creating your own.",
+      SymbolString::symbolParse(mGameSettings->getInputCodeManager(), "See the Bitfighter wiki for info on creating your own.",
                                 symbols, HelpContext, FontSize, true, &Colors::green, keyColor);
       pluginSymbolSet.add(SymbolString(symbols));
 
       // Using TAB_STOP:0 below will cause the text and the horiz. line to be printed in the same space, creating a underline effect
       symbols.clear();
       symbols.push_back(SymbolString::getHorizLine(735, FontSize, FontSize + 4, &Colors::gray70));
-      SymbolString::symbolParse(settings->getInputCodeManager(), "[[TAB_STOP:0]]Key" + tabstr + "Description",
+      SymbolString::symbolParse(mGameSettings->getInputCodeManager(), "[[TAB_STOP:0]]Key" + tabstr + "Description",
                                 symbols, HelpContext, FontSize, true, &Colors::yellow, keyColor);
       pluginSymbolSet.add(SymbolString(symbols));
 
@@ -255,7 +249,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
          string instr = pluginInfos->get(j).description;
 
          symbols.clear();
-         SymbolString::symbolParse(settings->getInputCodeManager(), key + tabstr + instr,
+         SymbolString::symbolParse(mGameSettings->getInputCodeManager(), key + tabstr + instr,
                                    symbols, HelpContext, FontSize, txtColor, keyColor);
          pluginSymbolSet.add(SymbolString(symbols));
       }
@@ -439,7 +433,7 @@ void EditorInstructionsUserInterface::renderPageWalls() const
          wallSegment->renderFill(Point(0,0), Colors::EDITOR_WALL_FILL_COLOR);
       }
 
-      renderWallEdges(edges, getGame()->getSettings()->getWallOutlineColor());
+      renderWallEdges(edges, mGameSettings->getWallOutlineColor());
 
       for(S32 i = 0; i < wallSegments.size(); i++)
          delete wallSegments[i];

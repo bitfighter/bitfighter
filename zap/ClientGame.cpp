@@ -61,7 +61,7 @@ static void initializeHelpItemForObjects()
 
 
 // Constructor
-ClientGame::ClientGame(const Address &bindAddress, UIManager *uiManager) : Game(bindAddress)
+ClientGame::ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIManager *uiManager) : Game(bindAddress, settings)
 {
    mRemoteLevelDownloadFilename = "downloaded.level";
 
@@ -72,7 +72,7 @@ ClientGame::ClientGame(const Address &bindAddress, UIManager *uiManager) : Game(
    //mLevel->onAddedToClientGame();
 
    // TODO: Make this a ref instead of a pointer
-   mClientInfo = new FullClientInfo(this, NULL, gSettings.getPlayerName(), ClientInfo::ClassHuman);  // Deleted in destructor
+   mClientInfo = new FullClientInfo(this, NULL, mSettings->getPlayerName(), ClientInfo::ClassHuman);  // Deleted in destructor
 
    for(S32 i = 0; i < JoystickAxesDirectionCount; i++)
       mJoystickInputs[i] = 0;
@@ -504,8 +504,8 @@ bool ClientGame::inReturnToGameCountdown() const
 }
 
 
-string ClientGame::getPlayerName()     const { return gSettings.getPlayerName();     }
-string ClientGame::getPlayerPassword() const { return gSettings.getPlayerPassword(); }
+string ClientGame::getPlayerName()     const { return mSettings->getPlayerName();     }
+string ClientGame::getPlayerPassword() const { return mSettings->getPlayerPassword(); }
 
 
 bool ClientGame::isLevelInDatabase() const
@@ -999,7 +999,7 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
 
       // True only if we are on a levelup threshold and we haven't already seen this message
       bool showLevelUpMessage = level != NONE && 
-                                !gSettings.getUserSettings(getClientInfo()->getName().getString())->levelupItemsAlreadySeen[level];
+                                !mSettings->getUserSettings(getClientInfo()->getName().getString())->levelupItemsAlreadySeen[level];
 
       mClientInfo->setShowLevelUpMessage(level); 
 
@@ -1465,25 +1465,25 @@ void ClientGame::changePassword(GameConnection::ParamType type, const Vector<str
    {
       // Clear any saved passwords for this server
       if(type == GameConnection::LevelChangePassword)
-         gSettings.forgetLevelChangePassword(gc->getServerName());
+         mSettings->forgetLevelChangePassword(gc->getServerName());
 
       else if(type == GameConnection::AdminPassword)
-         gSettings.forgetAdminPassword(gc->getServerName());
+         mSettings->forgetAdminPassword(gc->getServerName());
 
       else if(type == GameConnection::OwnerPassword)
-         gSettings.forgetOwnerPassword(gc->getServerName());
+         mSettings->forgetOwnerPassword(gc->getServerName());
    }
    else                    // Non-empty password
    {
       // Save the password so the user need not enter it again the next time they're on this server
       if(type == GameConnection::LevelChangePassword)
-         gSettings.saveLevelChangePassword(gc->getServerName(), words[1]);
+         mSettings->saveLevelChangePassword(gc->getServerName(), words[1]);
          
       else if(type == GameConnection::AdminPassword)
-         gSettings.saveAdminPassword(gc->getServerName(), words[1]);
+         mSettings->saveAdminPassword(gc->getServerName(), words[1]);
 
       else if(type == GameConnection::OwnerPassword)
-         gSettings.saveAdminPassword(gc->getServerName(), words[1]);
+         mSettings->saveAdminPassword(gc->getServerName(), words[1]);
    }
 }
 
@@ -1834,7 +1834,7 @@ void ClientGame::changeOwnTeam(S32 teamIndex) const
 
 InputMode ClientGame::getInputMode()
 {
-   return gSettings.getInputMode();
+   return mSettings->getInputMode();
 }
 
 

@@ -86,8 +86,7 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(
       { "Mission",           "[[Mission]]" }
    };
 
-   pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, 
-        helpBindLeft, ARRAYSIZE(helpBindLeft), getGame()->getSettings());
+   pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, helpBindLeft, ARRAYSIZE(helpBindLeft));
 
 
    const ControlStringsEditor helpBindRight[] = 
@@ -97,8 +96,7 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(
       { "Diagnostics",       "[[Diagnostics]]"   }
    };
 
-   pack(mSpecialKeysInstrRight, mSpecialKeysBindingsRight, 
-        helpBindRight, ARRAYSIZE(helpBindRight), getGame()->getSettings());
+   pack(mSpecialKeysInstrRight, mSpecialKeysBindingsRight, helpBindRight, ARRAYSIZE(helpBindRight));
 }
 
 
@@ -220,8 +218,8 @@ void InstructionsUserInterface::initNormalKeys_page1()
    keysInstrRight.add(blank);
    keysBindingsRight.add(blank);
 
-   pack(keysInstrLeft,  keysBindingsLeft, helpBindLeft, helpBindLeftCount, getGame()->getSettings());
-   pack(keysInstrRight, keysBindingsRight, helpBindRight, helpBindRightCount, getGame()->getSettings());
+   pack(keysInstrLeft,  keysBindingsLeft, helpBindLeft, helpBindLeftCount);
+   pack(keysInstrRight, keysBindingsRight, helpBindRight, helpBindRightCount);
 
 
    S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;  //(= 33)
@@ -336,10 +334,10 @@ void InstructionsUserInterface::activatePage(IntructionPages pageIndex)
 
 bool InstructionsUserInterface::usingArrowKeys() const
 {
-   return getInputCode(BINDING_LEFT)  == KEY_LEFT  &&
-          getInputCode(BINDING_RIGHT) == KEY_RIGHT &&
-          getInputCode(BINDING_UP)    == KEY_UP    &&
-          getInputCode(BINDING_DOWN)  == KEY_DOWN;
+   return getInputCode(mGameSettings, BINDING_LEFT)  == KEY_LEFT  &&
+          getInputCode(mGameSettings, BINDING_RIGHT) == KEY_RIGHT &&
+          getInputCode(mGameSettings, BINDING_UP)    == KEY_UP    &&
+          getInputCode(mGameSettings, BINDING_DOWN)  == KEY_DOWN;
 }
 
 
@@ -423,13 +421,13 @@ void InstructionsUserInterface::initPage2()
    mLoadoutInstructions.clear();
 
    initPage2Block(loadoutInstructions1, ARRAYSIZE(loadoutInstructions1), HeaderFontSize, &Colors::yellow, &Colors::green,
-                  getGame()->getSettings()->getInputCodeManager(), mLoadoutInstructions);
+         mGameSettings->getInputCodeManager(), mLoadoutInstructions);
 
    // Add some space separating the two sections
    mLoadoutInstructions.add(SymbolString::getBlankSymbol(0, 30));
 
    initPage2Block(loadoutInstructions2, ARRAYSIZE(loadoutInstructions2), HeaderFontSize, &Colors::yellow, &Colors::cyan, 
-               getGame()->getSettings()->getInputCodeManager(), mLoadoutInstructions);
+         mGameSettings->getInputCodeManager(), mLoadoutInstructions);
 }
 
 
@@ -437,7 +435,7 @@ void InstructionsUserInterface::initPageHeaders()
 {
    mPageHeaders.clear();
 
-   InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
+   InputCodeManager *inputCodeManager = mGameSettings->getInputCodeManager();
 
    mPageHeaders.add(SymbolString("Use [[Tab]] to expand a partially typed command", 
                     inputCodeManager, HelpContext, FontSize, true, AlignmentLeft));

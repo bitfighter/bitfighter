@@ -67,15 +67,15 @@ void ScreenShooter::resizeViewportToCanvas(UIManager *uiManager)
 
 
 // Stolen from VideoSystem::actualizeScreenMode()
-void ScreenShooter::restoreViewportToWindow()
+void ScreenShooter::restoreViewportToWindow(GameSettings *settings)
 {
-   DisplayMode displayMode = gSettings.getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
+   DisplayMode displayMode = settings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
 
    // Set up video/window flags amd parameters and get ready to change the window
    S32 sdlWindowWidth, sdlWindowHeight;
    F64 orthoLeft, orthoRight, orthoTop, orthoBottom;
 
-   VideoSystem::getWindowParameters(&gSettings, displayMode, sdlWindowWidth, sdlWindowHeight, orthoLeft, orthoRight, orthoTop, orthoBottom);
+   VideoSystem::getWindowParameters(settings, displayMode, sdlWindowWidth, sdlWindowHeight, orthoLeft, orthoRight, orthoTop, orthoBottom);
 
    glViewport(0, 0, sdlWindowWidth, sdlWindowHeight);
 
@@ -103,9 +103,9 @@ void ScreenShooter::restoreViewportToWindow()
 
 // Thanks to the good developers of naev for excellent code to base this off of.
 // Much was copied directly.
-void ScreenShooter::saveScreenshot(UIManager *uiManager, string filename)
+void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings, string filename)
 {
-   string folder = gSettings.getFolderManager()->getScreenshotDir();
+   string folder = settings->getFolderManager()->getScreenshotDir();
 
    // Let's find a filename to use
    makeSureFolderExists(folder);
@@ -170,7 +170,7 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, string filename)
 
    // Change opengl viewport back to what it was
    if(doResize)
-      restoreViewportToWindow();
+      restoreViewportToWindow(settings);
 
    // Convert Data
    for (S32 i = 0; i < height; i++)

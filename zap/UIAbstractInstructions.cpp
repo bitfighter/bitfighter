@@ -53,7 +53,7 @@ AbstractInstructionsUserInterface::~AbstractInstructionsUserInterface()
 
 
 void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStringSet &bindings,      // <== will be modified
-                                             const ControlStringsEditor *helpBindings, S32 bindingCount, GameSettings *settings)
+                                             const ControlStringsEditor *helpBindings, S32 bindingCount)
 {
    Vector<SymbolShapePtr> symbols;
 
@@ -82,13 +82,13 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStr
       else     // Normal line
       {
          symbols.clear();
-         SymbolString::symbolParse(settings->getInputCodeManager(), helpBindings[i].command, 
+         SymbolString::symbolParse(mGameSettings->getInputCodeManager(), helpBindings[i].command,
                                    symbols, HelpContext, FontSize, true, txtColor, keyColor);
 
          instrs.add(SymbolString(symbols));
 
          symbols.clear();
-         SymbolString::symbolParse(settings->getInputCodeManager(), helpBindings[i].binding, 
+         SymbolString::symbolParse(mGameSettings->getInputCodeManager(), helpBindings[i].binding,
                                    symbols, HelpContext, FontSize, true, keyColor);
          bindings.add(SymbolString(symbols));
       }
@@ -158,14 +158,14 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolString
       else
       {
          symbols.clear();
-         SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), cmdList[i].command, 
+         SymbolString::symbolParse(mGameSettings->getInputCodeManager(), cmdList[i].command,
                                    symbols, HelpContext, cmdSize, true, txtColor, keyColor);
 
          SymbolString instrs(symbols);
          instrs.render(cmdCol, ypos, UI::AlignmentLeft);
 
          symbols.clear();
-         SymbolString::symbolParse(getGame()->getSettings()->getInputCodeManager(), cmdList[i].binding, 
+         SymbolString::symbolParse(mGameSettings->getInputCodeManager(), cmdList[i].binding,
                                    symbols, HelpContext, cmdSize, true, txtColor, keyColor);
 
          SymbolString keys(symbols);

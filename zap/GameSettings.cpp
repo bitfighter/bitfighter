@@ -35,9 +35,6 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Our global static for settings
-GameSettings gSettings;
-
 
 enum ParamRequirements {
    NO_PARAMETERS,      
@@ -157,6 +154,8 @@ const char *helpTitles[] = {
 ////////////////////////////////////////
 ////////////////////////////////////////
 // Define statics
+GameSettings *GameSettings::staticSelf = NULL;
+
 Vector<string> GameSettings::DetectedJoystickNameList;   // List of joysticks we found attached to this machine
 
 S32 GameSettings::UseJoystickNumber = 0;
@@ -164,6 +163,7 @@ S32 GameSettings::UseJoystickNumber = 0;
 CIniFile GameSettings::iniFile("dummy");                 // Our INI file.  Real filename will be supplied later.
 CIniFile GameSettings::userPrefs("dummy");               // Our INI file.  Real filename will be supplied later.
 
+FolderManager *GameSettings::mFolderManager = NULL;
 string GameSettings::mExecutablePath = "bitfighter";     // Default executable name, will be overwritten
 
 // Constructor
@@ -171,6 +171,8 @@ GameSettings::GameSettings()
 {
    mBanList = new BanList(getFolderManager()->getIniDir());
    mLoadoutPresets.resize(LoadoutPresetCount);   // Make sure we have the right number of slots available
+
+   staticSelf = this;
 }
 
 
@@ -178,6 +180,11 @@ GameSettings::GameSettings()
 GameSettings::~GameSettings()
 {
    delete mBanList;
+   if(mFolderManager)
+   {
+      delete mFolderManager;
+      mFolderManager = NULL;
+   }
 }
 
 
@@ -191,6 +198,13 @@ static const string *choose(const string &firstChoice, const string &secondChoic
 static const string *choose(const string &firstChoice, const string &secondChoice, const string &thirdChoice)
 {
    return choose(firstChoice, *choose(secondChoice, thirdChoice));
+}
+
+
+GameSettings *GameSettings::get()
+{
+   TNLAssert(staticSelf, "Static access is NULL!");
+   return staticSelf;
 }
 
 
@@ -314,10 +328,12 @@ bool GameSettings::getSpecified(ParamId paramId)
 }
 
 
-// Lazily initialize
 FolderManager *GameSettings::getFolderManager()
 {
-   return &mFolderManager;
+   if(!mFolderManager)
+      mFolderManager = new FolderManager();
+
+   return mFolderManager;
 }
 
 
@@ -543,7 +559,7 @@ LevelSource *GameSettings::chooseLevelSource(Game *game)
 	if(isUsingPlaylist())
 	{
 		printf("isUsingPlaylist, and returned playlist object\n");
-		return new FileListLevelSource(getPlaylist(), getFolderManager()->getLevelDir());
+		return new FileListLevelSource(getPlaylist(), getFolderManager()->getLevelDir(), this);
 	}
 	else
 	{

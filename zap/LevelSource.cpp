@@ -540,8 +540,10 @@ FolderLevelSource::~FolderLevelSource()
 ////////////////////////////////////////
 
 // Constructor -- pass in a list of level names and a file; create LevelInfos for each
-FileListLevelSource::FileListLevelSource(const Vector<string> &levelList, const string &folder)
+FileListLevelSource::FileListLevelSource(const Vector<string> &levelList, const string &folder, GameSettings *settings)
 {
+   mGameSettings = settings;
+
 	for(S32 i = 0; i < levelList.size(); i++)
       mLevelInfos.push_back(LevelInfo(levelList[i], folder));
 }
@@ -561,7 +563,7 @@ Level *FileListLevelSource::getLevel(S32 index) const
 
    const LevelInfo *levelInfo = &mLevelInfos[index];
 
-	string filename = FolderManager::findLevelFile(gSettings.getFolderManager()->getLevelDir(), levelInfo->filename);
+	string filename = FolderManager::findLevelFile(mGameSettings->getFolderManager()->getLevelDir(), levelInfo->filename);
 
 	if(filename == "")
 	{

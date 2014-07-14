@@ -167,7 +167,7 @@ S32 lua_findFile(lua_State *L)
 
    string filename = getString(L, 1, "");
 
-   FolderManager *folderManager = gSettings.getFolderManager();
+   FolderManager *folderManager = GameSettings::getFolderManager();
 
    string fullname = folderManager->findScriptFile(filename);     // Looks in luadir, levelgens dir, bots dir
 
@@ -207,7 +207,7 @@ S32 lua_readFromFile(lua_State *L)
    if(filename == "")
       returnNil(L);
 
-   FolderManager *folderManager = gSettings.getFolderManager();
+   FolderManager *folderManager = GameSettings::getFolderManager();
 
    string contents;
    readFile(folderManager->getScreenshotDir() + getFileSeparator() + filename, contents);
@@ -245,7 +245,7 @@ S32 lua_writeToFile(lua_State *L)
 
    if(filename != "" && contents != "")
    {
-      FolderManager *folderManager = gSettings.getFolderManager();
+      FolderManager *folderManager = GameSettings::getFolderManager();
 
       string filePath = folderManager->getScreenshotDir() + getFileSeparator() + filename;
 

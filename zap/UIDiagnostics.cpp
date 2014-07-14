@@ -325,7 +325,7 @@ void DiagnosticUserInterface::render() const
 
    if(mCurPage == 0)
    {
-      string inputMode = getGame()->getSettings()->getInputCodeManager()->getInputModeString();
+      string inputMode = mGameSettings->getInputCodeManager()->getInputModeString();
 
       glColor(Colors::red);
       drawCenteredString(vertMargin + 37, 18, "Is something wrong?");
@@ -561,7 +561,7 @@ void DiagnosticUserInterface::render() const
       drawCenteredString(ypos, textsize, "Currently reading data and settings from:");
       ypos += textsize + gap + gap;
 
-      FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
+      FolderManager *folderManager = mGameSettings->getFolderManager();
       ypos = showFoldersBlock(folderManager, (F32)textsize, ypos, gap+2);
    }
    else if(mCurPage == 2)
@@ -574,32 +574,30 @@ void DiagnosticUserInterface::render() const
 
       glColor(Colors::white);
 
-      GameSettings *settings = getGame()->getSettings();
+      ypos += showNameDescrBlock(mGameSettings->getHostName(), mGameSettings->getHostDescr(), ypos, textsize, gap);
 
-      ypos += showNameDescrBlock(settings->getHostName(), settings->getHostDescr(), ypos, textsize, gap);
-
-      drawCenteredStringPair2Colf(ypos, textsize, true, "Host Addr:", "%s", settings->getHostAddress().c_str());
-      drawCenteredStringPair2Colf(ypos, smallText, false, "Lvl Change PW:", "%s", settings->getLevelChangePassword() == "" ?
-                                                                    "None - anyone can change" : settings->getLevelChangePassword().c_str());
+      drawCenteredStringPair2Colf(ypos, textsize, true, "Host Addr:", "%s", mGameSettings->getHostAddress().c_str());
+      drawCenteredStringPair2Colf(ypos, smallText, false, "Lvl Change PW:", "%s", mGameSettings->getLevelChangePassword() == "" ?
+                                                                    "None - anyone can change" : mGameSettings->getLevelChangePassword().c_str());
       ypos += textsize + gap;
 
       
-      drawCenteredStringPair2Colf(ypos, smallText, false, "Admin PW:", "%s", settings->getAdminPassword() == "" ? 
-                                                                     "None - no one can get admin" : settings->getAdminPassword().c_str());
+      drawCenteredStringPair2Colf(ypos, smallText, false, "Admin PW:", "%s", mGameSettings->getAdminPassword() == "" ?
+                                                                     "None - no one can get admin" : mGameSettings->getAdminPassword().c_str());
       ypos += textsize + gap;
 
-      drawCenteredStringPair2Colf(ypos, textsize, false, "Server PW:", "%s", settings->getServerPassword() == "" ? 
-                                                                             "None needed to play" : settings->getServerPassword().c_str());
+      drawCenteredStringPair2Colf(ypos, textsize, false, "Server PW:", "%s", mGameSettings->getServerPassword() == "" ?
+                                                                             "None needed to play" : mGameSettings->getServerPassword().c_str());
 
       ypos += textsize + gap;
       ypos += textsize + gap;
 
-      S32 x = getCenteredString2ColStartingPosf(textsize, false, "Max Players: %d", settings->getMaxPlayers());
+      S32 x = getCenteredString2ColStartingPosf(textsize, false, "Max Players: %d", mGameSettings->getMaxPlayers());
 
       glColor(Colors::white);
       x += drawStringAndGetWidthf(x, ypos, textsize, "Max Players: ");
       glColor(Colors::yellow);
-      x += drawStringAndGetWidthf(x, ypos, textsize, "%d", settings->getMaxPlayers());
+      x += drawStringAndGetWidthf(x, ypos, textsize, "%d", mGameSettings->getMaxPlayers());
 
       ypos += textsize + gap;
 
@@ -620,8 +618,8 @@ void DiagnosticUserInterface::render() const
       else     // No connection? Use settings in settings.
       {
          drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Send Lag/Pkt. Loss:", "%dms/%2.0f%%", 
-                                     settings->getSimulatedLag(), 
-                                     settings->getSimulatedLoss() * 100);
+                                     mGameSettings->getSimulatedLag(),
+                                     mGameSettings->getSimulatedLoss() * 100);
 
          ypos += textsize + gap;
       }
