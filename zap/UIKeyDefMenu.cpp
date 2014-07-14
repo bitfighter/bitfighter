@@ -82,8 +82,7 @@ void KeyDefMenuUserInterface::onActivate()
    errorMsgTimer.clear();
    errorMsg = "";
 
-   GameSettings *settings = getGame()->getSettings();
-   InputCodeManager *inputCodeManager = settings->getInputCodeManager();
+   InputCodeManager *inputCodeManager = mGameSettings->getInputCodeManager();
    InputMode inputMode = inputCodeManager->getInputMode();
 
    if(inputMode == InputModeJoystick)
@@ -197,12 +196,10 @@ bool KeyDefMenuUserInterface::isDuplicate(S32 key, const Vector<KeyDefMenuItem> 
    S32 size = menuItems.size();
    S32 count = 0;
 
-   GameSettings *settings = getGame()->getSettings();
-
-   InputCode targetInputCode = getInputCode(menuItems[key].primaryControl);
+   InputCode targetInputCode = getInputCode(mGameSettings, menuItems[key].primaryControl);
 
    for(S32 i = 0; i < size && count < 2; i++)
-      if(getInputCode(menuItems[i].primaryControl) == targetInputCode)
+      if(getInputCode(mGameSettings, menuItems[i].primaryControl) == targetInputCode)
          count++;
 
    return count >= 2;
@@ -260,7 +257,7 @@ void KeyDefMenuUserInterface::render() const
          const Color *color = dupe ? &Colors::red : NULL;
 
          JoystickRender::renderControllerButton(F32(xPos), F32(y + offset), 
-                               Joystick::SelectedPresetIndex, getInputCode(menuItems[i].primaryControl), color);
+                               Joystick::SelectedPresetIndex, getInputCode(mGameSettings, menuItems[i].primaryControl), color);
       }
    }
 
@@ -326,7 +323,7 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
          return true;
 
       // Assign key
-      setInputCode(getGame()->getSettings(), menuItems[mChangingItem].primaryControl, inputCode);
+      setInputCode(menuItems[mChangingItem].primaryControl, inputCode);
       mChangingItem = NONE;
 
       if(inputCode == KEY_CTRL)
@@ -361,7 +358,7 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)   // Quit
    {
       playBoop();
-      saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
+      saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
 
       getUIManager()->reactivatePrevUI();      // to gOptionsMenuUserInterface
    }

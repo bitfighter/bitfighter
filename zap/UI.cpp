@@ -51,6 +51,7 @@ S32 UserInterface::messageMargin = UserInterface::vertMargin + UI::LoadoutIndica
 UserInterface::UserInterface(ClientGame *clientGame)
 {
    mClientGame = clientGame;
+   mGameSettings = mClientGame->getSettings();
    mTimeSinceLastInput = 0;
    mDisableShipKeyboardInput = true;
 }
@@ -101,7 +102,7 @@ void UserInterface::onDisplayModeChange() { /* Do nothing */ }
 void UserInterface::onDeactivate(bool nextUIUsesEditorScreenMode)
 {
    if(nextUIUsesEditorScreenMode != usesEditorScreenMode())
-      VideoSystem::actualizeScreenMode(getGame()->getSettings(), true, nextUIUsesEditorScreenMode);
+      VideoSystem::actualizeScreenMode(mGameSettings, true, nextUIUsesEditorScreenMode);
 }
 
 
@@ -157,7 +158,7 @@ void UserInterface::renderMessageBox(const string &titleStr, const string &instr
    static const S32 TextSize = 18;
 
 
-   InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
+   InputCodeManager *inputCodeManager = mGameSettings->getInputCodeManager();
 
    SymbolShapePtr title = SymbolShapePtr(new SymbolString(titleStr, inputCodeManager, Context, TitleSize, false));
    SymbolShapePtr instr = SymbolShapePtr(new SymbolString(instrStr, inputCodeManager, Context, TextSize, false));
@@ -291,33 +292,33 @@ void UserInterface::onMouseDragged()  { /* Do nothing */ }
 
 
 // Static method
-InputCode UserInterface::getInputCode(BindingNameEnum binding)
+InputCode UserInterface::getInputCode(GameSettings *settings, BindingNameEnum binding)
 {
-   return gSettings.getInputCodeManager()->getBinding(binding);
+   return settings->getInputCodeManager()->getBinding(binding);
 }
 
 
-string UserInterface::getEditorBindingString(const GameSettings &settings, EditorBindingNameEnum binding)
+string UserInterface::getEditorBindingString(EditorBindingNameEnum binding)
 {
-   return gSettings.getInputCodeManager()->getEditorBinding(binding);
+   return mGameSettings->getInputCodeManager()->getEditorBinding(binding);
 }
 
 
-string UserInterface::getSpecialBindingString(const GameSettings &settings, SpecialBindingNameEnum binding)
+string UserInterface::getSpecialBindingString(SpecialBindingNameEnum binding)
 {
-   return gSettings.getInputCodeManager()->getSpecialBinding(binding);
+   return mGameSettings->getInputCodeManager()->getSpecialBinding(binding);
 }
 
 
-void UserInterface::setInputCode(GameSettings *settings, BindingNameEnum binding, InputCode inputCode)
+void UserInterface::setInputCode(BindingNameEnum binding, InputCode inputCode)
 {
-   settings->getInputCodeManager()->setBinding(binding, inputCode);
+   mGameSettings->getInputCodeManager()->setBinding(binding, inputCode);
 }
 
 
 bool UserInterface::checkInputCode(BindingNameEnum binding, InputCode inputCode)
 {
-   InputCode bindingCode = getInputCode(binding);
+   InputCode bindingCode = getInputCode(mGameSettings, binding);
 
    // Handle modified keys
    if(InputCodeManager::isModified(bindingCode))
@@ -326,13 +327,13 @@ bool UserInterface::checkInputCode(BindingNameEnum binding, InputCode inputCode)
 
    // Else just do a simple key check.  filterInputCode deals with the numeric keypad.
    else
-      return bindingCode == gSettings.getInputCodeManager()->filterInputCode(inputCode);
+      return bindingCode == mGameSettings->getInputCodeManager()->filterInputCode(inputCode);
 }
 
 
 const char *UserInterface::getInputCodeString(BindingNameEnum binding) const
 {
-   return InputCodeManager::inputCodeToString(getInputCode(binding));
+   return InputCodeManager::inputCodeToString(getInputCode(mGameSettings, binding));
 }
 
 
@@ -375,10 +376,10 @@ bool UserInterface::onKeyDown(InputCode inputCode)
    
 #ifndef BF_NO_SCREENSHOTS
    // Screenshot!
-   else if(inputString == getSpecialBindingString(gSettings, BINDING_SCREENSHOT_1) ||
-           inputString == getSpecialBindingString(gSettings, BINDING_SCREENSHOT_2))      
+   else if(inputString == getSpecialBindingString(BINDING_SCREENSHOT_1) ||
+           inputString == getSpecialBindingString(BINDING_SCREENSHOT_2))
    {
-      ScreenShooter::saveScreenshot(getUIManager());
+      ScreenShooter::saveScreenshot(getUIManager(), mGameSettings);
       handled = true;
    }
 #endif

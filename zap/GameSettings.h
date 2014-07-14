@@ -106,6 +106,9 @@ private:
    // Some items will be passthroughs to the underlying INI object; however, if a value can differ from the INI setting 
    // (such as when it can be overridden from the cmd line, or is set remotely), then we'll need to store the working value locally.
 
+   // This provides static access to the last instantiated GameSettings object, when needed
+   static GameSettings *staticSelf;
+
    string mHostName;                   // Server name used when hosting a game (default set in config.h, set in INI or on cmd line)
    string mHostDescr;                  // Brief description of host
 
@@ -119,7 +122,7 @@ private:
    string mLevelChangePassword;
 
    Vector<string> mLevelSkipList;      // Levels we'll never load, to create a pseudo delete function for remote server mgt  <=== does this ever get loaded???
-   FolderManager mFolderManager;
+   static FolderManager *mFolderManager;
    InputCodeManager mInputCodeManager;
 
    BanList *mBanList;                  // Our ban list
@@ -206,7 +209,7 @@ public:
    Vector<string> *getMasterServerList();
    void saveMasterAddressListInIniUnlessItCameFromCmdLine();
    
-   FolderManager *getFolderManager();
+   static FolderManager *getFolderManager();
    FolderManager getCmdLineFolderManager();    // Return a FolderManager struct populated with settings specified on cmd line
 
    BanList *getBanList();
@@ -301,10 +304,10 @@ public:
    // User settings
    const UserSettings *addUserSettings(const UserSettings &userSettings);     // Returns pointer to inserted item
    const UserSettings *getUserSettings(const string &name);
+
+   static GameSettings *get();
 };
 
-
-extern GameSettings gSettings;
 
 typedef boost::shared_ptr<GameSettings> GameSettingsPtr;
 

@@ -440,6 +440,8 @@ FileLogConsumer gServerLog;            // We'll apply a filter later on, in main
 // 8) Video system fails to initialize
 void shutdownBitfighter()
 {
+   GameSettings *settings = NULL;
+
    // Avoid this function being called twice when we exit via methods 1-4 above
 #ifndef ZAP_DEDICATED
    if(GameManager::getClientGames()->size() == 0)
@@ -447,27 +449,38 @@ void shutdownBitfighter()
       if(GameManager::getServerGame())
          exitToOs();
 
+// Grab a pointer to settings wherever we can.  Note that all Games (client or server) currently refer to the same settings object.
 #ifndef ZAP_DEDICATED
+   if(GameManager::getClientGames()->size() > 0)
+      settings = GameManager::getClientGames()->get(0)->getSettings();
+
    GameManager::deleteClientGames();
+
 #endif
 
    if(GameManager::getServerGame())
+   {
+      settings = GameManager::getServerGame()->getSettings();
       GameManager::deleteServerGame();
+   }
+
+
+   TNLAssert(settings, "Should always have a value here!");
 
    EventManager::shutdown();
    LuaScriptRunner::shutdown();
    SoundSystem::shutdown();
 
-   if(!gSettings.isDedicatedServer())
+   if(!settings->isDedicatedServer())
    {
 #ifndef ZAP_DEDICATED
       Joystick::shutdownJoystick();
 
       // Save current window position if in windowed mode
-      if(gSettings.getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode) == DISPLAY_MODE_WINDOWED)
+      if(settings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode) == DISPLAY_MODE_WINDOWED)
       {
-         gSettings.getIniSettings()->winXPos = VideoSystem::getWindowPositionX();
-         gSettings.getIniSettings()->winYPos = VideoSystem::getWindowPositionY();
+         settings->getIniSettings()->winXPos = VideoSystem::getWindowPositionX();
+         settings->getIniSettings()->winYPos = VideoSystem::getWindowPositionY();
       }
 
       SDL_QuitSubSystem(SDL_INIT_VIDEO);
@@ -481,7 +494,9 @@ void shutdownBitfighter()
    gOglConsoleLog.setMsgTypes(LogConsumer::LogNone);
 #endif
 
-   gSettings.save();                                  // Write settings to bitfighter.ini
+   settings->save();                                  // Write settings to bitfighter.ini
+
+   delete settings;
 
    DisplayManager::cleanup();
 
@@ -532,7 +547,7 @@ void createClientGame(GameSettingsPtr settings)
 
       // Create a new client, and let the system figure out IP address and assign a port
       // ClientGame destructor will clean up UIManager
-      ClientGame *clientGame = new ClientGame(Address(IPProtocol, Address::Any, portNumber), new UIManager());    
+      ClientGame *clientGame = new ClientGame(Address(IPProtocol, Address::Any, portNumber), settings, new UIManager());    
 
        // Put any saved filename into the editor file entry thingy
       clientGame->getUIManager()->getUI<LevelNameEntryUserInterface>()->setString(lastEditorName);
@@ -1089,6 +1104,30 @@ int main(int argc, char **argv)
 // Enable some heap checking stuff for Windows... slow... do not include in release version!!
 //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF );
 
+#ifdef TEST1  // #ifndef ZAP_DEDICATED
+   // Command line screenshot making from level, more work needed
+   if(argc >= 2 && argv[0] == "-makescreenshot")
+   {
+      const char* levelpath = argv[1];
+      if(argc >= 3) LevelDatabaseUploadThread::UploadScreenshotFilename = argv[2];
+
+      DisplayManager::initialize();
+      SDL_Init(0);
+      if(!VideoSystem::init())
+         return 1;  // error
+
+      VideoSystem::actualizeScreenMode(&gSettings, false, false);
+      FontManager::setFont(FontRoman);
+      gConsole.initialize();
+
+      ClientGame game(Address(), new UIManager());
+      game.getUIManager()->getUI<EditorUserInterface>()->setLevelFileName(levelpath);
+      game.getUIManager()->activate<EditorUserInterface>(false);
+      game.getUIManager()->getUI<EditorUserInterface>()->createNormalizedScreenshot(&game);
+      return 0;
+   }
+#endif
+
 
 #ifdef USE_EXCEPTION_BACKTRACE
    signal(SIGSEGV, exceptionHandler);   // install our handler
@@ -1172,6 +1211,7 @@ int main(int argc, char **argv)
 
    settings->runCmdLineDirectives();            // If we specified a directive on the cmd line, like -help, attend to that now
 
+
    // Even dedicated server needs sound these days
    SoundSystem::init(settings->getIniSettings()->sfxSet, folderManager->getSfxDir(), 
                      folderManager->getMusicDir(), settings->getIniSettings()->getMusicVolLevel());  
@@ -1189,7 +1229,7 @@ int main(int argc, char **argv)
       LevelSourcePtr levelSource = LevelSourcePtr(settings->chooseLevelSource(serverGame));
 
       // Figure out what levels we'll be playing with, and start hosting  
-      initHosting(levelSource, false, true);     
+      initHosting(settings, levelSource, false, true);     
    }
    else
    {

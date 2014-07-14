@@ -69,9 +69,10 @@ static Vector<DatabaseObject *> fillVector2;
 
 
 // Constructor
-Game::Game(const Address &theBindAddress)
+Game::Game(const Address &theBindAddress, GameSettingsPtr settings)
 {
    mLevelDatabaseId = 0;
+   mSettings = settings;
 
    mNextMasterTryTime = 0;
    mReadyToConnectToMaster = false;
@@ -157,7 +158,13 @@ bool Game::isSuspended() const
 
 GameSettings *Game::getSettings() const
 {
-   return &gSettings;      // For now until we're sure this is the way we want to go
+   return mSettings.get();
+}
+
+
+GameSettingsPtr Game::getSettingsPtr() const
+{
+   return mSettings;
 }
 
 
@@ -732,7 +739,7 @@ void Game::checkConnectionToMaster(U32 timeDelta)
 
    if(!mConnectionToMaster.isValid())      // It's valid if it isn't null, so could be disconnected and would still be valid
    {
-      Vector<string> *masterServerList = gSettings.getMasterServerList();
+      Vector<string> *masterServerList = mSettings->getMasterServerList();
 
       if(masterServerList->size() == 0)
          return;
@@ -803,7 +810,7 @@ void Game::processAnonymousMasterConnection()
    // Try to open a socket to master server
    if(!mNameToAddressThread)
    {
-      Vector<string> *masterServerList = gSettings.getMasterServerList();
+      Vector<string> *masterServerList = mSettings->getMasterServerList();
 
       // No master server addresses?
       if(masterServerList->size() == 0)

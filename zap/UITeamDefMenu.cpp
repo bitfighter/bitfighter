@@ -92,7 +92,7 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) :
    TNLAssert(ARRAYSIZE(TeamPresets) == Game::MAX_TEAMS, "Wrong number of presets!");
    TNLAssert(checkNameLengths(), "Team name is too long!");
 
-   InputCodeManager *inputCodeManager = gSettings.getInputCodeManager();
+   InputCodeManager *inputCodeManager = mGameSettings->getInputCodeManager();
    mTeamInfos = NULL;
 
    mTopInstructions =  getSymbolString("For quick configuration, press [[Alt+1]] - [[Alt+9]] to specify number of teams",
@@ -110,7 +110,7 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) :
    mBottomInstructions4 =  getSymbolString("[[Insert]] or [[+]] to insert team | [[Del]] or [[-]] to remove selected team",
                                           inputCodeManager, 16, Colors::menuHelpColor);
 
-   mColorEntryMode = gSettings.getIniSettings()->mSettings.getVal<ColorEntryMode>(IniKey::ColorEntryMode);
+   mColorEntryMode = mGameSettings->getIniSettings()->mSettings.getVal<ColorEntryMode>(IniKey::ColorEntryMode);
    mEditingColor = false;
 }
 
@@ -518,7 +518,7 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       if(mColorEntryMode >= ColorEntryModeCount)
          mColorEntryMode = ColorEntryMode(0);
 
-      gSettings.getIniSettings()->mSettings.setVal<ColorEntryMode>(IniKey::ColorEntryMode, mColorEntryMode);
+      mGameSettings->getIniSettings()->mSettings.setVal<ColorEntryMode>(IniKey::ColorEntryMode, mColorEntryMode);
       return true;
    }
 

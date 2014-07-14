@@ -67,7 +67,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
                   mChatMessageDisplayer3 (game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
                   mFpsRenderer(game),
                   mLevelInfoDisplayer(game),
-                  mHelpItemManager(game->getSettings())
+                  mHelpItemManager(mGameSettings)
 {
    mInScoreboardMode = false;
    displayInputModeChangeAlert = false;
@@ -1847,13 +1847,11 @@ Move *GameUserInterface::getCurrentMove()
       }
       else
       {
-         GameSettings *settings = getGame()->getSettings();
+         mCurrentMove.x = F32((InputCodeManager::getState(getInputCode(mGameSettings, BINDING_RIGHT)) ? 1 : 0) -
+                              (InputCodeManager::getState(getInputCode(mGameSettings, BINDING_LEFT))  ? 1 : 0));
 
-         mCurrentMove.x = F32((InputCodeManager::getState(getInputCode(BINDING_RIGHT)) ? 1 : 0) -
-                              (InputCodeManager::getState(getInputCode(BINDING_LEFT))  ? 1 : 0));
-
-         mCurrentMove.y = F32((InputCodeManager::getState(getInputCode(BINDING_DOWN))  ? 1 : 0) -
-                              (InputCodeManager::getState(getInputCode(BINDING_UP))    ? 1 : 0));
+         mCurrentMove.y = F32((InputCodeManager::getState(getInputCode(mGameSettings, BINDING_DOWN))  ? 1 : 0) -
+                              (InputCodeManager::getState(getInputCode(mGameSettings, BINDING_UP))    ? 1 : 0));
       }
 
       // If player is moving, do not show move instructions
@@ -1885,7 +1883,7 @@ Move *GameUserInterface::getCurrentMove()
 
    // Using relative controls -- all turning is done relative to the direction of the ship, so
    // we need to udate the move a little
-   if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<RelAbs>(IniKey::ControlMode) == Relative)
+   if(mGameSettings->getIniSettings()->mSettings.getVal<RelAbs>(IniKey::ControlMode) == Relative)
    {
       mTransformedMove = mCurrentMove;    // Copy move
 
@@ -1913,7 +1911,7 @@ Move *GameUserInterface::getCurrentMove()
    // We'll also run this while in the menus so if we enter keyboard mode accidentally, it won't
    // kill the joystick.  The design of combining joystick input and move updating really sucks.
    if(getGame()->getInputMode() == InputModeJoystick || getUIManager()->isCurrentUI<OptionsMenuUserInterface>())
-      joystickUpdateMove(getGame(), getGame()->getSettings(), move);
+      joystickUpdateMove(getGame(), mGameSettings, move);
 
    return move;
 }
@@ -2638,7 +2636,7 @@ void GameUserInterface::renderObjectIds() const
 
 //void GameUserInterface::saveAlreadySeenLevelupMessageList()
 //{
-//   getGame()->getSettings()->getIniSettings()->mSettings.setVal("LevelupItemsAlreadySeenList", 
+//   mGameSettings->getIniSettings()->mSettings.setVal("LevelupItemsAlreadySeenList",
 //                                                                getAlreadySeenLevelupMessageString());
 //}
 
@@ -2646,7 +2644,7 @@ void GameUserInterface::renderObjectIds() const
 //void GameUserInterface::loadAlreadySeenLevelupMessageList()
 //{
 //   setAlreadySeenLevelupMessageString(
-//         getGame()->getSettings()->getIniSettings()->mSettings.getVal<string>("LevelupItemsAlreadySeenList")
+//         mGameSettings->getIniSettings()->mSettings.getVal<string>("LevelupItemsAlreadySeenList")
 //   );
 //}
 
@@ -2822,7 +2820,7 @@ void GameUserInterface::renderGameNormal() const
    // Render in three passes, to ensure some objects are drawn above others
    for(S32 i = -1; i < 2; i++)
    {
-      Barrier::renderEdges(getGame()->getSettings(), i);    // Render wall edges
+      Barrier::renderEdges(mGameSettings, i);    // Render wall edges
 
       if(mDebugShowMeshZones)
          for(S32 j = 0; j < renderZones.size(); j++)
@@ -3057,7 +3055,7 @@ void GameUserInterface::renderGameCommander() const
       renderObjects[i]->renderLayer(0);
 
    // Second pass
-   Barrier::renderEdges(getGame()->getSettings(), 1);    // Render wall edges
+   Barrier::renderEdges(mGameSettings, 1);    // Render wall edges
 
    if(mDebugShowMeshZones)
       for(S32 i = 0; i < renderZones.size(); i++)

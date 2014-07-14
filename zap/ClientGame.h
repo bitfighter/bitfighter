@@ -75,8 +75,8 @@ private:
    AbstractTeam *getNewTeam();
 
 public:
-   ClientGame(const Address &bindAddress, UIManager *uiManager);   // Constructor
-   virtual ~ClientGame();                                          // Destructor
+   ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIManager *uiManager);
+   virtual ~ClientGame();
 
    void joinLocalGame(GameNetInterface *remoteInterface);
    void joinRemoteGame(Address remoteAddress, bool isFromMaster);

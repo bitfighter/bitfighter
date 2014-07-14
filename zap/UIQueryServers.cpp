@@ -144,8 +144,8 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) :
    UserInterface(game), 
    ChatParent(game)
 {
-   mSortColumn = getGame()->getSettings()->getQueryServerSortColumn();
-   mSortAscending = getGame()->getSettings()->getQueryServerSortAscending();
+   mSortColumn = mGameSettings->getQueryServerSortColumn();
+   mSortAscending = mGameSettings->getQueryServerSortAscending();
    mLastSortColumn = mSortColumn;
    mHighlightColumn = 0;
    mReceivedListOfServersFromMaster = false;
@@ -256,7 +256,7 @@ void QueryServersUserInterface::contactEveryone()
    //getGame()->getNetInterface()->sendPing(broadcastAddress, mLocalServerNonce);
 
    // Always ping these servers -- typically a local server
-   Vector<string> *pingList = &getGame()->getSettings()->getIniSettings()->alwaysPingList;
+   Vector<string> *pingList = &mGameSettings->getIniSettings()->alwaysPingList;
 
    for(S32 i = 0; i < pingList->size(); i++)
    {
@@ -267,7 +267,7 @@ void QueryServersUserInterface::contactEveryone()
    // Try to ping the servers from our fallback list if we're having trouble connecting to the master
    if(getGame()->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME) 
    {
-      Vector<string> *serverList = &getGame()->getSettings()->getIniSettings()->prevServerListFromMaster;
+      Vector<string> *serverList = &mGameSettings->getIniSettings()->prevServerListFromMaster;
 
       for(S32 i = 0; i < serverList->size(); i++)
          getGame()->getNetInterface()->sendPing(Address(serverList->get(i).c_str()), mRemoteServerNonce);
@@ -385,7 +385,7 @@ void QueryServersUserInterface::gotServerListFromMaster(const Vector<ServerAddr>
 // correct version).  Send a query packet to each.
 void QueryServersUserInterface::addServersToPingList(const Vector<ServerAddr> &serverList)
 {
-   saveServerListToIni(getGame()->getSettings(), serverList);
+   saveServerListToIni(mGameSettings, serverList);
 
    forgetServersNoLongerOnList(serverList);
 
@@ -804,7 +804,7 @@ void QueryServersUserInterface::render() const
    else
    {
       glColor(Colors::red);
-      if(mGivenUpOnMaster && getGame()->getSettings()->getIniSettings()->prevServerListFromMaster.size() != 0)
+      if(mGivenUpOnMaster && mGameSettings->getIniSettings()->prevServerListFromMaster.size() != 0)
          drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Using server list from last successful connect.");
       else
          drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Firewall issues? Do you have the latest version?");
@@ -1166,7 +1166,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
             if(servers.size() > currentIndex)      // Index is valid
             {
                leaveGlobalChat();
-               bool neverConnectDirect = getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::NeverConnectDirect);
+               bool neverConnectDirect = mGameSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::NeverConnectDirect);
 
                // Join the selected game...   (what if we select a local server from the list...  wouldn't 2nd param be true?)
                // Second param, false when we can ping that server, allows faster connect. If we can ping, we can connect 
@@ -1342,7 +1342,7 @@ void QueryServersUserInterface::sortSelected()
    selectedId = servers[currentItem].id;
 
    // Finally, save the current sort column to the INI
-   getGame()->getSettings()->setQueryServerSortColumn(mSortColumn, mSortAscending);
+   mGameSettings->setQueryServerSortColumn(mSortColumn, mSortAscending);
 }
 
 

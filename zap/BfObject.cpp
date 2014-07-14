@@ -400,6 +400,8 @@ static S32 getNextDefaultId()
 // Constructor
 BfObject::BfObject()
 {
+   mGameSettings = GameSettings::get();
+
    mGame = NULL;
    mObjectTypeNumber = UnknownTypeNumber;
 

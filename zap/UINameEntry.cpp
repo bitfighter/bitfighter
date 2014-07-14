@@ -184,7 +184,7 @@ void LevelNameEntryUserInterface::onActivate()
    Parent::onActivate();
    mLevelIndex = 0;
 
-   mLevels = getGame()->getSettings()->getLevelList();
+   mLevels = mGameSettings->getLevelList();
 
    // Remove the extension from the level file
    for(S32 i = 0; i < mLevels.size(); i++)
@@ -293,8 +293,8 @@ void LevelNameEntryUserInterface::onAccept(const char *name)
    getUIManager()->activate(ui, false);
    
    // Get that baby into the INI file
-   getGame()->getSettings()->getIniSettings()->lastEditorName = name;
-   saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());             
+   mGameSettings->getIniSettings()->lastEditorName = name;
+   saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
    // Should be...
    //getGame()->getIniSettings()->saveSettingsToDisk();
 }
