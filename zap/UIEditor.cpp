@@ -535,11 +535,9 @@ extern TeamPreset TeamPresets[];
 
 void EditorUserInterface::setLevelFileName(string name)
 {
-   if(name == "")
-      mEditFileName = "";
-   else
-      if(name.find('.') == string::npos)      // Append extension, if one is needed
-         mEditFileName = name + ".level";
+   mEditFileName = name;
+   if(name != "" && name.find('.') == string::npos)      // Append extension, if one is needed
+      mEditFileName = name + ".level";
 }
 
 
@@ -585,14 +583,16 @@ void EditorUserInterface::loadLevel()
    bool ok = level->loadLevelFromFile(fileName);
 
    if(ok)
-      setLevel(boost::shared_ptr<Level>(level));
+      ;
    else
    {
       delete level;
       level = new Level();
    }
+   setLevel(boost::shared_ptr<Level>(level));
 
    mLoadTarget = level;
+
 
    TNLAssert(mLevel->getGameType(), "Level should have GameType!");
    TNLAssert(mLevel->getTeamCount() > 0, "Level should have at least one team!");
@@ -1254,25 +1254,26 @@ void EditorUserInterface::onActivate()
 {
    FolderManager *folderManager = gSettings.getFolderManager();
 
-   if(folderManager->getLevelDir().empty())      // Never did resolve a leveldir... no editing for you!
-   {
-      getUIManager()->reactivatePrevUI();     // Must come before the error msg, so it will become the previous UI when that one exits
-
-      ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
-      ui->reset();
-      ui->setTitle("HOUSTON, WE HAVE A PROBLEM");
-      ui->setMessage("No valid level folder was found, so I cannot start the level editor.\n\n"
-                     "Check the LevelDir parameter in your INI file, or your command-line parameters to make sure"
-                     "you have correctly specified a valid folder.");
-
-      getUIManager()->activate(ui);
-
-      return;
-   }
-
    // Check if we have a level name:
    if(getLevelFileName() == UnnamedFile)     // We need to take a detour to get a level name
    {
+
+      if(folderManager->getLevelDir().empty())      // Never did resolve a leveldir... no editing for you!
+      {
+         getUIManager()->reactivatePrevUI();     // Must come before the error msg, so it will become the previous UI when that one exits
+
+         ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
+         ui->reset();
+         ui->setTitle("HOUSTON, WE HAVE A PROBLEM");
+         ui->setMessage("No valid level folder was found, so I cannot start the level editor.\n\n"
+                        "Check the LevelDir parameter in your INI file, or your command-line parameters to make sure"
+                        "you have correctly specified a valid folder.");
+
+         getUIManager()->activate(ui);
+
+         return;
+      }
+
       // Don't save this menu (false, below).  That way, if the user escapes out, and is returned to the "previous"
       // UI, they will get back to where they were before (prob. the main menu system), not back to here.
       getUIManager()->activate<LevelNameEntryUserInterface>(false);
@@ -5433,7 +5434,7 @@ void EditorMenuUserInterface::setupMenus()
    // Only show the upload to database option if authenticated
    if(getGame()->getClientInfo()->isAuthenticated())
    {
-      string title = LevelDatabase::isLevelInDatabase(getGame()->getLevelDatabaseId()) ?
+      string title = LevelDatabase::isLevelInDatabase(getGame()->getUIManager()->getUI<EditorUserInterface>()->getLevel()->getLevelDatabaseId()) ?
          "UPDATE LEVEL IN DB" :
          "UPLOAD LEVEL TO DB";
 

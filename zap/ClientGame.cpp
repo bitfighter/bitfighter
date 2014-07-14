@@ -200,7 +200,7 @@ void ClientGame::onConnectedToMaster()
 
    // Request ratings for current level if we don't already have them
 
-   if(needsRating())
+   if(mLevel != NULL && needsRating())
       mConnectionToMaster->c2mRequestLevelRating(mLevel->getLevelDatabaseId());
 
    logprintf(LogConsumer::LogConnection, "Client established connection with Master Server");

@@ -1089,6 +1089,30 @@ int main(int argc, char **argv)
 // Enable some heap checking stuff for Windows... slow... do not include in release version!!
 //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF );
 
+#ifdef TEST1  // #ifndef ZAP_DEDICATED
+   // Command line screenshot making from level, more work needed
+   if(argc >= 2 && argv[0] == "-makescreenshot")
+   {
+      const char* levelpath = argv[1];
+      if(argc >= 3) LevelDatabaseUploadThread::UploadScreenshotFilename = argv[2];
+
+      DisplayManager::initialize();
+      SDL_Init(0);
+      if(!VideoSystem::init())
+         return 1;  // error
+
+      VideoSystem::actualizeScreenMode(&gSettings, false, false);
+      FontManager::setFont(FontRoman);
+      gConsole.initialize();
+
+      ClientGame game(Address(), new UIManager());
+      game.getUIManager()->getUI<EditorUserInterface>()->setLevelFileName(levelpath);
+      game.getUIManager()->activate<EditorUserInterface>(false);
+      game.getUIManager()->getUI<EditorUserInterface>()->createNormalizedScreenshot(&game);
+      return 0;
+   }
+#endif
+
 
 #ifdef USE_EXCEPTION_BACKTRACE
    signal(SIGSEGV, exceptionHandler);   // install our handler
@@ -1097,7 +1121,7 @@ int main(int argc, char **argv)
    // Everything seems to need ScreenInfo from the DisplayManager
    DisplayManager::initialize();
 
-   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());      // Autodeleted
+   GameSettingsPtr settings = GameSettingsPtr(&gSettings);      // Autodeleted
 
    // Put all cmd args into a Vector for easier processing
    Vector<string> argVector(argc - 1);
