@@ -210,10 +210,12 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
 
    S32 boxTop = (canvasHeight - boxHeight) / 2 + vertOffset;
 
-   S32 maxLen = 0;
+   static const S32 HorizBoxPadding = 20;
+
+   S32 maxLen = title->getWidth() + HorizBoxPadding * 2;
+
    for(S32 i = 0; i < msgLines; i++)
    {
-      static const S32 HorizBoxPadding = 20;  
       S32 len = message[i]->getWidth() + HorizBoxPadding * 2;
       if(len > maxLen)
          maxLen = len;
