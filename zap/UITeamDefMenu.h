@@ -55,6 +55,7 @@ private:
    void doneEditingColor();
    void cancelEditing();
    void startEditing();
+   void resetEditors();
 
    const char *getEntryMessage() const;
 

@@ -137,8 +137,7 @@ void TeamDefUserInterface::onActivate()
    mTeamInfos = ui->getLevel()->getTeamInfosPtr().get();    // Reference the current team list
 
    // Grab team names and populate our editors
-   for(S32 i = 0; i < mTeamInfos->size(); i++)
-      mTeamNameEditors[i].setString(mTeamInfos->get(i).getName().getString());
+   resetEditors();
 
    //// Clear any unused editors -- probably unnecessary
    //for(S32 i = mTeamInfos->size(); i < ARRAYSIZE(mTeamNameEditors); i++)
@@ -158,6 +157,13 @@ void TeamDefUserInterface::onActivate()
    errorMsgTimer.reset(errorMsgDisplayTime);
    errorMsg = "";
    Cursor::disableCursor();
+}
+
+
+void TeamDefUserInterface::resetEditors()
+{
+   for(S32 i = 0; i < mTeamInfos->size(); i++)
+      mTeamNameEditors[i].setString(mTeamInfos->get(i).getName().getString());
 }
 
 
@@ -612,6 +618,8 @@ void TeamDefUserInterface::cancelEditing()
 {
    mEditingName = false;
    mEditingColor = false;
+
+   mTeamNameEditors[selectedIndex].setString(mTeamInfos->get(selectedIndex).getName().getString());
 }
 
 
