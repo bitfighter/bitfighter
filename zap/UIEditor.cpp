@@ -181,13 +181,14 @@ void EditorUserInterface::setLevel(boost::shared_ptr<Level> level)
 
    // Do some special preparations for walls/polywalls -- the editor needs to know about wall edges and such
    // for hit detection and mounting turrets/ffs
-   const Vector<DatabaseObject *> *objects = level->findObjects_fast();
-   for(S32 i = 0; i < objects->size(); i++)
-   {
-      DatabaseObject *obj = objects->get(i);
+   const Vector<WallItem *> &walls = level->getWallList();
 
-      if(obj->getObjectTypeNumber() == WallItemTypeNumber)
-         getGame()->addWallItem(static_cast<WallItem *>(obj), mLevel.get());
+   for(S32 i = 0; i < walls.size(); i++)
+   {
+      WallItem *wall = walls.get(i);
+
+      if(wall->getObjectTypeNumber() == WallItemTypeNumber)
+         addToEditor(wall);
 
  /*     else if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
          getGame()->addPolywallItem(static_cast<PolywallItem *>(obj), &mLevel);*/
