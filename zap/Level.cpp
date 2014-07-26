@@ -42,6 +42,7 @@ Level::Level()
 Level::~Level()
 {
    mWallItemList.deleteAndClear();
+   mPolyWallList.deleteAndClear();
 
    // Clean up our GameType
    if(mGameType.isValid() && !mGameType->isGhost())
@@ -626,10 +627,10 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
       wallItem->setUserAssignedId(id, false);
       mWallItemList.push_back(wallItem);
 
-      if(mWallItemList.size() == 0)
-         mWallItemExtents = wallItem->getExtent();
-      else
-         mWallItemExtents.unionRect(wallItem->getExtent());
+      //if(mWallItemList.size() == 0)
+      //   mWallItemExtents = wallItem->getExtent();
+      //else
+      //   mWallItemExtents.unionRect(wallItem->getExtent());
 
 
       // ADD TO DATABASE!!
@@ -652,9 +653,10 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
             //   addWallItem(&wallItem, NULL);
    }
 
+   // BarrierMakerS is the old name for PolyWall
    else if(stricmp(argv[0], "BarrierMakerS") == 0 || stricmp(argv[0], "PolyWall") == 0)
    {
-      // BarrierMakerS lines have a width, which we will skip
+      // BarrierMakerS lines have a width, which we will skip.  PolyWalls don't have this dummy argument.
       S32 firstArg = 0;
 
       if(stricmp(argv[0], "BarrierMakerS") == 0)
@@ -668,6 +670,15 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
          delete polywall;
          return false;
       }
+
+      polywall->setUserAssignedId(id, false);
+      mPolyWallList.push_back(polywall);
+
+      //if(mPolyWallList.size() == 0)
+      //   mWallItemExtents = wallItem->getExtent();
+      //else
+      //   mWallItemExtents.unionRect(wallItem->getExtent());
+
 
       // ADD POLYWALL TO DATABASE!!
 
@@ -761,6 +772,12 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
 const Vector<WallItem *> &Level::getWallList() const
 {
    return mWallItemList;
+}
+
+
+const Vector<PolyWall *> &Level::getPolyWallList() const
+{
+   return mPolyWallList;
 }
 
 

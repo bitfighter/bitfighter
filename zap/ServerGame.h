@@ -67,8 +67,6 @@ private:
    SafePtr<GameConnection> mSuspendor;    // Player requesting suspension if game suspended by request
    Timer mTimeToSuspend;
 
-   Vector<PolyWall *> mPolyWallList;      // List of polyWalls to be sent to the client
-
    GameRecorderServer *mGameRecorderServer;
 public:
    static const U32 PreSuspendSettlingPeriod = TWO_SECONDS;

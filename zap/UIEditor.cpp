@@ -186,12 +186,15 @@ void EditorUserInterface::setLevel(boost::shared_ptr<Level> level)
    for(S32 i = 0; i < walls.size(); i++)
    {
       WallItem *wall = walls.get(i);
+      addToEditor(wall);
+   }
 
-      if(wall->getObjectTypeNumber() == WallItemTypeNumber)
-         addToEditor(wall);
+   const Vector<PolyWall *> &polywalls = level->getPolyWallList();
 
- /*     else if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
-         getGame()->addPolywallItem(static_cast<PolywallItem *>(obj), &mLevel);*/
+   for(S32 i = 0; i < polywalls.size(); i++)
+   {
+      PolyWall *polywall = polywalls.get(i);
+      addToEditor(polywall);
    }
 
    // Tell mDockItems to use the same team info as we use for the regular items
@@ -551,7 +554,6 @@ void EditorUserInterface::cleanUp()
    mDockItems.removeEverythingFromDatabase();      // Free a little more -- dock will be rebuilt when editor restarts
    
    mLoadTarget = getLevel();
-   //mLoadTarget->removeEverythingFromDatabase();    // Deletes all objects
 
    mRobotLines.clear();    // Clear our special Robot lines
 

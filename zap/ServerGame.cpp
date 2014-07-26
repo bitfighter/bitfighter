@@ -1090,7 +1090,7 @@ const Vector<WallItem *> &ServerGame::getWallList() const
 
 const Vector<PolyWall *> &ServerGame::getPolyWallList() const
 {
-   return mPolyWallList;
+   return  mLevel->getPolyWallList();
 }
 
 

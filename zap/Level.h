@@ -27,6 +27,7 @@ namespace Zap
 class Game;
 class GameType;
 class WallItem;
+class PolyWall;
 
 class Level : public GridDatabase
 {
@@ -49,7 +50,9 @@ private:
    TeamManager mTeamManager;
 
    Vector<WallItem *>mWallItemList;    // Need to delete items that are removed from this list!
-   Rect mWallItemExtents;
+   Vector<PolyWall *>mPolyWallList;    // And from this one too!
+
+   //Rect mWallItemExtents;
 
    void parseLevelLine(const string &line, const string &levelFileName);
    bool processLevelLoadLine(U32 argc, S32 id, const char **argv, string &errorMsg);  
@@ -78,6 +81,7 @@ public:
 
 
    const Vector<WallItem *> &getWallList() const;
+   const Vector<PolyWall *> &getPolyWallList() const;
 
    string getHash() const;
    F32 getLegacyGridSize() const;
