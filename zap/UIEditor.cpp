@@ -203,6 +203,7 @@ void EditorUserInterface::setLevel(boost::shared_ptr<Level> level)
 void EditorUserInterface::onQuitted()
 {
    cleanUp();
+   mLevel = NULL;    // mLevel is a shared_ptr, so this will (hopefully) trigger some cleanup
 }
 
 
@@ -550,7 +551,7 @@ void EditorUserInterface::cleanUp()
    mDockItems.removeEverythingFromDatabase();      // Free a little more -- dock will be rebuilt when editor restarts
    
    mLoadTarget = getLevel();
-   mLoadTarget->removeEverythingFromDatabase();    // Deletes all objects
+   //mLoadTarget->removeEverythingFromDatabase();    // Deletes all objects
 
    mRobotLines.clear();    // Clear our special Robot lines
 
