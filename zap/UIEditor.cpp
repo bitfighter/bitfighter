@@ -5006,8 +5006,7 @@ string EditorUserInterface::getQuitLockedMessage()
 
 string EditorUserInterface::getLevelText() const
 {
-   logprintf(mLevel->getGameType()->getClassName());     // {P{P
-   string result;
+   string result = "";
 
    // Write out basic game parameters, including gameType info
    result += mLevel->toLevelCode();    // Note that this toLevelCode appends a newline char; most don't
