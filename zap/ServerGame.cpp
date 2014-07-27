@@ -1071,7 +1071,7 @@ bool ServerGame::loadLevel()
    // Fire an update to make sure certain events run on level start (like onShipSpawned)
    EventManager::get()->update();
 
-   // Check after script, script might add Teams
+   // Check after script, script might add or delete Teams
    if(mLevel->makeSureTeamCountIsNotZero())
       logprintf(LogConsumer::LogLevelError, "Warning: Missing Team in %s", 
                                             mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
