@@ -35,7 +35,7 @@ TEST_F(LevelLoaderTest, longLine)
    string code = getGenericHeader() + wall.toLevelCode();
 
    Level level;
-   EXPECT_EQ(0, level.findObjects_fast()->size());
+   EXPECT_EQ(0, level.findObjects_fast()->size()) << "Level should start out empty!";
    level.loadLevelFromString(code);
 
    
