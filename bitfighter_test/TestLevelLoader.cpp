@@ -34,13 +34,12 @@ TEST_F(LevelLoaderTest, longLine)
 
    string code = getGenericHeader() + wall.toLevelCode();
 
-   Level level;
-   EXPECT_EQ(0, level.findObjects_fast()->size()) << "Level should start out empty!";
-   level.loadLevelFromString(code);
-
+   // Create a level, with our giant wall object; test to ensure the wall is created and has the right number of vertices
+   Level level(code);
    
-   const Vector<DatabaseObject*> *objects = level.findObjects_fast();
-   EXPECT_EQ(TEST_POINTS - 1, objects->size());
+   const Vector<WallItem *> walls = level.getWallList();
+   ASSERT_EQ(1, walls.size());
+   EXPECT_EQ(TEST_POINTS, walls[0]->getVertCount());
 }
 
 };
