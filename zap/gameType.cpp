@@ -1315,6 +1315,7 @@ bool GameType::isTeamGame() const
 void GameType::onLevelLoaded()
 {
    TNLAssert(dynamic_cast<ServerGame *>(mGame), "Wrong game here!");
+   TNLAssert(mLevel, "Expect a level here!");
 
    mLevelHasLoadoutZone      = mLevel->hasObjectOfType(LoadoutZoneTypeNumber);
    mLevelHasPredeployedFlags = mLevel->hasObjectOfType(FlagTypeNumber);
