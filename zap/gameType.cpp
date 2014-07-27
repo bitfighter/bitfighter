@@ -2541,7 +2541,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
       if(localClientInfo->getName() == name)      
          mGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", teamName);
       else
-         mGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", teamName);
+         mGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), teamName);
    }
 
    // Make this client forget about any mines or spybugs he knows about... it's a bit of a kludge to do this here,
