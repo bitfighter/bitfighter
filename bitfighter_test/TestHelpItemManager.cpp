@@ -171,6 +171,7 @@ TEST_F(HelpItemManagerTest, priority)
 
    // Verify that our high priority item has been moved to the active display list
    checkQueues(0, 1, 1, highPriorityItem);
+   ASSERT_EQ(himgr.getHelpItemDisplayList()->size(), 1);    // Partial duplication of above check, but with ASSERT to prevent crash below
 
    S32 rollupPeriod;
    rollupPeriod = himgr.getRollupPeriod(0);
