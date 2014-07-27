@@ -181,7 +181,7 @@ void GamePair::removeClient(S32 index)
 
    clientGame->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
-   this->idle(10, 5);      // Let things 
+   this->idle(10, 5);      // Let things settle
 
    GameManager::deleteClientGame(index);
 }
