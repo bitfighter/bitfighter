@@ -54,13 +54,15 @@ private:
 
    //Rect mWallItemExtents;
 
+   void initialize();
    void parseLevelLine(const string &line, const string &levelFileName);
    bool processLevelLoadLine(U32 argc, S32 id, const char **argv, string &errorMsg);  
    bool processLevelParam(S32 argc, const char **argv);
 
 public:
-   Level();             // Constructor
-   virtual ~Level();    // Destructor
+   Level();                         // Constructor
+   Level(const string &levelCode);  // Constructor with passed levelcode, primarily used for testing
+   virtual ~Level();                // Destructor
 
    Level *clone();      // Duplicate level
 

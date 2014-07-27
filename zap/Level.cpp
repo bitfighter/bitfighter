@@ -29,12 +29,15 @@ namespace Zap
 // Constructor
 Level::Level() 
 { 
-   mVersion = 0; 
-   mLegacyGridSize = 1; 
-   mDatabaseId = 0; 
-   mAddedToGame = false;
-   mTeamInfos.reset(new Vector<TeamInfo>);      // mTeamInfos is a shared_ptr, which will handle cleanup
-   mLevelDatabaseId = LevelDatabase::NOT_IN_DATABASE;
+   initialize();
+}
+
+
+// Constructor, with passed level code, mainly used for testing
+Level::Level(const string &levelCode)
+{
+   initialize();
+   loadLevelFromString(levelCode);
 }
 
 
@@ -47,6 +50,17 @@ Level::~Level()
    // Clean up our GameType
    if(mGameType.isValid() && !mGameType->isGhost())
       delete mGameType.getPointer();
+}
+
+
+void Level::initialize()
+{
+   mVersion = 0; 
+   mLegacyGridSize = 1; 
+   mDatabaseId = 0; 
+   mAddedToGame = false;
+   mTeamInfos.reset(new Vector<TeamInfo>);      // mTeamInfos is a shared_ptr, which will handle cleanup
+   mLevelDatabaseId = LevelDatabase::NOT_IN_DATABASE;
 }
 
 

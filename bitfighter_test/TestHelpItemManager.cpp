@@ -26,7 +26,7 @@ public:
       himgr(UI::HelpItemManager(game->getSettings()))
    {
       // Need a Level to hold a GameType
-      Level *level = new Level();                  // Level will be cleaned up by game
+      Level *level = new Level("");                // Level will be cleaned up by game
       game->setLevel(level);                       
 
       // Need to add a GameType because GameType is where the game timer is managed
