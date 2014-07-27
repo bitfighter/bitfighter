@@ -29,7 +29,7 @@ protected:
    LuaLevelGenerator *levelgen;
    GamePair pair;
 
-   LuaEnvironmentTest() 
+   LuaEnvironmentTest() : pair(GamePair("", 0))    // Start with an empty level and no clients
    {
       int x = 0;
    }
@@ -40,7 +40,7 @@ protected:
       serverGame = pair.server;
       settings = serverGame->getSettingsPtr();
 
-      ASSERT_TRUE(serverGame->getGameObjDatabase()->findObjects_fast()->size() == 0) << "Database should be empty on a new level!";
+      ASSERT_EQ(0, serverGame->getGameObjDatabase()->findObjects_fast()->size()) << "Database should be empty on a new level with no clients!";
 
       // Check that the environment was set up during construction of GamePair
       ASSERT_TRUE(LuaScriptRunner::getL());
