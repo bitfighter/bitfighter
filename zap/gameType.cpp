@@ -168,7 +168,8 @@ bool GameType::onGhostAdd(GhostConnection *theConnection)
    Game *game = ((GameConnection *) theConnection)->getClientGame();
    TNLAssert(game && !game->isServer(), "Should only be client here!");
 
-   mLevel = game->getGameObjDatabase();
+   //setLevel(game->getGameObjDatabase());
+   game->getGameObjDatabase()->setGameType(this);
 
    addToGame(game, game->getGameObjDatabase());
    game->addInlineHelpItem(getGameStartInlineHelpItem());
