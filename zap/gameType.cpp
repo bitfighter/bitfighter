@@ -77,12 +77,37 @@ TNL_IMPLEMENT_NETOBJECT(GameType);
 const S32 GameType::MaxMenuScore = 1000;
 
 // Constructor
-GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(THREE_SECONDS), mGameTimeUpdateTimer(THIRTY_SECONDS)
+GameType::GameType(S32 winningScore) 
 {
+   initialize(NULL, winningScore);
+}
+
+
+GameType::GameType(Level *level)
+{
+   initialize(level, DefaultWinningScore);
+}
+
+
+// Destructor
+GameType::~GameType()
+{
+   if(mGame)
+      mGame->setPreviousLevelName(getLevelName());
+}
+
+
+void GameType::initialize(Level *level, S32 winningScore)
+{
+   mLevel = level;
+   mWinningScore = winningScore;
+
+   mScoreboardUpdateTimer.setPeriod(THREE_SECONDS);
+   mGameTimeUpdateTimer.setPeriod(THIRTY_SECONDS);
+
    mNetFlags.set(Ghostable);
    mBetweenLevels = true;
    mGameOver = false;
-   mWinningScore = winningScore;
    mLeadingTeam = -1;
    mLeadingTeamScore = 0;
    mCanSwitchTeams = true;       // Players can switch right away
@@ -109,15 +134,6 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(THREE_SECONDS), mG
 
    mObjectsExpected = 0;
    mGame = NULL;
-   mLevel = NULL;
-}
-
-
-// Destructor
-GameType::~GameType()
-{
-   if(mGame)
-      mGame->setPreviousLevelName(getLevelName());
 }
 
 
@@ -152,6 +168,8 @@ bool GameType::onGhostAdd(GhostConnection *theConnection)
    Game *game = ((GameConnection *) theConnection)->getClientGame();
    TNLAssert(game && !game->isServer(), "Should only be client here!");
 
+   mLevel = game->getGameObjDatabase();
+
    addToGame(game, game->getGameObjDatabase());
    game->addInlineHelpItem(getGameStartInlineHelpItem());
    return true;
@@ -174,15 +192,16 @@ void GameType::addToGame(Game *game)
 // Runs on both client and server.
 void GameType::addToGame(Game *game, Level *level)
 {
+   TNLAssert(mLevel, "Expect a level to be set here!");
    addToGame(game);
-   mLevel = level;
+   //mLevel = level;
 
    // On server, GameType is added to the Level as the level is being read from the LevelSource.  On the client, the
    // GameType is sent by the server, and here is where we add it to the level.
    TNLAssert( game->isServer() ||  level, "On the client, we expect a level to be passed...");
    TNLAssert(!game->isServer() || !level, "But not on the server!");
-   if(level)
-      level->setGameType(this);
+   //if(level)
+   //   level->setGameType(this);
 }
 
 

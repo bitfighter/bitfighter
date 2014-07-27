@@ -554,7 +554,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
             // To avoid crashing...
             if(!getGameType())
             {
-               GameType *gameType = new GameType();
+               GameType *gameType = new GameType(getGameObjDatabase());
                gameType->addToGame(this, getGameObjDatabase());
             }
             mLevel->makeSureTeamCountIsNotZero();

@@ -50,6 +50,7 @@ class GameType : public NetObject
 
 public:
    static const S32 TeamNotSpecified = -99999;
+   static const S32 DefaultWinningScore = 8;
 
    enum ScoringGroup {
       IndividualScore,
@@ -97,6 +98,8 @@ private:
 
    Vector<SafePtr<MoveItem> > mCacheResendItem;  // Speed up c2sResendItemStatus
 
+   void initialize(Level *level, S32 winningScore);
+
    void idle_client(U32 deltaT);
    void idle_server(U32 deltaT);
 
@@ -122,8 +125,10 @@ protected:
    static const S32 MaxMenuScore;
 
 public:
-   explicit GameType(S32 winningScore = 8);  // Constructor
-   virtual ~GameType();                      // Destructor
+   explicit GameType(S32 winningScore = DefaultWinningScore);  // Constructor
+   explicit GameType(Level *level);                            // Constructor
+
+   virtual ~GameType();                                        // Destructor
 
    static const S32 MAX_GAME_TIME = S32_MAX;
 

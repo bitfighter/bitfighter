@@ -26,12 +26,13 @@ public:
       himgr(UI::HelpItemManager(game->getSettings()))
    {
       // Need a Level to hold a GameType
-      game->setLevel(new Level());           // Level will be cleaned up by game
+      Level *level = new Level();                  // Level will be cleaned up by game
+      game->setLevel(level);                       
 
       // Need to add a GameType because GameType is where the game timer is managed
-      GameType *gameType = new GameType();   // Will be deleted in game destructor
+      GameType *gameType = new GameType(level);    // Will be deleted in game destructor
       gameType->addToGame(game, game->getGameObjDatabase());
-      game->addTeam(new Team());             // Cleanup handled by game
+      game->addTeam(new Team());                   // Cleanup handled by game
    }
 
 

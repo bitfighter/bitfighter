@@ -152,7 +152,7 @@ bool Level::loadLevelFromFile(const string &filename)
 void Level::validateLevel()
 {
    if(!mGameType)
-      mGameType.set(new GameType());    // Cleaned up... where, exactly?
+      mGameType.set(new GameType(this));    // Cleaned up... where, exactly?
 
    if(mTeamInfos->size() == 0)
    {
@@ -727,10 +727,7 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
 
       // Must have a GameType at this point, if not, we will add one to prevent problems loading a level with missing GameType
       if(!mGameType)   
-      {
-         //errorMsg = "Missing GameType!";
-         mGameType.set(new GameType());    // Cleaned up... where, exactly?
-      }
+         mGameType.set(new GameType(this));    // Cleaned up... where, exactly?
 
       TNL::Object *obj = TNL::Object::create(objName.c_str());    // Create an object of the type specified on the line
 
