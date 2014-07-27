@@ -206,7 +206,7 @@ void EditorUserInterface::setLevel(boost::shared_ptr<Level> level)
 void EditorUserInterface::onQuitted()
 {
    cleanUp();
-   mLevel = NULL;    // mLevel is a shared_ptr, so this will (hopefully) trigger some cleanup
+   mLevel = boost::shared_ptr<Level>();    // reset mLevel
 }
 
 
