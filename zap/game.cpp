@@ -1126,7 +1126,9 @@ string Game::getScriptName() const
 
 bool Game::levelHasLoadoutZone()
 {
-   return getGameType()->levelHasLoadoutZone();
+   // If we are idling after we have disconnected, we will no longer have a GameType (all ghosted objects
+   // get deleted on disconnect), but some display methods call this... so don't freak out of GameType is NULL.
+   return getGameType() && getGameType()->levelHasLoadoutZone();
 }
 
 

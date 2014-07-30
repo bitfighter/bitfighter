@@ -396,7 +396,7 @@ void GameUserInterface::idle(U32 timeDelta)
    mLoadoutIndicator.idle(timeDelta);
 
    // Processes sparks and teleporter effects -- 
-   //    do this even while suspended to make objects look normal while in /idling
+   //    Do this even while suspended to make objects look normal while in /idling
    //    But not while playing back game recordings, idled in idleFxManager with custom timeDelta
    if(dynamic_cast<GameRecorderPlayback *>(getGame()->getConnectionToServer()) == NULL)
       mFxManager.idle(timeDelta);

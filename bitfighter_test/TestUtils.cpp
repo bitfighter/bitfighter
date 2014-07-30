@@ -122,6 +122,7 @@ GamePair::~GamePair()
       if(clientGames->get(i)->getConnectionToServer())
          clientGames->get(i)->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
+   // Note that when the client disconnects, all local ghosted objects, including GameType, are deleted
    idle(10, 5);
 
    // Clean up GameManager

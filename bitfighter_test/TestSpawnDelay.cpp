@@ -341,8 +341,12 @@ TEST(SpawnDelayTest, SpawnDelayTests)
    ClientGame *clientGame = gamePair.getClient(0);
    ServerGame *serverGame = gamePair.server;
 
+   ASSERT_TRUE(serverGame->getGameType()) << "Expect a GameType by now!";
+
    // Idle for a while, let things settle
    gamePair.idle(10, 5);
+
+   ASSERT_TRUE(clientGame->getGameType()) << "Expect a GameType by now!";
 
    Vector<DatabaseObject *> fillVector;
 
