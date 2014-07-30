@@ -118,7 +118,6 @@ public:
                                                    const Vector<S32> *excludedWallList,
                                                    bool format, TestFunc testFunc, Point &anchor, Point &normal);
 
-   void setAnchorNormal(const Point &nrml);
    WallSegment *getMountSegment();
    void setMountSegment(WallSegment *mountSeg);
 

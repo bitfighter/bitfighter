@@ -537,7 +537,7 @@ void EngineeredItem::fillAttributesVectors(Vector<string> &keys, Vector<string> 
 
 
 // This is used for both positioning items in-game and for snapping them to walls in the editor --> static method
-// Polulates anchor and normal
+// Populates anchor and normal
 DatabaseObject *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
                                                          const Vector<S32> *excludedWallList,
                                                          bool format, Point &anchor, Point &normal)
@@ -546,7 +546,7 @@ DatabaseObject *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *wal
 }
 
 
-// Static function
+// Static function -- can return NULL
 DatabaseObject *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
                                                          const Vector<S32> *excludedWallList,
                                                          bool format, TestFunc testFunc, Point &anchor, Point &normal)
@@ -605,12 +605,6 @@ DatabaseObject *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *wal
    findNormalPoint(pos, p1, p2, anchor);
 
    return closestWall;
-}
-
-
-void EngineeredItem::setAnchorNormal(const Point &nrml)
-{
-   mAnchorNormal = nrml;
 }
 
 
@@ -1042,15 +1036,15 @@ void EngineeredItem::findMountPoint(const GridDatabase *database, const Point &p
    Point normal, anchor;
 
    // Anchor objects to the correct point
-   if(!findAnchorPointAndNormal(database, pos, MAX_SNAP_DISTANCE, NULL, true, anchor, normal))
+   if(findAnchorPointAndNormal(database, pos, MAX_SNAP_DISTANCE, NULL, true, anchor, normal))
    {
-      setPos(pos);               // Found no mount point, but for editor, needs to set the position
-      mAnchorNormal.set(1,0);
-   }
-   else
-   {
-      setPos(anchor + normal);
+      setPos(anchor/* + normal*/);
       mAnchorNormal.set(normal);
+   }
+   else   // Found no mount point
+   {
+      setPos(pos);   
+      mAnchorNormal.set(1,0);
    }
    
    computeObjectGeometry();                                    // Fills mCollisionPolyPoints 
@@ -1061,19 +1055,19 @@ void EngineeredItem::findMountPoint(const GridDatabase *database, const Point &p
 // Find mount point or turret or forcefield closest to pos; used in editor.  See findMountPoint() for in-game version.
 Point EngineeredItem::mountToWall(const Point &pos, const WallSegmentManager *wallSegmentManager, const Vector<S32> *excludedWallList)
 {  
-   Point anchor, nrml;
-   DatabaseObject *mountSeg = NULL;
+   Point normal, anchor;
+   DatabaseObject *mountSeg;
 
    mountSeg = findAnchorPointAndNormal(wallSegmentManager->getWallSegmentDatabase(), pos,    // <== Note different database than above!
                                        MAX_SNAP_DISTANCE, excludedWallList,
-                                       true, (TestFunc)isWallType, anchor, nrml);
+                                       true, (TestFunc)isWallType, anchor, normal);
 
    // It is possible to find an edge but not a segment while a wall is being dragged -- the edge remains in it's original location 
    // while the segment is being dragged around, some distance away
    if(mountSeg)   // Found a segment we can mount to
    {
       setPos(anchor);
-      setAnchorNormal(nrml);
+      mAnchorNormal.set(normal);
 
       TNLAssert(dynamic_cast<WallSegment *>(mountSeg), "NULL WallSegment");
       setMountSegment(static_cast<WallSegment *>(mountSeg));
