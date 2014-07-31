@@ -8,7 +8,6 @@
 
 #include "LevelSource.h"
 
-//#include "tnlVector.h"
 #include <string>
 
 namespace Zap
@@ -20,6 +19,7 @@ using namespace TNL;
 string getLevelCode1();
 string getLevelCodeForTestingEngineer1();
 string getLevelCodeForEmptyLevelWithBots(const string &botspec);
+string getLevelCodeForEngineeredItemSnapping();
 
 string getGenericHeader();
 

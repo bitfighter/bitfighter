@@ -62,6 +62,7 @@ static void initialize()
    levelInfos.push_back(LevelInfo("Engineer Test Bed One", BitmatchGame, 0, 0, ""));
 
    /////
+   // levelCodes[2]
    // Test some missing name permutations
    levelCodes.push_back(
       "GameType 10 92\n"
@@ -79,6 +80,8 @@ static void initialize()
    );
    levelInfos.push_back(LevelInfo("", BitmatchGame, 0, 0, ""));
 
+
+   // levelCodes[3]
    levelCodes.push_back(
       "GameType 10 92\n"
       "LevelName \n"     // No name, one space
@@ -95,7 +98,8 @@ static void initialize()
    );
    levelInfos.push_back(LevelInfo("", BitmatchGame, 0, 0, ""));
 
-    // Test some missing name permutations
+   // levelCodes[4]
+   // Test some missing name permutations
    levelCodes.push_back(
       "GameType 10 92\n"
       "LevelName  \n"     // No name, two spaces space
@@ -111,6 +115,31 @@ static void initialize()
       "ResourceItem   0.5 1\n"
    );
    levelInfos.push_back(LevelInfo("", BitmatchGame, 0, 0, ""));
+
+   // levelCodes[5]
+   // Test engineered item snapping
+   levelCodes.push_back(
+      "LevelFormat 2\n"
+      "NexusGameType 9 1 10 1000\n"
+      "LevelName NexusTestGame\n"
+      "LevelDescription Level for testing snapping\n"
+      "LevelCredits Bitfighter Snapper\n"
+      "Team White 1 1 1\n"
+      "Specials\n"
+      "MinPlayers 2\n"
+      "MaxPlayers 4\n"
+      "BarrierMaker 20 0 0 100 0\n" // Horizontal wall, 20 thick
+      "Turret 0 30 1\n"             // Turret slightly off-center, so should snap to top of wall
+   );
+   levelInfos.push_back(LevelInfo("NexusTestGame", NexusGame, 2, 4, ""));
+}
+
+
+// Note that the following functions need to be declared in LevelFilesForTesting.h
+string getLevelCodeForEngineeredItemSnapping()
+{
+   initialize();
+   return levelCodes[5];
 }
 
 
