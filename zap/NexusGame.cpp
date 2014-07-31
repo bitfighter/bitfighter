@@ -105,6 +105,7 @@ NexusGameType::~NexusGameType()
 }
 
 
+// NexusGameType [GameTime (in minutes)] [TimeNexusRemainsClosed (in minutes)] [TimeNexusRemainsOpen (in seconds)] [WinningScore]
 bool NexusGameType::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc > 0)

@@ -448,6 +448,7 @@ EngineeredItem::~EngineeredItem()
 }
 
 
+// XXXX <Team> <X> <Y> [HealRate]
 bool EngineeredItem::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 3)
@@ -1926,6 +1927,7 @@ Turret *Turret::clone() const
 }
 
 
+// Turret <Team> <X> <Y> [HealRate]
 bool Turret::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    S32 argc1 = 0;
