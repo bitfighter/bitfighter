@@ -225,7 +225,6 @@ public:
    S32 connectionSpeed;
 
    // Server display settings in join menu
-   S32 queryServerSortColumn;
    bool queryServerSortAscending;
       
    Vector<PluginBinding> pluginBindings;  // Keybindings for the editor plugins
