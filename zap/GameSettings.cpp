@@ -440,12 +440,12 @@ string GameSettings::getPlayerName()
 void GameSettings::setQueryServerSortColumn(S32 column, bool ascending)
 {
    mIniSettings.mSettings.setVal(IniKey::QueryServerSortColumn, column);
-   mIniSettings.queryServerSortAscending = ascending;
+   mIniSettings.mSettings.setVal(IniKey::QueryServerSortAscending, ascending);
 }
 
 
-S32  GameSettings::getQueryServerSortColumn()    { return mIniSettings.mSettings.getVal<S32>(IniKey::QueryServerSortColumn); }
-bool GameSettings::getQueryServerSortAscending() { return mIniSettings.queryServerSortAscending; }
+S32  GameSettings::getQueryServerSortColumn()    { return mIniSettings.mSettings.getVal<S32>(IniKey::QueryServerSortColumn);      }
+bool GameSettings::getQueryServerSortAscending() { return mIniSettings.mSettings.getVal<YesNo>(IniKey::QueryServerSortAscending); }
 
 
 // User has entered name and password, and has clicked Ok.  That's the only way to get here.

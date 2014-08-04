@@ -223,10 +223,6 @@ public:
    string lastEditorName;           // Name of file most recently edited by the user
 
    S32 connectionSpeed;
-
-   // Server display settings in join menu
-   bool queryServerSortAscending;
-      
    Vector<PluginBinding> pluginBindings;  // Keybindings for the editor plugins
 
    // Game window location when in windowed mode

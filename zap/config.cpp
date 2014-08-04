@@ -106,8 +106,6 @@ IniSettings::IniSettings()
 
    connectionSpeed = 0;
 
-   queryServerSortAscending = true;
-
    // Game window location when in windowed mode
    winXPos = 0;  // if set to (0,0), it will not set the position meaning it uses operating system default position. (see bottom of "VideoSystem::actualizeScreenMode" in VideoSystem.cpp)
    winYPos = 0;
@@ -440,9 +438,6 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    if(fps >= 1) 
       iniSettings->maxFPS = fps;   // Otherwise, leave it at the default value
    // else warn?
-
-   iniSettings->queryServerSortAscending = ini->GetValueB(section, "QueryServerSortAscending", iniSettings->queryServerSortAscending);
-
 
 #ifndef ZAP_DEDICATED
    gDefaultLineWidth = ini->GetValueF(section, "LineWidth", 2);
@@ -1116,7 +1111,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    ini->sectionComment(section, " MaxFPS - Maximum FPS the client will run at.  Higher values use more CPU, lower may increase lag (default = 100)");
    ini->sectionComment(section, " LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game");
    ini->sectionComment(section, " Version - Version of game last time it was run.  Don't monkey with this value; nothing good can come of it!");
-   ini->sectionComment(section, " QueryServerSortAscending - 1 for ascending sort, 0 for descending.  This value managed by game.");
 
    ini->sectionComment(section, "----------------");
 
@@ -1143,8 +1137,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
    ini->SetValueI (section, "ConnectionSpeed", iniSettings->connectionSpeed);  
    ini->SetValueI (section, "Version", BUILD_VERSION);
-
-   ini->SetValueB (section, "QueryServerSortAscending", iniSettings->queryServerSortAscending);
 
 #ifndef ZAP_DEDICATED
    // Don't save new value if out of range, so it will go back to the old value. 
