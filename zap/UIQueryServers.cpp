@@ -144,8 +144,9 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) :
    UserInterface(game), 
    ChatParent(game)
 {
-   mSortColumn = mGameSettings->getQueryServerSortColumn();
+   mSortColumn    = mGameSettings->getQueryServerSortColumn();
    mSortAscending = mGameSettings->getQueryServerSortAscending();
+
    mLastSortColumn = mSortColumn;
    mHighlightColumn = 0;
    mReceivedListOfServersFromMaster = false;
