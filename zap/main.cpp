@@ -978,6 +978,11 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       // Testing::OldGoalFlash --> Testing::GoalZoneFlashStyle
       string val = GameSettings::iniFile.GetValueYN("Testing", "OldGoalFlash", Yes) ? "Original" : "Experimental";
       GameSettings::iniFile.SetValue("Testing", "GoalZoneFlashStyle", val, true);
+
+      // We converted QueryServerSortAscending to YesNo from a 0/1 boolean setting.  Read the old
+      // value and write the updated version.
+      bool oldval = GameSettings::iniFile.GetValueB("Settings", "QueryServerSortAscending", true);
+      GameSettings::iniFile.setValueYN("Settings", "QueryServerSortAscending", oldval, false);
    }
 
 
