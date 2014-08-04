@@ -1781,7 +1781,7 @@ void ClientGame::addPolyWall(BfObject *polyWall, GridDatabase *database)
 }
 
 
-// Add polywall item to game
+// Add wall to game
 void ClientGame::addWallItem(WallItem *wallItem, GridDatabase *database)
 {
    Parent::addWallItem(wallItem, database);
