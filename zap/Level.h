@@ -37,7 +37,7 @@ private:
    S32 mVersion;
    F32 mLegacyGridSize; 
    U32 mDatabaseId;
-   SafePtr<GameType> mGameType;
+   RefPtr<GameType> mGameType;
    string mLevelHash;
    bool mAddedToGame;      // False until onAddedToGame() is called, then True
 

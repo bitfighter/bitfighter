@@ -1108,7 +1108,7 @@ void NexusZone::idle(BfObject::IdleCallPath path)
 void NexusZone::render() const
 {
 #ifndef ZAP_DEDICATED
-   GameType *gameType = getGame()->getGameType();
+   GameType *gameType = getGame() ? getGame()->getGameType() : NULL;
    NexusGameType *nexusGameType = NULL;
 
    if(gameType && gameType->getGameTypeId() == NexusGame)
