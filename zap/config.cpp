@@ -125,7 +125,17 @@ IniSettings::~IniSettings()
 
 
 // This list is currently incomplete, will grow as we move our settings into the new structure
-static const string sections[] = {"Settings", "Effects", "Host", "Host-Voting", "EditorSettings", "Updater", "Diagnostics"};
+static const string sections[] =
+{
+   "Settings",
+   "Effects",
+   "Host",
+   "Host-Voting",
+   "EditorSettings",
+   "Updater",
+   "Diagnostics"
+};
+// Aligned with 'sections' above
 static const string headerComments[] = 
 {
    "Settings entries contain a number of different options.",
@@ -383,12 +393,16 @@ extern F32 gDefaultLineWidth;
 extern F32 gLineWidth3;
 extern F32 gLineWidth4;
 
-typedef Vector<AbstractSetting<IniKey::SettingsItem> *> SettingsType;
+
+typedef Vector<AbstractSetting<IniKey::SettingsItem> *> SettingsList;
+
 
 static void loadSettings(CIniFile *ini, IniSettings *iniSettings, const string &section)
 {
-   SettingsType settings = iniSettings->mSettings.getSettingsInSection(section);
+   // Get all settings from the given section
+   SettingsList settings = iniSettings->mSettings.getSettingsInSection(section);
 
+   // Load the INI settings into the settings list, overwriting the defaults
    for(S32 i = 0; i < settings.size(); i++)
       settings[i]->setValFromString(ini->GetValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
 }
@@ -396,10 +410,6 @@ static void loadSettings(CIniFile *ini, IniSettings *iniSettings, const string &
 
 static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 {
-   // New school
-   for(U32 i = 0; i < ARRAYSIZE(sections); i++)
-      loadSettings(ini, iniSettings, sections[i]);
-
    string section = "Settings";
 
    // Now read the settings still defined all old school
@@ -977,8 +987,13 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
 
    ini->ReadFile();                             // Read the INI file
 
+   // New school
+   //
+   // Load settings from the INI for each section
+   // This will eventually replace all of the load...() methods below
    for(U32 i = 0; i < ARRAYSIZE(sections); i++)
       loadSettings(ini, iniSettings, sections[i]);
+
 
    // These two sections can be modernized, the remainder maybe not
    loadSoundSettings(ini, settings, iniSettings);
@@ -997,6 +1012,7 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
 
    loadQuickChatMessages(ini);
    loadServerBanList(ini, settings->getBanList());
+
 
    saveSettingsToINI(ini, settings);            // Save to fill in any missing settings
 
@@ -1064,7 +1080,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
       const string section = sections[i];
 
-      SettingsType settings = iniSettings->mSettings.getSettingsInSection(section);
+      SettingsList settings = iniSettings->mSettings.getSettingsInSection(section);
    
       if(true || ini->numSectionComments(section) == 0)  // <<<==== remove true when done testing!
       {
@@ -1230,12 +1246,15 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
 
    IniSettings *iniSettings = settings->getIniSettings();
 
+   // This is the new way to write out all settings and should eventually
+   // replace everything else below it
+   writeSettings(ini, iniSettings);
+
    writeForeignServerInfo(ini, iniSettings);
    writeLoadoutPresets(ini, settings);
    writePluginBindings(ini, iniSettings);
    writeConnectionsInfo(ini, iniSettings);
    writeSounds(ini, iniSettings);
-   writeSettings(ini, iniSettings);
    writeLevels(ini);
    writeSkipList(ini, settings->getLevelSkipList());
    writePasswordSection(ini);
@@ -1248,6 +1267,7 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    // This adds 200+ lines.
    //writeJoystick();
    writeServerBanList(ini, settings->getBanList());
+
 
    ini->WriteFile();    // Commit the file to disk
 }
