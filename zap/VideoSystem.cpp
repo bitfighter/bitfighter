@@ -307,11 +307,7 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    if(settings->getIniSettings()->oldDisplayMode == DISPLAY_MODE_WINDOWED ||
          (changingInterfaces && displayMode == DISPLAY_MODE_WINDOWED))
    {
-      settings->getIniSettings()->winXPos = getWindowPositionX();
-      settings->getIniSettings()->winYPos = getWindowPositionY();
-
-      GameSettings::iniFile.SetValueI("Settings", "WindowXPos", settings->getIniSettings()->winXPos, true);
-      GameSettings::iniFile.SetValueI("Settings", "WindowYPos", settings->getIniSettings()->winYPos, true);
+      settings->setWindowPosition(VideoSystem::getWindowPositionX(), VideoSystem::getWindowPositionY());
    }
 
    // When we're in the editor, let's take advantage of the entire screen unstretched
@@ -456,8 +452,11 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    // Now set the window position
    if(displayMode == DISPLAY_MODE_WINDOWED)
    {
-      if(settings->getIniSettings()->winXPos != 0 || settings->getIniSettings()->winYPos != 0)  // sometimes it happens to be (0,0) hiding the top title bar preventing ability to move the window, in this case we are not moving it unless it is not (0,0). Note that ini config file will default to (0,0).
-         setWindowPosition(settings->getIniSettings()->winXPos, settings->getIniSettings()->winYPos);
+      // Sometimes it happens to be (0,0) hiding the top title bar preventing ability to
+      // move the window, in this case we are not moving it unless it is not (0,0).
+      // Note that ini config file will default to (0,0).
+      if(settings->getWindowPositionX() != 0 || settings->getWindowPositionY() != 0)
+         setWindowPosition(settings->getWindowPositionX(), settings->getWindowPositionY());
    }
    else
       setWindowPosition(0, 0);
@@ -504,8 +503,8 @@ void VideoSystem::getWindowParameters(GameSettings *settings, DisplayMode displa
 
       case DISPLAY_MODE_WINDOWED:
       default:  //  Fall through OK
-         sdlWindowWidth  = (S32) floor((F32)DisplayManager::getScreenInfo()->getGameCanvasWidth()  * settings->getIniSettings()->winSizeFact + 0.5f);
-         sdlWindowHeight = (S32) floor((F32)DisplayManager::getScreenInfo()->getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
+         sdlWindowWidth  = (S32) floor((F32)DisplayManager::getScreenInfo()->getGameCanvasWidth()  * settings->getWindowSizeFactor() + 0.5f);
+         sdlWindowHeight = (S32) floor((F32)DisplayManager::getScreenInfo()->getGameCanvasHeight() * settings->getWindowSizeFactor() + 0.5f);
          orthoLeft   = 0;
          orthoRight  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
          orthoBottom = DisplayManager::getScreenInfo()->getGameCanvasHeight();

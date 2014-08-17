@@ -232,6 +232,12 @@ public:
    S32  getQueryServerSortColumn();   
    bool getQueryServerSortAscending();
 
+   S32  getWindowPositionX();
+   S32  getWindowPositionY();
+   void setWindowPosition(S32 x, S32 y);
+
+   F32  getWindowSizeFactor();
+   void setWindowSizeFactor(F32 scalingFactor);
 
    // Accessor methods
    U32 getSimulatedStutter();
@@ -306,6 +312,22 @@ public:
    const UserSettings *getUserSettings(const string &name);
 
    static GameSettings *get();
+
+   // Used for iniFile access in the setSetting() template below
+   void setIniSetting(const string &section, const string &key, const string &value);
+
+   // Helper method to simultaneously update the mSettings and iniFile objects
+   template <class DataType>
+   void setSetting(IniKey::SettingsItem indexType, const DataType &value)
+   {
+      mIniSettings.mSettings.setVal(indexType, value);
+
+      string section     = mIniSettings.mSettings.getSection(indexType);
+      string key         = mIniSettings.mSettings.getKey(indexType);
+      string valueString = mIniSettings.mSettings.getStrVal(indexType);
+
+      setIniSetting(section, key, valueString);
+   }
 };
 
 

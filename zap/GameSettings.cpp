@@ -448,6 +448,23 @@ S32  GameSettings::getQueryServerSortColumn()    { return mIniSettings.mSettings
 bool GameSettings::getQueryServerSortAscending() { return mIniSettings.mSettings.getVal<YesNo>(IniKey::QueryServerSortAscending); }
 
 
+void GameSettings::setWindowPosition(S32 x, S32 y)
+{
+   setSetting(IniKey::WindowXPos, x);
+   setSetting(IniKey::WindowYPos, y);
+}
+
+S32 GameSettings::getWindowPositionX() { return mIniSettings.mSettings.getVal<S32>(IniKey::WindowXPos); }
+S32 GameSettings::getWindowPositionY() { return mIniSettings.mSettings.getVal<S32>(IniKey::WindowYPos); }
+
+
+void GameSettings::setWindowSizeFactor(F32 scalingFactor)
+{
+   setSetting(IniKey::WindowScalingFactor, scalingFactor);
+}
+
+F32 GameSettings::getWindowSizeFactor() { return mIniSettings.mSettings.getVal<F32>(IniKey::WindowScalingFactor); }
+
 // User has entered name and password, and has clicked Ok.  That's the only way to get here.
 // Do not call this function directly -- you probably want ClientGame::userEnteredLoginCredentials(), which will call this.
 void GameSettings::setLoginCredentials(const string &name, const string &password, bool save)
@@ -949,13 +966,13 @@ void GameSettings::onFinishedLoading()
       getIniSettings()->mSettings.setVal(IniKey::WindowMode, cmdLineDisplayMode);
 
    if(xpos != S32_MIN)
-   {
-      getIniSettings()->winXPos = xpos;
-      getIniSettings()->winYPos = ypos;
-   }
+      setWindowPosition(xpos, ypos);
 
    if(winWidth > 0)
-      getIniSettings()->winSizeFact = max((F32) winWidth / (F32) DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getMinScalingFactor());
+   {
+      F32 scalingFactor = max((F32) winWidth / (F32) DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getMinScalingFactor());
+      setWindowSizeFactor(scalingFactor);
+   }
 
 #ifndef ZAP_DEDICATED
    U32 stick = getU32(USE_STICK);
@@ -1371,6 +1388,10 @@ const UserSettings *GameSettings::getUserSettings(const string &name)
    return &i->second;
 }
 
+void GameSettings::setIniSetting(const string &section, const string &key, const string &value)
+{
+   iniFile.SetValue(section, key, value, true);
+}
 
 };
 

@@ -554,19 +554,20 @@ void Event::onStickRemoved(S32 deviceId)
 // SDL_WINDOWEVENT_SIZE_CHANGED and merge this and VideoSystem::actualizeScreenMode
 void Event::onResize(ClientGame *game, S32 width, S32 height)
 {
-   IniSettings *iniSettings = game->getSettings()->getIniSettings();
+   GameSettings *settings = game->getSettings();
+   IniSettings *iniSettings = settings->getIniSettings();
 
    S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
    S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
    // Constrain window to correct proportions...
    if((width - canvasWidth) > (height - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
-      iniSettings->winSizeFact = max((F32) height / (F32)canvasHeight, DisplayManager::getScreenInfo()->getMinScalingFactor());
+      settings->setWindowSizeFactor(max((F32) height / (F32)canvasHeight, DisplayManager::getScreenInfo()->getMinScalingFactor()));
    else
-      iniSettings->winSizeFact = max((F32) width / (F32)canvasWidth, DisplayManager::getScreenInfo()->getMinScalingFactor());
+      settings->setWindowSizeFactor(max((F32) width / (F32)canvasWidth, DisplayManager::getScreenInfo()->getMinScalingFactor()));
 
-   S32 newWidth  = (S32)floor(canvasWidth  * iniSettings->winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
-   S32 newHeight = (S32)floor(canvasHeight * iniSettings->winSizeFact + 0.5f);
+   S32 newWidth  = (S32)floor(canvasWidth  * settings->getWindowSizeFactor() + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
+   S32 newHeight = (S32)floor(canvasHeight * settings->getWindowSizeFactor() + 0.5f);
 
 #if SDL_VERSION_ATLEAST(2,0,0)
    SDL_SetWindowSize(DisplayManager::getScreenInfo()->sdlWindow, newWidth, newHeight);
@@ -583,8 +584,6 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
    glViewport(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
 
    gConsole.onScreenResized();
-
-   GameSettings::iniFile.SetValueF("Settings", "WindowScalingFactor", iniSettings->winSizeFact, true);
 
    glScissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());    // See comment on identical line in main.cpp
 }

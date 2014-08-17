@@ -225,11 +225,6 @@ public:
    S32 connectionSpeed;
    Vector<PluginBinding> pluginBindings;  // Keybindings for the editor plugins
 
-   // Game window location when in windowed mode
-   S32 winXPos;
-   S32 winYPos;
-   F32 winSizeFact;
-
    bool musicMutedOnCmdLine;
 
    Vector<StringTableEntry> levelList;

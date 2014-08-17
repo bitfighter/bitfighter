@@ -478,10 +478,7 @@ void shutdownBitfighter()
 
       // Save current window position if in windowed mode
       if(settings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode) == DISPLAY_MODE_WINDOWED)
-      {
-         settings->getIniSettings()->winXPos = VideoSystem::getWindowPositionX();
-         settings->getIniSettings()->winYPos = VideoSystem::getWindowPositionY();
-      }
+         settings->setWindowPosition(VideoSystem::getWindowPositionX(), VideoSystem::getWindowPositionY());
 
       SDL_QuitSubSystem(SDL_INIT_VIDEO);
 

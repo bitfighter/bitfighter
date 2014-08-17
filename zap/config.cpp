@@ -106,11 +106,6 @@ IniSettings::IniSettings()
 
    connectionSpeed = 0;
 
-   // Game window location when in windowed mode
-   winXPos = 0;  // if set to (0,0), it will not set the position meaning it uses operating system default position. (see bottom of "VideoSystem::actualizeScreenMode" in VideoSystem.cpp)
-   winYPos = 0;
-   winSizeFact = 1.0;
-
    musicMutedOnCmdLine = false;
 
    version = BUILD_VERSION;   // Default to current version to avoid triggering upgrade checks on fresh install
@@ -426,10 +421,6 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->alwaysStartInKeyboardMode = ini->GetValueYN(section, "AlwaysStartInKeyboardMode", iniSettings->alwaysStartInKeyboardMode);
 #endif
 
-   iniSettings->winXPos = max(ini->GetValueI(section, "WindowXPos", iniSettings->winXPos), 0);    // Restore window location
-   iniSettings->winYPos = max(ini->GetValueI(section, "WindowYPos", iniSettings->winYPos), 0);
-
-   iniSettings->winSizeFact   = ini->GetValueF(section, "WindowScalingFactor", iniSettings->winSizeFact);
    iniSettings->masterAddress = ini->GetValue (section, "MasterServerAddressList", iniSettings->masterAddress);
    
    iniSettings->name           = ini->GetValue(section, "Nickname", iniSettings->name);
@@ -1062,13 +1053,6 @@ static void writeSounds(CIniFile *ini, IniSettings *iniSettings)
 }
 
 
-void saveWindowPosition(CIniFile *ini, S32 x, S32 y)
-{
-   ini->SetValueI("Settings", "WindowXPos", x);
-   ini->SetValueI("Settings", "WindowYPos", y);
-}
-
-
 static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 {
    TNLAssert(ARRAYSIZE(sections) == ARRAYSIZE(headerComments), "Mismatch!");
@@ -1113,8 +1097,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
    const char *section = "Settings";
 
-   ini->sectionComment(section, " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
-   ini->sectionComment(section, " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
    ini->sectionComment(section, " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
    ini->sectionComment(section, " JoystickLinuxUseOldDeviceSystem - Force SDL to add the older /dev/input/js0 device to the enumerated joystick list.  No effect on Windows/Mac systems");
    ini->sectionComment(section, " AlwaysStartInKeyboardMode - Change to 'Yes' to always start the game in keyboard mode (don't auto-select the joystick)");
@@ -1133,10 +1115,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
    // And the ones still to be ported to the new system
 
-
-   saveWindowPosition(ini, iniSettings->winXPos, iniSettings->winYPos);
-
-   ini->SetValueF (section, "WindowScalingFactor", iniSettings->winSizeFact);
 
 #ifndef ZAP_DEDICATED
    ini->setValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
