@@ -304,25 +304,25 @@ void GameSettings::setLevelChangePassword(const string &levelChangePassword, boo
 }
 
 
-string GameSettings::getString(ParamId paramId)
+string GameSettings::getCmdLineParamString(ParamId paramId)
 {
    return mCmdLineParams[paramId].size() > 0 ? mCmdLineParams[paramId].get(0) : "";
 }
 
 
-U32 GameSettings::getU32(ParamId paramId)
+U32 GameSettings::getCmdLineParamU32(ParamId paramId)
 {
    return mCmdLineParams[paramId].size() > 0 ? U32(Zap::stoi(mCmdLineParams[paramId].get(0))) : 0;
 }
 
 
-F32 GameSettings::getF32(ParamId paramId)
+F32 GameSettings::getCmdLineParamF32(ParamId paramId)
 {
    return mCmdLineParams[paramId].size() > 0 ? (F32)Zap::stof(mCmdLineParams[paramId].get(0)) : 0;
 }
 
 
-bool GameSettings::getSpecified(ParamId paramId)
+bool GameSettings::isCmdLineParamSpecified(ParamId paramId)
 {
    return mCmdLineParams[paramId].size() > 0;
 }
@@ -339,18 +339,18 @@ FolderManager *GameSettings::getFolderManager()
 
 FolderManager GameSettings::getCmdLineFolderManager()
 {
-    return FolderManager( getString(LEVEL_DIR), 
-                          getString(ROBOT_DIR), 
-                          getString(SFX_DIR),
-                          getString(MUSIC_DIR),
-                          getString(INI_DIR),
-                          getString(LOG_DIR),
-                          getString(SCREENSHOT_DIR),
-                          getString(SCRIPTS_DIR),
-                          getString(ROOT_DATA_DIR),
-                          getString(PLUGIN_DIR),
-                          getString(FONTS_DIR),
-                          getString(RECORD_DIR));
+    return FolderManager( getCmdLineParamString(LEVEL_DIR), 
+                          getCmdLineParamString(ROBOT_DIR), 
+                          getCmdLineParamString(SFX_DIR),
+                          getCmdLineParamString(MUSIC_DIR),
+                          getCmdLineParamString(INI_DIR),
+                          getCmdLineParamString(LOG_DIR),
+                          getCmdLineParamString(SCREENSHOT_DIR),
+                          getCmdLineParamString(SCRIPTS_DIR),
+                          getCmdLineParamString(ROOT_DATA_DIR),
+                          getCmdLineParamString(PLUGIN_DIR),
+                          getCmdLineParamString(FONTS_DIR),
+                          getCmdLineParamString(RECORD_DIR));
 }
 
 
@@ -370,7 +370,7 @@ void GameSettings::resolveDirs()
 string GameSettings::getHostAddress()
 {
    // Try cmd line first
-   string cmdLineHostAddr = getString(HOST_ADDRESS);
+   string cmdLineHostAddr = getCmdLineParamString(HOST_ADDRESS);
 
    if(cmdLineHostAddr != "")
       return cmdLineHostAddr;
@@ -388,7 +388,7 @@ string GameSettings::getHostAddress()
 
 U32 GameSettings::getMaxPlayers()
 {
-   U32 maxplayers = getU32(MAX_PLAYERS_PARAM);     // Command line value
+   U32 maxplayers = getCmdLineParamU32(MAX_PLAYERS_PARAM);     // Command line value
 
    if(maxplayers == 0)
       maxplayers = mIniSettings.mSettings.getVal<U32>(IniKey::MaxPlayers);
@@ -427,7 +427,7 @@ string GameSettings::getDefaultName()
 
 bool GameSettings::getForceUpdate()
 {
-   return getSpecified(FORCE_UPDATE);
+   return isCmdLineParamSpecified(FORCE_UPDATE);
 }
 
 
@@ -519,14 +519,14 @@ void GameSettings::setAutologin(bool autologin)
 
 bool GameSettings::isDedicatedServer()
 {
-   return getSpecified(DEDICATED);
+   return isCmdLineParamSpecified(DEDICATED);
 }
 
 
 string GameSettings::getLevelDir(SettingSource source)
 {
    if(source == CMD_LINE)
-      return getString(LEVEL_DIR);
+      return getCmdLineParamString(LEVEL_DIR);
    else
       return mIniSettings.mSettings.getVal<string>(IniKey::LevelDir);
 }
@@ -536,7 +536,7 @@ string GameSettings::getLevelDir(SettingSource source)
 // Will return the path if using the param, and "" if you arent
 string GameSettings::getPlaylistFile()
 {
-	return getString(USE_FILE);
+	return getCmdLineParamString(USE_FILE);
 }
 
 
@@ -743,9 +743,9 @@ static void parameterError(const char *errorMsg)
 }
 
 
-// Fills params with the requisite number of param arguments.  Returns new position along the tokens in cmd line where we should 
-// continue parsing.
-static S32 getParams(ParamRequirements argsRequired, const S32 paramPtr, const S32 argPtr, 
+// Fills params Vector with the requisite number of param arguments.  Returns new position along
+// the tokens in cmd line where we should continue parsing.
+static S32 parseParams(ParamRequirements argsRequired, const S32 paramPtr, const S32 argPtr,
                      const S32 argc, const Vector<string> &argv, const char *errorMsg, Vector<string> &params)
 {
    // Assume "args" starting with "-" are actually subsequent params
@@ -838,26 +838,27 @@ void GameSettings::readCmdLineParams(const Vector<string> &argv)
       }
 #endif
 
-      // Scan through the possible params
+      // Scan through the possible parameters for a match to what is on the command line
+      // This will fill out mCmdLineParams with any parameters found for the specific param id
       for(U32 i = 0; i < ARRAYSIZE(paramDefs); i++)
       {
          if(arg == "-" + paramDefs[i].paramName)
          {
-            argPtr = getParams(paramDefs[i].argsRequired, i, argPtr, argc, argv, paramDefs[i].errorMsg, mCmdLineParams[paramDefs[i].paramId]);
+            argPtr = parseParams(paramDefs[i].argsRequired, i, argPtr, argc, argv, paramDefs[i].errorMsg, mCmdLineParams[paramDefs[i].paramId]);
 
             found = true;
             break;
          }
       }
 
-      // Didn't find a matching parameter... let's try the commands
+      // Didn't find a matching parameter... let's try the command directives
       if(!found)
       {
          for(U32 i = 0; i < ARRAYSIZE(directiveDefs); i++)
          {
             if(arg == "-" + directiveDefs[i].paramName)
             {
-               argPtr = getParams(directiveDefs[i].argsRequired, i, argPtr, argc, argv, directiveDefs[i].errorMsg, mCmdLineParams[directiveDefs[i].paramId]);
+               argPtr = parseParams(directiveDefs[i].argsRequired, i, argPtr, argc, argv, directiveDefs[i].errorMsg, mCmdLineParams[directiveDefs[i].paramId]);
 
                found = true;
                break;
@@ -902,39 +903,43 @@ void GameSettings::onFinishedLoading()
    string masterAddressList, cmdLineVal;
    Settings<IniKey::SettingsItem> &settings = mIniSettings.mSettings;
 
-   // Some parameters can be specified both on the cmd line and in the INI... in those cases, the cmd line version takes precedence
+   // Some parameters can be specified both on the cmd line and in the INI... in those cases,
+   // the cmd line version takes precedence.
+   //
+   // No command-line parameter should write to the INI unless otherwise specified
+   //
    //                                First choice (cmdLine)             Second choice (INI)                  Third choice (fallback)
-   mServerPassword         = *choose( getString(SERVER_PASSWORD),       settings.getVal<string>(IniKey::ServerPassword) );
+   mServerPassword         = *choose( getCmdLineParamString(SERVER_PASSWORD),       settings.getVal<string>(IniKey::ServerPassword) );
 
-   mOwnerPassword          = *choose( getString(OWNER_PASSWORD),        settings.getVal<string>(IniKey::OwnerPassword) );
+   mOwnerPassword          = *choose( getCmdLineParamString(OWNER_PASSWORD),        settings.getVal<string>(IniKey::OwnerPassword) );
 
    // Admin and level change passwords have special overrides that force them to be blank... handle those below
-   if(getSpecified(NO_ADMIN_PASSWORD))
+   if(isCmdLineParamSpecified(NO_ADMIN_PASSWORD))
       mAdminPassword = "";
    else
-      mAdminPassword       = *choose( getString(ADMIN_PASSWORD),        settings.getVal<string>(IniKey::AdminPassword) );
+      mAdminPassword       = *choose( getCmdLineParamString(ADMIN_PASSWORD),        settings.getVal<string>(IniKey::AdminPassword) );
 
-   if(getSpecified(NO_LEVEL_CHANGE_PASSWORD))
+   if(isCmdLineParamSpecified(NO_LEVEL_CHANGE_PASSWORD))
       mLevelChangePassword = "";
    else
-      mLevelChangePassword = *choose( getString(LEVEL_CHANGE_PASSWORD), settings.getVal<string>(IniKey::LevelChangePassword) );
+      mLevelChangePassword = *choose( getCmdLineParamString(LEVEL_CHANGE_PASSWORD), settings.getVal<string>(IniKey::LevelChangePassword) );
 
 
-   mHostName               = *choose( getString(HOST_NAME),             settings.getVal<string>(IniKey::ServerName) );
-   mHostDescr              = *choose( getString(HOST_DESCRIPTION),      settings.getVal<string>(IniKey::ServerDescription) );
+   mHostName               = *choose( getCmdLineParamString(HOST_NAME),             settings.getVal<string>(IniKey::ServerName) );
+   mHostDescr              = *choose( getCmdLineParamString(HOST_DESCRIPTION),      settings.getVal<string>(IniKey::ServerDescription) );
 
 
-   cmdLineVal = getString(LOGIN_NAME);
+   cmdLineVal = getCmdLineParamString(LOGIN_NAME);
    mPlayerNameSpecifiedOnCmdLine = (cmdLineVal!= "");
 
    //                                 Cmd Line value                    User must set manually in INI            Saved in INI based on last entry       
    mPlayerName             = *choose( cmdLineVal,                       mIniSettings.name,                       mIniSettings.mSettings.getVal<string>(IniKey::LastName));
-   mPlayerPassword         = *choose( getString(LOGIN_PASSWORD),        mIniSettings.password,                   mIniSettings.lastPassword);
+   mPlayerPassword         = *choose( getCmdLineParamString(LOGIN_PASSWORD),        mIniSettings.password,                   mIniSettings.lastPassword);
 
-   cmdLineVal = getString(MASTER_ADDRESS);
+   cmdLineVal = getCmdLineParamString(MASTER_ADDRESS);
    mMasterServerSpecifiedOnCmdLine = (cmdLineVal != "");
 
-   masterAddressList       = *choose( getString(MASTER_ADDRESS),        getIniSettings()->masterAddress );    // The INI will always have a value
+   masterAddressList       = *choose( getCmdLineParamString(MASTER_ADDRESS),        getIniSettings()->masterAddress );    // The INI will always have a value
 
    parseString(masterAddressList, mMasterServerList, ',');        // Move the list of master servers into mMasterServerList
 
@@ -958,7 +963,7 @@ void GameSettings::onFinishedLoading()
    }
 
    // ... and finally, the window width (which in turns determines its height because the aspect ratio is fixed at 4:3)
-   U32 winWidth = getU32(WINDOW_WIDTH);
+   U32 winWidth = getCmdLineParamU32(WINDOW_WIDTH);
 
    // In all of these cases, if something was specified on the cmd line, write the result directly to the INI, clobbering whatever was there.
    // When we need the value, we'll get it from the INI.
@@ -975,7 +980,7 @@ void GameSettings::onFinishedLoading()
    }
 
 #ifndef ZAP_DEDICATED
-   U32 stick = getU32(USE_STICK);
+   U32 stick = getCmdLineParamU32(USE_STICK);
    if(stick > 0)
       UseJoystickNumber = stick - 1;
 #endif
@@ -985,7 +990,7 @@ void GameSettings::onFinishedLoading()
 // We need to show the name entry screen unless user has specified a nickname via the cmd line or the INI file
 bool GameSettings::shouldShowNameEntryScreenOnStartup()
 {
-   return getString(LOGIN_NAME) == "" && mIniSettings.name == "";
+   return getCmdLineParamString(LOGIN_NAME) == "" && mIniSettings.name == "";
 }
 
 
@@ -1009,13 +1014,13 @@ void GameSettings::saveMasterAddressListInIniUnlessItCameFromCmdLine()
 // Tries to figure out what display mode was specified on the cmd line, if any
 DisplayMode GameSettings::resolveCmdLineSpecifiedDisplayMode()
 {
-   if(getSpecified(WINDOW_MODE))
+   if(isCmdLineParamSpecified(WINDOW_MODE))
       return DISPLAY_MODE_WINDOWED;
 
-   if(getSpecified(FULLSCREEN_MODE))
+   if(isCmdLineParamSpecified(FULLSCREEN_MODE))
       return DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
 
-   if(getSpecified(FULLSCREEN_STRETCH))
+   if(isCmdLineParamSpecified(FULLSCREEN_STRETCH))
       return DISPLAY_MODE_FULL_SCREEN_STRETCHED;
 
    return DISPLAY_MODE_UNKNOWN;
@@ -1271,19 +1276,19 @@ const Color GameSettings::getWallOutlineColor() const
 // Accessor methods
 U32 GameSettings::getSimulatedStutter()
 {
-   return getU32(SIMULATED_STUTTER);
+   return getCmdLineParamU32(SIMULATED_STUTTER);
 }
 
 
 F32 GameSettings::getSimulatedLoss()
 {
-   return getF32(SIMULATED_LOSS);
+   return getCmdLineParamF32(SIMULATED_LOSS);
 }
 
 
 U32 GameSettings::getSimulatedLag()
 {
-   return min(getU32(SIMULATED_LAG), (U32)1000);
+   return min(getCmdLineParamU32(SIMULATED_LAG), (U32)1000);
 }
 
 

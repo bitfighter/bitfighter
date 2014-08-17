@@ -1518,7 +1518,7 @@ void SoundOptionsMenuUserInterface::setupMenus()
    addMenuItem(new ToggleMenuItem("SFX VOLUME:",        opts, U32((mGameSettings->getIniSettings()->sfxVolLevel + 0.05) * 10.0), false,
                                   setSFXVolumeCallback,   "Set sound effects volume", KEY_S));
 
-   if(mGameSettings->getSpecified(NO_MUSIC))
+   if(mGameSettings->isCmdLineParamSpecified(NO_MUSIC))
          addMenuItem(new MessageMenuItem("MUSIC MUTED FROM COMMAND LINE", Colors::red));
    else
       addMenuItem(new ToggleMenuItem("MUSIC VOLUME:",      opts, U32((mGameSettings->getIniSettings()->getMusicVolLevel() + 0.05) * 10.0), false,

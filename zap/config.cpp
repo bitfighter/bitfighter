@@ -506,7 +506,7 @@ static sfxSets stringToSFXSet(string sfxSet)
 
 static void loadSoundSettings(CIniFile *ini, GameSettings *settings, IniSettings *iniSettings)
 {
-   iniSettings->musicMutedOnCmdLine = settings->getSpecified(NO_MUSIC);
+   iniSettings->musicMutedOnCmdLine = settings->isCmdLineParamSpecified(NO_MUSIC);
 
    iniSettings->sfxVolLevel       = (F32) ini->GetValueI("Sounds", "EffectsVolume",   (S32) (iniSettings->sfxVolLevel        * 10)) / 10.0f;
    iniSettings->setMusicVolLevel(   (F32) ini->GetValueI("Sounds", "MusicVolume",     (S32) (iniSettings->getMusicVolLevel() * 10)) / 10.0f);
