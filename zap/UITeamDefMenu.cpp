@@ -110,7 +110,7 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) :
    mBottomInstructions4 =  getSymbolString("[[Insert]] or [[+]] to insert team | [[Del]] or [[-]] to remove selected team",
                                           inputCodeManager, 16, Colors::menuHelpColor);
 
-   mColorEntryMode = mGameSettings->getIniSettings()->mSettings.getVal<ColorEntryMode>(IniKey::ColorEntryMode);
+   mColorEntryMode = mGameSettings->getSetting<ColorEntryMode>(IniKey::ColorEntryMode);
    mEditingColor = false;
 }
 
@@ -524,7 +524,7 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       if(mColorEntryMode >= ColorEntryModeCount)
          mColorEntryMode = ColorEntryMode(0);
 
-      mGameSettings->getIniSettings()->mSettings.setVal<ColorEntryMode>(IniKey::ColorEntryMode, mColorEntryMode);
+      mGameSettings->setSetting<ColorEntryMode>(IniKey::ColorEntryMode, mColorEntryMode);
       return true;
    }
 

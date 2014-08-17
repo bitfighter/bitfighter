@@ -357,7 +357,7 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
       game->getUIManager()->getUI<OptionsMenuUserInterface>()->toggleDisplayMode();
 
       DisplayManager::getScreenInfo()->setCanvasMousePos((S32)pos->x, (S32)pos->y, 
-                           game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode));
+                           game->getSettings()->getSetting<DisplayMode>(IniKey::WindowMode));
 
 #if SDL_VERSION_ATLEAST(2,0,0)
       SDL_WarpMouseInWindow(DisplayManager::getScreenInfo()->sdlWindow, 

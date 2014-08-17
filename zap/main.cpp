@@ -336,7 +336,7 @@ void idle()
 
    bool dedicated = GameManager::getServerGame() && GameManager::getServerGame()->isDedicated();
 
-   U32 maxFPS = dedicated ? settings->getIniSettings()->mSettings.getVal<U32>(IniKey::MaxFpsServer) : 
+   U32 maxFPS = dedicated ? settings->getSetting<U32>(IniKey::MaxFpsServer) : 
                             settings->getIniSettings()->maxFPS;
    
    // If user specifies 0, run full-bore!
@@ -477,7 +477,7 @@ void shutdownBitfighter()
       Joystick::shutdownJoystick();
 
       // Save current window position if in windowed mode
-      if(settings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode) == DISPLAY_MODE_WINDOWED)
+      if(settings->getSetting<DisplayMode>(IniKey::WindowMode) == DISPLAY_MODE_WINDOWED)
          settings->setWindowPosition(VideoSystem::getWindowPositionX(), VideoSystem::getWindowPositionY());
 
       SDL_QuitSubSystem(SDL_INIT_VIDEO);
@@ -538,9 +538,9 @@ void createClientGame(GameSettingsPtr settings)
    if(!settings->isDedicatedServer())
    {
       // Grab some values from the settings
-      U16    portNumber     = settings->getIniSettings()->mSettings.getVal<U16>(IniKey::ClientPortNumber);
+      U16    portNumber     = settings->getSetting<U16>(IniKey::ClientPortNumber);
       string lastEditorName = settings->getIniSettings()->lastEditorName;
-      string lastName       = settings->getIniSettings()->mSettings.getVal<string>(IniKey::LastName);
+      string lastName       = settings->getSetting<string>(IniKey::LastName);
 
       // Create a new client, and let the system figure out IP address and assign a port
       // ClientGame destructor will clean up UIManager
@@ -573,7 +573,7 @@ void createClientGame(GameSettingsPtr settings)
          //   gClientGame = gClientGame1;
          //}
          //gClientGame->getUIManager()->getUI<NameEntryUserInterface>()->activate();     <-- won't work no more!
-         Game::seedRandomNumberGenerator(settings->getIniSettings()->mSettings.getVal<string>(IniKey::LastName));
+         Game::seedRandomNumberGenerator(settings->getSetting<string>(IniKey::LastName));
       }
       else  // Skipping startup screen
       {
@@ -695,7 +695,7 @@ void checkOnlineUpdate(GameSettings *settings)
    // Windows only
 #ifdef USE_BFUP
    // Spawn external updater tool to check for new version of Bitfighter
-   if(settings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::UseUpdater))
+   if(settings->getSetting<YesNo>(IniKey::UseUpdater))
       launchWindowsUpdater(settings->getForceUpdate());
 #endif   // USE_BFUP
 
@@ -898,8 +898,8 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    // See version.h for short history of roughly what version corresponds to a game release
 
    // 016:
-   if(previousVersion < 1840 && settings->getIniSettings()->mSettings.getVal<S32>(IniKey::MaxBots) == 127)
-      settings->getIniSettings()->mSettings.setVal(IniKey::MaxBots, 10);
+   if(previousVersion < 1840 && settings->getSetting<S32>(IniKey::MaxBots) == 127)
+      settings->setSetting(IniKey::MaxBots, 10);
 
    if(previousVersion < VERSION_016)
    {
@@ -940,7 +940,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       GameSettings::iniFile.SetValue("EditorPlugins", "Plugin1", "Ctrl+'|draw_stars.lua|Create polygon/star");
 
       // Add back linesmoothing option
-      settings->getIniSettings()->mSettings.setVal(IniKey::LineSmoothing, Yes);
+      settings->setSetting(IniKey::LineSmoothing, Yes);
    }
 
    // 019a:

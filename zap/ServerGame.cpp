@@ -59,7 +59,7 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
    // Stupid C++ spec doesn't allow ternary logic with static const if there is no definition
    // Workaround is to add '+' to force a read of the value
    // See:  http://stackoverflow.com/questions/5446005/why-dont-static-member-variables-play-well-with-the-ternary-operator
-   mNextLevel = mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::RandomLevels) ? +RANDOM_LEVEL : +NEXT_LEVEL;
+   mNextLevel = mSettings->getSetting<YesNo>(IniKey::RandomLevels) ? +RANDOM_LEVEL : +NEXT_LEVEL;
 
    mShuttingDown = false;
 
@@ -149,14 +149,14 @@ bool ServerGame::voteStart(ClientInfo *clientInfo, VoteType type, S32 number)
 {
    GameConnection *conn = clientInfo->getConnection();
 
-   if(!mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::VotingEnabled))
+   if(!mSettings->getSetting<YesNo>(IniKey::VotingEnabled))
       return false;
 
    U32 voteTimer;
    if(type == VoteChangeTeam)
-      voteTimer = mSettings->getIniSettings()->mSettings.getVal<U32>(IniKey::VoteLengthToChangeTeam) * 1000;
+      voteTimer = mSettings->getSetting<U32>(IniKey::VoteLengthToChangeTeam) * 1000;
    else
-      voteTimer = mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::VoteLength) * 1000;
+      voteTimer = mSettings->getSetting<YesNo>(IniKey::VoteLength) * 1000;
 
    if(voteTimer == 0)
       return false;
@@ -566,7 +566,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    computeWorldObjectExtents();                       // Compute world Extents nice and early
 
-   if(!mGameRecorderServer && !mShuttingDown && getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::GameRecording))
+   if(!mGameRecorderServer && !mShuttingDown && getSettings()->getSetting<YesNo>(IniKey::GameRecording))
       mGameRecorderServer = new GameRecorderServer(this);
 
 
@@ -762,7 +762,7 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
 {
    S32 currentLevelIndex = mCurrentLevelIndex;
    S32 levelCount = mLevelSource->getLevelCount();
-   bool skipUploads = getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::SkipUploads);
+   bool skipUploads = getSettings()->getSetting<YesNo>(IniKey::SkipUploads);
 
    if(levelCount == 1)
       nextLevel = FIRST_LEVEL;
@@ -1076,7 +1076,7 @@ bool ServerGame::loadLevel()
 
    // Global levelgens are run on every level.  Run any that are defined.
    Vector<string> scriptList;
-   parseString(getSettings()->getIniSettings()->mSettings.getVal<string>(IniKey::GlobalLevelScript), scriptList, '|');
+   parseString(getSettings()->getSetting<string>(IniKey::GlobalLevelScript), scriptList, '|');
 
    for(S32 i = 0; i < scriptList.size(); i++)
       runLevelGenScript(scriptList[i]);
@@ -1209,7 +1209,7 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
 
    // Advance to beginning of next level if there are no remaining players
    if(getPlayerCount() == 0 && !mShuttingDown && isDedicated())  // Only dedicated server can have zero players
-      cycleLevel(getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::RandomLevels) ? +RANDOM_LEVEL : +NEXT_LEVEL);
+      cycleLevel(getSettings()->getSetting<YesNo>(IniKey::RandomLevels) ? +RANDOM_LEVEL : +NEXT_LEVEL);
    else
       mRobotManager.balanceTeams();
 }
@@ -1387,7 +1387,7 @@ void ServerGame::idle(U32 timeDelta)
    if(isDedicated())   
    {
       // Save volume here to avoid repeated lookup; it can't change without a restart, so this will work
-      static const F32 volume = mSettings->getIniSettings()->mSettings.getVal<F32>(IniKey::AlertsVolume);
+      static const F32 volume = mSettings->getSetting<F32>(IniKey::AlertsVolume);
       SoundSystem::processAudio(volume);    
    }
 
@@ -1490,7 +1490,7 @@ void ServerGame::idle(U32 timeDelta)
       // Normalize ratings for this game
       getGameType()->updateRatings();
       cycleLevel(mNextLevel);
-      mNextLevel = getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::RandomLevels) ? +RANDOM_LEVEL : +NEXT_LEVEL;
+      mNextLevel = getSettings()->getSetting<YesNo>(IniKey::RandomLevels) ? +RANDOM_LEVEL : +NEXT_LEVEL;
    }
 
 

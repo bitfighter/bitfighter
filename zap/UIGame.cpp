@@ -1883,7 +1883,7 @@ Move *GameUserInterface::getCurrentMove()
 
    // Using relative controls -- all turning is done relative to the direction of the ship, so
    // we need to udate the move a little
-   if(mGameSettings->getIniSettings()->mSettings.getVal<RelAbs>(IniKey::ControlMode) == Relative)
+   if(mGameSettings->getSetting<RelAbs>(IniKey::ControlMode) == Relative)
    {
       mTransformedMove = mCurrentMove;    // Copy move
 
@@ -2126,7 +2126,7 @@ void GameUserInterface::VoiceRecorder::process()
       GameType *gameType = mGame->getGameType();
 
       if(gameType && sendBuffer->getBufferSize() < 1024)      // Don't try to send too big
-         gameType->c2sVoiceChat(mGame->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::VoiceEcho), sendBuffer);
+         gameType->c2sVoiceChat(mGame->getSettings()->getSetting<YesNo>(IniKey::VoiceEcho), sendBuffer);
    }
 }
 
@@ -2636,7 +2636,7 @@ void GameUserInterface::renderObjectIds() const
 
 //void GameUserInterface::saveAlreadySeenLevelupMessageList()
 //{
-//   mGameSettings->getIniSettings()->mSettings.setVal("LevelupItemsAlreadySeenList",
+//   mGameSettings->setSetting("LevelupItemsAlreadySeenList",
 //                                                                getAlreadySeenLevelupMessageString());
 //}
 
@@ -2644,7 +2644,7 @@ void GameUserInterface::renderObjectIds() const
 //void GameUserInterface::loadAlreadySeenLevelupMessageList()
 //{
 //   setAlreadySeenLevelupMessageString(
-//         mGameSettings->getIniSettings()->mSettings.getVal<string>("LevelupItemsAlreadySeenList")
+//         mGameSettings->getSetting<string>("LevelupItemsAlreadySeenList")
 //   );
 //}
 
@@ -3392,7 +3392,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
       S32 displayAreaHeight = (mMessages.size() - 1) * lineHeight;     
       S32 displayAreaYPos = anchorPos + (mTopDown ? displayAreaHeight : lineHeight);
 
-      scissorsManager.enable(true, mGame->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode), 0, 
+      scissorsManager.enable(true, mGame->getSettings()->getSetting<DisplayMode>(IniKey::WindowMode), 0, 
                              F32(displayAreaYPos - displayAreaHeight), F32(DisplayManager::getScreenInfo()->getGameCanvasWidth()), 
                              F32(displayAreaHeight));
    }

@@ -407,7 +407,7 @@ void GameSettings::save()
    //   bl->writeToFile();      // Writes ban list back to file XXX enable this when admin functionality is built in
 
    //saveWindowMode(&iniFile, &mIniSettings);
-   //getIniSettings()->mSettings.setVal("WindowMode", cmdLineDisplayMode);
+   //setSetting("WindowMode", cmdLineDisplayMode);
       //ini->SetValue("Settings",  "WindowMode", displayModeToString(iniSettings->displayMode));;
    saveSettingsToINI(&iniFile, this);        // Writes settings to iniFile, then writes it to disk
 }
@@ -963,7 +963,7 @@ void GameSettings::onFinishedLoading()
    // In all of these cases, if something was specified on the cmd line, write the result directly to the INI, clobbering whatever was there.
    // When we need the value, we'll get it from the INI.
    if(cmdLineDisplayMode != DISPLAY_MODE_UNKNOWN)
-      getIniSettings()->mSettings.setVal(IniKey::WindowMode, cmdLineDisplayMode);
+      setSetting(IniKey::WindowMode, cmdLineDisplayMode);
 
    if(xpos != S32_MIN)
       setWindowPosition(xpos, ypos);

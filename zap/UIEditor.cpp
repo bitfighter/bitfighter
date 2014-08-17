@@ -155,7 +155,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 
    mSaveMsgTimer.setPeriod(FIVE_SECONDS);    
 
-   mGridSize = mGameSettings->getIniSettings()->mSettings.getVal<U32>(IniKey::EditorGridSize);
+   mGridSize = mGameSettings->getSetting<U32>(IniKey::EditorGridSize);
 
    mQuitLocked = false;
    mVertexEditMode = true;
@@ -5427,7 +5427,7 @@ void EditorMenuUserInterface::setupMenus()
 
    clearMenuItems();
    addMenuItem(new MenuItem("RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R));
-   addMenuItem(getWindowModeMenuItem((U32)mGameSettings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode)));
+   addMenuItem(getWindowModeMenuItem((U32)mGameSettings->getSetting<DisplayMode>(IniKey::WindowMode)));
    addMenuItem(new MenuItem("TEST LEVEL",       testLevelCallback,           "", KEY_T));
    addMenuItem(new MenuItem("SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
    addMenuItem(new MenuItem("EDITOR SECRETS",   activateHelpCallback,        "", KEY_E, keyHelp));

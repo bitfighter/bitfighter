@@ -1136,9 +1136,9 @@ static void setFullscreenCallback(ClientGame *game, U32 mode)
 
    // Save existing setting
    settings->getIniSettings()->oldDisplayMode = 
-            game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
+            game->getSettings()->getSetting<DisplayMode>(IniKey::WindowMode);
 
-   settings->getIniSettings()->mSettings.setVal(IniKey::WindowMode, (DisplayMode)mode);
+   settings->setSetting(IniKey::WindowMode, (DisplayMode)mode);
    VideoSystem::actualizeScreenMode(game->getSettings(), false, game->getUIManager()->getCurrentUI()->usesEditorScreenMode());
 }
 
@@ -1178,7 +1178,7 @@ void OptionsMenuUserInterface::setupMenus()
                                  "on start, bypassing the first screen", KEY_A));
 
 #ifndef TNL_OS_MOBILE
-   addMenuItem(getWindowModeMenuItem((U32)mGameSettings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode)));
+   addMenuItem(getWindowModeMenuItem((U32)mGameSettings->getSetting<DisplayMode>(IniKey::WindowMode)));
 #endif
 
 #ifdef INCLUDE_CONN_SPEED_ITEM
@@ -1206,7 +1206,7 @@ void OptionsMenuUserInterface::toggleDisplayMode()
    DisplayMode oldMode = mGameSettings->getIniSettings()->oldDisplayMode;
 
    // Save current setting
-   DisplayMode curMode = mGameSettings->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
+   DisplayMode curMode = mGameSettings->getSetting<DisplayMode>(IniKey::WindowMode);
    mGameSettings->getIniSettings()->oldDisplayMode = curMode;
 
    DisplayMode mode;
@@ -1232,7 +1232,7 @@ void OptionsMenuUserInterface::toggleDisplayMode()
       mode = (nextmode == DISPLAY_MODE_UNKNOWN) ? (DisplayMode) 0 : nextmode; // Bounds check
    }
 
-   mGameSettings->getIniSettings()->mSettings.setVal(IniKey::WindowMode, mode);
+   mGameSettings->setSetting(IniKey::WindowMode, mode);
    VideoSystem::actualizeScreenMode(mGameSettings, false, editorScreenMode);
 }
 
@@ -1305,7 +1305,7 @@ void InputOptionsMenuUserInterface::render() const
 // Callbacks for InputOptions menu
 static void setControlsCallback(ClientGame *game, U32 val)
 {
-   game->getSettings()->getIniSettings()->mSettings.setVal(IniKey::ControlMode, RelAbs(val));
+   game->getSettings()->setSetting(IniKey::ControlMode, RelAbs(val));
 }
 
 
@@ -1317,7 +1317,7 @@ static void defineKeysCallback(ClientGame *game, U32 unused)
 
 static void setControllerCallback(ClientGame *game, U32 joystickIndex)
 {
-   game->getSettings()->getIniSettings()->mSettings.setVal(IniKey::JoystickType, 
+   game->getSettings()->setSetting(IniKey::JoystickType, 
                                                            Joystick::JoystickPresetList[joystickIndex].identifier);
    Joystick::setSelectedPresetIndex(joystickIndex);
 }
@@ -1428,7 +1428,7 @@ void InputOptionsMenuUserInterface::setupMenus()
    opts.push_back(ucase(Evaluator::toString(Absolute)));
    TNLAssert(Relative < Absolute, "Items added in wrong order!");
 
-   RelAbs mode = mGameSettings->getIniSettings()->mSettings.getVal<RelAbs>(IniKey::ControlMode);
+   RelAbs mode = mGameSettings->getSetting<RelAbs>(IniKey::ControlMode);
 
    addMenuItem(new ToggleMenuItem("CONTROLS:", opts, (U32)mode, true, 
                                   setControlsCallback, "Set controls to absolute (normal) or relative (like a tank) mode", KEY_C));
@@ -1503,7 +1503,7 @@ static void setVoiceVolumeCallback(ClientGame *game, U32 vol)
 
 static void setVoiceEchoCallback(ClientGame *game, U32 val)
 {
-   game->getSettings()->getIniSettings()->mSettings.setVal(IniKey::VoiceEcho, YesNo(val));
+   game->getSettings()->setSetting(IniKey::VoiceEcho, YesNo(val));
 }
 
 
@@ -1529,7 +1529,7 @@ void SoundOptionsMenuUserInterface::setupMenus()
    opts.clear();
    opts.push_back("DISABLED");      // No == 0
    opts.push_back("ENABLED");       // Yes == 1
-   addMenuItem(new ToggleMenuItem("VOICE ECHO:", opts, (U32)mGameSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::VoiceEcho),
+   addMenuItem(new ToggleMenuItem("VOICE ECHO:", opts, (U32)mGameSettings->getSetting<YesNo>(IniKey::VoiceEcho),
                                   true, setVoiceEchoCallback, "Toggle whether you hear your voice on voice chat",  KEY_E));
 }
 
@@ -1650,8 +1650,8 @@ void RobotOptionsMenuUserInterface::onEscape()
 void RobotOptionsMenuUserInterface::saveSettings()
 {
    // Save our minimum players, get the correct index of the appropriate menu item
-   mGameSettings->getIniSettings()->mSettings.setVal(IniKey::AddRobots,          YesNo(getMenuItem(0)->getIntValue() == 1));
-   mGameSettings->getIniSettings()->mSettings.setVal(IniKey::MinBalancedPlayers, getMenuItem(1)->getIntValue());
+   mGameSettings->setSetting(IniKey::AddRobots,          YesNo(getMenuItem(0)->getIntValue() == 1));
+   mGameSettings->setSetting(IniKey::MinBalancedPlayers, getMenuItem(1)->getIntValue());
 
    saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
 }
@@ -1797,7 +1797,7 @@ void NameEntryUserInterface::setupMenu()
    mRenderSpecialInstructions = false;
 
    addMenuItem(new MenuItem("PLAY", nameAndPasswordAcceptCallback, ""));
-   addMenuItem(new TextEntryMenuItem("NICKNAME:", mGameSettings->getIniSettings()->mSettings.getVal<string>(IniKey::LastName),
+   addMenuItem(new TextEntryMenuItem("NICKNAME:", mGameSettings->getSetting<string>(IniKey::LastName),
          mGameSettings->getDefaultName(), "", MAX_PLAYER_NAME_LENGTH));
 
    getMenuItem(1)->setFilter(nickNameFilter);  // Quotes are incompatible with PHPBB3 logins, %s are used for var substitution
@@ -1936,11 +1936,11 @@ void HostMenuUserInterface::setupMenus()
                             "Set server passwords/permissions", KEY_P));
 
    addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", 
-         mGameSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::AllowGetMap),
+         mGameSettings->getSetting<YesNo>(IniKey::AllowGetMap),
                                  "", KEY_M));
 
    addMenuItem(new YesNoMenuItem("RECORD GAMES:", 
-         mGameSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::GameRecording),
+         mGameSettings->getSetting<YesNo>(IniKey::GameRecording),
                                  ""));
 
    addMenuItem(new MenuItem("PLAYBACK GAMES", playbackGamesCallback, ""));
@@ -1962,8 +1962,8 @@ void HostMenuUserInterface::saveSettings()
    mGameSettings->setHostName (getMenuItem(OPT_NAME)->getValue(),  true);
    mGameSettings->setHostDescr(getMenuItem(OPT_DESCR)->getValue(), true);
 
-   mGameSettings->getIniSettings()->mSettings.setVal<YesNo>(IniKey::AllowGetMap,   getMenuItem(OPT_GETMAP)->getIntValue() ? Yes : No);
-   mGameSettings->getIniSettings()->mSettings.setVal<YesNo>(IniKey::GameRecording, getMenuItem(OPT_RECORD)->getIntValue() ? Yes : No);
+   mGameSettings->setSetting<YesNo>(IniKey::AllowGetMap,   getMenuItem(OPT_GETMAP)->getIntValue() ? Yes : No);
+   mGameSettings->setSetting<YesNo>(IniKey::GameRecording, getMenuItem(OPT_RECORD)->getIntValue() ? Yes : No);
 
    saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
 }

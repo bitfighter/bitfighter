@@ -398,7 +398,7 @@ void UserInterface::renderDiagnosticKeysOverlay()
 {
    // This setting can't be changed from in-game, so we can just grab the value at the outset and use that to save the lookup
    static const bool dumpKeys = 
-         GameManager::getClientGames()->get(0)->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::DumpKeys);
+         GameManager::getClientGames()->get(0)->getSettings()->getSetting<YesNo>(IniKey::DumpKeys);
 
    if(dumpKeys)
    {

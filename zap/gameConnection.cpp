@@ -280,7 +280,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerRequestSpawnDelayed, (bool incursPena
 // 4. server send CommandComplete
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   if(!mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::AllowGetMap))
+   if(!mSettings->getSetting<YesNo>(IniKey::AllowGetMap))
    {
       s2cDisplayErrorMessage("!!! Getmap command is disabled on this server");
       return;
@@ -427,7 +427,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
       mClientInfo->setRole(ClientInfo::RoleOwner);
       s2cSetRole(ClientInfo::RoleOwner, true);                    // Tell client they have been granted access
 
-      if(mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::AllowAdminMapUpload))
+      if(mSettings->getSetting<YesNo>(IniKey::AllowAdminMapUpload))
       {
          mSendableFlags |= ServerFlagAllowUpload;                 // Enable level uploads
          s2rSendableFlags(mSendableFlags);
@@ -452,7 +452,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
       mClientInfo->setRole(ClientInfo::RoleAdmin);               // Enter admin PW and...
       s2cSetRole(ClientInfo::RoleAdmin, true);                   // Tell client they have been granted access
 
-      if(mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::AllowAdminMapUpload))
+      if(mSettings->getSetting<YesNo>(IniKey::AllowAdminMapUpload))
       {
          mSendableFlags |= ServerFlagAllowUpload;                 // Enable level uploads
          s2rSendableFlags(mSendableFlags);
@@ -1363,7 +1363,7 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
    FolderManager *folderManager = mSettings->getFolderManager();
 
    if(isServer && levelgensize != 0 && 
-      !mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::AllowLevelgenUpload))
+      !mSettings->getSetting<YesNo>(IniKey::AllowLevelgenUpload))
    {
       s2cDisplayErrorMessage("!!! Server does not allow levelgen uploads");
       return;
@@ -1502,8 +1502,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
    // Abort early if user can't upload
-   if(!isInitiator() && !(mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::AllowMapUpload) || 
-                         (mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::AllowAdminMapUpload) && mClientInfo->isAdmin())))
+   if(!isInitiator() && !(mSettings->getSetting<YesNo>(IniKey::AllowMapUpload) || 
+                         (mSettings->getSetting<YesNo>(IniKey::AllowAdminMapUpload) && mClientInfo->isAdmin())))
       return;
 
    ByteBuffer *&dataBuffer = (type & 2 ? mDataBufferLevelGen : mDataBuffer);
@@ -1944,7 +1944,7 @@ void GameConnection::writeConnectAccept(BitStream *stream)
    Parent::writeConnectAccept(stream);
    stream->write(CONNECT_VERSION);
 
-   stream->writeFlag(mServerGame->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::EnableServerVoiceChat));
+   stream->writeFlag(mServerGame->getSettings()->getSetting<YesNo>(IniKey::EnableServerVoiceChat));
 }
 
 
@@ -2212,15 +2212,15 @@ void GameConnection::onConnectionEstablished_server()
                                           isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str());
 
    mSendableFlags = 0;
-   if(mSettings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::AllowMapUpload))
+   if(mSettings->getSetting<YesNo>(IniKey::AllowMapUpload))
       mSendableFlags |= ServerFlagAllowUpload;
-   if(settings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::GameRecordingDownload) && mConnectionVersion >= 1)  // 019c and earliear have broken file saving
+   if(settings->getSetting<YesNo>(IniKey::GameRecordingDownload) && mConnectionVersion >= 1)  // 019c and earliear have broken file saving
       mSendableFlags |= ServerFlagHasRecordedGameplayDownloads;
 
    s2rSendableFlags(mSendableFlags);
 
    // No team changing allowed
-   if(!settings->getIniSettings()->mSettings.getVal<YesNo>(IniKey::AllowTeamChanging))
+   if(!settings->getSetting<YesNo>(IniKey::AllowTeamChanging))
    {
       // Forever!
       mSwitchTimer.reset(U32_MAX, U32_MAX);

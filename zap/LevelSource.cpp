@@ -448,7 +448,7 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
 //
 //   computeWorldObjectExtents();                       // Compute world Extents nice and early
 //
-//   if(!mGameRecorderServer && !mShuttingDown && getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::GameRecording))
+//   if(!mGameRecorderServer && !mShuttingDown && getSettings()->getSetting<YesNo>(IniKey::GameRecording))
 //      mGameRecorderServer = new GameRecorderServer(this);
 //
 //

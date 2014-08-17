@@ -678,7 +678,7 @@ void GameType::idle_server(U32 deltaT)
                updateClientScoreboard(clientInfo->getConnection());
          }
 
-         if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::AllowTeamChanging))
+         if(getGame()->getSettings()->getSetting<YesNo>(IniKey::AllowTeamChanging))
          {
             if(conn->mSwitchTimer.getCurrent())             // Are we still counting down until the player can switch?
                if(conn->mSwitchTimer.update(deltaT))        // Has the time run out?
@@ -1063,7 +1063,7 @@ public:
    {
 #ifdef BF_WRITE_TO_MYSQL
       if(!mInitialized)
-         initializeDbSettings(mSettings->getIniSettings()->mSettings.getVal<string>(IniKey::MySqlStatsDatabaseCredentials));
+         initializeDbSettings(mSettings->getSetting<string>(IniKey::MySqlStatsDatabaseCredentials));
 
       if(mMySqlStatsDatabaseServer != "")
       {
@@ -1121,7 +1121,7 @@ void GameType::saveGameStats()
    if(masterConn)
       masterConn->s2mSendStatistics(stats);
 
-   if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::LogStats))
+   if(getGame()->getSettings()->getSetting<YesNo>(IniKey::LogStats))
    {
       processStatsResults(&stats.gameStats);
 
@@ -2760,7 +2760,7 @@ bool GameType::addBotFromClient(Vector<StringTableEntry> args)
 
    // No default robot set
    else if(!clientInfo->isAdmin() && args.size() < 2 &&
-           settings->getIniSettings()->mSettings.getVal<string>(IniKey::DefaultRobotScript) == "")
+           settings->getSetting<string>(IniKey::DefaultRobotScript) == "")
       conn->s2cDisplayErrorMessage("!!! This server doesn't have a default robot configured");
 
    else if(!clientInfo->isLevelChanger())
@@ -3026,7 +3026,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSetMaxBots, (S32 count), (count))
    if(count <= 0)
       return;  // Error message handled client-side
 
-   settings->getIniSettings()->mSettings.setVal(IniKey::MaxBots, count);
+   settings->setSetting(IniKey::MaxBots, count);
 
    //GameConnection *conn = clientInfo->getConnection();
    //TNLAssert(conn == source, "If this never fires, we can get rid of conn!");    // Added long ago, well before Dec 2013
@@ -3192,7 +3192,7 @@ GAMETYPE_RPC_C2S(GameType, c2sGlobalMutePlayer, (StringTableEntry playerName), (
    gc->mChatMute = !gc->mChatMute;
 
    // if server voice chat is allowed, send voice chat status.
-   if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::EnableServerVoiceChat))
+   if(getGame()->getSettings()->getSetting<YesNo>(IniKey::EnableServerVoiceChat))
       gc->s2rVoiceChatEnable(!gc->mChatMute);
 
    GameConnection *conn = clientInfo->getConnection();
@@ -3705,7 +3705,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sVoiceChat, (bool echo, ByteBufferPtr vo
    ClientInfo *sourceClientInfo = source->getClientInfo();
 
    // If globally muted or voice chat is disabled on the server, don't send to anyone
-   if(source->mChatMute || !getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>(IniKey::EnableServerVoiceChat))
+   if(source->mChatMute || !getGame()->getSettings()->getSetting<YesNo>(IniKey::EnableServerVoiceChat))
       return;
 
    if(source)

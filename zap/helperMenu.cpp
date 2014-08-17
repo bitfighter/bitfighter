@@ -290,7 +290,7 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
 /////
 
    S32 buttonWidth = getButtonWidth(items, count);
-   DisplayMode displayMode = getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
+   DisplayMode displayMode = getGame()->getSettings()->getSetting<DisplayMode>(IniKey::WindowMode);
    
    S32 yPos;
 
