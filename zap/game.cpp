@@ -472,6 +472,7 @@ void Game::addWallItem(WallItem *wallItem, GridDatabase *database)
 
    // Generate a series of 2-point wall segments, which are added to the spatial database
    Barrier::constructWalls(this, *wallItem->getOutline(), false, (F32)wallItem->getWidth());
+
    //wallItem->onAddedToGame();
 }
 

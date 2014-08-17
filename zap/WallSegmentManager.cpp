@@ -207,7 +207,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
       new WallSegment(mWallSegmentDatabase, *wall->getOutline(), wall->getSerialNumber());
 
    // Traditional walls will be represented by a series of rectangles, each representing a "puffed out" pair of sequential vertices
-   else     
+   else
    {
       TNLAssert(dynamic_cast<WallItem *>(wall), "Expected an WallItem!");
       WallItem *wallItem = static_cast<WallItem *>(wall);
