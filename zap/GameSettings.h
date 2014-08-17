@@ -328,6 +328,12 @@ public:
 
       setIniSetting(section, key, valueString);
    }
+
+   template <class DataType>
+   DataType getSetting(IniKey::SettingsItem indexType)
+   {
+      return mIniSettings.mSettings.getVal<DataType>(indexType);
+   }
 };
 
 
