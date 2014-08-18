@@ -197,8 +197,6 @@ public:
    Settings<IniKey::SettingsItem> mSettings;
 
    DisplayMode oldDisplayMode;
-   bool joystickLinuxUseOldDeviceSystem;
-   bool alwaysStartInKeyboardMode;
 
    F32 sfxVolLevel;                 // SFX volume (0 = silent, 1 = full bore)
    F32 voiceChatVolLevel;           // Ditto
@@ -213,14 +211,6 @@ public:
    sfxSets sfxSet;                  // Which set of SFX does the user want?
 
    U32 maxFPS;
-
-
-   string masterAddress;            // Default address of our master server
-   string name;                     // Player name (none by default)    
-   string password;                 // Player password (none by default) 
-   string defaultName;              // Name used if user hits <enter> on name entry screen
-   string lastPassword;
-   string lastEditorName;           // Name of file most recently edited by the user
 
    S32 connectionSpeed;
    Vector<PluginBinding> pluginBindings;  // Keybindings for the editor plugins

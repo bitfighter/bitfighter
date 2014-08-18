@@ -539,7 +539,7 @@ void createClientGame(GameSettingsPtr settings)
    {
       // Grab some values from the settings
       U16    portNumber     = settings->getSetting<U16>(IniKey::ClientPortNumber);
-      string lastEditorName = settings->getIniSettings()->lastEditorName;
+      string lastEditorName = settings->getSetting<string>(IniKey::LastEditorName);
       string lastName       = settings->getSetting<string>(IniKey::LastName);
 
       // Create a new client, and let the system figure out IP address and assign a port
@@ -904,7 +904,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    if(previousVersion < VERSION_016)
    {
       // Master server changed
-      settings->getIniSettings()->masterAddress = MASTER_SERVER_LIST_ADDRESS;
+      settings->setSetting(IniKey::MasterServerAddressList, MASTER_SERVER_LIST_ADDRESS);
 
       // We added editor plugins
       GameSettings::iniFile.addSection("EditorPlugins");

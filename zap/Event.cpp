@@ -555,7 +555,6 @@ void Event::onStickRemoved(S32 deviceId)
 void Event::onResize(ClientGame *game, S32 width, S32 height)
 {
    GameSettings *settings = game->getSettings();
-   IniSettings *iniSettings = settings->getIniSettings();
 
    S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
    S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();

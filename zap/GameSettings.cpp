@@ -421,7 +421,7 @@ IniSettings *GameSettings::getIniSettings()
 
 string GameSettings::getDefaultName()
 {
-   return mIniSettings.defaultName;
+   return getSetting<string>(IniKey::DefaultName);
 }
 
 
@@ -475,7 +475,7 @@ void GameSettings::setLoginCredentials(const string &name, const string &passwor
    if(save)
    {
       mIniSettings.mSettings.setVal(IniKey::LastName, name);          
-      mIniSettings.lastPassword = password;
+      mIniSettings.mSettings.setVal(IniKey::Password, password);
    
       iniFile.WriteFile();
    }
@@ -506,13 +506,13 @@ void GameSettings::setAutologin(bool autologin)
 {
    if(autologin)
    {
-      mIniSettings.name     = mIniSettings.mSettings.getVal<string>(IniKey::LastName);
-      mIniSettings.password = mIniSettings.lastPassword;
+      mIniSettings.mSettings.setVal(IniKey::Nickname, mIniSettings.mSettings.getVal<string>(IniKey::LastName));
+      mIniSettings.mSettings.setVal(IniKey::Password, mIniSettings.mSettings.getVal<string>(IniKey::LastPassword));
    }
    else
    {
-      mIniSettings.name     = "";
-      mIniSettings.password = "";
+      mIniSettings.mSettings.setVal(IniKey::Nickname, string());
+      mIniSettings.mSettings.setVal(IniKey::Password, string());
    }
 }
 
@@ -933,13 +933,13 @@ void GameSettings::onFinishedLoading()
    mPlayerNameSpecifiedOnCmdLine = (cmdLineVal!= "");
 
    //                                 Cmd Line value                    User must set manually in INI            Saved in INI based on last entry       
-   mPlayerName             = *choose( cmdLineVal,                       mIniSettings.name,                       mIniSettings.mSettings.getVal<string>(IniKey::LastName));
-   mPlayerPassword         = *choose( getCmdLineParamString(LOGIN_PASSWORD),        mIniSettings.password,                   mIniSettings.lastPassword);
+   mPlayerName             = *choose( cmdLineVal,                       getSetting<string>(IniKey::Nickname),    getSetting<string>(IniKey::LastName));
+   mPlayerPassword         = *choose( getCmdLineParamString(LOGIN_PASSWORD), getSetting<string>(IniKey::Password), getSetting<string>(IniKey::LastPassword));
 
    cmdLineVal = getCmdLineParamString(MASTER_ADDRESS);
    mMasterServerSpecifiedOnCmdLine = (cmdLineVal != "");
 
-   masterAddressList       = *choose( getCmdLineParamString(MASTER_ADDRESS),        getIniSettings()->masterAddress );    // The INI will always have a value
+   masterAddressList       = *choose( getCmdLineParamString(MASTER_ADDRESS), getSetting<string>(IniKey::MasterServerAddressList) );    // The INI will always have a value
 
    parseString(masterAddressList, mMasterServerList, ',');        // Move the list of master servers into mMasterServerList
 
@@ -990,7 +990,7 @@ void GameSettings::onFinishedLoading()
 // We need to show the name entry screen unless user has specified a nickname via the cmd line or the INI file
 bool GameSettings::shouldShowNameEntryScreenOnStartup()
 {
-   return getCmdLineParamString(LOGIN_NAME) == "" && mIniSettings.name == "";
+   return getCmdLineParamString(LOGIN_NAME) == "" && getSetting<string>(IniKey::Nickname) == "";
 }
 
 
@@ -1007,7 +1007,7 @@ void GameSettings::saveMasterAddressListInIniUnlessItCameFromCmdLine()
       return;
 
    // Otherwise write the master list to the INI file in their new order; the most recently successful address will now be first
-   mIniSettings.masterAddress = listToString(mMasterServerList, ",");
+   setSetting(IniKey::MasterServerAddressList, listToString(mMasterServerList, ","));
 }
 
 

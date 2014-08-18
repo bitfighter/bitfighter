@@ -87,8 +87,6 @@ IniSettings::IniSettings()
 #  undef SETTINGS_ITEM
 
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
-   joystickLinuxUseOldDeviceSystem = false;
-   alwaysStartInKeyboardMode = false;
 
    sfxVolLevel       = 1.0;           // SFX volume (0 = silent, 1 = full bore)
    musicVolLevel     = 1.0;           // Music volume (range as above)
@@ -97,12 +95,6 @@ IniSettings::IniSettings()
    sfxSet = sfxModernSet;             // Start off with our modern sounds
 
    maxFPS = 100;                      // Max FPS on client/non-dedicated server
-
-   masterAddress = MASTER_SERVER_LIST_ADDRESS;   // Default address of our master server
-   name = "";                         // Player name (none by default)
-   defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
-   lastPassword = "";
-   lastEditorName = "";               // No default editor level name
 
    connectionSpeed = 0;
 
@@ -415,21 +407,6 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 #endif
 
    iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
-
-#ifndef ZAP_DEDICATED
-   iniSettings->joystickLinuxUseOldDeviceSystem = ini->GetValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
-   iniSettings->alwaysStartInKeyboardMode = ini->GetValueYN(section, "AlwaysStartInKeyboardMode", iniSettings->alwaysStartInKeyboardMode);
-#endif
-
-   iniSettings->masterAddress = ini->GetValue (section, "MasterServerAddressList", iniSettings->masterAddress);
-   
-   iniSettings->name           = ini->GetValue(section, "Nickname", iniSettings->name);
-   iniSettings->password       = ini->GetValue(section, "Password", iniSettings->password);
-
-   iniSettings->defaultName    = ini->GetValue(section, "DefaultName", iniSettings->defaultName);
-
-   iniSettings->lastPassword   = ini->GetValue(section, "LastPassword", iniSettings->lastPassword);
-   iniSettings->lastEditorName = ini->GetValue(section, "LastEditorName", iniSettings->lastEditorName);
 
    iniSettings->version = ini->GetValueI(section, "Version", iniSettings->version);
 
@@ -1097,15 +1074,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
    const char *section = "Settings";
 
-   ini->sectionComment(section, " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
-   ini->sectionComment(section, " JoystickLinuxUseOldDeviceSystem - Force SDL to add the older /dev/input/js0 device to the enumerated joystick list.  No effect on Windows/Mac systems");
-   ini->sectionComment(section, " AlwaysStartInKeyboardMode - Change to 'Yes' to always start the game in keyboard mode (don't auto-select the joystick)");
-   ini->sectionComment(section, " MasterServerAddressList - Comma separated list of Address of master server, in form: IP:67.18.11.66:25955,IP:myMaster.org:25955 (tries all listed, only connects to one at a time)");
-   ini->sectionComment(section, " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
-   ini->sectionComment(section, " Nickname - Specify the nickname to use for autologin, or clear to disable autologin");
-   ini->sectionComment(section, " Password - Password to use for autologin, if your nickname has been reserved in the forums");
-   ini->sectionComment(section, " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
-   ini->sectionComment(section, " LastEditorName - Last edited file name");
    ini->sectionComment(section, " MaxFPS - Maximum FPS the client will run at.  Higher values use more CPU, lower may increase lag (default = 100)");
    ini->sectionComment(section, " LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game");
    ini->sectionComment(section, " Version - Version of game last time it was run.  Don't monkey with this value; nothing good can come of it!");
@@ -1114,18 +1082,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
 
    // And the ones still to be ported to the new system
-
-
-#ifndef ZAP_DEDICATED
-   ini->setValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
-   ini->setValueYN(section, "AlwaysStartInKeyboardMode", iniSettings->alwaysStartInKeyboardMode);
-#endif
-   ini->SetValue  (section, "MasterServerAddressList", iniSettings->masterAddress);
-   ini->SetValue  (section, "DefaultName", iniSettings->defaultName);
-   ini->SetValue  (section, "Nickname", iniSettings->name);
-   ini->SetValue  (section, "Password", iniSettings->password);
-   ini->SetValue  (section, "LastPassword", iniSettings->lastPassword);
-   ini->SetValue  (section, "LastEditorName", iniSettings->lastEditorName);
 
    ini->SetValueI (section, "MaxFPS", iniSettings->maxFPS);  
 

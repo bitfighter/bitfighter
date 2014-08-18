@@ -293,13 +293,12 @@ void LevelNameEntryUserInterface::onAccept(const char *name)
    getUIManager()->activate(ui, false);
    
    // Get that baby into the INI file
-   mGameSettings->getIniSettings()->lastEditorName = name;
+   mGameSettings->setSetting(IniKey::LastEditorName, name);
    saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
    // Should be...
    //getGame()->getIniSettings()->saveSettingsToDisk();
 }
 
-extern void drawHorizLine(S32,S32,S32);
 
 void LevelNameEntryUserInterface::render() const
 {
