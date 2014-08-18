@@ -1189,7 +1189,7 @@ void OptionsMenuUserInterface::setupMenus()
    opts.push_back("HIGH");
    opts.push_back("VERY HIGH");
 
-   addMenuItem(new ToggleMenuItem("CONNECTION SPEED:", opts, mGameSettings->getIniSettings()->connectionSpeed + 2, true,
+   addMenuItem(new ToggleMenuItem("CONNECTION SPEED:", opts, mGameSettings->getSetting<S32>(IniKey::ConnectionSpeed) + 2, true,
                                   setConnectionSpeedCallback, "Speed of your connection, if your ping goes too high, try slower speed.",  KEY_E));
 #endif
 }

@@ -510,7 +510,7 @@ void maxFpsHandler(ClientGame *game, const Vector<string> &words)
    if(number < 1)                              // Don't allow zero or negative numbers
       game->displayErrorMessage("!!! Usage: /maxfps <frame rate>, default = 100");
    else
-      game->getSettings()->getIniSettings()->maxFPS = number;
+      game->getSettings()->setSetting(IniKey::MaxFpsClient, number);
 }
 
 

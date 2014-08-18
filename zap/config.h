@@ -210,9 +210,6 @@ public:
 
    sfxSets sfxSet;                  // Which set of SFX does the user want?
 
-   U32 maxFPS;
-
-   S32 connectionSpeed;
    Vector<PluginBinding> pluginBindings;  // Keybindings for the editor plugins
 
    bool musicMutedOnCmdLine;
@@ -221,8 +218,6 @@ public:
 
    Vector<string> reservedNames;
    Vector<string> reservedPWs;
-
-   U32 version;
 
    Vector<string> prevServerListFromMaster;
    Vector<string> alwaysPingList;

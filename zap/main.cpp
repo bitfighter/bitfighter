@@ -337,7 +337,7 @@ void idle()
    bool dedicated = GameManager::getServerGame() && GameManager::getServerGame()->isDedicated();
 
    U32 maxFPS = dedicated ? settings->getSetting<U32>(IniKey::MaxFpsServer) : 
-                            settings->getIniSettings()->maxFPS;
+                            settings->getSetting<U32>(IniKey::MaxFpsClient);
    
    // If user specifies 0, run full-bore!
    if(maxFPS == 0 || deltaT >= S32(1000 / maxFPS))
@@ -882,7 +882,7 @@ void removeFile(const char *offendingFile)
 void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
 {
    // Previous version is what the INI currently says
-   U32 previousVersion = settings->getIniSettings()->version;
+   U32 previousVersion = settings->getSetting<U32>(IniKey::Version);
 
    // If we're at the same version as our INI, no need to update anything
    if(previousVersion >= BUILD_VERSION)
@@ -927,7 +927,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    if(previousVersion < VERSION_018a)
    {
       // Fix a previous evil bug that hurt connection speed.  Reset it to 0 here
-      settings->getIniSettings()->connectionSpeed = 0;
+      settings->setSetting(IniKey::ConnectionSpeed, 0);
    }
 
    // 019:

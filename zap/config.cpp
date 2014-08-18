@@ -74,6 +74,14 @@ static F32 writeVol(const F32 &vol)
 }  
 
 
+static U32 checkClientFps(const U32 &fps)
+{
+   // If FPS is not set, make sure it is default
+   if(fps < 1)
+      return 100;
+}
+
+
 // Constructor: Set default values here
 IniSettings::IniSettings()
 {
@@ -94,13 +102,7 @@ IniSettings::IniSettings()
 
    sfxSet = sfxModernSet;             // Start off with our modern sounds
 
-   maxFPS = 100;                      // Max FPS on client/non-dedicated server
-
-   connectionSpeed = 0;
-
    musicMutedOnCmdLine = false;
-
-   version = BUILD_VERSION;   // Default to current version to avoid triggering upgrade checks on fresh install
 }
 
 
@@ -408,14 +410,6 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
    iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
 
-   iniSettings->version = ini->GetValueI(section, "Version", iniSettings->version);
-
-   iniSettings->connectionSpeed = ini->GetValueI(section, "ConnectionSpeed", iniSettings->connectionSpeed);
-
-   S32 fps = ini->GetValueI(section, "MaxFPS", iniSettings->maxFPS);
-   if(fps >= 1) 
-      iniSettings->maxFPS = fps;   // Otherwise, leave it at the default value
-   // else warn?
 
 #ifndef ZAP_DEDICATED
    gDefaultLineWidth = ini->GetValueF(section, "LineWidth", 2);
@@ -1074,19 +1068,12 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
    const char *section = "Settings";
 
-   ini->sectionComment(section, " MaxFPS - Maximum FPS the client will run at.  Higher values use more CPU, lower may increase lag (default = 100)");
    ini->sectionComment(section, " LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game");
-   ini->sectionComment(section, " Version - Version of game last time it was run.  Don't monkey with this value; nothing good can come of it!");
 
    ini->sectionComment(section, "----------------");
 
 
    // And the ones still to be ported to the new system
-
-   ini->SetValueI (section, "MaxFPS", iniSettings->maxFPS);  
-
-   ini->SetValueI (section, "ConnectionSpeed", iniSettings->connectionSpeed);  
-   ini->SetValueI (section, "Version", BUILD_VERSION);
 
 #ifndef ZAP_DEDICATED
    // Don't save new value if out of range, so it will go back to the old value. 

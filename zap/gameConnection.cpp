@@ -2141,7 +2141,7 @@ void GameConnection::onConnectionEstablished()
 void GameConnection::onConnectionEstablished_client()
 {
 #ifndef ZAP_DEDICATED
-   setConnectionSpeed(mClientGame->getSettings()->getIniSettings()->connectionSpeed);  // set speed depending on client
+   setConnectionSpeed(mClientGame->getSettings()->getSetting<S32>(IniKey::ConnectionSpeed));  // set speed depending on client
    setGhostFrom(false);
    setGhostTo(true);
    logprintf(LogConsumer::LogConnection, "%s - connected to server.", getNetAddressString());
