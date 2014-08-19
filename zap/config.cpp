@@ -79,6 +79,8 @@ static U32 checkClientFps(const U32 &fps)
    // If FPS is not set, make sure it is default
    if(fps < 1)
       return 100;
+
+   return fps;
 }
 
 
