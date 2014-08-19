@@ -12,6 +12,7 @@ namespace Zap
 
 EnumParser<DisplayMode>        displayModeEnumParser;
 EnumParser<ColorEntryMode>     colorEntryModeEnumParser;
+EnumParser<SfxSet>             sfxSetEnumParser;
 EnumParser<YesNo>              yesNoEnumParser;
 EnumParser<MessageType>        messageTypeEnumParser;
 EnumParser<GoalZoneFlashStyle> goalZoneFlashEnumParser;
@@ -30,6 +31,10 @@ public:
 #define COLOR_ENTRY_MODE_ITEM(value, name) colorEntryModeEnumParser.addItem(name, value);
     COLOR_ENTRY_MODES_TABLE
 #undef COLOR_ENTRY_MODE_ITEM
+
+#define SFX_SET_ITEM(value, name) sfxSetEnumParser.addItem(name, value);
+    SFX_SET_TABLE
+#undef SFX_SET_ITEM
 
 #define YES_NO_ITEM(value, name) yesNoEnumParser.addItem(name, value);
     YES_NO_TABLE
@@ -66,6 +71,7 @@ template<> U16                Evaluator::fromString(const string &val) { return 
 template<> F32                Evaluator::fromString(const string &val) { return (F32)atof(val.c_str());                 }
 template<> MessageType        Evaluator::fromString(const string &val) { return messageTypeEnumParser.getVal(val);      }
 template<> DisplayMode        Evaluator::fromString(const string &val) { return displayModeEnumParser.getVal(val);      }
+template<> SfxSet             Evaluator::fromString(const string &val) { return sfxSetEnumParser.getVal(val);           }
 template<> YesNo              Evaluator::fromString(const string &val) { return yesNoEnumParser.getVal(val);            }
 template<> RelAbs             Evaluator::fromString(const string &val) { return relativeAbsoluteEnumParser.getVal(val); }
 template<> ColorEntryMode     Evaluator::fromString(const string &val) { return colorEntryModeEnumParser.getVal(val);   }
@@ -79,6 +85,7 @@ string Evaluator::toString(S32 val)                { return itos(val);          
 string Evaluator::toString(U32 val)                { return itos(val);                              }
 string Evaluator::toString(F32 val)                { return ftos(val);                              }
 string Evaluator::toString(MessageType val)        { return messageTypeEnumParser.getKey(val);      }
+string Evaluator::toString(SfxSet val)             { return sfxSetEnumParser.getKey(val);           }
 string Evaluator::toString(YesNo val)              { return yesNoEnumParser.getKey(val);            }
 string Evaluator::toString(RelAbs val)             { return relativeAbsoluteEnumParser.getKey(val); }
 string Evaluator::toString(DisplayMode val)        { return displayModeEnumParser.getKey(val);      }

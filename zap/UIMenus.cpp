@@ -1484,18 +1484,18 @@ static string getVolMsg(F32 volume)
 // Callbacks for SoundOptions menu
 static void setSFXVolumeCallback(ClientGame *game, U32 vol)
 {
-   game->getSettings()->getIniSettings()->sfxVolLevel = F32(vol) / 10;
+   game->getSettings()->setSetting(IniKey::EffectsVolume, F32(vol) * 0.1f);
 }
 
 static void setMusicVolumeCallback(ClientGame *game, U32 vol)
 {
-   game->getSettings()->getIniSettings()->setMusicVolLevel(F32(vol) / 10);
+   game->getSettings()->setSetting(IniKey::MusicVolume, F32(vol) * 0.1f);
 }
 
 static void setVoiceVolumeCallback(ClientGame *game, U32 vol)
 {
-   F32 oldVol = game->getSettings()->getIniSettings()->voiceChatVolLevel;
-   game->getSettings()->getIniSettings()->voiceChatVolLevel = F32(vol) / 10;
+   F32 oldVol = game->getSettings()->getSetting<F32>(IniKey::VoiceChatVolume);
+   game->getSettings()->setSetting(IniKey::VoiceChatVolume, F32(vol) * 0.1f);
    if((oldVol == 0) != (vol == 0) && game->getConnectionToServer())
       game->getConnectionToServer()->s2rVoiceChatEnable(vol != 0);
 }
@@ -1515,16 +1515,16 @@ void SoundOptionsMenuUserInterface::setupMenus()
    for(S32 i = 0; i <= 10; i++)
       opts.push_back(getVolMsg( F32(i) / 10 ));
 
-   addMenuItem(new ToggleMenuItem("SFX VOLUME:",        opts, U32((mGameSettings->getIniSettings()->sfxVolLevel + 0.05) * 10.0), false,
+   addMenuItem(new ToggleMenuItem("SFX VOLUME:",        opts, U32((mGameSettings->getSetting<F32>(IniKey::EffectsVolume) + 0.05) * 10.0), false,
                                   setSFXVolumeCallback,   "Set sound effects volume", KEY_S));
 
    if(mGameSettings->isCmdLineParamSpecified(NO_MUSIC))
          addMenuItem(new MessageMenuItem("MUSIC MUTED FROM COMMAND LINE", Colors::red));
    else
-      addMenuItem(new ToggleMenuItem("MUSIC VOLUME:",      opts, U32((mGameSettings->getIniSettings()->getMusicVolLevel() + 0.05) * 10.0), false,
+      addMenuItem(new ToggleMenuItem("MUSIC VOLUME:",      opts, U32((mGameSettings->getMusicVolume() + 0.05) * 10.0), false,
                                      setMusicVolumeCallback, "Set music volume", KEY_M));
 
-   addMenuItem(new ToggleMenuItem("VOICE CHAT VOLUME:", opts, U32((mGameSettings->getIniSettings()->voiceChatVolLevel + 0.05) * 10.0), false,
+   addMenuItem(new ToggleMenuItem("VOICE CHAT VOLUME:", opts, U32((mGameSettings->getSetting<F32>(IniKey::VoiceChatVolume) + 0.05) * 10.0), false,
                                   setVoiceVolumeCallback, "Set voice chat volume", KEY_V));
    opts.clear();
    opts.push_back("DISABLED");      // No == 0

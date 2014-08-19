@@ -465,6 +465,16 @@ void GameSettings::setWindowSizeFactor(F32 scalingFactor)
 
 F32 GameSettings::getWindowSizeFactor() { return mIniSettings.mSettings.getVal<F32>(IniKey::WindowScalingFactor); }
 
+
+F32 GameSettings::getMusicVolume()
+{
+   if(isCmdLineParamSpecified(NO_MUSIC))
+      return 0;
+
+   return mIniSettings.mSettings.getVal<F32>(IniKey::MusicVolume);
+}
+
+
 // User has entered name and password, and has clicked Ok.  That's the only way to get here.
 // Do not call this function directly -- you probably want ClientGame::userEnteredLoginCredentials(), which will call this.
 void GameSettings::setLoginCredentials(const string &name, const string &password, bool save)

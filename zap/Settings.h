@@ -101,6 +101,7 @@ public:
    static string toString(U32 val);
    static string toString(F32 val);
    static string toString(MessageType val);
+   static string toString(SfxSet val);
    static string toString(YesNo val);
    static string toString(RelAbs val);
    static string toString(DisplayMode val);

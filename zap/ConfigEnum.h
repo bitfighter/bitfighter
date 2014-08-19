@@ -53,6 +53,11 @@
    SETTINGS_ITEM(U16,                ClientPortNumber,         "Testing",        "ClientPortNumber",         0,                               NULL,     NULL,     "Only helps when punching through firewall when using router's port forwarded for client port number")                          \
    SETTINGS_ITEM(YesNo,              DisableScreenSaver,       "Testing",        "DisableScreenSaver",       Yes,                             NULL,     NULL,     "Disable ScreenSaver from having no input from keyboard/mouse, useful when using joystick")                                     \
                                                                                                                                                                                                                                                                                                   \
+   SETTINGS_ITEM(F32,                EffectsVolume,            "Sounds",         "EffectsVolume",            10,                              checkVol, writeVol, "Volume of sound effects from 0 (mute) to 10 (full bore).")                                                                     \
+   SETTINGS_ITEM(F32,                MusicVolume,              "Sounds",         "MusicVolume",              10,                              checkVol, writeVol, "Volume of music from 0 (mute) to 10 (full bore).")                                                                             \
+   SETTINGS_ITEM(F32,                VoiceChatVolume,          "Sounds",         "VoiceChatVolume",          10,                              checkVol, writeVol, "Volume of incoming voice chat messages from 0 (mute) to 10 (full bore).")                                                      \
+   SETTINGS_ITEM(SfxSet,             SFXSet,                   "Sounds",         "SFXSet",                   SfxSetModern,                    NULL,     NULL,     "Select which set of sounds you want: Classic or Modern.")                                                      \
+                                                                                                                                                                                                                                                                                                  \
    SETTINGS_ITEM(string,             ServerName,               "Host",           "ServerName",               "Bitfighter host",               NULL,     NULL,     "The name others will see when they are browsing for servers (max 20 chars)")                                                   \
    SETTINGS_ITEM(string,             ServerAddress,            "Host",           "ServerAddress",            "",                              NULL,     NULL,     "Socket address and port to bind to, e.g. IP:Any:9876 or IP:54.35.110.99:8000 or IP:bitfighter.org:8888\n"                      \
                                                                                                                                                                   "(leave blank to let the system decide; this is almost always what you want)")                                                  \
@@ -146,9 +151,16 @@ enum DisplayMode {
     DISPLAY_MODE_UNKNOWN    // <== Note: code depends on this being the first value that's not a real mode
 };  
 
-enum sfxSets {
-   sfxClassicSet,
-   sfxModernSet
+
+#define SFX_SET_TABLE \
+SFX_SET_ITEM(SfxSetClassic,     "Classic"     )  \
+SFX_SET_ITEM(SfxSetModern,      "Modern"      )  \
+
+// Gernerate an enum
+enum SfxSet {
+#define SFX_SET_ITEM(enumVal, b) enumVal,
+   SFX_SET_TABLE
+#undef SFX_SET_ITEM
 };
 
 

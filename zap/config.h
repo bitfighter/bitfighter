@@ -187,8 +187,6 @@ class InputCodeManager;
 //template <class T>
 struct IniSettings      // With defaults specified
 {
-private:
-   F32 musicVolLevel;   // Use getter/setter!
 
 public:
    IniSettings();       // Constructor
@@ -198,21 +196,9 @@ public:
 
    DisplayMode oldDisplayMode;
 
-   F32 sfxVolLevel;                 // SFX volume (0 = silent, 1 = full bore)
-   F32 voiceChatVolLevel;           // Ditto
-
-   F32 getMusicVolLevel();
-   F32 getRawMusicVolLevel();
-
-   void setMusicVolLevel(F32 vol);
-
    Vector<PluginBinding> getDefaultPluginBindings() const;
 
-   sfxSets sfxSet;                  // Which set of SFX does the user want?
-
    Vector<PluginBinding> pluginBindings;  // Keybindings for the editor plugins
-
-   bool musicMutedOnCmdLine;
 
    Vector<StringTableEntry> levelList;
 

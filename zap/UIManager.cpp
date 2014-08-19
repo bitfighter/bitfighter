@@ -533,10 +533,10 @@ MusicLocation UIManager::selectMusic()
 void UIManager::processAudio(U32 timeDelta)
 {
    SoundSystem::processAudio(timeDelta, 
-                             mSettings->getIniSettings()->sfxVolLevel,
-                             mSettings->getIniSettings()->getMusicVolLevel(),
-                             mSettings->getIniSettings()->voiceChatVolLevel,
-                             selectMusic());  
+                             mSettings->getSetting<F32>(IniKey::EffectsVolume),
+                             mSettings->getMusicVolume(),
+                             mSettings->getSetting<F32>(IniKey::VoiceChatVolume),
+                             selectMusic());
 }
 
 

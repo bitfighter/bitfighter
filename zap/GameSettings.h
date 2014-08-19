@@ -239,6 +239,8 @@ public:
    F32  getWindowSizeFactor();
    void setWindowSizeFactor(F32 scalingFactor);
 
+   F32 getMusicVolume();
+
    // Accessor methods
    U32 getSimulatedStutter();
    F32 getSimulatedLoss();

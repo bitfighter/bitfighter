@@ -83,24 +83,24 @@ static void setVolume(ClientGame *game, VolumeType volType, const Vector<string>
       return;
    }
 
-   IniSettings *ini = game->getSettings()->getIniSettings();
+   GameSettings *settings = game->getSettings();
 
    switch(volType)
    {
       case SfxVolumeType:
-         ini->sfxVolLevel = (F32) vol / 10.f;
+         settings->setSetting(IniKey::EffectsVolume, (F32) vol * 0.1f);
          game->displayCmdChatMessage("SFX volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
          return;
 
       case MusicVolumeType:
-         ini->setMusicVolLevel((F32) vol / 10.f);
+         settings->setSetting(IniKey::MusicVolume, (F32) vol * 0.1f);
          game->displayCmdChatMessage("Music volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
          return;
 
       case VoiceVolumeType:
       {
-         F32 oldVol = ini->voiceChatVolLevel;
-         ini->voiceChatVolLevel = (F32) vol / 10.f;
+         F32 oldVol = settings->getSetting<F32>(IniKey::VoiceChatVolume);
+         settings->setSetting(IniKey::VoiceChatVolume, (F32) vol * 0.1f);
          game->displayCmdChatMessage("Voice chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
          if((oldVol == 0) != (vol == 0) && game->getConnectionToServer())
             game->getConnectionToServer()->s2rVoiceChatEnable(vol != 0);

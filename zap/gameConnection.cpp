@@ -2172,7 +2172,7 @@ void GameConnection::onConnectionEstablished_client()
          mSettings->getIniSettings()->prevServerListFromMaster.push_back(addr);
    }
 
-   if(mSettings->getIniSettings()->voiceChatVolLevel == 0)
+   if(mSettings->getSetting<F32>(IniKey::VoiceChatVolume) == 0)
       s2rVoiceChatEnable(false);
 #endif
 }
