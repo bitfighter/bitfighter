@@ -76,7 +76,7 @@ bool Joystick::initJoystick(GameSettings *settings)
    //   http://superuser.com/questions/17959/linux-joystick-seems-mis-calibrated-in-an-sdl-game-freespace-2-open
 
 
-   if(settings->getSetting<bool>(IniKey::JoystickLinuxUseOldDeviceSystem))
+   if(settings->getSetting<YesNo>(IniKey::JoystickLinuxUseOldDeviceSystem))
    {
       string joystickEnv = "SDL_JOYSTICK_DEVICE=/dev/input/js" + itos(0);
       SDL_putenv((char *)joystickEnv.c_str());
