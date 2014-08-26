@@ -117,7 +117,8 @@ static const string sections[] =
    "EditorSettings",
    "Updater",
    "Diagnostics",
-   "Sounds"
+   "Sounds",
+   "Testing"
 };
 // Aligned with 'sections' above
 static const string headerComments[] = 
@@ -132,7 +133,9 @@ static const string headerComments[] =
    "The Updater section contains entries that control how game updates are handled.",
    "Diagnostic entries can be used to enable or disable particular actions for debugging purposes.\n"
       "You probably can't use any of these settings to enhance your gameplay experience!",
-   "Sound settings"
+   "Sound settings",
+   "Experimental and possibly short-lived settings use for testing.  They may be removed at any time,\n"
+      "even in the next version of Bitfighter."
 };
 
 
