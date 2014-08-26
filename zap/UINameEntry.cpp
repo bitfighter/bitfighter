@@ -293,7 +293,7 @@ void LevelNameEntryUserInterface::onAccept(const char *name)
    getUIManager()->activate(ui, false);
    
    // Get that baby into the INI file
-   mGameSettings->setSetting(IniKey::LastEditorName, name);
+   mGameSettings->setSetting(IniKey::LastEditorName, string(name));
    saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
    // Should be...
    //getGame()->getIniSettings()->saveSettingsToDisk();
