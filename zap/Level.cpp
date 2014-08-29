@@ -120,6 +120,7 @@ void Level::onAddedToClientGame()
 }
 
 
+// This is the core loader for levels in-game and in-editor
 void Level::loadLevelFromString(const string &contents, const string &filename)
 {
    istringstream iss(contents);
