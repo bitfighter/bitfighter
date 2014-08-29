@@ -586,9 +586,7 @@ void EditorUserInterface::loadLevel()
    Level *level = new Level();
    bool ok = level->loadLevelFromFile(fileName);
 
-   if(ok)
-      ;
-   else
+   if(!ok)
    {
       delete level;
       level = new Level();
