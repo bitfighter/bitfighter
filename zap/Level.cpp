@@ -135,6 +135,12 @@ void Level::loadLevelFromString(const string &contents, const string &filename)
 
 	mLevelHash = md5.getHash();
 
+   // Build wall edge geometry
+   // TODO
+
+   // Snap enigneered items to those edges
+   // TODO
+
    validateLevel();
 }
 
