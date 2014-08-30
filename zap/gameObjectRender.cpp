@@ -3305,37 +3305,53 @@ void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
 }
 
 
+static void renderGridLines(const Point &offset, F32 gridScale, F32 grayVal, bool fadeLines)
+{
+   // Use F32 to avoid cumulative rounding errors
+   F32 xStart = fmod(offset.x, gridScale);
+   F32 yStart = fmod(offset.y, gridScale);
+
+   glColor(grayVal);
+
+   while(yStart < DisplayManager::getScreenInfo()->getGameCanvasHeight())
+   {
+      drawHorizLine((F32)0, (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), (F32)yStart);
+      yStart += gridScale;
+   }
+   while(xStart < DisplayManager::getScreenInfo()->getGameCanvasWidth())
+   {
+      drawVertLine((F32)xStart, (F32)0, (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight());
+      xStart += gridScale;
+   }
+}
+
+
 // Render background snap grid for the editor
-void renderGrid(F32 curentScale, const Point &offset, const Point &origin, F32 gridSize, bool fadeLines, bool showMinorGridLines)
+void renderGrid(F32 currentScale, const Point &offset, const Point &origin, F32 gridSize, bool fadeLines, bool showMinorGridLines)
 {
    F32 snapFadeFact = fadeLines ? 1 : 0.5f;
 
    // Gridlines
-   for(S32 i = 1; i >= 0; i--)
+   // Render 2 layers:
+   //  1. layer 1 - minor gridlines (only if set)
+   //  2. layer 0 - major gridlines
+
+   // First minor lines
+   if(showMinorGridLines)
    {
-      if((i && showMinorGridLines) || !i)      // First minor then major
-      {
-         F32 gridScale = curentScale * gridSize * (i ? 0.1f : 1);    // Major gridlines are gridSize() pixels apart   
-         
-         // Use F32 to avoid cumulative rounding errors
-         F32 xStart = fmod(offset.x, gridScale);
-         F32 yStart = fmod(offset.y, gridScale);
+      F32 gridScale = currentScale * gridSize * 0.1f;
+      F32 grayVal = snapFadeFact * 0.2f;
 
-         F32 grayVal = ((i ? .2f : .4f) * snapFadeFact);
-         glColor(grayVal);
-
-         while(yStart < DisplayManager::getScreenInfo()->getGameCanvasHeight())
-         {
-            drawHorizLine((F32)0, (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), (F32)yStart);
-            yStart += gridScale;
-         }
-         while(xStart < DisplayManager::getScreenInfo()->getGameCanvasWidth())
-         {
-            drawVertLine((F32)xStart, (F32)0, (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight());
-            xStart += gridScale;
-         }
-      }
+      renderGridLines(offset, gridScale, grayVal, fadeLines);
    }
+
+
+   // Now major lines
+   F32 gridScale = currentScale * gridSize;
+   F32 grayVal = snapFadeFact * 0.4f;
+
+   renderGridLines(offset, gridScale, grayVal, fadeLines);
+
 
    // Draw axes
    glColor(0.7f * snapFadeFact);

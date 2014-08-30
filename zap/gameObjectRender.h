@@ -251,7 +251,7 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
 
 // Editor support items
 extern void renderPolyLineVertices(BfObject *obj, bool snapping, F32 currentScale);
-extern void renderGrid(F32 curentScale, const Point &offset, const Point &origin, F32 gridSize, bool fadeLines, bool showMinorGridLines);
+extern void renderGrid(F32 currentScale, const Point &offset, const Point &origin, F32 gridSize, bool fadeLines, bool showMinorGridLines);
 
 extern void renderForceFieldProjector(const Point &pos, const Point &normal, const Color *teamColor, bool enabled, S32 healRate);
 extern void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, const Color *teamColor, bool enabled, S32 healRate = 0);
