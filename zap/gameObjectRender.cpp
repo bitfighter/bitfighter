@@ -3350,6 +3350,13 @@ void renderGrid(F32 currentScale, const Point &offset, const Point &origin, F32 
    F32 gridScale = currentScale * gridSize;
    F32 grayVal = snapFadeFact * 0.4f;
 
+   // If we're zoomed out enough, don't draw so many lines
+   if(!showMinorGridLines)
+   {
+      while(gridScale < 0.05f * gridSize)
+         gridScale *= 20;
+   }
+
    renderGridLines(offset, gridScale, grayVal, fadeLines);
 
 
