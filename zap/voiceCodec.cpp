@@ -22,32 +22,45 @@ VoiceEncoder::~VoiceEncoder()
 
 ByteBufferPtr VoiceEncoder::compressBuffer(const ByteBufferPtr &sampleBuffer)
 {
-   U32 sampleCount = sampleBuffer->getBufferSize() >> 1;
-   U32 spf = getSamplesPerFrame();
+   // Number of 16 bit samples in the input buffer
+   U32 inputSampleCount = sampleBuffer->getBufferSize() / 2;  // Integer division OK
 
-   U32 framesUsed = U32(sampleCount / spf);
-   if(framesUsed)
+   // Samples per frame of the encoding codec
+   U32 samplesPerFrame = getSamplesPerFrame();
+
+   // How many frames will be used in this round (rounded down)
+   U32 framesToCompress = U32(inputSampleCount / samplesPerFrame);
+
+   // If we use any frames
+   if(framesToCompress != 0)
    {
-      U32 samplesUsed = framesUsed * spf;
-      U32 maxSize = getMaxCompressedFrameSize() * framesUsed;
-      ByteBufferPtr ret = new ByteBuffer(maxSize);
+      // How many samples will we compress
+      U32 samplesToCompress = framesToCompress * samplesPerFrame;
+      U32 maxSize = getMaxCompressedFrameSize() * framesToCompress;
 
-      U8 *compressedPtr = ret->getBuffer();
-      S16 *samplePtr = (S16 *) sampleBuffer->getBuffer();
+      // Create our compressed return buffer
+      ByteBufferPtr compressedBuffer = new ByteBuffer(maxSize);
 
+      U8 *compressedBufferPtr = compressedBuffer->getBuffer();
+      S16 *sampleBufferPtr = (S16 *) sampleBuffer->getBuffer();
+
+      // Fill our compressed buffer, frame by frame
       U32 len = 0;
+      for(U32 i = 0; i < samplesToCompress; i += samplesPerFrame)
+         len += compressFrame(sampleBufferPtr + i, compressedBufferPtr + len);
 
-      for(U32 i = 0; i < samplesUsed; i += spf)
-         len += compressFrame(samplePtr + i, compressedPtr + len);
+      compressedBuffer->resize(len);
 
-      ret->resize(len);
-
-      U32 newSize = (sampleCount - samplesUsed) * sizeof(U16);
-      memcpy(samplePtr, samplePtr + samplesUsed, newSize);
-
+      // This handles any trailing data not compressed in the input buffer and saves it back
+      // to the input buffer to be handled next round
+      U32 newSize = (inputSampleCount - samplesToCompress) * sizeof(U16);
+      memcpy(sampleBufferPtr, sampleBufferPtr + samplesToCompress, newSize);
       sampleBuffer->resize(newSize);
-      return ret;
+
+      // Finally return our compressed data for sending on the network
+      return compressedBuffer;
    }
+
    return NULL;
 }
 
@@ -65,34 +78,47 @@ VoiceDecoder::~VoiceDecoder()
 
 ByteBufferPtr VoiceDecoder::decompressBuffer(const ByteBufferPtr &compressedBuffer)
 {
-   U32 spf = getSamplesPerFrame();
-   U32 avgCompressedSize = getAvgCompressedFrameSize();
+   U32 samplesPerFrame = getSamplesPerFrame();
+   U32 avgCompressedFrameSize = getAvgCompressedFrameSize();
    U32 compressedSize = compressedBuffer->getBufferSize();
 
-   // guess the total number of frames:
-   U32 guessFrameCount = (compressedSize / avgCompressedSize) + 1;
+   // Guess the total number of frames:
+   U32 guessedFrameCount = (compressedSize / avgCompressedFrameSize) + 1;
 
-   ByteBufferPtr ret = new ByteBuffer(spf * sizeof(S16) * guessFrameCount);
+   // Create a buffer for for the decompressed data, giving it a guessed starting size
+   ByteBufferPtr decodedBuffer = new ByteBuffer(samplesPerFrame * sizeof(S16) * guessedFrameCount);
 
-   U32 p = 0;
-   U8 *inputPtr = (U8 *) compressedBuffer->getBuffer();
+   // Pointers to raw buffer data
+   U8 *compressedBufferPtr = compressedBuffer->getBuffer();
+   S16 *decodedBufferPtr = (S16 *) decodedBuffer->getBuffer();
+
    U32 frameCount = 0;
-   S16 *samplePtr = (S16 *) ret->getBuffer();
+   U32 bufferOffset = 0;
 
-   for(U32 i = 0; i < compressedSize; i += p)
+   // Loop until we've reached the end of our compressed input buffer
+   for(U32 i = 0; i < compressedSize; i += bufferOffset)
    {
-      if(frameCount == guessFrameCount)
+      // If we've hit our guessed frame count, that means we've guessed too low; resize the buffer
+      // a little bit more to handle more data
+      // FIXME why is this needed?  Why not just start with a larger buffer?
+      if(frameCount == guessedFrameCount)
       {
-         guessFrameCount = frameCount + ( (compressedSize - i) / avgCompressedSize ) + 1;
-         ret->resize(spf * sizeof(S16) * guessFrameCount);
+         guessedFrameCount = frameCount + ( (compressedSize - i) / avgCompressedFrameSize ) + 1;
+         decodedBuffer->resize(samplesPerFrame * sizeof(S16) * guessedFrameCount);
 
-         samplePtr = (S16 *) ret->getBuffer();
+         decodedBufferPtr = (S16 *) decodedBuffer->getBuffer();
       }
-      p = decompressFrame(samplePtr + frameCount * spf, inputPtr + i, compressedSize - i);
+
+      // Decode a frame and advance our buffer offset
+      bufferOffset = decompressFrame(decodedBufferPtr + frameCount * samplesPerFrame, compressedBufferPtr + i, compressedSize - i);
+
       frameCount++;
    }
-   ret->resize(frameCount * spf * sizeof(S16));
-   return ret;
+
+   // Finally resize the buffer to correspond to how many frames we've decompressed
+   decodedBuffer->resize(frameCount * samplesPerFrame * sizeof(S16));
+
+   return decodedBuffer;
 }
 
 
