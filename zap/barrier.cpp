@@ -212,6 +212,8 @@ void Barrier::constructWalls(Game *game, const Vector<Point> &verts, bool isPoly
 
    if(isPolywall)   
    {
+      //// No problem with running this on server... just documenting that it doesn't
+      //TNLAssert(!game->isServer(), "Expect that this only gets run on client!");    
       Barrier *b = new Barrier(verts, width, true);
       b->addToGame(game, game->getGameObjDatabase());
    }
@@ -220,7 +222,6 @@ void Barrier::constructWalls(Game *game, const Vector<Point> &verts, bool isPoly
       // First, fill a vector with barrier segments
       Vector<Point> barrierEnds;
       constructBarrierEndPoints(&verts, width, barrierEnds);
-
 
       Vector<Point> pts;      // Reusable container
 

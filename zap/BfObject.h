@@ -133,6 +133,7 @@ enum DamageType
    DamageTypeArea,
 };
 
+
 struct DamageInfo
 {
    Point collisionPoint;
@@ -234,7 +235,6 @@ private:
    S32 mSerialNumber;         // Autoincremented serial number  
    S32 mUserAssignedId;       // Id assigned to some objects in the editor
    U8 mOriginalTypeNumber;    // Used during final delete to help database remove the item
-
 
 protected:
    Move mPrevMove;      // The move for the previous update

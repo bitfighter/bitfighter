@@ -521,6 +521,7 @@ Rect GridDatabase::getExtents()
 }
 
 
+// TODO: Make this be a protected method -- the wallSegmentManager should be an internal property of Level, and 
 WallSegmentManager *GridDatabase::getWallSegmentManager() const
 {
    return mWallSegmentManager;
