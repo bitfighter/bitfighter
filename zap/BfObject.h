@@ -380,7 +380,7 @@ public:
 
    // Manage serial numbers -- every object gets a unique number to help identify it
    void assignNewSerialNumber();
-   S32 getSerialNumber();
+   S32 getSerialNumber() const;
 
    virtual void removeFromGame(bool deleteObject);
 

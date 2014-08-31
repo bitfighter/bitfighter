@@ -445,7 +445,7 @@ void BfObject::assignNewSerialNumber()
 }
 
 
-S32 BfObject::getSerialNumber()
+S32 BfObject::getSerialNumber() const
 {
    return mSerialNumber;
 }
