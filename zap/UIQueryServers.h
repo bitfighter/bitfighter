@@ -84,7 +84,7 @@ private:
    bool mAnnounced;           // Have we announced to the master that we've joined the chat room?
    bool mGivenUpOnMaster;     // Gets set to true once we start using our fallback server list
 
-   U32 selectedId;
+   mutable U32 selectedId;
    S32 mSortColumn;
    S32 mHighlightColumn;
    S32 mLastSortColumn;
