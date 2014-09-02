@@ -440,7 +440,7 @@ string GameSettings::getPlayerName()
 void GameSettings::setQueryServerSortColumn(S32 column, bool ascending)
 {
    mIniSettings.mSettings.setVal(IniKey::QueryServerSortColumn, column);
-   mIniSettings.mSettings.setVal(IniKey::QueryServerSortAscending, ascending);
+   mIniSettings.mSettings.setVal(IniKey::QueryServerSortAscending, ascending ? Yes : No);
 }
 
 
