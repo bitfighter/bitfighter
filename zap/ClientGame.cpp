@@ -68,7 +68,9 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIM
    mUIManager = uiManager;                // Gets deleted in destructor
    mUIManager->setClientGame(this);       // Need to do this before we can use it
 
-   //mLevel = boost::shared_ptr<Level>(new Level());
+   // Kind of silly that we need this, but ClientGame is always idling, and idling causes extents to be checked,
+   // and for that we need a non-NULL level.  Should be refactored away, I think.
+   mLevel = boost::shared_ptr<Level>(new Level());
    //mLevel->onAddedToClientGame();
 
    // TODO: Make this a ref instead of a pointer
@@ -647,7 +649,7 @@ void ClientGame::showPreviousLevelName() const
 // We'll take control of level and will delete it when we're done
 void ClientGame::setLevel(Level *level)
 {
-   mLevel = boost::shared_ptr<Level>(level);
+   //mLevel = boost::shared_ptr<Level>(level);
    mLevel->onAddedToClientGame();
 }
 
