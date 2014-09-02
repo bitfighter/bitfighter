@@ -337,7 +337,7 @@ void idle()
    bool dedicated = GameManager::getServerGame() && GameManager::getServerGame()->isDedicated();
 
    U32 maxFPS = dedicated ? settings->getSetting<U32>(IniKey::MaxFpsServer) : 
-                            settings->getIniSettings()->maxFPS;
+                            settings->getSetting<U32>(IniKey::MaxFpsClient);
    
    // If user specifies 0, run full-bore!
    if(maxFPS == 0 || deltaT >= S32(1000 / maxFPS))
@@ -539,7 +539,7 @@ void createClientGame(GameSettingsPtr settings)
    {
       // Grab some values from the settings
       U16    portNumber     = settings->getSetting<U16>(IniKey::ClientPortNumber);
-      string lastEditorName = settings->getIniSettings()->lastEditorName;
+      string lastEditorName = settings->getSetting<string>(IniKey::LastEditorName);
       string lastName       = settings->getSetting<string>(IniKey::LastName);
 
       // Create a new client, and let the system figure out IP address and assign a port
@@ -882,7 +882,7 @@ void removeFile(const char *offendingFile)
 void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
 {
    // Previous version is what the INI currently says
-   U32 previousVersion = settings->getIniSettings()->version;
+   U32 previousVersion = settings->getSetting<U32>(IniKey::Version);
 
    // If we're at the same version as our INI, no need to update anything
    if(previousVersion >= BUILD_VERSION)
@@ -904,7 +904,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    if(previousVersion < VERSION_016)
    {
       // Master server changed
-      settings->getIniSettings()->masterAddress = MASTER_SERVER_LIST_ADDRESS;
+      settings->setSetting(IniKey::MasterServerAddressList, MASTER_SERVER_LIST_ADDRESS);
 
       // We added editor plugins
       GameSettings::iniFile.addSection("EditorPlugins");
@@ -927,7 +927,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    if(previousVersion < VERSION_018a)
    {
       // Fix a previous evil bug that hurt connection speed.  Reset it to 0 here
-      settings->getIniSettings()->connectionSpeed = 0;
+      settings->setSetting(IniKey::ConnectionSpeed, 0);
    }
 
    // 019:
@@ -1215,8 +1215,8 @@ int main(int argc, char **argv)
 
 
    // Even dedicated server needs sound these days
-   SoundSystem::init(settings->getIniSettings()->sfxSet, folderManager->getSfxDir(), 
-                     folderManager->getMusicDir(), settings->getIniSettings()->getMusicVolLevel());  
+   SoundSystem::init(settings->getSetting<SfxSet>(IniKey::SFXSet), folderManager->getSfxDir(),
+                     folderManager->getMusicDir(), settings->getMusicVolume());
    
    if(settings->isDedicatedServer())
    {

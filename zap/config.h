@@ -187,8 +187,6 @@ class InputCodeManager;
 //template <class T>
 struct IniSettings      // With defaults specified
 {
-private:
-   F32 musicVolLevel;   // Use getter/setter!
 
 public:
    IniSettings();       // Constructor
@@ -197,42 +195,15 @@ public:
    Settings<IniKey::SettingsItem> mSettings;
 
    DisplayMode oldDisplayMode;
-   bool joystickLinuxUseOldDeviceSystem;
-   bool alwaysStartInKeyboardMode;
-
-   F32 sfxVolLevel;                 // SFX volume (0 = silent, 1 = full bore)
-   F32 voiceChatVolLevel;           // Ditto
-
-   F32 getMusicVolLevel();
-   F32 getRawMusicVolLevel();
-
-   void setMusicVolLevel(F32 vol);
 
    Vector<PluginBinding> getDefaultPluginBindings() const;
 
-   sfxSets sfxSet;                  // Which set of SFX does the user want?
-
-   U32 maxFPS;
-
-
-   string masterAddress;            // Default address of our master server
-   string name;                     // Player name (none by default)    
-   string password;                 // Player password (none by default) 
-   string defaultName;              // Name used if user hits <enter> on name entry screen
-   string lastPassword;
-   string lastEditorName;           // Name of file most recently edited by the user
-
-   S32 connectionSpeed;
    Vector<PluginBinding> pluginBindings;  // Keybindings for the editor plugins
-
-   bool musicMutedOnCmdLine;
 
    Vector<StringTableEntry> levelList;
 
    Vector<string> reservedNames;
    Vector<string> reservedPWs;
-
-   U32 version;
 
    Vector<string> prevServerListFromMaster;
    Vector<string> alwaysPingList;

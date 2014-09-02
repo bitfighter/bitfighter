@@ -74,6 +74,16 @@ static F32 writeVol(const F32 &vol)
 }  
 
 
+static U32 checkClientFps(const U32 &fps)
+{
+   // If FPS is not set, make sure it is default
+   if(fps < 1)
+      return 100;
+
+   return fps;
+}
+
+
 // Constructor: Set default values here
 IniSettings::IniSettings()
 {
@@ -87,28 +97,6 @@ IniSettings::IniSettings()
 #  undef SETTINGS_ITEM
 
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
-   joystickLinuxUseOldDeviceSystem = false;
-   alwaysStartInKeyboardMode = false;
-
-   sfxVolLevel       = 1.0;           // SFX volume (0 = silent, 1 = full bore)
-   musicVolLevel     = 1.0;           // Music volume (range as above)
-   voiceChatVolLevel = 1.0;           // INcoming voice chat volume (range as above)
-
-   sfxSet = sfxModernSet;             // Start off with our modern sounds
-
-   maxFPS = 100;                      // Max FPS on client/non-dedicated server
-
-   masterAddress = MASTER_SERVER_LIST_ADDRESS;   // Default address of our master server
-   name = "";                         // Player name (none by default)
-   defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
-   lastPassword = "";
-   lastEditorName = "";               // No default editor level name
-
-   connectionSpeed = 0;
-
-   musicMutedOnCmdLine = false;
-
-   version = BUILD_VERSION;   // Default to current version to avoid triggering upgrade checks on fresh install
 }
 
 
@@ -128,7 +116,9 @@ static const string sections[] =
    "Host-Voting",
    "EditorSettings",
    "Updater",
-   "Diagnostics"
+   "Diagnostics",
+   "Sounds",
+   "Testing"
 };
 // Aligned with 'sections' above
 static const string headerComments[] = 
@@ -142,7 +132,10 @@ static const string headerComments[] =
    "EditorSettings entries relate to items in the editor",
    "The Updater section contains entries that control how game updates are handled.",
    "Diagnostic entries can be used to enable or disable particular actions for debugging purposes.\n"
-      "You probably can't use any of these settings to enhance your gameplay experience!"
+      "You probably can't use any of these settings to enhance your gameplay experience!",
+   "Sound settings",
+   "Experimental and possibly short-lived settings use for testing.  They may be removed at any time,\n"
+      "even in the next version of Bitfighter."
 };
 
 
@@ -206,28 +199,6 @@ Vector<PluginBinding> IniSettings::getDefaultPluginBindings() const
    }
 
    return bindings;
-}
-
-
-F32 IniSettings::getMusicVolLevel()
-{
-   if(musicMutedOnCmdLine)
-      return 0;
-
-   return musicVolLevel;
-}
-
-
-// As above, but ignores whether music was muted or not
-F32 IniSettings::getRawMusicVolLevel()
-{
-   return musicVolLevel;
-}
-
-
-void  IniSettings::setMusicVolLevel(F32 vol)
-{
-   musicVolLevel = vol;
 }
 
 
@@ -416,29 +387,6 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
    iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
 
-#ifndef ZAP_DEDICATED
-   iniSettings->joystickLinuxUseOldDeviceSystem = ini->GetValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
-   iniSettings->alwaysStartInKeyboardMode = ini->GetValueYN(section, "AlwaysStartInKeyboardMode", iniSettings->alwaysStartInKeyboardMode);
-#endif
-
-   iniSettings->masterAddress = ini->GetValue (section, "MasterServerAddressList", iniSettings->masterAddress);
-   
-   iniSettings->name           = ini->GetValue(section, "Nickname", iniSettings->name);
-   iniSettings->password       = ini->GetValue(section, "Password", iniSettings->password);
-
-   iniSettings->defaultName    = ini->GetValue(section, "DefaultName", iniSettings->defaultName);
-
-   iniSettings->lastPassword   = ini->GetValue(section, "LastPassword", iniSettings->lastPassword);
-   iniSettings->lastEditorName = ini->GetValue(section, "LastEditorName", iniSettings->lastEditorName);
-
-   iniSettings->version = ini->GetValueI(section, "Version", iniSettings->version);
-
-   iniSettings->connectionSpeed = ini->GetValueI(section, "ConnectionSpeed", iniSettings->connectionSpeed);
-
-   S32 fps = ini->GetValueI(section, "MaxFPS", iniSettings->maxFPS);
-   if(fps >= 1) 
-      iniSettings->maxFPS = fps;   // Otherwise, leave it at the default value
-   // else warn?
 
 #ifndef ZAP_DEDICATED
    gDefaultLineWidth = ini->GetValueF(section, "LineWidth", 2);
@@ -494,31 +442,6 @@ static void loadPluginBindings(CIniFile *ini, IniSettings *iniSettings)
    // If no plugins we're loaded, add our defaults  (maybe we don't want to do this?)
    if(iniSettings->pluginBindings.size() == 0)
       iniSettings->pluginBindings = iniSettings->getDefaultPluginBindings();
-}
-
-
-// Convert a string value to our sfxSets enum
-static sfxSets stringToSFXSet(string sfxSet)
-{
-   return (lcase(sfxSet) == "classic") ? sfxClassicSet : sfxModernSet;
-}
-
-
-static void loadSoundSettings(CIniFile *ini, GameSettings *settings, IniSettings *iniSettings)
-{
-   iniSettings->musicMutedOnCmdLine = settings->getSpecified(NO_MUSIC);
-
-   iniSettings->sfxVolLevel       = (F32) ini->GetValueI("Sounds", "EffectsVolume",   (S32) (iniSettings->sfxVolLevel        * 10)) / 10.0f;
-   iniSettings->setMusicVolLevel(   (F32) ini->GetValueI("Sounds", "MusicVolume",     (S32) (iniSettings->getMusicVolLevel() * 10)) / 10.0f);
-   iniSettings->voiceChatVolLevel = (F32) ini->GetValueI("Sounds", "VoiceChatVolume", (S32) (iniSettings->voiceChatVolLevel  * 10)) / 10.0f;
-
-   string sfxSet = ini->GetValue("Sounds", "SFXSet", "Modern");
-   iniSettings->sfxSet = stringToSFXSet(sfxSet);
-
-   // Bounds checking
-   iniSettings->sfxVolLevel       = checkVol(iniSettings->sfxVolLevel);
-   iniSettings->setMusicVolLevel(checkVol(iniSettings->getRawMusicVolLevel()));
-   iniSettings->voiceChatVolLevel = checkVol(iniSettings->voiceChatVolLevel);
 }
 
 
@@ -986,8 +909,7 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
       loadSettings(ini, iniSettings, sections[i]);
 
 
-   // These two sections can be modernized, the remainder maybe not
-   loadSoundSettings(ini, settings, iniSettings);
+   // This section can be modernized, the remainder maybe not
    loadGeneralSettings(ini, iniSettings);
 
    loadLoadoutPresets(ini, settings);
@@ -1027,29 +949,6 @@ void IniSettings::loadUserSettingsFromINI(CIniFile *ini, GameSettings *settings)
 
       settings->addUserSettings(userSettings);
    }
-}
-
-
-static void writeSounds(CIniFile *ini, IniSettings *iniSettings)
-{
-   ini->addSection("Sounds");
-
-   if (ini->numSectionComments("Sounds") == 0)
-   {
-      ini->sectionComment("Sounds", "----------------");
-      ini->sectionComment("Sounds", " Sound settings");
-      ini->sectionComment("Sounds", " EffectsVolume - Volume of sound effects from 0 (mute) to 10 (full bore)");
-      ini->sectionComment("Sounds", " MusicVolume - Volume of sound effects from 0 (mute) to 10 (full bore)");
-      ini->sectionComment("Sounds", " VoiceChatVolume - Volume of incoming voice chat messages from 0 (mute) to 10 (full bore)");
-      ini->sectionComment("Sounds", " SFXSet - Select which set of sounds you want: Classic or Modern");
-      ini->sectionComment("Sounds", "----------------");
-   }
-
-   ini->SetValueI("Sounds", "EffectsVolume", (S32) (iniSettings->sfxVolLevel * 10));
-   ini->SetValueI("Sounds", "MusicVolume",   (S32) (iniSettings->getRawMusicVolLevel() * 10));
-   ini->SetValueI("Sounds", "VoiceChatVolume",   (S32) (iniSettings->voiceChatVolLevel * 10));
-
-   ini->SetValue("Sounds", "SFXSet", iniSettings->sfxSet == sfxClassicSet ? "Classic" : "Modern");
 }
 
 
@@ -1097,40 +996,12 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
    const char *section = "Settings";
 
-   ini->sectionComment(section, " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
-   ini->sectionComment(section, " JoystickLinuxUseOldDeviceSystem - Force SDL to add the older /dev/input/js0 device to the enumerated joystick list.  No effect on Windows/Mac systems");
-   ini->sectionComment(section, " AlwaysStartInKeyboardMode - Change to 'Yes' to always start the game in keyboard mode (don't auto-select the joystick)");
-   ini->sectionComment(section, " MasterServerAddressList - Comma separated list of Address of master server, in form: IP:67.18.11.66:25955,IP:myMaster.org:25955 (tries all listed, only connects to one at a time)");
-   ini->sectionComment(section, " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
-   ini->sectionComment(section, " Nickname - Specify the nickname to use for autologin, or clear to disable autologin");
-   ini->sectionComment(section, " Password - Password to use for autologin, if your nickname has been reserved in the forums");
-   ini->sectionComment(section, " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
-   ini->sectionComment(section, " LastEditorName - Last edited file name");
-   ini->sectionComment(section, " MaxFPS - Maximum FPS the client will run at.  Higher values use more CPU, lower may increase lag (default = 100)");
    ini->sectionComment(section, " LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game");
-   ini->sectionComment(section, " Version - Version of game last time it was run.  Don't monkey with this value; nothing good can come of it!");
 
    ini->sectionComment(section, "----------------");
 
 
    // And the ones still to be ported to the new system
-
-
-#ifndef ZAP_DEDICATED
-   ini->setValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
-   ini->setValueYN(section, "AlwaysStartInKeyboardMode", iniSettings->alwaysStartInKeyboardMode);
-#endif
-   ini->SetValue  (section, "MasterServerAddressList", iniSettings->masterAddress);
-   ini->SetValue  (section, "DefaultName", iniSettings->defaultName);
-   ini->SetValue  (section, "Nickname", iniSettings->name);
-   ini->SetValue  (section, "Password", iniSettings->password);
-   ini->SetValue  (section, "LastPassword", iniSettings->lastPassword);
-   ini->SetValue  (section, "LastEditorName", iniSettings->lastEditorName);
-
-   ini->SetValueI (section, "MaxFPS", iniSettings->maxFPS);  
-
-   ini->SetValueI (section, "ConnectionSpeed", iniSettings->connectionSpeed);  
-   ini->SetValueI (section, "Version", BUILD_VERSION);
 
 #ifndef ZAP_DEDICATED
    // Don't save new value if out of range, so it will go back to the old value. 
@@ -1232,7 +1103,6 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    writeLoadoutPresets(ini, settings);
    writePluginBindings(ini, iniSettings);
    writeConnectionsInfo(ini, iniSettings);
-   writeSounds(ini, iniSettings);
    writeLevels(ini);
    writeSkipList(ini, settings->getLevelSkipList());
    writePasswordSection(ini);

@@ -76,7 +76,7 @@ bool Joystick::initJoystick(GameSettings *settings)
    //   http://superuser.com/questions/17959/linux-joystick-seems-mis-calibrated-in-an-sdl-game-freespace-2-open
 
 
-   if(settings->getIniSettings()->joystickLinuxUseOldDeviceSystem)
+   if(settings->getSetting<YesNo>(IniKey::JoystickLinuxUseOldDeviceSystem))
    {
       string joystickEnv = "SDL_JOYSTICK_DEVICE=/dev/input/js" + itos(0);
       SDL_putenv((char *)joystickEnv.c_str());
@@ -143,7 +143,7 @@ bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
       return false;
 
    if(settings->getInputMode() == InputModeKeyboard &&
-        (hasBeenOpenedBefore || settings->getIniSettings()->alwaysStartInKeyboardMode)) // Don't enable joystick at all in keyboard mode
+        (hasBeenOpenedBefore || settings->getSetting<bool>(IniKey::AlwaysStartInKeyboardMode))) // Don't enable joystick at all in keyboard mode
          return true;
 
    // Enable joystick events

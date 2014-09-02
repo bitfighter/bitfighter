@@ -838,16 +838,15 @@ void QueryServersUserInterface::render() const
    drawCenteredString(getDividerPos() - SEL_SERVER_INSTR_SIZE - SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE + 1, SEL_SERVER_INSTR_SIZE, 
                       "UP, DOWN to select, ENTER to join | Click on column to sort | ESC exits");
 
-   if(servers.size())      // There are servers to display...
+   if(servers.size() != 0)      // There are servers to display...
    {
       // Find the selected server (it may have moved due to sort or new/removed servers)
       S32 selectedIndex = getSelectedIndex();
-      TNLAssert(!(selectedIndex < 0 && servers.size() >= 0), "Negative index?");   // Assert added Jul 2014 by Wat
-      //if(selectedIndex < 0 && servers.size() >= 0)
-      //{
-      //   selectedId = servers[0].id;
-      //   selectedIndex = 0;
-      //}
+      if(selectedIndex < 0)
+      {
+         selectedId = servers[0].id;
+         selectedIndex = 0;
+      }
 
       S32 colwidth = columns[1].xStart - columns[0].xStart;    
 

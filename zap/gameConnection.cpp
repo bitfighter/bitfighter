@@ -2141,7 +2141,7 @@ void GameConnection::onConnectionEstablished()
 void GameConnection::onConnectionEstablished_client()
 {
 #ifndef ZAP_DEDICATED
-   setConnectionSpeed(mClientGame->getSettings()->getIniSettings()->connectionSpeed);  // set speed depending on client
+   setConnectionSpeed(mClientGame->getSettings()->getSetting<S32>(IniKey::ConnectionSpeed));  // set speed depending on client
    setGhostFrom(false);
    setGhostTo(true);
    logprintf(LogConsumer::LogConnection, "%s - connected to server.", getNetAddressString());
@@ -2172,7 +2172,7 @@ void GameConnection::onConnectionEstablished_client()
          mSettings->getIniSettings()->prevServerListFromMaster.push_back(addr);
    }
 
-   if(mSettings->getIniSettings()->voiceChatVolLevel == 0)
+   if(mSettings->getSetting<F32>(IniKey::VoiceChatVolume) == 0)
       s2rVoiceChatEnable(false);
 #endif
 }

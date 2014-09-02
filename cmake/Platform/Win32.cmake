@@ -1,5 +1,14 @@
 ## Global project configuration
 
+# Win64
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+	message(STATUS "Win64 detected")
+	set(BF_LIB_DIR ${CMAKE_SOURCE_DIR}/lib/win64)
+else()
+	message(STATUS "Win32 detected")
+	set(BF_LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
+endif()
+
 #
 # Linker flags
 # 
@@ -83,12 +92,12 @@ endif()
 #
 
 # Set some search paths
-set(SDL2_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libsdl)
-set(OGG_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libogg)
-set(VORBIS_SEARCH_PATHS	${CMAKE_SOURCE_DIR}/lib	${CMAKE_SOURCE_DIR}/libvorbis)
-set(VORBISFILE_SEARCH_PATHS	${CMAKE_SOURCE_DIR}/lib	${CMAKE_SOURCE_DIR}/libvorbis)
-set(SPEEX_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libspeex)
-set(MODPLUG_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libmodplug)
+set(SDL2_SEARCH_PATHS       ${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libsdl)
+set(OGG_SEARCH_PATHS        ${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libogg)
+set(VORBIS_SEARCH_PATHS	    ${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libvorbis)
+set(VORBISFILE_SEARCH_PATHS	${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libvorbis)
+set(SPEEX_SEARCH_PATHS      ${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libspeex)
+set(MODPLUG_SEARCH_PATHS    ${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libmodplug)
 
 # Directly set include dirs for some libraries
 set(OPENAL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/openal/include")
@@ -98,9 +107,9 @@ set(PNG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libpng")
 set(PNG_PNG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libpng")
 
 # Directly specify some libs (because of deficiences in CMake modules?)
-set(OPENAL_LIBRARY "${CMAKE_SOURCE_DIR}/lib/OpenAL32.lib")
-set(ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/lib/zlib.lib")
-set(PNG_LIBRARY "${CMAKE_SOURCE_DIR}/lib/libpng14.lib")
+set(OPENAL_LIBRARY "${BF_LIB_DIR}/OpenAL32.lib")
+set(ZLIB_LIBRARY   "${BF_LIB_DIR}/zlib.lib")
+set(PNG_LIBRARY    "${BF_LIB_DIR}/libpng14.lib")
 	
 find_package(VorbisFile)
 
@@ -170,7 +179,7 @@ endfunction()
 function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	# The trailing slash is necessary to do here for proper native path translation
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/resource/ resDir)
-	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lib/ libDir)
+	file(TO_NATIVE_PATH ${BF_LIB_DIR}/ libDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lua/luajit/src/ luaLibDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
 	

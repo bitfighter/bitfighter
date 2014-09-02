@@ -32,6 +32,17 @@
    SETTINGS_ITEM(S32,                WindowXPos,               "Settings",       "WindowXPos",               0,                               NULL,     NULL,     "X position of window in window mode (will be overwritten if you move your window).")                                           \
    SETTINGS_ITEM(S32,                WindowYPos,               "Settings",       "WindowYPos",               0,                               NULL,     NULL,     "Y position of window in window mode (will be overwritten if you move your window).")                                           \
    SETTINGS_ITEM(F32,                WindowScalingFactor,      "Settings",       "WindowScalingFactor",      1.0,                             NULL,     NULL,     "Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.")                                     \
+   SETTINGS_ITEM(YesNo,       JoystickLinuxUseOldDeviceSystem, "Settings", "JoystickLinuxUseOldDeviceSystem",No,                              NULL,     NULL,     "Force SDL to add the older /dev/input/js0 device to the enumerated joystick list.  Linux only.")                               \
+   SETTINGS_ITEM(YesNo,              AlwaysStartInKeyboardMode,"Settings",       "AlwaysStartInKeyboardMode",No,                              NULL,     NULL,     "Change to 'Yes' to always start the game in keyboard mode (don't auto-select the joystick).")                                  \
+   SETTINGS_ITEM(string,             MasterServerAddressList,  "Settings",       "MasterServerAddressList",  MASTER_SERVER_LIST_ADDRESS,      NULL,     NULL,     "Comma-separated list of master server addresses, in form: IP:10.1.1.1:25955,IP:myMaster.org:25955 (connects to the first one it can)") \
+   SETTINGS_ITEM(string,             DefaultName,              "Settings",       "DefaultName",              "ChumpChange",                   NULL,     NULL,     "Name that will be used if user hits <enter> on name entry screen without entering one.")                                       \
+   SETTINGS_ITEM(string,             Nickname,                 "Settings",       "Nickname",                 "",                              NULL,     NULL,     "Specify the nickname to use for autologin, or clear to disable autologin.")                                                    \
+   SETTINGS_ITEM(string,             Password,                 "Settings",       "Password",                 "",                              NULL,     NULL,     "Password to use for autologin, if your nickname has been reserved in the forums.")                                             \
+   SETTINGS_ITEM(string,             LastPassword,             "Settings",       "LastPassword",             "",                              NULL,     NULL,     "Password user entered when game last run (may be overwritten if you enter a different pw on startup screen).")                 \
+   SETTINGS_ITEM(string,             LastEditorName,           "Settings",       "LastEditorName",           "",                              NULL,     NULL,     "Last edited file name.")                                                                                                       \
+   SETTINGS_ITEM(U32,                Version,                  "Settings",       "Version",                  BUILD_VERSION,                   NULL,     NULL,     "Version of game last time it was run.  Don't monkey with this value; nothing good can come of it!.")                           \
+   SETTINGS_ITEM(S32,                ConnectionSpeed,          "Settings",       "ConnectionSpeed",          0,                               NULL,     NULL,     "This adjusts the latency and bandwidth of a connection.  Values can be: -2, -1, 0, 1, 2, where the higher number means less latency and more bandwidth.  Zap! used -1.") \
+   SETTINGS_ITEM(U32,                MaxFpsClient,             "Settings",       "MaxFPS",                   100,                        checkClientFps,NULL,     "Maximum FPS the client will run at.  Higher values use more CPU, lower may increase lag (default = 100).")                     \
                                                                                                                                                                                                                                                                                                   \
    SETTINGS_ITEM(ColorEntryMode,     ColorEntryMode,           "EditorSettings", "ColorEntryMode",           ColorEntryMode100,               NULL,     NULL,     "Specifies which color entry mode to use: RGB100, RGB255, RGBHEX; best to let the game manage this")                            \
                                                                                                                                                                                                                                                                                                   \
@@ -42,8 +53,13 @@
    SETTINGS_ITEM(U16,                ClientPortNumber,         "Testing",        "ClientPortNumber",         0,                               NULL,     NULL,     "Only helps when punching through firewall when using router's port forwarded for client port number")                          \
    SETTINGS_ITEM(YesNo,              DisableScreenSaver,       "Testing",        "DisableScreenSaver",       Yes,                             NULL,     NULL,     "Disable ScreenSaver from having no input from keyboard/mouse, useful when using joystick")                                     \
                                                                                                                                                                                                                                                                                                   \
-   SETTINGS_ITEM(string,             ServerName,               "Host",           "ServerName",              "Bitfighter host",                NULL,     NULL,     "The name others will see when they are browsing for servers (max 20 chars)")                                                   \
-   SETTINGS_ITEM(string,             ServerAddress,            "Host",           "ServerAddress",            MASTER_SERVER_LIST_ADDRESS,      NULL,     NULL,     "Socket address and port to bind to, e.g. IP:Any:9876 or IP:54.35.110.99:8000 or IP:bitfighter.org:8888\n"                      \
+   SETTINGS_ITEM(F32,                EffectsVolume,            "Sounds",         "EffectsVolume",            10,                              checkVol, writeVol, "Volume of sound effects from 0 (mute) to 10 (full bore).")                                                                     \
+   SETTINGS_ITEM(F32,                MusicVolume,              "Sounds",         "MusicVolume",              10,                              checkVol, writeVol, "Volume of music from 0 (mute) to 10 (full bore).")                                                                             \
+   SETTINGS_ITEM(F32,                VoiceChatVolume,          "Sounds",         "VoiceChatVolume",          10,                              checkVol, writeVol, "Volume of incoming voice chat messages from 0 (mute) to 10 (full bore).")                                                      \
+   SETTINGS_ITEM(SfxSet,             SFXSet,                   "Sounds",         "SFXSet",                   SfxSetModern,                    NULL,     NULL,     "Select which set of sounds you want: Classic or Modern.")                                                      \
+                                                                                                                                                                                                                                                                                                  \
+   SETTINGS_ITEM(string,             ServerName,               "Host",           "ServerName",               "Bitfighter host",               NULL,     NULL,     "The name others will see when they are browsing for servers (max 20 chars)")                                                   \
+   SETTINGS_ITEM(string,             ServerAddress,            "Host",           "ServerAddress",            "",                              NULL,     NULL,     "Socket address and port to bind to, e.g. IP:Any:9876 or IP:54.35.110.99:8000 or IP:bitfighter.org:8888\n"                      \
                                                                                                                                                                   "(leave blank to let the system decide; this is almost always what you want)")                                                  \
    SETTINGS_ITEM(string,             ServerDescription,        "Host",           "ServerDescription",        "",                              NULL,     NULL,     "A one line description of your server.  Please include nickname and physical location!")                                       \
    SETTINGS_ITEM(string,             ServerPassword,           "Host",           "ServerPassword",           "",                              NULL,     NULL,     "You can require players to use a password to play on your server.  Leave blank to grant access to all.")                       \
@@ -135,9 +151,16 @@ enum DisplayMode {
     DISPLAY_MODE_UNKNOWN    // <== Note: code depends on this being the first value that's not a real mode
 };  
 
-enum sfxSets {
-   sfxClassicSet,
-   sfxModernSet
+
+#define SFX_SET_TABLE \
+SFX_SET_ITEM(SfxSetClassic,     "Classic"     )  \
+SFX_SET_ITEM(SfxSetModern,      "Modern"      )  \
+
+// Gernerate an enum
+enum SfxSet {
+#define SFX_SET_ITEM(enumVal, b) enumVal,
+   SFX_SET_TABLE
+#undef SFX_SET_ITEM
 };
 
 
