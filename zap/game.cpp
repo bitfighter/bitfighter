@@ -465,29 +465,15 @@ void Game::addPolyWall(BfObject *polyWall, GridDatabase *database)
 }
 
 
-// Is overridden in ClientGame
+// Is overridden in ClientGame, called from there
 void Game::addWallItem(WallItem *wallItem, GridDatabase *database)
 {
    //wallItem->addToGame(this, database);
 
-   // Generate a series of 2-point wall segments, which are added to the spatial database
+   // Generate a series of 2-point wall segments, which are added to the database
    Barrier::constructWalls(this, *wallItem->getOutline(), false, (F32)wallItem->getWidth());
 
    //wallItem->onAddedToGame();
-}
-
-
-const Vector<WallItem *> &Game::getWallList() const
-{
-   TNLAssert(false, "Not implemented for this class!");
-   return NULL;
-}
-   
-
-const Vector<PolyWall *> &Game::getPolyWallList() const
-{
-   TNLAssert(false, "Not implemented for this class!");
-   return NULL;
 }
 
 

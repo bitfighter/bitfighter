@@ -19,6 +19,7 @@
 #include "LevelSource.h"
 #include "LevelDatabase.h"
 #include "Level.h"
+#include "WallSegmentManager.h"
 
 #include "gameObjectRender.h"
 #include "stringUtils.h"
@@ -982,6 +983,7 @@ inline string getPathFromFilename(const string &filename)
 }
 
 
+// Returns true if the level is successfully loaded, false if it wasn't
 bool ServerGame::loadLevel()
 {
    mLevel = boost::shared_ptr<Level>(mLevelSource->getLevel(mCurrentLevelIndex));
@@ -1016,13 +1018,13 @@ bool ServerGame::loadLevel()
 
    for(S32 i = 0; i < walls.size(); i++)
    {
-      addWallItem(walls[i], NULL);     // Not sure we want this --> maybe just Barrier::constructWalls(this, *wallItem->getOutline(), false, wallItem->getWidth());
+      addWallItem(walls[i], NULL);     // Just does this --> Barrier::constructWalls(this, *wallItem->getOutline(), false, wallItem->getWidth());
 
                   // Use WallItem's ProcessGeometry method to read the points; this will let us put us all our error handling
          // and geom processing in our place.
          //WallItem wallItem;
          //if(wallItem.processArguments(argc, argv, this))    // Returns true if wall was successfully processed
-         //   addWallItem(&wallItem, NULL);
+            //addWallItem(&wallItem, NULL);
    }
 
    const Vector<PolyWall *> &polywalls = mLevel->getPolyWallList();
@@ -1038,6 +1040,8 @@ bool ServerGame::loadLevel()
          //   addWallItem(&wallItem, NULL);
    }
 
+
+   mLevel->getWallSegmentManager()->recomputeAllWallGeometry(mLevel.get());
 
    mLevel->addBots(this);
 
@@ -1092,18 +1096,6 @@ bool ServerGame::loadLevel()
    getGameType()->onLevelLoaded();
 
    return true;
-}
-
-
-const Vector<WallItem *> &ServerGame::getWallList() const
-{
-   return mLevel->getWallList();
-}
-
-
-const Vector<PolyWall *> &ServerGame::getPolyWallList() const
-{
-   return  mLevel->getPolyWallList();
 }
 
 

@@ -322,9 +322,6 @@ public:
    virtual void addPolyWall(BfObject *polyWall, GridDatabase *database);     
    virtual void addWallItem(WallItem *wallItem, GridDatabase *database);     
 
-   virtual const Vector<WallItem *>     &getWallList() const;
-   virtual const Vector<PolyWall *> &getPolyWallList() const;
-
    virtual void deleteLevelGen(LuaLevelGenerator *levelgen) = 0; 
 
    virtual Ship *getLocalPlayerShip() const = 0;

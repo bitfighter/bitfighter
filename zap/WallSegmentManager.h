@@ -20,6 +20,7 @@ class WallSegment;
 class GridDatabase;
 class DatabaseObject;
 class BfObject;
+class EngineeredItem;
 
 
 class WallSegmentManager
@@ -32,8 +33,11 @@ private:
 
    void rebuildEdges();
    void buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *object, const Vector<DatabaseObject *> &engrObjects);
-
+   void findEngineeredObjectsMountedOnWall(const BfObject *wall,
+                                           const Vector<DatabaseObject *> &engrObjects,
+                                           Vector<EngineeredItem *> &toBeRemounted) const;
 public:
+
    WallSegmentManager();   // Constructor
    virtual ~WallSegmentManager();  // Destructor
 
@@ -60,15 +64,11 @@ public:
 
    void clearSelected();
    void setSelected(S32 owner, bool selected);
-   void rebuildSelectedOutline();
+   void rebuildSelectionOutline();
 
    void deleteSegments(S32 owner);              // Delete all segments owned by specified WorldItem
 
    void updateAllMountedItems(GridDatabase *database);
-
-
-   // Takes a wall, finds all intersecting segments, and marks them invalid
-   //void invalidateIntersectingSegments(GridDatabase *gameDatabase, BfObject *item);      // unused
 
    // Recalucate edge geometry for all walls when item has changed
    void computeWallSegmentIntersections(GridDatabase *gameDatabase, BfObject *item); 

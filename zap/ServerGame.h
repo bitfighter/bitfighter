@@ -170,10 +170,6 @@ public:
 
    void onConnectedToMaster();
 
-   const Vector<WallItem *> &getWallList() const;
-   const Vector<PolyWall *> &getPolyWallList() const;
-
-
    /////
    // Bot related
    void startAllBots();                            // Loop through all our bots and run thier main() functions

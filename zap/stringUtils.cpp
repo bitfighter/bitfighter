@@ -863,15 +863,16 @@ bool writeFile(const string &path, const string &contents, bool append)
 }
 
 
-// Pass in a path, returns contents of file; if file does not exist, returns empty string
-void readFile(const string &path, string &contents)
+// Pass in a path, returns contents of file; if file does not exist, contents is set to an empty string
+// Function returns true if file exists, false if not
+bool readFile(const string &path, string &contents)
 {
    ifstream file(path.c_str(), ios_base::in | ios_base::binary);
 
    if(!file.is_open())
    {
       contents = "";
-      return;
+      return false;
    }
 
    // Resize the string to hold the file contents
@@ -885,6 +886,8 @@ void readFile(const string &path, string &contents)
    // Remove the UTF-8 BOM if it exists
    // These are the first three bytes:  EF BB BF
    trim_left_in_place(contents, "\357\273\277");
+
+   return true;
 }
 
 

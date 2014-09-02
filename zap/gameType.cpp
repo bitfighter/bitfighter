@@ -2634,12 +2634,12 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    Vector<Point> v;
    s2cAddWalls(v, 0, false);     // Sending an empty list clears the barriers
 
-   Vector<WallItem *> walls = mGame->getWallList();
+   Vector<WallItem *> walls = mLevel->getWallList();
 
    for(S32 i = 0; i < walls.size(); i++)
       s2cAddWalls(*walls[i]->getOutline(), (F32)walls[i]->getWidth(), false);
 
-   Vector<PolyWall *> polyWalls = mGame->getPolyWallList();
+   Vector<PolyWall *> polyWalls = mLevel->getPolyWallList();
 
    for(S32 i = 0; i < polyWalls.size(); i++)
       s2cAddWalls(*polyWalls[i]->getOutline(), 1, true);

@@ -104,7 +104,7 @@ void WallSegmentManager::finishedChangingWalls(GridDatabase *editorObjectDatabas
       }
    }
 
-   rebuildSelectedOutline();
+   rebuildSelectionOutline();
 }
 
 
@@ -112,7 +112,7 @@ void WallSegmentManager::finishedChangingWalls(GridDatabase *editorDatabase)
 {
    rebuildEdges();         // Rebuild all edges for all walls
    updateAllMountedItems(editorDatabase);
-   rebuildSelectedOutline();
+   rebuildSelectionOutline();
 }
 
 
@@ -122,7 +122,7 @@ void WallSegmentManager::recomputeAllWallGeometry(GridDatabase *gameDatabase)
    buildAllWallSegmentEdgesAndPoints(gameDatabase);
    rebuildEdges();
 
-   rebuildSelectedOutline();
+   rebuildSelectionOutline();    // Only needed by editor
 }
 
 
@@ -138,7 +138,7 @@ void WallSegmentManager::rebuildEdges()
 
    // Run clipper --> fills mWallEdgePoints from mWallSegments
    clipAllWallEdges(mWallSegmentDatabase->findObjects_fast(), mWallEdgePoints);    
-   mWallEdgeDatabase->removeEverythingFromDatabase();  //XXXX <---- THIS CAUSES THE CRASH
+   mWallEdgeDatabase->removeEverythingFromDatabase();
 
    // Create a WallEdge object from the clipped wall geometry.  We'll add it to the WallEdgeDatabase, which will 
    // delete the object when it is ulitmately removed.
@@ -161,7 +161,7 @@ void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *databas
    Vector<DatabaseObject *> engrObjects;
    database->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
 
-   // Iterate over all our wall objects
+   // Iterate over all our wall objects (WallItems and PolyWalls when run from the editor, Barriers when run from ServerGame::loadLevel)
    for(S32 i = 0; i < fillVector.size(); i++)
       buildWallSegmentEdgesAndPoints(database, fillVector[i], engrObjects);
 }
@@ -172,29 +172,14 @@ void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *databas
 void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, DatabaseObject *wallDbObject, 
                                                         const Vector<DatabaseObject *> &engrObjects)
 {
-#ifndef ZAP_DEDICATED
+#ifndef ZAP_DEDICATED  // <== why??
+
    // Find any engineered objects that terminate on this wall, and mark them for resnapping later
+   BfObject *wall = static_cast<BfObject *>(wallDbObject);     // Wall we're deleting and rebuilding
 
    Vector<EngineeredItem *> toBeRemounted;    // A list of engr objects terminating on the wall segment that we'll be deleting
 
-   BfObject *wall = static_cast<BfObject *>(wallDbObject);     // Wall we're deleting and rebuilding
-
-   S32 count = mWallSegmentDatabase->getObjectCount();
-
-   // Loop through all the walls, and, for each, see if any of the engineered objects we were given are mounted to it
-   for(S32 i = 0; i < count; i++)
-   {
-      WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
-      if(wallSegment->getOwner() == wall->getSerialNumber())       // Segment belongs to wall
-         for(S32 j = 0; j < engrObjects.size(); j++)               // Loop through all engineered objects checking the mount seg
-         {
-            EngineeredItem *engrObj = static_cast<EngineeredItem *>(engrObjects[j]);
-
-            // Does FF start or end on this segment?
-            if(engrObj->getMountSegment() == wallSegment || engrObj->getEndSegment() == wallSegment)
-               toBeRemounted.push_back(engrObj);
-         }
-   }
+   findEngineeredObjectsMountedOnWall(wall, engrObjects, toBeRemounted);
 
    // Get rid of any segments that correspond to our wall; we'll be building new ones
    deleteSegments(wall->getSerialNumber());
@@ -207,9 +192,8 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
       new WallSegment(mWallSegmentDatabase, *wall->getOutline(), wall->getSerialNumber());
 
    // Traditional walls will be represented by a series of rectangles, each representing a "puffed out" pair of sequential vertices
-   else
+   else if(wall->getObjectTypeNumber() == WallItemTypeNumber)
    {
-      TNLAssert(dynamic_cast<WallItem *>(wall), "Expected an WallItem!");
       WallItem *wallItem = static_cast<WallItem *>(wall);
 
       // Create a WallSegment for each sequential pair of vertices
@@ -225,7 +209,34 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
             allSegExtent.unionRect(newSegment->getExtent());
       }
 
-      wall->setExtent(allSegExtent);      // A wall's extent is the union of the extents of all its segments.  Makes sense, right?
+      wallDbObject->setExtent(allSegExtent);      // A wall's extent is the union of the extents of all its segments.  Makes sense, right?
+   }
+
+   // The final thing we could have here is a barrier, which is either a polywall or a single segment of a normal wall 
+   // that has been converted to a 4-point rectanglular polygon
+   // TODO -- this is really test code; if it works, we need to clean it up and optimize it
+   else
+   {
+      TNLAssert(dynamic_cast<Barrier *>(wall), "Expected a Barrier!");
+
+      Barrier *barrier = static_cast<Barrier *>(wall);
+
+      Vector<Point> pts;
+
+      for(S32 i = 0; i < barrier->getVertCount(); i++)
+      {
+         pts.push_back(barrier->getVert(i));
+
+         if(i == 0)
+            allSegExtent.set(barrier->getVert(i), 0);
+         else
+            allSegExtent.unionRect(Rect(barrier->getVert(i), 0));
+      }
+
+      // Create the segment; the WallSegment constructor will add it to the specified database
+      WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, pts, barrier->getSerialNumber());
+
+      wallDbObject->setExtent(allSegExtent);      // A wall's extent is the union of the extents of all its segments.  Makes sense, right?
    }
 
    // Remount all turrets & forcefields mounted on or terminating on any of the wall segments we deleted and potentially recreated
@@ -233,6 +244,31 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
       toBeRemounted[i]->mountToWall(toBeRemounted[i]->getVert(0), database->getWallSegmentManager(), NULL);
 
 #endif
+}
+
+
+// Populate toBeRemounted with objects from engrObjects that are mounted on wall
+void WallSegmentManager::findEngineeredObjectsMountedOnWall(const BfObject *wall, 
+                                                            const Vector<DatabaseObject *> &engrObjects, 
+                                                            Vector<EngineeredItem *> &toBeRemounted) const
+{
+   S32 count = mWallSegmentDatabase->getObjectCount();
+
+   // Loop through all the walls, and, for each, see if any of the engineered objects we were given are mounted to it
+   for(S32 i = 0; i < count; i++)
+   {
+      WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
+
+      if(wallSegment->getOwner() == wall->getSerialNumber())   // Segment belongs to wall
+         for(S32 j = 0; j < engrObjects.size(); j++)              // Loop through all engineered objects checking the mount seg
+         {
+            EngineeredItem *engrObj = static_cast<EngineeredItem *>(engrObjects[j]);
+
+            // Does FF start or end on this segment?
+            if(engrObj->getMountSegment() == wallSegment || engrObj->getEndSegment() == wallSegment)
+               toBeRemounted.push_back(engrObj);
+         }
+   }
 }
 
 
@@ -330,7 +366,8 @@ void WallSegmentManager::setSelected(S32 owner, bool selected)
 }
 
 
-void WallSegmentManager::rebuildSelectedOutline()
+// Rebuilds outline of selected walls
+void WallSegmentManager::rebuildSelectionOutline()
 {
    Vector<DatabaseObject *> selectedSegments;      // Use DatabaseObject here to match the args for clipAllWallEdges()
 
@@ -343,7 +380,7 @@ void WallSegmentManager::rebuildSelectedOutline()
          selectedSegments.push_back(wallSegment);
    }
 
-   // If no walls are selected we can skip a lot of work, butx removing this check will not change the result
+   // If no walls are selected we can skip a lot of work, but removing this check will not change the result
    if(selectedSegments.size() == 0)          
       mSelectedWallEdgePoints.clear();    
    else

@@ -487,35 +487,17 @@ BfObject *EditorUserInterface::findObjBySerialNumber(const GridDatabase *databas
 }
 
 
-void EditorUserInterface::rebuildEverything(GridDatabase *database)
+void EditorUserInterface::rebuildEverything(Level *level)
 {
-   database->getWallSegmentManager()->recomputeAllWallGeometry(database);
-   resnapAllEngineeredItems(database, false);
+   level->buildWallEdgeGeometry();
+
+   level->snapAllEngineeredItems(false);
 
    // If we're rebuilding items in our levelgen database, no need to save anything!
-   if(database != &mLevelGenDatabase)
+   if(level != &mLevelGenDatabase)
    {
       setNeedToSave(mAllUndoneUndoLevel != mLastUndoIndex);
       autoSave();
-   }
-}
-
-
-// Resnaps all engineered items in database
-void EditorUserInterface::resnapAllEngineeredItems(GridDatabase *database, bool onlyUnsnapped)
-{
-   fillVector.clear();
-   database->findObjects((TestFunc)isEngineeredType, fillVector);
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      EngineeredItem *engrObj = dynamic_cast<EngineeredItem *>(fillVector[i]);
-
-      // Skip already snapped items if only processing unsnapped ones
-      if(onlyUnsnapped && engrObj->isSnapped())
-         continue;
-
-      engrObj->mountToWall(engrObj->getPos(), database->getWallSegmentManager(), NULL);
    }
 }
 
@@ -584,39 +566,22 @@ void EditorUserInterface::loadLevel()
    // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
 
    Level *level = new Level();
-   bool ok = level->loadLevelFromFile(fileName);
+   bool isNewLevel = !level->loadLevelFromFile(fileName);   // load returns true if fileName exists, false if not
 
-   if(!ok)
-   {
-      delete level;
-      level = new Level();
-   }
    setLevel(boost::shared_ptr<Level>(level));
 
    mLoadTarget = level;
 
-
    TNLAssert(mLevel->getGameType(), "Level should have GameType!");
    TNLAssert(mLevel->getTeamCount() > 0, "Level should have at least one team!");
 
-   //if(!game->getGameType())         // Make sure we have GameType
-   //{
-   //   GameType *gameType = new GameType;
-   //   gameType->addToGame(game, mLoadTarget);   
-   //}
-
-   //makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team  --> should be handled by level loader
-
-   if(ok)   
+   if(isNewLevel)   
+      mLevel->getGameType()->setLevelCredits(getGame()->getClientInfo()->getName());  // Set default author
+   else
    {
       // Loaded a level!
       validateTeams();                 // Make sure every item has a valid team
       validateLevel();                 // Check level for errors (like too few spawns)
-   }
-   else     
-   {
-      // New level!
-      mLevel->getGameType()->setLevelCredits(getGame()->getClientInfo()->getName());  // Set default author
    }
 
    //// If we have a level in the database, let's ping the database to make sure it's really still there
@@ -635,7 +600,7 @@ void EditorUserInterface::loadLevel()
    mLoadTarget->getWallSegmentManager()->recomputeAllWallGeometry(mLoadTarget);
    
    // Snap all engineered items to the closest wall, if one is found
-   resnapAllEngineeredItems(mLoadTarget, false);
+   mLoadTarget->snapAllEngineeredItems(false);
 }
 
 
@@ -714,7 +679,7 @@ static void openConsole(ClientGame *game)
 
 
 // Runs an arbitrary lua script.  Command is first item in cmdAndArgs, subsequent items are the args, if any
-void EditorUserInterface::runScript(GridDatabase *database, const FolderManager *folderManager, 
+void EditorUserInterface::runScript(Level *level, const FolderManager *folderManager, 
                                     const string &scriptName, const Vector<string> &args)
 {
    string name = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script
@@ -727,7 +692,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    }
    
    // Load the items
-   LuaLevelGenerator levelGen(getGame(), name, args, database);
+   LuaLevelGenerator levelGen(getGame(), name, args, level);
 
    // Error reporting handled within -- we won't cache these scripts for easier development   
    bool error = !levelGen.runScript(false);      
@@ -760,14 +725,14 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    // Process new items that need it (walls need processing so that they can render properly).
    // Items that need no extra processing will be kept as-is.
    fillVector.clear();
-   database->findObjects((TestFunc)isWallType, fillVector);
+   level->findObjects((TestFunc)isWallType, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
 
       if(obj->getVertCount() < 2)      // Invalid item; delete  --> aren't 1 point walls already excluded, making this check redundant?
-         database->removeFromDatabase(obj, true);
+         level->removeFromDatabase(obj, true);
 
       if(obj->getObjectTypeNumber() == WallItemTypeNumber)
          static_cast<WallItem *>(obj)->processEndPoints();
@@ -776,13 +741,13 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    // Also find any teleporters and make sure their destinations are in order.  Teleporters with no dests will be deleted.
    // Those with multiple dests will be broken down into multiple single dest versions.
    fillVector.clear();
-   database->findObjects(TeleporterTypeNumber, fillVector);
+   level->findObjects(TeleporterTypeNumber, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       Teleporter *teleporter = static_cast<Teleporter *>(fillVector[i]);
       if(teleporter->getDestCount() == 0)
-         database->removeFromDatabase(teleporter, true);
+         level->removeFromDatabase(teleporter, true);
       else
       {
          for(S32 i = 1; i < teleporter->getDestCount(); i++)
@@ -792,7 +757,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
             newTel->setEndpoint(teleporter->getDest(i));
             newTel->addDest(teleporter->getDest(i));
 
-            //newTel->addToGame(getGame(), database);
+            //newTel->addToGame(getGame(), level);
             newTel->addToDatabase(mLevel.get());
          }
 
@@ -802,7 +767,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
       }
    }
 
-   rebuildEverything(database);
+   rebuildEverything(level);
 }
 
 
@@ -1218,7 +1183,7 @@ void EditorUserInterface::onSelectionChanged()
          wallSegmentManager->setSelected(obj->getSerialNumber(), true);
    }
 
-   wallSegmentManager->rebuildSelectedOutline();
+   wallSegmentManager->rebuildSelectionOutline();
 }
 
 
@@ -2487,7 +2452,7 @@ void EditorUserInterface::pasteSelection()
 
    onSelectionChanged();
 
-   resnapAllEngineeredItems(getLevel(), false);  // True would work?
+   getLevel()->snapAllEngineeredItems(false);  // True would work?
 
    validateLevel();
    setNeedToSave(true);
@@ -3727,7 +3692,7 @@ void EditorUserInterface::doneDeleteingWalls()
    WallSegmentManager *wallSegmentManager = mLoadTarget->getWallSegmentManager();
 
    wallSegmentManager->recomputeAllWallGeometry(mLoadTarget);   // Recompute wall edges
-   resnapAllEngineeredItems(mLoadTarget, false);
+   mLoadTarget->snapAllEngineeredItems(false);
 }
 
 
@@ -4781,7 +4746,7 @@ void EditorUserInterface::onFinishedDragging()
          }
 
          if(wallMoved)
-            resnapAllEngineeredItems(getLevel(), true);
+            getLevel()->snapAllEngineeredItems(true);
 
          setNeedToSave(true);
          autoSave();

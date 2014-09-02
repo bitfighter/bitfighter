@@ -12,6 +12,8 @@
 #include "robot.h"
 #include "Colors.h"
 #include "LevelDatabase.h"
+#include "WallSegmentManager.h"
+#include "EngineeredItem.h"
 
 #include "Md5Utils.h"
 #include "stringUtils.h"
@@ -46,6 +48,10 @@ Level::~Level()
 {
    mWallItemList.deleteAndClear();
    mPolyWallList.deleteAndClear();
+
+   // Clean up our GameType -- it's a RefPtr, so will be deleted when all refs are removed
+   //if(mGameType.isValid() && !mGameType->isGhost())
+   //   mGameType.set(NULL);
 }
 
 
@@ -120,7 +126,8 @@ void Level::onAddedToClientGame()
 }
 
 
-// This is the core loader for levels in-game and in-editor
+// This is the core loader for levels in-game and in-editor.  This will always return a valid level, even
+// if contents is empty or somehow invalid.
 void Level::loadLevelFromString(const string &contents, const string &filename)
 {
    istringstream iss(contents);
@@ -137,22 +144,47 @@ void Level::loadLevelFromString(const string &contents, const string &filename)
 	mLevelHash = md5.getHash();
 
    // Build wall edge geometry
-   // TODO
+   buildWallEdgeGeometry();
 
    // Snap enigneered items to those edges
-   // TODO
+   snapAllEngineeredItems(false);
 
    validateLevel();
 }
 
 
-// Load level stored in filename into database
+void Level::buildWallEdgeGeometry()
+{
+   getWallSegmentManager()->recomputeAllWallGeometry(this);
+}
+
+
+// Snaps all engineered items in database
+void Level::snapAllEngineeredItems(bool onlyUnsnapped)
+{
+   Vector<Zap::DatabaseObject *> fillVector;
+
+   findObjects((TestFunc)isEngineeredType, fillVector);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      EngineeredItem *engrObj = static_cast<EngineeredItem *>(fillVector[i]);
+
+      // Skip already snapped items if only processing unsnapped ones
+      if(onlyUnsnapped && engrObj->isSnapped())
+         continue;
+
+      engrObj->mountToWall(engrObj->getPos(), getWallSegmentManager(), NULL);
+   }
+}
+
+
+// Load level stored in filename into database; returns true if file exists, false if not.  In either case,
+// the Level object will be left in a usable state.
 bool Level::loadLevelFromFile(const string &filename)
 {
    string contents;
-   readFile(filename, contents);
-   if(contents == "")
-      return false;
+   bool fileExists = readFile(filename, contents);
 
    loadLevelFromString(contents, filename);
 
@@ -161,7 +193,7 @@ bool Level::loadLevelFromFile(const string &filename)
    logprintf("Loading %s", filename.c_str());
 #endif
 
-   return true;
+   return fileExists;
 }
 
 
@@ -188,7 +220,7 @@ void Level::parseLevelLine(const string &line, const string &levelFileName)
 
    string errorMsg;     // Reusable object
 
-   const char** argv = new const char* [argc];
+   const char** argv = new const char* [argc];     // Deleted below
 
    if(argc >= 1)
    {
@@ -630,6 +662,16 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
       // Do nothing here -- all the action is in the if statement
    }
 
+   // We will not add Walls directly to the database, because they are handled differently on the client, server, and editor.
+   // This special handling will occur when the level is loaded into the ServerGame/Editor.
+   //
+   // On client and server, we will be adding Barriers in lieu of WallItems to the database.  Barriers are simple polygon items,
+   // either consisting of a single wall segment that has been "puffed out" and rectangularized, or a single PolyWall polygon.
+   // Additionally, on the server, we need a list of full-on walls that we can send to the client; the client will manufacture their
+   // own Barriers.  WallItems are more efficient to send because we only need worry about vertex list and width, whereas Barriers
+   // require 4 points per segment.
+   //
+   // In the editor, we want WallItems directly in the database so they can be more easily manipulated by the user.
    else if(stricmp(argv[0], "BarrierMaker") == 0)
    {
       WallItem *wallItem = new WallItem();  
@@ -643,31 +685,6 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
 
       wallItem->setUserAssignedId(id, false);
       mWallItemList.push_back(wallItem);
-
-      //if(mWallItemList.size() == 0)
-      //   mWallItemExtents = wallItem->getExtent();
-      //else
-      //   mWallItemExtents.unionRect(wallItem->getExtent());
-
-
-      // ADD TO DATABASE!!
-            // Client:
-            //if(argc >= 2)
-            //{
-            //   WallItem *wallItem = new WallItem();  
-            //   wallItem->initializeEditor();        // Only runs unselectVerts
-        
-            //   wallItem->processArguments(argc, argv, this);
-         
-            //      addWallItem(wallItem, database);
-            //}
-
-            // Server:
-            // Use WallItem's ProcessGeometry method to read the points; this will let us put us all our error handling
-            // and geom processing in our place.
-            //WallItem wallItem;
-            //if(wallItem.processArguments(argc, argv, this))    // Returns true if wall was successfully processed
-            //   addWallItem(&wallItem, NULL);
    }
 
    // BarrierMakerS is the old name for PolyWall
@@ -690,6 +707,7 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
 
       polywall->setUserAssignedId(id, false);
       mPolyWallList.push_back(polywall);
+
 
       //if(mPolyWallList.size() == 0)
       //   mWallItemExtents = wallItem->getExtent();

@@ -75,6 +75,9 @@ public:
    bool loadLevelFromFile(const string &filename);
    void validateLevel();
 
+   void buildWallEdgeGeometry();
+   void snapAllEngineeredItems(bool onlyUnsnapped);
+
    boost::shared_ptr<Vector<TeamInfo> > getTeamInfosClone() const;
    string toLevelCode() const;
 

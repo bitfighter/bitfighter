@@ -276,7 +276,6 @@ private:
    Point convertCanvasToLevelCoord(const Point &p) const;
    Point convertLevelToCanvasCoord(const Point &p, bool convert = true) const;
 
-   void resnapAllEngineeredItems(GridDatabase *database, bool onlyUnsnapped);
    string getInfoMsg() const;
 
    boost::scoped_ptr<SimpleTextEntryMenuUI> mSimpleTextEntryMenu;
@@ -286,9 +285,9 @@ private:
    void showCouldNotFindScriptMessage(const string &scriptName);
    void showPluginError(const string &msg);
 
-   string mLingeringMessageQueue;      // Ok, not much of a queue, but we can only have one of these, so this is enough
+   string mLingeringMessageQueue;   // Ok, not much of a queue, but we can only have one of these, so this is enough
 
-   GridDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
+   Level mLevelGenDatabase;         // Database for inserting objects when running a levelgen script in the editor
 
    void translateSelectedItems(const Vector<Point> &origins, const Point &offset, const Point &lastOffset);
    void snapSelectedEngineeredItems(const Point &cumulativeOffset);
@@ -351,7 +350,7 @@ public:
 
    Vector<TeamInfo> mOldTeams;     // Team list from before we run team editor, so we can see what changed
 
-   void rebuildEverything(GridDatabase *database);   // Does lots of things in undo, redo, and add items from script
+   void rebuildEverything(Level *level);   // Does lots of things in undo, redo, and add items from script
 
    void onQuitted();       // Releases some memory when quitting the editor
 
@@ -464,7 +463,7 @@ public:
    void doneDeleting();
 
    // Run a script, and put resulting objects in database
-   void runScript(GridDatabase *database, const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);
+   void runScript(Level *level, const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);
    void runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);  
 
    string getPluginSignature();                 // Try to create some sort of uniqeish signature for the plugin
