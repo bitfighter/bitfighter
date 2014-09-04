@@ -162,7 +162,7 @@ public:
    Point mImpulseVector;
 
    virtual bool canAddToEditor();
-   const char *getOnScreenName();
+   const char *getOnScreenName() const;
 
    void selectNextWeapon();                   
    void selectPrevWeapon();
