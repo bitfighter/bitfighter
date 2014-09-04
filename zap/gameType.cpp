@@ -2631,6 +2631,21 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
          s2cClientJoinedTeam(clientInfo->getName(), team, false);
    }
 
+   sendWallsToClient();
+
+   broadcastNewRemainingTime();
+   s2cSetGameOver(mGameOver);    // TODO: Is this really needed?
+   TNLAssert(!mGameOver, "Is this ever true here?");     // If this assert never trips... then we can get rid of the s2c above.  4/26/2014
+
+   s2cSyncMessagesComplete(theConnection->getGhostingSequence());
+
+   NetObject::setRPCDestConnection(NULL);             // Set RPCs to go to all players
+}
+
+
+// Server only!
+void GameType::sendWallsToClient()
+{
    Vector<Point> v;
    s2cAddWalls(v, 0, false);     // Sending an empty list clears the barriers
 
@@ -2643,15 +2658,6 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
    for(S32 i = 0; i < polyWalls.size(); i++)
       s2cAddWalls(*polyWalls[i]->getOutline(), 1, true);
-
-
-   broadcastNewRemainingTime();
-   s2cSetGameOver(mGameOver);    // TODO: Is this really needed?
-   TNLAssert(!mGameOver, "Is this ever true here?");     // If this assert never trips... then we can get rid of the s2c above.  4/26/2014
-
-   s2cSyncMessagesComplete(theConnection->getGhostingSequence());
-
-   NetObject::setRPCDestConnection(NULL);             // Set RPCs to go to all players
 }
 
 
