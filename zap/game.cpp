@@ -40,6 +40,7 @@ NameToAddressThread::NameToAddressThread(const char *address_string) : mAddress_
    mDone = false;
 }
 
+
 // Destructor
 NameToAddressThread::~NameToAddressThread()
 {
