@@ -156,10 +156,13 @@ void Level::loadLevelFromString(const string &contents, const string &filename)
 void Level::buildWallEdgeGeometry()
 {
    fillVector.clear();
-   fillVector.reserve(mWallItemList.size());
+   fillVector.reserve(mWallItemList.size() + mPolyWallList.size());
 
    for(S32 i = 0; i < mWallItemList.size(); i++)
       fillVector.push_back(mWallItemList[i]);
+
+   for(S32 i = 0; i < mPolyWallList.size(); i++)
+      fillVector.push_back(mPolyWallList[i]);
 
    // Above could be replaced with this, if we implemented begin and end on Vector
    //Vector<DatabaseObject *> result(mWallItemList.begin(), mWallItemList.end());
