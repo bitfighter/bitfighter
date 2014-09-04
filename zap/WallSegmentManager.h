@@ -32,7 +32,9 @@ private:
    bool mBatchUpdatingGeom;     
 
    void rebuildEdges();
-   void buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *object, const Vector<DatabaseObject *> &engrObjects);
+   void buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, 
+                                       DatabaseObject *object, 
+                                       const Vector<DatabaseObject *>     &engrObjects);
    void findEngineeredObjectsMountedOnWall(const BfObject *wall,
                                            const Vector<DatabaseObject *> &engrObjects,
                                            Vector<EngineeredItem *> &toBeRemounted) const;
@@ -58,7 +60,7 @@ public:
    Vector<Point> mWallEdgePoints;               // For rendering
    Vector<Point> mSelectedWallEdgePoints;       // Also for rendering
 
-   void buildAllWallSegmentEdgesAndPoints(GridDatabase *gameDatabase);
+   void buildAllWallSegmentEdgesAndPoints(GridDatabase *database, const Vector<Zap::DatabaseObject *> &walls);
 
    void clear();                                // Delete everything from everywhere!
 
@@ -73,7 +75,8 @@ public:
    // Recalucate edge geometry for all walls when item has changed
    void computeWallSegmentIntersections(GridDatabase *gameDatabase, BfObject *item); 
 
-   void recomputeAllWallGeometry(GridDatabase *gameDatabase);
+   void recomputeAllWallGeometry(GridDatabase *database);
+   void recomputeAllWallGeometry(GridDatabase *database, const Vector<Zap::DatabaseObject *> &walls);
 
    // Populate wallEdges
    static void clipAllWallEdges(const Vector<DatabaseObject *> *wallSegments, Vector<Point> &wallEdges);

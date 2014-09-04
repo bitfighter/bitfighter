@@ -114,10 +114,19 @@ void WallSegmentManager::finishedChangingWalls(GridDatabase *editorDatabase)
 }
 
 
-// This function clears the WallSegment database, and refills it with the output of clipper
-void WallSegmentManager::recomputeAllWallGeometry(GridDatabase *gameDatabase)
+// These functions clear the WallSegment database, and refills it with the output of clipper
+void WallSegmentManager::recomputeAllWallGeometry(GridDatabase *database)
 {
-   buildAllWallSegmentEdgesAndPoints(gameDatabase);
+   fillVector.clear();
+   database->findObjects((TestFunc)isWallType, fillVector);
+
+   recomputeAllWallGeometry(database, fillVector);
+}
+
+
+void WallSegmentManager::recomputeAllWallGeometry(GridDatabase *database, const Vector<Zap::DatabaseObject *> &walls)
+{
+   buildAllWallSegmentEdgesAndPoints(database, walls);
    rebuildEdges();
 
    rebuildSelectionOutline();    // Only needed by editor
@@ -125,19 +134,16 @@ void WallSegmentManager::recomputeAllWallGeometry(GridDatabase *gameDatabase)
 
 
 // Delete all segments, then find all walls and build a new set of segments
-void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *database)
+void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *database, const Vector<Zap::DatabaseObject *> &walls)
 {
    mWallSegmentDatabase->removeEverythingFromDatabase();
-
-   fillVector.clear();
-   database->findObjects((TestFunc)isWallType, fillVector);
 
    Vector<DatabaseObject *> engrObjects;
    database->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
 
    // Iterate over all our wall objects (WallItems and PolyWalls when run from the editor, Barriers when run from ServerGame::loadLevel)
-   for(S32 i = 0; i < fillVector.size(); i++)
-      buildWallSegmentEdgesAndPoints(database, fillVector[i], engrObjects);
+   for(S32 i = 0; i < walls.size(); i++)
+      buildWallSegmentEdgesAndPoints(database, walls[i], engrObjects);
 }
 
 
