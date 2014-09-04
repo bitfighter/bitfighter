@@ -469,8 +469,6 @@ void Game::addPolyWall(BfObject *polyWall, GridDatabase *database)
 // Is overridden in ClientGame, called from there
 void Game::addWallItem(WallItem *wallItem, GridDatabase *database)
 {
-   //wallItem->addToGame(this, database);
-
    // Generate a series of 2-point wall segments, which are added to the database
    Barrier::constructWalls(this, *wallItem->getOutline(), (F32)wallItem->getWidth());
 }

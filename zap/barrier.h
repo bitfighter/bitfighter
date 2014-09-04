@@ -89,30 +89,6 @@ public:
 class WallItem;
 class PolyWall;
 
-// This is just a small container for the bits of a wall that we transfer from the client to the server
-// I feel as if this should be a parent class for both WallItem and PolyWall, but I can't quite seem to
-// get it to work...
-
-//struct WallRec
-//{
-//   Vector<Point> verts;
-//   F32 width;
-//   bool solid;
-//
-//   void constructVertices(const GeomObject *source, bool dedupe);    // Helper for constructors
-//
-//public:
-//   WallRec(F32 width, bool solid, const Vector<Point> &verts); // Constructor -- used on Client after receiving wall points
-//   explicit WallRec(const WallItem *wallItem);                 // Constructor -- used on Server
-//   explicit WallRec(const PolyWall *polyWall);                 // Constructor -- used on Server
-//
-//   void constructWalls(Game *theGame) const;
-//};
-// 
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 class WallItem : public CentroidObject
 {
    typedef CentroidObject Parent;
