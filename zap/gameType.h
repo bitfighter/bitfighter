@@ -103,6 +103,8 @@ private:
    void idle_client(U32 deltaT);
    void idle_server(U32 deltaT);
 
+   void sendWallsToClient();
+
    void launchKillStreakTextEffects(const ClientInfo *clientInfo) const;
    void fewerBots(ClientInfo *clientInfo);
    void moreBots(ClientInfo *clientInfo);
@@ -372,7 +374,9 @@ public:
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringPtr levelDesc, StringPtr musicName, S32 teamScoreLimit,
                                      StringTableEntry levelCreds, S32 objectCount, 
                                      bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId));
-   TNL_DECLARE_RPC(s2cAddWalls, (Vector<Point> barrier, F32 width, bool isPolywall));
+   TNL_DECLARE_RPC(s2cAddWalls,     (Vector<Point> barrier, F32 width));
+   TNL_DECLARE_RPC(s2cAddPolyWalls, (Vector<Point> barrier));
+
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isAuthenticated, Int<BADGE_COUNT> badges, 
                                   U16 gamesPlayed, RangedU32<0, ClientInfo::MaxKillStreakLength> killStreak,

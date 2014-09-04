@@ -205,37 +205,40 @@ bool Barrier::collide(BfObject *otherObject)
 // Adds walls to the game database -- used when playing games, but not in the editor
 // On client, is called when a wall object is sent from the server.
 // static method
-void Barrier::constructWalls(Game *game, const Vector<Point> &verts, bool isPolywall, F32 width)
+void Barrier::constructWalls(Game *game, const Vector<Point> &verts, F32 width)
 {
-   if(verts.size() < (isPolywall ? 3 : 2))      // Enough verts?
+   if(verts.size() < 2)      // Enough verts?
       return;
 
-   if(isPolywall)   
+   // First, fill a vector with barrier segments
+   Vector<Point> barrierEnds;
+   constructBarrierEndPoints(&verts, width, barrierEnds);
+
+   Vector<Point> pts;      // Reusable container
+
+   // Add individual segments to the game
+   for(S32 i = 0; i < barrierEnds.size(); i += 2)
    {
-      //// No problem with running this on server... just documenting that it doesn't
-      //TNLAssert(!game->isServer(), "Expect that this only gets run on client!");    
-      Barrier *b = new Barrier(verts, width, true);
+      pts.clear();
+      pts.push_back(barrierEnds[i]);
+      pts.push_back(barrierEnds[i+1]);
+
+      Barrier *b = new Barrier(pts, width, false);    // false = not solid
       b->addToGame(game, game->getGameObjDatabase());
    }
-   else        // This is a standard series of segments
-   {
-      // First, fill a vector with barrier segments
-      Vector<Point> barrierEnds;
-      constructBarrierEndPoints(&verts, width, barrierEnds);
+}
 
-      Vector<Point> pts;      // Reusable container
 
-      // Add individual segments to the game
-      for(S32 i = 0; i < barrierEnds.size(); i += 2)
-      {
-         pts.clear();
-         pts.push_back(barrierEnds[i]);
-         pts.push_back(barrierEnds[i+1]);
-
-         Barrier *b = new Barrier(pts, width, false);    // false = not solid
-         b->addToGame(game, game->getGameObjDatabase());
-      }
-   }
+// Adds polywalls to the game database -- used when playing games, but not in the editor
+// On client, is called when a wall object is sent from the server.
+// static method
+void Barrier::constructPolyWalls(Game *game, const Vector<Point> &verts)
+{
+   if(verts.size() < 3)      // Enough verts?
+      return;
+  
+   Barrier *b = new Barrier(verts, 1, true);
+   b->addToGame(game, game->getGameObjDatabase());
 }
 
 

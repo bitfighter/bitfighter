@@ -2647,17 +2647,17 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 void GameType::sendWallsToClient()
 {
    Vector<Point> v;
-   s2cAddWalls(v, 0, false);     // Sending an empty list clears the barriers
+   s2cAddWalls(v, 0);     // Sending an empty list clears the barriers
 
    Vector<WallItem *> walls = mLevel->getWallList();
 
    for(S32 i = 0; i < walls.size(); i++)
-      s2cAddWalls(*walls[i]->getOutline(), (F32)walls[i]->getWidth(), false);
+      s2cAddWalls(*walls[i]->getOutline(), (F32)walls[i]->getWidth());
 
    Vector<PolyWall *> polyWalls = mLevel->getPolyWallList();
 
    for(S32 i = 0; i < polyWalls.size(); i++)
-      s2cAddWalls(*polyWalls[i]->getOutline(), 1, true);
+      s2cAddPolyWalls(*polyWalls[i]->getOutline());
 }
 
 
@@ -2690,15 +2690,25 @@ GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
 
 // Gets called multiple times as barriers are added
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAddWalls, 
-                            (Vector<Point> verts, F32 width, bool isPolywall), 
-                            (              verts,     width,      isPolywall), 
+                            (Vector<Point> verts, F32 width), 
+                            (              verts,     width), 
                             NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
 {
    // Empty wall deletes all existing walls
    if(!verts.size())
       mGame->deleteObjects((TestFunc)isWallType);
    else
-      Barrier::constructWalls(mGame, verts, isPolywall, width);
+      Barrier::constructWalls(mGame, verts, width);
+}
+
+
+// Gets called multiple times as barriers are added
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAddPolyWalls, 
+                            (Vector<Point> verts), 
+                            (              verts), 
+                            NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
+{
+   Barrier::constructPolyWalls(mGame, verts);
 }
 
 

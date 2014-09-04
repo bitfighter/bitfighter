@@ -52,7 +52,8 @@ public:
    static Vector<Point> mRenderLineSegments;       // The clipped line segments representing this barrier
    Vector<Point> mBotZoneBufferLineSegments;       // The line segments representing a buffered barrier
 
-   static void constructWalls(Game *game, const Vector<Point> &verts, bool isPolywall, F32 width);
+   static void constructWalls    (Game *game, const Vector<Point> &verts, F32 width);
+   static void constructPolyWalls(Game *game, const Vector<Point> &verts);
 
    void renderLayer(S32 layerIndex);                                          // Renders barrier fill barrier-by-barrier
    static void renderEdges(const GameSettings *settings, S32 layerIndex);     // Renders all edges in one pass
