@@ -15,9 +15,6 @@ using namespace TNL;
 namespace Zap
 {
 
-// Statics
-bool WallSegmentManager::mBatchUpdatingGeom = false;
-
 
 // Constructor
 WallSegmentManager::WallSegmentManager()
@@ -25,6 +22,7 @@ WallSegmentManager::WallSegmentManager()
    // These deleted in the destructor
    mWallSegmentDatabase = new GridDatabase(false);      
    mWallEdgeDatabase    = new GridDatabase(false);
+   mBatchUpdatingGeom  = false;
 }
 
 
@@ -126,10 +124,28 @@ void WallSegmentManager::recomputeAllWallGeometry(GridDatabase *gameDatabase)
 }
 
 
+// Delete all segments, then find all walls and build a new set of segments
+void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *database)
+{
+   mWallSegmentDatabase->removeEverythingFromDatabase();
+
+   fillVector.clear();
+   database->findObjects((TestFunc)isWallType, fillVector);
+
+   Vector<DatabaseObject *> engrObjects;
+   database->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
+
+   // Iterate over all our wall objects (WallItems and PolyWalls when run from the editor, Barriers when run from ServerGame::loadLevel)
+   for(S32 i = 0; i < fillVector.size(); i++)
+      buildWallSegmentEdgesAndPoints(database, fillVector[i], engrObjects);
+}
+
+
 // Take geometry from all wall segments, and run them through clipper to generate new edge geometry.  Then use the results to create
 // a bunch of WallEdge objects, which will be stored in mWallEdgeDatabase for future reference.  The two key things to understand here
 // are that 1) it's all-or-nothing: all edges need to be recomputed at once; there is no way to do a partial rebuild.  And 2) the edges
 // cannot be associated with their source segment, so we'll need to rely on other tricks to find an associated wall when needed.
+// Private method
 void WallSegmentManager::rebuildEdges()
 {
    // Data flow in this method: wallSegments -> wallEdgePoints -> wallEdges
@@ -150,20 +166,25 @@ void WallSegmentManager::rebuildEdges()
 }
 
 
-// Delete all segments, then find all walls and build a new set of segments
-void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *database)
+// Rebuilds outline of selected walls
+void WallSegmentManager::rebuildSelectionOutline()
 {
-   mWallSegmentDatabase->removeEverythingFromDatabase();
+   Vector<DatabaseObject *> selectedSegments;      // Use DatabaseObject here to match the args for clipAllWallEdges()
 
-   fillVector.clear();
-   database->findObjects((TestFunc)isWallType, fillVector);
+   S32 count = mWallSegmentDatabase->getObjectCount();
 
-   Vector<DatabaseObject *> engrObjects;
-   database->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
+   for(S32 i = 0; i < count; i++)
+   {
+      WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
+      if(wallSegment->isSelected())
+         selectedSegments.push_back(wallSegment);
+   }
 
-   // Iterate over all our wall objects (WallItems and PolyWalls when run from the editor, Barriers when run from ServerGame::loadLevel)
-   for(S32 i = 0; i < fillVector.size(); i++)
-      buildWallSegmentEdgesAndPoints(database, fillVector[i], engrObjects);
+   // If no walls are selected we can skip a lot of work, but removing this check will not change the result
+   if(selectedSegments.size() == 0)          
+      mSelectedWallEdgePoints.clear();    
+   else
+      clipAllWallEdges(&selectedSegments, mSelectedWallEdgePoints);    // Populate edgePoints from segments
 }
 
 
@@ -363,28 +384,6 @@ void WallSegmentManager::setSelected(S32 owner, bool selected)
       if(wallSegment->getOwner() == owner)
          wallSegment->setSelected(selected);
    }
-}
-
-
-// Rebuilds outline of selected walls
-void WallSegmentManager::rebuildSelectionOutline()
-{
-   Vector<DatabaseObject *> selectedSegments;      // Use DatabaseObject here to match the args for clipAllWallEdges()
-
-   S32 count = mWallSegmentDatabase->getObjectCount();
-
-   for(S32 i = 0; i < count; i++)
-   {
-      WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
-      if(wallSegment->isSelected())
-         selectedSegments.push_back(wallSegment);
-   }
-
-   // If no walls are selected we can skip a lot of work, but removing this check will not change the result
-   if(selectedSegments.size() == 0)          
-      mSelectedWallEdgePoints.clear();    
-   else
-      clipAllWallEdges(&selectedSegments, mSelectedWallEdgePoints);    // Populate edgePoints from segments
 }
 
 
