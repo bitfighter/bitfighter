@@ -164,9 +164,6 @@ void Level::buildWallEdgeGeometry()
    for(S32 i = 0; i < mPolyWallList.size(); i++)
       fillVector.push_back(mPolyWallList[i]);
 
-   // Above could be replaced with this, if we implemented begin and end on Vector
-   //Vector<DatabaseObject *> result(mWallItemList.begin(), mWallItemList.end());
-
    getWallSegmentManager()->recomputeAllWallGeometry(this, fillVector);
 }
 
