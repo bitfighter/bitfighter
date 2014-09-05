@@ -404,52 +404,6 @@ StringTableEntry ServerGame::getCurrentLevelTypeName()
 }
 
 
-//bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id)
-//{
-//   if(!stricmp(argv[0], "BarrierMaker"))
-//   {
-//      // Use WallItem's ProcessGeometry method to read the points; this will let us put us all our error handling
-//      // and geom processing in our place.
-//      WallItem wallItem;
-//      if(wallItem.processArguments(argc, argv, this))    // Returns true if wall was successfully processed
-//         addWallItem(&wallItem, NULL);
-//   }
-//   else if(!stricmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
-//   {
-//      PolyWall polywall;
-//      if(polywall.processArguments(argc, argv, this))    // Returns true if wall was successfully processed
-//         addPolyWall(&polywall, NULL);
-//   }
-//
-//   else 
-//      return false;
-//
-//   return true;
-//}
-
-
-//void ServerGame::addPolyWall(BfObject *polyWall, GridDatabase *unused)
-//{
-//   Parent::addPolyWall(polyWall, getGameObjDatabase());
-//
-//   // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
-//   // is convenient to transmit to the clients
-//   //WallRec wallRec(polyWall);
-//   //getGameType()->addWall(wallRec, this);
-//}
-
-
-//void ServerGame::addWallItem(BfObject *wallItem, GridDatabase *unused)
-//{
-//   Parent::addWallItem(wallItem, getGameObjDatabase());
-//
-//   // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
-//   // is convenient to transmit to the clients
-//   //WallRec wallRec(wallItem);
-//   //getGameType()->addWall(wallRec, this);
-//}
-
-
 // Sort by order in which players should be added to teams
 // Highest ratings first -- runs on server only, so these should be FullClientInfos
 // Return 1 if a should be added before b, -1 if b should be added before a, and 0 if it doesn't matter
@@ -1017,62 +971,17 @@ bool ServerGame::loadLevel()
    const Vector<WallItem *> &walls = mLevel->getWallList();
 
    for(S32 i = 0; i < walls.size(); i++)
-   {
-      addWallItem(walls[i], NULL);     // Just does this --> Barrier::construcBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
-
-                  // Use WallItem's ProcessGeometry method to read the points; this will let us put us all our error handling
-         // and geom processing in our place.
-         //WallItem wallItem;
-         //if(wallItem.processArguments(argc, argv, this))    // Returns true if wall was successfully processed
-            //addWallItem(&wallItem, NULL);
-   }
+      addWallItem(walls[i], NULL);        // Just does this --> Barrier::construcBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
 
    const Vector<PolyWall *> &polywalls = mLevel->getPolyWallList();
 
    for(S32 i = 0; i < polywalls.size(); i++)
-   {
       addPolyWall(polywalls[i], NULL);     // Not sure we want this --> maybe just Barrier::construcBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
-
-                  // Use WallItem's ProcessGeometry method to read the points; this will let us put us all our error handling
-         // and geom processing in our place.
-         //WallItem wallItem;
-         //if(wallItem.processArguments(argc, argv, this))    // Returns true if wall was successfully processed
-         //   addWallItem(&wallItem, NULL);
-   }
 
 
    mLevel->getWallSegmentManager()->recomputeAllWallGeometry(mLevel.get());
 
    mLevel->addBots(this);
-
-//In editor:
-//   for each wall/polywall:
-//            //   wallItem->initializeEditor();        // Only runs unselectVerts
-//
-//   otherwise run addWallItem/addPolywallItem
-//
-//   for each mRobotLine:
-//      getUIManager()->readRobotLine(robotLine);
-//
-//
-//
-//computeWorldObjectExtents(); 
-//
-//Add teams:
-//         AbstractTeam *team = getNewTeam();
-//         if(team->processArguments(argc, argv))
-//            addTeam(team);
-//
-//Process team change lines
-//         S32 teamNumber = atoi(argv[1]);   // Team number to change
-//
-//         if(teamNumber >= 0 && teamNumber < getTeamCount())
-//         {
-//            AbstractTeam *team = getNewTeam();
-//            team->processArguments(argc-1, argv+1);          // skip one arg
-//            replaceTeam(team, teamNumber);
-//         }
-
 
    // Levelgens:
    // Run level's levelgen script (if any)
