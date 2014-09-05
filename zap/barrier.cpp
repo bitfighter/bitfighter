@@ -116,7 +116,7 @@ bool Barrier::collide(BfObject *otherObject)
 // Adds walls to the game database -- used when playing games, but not in the editor
 // On client, is called when a wall object is sent from the server.
 // static method
-void Barrier::constructWalls(Game *game, const Vector<Point> &verts, F32 width)
+void Barrier::construcBarriers(Game *game, const Vector<Point> &verts, F32 width)
 {
    if(verts.size() < 2)      // Enough verts?
       return;

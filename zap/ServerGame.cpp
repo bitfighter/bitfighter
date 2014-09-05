@@ -1018,7 +1018,7 @@ bool ServerGame::loadLevel()
 
    for(S32 i = 0; i < walls.size(); i++)
    {
-      addWallItem(walls[i], NULL);     // Just does this --> Barrier::constructWalls(this, *wallItem->getOutline(), false, wallItem->getWidth());
+      addWallItem(walls[i], NULL);     // Just does this --> Barrier::construcBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
 
                   // Use WallItem's ProcessGeometry method to read the points; this will let us put us all our error handling
          // and geom processing in our place.
@@ -1031,7 +1031,7 @@ bool ServerGame::loadLevel()
 
    for(S32 i = 0; i < polywalls.size(); i++)
    {
-      addPolyWall(polywalls[i], NULL);     // Not sure we want this --> maybe just Barrier::constructWalls(this, *wallItem->getOutline(), false, wallItem->getWidth());
+      addPolyWall(polywalls[i], NULL);     // Not sure we want this --> maybe just Barrier::construcBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
 
                   // Use WallItem's ProcessGeometry method to read the points; this will let us put us all our error handling
          // and geom processing in our place.

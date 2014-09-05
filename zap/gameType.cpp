@@ -2698,7 +2698,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAddWalls,
    if(!verts.size())
       mGame->deleteObjects((TestFunc)isWallType);
    else
-      Barrier::constructWalls(mGame, verts, width);
+      Barrier::construcBarriers(mGame, verts, width);
 }
 
 
