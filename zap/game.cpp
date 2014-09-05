@@ -470,7 +470,7 @@ void Game::addPolyWall(BfObject *polyWall, GridDatabase *database)
 void Game::addWallItem(WallItem *wallItem, GridDatabase *database)
 {
    // Generate a series of 2-point wall segments, which are added to the database
-   Barrier::construcBarriers(this, *wallItem->getOutline(), (F32)wallItem->getWidth());
+   Barrier::constructBarriers(this, *wallItem->getOutline(), (F32)wallItem->getWidth());
 }
 
 
