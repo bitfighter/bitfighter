@@ -532,6 +532,12 @@ F32 getStringWidth(FontContext fontContext, F32 size, const char *string)
 }
 
 
+S32 getStringWidth(S32 size, const string &str)
+{
+   return getStringWidth(size, str.c_str());
+}
+
+
 S32 getStringWidth(S32 size, const char *string)
 {
    return (S32)getStringWidth((F32)size, string);

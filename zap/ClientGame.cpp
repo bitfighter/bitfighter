@@ -1712,7 +1712,7 @@ void ClientGame::addPolyWall(BfObject *polyWall, GridDatabase *database)
 }
 
 
-// Add wall to game
+// Add wall to game -- only get here via editor plugin
 void ClientGame::addWallItem(WallItem *wallItem, GridDatabase *database)
 {
    Parent::addWallItem(wallItem, database);

@@ -190,6 +190,8 @@ void drawTime(S32 x, S32 y, S32 size, S32 timeInMs, const char *prefixString = "
 S32 getStringWidth(FontContext context, S32 size, const char *string);
 F32 getStringWidth(FontContext context, F32 size, const char *string);
 
+S32 getStringWidth(S32 size, const string &str);
+
 F32 getStringWidth(F32 size, const char *str);
 S32 getStringWidth(S32 size, const char *str);
 

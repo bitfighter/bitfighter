@@ -112,14 +112,14 @@ bool DiagnosticUserInterface::onKeyDown(InputCode inputCode)
 }
 
 
-S32 findLongestString(F32 size, const Vector<const char *> *strings)
+S32 findLongestString(F32 size, const Vector<string> &strings)
 {
    F32 maxLen = 0;
    S32 longest = 0;
 
-   for(S32 i = 0; i < strings->size(); i++)
+   for(S32 i = 0; i < strings.size(); i++)
    {
-      F32 len = getStringWidth(size, strings->get(i));
+      F32 len = getStringWidth(size, strings[i]);
       if(len > maxLen)
       {
          maxLen = len;
@@ -130,8 +130,8 @@ S32 findLongestString(F32 size, const Vector<const char *> *strings)
 }
 
 
-static Vector<const char *>names;
-static Vector<const char *>vals;
+static Vector<string>names;
+static Vector<string>vals;
 
 static S32 longestName;
 static S32 nameWidth;
@@ -143,45 +143,46 @@ static void initFoldersBlock(FolderManager *folderManager, S32 textsize)
 {
    const string levelDir = folderManager->getLevelDir();
    names.push_back("Level Dir:");
-   vals.push_back(levelDir.empty() ? "<<Unresolvable>>" : levelDir.c_str());
+   vals.push_back(levelDir.empty() ? "<<Unresolvable>>" : levelDir);
 
    names.push_back("");
    vals.push_back("");
 
    names.push_back("INI Dir:");
-   vals.push_back(folderManager->getIniDir().c_str());
-      
-   names.push_back("Log Dir:");
-   vals.push_back(folderManager->getLogDir().c_str());
-      
-   names.push_back("Lua Dir:");
-   vals.push_back(folderManager->getLuaDir().c_str());
+   vals.push_back(folderManager->getIniDir());
+                                            
+   names.push_back("Log Dir:");             
+   vals.push_back(folderManager->getLogDir());
+                                            
+   names.push_back("Lua Dir:");             
+   vals.push_back(folderManager->getLuaDir());
       
    names.push_back("Robot Dir:");
-   vals.push_back(folderManager->getRobotDir().c_str());
+   vals.push_back(folderManager->getRobotDir());
       
    names.push_back("Screenshot Dir:");
-   vals.push_back(folderManager->getScreenshotDir().c_str());
+   vals.push_back(folderManager->getScreenshotDir());
       
    names.push_back("SFX Dir:");
-   vals.push_back(folderManager->getSfxDir().c_str());
+   vals.push_back(folderManager->getSfxDir());
 
    names.push_back("Music Dir:");
-   vals.push_back(folderManager->getMusicDir().c_str());
+   vals.push_back(folderManager->getMusicDir());
 
    names.push_back("Fonts Dir:");
-   vals.push_back(folderManager->getFontsDir().c_str());
+   vals.push_back(folderManager->getFontsDir());
 
    names.push_back("");
    vals.push_back("");
 
    names.push_back("Root Data Dir:");
-   vals.push_back(folderManager->getRootDataDir() == "" ? "None specified" : folderManager->getRootDataDir().c_str());
+   vals.push_back(folderManager->getRootDataDir() == "" ? "None specified" : folderManager->getRootDataDir());
 
-   longestName = findLongestString((F32)textsize, &names);
+   longestName = findLongestString((F32)textsize, names);
+   longestVal  = findLongestString((F32)textsize, vals);
+
    nameWidth   = getStringWidth(textsize, names[longestName]);
    spaceWidth  = getStringWidth(textsize, " ");
-   longestVal  = findLongestString((F32)textsize, &vals);
 
    totLen = nameWidth + spaceWidth + getStringWidth(textsize, vals[longestVal]);
 }
@@ -196,10 +197,10 @@ static S32 showFoldersBlock(FolderManager *folderManager, F32 textsize, S32 ypos
    {
       S32 xpos = (DisplayManager::getScreenInfo()->getGameCanvasWidth() - totLen) / 2;
       glColor(Colors::cyan);
-      drawString(xpos, ypos, (S32)textsize, names[i]);
+      drawString(xpos, ypos, (S32)textsize, names[i].c_str());
       xpos += nameWidth + spaceWidth;
       glColor(Colors::white);
-      drawString(xpos, ypos, (S32)textsize, vals[i]);
+      drawString(xpos, ypos, (S32)textsize, vals[i].c_str());
 
       ypos += (S32)textsize + gap;
    }
