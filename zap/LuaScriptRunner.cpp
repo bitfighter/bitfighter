@@ -58,7 +58,7 @@ void LuaScriptRunner::clearScriptCache()
 // Constructor
 LuaScriptRunner::LuaScriptRunner()
 {
-   // These MUST be overriden in child classes
+   // These MUST be set in child classes
    mLuaGame = NULL;
    mLuaGridDatabase = NULL;
 
