@@ -77,7 +77,7 @@ protected:
 
    Game *mLuaGame;                  // Pointer to our current Game object, which could be ServerGame or
                                     // ClientGame depending on where the script is called from
-   Game *getGame() const;           // Use this to access mLuaGame
+   Game *getLuaGame() const;        // Use this to access mLuaGame
 
    GridDatabase *mLuaGridDatabase;  // Pointer to our current grid database with objects to manipulate
 

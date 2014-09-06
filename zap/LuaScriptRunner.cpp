@@ -104,7 +104,7 @@ lua_State *LuaScriptRunner::getL()
 }
 
 
-Game *LuaScriptRunner::getGame() const
+Game *LuaScriptRunner::getLuaGame() const
 {
    return mLuaGame;
 }
@@ -1147,7 +1147,7 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
       if(typenum != BotNavMeshZoneTypeNumber)
          types.push_back(typenum);
       else
-         getGame()->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector);
+         getLuaGame()->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector);
 
       lua_pop(L, 1);
    }
@@ -1237,7 +1237,7 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
    Rect searchArea = Rect(p1, p2);
 
    if(hasBotZoneType)
-      getGame()->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector, searchArea);
+      getLuaGame()->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector, searchArea);
 
    mLuaGridDatabase->findObjects(types, fillVector, searchArea);
 
@@ -1273,7 +1273,7 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "addItem");
 
-   TNLAssert(getGame() != NULL, "Game must not be NULL!");
+   TNLAssert(getLuaGame() != NULL, "Game must not be NULL!");
    TNLAssert(mLuaGridDatabase != NULL, "Grid Database must not be NULL!");
 
    // First check to see if item is a BfObject
@@ -1284,15 +1284,15 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
    {
       // Silently ignore illegal items when being run from the editor.  For the moment, if mGame is not a server, then
       // we are running from the editor.  This could conceivably change, but for the moment it seems to hold true.
-      if(getGame()->isServer() || obj->canAddToEditor())
+      if(getLuaGame()->isServer() || obj->canAddToEditor())
       {
          // Some objects require special handling
          if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
-            getGame()->addPolyWall(obj, mLuaGridDatabase);
+            getLuaGame()->addPolyWall(obj, mLuaGridDatabase);
          else if(obj->getObjectTypeNumber() == WallItemTypeNumber)
-            getGame()->addWallItem(static_cast<WallItem *>(obj), mLuaGridDatabase);
+            getLuaGame()->addWallItem(static_cast<WallItem *>(obj), mLuaGridDatabase);
          else
-            obj->addToGame(getGame(), mLuaGridDatabase);
+            obj->addToGame(getLuaGame(), mLuaGridDatabase);
       }
    }
 
@@ -1313,16 +1313,16 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
  */
 S32 LuaScriptRunner::lua_getGameInfo(lua_State *L)
 {
-   TNLAssert(getGame() != NULL, "Game must not be NULL!");
-   TNLAssert(dynamic_cast<ServerGame*>(getGame()), "Not ServerGame??");
+   TNLAssert(getLuaGame() != NULL, "Game must not be NULL!");
+   TNLAssert(dynamic_cast<ServerGame*>(getLuaGame()), "Not ServerGame??");
 
-   if(!getGame()->isServer())
+   if(!getLuaGame()->isServer())
    {
       logprintf(LogConsumer::LuaBotMessage, "'getGameInfo' can only be called in-game");
       returnNil(L);
    }
 
-   return returnGameInfo(L, static_cast<ServerGame*>(getGame()));
+   return returnGameInfo(L, static_cast<ServerGame*>(getLuaGame()));
 }
 
 
@@ -1333,9 +1333,9 @@ S32 LuaScriptRunner::lua_getGameInfo(lua_State *L)
  */
 S32 LuaScriptRunner::lua_getPlayerCount(lua_State *L)
 {
-   TNLAssert(getGame() != NULL, "Game must not be NULL!");
+   TNLAssert(getLuaGame() != NULL, "Game must not be NULL!");
 
-   return returnInt(L, getGame() ? getGame()->getPlayerCount() : 1);
+   return returnInt(L, getLuaGame() ? getLuaGame()->getPlayerCount() : 1);
 }
 
 
