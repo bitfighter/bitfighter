@@ -69,8 +69,6 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
    mInfoFlags = 0;                           // Currently used to specify test mode and debug builds
    mCurrentLevelIndex = 0;
 
-   mBotZoneDatabase = new GridDatabase();    // Deleted in destructor
-
    if(testMode)
       mInfoFlags |= TestModeFlag;
 
@@ -121,7 +119,6 @@ ServerGame::~ServerGame()
    instantiated = false;
 
    delete mGameInfo;
-   delete mBotZoneDatabase;
 
    GameManager::setHostingModePhase(GameManager::NotHosting);
 
@@ -563,7 +560,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
 #endif
 
    TNLAssert(getGameType(), "Expect to have a GameType here!");
-   getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(mBotZoneDatabase, &mAllZones,
+   getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(mLevel->getBotZoneDatabase(), mLevel->getBotZoneList(),
                                                                               getWorldExtents(), barrierList, turretList,
                                                                               forceFieldProjectorList, teleporterData, triangulate);
    // Clear team info for all clients
@@ -1783,15 +1780,15 @@ LuaGameInfo *ServerGame::getGameInfo()
 ///// 
 //BotNavMeshZone management
 
-GridDatabase *ServerGame::getBotZoneDatabase() const
+const Vector<BotNavMeshZone *> &ServerGame::getBotZoneList() const
 {
-   return mBotZoneDatabase;
+   return mLevel->getBotZoneList();
 }
 
 
-const Vector<BotNavMeshZone *> *ServerGame::getBotZones() const
+GridDatabase &ServerGame::getBotZoneDatabase() const
 {
-   return &mAllZones;
+   return mLevel->getBotZoneDatabase();
 }
 
 
@@ -1799,7 +1796,7 @@ const Vector<BotNavMeshZone *> *ServerGame::getBotZones() const
 U16 ServerGame::findZoneContaining(const Point &p) const
 {
    fillVector.clear();
-   mBotZoneDatabase->findObjects(BotNavMeshZoneTypeNumber, fillVector,
+   mLevel->getBotZoneDatabase().findObjects(BotNavMeshZoneTypeNumber, fillVector,
                                 Rect(p - Point(0.1f, 0.1f), p + Point(0.1f, 0.1f)));  // Slightly extend Rect, it can be on the edge of zone
 
    for(S32 i = 0; i < fillVector.size(); i++)

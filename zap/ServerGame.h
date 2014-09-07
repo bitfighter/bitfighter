@@ -108,9 +108,6 @@ private:
 
    LuaGameInfo *mGameInfo;
 
-   GridDatabase *mBotZoneDatabase;
-   Vector<BotNavMeshZone *> mAllZones;
-
 public:
    ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated);    // Constructor
    virtual ~ServerGame();   // Destructor
@@ -243,8 +240,9 @@ public:
 
    /////
    // BotNavMeshZone management
-   GridDatabase *getBotZoneDatabase() const;
-   const Vector<BotNavMeshZone *> *getBotZones() const;
+   const Vector<BotNavMeshZone *> &getBotZoneList() const;
+   GridDatabase &getBotZoneDatabase() const;
+
    U16 findZoneContaining(const Point &p) const;
 
    void setGameType(GameType *gameType);

@@ -106,6 +106,19 @@ void Level::onAddedToServerGame(Game *game)
 }
 
 
+GridDatabase &Level::getBotZoneDatabase()
+{
+   return mBotZoneDatabase;
+}
+
+
+Vector<BotNavMeshZone *> &Level::getBotZoneList()
+{
+   return mAllZones;
+}
+
+
+
 // Server only!
 void Level::addBots(Game *game)
 {

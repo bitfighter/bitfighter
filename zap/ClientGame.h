@@ -303,7 +303,7 @@ public:
    void setGameSuspended_FromServerMessage(bool suspend);
 
    S32 getBotCount() const;
-   GridDatabase *getBotZoneDatabase() const;
+   const GridDatabase &getBotZoneDatabase() const;
 
    void addPolyWall(BfObject *polyWall, GridDatabase *database);     // Add polyWall item to game
    void addWallItem(WallItem *wallItem, GridDatabase *database);     // Add wallItem item to game

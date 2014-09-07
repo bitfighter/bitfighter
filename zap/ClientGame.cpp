@@ -649,7 +649,7 @@ void ClientGame::showPreviousLevelName() const
 // We'll take control of level and will delete it when we're done
 void ClientGame::setLevel(Level *level)
 {
-   //mLevel = boost::shared_ptr<Level>(level);
+   mLevel = boost::shared_ptr<Level>(level);
    mLevel->onAddedToClientGame();
 }
 
@@ -1321,7 +1321,7 @@ S32 ClientGame::getBotCount() const
 }
 
 
-GridDatabase *ClientGame::getBotZoneDatabase() const
+const GridDatabase &ClientGame::getBotZoneDatabase() const
 {
    ServerGame *serverGame = getServerGame();
    TNLAssert(serverGame, "Expect a ServerGame here!");

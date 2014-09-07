@@ -28,6 +28,7 @@ class Game;
 class GameType;
 class WallItem;
 class PolyWall;
+class BotNavMeshZone;
 
 class Level : public GridDatabase
 {
@@ -52,7 +53,9 @@ private:
    Vector<WallItem *>mWallItemList;    // Need to delete items that are removed from this list!
    Vector<PolyWall *>mPolyWallList;    // And from this one too!
 
-   //Rect mWallItemExtents;
+   // Zone-related
+   GridDatabase mBotZoneDatabase;
+   Vector<BotNavMeshZone *> mAllZones;
 
    void initialize();
    void parseLevelLine(const string &line, const string &levelFileName);
@@ -92,6 +95,11 @@ public:
    F32 getLegacyGridSize() const;
    GameType *getGameType() const;
    void setGameType(GameType *gameType);
+
+   // Note that these return modifiable copies!
+   GridDatabase &getBotZoneDatabase();
+   Vector<BotNavMeshZone *> &getBotZoneList();
+
 
    bool getAddedToGame() const;
 

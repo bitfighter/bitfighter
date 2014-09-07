@@ -2722,9 +2722,9 @@ static void populateRenderZones(ClientGame *game, const Rect *extentRect = NULL)
    rawRenderObjects.clear();
 
    if(extentRect)
-      game->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects, *extentRect);
+      game->getBotZoneDatabase().findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects, *extentRect);
    else
-      game->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects);
+      game->getBotZoneDatabase().findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects);
 
    fillRenderZones();
 }

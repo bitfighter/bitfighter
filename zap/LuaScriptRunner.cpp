@@ -1147,7 +1147,7 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
       if(typenum != BotNavMeshZoneTypeNumber)
          types.push_back(typenum);
       else
-         getLuaGame()->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector);
+         getLuaGame()->getBotZoneDatabase().findObjects(BotNavMeshZoneTypeNumber, fillVector);
 
       lua_pop(L, 1);
    }
@@ -1237,7 +1237,7 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
    Rect searchArea = Rect(p1, p2);
 
    if(hasBotZoneType)
-      getLuaGame()->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector, searchArea);
+      getLuaGame()->getBotZoneDatabase().findObjects(BotNavMeshZoneTypeNumber, fillVector, searchArea);
 
    mLuaGridDatabase->findObjects(types, fillVector, searchArea);
 

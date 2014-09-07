@@ -407,7 +407,7 @@ public:
 
    string toLevelCode() const;
 
-   virtual GridDatabase *getBotZoneDatabase() const = 0;
+   virtual const GridDatabase &getBotZoneDatabase() const = 0;
 
    virtual string getPlayerName() const;
 

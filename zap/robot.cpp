@@ -604,7 +604,7 @@ U16 Robot::findClosestZone(const Point &point)
    Vector<DatabaseObject*> objects;
    Rect rect = Rect(point.x + searchRadius, point.y + searchRadius, point.x - searchRadius, point.y - searchRadius);
 
-   getGame()->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, objects, rect);
+   getGame()->getBotZoneDatabase().findObjects(BotNavMeshZoneTypeNumber, objects, rect);
 
    for(S32 i = 0; i < objects.size(); i++)
    {
@@ -626,7 +626,7 @@ U16 Robot::findClosestZone(const Point &point)
       F32 collisionTimeIgnore;
       Point surfaceNormalIgnore;
 
-      DatabaseObject* object = getGame()->getBotZoneDatabase()->findObjectLOS(BotNavMeshZoneTypeNumber,
+      DatabaseObject* object = getGame()->getBotZoneDatabase().findObjectLOS(BotNavMeshZoneTypeNumber,
             ActualState, point, extentsCenter, collisionTimeIgnore, surfaceNormalIgnore);
 
       BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(object);
@@ -865,7 +865,7 @@ S32 Robot::lua_getWaypoint(lua_State *L)
 
       if(!canSeePoint(target, true))           // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
       {
-         BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(getGame()->getBotZoneDatabase()->getObjectByIndex(targetZone));
+         BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(getGame()->getBotZoneDatabase().getObjectByIndex(targetZone));
 
          p = zone->getCenter();
          flightPlan.push_back(p);
@@ -883,12 +883,12 @@ S32 Robot::lua_getWaypoint(lua_State *L)
    // check cache for path first
    pair<S32,S32> pathIndex = pair<S32,S32>(currentZone, targetZone);
 
-   const Vector<BotNavMeshZone *> *zones = static_cast<ServerGame *>(getGame())->getBotZones();  // Our pre-cached list of nav zones
+   const Vector<BotNavMeshZone *> &zones = static_cast<ServerGame *>(getGame())->getBotZoneList();  // Our pre-cached list of nav zones
 
    if(getGame()->getGameType()->cachedBotFlightPlans.find(pathIndex) == getGame()->getGameType()->cachedBotFlightPlans.end())
    {
       // Not found so calculate flight plan
-      flightPlan = AStar::findPath(zones, currentZone, targetZone, target);
+      flightPlan = AStar::findPath(&zones, currentZone, targetZone, target);
 
       // Add to cache
       getGame()->getGameType()->cachedBotFlightPlans[pathIndex] = flightPlan;
@@ -1371,7 +1371,7 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
       if(typenum != BotNavMeshZoneTypeNumber)
          types.push_back(typenum);
       else
-         getGame()->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector, queryRect);
+         getGame()->getBotZoneDatabase().findObjects(BotNavMeshZoneTypeNumber, fillVector, queryRect);
 
       lua_pop(L, 1);
    }
