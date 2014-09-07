@@ -1147,7 +1147,7 @@ void Game::updateClientChangedName(ClientInfo *clientInfo, const StringTableEntr
 
 
 // Static method - only used for "illegal" activities
-const Level *Game::getServerGameObjectDatabase()
+const Level *Game::getServerLevel()
 {
    return GameManager::getServerGame()->getGameObjDatabase();
 }

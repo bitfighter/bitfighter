@@ -2607,7 +2607,7 @@ void GameUserInterface::renderObjectIds() const
    if(getGame()->isTestServer())
       return;
 
-   const Vector<DatabaseObject *> *objects = Game::getServerGameObjectDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objects = Game::getServerLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objects->size(); i++)
    {

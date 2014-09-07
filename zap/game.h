@@ -411,7 +411,7 @@ public:
 
    virtual string getPlayerName() const;
 
-   static const Level *getServerGameObjectDatabase();
+   static const Level *getServerLevel();
 
    // Passthroughs to GameType
    void onFlagMounted(S32 teamIndex);

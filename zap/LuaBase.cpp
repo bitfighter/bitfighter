@@ -305,7 +305,7 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
                                                    "If you want to add an item to the first team, specify team 1.  Remember "
                                                    "that Lua uses 1-based arrays.");
             i--;    // Subtract 1 because Lua indices start with 1, and we need to convert to C++ 0-based index
-            return ((i >= 0 && i < Game::getServerGameObjectDatabase()->getTeamCount()) || 
+            return ((i >= 0 && i < Game::getServerLevel()->getTeamCount()) || 
                      (i + 1) == TEAM_NEUTRAL || (i + 1) == TEAM_HOSTILE);
          }
 
