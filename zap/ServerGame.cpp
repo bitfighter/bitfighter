@@ -506,8 +506,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
             // To avoid crashing...
             if(!getGameType())
             {
-               GameType *gameType = new GameType(getGameObjDatabase());
-               gameType->addToGame(this, getGameObjDatabase());
+               GameType *gameType = new GameType(getLevel());
+               gameType->addToGame(this, getLevel());
             }
             mLevel->makeSureTeamCountIsNotZero();
 
@@ -541,13 +541,13 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    // Get our parameters together
    Vector<DatabaseObject *> barrierList;
-   getGameObjDatabase()->findObjects((TestFunc)isWallType, barrierList, *getWorldExtents());
+   getLevel()->findObjects((TestFunc)isWallType, barrierList, *getWorldExtents());
 
    Vector<DatabaseObject *> turretList;
-   getGameObjDatabase()->findObjects(TurretTypeNumber, turretList, *getWorldExtents());
+   getLevel()->findObjects(TurretTypeNumber, turretList, *getWorldExtents());
 
    Vector<DatabaseObject *> forceFieldProjectorList;
-   getGameObjDatabase()->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList, *getWorldExtents());
+   getLevel()->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList, *getWorldExtents());
 
    bool triangulate;
 

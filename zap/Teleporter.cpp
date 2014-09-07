@@ -514,7 +514,7 @@ void Teleporter::onDestroyed()
 {
    mHasExploded = true;
 
-   releaseResource(getOrigin(), getGame()->getGameObjDatabase());
+   releaseResource(getOrigin(), getGame()->getLevel());
 
    deleteObject(TeleporterExplosionTime + 500);  // Guarantee our explosion effect will complete
    setMaskBits(DestroyedMask);

@@ -1072,7 +1072,7 @@ void ClientGame::onGameUIActivated()
    mGameSuspended = false;
    resetCommandersMap();       // Start game in regular mode
 
-   //getGameObjDatabase()->removeEverythingFromDatabase();
+   //getLevel()->removeEverythingFromDatabase();
    mClientInfo->setSpawnDelayed(false);
 
    setPreviousLevelName("");

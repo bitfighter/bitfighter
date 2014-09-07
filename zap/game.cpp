@@ -364,7 +364,7 @@ GameNetInterface *Game::getNetInterface()
 }
 
 
-Level *Game::getGameObjDatabase()
+Level *Game::getLevel()
 {
    return mLevel.get();
 }
@@ -1149,7 +1149,7 @@ void Game::updateClientChangedName(ClientInfo *clientInfo, const StringTableEntr
 // Static method - only used for "illegal" activities
 const Level *Game::getServerLevel()
 {
-   return GameManager::getServerGame()->getGameObjDatabase();
+   return GameManager::getServerGame()->getLevel();
 }
 
 

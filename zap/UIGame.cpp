@@ -2799,7 +2799,7 @@ void GameUserInterface::renderGameNormal() const
 
    // Fill rawRenderObjects with anything within extentRect (our visibility extent)
    rawRenderObjects.clear();
-   getGame()->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, rawRenderObjects, extentRect);    
+   getGame()->getLevel()->findObjects((TestFunc)isAnyObjectType, rawRenderObjects, extentRect);    
 
    // Cast objects in rawRenderObjects and put them in renderObjects
    renderObjects.clear();
@@ -2906,7 +2906,7 @@ void GameUserInterface::renderInlineHelpItemOutlines(S32 playerTeam, F32 alpha) 
       }
 
       fillVector.clear();
-      getGame()->getGameObjDatabase()->findObjects(itemTypes, fillVector, *getGame()->getWorldExtents());
+      getGame()->getLevel()->findObjects(itemTypes, fillVector, *getGame()->getWorldExtents());
       polygons.clear();
       for(S32 i = 0; i < fillVector.size(); i++)
          if(static_cast<BfObject *>(fillVector[i])->shouldRender())
@@ -2978,9 +2978,9 @@ void GameUserInterface::renderGameCommander() const
    rawRenderObjects.clear();
 
    if(ship && ship->hasModule(ModuleSensor))
-      getGame()->getGameObjDatabase()->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
+      getGame()->getLevel()->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
    else
-      getGame()->getGameObjDatabase()->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
+      getGame()->getLevel()->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
 
    renderObjects.clear();
 
@@ -3026,7 +3026,7 @@ void GameUserInterface::renderGameCommander() const
             }
          }
 
-         const Vector<DatabaseObject *> *spyBugs = getGame()->getGameObjDatabase()->findObjects_fast(SpyBugTypeNumber);
+         const Vector<DatabaseObject *> *spyBugs = getGame()->getLevel()->findObjects_fast(SpyBugTypeNumber);
 
          // Render spy bug visibility range second, so ranges appear above ship scanner range
          for(S32 i = 0; i < spyBugs->size(); i++)

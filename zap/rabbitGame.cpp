@@ -254,7 +254,7 @@ void RabbitGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
       return;
 
    // Server only from here on
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
 
    for(S32 i = 0; i < flags->size(); i++)
    {

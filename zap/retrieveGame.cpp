@@ -51,7 +51,7 @@ void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
    StringTableEntry r = takeString;
 
-   if(getGame()->getGameObjDatabase()->getObjectCount(FlagTypeNumber) == 1)
+   if(getGame()->getLevel()->getObjectCount(FlagTypeNumber) == 1)
       r = oneFlagTakeString;
 
    ClientInfo *clientInfo = theShip->getClientInfo();
@@ -114,7 +114,7 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
       return;
 
    // See if this zone already has a flag in it.  If so, do nothing.
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
 
    for(S32 i = 0; i < flags->size(); i++)
       if(static_cast<FlagItem *>(flags->get(i))->getZone() == z)
@@ -139,12 +139,12 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
       Vector<StringTableEntry> e;
       e.push_back(s->getClientInfo()->getName());
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, 
-                       (getGame()->getGameObjDatabase()->getObjectCount(FlagTypeNumber) == 1) ? oneFlagCapString : capString, e);
+                       (getGame()->getLevel()->getObjectCount(FlagTypeNumber) == 1) ? oneFlagCapString : capString, e);
 
       // Drop the flag into the zone
       mountedFlag->dismount(DISMOUNT_SILENT);
 
-      const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+      const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
       S32 flagIndex = flags->getIndex(mountedFlag);
 
       static_cast<FlagItem *>(flags->get(flagIndex))->setZone(z);
@@ -220,7 +220,7 @@ void RetrieveGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo 
 
    S32 uTeam = scopeObject->getTeam();
 
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
    for(S32 i = 0; i < flags->size(); i++)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
@@ -255,8 +255,8 @@ void RetrieveGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight)
    bool uFlag = false;   // What does this mean?
    S32 team = ship->getTeam();
 
-   const Vector<DatabaseObject *> *goalZones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *goalZones = getGame()->getLevel()->findObjects_fast(GoalZoneTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
 
    for(S32 i = 0; i < flags->size(); i++)
    {

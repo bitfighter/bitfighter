@@ -25,7 +25,7 @@ LuaLevelGenerator::LuaLevelGenerator(Game *game, const string &scriptName, const
    TNLAssert(scriptName == "" || fileExists(scriptName), "Files should be checked before we get here -- something has gone wrong!");
 
    if(gridDatabase == NULL)
-      gridDatabase = game->getGameObjDatabase();
+      gridDatabase = game->getLevel();
 
    TNLAssert(gridDatabase, "Need a valid GridDatabase here!");
 

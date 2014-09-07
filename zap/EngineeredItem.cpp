@@ -399,7 +399,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
    engineerable->computeExtent();      // Recomputes extents
 
    deployedObject->setOwner(clientInfo);
-   deployedObject->addToGame(ship->getGame(), ship->getGame()->getGameObjDatabase());
+   deployedObject->addToGame(ship->getGame(), ship->getGame()->getLevel());
 
    MountableItem *resource = ship->dismountFirst(ResourceItemTypeNumber);
    ship->resetFastRecharge();
@@ -741,7 +741,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
       onDestroyed();
 
       if(mResource.isValid())
-         releaseResource(getPos() + mAnchorNormal * mResource->getRadius(), getGame()->getGameObjDatabase());
+         releaseResource(getPos() + mAnchorNormal * mResource->getRadius(), getGame()->getLevel());
 
       deleteObject(500);
    }
@@ -820,8 +820,8 @@ void EngineeredItem::setPos(lua_State *L, S32 stackIndex)
    GridDatabase *database = NULL;
    if(getDatabase())       
       database = getDatabase();
-   else if(getGame() && getGame()->getGameObjDatabase())
-      database = getGame()->getGameObjDatabase();
+   else if(getGame() && getGame()->getLevel())
+      database = getGame()->getLevel();
 
    if(database)
       findMountPoint(database, getPos());
@@ -1306,7 +1306,7 @@ S32 EngineeredItem::lua_setGeom(lua_State *L)
 {
    S32 retVal = Parent::lua_setGeom(L);
 
-   findMountPoint(getGame()->getGameObjDatabase(), getPos());
+   findMountPoint(getGame()->getLevel(), getPos());
 
    return retVal;
 }
@@ -1342,7 +1342,7 @@ ForceFieldProjector::ForceFieldProjector(lua_State *L) : Parent(TEAM_NEUTRAL, Po
          setTeam(L, 2);
       }
 
-      findMountPoint(getGame()->getGameObjDatabase(), getPos());
+      findMountPoint(getGame()->getLevel(), getPos());
    }
 
    initialize();
@@ -1481,7 +1481,7 @@ void ForceFieldProjector::onEnabled()
       ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
 
       mField = new ForceField(getTeam(), start, end);
-      mField->addToGame(getGame(), getGame()->getGameObjDatabase());
+      mField->addToGame(getGame(), getGame()->getLevel());
    }
 }
 
@@ -1644,7 +1644,7 @@ S32 ForceFieldProjector::lua_setTeam(lua_State *L)
       ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
 
       mField = new ForceField(getTeam(), start, end);
-      mField->addToGame(getGame(), getGame()->getGameObjDatabase());
+      mField->addToGame(getGame(), getGame()->getLevel());
    }
 
    return 0;

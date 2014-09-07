@@ -296,7 +296,7 @@ void Robot::onAddedToGame(Game *game)
    }
 
    mLuaGame = game;
-   mLuaGridDatabase = game->getGameObjDatabase();
+   mLuaGridDatabase = game->getLevel();
 
    if(!start())
    {
@@ -440,7 +440,7 @@ bool Robot::processArguments(const Vector<string> &args, Game *game, string &err
    //
    // Our 'Game' pointer in LuaScriptRunner is the same as the one in this game object
    mLuaGame = game;
-   mLuaGridDatabase = game->getGameObjDatabase();
+   mLuaGridDatabase = game->getLevel();
 
    return true;
 }
@@ -495,7 +495,7 @@ bool Robot::canSeePoint(Point point, bool wallOnly)
    Rect queryRect(thisPoints);
 
    fillVector.clear();
-   mGame->getGameObjDatabase()->findObjects(wallOnly ? (TestFunc)isWallType : (TestFunc)isCollideableType, fillVector, queryRect);
+   mGame->getLevel()->findObjects(wallOnly ? (TestFunc)isWallType : (TestFunc)isCollideableType, fillVector, queryRect);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -611,7 +611,7 @@ U16 Robot::findClosestZone(const Point &point)
       BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(objects[i]);
       Point center = zone->getCenter();
 
-      if(getGame()->getGameObjDatabase()->pointCanSeePoint(center, point))  // This is an expensive test
+      if(getGame()->getLevel()->pointCanSeePoint(center, point))  // This is an expensive test
       {
          closestZone = zone->getZoneId();
          break;
@@ -945,9 +945,9 @@ S32 Robot::lua_findClosestEnemy(lua_State *L)
    fillVector.clear();
 
    if(useRange)
-      getGame()->getGameObjDatabase()->findObjects((TestFunc)isShipType, fillVector, queryRect);   
+      getGame()->getLevel()->findObjects((TestFunc)isShipType, fillVector, queryRect);   
    else
-      getGame()->getGameObjDatabase()->findObjects((TestFunc)isShipType, fillVector);   
+      getGame()->getLevel()->findObjects((TestFunc)isShipType, fillVector);   
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -1377,7 +1377,7 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
    }
 
    // Get other objects on screen-visible area only
-   getGame()->getGameObjDatabase()->findObjects(types, fillVector, queryRect);
+   getGame()->getLevel()->findObjects(types, fillVector, queryRect);
 
 
    // We are expecting a table to be on top of the stack when we get here.  If not, we can add one.

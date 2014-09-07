@@ -168,10 +168,10 @@ bool GameType::onGhostAdd(GhostConnection *theConnection)
    Game *game = ((GameConnection *) theConnection)->getClientGame();
    TNLAssert(game && !game->isServer(), "Should only be client here!");
 
-   //setLevel(game->getGameObjDatabase());
-   game->getGameObjDatabase()->setGameType(this);
+   //setLevel(game->getLevel());
+   game->getLevel()->setGameType(this);
 
-   addToGame(game, game->getGameObjDatabase());
+   addToGame(game, game->getLevel());
    game->addInlineHelpItem(getGameStartInlineHelpItem());
    return true;
 #else
@@ -1420,7 +1420,7 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
 
          // Unless we're actually spawning onto a loadout zone
          Vector<DatabaseObject *> loadoutZones;
-         getGame()->getGameObjDatabase()->findObjects(LoadoutZoneTypeNumber, loadoutZones);
+         getGame()->getLevel()->findObjects(LoadoutZoneTypeNumber, loadoutZones);
          LoadoutZone *zone;
          for(S32 i = 0; i < loadoutZones.size(); i++) 
          {
@@ -1455,7 +1455,7 @@ Vector<AbstractSpawn *> GameType::getSpawnPoints(TypeNumber typeNumber, S32 team
 
    Vector<AbstractSpawn *> spawnPoints;
 
-   const Vector<DatabaseObject *> *objects = getGame()->getGameObjDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objects = getGame()->getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objects->size(); i++)
    {
@@ -2355,7 +2355,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    clientGame->onPlayerJoined(clientInfo, isMyClient, playAlert, showMessage);
 
 
-   const Vector<DatabaseObject*> &database = *(getGame()->getGameObjDatabase()->findObjects_fast());
+   const Vector<DatabaseObject*> &database = *(getGame()->getLevel()->findObjects_fast());
 
    for(S32 i = database.size()-1; i >= 0; i--)
    {
@@ -3831,7 +3831,7 @@ void GameType::updateTeamFlagPossessionStatus(S32 teamIndex)
 {
    getGame()->setTeamHasFlag(teamIndex, false);
 
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
 
    for(S32 i = 0; i < flags->size(); i++)
    {
@@ -3986,7 +3986,7 @@ S32 GameType::getLeadingTeam() const
 
 S32 GameType::getFlagCount()
 {
-   return getGame()->getGameObjDatabase()->getObjectCount(FlagTypeNumber);
+   return getGame()->getLevel()->getObjectCount(FlagTypeNumber);
 }
 
 

@@ -257,7 +257,7 @@ void FlagItem::removeOccupiedSpawnPoints(Vector<AbstractSpawn *> &spawnPoints) /
 {
    bool isTeamGame = getGame()->isTeamGame();
 
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
 
    // Now remove the occupied spots from our list of potential spawns
    for(S32 i = 0; i < flags->size(); i++)

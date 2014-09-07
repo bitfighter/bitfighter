@@ -166,7 +166,7 @@ void HTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    e.push_back(clientInfo->getName());
    e.push_back(getGame()->getTeamName(teamIndex));
 
-   if(getGame()->getGameObjDatabase()->getObjectCount(FlagTypeNumber) == 1)
+   if(getGame()->getLevel()->getObjectCount(FlagTypeNumber) == 1)
       e.push_back(theString);
    else
       e.push_back(aString);
@@ -196,7 +196,7 @@ void HTFGameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountM
             Vector<StringTableEntry> e;
             e.push_back(ship->getClientInfo()->getName());
 
-            if(getGame()->getGameObjDatabase()->getObjectCount(FlagTypeNumber) == 1)
+            if(getGame()->getLevel()->getObjectCount(FlagTypeNumber) == 1)
                e.push_back(theString);
             else
                e.push_back(aString);
@@ -215,7 +215,7 @@ void HTFGameType::shipTouchZone(Ship *ship, GoalZone *zone)
       return;
 
    // Does it already have a flag in it?
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
    for(S32 i = 0; i < flags->size(); i++)
       if(static_cast<FlagItem *>(flags->get(i))->getZone() == zone)
          return;
@@ -261,7 +261,7 @@ void HTFGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
       return;
 
    // Server only, from here on out
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
 
    for(S32 i = 0; i < flags->size(); i++)
    {
@@ -285,7 +285,7 @@ void HTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clie
    S32 uTeam = scopeObject->getTeam();
 
 
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
 
    for(S32 i = 0; i < flags->size(); i++)
    {
@@ -319,8 +319,8 @@ void HTFGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) cons
    bool uFlag = false;
    S32 team = ship->getTeam();
 
-   const Vector<DatabaseObject *> *goalZones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
-   const Vector<DatabaseObject *> *flags     = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *goalZones = getGame()->getLevel()->findObjects_fast(GoalZoneTypeNumber);
+   const Vector<DatabaseObject *> *flags     = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
 
    for(S32 i = 0; i < flags->size(); i++)
    {

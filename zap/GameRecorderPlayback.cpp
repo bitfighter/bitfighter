@@ -46,7 +46,7 @@ static S32 QSORT_CALLBACK alphaNumberSort(string *a, string *b)
 
 static void idleObjects(ClientGame *game, U32 timeDelta)
 {
-   const Vector<DatabaseObject *> *gameObjects = game->getGameObjDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *gameObjects = game->getLevel()->findObjects_fast();
 
    // Visit each game object, handling moves and running its idle method
    for(S32 i = gameObjects->size() - 1; i >= 0; i--)
@@ -70,7 +70,7 @@ static void idleObjects(ClientGame *game, U32 timeDelta)
 
 static void resetRenderState(ClientGame *game)
 {
-   const Vector<DatabaseObject *> *gameObjects = game->getGameObjDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *gameObjects = game->getLevel()->findObjects_fast();
 
    for(S32 i = gameObjects->size() - 1; i >= 0; i--)
    {

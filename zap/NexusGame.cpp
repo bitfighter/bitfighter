@@ -435,7 +435,7 @@ void NexusGameType::releaseFlag(const Point &pos, const Point &startVel, S32 cou
    vel += startVel;
 
    NexusFlagItem *newFlag = new NexusFlagItem(pos, vel, count, true);
-   newFlag->addToGame(game, game->getGameObjDatabase());
+   newFlag->addToGame(game, game->getLevel());
 }
 
 
@@ -795,7 +795,7 @@ bool NexusGameType::spawnShip(ClientInfo *clientInfo)
       return false;
 
    NexusFlagItem *newFlag = new NexusFlagItem(ship->getActualPos());
-   newFlag->addToGame(getGame(), getGame()->getGameObjDatabase());
+   newFlag->addToGame(getGame(), getGame()->getLevel());
    newFlag->mountToShip(ship);    // mountToShip() can handle NULL
    newFlag->changeFlagCount(0);
 

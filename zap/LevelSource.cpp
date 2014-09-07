@@ -437,7 +437,7 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
 //            if(!getGameType())
 //            {
 //               GameType *gameType = new GameType();
-//               gameType->addToGame(this, getGameObjDatabase());
+//               gameType->addToGame(this, getLevel());
 //            }
 //            mLevel->makeSureTeamCountIsNotZero();
 //
@@ -454,7 +454,7 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
 //
 //   ////// This block could easily be moved off somewhere else   
 //   fillVector.clear();
-//   getGameObjDatabase()->findObjects(TeleporterTypeNumber, fillVector);
+//   getLevel()->findObjects(TeleporterTypeNumber, fillVector);
 //
 //   Vector<pair<Point, const Vector<Point> *> > teleporterData(fillVector.size());
 //   pair<Point, const Vector<Point> *> teldat;
@@ -471,13 +471,13 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
 //
 //   // Get our parameters together
 //   Vector<DatabaseObject *> barrierList;
-//   getGameObjDatabase()->findObjects((TestFunc)isWallType, barrierList, *getWorldExtents());
+//   getLevel()->findObjects((TestFunc)isWallType, barrierList, *getWorldExtents());
 //
 //   Vector<DatabaseObject *> turretList;
-//   getGameObjDatabase()->findObjects(TurretTypeNumber, turretList, *getWorldExtents());
+//   getLevel()->findObjects(TurretTypeNumber, turretList, *getWorldExtents());
 //
 //   Vector<DatabaseObject *> forceFieldProjectorList;
-//   getGameObjDatabase()->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList, *getWorldExtents());
+//   getLevel()->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList, *getWorldExtents());
 //
 //   bool triangulate;
 //

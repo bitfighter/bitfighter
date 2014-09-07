@@ -496,7 +496,7 @@ void AsteroidSpawn::spawn()
 
    asteroid->setPosAng(getPos(), ang);
 
-   asteroid->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
+   asteroid->addToGame(game, game->getLevel());              // And add it to the list of game objects
    s2cSetTimeUntilSpawn(mTimer.getCurrent());
 }
 

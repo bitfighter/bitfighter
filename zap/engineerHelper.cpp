@@ -175,7 +175,7 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
 
          // Check deployment status on client; will be checked again on server,
          // but server will only handle likely valid placements
-         if(deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, engineerItemInfo[mSelectedIndex].itemIndex))
+         if(deployer.canCreateObjectAtLocation(getGame()->getLevel(), ship, engineerItemInfo[mSelectedIndex].itemIndex))
          {
             // Send command to server to deploy
             getGame()->getConnectionToServer()->c2sEngineerDeployObject(engineerItemInfo[mSelectedIndex].itemIndex);
@@ -230,7 +230,7 @@ void EngineerHelper::renderDeploymentMarker(const Ship *ship) const
          EngineerModuleDeployer::findDeployPoint(ship, item, deployPosition, deployNormal))
    {
       EngineerModuleDeployer deployer;
-      Level *level = getGame()->getGameObjDatabase();
+      Level *level = getGame()->getLevel();
       bool canDeploy = deployer.canCreateObjectAtLocation(level, ship, item);
 
       switch(engineerItemInfo[mSelectedIndex].itemIndex)

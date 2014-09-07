@@ -130,7 +130,7 @@ void CTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clie
    // Scan all the flags and mark any that are at home or parked in a zone as being in scope; for those that are mounted,
    // if the mount is on our team, mark both the mount and the flag as being in scope
 
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
 
    for(S32 i = 0; i < flags->size(); i++)
    {
@@ -164,7 +164,7 @@ void CTFGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) cons
    if(!ship)
       return;
 
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
 
    for(S32 i = 0; i < flags->size(); i++)
    {

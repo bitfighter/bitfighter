@@ -209,7 +209,7 @@ void SoccerGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) c
 
    S32 team = ship->getTeam();
 
-   const Vector<DatabaseObject *> *zones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
+   const Vector<DatabaseObject *> *zones = getGame()->getLevel()->findObjects_fast(GoalZoneTypeNumber);
 
    for(S32 i = 0; i < zones->size(); i++)
    {
@@ -414,7 +414,7 @@ void SoccerBallItem::onAddedToGame(Game *game)
    if(mLuaBall)
    {
       FlagSpawn *spawn = new FlagSpawn(mInitialPos, 0);
-      spawn->addToGame(mGame, mGame->getGameObjDatabase());
+      spawn->addToGame(mGame, mGame->getLevel());
    }
 }
 

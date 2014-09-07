@@ -349,7 +349,7 @@ public:
    void processAnonymousMasterConnection();
 
    GameNetInterface *getNetInterface();
-   Level *getGameObjDatabase();
+   Level *getLevel();
 
    const Vector<SafePtr<BfObject> > &getScopeAlwaysList();
 

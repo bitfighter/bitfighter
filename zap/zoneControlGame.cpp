@@ -98,7 +98,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    static const S32 MAX_ZONES_TO_NOTIFY = 50;   // Don't display messages when too many zones -- the flood of messages will get annoying!
    const S32 oldTeam = z->getTeam();
 
-   const Vector<DatabaseObject *> *zones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
+   const Vector<DatabaseObject *> *zones = getGame()->getLevel()->findObjects_fast(GoalZoneTypeNumber);
    S32 zoneCount = zones->size();
 
    if(oldTeam >= 0)                             // Zone is being captured from another team
@@ -209,7 +209,7 @@ void ZoneControlGameType::performProxyScopeQuery(BfObject *scopeObject, ClientIn
 
    S32 uTeam = scopeObject->getTeam();
 
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
    for(S32 i = 0; i < flags->size(); i++)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
@@ -242,7 +242,7 @@ void ZoneControlGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeig
 
    bool localClientHasFlag = (ship->getFlagCount() != 0);
 
-   const Vector<DatabaseObject *> *zones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
+   const Vector<DatabaseObject *> *zones = getGame()->getLevel()->findObjects_fast(GoalZoneTypeNumber);
    const S32 zoneCount = zones->size();
 
    if(localClientHasFlag)
@@ -260,7 +260,7 @@ void ZoneControlGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeig
    }
    else
    {
-      const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+      const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
 
       // Show all flags that can be picked up or is on the ship
       for(S32 i = 0; i < flags->size(); i++)
@@ -333,7 +333,7 @@ void ZoneControlGameType::majorScoringEventOcurred(S32 team)
 {
    // Find all zones...
    fillVector.clear();
-   const Vector<DatabaseObject *> *goalZones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
+   const Vector<DatabaseObject *> *goalZones = getGame()->getLevel()->findObjects_fast(GoalZoneTypeNumber);
 
    // ...and make sure they're not flashing...
    for(S32 i = 0; i < goalZones->size(); i++)
@@ -407,7 +407,7 @@ bool ZoneControlGameType::onGameOver()
    if(!Parent::onGameOver())
       return false;
 
-   const S32 zoneCount = getGame()->getGameObjDatabase()->getObjectCount(GoalZoneTypeNumber);
+   const S32 zoneCount = getGame()->getLevel()->getObjectCount(GoalZoneTypeNumber);
 
    // Let's see if anyone got the Zone Controller badge
    if(mZcBadgeAchievable &&                                       // Badge is still achievable (hasn't been forbidden by rules in shipTouchZone() )

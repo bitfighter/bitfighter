@@ -135,7 +135,7 @@ string RobotManager::addBot(const Vector<string> &args, ClientInfo::ClientClass 
    if(teamIndex != NO_TEAM)
       robot->setTeam(teamIndex);
 
-   robot->addToGame(mGame, mGame->getGameObjDatabase());
+   robot->addToGame(mGame, mGame->getLevel());
    static_cast<FullClientInfo *>(robot->getClientInfo())->setClientClass(clientClass);
 
    return "";

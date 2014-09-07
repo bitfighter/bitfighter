@@ -1519,7 +1519,7 @@ void Asteroid::damageObject(DamageInfo *damageInfo)
 
    newItem->setPosAng(getActualPos(), ang2);
 
-   newItem->addToGame(getGame(), getGame()->getGameObjDatabase());    // And add it to the list of game objects
+   newItem->addToGame(getGame(), getGame()->getLevel());    // And add it to the list of game objects
 }
 
 

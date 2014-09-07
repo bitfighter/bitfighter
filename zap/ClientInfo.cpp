@@ -407,7 +407,7 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
    EngineerModuleDeployer deployer;
 
    // Check if we can create the engineer object; if not, return false
-   if(!deployer.canCreateObjectAtLocation(game->getGameObjDatabase(), ship, objectType))
+   if(!deployer.canCreateObjectAtLocation(game->getLevel(), ship, objectType))
    {
       if(!isRobot())
          getConnection()->s2cDisplayErrorMessage(deployer.getErrorMessage().c_str());

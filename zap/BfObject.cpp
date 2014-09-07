@@ -1309,7 +1309,7 @@ bool BfObject::onGhostAdd(GhostConnection *theConnection)
 #endif
 
    // for performance, add to GridDatabase after update, to avoid slowdown from adding to database with zero points or (0,0) then moving
-   addToGame(gc->getClientGame(), gc->getClientGame()->getGameObjDatabase());
+   addToGame(gc->getClientGame(), gc->getClientGame()->getLevel());
 #endif
    return true;
 }

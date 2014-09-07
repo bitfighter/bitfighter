@@ -135,7 +135,7 @@ void Barrier::constructBarriers(Game *game, const Vector<Point> &verts, F32 widt
       pts.push_back(barrierEnds[i+1]);
 
       Barrier *b = new Barrier(pts, width, false);    // false = not solid
-      b->addToGame(game, game->getGameObjDatabase());
+      b->addToGame(game, game->getLevel());
    }
 }
 
@@ -149,7 +149,7 @@ void Barrier::constructPolyWalls(Game *game, const Vector<Point> &verts)
       return;
   
    Barrier *b = new Barrier(verts, 1, true);
-   b->addToGame(game, game->getGameObjDatabase());
+   b->addToGame(game, game->getLevel());
 }
 
 
@@ -211,7 +211,7 @@ void Barrier::prepareRenderingGeometry(Game *game)    // static
 
    Vector<DatabaseObject *> barrierList;
 
-   game->getGameObjDatabase()->findObjects((TestFunc)isWallType, barrierList);
+   game->getLevel()->findObjects((TestFunc)isWallType, barrierList);
 
    clipRenderLinesToPoly(barrierList, mRenderLineSegments);
 }
