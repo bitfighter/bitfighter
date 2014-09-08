@@ -33,7 +33,6 @@ LuaLevelGenerator::LuaLevelGenerator(Game *game, const string &scriptName, const
    mScriptArgs = scriptArgs;
    mScriptType = ScriptTypeLevelgen;
 
-   mLevel = level;
    mLuaGridDatabase = level;
    mGame = game;
    mLuaGame = game;  // Set our parent member, too

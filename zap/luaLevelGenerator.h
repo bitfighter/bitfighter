@@ -22,7 +22,6 @@ class LuaLevelGenerator: public LuaScriptRunner
 
 private:
    Game *mGame;
-   Level *mLevel;
 
 protected:
    void killScript();
