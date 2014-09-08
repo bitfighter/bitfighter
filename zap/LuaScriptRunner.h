@@ -75,9 +75,9 @@ protected:
       ScriptTypeInvalid,
    };
 
-   Game *mLuaGame;                  // Pointer to our current Game object, which could be ServerGame or
-                                    // ClientGame depending on where the script is called from
-   Game *getLuaGame() const;        // Use this to access mLuaGame
+   Game *mLuaGame;               // Pointer to our current Game object, which could be ServerGame or
+                                 // ClientGame depending on where the script is called from
+   Game *getLuaGame() const;     // Use this to access mLuaGame
 
    Level *mLevel;                // Pointer to our current level
 
