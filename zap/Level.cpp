@@ -60,7 +60,7 @@ void Level::initialize()
    mVersion = 0; 
    mLegacyGridSize = 1; 
    mDatabaseId = 0; 
-   mAddedToGame = false;
+   mGame = NULL;
    mTeamInfos.reset(new Vector<TeamInfo>);      // mTeamInfos is a shared_ptr, which will handle cleanup
    mLevelDatabaseId = LevelDatabase::NOT_IN_DATABASE;
 }
@@ -84,6 +84,16 @@ string Level::getHash() const
 }
 
 
+// TODO: Ideally, we'd like to be able to merge onAddedToClientGame and onAddedToServerGame...
+
+// Gets run when this level is associated with a game.  From this point forward, the Level object
+// will be tainted and polluted.  Don't reuse -- discard when done.
+void Level::onAddedToClientGame(Game *game)
+{
+   mGame = game;
+}
+
+
 // Gets run when this level is associated with a game.  From this point forward, the Level object
 // will be tainted and polluted.  Don't reuse -- discard when done.
 // Server only!
@@ -93,6 +103,7 @@ void Level::onAddedToServerGame(Game *game)
    TNLAssert(game->isServer(),    "Server only!");
    TNLAssert(mGameType.isValid(), "Server should have GameType by now!");
 
+   mGame = game;
    mGameType->addToGame(game);
 
    for(S32 i = 0; i < mTeamInfos->size(); i++)
@@ -101,8 +112,6 @@ void Level::onAddedToServerGame(Game *game)
       team->set(mTeamInfos->get(i));
       mTeamManager.addTeam(team);
    }
-
-   mAddedToGame = true;
 }
 
 
@@ -118,7 +127,6 @@ Vector<BotNavMeshZone *> &Level::getBotZoneList()
 }
 
 
-
 // Server only!
 void Level::addBots(Game *game)
 {
@@ -130,12 +138,6 @@ void Level::addBots(Game *game)
       else
          delete robot;
    }
-}
-
-
-void Level::onAddedToClientGame()
-{
-   mAddedToGame = true;
 }
 
 
@@ -394,13 +396,13 @@ F32 Level::getLegacyGridSize() const
 
 bool Level::getAddedToGame() const
 {
-   return mAddedToGame;
+   return (mGame != NULL);
 }
 
 
 S32 Level::getTeamCount() const
 {
-   if(mAddedToGame)
+   if(mGame)
       return mTeamManager.getTeamCount();
    
    return mTeamInfos->size();
@@ -430,7 +432,7 @@ const Color &Level::getTeamColor(S32 index) const
    if(index == TEAM_HOSTILE)
       return Colors::HostileTeamColor;
 
-   if(mAddedToGame)
+   if(mGame)
       return mTeamManager.getTeamColor(index);
    else
       return mTeamInfos->get(index).getColor();
@@ -439,7 +441,7 @@ const Color &Level::getTeamColor(S32 index) const
 
 StringTableEntry Level::getTeamName(S32 index) const
 {
-   if(mAddedToGame)
+   if(mGame)
       return mTeamManager.getTeamName(index);
    else
       return mTeamInfos->get(index).getName();
@@ -448,7 +450,7 @@ StringTableEntry Level::getTeamName(S32 index) const
 
 void Level::removeTeam(S32 teamIndex)
 { 
-   if(mAddedToGame)
+   if(mGame)
       mTeamManager.removeTeam(teamIndex);
    else
       mTeamInfos->erase(teamIndex);
@@ -457,7 +459,7 @@ void Level::removeTeam(S32 teamIndex)
 
 void Level::addTeam(AbstractTeam *team)
 { 
-   TNLAssert(mAddedToGame, "Expected to have been added to a game by now!");
+   TNLAssert(mGame, "Expected to have been added to a game by now!");
    mTeamManager.addTeam(team);
 }
 
@@ -470,7 +472,7 @@ void Level::addTeam(const TeamInfo &teamInfo)
 
 void Level::addTeam(AbstractTeam *team, S32 index)
 { 
-   TNLAssert(mAddedToGame, "Expected to have been added to a game by now!");
+   TNLAssert(mGame, "Expected to have been added to a game by now!");
    mTeamManager.addTeam(team, index);
 }
 
@@ -501,14 +503,14 @@ boost::shared_ptr<Vector<TeamInfo> > Level::getTeamInfosPtr() const
 
 void Level::setTeamHasFlag(S32 teamIndex, bool hasFlag)
 {
-   TNLAssert(mAddedToGame, "Expected to have been added to a game by now!");
+   TNLAssert(mGame, "Expected to have been added to a game by now!");
    mTeamManager.setTeamHasFlag(teamIndex, hasFlag);
 }
 
 
 bool Level::getTeamHasFlag(S32 teamIndex) const 
 { 
-   TNLAssert(mAddedToGame, "Expected to have been added to a game by now!");
+   TNLAssert(mGame, "Expected to have been added to a game by now!");
    return mTeamManager.getTeamHasFlag(teamIndex); 
 }
 
@@ -516,14 +518,14 @@ bool Level::getTeamHasFlag(S32 teamIndex) const
 // Perhaps unused
 void Level::replaceTeam(AbstractTeam *team, S32 index)
 { 
-   TNLAssert(mAddedToGame, "Expected to have been added to a game by now!");
+   TNLAssert(mGame, "Expected to have been added to a game by now!");
    mTeamManager.replaceTeam(team, index);
 }
 
 
 void Level::clearTeams()
 { 
-   if(mAddedToGame)
+   if(mGame)
       return mTeamManager.clearTeams();
   else
       mTeamInfos->clear();
@@ -538,7 +540,7 @@ const TeamInfo &Level::getTeamInfo(S32 index) const
 
 string Level::getTeamLevelCode(S32 index) const
 {
-   if(mAddedToGame)
+   if(mGame)
       return mTeamManager.getTeam(index)->toLevelCode();
    else
       return mTeamInfos->get(index).toLevelCode();
@@ -706,7 +708,7 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
       }
 
       wallItem->setUserAssignedId(id, false);
-      mWallItemList.push_back(wallItem);
+      addWallItem(wallItem);
    }
 
    // BarrierMakerS is the old name for PolyWall
@@ -728,35 +730,7 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
       }
 
       polywall->setUserAssignedId(id, false);
-      mPolyWallList.push_back(polywall);
-
-
-      //if(mPolyWallList.size() == 0)
-      //   mWallItemExtents = wallItem->getExtent();
-      //else
-      //   mWallItemExtents.unionRect(wallItem->getExtent());
-
-
-      // ADD POLYWALL TO DATABASE!!
-
-
-                  ////Server code
-                  //PolyWall polywall;
-                  //if(polywall.processArguments(argc - firstArg, argv + firstArg, this))    // Returns true if wall was successfully processed
-                  //   addPolyWall(&polywall, NULL);
-
-
-                  //// Client Code
-                  //PolyWall *polywall = new PolyWall();  
-
-                  //polywall->initializeEditor();     // Only runs unselectVerts
-
-                  //polywall->processArguments(argc - firstArg, argv + firstArg, this);
-         
-                  //if(polywall->getVertCount() >= 2)
-                  //   addPolyWall(polywall, database);
-                  //else
-                  //   delete polywall;
+      addPolyWall(polywall);
    }
 
    else if(stricmp(argv[0], "Robot") == 0)
@@ -816,10 +790,44 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
 
       object->setUserAssignedId(id, false);
       object->setExtent(object->calcExtents());    // This looks ugly
-      this->addToDatabase(object);
+      addToDatabase(object);
    }
 
    return true;
+}
+
+
+void Level::addWallItem(WallItem *wallItem, Game *game)
+{
+   mWallItemList.push_back(wallItem);
+
+   if(!game)
+      game = mGame;
+
+   // Normally we won't yet be in a game; but if we are, then we have a little more work to do
+   if(game)
+   {
+      game->addWallItem(wallItem, this);
+      wallItem->addToDatabase(this);
+      wallItem->onGeomChanged();            
+   }
+}
+
+
+void Level::addPolyWall(PolyWall *polywall, Game *game)
+{
+   mPolyWallList.push_back(polywall);
+
+   if(!game)
+      game = mGame;
+
+   // Normally we won't yet be in a game; but if we are, then we have a little more work to do
+   if(game)
+   {
+      game->addPolyWall(polywall, this);
+      polywall->onGeomChanged();            
+   }
+
 }
 
 
@@ -921,7 +929,7 @@ bool Level::processLevelParam(S32 argc, const char **argv)
 
 S32 Level::getBotCount() const
 {
-   TNLAssert(mAddedToGame, "Expected to have been added to a game by now!");
+   TNLAssert(mGame, "Expected to have been added to a game by now!");
    return mTeamManager.getBotCount();
 }
 

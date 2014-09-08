@@ -1289,9 +1289,9 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
       {
          // Some objects require special handling
          if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
-            getLuaGame()->addPolyWall(obj, mLevel);
+            mLevel->addPolyWall(static_cast<PolyWall *>(obj), mLuaGame);
          else if(obj->getObjectTypeNumber() == WallItemTypeNumber)
-            getLuaGame()->addWallItem(static_cast<WallItem *>(obj), mLevel);
+            mLevel->addWallItem(static_cast<WallItem *>(obj), mLuaGame);
          else
             obj->addToGame(getLuaGame(), mLevel);
       }

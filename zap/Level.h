@@ -40,7 +40,8 @@ private:
    U32 mDatabaseId;
    RefPtr<GameType> mGameType;
    string mLevelHash;
-   bool mAddedToGame;      // False until onAddedToGame() is called, then True
+
+   Game *mGame;             // Game we've been added to -- NULL until onAddedToGame() is called
 
    U32 mLevelDatabaseId;
 
@@ -72,7 +73,7 @@ public:
    static const U32 CurrentLevelFormat = 2;
 
    void onAddedToServerGame(Game *game);
-   void onAddedToClientGame();
+   void onAddedToClientGame(Game *game);
 
    void loadLevelFromString(const string &contents, const string &filename = "");
    bool loadLevelFromFile(const string &filename);
@@ -87,6 +88,8 @@ public:
    U32 getLevelDatabaseId() const;
    void setLevelDatabaseId(U32 id);
 
+   void addWallItem(WallItem *wall, Game *game = NULL);
+   void addPolyWall(PolyWall *polywall, Game *game = NULL);
 
    const Vector<WallItem *> &getWallList() const;
    const Vector<PolyWall *> &getPolyWallList() const;

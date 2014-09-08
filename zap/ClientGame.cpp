@@ -71,7 +71,6 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIM
    // Kind of silly that we need this, but ClientGame is always idling, and idling causes extents to be checked,
    // and for that we need a non-NULL level.  Should be refactored away, I think.
    mLevel = boost::shared_ptr<Level>(new Level());
-   //mLevel->onAddedToClientGame();
 
    // TODO: Make this a ref instead of a pointer
    mClientInfo = new FullClientInfo(this, NULL, mSettings->getPlayerName(), ClientInfo::ClassHuman);  // Deleted in destructor
@@ -650,7 +649,7 @@ void ClientGame::showPreviousLevelName() const
 void ClientGame::setLevel(Level *level)
 {
    mLevel = boost::shared_ptr<Level>(level);
-   mLevel->onAddedToClientGame();
+   mLevel->onAddedToClientGame(this);
 }
 
 
