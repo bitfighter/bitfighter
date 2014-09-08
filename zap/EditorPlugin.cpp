@@ -54,7 +54,7 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<boost::shared_ptr<Me
    return false;
 
 #else
-   // We'll load the functin first to see if it exists, then throw it away.  It will be loaded again when we attempt
+   // We'll load the function first to see if it exists, then throw it away.  It will be loaded again when we attempt
    // to run it.  This is inefficient; however, it makes our architecture cleaner, and it is in a higly performance
    // insensitive area, so it will probably be ok.
 
