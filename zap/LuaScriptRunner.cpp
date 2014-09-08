@@ -13,6 +13,7 @@
 #include "ServerGame.h"
 #include "GeomUtils.h"
 #include "barrier.h"
+#include "Level.h"
 
 #include "GameTypesEnum.h"
 #include "TeamConstants.h"

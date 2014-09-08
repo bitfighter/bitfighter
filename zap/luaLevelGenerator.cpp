@@ -20,21 +20,21 @@ namespace Zap
 LuaLevelGenerator::LuaLevelGenerator() { TNLAssert(false, "Don't use this constructor!"); }
 
 // Standard constructor
-LuaLevelGenerator::LuaLevelGenerator(Game *game, const string &scriptName, const Vector<string> &scriptArgs, GridDatabase *gridDatabase)
+LuaLevelGenerator::LuaLevelGenerator(Game *game, const string &scriptName, const Vector<string> &scriptArgs, Level *level)
 {
    TNLAssert(scriptName == "" || fileExists(scriptName), "Files should be checked before we get here -- something has gone wrong!");
 
-   if(gridDatabase == NULL)
-      gridDatabase = game->getLevel();
+   if(level == NULL)
+      level = game->getLevel();
 
-   TNLAssert(gridDatabase, "Need a valid GridDatabase here!");
+   TNLAssert(level, "Need a valid Level here!");
 
    mScriptName = scriptName;
    mScriptArgs = scriptArgs;
    mScriptType = ScriptTypeLevelgen;
 
-   mGridDatabase = gridDatabase;
-   mLuaGridDatabase = gridDatabase;
+   mLevel = level;
+   mLuaGridDatabase = level;
    mGame = game;
    mLuaGame = game;  // Set our parent member, too
 

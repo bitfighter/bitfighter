@@ -29,7 +29,7 @@ namespace Zap
 class BfObject;
 class DatabaseObject;
 class Game;
-class GridDatabase;
+class Level;
 class LuaPlayerInfo;
 class Rect;
 class Ship;
@@ -79,7 +79,7 @@ protected:
                                     // ClientGame depending on where the script is called from
    Game *getLuaGame() const;        // Use this to access mLuaGame
 
-   GridDatabase *mLuaGridDatabase;  // Pointer to our current grid database with objects to manipulate
+   Level *mLuaGridDatabase;      // Pointer to our current grid database with objects to manipulate
 
    static lua_State *L;          // Main Lua state variable
    string mScriptName;           // Fully qualified script name, with path and everything

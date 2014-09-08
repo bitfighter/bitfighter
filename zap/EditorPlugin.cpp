@@ -20,14 +20,14 @@ EditorPlugin::EditorPlugin() { TNLAssert(false, "Don't use this constructor!"); 
 
 // Constructor
 EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, 
-                           GridDatabase *gridDatabase, Game *game)
+                           Level *level, Game *game)
 {
    mScriptName = scriptName;
    mScriptArgs = scriptArgs;
    mScriptType = ScriptTypeEditorPlugin;
 
-   mGridDatabase = gridDatabase;
-   mLuaGridDatabase = gridDatabase;
+   mGridDatabase = level;
+   mLuaGridDatabase = level;
 
    mGame = game;
    mLuaGame = game;
