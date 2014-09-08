@@ -61,7 +61,7 @@ LuaScriptRunner::LuaScriptRunner()
 {
    // These MUST be set in child classes
    mLuaGame = NULL;
-   mLuaGridDatabase = NULL;
+   mLevel = NULL;
 
    static U32 mNextScriptId = 0;
 
@@ -1039,9 +1039,9 @@ S32 LuaScriptRunner::lua_pointCanSeePoint(lua_State *L)
    Point p1 = getPointOrXY(L, 1);
    Point p2 = getPointOrXY(L, 2);
 
-   TNLAssert(mLuaGridDatabase != NULL, "Grid Database must not be NULL!");
+   TNLAssert(mLevel != NULL, "Grid Database must not be NULL!");
 
-   return returnBool(L, mLuaGridDatabase->pointCanSeePoint(p1, p2));
+   return returnBool(L, mLevel->pointCanSeePoint(p1, p2));
 }
 
 
@@ -1067,9 +1067,9 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "findObjectById");
 
-   TNLAssert(mLuaGridDatabase != NULL, "Grid Database must not be NULL!");
+   TNLAssert(mLevel != NULL, "Grid Database must not be NULL!");
 
-   return findObjectById(L, mLuaGridDatabase->findObjects_fast());
+   return findObjectById(L, mLevel->findObjects_fast());
 }
 
 
@@ -1127,7 +1127,7 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "findAllObjects");
 
-   TNLAssert(mLuaGridDatabase != NULL, "Grid Database must not be NULL!");
+   TNLAssert(mLevel != NULL, "Grid Database must not be NULL!");
 
    fillVector.clear();
    static Vector<U8> types;
@@ -1156,10 +1156,10 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
    const Vector<DatabaseObject *> * results;
 
    if(types.size() == 0)
-      results = mLuaGridDatabase->findObjects_fast();
+      results = mLevel->findObjects_fast();
    else
    {
-      mLuaGridDatabase->findObjects(types, fillVector);
+      mLevel->findObjects(types, fillVector);
       results = &fillVector;
    }
 
@@ -1206,7 +1206,7 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "findAllObjectsInArea");
 
-   TNLAssert(mLuaGridDatabase != NULL, "Grid Database must not be NULL!");
+   TNLAssert(mLevel != NULL, "Grid Database must not be NULL!");
 
    static Vector<U8> types;
 
@@ -1240,7 +1240,7 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
    if(hasBotZoneType)
       getLuaGame()->getBotZoneDatabase().findObjects(BotNavMeshZoneTypeNumber, fillVector, searchArea);
 
-   mLuaGridDatabase->findObjects(types, fillVector, searchArea);
+   mLevel->findObjects(types, fillVector, searchArea);
 
    // This will guarantee a table at the top of the stack
    checkFillTable(L, fillVector.size());
@@ -1275,7 +1275,7 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
    checkArgList(L, functionArgs, luaClassName, "addItem");
 
    TNLAssert(getLuaGame() != NULL, "Game must not be NULL!");
-   TNLAssert(mLuaGridDatabase != NULL, "Grid Database must not be NULL!");
+   TNLAssert(mLevel != NULL, "Grid Database must not be NULL!");
 
    // First check to see if item is a BfObject
    BfObject *obj = luaW_check<BfObject>(L, 1);
@@ -1289,11 +1289,11 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
       {
          // Some objects require special handling
          if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
-            getLuaGame()->addPolyWall(obj, mLuaGridDatabase);
+            getLuaGame()->addPolyWall(obj, mLevel);
          else if(obj->getObjectTypeNumber() == WallItemTypeNumber)
-            getLuaGame()->addWallItem(static_cast<WallItem *>(obj), mLuaGridDatabase);
+            getLuaGame()->addWallItem(static_cast<WallItem *>(obj), mLevel);
          else
-            obj->addToGame(getLuaGame(), mLuaGridDatabase);
+            obj->addToGame(getLuaGame(), mLevel);
       }
    }
 

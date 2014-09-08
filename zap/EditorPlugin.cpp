@@ -27,7 +27,7 @@ EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scrip
    mScriptType = ScriptTypeEditorPlugin;
 
    mGridDatabase = level;
-   mLuaGridDatabase = level;
+   mLevel = level;
 
    mGame = game;
    mLuaGame = game;

@@ -296,7 +296,7 @@ void Robot::onAddedToGame(Game *game)
    }
 
    mLuaGame = game;
-   mLuaGridDatabase = game->getLevel();
+   mLevel = game->getLevel();
 
    if(!start())
    {
@@ -440,7 +440,7 @@ bool Robot::processArguments(const Vector<string> &args, Game *game, string &err
    //
    // Our 'Game' pointer in LuaScriptRunner is the same as the one in this game object
    mLuaGame = game;
-   mLuaGridDatabase = game->getLevel();
+   mLevel = game->getLevel();
 
    return true;
 }

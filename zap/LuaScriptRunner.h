@@ -79,7 +79,7 @@ protected:
                                     // ClientGame depending on where the script is called from
    Game *getLuaGame() const;        // Use this to access mLuaGame
 
-   Level *mLuaGridDatabase;      // Pointer to our current grid database with objects to manipulate
+   Level *mLevel;                // Pointer to our current level
 
    static lua_State *L;          // Main Lua state variable
    string mScriptName;           // Fully qualified script name, with path and everything
