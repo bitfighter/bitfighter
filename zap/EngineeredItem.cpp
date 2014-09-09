@@ -1463,7 +1463,7 @@ void ForceFieldProjector::setEndSegment(WallSegment *endSegment)
 
 
 // Forcefield projector has been turned on some how; either at the beginning of a level, or via repairing, or deploying. 
-// Runs on both client and server
+// Called on both client and server, does nothing on client.
 void ForceFieldProjector::onEnabled()
 {
    // Database can be NULL here if adding a forcefield from the editor:  The editor will
@@ -1561,7 +1561,7 @@ void ForceFieldProjector::findForceFieldEnd()
    if(ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallSegmentDatabase(), 
                                     start, mAnchorNormal, forceFieldEnd, &collObj))
    {
-      setEndSegment(dynamic_cast<WallSegment *>(collObj));
+      setEndSegment(static_cast<WallSegment *>(collObj));
    }
    else
       setEndSegment(NULL);
