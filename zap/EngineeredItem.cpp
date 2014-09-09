@@ -1752,6 +1752,9 @@ void ForceField::idle(BfObject::IdleCallPath path)
 }
 
 
+// TODO: I don't think this is right -- we are sending important state information about the FF using
+// unverified packets that, if lost, will not be retransmitted.  I think it better to send this info either
+// as part of the ghosting process or as an s2c.  Thoughts?
 U32 ForceField::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    if(stream->writeFlag(updateMask & InitialMask))
