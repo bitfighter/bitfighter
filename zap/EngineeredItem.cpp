@@ -1478,7 +1478,7 @@ void ForceFieldProjector::onEnabled()
       Point end;
       DatabaseObject *collObj;
 
-      ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
+      ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallSegmentDatabase(), start, mAnchorNormal, end, &collObj);
 
       mField = new ForceField(getTeam(), start, end);
       mField->addToGame(getGame(), getGame()->getLevel());
