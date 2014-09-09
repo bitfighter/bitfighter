@@ -621,7 +621,7 @@ void EngineeredItem::setMountSegment(WallSegment *mountSeg)
 }
 
 
-WallSegment *EngineeredItem::getEndSegment()
+const WallSegment *EngineeredItem::getEndSegment() const
 {
    return NULL;
 }
@@ -1361,6 +1361,9 @@ ForceFieldProjector::ForceFieldProjector(S32 team, const Point &anchorPoint, con
 ForceFieldProjector::~ForceFieldProjector()
 {
    LUAW_DESTRUCTOR_CLEANUP;
+
+   if(mNeedToCleanUpField)
+      delete mField;
 }
 
 
@@ -1369,6 +1372,8 @@ void ForceFieldProjector::initialize()
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ForceFieldProjectorTypeNumber;
    onGeomChanged();     // Can't be placed on parent, as parent constructor must initalized first
+
+   mNeedToCleanUpField = false;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -1439,7 +1444,7 @@ Point ForceFieldProjector::getForceFieldStartPoint(const Point &anchor, const Po
 }
 
 
-void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &end)
+void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &end) const
 {
    Point pos = getPos();
 
@@ -1450,15 +1455,16 @@ void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &en
 }
 
 
-WallSegment *ForceFieldProjector::getEndSegment()
+const WallSegment *ForceFieldProjector::getEndSegment() const
 {
-   return mForceFieldEndSegment;
+   return mField ? mField->getEndSegment() : NULL;
 }
 
 
 void ForceFieldProjector::setEndSegment(WallSegment *endSegment)
 {
-   mForceFieldEndSegment = endSegment;
+   TNLAssert(mField, "Expected to have an associated ForceField here!");
+   mField->setEndSegment(endSegment);
 }
 
 
@@ -1490,6 +1496,20 @@ const Vector<Point> *ForceFieldProjector::getCollisionPoly() const
 {
    TNLAssert(mCollisionPolyPoints.size() != 0, "mCollisionPolyPoints.size() shouldn't be zero");
    return &mCollisionPolyPoints;
+}
+
+
+void ForceFieldProjector::createCaptiveForceField()
+{
+   Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
+   Point end;
+   DatabaseObject *collObj;
+
+   ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
+
+   TNLAssert(!mField, "Better clean up mField!");
+   mField = new ForceField(getTeam(), start, end);    // Not added to a database, so needs to be cleaned up by us
+   mNeedToCleanUpField = true;
 }
 
 
@@ -1528,7 +1548,9 @@ void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCorn
       Point forceFieldStart = getForceFieldStartPoint(getPos(), mAnchorNormal, scaleFact);
 
       renderForceFieldProjector(&mCollisionPolyPoints, getPos(), color, true, mHealRate);
-      renderForceField(forceFieldStart, forceFieldEnd, color, true, scaleFact);
+      //renderForceField(forceFieldStart, mField->getVert(1), color, true, scaleFact);
+      if(mField)
+         mField->render(color);
    }
    else
       renderDock(color);
@@ -1550,29 +1572,29 @@ bool ForceFieldProjector::canBeNeutral() { return true; }
 // Determine on which segment forcefield lands -- only used in the editor, wraps ForceField::findForceFieldEnd()
 void ForceFieldProjector::findForceFieldEnd()
 {
+   if(!mField)
+      return;
+
    // Load the corner points of a maximum-length forcefield into geom
    DatabaseObject *collObj;
 
    F32 scale = 1;
    
    Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
+   Point end;
 
    // Pass in database containing WallSegments, returns object in collObj
-   if(ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallSegmentDatabase(), 
-                                    start, mAnchorNormal, forceFieldEnd, &collObj))
-   {
-      setEndSegment(static_cast<WallSegment *>(collObj));
-   }
-   else
-      setEndSegment(NULL);
-
-   setExtent(Rect(ForceField::computeGeom(start, forceFieldEnd, scale)));
+   ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallSegmentDatabase(), start, mAnchorNormal, end, &collObj);
+   setEndSegment(static_cast<WallSegment *>(collObj));
+   mField->setStartAndEndPoints(start, end);
+   
+   setExtent(Rect(ForceField::computeGeom(start, end, scale)));
 }
 
 
 void ForceFieldProjector::onGeomChanged()
 {
-   if(mSnapped)
+   if(mSnapped && mField)
       findForceFieldEnd();
 
    Parent::onGeomChanged();
@@ -1662,6 +1684,8 @@ ForceField::ForceField(S32 team, Point start, Point end)
    mStart = start;
    mEnd = end;
 
+   mEndSegment = NULL;     // Will be set elsewhere if it's needed
+
    mOutline = computeGeom(mStart, mEnd);
 
    Rect extent(mStart, mEnd);
@@ -1672,6 +1696,7 @@ ForceField::ForceField(S32 team, Point start, Point end)
    mObjectTypeNumber = ForceFieldTypeNumber;
    mNetFlags.set(Ghostable);
 }
+
 
 // Destructor
 ForceField::~ForceField()
@@ -1722,6 +1747,25 @@ bool ForceField::intersects(ForceField *forceField)
 const Vector<Point> *ForceField::getOutline() const
 {
    return &mOutline;
+}
+
+
+const WallSegment *ForceField::getEndSegment() const
+{
+   return mEndSegment;
+}
+
+
+void ForceField::setEndSegment(WallSegment *endSegment)
+{
+   mEndSegment = endSegment;
+}
+
+
+void ForceField::setStartAndEndPoints(const Point &start, const Point &end)
+{
+   mStart = start;
+   mEnd = end;
 }
 
 
@@ -1844,7 +1888,13 @@ const Vector<Point> *ForceField::getCollisionPoly() const
 
 void ForceField::render() const
 {
-   renderForceField(mStart, mEnd, getColor(), mFieldUp);
+   render(getColor());
+}
+
+
+void ForceField::render(const Color &color) const
+{
+   renderForceField(mStart, mEnd, color, mFieldUp);
 }
 
 
@@ -1854,7 +1904,7 @@ S32 ForceField::getRenderSortValue()
 }
 
 
-void ForceField::getForceFieldStartAndEndPoints(Point &start, Point &end)
+void ForceField::getForceFieldStartAndEndPoints(Point &start, Point &end) const
 {
    start = mStart;
    end = mEnd;

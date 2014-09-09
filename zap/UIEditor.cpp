@@ -572,6 +572,12 @@ void EditorUserInterface::loadLevel()
 
    mLoadTarget = level;
 
+   // Make sure all our ForceFieldProjectors have dummy forcefields for rendering purposes
+   fillVector.clear();
+   level->findObjects(ForceFieldProjectorTypeNumber, fillVector);
+   for(S32 i = 0; i < fillVector.size(); i++)
+      static_cast<ForceFieldProjector *>(fillVector[i])->createCaptiveForceField();
+
    TNLAssert(mLevel->getGameType(), "Level should have GameType!");
    TNLAssert(mLevel->getTeamCount() > 0, "Level should have at least one team!");
 

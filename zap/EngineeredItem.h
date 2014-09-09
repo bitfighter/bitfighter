@@ -122,7 +122,7 @@ public:
    void setMountSegment(WallSegment *mountSeg);
 
    // These methods are overriden in ForceFieldProjector
-   virtual WallSegment *getEndSegment();
+   virtual const WallSegment *getEndSegment() const;
    virtual void setEndSegment(WallSegment *endSegment);
 
    //// Is item sufficiently snapped?  
@@ -167,6 +167,7 @@ class ForceField : public BfObject
 
 private:
    Point mStart, mEnd;
+   WallSegment *mEndSegment;     // Used in editor, generally NULL otherwise
    Vector<Point> mOutline;    
 
    Timer mDownTimer;
@@ -193,6 +194,9 @@ public:
    void onAddedToGame(Game *theGame);
    void idle(BfObject::IdleCallPath path);
 
+   const WallSegment *getEndSegment() const;
+   void setEndSegment(WallSegment *endSegment);
+   void setStartAndEndPoints(const Point &start, const Point &end);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -206,9 +210,10 @@ public:
                                  Point &end, DatabaseObject **collObj);
 
    void render() const;
+   void render(const Color &color) const;
    S32 getRenderSortValue();
 
-   void getForceFieldStartAndEndPoints(Point &start, Point &end);
+   void getForceFieldStartAndEndPoints(Point &start, Point &end) const;
 
    TNL_DECLARE_CLASS(ForceField);
 };
@@ -223,14 +228,13 @@ class ForceFieldProjector : public EngineeredItem
 
 private:
    SafePtr<ForceField> mField;
-   WallSegment *mForceFieldEndSegment;
-   Point forceFieldEnd;
 
    void initialize();
 
    Vector<Point> getObjectGeometry(const Point &anchor, const Point &normal) const;  
 
    F32 getSelectionOffsetMagnitude();
+   bool mNeedToCleanUpField;
 
 public:
    static const S32 defaultRespawnTime = 0;
@@ -242,14 +246,16 @@ public:
    ForceFieldProjector *clone() const;
    
    const Vector<Point> *getCollisionPoly() const;
+
+   void createCaptiveForceField();
    
    static Vector<Point> getForceFieldProjectorGeometry(const Point &anchor, const Point &normal);
    static Point getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact = 1);
 
    // Get info about the forcfield that might be projected from this projector
-   void getForceFieldStartAndEndPoints(Point &start, Point &end);
+   void getForceFieldStartAndEndPoints(Point &start, Point &end) const;
 
-   WallSegment *getEndSegment();
+   const WallSegment *getEndSegment() const;
    void setEndSegment(WallSegment *endSegment);
 
    void onAddedToGame(Game *theGame);
