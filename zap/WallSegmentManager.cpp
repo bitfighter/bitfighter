@@ -139,7 +139,7 @@ void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *databas
    mWallSegmentDatabase->removeEverythingFromDatabase();
 
    Vector<DatabaseObject *> engrObjects;
-   database->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
+   //database->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
 
    // Iterate over all our wall objects (WallItems and PolyWalls when run from the editor, Barriers when run from ServerGame::loadLevel)
    for(S32 i = 0; i < walls.size(); i++)
@@ -302,10 +302,13 @@ void WallSegmentManager::findEngineeredObjectsMountedOnWall(const BfObject *wall
 // Used above and from instructions -- static method
 void WallSegmentManager::clipAllWallEdges(const Vector<DatabaseObject *> *wallSegments, Vector<Point> &wallEdges)
 {
+   S32 count = wallSegments->size();
+
+   if(count == 0)
+      return;
+
    Vector<const Vector<Point> *> inputPolygons;
    Vector<Vector<Point> > solution;
-
-   S32 count = wallSegments->size();
 
    for(S32 i = 0; i < count; i++)
    {
@@ -340,7 +343,7 @@ void WallSegmentManager::updateAllMountedItems(GridDatabase *database)
 void WallSegmentManager::computeWallSegmentIntersections(GridDatabase *gameObjDatabase, BfObject *item)
 {
    Vector<DatabaseObject *> engrObjects;
-   gameObjDatabase->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
+   //gameObjDatabase->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
 
    buildWallSegmentEdgesAndPoints(gameObjDatabase, item, engrObjects);
 }
