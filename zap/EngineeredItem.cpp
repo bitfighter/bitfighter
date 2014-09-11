@@ -1472,13 +1472,17 @@ void ForceFieldProjector::setEndSegment(WallSegment *endSegment)
 // Called on both client and server, does nothing on client.
 void ForceFieldProjector::onEnabled()
 {
+   // Server only -- nothing to do on client!
+   if(!isGhost())
+      return;
+
    // Database can be NULL here if adding a forcefield from the editor:  The editor will
    // add a new game object *without* adding it to a grid database in order to optimize
    // adding large groups of objects with copy/paste/undo/redo
    if(!getDatabase())
       return;
 
-   if(!isGhost() && mField.isNull())  // server only, add mField only when we don't have any
+   if(mField.isNull())     // Add mField only when we don't have any
    {
       Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
       Point end;
