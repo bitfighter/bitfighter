@@ -1503,6 +1503,7 @@ const Vector<Point> *ForceFieldProjector::getCollisionPoly() const
 }
 
 
+// Create a dummy ForceField object to help illustrate placement of ForceFieldProjectors in the editor
 void ForceFieldProjector::createCaptiveForceField()
 {
    Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
