@@ -116,12 +116,11 @@ S32 BfFont::getStashFontId()
 
 
 static FontId currentFontId;
-static bool mUsingExternalFonts = true;
 
 static BfFont *fontList[FontCount] = {NULL};
 
 sth_stash *FontManager::mStash = NULL;
-
+bool FontManager::mUsingExternalFonts = true;
 
 FontManager::FontManager()
 {
@@ -145,9 +144,6 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 
    mUsingExternalFonts = useExternalFonts;
 
-   TNLAssert(mStash == NULL, "This should be NULL, or else we'll have a memory leak!");
-   mStash = sth_create(512, 512);
-
    // Our stroke fonts
    fontList[FontRoman]               = new BfFont(&fgStrokeRoman);
    fontList[FontOrbitronLightStroke] = new BfFont(&fgStrokeOrbitronLight);
@@ -155,6 +151,9 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 
    if(mUsingExternalFonts)
    {
+      TNLAssert(mStash == NULL, "This should be NULL, or else we'll have a memory leak!");
+      mStash = sth_create(512, 512);
+
       TNLAssert(settings, "Settings can't be NULL if we are using external fonts!");
 
       // Our TTF fonts
@@ -165,10 +164,10 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
       fontList[FontPlay]           = new BfFont("Play-Regular-hinting.ttf", settings);
       fontList[FontPlayBold]       = new BfFont("Play-Bold.ttf",       settings);
       fontList[FontModernVision]   = new BfFont("Modern-Vision.ttf",   settings);
-   }
 
-   // set texture blending function
-   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      // set texture blending function
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   }
 }
 
 
@@ -180,8 +179,11 @@ void FontManager::cleanup()
       fontList[i] = NULL;
    }
 
-   sth_delete(mStash);
-   mStash = NULL;
+   if(mUsingExternalFonts)
+   {
+      sth_delete(mStash);
+      mStash = NULL;
+   }
 }
 
 
