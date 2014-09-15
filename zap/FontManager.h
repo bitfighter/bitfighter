@@ -33,6 +33,7 @@ class FontManager
 
 private:
    static sth_stash *mStash;
+   static bool mUsingExternalFonts;
 
    static BfFont *getFont(FontId currentFontId);
 
