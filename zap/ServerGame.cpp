@@ -951,20 +951,8 @@ bool ServerGame::loadLevel()
 
    mLevel->onAddedToServerGame(this);     // Gets the TeamManager up and running and populated, adds bots
 
-   const Vector<DatabaseObject *> objects = *mLevel->findObjects_fast();
-   for(S32 i = 0; i < objects.size(); i++)
-   {
-      BfObject *object = static_cast<BfObject *>(objects[i]);
 
-      // Mark the item as being a ghost (client copy of a server object) so that the object will not trigger server-side tests
-      // The only time this code is run on the client is when loading into the editor.
-      if(!isServer())
-         object->markAsGhost();
-
-      object->addToGame(this, NULL);
-   }
-
-
+   // Add walls first, so engineered items will have something to snap to
    const Vector<WallItem *> &walls = mLevel->getWallList();
 
    for(S32 i = 0; i < walls.size(); i++)
@@ -977,6 +965,25 @@ bool ServerGame::loadLevel()
 
 
    mLevel->getWallSegmentManager()->recomputeAllWallGeometry(mLevel.get());
+
+
+
+   const Vector<DatabaseObject *> objects = *mLevel->findObjects_fast();
+   for(S32 i = 0; i < objects.size(); i++)
+   {
+      // Walls have already been handled
+      if(isWallType(objects[i]->getObjectTypeNumber()))
+         continue;
+
+      BfObject *object = static_cast<BfObject *>(objects[i]);
+
+      // Mark the item as being a ghost (client copy of a server object) so that the object will not trigger server-side tests
+      // The only time this code is run on the client is when loading into the editor.
+      if(!isServer())
+         object->markAsGhost();
+
+      object->addToGame(this, NULL);
+   }
 
    mLevel->addBots(this);
 
