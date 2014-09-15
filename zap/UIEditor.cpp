@@ -189,13 +189,6 @@ void EditorUserInterface::setLevel(boost::shared_ptr<Level> level)
       addToEditor(wall);
    }
 
-   const Vector<PolyWall *> &polywalls = level->getPolyWallList();
-
-   for(S32 i = 0; i < polywalls.size(); i++)
-   {
-      PolyWall *polywall = polywalls.get(i);
-      addToEditor(polywall);
-   }
 
    // Tell mDockItems to use the same team info as we use for the regular items
    mDockItems.setTeamInfosPtr(mLevel->getTeamInfosPtr());

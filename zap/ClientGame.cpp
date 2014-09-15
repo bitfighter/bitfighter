@@ -1738,7 +1738,8 @@ Ship *ClientGame::getLocalPlayerShip() const
    if(!object)
       return NULL;
 
-   TNLAssert(object->getObjectTypeNumber() == PlayerShipTypeNumber || object->getObjectTypeNumber() == RobotShipTypeNumber, "What is this dude controlling??");
+   TNLAssert(object->getObjectTypeNumber() == PlayerShipTypeNumber || 
+             object->getObjectTypeNumber() == RobotShipTypeNumber, "What is this dude controlling??");
 
    return static_cast<Ship *>(object);
 }

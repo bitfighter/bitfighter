@@ -689,7 +689,7 @@ bool PolyWall::processArguments(S32 argc, const char **argv, Level *level)
    if(stricmp(argv[0], "BarrierMakerS") == 0)
       offset = 1;
 
-   readGeom(argc, argv, 1 + offset, level->getLegacyGridSize());
+   readGeom(argc, argv, offset, level->getLegacyGridSize());
    updateExtentInDatabase();
 
    if(getVertCount() < 3)     // Need at least 3 vertices for a polywall!

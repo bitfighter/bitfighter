@@ -107,6 +107,7 @@ void GridDatabase::copyObjects(const GridDatabase *source)
    mGoalZones .reserve(source->mGoalZones.size());
    mFlags     .reserve(source->mFlags.size());
    mSpyBugs   .reserve(source->mSpyBugs.size());
+   mPolyWalls .reserve(source->mPolyWalls.size());
 
 
    for(S32 i = 0; i < source->mAllObjects.size(); i++)
@@ -148,12 +149,15 @@ void GridDatabase::addToDatabase(DatabaseObject *object)
    mAllObjects.push_back(object);
 
    U8 type = object->getObjectTypeNumber();
+
    if(type == GoalZoneTypeNumber)
       mGoalZones.push_back(object);
    else if(type == FlagTypeNumber)
       mFlags.push_back(object);
    else if(type == SpyBugTypeNumber)
       mSpyBugs.push_back(object);
+   else if(type == PolyWallTypeNumber)
+      mPolyWalls.push_back(object);
    
    //sortObjects(mAllObjects);  // problem: Barriers in-game don't have mGeometry (it is NULL)
 }
@@ -189,6 +193,7 @@ void GridDatabase::removeEverythingFromDatabase()
    mGoalZones.clear();
    mFlags.clear();
    mSpyBugs.clear();
+   mPolyWalls.clear();
 
    mAllObjects.deleteAndClear();
    
@@ -255,7 +260,8 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
       eraseObject_fast(&mFlags, object);
    else if(type == SpyBugTypeNumber)
       eraseObject_fast(&mSpyBugs, object);
-
+   else if(type == PolyWallTypeNumber)
+      eraseObject_fast(&mPolyWalls, object);
    if(deleteObject)
       delete object;      
 }
@@ -288,6 +294,9 @@ const Vector<DatabaseObject *> *GridDatabase::findObjects_fast(U8 typeNumber) co
 
    if(typeNumber == SpyBugTypeNumber)
       return &mSpyBugs;
+
+   if(typeNumber == PolyWallTypeNumber)
+      return &mPolyWalls;
 
    TNLAssert(false, "This type not currently supported!  Sorry dude!");
    return NULL;
@@ -330,29 +339,9 @@ void GridDatabase::findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> 
 void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector) const
 {
    // If the user is looking for a type we maintain a list for, it will be faster to use that list than to cycle through the general item list.
-   TNLAssert(typeNumber != GoalZoneTypeNumber && typeNumber != FlagTypeNumber && typeNumber != SpyBugTypeNumber, 
+   TNLAssert(typeNumber != GoalZoneTypeNumber && typeNumber != FlagTypeNumber && 
+             typeNumber != SpyBugTypeNumber   && typeNumber != PolyWallTypeNumber, 
              "Can use findObjects_fast()?  If not, uncomment the appropriate block below; it will perform better!");
-
-   //if(typeNumber == GoalZoneTypeNumber)
-   //{
-   //   for(S32 i = 0; i < mGoalZones.size(); i++)
-   //      fillVector.push_back(mGoalZones[i]);
-   //   return;
-   //}
-
-   //if(typeNumber == FlagTypeNumber)
-   //{
-   //   for(S32 i = 0; i < mFlags.size(); i++)
-   //      fillVector.push_back(mFlags[i]);
-   //   return;
-   //}
-
-   //if(typeNumber == SpyBugTypeNumber)
-   //{
-   //   for(S32 i = 0; i < mSpyBugs.size(); i++)
-   //      fillVector.push_back(mSpyBugs[i]);
-   //   return;
-   //}
 
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if(mAllObjects[i]->getObjectTypeNumber() == typeNumber)
@@ -767,6 +756,9 @@ S32 GridDatabase::getObjectCount(U8 typeNumber) const
    if(typeNumber == SpyBugTypeNumber)
       return mSpyBugs.size();
 
+   if(typeNumber == PolyWallTypeNumber)
+      return mPolyWalls.size();
+
    TNLAssert(false, "Unsupported type!");
    return 0;
 }
@@ -782,6 +774,9 @@ bool GridDatabase::hasObjectOfType(U8 typeNumber) const
 
    if(typeNumber == SpyBugTypeNumber)
       return mSpyBugs.size() > 0;
+
+   if(typeNumber == PolyWallTypeNumber)
+      return mPolyWalls.size() > 0;
 
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if(mAllObjects[i]->getObjectTypeNumber() == typeNumber)
@@ -957,9 +952,7 @@ void DatabaseObject::setExtent(const Rect &extents)
    GridDatabase *gridDB = getDatabase();
 
    if(gridDB)
-   {
       gridDB->updateExtents(this, extents);
-   }
 
    mExtent.set(extents);
    mExtentSet = true;

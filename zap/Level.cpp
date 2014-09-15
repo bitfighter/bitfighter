@@ -47,10 +47,6 @@ Level::Level(const string &levelCode)
 Level::~Level()
 {
    mWallItemList.deleteAndClear();
-   for(S32 i = 0; i < mPolyWallList.size(); i++)
-      if(!mPolyWallList[i]->isInDatabase())
-         delete mPolyWallList[i];
-   mPolyWallList.clear();
 
    // Clean up our GameType -- it's a RefPtr, so will be deleted when all refs are removed
    //if(mGameType.isValid() && !mGameType->isGhost())
@@ -173,14 +169,16 @@ void Level::loadLevelFromString(const string &contents, const string &filename)
 
 void Level::buildWallEdgeGeometry()
 {
+   const Vector<DatabaseObject *> *polyWalls = findObjects_fast(PolyWallTypeNumber);
+
    fillVector.clear();
-   fillVector.reserve(mWallItemList.size() + mPolyWallList.size());
+   fillVector.reserve(mWallItemList.size() + polyWalls->size());
 
    for(S32 i = 0; i < mWallItemList.size(); i++)
       fillVector.push_back(mWallItemList[i]);
 
-   for(S32 i = 0; i < mPolyWallList.size(); i++)
-      fillVector.push_back(mPolyWallList[i]);
+   for(S32 i = 0; i < polyWalls->size(); i++)
+      fillVector.push_back(polyWalls->get(i));
 
    getWallSegmentManager()->recomputeAllWallGeometry(this, fillVector);
 }
@@ -715,26 +713,20 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
    }
 
    // BarrierMakerS is the old name for PolyWall
-   else if(stricmp(argv[0], "BarrierMakerS") == 0 || stricmp(argv[0], "PolyWall") == 0)
-   {
-      // BarrierMakerS lines have a width, which we will skip.  PolyWalls don't have this dummy argument.
-      S32 firstArg = 0;
+   //else 
 
-      if(stricmp(argv[0], "BarrierMakerS") == 0)
-         firstArg = 1;
+      //PolyWall *polywall = new PolyWall();  
 
-      PolyWall *polywall = new PolyWall();  
+      //if(!polywall->processArguments(argc - firstArg, argv + firstArg, this))
+      //{
+      //   errorMsg = "Invalid PolyWall definition!";
+      //   delete polywall;
+      //   return false;
+      //}
 
-      if(!polywall->processArguments(argc - firstArg, argv + firstArg, this))
-      {
-         errorMsg = "Invalid PolyWall definition!";
-         delete polywall;
-         return false;
-      }
-
-      polywall->setUserAssignedId(id, false);
-      addPolyWall(polywall);
-   }
+      //polywall->setUserAssignedId(id, false);
+      //addPolyWall(polywall);
+   //}
 
    else if(stricmp(argv[0], "Robot") == 0)
    {
@@ -754,6 +746,9 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
       // Convert legacy Hunters* objects
       else if(stricmp(argv[0], "HuntersNexusObject") == 0 || stricmp(argv[0], "NexusObject") == 0)
          objName = "NexusZone";
+
+      else if(stricmp(argv[0], "BarrierMakerS") == 0)
+         objName = "PolyWall";
 
       else
          objName = argv[0];
@@ -775,25 +770,33 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
       }
 
       // Object was valid... carry on!
-      // ProcessArguments() might delete this object (this happens with multi-dest teleporters), so isValid() could be false
-      // even when the object is entirely legit
       bool validArgs = object->processArguments(argc - 1, argv + 1, this);
 
-      if(!validArgs || object.isNull())
+      // processArguments() might delete this object (this happens with multi-dest teleporters), so isNull() could be true
+      // even when the object is entirely legit
+      if(object.isNull())
+         return false;
+
+      if(!validArgs)
       {
-         if(object.isNull())
-            errorMsg = "Could not create object '" + objName + "'!";
-         else
-         {
-            errorMsg = "Invalid arguments for object '" + objName + "'!";
-            delete obj;
-         }
+         errorMsg = "Invalid arguments for object '" + objName + "'!";
+         delete obj;
          return false;
       }
 
       object->setUserAssignedId(id, false);
       object->setExtent(object->calcExtents());    // This looks ugly
       addToDatabase(object);
+
+      if(stricmp(argv[0], "Polywall") == 0)
+      {
+      // Normally we won't yet be in a game; but if we are, then we have a little more work to do
+         if(mGame)
+         {
+            //mGame->addPolyWall(object, this);
+            object->onGeomChanged();            
+         }
+      }
    }
 
    return true;
@@ -819,7 +822,7 @@ void Level::addWallItem(WallItem *wallItem, Game *game)
 
 void Level::addPolyWall(PolyWall *polywall, Game *game)
 {
-   mPolyWallList.push_back(polywall);
+   polywall->addToDatabase(this);
 
    if(!game)
       game = mGame;
@@ -830,19 +833,12 @@ void Level::addPolyWall(PolyWall *polywall, Game *game)
       game->addPolyWall(polywall, this);
       polywall->onGeomChanged();            
    }
-
 }
 
 
 const Vector<WallItem *> &Level::getWallList() const
 {
    return mWallItemList;
-}
-
-
-const Vector<PolyWall *> &Level::getPolyWallList() const
-{
-   return mPolyWallList;
 }
 
 

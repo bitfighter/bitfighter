@@ -2654,10 +2654,10 @@ void GameType::sendWallsToClient()
    for(S32 i = 0; i < walls.size(); i++)
       s2cAddWalls(*walls[i]->getOutline(), (F32)walls[i]->getWidth());
 
-   Vector<PolyWall *> polyWalls = mLevel->getPolyWallList();
+   const Vector<DatabaseObject *> *polyWalls = mLevel->findObjects_fast(PolyWallTypeNumber);
 
-   for(S32 i = 0; i < polyWalls.size(); i++)
-      s2cAddPolyWalls(*polyWalls[i]->getOutline());
+   for(S32 i = 0; i < polyWalls->size(); i++)
+      s2cAddPolyWalls(*static_cast<PolyWall *>(polyWalls->get(i))->getOutline());
 }
 
 

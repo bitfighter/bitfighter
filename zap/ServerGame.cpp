@@ -958,14 +958,7 @@ bool ServerGame::loadLevel()
    for(S32 i = 0; i < walls.size(); i++)
       addWallItem(walls[i], NULL);        // Just does this --> Barrier::constructBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
 
-   const Vector<PolyWall *> &polywalls = mLevel->getPolyWallList();
-
-   for(S32 i = 0; i < polywalls.size(); i++)
-      addPolyWall(polywalls[i], mLevel.get());     // Not sure we want this --> maybe just Barrier::constructBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
-
-
    mLevel->getWallSegmentManager()->recomputeAllWallGeometry(mLevel.get());
-
 
 
    const Vector<DatabaseObject *> objects = *mLevel->findObjects_fast();

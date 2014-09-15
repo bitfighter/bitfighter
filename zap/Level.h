@@ -52,7 +52,6 @@ private:
    TeamManager mTeamManager;
 
    Vector<WallItem *>mWallItemList;    // Need to delete items that are removed from this list!
-   Vector<PolyWall *>mPolyWallList;    // And from this one too!
 
    // Zone-related
    GridDatabase mBotZoneDatabase;
@@ -92,7 +91,6 @@ public:
    void addPolyWall(PolyWall *polywall, Game *game = NULL);
 
    const Vector<WallItem *> &getWallList() const;
-   const Vector<PolyWall *> &getPolyWallList() const;
 
    string getHash() const;
    F32 getLegacyGridSize() const;
