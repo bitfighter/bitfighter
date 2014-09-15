@@ -460,12 +460,6 @@ void Game::addTeam(AbstractTeam *team, S32 index)     { mLevel->addTeam(team, in
 void Game::replaceTeam(AbstractTeam *team, S32 index) { mLevel->replaceTeam(team, index); }
 
 
-void Game::addPolyWall(BfObject *polyWall, GridDatabase *database)
-{
-   polyWall->addToGame(this, database);
-}
-
-
 // Is overridden in ClientGame, called from there
 void Game::addWallItem(WallItem *wallItem, GridDatabase *database)
 {

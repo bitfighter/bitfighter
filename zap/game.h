@@ -319,7 +319,6 @@ public:
 
    virtual void setLevel(Level *level) = 0;
 
-   virtual void addPolyWall(BfObject *polyWall, GridDatabase *database);     
    virtual void addWallItem(WallItem *wallItem, GridDatabase *database);     
 
    virtual void deleteLevelGen(LuaLevelGenerator *levelgen) = 0; 

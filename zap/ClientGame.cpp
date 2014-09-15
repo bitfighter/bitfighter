@@ -1703,14 +1703,6 @@ Point ClientGame::worldToScreenPoint(const Point *point, S32 canvasWidth, S32 ca
 }
 
 
-// Add polywall item to game
-void ClientGame::addPolyWall(BfObject *polyWall, GridDatabase *database)
-{
-   Parent::addPolyWall(polyWall, database);
-   polyWall->onGeomChanged(); 
-}
-
-
 // Add wall to game -- only get here via editor plugin
 void ClientGame::addWallItem(WallItem *wallItem, GridDatabase *database)
 {

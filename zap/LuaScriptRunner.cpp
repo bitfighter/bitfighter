@@ -1291,7 +1291,7 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
          if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
             if(mLuaGame)
             {
-               mLuaGame->addPolyWall(obj, mLevel);
+               obj->addToGame(mLuaGame, mLevel);
                obj->onGeomChanged();
             }
 
