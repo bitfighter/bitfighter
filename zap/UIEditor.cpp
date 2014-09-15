@@ -2415,7 +2415,7 @@ void EditorUserInterface::copySelection()
 // Paste items on the clipboard
 void EditorUserInterface::pasteSelection()
 {
-   if(mDraggingObjects)    // Pasting while dragging can cause crashes!!
+   if(mDraggingObjects)       // Pasting while dragging can cause crashes!!
       return;
 
    S32 objCount = mClipboard.size();

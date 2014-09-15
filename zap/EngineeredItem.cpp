@@ -1711,7 +1711,8 @@ S32 ForceFieldProjector::lua_setTeam(lua_State *L)
       Point end;
       DatabaseObject *collObj;
 
-      ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallSegmentDatabase(), start, mAnchorNormal, end, &collObj);
+      ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallSegmentDatabase(), 
+                                    start, mAnchorNormal, end, &collObj);
 
       delete mField;
       mField = new ForceField(getTeam(), start, end);
