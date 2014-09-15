@@ -631,10 +631,11 @@ WallSegment *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *wallEd
    findNormalPoint(pos, p1, p2, anchor);
 
    // Finally, figure out which segment this item is mounted on by rerunning our find algorithm, but using our segment
-   // database rather than our wall database.
+   // database rather than our wall-edge database.  We'll pass the anchor location we found above as the snap object's
+   // position, and use a dummy point to avoid clobbering the anchor location we found.
    Point dummy;
 
-   WallSegment * closestSegment = static_cast<WallSegment *>(
+   WallSegment *closestSegment = static_cast<WallSegment *>(
          findMountWall(wallSegmentDatabase, anchor, snapDist, excludedWallList, format, testFunc, dummy, normal));
 
    TNLAssert(closestSegment, "Should have found a segment here!");
