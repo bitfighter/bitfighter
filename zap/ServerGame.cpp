@@ -973,7 +973,7 @@ bool ServerGame::loadLevel()
    const Vector<PolyWall *> &polywalls = mLevel->getPolyWallList();
 
    for(S32 i = 0; i < polywalls.size(); i++)
-      addPolyWall(polywalls[i], NULL);     // Not sure we want this --> maybe just Barrier::constructBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
+      addPolyWall(polywalls[i], mLevel.get());     // Not sure we want this --> maybe just Barrier::constructBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
 
 
    mLevel->getWallSegmentManager()->recomputeAllWallGeometry(mLevel.get());

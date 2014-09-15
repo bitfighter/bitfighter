@@ -203,6 +203,12 @@ public:
 
    F32 getEditorRadius(F32 currentScale) const;
 
+   // Returns the collision polygon of this barrier, which is the boundary extruded from the start,end line segment
+   const Vector<Point> *getCollisionPoly() const;
+
+   // Collide always returns true for Barrier objects
+   bool collide(BfObject *otherObject);
+
    TNL_DECLARE_CLASS(PolyWall);
 
 

@@ -755,6 +755,18 @@ void PolyWall::onAddedToGame(Game *game)
 }
 
 
+const Vector<Point> *PolyWall::getCollisionPoly() const
+{
+   return this->getOutline();
+}
+
+
+bool PolyWall::collide(BfObject *otherObject)
+{
+   return true;
+}
+
+
 /////
 // Lua interface
 
