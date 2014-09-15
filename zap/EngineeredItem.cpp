@@ -1507,7 +1507,7 @@ void ForceFieldProjector::setEndSegment(WallSegment *endSegment)
 void ForceFieldProjector::onEnabled()
 {
    // Server only -- nothing to do on client!
-   if(!isGhost())
+   if(isGhost())
       return;
 
    // Database can be NULL here if adding a forcefield from the editor:  The editor will
