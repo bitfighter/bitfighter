@@ -88,7 +88,6 @@ public:
    void setLevelDatabaseId(U32 id);
 
    void addWallItem(WallItem *wall, Game *game = NULL);
-   void addPolyWall(PolyWall *polywall, Game *game = NULL);
 
    const Vector<WallItem *> &getWallList() const;
 

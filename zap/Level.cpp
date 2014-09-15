@@ -712,22 +712,6 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
       addWallItem(wallItem);
    }
 
-   // BarrierMakerS is the old name for PolyWall
-   //else 
-
-      //PolyWall *polywall = new PolyWall();  
-
-      //if(!polywall->processArguments(argc - firstArg, argv + firstArg, this))
-      //{
-      //   errorMsg = "Invalid PolyWall definition!";
-      //   delete polywall;
-      //   return false;
-      //}
-
-      //polywall->setUserAssignedId(id, false);
-      //addPolyWall(polywall);
-   //}
-
    else if(stricmp(argv[0], "Robot") == 0)
    {
       // Save these for later -- we'll use them to build a robot army when the game starts
@@ -789,14 +773,7 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
       addToDatabase(object);
 
       if(stricmp(argv[0], "Polywall") == 0)
-      {
-      // Normally we won't yet be in a game; but if we are, then we have a little more work to do
-         if(mGame)
-         {
-            //mGame->addPolyWall(object, this);
-            object->onGeomChanged();            
-         }
-      }
+         object->onGeomChanged();
    }
 
    return true;
@@ -816,22 +793,6 @@ void Level::addWallItem(WallItem *wallItem, Game *game)
       game->addWallItem(wallItem, this);
       wallItem->addToDatabase(this);
       wallItem->onGeomChanged();            
-   }
-}
-
-
-void Level::addPolyWall(PolyWall *polywall, Game *game)
-{
-   polywall->addToDatabase(this);
-
-   if(!game)
-      game = mGame;
-
-   // Normally we won't yet be in a game; but if we are, then we have a little more work to do
-   if(game)
-   {
-      game->addPolyWall(polywall, this);
-      polywall->onGeomChanged();            
    }
 }
 
