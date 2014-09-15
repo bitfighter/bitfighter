@@ -143,7 +143,7 @@ bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
       return false;
 
    if(settings->getInputMode() == InputModeKeyboard &&
-        (hasBeenOpenedBefore || settings->getSetting<bool>(IniKey::AlwaysStartInKeyboardMode))) // Don't enable joystick at all in keyboard mode
+        (hasBeenOpenedBefore || settings->getSetting<YesNo>(IniKey::AlwaysStartInKeyboardMode))) // Don't enable joystick at all in keyboard mode
          return true;
 
    // Enable joystick events
