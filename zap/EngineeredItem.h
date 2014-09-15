@@ -111,20 +111,14 @@ public:
    void getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const;
 
    // Figure out where to put our turrets and forcefield projectors.  Will return NULL if no mount points found.
-   static DatabaseObject *findAnchorPointAndNormal(const GridDatabase *wallEdgeDatabase, 
-                                                   const GridDatabase *wallSegmentDatabase,
-                                                   const Point &pos, F32 snapDist, 
-                                                   const Vector<S32> *excludedWallList,
-                                                   bool format, Point &anchor, Point &normal);
-
-   // Pass NULL if there is no excludedWallList
+   // Pass NULL if there is no excludedWallList.
    static WallSegment *findAnchorPointAndNormal(const GridDatabase *wallEdgeDatabase, 
                                                 const GridDatabase *wallSegmentDatabase,
                                                 const Point &pos, F32 snapDist, 
                                                 const Vector<S32> *excludedWallList,
-                                                bool format, TestFunc testFunc, Point &anchor, Point &normal);
+                                                bool format, Point &anchor, Point &normal);
 
-   WallSegment *getMountSegment();
+   WallSegment *getMountSegment() const;
    void setMountSegment(WallSegment *mountSeg);
 
    // These methods are overriden in ForceFieldProjector
@@ -263,6 +257,8 @@ public:
    void setEndSegment(WallSegment *endSegment);
 
    void onAddedToGame(Game *theGame);
+   void onAddedToEditor();
+
    void idle(BfObject::IdleCallPath path);
 
    void render() const;

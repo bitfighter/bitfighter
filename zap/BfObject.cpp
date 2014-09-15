@@ -376,6 +376,12 @@ void EditorObject::setVertexLitUp(S32 vertexIndex)
 }
 
 
+void EditorObject::onAddedToEditor()
+{
+   // Do nothing
+}
+
+
 // Size of object in editor 
 F32 EditorObject::getEditorRadius(F32 currentScale) const
 {

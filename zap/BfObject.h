@@ -162,6 +162,8 @@ public:
    EditorObject();            // Constructor
    virtual ~EditorObject();   // Destructor
 
+   virtual void onAddedToEditor();
+
    // Messages and such for the editor
    virtual const char *getOnScreenName() const;
    virtual const char *getPrettyNamePlural() const;
@@ -177,7 +179,6 @@ public:
    // (strictly speaking, only getEditorRadius needs to be public, but it make sense to keep these together organizationally.)
    virtual S32 getDockRadius() const;                    // Size of object on dock
    virtual F32 getEditorRadius(F32 currentScale) const;  // Size of object in editor
-
 
    //////
    // Things are happening in the editor; the object must respond!
@@ -374,7 +375,6 @@ public:
    BfObject *copy();       // Makes a duplicate of the item (see method for explanation)
    BfObject *newCopy();    // Creates a brand new object based on the current one (see method for explanation)
    virtual BfObject *clone() const;
-
 
    Game *getGame() const;
 

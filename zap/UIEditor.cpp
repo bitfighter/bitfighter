@@ -573,10 +573,10 @@ void EditorUserInterface::loadLevel()
    mLoadTarget = level;
 
    // Make sure all our ForceFieldProjectors have dummy forcefields for rendering purposes
-   fillVector.clear();
-   level->findObjects(ForceFieldProjectorTypeNumber, fillVector);
-   for(S32 i = 0; i < fillVector.size(); i++)
-      static_cast<ForceFieldProjector *>(fillVector[i])->createCaptiveForceField();
+   const Vector<DatabaseObject *> *objects = level->findObjects_fast();
+
+   for(S32 i = 0; i < objects->size(); i++)
+      static_cast<BfObject *>(objects->get(i))->onAddedToEditor();
 
    TNLAssert(mLevel->getGameType(), "Level should have GameType!");
    TNLAssert(mLevel->getTeamCount() > 0, "Level should have at least one team!");
@@ -2451,10 +2451,8 @@ void EditorUserInterface::pasteSelection()
 
    getLevel()->addToDatabase(copiedObjects);
 
-   // TODO: Need to do something here to snap pasted turrets that are not already snapped to something else
-
    for(S32 i = 0; i < copiedObjects.size(); i++)   
-      copiedObjects[i]->onGeomChanged();
+      static_cast<BfObject *>(copiedObjects[i])->onAddedToEditor();
 
    onSelectionChanged();
 
