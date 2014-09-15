@@ -48,7 +48,9 @@ protected:
    void computeObjectGeometry();          // Populates mCollisionPolyPoints
 
    // Figure out where to mount this item during construction... and move it there
-   void findMountPoint(const GridDatabase *database, const Point &pos);     
+   void findMountPoint(const GridDatabase *wallEdgeDatabase, 
+                       const GridDatabase *wallSegmentDatabase,
+                       const Point &pos);     
 
 
    WallSegment *mMountSeg;    // Segment we're mounted to in the editor (don't care in the game)
@@ -109,14 +111,18 @@ public:
    void getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const;
 
    // Figure out where to put our turrets and forcefield projectors.  Will return NULL if no mount points found.
-   static DatabaseObject *findAnchorPointAndNormal(const GridDatabase *db, const Point &pos, F32 snapDist, 
+   static DatabaseObject *findAnchorPointAndNormal(const GridDatabase *wallEdgeDatabase, 
+                                                   const GridDatabase *wallSegmentDatabase,
+                                                   const Point &pos, F32 snapDist, 
                                                    const Vector<S32> *excludedWallList,
                                                    bool format, Point &anchor, Point &normal);
 
    // Pass NULL if there is no excludedWallList
-   static DatabaseObject *findAnchorPointAndNormal(const GridDatabase *db, const Point &pos, F32 snapDist, 
-                                                   const Vector<S32> *excludedWallList,
-                                                   bool format, TestFunc testFunc, Point &anchor, Point &normal);
+   static WallSegment *findAnchorPointAndNormal(const GridDatabase *wallEdgeDatabase, 
+                                                const GridDatabase *wallSegmentDatabase,
+                                                const Point &pos, F32 snapDist, 
+                                                const Vector<S32> *excludedWallList,
+                                                bool format, TestFunc testFunc, Point &anchor, Point &normal);
 
    WallSegment *getMountSegment();
    void setMountSegment(WallSegment *mountSeg);
@@ -212,8 +218,6 @@ public:
    void render() const;
    void render(const Color &color) const;
    S32 getRenderSortValue();
-
-   void getForceFieldStartAndEndPoints(Point &start, Point &end) const;
 
    TNL_DECLARE_CLASS(ForceField);
 };
