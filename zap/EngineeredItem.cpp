@@ -631,7 +631,7 @@ WallSegment *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *wallEd
 }
 
 
-WallSegment *EngineeredItem::getMountSegment()
+WallSegment *EngineeredItem::getMountSegment() const
 {
    return mMountSeg;
 }

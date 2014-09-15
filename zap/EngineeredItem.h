@@ -118,7 +118,7 @@ public:
                                                 const Vector<S32> *excludedWallList,
                                                 bool format, Point &anchor, Point &normal);
 
-   WallSegment *getMountSegment();
+   WallSegment *getMountSegment() const;
    void setMountSegment(WallSegment *mountSeg);
 
    // These methods are overriden in ForceFieldProjector
