@@ -1402,6 +1402,8 @@ void ForceFieldProjector::initialize()
    mObjectTypeNumber = ForceFieldProjectorTypeNumber;
    onGeomChanged();     // Can't be placed on parent, as parent constructor must initalized first
 
+   mField = NULL;
+
    mNeedToCleanUpField = false;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -1410,7 +1412,10 @@ void ForceFieldProjector::initialize()
 
 ForceFieldProjector *ForceFieldProjector::clone() const
 {
-   return new ForceFieldProjector(*this);
+   ForceFieldProjector *ffp = new ForceFieldProjector(*this);
+   ffp->mField = NULL;
+
+   return ffp;
 }
 
 
@@ -1553,6 +1558,15 @@ void ForceFieldProjector::onAddedToGame(Game *theGame)
 }
 
 
+void ForceFieldProjector::onAddedToEditor()
+{
+   Parent::onAddedToEditor();
+
+   TNLAssert(!mField, "Shouldn't have a captive forcefield yet!");
+   createCaptiveForceField();
+}
+
+
 void ForceFieldProjector::render() const
 {
 #ifndef ZAP_DEDICATED
@@ -1628,7 +1642,7 @@ void ForceFieldProjector::findForceFieldEnd()
 
 void ForceFieldProjector::onGeomChanged()
 {
-   if(mSnapped && mField)
+   if(mField && mSnapped)
       findForceFieldEnd();
 
    Parent::onGeomChanged();
@@ -1699,6 +1713,7 @@ S32 ForceFieldProjector::lua_setTeam(lua_State *L)
 
       ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallSegmentDatabase(), start, mAnchorNormal, end, &collObj);
 
+      delete mField;
       mField = new ForceField(getTeam(), start, end);
       mField->addToGame(getGame(), getGame()->getLevel());
    }

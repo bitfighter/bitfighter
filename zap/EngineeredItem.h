@@ -257,6 +257,8 @@ public:
    void setEndSegment(WallSegment *endSegment);
 
    void onAddedToGame(Game *theGame);
+   void onAddedToEditor();
+
    void idle(BfObject::IdleCallPath path);
 
    void render() const;
