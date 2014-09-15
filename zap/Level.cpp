@@ -47,7 +47,10 @@ Level::Level(const string &levelCode)
 Level::~Level()
 {
    mWallItemList.deleteAndClear();
-   mPolyWallList.deleteAndClear();
+   for(S32 i = 0; i < mPolyWallList.size(); i++)
+      if(!mPolyWallList[i]->isInDatabase())
+         delete mPolyWallList[i];
+   mPolyWallList.clear();
 
    // Clean up our GameType -- it's a RefPtr, so will be deleted when all refs are removed
    //if(mGameType.isValid() && !mGameType->isGhost())
