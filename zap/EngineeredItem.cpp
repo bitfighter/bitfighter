@@ -537,10 +537,10 @@ void EngineeredItem::fillAttributesVectors(Vector<string> &keys, Vector<string> 
 }
 
 
-static DatabaseObject* findMountWall(const GridDatabase *database, const Point &pos, F32 snapDist, 
-                                     const Vector<S32> *excludedWallList,
-                                     bool format,
-                                     Point &anchor, Point &normal)
+static DatabaseObject* findClosestWall(const GridDatabase *database, const Point &pos, F32 snapDist, 
+                                       const Vector<S32> *excludedWallList,
+                                       bool format,
+                                       Point &anchor, Point &normal)
 {
    DatabaseObject *closestWall = NULL;
    F32 minDist = F32_MAX;
@@ -597,7 +597,7 @@ WallSegment *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *wallEd
    // Here we're interested in finding the closest wall edge to our item -- since edges are anonymous (i.e. we don't know
    // which wall they belong to), we don't really care which edge it is, only where the item will snap to.  We'll use this
    // snap location to identify the actual wall segment later.
-   DatabaseObject *edge = findMountWall(wallEdgeDatabase, pos, snapDist, NULL, format, anchor, normal);
+   DatabaseObject *edge = findClosestWall(wallEdgeDatabase, pos, snapDist, NULL, format, anchor, normal);
 
    if(!edge)
       return NULL;
@@ -623,7 +623,7 @@ WallSegment *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *wallEd
    Point dummy;
 
    WallSegment *closestSegment = static_cast<WallSegment *>(
-         findMountWall(wallSegmentDatabase, anchor, snapDist, excludedWallList, format, dummy, normal));
+         findClosestWall(wallSegmentDatabase, anchor, snapDist, excludedWallList, format, dummy, normal));
 
    TNLAssert(closestSegment, "Should have found a segment here!");
 

@@ -262,6 +262,7 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
       eraseObject_fast(&mSpyBugs, object);
    else if(type == PolyWallTypeNumber)
       eraseObject_fast(&mPolyWalls, object);
+
    if(deleteObject)
       delete object;      
 }
