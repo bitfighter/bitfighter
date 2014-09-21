@@ -189,12 +189,12 @@ private:
 
    // Some rendering routines
    void renderScoreboard() const;
-   void renderTeamScoreboard(S32 index, S32 teams, bool isTeamGame, 
+   void renderTeamScoreboard(S32 index, S32 teams, bool isTeamGame, bool isWinning,
                              S32 scoreboardTop, S32 sectionHeight, S32 teamHeaderHeight, S32 lineHeight) const;
    void renderScoreboardLine(const Vector<ClientInfo *> &playerScores, bool isTeamGame, S32 row, 
                              S32 x, S32 y, U32 lineHeight, S32 rightEdge, S32 *colWidths) const;
    void renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y, const S32 *colIndexWidths, bool isTeamGame) const;
-   void renderTeamName(S32 index, S32 left, S32 right, S32 top) const;
+   void renderTeamName(S32 index, bool isWinning, S32 left, S32 right, S32 top) const;
 
    Point getShipRenderPos() const;
 
