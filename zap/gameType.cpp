@@ -2708,7 +2708,13 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAddPolyWalls,
                             (              verts), 
                             NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
 {
-   Barrier::constructPolyWalls(mGame, verts);
+   //Barrier::constructPolyWalls(mGame, verts);
+   if(verts.size() < 3)
+      return;
+
+   PolyWall *polywall = new PolyWall(verts);
+
+   polywall->addToGame(mGame, mGame->getLevel());
 }
 
 

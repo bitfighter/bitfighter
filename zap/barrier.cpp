@@ -26,8 +26,8 @@ namespace Zap
 
 using namespace LuaArgs;
 
+// Statics
 Vector<Point> Barrier::mRenderLineSegments;
-
 
 
 // Constructor --> gets called from constructBarriers above
@@ -237,12 +237,7 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vec
    Vector<Point> points;
 
    for(S32 i = 0; i < barriers.size(); i++)
-   {
-      if(barriers[i]->getObjectTypeNumber() != BarrierTypeNumber)
-         continue;
-
       inputPolygons.push_back(static_cast<Barrier *>(barriers[i])->getCollisionPoly());
-   }
 
    return mergePolys(inputPolygons, solution);
 }
@@ -634,11 +629,8 @@ TNL_IMPLEMENT_NETOBJECT(PolyWall);
 // Combined Lua/C++ constructor
 PolyWall::PolyWall(lua_State *L)
 {
-   mObjectTypeNumber = PolyWallTypeNumber;
-   mAlreadyAdded = false;
+   initialize();
 
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
-   
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { POLY, END }}, 2 };
@@ -651,9 +643,45 @@ PolyWall::PolyWall(lua_State *L)
 }
 
 
+PolyWall::PolyWall(const Vector<Point> &verts)
+{
+   TNLAssert(verts.size() >= 3, "Not enough vertices for a polywall!");
+
+   initialize();
+
+   if(isWoundClockwise(verts))
+   {
+      // All walls must be CCW to clip correctly -- we need to reverse them before setting our geometry
+      S32 vsize = verts.size();
+
+      Vector<Point> ccwVerts(vsize);      // Reserve some space to avoid resizing cost while we're adding our points
+      for(S32 i = 0; i < vsize; i++)
+         ccwVerts.push_back(verts[vsize - i - 1]);
+
+      GeomObject::setGeom(ccwVerts);
+   }
+   else
+   {
+      // Verts are already wound the right way
+      GeomObject::setGeom(verts);
+   }
+
+   updateExtentInDatabase();
+}
+
+
 PolyWall::~PolyWall()
 {
    LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void PolyWall::initialize()
+{
+   mObjectTypeNumber = PolyWallTypeNumber;
+   mAlreadyAdded = false;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -677,6 +705,15 @@ void PolyWall::renderDock(const Color &color) const
    renderPolygonFill(getFill(), Colors::EDITOR_WALL_FILL_COLOR);
    renderPolygonOutline(getOutline(), wallOutlineColor);
 }
+
+
+void PolyWall::render() const
+{
+   renderWallFill(getFill(), mGameSettings->getWallFillColor(), true);
+   //renderZone(color, outline, fill);
+   //renderLoadoutZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle());
+}
+
 
 
 bool PolyWall::processArguments(S32 argc, const char **argv, Level *level)

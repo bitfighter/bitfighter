@@ -18,7 +18,7 @@ class Zone : public PolygonObject
 
 public:
    explicit Zone(lua_State *L = NULL);    // Combined Lua / C++ constructor
-   virtual ~Zone();              // Destructor
+   virtual ~Zone();                       // Destructor
    Zone *clone() const;
 
    virtual void render() const;

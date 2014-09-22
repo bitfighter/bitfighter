@@ -452,6 +452,8 @@ void PointGeometry::setGeom(const Vector<Point> &points)
 {
    if(points.size() >= 1)
       mPoint = points[0];
+
+   onPointsChanged();
 }
 
 
@@ -654,6 +656,8 @@ void SimpleLineGeometry::setGeom(const Vector<Point> &points)
       mFromPos = points[0];
       mToPos   = points[1];
    }
+
+   onPointsChanged();
 }
 
 
@@ -911,6 +915,8 @@ void PolylineGeometry::setGeom(const Vector<Point> &points)
    }
 
    mVertSelected.resize(mPolyBounds.size());
+
+   onPointsChanged();
 }
 
 

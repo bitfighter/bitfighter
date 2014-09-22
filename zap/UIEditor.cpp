@@ -2985,7 +2985,8 @@ void EditorUserInterface::onMouseMoved()
    if(mHitItem)
       mHitItem->setLitUp(true);
 
-   if(mVertexEditMode) {
+   if(mVertexEditMode) 
+   {
       // We hit a vertex that wasn't already selected
       if(!spaceDown && mHitItem && mHitVertex != NONE && !mHitItem->vertSelected(mHitVertex))   
          mHitItem->setVertexLitUp(mHitVertex);
@@ -4649,10 +4650,7 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
          else if(mDraggingObjects || mAddingVertex)     // We were dragging and dropping.  Could have been a move or a delete (by dragging to dock).
          {
             if(mAddingVertex)
-            {
-               //deleteUndoState();
                mAddingVertex = false;
-            }
             
             onFinishedDragging();
          }
@@ -4661,7 +4659,7 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
 
       default:
          break;
-   }     // case
+   }     // end case
 }
 
 
@@ -4716,9 +4714,9 @@ void EditorUserInterface::onFinishedDragging()
    }
 
    // Mouse not on dock, we are either:
-   // 1. dragging from the dock,
-   // 2. moving something,
-   // 3. or we moved something to the dock and nothing was deleted, e.g. when dragging a vertex
+   // 1. dragging from the dock;
+   // 2. moving something; or
+   // 3. we moved something to the dock and nothing was deleted, e.g. when dragging a vertex
    // need to save an undo state if anything changed
    if(mDraggingDockItem == NULL)    // Not dragging from dock - user is moving object around screen, or dragging vertex to dock
    {

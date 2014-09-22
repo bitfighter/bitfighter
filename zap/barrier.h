@@ -175,13 +175,17 @@ private:
    void checkIfHasBeenAddedToTheGame(lua_State *L);
 
 public:
-   explicit PolyWall(lua_State *L = NULL);      // Combined Lua/C++ constructor
-   virtual ~PolyWall();                         // Destructor
+   explicit PolyWall(lua_State *L = NULL);            // Combined Lua/C++ constructor
+   explicit PolyWall(const Vector<Point> &verts);     // Client-side constructor
+   virtual ~PolyWall();                               // Destructor
+
+   void initialize();
 
    PolyWall *clone() const;
 
    bool processArguments(S32 argc, const char **argv, Level *level);
 
+   void render() const;
    void renderDock(const Color &color) const;
 
    S32 getRenderSortValue();

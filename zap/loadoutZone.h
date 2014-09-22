@@ -17,7 +17,7 @@ class LoadoutZone : public GameZone
 
 public:
    explicit LoadoutZone(lua_State *L = NULL);   // Combined Lua / C++ constructor
-   virtual ~LoadoutZone();             // Destructor
+   virtual ~LoadoutZone();                      // Destructor
 
    LoadoutZone *clone() const;
 

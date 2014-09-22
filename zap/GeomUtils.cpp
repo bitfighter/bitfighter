@@ -371,7 +371,7 @@ bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool f
 
    S32 inc = format ? 1 : 2;
 
-   F32 currentCollisionTime = 100;
+   F32 currentCollisionTime = F32_MAX;
 
    for(U32 i = 0; i < vertexCount - (inc - 1); i += inc)    // Count by 1s when format is true, 2 when false
    {
@@ -412,6 +412,7 @@ bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool f
    // No intersection
    return false;
 }
+
 
 bool circleIntersectsSegment(Point center, float radius, Point start, Point end, float &collisionTime)
 {

@@ -2820,14 +2820,14 @@ void GameUserInterface::renderGameNormal() const
    // Render in three passes, to ensure some objects are drawn above others
    for(S32 i = -1; i < 2; i++)
    {
-      Barrier::renderEdges(mGameSettings, i);    // Render wall edges
-
       if(mDebugShowMeshZones)
          for(S32 j = 0; j < renderZones.size(); j++)
             renderZones[j]->renderLayer(i);
 
       for(S32 j = 0; j < renderObjects.size(); j++)
          renderObjects[j]->renderLayer(i);
+
+      Barrier::renderEdges(mGameSettings, i);    // Render wall edges
 
       mFxManager.render(i, getCommanderZoomFraction(), getShipRenderPos());
    }

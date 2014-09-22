@@ -612,7 +612,7 @@ bool BfObject::processArguments(S32 argc, const char **argv, Level *level)
 // Make sure the database extents are in sync with where the object actually is
 void BfObject::updateExtentInDatabase()
 {
-   setExtent(calcExtents());    
+   setExtent(calcExtents());
 }
 
 
