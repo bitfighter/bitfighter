@@ -287,8 +287,8 @@ void LoadoutHelper::setShowingPresets(bool showingPresets)
 
    else if(showingModules())
    {
-      char title[32];
-      dSprintf(title, sizeof(mTitle), "Pick %d modules:", ShipModuleCount);
+      static char title[32];  // static, so mTitle pointer stays valid
+      dSprintf(title, sizeof(title), "Pick %d modules:", ShipModuleCount);
       mTitle = title;
 
       mPrevRenderItems = NULL; //(showingMods ? mModuleMenuItems : mWeaponMenuItems).address();
@@ -300,8 +300,8 @@ void LoadoutHelper::setShowingPresets(bool showingPresets)
 
    else     
    {
-      char title[32];
-      dSprintf(title, sizeof(mTitle), "Pick %d weapons:", ShipWeaponCount);
+      static char title[32];
+      dSprintf(title, sizeof(title), "Pick %d weapons:", ShipWeaponCount);
       mTitle = title;
 
       mPrevRenderItems = mModuleMenuItems.address();
