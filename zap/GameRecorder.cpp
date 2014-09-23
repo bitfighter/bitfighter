@@ -134,8 +134,8 @@ static string newRecordingFileName(const string &dir, const string &levelName, c
    S32 max_id = 0;
    for(S32 i = 0; i < files.size(); i++)
    {
-      S32 id = Zap::stoi(files[i]);
-      if(max_id < id)
+      S32 id = atoi(files[i].c_str()); // do not use stoi unless using inside throw/cactch, stoi throws errors, if unhandled it kills program.
+      if(max_id < id && id < S32_MAX)
          max_id = id;
    }
 
