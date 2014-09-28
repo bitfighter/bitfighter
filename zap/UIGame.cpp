@@ -2263,9 +2263,10 @@ void GameUserInterface::renderScoreboard() const
    S32 maxTeamPlayers = getDummyMaxPlayers();
    S32 teams = isTeamGame ? getDummyTeamCount() : 1;
 #else
-   getGame()->countTeamPlayers();
+   ClientGame *clientGame = getGame();
 
-   const S32 teams = isTeamGame ? getGame()->getTeamCount() : 1;
+   getGame()->countTeamPlayers();
+   const S32 teams = isTeamGame ? clientGame->getTeamCount() : 1;
    S32 maxTeamPlayers = 0;
 
    // Check to make sure at least one team has at least one player...
@@ -2299,23 +2300,34 @@ void GameUserInterface::renderScoreboard() const
 
    const S32 scoreboardTop = (canvasHeight - totalHeight) / 2;    // Center vertically
 
+   const S32 winStatus = clientGame->getTeamBasedGameWinner().first;
+   bool hasWinner = winStatus == HasWinner;
+   bool isWinningTeam;
+
    // Outer scoreboard box
    drawFilledFancyBox(horizMargin - Gap, scoreboardTop - (2 * Gap),
                      (canvasWidth - horizMargin) + Gap, scoreboardTop + totalHeight + 23,
                      13, Colors::black, 0.85f, Colors::blue);
 
    FontManager::pushFontContext(ScoreboardContext);
-
+   
    for(S32 i = 0; i < teams; i++)
-      renderTeamScoreboard(i, teams, isTeamGame, scoreboardTop, sectionHeight, teamHeaderHeight, lineHeight);
+   {
+      if(clientGame->isGameOver() && hasWinner && i == clientGame->getTeamBasedGameWinner().second)
+         isWinningTeam = true;
+      else
+         isWinningTeam = false;
+      
+      renderTeamScoreboard(i, teams, isTeamGame, isWinningTeam, scoreboardTop, sectionHeight, teamHeaderHeight, lineHeight);
+   }
 
-   renderScoreboardLegend(getGame()->getPlayerCount(), scoreboardTop, totalHeight);
+   renderScoreboardLegend(clientGame->getPlayerCount(), scoreboardTop, totalHeight);
 
    FontManager::popFontContext();
 }
 
 
-void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGame, 
+void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGame, bool isWinningTeam,
                                              S32 scoreboardTop, S32 sectionHeight, S32 teamHeaderHeight, S32 lineHeight) const
 {
    static const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
@@ -2330,8 +2342,8 @@ void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGa
    const S32 yt = scoreboardTop + (index >> 1) * sectionHeight;   // Top edge of team render area
 
    // Team header
-   if(isTeamGame)     
-      renderTeamName(index, xl, xr, yt);
+   if (isTeamGame)
+      renderTeamName(index, isWinningTeam, xl, xr, yt);
 
    // Now for player scores.  First build a list.  Then sort it.  Then display it.
    Vector<ClientInfo *> playerScores;
@@ -2377,15 +2389,16 @@ void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGa
 }
 
 
-void GameUserInterface::renderTeamName(S32 index, S32 left, S32 right, S32 top) const
+void GameUserInterface::renderTeamName(S32 index, bool isWinningTeam, S32 left, S32 right, S32 top) const
 {
    static const S32 teamFontSize = 24;
 
    // First the box
    const Color &teamColor = getGame()->getTeamColor(index);
+   const Color &borderColor = isWinningTeam ? Colors::white : teamColor;
    const S32 headerBoxHeight = teamFontSize + 2 * Gap;
 
-   drawFilledFancyBox(left, top, right, top + headerBoxHeight, 10, teamColor, 0.6f, teamColor);
+   drawFilledFancyBox(left, top, right, top + headerBoxHeight, 10, teamColor, 0.6f, borderColor);
 
    // Then the team name & score
    FontManager::pushFontContext(ScoreboardHeadlineContext);
