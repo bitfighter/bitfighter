@@ -154,11 +154,6 @@ void AbstractTeam::setTeamIndex(S32 index)
    mTeamIndex = index;
 }
 
-S32 AbstractTeam::getTeamIndex()
-{
-	return mTeamIndex;
-}
-
 
 void AbstractTeam::alterRed(F32 amt) 
 {
