@@ -452,6 +452,7 @@ S32 Game::getTeamIndex(const StringTableEntry &playerName)
    return clientInfo ? clientInfo->getTeamIndex() : TEAM_NEUTRAL;    // If we can't find the team, let's call it neutral
 }
 
+
 // The following just delegate their work to the TeamManager.  TeamManager will handle cleanup of any added teams.
 void Game::removeTeam(S32 teamIndex)                  { mLevel->removeTeam(teamIndex);    }
 void Game::addTeam(AbstractTeam *team)                { mLevel->addTeam(team);            }
@@ -1100,12 +1101,14 @@ string Game::getScriptName() const
    return getGameType()->getScriptName();
 }
 
+
 bool Game::levelHasLoadoutZone()
 {
-	// If we are idling after we have disconnected, we will no longer have a GameType (all ghosted objects
-	// get deleted on disconnect), but some display methods call this... so don't freak out of GameType is NULL.
-	return getGameType() && getGameType()->levelHasLoadoutZone();
+   // If we are idling after we have disconnected, we will no longer have a GameType (all ghosted objects
+   // get deleted on disconnect), but some display methods call this... so don't freak out of GameType is NULL.
+   return getGameType() && getGameType()->levelHasLoadoutZone();
 }
+
 
 void Game::updateShipLoadout(BfObject *shipObject)
 {

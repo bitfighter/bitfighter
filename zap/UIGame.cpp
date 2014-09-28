@@ -2343,7 +2343,7 @@ void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGa
 
    // Team header
    if (isTeamGame)
-	   renderTeamName(index, isWinningTeam, xl, xr, yt);
+      renderTeamName(index, isWinningTeam, xl, xr, yt);
 
    // Now for player scores.  First build a list.  Then sort it.  Then display it.
    Vector<ClientInfo *> playerScores;
