@@ -369,8 +369,6 @@ public:
    S32 getTeamIndex(const StringTableEntry &playerName);
    S32 getTeamIndexFromTeamName(const char *teamName) const;
 
-   AbstractTeam *findWinningTeam();
-
    void countTeamPlayers() const;      // Makes sure that the mTeams[] structure has the proper player counts
    S32 findLargestTeamWithBots() const;
 

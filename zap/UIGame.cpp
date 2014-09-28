@@ -2263,22 +2263,11 @@ void GameUserInterface::renderScoreboard() const
    S32 maxTeamPlayers = getDummyMaxPlayers();
    S32 teams = isTeamGame ? getDummyTeamCount() : 1;
 #else
+   ClientGame *clientGame = getGame();
+
    getGame()->countTeamPlayers();
-
-   S32 teams;
-   S32 winningTeamIndex;
+   const S32 teams = isTeamGame ? clientGame->getTeamCount() : 1;
    S32 maxTeamPlayers = 0;
-
-   if (isTeamGame)
-   {
-	   teams = getGame()->getTeamCount();
-	   winningTeamIndex = getGame()->findWinningTeam()->getTeamIndex();
-   }
-   else
-   {
-	   teams = 1;
-	   winningTeamIndex = 1;
-   }
 
    // Check to make sure at least one team has at least one player...
    for(S32 i = 0; i < teams; i++)
@@ -2311,8 +2300,8 @@ void GameUserInterface::renderScoreboard() const
 
    const S32 scoreboardTop = (canvasHeight - totalHeight) / 2;    // Center vertically
 
-   ClientGame *clientGame = getGame();
-
+   const S32 winStatus = clientGame->getTeamBasedGameWinner().first;
+   bool hasWinner = winStatus == HasWinner;
    bool isWinningTeam;
 
    // Outer scoreboard box
@@ -2321,19 +2310,15 @@ void GameUserInterface::renderScoreboard() const
                      13, Colors::black, 0.85f, Colors::blue);
 
    FontManager::pushFontContext(ScoreboardContext);
-
-   for (S32 i = 0; i < teams; i++)
+   
+   for(S32 i = 0; i < teams; i++)
    {
-	   if (clientGame->isGameOver() && i == clientGame->getTeamBasedGameWinner().second)
-	   {
-		   isWinningTeam = true;
-	   }
-	   else
-	   {
-		   isWinningTeam = false;
-	   }
-
-	   renderTeamScoreboard(i, teams, isTeamGame, isWinningTeam, scoreboardTop, sectionHeight, teamHeaderHeight, lineHeight);
+      if(clientGame->isGameOver() && hasWinner && i == clientGame->getTeamBasedGameWinner().second)
+         isWinningTeam = true;
+      else
+         isWinningTeam = false;
+      
+      renderTeamScoreboard(i, teams, isTeamGame, isWinningTeam, scoreboardTop, sectionHeight, teamHeaderHeight, lineHeight);
    }
 
    renderScoreboardLegend(clientGame->getPlayerCount(), scoreboardTop, totalHeight);
