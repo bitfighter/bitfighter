@@ -8,40 +8,38 @@
 
 #include "UIGame.h"
 
-#include "UIMenus.h"
-#include "UIInstructions.h"
 #include "UIChat.h"
+#include "UIInstructions.h"
 #include "UIManager.h"
+#include "UIMenus.h"
 
-#include "gameType.h"
-#include "EngineeredItem.h"      // For EngineerModuleDeployer
-#include "shipItems.h"           // For EngineerBuildObjects
-#include "gameObjectRender.h"
+#include "barrier.h"
 #include "BotNavMeshZone.h"
-#include "projectile.h"          // For SpyBug
-#include "robot.h"
-
-#include "EnergyGaugeRenderer.h"
-
-#include "Console.h"             // Our console object
-#include "DisplayManager.h"
 #include "ClientGame.h"
-#include "ServerGame.h"
 #include "Colors.h"
+#include "Console.h"             // Our console object
 #include "Cursor.h"
-#include "ScissorsManager.h"
-#include "voiceCodec.h"
-#include "SoundSystem.h"
+#include "DisplayManager.h"
+#include "EnergyGaugeRenderer.h"
+#include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "FontManager.h"
+#include "gameObjectRender.h"
+#include "GameRecorderPlayback.h"
+#include "gameType.h"
 #include "Intervals.h"
 #include "Level.h"
+#include "projectile.h"          // For SpyBug
+#include "robot.h"
+#include "ScissorsManager.h"
+#include "ServerGame.h"
+#include "shipItems.h"           // For EngineerBuildObjects
+#include "SoundSystem.h"
+#include "voiceCodec.h"
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 #include "GeomUtils.h"
-
-#include "GameRecorderPlayback.h"
 
 #include <cmath>     // Needed to compile under Linux, OSX
 

@@ -6,6 +6,8 @@
 #include "WallSegmentManager.h"
 
 #include "barrier.h"
+#include "WallItem.h"
+
 #include "EngineeredItem.h"      // For forcefieldprojector def ==> probably should not be here
 
 #include "GeomUtils.h"

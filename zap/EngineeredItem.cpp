@@ -8,6 +8,7 @@
 #include "gameWeapons.h"
 #include "gameObjectRender.h"
 #include "WallSegmentManager.h"
+#include "WallItem.h"
 #include "Teleporter.h"
 #include "gameType.h"
 #include "Level.h"

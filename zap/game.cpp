@@ -5,23 +5,25 @@
 
 #include "game.h"
 
-#include "GameManager.h"
-
-#include "gameType.h"
+#include "barrier.h"
 #include "config.h"
+#include "GameManager.h"
+#include "gameNetInterface.h"
+#include "gameType.h"
+#include "Level.h"
 #include "masterConnection.h"
 #include "move.h"
 #include "robot.h"
-#include "stringUtils.h"
+#include "ServerGame.h"
 #include "SlipZone.h"  
 #include "Teleporter.h"
-#include "ServerGame.h"
-#include "gameNetInterface.h"
-#include "Level.h"
+#include "WallItem.h"
+
+#include "stringUtils.h"
 
 #include <boost/shared_ptr.hpp>
 #include <sys/stat.h>
-#include <cmath>
+//#include <cmath>
 
 #include "../master/DatabaseAccessThread.h"
 

@@ -9,7 +9,7 @@
 
 #include "flagItem.h"
 #include "gameStats.h"           // For VersionedGameStats
-#include "barrier.h"             // For WallRec def
+//#include "barrier.h"             // For WallRec def
 
 #include "game.h"                // For MaxTeams
 #include "gameConnection.h"      // For MessageColors enum

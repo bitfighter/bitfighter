@@ -12,8 +12,8 @@
 
 #include "Geometry.h"
 
-#include "Rect.h"
 #include "Color.h"
+#include "Rect.h"
 #include "SharedConstants.h"     // For MeritBadges enum
 #include "ShipShape.h"
 

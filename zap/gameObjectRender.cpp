@@ -5,20 +5,21 @@
 
 #include "gameObjectRender.h"
 
-#include "UI.h"                  // For margins only
-#include "projectile.h"
-#include "speedZone.h"
-#include "soccerGame.h"
-#include "CoreGame.h"            // For CORE_PANELS
-#include "EngineeredItem.h"      // For TURRET_OFFSET
 #include "BotNavMeshZone.h"      // For Border def
-#include "Teleporter.h"          // For TELEPORTER_RADIUS
-#include "version.h"
 #include "config.h"              // Only for testing burst graphics below
+#include "CoreGame.h"            // For CORE_PANELS
 #include "DisplayManager.h"
-#include "game.h"
-#include "VertexStylesEnum.h"
+#include "EngineeredItem.h"      // For TURRET_OFFSET
 #include "FontManager.h"
+#include "game.h"
+#include "projectile.h"
+#include "soccerGame.h"
+#include "speedZone.h"
+#include "Teleporter.h"          // For TELEPORTER_RADIUS
+#include "UI.h"                  // For margins only
+#include "version.h"
+#include "VertexStylesEnum.h"
+#include "WallItem.h"
 
 #include "Colors.h"
 

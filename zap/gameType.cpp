@@ -5,19 +5,22 @@
 
 #include "gameType.h"
 
-#include "projectile.h"       // For s2cClientJoinedTeam()
-#include "version.h"
 #include "BanList.h"
-#include "IniFile.h"          // For CIniFile
-#include "ServerGame.h"
-#include "robot.h"
-#include "Spawn.h"
-#include "Level.h"
-#include "loadoutZone.h"      // For LoadoutZone
-#include "LineEditorFilterEnum.h"
+#include "barrier.h"
 #include "game.h"
 #include "GameRecorder.h"
+#include "IniFile.h"          // For CIniFile
+#include "Level.h"
+#include "LineEditorFilterEnum.h"
+#include "loadoutZone.h"
+#include "PolyWall.h"
+#include "projectile.h"       // For s2cClientJoinedTeam()
+#include "robot.h"
+#include "ServerGame.h"
+#include "Spawn.h"
 #include "Teleporter.h"
+#include "version.h"
+#include "WallItem.h"
 
 #ifndef ZAP_DEDICATED
 #  include "gameObjectRender.h"
@@ -28,12 +31,6 @@
 #include "masterConnection.h"    
 
 #include "Colors.h"
-
-#include "GeomUtils.h"
-#include "stringUtils.h"
-
-#include "tnlThread.h"
-#include <math.h>
 
 namespace Zap
 {

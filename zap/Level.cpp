@@ -5,15 +5,16 @@
 
 #include "Level.h"
 
+#include "Colors.h"
+#include "EngineeredItem.h"
 #include "game.h"
 #include "gameType.h"
-#include "LevelLoadException.h"
-#include "Spawn.h"
-#include "robot.h"
-#include "Colors.h"
 #include "LevelDatabase.h"
+#include "LevelLoadException.h"
+#include "robot.h"
+#include "Spawn.h"
+#include "WallItem.h"
 #include "WallSegmentManager.h"
-#include "EngineeredItem.h"
 
 #include "Md5Utils.h"
 #include "stringUtils.h"

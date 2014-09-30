@@ -8,20 +8,20 @@
 #include "UIManager.h"
 #include "UIEditor.h"         // For PluginInfo def
 
-#include "ClientGame.h"       // For usage with getGame()
-#include "barrier.h"     
 #include "BotNavMeshZone.h"   // For Border class def
-#include "gameObjectRender.h"
+#include "ClientGame.h"       // For usage with getGame()
 #include "DisplayManager.h"
-#include "VertexStylesEnum.h"
 #include "FontManager.h"
+#include "gameObjectRender.h"
+#include "VertexStylesEnum.h"
+#include "WallItem.h"     
 
 #include "Colors.h"
 #include "Intervals.h"
 
 #include "GeomUtils.h"        // For polygon triangulation
-#include "RenderUtils.h"
 #include "OpenglUtils.h"
+#include "RenderUtils.h"
 #include "stringUtils.h"
 
 #include <cmath>

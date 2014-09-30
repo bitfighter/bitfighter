@@ -63,6 +63,7 @@ set(SHARED_SOURCES
 	Point.cpp
 	PointObject.cpp
 	polygon.cpp
+	PolyWall.cpp
 	projectile.cpp
 	rabbitGame.cpp
 	Rect.cpp
@@ -90,6 +91,7 @@ set(SHARED_SOURCES
 	Teleporter.cpp
 	TextItem.cpp
 	Timer.cpp
+	WallItem.cpp
 	WallSegmentManager.cpp
 	WeaponInfo.cpp
 	Zone.cpp

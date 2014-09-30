@@ -5,14 +5,17 @@
 
 #include "UIEditor.h"
 
-#include "UIEditorMenus.h"       // For access to menu methods such as setObject
 #include "UIEditorInstructions.h"
+#include "UIEditorMenus.h"       // For access to menu methods such as setObject
 #include "UIErrorMessage.h"
 #include "UIGameParameters.h"
+#include "UIManager.h"
 #include "UINameEntry.h"         // For LevelnameEntryUI
 #include "UITeamDefMenu.h"
-#include "UIManager.h"
 
+#include "LineItem.h"
+#include "PolyWall.h"
+#include "WallItem.h"
 #include "WallSegmentManager.h"
 
 #include "ClientGame.h"  
@@ -27,7 +30,6 @@
 #include "loadoutZone.h"         // For LoadoutZone def
 #include "PickupItem.h"          // For RepairItem
 #include "projectile.h"
-
 #include "Spawn.h"
 #include "speedZone.h"           // For Speedzone def
 #include "Teleporter.h"          // For Teleporter def

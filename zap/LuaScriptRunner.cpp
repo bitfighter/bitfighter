@@ -3,24 +3,25 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "LuaScriptRunner.h"   // Header
-#include "LuaModule.h"
+#include "LuaScriptRunner.h"  
+
 #include "BfObject.h"
-#include "ship.h"
 #include "BotNavMeshZone.h"
 #include "Engineerable.h"
 #include "game.h"
-#include "ServerGame.h"
 #include "GeomUtils.h"
-#include "barrier.h"
 #include "Level.h"
+#include "LuaModule.h"
+#include "ServerGame.h"
+#include "ship.h"
+#include "WallItem.h"
 
 #include "GameTypesEnum.h"
 #include "TeamConstants.h"
 
 #include "config.h"
-#include "GameSettings.h"
 #include "Console.h"           // For gConsole
+#include "GameSettings.h"
 
 #include "stringUtils.h"
 
