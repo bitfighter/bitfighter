@@ -34,6 +34,7 @@ HelperMenu::HelperMenu()
 
    mOldBottom = 0;
    mOldCount = 0;
+   mCurrentRenderCount = 0;
 }
 
 
