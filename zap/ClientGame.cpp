@@ -17,6 +17,7 @@
 #include "UIEditor.h"
 #include "UIManager.h"
 #include "EditorTeam.h"
+#include "WallItem.h"
 
 #include "ServerGame.h"
 #include "Level.h"

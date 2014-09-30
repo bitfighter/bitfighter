@@ -13,6 +13,7 @@
 
 #include "tnlLog.h"
 
+#include <cmath>
 
 using namespace TNL;
 
