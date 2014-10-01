@@ -2278,6 +2278,8 @@ void EditorUserInterface::renderSaveMessage() const
 }
 
 
+static const S32 WARN_MESSAGE_FADE_TIME = 500;
+
 void EditorUserInterface::renderWarnings() const
 {
    FontManager::pushFontContext(EditorWarningContext);
@@ -2285,8 +2287,8 @@ void EditorUserInterface::renderWarnings() const
    if(mWarnMsgTimer.getCurrent())
    {
       F32 alpha = 1.0;
-      if (mWarnMsgTimer.getCurrent() < 1000)
-         alpha = (F32) mWarnMsgTimer.getCurrent() / 1000;
+      if (mWarnMsgTimer.getCurrent() < WARN_MESSAGE_FADE_TIME)
+         alpha = (F32) mWarnMsgTimer.getCurrent() / WARN_MESSAGE_FADE_TIME;
 
       glColor(mWarnMsgColor, alpha);
       drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() / 4, 25, mWarnMsg1.c_str());
@@ -4920,7 +4922,7 @@ void EditorUserInterface::setWarnMessage(const string &msg1, const string &msg2)
 
 void EditorUserInterface::clearWarnMessage()
 {
-   setWarnMessage("", "");
+   mWarnMsgTimer.reset(WARN_MESSAGE_FADE_TIME);
 }
 
 
