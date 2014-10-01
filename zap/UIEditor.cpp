@@ -2586,12 +2586,6 @@ void EditorUserInterface::setSelectionId(S32 id)
 // Set the team affiliation of any selected items
 void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 {
-   mCurrentTeam = currentTeam;
-   bool anyChanged = false;
-
-   if(anythingSelected())
-      saveUndoState();
-
    if(currentTeam >= getTeamCount())
    {
       char msg[255];
@@ -2605,6 +2599,13 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 
       return;
    }
+
+   mCurrentTeam = currentTeam;
+   bool anyChanged = false;
+
+   if(anythingSelected())
+      saveUndoState();
+
 
    // Update all dock items to reflect new current team
    for(S32 i = 0; i < mDockItems.getObjectCount(); i++)
