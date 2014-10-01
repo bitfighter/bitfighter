@@ -429,9 +429,12 @@ public:
 
    void testLevel();
    void testLevelStart();
+
    void setSaveMessage(const string &msg, bool savedOK);
    void clearSaveMessage();
+
    void setWarnMessage(const string &msg1, const string &msg2);
+   void clearWarnMessage();
 
    void queueSetLingeringMessage(const string &msg);
    void setLingeringMessage(const string &msg);

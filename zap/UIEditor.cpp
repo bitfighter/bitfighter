@@ -2600,6 +2600,7 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
       return;
    }
 
+   clearWarnMessage();
    mCurrentTeam = currentTeam;
    bool anyChanged = false;
 
@@ -2656,7 +2657,7 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 
    if(anyChanged)
    {
-      setWarnMessage("", "");
+      clearWarnMessage();
       validateLevel();
       setNeedToSave(true);
       autoSave();
@@ -4914,6 +4915,12 @@ void EditorUserInterface::setWarnMessage(const string &msg1, const string &msg2)
    mWarnMsg2 = msg2;
    mWarnMsgTimer.reset(FOUR_SECONDS);    // Display for 4 seconds
    mWarnMsgColor = Colors::ErrorMessageTextColor;
+}
+
+
+void EditorUserInterface::clearWarnMessage()
+{
+   setWarnMessage("", "");
 }
 
 
