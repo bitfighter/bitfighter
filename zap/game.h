@@ -317,8 +317,9 @@ public:
 
    virtual AbstractTeam *getNewTeam() = 0;
 
-   virtual void setLevel(Level *level) = 0;
-
+   void setLevel(Level *level);
+   void setLevel(const boost::shared_ptr<Level> &level);
+   
    virtual void addWallItem(WallItem *wallItem, GridDatabase *database);     
 
    virtual void deleteLevelGen(LuaLevelGenerator *levelgen) = 0; 

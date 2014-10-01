@@ -176,10 +176,11 @@ F32 EditorUserInterface::getGridSize() const
 }
 
 
-void EditorUserInterface::setLevel(boost::shared_ptr<Level> level)
+void EditorUserInterface::setLevel(const boost::shared_ptr<Level> &level)
 {
    TNLAssert(level.get(), "Level should not be NULL!");
-   mLevel = boost::dynamic_pointer_cast<Level>(level);
+   mLevel = level;
+   getGame()->setLevel(level);
 
    // Do some special preparations for walls/polywalls -- the editor needs to know about wall edges and such
    // for hit detection and mounting turrets/ffs

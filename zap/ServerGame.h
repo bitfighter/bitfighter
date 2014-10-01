@@ -160,8 +160,6 @@ public:
    void deleteLevelGen(LuaLevelGenerator *levelgen);     // Add misbehaved levelgen to the kill list
    Vector<Vector<S32> > getCategorizedPlayerCountsByTeam() const;
 
-   void setLevel(Level *level);
-
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
    void sendLevelStatsToMaster();
 

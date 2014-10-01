@@ -84,25 +84,10 @@ string Level::getHash() const
 }
 
 
-// TODO: Ideally, we'd like to be able to merge onAddedToClientGame and onAddedToServerGame...
-
 // Gets run when this level is associated with a game.  From this point forward, the Level object
 // will be tainted and polluted.  Don't reuse -- discard when done.
-void Level::onAddedToClientGame(Game *game)
+void Level::onAddedToGame(Game *game)
 {
-   mGame = game;
-}
-
-
-// Gets run when this level is associated with a game.  From this point forward, the Level object
-// will be tainted and polluted.  Don't reuse -- discard when done.
-// Server only!
-void Level::onAddedToServerGame(Game *game)
-{
-   // If we're server, we need have a GameType -- on client, mGameType will be NULL and GameType will be created by TNL
-   TNLAssert(game->isServer(),    "Server only!");
-   TNLAssert(mGameType.isValid(), "Server should have GameType by now!");
-
    mGame = game;
    mGameType->addToGame(game);
 

@@ -470,6 +470,19 @@ void Game::addWallItem(WallItem *wallItem, GridDatabase *database)
 }
 
 
+void Game::setLevel(Level *level)
+{
+   setLevel(boost::shared_ptr<Level>(level));   // Will call implementations in ClientGame or ServerGame
+}
+
+
+void Game::setLevel(const boost::shared_ptr<Level> &level)
+{
+   mLevel = level;
+   mLevel->onAddedToGame(this);
+}
+
+
 void Game::setTeamHasFlag(S32 teamIndex, bool hasFlag)
 {
    mLevel->setTeamHasFlag(teamIndex, hasFlag);

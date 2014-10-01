@@ -71,8 +71,7 @@ public:
 
    static const U32 CurrentLevelFormat = 2;
 
-   void onAddedToServerGame(Game *game);
-   void onAddedToClientGame(Game *game);
+   void onAddedToGame(Game *game);
 
    void loadLevelFromString(const string &contents, const string &filename = "");
    bool loadLevelFromFile(const string &filename);

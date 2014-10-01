@@ -223,7 +223,7 @@ void TeamDefUserInterface::render() const
    glColor(Colors::NeutralTeamColor);
    drawCenteredStringf(yStart, fontsize, "Neutral Team (can't change)");
 
-   glColor(Colors::HostileTeamColor);
+   glColor(Colors::HostileTeamColor);  
    drawCenteredStringf(yStart + fontsize + fontgap, fontsize, "Hostile Team (can't change)");
 
    for(S32 j = 0; j < size; j++)

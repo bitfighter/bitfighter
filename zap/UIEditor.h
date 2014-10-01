@@ -129,7 +129,7 @@ private:
    boost::shared_ptr<Level> mLevel;
    Level mDockItems;                               // Use a level to manage items on the dock to make interactions more consistent
 
-   void setLevel(boost::shared_ptr<Level> level);
+   void setLevel(const boost::shared_ptr<Level> &level);
 
    Vector<Vector<string> > mMessageBoxQueue;
 

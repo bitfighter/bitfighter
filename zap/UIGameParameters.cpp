@@ -135,17 +135,16 @@ static const Vector<string> &getGameTypes()
 
 static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
 {
-   if(game->getGameType() != NULL)
-      delete game->getGameType();
-
    // Instantiate our gameType object and cast it to GameType
    TNL::Object *theObject = TNL::Object::create(GameType::getGameTypeClassName(getGameTypes()[gtIndex]));
    GameType *gt = dynamic_cast<GameType *>(theObject);   
 
-   gt->addToGame(game, game->getLevel());
+   TNLAssert(gt, "Whoa!");
+   
+   game->getLevel()->setGameType(gt);     // gt will be put into a RefPtr, which will handle cleanup
 
    // If we have a new gameType, we might have new game parameters; update the menu!
-   game->getUIManager()->getUI<GameParamUserInterface>()->updateMenuItems(game->getGameType());
+   game->getUIManager()->getUI<GameParamUserInterface>()->updateMenuItems(gt);
 }
 
 

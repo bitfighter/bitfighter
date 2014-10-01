@@ -645,15 +645,6 @@ void ClientGame::showPreviousLevelName() const
 }
 
 
-// For now...
-// We'll take control of level and will delete it when we're done
-void ClientGame::setLevel(Level *level)
-{
-   mLevel = boost::shared_ptr<Level>(level);
-   mLevel->onAddedToClientGame(this);
-}
-
-
 // On the client, this is called when we are in the editor, or when we've just begun a new game and the server has sent
 // us the latest 411 on the level we're about to play
 void ClientGame::setLevelDatabaseId(U32 id)
@@ -1083,7 +1074,7 @@ void ClientGame::onGameUIActivated()
 void ClientGame::onGameStarting()
 {
    // Start with a fresh level -- this will be populated with info from the server
-   setLevel(new Level());     // Level will be cleaned up by boost
+   Parent::setLevel(new Level());     // Level will be cleaned up by boost
 
    mUIManager->onGameStarting();
    

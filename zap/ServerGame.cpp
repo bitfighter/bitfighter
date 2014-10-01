@@ -949,7 +949,7 @@ bool ServerGame::loadLevel()
       return false;
    }
 
-   mLevel->onAddedToServerGame(this);     // Gets the TeamManager up and running and populated, adds bots
+   mLevel->onAddedToGame(this);     // Gets the TeamManager up and running and populated, adds bots
 
 
    // Add walls first, so engineered items will have something to snap to
@@ -1397,14 +1397,6 @@ void ServerGame::idle(U32 timeDelta)
 
    // Update to other clients right after idling everything else, so clients get more up to date information
    mNetInterface->processConnections(); 
-}
-
-
-// For now...
-void ServerGame::setLevel(Level *level)
-{
-   mLevel = boost::shared_ptr<Level>(level);
-   mLevel->onAddedToServerGame(this);
 }
 
 

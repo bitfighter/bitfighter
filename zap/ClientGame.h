@@ -316,7 +316,6 @@ public:
    void resetInGameHelpMessages();
 
    void setGameType(GameType *gameType);
-   void setLevel(Level *level);
 };
 
 
