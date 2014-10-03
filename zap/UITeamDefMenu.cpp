@@ -93,7 +93,6 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) :
    TNLAssert(checkNameLengths(), "Team name is too long!");
 
    InputCodeManager *inputCodeManager = mGameSettings->getInputCodeManager();
-   mTeamInfos = NULL;
 
    mTopInstructions =  getSymbolString("For quick configuration, press [[Alt+1]] - [[Alt+9]] to specify number of teams",
                                              inputCodeManager, 18, Colors::menuHelpColor);
@@ -128,29 +127,38 @@ static const S32 fontgap = 12;
 static const U32 yStart = UserInterface::vertMargin + 90;
 static const U32 itemHeight = fontsize + 5;
 
+
+Level *TeamDefUserInterface::getLevel()
+{
+   return getUIManager()->getUI<EditorUserInterface>()->getLevel();
+}
+
+
+const Level *TeamDefUserInterface::getConstLevel() const
+{
+   return getUIManager()->getUI<EditorUserInterface>()->getLevel();
+}
+
+
 void TeamDefUserInterface::onActivate()
 {
    selectedIndex = 0;                        // First item selected when we begin
    mEditingName = mEditingColor = false;     // Not editing anything by default
 
-   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
-   mTeamInfos = ui->getLevel()->getTeamInfosPtr().get();    // Reference the current team list
-
    // Grab team names and populate our editors
    resetEditors();
 
-   //// Clear any unused editors -- probably unnecessary
-   //for(S32 i = mTeamInfos->size(); i < ARRAYSIZE(mTeamNameEditors); i++)
-   //   mTeamNameEditors->clear();
+   Level *level = getLevel();
+   S32 teamCount = level->getTeamCount();
 
-   S32 teamCount = mTeamInfos->size();
+   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
    ui->mOldTeams.resize(teamCount);  // Avoid unnecessary reallocations
 
    for(S32 i = 0; i < teamCount; i++)
    {
-      ui->mOldTeams[i].setColor(mTeamInfos->get(i).getColor());
-      ui->mOldTeams[i].setName(mTeamInfos->get(i).getName().getString());
+      ui->mOldTeams[i].setColor(level->getTeamColor(i));
+      ui->mOldTeams[i].setName(level->getTeamName(i).getString());
    }
 
    // Display an intitial message to users
@@ -162,8 +170,11 @@ void TeamDefUserInterface::onActivate()
 
 void TeamDefUserInterface::resetEditors()
 {
-   for(S32 i = 0; i < mTeamInfos->size(); i++)
-      mTeamNameEditors[i].setString(mTeamInfos->get(i).getName().getString());
+   Level *level = getLevel();
+   S32 teamCount = level->getTeamCount();
+
+   for(S32 i = 0; i < teamCount; i++)
+      mTeamNameEditors[i].setString(level->getTeamName(i).getString());
 }
 
 
@@ -226,6 +237,8 @@ void TeamDefUserInterface::render() const
    glColor(Colors::HostileTeamColor);  
    drawCenteredStringf(yStart + fontsize + fontgap, fontsize, "Hostile Team (can't change)");
 
+   const Level *level = getConstLevel();
+
    for(S32 j = 0; j < size; j++)
    {
       S32 i = j + 2;    // Take account of the two fixed teams (neutral & hostile)
@@ -241,8 +254,10 @@ void TeamDefUserInterface::render() const
          string namestr = numstr + mTeamNameEditors[j].getString();
          
          string colorstr;
+         
+         S32 teamCount = level->getTeamCount();
 
-         const Color &color = mTeamInfos->get(j).getColor();
+         const Color &color = level->getTeamColor(j);
 
          if(mColorEntryMode == ColorEntryModeHex)
             colorstr = "#" + mHexColorEditors[j].getString();
@@ -307,9 +322,12 @@ void TeamDefUserInterface::render() const
 // Run this as we're exiting the menu
 void TeamDefUserInterface::onEscape()
 {
+   Level *level = getLevel();
+   S32 teamCount = level->getTeamCount();
+
    // Save the names back to the mTeamInfos
-   for(S32 i = 0; i < mTeamInfos->size(); i++)
-      mTeamInfos->get(i).setName(mTeamNameEditors[i].getString());
+   for(S32 i = 0; i < teamCount; i++)
+      level->setTeamName(i, mTeamNameEditors[i].getString());
 
    // Make sure there is at least one team left...
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
@@ -476,9 +494,11 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
    {
       if(mColorEntryMode != ColorEntryModeHex)
       {
-         Color color = mTeamInfos->get(selectedIndex).getColor();
+         Level *level = getLevel();
+
+         Color color = level->getTeamColor(selectedIndex);
          color.r = CLAMP(color.r + getAmount(), 0, 1);
-         mTeamInfos->get(selectedIndex).setColor(color); 
+         level->setTeamColor(selectedIndex, color); 
       }
 
       return true;
@@ -488,9 +508,11 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
    {
       if(mColorEntryMode != ColorEntryModeHex)
       {
-         Color color = mTeamInfos->get(selectedIndex).getColor();
+         Level *level = getLevel();
+
+         Color color = level->getTeamColor(selectedIndex);
          color.g = CLAMP(color.g + getAmount(), 0, 1);
-         mTeamInfos->get(selectedIndex).setColor(color); 
+         level->setTeamColor(selectedIndex, color); 
       }
 
       return true;
@@ -500,9 +522,11 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
    {
       if(mColorEntryMode != ColorEntryModeHex)
       {
-         Color color = mTeamInfos->get(selectedIndex).getColor();
+         Level *level = getLevel();
+
+         Color color = level->getTeamColor(selectedIndex);
          color.b = CLAMP(color.b + getAmount(), 0, 1);
-         mTeamInfos->get(selectedIndex).setColor(color); 
+         level->setTeamColor(selectedIndex, color); 
       }
 
       return true;
@@ -563,13 +587,7 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       // Replace all teams with # of teams based on presets
       if(InputCodeManager::checkModifier(KEY_ALT))
       {
-         U32 count = (inputCode - KEY_1) + 1;
-         level->clearTeams();
-         for(U32 i = 0; i < count; i++)
-         {
-            TeamInfo teamInfo(TeamPresets[i]);
-            level->addTeam(teamInfo);
-         }
+         addTeamsFromPresets(level, inputCode - KEY_1 + 1);
          return true;
       }
 
@@ -578,17 +596,27 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       mTeamNameEditors[selectedIndex].setString(TeamPresets[index].name);
       mHexColorEditors[selectedIndex].setString(TeamPresets[index].color.toHexString());
 
-      // This would also work... not sure which is the cleaner approach
-      //level->getTeam(selectedIndex)->setColor(TeamPresets[index].color);
-      //level->getTeam(selectedIndex)->setName(TeamPresets[index].name);
+      Level *level = getLevel();
 
-      mTeamInfos->get(selectedIndex).setName (TeamPresets[index].name);
-      mTeamInfos->get(selectedIndex).setColor(TeamPresets[index].color);
+      level->setTeamName(index, TeamPresets[index].name);
+      level->setTeamColor(index, TeamPresets[index].color);
 
       return true;
    }
 
    return false;
+}
+
+
+void TeamDefUserInterface::addTeamsFromPresets(Level *level, S32 count)
+{
+   level->clearTeams();
+
+   for(S32 i = 0; i < count; i++)
+   {
+      AbstractTeam *team = new EditorTeam(TeamPresets[i]);    // Team manager will clean up
+      level->addTeam(team);
+   }
 }
 
 
@@ -607,8 +635,8 @@ void TeamDefUserInterface::doneEditingColor()
 
    if(mColorEntryMode == ColorEntryModeHex)
    {
-      EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
-      mTeamInfos->get(selectedIndex).setColor(Color(mHexColorEditors[selectedIndex].getString()));
+      Level *level = getLevel();
+      level->setTeamColor(selectedIndex, Color(mHexColorEditors[selectedIndex].getString()));
    }
 }
 
@@ -619,7 +647,9 @@ void TeamDefUserInterface::cancelEditing()
    mEditingName = false;
    mEditingColor = false;
 
-   mTeamNameEditors[selectedIndex].setString(mTeamInfos->get(selectedIndex).getName().getString());
+   Level *level = getLevel();
+
+   mTeamNameEditors[selectedIndex].setString(level->getTeamName(selectedIndex).getString());
 }
 
 
@@ -674,8 +704,8 @@ void TeamDefUserInterface::onMouseMoved()
 
 void TeamDefUserInterface::onColorPicked(const Color &color)
 {
-   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
-   mTeamInfos->get(selectedIndex).setColor(color);
+   Level *level = getLevel();
+   level->setTeamColor(selectedIndex, color);
 }
 
 

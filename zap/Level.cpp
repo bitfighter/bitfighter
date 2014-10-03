@@ -86,10 +86,14 @@ string Level::getHash() const
 
 // Gets run when this level is associated with a game.  From this point forward, the Level object
 // will be tainted and polluted.  Don't reuse -- discard when done.
+// Runs on client and server
 void Level::onAddedToGame(Game *game)
 {
    mGame = game;
-   mGameType->addToGame(game);
+
+   // On client, might not have a GameType yet... need to wait for one to be sent from server
+   if(mGameType)
+      mGameType->addToGame(game);
 
    for(S32 i = 0; i < mTeamInfos->size(); i++)
    {
@@ -423,6 +427,23 @@ const Color &Level::getTeamColor(S32 index) const
       return mTeamManager.getTeamColor(index);
    else
       return mTeamInfos->get(index).getColor();
+}
+
+
+void Level::setTeamColor(S32 index, const Color &color)
+{
+   TNLAssert(mGame, "Expected game!");
+
+   mTeamManager.setTeamColor(index, color);
+}
+
+
+
+void Level::setTeamName(S32 index, const string &name)
+{
+   TNLAssert(mGame, "Expected game!");
+
+   mTeamManager.setTeamName(index, name.c_str());
 }
 
 

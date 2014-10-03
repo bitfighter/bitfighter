@@ -38,6 +38,7 @@ public:
    LineEditor *getTeamNameEditor();
    LineEditor *getHexColorEditor();
 
+   void setName(const StringTableEntry &name);
    void setName(const char *name);
    StringTableEntry getName() const;  // Returns a STE to make signatures match
 

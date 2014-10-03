@@ -43,8 +43,6 @@ private:
    bool mEditingName;         
    bool mEditingColor;
 
-   Vector<TeamInfo> *mTeamInfos;
-
    ColorEntryMode mColorEntryMode;
 
    LineEditor mHexColorEditors[Game::MAX_TEAMS];
@@ -57,10 +55,15 @@ private:
    void startEditing();
    void resetEditors();
 
+   Level *getLevel();
+   const Level *getConstLevel() const;
+
    const char *getEntryMessage() const;
 
    bool onKeyDown_editingName(InputCode inputCode);
    bool onKeyDown_editingColor(InputCode inputCode);
+
+   void addTeamsFromPresets(Level *level, S32 count);
 
 
 public:

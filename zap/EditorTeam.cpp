@@ -81,6 +81,13 @@ void EditorTeam::onColorChanged()
 }
 
 
+void EditorTeam::setName(const StringTableEntry &name)
+{
+   setName(name.getString());
+   Parent::setName(name);
+}
+
+
 void EditorTeam::setName(const char *name)
 {
    mNameEditor.setString(name);

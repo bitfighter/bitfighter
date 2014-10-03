@@ -37,7 +37,7 @@ public:
    bool processArguments(S32 argc, const char **argv);     // Read team info from level line
 
    virtual void setName(const char *name);
-   void setName(const StringTableEntry &name);
+   virtual void setName(const StringTableEntry &name);
    virtual StringTableEntry getName() const;
 
    string toLevelCode() const;
@@ -163,6 +163,8 @@ public:
 
    const Color &getTeamColor(S32 index) const;
    StringTableEntry getTeamName(S32 index) const;
+   void setTeamName(S32 index, const string &name);
+   void setTeamColor(S32 index, const Color &color);
 
    S32 getTeamCount() const;
 

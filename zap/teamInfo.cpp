@@ -517,6 +517,18 @@ StringTableEntry TeamManager::getTeamName(S32 index) const
 }
 
 
+void TeamManager::setTeamName(S32 index, const string &name)
+{
+   mTeams[index]->setName(name.c_str());
+}
+
+
+void TeamManager::setTeamColor(S32 index, const Color &color)
+{
+   mTeams[index]->setColor(color);
+}
+
+
 AbstractTeam *TeamManager::getTeam(S32 teamIndex) const
 {
    return mTeams[teamIndex];

@@ -120,7 +120,11 @@ public:
    const TeamInfo &getTeamInfo(S32 index) const;
 
    StringTableEntry getTeamName(S32 index) const;
+   void setTeamName(S32 index, const string &name);
+
    const Color &getTeamColor(S32 index) const;
+   void setTeamColor(S32 index, const Color &color);
+
    void removeTeam(S32 teamIndex); 
 
    void addTeam(AbstractTeam *team);
