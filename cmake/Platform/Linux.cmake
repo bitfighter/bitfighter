@@ -11,17 +11,13 @@ set(CMAKE_EXE_LINKER_FLAGS ${BF_LINK_FLAGS})
 # 
 # Compiler specific flags
 # 
-set(CMAKE_C_FLAGS_DEBUG "-g -Wall")
-set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELEASE} -g")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELEASE} -g")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
 
 # Define the Linux data dir if not defined in a packaging build script already
 if("${CMAKE_SYSTEM}" MATCHES "Linux")
 	if(NOT LINUX_DATA_DIR)
-		set(LINUX_DATA_DIR "/usr/share/games")
+		set(LINUX_DATA_DIR "/usr/share")
 	endif()
 
 	message(STATUS "LINUX_DATA_DIR: ${LINUX_DATA_DIR}.  Change this by invoking cmake with -DLINUX_DATA_DIR=<SOME_DIRECTORY>")
@@ -64,27 +60,24 @@ function(BF_PLATFORM_ADD_DEFINITIONS)
 endfunction()
 
 
-function(BF_PLATFORM_SET_TARGET_PROPERTIES)
+function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 	# Do nothing!
 endfunction()
 
 
-function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES)
+function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	# Do nothing!
 endfunction()
 
 
-function(BF_PLATFORM_INSTALL)
-	install(TARGETS bitfighter RUNTIME DESTINATION games)
-	install(FILES ${CMAKE_SOURCE_DIR}/resource/bitfighter.xpm
-		DESTINATION share/pixmaps/
-	)
+function(BF_PLATFORM_INSTALL targetName)
+	install(TARGETS ${targetName} RUNTIME DESTINATION bin)
 	install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource/
 		DESTINATION share/games/bitfighter/
 	)
 endfunction()
 
 
-function(BF_PLATFORM_CREATE_PACKAGES)
+function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	# Do nothing!
 endfunction()

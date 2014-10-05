@@ -1,5 +1,14 @@
 ## Global project configuration
 
+# Win64
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+	message(STATUS "Win64 detected")
+	set(BF_LIB_DIR ${CMAKE_SOURCE_DIR}/lib/win64)
+else()
+	message(STATUS "Win32 detected")
+	set(BF_LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
+endif()
+
 #
 # Linker flags
 # 
@@ -25,10 +34,18 @@ endif()
 
 if(MINGW)
 	# MinGW won't statically compile in Microsofts c/c++ library routines
-	set(BF_LINK_FLAGS "-Wl,--as-needed -static-libgcc")
+	set(BF_LINK_FLAGS "-Wl,--as-needed -static-libgcc -static-libstdc++")
 	
 	# Only link in what is absolutely necessary
 	set(CMAKE_EXE_LINKER_FLAGS ${BF_LINK_FLAGS})
+endif()
+
+if(XCOMPILE)
+	# Disable LuaJIT for cross-compile (for now)
+	set(USE_LUAJIT NO)
+	
+	# StackWalker has too much black magic for mingw
+	add_definitions(-DBF_NO_STACKTRACE)
 endif()
 
 
@@ -36,7 +53,7 @@ endif()
 # Compiler specific flags
 # 
 if(MSVC)
-	# Using /MT avoids linking against the stupid MSVC runtime libraries
+	# Using /MT avoids dynamically linking against the stupid MSVC runtime libraries
 	set(CompilerFlags
 		CMAKE_CXX_FLAGS
 		CMAKE_CXX_FLAGS_DEBUG
@@ -74,18 +91,13 @@ endif()
 # Library searching and dependencies
 #
 
-# Always use SDL2 on OSX or Windows
-set(USE_SDL2 YES)
-set(USE_LUAJIT YES)
-
 # Set some search paths
-set(SDL2_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libsdl)
-set(OGG_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libogg)
-set(VORBIS_SEARCH_PATHS	${CMAKE_SOURCE_DIR}/lib	${CMAKE_SOURCE_DIR}/libvorbis)
-set(VORBISFILE_SEARCH_PATHS	${CMAKE_SOURCE_DIR}/lib	${CMAKE_SOURCE_DIR}/libvorbis)
-set(SPEEX_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libspeex)
-set(MODPLUG_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libmodplug)
-set(ALURE_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/alure)
+set(SDL2_SEARCH_PATHS       ${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libsdl)
+set(OGG_SEARCH_PATHS        ${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libogg)
+set(VORBIS_SEARCH_PATHS	    ${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libvorbis)
+set(VORBISFILE_SEARCH_PATHS	${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libvorbis)
+set(SPEEX_SEARCH_PATHS      ${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libspeex)
+set(MODPLUG_SEARCH_PATHS    ${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libmodplug)
 
 # Directly set include dirs for some libraries
 set(OPENAL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/openal/include")
@@ -95,9 +107,9 @@ set(PNG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libpng")
 set(PNG_PNG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libpng")
 
 # Directly specify some libs (because of deficiences in CMake modules?)
-set(OPENAL_LIBRARY "${CMAKE_SOURCE_DIR}/lib/OpenAL32.lib")
-set(ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/lib/zlib.lib")
-set(PNG_LIBRARY "${CMAKE_SOURCE_DIR}/lib/libpng14.lib")
+set(OPENAL_LIBRARY "${BF_LIB_DIR}/OpenAL32.lib")
+set(ZLIB_LIBRARY   "${BF_LIB_DIR}/zlib.lib")
+set(PNG_LIBRARY    "${BF_LIB_DIR}/libpng14.lib")
 	
 find_package(VorbisFile)
 
@@ -112,9 +124,10 @@ find_package(VorbisFile)
 
 function(BF_PLATFORM_SET_EXTRA_SOURCES)
 	if(NOT XCOMPILE)
-		# Add icon resource in Visual Studio
-		list(APPEND CLIENT_SOURCES ZAP.rc)
-		set(CLIENT_SOURCES ${CLIENT_SOURCES} PARENT_SCOPE)
+		# Add icon resource in Visual Studio.  This must be added into the final
+		# executable
+		list(APPEND EXTRA_SOURCES ZAP.rc)
+		set(EXTRA_SOURCES ${EXTRA_SOURCES} PARENT_SCOPE)
 	endif()
 endfunction()
 
@@ -136,26 +149,26 @@ function(BF_PLATFORM_ADD_DEFINITIONS)
 endfunction()
 
 
-function(BF_PLATFORM_SET_TARGET_PROPERTIES)
+function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 	if(MSVC)
 		# Work around the "Debug", "Release", etc. directories Visual Studio tries to add
 		foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
 			string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
-			set_target_properties(test bitfighterd bitfighter 
+			set_target_properties(${targetName}
 				PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_SOURCE_DIR}/exe
 			)
 		endforeach()
 		
 		# Separate output name "bitfighter_debug.exe" for debug build, to avoid conflicts with debug/release build
-		set_target_properties(test bitfighterd bitfighter PROPERTIES DEBUG_POSTFIX "_debug")
+		set_target_properties(${targetName} PROPERTIES DEBUG_POSTFIX "_debug")
 
 		# Set some linker flags to use console mode in debug build, etc..
 		# Always use SUBSYSTEM:CONSOLE; hiding the console window is controlled in zap/main.cpp near the bottom of main()
 		# Allows console to stay visible if ran from typing in command window.
-		set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-		set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-		set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
-		set_target_properties(test bitfighterd bitfighter PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
+		set_target_properties(${targetName} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+		set_target_properties(${targetName} PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
+		set_target_properties(${targetName} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
+		set_target_properties(${targetName} PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
 		
 		# Set more compiler flags for console on appropriate targets
 		list(APPEND ALL_DEBUG_DEFS "_CONSOLE")
@@ -163,10 +176,10 @@ function(BF_PLATFORM_SET_TARGET_PROPERTIES)
 endfunction()
 
 
-function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES)
+function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	# The trailing slash is necessary to do here for proper native path translation
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/resource/ resDir)
-	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lib/ libDir)
+	file(TO_NATIVE_PATH ${BF_LIB_DIR}/ libDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lua/luajit/src/ luaLibDir)
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
 	
@@ -180,18 +193,18 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES)
 	endif()
 	
 	# Copy resources
-	add_custom_command(TARGET test bitfighterd bitfighter POST_BUILD 
+	add_custom_command(TARGET ${targetName} POST_BUILD 
 		COMMAND ${RES_COPY_CMD}
 		COMMAND ${LIB_COPY_CMD}
 	)
 endfunction()
 
 
-function(BF_PLATFORM_INSTALL)
+function(BF_PLATFORM_INSTALL targetName)
 	# Do nothing!
 endfunction()
 
 
-function(BF_PLATFORM_CREATE_PACKAGES)
+function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	# Do nothing!
 endfunction()

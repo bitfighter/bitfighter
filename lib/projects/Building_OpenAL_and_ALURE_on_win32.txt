@@ -10,7 +10,7 @@ To build OpenAL-Soft
 # done!
 
 
-To build ALURE
+To build ALURE (not needed anymore since we compile statically now)
 
 # Put FindModPlug.cmake into the 'cmake' directory at the alure root
 # apply the patch alure-cmake-findmodplug.diff so we can correctly find modplug
