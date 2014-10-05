@@ -229,7 +229,7 @@ TEST_F(ObjectTest, LuaSanity)
          lua_pushinteger(L, -2);
          bfobj->lua_setTeam(L);
          lua_pop(L, 1);
-         lua_pushvec(L, 2.3f, 4.3f);
+         luaPushPoint(L, 2.3f, 4.3f);
          bfobj->lua_setPos(L);
          lua_pop(L, 1);
 

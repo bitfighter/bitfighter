@@ -6,7 +6,7 @@
 #ifndef _TIMER_H_
 #define _TIMER_H_
 
-#include "../tnl/tnlTypes.h"
+#include "tnlTypes.h"
 
 using namespace TNL;
 

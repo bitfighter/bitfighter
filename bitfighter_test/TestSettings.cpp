@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "Settings.h"
-#include "config.h"
+#include "../zap/config.h"
 #include "gtest/gtest.h"
 
 namespace Zap

@@ -8,6 +8,8 @@
 #include "TestUtils.h"
 #include "gtest/gtest.h"
 
+#include <cmath>
+
 namespace Zap
 {
 

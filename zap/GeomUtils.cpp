@@ -33,7 +33,7 @@
 #include "../recast/Recast.h"
 #include "../recast/RecastAlloc.h"
 #include <clipper.hpp>
-#include "../poly2tri/poly2tri.h"
+#include <poly2tri.h>
 
 #include "tnlVector.h"
 #include "tnlTypes.h"
