@@ -43,7 +43,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	)
 
 	# Add in LUA_USE_MKSTEMP for environments that can handle it
-	if(NOT MSVC)
+	if(NOT WIN32)
 		get_property(LUA_VEC_DEFS TARGET lua-vec PROPERTY COMPILE_DEFINITIONS)
 		set_target_properties(lua-vec
 			PROPERTIES
