@@ -103,7 +103,7 @@ void TextItem::render()
 
    // Don't render opposing team's text items if we are in a game... but in editor preview mode, where
    // we don't have a connection to the server, text will be rendered normally
-   if(ourTeam != getTeam() && ourTeam != TEAM_NEUTRAL)
+   if(ourTeam != getTeam() && getTeam() != TEAM_NEUTRAL)
       return;
 
    renderTextItem(getVert(0), getVert(1), mSize, mText, getColor());

@@ -107,7 +107,7 @@ bool LineItem::shouldRender() const
    S32 ourTeam = static_cast<ClientGame*>(getGame())->getCurrentTeamIndex();
 
    // Don't render opposing team's line items
-   if(ourTeam != getTeam() && ourTeam != TEAM_NEUTRAL)
+   if(ourTeam != getTeam() && getTeam() != TEAM_NEUTRAL)
       return false;
 
    // Render item regardless of team when in editor (local remote ClientInfo will be NULL)
