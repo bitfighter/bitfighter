@@ -218,7 +218,7 @@ void mapLevelHandler(ClientGame *game, const Vector<string> &words)
       for(S32 i = 0; i < gameConnection->mLevelInfos.size(); i++)
       {
          // This finds the first level with the name..  so don't have duplicate-named levels!
-         if(levelName == gameConnection->mLevelInfos[i].mLevelName.getString())
+         if(stricmp(levelName.c_str(), gameConnection->mLevelInfos[i].mLevelName.getString()) == 0)
          {
             levelIndex = i;
             break;
