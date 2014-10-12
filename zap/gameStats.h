@@ -120,6 +120,10 @@ struct GameStats
 };
 
 
+// CURRENT_VERSION = 0 (older then 016, unsupported by master)
+// CURRENT_VERSION = 1 (016)
+// CURRENT_VERSION = 2 (017)
+// CURRENT_VERSION = 3 (018a)
 // This contains the whole kilbasa
 struct VersionedGameStats
 {
