@@ -320,7 +320,7 @@ static const U32 S32_MAX_DIGITS = 11;                             ///< S16_MIN =
 
 // Other values that might be needed here are: 
 // defined(_M_AMD64)|| defined(__amd64__) || defined(_M_IA64) || defined(__amd64) || defined(__ia64__) || defined(_IA64) || defined(__IA64__) || defined(__i686__)
-#if defined(_M_IX86) || defined(i386) || defined(__x86_64__) || defined(__x86_64__) || defined(__x86_64)
+#if defined(_M_IX86) || defined(_M_X64) || defined(i386) || defined(__x86_64__) || defined(__x86_64__) || defined(__x86_64)
 #  define TNL_CPU_STRING "Intel x86"
 #  define TNL_CPU_X86
 #  define TNL_LITTLE_ENDIAN
@@ -339,7 +339,7 @@ static const U32 S32_MAX_DIGITS = 11;                             ///< S16_MIN =
 #    define TNL_SUPPORTS_GCC_INLINE_X86_ASM
 #  elif defined (__MWERKS__)
 #    define TNL_SUPPORTS_MWERKS_INLINE_X86_ASM
-#  else
+#  elif defined(_MSC_VER) && defined(_M_IX86)
 #    define TNL_SUPPORTS_VC_INLINE_X86_ASM
 #  endif
 
