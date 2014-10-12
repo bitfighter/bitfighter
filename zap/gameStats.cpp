@@ -256,15 +256,13 @@ U32 readCompressedU32(TNL::BitStream &s)
 
 void read(TNL::BitStream &s, Zap::LoadoutStats *val, U8 version)
 {
-   if(version >= 2)
-      val->loadoutHash = readCompressedU32(s);
+   val->loadoutHash = readCompressedU32(s);
 }
 
 
 void write(TNL::BitStream &s, Zap::LoadoutStats &val, U8 version)
 {
-   if(version >= 2)
-      writeCompressedU32(s, val.loadoutHash);
+   writeCompressedU32(s, val.loadoutHash);
 }
 
 
@@ -305,47 +303,18 @@ void write(TNL::BitStream &s, Zap::WeaponStats &val, U8 version)
 }
 
 
-// Read/write is called by write(TNL::BitStream &s, TNL::Vector<T> &val, A arg1); arg1 is passed to us as a 3rd param
-// which we don't care about.
-void read(TNL::BitStream &s, Zap::ModuleStats *val, U8 dummy)
+// Read/write is called by write(TNL::BitStream &s, TNL::Vector<T> &val, A arg1);
+void read(TNL::BitStream &s, Zap::ModuleStats *val)
 {
    val->shipModule = ShipModule(readU8(s));
    val->seconds = readCompressedU32(s);
 }
 
 
-void write(TNL::BitStream &s, Zap::ModuleStats &val, U8 dummy)
+void write(TNL::BitStream &s, Zap::ModuleStats &val)
 {
    write(s, U8(val.shipModule));
    writeCompressedU32(s, val.seconds);
-}
-
-
-void readVersion0Stats(TNL::BitStream &s, Zap::PlayerStats *val)
-{
-   val->points = readS32(s);
-   val->kills = readU16(s);
-   val->deaths = readU16(s);
-   val->suicides = readU16(s);
-   val->switchedTeamCount = readU8(s);
-   val->isRobot = s.readFlag();
-   val->isAdmin = s.readFlag();
-   val->isLevelChanger = s.readFlag();
-   val->nonce.read(&s);
-}
-
-
-void writeVersion0Stats(TNL::BitStream &s, Zap::PlayerStats &val)
-{
-   write(s, S32(val.points));
-   write(s, U16(val.kills));
-   write(s, U16(val.deaths));
-   write(s, U16(val.suicides));
-   write(s, U8(val.switchedTeamCount));
-   s.writeFlag(val.isRobot);
-   s.writeFlag(val.isAdmin);
-   s.writeFlag(val.isLevelChanger);
-   val.nonce.write(&s);
 }
 
 
@@ -376,7 +345,7 @@ void readVersion1Stats(TNL::BitStream &s, Zap::PlayerStats *val)
    val->teleport = readCompressedU32(s);
    val->playTime = readCompressedU32(s);
 
-   read(s, &val->moduleStats, U8(0));     // This 0 ends up in the dummy param described higher up
+   read(s, &val->moduleStats);
 }
 
 
@@ -407,7 +376,7 @@ void writeVersion1Stats(TNL::BitStream &s, Zap::PlayerStats &val)
    writeCompressedU32(s, val.teleport);
    writeCompressedU32(s, val.playTime);
 
-   write(s, val.moduleStats, U8(0));    // This 0 ends up in the dummy param described higher up
+   write(s, val.moduleStats);
 }
 
 
@@ -439,13 +408,11 @@ void read(TNL::BitStream &s, Zap::PlayerStats *val, U8 version)
 {
    val->name = readString(s);
 
-   if(version == 0)
-      readVersion0Stats(s, val);
+   readVersion1Stats(s, val);
 
-   if(version >= 1)
-      readVersion1Stats(s, val);
+   if(version >= 2)
+      read(s, &val->loadoutStats, version);
 
-   read(s, &val->loadoutStats, version);
    read(s, &val->weaponStats, version);
 
    if(version >= 3)
@@ -457,13 +424,11 @@ void write(TNL::BitStream &s, Zap::PlayerStats &val, U8 version)
 {
    writeString(s, val.name);
 
-   if(version == 0)
-      writeVersion0Stats(s, val);
-      
-   if(version >= 1)
-      writeVersion1Stats(s, val);
+   writeVersion1Stats(s, val);
 
-   write(s, val.loadoutStats, version);
+   if(version >= 2)
+      write(s, val.loadoutStats, version);
+
    write(s, val.weaponStats, version);
 
    if(version >= 3)
@@ -498,19 +463,9 @@ void read(TNL::BitStream &s, Zap::GameStats *val, U8 version)
 {
    val->isOfficial = s.readFlag();
 
-   if(version == 0)
-   {
-      readU16(s);                   // playerCount - calculated below
-      val->duration = readU16(s);   // game length in seconds
-      val->isTesting = false;
-      val->build_version = 0;
-   }
-   else
-   {
-      val->duration = readCompressedU32(s);
-      val->isTesting = s.readFlag();
-      val->build_version = readS32(s);
-   }
+   val->duration = readCompressedU32(s);
+   val->isTesting = s.readFlag();
+   val->build_version = readS32(s);
 
    val->isTeamGame = s.readFlag();
    val->gameType = readString(s);
@@ -528,17 +483,9 @@ void write(TNL::BitStream &s, Zap::GameStats &val, U8 version)
 {
    s.writeFlag(val.isOfficial);
 
-   if(version == 0)
-   {
-      write(s, U16(val.playerCount));
-      write(s, U16(val.duration));     // game length in seconds
-   }
-   else
-   {
-      writeCompressedU32(s, val.duration);
-      s.writeFlag(val.isTesting);
-      write(s, S32(val.build_version));
-   }
+   writeCompressedU32(s, val.duration);     // game length in seconds
+   s.writeFlag(val.isTesting);
+   write(s, S32(val.build_version));
 
    s.writeFlag(val.isTeamGame);
    writeString(s, val.gameType);
@@ -553,6 +500,8 @@ void read(TNL::BitStream &s, VersionedGameStats *val)
    U32 bitStart = s.getBitPosition();
    val->version = readU8(s);  // Read version number
    val->valid = false;
+   if(val->version == 0)      // outdated client/server
+      return;
 
    if(val->version > VersionedGameStats::CURRENT_VERSION)  // this might happen with outdated master
       return;
@@ -562,13 +511,8 @@ void read(TNL::BitStream &s, VersionedGameStats *val)
    if(!s.isValid() || val->gameStats.teamStats.size() == 0)  // team size should never be zero
       return;
 
-   if(val->version >= 1)  // protect against incomplete or damaged data
-   {
-      U32 actualChecksum = calculateChecksum(s, bitStart, s.getBitPosition() - bitStart);
-      val->valid = (actualChecksum == readU32(s));
-   }
-   else
-      val->valid = true;
+   U32 actualChecksum = calculateChecksum(s, bitStart, s.getBitPosition() - bitStart);
+   val->valid = (actualChecksum == readU32(s));
 }
 
 
@@ -600,11 +544,9 @@ void write(TNL::BitStream &s, VersionedGameStats &val)
    // write(number) writes 8 bit int when number is U8
    // write(U16(number)) always writes 16 bit when number is U8, S32, or any other type
 
-   if(val.CURRENT_VERSION >= 1)
-   {
-      U32 checksum = calculateChecksum(s, bitStart, s.getBitPosition() - bitStart);
-      s.write(U32(checksum));
-   }
+   // checksum is used here, just in case a bad coding causes most cases of mismatched read/write not make it to database.
+   U32 checksum = calculateChecksum(s, bitStart, s.getBitPosition() - bitStart);
+   s.write(U32(checksum));
 }
 
 
