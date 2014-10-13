@@ -151,8 +151,8 @@ namespace Types
    extern void write(TNL::BitStream &s, Zap::LoadoutStats &val, U8 version);
    extern void read (TNL::BitStream &s, Zap::WeaponStats  *val, U8 version);
    extern void write(TNL::BitStream &s, Zap::WeaponStats  &val, U8 version);
-   extern void read (TNL::BitStream &s, Zap::ModuleStats  *val, U8 version);
-   extern void write(TNL::BitStream &s, Zap::ModuleStats  &val, U8 version);
+   extern void read (TNL::BitStream &s, Zap::ModuleStats  *val);
+   extern void write(TNL::BitStream &s, Zap::ModuleStats  &val);
    extern void read (TNL::BitStream &s, Zap::PlayerStats  *val, U8 version);
    extern void write(TNL::BitStream &s, Zap::PlayerStats  &val, U8 version);
    extern void read (TNL::BitStream &s, Zap::TeamStats    *val, U8 version);
