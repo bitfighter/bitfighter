@@ -122,7 +122,7 @@ static SFXProfile sfxProfilesModern[] = {
  {  "core_panel_explode.wav",    false, 2.0f,  false, 300, 1000 },
 
  // Seekers
- {  "seeker_fire.wav",         true,  1.0f, false, 150, 600 },
+ {  "seeker_fire.wav",         false,  1.0f, false, 150, 800 },
 
  // Other
  {  "achievement_earned.wav",  true,  1.0f, false,   0,   0 },
@@ -209,7 +209,7 @@ static SFXProfile sfxProfilesClassic[] = {
  {  "core_panel_explode.wav",    false, 2.0f,  false, 300, 1000 },
 
   // Seekers
- {  "seeker_fire.wav",         true,  1.0f, false, 150, 600 },
+ {  "seeker_fire.wav",         false,  1.0f, false, 150, 800 },
 
  // Other
  {  "achievement_earned.wav",  true,  1.0f, false,   0,   0 },
