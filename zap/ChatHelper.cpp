@@ -318,26 +318,16 @@ static void makeLevelNameList(Game *game, Vector<string> &nameCandidateList)
 
 static Vector<string> commandCandidateList;
 
-static Vector<string> *getCandidateList(Game *game, const char *first, S32 arg)
+static Vector<string> *getCandidateList(Game *game, CommandInfo *commandInfo, S32 arg)
 {
    if(arg == 0)         // ==> Command completion
       return &commandCandidateList;
 
    else if(arg > 0)     // ==> Arg completion
    {
-      // Figure out which command we're entering, so we know what kind of args to expect
-      S32 cmd = -1;
-
-      for(S32 i = 0; i < ChatHelper::chatCmdSize; i++)
-         if(!stricmp(chatCmds[i].cmdName.c_str(), first))
-         {
-            cmd = i;
-            break;
-         }
-
-      if(cmd != -1 && arg <= chatCmds[cmd].cmdArgCount)     // Found a command
+      if(commandInfo != NULL && arg <= commandInfo->cmdArgCount)     // Found a command
       {
-         ArgTypes argType = chatCmds[cmd].cmdArgInfo[arg - 1];  // What type of arg are we expecting?
+         ArgTypes argType = commandInfo->cmdArgInfo[arg - 1];  // What type of arg are we expecting?
 
          static Vector<string> nameCandidateList;     // Reusable container
 
@@ -419,12 +409,39 @@ bool ChatHelper::processInputCode(InputCode inputCode)
             partial = "";
             first = "";                      // We'll be matching against an empty list since we've typed nothing so far
          }
-         
-         const string *entry = mLineEditor.getStringPtr();  
 
-         Vector<string> *candidates = getCandidateList(getGame(), first, arg);     // Could return NULL
+         // Figure out which command we've got.  Can return NULL if command isn't found or
+         // we have a partial command
+         CommandInfo *commandInfo = getCommandInfo(first);
+
+         // Special case for multiple words as the last arg of a command
+         bool multiWordLastArg = false;
+         if(commandInfo != NULL && arg > commandInfo->cmdArgCount)
+         {
+            bool lastArgIsEmpty = (partial == "");
+
+            // If our last arg is empty, end at the previous one
+            S32 end = lastArgIsEmpty ? arg - 1 : arg;
+
+            string newPartial = words[commandInfo->cmdArgCount];
+            for(S32 i = commandInfo->cmdArgCount + 1; i <= end; i++)
+               newPartial = newPartial + " " + words[i];
+
+            // Set the arg to what it should be with the multiple words
+            arg = lastArgIsEmpty ? commandInfo->cmdArgCount + 1 : commandInfo->cmdArgCount;
+
+            // Set our new search string
+            partial = newPartial;
+
+            multiWordLastArg = true;
+         }
+
+         // Grab our candidates for tab-completion
+         Vector<string> *candidates = getCandidateList(getGame(), commandInfo, arg);     // Could return NULL
 
          // If the command string has quotes in it, use the last space up to the first quote
+         const string *entry = mLineEditor.getStringPtr();
+
          std::size_t lastChar = string::npos;
          if(entry->find_first_of("\"") != string::npos)
             lastChar = entry->find_first_of("\"");
@@ -432,6 +449,10 @@ bool ChatHelper::processInputCode(InputCode inputCode)
          string appender = " ";
 
          std::size_t pos = entry->find_last_of(' ', lastChar);
+
+         // Completion position is different if we've used multiple words in our last argument
+         if(multiWordLastArg)
+            pos = (entry->size() - 1) - partial.size();
 
          if(pos == string::npos)                         // String does not contain a space, requires special handling
          {
@@ -441,6 +462,7 @@ bool ChatHelper::processInputCode(InputCode inputCode)
             else
                appender = "";
          }
+
          mLineEditor.completePartial(candidates, partial, pos, appender);
       }
       else // Username chat completion
@@ -541,6 +563,16 @@ void ChatHelper::issueChat()
    }
 
    exitHelper();     // Hide chat display
+}
+
+
+CommandInfo *ChatHelper::getCommandInfo(const char *command)
+{
+   for(S32 i = 0; i < ChatHelper::chatCmdSize; i++)
+      if(!stricmp(chatCmds[i].cmdName.c_str(), command))
+         return &chatCmds[i];
+
+   return NULL;
 }
 
 
