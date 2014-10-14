@@ -13,6 +13,8 @@
 #include "UINameEntry.h"         // For LevelnameEntryUI
 #include "UITeamDefMenu.h"
 
+#include "EditorWorkUnit.h"
+
 #include "LineItem.h"
 #include "PolyWall.h"
 #include "WallItem.h"
@@ -142,13 +144,10 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mHitVertex = NONE;
    mEdgeHit   = NONE;
 
-   setNeedToSave(false);
-
-   mLastUndoStateWasBarrierWidthChange = false;
-
-   mUndoItems.resize(UNDO_STATES);     // Create slots for all our undos, which are pointers to levels
    mAutoScrollWithMouse = false;
    mAutoScrollWithMouseReady = false;
+
+   mAddingVertex = false;
 
    mEditorAttributeMenuItemBuilder.initialize(game);
 
@@ -181,6 +180,7 @@ void EditorUserInterface::setLevel(const boost::shared_ptr<Level> &level)
    TNLAssert(level.get(), "Level should not be NULL!");
    mLevel = level;
    getGame()->setLevel(level);
+   mUndoManager.setLevel(level, this);
 
    // Do some special preparations for walls/polywalls -- the editor needs to know about wall edges and such
    // for hit detection and mounting turrets/ffs
@@ -307,70 +307,6 @@ EditorUserInterface::~EditorUserInterface()
 }
 
 
-// Removes most recent undo state from stack --> won't actually delete items on stack until we need the slot, or we quit
-void EditorUserInterface::deleteUndoState()
-{
-   mLastUndoIndex--;
-   mLastRedoIndex--; 
-}
-
-
-// Save the current state of the editor objects for later undoing
-void EditorUserInterface::saveUndoState(bool forceSelectionOfTargetObject)
-{
-   // Use case: We do 5 actions, save, undo 2, redo 1, then do some new action.  
-   // Our "no need to save" undo point is lost forever.
-   if(mAllUndoneUndoLevel > mLastRedoIndex)     
-      mAllUndoneUndoLevel = NONE;
-
-
-   // Select item so when we undo, it will be selected, which looks better
-   bool unselHitItem = false;
-   if(forceSelectionOfTargetObject && mHitItem && !mHitItem->isSelected())
-   {
-      mHitItem->setSelected(true);
-      unselHitItem = true;
-   }
-
-   Level *oldLevel = getLevel();
-   Level *newLevel = oldLevel->clone();    // Make a copy
-
-   mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<Level>(newLevel);  
-
-   mLastUndoIndex++;
-   mLastRedoIndex = mLastUndoIndex;
-
-   if(mLastUndoIndex % UNDO_STATES == mFirstUndoIndex % UNDO_STATES)           // Undo buffer now full...
-   {
-      mFirstUndoIndex++;
-      mAllUndoneUndoLevel -= 1;     // If this falls below 0, then we can't undo our way out of needing to save
-   }
-   
-   setNeedToSave(mAllUndoneUndoLevel != mLastUndoIndex);
-   mRedoingAnUndo = false;
-   mLastUndoStateWasBarrierWidthChange = false;
-
-   if(unselHitItem)
-      mHitItem->setSelected(false);
-}
-
-
-// Remove and discard the most recently saved undo state 
-void EditorUserInterface::removeUndoState()
-{
-   mLastUndoIndex--;
-   mLastRedoIndex = mLastUndoIndex;
-
-   if(mLastUndoIndex % UNDO_STATES == mFirstUndoIndex % UNDO_STATES)           // Undo buffer now full...
-   {
-      mFirstUndoIndex++;
-      mAllUndoneUndoLevel -= 1;     // If this falls below 0, then we can't undo our way out of needing to save
-   }
-   
-   setNeedToSave(mAllUndoneUndoLevel != mLastUndoIndex);
-}
-
-
 void EditorUserInterface::clearSnapEnvironment()
 {
    mSnapObject = NULL;
@@ -380,106 +316,35 @@ void EditorUserInterface::clearSnapEnvironment()
 
 void EditorUserInterface::undo(bool addToRedoStack)
 {
-   if(!undoAvailable())
+   if(!mUndoManager.undoAvailable())
       return;
 
    clearSnapEnvironment();
 
-   if(mLastUndoIndex == mLastRedoIndex && !mRedoingAnUndo)
-   {
-      saveUndoState();
-      mLastUndoIndex--;
-      mLastRedoIndex--;
-      mRedoingAnUndo = true;
-   }
+   mUndoManager.undo();
 
-   mLastUndoIndex--;
 
-   setLevel(mUndoItems[mLastUndoIndex % UNDO_STATES]);
-   TNLAssert(mLevel->getGameType(), "mLevel has a NULL gameType!");
-
-   Level *level = getLevel();
-   mLoadTarget = level;
-
-   rebuildEverything(level);    // Well, rebuild segments from walls at least
+   rebuildEverything(getLevel());    // Well, rebuild segments from walls at least
 
    onSelectionChanged();
 
-   mLastUndoStateWasBarrierWidthChange = false;
    validateLevel();
 }
    
 
 void EditorUserInterface::redo()
 {
-   if(mLastRedoIndex != mLastUndoIndex)      // If there's a redo state available...
-   {
-      clearSnapEnvironment();
+   if(!mUndoManager.redoAvailable())
+      return;
 
-      mLastUndoIndex++;
+   clearSnapEnvironment();
 
-      // Perform a little trick here... if we're redoing, and it's our final step of the redo tree, and there's only one item selected,
-      // we'll make sure that same item is selected when we're finished.  That will help keep the focus on the item that's being modified
-      // during the redo step, and make the redo feel more natural.
-      // Act I:
-      S32 selectedItem = NONE;
+   mUndoManager.redo();
+   rebuildEverything(getLevel());    // Well, rebuild segments from walls at least
 
-      if(mLastRedoIndex == mLastUndoIndex && getItemSelectedCount() == 1)
-      {
-         const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
+   onSelectionChanged();
 
-         for(S32 i = 0; i < objList->size(); i++)
-         {
-            BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-            if(obj->isSelected())
-            {
-               selectedItem = obj->getSerialNumber();
-               break;
-            }
-         }
-      }
-
-      setLevel(mUndoItems[mLastUndoIndex % UNDO_STATES]);
-      mLoadTarget = mLevel.get();
-
-      // Act II:
-      if(selectedItem != NONE)
-      {
-         clearSelection(getLevel());
-
-         BfObject *obj = findObjBySerialNumber(getLevel(), selectedItem);
-
-         if(obj)
-            obj->setSelected(true);
-      }
-
-
-      TNLAssert(mUndoItems[mLastUndoIndex % UNDO_STATES], "null!");
-
-      rebuildEverything(mLevel.get()); // Needed?  Yes, for now, but theoretically no, because we should be restoring everything fully reconstituted...
-      onSelectionChanged();
-      validateLevel();
-
-      onMouseMoved();                  // If anything gets undeleted under the mouse, make sure it's highlighted
-   }
-}
-
-
-// Find specified object in specified database
-BfObject *EditorUserInterface::findObjBySerialNumber(const GridDatabase *database, S32 serialNumber) const
-{
-   const Vector<DatabaseObject *> *objList = database->findObjects_fast();
-
-   for(S32 i = 0; i < objList->size(); i++)
-   {
-      BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-      if(obj->getSerialNumber() == serialNumber)
-         return obj;
-   }
-
-   return NULL;
+   validateLevel();
 }
 
 
@@ -491,26 +356,7 @@ void EditorUserInterface::rebuildEverything(Level *level)
 
    // If we're rebuilding items in our levelgen database, no need to save anything!
    if(level != &mLevelGenDatabase)
-   {
-      setNeedToSave(mAllUndoneUndoLevel != mLastUndoIndex);
       autoSave();
-   }
-}
-
-
-bool EditorUserInterface::undoAvailable()
-{
-   return (mLastUndoIndex - mFirstUndoIndex) != 1;
-}
-
-
-// Wipe undo/redo history
-void EditorUserInterface::clearUndoHistory()
-{
-   mFirstUndoIndex = 0;
-   mLastUndoIndex = 1;
-   mLastRedoIndex = 1;
-   mRedoingAnUndo = false;
 }
 
 
@@ -528,8 +374,8 @@ void EditorUserInterface::cleanUp()
 {
    getGame()->resetRatings();      // Move to mLevel?
 
-   clearUndoHistory();                             // Clear up a little memory
-   mDockItems.removeEverythingFromDatabase();      // Free a little more -- dock will be rebuilt when editor restarts
+   mUndoManager.clearAll();                     // Clear up a little memory
+   mDockItems.removeEverythingFromDatabase();   // Free a little more -- dock will be rebuilt when editor restarts
    
    mLoadTarget = getLevel();
 
@@ -592,11 +438,10 @@ void EditorUserInterface::loadLevel()
    //   game->getConnectionToMaster()->c2mRequestLevelRating(getLevelDatabaseId());
    //}
 
-   clearUndoHistory();                 // Clean out undo/redo buffers
    clearSelection(mLoadTarget);        // Nothing starts selected
-   setNeedToSave(false);               // Why save when we just loaded?
-   mAllUndoneUndoLevel = mLastUndoIndex;
    populateDock();                     // Add game-specific items to the dock
+
+   mUndoManager.clearAll();
 
    // Bulk-process new items, walls first
    mLoadTarget->getWallSegmentManager()->recomputeAllWallGeometry(mLoadTarget);
@@ -620,7 +465,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
    // Duplicate EditorObject pointer list to avoid unsynchronized loop removal
    Vector<DatabaseObject *> tempList(*mLevelGenDatabase.findObjects_fast());
 
-   saveUndoState();
+   mUndoManager.startTransaction();
 
    // We can't call addToEditor immediately because it calls addToGame which will trigger
    // an assert since the levelGen items are already added to the game.  We must therefore
@@ -631,13 +476,15 @@ void EditorUserInterface::copyScriptItemsToEditor()
 
       obj->removeFromGame(false);     // False ==> remove, but do not delete object
       addToEditor(obj);
+      mUndoManager.saveAction(ActionCreate, obj);
    }
-      
-   mLevelGenDatabase.removeEverythingFromDatabase();    // Don't want to delete these objects... we just handed them off to the database!
+
+   mUndoManager.endTransaction();
+
+   // Don't want to delete these objects... we just handed them off to the database!      
+   mLevelGenDatabase.removeEverythingFromDatabase();   
 
    rebuildEverything(getLevel());
-
-   mLastUndoStateWasBarrierWidthChange = false;
 }
 
 
@@ -883,7 +730,7 @@ void EditorUserInterface::onPluginExecuted(const Vector<string> &args)
 {
    TNLAssert(mPluginRunner, "NULL PluginRunner!");
    
-   saveUndoState();
+   //saveUndoState();
 
    // Save menu values for next time -- using a key that includes both the script name and the type of menu items
    // provides some protection against the script being changed while Bitfighter is running.  Probably not realy
@@ -1147,15 +994,8 @@ void EditorUserInterface::teamsHaveChanged()
    validateTeams(mDockItems.findObjects_fast());
 
    validateLevel();          // Revalidate level -- if teams have changed, requirements for spawns have too
-   markLevelPermanentlyDirty();
+   //markLevelPermanentlyDirty();  //<<-- TODO: Remove when team saving is part of mUndoManager
    autoSave();
-}
-
-
-void EditorUserInterface::markLevelPermanentlyDirty()
-{
-   setNeedToSave(true);
-   mAllUndoneUndoLevel = -1; // This change can't be undone
 }
 
 
@@ -1348,13 +1188,7 @@ void EditorUserInterface::clearTeams()
 
 bool EditorUserInterface::getNeedToSave() const
 {
-   return mNeedToSave;
-}
-
-
-void EditorUserInterface::setNeedToSave(bool needToSave)
-{
-   mNeedToSave = needToSave;
+   return mUndoManager.needToSave();
 }
 
 
@@ -1425,16 +1259,16 @@ Point EditorUserInterface::snapPointToLevelGrid(Point const &p) const
 }
 
 
-Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, bool snapWhileOnDock) const
+Point EditorUserInterface::snapPoint(const Point &p, bool snapWhileOnDock) const
 {
    if(mouseOnDock() && !snapWhileOnDock) 
       return p;      // No snapping!
 
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
-   Point snapPoint(p);
+   Point snapPoint(p);     // Make a working copy
 
-   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
+   WallSegmentManager *wallSegmentManager = getLevel()->getWallSegmentManager();
 
    if(mDraggingObjects)
    {  
@@ -1555,7 +1389,7 @@ static void markSelectedObjectAsUnsnapped_body(BfObject *obj, S32 index, bool ca
 static void markSelectedObjectAsUnsnapped_done(bool calledDuringDragInitialization)
 {
    // Now review all the engineer items that are being dragged and see if the wall they are mounted to is being
-   // dragged as well.  If it is, keep them snapped; if not, mark them as unsnapped. 
+   // ` as well.  If it is, keep them snapped; if not, mark them as unsnapped. 
    for(S32 i = 0; i < selectedSnappedEngrObjects.size(); i++)
    {
       bool snapped = selectedWalls.contains(selectedSnappedEngrObjects[i]->getMountSegment()->getOwner());
@@ -1780,7 +1614,7 @@ void EditorUserInterface::renderInfoPanel() const
    if(mSnapObject)
       pos = mSnapObject->getVert(mSnapVertexIndex);
    else
-      pos = snapPoint(getLevel(), convertCanvasToLevelCoord(mMousePos));
+      pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
 
 
    glColor(Colors::white);
@@ -1792,11 +1626,14 @@ void EditorUserInterface::renderInfoPanel() const
    // Show number of teams
    renderPanelInfoLine(3, "Team Count: %d", getTeamCount());
 
-   glColor(mNeedToSave ? Colors::red : Colors::green);     // Color level name by whether it needs to be saved or not
+   bool needToSave = mUndoManager.needToSave();
+
+   // Color level name by whether it needs to be saved or not
+   glColor(needToSave ? Colors::red : Colors::green);     
 
    // Filename without extension
    string filename = getLevelFileName();
-   renderPanelInfoLine(4, "Filename: %s%s", mNeedToSave ? "*" : "", filename.substr(0, filename.find_last_of('.')).c_str());
+   renderPanelInfoLine(4, "Filename: %s%s", needToSave ? "*" : "", filename.substr(0, filename.find_last_of('.')).c_str());
 }
 
 
@@ -2149,7 +1986,7 @@ void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, 
 void EditorUserInterface::renderObjectsUnderConstruction() const
 {
    // Add a vert (and deleted it later) to help show what this item would look like if the user placed the vert in the current location
-   mNewItem->addVert(snapPoint(getLevel(), convertCanvasToLevelCoord(mMousePos)));
+   mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
    glLineWidth(gLineWidth3);
 
    if(mCreatingPoly) // Wall
@@ -2421,43 +2258,42 @@ void EditorUserInterface::pasteSelection()
     if(objCount == 0)         // Nothing on clipboard, nothing to do
       return;
 
-   saveUndoState();           // So we can undo the paste
-
    GridDatabase *database = getLevel();
-   clearSelection(database);  // Only the pasted items should be selected when we're done
 
-   Point pastePos = snapPoint(database, convertCanvasToLevelCoord(mMousePos));
+   Point pastePos = snapPoint(convertCanvasToLevelCoord(mMousePos));
 
    Point firstPoint = mClipboard[0]->getVert(0);
 
    Point offsetFromFirstPoint;
-   Vector<DatabaseObject *> copiedObjects;
+   Vector<DatabaseObject *> copiedObjects(objCount);
+   Vector<BfObject *> copiedBfObjects(objCount);
+
+   mUndoManager.startTransaction();
 
    for(S32 i = 0; i < objCount; i++)
    {
       offsetFromFirstPoint = firstPoint - mClipboard[i]->getVert(0);
 
       BfObject *newObject = mClipboard[i]->newCopy();
-      newObject->setSelected(true);
       newObject->moveTo(pastePos - offsetFromFirstPoint);
 
-      // addToGame is first so setSelected and onGeomChanged have mGame (at least barriers need it)
-      //newObject->addToGame(getGame(), NULL);    // Passing NULL keeps item out of any databases... will add in bulk below  
-
       copiedObjects.push_back(newObject);
+      copiedBfObjects.push_back(newObject);
+
+      mUndoManager.saveAction(ActionCreate, newObject);
    }
+
+   mUndoManager.endTransaction();
 
    getLevel()->addToDatabase(copiedObjects);
 
    for(S32 i = 0; i < copiedObjects.size(); i++)   
       static_cast<BfObject *>(copiedObjects[i])->onAddedToEditor();
 
-   onSelectionChanged();
-
    getLevel()->snapAllEngineeredItems(false);  // True would work?
 
-   validateLevel();
-   setNeedToSave(true);
+   doneAddingObjects(copiedBfObjects);
+   
    autoSave();
 }
 
@@ -2470,8 +2306,6 @@ void EditorUserInterface::scaleSelection(F32 scale)
    if(!anyItemsSelected(database) || scale < .01 || scale == 1)    // Apply some sanity checks; limits here are arbitrary
       return;
 
-   saveUndoState();
-
    // Find center of selection
    Point min, max;                        
    database->computeSelectionMinMax(min, max);
@@ -2481,6 +2315,7 @@ void EditorUserInterface::scaleSelection(F32 scale)
    WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 
    wallSegmentManager->beginBatchGeomUpdate();
+   mUndoManager.startTransaction();
 
    const Vector<DatabaseObject *> *objList = database->findObjects_fast();
 
@@ -2490,17 +2325,21 @@ void EditorUserInterface::scaleSelection(F32 scale)
 
       if(obj->isSelected())
       {
+         mUndoManager.saveChangeAction_before(obj);
+         
          obj->scale(ctr, scale);
          obj->onGeomChanged();
+
+         mUndoManager.saveChangeAction_after(obj);
 
          if(isWallType(obj->getObjectTypeNumber()))
             modifiedWalls = true;
       }
    }
 
+   mUndoManager.endTransaction();
    wallSegmentManager->endBatchGeomUpdate(database, modifiedWalls);
 
-   setNeedToSave(true);
    autoSave();
 }
 
@@ -2517,11 +2356,11 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
    if(!canRotate())
       return;
 
-   saveUndoState();
-
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    Point center(0,0);
+
+
 
    // If we're not going to use the origin, we're going to use the 'center of mass' of the total
    if(!useOrigin)
@@ -2548,6 +2387,8 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
          center = findCentroid(centroidList);
    }
 
+   mUndoManager.startTransaction();
+
    // Now do the actual rotation
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2555,12 +2396,17 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
 
       if(obj->isSelected())
       {
+         mUndoManager.saveChangeAction_before(obj);
+
          obj->rotateAboutPoint(center, angle);
          obj->onGeomChanged();
+
+         mUndoManager.saveChangeAction_after(obj);
       }
    }
 
-   setNeedToSave(true);
+   mUndoManager.endTransaction();
+
    autoSave();
 }
 
@@ -2577,8 +2423,9 @@ void EditorUserInterface::setSelectionId(S32 id)
       {
          if(obj->getUserAssignedId() != id)     // Did the id actually change?
          {
+            mUndoManager.saveChangeAction_before(obj);
             obj->setUserAssignedId(id, true);
-            mAllUndoneUndoLevel = -1;     // If so, it can't be undone
+            mUndoManager.saveChangeAction_after(obj);
          }
          break;
       }
@@ -2607,9 +2454,6 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
    mCurrentTeam = currentTeam;
    bool anyChanged = false;
 
-   if(anythingSelected())
-      saveUndoState();
-
 
    // Update all dock items to reflect new current team
    for(S32 i = 0; i < mDockItems.getObjectCount(); i++)
@@ -2629,6 +2473,8 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
    }
 
 
+   mUndoManager.startTransaction();
+
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
@@ -2637,6 +2483,8 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 
       if(obj->isSelected())
       {
+         mUndoManager.saveChangeAction_before(obj);
+
          if(!obj->hasTeam())
             continue;
 
@@ -2646,13 +2494,15 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
          if(currentTeam == TEAM_HOSTILE && !obj->canBeHostile())
             continue;
 
-         if(!anyChanged)
-            saveUndoState();
-
          obj->setTeam(currentTeam);
+
+         mUndoManager.saveChangeAction_after(obj);
+
          anyChanged = true;
       }
    }
+
+   mUndoManager.endTransaction();
 
    // Overwrite any warnings set above.  If we have a group of items selected, it makes no sense to show a
    // warning if one of those items has the team set improperly.  The warnings are more appropriate if only
@@ -2662,7 +2512,6 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
    {
       clearWarnMessage();
       validateLevel();
-      setNeedToSave(true);
       autoSave();
    }
 }
@@ -2695,11 +2544,8 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
 
    GridDatabase *database = getLevel();
 
-   saveUndoState();
-
    Point min, max;
    database->computeSelectionMinMax(min, max);
-//   F32 centerX = (min.x + max.x) / 2;
 
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
@@ -2707,6 +2553,7 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
    WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 
    wallSegmentManager->beginBatchGeomUpdate();
+   mUndoManager.startTransaction();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2714,17 +2561,21 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
 
       if(obj->isSelected())
       {
+         mUndoManager.saveChangeAction_before(obj);
+
          obj->flip(center, isHoriz);
          obj->onGeomChanged();
+
+         mUndoManager.saveChangeAction_after(obj);
 
          if(isWallType(obj->getObjectTypeNumber()))
             modifiedWalls = true;
       }
    }
 
+   mUndoManager.endTransaction();
    wallSegmentManager->endBatchGeomUpdate(database, modifiedWalls);
 
-   setNeedToSave(true);
    autoSave();
 }
 
@@ -3019,25 +2870,15 @@ void EditorUserInterface::onMouseDragged()
    if(mCreatingPoly || mCreatingPolyline || mDragSelecting)
       return;
 
-
-   bool needToSaveUndoState = true;
-
-   // I assert we never need to save an input state here if we are right-mouse dragging
-   if(InputCodeManager::getState(MOUSE_RIGHT))
-      needToSaveUndoState = false;
-
    if(mDraggingDockItem != NULL)    // We just started dragging an item off the dock
-   {
-       startDraggingDockItem();  
-       needToSaveUndoState = false;
-   }
+      startDraggingDockItem();  
 
    findSnapVertex();                               // Sets mSnapObject and mSnapVertexIndex
    if(!mSnapObject || mSnapVertexIndex == NONE)    // If we've just started dragging a dock item, this will be it
       return;
 
    if(!mDraggingObjects) 
-      onMouseDragged_StartDragging(needToSaveUndoState);
+      onMouseDragged_startDragging();
 
    SDL_SetCursor(Cursor::getSpray());
 
@@ -3046,22 +2887,32 @@ void EditorUserInterface::onMouseDragged()
    // want to factor that offset into our calculations.  For point items (and vertices), we don't really care about any slop
    // in the selection, and we just want the damn thing where we put it.
    if(mSnapObject->getGeomType() == geomPoint || (mHitItem && mHitItem->anyVertsSelected()))
-      mSnapDelta = snapPoint(getLevel(), convertCanvasToLevelCoord(mMousePos)) - mMoveOrigin;
+      mSnapDelta = snapPoint(convertCanvasToLevelCoord(mMousePos)) - mMoveOrigin;
    else  // larger items
-      mSnapDelta = snapPoint(getLevel(), convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
+      mSnapDelta = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
 
-   translateSelectedItems(mMoveOrigins, mSnapDelta, lastSnapDelta);  // Nudge all selected objects by incremental move amount
-   snapSelectedEngineeredItems(mSnapDelta);                          // Snap all selected engr. objects if possible
+   // Nudge all selected objects by incremental move amount
+   translateSelectedItems(mSnapDelta, lastSnapDelta);  
+
+   // Snap all selected engr. objects if possible
+   snapSelectedEngineeredItems(mSnapDelta);                   
 }
 
 
-void EditorUserInterface::onMouseDragged_StartDragging(const bool needToSaveUndoState)
+void EditorUserInterface::onMouseDragged_startDragging()
 {
-   if(needToSaveUndoState)
-      saveUndoState(true);       // Save undo state before we clear the selection
-
    mMoveOrigin = mSnapObject->getVert(mSnapVertexIndex);
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
+
+   mSelectedObjectsForDragging.clear();
+
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(objList->get(i));
+
+      if(obj->isSelected() || obj->anyVertsSelected())
+         mSelectedObjectsForDragging.push_back(obj->clone());
+   }
 
 #ifdef TNL_OS_MAC_OSX 
    bool ctrlDown = InputCodeManager::getState(KEY_META);
@@ -3070,25 +2921,18 @@ void EditorUserInterface::onMouseDragged_StartDragging(const bool needToSaveUndo
 #endif
 
    if(ctrlDown)     // Ctrl+Drag ==> copy and drag (except for Mac)
-      onMouseDragged_CopyAndDrag(objList);
+      onMouseDragged_copyAndDrag(objList);
 
    onSelectionChanged();
    mDraggingObjects = true; 
    mSnapDelta.set(0,0);
-
-   mMoveOrigins.resize(objList->size());
-
-   // Save the original location of each item pre-move, only used for snapping engineered items to walls
-   // Saves location of every item, selected or not
-   for(S32 i = 0; i < objList->size(); i++)
-      mMoveOrigins[i].set(objList->get(i)->getVert(0));
 
    markSelectedObjectsAsUnsnapped(objList);
 }
 
 
 // Copy objects and start dragging the copies
-void EditorUserInterface::onMouseDragged_CopyAndDrag(const Vector<DatabaseObject *> *objList)
+void EditorUserInterface::onMouseDragged_copyAndDrag(const Vector<DatabaseObject *> *objList)
 {
    Vector<DatabaseObject *> copiedObjects;
 
@@ -3100,7 +2944,6 @@ void EditorUserInterface::onMouseDragged_CopyAndDrag(const Vector<DatabaseObject
       {
          BfObject *newObject = obj->newCopy();
          newObject->setSelected(true);
-         //newObject->addToGame(getGame(), NULL);    // NULL keeps object out of database... will be added in bulk below 
 
          copiedObjects.push_back(newObject);
 
@@ -3133,31 +2976,25 @@ void EditorUserInterface::onMouseDragged_CopyAndDrag(const Vector<DatabaseObject
 }
 
 
-void EditorUserInterface::translateSelectedItems(const Vector<Point> &origins, const Point &offset, const Point &lastOffset)
+void EditorUserInterface::translateSelectedItems(const Point &offset, const Point &lastOffset)
 {
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
-   //mMoveOrigins[i].set(objList->get(i)->getPos());
-   TNLAssert(mMoveOrigins.size() == objList->size(), "Expected these to be the same size!");
-
+   S32 k = 0;
    for(S32 i = 0; i < objList->size(); i++)
    {
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
       if(obj->isSelected() || obj->anyVertsSelected())
       {
-         //obj->setPos(mMoveOrigins[i] + offset);
          Point newVert;    // Reusable container
 
          for(S32 j = obj->getVertCount() - 1; j >= 0;  j--)
+         {
             if(obj->isSelected())            // ==> Dragging whole object
             {
-               //          Offset from vertex @ getPos()   +  New position for vertex @ getPos()  
-               //F64 x = ((F64)obj->getVert(j).x - (F64)obj->getPos().x) + ((F64)mMoveOrigins[i].x + (F64)offset.x);
-               //F64 y = ((F64)obj->getVert(j).y - (F64)obj->getPos().y) + (F64)(mMoveOrigins[i].y + (F64)offset.y);
-               //newVert = Point((F32)x, (F32)y);
+               newVert = obj->getVert(j) + (mSelectedObjectsForDragging[k]->getVert(0) - obj->getVert(0)) + offset;
 
-               newVert = (obj->getVert(j) - obj->getVert(0)) + (mMoveOrigins[i] + offset);
                obj->setVert(newVert, j);
 
                obj->onItemDragging();        // Let the item know it's being dragged
@@ -3169,6 +3006,9 @@ void EditorUserInterface::translateSelectedItems(const Vector<Point> &origins, c
                obj->setVert(newVert, j);
                obj->onGeomChanging();        // Because, well, the geom is changing
             }
+         }
+
+         k++;
       }
    }
 }
@@ -3186,8 +3026,13 @@ void EditorUserInterface::snapSelectedEngineeredItems(const Point &cumulativeOff
       {
          // Only try to mount any items that are both 1) selected and 2) marked as wanting to snap
          EngineeredItem *engrObj = static_cast<EngineeredItem *>(objList->get(i));
+         S32 j = 0;
          if(engrObj->isSelected() && promiscuousSnapper[i])
-            engrObj->mountToWall(snapPointToLevelGrid(mMoveOrigins[i] + cumulativeOffset), wallSegmentManager, &selectedWalls);
+         {
+            engrObj->mountToWall(snapPointToLevelGrid(mSelectedObjectsForDragging[j]->getVert(0) + cumulativeOffset), 
+                                 wallSegmentManager, &selectedWalls);
+            j++;
+         }
       }
    }
 }
@@ -3206,25 +3051,21 @@ BfObject *EditorUserInterface::copyDockItem(BfObject *source)
 // User just dragged an item off the dock
 void EditorUserInterface::startDraggingDockItem()
 {
-   saveUndoState();     // Save our undo state before we create a new item
-
-   BfObject *item = copyDockItem(mDraggingDockItem);
+   BfObject *item(copyDockItem(mDraggingDockItem));
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
    Point pos = convertCanvasToLevelCoord(mMousePos) - item->getInitialPlacementOffset(mGridSize);
    item->moveTo(pos);
       
-   GridDatabase *database = getLevel();
+   addToEditor(item);
 
-   addToEditor(item); 
-//   database->dumpObjects();
+   // Create an undo action to remove this item
+   mUndoManager.saveCreateActionAndMergeWithNextUndoState();
+
+   mDraggingDockItem = NULL;     // Because now we're dragging a real item
+
+   doneAddingObjects(item);
    
-   clearSelection(database);    // No items are selected...
-   item->setSelected(true);     // ...except for the new one
-   onSelectionChanged();
-   mDraggingDockItem = NULL;    // Because now we're dragging a real item
-   validateLevel();             // Check level for errors
-
 
    // Because we sometimes have trouble finding an item when we drag it off the dock, after it's been sorted,
    // we'll manually set mHitItem based on the selected item, which will always be the one we just added.
@@ -3243,6 +3084,79 @@ void EditorUserInterface::startDraggingDockItem()
          break;
       }
    }
+}
+
+
+void EditorUserInterface::doneAddingObjects(S32 serialNumber)
+{
+   doneAddingObjects(mLevel->findObjBySerialNumber(serialNumber));
+}
+
+
+void EditorUserInterface::doneAddingObjects(const Vector<S32> &serialNumbers)
+{
+   Vector<BfObject *> bfObjects(serialNumbers.size());
+
+   for(S32 i = 0; i < serialNumbers.size(); i++)
+      bfObjects.push_back(mLevel->findObjBySerialNumber(serialNumbers[i]));
+
+   doneChangingGeoms(bfObjects);
+}
+
+
+void EditorUserInterface::doneAddingObjects(BfObject *bfObject)
+{
+   Vector<BfObject *> bfObjects;
+   bfObjects.push_back(bfObject);
+
+   doneAddingObjects(bfObjects);
+}
+
+
+void EditorUserInterface::doneChangingGeoms(const Vector<S32> &serialNumbers)
+{
+   Vector<BfObject *> bfObjects(serialNumbers.size());
+
+   for(S32 i = 0; i < serialNumbers.size(); i++)
+      bfObjects.push_back(mLevel->findObjBySerialNumber(serialNumbers[i]));
+
+   doneChangingGeoms(bfObjects);
+}
+
+
+void EditorUserInterface::doneAddingObjects(const Vector<BfObject *> &bfObjects)
+{
+   clearSelection(getLevel());   // No items are selected...
+
+   for(S32 i = 0; i < bfObjects.size(); i++)
+   {
+      BfObject *obj = mLevel->findObjBySerialNumber(bfObjects[i]->getSerialNumber());
+      obj->setSelected(true);  // ...except for the new ones;
+   }
+
+   onSelectionChanged();
+   validateLevel();              // Check level for errors
+}
+
+
+void EditorUserInterface::doneChangingGeoms(S32 serialNumber)
+{
+   doneChangingGeoms(mLevel->findObjBySerialNumber(serialNumber));
+}
+
+
+void EditorUserInterface::doneChangingGeoms(BfObject *bfObject)
+{
+   Vector<BfObject *> bfObjects;
+   bfObjects.push_back(bfObject);
+
+   doneChangingGeoms(bfObjects);
+}
+
+
+void EditorUserInterface::doneChangingGeoms(const Vector<BfObject *> &bfObjects)
+{
+   // Do nothing ??
 }
 
 
@@ -3324,7 +3238,10 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
    if(!anythingSelected())  // Nothing to delete
       return;
 
-   bool deleted = false, deletedWall = false;
+   mUndoManager.startTransaction();
+
+   bool deletedWall = false;
+   bool deletedAny = false;
 
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
@@ -3338,29 +3255,26 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          if(obj->isLitUp())
             mHitItem = NULL;
 
-         if(!deleted)
-            saveUndoState();
+         mUndoManager.saveAction(Editor::ActionDelete, obj);
 
          if(isWallType(obj->getObjectTypeNumber()))
             deletedWall = true;
 
          deleteItem(i, true);
-         deleted = true;
+         deletedAny = true;
       }
       else if(!objectsOnly)      // Deleted only selected vertices
       {
          bool geomChanged = false;
+
+         BfObject *origObj = obj->clone();      // Will be cleaned up by UndoManager
 
          // Backwards!  Since we could be deleting multiple at once
          for(S32 j = obj->getVertCount() - 1; j > -1 ; j--)
          {
             if(obj->vertSelected(j))
             {
-               if(!deleted)
-                  saveUndoState();
-              
                obj->deleteVert(j);
-               deleted = true;
 
                geomChanged = true;
                clearSnapEnvironment();
@@ -3370,28 +3284,31 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          // Check if item has too few vertices left to be viable
          if(obj->getVertCount() < obj->getMinVertCount())
          {
+            mUndoManager.saveAction(Editor::ActionDelete, origObj);
             if(isWallType(obj->getObjectTypeNumber()))
                deletedWall = true;
 
             deleteItem(i, true);
-            deleted = true;
          }
          else if(geomChanged)
+         {
+            mUndoManager.saveAction(Editor::ActionChange, origObj, obj);
             obj->onGeomChanged();
+         }
 
       }  // else if(!objectsOnly) 
    }  // for
 
 
+   mUndoManager.endTransaction();
+
    if(deletedWall)
       doneDeleteingWalls();
 
-   if(deleted)
+   if(deletedAny)
    {
-      setNeedToSave(true);
       autoSave();
-
-      doneDeleting();
+      doneDeletingObjects();
    }
 }
 
@@ -3399,20 +3316,24 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 // Increase selected wall thickness by amt
 void EditorUserInterface::changeBarrierWidth(S32 amt)
 {
-   if(!mLastUndoStateWasBarrierWidthChange)
-      saveUndoState(); 
-
    fillVector2.clear();    // fillVector gets modified in some child function, so use our secondary reusable container
    getLevel()->findObjects((TestFunc)isWallItemType, fillVector2);
+
+   mUndoManager.startTransaction();
 
    for(S32 i = 0; i < fillVector2.size(); i++)
    {
       WallItem *obj = static_cast<WallItem *>(fillVector2[i]);
+
       if(obj->isSelected())
+      {
+         mUndoManager.saveChangeAction_before(obj);
          obj->changeWidth(amt);     
+         mUndoManager.saveChangeAction_after(obj);
+      }
    }
 
-   mLastUndoStateWasBarrierWidthChange = true;
+   mUndoManager.endTransaction();
 }
 
 
@@ -3426,6 +3347,8 @@ void EditorUserInterface::splitBarrier()
 
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
+   mUndoManager.startTransaction();
+
    for(S32 i = 0; i < objList->size(); i++)
    {
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
@@ -3434,12 +3357,10 @@ void EditorUserInterface::splitBarrier()
           for(S32 j = 1; j < obj->getVertCount() - 1; j++)     // Can't split on end vertices!
             if(obj->vertSelected(j))
             {
-               saveUndoState();
-               
                doSplit(obj, j);
 
                split = true;
-               goto done2;                         // Yes, gotos are naughty, but they just work so well sometimes...
+               goto done2;       // Yes, gotos are naughty, but they just feel so good...
             }
    }
 
@@ -3447,18 +3368,16 @@ void EditorUserInterface::splitBarrier()
    if(!split && mSnapObject && mSnapObject->getGeomType() == geomPolyLine && mSnapObject->isSelected() && 
          mSnapVertexIndex != NONE && mSnapVertexIndex != 0 && mSnapVertexIndex != mSnapObject->getVertCount() - 1)
    {         
-      saveUndoState();
-
       doSplit(mSnapObject, mSnapVertexIndex);
-
       split = true;
    }
 
 done2:
+   mUndoManager.endTransaction();
+
    if(split)
    {
       clearSelection(database);
-      setNeedToSave(true);
       autoSave();
    }
 }
@@ -3467,12 +3386,16 @@ done2:
 // Split wall or line -- will probably crash on other geom types
 void EditorUserInterface::doSplit(BfObject *object, S32 vertex)
 {
+   TNLAssert(mUndoManager.inTransaction(), "Should have opened an undo transaction before calling this!");
+
    BfObject *newObj = object->newCopy();    // Copy the attributes
-   newObj->clearVerts();                        // Wipe out the geometry
+   newObj->clearVerts();                    // Wipe out the geometry
 
    // Note that it would be more efficient to start at the end and work backwards, but the direction of our numbering would be
    // reversed in the new object compared to what it was.  This isn't important at the moment, but it just seems wrong from a
    // geographic POV.  Which I have.
+
+   mUndoManager.saveChangeAction_before(object);
    for(S32 i = vertex; i < object->getVertCount(); i++) 
    {
       newObj->addVert(object->getVert(i), true);      // true: If wall already has more than max number of points, let children have more as well
@@ -3488,6 +3411,9 @@ void EditorUserInterface::doSplit(BfObject *object, S32 vertex)
    // Tell the new segments that they have new geometry
    object->onGeomChanged();
    newObj->onGeomChanged();            
+
+   mUndoManager.saveChangeAction_after(object);
+   mUndoManager.saveAction(ActionCreate, newObj);
 }
 
 
@@ -3495,9 +3421,11 @@ void EditorUserInterface::doSplit(BfObject *object, S32 vertex)
 // Will also merge two or more overlapping polygons.
 void EditorUserInterface::joinBarrier()
 {
+   GridDatabase *database = getLevel();
+
    BfObject *joinedObj = NULL;
 
-   GridDatabase *database = getLevel();
+   mUndoManager.startTransaction();
 
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
@@ -3509,86 +3437,157 @@ void EditorUserInterface::joinBarrier()
       if((obj_i->getGeomType() == geomPolyLine) && obj_i->isSelected())  
       {
          joinedObj = doMergeLines(obj_i, i);
+         if(joinedObj == NULL)
+         {
+            mUndoManager.rollbackTransaction();
+            return;
+         }
+
          break;
       }
       else if(obj_i->getGeomType() == geomPolygon && obj_i->isSelected())
       {
          joinedObj = doMergePolygons(obj_i, i);
+         if(joinedObj == NULL)
+         {
+            mUndoManager.rollbackTransaction();
+            return;
+         }
+
          break;
       }
    }
 
-   if(joinedObj)     // We had a successful merger
-   {
-      clearSelection(database);
-      setNeedToSave(true);
-      autoSave();
-      joinedObj->onGeomChanged();
-      joinedObj->setSelected(true);
+   // We had a successful merger
+   clearSelection(database);
+   autoSave();
+   joinedObj->onGeomChanged();
+   joinedObj->setSelected(true);
 
-      onSelectionChanged();
-   }
+   onSelectionChanged();
+
+   mUndoManager.endTransaction();
 }
 
 
 BfObject *EditorUserInterface::doMergePolygons(BfObject *firstItem, S32 firstItemIndex)
 {
+   TNLAssert(mUndoManager.inTransaction(), "Should be in an undo transaction here!");
+
    Vector<const Vector<Point> *> inputPolygons;
    Vector<Vector<Point> > outputPolygons;
    Vector<S32> deleteList;
-
-   saveUndoState();
 
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    inputPolygons.push_back(firstItem->getOutline());
 
-   bool cw = isWoundClockwise(*firstItem->getOutline());       // Make sure all our polys are wound the same direction as the first
-                                                               
+   // Make sure all our polys are wound the same direction as the first
+   bool cw = isWoundClockwise(*firstItem->getOutline());
+                                               
    for(S32 i = firstItemIndex + 1; i < objList->size(); i++)   // Compare against remaining objects
    {
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
       if(obj->getObjectTypeNumber() == firstItem->getObjectTypeNumber() && obj->isSelected())
       {
-         // We can just reverse the winding in place -- if merge succeeds, the poly will be deleted,
-         // and if it fails we'll just undo and revert everything to the way it was
+         // Reverse winding in place -- if merge succeeds, the poly will be deleted, and if it fails we'll revert it
          if(isWoundClockwise(*obj->getOutline()) != cw)
+         {
+            mUndoManager.saveChangeAction_before(obj);
             obj->reverseWinding();
+            mUndoManager.saveChangeAction_after(obj);
+         }
 
          inputPolygons.push_back(obj->getOutline());
          deleteList.push_back(i);
       }
    }
 
-   bool ok = mergePolys(inputPolygons, outputPolygons);
+   if(!mergePolys(inputPolygons, outputPolygons) || outputPolygons.size() != 1)
+      return NULL;
 
-   if(ok && outputPolygons.size() == 1)
+   mUndoManager.saveChangeAction_before(firstItem);
+
+   // Clear out the polygon, back to front
+   while(firstItem->getVertCount() > 0)
+      firstItem->deleteVert(firstItem->getVertCount() - 1);
+
+   // Add the new points
+   for(S32 i = 0; i < outputPolygons[0].size(); i++)
    {
-      // Clear out the polygon
-      while(firstItem->getVertCount())
-         firstItem->deleteVert(firstItem->getVertCount() - 1);
-
-      // Add the new points
-      for(S32 i = 0; i < outputPolygons[0].size(); i++)
-         ok &= firstItem->addVert(outputPolygons[0][i], true);
-
-      if(ok)
-      {
-         // Delete the constituent parts; work backwards to avoid queering the deleteList indices
-         for(S32 i = deleteList.size() - 1; i >= 0; i--)
-            deleteItem(deleteList[i]);
-
-         return firstItem;
-      }
+      bool ok = firstItem->addVert(outputPolygons[0][i], true);
+      TNLAssert(ok, "Should always return true!");
    }
 
-   undo(false);   // Merge failed for some reason.  Revert everything to undo state saved at the top of method.
-   return NULL;
+   mUndoManager.saveChangeAction_after(firstItem);
+
+   // Delete the constituent parts; work backwards to avoid queering the deleteList indices
+   for(S32 i = deleteList.size() - 1; i >= 0; i--)
+   {
+      mUndoManager.saveAction(ActionDelete, static_cast<BfObject *>(objList->get(deleteList[i])));
+      deleteItem(deleteList[i]);
+   }
+
+   return firstItem;
+}
+
+
+// First vertices are the same  1 2 3 | 1 4 5
+static void merge_1_2_3__1_4_5(BfObject *firstItem, BfObject *mergingWith)
+{
+   // Skip first vertex, because it would be a dupe
+   for(S32 a = 1; a < mergingWith->getVertCount(); a++)           
+      firstItem->addVertFront(mergingWith->getVert(a));
+}
+
+
+// First vertex conincides with final vertex 3 2 1 | 5 4 3
+static void merge_3_2_1__5_4_3(BfObject *firstItem, BfObject *mergingWith)
+{
+   for(S32 a = mergingWith->getVertCount() - 2; a >= 0; a--)
+      firstItem->addVertFront(mergingWith->getVert(a));
+}
+
+
+// Last vertex conincides with first 1 2 3 | 3 4 5
+static void merge_1_2_3__3_4_5(BfObject *firstItem, BfObject *mergingWith)
+{
+   // Skip first vertex, because it would be a dupe
+   for(S32 a = 1; a < mergingWith->getVertCount(); a++)  
+      firstItem->addVert(mergingWith->getVert(a));
+}
+
+
+// Last vertices coincide  1 2 3 | 5 4 3
+static void merge_1_2_3__5_4_3(BfObject *firstItem, BfObject *mergingWith)
+{
+   for(S32 j = mergingWith->getVertCount() - 2; j >= 0; j--)
+      firstItem->addVert(mergingWith->getVert(j));
+}
+
+
+BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, BfObject *mergingWith, S32 mergingWithIndex, 
+                                            void (*mergeFunction)(BfObject *, BfObject *))
+{
+   BfObject *joinedObj = firstItem;
+
+   mUndoManager.saveChangeAction_before(firstItem);
+
+   mergeFunction(firstItem, mergingWith);
+   
+   mUndoManager.saveChangeAction_after(firstItem);
+   mUndoManager.saveAction(ActionDelete, mergingWith);
+
+   deleteItem(mergingWithIndex);    // Deletes mergingWith, but slightly more efficiently since we already know the index
+
+   return joinedObj;
 }
 
 
 BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, S32 firstItemIndex)
 {
+   TNLAssert(mUndoManager.inTransaction(), "Should have opened an undo transaction before calling this!");
+
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
    BfObject *joinedObj = NULL;
 
@@ -3604,60 +3603,28 @@ BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, S32 firstItemIn
 
          if(firstItem->getVert(0).distSquared(obj->getVert(0)) < .0001)   // First vertices are the same  1 2 3 | 1 4 5
          {
-            if(!joinedObj)          // This is first join candidate found; something's going to merge, so save an undo state
-               saveUndoState();
-               
-            joinedObj = firstItem;
-
-            for(S32 a = 1; a < obj->getVertCount(); a++)           // Skip first vertex, because it would be a dupe
-               firstItem->addVertFront(obj->getVert(a));
-
-            deleteItem(i);
+            joinedObj = doMergeLines(firstItem, obj, i, merge_1_2_3__1_4_5);
             i--;
          }
 
          // First vertex conincides with final vertex 3 2 1 | 5 4 3
          else if(firstItem->getVert(0).distSquared(obj->getVert(obj->getVertCount() - 1)) < .0001)     
          {
-            if(!joinedObj)
-               saveUndoState();
-
-            joinedObj = firstItem;
-                  
-            for(S32 a = obj->getVertCount() - 2; a >= 0; a--)
-               firstItem->addVertFront(obj->getVert(a));
-
-            deleteItem(i);    // i has been merged into firstItem; don't need i anymore!
+            joinedObj = doMergeLines(firstItem, obj, i, merge_3_2_1__5_4_3);
             i--;
          }
 
          // Last vertex conincides with first 1 2 3 | 3 4 5
          else if(firstItem->getVert(firstItem->getVertCount() - 1).distSquared(obj->getVert(0)) < .0001)     
          {
-            if(!joinedObj)
-               saveUndoState();
-
-            joinedObj = firstItem;
-
-            for(S32 a = 1; a < obj->getVertCount(); a++)  // Skip first vertex, because it would be a dupe         
-               firstItem->addVert(obj->getVert(a));
-
-            deleteItem(i);
+            joinedObj = doMergeLines(firstItem, obj, i, merge_1_2_3__3_4_5);
             i--;
          }
 
          // Last vertices coincide  1 2 3 | 5 4 3
          else if(firstItem->getVert(firstItem->getVertCount() - 1).distSquared(obj->getVert(obj->getVertCount() - 1)) < .0001)     
          {
-            if(!joinedObj)
-               saveUndoState();
-
-            joinedObj = firstItem;
-
-            for(S32 j = obj->getVertCount() - 2; j >= 0; j--)
-               firstItem->addVert(obj->getVert(j));
-
-            deleteItem(i);
+            joinedObj = doMergeLines(firstItem, obj, i, merge_1_2_3__5_4_3);
             i--;
          }
       }
@@ -3677,7 +3644,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
    if(isWallType(obj->getObjectTypeNumber()))
    {
       // Need to recompute boundaries of any intersecting walls
-      wallSegmentManager->deleteSegments(obj->getSerialNumber());          // Delete the segments associated with the wall
+      wallSegmentManager->deleteSegments(obj->getSerialNumber());    // Delete the segments associated with the wall
       database->removeFromDatabase(obj, true);
 
       if(!batchMode)
@@ -3687,7 +3654,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
       database->removeFromDatabase(obj, true);
 
    if(!batchMode)
-      doneDeleting();
+      doneDeletingObjects();
 }
 
 
@@ -3701,7 +3668,7 @@ void EditorUserInterface::doneDeleteingWalls()
 }
 
 
-void EditorUserInterface::doneDeleting()
+void EditorUserInterface::doneDeletingObjects()
 {
    // Reset a bunch of things
    clearSnapEnvironment();
@@ -3715,11 +3682,6 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
 {
    if(mDraggingObjects)     // No inserting when items are being dragged!
       return;
-
-   GridDatabase *database = getLevel();
-
-   clearSelection(database);
-   saveUndoState();
 
    BfObject *newObject = NULL;
 
@@ -3740,12 +3702,12 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
    if(!newObject)
       return;
 
-   newObject->moveTo(snapPoint(database, convertCanvasToLevelCoord(mMousePos)));
-   addToEditor(newObject);    
-   newObject->onGeomChanged();
+   newObject->moveTo(snapPoint(convertCanvasToLevelCoord(mMousePos)));
+   addToEditor(newObject);
+   mUndoManager.saveAction(Editor::ActionCreate, newObject);
 
-   validateLevel();
-   setNeedToSave(true);
+   doneAddingObjects(newObject);
+
    autoSave();
 }
 
@@ -4121,13 +4083,14 @@ void EditorUserInterface::onMouseClicked_left()
 
    if(mCreatingPoly || mCreatingPolyline)       // Save any polygon/polyline we might be creating
    {
+      TNLAssert(mNewItem, "Should have an item here!");
+
       if(mNewItem->getVertCount() < 2)
-      {
          delete mNewItem.getPointer();
-         removeUndoState();
-      }
       else
          addToEditor(mNewItem);
+
+      mUndoManager.saveAction(ActionCreate, mNewItem);
 
       mNewItem = NULL;
 
@@ -4252,14 +4215,12 @@ void EditorUserInterface::onMouseClicked_right()
    {
       if(mNewItem->getVertCount() < Geometry::MAX_POLY_POINTS)    // Limit number of points in a polygon/polyline
       {
-         mNewItem->addVert(snapPoint(getLevel(), convertCanvasToLevelCoord(mMousePos)));
+         mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
          mNewItem->onGeomChanging();
       }
          
       return;
    }
-
-   saveUndoState(true);             // Save undo state before we clear the selection
 
    clearSelection(getLevel());   // Unselect anything currently selected
    onSelectionChanged();
@@ -4270,7 +4231,7 @@ void EditorUserInterface::onMouseClicked_right()
       if(mHitItem->getVertCount() >= Geometry::MAX_POLY_POINTS)     // Polygon full -- can't add more
          return;
 
-      Point newVertex = snapPoint(getLevel(), convertCanvasToLevelCoord(mMousePos));   // adding vertex w/ right-mouse
+      Point newVertex = snapPoint(convertCanvasToLevelCoord(mMousePos));   // adding vertex w/ right-mouse
 
       mAddingVertex = true;
 
@@ -4285,7 +4246,6 @@ void EditorUserInterface::onMouseClicked_right()
       // The user might just insert a vertex and be done; in that case we'll need to rebuild the wall outlines to account
       // for the new vertex.  If the user continues to drag the vertex to a new location, this will be wasted effort...
       mHitItem->onGeomChanged();
-
 
       mMouseDownPos = newVertex;
    }
@@ -4304,7 +4264,7 @@ void EditorUserInterface::onMouseClicked_right()
 
       mNewItem->initializeEditor();
       mNewItem->setTeam(mCurrentTeam);
-      mNewItem->addVert(snapPoint(getLevel(), convertCanvasToLevelCoord(mMousePos)));
+      mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
    }
 }
 
@@ -4545,8 +4505,6 @@ void EditorUserInterface::startAttributeEditor()
          {
             menu->startEditingAttrs(obj_i);
             getUIManager()->activate(menu);
-
-            saveUndoState();
          }
 
          break;
@@ -4562,6 +4520,8 @@ void EditorUserInterface::doneEditingAttributes(EditorAttributeMenuUI *editor, B
 
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
+   mUndoManager.startTransaction();
+
    // Find any other selected items of the same type of the item we just edited, and update their attributes too
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -4569,10 +4529,16 @@ void EditorUserInterface::doneEditingAttributes(EditorAttributeMenuUI *editor, B
 
       if(obj != object && obj->isSelected() && obj->getObjectTypeNumber() == object->getObjectTypeNumber())
       {
+         mUndoManager.saveChangeAction_before(obj);
+
          editor->doneEditingAttrs(obj);  // Transfer attributes from editor to object
          obj->onAttrsChanged();          // And notify the object that its attributes have changed
+
+         mUndoManager.saveChangeAction_after(obj);
       }
    }
+
+   mUndoManager.endTransaction();
 }
 
 
@@ -4623,50 +4589,57 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
       case MOUSE_MIDDLE:
          mAutoScrollWithMouse = mAutoScrollWithMouseReady;
          break;
+
       case MOUSE_LEFT:
       case MOUSE_RIGHT:  
-         mMousePos.set(DisplayManager::getScreenInfo()->getMousePos());
-
-         if(mDragSelecting)      // We were drawing a rubberband selection box
-         {
-            Rect r(convertCanvasToLevelCoord(mMousePos), mMouseDownPos);
-
-            fillVector.clear();
-
-            getLevel()->findObjects(fillVector);
-
-
-            for(S32 i = 0; i < fillVector.size(); i++)
-            {
-               BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
-
-               // Make sure that all vertices of an item are inside the selection box; basically means that the entire 
-               // item needs to be surrounded to be included in the selection
-               S32 j;
-
-               for(j = 0; j < obj->getVertCount(); j++)
-                  if(!r.contains(obj->getVert(j)))
-                     break;
-               if(j == obj->getVertCount())
-                  obj->setSelected(true);
-            }
-            mDragSelecting = false;
-            onSelectionChanged();
-         }
-
-         else if(mDraggingObjects || mAddingVertex)     // We were dragging and dropping.  Could have been a move or a delete (by dragging to dock).
-         {
-            if(mAddingVertex)
-               mAddingVertex = false;
-            
-            onFinishedDragging();
-         }
-
+         onMouseUp();
          break;
 
       default:
          break;
    }     // end case
+}
+
+
+void EditorUserInterface::onMouseUp()
+{
+   mMousePos.set(DisplayManager::getScreenInfo()->getMousePos());
+
+   if(mDragSelecting)      // We were drawing a rubberband selection box
+   {
+      Rect r(convertCanvasToLevelCoord(mMousePos), mMouseDownPos);
+
+      fillVector.clear();
+
+      getLevel()->findObjects(fillVector);
+
+
+      for(S32 i = 0; i < fillVector.size(); i++)
+      {
+         BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
+
+         // Make sure that all vertices of an item are inside the selection box; basically means that the entire 
+         // item needs to be surrounded to be included in the selection
+         S32 j;
+
+         for(j = 0; j < obj->getVertCount(); j++)
+            if(!r.contains(obj->getVert(j)))
+               break;
+         if(j == obj->getVertCount())
+            obj->setSelected(true);
+      }
+      mDragSelecting = false;
+      onSelectionChanged();
+   }
+
+   // We were dragging and dropping.  Could have been a move or a delete (by dragging to dock).
+   else if(mDraggingObjects || mAddingVertex)     
+   {
+      if(mAddingVertex)
+         mAddingVertex = false;
+            
+      onFinishedDragging();
+   }
 }
 
 
@@ -4676,48 +4649,15 @@ void EditorUserInterface::onFinishedDragging()
    mDraggingObjects = false;
    SDL_SetCursor(Cursor::getDefault());
 
-   // Dragged item off the dock, then back on  ==> nothing changed; restore to unmoved state, which was stored on undo stack
+   // Dragged item off the dock, then back on  ==> nothing changed, do nothing
    if(mouseOnDock() && mDraggingDockItem != NULL)
-   {
-      undo(false);
       return;
-   }
 
    // Mouse is over the dock and we dragged something to the dock (probably a delete)
    if(mouseOnDock() && !mDraggingDockItem)
    {
-      // Only delete items in normal dock mode
-      if(mDockMode == DOCKMODE_ITEMS)
-      {
-         const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
-         bool deletedSomething = false, deletedWall = false;
-
-         for(S32 i = 0; i < objList->size(); i++)    //  Delete all selected items
-         {
-            BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-            if(obj->isSelected())
-            {
-               if(isWallType(obj->getObjectTypeNumber()))
-                  deletedWall = true;
-
-               deleteItem(i, true);
-               i--;
-               deletedSomething = true;
-            }
-         }
-
-         // We deleted something, do some clean up and our job is done
-         if(deletedSomething)
-         {
-            if(deletedWall)
-               doneDeleteingWalls();
-
-            doneDeleting();
-
-            return;
-         }
-      }
+      onFinishedDragging_droppedItemOnDock();
+      return;
    }
 
    // Mouse not on dock, we are either:
@@ -4726,42 +4666,102 @@ void EditorUserInterface::onFinishedDragging()
    // 3. we moved something to the dock and nothing was deleted, e.g. when dragging a vertex
    // need to save an undo state if anything changed
    if(mDraggingDockItem == NULL)    // Not dragging from dock - user is moving object around screen, or dragging vertex to dock
+      onFinishedDragging_movingObject();
+}
+
+
+void EditorUserInterface::onFinishedDragging_droppedItemOnDock()
+{
+   // Only delete items in normal dock mode
+   if(mDockMode == DOCKMODE_ITEMS)
    {
-      // If our snap vertex has moved then all selected items have moved
-      bool itemsMoved = mDragCopying || (mSnapObject && mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin);
+      const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
+      bool deletedSomething = false, deletedWall = false;
 
-      if(itemsMoved)    // Move consumated... update any moved items, and save our autosave
+      // Move objects back to their starting location before deleting, so when undeleting, 
+      // objects return the way users will expect
+      translateSelectedItems(Point(0,0), mSnapDelta);
+
+      mUndoManager.startTransaction();
+
+      for(S32 i = 0; i < objList->size(); i++)    //  Delete all selected items
       {
-         bool wallMoved = false;
+         BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
-         const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
-
-         for(S32 i = 0; i < objList->size(); i++)
+         if(obj->isSelected())
          {
-            BfObject *obj = static_cast<BfObject *>(objList->get(i));
+            if(isWallType(obj->getObjectTypeNumber()))
+               deletedWall = true;
 
-            if(obj->isSelected() || objList->get(i)->anyVertsSelected())
-               obj->onGeomChanged();
+            mUndoManager.saveAction(ActionDelete, obj);
 
-            if(obj->isSelected() && isWallType(obj->getObjectTypeNumber()))      // Wall or polywall
-               wallMoved = true;
+            deleteItem(i, true);
+            i--;
+            deletedSomething = true;
          }
+      }
 
-         if(wallMoved)
-            getLevel()->snapAllEngineeredItems(true);
+      mUndoManager.endTransaction();
 
-         setNeedToSave(true);
-         autoSave();
+      // We deleted something, do some clean up and our job is done
+      if(deletedSomething)
+      {
+         if(deletedWall)
+            doneDeleteingWalls();
 
-         mDragCopying = false;
+         doneDeletingObjects();
 
          return;
       }
-      else if(!mJustInsertedVertex)    // We started our move, then didn't end up moving anything... remove associated undo state
-         deleteUndoState();
-      else
-         mJustInsertedVertex = false;
    }
+}
+
+
+void EditorUserInterface::onFinishedDragging_movingObject()
+{
+   // If our snap vertex has moved then all selected items have moved
+   bool itemsMoved = mDragCopying || (mSnapObject.isValid() && mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin);
+
+   if(itemsMoved)    // Move consumated... update any moved items, and save our autosave
+   {
+      bool wallMoved = false;
+
+      mUndoManager.startTransaction();
+
+      const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
+
+      S32 j = 0;
+      for(S32 i = 0; i < objList->size(); i++)
+      {
+         BfObject *obj = static_cast<BfObject *>(objList->get(i));
+
+         if(obj->isSelected() || objList->get(i)->anyVertsSelected())
+         {
+            obj->onGeomChanged();
+            mUndoManager.saveAction(ActionChange, mSelectedObjectsForDragging[j], obj);
+            j++;
+         }
+
+         if(obj->isSelected() && isWallType(obj->getObjectTypeNumber()))      // Wall or polywall
+            wallMoved = true;
+      }
+
+      if(wallMoved)
+         getLevel()->snapAllEngineeredItems(true);
+
+      mUndoManager.endTransaction();
+
+      autoSave();
+
+      mDragCopying = false;
+
+      return;
+   }
+
+   else if(mJustInsertedVertex)
+      mJustInsertedVertex = false;
+
+   // else we ended up doing nothing
 }
 
 
@@ -4941,8 +4941,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
    if(!doSaveLevel(filename, showFailMessages))
       return false;
 
-   mNeedToSave = false;
-   mAllUndoneUndoLevel = mLastUndoIndex;     // If we undo to this point, we won't need to save
+   mUndoManager.levelSaved();
 
    if(showSuccessMessages)
       setSaveMessage("Saved " + getLevelFileName(), true);

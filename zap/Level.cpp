@@ -361,6 +361,43 @@ void Level::setGameType(GameType *gameType)
 }
 
 
+void Level::deleteObject(S32 serialNumber)
+{
+   DatabaseObject *obj = findObjBySerialNumber(serialNumber);
+   TNLAssert(obj, "Expect to find obj here!");
+
+   removeFromDatabase(obj, true);
+}
+
+
+// Swap the specified object with the other specified object
+void Level::swapObject(S32 serialNumber, const BfObject *withThisObject)
+{
+   DatabaseObject *obj = findObjBySerialNumber(serialNumber);
+   TNLAssert(obj, "Could not find object!");
+
+   Parent::removeFromDatabase(obj, true);
+   addToDatabase(withThisObject->clone());
+}
+
+
+// Find specified object in specified database
+BfObject *Level::findObjBySerialNumber(S32 serialNumber) const
+{
+   const Vector<DatabaseObject *> *objList = findObjects_fast();
+
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(objList->get(i));
+
+      if(obj->getSerialNumber() == serialNumber)
+         return obj;
+   }
+
+   return NULL;
+}
+
+
 string Level::getLevelName() const
 {
    return mGameType->getLevelName();

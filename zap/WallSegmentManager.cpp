@@ -204,6 +204,8 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
 #ifndef ZAP_DEDICATED  // <== why??
 
    // Find any engineered objects that terminate on this wall, and mark them for resnapping later
+   TNLAssert(dynamic_cast<BfObject *>(wallDbObject), "Can't cast to BfObject!");
+
    BfObject *wall = static_cast<BfObject *>(wallDbObject);     // Wall we're deleting and rebuilding
 
    Vector<EngineeredItem *> toBeRemounted;    // A list of engr objects terminating on the wall segment that we'll be deleting

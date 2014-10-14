@@ -10,8 +10,9 @@
 #include "UIMenus.h"             // Parent
 
 #include "EditorPlugin.h"        // For plugin support
-#include "teamInfo.h"            // For TeamManager def
+#include "EditorUndoManager.h"   // To, like, undo stuff
 
+#include "teamInfo.h"            // For TeamManager def
 #include "VertexStylesEnum.h"
 #include "BfObject.h"            // For BfObject definition
 #include "Timer.h"
@@ -31,6 +32,8 @@ using namespace std;
 
 namespace Zap
 {
+
+using namespace Editor;
 
 class DatabaseObject;
 class EditorAttributeMenuUI;
@@ -121,7 +124,6 @@ private:
 
    SymbolString mLingeringMessage;
 
-   Vector<boost::shared_ptr<Level> > mUndoItems;   // Undo/redo history 
    Point mMoveOrigin;                              // Point representing where items were moved "from" for figuring out how far they moved
    Point mSnapDelta;                               // For tracking how far from the snap point our cursor is
    Vector<Point> mMoveOrigins;
@@ -133,27 +135,18 @@ private:
 
    Vector<Vector<string> > mMessageBoxQueue;
 
-   U32 mFirstUndoIndex;
-   U32 mLastUndoIndex;
-   U32 mLastRedoIndex;
-
    bool mDragCopying;
    bool mJustInsertedVertex;
-   bool mRedoingAnUndo;
 
    Vector<string> mRobotLines;         // A list of robot lines read from a level file when loading from the editor
 
    void clearSnapEnvironment();
 
-   static const U32 UNDO_STATES = 128;
-   void deleteUndoState();             // Removes most recent undo state from stack
-   bool undoAvailable();               // Is an undo state available?
+   EditorUndoManager mUndoManager;
    void undo(bool addToRedoStack);     // Restore mItems to latest undo state
    void redo();                        // Redo latest undo
 
    Vector<boost::shared_ptr<BfObject> > mClipboard;    // Items on clipboard
-
-   bool mLastUndoStateWasBarrierWidthChange;
 
    string mEditFileName;            // Manipulate with get/setLevelFileName
 
@@ -217,11 +210,13 @@ private:
    void doSplit(BfObject *object, S32 vertex);
    void joinBarrier();           // Join barrier bits together into one (if ends are coincident)
 
-   BfObject *doMergeLines   (BfObject *firstItem, S32 firstItemIndex);   
+   BfObject *doMergeLines(BfObject *firstItem, S32 firstItemIndex);   
+   BfObject *doMergeLines(BfObject *firstItem, BfObject *mergingWith, S32 mergingWithIndex,
+                          void (*mergeFunction)(BfObject *, BfObject *));
+
+
    BfObject *doMergePolygons(BfObject *firstItem, S32 firstItemIndex);
    
-   BfObject *findObjBySerialNumber(const GridDatabase *database, S32 serialNumber) const;
-
    bool anyItemsSelected(const GridDatabase *database) const;  // Are any items selected?
    bool anythingSelected() const;                              // Are any items/vertices selected?
 
@@ -254,9 +249,10 @@ private:
    SafePtr<BfObject> mDraggingDockItem;
    SafePtr<BfObject> mDockItemHit;
 
+   Vector<BfObject *> mSelectedObjectsForDragging;
+
    S32 mDockPluginScrollOffset;
    U32 mDockWidth;
-   bool mNeedToSave;                  // Have we modified the level such that we need to save?
    bool mIgnoreMouseInput;
 
 
@@ -268,6 +264,9 @@ private:
    GameType *mEditorGameType;    // Used to store our GameType while we're testing
 
    void onFinishedDragging();    // Called when we're done dragging an object
+   void onFinishedDragging_droppedItemOnDock();
+   void onFinishedDragging_movingObject();
+
    void onSelectionChanged();    // Called when current selection has changed
 
    void onMouseClicked_left();
@@ -289,7 +288,7 @@ private:
 
    Level mLevelGenDatabase;         // Database for inserting objects when running a levelgen script in the editor
 
-   void translateSelectedItems(const Vector<Point> &origins, const Point &offset, const Point &lastOffset);
+   void translateSelectedItems(const Point &offset, const Point &lastOffset);
    void snapSelectedEngineeredItems(const Point &cumulativeOffset);
 
    void render() const;
@@ -302,6 +301,12 @@ private:
    void onActivateReactivate();
 
    void setCurrentOffset(const Point &center);
+
+   void doneAddingObjects(const Vector<BfObject *> &bfObjects);
+   void doneAddingObjects(BfObject *bfObject);
+
+   void doneChangingGeoms(const Vector<BfObject *> &bfObjects);
+   void doneChangingGeoms(BfObject *bfObject);
 
 protected:
    void onActivate();
@@ -323,10 +328,6 @@ public:
    string getLevelFileName() const;
    void cleanUp();
    void loadLevel();
-   U32 mAllUndoneUndoLevel;   // What undo level reflects everything back just the
-
-   void saveUndoState(bool forceSelection = false);     // Save the current state of the editor objects for later undoing
-   void removeUndoState();    // Remove and discard the most recently saved undo state 
 
    Vector<string> mGameTypeArgs;
 
@@ -346,8 +347,6 @@ public:
    F32 getCurrentScale() const;
    Point getCurrentOffset() const;
 
-   void clearUndoHistory();        // Wipe undo/redo history
-
    Vector<TeamInfo> mOldTeams;     // Team list from before we run team editor, so we can see what changed
 
    void rebuildEverything(Level *level);   // Does lots of things in undo, redo, and add items from script
@@ -363,7 +362,6 @@ public:
    void clearTeams();
 
    bool getNeedToSave() const;
-   void setNeedToSave(bool needToSave);
 
    void clearRobotLines();
    void addRobotLine(const string &robotLine);
@@ -392,12 +390,21 @@ public:
 
 
    void onKeyUp(InputCode inputCode);
+   void onMouseUp();
+
    void onMouseMoved();
    void onMouseDragged();
-   void onMouseDragged_StartDragging(const bool needToSaveUndoState);
-   void onMouseDragged_CopyAndDrag(const Vector<DatabaseObject *> *objList);
+   void onMouseDragged_startDragging();
+   void onMouseDragged_copyAndDrag(const Vector<DatabaseObject *> *objList);
    void startDraggingDockItem();
    BfObject *copyDockItem(BfObject *source);
+
+   void doneAddingObjects(S32 serialNumber);
+   void doneAddingObjects(const Vector<S32> &serialNumbers);
+
+   void doneChangingGeoms(S32 serialNumber);
+   void doneChangingGeoms(const Vector<S32> &serialNumbers);
+
 
    void populateDock();                         // Load up dock with game-specific items to drag and drop
    void addDockObject(BfObject *object, F32 xPos, F32 yPos);
@@ -440,12 +447,10 @@ public:
    void setLingeringMessage(const string &msg);
    void clearLingeringMessage();
 
-   void markLevelPermanentlyDirty();
-
    void onDisplayModeChange();      // Called when we shift between windowed and fullscreen mode, after change is made
 
    // Snapping related functions:
-   Point snapPoint(GridDatabase *database, Point const &p, bool snapWhileOnDock = false) const;
+   Point snapPoint(const Point &p, bool snapWhileOnDock = false) const;
    Point snapPointToLevelGrid(Point const &p) const;
 
    void markSelectedObjectsAsUnsnapped(const Vector<DatabaseObject *> *objList);
@@ -463,7 +468,7 @@ public:
 
    // Helpers for doing batch deletes
    void doneDeleteingWalls(); 
-   void doneDeleting();
+   void doneDeletingObjects();
 
    // Run a script, and put resulting objects in database
    void runScript(Level *level, const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);

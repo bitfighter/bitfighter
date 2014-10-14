@@ -219,9 +219,7 @@ void GameParamUserInterface::onEscape()
    if(anythingChanged())
    {
       EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
-
-      ui->setNeedToSave(true);       // Need to save to retain our changes
-      ui->mAllUndoneUndoLevel = -1;  // This change can't be undone
+      // TODO -->Save undo state here!!!
       ui->validateLevel();
    }
 

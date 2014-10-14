@@ -170,8 +170,8 @@ public:
    void addToDatabase(const Vector<DatabaseObject *> &objects);
 
 
-   virtual void removeFromDatabase(DatabaseObject *theObject, bool deleteObject);
-   virtual void removeEverythingFromDatabase();
+   void removeFromDatabase(DatabaseObject *theObject, bool deleteObject);
+   void removeEverythingFromDatabase();
 
    S32 getObjectCount() const;                          // Return the number of objects currently in the database
    S32 getObjectCount(U8 typeNumber) const;             // Return the number of objects currently in the database of specified type

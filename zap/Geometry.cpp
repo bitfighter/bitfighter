@@ -457,6 +457,15 @@ void PointGeometry::setGeom(const Vector<Point> &points)
 }
 
 
+Vector<Point> PointGeometry::getGeom() const
+{
+   Vector<Point> points(1);
+   points.push_back(mPoint);
+
+   return points;
+}
+
+
 Rect PointGeometry::calcExtents()
 {
    return Rect(mPoint, mRadius);
@@ -661,6 +670,18 @@ void SimpleLineGeometry::setGeom(const Vector<Point> &points)
 }
 
 
+Vector<Point> SimpleLineGeometry::getGeom() const
+{
+   Vector<Point> points(2);
+
+   points.push_back(mFromPos);
+   points.push_back(mToPos);
+
+   return points;
+}
+
+
+
 Rect SimpleLineGeometry::calcExtents()
 {
    return Rect(mFromPos, mToPos);
@@ -737,6 +758,7 @@ void PolylineGeometry::clearVerts()
 }
 
 
+// If ignoreMaxPointsLimit is true, other code depends on this always returning true
 bool PolylineGeometry::addVert(const Point &point, bool ignoreMaxPointsLimit) 
 { 
    if(mPolyBounds.size() >= Geometry::MAX_POLY_POINTS && !ignoreMaxPointsLimit)
@@ -917,6 +939,17 @@ void PolylineGeometry::setGeom(const Vector<Point> &points)
    mVertSelected.resize(mPolyBounds.size());
 
    onPointsChanged();
+}
+
+
+Vector<Point> PolylineGeometry::getGeom() const
+{
+   Vector<Point> points(mPolyBounds.size());
+
+   for(S32 i = 0; i < mPolyBounds.size(); i++)
+      points.push_back(mPolyBounds[i]);
+
+   return points;
 }
 
 

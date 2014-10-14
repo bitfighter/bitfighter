@@ -7,19 +7,24 @@
 #define _GEOMOBJECT_H_
 
 #include "Geometry_Base.h"    // For Geometry class def
-#include "Point.h"
 
-//#include "gtest/gtest_prod.h"
+#include "Point.h"
+#include "tnlVector.h"
 
 #include <string>
+
+using namespace TNL;
 
 namespace Zap
 {
 
 class GeometryContainer
 {
+   friend class GeomObject;
+
 private:
    Geometry *mGeometry;
+   void setGeometry(Geometry *geometry);
 
 public:
    GeometryContainer();                                     // Constructor
@@ -27,7 +32,8 @@ public:
    virtual ~GeometryContainer();                            // Destructor
 
    Geometry *getGeometry() const;
-   void setGeometry(Geometry *geometry);
+   void setGeometry(const Vector<Point> &points);
+
    void reverseWinding();
 
    const Vector<Point> *getOutline() const;
@@ -92,6 +98,8 @@ public:
    virtual Rect calcExtents();
    bool hasGeometry() const;
 
+   void setGeometry(const Vector<Point> &points);
+
    void disableTriangulation();
 
    // Sending/receiving
@@ -101,6 +109,8 @@ public:
    // Saving/loading
    string geomToLevelCode() const;
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
+
+   GeometryContainer &getGeometry();
 
    virtual void onGeomChanging();      // Item geom is interactively changing
    virtual void onGeomChanged();       // Item changed geometry (or moved), do any internal updating that might be required

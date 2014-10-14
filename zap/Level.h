@@ -108,6 +108,11 @@ public:
    void setTeamInfosPtr(const boost::shared_ptr<Vector<TeamInfo> > &teamInfos);
    boost::shared_ptr<Vector<TeamInfo> > getTeamInfosPtr() const;
 
+   // Manipulating objects
+   void deleteObject(S32 serialNumber);
+   void swapObject(S32 replaceThisObject, const BfObject *withThisObject);
+
+   BfObject *findObjBySerialNumber(S32 serialNumber) const;
 
    // Level metadata
    string getLevelName() const;

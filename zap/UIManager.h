@@ -272,7 +272,6 @@ public:
 
    // EditorUI
    void readRobotLine(const string &robotLine);
-   void markEditorLevelPermanentlyDirty();
 };
 
 

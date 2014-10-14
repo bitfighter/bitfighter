@@ -609,7 +609,7 @@ void ClientGame::levelIsNotReallyInTheDatabase()
          "need to save).  You can upload the level again from the Editor menu.";
 
       mUIManager->displayMessageBox("Database Problem", "Press [[Esc]] to continue", msg);
-      mUIManager->markEditorLevelPermanentlyDirty();
+      //mUIManager->markEditorLevelPermanentlyDirty();
    }
 }
 

@@ -118,6 +118,8 @@ set(CLIENT_SOURCES
 	EditorAttributeMenuItemBuilder.cpp
 	EditorPlugin.cpp
 	EditorTeam.cpp
+	EditorUndoManager.cpp
+	EditorWorkUnit.cpp
 	EnergyGaugeRenderer.cpp
 	engineerHelper.cpp
 	Event.cpp

@@ -72,6 +72,8 @@ public:
    void packGeom(GhostConnection *connection, BitStream *stream);
    void unpackGeom(GhostConnection *connection, BitStream *stream);
    void setGeom(const Vector<Point> &points);
+   Vector<Point> getGeom() const;
+
 
    string geomToLevelCode() const;
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
@@ -122,6 +124,8 @@ public:
    void packGeom(GhostConnection *connection, BitStream *stream);
    void unpackGeom(GhostConnection *connection, BitStream *stream); 
    void setGeom(const Vector<Point> &points);
+   Vector<Point> getGeom() const;
+
 
    string geomToLevelCode() const;
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
@@ -182,6 +186,7 @@ public:
    void packGeom(GhostConnection *connection, BitStream *stream);
    void unpackGeom(GhostConnection *connection, BitStream *stream); 
    void setGeom(const Vector<Point> &points);
+   Vector<Point> getGeom() const;
 
    string geomToLevelCode() const;
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);

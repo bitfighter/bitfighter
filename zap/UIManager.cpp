@@ -1029,10 +1029,4 @@ void UIManager::readRobotLine(const string &robotLine)
 }
 
 
-void UIManager::markEditorLevelPermanentlyDirty() 
-{
-   getUI<EditorUserInterface>()->markLevelPermanentlyDirty();
-}
-
-
 };

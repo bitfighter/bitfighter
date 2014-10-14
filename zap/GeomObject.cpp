@@ -19,13 +19,6 @@ GeomObject::GeomObject()
 }
 
 
-//// Copy constructor
-//GeomObject::GeomObject(const GeomObject &g) 
-//{
-//   mGeometry = g.mGeometry;
-//}
-
-
 // Destructor
 GeomObject::~GeomObject()
 {
@@ -165,6 +158,18 @@ void GeomObject::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridS
 }
 
 
+GeometryContainer &GeomObject::getGeometry()
+{
+   return mGeometry;
+}
+
+
+void GeomObject::setGeometry(const Vector<Point> &points)
+{
+   mGeometry.setGeometry(points);
+}
+
+
 // Function currently only used for testing
 bool GeomObject::hasGeometry() const
 {
@@ -256,6 +261,7 @@ Geometry *GeometryContainer::getGeometry() const
 
 void GeometryContainer::setGeometry(Geometry *geometry)
 {
+   delete mGeometry;
    mGeometry = geometry;
 }
 
@@ -263,6 +269,12 @@ void GeometryContainer::setGeometry(Geometry *geometry)
 void GeometryContainer::reverseWinding()    
 {
    mGeometry->reverseWinding();
+}
+
+
+void GeometryContainer::setGeometry(const Vector<Point> &points)
+{
+   mGeometry->setGeom(points);
 }
 
 
