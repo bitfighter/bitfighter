@@ -636,6 +636,13 @@ void BfObject::onGeomChanged()
 }
 
 
+void BfObject::moveTo(const Point &pos, S32 snapVertex)
+{  
+   GeomObject::moveTo(pos, snapVertex);
+   onGeomChanged();
+}
+
+
 // Item is being dragged around in the editor...
 // Update their geometry so they will be visible in game-preview mode (tab key in the editor) while being dragged
 void BfObject::onItemDragging()  { onGeomChanged(); }
@@ -652,7 +659,7 @@ void BfObject::prepareForDock(const Point &point, S32 teamIndex)
 #endif
 
 
-#ifndef ZAP_DEDICATED
+#ifndef ZAP_DE+DICATED
 // Render selected and highlighted vertices, called from renderEditor
 void BfObject::renderAndLabelHighlightedVertices(F32 currentScale)
 {

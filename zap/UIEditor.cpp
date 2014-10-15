@@ -2258,8 +2258,6 @@ void EditorUserInterface::pasteSelection()
     if(objCount == 0)         // Nothing on clipboard, nothing to do
       return;
 
-   GridDatabase *database = getLevel();
-
    Point pastePos = snapPoint(convertCanvasToLevelCoord(mMousePos));
 
    Point firstPoint = mClipboard[0]->getVert(0);
@@ -2276,6 +2274,7 @@ void EditorUserInterface::pasteSelection()
 
       BfObject *newObject = mClipboard[i]->newCopy();
       newObject->moveTo(pastePos - offsetFromFirstPoint);
+      newObject->onGeomChanged();
 
       copiedObjects.push_back(newObject);
       copiedBfObjects.push_back(newObject);
@@ -2301,23 +2300,23 @@ void EditorUserInterface::pasteSelection()
 // Expand or contract selection by scale (i.e. resize)
 void EditorUserInterface::scaleSelection(F32 scale)
 {
-   GridDatabase *database = getLevel();
+   Level *level = getLevel();
 
-   if(!anyItemsSelected(database) || scale < .01 || scale == 1)    // Apply some sanity checks; limits here are arbitrary
+   if(!anyItemsSelected(level) || scale < .01 || scale == 1)    // Apply some sanity checks; limits here are arbitrary
       return;
 
    // Find center of selection
    Point min, max;                        
-   database->computeSelectionMinMax(min, max);
+   level->computeSelectionMinMax(min, max);
    Point ctr = (min + max) * 0.5;
 
    bool modifiedWalls = false;
-   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
+   WallSegmentManager *wallSegmentManager = level->getWallSegmentManager();
 
    wallSegmentManager->beginBatchGeomUpdate();
    mUndoManager.startTransaction();
 
-   const Vector<DatabaseObject *> *objList = database->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = level->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2338,7 +2337,7 @@ void EditorUserInterface::scaleSelection(F32 scale)
    }
 
    mUndoManager.endTransaction();
-   wallSegmentManager->endBatchGeomUpdate(database, modifiedWalls);
+   wallSegmentManager->endBatchGeomUpdate(level, modifiedWalls);
 
    autoSave();
 }
@@ -3902,32 +3901,32 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       mRight = true;
    else if(inputString == "Right Arrow")  // Pan right
       mRight = true;
-	   else if(inputString == getEditorBindingString(BINDING_FLIP_HORIZ))         // Flip horizontal
+   else if(inputString == getEditorBindingString(BINDING_FLIP_HORIZ))         // Flip horizontal
       flipSelectionHorizontal();
-	   else if(inputString == getEditorBindingString(BINDING_PASTE_SELECTION))    // Paste selection
+	else if(inputString == getEditorBindingString(BINDING_PASTE_SELECTION))    // Paste selection
       pasteSelection();
-	   else if(inputString == getEditorBindingString(BINDING_FLIP_VERTICAL))      // Flip vertical
+	else if(inputString == getEditorBindingString(BINDING_FLIP_VERTICAL))      // Flip vertical
       flipSelectionVertical();
    else if(inputString == "/" || inputString == "Keypad /")
       openConsole(NULL);
-	   else if(inputString == getEditorBindingString(BINDING_RELOAD_LEVEL))       // Reload level
+	else if(inputString == getEditorBindingString(BINDING_RELOAD_LEVEL))       // Reload level
    {
       loadLevel();                        
       setSaveMessage("Reloaded " + getLevelFileName(), true);
    }
-	   else if(inputString == getEditorBindingString(BINDING_REDO_ACTION))        // Redo
+	else if(inputString == getEditorBindingString(BINDING_REDO_ACTION))        // Redo
    {
       if(!mCreatingPolyline && !mCreatingPoly && !mDraggingObjects && !mDraggingDockItem)
          redo();
    }
-	   else if(inputString == getEditorBindingString(BINDING_UNDO_ACTION))        // Undo
+	else if(inputString == getEditorBindingString(BINDING_UNDO_ACTION))        // Undo
    {
       if(!mCreatingPolyline && !mCreatingPoly && !mDraggingObjects && !mDraggingDockItem)
          undo(true);
    }
-	   else if(inputString == getEditorBindingString(BINDING_RESET_VIEW))         // Reset veiw
+	else if(inputString == getEditorBindingString(BINDING_RESET_VIEW))         // Reset veiw
       centerView();
-	   else if(inputString == getEditorBindingString(BINDING_LVLGEN_SCRIPT))      // Run levelgen script, or clear last results
+	else if(inputString == getEditorBindingString(BINDING_LVLGEN_SCRIPT))      // Run levelgen script, or clear last results
    {
       // Ctrl+R is a toggle -- we either add items or clear them
       if(mLevelGenDatabase.getObjectCount() == 0)
@@ -3964,7 +3963,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       mOut = true;
    else if(inputString == "Down Arrow")         // Pan down
       mDown = true;
-	   else if(inputString == getEditorBindingString(BINDING_SAVE_LEVEL))          // Save
+	else if(inputString == getEditorBindingString(BINDING_SAVE_LEVEL))          // Save
       saveLevel(true, true);
    else if(inputString == "S"|| inputString == "Shift+S")                                    // Pan down
       mDown = true;

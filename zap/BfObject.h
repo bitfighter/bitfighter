@@ -410,6 +410,9 @@ public:
 
    virtual void setSnapped(bool snapped);                  // Overridden in EngineeredItem 
 
+   //// Geometry manipulation
+   void moveTo(const Point &pos, S32 snapVertex = 0);
+
    ///// Dock related
 #ifndef ZAP_DEDICATED
    virtual void prepareForDock(const Point &point, S32 teamIndex);

@@ -81,10 +81,13 @@ public:
 
    // Transforming the geometry
    void rotateAboutPoint(const Point &center, F32 angle);
-   void flip(F32 center, bool isHoriz);                   // Do a horizontal or vertical flip about line at center
+   void flip(F32 center, bool isHoriz);               // Do a horizontal or vertical flip about line at center
    void scale(const Point &center, F32 scale);
-   void moveTo(const Point &pos, S32 snapVertex = 0);     // Move object to location, specifying (optional) vertex to be positioned at pos
-   void offset(const Point &offset);                      // Offset object by a certain amount
+   void offset(const Point &offset);                  // Offset object by a certain amount
+
+   // Move object to location, specifying (optional) vertex to be positioned at pos
+   virtual void moveTo(const Point &pos, S32 snapVertex = 0);  
+   
 
    // Getting parts of the geometry
    Point getCentroid() const;
