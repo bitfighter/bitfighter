@@ -70,7 +70,7 @@ QueryServersUserInterface::ServerRef::ServerRef(S32 serverId, const Address &add
 {
    this->serverId = serverId;
    this->state = initialState;
-   this->isLocalServer = isLocalServer;      
+   this->isLocalServer = isLocalServer; 
 
    pingTimedOut = false;
    everGotQueryResponse = false;
@@ -188,6 +188,8 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) :
    
    buttons.push_back(prevButton);
    buttons.push_back(nextButton);
+
+   mHostOnServer = false;
 }
 
 
@@ -285,7 +287,7 @@ void QueryServersUserInterface::contactEveryone()
          masterConn->c2mJoinGlobalChat();    // Announce our presence in the chat room
          mAnnounced = true;
       }
-      masterConn->startServerQuery();
+      masterConn->startServerQuery(mHostOnServer);
       mWaitingForResponseFromMaster = true;
    }
    else     // Don't have a valid connection object
@@ -385,7 +387,8 @@ void QueryServersUserInterface::gotServerListFromMaster(const Vector<ServerAddr>
 // correct version).  Send a query packet to each.
 void QueryServersUserInterface::addServersToPingList(const Vector<ServerAddr> &serverList)
 {
-   saveServerListToIni(getGame()->getSettings(), serverList);
+   if(!mHostOnServer)
+      saveServerListToIni(getGame()->getSettings(), serverList);
 
    forgetServersNoLongerOnList(serverList);
 

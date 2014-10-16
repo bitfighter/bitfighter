@@ -82,6 +82,8 @@ private:
    void updateTimers_client(U32 timeDelta);
    void updateTimers_server(U32 timeDelta);
 
+	S32 mUploadIndex;
+
 public:
    bool mPackUnpackShipEnergyMeter; // Only true for game recorder
    U16 switchedTeamCount;
@@ -245,6 +247,9 @@ public:
 
    TNL_DECLARE_RPC(s2cAddLevel, (StringTableEntry name, RangedU32<0, GameTypesCount> type));
    TNL_DECLARE_RPC(s2cRemoveLevel, (S32 index));
+   TNL_DECLARE_RPC(c2sAddLevel, (StringTableEntry name, RangedU32<0, GameTypesCount> type, S32 minPlayers, S32 maxPlayers));
+   TNL_DECLARE_RPC(c2sRemoveLevel, (S32 index));
+   TNL_DECLARE_RPC(s2cRequestLevel, (S32 index));
 
    TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative));
    TNL_DECLARE_RPC(c2sShowNextLevel, ());
@@ -265,6 +270,7 @@ public:
    enum ServerFlags {
       ServerFlagAllowUpload = BIT(0),
       ServerFlagHasRecordedGameplayDownloads = BIT(1),
+      ServerFlagHostingLevels = BIT(2),
       // U8 max!
    };
 

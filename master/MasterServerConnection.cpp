@@ -324,6 +324,14 @@ void MasterServerConnection::processAutentication(StringTableEntry newName, PHPB
 // sends it to the client, followed by a QueryServersDone RPC.
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryServers, (U32 queryId))
 {
+	c2mQueryServersOption(queryId, false);
+}
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryHostServers, (U32 queryId))
+{
+	c2mQueryServersOption(queryId, true);
+}
+void MasterServerConnection::c2mQueryServersOption(U32 queryId, bool hostonly)
+{
    Vector<IPAddress> addresses(IP_MESSAGE_ADDRESS_COUNT);
    Vector<S32> serverIdList(IP_MESSAGE_ADDRESS_COUNT);
    
@@ -338,6 +346,10 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryServers, (U32 queryId
 
       // Skip servers with incompatible versions
       if(serverList->get(i)->mCSProtocolVersion != mCSProtocolVersion)  
+         continue;
+
+      // Skip servers with host mode
+      if(((serverList->get(i)->mInfoFlags & HostModeFlag) != 0) != hostonly)
          continue;
 
       // Add us to the results list
