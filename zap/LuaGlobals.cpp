@@ -102,7 +102,8 @@ S32 lua_print(lua_State *L)
  * real number in the range [0,1). When called with an integer number m,
  * math.random returns a uniform pseudo-random integer in the range [1, m]. When
  * called with two integer numbers m and n, math.random returns a uniform
- * pseudo-random integer in the range [m, n] where m, n must be greater than 0.
+ * pseudo-random integer in the range [m, n] where m, n is greater than or equal
+ * to 0.
  *
  * @param m (optional) Used for either [1, m] or [m, n] as described above.
  * @param n (optional) Used for [m, n] as described above.
