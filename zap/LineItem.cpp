@@ -70,7 +70,7 @@ LineItem::LineItem(lua_State *L)
       else if(profile == 2)
       {
          setGeom(L, 1);
-         setTeam(lua_tointeger(L, -1)); 
+         setTeam(L, 2);
       }
    }
 }
