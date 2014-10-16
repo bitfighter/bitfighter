@@ -501,10 +501,10 @@ void Joystick::loadJoystickPresets(GameSettings *settings)
 
 
       // Axis of evil
-      joystickInfo.moveAxesSdlIndex[0]  = Zap::stoi(joystickPresetsINI.GetValue(sectionId, "MoveAxisLeftRight"));
-      joystickInfo.moveAxesSdlIndex[1]  = Zap::stoi(joystickPresetsINI.GetValue(sectionId, "MoveAxisUpDown"));
-      joystickInfo.shootAxesSdlIndex[0] = Zap::stoi(joystickPresetsINI.GetValue(sectionId, "ShootAxisLeftRight"));
-      joystickInfo.shootAxesSdlIndex[1] = Zap::stoi(joystickPresetsINI.GetValue(sectionId, "ShootAxisUpDown"));
+      joystickInfo.moveAxesSdlIndex[0]  = atoi(joystickPresetsINI.GetValue(sectionId, "MoveAxisLeftRight").c_str());
+      joystickInfo.moveAxesSdlIndex[1]  = atoi(joystickPresetsINI.GetValue(sectionId, "MoveAxisUpDown").c_str());
+      joystickInfo.shootAxesSdlIndex[0] = atoi(joystickPresetsINI.GetValue(sectionId, "ShootAxisLeftRight").c_str());
+      joystickInfo.shootAxesSdlIndex[1] = atoi(joystickPresetsINI.GetValue(sectionId, "ShootAxisUpDown").c_str());
 
       Vector<string> sectionKeys;
       joystickPresetsINI.GetAllKeys(sectionId, sectionKeys);
@@ -545,8 +545,8 @@ void Joystick::loadJoystickPresets(GameSettings *settings)
          buttonInfo.color = stringToColor(buttonInfoMap["Color"]);
          buttonInfo.buttonShape = buttonLabelToButtonShape(buttonInfoMap["Shape"]);
          buttonInfo.buttonSymbol = stringToButtonSymbol(buttonInfoMap["Label"]);
-         buttonInfo.sdlButton = buttonInfoMap["Raw"] == "" ? FakeRawButton : U8(Zap::stoi(buttonInfoMap["Raw"]));
-         buttonInfo.rawAxis = buttonInfoMap["Axis"] == "" ? FakeRawButton : U8(Zap::stoi(buttonInfoMap["Axis"]));
+         buttonInfo.sdlButton = buttonInfoMap["Raw"] == "" ? FakeRawButton : U8(atoi(buttonInfoMap["Raw"].c_str()));
+         buttonInfo.rawAxis = buttonInfoMap["Axis"] == "" ? FakeRawButton : U8(atoi(buttonInfoMap["Axis"].c_str()));
 
          // Set the button info with index of the JoystickButton
          joystickInfo.buttonMappings[buttonInfo.button] = buttonInfo;

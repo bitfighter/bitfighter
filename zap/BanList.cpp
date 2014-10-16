@@ -133,7 +133,7 @@ bool BanList::processBanListLine(const string &line)
       return false;
 
    // Validate duration
-   if(Zap::stoi(durationMinutes) <= 0)
+   if(atoi(durationMinutes.c_str()) <= 0)
       return false;
 
    // Now finally add to banList
@@ -182,7 +182,7 @@ bool BanList::isBanned(const Address &address, const string &nickname, bool isAu
          continue;
 
       // Check time
-      if (from_iso_string(serverBanList[i].startDateTime) + minutes(Zap::stoi(serverBanList[i].durationMinutes)) < currentTime)
+      if (from_iso_string(serverBanList[i].startDateTime) + minutes(atoi(serverBanList[i].durationMinutes.c_str())) < currentTime)
          continue;
 
       // If we get here, that means nickname and IP address matched and we are still in the
