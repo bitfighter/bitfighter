@@ -2648,10 +2648,10 @@ void GameType::sendWallsToClient()
    Vector<Point> v;
    s2cAddWalls(v, 0);     // Sending an empty list clears the barriers
 
-   Vector<WallItem *> walls = mLevel->getWallList();
+   const Vector<DatabaseObject *> *walls = mLevel->findObjects_fast(WallItemTypeNumber);
 
-   for(S32 i = 0; i < walls.size(); i++)
-      s2cAddWalls(*walls[i]->getOutline(), (F32)walls[i]->getWidth());
+   for(S32 i = 0; i < walls->size(); i++)
+      s2cAddWalls(*walls->get(i)->getOutline(), (F32)static_cast<WallItem *>(walls->get(i))->getWidth());
 
    const Vector<DatabaseObject *> *polyWalls = mLevel->findObjects_fast(PolyWallTypeNumber);
 

@@ -47,8 +47,6 @@ Level::Level(const string &levelCode)
 // Destructor
 Level::~Level()
 {
-   mWallItemList.deleteAndClear();
-
    // Clean up our GameType -- it's a RefPtr, so will be deleted when all refs are removed
    //if(mGameType.isValid() && !mGameType->isGhost())
    //   mGameType.set(NULL);
@@ -160,12 +158,13 @@ void Level::loadLevelFromString(const string &contents, const string &filename)
 void Level::buildWallEdgeGeometry()
 {
    const Vector<DatabaseObject *> *polyWalls = findObjects_fast(PolyWallTypeNumber);
+   const Vector<DatabaseObject *> *wallItems = findObjects_fast(WallItemTypeNumber);
 
    fillVector.clear();
-   fillVector.reserve(mWallItemList.size() + polyWalls->size());
+   fillVector.reserve(wallItems->size() + polyWalls->size());
 
-   for(S32 i = 0; i < mWallItemList.size(); i++)
-      fillVector.push_back(mWallItemList[i]);
+   for(S32 i = 0; i < wallItems->size(); i++)
+      fillVector.push_back(wallItems->get(i));
 
    for(S32 i = 0; i < polyWalls->size(); i++)
       fillVector.push_back(polyWalls->get(i));
@@ -826,24 +825,18 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
 
 void Level::addWallItem(WallItem *wallItem, Game *game)
 {
-   mWallItemList.push_back(wallItem);
-
    if(!game)
       game = mGame;
+
+   wallItem->addToDatabase(this);
+   wallItem->onGeomChanged(); 
+
 
    // Normally we won't yet be in a game; but if we are, then we have a little more work to do
    if(game)
    {
       game->addWallItem(wallItem, this);
-      wallItem->addToDatabase(this);
-      wallItem->onGeomChanged();            
    }
-}
-
-
-const Vector<WallItem *> &Level::getWallList() const
-{
-   return mWallItemList;
 }
 
 

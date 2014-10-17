@@ -184,14 +184,14 @@ void EditorUserInterface::setLevel(const boost::shared_ptr<Level> &level)
 
    // Do some special preparations for walls/polywalls -- the editor needs to know about wall edges and such
    // for hit detection and mounting turrets/ffs
-   const Vector<WallItem *> &walls = level->getWallList();
+   //const Vector<DatabaseObject *> *walls = level->findObjects_fast(WallItemTypeNumber);
 
-   for(S32 i = 0; i < walls.size(); i++)
-   {
-      WallItem *wall = walls.get(i);
-      addToEditor(wall);
-   }
-
+   //for(S32 i = 0; i < walls->size(); i++)
+   //{
+   //   const WallItem *wall = static_cast<WallItem *>(walls->get(i));
+   //   //addToEditor(wall);
+   //   //wa
+   //}
 
    // Tell mDockItems to use the same team info as we use for the regular items
    mDockItems.setTeamInfosPtr(mLevel->getTeamInfosPtr());
@@ -3155,7 +3155,7 @@ void EditorUserInterface::doneChangingGeoms(BfObject *bfObject)
 
 void EditorUserInterface::doneChangingGeoms(const Vector<BfObject *> &bfObjects)
 {
-   // Do nothing ??
+   rebuildEverything(getLevel());
 }
 
 

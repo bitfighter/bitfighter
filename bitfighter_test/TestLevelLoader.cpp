@@ -40,7 +40,7 @@ TEST(LevelLoaderTest, longLine)
    // Create a level, with our giant wall object; test to ensure the wall is created and has the right number of vertices
    Level level(code);
    
-   const Vector<WallItem *> walls = level.getWallList();
+   const Vector<DatabaseObject *> *walls = level.findObjects_fast(WallItemTypeNumber);
    ASSERT_EQ(1, walls.size());
    EXPECT_EQ(TEST_POINTS, walls[0]->getVertCount());
 }

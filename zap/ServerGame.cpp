@@ -20,6 +20,7 @@
 #include "LevelDatabase.h"
 #include "Level.h"
 #include "WallSegmentManager.h"
+#include "WallItem.h"
 
 #include "gameObjectRender.h"
 #include "stringUtils.h"
@@ -953,10 +954,12 @@ bool ServerGame::loadLevel()
 
 
    // Add walls first, so engineered items will have something to snap to
-   const Vector<WallItem *> &walls = mLevel->getWallList();
+   Vector<DatabaseObject *> walls;
+   mLevel->findObjects(WallItemTypeNumber, walls);
 
    for(S32 i = 0; i < walls.size(); i++)
-      addWallItem(walls[i], NULL);        // Just does this --> Barrier::constructBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
+      addWallItem(static_cast<WallItem *>(walls[i]), NULL);        // Just does this --> Barrier::constructBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
+
 
    mLevel->getWallSegmentManager()->recomputeAllWallGeometry(mLevel.get());
 
@@ -964,7 +967,7 @@ bool ServerGame::loadLevel()
    const Vector<DatabaseObject *> objects = *mLevel->findObjects_fast();
    for(S32 i = 0; i < objects.size(); i++)
    {
-      // Walls have already been handled
+      // Walls have already been handled in addWallItem call above
       if(isWallType(objects[i]->getObjectTypeNumber()))
          continue;
 

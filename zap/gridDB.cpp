@@ -108,7 +108,7 @@ void GridDatabase::copyObjects(const GridDatabase *source)
    mFlags     .reserve(source->mFlags.size());
    mSpyBugs   .reserve(source->mSpyBugs.size());
    mPolyWalls .reserve(source->mPolyWalls.size());
-
+   mWallitems .reserve(source->mWallitems.size());
 
    for(S32 i = 0; i < source->mAllObjects.size(); i++)
       addToDatabase(source->mAllObjects[i]->clone());
@@ -158,7 +158,9 @@ void GridDatabase::addToDatabase(DatabaseObject *object)
       mSpyBugs.push_back(object);
    else if(type == PolyWallTypeNumber)
       mPolyWalls.push_back(object);
-   
+   else if(type == WallItemTypeNumber)
+      mWallitems.push_back(object);
+
    //sortObjects(mAllObjects);  // problem: Barriers in-game don't have mGeometry (it is NULL)
 }
 
@@ -194,6 +196,7 @@ void GridDatabase::removeEverythingFromDatabase()
    mFlags.clear();
    mSpyBugs.clear();
    mPolyWalls.clear();
+   mWallitems.clear();
 
    mAllObjects.deleteAndClear();
    
@@ -262,6 +265,8 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
       eraseObject_fast(&mSpyBugs, object);
    else if(type == PolyWallTypeNumber)
       eraseObject_fast(&mPolyWalls, object);
+   else if(type == WallItemTypeNumber)
+      eraseObject_fast(&mWallitems, object);
 
    if(deleteObject)
       delete object;      
@@ -298,6 +303,9 @@ const Vector<DatabaseObject *> *GridDatabase::findObjects_fast(U8 typeNumber) co
 
    if(typeNumber == PolyWallTypeNumber)
       return &mPolyWalls;
+
+   if(typeNumber == WallItemTypeNumber)
+      return &mWallitems;
 
    TNLAssert(false, "This type not currently supported!  Sorry dude!");
    return NULL;
@@ -760,6 +768,10 @@ S32 GridDatabase::getObjectCount(U8 typeNumber) const
    if(typeNumber == PolyWallTypeNumber)
       return mPolyWalls.size();
 
+   if(typeNumber == WallItemTypeNumber)
+      return mWallitems.size();
+
+
    TNLAssert(false, "Unsupported type!");
    return 0;
 }
@@ -778,6 +790,9 @@ bool GridDatabase::hasObjectOfType(U8 typeNumber) const
 
    if(typeNumber == PolyWallTypeNumber)
       return mPolyWalls.size() > 0;
+
+   if(typeNumber == WallItemTypeNumber)
+      return mWallitems.size() > 0;
 
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if(mAllObjects[i]->getObjectTypeNumber() == typeNumber)

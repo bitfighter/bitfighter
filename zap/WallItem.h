@@ -66,6 +66,8 @@ public:
    S32 getWidth() const;
    void setWidth(S32 width);
 
+   //const Vector<Point> *getCollisionPoly() const;
+
    void setSelected(bool selected);
 
    static const S32 VERTEX_SIZE = 5;

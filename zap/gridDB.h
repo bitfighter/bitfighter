@@ -97,6 +97,7 @@ private:
    Vector<DatabaseObject *> mFlags;
    Vector<DatabaseObject *> mSpyBugs;
    Vector<DatabaseObject *> mPolyWalls;
+   Vector<DatabaseObject *> mWallitems;
 
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins) const;
    void findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins) const;

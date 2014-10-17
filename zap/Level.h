@@ -51,8 +51,6 @@ private:
 
    TeamManager mTeamManager;
 
-   Vector<WallItem *>mWallItemList;    // Need to delete items that are removed from this list!
-
    // Zone-related
    GridDatabase mBotZoneDatabase;
    Vector<BotNavMeshZone *> mAllZones;
@@ -87,8 +85,6 @@ public:
    void setLevelDatabaseId(U32 id);
 
    void addWallItem(WallItem *wall, Game *game = NULL);
-
-   const Vector<WallItem *> &getWallList() const;
 
    string getHash() const;
    F32 getLegacyGridSize() const;

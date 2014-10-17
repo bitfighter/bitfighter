@@ -234,6 +234,12 @@ void WallItem::setWidth(S32 width)
       mWidth = width; 
 }
 
+//
+//const Vector<Point> *WallItem::getCollisionPoly() const
+//{
+//   return getOutline();
+//} 
+
 
 void WallItem::setSelected(bool selected)
 {
