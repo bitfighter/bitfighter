@@ -43,6 +43,20 @@ typedef const char* ClassName;
 typedef map <ClassName, const LuaFunctionProfile *> ArgMap;      // Map of class name and arguments list, for documentation
 typedef pair<ClassName, vector<ClassName> > Node;
 
+
+// Here we define what to do when we want to throw an exception in a Lua frame.
+// This is only used for methods inside of lua_pcall()
+//
+// Note: Since we've moved to LuaJIT, we cannot throw a c++ exception across Lua
+//       frames.  See http://luajit.org/extensions.html#exceptions
+//       We will therefore resort to using Lua's built-in error-raising system
+
+// New - uses C string
+#define THROW_LUA_EXCEPTION(L, msg) luaL_error(L, msg)
+// Old - uses std::string
+//#define THROW_LUA_EXCEPTION(L, msg) throw LuaException(msg)
+
+
 /**
  * Because windef.h (which is included by windows.h) typedefs BOOL and INT types,
  * we have to put this enum in a namespace. The `using namespace LuaArgs` statements
