@@ -1608,9 +1608,13 @@ bool Triangulate::mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& 
 
 
 // Derived from formulae here: http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/
+//
+// This will fail if the area sum is 0; e.g. with certain self-intersecting polygons
 Point findCentroid(const Vector<Point> &polyPoints)
 {
-   if(polyPoints.size() == 0)
+   S32 size = polyPoints.size();
+
+   if(size == 0)
       return Point(0,0);
 
    F32 x = 0;
@@ -1621,10 +1625,11 @@ Point findCentroid(const Vector<Point> &polyPoints)
    Point p1;
    Point p2;
 
-   for(S32 i = 0; i < polyPoints.size(); i++)
+   // All vertices except last
+   for(S32 i = 0; i < size - 1; i++)
    {
       p1 = polyPoints[i];
-      p2 = polyPoints[(i < polyPoints.size() - 1) ? i + 1 : 0];
+      p2 = polyPoints[i+1];
 
       area = (p1.x * p2.y - p2.x * p1.y);
       sArea += area;
@@ -1633,6 +1638,17 @@ Point findCentroid(const Vector<Point> &polyPoints)
       y += (p1.y + p2.y) * area;
    }
 
+   // Do last vertex
+   p1 = polyPoints[size - 1];
+   p2 = polyPoints[0];
+
+   area = (p1.x * p2.y - p2.x * p1.y);
+   sArea += area;
+
+   x += (p1.x + p2.x) * area;
+   y += (p1.y + p2.y) * area;
+
+   // Finish up
    sArea *= 3.0;  // 0.5 * 6  (from area6)
    x /= sArea;
    y /= sArea;
