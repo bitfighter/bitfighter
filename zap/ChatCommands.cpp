@@ -211,14 +211,22 @@ void mapLevelHandler(ClientGame *game, const Vector<string> &words)
 
       S32 levelIndex = S32_MIN;
 
-      string levelName = words[1];
+      // We could have sent in multiple words for a level name
+      string levelName = "";
+      for(S32 i = 1; i < words.size(); i++)
+      {
+         if(i != 1)
+            levelName = levelName + " ";
+
+         levelName = levelName + words[i];
+      }
 
       // Find our level index...  very inefficient; not sure how to do this
       // differently without a large refactor
       for(S32 i = 0; i < gameConnection->mLevelInfos.size(); i++)
       {
          // This finds the first level with the name..  so don't have duplicate-named levels!
-         if(levelName == gameConnection->mLevelInfos[i].mLevelName.getString())
+         if(stricmp(levelName.c_str(), gameConnection->mLevelInfos[i].mLevelName.getString()) == 0)
          {
             levelIndex = i;
             break;

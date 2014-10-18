@@ -13,6 +13,8 @@
 namespace Zap
 {
 
+struct CommandInfo;
+
 class ChatHelper : public HelperMenu
 {
    typedef HelperMenu Parent;
@@ -31,7 +33,9 @@ private:
    LineEditor mLineEditor;       // Message being composed
    ChatType mCurrentChatType;    // Current in-game chat mode (global or local)
 
-   void issueChat();                // Send chat message (either Team or Global)
+   void issueChat();             // Send chat message (either Team or Global)
+
+   CommandInfo *getCommandInfo(const char *command);
 
    // Related to running commands
    static void serverCommandHandler(ClientGame *game, const Vector<string> &words);

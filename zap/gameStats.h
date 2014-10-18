@@ -120,6 +120,10 @@ struct GameStats
 };
 
 
+// CURRENT_VERSION = 0 (older then 016, unsupported by master)
+// CURRENT_VERSION = 1 (016)
+// CURRENT_VERSION = 2 (017)
+// CURRENT_VERSION = 3 (018a)
 // This contains the whole kilbasa
 struct VersionedGameStats
 {
@@ -147,8 +151,8 @@ namespace Types
    extern void write(TNL::BitStream &s, Zap::LoadoutStats &val, U8 version);
    extern void read (TNL::BitStream &s, Zap::WeaponStats  *val, U8 version);
    extern void write(TNL::BitStream &s, Zap::WeaponStats  &val, U8 version);
-   extern void read (TNL::BitStream &s, Zap::ModuleStats  *val, U8 version);
-   extern void write(TNL::BitStream &s, Zap::ModuleStats  &val, U8 version);
+   extern void read (TNL::BitStream &s, Zap::ModuleStats  *val);
+   extern void write(TNL::BitStream &s, Zap::ModuleStats  &val);
    extern void read (TNL::BitStream &s, Zap::PlayerStats  *val, U8 version);
    extern void write(TNL::BitStream &s, Zap::PlayerStats  &val, U8 version);
    extern void read (TNL::BitStream &s, Zap::TeamStats    *val, U8 version);
