@@ -90,7 +90,7 @@ void GameConnection::initialize()
    mSendableFlags = 0;
    mDataBuffer = NULL;
    mDataBufferLevelGen = NULL;
-	mUploadIndex = -1;
+   mUploadIndex = -1;
 
    mWrongPasswordCount = 0;
 
@@ -1147,7 +1147,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageBox, (StringTableEntry title,
 TNL_IMPLEMENT_RPC(GameConnection, s2cAddLevel, (StringTableEntry name, RangedU32<0, GameTypesCount> type), (name, type),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
-	TNLAssert(!(mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when in host mode");
+   TNLAssert(!(mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when in host mode");
    // Sending a blank name and type will clear the list.  Type should never be blank except in this use case, so check it first.
    if(type == NoGameType)
       mLevelInfos.clear();
@@ -1161,7 +1161,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cAddLevel, (StringTableEntry name, RangedU32
 TNL_IMPLEMENT_RPC(GameConnection, s2cRemoveLevel, (S32 index), (index),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
-	TNLAssert(!(mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when in host mode");
+   TNLAssert(!(mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when in host mode");
    if(index < 0)
       mLevelInfos.clear();
    else if(index < mLevelInfos.size())
@@ -1170,22 +1170,22 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cRemoveLevel, (S32 index), (index),
 
 // Server sends the name and type of a level to the client (gets run repeatedly when client connects to the server). 
 // Sending a blank name and type will clear the list.
-TNL_IMPLEMENT_RPC(GameConnection, c2sAddLevel, (StringTableEntry name, RangedU32<0, GameTypesCount> type, S32 minPlayers, S32 maxPlayers), (name, type),
+TNL_IMPLEMENT_RPC(GameConnection, c2sAddLevel, (StringTableEntry name, RangedU32<0, GameTypesCount> type, S32 minPlayers, S32 maxPlayers), (name, type, minPlayers, maxPlayers),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 3)
 {
-	TNLAssert((mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when not in host mode");
-	if(mSendableFlags | ServerFlagHostingLevels)
-		return;
+   TNLAssert((mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when not in host mode");
+   if(mSendableFlags | ServerFlagHostingLevels)
+      return;
 
-	if(type == NoGameType)
-		getServerGame()->removeLevel(-1);
-	else
-	{
-		LevelInfo levelInfo(name, (GameTypeId)type.value);
-		levelInfo.minRecPlayers = minPlayers;
-		levelInfo.maxRecPlayers = maxPlayers;
-		getServerGame()->addLevel(levelInfo);
-	}
+   if(type == NoGameType)
+      getServerGame()->removeLevel(-1);
+   else
+   {
+      LevelInfo levelInfo(name, (GameTypeId)type.value);
+      levelInfo.minRecPlayers = minPlayers;
+      levelInfo.maxRecPlayers = maxPlayers;
+      getServerGame()->addLevel(levelInfo);
+   }
 }
 
 
@@ -1194,9 +1194,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAddLevel, (StringTableEntry name, RangedU32
 TNL_IMPLEMENT_RPC(GameConnection, c2sRemoveLevel, (S32 index), (index),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3)
 {
-	TNLAssert((mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when not in host mode");
-	if(mSendableFlags | ServerFlagHostingLevels)
-		return;
+   TNLAssert((mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when not in host mode");
+   if(mSendableFlags | ServerFlagHostingLevels)
+      return;
 
    getServerGame()->removeLevel(index);
 }
@@ -1204,10 +1204,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRemoveLevel, (S32 index), (index),
 TNL_IMPLEMENT_RPC(GameConnection, s2cRequestLevel, (S32 index), (index),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 3)
 {
-	TNLAssert((mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when not in host mode");
+   TNLAssert((mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when not in host mode");
 
-	if(U32(index) < U32(mLevelInfos.size()))
-		TransferLevelFile(mLevelInfos[index].filename.c_str());
+   if(U32(index) < U32(mLevelInfos.size()))
+      TransferLevelFile(mLevelInfos[index].filename.c_str());
 }
 
 
@@ -1396,31 +1396,31 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
-	if(isInitiator() && ((flags & ~mSendableFlags) & HostModeFlag))
-	{
-		c2sSetParam(mSettings->getLevelChangePassword(), LevelChangePassword);
-		c2sSetParam(mSettings->getAdminPassword(), AdminPassword);
-		c2sSetParam(mSettings->getOwnerPassword(), OwnerPassword);
-		c2sSetParam(mSettings->getServerPassword(), ServerPassword);
-		c2sSetParam(mSettings->getHostName(), ServerName);
-		c2sSetParam(mSettings->getHostDescr(), ServerDescr);
-	
-		LevelSource * levelSource = mClientGame->getSettings()->chooseLevelSource(NULL);
+   if(isInitiator() && ((flags & ~mSendableFlags) & HostModeFlag))
+   {
+      c2sSetParam(mSettings->getLevelChangePassword(), LevelChangePassword);
+      c2sSetParam(mSettings->getAdminPassword(), AdminPassword);
+      c2sSetParam(mSettings->getOwnerPassword(), OwnerPassword);
+      c2sSetParam(mSettings->getServerPassword(), ServerPassword);
+      c2sSetParam(mSettings->getHostName(), ServerName);
+      c2sSetParam(mSettings->getHostDescr(), ServerDescr);
+   
+      LevelSource * levelSource = mSettings->chooseLevelSource(NULL);
 
-		c2sRemoveLevel(-1);
-		for(S32 i = 0; i < levelSource->getLevelCount(); i++)
-		{
-			string filename = folderManager->findLevelFile(mLevelSource->getLevelFileName(i));
-			mLevelSource->populateLevelInfoFromSource(filename, i);
-			c2sAddLevel(
-				mLevelSource->getLevelName(i),
-				mLevelSource->getLevelType(i),
-				mLevelSource->getLevelInfo(i).minRecPlayers,
-				mLevelSource->getLevelInfo(i).maxRecPlayers);
-		}
+      c2sRemoveLevel(-1);	
+      for(S32 i = 0; i < levelSource->getLevelCount(); i++)
+      {
+         string filename = mSettings->getFolderManager()->findLevelFile(levelSource->getLevelFileName(i));
+         levelSource->populateLevelInfoFromSource(filename, i);
+         c2sAddLevel(
+            levelSource->getLevelName(i),
+            levelSource->getLevelType(i),
+            levelSource->getLevelInfo(i).minRecPlayers,
+            levelSource->getLevelInfo(i).maxRecPlayers);
+      }
 
-		delete levelSource;
-	}
+      delete levelSource;
+   }
 #endif
    mSendableFlags = flags;
 }
@@ -1640,18 +1640,18 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestRecordedGameplay, (StringPtr file), 
       Vector<string> levels;
       const string &dir = mServerGame->getSettings()->getFolderManager()->recordDir;
       getFilesFromFolder(dir, levels);
-		GameRecorderServer *g = mServerGame->getGameRecorder();
-		if(g)
-		{
-			for(S32 i = 0; i < levels.size(); i++)
-				if(levels[i] == g->mFileName)
-				{
-					levels.erase(i);
-					break;
-				}
-		}
-		if(levels.size())
-			levels.sort(numberAlphaSort);
+      GameRecorderServer *g = mServerGame->getGameRecorder();
+      if(g)
+      {
+         for(S32 i = 0; i < levels.size(); i++)
+            if(levels[i] == g->mFileName)
+            {
+               levels.erase(i);
+               break;
+            }
+      }
+      if(levels.size())
+         levels.sort(numberAlphaSort);
       s2cListRecordedGameplays(levels);
    }
 }
@@ -1996,11 +1996,11 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
       }
    }
 
-	if(mServerGame->mInfoFlags & HostModeFlag)
-	{
-		if(mConnectionVersion == 0) // old client can't host from server
-			return false;
-	}
+   if(mServerGame->mInfoFlags & HostModeFlag)
+   {
+      if(mConnectionVersion == 0) // old client can't host from server
+         return false;
+   }
 
    requestAuthenticationVerificationFromMaster();    
 
@@ -2277,16 +2277,16 @@ void GameConnection::onConnectionEstablished_server()
    if(mServerGame->getSettings()->getIniSettings()->enableGameRecording)
       mSendableFlags |= ServerFlagHasRecordedGameplayDownloads;
 
-	if(mServerGame->mInfoFlags & HostModeFlag)
-	{
-		mSendableFlags &= ~ServerFlagAllowUpload;
-		mSendableFlags |= ServerFlagHostingLevels;
-		mClientInfo->setRole(ClientInfo::RoleOwner);
-		s2cSetRole(ClientInfo::RoleOwner, false);
-		mServerGame->mHoster = this;
-		mServerGame->mInfoFlags &= ~HostModeFlag;
-	}
-	else if(mServerGame->getSettings()->getLevelChangePassword() == "")   // Grant level change permissions if level change PW is blank
+   if(mServerGame->mInfoFlags & HostModeFlag)
+   {
+      mSendableFlags &= ~ServerFlagAllowUpload;
+      mSendableFlags |= ServerFlagHostingLevels;
+      mClientInfo->setRole(ClientInfo::RoleOwner);
+      s2cSetRole(ClientInfo::RoleOwner, false);
+      mServerGame->mHoster = this;
+      mServerGame->mInfoFlags &= ~HostModeFlag;
+   }
+   else if(mServerGame->getSettings()->getLevelChangePassword() == "")   // Grant level change permissions if level change PW is blank
    {
       mClientInfo->setRole(ClientInfo::RoleLevelChanger);
       s2cSetRole(ClientInfo::RoleLevelChanger, false);          // Tell client, but don't display notification

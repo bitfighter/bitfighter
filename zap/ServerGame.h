@@ -69,8 +69,8 @@ private:
 
    GameRecorderServer *mGameRecorderServer;
 public:
-	bool mHostOnServer;
-	SafePtr<GameConnection> mHoster;
+   bool mHostOnServer;
+   SafePtr<GameConnection> mHoster;
 
    static const U32 PreSuspendSettlingPeriod = TWO_SECONDS;
 private:
@@ -114,7 +114,7 @@ private:
 
    GridDatabase *mBotZoneDatabase;
    Vector<BotNavMeshZone *> mAllZones;
-	
+   
 public:
    ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated, bool hostOnServer = false);    // Constructor
    virtual ~ServerGame();   // Destructor

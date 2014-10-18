@@ -31,7 +31,7 @@ protected:
 
 public:
    MasterThreadEntry(const MasterSettings *settings) { mSettings = settings; } // Quickie constructor
-	virtual ~MasterThreadEntry() {};
+   virtual ~MasterThreadEntry() {};
 };
 
 
@@ -324,11 +324,11 @@ void MasterServerConnection::processAutentication(StringTableEntry newName, PHPB
 // sends it to the client, followed by a QueryServersDone RPC.
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryServers, (U32 queryId))
 {
-	c2mQueryServersOption(queryId, false);
+   c2mQueryServersOption(queryId, false);
 }
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryHostServers, (U32 queryId))
 {
-	c2mQueryServersOption(queryId, true);
+   c2mQueryServersOption(queryId, true);
 }
 void MasterServerConnection::c2mQueryServersOption(U32 queryId, bool hostonly)
 {

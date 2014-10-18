@@ -498,35 +498,35 @@ static S32 QSORT_CALLBACK AddOrderSort(RefPtr<ClientInfo> *a, RefPtr<ClientInfo>
 // function respects meta-indices, and otherwise expects an absolute index.
 void ServerGame::cycleLevel(S32 nextLevel)
 {
-	if(mHostOnServer)
-	{
-		if(mHoster.isValid())
-		{
-			mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel);
-			nextLevel = mCurrentLevelIndex;
-			if(mLevelSource->getLevelFileName(mCurrentLevelIndex).length() == 0)
-			{
-				return;
-			}
-		}
-		else if(getPlayerCount() == 0)
-		{
+   if(mHostOnServer)
+   {
+      if(mHoster.isValid())
+      {
+         mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel);
+         nextLevel = mCurrentLevelIndex;
+         if(mLevelSource->getLevelFileName(mCurrentLevelIndex).length() == 0)
+         {
+            return;
+         }
+      }
+      else if(getPlayerCount() == 0)
+      {
          if(!getGameType())
          {
             GameType *gameType = new GameType();
             gameType->addToGame(this, getGameObjDatabase());
          }
          getGameType()->makeSureTeamCountIsNotZero();
-			return;
-		}
-		else
-		{
+         return;
+      }
+      else
+      {
          mShutdownTimer.reset(1); 
          mShuttingDown = true;
          mShutdownReason = "Host left game";
-			return;
-		}
-	}
+         return;
+      }
+   }
 
    if(mGameRecorderServer)
    {
@@ -572,8 +572,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
       {
          logprintf(LogConsumer::ServerFilter, "FAILED!");
 
-			if(mHostOnServer)
-				;
+         if(mHostOnServer)
+            ;
          else if(mLevelSource->getLevelCount() > 1)
             removeLevel(mCurrentLevelIndex);
          else
@@ -1166,11 +1166,11 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
 
-	if(mHostOnServer)
-	{
-		if(getPlayerCount() == 0)
-			mInfoFlags |= HostModeFlag;
-	}
+   if(mHostOnServer)
+   {
+      if(getPlayerCount() == 0)
+         mInfoFlags |= HostModeFlag;
+   }
    else if(getPlayerCount() == 0 && !mShuttingDown && isDedicated())  // only dedicated server can have zero players
       cycleLevel(getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL);    // Advance to beginning of next level
    else
@@ -1720,12 +1720,12 @@ void ServerGame::updateStatusOnMaster()
 // Returns true if things went well, false if we couldn't find any levels to host
 bool ServerGame::startHosting()
 {
-	if(mHostOnServer)
-	{
-		GameManager::setHostingModePhase(GameManager::NotHosting);
-		cycleLevel(FIRST_LEVEL);   // Start with the first level
-		return true;
-	}
+   if(mHostOnServer)
+   {
+      GameManager::setHostingModePhase(GameManager::NotHosting);
+      cycleLevel(FIRST_LEVEL);   // Start with the first level
+      return true;
+   }
 
    if(!mLevelSource->isEmptyLevelDirOk() && mSettings->getFolderManager()->levelDir == "")   // No leveldir, no hosting!
       return false;

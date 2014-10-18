@@ -82,7 +82,7 @@ private:
    void updateTimers_client(U32 timeDelta);
    void updateTimers_server(U32 timeDelta);
 
-	S32 mUploadIndex;
+   S32 mUploadIndex;
 
 public:
    bool mPackUnpackShipEnergyMeter; // Only true for game recorder
