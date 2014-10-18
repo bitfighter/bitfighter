@@ -659,7 +659,7 @@ void BfObject::prepareForDock(const Point &point, S32 teamIndex)
 #endif
 
 
-#ifndef ZAP_DE+DICATED
+#ifndef ZAP_DEDICATED
 // Render selected and highlighted vertices, called from renderEditor
 void BfObject::renderAndLabelHighlightedVertices(F32 currentScale)
 {
