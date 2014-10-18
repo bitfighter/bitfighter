@@ -3,12 +3,12 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "UIEditorMenus.h"
+#include "UIQuickMenu.h"
 
 #include "UIEditor.h"
 #include "UIManager.h"
-#include "DisplayManager.h"    // For canvasHeight
-#include "ClientGame.h"    // For UIManager and callback
+#include "DisplayManager.h"   // For canvasHeight
+#include "ClientGame.h"       // For UIManager and callback
 
 #include "Colors.h"
 

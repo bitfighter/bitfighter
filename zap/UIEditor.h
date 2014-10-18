@@ -491,31 +491,6 @@ public:
 };
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-class EditorMenuUserInterface : public MenuUserInterface
-{
-   typedef MenuUserInterface Parent;
-
-private:
-   void setupMenus();
-   void processSelection(U32 index);
-   void processShiftSelection(U32 index);
-   void onEscape();
-   void addStandardQuitItem();
-
-protected:
-   void onActivate();
-
-public:
-   explicit EditorMenuUserInterface(ClientGame *game);    // Constructor
-   virtual ~EditorMenuUserInterface();
-
-   void unlockQuit();
-};
-
-
 };
 
 #endif

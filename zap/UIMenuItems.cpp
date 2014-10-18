@@ -5,7 +5,7 @@
 
 #include "UIMenuItems.h"
 #include "UIMenus.h"
-#include "UIEditorMenus.h"
+#include "UIQuickMenu.h"
 
 #include "DisplayManager.h"    // For DisplayManager::getScreenInfo() stuff
 #include "FontManager.h"

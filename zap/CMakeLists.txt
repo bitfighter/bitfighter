@@ -158,7 +158,7 @@ set(CLIENT_SOURCES
 	UIDiagnostics.cpp
 	UIEditor.cpp
 	UIEditorInstructions.cpp
-	UIEditorMenus.cpp
+	UIEditorMenu.cpp
 	UIErrorMessage.cpp
 	UIGame.cpp
 	UIGameParameters.cpp
@@ -172,6 +172,7 @@ set(CLIENT_SOURCES
 	UIMessage.cpp
 	UINameEntry.cpp
 	UIQueryServers.cpp
+	UIQuickMenu.cpp
 	UITeamDefMenu.cpp
 	VideoSystem.cpp
 	voiceCodec.cpp

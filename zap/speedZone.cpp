@@ -5,22 +5,23 @@
 
 #include "speedZone.h"
 
-#include "Level.h"
-#include "game.h"
 #include "BfObject.h"
-#include "gameType.h"
+#include "game.h"
+#include "gameConnection.h"
 #include "gameNetInterface.h"
 #include "gameObjectRender.h"
+#include "gameType.h"
+#include "Level.h"
 #include "ship.h"
 #include "SoundSystem.h"
+
 #include "stringUtils.h"
-#include "gameConnection.h"
 #include "Colors.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
-#  include "UIEditorMenus.h"    // For GoFastEditorAttributeMenuUI def
 #  include "UI.h"
+#  include "UIQuickMenu.h"    // For GoFastEditorAttributeMenuUI def
 #endif
 
 

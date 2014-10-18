@@ -3,8 +3,8 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#ifndef _UIEDITORMENUS_H_
-#define _UIEDITORMENUS_H_
+#ifndef _QUICK_MENU_UI_H
+#define _QUICK_MENU_UI_H
 
 
 #include "UIMenus.h"    // Parent class

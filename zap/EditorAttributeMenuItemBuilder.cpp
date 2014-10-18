@@ -4,15 +4,16 @@
 //------------------------------------------------------------------------------
 
 #include "EditorAttributeMenuItemBuilder.h"
+
 #include "BfObject.h"
-#include "UIEditorMenus.h"
-#include "moveObject.h"
 #include "CoreGame.h"      // For CoreItem static values
 #include "EngineeredItem.h"
-#include "Spawn.h"
+#include "moveObject.h"
 #include "PickupItem.h"
-
+#include "Spawn.h"
 #include "TextItem.h"
+#include "UIQuickMenu.h"
+
 
 
 namespace Zap

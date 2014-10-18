@@ -15,7 +15,7 @@
 #ifndef ZAP_DEDICATED
 #  include "OpenglUtils.h"
 #  include "ClientGame.h"
-#  include "UIEditorMenus.h"     // For EditorAttributeMenuUI def
+#  include "UIQuickMenu.h"       // For EditorAttributeMenuUI def
 #endif
 
 
