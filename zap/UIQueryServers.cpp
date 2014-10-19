@@ -267,7 +267,7 @@ void QueryServersUserInterface::contactEveryone()
    } 
 
    // Try to ping the servers from our fallback list if we're having trouble connecting to the master
-   if(getGame()->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME) 
+   if(getGame()->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME && !mHostOnServer) 
    {
       Vector<string> *serverList = &getGame()->getSettings()->getIniSettings()->prevServerListFromMaster;
 

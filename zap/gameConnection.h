@@ -218,6 +218,7 @@ public:
    // Tell clients a player is authenticated, and pass on some badge info while we're on the phone
    TNL_DECLARE_RPC(s2cSetAuthenticated, (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges, U16 gamesPlayed));   
 
+   TNL_DECLARE_RPC(c2sSetVoteMapParam, (U8 voteLength, U8 voteLengthToChangeTeam, U8 voteRetryLength, S32 voteYesStrength, S32 voteNoStrength, S32 voteNothingStrength, bool voteEnable, bool allowGetMap, bool allowMapUpload));
    TNL_DECLARE_RPC(c2sSetParam, (StringPtr param, RangedU32<0, ParamTypeCount> paramType));
 
 

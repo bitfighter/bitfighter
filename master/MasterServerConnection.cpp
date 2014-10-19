@@ -1634,6 +1634,9 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
 
          // Send message of the day
          sendMotd();
+
+         // for "Host on server" 019d and later, Maybe improve this to only show it when server is available...
+         m2cHostOnServerAvailable(true);
       }
       break;
 

@@ -41,6 +41,7 @@ class ServerGame : public Game
 private:
    enum {
       UpdateServerStatusTime = TWENTY_SECONDS,    // How often we update our status on the master server (ms)
+      UpdateServerWhenHostGoesEmpty = FOUR_SECONDS, // How many seconds when host on server when server goes empty or not empty
       CheckServerStatusTime = FIVE_SECONDS,       // If it did not send updates, recheck after ms
       BotControlTickInterval = 33,                // Interval for how often should we let bots fire the onTick event (ms)
    };
@@ -173,6 +174,7 @@ public:
    void addWallItem(BfObject *wallItem, GridDatabase *database);
 
    void receivedLevelFromHoster(S32 levelIndex, const string &filename);
+   void makeEmptyLevelIfNoGameType();
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
    void sendLevelStatsToMaster();
 
@@ -239,7 +241,11 @@ public:
 
    Ship *getLocalPlayerShip() const;
 
+private:
+   void levelAddedNotifyClients(const LevelInfo &levelInfo);
+public:
    S32 addLevel(const LevelInfo &info);
+   void addNewLevel(const LevelInfo &info);
    void removeLevel(S32 index);
 
    // SFX Related -- these will just generate an error, as they should never be called

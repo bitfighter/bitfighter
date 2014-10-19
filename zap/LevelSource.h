@@ -75,6 +75,7 @@ public:
    void remove(S32 index);    // Remove level from the list of levels
 
    pair<S32, bool> addLevel(LevelInfo levelInfo);   // Yes, pass by value
+   void addNewLevel(const LevelInfo &levelInfo);
 
    // Extract info from specified level
    string          getLevelName(S32 index);
@@ -104,7 +105,7 @@ class MultiLevelSource : public LevelSource
    typedef LevelSource Parent;
 
 public:
-   MultiLevelSource();  				// Constructor
+   MultiLevelSource();              // Constructor
    virtual ~MultiLevelSource();     // Destructor
 
    bool loadLevels(FolderManager *folderManager);
