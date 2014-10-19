@@ -295,7 +295,7 @@ string GameSettings::getString(ParamId paramId)
 
 U32 GameSettings::getU32(ParamId paramId)
 {
-   return mCmdLineParams[paramId].size() > 0 ? U32(Zap::stoi(mCmdLineParams[paramId].get(0))) : 0;
+   return mCmdLineParams[paramId].size() > 0 ? U32(atoi(mCmdLineParams[paramId].get(0).c_str())) : 0;
 }
 
 
@@ -916,8 +916,8 @@ void GameSettings::onFinishedLoading()
    // ...and where the window should be...
    if(mCmdLineParams[WINDOW_POS].size() > 0)
    {
-      xpos = Zap::stoi(mCmdLineParams[WINDOW_POS].get(0));
-      ypos = Zap::stoi(mCmdLineParams[WINDOW_POS].get(1));
+      xpos = atoi(mCmdLineParams[WINDOW_POS].get(0).c_str());
+      ypos = atoi(mCmdLineParams[WINDOW_POS].get(1).c_str());
    }
 
    // ... and finally, the window width (which in turns determines its height because the aspect ratio is fixed at 4:3)

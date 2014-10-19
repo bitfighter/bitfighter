@@ -1255,7 +1255,7 @@ S32 EngineeredItem::lua_setHealRate(lua_State *L)
    S32 healRate = getInt(L, 1);
 
    if(healRate < 0)
-      throw LuaException("Specified healRate is negative, and that just makes me crazy!");
+      THROW_LUA_EXCEPTION(L, "Specified healRate is negative, and that just makes me crazy!");
 
    setHealRate(healRate);
 

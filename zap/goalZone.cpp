@@ -45,8 +45,8 @@ GoalZone::GoalZone(lua_State *L)
 
       if(profile == 1)        // Geom, Team
       {
-         setGeom(L,  1);
-         setTeam(L, -1);
+         setGeom(L, 1);
+         setTeam(L, 2);
       }
    }
 

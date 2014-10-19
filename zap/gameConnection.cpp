@@ -495,8 +495,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
 
 
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetVoteMapParam,
-                  (U8 voteLength, U8 voteLengthToChangeTeam, U8 voteRetryLength, S32 voteYesStrength, S32 voteNoStrength, S32 voteNothingStrength, bool voteEnable, bool allowGetMap, bool allowMapUpload),
-                  (voteLength, voteLengthToChangeTeam, voteRetryLength, voteYesStrength, voteNoStrength, voteNothingStrength, voteEnable, allowGetMap, allowMapUpload),
+                  (U8 voteLength, U8 voteLengthToChangeTeam, U8 voteRetryLength, S32 voteYesStrength, S32 voteNoStrength, S32 voteNothingStrength,
+                  bool voteEnable, bool allowGetMap, bool allowMapUpload, bool randomLevels),
+                  (voteLength, voteLengthToChangeTeam, voteRetryLength, voteYesStrength, voteNoStrength, voteNothingStrength,
+                  voteEnable, allowGetMap, allowMapUpload, randomLevels),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    if(!mClientInfo->isAdmin())
@@ -510,6 +512,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetVoteMapParam,
    mSettings->getIniSettings()->voteEnable = voteEnable;
    mSettings->getIniSettings()->allowGetMap = allowGetMap;
    mSettings->getIniSettings()->allowMapUpload = allowMapUpload;
+   mSettings->getIniSettings()->randomLevels = randomLevels;
 }
 
 // Allow admins to change the passwords and other parameters on their systems
@@ -1442,7 +1445,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClas
          mSettings->getIniSettings()->voteNothingStrength,
          mSettings->getIniSettings()->voteEnable,
          mSettings->getIniSettings()->allowGetMap,
-         mSettings->getIniSettings()->allowMapUpload );
+         mSettings->getIniSettings()->allowMapUpload,
+         mSettings->getIniSettings()->randomLevels );
    
       LevelSource * levelSource = mSettings->chooseLevelSource(NULL);
       delete mLevelSource;

@@ -1211,7 +1211,7 @@ public:
    LuaProxy<className> *mLuaProxy; \
    LuaProxy<className> *getLuaProxy() { return mLuaProxy; } \
    virtual void setLuaProxy(LuaProxy<className> *obj) { mLuaProxy = obj; } \
-   className(lua_State *L) { throw LuaException("Illegal attempt to instantiate abstract class!"); }
+   className(lua_State *L) { THROW_LUA_EXCEPTION(L, "Illegal attempt to instantiate abstract class!"); }
 
 // This is used for a class that you want to access (return as an object) but NOT instantiated (like PlayerInfo)
 #define  LUAW_DECLARE_NON_INSTANTIABLE_CLASS(className) \
@@ -1219,7 +1219,7 @@ public:
    LuaProxy<className> *getLuaProxy() { return mLuaProxy; } \
    virtual void setLuaProxy(LuaProxy<className> *obj) { mLuaProxy = obj; } \
    virtual void push(lua_State *L) { luaW_push(L, this); } \
-   className(lua_State *L) { throw LuaException("Illegal attempt to instantiate a non-instantiable class!"); }
+   className(lua_State *L) { THROW_LUA_EXCEPTION(L, "Illegal attempt to instantiate a non-instantiable class!"); }
 
 // This is the same as the CUSTOM_CONSTRUCTOR variant, except it sets up a constructor for you.  It
 // allows instantiation and access from Lua

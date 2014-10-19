@@ -1070,7 +1070,7 @@ S32 Teleporter::lua_getDest(lua_State *L)
    S32 index = getInt(L, 1) - 1;    // - 1 corrects for Lua indices starting at 1
 
    if(index < 0 || index >= getDestCount())
-      throw LuaException("Index out of range (requested " + itos(index) + ")");
+      THROW_LUA_EXCEPTION(L, string("Index out of range (requested " + itos(index) + ")").c_str());
 
    return returnPoint(L, mDestManager.getDest(index));
 }

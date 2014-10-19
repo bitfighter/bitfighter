@@ -52,7 +52,7 @@ TextItem::TextItem(lua_State *L)
       if(profile == 1)
       {
          setGeom(L, 1);
-         setText(L, -1);
+         setText(L, 2);
       }
    }
 
