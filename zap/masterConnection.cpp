@@ -9,6 +9,7 @@
 #include "ServerGame.h"
 #include "LevelDatabase.h"
 #include "gameConnection.h"
+#include "gameType.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
@@ -529,8 +530,8 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       bstream->write((U32) serverGame->getMaxPlayers());      // max players
       bstream->write((U32) serverGame->mInfoFlags);           // info flags (1=>test host, i.e. from editor)
 
-      bstream->writeString(serverGame->getCurrentLevelName().getString());          // Level name
-      bstream->writeString(serverGame->getCurrentLevelTypeName().getString());      // Level type
+      bstream->writeString(serverGame->getGameType()->getLevelName().c_str());                     // Level name
+      bstream->writeString(GameType::getGameTypeName(serverGame->getGameType()->getGameTypeId())); // Level type
 
       bstream->writeString(serverGame->getSettings()->getHostName().c_str());       // Server name
       bstream->writeString(serverGame->getSettings()->getHostDescr().c_str());      // Server description

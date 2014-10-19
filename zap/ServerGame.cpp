@@ -357,6 +357,14 @@ bool ServerGame::populateLevelInfoFromSource(const string &fullFilename, LevelIn
 // Can return "" if there was a problem with the level.
 string ServerGame::loadNextLevelInfo()
 {
+   // Last level to process?
+   if(mLevelLoadIndex == mLevelSource->getLevelCount())
+   {
+      TNLAssert(mHostOnServer, "Shouldn't be empty if not using -hostonserver");
+      GameManager::setHostingModePhase(GameManager::DoneLoadingLevels);
+      return string("No levels loaded");
+   }
+
    FolderManager *folderManager = getSettings()->getFolderManager();
 
    string filename = folderManager->findLevelFile(mLevelSource->getLevelFileName(mLevelLoadIndex));
@@ -383,7 +391,7 @@ string ServerGame::loadNextLevelInfo()
 // Get the level name, as defined in the level file
 StringTableEntry ServerGame::getLevelNameFromIndex(S32 index)
 {
-   return mLevelSource->getLevelInfo(getAbsoluteLevelIndex(index)).mLevelName;
+   return mLevelSource->getLevelName(getAbsoluteLevelIndex(index));
 }
 
 
@@ -397,7 +405,7 @@ string ServerGame::getCurrentLevelFileName() const
 // Return name of level currently in play
 StringTableEntry ServerGame::getCurrentLevelName() const
 {
-   return mLevelSource->getLevelInfo(mCurrentLevelIndex).mLevelName;
+   return mLevelSource->getLevelName(mCurrentLevelIndex);
 }
 
 
@@ -1208,7 +1216,7 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
          makeEmptyLevelIfNoGameType();
 
          mSettings->setServerPassword(string(), false);
-         mSettings->setHostName(string(), false);
+         mSettings->setHostName(string(), false); // TODO: probably should make the name change back rather then just blank
          mSettings->setHostDescr(string(), false);
 
          if(mMasterUpdateTimer.getCurrent() > UpdateServerWhenHostGoesEmpty)
@@ -1759,7 +1767,7 @@ void ServerGame::updateStatusOnMaster()
 {
    MasterServerConnection *masterConn = getConnectionToMaster();
 
-   static StringTableEntry prevCurrentLevelName;      // Using static, so it holds the value when it comes back here
+   static string prevCurrentLevelName;      // Using static, so it holds the value when it comes back here
    static GameTypeId prevCurrentLevelType;
    static S32 prevRobotCount;
    static S32 prevPlayerCount;
@@ -1767,18 +1775,20 @@ void ServerGame::updateStatusOnMaster()
    if(masterConn && masterConn->isEstablished())
    {
       // Only update if something is different
-      if(prevCurrentLevelName != getCurrentLevelName() || prevCurrentLevelType != getCurrentLevelType() || 
-         prevRobotCount       != getRobotCount()       || prevPlayerCount      != getPlayerCount())
+      if(prevCurrentLevelName != getGameType()->getLevelName() ||
+         prevCurrentLevelType != getGameType()->getGameTypeId() ||
+         prevRobotCount       != getRobotCount() ||
+         prevPlayerCount      != getPlayerCount())
       {
-         prevCurrentLevelName = getCurrentLevelName();
-         prevCurrentLevelType = getCurrentLevelType();
+         prevCurrentLevelName = getGameType()->getLevelName();
+         prevCurrentLevelType = getGameType()->getGameTypeId();
          prevRobotCount       = getRobotCount();
          prevPlayerCount      = getPlayerCount();
 
-         masterConn->updateServerStatus(getCurrentLevelName(), 
-                                        getCurrentLevelTypeName(), 
-                                        getRobotCount(), 
-                                        getPlayerCount(), 
+         masterConn->updateServerStatus(StringTableEntry(prevCurrentLevelName.c_str()), 
+                                        GameType::getGameTypeName(prevCurrentLevelType), 
+                                        prevRobotCount, 
+                                        prevPlayerCount, 
                                         mSettings->getMaxPlayers(), 
                                         mInfoFlags);
 
@@ -1798,15 +1808,15 @@ void ServerGame::updateStatusOnMaster()
 // Returns true if things went well, false if we couldn't find any levels to host
 bool ServerGame::startHosting()
 {
+   if(!mLevelSource->isEmptyLevelDirOk() && mSettings->getFolderManager()->levelDir == "")   // No leveldir, no hosting!
+      return false;
+
    if(mHostOnServer)
    {
       GameManager::setHostingModePhase(GameManager::NotHosting);
       cycleLevel(FIRST_LEVEL);   // Start with the first level
       return true;
    }
-
-   if(!mLevelSource->isEmptyLevelDirOk() && mSettings->getFolderManager()->levelDir == "")   // No leveldir, no hosting!
-      return false;
 
    S32 levelCount = mLevelSource->getLevelCount();
 

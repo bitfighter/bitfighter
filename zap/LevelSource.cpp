@@ -208,7 +208,10 @@ void LevelSource::addNewLevel(const LevelInfo &levelInfo)
 
 string LevelSource::getLevelName(S32 index)
 {
-   return mLevelInfos[index].mLevelName.getString(); 
+   if(index < 0 || index >= mLevelInfos.size())
+      return "";
+   else
+      return mLevelInfos[index].mLevelName.getString(); 
 }
 
 
@@ -217,8 +220,7 @@ string LevelSource::getLevelFileName(S32 index)
    if(index < 0 || index >= mLevelInfos.size())
       return "";
    else
-
-   return mLevelInfos[index].filename;
+      return mLevelInfos[index].filename;
 }
 void LevelSource::setLevelFileName(S32 index, const string &filename)
 {

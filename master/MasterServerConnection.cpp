@@ -1664,6 +1664,8 @@ void MasterServerConnection::writeConnectAccept(BitStream *stream)
 
 void MasterServerConnection::onConnectionEstablished()
 {
+   Parent::onConnectionEstablished();
+
    if(mConnectionType == MasterConnectionTypeClient)
    {
       // If client needs to upgrade, tell them
