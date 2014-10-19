@@ -297,6 +297,7 @@ public:
    static string cleanName(string name);
    bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
    void writeConnectAccept(BitStream *stream);
+   void onConnectionEstablished();
 
 
    TNL_DECLARE_RPC_OVERRIDE(c2mJoinGlobalChat, ());

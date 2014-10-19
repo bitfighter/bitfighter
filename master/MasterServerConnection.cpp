@@ -1627,16 +1627,6 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
                // Do nothing
                break;
          }
-
-         // If client needs to upgrade, tell them
-         m2cSendUpdgradeStatus(mMaster->getSetting<U32>("LatestReleasedCSProtocol")   > mCSProtocolVersion || 
-                               mMaster->getSetting<U32>("LatestReleasedBuildVersion") > mClientBuild);
-
-         // Send message of the day
-         sendMotd();
-
-         // for "Host on server" 019d and later, Maybe improve this to only show it when server is available...
-         m2cHostOnServerAvailable(true);
       }
       break;
 
@@ -1670,6 +1660,22 @@ void MasterServerConnection::writeConnectAccept(BitStream *stream)
 
    if(mCMProtocolVersion >= 8)
       stream->write(mClientId);
+}
+
+void MasterServerConnection::onConnectionEstablished()
+{
+   if(mConnectionType == MasterConnectionTypeClient)
+   {
+      // If client needs to upgrade, tell them
+      m2cSendUpdgradeStatus(mMaster->getSetting<U32>("LatestReleasedCSProtocol")   > mCSProtocolVersion || 
+                            mMaster->getSetting<U32>("LatestReleasedBuildVersion") > mClientBuild);
+
+      // Send message of the day
+      sendMotd();
+
+      // for "Host on server" 019d and later, Maybe improve this to only show it when server is available...
+      m2cHostOnServerAvailable(true);
+   }
 }
 
 
