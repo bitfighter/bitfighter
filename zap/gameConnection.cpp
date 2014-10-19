@@ -499,7 +499,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetVoteMapParam,
                   bool voteEnable, bool allowGetMap, bool allowMapUpload, bool randomLevels),
                   (voteLength, voteLengthToChangeTeam, voteRetryLength, voteYesStrength, voteNoStrength, voteNothingStrength,
                   voteEnable, allowGetMap, allowMapUpload, randomLevels),
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3)
 {
    if(!mClientInfo->isAdmin())
       return;
@@ -513,6 +513,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetVoteMapParam,
    mSettings->getIniSettings()->allowGetMap = allowGetMap;
    mSettings->getIniSettings()->allowMapUpload = allowMapUpload;
    mSettings->getIniSettings()->randomLevels = randomLevels;
+   mSettings->getIniSettings()->allowAdminMapUpload = true; // must be True, for host on server to work
+   mSettings->getIniSettings()->allowLevelgenUpload = true;
 }
 
 // Allow admins to change the passwords and other parameters on their systems
@@ -1464,6 +1466,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClas
             levelSource->getLevelInfo(i).maxRecPlayers,
             i); // index
       }
+
+      s2cRequestLevel(0);
+      TransferLevelFile(strictjoindir(mLevelSource->getLevelInfo(0).folder, mLevelSource->getLevelFileName(0)).c_str());
    }
 #endif
    mSendableFlags = flags;

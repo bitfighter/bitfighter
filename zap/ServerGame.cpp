@@ -25,6 +25,8 @@
 
 #include "GameRecorder.h"
 
+#include "IniFile.h"
+
 
 using namespace TNL;
 
@@ -55,6 +57,8 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
    mLevelLoadIndex = 0;
    mShutdownOriginator = NULL;
    mHostOnServer = hostOnServer;
+   if(hostOnServer)                             // Other hosts might override settings
+      GameSettings::iniFile.SetPath(string("")); // so lets make it so it never saves
 
    setAddTarget();               // When we do an addToGame, objects should be added to ServerGame
 
@@ -522,6 +526,16 @@ void ServerGame::cycleLevel(S32 nextLevel)
    {
       if(mHoster.isValid())
       {
+         if(mLevelSource->getLevelCount() == 0)
+         {
+            if(getGameType()->isGameOver())
+            {
+               mShutdownTimer.reset(1); 
+               mShuttingDown = true;
+               mShutdownReason = "Host failed to send level list";
+            }
+            return; // we haven't cleared anything so its like level never changed, yet.
+         }
          mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel);
          nextLevel = mCurrentLevelIndex;
          S32 hostLevelIndex = mLevelSource->getLevelInfo(mCurrentLevelIndex).mHosterLevelIndex;
@@ -1182,12 +1196,15 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
    {
       if(getPlayerCount() == 0)
       {
-         mInfoFlags |= HostModeFlag;
          delete mGameRecorderServer;
          mGameRecorderServer = NULL;
          cleanUp();
          mLevelSwitchTimer.clear();
          mScopeAlwaysList.clear();
+
+         removeLevel(-1);
+         mCurrentLevelIndex = FIRST_LEVEL;
+         mInfoFlags |= HostModeFlag;
          makeEmptyLevelIfNoGameType();
 
          mSettings->setServerPassword(string(), false);
