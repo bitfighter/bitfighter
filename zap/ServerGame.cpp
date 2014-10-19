@@ -494,6 +494,15 @@ static S32 QSORT_CALLBACK AddOrderSort(RefPtr<ClientInfo> *a, RefPtr<ClientInfo>
 }
 
 
+void ServerGame::receivedLevelFromHoster(S32 levelIndex, const string &filename)
+{
+   if(levelIndex >= mLevelSource->getLevelCount())
+      return; // out of range
+   mLevelSource->setLevelFileName(levelIndex, filename);
+   cycleLevel(levelIndex);
+}
+
+
 // Clear, prepare, and load the level given by the index \nextLevel. This
 // function respects meta-indices, and otherwise expects an absolute index.
 void ServerGame::cycleLevel(S32 nextLevel)
@@ -504,7 +513,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
       {
          mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel);
          nextLevel = mCurrentLevelIndex;
-         if(mLevelSource->getLevelFileName(mCurrentLevelIndex).length() == 0)
+         if(mLevelSource->getLevelFileName(mLevelSource->getLevelInfo(mCurrentLevelIndex).mHosterLevelIndex).length() == 0)
          {
             return;
          }

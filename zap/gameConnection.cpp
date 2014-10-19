@@ -42,9 +42,6 @@ GameConnection::GameConnection()
 
    mSettings = NULL; // mServerGame->getSettings();      // will be set on ReadConnectRequest
 
-   mVote = 0;
-   mVoteTime = 0;
-
    // Might be a tad more efficient to put this in the initializer, but the (legitimate, in this case) use of this
    // in the arguments makes VC++ nervous, which in turn makes me nervous.
    mClientInfo = NULL;    /// FullClientInfo created when we know what the ServerGame is, in readConnectRequest
@@ -98,6 +95,11 @@ void GameConnection::initialize()
 
    mPackUnpackShipEnergyMeter = false;
 
+   mVote = 0;
+   mVoteTime = 0;
+   mLevelSource = NULL;
+   mLevelUploadIndex = -1;
+
    resetConnectionStatus();
 }
 
@@ -127,6 +129,7 @@ GameConnection::~GameConnection()
       }
    }
 
+   delete mLevelSource;
    delete mDataBuffer;
 }
 
@@ -1170,8 +1173,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cRemoveLevel, (S32 index), (index),
 
 // Server sends the name and type of a level to the client (gets run repeatedly when client connects to the server). 
 // Sending a blank name and type will clear the list.
-TNL_IMPLEMENT_RPC(GameConnection, c2sAddLevel, (StringTableEntry name, RangedU32<0, GameTypesCount> type, S32 minPlayers, S32 maxPlayers), (name, type, minPlayers, maxPlayers),
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 3)
+TNL_IMPLEMENT_RPC(GameConnection, c2sAddLevel, (StringTableEntry name, RangedU32<0, GameTypesCount> type, S32 minPlayers, S32 maxPlayers, S32 index), (name, type, minPlayers, maxPlayers, index),
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3)
 {
    TNLAssert((mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when not in host mode");
    if(mSendableFlags | ServerFlagHostingLevels)
@@ -1184,6 +1187,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAddLevel, (StringTableEntry name, RangedU32
       LevelInfo levelInfo(name, (GameTypeId)type.value);
       levelInfo.minRecPlayers = minPlayers;
       levelInfo.maxRecPlayers = maxPlayers;
+      levelInfo.mHosterLevelIndex = index;
       getServerGame()->addLevel(levelInfo);
    }
 }
@@ -1202,12 +1206,17 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRemoveLevel, (S32 index), (index),
 }
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cRequestLevel, (S32 index), (index),
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 3)
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 3)
 {
-   TNLAssert((mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when not in host mode");
-
-   if(U32(index) < U32(mLevelInfos.size()))
-      TransferLevelFile(mLevelInfos[index].filename.c_str());
+   if(!isInitiator())
+      mLevelUploadIndex = index; // for c2s, just set the index to know which one is uploaded
+   else
+   {
+      TNLAssert((mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when not in host mode");
+      s2cRequestLevel(index); // c2s, tells the server which one we are uploading, this is done in case of lag and delays on uploading.
+      if(U32(index) < U32(mLevelInfos.size()))
+         TransferLevelFile(mLevelInfos[index].filename.c_str());
+   }
 }
 
 
@@ -1406,8 +1415,10 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClas
       c2sSetParam(mSettings->getHostDescr(), ServerDescr);
    
       LevelSource * levelSource = mSettings->chooseLevelSource(NULL);
+      delete mLevelSource;
+      mLevelSource = levelSource;
 
-      c2sRemoveLevel(-1);	
+      c2sRemoveLevel(-1);   
       for(S32 i = 0; i < levelSource->getLevelCount(); i++)
       {
          string filename = mSettings->getFolderManager()->findLevelFile(levelSource->getLevelFileName(i));
@@ -1416,10 +1427,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClas
             levelSource->getLevelName(i),
             levelSource->getLevelType(i),
             levelSource->getLevelInfo(i).minRecPlayers,
-            levelSource->getLevelInfo(i).maxRecPlayers);
+            levelSource->getLevelInfo(i).maxRecPlayers,
+            i); // index
       }
-
-      delete levelSource;
    }
 #endif
    mSendableFlags = flags;
@@ -1447,7 +1457,7 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
    {
       if(isServer)
       {
-         s2cDisplayErrorMessage("!!! LevelGen not uploaded, does Script name end with .levelgen ?"); // for existing client release 019
+         s2cDisplayErrorMessage("!!! LevelGen not uploaded, does Script name end with .levelgen ?"); // for old 019 clients
          return;
       }
       else
@@ -1530,9 +1540,15 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
 
       if(isServer)
       {
-         
-         S32 index = mServerGame->addLevel(levelInfo);
-         c2sRequestLevelChange_remote(index, false);  // Might as well switch to it after done with upload
+         if((mSendableFlags & ServerFlagHostingLevels) != 0 && mLevelUploadIndex >= 0)
+         {
+            mServerGame->receivedLevelFromHoster(mLevelUploadIndex, fullFilename);
+         }
+         else
+         {
+            S32 index = mServerGame->addLevel(levelInfo);
+            c2sRequestLevelChange_remote(index, false);  // Might as well switch to it after done with upload
+         }
       }
    }
    else if(isServer)

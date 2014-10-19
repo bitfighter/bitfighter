@@ -36,6 +36,7 @@ public:
    GameTypeId mLevelType;      
    S32 minRecPlayers;               // Min recommended number of players for this level
    S32 maxRecPlayers;               // Max recommended number of players for this level
+   S32 mHosterLevelIndex;           // Max recommended number of players for this level
 
    LevelInfo();      // Default constructor used on server side
 
@@ -78,6 +79,7 @@ public:
    // Extract info from specified level
    string          getLevelName(S32 index);
    virtual string  getLevelFileName(S32 index);
+   void            setLevelFileName(S32 index, const string &filename);
    GameTypeId      getLevelType(S32 index);
 
    virtual bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo) = 0;

@@ -172,6 +172,7 @@ public:
    void addPolyWall(BfObject *polyWall, GridDatabase *database);
    void addWallItem(BfObject *wallItem, GridDatabase *database);
 
+   void receivedLevelFromHoster(S32 levelIndex, const string &filename);
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
    void sendLevelStatsToMaster();
 
