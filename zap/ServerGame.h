@@ -69,6 +69,10 @@ private:
    Timer mTimeToSuspend;
 
    GameRecorderServer *mGameRecorderServer;
+
+   string mOriginalName;
+   string mOriginalDescr;
+   string mOriginalServerPassword;
 public:
    bool mHostOnServer;
    SafePtr<GameConnection> mHoster;

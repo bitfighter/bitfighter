@@ -57,8 +57,6 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
    mLevelLoadIndex = 0;
    mShutdownOriginator = NULL;
    mHostOnServer = hostOnServer;
-   if(hostOnServer)                             // Other hosts might override settings
-      GameSettings::iniFile.SetPath(string("")); // so lets make it so it never saves
 
    setAddTarget();               // When we do an addToGame, objects should be added to ServerGame
 
@@ -81,7 +79,15 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
       mInfoFlags |= TestModeFlag;
 
    if(hostOnServer)
+   {
       mInfoFlags |= HostModeFlag;
+      mOriginalServerPassword = mSettings->getServerPassword();
+      mOriginalName = mSettings->getHostName();
+      mOriginalDescr = mSettings->getHostDescr();
+
+      // Other hosts might override settings so lets make it so it never saves
+      GameSettings::iniFile.SetPath(string(""));
+   }
 
 #ifdef TNL_DEBUG
    mInfoFlags |= DebugModeFlag;
@@ -1215,9 +1221,9 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
          mInfoFlags |= HostModeFlag;
          makeEmptyLevelIfNoGameType();
 
-         mSettings->setServerPassword(string(), false);
-         mSettings->setHostName(string(), false); // TODO: probably should make the name change back rather then just blank
-         mSettings->setHostDescr(string(), false);
+         mSettings->setServerPassword(mOriginalServerPassword, false);
+         mSettings->setHostName(mOriginalName, false);
+         mSettings->setHostDescr(mOriginalDescr, false);
 
          if(mMasterUpdateTimer.getCurrent() > UpdateServerWhenHostGoesEmpty)
             mMasterUpdateTimer.setPeriod(UpdateServerWhenHostGoesEmpty);
