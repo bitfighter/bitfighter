@@ -383,7 +383,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdSh
 				urlComplete += gupParams.getCurrentVersion();
 
 #if defined(_M_X64) || defined(__x86_64__) || defined(__amd64__)
-				urlComplete += "&os=win64";
+				urlComplete += "&platform=win64";
 #endif
 
 			curl_easy_setopt(curl, CURLOPT_URL, urlComplete.c_str());

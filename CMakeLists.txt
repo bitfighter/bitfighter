@@ -210,6 +210,7 @@ endif()
 add_subdirectory(tnl)
 add_subdirectory(tnlping)
 add_subdirectory(master)
+add_subdirectory(updater)  # Windows-only
 
 
 # Our main sources!
