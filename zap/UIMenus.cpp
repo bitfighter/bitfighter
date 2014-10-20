@@ -1936,9 +1936,6 @@ void HostMenuUserInterface::setupMenus()
    // These menu items MUST align with the MenuItems enum
    addMenuItem(new MenuItem("START HOSTING", startHostingCallback, "", KEY_H));
 
-   if(getGame()->getConnectionToMaster() && getGame()->getConnectionToMaster()->isHostOnServerAvailable())
-      addMenuItem(new MenuItem("HOST ON SERVER", hostOnServerCallback, "", KEY_H));
-
    addMenuItem(new MenuItem(getMenuItemCount(), "ROBOTS", robotOptionsSelectedCallback,
          "Add robots and adjust their settings", KEY_R));
 
@@ -1954,6 +1951,11 @@ void HostMenuUserInterface::setupMenus()
    addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap, "", KEY_M));
 
    addMenuItem(new YesNoMenuItem("RECORD GAMES:", settings->getIniSettings()->enableGameRecording, ""));
+
+   // Note, Don't move "HOST ON SERVER" above "RECORD GAMES" unless
+   // first checking HostMenuUserInterface::saveSettings if it saves correctly
+   if(getGame()->getConnectionToMaster() && getGame()->getConnectionToMaster()->isHostOnServerAvailable())
+      addMenuItem(new MenuItem("HOST ON SERVER", hostOnServerCallback, "", KEY_H));
 
    addMenuItem(new MenuItem("PLAYBACK GAMES",    playbackGamesCallback,  ""));
 }
