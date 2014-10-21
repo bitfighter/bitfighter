@@ -36,6 +36,7 @@ class ServerGame;
 struct LevelInfo;
 class LuaPlayerInfo;
 class GameSettings;
+class LevelSource;
 
 class GameConnection: public ControlObjectConnection, public ChatCheck
 {
@@ -51,6 +52,8 @@ private:
    string mLastEnteredPassword;
 
    RefPtr<ClientInfo> mClientInfo;               // This could be either a FullClientInfo or a RemoteClientInfo
+   LevelSource *mLevelSource;
+   S32 mLevelUploadIndex;
 
 protected:
 #ifndef ZAP_DEDICATED
@@ -81,6 +84,8 @@ private:
 
    void updateTimers_client(U32 timeDelta);
    void updateTimers_server(U32 timeDelta);
+
+   S32 mUploadIndex;
 
 public:
    bool mPackUnpackShipEnergyMeter; // Only true for game recorder
@@ -213,6 +218,8 @@ public:
    // Tell clients a player is authenticated, and pass on some badge info while we're on the phone
    TNL_DECLARE_RPC(s2cSetAuthenticated, (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges, U16 gamesPlayed));   
 
+   TNL_DECLARE_RPC(c2sSetVoteMapParam, (U8 voteLength, U8 voteLengthToChangeTeam, U8 voteRetryLength, S32 voteYesStrength, S32 voteNoStrength, S32 voteNothingStrength,
+                                        bool voteEnable, bool allowGetMap, bool allowMapUpload, bool randomLevels));
    TNL_DECLARE_RPC(c2sSetParam, (StringPtr param, RangedU32<0, ParamTypeCount> paramType));
 
 
@@ -245,6 +252,9 @@ public:
 
    TNL_DECLARE_RPC(s2cAddLevel, (StringTableEntry name, RangedU32<0, GameTypesCount> type));
    TNL_DECLARE_RPC(s2cRemoveLevel, (S32 index));
+   TNL_DECLARE_RPC(c2sAddLevel, (StringTableEntry name, RangedU32<0, GameTypesCount> type, S32 minPlayers, S32 maxPlayers, S32 index));
+   TNL_DECLARE_RPC(c2sRemoveLevel, (S32 index));
+   TNL_DECLARE_RPC(s2cRequestLevel, (S32 index));
 
    TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative));
    TNL_DECLARE_RPC(c2sShowNextLevel, ());
@@ -265,6 +275,7 @@ public:
    enum ServerFlags {
       ServerFlagAllowUpload = BIT(0),
       ServerFlagHasRecordedGameplayDownloads = BIT(1),
+      ServerFlagHostingLevels = BIT(2),
       // U8 max!
    };
 

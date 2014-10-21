@@ -31,6 +31,7 @@ private:
    string mMasterName;
 
    S32 mClientId;
+   bool mHostOnServerAvailable;
 
    void terminateIfAnonymous();
 
@@ -42,13 +43,15 @@ public:
    MasterServerConnection();              // Default Constructor required by TNL
    virtual ~MasterServerConnection();     // Destructor
 
+   bool isHostOnServerAvailable();
+
    void setConnectionType(MasterConnectionType type);
    MasterConnectionType getConnectionType();
 
    void setMasterName(string name);
    string getMasterName();
 
-   void startServerQuery();
+   void startServerQuery(bool hostOnServer);
 
    Vector<ServerAddr> mServerList;
 
@@ -59,7 +62,10 @@ public:
 
    S32 getClientId() const;
 
+   TNL_DECLARE_RPC_OVERRIDE(m2cHostOnServerAvailable, (bool yes));
+
 #ifndef ZAP_DEDICATED
+
    TNL_DECLARE_RPC_OVERRIDE(m2cQueryServersResponse, (U32 queryId, Vector<IPAddress> ipList));
    TNL_DECLARE_RPC_OVERRIDE(m2cQueryServersResponse_019a, (U32 queryId, Vector<IPAddress> ipList, Vector<S32> clientIdList));
 #endif

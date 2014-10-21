@@ -208,6 +208,8 @@ public:
    // that match the client's particular filter criteria and
    // sends it to the client, followed by a QueryServersDone RPC.
    TNL_DECLARE_RPC_OVERRIDE(c2mQueryServers, (U32 queryId));
+   TNL_DECLARE_RPC_OVERRIDE(c2mQueryHostServers, (U32 queryId));
+   void c2mQueryServersOption(U32 queryId, bool hostonly);
 
    /// checkActivityTime validates that this particular connection is
    /// not issuing too many requests at once in an attempt to DOS
@@ -295,6 +297,7 @@ public:
    static string cleanName(string name);
    bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
    void writeConnectAccept(BitStream *stream);
+   void onConnectionEstablished();
 
 
    TNL_DECLARE_RPC_OVERRIDE(c2mJoinGlobalChat, ());

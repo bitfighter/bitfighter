@@ -25,6 +25,8 @@
 
 #include "GameRecorder.h"
 
+#include "IniFile.h"
+
 
 using namespace TNL;
 
@@ -36,7 +38,7 @@ static bool instantiated;           // Just a little something to keep us from c
 
 
 // Constructor -- be sure to see Game constructor too!  Lots going on there!
-ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated) : 
+ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated, bool hostOnServer) : 
       Game(address, settings),
       mRobotManager(this, settings)
 {
@@ -54,6 +56,7 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
    mVoteType = VoteLevelChange;  // Arbitrary
    mLevelLoadIndex = 0;
    mShutdownOriginator = NULL;
+   mHostOnServer = hostOnServer;
 
    setAddTarget();               // When we do an addToGame, objects should be added to ServerGame
 
@@ -74,6 +77,17 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
 
    if(testMode)
       mInfoFlags |= TestModeFlag;
+
+   if(hostOnServer)
+   {
+      mInfoFlags |= HostModeFlag;
+      mOriginalServerPassword = mSettings->getServerPassword();
+      mOriginalName = mSettings->getHostName();
+      mOriginalDescr = mSettings->getHostDescr();
+
+      // Other hosts might override settings so lets make it so it never saves
+      GameSettings::iniFile.SetPath(string(""));
+   }
 
 #ifdef TNL_DEBUG
    mInfoFlags |= DebugModeFlag;
@@ -349,6 +363,14 @@ bool ServerGame::populateLevelInfoFromSource(const string &fullFilename, LevelIn
 // Can return "" if there was a problem with the level.
 string ServerGame::loadNextLevelInfo()
 {
+   // Last level to process?
+   if(mLevelLoadIndex == mLevelSource->getLevelCount())
+   {
+      TNLAssert(mHostOnServer, "Shouldn't be empty if not using -hostonserver");
+      GameManager::setHostingModePhase(GameManager::DoneLoadingLevels);
+      return string("No levels loaded");
+   }
+
    FolderManager *folderManager = getSettings()->getFolderManager();
 
    string filename = folderManager->findLevelFile(mLevelSource->getLevelFileName(mLevelLoadIndex));
@@ -375,7 +397,7 @@ string ServerGame::loadNextLevelInfo()
 // Get the level name, as defined in the level file
 StringTableEntry ServerGame::getLevelNameFromIndex(S32 index)
 {
-   return mLevelSource->getLevelInfo(getAbsoluteLevelIndex(index)).mLevelName;
+   return mLevelSource->getLevelName(getAbsoluteLevelIndex(index));
 }
 
 
@@ -389,7 +411,7 @@ string ServerGame::getCurrentLevelFileName() const
 // Return name of level currently in play
 StringTableEntry ServerGame::getCurrentLevelName() const
 {
-   return mLevelSource->getLevelInfo(mCurrentLevelIndex).mLevelName;
+   return mLevelSource->getLevelName(mCurrentLevelIndex);
 }
 
 
@@ -490,15 +512,69 @@ static S32 QSORT_CALLBACK AddOrderSort(RefPtr<ClientInfo> *a, RefPtr<ClientInfo>
 }
 
 
+void ServerGame::receivedLevelFromHoster(S32 levelIndex, const string &filename)
+{
+   if(levelIndex >= mLevelSource->getLevelCount())
+      return; // out of range
+   mLevelSource->setLevelFileName(levelIndex, filename);
+   cycleLevel(levelIndex);
+}
+
+
+void ServerGame::makeEmptyLevelIfNoGameType()
+{
+   if(!getGameType())
+   {
+      GameType *gameType = new GameType();
+      gameType->addToGame(this, getGameObjDatabase());
+   }
+   getGameType()->makeSureTeamCountIsNotZero();
+}
+
+
 // Clear, prepare, and load the level given by the index \nextLevel. This
 // function respects meta-indices, and otherwise expects an absolute index.
 void ServerGame::cycleLevel(S32 nextLevel)
 {
-   if(mGameRecorderServer)
+   if(mHostOnServer)
    {
-      delete mGameRecorderServer;
-      mGameRecorderServer = NULL;
+      if(mHoster.isValid())
+      {
+         if(mLevelSource->getLevelCount() == 0)
+         {
+            if(getGameType()->isGameOver())
+            {
+               mShutdownTimer.reset(1); 
+               mShuttingDown = true;
+               mShutdownReason = "Host failed to send level list";
+            }
+            return; // we haven't cleared anything so its like level never changed, yet.
+         }
+         mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel);
+         nextLevel = mCurrentLevelIndex;
+         S32 hostLevelIndex = mLevelSource->getLevelInfo(mCurrentLevelIndex).mHosterLevelIndex;
+         if(mLevelSource->getLevelFileName(mLevelSource->getLevelInfo(mCurrentLevelIndex).mHosterLevelIndex).length() == 0 && hostLevelIndex >= 0)
+         {
+            mHoster->s2cRequestLevel(hostLevelIndex);
+            return;
+         }
+      }
+      else if(getPlayerCount() == 0)
+      {
+         makeEmptyLevelIfNoGameType();
+         return;
+      }
+      else
+      {
+         mShutdownTimer.reset(1); 
+         mShuttingDown = true;
+         mShutdownReason = "Host left game";
+         return;
+      }
    }
+
+   delete mGameRecorderServer;
+   mGameRecorderServer = NULL;
 
    cleanUp();
    mLevelSwitchTimer.clear();
@@ -538,7 +614,12 @@ void ServerGame::cycleLevel(S32 nextLevel)
       {
          logprintf(LogConsumer::ServerFilter, "FAILED!");
 
-         if(mLevelSource->getLevelCount() > 1)
+         if(mHostOnServer)
+         {
+            makeEmptyLevelIfNoGameType();
+            loaded = true;
+         }
+         else if(mLevelSource->getLevelCount() > 1)
             removeLevel(mCurrentLevelIndex);
          else
          {
@@ -551,12 +632,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
                               "Sorry dude -- hosting mode shutting down.";
 
             // To avoid crashing...
-            if(!getGameType())
-            {
-               GameType *gameType = new GameType();
-               gameType->addToGame(this, getGameObjDatabase());
-            }
-            getGameType()->makeSureTeamCountIsNotZero();
+            makeEmptyLevelIfNoGameType();
 
             return;
          }
@@ -1130,7 +1206,30 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
 
-   if(getPlayerCount() == 0 && !mShuttingDown && isDedicated())  // only dedicated server can have zero players
+   if(mHostOnServer)
+   {
+      if(getPlayerCount() == 0)
+      {
+         delete mGameRecorderServer;
+         mGameRecorderServer = NULL;
+         cleanUp();
+         mLevelSwitchTimer.clear();
+         mScopeAlwaysList.clear();
+
+         removeLevel(-1);
+         mCurrentLevelIndex = FIRST_LEVEL;
+         mInfoFlags |= HostModeFlag;
+         makeEmptyLevelIfNoGameType();
+
+         mSettings->setServerPassword(mOriginalServerPassword, false);
+         mSettings->setHostName(mOriginalName, false);
+         mSettings->setHostDescr(mOriginalDescr, false);
+
+         if(mMasterUpdateTimer.getCurrent() > UpdateServerWhenHostGoesEmpty)
+            mMasterUpdateTimer.setPeriod(UpdateServerWhenHostGoesEmpty);
+      }
+   }
+   else if(getPlayerCount() == 0 && !mShuttingDown && isDedicated())  // only dedicated server can have zero players
       cycleLevel(getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL);    // Advance to beginning of next level
    else
       mRobotManager.balanceTeams();
@@ -1257,8 +1356,33 @@ bool ServerGame::isFull()
 // Only called from outside ServerGame
 bool ServerGame::isReadyToShutdown(U32 timeDelta, string &reason)
 {
+   if(mHostOnServer && mShuttingDown)
+   {
+      if(mShutdownTimer.update(timeDelta) || onlyClientIs(mShutdownOriginator))
+      {
+         // Disconnect all clients, and  then this server will
+         // move from main server list into "Host from server" list
+
+         for(S32 i = 0; i < getClientCount(); i++)
+         {
+            ClientInfo *clientInfo = getClientInfo(i);
+   
+            if(!clientInfo->isRobot())
+            {
+               GameConnection *connection = clientInfo->getConnection();
+               if(connection != NULL)
+                  connection->disconnect(NetConnection::ReasonShutdown, mShutdownReason.c_str());
+            }
+         }
+         mShuttingDown = false;
+      }
+      return false;
+   }
+
    reason = mShutdownReason;
    return mShuttingDown && (mShutdownTimer.update(timeDelta) || onlyClientIs(mShutdownOriginator));
+
+
 }
 
 
@@ -1413,6 +1537,15 @@ void ServerGame::idle(U32 timeDelta)
       getGameType()->updateRatings();
       cycleLevel(mNextLevel);
       mNextLevel = getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL;
+   }
+
+   // The host could leave the game in a middle of next level upload, then we have to shut down
+   if(mHostOnServer && getGameType()->isGameOver() && mLevelSwitchTimer.getCurrent() == 0 && mHoster.isNull())
+   {
+      mShutdownTimer.reset(1);
+      mShuttingDown = true;
+      mShutdownReason = "Host left game";
+      return;
    }
 
 
@@ -1640,7 +1773,7 @@ void ServerGame::updateStatusOnMaster()
 {
    MasterServerConnection *masterConn = getConnectionToMaster();
 
-   static StringTableEntry prevCurrentLevelName;      // Using static, so it holds the value when it comes back here
+   static string prevCurrentLevelName;      // Using static, so it holds the value when it comes back here
    static GameTypeId prevCurrentLevelType;
    static S32 prevRobotCount;
    static S32 prevPlayerCount;
@@ -1648,18 +1781,20 @@ void ServerGame::updateStatusOnMaster()
    if(masterConn && masterConn->isEstablished())
    {
       // Only update if something is different
-      if(prevCurrentLevelName != getCurrentLevelName() || prevCurrentLevelType != getCurrentLevelType() || 
-         prevRobotCount       != getRobotCount()       || prevPlayerCount      != getPlayerCount())
+      if(prevCurrentLevelName != getGameType()->getLevelName() ||
+         prevCurrentLevelType != getGameType()->getGameTypeId() ||
+         prevRobotCount       != getRobotCount() ||
+         prevPlayerCount      != getPlayerCount())
       {
-         prevCurrentLevelName = getCurrentLevelName();
-         prevCurrentLevelType = getCurrentLevelType();
+         prevCurrentLevelName = getGameType()->getLevelName();
+         prevCurrentLevelType = getGameType()->getGameTypeId();
          prevRobotCount       = getRobotCount();
          prevPlayerCount      = getPlayerCount();
 
-         masterConn->updateServerStatus(getCurrentLevelName(), 
-                                        getCurrentLevelTypeName(), 
-                                        getRobotCount(), 
-                                        getPlayerCount(), 
+         masterConn->updateServerStatus(StringTableEntry(prevCurrentLevelName.c_str()), 
+                                        GameType::getGameTypeName(prevCurrentLevelType), 
+                                        prevRobotCount, 
+                                        prevPlayerCount, 
                                         mSettings->getMaxPlayers(), 
                                         mInfoFlags);
 
@@ -1682,6 +1817,13 @@ bool ServerGame::startHosting()
    if(!mLevelSource->isEmptyLevelDirOk() && mSettings->getFolderManager()->levelDir == "")   // No leveldir, no hosting!
       return false;
 
+   if(mHostOnServer)
+   {
+      GameManager::setHostingModePhase(GameManager::NotHosting);
+      cycleLevel(FIRST_LEVEL);   // Start with the first level
+      return true;
+   }
+
    S32 levelCount = mLevelSource->getLevelCount();
 
    for(S32 i = 0; i < levelCount; i++)
@@ -1689,7 +1831,7 @@ bool ServerGame::startHosting()
                 mLevelSource->getLevelFileName(i).c_str());
 
    if(!levelCount)            // No levels loaded... we'll crash if we try to start a game       
-      return false;      
+      return false;
 
    GameManager::setHostingModePhase(GameManager::NotHosting);
    cycleLevel(FIRST_LEVEL);   // Start with the first level
@@ -1710,6 +1852,17 @@ Ship *ServerGame::getLocalPlayerShip() const
    return NULL;
 }
 
+void ServerGame::levelAddedNotifyClients(const LevelInfo &levelInfo)
+{
+   // Let levelChangers know about the new level if it was just added
+   for(S32 i = 0; i < getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = getClientInfo(i);
+
+      if(clientInfo->isLevelChanger())
+         clientInfo->getConnection()->s2cAddLevel(levelInfo.mLevelName, levelInfo.mLevelType);
+   }
+}
 
 // levelInfo should arrive fully populated
 S32 ServerGame::addLevel(const LevelInfo &levelInfo)
@@ -1721,15 +1874,15 @@ S32 ServerGame::addLevel(const LevelInfo &levelInfo)
 
    // Let levelChangers know about the new level if it was just added
    if(ret.second)
-      for(S32 i = 0; i < getClientCount(); i++)
-      {
-         ClientInfo *clientInfo = getClientInfo(i);
-
-         if(clientInfo->isLevelChanger())
-            clientInfo->getConnection()->s2cAddLevel(levelInfo.mLevelName, levelInfo.mLevelType);
-      }
+      levelAddedNotifyClients(levelInfo);
 
    return ret.first;
+}
+
+void ServerGame::addNewLevel(const LevelInfo &levelInfo)
+{
+   mLevelSource->addNewLevel(levelInfo);
+   levelAddedNotifyClients(levelInfo);
 }
 
 void ServerGame::removeLevel(S32 index)
