@@ -4059,15 +4059,15 @@ void EditorUserInterface::onMouseClicked_left()
 
    if(mCreatingPoly || mCreatingPolyline)       // Save any polygon/polyline we might be creating
    {
-      TNLAssert(mNewItem, "Should have an item here!");
+      TNLAssert(mNewItem.isValid(), "Should have an item here!");
 
-      if(mNewItem->getVertCount() < 2)
-         delete mNewItem.getPointer();
-      else
+      if(mNewItem->getVertCount() >= 2)
+      {
          addToEditor(mNewItem);
+         mUndoManager.saveAction(ActionCreate, mNewItem);      // mNewItem gets copied
+      }
 
-      mUndoManager.saveAction(ActionCreate, mNewItem);
-
+      delete mNewItem.getPointer();
       mNewItem = NULL;
 
       mCreatingPoly = false;
