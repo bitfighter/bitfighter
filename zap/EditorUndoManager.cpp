@@ -8,6 +8,7 @@
 #include "BfObject.h"
 
 
+
 namespace Zap { namespace Editor 
 {
 
@@ -33,6 +34,7 @@ void EditorUndoManager::setLevel(boost::shared_ptr<Level> level, EditorUserInter
    mEditor = editor;
    mActions.deleteAndClear();    // Old actions won't work with new level!
    mUndoLevel = 0;
+   mChangeIdentifier = ChangeIdNone;
 }
 
 
@@ -152,6 +154,7 @@ void EditorUndoManager::clearAll()
    mInTransaction = false;
    mInMergeAction = false;
    mOrigObject = NULL;
+   mChangeIdentifier = ChangeIdNone;
 }
 
 
@@ -171,6 +174,8 @@ void EditorUndoManager::undo()
 
    mUndoLevel--;
    mActions[mUndoLevel]->undo();
+
+   mChangeIdentifier = ChangeIdNone;
 }
 
 
@@ -206,20 +211,55 @@ void EditorUndoManager::startTransaction()
 }
 
 
-void EditorUndoManager::endTransaction()
+// For the moment, we'll assume that the objects will be in the same order
+static bool transactionObjectsEqual(const Vector<EditorWorkUnit *> &first, const EditorWorkUnit *second)
+{
+   TNLAssert(dynamic_cast<const EditorWorkUnitGroup *>(second), "Expected a group transaction here!");
+
+   if(first.size() != static_cast<const EditorWorkUnitGroup *>(second)->getWorkUnitCount())
+      return false;
+
+   for(S32 i = 0; i < first.size(); i++)
+      if(first[i]->getSerialNumber() != static_cast<const EditorWorkUnitGroup *>(second)->getWorkUnitObjectSerialNumber(i))
+         return false;
+
+   return true;
+}
+
+
+void EditorUndoManager::endTransaction(ChangeIdentifier ident)
 {
    TNLAssert(mInTransaction, "Should be in a transaction!");
 
    mInTransaction = false;
 
+
    if(mTransactionActions.size() == 0)
+   {
+      mChangeIdentifier = ChangeIdNone;
       return;
+   }
 
-   EditorWorkUnitGroup *group = new EditorWorkUnitGroup(mLevel, mEditor, mTransactionActions);
 
-   fixupActionList();
-   mActions.push_back(group);
-   mUndoLevel = mActions.size();
+   // If the changeIdentifier matches our previous transaction, and the objects are the same, then we
+   // can merge this transaction with the previous one.  To merge, we'll replace the changed objects
+   // of the previous transaction with those from this one, without creating a new undo state.
+   if(ident != ChangeIdNone && ident == mChangeIdentifier && transactionObjectsEqual(mTransactionActions, mActions.last()))
+   {
+      TNLAssert(dynamic_cast<EditorWorkUnitGroup *>(mActions.last()), "Expected a WorkUnitGroup!");
+      static_cast<EditorWorkUnitGroup *>(mActions.last())->mergeTransactions(mTransactionActions);
+   }
+   else
+   {
+      EditorWorkUnitGroup *group = new EditorWorkUnitGroup(mLevel, mEditor, mTransactionActions);
+
+      fixupActionList();
+      mActions.push_back(group);
+      mUndoLevel = mActions.size();
+   }
+
+
+   mChangeIdentifier = ident;
 
    mTransactionActions.clear();
 }

@@ -26,6 +26,12 @@ namespace Editor
 
 class EditorUndoManager
 {
+public:
+   enum ChangeIdentifier {
+      ChangeIdMergeWalls,
+      ChangeIdNone
+   };
+
 private:
    S32 mUndoLevel;
    S32 mSavedAtLevel;
@@ -36,6 +42,7 @@ private:
    EditorUserInterface *mEditor;
 
    BfObject *mOrigObject;
+   ChangeIdentifier mChangeIdentifier;
 
    bool mInTransaction;
    bool mInMergeAction;
@@ -61,7 +68,7 @@ public:
    void redo();
 
    void startTransaction();
-   void endTransaction();
+   void endTransaction(ChangeIdentifier ident = ChangeIdNone);
    void rollbackTransaction();
    bool inTransaction();
    bool noMoreCanDoRedo();

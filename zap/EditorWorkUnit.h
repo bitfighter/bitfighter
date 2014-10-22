@@ -47,6 +47,10 @@ public:
 
    virtual void undo() = 0;
    virtual void redo() = 0;
+
+   virtual S32 getSerialNumber() const = 0;
+   virtual void merge(const EditorWorkUnit *workUnit) = 0;
+   virtual const BfObject *getObject() const = 0;
 };
 
 
@@ -66,10 +70,14 @@ public:
                         EditorUserInterface *editor,
                         const BfObject *bfObjects);
 
-   virtual ~EditorWorkUnitCreate();                                     // Destructor
+   virtual ~EditorWorkUnitCreate();    // Destructor
 
    void undo();
    void redo();
+   void merge(const EditorWorkUnit *workUnit);
+
+   S32 getSerialNumber() const;
+   const BfObject *getObject() const;
 };
 
 
@@ -93,6 +101,10 @@ public:
 
    void undo();
    void redo();
+   void merge(const EditorWorkUnit *workUnit);
+
+   S32 getSerialNumber() const;
+   const BfObject *getObject() const;
 };
 
 
@@ -120,6 +132,10 @@ public:
 
    void undo();
    void redo();
+   void merge(const EditorWorkUnit *workUnit);
+
+   S32 getSerialNumber() const;
+   const BfObject *getObject() const;
 };
 
 
@@ -144,6 +160,15 @@ public:
 
    void undo();
    void redo();
+   void merge(const EditorWorkUnit *workUnit);
+
+   void mergeTransactions(const Vector<EditorWorkUnit *> &newWorkUnits);
+
+   S32 getWorkUnitCount() const;
+   S32 getWorkUnitObjectSerialNumber(S32 index) const;
+
+   S32 getSerialNumber() const;
+   const BfObject *getObject() const;
 };
 
 

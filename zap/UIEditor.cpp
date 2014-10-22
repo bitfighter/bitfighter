@@ -3309,7 +3309,7 @@ void EditorUserInterface::changeBarrierWidth(S32 amt)
       }
    }
 
-   mUndoManager.endTransaction();
+   mUndoManager.endTransaction(EditorUndoManager::ChangeIdMergeWalls);
 }
 
 

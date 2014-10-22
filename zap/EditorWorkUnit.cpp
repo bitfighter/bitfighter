@@ -57,6 +57,12 @@ void EditorWorkUnitCreate::undo()
 }
 
 
+void EditorWorkUnitCreate::merge(const EditorWorkUnit *workUnit)
+{
+   TNLAssert(false, "Not implemented!");
+}
+
+
 void EditorWorkUnitCreate::redo()
 {
    mLevel->addToDatabase(mCreatedObject->clone());
@@ -64,6 +70,19 @@ void EditorWorkUnitCreate::redo()
    if(mEditor)
       mEditor->doneAddingObjects(mCreatedObject->getSerialNumber());
 }
+
+
+S32 EditorWorkUnitCreate::getSerialNumber() const
+{
+   return mCreatedObject->getSerialNumber();
+}
+
+
+const BfObject *EditorWorkUnitCreate::getObject() const
+{
+   return mCreatedObject;
+}
+
 
 
 ////////////////////////////////////////
@@ -103,7 +122,24 @@ void EditorWorkUnitDelete::redo()
 
    if(mEditor)
       mEditor->doneDeletingObjects();
-   
+}
+
+
+void EditorWorkUnitDelete::merge(const EditorWorkUnit *workUnit)
+{
+   TNLAssert(false, "Not implemented!");
+}
+
+
+S32 EditorWorkUnitDelete::getSerialNumber() const
+{
+   return mDeletedObject->getSerialNumber();
+}
+
+
+const BfObject *EditorWorkUnitDelete::getObject() const
+{
+   return NULL; // ?
 }
 
 
@@ -168,6 +204,25 @@ void EditorWorkUnitChange::redo()
 }
 
 
+void EditorWorkUnitChange::merge(const EditorWorkUnit *workUnit)
+{
+   delete mChangedObject;
+   mChangedObject = workUnit->getObject()->clone();
+}
+
+
+S32 EditorWorkUnitChange::getSerialNumber() const
+{
+   return mChangedObject->getSerialNumber();
+}
+
+
+const BfObject *EditorWorkUnitChange::getObject() const
+{
+   return mChangedObject;
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -206,6 +261,43 @@ void EditorWorkUnitGroup::redo()
 
    //if(mEditor)
    //   mEditor->doneChangingGeoms(mChangedObject->getSerialNumber());
+}
+
+
+void EditorWorkUnitGroup::merge(const EditorWorkUnit *workUnit)
+{
+   TNLAssert(false, "Not implemented!");
+}
+
+
+S32 EditorWorkUnitGroup::getWorkUnitCount() const
+{
+   return mWorkUnits.size();
+}
+
+
+S32 EditorWorkUnitGroup::getWorkUnitObjectSerialNumber(S32 index) const
+{
+   return mWorkUnits[index]->getSerialNumber();
+}
+
+
+S32 EditorWorkUnitGroup::getSerialNumber() const
+{
+   TNLAssert(false, "No object associated with a GroupWorkUnit!");
+}
+
+
+const BfObject *EditorWorkUnitGroup::getObject() const
+{
+   TNLAssert(false, "Not implemented!");
+}
+
+
+void EditorWorkUnitGroup::mergeTransactions(const Vector<EditorWorkUnit *> &newWorkUnits)
+{
+   for(S32 i = 0; i < mWorkUnits.size(); i++)
+      mWorkUnits[i]->merge(newWorkUnits[i]);
 }
 
 
