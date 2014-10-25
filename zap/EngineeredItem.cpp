@@ -1414,7 +1414,8 @@ void ForceFieldProjector::initialize()
 ForceFieldProjector *ForceFieldProjector::clone() const
 {
    ForceFieldProjector *ffp = new ForceFieldProjector(*this);
-   ffp->mField = NULL;
+   if(mField)
+      ffp->mField = mField->clone();
 
    return ffp;
 }
@@ -1746,6 +1747,8 @@ ForceField::ForceField(S32 team, Point start, Point end)
    mFieldUp = true;
    mObjectTypeNumber = ForceFieldTypeNumber;
    mNetFlags.set(Ghostable);
+
+   setNewGeometry(geomSimpleLine);     // Not used, keeps clone from blowing up
 }
 
 
@@ -1753,6 +1756,12 @@ ForceField::ForceField(S32 team, Point start, Point end)
 ForceField::~ForceField()
 {
    // Do nothing
+}
+
+
+ForceField *ForceField::clone() const
+{
+   return new ForceField(*this);
 }
 
 
