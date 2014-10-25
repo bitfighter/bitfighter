@@ -14,9 +14,9 @@
 #include "Colors.h"
 
 #include "stringUtils.h"
-#include "RenderUtils.h"
 
 #ifndef ZAP_DEDICATED
+#include "RenderUtils.h"
 #include "ClientGame.h"
 #endif
 
