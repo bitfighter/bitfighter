@@ -225,6 +225,8 @@ GeometryContainer::GeometryContainer(const GeometryContainer &container)
 {
    const Geometry *old = container.mGeometry;
 
+   TNLAssert(container.mGeometry, "Expected object to have geometry!");
+
    switch(container.mGeometry->getGeomType())
    {
       case geomPoint:

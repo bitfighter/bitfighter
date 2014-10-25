@@ -187,6 +187,7 @@ public:
 
    ForceField(S32 team = -1, Point start = Point(), Point end = Point());
    virtual ~ForceField();
+   ForceField *clone() const;
 
    bool collide(BfObject *hitObject);
    bool intersects(ForceField *forceField);     // Return true if forcefields intersect
