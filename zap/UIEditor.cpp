@@ -4066,8 +4066,12 @@ void EditorUserInterface::onMouseClicked_left()
          addToEditor(mNewItem);
          mUndoManager.saveAction(ActionCreate, mNewItem);      // mNewItem gets copied
       }
+      else
+      {
+         // Not enough points... delete the object under construction
+         delete mNewItem.getPointer();
+      }
 
-      delete mNewItem.getPointer();
       mNewItem = NULL;
 
       mCreatingPoly = false;
