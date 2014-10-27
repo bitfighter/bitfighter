@@ -126,6 +126,11 @@ void WallItem::onItemDragging()
    // Do nothing -- this is here to override Parent::onItemDragging(), onGeomChanged() should only be called after move is complete
 }
 
+void WallItem::setTeam(S32 team)
+{
+   // Do nothing... walls have no teams!
+}
+
 
 // WallItems are not really added to the game in the sense of other objects; rather their geometry is used
 // to create Barriers that are added directly.  Here we will mark the item as added (to catch errors in Lua

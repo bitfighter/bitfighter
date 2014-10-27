@@ -48,16 +48,17 @@ public:
    const char *getEditorHelpString() const;
    const char *getPrettyNamePlural() const;
    const char *getOnDockName() const;
-   const char *getOnScreenName() const;          // Vertices should not be labeled
+   const char *getOnScreenName() const;            // Vertices should not be labeled
    const char *getInstructionMsg(S32 attributeCount) const;
    void fillAttributesVectors(Vector<string> &keys, Vector<string> &values); 
 
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
-   F32 getEditorRadius(F32 currentScale) const;        // Basically, the size of our hit target for vertices
+   void setTeam(S32 team);
+   F32 getEditorRadius(F32 currentScale) const;    // Basically, the size of our hit target for vertices
 
-   const Color &getEditorRenderColor() const;    // Unselected wall spine color
+   const Color &getEditorRenderColor() const;      // Unselected wall spine color
 
    void scale(const Point &center, F32 scale);
 
