@@ -54,7 +54,6 @@ public:
 
    static void constructBarriers (Game *game, const Vector<Point> &verts, F32 width);
    static void constructPolyWalls(Game *game, const Vector<Point> &verts);
-   static void setWallSelected(GridDatabase *database, S32 serialNumber, bool selected);
 
    void renderLayer(S32 layerIndex);                                          // Renders barrier fill barrier-by-barrier
    static void renderEdges(const GameSettings *settings, S32 layerIndex);     // Renders all edges in one pass

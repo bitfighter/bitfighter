@@ -245,7 +245,7 @@ void WallItem::setSelected(bool selected)
    Parent::setSelected(selected);
    
    // Find the associated segment(s) and mark them as selected (or not)
-   Barrier::setWallSelected(getDatabase(), getSerialNumber(), selected);
+   getDatabase()->setWallSelected(getSerialNumber(), selected);
 }
 
 

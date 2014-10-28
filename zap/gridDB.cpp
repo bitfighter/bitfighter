@@ -814,6 +814,12 @@ DatabaseObject *GridDatabase::getObjectByIndex(S32 index) const
 } 
 
 
+void GridDatabase::setWallSelected(S32 serialNumber, bool selected)
+{
+   mWallSegmentManager->setSelected(serialNumber, selected);
+}
+
+
 void GridDatabase::updateExtents(DatabaseObject *object, const Rect &newExtents)
 {
    // Does the equivalent of the following, but more efficiently:

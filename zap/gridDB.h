@@ -154,6 +154,7 @@ public:
 
    void copyObjects(const GridDatabase *source);
 
+   void setWallSelected(S32 serialNumber, bool selected);
 
    bool testTypes(const Vector<U8> &types, U8 objectType) const;
 

@@ -158,7 +158,7 @@ void PolyWall::setSelected(bool selected)
 {
    Parent::setSelected(selected);
 
-   Barrier::setWallSelected(getDatabase(), getSerialNumber(), selected);
+   getDatabase()->setWallSelected(getSerialNumber(), selected);
 }
 
 

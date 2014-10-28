@@ -268,12 +268,4 @@ S32 Barrier::getRenderSortValue()
 }
 
 
-void Barrier::setWallSelected(GridDatabase *database, S32 serialNumber, bool selected)
-{
-   // Find the associated segment(s) and mark them as selected (or not)
-   if(database)
-      database->getWallSegmentManager()->setSelected(serialNumber, selected);
-}
-
-
 };
