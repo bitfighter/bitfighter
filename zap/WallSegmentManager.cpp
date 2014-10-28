@@ -140,12 +140,9 @@ void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *databas
 {
    mWallSegmentDatabase->removeEverythingFromDatabase();
 
-   Vector<DatabaseObject *> engrObjects;
-   //database->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
-
    // Iterate over all our wall objects (WallItems and PolyWalls when run from the editor, Barriers when run from ServerGame::loadLevel)
    for(S32 i = 0; i < walls.size(); i++)
-      buildWallSegmentEdgesAndPoints(database, walls[i], engrObjects);
+      buildWallSegmentEdgesAndPoints(database, walls[i]);
 }
 
 
@@ -198,8 +195,7 @@ void WallSegmentManager::rebuildSelectionOutline()
 
 // Given a wall, build all the segments and related geometry; also manage any affected mounted items
 // Operates only on passed wall segment -- does not alter others
-void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, DatabaseObject *wallDbObject, 
-                                                        const Vector<DatabaseObject *> &engrObjects)
+void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, DatabaseObject *wallDbObject)
 {
 #ifndef ZAP_DEDICATED  // <== why??
 
@@ -209,8 +205,6 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
    BfObject *wall = static_cast<BfObject *>(wallDbObject);     // Wall we're deleting and rebuilding
 
    Vector<EngineeredItem *> toBeRemounted;    // A list of engr objects terminating on the wall segment that we'll be deleting
-
-   findEngineeredObjectsMountedOnWall(wall, engrObjects, toBeRemounted);
 
    // Get rid of any segments that correspond to our wall; we'll be building new ones
    deleteSegments(wall->getSerialNumber());
@@ -278,31 +272,6 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
 }
 
 
-// Populate toBeRemounted with objects from engrObjects that are mounted on wall
-void WallSegmentManager::findEngineeredObjectsMountedOnWall(const BfObject *wall, 
-                                                            const Vector<DatabaseObject *> &engrObjects, 
-                                                            Vector<EngineeredItem *> &toBeRemounted) const
-{
-   S32 count = mWallSegmentDatabase->getObjectCount();
-
-   // Loop through all the walls, and, for each, see if any of the engineered objects we were given are mounted to it
-   for(S32 i = 0; i < count; i++)
-   {
-      WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
-
-      if(wallSegment->getOwner() == wall->getSerialNumber())   // Segment belongs to wall
-         for(S32 j = 0; j < engrObjects.size(); j++)              // Loop through all engineered objects checking the mount seg
-         {
-            EngineeredItem *engrObj = static_cast<EngineeredItem *>(engrObjects[j]);
-
-            // Does FF start or end on this segment?
-            if(engrObj->getMountSegment() == wallSegment || engrObj->getEndSegment() == wallSegment)
-               toBeRemounted.push_back(engrObj);
-         }
-   }
-}
-
-
 // Used above and from instructions -- static method
 void WallSegmentManager::clipAllWallEdges(const Vector<DatabaseObject *> *wallSegments, Vector<Point> &wallEdges)
 {
@@ -346,10 +315,7 @@ void WallSegmentManager::updateAllMountedItems(GridDatabase *database)
 // need to be recomputed.  This only operates on the specified item.  rebuildEdges() will need to be run separately.
 void WallSegmentManager::computeWallSegmentIntersections(GridDatabase *gameObjDatabase, BfObject *item)
 {
-   Vector<DatabaseObject *> engrObjects;
-   //gameObjDatabase->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
-
-   buildWallSegmentEdgesAndPoints(gameObjDatabase, item, engrObjects);
+   buildWallSegmentEdgesAndPoints(gameObjDatabase, item);
 }
 
 

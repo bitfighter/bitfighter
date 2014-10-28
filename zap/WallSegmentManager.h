@@ -33,11 +33,7 @@ private:
 
    void rebuildEdges();
    void buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, 
-                                       DatabaseObject *object, 
-                                       const Vector<DatabaseObject *>     &engrObjects);
-   void findEngineeredObjectsMountedOnWall(const BfObject *wall,
-                                           const Vector<DatabaseObject *> &engrObjects,
-                                           Vector<EngineeredItem *> &toBeRemounted) const;
+                                       DatabaseObject *object);
 public:
 
    WallSegmentManager();   // Constructor

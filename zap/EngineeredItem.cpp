@@ -1633,8 +1633,8 @@ void ForceFieldProjector::findForceFieldEnd()
    Point end;
 
    // Pass in database containing WallSegments, returns object in collObj
-   ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
-   setEndSegment(collObj);
+   ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallSegmentDatabase(), start, mAnchorNormal, end, &collObj);
+   setEndSegment(static_cast<WallSegment *>(collObj));
    mField->setStartAndEndPoints(start, end);
    
    setExtent(Rect(ForceField::computeGeom(start, end, scale)));
