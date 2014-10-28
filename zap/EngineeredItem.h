@@ -47,9 +47,7 @@ protected:
    void computeObjectGeometry();          // Populates mCollisionPolyPoints
 
    // Figure out where to mount this item during construction... and move it there
-   void findMountPoint(const GridDatabase *wallEdgeDatabase, 
-                       const GridDatabase *wallSegmentDatabase,
-                       const Point &pos);     
+   void findMountPoint(const Level *level, const Point &pos);     
 
 
    WallSegment *mMountSeg;    // Segment we're mounted to in the editor (don't care in the game)

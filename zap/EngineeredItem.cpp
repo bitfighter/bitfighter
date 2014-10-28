@@ -468,7 +468,7 @@ bool EngineeredItem::processArguments(S32 argc, const char **argv, Level *level)
    if(argc >= 4)
       setHealRate(atoi(argv[3]));
 
-   findMountPoint(level->getWallSegmentManager()->getWallEdgeDatabase(), level, pos);
+   findMountPoint(level, pos);
 
    return true;
 }
@@ -840,13 +840,13 @@ void EngineeredItem::setPos(lua_State *L, S32 stackIndex)
    // Find a database that will contain objects we could snap to.  If object is already in a database,
    // that is our first choice.  Otherwise, we'll see if there is one associated with the game, because
    // that is where we'll likely end up.  Otherwise, it's no snapping today.
-   GridDatabase *database = getDatabase();
+   Level *level = getGame()->getLevel();
 
-   if(!database && getGame() && getGame()->getLevel())
-      database = getGame()->getLevel();
+   //if(!database && getGame() && getGame()->getLevel())
+   //   database = getGame()->getLevel();
 
-   if(database)
-      findMountPoint(database, database->getWallSegmentManager()->getWallEdgeDatabase(), getPos());
+   if(level)
+      findMountPoint(level, getPos());
 }
 
 
@@ -1053,16 +1053,15 @@ static const F32 MAX_SNAP_DISTANCE = 100.0f;    // Max distance to look for a mo
 
 // Figure out where to mount this item during construction; mountToWall() is similar, but used in editor.  
 // findDeployPoint() is version used during deployment of engineerered item.
-void EngineeredItem::findMountPoint(const GridDatabase *wallEdgeDatabase, 
-                                    const GridDatabase *wallSegmentDatabase,
-                                    const Point &pos)
+void EngineeredItem::findMountPoint(const Level *level, const Point &pos)
 {
    Point normal, anchor;
 
    // Anchor objects to the correct point
-   if(findAnchorPointAndNormal(wallEdgeDatabase, wallSegmentDatabase, pos, MAX_SNAP_DISTANCE, NULL, true, anchor, normal))
+   if(findAnchorPointAndNormal(level->getWallSegmentManager()->getWallEdgeDatabase(), level, pos, 
+                               MAX_SNAP_DISTANCE, NULL, true, anchor, normal))
    {
-      setPos(anchor/* + normal*/);
+      setPos(anchor);
       mAnchorNormal.set(normal);
    }
    else   // Found no mount point
@@ -1336,7 +1335,7 @@ S32 EngineeredItem::lua_setGeom(lua_State *L)
 {
    S32 retVal = Parent::lua_setGeom(L);
 
-   findMountPoint(getGame()->getLevel(), getGame()->getLevel()->getWallSegmentManager()->getWallEdgeDatabase(), getPos());
+   findMountPoint(getGame()->getLevel(), getPos());
 
    return retVal;
 }
@@ -1372,7 +1371,7 @@ ForceFieldProjector::ForceFieldProjector(lua_State *L) : Parent(TEAM_NEUTRAL, Po
          setTeam(L, 2);
       }
 
-      findMountPoint(getGame()->getLevel(), getGame()->getLevel()->getWallSegmentManager()->getWallEdgeDatabase(), getPos());
+      findMountPoint(getGame()->getLevel(), getPos());
    }
 
    initialize();
@@ -1634,8 +1633,8 @@ void ForceFieldProjector::findForceFieldEnd()
    Point end;
 
    // Pass in database containing WallSegments, returns object in collObj
-   ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallSegmentDatabase(), start, mAnchorNormal, end, &collObj);
-   setEndSegment(static_cast<WallSegment *>(collObj));
+   ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
+   setEndSegment(collObj);
    mField->setStartAndEndPoints(start, end);
    
    setExtent(Rect(ForceField::computeGeom(start, end, scale)));
