@@ -538,7 +538,7 @@ void EngineeredItem::fillAttributesVectors(Vector<string> &keys, Vector<string> 
 }
 
 
-static DatabaseObject* findClosestWall(const GridDatabase *database, const Point &pos, F32 snapDist, 
+static DatabaseObject *findClosestWall(const GridDatabase *database, const Point &pos, F32 snapDist, 
                                        const Vector<S32> *excludedWallList,
                                        bool format,
                                        Point &anchor, Point &normal)
