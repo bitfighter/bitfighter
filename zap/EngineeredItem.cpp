@@ -644,18 +644,6 @@ void EngineeredItem::setMountSegment(WallSegment *mountSeg)
 }
 
 
-const WallSegment *EngineeredItem::getEndSegment() const
-{
-   return NULL;
-}
-
-
-void EngineeredItem::setEndSegment(WallSegment *endSegment)
-{
-   // Do nothing
-}
-
-
 // setSnapped() / isSnapped() only called from editor
 void EngineeredItem::setSnapped(bool snapped)
 {
@@ -1490,19 +1478,6 @@ void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &en
 }
 
 
-const WallSegment *ForceFieldProjector::getEndSegment() const
-{
-   return mField ? mField->getEndSegment() : NULL;
-}
-
-
-void ForceFieldProjector::setEndSegment(WallSegment *endSegment)
-{
-   TNLAssert(mField, "Expected to have an associated ForceField here!");
-   mField->setEndSegment(endSegment);
-}
-
-
 // Forcefield projector has been turned on some how; either at the beginning of a level, or via repairing, or deploying. 
 // Called on both client and server, does nothing on client.
 void ForceFieldProjector::onEnabled()
@@ -1634,7 +1609,6 @@ void ForceFieldProjector::findForceFieldEnd()
 
    // Pass in database containing WallSegments, returns object in collObj
    ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallSegmentDatabase(), start, mAnchorNormal, end, &collObj);
-   setEndSegment(static_cast<WallSegment *>(collObj));
    mField->setStartAndEndPoints(start, end);
    
    setExtent(Rect(ForceField::computeGeom(start, end, scale)));
@@ -1735,8 +1709,6 @@ ForceField::ForceField(S32 team, Point start, Point end)
    mStart = start;
    mEnd = end;
 
-   mEndSegment = NULL;     // Will be set elsewhere if it's needed
-
    mOutline = computeGeom(mStart, mEnd);
 
    Rect extent(mStart, mEnd);
@@ -1806,18 +1778,6 @@ bool ForceField::intersects(ForceField *forceField)
 const Vector<Point> *ForceField::getOutline() const
 {
    return &mOutline;
-}
-
-
-const WallSegment *ForceField::getEndSegment() const
-{
-   return mEndSegment;
-}
-
-
-void ForceField::setEndSegment(WallSegment *endSegment)
-{
-   mEndSegment = endSegment;
 }
 
 

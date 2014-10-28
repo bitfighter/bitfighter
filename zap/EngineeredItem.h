@@ -118,10 +118,6 @@ public:
    WallSegment *getMountSegment() const;
    void setMountSegment(WallSegment *mountSeg);
 
-   // These methods are overriden in ForceFieldProjector
-   virtual const WallSegment *getEndSegment() const;
-   virtual void setEndSegment(WallSegment *endSegment);
-
    //// Is item sufficiently snapped?  
    void setSnapped(bool snapped);
    bool isSnapped() const;
@@ -164,7 +160,6 @@ class ForceField : public BfObject
 
 private:
    Point mStart, mEnd;
-   WallSegment *mEndSegment;     // Used in editor, generally NULL otherwise
    Vector<Point> mOutline;    
 
    Timer mDownTimer;
@@ -192,8 +187,6 @@ public:
    void onAddedToGame(Game *theGame);
    void idle(BfObject::IdleCallPath path);
 
-   const WallSegment *getEndSegment() const;
-   void setEndSegment(WallSegment *endSegment);
    void setStartAndEndPoints(const Point &start, const Point &end);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
@@ -250,9 +243,6 @@ public:
 
    // Get info about the forcfield that might be projected from this projector
    void getForceFieldStartAndEndPoints(Point &start, Point &end) const;
-
-   const WallSegment *getEndSegment() const;
-   void setEndSegment(WallSegment *endSegment);
 
    void onAddedToGame(Game *theGame);
    void onAddedToEditor();
