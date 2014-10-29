@@ -2518,15 +2518,15 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
    if(!canRotate())
       return;
 
-   GridDatabase *database = getLevel();
+   Level *level = getLevel();
 
    Point min, max;
-   database->computeSelectionMinMax(min, max);
+   level->computeSelectionMinMax(min, max);
 
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    bool modifiedWalls = false;
-   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
+   WallSegmentManager *wallSegmentManager = level->getWallSegmentManager();
 
    wallSegmentManager->beginBatchGeomUpdate();
    mUndoManager.startTransaction();
@@ -2550,7 +2550,7 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
    }
 
    mUndoManager.endTransaction();
-   wallSegmentManager->endBatchGeomUpdate(database, modifiedWalls);
+   wallSegmentManager->endBatchGeomUpdate(level, modifiedWalls);
 
    autoSave();
 }
