@@ -29,14 +29,15 @@
 
 namespace Zap
 {
-
+   
 using UI::SymbolString;
 using UI::SymbolStringSet;
 
 // Constructor
-EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) : Parent(game),
-                                                                                     mAnimTimer(ONE_SECOND),
-                                                                                     mConsoleInstructions(10)
+EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) : 
+   Parent(game),
+   mAnimTimer(ONE_SECOND),
+   mConsoleInstructions(10)
 {
    mCurPage = 0;
    mAnimStage = 0;

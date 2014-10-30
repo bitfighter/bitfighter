@@ -876,8 +876,7 @@ const Vector<Point> *PolylineGeometry::getOutline() const
 
 const Vector<Point> *PolylineGeometry::getFill() const
 {
-   TNLAssert(false, "Polylines don't have fill!");
-   return NULL;
+   return &mPolyBounds;
 }
 
 

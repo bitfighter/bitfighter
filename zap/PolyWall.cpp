@@ -193,7 +193,7 @@ void PolyWall::onAddedToGame(Game *game)
 
 const Vector<Point> *PolyWall::getCollisionPoly() const
 {
-   return this->getOutline();
+   return getOutline();
 }
 
 

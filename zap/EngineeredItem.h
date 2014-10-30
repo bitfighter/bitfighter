@@ -197,8 +197,7 @@ public:
    const Vector<Point> *getOutline() const;
 
    static Vector<Point> computeGeom(const Point &start, const Point &end, F32 scaleFact = 1);
-   static bool findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal, 
-                                 Point &end, DatabaseObject **collObj);
+   static DatabaseObject *findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal, Point &end);
 
    void render() const;
    void render(const Color &color) const;

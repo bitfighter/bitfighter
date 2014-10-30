@@ -649,6 +649,9 @@ DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex, b
 
    findObjects(testFunc, fillVector, queryRect);
 
+   if(getWallSegmentManager())
+      getWallSegmentManager()->getWallEdgeDatabase()->findObjects(testFunc, fillVector, queryRect);
+
    Point collisionPoint;
 
    collisionTime = 1;

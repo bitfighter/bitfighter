@@ -178,6 +178,13 @@ Rect WallItem::calcExtents()
 }
 
 
+//const Vector<Point> *WallItem::getCollisionPoly() const
+//{
+//   return getFill();
+//}
+
+
+
 const char *WallItem::getOnScreenName()     const { return "Wall";  }
 const char *WallItem::getOnDockName()       const { return "Wall";  }
 const char *WallItem::getPrettyNamePlural() const { return "Walls"; }
@@ -355,8 +362,6 @@ S32 WallItem::lua_setGeom(lua_State *L)
    checkIfHasBeenAddedToTheGame(L);
    return Parent::lua_setGeom(L);
 }
-
-
 
 
 ////////////////////////////////////////

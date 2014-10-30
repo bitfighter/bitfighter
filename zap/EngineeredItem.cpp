@@ -194,8 +194,8 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const Level *level, const
 
    // Now we can find the point where the forcefield would end if this were a valid position
    Point forceFieldEnd;
-   DatabaseObject *terminatingWallObject;
-   ForceField::findForceFieldEnd(level, forceFieldStart, mDeployNormal, forceFieldEnd, &terminatingWallObject);
+   DatabaseObject *terminatingWallObject = 
+               ForceField::findForceFieldEnd(level, forceFieldStart, mDeployNormal, forceFieldEnd);
 
    bool collision = false;
 
@@ -1473,8 +1473,7 @@ void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &en
 
    start = getForceFieldStartPoint(pos, mAnchorNormal);
 
-   DatabaseObject *collObj;
-   ForceField::findForceFieldEnd(getDatabase(), getForceFieldStartPoint(pos, mAnchorNormal), mAnchorNormal, end, &collObj);
+   ForceField::findForceFieldEnd(getDatabase(), getForceFieldStartPoint(pos, mAnchorNormal), mAnchorNormal, end);
 }
 
 
@@ -1496,9 +1495,7 @@ void ForceFieldProjector::onEnabled()
    {
       Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
       Point end;
-      DatabaseObject *collObj;
-
-      ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
+      ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end);
 
       mField = new ForceField(getTeam(), start, end);
       mField->addToGame(getGame(), getGame()->getLevel());
@@ -1518,9 +1515,7 @@ void ForceFieldProjector::createCaptiveForceField()
 {
    Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
    Point end;
-   DatabaseObject *collObj;
-
-   ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
+   ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end);
 
    TNLAssert(!mField, "Better clean up mField!");
    mField = new ForceField(getTeam(), start, end);    // Not added to a database, so needs to be cleaned up by us
@@ -1608,7 +1603,7 @@ void ForceFieldProjector::findForceFieldEnd()
    Point end;
 
    // Pass in database containing WallSegments, returns object in collObj
-   ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallSegmentDatabase(), start, mAnchorNormal, end, &collObj);
+   collObj = ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end);
    mField->setStartAndEndPoints(start, end);
    
    setExtent(Rect(ForceField::computeGeom(start, end, scale)));
@@ -1684,10 +1679,8 @@ S32 ForceFieldProjector::lua_setTeam(lua_State *L)
 
       Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
       Point end;
-      DatabaseObject *collObj;
 
-      ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallSegmentDatabase(), 
-                                    start, mAnchorNormal, end, &collObj);
+      DatabaseObject *collObj = ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end);
 
       delete mField;
       mField = new ForceField(getTeam(), start, end);
@@ -1879,23 +1872,20 @@ Vector<Point> ForceField::computeGeom(const Point &start, const Point &end, F32 
 
 
 // Pass in a database containing walls or wallsegments
-bool ForceField::findForceFieldEnd(const GridDatabase *database, const Point &start, const Point &normal,  
-                                   Point &end, DatabaseObject **collObj)
+// Static method
+DatabaseObject *ForceField::findForceFieldEnd(const GridDatabase *database, const Point &start, const Point &normal, Point &end)
 {
    F32 time;
    Point n;
 
    end.set(start.x + normal.x * MAX_FORCEFIELD_LENGTH, start.y + normal.y * MAX_FORCEFIELD_LENGTH);
 
-   *collObj = database->findObjectLOS((TestFunc)isWallType, ActualState, start, end, time, n);
+   DatabaseObject *collObj = database->findObjectLOS((TestFunc)isWallType, ActualState, start, end, time, n);
 
-   if(*collObj)
-   {
+   if(collObj)
       end.set(start + (end - start) * time); 
-      return true;
-   }
 
-   return false;
+   return collObj;
 }
 
 
