@@ -128,7 +128,7 @@ void AbstractChat::playerJoinedGlobalChat(const StringTableEntry &playerNick)
    // Make the following be from us, so it will be colored white
    string msg = "----- Player " + string(playerNick.getString()) + " joined the conversation -----";
    newMessage(mGame->getClientInfo()->getName().getString(), msg, false, true, true);
-   SoundSystem::playSoundEffect(SFXPlayerJoined, mGame->getSettings()->getIniSettings()->sfxVolLevel);   // Make sound?
+   SoundSystem::playSoundEffect(SFXPlayerEnteredGlobalChat, mGame->getSettings()->getIniSettings()->sfxVolLevel);   // Make sound?
 }
 
 
@@ -144,7 +144,7 @@ void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
          string msg = "----- Player " + string(playerNick.getString()) + " left the conversation -----";
          newMessage(mGame->getClientInfo()->getName().getString(), msg, false, true, true);
          
-         SoundSystem::playSoundEffect(SFXPlayerLeft, mGame->getSettings()->getIniSettings()->sfxVolLevel);   // Me make sound!
+         SoundSystem::playSoundEffect(SFXPlayerLeftGlobalChat, mGame->getSettings()->getIniSettings()->sfxVolLevel);   // Me make sound!
          break;
       }
 }
