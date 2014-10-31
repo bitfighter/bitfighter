@@ -2039,7 +2039,15 @@ void Turret::renderDock()
 void Turret::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    if(mSnapped)
-      render();
+   {
+      // We render the turret with/without health if it is neutral or not (as it
+      // starts in the game)
+      S32 team = getTeam();
+      bool enabled = team != TEAM_NEUTRAL;
+      F32 health = team == TEAM_NEUTRAL ? 0.0f : 1.0f;
+
+      renderTurret(*(getColor()), getPos(), mAnchorNormal, enabled, health, mCurrentAngle, mHealRate);
+   }
    else
       renderDock();
 }
