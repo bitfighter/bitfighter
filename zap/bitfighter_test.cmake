@@ -37,25 +37,25 @@ set(TEST_SOURCES
 )
 
 
-add_executable(test EXCLUDE_FROM_ALL
+add_executable(bitfighter_test EXCLUDE_FROM_ALL
 	$<TARGET_OBJECTS:bitfighter_client>
 	$<TARGET_OBJECTS:master_lib>
 	${TEST_SOURCES}
 )
 
-target_link_libraries(test
+target_link_libraries(bitfighter_test
 	${CLIENT_LIBS}
 	${SHARED_LIBS}
 	gtest
 )
 
-add_dependencies(test
+add_dependencies(bitfighter_test
 	bitfighter_client
 	master_lib
 	gtest
 )
 
-set_target_properties(test
+set_target_properties(bitfighter_test
 	PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe
 	COMPILE_DEFINITIONS BITFIGHTER_TEST
@@ -65,28 +65,28 @@ set_target_properties(test
 # to use the coverage target, install lcov, enable BITFIGHTER_COVERAGE, and run it
 # coverage data is output to the 'cov' directory in html format.
 if(BITFIGHTER_COVERAGE)
-   set_target_properties(test
+   set_target_properties(bitfighter_test
       PROPERTIES
       LINK_FLAGS "--coverage"
       COMPILE_FLAGS "--coverage"
    )
 
-   add_custom_target(coverage cd ${CMAKE_SOURCE_DIR}/exe && ${CMAKE_SOURCE_DIR}/exe/test
+   add_custom_target(coverage cd ${CMAKE_SOURCE_DIR}/exe && ${CMAKE_SOURCE_DIR}/exe/bitfighter_test
       COMMAND lcov --capture --directory ${CMAKE_SOURCE_DIR} --output-file ${CMAKE_SOURCE_DIR}/build/coverage.info
       COMMAND lcov --extract ${CMAKE_SOURCE_DIR}/build/coverage.info --output-file ${CMAKE_SOURCE_DIR}/build/coverage.info ${CMAKE_SOURCE_DIR}/zap/*
       COMMAND genhtml ${CMAKE_SOURCE_DIR}/build/coverage.info --output-directory ${CMAKE_SOURCE_DIR}/build/cov
-      DEPENDS test alure ${LUA_LIB} tnl tomcrypt
+      DEPENDS bitfighter_test alure ${LUA_LIB} tnl tomcrypt
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build 
    )
 endif()
 
 
-set_target_properties(test PROPERTIES COMPILE_DEFINITIONS_DEBUG "TNL_DEBUG")
+set_target_properties(bitfighter_test PROPERTIES COMPILE_DEFINITIONS_DEBUG "TNL_DEBUG")
 
-BF_PLATFORM_SET_TARGET_PROPERTIES(test)
+BF_PLATFORM_SET_TARGET_PROPERTIES(bitfighter_test)
 
-BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES(test)
+BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES(bitfighter_test)
 
-# BF_PLATFORM_INSTALL(test)
+# BF_PLATFORM_INSTALL(bitfighter_test)
 
-# BF_PLATFORM_CREATE_PACKAGES(test)
+# BF_PLATFORM_CREATE_PACKAGES(bitfighter_test)
