@@ -3622,9 +3622,6 @@ void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
       // Need to recompute boundaries of any intersecting walls
       wallSegmentManager->deleteSegments(obj->getSerialNumber());    // Delete the segments associated with the wall
       database->removeFromDatabase(obj, true);
-
-      if(!batchMode)
-         doneDeleteingWalls();
    }
    else
       database->removeFromDatabase(obj, true);
