@@ -131,6 +131,7 @@ public:
    S32 lua_getPlayerCount(lua_State *L);
    S32 lua_getScore(lua_State *L);
    S32 lua_getPlayers(lua_State *L);
+   S32 lua_getColor(lua_State *L);
 };
 
 
