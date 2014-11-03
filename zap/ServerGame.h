@@ -41,6 +41,7 @@ class ServerGame : public Game
 private:
    enum {
       UpdateServerStatusTime = TWENTY_SECONDS,    // How often we update our status on the master server (ms)
+      UpdateServerWhenHostGoesEmpty = FOUR_SECONDS, // How many seconds when host on server when server goes empty or not empty
       CheckServerStatusTime = FIVE_SECONDS,       // If it did not send updates, recheck after ms
       BotControlTickInterval = 33,                // Interval for how often should we let bots fire the onTick event (ms)
    };
@@ -68,7 +69,14 @@ private:
    Timer mTimeToSuspend;
 
    GameRecorderServer *mGameRecorderServer;
+
+   string mOriginalName;
+   string mOriginalDescr;
+   string mOriginalServerPassword;
 public:
+   bool mHostOnServer;
+   SafePtr<GameConnection> mHoster;
+
    static const U32 PreSuspendSettlingPeriod = TWO_SECONDS;
 private:
 
@@ -109,7 +117,7 @@ private:
    LuaGameInfo *mGameInfo;
 
 public:
-   ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated);    // Constructor
+   ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated, bool hostOnServer = false);    // Constructor
    virtual ~ServerGame();   // Destructor
 
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
@@ -160,6 +168,8 @@ public:
    void deleteLevelGen(LuaLevelGenerator *levelgen);     // Add misbehaved levelgen to the kill list
    Vector<Vector<S32> > getCategorizedPlayerCountsByTeam() const;
 
+   void receivedLevelFromHoster(S32 levelIndex, const string &filename);
+   void makeEmptyLevelIfNoGameType();
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
    void sendLevelStatsToMaster();
 
@@ -225,7 +235,11 @@ public:
 
    Ship *getLocalPlayerShip() const;
 
+private:
+   void levelAddedNotifyClients(const LevelInfo &levelInfo);
+public:
    S32 addLevel(const LevelInfo &info);
+   void addNewLevel(const LevelInfo &info);
    void removeLevel(S32 index);
 
    // SFX Related -- these will just generate an error, as they should never be called

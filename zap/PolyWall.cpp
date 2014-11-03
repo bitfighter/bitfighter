@@ -245,7 +245,7 @@ void PolyWall::checkIfHasBeenAddedToTheGame(lua_State *L)
       {
          const char *msg = "Can't modify a PolyWall that's already been added to a game!";
          logprintf(LogConsumer::LogError, msg);
-         throw LuaException(msg);
+         THROW_LUA_EXCEPTION(L, msg);
       }
    }
 }

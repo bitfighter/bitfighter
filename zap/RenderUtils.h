@@ -6,6 +6,9 @@
 #ifndef _RENDER_UTILS_H_
 #define _RENDER_UTILS_H_
 
+#ifdef ZAP_DEDICATED
+#  error "RenderUtils.h shouldn't be included in dedicated build"
+#endif
 
 #include "Point.h"
 #include "Color.h"

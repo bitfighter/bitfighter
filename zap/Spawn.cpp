@@ -391,7 +391,7 @@ S32 ItemSpawn::lua_spawnNow(lua_State *L)
    {
       const char *msg = "Cannot spawn item before spawn has been added to game!";
       logprintf(LogConsumer::LogError, msg);
-      throw LuaException(msg);
+      THROW_LUA_EXCEPTION(L, msg);
    }
 
    spawn();

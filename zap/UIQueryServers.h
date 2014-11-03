@@ -58,6 +58,10 @@ private:
    bool mScrollingUpMode;     // false = scrolling down, true = scrolling up
    bool mMouseAtBottomFixFactor;    // UGLY
 
+public:
+   bool mHostOnServer;
+
+private:
    Vector<Button> buttons;
 
    S32 mPage;

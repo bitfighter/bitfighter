@@ -1362,7 +1362,9 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       return true;
    }
 
-   if(mHelperManager.isHelperActive() && mHelperManager.processInputCode(inputCode))   // Will return true if key was processed
+   // Disallow chat when a level is loading.  This is a workaround for disappearing chats during
+   // level transitions.  The true fix is probably to move chats from the GameType and into the GameConnection
+   if(!mShowProgressBar && mHelperManager.isHelperActive() && mHelperManager.processInputCode(inputCode))   // Will return true if key was processed
    {
       // Experimental, to keep ship from moving after entering a quick chat that has the same shortcut as a movement key
       InputCodeManager::setState(inputCode, false);

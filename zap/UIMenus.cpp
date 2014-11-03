@@ -34,6 +34,7 @@
 #include "VideoSystem.h"
 #include "FontManager.h"
 #include "SystemFunctions.h"
+#include "masterConnection.h"
 
 #include "gameObjectRender.h"    // For renderBitfighterLogo, glColor
 #include "stringUtils.h"
@@ -886,6 +887,7 @@ void MenuUserInterfaceWithIntroductoryAnimation::processSelection(U32 index)
 
 static void joinSelectedCallback(ClientGame *game, U32 unused)
 {
+   game->getUIManager()->getUI<QueryServersUserInterface>()->mHostOnServer = false;
    game->getUIManager()->activate<QueryServersUserInterface>();
 }
 
@@ -1896,6 +1898,11 @@ static void startHostingCallback(ClientGame *game, U32 unused)
    initHosting(game->getSettingsPtr(), levelSource, false, false);
 }
 
+static void hostOnServerCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->getUI<QueryServersUserInterface>()->mHostOnServer = true;
+   game->getUIManager()->activate<QueryServersUserInterface>();
+}
 
 static void robotOptionsSelectedCallback(ClientGame *game, U32 unused)
 {
@@ -1942,6 +1949,11 @@ void HostMenuUserInterface::setupMenus()
    addMenuItem(new YesNoMenuItem("RECORD GAMES:", 
          mGameSettings->getSetting<YesNo>(IniKey::GameRecording),
                                  ""));
+
+   // Note, Don't move "HOST ON SERVER" above "RECORD GAMES" unless
+   // first checking HostMenuUserInterface::saveSettings if it saves correctly
+   if(getGame()->getConnectionToMaster() && getGame()->getConnectionToMaster()->isHostOnServerAvailable())
+      addMenuItem(new MenuItem("HOST ON SERVER", hostOnServerCallback, "", KEY_H));
 
    addMenuItem(new MenuItem("PLAYBACK GAMES", playbackGamesCallback, ""));
 }

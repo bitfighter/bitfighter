@@ -65,7 +65,7 @@ SpeedZone::SpeedZone(lua_State *L)
       else if(profile == 2)
       {
          setGeom(L, 1);
-         setSpeed(getInt(L, -1));
+         setSpeed(getInt(L, 2));
       }
    }
 
