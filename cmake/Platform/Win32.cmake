@@ -4,6 +4,7 @@
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 	message(STATUS "Win64 detected")
 	set(BF_LIB_DIR ${CMAKE_SOURCE_DIR}/lib/win64)
+	set(WIN64 TRUE)
 else()
 	message(STATUS "Win32 detected")
 	set(BF_LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
@@ -206,5 +207,27 @@ endfunction()
 
 
 function(BF_PLATFORM_CREATE_PACKAGES targetName)
-	# Do nothing!
+	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Bitfighter, a 2-D multi-player space combat game")
+	set(CPACK_PACKAGE_VENDOR "Bitfighter Industries")
+	set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.txt")
+	set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE.txt")
+	set(CPACK_PACKAGE_VERSION_MAJOR ${BF_VERSION})
+	
+	if(NOT WIN64)
+		set(CPACK_PACKAGE_FILE_NAME "Bitfighter-Installer-${BF_VERSION}")
+
+		# Configure our NSIS input into a CPack template.  Use '@ONLY' (variables of the
+		# form: @var@) because NSIS uses variables of the form ${var} which CMake will 
+		# normally attempt to replace, too.
+		configure_file(
+			${CMAKE_SOURCE_DIR}/build/windows/installer/Bitfighter_installer.nsi.in
+			${CMAKE_MODULE_PATH}/NSIS.template.in
+			@ONLY
+		)
+
+		# NSIS setup
+		set(CPACK_NSIS_DISPLAY_NAME "Bitfighter")
+	endif()
+	
+	include(CPack)
 endfunction()
