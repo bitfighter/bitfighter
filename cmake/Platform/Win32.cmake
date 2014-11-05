@@ -202,19 +202,58 @@ endfunction()
 
 
 function(BF_PLATFORM_INSTALL targetName)
-	# Do nothing!
+	# Binaries
+	install(TARGETS ${targetName} RUNTIME DESTINATION ./)
+	install(PROGRAMS ${CMAKE_SOURCE_DIR}/notifier/pyinstaller/dist/bitfighter_notifier.exe DESTINATION ./)
+	
+	# Libraries
+	file(GLOB BF_INSTALL_LIBS ${CMAKE_SOURCE_DIR}/exe/*.dll)
+	install(FILES ${BF_INSTALL_LIBS} DESTINATION ./)
+	
+	# Resources
+	install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource/ DESTINATION ./)
+	install(FILES ${CMAKE_SOURCE_DIR}/exe/joystick_presets.ini DESTINATION ./)
+	install(FILES ${CMAKE_SOURCE_DIR}/notifier/redship48.ico DESTINATION ./)
+	
+	# Doc
+	install(FILES ${CMAKE_SOURCE_DIR}/doc/readme.txt DESTINATION ./)
+	install(FILES ${CMAKE_SOURCE_DIR}/LICENSE.txt DESTINATION ./)
+	install(FILES ${CMAKE_SOURCE_DIR}/COPYING.txt DESTINATION ./)
+	
+	# Updater
+	install(DIRECTORY ${CMAKE_SOURCE_DIR}/exe/updater DESTINATION ./)
+	
+	# Other
+	install(FILES ${CMAKE_SOURCE_DIR}/build/windows/installer/twoplayers.bat DESTINATION ./)
 endfunction()
 
 
 function(BF_PLATFORM_CREATE_PACKAGES targetName)
+	set(CPACK_PACKAGE_NAME "Bitfighter")
 	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Bitfighter, a 2-D multi-player space combat game")
 	set(CPACK_PACKAGE_VENDOR "Bitfighter Industries")
 	set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.txt")
 	set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE.txt")
 	set(CPACK_PACKAGE_VERSION_MAJOR ${BF_VERSION})
+	set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
+	set(CPACK_CREATE_DESKTOP_LINKS ${targetName})
 	
-	if(NOT WIN64)
-		set(CPACK_PACKAGE_FILE_NAME "Bitfighter-Installer-${BF_VERSION}")
+	if(WIN64)
+		# We use WiX for x64 MSI
+		set(CPACK_GENERATOR WIX)
+		set(CPACK_PACKAGE_FILE_NAME "Bitfighter-${BF_VERSION}-x64-installer")
+		
+		set(CPACK_PACKAGE_VERSION_MAJOR 0)
+		set(CPACK_PACKAGE_VERSION_MINOR 19)
+		set(CPACK_PACKAGE_VERSION_PATCH 4)  # 'd'
+		
+		set(CPACK_WIX_UPGRADE_GUID "5E1F1E55-11FE-1E55-BAAD-00B17F164732")
+		
+	else()
+		# NSIS setup
+		set(CPACK_GENERATOR NSIS) # TODO add ZIP for portable install?
+		
+		set(CPACK_PACKAGE_FILE_NAME "Bitfighter-${BF_VERSION}-win32-installer")
 
 		# Configure our NSIS input into a CPack template.  Use '@ONLY' (variables of the
 		# form: @var@) because NSIS uses variables of the form ${var} which CMake will 
@@ -224,9 +263,6 @@ function(BF_PLATFORM_CREATE_PACKAGES targetName)
 			${CMAKE_MODULE_PATH}/NSIS.template.in
 			@ONLY
 		)
-
-		# NSIS setup
-		set(CPACK_NSIS_DISPLAY_NAME "Bitfighter")
 	endif()
 	
 	include(CPack)
