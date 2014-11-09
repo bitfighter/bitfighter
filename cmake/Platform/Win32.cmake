@@ -213,7 +213,7 @@ function(BF_PLATFORM_INSTALL targetName)
 	# Resources
 	install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource/ DESTINATION ./)
 	install(FILES ${CMAKE_SOURCE_DIR}/exe/joystick_presets.ini DESTINATION ./)
-	install(FILES ${CMAKE_SOURCE_DIR}/notifier/redship48.ico DESTINATION ./)
+	install(FILES ${CMAKE_SOURCE_DIR}/zap/bitfighter_win_icon_green.ico DESTINATION ./)
 	
 	# Doc
 	install(FILES ${CMAKE_SOURCE_DIR}/doc/readme.txt DESTINATION ./)
@@ -237,29 +237,39 @@ function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	set(CPACK_PACKAGE_VERSION_MAJOR ${BF_VERSION})
 	set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
 	set(CPACK_CREATE_DESKTOP_LINKS ${targetName})
+	# This sets up start menu and desktop shortcuts
+	set(CPACK_PACKAGE_EXECUTABLES "bitfighter;Bitfighter" "bitfighter_notifier;Bitfighter Notifier")
+	
+	set(BF_PACKAGE_RESOURCE_DIR ${CMAKE_SOURCE_DIR}/build/windows/installer)
 	
 	if(WIN64)
 		# We use WiX for x64 MSI
 		set(CPACK_GENERATOR WIX)
 		set(CPACK_PACKAGE_FILE_NAME "Bitfighter-${BF_VERSION}-x64-installer")
 		
-		set(CPACK_PACKAGE_VERSION_MAJOR 0)
-		set(CPACK_PACKAGE_VERSION_MINOR 19)
-		set(CPACK_PACKAGE_VERSION_PATCH 4)  # 'd'
-		
+		# Keep this the same so MSI installers can update/repair across versions
 		set(CPACK_WIX_UPGRADE_GUID "5E1F1E55-11FE-1E55-BAAD-00B17F164732")
+		set(CPACK_WIX_UI_DIALOG ${BF_PACKAGE_RESOURCE_DIR}/wix_welcome_banner.bmp)
+		set(CPACK_WIX_UI_BANNER ${BF_PACKAGE_RESOURCE_DIR}/wix_header_banner.bmp)
+		set(CPACK_WIX_PROGRAM_MENU_FOLDER "Bitfighter")
 		
+		# Wix requires some version, but can't handle bitfighter versions because of the letters
+		set(CPACK_PACKAGE_VERSION_MAJOR 1)
 	else()
 		# NSIS setup
 		set(CPACK_GENERATOR NSIS) # TODO add ZIP for portable install?
 		
 		set(CPACK_PACKAGE_FILE_NAME "Bitfighter-${BF_VERSION}-win32-installer")
 
+		#set(WELCOME_BANNER ${BF_PACKAGE_RESOURCE_DIR}/WelcomePageBanner.bmp)
+		#set(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "!define MUI_WELCOMEFINISHPAGE_BITMAP \\\"${WELCOME_BANNER}\\\"")
+		
+		
 		# Configure our NSIS input into a CPack template.  Use '@ONLY' (variables of the
 		# form: @var@) because NSIS uses variables of the form ${var} which CMake will 
 		# normally attempt to replace, too.
 		configure_file(
-			${CMAKE_SOURCE_DIR}/build/windows/installer/Bitfighter_installer.nsi.in
+			${BF_PACKAGE_RESOURCE_DIR}/Bitfighter_installer.nsi.in
 			${CMAKE_MODULE_PATH}/NSIS.template.in
 			@ONLY
 		)
