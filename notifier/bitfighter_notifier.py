@@ -84,7 +84,7 @@ EXECUTABLE              = "bitfighter"
 
 # Different icon formats for different systems
 if sys.platform == 'win32':
-    ICON_FILE           = "redship48.ico"
+    ICON_FILE           = "bitfighter_win_icon_green.ico"
 
 elif sys.platform == 'darwin':
     ICON_FILE           = "redship18.png"
