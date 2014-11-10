@@ -230,7 +230,7 @@ endfunction()
 
 function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	set(CPACK_PACKAGE_NAME "Bitfighter")
-	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Bitfighter, a 2-D multi-player space combat game")
+	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A 2-D multi-player space combat game")
 	set(CPACK_PACKAGE_VENDOR "Bitfighter Industries")
 	set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.txt")
 	set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE.txt")
@@ -251,28 +251,38 @@ function(BF_PLATFORM_CREATE_PACKAGES targetName)
 		set(CPACK_WIX_UPGRADE_GUID "5E1F1E55-11FE-1E55-BAAD-00B17F164732")
 		set(CPACK_WIX_UI_DIALOG ${BF_PACKAGE_RESOURCE_DIR}/wix_welcome_banner.bmp)
 		set(CPACK_WIX_UI_BANNER ${BF_PACKAGE_RESOURCE_DIR}/wix_header_banner.bmp)
-		set(CPACK_WIX_PROGRAM_MENU_FOLDER "Bitfighter")
+		set(CPACK_WIX_PROGRAM_MENU_FOLDER ${CPACK_PACKAGE_NAME})
 		
 		# Wix requires some version, but can't handle bitfighter versions because of the letters
 		set(CPACK_PACKAGE_VERSION_MAJOR 1)
 	else()
 		# NSIS setup
 		set(CPACK_GENERATOR NSIS) # TODO add ZIP for portable install?
-		
 		set(CPACK_PACKAGE_FILE_NAME "Bitfighter-${BF_VERSION}-win32-installer")
+		set(CPACK_NSIS_COMPRESSOR "/SOLID lzma")
+		set(CPACK_NSIS_HELP_LINK "http://bitfighter.org/")
+		set(CPACK_NSIS_URL_INFO_ABOUT "http://bitfighter.org/")
+		
+		# Desktop shortcut handling for install/uninstall
+		set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut \\\"$DESKTOP\\\\Bitfighter.lnk\\\" \\\"$INSTDIR\\\\bitfighter.exe\\\"")
+		set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "Delete \\\"$DESKTOP\\\\Bitfighter.lnk\\\"")
 
-		#set(WELCOME_BANNER ${BF_PACKAGE_RESOURCE_DIR}/WelcomePageBanner.bmp)
-		#set(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "!define MUI_WELCOMEFINISHPAGE_BITMAP \\\"${WELCOME_BANNER}\\\"")
+		# Any extra start menu shortcuts
+		set(CPACK_NSIS_MENU_LINKS 
+			"http://bitfighter.org/" "Bitfighter Home Page"
+			"http://bitfighter.org/forums/" "Bitfighter Forums")
 		
+		# Branding
+		# Four backslashes because NSIS can't resolve the last portion of a UNIX path.  Fun!
+		set(CPACK_PACKAGE_ICON "${BF_PACKAGE_RESOURCE_DIR}\\\\nsis_header_banner.bmp")
+		set(WELCOME_BANNER ${BF_PACKAGE_RESOURCE_DIR}\\\\nsis_welcome_banner.bmp) 
+		set(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "BrandingText \\\"${CPACK_PACKAGE_NAME} ${BF_VERSION}\\\"
+			!define MUI_WELCOMEFINISHPAGE_BITMAP \\\"${WELCOME_BANNER}\\\"")
 		
-		# Configure our NSIS input into a CPack template.  Use '@ONLY' (variables of the
-		# form: @var@) because NSIS uses variables of the form ${var} which CMake will 
-		# normally attempt to replace, too.
-		configure_file(
-			${BF_PACKAGE_RESOURCE_DIR}/Bitfighter_installer.nsi.in
-			${CMAKE_MODULE_PATH}/NSIS.template.in
-			@ONLY
-		)
+		# Need this otherwise NSIS thinks executables are in the 'bin' sub-folder
+		set(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
+		
+		set(CPACK_NSIS_MUI_FINISHPAGE_RUN "bitfighter.exe")
 	endif()
 	
 	include(CPack)
