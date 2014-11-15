@@ -19,6 +19,32 @@
 namespace Zap
 {
 
+
+class BarrierX
+{
+private:
+   Vector<WallSegment *> mSegments;
+
+   Rect mSegmentExtent;
+
+public:
+   BarrierX();             // Constructor
+   virtual ~BarrierX();    // Destructor
+
+   void setSegments(const Vector<WallSegment *> &segments);
+   const Vector<WallSegment *> &getSegments() const;
+
+   const Rect &getSegmentExtent() const;
+   S32 getSegmentCount() const;
+   const WallSegment *getSegment(S32 index) const;
+
+   bool isPointOnWall(const Point &point) const;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 /// The Barrier class represents rectangular barriers that player controlled
 /// ships cannot pass through... i.e. walls  Barrier objects, once created, never
 /// change state, simplifying the pack/unpack update methods.  Barriers are

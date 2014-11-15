@@ -321,6 +321,7 @@ bool Teleporter::checkDeploymentPosition(const Point &position, const GridDataba
    Rect queryRect(position, TELEPORTER_RADIUS);
    Point outPoint;  // only used as a return value in polygonCircleIntersect
 
+   // Finds: Barriers, PolyWalls, Turrets, ForceFields, Cores, and ForceFieldProjectors
    foundObjects.clear();
    gb->findObjects((TestFunc) isCollideableType, foundObjects, queryRect);
 
@@ -347,7 +348,9 @@ bool Teleporter::checkDeploymentPosition(const Point &position, const GridDataba
       // Try the collision circle if no poly bounds were found
       else
       {
-         if(bfObject->getCollisionCircle(RenderState, foundObjectCenter, foundObjectRadius))
+         // State specified below doesn't matter, as foundObjects are all CollideableTypes, and only
+         // MoveObjects consider state, and no MoveObjects are CollideableTypes.  So there!
+         if(bfObject->getCollisionCircle(ActualState, foundObjectCenter, foundObjectRadius))
             if(circleCircleIntersect(foundObjectCenter, foundObjectRadius, position, (F32)TELEPORTER_RADIUS))
                return false;
       }

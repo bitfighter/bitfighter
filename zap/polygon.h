@@ -47,6 +47,8 @@ public:
    // that are common to the polygon classes
    S32 getRad(lua_State *L);        // Radius of item (returns number)
    S32 getVel(lua_State *L);        // Velocity of item (returns point)
+
+   bool overlapsPoint(const Point &point) const;
 };
 
 };

@@ -7,11 +7,13 @@
 #define _POLYWALL_H_
 
 #include "polygon.h"       // For PolygonObject def
+#include "barrier.h"       // for BarrierX def
+
 
 namespace Zap
 {
 
-class PolyWall : public PolygonObject
+class PolyWall : public PolygonObject, public BarrierX
 {
    typedef PolygonObject Parent;
 
@@ -35,12 +37,9 @@ public:
 
    S32 getRenderSortValue();
 
-   void setSelected(bool selected);
-
    virtual void onGeomChanged();
    virtual void onItemDragging();
    virtual void onAddedToGame(Game *game);
-
 
    /////
    // Editor methods

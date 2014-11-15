@@ -14,7 +14,8 @@
 #include "robot.h"
 #include "Spawn.h"
 #include "WallItem.h"
-#include "WallSegmentManager.h"
+#include "PolyWall.h"
+#include "barrier.h"
 
 #include "Md5Utils.h"
 #include "stringUtils.h"
@@ -30,7 +31,7 @@ namespace Zap
 
 
 // Constructor
-Level::Level() 
+Level::Level()
 { 
    initialize();
 }
@@ -114,6 +115,40 @@ Vector<BotNavMeshZone *> &Level::getBotZoneList()
 }
 
 
+void Level::beginBatchGeomUpdate()
+{
+   mWallEdgeManager.beginBatchGeomUpdate();
+}
+
+
+void Level::endBatchGeomUpdate(GridDatabase *gameObjectDatabase, 
+                               const Vector<WallSegment const *> &wallSegments, 
+                               Vector<Point> &wallEdgePoints,    // <== gets modified!
+                               bool modifiedWalls)
+{
+   mWallEdgeManager.endBatchGeomUpdate(gameObjectDatabase, wallSegments, wallEdgePoints, modifiedWalls);
+}
+
+
+const GridDatabase *Level::getWallEdgeDatabase() const
+{
+   return mWallEdgeManager.getWallEdgeDatabase();
+}
+
+
+const WallEdgeManager *Level::getWallEdgeManager() const
+{
+   return &mWallEdgeManager;
+}
+
+
+void Level::clearAllObjects()
+{
+   Parent::removeEverythingFromDatabase();
+   mWallEdgeManager.clear();
+}
+
+
 // Server only!
 void Level::addBots(Game *game)
 {
@@ -146,7 +181,8 @@ void Level::loadLevelFromString(const string &contents, const string &filename)
 	mLevelHash = md5.getHash();
 
    // Build wall edge geometry
-   buildWallEdgeGeometry();
+   Vector<Point> wallEdgePoints;  // <== not used
+   buildWallEdgeGeometry(wallEdgePoints);
 
    // Snap enigneered items to those edges
    snapAllEngineeredItems(false);
@@ -155,21 +191,33 @@ void Level::loadLevelFromString(const string &contents, const string &filename)
 }
 
 
-void Level::buildWallEdgeGeometry()
+// Populates wallEdgePoints
+void Level::buildWallEdgeGeometry(Vector<Point> &wallEdgePoints)
 {
+   Vector<const WallSegment *> wallSegments;
+
    const Vector<DatabaseObject *> *polyWalls = findObjects_fast(PolyWallTypeNumber);
    const Vector<DatabaseObject *> *wallItems = findObjects_fast(WallItemTypeNumber);
 
-   fillVector.clear();
-   fillVector.reserve(wallItems->size() + polyWalls->size());
+   for(S32 i = 0; i < polyWalls->size(); i++)
+   {
+      BarrierX *barrier = static_cast<BarrierX *>(static_cast<PolyWall *>(polyWalls->get(i)));
+
+      for(S32 j = 0; j < barrier->getSegmentCount(); j++)
+         wallSegments.push_back(barrier->getSegment(j));
+   }
+
 
    for(S32 i = 0; i < wallItems->size(); i++)
-      fillVector.push_back(wallItems->get(i));
+   {
+      BarrierX *barrier = static_cast<BarrierX *>(static_cast<WallItem *>(wallItems->get(i)));
 
-   for(S32 i = 0; i < polyWalls->size(); i++)
-      fillVector.push_back(polyWalls->get(i));
+      for(S32 j = 0; j < barrier->getSegmentCount(); j++)
+         wallSegments.push_back(barrier->getSegment(j));
+   }
 
-   getWallSegmentManager()->recomputeAllWallGeometry(this, fillVector);
+
+   mWallEdgeManager.rebuildEdges(wallSegments, wallEdgePoints);      // Fills wallEdgePoints
 }
 
 
@@ -188,7 +236,7 @@ void Level::snapAllEngineeredItems(bool onlyUnsnapped)
       if(onlyUnsnapped && engrObj->isSnapped())
          continue;
 
-      engrObj->mountToWall(engrObj->getPos(), getWallSegmentManager(), NULL);
+      engrObj->mountToWall(engrObj->getPos(), this, getWallEdgeDatabase(), NULL);
    }
 }
 

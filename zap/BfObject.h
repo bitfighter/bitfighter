@@ -303,6 +303,8 @@ public:
    void setCurrentMove(const Move &move);
    void setPrevMove(const Move &move);
 
+   virtual bool overlapsPoint(const Point &point) const;
+
    // renderLayer() is called three times for every object that is in the
    // render list, at layers -1, 0, 1.  By default renderLayer() call the render()
    // method one time (when layerIndex == 0).

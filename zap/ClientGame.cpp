@@ -1701,7 +1701,7 @@ void ClientGame::addWallItem(WallItem *wallItem, GridDatabase *database)
    Parent::addWallItem(wallItem, database);
 
    // Do we want to run onGeomChanged here instead?  If so, we can combine with addPolyWall.
-   wallItem->processEndPoints();
+   wallItem->computeExtendedEndPoints();
 }
 
 

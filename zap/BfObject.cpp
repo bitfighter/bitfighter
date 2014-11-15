@@ -488,6 +488,13 @@ void BfObject::setPos(lua_State *L, S32 stackPos)
 }
 
 
+// Overridden in children
+bool BfObject::overlapsPoint(const Point &point) const
+{
+   return false;
+}
+
+
 // Function needed to provide this signature at this level
 void BfObject::setPos(const Point &point)
 {
@@ -932,7 +939,7 @@ Vector<Point> BfObject::getRepairLocations(const Point &repairOrigin)
 // This method returns true if the specified object collides with the given ray designated by
 // rayStart and rayEnd
 bool BfObject::objectIntersectsSegment(BfObject *object, const Point &rayStart, const Point &rayEnd,
-      F32 &fillCollisionTime)
+                                       F32 &fillCollisionTime)
 {
    F32 collisionTime = 1.f;
 
@@ -1072,6 +1079,8 @@ BfObject *BfObject::findObjectLOS(U8 typeNumber, U32 stateIndex, const Point &ra
          gridDB->findObjectLOS(typeNumber, stateIndex, rayStart, rayEnd, collisionTime, collisionNormal)
          );
 
+   // TODO: Probably need to check level::wallEdgeDatabase as well
+
    return NULL;
 }
 
@@ -1085,6 +1094,8 @@ BfObject *BfObject::findObjectLOS(TestFunc objectTypeTest, U32 stateIndex, const
      return static_cast<BfObject *>(
          gridDB->findObjectLOS(objectTypeTest, stateIndex, rayStart, rayEnd, collisionTime, collisionNormal)
          );
+
+   // TODO: Probably need to check level::wallEdgeDatabase as well
 
    return NULL;
 }

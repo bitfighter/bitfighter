@@ -50,7 +50,7 @@ protected:
    void findMountPoint(const Level *level, const Point &pos);     
 
 
-   WallSegment *mMountSeg;    // Segment we're mounted to in the editor (don't care in the game)
+   BfObject *mMountSeg;    // Object we're mounted to in the editor (don't care in the game)
 
    enum MaskBits
    {
@@ -101,7 +101,8 @@ public:
    bool collide(BfObject *hitObject);
    F32 getHealth() const;
    void healObject(S32 time);
-   Point mountToWall(const Point &pos, const WallSegmentManager *wallSegmentManager, const Vector<S32> *excludedWallList);
+   Point mountToWall(const Point &pos, const GridDatabase *gameObjectDatabase,
+                     const GridDatabase *wallEdgeDatabase, const Vector<BfObject *> *excludedWallList);
 
    void onGeomChanged();
 
@@ -109,14 +110,14 @@ public:
 
    // Figure out where to put our turrets and forcefield projectors.  Will return NULL if no mount points found.
    // Pass NULL if there is no excludedWallList.
-   static WallSegment *findAnchorPointAndNormal(const GridDatabase *wallEdgeDatabase, 
-                                                const GridDatabase *wallSegmentDatabase,
-                                                const Point &pos, F32 snapDist, 
-                                                const Vector<S32> *excludedWallList,
-                                                bool format, Point &anchor, Point &normal);
+   static BfObject *findAnchorPointAndNormal(const GridDatabase *gameObjectDatabase, 
+                                             const GridDatabase *wallEdgeDatabase,
+                                             const Point &pos, F32 snapDist, 
+                                             const Vector<BfObject *> *excludedWallList,
+                                             bool format, Point &anchor, Point &normal);
 
-   WallSegment *getMountSegment() const;
-   void setMountSegment(WallSegment *mountSeg);
+   BfObject *getMountSegment() const;
+   void setMountSegment(BfObject *mountSeg);
 
    //// Is item sufficiently snapped?  
    void setSnapped(bool snapped);

@@ -6,14 +6,14 @@
 #ifndef _WALLITEM_H_
 #define _WALLITEM_H_
 
-#include "BfObject.h"
+#include "barrier.h"
 
 namespace Zap
 {
 
 class PolyWall;
 
-class WallItem : public CentroidObject
+class WallItem : public CentroidObject, public BarrierX
 {
    typedef CentroidObject Parent;
 
@@ -37,9 +37,13 @@ public:
    virtual void onItemDragging();
    virtual void onAddedToGame(Game *game);
 
-   void processEndPoints();  
+   void computeExtendedEndPoints();  
 
    void changeWidth(S32 amt);
+
+   bool overlapsPoint(const Point &point) const;
+   bool checkForCollision(const Point &rayStart, const Point &rayEnd, bool format, U32 stateIndex,
+                          F32 &collisionTime, Point &surfaceNormal) const;
 
    void render() const;
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
@@ -69,8 +73,6 @@ public:
 
    //const Vector<Point> *getCollisionPoly() const;
 
-   void setSelected(bool selected);
-
    static const S32 VERTEX_SIZE = 5;
 
    ///// Lua interface
@@ -96,35 +98,33 @@ public:
 class WallSegment : public DatabaseObject
 {
 private:
-   S32 mOwner;
-   bool mSelected;
-
-  void init(GridDatabase *database, S32 owner);
   bool invalid;              // A flag for marking segments in need of processing
 
    Vector<Point> mEdges;    
    Vector<Point> mCorners;
    Vector<Point> mTriangulatedFillPoints;
 
+   BarrierX *mOwner;
+
+   void init(BarrierX *owner);
+
 public:
-   WallSegment(GridDatabase *gridDatabase, const Point &start, const Point &end, F32 width, S32 owner = -1);    // Normal wall segment
-   WallSegment(GridDatabase *gridDatabase, const Vector<Point> &points, S32 owner = -1);                        // PolyWall 
+   WallSegment(const Point &start, const Point &end, F32 width, BarrierX *owner);    // Normal wall segment
+   WallSegment(const Vector<Point> &points, BarrierX *owner);                        // PolyWall 
    virtual ~WallSegment();
 
-   S32 getOwner();
    void invalidate();
 
-   bool isSelected() const;
-   void setSelected(bool selected);
+   BarrierX *getOwner() const;
 
    void resetEdges();         // Compute basic edges from corner points
    void computeBoundingBox(); // Computes bounding box based on the corners, updates database
    
-   void renderFill(const Point &offset, const Color &color);
+   void renderFill(const Point &offset, const Color &color, bool isSelected) const;
 
-   const Vector<Point> *getCorners();
-   const Vector<Point> *getEdges();
-   const Vector<Point> *getTriangulatedFillPoints();
+   const Vector<Point> *getCorners() const;
+   const Vector<Point> *getEdges() const;
+   const Vector<Point> *getTriangulatedFillPoints() const;
 
    ////////////////////
    // DatabaseObject methods

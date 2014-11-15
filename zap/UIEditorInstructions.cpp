@@ -414,25 +414,21 @@ void EditorInstructionsUserInterface::renderPageWalls() const
       Vector<Point> extendedEndPoints;
       constructBarrierEndPoints(&points, width, extendedEndPoints);
 
-       Vector<DatabaseObject *> wallSegments;      
+       Vector<const WallSegment *> wallSegments;      
 
       // Create a series of WallSegments, each representing a sequential pair of vertices on our wall
       for(S32 i = 0; i < extendedEndPoints.size(); i += 2)
       {
          // Create a new segment, and add it to the list.  The WallSegment constructor will add it to the specified database.
-         WallSegment *newSegment = new WallSegment(mWallSegmentManager.getWallSegmentDatabase(), 
-                                                   extendedEndPoints[i], extendedEndPoints[i+1], width);    
+         WallSegment *newSegment = new WallSegment(extendedEndPoints[i], extendedEndPoints[i+1], width, NULL);
          wallSegments.push_back(newSegment);            
       }
 
       Vector<Point> edges;
-      mWallSegmentManager.clipAllWallEdges(&wallSegments, edges);      // Remove interior wall outline fragments
+      mWallEdgeManager.clipAllWallEdges(wallSegments, edges);      // Remove interior wall outline fragments
 
       for(S32 i = 0; i < wallSegments.size(); i++)
-      {
-         WallSegment *wallSegment = static_cast<WallSegment *>(wallSegments[i]);
-         wallSegment->renderFill(Point(0,0), Colors::EDITOR_WALL_FILL_COLOR);
-      }
+         wallSegments[i]->renderFill(Point(0,0), Colors::EDITOR_WALL_FILL_COLOR, false);
 
       renderWallEdges(edges, mGameSettings->getWallOutlineColor());
 

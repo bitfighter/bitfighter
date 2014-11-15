@@ -994,7 +994,7 @@ void Game::cleanUp()
    // destructors... CoreItems, for example
    if(mLevel)
    {
-      mLevel->removeEverythingFromDatabase();
+      mLevel->clearAllObjects();
       mLevel.reset();    // mLevel is a shared_ptr, so cleanup will be handled automatically
    }
 }

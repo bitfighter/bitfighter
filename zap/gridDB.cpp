@@ -5,7 +5,6 @@
 
 #include "gridDB.h"
 #include "moveObject.h"    // For def of ActualState
-#include "WallSegmentManager.h"
 #include "Level.h"
 
 #include "GeomUtils.h"
@@ -26,7 +25,7 @@ static U32 getNextId()
 }
 
 // Constructor
-GridDatabase::GridDatabase(bool createWallSegmentManager)
+GridDatabase::GridDatabase()
 {
    if(mChunker == NULL)
       mChunker = new ClassChunker<BucketEntry>();        // Static shared by all databases, reference counted and deleted in destructor
@@ -37,23 +36,8 @@ GridDatabase::GridDatabase(bool createWallSegmentManager)
       for(U32 j = 0; j < BucketRowCount; j++)
          mBuckets[i][j] = NULL;
 
-   if(createWallSegmentManager)
-      mWallSegmentManager = new WallSegmentManager();    // Gets deleted in destructor
-   else
-      mWallSegmentManager = NULL;
-
    mDatabaseId = getNextId();
 }
-
-
-// Copy contents of source into this
-// GridDatabase::GridDatabase(const GridDatabase &source)
-// {
-//    mAllObjects.reserve(source.mAllObjects.size());
-// 
-//    for(S32 i = 0; i < source.mAllObjects.size(); i++)
-//       addToDatabase(source.mAllObjects[i]->clone(), source.mAllObjects[i]->getExtent());
-// }
 
 
 // Destructor
@@ -62,9 +46,6 @@ GridDatabase::~GridDatabase()
    removeEverythingFromDatabase();
 
    TNLAssert(mChunker != NULL || mCountGridDatabase != 0, "Running GridDatabase destructor without initalizing?");
-
-   if(mWallSegmentManager)
-      delete mWallSegmentManager;
 
    mCountGridDatabase--;
 
@@ -199,9 +180,6 @@ void GridDatabase::removeEverythingFromDatabase()
    mWallitems.clear();
 
    mAllObjects.deleteAndClear();
-   
-   if(mWallSegmentManager)
-      mWallSegmentManager->clear();
 }
 
 
@@ -217,6 +195,16 @@ static void eraseObject_fast(Vector<DatabaseObject *> *objects, DatabaseObject *
 }
 
 
+// Delete by index
+void GridDatabase::removeFromDatabase(S32 index, bool deleteObject)
+{
+   DatabaseObject *obj = mAllObjects[index];
+
+   removeFromDatabase(obj, deleteObject);
+}
+
+
+// Delete by object
 void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
 {
    TNLAssert(object->mDatabase == this || object->mDatabase == NULL, "Trying to remove Object from wrong database");
@@ -519,13 +507,6 @@ Rect GridDatabase::getExtents()
 }
 
 
-// TODO: Make this be a protected method -- the wallSegmentManager should be an internal property of Level, and 
-WallSegmentManager *GridDatabase::getWallSegmentManager() const
-{
-   return mWallSegmentManager;
-}
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -582,124 +563,67 @@ DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex, bool 
 {
    Rect queryRect(rayStart, rayEnd);
 
-   static Vector<DatabaseObject *> fillVector;  // Use local here, Most of code expects a global FillVector left unchanged
+   // Use a local copy here, most callers expect our global fillVector to remain unchanged
+   static Vector<DatabaseObject *> fillVector;  
    fillVector.clear();
 
    findObjects(typeNumber, fillVector, queryRect);
 
-   Point collisionPoint;
-
-   collisionTime = 1;
-   DatabaseObject *retObject = NULL;
-
-   Point center;
-   Rect rect;
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      if(!fillVector[i]->isCollisionEnabled())     // Skip collision-disabled objects
-         continue;
-
-      const Vector<Point> *poly = fillVector[i]->getCollisionPoly();
-
-      F32 radius, ct;
-
-      if(poly)
-      {
-         if(poly->size() == 0)    // This can happen in the editor when a wall segment is completely hidden by another
-            continue;
-
-         Point normal;
-         if(polygonIntersectsSegmentDetailed(&poly->first(), poly->size(), format, rayStart, rayEnd, ct, normal))
-         {
-            if(ct < collisionTime)
-            {
-               collisionTime = ct;
-               retObject = fillVector[i];
-               surfaceNormal = normal;
-            }
-         }
-      }
-      else if(fillVector[i]->getCollisionCircle(stateIndex, center, radius))
-      {
-         if(circleIntersectsSegment(center, radius, rayStart, rayEnd, ct) && ct < collisionTime)
-         {
-            collisionTime = ct;
-            surfaceNormal = (rayStart + (rayEnd - rayStart) * ct) - center;
-            retObject = fillVector[i];
-         }
-      }
-   }
-
-   if(retObject)
-      surfaceNormal.normalize();
-
-   return retObject;
+   return findObjectLOS(fillVector, stateIndex, format, rayStart, rayEnd, collisionTime, surfaceNormal);
 }
 
 
 DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex, bool format,
                                             const Point &rayStart, const Point &rayEnd, 
-                                            float &collisionTime, Point &surfaceNormal) const
+                                            F32 &collisionTime, Point &surfaceNormal) const
 {
    Rect queryRect(rayStart, rayEnd);
 
-   static Vector<DatabaseObject *> fillVector;  // Use local here, most callers expect our global fillVector to remain unchanged
+   // Use a local copy here, most callers expect our global fillVector to remain unchanged
+   static Vector<DatabaseObject *> fillVector;  
    fillVector.clear();
 
    findObjects(testFunc, fillVector, queryRect);
 
-   if(getWallSegmentManager())
-      getWallSegmentManager()->getWallEdgeDatabase()->findObjects(testFunc, fillVector, queryRect);
+   return findObjectLOS(fillVector, stateIndex, format, rayStart, rayEnd, collisionTime, surfaceNormal);
+}
 
+
+// This variant only searches one of the items in the passed vector
+DatabaseObject *GridDatabase::findObjectLOS(const Vector<DatabaseObject *> &objList, U32 stateIndex, bool format,
+                                            const Point &rayStart, const Point &rayEnd, 
+                                            F32 &collisionTime, Point &surfaceNormal) const
+{
    Point collisionPoint;
 
-   collisionTime = 1;
+   collisionTime = 1;      // collisionTime will be an F32 between 0 and 1 inclusive -- so this is its max value
    DatabaseObject *retObject = NULL;
 
-   Point center;
+   // Temp vars used to return a value from checkCollision*ForCollision
+   Point norm;    
+   F32 ct = collisionTime;
+
    Rect rect;
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < objList.size(); i++)
    {
-      if(!fillVector[i]->isCollisionEnabled())     // Skip collision-disabled objects
+      if(!objList[i]->isCollisionEnabled())     // Skip collision-disabled objects
          continue;
 
-      const Vector<Point> *poly = fillVector[i]->getCollisionPoly();
-
-      F32 radius;
-      float ct;
-
-      if(poly)
+      if(objList[i]->checkForCollision(rayStart, rayEnd, format, stateIndex, ct, norm))
       {
-         if(poly->size() == 0)    // This can happen in the editor when a wall segment is completely hidden by another
+         if(ct < 0)        // Special condition... found something, but not what we want.  Don't do circle check.
             continue;
 
-         Point normal;
-         if(polygonIntersectsSegmentDetailed(&poly->get(0), poly->size(), format, rayStart, rayEnd, ct, normal))
+         // Found object closer than any we've found so far
+         if(ct < collisionTime)
          {
-            if(ct < collisionTime)
-            {
-               collisionTime = ct;
-               retObject = fillVector[i];
-               surfaceNormal = normal;
-            }
-         }
-      }
-      else if(fillVector[i]->getCollisionCircle(stateIndex, center, radius))
-      {
-         if(circleIntersectsSegment(center, radius, rayStart, rayEnd, ct))
-         {
-            if(ct < collisionTime)
-            {
-               collisionTime = ct;
-               surfaceNormal = (rayStart + (rayEnd - rayStart) * ct) - center;
-               retObject = fillVector[i];
-            }
+            collisionTime = ct;
+            surfaceNormal = norm;
+            retObject = objList[i];
          }
       }
    }
-
 
    if(retObject)
       surfaceNormal.normalize();
@@ -721,7 +645,7 @@ bool GridDatabase::pointCanSeePoint(const Point &point1, const Point &point2)
    F32 time;
    Point coll;
 
-   return( findObjectLOS((TestFunc)isWallType, ActualState, true, point1, point2, time, coll) == NULL );
+   return(findObjectLOS((TestFunc)isWallType, ActualState, true, point1, point2, time, coll) == NULL);
 }
 
 
@@ -815,12 +739,6 @@ DatabaseObject *GridDatabase::getObjectByIndex(S32 index) const
    else
       return mAllObjects[index]; 
 } 
-
-
-void GridDatabase::setWallSelected(S32 serialNumber, bool selected)
-{
-   mWallSegmentManager->setSelected(serialNumber, selected);
-}
 
 
 void GridDatabase::updateExtents(DatabaseObject *object, const Rect &newExtents)
@@ -924,7 +842,41 @@ bool DatabaseObject::isDatabasable()
 const Vector<Point> *DatabaseObject::getCollisionPoly() const
 {
    return NULL;
-}  
+}
+
+
+// Overridden by WallItem
+bool DatabaseObject::checkForCollision(const Point &rayStart, const Point &rayEnd, bool format, U32 stateIndex,
+                                       F32 &collisionTime, Point &surfaceNormal) const
+{
+   const Vector<Point> *poly = getCollisionPoly();
+
+   if(poly)
+   {
+      if(poly->size() == 0)    // This can happen in the editor when a wall segment is completely hidden by another
+      {
+         collisionTime = -1;
+         return true;
+      }
+
+      return polygonIntersectsSegmentDetailed(&poly->get(0), poly->size(), format, rayStart, rayEnd, collisionTime, surfaceNormal);
+   }
+
+   else  // No collisionPoly... try a collisionCircle
+   {
+      F32 radius;
+      Point center;
+
+      if(getCollisionCircle(stateIndex, center, radius))
+      {
+         if(!circleIntersectsSegment(center, radius, rayStart, rayEnd, collisionTime))
+            return false;
+
+         surfaceNormal = (rayStart + (rayEnd - rayStart) * collisionTime) - center;
+         return true;
+      }
+   }
+}
 
 
 bool DatabaseObject::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const

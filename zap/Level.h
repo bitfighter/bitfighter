@@ -6,9 +6,10 @@
 #ifndef _LEVEL_H_
 #define _LEVEL_H_
 
-#include "gridDB.h"
+#include "gridDB.h"     // Parent class
 
 #include "teamInfo.h"
+#include "WallEdgeManager.h"
 
 #include "tnlTypes.h"
 #include "tnlNetBase.h"
@@ -24,11 +25,11 @@ using namespace TNL;
 namespace Zap
 {
 
+class BotNavMeshZone;
 class Game;
 class GameType;
-class WallItem;
 class PolyWall;
-class BotNavMeshZone;
+class WallItem;
 
 class Level : public GridDatabase
 {
@@ -42,6 +43,8 @@ private:
    string mLevelHash;
 
    Game *mGame;             // Game we've been added to -- NULL until onAddedToGame() is called
+
+   WallEdgeManager mWallEdgeManager;
 
    U32 mLevelDatabaseId;
 
@@ -75,7 +78,7 @@ public:
    bool loadLevelFromFile(const string &filename);
    void validateLevel();
 
-   void buildWallEdgeGeometry();
+   void buildWallEdgeGeometry(Vector<Point> &wallEdgePoints);
    void snapAllEngineeredItems(bool onlyUnsnapped);
 
    boost::shared_ptr<Vector<TeamInfo> > getTeamInfosClone() const;
@@ -85,6 +88,14 @@ public:
    void setLevelDatabaseId(U32 id);
 
    void addWallItem(WallItem *wall, Game *game = NULL);
+   const GridDatabase *getWallEdgeDatabase() const;
+   const WallEdgeManager *getWallEdgeManager() const;
+
+   void beginBatchGeomUpdate();                                     
+   void endBatchGeomUpdate(GridDatabase *gameObjectDatabase, 
+                           const Vector<WallSegment const *> &wallSegments, 
+                           Vector<Point> &wallEdgePoints,    // <== gets modified!
+                           bool modifiedWalls);
 
    string getHash() const;
    F32 getLegacyGridSize() const;
@@ -140,6 +151,8 @@ public:
    void replaceTeam(AbstractTeam *team, S32 index);
    void clearTeams();             
    string getTeamLevelCode(S32 index) const;
+
+   void clearAllObjects();
 
    bool makeSureTeamCountIsNotZero();        // Because zero teams can cause crashiness
 

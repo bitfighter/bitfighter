@@ -58,6 +58,9 @@ public:
    void setExtent(const Rect &extentRect);
    
    virtual const Vector<Point> *getCollisionPoly() const;
+   virtual bool checkForCollision(const Point &rayStart, const Point &rayEnd, bool format, U32 stateIndex,
+                                  F32 &collisionTime, Point &surfaceNormal) const;
+
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const;
 
    virtual bool isCollisionEnabled() const;
@@ -90,8 +93,6 @@ private:
    static U32 mQueryId;
    static U32 mCountGridDatabase;      // Reference counter for destruction of mChunker
 
-   WallSegmentManager *mWallSegmentManager;
-
    Vector<DatabaseObject *> mAllObjects;
    Vector<DatabaseObject *> mGoalZones;
    Vector<DatabaseObject *> mFlags;
@@ -121,20 +122,24 @@ public:
 
    BucketEntry *mBuckets[BucketRowCount][BucketRowCount];
 
-   explicit GridDatabase(bool createWallSegmentManager = true);   // Constructor
-   virtual ~GridDatabase();                                       // Destructor
+   explicit GridDatabase();   // Constructor
+   virtual ~GridDatabase();   // Destructor
 
 
    static const S32 BucketWidthBitShift = 8;    // Width/height of each bucket in pixels, in a form of 2 ^ n, 8 is 256 pixels
 
    DatabaseObject *findObjectLOS(U8 typeNumber, U32 stateIndex, bool format, const Point &rayStart, const Point &rayEnd,
-                                 float &collisionTime, Point &surfaceNormal) const;
+                                 F32 &collisionTime, Point &surfaceNormal) const;
    DatabaseObject *findObjectLOS(U8 typeNumber, U32 stateIndex, const Point &rayStart, const Point &rayEnd,
-                                 float &collisionTime, Point &surfaceNormal) const;
+                                 F32 &collisionTime, Point &surfaceNormal) const;
    DatabaseObject *findObjectLOS(TestFunc testFunc, U32 stateIndex, bool format, const Point &rayStart, const Point &rayEnd,
-                                 float &collisionTime, Point &surfaceNormal) const;
+                                 F32 &collisionTime, Point &surfaceNormal) const;
    DatabaseObject *findObjectLOS(TestFunc testFunc, U32 stateIndex, const Point &rayStart, const Point &rayEnd,
-                                 float &collisionTime, Point &surfaceNormal) const;
+                                 F32 &collisionTime, Point &surfaceNormal) const;
+
+   DatabaseObject *findObjectLOS(const Vector<DatabaseObject *> &objList, U32 stateIndex, bool format,
+                                 const Point &rayStart, const Point &rayEnd, 
+                                 F32 &collisionTime, Point &surfaceNormal) const;
 
    bool pointCanSeePoint(const Point &point1, const Point &point2);
    void computeSelectionMinMax(Point &min, Point &max);
@@ -154,8 +159,6 @@ public:
 
    void copyObjects(const GridDatabase *source);
 
-   void setWallSelected(S32 serialNumber, bool selected);
-
    bool testTypes(const Vector<U8> &types, U8 objectType) const;
 
 
@@ -165,14 +168,13 @@ public:
    Rect getExtents();      // Get the combined extents of every object in the database
    void updateExtents(DatabaseObject *object, const Rect &newExtents);
 
-
-   WallSegmentManager *getWallSegmentManager() const;      
-
    void addToDatabase(DatabaseObject *databaseObject);
    void addToDatabase(const Vector<DatabaseObject *> &objects);
 
 
    void removeFromDatabase(DatabaseObject *theObject, bool deleteObject);
+   void removeFromDatabase(S32 index, bool deleteObject);
+
    void removeEverythingFromDatabase();
 
    S32 getObjectCount() const;                          // Return the number of objects currently in the database

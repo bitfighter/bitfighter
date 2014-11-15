@@ -19,7 +19,6 @@
 #include "LineItem.h"
 #include "PolyWall.h"
 #include "WallItem.h"
-#include "WallSegmentManager.h"
 
 #include "ClientGame.h"  
 #include "CoreGame.h"            // For CoreItem def
@@ -154,6 +153,15 @@ F32 EditorUserInterface::getGridSize() const
 }
 
 
+void EditorUserInterface::geomChanged(BfObject *obj)
+{
+   obj->onGeomChanged();
+
+   if(isWallType(obj->getObjectTypeNumber()))
+         rebuildWallGeometry(mLevel.get());
+}
+
+
 void EditorUserInterface::setLevel(const boost::shared_ptr<Level> &level)
 {
    TNLAssert(level.get(), "Level should not be NULL!");
@@ -195,7 +203,7 @@ void EditorUserInterface::addDockObject(BfObject *object, F32 xPos, F32 yPos)
 void EditorUserInterface::populateDock()
 {
    // Out with the old
-   mDockItems.removeEverythingFromDatabase();
+   mDockItems.clearAllObjects();
 
    F32 xPos = (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin - ITEMS_DOCK_WIDTH / 2;
    F32 yPos = 35;
@@ -327,11 +335,18 @@ void EditorUserInterface::redo()
 }
 
 
-void EditorUserInterface::rebuildEverything(Level *level)
+void EditorUserInterface::rebuildWallGeometry(Level *level)
 {
-   level->buildWallEdgeGeometry();
+   level->buildWallEdgeGeometry(mWallEdgePoints);     // Populates mWallEdgePoints
+   rebuildSelectionOutline();  
 
    level->snapAllEngineeredItems(false);
+}
+
+
+void EditorUserInterface::rebuildEverything(Level *level)
+{
+   rebuildWallGeometry(level);
 
    // If we're rebuilding items in our levelgen database, no need to save anything!
    if(level != &mLevelGenDatabase)
@@ -349,14 +364,14 @@ void EditorUserInterface::setLevelFileName(string name)
 
 void EditorUserInterface::cleanUp()
 {
-   getGame()->resetRatings();      // Move to mLevel?
+   getGame()->resetRatings();       // Move to mLevel?
 
-   mUndoManager.clearAll();                     // Clear up a little memory
-   mDockItems.removeEverythingFromDatabase();   // Free a little more -- dock will be rebuilt when editor restarts
+   mUndoManager.clearAll();         // Clear up a little memory
+   mDockItems.clearAllObjects();    // Free a little more -- dock will be rebuilt when editor restarts
    
    mLoadTarget = getLevel();
 
-   mRobotLines.clear();    // Clear our special Robot lines
+   mRobotLines.clear();             // Clear our special Robot lines
 
    mLevel->clearTeams();
    
@@ -421,8 +436,8 @@ void EditorUserInterface::loadLevel()
    mUndoManager.clearAll();
 
    // Bulk-process new items, walls first
-   mLoadTarget->getWallSegmentManager()->recomputeAllWallGeometry(mLoadTarget);
-   
+   rebuildWallGeometry(mLevel.get());
+
    // Snap all engineered items to the closest wall, if one is found
    mLoadTarget->snapAllEngineeredItems(false);
 }
@@ -430,7 +445,7 @@ void EditorUserInterface::loadLevel()
 
 void EditorUserInterface::clearLevelGenItems()
 {
-   mLevelGenDatabase.removeEverythingFromDatabase();
+   mLevelGenDatabase.clearAllObjects();
 }
 
 
@@ -458,8 +473,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
 
    mUndoManager.endTransaction();
 
-   // Don't want to delete these objects... we just handed them off to the database!      
-   mLevelGenDatabase.removeEverythingFromDatabase();   
+   mLevelGenDatabase.clearAllObjects();   // This will delete objects... is that what we want?
 
    rebuildEverything(getLevel());
 }
@@ -468,7 +482,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
 void EditorUserInterface::addToEditor(BfObject *obj)
 {
    obj->addToDatabase(mLevel.get());
-   obj->onGeomChanged();               // Easy way to get PolyWalls to build themselves after being dragged from the dock
+   geomChanged(obj);                   // Easy way to get PolyWalls to build themselves after being dragged from the dock
 }
 
 
@@ -561,7 +575,7 @@ void EditorUserInterface::runScript(Level *level, const FolderManager *folderMan
          level->removeFromDatabase(obj, true);
 
       if(obj->getObjectTypeNumber() == WallItemTypeNumber)
-         static_cast<WallItem *>(obj)->processEndPoints();
+         static_cast<WallItem *>(obj)->computeExtendedEndPoints();
    }
 
    // Also find any teleporters and make sure their destinations are in order.  Teleporters with no dests will be deleted.
@@ -985,24 +999,57 @@ string EditorUserInterface::getLevelFileName() const
 void EditorUserInterface::onSelectionChanged()
 {
    GridDatabase *database = getLevel();
-   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 
-   wallSegmentManager->clearSelected();
-   
-   // Update wall segment manager with what's currently selected
-   fillVector.clear();
-   database->findObjects((TestFunc)isWallType, fillVector);
+   rebuildSelectionOutline();
+}
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+template <class T>
+static void addSelectedSegmentsToList(const Vector<DatabaseObject *> *walls, Vector<const WallSegment *> &segments)
+{
+   for(S32 i = 0; i < walls->size(); i++)
    {
-      TNLAssert(dynamic_cast<BfObject *>(fillVector[i]), "Bad cast!");
-      BfObject *obj = static_cast<BfObject *>(fillVector[i]);
+      WallItem *wall = static_cast<WallItem *>(walls->get(i));
+         
+      if(wall->isSelected() || wall->anyVertsSelected())
+      {
+         const Vector<WallSegment *> wallsegs = static_cast<BarrierX *>(wall)->getSegments();
 
-      if(obj->isSelected())
-         wallSegmentManager->setSelected(obj->getSerialNumber(), true);
+         for(S32 j = 0; j < wallsegs.size(); j++)
+            segments.push_back(wallsegs[j]);
+      }
    }
+}
 
-   wallSegmentManager->rebuildSelectionOutline();
+// Declare these specific implementations of the above template so project will link
+template void addSelectedSegmentsToList<WallItem>(const Vector<DatabaseObject *> *walls, Vector<const WallSegment *> &segments);
+template void addSelectedSegmentsToList<PolyWall>(const Vector<DatabaseObject *> *walls, Vector<const WallSegment *> &segments);
+                                          
+
+// Return a list of all selected segments
+static Vector<WallSegment const *> getSelectedWallsAndPolywallSegments(const Level *level)
+{
+   Vector<WallSegment const *> segments;
+
+   const Vector<DatabaseObject *> *walls = level->findObjects_fast(WallItemTypeNumber);
+   const Vector<DatabaseObject *> *polywalls = level->findObjects_fast(PolyWallTypeNumber);
+
+   addSelectedSegmentsToList<WallItem>(walls, segments);
+   addSelectedSegmentsToList<PolyWall>(polywalls, segments);
+
+   return segments;
+}
+
+
+// Rebuilds outline of selected walls
+void EditorUserInterface::rebuildSelectionOutline()
+{
+   Vector<WallSegment const *> segments = getSelectedWallsAndPolywallSegments(mLevel.get());
+
+   // If no walls are selected we can skip a lot of work
+   if(segments.size() == 0)          
+      mSelectedWallEdgePoints.clear();    
+   else
+      WallEdgeManager::clipAllWallEdges(segments, mSelectedWallEdgePoints);    // Populate mSelectedWallEdgePoints from segments
 }
 
 
@@ -1245,8 +1292,6 @@ Point EditorUserInterface::snapPoint(const Point &p, bool snapWhileOnDock) const
 
    Point snapPoint(p);     // Make a working copy
 
-   WallSegmentManager *wallSegmentManager = getLevel()->getWallSegmentManager();
-
    if(mDraggingObjects)
    {  
       // Turrets & forcefields: Snap to a wall edge as first (and only) choice, regardless of whether snapping is on or off
@@ -1289,7 +1334,7 @@ Point EditorUserInterface::snapPoint(const Point &p, bool snapWhileOnDock) const
 
       // Search for a corner to snap to - by using wall edges, we'll also look for intersections between segments
       if(snapToWallCorners)   
-         checkCornersForSnap(p, wallSegmentManager->getWallEdgeDatabase()->findObjects_fast(), minDist, snapPoint);
+         checkCornersForSnap(p, mLevel->getWallEdgeDatabase()->findObjects_fast(), minDist, snapPoint);
    }
 
    return snapPoint;
@@ -1317,7 +1362,7 @@ Point EditorUserInterface::snapPoint(const Point &p, bool snapWhileOnDock) const
 static Vector<EngineeredItem *> selectedSnappedEngrObjects;
 static Vector<S32> selectedSnappedEngrObjectIndices;
 static Vector<bool> promiscuousSnapper;
-static Vector<S32> selectedWalls;
+static Vector<BfObject *> selectedWalls;
 
 static void markSelectedObjectsAsUnsnapped_init(S32 itemCount, bool calledDuringDragInitialization)
 {
@@ -1352,10 +1397,7 @@ static void markSelectedObjectAsUnsnapped_body(BfObject *obj, S32 index, bool ca
       else        // Not an engineered object
       {
          if(isWallType(obj->getObjectTypeNumber()))      // Wall or polywall in this context
-         {
-            BfObject *bfObj = static_cast<BfObject *>(obj);
-            selectedWalls.push_back(bfObj->getSerialNumber());
-         }
+            selectedWalls.push_back(static_cast<BfObject *>(obj));
 
          obj->setSnapped(false);
       }
@@ -1369,7 +1411,9 @@ static void markSelectedObjectAsUnsnapped_done(bool calledDuringDragInitializati
    // ` as well.  If it is, keep them snapped; if not, mark them as unsnapped. 
    for(S32 i = 0; i < selectedSnappedEngrObjects.size(); i++)
    {
-      bool snapped = selectedWalls.contains(selectedSnappedEngrObjects[i]->getMountSegment()->getOwner());
+      BfObject *owner = reinterpret_cast<BfObject *>(selectedSnappedEngrObjects[i]->getMountSegment()->getOwner());
+
+      bool snapped = selectedWalls.contains(owner);
       selectedSnappedEngrObjects[i]->setSnapped(snapped);
 
       if(snapped && calledDuringDragInitialization)
@@ -1941,15 +1985,13 @@ void EditorUserInterface::renderObjects(const GridDatabase *database, RenderMode
 void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, const Point &offset,
                                                   bool drawSelected, bool isLevelGenDatabase) const
 {
-   WallSegmentManager *wsm = database->getWallSegmentManager();
-
    // Guarantee walls are a standard color for editor screenshot uploads to the level database
    const Color &fillColor = mNormalizedScreenshotMode ? Colors::DefaultWallFillColor :
          mPreviewMode ? mGameSettings->getWallFillColor() : Colors::EDITOR_WALL_FILL_COLOR;
 
    const Color &outlineColor = mNormalizedScreenshotMode ? Colors::DefaultWallOutlineColor: mGameSettings->getWallOutlineColor();
 
-   renderWalls(wsm->getWallSegmentDatabase(), *wsm->getWallEdgePoints(), *wsm->getSelectedWallEdgePoints(), outlineColor,
+   renderWalls(mLevel.get(), mWallEdgePoints, mSelectedWallEdgePoints, outlineColor,
                fillColor, mCurrentScale, mDraggingObjects, drawSelected, offset, mPreviewMode, 
                getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
 
@@ -2251,7 +2293,7 @@ void EditorUserInterface::pasteSelection()
 
       BfObject *newObject = mClipboard[i]->newCopy();
       newObject->moveTo(pastePos - offsetFromFirstPoint);
-      newObject->onGeomChanged();
+      geomChanged(newObject);
 
       copiedObjects.push_back(newObject);
       copiedBfObjects.push_back(newObject);
@@ -2288,9 +2330,7 @@ void EditorUserInterface::scaleSelection(F32 scale)
    Point ctr = (min + max) * 0.5;
 
    bool modifiedWalls = false;
-   WallSegmentManager *wallSegmentManager = level->getWallSegmentManager();
-
-   wallSegmentManager->beginBatchGeomUpdate();
+   mLevel->beginBatchGeomUpdate();
    mUndoManager.startTransaction();
 
    const Vector<DatabaseObject *> *objList = level->findObjects_fast();
@@ -2304,7 +2344,7 @@ void EditorUserInterface::scaleSelection(F32 scale)
          mUndoManager.saveChangeAction_before(obj);
          
          obj->scale(ctr, scale);
-         obj->onGeomChanged();
+         geomChanged(obj);
 
          mUndoManager.saveChangeAction_after(obj);
 
@@ -2314,7 +2354,11 @@ void EditorUserInterface::scaleSelection(F32 scale)
    }
 
    mUndoManager.endTransaction();
-   wallSegmentManager->endBatchGeomUpdate(level, modifiedWalls);
+   
+   Vector<WallSegment const *> segments = getSelectedWallsAndPolywallSegments(mLevel.get());
+
+   mLevel->endBatchGeomUpdate(mLevel.get(), segments, mWallEdgePoints, modifiedWalls);
+   rebuildSelectionOutline();
 
    autoSave();
 }
@@ -2375,7 +2419,7 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
          mUndoManager.saveChangeAction_before(obj);
 
          obj->rotateAboutPoint(center, angle);
-         obj->onGeomChanged();
+         geomChanged(obj);
 
          mUndoManager.saveChangeAction_after(obj);
       }
@@ -2526,9 +2570,8 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    bool modifiedWalls = false;
-   WallSegmentManager *wallSegmentManager = level->getWallSegmentManager();
 
-   wallSegmentManager->beginBatchGeomUpdate();
+   level->beginBatchGeomUpdate();
    mUndoManager.startTransaction();
 
    for(S32 i = 0; i < objList->size(); i++)
@@ -2540,7 +2583,7 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
          mUndoManager.saveChangeAction_before(obj);
 
          obj->flip(center, isHoriz);
-         obj->onGeomChanged();
+         geomChanged(obj);
 
          mUndoManager.saveChangeAction_after(obj);
 
@@ -2550,7 +2593,11 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
    }
 
    mUndoManager.endTransaction();
-   wallSegmentManager->endBatchGeomUpdate(level, modifiedWalls);
+
+   Vector<WallSegment const *> segments = getSelectedWallsAndPolywallSegments(mLevel.get());
+
+   mLevel->endBatchGeomUpdate(mLevel.get(), segments, mWallEdgePoints, modifiedWalls);
+   rebuildSelectionOutline();
 
    autoSave();
 }
@@ -2593,19 +2640,18 @@ void EditorUserInterface::findHitItemAndEdge()
       }
 
    // We've already checked for wall vertices; now we'll check for hits in the interior of walls
-   GridDatabase *wallDb = editorDb->getWallSegmentManager()->getWallSegmentDatabase();
    fillVector2.clear();
 
-   wallDb->findObjects((TestFunc)isAnyObjectType, fillVector2, cursorRect);
+   mLevel->findObjects(isWallType, fillVector2, cursorRect);
 
    for(S32 i = 0; i < fillVector2.size(); i++)
-      if(checkForWallHit(mouse, fillVector2[i]))
+      if(overlaps(mouse, static_cast<BfObject *>(fillVector2[i])))
          return;
 
    // If we're still here, it means we didn't find anything yet.  Make one more pass, and see if we're in any polys.
    // This time we'll loop forward, though I don't think it really matters.
    for(S32 i = 0; i < fillVector.size(); i++)
-     if(checkForPolygonHit(mouse, dynamic_cast<BfObject *>(fillVector[i])))
+     if(overlaps(mouse, static_cast<BfObject *>(fillVector[i])))
         return;
 }
 
@@ -2671,58 +2717,10 @@ bool EditorUserInterface::checkForEdgeHit(const Point &point, BfObject *object)
 }
 
 
-bool EditorUserInterface::checkForWallHit(const Point &point, DatabaseObject *object)
+// Returns true if point overlaps object
+bool EditorUserInterface::overlaps(const Point &point, BfObject *object)
 {
-   TNLAssert(dynamic_cast<WallSegment *>(object), "Expected a WallSegment!");
-   WallSegment *wallSegment = static_cast<WallSegment *>(object);
-
-   if(triangulatedFillContains(wallSegment->getTriangulatedFillPoints(), point))
-   {
-      // Now that we've found a segment that our mouse is over, we need to find the wall object that it belongs to.  Chances are good
-      // that it will be one of the objects sitting in fillVector.
-      for(S32 i = 0; i < fillVector.size(); i++)
-      {
-         if(isWallType(fillVector[i]->getObjectTypeNumber()))
-         {
-            BfObject *eobj = dynamic_cast<BfObject *>(fillVector[i]);
-
-            if(eobj->getSerialNumber() == wallSegment->getOwner())
-            {
-               mHitItem = eobj;
-               return true;
-            }
-         }
-      }
-
-      // Note, if we get to here, we have a problem.
-
-      // This code does a less efficient but more thorough job finding a wall that matches the segment we hit... if the above assert
-      // keeps going off, and we can't fix it, this code here should take care of the problem.  But using it is an admission of failure.
-
-      const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
-
-      for(S32 i = 0; i < objList->size(); i++)
-      {
-         BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-         if(isWallType(obj->getObjectTypeNumber()))
-         {
-            if(obj->getSerialNumber() == wallSegment->getOwner())
-            {
-               mHitItem = obj;
-               return true;
-            }
-         }
-      }
-   }
-
-   return false;
-}
-
-
-bool EditorUserInterface::checkForPolygonHit(const Point &point, BfObject *object)
-{
-   if(object->getGeomType() == geomPolygon && triangulatedFillContains(object->getFill(), point))
+   if(object->overlapsPoint(point))
    {
       mHitItem = object;
       return true;
@@ -2949,6 +2947,8 @@ void EditorUserInterface::onMouseDragged_copyAndDrag(const Vector<DatabaseObject
    // Running onGeomChanged causes any copied walls to have a full body while we're dragging them 
    for(S32 i = 0; i < copiedObjects.size(); i++)
       copiedObjects[i]->onGeomChanged();
+
+   rebuildWallGeometry(mLevel.get());
 }
 
 
@@ -2956,7 +2956,7 @@ void EditorUserInterface::translateSelectedItems(const Point &offset, const Poin
 {
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
-   S32 k = 0;
+   S32 k = 0; 
    for(S32 i = 0; i < objList->size(); i++)
    {
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
@@ -2971,7 +2971,7 @@ void EditorUserInterface::translateSelectedItems(const Point &offset, const Poin
             {
                newVert = obj->getVert(j) + (mSelectedObjectsForDragging[k]->getVert(0) - obj->getVert(0)) + offset;
 
-               obj->setVert(newVert, j);
+               obj->setVert(newVert, j); 
 
                obj->onItemDragging();        // Let the item know it's being dragged
             }
@@ -2981,6 +2981,9 @@ void EditorUserInterface::translateSelectedItems(const Point &offset, const Poin
                newVert = obj->getVert(j) + (offset - lastOffset);
                obj->setVert(newVert, j);
                obj->onGeomChanging();        // Because, well, the geom is changing
+
+               if(isWallType(obj->getObjectTypeNumber()))
+                  rebuildSelectionOutline();
             }
          }
 
@@ -2994,8 +2997,6 @@ void EditorUserInterface::snapSelectedEngineeredItems(const Point &cumulativeOff
 {
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
-   WallSegmentManager *wallSegmentManager = getLevel()->getWallSegmentManager();
-
    for(S32 i = 0; i < objList->size(); i++)
    {
       if(isEngineeredType(objList->get(i)->getObjectTypeNumber()))
@@ -3006,7 +3007,7 @@ void EditorUserInterface::snapSelectedEngineeredItems(const Point &cumulativeOff
          if(engrObj->isSelected() && promiscuousSnapper[i])
          {
             engrObj->mountToWall(snapPointToLevelGrid(mSelectedObjectsForDragging[j]->getVert(0) + cumulativeOffset), 
-                                 wallSegmentManager, &selectedWalls);
+                                 getLevel(), mLevel->getWallEdgeDatabase(), &selectedWalls);
             j++;
          }
       }
@@ -3279,7 +3280,8 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
    mUndoManager.endTransaction();
 
    if(deletedWall)
-      doneDeleteingWalls();
+      rebuildWallGeometry(mLevel.get());
+
 
    if(deletedAny)
    {
@@ -3386,7 +3388,9 @@ void EditorUserInterface::doSplit(BfObject *object, S32 vertex)
 
    // Tell the new segments that they have new geometry
    object->onGeomChanged();
-   newObj->onGeomChanged();            
+   newObj->onGeomChanged();
+
+   rebuildWallGeometry(mLevel.get());
 
    mUndoManager.saveChangeAction_after(object);
    mUndoManager.saveAction(ActionCreate, newObj);
@@ -3441,6 +3445,7 @@ void EditorUserInterface::joinBarrier()
    joinedObj->setSelected(true);
 
    onSelectionChanged();
+   rebuildWallGeometry(mLevel.get());
 
    mUndoManager.endTransaction();
 }
@@ -3610,21 +3615,10 @@ BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, S32 firstItemIn
 }
 
 
+// batchMode defaults to false
 void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
 {
-   GridDatabase *database = getLevel();
-   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
-
-   BfObject *obj = static_cast<BfObject *>(getLevel()->findObjects_fast()->get(itemIndex));
-
-   if(isWallType(obj->getObjectTypeNumber()))
-   {
-      // Need to recompute boundaries of any intersecting walls
-      wallSegmentManager->deleteSegments(obj->getSerialNumber());    // Delete the segments associated with the wall
-      database->removeFromDatabase(obj, true);
-   }
-   else
-      database->removeFromDatabase(obj, true);
+   mLevel->removeFromDatabase(itemIndex, true);    // true ==> object will be deleted
 
    if(!batchMode)
       doneDeletingObjects();
@@ -3634,10 +3628,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
 // After deleting a bunch of items, clean up
 void EditorUserInterface::doneDeleteingWalls()
 {
-   WallSegmentManager *wallSegmentManager = mLoadTarget->getWallSegmentManager();
-
-   wallSegmentManager->recomputeAllWallGeometry(mLoadTarget);   // Recompute wall edges
-   mLoadTarget->snapAllEngineeredItems(false);
+   rebuildWallGeometry(mLevel.get());
 }
 
 
@@ -4602,6 +4593,7 @@ void EditorUserInterface::onMouseUp()
          for(j = 0; j < obj->getVertCount(); j++)
             if(!r.contains(obj->getVert(j)))
                break;
+
          if(j == obj->getVertCount())
             obj->setSelected(true);
       }
@@ -4723,8 +4715,8 @@ void EditorUserInterface::onFinishedDragging_movingObject()
             wallMoved = true;
       }
 
-      if(wallMoved)
-         getLevel()->snapAllEngineeredItems(true);
+         if(wallMoved)
+            rebuildWallGeometry(mLevel.get());
 
       mUndoManager.endTransaction();
 

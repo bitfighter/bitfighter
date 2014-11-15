@@ -414,9 +414,9 @@ bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool f
 }
 
 
-bool circleIntersectsSegment(Point center, float radius, Point start, Point end, float &collisionTime)
+bool circleIntersectsSegment(Point center, F32 radius, Point start, Point end, F32 &collisionTime)
 {
-   // if the point is in the circle, it's a collision at the start
+   // If the point is in the circle, it's a collision at the start
    Point d = center - start;
    Point v = end - start;
 
@@ -426,7 +426,7 @@ bool circleIntersectsSegment(Point center, float radius, Point start, Point end,
       return true;
    }
 
-   // otherwise, solve the following equation for t
+   // Otherwise, solve the following equation for t
    // (d - vt)^2 = radius^2
 
    float a = v.dot(v);
@@ -895,7 +895,8 @@ Paths upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons)
       outputPolygons[i].resize(inputPolygons[i]->size());
 
       for(S32 j = 0; j < inputPolygons[i]->size(); j++)
-         outputPolygons[i][j] = IntPoint(S64(inputPolygons[i]->get(j).x * CLIPPER_SCALE_FACT), S64(inputPolygons[i]->get(j).y * CLIPPER_SCALE_FACT));
+         outputPolygons[i][j] = IntPoint(S64(inputPolygons[i]->get(j).x * CLIPPER_SCALE_FACT), 
+                                         S64(inputPolygons[i]->get(j).y * CLIPPER_SCALE_FACT));
    }
 
    return outputPolygons;

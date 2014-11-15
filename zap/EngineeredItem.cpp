@@ -7,7 +7,6 @@
 
 #include "gameWeapons.h"
 #include "gameObjectRender.h"
-#include "WallSegmentManager.h"
 #include "WallItem.h"
 #include "Teleporter.h"
 #include "gameType.h"
@@ -538,8 +537,9 @@ void EngineeredItem::fillAttributesVectors(Vector<string> &keys, Vector<string> 
 }
 
 
+// Database could be either a database full of WallEdges or game objects
 static DatabaseObject *findClosestWall(const GridDatabase *database, const Point &pos, F32 snapDist, 
-                                       const Vector<S32> *excludedWallList,
+                                       const Vector<BfObject *> *excludedWallList,
                                        bool format,
                                        Point &anchor, Point &normal)
 {
@@ -573,7 +573,7 @@ static DatabaseObject *findClosestWall(const GridDatabase *database, const Point
          continue;
 
       // Skip candidate if it's on our exclusion list
-      if(excludedWallList && excludedWallList->contains(static_cast<WallSegment *>(wall)->getOwner()))
+      if(excludedWallList && excludedWallList->contains(static_cast<BfObject *>(wall)))
          continue;
 
       // If we get to here, the wall we've found is our best candidate yet!
@@ -588,12 +588,12 @@ static DatabaseObject *findClosestWall(const GridDatabase *database, const Point
 
 
 // Static function -- returns segment item is mounted on; returns NULL if item is not mounted; populates anchor and normal
-WallSegment *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *wallEdgeDatabase, 
-                                                      const GridDatabase *wallSegmentDatabase,
-                                                      const Point &pos, 
-                                                      F32 snapDist, 
-                                                      const Vector<S32> *excludedWallList,
-                                                      bool format, Point &anchor, Point &normal)
+BfObject *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *gameObjectDatabase, 
+                                                   const GridDatabase *wallEdgeDatabase,
+                                                   const Point &pos, 
+                                                   F32 snapDist, 
+                                                   const Vector<BfObject *> *excludedWallList,
+                                                   bool format, Point &anchor, Point &normal)
 {
    // Here we're interested in finding the closest wall edge to our item -- since edges are anonymous (i.e. we don't know
    // which wall they belong to), we don't really care which edge it is, only where the item will snap to.  We'll use this
@@ -623,22 +623,22 @@ WallSegment *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *wallEd
    // position, and use a dummy point to avoid clobbering the anchor location we found.
    Point dummy;
 
-   WallSegment *closestSegment = static_cast<WallSegment *>(
-         findClosestWall(wallSegmentDatabase, anchor, snapDist, excludedWallList, format, dummy, normal));
+   BfObject *closestWall = static_cast<BfObject *>(
+         findClosestWall(gameObjectDatabase, anchor, snapDist, excludedWallList, format, dummy, normal));
 
-   TNLAssert(closestSegment, "Should have found a segment here!");
+   TNLAssert(closestWall, "Should have found something here!");
 
-   return closestSegment;
+   return closestWall;
 }
 
 
-WallSegment *EngineeredItem::getMountSegment() const
+BfObject *EngineeredItem::getMountSegment() const
 {
    return mMountSeg;
 }
 
 
-void EngineeredItem::setMountSegment(WallSegment *mountSeg)
+void EngineeredItem::setMountSegment(BfObject *mountSeg)
 {
    mMountSeg = mountSeg;
 }
@@ -1046,7 +1046,7 @@ void EngineeredItem::findMountPoint(const Level *level, const Point &pos)
    Point normal, anchor;
 
    // Anchor objects to the correct point
-   if(findAnchorPointAndNormal(level->getWallSegmentManager()->getWallEdgeDatabase(), level, pos, 
+   if(findAnchorPointAndNormal(level, level->getWallEdgeDatabase(), pos, 
                                MAX_SNAP_DISTANCE, NULL, true, anchor, normal))
    {
       setPos(anchor);
@@ -1065,14 +1065,15 @@ void EngineeredItem::findMountPoint(const Level *level, const Point &pos)
 
 // Find mount point or turret or forcefield closest to pos; used in editor.  See findMountPoint() for in-game version.
 Point EngineeredItem::mountToWall(const Point &pos, 
-                                  const WallSegmentManager *wallSegmentManager, 
-                                  const Vector<S32> *excludedWallList)
+                                  const GridDatabase *gameObjectDatabase, 
+                                  const GridDatabase *wallEdgeDatabase, 
+                                  const Vector<BfObject *> *excludedWallList)
 {  
    Point normal, anchor;
-   DatabaseObject *mountSeg;
+   BfObject *mountSeg;
 
-   mountSeg = findAnchorPointAndNormal(wallSegmentManager->getWallEdgeDatabase(), 
-                                       wallSegmentManager->getWallSegmentDatabase(), 
+   mountSeg = findAnchorPointAndNormal(gameObjectDatabase,
+                                       wallEdgeDatabase, 
                                        pos,    
                                        MAX_SNAP_DISTANCE, 
                                        excludedWallList,
@@ -1087,8 +1088,7 @@ Point EngineeredItem::mountToWall(const Point &pos,
       setPos(anchor);
       mAnchorNormal.set(normal);
 
-      TNLAssert(dynamic_cast<WallSegment *>(mountSeg), "NULL WallSegment");
-      setMountSegment(static_cast<WallSegment *>(mountSeg));
+      setMountSegment(mountSeg);
 
       mSnapped = true;
       onGeomChanged();

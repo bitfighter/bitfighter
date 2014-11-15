@@ -5,13 +5,11 @@
 
 #include "PolyWall.h"
 
-#include "barrier.h"
 #include "gameObjectRender.h"
 #include "GameSettings.h"
 #include "Level.h"
 #include "LuaBase.h"
 #include "WallItem.h"
-#include "WallSegmentManager.h"
 
 #include "Colors.h"
 #include "GeomUtils.h"
@@ -154,20 +152,12 @@ const char *PolyWall::getPrettyNamePlural() const { return "PolyWalls"; }
 const char *PolyWall::getEditorHelpString() const { return "Polygonal wall item lets you be creative with your wall design."; }
 
 
-void PolyWall::setSelected(bool selected)
-{
-   Parent::setSelected(selected);
-
-   getDatabase()->setWallSelected(getSerialNumber(), selected);
-}
-
-
 void PolyWall::onGeomChanged()
 {
-   GridDatabase *db = getDatabase();
+   Vector<WallSegment *> segments;
+   segments.push_back(new WallSegment(*getOutline(), this));
 
-   if(db)      // db might be NULL if PolyWall hasn't yet been added to the editor (e.g. if it's still a figment of Lua's fancy)
-      db->getWallSegmentManager()->onWallGeomChanged(db, this, isSelected(), getSerialNumber());
+   setSegments(segments);
 
    Parent::onGeomChanged();
 }

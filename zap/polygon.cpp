@@ -7,6 +7,7 @@
 
 #include "Colors.h"
 #include "gameObjectRender.h"
+#include "GeomUtils.h"
 
 namespace Zap
 {
@@ -131,6 +132,11 @@ S32 PolygonObject::getVel(lua_State *L)
    return returnPoint(L, Point(0,0));
 }
 
+
+bool PolygonObject::overlapsPoint(const Point &point) const
+{
+   return triangulatedFillContains(getFill(), point);
+}
 
 };
 

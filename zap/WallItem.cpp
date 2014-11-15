@@ -11,7 +11,6 @@
 #include "GeomUtils.h"
 #include "Level.h"
 #include "stringUtils.h"
-#include "WallSegmentManager.h"
 
 #include "tnlLog.h"
 
@@ -107,15 +106,53 @@ void WallItem::changeWidth(S32 amt)
 }
 
 
+bool WallItem::overlapsPoint(const Point &point) const
+{
+   return isPointOnWall(point);
+}
+
+
+// Override
+bool WallItem::checkForCollision(const Point &rayStart, const Point &rayEnd, bool format, U32 stateIndex,
+                                 F32 &collisionTime, Point &surfaceNormal) const
+{
+   F32 ct;
+   Point norm;
+   bool found = false;
+
+   for(S32 i = 0; i < getSegmentCount(); i++)
+   {
+      if(getSegment(i)->checkForCollision(rayStart, rayEnd, format, stateIndex, ct, norm))
+      {
+         if(ct < collisionTime)
+         {
+            collisionTime = ct;
+            surfaceNormal = norm;
+            found = true;
+         }
+      }
+   }
+
+   return found;
+}
+
+
 void WallItem::onGeomChanged()
 {
    // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges
-   processEndPoints();
+   computeExtendedEndPoints();
 
-   GridDatabase *db = getDatabase();
+   Vector<WallSegment *> segments;
 
-   if(db)
-      db->getWallSegmentManager()->onWallGeomChanged(db, this, isSelected(), getSerialNumber());
+   // Create a WallSegment for each sequential pair of vertices
+   for(S32 i = 0; i < extendedEndPoints.size(); i += 2)
+   {
+      // Create the segment; the WallSegment constructor will add it to the specified database
+      WallSegment *newSegment = new WallSegment(extendedEndPoints[i], extendedEndPoints[i+1], (F32)getWidth(), this);
+      segments.push_back(newSegment);
+   }
+
+   setSegments(segments);
 
    Parent::onGeomChanged();
 }
@@ -125,6 +162,7 @@ void WallItem::onItemDragging()
 {
    // Do nothing -- this is here to override Parent::onItemDragging(), onGeomChanged() should only be called after move is complete
 }
+
 
 void WallItem::setTeam(S32 team)
 {
@@ -154,14 +192,14 @@ void WallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled,
 {
 #ifndef ZAP_DEDICATED
    if(isSelected() || isLitUp())
-      renderWallOutline(this, getOutline(), currentScale, snappingToWallCornersEnabled, renderVertices);
+      renderWallSpine(this, getOutline(), currentScale, snappingToWallCornersEnabled, renderVertices);
    else
-      renderWallOutline(this, getOutline(), getEditorRenderColor(), currentScale, snappingToWallCornersEnabled, renderVertices);
+      renderWallSpine(this, getOutline(), getEditorRenderColor(), currentScale, snappingToWallCornersEnabled, renderVertices);
 #endif
 }
 
 
-void WallItem::processEndPoints()
+void WallItem::computeExtendedEndPoints()
 {
 #ifndef ZAP_DEDICATED
    // Extend wall endpoints for nicer rendering
@@ -170,18 +208,11 @@ void WallItem::processEndPoints()
 }
 
 
+// TODO: Should return const ref rather than copy
 Rect WallItem::calcExtents()
 {
-   // mExtent was already calculated when the wall was inserted into the segmentManager...
-   // All we need to do here is override the default calcExtents, to avoid clobbering our already good mExtent.
-   return getExtent();     
+   return getSegmentExtent();
 }
-
-
-//const Vector<Point> *WallItem::getCollisionPoly() const
-//{
-//   return getFill();
-//}
 
 
 
@@ -244,15 +275,6 @@ void WallItem::setWidth(S32 width)
 
    else
       mWidth = width; 
-}
-
-
-void WallItem::setSelected(bool selected)
-{
-   Parent::setSelected(selected);
-   
-   // Find the associated segment(s) and mark them as selected (or not)
-   getDatabase()->setWallSelected(getSerialNumber(), selected);
 }
 
 
@@ -397,7 +419,7 @@ Point *WallEdge::getEnd()   { return &mEnd;   }
 
 const Vector<Point> *WallEdge::getCollisionPoly() const
 {
-   return &mPoints;
+   return &mPoints;     // Will contain 2 points
 }
 
 
@@ -411,29 +433,31 @@ bool WallEdge::getCollisionCircle(U32 stateIndex, Point &point, float &radius) c
 ////////////////////////////////////////
 
 // Regular constructor
-WallSegment::WallSegment(GridDatabase *gridDatabase, const Point &start, const Point &end, F32 width, S32 owner) 
+WallSegment::WallSegment(const Point &start, const Point &end, F32 width, BarrierX *owner) 
 { 
    // Calculate segment corners by expanding the extended end points into a rectangle
    expandCenterlineToOutline(start, end, width, mCorners);  // ==> Fills mCorners 
-   init(gridDatabase, owner);
+   init(owner);
 }
 
 
 // PolyWall constructor
-WallSegment::WallSegment(GridDatabase *gridDatabase, const Vector<Point> &points, S32 owner)
+WallSegment::WallSegment(const Vector<Point> &points, BarrierX *owner)
 {
    mCorners = points;
 
    if(isWoundClockwise(points))
       mCorners.reverse();
 
-   init(gridDatabase, owner);
+   init(owner);
 }
 
 
 // Intialize, only called from constructors above
-void WallSegment::init(GridDatabase *database, S32 owner)
+void WallSegment::init(BarrierX *owner)
 {
+   mOwner = owner;
+
    // Recompute the edges based on our new corner points
    resetEdges();   
 
@@ -441,15 +465,10 @@ void WallSegment::init(GridDatabase *database, S32 owner)
 
    setExtent(Rect(mCorners));
 
-   // Add item to database, set its extents
-   addToDatabase(database);
-   
    // Drawing filled wall requires that points be triangluated
    Triangulate::Process(mCorners, mTriangulatedFillPoints);    // ==> Fills mTriangulatedFillPoints
 
-   mOwner = owner; 
    invalid = false; 
-   mSelected = false;
 }
 
 
@@ -462,18 +481,17 @@ WallSegment::~WallSegment()
 }
 
 
-// Returns serial number of owner
-S32 WallSegment::getOwner()
-{
-   return mOwner;
-}
-
-
 void WallSegment::invalidate()
 {
    invalid = true;
 }
  
+
+BarrierX *WallSegment::getOwner() const
+{
+   return mOwner;
+}
+
 
 // Resets edges of a wall segment to their factory settings; i.e. 4 simple walls representing a simple outline
 void WallSegment::resetEdges()
@@ -482,32 +500,20 @@ void WallSegment::resetEdges()
 }
 
 
-void WallSegment::renderFill(const Point &offset, const Color &color)
+void WallSegment::renderFill(const Point &offset, const Color &color, bool isSelected) const
 {
 #ifndef ZAP_DEDICATED
-   if(mSelected)
-      renderWallFill(&mTriangulatedFillPoints, color, offset, true);       // Use true because all segment fills are triangulated
+   if(isSelected)
+      renderWallFill(&mTriangulatedFillPoints, color, offset, true);    // true ==> all segment fills are triangulated
    else
       renderWallFill(&mTriangulatedFillPoints, color, true);
 #endif
 }
 
 
-bool WallSegment::isSelected() const
-{
-   return mSelected;
-}
-
-
-void WallSegment::setSelected(bool selected)
-{
-   mSelected = selected;
-}
-
-
-const Vector<Point> *WallSegment::getCorners()                { return &mCorners; }
-const Vector<Point> *WallSegment::getEdges()                  { return &mEdges; }
-const Vector<Point> *WallSegment::getTriangulatedFillPoints() { return &mTriangulatedFillPoints; }
+const Vector<Point> *WallSegment::getCorners() const                { return &mCorners; }
+const Vector<Point> *WallSegment::getEdges() const                  { return &mEdges; }
+const Vector<Point> *WallSegment::getTriangulatedFillPoints() const { return &mTriangulatedFillPoints; }
 
 
 const Vector<Point> *WallSegment::getCollisionPoly() const

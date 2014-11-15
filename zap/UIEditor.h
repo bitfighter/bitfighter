@@ -65,6 +65,8 @@ struct PluginInfo
 ////////////////////////////////////////
 
 
+class BarrierX;
+
 class EditorUserInterface : public UserInterface
 {
    typedef UserInterface Parent;
@@ -141,6 +143,7 @@ private:
    Vector<string> mRobotLines;         // A list of robot lines read from a level file when loading from the editor
 
    void clearSnapEnvironment();
+   void rebuildWallGeometry(Level *level);
 
    EditorUndoManager mUndoManager;
    void undo(bool addToRedoStack);     // Restore mItems to latest undo state
@@ -228,8 +231,8 @@ private:
    void findHitItemAndEdge();                         
    bool checkForVertexHit(BfObject *object);
    bool checkForEdgeHit(const Point &point, BfObject *object);        
-   bool checkForWallHit(const Point &point, DatabaseObject *wallSegment);
-   bool checkForPolygonHit(const Point &point, BfObject *object);    
+
+   bool overlaps(const Point &point, BfObject *object);    // Returns true if point overlaps object
 
    void findHitItemOnDock();     // Sets mDockItemHit
    S32 findHitPlugin() const;
@@ -281,6 +284,9 @@ private:
    boost::scoped_ptr<PluginMenuUI> mPluginMenu;      
    map<string, Vector<string> > mPluginMenuValues;
 
+   Vector<Point> mWallEdgePoints;               // For rendering
+   Vector<Point> mSelectedWallEdgePoints;       // Also for rendering
+
    void showCouldNotFindScriptMessage(const string &scriptName);
    void showPluginError(const string &msg);
 
@@ -307,6 +313,7 @@ private:
 
    void doneChangingGeoms(const Vector<BfObject *> &bfObjects);
    void doneChangingGeoms(BfObject *bfObject);
+
 
 protected:
    void onActivate();
@@ -367,6 +374,7 @@ public:
    void addRobotLine(const string &robotLine);
 
    bool mDraggingObjects;     // Should be private
+   void geomChanged(BfObject *obj);
 
    // Handle input
    bool onKeyDown(InputCode inputCode);                         // Handle all keyboard inputs, mouse clicks, and button presses
@@ -421,9 +429,11 @@ public:
    void flipSelectionVertical();                 // Flip selection along vertical axis
    void flipSelection(F32 center, bool isHoriz); // Do the actual flipping for the above
 
-   void scaleSelection(F32 scale);               // Scale selection by scale
-   void rotateSelection(F32 angle, bool useOrigin); // Rotate selecton by angle
+   void scaleSelection(F32 scale);                    // Scale selection by scale
+   void rotateSelection(F32 angle, bool useOrigin);   // Rotate selecton by angle
    void setSelectionId(S32 id);
+
+   void rebuildSelectionOutline();
 
    void validateLevel();               // Check level for things that will make the game crash!
    void validateTeams();               // Check that each item has a valid team (and fix any errors found)

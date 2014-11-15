@@ -19,7 +19,6 @@
 #include "LevelSource.h"
 #include "LevelDatabase.h"
 #include "Level.h"
-#include "WallSegmentManager.h"
 #include "WallItem.h"
 
 #include "gameObjectRender.h"
@@ -961,7 +960,8 @@ bool ServerGame::loadLevel()
       addWallItem(static_cast<WallItem *>(walls[i]), NULL);        // Just does this --> Barrier::constructBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
 
 
-   mLevel->getWallSegmentManager()->recomputeAllWallGeometry(mLevel.get());
+   Vector<Point> points;
+   mLevel->buildWallEdgeGeometry(points);
 
 
    const Vector<DatabaseObject *> objects = *mLevel->findObjects_fast();

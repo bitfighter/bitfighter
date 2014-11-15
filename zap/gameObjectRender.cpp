@@ -20,6 +20,7 @@
 #include "version.h"
 #include "VertexStylesEnum.h"
 #include "WallItem.h"
+#include "PolyWall.h"
 
 #include "Colors.h"
 
@@ -3471,13 +3472,20 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
 }
 
 
-void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &wallEdgePoints, 
+void renderWalls(const GridDatabase *gameObjectDatabase, const Vector<Point> &wallEdgePoints, 
                  const Vector<Point> &selectedWallEdgePoints, const Color &outlineColor, 
                  const Color &fillColor, F32 currentScale, bool dragMode, bool drawSelected,
                  const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha)
 {
    bool moved = (selectedItemOffset.x != 0 || selectedItemOffset.y != 0);
-   S32 count = wallSegmentDatabase->getObjectCount();
+
+   const Vector<DatabaseObject *> *walls = gameObjectDatabase->findObjects_fast(WallItemTypeNumber);
+   const Vector<DatabaseObject *> *polyWalls = gameObjectDatabase->findObjects_fast(PolyWallTypeNumber);
+
+   S32 wallCount     = walls->size();
+   S32 polyWallCount = polyWalls->size();
+
+   S32 count = wallCount + polyWallCount;
 
    if(!drawSelected)    // Essentially pass 1, drawn earlier in the process
    {
@@ -3486,9 +3494,16 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
       {
          for(S32 i = 0; i < count; i++)
          {
-            WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
-            if(wallSegment->isSelected())     
-               wallSegment->renderFill(Point(0,0), Color(.1));
+            BfObject *obj = dynamic_cast<BfObject *>((i < wallCount) ? walls->get(i) : polyWalls->get(i - wallCount));
+            BarrierX *barrier = reinterpret_cast<BarrierX *>(obj);
+
+            for(S32 j = 0; j < barrier->getSegmentCount(); j++)
+            {
+              const WallSegment *wallSegment = barrier->getSegment(j);
+
+               if(obj->isSelected())     
+                  wallSegment->renderFill(Point(0,0), Color(.1), true);  // false??
+            }
          }
       }
 
@@ -3498,12 +3513,30 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
          color = Colors::gray67;
       else
          color = fillColor * alpha;
-
+     
       for(S32 i = 0; i < count; i++)
       {
-         WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
-         if(!moved || !wallSegment->isSelected())         
-            wallSegment->renderFill(selectedItemOffset, color);      // RenderFill ignores offset for unselected walls
+         BarrierX *barrier;
+         BfObject *obj;
+         
+         if(i < wallCount)
+         {
+            barrier = static_cast<BarrierX *>(static_cast<WallItem *>(walls->get(i)));
+            obj     = static_cast<BfObject *>(walls->get(i));
+         }
+         else
+         {
+            barrier = static_cast<BarrierX *>(static_cast<PolyWall *>(polyWalls->get(i - wallCount)));
+            obj     = static_cast<BfObject *>(polyWalls->get(i - wallCount));
+         }
+
+         for(S32 j = 0; j < barrier->getSegmentCount(); j++)
+         {
+            const WallSegment *wallSegment = barrier->getSegment(j);
+
+            if(!moved || !obj->isSelected())         
+               wallSegment->renderFill(selectedItemOffset, color, false);      // RenderFill ignores offset for unselected walls
+         }
       }
 
       renderWallEdges(wallEdgePoints, outlineColor);                 // Render wall outlines with unselected walls
@@ -3512,9 +3545,19 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
    {
       for(S32 i = 0; i < count; i++)
       {
-         WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
-         if(wallSegment->isSelected())  
-            wallSegment->renderFill(selectedItemOffset, fillColor * alpha);
+         BfObject *obj = dynamic_cast<BfObject *>((i < wallCount) ? walls->get(i) : polyWalls->get(i - wallCount));
+         BarrierX *barrier = reinterpret_cast<BarrierX *>(obj);
+
+         for(S32 j = 0; j < barrier->getSegmentCount(); j++)
+         {
+            const WallSegment *wallSegment = barrier->getSegment(j);
+
+            if(obj->isSelected())  
+               wallSegment->renderFill(selectedItemOffset, fillColor * alpha, true);
+
+            if(obj->isSelected())     
+               wallSegment->renderFill(Point(0,0), Color(.1), true);  // false??
+         }
       }
 
       // Render wall outlines for selected walls only
@@ -3534,15 +3577,16 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
 }
 
 
-void renderWallOutline(const WallItem *wallItem, const Vector<Point> *outline, const Color &color, 
+// Renders wall "spine", actually
+void renderWallSpine(const WallItem *wallItem, const Vector<Point> *outline, const Color &color, 
                        F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    glColor(color);
-   renderWallOutline(wallItem, outline, currentScale, snappingToWallCornersEnabled, renderVertices);
+   renderWallSpine(wallItem, outline, currentScale, snappingToWallCornersEnabled, renderVertices);
 }
 
 
-void renderWallOutline(const WallItem *wallItem, const Vector<Point> *outline, 
+void renderWallSpine(const WallItem *wallItem, const Vector<Point> *outline, 
                        F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    renderLine(outline);
@@ -3620,7 +3664,7 @@ void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color
 
    //   Point cen = rp - arrowDir * 12;
 
-   // Try labelling the objective arrows... kind of lame.
+   // Try labeling the objective arrows... kind of lame.
    //drawStringf(cen.x - UserInterface::getStringWidthf(10,"%2.1f", dist/100) / 2, cen.y - 5, 10, "%2.1f", dist/100);
 
    // Add an icon to the objective arrow...  kind of lame.
