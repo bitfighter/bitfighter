@@ -207,7 +207,9 @@ function(BF_PLATFORM_INSTALL targetName)
 	install(PROGRAMS ${CMAKE_SOURCE_DIR}/notifier/pyinstaller/dist/bitfighter_notifier.exe DESTINATION ./)
 	
 	# Libraries
-	file(GLOB BF_INSTALL_LIBS ${CMAKE_SOURCE_DIR}/exe/*.dll)
+	file(GLOB BF_INSTALL_LIBS ${BF_LIB_DIR}/*.dll)
+	# Except libcurl which will be put into the notifier directory
+	#list(REMOVE_ITEM BF_INSTALL_LIBS "${BF_LIB_DIR}/libcurl.dll")
 	install(FILES ${BF_INSTALL_LIBS} DESTINATION ./)
 	
 	# Resources
@@ -221,7 +223,9 @@ function(BF_PLATFORM_INSTALL targetName)
 	install(FILES ${CMAKE_SOURCE_DIR}/COPYING.txt DESTINATION ./)
 	
 	# Updater
-	install(DIRECTORY ${CMAKE_SOURCE_DIR}/exe/updater DESTINATION ./)
+	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/bfup.exe DESTINATION updater)
+	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/bfup.xml DESTINATION updater)
+	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/libcurl.dll DESTINATION updater)
 	
 	# Other
 	install(FILES ${CMAKE_SOURCE_DIR}/build/windows/installer/twoplayers.bat DESTINATION ./)
