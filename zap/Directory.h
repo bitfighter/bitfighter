@@ -22,7 +22,7 @@ void moveToAppPath();
 void prepareFirstLaunchMac();
 void checkForUpdates();
 void getAppResourcePath(std::string &fillPath);
-void getUserDataPath(std::string &fillPath);
+void getApplicationSupportPath(std::string &fillPath);
 void getDocumentsPath(std::string &fillPath);
 void getBundlePath(std::string &fillPath);
 void getExecutablePath(std::string &fillPath);
