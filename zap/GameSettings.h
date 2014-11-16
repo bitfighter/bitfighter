@@ -189,7 +189,7 @@ public:
    Vector<string> *getLevelSkipList();
    Vector<string> *getSpecifiedLevels();
 
-   void setLoginCredentials(const string &name, const string &password, bool save);
+   void setLoginCredentials(const string &name, const string &password, bool savePassword);
 
 
    bool getSpecified(ParamId paramId);                      // Returns true if parameter was present, false if not
