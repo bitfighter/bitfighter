@@ -482,6 +482,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
 void EditorUserInterface::addToEditor(BfObject *obj)
 {
    obj->addToDatabase(mLevel.get());
+   obj->onAddedToEditor();
    geomChanged(obj);                   // Easy way to get PolyWalls to build themselves after being dragged from the dock
 }
 
@@ -2908,7 +2909,7 @@ void EditorUserInterface::onMouseDragged_startDragging()
 // Copy objects and start dragging the copies
 void EditorUserInterface::onMouseDragged_copyAndDrag(const Vector<DatabaseObject *> *objList)
 {
-   Vector<DatabaseObject *> copiedObjects;
+   Vector<BfObject *> copiedObjects;
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2941,12 +2942,8 @@ void EditorUserInterface::onMouseDragged_copyAndDrag(const Vector<DatabaseObject
       obj->setLitUp(false);
    }
 
-   // Now add copied objects to our database; these were marked as selected when they were created
-   getLevel()->addToDatabase(copiedObjects);
-
-   // Running onGeomChanged causes any copied walls to have a full body while we're dragging them 
    for(S32 i = 0; i < copiedObjects.size(); i++)
-      copiedObjects[i]->onGeomChanged();
+      addToEditor(copiedObjects[i]);
 
    rebuildWallGeometry(mLevel.get());
 }
