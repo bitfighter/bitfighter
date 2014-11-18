@@ -37,7 +37,7 @@ BarrierX::BarrierX()
 // Destructor
 BarrierX::~BarrierX()
 {
-   //mSegments.deleteAndClear();
+   mSegments.deleteAndClear();
 }
 
 
@@ -87,6 +87,18 @@ bool BarrierX::isPointOnWall(const Point &point) const
          return true;
 
    return false;
+}
+
+
+void BarrierX::cloneSegments(const BarrierX *source)
+{
+   // First clear out (but do not delete) any existing segments.  These will be copies of the pointers
+   // of the segments from source, and we don't want to delete those, as they're needed by source.
+   mSegments.clear();
+
+   for(S32 i = 0; i < source->getSegmentCount(); i++)
+      mSegments.push_back(new WallSegment(source->getSegment(i), this));
+
 }
 
 

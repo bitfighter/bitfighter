@@ -92,6 +92,9 @@ void PolyWall::initialize()
 PolyWall *PolyWall::clone() const
 {
    PolyWall *polyWall = new PolyWall(*this);
+
+   polyWall->cloneSegments(this);
+
    return polyWall;
 }
 

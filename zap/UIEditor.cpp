@@ -1020,7 +1020,7 @@ static void addSelectedSegmentsToList(const Vector<DatabaseObject *> *walls, Vec
    }
 }
 
-// Declare these specific implementations of the above template so project will link
+// Declare these specific implementations of the above template so here so project will link
 template void addSelectedSegmentsToList<WallItem>(const Vector<DatabaseObject *> *walls, Vector<const WallSegment *> &segments);
 template void addSelectedSegmentsToList<PolyWall>(const Vector<DatabaseObject *> *walls, Vector<const WallSegment *> &segments);
                                           

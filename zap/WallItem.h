@@ -111,6 +111,7 @@ private:
 public:
    WallSegment(const Point &start, const Point &end, F32 width, BarrierX *owner);    // Normal wall segment
    WallSegment(const Vector<Point> &points, BarrierX *owner);                        // PolyWall 
+   WallSegment(const WallSegment *source, BarrierX *owner);                          // Copy constructor
    virtual ~WallSegment();
 
    void invalidate();

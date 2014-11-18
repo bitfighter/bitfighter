@@ -39,6 +39,8 @@ public:
    const WallSegment *getSegment(S32 index) const;
 
    bool isPointOnWall(const Point &point) const;
+
+   void cloneSegments(const BarrierX *source);
 };
 
 

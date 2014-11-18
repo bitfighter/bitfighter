@@ -59,7 +59,10 @@ WallItem::~WallItem()
 
 WallItem *WallItem::clone() const
 {
-   return new WallItem(*this);
+   WallItem *wallItem = new WallItem(*this);
+   wallItem->cloneSegments(this);
+
+   return wallItem;
 }
 
 
@@ -449,6 +452,13 @@ WallSegment::WallSegment(const Vector<Point> &points, BarrierX *owner)
    if(isWoundClockwise(points))
       mCorners.reverse();
 
+   init(owner);
+}
+
+
+WallSegment::WallSegment(const WallSegment *source, BarrierX *owner)
+{
+   mCorners = *source->getCorners();
    init(owner);
 }
 
