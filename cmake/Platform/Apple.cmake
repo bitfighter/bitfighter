@@ -220,12 +220,25 @@ endfunction()
 
 
 function(BF_PLATFORM_INSTALL targetName)
-	# Do nothing!
+	set(CMAKE_INSTALL_PREFIX "/Applications")
+	
+	# This will install the .app.  The .app should have already been built
+	# in the post-build section
+	install(TARGETS ${targetName} BUNDLE DESTINATION ./)
+
 endfunction()
 
 
 function(BF_PLATFORM_CREATE_PACKAGES targetName)
-	add_custom_target(dmg)
-	# TODO:  build DMG
-	#set_target_properties(dmg PROPERTIES POST_INSTALL_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/CreateMacBundle.cmake)
+	set(CPACK_GENERATOR "DragNDrop")
+	set(CPACK_SYSTEM_NAME "OSX")
+	set(CPACK_PACKAGE_FILE_NAME "Bitfighter-${BF_VERSION}-OSX-64bit-Intel")
+	set(CPACK_DMG_FORMAT "UDBZ")
+	set(CPACK_DMG_VOLUME_NAME "Bitfighter ${BF_VERSION}")
+	set(CPACK_DMG_DS_STORE "${OSX_BUILD_RESOURCE_DIR}/bitfighter.dsstore")
+	set(CPACK_DMG_BACKGROUND_IMAGE "${OSX_BUILD_RESOURCE_DIR}/bf_dmg_background.png")
+	
+	#set(CPACK_PACKAGE_ICON "${ICONS_DIR}/DMG.icns")
+	
+	include(CPack)
 endfunction()
