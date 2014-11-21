@@ -177,6 +177,11 @@ function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 endfunction()
 
 
+function(BF_PLATFORM_SET_TARGET_OTHER_PROPERTIES targetName)
+	# Do nothing
+endfunction()
+
+
 function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	# The trailing slash is necessary to do here for proper native path translation
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/resource/ resDir)

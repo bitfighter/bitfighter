@@ -129,27 +129,31 @@ endfunction()
 
 
 function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
-	# Setup OSX Bundle
 	
 	# We need this variable in both scopes
 	set(OSX_BUILD_RESOURCE_DIR "${CMAKE_SOURCE_DIR}/build/osx/")
 	set(OSX_BUILD_RESOURCE_DIR "${OSX_BUILD_RESOURCE_DIR}" PARENT_SCOPE)
 	
-	# Specify output to be a .app
-	set_target_properties(${targetName} PROPERTIES MACOSX_BUNDLE TRUE)
-	
-	# Use a custom plist
-	set_target_properties(${targetName} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${OSX_BUILD_RESOURCE_DIR}/Bitfighter-Info.plist)
-	
-	# Set up our bundle plist variables
-	set(MACOSX_BUNDLE_NAME "Bitfighter")
-	set(MACOSX_BUNDLE_VERSION ${BITFIGHTER_BUILD_VERSION})
-	set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${BITFIGHTER_RELEASE})
-	
 	# Special flags needed because of LuaJIT on 64 bit OSX
 	if(USE_LUAJIT AND CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
 		set_target_properties(${targetName} PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
 	endif()
+endfunction()
+
+
+function(BF_PLATFORM_SET_TARGET_OTHER_PROPERTIES targetName)
+	# Setup OSX Bundle; specify output to be a .app
+	set_target_properties(${targetName} PROPERTIES MACOSX_BUNDLE TRUE)
+	
+	# Set up our bundle plist variables
+	set(MACOSX_BUNDLE_NAME "Bitfighter")
+	set(MACOSX_BUNDLE_EXECUTABLE ${targetName})
+	
+	# Fill out a plist template with CMake variables
+	configure_file(${OSX_BUILD_RESOURCE_DIR}/Bitfighter-Info.plist.cmake ${OSX_BUILD_RESOURCE_DIR}/Bitfighter-Info.plist)
+	
+	# Use the custom plist
+	set_target_properties(${targetName} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${OSX_BUILD_RESOURCE_DIR}/Bitfighter-Info.plist)
 endfunction()
 
 
