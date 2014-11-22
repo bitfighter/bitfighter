@@ -12,13 +12,18 @@
 #ifdef TNL_OS_MAC_OSX
 #import <Cocoa/Cocoa.h>
 #import "SUUpdater.h"
-// Here we add a GET parameter if we're running on older OSX.  This way we
-// can serve up a different download URL
-#ifdef __x86_64__
-#define SPARKLE_APPCAST_URL @"http://bitfighter.org/files/getDownloadUrl.php"
-#else
-#define SPARKLE_APPCAST_URL @"http://bitfighter.org/files/getDownloadUrl.php?legacy=1"
-#endif
+// Here we add a GET parameter for the different OSX architectures.  This way we
+// can serve up a different download URL dynamically
+#  if defined (__x86_64__)
+#     define SPARKLE_APPCAST_URL @"http://bitfighter.org/files/getDownloadUrl.php?platform=osxx86_64"
+#  elif defined (__i386__)
+#     define SPARKLE_APPCAST_URL @"http://bitfighter.org/files/getDownloadUrl.php?platform=osxi386"
+#  elif defined (__ppc__) || defined (__ppc64__)
+#     define SPARKLE_APPCAST_URL @"http://bitfighter.org/files/getDownloadUrl.php?platform=osxppc"
+#  else
+      // Default to x86_64 since that is all OSX runs on these days...
+#     define SPARKLE_APPCAST_URL @"http://bitfighter.org/files/getDownloadUrl.php?platform=osxx86_64"
+#  endif
 #else
 #import <Foundation/Foundation.h>
 #endif
