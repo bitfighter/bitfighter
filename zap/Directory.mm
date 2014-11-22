@@ -73,6 +73,7 @@ void checkForUpdates()
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SUUpdater* updater = [SUUpdater sharedUpdater];
     [updater setFeedURL:[NSURL URLWithString:SPARKLE_APPCAST_URL]];
+    [updater setSendsSystemProfile:NO];
     [updater checkForUpdatesInBackground];
     [pool release];
 #endif
