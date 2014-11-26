@@ -45,6 +45,12 @@ struct rcPolyMesh
 		verts = 0;
 		polys = 0;
 		adjacency = 0;
+		nverts = 0;
+		npolys = 0;
+		maxpolys = 0;
+		nvp = 0;
+		offsetX = 0;
+		offsetY = 0;
 	}
 	~rcPolyMesh()
 	{

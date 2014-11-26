@@ -64,6 +64,11 @@ function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 endfunction()
 
 
+function(BF_PLATFORM_SET_TARGET_OTHER_PROPERTIES targetName)
+	# Do nothing
+endfunction()
+
+
 function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	# Do nothing!
 endfunction()
