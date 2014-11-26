@@ -1085,7 +1085,7 @@ S32 Robot::lua_fireWeapon(lua_State *L)
       setCurrentMove(move);
    }
    else
-      throw LuaException("The weapon given to bot:fireWeapon(weapon) is not equipped!");
+      THROW_LUA_EXCEPTION(L, "The weapon given to bot:fireWeapon(weapon) is not equipped!");
 
    return 0;
 }
@@ -1138,7 +1138,7 @@ S32 Robot::lua_fireModule(lua_State *L)
       }
 
    if(!hasModule)
-      throw LuaException("The module given to bot:fireModule(module) is not equipped!");
+      THROW_LUA_EXCEPTION(L, "The module given to bot:fireModule(module) is not equipped!");
 
    return 0;
 }

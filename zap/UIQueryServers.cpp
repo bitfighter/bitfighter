@@ -189,6 +189,7 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) :
    
    buttons.push_back(prevButton);
    buttons.push_back(nextButton);
+   mHostOnServer = false;
 }
 
 
@@ -266,7 +267,7 @@ void QueryServersUserInterface::contactEveryone()
    } 
 
    // Try to ping the servers from our fallback list if we're having trouble connecting to the master
-   if(getGame()->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME) 
+   if(getGame()->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME && !mHostOnServer) 
    {
       Vector<string> *serverList = &mGameSettings->getIniSettings()->prevServerListFromMaster;
 
@@ -286,7 +287,7 @@ void QueryServersUserInterface::contactEveryone()
          masterConn->c2mJoinGlobalChat();    // Announce our presence in the chat room
          mAnnounced = true;
       }
-      masterConn->startServerQuery();
+      masterConn->startServerQuery(mHostOnServer);
       mWaitingForResponseFromMaster = true;
    }
    else     // Don't have a valid connection object
@@ -386,7 +387,8 @@ void QueryServersUserInterface::gotServerListFromMaster(const Vector<ServerAddr>
 // correct version).  Send a query packet to each.
 void QueryServersUserInterface::addServersToPingList(const Vector<ServerAddr> &serverList)
 {
-   saveServerListToIni(mGameSettings, serverList);
+   if(!mHostOnServer)
+      saveServerListToIni(getGame()->getSettings(), serverList);
 
    forgetServersNoLongerOnList(serverList);
 
@@ -1166,6 +1168,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
             if(servers.size() > currentIndex)      // Index is valid
             {
                leaveGlobalChat();
+
                bool neverConnectDirect = mGameSettings->getSetting<YesNo>(IniKey::NeverConnectDirect);
 
                // Join the selected game...   (what if we select a local server from the list...  wouldn't 2nd param be true?)

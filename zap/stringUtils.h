@@ -50,10 +50,6 @@ string itos(S64 i);
 string ftos(F32 f, int digits);
 string ftos(F32 f);
 
-#ifdef NEED_STOI
-S32 stoi(const string &s);
-#endif 
-
 F64 stof(const string &s);
 
 string replaceString(const string &strString, const string &strOld, const string &strNew);

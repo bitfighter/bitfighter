@@ -96,6 +96,8 @@ public:
    string findPlugin(const string &filename) const;
    string findBotFile(const string &filename) const;
    string findScriptFile(const string &filename) const;
+
+   void setLevelDir(const string &levelDir);
 };
 
 

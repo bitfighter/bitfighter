@@ -1,0 +1,9 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=bitfighter
+GenericName=bitfighter
+Type=Application
+Comment=A 2-D multi-player space combat game
+Exec=bitfighter
+Icon=bitfighter
+Categories=Game;ArcadeGame;

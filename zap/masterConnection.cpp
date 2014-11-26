@@ -9,6 +9,7 @@
 #include "ServerGame.h"
 #include "LevelDatabase.h"
 #include "gameConnection.h"
+#include "gameType.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
@@ -26,6 +27,7 @@ TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, false);
 MasterServerConnection::MasterServerConnection(Game *game)   
 {
    mGame = game;
+   mHostOnServerAvailable = false;
 
    // Assign a default id now, will be overwritten with a value from the master when we make our connection
    // This id is sent out with ping and query responses in order to identify servers that may have a different
@@ -57,15 +59,28 @@ MasterServerConnection::~MasterServerConnection()
    // Do nothing
 }
 
+bool MasterServerConnection::isHostOnServerAvailable()
+{
+   return mHostOnServerAvailable;
+}
 
-void MasterServerConnection::startServerQuery()
+
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cHostOnServerAvailable, (bool yes))
+{
+   mHostOnServerAvailable = yes;
+}
+
+void MasterServerConnection::startServerQuery(bool hostOnServer)
 {
    // Invalidate old queries
    mCurrentQueryId++;
 
    // And automatically do a server query as well - you may not want to do things
    // in this order in your own clients.
-   c2mQueryServers(mCurrentQueryId);
+   if(hostOnServer)
+      c2mQueryHostServers(mCurrentQueryId);
+   else
+      c2mQueryServers(mCurrentQueryId);
 }
 
 
@@ -515,8 +530,8 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       bstream->write((U32) serverGame->getMaxPlayers());      // max players
       bstream->write((U32) serverGame->mInfoFlags);           // info flags (1=>test host, i.e. from editor)
 
-      bstream->writeString(serverGame->getCurrentLevelName().getString());          // Level name
-      bstream->writeString(serverGame->getCurrentLevelTypeName().getString());      // Level type
+      bstream->writeString(serverGame->getGameType()->getLevelName().c_str());                     // Level name
+      bstream->writeString(GameType::getGameTypeName(serverGame->getGameType()->getGameTypeId())); // Level type
 
       bstream->writeString(serverGame->getSettings()->getHostName().c_str());       // Server name
       bstream->writeString(serverGame->getSettings()->getHostDescr().c_str());      // Server description

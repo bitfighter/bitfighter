@@ -172,7 +172,7 @@ void EditorMenuUserInterface::setupMenus()
    addMenuItem(getWindowModeMenuItem((U32)mGameSettings->getSetting<DisplayMode>(IniKey::WindowMode)));
    addMenuItem(new MenuItem("TEST LEVEL",       testLevelCallback,           "", KEY_T));
    addMenuItem(new MenuItem("SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
-   addMenuItem(new MenuItem("HOW TO EDIT",      activateHelpCallback,        "", KEY_E, keyHelp));
+   addMenuItem(new MenuItem("HOW TO EDIT",      activateHelpCallback,        "", KEY_H, keyHelp));
    addMenuItem(new MenuItem("LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
    addMenuItem(new MenuItem("MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
 

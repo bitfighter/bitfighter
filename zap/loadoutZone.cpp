@@ -39,8 +39,8 @@ LoadoutZone::LoadoutZone(lua_State *L)
 
       if(profile == 1)         // Geom, team
       {
-         setGeom(L,  1);
-         setTeam(L, -1);
+         setGeom(L, 1);
+         setTeam(L, 2);
       }
    }
 

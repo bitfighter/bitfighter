@@ -36,6 +36,7 @@ enum ParamId {
    MASTER_ADDRESS,
 
    DEDICATED,
+   HOST_ON_DEDICATED,
    SERVER_PASSWORD,
    OWNER_PASSWORD,
    ADMIN_PASSWORD,
@@ -194,7 +195,7 @@ public:
    Vector<string> *getLevelSkipList();
    Vector<string> *getSpecifiedLevels();
 
-   void setLoginCredentials(const string &name, const string &password, bool save);
+   void setLoginCredentials(const string &name, const string &password, bool savePassword);
 
 
    bool isCmdLineParamSpecified(ParamId paramId);                      // Returns true if parameter was present, false if not

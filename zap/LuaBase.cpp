@@ -32,7 +32,7 @@ void checkArgCount(lua_State *L, S32 argsWanted, const char *methodName)
       dSprintf(msg, sizeof(msg), "%s called with %d args, expected %d", methodName, args, argsWanted);
       logprintf(LogConsumer::LogError, msg);
 
-      throw LuaException(msg);
+      THROW_LUA_EXCEPTION(L, msg);
    }
 }
 
@@ -113,8 +113,10 @@ S32 checkArgList(lua_State *L, const LuaFunctionArgList &functionArgList, const 
    
    // Uh oh... items on stack did not match any known parameter profile.  Try to construct a useful error message.
    // If we want a stack trace for parameter errors, we need to force it here... not sure how, exactly
-   throw LuaException("Could not validate params for function " + string(className) + "::" + string(functionName) + "()\n" +
-                      "Expected" + (functionArgList.profileCount > 1 ? " one of the following:" : ":") + prettyPrintParamList(functionArgList));
+   string luaError = "Could not validate params for function " + string(className) + "::" + string(functionName) + "()\n" +
+            "Expected" + (functionArgList.profileCount > 1 ? " one of the following:" : ":") + prettyPrintParamList(functionArgList);
+
+   THROW_LUA_EXCEPTION(L, luaError.c_str());
 
    return -1;     // No valid profile found, but we never get here, so it doesn't really matter what we return, does it?
 }
@@ -559,7 +561,7 @@ lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, 
       dSprintf(msg, sizeof(msg), "%s called with out-of-bounds arg: %d (val=%d)", methodName, index, val);
       logprintf(LogConsumer::LogError, msg);
 
-      throw LuaException(msg);
+      THROW_LUA_EXCEPTION(L, msg);
    }
 
    return val;
@@ -602,7 +604,7 @@ inline void checkForNumber(lua_State *L, S32 index, const char *methodName)
       dSprintf(msg, sizeof(msg), "%s expected numeric arg at position %d", methodName, index);
       logprintf(LogConsumer::LogError, msg);
 
-      throw LuaException(msg);
+      THROW_LUA_EXCEPTION(L, msg);
    }
 }
 
@@ -673,7 +675,7 @@ const char *getCheckedString(lua_State *L, S32 index, const char *methodName)
       dSprintf(msg, sizeof(msg), "%s expected string arg at position %d", methodName, index);
       logprintf(LogConsumer::LogError, msg);
 
-      throw LuaException(msg);
+      THROW_LUA_EXCEPTION(L, msg);
    }
 
    return lua_tostring(L, index);

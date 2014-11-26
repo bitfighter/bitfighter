@@ -29,10 +29,19 @@ static const S32 M_RPC_017  = 1;
 static const S32 M_RPC_018  = 2;
 static const S32 M_RPC_019  = 3;
 static const S32 M_RPC_019a = 4;
+static const S32 M_RPC_019d = 5;
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, c2mQueryServers,
    (U32 queryId), (queryId),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, M_RPC_PRE_017) {}
+
+TNL_IMPLEMENT_RPC(MasterServerInterface, c2mQueryHostServers,
+   (U32 queryId), (queryId),
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, M_RPC_019d) {}
+
+TNL_IMPLEMENT_RPC(MasterServerInterface, m2cHostOnServerAvailable,
+   (bool yes), (yes),
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, M_RPC_019d) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cQueryServersResponse,
    (U32 queryId, Vector<IPAddress> ipList), (queryId, ipList),

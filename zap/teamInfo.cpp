@@ -359,6 +359,7 @@ void Team::incrementBotCount()
    METHOD(CLASS, getScore,          ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getPlayerCount,    ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getPlayers,        ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getColor,          ARRAYDEF({{ END }}), 1 ) \
 
 GENERATE_LUA_FUNARGS_TABLE(Team, LUA_METHODS);
 GENERATE_LUA_METHODS_TABLE(Team, LUA_METHODS);
@@ -477,6 +478,46 @@ S32 Team::lua_getPlayers(lua_State *L)
          lua_rawseti(L, 1, pushed);
       }
    }
+
+   return 1;
+}
+
+
+/**
+ * @luafunc table Team::getColor()
+ *
+ * @brief Get the team color
+ *
+ * @desc
+ * The team color is a table with 3 values: red, green, blue.  These are returned
+ * as integers in the range of 0-255
+ *
+ * @code
+ *   local color = team:getColor()
+ *
+ *   local red   = color[0]
+ *   local green = color[1]
+ *   local blue  = color[2]
+ * @endcode
+ *
+ * @return A table of RGB values for this team's color.
+ */
+S32 Team::lua_getColor(lua_State *L)
+{
+   const Color &color = getColor();
+
+   S32 r = S32(color.r * 255);
+   S32 g = S32(color.g * 255);
+   S32 b = S32(color.b * 255);
+
+   lua_newtable(L);    // Create a table, with no slots pre-allocated for our data
+
+   lua_pushinteger(L, r);
+   lua_rawseti(L, 1, 0);
+   lua_pushinteger(L, g);
+   lua_rawseti(L, 1, 1);
+   lua_pushinteger(L, b);
+   lua_rawseti(L, 1, 2);
 
    return 1;
 }

@@ -1236,6 +1236,13 @@ string FolderManager::getPluginDir()     const { return pluginDir;     }
 string FolderManager::getLuaDir()        const { return luaDir;        }
 
 
+// Setters
+void FolderManager::setLevelDir(const string &lvlDir)
+{
+   levelDir = lvlDir;
+}
+
+
 // Doesn't handle leveldir -- that one is handled separately, later, because it requires input from the INI file
 void FolderManager::resolveDirs(GameSettings *settings)
 {

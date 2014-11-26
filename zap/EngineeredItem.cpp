@@ -1278,7 +1278,7 @@ S32 EngineeredItem::lua_setHealRate(lua_State *L)
    S32 healRate = getInt(L, 1);
 
    if(healRate < 0)
-      throw LuaException("Specified healRate is negative, and that just makes me crazy!");
+      THROW_LUA_EXCEPTION(L, "Specified healRate is negative, and that just makes me crazy!");
 
    setHealRate(healRate);
 
@@ -2107,7 +2107,14 @@ void Turret::renderDock(const Color &color) const
 void Turret::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    if(mSnapped)
-      render();
+   {
+      // We render the turret with/without health if it is neutral or not (as it starts in the game)
+      S32 team = getTeam();
+      bool enabled = team != TEAM_NEUTRAL;
+      F32 health = team == TEAM_NEUTRAL ? 0.0f : 1.0f;
+
+      renderTurret(getColor(), getPos(), mAnchorNormal, enabled, health, mCurrentAngle, mHealRate);
+   }
    else
       renderDock(getColor());
 }

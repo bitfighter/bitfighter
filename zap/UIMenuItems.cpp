@@ -482,7 +482,7 @@ static void getStringVectorFromTable(lua_State *L, S32 index, const char *method
       dSprintf(msg, sizeof(msg), "%s expected table arg (which I wanted to convert to a string vector) at position %d", methodName, index);
       logprintf(LogConsumer::LogError, msg);
 
-      throw LuaException(msg);
+      THROW_LUA_EXCEPTION(L, msg);
    }
 
    // The following block loosely based on http://www.gamedev.net/topic/392970-lua-table-iteration-in-c---basic-walkthrough/
@@ -502,7 +502,7 @@ static void getStringVectorFromTable(lua_State *L, S32 index, const char *method
                                     methodName, index, strings.size() + 1);
          logprintf(LogConsumer::LogError, msg);
 
-         throw LuaException(msg);
+         THROW_LUA_EXCEPTION(L, msg);
       }
 
       strings.push_back(lua_tostring(L, -1));

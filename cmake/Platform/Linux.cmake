@@ -15,16 +15,15 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
 
 # Define the Linux data dir if not defined in a packaging build script already
-if("${CMAKE_SYSTEM}" MATCHES "Linux")
-	if(NOT LINUX_DATA_DIR)
-		set(LINUX_DATA_DIR "/usr/share")
-	endif()
-
-	message(STATUS "LINUX_DATA_DIR: ${LINUX_DATA_DIR}.  Change this by invoking cmake with -DLINUX_DATA_DIR=<SOME_DIRECTORY>")
-
-	# Quotes need to be a part of the definition or the compiler won't understand
-	add_definitions(-DLINUX_DATA_DIR="${LINUX_DATA_DIR}")
+if(NOT CMAKE_DATA_PATH)
+	set(CMAKE_DATA_PATH "${CMAKE_INSTALL_PREFIX}/share")
 endif()
+
+message(STATUS "CMAKE_DATA_PATH: ${CMAKE_DATA_PATH}.  Change this by invoking cmake with -DCMAKE_DATA_PATH=<SOME_DIRECTORY>")
+
+# Quotes need to be a part of the definition or the compiler won't understand
+add_definitions(-DLINUX_DATA_DIR="${CMAKE_DATA_PATH}")
+
 
 
 #
@@ -71,10 +70,24 @@ endfunction()
 
 
 function(BF_PLATFORM_INSTALL targetName)
+	# Binaries
 	install(TARGETS ${targetName} RUNTIME DESTINATION bin)
-	install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource/
-		DESTINATION share/games/bitfighter/
-	)
+	
+	# Modify python script to have the shebang
+	install(CODE "execute_process(COMMAND sed -i -e \"1s@^@#!/usr/bin/env python\\\\n\\\\n@\" ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py)")
+	install(PROGRAMS ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py DESTINATION bin)
+	
+	# Install desktop files
+	install(FILES ${CMAKE_SOURCE_DIR}/debian/bitfighter.desktop DESTINATION ${CMAKE_DATA_PATH}/applications/)
+	install(FILES ${CMAKE_SOURCE_DIR}/debian/bitfighter.png DESTINATION ${CMAKE_DATA_PATH}/pixmaps/)
+	
+	# Manpage
+	install(FILES ${CMAKE_SOURCE_DIR}/debian/bitfighter.1 DESTINATION ${CMAKE_DATA_PATH}/man/man1/)
+	
+	# Resources
+	install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource/ DESTINATION ${CMAKE_DATA_PATH}/bitfighter/)
+	install(FILES ${CMAKE_SOURCE_DIR}/exe/joystick_presets.ini DESTINATION ${CMAKE_DATA_PATH}/bitfighter/)
+	
 endfunction()
 
 
