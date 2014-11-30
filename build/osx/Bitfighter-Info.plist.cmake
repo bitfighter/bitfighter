@@ -5,13 +5,15 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
+	<string>${MACOSX_BUNDLE_EXECUTABLE}</string>
 	<key>CFBundleIconFile</key>
 	<string>Bitfighter.icns</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.bitfighter.Bitfighter</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleLongVersionString</key>
+	<string>${BF_VERSION}</string>
 	<key>CFBundleName</key>
 	<string>${MACOSX_BUNDLE_NAME}</string>
 	<key>CFBundlePackageType</key>
@@ -19,9 +21,9 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleShortVersionString</key>
-	<string>${MACOSX_BUNDLE_SHORT_VERSION_STRING}</string>
+	<string>${BF_VERSION}</string>
 	<key>CFBundleVersion</key>
-	<string>${MACOSX_BUNDLE_VERSION}</string>
+	<string>${BF_BUILD_VERSION}</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>${MACOSX_DEPLOYMENT_TARGET}</string>
 	<key>LSMinimumSystemVersionByArchitecture</key>

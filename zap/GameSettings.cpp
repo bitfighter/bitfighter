@@ -478,18 +478,17 @@ F32 GameSettings::getMusicVolume()
 
 // User has entered name and password, and has clicked Ok.  That's the only way to get here.
 // Do not call this function directly -- you probably want ClientGame::userEnteredLoginCredentials(), which will call this.
-void GameSettings::setLoginCredentials(const string &name, const string &password, bool save)
+void GameSettings::setLoginCredentials(const string &name, const string &password, bool savePassword)
 {
    mPlayerName = name;
    mPlayerPassword = password;
 
-   if(save)
-   {
-      mIniSettings.mSettings.setVal(IniKey::LastName, name);          
+   if(savePassword)
       mIniSettings.mSettings.setVal(IniKey::Password, password);
+
+   mIniSettings.mSettings.setVal(IniKey::LastName, name);
    
-      iniFile.WriteFile();
-   }
+   iniFile.WriteFile();
 }
 
 

@@ -177,6 +177,11 @@ function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 endfunction()
 
 
+function(BF_PLATFORM_SET_TARGET_OTHER_PROPERTIES targetName)
+	# Do nothing
+endfunction()
+
+
 function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	# The trailing slash is necessary to do here for proper native path translation
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/resource/ resDir)
@@ -202,31 +207,91 @@ endfunction()
 
 
 function(BF_PLATFORM_INSTALL targetName)
-	# Do nothing!
+	# Binaries
+	install(TARGETS ${targetName} RUNTIME DESTINATION ./)
+	install(PROGRAMS ${CMAKE_SOURCE_DIR}/notifier/pyinstaller/dist/bitfighter_notifier.exe DESTINATION ./)
+	
+	# Libraries
+	file(GLOB BF_INSTALL_LIBS ${BF_LIB_DIR}/*.dll)
+	# Except libcurl which will be put into the notifier directory
+	#list(REMOVE_ITEM BF_INSTALL_LIBS "${BF_LIB_DIR}/libcurl.dll")
+	install(FILES ${BF_INSTALL_LIBS} DESTINATION ./)
+	
+	# Resources
+	install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource/ DESTINATION ./)
+	install(FILES ${CMAKE_SOURCE_DIR}/exe/joystick_presets.ini DESTINATION ./)
+	install(FILES ${CMAKE_SOURCE_DIR}/zap/bitfighter_win_icon_green.ico DESTINATION ./)
+	
+	# Doc
+	install(FILES ${CMAKE_SOURCE_DIR}/doc/readme.txt DESTINATION ./)
+	install(FILES ${CMAKE_SOURCE_DIR}/LICENSE.txt DESTINATION ./)
+	install(FILES ${CMAKE_SOURCE_DIR}/COPYING.txt DESTINATION ./)
+	
+	# Updater
+	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/bfup.exe DESTINATION updater)
+	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/bfup.xml DESTINATION updater)
+	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/libcurl.dll DESTINATION updater)
+	
+	# Other
+	install(FILES ${CMAKE_SOURCE_DIR}/build/windows/installer/twoplayers.bat DESTINATION ./)
 endfunction()
 
 
 function(BF_PLATFORM_CREATE_PACKAGES targetName)
-	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Bitfighter, a 2-D multi-player space combat game")
+	set(CPACK_PACKAGE_NAME "Bitfighter")
+	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A 2-D multi-player space combat game")
 	set(CPACK_PACKAGE_VENDOR "Bitfighter Industries")
 	set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.txt")
 	set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE.txt")
 	set(CPACK_PACKAGE_VERSION_MAJOR ${BF_VERSION})
+	set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
+	set(CPACK_CREATE_DESKTOP_LINKS ${targetName})
+	# This sets up start menu and desktop shortcuts
+	set(CPACK_PACKAGE_EXECUTABLES "bitfighter;Bitfighter" "bitfighter_notifier;Bitfighter Notifier")
 	
-	if(NOT WIN64)
-		set(CPACK_PACKAGE_FILE_NAME "Bitfighter-Installer-${BF_VERSION}")
-
-		# Configure our NSIS input into a CPack template.  Use '@ONLY' (variables of the
-		# form: @var@) because NSIS uses variables of the form ${var} which CMake will 
-		# normally attempt to replace, too.
-		configure_file(
-			${CMAKE_SOURCE_DIR}/build/windows/installer/Bitfighter_installer.nsi.in
-			${CMAKE_MODULE_PATH}/NSIS.template.in
-			@ONLY
-		)
-
+	set(BF_PACKAGE_RESOURCE_DIR ${CMAKE_SOURCE_DIR}/build/windows/installer)
+	
+	if(WIN64)
+		# We use WiX for x64 MSI
+		set(CPACK_GENERATOR WIX)
+		set(CPACK_PACKAGE_FILE_NAME "Bitfighter-${BF_VERSION}-x64-installer")
+		
+		# Keep this the same so MSI installers can update/repair across versions
+		set(CPACK_WIX_UPGRADE_GUID "5E1F1E55-11FE-1E55-BAAD-00B17F164732")
+		set(CPACK_WIX_UI_DIALOG ${BF_PACKAGE_RESOURCE_DIR}/wix_welcome_banner.bmp)
+		set(CPACK_WIX_UI_BANNER ${BF_PACKAGE_RESOURCE_DIR}/wix_header_banner.bmp)
+		set(CPACK_WIX_PROGRAM_MENU_FOLDER ${CPACK_PACKAGE_NAME})
+		
+		# Wix requires some version, but can't handle bitfighter versions because of the letters
+		set(CPACK_PACKAGE_VERSION_MAJOR 1)
+	else()
 		# NSIS setup
-		set(CPACK_NSIS_DISPLAY_NAME "Bitfighter")
+		set(CPACK_GENERATOR NSIS) # TODO add ZIP for portable install?
+		set(CPACK_PACKAGE_FILE_NAME "Bitfighter-${BF_VERSION}-win32-installer")
+		set(CPACK_NSIS_COMPRESSOR "/SOLID lzma")
+		set(CPACK_NSIS_HELP_LINK "http://bitfighter.org/")
+		set(CPACK_NSIS_URL_INFO_ABOUT "http://bitfighter.org/")
+		
+		# Desktop shortcut handling for install/uninstall
+		set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut \\\"$DESKTOP\\\\Bitfighter.lnk\\\" \\\"$INSTDIR\\\\bitfighter.exe\\\"")
+		set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "Delete \\\"$DESKTOP\\\\Bitfighter.lnk\\\"")
+
+		# Any extra start menu shortcuts
+		set(CPACK_NSIS_MENU_LINKS 
+			"http://bitfighter.org/" "Bitfighter Home Page"
+			"http://bitfighter.org/forums/" "Bitfighter Forums")
+		
+		# Branding
+		# Four backslashes because NSIS can't resolve the last portion of a UNIX path.  Fun!
+		set(CPACK_PACKAGE_ICON "${BF_PACKAGE_RESOURCE_DIR}\\\\nsis_header_banner.bmp")
+		set(WELCOME_BANNER ${BF_PACKAGE_RESOURCE_DIR}\\\\nsis_welcome_banner.bmp) 
+		set(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "BrandingText \\\"${CPACK_PACKAGE_NAME} ${BF_VERSION}\\\"
+			!define MUI_WELCOMEFINISHPAGE_BITMAP \\\"${WELCOME_BANNER}\\\"")
+		
+		# Need this otherwise NSIS thinks executables are in the 'bin' sub-folder
+		set(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
+		
+		set(CPACK_NSIS_MUI_FINISHPAGE_RUN "bitfighter.exe")
 	endif()
 	
 	include(CPack)

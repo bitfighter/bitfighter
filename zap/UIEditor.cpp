@@ -118,6 +118,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mDockWidth = ITEMS_DOCK_WIDTH;
    mDockMode = DOCKMODE_ITEMS;
    mDockPluginScrollOffset = 0;
+   mCurrentTeam = 0;
 
    mHitVertex = NONE;
    mEdgeHit   = NONE;

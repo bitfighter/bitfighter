@@ -141,7 +141,7 @@ local CLASS_TO_OBJTYPE = invert(copy(OBJTYPE_TO_CLASS))
 local function is(...)
 	local objTypes = { }
 	local objects = { }
-
+	local arg = {...}
 	for _, v in pairs(arg) do
 		if type(v) == "userdata" then
 			table.insert(objects, v)
@@ -212,6 +212,7 @@ end
 
 -- Keep all objects in `t` which are of one of the Classes or ObjTypes given
 local function keep(t, ...)
+	local arg = {...}
 	filter(t, function(x) return is(x, unpack(arg)) end)
 	return t
 end

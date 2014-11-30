@@ -150,12 +150,11 @@ bool VideoSystem::init()
    string iconPath = getInstalledDataDir() + getFileSeparator() + "bficon.bmp";
    SDL_Surface *icon = SDL_LoadBMP(iconPath.c_str());
 #if SDL_VERSION_ATLEAST(2,0,0)
+   // OSX handles icons better with its native .icns file
+#  ifndef TNL_OS_MAC_OSX
    if(icon != NULL)
-   {
-      // flag must be non-zero to enable color key
-      SDL_SetColorKey(icon, 1, SDL_MapRGB(icon->format, 0, 0, 0));
       SDL_SetWindowIcon(DisplayManager::getScreenInfo()->sdlWindow, icon);
-   }
+#  endif
 #else
    // Set window and icon title here so window will be created with proper name later
    SDL_WM_SetCaption(WINDOW_TITLE.c_str(), WINDOW_TITLE.c_str());

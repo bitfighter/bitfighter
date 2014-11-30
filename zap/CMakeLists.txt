@@ -3,9 +3,15 @@
 # See LICENSE.txt for full copyright information
 #------------------------------------------------------------------------------
 
-file(STRINGS version.h versionFileLine REGEX "define[ ]+ZAP_GAME_RELEASE")
-string(REGEX REPLACE "#define[ ]+ZAP_GAME_RELEASE[ ]+\"([^\"]+)\".*" "\\1" BF_VERSION ${versionFileLine})
+file(STRINGS version.h versionLine REGEX "define[ ]+ZAP_GAME_RELEASE")
+string(REGEX REPLACE "#define[ ]+ZAP_GAME_RELEASE[ ]+\"([^\"]+)\".*" "\\1" BF_VERSION ${versionLine})
 message(STATUS "Bitfighter version: ${BF_VERSION}")
+
+file(STRINGS version.h buildVersionStringDefine REGEX "define[ ]+BUILD_VERSION")
+string(REGEX REPLACE "#define[ ]+BUILD_VERSION[ ]+([^ ]+).*" "\\1" buildVersionString ${buildVersionStringDefine})
+file(STRINGS version.h buildVersionLine REGEX "${buildVersionString}")
+string(REGEX REPLACE "#define[ ]+${buildVersionString}[ ]+([0-9]+).*" "\\1" BF_BUILD_VERSION ${buildVersionLine})
+message(STATUS "Bitfighter build version: ${BF_BUILD_VERSION}")
 
 set(SHARED_SOURCES
 	BanList.cpp

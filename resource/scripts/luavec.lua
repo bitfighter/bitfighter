@@ -66,8 +66,14 @@ mt.__mul = function(v1,v2)
     -- vector * scalar
     return point.new(v1.x*s,v1.y*s)
   else
-    -- vector * vector
-    return point.new(v1.x*v2.x,v1.y*v2.y)
+    local s = tonumber(v1)
+    if s then
+      -- scalar * vector
+      return point.new(v2.x*s,v2.y*s)
+    else
+      -- vector * vector
+      return point.new(v1.x*v2.x,v1.y*v2.y)
+	end
   end
 end
 mt.__div = function(v1,s) return point.new(v1.x/s,v1.y/s) end
