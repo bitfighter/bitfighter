@@ -4415,7 +4415,7 @@ void EditorUserInterface::doneWithSimpleTextEntryMenu(SimpleTextEntryMenuUI *men
    switch(entryType)
    {
       case SimpleTextEntryID:
-         setSelectionId(Zap::stoi(value));
+         setSelectionId(atoi(value.c_str()));
          break;
 
       case SimpleTextEntryRotateOrigin:

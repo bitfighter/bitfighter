@@ -51,7 +51,7 @@ TextItem::TextItem(lua_State *L)
       if(profile == 1)
       {
          setGeom(L, 1);
-         setText(L, -1);
+         setText(L, 2);
       }
    }
 
@@ -102,9 +102,9 @@ void TextItem::render() const
 
    //// Don't render opposing team's text items if we are in a game... but in editor preview mode, where
    //// we don't have a connection to the server, text will be rendered normally
-   //if(ourTeam != getTeam() && ourTeam != TEAM_NEUTRAL)
+   //if(ourTeam != getTeam() && getTeam() != TEAM_NEUTRAL)
    //   return;
-
+      
    // The above should be handled by not sending textItems to players who shouldn't see them!!!
 
    renderTextItem(getVert(0), getVert(1), mSize, mText, getColor());

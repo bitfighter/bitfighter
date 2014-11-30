@@ -367,7 +367,7 @@ void WallItem::checkIfHasBeenAddedToTheGame(lua_State *L)
       {
          const char *msg = "Can't modify a wall that's already been added to a game!";
          logprintf(LogConsumer::LogError, msg);
-         throw LuaException(msg);
+         THROW_LUA_EXCEPTION(L, msg);
       }
    }
 }

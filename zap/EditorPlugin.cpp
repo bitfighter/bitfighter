@@ -170,7 +170,7 @@ bool EditorPlugin::prepareEnvironment()
 bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<boost::shared_ptr<MenuItem> > &menuItems)
 {
 #ifdef ZAP_DEDICATED
-   throw LuaException("Dedicated server should not use MenuItem");
+   THROW_LUA_EXCEPTION(L, "Dedicated server should not use MenuItem");
 #else
    if(!lua_istable(L, index))
    {
@@ -178,7 +178,7 @@ bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const cha
       dSprintf(msg, sizeof(msg), "%s expected table arg (which I wanted to convert to a menuItem vector) at position %d", methodName, index);
       logprintf(LogConsumer::LogError, msg);
 
-      throw LuaException(msg);
+      THROW_LUA_EXCEPTION(L, msg);
    }
 
    // The following block is (very) loosely based on http://www.gamedev.net/topic/392970-lua-table-iteration-in-c---basic-walkthrough/
@@ -212,7 +212,7 @@ bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const cha
          dSprintf(msg, sizeof(msg), "%s expected a MenuItem at table index %d", methodName, menuItems.size() + 1);
          logprintf(LogConsumer::LogError, msg);
 
-         throw LuaException(msg);
+         THROW_LUA_EXCEPTION(L, msg);
       }
 
       menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));   // Add the MenuItem to our list

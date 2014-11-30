@@ -17,6 +17,9 @@ enum SFXProfiles
    SFXVoice,
    SFXNone,
 
+   SFXPlayerEnteredGlobalChat,
+   SFXPlayerLeftGlobalChat,
+
    SFXPlayerJoined,
    SFXPlayerLeft,
 

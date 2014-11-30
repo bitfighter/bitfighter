@@ -91,9 +91,10 @@ static void activateTeamDefCallback(ClientGame *game, U32 unused)
    game->getUIManager()->activate<TeamDefUserInterface>();
 }
 
-void uploadToDbCallback(ClientGame *game, U32 unused)
+
+void uploadToDbCallback(ClientGame *game)
 {
-   game->getUIManager()->reactivatePrevUI();
+   game->getUIManager()->activate<EditorUserInterface>();
 
    EditorUserInterface* editor = game->getUIManager()->getUI<EditorUserInterface>();
    editor->createNormalizedScreenshot(game);
@@ -105,7 +106,8 @@ void uploadToDbCallback(ClientGame *game, U32 unused)
    }
 
 
-   if(game->getClientInfo()->getName().getString() != game->getGameType()->getLevelCredits())
+   if(strcmp(game->getClientInfo()->getName().getString(),
+         game->getGameType()->getLevelCredits().c_str()) != 0)
    {
       editor->setSaveMessage("Failed: Level author must match your username", false);
       return;
@@ -114,6 +116,23 @@ void uploadToDbCallback(ClientGame *game, U32 unused)
    RefPtr<LevelDatabaseUploadThread> uploadThread;
    uploadThread = new LevelDatabaseUploadThread(game);
    game->getSecondaryThread()->addEntry(uploadThread);
+}
+
+
+void uploadToDbPromptCallback(ClientGame *game, U32 unused)
+{
+   ErrorMessageUserInterface *ui = game->getUIManager()->getUI<ErrorMessageUserInterface>();
+
+   ui->reset();
+   ui->setTitle("UPLOAD LEVEL?");
+   ui->setMessage("Do you want to upload your level to the online\n\n"
+                  "level database?");
+   ui->setInstr("Press [[Y]] to upload,  [[Esc]] to cancel");
+
+   ui->registerKey(KEY_Y, uploadToDbCallback);
+   ui->setRenderUnderlyingUi(false);
+
+   game->getUIManager()->activate(ui);
 }
 
 
@@ -183,7 +202,7 @@ void EditorMenuUserInterface::setupMenus()
          "UPDATE LEVEL IN DB" :
          "UPLOAD LEVEL TO DB";
 
-      addMenuItem(new MenuItem(title, uploadToDbCallback, "Levels posted at " + HttpRequest::LevelDatabaseBaseUrl, KEY_U));
+      addMenuItem(new MenuItem(title, uploadToDbPromptCallback, "Levels posted at " + HttpRequest::LevelDatabaseBaseUrl, KEY_U));
    }
    else
       addMenuItem(new MessageMenuItem("MUST BE LOGGED IN TO UPLOAD LEVELS TO DB", Colors::gray40));

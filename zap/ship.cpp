@@ -2723,7 +2723,7 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
 
    // Make sure we have the appropriate number of loadout values
    if(loadoutValues.size() != expectedSize)
-      throw LuaException("The loadout given must contain " + itos(expectedSize) + " elements");
+      THROW_LUA_EXCEPTION(L, string("The loadout given must contain " + itos(expectedSize) + " elements").c_str());
 
 
    // Now we verify and build up our loadout
@@ -2737,7 +2737,7 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
       if(value >= (S32)ModuleCount)
       {
          if(weaponCount >= ShipWeaponCount)
-            throw LuaException("Too many weapons!  You must provide exactly " + itos(ShipWeaponCount) + " weapons.");
+            THROW_LUA_EXCEPTION(L, string("Too many weapons!  You must provide exactly " + itos(ShipWeaponCount) + " weapons.").c_str());
 
          loadout.setWeapon(weaponCount, WeaponType(value - ModuleCount));
          weaponCount++;
@@ -2745,7 +2745,7 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
       else
       {
          if(moduleCount >= ShipWeaponCount)
-            throw LuaException("Too many modules!  You must provide exactly " + itos(ShipModuleCount) + " modules.");
+            THROW_LUA_EXCEPTION(L, string("Too many modules!  You must provide exactly " + itos(ShipModuleCount) + " modules.").c_str());
 
          loadout.setModule(moduleCount, ShipModule(value));
          moduleCount++;
@@ -2827,7 +2827,7 @@ S32 Ship::lua_setLoadoutNow(lua_State *L)
       setLoadout(loadout);
    }
    else
-      throw LuaException("The loadout given is invalid");
+      THROW_LUA_EXCEPTION(L, "The loadout given is invalid");
 
    return 0;
 }

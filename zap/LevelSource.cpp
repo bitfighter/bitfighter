@@ -70,6 +70,7 @@ void LevelInfo::initialize()
    mLevelType = BitmatchGame;
    minRecPlayers = 0;
    maxRecPlayers = 0;
+   mHosterLevelIndex = -1;
 }
 
 
@@ -260,21 +261,31 @@ pair<S32, bool> LevelSource::addLevel(LevelInfo levelInfo)
 
    return pair<S32, bool>(getLevelCount() - 1, true);
 }
+void LevelSource::addNewLevel(const LevelInfo &levelInfo)
+{
+   mLevelInfos.push_back(levelInfo);
+}
 
 
 string LevelSource::getLevelName(S32 index)
 {
-   return mLevelInfos[index].mLevelName.getString(); 
+   if(index < 0 || index >= mLevelInfos.size())
+      return "";
+   else
+      return mLevelInfos[index].mLevelName.getString(); 
 }
 
 
 string LevelSource::getLevelFileName(S32 index)
-{   
+{
    if(index < 0 || index >= mLevelInfos.size())
       return "";
    else
-
-   return mLevelInfos[index].filename;
+      return mLevelInfos[index].filename;
+}
+void LevelSource::setLevelFileName(S32 index, const string &filename)
+{
+   mLevelInfos[index].filename = filename;
 }
 
 
@@ -320,7 +331,7 @@ bool LevelSource::populateLevelInfoFromSource(const string &fullFilename, S32 in
 // Should be overridden in each subclass of LevelSource
 bool LevelSource::loadLevels(FolderManager *folderManager)
 {
-	return true;
+   return true;
 }
 
 
@@ -398,6 +409,7 @@ string MultiLevelSource::getLevelFileDescriptor(S32 index) const
 
 
 // Populates levelInfo with data from fullFilename -- returns true if successful, false otherwise
+// Reads 4kb of file and uses what it finds there to populate the levelInfo
 bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo)
 {
 	FILE *f = fopen(fullFilename.c_str(), "rb");
@@ -500,20 +512,20 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
 
 
    char data[1024 * 4];  // Should be enough to fit all parameters at the beginning of level; we don't need to read everything
-	S32 size = (S32)fread(data, 1, sizeof(data), f);
-	fclose(f);
+   S32 size = (S32)fread(data, 1, sizeof(data), f);
+   fclose(f);
 
    getLevelInfoFromCodeChunk(string(data, size), levelInfo);     // Fills levelInfo with data from file
 
 
    levelInfo.ensureLevelInfoHasValidName();
-	return true;
+   return true;
 }
 
 
 bool MultiLevelSource::isEmptyLevelDirOk() const
 {
-	return false;
+   return false;
 }
 
 
@@ -544,7 +556,7 @@ FileListLevelSource::FileListLevelSource(const Vector<string> &levelList, const 
 {
    mGameSettings = settings;
 
-	for(S32 i = 0; i < levelList.size(); i++)
+   for(S32 i = 0; i < levelList.size(); i++)
       mLevelInfos.push_back(LevelInfo(levelList[i], folder));
 }
 
@@ -563,22 +575,22 @@ Level *FileListLevelSource::getLevel(S32 index) const
 
    const LevelInfo *levelInfo = &mLevelInfos[index];
 
-	string filename = FolderManager::findLevelFile(mGameSettings->getFolderManager()->getLevelDir(), levelInfo->filename);
+   string filename = FolderManager::findLevelFile(GameSettings::getFolderManager()->getLevelDir(), levelInfo->filename);
 
-	if(filename == "")
-	{
-		logprintf("Unable to find level file \"%s\".  Skipping...", levelInfo->filename.c_str());
-		return NULL;
-	}
+   if(filename == "")
+   {
+      logprintf("Unable to find level file \"%s\".  Skipping...", levelInfo->filename.c_str());
+      return NULL;
+   }
 
    Level *level = new Level();      // Will be deleted by caller
 
-	if(!level->loadLevelFromFile(filename))
-	{
-		logprintf("Unable to process level file \"%s\".  Skipping...", levelInfo->filename.c_str());
+   if(!level->loadLevelFromFile(filename))
+   {
+      logprintf("Unable to process level file \"%s\".  Skipping...", levelInfo->filename.c_str());
       delete level;
-		return NULL;
-	}
+      return NULL;
+   }
 
    return level;
 }
@@ -594,7 +606,7 @@ Vector<string> FileListLevelSource::findAllFilesInPlaylist(const string &fileNam
    Vector<string> lines = parseString(contents);
 
    for(S32 i = 0; i < lines.size(); i++)
-	{
+   {
       string filename = trim(chopComment(lines[i]));
       if(filename == "")    // Probably a comment or blank line
          continue;
@@ -607,10 +619,10 @@ Vector<string> FileListLevelSource::findAllFilesInPlaylist(const string &fileNam
          continue;
       }
 
-   	levels.push_back(filename);      // We will append the folder name later
-	}
+      levels.push_back(filename);      // We will append the folder name later
+   }
 
-	return levels;
+   return levels;
 }
 
 

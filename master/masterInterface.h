@@ -65,6 +65,8 @@ public:
    /// result in one or more m2cQueryServersResponse RPCs, with the final call having an empty
    /// Vector of servers.
    TNL_DECLARE_RPC(c2mQueryServers, (U32 queryId));
+   TNL_DECLARE_RPC(c2mQueryHostServers, (U32 queryId));
+   TNL_DECLARE_RPC(m2cHostOnServerAvailable, (bool yes));
 
    /// m2cQueryServersResponse is sent by the master server in response to a c2mQueryServers RPC, to
    /// return a partial list of the servers that matched the specified filter criteria.  Because packets

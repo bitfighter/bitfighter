@@ -38,14 +38,14 @@ namespace Zap
 
 
 // Host a game (and maybe even play a bit, too!)
-void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicatedServer)
+void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicatedServer, bool hostOnServer)
 {
    TNLAssert(!GameManager::getServerGame(), "Already have a ServerGame!");
 
    Address address(IPProtocol, Address::Any, GameSettings::DEFAULT_GAME_PORT);   // Equivalent to ("IP:Any:28000")
    address.set(settings->getHostAddress());                          // May overwrite parts of address, depending on what getHostAddress contains
 
-   GameManager::setServerGame(new ServerGame(address, settings, levelSource, testMode, dedicatedServer));
+   GameManager::setServerGame(new ServerGame(address, settings, levelSource, testMode, dedicatedServer, hostOnServer));
 
    GameManager::getServerGame()->setReadyToConnectToMaster(true);
    Game::seedRandomNumberGenerator(settings->getHostName());
@@ -61,7 +61,7 @@ void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool test
       logprintf(LogConsumer::ServerFilter, "Loaded %d levels:", levelSource->getLevelCount());
    }
 
-   if(levelSource->getLevelCount() == 0)     // No levels!
+   if(levelSource->getLevelCount() == 0 && !hostOnServer)     // No levels!
    {
       abortHosting_noLevels(GameManager::getServerGame());
       GameManager::deleteServerGame();
@@ -69,6 +69,9 @@ void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool test
    }
 
    GameManager::getServerGame()->resetLevelLoadIndex();
+
+   if(hostOnServer)
+      GameManager::setHostingModePhase(GameManager::DoneLoadingLevels);
 
    GameManager::setHostingModePhase(GameManager::LoadingLevels);
 

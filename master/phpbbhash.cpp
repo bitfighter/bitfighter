@@ -24,8 +24,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "phpbbhash.h"
-#include "mycrypt.h"
-#include <ctype.h>
+#include <tomcrypt.h>
 #include <math.h>
 
 

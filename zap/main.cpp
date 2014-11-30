@@ -1231,7 +1231,7 @@ int main(int argc, char **argv)
       LevelSourcePtr levelSource = LevelSourcePtr(settings->chooseLevelSource(serverGame));
 
       // Figure out what levels we'll be playing with, and start hosting  
-      initHosting(settings, levelSource, false, true);     
+      initHosting(settings, levelSource, false, true, settings->isCmdLineParamSpecified(HOST_ON_DEDICATED));
    }
    else
    {

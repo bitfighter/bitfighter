@@ -36,6 +36,7 @@ public:
    GameTypeId mLevelType;      
    S32 minRecPlayers;               // Min recommended number of players for this level
    S32 maxRecPlayers;               // Max recommended number of players for this level
+   S32 mHosterLevelIndex;           // Max recommended number of players for this level
 
    // Default constructor used on server side
    LevelInfo();      
@@ -83,10 +84,12 @@ public:
    void remove(S32 index);    // Remove level from the list of levels
 
    pair<S32, bool> addLevel(LevelInfo levelInfo);   // Yes, pass by value
+   void addNewLevel(const LevelInfo &levelInfo);
 
    // Extract info from specified level
    string          getLevelName(S32 index);
    virtual string  getLevelFileName(S32 index);
+   void            setLevelFileName(S32 index, const string &filename);
    GameTypeId      getLevelType(S32 index);
 
    virtual bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo) = 0;
@@ -114,7 +117,7 @@ class MultiLevelSource : public LevelSource
    typedef LevelSource Parent;
 
 public:
-   MultiLevelSource();  				// Constructor
+   MultiLevelSource();              // Constructor
    virtual ~MultiLevelSource();     // Destructor
 
    bool loadLevels(FolderManager *folderManager);

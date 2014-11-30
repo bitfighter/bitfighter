@@ -74,6 +74,7 @@ ParamInfo paramDefs[] = {
 
 // Options for hosting
 { "dedicated",             NO_PARAMETERS,  DEDICATED,             1, "",          "Run as a dedicated game server (i.e. no game window, console mode)",                     "" },
+{ "hostondedicated",       NO_PARAMETERS,  HOST_ON_DEDICATED,     1, "",          "Run as a dedicated game server using host's maps and settings" ,                         "" },
 { "serverpassword",        ONE_REQUIRED,   SERVER_PASSWORD,       1, "<string>",  "Specify a server password (players will need to know this to connect to your server)",    "You must enter a password with the -serverpassword option" },
 { "ownerpassword",         ONE_REQUIRED,   OWNER_PASSWORD,        1, "<string>",  "Specify an owner password (allowing those with the password to have all admin priveleges and power over admins) when you host a game or run a dedicated server", "You must specify an owner password with the -ownerpassword option" },
 { "adminpassword",         ONE_REQUIRED,   ADMIN_PASSWORD,        1, "<string>",  "Specify an admin password (allowing those with the password to kick players and change their teams) when you host a game or run a dedicated server", "You must specify an admin password with the -adminpassword option" },
@@ -312,7 +313,7 @@ string GameSettings::getCmdLineParamString(ParamId paramId)
 
 U32 GameSettings::getCmdLineParamU32(ParamId paramId)
 {
-   return mCmdLineParams[paramId].size() > 0 ? U32(Zap::stoi(mCmdLineParams[paramId].get(0))) : 0;
+   return mCmdLineParams[paramId].size() > 0 ? U32(atoi(mCmdLineParams[paramId].get(0).c_str())) : 0;
 }
 
 
@@ -529,7 +530,7 @@ void GameSettings::setAutologin(bool autologin)
 
 bool GameSettings::isDedicatedServer()
 {
-   return isCmdLineParamSpecified(DEDICATED);
+   return isCmdLineParamSpecified(DEDICATED) || isCmdLineParamSpecified(HOST_ON_DEDICATED);
 }
 
 
@@ -968,8 +969,8 @@ void GameSettings::onFinishedLoading()
    // ...and where the window should be...
    if(mCmdLineParams[WINDOW_POS].size() > 0)
    {
-      xpos = Zap::stoi(mCmdLineParams[WINDOW_POS].get(0));
-      ypos = Zap::stoi(mCmdLineParams[WINDOW_POS].get(1));
+      xpos = atoi(mCmdLineParams[WINDOW_POS].get(0).c_str());
+      ypos = atoi(mCmdLineParams[WINDOW_POS].get(1).c_str());
    }
 
    // ... and finally, the window width (which in turns determines its height because the aspect ratio is fixed at 4:3)
