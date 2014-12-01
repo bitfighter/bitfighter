@@ -3,11 +3,12 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "barrier.h"
+//#include "barrier.h"
 #include "gameType.h"
 #include "ServerGame.h"
 #include "Level.h"
 #include "GameManager.h"
+#include "WallItem.h"
 
 
 #include "TestUtils.h"
@@ -41,8 +42,8 @@ TEST(LevelLoaderTest, longLine)
    Level level(code);
    
    const Vector<DatabaseObject *> *walls = level.findObjects_fast(WallItemTypeNumber);
-   ASSERT_EQ(1, walls.size());
-   EXPECT_EQ(TEST_POINTS, walls[0]->getVertCount());
+   ASSERT_EQ(1, walls->size());
+   EXPECT_EQ(TEST_POINTS, walls->get(0)->getVertCount());
 }
 
 
@@ -55,7 +56,7 @@ TEST(LevelLoaderTest, EngineeredItemMounting)
    ServerGame *serverGame = GameManager::getServerGame();
 
    Vector<DatabaseObject *> fillItems;
-   serverGame->getGameObjDatabase()->findObjects(TurretTypeNumber, fillItems);
+   serverGame->getLevel()->findObjects(TurretTypeNumber, fillItems);
    ASSERT_EQ(1, fillItems.size());
    EXPECT_EQ(fillItems[0]->getPos().toString(), Point(30, 10).toString()) << "Turret did not mount!";
 }
