@@ -238,7 +238,7 @@ function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	set(CPACK_SYSTEM_NAME "OSX")
 	
 	if(CMAKE_OSX_ARCHITECTURES STREQUAL "ppc")
-		set(DMG_ARCH "PowerPC")
+		set(DMG_ARCH "32bit-PowerPC")
 	elseif(CMAKE_OSX_ARCHITECTURES STREQUAL "i386")
 		set(DMG_ARCH "32bit-Intel")
 	else()
