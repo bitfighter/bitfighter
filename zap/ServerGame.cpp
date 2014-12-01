@@ -37,8 +37,8 @@ namespace Zap
 static bool instantiated;           // Just a little something to keep us from creating multiple ServerGames...
 
 
-// Constructor -- be sure to see Game constructor too!  Lots going on there!
-ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated) : 
+// Constructor -- be sure to see Game constructor too!  Lots going on there!// Constructor -- be sure to see Game constructor too!  Lots going on there!
+ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated, bool hostOnServer) : 
       Game(address, settings),
       mRobotManager(this, settings)
 {
@@ -56,6 +56,7 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
    mVoteType = VoteLevelChange;  // Arbitrary
    mLevelLoadIndex = 0;
    mShutdownOriginator = NULL;
+   mHostOnServer = hostOnServer;
 
    // Stupid C++ spec doesn't allow ternary logic with static const if there is no definition
    // Workaround is to add '+' to force a read of the value

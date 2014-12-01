@@ -491,6 +491,62 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
 }
 
 
+TNL_IMPLEMENT_RPC(GameConnection, c2sSetVoteMapParam,
+                  (U8 voteLength, U8 voteLengthToChangeTeam, U8 voteRetryLength, S32 voteYesStrength, S32 voteNoStrength, S32 voteNothingStrength,
+                  bool voteEnable, bool allowGetMap, bool allowMapUpload, bool randomLevels),
+                  (voteLength, voteLengthToChangeTeam, voteRetryLength, voteYesStrength, voteNoStrength, voteNothingStrength,
+                  voteEnable, allowGetMap, allowMapUpload, randomLevels),
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3)
+{
+   if(!mClientInfo->isAdmin())
+      return;
+
+   mSettings->setSetting(IniKey::VoteLength, voteLength);
+   mSettings->setSetting(IniKey::VoteLengthToChangeTeam, voteLengthToChangeTeam);
+   mSettings->setSetting(IniKey::VoteRetryLength, voteRetryLength);
+   mSettings->setSetting(IniKey::VoteYesStrength, voteYesStrength);
+   mSettings->setSetting(IniKey::VoteNoStrength, voteNoStrength);
+   mSettings->setSetting(IniKey::VoteNothingStrength, voteNothingStrength);
+   mSettings->setSetting(IniKey::VotingEnabled, voteEnable);
+   mSettings->setSetting(IniKey::AllowGetMap, allowGetMap);
+   mSettings->setSetting(IniKey::AllowMapUpload, allowMapUpload);
+   mSettings->setSetting(IniKey::RandomLevels, randomLevels);
+   mSettings->setSetting(IniKey::AllowAdminMapUpload, true); // must be True, for host on server to work
+   mSettings->setSetting(IniKey::AllowLevelgenUpload, true);
+}
+
+
+//// Server sends the name and type of a level to the client (gets run repeatedly when client connects to the server). 
+//// Sending a blank name and type will clear the list.
+//TNL_IMPLEMENT_RPC(GameConnection, c2sAddLevel, (StringTableEntry name, RangedU32<0, GameTypesCount> type, S32 minPlayers, S32 maxPlayers, S32 index), (name, type, minPlayers, maxPlayers, index),
+//                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3)
+//{
+//   TNLAssert((mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when not in host mode");
+//   if(!(mSendableFlags | ServerFlagHostingLevels))
+//      return;
+//
+//   LevelInfo levelInfo(name, (GameTypeId)type.value);
+//   levelInfo.minRecPlayers = minPlayers;
+//   levelInfo.maxRecPlayers = maxPlayers;
+//   levelInfo.mHosterLevelIndex = index;
+//   levelInfo.folder = mSettings->getFolderManager()->levelDir;
+//   getServerGame()->addNewLevel(levelInfo);
+//}
+//
+//
+//// Server sends the level that got removed, or removes all levels from list when index is -1
+//// Unused??
+//TNL_IMPLEMENT_RPC(GameConnection, c2sRemoveLevel, (S32 index), (index),
+//                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3)
+//{
+//   TNLAssert((mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when not in host mode");
+//   if(!(mSendableFlags | ServerFlagHostingLevels))
+//      return;
+//
+//   getServerGame()->removeLevel(index);
+//}
+
+
 // Allow admins to change the passwords and other parameters on their systems
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, 
                   (StringPtr param, RangedU32<0, GameConnection::ParamTypeCount> paramType), 
@@ -1203,6 +1259,21 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
       e.push_back(mServerGame->getLevelNameFromIndex(newLevelIndex));
 
    mServerGame->getGameType()->broadcastMessage(ColorYellow, SFXNone, msg, e);
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, s2cRequestLevel, (S32 index), (index),
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 3)
+{
+   if(!isInitiator())
+      mLevelUploadIndex = index; // for c2s, just set the index to know which one is uploaded
+   else
+   {
+      TNLAssert((mSendableFlags & ServerFlagHostingLevels), "Shouldn't be used when not in host mode");
+      s2cRequestLevel(index); // c2s, tells the server which one we are uploading, this is done in case of lag and delays on uploading.
+      if(mLevelSource != NULL && U32(index) < U32(mLevelSource->getLevelCount()))
+         TransferLevelFile(strictjoindir(mLevelSource->getLevelInfo(index).folder, mLevelSource->getLevelFileName(index)).c_str());
+   }
 }
 
 

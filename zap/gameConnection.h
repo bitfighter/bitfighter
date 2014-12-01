@@ -252,8 +252,8 @@ public:
 
    TNL_DECLARE_RPC(s2cAddLevel, (StringTableEntry name, RangedU32<0, GameTypesCount> type));
    TNL_DECLARE_RPC(s2cRemoveLevel, (S32 index));
-   TNL_DECLARE_RPC(c2sAddLevel, (StringTableEntry name, RangedU32<0, GameTypesCount> type, S32 minPlayers, S32 maxPlayers, S32 index));
-   TNL_DECLARE_RPC(c2sRemoveLevel, (S32 index));
+   //TNL_DECLARE_RPC(c2sAddLevel, (StringTableEntry name, RangedU32<0, GameTypesCount> type, S32 minPlayers, S32 maxPlayers, S32 index));
+   //TNL_DECLARE_RPC(c2sRemoveLevel, (S32 index));
    TNL_DECLARE_RPC(s2cRequestLevel, (S32 index));
 
    TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative));
