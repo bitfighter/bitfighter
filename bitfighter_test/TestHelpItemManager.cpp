@@ -7,6 +7,7 @@
 #include "gtest/gtest.h"
 #include "HelpItemManager.h"
 #include "ClientGame.h"
+#include "ServerGame.h"
 #include "gameType.h"
 #include "Level.h"
 
@@ -17,14 +18,18 @@ class HelpItemManagerTest : public testing::Test
 {
 public:
    ClientGame *game;
+   GamePair *gamePair;
    GameType *gameType;
    HelpItem helpItem;
    UI::HelpItemManager himgr;
 
    HelpItemManagerTest() :
-      game(newClientGame()), 
       himgr(UI::HelpItemManager(game->getSettings()))
    {
+      gamePair = new GamePair();                   // Creates one client by default
+      gamePair->server->addTeam(new Team());
+      game = gamePair->getClient(0);
+
       // Need a Level to hold a GameType
       Level *level = new Level("");                // Level will be cleaned up by game
       game->setLevel(level);                       
@@ -37,7 +42,7 @@ public:
 
 
    ~HelpItemManagerTest() {
-      delete game;
+      delete gamePair;
    }
 
 
