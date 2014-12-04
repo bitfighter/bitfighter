@@ -58,7 +58,8 @@ TEST(LevelLoaderTest, EngineeredItemMounting)
    Vector<DatabaseObject *> fillItems;
    serverGame->getLevel()->findObjects(TurretTypeNumber, fillItems);
    ASSERT_EQ(1, fillItems.size());
-   EXPECT_EQ(fillItems[0]->getPos().toString(), Point(30, 10).toString()) << "Turret did not mount!";
+   EXPECT_FLOAT_EQ(fillItems[0]->getPos().x, 30) << "Turret did not mount! (x-coord)";
+   EXPECT_FLOAT_EQ(fillItems[0]->getPos().y, 10) << "Turret did not mount! (y-coord)";
 }
 
 };
