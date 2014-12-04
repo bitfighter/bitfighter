@@ -1104,6 +1104,10 @@ static void checkFillTable(lua_State *L, S32 size)
  * If a table is not provided, the function will create a table and return it on
  * the stack.
  *
+ * If you do provide a table, it will not be emptied -- any found items will be added to the 
+ * end of the table.  Be sure to clear the table before sending it if you do not want this 
+ * to happen!
+ *
  * If no object types are provided, this function will return every object on
  * the level.
  *
@@ -1167,13 +1171,10 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
    // This will guarantee a table at the top of the stack
    checkFillTable(L, results->size());
 
-   S32 pushed = 0;      // Count of items we put into our table
-
    for(S32 i = 0; i < results->size(); i++)
    {
       static_cast<BfObject *>(results->get(i))->push(L);
-      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
-      lua_rawseti(L, 1, pushed);
+      lua_rawseti(L, 1, i + 1);    // +1 because Lua uses 1-based arrays
    }
 
    TNLAssert(lua_gettop(L) == 1 || dumpStack(L), "Stack has unexpected items on it!");
@@ -1290,12 +1291,13 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
       {
          // Some objects require special handling
          if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
+         {
             if(mLuaGame)
             {
                obj->addToGame(mLuaGame, mLevel);
                obj->onGeomChanged();
             }
-
+         }
          else if(obj->getObjectTypeNumber() == WallItemTypeNumber)
             mLevel->addWallItem(static_cast<WallItem *>(obj), mLuaGame);
          else
