@@ -137,11 +137,13 @@ TEST_F(LuaEnvironmentTest, findAllObjects)
    EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t)"));
    ASSERT_TRUE(levelgen->runString("assert(#t == 0)"));
 
+   // Level will have 3 items: 2 ResourceItems, and one TestItem
    EXPECT_TRUE(levelgen->runString("bf:addItem(ResourceItem.new(point.new(0,0)))"));
    EXPECT_TRUE(levelgen->runString("bf:addItem(ResourceItem.new(point.new(300,300)))"));
    EXPECT_TRUE(levelgen->runString("bf:addItem(TestItem.new(point.new(200,200)))"));
 
    EXPECT_TRUE(levelgen->runString("t = { }"));
+   EXPECT_TRUE(levelgen->runString("assert(#t == 0)"));
    EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t)"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 3)"));
 
@@ -152,8 +154,9 @@ TEST_F(LuaEnvironmentTest, findAllObjects)
    EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t, ObjType.ResourceItem)"));
 
    EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects()"));
-   EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t, ObjType.ResourceItem)"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 3)"));
+   EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t, ObjType.ResourceItem)"));
+   EXPECT_TRUE(levelgen->runString("assert(#t == 5)")) << "t had 3 items when starting, added 2 more";
    EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects(ObjType.ResourceItem)"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 2)"));
 }
