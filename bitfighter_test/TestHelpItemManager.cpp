@@ -30,15 +30,6 @@ public:
       game = gamePair->getClient(0);
 
       himgr = new UI::HelpItemManager(game->getSettings());
-
-      // Need a Level to hold a GameType
-      Level *level = new Level("");                // Level will be cleaned up by game
-      game->setLevel(level);                       
-
-      // Need to add a GameType because GameType is where the game timer is managed
-      GameType *gameType = new GameType(level);    // Will be deleted in game destructor
-      gameType->addToGame(game, game->getLevel());
-      game->addTeam(new Team());                   // Cleanup handled by game
    }
 
 
@@ -51,18 +42,18 @@ public:
    void checkQueues(S32 highSize, S32 lowSize, S32 displaySize, HelpItem displayItem = UnknownHelpItem)
    {
       // Check that queue sizes match what we specified
-      ASSERT_EQ(himgr->getHighPriorityQueue()->size(), highSize);
-      ASSERT_EQ(himgr->getLowPriorityQueue()->size(), lowSize);
-      ASSERT_EQ(himgr->getHelpItemDisplayList()->size(), displaySize);
+      ASSERT_EQ(highSize, himgr->getHighPriorityQueue()->size());
+      ASSERT_EQ(lowSize, himgr->getLowPriorityQueue()->size());
+      ASSERT_EQ(displaySize, himgr->getHelpItemDisplayList()->size());
 
       // Check if displayItem is being displayed, unless displayItem is UnknownHelpItem
       if(displayItem != UnknownHelpItem && himgr->getHelpItemDisplayList()->size() > 0)
-         ASSERT_EQ(himgr->getHelpItemDisplayList()->get(0), displayItem);
+         ASSERT_EQ(displayItem, himgr->getHelpItemDisplayList()->get(0));
    }
 
 
    // Full cycle is PacedTimerPeriod; that is, every PacedTimerPeriod ms, a new
-   // item is displayed Within that cycle, and item is displayed for
+   // item is displayed within that cycle, and item is displayed for
    // HelpItemDisplayPeriod, then faded for getRollupPeriod, at which point it
    // is expired and removed from the screen.  Then we must wait until the
    // remainder of PacedTimerPeriod has elapsed before a new item will be shown.
@@ -139,13 +130,13 @@ TEST_F(HelpItemManagerTest, INIStorage)
 
    idleUntilItemExpired();
 
-   ASSERT_EQ(himgr->getHelpItemDisplayList()->size(), 0);    // Verify help item is no longer displayed
+   ASSERT_EQ(0, himgr->getHelpItemDisplayList()->size());    // Verify help item is no longer displayed
    himgr->addInlineHelpItem(TeleporterSpotedItem);
-   ASSERT_EQ(himgr->getHelpItemDisplayList()->size(), 0);    // Still in flood control period, new item not added
+   ASSERT_EQ(0, himgr->getHelpItemDisplayList()->size());    // Still in flood control period, new item not added
 
    himgr->idle(himgr->FloodControlPeriod, game);
    himgr->addInlineHelpItem(helpItem);                       // We've already added this item, so it should not be displayed again
-   ASSERT_EQ(himgr->getHelpItemDisplayList()->size(), 0);    // Verify help item is not displayed again
+   ASSERT_EQ(0, himgr->getHelpItemDisplayList()->size());    // Verify help item is not displayed again
    himgr->addInlineHelpItem(TeleporterSpotedItem);           // Now, new item should be added (we tried adding this above, and it didn't go)
    ASSERT_EQ(himgr->getHelpItemDisplayList()->get(0), TeleporterSpotedItem);   // Verify help item is now visible
 }

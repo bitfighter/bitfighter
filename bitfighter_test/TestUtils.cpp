@@ -117,6 +117,8 @@ void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32
 
    for(S32 i = 0; i < clientCount; i++)
       addClient("TestPlayer" + itos(i));
+
+   idle(1, 5);    // Give GameType and game objects time to propagate to client(s)
 }
 
 
