@@ -1170,6 +1170,8 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
 
    // This will guarantee a table at the top of the stack
    checkFillTable(L, results->size());
+   
+   // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
    for(S32 i = 0; i < results->size(); i++)
    {
