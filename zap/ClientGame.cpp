@@ -276,7 +276,7 @@ ClientInfo *ClientGame::getLocalRemoteClientInfo() const
 }
 
 
-void ClientGame::setSpawnDelayed(bool spawnDelayed) const
+void ClientGame::setSpawnDelayed(bool spawnDelayed)
 {
    if(!spawnDelayed)
       mUIManager->clearSparks();
@@ -395,11 +395,11 @@ void ClientGame::queueVoiceChatBuffer(const SFXHandle &effect, const ByteBufferP
 
 S32 ClientGame::getCurrentTeamIndex() const
 {
-   Ship *ship = getLocalPlayerShip(); // first try, when playing back a recorded game
+   Ship *ship = getLocalPlayerShip(); // First try: when playing back a recorded game
    if(ship)
       return ship->getTeam();
 
-   ClientInfo *clientInfo = getLocalRemoteClientInfo(); // second try, when idling in-game
+   ClientInfo *clientInfo = getLocalRemoteClientInfo(); // Second try: when idling in-game
    if(clientInfo)
       return clientInfo->getTeamIndex();
 

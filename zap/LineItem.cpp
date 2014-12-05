@@ -106,9 +106,6 @@ bool LineItem::shouldRender() const
    if(mGlobal)
       return true;
 
-   if(!isGhost()) // always render when in editor
-      return true;
-
 #ifndef ZAP_DEDICATED
    //S32 ourTeam = static_cast<ClientGame*>(getGame())->getCurrentTeamIndex();
 
@@ -119,6 +116,7 @@ bool LineItem::shouldRender() const
    //   return false;
 #endif
 
+   // Render item regardless of team when in editor (local remote ClientInfo will be NULL)
    return true;
 }
 

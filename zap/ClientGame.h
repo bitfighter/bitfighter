@@ -182,7 +182,7 @@ public:
 
    bool isGameOver() const;
 
-   void setSpawnDelayed(bool spawnDelayed) const;
+   void setSpawnDelayed(bool spawnDelayed);
    bool isSpawnDelayed() const;
    void undelaySpawn() const;
 

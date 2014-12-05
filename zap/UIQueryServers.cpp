@@ -1169,6 +1169,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
             if(servers.size() > currentIndex)      // Index is valid
             {
                leaveGlobalChat();
+
                bool neverConnectDirect = mGameSettings->getSetting<YesNo>(IniKey::NeverConnectDirect);
 
                // Join the selected game...   (what if we select a local server from the list...  wouldn't 2nd param be true?)

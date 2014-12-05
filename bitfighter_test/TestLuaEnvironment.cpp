@@ -40,6 +40,10 @@ protected:
       serverGame = pair.server;
       settings = serverGame->getSettingsPtr();
 
+      // Set-up our environment
+      EXPECT_TRUE(LuaScriptRunner::startLua(settings->getFolderManager()->luaDir));
+
+
       ASSERT_EQ(0, serverGame->getGameObjDatabase()->findObjects_fast()->size()) << "Database should be empty on a new level with no clients!";
 
       // Check that the environment was set up during construction of GamePair

@@ -117,8 +117,10 @@ private:
    LuaGameInfo *mGameInfo;
 
 public:
-   ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated, bool hostOnServer = false);    // Constructor
-   virtual ~ServerGame();   // Destructor
+   // Constructor/Destructors
+   ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, 
+              bool testMode, bool dedicated, bool hostOnServer = false);    
+   virtual ~ServerGame();   
 
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
 

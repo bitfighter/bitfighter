@@ -504,7 +504,7 @@ S32 Team::lua_getPlayers(lua_State *L)
  */
 S32 Team::lua_getColor(lua_State *L)
 {
-   const Color color = getColor();
+   const Color &color = getColor();
 
    S32 r = S32(color.r * 255);
    S32 g = S32(color.g * 255);

@@ -216,4 +216,3 @@ void GameNetInterface::sendQuery(const Address &theAddress, const Nonce &clientN
 }
 
 };
-

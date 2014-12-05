@@ -519,6 +519,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetVoteMapParam,
    mSettings->setSetting(IniKey::AllowLevelgenUpload, true);
 }
 
+
 // Allow admins to change the passwords and other parameters on their systems
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, 
                   (StringPtr param, RangedU32<0, GameConnection::ParamTypeCount> paramType), 
