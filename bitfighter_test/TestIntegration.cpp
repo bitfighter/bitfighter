@@ -32,7 +32,7 @@ void checkTeleporter(Game *game, const string &geomString, S32 expectedDests)
    Vector<DatabaseObject *> fillVector;
    Teleporter *teleporter = NULL;
 
-   game->getGameObjDatabase()->findObjects(TeleporterTypeNumber, fillVector);
+   game->getLevel()->findObjects(TeleporterTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());
    teleporter = dynamic_cast<Teleporter *>(fillVector[0]);
    ASSERT_TRUE(teleporter);
@@ -105,13 +105,13 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
    
    // First test the ServerGame
    Vector<DatabaseObject *> fillVector;
-   serverGame->getGameObjDatabase()->findObjects(TestItemTypeNumber, fillVector);
+   serverGame->getLevel()->findObjects(TestItemTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size()) << "Looks like objects aren't being read properly by the server!";
    EXPECT_TRUE(fillVector[0]->getCentroid() == Point(255, 255));
 
    // BarrierMaker 40 -1 -1 -1 1
    fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(BarrierTypeNumber, fillVector);
+   serverGame->getLevel()->findObjects(BarrierTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size()) << "BarrierMaker items not being processed by the server!";
    Barrier *barrier = dynamic_cast<Barrier *>(fillVector[0]);
    ASSERT_TRUE(barrier);
@@ -127,24 +127,24 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
       ClientGame *clientGame = clientGames->get(i);
 
       fillVector.clear();
-      clientGame->getGameObjDatabase()->findObjects(TestItemTypeNumber, fillVector);
+      clientGame->getLevel()->findObjects(TestItemTypeNumber, fillVector);
       ASSERT_EQ(1, fillVector.size()) << "Looks like object propagation is broken!";
       EXPECT_TRUE(fillVector[0]->getCentroid() == Point(255, 255));
 
       // RepairItem (placed @ 0,1, repop time = 10)
       fillVector.clear();
-      clientGame->getGameObjDatabase()->findObjects(RepairItemTypeNumber, fillVector);
+      clientGame->getLevel()->findObjects(RepairItemTypeNumber, fillVector);
       ASSERT_EQ(1, fillVector.size());
       EXPECT_TRUE(fillVector[0]->getCentroid() == Point(0, 255));
 
       fillVector.clear();
-      serverGame->getGameObjDatabase()->findObjects(RepairItemTypeNumber, fillVector);
+      serverGame->getLevel()->findObjects(RepairItemTypeNumber, fillVector);
       EXPECT_EQ(10, static_cast<RepairItem *>(fillVector[0])->getRepopDelay()); // <=== repopDelay is not sent to the client; on client will always be default
 
       // Wall (placed @ -1,-1 ==> -1,1  thickness = 40)
       // BarrierMaker 40 -1 -1 -1 1
       fillVector.clear();
-      clientGame->getGameObjDatabase()->findObjects(BarrierTypeNumber, fillVector);
+      clientGame->getLevel()->findObjects(BarrierTypeNumber, fillVector);
       ASSERT_EQ(1, fillVector.size());
       Barrier *barrier = dynamic_cast<Barrier *>(fillVector[0]);
       ASSERT_TRUE(barrier);
@@ -164,7 +164,7 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
 
    // Now move the teleporter on server, make sure changes propagate to client
    fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(TeleporterTypeNumber, fillVector);
+   serverGame->getLevel()->findObjects(TeleporterTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());
    Teleporter *teleporter = dynamic_cast<Teleporter *>(fillVector[0]);
    ASSERT_TRUE(teleporter);

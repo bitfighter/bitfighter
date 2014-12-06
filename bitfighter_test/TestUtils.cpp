@@ -86,6 +86,15 @@ GamePair::GamePair(const string &levelCode, S32 clientCount)
 }
 
 
+//// Or don't provide any levelcode -- your choice!
+//GamePair::GamePair(S32 clientCount)
+//{
+//   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
+//
+//   initialize(settings, "", clientCount);
+//}
+//
+
 void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32 clientCount)
 {
    // Need to start Lua before we add any clients.  Might as well do it now.
@@ -108,6 +117,8 @@ void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32
 
    for(S32 i = 0; i < clientCount; i++)
       addClient("TestPlayer" + itos(i));
+
+   idle(1, 5);    // Give GameType and game objects time to propagate to client(s)
 }
 
 

@@ -326,6 +326,18 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryServers, (U32 queryId
 {
    c2mQueryServersOption(queryId, false);
 }
+
+
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryHostServers, (U32 queryId))
+{
+   c2mQueryServersOption(queryId, true);
+}
+
+
+void MasterServerConnection::c2mQueryServersOption(U32 queryId, bool hostonly)
+{
+   c2mQueryServersOption(queryId, false);
+}
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryHostServers, (U32 queryId))
 {
    c2mQueryServersOption(queryId, true);
@@ -1661,6 +1673,25 @@ void MasterServerConnection::writeConnectAccept(BitStream *stream)
    if(mCMProtocolVersion >= 8)
       stream->write(mClientId);
 }
+
+void MasterServerConnection::onConnectionEstablished()
+{
+   Parent::onConnectionEstablished();
+
+   if(mConnectionType == MasterConnectionTypeClient)
+   {
+      // If client needs to upgrade, tell them
+      m2cSendUpdgradeStatus(mMaster->getSetting<U32>(IniKey::LatestReleasedCSProtocol)   > mCSProtocolVersion || 
+                            mMaster->getSetting<U32>(IniKey::LatestReleasedBuildVersion) > mClientBuild);
+
+      // Send message of the day
+      sendMotd();
+
+      // for "Host on server" 019d and later, Maybe improve this to only show it when server is available...
+      m2cHostOnServerAvailable(true);
+   }
+}
+
 
 void MasterServerConnection::onConnectionEstablished()
 {

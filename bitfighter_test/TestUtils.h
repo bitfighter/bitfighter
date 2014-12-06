@@ -51,6 +51,7 @@ struct GamePair
    GamePair(GameSettingsPtr settings);
    GamePair(GameSettingsPtr settings, const string &levelCode);
 
+
 	~GamePair();
 
    void initialize(GameSettingsPtr settings, const string &levelcode, S32 clientCount);

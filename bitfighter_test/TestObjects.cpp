@@ -153,7 +153,7 @@ TEST_F(ObjectTest, GhostingSanity)
          }
          else
             bfobj->GeomObject::setGeom(geom);
-         bfobj->addToGame(serverGame, serverGame->getGameObjDatabase());
+         bfobj->addToGame(serverGame, serverGame->getLevel());
 
          ghostingRecords[i].server = true;
       }
@@ -165,7 +165,7 @@ TEST_F(ObjectTest, GhostingSanity)
    gamePair.idle(10, 10);
 
    // Check whether the objects created on the server made it onto the client
-   const Vector<DatabaseObject *> *objects = clientGame->getGameObjDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objects = clientGame->getLevel()->findObjects_fast();
    for(S32 i = 0; i < objects->size(); i++)
    {
       BfObject *bfobj = dynamic_cast<BfObject *>((*objects)[i]);
@@ -248,7 +248,7 @@ TEST_F(ObjectTest, LuaSanity)
          bfobj->lua_setPos(L);
          lua_pop(L, 1);
 
-         bfobj->addToGame(serverGame, serverGame->getGameObjDatabase());
+         bfobj->addToGame(serverGame, serverGame->getLevel());
       }
       else
          delete bfobj;

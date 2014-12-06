@@ -93,7 +93,7 @@ TEST(GameUserInterfaceTest, Engineer)
    {
       SCOPED_TRACE("i = " + itos(i));
       Vector<DatabaseObject *> fillVector;
-      clientGames->get(i)->getGameObjDatabase()->findObjects(TeleporterTypeNumber, fillVector);
+      clientGames->get(i)->getLevel()->findObjects(TeleporterTypeNumber, fillVector);
       EXPECT_EQ(1, fillVector.size()) << "Expected a teleporter!";
    }
 }
