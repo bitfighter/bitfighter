@@ -66,7 +66,7 @@ void EditorUndoManager::saveAction(EditorAction action, const BfObject *bfObject
    else if(action == Editor::ActionDelete)
       actionList->push_back(new EditorWorkUnitDelete(mLevel, mEditor, bfObject));
    else 
-      TNLAssert(false, "Action not implemented!")
+      TNLAssert(false, "Action not implemented!");
 
    if(!mInTransaction)
       mUndoLevel = mActions.size();

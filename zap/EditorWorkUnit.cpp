@@ -285,12 +285,14 @@ S32 EditorWorkUnitGroup::getWorkUnitObjectSerialNumber(S32 index) const
 S32 EditorWorkUnitGroup::getSerialNumber() const
 {
    TNLAssert(false, "No object associated with a GroupWorkUnit!");
+   return 0;
 }
 
 
 const BfObject *EditorWorkUnitGroup::getObject() const
 {
    TNLAssert(false, "Not implemented!");
+   return 0;
 }
 
 
