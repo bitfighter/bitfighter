@@ -1061,7 +1061,7 @@ S32 LuaScriptRunner::lua_pointCanSeePoint(lua_State *L)
  * 
  * @param id id to search for.
  * 
- * @return The found BfObject, or `nil` if no objects with the specified id
+ * @return The found BfObject, or 'nil'f if no objects with the specified id
  * could be found.
  */
 S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
@@ -1073,11 +1073,30 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
    return findObjectById(L, mLevel->findObjects_fast());
 }
 
+#define lua_swap(L) lua_insert(L, -2) 
+
+// Clear a lua table at top of the stack
+static void lua_clearTable(lua_State *L)
+{
+   //dumpStack(L);
+   //luaL_loadstring(L, "function(tab) for k,v in pairs(tab) do tab[k]=nil end return tab end");
+   //lua_pcall(L, 0, 0, 0);
+   //lua_getglobal(L, "clearTable");
+   //dumpStack(L);
+   //lua_swap(L);
+   //dumpStack(L);
+      //lua_pcall(L, 1, 0, 0);
+   //dumpStack(L);
+}
+
 
 static void checkFillTable(lua_State *L, S32 size)
 {
+   dumpStack(L);
    // We are expecting a table to be on top of the stack when we get here.  If not, we can add one.
-   if(!lua_istable(L, -1))
+   if (lua_istable(L, -1))
+      lua_clearTable(L);
+   else
    {
       TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
 
@@ -1104,14 +1123,13 @@ static void checkFillTable(lua_State *L, S32 size)
  * If a table is not provided, the function will create a table and return it on
  * the stack.
  *
- * If you do provide a table, it will not be emptied -- any found items will be added to the 
- * end of the table.  Be sure to clear the table before sending it if you do not want this 
- * to happen!
+ * If you do provide a table, it will be emptied before any found items are added.
+ * This is a change in behavior: prior to 020, the table was not automatically cleared.
  *
  * If no object types are provided, this function will return every object on
  * the level.
  *
- * @param [results] Reusable table into which results can be written.
+ * @param [results] Reusable table into which results can be written.  
  * @param [objType] Zero or more ObjTypes specifying what types of objects to find.
  *
  * @return A reference back to the passed table, or a new table if one was not
@@ -1122,7 +1140,6 @@ static void checkFillTable(lua_State *L, S32 size)
  *             -- any functions, it will have global scope.
  *
  * function countObjects(objType, ...) -- Pass one or more object types
- *   table.clear(items) -- Remove any items in table from previous use
  *   levelgen:findGlobalObjects(items, objType, ...) -- Put all items of specified type(s) into items table
  *   print(#items) -- Print the number of items found to the console
  * end
@@ -1171,8 +1188,6 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
    // This will guarantee a table at the top of the stack
    checkFillTable(L, results->size());
    
-   // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
    for(S32 i = 0; i < results->size(); i++)
    {
       static_cast<BfObject *>(results->get(i))->push(L);
