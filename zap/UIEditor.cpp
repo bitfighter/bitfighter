@@ -4261,13 +4261,9 @@ static void simpleTextEntryMenuCallback(ClientGame *game, U32 unused)
 }
 
 
-void idEntryCallback(string text, BfObject *object)
+void idEntryCallback(TextEntryMenuItem *menuItem, const string &text, BfObject *object)
 {
    TNLAssert(object, "Expected an object here!");
-
-   // Grab ClientGame from our object
-   ClientGame *clientGame = static_cast<ClientGame *>(object->getGame());
-   UIManager *uiManager = clientGame->getUIManager();
 
    // Check for duplicate IDs
    S32 id = atoi(text.c_str());
@@ -4275,13 +4271,13 @@ void idEntryCallback(string text, BfObject *object)
 
    if(id != 0)
    {
-      const Vector<DatabaseObject *> *objList = uiManager->getUI<EditorUserInterface>()->getLevel()->findObjects_fast();
+      const Vector<DatabaseObject *> *objList = object->getDatabase()->findObjects_fast();
 
       for(S32 i = 0; i < objList->size(); i++)
       {
          BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
-         if(obj->getUserAssignedId() == id && !obj->isSelected())
+         if(obj->getUserAssignedId() == id && obj != object)
          {
             duplicateFound = true;
             break;
@@ -4289,11 +4285,6 @@ void idEntryCallback(string text, BfObject *object)
       }
    }
 
-
-   SimpleTextEntryMenuUI *ui = dynamic_cast<SimpleTextEntryMenuUI *>(uiManager->getCurrentUI());
-   TNLAssert(ui, "Should be in SimpleTextEntryMenuUI!");
-
-   SimpleTextEntryMenuItem *menuItem = static_cast<SimpleTextEntryMenuItem*>(ui->getMenuItem(0));
 
    // Show a message if we've detected a duplicate ID is being entered
    if(duplicateFound)
@@ -4320,7 +4311,7 @@ void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType
    string lineValue = "";
 
    LineEditorFilter filter = numericFilter;
-   void(*callback)(string, BfObject *) = NULL;  // Our input callback; triggers on input change
+   void(*callback)(TextEntryMenuItem *, const string &, BfObject *) = NULL;  // Our input callback; triggers on input change
 
    static U32 inputLength = 9;   // Less than S32_MAX
 
@@ -4376,14 +4367,17 @@ void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType
          menuTitle = "Rotate object(s) about (0,0)";
          menuItemTitle = "Angle:";
          break;
+
       case SimpleTextEntryRotateCentroid:
          menuTitle = "Spin object(s)";
          menuItemTitle = "Angle:";
          break;
+
       case SimpleTextEntryScale:
          menuTitle = "Resize";
          menuItemTitle = "Resize Factor:";
          break;
+
       default:
          break;
    }

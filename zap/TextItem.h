@@ -15,6 +15,8 @@ namespace Zap
 {
 
 class ClientGame;
+class TextEntryMenuItem;
+
 static const S32 MAX_TEXTITEM_LEN = 255;
 
 class TextItem : public SimpleLine
@@ -51,7 +53,7 @@ public:
 
    void onAddedToGame(Game *theGame);  
 
-   static void textEditedCallback(string text, BfObject *obj);
+   static void textEditedCallback(TextEntryMenuItem *item, const string &text, BfObject *obj);
 
    const Vector<Point> *getCollisionPoly() const;          // More precise boundary for precise collision detection
    bool collide(BfObject *hitObject);

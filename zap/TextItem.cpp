@@ -401,7 +401,7 @@ void TextItem::onGeomChanged()
 }
 
 
-void TextItem::textEditedCallback(string text, BfObject *obj)
+void TextItem::textEditedCallback(TextEntryMenuItem *item, const string &text, BfObject *obj)
 {
    TextItem *textItem = static_cast<TextItem *>(obj);
    textItem->setText(text);

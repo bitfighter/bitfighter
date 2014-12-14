@@ -381,7 +381,7 @@ private:
 
 protected:
       LineEditor mLineEditor;
-      void (*mTextEditedCallback)(string, BfObject *);
+      void(*mTextEditedCallback)(TextEntryMenuItem *, const string &, BfObject *);
 
 public:
    // Contstuctor
@@ -398,6 +398,9 @@ public:
    virtual bool handleKey(InputCode inputCode);
    virtual void handleTextInput(char ascii);
 
+   virtual void setHelp(const string &help);
+   virtual void setHasError(bool hasError);
+
    LineEditor *getLineEditor();
    void setLineEditor(LineEditor editor);
 
@@ -410,7 +413,7 @@ public:
 
    virtual void activatedWithShortcutKey();
 
-   virtual void setTextEditedCallback(void (*callback)(string, BfObject *));
+   virtual void setTextEditedCallback(void (*callback)(TextEntryMenuItem *, const string &, BfObject *));
 
    virtual void setSecret(bool secret);
 
@@ -452,7 +455,7 @@ public:
    SimpleTextEntryMenuItem(string title, U32 length, void (*callback)(ClientGame *, U32));
    virtual ~SimpleTextEntryMenuItem();
 
-   void setHelp(string help);
+   void setHelp(const string &help);
    void setHasError(bool hasError);
 
    virtual bool handleKey(InputCode inputCode);
