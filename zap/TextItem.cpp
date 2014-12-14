@@ -403,7 +403,7 @@ void TextItem::onGeomChanged()
 
 void TextItem::textEditedCallback(string text, BfObject *obj)
 {
-   TextItem *textItem = dynamic_cast<TextItem *>(obj);
+   TextItem *textItem = static_cast<TextItem *>(obj);
    textItem->setText(text);
 }
 
