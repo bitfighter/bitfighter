@@ -1072,8 +1072,6 @@ static void checkFillTable(lua_State *L, S32 size)
    {
       TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
 
-      logprintf(LogConsumer::LogWarning,
-                  "Finding objects will be far more efficient if your script provides a table -- see scripting docs for details!");
       lua_createtable(L, size, 0);    // Create a table, with enough slots pre-allocated for our data
    }
 
@@ -1097,6 +1095,9 @@ static void checkFillTable(lua_State *L, S32 size)
  *
  * If no object types are provided, this function will return every object on
  * the level.
+ *
+ * @note If you provide your own table to this method, make sure you clear it
+ * first.
  *
  * @param [results] Reusable table into which results can be written.
  * @param [objType] Zero or more ObjTypes specifying what types of objects to find.
