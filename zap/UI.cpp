@@ -50,6 +50,8 @@ S32 UserInterface::messageMargin = UserInterface::vertMargin + UI::LoadoutIndica
 // Constructor
 UserInterface::UserInterface(ClientGame *clientGame)
 {
+   TNLAssert(clientGame, "Need a ClientGame to get settings!");
+
    mClientGame = clientGame;
    mGameSettings = mClientGame->getSettings();
    mTimeSinceLastInput = 0;
@@ -63,6 +65,12 @@ UserInterface::~UserInterface()
 }
 
 
+void UserInterface::setUiManager(UIManager *uiManager)
+{
+   mUiManager = uiManager;
+}
+
+
 ClientGame *UserInterface::getGame() const
 {
    return mClientGame;
@@ -71,8 +79,7 @@ ClientGame *UserInterface::getGame() const
 
 UIManager *UserInterface::getUIManager() const 
 { 
-   TNLAssert(mClientGame, "mGame is NULL!");
-   return mClientGame->getUIManager(); 
+   return mUiManager;
 }
 
 
@@ -119,14 +126,13 @@ void UserInterface::playBoop()
 
 
 // Render master connection state if we're not connected
-void UserInterface::renderMasterStatus()
+void UserInterface::renderMasterStatus(const MasterServerConnection *connectionToMaster) const
 {
-   MasterServerConnection *conn = mClientGame->getConnectionToMaster();
-
-   if(conn && conn->getConnectionState() != NetConnection::Connected)
+   if(connectionToMaster && connectionToMaster->getConnectionState() != NetConnection::Connected)
    {
       glColor(Colors::white);
-      drawStringf(10, 550, 15, "Master Server - %s", GameConnection::getConnectionStateString(conn->getConnectionState()));
+      drawStringf(10, 550, 15, "Master Server - %s", 
+               GameConnection::getConnectionStateString(connectionToMaster->getConnectionState()));
    }
 }
 
@@ -347,7 +353,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
 
    bool handled = false;
 
-   UIManager *uiManager = getGame()->getUIManager();
+   UIManager *uiManager = getUIManager();
    string inputString = InputCodeManager::getCurrentInputString(inputCode);
 
    if(checkInputCode(BINDING_DIAG, inputCode))              // Turn on diagnostic overlay
@@ -368,7 +374,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
       if(uiManager->isCurrentUI<ChatUserInterface>() || uiManager->isCurrentUI<NameEntryUserInterface>())
          return false;
 
-      getGame()->getUIManager()->activate<ChatUserInterface>();
+      getUIManager()->activate<ChatUserInterface>();
       playBoop();
 
       handled = true;

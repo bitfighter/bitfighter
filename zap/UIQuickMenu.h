@@ -75,6 +75,8 @@ public:
    virtual void startEditingAttrs(BfObject *object);
    virtual void doneEditing();
    virtual void doneEditingAttrs(BfObject *object);
+
+   bool configureForObject(BfObject *obj);
 };
 
 

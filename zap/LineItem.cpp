@@ -325,14 +325,14 @@ void LineItem::onGeomChanged()
 
 #ifndef ZAP_DEDICATED
 
-EditorAttributeMenuUI *LineItem::getAttributeMenu()
+EditorAttributeMenuUI *LineItem::getAttributeMenu(ClientGame *game) const
 {
    // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
    if(!mAttributeMenuUI)
    {
-      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
+      ClientGame *clientGame = static_cast<ClientGame *>(game);
 
-      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
+      mAttributeMenuUI = new EditorAttributeMenuUI(game);
 
       mAttributeMenuUI->addMenuItem(new YesNoMenuItem("Global:", true, "Viewable by all teams"));
 

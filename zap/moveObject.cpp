@@ -1653,14 +1653,14 @@ string Asteroid::toLevelCode() const
 
 //EditorAttributeMenuUI *Asteroid::mAttributeMenuUI = NULL;
 //
-//EditorAttributeMenuUI *Asteroid::getAttributeMenu()
+//EditorAttributeMenuUI *Asteroid::getAttributeMenu(ClientGame *game) const
 //{
 //   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
 //   if(!mAttributeMenuUI)
 //   {
-//      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
+//      ClientGame *clientGame = static_cast<ClientGame *>(game);
 //
-//      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
+//      mAttributeMenuUI = new EditorAttributeMenuUI(game);
 //
 //      mAttributeMenuUI->addMenuItem(new CounterMenuItem("Size:", mSizeLeft, 1, 1, ASTEROID_SIZELEFT_MAX, "", "", ""));
 //

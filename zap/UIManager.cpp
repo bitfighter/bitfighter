@@ -491,7 +491,7 @@ void UIManager::renderCurrent()
    // Run the active UI renderer
    mCurrentInterface->render();
    UserInterface::renderDiagnosticKeysOverlay();    // By putting this here, it will always get rendered, regardless of active UI
-   mCurrentInterface->renderMasterStatus();
+   mCurrentInterface->renderMasterStatus(mGame->getConnectionToMaster());
 }
 
 

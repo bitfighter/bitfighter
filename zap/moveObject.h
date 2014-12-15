@@ -344,7 +344,7 @@ public:
 //
 //public:
 //   // These four methods are all that's needed to add an editable attribute to a class...
-//   EditorAttributeMenuUI *getAttributeMenu();
+//   EditorAttributeMenuUI *getAttributeMenu(ClientGame *game) const;
 //   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
 //   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
 

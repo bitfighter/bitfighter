@@ -198,7 +198,7 @@ void EditorMenuUserInterface::setupMenus()
    // Only show the upload to database option if authenticated
    if(getGame()->getClientInfo()->isAuthenticated())
    {
-      string title = LevelDatabase::isLevelInDatabase(getGame()->getUIManager()->getUI<EditorUserInterface>()->getLevel()->getLevelDatabaseId()) ?
+      string title = LevelDatabase::isLevelInDatabase(getUIManager()->getUI<EditorUserInterface>()->getLevel()->getLevelDatabaseId()) ?
          "UPDATE LEVEL IN DB" :
          "UPLOAD LEVEL TO DB";
 

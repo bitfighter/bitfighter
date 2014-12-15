@@ -429,9 +429,9 @@ public:
    virtual void initializeEditor();
 
    // For editing attributes:
-   virtual EditorAttributeMenuUI *getAttributeMenu();                      // Override in child if it has an attribute menu
-   virtual void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);   // Called when we start editing to get menus populated
-   virtual void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we're done to retrieve values set by the menu
+   virtual EditorAttributeMenuUI *getAttributeMenu(ClientGame *game) const; // Override in child if it has an attribute menu
+   virtual void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
+   virtual void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
 
    ///// Lua interface
    // Top level Lua methods

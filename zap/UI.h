@@ -43,6 +43,7 @@ class ClientGame;
 class GameSettings;
 class UIManager;
 class Color;
+class MasterServerConnection;
 
 class UserInterface
 {
@@ -50,6 +51,8 @@ class UserInterface
 
 private:
    ClientGame *mClientGame;
+   UIManager *mUiManager;
+
    U32 mTimeSinceLastInput;
 
    static void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool autoLineWidth = true);
@@ -101,7 +104,7 @@ public:
    virtual bool usesEditorScreenMode() const;   // Returns true if the UI attempts to use entire screen like editor, false otherwise
 
    void renderConsole()const;             // Render game console
-   virtual void renderMasterStatus();     // Render master server connection status
+   virtual void renderMasterStatus(const MasterServerConnection *connectionToMaster) const;
 
    // Helpers to simplify dealing with key bindings
    static InputCode getInputCode(GameSettings *settings, BindingNameEnum binding);
@@ -111,6 +114,8 @@ public:
    void setInputCode(BindingNameEnum binding, InputCode inputCode);
    bool checkInputCode(BindingNameEnum, InputCode inputCode);
    const char *getInputCodeString(BindingNameEnum binding) const;
+
+   void setUiManager(UIManager *uiManager);
 
    // Input event handlers
    virtual bool onKeyDown(InputCode inputCode);

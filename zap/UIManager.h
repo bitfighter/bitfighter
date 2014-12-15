@@ -83,7 +83,9 @@ public:
       // Lazily initialize if UI has not yet been instantiated; store for later use
       if(!ui)  
       {
+         // TODO: set UI Manager in constructor
          ui = new T(mGame);
+         ui->setUiManager(this);
          mUis[typeinfo] = ui;
       }
 

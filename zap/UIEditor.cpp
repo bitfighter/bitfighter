@@ -128,8 +128,6 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 
    mAddingVertex = false;
 
-   mEditorAttributeMenuItemBuilder.initialize(game);
-
    mPreviewMode = false;
    mNormalizedScreenshotMode = false;
 
@@ -1148,7 +1146,7 @@ void EditorUserInterface::onActivate()
 }
 
 
-void EditorUserInterface::renderMasterStatus()
+void EditorUserInterface::renderMasterStatus(const MasterServerConnection *connectionToMaster) const
 {
    // Do nothing, don't render this in editor 
 }
@@ -4460,14 +4458,17 @@ void EditorUserInterface::startAttributeEditor()
          }
 
          // Activate the attribute editor if there is one
-         EditorAttributeMenuUI *menu = mEditorAttributeMenuItemBuilder.getAttributeMenu(obj_i);
-         if(menu)
+         EditorAttributeMenuUI *menu = getUIManager()->getUI<EditorAttributeMenuUI>();
+
+         bool hasMenu = menu->configureForObject(obj_i);
+
+         if(hasMenu)
          {
             menu->startEditingAttrs(obj_i);
             getUIManager()->activate(menu);
          }
 
-         break;
+         return;
       }
    }
 }

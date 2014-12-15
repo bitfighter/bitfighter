@@ -18,7 +18,6 @@
 #include "Timer.h"
 #include "Point.h"
 #include "Color.h"
-#include "EditorAttributeMenuItemBuilder.h"
 #include "Level.h"
 
 #include "tnlNetStringTable.h"
@@ -66,6 +65,7 @@ struct PluginInfo
 
 
 class BarrierX;
+class MasterServerConnection;
 
 class EditorUserInterface : public UserInterface
 {
@@ -184,8 +184,6 @@ private:
    void renderSaveMessage() const;
    void renderWarnings() const;
    void renderLingeringMessage() const;
-
-   EditorAttributeMenuItemBuilder mEditorAttributeMenuItemBuilder;
 
    bool mCreatingPoly;
    bool mCreatingPolyline;
@@ -319,7 +317,7 @@ protected:
    void onActivate();
    void onReactivate();
 
-   void renderMasterStatus();
+   void renderMasterStatus(const MasterServerConnection *connectionToMaster) const;
 
    bool usesEditorScreenMode() const;
 

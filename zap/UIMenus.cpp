@@ -99,7 +99,8 @@ void MenuUserInterface::initialize()
    mAssociatedObject = NULL;
 
    // Max number of menu items we show on screen before we go into scrolling mode -- won't work with mixed size menus
-   mMaxMenuSize = S32((DisplayManager::getScreenInfo()->getGameCanvasHeight() - 150) / (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)));
+   mMaxMenuSize = S32((DisplayManager::getScreenInfo()->getGameCanvasHeight() - 150) / 
+                      (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)));
 }
 
 

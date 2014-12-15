@@ -333,14 +333,14 @@ string SpeedZone::toLevelCode() const
 
 #ifndef ZAP_DEDICATED
 
-EditorAttributeMenuUI *SpeedZone::getAttributeMenu()
+EditorAttributeMenuUI *SpeedZone::getAttributeMenu(ClientGame *game) const
 {
    // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
    if(!mAttributeMenuUI)
    {
-      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
+      ClientGame *clientGame = static_cast<ClientGame *>(game);
 
-      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
+      mAttributeMenuUI = new EditorAttributeMenuUI(game);
 
       mAttributeMenuUI->addMenuItem(new CounterMenuItem("Speed:", 999, 100, minSpeed, maxSpeed, "", "Really slow", ""));
       mAttributeMenuUI->addMenuItem(new YesNoMenuItem("Snapping:", true, ""));

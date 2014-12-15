@@ -10,6 +10,12 @@
 #include "DisplayManager.h"   // For canvasHeight
 #include "ClientGame.h"       // For UIManager and callback
 
+#include "Spawn.h"
+#include "CoreGame.h"
+#include "TextItem.h"
+#include "PickupItem.h"
+#include "EngineeredItem.h"
+
 #include "Colors.h"
 
 #include "stringUtils.h"
@@ -340,9 +346,44 @@ void EditorAttributeMenuUI::startEditingAttrs(BfObject *object)
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
    Point center = (mAssociatedObject->getVert(0) + mAssociatedObject->getVert(1)) * ui->getCurrentScale() / 2 + ui->getCurrentOffset();
-   setMenuCenterPoint(center);  
+   setMenuCenterPoint(center); 
 
-   EditorAttributeMenuItemBuilder::startEditingAttrs(this, object);
+   EditorAttributeMenuUI *attributeMenu = getUIManager()->getUI<EditorAttributeMenuUI>();
+
+   switch(object->getObjectTypeNumber())
+   {
+      case AsteroidTypeNumber:
+         attributeMenu->getMenuItem(0)->setIntValue(static_cast<Asteroid *>(object)->getCurrentSize());
+         break;
+
+      case ShipSpawnTypeNumber:
+      case AsteroidSpawnTypeNumber:
+      case FlagSpawnTypeNumber:
+         attributeMenu->getMenuItem(0)->setIntValue(static_cast<AbstractSpawn *>(object)->getSpawnTime());
+         break;
+
+      case CoreTypeNumber:
+         attributeMenu->getMenuItem(0)->setIntValue(S32(static_cast<CoreItem *>(object)->getStartingHealth()+0.5));
+         break;
+
+      case TurretTypeNumber:
+      case ForceFieldProjectorTypeNumber:
+         attributeMenu->getMenuItem(0)->setIntValue(static_cast<EngineeredItem *>(object)->getHealRate());
+         break;
+
+      case RepairItemTypeNumber:
+      case EnergyItemTypeNumber:
+         attributeMenu->getMenuItem(0)->setIntValue(static_cast<PickupItem *>(object)->getRepopDelay());
+         break;
+
+      case TextItemTypeNumber:
+         attributeMenu->getMenuItem(0)->setValue(static_cast<TextItem *>(object)->getText());
+         break;
+
+      default:
+         object->startEditingAttrs(attributeMenu);
+         break;
+   }
 }
 
 
@@ -356,12 +397,141 @@ void EditorAttributeMenuUI::doneEditingAttrs(BfObject *object)
 {
    // Has to be object, not mAssociatedObject... this gets run once for every selected item of same type as mAssociatedObject, 
    // and we need to make sure that those objects (passed in as object), get updated
-   EditorAttributeMenuItemBuilder::doneEditingAttrs(this, object);     
+   EditorAttributeMenuUI *attributeMenu = getUIManager()->getUI<EditorAttributeMenuUI>();
+
+   switch(object->getObjectTypeNumber())
+   {
+      case AsteroidTypeNumber:
+         static_cast<Asteroid *>(object)->setCurrentSize(attributeMenu->getMenuItem(0)->getIntValue());
+         break;
+
+      case ShipSpawnTypeNumber:
+      case AsteroidSpawnTypeNumber:
+      case FlagSpawnTypeNumber:
+         static_cast<AbstractSpawn *>(object)->setSpawnTime(attributeMenu->getMenuItem(0)->getIntValue());
+         break;
+
+      case CoreTypeNumber:
+         static_cast<CoreItem *>(object)->setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()));
+         break;
+
+         
+      case TurretTypeNumber:
+      case ForceFieldProjectorTypeNumber:
+         static_cast<EngineeredItem *>(object)->setHealRate(attributeMenu->getMenuItem(0)->getIntValue());
+         break;
+
+      case RepairItemTypeNumber:
+      case EnergyItemTypeNumber:
+         static_cast<PickupItem *>(object)->setRepopDelay(attributeMenu->getMenuItem(0)->getIntValue());
+         break;
+
+      case TextItemTypeNumber:
+         static_cast<TextItem *>(object)->setText(attributeMenu->getMenuItem(0)->getValue());
+         break;
+
+      default:
+         object->doneEditingAttrs(attributeMenu);
+         break;
+   }
 
    // Only run on object that is the subject of this editor.  See TextItemEditorAttributeMenuUI::doneEditingAttrs() for explanation
    // of why this may be run on objects that are not actually the ones being edited (hence the need for passing an object in).
    if(object == mAssociatedObject)   
       getUIManager()->getUI<EditorUserInterface>()->doneEditingAttributes(this, mAssociatedObject); 
+}
+
+
+// TODO: Move the following class-specific code into the objects themselves
+bool EditorAttributeMenuUI::configureForObject(BfObject *obj)
+{
+   switch(obj->getObjectTypeNumber())
+   {
+      case AsteroidTypeNumber:
+      { 
+         addMenuItem(
+            new CounterMenuItem("Size:", Asteroid::ASTEROID_INITIAL_SIZELEFT, 1, 1, Asteroid::ASTEROID_SIZELEFT_MAX, "", "", "")
+            );
+
+         // Add our standard save and exit option to the menu
+         addSaveAndQuitMenuItem();
+         return true;
+         }
+
+      case ShipSpawnTypeNumber:
+      case AsteroidSpawnTypeNumber:
+      case FlagSpawnTypeNumber:
+      {
+         if(static_cast<AbstractSpawn *>(obj)->getDefaultRespawnTime()==-1)  // No editing RespawnTimer for Ship Spawn
+            return false;
+
+         CounterMenuItem *menuItem = new CounterMenuItem("Spawn Timer:", 999, 1, 0, 1000, "secs", "Never spawns",
+            "Time it takes for each item to be spawned");
+         addMenuItem(menuItem);
+
+         // Add our standard save and exit option to the menu
+         addSaveAndQuitMenuItem();
+
+         return true;
+      }
+
+      case CoreTypeNumber:
+      {
+         addMenuItem(new CounterMenuItem("Hit points:", CoreItem::CoreDefaultStartingHealth,
+            1, 1, S32(CoreItem::DamageReductionRatio), "", "", ""));
+
+         // Add our standard save and exit option to the menu
+         addSaveAndQuitMenuItem();
+
+         return true;
+      }
+
+      case TurretTypeNumber:
+      case ForceFieldProjectorTypeNumber:
+      {
+         // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
+         CounterMenuItem *menuItem = new CounterMenuItem("10% Heal:", 99, 1, 0, 100, "secs", "Disabled",
+            "Time for this item to heal itself 10%");
+         addMenuItem(menuItem);
+
+         // Add our standard save and exit option to the menu
+         addSaveAndQuitMenuItem();
+
+         return true;
+      }
+
+      case RepairItemTypeNumber:
+      case EnergyItemTypeNumber:
+      {
+         // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
+         CounterMenuItem *menuItem = new CounterMenuItem("Regen Time:", 99, 1, 0, 100, "secs", "No regen",
+            "Time for this item to reappear after it has been picked up");
+
+         addMenuItem(menuItem);
+
+         // Add our standard save and exit option to the menu
+         addSaveAndQuitMenuItem();
+
+         return true;
+      }
+
+      case TextItemTypeNumber:
+      {
+         // "Blah" will be overwritten when startEditingAttrs() is called
+         TextEntryMenuItem *menuItem = new TextEntryMenuItem("Text: ", "Blah", "", "", MAX_TEXTITEM_LEN);
+         menuItem->setTextEditedCallback(TextItem::textEditedCallback);
+
+         addMenuItem(menuItem);
+
+         // Add our standard save and exit option to the menu
+         addSaveAndQuitMenuItem();
+
+         return true;
+      }
+
+      default:
+         return true;
+   }
 }
 
 
@@ -372,7 +542,7 @@ void EditorAttributeMenuUI::doneEditingAttrs(BfObject *object)
 PluginMenuUI::PluginMenuUI(ClientGame *game, const string &title) :
       Parent(game, title)
 {
-   /* Do nothing */
+   // Do nothing 
 }
 
 
