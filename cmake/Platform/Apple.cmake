@@ -132,7 +132,7 @@ function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 	set(OSX_BUILD_RESOURCE_DIR "${OSX_BUILD_RESOURCE_DIR}" PARENT_SCOPE)
 	
 	# Special flags needed because of LuaJIT on 64 bit OSX
-	if(USE_LUAJIT AND CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+	if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
 		set_target_properties(${targetName} PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
 	endif()
 endfunction()
@@ -189,7 +189,7 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	)
 	
 	# 64-bit OSX needs to use shared LuaJIT library
-	if(USE_LUAJIT AND CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+	if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
 		add_custom_command(TARGET ${targetName} POST_BUILD
 			COMMAND cp -rp ${luaLibDir}libluajit.dylib ${frameworksDir}
 		)
