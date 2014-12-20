@@ -30,21 +30,18 @@ if(NOT XCOMPILE)
 
 	# Set the proper SDK for compiling
 	if(OSX_DEPLOY_TARGET VERSION_EQUAL "10.4")
-		set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.4u.sdk/")
+		# We will use the 10.5 SDK for ppc because it is friendlier to certain libraries (like LuaJIT)
+		if(CMAKE_OSX_ARCHITECTURES STREQUAL "ppc")
+			set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.5.sdk/")
+		else()
+			set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.4u.sdk/")
+		endif()
 	else()
 		set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX${OSX_DEPLOY_TARGET}.sdk/")
 	endif()
 endif()
 
-
 message(STATUS "Compiling for OSX architectures: ${CMAKE_OSX_ARCHITECTURES}")
-
-
-# LuaJIT will not compile on 10.4 ppc - it requires GCC >= 4.3
-# Disable LuaJIT for cross-compile (for now)
-if(CMAKE_OSX_ARCHITECTURES STREQUAL "ppc" OR XCOMPILE)
-	set(USE_LUAJIT NO)
-endif()
 
 
 #
