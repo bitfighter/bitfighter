@@ -182,7 +182,7 @@ void EditorUndoManager::undo()
 {
    TNLAssert(!mInTransaction, "No undo in transactions!");
 
-   // Nothing to undo!
+   // Nothing to undo!  (will probably never happen, as this is checked by caller)
    if(mUndoLevel == 0)
       return;
 
