@@ -711,7 +711,7 @@ const char *gGameObjectInfo[] = {
    /* 24 */   "Test Item",     "Bouncy ball",
    /* 25 */   "Resource Item", "Use with engineer module",
    /* 26 */   "Soccer Ball",   "Push into enemy goal in Soccer game",
-   /* 27 */   "Core",          "Kill the enemy's; defend yours OR DIE!",
+   /* 27 */   "Core",          "Destroy the enemy's; defend yours at all cost!",
    /* 28 */   "GoFast",        "Makes ship go fast"
 };
 
