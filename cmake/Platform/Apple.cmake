@@ -28,14 +28,17 @@ if(NOT XCOMPILE)
 	endif()
 
 
-	# Set the proper SDK for compiling
+	# Set the proper SDK for compiling - we deploy to 10.4 for i386, ppc
+	# but will use 10.6 to compile i386 and 10.5 to compile ppc.  Internally, they should add
+	# the flag -mmacosx-version-min=10.4 and will be compatible with that OS version
 	if(OSX_DEPLOY_TARGET VERSION_EQUAL "10.4")
 		# We will use the 10.5 SDK for ppc because it is friendlier to certain libraries (like LuaJIT)
 		if(CMAKE_OSX_ARCHITECTURES STREQUAL "ppc")
 			set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.5.sdk/")
 		else()
-			set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.4u.sdk/")
+			set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk/")
 		endif()
+	# Here we use whatever the default SDK is for x86_64, but will deploy to OSX 10.6
 	else()
 		set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX${OSX_DEPLOY_TARGET}.sdk/")
 	endif()
