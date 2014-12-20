@@ -14,11 +14,16 @@
 #include "stringUtils.h"         // For itos()
 
 
+#ifndef ZAP_DEDICATED
+#  include "UIQuickMenu.h"
+#endif
+
+
 namespace Zap
 {
 
 // Constructor
-PickupItem::PickupItem(float radius, S32 repopDelay) : Parent(radius)
+PickupItem::PickupItem(F32 radius, S32 repopDelay) : Parent(radius)
 {
    show();
 
@@ -201,6 +206,26 @@ void PickupItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &val
    else
       values.push_back(itos(mRepopDelay) + " sec" + ( mRepopDelay != 1 ? "s" : ""));
 }
+
+
+#ifndef ZAP_DEDICATED
+
+bool PickupItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   CounterMenuItem *menuItem = new CounterMenuItem("Regen Time:", getRepopDelay(), 1, 0, 100, "secs", "No regen",
+                                                   "Time for this item to reappear after it has been picked up");
+   attributeMenu->addMenuItem(menuItem);
+
+   return true;
+}
+
+
+void PickupItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   setRepopDelay(attributeMenu->getMenuItem(0)->getIntValue());
+}
+
+#endif
 
 
 /////

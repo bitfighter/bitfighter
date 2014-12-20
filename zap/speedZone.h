@@ -31,10 +31,6 @@ private:
 
    void computeExtent();                                            // Bounding box for quick collision-possibility elimination
 
-#ifndef ZAP_DEDICATED
-   static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
-#endif
-
 public:
    enum {
       halfWidth = 25,
@@ -91,9 +87,7 @@ public:
    void onGeomChanged();
 
 #ifndef ZAP_DEDICATED
-   // These four methods are all that's needed to add an editable attribute to a class...
-   EditorAttributeMenuUI *getAttributeMenu(ClientGame *game) const;
-   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
+   bool startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
    void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
 
    void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);

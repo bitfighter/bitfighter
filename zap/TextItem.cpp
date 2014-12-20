@@ -17,6 +17,7 @@
 #ifndef ZAP_DEDICATED
 #  include "RenderUtils.h"
 #  include "ClientGame.h"
+#  include "UIQuickMenu.h"
 #endif
 
 #include <cmath>
@@ -29,10 +30,6 @@ using namespace LuaArgs;
 
 TNL_IMPLEMENT_NETOBJECT(TextItem);
 
-
-#ifndef ZAP_DEDICATED
-EditorAttributeMenuUI *TextItem::mAttributeMenuUI = NULL;
-#endif
 
 // Combined Lua / C++ constructor
 TextItem::TextItem(lua_State *L)
@@ -125,6 +122,28 @@ const char *TextItem::getOnScreenName()     const  { return "Text";      }
 const char *TextItem::getOnDockName()       const  { return "TextItem";  }
 const char *TextItem::getPrettyNamePlural() const  { return "TextItems"; }
 const char *TextItem::getEditorHelpString() const  { return "Draws a bit of text on the map.  Visible only to team, or to all if neutral."; }
+
+
+#ifndef ZAP_DEDICATED
+
+bool TextItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   // "Blah" will be overwritten when startEditingAttrs() is called
+   TextEntryMenuItem *menuItem = new TextEntryMenuItem("Text: ", getText(), "", "", MAX_TEXTITEM_LEN);
+                                                       menuItem->setTextEditedCallback(textEditedCallback);
+    attributeMenu->addMenuItem(menuItem);
+
+    return true;
+}
+
+
+void TextItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   setText(attributeMenu->getMenuItem(0)->getValue());
+}
+
+#endif
+
 
 
 bool TextItem::hasTeam()      { return true; }

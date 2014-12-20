@@ -4460,13 +4460,9 @@ void EditorUserInterface::startAttributeEditor()
          // Activate the attribute editor if there is one
          EditorAttributeMenuUI *menu = getUIManager()->getUI<EditorAttributeMenuUI>();
 
-         bool hasMenu = menu->configureForObject(obj_i);
-
-         if(hasMenu)
-         {
-            menu->startEditingAttrs(obj_i);
+         bool ok = menu->startEditingAttrs(obj_i);
+         if(ok)
             getUIManager()->activate(menu);
-         }
 
          return;
       }

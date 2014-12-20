@@ -338,18 +338,7 @@ public:
    bool processArguments(S32 argc2, const char **argv2, Level *level);
    string toLevelCode() const;
 
-//#ifndef ZAP_DEDICATED
-//private:
-//   static EditorAttributeMenuUI *mAttributeMenuUI;
-//
-//public:
-//   // These four methods are all that's needed to add an editable attribute to a class...
-//   EditorAttributeMenuUI *getAttributeMenu(ClientGame *game) const;
-//   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
-//   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
-
    virtual void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
-//#endif
 
    static U32 getDesignCount();
    S32 getCurrentSize() const;
@@ -365,6 +354,11 @@ public:
 
    F32 getEditorRadius(F32 currentScale) const;
    void renderDock(const Color &color) const;
+
+#ifndef ZAP_DEDICATED
+   bool startEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+#endif
 
    ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Asteroid);

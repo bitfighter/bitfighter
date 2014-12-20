@@ -11,6 +11,7 @@
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "gameObjectRender.h"
+#  include "UIQuickMenu.h"
 #endif
 
 #include "Colors.h"
@@ -1064,42 +1065,33 @@ void CoreItem::onItemExploded(Point pos)
 void CoreItem::onGeomChanged()
 {
    Parent::onGeomChanged();
-
-   //GameType *gameType = getGame()->getGameType();
-   //fillPanelGeom(getPos(), gameType->getTotalGamePlayedInMs() * mRotateSpeed, mPanelGeom);
 }
+
+
+#ifndef ZAP_DEDICATED
+
+bool CoreItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->addMenuItem(new CounterMenuItem("Hit points:", S32(getStartingHealth() + 0.5),
+                              1, 1, S32(CoreItem::DamageReductionRatio), "", "", ""));
+   return true;
+}
+
+
+void CoreItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()));
+}
+
+#endif
+
+
+
 #endif
 
 
 bool CoreItem::canBeHostile() { return true; }
 bool CoreItem::canBeNeutral() { return true; }
-
-
-S32 CoreItem::lua_setTeam(lua_State *L)
-{
-   S32 oldTeamIndex = this->getTeam();
-   S32 results = Parent::lua_setTeam(L);
-   S32 newTeamIndex = this->getTeam();
-
-   if(getGame() && getGame()->getGameType() && getGame()->getGameType()->getGameTypeId() == CoreGame)
-   {
-      if(oldTeamIndex >= 0 && oldTeamIndex < getGame()->getTeamCount())
-      {
-         Team* oldTeam = dynamic_cast<Team *>(getGame()->getTeam(oldTeamIndex));
-         oldTeam->addScore(-1);
-         getGame()->getGameType()->s2cSetTeamScore(oldTeamIndex, oldTeam->getScore());
-      }
-   
-      if(newTeamIndex >= 0)
-      {
-         Team* newTeam = dynamic_cast<Team *>(getGame()->getTeam(newTeamIndex));
-         newTeam->addScore(1);
-         getGame()->getGameType()->s2cSetTeamScore(newTeamIndex, newTeam->getScore());
-      }
-   }
-
-   return results;
-}
 
 
 /////
@@ -1170,5 +1162,32 @@ S32 CoreItem::lua_setFullHealth(lua_State *L)
    return 0;     
 }
 
+
+// Overrides
+S32 CoreItem::lua_setTeam(lua_State *L)
+{
+   S32 oldTeamIndex = this->getTeam();
+   S32 results = Parent::lua_setTeam(L);
+   S32 newTeamIndex = this->getTeam();
+
+   if(getGame()&&getGame()->getGameType()&&getGame()->getGameType()->getGameTypeId()==CoreGame)
+   {
+      if(oldTeamIndex>=0&&oldTeamIndex < getGame()->getTeamCount())
+      {
+         Team* oldTeam = dynamic_cast<Team *>(getGame()->getTeam(oldTeamIndex));
+         oldTeam->addScore(-1);
+         getGame()->getGameType()->s2cSetTeamScore(oldTeamIndex, oldTeam->getScore());
+      }
+
+      if(newTeamIndex>=0)
+      {
+         Team* newTeam = dynamic_cast<Team *>(getGame()->getTeam(newTeamIndex));
+         newTeam->addScore(1);
+         getGame()->getGameType()->s2cSetTeamScore(newTeamIndex, newTeam->getScore());
+      }
+   }
+
+   return results;
+}
 
 }; /* namespace Zap */

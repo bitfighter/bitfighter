@@ -39,11 +39,6 @@ TNL_IMPLEMENT_NETOBJECT_RPC(LineItem, s2cSetGeom,
 const S32 LineItem::MIN_LINE_WIDTH = 1;
 const S32 LineItem::MAX_LINE_WIDTH = 255;
 
-// Statics:
-#ifndef ZAP_DEDICATED
-   EditorAttributeMenuUI *LineItem::mAttributeMenuUI = NULL;
-#endif
-
 // Combined C++ / Lua constructor
 /**
  * @luafunc LineItem::LineItem()
@@ -325,29 +320,12 @@ void LineItem::onGeomChanged()
 
 #ifndef ZAP_DEDICATED
 
-EditorAttributeMenuUI *LineItem::getAttributeMenu(ClientGame *game) const
-{
-   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
-   if(!mAttributeMenuUI)
-   {
-      ClientGame *clientGame = static_cast<ClientGame *>(game);
-
-      mAttributeMenuUI = new EditorAttributeMenuUI(game);
-
-      mAttributeMenuUI->addMenuItem(new YesNoMenuItem("Global:", true, "Viewable by all teams"));
-
-      // Add our standard save and exit option to the menu
-      mAttributeMenuUI->addSaveAndQuitMenuItem();
-   }
-
-   return mAttributeMenuUI;
-}
-
-
 // Get the menu looking like what we want
-void LineItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+bool LineItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
    attributeMenu->getMenuItem(0)->setIntValue(mGlobal ? 1 : 0);
+
+   return true;
 }
 
 

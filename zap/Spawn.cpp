@@ -15,15 +15,15 @@
 #include "gameConnection.h"
 #include "tnlRandom.h"
 
+#ifndef ZAP_DEDICATED
+#  include "UIQuickMenu.h"
+#endif
+
+
 namespace Zap
 {
 
 using namespace LuaArgs;
-
-// Statics:
-#ifndef ZAP_DEDICATED
-   EditorAttributeMenuUI *AbstractSpawn::mAttributeMenuUI = NULL;
-#endif
 
 // TODO: Move all time related stuff down to ItemSpawn
 
@@ -227,6 +227,7 @@ const char *Spawn::getOnDockName()        const { return "Spawn";        }
 const char *Spawn::getPrettyNamePlural()  const { return "Spawn Points"; }
 const char *Spawn::getEditorHelpString()  const { return "Location where ships start.  At least one per team is required. [G]"; }
 
+
 const char *Spawn::getClassName() const  { return "Spawn"; }
 
 
@@ -318,6 +319,26 @@ const char *ItemSpawn::getClassName() const                                     
 S32 ItemSpawn::getDefaultRespawnTime()                                            { TNLAssert(false, "Not implemented!"); return 0;  }
 void ItemSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const { TNLAssert(false, "Not implemented!"); }
 void ItemSpawn::renderDock(const Color &color) const                              { TNLAssert(false, "Not implemented!"); }
+
+
+#ifndef ZAP_DEDICATED
+
+bool ItemSpawn::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   CounterMenuItem *menuItem = new CounterMenuItem("Spawn Timer:", getSpawnTime(), 1, 0, 1000, "secs", "Never spawns",
+      "Time it takes for each item to be spawned");
+   attributeMenu->addMenuItem(menuItem);
+
+   return true;
+}
+
+
+void ItemSpawn::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   setSpawnTime(attributeMenu->getMenuItem(0)->getIntValue());
+}
+
+#endif
 
 
 /////
@@ -465,6 +486,7 @@ const char *AsteroidSpawn::getOnScreenName()     const  { return "AsteroidSpawn"
 const char *AsteroidSpawn::getOnDockName()       const  { return "ASP";                   }
 const char *AsteroidSpawn::getPrettyNamePlural() const  { return "Asteroid Spawn Points"; }
 const char *AsteroidSpawn::getEditorHelpString() const  { return "Periodically spawns a new asteroid."; }
+
 
 const char *AsteroidSpawn::getClassName() const  { return "AsteroidSpawn"; }
 
@@ -683,6 +705,7 @@ const char *FlagSpawn::getOnScreenName()     const  { return "FlagSpawn";       
 const char *FlagSpawn::getOnDockName()       const  { return "FlagSpawn";         }
 const char *FlagSpawn::getPrettyNamePlural() const  { return "Flag Spawn points"; }
 const char *FlagSpawn::getEditorHelpString() const  { return "Location where flags (or balls in Soccer) spawn after capture."; }
+
 
 const char *FlagSpawn::getClassName() const  { return "FlagSpawn"; }
 

@@ -18,6 +18,7 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"        // for accessing client's spark manager
+#  include "UIQuickMenu.h"
 #endif
 
 #include "Colors.h"
@@ -1032,8 +1033,7 @@ void EngineeredItem::healObject(S32 time)
 // Server only
 void EngineeredItem::getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const
 {
-   // Fill zonePoints
-   offsetPolygon(getCollisionPoly(), points, bufferRadius);
+   offsetPolygon(getCollisionPoly(), points, bufferRadius);    // Fill zonePoints
 }
 
 
@@ -1104,6 +1104,26 @@ Point EngineeredItem::mountToWall(const Point &pos,
       return pos;
    }
 }
+
+
+#ifndef ZAP_DEDICATED
+
+bool EngineeredItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   CounterMenuItem *menuItem = new CounterMenuItem("10% Heal:", getHealRate(), 1, 0, 100, "secs", "Disabled",
+      "Time for this item to heal itself 10%");
+   attributeMenu->addMenuItem(menuItem);
+
+   return true;
+}
+
+
+void EngineeredItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   setHealRate(attributeMenu->getMenuItem(0)->getIntValue());
+}
+
+#endif
 
 
 /////

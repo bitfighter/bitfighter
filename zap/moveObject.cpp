@@ -24,6 +24,7 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
+#  include "UIQuickMenu.h"
 #endif
 
 
@@ -1466,6 +1467,24 @@ F32 Asteroid::getEditorRadius(F32 currentScale) const
 }
 
 
+#ifndef ZAP_DEDICATED
+
+bool Asteroid::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->addMenuItem(new CounterMenuItem("Size:", getCurrentSize(), 1, 1, ASTEROID_SIZELEFT_MAX, "", "", ""));
+
+   return true;
+}
+
+
+void Asteroid::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   setCurrentSize(attributeMenu->getMenuItem(0)->getIntValue());
+}
+
+#endif
+
+
 const Vector<Point> *Asteroid::getCollisionPoly() const
 {
    //for(S32 i = 0; i < ASTEROID_POINTS; i++)
@@ -1649,52 +1668,11 @@ string Asteroid::toLevelCode() const
 }
 
 
-//#ifndef ZAP_DEDICATED
-
-//EditorAttributeMenuUI *Asteroid::mAttributeMenuUI = NULL;
-//
-//EditorAttributeMenuUI *Asteroid::getAttributeMenu(ClientGame *game) const
-//{
-//   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
-//   if(!mAttributeMenuUI)
-//   {
-//      ClientGame *clientGame = static_cast<ClientGame *>(game);
-//
-//      mAttributeMenuUI = new EditorAttributeMenuUI(game);
-//
-//      mAttributeMenuUI->addMenuItem(new CounterMenuItem("Size:", mSizeLeft, 1, 1, ASTEROID_SIZELEFT_MAX, "", "", ""));
-//
-//      // Add our standard save and exit option to the menu
-//      mAttributeMenuUI->addSaveAndQuitMenuItem();
-//   }
-//
-//   return mAttributeMenuUI;
-//}
-//
-//
-//// Get the menu looking like what we want
-//void Asteroid::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-//{
-//   attributeMenu->getMenuItem(0)->setIntValue(mSizeLeft);
-//}
-//
-//
-//// Retrieve the values we need from the menu
-//void Asteroid::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-//{
-//   mSizeLeft = attributeMenu->getMenuItem(0)->getIntValue();
-//   setRadius(getAsteroidRadius(mSizeLeft));
-//   setMass(getAsteroidMass(mSizeLeft));
-//}
-
-
 // Render some attributes when item is selected but not being edited
 void Asteroid::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
    keys.push_back("Size");   values.push_back(itos(mSizeLeft));
 }
-
-//#endif
 
 
 /////

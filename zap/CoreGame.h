@@ -199,6 +199,11 @@ public:
    const char *getOnDockName() const;
    const char *getOnScreenName() const;
 
+#ifndef ZAP_DEDICATED
+   bool startEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+#endif
+
    F32 getEditorRadius(F32 currentScale) const;
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;    
    void renderDock(const Color &color) const;

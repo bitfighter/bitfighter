@@ -30,7 +30,6 @@ protected:
 
    S32 mRepopDelay;            // Period of mRepopTimer, in seconds
 
-
 public:
    PickupItem(float radius = 1, S32 repopDelay = 20);   // Constructor
    virtual ~PickupItem();                               // Destructor
@@ -57,6 +56,12 @@ public:
    void show();
    virtual bool pickup(Ship *theShip);
    virtual void onClientPickup();
+
+   ///// Editor methods
+#ifndef ZAP_DEDICATED
+   bool startEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+#endif
 
 	///// Lua interface
 	LUAW_DECLARE_CLASS(PickupItem);

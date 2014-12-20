@@ -21,9 +21,6 @@ class AbstractSpawn : public PointObject
 {
    typedef PointObject Parent;
 
-private:
-   static EditorAttributeMenuUI *mAttributeMenuUI;
-
 protected:
    S32 mSpawnTime;
    Timer mTimer;
@@ -59,6 +56,8 @@ public:
    void resetTimer();
    U32 getPeriod();     // temp debugging
 
+
+   ///// Editor methods
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const = 0;
    virtual void renderDock(const Color &color) const = 0;
 };
@@ -81,17 +80,18 @@ public:
 
    Spawn *clone() const;
 
-   const char *getEditorHelpString() const;
-   const char *getPrettyNamePlural() const;
-   const char *getOnDockName() const;
-   const char *getOnScreenName() const;
-
    const char *getClassName() const;
 
    string toLevelCode() const;
    bool processArguments(S32 argc, const char **argv, Level *level);
 
    S32 getDefaultRespawnTime();    // Somewhat meaningless in this context
+
+   ///// Editor methods
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
 
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
    void renderDock(const Color &color) const;
@@ -129,6 +129,10 @@ public:
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
    virtual void renderDock(const Color &color) const;
 
+#ifndef ZAP_DEDICATED
+   bool startEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+#endif
 
    ///// Lua interface
    LUAW_DECLARE_ABSTRACT_CLASS(ItemSpawn);
@@ -164,11 +168,6 @@ public:
 
    AsteroidSpawn *clone() const;
 
-   const char *getEditorHelpString() const;
-   const char *getPrettyNamePlural() const;
-   const char *getOnDockName() const;
-   const char *getOnScreenName() const;
-
    const char *getClassName() const;
 
    S32 getDefaultRespawnTime();
@@ -180,6 +179,13 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    void renderLayer(S32 layerIndex);
+
+   ///// Editor methods
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
+
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
    void renderDock(const Color &color) const;
 
@@ -224,16 +230,17 @@ public:
 
    void spawn();
 
+   const char *getClassName() const;
+
+   S32 getDefaultRespawnTime();
+
+
+   ///// Editor methods
    const char *getEditorHelpString() const;
    const char *getPrettyNamePlural() const;
    const char *getOnDockName() const;
    const char *getOnScreenName() const;
 
-   const char *getClassName() const;
-
-   S32 getDefaultRespawnTime();
-
-   //void spawn(Game *game);
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
    void renderDock(const Color &color) const;
 

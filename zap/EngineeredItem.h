@@ -22,10 +22,6 @@ private:
 
    static const F32 EngineeredItemRadius;
 
-#ifndef ZAP_DEDICATED
-   static EditorAttributeMenuUI *mAttributeMenuUI;    // Menu for text editing; since it's static, don't bother with smart pointer
-#endif   
-   
    void computeExtent();
 
    virtual F32 getSelectionOffsetMagnitude();         // Provides base magnitude for getEditorSelectionOffset()
@@ -124,10 +120,15 @@ public:
    bool isSnapped() const;
 
 
-   /////
-   // Editor stuff
+   ///// Editor methods
    virtual string toLevelCode() const;
    virtual void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
+
+#ifndef ZAP_DEDICATED
+   bool startEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+#endif
+
 
 	///// Lua interface
 	LUAW_DECLARE_CLASS(EngineeredItem);

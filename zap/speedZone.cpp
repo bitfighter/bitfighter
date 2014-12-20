@@ -38,11 +38,6 @@ const U16 SpeedZone::minSpeed = 500;
 const U16 SpeedZone::maxSpeed = 5000;
 const U16 SpeedZone::defaultSpeed = 2000;
 
-#ifndef ZAP_DEDICATED
-   EditorAttributeMenuUI *SpeedZone::mAttributeMenuUI = NULL;
-#endif
-
-
 // Combined C++/Lua constructor
 SpeedZone::SpeedZone(lua_State *L)
 {
@@ -333,31 +328,13 @@ string SpeedZone::toLevelCode() const
 
 #ifndef ZAP_DEDICATED
 
-EditorAttributeMenuUI *SpeedZone::getAttributeMenu(ClientGame *game) const
-{
-   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
-   if(!mAttributeMenuUI)
-   {
-      ClientGame *clientGame = static_cast<ClientGame *>(game);
-
-      mAttributeMenuUI = new EditorAttributeMenuUI(game);
-
-      mAttributeMenuUI->addMenuItem(new CounterMenuItem("Speed:", 999, 100, minSpeed, maxSpeed, "", "Really slow", ""));
-      mAttributeMenuUI->addMenuItem(new YesNoMenuItem("Snapping:", true, ""));
-
-      // Add our standard save and exit option to the menu
-      mAttributeMenuUI->addSaveAndQuitMenuItem();
-   }
-
-   return mAttributeMenuUI;
-}
-
-
 // Get the menu looking like what we want
-void SpeedZone::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+bool SpeedZone::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   attributeMenu->getMenuItem(0)->setIntValue(mSpeed);
-   attributeMenu->getMenuItem(1)->setIntValue(mSnapLocation ? 1 : 0);
+   attributeMenu->addMenuItem(new CounterMenuItem("Speed:", mSpeed, 100, minSpeed, maxSpeed, "", "Really slow", ""));
+   attributeMenu->addMenuItem(new YesNoMenuItem("Snapping:", mSnapLocation, ""));
+
+   return true;
 }
 
 
