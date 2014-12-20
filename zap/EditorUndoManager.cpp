@@ -54,8 +54,22 @@ void EditorUndoManager::fixupActionList()
 
 void EditorUndoManager::saveAction(EditorAction action, const BfObject *bfObject)
 {
+   // Handle special case... if we're in a MergeAction, and the first part was creating the object, and
+   // now we want to delete the object, we'll just back it out and call the whole thing a wash, as if the
+   // create/delete cycle never occurred.  An example of where this happens is when you create an object
+   // by dragging from the dock (creating a create action that expects to be merged with a move action),
+   // but instead drag the item back to the dock; now we have a create merging with a delete, and the 
+   // whole things should just go away.
+   if(mInMergeAction && action == ActionDelete)
+   {
+      mInMergeAction = false;
+      return;
+   }
+
+
    TNLAssert(!mInMergeAction, "Should not be in the midst of a merge action!");
 
+   // Pick which action list we should be working with
    Vector<EditorWorkUnit *> *actionList = mInTransaction ? &mTransactionActions : &mActions;
 
    if(!mInTransaction)
@@ -227,12 +241,11 @@ static bool transactionObjectsEqual(const Vector<EditorWorkUnit *> &first, const
 }
 
 
-void EditorUndoManager::endTransaction(ChangeIdentifier ident)
+void EditorUndoManager::endTransaction(ChangeIdentifier ident)    // ident defaults to ChangeIdNone
 {
    TNLAssert(mInTransaction, "Should be in a transaction!");
 
    mInTransaction = false;
-
 
    if(mTransactionActions.size() == 0)
    {

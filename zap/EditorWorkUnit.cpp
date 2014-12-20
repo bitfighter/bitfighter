@@ -84,6 +84,11 @@ const BfObject *EditorWorkUnitCreate::getObject() const
 }
 
 
+EditorAction EditorWorkUnitCreate::getAction() const
+{
+   return ActionCreate;
+}
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -140,6 +145,12 @@ S32 EditorWorkUnitDelete::getSerialNumber() const
 const BfObject *EditorWorkUnitDelete::getObject() const
 {
    return NULL; // ?
+}
+
+
+EditorAction EditorWorkUnitDelete::getAction() const
+{
+   return ActionDelete;
 }
 
 
@@ -223,6 +234,12 @@ const BfObject *EditorWorkUnitChange::getObject() const
 }
 
 
+EditorAction EditorWorkUnitChange::getAction() const
+{
+   return ActionChange;
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -301,6 +318,14 @@ void EditorWorkUnitGroup::mergeTransactions(const Vector<EditorWorkUnit *> &newW
    for(S32 i = 0; i < mWorkUnits.size(); i++)
       mWorkUnits[i]->merge(newWorkUnits[i]);
 }
+
+
+
+EditorAction EditorWorkUnitGroup::getAction() const
+{
+   return ActionGroup;
+}
+
 
 
 } };  // Nested namespace

@@ -27,6 +27,7 @@ enum EditorAction {
    ActionCreate,
    ActionDelete,
    ActionChange,
+   ActionGroup
    /*ActionChangeAttribs,
    ActionChangeTeams*/
 };
@@ -51,6 +52,8 @@ public:
    virtual S32 getSerialNumber() const = 0;
    virtual void merge(const EditorWorkUnit *workUnit) = 0;
    virtual const BfObject *getObject() const = 0;
+
+   virtual EditorAction getAction() const = 0;
 };
 
 
@@ -78,6 +81,8 @@ public:
 
    S32 getSerialNumber() const;
    const BfObject *getObject() const;
+
+   EditorAction getAction() const;
 };
 
 
@@ -105,6 +110,8 @@ public:
 
    S32 getSerialNumber() const;
    const BfObject *getObject() const;
+
+   EditorAction getAction() const;
 };
 
 
@@ -136,6 +143,8 @@ public:
 
    S32 getSerialNumber() const;
    const BfObject *getObject() const;
+
+   EditorAction getAction() const;
 };
 
 
@@ -169,6 +178,8 @@ public:
 
    S32 getSerialNumber() const;
    const BfObject *getObject() const;
+
+   EditorAction getAction() const;
 };
 
 
