@@ -66,6 +66,8 @@ protected:
    Vector<LevelInfo> mLevelInfos;   // Info about these levels
 
 public:
+   static const string TestFileName;
+
    LevelSource();             // Constructor
    virtual ~LevelSource();    // Destructor
 
