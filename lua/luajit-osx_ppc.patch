@@ -1,0 +1,24 @@
+diff -r e96b630d33e3 lua/luajit/src/host/buildvm.c
+--- a/lua/luajit/src/host/buildvm.c	Sat Dec 13 23:45:04 2014 -0700
++++ b/lua/luajit/src/host/buildvm.c	Fri Dec 19 20:03:32 2014 -0700
+@@ -113,7 +113,7 @@
+       name[0] = '@';
+     else
+       *p = '\0';
+-#elif (LJ_TARGET_PPC  || LJ_TARGET_PPCSPE) && !LJ_TARGET_CONSOLE
++#elif ((LJ_TARGET_PPC && !LJ_TARGET_OSX) || LJ_TARGET_PPCSPE) && !LJ_TARGET_CONSOLE
+     /* Keep @plt. */
+ #else
+     *p = '\0';
+diff -r e96b630d33e3 lua/luajit/src/lj_arch.h
+--- a/lua/luajit/src/lj_arch.h	Sat Dec 13 23:45:04 2014 -0700
++++ b/lua/luajit/src/lj_arch.h	Fri Dec 19 20:03:32 2014 -0700
+@@ -297,7 +297,7 @@
+ #if (__GNUC__ < 4) || ((__GNUC__ == 4) && __GNUC_MINOR__ < 2)
+ #error "Need at least GCC 4.2 or newer"
+ #endif
+-#elif !LJ_TARGET_PS3
++#elif !LJ_TARGET_PS3 && !LJ_TARGET_PPC
+ #if (__GNUC__ < 4) || ((__GNUC__ == 4) && __GNUC_MINOR__ < 3)
+ #error "Need at least GCC 4.3 or newer"
+ #endif

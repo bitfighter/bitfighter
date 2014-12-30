@@ -17,9 +17,6 @@ enum SFXProfiles
    SFXVoice,
    SFXNone,
 
-   SFXPlayerEnteredGlobalChat,
-   SFXPlayerLeftGlobalChat,
-
    SFXPlayerJoined,
    SFXPlayerLeft,
 
@@ -96,6 +93,9 @@ enum SFXProfiles
 
    // Other noises
    SFXAchievementEarned,
+
+   SFXPlayerEnteredGlobalChat,
+   SFXPlayerLeftGlobalChat,
 
    NumSFXBuffers     // Count of the number of SFX sounds we have
 };

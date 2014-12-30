@@ -69,7 +69,8 @@ public:
 
 
    struct ButtonInfo {
-      ButtonInfo() { sdlButton = FakeRawButton; }     // Quickie constructor slipped in to header file... shhhh!
+      ButtonInfo();
+
       JoystickButton button;
       U8 sdlButton;
       U8 rawAxis;

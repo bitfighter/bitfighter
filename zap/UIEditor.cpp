@@ -5055,20 +5055,18 @@ void EditorUserInterface::testLevel()
 
 void EditorUserInterface::testLevelStart()
 {
-   static const string TestFileName = "editor.tmp";   // Temp file where we'll save current level while testing
-
    Cursor::disableCursor();                           // Turn off cursor
 
    mEditorGameType = mLevel->getGameType();           // Sock our current gametype away, will use it when we reenter the editor
 
-   if(!doSaveLevel(TestFileName, true))
+   if(!doSaveLevel(LevelSource::TestFileName, true))
       getUIManager()->reactivatePrevUI();  // Saving failed, can't test, reactivate editor
    else
    {
       mWasTesting = true;
 
       Vector<string> levelList;
-      levelList.push_back(TestFileName);
+      levelList.push_back(LevelSource::TestFileName);
 
       LevelSourcePtr levelSource = LevelSourcePtr(
             new FolderLevelSource(levelList, mGameSettings->getFolderManager()->getLevelDir()));

@@ -196,11 +196,11 @@ void hostGame(ServerGame *serverGame)
 }
 
 
+#ifndef ZAP_DEDICATED
+
 // Clear screen -- force clear of "black bars" area to avoid flickering on some video cards
 static void clearScreen()
 {
-#ifndef ZAP_DEDICATED
-
    bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
 
    if(scissorMode)
@@ -210,13 +210,8 @@ static void clearScreen()
 
    if(scissorMode)
       glEnable(GL_SCISSOR_TEST);
-
-#endif
 }
 
-
-
-#ifndef ZAP_DEDICATED
 
 // Draw the screen
 void display()
@@ -963,6 +958,8 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
 
       removeFile(offendingFile);
    }
+
+   // 019b, 019c, 019d - no major changes with preferences
 
    // 019b: Nothing to update
 

@@ -530,7 +530,11 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       bstream->write((U32) serverGame->getMaxPlayers());      // max players
       bstream->write((U32) serverGame->mInfoFlags);           // info flags (1=>test host, i.e. from editor)
 
-      bstream->writeString(serverGame->getGameType()->getLevelName().c_str());                     // Level name
+      string levelName = serverGame->getGameType()->getLevelName();
+      if(serverGame->isTestServer())
+         levelName = LevelSource::TestFileName;
+
+      bstream->writeString(levelName.c_str());                     // Level name
       bstream->writeString(GameType::getGameTypeName(serverGame->getGameType()->getGameTypeId())); // Level type
 
       bstream->writeString(serverGame->getSettings()->getHostName().c_str());       // Server name

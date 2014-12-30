@@ -98,6 +98,9 @@ void LevelInfo::ensureLevelInfoHasValidName()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Statics
+const string LevelSource::TestFileName = "editor.tmp";
+
 
 // Constructor
 LevelSource::LevelSource()

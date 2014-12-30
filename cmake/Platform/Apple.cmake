@@ -28,23 +28,23 @@ if(NOT XCOMPILE)
 	endif()
 
 
-	# Set the proper SDK for compiling
+	# Set the proper SDK for compiling - we deploy to 10.4 for i386, ppc
+	# but will use 10.6 to compile i386 and 10.5 to compile ppc.  Internally, they should add
+	# the flag -mmacosx-version-min=10.4 and will be compatible with that OS version
 	if(OSX_DEPLOY_TARGET VERSION_EQUAL "10.4")
-		set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.4u.sdk/")
+		# We will use the 10.5 SDK for ppc because it is friendlier to certain libraries (like LuaJIT)
+		if(CMAKE_OSX_ARCHITECTURES STREQUAL "ppc")
+			set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.5.sdk/")
+		else()
+			set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk/")
+		endif()
+	# Here we use whatever the default SDK is for x86_64, but will deploy to OSX 10.6
 	else()
 		set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX${OSX_DEPLOY_TARGET}.sdk/")
 	endif()
 endif()
 
-
 message(STATUS "Compiling for OSX architectures: ${CMAKE_OSX_ARCHITECTURES}")
-
-
-# LuaJIT will not compile on 10.4 ppc - it requires GCC >= 4.3
-# Disable LuaJIT for cross-compile (for now)
-if(CMAKE_OSX_ARCHITECTURES STREQUAL "ppc" OR XCOMPILE)
-	set(USE_LUAJIT NO)
-endif()
 
 
 #
@@ -135,7 +135,7 @@ function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 	set(OSX_BUILD_RESOURCE_DIR "${OSX_BUILD_RESOURCE_DIR}" PARENT_SCOPE)
 	
 	# Special flags needed because of LuaJIT on 64 bit OSX
-	if(USE_LUAJIT AND CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+	if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
 		set_target_properties(${targetName} PROPERTIES LINK_FLAGS "-pagezero_size 10000 -image_base 100000000")
 	endif()
 endfunction()
@@ -192,7 +192,7 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	)
 	
 	# 64-bit OSX needs to use shared LuaJIT library
-	if(USE_LUAJIT AND CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+	if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
 		add_custom_command(TARGET ${targetName} POST_BUILD
 			COMMAND cp -rp ${luaLibDir}libluajit.dylib ${frameworksDir}
 		)
