@@ -8,6 +8,7 @@ cmake_minimum_required (VERSION 2.8.8)
 
 option(USE_SDL2 "Use SDL2" YES)
 option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
+option(USE_LUAJIT_IN_TREE "Force usage of in-tree LuaJIT." NO)
 
 
 #
@@ -173,7 +174,7 @@ endif()
 
 # LuaJIT / Lua
 find_with_fallback(LuaJit LUAJIT lua)
-if(LUAJIT_FOUND)
+if(LUAJIT_FOUND AND NOT USE_LUAJIT_IN_TREE)
 	set(LUA_LIB ${LUAJIT_LIBRARIES})
 	set(LUA_INCLUDE_DIR ${LUAJIT_INCLUDE_DIR})
 else()
