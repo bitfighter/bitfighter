@@ -1362,8 +1362,9 @@ bool ServerGame::isReadyToShutdown(U32 timeDelta, string &reason)
       {
          // Disconnect all clients, and  then this server will
          // move from main server list into "Host from server" list
+         // Loop backwards to avoid skipping clients
 
-         for(S32 i = 0; i < getClientCount(); i++)
+         for(S32 i = getClientCount() - 1; i >= 0; i--)
          {
             ClientInfo *clientInfo = getClientInfo(i);
    
