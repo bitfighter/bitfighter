@@ -324,7 +324,7 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vec
 void Barrier::renderLayer(S32 layerIndex)
 {
 #ifndef ZAP_DEDICATED
-   static const Color fillColor(mGameSettings->getWallFillColor());
+   static const Color fillColor(GameSettings::get()->getWallFillColor());
 
    if(layerIndex == 0)           // First pass: draw the fill
       renderWallFill(&mRenderFillGeometry, fillColor, mIsPolywall);

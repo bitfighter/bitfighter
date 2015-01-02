@@ -107,7 +107,7 @@ S32 PolyWall::getRenderSortValue()
 
 void PolyWall::renderDock(const Color &color) const
 {
-   static const Color wallOutlineColor(mGameSettings->getWallOutlineColor());
+   static const Color wallOutlineColor(GameSettings::get()->getWallOutlineColor());
 
    renderPolygonFill(getFill(), Colors::EDITOR_WALL_FILL_COLOR);
    renderPolygonOutline(getOutline(), wallOutlineColor);
@@ -116,7 +116,7 @@ void PolyWall::renderDock(const Color &color) const
 
 void PolyWall::render() const
 {
-   renderWallFill(getFill(), mGameSettings->getWallFillColor(), true);
+   renderWallFill(getFill(), GameSettings::get()->getWallFillColor(), true);
    //renderZone(color, outline, fill);
    //renderLoadoutZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle());
 }
