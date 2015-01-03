@@ -128,6 +128,11 @@ function(BF_PLATFORM_ADD_DEFINITIONS)
 endfunction()
 
 
+function(BF_PLATFORM_SET_EXECUTABLE_NAME)
+	set(BF_EXE_NAME "Bitfighter" PARENT_SCOPE)
+endfunction()
+
+
 function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 	
 	# We need this variable in both scopes
@@ -146,7 +151,7 @@ function(BF_PLATFORM_SET_TARGET_OTHER_PROPERTIES targetName)
 	set_target_properties(${targetName} PROPERTIES MACOSX_BUNDLE TRUE)
 	
 	# Set up our bundle plist variables
-	set(MACOSX_BUNDLE_NAME "Bitfighter")
+	set(MACOSX_BUNDLE_NAME ${targetName})
 	set(MACOSX_BUNDLE_EXECUTABLE ${targetName})
 	
 	# Fill out a plist template with CMake variables
