@@ -550,10 +550,9 @@ void AsteroidSpawn::unpackUpdate(GhostConnection *connection, BitStream *stream)
 void AsteroidSpawn::renderLayer(S32 layerIndex)
 {
 #ifndef ZAP_DEDICATED
-   if(layerIndex != -1)
-      return;
-
-   renderAsteroidSpawn(getPos(), mTimer.getCurrent());
+   // Draw on top of most things, including walls (like RepairItem)
+   if(layerIndex == 1)
+      renderAsteroidSpawn(getPos(), mTimer.getCurrent());
 #endif
 }
 
