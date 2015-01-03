@@ -3494,8 +3494,9 @@ void renderWalls(const GridDatabase *gameObjectDatabase, const Vector<Point> &wa
       {
          for(S32 i = 0; i < count; i++)
          {
-            BfObject *obj = dynamic_cast<BfObject *>((i < wallCount) ? walls->get(i) : polyWalls->get(i - wallCount));
-            BarrierX *barrier = reinterpret_cast<BarrierX *>(obj);
+            // TODO figure out how to remove dynamic_cast
+            BfObject *obj = static_cast<BfObject *>((i < wallCount) ? walls->get(i) : polyWalls->get(i - wallCount));
+            BarrierX *barrier = dynamic_cast<BarrierX *>(obj);
 
             for(S32 j = 0; j < barrier->getSegmentCount(); j++)
             {
@@ -3545,8 +3546,9 @@ void renderWalls(const GridDatabase *gameObjectDatabase, const Vector<Point> &wa
    {
       for(S32 i = 0; i < count; i++)
       {
-         BfObject *obj = dynamic_cast<BfObject *>((i < wallCount) ? walls->get(i) : polyWalls->get(i - wallCount));
-         BarrierX *barrier = reinterpret_cast<BarrierX *>(obj);
+         // TODO figure out how to remove dynamic_cast
+         BfObject *obj = static_cast<BfObject *>((i < wallCount) ? walls->get(i) : polyWalls->get(i - wallCount));
+         BarrierX *barrier = dynamic_cast<BarrierX *>(obj);
 
          for(S32 j = 0; j < barrier->getSegmentCount(); j++)
          {
