@@ -26,6 +26,7 @@
 #include "gameObjectRender.h"
 #include "GameRecorderPlayback.h"
 #include "gameType.h"
+#include "HealthGaugeRenderer.h"
 #include "Intervals.h"
 #include "Level.h"
 #include "projectile.h"          // For SpyBug
@@ -2863,7 +2864,10 @@ void GameUserInterface::renderGameNormal() const
 
    // Render current ship's energy
    if(ship)
+   {
       UI::EnergyGaugeRenderer::render(ship->mEnergy);   
+      UI::HealthGaugeRenderer::render(ship->mHealth);
+   }
 
    // Render any screen-linked special effects, outside the matrix transformations
    mFxManager.renderScreenEffects();
@@ -3088,7 +3092,10 @@ void GameUserInterface::renderGameCommander() const
 
    // Render current ship's energy
    if(ship)
-      UI::EnergyGaugeRenderer::render(ship->mEnergy);   
+   {
+      UI::EnergyGaugeRenderer::render(ship->mEnergy);
+      UI::HealthGaugeRenderer::render(ship->mHealth);
+   }
 
    // Render any screen-linked special effects, outside the matrix transformations
    mFxManager.renderScreenEffects();

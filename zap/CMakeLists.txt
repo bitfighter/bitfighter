@@ -136,6 +136,7 @@ set(CLIENT_SOURCES
 	FpsRenderer.cpp
 	gameObjectRender.cpp
 	GameRecorderPlayback.cpp
+	HealthGaugeRenderer.cpp
 	HelpItemManager.cpp
 	HelperManager.cpp
 	helperMenu.cpp
