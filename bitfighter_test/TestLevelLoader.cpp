@@ -94,7 +94,7 @@ TEST(LevelLoaderTest, EngineeredItemMounting2)
       }
       else if(id == 2)
       {
-         // "PolyWall -255 -176.5 -255 -100 -25.5 -100 -25.5 -176.5\n" // Wall wound in reverse order
+         // "PolyWall -25.5 -176.5 -25.5 -100 -255 -100 -255 -176.5\n" // Wall wound in reverse order
          // "Turret!2 0 -128 -100.1 0\n"
          EXPECT_FLOAT_EQ(-128, anchor.x)  << "Turret 2 did not mount! (x-coord)";
          EXPECT_FLOAT_EQ(-100, anchor.y)  << "Turret 2 did not mount! (y-coord)";
@@ -104,7 +104,6 @@ TEST(LevelLoaderTest, EngineeredItemMounting2)
       else
          TNLAssert(false, "Bad id!");
    }
-
 };
    
 }     // namespace

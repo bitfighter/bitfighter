@@ -148,7 +148,7 @@ static void initialize()
       "MaxPlayers 999\n"
       "PolyWall -255 -76.5 -255 0 -25.5 0 -25.5 -76.5\n"          // Wall wound in default order
       "Turret!1 0 -128 -0.1 0\n"                                  // Turret <Team> <X> <Y> [HealRate]
-      "PolyWall -255 -176.5 -255 -100 -25.5 -100 -25.5 -176.5\n"  // Wall wound in reverse order
+      "PolyWall -25.5 -176.5 -25.5 -100 -255 -100 -255 -176.5\n"  // Wall wound in reverse order
       "Turret!2 0 -128 -100.1 0\n"                              
       
    );
