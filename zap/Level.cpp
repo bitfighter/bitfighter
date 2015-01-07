@@ -286,6 +286,7 @@ void Level::parseLevelLine(const string &line, const string &levelFileName)
 
    if(argc >= 1)
    {
+      // Check if there is an id embedded with a "!"  (Turret!5 is a turret with id = 5)
       std::size_t pos = args[0].find("!");
       if(pos != string::npos)
       {

@@ -11,7 +11,7 @@
 #include "Teleporter.h"
 #include "gameType.h"
 #include "Level.h"
-
+#include "PolyWall.h"
 #include "projectile.h"
 
 #include "ServerGame.h"
@@ -426,7 +426,10 @@ const F32 EngineeredItem::EngineeredItemRadius = 7.f;
 const F32 EngineeredItem::DamageReductionFactor = 0.25f;
 
 // Constructor
-EngineeredItem::EngineeredItem(S32 team, const Point &anchorPoint, const Point &anchorNormal) : Parent(EngineeredItemRadius), Engineerable(), mAnchorNormal(anchorNormal)
+EngineeredItem::EngineeredItem(S32 team, const Point &anchorPoint, const Point &anchorNormal) : 
+      Parent(EngineeredItemRadius), 
+      Engineerable(), 
+      mAnchorNormal(anchorNormal)
 {
    mHealth = 1.0f;
    setTeam(team);
@@ -596,16 +599,16 @@ BfObject *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *gameObjec
                                                    const Vector<BfObject *> *excludedWallList,
                                                    bool format, Point &anchor, Point &normal)
 {
-   // Here we're interested in finding the closest wall edge to our item -- since edges are anonymous (i.e. we don't know
-   // which wall they belong to), we don't really care which edge it is, only where the item will snap to.  We'll use this
-   // snap location to identify the actual wall segment later.
+   // Here we're interested in finding the closest wall edge to our item -- since edges are anonymous (i.e.
+   // we don't know which wall they belong to), we don't really care which edge it is, only where the item
+   // will snap to.  We'll use this snap location to identify the actual wall segment later.
    DatabaseObject *edge = findClosestWall(wallEdgeDatabase, pos, snapDist, NULL, format, anchor, normal);
 
    if(!edge)
       return NULL;
 
    // Re-adjust our anchor to a segment built from the anchor and normal vector found above.
-   // This is because the anchor may be slightly off due to the inaccurate sweep angles
+   // This is because the anchor may be slightly off due to the inaccurate sweep angles.
    //
    // The algorithm here is to concoct a small segment through the anchor detected in the sweep, and
    // make it perpendicular to the normal vector that was also detected in the sweep (so parallel to
@@ -619,13 +622,22 @@ BfObject *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *gameObjec
    // Now find our new anchor
    findNormalPoint(pos, p1, p2, anchor);
 
-   // Finally, figure out which segment this item is mounted on by rerunning our find algorithm, but using our segment
+   // Finally, figure out which segment this item is mounted on by re-running our find algorithm, but using our segment
    // database rather than our wall-edge database.  We'll pass the anchor location we found above as the snap object's
    // position, and use a dummy point to avoid clobbering the anchor location we found.
    Point dummy;
 
    BfObject *closestWall = static_cast<BfObject *>(
          findClosestWall(gameObjectDatabase, anchor, snapDist, excludedWallList, format, dummy, normal));
+
+   // If closestWall is a polywall, and if it is wound CW, need to reverse the normal point
+   if(closestWall->getObjectTypeNumber() == PolyWallTypeNumber)
+   { 
+      PolyWall *polywall = static_cast<PolyWall *>(closestWall);
+
+      if(isWoundClockwise(polywall->getCollisionPoly()))
+         normal *= -1;
+   }
 
    TNLAssert(closestWall, "Should have found something here!");
 
@@ -1064,10 +1076,10 @@ void EngineeredItem::findMountPoint(const Level *level, const Point &pos)
 
 
 // Find mount point or turret or forcefield closest to pos; used in editor.  See findMountPoint() for in-game version.
-Point EngineeredItem::mountToWall(const Point &pos, 
-                                  const GridDatabase *gameObjectDatabase, 
-                                  const GridDatabase *wallEdgeDatabase, 
-                                  const Vector<BfObject *> *excludedWallList)
+void EngineeredItem::mountToWall(const Point &pos, 
+                                 const GridDatabase *gameObjectDatabase, 
+                                 const GridDatabase *wallEdgeDatabase, 
+                                 const Vector<BfObject *> *excludedWallList)
 {  
    Point normal, anchor;
    BfObject *mountSeg;
@@ -1091,18 +1103,14 @@ Point EngineeredItem::mountToWall(const Point &pos,
       setMountSegment(mountSeg);
 
       mSnapped = true;
-      onGeomChanged();
-
-      return anchor;
    }
    else           // No suitable segments found
    {
       mSnapped = false;
       setPos(pos);
-      onGeomChanged();
+   }  
 
-      return pos;
-   }
+   onGeomChanged();
 }
 
 

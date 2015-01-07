@@ -9,6 +9,7 @@
 #include "Level.h"
 #include "GameManager.h"
 #include "WallItem.h"
+#include "EngineeredItem.h"
 
 
 #include "TestUtils.h"
@@ -19,10 +20,11 @@
 namespace Zap
 {
 
-class LevelLoaderTest: public testing::Test
+class LevelLoaderTest : public testing::Test
 {
 
 };
+
 
 TEST(LevelLoaderTest, longLine)
 {
@@ -35,6 +37,8 @@ TEST(LevelLoaderTest, longLine)
 
    WallItem wall;
    wall.GeomObject::setGeom(geom);
+
+   GamePair gamePair;
 
    string code = getGenericHeader() + wall.toLevelCode();
 
@@ -50,9 +54,7 @@ TEST(LevelLoaderTest, longLine)
 // Test to make sure our engineered items are mounting on walls properly when the level loads
 TEST(LevelLoaderTest, EngineeredItemMounting)
 {
-   //string code = getLevelCodeForEngineeredItemSnapping();
-
-   GamePair gamePair(getLevelCodeForEngineeredItemSnapping(), 0);    // No clients, only create a server here
+   GamePair gamePair(getLevelCodeForEngineeredItemSnapping(), 0);    // No clients, only server
    ServerGame *serverGame = GameManager::getServerGame();
 
    Vector<DatabaseObject *> fillItems;
@@ -62,5 +64,48 @@ TEST(LevelLoaderTest, EngineeredItemMounting)
    EXPECT_FLOAT_EQ(fillItems[0]->getPos().y, 10) << "Turret did not mount! (y-coord)";
 }
 
+
+// Check for turret snapping to polywalls wound different ways
+TEST(LevelLoaderTest, EngineeredItemMounting2)
+{
+   GamePair gamePair(getLevelCodeForEngineeredItemSnapping2(), 0);    // No clients, only server
+   ServerGame *serverGame = GameManager::getServerGame();
+
+   Vector<DatabaseObject *> fillItems;
+   serverGame->getLevel()->findObjects(TurretTypeNumber, fillItems);
+   ASSERT_EQ(2, fillItems.size());
+
+   for(S32 i = 0; i < fillItems.size(); i++)
+   {
+      Turret *turret = static_cast<Turret *>(fillItems[i]);
+
+      Point anchor = turret->getPos();
+      Point normal = turret->mAnchorNormal;
+      S32 id = turret->getUserAssignedId();
+
+      if(id == 1)
+      {
+         // "PolyWall -255 -76.5 -255 0 -25.5 0 -25.5 -76.5\n"    // Wall wound in default order
+         // "Turret 0 -128 0 0\n"
+         EXPECT_FLOAT_EQ(-128, anchor.x)  << "Turret 1 did not mount! (x-coord)";
+         EXPECT_FLOAT_EQ(   0, anchor.y)  << "Turret 1 did not mount! (y-coord)";
+         EXPECT_FLOAT_EQ(   0, normal.x)  << "Turret 1 bad normal (x)";
+         EXPECT_FLOAT_EQ(   1, normal.y)  << "Turret 1 bad normal (y)";
+      }
+      else if(id == 2)
+      {
+         // "PolyWall -255 -176.5 -255 -100 -25.5 -100 -25.5 -176.5\n" // Wall wound in reverse order
+         // "Turret!2 0 -128 -100.1 0\n"
+         EXPECT_FLOAT_EQ(-128, anchor.x)  << "Turret 2 did not mount! (x-coord)";
+         EXPECT_FLOAT_EQ(-100, anchor.y)  << "Turret 2 did not mount! (y-coord)";
+         EXPECT_FLOAT_EQ(   0, normal.x)  << "Turret 2 bad normal (x)";
+         EXPECT_FLOAT_EQ(   1, normal.y)  << "Turret 2 bad normal (y)";
+      }
+      else
+         TNLAssert(false, "Bad id!");
+   }
+
 };
+   
+}     // namespace
 

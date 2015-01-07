@@ -132,6 +132,27 @@ static void initialize()
       "Turret 0 30 1\n"             // Turret slightly off-center, so should snap to top of wall
    );
    levelInfos.push_back(LevelInfo("NexusTestGame", NexusGame, 2, 4, ""));
+
+
+   // levelCodes[6]
+   // Test engineered item snapping 2
+   levelCodes.push_back(
+      "LevelFormat 2\n"
+      "GameType 8 8\n"
+      "LevelName \"Snapping Testing Level Part II!!!\"\n"
+      "LevelDescription \"This is a very simple level!\"\n"
+      "LevelCredits Fortran1234\n"
+      "Team Blue 0 0 1\n"
+      "Specials\n"
+      "MinPlayers\n"
+      "MaxPlayers 999\n"
+      "PolyWall -255 -76.5 -255 0 -25.5 0 -25.5 -76.5\n"          // Wall wound in default order
+      "Turret!1 0 -128 -0.1 0\n"                                  // Turret <Team> <X> <Y> [HealRate]
+      "PolyWall -255 -176.5 -255 -100 -25.5 -100 -25.5 -176.5\n"  // Wall wound in reverse order
+      "Turret!2 0 -128 -100.1 0\n"                              
+      
+   );
+   levelInfos.push_back(LevelInfo("Snapping Testing Level Part II!!!", BitmatchGame, 0, 999, ""));
 }
 
 
@@ -140,6 +161,13 @@ string getLevelCodeForEngineeredItemSnapping()
 {
    initialize();
    return levelCodes[5];
+}
+
+
+string getLevelCodeForEngineeredItemSnapping2()
+{
+   initialize();
+   return levelCodes[6];
 }
 
 

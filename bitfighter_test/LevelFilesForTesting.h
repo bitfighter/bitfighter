@@ -20,6 +20,7 @@ string getLevelCode1();
 string getLevelCodeForTestingEngineer1();
 string getLevelCodeForEmptyLevelWithBots(const string &botspec);
 string getLevelCodeForEngineeredItemSnapping();
+string getLevelCodeForEngineeredItemSnapping2();
 
 string getGenericHeader();
 

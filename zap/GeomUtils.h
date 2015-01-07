@@ -137,8 +137,9 @@ void polyMeshToPolygons(const rcPolyMesh &mesh, Vector<Vector<Point> > &result);
 // Convert a Polygons to a list of points in a-b b-c c-d d-a format
 void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineSegmentPoints);
 
-// test if a complex polygon has clockwise point winding order
+// Test if a complex polygon has clockwise point winding order
 bool isWoundClockwise(const Vector<Point>& inputPoly);
+bool isWoundClockwise(const Vector<Point> *inputPoly);
 
 
 // Return true out if point is in polygon given a triangulated fill
