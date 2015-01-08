@@ -80,8 +80,10 @@ public:
    const char *getOnScreenName() const;
    const char *getInstructionMsg(S32 attributeCount) const;
 
+#ifndef ZAP_DEDICATED
    bool startEditingAttrs(EditorAttributeMenuUI *attributeMenu);
    void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+#endif
 
    const Color &getEditorRenderColor() const;
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;

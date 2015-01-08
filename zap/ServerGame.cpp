@@ -1334,8 +1334,9 @@ bool ServerGame::isReadyToShutdown(U32 timeDelta, string &reason)
       {
          // Disconnect all clients, and  then this server will
          // move from main server list into "Host from server" list
+         // Loop backwards to avoid skipping clients
 
-         for(S32 i = 0; i < getClientCount(); i++)
+         for(S32 i = getClientCount() - 1; i >= 0; i--)
          {
             ClientInfo *clientInfo = getClientInfo(i);
    
@@ -1842,9 +1843,10 @@ void ServerGame::levelAddedNotifyClients(const LevelInfo &levelInfo)
    for(S32 i = 0; i < getClientCount(); i++)
    {
       ClientInfo *clientInfo = getClientInfo(i);
+      GameConnection *conn = clientInfo->getConnection();
 
-      if(clientInfo->isLevelChanger())
-         clientInfo->getConnection()->s2cAddLevel(levelInfo.mLevelName, levelInfo.mLevelType);
+      if(clientInfo->isLevelChanger() && conn)
+         conn->s2cAddLevel(levelInfo.mLevelName, levelInfo.mLevelType);
    }
 }
 

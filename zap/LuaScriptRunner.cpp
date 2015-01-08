@@ -1084,6 +1084,9 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
  * If no object types are provided, this function will return every object on
  * the level.
  *
+ * @note If you provide your own table to this method, make sure you clear it
+ * first.
+ *
  * @param [objType] Zero or more ObjTypes specifying what types of objects to find.
  *
  * @return A reference back to the passed table, or a new table if one was not

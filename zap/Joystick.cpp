@@ -560,4 +560,15 @@ void Joystick::loadJoystickPresets(GameSettings *settings)
 }
 
 
+Joystick::ButtonInfo::ButtonInfo() {
+   button = JoystickButtonUnknown;
+   sdlButton = FakeRawButton;
+   rawAxis = FakeRawButton;
+   label = "";
+   color = Colors::white;
+   buttonShape = ButtonShapeRound;
+   buttonSymbol = ButtonSymbolNone;
+}
+
+
 } /* namespace Zap */

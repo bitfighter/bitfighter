@@ -49,8 +49,6 @@ static SFXProfile sfxProfilesModern[] = {
  {  "phaser.wav",          false, 0.45f, false, 150, 600 },    // SFXNone  -- as above
 
  // Players joining/leaving noises -- aren't really relative, but true allows them to play properly...
- {  "player_joined_global_chat.wav",   true,  0.8f,  false, 150, 600 },
- {  "player_left_global_chat.wav",     true,  0.8f,  false, 150, 600 },
  {  "player_joined.wav",   true,  0.8f,  false, 150, 600 },
  {  "player_left.wav",     true,  0.8f,  false, 150, 600 },
 
@@ -128,6 +126,9 @@ static SFXProfile sfxProfilesModern[] = {
 
  // Other
  {  "achievement_earned.wav",  true,  1.0f, false,   0,   0 },
+
+ {  "player_joined_global_chat.wav",   true,  0.8f,  false, 150, 600 },
+ {  "player_left_global_chat.wav",     true,  0.8f,  false, 150, 600 },
 
  {  NULL, false, 0, false, 0, 0 },
 };

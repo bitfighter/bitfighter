@@ -59,6 +59,11 @@ function(BF_PLATFORM_ADD_DEFINITIONS)
 endfunction()
 
 
+function(BF_PLATFORM_SET_EXECUTABLE_NAME)
+	# Do nothing!
+endfunction()
+
+
 function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 	# Do nothing!
 endfunction()

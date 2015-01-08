@@ -8,7 +8,7 @@ cmake_minimum_required (VERSION 2.8.8)
 
 option(USE_SDL2 "Use SDL2" YES)
 option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
-option(USE_LUAJIT "Use LuaJIT; compiling in-tree sources if needed" YES)
+option(USE_LUAJIT_IN_TREE "Force usage of in-tree LuaJIT." NO)
 
 
 #
@@ -174,19 +174,14 @@ endif()
 
 # LuaJIT / Lua
 find_with_fallback(LuaJit LUAJIT lua)
-if(LUAJIT_FOUND)
+if(LUAJIT_FOUND AND NOT USE_LUAJIT_IN_TREE)
 	set(LUA_LIB ${LUAJIT_LIBRARIES})
 	set(LUA_INCLUDE_DIR ${LUAJIT_INCLUDE_DIR})
-elseif(USE_LUAJIT)
+else()
 	message(STATUS "Using in-tree LuaJIT")
 	# Use internal LuaJIT
 	set(LUA_LIB luajit)
 	set(LUA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lua/luajit/src")
-else()
-	message(STATUS "Using in-tree Lua.  Bitfighter will run scripts much slower than with LuaJIT")
-	# Failing that, use the slow one
-	set(LUA_LIB lua-vec)
-	set(LUA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lua/lua-vec/src")
 endif()
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/lua/${LUA_LIB}")
