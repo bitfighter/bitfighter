@@ -493,14 +493,16 @@ void QueryServersUserInterface::gotQueryResponse(const Address &address, S32 ser
          // If serverId has changed, it means this is a locally hosted server that we first saw before it contacted
          // the master to get a serverId.  We want to make sure we don't have another version of this same server from 
          // the master.  Find the dupe and kill it.
-         if(s.serverId != serverId && serverId != 0)
+         // When a server restarts, serverid becomes different, often before getting the new list from master.
+         if(s.serverId != serverId && serverId != 0 && s.isLocalServer)
          {
-            TNLAssert(s.isLocalServer, "Expected a local server!");
-            
             S32 index = findServerByServerId(servers, serverId);
-            TNLAssert(!servers[index].isLocalServer, "Expected a remote server!");
-
-            servers.erase_fast(index);
+            if(index >= 0)
+            {
+               TNLAssert(!servers[index].isLocalServer, "Expected a remote server!");
+               servers.erase_fast(index);
+               break;  // avoids using a possibly bad 's' pointer after erase
+            }
          }
 
          s.serverId = serverId;

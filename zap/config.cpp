@@ -2101,7 +2101,7 @@ void FolderManager::resolveDirs(GameSettings *settings)
    folderManager->logDir        = resolutionHelper(cmdLineDirs.logDir,        rootDataDir, "");
    folderManager->screenshotDir = resolutionHelper(cmdLineDirs.screenshotDir, rootDataDir, "screenshots");
    folderManager->musicDir      = resolutionHelper(cmdLineDirs.musicDir,      rootDataDir, "music");
-   folderManager->recordDir     = resolutionHelper(cmdLineDirs.musicDir,      rootDataDir, "record");
+   folderManager->recordDir     = resolutionHelper(cmdLineDirs.recordDir,     rootDataDir, "record");
 
    // rootDataDir not used for these folders
    folderManager->sfxDir        = resolutionHelper(cmdLineDirs.sfxDir,        "", "sfx");
