@@ -99,7 +99,7 @@ void GoalZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled,
             GameSettings::get()->getSetting<GoalZoneFlashStyle>(IniKey::GoalZoneFlashStyle);
 
    renderGoalZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), false, 0, 0, 0, flashStyle);
-   PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled);
+   PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled, true);
 }
 
 
