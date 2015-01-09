@@ -390,7 +390,7 @@ static void setWallSelected(GridDatabase *database, S32 serialNumber, bool selec
 
 static F32 getWallEditorRadius(F32 currentScale)
 {
-   return (F32)WallItem::VERTEX_SIZE;   // Keep vertex hit targets the same regardless of scale
+   return (F32)EditorObject::VERTEX_SIZE;   // Keep vertex hit targets the same regardless of scale
 }
 
 

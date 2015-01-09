@@ -44,6 +44,8 @@ public:
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
    virtual void renderDock();
 
+   virtual F32 getEditorRadius(F32 currentScale);
+
    TNL_DECLARE_CLASS(Zone);
 
    //// Lua interface

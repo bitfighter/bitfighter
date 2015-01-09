@@ -2801,19 +2801,19 @@ void renderSmallSolidVertex(F32 currentScale, const Point &pos, bool snapping)
 
 void renderVertex(char style, const Point &v, S32 number)
 {
-   renderVertex(style, v, number, WallItem::VERTEX_SIZE, 1, 1);
+   renderVertex(style, v, number, EditorObject::VERTEX_SIZE, 1, 1);
 }
 
 
 void renderVertex(char style, const Point &v, S32 number, F32 scale)
 {
-   renderVertex(style, v, number, WallItem::VERTEX_SIZE, scale, 1);
+   renderVertex(style, v, number, EditorObject::VERTEX_SIZE, scale, 1);
 }
 
 
 void renderVertex(char style, const Point &v, S32 number, F32 scale, F32 alpha)
 {
-   renderVertex(style, v, number, WallItem::VERTEX_SIZE, scale, alpha);
+   renderVertex(style, v, number, EditorObject::VERTEX_SIZE, scale, alpha);
 }
 
 
