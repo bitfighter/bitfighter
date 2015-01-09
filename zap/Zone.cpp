@@ -71,6 +71,12 @@ void Zone::renderDock(const Color &color) const
 }
 
 
+F32 Zone::getEditorRadius(F32 currentScale) const
+{
+   return (F32)EditorObject::VERTEX_SIZE;   // Keep vertex hit targets the same regardless of scale
+}
+
+
 S32 Zone::getRenderSortValue()
 {
    return -1;
