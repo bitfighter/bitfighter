@@ -1300,7 +1300,7 @@ void SpyBug::renderDock(const Color &color) const
 const char *SpyBug::getOnScreenName()     const  { return "Spy Bug";  }
 const char *SpyBug::getOnDockName()       const  { return "Bug";      }
 const char *SpyBug::getPrettyNamePlural() const  { return "Spy Bugs"; }
-const char *SpyBug::getEditorHelpString() const  { return "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]"; }
+const char *SpyBug::getEditorHelpString() const  { return "Remote monitoring device that shows enemy ships on the commander's map."; }
 
 
 bool SpyBug::hasTeam()        { return true;  }
