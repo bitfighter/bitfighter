@@ -1295,7 +1295,7 @@ void SpyBug::renderDock()
 const char *SpyBug::getOnScreenName()     { return "Spy Bug";  }
 const char *SpyBug::getOnDockName()       { return "Bug";      }
 const char *SpyBug::getPrettyNamePlural() { return "Spy Bugs"; }
-const char *SpyBug::getEditorHelpString() { return "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]"; }
+const char *SpyBug::getEditorHelpString() { return "Remote monitoring device that shows enemy ships on the commander's map."; }
 
 
 bool SpyBug::hasTeam()        { return true;  }

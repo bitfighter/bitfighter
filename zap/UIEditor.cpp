@@ -1869,11 +1869,10 @@ static void renderAttribText(S32 xpos, S32 ypos, S32 textsize,
 // Shows selected item attributes, or, if we're hovering over dock item, shows dock item info string
 void EditorUserInterface::renderItemInfoPanel()
 {
-   string attribsText, itemName, attribs;     // All intialized to ""
+   string itemName;     // All intialized to ""
 
    S32 hitCount = 0;
    bool multipleKindsOfObjectsSelected = false;
-   bool dockItem = false;
 
    static Vector<string> keys, values;    // Reusable containers
    keys.clear();
@@ -1881,12 +1880,25 @@ void EditorUserInterface::renderItemInfoPanel()
 
    const char *instructs = "";
 
+   S32 xpos = PanelRight + 9;
+   S32 ypos = PanelBottom - PANEL_TEXT_SIZE - PANEL_SPACING + 6;
+   S32 upperLineTextSize = 14;
+
+   // Render information when hovering over a dock item
    if(mDockItemHit)
    {
       itemName    = mDockItemHit->getOnScreenName();
-      attribsText = mDockItemHit->getEditorHelpString();
-      dockItem = true;
+
+      glColor(Colors::green);
+      drawString(xpos, ypos, 12, mDockItemHit->getEditorHelpString());
+
+      ypos -= S32(upperLineTextSize * 1.3);
+
+      glColor(Colors::white);
+      drawString(xpos, ypos, upperLineTextSize, itemName.c_str());
    }
+
+   // Handle everything else
    else
    {
       // Cycle through all our objects to find the selected ones
@@ -1923,49 +1935,40 @@ void EditorUserInterface::renderItemInfoPanel()
          else if(obj->isLitUp() && !mouseOnDock())
             mInfoMsg = string("Hover: ") + obj->getOnScreenName();
       }
-   }
 
-   /////
-   // Now render the info we collected above
+      /////
+      // Now render the info we collected above
 
-   // Green for dock item, yellow for regular item
-   const Color *textColor = (mDockItemHit ? &Colors::green : &Colors::yellow);
+      if(hitCount == 1)
+      {
+         glColor(Colors::yellow);
+         S32 w = drawStringAndGetWidth(xpos, ypos, PANEL_TEXT_SIZE, instructs);
+         if(w > 0)
+            w += drawStringAndGetWidth(xpos + w, ypos, PANEL_TEXT_SIZE, "; ");
+         drawString(xpos + w, ypos, PANEL_TEXT_SIZE, "[#] to edit Id");
 
-   S32 xpos = PanelRight + 9;
-   S32 ypos = PanelBottom - PANEL_TEXT_SIZE - PANEL_SPACING + 6;
-   S32 upperLineTextSize = 14;
-
-   if(hitCount == 1)
-   {
-      glColor(textColor);
-      S32 w = drawStringAndGetWidth(xpos, ypos, PANEL_TEXT_SIZE, instructs);
-      if(w > 0)
-         w += drawStringAndGetWidth(xpos + w, ypos, PANEL_TEXT_SIZE, "; ");
-      drawString(xpos + w, ypos, PANEL_TEXT_SIZE, "[#] to edit Id");
-
-      if(!dockItem)
          renderAttribText(xpos, ypos - PANEL_SPACING, PANEL_TEXT_SIZE, Colors::cyan, Colors::white, keys, values);
-   }
+      }
 
-   ypos -= PANEL_SPACING + S32(upperLineTextSize * 1.3);
+      ypos -= PANEL_SPACING + S32(upperLineTextSize * 1.3);
+      if(hitCount > 0)
+      {
+         if(!multipleKindsOfObjectsSelected)
+            itemName = (mDraggingObjects ? "Dragging " : "Selected ") + itemName;
 
-   if(hitCount > 0)
-   {
-      if(!multipleKindsOfObjectsSelected)
-         itemName = (mDraggingObjects ? "Dragging " : "Selected ") + itemName;
+         if(hitCount > 1)
+            itemName += " (" + itos(hitCount) + ")";
 
-      if(hitCount > 1)
-         itemName += " (" + itos(hitCount) + ")";
+         glColor(Colors::yellow);
+         drawString(xpos, ypos, upperLineTextSize, itemName.c_str());
+      }
 
-      glColor(textColor);
-      drawString(xpos, ypos, upperLineTextSize, itemName.c_str());
-   }
-
-   ypos -= S32(upperLineTextSize * 1.3);
-   if(mInfoMsg != "" && !mDockItemHit)
-   {
-      glColor(Colors::white);
-      drawString(xpos, ypos, upperLineTextSize, mInfoMsg.c_str());
+      ypos -= S32(upperLineTextSize * 1.3);
+      if(mInfoMsg != "")
+      {
+         glColor(Colors::white);
+         drawString(xpos, ypos, upperLineTextSize, mInfoMsg.c_str());
+      }
    }
 }
 
