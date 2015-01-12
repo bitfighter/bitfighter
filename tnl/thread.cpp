@@ -110,10 +110,13 @@ U32 Thread::run()
    return 0;
 }
 
-void Thread::start()
+bool Thread::start()
 {
    HANDLE thread = CreateThread(NULL, 0, ThreadProc, this, 0, NULL);
+   if(thread == NULL)
+      return false;
    CloseHandle(thread); // This does not kill the thread or cause any problems, it is to prevent memory leak
+   return true;
 }
 
 Thread::Thread()
@@ -211,11 +214,13 @@ Thread::Thread()
 {
 }
 
-void Thread::start()
+bool Thread::start()
 {
    pthread_t thread;
-   pthread_create(&thread, NULL, ThreadProc, this);
+   if(pthread_create(&thread, NULL, ThreadProc, this) != 0)
+      return false;
    pthread_detach(thread);  // Declare that this thread clean itself up after finishing
+   return true;
 }
 
 Thread::~Thread()

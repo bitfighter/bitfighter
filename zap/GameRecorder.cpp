@@ -49,7 +49,12 @@ public:
       threadPos = 0;
       exitNow = false;
       f = file;
-      start();
+      if(!start())
+      {
+         logprintf(LogConsumer::LogWarning, "Failed to create thread for recorder, games may not record");
+         fclose(f);
+			f = NULL;
+      }
    }
    ~WriteBufferThread()
    {

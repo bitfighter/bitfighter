@@ -117,7 +117,7 @@ public:
    virtual ~Thread();
 
    /// starts the thread's main run function.
-   void start();
+   bool start();
 };
 
 /// Platform independent per-thread storage class.
