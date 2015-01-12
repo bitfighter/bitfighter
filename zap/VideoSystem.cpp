@@ -129,9 +129,6 @@ bool VideoSystem::init()
    SDL_GLContext context = SDL_GL_CreateContext(DisplayManager::getScreenInfo()->sdlWindow);
    DisplayManager::getScreenInfo()->sdlGlContext = &context;
 
-   // We can set up vsync, too
-   SDL_GL_SetSwapInterval(1);
-
 #else
 
    const SDL_VideoInfo* info = SDL_GetVideoInfo();
@@ -375,6 +372,8 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    // Flush window events because SDL_SetWindowSize triggers a SDL_WINDOWEVENT_RESIZED 
    // event (which in turn triggers another SDL_SetWindowSize)
    SDL_FlushEvent(SDL_WINDOWEVENT);
+
+   SDL_GL_SetSwapInterval(settings->getIniSettings()->mSettings.getVal<YesNo>("Vsync") ? 1 : 0);
 #else
    // Set up sdl video flags according to display mode
    S32 sdlVideoFlags = SDL_OPENGL;

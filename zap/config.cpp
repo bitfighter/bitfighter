@@ -72,6 +72,7 @@ IniSettings::IniSettings()
    mSettings.add(new Setting<string>        ("HelpItemsAlreadySeenList", "",                    "HelpItemsAlreadySeenList",    "Settings", "Tracks which in-game help items have already been seen; let the game manage this"));
    mSettings.add(new Setting<U32>           ("EditorGridSize",           255,                   "EditorGridSize",              "Settings", "Grid size used in the editor, mostly for snapping purposes"));
    mSettings.add(new Setting<YesNo>         ("LineSmoothing",            Yes,                   "LineSmoothing",               "Settings", "Activates anti-aliased rendering.  This may be a little slower on some machines.  Yes/No"));
+   mSettings.add(new Setting<YesNo>         ("Vsync",                    Yes,                   "Vsync",                       "Settings", "Turns on vertical sync. Yes/No"));
 
    mSettings.add(new Setting<ColorEntryMode>("ColorEntryMode",           ColorEntryMode100,     "ColorEntryMode",        "EditorSettings", "Specifies which color entry mode to use: RGB100, RGB255, RGBHEX; best to let the game manage this"));
 
