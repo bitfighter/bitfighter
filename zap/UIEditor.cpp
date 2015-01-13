@@ -1794,7 +1794,6 @@ void EditorUserInterface::renderItemInfoPanel() const
          glColor(Colors::white);
          drawString(xpos, ypos, upperLineTextSize, mInfoMsg.c_str());
       }
-      }
    }
 }
 
