@@ -303,7 +303,7 @@ public:
    bool isEngineerUnrestrictedEnabled();
    void setEngineerUnrestrictedEnabled(bool enabled);
 
-   bool areBotsAllowed();
+   bool areBotsAllowed() const;
    void setBotsAllowed(bool allowed);
    
    string getScriptLine() const;
@@ -507,6 +507,7 @@ public:
    virtual void majorScoringEventOcurred(S32 team);    // Gets called when touchdown is scored...  currently only used by zone control & retrieve
 
    void processServerCommand(ClientInfo *clientInfo, const char *cmd, Vector<StringPtr> args);
+   bool canClientAddBots(GameConnection *source, bool checkDefaultBot = true);
    bool addBotFromClient(Vector<StringTableEntry> args);
 
    map <pair<U16,U16>, Vector<Point> > cachedBotFlightPlans;  // cache of zone-to-zone flight plans, shared for all bots

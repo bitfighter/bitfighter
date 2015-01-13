@@ -2631,9 +2631,15 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
    ServerGame *serverGame = static_cast<ServerGame *>(mGame);
 
    if(stricmp(cmd, "FewerBots") == 0)
-      fewerBots(clientInfo);
+   {
+      if(canClientAddBots(clientInfo->getConnection()))
+         fewerBots(clientInfo);
+   }
    else if(stricmp(cmd, "MoreBots") == 0)
-      moreBots(clientInfo);   
+   {
+      if(canClientAddBots(clientInfo->getConnection()))
+         moreBots(clientInfo);   
+   }
    else if(stricmp(cmd, "yes") == 0)
       serverGame->voteClient(clientInfo, true);
    else if(stricmp(cmd, "no") == 0)
@@ -2662,15 +2668,10 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
 }
 
 
-// Get here from c2sAddBot() and c2sAddBots()
-bool GameType::addBotFromClient(Vector<StringTableEntry> args)
+bool GameType::canClientAddBots(GameConnection *conn, bool checkDefaultBot)
 {
-   GameConnection *source = (GameConnection *) getRPCSourceConnection();
-   ClientInfo *clientInfo = source->getClientInfo();
+   ClientInfo *clientInfo = conn->getClientInfo();
    GameSettings *settings = getGame()->getSettings();
-
-   GameConnection *conn = clientInfo->getConnection();
-
    S32 maxBots = RobotManager::getMaxBots(settings, clientInfo->isAdmin());
 
    if(mBotZoneCreationFailed)
@@ -2681,7 +2682,7 @@ bool GameType::addBotFromClient(Vector<StringTableEntry> args)
       conn->s2cDisplayErrorMessage("!!! This level does not allow robots");
 
    // No default robot set
-   else if(!clientInfo->isAdmin() && settings->getIniSettings()->defaultRobotScript == "" && args.size() < 2)
+   else if(checkDefaultBot && !clientInfo->isAdmin() && settings->getIniSettings()->defaultRobotScript == "")
       conn->s2cDisplayErrorMessage("!!! This server doesn't have default robots configured");
 
    else if(!clientInfo->isLevelChanger())
@@ -2689,6 +2690,20 @@ bool GameType::addBotFromClient(Vector<StringTableEntry> args)
 
    else if(getGame()->getBotCount() >= maxBots)
       conn->s2cDisplayErrorMessage("!!! Can't add more bots -- this server can only have " + itos(maxBots));
+
+   else
+      return true;
+   return false;
+}
+
+
+// Get here from c2sAddBot() and c2sAddBots()
+bool GameType::addBotFromClient(Vector<StringTableEntry> args)
+{
+   GameConnection *conn = (GameConnection *) getRPCSourceConnection();
+
+   if(!canClientAddBots(conn, args.size() < 2))
+      ;
 
    else if(args.size() >= 2 && !safeFilename(args[1].getString()))
       conn->s2cDisplayErrorMessage("!!! Invalid filename");
@@ -4109,7 +4124,7 @@ void GameType::setEngineerUnrestrictedEnabled(bool enabled)
 }
 
 
-bool GameType::areBotsAllowed()
+bool GameType::areBotsAllowed() const
 {
    return mBotsAllowed;
 }
