@@ -54,7 +54,7 @@ public:
       {
          logprintf(LogConsumer::LogWarning, "Failed to create thread for recorder, games may not record");
          fclose(f);
-			f = NULL;
+         f = NULL;
       }
    }
    ~WriteBufferThread()
