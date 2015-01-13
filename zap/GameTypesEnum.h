@@ -6,13 +6,18 @@
 #ifndef _GAMETYPESENUM_H_
 #define _GAMETYPESENUM_H_
 
+#include "tnlTypes.h"
+#include <utility>
+
+using namespace TNL;
+
 namespace Zap
 {     
 /**
  * @luaenum GameType(1,2)
  * The GameType enum represets the different types of game.
  */
-//                 Enum              ClassName             LuaEnum     GameType Name     TeamGame  Game Instructions                
+//                 Enum              ClassName             LuaEnum     GameType Name     TeamGame  Game Instructions
 #define GAME_TYPE_TABLE \
    GAME_TYPE_ITEM( BitmatchGame,    "GameType",            "Bitmatch", "Bitmatch",         false, "Simple combat game -- zap as many players as you can.  Also has a team variant where you can work together to rack up points." )                                                \
    GAME_TYPE_ITEM( NexusGame,       "NexusGameType",       "Nexus",    "Nexus",            false, "Blast other players and grab their flags.  Bring them to the Nexus when it is open to score.  Points grow geometricaly, so one big score is worth more than two smaller ones." ) \
@@ -76,7 +81,22 @@ namespace Zap
          ScoringEventsCount
    };
 
+
+enum GameEndStatus {
+   HasWinner,
+   Tied,
+   TiedByTeamsWithNoPlayers,
+   OnlyOnePlayerOrTeam
 };
+
+
+class ClientInfo;
+
+typedef std::pair<GameEndStatus, ClientInfo *> IndividualGameResults;
+typedef std::pair<GameEndStatus, S32>          TeamGameResults;
+
+
+}
 
 
 #endif

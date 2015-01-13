@@ -22,15 +22,8 @@ EditorTeam::EditorTeam(const TeamPreset &preset)
 {
    initialize();
 
-   setColor(preset.r, preset.g, preset.b);
+   setColor(preset.color);
    mNameEditor.setString(preset.name);
-}
-
-
-void EditorTeam::initialize()
-{
-   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
-   mHexColorEditor.mMaxLen = 6;     // rrggbb
 }
 
 
@@ -38,6 +31,13 @@ void EditorTeam::initialize()
 EditorTeam::~EditorTeam()
 {
    // Do nothing
+}
+
+
+void EditorTeam::initialize()
+{
+   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
+   mHexColorEditor.mMaxLen = 6;     // rrggbb
 }
 
 
@@ -56,16 +56,36 @@ LineEditor *EditorTeam::getHexColorEditor()
 void EditorTeam::setColor(F32 r, F32 g, F32 b)
 {
    Parent::setColor(r, g, b);
-   mHexColorEditor.setString(getColor()->toHexString());
+   onColorChanged();
 }
 
 
 void EditorTeam::setColor(const Color &color)
 {
-   Parent::setColor(color);
-   mHexColorEditor.setString(getColor()->toHexString());
+   TeamInfo::setColor(color);    // TeamInfo is grandparent class
+   onColorChanged();
 }
 
+
+void EditorTeam::setColor(const Color *color)
+{
+   TeamInfo::setColor(color);    // TeamInfo is grandparent class
+   onColorChanged();
+}
+
+
+// Gets called when the color is changed
+void EditorTeam::onColorChanged()
+{
+   mHexColorEditor.setString(getColor().toHexString());
+}
+
+
+void EditorTeam::setName(const StringTableEntry &name)
+{
+   setName(name.getString());
+   Parent::setName(name);
+}
 
 
 void EditorTeam::setName(const char *name)
@@ -74,29 +94,11 @@ void EditorTeam::setName(const char *name)
 }
 
 
+// Returns a STE to make signatures match
 StringTableEntry EditorTeam::getName() const
 {
    return StringTableEntry(mNameEditor.c_str());
 }
-
-
-S32 EditorTeam::getPlayerBotCount() const
-{
-   return 0;
-}
-
-
-S32 EditorTeam::getPlayerCount() const
-{
-   return 0;
-}
-
-
-S32 EditorTeam::getBotCount() const
-{
-   return 0;
-}   
-
 
 
 };

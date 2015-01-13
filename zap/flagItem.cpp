@@ -4,6 +4,8 @@
 //------------------------------------------------------------------------------
 
 #include "flagItem.h"
+
+#include "Level.h"
 #include "Spawn.h"
 #include "goalZone.h"
 #include "ship.h"
@@ -131,14 +133,14 @@ void FlagItem::changeFlagCount(U32 change) { TNLAssert(false, "Should never be c
 U32 FlagItem::getFlagCount()               { return 1; }
 
 
-bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
+bool FlagItem::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 3)         // FlagItem <team> <x> <y> {time}
       return false;
 
    setTeam(atoi(argv[0]));
-   
-   if(!Parent::processArguments(argc-1, argv+1, game))
+
+   if(!Parent::processArguments(argc - 1, argv + 1, level))
       return false;
 
    S32 time = (argc >= 4) ? atoi(argv[4]) : 0;     // Flag spawn time is possible 4th argument.  Only important in Nexus games for now.
@@ -147,7 +149,7 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
 
    // Create a spawn at the flag's location
    FlagSpawn *spawn = new FlagSpawn(mInitialPos, time, getTeam());
-   spawn->addToGame(game, game->getGameObjDatabase());
+   level->addToDatabase(spawn);
 
    return true;
 }
@@ -255,7 +257,7 @@ void FlagItem::removeOccupiedSpawnPoints(Vector<AbstractSpawn *> &spawnPoints) /
 {
    bool isTeamGame = getGame()->isTeamGame();
 
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
 
    // Now remove the occupied spots from our list of potential spawns
    for(S32 i = 0; i < flags->size(); i++)
@@ -277,7 +279,7 @@ void FlagItem::removeOccupiedSpawnPoints(Vector<AbstractSpawn *> &spawnPoints) /
 }
 
 
-void FlagItem::renderItem(const Point &pos)
+void FlagItem::renderItem(const Point &pos) const
 {
    Point offset(0,0);
 
@@ -288,31 +290,31 @@ void FlagItem::renderItem(const Point &pos)
 }
 
 
-void FlagItem::renderItemAlpha(const Point &pos, F32 alpha)
+void FlagItem::renderItemAlpha(const Point &pos, F32 alpha) const
 {
    // No cloaking for normal flags!
    renderItem(pos);
 }
 
 
-void FlagItem::renderDock()
+void FlagItem::renderDock(const Color &color) const
 {
 #ifndef ZAP_DEDICATED
-   renderFlag(getActualPos(), 0.6f, getColor());
+   renderFlag(getActualPos(), 0.6f, color);
 #endif
 }
 
 
-F32 FlagItem::getEditorRadius(F32 currentScale)
+F32 FlagItem::getEditorRadius(F32 currentScale) const
 {
    return 18 * currentScale;
 }
 
 
-const char *FlagItem::getOnScreenName()     { return "Flag";  }
-const char *FlagItem::getOnDockName()       { return "Flag";  }
-const char *FlagItem::getPrettyNamePlural() { return "Flags"; }
-const char *FlagItem::getEditorHelpString() { return "Flag item, used by a variety of game types."; }
+const char *FlagItem::getOnScreenName()     const { return "Flag";  }
+const char *FlagItem::getOnDockName()       const { return "Flag";  }
+const char *FlagItem::getPrettyNamePlural() const { return "Flags"; }
+const char *FlagItem::getEditorHelpString() const { return "Flag item, used by a variety of game types."; }
 
 
 bool FlagItem::hasTeam()      { return true; }

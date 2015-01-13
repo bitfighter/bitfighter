@@ -4,6 +4,8 @@
 //------------------------------------------------------------------------------
 
 #include "projectile.h"
+
+#include "Level.h"
 #include "ship.h"
 #include "game.h"
 #include "gameConnection.h"
@@ -370,7 +372,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
 }
 
 
-F32 Projectile::getRadius()
+F32 Projectile::getRadius() const
 {
    return 10;     // Or so...  currently only used for inserting objects into database and for Lua on the odd chance someone asks
 }
@@ -420,7 +422,7 @@ Point Projectile::getActualVel() const { return mVelocity; }
 
 
 // TODO: Get rid of this! (currently won't render without it)
-void Projectile::render()
+void Projectile::render() const
 {
    renderItem(getPos());
 }
@@ -429,7 +431,7 @@ void Projectile::render()
 bool Projectile::canAddToEditor() { return false; }      // No projectiles in the editor
 
 
-void Projectile::renderItem(const Point &pos)
+void Projectile::renderItem(const Point &pos) const
 {
    if(shouldRender())
       renderProjectile(pos, mType, getGame()->getCurrentTime() - getCreationTime());
@@ -744,7 +746,7 @@ bool Burst::canAddToEditor() { return false; }      // No bursts in the editor
 
 
 
-void Burst::renderItem(const Point &pos)
+void Burst::renderItem(const Point &pos) const
 {
    if(!shouldRender())
       return;
@@ -797,7 +799,7 @@ TNL_IMPLEMENT_NETOBJECT(Mine);
 
 
 const U32 Mine::FuseDelay = 100;
-const S32 Mine::SensorRadius = 50;
+const F32 Mine::SensorRadius = 50;
 
 
 // Constructor -- used when mine is planted
@@ -1005,35 +1007,41 @@ void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-void Mine::renderItem(const Point &pos)
+bool Mine::getMineVisible(const ClientGame *game) const
+{
+#ifndef ZAP_DEDICATED
+   S32 ourTeam = game->getCurrentTeamIndex();
+
+   // Neutral player see all mines -- note that we don't really have neutral players at this time.  But if we did...
+   if(ourTeam == TEAM_NEUTRAL)
+      return true;
+
+   // Can see mine if laid by teammate in team game OR you laid it yourself
+   if((ourTeam == getTeam() && game->isTeamGame()) || mIsOwnedByLocalClient)
+      return true;
+
+   // If sensor is active and you're within the detection distance
+   Ship *ship = game->getLocalPlayerShip();
+   if(ship && ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < 
+                                                         sq(ModuleInfo::SensorCloakInnerDetectionDistance))
+      return true;
+#endif
+   return false;
+}
+
+
+void Mine::renderItem(const Point &pos) const
 {
 #ifndef ZAP_DEDICATED
    if(!shouldRender())
       return;
 
-   bool visible = false, armed = false;
+   bool visible = true, armed = true;
 
-   Ship *ship = getGame()->getLocalPlayerShip();
-
-   S32 ourTeam = static_cast<ClientGame*>(getGame())->getCurrentTeamIndex();
-
-   if(ourTeam != TEAM_NEUTRAL)
+   if(getGame())
    {
+      visible = getMineVisible(static_cast<ClientGame *>(getGame()));
       armed = mArmed;
-
-      // Can see mine if laid by teammate in team game OR you laid it yourself
-      if( (ourTeam == getTeam() && getGame()->isTeamGame()) ||
-            mIsOwnedByLocalClient)
-         visible = true;
-
-      // If sensor is active and you're within the detection distance
-      if(ship && ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(ModuleInfo::SensorCloakInnerDetectionDistance))
-         visible = true;
-   }
-   else
-   {
-      armed = true;
-      visible = true;      // We get here in editor when in preview mode
    }
 
    renderMine(pos, armed, visible);
@@ -1041,13 +1049,13 @@ void Mine::renderItem(const Point &pos)
 }
 
 
-void Mine::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void Mine::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    renderMine(getActualPos(), true, true);
 }
 
 
-void Mine::renderDock()
+void Mine::renderDock(const Color &color) const
 {
 #ifndef ZAP_DEDICATED
    Point pos = getActualPos();
@@ -1058,10 +1066,10 @@ void Mine::renderDock()
 }
 
 
-const char *Mine::getOnScreenName()     { return "Mine";  }
-const char *Mine::getOnDockName()       { return "Mine";  }
-const char *Mine::getPrettyNamePlural() { return "Mines"; }
-const char *Mine::getEditorHelpString() { return "Mines can be prepositioned, and are are \"hostile to all\". [M]"; }
+const char *Mine::getOnScreenName()     const  { return "Mine";  }
+const char *Mine::getOnDockName()       const  { return "Mine";  }
+const char *Mine::getPrettyNamePlural() const  { return "Mines"; }
+const char *Mine::getEditorHelpString() const  { return "Mines can be prepositioned, and are are \"hostile to all\". [M]"; }
 
 
 bool Mine::hasTeam()        { return false; }
@@ -1145,7 +1153,7 @@ SpyBug *SpyBug::clone() const
 }
 
 
-bool SpyBug::processArguments(S32 argc, const char **argv, Game *game)
+bool SpyBug::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 3)
       return false;
@@ -1153,10 +1161,7 @@ bool SpyBug::processArguments(S32 argc, const char **argv, Game *game)
    setTeam(atoi(argv[0]));
 
    // Strips off first arg from argv, so the parent gets the straight coordinate pair it's expecting
-   if(!Parent::processArguments(2, &argv[1], game))    
-      return false;
-
-   return true;
+   return Parent::processArguments(2, &argv[1], level);
 }
 
 
@@ -1237,7 +1242,7 @@ void SpyBug::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-void SpyBug::renderItem(const Point &pos)
+void SpyBug::renderItem(const Point &pos) const
 {
 #ifndef ZAP_DEDICATED
    if(!shouldRender())
@@ -1266,25 +1271,25 @@ void SpyBug::renderItem(const Point &pos)
       visible = true;      // We get here in editor when in preview mode
 
 
-   renderSpyBug(pos, *getColor(), visible, true);
+   renderSpyBug(pos, getColor(), visible, true);
 #endif
 }
 
 
-void SpyBug::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void SpyBug::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
-   renderSpyBug(getPos(), *getColor(), true, true);
+   renderSpyBug(getPos(), getColor(), true, true);
 }
 
 
-void SpyBug::renderDock()
+void SpyBug::renderDock(const Color &color) const
 {
 #ifndef ZAP_DEDICATED
    const F32 radius = 9;
 
    Point pos = getRenderPos();
 
-   drawFilledCircle(pos, radius, getColor());
+   drawFilledCircle(pos, radius, color);
 
    drawCircle(pos, radius, &Colors::gray70);
    drawLetter('S', pos, Color(getTeam() < 0 ? .5 : .7), 1);    // Use darker gray for neutral spybugs so S will show up clearer
@@ -1292,10 +1297,10 @@ void SpyBug::renderDock()
 }
 
 
-const char *SpyBug::getOnScreenName()     { return "Spy Bug";  }
-const char *SpyBug::getOnDockName()       { return "Bug";      }
-const char *SpyBug::getPrettyNamePlural() { return "Spy Bugs"; }
-const char *SpyBug::getEditorHelpString() { return "Remote monitoring device that shows enemy ships on the commander's map."; }
+const char *SpyBug::getOnScreenName()     const  { return "Spy Bug";  }
+const char *SpyBug::getOnDockName()       const  { return "Bug";      }
+const char *SpyBug::getPrettyNamePlural() const  { return "Spy Bugs"; }
+const char *SpyBug::getEditorHelpString() const  { return "Remote monitoring device that shows enemy ships on the commander's map."; }
 
 
 bool SpyBug::hasTeam()        { return true;  }
@@ -1318,6 +1323,8 @@ bool SpyBug::isVisibleToPlayer(S32 playerTeam, bool isTeamGame)
    else
       return mIsOwnedByLocalClient;
 }
+
+
 // server side
 bool SpyBug::isVisibleToPlayer(ClientInfo *clientInfo, bool isTeamGame)
 {
@@ -1827,7 +1834,7 @@ bool Seeker::collided(BfObject *otherObj, U32 stateIndex)
 BfObject *Seeker::getShooter() const {return mShooter; }
 
 
-void Seeker::renderItem(const Point &pos)
+void Seeker::renderItem(const Point &pos) const
 {
 #ifndef ZAP_DEDICATED
    if(!shouldRender())  

@@ -28,8 +28,6 @@ public:
    void shipTouchFlag(Ship *ship, FlagItem *flag);
    void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);
 
-   void addFlag(FlagItem *flag);     // Server only
-
    void shipTouchZone(Ship *ship, GoalZone *zone);
 
    GameTypeId getGameTypeId() const;
@@ -52,7 +50,8 @@ public:
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
-   void onGameOver();
+   bool onGameOver();
+   void onOvertimeStarted();
 
    TNL_DECLARE_CLASS(ZoneControlGameType);
 };

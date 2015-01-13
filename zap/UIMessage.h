@@ -42,7 +42,7 @@ public:
    void setStyle(U32 style);                 // Use a preset menu style
    void reset();
    void idle(U32 t);
-   void render();
+   void render() const;
    void quit();
    bool onKeyDown(InputCode inputCode);
 };

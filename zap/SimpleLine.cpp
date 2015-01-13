@@ -24,23 +24,22 @@ SimpleLine::~SimpleLine()
 }
 
 
-S32 SimpleLine::getDockRadius()
+S32 SimpleLine::getDockRadius() const
 {
    return 8;
 }
 
 
-F32 SimpleLine::getEditorRadius(F32 currentScale)
+F32 SimpleLine::getEditorRadius(F32 currentScale) const
 {
    return 7;
 }
 
 
-void SimpleLine::renderDock()
+void SimpleLine::renderDock(const Color &color) const
 {
 #ifndef ZAP_DEDICATED
-   Color color = getEditorRenderColor();
-   drawFilledSquare(getVert(0), 5, &color);       // Draw origin of item to give user something to grab on the dock
+   drawFilledSquare(getVert(0), 5, getEditorRenderColor()); // Draw origin of item to give user something to grab on the dock
 #endif
 }
 
@@ -69,7 +68,7 @@ Point SimpleLine::getInitialPlacementOffset(U32 gridSize)  const
 
 // Draw arrow that serves as the core of SimpleLine items in the editor
 // Subclasses will fill in the rest
-void SimpleLine::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void SimpleLine::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    renderHeavysetArrow(getVert(0), getVert(1), getEditorRenderColor(), isSelected(), isLitUp());
@@ -77,11 +76,11 @@ void SimpleLine::renderEditor(F32 currentScale, bool snappingToWallCornersEnable
 }
 
 
-void SimpleLine::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
+void SimpleLine::prepareForDock(const Point &point, S32 teamIndex)
 {
 #ifndef ZAP_DEDICATED
    setVert(point, 0);
-   Parent::prepareForDock(game, point, teamIndex);
+   Parent::prepareForDock(point, teamIndex);
 #endif
 }
 

@@ -6,6 +6,7 @@
 #include "gameWeapons.h"
 #include "projectile.h"
 #include "game.h"
+#include "Level.h"
 
 #include "Colors.h"
 
@@ -63,27 +64,27 @@ void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, co
             const F32 SPREAD_FACTOR = 40.0f;    // Larger = broader spread
             Point velPerp(projVel.y, -projVel.x);
             velPerp.normalize(SPREAD_FACTOR); 
-            (new Projectile(weapon, firePos, projVel,           shooter))->addToGame(game, game->getGameObjDatabase());
-            (new Projectile(weapon, firePos, projVel + velPerp, shooter))->addToGame(game, game->getGameObjDatabase());
-            (new Projectile(weapon, firePos, projVel - velPerp, shooter))->addToGame(game, game->getGameObjDatabase());
+            (new Projectile(weapon, firePos, projVel,           shooter))->addToGame(game, game->getLevel());
+            (new Projectile(weapon, firePos, projVel + velPerp, shooter))->addToGame(game, game->getLevel());
+            (new Projectile(weapon, firePos, projVel - velPerp, shooter))->addToGame(game, game->getLevel());
          }
          break;
       case WeaponPhaser:
       case WeaponBounce:
       case WeaponTurret:
-         (new Projectile(weapon, firePos, projVel, shooter))->addToGame(game, game->getGameObjDatabase());
+         (new Projectile(weapon, firePos, projVel, shooter))->addToGame(game, game->getLevel());
          break;
       case WeaponBurst:                                         // 0.9 to fix firing through barriers
-         (new Burst(shooterPos + dir * shooterRadius * 0.9f, projVel, shooter))->addToGame(game, game->getGameObjDatabase());
+         (new Burst(shooterPos + dir * shooterRadius * 0.9f, projVel, shooter))->addToGame(game, game->getLevel());
          break;
       case WeaponMine:
-         (new Mine(firePos, shooter))->addToGame(game, game->getGameObjDatabase());
+         (new Mine(firePos, shooter))->addToGame(game, game->getLevel());
          break;
       case WeaponSpyBug:
-         (new SpyBug(firePos, shooter))->addToGame(game, game->getGameObjDatabase());
+         (new SpyBug(firePos, shooter))->addToGame(game, game->getLevel());
          break;
       case WeaponSeeker:
-         (new Seeker(shooterPos + dir * shooterRadius * 0.9f, projVel, dir.ATAN2(), shooter))->addToGame(game, game->getGameObjDatabase());
+         (new Seeker(shooterPos + dir * shooterRadius * 0.9f, projVel, dir.ATAN2(), shooter))->addToGame(game, game->getLevel());
          break;
       default:
          break;

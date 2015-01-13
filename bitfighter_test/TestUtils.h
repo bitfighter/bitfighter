@@ -51,6 +51,7 @@ struct GamePair
    GamePair(GameSettingsPtr settings);
    GamePair(GameSettingsPtr settings, const string &levelCode);
 
+
 	~GamePair();
 
    void initialize(GameSettingsPtr settings, const string &levelcode, S32 clientCount);
@@ -59,8 +60,8 @@ struct GamePair
 	static void idle(U32 timeDelta, U32 cycles = 1);
 	ServerGame *server;
 
-   void addClient(const string &name, S32 team = NO_TEAM);
-   void addBotClient(const string &name, S32 team = NO_TEAM);
+   void addClient(const string &name, S32 teamIndex = NO_TEAM);
+   void addBotClient(const string &name, S32 teamIndex = NO_TEAM);
 
    ClientGame *getClient(S32 index);
 

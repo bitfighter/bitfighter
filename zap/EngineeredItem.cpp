@@ -7,16 +7,18 @@
 
 #include "gameWeapons.h"
 #include "gameObjectRender.h"
-#include "WallSegmentManager.h"
+#include "WallItem.h"
 #include "Teleporter.h"
 #include "gameType.h"
-
+#include "Level.h"
+#include "PolyWall.h"
 #include "projectile.h"
 
 #include "ServerGame.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"        // for accessing client's spark manager
+#  include "UIQuickMenu.h"
 #endif
 
 #include "Colors.h"
@@ -69,15 +71,15 @@ void Engineerable::setResource(MountableItem *resource)
 }
 
 
-void Engineerable::releaseResource(const Point &releasePos, GridDatabase *database)
+void Engineerable::releaseResource(const Point &releasePos, Level *level)
 {
-   if(!mResource) {
+   if(!mResource) 
       return;
-   }
-   mResource->addToDatabase(database);
+
+   mResource->addToDatabase(level);
    mResource->setPosVelAng(releasePos, Point(), 0);               // Reset velocity of resource item to 0,0
 
-   TNLAssert(dynamic_cast<ServerGame*>(mResource->getGame()), "Null ServerGame");
+   TNLAssert(dynamic_cast<ServerGame*>(mResource->getGame()), "NULL ServerGame");
    static_cast<ServerGame*>(mResource->getGame())->onObjectAdded(mResource);
 }
 
@@ -132,7 +134,7 @@ string EngineerModuleDeployer::checkResourcesAndEnergy(const Ship *ship)
 
 // Returns "" if location is OK, otherwise returns an error message
 // Runs on client and server
-bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameObjectDatabase, const Ship *ship, U32 objectType)
+bool EngineerModuleDeployer::canCreateObjectAtLocation(const Level *level, const Ship *ship, U32 objectType)
 {
    string msg;
 
@@ -157,15 +159,15 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
    {
       case EngineeredTurret:
          bounds = Turret::getTurretGeometry(mDeployPosition, mDeployNormal);   
-         goodDeploymentPosition = EngineeredItem::checkDeploymentPosition(bounds, gameObjectDatabase);
+         goodDeploymentPosition = EngineeredItem::checkDeploymentPosition(bounds, level);
          break;
       case EngineeredForceField:
          bounds = ForceFieldProjector::getForceFieldProjectorGeometry(mDeployPosition, mDeployNormal);
-         goodDeploymentPosition = EngineeredItem::checkDeploymentPosition(bounds, gameObjectDatabase);
+         goodDeploymentPosition = EngineeredItem::checkDeploymentPosition(bounds, level);
          break;
       case EngineeredTeleporterEntrance:
       case EngineeredTeleporterExit:
-         goodDeploymentPosition = Teleporter::checkDeploymentPosition(mDeployPosition, gameObjectDatabase, ship);
+         goodDeploymentPosition = Teleporter::checkDeploymentPosition(mDeployPosition, level, ship);
          break;
       default:    // will never happen
          TNLAssert(false, "Bad objectType");
@@ -192,8 +194,8 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
 
    // Now we can find the point where the forcefield would end if this were a valid position
    Point forceFieldEnd;
-   DatabaseObject *terminatingWallObject;
-   ForceField::findForceFieldEnd(gameObjectDatabase, forceFieldStart, mDeployNormal, forceFieldEnd, &terminatingWallObject);
+   DatabaseObject *terminatingWallObject = 
+               ForceField::findForceFieldEnd(level, forceFieldStart, mDeployNormal, forceFieldEnd);
 
    bool collision = false;
 
@@ -204,7 +206,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
    Vector<Point> candidateForceFieldGeom = ForceField::computeGeom(forceFieldStart, forceFieldEnd);
 
    fillVector.clear();
-   gameObjectDatabase->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
+   level->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -224,7 +226,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
       // one could intersect the end of the other.
       fillVector.clear();
       queryRect.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));
-      gameObjectDatabase->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
+      level->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
 
       // Reusable containers for holding geom of any forcefields we might need to check for intersection with our candidate
       Point start, end;
@@ -252,11 +254,11 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
 
    /// Part TWO - preventative abuse measures
 
-   // First thing first, is abusive engineer allowed?  If so, let's get out of here
+   // First thing first, is abusive engineer allowed?  If so, let's get out of here.
    if(ship->getGame()->getGameType()->isEngineerUnrestrictedEnabled())
       return true;
 
-   // Continuing on..  let's check to make sure that forcefield doesn't come within a ship's
+   // Continuing on...  let's check to make sure that forcefield doesn't come within a ship's
    // width of a wall; this should really squelch the forcefield abuse
    bool wallTooClose = false;
    fillVector.clear();
@@ -278,7 +280,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
    queryRect = Rect(collisionPoly);
 
    // Search for wall segments within query
-   gameObjectDatabase->findObjects(isWallType, fillVector, queryRect);
+   level->findObjects(isWallType, fillVector, queryRect);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -305,7 +307,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
    // part two.  We can excluded engineered turrets because they can be destroyed
    bool turretInTheWay = false;
    fillVector.clear();
-   gameObjectDatabase->findObjects(TurretTypeNumber, fillVector, queryRect);
+   level->findObjects(TurretTypeNumber, fillVector, queryRect);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -398,7 +400,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
    engineerable->computeExtent();      // Recomputes extents
 
    deployedObject->setOwner(clientInfo);
-   deployedObject->addToGame(ship->getGame(), ship->getGame()->getGameObjDatabase());
+   deployedObject->addToGame(ship->getGame(), ship->getGame()->getLevel());
 
    MountableItem *resource = ship->dismountFirst(ResourceItemTypeNumber);
    ship->resetFastRecharge();
@@ -424,7 +426,10 @@ const F32 EngineeredItem::EngineeredItemRadius = 7.f;
 const F32 EngineeredItem::DamageReductionFactor = 0.25f;
 
 // Constructor
-EngineeredItem::EngineeredItem(S32 team, const Point &anchorPoint, const Point &anchorNormal) : Parent(EngineeredItemRadius), Engineerable(), mAnchorNormal(anchorNormal)
+EngineeredItem::EngineeredItem(S32 team, const Point &anchorPoint, const Point &anchorNormal) : 
+      Parent(EngineeredItemRadius), 
+      Engineerable(), 
+      mAnchorNormal(anchorNormal)
 {
    mHealth = 1.0f;
    setTeam(team);
@@ -447,26 +452,26 @@ EngineeredItem::~EngineeredItem()
 }
 
 
-bool EngineeredItem::processArguments(S32 argc, const char **argv, Game *game)
+// XXXX <Team> <X> <Y> [HealRate]
+bool EngineeredItem::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 3)
       return false;
 
    setTeam(atoi(argv[0]));
    mOriginalTeam = getTeam();
+
    if(mOriginalTeam == TEAM_NEUTRAL)      // Neutral object starts with no health and can be repaired and claimed by anyone
       mHealth = 0;
    
    Point pos;
    pos.read(argv + 1);
-   pos *= game->getLegacyGridSize();
+   pos *= level->getLegacyGridSize();
 
    if(argc >= 4)
-   {
       setHealRate(atoi(argv[3]));
-   }
 
-   findMountPoint(game, pos);
+   findMountPoint(level, pos);
 
    return true;
 }
@@ -536,67 +541,80 @@ void EngineeredItem::fillAttributesVectors(Vector<string> &keys, Vector<string> 
 }
 
 
-// This is used for both positioning items in-game and for snapping them to walls in the editor --> static method
-// Polulates anchor and normal
-DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
-                                                         const Vector<S32> *excludedWallList,
-                                                         bool format, Point &anchor, Point &normal)
+// Database could be either a database full of WallEdges or game objects
+static DatabaseObject *findClosestWall(const GridDatabase *database, const Point &pos, F32 snapDist, 
+                                       const Vector<BfObject *> *excludedWallList,
+                                       bool format,
+                                       Point &anchor, Point &normal)
 {
-   return findAnchorPointAndNormal(wallEdgeDatabase, pos, snapDist, excludedWallList, format, (TestFunc)isWallType, anchor, normal);
-}
-
-
-// Static function
-DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeDatabase, const Point &pos, F32 snapDist, 
-                                                         const Vector<S32> *excludedWallList,
-                                                         bool format, TestFunc testFunc, Point &anchor, Point &normal)
-{
-   F32 minDist = F32_MAX;
    DatabaseObject *closestWall = NULL;
+   F32 minDist = F32_MAX;
 
-   Point n;    // Reused in loop below
+   Point n, dir, mountPos;    // Reused in loop below
    F32 t;
 
-   // Start with a sweep of the area
+   // Start with a sweep of the area.
    //
    // The smaller the increment, the closer to finding an accurate line perpendicular to the wall; however
    // we will trade accuracy for performance here and follow up with finding the exact normal and anchor
-   // below this loop
+   // below this loop.
    //
-   // Start at any angle other than 0.  Search at angle 0 seems to return the wrong wall sometimes
+   // Start at any angle other than 0.  Search at angle 0 seems to return the wrong wall sometimes.
    F32 increment = Float2Pi * 0.0625f;
+
    for(F32 theta = increment; theta < Float2Pi + increment; theta += increment)
    {
-      Point dir(cos(theta), sin(theta));
-      dir *= snapDist;
-      Point mountPos = pos - dir * 0.001f;  // Offsetting slightly prevents spazzy behavior in editor
+      dir.set(cos(theta) * snapDist, sin(theta) * snapDist);
+      mountPos.set(pos - dir * 0.001f);   // Offsetting slightly prevents spazzy behavior in editor
 
       // Look for walls
-      DatabaseObject *wall = wallEdgeDatabase->findObjectLOS(testFunc, ActualState, format, mountPos, mountPos + dir, t, n);
+      DatabaseObject *wall = database->findObjectLOS(isWallType, ActualState, format, mountPos, mountPos + dir, t, n);
 
-      if(wall == NULL)
+      if(wall == NULL)     // No wall in this direction
          continue;
 
-      if(t >= minDist)
+      if(t >= minDist)     // Wall in this direction, but not as close as other candidates
          continue;
 
-      if(excludedWallList && excludedWallList->contains(static_cast<WallSegment *>(wall)->getOwner()))
+      // Skip candidate if it's on our exclusion list
+      if(excludedWallList && excludedWallList->contains(static_cast<BfObject *>(wall)))
          continue;
 
+      // If we get to here, the wall we've found is our best candidate yet!
       anchor.set(mountPos + dir * t);
       normal.set(n);
       minDist = t;
       closestWall = wall;
    }
 
+   return closestWall;
+}
+
+
+// Static function -- returns segment item is mounted on; returns NULL if item is not mounted; populates anchor and normal
+BfObject *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *gameObjectDatabase, 
+                                                   const GridDatabase *wallEdgeDatabase,
+                                                   const Point &pos, 
+                                                   F32 snapDist, 
+                                                   const Vector<BfObject *> *excludedWallList,
+                                                   bool format, Point &anchor, Point &normal)
+{
+   // Here we're interested in finding the closest wall edge to our item -- since edges are anonymous (i.e.
+   // we don't know which wall they belong to), we don't really care which edge it is, only where the item
+   // will snap to.  We'll use this snap location to identify the actual wall segment later.
+   DatabaseObject *edge = findClosestWall(wallEdgeDatabase, pos, snapDist, NULL, format, anchor, normal);
+
+   if(!edge)
+      return NULL;
+
    // Re-adjust our anchor to a segment built from the anchor and normal vector found above.
-   // This is because the anchor may be slightly off due to the inaccurate sweep angles
+   // This is because the anchor may be slightly off due to the inaccurate sweep angles.
    //
    // The algorithm here is to concoct a small segment through the anchor detected in the sweep, and
    // make it perpendicular to the normal vector that was also detected in the sweep (so parallel to
    // the wall edge).  Then find the new normal point to this segment and make that the anchor.
    //
-   // 10 point length parallel segment should be plenty
+   // 10 point length parallel segment should be plenty.
    Point normalNormal(normal.y, -normal.x);
    Point p1 = Point(anchor.x + (5 * normalNormal.x), anchor.y + (5 * normalNormal.y));
    Point p2 = Point(anchor.x - (5 * normalNormal.x), anchor.y - (5 * normalNormal.y));
@@ -604,37 +622,38 @@ DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeD
    // Now find our new anchor
    findNormalPoint(pos, p1, p2, anchor);
 
+   // Finally, figure out which segment this item is mounted on by re-running our find algorithm, but using our segment
+   // database rather than our wall-edge database.  We'll pass the anchor location we found above as the snap object's
+   // position, and use a dummy point to avoid clobbering the anchor location we found.
+   Point dummy;
+
+   BfObject *closestWall = static_cast<BfObject *>(
+         findClosestWall(gameObjectDatabase, anchor, snapDist, excludedWallList, format, dummy, normal));
+
+   // If closestWall is a polywall, and if it is wound CW, need to reverse the normal point
+   if(closestWall->getObjectTypeNumber() == PolyWallTypeNumber)
+   { 
+      PolyWall *polywall = static_cast<PolyWall *>(closestWall);
+
+      if(isWoundClockwise(polywall->getCollisionPoly()))
+         normal *= -1;
+   }
+
+   TNLAssert(closestWall, "Should have found something here!");
+
    return closestWall;
 }
 
 
-void EngineeredItem::setAnchorNormal(const Point &nrml)
-{
-   mAnchorNormal = nrml;
-}
-
-
-WallSegment *EngineeredItem::getMountSegment()
+BfObject *EngineeredItem::getMountSegment() const
 {
    return mMountSeg;
 }
 
 
-void EngineeredItem::setMountSegment(WallSegment *mountSeg)
+void EngineeredItem::setMountSegment(BfObject *mountSeg)
 {
    mMountSeg = mountSeg;
-}
-
-
-WallSegment *EngineeredItem::getEndSegment()
-{
-   return NULL;
-}
-
-
-void EngineeredItem::setEndSegment(WallSegment *endSegment)
-{
-   // Do nothing
 }
 
 
@@ -653,7 +672,7 @@ bool EngineeredItem::isSnapped() const
 
 static const F32 disabledLevel = 0.25;
 
-bool EngineeredItem::isEnabled()
+bool EngineeredItem::isEnabled() const
 {
    return mHealth >= disabledLevel;
 }
@@ -661,7 +680,7 @@ bool EngineeredItem::isEnabled()
 
 void EngineeredItem::damageObject(DamageInfo *di)
 {
-   // Don't do self damage.  This is more complicated than it should probably be..
+   // Don't do self damage.  This is more complicated than it should probably be.
    BfObject *damagingObject = di->damagingObject;
 
    U8 damagingObjectType = UnknownTypeNumber;
@@ -746,9 +765,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
       onDestroyed();
 
       if(mResource.isValid())
-      {
-         releaseResource(getPos() + mAnchorNormal * mResource->getRadius(), getGame()->getGameObjDatabase());
-      }
+         releaseResource(getPos() + mAnchorNormal * mResource->getRadius(), getGame()->getLevel());
 
       deleteObject(500);
    }
@@ -820,7 +837,17 @@ Vector<Point> EngineeredItem::getObjectGeometry(const Point &anchor, const Point
 void EngineeredItem::setPos(lua_State *L, S32 stackIndex)
 {
    Parent::setPos(L, stackIndex);
-   findMountPoint(Game::getAddTarget(), getPos());
+
+   // Find a database that will contain objects we could snap to.  If object is already in a database,
+   // that is our first choice.  Otherwise, we'll see if there is one associated with the game, because
+   // that is where we'll likely end up.  Otherwise, it's no snapping today.
+   Level *level = getGame()->getLevel();
+
+   //if(!database && getGame() && getGame()->getLevel())
+   //   database = getGame()->getLevel();
+
+   if(level)
+      findMountPoint(level, getPos());
 }
 
 
@@ -1018,8 +1045,7 @@ void EngineeredItem::healObject(S32 time)
 // Server only
 void EngineeredItem::getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const
 {
-   // Fill zonePoints
-   offsetPolygon(getCollisionPoly(), points, bufferRadius);
+   offsetPolygon(getCollisionPoly(), points, bufferRadius);    // Fill zonePoints
 }
 
 
@@ -1027,20 +1053,21 @@ static const F32 MAX_SNAP_DISTANCE = 100.0f;    // Max distance to look for a mo
 
 // Figure out where to mount this item during construction; mountToWall() is similar, but used in editor.  
 // findDeployPoint() is version used during deployment of engineerered item.
-void EngineeredItem::findMountPoint(Game *game, const Point &pos)
+void EngineeredItem::findMountPoint(const Level *level, const Point &pos)
 {
    Point normal, anchor;
 
    // Anchor objects to the correct point
-   if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, MAX_SNAP_DISTANCE, NULL, true, anchor, normal))
+   if(findAnchorPointAndNormal(level, level->getWallEdgeDatabase(), pos, 
+                               MAX_SNAP_DISTANCE, NULL, true, anchor, normal))
    {
-      setPos(pos);               // Found no mount point, but for editor, needs to set the position
-      mAnchorNormal.set(1,0);
-   }
-   else
-   {
-      setPos(anchor + normal);
+      setPos(anchor);
       mAnchorNormal.set(normal);
+   }
+   else   // Found no mount point
+   {
+      setPos(pos);   
+      mAnchorNormal.set(1,0);
    }
    
    computeObjectGeometry();                                    // Fills mCollisionPolyPoints 
@@ -1049,38 +1076,62 @@ void EngineeredItem::findMountPoint(Game *game, const Point &pos)
 
 
 // Find mount point or turret or forcefield closest to pos; used in editor.  See findMountPoint() for in-game version.
-Point EngineeredItem::mountToWall(const Point &pos, const WallSegmentManager *wallSegmentManager, const Vector<S32> *excludedWallList)
+void EngineeredItem::mountToWall(const Point &pos, 
+                                 const GridDatabase *gameObjectDatabase, 
+                                 const GridDatabase *wallEdgeDatabase, 
+                                 const Vector<BfObject *> *excludedWallList)
 {  
-   Point anchor, nrml;
-   DatabaseObject *mountSeg = NULL;
+   Point normal, anchor;
+   BfObject *mountSeg;
 
-   mountSeg = findAnchorPointAndNormal(wallSegmentManager->getWallSegmentDatabase(), pos,    // <== Note different database than above!
-                                       MAX_SNAP_DISTANCE, excludedWallList,
-                                       true, (TestFunc)isWallType, anchor, nrml);
+   mountSeg = findAnchorPointAndNormal(gameObjectDatabase,
+                                       wallEdgeDatabase, 
+                                       pos,    
+                                       MAX_SNAP_DISTANCE, 
+                                       excludedWallList,
+                                       true, 
+                                       anchor, 
+                                       normal);
 
    // It is possible to find an edge but not a segment while a wall is being dragged -- the edge remains in it's original location 
    // while the segment is being dragged around, some distance away
    if(mountSeg)   // Found a segment we can mount to
    {
       setPos(anchor);
-      setAnchorNormal(nrml);
-      // TODO -- After 019 release -- change this to a static_cast with a protecting assert
-      setMountSegment(dynamic_cast<WallSegment *>(mountSeg));
+      mAnchorNormal.set(normal);
+
+      setMountSegment(mountSeg);
 
       mSnapped = true;
-      onGeomChanged();
-
-      return anchor;
    }
    else           // No suitable segments found
    {
       mSnapped = false;
       setPos(pos);
-      onGeomChanged();
+   }  
 
-      return pos;
-   }
+   onGeomChanged();
 }
+
+
+#ifndef ZAP_DEDICATED
+
+bool EngineeredItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   CounterMenuItem *menuItem = new CounterMenuItem("10% Heal:", getHealRate(), 1, 0, 100, "secs", "Disabled",
+      "Time for this item to heal itself 10%");
+   attributeMenu->addMenuItem(menuItem);
+
+   return true;
+}
+
+
+void EngineeredItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   setHealRate(attributeMenu->getMenuItem(0)->getIntValue());
+}
+
+#endif
 
 
 /////
@@ -1300,7 +1351,7 @@ S32 EngineeredItem::lua_setGeom(lua_State *L)
 {
    S32 retVal = Parent::lua_setGeom(L);
 
-   findMountPoint(Game::getAddTarget(), getPos());
+   findMountPoint(getGame()->getLevel(), getPos());
 
    return retVal;
 }
@@ -1336,7 +1387,7 @@ ForceFieldProjector::ForceFieldProjector(lua_State *L) : Parent(TEAM_NEUTRAL, Po
          setTeam(L, 2);
       }
 
-      findMountPoint(Game::getAddTarget(), getPos());
+      findMountPoint(getGame()->getLevel(), getPos());
    }
 
    initialize();
@@ -1344,7 +1395,8 @@ ForceFieldProjector::ForceFieldProjector(lua_State *L) : Parent(TEAM_NEUTRAL, Po
 
 
 // Constructor for when projector is built with engineer
-ForceFieldProjector::ForceFieldProjector(S32 team, const Point &anchorPoint, const Point &anchorNormal) : Parent(team, anchorPoint, anchorNormal)
+ForceFieldProjector::ForceFieldProjector(S32 team, const Point &anchorPoint, const Point &anchorNormal) : 
+   Parent(team, anchorPoint, anchorNormal)
 {
    initialize();
 }
@@ -1354,6 +1406,9 @@ ForceFieldProjector::ForceFieldProjector(S32 team, const Point &anchorPoint, con
 ForceFieldProjector::~ForceFieldProjector()
 {
    LUAW_DESTRUCTOR_CLEANUP;
+
+   if(mNeedToCleanUpField)
+      delete mField;
 }
 
 
@@ -1363,13 +1418,21 @@ void ForceFieldProjector::initialize()
    mObjectTypeNumber = ForceFieldProjectorTypeNumber;
    onGeomChanged();     // Can't be placed on parent, as parent constructor must initalized first
 
+   mField = NULL;
+
+   mNeedToCleanUpField = false;
+
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 ForceFieldProjector *ForceFieldProjector::clone() const
 {
-   return new ForceFieldProjector(*this);
+   ForceFieldProjector *ffp = new ForceFieldProjector(*this);
+   if(mField)
+      ffp->mField = mField->clone();
+
+   return ffp;
 }
 
 
@@ -1432,49 +1495,38 @@ Point ForceFieldProjector::getForceFieldStartPoint(const Point &anchor, const Po
 }
 
 
-void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &end)
+void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &end) const
 {
    Point pos = getPos();
 
    start = getForceFieldStartPoint(pos, mAnchorNormal);
 
-   DatabaseObject *collObj;
-   ForceField::findForceFieldEnd(getDatabase(), getForceFieldStartPoint(pos, mAnchorNormal), mAnchorNormal, end, &collObj);
-}
-
-
-WallSegment *ForceFieldProjector::getEndSegment()
-{
-   return mForceFieldEndSegment;
-}
-
-
-void ForceFieldProjector::setEndSegment(WallSegment *endSegment)
-{
-   mForceFieldEndSegment = endSegment;
+   ForceField::findForceFieldEnd(getDatabase(), getForceFieldStartPoint(pos, mAnchorNormal), mAnchorNormal, end);
 }
 
 
 // Forcefield projector has been turned on some how; either at the beginning of a level, or via repairing, or deploying. 
-// Runs on both client and server
+// Called on both client and server, does nothing on client.
 void ForceFieldProjector::onEnabled()
 {
+   // Server only -- nothing to do on client!
+   if(isGhost())
+      return;
+
    // Database can be NULL here if adding a forcefield from the editor:  The editor will
    // add a new game object *without* adding it to a grid database in order to optimize
    // adding large groups of objects with copy/paste/undo/redo
    if(!getDatabase())
       return;
 
-   if(!isGhost() && mField.isNull())  // server only, add mField only when we don't have any
+   if(mField.isNull())     // Add mField only when we don't have any
    {
       Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
       Point end;
-      DatabaseObject *collObj;
-
-      ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
+      ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end);
 
       mField = new ForceField(getTeam(), start, end);
-      mField->addToGame(getGame(), getGame()->getGameObjDatabase());
+      mField->addToGame(getGame(), getGame()->getLevel());
    }
 }
 
@@ -1486,17 +1538,39 @@ const Vector<Point> *ForceFieldProjector::getCollisionPoly() const
 }
 
 
+// Create a dummy ForceField object to help illustrate placement of ForceFieldProjectors in the editor
+void ForceFieldProjector::createCaptiveForceField()
+{
+   Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
+   Point end;
+   ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end);
+
+   TNLAssert(!mField, "Better clean up mField!");
+   mField = new ForceField(getTeam(), start, end);    // Not added to a database, so needs to be cleaned up by us
+   mNeedToCleanUpField = true;
+}
+
+
 void ForceFieldProjector::onAddedToGame(Game *theGame)
 {
    Parent::onAddedToGame(theGame);
 }
 
 
-void ForceFieldProjector::render()
+void ForceFieldProjector::onAddedToEditor()
+{
+   Parent::onAddedToEditor();
+
+   TNLAssert(!mField, "Shouldn't have a captive forcefield yet!");
+   createCaptiveForceField();
+}
+
+
+void ForceFieldProjector::render() const
 {
 #ifndef ZAP_DEDICATED
    // We're not in editor (connected to game)
-   if(static_cast<ClientGame*>(getGame())->isConnectedToServer())
+   if (getGame() && static_cast<ClientGame*>(getGame())->isConnectedToServer())
       renderForceFieldProjector(&mCollisionPolyPoints, getPos(), getColor(), isEnabled(), mHealRate);
    else
       renderEditor(0, false);
@@ -1504,35 +1578,37 @@ void ForceFieldProjector::render()
 }
 
 
-void ForceFieldProjector::renderDock()
+void ForceFieldProjector::renderDock(const Color &color) const
 {
-   renderSquareItem(getPos(), getColor(), 1, &Colors::white, '>');
+   renderSquareItem(getPos(), color, 1, Colors::white, '>');
 }
 
 
-void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    F32 scaleFact = 1;
-   const Color *color = getColor();
+   const Color &color = getColor();
 
    if(mSnapped)
    {
       Point forceFieldStart = getForceFieldStartPoint(getPos(), mAnchorNormal, scaleFact);
 
       renderForceFieldProjector(&mCollisionPolyPoints, getPos(), color, true, mHealRate);
-      renderForceField(forceFieldStart, forceFieldEnd, color, true, scaleFact);
+      //renderForceField(forceFieldStart, mField->getVert(1), color, true, scaleFact);
+      if(mField)
+         mField->render(color);
    }
    else
-      renderDock();
+      renderDock(color);
 #endif
 }
 
 
-const char *ForceFieldProjector::getOnScreenName()     { return "ForceFld"; }
-const char *ForceFieldProjector::getOnDockName()       { return "ForceFld"; }
-const char *ForceFieldProjector::getPrettyNamePlural() { return "Force Field Projectors"; }
-const char *ForceFieldProjector::getEditorHelpString() { return "Creates a force field that lets only team members pass. [F]"; }
+const char *ForceFieldProjector::getOnScreenName()     const {  return "ForceFld";  }
+const char *ForceFieldProjector::getOnDockName()       const {  return "ForceFld";  }
+const char *ForceFieldProjector::getPrettyNamePlural() const {  return "Force Field Projectors";  }
+const char *ForceFieldProjector::getEditorHelpString() const {  return "Creates a force field that lets only team members pass. [F]";  }
 
 
 bool ForceFieldProjector::hasTeam() { return true; }
@@ -1543,29 +1619,28 @@ bool ForceFieldProjector::canBeNeutral() { return true; }
 // Determine on which segment forcefield lands -- only used in the editor, wraps ForceField::findForceFieldEnd()
 void ForceFieldProjector::findForceFieldEnd()
 {
+   if(!mField)
+      return;
+
    // Load the corner points of a maximum-length forcefield into geom
    DatabaseObject *collObj;
 
    F32 scale = 1;
    
    Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
+   Point end;
 
    // Pass in database containing WallSegments, returns object in collObj
-   if(ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallSegmentDatabase(), 
-                                    start, mAnchorNormal, forceFieldEnd, &collObj))
-   {
-      setEndSegment(dynamic_cast<WallSegment *>(collObj));
-   }
-   else
-      setEndSegment(NULL);
-
-   setExtent(Rect(ForceField::computeGeom(start, forceFieldEnd, scale)));
+   collObj = ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end);
+   mField->setStartAndEndPoints(start, end);
+   
+   setExtent(Rect(ForceField::computeGeom(start, end, scale)));
 }
 
 
 void ForceFieldProjector::onGeomChanged()
 {
-   if(mSnapped)
+   if(mField && mSnapped)
       findForceFieldEnd();
 
    Parent::onGeomChanged();
@@ -1632,12 +1707,12 @@ S32 ForceFieldProjector::lua_setTeam(lua_State *L)
 
       Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
       Point end;
-      DatabaseObject *collObj;
 
-      ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
+      DatabaseObject *collObj = ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end);
 
+      delete mField;
       mField = new ForceField(getTeam(), start, end);
-      mField->addToGame(getGame(), getGame()->getGameObjDatabase());
+      mField->addToGame(getGame(), getGame()->getLevel());
    }
 
    return 0;
@@ -1664,12 +1739,21 @@ ForceField::ForceField(S32 team, Point start, Point end)
    mFieldUp = true;
    mObjectTypeNumber = ForceFieldTypeNumber;
    mNetFlags.set(Ghostable);
+
+   setNewGeometry(geomSimpleLine);     // Not used, keeps clone from blowing up
 }
+
 
 // Destructor
 ForceField::~ForceField()
 {
    // Do nothing
+}
+
+
+ForceField *ForceField::clone() const
+{
+   return new ForceField(*this);
 }
 
 
@@ -1718,6 +1802,13 @@ const Vector<Point> *ForceField::getOutline() const
 }
 
 
+void ForceField::setStartAndEndPoints(const Point &start, const Point &end)
+{
+   mStart = start;
+   mEnd = end;
+}
+
+
 void ForceField::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
@@ -1745,6 +1836,9 @@ void ForceField::idle(BfObject::IdleCallPath path)
 }
 
 
+// TODO: I don't think this is right -- we are sending important state information about the FF using
+// unverified packets that, if lost, will not be retransmitted.  I think it better to send this info either
+// as part of the ghosting process or as an s2c.  Thoughts?
 U32 ForceField::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    if(stream->writeFlag(updateMask & InitialMask))
@@ -1806,23 +1900,20 @@ Vector<Point> ForceField::computeGeom(const Point &start, const Point &end, F32 
 
 
 // Pass in a database containing walls or wallsegments
-bool ForceField::findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal,  
-                                   Point &end, DatabaseObject **collObj)
+// Static method
+DatabaseObject *ForceField::findForceFieldEnd(const GridDatabase *database, const Point &start, const Point &normal, Point &end)
 {
    F32 time;
    Point n;
 
    end.set(start.x + normal.x * MAX_FORCEFIELD_LENGTH, start.y + normal.y * MAX_FORCEFIELD_LENGTH);
 
-   *collObj = db->findObjectLOS((TestFunc)isWallType, ActualState, start, end, time, n);
+   DatabaseObject *collObj = database->findObjectLOS((TestFunc)isWallType, ActualState, start, end, time, n);
 
-   if(*collObj)
-   {
+   if(collObj)
       end.set(start + (end - start) * time); 
-      return true;
-   }
 
-   return false;
+   return collObj;
 }
 
 
@@ -1832,9 +1923,15 @@ const Vector<Point> *ForceField::getCollisionPoly() const
 }
 
 
-void ForceField::render()
+void ForceField::render() const
 {
-   renderForceField(mStart, mEnd, getColor(), mFieldUp);
+   render(getColor());
+}
+
+
+void ForceField::render(const Color &color) const
+{
+   renderForceField(mStart, mEnd, color, mFieldUp);
 }
 
 
@@ -1844,18 +1941,13 @@ S32 ForceField::getRenderSortValue()
 }
 
 
-void ForceField::getForceFieldStartAndEndPoints(Point &start, Point &end)
-{
-   start = mStart;
-   end = mEnd;
-}
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(Turret);
 
+
+const F32 Turret::TURRET_OFFSET = 15; 
 
 // Combined Lua / C++ default constructor
 /**
@@ -1918,13 +2010,16 @@ Turret *Turret::clone() const
 }
 
 
-bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
+// Turret <Team> <X> <Y> [HealRate]
+bool Turret::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    S32 argc1 = 0;
    const char *argv1[32];
+
    for(S32 i = 0; i < argc2; i++)
    {
       char firstChar = argv2[i][0];
+
       if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z'))  // starts with a letter
       {
          if(!strncmp(argv2[i], "W=", 2))  // W= is in 015a
@@ -1945,12 +2040,13 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
             argc1++;
          }
       }
-      
    }
 
-   bool returnBool = EngineeredItem::processArguments(argc1, argv1, game);
+   if (!EngineeredItem::processArguments(argc1, argv1, level))
+      return false;
+
    mCurrentAngle = mAnchorNormal.ATAN2();
-   return returnBool;
+   return true;
 }
 
 
@@ -2002,7 +2098,7 @@ const Vector<Point> *Turret::getOutline() const
 }
 
 
-F32 Turret::getEditorRadius(F32 currentScale)
+F32 Turret::getEditorRadius(F32 currentScale) const
 {
    if(mSnapped)
       return 25 * currentScale;
@@ -2024,19 +2120,19 @@ void Turret::onAddedToGame(Game *theGame)
 }
 
 
-void Turret::render()
+void Turret::render() const
 {
-   renderTurret(*(getColor()), getPos(), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle, mHealRate);
+   renderTurret(getColor(), getPos(), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle, mHealRate);
 }
 
 
-void Turret::renderDock()
+void Turret::renderDock(const Color &color) const
 {
-   renderSquareItem(getPos(), getColor(), 1, &Colors::white, 'T');
+   renderSquareItem(getPos(), color, 1, Colors::white, 'T');
 }
 
 
-void Turret::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void Turret::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    if(mSnapped)
    {
@@ -2046,10 +2142,10 @@ void Turret::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, b
       bool enabled = team != TEAM_NEUTRAL;
       F32 health = team == TEAM_NEUTRAL ? 0.0f : 1.0f;
 
-      renderTurret(*(getColor()), getPos(), mAnchorNormal, enabled, health, mCurrentAngle, mHealRate);
+      renderTurret(getColor(), getPos(), mAnchorNormal, enabled, health, mCurrentAngle, mHealRate);
    }
    else
-      renderDock();
+      renderDock(getColor());
 }
 
 
@@ -2217,10 +2313,10 @@ void Turret::idle(IdleCallPath path)
 }
 
 
-const char *Turret::getOnScreenName()     { return "Turret";  }
-const char *Turret::getOnDockName()       { return "Turret";  }
-const char *Turret::getPrettyNamePlural() { return "Turrets"; }
-const char *Turret::getEditorHelpString() { return "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]"; }
+const char *Turret::getOnScreenName()     const  { return "Turret";  }
+const char *Turret::getOnDockName()       const  { return "Turret";  }
+const char *Turret::getPrettyNamePlural() const  { return "Turrets"; }
+const char *Turret::getEditorHelpString() const  { return "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]"; }
 
 
 bool Turret::hasTeam()      { return true; }
@@ -2310,7 +2406,7 @@ S32 Turret::lua_setWeapon(lua_State *L)
 // Override some methods
 S32 Turret::lua_getRad(lua_State *L)
 {
-   return returnInt(L, TURRET_OFFSET);
+   return returnFloat(L, TURRET_OFFSET);
 }
 
 

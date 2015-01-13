@@ -25,21 +25,17 @@ private:
    S32 mWidth;
    bool mGlobal;    // If global, then all teams will see it
 
-#ifndef ZAP_DEDICATED
-   static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
-#endif
-
 public:
    explicit LineItem(lua_State *L = NULL);   // Combined C++ / Lua constructor
    virtual ~LineItem();                      // Destructor
    LineItem *clone() const;
 
-   virtual void render();
+   virtual void render() const;
    bool shouldRender() const;
 
    S32 getRenderSortValue();
 
-   bool processArguments(S32 argc, const char **argv, Game *game);   // Create objects from parameters stored in level file
+   bool processArguments(S32 argc, const char **argv, Level *level); // Create objects from parameters stored in level file
    void onAddedToGame(Game *theGame);
    virtual void onGhostAvailable(GhostConnection *connection);
    virtual void onGhostAddBeforeUpdate(GhostConnection *connection);
@@ -59,8 +55,8 @@ public:
    /////
    // Editor methods
    string toLevelCode() const;
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
-   virtual const Color *getEditorRenderColor();
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
+   virtual const Color &getEditorRenderColor() const;
 
 
    // Thickness-related
@@ -70,22 +66,23 @@ public:
    void changeWidth(S32 amt);  
 
 #ifndef ZAP_DEDICATED
-   // These four methods are all that's needed to add an editable attribute to a class...
-   EditorAttributeMenuUI *getAttributeMenu();
-   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
+   bool startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
    void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
 
    void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
 #endif
 
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
+
+   F32 getEditorRadius(F32 currentScale) const;
 
    F32 getEditorRadius(F32 currentScale);
 

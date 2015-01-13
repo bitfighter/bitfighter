@@ -7,17 +7,17 @@
 
 #include "game.h"
 #include "ship.h"
-#include "stringUtils.h"
+#include "Level.h"
 
 #include "gameObjectRender.h"    // For renderTextItem()
-
 #include "Colors.h"
 
 #include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
-#include "RenderUtils.h"
-#include "ClientGame.h"
+#  include "RenderUtils.h"
+#  include "ClientGame.h"
+#  include "UIQuickMenu.h"
 #endif
 
 #include <cmath>
@@ -30,10 +30,6 @@ using namespace LuaArgs;
 
 TNL_IMPLEMENT_NETOBJECT(TextItem);
 
-
-#ifndef ZAP_DEDICATED
-EditorAttributeMenuUI *TextItem::mAttributeMenuUI = NULL;
-#endif
 
 // Combined Lua / C++ constructor
 TextItem::TextItem(lua_State *L)
@@ -79,7 +75,7 @@ void TextItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &value
 }
 
 
-const char *TextItem::getInstructionMsg(S32 attributeCount)
+const char *TextItem::getInstructionMsg(S32 attributeCount) const
 {
    return "[Enter] to edit text";
 }
@@ -96,34 +92,58 @@ void TextItem::newObjectFromDock(F32 gridSize)
 
 
 // In game rendering
-void TextItem::render()
+void TextItem::render() const
 {
 #ifndef ZAP_DEDICATED
-   S32 ourTeam = static_cast<ClientGame*>(getGame())->getCurrentTeamIndex();
+   //S32 ourTeam = static_cast<ClientGame*>(getGame())->getCurrentTeamIndex();
 
-   // Don't render opposing team's text items if we are in a game... but in editor preview mode, where
-   // we don't have a connection to the server, text will be rendered normally
+   //// Don't render opposing team's text items if we are in a game... but in editor preview mode, where
+   //// we don't have a connection to the server, text will be rendered normally
    // ourTeam == TEAM_NEUTRAL when in editor
-   if(ourTeam != getTeam() && getTeam() != TEAM_NEUTRAL && ourTeam != TEAM_NEUTRAL)
-      return;
-
+   //if(ourTeam != getTeam() && getTeam() != TEAM_NEUTRAL && ourTeam != TEAM_NEUTRAL)
+   //   return;
+      
+   // The above should be handled by not sending textItems to players who shouldn't see them!!!
+   
    renderTextItem(getVert(0), getVert(1), mSize, mText, getColor());
 #endif
 }
 
 
 // Called by SimpleItem::renderEditor()
-void TextItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void TextItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    Parent::renderEditor(currentScale, snappingToWallCornersEnabled);
    render();
 }
 
 
-const char *TextItem::getOnScreenName()     { return "Text";      }
-const char *TextItem::getOnDockName()       { return "TextItem";  }
-const char *TextItem::getPrettyNamePlural() { return "TextItems"; }
-const char *TextItem::getEditorHelpString() { return "Draws a bit of text on the map.  Visible only to team, or to all if neutral."; }
+const char *TextItem::getOnScreenName()     const  { return "Text";      }
+const char *TextItem::getOnDockName()       const  { return "TextItem";  }
+const char *TextItem::getPrettyNamePlural() const  { return "TextItems"; }
+const char *TextItem::getEditorHelpString() const  { return "Draws a bit of text on the map.  Visible only to team, or to all if neutral."; }
+
+
+#ifndef ZAP_DEDICATED
+
+bool TextItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   // "Blah" will be overwritten when startEditingAttrs() is called
+   TextEntryMenuItem *menuItem = new TextEntryMenuItem("Text: ", getText(), "", "", MAX_TEXTITEM_LEN);
+                                                       menuItem->setTextEditedCallback(textEditedCallback);
+    attributeMenu->addMenuItem(menuItem);
+
+    return true;
+}
+
+
+void TextItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   setText(attributeMenu->getMenuItem(0)->getValue());
+}
+
+#endif
+
 
 
 bool TextItem::hasTeam()      { return true; }
@@ -131,7 +151,7 @@ bool TextItem::canBeHostile() { return true; }
 bool TextItem::canBeNeutral() { return true; }
 
 
-Color TextItem::getEditorRenderColor()
+const Color &TextItem::getEditorRenderColor() const
 {
    return Colors::blue;
 }
@@ -182,7 +202,7 @@ S32 TextItem::getRenderSortValue()
 
 // Create objects from parameters stored in level file
 // Entry looks like: TextItem 0 50 10 10 11 11 Message goes here
-bool TextItem::processArguments(S32 argc, const char **argv, Game *game)
+bool TextItem::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 7)
       return false;
@@ -192,10 +212,10 @@ bool TextItem::processArguments(S32 argc, const char **argv, Game *game)
    Point pos, dir;
 
    pos.read(argv + 1);
-   pos *= game->getLegacyGridSize();
+   pos *= level->getLegacyGridSize();
 
    dir.read(argv + 3);
-   dir *= game->getLegacyGridSize();
+   dir *= level->getLegacyGridSize();
 
    setSize((F32)atof(argv[5]));
 
@@ -396,14 +416,13 @@ void TextItem::onGeomChanging()  { onGeomChanged(); }
 void TextItem::onGeomChanged()
 {
    recalcTextSize();
-   setMaskBits(GeomMask);
    Parent::onGeomChanged();
 }
 
 
-void TextItem::textEditedCallback(string text, BfObject *obj)
+void TextItem::textEditedCallback(TextEntryMenuItem *item, const string &text, BfObject *obj)
 {
-   TextItem *textItem = dynamic_cast<TextItem *>(obj);
+   TextItem *textItem = static_cast<TextItem *>(obj);
    textItem->setText(text);
 }
 

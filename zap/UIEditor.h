@@ -10,14 +10,15 @@
 #include "UIMenus.h"             // Parent
 
 #include "EditorPlugin.h"        // For plugin support
-#include "teamInfo.h"            // For TeamManager def
+#include "EditorUndoManager.h"   // To, like, undo stuff
 
+#include "teamInfo.h"            // For TeamManager def
 #include "VertexStylesEnum.h"
 #include "BfObject.h"            // For BfObject definition
 #include "Timer.h"
 #include "Point.h"
 #include "Color.h"
-#include "EditorAttributeMenuItemBuilder.h"
+#include "Level.h"
 
 #include "tnlNetStringTable.h"
 
@@ -31,6 +32,8 @@ using namespace std;
 namespace Zap
 {
 
+using namespace Editor;
+
 class DatabaseObject;
 class EditorAttributeMenuUI;
 class EditorTeam;
@@ -39,7 +42,7 @@ class LuaLevelGenerator;
 class PluginMenuUI;
 class SimpleTextEntryMenuUI;
 
-struct FolderManager;
+class FolderManager;
 
 
 ////////////////////////////////////////
@@ -60,6 +63,9 @@ struct PluginInfo
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+class BarrierX;
+class MasterServerConnection;
 
 class EditorUserInterface : public UserInterface
 {
@@ -120,40 +126,30 @@ private:
 
    SymbolString mLingeringMessage;
 
-   Vector<boost::shared_ptr<GridDatabase> > mUndoItems;  // Undo/redo history 
-   Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
-   Point mSnapDelta;                            // For tracking how far from the snap point our cursor is
+   Point mMoveOrigin;                              // Point representing where items were moved "from" for figuring out how far they moved
+   Point mSnapDelta;                               // For tracking how far from the snap point our cursor is
    Vector<Point> mMoveOrigins;
 
-   boost::shared_ptr<GridDatabase> mEditorDatabase;
+   boost::shared_ptr<Level> mLevel;
+   Level mDockItems;                               // Use a level to manage items on the dock to make interactions more consistent
 
-   void setDatabase(boost::shared_ptr<GridDatabase> database);
-
-   Vector<boost::shared_ptr<BfObject> > mDockItems;    // Items sitting in the dock
+   void setLevel(const boost::shared_ptr<Level> &level);
 
    Vector<Vector<string> > mMessageBoxQueue;
 
-   U32 mFirstUndoIndex;
-   U32 mLastUndoIndex;
-   U32 mLastRedoIndex;
-
    bool mDragCopying;
    bool mJustInsertedVertex;
-   bool mRedoingAnUndo;
 
    Vector<string> mRobotLines;         // A list of robot lines read from a level file when loading from the editor
 
    void clearSnapEnvironment();
+   void rebuildWallGeometry(Level *level);
 
-   static const U32 UNDO_STATES = 128;
-   void deleteUndoState();             // Removes most recent undo state from stack
-   bool undoAvailable();               // Is an undo state available?
+   EditorUndoManager mUndoManager;
    void undo(bool addToRedoStack);     // Restore mItems to latest undo state
    void redo();                        // Redo latest undo
 
    Vector<boost::shared_ptr<BfObject> > mClipboard;    // Items on clipboard
-
-   bool mLastUndoStateWasBarrierWidthChange;
 
    string mEditFileName;            // Manipulate with get/setLevelFileName
 
@@ -170,26 +166,24 @@ private:
    Point mScrollWithMouseLocation;
 
    U32 mGridSize;                   // Our editor gridsize
-   bool showMinorGridLines();
+   bool showMinorGridLines() const;
 
    // Helper drawing methods
-   void renderTurretAndSpyBugRanges(GridDatabase *editorDb);   // Draw translucent turret & spybug ranges
-   void renderObjectsUnderConstruction();                      // Render partially constructed walls and other items that aren't yet in a db
-   void renderDock();
-   void renderInfoPanel();
-   void renderPanelInfoLine(S32 line, const char *format, ...);
+   void renderTurretAndSpyBugRanges(GridDatabase *editorDb) const;   // Draw translucent turret & spybug ranges
+   void renderObjectsUnderConstruction() const;                      // Render partially constructed walls and other items that aren't yet in a db
+   void renderDock() const;
+   void renderInfoPanel() const;
+   void renderPanelInfoLine(S32 line, const char *format, ...) const;
 
-   void renderItemInfoPanel();
+   void renderItemInfoPanel() const;
 
-   void renderReferenceShip();
-   void renderDragSelectBox();      // Render box when selecting a group of items
-   void renderDockItems();          // Render all items on the dock
-   void renderDockPlugins();
+   void renderReferenceShip() const;
+   void renderDragSelectBox() const;      // Render box when selecting a group of items
+   void renderDockItems() const;          // Render all items on the dock
+   void renderDockPlugins() const;
    void renderSaveMessage() const;
    void renderWarnings() const;
    void renderLingeringMessage() const;
-
-   EditorAttributeMenuItemBuilder mEditorAttributeMenuItemBuilder;
 
    bool mCreatingPoly;
    bool mCreatingPolyline;
@@ -217,11 +211,13 @@ private:
    void doSplit(BfObject *object, S32 vertex);
    void joinBarrier();           // Join barrier bits together into one (if ends are coincident)
 
-   BfObject *doMergeLines   (BfObject *firstItem, S32 firstItemIndex);   
+   BfObject *doMergeLines(BfObject *firstItem, S32 firstItemIndex);   
+   BfObject *doMergeLines(BfObject *firstItem, BfObject *mergingWith, S32 mergingWithIndex,
+                          void (*mergeFunction)(BfObject *, BfObject *));
+
+
    BfObject *doMergePolygons(BfObject *firstItem, S32 firstItemIndex);
    
-   BfObject *findObjBySerialNumber(const GridDatabase *database, S32 serialNumber) const;
-
    bool anyItemsSelected(const GridDatabase *database) const;  // Are any items selected?
    bool anythingSelected() const;                              // Are any items/vertices selected?
 
@@ -233,11 +229,11 @@ private:
    void findHitItemAndEdge();                         
    bool checkForVertexHit(BfObject *object);
    bool checkForEdgeHit(const Point &point, BfObject *object);        
-   bool checkForWallHit(const Point &point, DatabaseObject *wallSegment);
-   bool checkForPolygonHit(const Point &point, BfObject *object);    
+
+   bool overlaps(const Point &point, BfObject *object);    // Returns true if point overlaps object
 
    void findHitItemOnDock();     // Sets mDockItemHit
-   S32 findHitPlugin();
+   S32 findHitPlugin() const;
 
    void findSnapVertex();
    S32 mSnapVertexIndex;
@@ -254,10 +250,14 @@ private:
    SafePtr<BfObject> mDraggingDockItem;
    SafePtr<BfObject> mDockItemHit;
 
+   Vector<BfObject *> mSelectedObjectsForDragging;
+
    S32 mDockPluginScrollOffset;
    U32 mDockWidth;
-   bool mouseOnDock();                // Return whether mouse is currently over the dock
-   bool mNeedToSave;                  // Have we modified the level such that we need to save?
+   bool mIgnoreMouseInput;
+
+
+   bool mouseOnDock() const;          // Return whether mouse is currently over the dock
 
    void insertNewItem(U8 itemTypeNumber);    // Insert a new object into the specified database
 
@@ -265,33 +265,39 @@ private:
    GameType *mEditorGameType;    // Used to store our GameType while we're testing
 
    void onFinishedDragging();    // Called when we're done dragging an object
+   void onFinishedDragging_droppedItemOnDock();
+   void onFinishedDragging_movingObject();
+
    void onSelectionChanged();    // Called when current selection has changed
 
    void onMouseClicked_left();
    void onMouseClicked_right();
 
-   Point convertCanvasToLevelCoord(Point p);
-   Point convertLevelToCanvasCoord(Point p, bool convert = true);
+   Point convertCanvasToLevelCoord(const Point &p) const;
+   Point convertLevelToCanvasCoord(const Point &p, bool convert = true) const;
 
-   void resnapAllEngineeredItems(GridDatabase *database, bool onlyUnsnapped);
+   string getInfoMsg() const;
 
    boost::scoped_ptr<SimpleTextEntryMenuUI> mSimpleTextEntryMenu;
    boost::scoped_ptr<PluginMenuUI> mPluginMenu;      
    map<string, Vector<string> > mPluginMenuValues;
 
+   Vector<Point> mWallEdgePoints;               // For rendering
+   Vector<Point> mSelectedWallEdgePoints;       // Also for rendering
+
    void showCouldNotFindScriptMessage(const string &scriptName);
    void showPluginError(const string &msg);
 
-   string mLingeringMessageQueue;      // Ok, not much of a queue, but we can only have one of these, so this is enough
+   string mLingeringMessageQueue;   // Ok, not much of a queue, but we can only have one of these, so this is enough
 
-   GridDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
+   Level mLevelGenDatabase;         // Database for inserting objects when running a levelgen script in the editor
 
-   void translateSelectedItems(const Vector<Point> &origins, const Point &offset, const Point &lastOffset);
+   void translateSelectedItems(const Point &offset, const Point &lastOffset);
    void snapSelectedEngineeredItems(const Point &cumulativeOffset);
 
-   void render();
-   void renderObjects(GridDatabase *database, RenderModes renderMode, bool isLevelgenOverlay);
-   void renderWallsAndPolywalls(GridDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase);
+   void render() const;
+   void renderObjects(const GridDatabase *database, RenderModes renderMode, bool isLevelgenOverlay) const;
+   void renderWallsAndPolywalls(const GridDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase) const;
 
    void autoSave();                    // Hope for the best, prepare for the worst
    bool doSaveLevel(const string &saveName, bool showFailMessages);
@@ -300,11 +306,18 @@ private:
 
    void setCurrentOffset(const Point &center);
 
+   void doneAddingObjects(const Vector<BfObject *> &bfObjects);
+   void doneAddingObjects(BfObject *bfObject);
+
+   void doneChangingGeoms(const Vector<BfObject *> &bfObjects);
+   void doneChangingGeoms(BfObject *bfObject);
+
+
 protected:
    void onActivate();
    void onReactivate();
 
-   void renderMasterStatus();
+   void renderMasterStatus(const MasterServerConnection *connectionToMaster) const;
 
    bool usesEditorScreenMode() const;
 
@@ -312,18 +325,14 @@ public:
    explicit EditorUserInterface(ClientGame *game);    // Constructor
    virtual ~EditorUserInterface();                    // Destructor
 
-   GridDatabase *getDatabase() const;        // Need external access to this in one static function
+   Level *getLevel() const;           // Need external access to this in one static function
 
    void setLevelFileName(string name);
    void setLevelGenScriptName(string name);
 
-   string getLevelFileName();
+   string getLevelFileName() const;
    void cleanUp();
    void loadLevel();
-   U32 mAllUndoneUndoLevel;   // What undo level reflects everything back just the
-
-   void saveUndoState(bool forceSelection = false);     // Save the current state of the editor objects for later undoing
-   void removeUndoState();    // Remove and discard the most recently saved undo state 
 
    Vector<string> mGameTypeArgs;
 
@@ -337,35 +346,33 @@ public:
    string getQuitLockedMessage();
    bool isQuitLocked();
 
-   string getLevelText();
+   string getLevelText() const;
    const Vector<PluginInfo> *getPluginInfos() const;
 
-   F32 getCurrentScale();
-   Point getCurrentOffset();
-
-   void clearUndoHistory();        // Wipe undo/redo history
+   F32 getCurrentScale() const;
+   Point getCurrentOffset() const;
 
    Vector<TeamInfo> mOldTeams;     // Team list from before we run team editor, so we can see what changed
 
-   void rebuildEverything(GridDatabase *database);   // Does lots of things in undo, redo, and add items from script
+   void rebuildEverything(Level *level);   // Does lots of things in undo, redo, and add items from script
 
    void onQuitted();       // Releases some memory when quitting the editor
 
-   S32 getTeamCount();
-   EditorTeam *getTeam(S32 teamId);
+   S32 getTeamCount() const;
+   const TeamInfo &getTeam(S32 teamId);
 
-   void addTeam(EditorTeam *team);
+   void addTeam(const TeamInfo &teamInfo);
    void addTeam(EditorTeam *team, S32 index);
    void removeTeam(S32 teamId);
    void clearTeams();
 
    bool getNeedToSave() const;
-   void setNeedToSave(bool needToSave);
 
    void clearRobotLines();
    void addRobotLine(const string &robotLine);
 
    bool mDraggingObjects;     // Should be private
+   void geomChanged(BfObject *obj);
 
    // Handle input
    bool onKeyDown(InputCode inputCode);                         // Handle all keyboard inputs, mouse clicks, and button presses
@@ -389,13 +396,21 @@ public:
 
 
    void onKeyUp(InputCode inputCode);
+   void onMouseUp();
+
    void onMouseMoved();
    void onMouseDragged();
-   void onMouseDragged_StartDragging(const bool needToSaveUndoState);
-   void onMouseDragged_CopyAndDrag(const Vector<DatabaseObject *> *objList);
+   void onMouseDragged_startDragging();
+   void onMouseDragged_copyAndDrag(const Vector<DatabaseObject *> *objList);
    void startDraggingDockItem();
    BfObject *copyDockItem(BfObject *source);
-   bool mouseIgnore;
+
+   void doneAddingObjects(S32 serialNumber);
+   void doneAddingObjects(const Vector<S32> &serialNumbers);
+
+   void doneChangingGeoms(S32 serialNumber);
+   void doneChangingGeoms(const Vector<S32> &serialNumbers);
+
 
    void populateDock();                         // Load up dock with game-specific items to drag and drop
    void addDockObject(BfObject *object, F32 xPos, F32 yPos);
@@ -412,9 +427,11 @@ public:
    void flipSelectionVertical();                 // Flip selection along vertical axis
    void flipSelection(F32 center, bool isHoriz); // Do the actual flipping for the above
 
-   void scaleSelection(F32 scale);               // Scale selection by scale
-   void rotateSelection(F32 angle, bool useOrigin); // Rotate selecton by angle
+   void scaleSelection(F32 scale);                    // Scale selection by scale
+   void rotateSelection(F32 angle, bool useOrigin);   // Rotate selecton by angle
    void setSelectionId(S32 id);
+
+   void rebuildSelectionOutline();
 
    void validateLevel();               // Check level for things that will make the game crash!
    void validateTeams();               // Check that each item has a valid team (and fix any errors found)
@@ -427,41 +444,42 @@ public:
 
    void testLevel();
    void testLevelStart();
+
    void setSaveMessage(const string &msg, bool savedOK);
    void clearSaveMessage();
+
    void setWarnMessage(const string &msg1, const string &msg2);
+   void clearWarnMessage();
 
    void queueSetLingeringMessage(const string &msg);
    void setLingeringMessage(const string &msg);
    void clearLingeringMessage();
 
-   void markLevelPermanentlyDirty();
-
    void onDisplayModeChange();      // Called when we shift between windowed and fullscreen mode, after change is made
 
    // Snapping related functions:
-   Point snapPoint(GridDatabase *database, Point const &p, bool snapWhileOnDock = false);
-   Point snapPointToLevelGrid(Point const &p);
+   Point snapPoint(const Point &p, bool snapWhileOnDock = false) const;
+   Point snapPointToLevelGrid(Point const &p) const;
 
    void markSelectedObjectsAsUnsnapped(const Vector<DatabaseObject *> *objList);
    void markSelectedObjectsAsUnsnapped(const Vector<boost::shared_ptr<BfObject> > &objList);
 
 
-   bool getSnapToWallCorners();     // Returns true if wall corners are active snap targets
+   bool getSnapToWallCorners() const;     // Returns true if wall corners are active snap targets
 
    void onBeforeRunScriptFromConsole();
    void onAfterRunScriptFromConsole();
 
-   S32 checkCornersForSnap(const Point &clickPoint,  const Vector<DatabaseObject *> *edges, F32 &minDist, Point &snapPoint);
+   S32 checkCornersForSnap(const Point &clickPoint,  const Vector<DatabaseObject *> *edges, F32 &minDist, Point &snapPoint) const;
 
    void deleteItem(S32 itemIndex, bool batchMode = false);
 
    // Helpers for doing batch deletes
    void doneDeleteingWalls(); 
-   void doneDeleting();
+   void doneDeletingObjects();
 
    // Run a script, and put resulting objects in database
-   void runScript(GridDatabase *database, const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);
+   void runScript(Level *level, const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);
    void runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);  
 
    string getPluginSignature();                 // Try to create some sort of uniqeish signature for the plugin
@@ -478,31 +496,6 @@ public:
 
    void findPlugins();
    U32 findPluginDockWidth();
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class EditorMenuUserInterface : public MenuUserInterface
-{
-   typedef MenuUserInterface Parent;
-
-private:
-   void setupMenus();
-   void processSelection(U32 index);
-   void processShiftSelection(U32 index);
-   void onEscape();
-   void addStandardQuitItem();
-
-protected:
-   void onActivate();
-
-public:
-   explicit EditorMenuUserInterface(ClientGame *game);    // Constructor
-   virtual ~EditorMenuUserInterface();
-
-   void unlockQuit();
 };
 
 

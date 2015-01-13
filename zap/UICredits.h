@@ -39,7 +39,7 @@ public:
    CreditsScroller();           // Constructor
    virtual ~CreditsScroller();  // Destructor
    void updateFX(U32 delta);
-   void render();
+   void render() const;
    void resetPosition();
 
    void setActive(bool active);
@@ -64,7 +64,7 @@ public:
    void onActivate();
    void onReactivate();
    void idle(U32 timeDelta);
-   void render();
+   void render() const;
    void quit();
    bool onKeyDown(InputCode inputCode);
 };
@@ -95,7 +95,7 @@ public:
 
    void onActivate();
    void idle(U32 timeDelta);
-   void render();
+   void render() const;
    void quit();
    bool onKeyDown(InputCode inputCode);
 };

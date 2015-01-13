@@ -248,7 +248,7 @@ void Console::setCommandProcessorCallback(void(*callback)(OGLCONSOLE_Console con
 }
 
 
-void Console::render()
+void Console::render() const
 {
 #ifndef BF_NO_CONSOLE
 

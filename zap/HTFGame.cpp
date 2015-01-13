@@ -4,6 +4,8 @@
 //------------------------------------------------------------------------------
 
 #include "HTFGame.h"
+
+#include "Level.h"
 #include "goalZone.h"
 #include "gameObjectRender.h"
 
@@ -32,12 +34,12 @@ HTFGameType::~HTFGameType()
 }
 
 
-bool HTFGameType::processArguments(S32 argc, const char **argv, Game *game)
+bool HTFGameType::processArguments(S32 argc, const char **argv, Level *level)
 {
    if (argc < 2)
       return false;
 
-   if(!Parent::processArguments(argc, argv, game))
+   if(!Parent::processArguments(argc, argv, level))
       return false;
 
    // Third arg is points-per-minute
@@ -59,25 +61,31 @@ string HTFGameType::toLevelCode() const
 
 
 #ifndef ZAP_DEDICATED
-// Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
-Vector<string> HTFGameType::getGameParameterMenuKeys()
+Vector<string> HTFGameType::makeParameterMenuKeys() const
 {
-   Vector<string> items = Parent::getGameParameterMenuKeys();
+   // Start with the keys from our parent (GameType)
+   Vector<string> items = *Parent::getGameParameterMenuKeys();
 
-   // Use "Win Score" as an indicator of where to insert our specific menu items
-   for(S32 i = 0; i < items.size(); i++)
-      if(items[i] == "Win Score")
-      {
-         items.insert(i + 2, "Point Earn Rate");
-         break;
-      }
+   // Remove "Win Score" as that's not needed here -- win score is determined by the number of cores
+   S32 index = items.getIndex("Win Score");
+   TNLAssert(index >= 0, "Invalid index!");     // Protect against text of Win Score being changed in parent
+
+   items.insert(index + 2, "Point Earn Rate");
 
    return items;
 }
 
 
+// Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
+const Vector<string> *HTFGameType::getGameParameterMenuKeys() const
+{
+   static const Vector<string> keys = makeParameterMenuKeys();
+   return &keys;
+}
+
+
 // Definitions for those items
-boost::shared_ptr<MenuItem> HTFGameType::getMenuItem(const string &key)
+boost::shared_ptr<MenuItem> HTFGameType::getMenuItem(const string &key) const
 {
    if(key == "Point Earn Rate")
       return boost::shared_ptr<MenuItem>(new CounterMenuItem("Point Earn Rate:", getFlagScore(), 1, 1, MaxMenuScore,
@@ -112,16 +120,6 @@ S32 HTFGameType::getFlagScore() const
 
 
 bool HTFGameType::isFlagGame() const { return true; }
-
-
-// Server only
-void HTFGameType::addFlag(FlagItem *flag)
-{
-   Parent::addFlag(flag);
-
-   if(!isGhost())
-      addItemOfInterest(flag);      // Server only
-}
 
 
 // Note -- neutral or enemy-to-all robots can't pick up the flag!!!  When we add robots, this may be important!!!
@@ -168,7 +166,7 @@ void HTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    e.push_back(clientInfo->getName());
    e.push_back(getGame()->getTeamName(teamIndex));
 
-   if(getGame()->getGameObjDatabase()->getObjectCount(FlagTypeNumber) == 1)
+   if(getGame()->getLevel()->getObjectCount(FlagTypeNumber) == 1)
       e.push_back(theString);
    else
       e.push_back(aString);
@@ -198,7 +196,7 @@ void HTFGameType::itemDropped(Ship *ship, MoveItem *item, DismountMode dismountM
             Vector<StringTableEntry> e;
             e.push_back(ship->getClientInfo()->getName());
 
-            if(getGame()->getGameObjDatabase()->getObjectCount(FlagTypeNumber) == 1)
+            if(getGame()->getLevel()->getObjectCount(FlagTypeNumber) == 1)
                e.push_back(theString);
             else
                e.push_back(aString);
@@ -217,7 +215,7 @@ void HTFGameType::shipTouchZone(Ship *ship, GoalZone *zone)
       return;
 
    // Does it already have a flag in it?
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
    for(S32 i = 0; i < flags->size(); i++)
       if(static_cast<FlagItem *>(flags->get(i))->getZone() == zone)
          return;
@@ -263,7 +261,7 @@ void HTFGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
       return;
 
    // Server only, from here on out
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
 
    for(S32 i = 0; i < flags->size(); i++)
    {
@@ -287,7 +285,7 @@ void HTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clie
    S32 uTeam = scopeObject->getTeam();
 
 
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
 
    for(S32 i = 0; i < flags->size(); i++)
    {
@@ -321,8 +319,8 @@ void HTFGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) cons
    bool uFlag = false;
    S32 team = ship->getTeam();
 
-   const Vector<DatabaseObject *> *goalZones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
-   const Vector<DatabaseObject *> *flags     = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *goalZones = getGame()->getLevel()->findObjects_fast(GoalZoneTypeNumber);
+   const Vector<DatabaseObject *> *flags     = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
 
    for(S32 i = 0; i < flags->size(); i++)
    {

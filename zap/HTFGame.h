@@ -14,22 +14,26 @@ namespace Zap
 class HTFGameType : public GameType
 {
    typedef GameType Parent;
+
+private:
    static StringTableEntry aString;
    static StringTableEntry theString;
 
    U32 mFlagScoreTime;     // Time flag is in your zone to get points for your team
 
-public:
-   HTFGameType();    // Constructor
-   virtual ~HTFGameType();
+   Vector<string> makeParameterMenuKeys() const;
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+public:
+   HTFGameType();             // Constructor
+   virtual ~HTFGameType();    // Destructor
+
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
 #ifndef ZAP_DEDICATED
    // Editor menu
-   Vector<string> getGameParameterMenuKeys();
-   boost::shared_ptr<MenuItem> getMenuItem(const string &key);
+   const Vector<string> *getGameParameterMenuKeys() const;
+   boost::shared_ptr<MenuItem> getMenuItem(const string &key) const;
    bool saveMenuItem(const MenuItem *menuItem, const string &key);
 #endif
 
@@ -37,10 +41,6 @@ public:
    S32 getFlagScore() const;
 
    bool isFlagGame() const;
-
-   // Server only
-   void addFlag(FlagItem *flag);
-
 
    // Note -- neutral or enemy-to-all robots can't pick up the flag!!!  When we add robots, this may be important!!!
    void shipTouchFlag(Ship *theShip, FlagItem *theFlag);

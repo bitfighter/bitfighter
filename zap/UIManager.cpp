@@ -174,11 +174,8 @@ void UIManager::renderPrevUI(const UserInterface *ui)
 
 void UIManager::activate(UserInterface *ui, bool save)  // save defaults to true
 {
-   if(mCurrentInterface)
-   {
-      if(save)
-         saveUI(mCurrentInterface);
-   }
+   if(mCurrentInterface && save)
+      saveUI(mCurrentInterface);
 
    mLastUI = mCurrentInterface;
    mLastWasLower = false;
@@ -427,6 +424,12 @@ void UIManager::onPlayerQuit(const char *name)
 }
 
 
+void UIManager::updateLeadingPlayerAndScore()
+{
+   getUI<GameUserInterface>()->updateLeadingPlayerAndScore();
+}
+
+
 void UIManager::onGameStarting()
 {
    getUI<GameUserInterface>()->onGameStarting();
@@ -437,6 +440,13 @@ void UIManager::onGameOver()
 {
    if(mUis[getTypeInfo<GameUserInterface>()])
       getUI<GameUserInterface>()->onGameOver();    // Closes helpers and such
+}
+
+
+void UIManager::onGameReallyAndTrulyOver()
+{
+   if(mUis[getTypeInfo<GameUserInterface>()])
+      getUI<GameUserInterface>()->onGameReallyAndTrulyOver();    // Closes helpers and such
 }
 
 
@@ -481,7 +491,7 @@ void UIManager::renderCurrent()
    // Run the active UI renderer
    mCurrentInterface->render();
    UserInterface::renderDiagnosticKeysOverlay();    // By putting this here, it will always get rendered, regardless of active UI
-   mCurrentInterface->renderMasterStatus();
+   mCurrentInterface->renderMasterStatus(mGame->getConnectionToMaster());
 }
 
 
@@ -523,10 +533,10 @@ MusicLocation UIManager::selectMusic()
 void UIManager::processAudio(U32 timeDelta)
 {
    SoundSystem::processAudio(timeDelta, 
-                             mSettings->getIniSettings()->sfxVolLevel,
-                             mSettings->getIniSettings()->getMusicVolLevel(),
-                             mSettings->getIniSettings()->voiceChatVolLevel,
-                             selectMusic());  
+                             mSettings->getSetting<F32>(IniKey::EffectsVolume),
+                             mSettings->getMusicVolume(),
+                             mSettings->getSetting<F32>(IniKey::VoiceChatVolume),
+                             selectMusic());
 }
 
 
@@ -814,9 +824,15 @@ void UIManager::emitDebrisChunk(const Vector<Point> &points, const Color &color,
 }
 
 
-void UIManager::emitTextEffect(const string &text, const Color &color, const Point &pos)
+void UIManager::emitTextEffect(const string &text, const Color &color, const Point &pos, bool relative)
 {
-   getUI<GameUserInterface>()->emitTextEffect(text, color, pos);
+   getUI<GameUserInterface>()->emitTextEffect(text, color, pos, relative);
+}
+
+
+void UIManager::emitDelayedTextEffect(U32 delay, const string &text, const Color &color, const Point &pos, bool relative)
+{
+   getUI<GameUserInterface>()->emitDelayedTextEffect(delay, text, color, pos, relative);
 }
 
 
@@ -1010,12 +1026,6 @@ void UIManager::onGameTypeChanged()
 void UIManager::readRobotLine(const string &robotLine)
 {
    getUI<EditorUserInterface>()->addRobotLine(robotLine);
-}
-
-
-void UIManager::markEditorLevelPermanentlyDirty() 
-{
-   getUI<EditorUserInterface>()->markLevelPermanentlyDirty();
 }
 
 

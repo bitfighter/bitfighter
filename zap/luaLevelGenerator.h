@@ -22,7 +22,6 @@ class LuaLevelGenerator: public LuaScriptRunner
 
 private:
    Game *mGame;
-   GridDatabase *mGridDatabase;
 
 protected:
    void killScript();
@@ -31,7 +30,8 @@ public:
    LuaLevelGenerator();                // Default constructor
 
    // Standard constructor
-   LuaLevelGenerator(Game *game, const string &scriptName = "", const Vector<string> &scriptArgs = Vector<string>(), GridDatabase *gridDatabase = NULL);
+   LuaLevelGenerator(Game *game, const string &scriptName = "", const Vector<string> &scriptArgs = Vector<string>(), 
+                     Level *level = NULL);
    virtual ~LuaLevelGenerator();       // Destructor
 
    bool prepareEnvironment();

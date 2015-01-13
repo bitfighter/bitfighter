@@ -88,7 +88,7 @@ void LevelInfoDisplayer::render() const
    FontManager::pushFontContext(MenuHeaderContext);
 
     // Only render these when they are not empty
-   bool showCredits = gameType->getLevelCredits()->isNotNull();    
+   bool showCredits = gameType->getLevelCredits() != "";    
    bool showDescr   = strcmp(gameType->getLevelDescription(), "") != 0;
 
    const S32 titleSize = 30;
@@ -183,7 +183,7 @@ void LevelInfoDisplayer::render() const
    const S32 descriptionHeight = showDescr ? descriptionSize + 8 : 0;
 
    const char *designedBy      = "Designed By:";
-   const char *credits         = gameType->getLevelCredits()->getString();
+   string credits              = gameType->getLevelCredits();
    const S32 creditsSize       = 20;
    const S32 creditsHeight     = showCredits ? creditsSize + 8 : 0;
    
@@ -194,7 +194,8 @@ void LevelInfoDisplayer::render() const
    S32 yPos = frameMargin + titleSize;
 
    // Draw top info box
-   renderSlideoutWidgetFrame((DisplayManager::getScreenInfo()->getGameCanvasWidth() - totalWidth) / 2, 0, totalWidth, totalHeight, Colors::blue);
+   renderSlideoutWidgetFrame((DisplayManager::getScreenInfo()->getGameCanvasWidth() - totalWidth) / 2, 0, 
+                             totalWidth, totalHeight, Colors::blue);
 
    glColor(Colors::white);
    titleSymbolString.render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, yPos, AlignmentCenter);
@@ -210,7 +211,7 @@ void LevelInfoDisplayer::render() const
 
    if(showCredits)
    {
-      drawCenteredStringPair(yPos, creditsSize, Colors::cyan, Colors::red, designedBy, credits);
+      drawCenteredStringPair(yPos, creditsSize, Colors::cyan, Colors::red, designedBy, credits.c_str());
       yPos += creditsHeight;
    }
 

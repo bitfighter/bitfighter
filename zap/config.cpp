@@ -11,6 +11,7 @@
 #include "version.h"
 #include "BanList.h"
 #include "Colors.h"
+#include "../master/database.h"
 
 #ifndef ZAP_DEDICATED
 #  include "quickChatHelper.h"
@@ -28,6 +29,10 @@
 #ifdef TNL_OS_WIN32
 #  include <windows.h>   // For ARRAYSIZE when using ZAP_DEDICATED
 #endif
+
+
+using namespace DbWriter;
+
 
 namespace Zap
 {
@@ -55,135 +60,43 @@ const char *MASTER_SERVER_LIST_ADDRESS = "bitfighter.org:25955,bitfighter.net:25
 //const char *MASTER_SERVER_LIST_ADDRESS = "IP:199.192.229.168:25955, bitfighter.net:25955";
 
 
+// Vol gets stored as a number from 0 to 10; normalize it to 0-1
+static F32 checkVol(const F32 &vol) 
+{ 
+   F32 v = vol / 10.0f; 
+   return CLAMP(v, 0, 1);
+}  
+
+
+static F32 writeVol(const F32 &vol) 
+{ 
+   return ceilf(vol * 10.0f);
+}  
+
+
+static U32 checkClientFps(const U32 &fps)
+{
+   // If FPS is not set, make sure it is default
+   if(fps < 1)
+      return 100;
+
+   return fps;
+}
+
+
 // Constructor: Set default values here
 IniSettings::IniSettings()
 {
-   // Can probably get rid of VerboseHelpMessages
 
-   //                       Data type        Setting name                Default value           INI Key                      INI Section  INI Comment                                               
-   mSettings.add(new Setting<string>        ("LastName",                 "ChumpChange",         "LastName",                    "Settings", "Name user entered when game last run (may be overwritten if you enter a different name on startup screen)"));
-   mSettings.add(new Setting<DisplayMode>   ("WindowMode",               DISPLAY_MODE_WINDOWED, "WindowMode",                  "Settings", "Fullscreen, Fullscreen-Stretch or Window"));
-   mSettings.add(new Setting<YesNo>         ("UseFakeFullscreen",        Yes,                   "UseFakeFullscreen",           "Settings", "Faster fullscreen switching; however, may not cover the taskbar"));
-   mSettings.add(new Setting<RelAbs>        ("ControlMode",              Absolute,              "ControlMode",                 "Settings", "Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)"));
-   mSettings.add(new Setting<YesNo>         ("VoiceEcho",                No,                    "VoiceEcho",                   "Settings", "Play echo when recording a voice message? Yes/No"));
-   mSettings.add(new Setting<YesNo>         ("VerboseHelpMessages",      Yes,                   "VerboseHelpMessages",         "Settings", "Display all messages related to loadout management?  Yes/No"));
-   mSettings.add(new Setting<YesNo>         ("ShowInGameHelp",           Yes,                   "ShowInGameHelp",              "Settings", "Show tutorial style messages in-game?  Yes/No"));
-   mSettings.add(new Setting<string>        ("JoystickType",             NoJoystick,            "JoystickType",                "Settings", "Type of joystick to use if auto-detect doesn't recognize your controller"));
-   mSettings.add(new Setting<string>        ("HelpItemsAlreadySeenList", "",                    "HelpItemsAlreadySeenList",    "Settings", "Tracks which in-game help items have already been seen; let the game manage this"));
-   mSettings.add(new Setting<U32>           ("EditorGridSize",           255,                   "EditorGridSize",              "Settings", "Grid size used in the editor, mostly for snapping purposes"));
-   mSettings.add(new Setting<YesNo>         ("LineSmoothing",            Yes,                   "LineSmoothing",               "Settings", "Activates anti-aliased rendering.  This may be a little slower on some machines.  Yes/No"));
-   mSettings.add(new Setting<YesNo>         ("Vsync",                    Yes,                   "Vsync",                       "Settings", "Turns on vertical sync. Yes/No"));
-
-   mSettings.add(new Setting<ColorEntryMode>("ColorEntryMode",           ColorEntryMode100,     "ColorEntryMode",        "EditorSettings", "Specifies which color entry mode to use: RGB100, RGB255, RGBHEX; best to let the game manage this"));
+#  define SETTINGS_ITEM(typeName, enumVal, section, key, defaultVal, readValidator, writeValidator, comment)    \
+            mSettings.add(                                                                                      \
+               new Setting<typeName, IniKey::SettingsItem>(IniKey::enumVal, defaultVal, key,                    \
+                                                           section, readValidator, writeValidator, comment)     \
+            );
+      SETTINGS_TABLE
+#  undef SETTINGS_ITEM
 
    oldDisplayMode = DISPLAY_MODE_UNKNOWN;
-   joystickLinuxUseOldDeviceSystem = false;
-   alwaysStartInKeyboardMode = false;
-
-   sfxVolLevel       = 1.0;           // SFX volume (0 = silent, 1 = full bore)
-   musicVolLevel     = 1.0;           // Music volume (range as above)
-   voiceChatVolLevel = 1.0;           // INcoming voice chat volume (range as above)
-   alertsVolLevel    = 1.0;           // Audio alerts volume (when in dedicated server mode only, range as above)
-
-   sfxSet = sfxModernSet;             // Start off with our modern sounds
-
-   diagnosticKeyDumpMode = false;     // True if want to dump keystrokes to the screen
-
-   allowDataConnections = false;      // Disabled unless explicitly enabled for security reasons -- most users won't need this
-   allowGetMap = false;               // Disabled by default -- many admins won't want this
-
-   maxDedicatedFPS = 100;             // Max FPS on dedicated server
-   maxFPS = 100;                      // Max FPS on client/non-dedicated server
-
-   masterAddress = MASTER_SERVER_LIST_ADDRESS;   // Default address of our master server
-   name = "";                         // Player name (none by default)
-   defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
-   lastPassword = "";
-   lastEditorName = "";               // No default editor level name
-   hostname = "Bitfighter host";      // Default host name
-   hostdescr = "";
-   maxPlayers = 127;
-   maxBots = 10;
-   playWithBots = false;
-   minBalancedPlayers = 6;
-   enableServerVoiceChat = true;
-   allowTeamChanging = true;
-   serverPassword = "";               // Passwords empty by default
-   ownerPassword = "";
-   adminPassword = "";
-   levelChangePassword = "";
-   levelDir = "";
-
-   connectionSpeed = 0;
-
-   defaultRobotScript = "s_bot.bot";            
-   globalLevelScript = "";
-
-   wallFillColor.set(0,0,.15);
-   wallOutlineColor.set(Colors::blue);
-   clientPortNumber = 0;
-   disableScreenSaver = true;
-
-   randomLevels = false;
-   skipUploads = false;
-
-   allowMapUpload = false;
-   allowAdminMapUpload = true;
-   allowLevelgenUpload = true;
-
-   enableGameRecording = false;
-
-   voteEnable = false;     // Voting disabled by default
-   voteLength = 12;
-   voteLengthToChangeTeam = 10;
-   voteRetryLength = 30;
-   voteYesStrength = 3;
-   voteNoStrength = -3;
-   voteNothingStrength = -1;
-
-
-   queryServerSortColumn = 0;
-   queryServerSortAscending = true;
-
-   useUpdater = true;
-
-   // Game window location when in windowed mode
-   winXPos = 0;  // if set to (0,0), it will not set the position meaning it uses operating system default position. (see bottom of "VideoSystem::actualizeScreenMode" in VideoSystem.cpp)
-   winYPos = 0;
-   winSizeFact = 1.0;
-
-   musicMutedOnCmdLine = false;
-
-   neverConnectDirect = false;
-
-   // Specify which events to log
-   logConnectionProtocol = false;
-   logNetConnection = false;
-   logEventConnection = false;
-   logGhostConnection = false;
-   logNetInterface = false;
-   logPlatform = false;
-   logNetBase = false;
-   logUDP = false;
-
-   logFatalError = true;       
-   logError = true;            
-   logWarning = true;     
-   logConfigurationError = true;
-   logConnection = true;       
-   logLevelLoaded = true;      
-   logLuaObjectLifecycle = false;
-   luaLevelGenerator = true;   
-   luaBotMessage = true;       
-   serverFilter = false; 
-
-   logLevelError = true;
-
-   logStats = false;          // Log statistics into local sqlite database
-
-   version = BUILD_VERSION;   // Default to current version to avoid triggering upgrade checks on fresh install
-
-   oldGoalFlash = true;
 }
 
 
@@ -192,6 +105,38 @@ IniSettings::~IniSettings()
 {
    // Do nothing
 }
+
+
+// This list is currently incomplete, will grow as we move our settings into the new structure
+static const string sections[] =
+{
+   "Settings",
+   "Effects",
+   "Host",
+   "Host-Voting",
+   "EditorSettings",
+   "Updater",
+   "Diagnostics",
+   "Sounds",
+   "Testing"
+};
+// Aligned with 'sections' above
+static const string headerComments[] = 
+{
+   "Settings entries contain a number of different options.",
+   "Various visual effects.",
+   "Items in this section control how Bitfighter works when you are hosting a game.  See also Host-Voting.",
+   "Control how voting works on the server.  The default values work pretty well, but if you want to tweak them, go ahead!\n"
+      "Yes and No votes, and abstentions, have different weights.  When a vote is conducted, the total value of all votes (or non-votes)\n"
+      "is added up, and if the result is greater than 0, the vote passes.  Otherwise it fails.  You can adjust the weight of the votes below.",
+   "EditorSettings entries relate to items in the editor",
+   "The Updater section contains entries that control how game updates are handled.",
+   "Diagnostic entries can be used to enable or disable particular actions for debugging purposes.\n"
+      "You probably can't use any of these settings to enhance your gameplay experience!",
+   "Sound settings",
+   "Experimental and possibly short-lived settings use for testing.  They may be removed at any time,\n"
+      "even in the next version of Bitfighter."
+};
 
 
 // Some static helper methods:
@@ -255,29 +200,6 @@ Vector<PluginBinding> IniSettings::getDefaultPluginBindings() const
 
    return bindings;
 }
-
-
-F32 IniSettings::getMusicVolLevel()
-{
-   if(musicMutedOnCmdLine)
-      return 0;
-
-   return musicVolLevel;
-}
-
-
-// As above, but ignores whether music was muted or not
-F32 IniSettings::getRawMusicVolLevel()
-{
-   return musicVolLevel;
-}
-
-
-void  IniSettings::setMusicVolLevel(F32 vol)
-{
-   musicVolLevel = vol;
-}
-
 
 
 extern string lcase(string strToConvert);
@@ -438,14 +360,23 @@ extern F32 gLineWidth3;
 extern F32 gLineWidth4;
 
 
+typedef Vector<AbstractSetting<IniKey::SettingsItem> *> SettingsList;
+
+
+static void loadSettings(CIniFile *ini, IniSettings *iniSettings, const string &section)
+{
+   // Get all settings from the given section
+   SettingsList settings = iniSettings->mSettings.getSettingsInSection(section);
+
+   // Load the INI settings into the settings list, overwriting the defaults
+   for(S32 i = 0; i < settings.size(); i++)
+      settings[i]->setValFromString(ini->GetValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
+}
+
+
 static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 {
    string section = "Settings";
-
-   // Read all settings defined in the new modern manner
-   Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
-   for(S32 i = 0; i < settings.size(); i++)
-      settings[i]->setValFromString(ini->GetValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
 
    // Now read the settings still defined all old school
 
@@ -454,38 +385,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->mSettings.setVal("WindowMode", DISPLAY_MODE_FULL_SCREEN_STRETCHED);
 #endif
 
-   iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>("WindowMode");
-
-#ifndef ZAP_DEDICATED
-   iniSettings->joystickLinuxUseOldDeviceSystem = ini->GetValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
-   iniSettings->alwaysStartInKeyboardMode = ini->GetValueYN(section, "AlwaysStartInKeyboardMode", iniSettings->alwaysStartInKeyboardMode);
-#endif
-
-   iniSettings->winXPos = max(ini->GetValueI(section, "WindowXPos", iniSettings->winXPos), 0);    // Restore window location
-   iniSettings->winYPos = max(ini->GetValueI(section, "WindowYPos", iniSettings->winYPos), 0);
-
-   iniSettings->winSizeFact   = ini->GetValueF(section, "WindowScalingFactor", iniSettings->winSizeFact);
-   iniSettings->masterAddress = ini->GetValue (section, "MasterServerAddressList", iniSettings->masterAddress);
-   
-   iniSettings->name           = ini->GetValue(section, "Nickname", iniSettings->name);
-   iniSettings->password       = ini->GetValue(section, "Password", iniSettings->password);
-
-   iniSettings->defaultName    = ini->GetValue(section, "DefaultName", iniSettings->defaultName);
-
-   iniSettings->lastPassword   = ini->GetValue(section, "LastPassword", iniSettings->lastPassword);
-   iniSettings->lastEditorName = ini->GetValue(section, "LastEditorName", iniSettings->lastEditorName);
-
-   iniSettings->version = ini->GetValueI(section, "Version", iniSettings->version);
-
-   iniSettings->connectionSpeed = ini->GetValueI(section, "ConnectionSpeed", iniSettings->connectionSpeed);
-
-   S32 fps = ini->GetValueI(section, "MaxFPS", iniSettings->maxFPS);
-   if(fps >= 1) 
-      iniSettings->maxFPS = fps;   // Otherwise, leave it at the default value
-   // else warn?
-
-   iniSettings->queryServerSortColumn    = ini->GetValueI(section, "QueryServerSortColumn",    iniSettings->queryServerSortColumn);
-   iniSettings->queryServerSortAscending = ini->GetValueB(section, "QueryServerSortAscending", iniSettings->queryServerSortAscending);
+   iniSettings->oldDisplayMode = iniSettings->mSettings.getVal<DisplayMode>(IniKey::WindowMode);
 
 
 #ifndef ZAP_DEDICATED
@@ -494,58 +394,6 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    gLineWidth3 = gDefaultLineWidth * 1.5f;
    gLineWidth4 = gDefaultLineWidth * 2;
 #endif
-}
-
-
-static void loadEditorSettings(CIniFile *ini, IniSettings *iniSettings)
-{
-   string section = "EditorSettings";
-
-   // Read all settings defined in the new modern manner
-   Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
-   for(S32 i = 0; i < settings.size(); i++)
-      settings[i]->setValFromString(ini->GetValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
-}
-
-
-static void loadDiagnostics(CIniFile *ini, IniSettings *iniSettings)
-{
-   string section = "Diagnostics";
-
-   iniSettings->diagnosticKeyDumpMode = ini->GetValueYN(section, "DumpKeys",              iniSettings->diagnosticKeyDumpMode);
-
-   iniSettings->logConnectionProtocol = ini->GetValueYN(section, "LogConnectionProtocol", iniSettings->logConnectionProtocol);
-   iniSettings->logNetConnection      = ini->GetValueYN(section, "LogNetConnection",      iniSettings->logNetConnection);
-   iniSettings->logEventConnection    = ini->GetValueYN(section, "LogEventConnection",    iniSettings->logEventConnection);
-   iniSettings->logGhostConnection    = ini->GetValueYN(section, "LogGhostConnection",    iniSettings->logGhostConnection);
-   iniSettings->logNetInterface       = ini->GetValueYN(section, "LogNetInterface",       iniSettings->logNetInterface);
-   iniSettings->logPlatform           = ini->GetValueYN(section, "LogPlatform",           iniSettings->logPlatform);
-   iniSettings->logNetBase            = ini->GetValueYN(section, "LogNetBase",            iniSettings->logNetBase);
-   iniSettings->logUDP                = ini->GetValueYN(section, "LogUDP",                iniSettings->logUDP);
-
-   iniSettings->logFatalError         = ini->GetValueYN(section, "LogFatalError",         iniSettings->logFatalError);
-   iniSettings->logError              = ini->GetValueYN(section, "LogError",              iniSettings->logError);
-   iniSettings->logWarning            = ini->GetValueYN(section, "LogWarning",            iniSettings->logWarning);
-   iniSettings->logConfigurationError = ini->GetValueYN(section, "LogConfigurationError", iniSettings->logConfigurationError);
-   iniSettings->logConnection         = ini->GetValueYN(section, "LogConnection",         iniSettings->logConnection);
-   iniSettings->logLevelError         = ini->GetValueYN(section, "LogLevelError",         iniSettings->logLevelError);
-
-   iniSettings->logLevelLoaded        = ini->GetValueYN(section, "LogLevelLoaded",        iniSettings->logLevelLoaded);
-   iniSettings->logLuaObjectLifecycle = ini->GetValueYN(section, "LogLuaObjectLifecycle", iniSettings->logLuaObjectLifecycle);
-   iniSettings->luaLevelGenerator     = ini->GetValueYN(section, "LuaLevelGenerator",     iniSettings->luaLevelGenerator);
-   iniSettings->luaBotMessage         = ini->GetValueYN(section, "LuaBotMessage",         iniSettings->luaBotMessage);
-   iniSettings->serverFilter          = ini->GetValueYN(section, "ServerFilter",          iniSettings->serverFilter);
-}
-
-
-static void loadTestSettings(CIniFile *ini, IniSettings *iniSettings)
-{
-   iniSettings->neverConnectDirect = ini->GetValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
-   iniSettings->wallFillColor.set(ini->GetValue("Testing", "WallFillColor", iniSettings->wallFillColor.toRGBString()));
-   iniSettings->wallOutlineColor.set(ini->GetValue("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString()));
-   iniSettings->oldGoalFlash = ini->GetValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
-   iniSettings->clientPortNumber = (U16) ini->GetValueI("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
-   iniSettings->disableScreenSaver = ini->GetValueYN("Testing", "DisableScreenSaver", iniSettings->disableScreenSaver);
 }
 
 
@@ -597,120 +445,6 @@ static void loadPluginBindings(CIniFile *ini, IniSettings *iniSettings)
 }
 
 
-static void loadEffectsSettings(CIniFile *ini, IniSettings *iniSettings)
-{
-   // Nothing at the moment
-}
-
-
-// Convert a string value to our sfxSets enum
-static sfxSets stringToSFXSet(string sfxSet)
-{
-   return (lcase(sfxSet) == "classic") ? sfxClassicSet : sfxModernSet;
-}
-
-
-static F32 checkVol(F32 vol)
-{
-   return max(min(vol, 1.f), 0.f);    // Restrict volume to be between 0 and 1
-}
-
-
-static void loadSoundSettings(CIniFile *ini, GameSettings *settings, IniSettings *iniSettings)
-{
-   iniSettings->musicMutedOnCmdLine = settings->getSpecified(NO_MUSIC);
-
-   iniSettings->sfxVolLevel       = (F32) ini->GetValueI("Sounds", "EffectsVolume",   (S32) (iniSettings->sfxVolLevel        * 10)) / 10.0f;
-   iniSettings->setMusicVolLevel(   (F32) ini->GetValueI("Sounds", "MusicVolume",     (S32) (iniSettings->getMusicVolLevel() * 10)) / 10.0f);
-   iniSettings->voiceChatVolLevel = (F32) ini->GetValueI("Sounds", "VoiceChatVolume", (S32) (iniSettings->voiceChatVolLevel  * 10)) / 10.0f;
-
-   string sfxSet = ini->GetValue("Sounds", "SFXSet", "Modern");
-   iniSettings->sfxSet = stringToSFXSet(sfxSet);
-
-   // Bounds checking
-   iniSettings->sfxVolLevel       = checkVol(iniSettings->sfxVolLevel);
-   iniSettings->setMusicVolLevel(checkVol(iniSettings->getRawMusicVolLevel()));
-   iniSettings->voiceChatVolLevel = checkVol(iniSettings->voiceChatVolLevel);
-}
-
-
-static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
-{
-   const char *section = "Host";
-
-   iniSettings->hostname  = ini->GetValue(section, "ServerName", iniSettings->hostname);
-   iniSettings->hostaddr  = ini->GetValue(section, "ServerAddress", iniSettings->hostaddr);
-   iniSettings->hostdescr = ini->GetValue(section, "ServerDescription", iniSettings->hostdescr);
-
-   iniSettings->serverPassword         = ini->GetValue  (section, "ServerPassword", iniSettings->serverPassword);
-   iniSettings->ownerPassword          = ini->GetValue  (section, "OwnerPassword", iniSettings->ownerPassword);
-   iniSettings->adminPassword          = ini->GetValue  (section, "AdminPassword", iniSettings->adminPassword);
-   iniSettings->levelChangePassword    = ini->GetValue  (section, "LevelChangePassword", iniSettings->levelChangePassword);
-   iniSettings->levelDir               = ini->GetValue  (section, "LevelDir", iniSettings->levelDir);
-   iniSettings->maxPlayers             = ini->GetValueI (section, "MaxPlayers", iniSettings->maxPlayers);
-   iniSettings->maxBots                = ini->GetValueI (section, "MaxBots", iniSettings->maxBots);
-   iniSettings->playWithBots           = ini->GetValueYN(section, "AddRobots", iniSettings->playWithBots);
-   iniSettings->minBalancedPlayers     = ini->GetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
-   iniSettings->enableServerVoiceChat  = ini->GetValueYN (section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);
-
-   iniSettings->alertsVolLevel       = (F32) ini->GetValueI(section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10)) / 10.0f;
-   iniSettings->allowGetMap          = ini->GetValueYN (section, "AllowGetMap", iniSettings->allowGetMap);
-   iniSettings->allowDataConnections = ini->GetValueYN (section, "AllowDataConnections", iniSettings->allowDataConnections);
-
-   S32 fps = ini->GetValueI(section, "MaxFPS", iniSettings->maxDedicatedFPS);
-   if(fps >= 1) 
-      iniSettings->maxDedicatedFPS = fps; 
-   // TODO: else warn?
-
-   iniSettings->logStats = ini->GetValueYN(section, "LogStats", iniSettings->logStats);
-
-   //iniSettings->SendStatsToMaster = (lcase(ini->GetValue(section, "SendStatsToMaster", "yes")) != "no");
-
-   iniSettings->alertsVolLevel = checkVol(iniSettings->alertsVolLevel);
-
-   iniSettings->randomLevels           = (U32) ini->GetValueYN(section, "RandomLevels", S32(iniSettings->randomLevels) );
-   iniSettings->skipUploads            = (U32) ini->GetValueYN(section, "SkipUploads", S32(iniSettings->skipUploads) );
-
-   iniSettings->allowMapUpload         = (U32) ini->GetValueYN(section, "AllowMapUpload", S32(iniSettings->allowMapUpload) );
-   iniSettings->allowAdminMapUpload    = (U32) ini->GetValueYN(section, "AllowAdminMapUpload", S32(iniSettings->allowAdminMapUpload) );
-   iniSettings->allowLevelgenUpload    = (U32) ini->GetValueYN(section, "AllowLevelgenUpload", S32(iniSettings->allowLevelgenUpload) );
-
-   iniSettings->voteEnable             = (U32) ini->GetValueYN(section, "VoteEnable", S32(iniSettings->voteEnable) );
-   iniSettings->voteLength             = (U32) ini->GetValueI (section, "VoteLength", S32(iniSettings->voteLength) );
-   iniSettings->voteLengthToChangeTeam = (U32) ini->GetValueI (section, "VoteLengthToChangeTeam", S32(iniSettings->voteLengthToChangeTeam) );
-   iniSettings->voteRetryLength        = (U32) ini->GetValueI (section, "VoteRetryLength", S32(iniSettings->voteRetryLength) );
-
-   iniSettings->voteYesStrength        = ini->GetValueI(section, "VoteYesStrength", iniSettings->voteYesStrength );
-   iniSettings->voteNoStrength         = ini->GetValueI(section, "VoteNoStrength", iniSettings->voteNoStrength );
-   iniSettings->voteNothingStrength    = ini->GetValueI(section, "VoteNothingStrength", iniSettings->voteNothingStrength );
-   iniSettings->allowTeamChanging      = ini->GetValueYN(section, "AllowTeamChanging", iniSettings->allowTeamChanging);
-
-#ifdef BF_WRITE_TO_MYSQL
-   Vector<string> args;
-   parseString(ini->GetValue(section, "MySqlStatsDatabaseCredentials"), args, ',');
-   if(args.size() >= 1) iniSettings->mySqlStatsDatabaseServer = args[0];
-   if(args.size() >= 2) iniSettings->mySqlStatsDatabaseName = args[1];
-   if(args.size() >= 3) iniSettings->mySqlStatsDatabaseUser = args[2];
-   if(args.size() >= 4) iniSettings->mySqlStatsDatabasePassword = args[3];
-   if(iniSettings->mySqlStatsDatabaseServer == "server" && iniSettings->mySqlStatsDatabaseName == "dbname")
-   {
-      iniSettings->mySqlStatsDatabaseServer = "";  // blank this, so it won't try to connect to "server"
-   }
-#endif
-
-   iniSettings->defaultRobotScript = ini->GetValue(section, "DefaultRobotScript", iniSettings->defaultRobotScript);
-   iniSettings->globalLevelScript  = ini->GetValue(section, "GlobalLevelScript", iniSettings->globalLevelScript);
-
-   iniSettings->enableGameRecording = ini->GetValueYN(section, "GameRecording", iniSettings->enableGameRecording);
-}
-
-
-void loadUpdaterSettings(CIniFile *ini, IniSettings *iniSettings)
-{
-   iniSettings->useUpdater = lcase(ini->GetValue("Updater", "UseUpdater", "Yes")) != "no";
-}
-
-
 static InputCode getInputCode(CIniFile *ini, const string &section, const string &key, InputCode defaultValue)
 {
    const char *code = InputCodeManager::inputCodeToString(defaultValue);
@@ -753,10 +487,10 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
    //          getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(InputCodeManager::BINDING_SELWEAP1), 
    //                       KEY_1));
 
-#define BINDING(enumVal, b, savedInIni, d, defaultKeyboardBinding, f)                                             \
-      if(savedInIni)                                                                                              \
-         inputCodeManager->setBinding(enumVal, InputModeKeyboard,                            						   \
-            getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(enumVal), 						\
+#define BINDING(enumVal, b, savedInIni, d, defaultKeyboardBinding, f)                           \
+      if(savedInIni)                                                                            \
+         inputCodeManager->setBinding(enumVal, InputModeKeyboard,                            	\
+            getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(enumVal), \
                          defaultKeyboardBinding));
     BINDING_TABLE
 #undef BINDING
@@ -782,7 +516,7 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
 }
 
 
-// Only called while loading keys from the INI
+// Only called while loading keys from the INI; Note that this function might not be able to be modernized!
 void setDefaultEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
 #define EDITOR_BINDING(editorEnumVal, b, c, defaultEditorKeyboardBinding)                                       \
@@ -824,6 +558,7 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
 }
 
 
+// Note that this function might not be able to be modernized!
 static void writeEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section)
 {
    string key;
@@ -873,6 +608,39 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 }
 
 
+static void insertQuickChatMessageCommonBits(CIniFile *ini, const string &key, 
+                                   MessageType messageType, 
+                                   InputCode keyCode, InputCode buttonCode, 
+                                   const string &caption)
+{
+   ini->SetValue(key, "Key", InputCodeManager::inputCodeToString(keyCode));
+   ini->SetValue(key, "Button", InputCodeManager::inputCodeToString(buttonCode));
+   ini->SetValue(key, "MessageType", Evaluator::toString(messageType));
+   ini->SetValue(key, "Caption", caption);
+}
+
+
+static void insertQuickChatMessageSection(CIniFile *ini, S32 group, MessageType messageType, 
+                                   InputCode keyCode, InputCode buttonCode, 
+                                   const string &caption)
+{
+   const string key = "QuickChatMessagesGroup" + itos(group);
+
+   insertQuickChatMessageCommonBits(ini, key, messageType, keyCode, buttonCode, caption);
+}
+
+
+static void insertQuickChatMessage(CIniFile *ini, S32 group, S32 messageId, MessageType messageType, 
+                                   InputCode keyCode, InputCode buttonCode, 
+                                   const string &caption, const string &message)
+{
+   const string key = "QuickChatMessagesGroup" + itos(group) + "_Message" + itos(messageId);
+
+   insertQuickChatMessageCommonBits(ini, key, messageType, keyCode, buttonCode, caption);
+   ini->SetValue(key, "Message", message);
+}
+
+
 /*  INI file looks a little like this:
    [QuickChatMessagesGroup1]
    Key=F
@@ -902,11 +670,10 @@ static void loadQuickChatMessages(CIniFile *ini)
 
    QuickChatHelper::nodeTree.push_back(emptyNode);
 
-   // Read QuickChat messages -- first search for keys matching "QuickChatMessagesGroup123"
    S32 keys = ini->GetNumSections();
    Vector<string> groups;
 
-   // Next, read any top-level messages
+   // Read any top-level messages (those starting with "QuickChat_Message")
    Vector<string> messages;
    for(S32 i = 0; i < keys; i++)
    {
@@ -918,20 +685,9 @@ static void loadQuickChatMessages(CIniFile *ini)
    messages.sort(alphaSort);
 
    for(S32 i = messages.size() - 1; i >= 0; i--)
-   {
-      QuickChatNode node;
-      node.depth = 1;   // This is a top-level message node
-      node.inputCode =  InputCodeManager::stringToInputCode(ini->GetValue(messages[i], "Key", "A").c_str());
-      node.buttonCode = InputCodeManager::stringToInputCode(ini->GetValue(messages[i], "Button", "Button 1").c_str());
-      string str1 = lcase(ini->GetValue(messages[i], "MessageType", "Team"));      // lcase for case insensitivity
-      node.teamOnly = str1 == "team";
-      node.commandOnly = str1 == "command";
-      node.caption = ini->GetValue(messages[i], "Caption", "Caption");
-      node.msg = ini->GetValue(messages[i], "Message", "Message");
-      node.isMsgItem = true;
-      QuickChatHelper::nodeTree.push_back(node);
-   }
+      QuickChatHelper::nodeTree.push_back(QuickChatNode(1, ini, messages[i], false));
 
+   // Now search for groups, which have keys matching "QuickChatMessagesGroup123"
    for(S32 i = 0; i < keys; i++)
    {
       string keyName = ini->getSectionName(i);
@@ -945,7 +701,7 @@ static void loadQuickChatMessages(CIniFile *ini)
    // quickChat render functions were designed to work with the messages sorted in reverse.  Rather than
    // reenigneer those, let's just iterate backwards and leave the render functions alone.
 
-   for(S32 i = groups.size()-1; i >= 0; i--)
+   for(S32 i = groups.size() - 1; i >= 0; i--)
    {
       Vector<string> messages;
       for(S32 j = 0; j < keys; j++)
@@ -957,31 +713,10 @@ static void loadQuickChatMessages(CIniFile *ini)
 
       messages.sort(alphaSort);
 
-      QuickChatNode node;
-      node.depth = 1;      // This is a group node
-      node.inputCode =  InputCodeManager::stringToInputCode(ini->GetValue(groups[i], "Key", "A").c_str());
-      node.buttonCode = InputCodeManager::stringToInputCode(ini->GetValue(groups[i], "Button", "Button 1").c_str());
-      string str1 = lcase(ini->GetValue(groups[i], "MessageType", "Team"));      // lcase for case insensitivity
-      node.teamOnly = str1 == "team";
-      node.commandOnly = str1 == "command";
-      node.caption = ini->GetValue(groups[i], "Caption", "Caption");
-      node.msg = "";
-      node.isMsgItem = false;
-      QuickChatHelper::nodeTree.push_back(node);
+      QuickChatHelper::nodeTree.push_back(QuickChatNode(1, ini, groups[i], true));
 
-      for(S32 j = messages.size()-1; j >= 0; j--)
-      {
-         node.depth = 2;   // This is a message node
-         node.inputCode =  InputCodeManager::stringToInputCode(ini->GetValue(messages[j], "Key", "A").c_str());
-         node.buttonCode = InputCodeManager::stringToInputCode(ini->GetValue(messages[j], "Button", "Button 1").c_str());
-         str1 = lcase(ini->GetValue(messages[j], "MessageType", "Team"));      // lcase for case insensitivity
-         node.teamOnly = str1 == "team";
-         node.commandOnly = str1 == "command";
-         node.caption = ini->GetValue(messages[j], "Caption", "Caption");
-         node.msg = ini->GetValue(messages[j], "Message", "Message");
-         node.isMsgItem = true;
-         QuickChatHelper::nodeTree.push_back(node);
-      }
+      for(S32 j = messages.size() - 1; j >= 0; j--)
+         QuickChatHelper::nodeTree.push_back(QuickChatNode(2, ini, messages[j], false));
    }
 
    // Add final node.  Last verse, same as the first.
@@ -998,12 +733,16 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
    if(ini->numSectionComments(section) == 0)
    {
       addComment("----------------");
+      addComment(" WARNING!  Do not edit this section while Bitfighter is running... your changes will be clobbered!");
+      addComment("----------------");
       addComment(" The structure of the QuickChatMessages sections is a bit complicated.  The structure reflects the");
       addComment(" way the messages are displayed in the QuickChat menu, so make sure you are familiar with that before");
-      addComment(" you start modifying these items. Messages are grouped, and each group has a Caption (short name");
+      addComment(" you start modifying these items. ");
+      addComment(" ");
+      addComment(" Messages are grouped, and each group has a Caption (short name");
       addComment(" shown on screen), a Key (the shortcut key used to select the group), and a Button (a shortcut button");
       addComment(" used when in joystick mode).  If the Button is \"Undefined key\", then that item will not be shown");
-      addComment(" in joystick mode, unless the  setting is true.  Groups can be defined in");
+      addComment(" in joystick mode, unless the setting is true.  Groups can be defined in");
       addComment(" any order, but will be displayed sorted by [section] name.  Groups are designated by the");
       addComment(" [QuickChatMessagesGroupXXX] sections, where XXX is a unique suffix, usually a number.");
       addComment(" ");
@@ -1013,22 +752,21 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
       addComment(" Caption serve the same purposes as in the group definitions. Message is the actual message text that");
       addComment(" is sent, and MessageType should be either \"Team\" or \"Global\", depending on which users the");
       addComment(" message should be sent to.  You can mix Team and Global messages in the same section, but it may be");
-      addComment(" less confusing not to do so.");
+      addComment(" less confusing not to do so.  MessageType can also be \"Command\", in which case the message will be");
+      addComment(" sent to the server, as if it were a /command; see below for more details.");
       addComment(" ");
-      addComment(" Messages can also be added to the top-tier of items, by specifying a section like");
-      addComment(" [QuickChat_MessageZZZ].");
+      addComment(" Messages can also be added to the top-tier of items, by specifying a section like [QuickChat_MessageZZZ].");
       addComment(" ");
-      addComment(" Note that no quotes are required around Messages or Captions, and if included, they will be sent as");
+      addComment(" Note that quotes are not required around Messages or Captions, and if included, they will be sent as");
       addComment(" part of the message. Also, if you bullocks things up too badly, simply delete all QuickChatMessage");
-      addComment(" sections, and they will be regenerated the next time you run the game (though your modifications");
-      addComment(" will be lost).");
+      addComment(" sections, along with this section and all comments, and a clean set of commands will be regenerated"); 
+      addComment(" the next time you run the game (though your modifications will be lost, obviously).");
       addComment(" ");
       addComment(" Note that you can also use the QuickChat functionality to create shortcuts to commonly run /commands");
       addComment(" by setting the MessageType to \"Command\".  For example, if you define a QuickChat message to be");
-      addComment(" \"addbots 2\" (without quotes, and without a slash), and the MessageType to \"Command\" (also");
-      addComment(" without quotes), 2 robots will be added to the game when you press the appropriate keys.  You can");
-      addComment(" use this functionality to assign commonly used commands to joystick buttons or short keyboard");
-      addComment(" sequences.");
+      addComment(" \"addbots 2\" (without quotes, and without a leading \"/\"), and the MessageType to \"Command\" (also");
+      addComment(" without quotes), 2 robots will be added to the game when you select the appropriate message.  You can");
+      addComment(" use this functionality to assign commonly used commands to joystick buttons or short key sequences.");
       addComment("----------------");
    }
 
@@ -1043,402 +781,68 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
          return;
    }
 
-   ini->SetValue("QuickChatMessagesGroup1", "Key", InputCodeManager::inputCodeToString(KEY_G));
-   ini->SetValue("QuickChatMessagesGroup1", "Button", InputCodeManager::inputCodeToString(BUTTON_6));
-   ini->SetValue("QuickChatMessagesGroup1", "Caption", "Global");
-   ini->SetValue("QuickChatMessagesGroup1", "MessageType", "Global");
+   insertQuickChatMessageSection(ini, 1, GlobalMessageType, KEY_G, BUTTON_6, "Global");
+      insertQuickChatMessage(ini, 1, 1, GlobalMessageType, KEY_A, BUTTON_1,    "No Problem",            "No Problemo.");
+      insertQuickChatMessage(ini, 1, 2, GlobalMessageType, KEY_T, BUTTON_2,    "Thanks",                "Thanks.");
+      insertQuickChatMessage(ini, 1, 3, GlobalMessageType, KEY_X, KEY_UNKNOWN, "You idiot!",            "You idiot!");
+      insertQuickChatMessage(ini, 1, 4, GlobalMessageType, KEY_E, BUTTON_3,    "Duh",                   "Duh.");
+      insertQuickChatMessage(ini, 1, 5, GlobalMessageType, KEY_C, KEY_UNKNOWN, "Crap",                  "Ah Crap!");
+      insertQuickChatMessage(ini, 1, 6, GlobalMessageType, KEY_D, BUTTON_4,    "Damnit",                "Dammit!");
+      insertQuickChatMessage(ini, 1, 7, GlobalMessageType, KEY_S, BUTTON_5,    "Shazbot",               "Shazbot!");
+      insertQuickChatMessage(ini, 1, 8, GlobalMessageType, KEY_Z, BUTTON_6,    "Doh",                   "Doh!");
 
-      ini->SetValue("QuickChatMessagesGroup1_Message1", "Key", InputCodeManager::inputCodeToString(KEY_A));
-      ini->SetValue("QuickChatMessagesGroup1_Message1", "Button", InputCodeManager::inputCodeToString(BUTTON_1));
-      ini->SetValue("QuickChatMessagesGroup1_Message1", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup1_Message1", "Caption", "No Problem");
-      ini->SetValue("QuickChatMessagesGroup1_Message1", "Message", "No Problemo.");
+   insertQuickChatMessageSection(ini, 2, TeamMessageType, KEY_D, BUTTON_5, "Defense");
+      insertQuickChatMessage(ini, 2, 1, TeamMessageType, KEY_G, KEY_UNKNOWN,   "Defend Our Base",       "Defend our base.");
+      insertQuickChatMessage(ini, 2, 2, TeamMessageType, KEY_D, BUTTON_1,      "Defending Base",        "Defending our base.");
+      insertQuickChatMessage(ini, 2, 3, TeamMessageType, KEY_Q, BUTTON_2,      "Is Base Clear?",        "Is our base clear?");
+      insertQuickChatMessage(ini, 2, 4, TeamMessageType, KEY_C, BUTTON_3,      "Base Clear",            "Base is secured.");
+      insertQuickChatMessage(ini, 2, 5, TeamMessageType, KEY_T, BUTTON_4,      "Base Taken",            "Base is taken.");
+      insertQuickChatMessage(ini, 2, 6, TeamMessageType, KEY_N, BUTTON_5,      "Need More Defense",     "We need more defense.");
+      insertQuickChatMessage(ini, 2, 7, TeamMessageType, KEY_E, BUTTON_6,      "Enemy Attacking Base",  "The enemy is attacking our base.");
+      insertQuickChatMessage(ini, 2, 8, TeamMessageType, KEY_A, KEY_UNKNOWN,   "Attacked",              "We are being attacked.");
 
-      ini->SetValue("QuickChatMessagesGroup1_Message2", "Key", InputCodeManager::inputCodeToString(KEY_T));
-      ini->SetValue("QuickChatMessagesGroup1_Message2", "Button", InputCodeManager::inputCodeToString(BUTTON_2));
-      ini->SetValue("QuickChatMessagesGroup1_Message2", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup1_Message2", "Caption", "Thanks");
-      ini->SetValue("QuickChatMessagesGroup1_Message2", "Message", "Thanks.");
+   insertQuickChatMessageSection(ini, 3, TeamMessageType, KEY_F, BUTTON_4, "Flag");
+      insertQuickChatMessage(ini, 3, 1, TeamMessageType, KEY_F, BUTTON_1,      "Get enemy flag",        "Get the enemy flag.");
+      insertQuickChatMessage(ini, 3, 2, TeamMessageType, KEY_R, BUTTON_2,      "Return our flag",       "Return our flag to base.");
+      insertQuickChatMessage(ini, 3, 3, TeamMessageType, KEY_S, BUTTON_3,      "Flag secure",           "Our flag is secure.");
+      insertQuickChatMessage(ini, 3, 4, TeamMessageType, KEY_H, BUTTON_4,      "Have enemy flag",       "I have the enemy flag.");
+      insertQuickChatMessage(ini, 3, 5, TeamMessageType, KEY_E, BUTTON_5,      "Enemy has flag",        "The enemy has our flag!");
+      insertQuickChatMessage(ini, 3, 6, TeamMessageType, KEY_G, BUTTON_6,      "Flag gone",             "Our flag is not in the base!");
 
-      ini->SetValue("QuickChatMessagesGroup1_Message3", "Key", InputCodeManager::inputCodeToString(KEY_X));
-      ini->SetValue("QuickChatMessagesGroup1_Message3", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup1_Message3", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup1_Message3", "Caption", "You idiot!");
-      ini->SetValue("QuickChatMessagesGroup1_Message3", "Message", "You idiot!");
+   insertQuickChatMessageSection(ini, 4, TeamMessageType, KEY_S, KEY_UNKNOWN, "Incoming Enemies - Direction");
+      insertQuickChatMessage(ini, 4, 1, TeamMessageType, KEY_S, KEY_UNKNOWN,   "Incoming South",        "*** INCOMING SOUTH ***");
+      insertQuickChatMessage(ini, 4, 2, TeamMessageType, KEY_E, KEY_UNKNOWN,   "Incoming East",         "*** INCOMING EAST  ***");
+      insertQuickChatMessage(ini, 4, 3, TeamMessageType, KEY_W, KEY_UNKNOWN,   "Incoming West",         "*** INCOMING WEST  ***");
+      insertQuickChatMessage(ini, 4, 4, TeamMessageType, KEY_N, KEY_UNKNOWN,   "Incoming North",        "*** INCOMING NORTH ***");
+      insertQuickChatMessage(ini, 4, 5, TeamMessageType, KEY_V, KEY_UNKNOWN,   "Incoming Enemies",      "Incoming enemies!");
 
-      ini->SetValue("QuickChatMessagesGroup1_Message4", "Key", InputCodeManager::inputCodeToString(KEY_E));
-      ini->SetValue("QuickChatMessagesGroup1_Message4", "Button", InputCodeManager::inputCodeToString(BUTTON_3));
-      ini->SetValue("QuickChatMessagesGroup1_Message4", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup1_Message4", "Caption", "Duh");
-      ini->SetValue("QuickChatMessagesGroup1_Message4", "Message", "Duh.");
+   insertQuickChatMessageSection(ini, 5, TeamMessageType, KEY_V, BUTTON_3, "Quick");
+      insertQuickChatMessage(ini, 5, 1, TeamMessageType, KEY_J, KEY_UNKNOWN,   "Capture the objective", "Capture the objective.");
+      insertQuickChatMessage(ini, 5, 2, TeamMessageType, KEY_O, KEY_UNKNOWN,   "Go on the offensive",   "Go on the offensive.");
+      insertQuickChatMessage(ini, 5, 3, TeamMessageType, KEY_A, BUTTON_1,      "Attack!",               "Attack!");
+      insertQuickChatMessage(ini, 5, 4, TeamMessageType, KEY_W, BUTTON_2,      "Wait for signal",       "Wait for my signal to attack.");
+      insertQuickChatMessage(ini, 5, 5, TeamMessageType, KEY_V, BUTTON_3,      "Help!",                 "Help!");
+      insertQuickChatMessage(ini, 5, 6, TeamMessageType, KEY_E, BUTTON_4,      "Regroup",               "Regroup.");
+      insertQuickChatMessage(ini, 5, 7, TeamMessageType, KEY_G, BUTTON_5,      "Going offense",         "Going offense.");
+      insertQuickChatMessage(ini, 5, 8, TeamMessageType, KEY_Z, BUTTON_6,      "Move out",              "Move out.");
 
-      ini->SetValue("QuickChatMessagesGroup1_Message5", "Key", InputCodeManager::inputCodeToString(KEY_C));
-      ini->SetValue("QuickChatMessagesGroup1_Message5", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup1_Message5", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup1_Message5", "Caption", "Crap");
-      ini->SetValue("QuickChatMessagesGroup1_Message5", "Message", "Ah Crap!");
+   insertQuickChatMessageSection(ini, 6, TeamMessageType, KEY_R, BUTTON_2, "Reponses");
+      insertQuickChatMessage(ini, 6, 1, TeamMessageType, KEY_A, BUTTON_1,      "Acknowledge",           "Acknowledged.");
+      insertQuickChatMessage(ini, 6, 2, TeamMessageType, KEY_N, BUTTON_2,      "No",                    "No.");
+      insertQuickChatMessage(ini, 6, 3, TeamMessageType, KEY_Y, BUTTON_3,      "Yes",                   "Yes.");
+      insertQuickChatMessage(ini, 6, 4, TeamMessageType, KEY_S, BUTTON_4,      "Sorry",                 "Sorry.");
+      insertQuickChatMessage(ini, 6, 5, TeamMessageType, KEY_T, BUTTON_5,      "Thanks",                "Thanks.");
+      insertQuickChatMessage(ini, 6, 6, TeamMessageType, KEY_D, BUTTON_6,      "Don't know",            "I don't know.");
 
-      ini->SetValue("QuickChatMessagesGroup1_Message6", "Key", InputCodeManager::inputCodeToString(KEY_D));
-      ini->SetValue("QuickChatMessagesGroup1_Message6", "Button", InputCodeManager::inputCodeToString(BUTTON_4));
-      ini->SetValue("QuickChatMessagesGroup1_Message6", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup1_Message6", "Caption", "Damnit");
-      ini->SetValue("QuickChatMessagesGroup1_Message6", "Message", "Dammit!");
-
-      ini->SetValue("QuickChatMessagesGroup1_Message7", "Key", InputCodeManager::inputCodeToString(KEY_S));
-      ini->SetValue("QuickChatMessagesGroup1_Message7", "Button", InputCodeManager::inputCodeToString(BUTTON_5));
-      ini->SetValue("QuickChatMessagesGroup1_Message7", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup1_Message7", "Caption", "Shazbot");
-      ini->SetValue("QuickChatMessagesGroup1_Message7", "Message", "Shazbot!");
-
-      ini->SetValue("QuickChatMessagesGroup1_Message8", "Key", InputCodeManager::inputCodeToString(KEY_Z));
-      ini->SetValue("QuickChatMessagesGroup1_Message8", "Button", InputCodeManager::inputCodeToString(BUTTON_6));
-      ini->SetValue("QuickChatMessagesGroup1_Message8", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup1_Message8", "Caption", "Doh");
-      ini->SetValue("QuickChatMessagesGroup1_Message8", "Message", "Doh!");
-
-   ini->SetValue("QuickChatMessagesGroup2", "Key", InputCodeManager::inputCodeToString(KEY_D));
-   ini->SetValue("QuickChatMessagesGroup2", "Button", InputCodeManager::inputCodeToString(BUTTON_5));
-   ini->SetValue("QuickChatMessagesGroup2", "MessageType", "Team");
-   ini->SetValue("QuickChatMessagesGroup2", "Caption", "Defense");
-
-      ini->SetValue("QuickChatMessagesGroup2_Message1", "Key", InputCodeManager::inputCodeToString(KEY_G));
-      ini->SetValue("QuickChatMessagesGroup2_Message1", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup2_Message1", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup2_Message1", "Caption", "Defend Our Base");
-      ini->SetValue("QuickChatMessagesGroup2_Message1", "Message", "Defend our base.");
-
-      ini->SetValue("QuickChatMessagesGroup2_Message2", "Key", InputCodeManager::inputCodeToString(KEY_D));
-      ini->SetValue("QuickChatMessagesGroup2_Message2", "Button", InputCodeManager::inputCodeToString(BUTTON_1));
-      ini->SetValue("QuickChatMessagesGroup2_Message2", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup2_Message2", "Caption", "Defending Base");
-      ini->SetValue("QuickChatMessagesGroup2_Message2", "Message", "Defending our base.");
-
-      ini->SetValue("QuickChatMessagesGroup2_Message3", "Key", InputCodeManager::inputCodeToString(KEY_Q));
-      ini->SetValue("QuickChatMessagesGroup2_Message3", "Button", InputCodeManager::inputCodeToString(BUTTON_2));
-      ini->SetValue("QuickChatMessagesGroup2_Message3", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup2_Message3", "Caption", "Is Base Clear?");
-      ini->SetValue("QuickChatMessagesGroup2_Message3", "Message", "Is our base clear?");
-
-      ini->SetValue("QuickChatMessagesGroup2_Message4", "Key", InputCodeManager::inputCodeToString(KEY_C));
-      ini->SetValue("QuickChatMessagesGroup2_Message4", "Button", InputCodeManager::inputCodeToString(BUTTON_3));
-      ini->SetValue("QuickChatMessagesGroup2_Message4", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup2_Message4", "Caption", "Base Clear");
-      ini->SetValue("QuickChatMessagesGroup2_Message4", "Message", "Base is secured.");
-
-      ini->SetValue("QuickChatMessagesGroup2_Message5", "Key", InputCodeManager::inputCodeToString(KEY_T));
-      ini->SetValue("QuickChatMessagesGroup2_Message5", "Button", InputCodeManager::inputCodeToString(BUTTON_4));
-      ini->SetValue("QuickChatMessagesGroup2_Message5", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup2_Message5", "Caption", "Base Taken");
-      ini->SetValue("QuickChatMessagesGroup2_Message5", "Message", "Base is taken.");
-
-      ini->SetValue("QuickChatMessagesGroup2_Message6", "Key", InputCodeManager::inputCodeToString(KEY_N));
-      ini->SetValue("QuickChatMessagesGroup2_Message6", "Button", InputCodeManager::inputCodeToString(BUTTON_5));
-      ini->SetValue("QuickChatMessagesGroup2_Message6", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup2_Message6", "Caption", "Need More Defense");
-      ini->SetValue("QuickChatMessagesGroup2_Message6", "Message", "We need more defense.");
-
-      ini->SetValue("QuickChatMessagesGroup2_Message7", "Key", InputCodeManager::inputCodeToString(KEY_E));
-      ini->SetValue("QuickChatMessagesGroup2_Message7", "Button", InputCodeManager::inputCodeToString(BUTTON_6));
-      ini->SetValue("QuickChatMessagesGroup2_Message7", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup2_Message7", "Caption", "Enemy Attacking Base");
-      ini->SetValue("QuickChatMessagesGroup2_Message7", "Message", "The enemy is attacking our base.");
-
-      ini->SetValue("QuickChatMessagesGroup2_Message8", "Key", InputCodeManager::inputCodeToString(KEY_A));
-      ini->SetValue("QuickChatMessagesGroup2_Message8", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup2_Message8", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup2_Message8", "Caption", "Attacked");
-      ini->SetValue("QuickChatMessagesGroup2_Message8", "Message", "We are being attacked.");
-
-   ini->SetValue("QuickChatMessagesGroup3", "Key", InputCodeManager::inputCodeToString(KEY_F));
-   ini->SetValue("QuickChatMessagesGroup3", "Button", InputCodeManager::inputCodeToString(BUTTON_4));
-   ini->SetValue("QuickChatMessagesGroup3", "MessageType", "Team");
-   ini->SetValue("QuickChatMessagesGroup3", "Caption", "Flag");
-
-      ini->SetValue("QuickChatMessagesGroup3_Message1", "Key", InputCodeManager::inputCodeToString(KEY_F));
-      ini->SetValue("QuickChatMessagesGroup3_Message1", "Button", InputCodeManager::inputCodeToString(BUTTON_1));
-      ini->SetValue("QuickChatMessagesGroup3_Message1", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup3_Message1", "Caption", "Get enemy flag");
-      ini->SetValue("QuickChatMessagesGroup3_Message1", "Message", "Get the enemy flag.");
-
-      ini->SetValue("QuickChatMessagesGroup3_Message2", "Key", InputCodeManager::inputCodeToString(KEY_R));
-      ini->SetValue("QuickChatMessagesGroup3_Message2", "Button", InputCodeManager::inputCodeToString(BUTTON_2));
-      ini->SetValue("QuickChatMessagesGroup3_Message2", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup3_Message2", "Caption", "Return our flag");
-      ini->SetValue("QuickChatMessagesGroup3_Message2", "Message", "Return our flag to base.");
-
-      ini->SetValue("QuickChatMessagesGroup3_Message3", "Key", InputCodeManager::inputCodeToString(KEY_S));
-      ini->SetValue("QuickChatMessagesGroup3_Message3", "Button", InputCodeManager::inputCodeToString(BUTTON_3));
-      ini->SetValue("QuickChatMessagesGroup3_Message3", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup3_Message3", "Caption", "Flag secure");
-      ini->SetValue("QuickChatMessagesGroup3_Message3", "Message", "Our flag is secure.");
-
-      ini->SetValue("QuickChatMessagesGroup3_Message4", "Key", InputCodeManager::inputCodeToString(KEY_H));
-      ini->SetValue("QuickChatMessagesGroup3_Message4", "Button", InputCodeManager::inputCodeToString(BUTTON_4));
-      ini->SetValue("QuickChatMessagesGroup3_Message4", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup3_Message4", "Caption", "Have enemy flag");
-      ini->SetValue("QuickChatMessagesGroup3_Message4", "Message", "I have the enemy flag.");
-
-      ini->SetValue("QuickChatMessagesGroup3_Message5", "Key", InputCodeManager::inputCodeToString(KEY_E));
-      ini->SetValue("QuickChatMessagesGroup3_Message5", "Button", InputCodeManager::inputCodeToString(BUTTON_5));
-      ini->SetValue("QuickChatMessagesGroup3_Message5", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup3_Message5", "Caption", "Enemy has flag");
-      ini->SetValue("QuickChatMessagesGroup3_Message5", "Message", "The enemy has our flag!");
-
-      ini->SetValue("QuickChatMessagesGroup3_Message6", "Key", InputCodeManager::inputCodeToString(KEY_G));
-      ini->SetValue("QuickChatMessagesGroup3_Message6", "Button", InputCodeManager::inputCodeToString(BUTTON_6));
-      ini->SetValue("QuickChatMessagesGroup3_Message6", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup3_Message6", "Caption", "Flag gone");
-      ini->SetValue("QuickChatMessagesGroup3_Message6", "Message", "Our flag is not in the base!");
-
-   ini->SetValue("QuickChatMessagesGroup4", "Key", InputCodeManager::inputCodeToString(KEY_S));
-   ini->SetValue("QuickChatMessagesGroup4", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-   ini->SetValue("QuickChatMessagesGroup4", "MessageType", "Team");
-   ini->SetValue("QuickChatMessagesGroup4", "Caption", "Incoming Enemies - Direction");
-
-      ini->SetValue("QuickChatMessagesGroup4_Message1", "Key", InputCodeManager::inputCodeToString(KEY_S));
-      ini->SetValue("QuickChatMessagesGroup4_Message1", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup4_Message1", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup4_Message1", "Caption", "Incoming South");
-      ini->SetValue("QuickChatMessagesGroup4_Message1", "Message", "*** INCOMING SOUTH ***");
-
-      ini->SetValue("QuickChatMessagesGroup4_Message2", "Key", InputCodeManager::inputCodeToString(KEY_E));
-      ini->SetValue("QuickChatMessagesGroup4_Message2", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup4_Message2", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup4_Message2", "Caption", "Incoming East");
-      ini->SetValue("QuickChatMessagesGroup4_Message2", "Message", "*** INCOMING EAST  ***");
-
-      ini->SetValue("QuickChatMessagesGroup4_Message3", "Key", InputCodeManager::inputCodeToString(KEY_W));
-      ini->SetValue("QuickChatMessagesGroup4_Message3", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup4_Message3", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup4_Message3", "Caption", "Incoming West");
-      ini->SetValue("QuickChatMessagesGroup4_Message3", "Message", "*** INCOMING WEST  ***");
-
-      ini->SetValue("QuickChatMessagesGroup4_Message4", "Key", InputCodeManager::inputCodeToString(KEY_N));
-      ini->SetValue("QuickChatMessagesGroup4_Message4", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup4_Message4", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup4_Message4", "Caption", "Incoming North");
-      ini->SetValue("QuickChatMessagesGroup4_Message4", "Message", "*** INCOMING NORTH ***");
-
-      ini->SetValue("QuickChatMessagesGroup4_Message5", "Key", InputCodeManager::inputCodeToString(KEY_V));
-      ini->SetValue("QuickChatMessagesGroup4_Message5", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup4_Message5", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup4_Message5", "Caption", "Incoming Enemies");
-      ini->SetValue("QuickChatMessagesGroup4_Message5", "Message", "Incoming enemies!");
-
-   ini->SetValue("QuickChatMessagesGroup5", "Key", InputCodeManager::inputCodeToString(KEY_V));
-   ini->SetValue("QuickChatMessagesGroup5", "Button", InputCodeManager::inputCodeToString(BUTTON_3));
-   ini->SetValue("QuickChatMessagesGroup5", "MessageType", "Team");
-   ini->SetValue("QuickChatMessagesGroup5", "Caption", "Quick");
-
-      ini->SetValue("QuickChatMessagesGroup5_Message1", "Key", InputCodeManager::inputCodeToString(KEY_J));
-      ini->SetValue("QuickChatMessagesGroup5_Message1", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup5_Message1", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup5_Message1", "Caption", "Capture the objective");
-      ini->SetValue("QuickChatMessagesGroup5_Message1", "Message", "Capture the objective.");
-
-      ini->SetValue("QuickChatMessagesGroup5_Message2", "Key", InputCodeManager::inputCodeToString(KEY_O));
-      ini->SetValue("QuickChatMessagesGroup5_Message2", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup5_Message2", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup5_Message2", "Caption", "Go on the offensive");
-      ini->SetValue("QuickChatMessagesGroup5_Message2", "Message", "Go on the offensive.");
-
-      ini->SetValue("QuickChatMessagesGroup5_Message3", "Key", InputCodeManager::inputCodeToString(KEY_A));
-      ini->SetValue("QuickChatMessagesGroup5_Message3", "Button", InputCodeManager::inputCodeToString(BUTTON_1));
-      ini->SetValue("QuickChatMessagesGroup5_Message3", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup5_Message3", "Caption", "Attack!");
-      ini->SetValue("QuickChatMessagesGroup5_Message3", "Message", "Attack!");
-
-      ini->SetValue("QuickChatMessagesGroup5_Message4", "Key", InputCodeManager::inputCodeToString(KEY_W));
-      ini->SetValue("QuickChatMessagesGroup5_Message4", "Button", InputCodeManager::inputCodeToString(BUTTON_2));
-      ini->SetValue("QuickChatMessagesGroup5_Message4", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup5_Message4", "Caption", "Wait for signal");
-      ini->SetValue("QuickChatMessagesGroup5_Message4", "Message", "Wait for my signal to attack.");
-
-      ini->SetValue("QuickChatMessagesGroup5_Message5", "Key", InputCodeManager::inputCodeToString(KEY_V));
-      ini->SetValue("QuickChatMessagesGroup5_Message5", "Button", InputCodeManager::inputCodeToString(BUTTON_3));
-      ini->SetValue("QuickChatMessagesGroup5_Message5", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup5_Message5", "Caption", "Help!");
-      ini->SetValue("QuickChatMessagesGroup5_Message5", "Message", "Help!");
-
-      ini->SetValue("QuickChatMessagesGroup5_Message6", "Key", InputCodeManager::inputCodeToString(KEY_E));
-      ini->SetValue("QuickChatMessagesGroup5_Message6", "Button", InputCodeManager::inputCodeToString(BUTTON_4));
-      ini->SetValue("QuickChatMessagesGroup5_Message6", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup5_Message6", "Caption", "Regroup");
-      ini->SetValue("QuickChatMessagesGroup5_Message6", "Message", "Regroup.");
-
-      ini->SetValue("QuickChatMessagesGroup5_Message7", "Key", InputCodeManager::inputCodeToString(KEY_G));
-      ini->SetValue("QuickChatMessagesGroup5_Message7", "Button", InputCodeManager::inputCodeToString(BUTTON_5));
-      ini->SetValue("QuickChatMessagesGroup5_Message7", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup5_Message7", "Caption", "Going offense");
-      ini->SetValue("QuickChatMessagesGroup5_Message7", "Message", "Going offense.");
-
-      ini->SetValue("QuickChatMessagesGroup5_Message8", "Key", InputCodeManager::inputCodeToString(KEY_Z));
-      ini->SetValue("QuickChatMessagesGroup5_Message8", "Button", InputCodeManager::inputCodeToString(BUTTON_6));
-      ini->SetValue("QuickChatMessagesGroup5_Message8", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup5_Message8", "Caption", "Move out");
-      ini->SetValue("QuickChatMessagesGroup5_Message8", "Message", "Move out.");
-
-   ini->SetValue("QuickChatMessagesGroup6", "Key", InputCodeManager::inputCodeToString(KEY_R));
-   ini->SetValue("QuickChatMessagesGroup6", "Button", InputCodeManager::inputCodeToString(BUTTON_2));
-   ini->SetValue("QuickChatMessagesGroup6", "MessageType", "Team");
-   ini->SetValue("QuickChatMessagesGroup6", "Caption", "Reponses");
-
-      ini->SetValue("QuickChatMessagesGroup6_Message1", "Key", InputCodeManager::inputCodeToString(KEY_A));
-      ini->SetValue("QuickChatMessagesGroup6_Message1", "Button", InputCodeManager::inputCodeToString(BUTTON_1));
-      ini->SetValue("QuickChatMessagesGroup6_Message1", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup6_Message1", "Caption", "Acknowledge");
-      ini->SetValue("QuickChatMessagesGroup6_Message1", "Message", "Acknowledged.");
-
-      ini->SetValue("QuickChatMessagesGroup6_Message2", "Key", InputCodeManager::inputCodeToString(KEY_N));
-      ini->SetValue("QuickChatMessagesGroup6_Message2", "Button", InputCodeManager::inputCodeToString(BUTTON_2));
-      ini->SetValue("QuickChatMessagesGroup6_Message2", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup6_Message2", "Caption", "No");
-      ini->SetValue("QuickChatMessagesGroup6_Message2", "Message", "No.");
-
-      ini->SetValue("QuickChatMessagesGroup6_Message3", "Key", InputCodeManager::inputCodeToString(KEY_Y));
-      ini->SetValue("QuickChatMessagesGroup6_Message3", "Button", InputCodeManager::inputCodeToString(BUTTON_3));
-      ini->SetValue("QuickChatMessagesGroup6_Message3", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup6_Message3", "Caption", "Yes");
-      ini->SetValue("QuickChatMessagesGroup6_Message3", "Message", "Yes.");
-
-      ini->SetValue("QuickChatMessagesGroup6_Message4", "Key", InputCodeManager::inputCodeToString(KEY_S));
-      ini->SetValue("QuickChatMessagesGroup6_Message4", "Button", InputCodeManager::inputCodeToString(BUTTON_4));
-      ini->SetValue("QuickChatMessagesGroup6_Message4", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup6_Message4", "Caption", "Sorry");
-      ini->SetValue("QuickChatMessagesGroup6_Message4", "Message", "Sorry.");
-
-      ini->SetValue("QuickChatMessagesGroup6_Message5", "Key", InputCodeManager::inputCodeToString(KEY_T));
-      ini->SetValue("QuickChatMessagesGroup6_Message5", "Button", InputCodeManager::inputCodeToString(BUTTON_5));
-      ini->SetValue("QuickChatMessagesGroup6_Message5", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup6_Message5", "Caption", "Thanks");
-      ini->SetValue("QuickChatMessagesGroup6_Message5", "Message", "Thanks.");
-
-      ini->SetValue("QuickChatMessagesGroup6_Message6", "Key", InputCodeManager::inputCodeToString(KEY_D));
-      ini->SetValue("QuickChatMessagesGroup6_Message6", "Button", InputCodeManager::inputCodeToString(BUTTON_6));
-      ini->SetValue("QuickChatMessagesGroup6_Message6", "MessageType", "Team");
-      ini->SetValue("QuickChatMessagesGroup6_Message6", "Caption", "Don't know");
-      ini->SetValue("QuickChatMessagesGroup6_Message6", "Message", "I don't know.");
-
-   ini->SetValue("QuickChatMessagesGroup7", "Key", InputCodeManager::inputCodeToString(KEY_T));
-   ini->SetValue("QuickChatMessagesGroup7", "Button", InputCodeManager::inputCodeToString(BUTTON_1));
-   ini->SetValue("QuickChatMessagesGroup7", "MessageType", "Global");
-   ini->SetValue("QuickChatMessagesGroup7", "Caption", "Taunts");
-
-      ini->SetValue("QuickChatMessagesGroup7_Message1", "Key", InputCodeManager::inputCodeToString(KEY_R));
-      ini->SetValue("QuickChatMessagesGroup7_Message1", "Button", InputCodeManager::inputCodeToString(KEY_UNKNOWN));
-      ini->SetValue("QuickChatMessagesGroup7_Message1", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup7_Message1", "Caption", "Rawr");
-      ini->SetValue("QuickChatMessagesGroup7_Message1", "Message", "RAWR!");
-
-      ini->SetValue("QuickChatMessagesGroup7_Message2", "Key", InputCodeManager::inputCodeToString(KEY_C));
-      ini->SetValue("QuickChatMessagesGroup7_Message2", "Button", InputCodeManager::inputCodeToString(BUTTON_1));
-      ini->SetValue("QuickChatMessagesGroup7_Message2", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup7_Message2", "Caption", "Come get some!");
-      ini->SetValue("QuickChatMessagesGroup7_Message2", "Message", "Come get some!");
-
-      ini->SetValue("QuickChatMessagesGroup7_Message3", "Key", InputCodeManager::inputCodeToString(KEY_D));
-      ini->SetValue("QuickChatMessagesGroup7_Message3", "Button", InputCodeManager::inputCodeToString(BUTTON_2));
-      ini->SetValue("QuickChatMessagesGroup7_Message3", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup7_Message3", "Caption", "Dance!");
-      ini->SetValue("QuickChatMessagesGroup7_Message3", "Message", "Dance!");
-
-      ini->SetValue("QuickChatMessagesGroup7_Message4", "Key", InputCodeManager::inputCodeToString(KEY_X));
-      ini->SetValue("QuickChatMessagesGroup7_Message4", "Button", InputCodeManager::inputCodeToString(BUTTON_3));
-      ini->SetValue("QuickChatMessagesGroup7_Message4", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup7_Message4", "Caption", "Missed me!");
-      ini->SetValue("QuickChatMessagesGroup7_Message4", "Message", "Missed me!");
-
-      ini->SetValue("QuickChatMessagesGroup7_Message5", "Key", InputCodeManager::inputCodeToString(KEY_W));
-      ini->SetValue("QuickChatMessagesGroup7_Message5", "Button", InputCodeManager::inputCodeToString(BUTTON_4));
-      ini->SetValue("QuickChatMessagesGroup7_Message5", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup7_Message5", "Caption", "I've had worse...");
-      ini->SetValue("QuickChatMessagesGroup7_Message5", "Message", "I've had worse...");
-
-      ini->SetValue("QuickChatMessagesGroup7_Message6", "Key", InputCodeManager::inputCodeToString(KEY_Q));
-      ini->SetValue("QuickChatMessagesGroup7_Message6", "Button", InputCodeManager::inputCodeToString(BUTTON_5));
-      ini->SetValue("QuickChatMessagesGroup7_Message6", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup7_Message6", "Caption", "How'd THAT feel?");
-      ini->SetValue("QuickChatMessagesGroup7_Message6", "Message", "How'd THAT feel?");
-
-      ini->SetValue("QuickChatMessagesGroup7_Message7", "Key", InputCodeManager::inputCodeToString(KEY_E));
-      ini->SetValue("QuickChatMessagesGroup7_Message7", "Button", InputCodeManager::inputCodeToString(BUTTON_6));
-      ini->SetValue("QuickChatMessagesGroup7_Message7", "MessageType", "Global");
-      ini->SetValue("QuickChatMessagesGroup7_Message7", "Caption", "Yoohoo!");
-      ini->SetValue("QuickChatMessagesGroup7_Message7", "Message", "Yoohoo!");
+   insertQuickChatMessageSection(ini, 7, GlobalMessageType, KEY_T, BUTTON_1, "Taunts");
+      insertQuickChatMessage(ini, 7, 1, GlobalMessageType, KEY_R, KEY_UNKNOWN, "Rawr",                  "RAWR!");
+      insertQuickChatMessage(ini, 7, 2, GlobalMessageType, KEY_C, BUTTON_1,    "Come get some!",        "Come get some!");
+      insertQuickChatMessage(ini, 7, 3, GlobalMessageType, KEY_D, BUTTON_2,    "Dance!",                "Dance!"); 
+      insertQuickChatMessage(ini, 7, 4, GlobalMessageType, KEY_X, BUTTON_3,    "Missed me!",            "Missed me!");
+      insertQuickChatMessage(ini, 7, 5, GlobalMessageType, KEY_W, BUTTON_4,    "I've had worse...",     "I've had worse...");
+      insertQuickChatMessage(ini, 7, 6, GlobalMessageType, KEY_Q, BUTTON_5,    "How'd THAT feel?",      "How'd THAT feel?");
+      insertQuickChatMessage(ini, 7, 7, GlobalMessageType, KEY_E, BUTTON_6,    "Yoohoo!",               "Yoohoo!");
 }
-
-// TODO:  reimplement joystick mapping methods for future custom joystick
-// mappings with axes as well as buttons
-//void readJoystick()
-//{
-//   gJoystickMapping.enable = ini->GetValueYN("Joystick", "Enable", false);
-//   for(U32 i=0; i<MaxJoystickAxes*2; i++)
-//   {
-//      Vector<string> buttonList;
-//      parseString(ini->GetValue("Joystick", "Axes" + itos(i), i<8 ? itos(i+16) : ""), buttonList, ',');
-//      gJoystickMapping.axes[i] = 0;
-//      for(S32 j=0; j<buttonList.size(); j++)
-//      {
-//         gJoystickMapping.axes[i] |= 1 << atoi(buttonList[j].c_str());
-//      }
-//   }
-//   for(U32 i=0; i<32; i++)
-//   {
-//      Vector<string> buttonList;
-//      parseString(ini->GetValue("Joystick", "Button" + itos(i), i<10 ? itos(i) : ""), buttonList, ',');
-//      gJoystickMapping.button[i] = 0;
-//      for(S32 j=0; j<buttonList.size(); j++)
-//      {
-//         gJoystickMapping.button[i] |= 1 << atoi(buttonList[j].c_str());
-//      }
-//   }
-//   for(U32 i=0; i<4; i++)
-//   {
-//      Vector<string> buttonList;
-//      parseString(ini->GetValue("Joystick", "Pov" + itos(i), itos(i+10)), buttonList, ',');
-//      gJoystickMapping.pov[i] = 0;
-//      for(S32 j=0; j<buttonList.size(); j++)
-//      {
-//         gJoystickMapping.pov[i] |= 1 << atoi(buttonList[j].c_str());
-//      }
-//   }
-//}
-//
-//void writeJoystick()
-//{
-//   ini->setValueYN("Joystick", "Enable", gJoystickMapping.enable);
-//   ///for(listToString(alwaysPingList, ',')
-//   for(U32 i=0; i<MaxJoystickAxes*2; i++)
-//   {
-//      Vector<string> buttonList;
-//      for(U32 j=0; j<32; j++)
-//      {
-//         if(gJoystickMapping.axes[i] & (1 << j))
-//            buttonList.push_back(itos(j));
-//      }
-//      ini->SetValue("Joystick", "Axes" + itos(i), listToString(buttonList, ','));
-//   }
-//   for(U32 i=0; i<32; i++)
-//   {
-//      Vector<string> buttonList;
-//      for(U32 j=0; j<32; j++)
-//      {
-//         if(gJoystickMapping.button[i] & (1 << j))
-//            buttonList.push_back(itos(j));
-//      }
-//      ini->SetValue("Joystick", "Button" + itos(i), listToString(buttonList, ','));
-//   }
-//   for(U32 i=0; i<4; i++)
-//   {
-//      Vector<string> buttonList;
-//      for(U32 j=0; j<32; j++)
-//      {
-//         if(gJoystickMapping.pov[i] & (1 << j))
-//            buttonList.push_back(itos(j));
-//      }
-//      ini->SetValue("Joystick", "Pov" + itos(i), listToString(buttonList, ','));
-//   }
-//}
 
 
 static void loadServerBanList(CIniFile *ini, BanList *banList)
@@ -1447,6 +851,7 @@ static void loadServerBanList(CIniFile *ini, BanList *banList)
    ini->GetAllValues("ServerBanList", banItemList);
    banList->loadBanList(banItemList);
 }
+
 
 // Can't be static -- called externally!
 void writeServerBanList(CIniFile *ini, BanList *banList)
@@ -1487,7 +892,6 @@ void writeServerBanList(CIniFile *ini, BanList *banList)
 }
 
 
-// Option default values are stored here, in the 3rd prarm of the GetValue call
 // This is only called once, during initial initialization
 // Is also called from gameType::processServerCommand (why?)
 void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
@@ -1497,18 +901,19 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
 
    ini->ReadFile();                             // Read the INI file
 
-   loadSoundSettings(ini, settings, iniSettings);
-   loadEffectsSettings(ini, iniSettings);
+   // New school
+   //
+   // Load settings from the INI for each section
+   // This will eventually replace all of the load...() methods below
+   for(U32 i = 0; i < ARRAYSIZE(sections); i++)
+      loadSettings(ini, iniSettings, sections[i]);
+
+
+   // This section can be modernized, the remainder maybe not
    loadGeneralSettings(ini, iniSettings);
-   loadEditorSettings(ini, iniSettings);
+
    loadLoadoutPresets(ini, settings);
    loadPluginBindings(ini, iniSettings);
-
-   loadHostConfiguration(ini, iniSettings);
-   loadUpdaterSettings(ini, iniSettings);
-   loadDiagnostics(ini, iniSettings);
-
-   loadTestSettings(ini, iniSettings);
 
    setDefaultKeyBindings(ini, inputCodeManager);
    setDefaultEditorKeyBindings(ini, inputCodeManager);
@@ -1519,12 +924,12 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    loadLevelSkipList(ini, settings);            // Read level skipList, if there are any
 
    loadQuickChatMessages(ini);
-
    loadServerBanList(ini, settings->getBanList());
+
 
    saveSettingsToINI(ini, settings);            // Save to fill in any missing settings
 
-   settings->onFinishedLoading();
+   settings->onFinishedLoading();               // Merge INI settings with cmd line settings
 }
 
 
@@ -1547,310 +952,62 @@ void IniSettings::loadUserSettingsFromINI(CIniFile *ini, GameSettings *settings)
 }
 
 
-static void writeDiagnostics(CIniFile *ini, IniSettings *iniSettings)
-{
-   const char *section = "Diagnostics";
-   ini->addSection(section);
-
-   if (ini->numSectionComments(section) == 0)
-   {
-      ini->sectionComment(section, "----------------");
-      ini->sectionComment(section, " Diagnostic entries can be used to enable or disable particular actions for debugging purposes.");
-      ini->sectionComment(section, " You probably can't use any of these settings to enhance your gameplay experience!");
-      ini->sectionComment(section, " DumpKeys - Enable this to dump raw input to the screen (Yes/No)");
-      ini->sectionComment(section, " LogConnectionProtocol - Log ConnectionProtocol events (Yes/No)");
-      ini->sectionComment(section, " LogNetConnection - Log NetConnectionEvents (Yes/No)");
-      ini->sectionComment(section, " LogEventConnection - Log EventConnection events (Yes/No)");
-      ini->sectionComment(section, " LogGhostConnection - Log GhostConnection events (Yes/No)");
-      ini->sectionComment(section, " LogNetInterface - Log NetInterface events (Yes/No)");
-      ini->sectionComment(section, " LogPlatform - Log Platform events (Yes/No)");
-      ini->sectionComment(section, " LogNetBase - Log NetBase events (Yes/No)");
-      ini->sectionComment(section, " LogUDP - Log UDP events (Yes/No)");
-
-      ini->sectionComment(section, " LogFatalError - Log fatal errors; should be left on (Yes/No)");
-      ini->sectionComment(section, " LogError - Log serious errors; should be left on (Yes/No)");
-      ini->sectionComment(section, " LogWarning - Log less serious errors (Yes/No)");
-      ini->sectionComment(section, " LogConfigurationError - Log problems with configuration (Yes/No)");
-      ini->sectionComment(section, " LogConnection - High level logging connections with remote machines (Yes/No)");
-      ini->sectionComment(section, " LogLevelLoaded - Write a log entry when a level is loaded (Yes/No)");
-      ini->sectionComment(section, " LogLevelError - Log errors and warnings about levels loaded (Yes/No)");
-      ini->sectionComment(section, " LogLuaObjectLifecycle - Creation and destruciton of lua objects (Yes/No)");
-      ini->sectionComment(section, " LuaLevelGenerator - Messages from the LuaLevelGenerator (Yes/No)");
-      ini->sectionComment(section, " LuaBotMessage - Message from a bot (Yes/No)");
-      ini->sectionComment(section, " ServerFilter - For logging messages specific to hosting games (Yes/No)");
-      ini->sectionComment(section, "                (Note: these messages will go to bitfighter_server.log regardless of this setting) ");
-      ini->sectionComment(section, "----------------");
-   }
-
-   ini->setValueYN(section, "DumpKeys", iniSettings->diagnosticKeyDumpMode);
-   ini->setValueYN(section, "LogConnectionProtocol", iniSettings->logConnectionProtocol);
-   ini->setValueYN(section, "LogNetConnection",      iniSettings->logNetConnection);
-   ini->setValueYN(section, "LogEventConnection",    iniSettings->logEventConnection);
-   ini->setValueYN(section, "LogGhostConnection",    iniSettings->logGhostConnection);
-   ini->setValueYN(section, "LogNetInterface",       iniSettings->logNetInterface);
-   ini->setValueYN(section, "LogPlatform",           iniSettings->logPlatform);
-   ini->setValueYN(section, "LogNetBase",            iniSettings->logNetBase);
-   ini->setValueYN(section, "LogUDP",                iniSettings->logUDP);
-
-   ini->setValueYN(section, "LogFatalError",         iniSettings->logFatalError);
-   ini->setValueYN(section, "LogError",              iniSettings->logError);
-   ini->setValueYN(section, "LogWarning",            iniSettings->logWarning);
-   ini->setValueYN(section, "LogConfigurationError", iniSettings->logConfigurationError);
-   ini->setValueYN(section, "LogConnection",         iniSettings->logConnection);
-   ini->setValueYN(section, "LogLevelLoaded",        iniSettings->logLevelLoaded);
-   ini->setValueYN(section, "LogLevelError",         iniSettings->logLevelError);
-   ini->setValueYN(section, "LogLuaObjectLifecycle", iniSettings->logLuaObjectLifecycle);
-   ini->setValueYN(section, "LuaLevelGenerator",     iniSettings->luaLevelGenerator);
-   ini->setValueYN(section, "LuaBotMessage",         iniSettings->luaBotMessage);
-   ini->setValueYN(section, "ServerFilter",          iniSettings->serverFilter);
-}
-
-
-static void writeEffects(CIniFile *ini, IniSettings *iniSettings)
-{
-   const char *section = "Effects";
-   ini->addSection(section);
-
-   if (ini->numSectionComments(section) == 0)
-   {
-      ini->sectionComment(section, "----------------");
-      ini->sectionComment(section, " Various visual effects");
-      ini->sectionComment(section, "----------------");
-   }
-}
-
-static void writeSounds(CIniFile *ini, IniSettings *iniSettings)
-{
-   ini->addSection("Sounds");
-
-   if (ini->numSectionComments("Sounds") == 0)
-   {
-      ini->sectionComment("Sounds", "----------------");
-      ini->sectionComment("Sounds", " Sound settings");
-      ini->sectionComment("Sounds", " EffectsVolume - Volume of sound effects from 0 (mute) to 10 (full bore)");
-      ini->sectionComment("Sounds", " MusicVolume - Volume of sound effects from 0 (mute) to 10 (full bore)");
-      ini->sectionComment("Sounds", " VoiceChatVolume - Volume of incoming voice chat messages from 0 (mute) to 10 (full bore)");
-      ini->sectionComment("Sounds", " SFXSet - Select which set of sounds you want: Classic or Modern");
-      ini->sectionComment("Sounds", "----------------");
-   }
-
-   ini->SetValueI("Sounds", "EffectsVolume", (S32) (iniSettings->sfxVolLevel * 10));
-   ini->SetValueI("Sounds", "MusicVolume",   (S32) (iniSettings->getRawMusicVolLevel() * 10));
-   ini->SetValueI("Sounds", "VoiceChatVolume",   (S32) (iniSettings->voiceChatVolLevel * 10));
-
-   ini->SetValue("Sounds", "SFXSet", iniSettings->sfxSet == sfxClassicSet ? "Classic" : "Modern");
-}
-
-
-void saveWindowPosition(CIniFile *ini, S32 x, S32 y)
-{
-   ini->SetValueI("Settings", "WindowXPos", x);
-   ini->SetValueI("Settings", "WindowYPos", y);
-}
-
-
 static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 {
-   const char *section = "Settings";
-   ini->addSection(section);
+   TNLAssert(ARRAYSIZE(sections) == ARRAYSIZE(headerComments), "Mismatch!");
+   static const string HorizontalLine = "----------------";
 
-   Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
-
-   if(ini->numSectionComments(section) == 0)
+   for(U32 i = 0; i < ARRAYSIZE(sections); i++)
    {
-      ini->sectionComment(section, "----------------");
-      ini->sectionComment(section, " Settings entries contain a number of different options");
+      ini->addSection(sections[i]);
 
-      // Write all our section comments for items defined in the new manner
+      const string section = sections[i];
+
+      SettingsList settings = iniSettings->mSettings.getSettingsInSection(section);
+   
+      if(true || ini->numSectionComments(section) == 0)  // <<<==== remove true when done testing!
+      {
+         const Vector<string> comments = wrapString(headerComments[i], NO_AUTO_WRAP);
+
+         ini->deleteSectionComments(section);      // Delete when done testing (harmless but useless)
+
+         ini->sectionComment(section, HorizontalLine);      // ----------------
+         for(S32 i = 0; i < comments.size(); i++)
+            ini->sectionComment(section, " " + comments[i]);
+         ini->sectionComment(section, HorizontalLine);      // ----------------
+
+         // Write all our section comments for items defined in the new manner
+         for(S32 i = 0; i < settings.size(); i++)
+         {
+            // Pass NO_AUTO_WRAP as width to disable automatic wrapping... we'll rely on \ns to do our wrapping here
+            const string prefix = settings[i]->getKey() + " - ";
+            const Vector<string> comments = wrapString(prefix + settings[i]->getComment(), NO_AUTO_WRAP, string(prefix.size(), ' '));
+            for(S32 j = 0; j < comments.size(); j++)
+               ini->sectionComment(section, " " + comments[j]);
+         }
+
+         ini->sectionComment(section, HorizontalLine);      // ----------------
+      }
+
+      // Write the settings themselves
       for(S32 i = 0; i < settings.size(); i++)
-         ini->sectionComment(section, " " + settings[i]->getKey() + " - " + settings[i]->getComment());
-
-
-      ini->sectionComment(section, " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
-      ini->sectionComment(section, " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
-      ini->sectionComment(section, " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
-      ini->sectionComment(section, " JoystickLinuxUseOldDeviceSystem - Force SDL to add the older /dev/input/js0 device to the enumerated joystick list.  No effect on Windows/Mac systems");
-      ini->sectionComment(section, " AlwaysStartInKeyboardMode - Change to 'Yes' to always start the game in keyboard mode (don't auto-select the joystick)");
-      ini->sectionComment(section, " MasterServerAddressList - Comma separated list of Address of master server, in form: IP:67.18.11.66:25955,IP:myMaster.org:25955 (tries all listed, only connects to one at a time)");
-      ini->sectionComment(section, " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
-      ini->sectionComment(section, " Nickname - Specify the nickname to use for autologin, or clear to disable autologin");
-      ini->sectionComment(section, " Password - Password to use for autologin, if your nickname has been reserved in the forums");
-      ini->sectionComment(section, " LastName - Name user entered when game last run (may be overwritten if you enter a different name on startup screen)");
-      ini->sectionComment(section, " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
-      ini->sectionComment(section, " LastEditorName - Last edited file name");
-      ini->sectionComment(section, " MaxFPS - Maximum FPS the client will run at.  Higher values use more CPU, lower may increase lag (default = 100)");
-      ini->sectionComment(section, " LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game");
-      ini->sectionComment(section, " Version - Version of game last time it was run.  Don't monkey with this value; nothing good can come of it!");
-      ini->sectionComment(section, " QueryServerSortColumn - Index of column to sort by when in the Join Servers menu. (0 is first col.)  This value managed by game.");
-      ini->sectionComment(section, " QueryServerSortAscending - 1 for ascending sort, 0 for descending.  This value managed by game.");
-
-      ini->sectionComment(section, "----------------");
+         ini->SetValue(section, settings[i]->getKey(), settings[i]->getIniString());
    }
 
-   // Write all settings defined in the new modern manner
-   for(S32 i = 0; i < settings.size(); i++)
-      ini->SetValue(section, settings[i]->getKey(), settings[i]->getValueString());
+   const char *section = "Settings";
+
+   ini->sectionComment(section, " LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game");
+
+   ini->sectionComment(section, "----------------");
 
 
    // And the ones still to be ported to the new system
-
-
-   saveWindowPosition(ini, iniSettings->winXPos, iniSettings->winYPos);
-
-   ini->SetValueF (section, "WindowScalingFactor", iniSettings->winSizeFact);
-
-#ifndef ZAP_DEDICATED
-   ini->setValueYN(section, "JoystickLinuxUseOldDeviceSystem", iniSettings->joystickLinuxUseOldDeviceSystem);
-   ini->setValueYN(section, "AlwaysStartInKeyboardMode", iniSettings->alwaysStartInKeyboardMode);
-#endif
-   ini->SetValue  (section, "MasterServerAddressList", iniSettings->masterAddress);
-   ini->SetValue  (section, "DefaultName", iniSettings->defaultName);
-   ini->SetValue  (section, "Nickname", iniSettings->name);
-   ini->SetValue  (section, "Password", iniSettings->password);
-   ini->SetValue  (section, "LastPassword", iniSettings->lastPassword);
-   ini->SetValue  (section, "LastEditorName", iniSettings->lastEditorName);
-
-   ini->SetValueI (section, "MaxFPS", iniSettings->maxFPS);  
-
-   ini->SetValueI (section, "ConnectionSpeed", iniSettings->connectionSpeed);  
-   ini->SetValueI (section, "Version", BUILD_VERSION);
-
-   ini->SetValueI (section, "QueryServerSortColumn",    iniSettings->queryServerSortColumn);
-   ini->SetValueB (section, "QueryServerSortAscending", iniSettings->queryServerSortAscending);
 
 #ifndef ZAP_DEDICATED
    // Don't save new value if out of range, so it will go back to the old value. 
    // Just in case a user screw up with /linewidth command using value too big or too small.
    if(gDefaultLineWidth >= 0.5 && gDefaultLineWidth <= 5)
       ini->SetValueF (section, "LineWidth", gDefaultLineWidth);
-#endif
-}
-
-
-static void writeEditorSettings(CIniFile *ini, IniSettings *iniSettings)
-{
-   const char *section = "EditorSettings";
-   ini->addSection(section);
-
-   Vector<AbstractSetting *> settings = iniSettings->mSettings.getSettingsInSection(section);
-
-   if(ini->numSectionComments(section) == 0)
-   {
-      ini->sectionComment(section, "----------------");
-      ini->sectionComment(section, " EditorSettings entries relate to items in the editor");
-
-      // Write all our section comments for items defined in the new manner
-      for(S32 i = 0; i < settings.size(); i++)
-         ini->sectionComment(section, " " + settings[i]->getKey() + " - " + settings[i]->getComment());
-
-      ini->sectionComment(section, "----------------");
-   }
-
-   // Write all settings defined in the new modern manner
-   for(S32 i = 0; i < settings.size(); i++)
-      ini->SetValue(section, settings[i]->getKey(), settings[i]->getValueString());
-}
-
-
-static void writeUpdater(CIniFile *ini, IniSettings *iniSettings)
-{
-   ini->addSection("Updater");
-
-   if(ini->numSectionComments("Updater") == 0)
-   {
-      ini->sectionComment("Updater", "----------------");
-      ini->sectionComment("Updater", " The Updater section contains entries that control how game updates are handled");
-      ini->sectionComment("Updater", " UseUpdater - Enable or disable process that installs updates (WINDOWS ONLY)");
-      ini->sectionComment("Updater", "----------------");
-
-   }
-   ini->setValueYN("Updater", "UseUpdater", iniSettings->useUpdater, true);
-}
-
-
-static void writeHost(CIniFile *ini, IniSettings *iniSettings)
-{
-   const char *section = "Host";
-   ini->addSection(section);
-
-   if(ini->numSectionComments(section) == 0)
-   {
-      addComment("----------------");
-      addComment(" The Host section contains entries that configure the game when you are hosting");
-      addComment(" ServerName - The name others will see when they are browsing for servers (max 20 chars)");
-      addComment(" ServerAddress - Socket address and port to bind to, e.g. IP:Any:9876 or IP:54.35.110.99:8000 or IP:bitfighter.org:8888 (leave blank to let the system decide; this is almost always what you want)");
-      addComment(" ServerDescription - A one line description of your server.  Please include nickname and physical location!");
-      addComment(" ServerPassword - You can require players to use a password to play on your server.  Leave blank to grant access to all.");
-      addComment(" OwnerPassword - Super admin password.  Gives admin rights + power over admins.  Do not give this out!");
-      addComment(" AdminPassword - Use this password to manage players & change levels on your server.");
-      addComment(" LevelChangePassword - Use this password to change levels on your server.  Leave blank to grant access to all.");
-      addComment(" LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
-      addComment(" MaxPlayers - The max number of players that can play on your server.");
-      addComment(" MaxBots - The max number of bots allowed on this server.");
-      addComment(" AddRobots - Add robot players to this server.");
-      addComment(" MinBalancedPlayers - The minimum number of players ensured in each map.  Bots will be added up to this number.");
-      addComment(" EnableServerVoiceChat - If false, prevents any voice chat in a server.");
-      addComment(" AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
-      addComment(" MaxFPS - Maximum FPS the dedicaetd server will run at.  Higher values use more CPU, lower may increase lag (default = 100).");
-      addComment(" RandomLevels - When current level ends, this can enable randomly switching to any available levels.");
-      addComment(" SkipUploads - When current level ends, enables skipping all uploaded levels.");
-      addComment(" AllowGetMap - When getmap is allowed, anyone can download the current level using the /getmap command.");
-      addComment(" AllowDataConnections - When data connections are allowed, anyone with the admin password can upload or download levels, bots, or");
-      addComment("                        levelGen scripts.  This feature is probably insecure, and should be DISABLED unless you require the functionality.");
-      addComment(" LogStats - Save game stats locally to built-in sqlite database (saves the same stats as are sent to the master)");
-      addComment(" DefaultRobotScript - If user adds a robot, this script is used if none is specified");
-      addComment(" GlobalLevelScript - Specify a levelgen that will get run on every level");
-      addComment(" MySqlStatsDatabaseCredentials - If MySql integration has been compiled in (which it probably hasn't been), you can specify the");
-      addComment("                                 database server, database name, login, and password as a comma delimeted list");
-      addComment(" VoteLength - number of seconds the voting will last, zero will disable voting.");
-      addComment(" VoteRetryLength - When vote fail, the vote caller is unable to vote until after this number of seconds.");
-      addComment(" Vote Strengths - Vote will pass when sum of all vote strengths is bigger then zero.");
-      addComment("----------------");
-   }
-
-   ini->SetValue  (section, "ServerName", iniSettings->hostname);
-   ini->SetValue  (section, "ServerAddress", iniSettings->hostaddr);
-   ini->SetValue  (section, "ServerDescription", iniSettings->hostdescr);
-   ini->SetValue  (section, "ServerPassword", iniSettings->serverPassword);
-   ini->SetValue  (section, "OwnerPassword", iniSettings->ownerPassword);
-   ini->SetValue  (section, "AdminPassword", iniSettings->adminPassword);
-   ini->SetValue  (section, "LevelChangePassword", iniSettings->levelChangePassword);
-   ini->SetValue  (section, "LevelDir", iniSettings->levelDir);
-   ini->SetValueI (section, "MaxPlayers", iniSettings->maxPlayers);
-   ini->SetValueI (section, "MaxBots", iniSettings->maxBots);
-   ini->setValueYN(section, "AddRobots", iniSettings->playWithBots);
-   ini->SetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
-   ini->setValueYN(section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);
-   ini->setValueYN(section, "AllowTeamChanging", iniSettings->allowTeamChanging);
-   ini->SetValueI (section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10));
-   ini->setValueYN(section, "AllowGetMap", iniSettings->allowGetMap);
-   ini->setValueYN(section, "AllowDataConnections", iniSettings->allowDataConnections);
-   ini->SetValueI (section, "MaxFPS", iniSettings->maxDedicatedFPS);
-   ini->setValueYN(section, "LogStats", iniSettings->logStats);
-
-   ini->setValueYN(section, "RandomLevels", S32(iniSettings->randomLevels) );
-   ini->setValueYN(section, "SkipUploads", S32(iniSettings->skipUploads) );
-
-   ini->setValueYN(section, "AllowMapUpload", S32(iniSettings->allowMapUpload) );
-   ini->setValueYN(section, "AllowAdminMapUpload", S32(iniSettings->allowAdminMapUpload) );
-   ini->setValueYN(section, "AllowLevelgenUpload", S32(iniSettings->allowLevelgenUpload) );
-
-
-   ini->setValueYN(section, "VoteEnable", S32(iniSettings->voteEnable) );
-   ini->SetValueI (section, "VoteLength", S32(iniSettings->voteLength) );
-   ini->SetValueI (section, "VoteLengthToChangeTeam", S32(iniSettings->voteLengthToChangeTeam) );
-   ini->SetValueI (section, "VoteRetryLength", S32(iniSettings->voteRetryLength) );
-   ini->SetValueI (section, "VoteYesStrength", iniSettings->voteYesStrength );
-   ini->SetValueI (section, "VoteNoStrength", iniSettings->voteNoStrength );
-   ini->SetValueI (section, "VoteNothingStrength", iniSettings->voteNothingStrength );
-
-   ini->SetValue  (section, "DefaultRobotScript", iniSettings->defaultRobotScript);
-   ini->SetValue  (section, "GlobalLevelScript", iniSettings->globalLevelScript);
-
-   ini->setValueYN(section, "GameRecording", iniSettings->enableGameRecording);
-#ifdef BF_WRITE_TO_MYSQL
-   if(iniSettings->mySqlStatsDatabaseServer == "" && iniSettings->mySqlStatsDatabaseName == "" && iniSettings->mySqlStatsDatabaseUser == "" && iniSettings->mySqlStatsDatabasePassword == "")
-      ini->SetValue  (section, "MySqlStatsDatabaseCredentials", "server, dbname, login, password");
 #endif
 }
 
@@ -1878,37 +1035,6 @@ static void writeLevels(CIniFile *ini)
 }
 
 
-static void writeTesting(CIniFile *ini, GameSettings *settings)
-{
-   IniSettings *iniSettings = settings->getIniSettings();
-
-   ini->addSection("Testing");
-   if (ini->numSectionComments("Testing") == 0)
-   {
-      ini->sectionComment("Testing", "----------------");
-      ini->sectionComment("Testing", " These settings are here to enable/disable certain items for testing.  They are by their nature");
-      ini->sectionComment("Testing", " short lived, and may well be removed in the next version of Bitfighter.");
-      ini->sectionComment("Testing", " BurstGraphics - Select which graphic to use for bursts (1-5)");
-      ini->sectionComment("Testing", " NeverConnectDirect - Never connect to pingable internet server directly; forces arranged connections via master");
-      ini->sectionComment("Testing", " WallOutlineColor - Color used locally for rendering wall outlines (r,g,b), (values between 0 and 1)");
-      ini->sectionComment("Testing", " WallFillColor - Color used locally for rendering wall fill (r,g,b), (values between 0 and 1)");
-      ini->sectionComment("Testing", " ClientPortNumber - Only helps when punching through firewall when using router's port forwarded for client port number");
-      ini->sectionComment("Testing", " DisableScreenSaver - Disable ScreenSaver from having no input from keyboard/mouse, useful when using joystick");
-      ini->sectionComment("Testing", "----------------");
-   }
-
-   ini->setValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
-
-   // Maybe we should not write these if they are the default values?
-   ini->SetValue  ("Testing", "WallFillColor",   settings->getWallFillColor()->toRGBString());
-   ini->SetValue  ("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString());
-
-   ini->setValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
-   ini->SetValueI ("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
-   ini->setValueYN("Testing", "DisableScreenSaver", iniSettings->disableScreenSaver);
-}
-
-
 static void writePasswordSection_helper(CIniFile *ini, string section)
 {
    ini->addSection(section);
@@ -1919,6 +1045,7 @@ static void writePasswordSection_helper(CIniFile *ini, string section)
       ini->sectionComment(section, "----------------");
    }
 }
+
 
 static void writePasswordSection(CIniFile *ini)
 {
@@ -1933,13 +1060,29 @@ static void writeINIHeader(CIniFile *ini)
 {
    if(!ini->NumHeaderComments())
    {
-      ini->headerComment("Bitfighter configuration file");
-      ini->headerComment("=============================");
-      ini->headerComment(" This file is intended to be user-editable, but some settings here may be overwritten by the game.");
-      ini->headerComment(" If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.");
-      ini->headerComment(" First, some basic terminology:");
-      ini->headerComment(" [section]");
-      ini->headerComment(" key=value");
+      //ini->headerComment("Bitfighter configuration file");
+      //ini->headerComment("=============================");
+      //ini->headerComment(" This file is intended to be user-editable, but some settings here may be overwritten by the game.");
+      //ini->headerComment(" If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.");
+      //ini->headerComment(" First, some basic terminology:");
+      //ini->headerComment(" [section]");
+      //ini->headerComment(" key=value");
+
+      string headerComments =
+         "Bitfighter configuration file\n"
+         "=============================\n"
+         "This file is intended to be user-editable, but some settings here may be overwritten by the game. "
+         "If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.\n"
+         "\n"
+         "First, some basic terminology:\n"
+         "\t[section]\n"
+         "\tkey=value\n";
+
+      Vector<string> lines = wrapString(headerComments, 100);
+
+      for(S32 i = 0; i < lines.size(); i++)
+         ini->headerComment(" " + lines[i]);
+
       ini->headerComment("");
    }
 }
@@ -1952,20 +1095,16 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
 
    IniSettings *iniSettings = settings->getIniSettings();
 
-   writeHost(ini, iniSettings);
+   // This is the new way to write out all settings and should eventually
+   // replace everything else below it
+   writeSettings(ini, iniSettings);
+
    writeForeignServerInfo(ini, iniSettings);
    writeLoadoutPresets(ini, settings);
    writePluginBindings(ini, iniSettings);
    writeConnectionsInfo(ini, iniSettings);
-   writeEffects(ini, iniSettings);
-   writeSounds(ini, iniSettings);
-   writeSettings(ini, iniSettings);
-   writeEditorSettings(ini, iniSettings);
-   writeDiagnostics(ini, iniSettings);
    writeLevels(ini);
    writeSkipList(ini, settings->getLevelSkipList());
-   writeUpdater(ini, iniSettings);
-   writeTesting(ini, settings);
    writePasswordSection(ini);
    writeKeyBindings(ini, settings->getInputCodeManager());
    
@@ -1977,7 +1116,8 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    //writeJoystick();
    writeServerBanList(ini, settings->getBanList());
 
-   ini->WriteFile();
+
+   ini->WriteFile();    // Commit the file to disk
 }
 
 
@@ -2079,8 +1219,29 @@ static string resolutionHelper(const string &cmdLineDir, const string &rootDataD
 }
 
 
-extern string gSqlite;
 struct CmdLineSettings;
+
+// Getters
+string FolderManager::getLevelDir()      const { return levelDir;      }
+string FolderManager::getIniDir()        const { return iniDir;        }
+string FolderManager::getRecordDir()     const { return recordDir;     }
+string FolderManager::getRobotDir()      const { return robotDir;      }
+string FolderManager::getFontsDir()      const { return fontsDir;      }
+string FolderManager::getScreenshotDir() const { return screenshotDir; }
+string FolderManager::getSfxDir()        const { return sfxDir;        }
+string FolderManager::getMusicDir()      const { return musicDir;      }
+string FolderManager::getRootDataDir()   const { return rootDataDir;   }
+string FolderManager::getLogDir()        const { return logDir;        }
+string FolderManager::getPluginDir()     const { return pluginDir;     }
+string FolderManager::getLuaDir()        const { return luaDir;        }
+
+
+// Setters
+void FolderManager::setLevelDir(const string &lvlDir)
+{
+   levelDir = lvlDir;
+}
+
 
 // Doesn't handle leveldir -- that one is handled separately, later, because it requires input from the INI file
 void FolderManager::resolveDirs(GameSettings *settings)
@@ -2108,7 +1269,7 @@ void FolderManager::resolveDirs(GameSettings *settings)
    folderManager->sfxDir        = resolutionHelper(cmdLineDirs.sfxDir,        "", "sfx");
    folderManager->fontsDir      = resolutionHelper(cmdLineDirs.fontsDir,      "", "fonts");
 
-   gSqlite = folderManager->logDir + "stats";
+   DatabaseWriter::sqliteFile = folderManager->logDir + DatabaseWriter::sqliteFile;
 }
 
 
@@ -2130,7 +1291,7 @@ void FolderManager::resolveDirs(const string &root)
    sfxDir        = joindir("", "sfx");
    fontsDir      = joindir("", "fonts");
 
-   gSqlite = logDir + "stats";
+   DbWriter::DatabaseWriter::sqliteFile = logDir + DbWriter::DatabaseWriter::sqliteFile;
 }
 
 // Figure out where the levels are.  This is exceedingly complex.
@@ -2374,6 +1535,7 @@ CmdLineSettings::CmdLineSettings()
 {
    init();
 }
+
 
 // Destructor
 CmdLineSettings::~CmdLineSettings()

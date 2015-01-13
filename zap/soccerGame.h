@@ -31,6 +31,8 @@ public:
    void scoreGoal(Ship *ship, const StringTableEntry &lastPlayerTouchName, S32 lastPlayerTouchTeam, const Point &scorePos, S32 goalTeamIndex, S32 score);
    void updateSoccerScore(Ship *ship, S32 scoringTeam, ScoringEvent scoringEvent, S32 score);   // Helper function to make sure the two-arg version of updateScore doesn't get a null ship
 
+   void onOvertimeStarted();
+
    void setBall(SoccerBallItem *theBall);
    void renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const;
 
@@ -79,14 +81,14 @@ public:
 
    SoccerBallItem *clone() const;
 
-   static const S32 SOCCER_BALL_RADIUS = 30;
+   static const F32 SOCCER_BALL_RADIUS;
 
-   void renderItem(const Point &pos);
+   void renderItem(const Point &pos) const;
    void resetPlayerTouch();
    void sendHome();
    void damageObject(DamageInfo *theInfo);
    void idle(BfObject::IdleCallPath path);
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
    void onAddedToGame(Game *game);
@@ -96,18 +98,19 @@ public:
    TNL_DECLARE_CLASS(SoccerBallItem);
 
    ///// Editor methods
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
 
-   void renderDock();
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+   void renderDock(const Color &color) const;
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
 
-   const Color *getColor() const;
+   const Color &getColor() const;
 
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);

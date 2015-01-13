@@ -35,8 +35,8 @@ public:
    static const Color *groupHeaderColor;
 
 protected:
-   void render(const char *header, S32 page, S32 pages);
-   void renderConsoleCommands(const UI::SymbolStringSet &instructions, const ControlStringsEditor *cmdList);
+   void render(const char *header, S32 page, S32 pages) const;
+   void renderConsoleCommands(const UI::SymbolStringSet &instructions, const ControlStringsEditor *cmdList) const;
 
    UI::SymbolStringSet 
          mSpecialKeysInstrLeft,   mSpecialKeysBindingsLeft, 
@@ -44,7 +44,7 @@ protected:
          mWallInstr,              mWallBindings;
 
    void pack(UI::SymbolStringSet &Instrs, UI::SymbolStringSet &Bindings, 
-            const ControlStringsEditor *helpBindings, S32 bindingCount, GameSettings *settings);
+            const ControlStringsEditor *helpBindings, S32 bindingCount);
 
 public:
    explicit AbstractInstructionsUserInterface(ClientGame *clientGame);  // Constructor

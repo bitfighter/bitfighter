@@ -76,7 +76,7 @@ bool Joystick::initJoystick(GameSettings *settings)
    //   http://superuser.com/questions/17959/linux-joystick-seems-mis-calibrated-in-an-sdl-game-freespace-2-open
 
 
-   if(settings->getIniSettings()->joystickLinuxUseOldDeviceSystem)
+   if(settings->getSetting<YesNo>(IniKey::JoystickLinuxUseOldDeviceSystem))
    {
       string joystickEnv = "SDL_JOYSTICK_DEVICE=/dev/input/js" + itos(0);
       SDL_putenv((char *)joystickEnv.c_str());
@@ -143,7 +143,7 @@ bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
       return false;
 
    if(settings->getInputMode() == InputModeKeyboard &&
-        (hasBeenOpenedBefore || settings->getIniSettings()->alwaysStartInKeyboardMode)) // Don't enable joystick at all in keyboard mode
+        (hasBeenOpenedBefore || settings->getSetting<YesNo>(IniKey::AlwaysStartInKeyboardMode))) // Don't enable joystick at all in keyboard mode
          return true;
 
    // Enable joystick events
@@ -174,7 +174,7 @@ bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
    // Otherwise, it makes more sense to remember what the user had last specified
    if(!hasBeenOpenedBefore && joystickType != NoJoystick)
    {
-	  settings->getIniSettings()->mSettings.setVal("JoystickType", joystickType);
+	   settings->setSetting(IniKey::JoystickType, joystickType);
       setSelectedPresetIndex(Joystick::getJoystickIndex(joystickType));
    }
 
@@ -248,7 +248,7 @@ string Joystick::autodetectJoystick(GameSettings *settings)
       return JoystickPresetList[match].identifier;
    
    // If we've made it here, let's try the value stored in the INI
-   string lastStickUsed = settings->getIniSettings()->mSettings.getVal<string>("JoystickType");
+   string lastStickUsed = settings->getSetting<string>(IniKey::JoystickType);
 
    // Let's validate that, shall we?
    for(S32 i = 0; i < JoystickPresetList.size(); i++)
@@ -480,7 +480,7 @@ U32 Joystick::getJoystickIndex(const string &joystickType)
 void Joystick::loadJoystickPresets(GameSettings *settings)
 {
    // Load up the joystick presets INI
-   joystickPresetsINI.SetPath(joindir(settings->getFolderManager()->iniDir, "joystick_presets.ini"));
+   joystickPresetsINI.SetPath(joindir(settings->getFolderManager()->getIniDir(), "joystick_presets.ini"));
    joystickPresetsINI.ReadFile();
 
    // Loop through each section (each section is a joystick) and parse

@@ -6,6 +6,7 @@
 #include "soccerGame.h"
 
 #include "gameNetInterface.h"
+#include "Level.h"
 #include "projectile.h"
 #include "goalZone.h"
 #include "Spawn.h"      // For AbstractSpawn def
@@ -105,7 +106,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
 
    // Print the message and emit the text effect
    getGame()->displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());
-   getGame()->emitTextEffect(txtEffect, *getTeamColor(scorerTeam), scorePos);
+   getGame()->emitTextEffect(txtEffect, getTeamColor(scorerTeam), scorePos, true);
 }
 
 
@@ -187,6 +188,13 @@ void SoccerGameType::scoreGoal(Ship *ship, const StringTableEntry &scorerName, S
 }
 
 
+// In Soccer games, we'll enter sudden death... next score wins
+void SoccerGameType::onOvertimeStarted()
+{
+   startSuddenDeath();
+}
+
+
 // Runs on client
 void SoccerGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const
 {
@@ -201,7 +209,7 @@ void SoccerGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) c
 
    S32 team = ship->getTeam();
 
-   const Vector<DatabaseObject *> *zones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
+   const Vector<DatabaseObject *> *zones = getGame()->getLevel()->findObjects_fast(GoalZoneTypeNumber);
 
    for(S32 i = 0; i < zones->size(); i++)
    {
@@ -292,13 +300,14 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
 TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 
 static const F32 SOCCER_BALL_ITEM_MASS = 4;
+const F32 SoccerBallItem::SOCCER_BALL_RADIUS = 30;
 
 /**
  * @luafunc SoccerBallItem::SoccerBallItem()
  * @luafunc SoccerBallItem::SoccerBallItem(point)
  */
 // Combined Lua / C++ default constructor
-SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, (F32)SoccerBallItem::SOCCER_BALL_RADIUS, SOCCER_BALL_ITEM_MASS)
+SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, SoccerBallItem::SOCCER_BALL_RADIUS, SOCCER_BALL_ITEM_MASS)
 {
    mObjectTypeNumber = SoccerBallItemTypeNumber;
    mNetFlags.set(Ghostable);
@@ -341,7 +350,7 @@ SoccerBallItem *SoccerBallItem::clone() const
 }
 
 
-bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
+bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    S32 argc = 0;
    const char *argv[16];
@@ -360,14 +369,14 @@ bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
       }
    }
 
-   if(!Parent::processArguments(argc, argv, game))
+   if(!Parent::processArguments(argc, argv, level))
       return false;
 
    mInitialPos = getActualPos();
 
    // Add a spawn point at the ball's starting location
    FlagSpawn *spawn = new FlagSpawn(mInitialPos, 0);
-   spawn->addToGame(game, game->getGameObjDatabase());
+   level->addToDatabase(spawn);
 
    return true;
 }
@@ -405,21 +414,21 @@ void SoccerBallItem::onAddedToGame(Game *game)
    if(mLuaBall)
    {
       FlagSpawn *spawn = new FlagSpawn(mInitialPos, 0);
-      spawn->addToGame(mGame, mGame->getGameObjDatabase());
+      spawn->addToGame(mGame, mGame->getLevel());
    }
 }
 
 
-void SoccerBallItem::renderItem(const Point &pos)
+void SoccerBallItem::renderItem(const Point &pos) const
 {
    renderSoccerBall(pos);
 }
 
 
-const char *SoccerBallItem::getOnScreenName()     { return "Soccer Ball";  }
-const char *SoccerBallItem::getOnDockName()       { return "Ball";         }
-const char *SoccerBallItem::getPrettyNamePlural() { return "Soccer Balls"; }
-const char *SoccerBallItem::getEditorHelpString() { return "Soccer ball, can only be used in Soccer games."; }
+const char *SoccerBallItem::getOnScreenName()      const { return "Soccer Ball";  }
+const char *SoccerBallItem::getOnDockName()        const { return "Ball";         }
+const char *SoccerBallItem::getPrettyNamePlural()  const { return "Soccer Balls"; }
+const char *SoccerBallItem::getEditorHelpString()  const { return "Soccer ball, can only be used in Soccer games."; }
 
 
 bool SoccerBallItem::hasTeam()      { return false; }
@@ -427,19 +436,19 @@ bool SoccerBallItem::canBeHostile() { return false; }
 bool SoccerBallItem::canBeNeutral() { return false; }
 
 
-const Color *SoccerBallItem::getColor() const
+const Color &SoccerBallItem::getColor() const
 { 
    return getGame()->getTeamColor(TEAM_NEUTRAL);
 }
 
 
-void SoccerBallItem::renderDock()
+void SoccerBallItem::renderDock(const Color &color) const
 {
    renderSoccerBall(getRenderPos(), 7);
 }
 
 
-void SoccerBallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void SoccerBallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    renderItem(getRenderPos());
 }

@@ -18,11 +18,13 @@ class RabbitGameType : public GameType
 {
    typedef GameType Parent;
 
+private:
    U32 mFlagReturnTimer;
    U32 mFlagScoreTimer;
 
-public:
+   Vector<string> makeParameterMenuKeys() const;
 
+public:
    enum
    {
       RabbitMsgGrab,
@@ -37,12 +39,12 @@ public:
    RabbitGameType();  // Constructor
    virtual ~RabbitGameType();
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
 #ifndef ZAP_DEDICATED
-   Vector<string> getGameParameterMenuKeys();
-   boost::shared_ptr<MenuItem> getMenuItem(const string &key);
+   const Vector<string> *getGameParameterMenuKeys() const;
+   boost::shared_ptr<MenuItem> getMenuItem(const string &key) const;
    bool saveMenuItem(const MenuItem *menuItem, const string &key);
 #endif
 
@@ -59,7 +61,7 @@ public:
    bool teamHasFlag(S32 teamIndex) const;
    void onFlagMounted(S32 teamIndex);
 
-   const Color *getTeamColor(const BfObject *object) const;
+   const Color &getTeamColor(const BfObject *object) const;
 
    void onFlagHeld(Ship *ship);
    void onFlaggerDead(Ship *killerShip);

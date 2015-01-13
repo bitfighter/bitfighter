@@ -99,7 +99,6 @@ private:
 
    string getLevelFileNameFromIndex(S32 indx);
 
-
    void resetAllClientTeams();                        // Resets all player team assignments
 
    bool onlyClientIs(GameConnection *client);
@@ -117,12 +116,11 @@ private:
 
    LuaGameInfo *mGameInfo;
 
-   GridDatabase *mBotZoneDatabase;
-   Vector<BotNavMeshZone *> mAllZones;
-   
 public:
-   ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicated, bool hostOnServer = false);    // Constructor
-   virtual ~ServerGame();   // Destructor
+   // Constructor/Destructors
+   ServerGame(const Address &address, GameSettingsPtr settings, LevelSourcePtr levelSource, 
+              bool testMode, bool dedicated, bool hostOnServer = false);    
+   virtual ~ServerGame();   
 
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
 
@@ -172,11 +170,6 @@ public:
    void deleteLevelGen(LuaLevelGenerator *levelgen);     // Add misbehaved levelgen to the kill list
    Vector<Vector<S32> > getCategorizedPlayerCountsByTeam() const;
 
-   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id);
-
-   void addPolyWall(BfObject *polyWall, GridDatabase *database);
-   void addWallItem(BfObject *wallItem, GridDatabase *database);
-
    void receivedLevelFromHoster(S32 levelIndex, const string &filename);
    void makeEmptyLevelIfNoGameType();
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
@@ -193,12 +186,11 @@ public:
    void balanceTeams();
 
    Robot *getBot(S32 index);
-   string addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass);
+   string addBot(const Vector<string> &args, ClientInfo::ClientClass clientClass);
    void addBot(Robot *robot);
    void removeBot(Robot *robot);
    void deleteBot(const StringTableEntry &name);
    void deleteBot(S32 i);
-   //void deleteBotFromTeam(S32 teamIndex);
    void deleteAllBots();
    Robot *findBot(const char *id);
    void moreBots();
@@ -262,8 +254,9 @@ public:
 
    /////
    // BotNavMeshZone management
-   GridDatabase *getBotZoneDatabase() const;
-   const Vector<BotNavMeshZone *> *getBotZones() const;
+   const Vector<BotNavMeshZone *> &getBotZoneList() const;
+   GridDatabase &getBotZoneDatabase() const;
+
    U16 findZoneContaining(const Point &p) const;
 
    void setGameType(GameType *gameType);

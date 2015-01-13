@@ -67,6 +67,9 @@ private:
 
    void activateTransitionFromLoadoutMenuToPresetMenu();
    void rebuildPresetItems();
+   void reset();
+   bool showingModules() const;
+   void setShowingPresets(bool showingPresets);
 
 public:
    explicit LoadoutHelper();                    // Constructor
@@ -75,7 +78,7 @@ public:
    void pregameSetup(bool engineerEnabled);     // Set things up
    HelperMenu::HelperMenuType getType();
 
-   void render();                
+   void render() const;                
    void onActivated();  
    bool processInputCode(InputCode inputCode);   
 

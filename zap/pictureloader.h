@@ -3,7 +3,7 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "../tnl/tnlTypes.h"
+#include "tnlTypes.h"
 
 #if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
 #include "SDL_opengles.h"

@@ -28,14 +28,14 @@ TEST(MasterTest, Sanity)
 
    ClientGame *clientGame = newClientGame(gameSettings);
 
-   clientGame->setConnectionToMaster(new Zap::MasterServerConnection(clientGame)); // uses Zap::MasterServerConnection
-   clientGame->getConnectionToMaster()->connectLocal((NetInterface*) clientGame->getNetInterface(), master.getNetInterface());
-   EXPECT_TRUE(clientGame->isConnectedToMaster());
-
-   Zap::MasterServerConnection *clientConnection = clientGame->getConnectionToMaster();
-   EXPECT_TRUE(clientConnection != NULL);
-   Master::MasterServerConnection *masterConnection = dynamic_cast<Master::MasterServerConnection *>(clientConnection->getRemoteConnectionObject());
-   EXPECT_TRUE(masterConnection != NULL);
+//   clientGame->setConnectionToMaster(new Zap::MasterServerConnection(clientGame)); // uses Zap::MasterServerConnection
+//   clientGame->getConnectionToMaster()->connectLocal((NetInterface*) clientGame->getNetInterface(), master.getNetInterface());
+//   EXPECT_TRUE(clientGame->isConnectedToMaster());
+//
+//   Zap::MasterServerConnection *clientConnection = clientGame->getConnectionToMaster();
+//   EXPECT_TRUE(clientConnection != NULL);
+//   Master::MasterServerConnection *masterConnection = dynamic_cast<Master::MasterServerConnection *>(clientConnection->getRemoteConnectionObject());
+//   EXPECT_TRUE(masterConnection != NULL);
 
    delete clientGame;
 }

@@ -27,7 +27,7 @@ class LineEditor
 {
 private:
    // Don't put another string after this or you'll get a weird memory bug that will
-   // drain precious hours of your life away trying to figure out...
+   // drain precious hours of your life away trying to figure out...  <== don't worry, I don't understand this anymore either! -Wat
    string mLine;
 
    bool mMasked;
@@ -51,7 +51,7 @@ public:
    LineEditor(U32 maxLength = 256, string value = "", U32 displayedCharacters = 0xFFFF);   // Constructor
    virtual ~LineEditor();
 
-   U32 length();                                // Returns line length in chars
+   U32 length() const;                          // Returns line length in chars
    bool addChar(char c);                        // Returns true if char was added to line
    void backspacePressed();                     // User hit Backspace
    void deletePressed();                        // User hit Delete
@@ -76,9 +76,9 @@ public:
    string getPrompt() const;
    const char *c_str() const;                   // Return the string in c_str format
 
-   void drawCursor(S32 x, S32 y, S32 fontSize);                             // Draw our cursor, assuming string is drawn at x,y
-   void drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle);             // Draw our cursor, assuming string is drawn at x,y at specified angle
-   void drawCursor(S32 x, S32 y, S32 fontSize, S32 startingWidth);   // Draw cursor starting at a given width
+   void drawCursor(S32 x, S32 y, S32 fontSize) const;                // Draw our cursor, assuming string is drawn at x,y
+   void drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle);      // Draw our cursor, assuming string is drawn at x,y at specified angle
+   void drawCursor(S32 x, S32 y, S32 fontSize, S32 startingWidth) const;   // Draw cursor starting at a given width
 
    // For tab expansion 
    void completePartial(const Vector<string> *candidates, const string &partial, std::size_t replacePos, const string &appender, bool wrapQuotes = true);

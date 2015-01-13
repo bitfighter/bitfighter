@@ -34,6 +34,7 @@ HelperMenu::HelperMenu()
 
    mOldBottom = 0;
    mOldCount = 0;
+   mCurrentRenderCount = 0;
 }
 
 
@@ -106,60 +107,85 @@ static S32 ButtonLabelGap = 9;      // Space between button/key rendering and me
 // Returns visible width of the helper
  S32 HelperMenu::getCurrentDisplayWidth(S32 widthOfButtons, S32 widthOfTextBlock) const
 {
-   return getWidth() + getInsideEdge();
+   return getWidth() + (S32)getInsideEdge();
+}
+
+
+ // Count how many items we will be displaying -- some may be hidden
+ // Should be precalcuated when items change!!
+static S32 getDisplayItemCount(const OverlayMenuItem *items, S32 itemCount)
+{
+   S32 displayItems = 0;
+   for(S32 i = 0; i < itemCount; i++)
+      if(items[i].showOnMenu)
+         displayItems++;
+
+   return displayItems;
 }
 
 
 extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 
-// Oh, this is so ugly and convoluted!  Drawing things on the screen is so messy!
-void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S32 count, 
-                              const OverlayMenuItem *prevItems, S32 prevCount,
-                              S32 widthOfButtons, S32 widthOfTextBlock,
-                              const char **legendText, const Color **legendColors, S32 legendCount)
+// Set a bunch of display geometry parameters -- there are more in the .h file
+static const S32 MENU_LEGEND_FONT_SIZE = 11;    // Smaller font of lengend items on QuickChat menus
+static const S32 TITLE_FONT_SIZE       = 20;    // Size of title of menu
+static const S32 GrayLineBuffer        = 10;
+
+static const S32 TitleHeight = TITLE_FONT_SIZE + GrayLineBuffer;
+static const S32 InstructionHeight = MENU_LEGEND_FONT_SIZE;
+
+
+S32 HelperMenu::getLegendHeight() const
 {
+   if(mLegend)
+      return MENU_LEGEND_FONT_SIZE + MENU_FONT_SPACING;
+
+   return 0;
+}
+
+// Total height of the menu
+S32 HelperMenu::getMenuHeight() const
+{
+   S32 displayItems = getDisplayItemCount(mCurrentRenderItems, mCurrentRenderCount);
+
+   // Height of variable menu parts
+   const S32 itemsHeight  = displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + MENU_PADDING + GrayLineBuffer;
+
+   return MENU_PADDING + TitleHeight + itemsHeight + getLegendHeight() + InstructionHeight + BottomPadding;     
+}
+
+
+S32 HelperMenu::getMenuBottomPos() const
+{
+   return MENU_TOP + getMenuHeight();
+}
+
+
+// Oh, this is so ugly and convoluted!  Drawing things on the screen is so messy!
+void HelperMenu::drawItemMenu(S32 widthOfButtons, S32 widthOfTextBlock) const
+{
+   if(mCurrentRenderCount == 0)
+      return;
+
    glPushMatrix();
-   glTranslate(getInsideEdge(), 0, 0);
+   glTranslate(getInsideEdge(), 0);
 
    static const Color baseColor(Colors::red);
 
-   S32 displayItems = 0;
-
-   // Count how many items we will be displaying -- some may be hidden
-   for(S32 i = 0; i < count; i++)
-      if(items[i].showOnMenu)
-         displayItems++;
-
-   bool hasLegend = legendCount > 0;
-
-   const S32 grayLineBuffer = 10;
-
-   // Height of menu parts
-   const S32 topPadding        = MENU_PADDING;
-   const S32 titleHeight       = TITLE_FONT_SIZE + grayLineBuffer ;
-   const S32 itemsHeight       = displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + MENU_PADDING + grayLineBuffer;
-   const S32 legendHeight      = (hasLegend ? MENU_LEGEND_FONT_SIZE + MENU_FONT_SPACING : 0); 
-   const S32 instructionHeight = MENU_LEGEND_FONT_SIZE;
-   const S32 bottomPadding     = MENU_PADDING;
-
    // Total height of the menu
-   const S32 totalHeight = topPadding + titleHeight + itemsHeight + legendHeight + instructionHeight + bottomPadding;     
+   const S32 totalHeight = getMenuHeight();
 
-   S32 yPos = MENU_TOP + topPadding;
-   S32 newBottom = MENU_TOP + totalHeight;
+   S32 newBottom = getMenuBottomPos();
+
+   static const S32 yStartPos = MENU_TOP + MENU_PADDING;   
+
+   S32 yPos = yStartPos;
 
    // If we are transitioning between items of different sizes, we will gradually change the rendered size during the transition
    // Generally, the top of the menu will stay in place, while the bottom will be adjusted.  Therefore, lower items need
    // to be offset by the transitionOffset which we will calculate below.  MenuBottom will be the actual bottom of the menu
    // adjusted for the transition effect.
    S32 menuBottom = getTransitionPos(mOldBottom, newBottom);
-
-   // Once scroll effect is over, need to save some values for next time
-   if(!Scroller::isActive())
-   {
-      mOldBottom = menuBottom;
-      mOldCount = displayItems;
-   }
 
    FontManager::pushFontContext(HelperMenuContext);
 
@@ -174,30 +200,31 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    glColor(baseColor);
    
    FontManager::pushFontContext(HelperMenuHeadlineContext);
-   drawCenteredString(grayLineCenter, yPos, TITLE_FONT_SIZE, title);
+   drawCenteredString(grayLineCenter, yPos, TITLE_FONT_SIZE, mTitle);
    FontManager::popFontContext();
 
-   yPos += titleHeight;
+   yPos += TitleHeight;
 
    // Gray line
    glColor(Colors::gray20);
    drawHorizLine(grayLineLeft, grayLineRight, yPos + 2);
 
-   yPos += grayLineBuffer;
+   yPos += GrayLineBuffer;
 
    // Draw menu items (below gray line)
-   drawMenuItems(prevItems, prevCount, yPos + 2, menuBottom, false, mHorizLabelOffset);
-   drawMenuItems(items,     count,     yPos,     menuBottom, true,  0);      
+   drawMenuItems(mPrevRenderItems,    mPrevRenderCount,    yPos + 2, menuBottom, false, mHorizLabelOffset);
+   drawMenuItems(mCurrentRenderItems, mCurrentRenderCount, yPos,     menuBottom, true,  0);      
 
-   // itemsHeight includes grayLineBuffer, transitionOffset accounts for potentially changing menu height during transition
-   yPos += itemsHeight; 
+   yPos += getMenuHeight(); 
 
    // Adjust for any transition that might be going on that is changing the overall menu height.  menuBottom is the rendering location
    // of the bottom fo the menu, newBottom is the target bottom location after the transition has ocurred.
    yPos += menuBottom - newBottom;
 
-   if(hasLegend)
-      renderLegend(grayLineCenter, yPos - legendHeight - 3, legendText, legendColors, legendCount);
+   S32 legendHeight = getLegendHeight();
+
+   if(mLegend)
+      renderLegend(grayLineCenter, yPos - legendHeight - 3, *mLegend);
 
    yPos += legendHeight;
 
@@ -238,7 +265,7 @@ void HelperMenu::setExpectedWidth_MidTransition(S32 width)
 
 
 // Render a set of menu items.  Break this code out to make transitions easier (when we'll be rendering two sets of items).
-void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top, S32 bottom, bool newItems, S32 horizOffset)
+void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top, S32 bottom, bool newItems, S32 horizOffset) const
 {
    if(!items)
       return;
@@ -264,10 +291,9 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
 /////
 
    S32 buttonWidth = getButtonWidth(items, count);
-
+   DisplayMode displayMode = getGame()->getSettings()->getSetting<DisplayMode>(IniKey::WindowMode);
+   
    S32 yPos;
-
-   DisplayMode displayMode = getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
 
    if(newItems)      // Draw the new items we're transitioning to
       yPos = prepareToRenderToDisplay(displayMode, top, oldHeight, height);
@@ -313,7 +339,7 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
 }
 
 
-void HelperMenu::renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &baseColor, InputMode inputMode)
+void HelperMenu::renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &baseColor, InputMode inputMode) const
 {
    glColor(baseColor);
 
@@ -334,23 +360,25 @@ void HelperMenu::renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &base
 }
 
 
-void HelperMenu::renderLegend(S32 x, S32 y, const char **legendText, const Color **legendColors, S32 legendCount)
+void HelperMenu::renderLegend(S32 x, S32 y, const Vector<HelperMenuLegendItem> &legend) const
 {
+   const S32 SPACE_BETWEEN_LEGEND_ITEMS = 7;
+
    S32 width = 0;
    y += MENU_FONT_SPACING;
 
-   const S32 SPACE_BETWEEN_LEGEND_ITEMS = 7;
-
    // First, get the total width so we can center poperly
-   for(S32 i = 0; i < legendCount; i++)
-      width += getStringWidth(MENU_LEGEND_FONT_SIZE, legendText[i]) + SPACE_BETWEEN_LEGEND_ITEMS;
+   for(S32 i = 0; i < legend.size(); i++)
+      width += getStringWidth(MENU_LEGEND_FONT_SIZE, legend[i].text.c_str()) + SPACE_BETWEEN_LEGEND_ITEMS;
+
+   width -= SPACE_BETWEEN_LEGEND_ITEMS;
 
    x -= width / 2;
 
-   for(S32 i = 0; i < legendCount; i++)
+   for(S32 i = 0; i < legend.size(); i++)
    {
-      glColor(legendColors[i]);
-      x += drawStringAndGetWidth(x, y, MENU_LEGEND_FONT_SIZE, legendText[i]) + SPACE_BETWEEN_LEGEND_ITEMS;
+      glColor(legend[i].color);
+      x += drawStringAndGetWidth(x, y, MENU_LEGEND_FONT_SIZE, legend[i].text.c_str()) + SPACE_BETWEEN_LEGEND_ITEMS;
    }
 }
 
@@ -388,8 +416,7 @@ bool HelperMenu::processInputCode(InputCode inputCode)
    {
       exitHelper();      
 
-      if(mClientGame->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
-         mClientGame->displayMessage(Colors::ErrorMessageTextColor, getCancelMessage());
+      mClientGame->displayMessage(Colors::ErrorMessageTextColor, getCancelMessage());
 
       return true;
    }
@@ -425,6 +452,14 @@ void HelperMenu::idle(U32 deltaT)
    // Idle the parent classes
    Slider::idle(deltaT);
    Scroller::idle(deltaT);
+
+   // Once scroll effect is over, need to save some values for next time
+   // Not sure this is the right place... we'll see!
+   if(!Scroller::isActive())
+   {
+      mOldBottom = getTransitionPos(mOldBottom, getMenuBottomPos());
+      mOldCount =  getDisplayItemCount(mCurrentRenderItems, mCurrentRenderCount);
+   }
 }
 
 

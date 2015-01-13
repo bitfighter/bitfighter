@@ -4,13 +4,14 @@
 //------------------------------------------------------------------------------
 
 #include "TestUtils.h"
-#include "../zap/gameType.h"
-#include "../zap/GameManager.h"
-#include "../zap/ServerGame.h"
-#include "../zap/ClientGame.h"
-#include "../zap/FontManager.h"
-#include "../zap/UIManager.h"
-#include "../zap/SystemFunctions.h"
+#include "gameType.h"
+#include "GameManager.h"
+#include "ServerGame.h"
+#include "ClientGame.h"
+#include "FontManager.h"
+#include "UIManager.h"
+#include "SystemFunctions.h"
+#include "Level.h"
 
 #include "../zap/stringUtils.h"
 #include "gtest/gtest.h"
@@ -39,7 +40,7 @@ ClientGame *newClientGame(const GameSettingsPtr &settings)
    FontManager::initialize(settings.get(), false);   
    ClientGame *game = new ClientGame(addr, settings, new UIManager());    // ClientGame destructor will clean up UIManager
 
-   game->addTeam(new Team());     // Teams will be deleted by ClientGame destructor
+   //game->addTeam(new Team());     // Teams will be deleted by ClientGame destructor
 
    return game;
 }
@@ -50,9 +51,14 @@ ServerGame *newServerGame()
 {
    Address addr;
    GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
+
    LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(""));
 
+   Level *level = new Level();
+   level->loadLevelFromString("");
+
    ServerGame *game = new ServerGame(addr, settings, levelSource, false, false);
+   game->setLevel(level);
    game->addTeam(new Team());    // Team will be cleaned up when game is deleted
 
    return game;
@@ -80,10 +86,19 @@ GamePair::GamePair(const string &levelCode, S32 clientCount)
 }
 
 
+//// Or don't provide any levelcode -- your choice!
+//GamePair::GamePair(S32 clientCount)
+//{
+//   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
+//
+//   initialize(settings, "", clientCount);
+//}
+//
+
 void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32 clientCount)
 {
    // Need to start Lua before we add any clients.  Might as well do it now.
-   LuaScriptRunner::startLua(settings->getFolderManager()->luaDir);
+   LuaScriptRunner::startLua(settings->getFolderManager()->getLuaDir());
 
    LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(levelCode));
    initHosting(settings, levelSource, true, false);      // Creates a game and adds it to GameManager
@@ -102,6 +117,8 @@ void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32
 
    for(S32 i = 0; i < clientCount; i++)
       addClient("TestPlayer" + itos(i));
+
+   idle(1, 5);    // Give GameType and game objects time to propagate to client(s)
 }
 
 
@@ -116,6 +133,7 @@ GamePair::~GamePair()
       if(clientGames->get(i)->getConnectionToServer())
          clientGames->get(i)->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
+   // Note that when the client disconnects, all local ghosted objects, including GameType, are deleted
    idle(10, 5);
 
    // Clean up GameManager
@@ -136,12 +154,10 @@ void GamePair::idle(U32 timeDelta, U32 cycles)
 
 
 // Simulates player joining game from new client
-void GamePair::addClient(const string &name, S32 team)
+void GamePair::addClient(const string &name, S32 teamIndex)
 {
-   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
-
    ServerGame *server = GameManager::getServerGame();
-   ClientGame *client = newClientGame(settings);
+   ClientGame *client = newClientGame();
    GameManager::addClientGame(client);
 
    client->userEnteredLoginCredentials(name, "password", false);    // Simulates entry from NameEntryUserInterface
@@ -156,10 +172,10 @@ void GamePair::addClient(const string &name, S32 team)
    if(!clientInfo->isRobot())
       clientInfo->getConnection()->useZeroLatencyForTesting();
 
-   if(team != NO_TEAM)
+   if(teamIndex != NO_TEAM)
    {
-      TNLAssert(team < server->getTeamCount(), "Bad team!");
-      server->getGameType()->changeClientTeam(clientInfo, team);
+      TNLAssert(teamIndex < server->getTeamCount(), "Bad team!");
+      server->getGameType()->changeClientTeam(clientInfo, teamIndex);
    }
 }
 
@@ -177,7 +193,7 @@ void GamePair::removeClient(S32 index)
 
    clientGame->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
-   this->idle(10, 5);      // Let things propagate
+   this->idle(10, 5);      // Let things settle
 
    GameManager::deleteClientGame(index);
 }
@@ -203,11 +219,11 @@ void GamePair::removeClient(const string &name)
 }
 
 
-void GamePair::addBotClient(const string &name, S32 team)
+void GamePair::addBotClient(const string &name, S32 teamIndex)
 {
    ServerGame *server = GameManager::getServerGame();
 
-   server->addBot(Vector<const char *>(), ClientInfo::ClassRobotAddedByAutoleveler);
+   server->addBot(Vector<string>(), ClientInfo::ClassRobotAddedByAutoleveler);
    // Get most recently added clientInfo
    ClientInfo *clientInfo = server->getClientInfo(server->getClientInfos()->size() - 1);
    ASSERT_TRUE(clientInfo->isRobot()) << "This is supposed to be a robot!";
@@ -216,8 +232,8 @@ void GamePair::addBotClient(const string &name, S32 team)
    // respawning the BfObject representing that ship would be on the correct team.  Not so here (where we are
    // taking lots of shortcuts); here we need to manually assign a new team to the robot object in addition to
    // it's more "official" setting on the ClientInfo.
-   clientInfo->setTeamIndex(team);
-   clientInfo->getShip()->setTeam(team);
+   clientInfo->setTeamIndex(teamIndex);
+   clientInfo->getShip()->setTeam(teamIndex);
 }
 
 

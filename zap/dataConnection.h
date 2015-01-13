@@ -63,7 +63,7 @@ public:
 ////////////////////////////////////
 
 class GameSettings;
-struct FolderManager;
+class FolderManager;
 
 class DataSender 
 {

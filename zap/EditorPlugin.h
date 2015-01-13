@@ -33,7 +33,7 @@ protected:
 public:
    // Constructors
    EditorPlugin();      // Dummy 0-args constructor, here to make boost happy!
-   EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, GridDatabase *gridDatabase, Game *game);
+   EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, Level *gridDatabase, Game *game);
 
    virtual ~EditorPlugin();  // Destructor
 

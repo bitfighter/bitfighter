@@ -95,7 +95,7 @@ S32 SlideOutWidget::getTotalDisplayWidth() const
 // Gets run when opening animation is complete
 void SlideOutWidget::onWidgetOpened() 
 { 
-   /* Do nothing */ 
+   // Do nothing
 }
 
 

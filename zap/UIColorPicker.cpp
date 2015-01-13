@@ -115,7 +115,7 @@ const F32 colorBrightnessPointsBlue[] = {
 };
 
 
-void UIColorPicker::render()
+void UIColorPicker::render() const
 {
    glColor(Colors::green);
 
@@ -133,10 +133,9 @@ void UIColorPicker::render()
       maxCol = b;
 
    F32 r2, g2, b2;
+
    if(maxCol == 0)
-   {
       b2 = g2 = r2 = 1;
-   }
    else
    {
       r2 = r / maxCol;
@@ -230,16 +229,16 @@ void UIColorPicker::render()
       pointerArrow[4] = pointerArrow[0] + 10;                 pointerArrow[5] = pointerArrow[1] + 10;
       pointerArrow[6] = pointerArrow[0] + 10;                 pointerArrow[7] = pointerArrow[1] - 10;
 
-      glColor(maxCol > .6f ?  0.f : 1.f);
+      glColor(maxCol > 0.6 ?  0.0f : 1.0f);
 
       renderVertexArray(pointerArrow, 4, GL_LINES);
    }
 
 
    // Render some samples in selected color
-   static const S32 x = 50;
-   static const S32 y = 540;
-   static const S32 h = 50;
+   static const F32 x = 50;
+   static const F32 y = 540;
+   static const F32 h = 50;
 
 
    // Loadout zone
@@ -247,24 +246,24 @@ void UIColorPicker::render()
    static const Vector<Point> o(pointAry, ARRAYSIZE(pointAry)); 
    Vector<Point> f;     // fill
    Triangulate::Process(o, f);
-   renderLoadoutZone(this, &o, &f, Point(x + h/2, y + h/2), 0);
+   renderLoadoutZone(*this, &o, &f, Point(x + h/2, y + h/2), 0);
 
    // Ship
    static F32 thrusts[4] =  { 1, 0, 0, 0 };
 
    glPushMatrix();
-   glTranslatef(165, F32(y + h / 2), 0);
-   glRotatef(-90, 0, 0, 1);
+   glTranslate(165, y + h / 2);
+   glRotate(-90);
 
-   renderShip(ShipShape::Normal, this, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
+   renderShip(ShipShape::Normal, *this, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
 
    glPopMatrix();
 
    // Turret
    glPushMatrix();
-   glTranslatef(240, F32(y + h / 2), 0);
+   glTranslate(240, y + h / 2);
 
-   renderTurret(*(const Color *)this, Point(0, 15), Point(0, -1), true, 1, 0, 0);
+   renderTurret(*this, Point(0, 15), Point(0, -1), true, 1, 0, 0);
 
    glPopMatrix();
 }

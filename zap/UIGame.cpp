@@ -8,39 +8,39 @@
 
 #include "UIGame.h"
 
-#include "UIMenus.h"
-#include "UIInstructions.h"
 #include "UIChat.h"
+#include "UIInstructions.h"
 #include "UIManager.h"
+#include "UIMenus.h"
 
-#include "gameType.h"
-#include "EngineeredItem.h"      // For EngineerModuleDeployer
-#include "shipItems.h"           // For EngineerBuildObjects
-#include "gameObjectRender.h"
+#include "barrier.h"
 #include "BotNavMeshZone.h"
+#include "ClientGame.h"
+#include "Colors.h"
+#include "Console.h"             // Our console object
+#include "Cursor.h"
+#include "DisplayManager.h"
+#include "EnergyGaugeRenderer.h"
+#include "EngineeredItem.h"      // For EngineerModuleDeployer
+#include "FontManager.h"
+#include "gameObjectRender.h"
+#include "GameRecorderPlayback.h"
+#include "gameType.h"
+#include "HealthGaugeRenderer.h"
+#include "Intervals.h"
+#include "Level.h"
 #include "projectile.h"          // For SpyBug
 #include "robot.h"
-
-#include "EnergyGaugeRenderer.h"
-
-#include "Console.h"             // Our console object
-#include "DisplayManager.h"
-#include "ClientGame.h"
-#include "ServerGame.h"
-#include "Colors.h"
-#include "Cursor.h"
 #include "ScissorsManager.h"
-#include "voiceCodec.h"
+#include "ServerGame.h"
+#include "shipItems.h"           // For EngineerBuildObjects
 #include "SoundSystem.h"
-#include "FontManager.h"
-#include "Intervals.h"
+#include "voiceCodec.h"
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 #include "GeomUtils.h"
-
-#include "GameRecorderPlayback.h"
 
 #include <cmath>     // Needed to compile under Linux, OSX
 
@@ -66,7 +66,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
                   mChatMessageDisplayer3 (game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
                   mFpsRenderer(game),
                   mLevelInfoDisplayer(game),
-                  mHelpItemManager(game->getSettings())
+                  mHelpItemManager(mGameSettings)
 {
    mInScoreboardMode = false;
    displayInputModeChangeAlert = false;
@@ -99,7 +99,6 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
    mAnnouncement = "";
 
    mShowProgressBar = false;
-   mHasShipPos = false;
    mProgressBarFadeTimer.setPeriod(ONE_SECOND);
 
    // Transition time between regular map and commander's map; in ms, higher = slower
@@ -119,9 +118,22 @@ GameUserInterface::~GameUserInterface()
 
 void GameUserInterface::onPlayerJoined()     { mHelperManager.onPlayerJoined();     }
 void GameUserInterface::onPlayerQuit()       { mHelperManager.onPlayerQuit();       }
-void GameUserInterface::onGameOver()         { mHelperManager.onGameOver();         }
 void GameUserInterface::quitEngineerHelper() { mHelperManager.quitEngineerHelper(); }  // When ship dies engineering
 void GameUserInterface::exitHelper()         { mHelperManager.exitHelper();         }
+
+
+void GameUserInterface::onGameOver()         
+{ 
+   mHelperManager.onGameOver();         
+}
+
+
+// This event gets run after the scoreboard display is finished
+void GameUserInterface::onGameReallyAndTrulyOver()         
+{ 
+   mFxManager.onGameReallyAndTrulyOver();
+   mHelperManager.onGameOver();         
+}
 
 
 void GameUserInterface::setAnnouncement(const string &message)
@@ -153,7 +165,6 @@ void GameUserInterface::onActivate()
 
    mLoadoutIndicator.reset();
    mShowProgressBar = true;               // Causes screen to be black before level is loaded
-   mHasShipPos = false;
 
    mHelperManager.reset();
 
@@ -225,7 +236,6 @@ void GameUserInterface::onGameStarting()
 {
    mDispWorldExtents.set(Point(0,0), 0);
    Barrier::clearRenderItems();
-   mHasShipPos = false;
 
    addStartingHelpItemsToQueue();      // Do this here so if the helpItem manager gets turned on, items will start displaying next game
 
@@ -353,11 +363,15 @@ void GameUserInterface::idle(U32 timeDelta)
 
    // Update some timers
    mShutdownTimer.update(timeDelta);
-   mInputModeChangeAlertDisplayTimer.update(timeDelta);
    mWrongModeMsgDisplay.update(timeDelta);
    mProgressBarFadeTimer.update(timeDelta);
    mCommanderZoomDelta.update(timeDelta);
    mLevelInfoDisplayer.idle(timeDelta);
+
+   if(shouldRenderLevelInfo())
+      mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
+   else
+      mInputModeChangeAlertDisplayTimer.update(timeDelta);
 
    if(mAnnouncementTimer.update(timeDelta))
       mAnnouncement = "";
@@ -381,22 +395,13 @@ void GameUserInterface::idle(U32 timeDelta)
    mLoadoutIndicator.idle(timeDelta);
 
    // Processes sparks and teleporter effects -- 
-   //    do this even while suspended to make objects look normal while in /idling
+   //    Do this even while suspended to make objects look normal while in /idling
    //    But not while playing back game recordings, idled in idleFxManager with custom timeDelta
    if(dynamic_cast<GameRecorderPlayback *>(getGame()->getConnectionToServer()) == NULL)
       mFxManager.idle(timeDelta);
 
    if(shouldCountdownHelpItemTimer())
       mHelpItemManager.idle(timeDelta, getGame());
-
-   // Update mShipPos... track this so that we can keep a fix on the ship location even if it subsequently dies
-   Ship *ship = getGame()->getLocalPlayerShip();
-
-   if(ship)
-   {
-      mShipPos.set(ship->getRenderPos());     // Get the player's ship position
-      mHasShipPos = true;
-   }
 
    // Keep ship pointed towards mouse cmdrs map zoom transition
    if(mCommanderZoomDelta.getCurrent() > 0)               
@@ -486,11 +491,16 @@ void GameUserInterface::emitDebrisChunk(const Vector<Point> &points, const Color
 }
 
 
-void GameUserInterface::emitTextEffect(const string &text, const Color &color, const Point &pos)
+void GameUserInterface::emitTextEffect(const string &text, const Color &color, const Point &pos, bool relative)
 {
-   mFxManager.emitTextEffect(text, color, pos);
+   mFxManager.emitTextEffect(text, color, pos, relative);
 }
 
+
+void GameUserInterface::emitDelayedTextEffect(U32 delay, const string &text, const Color &color, const Point &pos, bool relative)
+{
+   mFxManager.emitDelayedTextEffect(delay, text, color, pos, relative);
+}
 
 void GameUserInterface::emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType)
 {
@@ -511,19 +521,25 @@ void GameUserInterface::emitTeleportInEffect(const Point &pos, U32 type)
 
 
 // Draw main game screen (client only)
-void GameUserInterface::render()
+void GameUserInterface::render() const
 {
    if(!getGame()->isConnectedToServer())
    {
       glColor(Colors::white);
-      drawCenteredString(260, 30, "Connecting to server...");
+      static const SymbolString connecting("Connecting to server...", NULL, ErrorMsgContext, 30, false, AlignmentCenter);
+      connecting.render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 290));
 
       glColor(Colors::green);
       if(getGame()->getConnectionToServer())
-         drawCenteredString(310, 16, GameConnection::getConnectionStateString(getGame()->getConnectionToServer()->getConnectionState()));
+      {
+         SymbolString stat(GameConnection::getConnectionStateString(getGame()->getConnectionToServer()->getConnectionState()), 
+                           NULL, ErrorMsgContext, 16, false, AlignmentCenter);
+         stat.render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 326));
+      }
 
       glColor(Colors::white);
-      drawCenteredString(346, 20, "Press <ESC> to abort");
+      static const SymbolString pressEsc("Press [[ESC]] to abort", NULL, ErrorMsgContext, 20, false, AlignmentCenter);
+      pressEsc.render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 366));
 
       return;
    }
@@ -557,19 +573,18 @@ void GameUserInterface::render()
    renderProgressBar();                   // Status bar that shows progress of loading this level
    mVoiceRecorder.render();               // Indicator that someone is sending a voice msg
 
-   mFpsRenderer.render(DisplayManager::getScreenInfo()->getGameCanvasWidth());     // Display running average FPS
-   mConnectionStatsRenderer.render(getGame()->getConnectionToServer());     // Display running average FPS
-
    mHelperManager.render();
+   renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
+
+   mFpsRenderer.render(DisplayManager::getScreenInfo()->getGameCanvasWidth());     // Display running average FPS
+   mConnectionStatsRenderer.render(getGame()->getConnectionToServer());    
 
    GameType *gameType = getGame()->getGameType();
 
    if(gameType)
-      gameType->renderInterfaceOverlay(DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
-
+      gameType->renderInterfaceOverlay(DisplayManager::getScreenInfo()->getGameCanvasWidth(), 
+                                       DisplayManager::getScreenInfo()->getGameCanvasHeight());
    renderLevelInfo();
-
-   renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
    
    renderShutdownMessage();
 
@@ -703,11 +718,45 @@ void GameUserInterface::renderLostConnectionMessage() const
 
    if(connection && connection->lostContact())
    {
-      static string msg = "We have lost contact with the server; You can't play "
-                          "until the connection has been re-established.\n\n"
-                          "Trying to reconnect... [[SPINNER]]";
+      //static string msg = "We have lost contact with the server; You can't play "
+      //                    "until the connection has been re-established.\n\n"
+      //                    "Trying to reconnect... [[SPINNER]]";
+      //renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, -30);
 
-      renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, -30);
+      // Above: the old way of displaying connection problem
+
+      // You may test this rendering by using /lag 0 100
+
+      renderCenteredFancyBox(130, 54, 130, 10, Colors::red30, 0.75f, Colors::white);
+
+      glColor(Colors::white);
+      drawStringc(430, 170, 30, "CONNECTION INTERRUPTED");
+
+      const S32 x1 = 140;
+      const S32 y1 = 142;
+
+      glColor(Colors::black);
+      drawRect(x1 +  1, y1 + 20, x1 + 8, y1 + 30, GL_TRIANGLE_FAN);
+      drawRect(x1 + 11, y1 + 15, x1 + 18, y1 + 30, GL_TRIANGLE_FAN);
+      drawRect(x1 + 21, y1 + 10, x1 + 28, y1 + 30, GL_TRIANGLE_FAN);
+      drawRect(x1 + 31, y1 + 05, x1 + 38, y1 + 30, GL_TRIANGLE_FAN);
+      drawRect(x1 + 41, y1 + 00, x1 + 48, y1 + 30, GL_TRIANGLE_FAN);
+      glColor(Colors::gray40);
+      drawRect(x1 +  1, y1 + 20, x1 + 8, y1 + 30, GL_LINE_LOOP);
+      drawRect(x1 + 11, y1 + 15, x1 + 18, y1 + 30, GL_LINE_LOOP);
+      drawRect(x1 + 21, y1 + 10, x1 + 28, y1 + 30, GL_LINE_LOOP);
+      drawRect(x1 + 31, y1 + 05, x1 + 38, y1 + 30, GL_LINE_LOOP);
+      drawRect(x1 + 41, y1 + 00, x1 + 48, y1 + 30, GL_LINE_LOOP);
+
+
+      if((Platform::getRealMilliseconds() & 0x300) != 0) // Draw flashing red "X" on empty connection bars
+      {
+         static const F32 vertices[] = {x1 + 5, y1 - 5, x1 + 45, y1 + 35,  x1 + 5, y1 + 35, x1 + 45, y1 - 5 };
+         glColor(Colors::red);
+         glLineWidth(gDefaultLineWidth * 2.f);
+         renderVertexArray(vertices, 4, GL_LINES);
+         glLineWidth(gDefaultLineWidth);
+      }
    }
 }
 
@@ -847,7 +896,7 @@ void GameUserInterface::renderProgressBar() const
       // a disconcerting effect, as if the level did not fully load.  Rather than waste any more time on this problem, we'll just
       // fill in the status bar while it's fading, to make it look like the level fully loaded.  Since the only thing that this
       // whole mechanism is used for is to display something to the user, this should work fine.
-      F32 barWidth = mShowProgressBar ? S32((F32) width * (F32) getGame()->mObjectsLoaded / (F32) gt->mObjectsExpected) : width;
+      F32 barWidth = mShowProgressBar ? S32((F32) width * (F32) gt->getObjectsLoaded() / (F32) gt->mObjectsExpected) : width;
 
       for(S32 i = 1; i >= 0; i--)
       {
@@ -873,7 +922,8 @@ void GameUserInterface::renderReticle() const
    if(!shouldRender)
       return;
 
-   Point offsetMouse = mMousePoint + Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
+   Point offsetMouse = mMousePoint + Point(DisplayManager::getScreenInfo()->getGameCanvasWidth()  * 0.5f, 
+                                           DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f);
 
    F32 vertices[] = {
       // Center cross-hairs
@@ -964,7 +1014,8 @@ void GameUserInterface::onMouseMoved()
          return;
 
       Point o = ship->getRenderPos();  // To avoid taking address of temporary
-      Point p = worldToScreenPoint(&o, DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
+      Point p = worldToScreenPoint(&o, DisplayManager::getScreenInfo()->getGameCanvasWidth(), 
+                                       DisplayManager::getScreenInfo()->getGameCanvasHeight());
 
       mCurrentMove.angle = atan2(mMousePoint.y + DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - p.y, 
                                  mMousePoint.x + DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2 - p.x);
@@ -1065,7 +1116,7 @@ const HelperMenu *GameUserInterface::getActiveHelper() const
 }
 
 
-void GameUserInterface::renderEngineeredItemDeploymentMarker(Ship *ship)
+void GameUserInterface::renderEngineeredItemDeploymentMarker(Ship *ship) const
 {
    mHelperManager.renderEngineeredItemDeploymentMarker(ship);
 }
@@ -1196,6 +1247,12 @@ void GameUserInterface::setActiveWeapon(U32 weaponIndex)
 }
 
 
+void GameUserInterface::updateLeadingPlayerAndScore()
+{
+   mTimeLeftRenderer.updateLeadingPlayerAndScore(getGame());
+}
+
+
 // Used?
 void GameUserInterface::setModulePrimary(ShipModule module, bool isActive)
 {
@@ -1219,7 +1276,7 @@ S32 GameUserInterface::getLoadoutIndicatorWidth() const
 bool GameUserInterface::scoreboardIsVisible() const
 {
    // GameType can be NULL when first starting up
-   return mInScoreboardMode || (getGame()->getGameType() && getGame()->getGameType()->isGameOver());
+   return mInScoreboardMode || getGame()->isGameOver();
 }
 
 
@@ -1791,13 +1848,11 @@ Move *GameUserInterface::getCurrentMove()
       }
       else
       {
-         GameSettings *settings = getGame()->getSettings();
+         mCurrentMove.x = F32((InputCodeManager::getState(getInputCode(mGameSettings, BINDING_RIGHT)) ? 1 : 0) -
+                              (InputCodeManager::getState(getInputCode(mGameSettings, BINDING_LEFT))  ? 1 : 0));
 
-         mCurrentMove.x = F32((InputCodeManager::getState(getInputCode(settings, BINDING_RIGHT)) ? 1 : 0) -
-                              (InputCodeManager::getState(getInputCode(settings, BINDING_LEFT))  ? 1 : 0));
-
-         mCurrentMove.y = F32((InputCodeManager::getState(getInputCode(settings, BINDING_DOWN))  ? 1 : 0) -
-                              (InputCodeManager::getState(getInputCode(settings, BINDING_UP))    ? 1 : 0));
+         mCurrentMove.y = F32((InputCodeManager::getState(getInputCode(mGameSettings, BINDING_DOWN))  ? 1 : 0) -
+                              (InputCodeManager::getState(getInputCode(mGameSettings, BINDING_UP))    ? 1 : 0));
       }
 
       // If player is moving, do not show move instructions
@@ -1829,7 +1884,7 @@ Move *GameUserInterface::getCurrentMove()
 
    // Using relative controls -- all turning is done relative to the direction of the ship, so
    // we need to udate the move a little
-   if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<RelAbs>("ControlMode") == Relative)
+   if(mGameSettings->getSetting<RelAbs>(IniKey::ControlMode) == Relative)
    {
       mTransformedMove = mCurrentMove;    // Copy move
 
@@ -1857,7 +1912,7 @@ Move *GameUserInterface::getCurrentMove()
    // We'll also run this while in the menus so if we enter keyboard mode accidentally, it won't
    // kill the joystick.  The design of combining joystick input and move updating really sucks.
    if(getGame()->getInputMode() == InputModeJoystick || getUIManager()->isCurrentUI<OptionsMenuUserInterface>())
-      joystickUpdateMove(getGame(), getGame()->getSettings(), move);
+      joystickUpdateMove(getGame(), mGameSettings, move);
 
    return move;
 }
@@ -2072,7 +2127,7 @@ void GameUserInterface::VoiceRecorder::process()
       GameType *gameType = mGame->getGameType();
 
       if(gameType && sendBuffer->getBufferSize() < 1024)      // Don't try to send too big
-         gameType->c2sVoiceChat(mGame->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VoiceEcho"), sendBuffer);
+         gameType->c2sVoiceChat(mGame->getSettings()->getSetting<YesNo>(IniKey::VoiceEcho), sendBuffer);
    }
 }
 
@@ -2195,7 +2250,7 @@ enum ColIndex {
 };
 
 
-void GameUserInterface::renderScoreboard()
+void GameUserInterface::renderScoreboard() const
 {
    // This is probably not needed... if gameType were NULL, we'd have crashed and burned long ago
    GameType *gameType = getGame()->getGameType();
@@ -2209,9 +2264,10 @@ void GameUserInterface::renderScoreboard()
    S32 maxTeamPlayers = getDummyMaxPlayers();
    S32 teams = isTeamGame ? getDummyTeamCount() : 1;
 #else
-   getGame()->countTeamPlayers();
+   ClientGame *clientGame = getGame();
 
-   const S32 teams = isTeamGame ? getGame()->getTeamCount() : 1;
+   getGame()->countTeamPlayers();
+   const S32 teams = isTeamGame ? clientGame->getTeamCount() : 1;
    S32 maxTeamPlayers = 0;
 
    // Check to make sure at least one team has at least one player...
@@ -2245,23 +2301,34 @@ void GameUserInterface::renderScoreboard()
 
    const S32 scoreboardTop = (canvasHeight - totalHeight) / 2;    // Center vertically
 
+   const S32 winStatus = clientGame->getTeamBasedGameWinner().first;
+   bool hasWinner = winStatus == HasWinner;
+   bool isWinningTeam;
+
    // Outer scoreboard box
    drawFilledFancyBox(horizMargin - Gap, scoreboardTop - (2 * Gap),
                      (canvasWidth - horizMargin) + Gap, scoreboardTop + totalHeight + 23,
                      13, Colors::black, 0.85f, Colors::blue);
 
    FontManager::pushFontContext(ScoreboardContext);
-
+   
    for(S32 i = 0; i < teams; i++)
-      renderTeamScoreboard(i, teams, isTeamGame, scoreboardTop, sectionHeight, teamHeaderHeight, lineHeight);
+   {
+      if(clientGame->isGameOver() && hasWinner && i == clientGame->getTeamBasedGameWinner().second)
+         isWinningTeam = true;
+      else
+         isWinningTeam = false;
+      
+      renderTeamScoreboard(i, teams, isTeamGame, isWinningTeam, scoreboardTop, sectionHeight, teamHeaderHeight, lineHeight);
+   }
 
-   renderScoreboardLegend(getGame()->getPlayerCount(), scoreboardTop, totalHeight);
+   renderScoreboardLegend(clientGame->getPlayerCount(), scoreboardTop, totalHeight);
 
    FontManager::popFontContext();
 }
 
 
-void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGame, 
+void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGame, bool isWinningTeam,
                                              S32 scoreboardTop, S32 sectionHeight, S32 teamHeaderHeight, S32 lineHeight) const
 {
    static const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
@@ -2276,8 +2343,8 @@ void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGa
    const S32 yt = scoreboardTop + (index >> 1) * sectionHeight;   // Top edge of team render area
 
    // Team header
-   if(isTeamGame)     
-      renderTeamName(index, xl, xr, yt);
+   if (isTeamGame)
+      renderTeamName(index, isWinningTeam, xl, xr, yt);
 
    // Now for player scores.  First build a list.  Then sort it.  Then display it.
    Vector<ClientInfo *> playerScores;
@@ -2323,15 +2390,16 @@ void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGa
 }
 
 
-void GameUserInterface::renderTeamName(S32 index, S32 left, S32 right, S32 top) const
+void GameUserInterface::renderTeamName(S32 index, bool isWinningTeam, S32 left, S32 right, S32 top) const
 {
    static const S32 teamFontSize = 24;
 
    // First the box
-   const Color *teamColor = getGame()->getTeamColor(index);
+   const Color &teamColor = getGame()->getTeamColor(index);
+   const Color &borderColor = isWinningTeam ? Colors::white : teamColor;
    const S32 headerBoxHeight = teamFontSize + 2 * Gap;
 
-   drawFilledFancyBox(left, top, right, top + headerBoxHeight, 10, *teamColor, 0.6f, *teamColor);
+   drawFilledFancyBox(left, top, right, top + headerBoxHeight, 10, teamColor, 0.6f, borderColor);
 
    // Then the team name & score
    FontManager::pushFontContext(ScoreboardHeadlineContext);
@@ -2344,7 +2412,8 @@ void GameUserInterface::renderTeamName(S32 index, S32 left, S32 right, S32 top) 
 }
 
 
-void GameUserInterface::renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y, const S32 *colIndexWidths, bool isTeamGame) const
+void GameUserInterface::renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y, 
+                                                      const S32 *colIndexWidths, bool isTeamGame) const
 {
    glColor(Colors::gray50);
 
@@ -2385,6 +2454,7 @@ void GameUserInterface::renderScoreboardLine(const Vector<ClientInfo *> &playerS
 }
 
 
+// Static method
 void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio)
 {
    // Default to vector font for badges
@@ -2426,7 +2496,7 @@ void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 s
 }
 
 
-void GameUserInterface::renderBasicInterfaceOverlay()
+void GameUserInterface::renderBasicInterfaceOverlay() const
 {
    GameType *gameType = getGame()->getGameType();
 
@@ -2464,17 +2534,14 @@ bool GameUserInterface::shouldRenderLevelInfo() const
 }
 
 
-void GameUserInterface::renderLevelInfo() 
+void GameUserInterface::renderLevelInfo() const
 {
    // Level Info requires gametype.  It can be NULL when switching levels
    if(getGame()->getGameType() == NULL)
       return;
 
    if(shouldRenderLevelInfo())
-   {
       mLevelInfoDisplayer.render();
-      mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
-   }
 }
 
 
@@ -2554,7 +2621,7 @@ void GameUserInterface::renderObjectIds() const
    if(getGame()->isTestServer())
       return;
 
-   const Vector<DatabaseObject *> *objects = Game::getServerGameObjectDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objects = Game::getServerLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objects->size(); i++)
    {
@@ -2581,19 +2648,19 @@ void GameUserInterface::renderObjectIds() const
 }
 
 
-void GameUserInterface::saveAlreadySeenLevelupMessageList()
-{
-   getGame()->getSettings()->getIniSettings()->mSettings.setVal("LevelupItemsAlreadySeenList", 
-                                                                getAlreadySeenLevelupMessageString());
-}
+//void GameUserInterface::saveAlreadySeenLevelupMessageList()
+//{
+//   mGameSettings->setSetting("LevelupItemsAlreadySeenList",
+//                                                                getAlreadySeenLevelupMessageString());
+//}
 
 
-void GameUserInterface::loadAlreadySeenLevelupMessageList()
-{
-   setAlreadySeenLevelupMessageString(
-         getGame()->getSettings()->getIniSettings()->mSettings.getVal<string>("LevelupItemsAlreadySeenList")
-   );
-}
+//void GameUserInterface::loadAlreadySeenLevelupMessageList()
+//{
+//   setAlreadySeenLevelupMessageString(
+//         mGameSettings->getSetting<string>("LevelupItemsAlreadySeenList")
+//   );
+//}
 
 
 const string GameUserInterface::getAlreadySeenLevelupMessageString() const
@@ -2669,9 +2736,9 @@ static void populateRenderZones(ClientGame *game, const Rect *extentRect = NULL)
    rawRenderObjects.clear();
 
    if(extentRect)
-      game->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects, *extentRect);
+      game->getBotZoneDatabase().findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects, *extentRect);
    else
-      game->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects);
+      game->getBotZoneDatabase().findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects);
 
    fillRenderZones();
 }
@@ -2693,7 +2760,26 @@ static S32 QSORT_CALLBACK renderSortCompare(BfObject **a, BfObject **b)
 }
 
 
-void GameUserInterface::renderGameNormal()
+// Note: With the exception of renderCommander, this function cannot be called if ship is NULL.  If it is never
+// called with a NULL ship from renderCommander in practice, we can get rid of the caching of lastRenderPos (which will
+// fail here if we ever have more than one UIGame instance.  If the following assert never trips, we can get rid of the 
+// cached value, and perhaps the whole function itself.
+Point GameUserInterface::getShipRenderPos() const
+{
+   static Point lastRenderPos;
+
+   Ship *ship = getGame()->getLocalPlayerShip();
+
+   TNLAssert(ship, "Expected a valid ship here!");    // <== see comment above!
+
+   if(ship)
+      lastRenderPos = ship->getRenderPos();
+
+   return lastRenderPos;
+}
+
+
+void GameUserInterface::renderGameNormal() const
 {
    // Start of the level, we only show progress bar
    if(mShowProgressBar)
@@ -2708,34 +2794,26 @@ void GameUserInterface::renderGameNormal()
 
    visExt = getGame()->computePlayerVisArea(ship);
 
-   // TODO: This should not be needed here -- mPos is set elsewhere, but appears to be lagged by a frame, which 
-   //       creates a weird slightly off-center effect when moving.  This is harmless for the moment, but should be removed.
-   mShipPos.set(ship->getRenderPos());
-   mHasShipPos = true;
-
-
    glPushMatrix();
 
-   // Put (0,0) at the center of the screen
-   glTranslatef(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2.f, 
-                DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2.f, 0);       
+   static const Point center(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2,
+                             DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
+
+   glTranslate(center);       // Put (0,0) at the center of the screen
 
    // These scaling factors are different when changing the visible area by equiping the sensor module
-   F32 scaleFactX = (DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2) / visExt.x;
-   F32 scaleFactY = (DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2) / visExt.y;
+   glScale(center.x / visExt.x, center.y / visExt.y);
+   glTranslate(getShipRenderPos() * -1);
 
-   glScalef(scaleFactX, scaleFactY, 1);
-   glTranslatef(-mShipPos.x, -mShipPos.y, 0);
-
-   renderStars(mStars, mStarColors, NumStars, 1.0, mShipPos, visExt * 2);
+   renderStars(mStars, mStarColors, NumStars, 1.0, getShipRenderPos(), visExt * 2);
 
    // Render all the objects the player can see
    screenSize.set(visExt);
-   Rect extentRect(mShipPos - screenSize, mShipPos + screenSize);
+   Rect extentRect(getShipRenderPos() - screenSize, getShipRenderPos() + screenSize);
 
    // Fill rawRenderObjects with anything within extentRect (our visibility extent)
    rawRenderObjects.clear();
-   getGame()->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, rawRenderObjects, extentRect);    
+   getGame()->getLevel()->findObjects((TestFunc)isAnyObjectType, rawRenderObjects, extentRect);    
 
    // Cast objects in rawRenderObjects and put them in renderObjects
    renderObjects.clear();
@@ -2756,8 +2834,6 @@ void GameUserInterface::renderGameNormal()
    // Render in three passes, to ensure some objects are drawn above others
    for(S32 i = -1; i < 2; i++)
    {
-      Barrier::renderEdges(i, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
-
       if(mDebugShowMeshZones)
          for(S32 j = 0; j < renderZones.size(); j++)
             renderZones[j]->renderLayer(i);
@@ -2765,7 +2841,9 @@ void GameUserInterface::renderGameNormal()
       for(S32 j = 0; j < renderObjects.size(); j++)
          renderObjects[j]->renderLayer(i);
 
-      mFxManager.render(i, getCommanderZoomFraction());
+      Barrier::renderEdges(mGameSettings, i);    // Render wall edges
+
+      mFxManager.render(i, getCommanderZoomFraction(), getShipRenderPos());
    }
 
    S32 team = NONE;
@@ -2786,7 +2864,14 @@ void GameUserInterface::renderGameNormal()
 
    // Render current ship's energy
    if(ship)
+   {
       UI::EnergyGaugeRenderer::render(ship->mEnergy);   
+      UI::HealthGaugeRenderer::render(ship->mHealth);
+   }
+
+   // Render any screen-linked special effects, outside the matrix transformations
+   mFxManager.renderScreenEffects();
+
 
    //renderOverlayMap();     // Draw a floating overlay map
 }
@@ -2838,7 +2923,7 @@ void GameUserInterface::renderInlineHelpItemOutlines(S32 playerTeam, F32 alpha) 
       }
 
       fillVector.clear();
-      getGame()->getGameObjDatabase()->findObjects(itemTypes, fillVector, *getGame()->getWorldExtents());
+      getGame()->getLevel()->findObjects(itemTypes, fillVector, *getGame()->getWorldExtents());
       polygons.clear();
       for(S32 i = 0; i < fillVector.size(); i++)
          if(static_cast<BfObject *>(fillVector[i])->shouldRender())
@@ -2853,12 +2938,12 @@ void GameUserInterface::renderInlineHelpItemOutlines(S32 playerTeam, F32 alpha) 
       offsetPolygons(polygons, outlines, HIGHLIGHTED_OBJECT_BUFFER_WIDTH);
 
       for(S32 j = 0; j < outlines.size(); j++)
-         renderPolygonOutline(&outlines[j], &Colors::green, alpha);
+         renderPolygonOutline(&outlines[j], Colors::green, alpha);
    }
 }
 
 
-void GameUserInterface::renderGameCommander()
+void GameUserInterface::renderGameCommander() const
 {
    // Start of the level, we only show progress bar
    if(mShowProgressBar)
@@ -2885,23 +2970,22 @@ void GameUserInterface::renderGameCommander()
 
    Ship *ship = getGame()->getLocalPlayerShip();
 
-   //mShipPos = ship ? ship->getRenderPos()                 : Point(0,0);
    visSize = ship ? getGame()->computePlayerVisArea(ship) * 2 : worldExtents;
 
 
    glPushMatrix();
 
    // Put (0,0) at the center of the screen
-   glTranslatef(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.5f, DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f, 0);    
+   glTranslate(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.5f, 
+               DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f);    
 
    F32 zoomFrac = getCommanderZoomFraction();
 
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
-   glScalef(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y, 1);
+   glScale(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y);
 
-   // We should probably check that mHasShipPos == true, but it will hardly ever matter
-   Point offset = (mDispWorldExtents.getCenter() - mShipPos) * zoomFrac + mShipPos;
-   glTranslatef(-offset.x, -offset.y, 0);
+   Point offset = (mDispWorldExtents.getCenter() - getShipRenderPos()) * zoomFrac + getShipRenderPos();
+   glTranslate(-offset.x, -offset.y);
 
    // zoomFrac == 1.0 when fully zoomed out to cmdr's map
    renderStars(mStars, mStarColors, NumStars, 1 - zoomFrac, offset, modVisSize);
@@ -2911,9 +2995,9 @@ void GameUserInterface::renderGameCommander()
    rawRenderObjects.clear();
 
    if(ship && ship->hasModule(ModuleSensor))
-      getGame()->getGameObjDatabase()->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
+      getGame()->getLevel()->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
    else
-      getGame()->getGameObjDatabase()->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
+      getGame()->getLevel()->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
 
    renderObjects.clear();
 
@@ -2937,7 +3021,7 @@ void GameUserInterface::renderGameCommander()
       if(gameType)
       {
          playerTeam = ship->getTeam();
-         Color teamColor = *ship->getColor();
+         const Color &teamColor = ship->getColor();
 
          for(S32 i = 0; i < renderObjects.size(); i++)
          {
@@ -2959,7 +3043,7 @@ void GameUserInterface::renderGameCommander()
             }
          }
 
-         const Vector<DatabaseObject *> *spyBugs = getGame()->getGameObjDatabase()->findObjects_fast(SpyBugTypeNumber);
+         const Vector<DatabaseObject *> *spyBugs = getGame()->getLevel()->findObjects_fast(SpyBugTypeNumber);
 
          // Render spy bug visibility range second, so ranges appear above ship scanner range
          for(S32 i = 0; i < spyBugs->size(); i++)
@@ -2988,7 +3072,7 @@ void GameUserInterface::renderGameCommander()
       renderObjects[i]->renderLayer(0);
 
    // Second pass
-   Barrier::renderEdges(1, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
+   Barrier::renderEdges(mGameSettings, 1);    // Render wall edges
 
    if(mDebugShowMeshZones)
       for(S32 i = 0; i < renderZones.size(); i++)
@@ -3005,9 +3089,16 @@ void GameUserInterface::renderGameCommander()
 
    glPopMatrix();
 
+
    // Render current ship's energy
    if(ship)
-      UI::EnergyGaugeRenderer::render(ship->mEnergy);   
+   {
+      UI::EnergyGaugeRenderer::render(ship->mEnergy);
+      UI::HealthGaugeRenderer::render(ship->mHealth);
+   }
+
+   // Render any screen-linked special effects, outside the matrix transformations
+   mFxManager.renderScreenEffects();
 }
 
 
@@ -3054,9 +3145,9 @@ void GameUserInterface::renderGameCommander()
 //
 //   glPushMatrix();   // Set scaling and positioning of the overlay
 //
-//   glTranslatef(mapX + mapWidth / 2.f, mapY + mapHeight / 2.f, 0);          // Move map off to the corner
-//   glScalef(mapScale, mapScale, 1);                                     // Scale map
-//   glTranslatef(-position.x, -position.y, 0);                           // Put ship at the center of our overlay map area
+//   glTranslate(mapX + mapWidth / 2.f, mapY + mapHeight / 2.f);          // Move map off to the corner
+//   glScale(mapScale);                                     // Scale map
+//   glTranslate(-position.x, -position.y);                           // Put ship at the center of our overlay map area
 //
 //   // Render the objects.  Start by putting all command-map-visible objects into renderObjects
 //   Rect mapBounds(position, position);
@@ -3098,7 +3189,7 @@ void GameUserInterface::renderGameCommander()
 ////////////////////////////////////////////////////////////
 
 
-void GameUserInterface::renderSuspended()
+void GameUserInterface::renderSuspended() const
 {
    glColor(Colors::yellow);
    S32 textHeight = 20;
@@ -3321,8 +3412,9 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
       S32 displayAreaHeight = (mMessages.size() - 1) * lineHeight;     
       S32 displayAreaYPos = anchorPos + (mTopDown ? displayAreaHeight : lineHeight);
 
-      scissorsManager.enable(true, mGame->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
-                             0.0f, F32(displayAreaYPos - displayAreaHeight), F32(DisplayManager::getScreenInfo()->getGameCanvasWidth()), F32(displayAreaHeight));
+      scissorsManager.enable(true, mGame->getSettings()->getSetting<DisplayMode>(IniKey::WindowMode), 0, 
+                             F32(displayAreaYPos - displayAreaHeight), F32(DisplayManager::getScreenInfo()->getGameCanvasWidth()), 
+                             F32(displayAreaHeight));
    }
 
    // Initialize the starting rendering position.  This represents the bottom of the message rendering area, and

@@ -3,12 +3,18 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "UIEditorMenus.h"
+#include "UIQuickMenu.h"
 
 #include "UIEditor.h"
 #include "UIManager.h"
-#include "DisplayManager.h"    // For canvasHeight
-#include "ClientGame.h"    // For UIManager and callback
+#include "DisplayManager.h"   // For canvasHeight
+#include "ClientGame.h"       // For UIManager and callback
+
+#include "Spawn.h"
+#include "CoreGame.h"
+#include "TextItem.h"
+#include "PickupItem.h"
+#include "EngineeredItem.h"
 
 #include "Colors.h"
 
@@ -41,12 +47,11 @@ QuickMenuUI::~QuickMenuUI()
 
 void QuickMenuUI::initialize()
 {
-   mTopOfFirstMenuItem = -1;    
    mDisableHighlight = false;
 }
 
 
-string QuickMenuUI::getTitle()
+string QuickMenuUI::getTitle() const
 {
    return mMenuTitle;
 }
@@ -64,32 +69,25 @@ S32 QuickMenuUI::getGap(MenuItemSize size) const
 }
 
 
-void QuickMenuUI::render()
+static const S32 vpad = 4;
+
+void QuickMenuUI::render() const
 {
    // Draw the underlying editor screen
    getUIManager()->getPrevUI()->render();
 
    // mMenuLocation.x = 1000; mMenuLocation.y = -1000;      // <== For testing menu positioning code
 
-   //TODO: Get rid of the following
-   const S32 INSTRUCTION_SIZE = getTextSize(MENU_ITEM_SIZE_SMALL);     // Size of smaller bottom menu item, "Save and quit"
-
    string title = getTitle();
 
-   //S32 count = getMenuItemCount() - 1;      // We won't count our last item, save-n-quit, because it's rendered separately
-   // was S32 yStart = S32(mMenuLocation.y) - count * (getTextSize() + getGap()) - 10 - (getGap() + INSTRUCTION_SIZE);
-
-   S32 yStart = S32(mMenuLocation.y);
-
    S32 menuHeight = getTotalMenuItemHeight() +                                         // Height of all menu items
-                    getTextSize(MENU_ITEM_SIZE_SMALL) + getGap(MENU_ITEM_SIZE_NORMAL); // Height of title and title gam
+                    getTextSize(MENU_ITEM_SIZE_SMALL) + getGap(MENU_ITEM_SIZE_NORMAL); // Height of title and title gap
 
-   yStart = S32(mMenuLocation.y) - menuHeight;
+   S32 yStart = S32(mMenuLocation.y) - menuHeight;
 
-   S32 width = max(getMenuWidth(), getStringWidth(INSTRUCTION_SIZE, title.c_str()));
+   S32 width = max(getMenuWidth(), getStringWidth(getTextSize(MENU_ITEM_SIZE_SMALL), title.c_str()));
 
    S32 hpad = 8;
-   S32 vpad = 4;
 
    S32 naturalLeft = S32(mMenuLocation.x) - width / 2 - hpad;
    S32 naturalRight = S32(mMenuLocation.x) + width / 2 + hpad;
@@ -116,7 +114,7 @@ void QuickMenuUI::render()
    yStart += keepingItOnScreenAdjFactorY;
    S32 cenX = S32(mMenuLocation.x) + keepingItOnScreenAdjFactorX;
 
-   S32 left = naturalLeft  + keepingItOnScreenAdjFactorX;
+   S32 left  = naturalLeft  + keepingItOnScreenAdjFactorX;
    S32 right = naturalRight + keepingItOnScreenAdjFactorX;
 
    // Background rectangle
@@ -125,7 +123,7 @@ void QuickMenuUI::render()
                   Color(.1), Color(.5));
 
    // Now that the background has been drawn, adjust left and right to create the inset for the menu item highlights
-   left += 3;
+   left  += 3;
    right -= 4;
 
    // First draw the menu title
@@ -134,7 +132,9 @@ void QuickMenuUI::render()
 
    // Then the menu items
    yStart += getGap(MENU_ITEM_SIZE_NORMAL) + getTextSize(MENU_ITEM_SIZE_SMALL) + 2;
-   mTopOfFirstMenuItem = yStart;    // Save this -- it will be handy elsewhere!
+   //mTopOfFirstMenuItem = yStart;    // Save this -- it will be handy elsewhere!
+
+   TNLAssert(yStart == getYStart(), "Out of sync!");
 
    S32 y = yStart;
 
@@ -201,17 +201,30 @@ void QuickMenuUI::render()
 }
 
 
+// Used to figure out which item mouse is over.  Will always be positive during normal use.
 S32 QuickMenuUI::getYStart() const
 {
-   return mTopOfFirstMenuItem;
+   S32 menuHeight = getTotalMenuItemHeight() +                                         // Height of all menu items
+                    getTextSize(MENU_ITEM_SIZE_SMALL) + getGap(MENU_ITEM_SIZE_NORMAL); // Height of title and title gap
+
+   S32 yStart = S32(mMenuLocation.y) - menuHeight;
+
+   S32 naturalBottom = yStart + menuHeight + vpad * 2 + 2;
+
+   // Keep the menu on screen, no matter where the item being edited is located
+   if(yStart - vpad < 0)
+      yStart = vpad;
+   else if(naturalBottom > DisplayManager::getScreenInfo()->getGameCanvasHeight())
+      yStart = DisplayManager::getScreenInfo()->getGameCanvasHeight() - menuHeight - vpad * 2 - 2;
+
+   yStart += getGap(MENU_ITEM_SIZE_NORMAL) + getTextSize(MENU_ITEM_SIZE_SMALL) + 2;
+
+   return yStart;
 }
 
 
 S32 QuickMenuUI::getSelectedMenuItem()
 {
-   if(getYStart() < 0)      // Haven't run render yet, still have no idea where the menu is!
-      return 0;
-
    return Parent::getSelectedMenuItem();
 }
 
@@ -234,7 +247,7 @@ void QuickMenuUI::onDisplayModeChange()
 }
 
 
-S32 QuickMenuUI::getMenuWidth()
+S32 QuickMenuUI::getMenuWidth() const
 {
    S32 width = 0;
 
@@ -316,7 +329,7 @@ EditorAttributeMenuUI::~EditorAttributeMenuUI()
 }
 
 
-string EditorAttributeMenuUI::getTitle()
+string EditorAttributeMenuUI::getTitle() const
 {
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
@@ -326,16 +339,31 @@ string EditorAttributeMenuUI::getTitle()
 }
 
 
-void EditorAttributeMenuUI::startEditingAttrs(BfObject *object) 
+bool EditorAttributeMenuUI::startEditingAttrs(BfObject *object) 
 { 
    mAssociatedObject = object; 
 
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
-   Point center = (mAssociatedObject->getVert(0) + mAssociatedObject->getVert(1)) * ui->getCurrentScale() / 2 + ui->getCurrentOffset();
-   setMenuCenterPoint(center);  
+ 
 
-   EditorAttributeMenuItemBuilder::startEditingAttrs(this, object);
+   EditorAttributeMenuUI *attributeMenu = getUIManager()->getUI<EditorAttributeMenuUI>();
+   attributeMenu->clearMenuItems();
+
+   bool ok = object->startEditingAttrs(attributeMenu);
+
+   if(!ok)
+      return false;
+
+   Point center = (mAssociatedObject->getVert(0) + 
+                   mAssociatedObject->getVert(1)) * ui->getCurrentScale() / 2 + 
+                   ui->getCurrentOffset();
+
+   setMenuCenterPoint(center);
+
+   attributeMenu->addSaveAndQuitMenuItem();
+
+   return true;
 }
 
 
@@ -349,7 +377,8 @@ void EditorAttributeMenuUI::doneEditingAttrs(BfObject *object)
 {
    // Has to be object, not mAssociatedObject... this gets run once for every selected item of same type as mAssociatedObject, 
    // and we need to make sure that those objects (passed in as object), get updated
-   EditorAttributeMenuItemBuilder::doneEditingAttrs(this, object);     
+   EditorAttributeMenuUI *attributeMenu = getUIManager()->getUI<EditorAttributeMenuUI>();
+   object->doneEditingAttrs(attributeMenu);
 
    // Only run on object that is the subject of this editor.  See TextItemEditorAttributeMenuUI::doneEditingAttrs() for explanation
    // of why this may be run on objects that are not actually the ones being edited (hence the need for passing an object in).
@@ -365,7 +394,7 @@ void EditorAttributeMenuUI::doneEditingAttrs(BfObject *object)
 PluginMenuUI::PluginMenuUI(ClientGame *game, const string &title) :
       Parent(game, title)
 {
-   /* Do nothing */
+   // Do nothing 
 }
 
 

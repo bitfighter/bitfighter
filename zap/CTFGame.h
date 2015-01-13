@@ -26,7 +26,6 @@ public:
    CTFGameType();
    virtual ~CTFGameType();
 
-   void addFlag(FlagItem *flag);
    void shipTouchFlag(Ship *ship, FlagItem *flag);
    void itemDropped(Ship *ship, MoveItem *item, DismountMode dismountMode);
    void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
@@ -47,7 +46,8 @@ public:
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
-   void onGameOver();
+   bool onGameOver();
+   void onOvertimeStarted();
 
    TNL_DECLARE_CLASS(CTFGameType);
 };

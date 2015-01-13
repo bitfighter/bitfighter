@@ -4,12 +4,14 @@
 //------------------------------------------------------------------------------
 
 #include "rabbitGame.h"
-#include "Colors.h"
+
+#include "Level.h"
 
 #ifndef ZAP_DEDICATED
 #  include "UIMenuItems.h"
 #endif
 
+#include "Colors.h"
 #include "stringUtils.h"
 
 
@@ -90,12 +92,12 @@ RabbitGameType::~RabbitGameType()
 }
 
 
-bool RabbitGameType::processArguments(S32 argc, const char **argv, Game *game)
+bool RabbitGameType::processArguments(S32 argc, const char **argv, Level *level)
 {
-   if (argc != 4)
+   if(argc != 4)
       return false;
 
-   if(!Parent::processArguments(argc, argv, game))
+   if(!Parent::processArguments(argc, argv, level))
       return false;
 
    mFlagReturnTimer = atoi(argv[2]) * 1000;
@@ -113,26 +115,32 @@ string RabbitGameType::toLevelCode() const
 
 #ifndef ZAP_DEDICATED
 // Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
-Vector<string> RabbitGameType::getGameParameterMenuKeys()
+Vector<string> RabbitGameType::makeParameterMenuKeys() const
 {
-   Vector<string> items = Parent::getGameParameterMenuKeys();
-
-   // Use "Win Score" as an indicator of where to insert our Rabbit specific menu items
-   for(S32 i = 0; i < items.size(); i++)
-      if(items[i] == "Win Score")
-      {
-         items.insert(i - 1, "Flag Return Time");
-         items.insert(i + 2, "Point Earn Rate");
-
-         break;
-      }
+   // Start with the keys from our parent (GameType)
+   Vector<string> items = *Parent::getGameParameterMenuKeys();
+   
+   S32 index = items.getIndex("Win Score");
+   TNLAssert(index >= 0, "Invalid index!");     // Protect against text of Win Score being changed in parent
+   
+   // Use "Win Score" as a marker of where to insert our Rabbit specific menu items
+   items.insert(index - 1, "Flag Return Time");
+   items.insert(index + 2, "Point Earn Rate");
 
    return items;
 }
 
 
+// Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
+const Vector<string> *RabbitGameType::getGameParameterMenuKeys() const
+{
+   static const Vector<string> keys = makeParameterMenuKeys();
+   return &keys;
+}
+
+
 // Definitions for those items
-boost::shared_ptr<MenuItem> RabbitGameType::getMenuItem(const string &key)
+boost::shared_ptr<MenuItem> RabbitGameType::getMenuItem(const string &key) const
 {
    if(key == "Flag Return Time")
       return boost::shared_ptr<MenuItem>(new CounterMenuItem("Flag Return Timer:", mFlagReturnTimer / 1000, 1, 1, MaxMenuScore,
@@ -203,28 +211,29 @@ bool RabbitGameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
 }
 
 
-const Color *RabbitGameType::getTeamColor(const BfObject *object) const
+const Color &RabbitGameType::getTeamColor(const BfObject *object) const
 {
    // Neutral flags are orange in Rabbit
    if(object->getObjectTypeNumber() == FlagTypeNumber && object->getTeam() == TEAM_NEUTRAL)
-      return &Colors::orange50;  
+      return Colors::orange50;  
 
    // In team game, ships use team color
    if(isShipType(object->getObjectTypeNumber()) && !isTeamGame())
    {
       Ship *localShip = getGame()->getLocalPlayerShip();    // (can return NULL)
+
       if(localShip)
       {
          if(object == localShip)                            // Players always appear green to themselves
-            return &Colors::green;
+            return Colors::green;
 
          const Ship *ship = static_cast<const Ship *>(object);
 
          if(shipHasFlag(ship) || shipHasFlag(localShip))    // If a ship has the flag, it's red; if we have the flag, others are red
-            return &Colors::red;
+            return Colors::red;
       }
 
-      return &Colors::green;                                // All others are green
+      return Colors::green;                                // All others are green
    }
 
    return Parent::getTeamColor(object);
@@ -245,7 +254,7 @@ void RabbitGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
       return;
 
    // Server only from here on
-   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getLevel()->findObjects_fast(FlagTypeNumber);
 
    for(S32 i = 0; i < flags->size(); i++)
    {

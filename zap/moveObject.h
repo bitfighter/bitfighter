@@ -24,7 +24,7 @@ enum MoveStateNames {
 class MoveStates
 {
 private:
-   struct MoveState  // need public, not protected, for SpeedZone handling...  TODO: fix this flaw
+   struct MoveState
    {
       Point pos;        // Actual position of the ship/object
       float angle;      // Actual angle of the ship/object
@@ -76,10 +76,10 @@ protected:
 
 
 public:
-   MoveObject(const Point &p = Point(0,0), float radius = 1, float mass = 1);     // Constructor
-   virtual ~MoveObject();                                                                // Destructor
+   MoveObject(const Point &p = Point(0,0), float radius = 1, float mass = 1);    // Constructor
+   virtual ~MoveObject();                                                        // Destructor
       
-   virtual bool processArguments(S32 argc, const char **argv, Game *game);
+   virtual bool processArguments(S32 argc, const char **argv, Level *level);
    virtual string toLevelCode() const;
 
 
@@ -191,10 +191,10 @@ public:
    void setCollideable(bool isCollideable);
    void setPositionMask();
 
-   virtual void render();
+   virtual void render() const;
 
-   virtual void renderItem(const Point &pos);                  // Does actual rendering, allowing render() to be generic for all Items
-   virtual void renderItemAlpha(const Point &pos, F32 alpha);  // Used for mounted items when cloaked
+   virtual void renderItem(const Point &pos) const;                  // Does actual rendering, allowing render() to be generic for all Items
+   virtual void renderItemAlpha(const Point &pos, F32 alpha) const;  // Used for mounted items when cloaked
 
    virtual bool collide(BfObject *otherObject);
 };
@@ -224,7 +224,7 @@ public:
 
    // Override some parent functions
    void idle(BfObject::IdleCallPath path);
-   void render();
+   void render() const;
    virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
    bool collide(BfObject *otherObject);
@@ -322,7 +322,7 @@ public:
    static F32 getAsteroidRadius(S32 size_left);
    static F32 getAsteroidMass(S32 size_left);
 
-   void renderItem(const Point &pos);
+   void renderItem(const Point &pos) const;
    bool shouldRender() const;
    const Vector<Point> *getCollisionPoly() const;
    bool collide(BfObject *otherObject);
@@ -335,21 +335,10 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
    void onItemExploded(Point pos);
 
-   bool processArguments(S32 argc2, const char **argv2, Game *game);
+   bool processArguments(S32 argc2, const char **argv2, Level *level);
    string toLevelCode() const;
 
-//#ifndef ZAP_DEDICATED
-//private:
-//   static EditorAttributeMenuUI *mAttributeMenuUI;
-//
-//public:
-//   // These four methods are all that's needed to add an editable attribute to a class...
-//   EditorAttributeMenuUI *getAttributeMenu();
-//   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
-//   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
-
    virtual void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
-//#endif
 
    static U32 getDesignCount();
    S32 getCurrentSize() const;
@@ -358,14 +347,18 @@ public:
    TNL_DECLARE_CLASS(Asteroid);
 
    ///// Editor methods
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
 
-   //virtual S32 getDockRadius();
-   F32 getEditorRadius(F32 currentScale);
-   void renderDock();
+   F32 getEditorRadius(F32 currentScale) const;
+   void renderDock(const Color &color) const;
+
+#ifndef ZAP_DEDICATED
+   bool startEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+#endif
 
    ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Asteroid);
@@ -401,7 +394,7 @@ public:
    static const S32 TEST_ITEM_RADIUS = 60;
    static const S32 TEST_ITEM_SIDES  =  7;
 
-   void renderItem(const Point &pos);
+   void renderItem(const Point &pos) const;
    void damageObject(DamageInfo *theInfo);
    const Vector<Point> *getCollisionPoly() const;
 
@@ -409,13 +402,13 @@ public:
    TNL_DECLARE_CLASS(TestItem);
 
    ///// Editor methods
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
 
-   F32 getEditorRadius(F32 currentScale);
-   void renderDock();
+   F32 getEditorRadius(F32 currentScale) const;
+   void renderDock(const Color &color) const;
 
    ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(TestItem);
@@ -443,8 +436,8 @@ public:
 
    static const S32 RESOURCE_ITEM_RADIUS = 20;
 
-   void renderItem(const Point &pos);
-   void renderItemAlpha(const Point &pos, F32 alpha);
+   void renderItem(const Point &pos) const;
+   void renderItemAlpha(const Point &pos, F32 alpha) const;
    bool collide(BfObject *hitObject);
    void damageObject(DamageInfo *theInfo);
    void dismount(DismountMode dismountMode);
@@ -456,12 +449,12 @@ public:
    TNL_DECLARE_CLASS(ResourceItem);
 
    ///// Editor methods
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
 
-   void renderDock();
+   void renderDock(const Color &color) const;
 
    ///// Lua Interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(ResourceItem);

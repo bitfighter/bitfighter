@@ -19,12 +19,12 @@ using namespace TNL;
 TEST(RobotTest, addBot)
 {
 	GamePair gamePair;
-	Vector<const char *> args;
+	Vector<string> empty;
 
 	EXPECT_EQ(0, gamePair.server->getRobotCount());
 	EXPECT_EQ(0, gamePair.getClient(0)->getRobotCount());
 
-	gamePair.server->addBot(args, ClientInfo::ClassRobotAddedByAddbots);
+	gamePair.server->addBot(empty, ClientInfo::ClassRobotAddedByAddbots);
 
 	for(U32 i = 0; i < 10; i++)
 		gamePair.idle(10);
@@ -46,16 +46,14 @@ TEST(RobotTest, luaRobotNew)
 
 	EXPECT_TRUE(levelgen.runString("bf:addItem(Robot.new())"));
 
-	for(U32 i = 0; i < 10; i++)
-		gamePair.idle(10);
+	gamePair.idle(10, 10);
 	
 	EXPECT_EQ(1, gamePair.server->getRobotCount());
 	EXPECT_EQ(1, gamePair.getClient(0)->getRobotCount());
 
 	EXPECT_TRUE(levelgen.runString("bots = bf:findAllObjects(ObjType.Robot); bots[1]:removeFromGame()"));
 
-	for(U32 i = 0; i < 10; i++)
-		gamePair.idle(10);
+	gamePair.idle(10, 10);
 	
 	EXPECT_EQ(0, gamePair.server->getRobotCount());
 	EXPECT_EQ(0, gamePair.getClient(0)->getRobotCount());

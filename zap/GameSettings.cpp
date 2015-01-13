@@ -142,20 +142,21 @@ DirectiveInfo directiveDefs[] = {
 
 // These correspond to tier above
 const char *helpTitles[] = {
-   "Player-oriented options",
-   "Options for hosting",
-   "Specifying levels",
-   "Specifying folders\nAll of the following options can be specified with either a relative or absolute path. They are primarily intended to make installation on certain Linux platforms more flexible; they are not meant for daily use by average users.\nIn most cases, -rootdatadir is the only parameter in this section you will need.",
-   "Developer-oriented options",
-   "Advanced server management commands",
-   "Other commands",
+   "Player-oriented options:",
+   "Options for hosting:",
+   "Specifying levels:",
+   "Specifying folders:\n\nAll of the following options can be specified with either a relative or absolute path. They are primarily intended to make installation on certain Linux platforms more flexible; they are not meant for daily use by average users.\nIn most cases, -rootdatadir is the only parameter in this section you will need.",
+   "Developer-oriented options:",
+   "Advanced server management commands:",
+   "Other commands:",
 };
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 // Define statics
-FolderManager *GameSettings::mFolderManager = NULL;
+GameSettings *GameSettings::staticSelf = NULL;
+
 Vector<string> GameSettings::DetectedJoystickNameList;   // List of joysticks we found attached to this machine
 
 S32 GameSettings::UseJoystickNumber = 0;
@@ -163,16 +164,20 @@ S32 GameSettings::UseJoystickNumber = 0;
 CIniFile GameSettings::iniFile("dummy");                 // Our INI file.  Real filename will be supplied later.
 CIniFile GameSettings::userPrefs("dummy");               // Our INI file.  Real filename will be supplied later.
 
+FolderManager *GameSettings::mFolderManager = NULL;
+string GameSettings::mExecutablePath = "bitfighter";     // Default executable name, will be overwritten
 
 // Constructor
 GameSettings::GameSettings()
 {
-   mBanList = new BanList(getFolderManager()->iniDir);
+   mBanList = new BanList(getFolderManager()->getIniDir());
    mLoadoutPresets.resize(LoadoutPresetCount);   // Make sure we have the right number of slots available
+
+   staticSelf = this;
 }
 
 
-// Destructor
+// Destructor -- this will only get run when Bitfighter is shutting down
 GameSettings::~GameSettings()
 {
    delete mBanList;
@@ -197,18 +202,31 @@ static const string *choose(const string &firstChoice, const string &secondChoic
 }
 
 
+GameSettings *GameSettings::get()
+{
+   TNLAssert(staticSelf, "Static access is NULL!");
+   return staticSelf;
+}
+
+
+void GameSettings::setExecutablePath(const string &executablePath)
+{
+   mExecutablePath = executablePath;
+}
+
+
 string GameSettings::getHostName()
 {
    return mHostName;
 }
 
 
-void GameSettings::setHostName(const string &hostName, bool updateINI) 
+void GameSettings::setHostName(const string &serverName, bool updateINI) 
 { 
-   mHostName = hostName; 
+   mHostName = serverName; 
 
    if(updateINI)
-      mIniSettings.hostname = hostName; 
+      mIniSettings.mSettings.setVal(IniKey::ServerName, serverName);
 }
 
 
@@ -218,12 +236,12 @@ string GameSettings::getHostDescr()
 }
 
 
-void GameSettings::setHostDescr(const string &hostDescr, bool updateINI) 
+void GameSettings::setHostDescr(const string &serverDescription, bool updateINI) 
 { 
-   mHostDescr = hostDescr;
+   mHostDescr = serverDescription;
    
    if(updateINI)
-      mIniSettings.hostdescr = hostDescr; 
+      mIniSettings.mSettings.setVal(IniKey::ServerDescription, serverDescription);
 }
 
 
@@ -238,7 +256,7 @@ void GameSettings::setServerPassword(const string &serverPassword, bool updateIN
    mServerPassword = serverPassword; 
 
    if(updateINI)
-      mIniSettings.serverPassword = serverPassword; 
+      mIniSettings.mSettings.setVal(IniKey::ServerPassword, serverPassword);
 }
 
 
@@ -253,7 +271,7 @@ void GameSettings::setOwnerPassword(const string &ownerPassword, bool updateINI)
    mOwnerPassword = ownerPassword;
 
    if(updateINI)
-      mIniSettings.ownerPassword = ownerPassword;
+      mIniSettings.mSettings.setVal(IniKey::OwnerPassword, ownerPassword);
 }
 
 
@@ -268,7 +286,7 @@ void GameSettings::setAdminPassword(const string &adminPassword, bool updateINI)
    mAdminPassword = adminPassword; 
 
    if(updateINI)
-      mIniSettings.adminPassword = adminPassword; 
+      mIniSettings.mSettings.setVal(IniKey::AdminPassword, adminPassword);
 }
 
 
@@ -283,35 +301,34 @@ void GameSettings::setLevelChangePassword(const string &levelChangePassword, boo
    mLevelChangePassword = levelChangePassword;     // Update our working copy
 
    if(updateINI)
-      mIniSettings.levelChangePassword = levelChangePassword; 
+      mIniSettings.mSettings.setVal(IniKey::LevelChangePassword, levelChangePassword);        
 }
 
 
-string GameSettings::getString(ParamId paramId)
+string GameSettings::getCmdLineParamString(ParamId paramId)
 {
    return mCmdLineParams[paramId].size() > 0 ? mCmdLineParams[paramId].get(0) : "";
 }
 
 
-U32 GameSettings::getU32(ParamId paramId)
+U32 GameSettings::getCmdLineParamU32(ParamId paramId)
 {
    return mCmdLineParams[paramId].size() > 0 ? U32(atoi(mCmdLineParams[paramId].get(0).c_str())) : 0;
 }
 
 
-F32 GameSettings::getF32(ParamId paramId)
+F32 GameSettings::getCmdLineParamF32(ParamId paramId)
 {
    return mCmdLineParams[paramId].size() > 0 ? (F32)Zap::stof(mCmdLineParams[paramId].get(0)) : 0;
 }
 
 
-bool GameSettings::getSpecified(ParamId paramId)
+bool GameSettings::isCmdLineParamSpecified(ParamId paramId)
 {
    return mCmdLineParams[paramId].size() > 0;
 }
 
 
-// Lazily initialize
 FolderManager *GameSettings::getFolderManager()
 {
    if(!mFolderManager)
@@ -323,18 +340,18 @@ FolderManager *GameSettings::getFolderManager()
 
 FolderManager GameSettings::getCmdLineFolderManager()
 {
-    return FolderManager( getString(LEVEL_DIR), 
-                          getString(ROBOT_DIR), 
-                          getString(SFX_DIR),
-                          getString(MUSIC_DIR),
-                          getString(INI_DIR),
-                          getString(LOG_DIR),
-                          getString(SCREENSHOT_DIR),
-                          getString(SCRIPTS_DIR),
-                          getString(ROOT_DATA_DIR),
-                          getString(PLUGIN_DIR),
-                          getString(FONTS_DIR),
-                          getString(RECORD_DIR));
+    return FolderManager( getCmdLineParamString(LEVEL_DIR), 
+                          getCmdLineParamString(ROBOT_DIR), 
+                          getCmdLineParamString(SFX_DIR),
+                          getCmdLineParamString(MUSIC_DIR),
+                          getCmdLineParamString(INI_DIR),
+                          getCmdLineParamString(LOG_DIR),
+                          getCmdLineParamString(SCREENSHOT_DIR),
+                          getCmdLineParamString(SCRIPTS_DIR),
+                          getCmdLineParamString(ROOT_DATA_DIR),
+                          getCmdLineParamString(PLUGIN_DIR),
+                          getCmdLineParamString(FONTS_DIR),
+                          getCmdLineParamString(RECORD_DIR));
 }
 
 
@@ -354,14 +371,16 @@ void GameSettings::resolveDirs()
 string GameSettings::getHostAddress()
 {
    // Try cmd line first
-   string cmdLineHostAddr = getString(HOST_ADDRESS);
+   string cmdLineHostAddr = getCmdLineParamString(HOST_ADDRESS);
 
    if(cmdLineHostAddr != "")
       return cmdLineHostAddr;
 
    // Then look in the INI
-   if(mIniSettings.hostaddr != "")
-      return mIniSettings.hostaddr;
+   string addr = mIniSettings.mSettings.getVal<string>(IniKey::ServerAddress);
+
+   if(addr != "")
+      return addr;
 
    // Fall back to default, which is what we usually want anyway!
    return "IP:Any:" + itos(DEFAULT_GAME_PORT);
@@ -370,10 +389,10 @@ string GameSettings::getHostAddress()
 
 U32 GameSettings::getMaxPlayers()
 {
-   U32 maxplayers = getU32(MAX_PLAYERS_PARAM);
+   U32 maxplayers = getCmdLineParamU32(MAX_PLAYERS_PARAM);     // Command line value
 
    if(maxplayers == 0)
-      maxplayers = mIniSettings.maxPlayers;
+      maxplayers = mIniSettings.mSettings.getVal<U32>(IniKey::MaxPlayers);
 
    if(maxplayers > MAX_PLAYERS)
       maxplayers = MAX_PLAYERS;
@@ -389,7 +408,7 @@ void GameSettings::save()
    //   bl->writeToFile();      // Writes ban list back to file XXX enable this when admin functionality is built in
 
    //saveWindowMode(&iniFile, &mIniSettings);
-   //getIniSettings()->mSettings.setVal("WindowMode", cmdLineDisplayMode);
+   //setSetting("WindowMode", cmdLineDisplayMode);
       //ini->SetValue("Settings",  "WindowMode", displayModeToString(iniSettings->displayMode));;
    saveSettingsToINI(&iniFile, this);        // Writes settings to iniFile, then writes it to disk
 }
@@ -403,13 +422,13 @@ IniSettings *GameSettings::getIniSettings()
 
 string GameSettings::getDefaultName()
 {
-   return mIniSettings.defaultName;
+   return getSetting<string>(IniKey::DefaultName);
 }
 
 
 bool GameSettings::getForceUpdate()
 {
-   return getSpecified(FORCE_UPDATE);
+   return isCmdLineParamSpecified(FORCE_UPDATE);
 }
 
 
@@ -421,13 +440,40 @@ string GameSettings::getPlayerName()
 
 void GameSettings::setQueryServerSortColumn(S32 column, bool ascending)
 {
-   mIniSettings.queryServerSortColumn = column;
-   mIniSettings.queryServerSortAscending = ascending;
+   mIniSettings.mSettings.setVal(IniKey::QueryServerSortColumn, column);
+   mIniSettings.mSettings.setVal(IniKey::QueryServerSortAscending, ascending ? Yes : No);
 }
 
 
-S32  GameSettings::getQueryServerSortColumn()    { return mIniSettings.queryServerSortColumn;    }
-bool GameSettings::getQueryServerSortAscending() { return mIniSettings.queryServerSortAscending; }
+S32  GameSettings::getQueryServerSortColumn()    { return mIniSettings.mSettings.getVal<S32>(IniKey::QueryServerSortColumn);      }
+bool GameSettings::getQueryServerSortAscending() { return mIniSettings.mSettings.getVal<YesNo>(IniKey::QueryServerSortAscending); }
+
+
+void GameSettings::setWindowPosition(S32 x, S32 y)
+{
+   setSetting(IniKey::WindowXPos, x);
+   setSetting(IniKey::WindowYPos, y);
+}
+
+S32 GameSettings::getWindowPositionX() { return mIniSettings.mSettings.getVal<S32>(IniKey::WindowXPos); }
+S32 GameSettings::getWindowPositionY() { return mIniSettings.mSettings.getVal<S32>(IniKey::WindowYPos); }
+
+
+void GameSettings::setWindowSizeFactor(F32 scalingFactor)
+{
+   setSetting(IniKey::WindowScalingFactor, scalingFactor);
+}
+
+F32 GameSettings::getWindowSizeFactor() { return mIniSettings.mSettings.getVal<F32>(IniKey::WindowScalingFactor); }
+
+
+F32 GameSettings::getMusicVolume()
+{
+   if(isCmdLineParamSpecified(NO_MUSIC))
+      return 0;
+
+   return mIniSettings.mSettings.getVal<F32>(IniKey::MusicVolume);
+}
 
 
 // User has entered name and password, and has clicked Ok.  That's the only way to get here.
@@ -438,9 +484,9 @@ void GameSettings::setLoginCredentials(const string &name, const string &passwor
    mPlayerPassword = password;
 
    if(savePassword)
-      mIniSettings.lastPassword = password;
+      mIniSettings.mSettings.setVal(IniKey::Password, password);
 
-   mIniSettings.mSettings.setVal("LastName", name);
+   mIniSettings.mSettings.setVal(IniKey::LastName, name);
    
    iniFile.WriteFile();
 }
@@ -453,7 +499,7 @@ void GameSettings::updatePlayerName(const string &name)
 
    if(!mPlayerNameSpecifiedOnCmdLine)
    {
-      mIniSettings.mSettings.setVal("LastName", name);      // Save new name to the INI
+      mIniSettings.mSettings.setVal(IniKey::LastName, name);      // Save new name to the INI
       iniFile.WriteFile();
    }
 }
@@ -470,29 +516,29 @@ void GameSettings::setAutologin(bool autologin)
 {
    if(autologin)
    {
-      mIniSettings.name     = mIniSettings.mSettings.getVal<string>("LastName");
-      mIniSettings.password = mIniSettings.lastPassword;
+      mIniSettings.mSettings.setVal(IniKey::Nickname, mIniSettings.mSettings.getVal<string>(IniKey::LastName));
+      mIniSettings.mSettings.setVal(IniKey::Password, mIniSettings.mSettings.getVal<string>(IniKey::LastPassword));
    }
    else
    {
-      mIniSettings.name     = "";
-      mIniSettings.password = "";
+      mIniSettings.mSettings.setVal(IniKey::Nickname, string());
+      mIniSettings.mSettings.setVal(IniKey::Password, string());
    }
 }
 
 
 bool GameSettings::isDedicatedServer()
 {
-   return getSpecified(DEDICATED) || getSpecified(HOST_ON_DEDICATED);
+   return isCmdLineParamSpecified(DEDICATED) || isCmdLineParamSpecified(HOST_ON_DEDICATED);
 }
 
 
 string GameSettings::getLevelDir(SettingSource source)
 {
    if(source == CMD_LINE)
-      return getString(LEVEL_DIR);
+      return getCmdLineParamString(LEVEL_DIR);
    else
-      return mIniSettings.levelDir;
+      return mIniSettings.mSettings.getVal<string>(IniKey::LevelDir);
 }
 
 
@@ -500,7 +546,7 @@ string GameSettings::getLevelDir(SettingSource source)
 // Will return the path if using the param, and "" if you arent
 string GameSettings::getPlaylistFile()
 {
-	return getString(USE_FILE);
+	return getCmdLineParamString(USE_FILE);
 }
 
 
@@ -528,7 +574,7 @@ string GameSettings::getlevelLoc()
 	}
 	else
 	{
-		 return getFolderManager()->levelDir;
+		 return getFolderManager()->getLevelDir();
 	}
 	return "";
 }
@@ -540,11 +586,11 @@ LevelSource *GameSettings::chooseLevelSource(Game *game)
 	if(isUsingPlaylist())
 	{
 		printf("isUsingPlaylist, and returned playlist object\n");
-		return new FileListLevelSource(getPlaylist(), getFolderManager()->levelDir);
+		return new FileListLevelSource(getPlaylist(), getFolderManager()->getLevelDir(), this);
 	}
 	else
 	{
-		return new FolderLevelSource(getLevelList(), getFolderManager()->levelDir);
+		return new FolderLevelSource(getLevelList(), getFolderManager()->getLevelDir());
 	}
 }
 
@@ -645,7 +691,7 @@ Vector<string> *GameSettings::getSpecifiedLevels()
 // This is the generic way to get a list of levels we'll be playing with, the one used in the ordinary course of events
 Vector<string> GameSettings::getLevelList()
 {
-   return getLevelList(getFolderManager()->levelDir, false);
+   return getLevelList(getFolderManager()->getLevelDir(), false);
 }
 
 
@@ -694,7 +740,7 @@ Vector<string> GameSettings::getLevelList(const string &levelDir, bool ignoreCmd
 Vector<string> GameSettings::getPlaylist()
 {
    // Build our level list by reading the playlist
-   return FileListLevelSource::findAllFilesInPlaylist(getPlaylistFile(), GameSettings::getFolderManager()->levelDir);
+   return FileListLevelSource::findAllFilesInPlaylist(getPlaylistFile(), GameSettings::getFolderManager()->getLevelDir());
 }
 
 
@@ -707,9 +753,9 @@ static void parameterError(const char *errorMsg)
 }
 
 
-// Fills params with the requisite number of param arguments.  Returns new position along the tokens in cmd line where we should 
-// continue parsing.
-static S32 getParams(ParamRequirements argsRequired, const S32 paramPtr, const S32 argPtr, 
+// Fills params Vector with the requisite number of param arguments.  Returns new position along
+// the tokens in cmd line where we should continue parsing.
+static S32 parseParams(ParamRequirements argsRequired, const S32 paramPtr, const S32 argPtr,
                      const S32 argc, const Vector<string> &argv, const char *errorMsg, Vector<string> &params)
 {
    // Assume "args" starting with "-" are actually subsequent params
@@ -802,26 +848,27 @@ void GameSettings::readCmdLineParams(const Vector<string> &argv)
       }
 #endif
 
-      // Scan through the possible params
+      // Scan through the possible parameters for a match to what is on the command line
+      // This will fill out mCmdLineParams with any parameters found for the specific param id
       for(U32 i = 0; i < ARRAYSIZE(paramDefs); i++)
       {
          if(arg == "-" + paramDefs[i].paramName)
          {
-            argPtr = getParams(paramDefs[i].argsRequired, i, argPtr, argc, argv, paramDefs[i].errorMsg, mCmdLineParams[paramDefs[i].paramId]);
+            argPtr = parseParams(paramDefs[i].argsRequired, i, argPtr, argc, argv, paramDefs[i].errorMsg, mCmdLineParams[paramDefs[i].paramId]);
 
             found = true;
             break;
          }
       }
 
-      // Didn't find a matching parameter... let's try the commands
+      // Didn't find a matching parameter... let's try the command directives
       if(!found)
       {
          for(U32 i = 0; i < ARRAYSIZE(directiveDefs); i++)
          {
             if(arg == "-" + directiveDefs[i].paramName)
             {
-               argPtr = getParams(directiveDefs[i].argsRequired, i, argPtr, argc, argv, directiveDefs[i].errorMsg, mCmdLineParams[directiveDefs[i].paramId]);
+               argPtr = parseParams(directiveDefs[i].argsRequired, i, argPtr, argc, argv, directiveDefs[i].errorMsg, mCmdLineParams[directiveDefs[i].paramId]);
 
                found = true;
                break;
@@ -864,47 +911,53 @@ void GameSettings::runCmdLineDirectives()
 void GameSettings::onFinishedLoading()
 {
    string masterAddressList, cmdLineVal;
+   Settings<IniKey::SettingsItem> &settings = mIniSettings.mSettings;
 
-   // Some parameters can be specified both on the cmd line and in the INI... in those cases, the cmd line version takes precedence
+   // Some parameters can be specified both on the cmd line and in the INI... in those cases,
+   // the cmd line version takes precedence.
+   //
+   // No command-line parameter should write to the INI unless otherwise specified
+   //
    //                                First choice (cmdLine)             Second choice (INI)                  Third choice (fallback)
-   mServerPassword         = *choose( getString(SERVER_PASSWORD),       mIniSettings.serverPassword );
+   mServerPassword         = *choose( getCmdLineParamString(SERVER_PASSWORD),       settings.getVal<string>(IniKey::ServerPassword) );
 
-   mOwnerPassword          = *choose( getString(OWNER_PASSWORD),        mIniSettings.ownerPassword );
+   mOwnerPassword          = *choose( getCmdLineParamString(OWNER_PASSWORD),        settings.getVal<string>(IniKey::OwnerPassword) );
 
    // Admin and level change passwords have special overrides that force them to be blank... handle those below
-   if(getSpecified(NO_ADMIN_PASSWORD))
+   if(isCmdLineParamSpecified(NO_ADMIN_PASSWORD))
       mAdminPassword = "";
    else
-      mAdminPassword       = *choose( getString(ADMIN_PASSWORD),        mIniSettings.adminPassword );
+      mAdminPassword       = *choose( getCmdLineParamString(ADMIN_PASSWORD),        settings.getVal<string>(IniKey::AdminPassword) );
 
-   if(getSpecified(NO_LEVEL_CHANGE_PASSWORD))
+   if(isCmdLineParamSpecified(NO_LEVEL_CHANGE_PASSWORD))
       mLevelChangePassword = "";
    else
-      mLevelChangePassword = *choose( getString(LEVEL_CHANGE_PASSWORD), mIniSettings.levelChangePassword );
+      mLevelChangePassword = *choose( getCmdLineParamString(LEVEL_CHANGE_PASSWORD), settings.getVal<string>(IniKey::LevelChangePassword) );
 
 
-   mHostName               = *choose( getString(HOST_NAME),             mIniSettings.hostname );
-   mHostDescr              = *choose( getString(HOST_DESCRIPTION),      mIniSettings.hostdescr );
+   mHostName               = *choose( getCmdLineParamString(HOST_NAME),             settings.getVal<string>(IniKey::ServerName) );
+   mHostDescr              = *choose( getCmdLineParamString(HOST_DESCRIPTION),      settings.getVal<string>(IniKey::ServerDescription) );
 
 
-   cmdLineVal = getString(LOGIN_NAME);
+   cmdLineVal = getCmdLineParamString(LOGIN_NAME);
    mPlayerNameSpecifiedOnCmdLine = (cmdLineVal!= "");
 
    //                                 Cmd Line value                    User must set manually in INI            Saved in INI based on last entry       
-   mPlayerName             = *choose( cmdLineVal,                       mIniSettings.name,                       mIniSettings.mSettings.getVal<string>("LastName"));
-   mPlayerPassword         = *choose( getString(LOGIN_PASSWORD),        mIniSettings.password,                   mIniSettings.lastPassword);
+   mPlayerName             = *choose( cmdLineVal,                       getSetting<string>(IniKey::Nickname),    getSetting<string>(IniKey::LastName));
+   mPlayerPassword         = *choose( getCmdLineParamString(LOGIN_PASSWORD), getSetting<string>(IniKey::Password), getSetting<string>(IniKey::LastPassword));
 
-   cmdLineVal = getString(MASTER_ADDRESS);
+   cmdLineVal = getCmdLineParamString(MASTER_ADDRESS);
    mMasterServerSpecifiedOnCmdLine = (cmdLineVal != "");
 
-   masterAddressList       = *choose( getString(MASTER_ADDRESS),        getIniSettings()->masterAddress );    // The INI will always have a value
+   masterAddressList       = *choose( getCmdLineParamString(MASTER_ADDRESS), getSetting<string>(IniKey::MasterServerAddressList) );    // The INI will always have a value
 
    parseString(masterAddressList, mMasterServerList, ',');        // Move the list of master servers into mMasterServerList
 
    getFolderManager()->resolveLevelDir(this);                     // Figure out where the heck our levels are stored
 
-   if(getIniSettings()->levelDir == "")                           // If there is nothing in the INI,
-      getIniSettings()->levelDir = getFolderManager()->levelDir;  // write a good default to the INI
+   // If there is nothing in the INI, write a good default to the INI
+   if(mIniSettings.mSettings.getVal<string>(IniKey::LevelDir) == "")    
+      mIniSettings.mSettings.setVal(IniKey::LevelDir, getFolderManager()->getLevelDir());
 
    // Now we turn to the size and position of the game window
    // First, figure out what display mode to start in...
@@ -920,24 +973,24 @@ void GameSettings::onFinishedLoading()
    }
 
    // ... and finally, the window width (which in turns determines its height because the aspect ratio is fixed at 4:3)
-   U32 winWidth = getU32(WINDOW_WIDTH);
+   U32 winWidth = getCmdLineParamU32(WINDOW_WIDTH);
 
    // In all of these cases, if something was specified on the cmd line, write the result directly to the INI, clobbering whatever was there.
    // When we need the value, we'll get it from the INI.
    if(cmdLineDisplayMode != DISPLAY_MODE_UNKNOWN)
-      getIniSettings()->mSettings.setVal("WindowMode", cmdLineDisplayMode);
+      setSetting(IniKey::WindowMode, cmdLineDisplayMode);
 
    if(xpos != S32_MIN)
-   {
-      getIniSettings()->winXPos = xpos;
-      getIniSettings()->winYPos = ypos;
-   }
+      setWindowPosition(xpos, ypos);
 
    if(winWidth > 0)
-      getIniSettings()->winSizeFact = max((F32) winWidth / (F32) DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getMinScalingFactor());
+   {
+      F32 scalingFactor = max((F32) winWidth / (F32) DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getMinScalingFactor());
+      setWindowSizeFactor(scalingFactor);
+   }
 
 #ifndef ZAP_DEDICATED
-   U32 stick = getU32(USE_STICK);
+   U32 stick = getCmdLineParamU32(USE_STICK);
    if(stick > 0)
       UseJoystickNumber = stick - 1;
 #endif
@@ -947,7 +1000,7 @@ void GameSettings::onFinishedLoading()
 // We need to show the name entry screen unless user has specified a nickname via the cmd line or the INI file
 bool GameSettings::shouldShowNameEntryScreenOnStartup()
 {
-   return getString(LOGIN_NAME) == "" && mIniSettings.name == "";
+   return getCmdLineParamString(LOGIN_NAME) == "" && getSetting<string>(IniKey::Nickname) == "";
 }
 
 
@@ -964,20 +1017,20 @@ void GameSettings::saveMasterAddressListInIniUnlessItCameFromCmdLine()
       return;
 
    // Otherwise write the master list to the INI file in their new order; the most recently successful address will now be first
-   mIniSettings.masterAddress = listToString(mMasterServerList, ",");
+   setSetting(IniKey::MasterServerAddressList, listToString(mMasterServerList, ","));
 }
 
 
 // Tries to figure out what display mode was specified on the cmd line, if any
 DisplayMode GameSettings::resolveCmdLineSpecifiedDisplayMode()
 {
-   if(getSpecified(WINDOW_MODE))
+   if(isCmdLineParamSpecified(WINDOW_MODE))
       return DISPLAY_MODE_WINDOWED;
 
-   if(getSpecified(FULLSCREEN_MODE))
+   if(isCmdLineParamSpecified(FULLSCREEN_MODE))
       return DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
 
-   if(getSpecified(FULLSCREEN_STRETCH))
+   if(isCmdLineParamSpecified(FULLSCREEN_STRETCH))
       return DISPLAY_MODE_FULL_SCREEN_STRETCHED;
 
    return DISPLAY_MODE_UNKNOWN;
@@ -1139,6 +1192,11 @@ static void printHelpEntry(const string &paramName, const string &paramString, c
 
 void GameSettings::showHelp(GameSettings *settings, const Vector<string> &words)
 {
+   // Header
+   printf("Usage: %s [OPTIONS]\n\nRun %s, a 2-D multiplayer space-combat game.\n\nOptions:\n\n"
+         "The following options can be specified on the command-line.",
+         mExecutablePath.c_str(), ZAP_GAME_NAME);
+
    for(S32 i = 0; i < S32(ARRAYSIZE(helpTitles)); i++)
    {
       // Make an initial sweep through to check on the sizes of things, to ensure we get the indention right
@@ -1202,34 +1260,45 @@ void GameSettings::showHelp(GameSettings *settings, const Vector<string> &words)
 }
 
 
-const Color *GameSettings::getWallFillColor() const
+void GameSettings::showVersion(GameSettings *settings, const Vector<string> &words)
 {
-   return &mIniSettings.wallFillColor;
+#ifdef TNL_DEBUG
+   printf("%s %s\nBuild: %d\nClient-Server protocol: %d\nMaster protocol: %d\n",
+         ZAP_GAME_NAME, ZAP_GAME_RELEASE, BUILD_VERSION, CS_PROTOCOL_VERSION, MASTER_PROTOCOL_VERSION);
+#else
+   printf("%s %s\n", ZAP_GAME_NAME, ZAP_GAME_RELEASE);
+#endif
 }
 
 
-const Color *GameSettings::getWallOutlineColor() const
+const Color GameSettings::getWallFillColor() const
 {
-   return &mIniSettings.wallOutlineColor;
+   return mIniSettings.mSettings.getVal<Color>(IniKey::WallFillColor);
+}
+
+
+const Color GameSettings::getWallOutlineColor() const
+{
+   return mIniSettings.mSettings.getVal<Color>(IniKey::WallOutlineColor);
 }
 
 
 // Accessor methods
 U32 GameSettings::getSimulatedStutter()
 {
-   return getU32(SIMULATED_STUTTER);
+   return getCmdLineParamU32(SIMULATED_STUTTER);
 }
 
 
 F32 GameSettings::getSimulatedLoss()
 {
-   return getF32(SIMULATED_LOSS);
+   return getCmdLineParamF32(SIMULATED_LOSS);
 }
 
 
 U32 GameSettings::getSimulatedLag()
 {
-   return min(getU32(SIMULATED_LAG), (U32)1000);
+   return min(getCmdLineParamU32(SIMULATED_LAG), (U32)1000);
 }
 
 
@@ -1299,13 +1368,13 @@ InputMode GameSettings::getInputMode()
 
 void GameSettings::setShowingInGameHelp(bool show)
 {
-   mIniSettings.mSettings.setVal("ShowInGameHelp", show ? Yes : No);
+   mIniSettings.mSettings.setVal(IniKey::ShowInGameHelp, show ? Yes : No);
 }
 
 
 bool GameSettings::getShowingInGameHelp()
 {
-   return mIniSettings.mSettings.getVal<YesNo>("ShowInGameHelp");
+   return mIniSettings.mSettings.getVal<YesNo>(IniKey::ShowInGameHelp);
 }
 
 
@@ -1334,20 +1403,10 @@ const UserSettings *GameSettings::getUserSettings(const string &name)
    return &i->second;
 }
 
-
-void GameSettings::showVersion(GameSettings *settings, const Vector<string> &words)
+void GameSettings::setIniSetting(const string &section, const string &key, const string &value)
 {
-#ifdef TNL_DEBUG
-   printf("%s %s\nBuild: %d\nClient-Server protocol: %d\nMaster protocol: %d\n",
-         ZAP_GAME_NAME, ZAP_GAME_RELEASE, BUILD_VERSION, CS_PROTOCOL_VERSION, MASTER_PROTOCOL_VERSION);
-#else
-   printf("%s %s\n", ZAP_GAME_NAME, ZAP_GAME_RELEASE);
-#endif
+   iniFile.SetValue(section, key, value, true);
 }
-
-
-
-
 
 };
 

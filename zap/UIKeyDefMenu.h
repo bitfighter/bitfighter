@@ -57,15 +57,15 @@ private:
    const char *mMenuFooter;
 
    S32 selectedIndex;          // Highlighted menu item
-   S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
+   S32 mChangingItem;          // Index of key we're changing (in keyDef mode), -1 otherwise
 
-   bool isDuplicate(S32 key, const Vector<KeyDefMenuItem> &menuItems);
+   bool isDuplicate(S32 key, const Vector<KeyDefMenuItem> &menuItems) const;
 
 public:
    explicit KeyDefMenuUserInterface(ClientGame *game);   // Constructor
    virtual ~KeyDefMenuUserInterface();
 
-   void render();              // Draw the menu
+   void render() const;              // Draw the menu
    void idle(U32 timeDelta);
    bool onKeyDown(InputCode inputCode);
 

@@ -19,13 +19,6 @@ GeomObject::GeomObject()
 }
 
 
-//// Copy constructor
-//GeomObject::GeomObject(const GeomObject &g) 
-//{
-//   mGeometry = g.mGeometry;
-//}
-
-
 // Destructor
 GeomObject::~GeomObject()
 {
@@ -64,14 +57,14 @@ void GeomObject::setNewGeometry(GeomType geomType, F32 radius)
 
 
 // Basic definitions
-GeomType GeomObject::getGeomType() const        {   return mGeometry.getGeometry()->getGeomType();   }
-Point    GeomObject::getVert(S32 index) const   {   return mGeometry.getVert(index);                 }
+GeomType      GeomObject::getGeomType() const        {   return mGeometry.getGeometry()->getGeomType();   }
+Point         GeomObject::getVert(S32 index) const   {   return mGeometry.getVert(index);                 }
 
 bool GeomObject::deleteVert(S32 vertIndex)
 {   
    if(mGeometry.getGeometry()->deleteVert(vertIndex))
    {
-      onPointsChanged();
+      onGeomChanged();
       return true;
    }
 
@@ -83,7 +76,7 @@ bool GeomObject::insertVert(Point vertex, S32 vertIndex)
 {   
    if(mGeometry.getGeometry()->insertVert(vertex, vertIndex))
    {
-      onPointsChanged();
+      onGeomChanged();
       return true;
    }
 
@@ -93,18 +86,18 @@ bool GeomObject::insertVert(Point vertex, S32 vertIndex)
 
 void GeomObject::setVert(const Point &pos, S32 index)    { mGeometry.getGeometry()->setVert(pos, index); }
                                                                                            
-bool GeomObject::anyVertsSelected()          {   return mGeometry.getGeometry()->anyVertsSelected();        }
-S32 GeomObject::getVertCount() const         {   return mGeometry.getGeometry()->getVertCount();            }
-S32 GeomObject::getMinVertCount() const      {   return mGeometry.getGeometry()->getMinVertCount();         }
+bool GeomObject::anyVertsSelected() const    {   return mGeometry.getGeometry()->anyVertsSelected();        }
+S32  GeomObject::getVertCount()     const    {   return mGeometry.getGeometry()->getVertCount();            }
+S32  GeomObject::getMinVertCount()  const    {   return mGeometry.getGeometry()->getMinVertCount();         }
 
-void GeomObject::clearVerts()                {   mGeometry.getGeometry()->clearVerts(); onPointsChanged();  }                        
+void GeomObject::clearVerts()                {   mGeometry.getGeometry()->clearVerts(); onGeomChanged();  }
 
 
 bool GeomObject::addVertFront(Point vert)
 {
    if(mGeometry.getGeometry()->addVertFront(vert))
    {
-      onPointsChanged();
+      onGeomChanged();
       return true;
    }
 
@@ -116,7 +109,7 @@ bool GeomObject::addVert(const Point &point, bool ignoreMaxPointsLimit)
 {
    if(mGeometry.getGeometry()->addVert(point, ignoreMaxPointsLimit))
    {
-      onPointsChanged();
+      onGeomChanged();
       return true;
    }
 
@@ -125,12 +118,12 @@ bool GeomObject::addVert(const Point &point, bool ignoreMaxPointsLimit)
 
 
 // Vertex selection -- only needed in editor
-void GeomObject::selectVert(S32 vertIndex)   {   mGeometry.getGeometry()->selectVert(vertIndex);            }
-void GeomObject::aselectVert(S32 vertIndex)  {   mGeometry.getGeometry()->aselectVert(vertIndex);           }
-void GeomObject::unselectVert(S32 vertIndex) {   mGeometry.getGeometry()->unselectVert(vertIndex);          }
-void GeomObject::unselectVerts()             {   mGeometry.getGeometry()->unselectVerts();                  }
+void GeomObject::selectVert(S32 vertIndex)         {   mGeometry.getGeometry()->selectVert(vertIndex);            }
+void GeomObject::aselectVert(S32 vertIndex)        {   mGeometry.getGeometry()->aselectVert(vertIndex);           }
+void GeomObject::unselectVert(S32 vertIndex)       {   mGeometry.getGeometry()->unselectVert(vertIndex);          }
+void GeomObject::unselectVerts()                   {   mGeometry.getGeometry()->unselectVerts();                  }
      
-bool GeomObject::vertSelected(S32 vertIndex) {   return mGeometry.getGeometry()->vertSelected(vertIndex);   }
+bool GeomObject::vertSelected(S32 vertIndex) const {   return mGeometry.getGeometry()->vertSelected(vertIndex);   }
 
 // Geometric calculations
 Point GeomObject::getCentroid()   const {   return mGeometry.getGeometry()->getCentroid();     }
@@ -155,13 +148,25 @@ void GeomObject::offset(const Point &offset)                       {  mGeometry.
 
 // Geom in-out
 void GeomObject::packGeom(GhostConnection *connection, BitStream *stream)    {   mGeometry.getGeometry()->packGeom(connection, stream);     }
-void GeomObject::unpackGeom(GhostConnection *connection, BitStream *stream)  {   mGeometry.getGeometry()->unpackGeom(connection, stream); onPointsChanged();  }
+void GeomObject::unpackGeom(GhostConnection *connection, BitStream *stream)  {   mGeometry.getGeometry()->unpackGeom(connection, stream); onGeomChanged();  }
 void GeomObject::setGeom(const Vector<Point> &points)                        {   mGeometry.getGeometry()->setGeom(points); }
 
 void GeomObject::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) 
 {  
    mGeometry.getGeometry()->readGeom(argc, argv, firstCoord, gridSize); 
-   onPointsChanged();
+   onGeomChanged();
+}
+
+
+GeometryContainer &GeomObject::getGeometry()
+{
+   return mGeometry;
+}
+
+
+void GeomObject::setGeometry(const Vector<Point> &points)
+{
+   mGeometry.setGeometry(points);
 }
 
 
@@ -193,20 +198,17 @@ void GeomObject::setPos(const Point &pos)
 
 void GeomObject::onGeomChanging()
 {
-   if(getGeomType() == geomPolygon)
-      onGeomChanged();               // Allows poly fill to get reshaped as vertices move
-
-   onPointsChanged();
+   onGeomChanged();
 }
 
 
-void GeomObject::onGeomChanged() {  /* Do nothing */ }
-
-
-void GeomObject::onPointsChanged()                        
-{   
+void GeomObject::onGeomChanged()
+{
+   // This will update any other internal data our geometry may have,
+   // like a centroid or triangulated polygon fill
    mGeometry.getGeometry()->onPointsChanged();
 }
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -222,6 +224,8 @@ GeometryContainer::GeometryContainer()
 GeometryContainer::GeometryContainer(const GeometryContainer &container)
 {
    const Geometry *old = container.mGeometry;
+
+   TNLAssert(container.mGeometry, "Expected object to have geometry!");
 
    switch(container.mGeometry->getGeomType())
    {
@@ -259,6 +263,7 @@ Geometry *GeometryContainer::getGeometry() const
 
 void GeometryContainer::setGeometry(Geometry *geometry)
 {
+   delete mGeometry;
    mGeometry = geometry;
 }
 
@@ -266,6 +271,12 @@ void GeometryContainer::setGeometry(Geometry *geometry)
 void GeometryContainer::reverseWinding()    
 {
    mGeometry->reverseWinding();
+}
+
+
+void GeometryContainer::setGeometry(const Vector<Point> &points)
+{
+   mGeometry->setGeom(points);
 }
 
 

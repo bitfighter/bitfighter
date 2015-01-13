@@ -184,7 +184,7 @@ bool Event::inputCodeDown(UserInterface *currentUI, InputCode inputCode)
 
 void Event::onEvent(ClientGame *game, SDL_Event *event)
 {
-   IniSettings *iniSettings = game->getSettings()->getIniSettings();
+   GameSettings *settings = game->getSettings();
    UserInterface *currentUI = game->getUIManager()->getCurrentUI();
 
    switch (event->type)
@@ -213,22 +213,26 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
 #endif
 
       case SDL_MOUSEMOTION:
-         onMouseMoved(currentUI, event->motion.x, event->motion.y, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
+         onMouseMoved(currentUI, event->motion.x, event->motion.y, 
+               settings->getSetting<DisplayMode>(IniKey::WindowMode));
          break;
 
       case SDL_MOUSEBUTTONDOWN:
          switch (event->button.button)
          {
             case SDL_BUTTON_LEFT:
-               onMouseButtonDown(currentUI, event->button.x, event->button.y, MOUSE_LEFT, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
+               onMouseButtonDown(currentUI, event->button.x, event->button.y, MOUSE_LEFT, 
+                     settings->getSetting<DisplayMode>(IniKey::WindowMode));
                break;
 
             case SDL_BUTTON_RIGHT:
-               onMouseButtonDown(currentUI, event->button.x, event->button.y, MOUSE_RIGHT, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
+               onMouseButtonDown(currentUI, event->button.x, event->button.y, MOUSE_RIGHT, 
+                     settings->getSetting<DisplayMode>(IniKey::WindowMode));
                break;
 
             case SDL_BUTTON_MIDDLE:
-               onMouseButtonDown(currentUI, event->button.x, event->button.y, MOUSE_MIDDLE, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
+               onMouseButtonDown(currentUI, event->button.x, event->button.y, MOUSE_MIDDLE, 
+                     settings->getSetting<DisplayMode>(IniKey::WindowMode));
                break;
 #if !SDL_VERSION_ATLEAST(2,0,0)
             case SDL_BUTTON_WHEELUP:
@@ -255,15 +259,18 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
          switch(event->button.button)
          {
             case SDL_BUTTON_LEFT:
-               onMouseButtonUp(currentUI, event->button.x, event->button.y, MOUSE_LEFT, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
+               onMouseButtonUp(currentUI, event->button.x, event->button.y, MOUSE_LEFT, 
+                     settings->getSetting<DisplayMode>(IniKey::WindowMode));
                break;
 
             case SDL_BUTTON_RIGHT:
-               onMouseButtonUp(currentUI, event->button.x, event->button.y, MOUSE_RIGHT, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
+               onMouseButtonUp(currentUI, event->button.x, event->button.y, MOUSE_RIGHT, 
+                     settings->getSetting<DisplayMode>(IniKey::WindowMode));
                break;
 
             case SDL_BUTTON_MIDDLE:
-               onMouseButtonUp(currentUI, event->button.x, event->button.y, MOUSE_MIDDLE, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
+               onMouseButtonUp(currentUI, event->button.x, event->button.y, MOUSE_MIDDLE, 
+                     settings->getSetting<DisplayMode>(IniKey::WindowMode));
                break;
          }
          break;
@@ -349,12 +356,16 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
 
       game->getUIManager()->getUI<OptionsMenuUserInterface>()->toggleDisplayMode();
 
-      DisplayManager::getScreenInfo()->setCanvasMousePos((S32)pos->x, (S32)pos->y, game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"));
+      DisplayManager::getScreenInfo()->setCanvasMousePos((S32)pos->x, (S32)pos->y, 
+                           game->getSettings()->getSetting<DisplayMode>(IniKey::WindowMode));
 
 #if SDL_VERSION_ATLEAST(2,0,0)
-      SDL_WarpMouseInWindow(DisplayManager::getScreenInfo()->sdlWindow, (S32)DisplayManager::getScreenInfo()->getWindowMousePos()->x, (S32)DisplayManager::getScreenInfo()->getWindowMousePos()->y);
+      SDL_WarpMouseInWindow(DisplayManager::getScreenInfo()->sdlWindow, 
+                                 (S32)DisplayManager::getScreenInfo()->getWindowMousePos()->x, 
+                                 (S32)DisplayManager::getScreenInfo()->getWindowMousePos()->y);
 #else
-      SDL_WarpMouse(DisplayManager::getScreenInfo()->getWindowMousePos()->x, DisplayManager::getScreenInfo()->getWindowMousePos()->y);
+      SDL_WarpMouse(DisplayManager::getScreenInfo()->getWindowMousePos()->x, 
+                    DisplayManager::getScreenInfo()->getWindowMousePos()->y);
 #endif
    }
    // The rest
@@ -543,19 +554,19 @@ void Event::onStickRemoved(S32 deviceId)
 // SDL_WINDOWEVENT_SIZE_CHANGED and merge this and VideoSystem::actualizeScreenMode
 void Event::onResize(ClientGame *game, S32 width, S32 height)
 {
-   IniSettings *iniSettings = game->getSettings()->getIniSettings();
+   GameSettings *settings = game->getSettings();
 
    S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
    S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
    // Constrain window to correct proportions...
    if((width - canvasWidth) > (height - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
-      iniSettings->winSizeFact = max((F32) height / (F32)canvasHeight, DisplayManager::getScreenInfo()->getMinScalingFactor());
+      settings->setWindowSizeFactor(max((F32) height / (F32)canvasHeight, DisplayManager::getScreenInfo()->getMinScalingFactor()));
    else
-      iniSettings->winSizeFact = max((F32) width / (F32)canvasWidth, DisplayManager::getScreenInfo()->getMinScalingFactor());
+      settings->setWindowSizeFactor(max((F32) width / (F32)canvasWidth, DisplayManager::getScreenInfo()->getMinScalingFactor()));
 
-   S32 newWidth  = (S32)floor(canvasWidth  * iniSettings->winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
-   S32 newHeight = (S32)floor(canvasHeight * iniSettings->winSizeFact + 0.5f);
+   S32 newWidth  = (S32)floor(canvasWidth  * settings->getWindowSizeFactor() + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
+   S32 newHeight = (S32)floor(canvasHeight * settings->getWindowSizeFactor() + 0.5f);
 
 #if SDL_VERSION_ATLEAST(2,0,0)
    SDL_SetWindowSize(DisplayManager::getScreenInfo()->sdlWindow, newWidth, newHeight);
@@ -572,8 +583,6 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
    glViewport(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
 
    gConsole.onScreenResized();
-
-   GameSettings::iniFile.SetValueF("Settings", "WindowScalingFactor", iniSettings->winSizeFact, true);
 
    glScissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());    // See comment on identical line in main.cpp
 }

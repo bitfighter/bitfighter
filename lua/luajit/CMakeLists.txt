@@ -1,11 +1,21 @@
 # We must use the LuaJIT internal build system
 include(ExternalProject)
 
+# Options
+option(LUAJIT_DISABLE_JIT "Disable the JIT compiler in LuaJIT.  Try this if LuaJIT doesn't compile for your platform" NO)
+
+
 set(LUAJIT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/lua/luajit/src")
 set(LUAJIT_LIBRARY "libluajit.a")
 
 set(LUAJIT_BUILDCOMMAND "make" "amalg")
 set(LUAJIT_POSTBUILDCOMMAND "")
+
+if(LUAJIT_DISABLE_JIT)
+	message(STATUS "LuaJIT: JIT compiler will be disabled")
+	set(CC "${CMAKE_C_COMPILER} -DLUAJIT_DISABLE_JIT")
+	set(LUAJIT_BUILDCOMMAND "make" "CC=${CC}" "amalg")
+endif()
 
 # Different library names depending on platform
 if(MSVC)

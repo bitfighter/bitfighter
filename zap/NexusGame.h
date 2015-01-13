@@ -25,6 +25,8 @@ private:
    S32 mNexusOpenTime;        // Time Nexus remains open, in milliseconds
    S32 mNexusChangeAtTime;    // When the next Nexus status change will occur  --> needs to be able go be negative
 
+   bool mNexusIsOpen;         // Is the nexus open?
+
    struct YardSaleWaypoint
    {
       Timer timeLeft;
@@ -36,6 +38,9 @@ private:
    Vector<YardSaleWaypoint> mYardSaleWaypoints;
    Vector<SafePtr<NexusZone> > mNexus;
 
+
+   Vector<string> makeParameterMenuKeys() const;
+
    void idle_client(U32 deltaT);     // Idle for clients
    void idle_server(U32 deltaT);     // Idle for server
 
@@ -45,14 +50,14 @@ public:
    NexusGameType();           // Constructor
    virtual ~NexusGameType();
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
-   bool mNexusIsOpen;               // Is the nexus open?
-   S32 getNexusTimeLeftMs() const;    // Get time until the nexus changes state in MilliSeconds
-
+   S32 getNexusTimeLeftMs() const;     // Get time until the nexus changes state in MilliSeconds
 
    bool isSpawnWithLoadoutGame();
+
+   void onOvertimeStarted();
 
    void shipTouchFlag(Ship *ship, FlagItem *flag);
 
@@ -67,8 +72,8 @@ public:
    void setNewClosedTime(S32 timeInSeconds);
 
 #ifndef ZAP_DEDICATED
-   Vector<string> getGameParameterMenuKeys();
-   boost::shared_ptr<MenuItem> getMenuItem(const string &key);
+   const Vector<string> *getGameParameterMenuKeys() const;
+   boost::shared_ptr<MenuItem> getMenuItem(const string &key) const;
    bool saveMenuItem(const MenuItem *menuItem, const string &key);
 #endif
 
@@ -86,6 +91,8 @@ public:
 
    void controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject);
    bool spawnShip(ClientInfo *clientInfo);
+
+   bool isNexusOpen() const;
 
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;
@@ -145,8 +152,8 @@ public:
    NexusFlagItem(Point pos = Point(), Point vel = Point(0,0), S32 count = 0, bool useDropDelay = false);    // Constructor
    virtual ~NexusFlagItem();                                                                                // Destructor
 
-   void renderItem(const Point &pos);
-   void renderItemAlpha(const Point &pos, F32 alpha);
+   void renderItem(const Point &pos) const;
+   void renderItemAlpha(const Point &pos, F32 alpha) const;
 
    void dismount(DismountMode dismountMode);
 
@@ -181,13 +188,13 @@ public:
 
    NexusZone *clone() const;
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
 
    void onAddedToGame(Game *theGame);
    void idle(BfObject::IdleCallPath path);
 
-   void render();
-   void renderDock();
+   void render() const;
+   void renderDock(const Color &color) const;
 
    const Vector<Point> *getCollisionPoly() const;
    bool collide(BfObject *hitObject);
@@ -203,10 +210,10 @@ public:
 
    /////
    // Editor methods
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
 
    string toLevelCode() const;
 
@@ -214,7 +221,7 @@ public:
    bool canBeHostile();
    bool canBeNeutral();
    
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
 
    //// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(NexusZone);

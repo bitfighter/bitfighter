@@ -5,7 +5,8 @@
 
 #include "gridDB.h"
 #include "moveObject.h"    // For def of ActualState
-#include "WallSegmentManager.h"
+#include "Level.h"
+
 #include "GeomUtils.h"
 
 #include "tnlLog.h"
@@ -24,7 +25,7 @@ static U32 getNextId()
 }
 
 // Constructor
-GridDatabase::GridDatabase(bool createWallSegmentManager)
+GridDatabase::GridDatabase()
 {
    if(mChunker == NULL)
       mChunker = new ClassChunker<DatabaseBucketEntry>();        // Static shared by all databases, reference counted and deleted in destructor
@@ -35,23 +36,8 @@ GridDatabase::GridDatabase(bool createWallSegmentManager)
       for(U32 j = 0; j < BucketRowCount; j++)
          mBuckets[i][j].nextInBucket = NULL;
 
-   if(createWallSegmentManager)
-      mWallSegmentManager = new WallSegmentManager();    // Gets deleted in destructor
-   else
-      mWallSegmentManager = NULL;
-
    mDatabaseId = getNextId();
 }
-
-
-// Copy contents of source into this
-// GridDatabase::GridDatabase(const GridDatabase &source)
-// {
-//    mAllObjects.reserve(source.mAllObjects.size());
-// 
-//    for(S32 i = 0; i < source.mAllObjects.size(); i++)
-//       addToDatabase(source.mAllObjects[i]->clone(), source.mAllObjects[i]->getExtent());
-// }
 
 
 // Destructor
@@ -60,9 +46,6 @@ GridDatabase::~GridDatabase()
    removeEverythingFromDatabase();
 
    TNLAssert(mChunker != NULL || mCountGridDatabase != 0, "Running GridDatabase destructor without initalizing?");
-
-   if(mWallSegmentManager)
-      delete mWallSegmentManager;
 
    mCountGridDatabase--;
 
@@ -105,7 +88,8 @@ void GridDatabase::copyObjects(const GridDatabase *source)
    mGoalZones .reserve(source->mGoalZones.size());
    mFlags     .reserve(source->mFlags.size());
    mSpyBugs   .reserve(source->mSpyBugs.size());
-
+   mPolyWalls .reserve(source->mPolyWalls.size());
+   mWallitems .reserve(source->mWallitems.size());
 
    for(S32 i = 0; i < source->mAllObjects.size(); i++)
       addToDatabase(source->mAllObjects[i]->clone());
@@ -114,48 +98,57 @@ void GridDatabase::copyObjects(const GridDatabase *source)
 }
 
 
-// This is private
-void GridDatabase::addToDatabase(DatabaseObject *theObject)
+// Adds an object to the database; checks to ensure object is not added twice.
+// Private function
+void GridDatabase::addToDatabase(DatabaseObject *object)
 {
-   TNLAssert(theObject->mDatabase != this, "Already added to database, trying to add to same database again!");
-   TNLAssert(!theObject->mDatabase,        "Already added to database, trying to add to different database!");
-   TNLAssert(theObject->getExtentSet(),    "Object extents were never set!");
-   TNLAssert(!theObject->mBucketList,       "BucketList must be NULL");
+   TNLAssert(object->mDatabase != this, "Already added to database, trying to add to same database again!");
+   TNLAssert(!object->mDatabase,        "Already added to database, trying to add to different database!");
+   TNLAssert(object->getExtentSet(),    "Object extents were never set!");
+   TNLAssert(!object->mBucketList,      "BucketList must be NULL");
 
-   if(theObject->mDatabase)      // Should never happen
+   // WallItems should not be added to the database during a regular game, but the editor will add them...
+   //TNLAssert(object->getObjectTypeNumber() != WallItemTypeNumber, "Should not add wall items to the database!");
+
+   if(object->mDatabase)      // Should never happen
       return;
 
-   theObject->mDatabase = this;
+   object->mDatabase = this;
 
    static IntRect bins;
-   fillBins(theObject->getExtent(), bins);
+   fillBins(object->getExtent(), bins);
 
    for(S32 x = bins.minx; bins.maxx - x >= 0; x++)
       for(S32 y = bins.miny; bins.maxy - y >= 0; y++)
       {
          DatabaseBucketEntry *be = mChunker->alloc();
          DatabaseBucketEntryBase *base = &mBuckets[x & BucketMask][y & BucketMask];
-         be->theObject = theObject;
+         be->theObject = object;
          if(base->nextInBucket)
             base->nextInBucket->prevInBucket = be;
          be->nextInBucket = base->nextInBucket;
          be->prevInBucket = base;
          base->nextInBucket = be;
-         be->nextInBucketForThisObject = theObject->mBucketList;
-         theObject->mBucketList = be;
+         be->nextInBucketForThisObject = object->mBucketList;
+         object->mBucketList = be;
       }
 
    // Add the object to our non-spatial "database" as well
-   mAllObjects.push_back(theObject);
+   mAllObjects.push_back(object);
 
-   U8 type = theObject->getObjectTypeNumber();
+   U8 type = object->getObjectTypeNumber();
+
    if(type == GoalZoneTypeNumber)
-      mGoalZones.push_back(theObject);
+      mGoalZones.push_back(object);
    else if(type == FlagTypeNumber)
-      mFlags.push_back(theObject);
+      mFlags.push_back(object);
    else if(type == SpyBugTypeNumber)
-      mSpyBugs.push_back(theObject);
-   
+      mSpyBugs.push_back(object);
+   else if(type == PolyWallTypeNumber)
+      mPolyWalls.push_back(object);
+   else if(type == WallItemTypeNumber)
+      mWallitems.push_back(object);
+
    //sortObjects(mAllObjects);  // problem: Barriers in-game don't have mGeometry (it is NULL)
 }
 
@@ -168,6 +161,7 @@ void GridDatabase::addToDatabase(const Vector<DatabaseObject *> &objects)
 }
 
 
+// Removes and deletes all objects in database
 void GridDatabase::removeEverythingFromDatabase()
 {
    for(S32 x = 0; x < BucketRowCount; x++)
@@ -190,11 +184,10 @@ void GridDatabase::removeEverythingFromDatabase()
    mGoalZones.clear();
    mFlags.clear();
    mSpyBugs.clear();
+   mPolyWalls.clear();
+   mWallitems.clear();
 
    mAllObjects.deleteAndClear();
-   
-   if(mWallSegmentManager)
-      mWallSegmentManager->clear();
 }
 
 
@@ -210,6 +203,16 @@ static void eraseObject_fast(Vector<DatabaseObject *> *objects, DatabaseObject *
 }
 
 
+// Delete by index
+void GridDatabase::removeFromDatabase(S32 index, bool deleteObject)
+{
+   DatabaseObject *obj = mAllObjects[index];
+
+   removeFromDatabase(obj, deleteObject);
+}
+
+
+// Delete by object
 void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
 {
    TNLAssert(object->mDatabase == this || object->mDatabase == NULL, "Trying to remove Object from wrong database");
@@ -251,6 +254,10 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
       eraseObject_fast(&mFlags, object);
    else if(type == SpyBugTypeNumber)
       eraseObject_fast(&mSpyBugs, object);
+   else if(type == PolyWallTypeNumber)
+      eraseObject_fast(&mPolyWalls, object);
+   else if(type == WallItemTypeNumber)
+      eraseObject_fast(&mWallitems, object);
 
    if(deleteObject)
       delete object;      
@@ -285,8 +292,14 @@ const Vector<DatabaseObject *> *GridDatabase::findObjects_fast(U8 typeNumber) co
    if(typeNumber == SpyBugTypeNumber)
       return &mSpyBugs;
 
+   if(typeNumber == PolyWallTypeNumber)
+      return &mPolyWalls;
+
+   if(typeNumber == WallItemTypeNumber)
+      return &mWallitems;
+
    TNLAssert(false, "This type not currently supported!  Sorry dude!");
-   return NULL;  // this line gets rid of compile warning "Not all control paths return a value"
+   return NULL;
 }
 
 
@@ -326,29 +339,9 @@ void GridDatabase::findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> 
 void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector) const
 {
    // If the user is looking for a type we maintain a list for, it will be faster to use that list than to cycle through the general item list.
-   TNLAssert(typeNumber != GoalZoneTypeNumber && typeNumber != FlagTypeNumber && typeNumber != SpyBugTypeNumber, 
+   TNLAssert(typeNumber != GoalZoneTypeNumber && typeNumber != FlagTypeNumber && 
+             typeNumber != SpyBugTypeNumber   && typeNumber != PolyWallTypeNumber, 
              "Can use findObjects_fast()?  If not, uncomment the appropriate block below; it will perform better!");
-
-   //if(typeNumber == GoalZoneTypeNumber)
-   //{
-   //   for(S32 i = 0; i < mGoalZones.size(); i++)
-   //      fillVector.push_back(mGoalZones[i]);
-   //   return;
-   //}
-
-   //if(typeNumber == FlagTypeNumber)
-   //{
-   //   for(S32 i = 0; i < mFlags.size(); i++)
-   //      fillVector.push_back(mFlags[i]);
-   //   return;
-   //}
-
-   //if(typeNumber == SpyBugTypeNumber)
-   //{
-   //   for(S32 i = 0; i < mSpyBugs.size(); i++)
-   //      fillVector.push_back(mSpyBugs[i]);
-   //   return;
-   //}
 
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if(mAllObjects[i]->getObjectTypeNumber() == typeNumber)
@@ -459,10 +452,21 @@ void GridDatabase::dumpObjects()
       for(S32 y = 0; y < BucketRowCount; y++)
          for(DatabaseBucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask].nextInBucket; walk; walk = walk->nextInBucket)
          {
-            DatabaseObject *theObject = walk->theObject;
-            logprintf("Found object in (%d,%d) with extents %s", x, y, theObject->getExtent().toString().c_str());
-            logprintf("Obj coords: %s", static_cast<BfObject *>(theObject)->getPos().toString().c_str());
+            DatabaseObject *object = walk->theObject;
+            logprintf("Found object in (%d,%d) with extents %s", x, y, object->getExtent().toString().c_str());
+            logprintf("Obj coords: %s", static_cast<BfObject *>(object)->getPos().toString().c_str());
          }
+}
+
+
+// Return the first non-UnknownType object, or -1 if none are found
+static S32 findFirstNonUnknownTypeObject(const Vector<DatabaseObject *> &allObjects)
+{
+   for(S32 i = 0; i < allObjects.size(); i++)
+      if(allObjects[i]->getObjectTypeNumber() != UnknownTypeNumber)
+         return i;
+
+   return -1;
 }
 
 
@@ -475,6 +479,7 @@ Rect GridDatabase::getExtents()
    Rect rect;
 
    // Think we can delete from HERE...   inserted this comment 27-Jan-2012  #########################################
+   // To the best of my knowledge, the assert below has never fired 5/24/2014 -Wat
 
    // All this rigamarole is to make world extent correct for levels that do not overlap (0,0)
    // The problem is that the GameType is treated as an object, and has the extent (0,0), and
@@ -484,37 +489,24 @@ Rect GridDatabase::getExtents()
    // of (0,0) that are assigned by the constructor.
 
 
-   S32 first = -1;
+   //S32 first = findFirstNonUnknownTypeObject(mAllObjects);
 
-   // Look for first non-UnknownType object
-   for(S32 i = 0; i < mAllObjects.size() && first == -1; i++)
-      if(mAllObjects[i]->getObjectTypeNumber() != UnknownTypeNumber)
-      {
-         rect = mAllObjects[i]->getExtent();
-         first = i;
-      }
+   TNLAssert(findFirstNonUnknownTypeObject(mAllObjects) == 0, 
+             "I think this should never happen -- how would an object with UnknownTypeNumber get in the database?? \
+             if it does, please document it and remove this assert, along withthe rect = line below -Wat");
 
-   TNLAssert(first == 0, "I think this should never happen -- how would an object with UnknownTypeNumber get in the database?? \
-                          if it does, please document it and remove this assert, along withthe rect = line below -Wat");
-
-   if(first == -1)      // No suitable objects found, return empty extents
-      return Rect();
+   //if(first == -1)      // No suitable objects found, return empty extents
+   //   return Rect();
 
    // ...to HERE
 
    rect = mAllObjects[0]->getExtent();
 
    // Now start unioning the extents of remaining objects.  Should be all of them.
-   for(S32 i = /*first + */1; i < mAllObjects.size(); i++)
+   for(S32 i = 1; i < mAllObjects.size(); i++)
       rect.unionRect(mAllObjects[i]->getExtent());
 
    return rect;
-}
-
-
-WallSegmentManager *GridDatabase::getWallSegmentManager() const
-{
-   return mWallSegmentManager;
 }
 
 
@@ -575,121 +567,67 @@ DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex, bool 
 {
    Rect queryRect(rayStart, rayEnd);
 
-   static Vector<DatabaseObject *> fillVector;  // Use local here, Most of code expects a global FillVector left unchanged
+   // Use a local copy here, most callers expect our global fillVector to remain unchanged
+   static Vector<DatabaseObject *> fillVector;  
    fillVector.clear();
 
    findObjects(typeNumber, fillVector, queryRect);
 
-   Point collisionPoint;
-
-   collisionTime = 1;
-   DatabaseObject *retObject = NULL;
-
-   Point center;
-   Rect rect;
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      if(!fillVector[i]->isCollisionEnabled())     // Skip collision-disabled objects
-         continue;
-
-      const Vector<Point> *poly = fillVector[i]->getCollisionPoly();
-
-      F32 radius, ct;
-
-      if(poly)
-      {
-         if(poly->size() == 0)    // This can happen in the editor when a wall segment is completely hidden by another
-            continue;
-
-         Point normal;
-         if(polygonIntersectsSegmentDetailed(&poly->first(), poly->size(), format, rayStart, rayEnd, ct, normal))
-         {
-            if(ct < collisionTime)
-            {
-               collisionTime = ct;
-               retObject = fillVector[i];
-               surfaceNormal = normal;
-            }
-         }
-      }
-      else if(fillVector[i]->getCollisionCircle(stateIndex, center, radius))
-      {
-         if(circleIntersectsSegment(center, radius, rayStart, rayEnd, ct) && ct < collisionTime)
-         {
-            collisionTime = ct;
-            surfaceNormal = (rayStart + (rayEnd - rayStart) * ct) - center;
-            retObject = fillVector[i];
-         }
-      }
-   }
-
-   if(retObject)
-      surfaceNormal.normalize();
-
-   return retObject;
+   return findObjectLOS(fillVector, stateIndex, format, rayStart, rayEnd, collisionTime, surfaceNormal);
 }
 
 
 DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex, bool format,
                                             const Point &rayStart, const Point &rayEnd, 
-                                            float &collisionTime, Point &surfaceNormal) const
+                                            F32 &collisionTime, Point &surfaceNormal) const
 {
    Rect queryRect(rayStart, rayEnd);
 
-   static Vector<DatabaseObject *> fillVector;  // Use local here, most callers expect our global fillVector to be left unchanged
+   // Use a local copy here, most callers expect our global fillVector to remain unchanged
+   static Vector<DatabaseObject *> fillVector;  
    fillVector.clear();
 
    findObjects(testFunc, fillVector, queryRect);
 
+   return findObjectLOS(fillVector, stateIndex, format, rayStart, rayEnd, collisionTime, surfaceNormal);
+}
+
+
+// This variant only searches one of the items in the passed vector
+DatabaseObject *GridDatabase::findObjectLOS(const Vector<DatabaseObject *> &objList, U32 stateIndex, bool format,
+                                            const Point &rayStart, const Point &rayEnd, 
+                                            F32 &collisionTime, Point &surfaceNormal) const
+{
    Point collisionPoint;
 
-   collisionTime = 1;
+   collisionTime = 1;      // collisionTime will be an F32 between 0 and 1 inclusive -- so this is its max value
    DatabaseObject *retObject = NULL;
 
-   Point center;
+   // Temp vars used to return a value from checkCollision*ForCollision
+   Point norm;    
+   F32 ct = collisionTime;
+
    Rect rect;
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < objList.size(); i++)
    {
-      if(!fillVector[i]->isCollisionEnabled())     // Skip collision-disabled objects
+      if(!objList[i]->isCollisionEnabled())     // Skip collision-disabled objects
          continue;
 
-      const Vector<Point> *poly = fillVector[i]->getCollisionPoly();
-
-      F32 radius;
-      float ct;
-
-      if(poly)
+      if(objList[i]->checkForCollision(rayStart, rayEnd, format, stateIndex, ct, norm))
       {
-         if(poly->size() == 0)    // This can happen in the editor when a wall segment is completely hidden by another
+         if(ct < 0)        // Special condition... found something, but not what we want.  Don't do circle check.
             continue;
 
-         Point normal;
-         if(polygonIntersectsSegmentDetailed(&poly->get(0), poly->size(), format, rayStart, rayEnd, ct, normal))
+         // Found object closer than any we've found so far
+         if(ct < collisionTime)
          {
-            if(ct < collisionTime)
-            {
-               collisionTime = ct;
-               retObject = fillVector[i];
-               surfaceNormal = normal;
-            }
-         }
-      }
-      else if(fillVector[i]->getCollisionCircle(stateIndex, center, radius))
-      {
-         if(circleIntersectsSegment(center, radius, rayStart, rayEnd, ct))
-         {
-            if(ct < collisionTime)
-            {
-               collisionTime = ct;
-               surfaceNormal = (rayStart + (rayEnd - rayStart) * ct) - center;
-               retObject = fillVector[i];
-            }
+            collisionTime = ct;
+            surfaceNormal = norm;
+            retObject = objList[i];
          }
       }
    }
-
 
    if(retObject)
       surfaceNormal.normalize();
@@ -711,7 +649,7 @@ bool GridDatabase::pointCanSeePoint(const Point &point1, const Point &point2)
    F32 time;
    Point coll;
 
-   return( findObjectLOS((TestFunc)isWallType, ActualState, true, point1, point2, time, coll) == NULL );
+   return(findObjectLOS((TestFunc)isWallType, ActualState, true, point1, point2, time, coll) == NULL);
 }
 
 
@@ -758,6 +696,13 @@ S32 GridDatabase::getObjectCount(U8 typeNumber) const
    if(typeNumber == SpyBugTypeNumber)
       return mSpyBugs.size();
 
+   if(typeNumber == PolyWallTypeNumber)
+      return mPolyWalls.size();
+
+   if(typeNumber == WallItemTypeNumber)
+      return mWallitems.size();
+
+
    TNLAssert(false, "Unsupported type!");
    return 0;
 }
@@ -773,6 +718,12 @@ bool GridDatabase::hasObjectOfType(U8 typeNumber) const
 
    if(typeNumber == SpyBugTypeNumber)
       return mSpyBugs.size() > 0;
+
+   if(typeNumber == PolyWallTypeNumber)
+      return mPolyWalls.size() > 0;
+
+   if(typeNumber == WallItemTypeNumber)
+      return mWallitems.size() > 0;
 
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if(mAllObjects[i]->getObjectTypeNumber() == typeNumber)
@@ -794,9 +745,77 @@ DatabaseObject *GridDatabase::getObjectByIndex(S32 index) const
 } 
 
 
+void GridDatabase::updateExtents(DatabaseObject *object, const Rect &newExtents)
+{
+   // Does the equivalent of the following, but more efficiently:
+   // removeFromDatabase();    
+   // addToDatabase();
+
+   S32 minxold, minyold, maxxold, maxyold;
+   S32 minx, miny, maxx, maxy;
+
+   Rect oldExtents = object->getExtent();
+
+   minxold = S32(oldExtents.min.x) >> BucketWidthBitShift;
+   minyold = S32(oldExtents.min.y) >> BucketWidthBitShift;
+   maxxold = S32(oldExtents.max.x) >> BucketWidthBitShift;
+   maxyold = S32(oldExtents.max.y) >> BucketWidthBitShift;
+
+   minx    = S32(newExtents.min.x) >> BucketWidthBitShift;
+   miny    = S32(newExtents.min.y) >> BucketWidthBitShift;
+   maxx    = S32(newExtents.max.x) >> BucketWidthBitShift;
+   maxy    = S32(newExtents.max.y) >> BucketWidthBitShift;
+
+   // Don't do anything if the buckets haven't changed...
+   if((minxold - minx) | (minyold - miny) | (maxxold - maxx) | (maxyold - maxy))
+   {
+      // They are different... remove and readd to database, but don't touch mAllObjects
+      if(U32(maxx - minx) >= BucketRowCount)        maxx    = minx    + BucketRowCount - 1;
+      if(U32(maxy - miny) >= BucketRowCount)        maxy    = miny    + BucketRowCount - 1;
+      if(U32(maxxold >= minxold) + BucketRowCount)  maxxold = minxold + BucketRowCount - 1;
+      if(U32(maxyold >= minyold) + BucketRowCount)  maxyold = minyold + BucketRowCount - 1;
+
+
+      // Don't use x <= maxx, it will endless loop if maxx = S32_MAX and x overflows
+      // Instead, use maxx - x >= 0, it will better handle overflows and avoid endless loop (MIN_S32 - MAX_S32 = +1)
+
+      // Remove from the extents database for current extents...
+      while(object->mBucketList)
+      {
+         DatabaseBucketEntry *b = object->mBucketList;
+         TNLAssert(b->theObject == object, "Object mismatch");
+         TNLAssert(b->prevInBucket->nextInBucket == b, "Broken linked list");
+         if(b->nextInBucket)
+            b->nextInBucket->prevInBucket = b->prevInBucket;
+         b->prevInBucket->nextInBucket = b->nextInBucket;
+         object->mBucketList = b->nextInBucketForThisObject;
+         mChunker->free(b);
+      }
+      // ...and re-add for the new extent
+      for(S32 x = minx; maxx - x >= 0; x++)
+         for(S32 y = miny; maxy - y >= 0; y++)
+         {
+            DatabaseBucketEntry *be = mChunker->alloc();
+            DatabaseBucketEntryBase *base = &mBuckets[x & BucketMask][y & BucketMask];
+            be->theObject = object;
+            if(base->nextInBucket)
+               base->nextInBucket->prevInBucket = be;
+            be->nextInBucket = base->nextInBucket;
+            be->prevInBucket = base;
+            base->nextInBucket = be;
+            be->nextInBucketForThisObject = object->mBucketList;
+            object->mBucketList = be;
+         }
+   }
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 void DatabaseObject::addToDatabase(GridDatabase *database)
 {
-   TNLAssert(mExtentSet, "Extent has not been set on this object!");    // Sanity check
+   TNLAssert(mExtentSet, "Extent has not been set on this object!");    // Extent should set before adding the object
 
    if(isDatabasable())
       database->addToDatabase(this);
@@ -833,7 +852,41 @@ bool DatabaseObject::isDatabasable()
 const Vector<Point> *DatabaseObject::getCollisionPoly() const
 {
    return NULL;
-}  
+}
+
+
+// Overridden by WallItem
+bool DatabaseObject::checkForCollision(const Point &rayStart, const Point &rayEnd, bool format, U32 stateIndex,
+                                       F32 &collisionTime, Point &surfaceNormal) const
+{
+   const Vector<Point> *poly = getCollisionPoly();
+
+   if(poly)
+   {
+      if(poly->size() == 0)    // This can happen in the editor when a wall segment is completely hidden by another
+      {
+         collisionTime = -1;
+         return true;
+      }
+
+      return polygonIntersectsSegmentDetailed(&poly->get(0), poly->size(), format, rayStart, rayEnd, collisionTime, surfaceNormal);
+   }
+
+   else  // No collisionPoly... try a collisionCircle
+   {
+      F32 radius;
+      Point center;
+
+      if(getCollisionCircle(stateIndex, center, radius))
+      {
+         if(!circleIntersectsSegment(center, radius, rayStart, rayEnd, collisionTime))
+            return false;
+
+         surfaceNormal = (rayStart + (rayEnd - rayStart) * collisionTime) - center;
+         return true;
+      }
+   }
+}
 
 
 bool DatabaseObject::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const
@@ -886,69 +939,7 @@ void DatabaseObject::setExtent(const Rect &extents)
    GridDatabase *gridDB = getDatabase();
 
    if(gridDB)
-   {
-      // Remove from the extents database for current extents...
-      //gridDB->removeFromDatabase(this, mExtent);    // old extent
-      // ...and re-add for the new extent
-      //gridDB->addToDatabase(this, extents);
-
-
-      S32 minxold, minyold, maxxold, maxyold;
-      S32 minx, miny, maxx, maxy;
-
-      minxold = S32(mExtent.min.x) >> GridDatabase::BucketWidthBitShift;
-      minyold = S32(mExtent.min.y) >> GridDatabase::BucketWidthBitShift;
-      maxxold = S32(mExtent.max.x) >> GridDatabase::BucketWidthBitShift;
-      maxyold = S32(mExtent.max.y) >> GridDatabase::BucketWidthBitShift;
-
-      minx    = S32(extents.min.x) >> GridDatabase::BucketWidthBitShift;
-      miny    = S32(extents.min.y) >> GridDatabase::BucketWidthBitShift;
-      maxx    = S32(extents.max.x) >> GridDatabase::BucketWidthBitShift;
-      maxy    = S32(extents.max.y) >> GridDatabase::BucketWidthBitShift;
-
-      // Don't do anything if the buckets haven't changed...
-      if((minxold - minx) | (minyold - miny) | (maxxold - maxx) | (maxyold - maxy))
-      {
-         // They are different... remove and readd to database, but don't touch gridDB->mAllObjects
-         if(U32(maxx - minx) >= gridDB->BucketRowCount)        maxx    = minx    + gridDB->BucketRowCount - 1;
-         if(U32(maxy - miny) >= gridDB->BucketRowCount)        maxy    = miny    + gridDB->BucketRowCount - 1;
-         if(U32(maxxold >= minxold) + gridDB->BucketRowCount)  maxxold = minxold + gridDB->BucketRowCount - 1;
-         if(U32(maxyold >= minyold) + gridDB->BucketRowCount)  maxyold = minyold + gridDB->BucketRowCount - 1;
-
-
-         // Don't use x <= maxx, it will endless loop if maxx = S32_MAX and x overflows
-         // Instead, use maxx - x >= 0, it will better handle overflows and avoid endless loop (MIN_S32 - MAX_S32 = +1)
-
-         // Remove from the extents database for current extents...
-         while(mBucketList)
-         {
-            DatabaseBucketEntry *b = mBucketList;
-            TNLAssert(b->theObject == this, "Object mismatch");
-            TNLAssert(b->prevInBucket->nextInBucket == b, "Broken linked list");
-            if(b->nextInBucket)
-               b->nextInBucket->prevInBucket = b->prevInBucket;
-            b->prevInBucket->nextInBucket = b->nextInBucket;
-            mBucketList = b->nextInBucketForThisObject;
-            gridDB->mChunker->free(b);
-         }
-
-         // ...and re-add for the new extent
-         for(S32 x = minx; maxx - x >= 0; x++)
-            for(S32 y = miny; maxy - y >= 0; y++)
-            {
-               DatabaseBucketEntry *be = gridDB->mChunker->alloc();
-               DatabaseBucketEntryBase *base = &gridDB->mBuckets[x & gridDB->BucketMask][y & gridDB->BucketMask];
-               be->theObject = this;
-               if(base->nextInBucket)
-                  base->nextInBucket->prevInBucket = be;
-               be->nextInBucket = base->nextInBucket;
-               be->prevInBucket = base;
-               base->nextInBucket = be;
-               be->nextInBucketForThisObject = mBucketList;
-               mBucketList = be;
-            }
-      }
-   }
+      gridDB->updateExtents(this, extents);
 
    mExtent.set(extents);
    mExtentSet = true;

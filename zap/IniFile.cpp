@@ -79,7 +79,7 @@ void CIniFile::ReadFile()
 
    f.open(y.c_str(), ios::in);
 
-   if(!f.fail())    // This is true if the file cannot be opened or something... in which case we don't want to read the file!
+   if(!f.fail())     // This is true if the file cannot be opened or something... in which case we don't want to read the file!
    {
       while(getline(f, line))
          if(line.length() > 2)                   // Anything shorter can't be useful...  

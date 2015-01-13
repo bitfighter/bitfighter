@@ -17,12 +17,12 @@ class LoadoutZone : public GameZone
 
 public:
    explicit LoadoutZone(lua_State *L = NULL);   // Combined Lua / C++ constructor
-   virtual ~LoadoutZone();             // Destructor
+   virtual ~LoadoutZone();                      // Destructor
 
    LoadoutZone *clone() const;
 
-   void render();
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   void render() const;
+   bool processArguments(S32 argc, const char **argv, Level *level);
    void onAddedToGame(Game *theGame);
 
    const Vector<Point> *getCollisionPoly() const;     // More precise boundary for precise collision detection
@@ -32,10 +32,10 @@ public:
 
    /////
    // Editor methods
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
 
    bool hasTeam();      
    bool canBeHostile(); 
@@ -43,8 +43,8 @@ public:
 
    string toLevelCode() const;
 
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
-   void renderDock();
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
+   void renderDock(const Color &color) const;
 
    TNL_DECLARE_CLASS(LoadoutZone);
 

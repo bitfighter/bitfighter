@@ -147,7 +147,7 @@ extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 extern void drawFilledRoundedRect(const Point &pos, S32 width, S32 height, const Color &fillColor, 
                                   const Color &outlineColor, S32 radius, F32 alpha = 1.0);
 
-void TeamShuffleHelper::render()
+void TeamShuffleHelper::render() const
 {
    FontManager::pushFontContext(TeamShuffleContext);
 
@@ -162,12 +162,12 @@ void TeamShuffleHelper::render()
 
          S32 teamIndex = i * cols + j;
 
-         Color c = *getGame()->getTeamColor(teamIndex);
+         Color c = getGame()->getTeamColor(teamIndex);      // Creates a copy of color
          c *= .2f;
 
          drawFilledRoundedRect(Point(x + columnWidth / 2, y + rowHeight / 2), 
                                columnWidth, rowHeight, 
-                               c, *getGame()->getTeamColor(teamIndex), 8);
+                               c, getGame()->getTeamColor(teamIndex), 8);
 
          glColor(getGame()->getTeamColor(teamIndex));
          drawString(x + hpad, y + vpad, TEXT_SIZE, getGame()->getTeamName(teamIndex).getString());

@@ -18,10 +18,10 @@ class EnergyGaugeRenderer
 {
 public:
    static const S32 GuageWidth = 200;
-   static const S32 GaugeHeight = 20;
+   static const S32 GaugeHeight = 15;
    static const S32 SafetyLineExtend = 4;      // How far the safety line extends above/below the main bar
    static const S32 GaugeLeftMargin   = UserInterface::horizMargin;
-   static const S32 GaugeBottomMargin = UserInterface::vertMargin;
+   static const S32 GaugeBottomMargin = UserInterface::vertMargin + 10;
 
    static void render(S32 energy);
 };

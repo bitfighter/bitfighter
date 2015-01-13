@@ -31,11 +31,13 @@
 //--------------------------------------
 // Enable Asserts in all debug builds
 #if defined(TNL_DEBUG)
-#ifndef TNL_ENABLE_ASSERTS
-#define TNL_ENABLE_ASSERTS
+#  ifndef TNL_ENABLE_ASSERTS
+#     define TNL_ENABLE_ASSERTS
+#  endif
 #endif
-#endif
+
 #include <stdlib.h>
+
 //inline void* operator new(size_t size, void* ptr) { return ptr; }
 #include <new>
 

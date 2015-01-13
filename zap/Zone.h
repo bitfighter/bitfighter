@@ -18,22 +18,22 @@ class Zone : public PolygonObject
 
 public:
    explicit Zone(lua_State *L = NULL);    // Combined Lua / C++ constructor
-   virtual ~Zone();              // Destructor
+   virtual ~Zone();                       // Destructor
    Zone *clone() const;
 
-   virtual void render();
+   virtual void render() const;
    S32 getRenderSortValue();
-   virtual bool processArguments(S32 argc, const char **argv, Game *game);
+   virtual bool processArguments(S32 argc, const char **argv, Level *level);
 
    virtual const Vector<Point> *getCollisionPoly() const;     // More precise boundary for precise collision detection
    virtual bool collide(BfObject *hitObject);
 
    /////
    // Editor methods
-   virtual const char *getEditorHelpString();
-   virtual const char *getPrettyNamePlural();
-   virtual const char *getOnDockName();
-   virtual const char *getOnScreenName();
+   virtual const char *getEditorHelpString() const;
+   virtual const char *getPrettyNamePlural() const;
+   virtual const char *getOnDockName() const;
+   virtual const char *getOnScreenName() const;
 
    bool hasTeam();      
    bool canBeHostile(); 
@@ -41,8 +41,10 @@ public:
 
    virtual string toLevelCode() const;
 
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
-   virtual void renderDock();
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
+   virtual void renderDock(const Color &color) const;
+
+   virtual F32 getEditorRadius(F32 currentScale) const;
 
    virtual F32 getEditorRadius(F32 currentScale);
 

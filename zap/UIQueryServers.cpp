@@ -144,8 +144,9 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) :
    UserInterface(game), 
    ChatParent(game)
 {
-   mSortColumn = getGame()->getSettings()->getQueryServerSortColumn();
-   mSortAscending = getGame()->getSettings()->getQueryServerSortAscending();
+   mSortColumn    = mGameSettings->getQueryServerSortColumn();
+   mSortAscending = mGameSettings->getQueryServerSortAscending();
+
    mLastSortColumn = mSortColumn;
    mHighlightColumn = 0;
    mReceivedListOfServersFromMaster = false;
@@ -258,7 +259,7 @@ void QueryServersUserInterface::contactEveryone()
    //getGame()->getNetInterface()->sendPing(broadcastAddress, mLocalServerNonce);
 
    // Always ping these servers -- typically a local server
-   Vector<string> *pingList = &getGame()->getSettings()->getIniSettings()->alwaysPingList;
+   Vector<string> *pingList = &mGameSettings->getIniSettings()->alwaysPingList;
 
    for(S32 i = 0; i < pingList->size(); i++)
    {
@@ -269,7 +270,7 @@ void QueryServersUserInterface::contactEveryone()
    // Try to ping the servers from our fallback list if we're having trouble connecting to the master
    if(getGame()->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME && !mHostOnServer) 
    {
-      Vector<string> *serverList = &getGame()->getSettings()->getIniSettings()->prevServerListFromMaster;
+      Vector<string> *serverList = &mGameSettings->getIniSettings()->prevServerListFromMaster;
 
       for(S32 i = 0; i < serverList->size(); i++)
          getGame()->getNetInterface()->sendPing(Address(serverList->get(i).c_str()), mRemoteServerNonce);
@@ -660,25 +661,26 @@ void QueryServersUserInterface::idle(U32 timeDelta)
 }  // end idle
 
 
-bool QueryServersUserInterface::mouseInHeaderRow(const Point *pos)
+bool QueryServersUserInterface::mouseInHeaderRow(const Point *pos) const
 {
    return pos->y >= COLUMN_HEADER_TOP && pos->y < COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT - 1;
 }
 
 
-string QueryServersUserInterface::getLastSelectedServerName()
+string QueryServersUserInterface::getLastSelectedServerName() const
 {
    return mLastSelectedServerName;
 }
 
 
-S32 QueryServersUserInterface::getSelectedIndex()
+S32 QueryServersUserInterface::getSelectedIndex() const
 {
    if(servers.size() == 0)       // When no servers, return dummy value
       return -1;
 
    // This crazy thing can happen if the number of servers changes and suddenly there's none shown on the screen
    // Shouldn't happen anymore due to check in idle() function
+   TNLAssert(getFirstServerIndexOnCurrentPage() < servers.size(), "Index out of bounds!"); // Assert added July 2014 by Wat
    if(getFirstServerIndexOnCurrentPage() >= servers.size())
       return -1;
 
@@ -782,7 +784,7 @@ static Color getPlayerCountColor(S32 players, S32 maxPlayers)
 }
 
 
-void QueryServersUserInterface::render()
+void QueryServersUserInterface::render() const
 {
    const S32 canvasWidth =  DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
@@ -808,7 +810,7 @@ void QueryServersUserInterface::render()
    else
    {
       glColor(Colors::red);
-      if(mGivenUpOnMaster && getGame()->getSettings()->getIniSettings()->prevServerListFromMaster.size() != 0)
+      if(mGivenUpOnMaster && mGameSettings->getIniSettings()->prevServerListFromMaster.size() != 0)
          drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Using server list from last successful connect.");
       else
          drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Firewall issues? Do you have the latest version?");
@@ -841,11 +843,11 @@ void QueryServersUserInterface::render()
    drawCenteredString(getDividerPos() - SEL_SERVER_INSTR_SIZE - SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE + 1, SEL_SERVER_INSTR_SIZE, 
                       "UP, DOWN to select, ENTER to join | Click on column to sort | ESC exits");
 
-   if(servers.size())      // There are servers to display...
+   if(servers.size() != 0)      // There are servers to display...
    {
       // Find the selected server (it may have moved due to sort or new/removed servers)
       S32 selectedIndex = getSelectedIndex();
-      if(selectedIndex < 0 && servers.size() >= 0)
+      if(selectedIndex < 0)
       {
          selectedId = servers[0].id;
          selectedIndex = 0;
@@ -859,7 +861,7 @@ void QueryServersUserInterface::render()
       for(S32 i = getFirstServerIndexOnCurrentPage(); i <= lastServer; i++)
       {
          U32 y = TOP_OF_SERVER_LIST + (i - getFirstServerIndexOnCurrentPage()) * SERVER_ENTRY_HEIGHT + 1;
-         ServerRef &s = servers[i];
+         const ServerRef &s = servers[i];
 
          if(s.isLocalServer)
          {
@@ -879,7 +881,7 @@ void QueryServersUserInterface::render()
       for(S32 i = getFirstServerIndexOnCurrentPage(); i <= lastServer; i++)
       {
          y = TOP_OF_SERVER_LIST + (i - getFirstServerIndexOnCurrentPage()) * SERVER_ENTRY_HEIGHT + 2;
-         ServerRef &s = servers[i];
+         const ServerRef &s = servers[i];
 
          if(i == selectedIndex)
          {
@@ -923,7 +925,7 @@ void QueryServersUserInterface::render()
          if(s.passwordRequired || s.pingTimedOut || !s.everGotQueryResponse)
          {
             glPushMatrix();
-               glTranslatef(F32(columns[1].xStart + 25), F32(y + 2), 0);
+               glTranslate(F32(columns[1].xStart + 25), F32(y + 2));
                if(s.pingTimedOut || !s.everGotQueryResponse)
                   drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
                else
@@ -962,7 +964,7 @@ void QueryServersUserInterface::render()
 }
 
 
-void QueryServersUserInterface::renderTopBanner()
+void QueryServersUserInterface::renderTopBanner() const
 {
    const S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
@@ -986,7 +988,7 @@ void QueryServersUserInterface::renderTopBanner()
 }
 
 
-void QueryServersUserInterface::renderColumnHeaders()
+void QueryServersUserInterface::renderColumnHeaders() const
 {
    S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
@@ -1030,7 +1032,7 @@ void QueryServersUserInterface::renderColumnHeaders()
 }
 
 
-void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
+void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2) const
 {
    // Warning... the following section is pretty darned ugly!  We're just drawing a message box...
 
@@ -1170,10 +1172,13 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
             {
                leaveGlobalChat();
 
+               bool neverConnectDirect = mGameSettings->getSetting<YesNo>(IniKey::NeverConnectDirect);
+
                // Join the selected game...   (what if we select a local server from the list...  wouldn't 2nd param be true?)
-               // Second param, false when we can ping that server, allows faster connect. If we can ping, we can connect without master help.
+               // Second param, false when we can ping that server, allows faster connect. If we can ping, we can connect 
+               // without master help.
                getGame()->joinRemoteGame(servers[currentIndex].serverAddress, !servers[currentIndex].isLocalServer && 
-                    (getGame()->getSettings()->getIniSettings()->neverConnectDirect || !servers[currentIndex].everGotQueryResponse));
+                                        (neverConnectDirect || !servers[currentIndex].everGotQueryResponse));
 
                // Save this because we'll need the server name when connecting.  Kind of a hack.
                mLastSelectedServerName = servers[currentIndex].serverName;    
@@ -1314,7 +1319,7 @@ void QueryServersUserInterface::onMouseDragged()
 }
 
 
-S32 QueryServersUserInterface::getFirstServerIndexOnCurrentPage()
+S32 QueryServersUserInterface::getFirstServerIndexOnCurrentPage() const
 {
    return mPage * mServersPerPage;
 }
@@ -1343,7 +1348,7 @@ void QueryServersUserInterface::sortSelected()
    selectedId = servers[currentItem].id;
 
    // Finally, save the current sort column to the INI
-   getGame()->getSettings()->setQueryServerSortColumn(mSortColumn, mSortAscending);
+   mGameSettings->setQueryServerSortColumn(mSortColumn, mSortAscending);
 }
 
 
@@ -1386,7 +1391,7 @@ void QueryServersUserInterface::onMouseMoved()
 }
 
 
-S32 QueryServersUserInterface::getDividerPos()
+S32 QueryServersUserInterface::getDividerPos() const
 {
    if(mShowChat)
       return TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER;
@@ -1395,7 +1400,7 @@ S32 QueryServersUserInterface::getDividerPos()
 }
 
 
-S32 QueryServersUserInterface::getServersPerPage()
+S32 QueryServersUserInterface::getServersPerPage() const
 {
    if(mShowChat)
       return mServersPerPage;
@@ -1404,13 +1409,13 @@ S32 QueryServersUserInterface::getServersPerPage()
 }
 
 
-S32 QueryServersUserInterface::getLastPage()
+S32 QueryServersUserInterface::getLastPage() const
 {
    return (servers.size() - 1) / mServersPerPage;
 }
 
 
-bool QueryServersUserInterface::isMouseOverDivider()
+bool QueryServersUserInterface::isMouseOverDivider() const
 {
    if(!mShowChat)       // Divider is only in operation when window is split
       return false;

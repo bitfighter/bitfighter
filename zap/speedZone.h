@@ -31,10 +31,6 @@ private:
 
    void computeExtent();                                            // Bounding box for quick collision-possibility elimination
 
-#ifndef ZAP_DEDICATED
-   static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
-#endif
-
 public:
    enum {
       halfWidth = 25,
@@ -64,10 +60,10 @@ public:
    U32 mUnpackInit;  // Some form of counter, to know that it is a rotating speed zone.
 
    static void generatePoints(const Point &pos, const Point &dir, Vector<Point> &points, Vector<Point> &outline);
-   void render();
+   void render() const;
    S32 getRenderSortValue();
 
-   bool processArguments(S32 argc, const char **argv, Game *game);  // Create objects from parameters stored in level file
+   bool processArguments(S32 argc, const char **argv, Level *level);  // Create objects from parameters stored in level file
    string toLevelCode() const;
 
    void onAddedToGame(Game *game);
@@ -82,28 +78,27 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    ///// Editor methods 
-   Color getEditorRenderColor();
+   const Color &getEditorRenderColor() const;
 
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
 
    void onAttrsChanging();
    void onGeomChanging();
    void onGeomChanged();
 
 #ifndef ZAP_DEDICATED
-   // These four methods are all that's needed to add an editable attribute to a class...
-   EditorAttributeMenuUI *getAttributeMenu();
-   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
+   bool startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
    void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
 
    void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
 #endif
 
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();

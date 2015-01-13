@@ -5,7 +5,9 @@ option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and 
 
 set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/LevelFilesForTesting.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestColor.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestEditor.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGame.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameType.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameUserInterface.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGeomUtils.cpp
@@ -15,6 +17,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestInputCode.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestIntegration.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelLoader.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelSource.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLevelMenuSelectUserInterface.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLoadoutIndicator.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLoadoutTracker.cpp

@@ -1322,7 +1322,7 @@ void SymbolBullet::render(const Point &pos) const
 {
    // We are given the bottom y position of the line, but the icon expects the center
    Point center(pos.x, (pos.y - 7));
-   drawFilledSquare(center, BulletRad);
+   drawFilledSquare(center, (F32)BulletRad);
 }
 
 

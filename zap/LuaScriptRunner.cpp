@@ -3,22 +3,25 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "LuaScriptRunner.h"   // Header
-#include "LuaModule.h"
+#include "LuaScriptRunner.h"  
+
 #include "BfObject.h"
-#include "ship.h"
 #include "BotNavMeshZone.h"
 #include "Engineerable.h"
 #include "game.h"
-#include "ServerGame.h"
 #include "GeomUtils.h"
+#include "Level.h"
+#include "LuaModule.h"
+#include "ServerGame.h"
+#include "ship.h"
+#include "WallItem.h"
 
 #include "GameTypesEnum.h"
 #include "TeamConstants.h"
 
 #include "config.h"
-#include "GameSettings.h"
 #include "Console.h"           // For gConsole
+#include "GameSettings.h"
 
 #include "stringUtils.h"
 
@@ -57,9 +60,9 @@ void LuaScriptRunner::clearScriptCache()
 // Constructor
 LuaScriptRunner::LuaScriptRunner()
 {
-   // These MUST be overriden in child classes
+   // These MUST be set in child classes
    mLuaGame = NULL;
-   mLuaGridDatabase = NULL;
+   mLevel = NULL;
 
    static U32 mNextScriptId = 0;
 
@@ -100,6 +103,12 @@ lua_State *LuaScriptRunner::getL()
 {
    TNLAssert(L, "L not yet instantiated!");
    return L;
+}
+
+
+Game *LuaScriptRunner::getLuaGame() const
+{
+   return mLuaGame;
 }
 
 
@@ -955,8 +964,8 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
 #define LUA_METHODS(CLASS, METHOD) \
       METHOD(CLASS, pointCanSeePoint,      ARRAYDEF({{ PT, PT, END }}), 1 ) \
       METHOD(CLASS, findObjectById,        ARRAYDEF({{ INT, END }}), 1 )    \
-      METHOD(CLASS, findAllObjects,        ARRAYDEF({{ TABLE, INTx, END }, { INTx, END }, { END }}), 3 ) \
-      METHOD(CLASS, findAllObjectsInArea,  ARRAYDEF({{ TABLE, PT, PT, INTS, END }, { PT, PT, INTS, END }}), 2 ) \
+      METHOD(CLASS, findAllObjects,        ARRAYDEF({{ INTx, END }, { END }}), 2 ) \
+      METHOD(CLASS, findAllObjectsInArea,  ARRAYDEF({{ PT, PT, INTS, END }}), 1 ) \
       METHOD(CLASS, addItem,               ARRAYDEF({{ BFOBJ, END }}), 1 )  \
       METHOD(CLASS, getGameInfo,           ARRAYDEF({{ END }}), 1 )         \
       METHOD(CLASS, getPlayerCount,        ARRAYDEF({{ END }}), 1 )         \
@@ -1031,9 +1040,9 @@ S32 LuaScriptRunner::lua_pointCanSeePoint(lua_State *L)
    Point p1 = getPointOrXY(L, 1);
    Point p2 = getPointOrXY(L, 2);
 
-   TNLAssert(mLuaGridDatabase != NULL, "Grid Database must not be NULL!");
+   TNLAssert(mLevel != NULL, "Grid Database must not be NULL!");
 
-   return returnBool(L, mLuaGridDatabase->pointCanSeePoint(p1, p2));
+   return returnBool(L, mLevel->pointCanSeePoint(p1, p2));
 }
 
 
@@ -1052,46 +1061,25 @@ S32 LuaScriptRunner::lua_pointCanSeePoint(lua_State *L)
  * 
  * @param id id to search for.
  * 
- * @return The found BfObject, or `nil` if no objects with the specified id
+ * @return The found BfObject, or 'nil'f if no objects with the specified id
  * could be found.
  */
 S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "findObjectById");
 
-   TNLAssert(mLuaGridDatabase != NULL, "Grid Database must not be NULL!");
+   TNLAssert(mLevel != NULL, "Grid Database must not be NULL!");
 
-   return findObjectById(L, mLuaGridDatabase->findObjects_fast());
-}
-
-
-static void checkFillTable(lua_State *L, S32 size)
-{
-   // We are expecting a table to be on top of the stack when we get here.  If not, we can add one.
-   if(!lua_istable(L, -1))
-   {
-      TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
-
-      lua_createtable(L, size, 0);    // Create a table, with enough slots pre-allocated for our data
-   }
-
-   TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || dumpStack(L), "Should only have table!");
+   return findObjectById(L, mLevel->findObjects_fast());
 }
 
 
 /**
- * @luafunc table LuaScriptRunner::findAllObjects(table results, ObjType objType, ...)
+ * @luafunc table LuaScriptRunner::findAllObjects(ObjType objType, ...)
  *
  * @brief Finds all items of the specified type anywhere on the level.
  *
- * @descr Can specify multiple types. The table argument is optional, but
- * levelgens that call this function frequently will perform better if they
- * provide a reusable table in which found objects can be stored. By providing a
- * table, you will avoid incurring the overhead of construction and destruction
- * of a new one.
- *
- * If a table is not provided, the function will create a table and return it on
- * the stack.
+ * @descr Can specify multiple types.
  *
  * If no object types are provided, this function will return every object on
  * the level.
@@ -1099,20 +1087,15 @@ static void checkFillTable(lua_State *L, S32 size)
  * @note If you provide your own table to this method, make sure you clear it
  * first.
  *
- * @param [results] Reusable table into which results can be written.
  * @param [objType] Zero or more ObjTypes specifying what types of objects to find.
  *
  * @return A reference back to the passed table, or a new table if one was not
  * provided.
  *
  * @code
- * items = { } -- Reusable container for findAllObjects. Because it is defined outside
- *             -- any functions, it will have global scope.
- *
  * function countObjects(objType, ...) -- Pass one or more object types
- *   table.clear(items) -- Remove any items in table from previous use
- *   levelgen:findGlobalObjects(items, objType, ...) -- Put all items of specified type(s) into items table
- *   print(#items) -- Print the number of items found to the console
+ *   local items = bf:findAllObjects(objType, ...) -- Put all items of specified type(s) into items table
+ *   logprint(#items) -- Print the number of items found to the console
  * end
  * @endcode
  */
@@ -1120,19 +1103,15 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "findAllObjects");
 
-   TNLAssert(mLuaGridDatabase != NULL, "Grid Database must not be NULL!");
+   TNLAssert(mLevel != NULL, "Grid Database must not be NULL!");
 
    fillVector.clear();
    static Vector<U8> types;
 
    types.clear();
 
-   // We expect the stack to look like this: -- [fillTable], objType1, objType2, ...
-   // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
-   // We expect that when we find something that is not a number, the stack will only contain our fillTable.  If the stack
-   // is empty at that point, we'll add a table, and warn the user that they are using a less efficient method.
-   // Note that even if stack is empty, lua_isnumber will return a value... which makes no sense!
-   while(lua_gettop(L) > 0 && lua_isnumber(L, -1))
+   // We expect only numbers on the stack:  -- objType1, objType2, ...
+   while(lua_gettop(L) > 0)
    {
       U8 typenum = (U8)lua_tointeger(L, -1);
 
@@ -1141,7 +1120,7 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
       if(typenum != BotNavMeshZoneTypeNumber)
          types.push_back(typenum);
       else
-         mLuaGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector);
+         getLuaGame()->getBotZoneDatabase().findObjects(BotNavMeshZoneTypeNumber, fillVector);
 
       lua_pop(L, 1);
    }
@@ -1149,23 +1128,22 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
    const Vector<DatabaseObject *> * results;
 
    if(types.size() == 0)
-      results = mLuaGridDatabase->findObjects_fast();
+      results = mLevel->findObjects_fast();
    else
    {
-      mLuaGridDatabase->findObjects(types, fillVector);
+      mLevel->findObjects(types, fillVector);
       results = &fillVector;
    }
+   
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
 
-   // This will guarantee a table at the top of the stack
-   checkFillTable(L, results->size());
-
-   S32 pushed = 0;      // Count of items we put into our table
+   // Create a table, with enough slots pre-allocated for our data
+   lua_createtable(L, fillVector.size(), 0);
 
    for(S32 i = 0; i < results->size(); i++)
    {
       static_cast<BfObject *>(results->get(i))->push(L);
-      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
-      lua_rawseti(L, 1, pushed);
+      lua_rawseti(L, 1, i + 1);    // +1 because Lua uses 1-based arrays
    }
 
    TNLAssert(lua_gettop(L) == 1 || dumpStack(L), "Stack has unexpected items on it!");
@@ -1175,19 +1153,14 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
 
 
 /**
- * @luafunc table LuaScriptRunner::findAllObjectsInArea(table results, point point1, point point2, ObjType objType, ...)
+ * @luafunc table LuaScriptRunner::findAllObjectsInArea(point point1, point point2, ObjType objType, ...)
  *
  * @brief Finds all items of the specified type(s) in a given search area.
  *
  * @descr Multiple object types can be specified. A search rectangle will be
  * constructed from the two points given, with each point positioned at opposite
- * corners. A reusable fill table can be given to increase performance if this
- * method is called frequently.
+ * corners.
  *
- * @note See LuaScriptRunner::findAllObjects for a code example with using a
- * fill table.
- *
- * @param results (Optional) A reusable fill table.
  * @param point1 One corner of a search rectangle.
  * @param point2 Another corner of a search rectangle diagonally opposite to the
  * first.
@@ -1199,7 +1172,7 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "findAllObjectsInArea");
 
-   TNLAssert(mLuaGridDatabase != NULL, "Grid Database must not be NULL!");
+   TNLAssert(mLevel != NULL, "Grid Database must not be NULL!");
 
    static Vector<U8> types;
 
@@ -1208,8 +1181,8 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
 
    bool hasBotZoneType = false;
 
-   // We expect the stack to look like this: -- [fillTable], objType1, objType2, ...
-   // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
+   // We expect numbers on the stack, with two points at the bottom:
+   //   -- pt1, pt2, objType1, objType2, ...
    while(lua_gettop(L) > 0 && lua_isnumber(L, -1))
    {
       U8 typenum = (U8)lua_tointeger(L, -1);
@@ -1231,21 +1204,19 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
    Rect searchArea = Rect(p1, p2);
 
    if(hasBotZoneType)
-      mLuaGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector, searchArea);
+      getLuaGame()->getBotZoneDatabase().findObjects(BotNavMeshZoneTypeNumber, fillVector, searchArea);
 
-   mLuaGridDatabase->findObjects(types, fillVector, searchArea);
+   mLevel->findObjects(types, fillVector, searchArea);
 
-   // This will guarantee a table at the top of the stack
-   checkFillTable(L, fillVector.size());
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
 
-
-   S32 pushed = 0;      // Count of items we put into our table
+   // Create a table, with enough slots pre-allocated for our data
+   lua_createtable(L, fillVector.size(), 0);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       static_cast<BfObject *>(fillVector[i])->push(L);
-      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
-      lua_rawseti(L, 1, pushed);
+      lua_rawseti(L, 1, i + 1);
    }
 
    TNLAssert(lua_gettop(L) == 1 || dumpStack(L), "Stack has unexpected items on it!");
@@ -1267,8 +1238,8 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "addItem");
 
-   TNLAssert(mLuaGame != NULL, "Game must not be NULL!");
-   TNLAssert(mLuaGridDatabase != NULL, "Grid Database must not be NULL!");
+   TNLAssert(getLuaGame() != NULL, "Game must not be NULL!");
+   TNLAssert(mLevel != NULL, "Grid Database must not be NULL!");
 
    // First check to see if item is a BfObject
    BfObject *obj = luaW_check<BfObject>(L, 1);
@@ -1278,15 +1249,21 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
    {
       // Silently ignore illegal items when being run from the editor.  For the moment, if mGame is not a server, then
       // we are running from the editor.  This could conceivably change, but for the moment it seems to hold true.
-      if(mLuaGame->isServer() || obj->canAddToEditor())
+      if(getLuaGame()->isServer() || obj->canAddToEditor())
       {
          // Some objects require special handling
          if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
-            mLuaGame->addPolyWall(obj, mLuaGridDatabase);
+         {
+            if(mLuaGame)
+            {
+               obj->addToGame(mLuaGame, mLevel);
+               obj->onGeomChanged();
+            }
+         }
          else if(obj->getObjectTypeNumber() == WallItemTypeNumber)
-            mLuaGame->addWallItem(obj, mLuaGridDatabase);
+            mLevel->addWallItem(static_cast<WallItem *>(obj), mLuaGame);
          else
-            obj->addToGame(mLuaGame, mLuaGridDatabase);
+            obj->addToGame(getLuaGame(), mLevel);
       }
    }
 
@@ -1307,16 +1284,16 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
  */
 S32 LuaScriptRunner::lua_getGameInfo(lua_State *L)
 {
-   TNLAssert(mLuaGame != NULL, "Game must not be NULL!");
-   TNLAssert(dynamic_cast<ServerGame*>(mLuaGame), "Not ServerGame??");
+   TNLAssert(getLuaGame() != NULL, "Game must not be NULL!");
+   TNLAssert(dynamic_cast<ServerGame*>(getLuaGame()), "Not ServerGame??");
 
-   if(!mLuaGame->isServer())
+   if(!getLuaGame()->isServer())
    {
       logprintf(LogConsumer::LuaBotMessage, "'getGameInfo' can only be called in-game");
       returnNil(L);
    }
 
-   return returnGameInfo(L, static_cast<ServerGame*>(mLuaGame));
+   return returnGameInfo(L, static_cast<ServerGame*>(getLuaGame()));
 }
 
 
@@ -1327,9 +1304,9 @@ S32 LuaScriptRunner::lua_getGameInfo(lua_State *L)
  */
 S32 LuaScriptRunner::lua_getPlayerCount(lua_State *L)
 {
-   TNLAssert(mLuaGame != NULL, "Game must not be NULL!");
+   TNLAssert(getLuaGame() != NULL, "Game must not be NULL!");
 
-   return returnInt(L, mLuaGame ? mLuaGame->getPlayerCount() : 1);
+   return returnInt(L, getLuaGame() ? getLuaGame()->getPlayerCount() : 1);
 }
 
 

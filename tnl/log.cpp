@@ -181,8 +181,8 @@ void FileLogConsumer::writeString(const char *string)
       fprintf(f, "%s", string);
       fflush(f);
    }
-   else
-      TNLAssert(false, "Logfile not initialized!");
+   //else
+      //TNLAssert(false, "Logfile not initialized!");  // Causes stack overflow
 }
 
 

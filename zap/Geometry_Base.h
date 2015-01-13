@@ -71,6 +71,7 @@ public:
    virtual void packGeom(GhostConnection *connection, BitStream *stream);
    virtual void unpackGeom(GhostConnection *connection, BitStream *stream);
    virtual void setGeom(const Vector<Point> &points);
+   virtual Vector<Point> getGeom() const = 0;
 
    virtual string geomToLevelCode() const;
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);

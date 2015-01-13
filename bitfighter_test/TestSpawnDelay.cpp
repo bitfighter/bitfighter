@@ -5,12 +5,13 @@
 
 #include "TestUtils.h"
 
-#include "../zap/gameType.h"
-#include "../zap/ServerGame.h"
-#include "../zap/ClientGame.h"
-#include "../zap/ChatCommands.h"
-#include "../zap/UIGame.h"
-#include "../zap/UIManager.h"
+#include "gameType.h"
+#include "ServerGame.h"
+#include "ClientGame.h"
+#include "ChatCommands.h"
+#include "UIGame.h"
+#include "UIManager.h"
+#include "Level.h"
 
 #include "gtest/gtest.h"
 
@@ -43,7 +44,7 @@ static void doScenario1(GamePair &gamePair)
 
    // Kill the ship again -- should be delayed when it tries to respawn because client has been inactive
    fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   serverGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    EXPECT_EQ(1, fillVector.size());    // Should only be one ship
 
    Ship *ship = static_cast<Ship *>(fillVector[0]);      // Server's copy of the ship
@@ -61,7 +62,7 @@ static void doScenario1(GamePair &gamePair)
    // If spawn were not delayed, ship would have respawned.  Check for it on the server.
    // (Dead ship may linger on client while exploding, so we won't check there.)
    fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   serverGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(0, fillVector.size());                   // Ship is spawn delayed and won't spawn... hence no ships
    ASSERT_EQ(0, serverGame->getClientInfo(0)->getReturnToGameTime());      // No returnToGamePenalty in this scenario
    ASSERT_EQ(0, clientGame->getReturnToGameDelay());
@@ -74,10 +75,10 @@ static void doScenario1(GamePair &gamePair)
    ASSERT_FALSE(serverGame->getClientInfo(0)->isSpawnDelayed());     // Player should no longer be spawn delayed
    ASSERT_FALSE(clientGame->inReturnToGameCountdown());
    fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   serverGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());    // Ship should have spawned and be available on client and server
    fillVector.clear();
-   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   clientGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());    // Ship should have spawned and be available on client and server
 }
 
@@ -103,13 +104,13 @@ static void doScenario2(GamePair &gamePair)
    // Should now be 2 ships in the game -- one belonging to client1 and another belonging to client2
    gamePair.idle(10, 5);               // Idle 5x; give things time to propagate
    fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   serverGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(2, fillVector.size());                  
    fillVector.clear();
-   client1->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   client1->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(2, fillVector.size());
    fillVector.clear();
-   client2->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   client2->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(2, fillVector.size());
 
    Vector<string> words;
@@ -119,13 +120,13 @@ static void doScenario2(GamePair &gamePair)
    ASSERT_TRUE(serverGame->getClientInfo(0)->isSpawnDelayed());
    ASSERT_TRUE(client1->isSpawnDelayed());            // Status should have propagated to client by now
    fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   serverGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());                   // Ship should have been killed off -- only 2nd player ship should be left
    fillVector.clear();
-   client1->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   client1->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(0, fillVector.size());                   // Suspended players don't see remote objects
    fillVector.clear();
-   client2->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   client2->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    //ASSERT_EQ(1, fillVector.size());                   // Player 2 should see self
 
    ASSERT_TRUE(client2->findClientInfo(client1->getPlayerName())->isSpawnDelayed());    // Check that other player knows our status
@@ -144,12 +145,12 @@ static void doScenario2(GamePair &gamePair)
 
    // Check to ensure ship didn't spawn -- spawn should be delayed until penalty period has expired
    fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   serverGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());   // (one ship for client2) 
 
    // Client 1 won't see spawning ship while he is suspended
    fillVector.clear();
-   client1->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   client1->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(0, fillVector.size());
 
    // Client 2 should see that client 1 has been delayed
@@ -159,10 +160,10 @@ static void doScenario2(GamePair &gamePair)
    gamePair.idle(ClientInfo::SPAWN_UNDELAY_TIMER_DELAY / 100, 105);  // More time than SPAWN_UNDELAY_TIMER_DELAY
    ASSERT_FALSE(client1->inReturnToGameCountdown());
    fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   serverGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(2, fillVector.size());    
    fillVector.clear();
-   client1->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   client1->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(2, fillVector.size());
 
    gamePair.removeClient(1);
@@ -184,10 +185,10 @@ static void doScenario34(GamePair &gamePair, bool letGameSlipIntoFullSuspendMode
 
    gamePair.idle(Ship::KillDeleteDelay / 15, 20);     // Idle; give things time to propagate
    fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   serverGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());                   // Now that player 2 has left, should only be one ship
    fillVector.clear();
-   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   clientGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());
 
    Vector<string> words;
@@ -200,7 +201,7 @@ static void doScenario34(GamePair &gamePair, bool letGameSlipIntoFullSuspendMode
    EXPECT_FALSE(clientGame->isSuspended());
 
    fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   serverGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(0, fillVector.size());                   // No ships remaining in game -- don't check client as it may have exploding ship there
    fillVector.clear();
 
@@ -260,10 +261,10 @@ static void doScenario34(GamePair &gamePair, bool letGameSlipIntoFullSuspendMode
 
    // Check to ensure ship spawned
    fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   serverGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());   
    fillVector.clear();
-   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   clientGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());
 
    ASSERT_FALSE(serverGame->isOrIsAboutToBeSuspended());
@@ -340,20 +341,24 @@ TEST(SpawnDelayTest, SpawnDelayTests)
    ClientGame *clientGame = gamePair.getClient(0);
    ServerGame *serverGame = gamePair.server;
 
+   ASSERT_TRUE(serverGame->getGameType()) << "Expect a GameType by now!";
+
    // Idle for a while, let things settle
    gamePair.idle(10, 5);
+
+   ASSERT_TRUE(clientGame->getGameType()) << "Expect a GameType by now!";
 
    Vector<DatabaseObject *> fillVector;
 
    // Ship should have spawned by now... check for it on the client and server
    fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   serverGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());    // Ship should have spawned by now
 
    Ship *ship = static_cast<Ship *>(fillVector[0]);      // Server's copy of the ship
 
    fillVector.clear();
-   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   clientGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());    // And it should be on the client, too
 
    ASSERT_FALSE(clientGame->isSpawnDelayed());     // Should not be spawn-delayed at this point
@@ -364,10 +369,10 @@ TEST(SpawnDelayTest, SpawnDelayTests)
 
    // Ship should have spawned by now... check for it on the client and server
    fillVector.clear();
-   serverGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   serverGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());    //  Ship should have respawned and be available on the server...
    fillVector.clear();
-   clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+   clientGame->getLevel()->findObjects(PlayerShipTypeNumber, fillVector);
    ASSERT_EQ(1, fillVector.size());    // ...and also on the client
 
    // Scenario 1: Player is idle and gets spawn delayed -- no other players in game

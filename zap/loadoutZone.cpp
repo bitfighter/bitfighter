@@ -4,6 +4,8 @@
 //------------------------------------------------------------------------------
 
 #include "loadoutZone.h"
+
+#include "Level.h"
 #include "game.h"
 
 #include "gameObjectRender.h"
@@ -59,27 +61,27 @@ LoadoutZone *LoadoutZone::clone() const
 }
 
 
-void LoadoutZone::render()
+void LoadoutZone::render() const
 {
    renderLoadoutZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle());
 }
 
 
-void LoadoutZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void LoadoutZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
    render();
    PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled, true);
 }
 
 
-void LoadoutZone::renderDock()
+void LoadoutZone::renderDock(const Color &color) const
 {
-  renderZone(getColor(), getOutline(), getFill());
+   renderZone(color, getOutline(), getFill());
 }
 
 
 // Create objects from parameters stored in level file
-bool LoadoutZone::processArguments(S32 argc2, const char **argv2, Game *game)
+bool LoadoutZone::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    // Need to handle or ignore arguments that starts with letters,
    // so a possible future version can add parameters without compatibility problem.
@@ -105,14 +107,14 @@ bool LoadoutZone::processArguments(S32 argc2, const char **argv2, Game *game)
       return false;
 
    setTeam(atoi(argv[0]));     // Team is first arg
-   return Parent::processArguments(argc - 1, argv + 1, game);
+   return Parent::processArguments(argc - 1, argv + 1, level);
 }
 
 
-const char *LoadoutZone::getOnScreenName()     { return "Loadout";       }
-const char *LoadoutZone::getPrettyNamePlural() { return "Loadout Zones"; }
-const char *LoadoutZone::getOnDockName()       { return "Loadout";       }
-const char *LoadoutZone::getEditorHelpString() { return "Area to finalize ship modifications.  Each team should have at least one."; }
+const char *LoadoutZone::getOnScreenName()     const  { return "Loadout";       }
+const char *LoadoutZone::getPrettyNamePlural() const  { return "Loadout Zones"; }
+const char *LoadoutZone::getOnDockName()       const  { return "Loadout";       }
+const char *LoadoutZone::getEditorHelpString() const  { return "Area to finalize ship modifications.  Each team should have at least one."; }
 
 bool LoadoutZone::hasTeam()      { return true; }
 bool LoadoutZone::canBeHostile() { return true; }
@@ -144,6 +146,9 @@ const Vector<Point> *LoadoutZone::getCollisionPoly() const
 // Gets called on both client and server
 bool LoadoutZone::collide(BfObject *hitObject)
 {
+   // This is probably a useless assert in the long-term, but tests are crashing here due to refactor blues
+   TNLAssert(getGame(), "Expect a game here!");
+
    // Anyone can use neutral loadout zones
    if(!isGhost() &&                                                           // On the server
          (hitObject->getTeam() == getTeam() || getTeam() == TEAM_NEUTRAL) &&  // The zone is on the same team as hitObject, or it's neutral

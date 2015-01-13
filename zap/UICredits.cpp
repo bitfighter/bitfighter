@@ -124,19 +124,19 @@ void CreditsUserInterface::idle(U32 timeDelta)
 
    if(mScroller->isActive())
       mScroller->updateFX(timeDelta);
-}
-
-
-void CreditsUserInterface::render()
-{
-   if(mScroller->isActive())
-      mScroller->render();
 
    if(quitting)
    {
       quitting = false;
       quit();
    }
+}
+
+
+void CreditsUserInterface::render() const
+{
+   if(mScroller->isActive())
+      mScroller->render();
 }
 
 
@@ -234,7 +234,7 @@ void CreditsScroller::updateFX(U32 delta)
 }
 
 
-void CreditsScroller::render()
+void CreditsScroller::render() const
 {
    glColor(Colors::white);
 
@@ -319,7 +319,7 @@ void SplashUserInterface::idle(U32 timeDelta)
 }
 
 
-void SplashUserInterface::render()
+void SplashUserInterface::render() const
 {
    if(mPhase == SplashPhaseAnimation)             // Main animation phase
    {

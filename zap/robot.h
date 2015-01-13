@@ -28,10 +28,6 @@ class Robot : public Ship, public LuaScriptRunner
    typedef Ship Parent;
 
 private:
-   static const S32 RobotRespawnDelay = 1500;
-
-   string message;
-
    U16 mCurrentZone;                // Zone robot is currently in
 
    LuaPlayerInfo *mPlayerInfo;      // Player info object describing the robot
@@ -45,18 +41,21 @@ protected:
    void killScript();
 
 public:
-   explicit Robot(lua_State *L = NULL);      // Combined Lua / C++ default constructor
-   virtual ~Robot();                // Destructor
+   explicit Robot(lua_State *L = NULL);   // Combined Lua / C++ default constructor
+   virtual ~Robot();                      // Destructor
 
-   bool initialize(Point &pos);
+   void initialize(const Point &pos);
+   void doClassSpecificInitialization(const Point &pos);
 
    void kill();
 
    void renderLayer(S32 layerIndex);
    void idle(IdleCallPath path);
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
-   bool processArguments(S32 argc, const char **argv, Game *game, string &errorMessage);
+   bool processArguments(S32 argc, const char **argv, Level *level);
+   bool processArguments(const Vector<string> &args, Game *game, string &errorMessage);
+   bool processArguments(const string &args, Game *game);
+
    void onAddedToGame(Game *);
 
    S32 getCurrentZone();
@@ -69,7 +68,8 @@ public:
    // Some informational functions
    F32 getAnglePt(Point point);
 
-   bool isRobot();
+   void onPositionChanged(GhostConnection *connection);
+   void onChangedClientTeam();
 
    const char *getErrorMessagePrefix();
 

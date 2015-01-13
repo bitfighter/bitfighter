@@ -29,6 +29,9 @@
 #endif
 
 #ifdef WIN
+/* API declaration export attribute */
+#define ALURE_API
+
 /* Define if we have windows.h */
 #define HAVE_WINDOWS_H
 

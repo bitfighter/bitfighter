@@ -28,6 +28,7 @@ private:
    LineEditor mHexColorEditor;
 
    void initialize();
+   void onColorChanged();
 
 public:
    EditorTeam();                                   // Constructor
@@ -37,16 +38,13 @@ public:
    LineEditor *getTeamNameEditor();
    LineEditor *getHexColorEditor();
 
+   void setName(const StringTableEntry &name);
    void setName(const char *name);
-   StringTableEntry getName() const;  // Wrap in STE to make signatures match
-
-   S32 getPlayerBotCount() const;
-   S32 getPlayerCount() const;    
-   S32 getBotCount() const;
+   StringTableEntry getName() const;  // Returns a STE to make signatures match
 
    void setColor(F32 r, F32 g, F32 b);
    void setColor(const Color &color);
-
+   void setColor(const Color *color);
 };
 
 }

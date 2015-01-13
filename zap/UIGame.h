@@ -137,7 +137,6 @@ private:
    Move mCurrentMove;
    Move mTransformedMove;
    Point mMousePoint;
-   Point mShipPos;      // Track ship pos, so we have something if the ship disappears for whatever reason
 
    HelperManager mHelperManager;
    LoadoutIndicator mLoadoutIndicator;
@@ -187,17 +186,17 @@ private:
 
    Timer mProgressBarFadeTimer;     // For fading out progress bar after level is loaded
    bool mShowProgressBar;
-   bool mHasShipPos;                // True if mShipPos has been explicitly set
-
 
    // Some rendering routines
-   void renderScoreboard();
-   void renderTeamScoreboard(S32 index, S32 teams, bool isTeamGame, 
+   void renderScoreboard() const;
+   void renderTeamScoreboard(S32 index, S32 teams, bool isTeamGame, bool isWinningTeam,
                              S32 scoreboardTop, S32 sectionHeight, S32 teamHeaderHeight, S32 lineHeight) const;
    void renderScoreboardLine(const Vector<ClientInfo *> &playerScores, bool isTeamGame, S32 row, 
                              S32 x, S32 y, U32 lineHeight, S32 rightEdge, S32 *colWidths) const;
    void renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y, const S32 *colIndexWidths, bool isTeamGame) const;
-   void renderTeamName(S32 index, S32 left, S32 right, S32 top) const;
+   void renderTeamName(S32 index, bool isWinningTeam, S32 left, S32 right, S32 top) const;
+
+   Point getShipRenderPos() const;
 
 
    // Some key press/release handler helpers
@@ -276,8 +275,8 @@ private:
    void dropItem();                                // User presses drop item key
 
 
-   void loadAlreadySeenLevelupMessageList();
-   void saveAlreadySeenLevelupMessageList();
+   //void loadAlreadySeenLevelupMessageList();
+   //void saveAlreadySeenLevelupMessageList();
 
    const string getAlreadySeenLevelupMessageString() const;
    void setAlreadySeenLevelupMessageString(const string &vals);
@@ -329,7 +328,7 @@ public:
    void showLevelLoadDisplay(bool show, bool fade);
    void serverLoadedLevel(const string &levelName);
 
-   void render();                         // Render game screen
+   void render() const;                   // Render game screen
   
    void renderReticle() const;            // Render crosshairs
    void renderWrongModeIndicator() const;
@@ -362,6 +361,8 @@ public:
    void setShowingInGameHelp(bool showing);
    void resetInGameHelpMessages();
 
+   void updateLeadingPlayerAndScore();
+
    bool isShowingDebugShipCoords() const;
 
    // FxManager passthroughs
@@ -370,14 +371,15 @@ public:
    void emitBlast(const Point &pos, U32 size);
    void emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2);
    void emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation);
-   void emitTextEffect(const string &text, const Color &color, const Point &pos);
+   void emitTextEffect(const string &text, const Color &color, const Point &pos, bool relative);
+   void emitDelayedTextEffect(U32 delay, const string &text, const Color &color, const Point &pos, bool relative);
    void emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, UI::SparkType sparkType);
    void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
    void emitTeleportInEffect(const Point &pos, U32 type);
 
    
-   void renderBasicInterfaceOverlay();
-   void renderLevelInfo();
+   void renderBasicInterfaceOverlay() const;
+   void renderLevelInfo() const;
    bool shouldRenderLevelInfo() const;
    static void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio);
 
@@ -395,20 +397,18 @@ public:
    Point worldToScreenPoint(const Point *point,  S32 canvasWidth, S32 canvasHeight) const;
    void toggleCommanderMap();
 
-   void onActivate();                 // Gets run when interface is first activated
-   void onReactivate();               // Gets run when interface is subsequently reactivated
+   void onActivate();                  // Gets run when interface is first activated
+   void onReactivate();                // Gets run when interface is subsequently reactivated
 
    void onPlayerJoined();
    void onPlayerQuit();
-   void onGameOver();
+   void onGameOver();                  // Scoreboard display begins
+   void onGameReallyAndTrulyOver();    // After scoreboard display is finished
 
    void pregameSetup(bool engineerEnabled);
    void setSelectedEngineeredObject(U32 objectType);
 
    void quitEngineerHelper();
-
-   //ofstream mOutputFile;            // For saving downloaded levels
-   //FILE *mOutputFile;               // For saving downloaded levels
 
    bool onKeyDown(InputCode inputCode);
    void onKeyUp(InputCode inputCode);
@@ -442,13 +442,13 @@ public:
    const HelperMenu *getActiveHelper() const;
 
 
-   void renderGameNormal();         // Render game in normal play mode
-   void renderGameCommander();      // Render game in commander's map mode
-   void renderSuspended();          // Render suspended game
+   void renderGameNormal() const;         // Render game in normal play mode
+   void renderGameCommander() const;      // Render game in commander's map mode
+   void renderSuspended() const;          // Render suspended game
 
-   void renderOverlayMap();         // Render the overlay map in normal play mode
+   void renderOverlayMap() const;         // Render the overlay map in normal play mode
 
-   void renderEngineeredItemDeploymentMarker(Ship *ship);
+   void renderEngineeredItemDeploymentMarker(Ship *ship) const;
 
    void receivedControlUpdate(bool recvd);
 

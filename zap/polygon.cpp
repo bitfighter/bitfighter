@@ -7,6 +7,7 @@
 
 #include "Colors.h"
 #include "gameObjectRender.h"
+#include "GeomUtils.h"
 
 namespace Zap
 {
@@ -29,12 +30,11 @@ PolygonObject::~PolygonObject()
 // Tell the geometry that things have changed
 void PolygonObject::onGeomChanged() 
 { 
-   onPointsChanged(); 
    Parent::onGeomChanged();
 }  
 
 
-void PolygonObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void PolygonObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    if(isSelected() || isLitUp())
@@ -46,13 +46,13 @@ void PolygonObject::renderEditor(F32 currentScale, bool snappingToWallCornersEna
 }
 
 
-void PolygonObject::renderDock()
+void PolygonObject::renderDock(const Color &color) const
 {
    renderEditor(1, false);
 }
 
 
-void PolygonObject::highlightDockItem() 
+void PolygonObject::highlightDockItem() const
 {   
    renderPolyHighlight(); 
 }
@@ -60,15 +60,16 @@ void PolygonObject::highlightDockItem()
 
 extern F32 gLineWidth3;
 
-void PolygonObject::renderPolyHighlight()
+void PolygonObject::renderPolyHighlight() const
 {
 #ifndef ZAP_DEDICATED
-   renderPolygonOutline(getOutline(), isSelected() ? &Colors::EDITOR_SELECT_COLOR : &Colors::EDITOR_HIGHLIGHT_COLOR, 1, gLineWidth3);
+   const Color &color = isSelected() ? Colors::EDITOR_SELECT_COLOR : Colors::EDITOR_HIGHLIGHT_COLOR;
+   renderPolygonOutline(getOutline(), color, 1, gLineWidth3);
 #endif
 }
 
 
-Point PolygonObject::getDockLabelPos()
+Point PolygonObject::getDockLabelPos() const
 {
    static const Point labelOffset(0, -2);
 
@@ -76,7 +77,7 @@ Point PolygonObject::getDockLabelPos()
 }
 
 
-void PolygonObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
+void PolygonObject::prepareForDock(const Point &point, S32 teamIndex)
 {
 #ifndef ZAP_DEDICATED
    F32 h = 16;    // Entire height
@@ -88,7 +89,7 @@ void PolygonObject::prepareForDock(ClientGame *game, const Point &point, S32 tea
    addVert(point + Point( w, h)); 
    addVert(point + Point(-w, h)); 
 
-   Parent::prepareForDock(game, point, teamIndex);
+   Parent::prepareForDock(point, teamIndex);
 #endif
 }
 
@@ -131,6 +132,11 @@ S32 PolygonObject::getVel(lua_State *L)
    return returnPoint(L, Point(0,0));
 }
 
+
+bool PolygonObject::overlapsPoint(const Point &point) const
+{
+   return triangulatedFillContains(getFill(), point);
+}
 
 };
 

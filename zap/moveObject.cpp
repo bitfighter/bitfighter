@@ -11,6 +11,7 @@
 #include "game.h"
 #include "gameConnection.h"
 #include "ship.h"
+#include "Level.h"
 
 #include "Colors.h"
 #include "GeomUtils.h"
@@ -23,6 +24,7 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
+#  include "UIQuickMenu.h"
 #endif
 
 
@@ -80,11 +82,12 @@ MoveObject::~MoveObject()
 }
 
 
-bool MoveObject::processArguments(S32 argc, const char **argv, Game *game)
+bool MoveObject::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 2)
       return false;
-   else if(!Parent::processArguments(argc, argv, game))
+
+   else if(!Parent::processArguments(argc, argv, level))
       return false;
 
    setInitialPosVelAng(getPos(), Point(0,0), 0);
@@ -869,11 +872,11 @@ void MoveItem::setCollideable(bool isCollideable)
 }
 
 // Rendering - client only, in-game
-void MoveItem::render()                                     { renderItem(getRenderPos());                  }
+void MoveItem::render()   const                                   { renderItem(getRenderPos());                  }
 
 // Override the following to actually draw our items
-void MoveItem::renderItem(const Point &pos)                 { TNLAssert(false, "Unimplemented function!"); }
-void MoveItem::renderItemAlpha(const Point &pos, F32 alpha) { TNLAssert(false, "Unimplemented function!"); }
+void MoveItem::renderItem(const Point &pos) const                 { TNLAssert(false, "Unimplemented function!"); }
+void MoveItem::renderItemAlpha(const Point &pos, F32 alpha) const { TNLAssert(false, "Unimplemented function!"); }
 
 
 // Note that I could only get this function to run on the client, and only from unpackUpdate... so I'm not sure
@@ -1084,7 +1087,7 @@ void MountableItem::idle(BfObject::IdleCallPath path)
 
 
 // Client only, in-game
-void MountableItem::render()
+void MountableItem::render() const
 {
    // If the item is mounted, renderItem will be called from the ship it is mounted to
    if(mIsMounted)
@@ -1439,29 +1442,47 @@ bool Asteroid::shouldRender() const
 }
 
 
-void Asteroid::renderItem(const Point &pos)
+void Asteroid::renderItem(const Point &pos) const
 {
    if(shouldRender())
       renderAsteroid(pos, mDesign, mRadius / 89.f);
 }
 
 
-void Asteroid::renderDock()
+void Asteroid::renderDock(const Color &color) const
 {
    renderAsteroid(getActualPos(), 2, .1f);
 }
 
 
-const char *Asteroid::getOnScreenName()     { return "Asteroid";  }
-const char *Asteroid::getPrettyNamePlural() { return "Asteroids"; }
-const char *Asteroid::getOnDockName()       { return "Ast.";      }
-const char *Asteroid::getEditorHelpString() { return "Shootable asteroid object.  Just like the arcade game."; }
+const char *Asteroid::getOnScreenName()     const  { return "Asteroid";  }
+const char *Asteroid::getPrettyNamePlural() const  { return "Asteroids"; }
+const char *Asteroid::getOnDockName()       const  { return "Ast.";      }
+const char *Asteroid::getEditorHelpString() const  { return "Shootable asteroid object.  Just like the arcade game."; }
 
 
-F32 Asteroid::getEditorRadius(F32 currentScale)
+F32 Asteroid::getEditorRadius(F32 currentScale) const
 {
    return mRadius * currentScale;
 }
+
+
+#ifndef ZAP_DEDICATED
+
+bool Asteroid::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->addMenuItem(new CounterMenuItem("Size:", getCurrentSize(), 1, 1, ASTEROID_SIZELEFT_MAX, "", "", ""));
+
+   return true;
+}
+
+
+void Asteroid::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   setCurrentSize(attributeMenu->getMenuItem(0)->getIntValue());
+}
+
+#endif
 
 
 const Vector<Point> *Asteroid::getCollisionPoly() const
@@ -1517,7 +1538,7 @@ void Asteroid::damageObject(DamageInfo *damageInfo)
 
    newItem->setPosAng(getActualPos(), ang2);
 
-   newItem->addToGame(getGame(), getGame()->getGameObjDatabase());    // And add it to the list of game objects
+   newItem->addToGame(getGame(), getGame()->getLevel());    // And add it to the list of game objects
 }
 
 
@@ -1608,7 +1629,7 @@ void Asteroid::onItemExploded(Point pos)
 }
 
 
-bool Asteroid::processArguments(S32 argc2, const char **argv2, Game *game)
+bool Asteroid::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    S32 argc = 0;
    const char *argv[8];                // 8 is ok for now..
@@ -1634,7 +1655,7 @@ bool Asteroid::processArguments(S32 argc2, const char **argv2, Game *game)
    setRadius(getAsteroidRadius(mSizeLeft));
    setMass(getAsteroidMass(mSizeLeft));
 
-   return Parent::processArguments(argc, argv, game);
+   return Parent::processArguments(argc, argv, level);
 }
 
 
@@ -1647,52 +1668,11 @@ string Asteroid::toLevelCode() const
 }
 
 
-//#ifndef ZAP_DEDICATED
-
-//EditorAttributeMenuUI *Asteroid::mAttributeMenuUI = NULL;
-//
-//EditorAttributeMenuUI *Asteroid::getAttributeMenu()
-//{
-//   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
-//   if(!mAttributeMenuUI)
-//   {
-//      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
-//
-//      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
-//
-//      mAttributeMenuUI->addMenuItem(new CounterMenuItem("Size:", mSizeLeft, 1, 1, ASTEROID_SIZELEFT_MAX, "", "", ""));
-//
-//      // Add our standard save and exit option to the menu
-//      mAttributeMenuUI->addSaveAndQuitMenuItem();
-//   }
-//
-//   return mAttributeMenuUI;
-//}
-//
-//
-//// Get the menu looking like what we want
-//void Asteroid::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-//{
-//   attributeMenu->getMenuItem(0)->setIntValue(mSizeLeft);
-//}
-//
-//
-//// Retrieve the values we need from the menu
-//void Asteroid::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
-//{
-//   mSizeLeft = attributeMenu->getMenuItem(0)->getIntValue();
-//   setRadius(getAsteroidRadius(mSizeLeft));
-//   setMass(getAsteroidMass(mSizeLeft));
-//}
-
-
 // Render some attributes when item is selected but not being edited
 void Asteroid::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
    keys.push_back("Size");   values.push_back(itos(mSizeLeft));
 }
-
-//#endif
 
 
 /////
@@ -1822,7 +1802,7 @@ void TestItem::idle(BfObject::IdleCallPath path)
 }
 
 
-void TestItem::renderItem(const Point &pos)
+void TestItem::renderItem(const Point &pos) const
 {
    renderTestItem(mOutlinePoints);
 }
@@ -1835,19 +1815,19 @@ void TestItem::setOutline()
 }
 
 
-void TestItem::renderDock()
+void TestItem::renderDock(const Color &color) const
 {
    renderTestItem(getActualPos(), 8);
 }
 
 
-const char *TestItem::getOnScreenName()      {  return "TestItem";   }
-const char *TestItem::getPrettyNamePlural()  {  return "TestItems";  }
-const char *TestItem::getOnDockName()        {  return "Test";       }
-const char *TestItem::getEditorHelpString()  {  return "Bouncy object that floats around and gets in the way."; }
+const char *TestItem::getOnScreenName()     const  {  return "TestItem";   }
+const char *TestItem::getPrettyNamePlural() const  {  return "TestItems";  }
+const char *TestItem::getOnDockName()       const  {  return "Test";       }
+const char *TestItem::getEditorHelpString() const  {  return "Bouncy object that floats around and gets in the way."; }
 
 
-F32 TestItem::getEditorRadius(F32 currentScale)
+F32 TestItem::getEditorRadius(F32 currentScale) const
 {
    return getRadius() * currentScale;
 }
@@ -1948,32 +1928,32 @@ void ResourceItem::setOutline()
 }
 
 
-void ResourceItem::renderItem(const Point &pos)
+void ResourceItem::renderItem(const Point &pos) const
 {
    renderResourceItem(mOutlinePoints);
 }
 
 
-void ResourceItem::renderItemAlpha(const Point &pos, F32 alpha)
+void ResourceItem::renderItemAlpha(const Point &pos, F32 alpha) const
 {
    renderResourceItem(mOutlinePoints, alpha);
 }
 
 
-void ResourceItem::renderDock()
+void ResourceItem::renderDock(const Color &color) const
 {
    static Vector<Point> points;
    points.clear();
-   generateOutlinePoints(getActualPos(), 0.4f   , points);
+   generateOutlinePoints(getActualPos(), 0.4f, points);
 
    renderResourceItem(points);
 }
 
 
-const char *ResourceItem::getOnScreenName()     { return "ResourceItem"; }
-const char *ResourceItem::getPrettyNamePlural() { return "Resource Items"; }
-const char *ResourceItem::getOnDockName()       { return "Res."; }
-const char *ResourceItem::getEditorHelpString() { return "Small bouncy object; capture one to activate Engineer module"; }
+const char *ResourceItem::getOnScreenName()     const  { return "ResourceItem"; }
+const char *ResourceItem::getPrettyNamePlural() const  { return "Resource Items"; }
+const char *ResourceItem::getOnDockName()       const  { return "Res."; }
+const char *ResourceItem::getEditorHelpString() const  { return "Small bouncy object; capture one to activate Engineer module"; }
 
 
 bool ResourceItem::collide(BfObject *hitObject)

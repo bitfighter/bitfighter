@@ -3,8 +3,8 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#ifndef _UIEDITORMENUS_H_
-#define _UIEDITORMENUS_H_
+#ifndef _QUICK_MENU_UI_H
+#define _QUICK_MENU_UI_H
 
 
 #include "UIMenus.h"    // Parent class
@@ -22,18 +22,14 @@ class QuickMenuUI : public MenuUserInterface    // There's really nothing quick 
 
 private:
    virtual void initialize();
-   virtual string getTitle();
-   S32 getMenuWidth();     
+   virtual string getTitle() const;
+   S32 getMenuWidth() const;     
    Point mMenuLocation;
 
    S32 getYStart() const;
 
    virtual S32 getTextSize(MenuItemSize size) const;     // Let menus set their own text size
    virtual S32 getGap(MenuItemSize size) const;          // Gap is the space between items
-
-   // Calculated during rendering, used for figuring out which item mouse is over.  Will always be positive during normal use, 
-   // but will be intialized to negative so that we know not to use it before menu has been rendered, and this value caluclated.
-   S32 mTopOfFirstMenuItem;       
 
 protected:
    bool mDisableHighlight;   // Disable highlighting of selected menu item
@@ -47,7 +43,7 @@ public:
    QuickMenuUI(ClientGame *game, const string &title);
    virtual ~QuickMenuUI();
 
-   void render();
+   void render() const;
 
    virtual void onEscape();
 
@@ -70,13 +66,13 @@ class EditorAttributeMenuUI : public QuickMenuUI
    typedef QuickMenuUI Parent;
       
 private:
-   string getTitle();
+   string getTitle() const;
 
 public:
    explicit EditorAttributeMenuUI(ClientGame *game);    // Constructor
    virtual ~EditorAttributeMenuUI();                    // Destructor
 
-   virtual void startEditingAttrs(BfObject *object);
+   virtual bool startEditingAttrs(BfObject *object);
    virtual void doneEditing();
    virtual void doneEditingAttrs(BfObject *object);
 };

@@ -10,6 +10,7 @@
 #include "ServerGame.h"
 #include "stringUtils.h"
 #include "tnlThread.h"
+#include "Level.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
@@ -53,7 +54,7 @@ public:
       {
          logprintf(LogConsumer::LogWarning, "Failed to create thread for recorder, games may not record");
          fclose(f);
-			f = NULL;
+         f = NULL;
       }
    }
    ~WriteBufferThread()
@@ -119,7 +120,7 @@ static void gameRecorderScoping(GameRecorderServer *conn, Game *game)
       conn->objectLocalScopeAlways(gt);
 
 
-   const Vector<DatabaseObject *> &gameObjects = *(game->getGameObjDatabase()->findObjects_fast());
+   const Vector<DatabaseObject *> &gameObjects = *(game->getLevel()->findObjects_fast());
    for(S32 i=0; i < gameObjects.size(); i++)
    {
       BfObject *obj = dynamic_cast<BfObject *>(gameObjects[i]);
@@ -164,7 +165,7 @@ GameRecorderServer::GameRecorderServer(ServerGame *game)
    mPackUnpackShipEnergyMeter = true;
 
    {
-      const string &dir = game->getSettings()->getFolderManager()->recordDir;
+      const string &dir = game->getSettings()->getFolderManager()->getRecordDir();
       mFileName = newRecordingFileName(dir, game->getGameType()->getLevelName(), game->getSettings()->getHostName()) +
             "." + buildGameRecorderExtension();
       string filename = joindir(dir, mFileName);

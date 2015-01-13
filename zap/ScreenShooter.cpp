@@ -69,7 +69,7 @@ void ScreenShooter::resizeViewportToCanvas(UIManager *uiManager)
 // Stolen from VideoSystem::actualizeScreenMode()
 void ScreenShooter::restoreViewportToWindow(GameSettings *settings)
 {
-   DisplayMode displayMode = settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
+   DisplayMode displayMode = settings->getSetting<DisplayMode>(IniKey::WindowMode);
 
    // Set up video/window flags amd parameters and get ready to change the window
    S32 sdlWindowWidth, sdlWindowHeight;
@@ -105,7 +105,7 @@ void ScreenShooter::restoreViewportToWindow(GameSettings *settings)
 // Much was copied directly.
 void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings, string filename)
 {
-   string folder = settings->getFolderManager()->screenshotDir;
+   string folder = settings->getFolderManager()->getScreenshotDir();
 
    // Let's find a filename to use
    makeSureFolderExists(folder);
@@ -124,9 +124,7 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings,
       }
    }
    else
-   {
       fullFilename = joindir(folder, filename + ".png");
-   }
 
    // We default to resizing the opengl viewport to the standard canvas size, unless we're
    // in the editor or our window is smaller than the canvas size
@@ -144,13 +142,13 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings,
    // If we're resizing, use the default canvas size
    if(doResize)
    {
-      width = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+      width  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
       height = DisplayManager::getScreenInfo()->getGameCanvasHeight();
    }
    // Otherwise just take the window size
    else
    {
-      width = DisplayManager::getScreenInfo()->getWindowWidth();
+      width  = DisplayManager::getScreenInfo()->getWindowWidth();
       height = DisplayManager::getScreenInfo()->getWindowHeight();
    }
 

@@ -5,16 +5,20 @@
 
 #include "UIEditor.h"
 
-#include "UIEditorMenus.h"       // For access to menu methods such as setObject
 #include "UIEditorInstructions.h"
+#include "UIEditorMenu.h"
+#include "UIQuickMenu.h"         // For access to menu methods such as setObject
 #include "UIErrorMessage.h"
 #include "UIGameParameters.h"
+#include "UIManager.h"
 #include "UINameEntry.h"         // For LevelnameEntryUI
 #include "UITeamDefMenu.h"
-#include "UIManager.h"
 
-#include "gridDB.h"
-#include "WallSegmentManager.h"
+#include "EditorWorkUnit.h"
+
+#include "LineItem.h"
+#include "PolyWall.h"
+#include "WallItem.h"
 
 #include "ClientGame.h"  
 #include "CoreGame.h"            // For CoreItem def
@@ -28,7 +32,6 @@
 #include "loadoutZone.h"         // For LoadoutZone def
 #include "PickupItem.h"          // For RepairItem
 #include "projectile.h"
-
 #include "Spawn.h"
 #include "speedZone.h"           // For Speedzone def
 #include "Teleporter.h"          // For Teleporter def
@@ -40,13 +43,10 @@
 #include "Intervals.h"
 #include "EditorTeam.h"
 
-#include "gameLoader.h"          // For LevelLoadException def
 #include "LevelSource.h"
-#include "LevelDatabase.h"
 
 #include "luaLevelGenerator.h"
 #include "LevelDatabaseUploadThread.h"
-#include "HttpRequest.h"
 #include "gameObjectRender.h"
 #include "SystemFunctions.h"
 
@@ -59,12 +59,11 @@
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 #include "ScreenShooter.h"
+#include "FontManager.h"
 
 #include <cmath>
 #include <set>
 
-
-using namespace boost;
 
 namespace Zap
 {
@@ -78,7 +77,7 @@ const F32 MIN_SCALE = .02f;         // Most zoomed-out scale
 const F32 MAX_SCALE = 10.0f;        // Most zoomed-in scale
 const F32 STARTING_SCALE = 0.5;
 
-static GridDatabase *mLoadTarget;
+static Level *mLoadTarget;
 
 const string EditorUserInterface::UnnamedFile = "unnamed_file";      // When a file has no name, this is its name!
 
@@ -86,26 +85,6 @@ const string EditorUserInterface::UnnamedFile = "unnamed_file";      // When a f
 S32 QSORT_CALLBACK pluginInfoSort(PluginInfo *a, PluginInfo *b)
 {
    return stricmp((a)->prettyName.c_str(), (b)->prettyName.c_str());
-}
-
-
-static void backToMainMenuCallback(ClientGame *game)
-{
-   UIManager *uiManager = game->getUIManager();
-
-   uiManager->getUI<EditorUserInterface>()->onQuitted();
-   uiManager->reactivate(uiManager->getUI<MainMenuUserInterface>());
-}
-
-
-static void saveLevelCallback(ClientGame *game)
-{
-   UIManager *uiManager = game->getUIManager();
-
-   if(uiManager->getUI<EditorUserInterface>()->saveLevel(true, true))
-      backToMainMenuCallback(game);
-   else
-      uiManager->reactivate(uiManager->getUI<EditorUserInterface>());
 }
 
 
@@ -129,7 +108,7 @@ PluginInfo::PluginInfo(string prettyName, string fileName, string description, s
 EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 {
    mWasTesting = false;
-   mouseIgnore = false;
+   mIgnoreMouseInput = false;
 
    clearSnapEnvironment();
 
@@ -144,46 +123,64 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mHitVertex = NONE;
    mEdgeHit   = NONE;
 
-   mEditorDatabase = boost::shared_ptr<GridDatabase>(new GridDatabase());
-
-   setNeedToSave(false);
-
-   mLastUndoStateWasBarrierWidthChange = false;
-
-   mUndoItems.resize(UNDO_STATES);     // Create slots for all our undos... also creates a ton of empty dbs.  Maybe we should be using pointers?
    mAutoScrollWithMouse = false;
    mAutoScrollWithMouseReady = false;
 
-   mEditorAttributeMenuItemBuilder.initialize(game);
+   mAddingVertex = false;
 
    mPreviewMode = false;
    mNormalizedScreenshotMode = false;
 
    mSaveMsgTimer.setPeriod(FIVE_SECONDS);    
 
-   mGridSize = game->getSettings()->getIniSettings()->mSettings.getVal<U32>("EditorGridSize");
+   mGridSize = mGameSettings->getSetting<U32>(IniKey::EditorGridSize);
 
    mQuitLocked = false;
    mVertexEditMode = true;
 }
 
 
-GridDatabase *EditorUserInterface::getDatabase() const
+Level *EditorUserInterface::getLevel() const
 { 
-   return mEditorDatabase.get();
+   return mLevel.get();
 }  
 
 
 F32 EditorUserInterface::getGridSize() const
 {
-   return mGridSize;
+   return (F32)mGridSize;
 }
 
 
-void EditorUserInterface::setDatabase(boost::shared_ptr<GridDatabase> database)
+void EditorUserInterface::geomChanged(BfObject *obj)
 {
-   TNLAssert(database.get(), "Database should not be NULL!");
-   mEditorDatabase = boost::dynamic_pointer_cast<GridDatabase>(database);
+   obj->onGeomChanged();
+
+   if(isWallType(obj->getObjectTypeNumber()))
+         rebuildWallGeometry(mLevel.get());
+}
+
+
+void EditorUserInterface::setLevel(const boost::shared_ptr<Level> &level)
+{
+   TNLAssert(level.get(), "Level should not be NULL!");
+   mLevel = level;
+   getGame()->setLevel(level);
+   mUndoManager.setLevel(level, this);
+
+   // Do some special preparations for walls/polywalls -- the editor needs to know about wall edges and such
+   // for hit detection and mounting turrets/ffs
+   //const Vector<DatabaseObject *> *walls = level->findObjects_fast(WallItemTypeNumber);
+
+   //for(S32 i = 0; i < walls->size(); i++)
+   //{
+   //   const WallItem *wall = static_cast<WallItem *>(walls->get(i));
+   //   //addToEditor(wall);
+   //   //wa
+   //}
+
+   // Tell mDockItems to use the same team info as we use for the regular items
+   mDockItems.setTeamInfosPtr(mLevel->getTeamInfosPtr());
 }
 
 
@@ -191,20 +188,21 @@ void EditorUserInterface::setDatabase(boost::shared_ptr<GridDatabase> database)
 void EditorUserInterface::onQuitted()
 {
    cleanUp();
-   getGame()->clearAddTarget();
+   mLevel.reset();    // reset mLevel
 }
 
 
 void EditorUserInterface::addDockObject(BfObject *object, F32 xPos, F32 yPos)
 {
-   object->prepareForDock(getGame(), Point(xPos, yPos), mCurrentTeam);     // Prepare object   
-   mDockItems.push_back(boost::shared_ptr<BfObject>(object));          // Add item to our list of dock objects
+   object->prepareForDock(Point(xPos, yPos), mCurrentTeam);  // Prepare object   
+   mDockItems.addToDatabase(object);
 }
 
 
 void EditorUserInterface::populateDock()
 {
-   mDockItems.clear();
+   // Out with the old
+   mDockItems.clearAllObjects();
 
    F32 xPos = (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin - ITEMS_DOCK_WIDTH / 2;
    F32 yPos = 35;
@@ -232,9 +230,9 @@ void EditorUserInterface::populateDock()
    addDockObject(new TextItem(), xPos, yPos);
    yPos += spacer;
 
-   if(getGame()->getGameType()->getGameTypeId() == SoccerGame)
+   if(mLevel->getGameType()->getGameTypeId() == SoccerGame)
       addDockObject(new SoccerBallItem(), xPos, yPos);
-   else if(getGame()->getGameType()->getGameTypeId() == CoreGame)
+   else if(mLevel->getGameType()->getGameTypeId() == CoreGame)
       addDockObject(new CoreItem(), xPos, yPos);
    else
       addDockObject(new FlagItem(), xPos, yPos);
@@ -266,7 +264,7 @@ void EditorUserInterface::populateDock()
    addDockObject(new LoadoutZone(), xPos, yPos);
    yPos += 25;
 
-   if(getGame()->getGameType()->getGameTypeId() == NexusGame)
+   if(mLevel->getGameType()->getGameTypeId() == NexusGame)
    {
       addDockObject(new NexusZone(), xPos, yPos);
       yPos += 25;
@@ -289,76 +287,9 @@ void EditorUserInterface::populateDock()
 // Destructor -- unwind things in an orderly fashion.  Note that mLevelGenDatabase will clear itself as the referenced object is deleted.
 EditorUserInterface::~EditorUserInterface()
 {
-   mDockItems.clear();
    mClipboard.clear();
 
    delete mNewItem.getPointer();
-}
-
-
-// Removes most recent undo state from stack --> won't actually delete items on stack until we need the slot, or we quit
-void EditorUserInterface::deleteUndoState()
-{
-   mLastUndoIndex--;
-   mLastRedoIndex--; 
-}
-
-
-// Save the current state of the editor objects for later undoing
-void EditorUserInterface::saveUndoState(bool forceSelectionOfTargetObject)
-{
-   // Use case: We do 5 actions, save, undo 2, redo 1, then do some new action.  
-   // Our "no need to save" undo point is lost forever.
-   if(mAllUndoneUndoLevel > mLastRedoIndex)     
-      mAllUndoneUndoLevel = NONE;
-
-
-   // Select item so when we undo, it will be selected, which looks better
-   bool unselHitItem = false;
-   if(forceSelectionOfTargetObject && mHitItem && !mHitItem->isSelected())
-   {
-      mHitItem->setSelected(true);
-      unselHitItem = true;
-   }
-
-
-   GridDatabase *newDB = new GridDatabase();    // Make a copy
-
-   newDB->copyObjects(getDatabase());
-
-   mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<GridDatabase>(newDB);  
-
-   mLastUndoIndex++;
-   mLastRedoIndex = mLastUndoIndex;
-
-   if(mLastUndoIndex % UNDO_STATES == mFirstUndoIndex % UNDO_STATES)           // Undo buffer now full...
-   {
-      mFirstUndoIndex++;
-      mAllUndoneUndoLevel -= 1;     // If this falls below 0, then we can't undo our way out of needing to save
-   }
-   
-   setNeedToSave(mAllUndoneUndoLevel != mLastUndoIndex);
-   mRedoingAnUndo = false;
-   mLastUndoStateWasBarrierWidthChange = false;
-
-   if(unselHitItem)
-      mHitItem->setSelected(false);
-}
-
-
-// Remove and discard the most recently saved undo state 
-void EditorUserInterface::removeUndoState()
-{
-   mLastUndoIndex--;
-   mLastRedoIndex = mLastUndoIndex;
-
-   if(mLastUndoIndex % UNDO_STATES == mFirstUndoIndex % UNDO_STATES)           // Undo buffer now full...
-   {
-      mFirstUndoIndex++;
-      mAllUndoneUndoLevel -= 1;     // If this falls below 0, then we can't undo our way out of needing to save
-   }
-   
-   setNeedToSave(mAllUndoneUndoLevel != mLastUndoIndex);
 }
 
 
@@ -371,206 +302,83 @@ void EditorUserInterface::clearSnapEnvironment()
 
 void EditorUserInterface::undo(bool addToRedoStack)
 {
-   if(!undoAvailable())
+   if(!mUndoManager.undoAvailable())
       return;
 
    clearSnapEnvironment();
 
-   if(mLastUndoIndex == mLastRedoIndex && !mRedoingAnUndo)
-   {
-      saveUndoState();
-      mLastUndoIndex--;
-      mLastRedoIndex--;
-      mRedoingAnUndo = true;
-   }
+   mUndoManager.undo();
 
-   mLastUndoIndex--;
 
-   setDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
-   GridDatabase *database = getDatabase();
-   mLoadTarget = database;
-
-   rebuildEverything(database);    // Well, rebuild segments from walls at least
+   rebuildEverything(getLevel());    // Well, rebuild segments from walls at least
 
    onSelectionChanged();
 
-   mLastUndoStateWasBarrierWidthChange = false;
    validateLevel();
 }
    
 
 void EditorUserInterface::redo()
 {
-   if(mLastRedoIndex != mLastUndoIndex)      // If there's a redo state available...
-   {
-      clearSnapEnvironment();
+   if(!mUndoManager.redoAvailable())
+      return;
 
-      mLastUndoIndex++;
+   clearSnapEnvironment();
 
-      // Perform a little trick here... if we're redoing, and it's our final step of the redo tree, and there's only one item selected,
-      // we'll make sure that same item is selected when we're finished.  That will help keep the focus on the item that's being modified
-      // during the redo step, and make the redo feel more natural.
-      // Act I:
-      S32 selectedItem = NONE;
+   mUndoManager.redo();
+   rebuildEverything(getLevel());    // Well, rebuild segments from walls at least
 
-      if(mLastRedoIndex == mLastUndoIndex && getItemSelectedCount() == 1)
-      {
-         const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   onSelectionChanged();
 
-         for(S32 i = 0; i < objList->size(); i++)
-         {
-            BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-            if(obj->isSelected())
-            {
-               selectedItem = obj->getSerialNumber();
-               break;
-            }
-         }
-      }
-
-      setDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
-      GridDatabase *database = mUndoItems[mLastUndoIndex % UNDO_STATES].get();
-      mLoadTarget = database;
-
-      // Act II:
-      if(selectedItem != NONE)
-      {
-         clearSelection(getDatabase());
-
-         BfObject *obj = findObjBySerialNumber(getDatabase(), selectedItem);
-
-         if(obj)
-            obj->setSelected(true);
-      }
-
-
-      TNLAssert(mUndoItems[mLastUndoIndex % UNDO_STATES], "null!");
-
-      rebuildEverything(database);  // Needed?  Yes, for now, but theoretically no, because we should be restoring everything fully reconstituted...
-      onSelectionChanged();
-      validateLevel();
-
-      onMouseMoved();               // If anything gets undeleted under the mouse, make sure it's highlighted
-   }
+   validateLevel();
 }
 
 
-// Find specified object in specified database
-BfObject *EditorUserInterface::findObjBySerialNumber(const GridDatabase *database, S32 serialNumber) const
+void EditorUserInterface::rebuildWallGeometry(Level *level)
 {
-   const Vector<DatabaseObject *> *objList = database->findObjects_fast();
+   level->buildWallEdgeGeometry(mWallEdgePoints);     // Populates mWallEdgePoints
+   rebuildSelectionOutline();  
 
-   for(S32 i = 0; i < objList->size(); i++)
-   {
-      BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-      if(obj->getSerialNumber() == serialNumber)
-         return obj;
-   }
-
-   return NULL;
+   level->snapAllEngineeredItems(false);
 }
 
 
-void EditorUserInterface::rebuildEverything(GridDatabase *database)
+void EditorUserInterface::rebuildEverything(Level *level)
 {
-   database->getWallSegmentManager()->recomputeAllWallGeometry(database);
-   resnapAllEngineeredItems(database, false);
+   rebuildWallGeometry(level);
 
    // If we're rebuilding items in our levelgen database, no need to save anything!
-   if(database != &mLevelGenDatabase)
-   {
-      setNeedToSave(mAllUndoneUndoLevel != mLastUndoIndex);
+   if(level != &mLevelGenDatabase)
       autoSave();
-   }
 }
 
-
-// Resnaps all engineered items in database
-void EditorUserInterface::resnapAllEngineeredItems(GridDatabase *database, bool onlyUnsnapped)
-{
-   fillVector.clear();
-   database->findObjects((TestFunc)isEngineeredType, fillVector);
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      EngineeredItem *engrObj = dynamic_cast<EngineeredItem *>(fillVector[i]);
-
-      // Skip already snapped items if only processing unsnapped ones
-      if(onlyUnsnapped && engrObj->isSnapped())
-         continue;
-
-      engrObj->mountToWall(engrObj->getPos(), database->getWallSegmentManager(), NULL);
-   }
-}
-
-
-bool EditorUserInterface::undoAvailable()
-{
-   return mLastUndoIndex - mFirstUndoIndex != 1;
-}
-
-
-// Wipe undo/redo history
-void EditorUserInterface::clearUndoHistory()
-{
-   mFirstUndoIndex = 0;
-   mLastUndoIndex = 1;
-   mLastRedoIndex = 1;
-   mRedoingAnUndo = false;
-}
-
-
-extern TeamPreset gTeamPresets[];
 
 void EditorUserInterface::setLevelFileName(string name)
 {
-   if(name == "")
-      mEditFileName = "";
-   else
-      if(name.find('.') == string::npos)      // Append extension, if one is needed
-         mEditFileName = name + ".level";
-}
-
-
-void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
-{
-   if(getTeamCount() == 0)
-   {
-      EditorTeam *team = new EditorTeam(gTeamPresets[0]);
-
-      getGame()->addTeam(team);
-   }
+   mEditFileName = name;
+   if(name != "" && name.find('.') == string::npos)      // Append extension, if one is needed
+      mEditFileName = name + ".level";
 }
 
 
 void EditorUserInterface::cleanUp()
 {
-   ClientGame *game = getGame();
+   getGame()->resetRatings();       // Move to mLevel?
 
-   game->resetRatings();
-
-   clearUndoHistory();     // Clear up a little memory
-   mDockItems.clear();     // Free a little more -- dock will be rebuilt when editor restarts
+   mUndoManager.clearAll();         // Clear up a little memory
+   mDockItems.clearAllObjects();    // Free a little more -- dock will be rebuilt when editor restarts
    
-   mLoadTarget = getDatabase();
-   mLoadTarget->removeEverythingFromDatabase();    // Deletes all objects
+   mLoadTarget = getLevel();
 
-   mRobotLines.clear();    // Clear our special Robot lines
+   mRobotLines.clear();             // Clear our special Robot lines
 
-   game->clearTeams();
+   mLevel->clearTeams();
    
    clearSnapEnvironment();
    
    mAddingVertex = false;
    clearLevelGenItems();
    mGameTypeArgs.clear();
-
-   game->resetLevelInfo();
-
-   if(game->getGameType())
-      delete game->getGameType();
 }
 
 
@@ -580,35 +388,39 @@ void EditorUserInterface::loadLevel()
    string filename = getLevelFileName();
    TNLAssert(filename != "", "Need file name here!");
 
-   ClientGame *game = getGame();
+   // Only clean up if we've got a level to clean up!
+   if(mLevel)
+      cleanUp();
 
-   cleanUp();
-
-   FolderManager *folderManager = game->getSettings()->getFolderManager();
-   string fileName = joindir(folderManager->levelDir, filename).c_str();
+   FolderManager *folderManager = mGameSettings->getFolderManager();
+   string fileName = joindir(folderManager->getLevelDir(), filename).c_str();
 
 
    // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
-   bool levelLoaded = game->loadLevelFromFile(fileName, mLoadTarget);
 
-   if(!game->getGameType())  // make sure we have GameType
-   {
-      GameType *gameType = new GameType;
-      gameType->addToGame(game, mLoadTarget);   
-   }
+   Level *level = new Level();
+   bool isNewLevel = !level->loadLevelFromFile(fileName);   // load returns true if fileName exists, false if not
 
-   makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
+   setLevel(boost::shared_ptr<Level>(level));
 
-   if(levelLoaded)   
+   mLoadTarget = level;
+
+   // Make sure all our ForceFieldProjectors have dummy forcefields for rendering purposes
+   const Vector<DatabaseObject *> *objects = level->findObjects_fast();
+
+   for(S32 i = 0; i < objects->size(); i++)
+      static_cast<BfObject *>(objects->get(i))->onAddedToEditor();
+
+   TNLAssert(mLevel->getGameType(), "Level should have GameType!");
+   TNLAssert(mLevel->getTeamCount() > 0, "Level should have at least one team!");
+
+   if(isNewLevel)   
+      mLevel->getGameType()->setLevelCredits(getGame()->getClientInfo()->getName());  // Set default author
+   else
    {
       // Loaded a level!
       validateTeams();                 // Make sure every item has a valid team
       validateLevel();                 // Check level for errors (like too few spawns)
-   }
-   else     
-   {
-      // New level!
-      game->getGameType()->setLevelCredits(getGame()->getClientInfo()->getName());  // Set default author
    }
 
    //// If we have a level in the database, let's ping the database to make sure it's really still there
@@ -617,23 +429,22 @@ void EditorUserInterface::loadLevel()
    //   game->getConnectionToMaster()->c2mRequestLevelRating(getLevelDatabaseId());
    //}
 
-   clearUndoHistory();                 // Clean out undo/redo buffers
    clearSelection(mLoadTarget);        // Nothing starts selected
-   setNeedToSave(false);               // Why save when we just loaded?
-   mAllUndoneUndoLevel = mLastUndoIndex;
    populateDock();                     // Add game-specific items to the dock
 
+   mUndoManager.clearAll();
+
    // Bulk-process new items, walls first
-   mLoadTarget->getWallSegmentManager()->recomputeAllWallGeometry(mLoadTarget);
-   
+   rebuildWallGeometry(mLevel.get());
+
    // Snap all engineered items to the closest wall, if one is found
-   resnapAllEngineeredItems(mLoadTarget, false);
+   mLoadTarget->snapAllEngineeredItems(false);
 }
 
 
 void EditorUserInterface::clearLevelGenItems()
 {
-   mLevelGenDatabase.removeEverythingFromDatabase();
+   mLevelGenDatabase.clearAllObjects();
 }
 
 
@@ -645,7 +456,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
    // Duplicate EditorObject pointer list to avoid unsynchronized loop removal
    Vector<DatabaseObject *> tempList(*mLevelGenDatabase.findObjects_fast());
 
-   saveUndoState();
+   mUndoManager.startTransaction();
 
    // We can't call addToEditor immediately because it calls addToGame which will trigger
    // an assert since the levelGen items are already added to the game.  We must therefore
@@ -654,29 +465,31 @@ void EditorUserInterface::copyScriptItemsToEditor()
    {
       BfObject *obj = static_cast<BfObject *>(tempList[i]);
 
-      obj->removeFromGame(false);     // False ==> do not delete object
+      obj->removeFromGame(false);     // False ==> remove, but do not delete object
       addToEditor(obj);
+      mUndoManager.saveAction(ActionCreate, obj);
    }
-      
-   mLevelGenDatabase.removeEverythingFromDatabase();    // Don't want to delete these objects... we just handed them off to the database!
 
-   rebuildEverything(getDatabase());
+   mUndoManager.endTransaction();
 
-   mLastUndoStateWasBarrierWidthChange = false;
+   mLevelGenDatabase.clearAllObjects();   // This will delete objects... is that what we want?
+
+   rebuildEverything(getLevel());
 }
 
 
 void EditorUserInterface::addToEditor(BfObject *obj)
 {
-   obj->addToGame(getGame(), getDatabase());     
-   obj->onGeomChanged();                        // Generic way to get PolyWalls to build themselves after being dragged from the dock
+   obj->addToDatabase(mLevel.get());
+   obj->onAddedToEditor();
+   geomChanged(obj);                   // Easy way to get PolyWalls to build themselves after being dragged from the dock
 }
 
 
 // User has pressed Ctrl+K -- run the levelgen script and insert any resulting items into the editor in a separate database
 void EditorUserInterface::runLevelGenScript()
 {
-   GameType *gameType = getGame()->getGameType();
+   GameType *gameType = mLevel->getGameType();
    string scriptName = gameType->getScriptName();
 
    if(scriptName == "")      // No script included!!
@@ -688,7 +501,7 @@ void EditorUserInterface::runLevelGenScript()
 
    clearLevelGenItems();      // Clear out any items from the last run
 
-   FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
+   FolderManager *folderManager = mGameSettings->getFolderManager();
    runScript(&mLevelGenDatabase, folderManager, scriptName, *scriptArgs);
 }
 
@@ -706,7 +519,7 @@ static void openConsole(ClientGame *game)
 
 
 // Runs an arbitrary lua script.  Command is first item in cmdAndArgs, subsequent items are the args, if any
-void EditorUserInterface::runScript(GridDatabase *database, const FolderManager *folderManager, 
+void EditorUserInterface::runScript(Level *level, const FolderManager *folderManager, 
                                     const string &scriptName, const Vector<string> &args)
 {
    string name = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script
@@ -719,7 +532,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    }
    
    // Load the items
-   LuaLevelGenerator levelGen(getGame(), name, args, database);
+   LuaLevelGenerator levelGen(getGame(), name, args, level);
 
    // Error reporting handled within -- we won't cache these scripts for easier development   
    bool error = !levelGen.runScript(false);      
@@ -752,29 +565,29 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    // Process new items that need it (walls need processing so that they can render properly).
    // Items that need no extra processing will be kept as-is.
    fillVector.clear();
-   database->findObjects((TestFunc)isWallType, fillVector);
+   level->findObjects((TestFunc)isWallType, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
 
       if(obj->getVertCount() < 2)      // Invalid item; delete  --> aren't 1 point walls already excluded, making this check redundant?
-         database->removeFromDatabase(obj, true);
+         level->removeFromDatabase(obj, true);
 
-      if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
-         dynamic_cast<WallItem *>(obj)->processEndPoints();
+      if(obj->getObjectTypeNumber() == WallItemTypeNumber)
+         static_cast<WallItem *>(obj)->computeExtendedEndPoints();
    }
 
    // Also find any teleporters and make sure their destinations are in order.  Teleporters with no dests will be deleted.
    // Those with multiple dests will be broken down into multiple single dest versions.
    fillVector.clear();
-   database->findObjects(TeleporterTypeNumber, fillVector);
+   level->findObjects(TeleporterTypeNumber, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       Teleporter *teleporter = static_cast<Teleporter *>(fillVector[i]);
       if(teleporter->getDestCount() == 0)
-         database->removeFromDatabase(teleporter, true);
+         level->removeFromDatabase(teleporter, true);
       else
       {
          for(S32 i = 1; i < teleporter->getDestCount(); i++)
@@ -784,7 +597,8 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
             newTel->setEndpoint(teleporter->getDest(i));
             newTel->addDest(teleporter->getDest(i));
 
-            newTel->addToGame(getGame(), database);     
+            //newTel->addToGame(getGame(), level);
+            newTel->addToDatabase(mLevel.get());
          }
 
          // Delete any destinations past the first one
@@ -793,7 +607,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
       }
    }
 
-   rebuildEverything(database);
+   rebuildEverything(level);
 }
 
 
@@ -889,7 +703,8 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    
    mPluginMenu->addSaveAndQuitMenuItem("Run plugin", "Saves values and runs plugin");
 
-   mPluginMenu->setMenuCenterPoint(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2));  
+   mPluginMenu->setMenuCenterPoint(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 
+                                         DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2));  
 
    // Restore previous values, if available
    string key = getPluginSignature();
@@ -898,7 +713,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
       for(S32 i = 0; i < mPluginMenuValues[key].size(); i++)
          mPluginMenu->getMenuItem(i)->setValue(mPluginMenuValues[key].get(i));
 
-   getGame()->getUIManager()->activate(mPluginMenu.get());
+   getUIManager()->activate(mPluginMenu.get());
 }
 
 
@@ -906,7 +721,7 @@ void EditorUserInterface::onPluginExecuted(const Vector<string> &args)
 {
    TNLAssert(mPluginRunner, "NULL PluginRunner!");
    
-   saveUndoState();
+   //saveUndoState();
 
    // Save menu values for next time -- using a key that includes both the script name and the type of menu items
    // provides some protection against the script being changed while Bitfighter is running.  Probably not realy
@@ -918,7 +733,7 @@ void EditorUserInterface::onPluginExecuted(const Vector<string> &args)
    if(!mPluginRunner->runMain(args))
       setSaveMessage("Plugin Error: press [/] for details", false);
 
-   rebuildEverything(getDatabase());
+   rebuildEverything(getLevel());
    findSnapVertex();
 
    mPluginRunner.reset();
@@ -927,7 +742,7 @@ void EditorUserInterface::onPluginExecuted(const Vector<string> &args)
 
 void EditorUserInterface::showCouldNotFindScriptMessage(const string &scriptName)
 {
-   string pluginDir = getGame()->getSettings()->getFolderManager()->pluginDir;
+   string pluginDir = mGameSettings->getFolderManager()->getPluginDir();
 
    Vector<string> messages;
    messages.push_back("Plugin not Found");
@@ -1031,10 +846,10 @@ void EditorUserInterface::validateLevel()
    for(S32 i = 0; i < teamCount; i++)      // Initialize vector
       foundSpawn[i] = false;
 
-   GridDatabase *gridDatabase = getDatabase();
+   Level *level = getLevel();
       
    fillVector.clear();
-   gridDatabase->findObjects(ShipSpawnTypeNumber, fillVector);
+   level->findObjects(ShipSpawnTypeNumber, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -1047,16 +862,16 @@ void EditorUserInterface::validateLevel()
          foundSpawn[team] = true;
    }
 
-   bool foundSoccerBall = gridDatabase->hasObjectOfType(SoccerBallItemTypeNumber);
-   bool foundNexus      = gridDatabase->hasObjectOfType(NexusTypeNumber);
-   bool foundFlags      = gridDatabase->hasObjectOfType(FlagTypeNumber);
+   bool foundSoccerBall = level->hasObjectOfType(SoccerBallItemTypeNumber);
+   bool foundNexus      = level->hasObjectOfType(NexusTypeNumber);
+   bool foundFlags      = level->hasObjectOfType(FlagTypeNumber);
 
-   bool foundTeamFlags      = hasTeamFlags (gridDatabase);
-   bool foundTeamFlagSpawns = hasTeamSpawns(gridDatabase);
+   bool foundTeamFlags      = hasTeamFlags (level);
+   bool foundTeamFlagSpawns = hasTeamSpawns(level);
 
    // "Unversal errors" -- levelgens can't (yet) change gametype
 
-   GameType *gameType = getGame()->getGameType();
+   GameType *gameType = mLevel->getGameType();
 
    // Check for soccer ball in a a game other than SoccerGameType. Doesn't crash no more.
    if(foundSoccerBall && gameType->getGameTypeId() != SoccerGame)
@@ -1079,7 +894,7 @@ void EditorUserInterface::validateLevel()
 
    // Errors that may be corrected by levelgen -- script could add spawns
    // Neutral spawns work for all; if there's one, then that will satisfy our need for spawns for all teams
-   if(getGame()->getGameType()->getScriptName() == "" && !foundNeutralSpawn)
+   if(mLevel->getGameType()->getScriptName() == "" && !foundNeutralSpawn)
    {
       if(TeamListToString(teamList, foundSpawn))     // Compose error message
          mLevelErrorMsgs.push_back("ERROR: Need spawn point for " + teamList);
@@ -1092,7 +907,7 @@ void EditorUserInterface::validateLevel()
          foundSpawn[i] = false;
 
       fillVector.clear();
-      gridDatabase->findObjects(CoreTypeNumber, fillVector);
+      level->findObjects(CoreTypeNumber, fillVector);
       for(S32 i = 0; i < fillVector.size(); i++)
       {
          CoreItem *core = static_cast<CoreItem *>(fillVector[i]);
@@ -1108,7 +923,7 @@ void EditorUserInterface::validateLevel()
 
 void EditorUserInterface::validateTeams()
 {
-   validateTeams(getDatabase()->findObjects_fast());
+   validateTeams(getLevel()->findObjects_fast());
 }
 
 
@@ -1152,9 +967,10 @@ void EditorUserInterface::teamsHaveChanged()
    else
       for(S32 i = 0; i < getTeamCount(); i++)
       {
-         EditorTeam *team = getTeam(i);
+         TeamInfo team = getTeam(i);
 
-         if(mOldTeams[i].color != *team->getColor() || mOldTeams[i].name != team->getName().getString()) // Color(s) or names(s) have changed
+         if(mOldTeams[i].getColor() != team.getColor() ||          // Color(s) or
+            mOldTeams[i].getName()  != team.getName().getString()) // names(s) have changed
          {
             teamsChanged = true;
             break;
@@ -1166,28 +982,15 @@ void EditorUserInterface::teamsHaveChanged()
 
    validateTeams();
 
-   // TODO: I hope we can get rid of this in future... perhaps replace with mDockItems being stored in a database, and pass the database?
-   Vector<DatabaseObject *> hackyjunk;
-   hackyjunk.resize(mDockItems.size());
-   for(S32 i = 0; i < mDockItems.size(); i++)
-      hackyjunk[i] = mDockItems[i].get();
-
-   validateTeams(&hackyjunk);
+   validateTeams(mDockItems.findObjects_fast());
 
    validateLevel();          // Revalidate level -- if teams have changed, requirements for spawns have too
-   markLevelPermanentlyDirty();
+   //markLevelPermanentlyDirty();  //<<-- TODO: Remove when team saving is part of mUndoManager
    autoSave();
 }
 
 
-void EditorUserInterface::markLevelPermanentlyDirty()
-{
-   setNeedToSave(true);
-   mAllUndoneUndoLevel = -1; // This change can't be undone
-}
-
-
-string EditorUserInterface::getLevelFileName()
+string EditorUserInterface::getLevelFileName() const
 {
    return mEditFileName != "" ? mEditFileName : UnnamedFile;
 }
@@ -1195,31 +998,64 @@ string EditorUserInterface::getLevelFileName()
 
 void EditorUserInterface::onSelectionChanged()
 {
-   GridDatabase *database = getDatabase();
-   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
+   GridDatabase *database = getLevel();
 
-   wallSegmentManager->clearSelected();
-   
-   // Update wall segment manager with what's currently selected
-   fillVector.clear();
-   database->findObjects((TestFunc)isWallType, fillVector);
+   rebuildSelectionOutline();
+}
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+template <class T>
+static void addSelectedSegmentsToList(const Vector<DatabaseObject *> *walls, Vector<const WallSegment *> &segments)
+{
+   for(S32 i = 0; i < walls->size(); i++)
    {
-      TNLAssert(dynamic_cast<BfObject *>(fillVector[i]), "Bad cast!");
-      BfObject *obj = static_cast<BfObject *>(fillVector[i]);
+      WallItem *wall = static_cast<WallItem *>(walls->get(i));
+         
+      if(wall->isSelected() || wall->anyVertsSelected())
+      {
+         const Vector<WallSegment *> wallsegs = static_cast<BarrierX *>(wall)->getSegments();
 
-      if(obj->isSelected())
-         wallSegmentManager->setSelected(obj->getSerialNumber(), true);
+         for(S32 j = 0; j < wallsegs.size(); j++)
+            segments.push_back(wallsegs[j]);
+      }
    }
+}
 
-   wallSegmentManager->rebuildSelectedOutline();
+// Declare these specific implementations of the above template so here so project will link
+template void addSelectedSegmentsToList<WallItem>(const Vector<DatabaseObject *> *walls, Vector<const WallSegment *> &segments);
+template void addSelectedSegmentsToList<PolyWall>(const Vector<DatabaseObject *> *walls, Vector<const WallSegment *> &segments);
+                                          
+
+// Return a list of all selected segments
+static Vector<WallSegment const *> getSelectedWallsAndPolywallSegments(const Level *level)
+{
+   Vector<WallSegment const *> segments;
+
+   const Vector<DatabaseObject *> *walls = level->findObjects_fast(WallItemTypeNumber);
+   const Vector<DatabaseObject *> *polywalls = level->findObjects_fast(PolyWallTypeNumber);
+
+   addSelectedSegmentsToList<WallItem>(walls, segments);
+   addSelectedSegmentsToList<PolyWall>(polywalls, segments);
+
+   return segments;
+}
+
+
+// Rebuilds outline of selected walls
+void EditorUserInterface::rebuildSelectionOutline()
+{
+   Vector<WallSegment const *> segments = getSelectedWallsAndPolywallSegments(mLevel.get());
+
+   // If no walls are selected we can skip a lot of work
+   if(segments.size() == 0)          
+      mSelectedWallEdgePoints.clear();    
+   else
+      WallEdgeManager::clipAllWallEdges(segments, mSelectedWallEdgePoints);    // Populate mSelectedWallEdgePoints from segments
 }
 
 
 void EditorUserInterface::onBeforeRunScriptFromConsole()
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    // Use selection as a marker -- will have to change in future
    for(S32 i = 0; i < objList->size(); i++)
@@ -1232,7 +1068,7 @@ void EditorUserInterface::onBeforeRunScriptFromConsole()
 
 void EditorUserInterface::onAfterRunScriptFromConsole()
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    // Since all our original objects were marked as selected before the script was run, and since the objects generated by
    // the script are not selected, if we invert the selection, our script items will now be selected.
@@ -1242,36 +1078,35 @@ void EditorUserInterface::onAfterRunScriptFromConsole()
       obj->setSelected(!obj->isSelected());
    }
 
-   rebuildEverything(getDatabase());
+   rebuildEverything(getLevel());
    onSelectionChanged();
 }
 
 
 void EditorUserInterface::onActivate()
 {
-   GameSettings *settings = getGame()->getSettings();
-
-   FolderManager *folderManager = settings->getFolderManager();
-
-   if(folderManager->levelDir == "")      // Never did resolve a leveldir... no editing for you!
-   {
-      getUIManager()->reactivatePrevUI();     // Must come before the error msg, so it will become the previous UI when that one exits
-
-      ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
-      ui->reset();
-      ui->setTitle("HOUSTON, WE HAVE A PROBLEM");
-      ui->setMessage("No valid level folder was found, so I cannot start the level editor.\n\n"
-                     "Check the LevelDir parameter in your INI file, or your command-line parameters to make sure"
-                     "you have correctly specified a valid folder.");
-
-      getUIManager()->activate(ui);
-
-      return;
-   }
+   FolderManager *folderManager = mGameSettings->getFolderManager();
 
    // Check if we have a level name:
    if(getLevelFileName() == UnnamedFile)     // We need to take a detour to get a level name
    {
+
+      if(folderManager->getLevelDir().empty())      // Never did resolve a leveldir... no editing for you!
+      {
+         getUIManager()->reactivatePrevUI();     // Must come before the error msg, so it will become the previous UI when that one exits
+
+         ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
+         ui->reset();
+         ui->setTitle("HOUSTON, WE HAVE A PROBLEM");
+         ui->setMessage("No valid level folder was found, so I cannot start the level editor.\n\n"
+                        "Check the LevelDir parameter in your INI file, or your command-line parameters to make sure"
+                        "you have correctly specified a valid folder.");
+
+         getUIManager()->activate(ui);
+
+         return;
+      }
+
       // Don't save this menu (false, below).  That way, if the user escapes out, and is returned to the "previous"
       // UI, they will get back to where they were before (prob. the main menu system), not back to here.
       getUIManager()->activate<LevelNameEntryUserInterface>(false);
@@ -1304,14 +1139,14 @@ void EditorUserInterface::onActivate()
    mDragCopying = false;
    mJustInsertedVertex = false;
 
-   VideoSystem::actualizeScreenMode(settings, true, usesEditorScreenMode());
+   VideoSystem::actualizeScreenMode(mGameSettings, true, usesEditorScreenMode());
 
    centerView();
    findPlugins();
 }
 
 
-void EditorUserInterface::renderMasterStatus()
+void EditorUserInterface::renderMasterStatus(const MasterServerConnection *connectionToMaster) const
 {
    // Do nothing, don't render this in editor 
 }
@@ -1328,10 +1163,7 @@ void EditorUserInterface::onActivateReactivate()
 {
    mDraggingObjects = false;
    mUp = mDown = mLeft = mRight = mIn = mOut = false;
-   getGame()->setAddTarget();    // When a Lua script does an addToGame(), objects should be added to this game
    mDockItemHit = NULL;
-
-   getGame()->setActiveTeamManager(&mTeamManager);
 
    Cursor::enableCursor();
 }
@@ -1346,7 +1178,7 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
       mWasTesting = false;
       mSaveMsgTimer.clear();
 
-      getGame()->setGameType(mEditorGameType); 
+      //getGame()->setGameType(mEditorGameType); 
 
       remove("editor.tmp");      // Delete temp file
    }
@@ -1356,66 +1188,59 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
       mCurrentTeam = 0;
 
    if(UserInterface::getUIManager()->getPrevUI()->usesEditorScreenMode() != usesEditorScreenMode())
-      VideoSystem::actualizeScreenMode(getGame()->getSettings(), true, usesEditorScreenMode());
+      VideoSystem::actualizeScreenMode(mGameSettings, true, usesEditorScreenMode());
 }
 
 
-S32 EditorUserInterface::getTeamCount()
+S32 EditorUserInterface::getTeamCount() const
 {
-   return getGame()->getTeamCount();
+   return mLevel->getTeamCount();
 }
 
 
-EditorTeam *EditorUserInterface::getTeam(S32 teamId)
+const TeamInfo &EditorUserInterface::getTeam(S32 teamId)
 {
-   TNLAssert(dynamic_cast<EditorTeam *>(getGame()->getTeam(teamId)), "Expected a EditorTeam");
-   return static_cast<EditorTeam *>(getGame()->getTeam(teamId));
+   return mLevel->getTeamInfo(teamId);
 }
 
 
 void EditorUserInterface::clearTeams()
 {
-   getGame()->clearTeams();
+   mLevel->clearTeams();
 }
 
 
 bool EditorUserInterface::getNeedToSave() const
 {
-   return mNeedToSave;
+   return mUndoManager.needToSave();
 }
 
 
-void EditorUserInterface::setNeedToSave(bool needToSave)
+void EditorUserInterface::addTeam(const TeamInfo &teamInfo)
 {
-   mNeedToSave = needToSave;
-}
-
-
-void EditorUserInterface::addTeam(EditorTeam *team)
-{
-   getGame()->addTeam(team);
+   mLevel->addTeam(teamInfo);
 }
 
 
 void EditorUserInterface::addTeam(EditorTeam *team, S32 teamIndex)
 {
-   getGame()->addTeam(team, teamIndex);
+   mLevel->addTeam(team, teamIndex);
 }
 
 
 void EditorUserInterface::removeTeam(S32 teamIndex)
 {
-   getGame()->removeTeam(teamIndex);
+   mLevel->removeTeam(teamIndex);
 }
 
 
-Point EditorUserInterface::convertCanvasToLevelCoord(Point p)
+Point EditorUserInterface::convertCanvasToLevelCoord(const Point &p) const
 {
    return (p - mCurrentOffset) * (1 / mCurrentScale);
 }
 
 
-Point EditorUserInterface::convertLevelToCanvasCoord(Point p, bool convert)
+Point EditorUserInterface::convertLevelToCanvasCoord(const Point &p, bool convert) const
 {
    return convert ? p * mCurrentScale + mCurrentOffset : p;
 }
@@ -1436,8 +1261,9 @@ void EditorUserInterface::onDisplayModeChange()
    }
 
    // Need to populate the dock here because dock items are tied to a particular screen x,y; 
-   // maybe it would be better to give them a dock x,y instead?
-   if(getGame()->getGameType())
+   // maybe it would be better to give them a dock x,y instead?  
+   // mLevel might be NULL here when we first start up the editor.
+   if(mLevel && mLevel->getGameType())
       populateDock();               // If game type has changed, items on dock will change
 
    previousXSize = DisplayManager::getScreenInfo()->getGameCanvasWidth();
@@ -1445,7 +1271,7 @@ void EditorUserInterface::onDisplayModeChange()
 }
 
 
-Point EditorUserInterface::snapPointToLevelGrid(Point const &p)
+Point EditorUserInterface::snapPointToLevelGrid(Point const &p) const
 {
    if(mSnapContext != FULL_SNAPPING)
       return p;
@@ -1457,16 +1283,14 @@ Point EditorUserInterface::snapPointToLevelGrid(Point const &p)
 }
 
 
-Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, bool snapWhileOnDock)
+Point EditorUserInterface::snapPoint(const Point &p, bool snapWhileOnDock) const
 {
    if(mouseOnDock() && !snapWhileOnDock) 
       return p;      // No snapping!
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
-   Point snapPoint(p);
-
-   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
+   Point snapPoint(p);     // Make a working copy
 
    if(mDraggingObjects)
    {  
@@ -1510,7 +1334,7 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
 
       // Search for a corner to snap to - by using wall edges, we'll also look for intersections between segments
       if(snapToWallCorners)   
-         checkCornersForSnap(p, wallSegmentManager->getWallEdgeDatabase()->findObjects_fast(), minDist, snapPoint);
+         checkCornersForSnap(p, mLevel->getWallEdgeDatabase()->findObjects_fast(), minDist, snapPoint);
    }
 
    return snapPoint;
@@ -1538,7 +1362,7 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
 static Vector<EngineeredItem *> selectedSnappedEngrObjects;
 static Vector<S32> selectedSnappedEngrObjectIndices;
 static Vector<bool> promiscuousSnapper;
-static Vector<S32> selectedWalls;
+static Vector<BfObject *> selectedWalls;
 
 static void markSelectedObjectsAsUnsnapped_init(S32 itemCount, bool calledDuringDragInitialization)
 {
@@ -1573,10 +1397,7 @@ static void markSelectedObjectAsUnsnapped_body(BfObject *obj, S32 index, bool ca
       else        // Not an engineered object
       {
          if(isWallType(obj->getObjectTypeNumber()))      // Wall or polywall in this context
-         {
-            BfObject *bfObj = static_cast<BfObject *>(obj);
-            selectedWalls.push_back(bfObj->getSerialNumber());
-         }
+            selectedWalls.push_back(static_cast<BfObject *>(obj));
 
          obj->setSnapped(false);
       }
@@ -1587,10 +1408,12 @@ static void markSelectedObjectAsUnsnapped_body(BfObject *obj, S32 index, bool ca
 static void markSelectedObjectAsUnsnapped_done(bool calledDuringDragInitialization)
 {
    // Now review all the engineer items that are being dragged and see if the wall they are mounted to is being
-   // dragged as well.  If it is, keep them snapped; if not, mark them as unsnapped. 
+   // ` as well.  If it is, keep them snapped; if not, mark them as unsnapped. 
    for(S32 i = 0; i < selectedSnappedEngrObjects.size(); i++)
    {
-      bool snapped = selectedWalls.contains(selectedSnappedEngrObjects[i]->getMountSegment()->getOwner());
+      BfObject *owner = reinterpret_cast<BfObject *>(selectedSnappedEngrObjects[i]->getMountSegment()->getOwner());
+
+      bool snapped = selectedWalls.contains(owner);
       selectedSnappedEngrObjects[i]->setSnapped(snapped);
 
       if(snapped && calledDuringDragInitialization)
@@ -1623,7 +1446,7 @@ void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<DatabaseOb
 }
 
 
-bool EditorUserInterface::getSnapToWallCorners()
+bool EditorUserInterface::getSnapToWallCorners() const
 {
    // Allow snapping to wall corners when we're dragging items.  Disallow for all wall types other than PolyWall
    return mSnapContext != NO_SNAPPING && mDraggingObjects &&
@@ -1648,7 +1471,8 @@ static bool checkPoint(const Point &clickPoint, const Point &point, F32 &minDist
 }
 
 
-S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vector<DatabaseObject *> *edges, F32 &minDist, Point &snapPoint)
+S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vector<DatabaseObject *> *edges, 
+                                             F32 &minDist, Point &snapPoint) const
 {
    const Point *vert;
 
@@ -1670,7 +1494,7 @@ S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vect
 // Rendering routines
 
 
-bool EditorUserInterface::showMinorGridLines()
+bool EditorUserInterface::showMinorGridLines() const
 {
    return mCurrentScale >= .5;
 }
@@ -1683,7 +1507,7 @@ static S32 QSORT_CALLBACK sortByTeam(DatabaseObject **a, DatabaseObject **b)
 }
 
 
-void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
+void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb) const
 {
    fillVector = *editorDb->findObjects_fast(SpyBugTypeNumber);  // This will actually copy vector of pointers to fillVector
                                                                 // so we can sort by team, this is still faster then findObjects.
@@ -1696,7 +1520,7 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
       glEnable(GL_DEPTH_WRITEMASK);
       glDepthFunc(GL_LESS);
       glPushMatrix();
-      glTranslatef(0, 0, -0.95f);
+      glTranslate(0, 0, -0.95f);
 
       // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
       glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);  
@@ -1709,13 +1533,13 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
          BfObject *editorObj = dynamic_cast<BfObject *>(fillVector[i]);
 
          if(i != 0 && editorObj->getTeam() != prevTeam)
-            glTranslatef(0, 0, 0.05f);
+            glTranslate(0, 0, 0.05f);
          prevTeam = editorObj->getTeam();
 
          Point pos = editorObj->getPos();
          pos *= mCurrentScale;
          pos += mCurrentOffset;
-         renderSpyBugVisibleRange(pos, *editorObj->getColor(), mCurrentScale);
+         renderSpyBugVisibleRange(pos, editorObj->getColor(), mCurrentScale);
       }
 
       setDefaultBlendFunction();
@@ -1737,7 +1561,7 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
          Point pos = editorObj->getPos();
          pos *= mCurrentScale;
          pos += mCurrentOffset;
-         renderTurretFiringRange(pos, *editorObj->getColor(), mCurrentScale);
+         renderTurretFiringRange(pos, editorObj->getColor(), mCurrentScale);
       }
    }
 }
@@ -1749,7 +1573,7 @@ S32 getDockHeight()
 }
 
 
-void EditorUserInterface::renderDock()    
+void EditorUserInterface::renderDock() const  
 {
    // Render item dock down RHS of screen
    const S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
@@ -1792,7 +1616,7 @@ const S32 PANEL_SPACING = S32(PANEL_TEXT_SIZE * 1.3);
 
 static S32 PanelBottom, PanelTop, PanelLeft, PanelRight, PanelInnerMargin;
 
-void EditorUserInterface::renderInfoPanel() 
+void EditorUserInterface::renderInfoPanel() const
 {
    // Recalc dimensions in case screen mode changed
    PanelBottom = DisplayManager::getScreenInfo()->getGameCanvasHeight() - EditorUserInterface::vertMargin;
@@ -1811,7 +1635,7 @@ void EditorUserInterface::renderInfoPanel()
    if(mSnapObject)
       pos = mSnapObject->getVert(mSnapVertexIndex);
    else
-      pos = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos));
+      pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
 
 
    glColor(Colors::white);
@@ -1823,15 +1647,18 @@ void EditorUserInterface::renderInfoPanel()
    // Show number of teams
    renderPanelInfoLine(3, "Team Count: %d", getTeamCount());
 
-   glColor(mNeedToSave ? Colors::red : Colors::green);     // Color level name by whether it needs to be saved or not
+   bool needToSave = mUndoManager.needToSave();
+
+   // Color level name by whether it needs to be saved or not
+   glColor(needToSave ? Colors::red : Colors::green);     
 
    // Filename without extension
    string filename = getLevelFileName();
-   renderPanelInfoLine(4, "Filename: %s%s", mNeedToSave ? "*" : "", filename.substr(0, filename.find_last_of('.')).c_str());
+   renderPanelInfoLine(4, "Filename: %s%s", needToSave ? "*" : "", filename.substr(0, filename.find_last_of('.')).c_str());
 }
 
 
-void EditorUserInterface::renderPanelInfoLine(S32 line, const char *format, ...)
+void EditorUserInterface::renderPanelInfoLine(S32 line, const char *format, ...) const
 {
    const S32 xpos = horizMargin + PanelInnerMargin;
 
@@ -1842,7 +1669,8 @@ void EditorUserInterface::renderPanelInfoLine(S32 line, const char *format, ...)
    vsnprintf(text, sizeof(text), format, args); 
    va_end(args);
 
-   drawString(xpos, DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - PANEL_TEXT_SIZE - line * PANEL_SPACING + 6, PANEL_TEXT_SIZE, text);
+   drawString(xpos, DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - PANEL_TEXT_SIZE - 
+                    line * PANEL_SPACING + 6, PANEL_TEXT_SIZE, text);
 }
 
 
@@ -1867,14 +1695,14 @@ static void renderAttribText(S32 xpos, S32 ypos, S32 textsize,
 
 
 // Shows selected item attributes, or, if we're hovering over dock item, shows dock item info string
-void EditorUserInterface::renderItemInfoPanel()
+void EditorUserInterface::renderItemInfoPanel() const
 {
    string itemName;     // All intialized to ""
 
    S32 hitCount = 0;
    bool multipleKindsOfObjectsSelected = false;
 
-   static Vector<string> keys, values;    // Reusable containers
+   static Vector<string> keys, values;       // Reusable containers
    keys.clear();
    values.clear();
 
@@ -1902,7 +1730,7 @@ void EditorUserInterface::renderItemInfoPanel()
    else
    {
       // Cycle through all our objects to find the selected ones
-      const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+      const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
       for(S32 i = 0; i < objList->size(); i++)
       {
@@ -1931,9 +1759,6 @@ void EditorUserInterface::renderItemInfoPanel()
 
             hitCount++;
          }  // end if obj is selected
-
-         else if(obj->isLitUp() && !mouseOnDock())
-            mInfoMsg = string("Hover: ") + obj->getOnScreenName();
       }
 
       /////
@@ -1969,11 +1794,12 @@ void EditorUserInterface::renderItemInfoPanel()
          glColor(Colors::white);
          drawString(xpos, ypos, upperLineTextSize, mInfoMsg.c_str());
       }
+      }
    }
 }
 
 
-void EditorUserInterface::renderReferenceShip()
+void EditorUserInterface::renderReferenceShip() const
 {
    // Render ship at cursor to show scale
    static F32 thrusts[4] =  { 1, 0, 0, 0 };
@@ -1981,15 +1807,15 @@ void EditorUserInterface::renderReferenceShip()
    glPushMatrix();
       glTranslate(mMousePos);
       glScale(mCurrentScale);
-      glRotatef(90, 0, 0, 1);
-      renderShip(ShipShape::Normal, &Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
-      glRotatef(-90, 0, 0, 1);
+      glRotate(90);
+      renderShip(ShipShape::Normal, Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
+      glRotate(-90);
 
       // Draw collision circle
       const F32 spaceAngle = 0.0278f * FloatTau;
       glColor(Colors::green, 0.35f);
       glLineWidth(gLineWidth1);
-      drawDashedCircle(Point(0,0), Ship::CollisionRadius, 10, spaceAngle, 0);
+      drawDashedCircle(Point(0,0), (F32)Ship::CollisionRadius, 10, spaceAngle, 0);
       glLineWidth(gDefaultLineWidth);
 
       // And show how far it can see
@@ -2009,19 +1835,16 @@ static F32 getRenderingAlpha(bool isScriptItem)
 }
 
 
-void EditorUserInterface::render()
+void EditorUserInterface::render() const
 {
-   GridDatabase *editorDb = getDatabase();
-   mInfoMsg = "";
-
-   mouseIgnore = false;                // Avoid freezing effect from too many mouseMoved events without a render in between (sam)
+   GridDatabase *editorDb = getLevel();
 
    // Render bottom-most layer of our display
    if(mPreviewMode)
       renderTurretAndSpyBugRanges(editorDb);    // Render range of all turrets and spybugs in editorDb
    else
       renderGrid(mCurrentScale, mCurrentOffset, convertLevelToCanvasCoord(Point(0,0)), 
-                 mGridSize, mSnapContext == FULL_SNAPPING, showMinorGridLines());
+                 (F32)mGridSize, mSnapContext == FULL_SNAPPING, showMinorGridLines());
 
    glPushMatrix();
       glTranslate(getCurrentOffset());
@@ -2131,7 +1954,7 @@ static void setColor(bool isSelected, bool isLitUp, bool isScriptItem)
 
 
 // Render objects in the specified database
-void EditorUserInterface::renderObjects(GridDatabase *database, RenderModes renderMode, bool isLevelgenOverlay)
+void EditorUserInterface::renderObjects(const GridDatabase *database, RenderModes renderMode, bool isLevelgenOverlay) const
 {
    const Vector<DatabaseObject *> *objList = database->findObjects_fast();
 
@@ -2163,19 +1986,16 @@ void EditorUserInterface::renderObjects(GridDatabase *database, RenderModes rend
 
 
 // Render walls (both normal walls and polywalls, outlines and fills) and centerlines
-void EditorUserInterface::renderWallsAndPolywalls(GridDatabase *database, const Point &offset, bool drawSelected, bool isLevelGenDatabase)
+void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, const Point &offset,
+                                                  bool drawSelected, bool isLevelGenDatabase) const
 {
-   GameSettings *settings = getGame()->getSettings();
-
-   WallSegmentManager *wsm = database->getWallSegmentManager();
-
    // Guarantee walls are a standard color for editor screenshot uploads to the level database
    const Color &fillColor = mNormalizedScreenshotMode ? Colors::DefaultWallFillColor :
-         mPreviewMode ? *settings->getWallFillColor() : Colors::EDITOR_WALL_FILL_COLOR;
+         mPreviewMode ? mGameSettings->getWallFillColor() : Colors::EDITOR_WALL_FILL_COLOR;
 
-   const Color &outlineColor = mNormalizedScreenshotMode ? Colors::DefaultWallOutlineColor : *settings->getWallOutlineColor();
+   const Color &outlineColor = mNormalizedScreenshotMode ? Colors::DefaultWallOutlineColor: mGameSettings->getWallOutlineColor();
 
-   renderWalls(wsm->getWallSegmentDatabase(), *wsm->getWallEdgePoints(), *wsm->getSelectedWallEdgePoints(), outlineColor,
+   renderWalls(mLevel.get(), mWallEdgePoints, mSelectedWallEdgePoints, outlineColor,
                fillColor, mCurrentScale, mDraggingObjects, drawSelected, offset, mPreviewMode, 
                getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
 
@@ -2186,16 +2006,16 @@ void EditorUserInterface::renderWallsAndPolywalls(GridDatabase *database, const 
 }
 
 
-void EditorUserInterface::renderObjectsUnderConstruction()
+void EditorUserInterface::renderObjectsUnderConstruction() const
 {
    // Add a vert (and deleted it later) to help show what this item would look like if the user placed the vert in the current location
-   mNewItem->addVert(snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos)));
+   mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
    glLineWidth(gLineWidth3);
 
    if(mCreatingPoly) // Wall
       glColor(Colors::EDITOR_SELECT_COLOR);
    else              // LineItem --> Caution! we're rendering an object that doesn't exist yet; its game is NULL
-      glColor(getGame()->getTeamColor(mCurrentTeam));
+      glColor(mLevel->getTeamColor(mCurrentTeam));
 
    renderLine(mNewItem->getOutline());
 
@@ -2216,7 +2036,7 @@ void EditorUserInterface::renderObjectsUnderConstruction()
 
 
 // Draw box for selecting items
-void EditorUserInterface::renderDragSelectBox()
+void EditorUserInterface::renderDragSelectBox() const
 {
    if(!mDragSelecting)   
       return;
@@ -2233,24 +2053,26 @@ static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
 static void renderDockItemLabel(const Point &pos, const char *label);
 static void renderDockItem(BfObject *object, F32 currentScale, S32 snapVertexIndex);
 
-void EditorUserInterface::renderDockItems()
-{
-   for(S32 i = 0; i < mDockItems.size(); i++)
-      renderDockItem(mDockItems[i].get(), mCurrentScale, mSnapVertexIndex);
-}
-
-
-static void renderDockItem(BfObject *object, F32 currentScale, S32 snapVertexIndex)
+static void renderDockItem(const BfObject *object, const Color &color, F32 currentScale, S32 snapVertexIndex)
 {
    glColor(Colors::EDITOR_PLAIN_COLOR);
 
-   object->renderDock();
+   object->renderDock(color);
    renderDockItemLabel(object->getDockLabelPos(), object->getOnDockName());
 
    if(object->isLitUp())
      object->highlightDockItem();
+}
 
-   object->setLitUp(false);
+
+void EditorUserInterface::renderDockItems() const
+{
+   for(S32 i = 0; i < mDockItems.getObjectCount(); i++)
+   {
+      BfObject *bfObject = (BfObject *)mDockItems.getObjectByIndex(i);
+      renderDockItem(bfObject, mLevel->getTeamColor(mCurrentTeam), mCurrentScale, mSnapVertexIndex);
+      bfObject->setLitUp(false);    // TODO -- This should not be in render method
+   }
 }
 
 
@@ -2263,7 +2085,7 @@ static void renderDockItemLabel(const Point &pos, const char *label)
 }
 
 
-void EditorUserInterface::renderDockPlugins()
+void EditorUserInterface::renderDockPlugins() const
 {
    S32 hoveredPlugin = mouseOnDock() ? findHitPlugin() : -1;
    S32 maxPlugins = getDockHeight() / PLUGIN_LINE_SPACING;
@@ -2273,13 +2095,15 @@ void EditorUserInterface::renderDockPlugins()
       {
          S32 x = DisplayManager::getScreenInfo()->getGameCanvasWidth() - mDockWidth - horizMargin;
          F32 y = 1.5f * vertMargin + PLUGIN_LINE_SPACING * (i - mDockPluginScrollOffset);
+
          drawHollowRect(x + horizMargin / 3, y, x + mDockWidth - horizMargin / 3, y + PLUGIN_LINE_SPACING, Colors::white);
-         mInfoMsg = mPluginInfos[i].description;
       }
 
       glColor(Colors::white);
+
       S32 y = (S32) (1.5 * vertMargin + PLUGIN_LINE_SPACING * (i - mDockPluginScrollOffset + 0.33));
       drawString((S32) (DisplayManager::getScreenInfo()->getGameCanvasWidth() - mDockWidth - horizMargin / 2), y, DOCK_LABEL_SIZE, mPluginInfos[i].prettyName.c_str());
+
       S32 bindingWidth = getStringWidth(DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
       drawString((S32) (DisplayManager::getScreenInfo()->getGameCanvasWidth() - bindingWidth - horizMargin * 1.5), y, DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
    }
@@ -2315,13 +2139,17 @@ void EditorUserInterface::renderSaveMessage() const
 }
 
 
+static const S32 WARN_MESSAGE_FADE_TIME = 500;
+
 void EditorUserInterface::renderWarnings() const
 {
+   FontManager::pushFontContext(EditorWarningContext);
+
    if(mWarnMsgTimer.getCurrent())
    {
       F32 alpha = 1.0;
-      if (mWarnMsgTimer.getCurrent() < 1000)
-         alpha = (F32) mWarnMsgTimer.getCurrent() / 1000;
+      if (mWarnMsgTimer.getCurrent() < WARN_MESSAGE_FADE_TIME)
+         alpha = (F32) mWarnMsgTimer.getCurrent() / WARN_MESSAGE_FADE_TIME;
 
       glColor(mWarnMsgColor, alpha);
       drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() / 4, 25, mWarnMsg1.c_str());
@@ -2330,7 +2158,7 @@ void EditorUserInterface::renderWarnings() const
 
    if(mLevelErrorMsgs.size() || mLevelWarnings.size())
    {
-      S32 ypos = vertMargin + 50;
+      S32 ypos = vertMargin + 20;
 
       glColor(Colors::ErrorMessageTextColor);
 
@@ -2348,6 +2176,8 @@ void EditorUserInterface::renderWarnings() const
          ypos += 25;
       }
    }
+
+   FontManager::popFontContext();
 }
 
 
@@ -2377,7 +2207,7 @@ If wall thickness is changed, steps 3-5 need to be repeated
 // Mark all objects in database as unselected
 void EditorUserInterface::clearSelection(GridDatabase *database)
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2390,7 +2220,7 @@ void EditorUserInterface::clearSelection(GridDatabase *database)
 // Mark everything as selected
 void EditorUserInterface::selectAll(GridDatabase *database)
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2418,14 +2248,14 @@ bool EditorUserInterface::anyItemsSelected(const GridDatabase *database) const
 // Copy selection to the clipboard
 void EditorUserInterface::copySelection()
 {
-   GridDatabase *database = getDatabase();
+   GridDatabase *database = getLevel();
 
    if(!anyItemsSelected(database))
       return;
 
    mClipboard.clear();     
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2443,7 +2273,7 @@ void EditorUserInterface::copySelection()
 // Paste items on the clipboard
 void EditorUserInterface::pasteSelection()
 {
-   if(mDraggingObjects)    // Pasting while dragging can cause crashes!!
+   if(mDraggingObjects)       // Pasting while dragging can cause crashes!!
       return;
 
    S32 objCount = mClipboard.size();
@@ -2451,45 +2281,41 @@ void EditorUserInterface::pasteSelection()
     if(objCount == 0)         // Nothing on clipboard, nothing to do
       return;
 
-   saveUndoState();           // So we can undo the paste
-
-   GridDatabase *database = getDatabase();
-   clearSelection(database);  // Only the pasted items should be selected when we're done
-
-   Point pastePos = snapPoint(database, convertCanvasToLevelCoord(mMousePos));
+   Point pastePos = snapPoint(convertCanvasToLevelCoord(mMousePos));
 
    Point firstPoint = mClipboard[0]->getVert(0);
 
    Point offsetFromFirstPoint;
-   Vector<DatabaseObject *> copiedObjects;
+   Vector<DatabaseObject *> copiedObjects(objCount);
+   Vector<BfObject *> copiedBfObjects(objCount);
+
+   mUndoManager.startTransaction();
 
    for(S32 i = 0; i < objCount; i++)
    {
       offsetFromFirstPoint = firstPoint - mClipboard[i]->getVert(0);
 
       BfObject *newObject = mClipboard[i]->newCopy();
-      newObject->setSelected(true);
       newObject->moveTo(pastePos - offsetFromFirstPoint);
-
-      // addToGame is first so setSelected and onGeomChanged have mGame (at least barriers need it)
-      newObject->addToGame(getGame(), NULL);    // Passing NULL keeps item out of any databases... will add in bulk below  
+      geomChanged(newObject);
 
       copiedObjects.push_back(newObject);
+      copiedBfObjects.push_back(newObject);
+
+      mUndoManager.saveAction(ActionCreate, newObject);
    }
 
-   getDatabase()->addToDatabase(copiedObjects);
+   mUndoManager.endTransaction();
 
-   // TODO: Need to do something here to snap pasted turrets that are not already snapped to something else
+   getLevel()->addToDatabase(copiedObjects);
 
    for(S32 i = 0; i < copiedObjects.size(); i++)   
-      copiedObjects[i]->onGeomChanged();
+      static_cast<BfObject *>(copiedObjects[i])->onAddedToEditor();
 
-   onSelectionChanged();
+   getLevel()->snapAllEngineeredItems(false);  // True would work?
 
-   resnapAllEngineeredItems(getDatabase(), false);  // True would work?
-
-   validateLevel();
-   setNeedToSave(true);
+   doneAddingObjects(copiedBfObjects);
+   
    autoSave();
 }
 
@@ -2497,24 +2323,21 @@ void EditorUserInterface::pasteSelection()
 // Expand or contract selection by scale (i.e. resize)
 void EditorUserInterface::scaleSelection(F32 scale)
 {
-   GridDatabase *database = getDatabase();
+   Level *level = getLevel();
 
-   if(!anyItemsSelected(database) || scale < .01 || scale == 1)    // Apply some sanity checks; limits here are arbitrary
+   if(!anyItemsSelected(level) || scale < .01 || scale == 1)    // Apply some sanity checks; limits here are arbitrary
       return;
-
-   saveUndoState();
 
    // Find center of selection
    Point min, max;                        
-   database->computeSelectionMinMax(min, max);
+   level->computeSelectionMinMax(min, max);
    Point ctr = (min + max) * 0.5;
 
    bool modifiedWalls = false;
-   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
+   mLevel->beginBatchGeomUpdate();
+   mUndoManager.startTransaction();
 
-   wallSegmentManager->beginBatchGeomUpdate();
-
-   const Vector<DatabaseObject *> *objList = database->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = level->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2522,24 +2345,32 @@ void EditorUserInterface::scaleSelection(F32 scale)
 
       if(obj->isSelected())
       {
+         mUndoManager.saveChangeAction_before(obj);
+         
          obj->scale(ctr, scale);
-         obj->onGeomChanged();
+         geomChanged(obj);
+
+         mUndoManager.saveChangeAction_after(obj);
 
          if(isWallType(obj->getObjectTypeNumber()))
             modifiedWalls = true;
       }
    }
 
-   wallSegmentManager->endBatchGeomUpdate(database, modifiedWalls);
+   mUndoManager.endTransaction();
+   
+   Vector<WallSegment const *> segments = getSelectedWallsAndPolywallSegments(mLevel.get());
 
-   setNeedToSave(true);
+   mLevel->endBatchGeomUpdate(mLevel.get(), segments, mWallEdgePoints, modifiedWalls);
+   rebuildSelectionOutline();
+
    autoSave();
 }
 
 
 bool EditorUserInterface::canRotate() const
 {
-   return !mDraggingObjects && anyItemsSelected(getDatabase());
+   return !mDraggingObjects && anyItemsSelected(getLevel());
 }
 
 
@@ -2549,11 +2380,11 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
    if(!canRotate())
       return;
 
-   saveUndoState();
-
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    Point center(0,0);
+
+
 
    // If we're not going to use the origin, we're going to use the 'center of mass' of the total
    if(!useOrigin)
@@ -2580,6 +2411,8 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
          center = findCentroid(centroidList);
    }
 
+   mUndoManager.startTransaction();
+
    // Now do the actual rotation
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2587,19 +2420,24 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
 
       if(obj->isSelected())
       {
+         mUndoManager.saveChangeAction_before(obj);
+
          obj->rotateAboutPoint(center, angle);
-         obj->onGeomChanged();
+         geomChanged(obj);
+
+         mUndoManager.saveChangeAction_after(obj);
       }
    }
 
-   setNeedToSave(true);
+   mUndoManager.endTransaction();
+
    autoSave();
 }
 
 
 void EditorUserInterface::setSelectionId(S32 id)
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2609,8 +2447,9 @@ void EditorUserInterface::setSelectionId(S32 id)
       {
          if(obj->getUserAssignedId() != id)     // Did the id actually change?
          {
+            mUndoManager.saveChangeAction_before(obj);
             obj->setUserAssignedId(id, true);
-            mAllUndoneUndoLevel = -1;     // If so, it can't be undone
+            mUndoManager.saveChangeAction_after(obj);
          }
          break;
       }
@@ -2621,12 +2460,6 @@ void EditorUserInterface::setSelectionId(S32 id)
 // Set the team affiliation of any selected items
 void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 {
-   mCurrentTeam = currentTeam;
-   bool anyChanged = false;
-
-   if(anythingSelected())
-      saveUndoState();
-
    if(currentTeam >= getTeamCount())
    {
       char msg[255];
@@ -2641,23 +2474,32 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
       return;
    }
 
+   clearWarnMessage();
+   mCurrentTeam = currentTeam;
+   bool anyChanged = false;
+
+
    // Update all dock items to reflect new current team
-   for(S32 i = 0; i < mDockItems.size(); i++)
+   for(S32 i = 0; i < mDockItems.getObjectCount(); i++)
    {
-      if(!mDockItems[i]->hasTeam())
+      BfObject *bfObject = (BfObject *)mDockItems.getObjectByIndex(i);
+
+      if(!bfObject->hasTeam())
          continue;
 
-      if(currentTeam == TEAM_NEUTRAL && !mDockItems[i]->canBeNeutral())
+      if(currentTeam == TEAM_NEUTRAL && !bfObject->canBeNeutral())
          continue;
 
-      if(currentTeam == TEAM_HOSTILE && !mDockItems[i]->canBeHostile())
+      if(currentTeam == TEAM_HOSTILE && !bfObject->canBeHostile())
          continue;
 
-      mDockItems[i]->setTeam(currentTeam);
+      bfObject->setTeam(currentTeam);
    }
 
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   mUndoManager.startTransaction();
+
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2665,6 +2507,8 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 
       if(obj->isSelected())
       {
+         mUndoManager.saveChangeAction_before(obj);
+
          if(!obj->hasTeam())
             continue;
 
@@ -2674,13 +2518,15 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
          if(currentTeam == TEAM_HOSTILE && !obj->canBeHostile())
             continue;
 
-         if(!anyChanged)
-            saveUndoState();
-
          obj->setTeam(currentTeam);
+
+         mUndoManager.saveChangeAction_after(obj);
+
          anyChanged = true;
       }
    }
+
+   mUndoManager.endTransaction();
 
    // Overwrite any warnings set above.  If we have a group of items selected, it makes no sense to show a
    // warning if one of those items has the team set improperly.  The warnings are more appropriate if only
@@ -2688,9 +2534,8 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 
    if(anyChanged)
    {
-      setWarnMessage("", "");
+      clearWarnMessage();
       validateLevel();
-      setNeedToSave(true);
       autoSave();
    }
 }
@@ -2699,7 +2544,7 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 void EditorUserInterface::flipSelectionHorizontal()
 {
    Point min, max;
-   getDatabase()->computeSelectionMinMax(min, max);
+   getLevel()->computeSelectionMinMax(min, max);
    F32 centerX = (min.x + max.x) / 2;
 
    flipSelection(centerX, true);
@@ -2709,7 +2554,7 @@ void EditorUserInterface::flipSelectionHorizontal()
 void EditorUserInterface::flipSelectionVertical()
 {
    Point min, max;
-   getDatabase()->computeSelectionMinMax(min, max);
+   getLevel()->computeSelectionMinMax(min, max);
    F32 centerY = (min.y + max.y) / 2;
 
    flipSelection(centerY, false);
@@ -2721,20 +2566,17 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
    if(!canRotate())
       return;
 
-   GridDatabase *database = getDatabase();
-
-   saveUndoState();
+   Level *level = getLevel();
 
    Point min, max;
-   database->computeSelectionMinMax(min, max);
-//   F32 centerX = (min.x + max.x) / 2;
+   level->computeSelectionMinMax(min, max);
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    bool modifiedWalls = false;
-   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 
-   wallSegmentManager->beginBatchGeomUpdate();
+   level->beginBatchGeomUpdate();
+   mUndoManager.startTransaction();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2742,17 +2584,25 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
 
       if(obj->isSelected())
       {
+         mUndoManager.saveChangeAction_before(obj);
+
          obj->flip(center, isHoriz);
-         obj->onGeomChanged();
+         geomChanged(obj);
+
+         mUndoManager.saveChangeAction_after(obj);
 
          if(isWallType(obj->getObjectTypeNumber()))
             modifiedWalls = true;
       }
    }
 
-   wallSegmentManager->endBatchGeomUpdate(database, modifiedWalls);
+   mUndoManager.endTransaction();
 
-   setNeedToSave(true);
+   Vector<WallSegment const *> segments = getSelectedWallsAndPolywallSegments(mLevel.get());
+
+   mLevel->endBatchGeomUpdate(mLevel.get(), segments, mWallEdgePoints, modifiedWalls);
+   rebuildSelectionOutline();
+
    autoSave();
 }
 
@@ -2772,7 +2622,7 @@ void EditorUserInterface::findHitItemAndEdge()
    const Rect cursorRect((mMousePos - mCurrentOffset) / mCurrentScale, 50); 
 
    fillVector.clear();
-   GridDatabase *editorDb = getDatabase();
+   GridDatabase *editorDb = getLevel();
    editorDb->findObjects((TestFunc)isAnyObjectType, fillVector, cursorRect);
 
    Point mouse = convertCanvasToLevelCoord(mMousePos);      // Figure out where the mouse is in level coords
@@ -2794,19 +2644,18 @@ void EditorUserInterface::findHitItemAndEdge()
       }
 
    // We've already checked for wall vertices; now we'll check for hits in the interior of walls
-   GridDatabase *wallDb = editorDb->getWallSegmentManager()->getWallSegmentDatabase();
    fillVector2.clear();
 
-   wallDb->findObjects((TestFunc)isAnyObjectType, fillVector2, cursorRect);
+   mLevel->findObjects(isWallType, fillVector2, cursorRect);
 
    for(S32 i = 0; i < fillVector2.size(); i++)
-      if(checkForWallHit(mouse, fillVector2[i]))
+      if(overlaps(mouse, static_cast<BfObject *>(fillVector2[i])))
          return;
 
    // If we're still here, it means we didn't find anything yet.  Make one more pass, and see if we're in any polys.
    // This time we'll loop forward, though I don't think it really matters.
    for(S32 i = 0; i < fillVector.size(); i++)
-     if(checkForPolygonHit(mouse, dynamic_cast<BfObject *>(fillVector[i])))
+     if(overlaps(mouse, static_cast<BfObject *>(fillVector[i])))
         return;
 }
 
@@ -2872,58 +2721,10 @@ bool EditorUserInterface::checkForEdgeHit(const Point &point, BfObject *object)
 }
 
 
-bool EditorUserInterface::checkForWallHit(const Point &point, DatabaseObject *object)
+// Returns true if point overlaps object
+bool EditorUserInterface::overlaps(const Point &point, BfObject *object)
 {
-   TNLAssert(dynamic_cast<WallSegment *>(object), "Expected a WallSegment!");
-   WallSegment *wallSegment = static_cast<WallSegment *>(object);
-
-   if(triangulatedFillContains(wallSegment->getTriangulatedFillPoints(), point))
-   {
-      // Now that we've found a segment that our mouse is over, we need to find the wall object that it belongs to.  Chances are good
-      // that it will be one of the objects sitting in fillVector.
-      for(S32 i = 0; i < fillVector.size(); i++)
-      {
-         if(isWallType(fillVector[i]->getObjectTypeNumber()))
-         {
-            BfObject *eobj = dynamic_cast<BfObject *>(fillVector[i]);
-
-            if(eobj->getSerialNumber() == wallSegment->getOwner())
-            {
-               mHitItem = eobj;
-               return true;
-            }
-         }
-      }
-
-      // Note, if we get to here, we have a problem.
-
-      // This code does a less efficient but more thorough job finding a wall that matches the segment we hit... if the above assert
-      // keeps going off, and we can't fix it, this code here should take care of the problem.  But using it is an admission of failure.
-
-      const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
-
-      for(S32 i = 0; i < objList->size(); i++)
-      {
-         BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-         if(isWallType(obj->getObjectTypeNumber()))
-         {
-            if(obj->getSerialNumber() == wallSegment->getOwner())
-            {
-               mHitItem = obj;
-               return true;
-            }
-         }
-      }
-   }
-
-   return false;
-}
-
-
-bool EditorUserInterface::checkForPolygonHit(const Point &point, BfObject *object)
-{
-   if(object->getGeomType() == geomPolygon && triangulatedFillContains(object->getFill(), point))
+   if(object->overlapsPoint(point))
    {
       mHitItem = object;
       return true;
@@ -2938,49 +2739,51 @@ void EditorUserInterface::findHitItemOnDock()
 {
    mDockItemHit = NULL;
 
-   for(S32 i = mDockItems.size() - 1; i >= 0; i--)     // Go in reverse order because the code we copied did ;-)
+   for(S32 i = 0; i < mDockItems.getObjectCount(); i++)
    {
-      Point pos = mDockItems[i]->getPos();
+      BfObject *bfObject = (BfObject *)mDockItems.getObjectByIndex(i);
+
+      Point pos = bfObject->getPos();
 
       if(fabs(mMousePos.x - pos.x) < POINT_HIT_RADIUS && fabs(mMousePos.y - pos.y) < POINT_HIT_RADIUS)
       {
-         mDockItemHit = mDockItems[i].get();
+         mDockItemHit = bfObject;
          return;
       }
    }
 
    // Now check for polygon interior hits
-   for(S32 i = 0; i < mDockItems.size(); i++)
-      if(mDockItems[i]->getGeomType() == geomPolygon)
+   for(S32 i = 0; i < mDockItems.getObjectCount(); i++)
+   {
+      BfObject *bfObject = (BfObject *)mDockItems.getObjectByIndex(i);
+
+      if(bfObject->getGeomType() == geomPolygon)
       {
          Vector<Point> verts;
-         for(S32 j = 0; j < mDockItems[i]->getVertCount(); j++)
-            verts.push_back(mDockItems[i]->getVert(j));
+         for(S32 j = 0; j < bfObject->getVertCount(); j++)
+            verts.push_back(bfObject->getVert(j));
 
          if(polygonContainsPoint(verts.address(),verts.size(), mMousePos))
          {
-            mDockItemHit = mDockItems[i].get();
+            mDockItemHit = bfObject;
             return;
          }
       }
+   }
 
    return;
 }
 
 
-S32 EditorUserInterface::findHitPlugin()
+S32 EditorUserInterface::findHitPlugin() const
 {
    S32 i;
    for(i = 0; i < mPluginInfos.size(); i++)
-   {
-      if(mMousePos.y > 1.5 * vertMargin + PLUGIN_LINE_SPACING * i &&
-         mMousePos.y < 1.5 * vertMargin + PLUGIN_LINE_SPACING * (i + 1)
-      )
-      {
+      if( mMousePos.y > 1.5 * vertMargin + PLUGIN_LINE_SPACING * i &&
+          mMousePos.y < 1.5 * vertMargin + PLUGIN_LINE_SPACING * (i + 1) )
          return i + mDockPluginScrollOffset;
-      }
-   }
-   return -1;
+
+      return -1;
 }
 
 
@@ -2988,10 +2791,10 @@ void EditorUserInterface::onMouseMoved()
 {
    Parent::onMouseMoved();
 
-   if(mouseIgnore)  // Needed to avoid freezing effect from too many mouseMoved events without a render in between
+   if(mIgnoreMouseInput)  // Needed to avoid freezing effect from too many mouseMoved events without a render in between
       return;
 
-   mouseIgnore = true;
+   mIgnoreMouseInput = true;
 
    mMousePos.set(DisplayManager::getScreenInfo()->getMousePos());
 
@@ -3018,7 +2821,8 @@ void EditorUserInterface::onMouseMoved()
    if(mHitItem)
       mHitItem->setLitUp(true);
 
-   if(mVertexEditMode) {
+   if(mVertexEditMode) 
+   {
       // We hit a vertex that wasn't already selected
       if(!spaceDown && mHitItem && mHitVertex != NONE && !mHitItem->vertSelected(mHitVertex))   
          mHitItem->setVertexLitUp(mHitVertex);
@@ -3044,25 +2848,15 @@ void EditorUserInterface::onMouseDragged()
    if(mCreatingPoly || mCreatingPolyline || mDragSelecting)
       return;
 
-
-   bool needToSaveUndoState = true;
-
-   // I assert we never need to save an input state here if we are right-mouse dragging
-   if(InputCodeManager::getState(MOUSE_RIGHT))
-      needToSaveUndoState = false;
-
    if(mDraggingDockItem != NULL)    // We just started dragging an item off the dock
-   {
-       startDraggingDockItem();  
-       needToSaveUndoState = false;
-   }
+      startDraggingDockItem();  
 
    findSnapVertex();                               // Sets mSnapObject and mSnapVertexIndex
    if(!mSnapObject || mSnapVertexIndex == NONE)    // If we've just started dragging a dock item, this will be it
       return;
 
    if(!mDraggingObjects) 
-      onMouseDragged_StartDragging(needToSaveUndoState);
+      onMouseDragged_startDragging();
 
    SDL_SetCursor(Cursor::getSpray());
 
@@ -3071,22 +2865,32 @@ void EditorUserInterface::onMouseDragged()
    // want to factor that offset into our calculations.  For point items (and vertices), we don't really care about any slop
    // in the selection, and we just want the damn thing where we put it.
    if(mSnapObject->getGeomType() == geomPoint || (mHitItem && mHitItem->anyVertsSelected()))
-      mSnapDelta = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos)) - mMoveOrigin;
+      mSnapDelta = snapPoint(convertCanvasToLevelCoord(mMousePos)) - mMoveOrigin;
    else  // larger items
-      mSnapDelta = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
+      mSnapDelta = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
 
-   translateSelectedItems(mMoveOrigins, mSnapDelta, lastSnapDelta);  // Nudge all selected objects by incremental move amount
-   snapSelectedEngineeredItems(mSnapDelta);                          // Snap all selected engr. objects if possible
+   // Nudge all selected objects by incremental move amount
+   translateSelectedItems(mSnapDelta, lastSnapDelta);  
+
+   // Snap all selected engr. objects if possible
+   snapSelectedEngineeredItems(mSnapDelta);                   
 }
 
 
-void EditorUserInterface::onMouseDragged_StartDragging(const bool needToSaveUndoState)
+void EditorUserInterface::onMouseDragged_startDragging()
 {
-   if(needToSaveUndoState)
-      saveUndoState(true);       // Save undo state before we clear the selection
-
    mMoveOrigin = mSnapObject->getVert(mSnapVertexIndex);
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
+
+   mSelectedObjectsForDragging.clear();
+
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(objList->get(i));
+
+      if(obj->isSelected() || obj->anyVertsSelected())
+         mSelectedObjectsForDragging.push_back(obj->clone());
+   }
 
 #ifdef TNL_OS_MAC_OSX 
    bool ctrlDown = InputCodeManager::getState(KEY_META);
@@ -3095,27 +2899,20 @@ void EditorUserInterface::onMouseDragged_StartDragging(const bool needToSaveUndo
 #endif
 
    if(ctrlDown)     // Ctrl+Drag ==> copy and drag (except for Mac)
-      onMouseDragged_CopyAndDrag(objList);
+      onMouseDragged_copyAndDrag(objList);
 
    onSelectionChanged();
    mDraggingObjects = true; 
    mSnapDelta.set(0,0);
-
-   mMoveOrigins.resize(objList->size());
-
-   // Save the original location of each item pre-move, only used for snapping engineered items to walls
-   // Saves location of every item, selected or not
-   for(S32 i = 0; i < objList->size(); i++)
-      mMoveOrigins[i].set(objList->get(i)->getVert(0));
 
    markSelectedObjectsAsUnsnapped(objList);
 }
 
 
 // Copy objects and start dragging the copies
-void EditorUserInterface::onMouseDragged_CopyAndDrag(const Vector<DatabaseObject *> *objList)
+void EditorUserInterface::onMouseDragged_copyAndDrag(const Vector<DatabaseObject *> *objList)
 {
-   Vector<DatabaseObject *> copiedObjects;
+   Vector<BfObject *> copiedObjects;
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -3125,7 +2922,6 @@ void EditorUserInterface::onMouseDragged_CopyAndDrag(const Vector<DatabaseObject
       {
          BfObject *newObject = obj->newCopy();
          newObject->setSelected(true);
-         newObject->addToGame(getGame(), NULL);    // NULL keeps object out of database... will be added in bulk below 
 
          copiedObjects.push_back(newObject);
 
@@ -3149,41 +2945,33 @@ void EditorUserInterface::onMouseDragged_CopyAndDrag(const Vector<DatabaseObject
       obj->setLitUp(false);
    }
 
-   // Now add copied objects to our database; these were marked as selected when they were created
-   getDatabase()->addToDatabase(copiedObjects);
-
-   // Running onGeomChanged causes any copied walls to have a full body while we're dragging them 
    for(S32 i = 0; i < copiedObjects.size(); i++)
-      copiedObjects[i]->onGeomChanged();
+      addToEditor(copiedObjects[i]);
+
+   rebuildWallGeometry(mLevel.get());
 }
 
 
-void EditorUserInterface::translateSelectedItems(const Vector<Point> &origins, const Point &offset, const Point &lastOffset)
+void EditorUserInterface::translateSelectedItems(const Point &offset, const Point &lastOffset)
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
-   //mMoveOrigins[i].set(objList->get(i)->getPos());
-   TNLAssert(mMoveOrigins.size() == objList->size(), "Expected these to be the same size!");
-
+   S32 k = 0; 
    for(S32 i = 0; i < objList->size(); i++)
    {
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
       if(obj->isSelected() || obj->anyVertsSelected())
       {
-         //obj->setPos(mMoveOrigins[i] + offset);
          Point newVert;    // Reusable container
 
          for(S32 j = obj->getVertCount() - 1; j >= 0;  j--)
+         {
             if(obj->isSelected())            // ==> Dragging whole object
             {
-               //          Offset from vertex @ getPos()   +  New position for vertex @ getPos()  
-               //F64 x = ((F64)obj->getVert(j).x - (F64)obj->getPos().x) + ((F64)mMoveOrigins[i].x + (F64)offset.x);
-               //F64 y = ((F64)obj->getVert(j).y - (F64)obj->getPos().y) + (F64)(mMoveOrigins[i].y + (F64)offset.y);
-               //newVert = Point((F32)x, (F32)y);
+               newVert = obj->getVert(j) + (mSelectedObjectsForDragging[k]->getVert(0) - obj->getVert(0)) + offset;
 
-               newVert = (obj->getVert(j) - obj->getVert(0)) + (mMoveOrigins[i] + offset);
-               obj->setVert(newVert, j);
+               obj->setVert(newVert, j); 
 
                obj->onItemDragging();        // Let the item know it's being dragged
             }
@@ -3193,7 +2981,13 @@ void EditorUserInterface::translateSelectedItems(const Vector<Point> &origins, c
                newVert = obj->getVert(j) + (offset - lastOffset);
                obj->setVert(newVert, j);
                obj->onGeomChanging();        // Because, well, the geom is changing
+
+               if(isWallType(obj->getObjectTypeNumber()))
+                  rebuildSelectionOutline();
             }
+         }
+
+         k++;
       }
    }
 }
@@ -3201,9 +2995,7 @@ void EditorUserInterface::translateSelectedItems(const Vector<Point> &origins, c
 
 void EditorUserInterface::snapSelectedEngineeredItems(const Point &cumulativeOffset)
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
-
-   WallSegmentManager *wallSegmentManager = getDatabase()->getWallSegmentManager();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -3211,8 +3003,13 @@ void EditorUserInterface::snapSelectedEngineeredItems(const Point &cumulativeOff
       {
          // Only try to mount any items that are both 1) selected and 2) marked as wanting to snap
          EngineeredItem *engrObj = static_cast<EngineeredItem *>(objList->get(i));
+         S32 j = 0;
          if(engrObj->isSelected() && promiscuousSnapper[i])
-            engrObj->mountToWall(snapPointToLevelGrid(mMoveOrigins[i] + cumulativeOffset), wallSegmentManager, &selectedWalls);
+         {
+            engrObj->mountToWall(snapPointToLevelGrid(mSelectedObjectsForDragging[j]->getVert(0) + cumulativeOffset), 
+                                 getLevel(), mLevel->getWallEdgeDatabase(), &selectedWalls);
+            j++;
+         }
       }
    }
 }
@@ -3222,7 +3019,7 @@ BfObject *EditorUserInterface::copyDockItem(BfObject *source)
 {
    // Instantiate object so we are essentially dragging a non-dock item
    BfObject *newObject = source->newCopy();
-   newObject->newObjectFromDock(mGridSize);     // Do things particular to creating an object that came from dock
+   newObject->newObjectFromDock((F32)mGridSize);     // Do things particular to creating an object that came from dock
 
    return newObject;
 }
@@ -3231,31 +3028,27 @@ BfObject *EditorUserInterface::copyDockItem(BfObject *source)
 // User just dragged an item off the dock
 void EditorUserInterface::startDraggingDockItem()
 {
-   saveUndoState();     // Save our undo state before we create a new item
-
-   BfObject *item = copyDockItem(mDraggingDockItem);
+   BfObject *item(copyDockItem(mDraggingDockItem));
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
    Point pos = convertCanvasToLevelCoord(mMousePos) - item->getInitialPlacementOffset(mGridSize);
    item->moveTo(pos);
       
-   GridDatabase *database = getDatabase();
+   addToEditor(item);
 
-   addToEditor(item); 
-//   database->dumpObjects();
+   // Create an undo action to remove this item
+   mUndoManager.saveCreateActionAndMergeWithNextUndoState();
+
+   mDraggingDockItem = NULL;     // Because now we're dragging a real item
+
+   doneAddingObjects(item);
    
-   clearSelection(database);    // No items are selected...
-   item->setSelected(true);     // ...except for the new one
-   onSelectionChanged();
-   mDraggingDockItem = NULL;    // Because now we're dragging a real item
-   validateLevel();             // Check level for errors
-
 
    // Because we sometimes have trouble finding an item when we drag it off the dock, after it's been sorted,
    // we'll manually set mHitItem based on the selected item, which will always be the one we just added.
    // TODO: Still needed?
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    mEdgeHit = NONE;
    for(S32 i = 0; i < objList->size(); i++)
@@ -3268,6 +3061,79 @@ void EditorUserInterface::startDraggingDockItem()
          break;
       }
    }
+}
+
+
+void EditorUserInterface::doneAddingObjects(S32 serialNumber)
+{
+   doneAddingObjects(mLevel->findObjBySerialNumber(serialNumber));
+}
+
+
+void EditorUserInterface::doneAddingObjects(const Vector<S32> &serialNumbers)
+{
+   Vector<BfObject *> bfObjects(serialNumbers.size());
+
+   for(S32 i = 0; i < serialNumbers.size(); i++)
+      bfObjects.push_back(mLevel->findObjBySerialNumber(serialNumbers[i]));
+
+   doneChangingGeoms(bfObjects);
+}
+
+
+void EditorUserInterface::doneAddingObjects(BfObject *bfObject)
+{
+   Vector<BfObject *> bfObjects;
+   bfObjects.push_back(bfObject);
+
+   doneAddingObjects(bfObjects);
+}
+
+
+void EditorUserInterface::doneChangingGeoms(const Vector<S32> &serialNumbers)
+{
+   Vector<BfObject *> bfObjects(serialNumbers.size());
+
+   for(S32 i = 0; i < serialNumbers.size(); i++)
+      bfObjects.push_back(mLevel->findObjBySerialNumber(serialNumbers[i]));
+
+   doneChangingGeoms(bfObjects);
+}
+
+
+void EditorUserInterface::doneAddingObjects(const Vector<BfObject *> &bfObjects)
+{
+   clearSelection(getLevel());   // No items are selected...
+
+   for(S32 i = 0; i < bfObjects.size(); i++)
+   {
+      BfObject *obj = mLevel->findObjBySerialNumber(bfObjects[i]->getSerialNumber());
+      obj->setSelected(true);  // ...except for the new ones;
+   }
+
+   onSelectionChanged();
+   validateLevel();              // Check level for errors
+}
+
+
+void EditorUserInterface::doneChangingGeoms(S32 serialNumber)
+{
+   doneChangingGeoms(mLevel->findObjBySerialNumber(serialNumber));
+}
+
+
+void EditorUserInterface::doneChangingGeoms(BfObject *bfObject)
+{
+   Vector<BfObject *> bfObjects;
+   bfObjects.push_back(bfObject);
+
+   doneChangingGeoms(bfObjects);
+}
+
+
+void EditorUserInterface::doneChangingGeoms(const Vector<BfObject *> &bfObjects)
+{
+   rebuildEverything(getLevel());
 }
 
 
@@ -3319,7 +3185,7 @@ void EditorUserInterface::findSnapVertex()
       return;
    } 
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    // Otherwise, we don't have a selected hitItem -- look for a selected vertex
    for(S32 i = 0; i < objList->size(); i++)
@@ -3349,9 +3215,12 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
    if(!anythingSelected())  // Nothing to delete
       return;
 
-   bool deleted = false, deletedWall = false;
+   mUndoManager.startTransaction();
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   bool deletedWall = false;
+   bool deletedAny = false;
+
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = objList->size() - 1; i >= 0; i--)  // Reverse to avoid having to have i-- in middle of loop
    {
@@ -3363,29 +3232,26 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          if(obj->isLitUp())
             mHitItem = NULL;
 
-         if(!deleted)
-            saveUndoState();
+         mUndoManager.saveAction(Editor::ActionDelete, obj);
 
          if(isWallType(obj->getObjectTypeNumber()))
             deletedWall = true;
 
          deleteItem(i, true);
-         deleted = true;
+         deletedAny = true;
       }
       else if(!objectsOnly)      // Deleted only selected vertices
       {
          bool geomChanged = false;
+
+         BfObject *origObj = obj->clone();      // Will be cleaned up by UndoManager
 
          // Backwards!  Since we could be deleting multiple at once
          for(S32 j = obj->getVertCount() - 1; j > -1 ; j--)
          {
             if(obj->vertSelected(j))
             {
-               if(!deleted)
-                  saveUndoState();
-              
                obj->deleteVert(j);
-               deleted = true;
 
                geomChanged = true;
                clearSnapEnvironment();
@@ -3395,28 +3261,32 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          // Check if item has too few vertices left to be viable
          if(obj->getVertCount() < obj->getMinVertCount())
          {
+            mUndoManager.saveAction(Editor::ActionDelete, origObj);
             if(isWallType(obj->getObjectTypeNumber()))
                deletedWall = true;
 
             deleteItem(i, true);
-            deleted = true;
          }
          else if(geomChanged)
+         {
+            mUndoManager.saveAction(Editor::ActionChange, origObj, obj);
             obj->onGeomChanged();
+         }
 
       }  // else if(!objectsOnly) 
    }  // for
 
 
+   mUndoManager.endTransaction();
+
    if(deletedWall)
-      doneDeleteingWalls();
+      rebuildWallGeometry(mLevel.get());
 
-   if(deleted)
+
+   if(deletedAny)
    {
-      setNeedToSave(true);
       autoSave();
-
-      doneDeleting();
+      doneDeletingObjects();
    }
 }
 
@@ -3424,20 +3294,24 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 // Increase selected wall thickness by amt
 void EditorUserInterface::changeBarrierWidth(S32 amt)
 {
-   if(!mLastUndoStateWasBarrierWidthChange)
-      saveUndoState(); 
-
    fillVector2.clear();    // fillVector gets modified in some child function, so use our secondary reusable container
-   getDatabase()->findObjects((TestFunc)isWallItemType, fillVector2);
+   getLevel()->findObjects((TestFunc)isWallItemType, fillVector2);
+
+   mUndoManager.startTransaction();
 
    for(S32 i = 0; i < fillVector2.size(); i++)
    {
       WallItem *obj = static_cast<WallItem *>(fillVector2[i]);
+
       if(obj->isSelected())
+      {
+         mUndoManager.saveChangeAction_before(obj);
          obj->changeWidth(amt);     
+         mUndoManager.saveChangeAction_after(obj);
+      }
    }
 
-   mLastUndoStateWasBarrierWidthChange = true;
+   mUndoManager.endTransaction(EditorUndoManager::ChangeIdMergeWalls);
 }
 
 
@@ -3447,9 +3321,11 @@ void EditorUserInterface::splitBarrier()
 {
    bool split = false;
 
-   GridDatabase *database = getDatabase();
+   GridDatabase *database = getLevel();
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
+
+   mUndoManager.startTransaction();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -3459,12 +3335,10 @@ void EditorUserInterface::splitBarrier()
           for(S32 j = 1; j < obj->getVertCount() - 1; j++)     // Can't split on end vertices!
             if(obj->vertSelected(j))
             {
-               saveUndoState();
-               
                doSplit(obj, j);
 
                split = true;
-               goto done2;                         // Yes, gotos are naughty, but they just work so well sometimes...
+               goto done2;       // Yes, gotos are naughty, but they just feel so good...
             }
    }
 
@@ -3472,18 +3346,16 @@ void EditorUserInterface::splitBarrier()
    if(!split && mSnapObject && mSnapObject->getGeomType() == geomPolyLine && mSnapObject->isSelected() && 
          mSnapVertexIndex != NONE && mSnapVertexIndex != 0 && mSnapVertexIndex != mSnapObject->getVertCount() - 1)
    {         
-      saveUndoState();
-
       doSplit(mSnapObject, mSnapVertexIndex);
-
       split = true;
    }
 
 done2:
+   mUndoManager.endTransaction();
+
    if(split)
    {
       clearSelection(database);
-      setNeedToSave(true);
       autoSave();
    }
 }
@@ -3492,12 +3364,16 @@ done2:
 // Split wall or line -- will probably crash on other geom types
 void EditorUserInterface::doSplit(BfObject *object, S32 vertex)
 {
+   TNLAssert(mUndoManager.inTransaction(), "Should have opened an undo transaction before calling this!");
+
    BfObject *newObj = object->newCopy();    // Copy the attributes
-   newObj->clearVerts();                        // Wipe out the geometry
+   newObj->clearVerts();                    // Wipe out the geometry
 
    // Note that it would be more efficient to start at the end and work backwards, but the direction of our numbering would be
    // reversed in the new object compared to what it was.  This isn't important at the moment, but it just seems wrong from a
    // geographic POV.  Which I have.
+
+   mUndoManager.saveChangeAction_before(object);
    for(S32 i = vertex; i < object->getVertCount(); i++) 
    {
       newObj->addVert(object->getVert(i), true);      // true: If wall already has more than max number of points, let children have more as well
@@ -3512,7 +3388,12 @@ void EditorUserInterface::doSplit(BfObject *object, S32 vertex)
 
    // Tell the new segments that they have new geometry
    object->onGeomChanged();
-   newObj->onGeomChanged();            
+   newObj->onGeomChanged();
+
+   rebuildWallGeometry(mLevel.get());
+
+   mUndoManager.saveChangeAction_after(object);
+   mUndoManager.saveAction(ActionCreate, newObj);
 }
 
 
@@ -3520,11 +3401,13 @@ void EditorUserInterface::doSplit(BfObject *object, S32 vertex)
 // Will also merge two or more overlapping polygons.
 void EditorUserInterface::joinBarrier()
 {
+   GridDatabase *database = getLevel();
+
    BfObject *joinedObj = NULL;
 
-   GridDatabase *database = getDatabase();
+   mUndoManager.startTransaction();
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size()-1; i++)
    {
@@ -3534,87 +3417,159 @@ void EditorUserInterface::joinBarrier()
       if((obj_i->getGeomType() == geomPolyLine) && obj_i->isSelected())  
       {
          joinedObj = doMergeLines(obj_i, i);
+         if(joinedObj == NULL)
+         {
+            mUndoManager.rollbackTransaction();
+            return;
+         }
+
          break;
       }
       else if(obj_i->getGeomType() == geomPolygon && obj_i->isSelected())
       {
          joinedObj = doMergePolygons(obj_i, i);
+         if(joinedObj == NULL)
+         {
+            mUndoManager.rollbackTransaction();
+            return;
+         }
+
          break;
       }
    }
 
-   if(joinedObj)     // We had a successful merger
-   {
-      clearSelection(database);
-      setNeedToSave(true);
-      autoSave();
-      joinedObj->onGeomChanged();
-      joinedObj->setSelected(true);
+   // We had a successful merger
+   clearSelection(database);
+   autoSave();
+   joinedObj->onGeomChanged();
+   joinedObj->setSelected(true);
 
-      onSelectionChanged();
-   }
+   onSelectionChanged();
+   rebuildWallGeometry(mLevel.get());
+
+   mUndoManager.endTransaction();
 }
 
 
 BfObject *EditorUserInterface::doMergePolygons(BfObject *firstItem, S32 firstItemIndex)
 {
+   TNLAssert(mUndoManager.inTransaction(), "Should be in an undo transaction here!");
+
    Vector<const Vector<Point> *> inputPolygons;
    Vector<Vector<Point> > outputPolygons;
    Vector<S32> deleteList;
 
-   saveUndoState();
-
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    inputPolygons.push_back(firstItem->getOutline());
 
-   bool cw = isWoundClockwise(*firstItem->getOutline());       // Make sure all our polys are wound the same direction as the first
-                                                               
+   // Make sure all our polys are wound the same direction as the first
+   bool cw = isWoundClockwise(*firstItem->getOutline());
+                                               
    for(S32 i = firstItemIndex + 1; i < objList->size(); i++)   // Compare against remaining objects
    {
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
       if(obj->getObjectTypeNumber() == firstItem->getObjectTypeNumber() && obj->isSelected())
       {
-         // We can just reverse the winding in place -- if merge succeeds, the poly will be deleted,
-         // and if it fails we'll just undo and revert everything to the way it was
+         // Reverse winding in place -- if merge succeeds, the poly will be deleted, and if it fails we'll revert it
          if(isWoundClockwise(*obj->getOutline()) != cw)
+         {
+            mUndoManager.saveChangeAction_before(obj);
             obj->reverseWinding();
+            mUndoManager.saveChangeAction_after(obj);
+         }
 
          inputPolygons.push_back(obj->getOutline());
          deleteList.push_back(i);
       }
    }
 
-   bool ok = mergePolys(inputPolygons, outputPolygons);
+   if(!mergePolys(inputPolygons, outputPolygons) || outputPolygons.size() != 1)
+      return NULL;
 
-   if(ok && outputPolygons.size() == 1)
+   mUndoManager.saveChangeAction_before(firstItem);
+
+   // Clear out the polygon, back to front
+   while(firstItem->getVertCount() > 0)
+      firstItem->deleteVert(firstItem->getVertCount() - 1);
+
+   // Add the new points
+   for(S32 i = 0; i < outputPolygons[0].size(); i++)
    {
-      // Clear out the polygon
-      while(firstItem->getVertCount())
-         firstItem->deleteVert(firstItem->getVertCount() - 1);
-
-      // Add the new points
-      for(S32 i = 0; i < outputPolygons[0].size(); i++)
-         ok &= firstItem->addVert(outputPolygons[0][i], true);
-
-      if(ok)
-      {
-         // Delete the constituent parts; work backwards to avoid queering the deleteList indices
-         for(S32 i = deleteList.size() - 1; i >= 0; i--)
-            deleteItem(deleteList[i]);
-
-         return firstItem;
-      }
+      bool ok = firstItem->addVert(outputPolygons[0][i], true);
+      TNLAssert(ok, "Should always return true!");
    }
 
-   undo(false);   // Merge failed for some reason.  Revert everything to undo state saved at the top of method.
-   return NULL;
+   mUndoManager.saveChangeAction_after(firstItem);
+
+   // Delete the constituent parts; work backwards to avoid queering the deleteList indices
+   for(S32 i = deleteList.size() - 1; i >= 0; i--)
+   {
+      mUndoManager.saveAction(ActionDelete, static_cast<BfObject *>(objList->get(deleteList[i])));
+      deleteItem(deleteList[i]);
+   }
+
+   return firstItem;
+}
+
+
+// First vertices are the same  1 2 3 | 1 4 5
+static void merge_1_2_3__1_4_5(BfObject *firstItem, BfObject *mergingWith)
+{
+   // Skip first vertex, because it would be a dupe
+   for(S32 a = 1; a < mergingWith->getVertCount(); a++)           
+      firstItem->addVertFront(mergingWith->getVert(a));
+}
+
+
+// First vertex conincides with final vertex 3 2 1 | 5 4 3
+static void merge_3_2_1__5_4_3(BfObject *firstItem, BfObject *mergingWith)
+{
+   for(S32 a = mergingWith->getVertCount() - 2; a >= 0; a--)
+      firstItem->addVertFront(mergingWith->getVert(a));
+}
+
+
+// Last vertex conincides with first 1 2 3 | 3 4 5
+static void merge_1_2_3__3_4_5(BfObject *firstItem, BfObject *mergingWith)
+{
+   // Skip first vertex, because it would be a dupe
+   for(S32 a = 1; a < mergingWith->getVertCount(); a++)  
+      firstItem->addVert(mergingWith->getVert(a));
+}
+
+
+// Last vertices coincide  1 2 3 | 5 4 3
+static void merge_1_2_3__5_4_3(BfObject *firstItem, BfObject *mergingWith)
+{
+   for(S32 j = mergingWith->getVertCount() - 2; j >= 0; j--)
+      firstItem->addVert(mergingWith->getVert(j));
+}
+
+
+BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, BfObject *mergingWith, S32 mergingWithIndex, 
+                                            void (*mergeFunction)(BfObject *, BfObject *))
+{
+   BfObject *joinedObj = firstItem;
+
+   mUndoManager.saveChangeAction_before(firstItem);
+
+   mergeFunction(firstItem, mergingWith);
+   
+   mUndoManager.saveChangeAction_after(firstItem);
+   mUndoManager.saveAction(ActionDelete, mergingWith);
+
+   deleteItem(mergingWithIndex);    // Deletes mergingWith, but slightly more efficiently since we already know the index
+
+   return joinedObj;
 }
 
 
 BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, S32 firstItemIndex)
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   TNLAssert(mUndoManager.inTransaction(), "Should have opened an undo transaction before calling this!");
+
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
    BfObject *joinedObj = NULL;
 
    for(S32 i = firstItemIndex + 1; i < objList->size(); i++)              // Compare against remaining objects
@@ -3629,60 +3584,28 @@ BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, S32 firstItemIn
 
          if(firstItem->getVert(0).distSquared(obj->getVert(0)) < .0001)   // First vertices are the same  1 2 3 | 1 4 5
          {
-            if(!joinedObj)          // This is first join candidate found; something's going to merge, so save an undo state
-               saveUndoState();
-               
-            joinedObj = firstItem;
-
-            for(S32 a = 1; a < obj->getVertCount(); a++)           // Skip first vertex, because it would be a dupe
-               firstItem->addVertFront(obj->getVert(a));
-
-            deleteItem(i);
+            joinedObj = doMergeLines(firstItem, obj, i, merge_1_2_3__1_4_5);
             i--;
          }
 
          // First vertex conincides with final vertex 3 2 1 | 5 4 3
          else if(firstItem->getVert(0).distSquared(obj->getVert(obj->getVertCount() - 1)) < .0001)     
          {
-            if(!joinedObj)
-               saveUndoState();
-
-            joinedObj = firstItem;
-                  
-            for(S32 a = obj->getVertCount() - 2; a >= 0; a--)
-               firstItem->addVertFront(obj->getVert(a));
-
-            deleteItem(i);    // i has been merged into firstItem; don't need i anymore!
+            joinedObj = doMergeLines(firstItem, obj, i, merge_3_2_1__5_4_3);
             i--;
          }
 
          // Last vertex conincides with first 1 2 3 | 3 4 5
          else if(firstItem->getVert(firstItem->getVertCount() - 1).distSquared(obj->getVert(0)) < .0001)     
          {
-            if(!joinedObj)
-               saveUndoState();
-
-            joinedObj = firstItem;
-
-            for(S32 a = 1; a < obj->getVertCount(); a++)  // Skip first vertex, because it would be a dupe         
-               firstItem->addVert(obj->getVert(a));
-
-            deleteItem(i);
+            joinedObj = doMergeLines(firstItem, obj, i, merge_1_2_3__3_4_5);
             i--;
          }
 
          // Last vertices coincide  1 2 3 | 5 4 3
          else if(firstItem->getVert(firstItem->getVertCount() - 1).distSquared(obj->getVert(obj->getVertCount() - 1)) < .0001)     
          {
-            if(!joinedObj)
-               saveUndoState();
-
-            joinedObj = firstItem;
-
-            for(S32 j = obj->getVertCount() - 2; j >= 0; j--)
-               firstItem->addVert(obj->getVert(j));
-
-            deleteItem(i);
+            joinedObj = doMergeLines(firstItem, obj, i, merge_1_2_3__5_4_3);
             i--;
          }
       }
@@ -3692,41 +3615,24 @@ BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, S32 firstItemIn
 }
 
 
+// batchMode defaults to false
 void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
 {
-   GridDatabase *database = getDatabase();
-   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
-
-   BfObject *obj = static_cast<BfObject *>(getDatabase()->findObjects_fast()->get(itemIndex));
-
-   if(isWallType(obj->getObjectTypeNumber()))
-   {
-      // Need to recompute boundaries of any intersecting walls
-      wallSegmentManager->deleteSegments(obj->getSerialNumber());          // Delete the segments associated with the wall
-      database->removeFromDatabase(obj, true);
-
-      if(!batchMode)
-         doneDeleteingWalls();
-   }
-   else
-      database->removeFromDatabase(obj, true);
+   mLevel->removeFromDatabase(itemIndex, true);    // true ==> object will be deleted
 
    if(!batchMode)
-      doneDeleting();
+      doneDeletingObjects();
 }
 
 
 // After deleting a bunch of items, clean up
 void EditorUserInterface::doneDeleteingWalls()
 {
-   WallSegmentManager *wallSegmentManager = mLoadTarget->getWallSegmentManager();
-
-   wallSegmentManager->recomputeAllWallGeometry(mLoadTarget);   // Recompute wall edges
-   resnapAllEngineeredItems(mLoadTarget, false);
+   rebuildWallGeometry(mLevel.get());
 }
 
 
-void EditorUserInterface::doneDeleting()
+void EditorUserInterface::doneDeletingObjects()
 {
    // Reset a bunch of things
    clearSnapEnvironment();
@@ -3741,40 +3647,38 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
    if(mDraggingObjects)     // No inserting when items are being dragged!
       return;
 
-   GridDatabase *database = getDatabase();
-
-   clearSelection(database);
-   saveUndoState();
-
    BfObject *newObject = NULL;
 
    // Find a dockItem to copy
-   for(S32 i = 0; i < mDockItems.size(); i++)
-      if(mDockItems[i]->getObjectTypeNumber() == itemTypeNumber)
+   for(S32 i = 0; i < mDockItems.getObjectCount(); i++)
+   {
+      BfObject *bfObject = (BfObject *)mDockItems.getObjectByIndex(i);
+
+      if(bfObject->getObjectTypeNumber() == itemTypeNumber)
       {
-         newObject = copyDockItem(mDockItems[i].get());
+         newObject = copyDockItem(bfObject);
          break;
       }
+   }
 
    // May occur if requested item is not currently on the dock
    TNLAssert(newObject, "Couldn't create object in insertNewItem()");
    if(!newObject)
       return;
 
+   newObject->moveTo(snapPoint(convertCanvasToLevelCoord(mMousePos)));
+   addToEditor(newObject);
+   mUndoManager.saveAction(Editor::ActionCreate, newObject);
 
-   newObject->moveTo(snapPoint(database, convertCanvasToLevelCoord(mMousePos)));
-   addToEditor(newObject);    
-   newObject->onGeomChanged();
+   doneAddingObjects(newObject);
 
-   validateLevel();
-   setNeedToSave(true);
    autoSave();
 }
 
 
 void EditorUserInterface::centerView(bool isScreenshot)
 {
-   Rect extents = getDatabase()->getExtents();
+   Rect extents = getLevel()->getExtents();
    Rect levelgenDbExtents = mLevelGenDatabase.getExtents();
 
    if(levelgenDbExtents.getWidth() > 0 || levelgenDbExtents.getHeight() > 0)
@@ -3800,13 +3704,13 @@ void EditorUserInterface::centerView(bool isScreenshot)
 }
 
 
-F32 EditorUserInterface::getCurrentScale()
+F32 EditorUserInterface::getCurrentScale() const
 {
    return mCurrentScale;
 }
 
 
-Point EditorUserInterface::getCurrentOffset()
+Point EditorUserInterface::getCurrentOffset() const
 {
    return mCurrentOffset;
 }
@@ -3905,8 +3809,6 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
 
    string inputString = InputCodeManager::getCurrentInputString(inputCode);
 
-   GameSettings *settings = getGame()->getSettings();
-
    if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)       // Enter - Edit props
       startAttributeEditor();
 
@@ -3964,32 +3866,32 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       mRight = true;
    else if(inputString == "Right Arrow")  // Pan right
       mRight = true;
-	   else if(inputString == getEditorBindingString(settings, BINDING_FLIP_HORIZ))          // Flip horizontal
+   else if(inputString == getEditorBindingString(BINDING_FLIP_HORIZ))         // Flip horizontal
       flipSelectionHorizontal();
-	   else if(inputString == getEditorBindingString(settings, BINDING_PASTE_SELECTION))     // Paste selection
+	else if(inputString == getEditorBindingString(BINDING_PASTE_SELECTION))    // Paste selection
       pasteSelection();
-	   else if(inputString == getEditorBindingString(settings, BINDING_FLIP_VERTICAL))       // Flip vertical
+	else if(inputString == getEditorBindingString(BINDING_FLIP_VERTICAL))      // Flip vertical
       flipSelectionVertical();
    else if(inputString == "/" || inputString == "Keypad /")
       openConsole(NULL);
-	   else if(inputString == getEditorBindingString(settings, BINDING_RELOAD_LEVEL))        // Reload level
+	else if(inputString == getEditorBindingString(BINDING_RELOAD_LEVEL))       // Reload level
    {
       loadLevel();                        
       setSaveMessage("Reloaded " + getLevelFileName(), true);
    }
-	   else if(inputString == getEditorBindingString(settings, BINDING_REDO_ACTION))         // Redo
+	else if(inputString == getEditorBindingString(BINDING_REDO_ACTION))        // Redo
    {
       if(!mCreatingPolyline && !mCreatingPoly && !mDraggingObjects && !mDraggingDockItem)
          redo();
    }
-	   else if(inputString == getEditorBindingString(settings, BINDING_UNDO_ACTION))         // Undo
+	else if(inputString == getEditorBindingString(BINDING_UNDO_ACTION))        // Undo
    {
       if(!mCreatingPolyline && !mCreatingPoly && !mDraggingObjects && !mDraggingDockItem)
          undo(true);
    }
-	   else if(inputString == getEditorBindingString(settings, BINDING_RESET_VIEW))          // Reset veiw
+	else if(inputString == getEditorBindingString(BINDING_RESET_VIEW))         // Reset veiw
       centerView();
-	   else if(inputString == getEditorBindingString(settings, BINDING_LVLGEN_SCRIPT))       // Run levelgen script, or clear last results
+	else if(inputString == getEditorBindingString(BINDING_LVLGEN_SCRIPT))      // Run levelgen script, or clear last results
    {
       // Ctrl+R is a toggle -- we either add items or clear them
       if(mLevelGenDatabase.getObjectCount() == 0)
@@ -3999,23 +3901,23 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    }
    else if(inputString == "Shift+1" || inputString == "Shift+3")  // '!' or '#'
       startSimpleTextEntryMenu(SimpleTextEntryID);
-   else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CENTROID))     // Spin by arbitrary amount
+   else if(inputString == getEditorBindingString(BINDING_ROTATE_CENTROID))    // Spin by arbitrary amount
    {
       if(canRotate())
          startSimpleTextEntryMenu(SimpleTextEntryRotateCentroid);
    }
-	else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_ORIGIN))      // Rotate by arbitrary amount
+	else if(inputString == getEditorBindingString(BINDING_ROTATE_ORIGIN))      // Rotate by arbitrary amount
       startSimpleTextEntryMenu(SimpleTextEntryRotateOrigin);
-	else if(inputString == getEditorBindingString(settings, BINDING_SPIN_CCW))            // Spin CCW
+	else if(inputString == getEditorBindingString(BINDING_SPIN_CCW))           // Spin CCW
       rotateSelection(-15.f, false);
-	else if(inputString == getEditorBindingString(settings, BINDING_SPIN_CW))             // Spin CW
+	else if(inputString == getEditorBindingString(BINDING_SPIN_CW))            // Spin CW
       rotateSelection(15.f, false);
-	else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CCW_ORIGIN))   // Rotate CCW about origin
+	else if(inputString == getEditorBindingString(BINDING_ROTATE_CCW_ORIGIN))  // Rotate CCW about origin
       rotateSelection(-15.f, true);
-	else if(inputString == getEditorBindingString(settings, BINDING_ROTATE_CW_ORIGIN))    // Rotate CW about origin
+	else if(inputString == getEditorBindingString(BINDING_ROTATE_CW_ORIGIN))   // Rotate CW about origin
       rotateSelection(15.f, true);
 
-	else if(inputString == getEditorBindingString(settings, BINDING_INSERT_GEN_ITEMS))    // Insert items generated with script into editor
+	else if(inputString == getEditorBindingString(BINDING_INSERT_GEN_ITEMS))   // Insert items generated with script into editor
       copyScriptItemsToEditor();
 
    else if(inputString == "Up Arrow" || inputString == "W" || inputString == "Shift+W")     // W or Up - Pan up
@@ -4026,7 +3928,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       mOut = true;
    else if(inputString == "Down Arrow")         // Pan down
       mDown = true;
-	   else if(inputString == getEditorBindingString(settings, BINDING_SAVE_LEVEL))           // Save
+	else if(inputString == getEditorBindingString(BINDING_SAVE_LEVEL))          // Save
       saveLevel(true, true);
    else if(inputString == "S"|| inputString == "Shift+S")                                    // Pan down
       mDown = true;
@@ -4040,70 +3942,70 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       changeBarrierWidth(-1);
    else if(inputString == "-" || inputString == "Keypad -")                                  // Unshifted --> by 5
       changeBarrierWidth(-5);
-	else if(inputString == getEditorBindingString(settings, BINDING_ZOOM_IN))                 // Zoom In
+	else if(inputString == getEditorBindingString(BINDING_ZOOM_IN))                // Zoom In
       mIn = true;                                                                           
    else if(inputString == "\\")                                                              // Split barrier on selected vertex               
       splitBarrier();                                                                       
-	else if(inputString == getEditorBindingString(settings, BINDING_JOIN_SELECTION))          // Join selected barrier segments or polygons
+	else if(inputString == getEditorBindingString(BINDING_JOIN_SELECTION))         // Join selected barrier segments or polygons
       joinBarrier();                                                                        
-	else if(inputString == getEditorBindingString(settings, BINDING_SELECT_EVERYTHING))       // Select everything
-      selectAll(getDatabase());                                                             
-	else if(inputString == getEditorBindingString(settings, BINDING_RESIZE_SELECTION))        // Resize selection
+	else if(inputString == getEditorBindingString(BINDING_SELECT_EVERYTHING))      // Select everything
+      selectAll(getLevel());                                                             
+	else if(inputString == getEditorBindingString(BINDING_RESIZE_SELECTION))       // Resize selection
       startSimpleTextEntryMenu(SimpleTextEntryScale);                                       
-	else if(inputString == getEditorBindingString(settings, BINDING_CUT_SELECTION))           // Cut selection
+	else if(inputString == getEditorBindingString(BINDING_CUT_SELECTION))          // Cut selection
    {
       copySelection();
       deleteSelection(true);
    }
-	else if(inputString == getEditorBindingString(settings, BINDING_COPY_SELECTION))          // Copy selection to clipboard
+	else if(inputString == getEditorBindingString(BINDING_COPY_SELECTION))         // Copy selection to clipboard
       copySelection();                                                                      
-	else if(inputString == getEditorBindingString(settings, BINDING_ZOOM_OUT))                // Zoom out
+	else if(inputString == getEditorBindingString(BINDING_ZOOM_OUT))               // Zoom out
       mOut = true;                                                                          
-	else if(inputString == getEditorBindingString(settings, BINDING_LEVEL_PARAM_EDITOR))      // Level Parameter Editor
+	else if(inputString == getEditorBindingString(BINDING_LEVEL_PARAM_EDITOR))     // Level Parameter Editor
    {                                                                                        
       getUIManager()->activate<GameParamUserInterface>();                                   
       playBoop();                                                                           
    }                                                                                        
-	else if(inputString == getEditorBindingString(settings, BINDING_TEAM_EDITOR))             // Team Editor Menu
+	else if(inputString == getEditorBindingString(BINDING_TEAM_EDITOR))            // Team Editor Menu
    {                                                                                        
       getUIManager()->activate<TeamDefUserInterface>();                                     
       playBoop();                                                                           
    }                                                                                        
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_TELEPORTER))        // Teleporter
-      insertNewItem(TeleporterTypeNumber);                                                  
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_SPEEDZONE))         // SpeedZone
-      insertNewItem(SpeedZoneTypeNumber);                                                   
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_SPAWN))             // Spawn
-      insertNewItem(ShipSpawnTypeNumber);                                                   
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_SPYBUG))            // Spybug
-      insertNewItem(SpyBugTypeNumber);                                                      
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_REPAIR))            // Repair
-      insertNewItem(RepairItemTypeNumber);                                                  
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_TURRET))            // Turret
-      insertNewItem(TurretTypeNumber);                                                      
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_MINE))              // Mine
-      insertNewItem(MineTypeNumber);                                                        
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_FORCEFIELD))        // Forcefield
+	else if(inputString == getEditorBindingString(BINDING_PLACE_TELEPORTER))       // Teleporter
+      insertNewItem(TeleporterTypeNumber);                                                 
+	else if(inputString == getEditorBindingString(BINDING_PLACE_SPEEDZONE))        // SpeedZone
+      insertNewItem(SpeedZoneTypeNumber);                                                  
+	else if(inputString == getEditorBindingString(BINDING_PLACE_SPAWN))            // Spawn
+      insertNewItem(ShipSpawnTypeNumber);                                                  
+	else if(inputString == getEditorBindingString(BINDING_PLACE_SPYBUG))           // Spybug
+      insertNewItem(SpyBugTypeNumber);                                                     
+	else if(inputString == getEditorBindingString(BINDING_PLACE_REPAIR))           // Repair
+      insertNewItem(RepairItemTypeNumber);                                                 
+	else if(inputString == getEditorBindingString(BINDING_PLACE_TURRET))           // Turret
+      insertNewItem(TurretTypeNumber);                                                     
+	else if(inputString == getEditorBindingString(BINDING_PLACE_MINE))             // Mine
+      insertNewItem(MineTypeNumber);                                                       
+	else if(inputString == getEditorBindingString(BINDING_PLACE_FORCEFIELD))       // Forcefield
       insertNewItem(ForceFieldProjectorTypeNumber);
    else if(inputString == "Backspace" || inputString == "Del" || inputString == "Keypad .")  // Keypad . is the keypad's del key
       deleteSelection(false);
 	else if(checkInputCode(BINDING_HELP, inputCode))                                          // Turn on help screen
    {
-      getGame()->getUIManager()->activate<EditorInstructionsUserInterface>();
+      getUIManager()->activate<EditorInstructionsUserInterface>();
       playBoop();
    }
    else if(inputCode == KEY_ESCAPE)          // Activate the menu
    {
       playBoop();
-      getGame()->getUIManager()->activate<EditorMenuUserInterface>();
+      getUIManager()->activate<EditorMenuUserInterface>();
    }
-	else if(inputString == getEditorBindingString(settings, BINDING_NO_SNAPPING))             // No snapping to grid, but still to other things
+	else if(inputString == getEditorBindingString(BINDING_NO_SNAPPING))            // No snapping to grid, but still to other things
       mSnapContext = NO_GRID_SNAPPING;                                                     
-	else if(inputString == getEditorBindingString(settings, BINDING_NO_GRID_SNAPPING))        // Completely disable snapping
+	else if(inputString == getEditorBindingString(BINDING_NO_GRID_SNAPPING))       // Completely disable snapping
       mSnapContext = NO_SNAPPING;                                                          
-	else if(inputString == getEditorBindingString(settings, BINDING_PREVIEW_MODE))            // Turn on preview mode
+	else if(inputString == getEditorBindingString(BINDING_PREVIEW_MODE))           // Turn on preview mode
       mPreviewMode = true;                                                                 
-	else if(inputString == getEditorBindingString(settings, BINDING_DOCKMODE_ITEMS))          //  Toggle dockmode Items
+	else if(inputString == getEditorBindingString(BINDING_DOCKMODE_ITEMS))         //  Toggle dockmode Items
    {
 	  if(mDockMode == DOCKMODE_ITEMS)
 	  {
@@ -4120,7 +4022,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    {
       // Do nothing
    }
-   else if(inputString == getEditorBindingString(settings, BINDING_TOGGLE_EDIT_MODE))
+   else if(inputString == getEditorBindingString(BINDING_TOGGLE_EDIT_MODE))
    {
       mVertexEditMode = !mVertexEditMode;
    }
@@ -4145,13 +4047,18 @@ void EditorUserInterface::onMouseClicked_left()
 
    if(mCreatingPoly || mCreatingPolyline)       // Save any polygon/polyline we might be creating
    {
-      if(mNewItem->getVertCount() < 2)
+      TNLAssert(mNewItem.isValid(), "Should have an item here!");
+
+      if(mNewItem->getVertCount() >= 2)
       {
-         delete mNewItem.getPointer();
-         removeUndoState();
+         addToEditor(mNewItem);
+         mUndoManager.saveAction(ActionCreate, mNewItem);      // mNewItem gets copied
       }
       else
-         addToEditor(mNewItem);
+      {
+         // Not enough points... delete the object under construction
+         delete mNewItem.getPointer();
+      }
 
       mNewItem = NULL;
 
@@ -4166,7 +4073,7 @@ void EditorUserInterface::onMouseClicked_left()
       switch(mDockMode)
       {
          case DOCKMODE_ITEMS:
-      clearSelection(getDatabase());
+      clearSelection(getLevel());
       mDraggingDockItem = mDockItemHit;      // Could be NULL
 
       if(mDraggingDockItem)
@@ -4177,7 +4084,7 @@ void EditorUserInterface::onMouseClicked_left()
             S32 hitPlugin = findHitPlugin();
 
             if(hitPlugin >= 0 && hitPlugin < mPluginInfos.size())
-               runPlugin(getGame()->getSettings()->getFolderManager(), mPluginInfos[hitPlugin].fileName, Vector<string>());
+               runPlugin(mGameSettings->getFolderManager(), mPluginInfos[hitPlugin].fileName, Vector<string>());
 
             break;
       }
@@ -4222,7 +4129,7 @@ void EditorUserInterface::onMouseClicked_left()
          // Note that in the case of a point item, we want to skip this step, as we don't select individual vertices.
          if(mVertexEditMode && !spaceDown && mHitVertex != NONE && mHitItem && mHitItem->isSelected() && mHitItem->getGeomType() != geomPoint)
          {
-            clearSelection(getDatabase());
+            clearSelection(getLevel());
             mHitItem->selectVert(mHitVertex);
             onSelectionChanged();
          }
@@ -4233,7 +4140,7 @@ void EditorUserInterface::onMouseClicked_left()
          }
          else if(mHitItem && mHitItem->getGeomType() == geomPoint)  // Hit a point item
          {
-            clearSelection(getDatabase());
+            clearSelection(getLevel());
             mHitItem->setSelected(true);
             onSelectionChanged();
          }
@@ -4241,21 +4148,21 @@ void EditorUserInterface::onMouseClicked_left()
          {        // (braces required)
             if(!(mHitItem->vertSelected(mHitVertex)))
             {
-               clearSelection(getDatabase());
+               clearSelection(getLevel());
                mHitItem->selectVert(mHitVertex);
                onSelectionChanged();
             }
          }
          else if(mHitItem)                                                          // Hit a non-point item, but not a vertex
          {
-            clearSelection(getDatabase());
+            clearSelection(getLevel());
             mHitItem->setSelected(true);
             onSelectionChanged();
          }
          else     // Clicked off in space.  Starting to draw a bounding rectangle?
          {
             mDragSelecting = true;
-            clearSelection(getDatabase());
+            clearSelection(getLevel());
             onSelectionChanged();
          }
       }
@@ -4276,16 +4183,14 @@ void EditorUserInterface::onMouseClicked_right()
    {
       if(mNewItem->getVertCount() < Geometry::MAX_POLY_POINTS)    // Limit number of points in a polygon/polyline
       {
-         mNewItem->addVert(snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos)));
+         mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
          mNewItem->onGeomChanging();
       }
          
       return;
    }
 
-   saveUndoState(true);             // Save undo state before we clear the selection
-
-   clearSelection(getDatabase());   // Unselect anything currently selected
+   clearSelection(getLevel());   // Unselect anything currently selected
    onSelectionChanged();
 
    // Can only add new vertices by clicking on item's edge, not it's interior (for polygons, that is)
@@ -4294,7 +4199,7 @@ void EditorUserInterface::onMouseClicked_right()
       if(mHitItem->getVertCount() >= Geometry::MAX_POLY_POINTS)     // Polygon full -- can't add more
          return;
 
-      Point newVertex = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos));   // adding vertex w/ right-mouse
+      Point newVertex = snapPoint(convertCanvasToLevelCoord(mMousePos));   // adding vertex w/ right-mouse
 
       mAddingVertex = true;
 
@@ -4309,7 +4214,6 @@ void EditorUserInterface::onMouseClicked_right()
       // The user might just insert a vertex and be done; in that case we'll need to rebuild the wall outlines to account
       // for the new vertex.  If the user continues to drag the vertex to a new location, this will be wasted effort...
       mHitItem->onGeomChanged();
-
 
       mMouseDownPos = newVertex;
    }
@@ -4328,7 +4232,7 @@ void EditorUserInterface::onMouseClicked_right()
 
       mNewItem->initializeEditor();
       mNewItem->setTeam(mCurrentTeam);
-      mNewItem->addVert(snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos)));
+      mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
    }
 }
 
@@ -4336,13 +4240,11 @@ void EditorUserInterface::onMouseClicked_right()
 // Returns true if key was handled, false if not
 bool EditorUserInterface::checkPluginKeyBindings(string inputString)
 {
-   GameSettings *settings = getGame()->getSettings();
-
    for(S32 i = 0; i < mPluginInfos.size(); i++)
    {
       if(mPluginInfos[i].binding != "" && inputString == mPluginInfos[i].binding)
       {
-         runPlugin(settings->getFolderManager(), mPluginInfos[i].fileName, Vector<string>());
+         runPlugin(mGameSettings->getFolderManager(), mPluginInfos[i].fileName, Vector<string>());
          return true;
       }
    }
@@ -4361,12 +4263,9 @@ static void simpleTextEntryMenuCallback(ClientGame *game, U32 unused)
 }
 
 
-void idEntryCallback(string text, BfObject *object)
+void idEntryCallback(TextEntryMenuItem *menuItem, const string &text, BfObject *object)
 {
    TNLAssert(object, "Expected an object here!");
-
-   // Grab ClientGame from our object
-   ClientGame *clientGame = static_cast<ClientGame *>(object->getGame());
 
    // Check for duplicate IDs
    S32 id = atoi(text.c_str());
@@ -4374,13 +4273,13 @@ void idEntryCallback(string text, BfObject *object)
 
    if(id != 0)
    {
-      const Vector<DatabaseObject *> *objList = clientGame->getUIManager()->getUI<EditorUserInterface>()->getDatabase()->findObjects_fast();
+      const Vector<DatabaseObject *> *objList = object->getDatabase()->findObjects_fast();
 
       for(S32 i = 0; i < objList->size(); i++)
       {
          BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
-         if(obj->getUserAssignedId() == id && !obj->isSelected())
+         if(obj->getUserAssignedId() == id && obj != object)
          {
             duplicateFound = true;
             break;
@@ -4388,11 +4287,6 @@ void idEntryCallback(string text, BfObject *object)
       }
    }
 
-
-   SimpleTextEntryMenuUI *ui = dynamic_cast<SimpleTextEntryMenuUI *>(clientGame->getUIManager()->getCurrentUI());
-   TNLAssert(ui, "Should be in SimpleTextEntryMenuUI!");
-
-   SimpleTextEntryMenuItem *menuItem = static_cast<SimpleTextEntryMenuItem*>(ui->getMenuItem(0));
 
    // Show a message if we've detected a duplicate ID is being entered
    if(duplicateFound)
@@ -4411,7 +4305,7 @@ void idEntryCallback(string text, BfObject *object)
 void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType)
 {
    // No items selected?  Abort!
-   if(!anyItemsSelected(getDatabase()))
+   if(!anyItemsSelected(getLevel()))
       return;
 
    string menuTitle = "Some Interesting Title";
@@ -4419,13 +4313,13 @@ void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType
    string lineValue = "";
 
    LineEditorFilter filter = numericFilter;
-   void(*callback)(string, BfObject *) = NULL;  // Our input callback; triggers on input change
+   void(*callback)(TextEntryMenuItem *, const string &, BfObject *) = NULL;  // Our input callback; triggers on input change
 
    static U32 inputLength = 9;   // Less than S32_MAX
 
 
    // Find first selected item, and work with that
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    S32 selectedIndex = NONE;
    BfObject *selectedObject = NULL;
@@ -4454,7 +4348,7 @@ void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType
          callback = idEntryCallback;
 
          // We need to assure that we only assign an ID to ONE object
-         const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+         const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
          // Unselect all objects but our first selected one
          for(S32 i = 0; i < objList->size(); i++)
@@ -4475,14 +4369,17 @@ void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType
          menuTitle = "Rotate object(s) about (0,0)";
          menuItemTitle = "Angle:";
          break;
+
       case SimpleTextEntryRotateCentroid:
          menuTitle = "Spin object(s)";
          menuItemTitle = "Angle:";
          break;
+
       case SimpleTextEntryScale:
          menuTitle = "Resize";
          menuItemTitle = "Resize Factor:";
          break;
+
       default:
          break;
    }
@@ -4544,7 +4441,7 @@ void EditorUserInterface::doneWithSimpleTextEntryMenu(SimpleTextEntryMenuUI *men
 
 void EditorUserInterface::startAttributeEditor()
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -4565,16 +4462,13 @@ void EditorUserInterface::startAttributeEditor()
          }
 
          // Activate the attribute editor if there is one
-         EditorAttributeMenuUI *menu = mEditorAttributeMenuItemBuilder.getAttributeMenu(obj_i);
-         if(menu)
-         {
-            menu->startEditingAttrs(obj_i);
+         EditorAttributeMenuUI *menu = getUIManager()->getUI<EditorAttributeMenuUI>();
+
+         bool ok = menu->startEditingAttrs(obj_i);
+         if(ok)
             getUIManager()->activate(menu);
 
-            saveUndoState();
-         }
-
-         break;
+         return;
       }
    }
 }
@@ -4585,7 +4479,9 @@ void EditorUserInterface::doneEditingAttributes(EditorAttributeMenuUI *editor, B
 {
    object->onAttrsChanged();
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
+
+   mUndoManager.startTransaction();
 
    // Find any other selected items of the same type of the item we just edited, and update their attributes too
    for(S32 i = 0; i < objList->size(); i++)
@@ -4594,10 +4490,16 @@ void EditorUserInterface::doneEditingAttributes(EditorAttributeMenuUI *editor, B
 
       if(obj != object && obj->isSelected() && obj->getObjectTypeNumber() == object->getObjectTypeNumber())
       {
+         mUndoManager.saveChangeAction_before(obj);
+
          editor->doneEditingAttrs(obj);  // Transfer attributes from editor to object
          obj->onAttrsChanged();          // And notify the object that its attributes have changed
+
+         mUndoManager.saveChangeAction_after(obj);
       }
    }
+
+   mUndoManager.endTransaction();
 }
 
 
@@ -4648,53 +4550,58 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
       case MOUSE_MIDDLE:
          mAutoScrollWithMouse = mAutoScrollWithMouseReady;
          break;
+
       case MOUSE_LEFT:
       case MOUSE_RIGHT:  
-         mMousePos.set(DisplayManager::getScreenInfo()->getMousePos());
-
-         if(mDragSelecting)      // We were drawing a rubberband selection box
-         {
-            Rect r(convertCanvasToLevelCoord(mMousePos), mMouseDownPos);
-
-            fillVector.clear();
-
-            getDatabase()->findObjects(fillVector);
-
-
-            for(S32 i = 0; i < fillVector.size(); i++)
-            {
-               BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
-
-               // Make sure that all vertices of an item are inside the selection box; basically means that the entire 
-               // item needs to be surrounded to be included in the selection
-               S32 j;
-
-               for(j = 0; j < obj->getVertCount(); j++)
-                  if(!r.contains(obj->getVert(j)))
-                     break;
-               if(j == obj->getVertCount())
-                  obj->setSelected(true);
-            }
-            mDragSelecting = false;
-            onSelectionChanged();
-         }
-
-         else if(mDraggingObjects || mAddingVertex)     // We were dragging and dropping.  Could have been a move or a delete (by dragging to dock).
-         {
-            if(mAddingVertex)
-            {
-               //deleteUndoState();
-               mAddingVertex = false;
-            }
-            
-            onFinishedDragging();
-         }
-
+         onMouseUp();
          break;
 
       default:
          break;
-   }     // case
+   }     // end case
+}
+
+
+void EditorUserInterface::onMouseUp()
+{
+   mMousePos.set(DisplayManager::getScreenInfo()->getMousePos());
+
+   if(mDragSelecting)      // We were drawing a rubberband selection box
+   {
+      Rect r(convertCanvasToLevelCoord(mMousePos), mMouseDownPos);
+
+      fillVector.clear();
+
+      getLevel()->findObjects(fillVector);
+
+
+      for(S32 i = 0; i < fillVector.size(); i++)
+      {
+         BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
+
+         // Make sure that all vertices of an item are inside the selection box; basically means that the entire 
+         // item needs to be surrounded to be included in the selection
+         S32 j;
+
+         for(j = 0; j < obj->getVertCount(); j++)
+            if(!r.contains(obj->getVert(j)))
+               break;
+
+         if(j == obj->getVertCount())
+            obj->setSelected(true);
+      }
+      mDragSelecting = false;
+      onSelectionChanged();
+   }
+
+   // We were dragging and dropping.  Could have been a move or a delete (by dragging to dock).
+   else if(mDraggingObjects || mAddingVertex)     
+   {
+      if(mAddingVertex)
+         mAddingVertex = false;
+            
+      onFinishedDragging();
+   }
 }
 
 
@@ -4704,96 +4611,123 @@ void EditorUserInterface::onFinishedDragging()
    mDraggingObjects = false;
    SDL_SetCursor(Cursor::getDefault());
 
-   // Dragged item off the dock, then back on  ==> nothing changed; restore to unmoved state, which was stored on undo stack
+   // Dragged item off the dock, then back on  ==> nothing changed, do nothing
    if(mouseOnDock() && mDraggingDockItem != NULL)
-   {
-      undo(false);
       return;
-   }
 
    // Mouse is over the dock and we dragged something to the dock (probably a delete)
    if(mouseOnDock() && !mDraggingDockItem)
    {
-      // Only delete items in normal dock mode
-      if(mDockMode == DOCKMODE_ITEMS)
-      {
-         const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
-         bool deletedSomething = false, deletedWall = false;
-
-         for(S32 i = 0; i < objList->size(); i++)    //  Delete all selected items
-         {
-            BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-            if(obj->isSelected())
-            {
-               if(isWallType(obj->getObjectTypeNumber()))
-                  deletedWall = true;
-
-               deleteItem(i, true);
-               i--;
-               deletedSomething = true;
-            }
-         }
-
-         // We deleted something, do some clean up and our job is done
-         if(deletedSomething)
-         {
-            if(deletedWall)
-               doneDeleteingWalls();
-
-            doneDeleting();
-
-            return;
-         }
-      }
+      onFinishedDragging_droppedItemOnDock();
+      return;
    }
 
    // Mouse not on dock, we are either:
-   // 1. dragging from the dock,
-   // 2. moving something,
-   // 3. or we moved something to the dock and nothing was deleted, e.g. when dragging a vertex
+   // 1. dragging from the dock;
+   // 2. moving something; or
+   // 3. we moved something to the dock and nothing was deleted, e.g. when dragging a vertex
    // need to save an undo state if anything changed
    if(mDraggingDockItem == NULL)    // Not dragging from dock - user is moving object around screen, or dragging vertex to dock
+      onFinishedDragging_movingObject();
+}
+
+
+void EditorUserInterface::onFinishedDragging_droppedItemOnDock()
+{
+   // Only delete items in normal dock mode
+   if(mDockMode == DOCKMODE_ITEMS)
    {
-      // If our snap vertex has moved then all selected items have moved
-      bool itemsMoved = mDragCopying || (mSnapObject && mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin);
+      const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
+      bool deletedSomething = false, deletedWall = false;
 
-      if(itemsMoved)    // Move consumated... update any moved items, and save our autosave
+      // Move objects back to their starting location before deleting, so when undeleting, 
+      // objects return the way users will expect
+      translateSelectedItems(Point(0,0), mSnapDelta);
+
+      mUndoManager.startTransaction();
+
+      for(S32 i = 0; i < objList->size(); i++)    //  Delete all selected items
       {
-         bool wallMoved = false;
+         BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
-         const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
-
-         for(S32 i = 0; i < objList->size(); i++)
+         if(obj->isSelected())
          {
-            BfObject *obj = static_cast<BfObject *>(objList->get(i));
+            if(isWallType(obj->getObjectTypeNumber()))
+               deletedWall = true;
 
-            if(obj->isSelected() || objList->get(i)->anyVertsSelected())
-               obj->onGeomChanged();
+            mUndoManager.saveAction(ActionDelete, obj);
 
-            if(obj->isSelected() && isWallType(obj->getObjectTypeNumber()))      // Wall or polywall
-               wallMoved = true;
+            deleteItem(i, true);
+            i--;
+            deletedSomething = true;
          }
+      }
 
-         if(wallMoved)
-            resnapAllEngineeredItems(getDatabase(), true);
+      mUndoManager.endTransaction();
 
-         setNeedToSave(true);
-         autoSave();
+      // We deleted something, do some clean up and our job is done
+      if(deletedSomething)
+      {
+         if(deletedWall)
+            doneDeleteingWalls();
 
-         mDragCopying = false;
+         doneDeletingObjects();
 
          return;
       }
-      else if(!mJustInsertedVertex)    // We started our move, then didn't end up moving anything... remove associated undo state
-         deleteUndoState();
-      else
-         mJustInsertedVertex = false;
    }
 }
 
 
-bool EditorUserInterface::mouseOnDock()
+void EditorUserInterface::onFinishedDragging_movingObject()
+{
+   // If our snap vertex has moved then all selected items have moved
+   bool itemsMoved = mDragCopying || (mSnapObject.isValid() && mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin);
+
+   if(itemsMoved)    // Move consumated... update any moved items, and save our autosave
+   {
+      bool wallMoved = false;
+
+      mUndoManager.startTransaction();
+
+      const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
+
+      S32 j = 0;
+      for(S32 i = 0; i < objList->size(); i++)
+      {
+         BfObject *obj = static_cast<BfObject *>(objList->get(i));
+
+         if(obj->isSelected() || objList->get(i)->anyVertsSelected())
+         {
+            obj->onGeomChanged();
+            mUndoManager.saveAction(ActionChange, mSelectedObjectsForDragging[j], obj);
+            j++;
+         }
+
+         if(obj->isSelected() && isWallType(obj->getObjectTypeNumber()))      // Wall or polywall
+            wallMoved = true;
+      }
+
+         if(wallMoved)
+            rebuildWallGeometry(mLevel.get());
+
+      mUndoManager.endTransaction();
+
+      autoSave();
+
+      mDragCopying = false;
+
+      return;
+   }
+
+   else if(mJustInsertedVertex)
+      mJustInsertedVertex = false;
+
+   // else we ended up doing nothing
+}
+
+
+bool EditorUserInterface::mouseOnDock() const
 {
    return (mMousePos.x >= DisplayManager::getScreenInfo()->getGameCanvasWidth() - mDockWidth - horizMargin &&
            mMousePos.x <= DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin &&
@@ -4804,7 +4738,7 @@ bool EditorUserInterface::mouseOnDock()
 
 S32 EditorUserInterface::getItemSelectedCount()
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    S32 count = 0;
 
@@ -4822,7 +4756,7 @@ S32 EditorUserInterface::getItemSelectedCount()
 
 bool EditorUserInterface::anythingSelected() const
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -4838,6 +4772,8 @@ bool EditorUserInterface::anythingSelected() const
 void EditorUserInterface::idle(U32 timeDelta)
 {
    Parent::idle(timeDelta);
+
+   mIgnoreMouseInput = false;    // Avoid freezing effect from too many mouseMoved events without a render in between (sam)
 
    F32 pixelsToScroll = timeDelta * (InputCodeManager::getState(KEY_SHIFT) ? 1.0f : 0.5f);    // Double speed when shift held down
 
@@ -4883,6 +4819,24 @@ void EditorUserInterface::idle(U32 timeDelta)
       setLingeringMessage(mLingeringMessageQueue);
       mLingeringMessageQueue = "";
    }
+
+   mInfoMsg = getInfoMsg();
+}
+
+
+string EditorUserInterface::getInfoMsg() const
+{
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
+
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(objList->get(i));
+
+      if(!obj->isSelected() && obj->isLitUp() && !mouseOnDock())
+         return string("Hover: ") + obj->getOnScreenName();
+   }
+
+   return "";
 }
 
 
@@ -4929,6 +4883,12 @@ void EditorUserInterface::setWarnMessage(const string &msg1, const string &msg2)
 }
 
 
+void EditorUserInterface::clearWarnMessage()
+{
+   mWarnMsgTimer.reset(WARN_MESSAGE_FADE_TIME);
+}
+
+
 void EditorUserInterface::autoSave()
 {
    doSaveLevel("auto.save", false);
@@ -4943,8 +4903,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
    if(!doSaveLevel(filename, showFailMessages))
       return false;
 
-   mNeedToSave = false;
-   mAllUndoneUndoLevel = mLastUndoIndex;     // If we undo to this point, we won't need to save
+   mUndoManager.levelSaved();
 
    if(showSuccessMessages)
       setSaveMessage("Saved " + getLevelFileName(), true);
@@ -4979,19 +4938,19 @@ string EditorUserInterface::getQuitLockedMessage()
 }
 
 
-string EditorUserInterface::getLevelText() 
+string EditorUserInterface::getLevelText() const
 {
-   string result;
+   string result = "";
 
    // Write out basic game parameters, including gameType info
-   result += getGame()->toLevelCode();    // Note that this toLevelCode appends a newline char; most don't
+   result += mLevel->toLevelCode();    // Note that this toLevelCode appends a newline char; most don't
 
    // Next come the robots
    for(S32 i = 0; i < mRobotLines.size(); i++)
       result += mRobotLines[i] + "\n";
 
    // Write out all level items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    for(S32 j = 0; j < 2; j++)
    {
@@ -5032,9 +4991,9 @@ bool EditorUserInterface::doSaveLevel(const string &saveName, bool showFailMessa
 {
    try
    {
-      FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
+      FolderManager *folderManager = mGameSettings->getFolderManager();
 
-      string fileName = joindir(folderManager->levelDir, saveName);
+      string fileName = joindir(folderManager->getLevelDir(), saveName);
       if(!writeFile(fileName, getLevelText()))
          throw(SaveException("Could not open file for writing"));
    }
@@ -5059,7 +5018,7 @@ void testLevelStart_local(ClientGame *game)
 void EditorUserInterface::testLevel()
 {
    bool gameTypeError = false;
-   if(!getGame()->getGameType())     // Not sure this could really happen anymore...  TODO: Make sure we always have a valid gametype
+   if(!mLevel->getGameType())     // Not sure this could really happen anymore...  TODO: Make sure we always have a valid gametype
       gameTypeError = true;
 
    // With all the map loading error fixes, game should never crash!
@@ -5102,10 +5061,10 @@ void EditorUserInterface::testLevelStart()
 {
    Cursor::disableCursor();                           // Turn off cursor
 
-   mEditorGameType = getGame()->getGameType();        // Sock our current gametype away, will use it when we reenter the editor
+   mEditorGameType = mLevel->getGameType();           // Sock our current gametype away, will use it when we reenter the editor
 
    if(!doSaveLevel(LevelSource::TestFileName, true))
-      getGame()->getUIManager()->reactivatePrevUI();  // Saving failed, can't test, reactivate editor
+      getUIManager()->reactivatePrevUI();  // Saving failed, can't test, reactivate editor
    else
    {
       mWasTesting = true;
@@ -5113,9 +5072,10 @@ void EditorUserInterface::testLevelStart()
       Vector<string> levelList;
       levelList.push_back(LevelSource::TestFileName);
 
-      LevelSourcePtr levelSource = LevelSourcePtr(new FolderLevelSource(levelList, getGame()->getSettings()->getFolderManager()->levelDir));
+      LevelSourcePtr levelSource = LevelSourcePtr(
+            new FolderLevelSource(levelList, mGameSettings->getFolderManager()->getLevelDir()));
 
-      getGame()->setGameType(NULL); // Prevents losing seconds on game timer (test level from editor, save, and reload level)
+      //getGame()->setGameType(NULL); // Prevents losing seconds on game timer (test level from editor, save, and reload level)
 
       initHosting(getGame()->getSettingsPtr(), levelSource, true, false);
    }
@@ -5132,8 +5092,7 @@ void EditorUserInterface::createNormalizedScreenshot(ClientGame* game)
 
    render();
 #ifndef BF_NO_SCREENSHOTS
-   ScreenShooter::saveScreenshot(game->getUIManager(), game->getSettings(), 
-                                 LevelDatabaseUploadThread::UploadScreenshotFilename);
+   ScreenShooter::saveScreenshot(game->getUIManager(), mGameSettings, LevelDatabaseUploadThread::UploadScreenshotFilename);
 #endif
    mPreviewMode = false;
    mNormalizedScreenshotMode = false;
@@ -5141,42 +5100,16 @@ void EditorUserInterface::createNormalizedScreenshot(ClientGame* game)
 }
 
 
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-
-// Constructor
-EditorMenuUserInterface::EditorMenuUserInterface(ClientGame *game) : Parent(game)
-{
-   mMenuTitle = "EDITOR MENU";
-}
-
-
-// Destructor
-EditorMenuUserInterface::~EditorMenuUserInterface()
-{
-   // Do nothing
-}
-
-
-void EditorMenuUserInterface::onActivate()
-{
-   Parent::onActivate();
-   setupMenus();
-}
-
-
 void EditorUserInterface::findPlugins()
 {
    mPluginInfos.clear();
-   string dirName = getGame()->getSettings()->getFolderManager()->pluginDir;
+   string dirName = mGameSettings->getFolderManager()->getPluginDir();
    Vector<string> plugins;
    string extension = ".lua";
    getFilesFromFolder(dirName, plugins, &extension, 1);
 
    // Reference to original
-   Vector<PluginBinding> &bindings = getGame()->getSettings()->getIniSettings()->pluginBindings;
+   Vector<PluginBinding> &bindings = mGameSettings->getIniSettings()->pluginBindings;
 
    // Check for binding collision in INI.  If one is detected, set its key to empty
    for(S32 i = 0; i < bindings.size(); i++)
@@ -5292,177 +5225,6 @@ U32 EditorUserInterface::findPluginDockWidth()
       maxBindingWidth = max(maxBindingWidth, bindingWidth);
    }
    return maxNameWidth + maxBindingWidth + 2 * horizMargin;
-}
-
-
-extern MenuItem *getWindowModeMenuItem(U32 displayMode);
-
-//////////
-// Editor menu callbacks
-//////////
-
-void reactivatePrevUICallback(ClientGame *game, U32 unused)
-{
-   game->getUIManager()->reactivatePrevUI();
-}
-
-
-static void testLevelCallback(ClientGame *game, U32 unused)
-{
-   game->getUIManager()->getUI<EditorUserInterface>()->testLevel();
-}
-
-
-void returnToEditorCallback(ClientGame *game, U32 unused)
-{
-   EditorUserInterface *ui = game->getUIManager()->getUI<EditorUserInterface>();
-
-   ui->saveLevel(true, true);                                     // Save level
-   ui->setSaveMessage("Saved " + ui->getLevelFileName(), true);   // Setup a message for the user
-   game->getUIManager()->reactivatePrevUI();                      // Return to editor
-}
-
-
-static void activateHelpCallback(ClientGame *game, U32 unused)
-{
-   game->getUIManager()->activate<EditorInstructionsUserInterface>();
-}
-
-
-static void activateLevelParamsCallback(ClientGame *game, U32 unused)
-{
-   game->getUIManager()->activate<GameParamUserInterface>();
-}
-
-
-static void activateTeamDefCallback(ClientGame *game, U32 unused)
-{
-   game->getUIManager()->activate<TeamDefUserInterface>();
-}
-
-void uploadToDbCallback(ClientGame *game)
-{
-   game->getUIManager()->activate<EditorUserInterface>();
-
-   EditorUserInterface* editor = game->getUIManager()->getUI<EditorUserInterface>();
-   editor->createNormalizedScreenshot(game);
-
-   if(game->getGameType()->getLevelName() == "")    
-   {
-      editor->setSaveMessage("Failed: Level name required", false);
-      return;
-   }
-
-
-   if(strcmp(game->getClientInfo()->getName().getString(),
-         game->getGameType()->getLevelCredits()->getString()) != 0)
-   {
-      editor->setSaveMessage("Failed: Level author must match your username", false);
-      return;
-   }
-
-   RefPtr<LevelDatabaseUploadThread> uploadThread;
-   uploadThread = new LevelDatabaseUploadThread(game);
-   game->getSecondaryThread()->addEntry(uploadThread);
-}
-
-
-void uploadToDbPromptCallback(ClientGame *game, U32 unused)
-{
-   ErrorMessageUserInterface *ui = game->getUIManager()->getUI<ErrorMessageUserInterface>();
-
-   ui->reset();
-   ui->setTitle("UPLOAD LEVEL?");
-   ui->setMessage("Do you want to upload your level to the online\n\n"
-                  "level database?");
-   ui->setInstr("Press [[Y]] to upload,  [[Esc]] to cancel");
-
-   ui->registerKey(KEY_Y, uploadToDbCallback);
-   ui->setRenderUnderlyingUi(false);
-
-   game->getUIManager()->activate(ui);
-}
-
-
-void quitEditorCallback(ClientGame *game, U32 unused)
-{
-   EditorUserInterface *editorUI = game->getUIManager()->getUI<EditorUserInterface>();
-
-   if(editorUI->getNeedToSave())
-   {
-      ErrorMessageUserInterface *ui = game->getUIManager()->getUI<ErrorMessageUserInterface>();
-
-      ui->reset();
-      ui->setTitle("SAVE YOUR EDITS?");
-      ui->setMessage("You have not saved your changes to this level.\n\n"
-                     "Do you want to?");
-      ui->setInstr("Press [[Y]] to save,  [[N]] to quit,  [[Esc]] to cancel");
-
-      ui->registerKey(KEY_Y, saveLevelCallback);
-      ui->registerKey(KEY_N, backToMainMenuCallback);
-      ui->setRenderUnderlyingUi(false);
-
-      game->getUIManager()->activate(ui);
-   }
-   else
-     backToMainMenuCallback(game);
-}
-
-//////////
-
-void EditorMenuUserInterface::setupMenus()
-{
-   GameSettings *settings = getGame()->getSettings();
-   InputCode keyHelp = getInputCode(settings, BINDING_HELP);
-
-   clearMenuItems();
-   addMenuItem(new MenuItem("RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R));
-   addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode")));
-   addMenuItem(new MenuItem("TEST LEVEL",       testLevelCallback,           "", KEY_T));
-   addMenuItem(new MenuItem("SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
-   addMenuItem(new MenuItem("HOW TO EDIT",      activateHelpCallback,        "", KEY_E, keyHelp));
-   addMenuItem(new MenuItem("LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
-   addMenuItem(new MenuItem("MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
-
-   // Only show the upload to database option if authenticated
-   if(getGame()->getClientInfo()->isAuthenticated())
-   {
-      string title = LevelDatabase::isLevelInDatabase(getGame()->getLevelDatabaseId()) ?
-         "UPDATE LEVEL IN DB" :
-         "UPLOAD LEVEL TO DB";
-
-      addMenuItem(new MenuItem(title, uploadToDbPromptCallback, "Levels posted at " + HttpRequest::LevelDatabaseBaseUrl, KEY_U));
-   }
-   else
-      addMenuItem(new MessageMenuItem("MUST BE LOGGED IN TO UPLOAD LEVELS TO DB", Colors::gray40));
-
-   if(getUIManager()->getUI<EditorUserInterface>()->isQuitLocked())
-      addMenuItem(new MessageMenuItem(getUIManager()->getUI<EditorUserInterface>()->getQuitLockedMessage(), Colors::red));
-   else
-      addStandardQuitItem();
-}
-
-
-void EditorMenuUserInterface::addStandardQuitItem()
-{
-   addMenuItem(new MenuItem("QUIT", quitEditorCallback, "", KEY_Q, KEY_UNKNOWN));
-}
-
-
-void EditorMenuUserInterface::unlockQuit()
-{
-   if(mMenuItems.size() > 0)
-   {
-      mMenuItems.erase(mMenuItems.size() - 1);     // Remove last item
-      addStandardQuitItem();                       // Replace it with QUIT
-   }
-}
-
-
-void EditorMenuUserInterface::onEscape()
-{
-   Cursor::disableCursor();
-   getUIManager()->reactivatePrevUI();
 }
 
 

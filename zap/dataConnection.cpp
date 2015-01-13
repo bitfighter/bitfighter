@@ -7,10 +7,10 @@
 #include "ServerGame.h"
 #include "gameNetInterface.h"             // for GetGame() through GameNetInterface
 
+#include "Md5Utils.h"
 #include "stringUtils.h"
 
 using namespace TNL;
-
 
 namespace Zap {
 
@@ -53,18 +53,17 @@ static string getFullFilename(const FolderManager *configDirs, string filename, 
 static string getOutputFolder(FolderManager *folderManager, FileType filetype)
 {
    if(filetype == BOT_TYPE) 
-      return folderManager->robotDir;
+      return folderManager->getRobotDir();
    else if(filetype == LEVEL_TYPE) 
-      return folderManager->levelDir;
+      return folderManager->getLevelDir();
    else if(filetype == LEVELGEN_TYPE) 
-      return folderManager->levelDir;
+      return folderManager->getLevelDir();
    else return "";
 }
 
 
 extern bool writeToConsole();
 extern void exitToOs(S32 errcode);
-
 
 
 void transferResource(GameSettings *settings, const string &addr, const string &pw, const string &fileName, const string &resourceType, bool sending)
@@ -79,7 +78,7 @@ void transferResource(GameSettings *settings, const string &addr, const string &
       exitToOs(1);
    }
 
-   string password = Game::md5.getSaltedHashFromString(pw);
+   string password = Md5::getSaltedHashFromString(pw);
 
    FileType fileType = getResourceType(resourceType.c_str());
    if(fileType == INVALID_RESOURCE_TYPE)
@@ -132,6 +131,7 @@ DataSendable::DataSendable()
 {
    // Do nothing
 }
+
 
 // Destructor
 DataSendable::~DataSendable()
@@ -326,7 +326,7 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    GameSettings *settings = game->getSettings();
 
    // Check if data connections are allowed
-   if(!settings->getIniSettings()->allowDataConnections)
+   if(!settings->getSetting<YesNo>(IniKey::AllowDataConnections))
    {
       logprintf("This server does not allow remote access to resources.  It can be enabled in the server's INI file.");
       disconnect(ReasonConnectionsForbidden, "");
@@ -337,8 +337,8 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    string adminPW = settings->getAdminPassword();
    string ownerPW = settings->getOwnerPassword();
 
-   bool goodOwnerPW = ownerPW != "" && strcmp(Game::md5.getSaltedHashFromString(ownerPW).c_str(), password) == 0;
-   bool goodAdminPW = adminPW != "" && strcmp(Game::md5.getSaltedHashFromString(adminPW).c_str(), password) == 0;
+   bool goodOwnerPW = ownerPW != "" && strcmp(Md5::getSaltedHashFromString(ownerPW).c_str(), password) == 0;
+   bool goodAdminPW = adminPW != "" && strcmp(Md5::getSaltedHashFromString(adminPW).c_str(), password) == 0;
 
    if(!goodOwnerPW && !goodAdminPW)
    {

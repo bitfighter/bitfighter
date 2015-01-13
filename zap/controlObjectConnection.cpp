@@ -93,8 +93,8 @@ void ControlObjectConnection::addPendingMove(Move *theMove)
       return;
 
    if(pendingMoves.size() != 0 &&
-      (theMove->time + pendingMoves.last().time < 50 ||   // Send less often when almost full.
-      (theMove->time + pendingMoves.last().time < 8 && pendingMoves.size() < MaxPendingMoves-10)) &&
+      (theMove->time + pendingMoves.last().time < 50 ||   // Send less often when almost full
+      (theMove->time + pendingMoves.last().time < 8 && pendingMoves.size() < MaxPendingMoves - 10)) &&
       U8(highSendIndex[2] - firstMoveIndex) != pendingMoves.size())
    {
       ControlObjectData *m = &pendingMoves.last();
@@ -115,6 +115,11 @@ void ControlObjectConnection::addPendingMove(Move *theMove)
 
    controlObject->setCurrentMove(*theMove);
    controlObject->idle(BfObject::ClientReplayingPendingMoves);
+}
+
+bool ControlObjectConnection::isMovesFull()
+{
+   return pendingMoves.size() >= MaxPendingMoves;
 }
 
 

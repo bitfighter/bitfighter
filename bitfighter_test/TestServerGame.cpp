@@ -7,6 +7,9 @@
 #include "ServerGame.h"
 #include "EngineeredItem.h"
 
+#include "Level.h"
+
+#include "LevelFilesForTesting.h"
 #include "TestUtils.h"
 
 #include "gtest/gtest.h"
@@ -17,18 +20,12 @@
 namespace Zap
 {
 
-TEST(ServerGameTest, ProcessEmptyLevelLine)
+TEST(ServerGameTest, LoadLevelWithEmptyLevelLine)
 {
-   Address addr;
-   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
-   LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(""));
-
-   ServerGame g(addr, settings, levelSource, false, false);
-   GameType gt;
-   gt.addToGame(&g, g.getGameObjDatabase());
+   Level level;
 
    // Empty level lines caused crashes at one point
-   g.loadLevelFromString(g.toLevelCode() + "\r\n\r\n", g.getGameObjDatabase());
+   level.loadLevelFromString(getGenericHeader() + "\r\n\r\n");
 }
 
 
@@ -60,10 +57,9 @@ TEST(ServerGameTest, KillStreakTests)
 
 TEST(ServerGameTest, LittleStory) 
 {
-   ServerGame *serverGame = newServerGame();
-
-   GameType *gt = new GameType();    // Will be deleted in serverGame destructor
-   gt->addToGame(serverGame, serverGame->getGameObjDatabase());
+   // Use GamePair to our serverGame set up properly.  We don't care about clients here.
+   GamePair gamePair("", 0);      
+   ServerGame *serverGame = gamePair.server;
 
    ASSERT_TRUE(serverGame->isSuspended());    // ServerGame starts suspended
    serverGame->unsuspendGame(false);         
@@ -71,7 +67,7 @@ TEST(ServerGameTest, LittleStory)
    // When adding objects to the game, use new and a pointer -- the game will 
    // delete defunct objects, so a reference will not work.
    SafePtr<Ship> ship = new Ship;
-   ship->addToGame(serverGame, serverGame->getGameObjDatabase());
+   ship->addToGame(serverGame, serverGame->getLevel());
 
    ASSERT_EQ(ship->getPos(), Point(0,0));     // By default, the ship starts at 0,0
    ship->setMove(Move(0,0));
@@ -93,7 +89,7 @@ TEST(ServerGameTest, LittleStory)
 
    // Uh oh, here comes a turret!  (will be deleted in serverGame destructor)
    Turret *t = new Turret(2, Point(71, -100), Point(0, 1));    // Turret is below the ship, pointing up
-   t->addToGame(serverGame, serverGame->getGameObjDatabase());
+   t->addToGame(serverGame, serverGame->getLevel());
 
    bool shipDeleted = false;
    for(S32 i = 0; i < 100; i++)
@@ -107,19 +103,17 @@ TEST(ServerGameTest, LittleStory)
       }
    }
    ASSERT_TRUE(shipDeleted);     // Ship was killed, and object was cleaned up
-
-   delete serverGame;
 }
 
 
 TEST(ServerGameTest, LoadoutManagementTests)
 {
-   ServerGame *serverGame = newServerGame();
-   GameType *gt = new GameType();    // Cleaned up by database
-   gt->addToGame(serverGame, serverGame->getGameObjDatabase());
+   // Use GamePair to our serverGame set up properly.  We don't care about clients here.
+   GamePair gamePair("", 0);      
+   ServerGame *serverGame = gamePair.server;
 
    Ship *s = new Ship();             // Cleaned up by database
-   s->addToGame(serverGame, serverGame->getGameObjDatabase());
+   s->addToGame(serverGame, serverGame->getLevel());
 
    // Tests to ensure that currently selected weapon stays the same when changing loadout
    s->setLoadout(LoadoutTracker("Shield,Repair,Burst,Phaser,Bouncer"));        // Set initial loadout
@@ -136,12 +130,12 @@ TEST(ServerGameTest, LoadoutManagementTests)
    EXPECT_EQ(s->getActiveWeapon(), WeaponSeeker);                              // Mine not in loadout, should select first weap (Seeker)
 
    // Tests to ensure that resource items get dropped when changing loadout away from engineer.  We'll also add a flag
-   // and verify that the flag is not similarly dropped.  These cleaned up by database.
+   // and verify that the flag is not similarly dropped.  These objects will be cleaned up by the database.
    ResourceItem *r = new ResourceItem();
    FlagItem     *f = new FlagItem();
 
-   r->addToGame(serverGame, serverGame->getGameObjDatabase());
-   f->addToGame(serverGame, serverGame->getGameObjDatabase());
+   r->addToGame(serverGame, serverGame->getLevel());
+   f->addToGame(serverGame, serverGame->getLevel());
 
    s->setLoadout(LoadoutTracker("Engineer,Shield,Triple,Mine,Bouncer"));       // Ship has engineer
    r->mountToShip(s);
@@ -160,8 +154,6 @@ TEST(ServerGameTest, LoadoutManagementTests)
    s->setLoadout(LoadoutTracker("Turbo,Shield,Triple,Mine,Bouncer"), true);    // Ship does not have engineer
    EXPECT_FALSE(s->isCarryingItem(ResourceItemTypeNumber));
    EXPECT_TRUE(s->isCarryingItem(FlagTypeNumber));
-
-   delete serverGame;
 }
 
 

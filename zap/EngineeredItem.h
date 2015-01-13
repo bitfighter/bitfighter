@@ -1,4 +1,3 @@
-//------------------------------------------------------------------------------
 // Copyright Chris Eykamp
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
@@ -12,6 +11,7 @@
 #include "TeamConstants.h"    // For TEAM_NEUTRAL constant
 #include "WeaponInfo.h"
 
+#include "gtest/gtest_prod.h"
 
 namespace Zap
 {
@@ -23,10 +23,6 @@ private:
 
    static const F32 EngineeredItemRadius;
 
-#ifndef ZAP_DEDICATED
-   static EditorAttributeMenuUI *mAttributeMenuUI;    // Menu for text editing; since it's static, don't bother with smart pointer
-#endif   
-   
    void computeExtent();
 
    virtual F32 getSelectionOffsetMagnitude();         // Provides base magnitude for getEditorSelectionOffset()
@@ -47,10 +43,11 @@ protected:
    Vector<Point> mCollisionPolyPoints;    // Used on server, also used for rendering on client -- computed when item is added to game
    void computeObjectGeometry();          // Populates mCollisionPolyPoints
 
-   void findMountPoint(Game *game, const Point &pos);     // Figure out where to mount this item during construction
+   // Figure out where to mount this item during construction... and move it there
+   void findMountPoint(const Level *level, const Point &pos);     
 
 
-   WallSegment *mMountSeg;    // Segment we're mounted to in the editor (don't care in the game)
+   BfObject *mMountSeg;    // Object we're mounted to in the editor (don't care in the game)
 
    enum MaskBits
    {
@@ -64,7 +61,7 @@ public:
    EngineeredItem(S32 team = TEAM_NEUTRAL, const Point &anchorPoint = Point(0,0), const Point &anchorNormal = Point(1,0));  // Constructor
    virtual ~EngineeredItem();                                                                                               // Destructor
 
-   virtual bool processArguments(S32 argc, const char **argv, Game *game);
+   virtual bool processArguments(S32 argc, const char **argv, Level *level);
 
    virtual void onAddedToGame(Game *theGame);
 
@@ -85,7 +82,7 @@ public:
    Point getEditorSelectionOffset(F32 currentScale);
 #endif
 
-   bool isEnabled();    // True if still active, false otherwise
+   bool isEnabled() const;    // True if still active, false otherwise
 
    void explode();
    bool isDestroyed();
@@ -101,39 +98,38 @@ public:
    bool collide(BfObject *hitObject);
    F32 getHealth() const;
    void healObject(S32 time);
-   Point mountToWall(const Point &pos, const WallSegmentManager *wallSegmentManager, const Vector<S32> *excludedWallList);
+   void mountToWall(const Point &pos, const GridDatabase *gameObjectDatabase,
+                    const GridDatabase *wallEdgeDatabase, const Vector<BfObject *> *excludedWallList);
 
    void onGeomChanged();
 
    void getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const;
 
    // Figure out where to put our turrets and forcefield projectors.  Will return NULL if no mount points found.
-   static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
-                                                   const Vector<S32> *excludedWallList,
-                                                   bool format, Point &anchor, Point &normal);
+   // Pass NULL if there is no excludedWallList.
+   static BfObject *findAnchorPointAndNormal(const GridDatabase *gameObjectDatabase, 
+                                             const GridDatabase *wallEdgeDatabase,
+                                             const Point &pos, F32 snapDist, 
+                                             const Vector<BfObject *> *excludedWallList,
+                                             bool format, Point &anchor, Point &normal);
 
-   // Pass NULL if there is no excludedWallList
-   static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
-                                                   const Vector<S32> *excludedWallList,
-                                                   bool format, TestFunc testFunc, Point &anchor, Point &normal);
-
-   void setAnchorNormal(const Point &nrml);
-   WallSegment *getMountSegment();
-   void setMountSegment(WallSegment *mountSeg);
-
-   // These methods are overriden in ForceFieldProjector
-   virtual WallSegment *getEndSegment();
-   virtual void setEndSegment(WallSegment *endSegment);
+   BfObject *getMountSegment() const;
+   void setMountSegment(BfObject *mountSeg);
 
    //// Is item sufficiently snapped?  
    void setSnapped(bool snapped);
    bool isSnapped() const;
 
 
-   /////
-   // Editor stuff
+   ///// Editor methods
    virtual string toLevelCode() const;
    virtual void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
+
+#ifndef ZAP_DEDICATED
+   bool startEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+#endif
+
 
 	///// Lua interface
 	LUAW_DECLARE_CLASS(EngineeredItem);
@@ -155,6 +151,10 @@ public:
 
    // Some overrides
    S32 lua_setGeom(lua_State *L);
+
+   ///// Testing
+   friend class LevelLoaderTest;
+   FRIEND_TEST(LevelLoaderTest, EngineeredItemMounting2);
 };
 
 
@@ -187,12 +187,14 @@ public:
 
    ForceField(S32 team = -1, Point start = Point(), Point end = Point());
    virtual ~ForceField();
+   ForceField *clone() const;
 
    bool collide(BfObject *hitObject);
    bool intersects(ForceField *forceField);     // Return true if forcefields intersect
    void onAddedToGame(Game *theGame);
    void idle(BfObject::IdleCallPath path);
 
+   void setStartAndEndPoints(const Point &start, const Point &end);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -202,13 +204,11 @@ public:
    const Vector<Point> *getOutline() const;
 
    static Vector<Point> computeGeom(const Point &start, const Point &end, F32 scaleFact = 1);
-   static bool findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal, 
-                                 Point &end, DatabaseObject **collObj);
+   static DatabaseObject *findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal, Point &end);
 
-   void render();
+   void render() const;
+   void render(const Color &color) const;
    S32 getRenderSortValue();
-
-   void getForceFieldStartAndEndPoints(Point &start, Point &end);
 
    TNL_DECLARE_CLASS(ForceField);
 };
@@ -223,14 +223,13 @@ class ForceFieldProjector : public EngineeredItem
 
 private:
    SafePtr<ForceField> mField;
-   WallSegment *mForceFieldEndSegment;
-   Point forceFieldEnd;
 
    void initialize();
 
    Vector<Point> getObjectGeometry(const Point &anchor, const Point &normal) const;  
 
    F32 getSelectionOffsetMagnitude();
+   bool mNeedToCleanUpField;
 
 public:
    static const S32 defaultRespawnTime = 0;
@@ -242,36 +241,38 @@ public:
    ForceFieldProjector *clone() const;
    
    const Vector<Point> *getCollisionPoly() const;
+
+   void createCaptiveForceField();
    
    static Vector<Point> getForceFieldProjectorGeometry(const Point &anchor, const Point &normal);
    static Point getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact = 1);
 
    // Get info about the forcfield that might be projected from this projector
-   void getForceFieldStartAndEndPoints(Point &start, Point &end);
-
-   WallSegment *getEndSegment();
-   void setEndSegment(WallSegment *endSegment);
+   void getForceFieldStartAndEndPoints(Point &start, Point &end) const;
 
    void onAddedToGame(Game *theGame);
+   void onAddedToEditor();
+
    void idle(BfObject::IdleCallPath path);
 
-   void render();
+   void render() const;
    void onEnabled();
    void onDisabled();
 
    TNL_DECLARE_CLASS(ForceFieldProjector);
 
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
 
-   void renderDock();
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+   void renderDock(const Color &color) const;
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
 
    void onGeomChanged();
    void findForceFieldEnd();                      // Find end of forcefield in editor
@@ -314,12 +315,12 @@ public:
 
    WeaponType mWeaponFireType;
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
    static const S32 defaultRespawnTime = 0;
 
-   static const S32 TURRET_OFFSET = 15;               // Distance of the turret's render location from it's attachment location
+   static const F32 TURRET_OFFSET;                    // Distance of the turret's render location from it's attachment location
                                                       // Also serves as radius of circle of turret's body, where the turret starts
    static const S32 TurretTurnRate = 4;               // How fast can turrets turn to aim?
    static const S32 TurretPerceptionDistance = 800;   // Area to search for potential targets...
@@ -333,9 +334,9 @@ public:
    const Vector<Point> *getCollisionPoly() const;
    const Vector<Point> *getOutline() const;
 
-   F32 getEditorRadius(F32 currentScale);
+   F32 getEditorRadius(F32 currentScale) const;
 
-   void render();
+   void render() const;
    void idle(IdleCallPath path);
    void onAddedToGame(Game *theGame);
 
@@ -346,18 +347,19 @@ public:
 
    /////
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
 
    void onGeomChanged();
 
-   void renderDock();
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+   void renderDock(const Color &color) const;
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
 
    ///// Lua interface
 	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Turret);
@@ -386,7 +388,7 @@ private:
 
 public:
    // Check potential deployment position
-   bool canCreateObjectAtLocation(const GridDatabase *database, const Ship *ship, U32 objectType);
+   bool canCreateObjectAtLocation(const Level *level, const Ship *ship, U32 objectType);
 
    bool deployEngineeredItem(ClientInfo *clientInfo, U32 objectType);  // Deploy!
    string getErrorMessage();

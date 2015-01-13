@@ -29,7 +29,7 @@ namespace Zap
 class BfObject;
 class DatabaseObject;
 class Game;
-class GridDatabase;
+class Level;
 class LuaPlayerInfo;
 class Rect;
 class Ship;
@@ -75,9 +75,11 @@ protected:
       ScriptTypeInvalid,
    };
 
-   Game *mLuaGame;                  // Pointer to our current Game object, which could be ServerGame or
-                                    // ClientGame depending on where the script is called from
-   GridDatabase *mLuaGridDatabase;  // Pointer to our current grid database with objects to manipulate
+   Game *mLuaGame;               // Pointer to our current Game object, which could be ServerGame or
+                                 // ClientGame depending on where the script is called from
+   Game *getLuaGame() const;     // Use this to access mLuaGame
+
+   Level *mLevel;                // Pointer to our current level
 
    static lua_State *L;          // Main Lua state variable
    string mScriptName;           // Fully qualified script name, with path and everything

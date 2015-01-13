@@ -210,7 +210,9 @@ S32 lua_readFromFile(lua_State *L)
 
    FolderManager *folderManager = GameSettings::getFolderManager();
 
-   return returnString(L, readFile(folderManager->screenshotDir + getFileSeparator() + filename).c_str());
+   string contents;
+   readFile(folderManager->getScreenshotDir() + getFileSeparator() + filename, contents);
+   return returnString(L, contents.c_str());
 }
 
 
@@ -246,7 +248,7 @@ S32 lua_writeToFile(lua_State *L)
    {
       FolderManager *folderManager = GameSettings::getFolderManager();
 
-      string filePath = folderManager->screenshotDir + getFileSeparator() + filename;
+      string filePath = folderManager->getScreenshotDir() + getFileSeparator() + filename;
 
       writeFile(filePath, contents, append);
    }

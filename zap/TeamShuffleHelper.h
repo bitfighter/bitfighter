@@ -48,7 +48,7 @@ public:
 
    HelperMenuType getType();
 
-   void render();                
+   void render() const;                
    void onActivated();  
 
    bool processInputCode(InputCode inputCode);   

@@ -6,6 +6,7 @@
 #include "Zone.h"
 
 #include "game.h"
+#include "Level.h"
 #include "Colors.h"
 #include "GeomUtils.h"
 
@@ -51,22 +52,28 @@ Zone *Zone::clone() const
 }
 
 
-void Zone::render()
+void Zone::render() const
 {
    // Do nothing -- zones aren't rendered in-game
 }
 
 
-void Zone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void Zone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
-   renderZone(&Colors::white, getOutline(), getFill());
+   renderZone(Colors::white, getOutline(), getFill());
    PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled, true);
 }
 
 
-void Zone::renderDock()
+void Zone::renderDock(const Color &color) const
 {
-   renderZone(&Colors::white, getOutline(), getFill());
+   renderZone(Colors::white, getOutline(), getFill());
+}
+
+
+F32 Zone::getEditorRadius(F32 currentScale) const
+{
+   return (F32)EditorObject::VERTEX_SIZE;   // Keep vertex hit targets the same regardless of scale
 }
 
 
@@ -83,7 +90,7 @@ S32 Zone::getRenderSortValue()
 
 
 // Create objects from parameters stored in level file
-bool Zone::processArguments(S32 argc2, const char **argv2, Game *game)
+bool Zone::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    // Need to handle or ignore arguments that starts with letters,
    // so a possible future version can add parameters without compatibility problem.
@@ -99,7 +106,8 @@ bool Zone::processArguments(S32 argc2, const char **argv2, Game *game)
       if((c < 'a' || c > 'z') && (c < 'A' || c > 'Z'))
       {
          if(argc < Geometry::MAX_POLY_POINTS * 2 + 1)
-         {  argv[argc] = argv2[i];
+         {  
+            argv[argc] = argv2[i];
             argc++;
          }
       }
@@ -108,11 +116,12 @@ bool Zone::processArguments(S32 argc2, const char **argv2, Game *game)
    if(argc < 6)
       return false;
 
-   readGeom(argc, argv, 0, game->getLegacyGridSize());
+   readGeom(argc, argv, 0, level->getLegacyGridSize());
+   updateExtentInDatabase();
+
+   // Make sure our Zone doesn't have invalid geometry
    if(getExtent().getHeight() == 0 && getExtent().getWidth() == 0)
       return false;
-
-   updateExtentInDatabase();
 
    return true;
 }
@@ -124,10 +133,10 @@ string Zone::toLevelCode() const
 }
 
 
-const char *Zone::getOnScreenName()     { return "Zone";  }
-const char *Zone::getOnDockName()       { return "Zone";  }
-const char *Zone::getPrettyNamePlural() { return "Zones"; }
-const char *Zone::getEditorHelpString() { return "Generic area, does not appear in-game, possibly useful to scripts."; }
+const char *Zone::getOnScreenName()     const  { return "Zone";  }
+const char *Zone::getOnDockName()       const  { return "Zone";  }
+const char *Zone::getPrettyNamePlural() const  { return "Zones"; }
+const char *Zone::getEditorHelpString() const  { return "Generic area, does not appear in-game, possibly useful to scripts."; }
 
 bool Zone::hasTeam()      { return false; }
 bool Zone::canBeHostile() { return false; }

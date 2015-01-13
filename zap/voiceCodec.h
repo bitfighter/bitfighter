@@ -8,7 +8,7 @@
 
 #include "tnlByteBuffer.h"
 
-#if defined(TNL_OS_MOBILE) || defined(BF_NO_AUDIO)
+#if defined(TNL_OS_MOBILE) || defined(BF_NO_AUDIO) || defined(ZAP_DEDICATED)
 #  define BF_NO_VOICECHAT
 #endif
 

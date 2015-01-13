@@ -4,10 +4,13 @@
 //------------------------------------------------------------------------------
 
 #include "TestUtils.h"
-#include "../zap/ServerGame.h"
-#include "../zap/gameType.h"
-#include "../zap/luaLevelGenerator.h"
-#include "../zap/SystemFunctions.h"
+
+#include "ServerGame.h"
+#include "gameType.h"
+#include "Level.h"
+#include "luaLevelGenerator.h"
+#include "SystemFunctions.h"
+
 #include "gtest/gtest.h"
 
 namespace Zap
@@ -24,34 +27,40 @@ protected:
    lua_State *L;
 
    LuaLevelGenerator *levelgen;
+   GamePair pair;
+
+   LuaEnvironmentTest() : pair(GamePair("", 0))    // Start with an empty level and no clients
+   {
+      int x = 0;
+   }
 
 
-   virtual void SetUp() {
-      serverGame = newServerGame();
+   virtual void SetUp() 
+   {
+      serverGame = pair.server;
       settings = serverGame->getSettingsPtr();
 
-      // Set-up our environment
-      EXPECT_TRUE(LuaScriptRunner::startLua(settings->getFolderManager()->luaDir));
+      ASSERT_EQ(0, serverGame->getLevel()->findObjects_fast()->size()) << 
+                "Database should be empty on a new level with no clients!";
+
+      // Check that the environment was set up during construction of GamePair
+      ASSERT_TRUE(LuaScriptRunner::getL());
 
       // Set up a levelgen object, with no script
       levelgen = new LuaLevelGenerator(serverGame);
 
       // Ensure environment set-up
-      EXPECT_TRUE(levelgen->prepareEnvironment());
+      ASSERT_TRUE(levelgen->prepareEnvironment());
 
       // Grab our Lua state
       L = LuaScriptRunner::getL();
-      EXPECT_TRUE(L);
    }
 
 
    virtual void TearDown()
    {
       delete levelgen;
-
       LuaScriptRunner::shutdown();
-
-      delete serverGame;
    }
 
 
@@ -59,14 +68,14 @@ protected:
    {
       return LuaScriptRunner::loadFunction(L, levelgen->getScriptId(), functionName.c_str());
    }
-
 };
 
 
 TEST_F(LuaEnvironmentTest, sanityCheck)
 {
-   // Test exception throwing
-   EXPECT_FALSE(levelgen->runString("a = b.b"));
+   // Test exception throwing -- for some reason, test triggers SEH exception if code is passed directly
+   string code = "a = b.b";      // Illegal code
+   EXPECT_FALSE(levelgen->runString(code));
 }
 
 
@@ -124,22 +133,30 @@ TEST_F(LuaEnvironmentTest, immutability)
 
 TEST_F(LuaEnvironmentTest, findAllObjects)
 {
+   EXPECT_TRUE(levelgen->runString("t = { }"));
+   EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t)"));
+   ASSERT_TRUE(levelgen->runString("assert(#t == 0)"));
+
+   // Level will have 3 items: 2 ResourceItems, and one TestItem
    EXPECT_TRUE(levelgen->runString("bf:addItem(ResourceItem.new(point.new(0,0)))"));
    EXPECT_TRUE(levelgen->runString("bf:addItem(ResourceItem.new(point.new(300,300)))"));
    EXPECT_TRUE(levelgen->runString("bf:addItem(TestItem.new(point.new(200,200)))"));
 
-
    EXPECT_TRUE(levelgen->runString("t = { }"));
+   EXPECT_TRUE(levelgen->runString("assert(#t == 0)"));
    EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t)"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 3)"));
 
    EXPECT_TRUE(levelgen->runString("t = { }"));
+
    EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t, ObjType.ResourceItem)"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 2)"));
+   EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t, ObjType.ResourceItem)"));
 
    EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects()"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 3)"));
-
+   EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t, ObjType.ResourceItem)"));
+   EXPECT_TRUE(levelgen->runString("assert(#t == 2)")) << "t had 3 items, but should have been cleared before adding 2 more";
    EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects(ObjType.ResourceItem)"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 2)"));
 }

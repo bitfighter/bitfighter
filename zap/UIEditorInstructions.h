@@ -7,7 +7,7 @@
 #define _UIEDITORINSTRUCTIONS_H_
 
 #include "UIAbstractInstructions.h"
-#include "WallSegmentManager.h"
+#include "WallEdgeManager.h"
 #include "Timer.h"
 
 namespace Zap
@@ -27,7 +27,7 @@ private:
    S32 mCurPage;
    Timer mAnimTimer;
    S32 mAnimStage;
-   WallSegmentManager mWallSegmentManager;
+   WallEdgeManager mWallEdgeManager;
 
    UI::SymbolStringSetCollection mSymbolSets1Left,     mSymbolSets1Right;     // For page 1
    UI::SymbolStringSetCollection mSymbolSets2Left,     mSymbolSets2Right;     // For page 2
@@ -44,11 +44,11 @@ public:
    explicit EditorInstructionsUserInterface(ClientGame *game);      // Constructor
    virtual ~EditorInstructionsUserInterface();
 
-   void render();
-   void renderPageCommands(S32 page);
-   void renderPageWalls();
+   void render() const;
+   void renderPageCommands(S32 page) const;
+   void renderPageWalls() const;
 
-   S32 getPageCount();
+   S32 getPageCount() const;
  
    bool onKeyDown(InputCode inputCode);
 

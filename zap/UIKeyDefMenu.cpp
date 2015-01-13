@@ -76,14 +76,13 @@ void KeyDefMenuUserInterface::onActivate()
 {
    mDisableShipKeyboardInput = true;      // Keep keystrokes from getting to game
    selectedIndex = 0;                     // First item selected when we begin
-   changingItem = NONE;                   // Not changing anything at the moment...
+   mChangingItem = NONE;                  // Not changing anything at the moment...
 
    // Display an intitial message to users
    errorMsgTimer.clear();
    errorMsg = "";
 
-   GameSettings *settings = getGame()->getSettings();
-   InputCodeManager *inputCodeManager = settings->getInputCodeManager();
+   InputCodeManager *inputCodeManager = mGameSettings->getInputCodeManager();
    InputMode inputMode = inputCodeManager->getInputMode();
 
    if(inputMode == InputModeJoystick)
@@ -192,24 +191,22 @@ void KeyDefMenuUserInterface::idle(U32 timeDelta)
 
 
 // Finds out if key is already assigned to something else
-bool KeyDefMenuUserInterface::isDuplicate(S32 key, const Vector<KeyDefMenuItem> &menuItems)
+bool KeyDefMenuUserInterface::isDuplicate(S32 key, const Vector<KeyDefMenuItem> &menuItems) const
 {
    S32 size = menuItems.size();
    S32 count = 0;
 
-   GameSettings *settings = getGame()->getSettings();
-
-   InputCode targetInputCode = getInputCode(settings, menuItems[key].primaryControl);
+   InputCode targetInputCode = getInputCode(mGameSettings, menuItems[key].primaryControl);
 
    for(S32 i = 0; i < size && count < 2; i++)
-      if(getInputCode(settings, menuItems[i].primaryControl) == targetInputCode)
+      if(getInputCode(mGameSettings, menuItems[i].primaryControl) == targetInputCode)
          count++;
 
    return count >= 2;
 }
 
 
-void KeyDefMenuUserInterface::render()
+void KeyDefMenuUserInterface::render() const
 {
    // Draw the game screen, then dim it out so you can still see it under our overlay
    if(getGame()->getConnectionToServer())
@@ -225,8 +222,9 @@ void KeyDefMenuUserInterface::render()
    glColor(Colors::white);
    drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - 20, 18, mMenuFooter);
 
-   if(selectedIndex >= menuItems.size())
-      selectedIndex = 0;
+   TNLAssert(selectedIndex < menuItems.size(), "Index out of bounds!");
+   //if(selectedIndex >= menuItems.size())
+   //   selectedIndex = 0;
 
    S32 size = menuItems.size();
 
@@ -248,7 +246,7 @@ void KeyDefMenuUserInterface::render()
 
 		xPos += Column_Width * 14 / 20;
 
-      if(changingItem == i)
+      if(mChangingItem == i)
       {
          glColor(Colors::red);
          drawString(xPos, y + offset + 1, 13, "Press Key or Button");
@@ -259,7 +257,7 @@ void KeyDefMenuUserInterface::render()
          const Color *color = dupe ? &Colors::red : NULL;
 
          JoystickRender::renderControllerButton(F32(xPos), F32(y + offset), 
-                               Joystick::SelectedPresetIndex, getInputCode(getGame()->getSettings(), menuItems[i].primaryControl), color);
+                               Joystick::SelectedPresetIndex, getInputCode(mGameSettings, menuItems[i].primaryControl), color);
       }
    }
 
@@ -296,13 +294,13 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
    if(Parent::onKeyDown(inputCode)) { /* Do nothing */ }
 
    // InputCode entry
-   else if(changingItem != NONE)
+   else if(mChangingItem != NONE)
    {
       playBoop();
 
       if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)
       {
-         changingItem = NONE;
+         mChangingItem = NONE;
          return true;
       }
 
@@ -325,8 +323,8 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
          return true;
 
       // Assign key
-      setInputCode(getGame()->getSettings(), menuItems[changingItem].primaryControl, inputCode);
-      changingItem = NONE;
+      setInputCode(menuItems[mChangingItem].primaryControl, inputCode);
+      mChangingItem = NONE;
 
       if(inputCode == KEY_CTRL)
       {
@@ -340,7 +338,7 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
    if(inputCode == KEY_SPACE || inputCode == KEY_ENTER || inputCode == BUTTON_START || inputCode == MOUSE_LEFT)      // Set key for selected item
    {
       playBoop();
-      changingItem = selectedIndex;
+      mChangingItem = selectedIndex;
    }
    else if(inputCode == KEY_RIGHT  || inputCode == BUTTON_DPAD_RIGHT || inputCode == KEY_LEFT || inputCode == BUTTON_DPAD_LEFT)    // Change col
    {
@@ -360,7 +358,7 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)   // Quit
    {
       playBoop();
-      saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
+      saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
 
       getUIManager()->reactivatePrevUI();      // to gOptionsMenuUserInterface
    }

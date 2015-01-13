@@ -10,7 +10,7 @@
 #include "MasterServerConnection.h"
 
 #include "../zap/HttpRequest.h"
-#include "../zap/md5wrapper.h"
+#include "../zap/Md5Utils.h"
 #include "../zap/stringUtils.h"
 
 using namespace Zap;
@@ -33,8 +33,6 @@ namespace GameJolt
 // Bitfighter's GameJolt id ==> does it make sense to put this in the INI?
 static const string gameIdString = "game_id=20546";      
 
-static md5wrapper md5;
-
 
 // When using curl, this will never return
 static void updateGameJolt(const MasterSettings *settings, const string &baseUrl, 
@@ -48,8 +46,6 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
    string databaseName = settings->getVal<string>("Phpbb3Database");
    Vector<string> credentialStrings = databaseWriter.getGameJoltCredentialStrings(databaseName, quotedNameList, 1);
 
-   //HttpRequest request;
-
    string urlList = "";
    string otherParamString = otherParams + (otherParams != "" ? "&" : "");
 
@@ -57,7 +53,7 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
    {
       string url = baseUrl + "?" + gameIdString + "&" + otherParamString + credentialStrings[i];
 
-      string signature = md5.getHashFromString(url + secret);
+      string signature = Md5::getHashFromString(url + secret);
 
       url += "&signature=" + signature;
 
@@ -172,7 +168,7 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
    
    // Assemble list of all connected and authenticated players
 
-   string nameList = "";  // Comma seperated list of quoted, sanitized names ready to pass to a SQL IN() function
+   string nameList = "";  // Comma separated list of quoted, sanitized names ready to pass to a SQL IN() function
    S32 nameCount = 0;
 
    for(S32 i = 0; i < clientList->size(); i++)

@@ -4,9 +4,10 @@
 //------------------------------------------------------------------------------
 
 #include "luaLevelGenerator.h"
-#include "gameLoader.h"
+
 #include "game.h"
 #include "barrier.h"             // For PolyWall def
+#include "Level.h"
 
 #include "stringUtils.h"         // fileExists
 
@@ -19,21 +20,20 @@ namespace Zap
 LuaLevelGenerator::LuaLevelGenerator() { TNLAssert(false, "Don't use this constructor!"); }
 
 // Standard constructor
-LuaLevelGenerator::LuaLevelGenerator(Game *game, const string &scriptName, const Vector<string> &scriptArgs, GridDatabase *gridDatabase)
+LuaLevelGenerator::LuaLevelGenerator(Game *game, const string &scriptName, const Vector<string> &scriptArgs, Level *level)
 {
    TNLAssert(scriptName == "" || fileExists(scriptName), "Files should be checked before we get here -- something has gone wrong!");
 
-   if(gridDatabase == NULL)
-   {
-      gridDatabase = game->getGameObjDatabase();
-   }
+   if(level == NULL)
+      level = game->getLevel();
+
+   TNLAssert(level, "Need a valid Level here!");
 
    mScriptName = scriptName;
    mScriptArgs = scriptArgs;
    mScriptType = ScriptTypeLevelgen;
 
-   mGridDatabase = gridDatabase;
-   mLuaGridDatabase = gridDatabase;
+   mLevel = level;
    mGame = game;
    mLuaGame = game;  // Set our parent member, too
 

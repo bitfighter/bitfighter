@@ -9,21 +9,25 @@
 
 #include "gtest/gtest.h"
 
-#include "tnlNetObject.h"
-#include "tnlGhostConnection.h"
-#include "tnlPlatform.h"
-
 #include "BfObject.h"
 #include "gameType.h"
 #include "ServerGame.h"
 #include "ClientGame.h"
+#include "Level.h"
 #include "SystemFunctions.h"
+
+#include "LuaScriptRunner.h"
 
 #include "GeomUtils.h"
 #include "stringUtils.h"
 #include "RenderUtils.h"
 
 #include "TestUtils.h"
+
+#include "tnlNetObject.h"
+#include "tnlGhostConnection.h"
+#include "tnlPlatform.h"
+
 
 #include <string>
 #include <cmath>
@@ -38,12 +42,15 @@ using namespace std;
 class ObjectTest : public testing::Test
 {
    public:
+      // argv will be a single header directive followed by a bunch of garbage
       static void process(ServerGame *game, S32 argc, const char **argv)
       {
+         string err;
+
          for(S32 j = 1; j <= argc; j++)
          {
-            game->cleanUp();
-            game->processLevelLoadLine(j, 0, argv, game->getGameObjDatabase(), "some_non_existing_filename.level");
+            Level level;
+            level.processLevelLoadLine(j, 0, argv, err);
          }
       }
 };
@@ -111,7 +118,7 @@ TEST_F(ObjectTest, GhostingSanity)
       ghostingRecords[i].client = false;
    }
 
-   // Create our pair of connected games
+   // Create a pair of connected games
    GamePair gamePair;
    ClientGame *clientGame = gamePair.getClient(0);
    ServerGame *serverGame = gamePair.server;
@@ -146,7 +153,7 @@ TEST_F(ObjectTest, GhostingSanity)
          }
          else
             bfobj->GeomObject::setGeom(geom);
-         bfobj->addToGame(serverGame, serverGame->getGameObjDatabase());
+         bfobj->addToGame(serverGame, serverGame->getLevel());
 
          ghostingRecords[i].server = true;
       }
@@ -158,7 +165,7 @@ TEST_F(ObjectTest, GhostingSanity)
    gamePair.idle(10, 10);
 
    // Check whether the objects created on the server made it onto the client
-   const Vector<DatabaseObject *> *objects = clientGame->getGameObjDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objects = clientGame->getLevel()->findObjects_fast();
    for(S32 i = 0; i < objects->size(); i++)
    {
       BfObject *bfobj = dynamic_cast<BfObject *>((*objects)[i]);
@@ -205,7 +212,13 @@ TEST_F(ObjectTest, LuaSanity)
    geom.push_back(Point(1,0));
    geom.push_back(Point(0,1));
 
-   lua_State *L = lua_open();
+   // TODO: Should not need this... we start an L somewhere in one of the tests and never shut it down
+   if(!LuaScriptRunner::getL())
+      ASSERT_TRUE(LuaScriptRunner::startLua((clientGame->getSettings()->getFolderManager()->getLuaDir())));
+      
+   lua_State *L = LuaScriptRunner::getL();
+
+   ASSERT_EQ(1, serverGame->getTeamCount()) << "Need a team here or else the bfobj->lua_setTeam() below will fail!";
 
    // Create one of each type of registered NetClass
    for(U32 i = 0; i < classCount; i++)
@@ -219,28 +232,29 @@ TEST_F(ObjectTest, LuaSanity)
       if(bfobj && bfobj->hasGeometry())
       {
          // First, add some geometry
-         bfobj->setExtent(Rect(0,0,1,1));
+         bfobj->setExtent(Rect(0,0, 1,1));
          bfobj->GeomObject::setGeom(geom);
 
-         // LUA testing
+         // Lua testing
          lua_pushinteger(L, 1);
-         bfobj->lua_setTeam(L);
+         bfobj->lua_setTeam(L);     // Assign bfobj to team 1 (first team, lua uses 1-index arrays)
          lua_pop(L, 1);
-         lua_pushinteger(L, -2);
-         bfobj->lua_setTeam(L);
+
+         lua_pushinteger(L, TEAM_HOSTILE);
+         bfobj->lua_setTeam(L);     
          lua_pop(L, 1);
+
          luaPushPoint(L, 2.3f, 4.3f);
          bfobj->lua_setPos(L);
          lua_pop(L, 1);
 
-         bfobj->addToGame(serverGame, serverGame->getGameObjDatabase());
+         bfobj->addToGame(serverGame, serverGame->getLevel());
       }
       else
          delete bfobj;
    }
 
-
-   lua_close(L);
+   LuaScriptRunner::shutdown();
 }
 
    

@@ -136,13 +136,14 @@ void ChatHelper::activate(ChatType chatType)
 }
 
 
-bool ChatHelper::isCmdChat()
+// Returns true if the chat message being composed looks like a command
+bool ChatHelper::isCmdChat() const
 {
    return mLineEditor.at(0) == '/' || mCurrentChatType == CmdChat;
 }
 
 
-void ChatHelper::render()
+void ChatHelper::render() const
 {
    FontManager::pushFontContext(InputContext);
    const char *promptStr;
@@ -199,7 +200,7 @@ void ChatHelper::render()
    // Only need to set scissors if we're scrolling.  When not scrolling, we control the display by only showing
    // the specified number of lines; there are normally no partial lines that need vertical clipping as 
    // there are when we're scrolling.  Note also that we only clip vertically, and can ignore the horizontal.
-   scissorsManager.enable(isAnimating, getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
+   scissorsManager.enable(isAnimating, getGame()->getSettings()->getSetting<DisplayMode>(IniKey::WindowMode), 
                           0.0f, F32(realYPos - 3), F32(DisplayManager::getScreenInfo()->getGameCanvasWidth()), F32(BOX_HEIGHT));
 
    // Render text entry box like thingy

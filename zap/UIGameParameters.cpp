@@ -67,14 +67,10 @@ GameParamUserInterface::GameParamUserInterface(ClientGame *game) : Parent(game)
    mMenuTitle = "GAME PARAMETERS MENU";
    mMenuSubTitle = "";
    mMaxMenuSize = S32_MAX;                // We never want scrolling on this menu!
-
-   mGameSpecificParams = 0;
-   selectedIndex = 0;
-   mQuitItemIndex = 0;
-   changingItem = -1;
 }
 
 
+// Destructor
 GameParamUserInterface::~GameParamUserInterface()
 {
    // Do nothing
@@ -83,26 +79,30 @@ GameParamUserInterface::~GameParamUserInterface()
 
 void GameParamUserInterface::onActivate()
 {
-   selectedIndex = 0;                          // First item selected when we begin
+   TNLAssert(getUIManager()->cameFrom<EditorUserInterface>(), "GameParamUserInterface should only be called from the editor!");
+
+   Level *level = getUIManager()->getUI<EditorUserInterface>()->getLevel();
+   const GameType *gameType = level->getGameType();
 
    // Force rebuild of all params for current gameType; this will make sure we have the latest info if we've loaded a new level,
    // but will also preserve any values entered for gameTypes that are not current.
-   clearCurrentGameTypeParams();
+   clearCurrentGameTypeParams(gameType);
 
-   updateMenuItems();   
-   origGameParams = getGame()->toLevelCode();   // Save a copy of the params coming in for comparison when we leave to see what changed
+   updateMenuItems(gameType);   
+   mOrigGameParams = level->toLevelCode();   // Save a copy of the params coming in for comparison when we leave to see what changed
    Cursor::disableCursor();
 }
 
 
 // Find and delete any parameters associated with the current gameType
-void GameParamUserInterface::clearCurrentGameTypeParams()
+void GameParamUserInterface::clearCurrentGameTypeParams(const GameType *gameType)
 {
-   const Vector<string> keys = getGame()->getGameType()->getGameParameterMenuKeys();
+   // Get the current GameType from the level being edited in the Editor
+   const Vector<string> *keys = gameType->getGameParameterMenuKeys();
 
-   for(S32 i = 0; i < keys.size(); i++)
+   for(S32 i = 0; i < keys->size(); i++)
    {
-      MenuItemMap::iterator iter = mMenuItemMap.find(keys[i]);
+      MenuItemMap::iterator iter = mMenuItemMap.find(keys->get(i));
 
       boost::shared_ptr<MenuItem> menuItem;
 
@@ -112,36 +112,45 @@ void GameParamUserInterface::clearCurrentGameTypeParams()
 }
 
 
-static Vector<string> gameTypes;
+extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
 
-static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
+static const Vector<string> buildGameTypesList()
 {
-   if(game->getGameType() != NULL)
-      delete game->getGameType();
+   Vector<string> gameTypes;
 
-   // Instantiate our gameType object and cast it to GameType
-   TNL::Object *theObject = TNL::Object::create(GameType::getGameTypeClassName(gameTypes[gtIndex]));
-   GameType *gt = dynamic_cast<GameType *>(theObject);   
+   gameTypes = GameType::getGameTypeNames();
+   gameTypes.sort(alphaSort);
 
-   gt->addToGame(game, NULL);    // GameType::addToGame() ignores database (and what would it do with one, anyway?), so we can pass NULL
-
-   // If we have a new gameType, we might have new game parameters; update the menu!
-   game->getUIManager()->getUI<GameParamUserInterface>()->updateMenuItems();
+   return gameTypes;
 }
 
 
-extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
-
-void GameParamUserInterface::updateMenuItems()
+static const Vector<string> &getGameTypes()
 {
-   GameType *gameType = getGame()->getGameType();
-   TNLAssert(gameType, "Missing game type!");
+   static const Vector<string> gameTypes = buildGameTypesList();
 
-   if(gameTypes.size() == 0)     // Should only be run once, as these gameTypes will not change during the session
-   {
-      gameTypes = GameType::getGameTypeNames();
-      gameTypes.sort(alphaSort);
-   }
+   return gameTypes;
+}
+
+
+static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
+{
+   // Instantiate our gameType object and cast it to GameType
+   TNL::Object *theObject = TNL::Object::create(GameType::getGameTypeClassName(getGameTypes()[gtIndex]));
+   GameType *gt = dynamic_cast<GameType *>(theObject);   
+
+   TNLAssert(gt, "Whoa!");
+   
+   game->getLevel()->setGameType(gt);     // gt will be put into a RefPtr, which will handle cleanup
+
+   // If we have a new gameType, we might have new game parameters; update the menu!
+   game->getUIManager()->getUI<GameParamUserInterface>()->updateMenuItems(gt);
+}
+
+
+void GameParamUserInterface::updateMenuItems(const GameType *gameType)
+{
+   TNLAssert(gameType, "Missing game type!");
 
    clearMenuItems();
 
@@ -150,8 +159,8 @@ void GameParamUserInterface::updateMenuItems()
                              (gameType->getInstructionString()[1] ?  string(" ") + gameType->getInstructionString()[1] : "");
 
    addMenuItem(new ToggleMenuItem("Game Type:",       
-                                  gameTypes,
-                                  gameTypes.getIndex(gameType->getGameTypeName()),
+                                  getGameTypes(),
+                                  getGameTypes().getIndex(gameType->getGameTypeName()),
                                   true,
                                   changeGameTypeCallback,
                                   instructs));
@@ -167,11 +176,11 @@ void GameParamUserInterface::updateMenuItems()
                                      "File where this level is stored",   // help
                                      MAX_FILE_NAME_LEN));
 
-   const Vector<string> keys = gameType->getGameParameterMenuKeys();
+   const Vector<string> *keys = gameType->getGameParameterMenuKeys();
 
-   for(S32 i = 0; i < keys.size(); i++)
+   for(S32 i = 0; i < keys->size(); i++)
    {
-      MenuItemMap::iterator iter = mMenuItemMap.find(keys[i]);
+      MenuItemMap::iterator iter = mMenuItemMap.find(keys->get(i));
 
       boost::shared_ptr<MenuItem> menuItem;
 
@@ -179,10 +188,10 @@ void GameParamUserInterface::updateMenuItems()
          menuItem = iter->second;
       else                 // Item not found
       {
-         menuItem = gameType->getMenuItem(keys[i]);
+         menuItem = gameType->getMenuItem(keys->get(i));
          TNLAssert(menuItem, "Failed to make a new menu item!");
 
-         mMenuItemMap.insert(pair<string, boost::shared_ptr<MenuItem> >(keys[i], menuItem));
+         mMenuItemMap.insert(pair<string, boost::shared_ptr<MenuItem> >(keys->get(i), menuItem));
       }
 
       addWrappedMenuItem(menuItem);
@@ -195,24 +204,22 @@ void GameParamUserInterface::onEscape()
 {
    getUIManager()->getUI<EditorUserInterface>()->setLevelFileName(getMenuItem(1)->getValue());  
 
-   GameType *gameType = getGame()->getGameType();
+   GameType *gameType = getUIManager()->getUI<EditorUserInterface>()->getLevel()->getGameType();
 
-   const Vector<string> keys = gameType->getGameParameterMenuKeys();
+   const Vector<string> *keys = gameType->getGameParameterMenuKeys();
 
-   for(S32 i = 0; i < keys.size(); i++)
+   for(S32 i = 0; i < keys->size(); i++)
    {
-      MenuItemMap::iterator iter = mMenuItemMap.find(keys[i]);
+      MenuItemMap::iterator iter = mMenuItemMap.find(keys->get(i));
 
       MenuItem *menuItem = iter->second.get();
-      gameType->saveMenuItem(menuItem, keys[i]);
+      gameType->saveMenuItem(menuItem, keys->get(i));
    }
 
    if(anythingChanged())
    {
       EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
-
-      ui->setNeedToSave(true);       // Need to save to retain our changes
-      ui->mAllUndoneUndoLevel = -1;  // This change can't be undone
+      // TODO -->Save undo state here!!!
       ui->validateLevel();
    }
 
@@ -229,7 +236,9 @@ void GameParamUserInterface::processSelection(U32 index)
 
 bool GameParamUserInterface::anythingChanged()
 {
-   return origGameParams != getGame()->toLevelCode();
+   // While we were in the menu, no items changed... the only things that could have changed would be in the level
+   // metadata and settings section.
+   return mOrigGameParams != getUIManager()->getUI<EditorUserInterface>()->getLevel()->toLevelCode();
 }
 
 

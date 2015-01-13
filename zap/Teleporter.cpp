@@ -5,6 +5,13 @@
 
 #include "Teleporter.h"
 
+#include "game.h"
+#include "ship.h"
+#include "SoundSystemEnums.h"
+#include "ClientInfo.h"
+#include "gameConnection.h"
+#include "Level.h"
+
 #include "Colors.h"
 #include "gameObjectRender.h"
 
@@ -12,11 +19,6 @@
 #include "MathUtils.h"           // For sq
 #include "GeomUtils.h"
 #include "tnlRandom.h"
-#include "game.h"
-#include "ship.h"
-#include "SoundSystemEnums.h"
-#include "ClientInfo.h"
-#include "gameConnection.h"
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
@@ -218,7 +220,7 @@ void Teleporter::onAddedToGame(Game *theGame)
 }
 
 
-bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
+bool Teleporter::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    S32 argc = 0;
    const char *argv[8];
@@ -250,43 +252,33 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
    pos.read(argv);
    dest.read(argv + 2);
 
-   pos  *= game->getLegacyGridSize();
-   dest *= game->getLegacyGridSize();
+   pos  *= level->getLegacyGridSize();
+   dest *= level->getLegacyGridSize();
 
    setVert(pos,  0);
    setVert(dest, 1);
 
    // See if we already have any teleports with this pos... if so, this is a "multi-dest" teleporter.
-   // Note that editor handles multi-dest teleporters as separate single dest items, so this only runs on server!
-   if(game->isServer())    
-   {
-      foundObjects.clear();
-      game->getGameObjDatabase()->findObjects(TeleporterTypeNumber, foundObjects, Rect(pos, 1));
+   // Note that editor handles multi-dest teleporters as separate single dest items, so multi-dest teleporters will be
+   // broken into a series of single-dest teleporters when the level is added to the editor.
+   foundObjects.clear();
+   level->findObjects(TeleporterTypeNumber, foundObjects, Rect(pos, 1));
 
-      for(S32 i = 0; i < foundObjects.size(); i++)
+   for(S32 i = 0; i < foundObjects.size(); i++)
+   {
+      Teleporter *tel = static_cast<Teleporter *>(foundObjects[i]);
+      if(tel->getOrigin().distSquared(pos) < 1)     // i.e These are really close!  Must be the same!
       {
-         Teleporter *tel = static_cast<Teleporter *>(foundObjects[i]);
-         if(tel->getOrigin().distSquared(pos) < 1)     // i.e These are really close!  Must be the same!
-         {
-            tel->addDest(dest);
+         tel->addDest(dest);
 
-            // See http://www.parashift.com/c++-faq-lite/delete-this.html for thoughts on delete this here
-            delete this;    // Since this is really part of a different teleporter, delete this one 
-            return true;    // There will only be one!
-         }
+         // See http://www.parashift.com/c++-faq-lite/delete-this.html for thoughts on delete this here
+         delete this;    // Since this is really part of a different teleporter, delete this one 
+         return true;    // There will only be one!
       }
-
-      // New teleporter origin
-      addDest(dest);
-      computeExtent(); // for ServerGame extent
    }
-#ifndef ZAP_DEDICATED
-   else     // Is client
-   {
-      addDest(dest);
-      setExtent(calcExtents()); // for editor
-   }
-#endif
+   // New teleporter origin
+   addDest(dest);
+   computeExtent(); // for ServerGame extent
 
    return true;
 }
@@ -329,6 +321,7 @@ bool Teleporter::checkDeploymentPosition(const Point &position, const GridDataba
    Rect queryRect(position, TELEPORTER_RADIUS);
    Point outPoint;  // only used as a return value in polygonCircleIntersect
 
+   // Finds: Barriers, PolyWalls, Turrets, ForceFields, Cores, and ForceFieldProjectors
    foundObjects.clear();
    gb->findObjects((TestFunc) isCollideableType, foundObjects, queryRect);
 
@@ -355,7 +348,9 @@ bool Teleporter::checkDeploymentPosition(const Point &position, const GridDataba
       // Try the collision circle if no poly bounds were found
       else
       {
-         if(bfObject->getCollisionCircle(RenderState, foundObjectCenter, foundObjectRadius))
+         // State specified below doesn't matter, as foundObjects are all CollideableTypes, and only
+         // MoveObjects consider state, and no MoveObjects are CollideableTypes.  So there!
+         if(bfObject->getCollisionCircle(ActualState, foundObjectCenter, foundObjectRadius))
             if(circleCircleIntersect(foundObjectCenter, foundObjectRadius, position, (F32)TELEPORTER_RADIUS))
                return false;
       }
@@ -522,7 +517,7 @@ void Teleporter::onDestroyed()
 {
    mHasExploded = true;
 
-   releaseResource(getOrigin(), getGame()->getGameObjDatabase());
+   releaseResource(getOrigin(), getGame()->getLevel());
 
    deleteObject(TeleporterExplosionTime + 500);  // Guarantee our explosion effect will complete
    setMaskBits(DestroyedMask);
@@ -539,6 +534,7 @@ void Teleporter::onDestroyed()
       }
    }
 }
+
 
 void Teleporter::doTeleport()
 {
@@ -774,20 +770,27 @@ void Teleporter::idle(IdleCallPath path)
    U32 deltaT = mCurrentMove.time;
    mTime += deltaT;
 
+#ifndef ZAP_DEDICATED
    // Client only
    if(path == ClientIdlingNotLocalShip)
    {
-      // Update Explosion Timer
+      // Handle explosions
       if(mHasExploded)
-         mExplosionTimer.update(deltaT);
+      {
+         if(mExplosionTimer.getCurrent() == 0 && !mFinalExplosionTriggered)
+            doExplosion();
+         else
+            mExplosionTimer.update(deltaT);
+      }
    }
+#endif
 
    if(mTeleportCooldown.update(deltaT) && path == ServerIdleMainLoop)
       doTeleport();
 }
 
 
-void Teleporter::render()
+void Teleporter::render() const
 {
 #ifndef ZAP_DEDICATED
    // Render at a different radius depending on if a ship has just gone into the teleport
@@ -826,10 +829,6 @@ void Teleporter::render()
       else
          radiusFraction = 2 * F32(mExplosionTimer.getCurrent()) / 
                               F32(halfPeriod);
-
-      // Add ending explosion
-      if(mExplosionTimer.getCurrent() == 0 && !mFinalExplosionTriggered)
-         doExplosion();
    }
 
    if(radiusFraction != 0)
@@ -838,9 +837,11 @@ void Teleporter::render()
       if(mHealth < 1.f)
          trackerCount = U32(mHealth * 75.f) + 25;
 
-      F32 zoomFraction = getGame()->getCommanderZoomFraction();
+      // When rendering from the editor, getGame() will return NULL
+      F32 zoomFraction = getGame() ? getGame()->getCommanderZoomFraction() : 1;
+
       U32 renderStyle = mEngineered ? 2 : 0;
-      renderTeleporter(getOrigin(), renderStyle, true, getGame()->getCurrentTime(), zoomFraction, radiusFraction, 
+      renderTeleporter(getOrigin(), renderStyle, true, Platform::getRealMilliseconds(), zoomFraction, radiusFraction, 
                        (F32)TELEPORTER_RADIUS, 1.0, mDestManager.getDestList(), trackerCount);
    }
 
@@ -902,7 +903,7 @@ void Teleporter::doExplosion()
 #endif
 
 
-void Teleporter::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void Teleporter::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    Parent::renderEditor(currentScale, snappingToWallCornersEnabled);
@@ -911,7 +912,7 @@ void Teleporter::renderEditor(F32 currentScale, bool snappingToWallCornersEnable
 }
 
 
-Color Teleporter::getEditorRenderColor()
+const Color &Teleporter::getEditorRenderColor() const
 {
    return Colors::green;
 }
@@ -945,10 +946,10 @@ void Teleporter::onGeomChanged()
 }   
 
 
-const char *Teleporter::getOnScreenName()     { return "Teleporter";    }
-const char *Teleporter::getPrettyNamePlural() { return "Teleporters"; }
-const char *Teleporter::getOnDockName()       { return "Teleporter";    }
-const char *Teleporter::getEditorHelpString() { return "Teleports ships from one place to another. [T]"; }
+const char *Teleporter::getOnScreenName()     const  { return "Teleporter";    }
+const char *Teleporter::getPrettyNamePlural() const  { return "Teleporters"; }
+const char *Teleporter::getOnDockName()       const  { return "Teleporter";    }
+const char *Teleporter::getEditorHelpString() const  { return "Teleports ships from one place to another. [T]"; }
 
 
 bool Teleporter::hasTeam()      { return false; }

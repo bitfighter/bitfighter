@@ -9,7 +9,7 @@
 
 #include "flagItem.h"
 #include "gameStats.h"           // For VersionedGameStats
-#include "barrier.h"             // For WallRec def
+//#include "barrier.h"             // For WallRec def
 
 #include "game.h"                // For MaxTeams
 #include "gameConnection.h"      // For MessageColors enum
@@ -44,17 +44,24 @@ class Zone;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-
 class GameType : public NetObject
 {
    typedef NetObject Parent;
 
+public:
    static const S32 TeamNotSpecified = -99999;
+   static const S32 DefaultWinningScore = 8;
+
+   enum ScoringGroup {
+      IndividualScore,
+      TeamScore
+   };
 
 private:
-   Game *mGame;
+   Game *mGame;                     // Game that this GameType is related to; NULL if it has not been added to a game
+   Level *mLevel;                   // Level that this GameType is related to; NULL if it is not part of a level
 
-   Point getSpawnPoint(S32 team);        // Pick a spawn point for ship or robot
+   Point getSpawnPoint(S32 team);   // Pick a spawn point for ship or robot
 
    bool mLevelHasLoadoutZone;
    bool mLevelHasPredeployedFlags;
@@ -62,39 +69,41 @@ private:
 
    bool mShowAllBots;
 
-   Vector<WallRec> mWalls;
+   bool mEngineerEnabled;
+   bool mEngineerUnrestrictedEnabled;
 
    S32 mWinningScore;               // Game over when team (or player in individual games) gets this score
    S32 mLeadingTeam;                // Team with highest score
    S32 mLeadingTeamScore;           // Score of mLeadingTeam
-   S32 mLeadingPlayer;              // Player index of mClientInfos with highest score
-   S32 mLeadingPlayerScore;         // Score of mLeadingPlayer
-   S32 mSecondLeadingPlayer;        // Player index of mClientInfos with highest score
-   S32 mSecondLeadingPlayerScore;   // Score of mLeadingPlayer
 
    bool mCanSwitchTeams;            // Player can switch teams when this is true, not when it is false
-   bool mBetweenLevels;             // We'll need to prohibit certain things (like team changes) when game is in an "intermediate" state
+   bool mBetweenLevels;             // We need to prohibit certain things (like team changes) when game is in an "intermediate" state
    bool mGameOver;                  // Set to true when an end condition is met
 
-   bool mEngineerEnabled;
-   bool mEngineerUnrestrictedEnabled;
    bool mBotsAllowed;
+
+   bool mOvertime;                  // True when we're in overtime/extended play, false during the normal game
+   bool mSuddenDeath;               // True when we're in sudden death and next score wins (only possible in some GameTypes)
 
    // Info about current level
    string mLevelName;
    string mLevelDescription;
    StringTableEntry mLevelCredits;
 
-   string mScriptName;                 // Name of levelgen script, if any
-   Vector<string> mScriptArgs;         // List of script params  
+   string mScriptName;              // Name of levelgen script, if any
+   Vector<string> mScriptArgs;      // List of script params  
 
-   S32 mMinRecPlayers;         // Recommended min players for this level
-   S32 mMaxRecPlayers;         // Recommended max players for this level
+   S32 mMinRecPlayers;              // Recommended min players for this level
+   S32 mMaxRecPlayers;              // Recommended max players for this level
 
    Vector<SafePtr<MoveItem> > mCacheResendItem;  // Speed up c2sResendItemStatus
 
+   void initialize(Level *level, S32 winningScore);
+
    void idle_client(U32 deltaT);
    void idle_server(U32 deltaT);
+
+   void sendWallsToClient();
 
    void launchKillStreakTextEffects(const ClientInfo *clientInfo) const;
    void fewerBots(ClientInfo *clientInfo);
@@ -104,7 +113,7 @@ protected:
    Timer mScoreboardUpdateTimer;
 
    U32 mTotalGamePlay;  // Continuously counts up and never goes down. Used for syncing and gameplay stats. In Milliseconds.
-   U32 mEndingGamePlay; // Game over when mTotalGamePlay reaches mEndingGamePlay, 0 = no time limit. In Milliseconds.
+   U32 mEndingGamePlay; // Game over when mTotalGamePlay >= mEndingGamePlay, 0 = no time limit. In Milliseconds.
 
    Timer mGameTimeUpdateTimer;         // Timer for when to send clients a game clock update
                        
@@ -113,16 +122,23 @@ protected:
 
    void notifyClientsWhoHasTheFlag();           // Notify the clients when flag status changes... only called by some game types (server only)
    bool doTeamHasFlag(S32 teamIndex) const;     // Do the actual work of figuring out if the specified team has the flag  (server only)
-   void updateWhichTeamsHaveFlags();
+   void updateTeamFlagPossessionStatus(S32 teamIndex);
 
    static const S32 MaxMenuScore;
 
 public:
+   explicit GameType(S32 winningScore = DefaultWinningScore);  // Constructor
+   explicit GameType(Level *level);                            // Constructor
+
+   virtual ~GameType();                                        // Destructor
+
    static const S32 MAX_GAME_TIME = S32_MAX;
 
    static const S32 FirstTeamNumber = -2;                               // First team is "Hostile to All" with index -2
    static const U32 gMaxTeamCount = Game::MAX_TEAMS - FirstTeamNumber;  // Number of possible teams, including Neutral and Hostile to All
-   static const char *validateGameType(const char *gtype);              // Returns a valid gameType, defaulting to base class if needed
+
+   GameType *clone() const;
+   static string validateGameType(const string &gtype);                 // Returns a valid gameType, defaulting to base class if needed
 
    Game *getGame() const;
    bool onGhostAdd(GhostConnection *theConnection);
@@ -142,6 +158,10 @@ public:
    virtual bool canBeIndividualGame() const;
    virtual bool teamHasFlag(S32 teamIndex) const;
 
+   void setLevel(Level *level);
+
+   bool isOvertime() const;
+
    virtual void onFlagMounted(S32 teamIndex);         // A flag was picked up by a ship on the specified team
 
    S32 getWinningScore() const;
@@ -149,6 +169,7 @@ public:
 
    Vector<AbstractSpawn *> getSpawnPoints(TypeNumber typeNumber, S32 teamIndex = TeamNotSpecified);
 
+   static GameTypeId getGameTypeIdFromName(const string &name);
 
    // Info about the level itself
    bool hasFlagSpawns() const;      
@@ -159,25 +180,23 @@ public:
    void setGameTime(F32 timeInSeconds);
    void extendGameTime(S32 timeInMs);
 
-   U32 getTotalGameTime() const;            // In seconds
-   U32 getTotalGameTimeInMs() const;            // In milliseconds
-   U32 getTotalGamePlayedInMs() const;    // In milliseconds
-   S32 getRemainingGameTime() const;        // In seconds
-   S32 getRemainingGameTimeInMs() const;    // In ms
-   string getRemainingGameTimeInMinutesString() const;        // In seconds
+   U32 getTotalGameTime() const;                         // In seconds
+   U32 getTotalGameTimeInMs() const;                     // In milliseconds
+   U32 getTotalGamePlayedInMs() const;                   // In milliseconds
+   S32 getRemainingGameTime() const;                     // In seconds
+   S32 getRemainingGameTimeInMs() const;                 // In milliseconds
+   string getRemainingGameTimeInMinutesString() const;   // In seconds
    bool isTimeUnlimited() const;
    S32 getRenderingOffset() const;
    /////
    
-
    S32 getLeadingScore() const;
    S32 getLeadingTeam() const;
-   S32 getLeadingPlayerScore() const;
-   S32 getLeadingPlayer() const;
-   S32 getSecondLeadingPlayerScore() const;
-   S32 getSecondLeadingPlayer() const;
 
-   void addWall(const WallRec &barrier, Game *game);
+   bool isEngineerEnabled() const;
+   void setEngineerEnabled(bool enabled);
+   bool isEngineerUnrestrictedEnabled() const;
+   void setEngineerUnrestrictedEnabled(bool enabled);
 
    virtual bool isFlagGame() const; // Does game use flags?
    virtual S32 getFlagCount();      // Return the number of game-significant flags
@@ -195,25 +214,13 @@ public:
    enum
    {
       RespawnDelay = 1500,
-      SwitchTeamsDelay = 60000,   // Time between team switches (ms) -->  60000 = 1 minute
-      naScore = -99999,           // Score representing a nonsesical event
-      NO_FLAG = -1,               // Constant used for ship not having a flag
+      SwitchTeamsDelay = ONE_MINUTE,   // Time between team switches
+      naScore = -99999,                // Score representing a nonsesical event
+      NO_FLAG = -1,                    // Constant used for ship not having a flag
    };
-
-
-   const Vector<WallRec> *getBarrierList();
 
    S32 mObjectsExpected;            // Count of objects we expect to get with this level (for display purposes only)
-
-   struct ItemOfInterest
-   {
-      SafePtr<MoveItem> theItem;
-      U32 teamVisMask;        // Bitmask, where 1 = object is visible to team in that position, 0 if not
-   };
-
-   Vector<ItemOfInterest> mItemsOfInterest;
-
-   void addItemOfInterest(MoveItem *theItem);
+   S32 getObjectsLoaded() const;
 
    void broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, const StringTableEntry &formatString);
 
@@ -228,16 +235,7 @@ public:
 
    static Vector<string> getGameTypeNames();
 
-   bool mHaveSoccer;                // Does level have soccer balls? used to determine weather or not to send s2cSoccerCollide
-
    bool mBotZoneCreationFailed;
-
-   enum
-   {
-      MaxPing = 999,
-      DefaultGameTime = 10 * 60 * 1000,
-      DefaultWinningScore = 8,
-   };
 
    // Some games have extra game parameters.  We need to create a structure to communicate those parameters to the editor so
    // it can make an intelligent decision about how to handle them.  Note that, for now, all such parameters are assumed to be S32.
@@ -251,37 +249,31 @@ public:
       S32 maxval;    // Max value for this param
    };
 
-   enum ScoringGroup
-   {
-      IndividualScore,
-      TeamScore,
-   };
 
    virtual S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
    static string getScoringEventDescr(ScoringEvent event);
 
    // Static vectors used for constructing update RPCs
+   static const S32 MaxPing = 999;
+
    static Vector<RangedU32<0, MaxPing> > mPingTimes;
    static Vector<SignedInt<24> > mScores;
    static Vector<SignedFloat<8> > mRatings;
 
-   explicit GameType(S32 winningScore = DefaultWinningScore);    // Constructor
-   virtual ~GameType();                                 // Destructor
+   void addToGame(Game *game);
+   virtual void addToGame(Game *game, Level *level);
 
-   virtual void addToGame(Game *game, GridDatabase *database);
-
-   virtual bool processArguments(S32 argc, const char **argv, Game *game);
+   virtual bool processArguments(S32 argc, const char **argv, Level *level);
    virtual string toLevelCode() const;
 
 #ifndef ZAP_DEDICATED
-   virtual Vector<string> getGameParameterMenuKeys();
-   virtual boost::shared_ptr<MenuItem> getMenuItem(const string &key);
+   virtual const Vector<string> *getGameParameterMenuKeys() const;
+   virtual boost::shared_ptr<MenuItem> getMenuItem(const string &key) const;
    virtual bool saveMenuItem(const MenuItem *menuItem, const string &key);
 #endif
 
    virtual bool processSpecialsParam(const char *param);
    virtual string getSpecialsLine();
-
 
    string getLevelName() const;
    void setLevelName(const StringTableEntry &levelName);
@@ -289,7 +281,7 @@ public:
    const char *getLevelDescription() const;
    void setLevelDescription(const string &levelDescription);
 
-   const StringTableEntry *getLevelCredits() const;
+   string getLevelCredits() const;
    void setLevelCredits(const StringTableEntry &levelCredits);
 
    S32 getMinRecPlayers();
@@ -297,11 +289,6 @@ public:
 
    S32 getMaxRecPlayers();
    void setMaxRecPlayers(S32 maxPlayers);
-
-   bool isEngineerEnabled();
-   void setEngineerEnabled(bool enabled);
-   bool isEngineerUnrestrictedEnabled();
-   void setEngineerUnrestrictedEnabled(bool enabled);
 
    bool areBotsAllowed();
    void setBotsAllowed(bool allowed);
@@ -328,11 +315,15 @@ public:
 
    void achievementAchieved(U8 achievement, const StringTableEntry &playerName);
 
-   virtual void onGameOver();
+   bool onGameOver();
+   void startOvertime();                     // If game ends in a tie, start overtime
+   virtual void onOvertimeStarted();         // Handle GameType specific overtime settings  
+   void startSuddenDeath();
+
 
    void serverAddClient(ClientInfo *clientInfo);         
 
-   void serverRemoveClient(ClientInfo *clientInfo);   // Remove a client from the game
+   void removeClient(ClientInfo *clientInfo);   // Remove a client from the game
 
    virtual bool objectCanDamageObject(BfObject *damager, BfObject *victim);
    virtual void controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject);
@@ -348,8 +339,8 @@ public:
    virtual S32 renderTimeLeftSpecial(S32 right, S32 bottom, bool render) const;
 
    void renderObjectiveArrow(const BfObject *target, S32 canvasWidth, S32 canvasHeigh) const;
-   void renderObjectiveArrow(const BfObject *target, const Color *c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod = 1.0f) const;
-   void renderObjectiveArrow(const Point &p, const Color *c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod = 1.0f) const;
+   void renderObjectiveArrow(const BfObject *target, const Color &c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod = 1.0f) const;
+   void renderObjectiveArrow(const Point &point, const Color &c, S32 canvasWidth, S32 canvasHeight, F32 alphaMod = 1.0f) const;
 #endif
 
 
@@ -358,11 +349,10 @@ public:
    void makeRequestedLoadoutActiveIfShipIsInLoadoutZone(ClientInfo *clientInfo, const LoadoutTracker &loadout);
    void updateShipLoadout(BfObject *shipObject); // called from LoadoutZone when a Ship touches the zone
 
-   bool makeSureTeamCountIsNotZero();                 // Zero teams can cause crashiness
+   virtual const Color &getTeamColor(const BfObject *object) const; // Get the color of a team, based on object
+           const Color &getTeamColor(S32 team)               const; // Get the color of a team, based on index
 
-   virtual const Color *getTeamColor(const BfObject *object) const; // Get the color of a team, based on object
-           const Color *getTeamColor(S32 team)               const; // Get the color of a team, based on index
-
+   bool isSuddenDeath() const;
 
    //S32 getTeam(const StringTableEntry &playerName);   // Given a player's name, return their team
 
@@ -377,7 +367,6 @@ public:
 
    virtual void shipTouchZone(Ship *ship, GoalZone *zone);
 
-   void queryItemsOfInterest();
    void performScopeQuery(GhostConnection *connection);
    virtual void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
 
@@ -385,7 +374,9 @@ public:
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringPtr levelDesc, StringPtr musicName, S32 teamScoreLimit,
                                      StringTableEntry levelCreds, S32 objectCount, 
                                      bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId));
-   TNL_DECLARE_RPC(s2cAddWalls, (Vector<F32> barrier, F32 width, bool solid));
+   TNL_DECLARE_RPC(s2cAddWalls,     (Vector<Point> barrier, F32 width));
+   TNL_DECLARE_RPC(s2cAddPolyWalls, (Vector<Point> barrier));
+
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isAuthenticated, Int<BADGE_COUNT> badges, 
                                   U16 gamesPlayed, RangedU32<0, ClientInfo::MaxKillStreakLength> killStreak,
@@ -399,6 +390,8 @@ public:
    TNL_DECLARE_RPC(c2sSyncMessagesComplete, (U32 sequence));
 
    TNL_DECLARE_RPC(s2cSetGameOver, (bool gameOver));
+   TNL_DECLARE_RPC(s2cSetOvertime, ());
+
    TNL_DECLARE_RPC(s2cSetNewTimeRemaining, (U32 timeEndingInMs));
    TNL_DECLARE_RPC(s2cChangeScoreToWin, (U32 score, StringTableEntry changer));
 
@@ -406,8 +399,8 @@ public:
 
    TNL_DECLARE_RPC(s2cCanSwitchTeams, (bool allowed));
 
-   TNL_DECLARE_RPC(s2cRenameClient, (StringTableEntry oldName,StringTableEntry newName));
-   void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName);
+   TNL_DECLARE_RPC(s2cRenameClient, (StringTableEntry oldName, StringTableEntry newName));
+   void updateClientChangedName(ClientInfo *clientInfo, const StringTableEntry &newName);
 
    TNL_DECLARE_RPC(s2cRemoveClient, (StringTableEntry clientName));
 
@@ -417,12 +410,10 @@ public:
    void updateScore(Ship *ship, ScoringEvent event, S32 data = 0);              
    void updateScore(ClientInfo *clientInfo, ScoringEvent scoringEvent, S32 data = 0); 
    void updateScore(S32 team, ScoringEvent event, S32 data = 0);
-   virtual void updateScore(ClientInfo *player, S32 team, ScoringEvent event, S32 data = 0); // Core uses their own updateScore
+   virtual void updateScore(ClientInfo *player, S32 team, ScoringEvent event, S32 data = 0); // Core uses its own updateScore
 
    void updateLeadingTeamAndScore();   // Sets mLeadingTeamScore and mLeadingTeam
-   void updateLeadingPlayerAndScore(); // Sets mLeadingTeamScore and mLeadingTeam
    void updateRatings();               // Update everyone's game-normalized ratings at the end of the game
-
 
    TNL_DECLARE_RPC(s2cSetTeamScore, (RangedU32<0, Game::MAX_TEAMS> teamIndex, U32 score));
    TNL_DECLARE_RPC(s2cSetPlayerScore, (U16 index, S32 score));

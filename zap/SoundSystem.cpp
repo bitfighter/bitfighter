@@ -267,7 +267,7 @@ SoundSystem::~SoundSystem()
 
 // Initialize the sound sub-system
 // Use ALURE to ease the use of OpenAL
-void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &musicDir, float musicVolLevel)
+void SoundSystem::init(SfxSet sfxSet, const string &sfxDir, const string &musicDir, float musicVolLevel)
 {
    // Initialize the sound device
    if(!alureInitDevice(NULL, NULL))    // <=== causes crash on exit
@@ -304,7 +304,7 @@ void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &music
       logprintf(LogConsumer::LogWarning, "Failed to set proper sound gain distance model!  Sounds will be off..\n");
 
    // Choose the sound set
-   if(sfxSet == sfxClassicSet)
+   if(sfxSet == SfxSetClassic)
       gSFXProfiles = sfxProfilesClassic;
    else
       gSFXProfiles = sfxProfilesModern;
@@ -1169,7 +1169,7 @@ void SoundSystem::queueVoiceChatBuffer(const SFXHandle &effect, ByteBufferPtr p)
    // Do nothing
 }
 
-void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &musicDir, float musicVol)
+void SoundSystem::init(SfxSet sfxSet, const string &sfxDir, const string &musicDir, float musicVolLevel)
 {
    logprintf(LogConsumer::LogError, "No OpenAL support on this platform.");
 }

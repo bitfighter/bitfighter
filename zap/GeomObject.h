@@ -7,19 +7,24 @@
 #define _GEOMOBJECT_H_
 
 #include "Geometry_Base.h"    // For Geometry class def
-#include "Point.h"
 
-//#include "gtest/gtest_prod.h"
+#include "Point.h"
+#include "tnlVector.h"
 
 #include <string>
+
+using namespace TNL;
 
 namespace Zap
 {
 
 class GeometryContainer
 {
+   friend class GeomObject;
+
 private:
    Geometry *mGeometry;
+   void setGeometry(Geometry *geometry);
 
 public:
    GeometryContainer();                                     // Constructor
@@ -27,7 +32,8 @@ public:
    virtual ~GeometryContainer();                            // Destructor
 
    Geometry *getGeometry() const;
-   void setGeometry(Geometry *geometry);
+   void setGeometry(const Vector<Point> &points);
+
    void reverseWinding();
 
    const Vector<Point> *getOutline() const;
@@ -60,7 +66,7 @@ public:
    S32 getMinVertCount() const;       // Minimum  vertices geometry needs to be viable
    S32 getVertCount() const;          // Actual number of vertices in the geometry
 
-   bool anyVertsSelected();
+   bool anyVertsSelected() const;
    void selectVert(S32 vertIndex);
    void aselectVert(S32 vertIndex);   // Select another vertex (remember cmdline ArcInfo?)
    void unselectVert(S32 vertIndex);
@@ -71,14 +77,17 @@ public:
    bool deleteVert(S32 vertIndex);
    bool insertVert(Point vertex, S32 vertIndex);
    void unselectVerts();
-   bool vertSelected(S32 vertIndex);
+   bool vertSelected(S32 vertIndex) const;
 
    // Transforming the geometry
    void rotateAboutPoint(const Point &center, F32 angle);
-   void flip(F32 center, bool isHoriz);                   // Do a horizontal or vertical flip about line at center
+   void flip(F32 center, bool isHoriz);               // Do a horizontal or vertical flip about line at center
    void scale(const Point &center, F32 scale);
-   void moveTo(const Point &pos, S32 snapVertex = 0);     // Move object to location, specifying (optional) vertex to be positioned at pos
-   void offset(const Point &offset);                      // Offset object by a certain amount
+   void offset(const Point &offset);                  // Offset object by a certain amount
+
+   // Move object to location, specifying (optional) vertex to be positioned at pos
+   virtual void moveTo(const Point &pos, S32 snapVertex = 0);  
+   
 
    // Getting parts of the geometry
    Point getCentroid() const;
@@ -92,6 +101,8 @@ public:
    virtual Rect calcExtents();
    bool hasGeometry() const;
 
+   void setGeometry(const Vector<Point> &points);
+
    void disableTriangulation();
 
    // Sending/receiving
@@ -102,7 +113,8 @@ public:
    string geomToLevelCode() const;
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
-   virtual void onPointsChanged();
+   GeometryContainer &getGeometry();
+
    virtual void onGeomChanging();      // Item geom is interactively changing
    virtual void onGeomChanged();       // Item changed geometry (or moved), do any internal updating that might be required
 

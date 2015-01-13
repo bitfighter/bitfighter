@@ -23,14 +23,19 @@ class CoreGameType : public GameType
 private:
    Vector<SafePtr<CoreItem> > mCores;
 
+   Vector<string> makeParameterMenuKeys() const;
+
 public:
    static const S32 DestroyedCoreScore = 1;
 
    CoreGameType();            // Constructor
    virtual ~CoreGameType();   // Destructor
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
+
+   void idle(BfObject::IdleCallPath path, U32 deltaT);
+
 
    bool isTeamCoreBeingAttacked(S32 teamIndex) const;
 
@@ -45,9 +50,11 @@ public:
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
    void score(ClientInfo *destroyer, S32 coreOwningTeam, S32 score);
 
+   void onOvertimeStarted();
+
 
 #ifndef ZAP_DEDICATED
-   Vector<string> getGameParameterMenuKeys();
+   const Vector<string> *getGameParameterMenuKeys() const;
    void renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const;
 #endif
 
@@ -77,8 +84,8 @@ struct PanelGeom
    F32 angle;
    bool isValid;
 
-   Point getStart(S32 i) { return vert[i % CORE_PANELS]; }
-   Point getEnd(S32 i)   { return vert[(i + 1) % CORE_PANELS]; }
+   Point getStart(S32 i) const { return vert[i % CORE_PANELS]; }
+   Point getEnd(S32 i) const   { return vert[(i + 1) % CORE_PANELS]; }
 };
 
 
@@ -134,12 +141,14 @@ public:
    CoreItem *clone() const;
 
    static F32 getCoreAngle(U32 time);
-   void renderItem(const Point &pos);
+   void renderItem(const Point &pos) const;
    bool shouldRender() const;
 
    const Vector<Point> *getCollisionPoly() const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(BfObject *otherObject);
+   void degradeAllPanels(F32 amount);
+
 
    bool isBeingAttacked();
 
@@ -151,7 +160,7 @@ public:
    bool isPanelInRepairRange(const Point &origin, S32 panelIndex);
 
    Vector<Point> getRepairLocations(const Point &repairOrigin);
-   PanelGeom *getPanelGeom();
+   PanelGeom getPanelGeom() const;
    static void fillPanelGeom(const Point &pos, S32 time, PanelGeom &panelGeom);
 
 
@@ -161,6 +170,10 @@ public:
 #endif
 
    void damageObject(DamageInfo *theInfo);
+   bool damagePanel(S32 panelIndex, F32 damage, F32 minHealth = 0);
+   bool checkIfCoreIsDestroyed() const;
+   void coreDestroyed(const DamageInfo *damageInfo);
+
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
 
 #ifndef ZAP_DEDICATED
@@ -173,7 +186,7 @@ public:
 
    void idle(BfObject::IdleCallPath path);
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
+   bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
 
    TNL_DECLARE_CLASS(CoreItem);
@@ -181,14 +194,19 @@ public:
    void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
 
    ///// Editor methods
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
 
-   F32 getEditorRadius(F32 currentScale);
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);    
-   void renderDock();
+#ifndef ZAP_DEDICATED
+   bool startEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+#endif
+
+   F32 getEditorRadius(F32 currentScale) const;
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;    
+   void renderDock(const Color &color) const;
 
    bool canBeHostile();
    bool canBeNeutral();

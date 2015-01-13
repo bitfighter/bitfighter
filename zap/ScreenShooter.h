@@ -39,7 +39,6 @@ private:
 
    static bool writePNG(const char *file_name, png_bytep *rows,
                         S32 width, S32 height, S32 colorType, S32 bitDepth);
-
 public:
    ScreenShooter();
    virtual ~ScreenShooter();

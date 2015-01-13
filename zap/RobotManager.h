@@ -40,7 +40,7 @@ public:
 
    void balanceTeams();
 
-   string addBot(const Vector<const char *> &args, ClientInfo::ClientClass clientClass, S32 teamIndex = NO_TEAM);
+   string addBot(const Vector<string> &args, ClientInfo::ClientClass clientClass, S32 teamIndex = NO_TEAM);
 
    static S32 getMaxBots(GameSettings *settings, bool isAdmin);
 

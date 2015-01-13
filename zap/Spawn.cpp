@@ -6,6 +6,7 @@
 #include "Spawn.h"
 
 #include "game.h"
+#include "Level.h"
 
 #include "stringUtils.h"         // For itos()
 #include "gameObjectRender.h"    // For renderSquareItem(), renderFlag(), drawCircle()
@@ -14,15 +15,15 @@
 #include "gameConnection.h"
 #include "tnlRandom.h"
 
+#ifndef ZAP_DEDICATED
+#  include "UIQuickMenu.h"
+#endif
+
+
 namespace Zap
 {
 
 using namespace LuaArgs;
-
-// Statics:
-#ifndef ZAP_DEDICATED
-   EditorAttributeMenuUI *AbstractSpawn::mAttributeMenuUI = NULL;
-#endif
 
 // TODO: Move all time related stuff down to ItemSpawn
 
@@ -54,27 +55,27 @@ void AbstractSpawn::setRespawnTime(S32 time)       // in seconds
 
 
 // In game radius -- these are never displayed or interacted with; radius doesn't matter
-F32 AbstractSpawn::getRadius()
+F32 AbstractSpawn::getRadius() const
 {
    return 1;      
 }
 
 
-F32 AbstractSpawn::getEditorRadius(F32 currentScale)
+F32 AbstractSpawn::getEditorRadius(F32 currentScale) const
 {
    return 12;     // Constant size, regardless of zoom
 }
 
 
 // Looking for <x> <y> {spawn-time}
-bool AbstractSpawn::processArguments(S32 argc, const char **argv, Game *game)
+bool AbstractSpawn::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 2)
       return false;
 
    Point pos;
    pos.read(argv);
-   pos *= game->getLegacyGridSize();
+   pos *= level->getLegacyGridSize();
 
    setPos(pos);
 
@@ -200,7 +201,7 @@ Spawn *Spawn::clone() const
 
 
 // Spawn <team> <x> <y>
-bool Spawn::processArguments(S32 argc, const char **argv, Game *game)
+bool Spawn::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 3)
       return false;
@@ -208,7 +209,7 @@ bool Spawn::processArguments(S32 argc, const char **argv, Game *game)
    S32 teamIndex = atoi(argv[0]);
    setTeam(teamIndex);
 
-   Parent::processArguments(argc - 1, argv + 1, game);
+   Parent::processArguments(argc - 1, argv + 1, level);
 
    return true;
 }
@@ -221,10 +222,11 @@ string Spawn::toLevelCode() const
 }
 
 
-const char *Spawn::getOnScreenName()     { return "Spawn";        }
-const char *Spawn::getOnDockName()       { return "Spawn";        }
-const char *Spawn::getPrettyNamePlural() { return "Spawn Points"; }
-const char *Spawn::getEditorHelpString() { return "Location where ships start.  At least one per team is required. [G]"; }
+const char *Spawn::getOnScreenName()      const { return "Spawn";        }
+const char *Spawn::getOnDockName()        const { return "Spawn";        }
+const char *Spawn::getPrettyNamePlural()  const { return "Spawn Points"; }
+const char *Spawn::getEditorHelpString()  const { return "Location where ships start.  At least one per team is required. [G]"; }
+
 
 const char *Spawn::getClassName() const  { return "Spawn"; }
 
@@ -235,7 +237,7 @@ S32 Spawn::getDefaultRespawnTime()
 }
 
 
-void Spawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void Spawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    renderSpawn(getPos(), 1/currentScale, getColor());
@@ -243,7 +245,7 @@ void Spawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bo
 }
 
 
-void Spawn::renderDock()
+void Spawn::renderDock(const Color &color) const
 {
    renderEditor(1, false);
 }
@@ -295,10 +297,12 @@ void ItemSpawn::spawn()
    resetTimer();     // Reset the spawn timer
 }
 
+
 void ItemSpawn::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
 }
+
 
 void ItemSpawn::idle(IdleCallPath path)
 {
@@ -312,9 +316,29 @@ void ItemSpawn::idle(IdleCallPath path)
 
 // These methods exist solely to make ItemSpawn instantiable so it can be instantiated by Lua... even though it never will
 const char *ItemSpawn::getClassName() const                                       { TNLAssert(false, "Not implemented!"); return ""; }
-S32 ItemSpawn::getDefaultRespawnTime()                                            { TNLAssert(false, "Not implemented!");  return 0; }
-void ItemSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) { TNLAssert(false, "Not implemented!"); }
-void ItemSpawn::renderDock()                                                      { TNLAssert(false, "Not implemented!"); }
+S32 ItemSpawn::getDefaultRespawnTime()                                            { TNLAssert(false, "Not implemented!"); return 0;  }
+void ItemSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const { TNLAssert(false, "Not implemented!"); }
+void ItemSpawn::renderDock(const Color &color) const                              { TNLAssert(false, "Not implemented!"); }
+
+
+#ifndef ZAP_DEDICATED
+
+bool ItemSpawn::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   CounterMenuItem *menuItem = new CounterMenuItem("Spawn Timer:", getSpawnTime(), 1, 0, 1000, "secs", "Never spawns",
+      "Time it takes for each item to be spawned");
+   attributeMenu->addMenuItem(menuItem);
+
+   return true;
+}
+
+
+void ItemSpawn::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   setSpawnTime(attributeMenu->getMenuItem(0)->getIntValue());
+}
+
+#endif
 
 
 /////
@@ -458,10 +482,11 @@ AsteroidSpawn *AsteroidSpawn::clone() const
 }
 
 
-const char *AsteroidSpawn::getOnScreenName()     { return "AsteroidSpawn";         }
-const char *AsteroidSpawn::getOnDockName()       { return "ASP";                   }
-const char *AsteroidSpawn::getPrettyNamePlural() { return "Asteroid Spawn Points"; }
-const char *AsteroidSpawn::getEditorHelpString() { return "Periodically spawns a new asteroid."; }
+const char *AsteroidSpawn::getOnScreenName()     const  { return "AsteroidSpawn";         }
+const char *AsteroidSpawn::getOnDockName()       const  { return "ASP";                   }
+const char *AsteroidSpawn::getPrettyNamePlural() const  { return "Asteroid Spawn Points"; }
+const char *AsteroidSpawn::getEditorHelpString() const  { return "Periodically spawns a new asteroid."; }
+
 
 const char *AsteroidSpawn::getClassName() const  { return "AsteroidSpawn"; }
 
@@ -493,7 +518,7 @@ void AsteroidSpawn::spawn()
 
    asteroid->setPosAng(getPos(), ang);
 
-   asteroid->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
+   asteroid->addToGame(game, game->getLevel());              // And add it to the list of game objects
    s2cSetTimeUntilSpawn(mTimer.getCurrent());
 }
 
@@ -525,15 +550,14 @@ void AsteroidSpawn::unpackUpdate(GhostConnection *connection, BitStream *stream)
 void AsteroidSpawn::renderLayer(S32 layerIndex)
 {
 #ifndef ZAP_DEDICATED
-   if(layerIndex != -1)
-      return;
-
-   renderAsteroidSpawn(getPos(), mTimer.getCurrent());
+   // Draw on top of most things, including walls (like RepairItem)
+   if(layerIndex == 1)
+      renderAsteroidSpawn(getPos(), mTimer.getCurrent());
 #endif
 }
 
 
-void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    renderAsteroidSpawnEditor(getPos(), 1/currentScale);
@@ -541,7 +565,7 @@ void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEna
 }
 
 
-void AsteroidSpawn::renderDock()
+void AsteroidSpawn::renderDock(const Color &color) const
 {
 #ifndef ZAP_DEDICATED
    renderAsteroidSpawnEditor(getPos());
@@ -631,14 +655,14 @@ void FlagSpawn::initialize()
 
 
 // FlagSpawn <team> <x> <y> {spawn time}
-bool FlagSpawn::processArguments(S32 argc, const char **argv, Game *game)
+bool FlagSpawn::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 3)
       return false;
 
    setTeam(atoi(argv[0]));
    
-   return Parent::processArguments(argc - 1, argv + 1, game);     // then read the rest of the args
+   return Parent::processArguments(argc - 1, argv + 1, level);    // Read the rest of the args
 }
 
 
@@ -676,10 +700,11 @@ void FlagSpawn::resetTimer()
 }
 
 
-const char *FlagSpawn::getOnScreenName()     { return "FlagSpawn";         }
-const char *FlagSpawn::getOnDockName()       { return "FlagSpawn";         }
-const char *FlagSpawn::getPrettyNamePlural() { return "Flag Spawn points"; }
-const char *FlagSpawn::getEditorHelpString() { return "Location where flags (or balls in Soccer) spawn after capture."; }
+const char *FlagSpawn::getOnScreenName()     const  { return "FlagSpawn";         }
+const char *FlagSpawn::getOnDockName()       const  { return "FlagSpawn";         }
+const char *FlagSpawn::getPrettyNamePlural() const  { return "Flag Spawn points"; }
+const char *FlagSpawn::getEditorHelpString() const  { return "Location where flags (or balls in Soccer) spawn after capture."; }
+
 
 const char *FlagSpawn::getClassName() const  { return "FlagSpawn"; }
 
@@ -690,7 +715,7 @@ S32 FlagSpawn::getDefaultRespawnTime()
 }
 
 
-void FlagSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void FlagSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
@@ -699,7 +724,7 @@ void FlagSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled
 }
 
 
-void FlagSpawn::renderDock()
+void FlagSpawn::renderDock(const Color &color) const
 {
    renderEditor(1, false);
 }

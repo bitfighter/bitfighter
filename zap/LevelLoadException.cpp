@@ -3,38 +3,13 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#ifdef _MSC_VER
-#  pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
-#endif
-
-#include "gameLoader.h"
-#include "stringUtils.h"
-
-#include "tnl.h"
-#include "tnlLog.h"
-
-#include <fstream>
-#include <sstream>
-
-#include <stdio.h>
-
-#  ifdef TNL_OS_WIN32
-#     include "../other/dirent.h"        // Need local copy for Windows builds
-#  else
-#     include <dirent.h>        // Need standard copy for *NIXes
-#  endif
-
-
-using namespace TNL;
-
-
-namespace Zap
-{
-
+#include "LevelLoadException.h"
 
 using namespace std;
 
 
+namespace Zap
+{
 
 // Constructor
 LevelLoadException::LevelLoadException(string str) : msg(str)

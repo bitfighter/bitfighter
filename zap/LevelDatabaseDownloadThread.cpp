@@ -31,16 +31,15 @@ LevelDatabaseDownloadThread::LevelDatabaseDownloadThread(const string &levelId, 
    levelFileName = "db_" + mLevelId + ".level";
 
    FolderManager *fm = mGame->getSettings()->getFolderManager();
-   levelDir = fm->levelDir;
+   levelDir = fm->getLevelDir();
    string filePath = joindir(levelDir, levelFileName);
 
    if(fileExists(filePath))
    {
       // Check if file is on our delete list... if so, we can clobber it.  But we also need to remove it from the skiplist.
       if(mGame->getSettings()->isLevelOnSkipList(levelFileName))
-      {
          mGame->getSettings()->removeLevelFromSkipList(levelFileName);
-      }
+
       else     // File exists and is not on the skip list... show an error message
       {
          mGame->displayErrorMessage("!!! Already have a file called %s on the server.  Download aborted.", filePath.c_str());

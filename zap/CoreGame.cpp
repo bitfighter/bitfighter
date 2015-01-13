@@ -5,11 +5,13 @@
 
 #include "CoreGame.h"
 
+#include "Level.h"
 #include "SoundSystem.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "gameObjectRender.h"
+#  include "UIQuickMenu.h"
 #endif
 
 #include "Colors.h"
@@ -22,10 +24,12 @@ namespace Zap {
 
 using namespace LuaArgs;
 
+
 CoreGameType::CoreGameType() : GameType(0)  // Winning score hard-coded to 0
 {
    // Do nothing
 }
+
 
 CoreGameType::~CoreGameType()
 {
@@ -33,7 +37,7 @@ CoreGameType::~CoreGameType()
 }
 
 
-bool CoreGameType::processArguments(S32 argc, const char **argv, Game *game)
+bool CoreGameType::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc > 0)
       setGameTime(F32(atof(argv[0]) * 60.0));      // Game time, stored in minutes in level file
@@ -70,6 +74,20 @@ void CoreGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) con
 }
 
 
+void CoreGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
+{
+   Parent::idle(path, deltaT);
+
+   if(isServer()) 
+      if(isOvertime())
+      {
+         static const F32 OvertimeDegradeRate = 0.01f;      // 1 % per second
+         for(S32 i = 0; i < mCores.size(); i++)
+            mCores[i]->degradeAllPanels(OvertimeDegradeRate * deltaT / 1000);
+      }
+}
+
+
 bool CoreGameType::isTeamCoreBeingAttacked(S32 teamIndex) const
 {
    for(S32 i = mCores.size() - 1; i >= 0; i--)
@@ -86,19 +104,26 @@ bool CoreGameType::isTeamCoreBeingAttacked(S32 teamIndex) const
 
 
 #ifndef ZAP_DEDICATED
-Vector<string> CoreGameType::getGameParameterMenuKeys()
+
+Vector<string> CoreGameType::makeParameterMenuKeys() const
 {
-   Vector<string> items = Parent::getGameParameterMenuKeys();
+   // Start with the keys from our parent (GameType)
+   Vector<string> items = *Parent::getGameParameterMenuKeys();
 
    // Remove "Win Score" as that's not needed here -- win score is determined by the number of cores
-   for(S32 i = 0; i < items.size(); i++)
-      if(items[i] == "Win Score")
-      {
-         items.erase(i);
-         break;
-      }
- 
+   S32 index = items.getIndex("Win Score");
+   TNLAssert(index >= 0, "Invalid index!");     // Protect against text of Win Score being changed in parent
+
+   items.erase(index);
+
    return items;
+}
+
+
+const Vector<string> *CoreGameType::getGameParameterMenuKeys() const
+{
+   static const Vector<string> keys = makeParameterMenuKeys();
+   return &keys;
 }
 #endif
 
@@ -126,6 +151,7 @@ void CoreGameType::removeCore(CoreItem *core)
 }
 
 
+// Overrides GameType function
 void CoreGameType::updateScore(ClientInfo *player, S32 team, ScoringEvent event, S32 data)
 {
    if(isGameOver()) // Game play ended, no changing score
@@ -140,14 +166,15 @@ void CoreGameType::updateScore(ClientInfo *player, S32 team, ScoringEvent event,
 
    if((event == OwnCoreDestroyed || event == EnemyCoreDestroyed) && U32(team) < U32(getGame()->getTeamCount()))
    {
-      ((Team *)getGame()->getTeam(team))->addScore(-1); // Count down when a core is destoryed
+      getGame()->getTeam(team)->addScore(-1);      // Count down when a core is destoryed
       S32 numberOfTeamsHaveSomeCores = 0;
-      s2cSetTeamScore(team, ((Team *)(getGame()->getTeam(team)))->getScore());     // Broadcast result
+
+      s2cSetTeamScore(team, getGame()->getTeam(team)->getScore());     // Broadcast result
+
       for(S32 i = 0; i < getGame()->getTeamCount(); i++)
-      {
-         if(((Team *)getGame()->getTeam(i))->getScore() != 0)
+         if(getGame()->getTeam(i)->getScore() != 0)
             numberOfTeamsHaveSomeCores++;
-      }
+
       if(numberOfTeamsHaveSomeCores <= 1)
          gameOverManGameOver();
    }
@@ -212,14 +239,28 @@ void CoreGameType::score(ClientInfo *destroyer, S32 coreOwningTeam, S32 score)
          updateScore(NULL, coreOwningTeam, OwnCoreDestroyed, score);
       }
    }
-   else
+   else     // No or unknown destroyer
    {
-      e.push_back(getGame()->getTeamName(coreOwningTeam));
+      static StringTableEntry killString("Something destroyed a %e0 Core!");
 
-      static StringTableEntry capString("Something destroyed a %e0 Core!");
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
+      e.push_back(getGame()->getTeamName(coreOwningTeam));
+      
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, killString, e);
 
       updateScore(NULL, coreOwningTeam, EnemyCoreDestroyed, score);
+   }
+}
+
+
+// In Core games, we'll enter sudden death... next score wins
+void CoreGameType::onOvertimeStarted()
+{
+   startSuddenDeath();
+
+   if(isClient())
+   {
+      // Augment messages shown by startSuddenDeath()
+      getGame()->emitDelayedTextEffect(1500, "CORES WEAKEN!", Colors::red, Point(0,0), false);
    }
 }
 
@@ -268,7 +309,7 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
    mHasExploded = false;
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
    mCurrentExplosionNumber = 0;
-   mPanelGeom.isValid = false;
+   //mPanelGeom.isValid = false;
    mRotateSpeed = 1;
 
 
@@ -300,9 +341,10 @@ CoreItem::~CoreItem()
    LUAW_DESTRUCTOR_CLEANUP;
 
    // Alert the gameType, if it still exists (it might not when the game is over)
-   if(getGame())
+   if(getDatabase())
    {
-      GameType *gameType = getGame()->getGameType();
+      GameType *gameType = static_cast<Level *>(getDatabase())->getGameType();
+
       if(gameType && gameType->getGameTypeId() == CoreGame)
          static_cast<CoreGameType *>(gameType)->removeCore(this);
    }
@@ -321,14 +363,15 @@ F32 CoreItem::getCoreAngle(U32 time)
 }
 
 
-void CoreItem::renderItem(const Point &pos)
+void CoreItem::renderItem(const Point &pos) const
 {
 #ifndef ZAP_DEDICATED
    if(shouldRender())
    {
-      GameType *gameType = getGame()->getGameType();
+      GameType *gameType = static_cast<Level *>(getDatabase())->getGameType();
       S32 time = gameType->getTotalGamePlayedInMs();
-      renderCore(pos, getColor(), time, getPanelGeom(), mPanelHealth, mStartingPanelHealth);
+      PanelGeom panelGeom = getPanelGeom();
+      renderCore(pos, getColor(), time, &panelGeom, mPanelHealth, mStartingPanelHealth);
    }
 #endif
 }
@@ -340,16 +383,16 @@ bool CoreItem::shouldRender() const
 }
 
 
-void CoreItem::renderDock()
+void CoreItem::renderDock(const Color &color) const
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
-   renderCoreSimple(pos, &Colors::white, 10);
+   renderCoreSimple(pos, Colors::white, 10);
 #endif
 }
 
 
-void CoreItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void CoreItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
@@ -389,17 +432,18 @@ void CoreGameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) c
 // Render some attributes when item is selected but not being edited
 void CoreItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
-   keys.push_back("Health");   values.push_back(itos(S32(mStartingHealth * DamageReductionRatio + 0.5)));
+   keys.push_back("Health");   
+   values.push_back(itos(S32(mStartingHealth * DamageReductionRatio + 0.5)));
 }
 
 
-const char *CoreItem::getOnScreenName()     { return "Core";  }
-const char *CoreItem::getOnDockName()       { return "Core";  }
-const char *CoreItem::getPrettyNamePlural() { return "Cores"; }
-const char *CoreItem::getEditorHelpString() { return "Core.  Destroy to score."; }
+const char *CoreItem::getOnScreenName()     const  {  return "Core";   }
+const char *CoreItem::getOnDockName()       const  {  return "Core";   }
+const char *CoreItem::getPrettyNamePlural() const  {  return "Cores";  }
+const char *CoreItem::getEditorHelpString() const  {  return "Core.  Destroy to score.";  }
 
 
-F32 CoreItem::getEditorRadius(F32 currentScale)
+F32 CoreItem::getEditorRadius(F32 currentScale) const
 {
    return CoreRadius * currentScale + 5;
 }
@@ -427,10 +471,10 @@ bool CoreItem::isPanelDamaged(S32 panelIndex)
 
 bool CoreItem::isPanelInRepairRange(const Point &origin, S32 panelIndex)
 {
-   PanelGeom *panelGeom = getPanelGeom();
+   PanelGeom panelGeom = getPanelGeom();
 
-   F32 distanceSq1 = (panelGeom->getStart(panelIndex)).distSquared(origin);
-   F32 distanceSq2 = (panelGeom->getEnd(panelIndex)).distSquared(origin);
+   F32 distanceSq1 = (panelGeom.getStart(panelIndex)).distSquared(origin);
+   F32 distanceSq2 = (panelGeom.getEnd(panelIndex)).distSquared(origin);
    S32 radiusSq = Ship::RepairRadius * Ship::RepairRadius;
 
    // Ignoring case where center is in range while endpoints are not...
@@ -484,8 +528,8 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       shotAngle = p.angleTo(theInfo->damagingObject->getPos());
 
 
-   PanelGeom *panelGeom = getPanelGeom();
-   F32 coreAngle = panelGeom->angle;
+   const PanelGeom panelGeom = getPanelGeom();
+   F32 coreAngle = panelGeom.angle;
 
    F32 combinedAngle = (shotAngle - coreAngle);
 
@@ -498,51 +542,64 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    S32 hit = (S32) (combinedAngle / PANEL_ANGLE);
 
    if(mPanelHealth[hit] > 0)
-   {
-      mPanelHealth[hit] -= theInfo->damageAmount / DamageReductionRatio;
-
-      if(mPanelHealth[hit] < 0)
-         mPanelHealth[hit] = 0;
-
-      setMaskBits(PanelDamagedMask << hit);
-   }
-
-   // Determine if Core is destroyed by checking all the panel healths
-   bool coreDestroyed = false;
-
-   if(mPanelHealth[hit] == 0)
-   {
-      coreDestroyed = true;
-      for(S32 i = 0; i < CORE_PANELS; i++)
-         if(mPanelHealth[i] > 0)
+      if(damagePanel(hit, theInfo->damageAmount / DamageReductionRatio))
+         if(checkIfCoreIsDestroyed())
          {
-            coreDestroyed = false;
-            break;
+            coreDestroyed(theInfo);
+            return;
          }
-   }
-
-   if(coreDestroyed)
-   {
-      // We've scored!
-      GameType *gameType = getGame()->getGameType();
-      if(gameType)
-      {
-         ClientInfo *destroyer = theInfo->damagingObject->getOwner();
-         if(gameType->getGameTypeId() == CoreGame)
-            static_cast<CoreGameType*>(gameType)->score(destroyer, getTeam(), CoreGameType::DestroyedCoreScore);
-      }
-
-      mHasExploded = true;
-      deleteObject(ExplosionCount * ExplosionInterval);  // Must wait for triggered explosions
-      setMaskBits(ExplodedMask);                         
-      disableCollision();
-
-      return;
-   }
 
    // Reset the attacked warning timer if we're not healing
    if(theInfo->damageAmount > 0)
       mAttackedWarningTimer.reset(CoreAttackedWarningDuration);
+}
+
+
+// Damage specified panel.  Health will not fall below minHealth, which defaults to 0.
+// Returns true if panel was destroyed
+bool CoreItem::damagePanel(S32 panelIndex, F32 damage, F32 minHealth)
+{
+   // This check needed to avoid healing panel if minHealth > 0
+   if(mPanelHealth[panelIndex] == 0)
+      return false;
+
+   mPanelHealth[panelIndex] -= damage;
+
+   if(mPanelHealth[panelIndex] < minHealth)
+      mPanelHealth[panelIndex] = minHealth;
+
+   setMaskBits(PanelDamagedMask << panelIndex);
+
+   return mPanelHealth[panelIndex] == 0;
+}
+
+
+// Returns true if all panels are at 0 health
+bool CoreItem::checkIfCoreIsDestroyed() const
+{
+   for(S32 i = 0; i < CORE_PANELS; i++)
+      if(mPanelHealth[i] > 0)
+         return false;  
+
+   return true;      // Core is dead!
+}
+
+
+void CoreItem::coreDestroyed(const DamageInfo *damageInfo)
+{
+   // We've scored!  But this only matters in a Core game...
+   GameType *gameType = getGame()->getGameType();
+   if(gameType && gameType->getGameTypeId() == CoreGame)
+   {
+      ClientInfo *destroyer = damageInfo->damagingObject->getOwner();
+
+      static_cast<CoreGameType*>(gameType)->score(destroyer, getTeam(), CoreGameType::DestroyedCoreScore);
+   }
+
+   mHasExploded = true;
+   deleteObject(ExplosionCount * ExplosionInterval);  // Must wait for triggered explosions
+   setMaskBits(ExplodedMask);                         
+   disableCollision();
 }
 
 
@@ -551,7 +608,8 @@ void CoreItem::doExplosion(const Point &pos)
 {
    ClientGame *game = static_cast<ClientGame *>(getGame());
 
-   Color teamColor = *(getColor());
+   const Color &teamColor = getColor();
+
    Color CoreExplosionColors[12] = {
       Colors::red,
       teamColor,
@@ -592,12 +650,14 @@ void CoreItem::doExplosion(const Point &pos)
 #endif
 
 
-PanelGeom *CoreItem::getPanelGeom()
+PanelGeom CoreItem::getPanelGeom() const
 {
-   if(!mPanelGeom.isValid)
-      fillPanelGeom(getPos(), getGame()->getGameType()->getTotalGamePlayedInMs() * mRotateSpeed, mPanelGeom);
+   PanelGeom panelGeom;
 
-   return &mPanelGeom;
+   U32 timePlayed = getGame() ? getGame()->getGameType()->getTotalGamePlayedInMs() : Platform::getRealMilliseconds();
+   fillPanelGeom(getPos(), timePlayed * mRotateSpeed, panelGeom);
+
+   return panelGeom;
 }
 
 
@@ -639,9 +699,9 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 
    Point pos = getPos();               // Center of core
 
-   PanelGeom *panelGeom = getPanelGeom();
+   const PanelGeom panelGeom = getPanelGeom();
    
-   Point dir = panelGeom->mid[panelIndex] - pos;   // Line extending from the center of the core towards the center of the panel
+   Point dir = panelGeom.mid[panelIndex] - pos;   // Line extending from the center of the core towards the center of the panel
    dir.normalize(100);
    Point cross(dir.y, -dir.x);         // Line parallel to the panel, perpendicular to dir
 
@@ -652,7 +712,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 
    // Draw debris for the panel
    S32 num = Random::readI(5, 15);
-   const Color *teamColor = getColor();
+   const Color &teamColor = getColor();
 
    Point chunkPos, chunkVel;           // Reusable containers
 
@@ -661,7 +721,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
       static const S32 MAX_CHUNK_LENGTH = 10;
       points[1].set(0, Random::readF() * MAX_CHUNK_LENGTH);
 
-      chunkPos = panelGeom->getStart(panelIndex) + (panelGeom->getEnd(panelIndex) - panelGeom->getStart(panelIndex)) * Random::readF();
+      chunkPos = panelGeom.getStart(panelIndex) + (panelGeom.getEnd(panelIndex) - panelGeom.getStart(panelIndex)) * Random::readF();
       chunkVel = dir * (Random::readF() * 10  - 3) * .2f + cross * (Random::readF() * 30  - 15) * .05f;
 
       S32 ttl = Random::readI(2500, 3000);
@@ -669,7 +729,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
       F32 rotationRate = Random::readF() * 4 - 2;
 
       // Every-other chunk is team color instead of panel color
-      Color chunkColor = i % 2 == 0 ? Colors::gray80 : *teamColor;
+      const Color &chunkColor = i % 2 == 0 ? Colors::gray80 : teamColor;
 
       game->emitDebrisChunk(points, chunkColor, chunkPos, chunkVel, ttl, startAngle, rotationRate);
    }
@@ -687,11 +747,11 @@ void CoreItem::doPanelDebris(S32 panelIndex)
       F32 angle = Random::readF() * FloatTau;
       F32 rotation = Random::readF() * 4 - 2;
 
-      game->emitDebrisChunk(points, Colors::gray20, (panelGeom->mid[i] + pos) / 2, sparkVel, ttl, angle, rotation);
+      game->emitDebrisChunk(points, Colors::gray20, (panelGeom.mid[i] + pos) / 2, sparkVel, ttl, angle, rotation);
    }
 
    // And do the sound effect
-   SoundSystem::playSoundEffect(SFXCorePanelExplode, panelGeom->mid[panelIndex]);
+   SoundSystem::playSoundEffect(SFXCorePanelExplode, panelGeom.mid[panelIndex]);
 }
 
 #endif
@@ -699,7 +759,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 
 void CoreItem::idle(BfObject::IdleCallPath path)
 {
-   mPanelGeom.isValid = false;      // Force recalculation of panel geometry next time it's needed
+   //mPanelGeom.isValid = false;      // Force recalculation of panel geometry next time it's needed
 
    // Update attack timer on the server
    if(path == ServerIdleMainLoop)
@@ -750,12 +810,12 @@ void CoreItem::idle(BfObject::IdleCallPath path)
 
       for(S32 i = 0; i < CORE_PANELS; i++)
       {
-         if(mPanelHealth[i] == 0)                  // Panel is dead     TODO: And if panel is close enough to be worth it
+         if(mPanelHealth[i] == 0)                  // Panel is dead.  Guaranteed to be 0 in CoreItem::damageObject
          {
             Point sparkEmissionPos = getPos();
             sparkEmissionPos += dir * 3;
 
-            Point dir = getPanelGeom()->mid[i] - getPos();  // Line extending from the center of the core towards the center of the panel
+            Point dir = getPanelGeom().mid[i] - getPos();  // Line extending from the center of the core towards the center of the panel
             dir.normalize(100);
             Point cross(dir.y, -dir.x);                     // Line parallel to the panel, perpendicular to dir
 
@@ -811,12 +871,12 @@ Vector<Point> CoreItem::getRepairLocations(const Point &repairOrigin)
 {
    Vector<Point> repairLocations;
 
-   PanelGeom *panelGeom = getPanelGeom();
+   const PanelGeom panelGeom = getPanelGeom();
 
    for(S32 i = 0; i < CORE_PANELS; i++)
       if(isPanelDamaged(i))
          if(isPanelInRepairRange(repairOrigin, i))
-            repairLocations.push_back(panelGeom->repair[i]);
+            repairLocations.push_back(panelGeom.repair[i]);
 
    return repairLocations;
 }
@@ -943,7 +1003,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 #endif
 
 
-bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
+bool CoreItem::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 4)         // CoreItem <team> <health> <x> <y>
       return false;
@@ -951,7 +1011,7 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
    setTeam(atoi(argv[0]));
    setStartingHealth((F32)atof(argv[1]));
 
-   if(!Parent::processArguments(argc-2, argv+2, game))
+   if(!Parent::processArguments(argc - 2, argv + 2, level))
       return false;
 
    return true;
@@ -960,7 +1020,8 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string CoreItem::toLevelCode() const
 {
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + ftos(mStartingHealth * DamageReductionRatio) + " " + geomToLevelCode();
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + 
+                 ftos(mStartingHealth * DamageReductionRatio) + " " + geomToLevelCode();
 }
 
 
@@ -976,6 +1037,19 @@ bool CoreItem::collide(BfObject *otherObject)
 }
 
 
+// Degrade all panels that are still alive by specified amount (expressed as a fraction, not as an absolute amount).
+// This damage will not kill a core, but will weaken it to a trivially killed state.
+void CoreItem::degradeAllPanels(F32 amount)
+{
+   if(mHasExploded)
+      return;
+
+   // Apply damage to each panel... get them almost dead, but just hold back a tiny bit
+   for(S32 i = 0; i < CORE_PANELS; i++)
+      damagePanel(i, mStartingPanelHealth * amount, F32_MIN);
+}
+
+
 #ifndef ZAP_DEDICATED
 // Client only
 void CoreItem::onItemExploded(Point pos)
@@ -987,45 +1061,37 @@ void CoreItem::onItemExploded(Point pos)
    doExplosion(pos);
 }
 
+
 void CoreItem::onGeomChanged()
 {
    Parent::onGeomChanged();
-
-   GameType *gameType = getGame()->getGameType();
-   fillPanelGeom(getPos(), gameType->getTotalGamePlayedInMs() * mRotateSpeed, mPanelGeom);
 }
+
+
+#ifndef ZAP_DEDICATED
+
+bool CoreItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->addMenuItem(new CounterMenuItem("Hit points:", S32(getStartingHealth() + 0.5),
+                              1, 1, S32(CoreItem::DamageReductionRatio), "", "", ""));
+   return true;
+}
+
+
+void CoreItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()));
+}
+
+#endif
+
+
+
 #endif
 
 
 bool CoreItem::canBeHostile() { return true; }
 bool CoreItem::canBeNeutral() { return true; }
-
-
-S32 CoreItem::lua_setTeam(lua_State *L)
-{
-   S32 oldTeamIndex = this->getTeam();
-   S32 results = Parent::lua_setTeam(L);
-   S32 newTeamIndex = this->getTeam();
-
-   if(getGame() && getGame()->getGameType() && getGame()->getGameType()->getGameTypeId() == CoreGame)
-   {
-      if(oldTeamIndex >= 0 && oldTeamIndex < getGame()->getTeamCount())
-      {
-         Team* oldTeam = dynamic_cast<Team *>(getGame()->getTeam(oldTeamIndex));
-         oldTeam->addScore(-1);
-         getGame()->getGameType()->s2cSetTeamScore(oldTeamIndex, oldTeam->getScore());
-      }
-   
-      if(newTeamIndex >= 0)
-      {
-         Team* newTeam = dynamic_cast<Team *>(getGame()->getTeam(newTeamIndex));
-         newTeam->addScore(1);
-         getGame()->getGameType()->s2cSetTeamScore(newTeamIndex, newTeam->getScore());
-      }
-   }
-
-   return results;
-}
 
 
 /////
@@ -1096,5 +1162,32 @@ S32 CoreItem::lua_setFullHealth(lua_State *L)
    return 0;     
 }
 
+
+// Overrides
+S32 CoreItem::lua_setTeam(lua_State *L)
+{
+   S32 oldTeamIndex = this->getTeam();
+   S32 results = Parent::lua_setTeam(L);
+   S32 newTeamIndex = this->getTeam();
+
+   if(getGame()&&getGame()->getGameType()&&getGame()->getGameType()->getGameTypeId()==CoreGame)
+   {
+      if(oldTeamIndex>=0&&oldTeamIndex < getGame()->getTeamCount())
+      {
+         Team* oldTeam = dynamic_cast<Team *>(getGame()->getTeam(oldTeamIndex));
+         oldTeam->addScore(-1);
+         getGame()->getGameType()->s2cSetTeamScore(oldTeamIndex, oldTeam->getScore());
+      }
+
+      if(newTeamIndex>=0)
+      {
+         Team* newTeam = dynamic_cast<Team *>(getGame()->getTeam(newTeamIndex));
+         newTeam->addScore(1);
+         getGame()->getGameType()->s2cSetTeamScore(newTeamIndex, newTeam->getScore());
+      }
+   }
+
+   return results;
+}
 
 }; /* namespace Zap */

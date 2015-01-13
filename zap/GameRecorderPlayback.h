@@ -26,15 +26,17 @@ class GameRecorderPlayback : public GameConnection
    S32 mMilliSeconds;
    U32 mSizeToRead;
    SafePtr<ClientInfo> mClientInfoSpectating;
+
 public:
+   GameRecorderPlayback(ClientGame *game, const char *filename);
+   ~GameRecorderPlayback();
+
    StringTableEntry mClientInfoSpectatingName;
    bool mIsButtonHeldDown;
 
    U32 mTotalTime;
    U32 mCurrentTime;
 
-   GameRecorderPlayback(ClientGame *game, const char *filename);
-   ~GameRecorderPlayback();
    bool isValid();
 
    bool lostContact();
@@ -86,7 +88,7 @@ public:
    void onMouseMoved();
 
    void idle(U32 timeDelta);
-   void render();
+   void render() const;
 };
 
 }

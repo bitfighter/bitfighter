@@ -5,6 +5,7 @@
 
 #include "master.h"
 #include "database.h"
+
 #include "tnlTypes.h"
 #include "tnlLog.h"
 
@@ -26,17 +27,19 @@ using namespace Master;
 namespace DbWriter
 {
 
+string DatabaseWriter::sqliteFile = "stats.db";
+
    
 // TODO: Should we be reusing these?
 DatabaseWriter getDatabaseWriter(const MasterSettings *settings)
 {
-   if(settings->getVal<YesNo>("WriteStatsToMySql"))
-      return DatabaseWriter(settings->getVal<string>("StatsDatabaseAddress").c_str(), 
-                            settings->getVal<string>("StatsDatabaseName").c_str(),
-                            settings->getVal<string>("StatsDatabaseUsername").c_str(), 
-                            settings->getVal<string>("StatsDatabasePassword").c_str());
+   if(settings->getVal<YesNo>(Master::IniKey::WriteStatsToMySql))
+      return DatabaseWriter(settings->getVal<string>(Master::IniKey::StatsDatabaseAddress).c_str(), 
+                            settings->getVal<string>(Master::IniKey::StatsDatabaseName).c_str(),
+                            settings->getVal<string>(Master::IniKey::StatsDatabaseUsername).c_str(), 
+                            settings->getVal<string>(Master::IniKey::StatsDatabasePassword).c_str());
    else
-      return DatabaseWriter("stats.db");
+      return DatabaseWriter(DatabaseWriter::sqliteFile.c_str());
 }
 
 

@@ -371,7 +371,7 @@ bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool f
 
    S32 inc = format ? 1 : 2;
 
-   F32 currentCollisionTime = 100;
+   F32 currentCollisionTime = F32_MAX;
 
    for(U32 i = 0; i < vertexCount - (inc - 1); i += inc)    // Count by 1s when format is true, 2 when false
    {
@@ -413,9 +413,10 @@ bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool f
    return false;
 }
 
-bool circleIntersectsSegment(Point center, float radius, Point start, Point end, float &collisionTime)
+
+bool circleIntersectsSegment(Point center, F32 radius, Point start, Point end, F32 &collisionTime)
 {
-   // if the point is in the circle, it's a collision at the start
+   // If the point is in the circle, it's a collision at the start
    Point d = center - start;
    Point v = end - start;
 
@@ -425,7 +426,7 @@ bool circleIntersectsSegment(Point center, float radius, Point start, Point end,
       return true;
    }
 
-   // otherwise, solve the following equation for t
+   // Otherwise, solve the following equation for t
    // (d - vt)^2 = radius^2
 
    float a = v.dot(v);
@@ -894,7 +895,8 @@ Paths upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons)
       outputPolygons[i].resize(inputPolygons[i]->size());
 
       for(S32 j = 0; j < inputPolygons[i]->size(); j++)
-         outputPolygons[i][j] = IntPoint(S64(inputPolygons[i]->get(j).x * CLIPPER_SCALE_FACT), S64(inputPolygons[i]->get(j).y * CLIPPER_SCALE_FACT));
+         outputPolygons[i][j] = IntPoint(S64(inputPolygons[i]->get(j).x * CLIPPER_SCALE_FACT), 
+                                         S64(inputPolygons[i]->get(j).y * CLIPPER_SCALE_FACT));
    }
 
    return outputPolygons;
@@ -1417,15 +1419,21 @@ Vector<Point> floatsToPoints(const Vector<F32> floats)
 // Test if a complex polygon has clockwise point winding order
 // Implemented from
 // http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order/1165943#1165943
-bool isWoundClockwise(const Vector<Point>& inputPoly)
+bool isWoundClockwise(const Vector<Point> &inputPoly)
+{
+   return isWoundClockwise(&inputPoly);
+}
+
+
+bool isWoundClockwise(const Vector<Point> *inputPoly)
 {
    F32 finalSum = 0;
-   S32 i_prev = inputPoly.size() - 1;
+   S32 i_prev = inputPoly->size() - 1;
 
-   for(S32 i = 0; i < inputPoly.size(); i++)
+   for(S32 i = 0; i < inputPoly->size(); i++)
    {
       // (x2-x1)(y2+y1)
-      finalSum += (inputPoly[i].x - inputPoly[i_prev].x) * (inputPoly[i].y + inputPoly[i_prev].y);
+      finalSum += (inputPoly->get(i).x - inputPoly->get(i_prev).x) * (inputPoly->get(i).y + inputPoly->get(i_prev).y);
       i_prev = i;
    }
 
@@ -2084,7 +2092,7 @@ S32 lua_offsetPolygons(lua_State *L)
 {
    checkArgList(L, "Geom", "offsetPolygons");
 
-   F32 amount = lua_tonumber(L, 1);
+   F32 amount = (F32)lua_tonumber(L, 1);     // lua_tonumber returns a double
    Vector<Vector<Point> > input = getPolygons(L, 2);
 
    lua_pop(L, 2);

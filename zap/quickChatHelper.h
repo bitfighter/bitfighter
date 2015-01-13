@@ -19,18 +19,21 @@ using namespace std;
 namespace Zap
 {
 
+class CIniFile;
+
 struct QuickChatNode
 {
    U32 depth;
    InputCode inputCode;
    InputCode buttonCode;
-   bool teamOnly;
-   bool commandOnly;
+   MessageType messageType;
    string caption;
    string msg;
-   bool isMsgItem;         // False for groups, true for messages
 
-   QuickChatNode();        // Constructor
+   // Constructors
+   QuickChatNode();
+   QuickChatNode(S32 depth, const CIniFile *ini, const string &key, bool isGroup);
+
    virtual ~QuickChatNode();
 };
 
@@ -52,8 +55,11 @@ private:
    S32 mQuickChatButtonsWidth;
 
    Vector<OverlayMenuItem> *getMenuItems(bool one);
+   const Vector<OverlayMenuItem> *getConstMenuItems(bool one) const;
+
    S32 getWidthOfItems() const;
    S32 getWidthOfButtons() const;
+   void setLegend();
 
    void updateChatMenuItems(S32 curNode);
 
@@ -65,7 +71,7 @@ public:
 
    static Vector<QuickChatNode> nodeTree;
 
-   void render();                
+   void render() const;                
    void onActivated();  
    bool processInputCode(InputCode inputCode);   
    bool isMovementDisabled() const;

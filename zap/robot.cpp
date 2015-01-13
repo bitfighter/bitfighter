@@ -5,16 +5,17 @@
 
 #include "robot.h"
 
+#include "Level.h"
 #include "playerInfo.h"          // For RobotPlayerInfo constructor
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 #include "gameObjectRender.h"
 #include "GameSettings.h"
 
-#include "MathUtils.h"           // For findLowestRootIninterval()
-#include "GeomUtils.h"
-
 #include "ServerGame.h"
 #include "GameManager.h"
+
+#include "MathUtils.h"           // For findLowestRootIninterval()
+#include "GeomUtils.h"
 
 
 #define hypot _hypot    // Kill some warnings
@@ -38,7 +39,7 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
  * @param [scriptName] The bot script to use. Defaults to the server's default bot.
  * @param [scriptArg] Zero or more string arguments to pass to the script.
  */
-Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),   
+Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0)),   
                              LuaScriptRunner() 
 {
    if(L)
@@ -96,24 +97,27 @@ Robot::~Robot()
       return;
    }
 
-   dismountAll();  // fixes dropping CTF flag without ClientInfo...
-
    // Server only from here on down
-   if(getGame())  // can be NULL if this robot was never added to game (bad / missing robot file)
+
+   dismountAll();
+
+   Game *game = getGame();
+
+   if(game)       // Can be NULL if this robot was never added to game (bad / missing robot file)
    {
       EventManager::get()->fireEvent(this, EventManager::PlayerLeftEvent, getPlayerInfo());
 
-      if(getGame()->getGameType())
-         getGame()->getGameType()->serverRemoveClient(mClientInfo);
+      if(game->getGameType())
+         game->getGameType()->removeClient(mClientInfo);
 
-      getGame()->removeBot(this);
-      logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot %s terminated (%d bots left)", mScriptName.c_str(), getGame()->getRobotCount());
+      game->removeBot(this);
+      logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot %s terminated (%d bots left)", mScriptName.c_str(), game->getRobotCount());
    }
 
    delete mPlayerInfo;
    if(mClientInfo.isValid())
    {
-      getGame()->removeFromClientList(mClientInfo.getPointer());
+      game->removeFromClientList(mClientInfo.getPointer());
 	   delete mClientInfo.getPointer();
    }
 
@@ -125,38 +129,33 @@ Robot::~Robot()
 
 // Reset everything on the robot back to the factory settings -- runs only when bot is spawning in GameType::spawnRobot()
 // Only runs on server!
-bool Robot::initialize(Point &pos)
+void Robot::initialize(const Point &pos)
 {
    TNLAssert(!isGhost(), "Server only, dude!");
 
-   try
-   {
-      flightPlan.clear();
+   Parent::initialize(pos);
 
-      mCurrentZone = U16_MAX;   // Correct value will be calculated upon first request
+   flightPlan.clear();
 
-      Parent::initialize(pos);
+   mCurrentZone = U16_MAX;   // Correct value will be calculated upon first request
+   // Robots added via robot.new() get intialized.  If the robot is added in a script's main() 
+   // function, the bot will be reinitialized when the game starts.  This check avoids that.
+   if(!isCollisionEnabled())
+      enableCollision();
 
-      // Robots added via robot.new() get intialized.  If the robot is added in a script's main() 
-      // function, the bot will be reinitialized when the game starts.  This check avoids that.
-      if(!isCollisionEnabled())
-         enableCollision();
+   // WarpPositionMask triggers the spinny spawning visual effect
+   setMaskBits(RespawnMask | HealthMask        | LoadoutMask         | PositionMask | 
+               MoveMask    | ModulePrimaryMask | ModuleSecondaryMask | WarpPositionMask);      // Send lots to the client
 
-      // WarpPositionMask triggers the spinny spawning visual effect
-      setMaskBits(RespawnMask | HealthMask        | LoadoutMask         | PositionMask | 
-                  MoveMask    | ModulePrimaryMask | ModuleSecondaryMask | WarpPositionMask);      // Send lots to the client
-
-      EventManager::get()->update();   // Ensure registrations made during bot initialization are ready to go
-   }
-   catch(LuaException &e)
-   {
-      logError("Robot error during spawn: %s.  Shutting robot down.", e.what());
-      clearStack(L);
-      return false;
-   }
-
-   return true;
+   EventManager::get()->update();   // Ensure registrations made during bot initialization are ready to go
 } 
+
+
+// Overrides method in Ship
+void Robot::doClassSpecificInitialization(const Point &pos)
+{
+   mHasExploded = false;    // Client needs this false for unpackUpdate
+}
 
 
 const char *Robot::getErrorMessagePrefix() { return "***ROBOT ERROR***"; }
@@ -292,12 +291,12 @@ void Robot::onAddedToGame(Game *game)
    // Check whether a script file has been specified. If not, use the default
    if(mScriptName == "")
    {
-      string scriptName = game->getSettings()->getIniSettings()->defaultRobotScript;
+      string scriptName = game->getSettings()->getSetting<string>(IniKey::DefaultRobotScript);
       mScriptName = GameSettings::getFolderManager()->findBotFile(scriptName);
    }
 
    mLuaGame = game;
-   mLuaGridDatabase = game->getGameObjDatabase();
+   mLevel = game->getLevel();
 
    if(!start())
    {
@@ -337,46 +336,71 @@ void Robot::kill()
 }
 
 
-// Need this, as this may come from level or levelgen
-bool Robot::processArguments(S32 argc, const char **argv, Game *game)
+// Called by Level when it is added to a game
+bool Robot::processArguments(const string &argString, Game *game)
 {
+   Vector<string> args = parseString(argString);
+
    string errorMessage;
 
-   bool retcode = processArguments(argc, argv, game, errorMessage);
+   bool retcode = processArguments(args, game, errorMessage);
 
    if(errorMessage != "")
    {
-      string line;
-      
-      for(S32 i = 0; i < argc; i++)
-      {
-         if(i > 0)
-            line += " ";
-         line += argv[i];
-      }
-
       if(GameManager::getServerGame())
          logprintf(LogConsumer::LogLevelError, "Levelcode error in level %s, line \"%s\":\n\t%s",
-                   GameManager::getServerGame()->getCurrentLevelFileName().c_str(), line.c_str(), errorMessage.c_str());
+                   GameManager::getServerGame()->getCurrentLevelFileName().c_str(), argString.c_str(), errorMessage.c_str());
       else
          logprintf(LogConsumer::LogLevelError, "Levelcode error, line \"%s\":\n\t%s",
-                   line.c_str(), errorMessage.c_str());
+                   argString.c_str(), errorMessage.c_str());
    }
 
    return retcode;
 }
 
 
-// Expect [team] [bot script file] [bot args]
-bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &errorMessage)
+// Need this, as this may come from level or levelgen
+bool Robot::processArguments(S32 argc, const char **argv, Level *level)
+{
+   return true;
+
+   //string errorMessage;
+
+   //bool retcode = processArguments(argc, argv, level->getLegacyGridSize(), errorMessage);
+
+   //if(errorMessage != "")
+   //{
+   //   string line;
+   //   
+   //   for(S32 i = 0; i < argc; i++)
+   //   {
+   //      if(i > 0)
+   //         line += " ";
+   //      line += argv[i];
+   //   }
+
+   //   if(GameManager::getServerGame())
+   //      logprintf(LogConsumer::LogLevelError, "Levelcode error in level %s, line \"%s\":\n\t%s",
+   //                GameManager::getServerGame()->getCurrentLevelFileName().c_str(), line.c_str(), errorMessage.c_str());
+   //   else
+   //      logprintf(LogConsumer::LogLevelError, "Levelcode error, line \"%s\":\n\t%s",
+   //                line.c_str(), errorMessage.c_str());
+   //}
+
+   //return retcode;
+}
+
+
+// Expect args to look like this: [team] [bot script file] [bot args]
+bool Robot::processArguments(const Vector<string> &args, Game *game, string &errorMessage)
 {
    S32 team;
 
-   if(argc <= 1)
+   if(args.size() <= 1)
       team = NO_TEAM;   
    else
    {
-      team = atoi(argv[0]);
+      team = atoi(args[0].c_str());
 
       if(team != NO_TEAM && (team < 0 || team >= game->getTeamCount()))
       {
@@ -389,10 +413,10 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
    
    string scriptName;
 
-   if(argc >= 2)
-      scriptName = argv[1];
+   if(args.size() >= 2)
+      scriptName = args[1];
    else
-      scriptName = game->getSettings()->getIniSettings()->defaultRobotScript;
+      scriptName = game->getSettings()->getSetting<string>(IniKey::DefaultRobotScript);
 
    FolderManager *folderManager = game->getSettings()->getFolderManager();
 
@@ -408,15 +432,15 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
    // Collect our arguments to be passed into the args table in the robot (starting with the robot name)
    // Need to make a copy or containerize argv[i] somehow, because otherwise new data will get written
    // to the string location subsequently, and our vals will change from under us.  That's bad!
-   for(S32 i = 2; i < argc; i++)        // Does nothing if we have no args
-      mScriptArgs.push_back(string(argv[i]));
+   for(S32 i = 2; i < args.size(); i++)        // Does nothing if we have no args
+      mScriptArgs.push_back(args[i]);
 
    // I'm not sure this goes here, but it needs to be set early in setting up the Robot, but after
    // the constructor
    //
    // Our 'Game' pointer in LuaScriptRunner is the same as the one in this game object
    mLuaGame = game;
-   mLuaGridDatabase = game->getGameObjDatabase();
+   mLevel = game->getLevel();
 
    return true;
 }
@@ -471,7 +495,7 @@ bool Robot::canSeePoint(Point point, bool wallOnly)
    Rect queryRect(thisPoints);
 
    fillVector.clear();
-   mGame->getGameObjDatabase()->findObjects(wallOnly ? (TestFunc)isWallType : (TestFunc)isCollideableType, fillVector, queryRect);
+   mGame->getLevel()->findObjects(wallOnly ? (TestFunc)isWallType : (TestFunc)isCollideableType, fillVector, queryRect);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -535,9 +559,17 @@ void Robot::clearMove()
 }
 
 
-bool Robot::isRobot()
+// Overrides Ship method
+void Robot::onPositionChanged(GhostConnection *connection)
 {
-   return true;
+   // Do nothing
+}
+
+
+// Overrides Ship method
+void Robot::onChangedClientTeam()
+{
+   setChangeTeamMask();
 }
 
 
@@ -572,14 +604,14 @@ U16 Robot::findClosestZone(const Point &point)
    Vector<DatabaseObject*> objects;
    Rect rect = Rect(point.x + searchRadius, point.y + searchRadius, point.x - searchRadius, point.y - searchRadius);
 
-   getGame()->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, objects, rect);
+   getGame()->getBotZoneDatabase().findObjects(BotNavMeshZoneTypeNumber, objects, rect);
 
    for(S32 i = 0; i < objects.size(); i++)
    {
       BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(objects[i]);
       Point center = zone->getCenter();
 
-      if(getGame()->getGameObjDatabase()->pointCanSeePoint(center, point))  // This is an expensive test
+      if(getGame()->getLevel()->pointCanSeePoint(center, point))  // This is an expensive test
       {
          closestZone = zone->getZoneId();
          break;
@@ -594,7 +626,7 @@ U16 Robot::findClosestZone(const Point &point)
       F32 collisionTimeIgnore;
       Point surfaceNormalIgnore;
 
-      DatabaseObject* object = getGame()->getBotZoneDatabase()->findObjectLOS(BotNavMeshZoneTypeNumber,
+      DatabaseObject* object = getGame()->getBotZoneDatabase().findObjectLOS(BotNavMeshZoneTypeNumber,
             ActualState, point, extentsCenter, collisionTimeIgnore, surfaceNormalIgnore);
 
       BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(object);
@@ -833,7 +865,7 @@ S32 Robot::lua_getWaypoint(lua_State *L)
 
       if(!canSeePoint(target, true))           // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
       {
-         BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(getGame()->getBotZoneDatabase()->getObjectByIndex(targetZone));
+         BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(getGame()->getBotZoneDatabase().getObjectByIndex(targetZone));
 
          p = zone->getCenter();
          flightPlan.push_back(p);
@@ -851,12 +883,12 @@ S32 Robot::lua_getWaypoint(lua_State *L)
    // check cache for path first
    pair<S32,S32> pathIndex = pair<S32,S32>(currentZone, targetZone);
 
-   const Vector<BotNavMeshZone *> *zones = static_cast<ServerGame *>(getGame())->getBotZones();  // Our pre-cached list of nav zones
+   const Vector<BotNavMeshZone *> &zones = static_cast<ServerGame *>(getGame())->getBotZoneList();  // Our pre-cached list of nav zones
 
    if(getGame()->getGameType()->cachedBotFlightPlans.find(pathIndex) == getGame()->getGameType()->cachedBotFlightPlans.end())
    {
       // Not found so calculate flight plan
-      flightPlan = AStar::findPath(zones, currentZone, targetZone, target);
+      flightPlan = AStar::findPath(&zones, currentZone, targetZone, target);
 
       // Add to cache
       getGame()->getGameType()->cachedBotFlightPlans[pathIndex] = flightPlan;
@@ -913,9 +945,9 @@ S32 Robot::lua_findClosestEnemy(lua_State *L)
    fillVector.clear();
 
    if(useRange)
-      getGame()->getGameObjDatabase()->findObjects((TestFunc)isShipType, fillVector, queryRect);   
+      getGame()->getLevel()->findObjects((TestFunc)isShipType, fillVector, queryRect);   
    else
-      getGame()->getGameObjDatabase()->findObjects((TestFunc)isShipType, fillVector);   
+      getGame()->getLevel()->findObjects((TestFunc)isShipType, fillVector);   
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -1330,7 +1362,7 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
    // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
    // We expect that when we find something that is not a number, the stack will only contain our fillTable.  If the stack
    // is empty at that point, we'll add a table, and warn the user that they are using a less efficient method.
-   while(lua_isnumber(L, -1))
+   while(lua_gettop(L) > 0 && lua_isnumber(L, -1))
    {
       U8 typenum = (U8)lua_tointeger(L, -1);
 
@@ -1339,13 +1371,13 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
       if(typenum != BotNavMeshZoneTypeNumber)
          types.push_back(typenum);
       else
-         getGame()->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector, queryRect);
+         getGame()->getBotZoneDatabase().findObjects(BotNavMeshZoneTypeNumber, fillVector, queryRect);
 
       lua_pop(L, 1);
    }
 
    // Get other objects on screen-visible area only
-   getGame()->getGameObjDatabase()->findObjects(types, fillVector, queryRect);
+   getGame()->getLevel()->findObjects(types, fillVector, queryRect);
 
 
    // We are expecting a table to be on top of the stack when we get here.  If not, we can add one.

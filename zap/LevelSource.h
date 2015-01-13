@@ -25,7 +25,7 @@ namespace Zap
 struct LevelInfo
 {
 private:
-   void initialize();      // Called by constructors
+   void initialize();               // Called by constructors
 
 public:
    string filename;                 // File level is stored in
@@ -38,16 +38,23 @@ public:
    S32 maxRecPlayers;               // Max recommended number of players for this level
    S32 mHosterLevelIndex;           // Max recommended number of players for this level
 
-   LevelInfo();      // Default constructor used on server side
+   // Default constructor used on server side
+   LevelInfo();      
 
    // Constructor, used on client side where we don't care about min/max players
    LevelInfo(const StringTableEntry &name, GameTypeId type);
 
    // Constructor, used on server side, augmented with setInfo method below
    LevelInfo(const string &filename, const string &folder);
+
+   // Constructor with most fields, for testing purposes
+   LevelInfo(const string &levelName, GameTypeId levelType, S32 minPlayers, S32 maxPlayers, const string &script);
+
+   // Destructor
    virtual ~LevelInfo();
 
    const char *getLevelTypeName();
+   void writeToStream(ostream &stream, const string &hash) const;
    void ensureLevelInfoHasValidName();
 };
 
@@ -58,7 +65,9 @@ public:
 
 class GridDatabase;
 class Game;
-struct FolderManager;
+class GameSettings;
+class FolderManager;
+class Level;
 
 class LevelSource
 {
@@ -86,7 +95,7 @@ public:
    GameTypeId      getLevelType(S32 index);
 
    virtual bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo) = 0;
-   virtual string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase) = 0;
+   virtual Level *getLevel(S32 index) const = 0;
    virtual bool loadLevels(FolderManager *folderManager);
    virtual string getLevelFileDescriptor(S32 index) const = 0;
    virtual bool isEmptyLevelDirOk() const = 0;
@@ -94,7 +103,10 @@ public:
    bool populateLevelInfoFromSource(const string &sourceName, S32 levelInfoIndex);
 
    static Vector<string> findAllLevelFilesInFolder(const string &levelDir);
-   static void getLevelInfoFromCodeChunk(char *chunk, S32 size, LevelInfo &levelInfo);     // Populates levelInfo
+
+   // The following populate levelInfo
+   static bool getLevelInfoFromDatabase(const string &hash, LevelInfo &levelInfo);
+   static void getLevelInfoFromCodeChunk(const string &code, LevelInfo &levelInfo);     
 };
 
 
@@ -111,7 +123,7 @@ public:
    virtual ~MultiLevelSource();     // Destructor
 
    bool loadLevels(FolderManager *folderManager);
-   string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase);
+   Level *getLevel(S32 index) const;
    string getLevelFileDescriptor(S32 index) const;
    bool isEmptyLevelDirOk() const;
 
@@ -144,12 +156,13 @@ class FileListLevelSource : public MultiLevelSource
 
 private:
    string playlistFile;
+   GameSettings *mGameSettings;
 
 public:
-   FileListLevelSource(const Vector<string> &levelList, const string &folder);     // Constructor
+   FileListLevelSource(const Vector<string> &levelList, const string &folder, GameSettings *settings);     // Constructor
    virtual ~FileListLevelSource();                                                                                                                // Destructor
 
-   string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase);
+   Level *getLevel(S32 index) const;
 
    static Vector<string> findAllFilesInPlaylist(const string &fileName, const string &levelDir);
 };
@@ -171,7 +184,7 @@ public:
    StringLevelSource(const string &levelCode);     // Constructor
    virtual ~StringLevelSource();                   // Destructor
 
-   string loadLevel(S32 index, Game *game, GridDatabase *gameObjDatabase);
+   Level *getLevel(S32 index) const;
    string getLevelFileDescriptor(S32 index) const;
    bool isEmptyLevelDirOk() const;
 

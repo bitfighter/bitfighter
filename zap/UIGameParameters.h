@@ -53,16 +53,13 @@ private:
 
    bool anythingChanged();           // Compare list of parameters from before and after a session in the GameParams menu.  Did anything get changed??
 
-   string origGameParams;            // Copy of the game parameters as specified when we activated the GameParameters, used to compare before and after to detect changes
-
-   S32 mQuitItemIndex;               // Index of our quit item -- will vary depending on how many game-specific parameters there are
-   S32 mGameSpecificParams;          // How many game specific parameters do we have?
+   string mOrigGameParams;           // Copy of the game parameters as specified when we activated the GameParameters, used to compare before and after to detect changes
 
    virtual S32 getTextSize(MenuItemSize size) const;
    virtual S32 getGap(MenuItemSize size) const;
 
    S32 getYStart() const;
-
+   void clearCurrentGameTypeParams(const GameType *gameType);
 
    typedef map<const string, boost::shared_ptr<MenuItem> > MenuItemMap;
    MenuItemMap mMenuItemMap;
@@ -72,14 +69,11 @@ public:
    explicit GameParamUserInterface(ClientGame *game);   // Constructor
    virtual ~GameParamUserInterface();
 
-   S32 selectedIndex;          // Highlighted menu item
-   S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
-
-   void updateMenuItems();
-   void clearCurrentGameTypeParams();
-
    void onActivate();
    void onEscape();
+
+   void updateMenuItems(const GameType *gameType);
+
 };
 
 };

@@ -48,7 +48,8 @@ public:
    };
 
    // Robots can be different classes... as we descend the following list, each class is a lower priority
-   // and can be more readily removed
+   // and can be more readily removed.  These classes are used to determine which bots to kick first when 
+   // applying team balancing schemes.
    enum ClientClass {
       ClassHuman,                   // Human player, obviously
       ClassRobotAddedByLevel,       // A bot, specified in the level file with Robot directive, along with a team

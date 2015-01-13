@@ -123,7 +123,6 @@ public:
    const T*   address() const;
    void reverse();
 
-
    typedef S32 (QSORT_CALLBACK *compare_func)(T *a, T *b);
    void sort(compare_func f);
 };

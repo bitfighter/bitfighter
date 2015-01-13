@@ -107,6 +107,9 @@ private:
    // Some items will be passthroughs to the underlying INI object; however, if a value can differ from the INI setting 
    // (such as when it can be overridden from the cmd line, or is set remotely), then we'll need to store the working value locally.
 
+   // This provides static access to the last instantiated GameSettings object, when needed
+   static GameSettings *staticSelf;
+
    string mHostName;                   // Server name used when hosting a game (default set in config.h, set in INI or on cmd line)
    string mHostDescr;                  // Brief description of host
 
@@ -131,6 +134,8 @@ private:
    // Store params read from the cmd line
    Vector<string> mCmdLineParams[CmdLineParams::PARAM_COUNT];
 
+   static string mExecutablePath;
+
    // User settings storage
    UserSettingsMap mUserSettings;
 
@@ -139,9 +144,9 @@ private:
 
    // Helper functions:
    // This first lot return the first value following the cmd line parameter cast to various types
-   string getString(ParamId paramId);
-   U32 getU32(ParamId paramId);
-   F32 getF32(ParamId paramId);
+   string getCmdLineParamString(ParamId paramId);
+   U32 getCmdLineParamU32(ParamId paramId);
+   F32 getCmdLineParamF32(ParamId paramId);
 
    DisplayMode resolveCmdLineSpecifiedDisplayMode();  // Tries to figure out what display mode was specified on the cmd line, if any
       
@@ -162,6 +167,7 @@ public:
 
    static const U16 DEFAULT_GAME_PORT = 28000;
 
+   void setExecutablePath(const string &executablePath);
 
    void readCmdLineParams(const Vector<string> &argv);
    void resolveDirs();
@@ -192,7 +198,7 @@ public:
    void setLoginCredentials(const string &name, const string &password, bool savePassword);
 
 
-   bool getSpecified(ParamId paramId);                      // Returns true if parameter was present, false if not
+   bool isCmdLineParamSpecified(ParamId paramId);                      // Returns true if parameter was present, false if not
 
    // Variations on generating a list of levels
    Vector<string> getLevelList();                            // Generic, grab a list of levels based on current settings
@@ -220,13 +226,21 @@ public:
 
    bool shouldShowNameEntryScreenOnStartup();
 
-   const Color *getWallFillColor() const;
-   const Color *getWallOutlineColor() const;
+   const Color getWallFillColor() const;
+   const Color getWallOutlineColor() const;
 
    void setQueryServerSortColumn(S32 column, bool ascending);
    S32  getQueryServerSortColumn();   
    bool getQueryServerSortAscending();
 
+   S32  getWindowPositionX();
+   S32  getWindowPositionY();
+   void setWindowPosition(S32 x, S32 y);
+
+   F32  getWindowSizeFactor();
+   void setWindowSizeFactor(F32 scalingFactor);
+
+   F32 getMusicVolume();
 
    // Accessor methods
    U32 getSimulatedStutter();
@@ -299,6 +313,30 @@ public:
    // User settings
    const UserSettings *addUserSettings(const UserSettings &userSettings);     // Returns pointer to inserted item
    const UserSettings *getUserSettings(const string &name);
+
+   static GameSettings *get();
+
+   // Used for iniFile access in the setSetting() template below
+   void setIniSetting(const string &section, const string &key, const string &value);
+
+   // Helper method to simultaneously update the mSettings and iniFile objects
+   template <class DataType>
+   void setSetting(IniKey::SettingsItem indexType, const DataType &value)
+   {
+      mIniSettings.mSettings.setVal(indexType, value);
+
+      string section     = mIniSettings.mSettings.getSection(indexType);
+      string key         = mIniSettings.mSettings.getKey(indexType);
+      string valueString = mIniSettings.mSettings.getStrVal(indexType);
+
+      setIniSetting(section, key, valueString);
+   }
+
+   template <class DataType>
+   DataType getSetting(IniKey::SettingsItem indexType)
+   {
+      return mIniSettings.mSettings.getVal<DataType>(indexType);
+   }
 };
 
 

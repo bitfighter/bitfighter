@@ -12,8 +12,9 @@
 
 
 #include "ConfigEnum.h"
-#include "tnlVector.h"     // For Vector
-#include "tnlTypes.h"
+#include "Color.h"
+
+#include "tnlVector.h"
 
 #include <string>
 #include <map>
@@ -64,6 +65,10 @@ Vector<string> parseStringAndStripLeadingSlash(const char *str);
 
 void parseComplexStringToMap(const string &inputString, map<string, string> &fillMap,
                              const string &entryDelimiter = ";", const string &keyValueDelimiter = ":");
+
+// Split a block of text into a vector of lines broken by \n or \r\n
+void splitMultiLineString(const string &str, Vector<string> &strings);
+
 
 const char *findPointerOfArg(const char *message, S32 count);
 
@@ -125,25 +130,26 @@ string writeLevelString(const char *in);
 string chopComment(const string &line);
 
 
-bool writeFile(const string& path, const string& contents, bool append = false);
-const string readFile(const string& path);
+bool writeFile(const string &path, const string &contents, bool append = false);
+bool readFile(const string &path, string &contents);
+
 
 string getExecutableDir();
 
 bool stringContainsAllTheSameCharacter(const string &str);
 
-string toString(const string &val);      
-string toString(S32 val);                
-string toString(DisplayMode displayMode);
-string toString(YesNo yesNo);            
-string toString(RelAbs relAbs); 
-string toString(ColorEntryMode colorMode);
-
 bool isPrintable(char c);
 bool isHex(char c);
 bool isHex(const string &str);
 
+static const S32 NO_AUTO_WRAP = -1;
 
+// Wraps a long string into a Vector of stings equal to or shorter than wrapWidth.  Pass a custom width calculator to distinguish
+// between char count and rendered width.  See tests for examples.
+Vector<string> wrapString(const string &str, S32 charCount, const string &indentPrefix = "");
+#if !defined(ZAP_DEDICATED) && !defined(BF_MASTER)
+Vector<string> wrapString(const string &str, S32 lineWidth, S32 fontSize, const string &indentPrefix = "");
+#endif
 
 };
 

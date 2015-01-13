@@ -26,7 +26,7 @@ public:
    void onActivate();
    void onReactivate();
    void idle(U32 timeDelta);
-   void render();
+   void render() const;
    void quit();
    bool onKeyDown(InputCode inputCode);
    void onKeyUp(InputCode inputCode);

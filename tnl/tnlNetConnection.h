@@ -579,8 +579,8 @@ public:
    /// Sets the current connection state of this NetConnection.
    void setConnectionState(NetConnectionState state) { mConnectionState = state; }
 
-   /// Gets the current connection state of this NetConnection.
-   NetConnectionState getConnectionState() { return mConnectionState; }
+   /// Returns the current connection state of this NetConnection.
+   NetConnectionState getConnectionState() const { return mConnectionState; }
 
    /// Returns true if the connection handshaking has completed successfully.
    bool isEstablished() 

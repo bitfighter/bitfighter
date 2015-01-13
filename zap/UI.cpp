@@ -50,7 +50,10 @@ S32 UserInterface::messageMargin = UserInterface::vertMargin + UI::LoadoutIndica
 // Constructor
 UserInterface::UserInterface(ClientGame *clientGame)
 {
+   TNLAssert(clientGame, "Need a ClientGame to get settings!");
+
    mClientGame = clientGame;
+   mGameSettings = mClientGame->getSettings();
    mTimeSinceLastInput = 0;
    mDisableShipKeyboardInput = true;
 }
@@ -62,6 +65,12 @@ UserInterface::~UserInterface()
 }
 
 
+void UserInterface::setUiManager(UIManager *uiManager)
+{
+   mUiManager = uiManager;
+}
+
+
 ClientGame *UserInterface::getGame() const
 {
    return mClientGame;
@@ -70,8 +79,7 @@ ClientGame *UserInterface::getGame() const
 
 UIManager *UserInterface::getUIManager() const 
 { 
-   TNLAssert(mClientGame, "mGame is NULL!");
-   return mClientGame->getUIManager(); 
+   return mUiManager;
 }
 
 
@@ -101,7 +109,7 @@ void UserInterface::onDisplayModeChange() { /* Do nothing */ }
 void UserInterface::onDeactivate(bool nextUIUsesEditorScreenMode)
 {
    if(nextUIUsesEditorScreenMode != usesEditorScreenMode())
-      VideoSystem::actualizeScreenMode(getGame()->getSettings(), true, nextUIUsesEditorScreenMode);
+      VideoSystem::actualizeScreenMode(mGameSettings, true, nextUIUsesEditorScreenMode);
 }
 
 
@@ -118,14 +126,13 @@ void UserInterface::playBoop()
 
 
 // Render master connection state if we're not connected
-void UserInterface::renderMasterStatus()
+void UserInterface::renderMasterStatus(const MasterServerConnection *connectionToMaster) const
 {
-   MasterServerConnection *conn = mClientGame->getConnectionToMaster();
-
-   if(conn && conn->getConnectionState() != NetConnection::Connected)
+   if(connectionToMaster && connectionToMaster->getConnectionState() != NetConnection::Connected)
    {
       glColor(Colors::white);
-      drawStringf(10, 550, 15, "Master Server - %s", GameConnection::getConnectionStateString(conn->getConnectionState()));
+      drawStringf(10, 550, 15, "Master Server - %s", 
+               GameConnection::getConnectionStateString(connectionToMaster->getConnectionState()));
    }
 }
 
@@ -157,7 +164,7 @@ void UserInterface::renderMessageBox(const string &titleStr, const string &instr
    static const S32 TextSize = 18;
 
 
-   InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
+   InputCodeManager *inputCodeManager = mGameSettings->getInputCodeManager();
 
    SymbolShapePtr title = SymbolShapePtr(new SymbolString(titleStr, inputCodeManager, Context, TitleSize, false));
    SymbolShapePtr instr = SymbolShapePtr(new SymbolString(instrStr, inputCodeManager, Context, TextSize, false));
@@ -183,7 +190,7 @@ void UserInterface::renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset,
 
 // Note that title and instr can be NULL
 void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolShapePtr &instr, 
-                                           SymbolShapePtr *message, S32 msgLines, S32 vertOffset, S32 style) const
+                                     const SymbolShapePtr *message, S32 msgLines, S32 vertOffset, S32 style) const
 {
    const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
    const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
@@ -210,10 +217,12 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
 
    S32 boxTop = (canvasHeight - boxHeight) / 2 + vertOffset;
 
-   S32 maxLen = 0;
+   static const S32 HorizBoxPadding = 20;
+
+   S32 maxLen = title ? title->getWidth() + HorizBoxPadding * 2 : 0;
+
    for(S32 i = 0; i < msgLines; i++)
    {
-      static const S32 HorizBoxPadding = 20;  
       S32 len = message[i]->getWidth() + HorizBoxPadding * 2;
       if(len > maxLen)
          maxLen = len;
@@ -267,7 +276,7 @@ void UserInterface::drawMenuItemHighlight(S32 x1, S32 y1, S32 x2, S32 y2, bool d
 
 
 // These will be overridden in child classes if needed
-void UserInterface::render() 
+void UserInterface::render() const
 { 
    // Do nothing -- probably never even gets called
 }
@@ -288,35 +297,34 @@ void UserInterface::onMouseMoved()
 void UserInterface::onMouseDragged()  { /* Do nothing */ }
 
 
+// Static method
 InputCode UserInterface::getInputCode(GameSettings *settings, BindingNameEnum binding)
 {
    return settings->getInputCodeManager()->getBinding(binding);
 }
 
 
-string UserInterface::getEditorBindingString(GameSettings *settings, EditorBindingNameEnum binding)
+string UserInterface::getEditorBindingString(EditorBindingNameEnum binding)
 {
-   return settings->getInputCodeManager()->getEditorBinding(binding);
+   return mGameSettings->getInputCodeManager()->getEditorBinding(binding);
 }
 
 
-string UserInterface::getSpecialBindingString(GameSettings *settings, SpecialBindingNameEnum binding)
+string UserInterface::getSpecialBindingString(SpecialBindingNameEnum binding)
 {
-   return settings->getInputCodeManager()->getSpecialBinding(binding);
+   return mGameSettings->getInputCodeManager()->getSpecialBinding(binding);
 }
 
 
-void UserInterface::setInputCode(GameSettings *settings, BindingNameEnum binding, InputCode inputCode)
+void UserInterface::setInputCode(BindingNameEnum binding, InputCode inputCode)
 {
-   settings->getInputCodeManager()->setBinding(binding, inputCode);
+   mGameSettings->getInputCodeManager()->setBinding(binding, inputCode);
 }
 
 
 bool UserInterface::checkInputCode(BindingNameEnum binding, InputCode inputCode)
 {
-   GameSettings *settings = getGame()->getSettings();
-
-   InputCode bindingCode = getInputCode(settings, binding);
+   InputCode bindingCode = getInputCode(mGameSettings, binding);
 
    // Handle modified keys
    if(InputCodeManager::isModified(bindingCode))
@@ -325,13 +333,13 @@ bool UserInterface::checkInputCode(BindingNameEnum binding, InputCode inputCode)
 
    // Else just do a simple key check.  filterInputCode deals with the numeric keypad.
    else
-      return bindingCode == settings->getInputCodeManager()->filterInputCode(inputCode);
+      return bindingCode == mGameSettings->getInputCodeManager()->filterInputCode(inputCode);
 }
 
 
-const char *UserInterface::getInputCodeString(GameSettings *settings, BindingNameEnum binding)
+const char *UserInterface::getInputCodeString(BindingNameEnum binding) const
 {
-   return InputCodeManager::inputCodeToString(getInputCode(settings, binding));
+   return InputCodeManager::inputCodeToString(getInputCode(mGameSettings, binding));
 }
 
 
@@ -345,7 +353,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
 
    bool handled = false;
 
-   UIManager *uiManager = getGame()->getUIManager();
+   UIManager *uiManager = getUIManager();
    string inputString = InputCodeManager::getCurrentInputString(inputCode);
 
    if(checkInputCode(BINDING_DIAG, inputCode))              // Turn on diagnostic overlay
@@ -366,7 +374,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
       if(uiManager->isCurrentUI<ChatUserInterface>() || uiManager->isCurrentUI<NameEntryUserInterface>())
          return false;
 
-      getGame()->getUIManager()->activate<ChatUserInterface>();
+      getUIManager()->activate<ChatUserInterface>();
       playBoop();
 
       handled = true;
@@ -374,10 +382,10 @@ bool UserInterface::onKeyDown(InputCode inputCode)
    
 #ifndef BF_NO_SCREENSHOTS
    // Screenshot!
-   else if(inputString == getSpecialBindingString(getGame()->getSettings(), BINDING_SCREENSHOT_1) ||
-           inputString == getSpecialBindingString(getGame()->getSettings(), BINDING_SCREENSHOT_2))      
+   else if(inputString == getSpecialBindingString(BINDING_SCREENSHOT_1) ||
+           inputString == getSpecialBindingString(BINDING_SCREENSHOT_2))
    {
-      ScreenShooter::saveScreenshot(getUIManager(), getGame()->getSettings());
+      ScreenShooter::saveScreenshot(getUIManager(), mGameSettings);
       handled = true;
    }
 #endif
@@ -394,7 +402,11 @@ void UserInterface::onTextInput(char ascii)      { /* Do nothing */ }
 // This should make it easier to see what happens when users press joystick buttons.
 void UserInterface::renderDiagnosticKeysOverlay()
 {
-   if(GameManager::getClientGames()->get(0)->getSettings()->getIniSettings()->diagnosticKeyDumpMode)
+   // This setting can't be changed from in-game, so we can just grab the value at the outset and use that to save the lookup
+   static const bool dumpKeys = 
+         GameManager::getClientGames()->get(0)->getSettings()->getSetting<YesNo>(IniKey::DumpKeys);
+
+   if(dumpKeys)
    {
      S32 vpos = DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2;
      S32 hpos = horizMargin;

@@ -6,16 +6,25 @@
 #ifndef _LEVEL_FILES_FOR_TESTING_H_
 #define _LEVEL_FILES_FOR_TESTING_H_
 
+#include "LevelSource.h"
+
 #include <string>
 
 namespace Zap
 {
 
 using namespace std;
+using namespace TNL;
 
 string getLevelCode1();
 string getLevelCodeForTestingEngineer1();
 string getLevelCodeForEmptyLevelWithBots(const string &botspec);
+string getLevelCodeForEngineeredItemSnapping();
+string getLevelCodeForEngineeredItemSnapping2();
+
+string getGenericHeader();
+
+pair<Vector<string>, Vector<LevelInfo> > getLevels();
 
 };
 

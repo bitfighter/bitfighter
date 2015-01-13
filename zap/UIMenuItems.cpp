@@ -5,7 +5,7 @@
 
 #include "UIMenuItems.h"
 #include "UIMenus.h"
-#include "UIEditorMenus.h"
+#include "UIQuickMenu.h"
 
 #include "DisplayManager.h"    // For DisplayManager::getScreenInfo() stuff
 #include "FontManager.h"
@@ -1185,13 +1185,14 @@ void PlayerMenuItem::activatedWithShortcutKey()
 ////////////////////////////////////
 
 TeamMenuItem::TeamMenuItem(S32 index, AbstractTeam *team, void (*callback)(ClientGame *, U32), InputCode inputCode, bool isCurrent) :
-               MenuItem(index, team->getName().getString(), callback, "", inputCode, KEY_UNKNOWN)
+   MenuItem(index, team->getName().getString(), callback, "", inputCode, KEY_UNKNOWN)
 {
+   mSelectedColor   = team->getColor();
+   mUnselectedColor = team->getColor();
    mTeam = team;
    mIsCurrent = isCurrent;
-   mUnselectedColor = *team->getColor();
-   mSelectedColor = *team->getColor();
 }
+
 
 // Destructor
 TeamMenuItem::~TeamMenuItem()
@@ -1305,7 +1306,7 @@ bool TextEntryMenuItem::handleKey(InputCode inputCode)
 { 
    bool handled = mLineEditor.handleKey(inputCode);
    if(mTextEditedCallback)
-      mTextEditedCallback(mLineEditor.getString(), mMenu->getAssociatedObject());
+      mTextEditedCallback(this, mLineEditor.getString(), mMenu->getAssociatedObject());
 
    return handled;
 }
@@ -1324,9 +1325,12 @@ void TextEntryMenuItem::handleTextInput(char ascii)
       mLineEditor.addChar(ascii);
 
       if(mTextEditedCallback)
-         mTextEditedCallback(mLineEditor.getString(), mMenu->getAssociatedObject());
+         mTextEditedCallback(this, mLineEditor.getString(), mMenu->getAssociatedObject());
    }
 }
+
+void TextEntryMenuItem::setHelp(const string &help)   { TNLAssert(false, "Not implemented for this class!"); }
+void TextEntryMenuItem::setHasError(bool hasError)    { TNLAssert(false, "Not implemented for this class!"); }
 
 
 MenuItemTypes TextEntryMenuItem::getItemType()
@@ -1377,7 +1381,7 @@ void TextEntryMenuItem::activatedWithShortcutKey()
 }
 
 
-void TextEntryMenuItem::setTextEditedCallback(void(*callback)(string, BfObject *))
+void TextEntryMenuItem::setTextEditedCallback(void(*callback)(TextEntryMenuItem *, const string &, BfObject *))
 {
    mTextEditedCallback = callback;
 }
@@ -1478,7 +1482,7 @@ SimpleTextEntryMenuItem::~SimpleTextEntryMenuItem()
 }
 
 
-void SimpleTextEntryMenuItem::setHelp(string help)
+void SimpleTextEntryMenuItem::setHelp(const string &help)
 {
    mHelp = help;
 }
@@ -1505,7 +1509,7 @@ bool SimpleTextEntryMenuItem::handleKey(InputCode inputCode)
 
    // Call this menu item's callback if the lineEditor handled the key (it is also run in hasTextInput() )
    if(mTextEditedCallback && handled)
-      mTextEditedCallback(mLineEditor.getString(), mMenu->getAssociatedObject());
+      mTextEditedCallback(this, mLineEditor.getString(), mMenu->getAssociatedObject());
 
    return handled;
 }

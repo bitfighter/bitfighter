@@ -5,6 +5,7 @@
 
 #include "goalZone.h"
 #include "ship.h"
+#include "Level.h"
 #include "gameObjectRender.h"
 #include "game.h"
 #include "stringUtils.h"
@@ -67,42 +68,54 @@ GoalZone *GoalZone::clone() const
 }
 
 
-void GoalZone::render()
+void GoalZone::render() const
 {
-   F32 glow = getGame()->getGlowZoneTimer().getFraction();
-   S32 glowingZoneTeam = getGame()->getGlowingZoneTeam();
+   F32 glow = 0;
+   S32 glowingZoneTeam = TEAM_NEUTRAL;
 
-   // Check if to make sure that the zone matches the glow team if we're glowing
-   if(glowingZoneTeam >= 0 && glowingZoneTeam != getTeam())
-      glow = 0;
+   if(getGame())
+   {
+      glow = getGame()->getGlowZoneTimer().getFraction();
+      glowingZoneTeam = getGame()->getGlowingZoneTeam();
 
-   bool useOldStyle = getGame()->getSettings()->getIniSettings()->oldGoalFlash;
-   renderGoalZone(*getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore, 
-                  mFlashCount ? F32(mFlashTimer.getCurrent()) / FlashDelay : 0, useOldStyle);
+      // Check if to make sure that the zone matches the glow team if we're glowing
+      if(glowingZoneTeam >= 0 && glowingZoneTeam != getTeam())
+         glow = 0;
+   }
+
+   // This won't change during the game
+   static const GoalZoneFlashStyle flashStyle = 
+            GameSettings::get()->getSetting<GoalZoneFlashStyle>(IniKey::GoalZoneFlashStyle);
+
+   renderGoalZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore, 
+                  mFlashCount ? F32(mFlashTimer.getCurrent()) / FlashDelay : 0, flashStyle);
 }
 
 
-void GoalZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+void GoalZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
-   bool useOldStyle = getGame()->getSettings()->getIniSettings()->oldGoalFlash;
+   // This won't change during the game
+   static const GoalZoneFlashStyle flashStyle = 
+            GameSettings::get()->getSetting<GoalZoneFlashStyle>(IniKey::GoalZoneFlashStyle);
 
-   renderGoalZone(*getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), false, 0, 0, 0, useOldStyle);
+   renderGoalZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), false, 0, 0, 0, flashStyle);
    PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled, true);
 }
 
 
-void GoalZone::renderDock()
+void GoalZone::renderDock(const Color &color) const
 {
-  renderGoalZone(*getColor(), getOutline(), getFill());
+  renderGoalZone(color, getOutline(), getFill());
 }
 
 
-bool GoalZone::processArguments(S32 argc2, const char **argv2, Game *game)
+bool GoalZone::processArguments(S32 argc2, const char **argv2, Level *level)
 {
    // Need to handle or ignore arguments that starts with letters,
    // so a possible future version can add parameters without compatibility problem.
    S32 argc = 0;
    const char *argv[Geometry::MAX_POLY_POINTS * 2 + 1];
+
    for(S32 i = 0; i < argc2; i++)  // the idea here is to allow optional R3.5 for rotate at speed of 3.5
    {
       char c = argv2[i][0];
@@ -120,14 +133,14 @@ bool GoalZone::processArguments(S32 argc2, const char **argv2, Game *game)
       return false;
 
    setTeam(atoi(argv[0]));     // Team is first arg
-   return Parent::processArguments(argc - 1, argv + 1, game);
+   return Parent::processArguments(argc - 1, argv + 1, level);
 }
 
 
-const char *GoalZone::getOnScreenName()     { return "Goal";       }
-const char *GoalZone::getOnDockName()       { return "Goal";       }
-const char *GoalZone::getPrettyNamePlural() { return "Goal Zones"; }
-const char *GoalZone::getEditorHelpString() { return "Target area used in a variety of games."; }
+const char *GoalZone::getOnScreenName()     const  { return "Goal";       }
+const char *GoalZone::getOnDockName()       const  { return "Goal";       }
+const char *GoalZone::getPrettyNamePlural() const  { return "Goal Zones"; }
+const char *GoalZone::getEditorHelpString() const  { return "Target area used in a variety of games."; }
 
 bool GoalZone::hasTeam()      { return true; }
 bool GoalZone::canBeHostile() { return true; }
@@ -199,7 +212,7 @@ bool GoalZone::collide(BfObject *hitObject)
 }
 
 
-bool GoalZone::isFlashing()
+bool GoalZone::isFlashing() const
 {
    return mFlashCount & 1;
 }

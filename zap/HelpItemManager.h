@@ -122,7 +122,7 @@
 using namespace TNL;
 using namespace std;
 
-namespace Zap { 
+namespace Zap {
 
    enum HelpItem {
 #define HELP_TABLE_ITEM(value, b, c, d, e, f, g) value,
@@ -244,8 +244,8 @@ public:
 
    void onGameStarting();        // Reset things for a new level
    
-   void loadAlreadySeenLevelupMessageList();
-   void saveAlreadySeenLevelupMessageList();
+   //void loadAlreadySeenLevelupMessageList();
+   //void saveAlreadySeenLevelupMessageList();
 
    void resetInGameHelpMessages();
    S32 getRollupPeriod(S32 index) const;     // Public so tests can get access

@@ -40,8 +40,8 @@ public:
 
    void onActivated();
    bool processInputCode(InputCode inputCode);   
-   void render();                
-   void renderDeploymentMarker(const Ship *ship);
+   void render() const;                
+   void renderDeploymentMarker(const Ship *ship) const;
 
    bool isChatDisabled() const;
    S32 getAnimationTime() const;

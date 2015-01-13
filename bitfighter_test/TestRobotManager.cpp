@@ -137,7 +137,7 @@ static void setTeams(GamePair &gamePair, const string &teamConfig)
       gamePair.server->addTeam(new Team());
 
    for(S32 i = 0; i < words.size(); i++)           // Iterate over teams
-      for(S32 j = 0; j < words[i].size(); j++)     // Iterate over chars
+      for(U32 j = 0; j < words[i].size(); j++)     // Iterate over chars
       {
          if(words[i][j] == 'H')
             gamePair.addClient("Human " + itos(i) + " " + itos(j), i);
@@ -157,15 +157,16 @@ TEST(RobotManagerTest, moreLessBots)
 {
    // Disable auto-leveling so we can create teams without bot manager interfering
    GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
-   settings->getIniSettings()->playWithBots = false;
 
-   Vector<const char *> botArgs;
+   settings->setSetting(IniKey::AddRobots, No);
+
+   Vector<string> emptyBotArgs;
 
    // By putting each of tese tests in a block, we can not worry too much about how to add/remove bots and players
    // for each test.  Instead, we can blow the entire gamePair away and just start clean each time.  The point of
    // the tests is to look at more/less bots, not adding/removing players in bulk.
    {  // =-=-=-= One team =-=-=-=
-   GamePair gamePair(settings); 
+   GamePair gamePair(settings);
 
    // Make sure game starts off with no players
    ASSERT_EQ(0, gamePair.server->getPlayerCount());
@@ -224,10 +225,10 @@ TEST(RobotManagerTest, moreLessBots)
    gamePair.addClient("newclient2", 1);    EXPECT_EQ("HHHH HB",      getTeams(gamePair));
 
    // /addbot
-   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHH HAB",    getTeams(gamePair));
-   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHH HAAB",   getTeams(gamePair));
-   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHHA HAAB",  getTeams(gamePair));
-   gamePair.server->addBot(botArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHHA HAAAB", getTeams(gamePair));
+   gamePair.server->addBot(emptyBotArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHH HAB",    getTeams(gamePair));
+   gamePair.server->addBot(emptyBotArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHH HAAB",   getTeams(gamePair));
+   gamePair.server->addBot(emptyBotArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHHA HAAB",  getTeams(gamePair));
+   gamePair.server->addBot(emptyBotArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHHA HAAAB", getTeams(gamePair));
    }
 
 
@@ -271,16 +272,17 @@ TEST(RobotManagerTest, moreLessBots)
 TEST(RobotManagerTest, levelsThatIncludeBots)
 {
    GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
-   settings->getIniSettings()->playWithBots = false;
+   settings->setSetting(IniKey::AddRobots, No);
 
    // Test what happens when you load a level with several bots on one team, and a new player joins.  This was broken in 019.
    // Try one with a small number of players specified
    {
-   settings->getIniSettings()->minBalancedPlayers = 2;
-   settings->getIniSettings()->playWithBots       = true;
+   settings->setSetting(IniKey::MinBalancedPlayers, 2);
+   settings->setSetting(IniKey::AddRobots, Yes);
+
    GamePair gamePair(settings, getLevelCodeForEmptyLevelWithBots("0 BB"));
 
-   gamePair.server->cycleLevel();       EXPECT_EQ("BB LL",     getTeams(gamePair));
+   gamePair.server->cycleLevel();       EXPECT_EQ("BB LL",     getTeams(gamePair)) << "Expect 2 from level, 2 from balancer";
 
    gamePair.addClient("Cookie Jarvis"); EXPECT_EQ("HB LL",     getTeams(gamePair));
    gamePair.server->cycleLevel();       EXPECT_EQ("HB LL",     getTeams(gamePair));
@@ -300,8 +302,9 @@ TEST(RobotManagerTest, levelsThatIncludeBots)
 
    // Same test, but with a larger number of players specified
    {
-   settings->getIniSettings()->minBalancedPlayers = 8;
-   settings->getIniSettings()->playWithBots       = true;
+   settings->setSetting(IniKey::MinBalancedPlayers, 8);
+   settings->setSetting(IniKey::AddRobots, Yes);
+
    GamePair gamePair(settings, getLevelCodeForEmptyLevelWithBots("0 BB"));
 
    gamePair.server->cycleLevel();       EXPECT_EQ("BBBB LLBB", getTeams(gamePair));
@@ -325,7 +328,8 @@ TEST(RobotManagerTest, levelsThatIncludeBots)
 
    // And again, with bot balancing disabled
    {
-   settings->getIniSettings()->playWithBots = false;     // Disables autoleveling
+   settings->setSetting(IniKey::AddRobots, No); // Disable autoleveling
+
    GamePair gamePair(settings, getLevelCodeForEmptyLevelWithBots("0 BB"));
 
    gamePair.server->cycleLevel();       EXPECT_EQ("0 LL",     getTeams(gamePair));
@@ -351,12 +355,11 @@ TEST(RobotManagerTest, levelsThatIncludeBots)
 TEST(RobotManagerTest, autolevelingWithLevelsThatIncludeBots)
 {
    GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
-   settings->getIniSettings()->minBalancedPlayers = 12;     // A high number!
-   settings->getIniSettings()->playWithBots = false;
+   settings->setSetting(IniKey::MinBalancedPlayers, 12);    // A high number!
 
    // And again, with bot balancing disabled
    {
-   settings->getIniSettings()->playWithBots = false;     // Disables autoleveling
+   settings->setSetting(IniKey::AddRobots, No);          // Disable autoleveling
    GamePair gamePair(settings, getLevelCodeForEmptyLevelWithBots("0 LL L"));
 
    gamePair.server->cycleLevel();       EXPECT_EQ("0 LL L",      getTeams(gamePair));

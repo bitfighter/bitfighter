@@ -199,7 +199,7 @@ S32 LuaGameInfo::lua_isNexusOpen(lua_State *L)
    if(!gameType || gameType->getGameTypeId() != NexusGame)
       return returnNil(L);
 
-   return returnBool(L, static_cast<NexusGameType *>(gameType)->mNexusIsOpen);
+   return returnBool(L, static_cast<NexusGameType *>(gameType)->isNexusOpen());
 }
 
 
@@ -209,7 +209,8 @@ S32 LuaGameInfo::lua_isNexusOpen(lua_State *L)
  * @brief The number of seconds until the nexus opens or closes.
  *
  * @return The number of seconds until the Nexus opens or closes, or nil if this
- * is not a nexus game.
+ * is not a nexus game.  If this function returns 0, the Nexus will remain in its 
+ * current state until the end of the game
  */
 S32 LuaGameInfo::lua_getNexusTimeLeft(lua_State *L)
 {
@@ -226,7 +227,7 @@ S32 LuaGameInfo::lua_getNexusTimeLeft(lua_State *L)
  *
  * @brief Get the value of a \ref ScoringEventEnum.
  *
- * @return The number of points earned when the \ref ScoringEventEnum `event`
+ * @return The number of points earned when the \ref ScoringEventEnum 'event'
  * occurs, or zero of an unknown event is specified.
  */
 S32 LuaGameInfo::lua_getEventScore(lua_State *L)

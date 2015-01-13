@@ -24,16 +24,16 @@ PointObject::~PointObject()
 }
 
 
-void PointObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
+void PointObject::prepareForDock(const Point &point, S32 teamIndex)
 {
 #ifndef ZAP_DEDICATED
    setPos(point);
-   Parent::prepareForDock(game, point, teamIndex);
+   Parent::prepareForDock(point, teamIndex);
 #endif
 }
 
 
-F32 PointObject::getRadius() { return mRadius; }
+F32 PointObject::getRadius() const  {  return mRadius;  }
 
 
 };

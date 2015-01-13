@@ -51,7 +51,7 @@ public:
    static void processConsoleCommandCallback(OGLCONSOLE_Console console, char *cmdline);
    void processCommand(const char *cmdline);
 
-   void render();
+   void render() const;
 
    bool isVisible();
    void show();

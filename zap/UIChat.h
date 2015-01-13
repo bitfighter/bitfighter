@@ -48,28 +48,26 @@ class AbstractChat
 private:
    static std::map<string, Color> mFromColors;       // Map nicknames to colors
    static U32 mColorPtr;
-   Color getNextColor();                             // Get next available color for a new nick
    static const S32 MESSAGES_TO_RETAIN = 80;         // Plenty for now... far too many, really
    static const S32 MESSAGE_OVERFLOW_SHIFT = 25;     // Number of characters to shift when typing a long message
-                                                     // and you over flow the box
 
    static U32 mMessageCount;
-
-   Color getColor(string name);
-
    ClientGame *mGame;
+
+   Color getNextColor() const;                       // Get next available color for a new nick
+   Color getColor(string name) const;
+
 
 protected:
    // Message data
    static ChatMessage mMessages[MESSAGES_TO_RETAIN];
    LineEditor mLineEditor;
 
-   ChatMessage getMessage(U32 index);
    U32 mChatCursorPos;                     // Where is cursor?
 
-   U32 getMessageCount();
-
-   bool composingMessage();
+   ChatMessage getMessage(U32 index) const;
+   U32 getMessageCount() const;
+   bool composingMessage() const;
 
 public:
    explicit AbstractChat(ClientGame *game);        // Constructor
@@ -81,10 +79,10 @@ public:
 
    void leaveGlobalChat();                // Send msg to master telling them we're leaving chat
 
-   void renderMessages(U32 yPos, U32 lineCountToDisplay);
-   void renderMessageComposition(S32 ypos);   // Render outgoing chat message composition line
+   void renderMessages(U32 yPos, U32 lineCountToDisplay) const;
+   void renderMessageComposition(S32 ypos) const;   // Render outgoing chat message composition line
 
-   void renderChatters(S32 xpos, S32 ypos);   // Render list of other people in chat room
+   void renderChatters(S32 xpos, S32 ypos) const;   // Render list of other people in chat room
    void deliverPrivateMessage(const char *sender, const char *message);
 
    // Handle players joining and leaving the chat session
@@ -116,7 +114,7 @@ class ChatUserInterface : public UserInterface, public AbstractChat
 private:
    Color mMenuSubTitleColor;
 
-   virtual void renderHeader();
+   virtual void renderHeader() const;
    //virtual void renderFooter();
    virtual void onOutGameChat();       // What to do if user presses [F5]
    bool mRenderUnderlyingUI;
@@ -126,7 +124,7 @@ public:
    virtual ~ChatUserInterface();                      // Constructor
 
    // UI related
-   void render();
+   void render() const;
    bool onKeyDown(InputCode inputCode);
    void onTextInput(char ascii);
 
@@ -149,7 +147,7 @@ class SuspendedUserInterface : public ChatUserInterface
    typedef ChatUserInterface Parent;
 
 private:
-   void renderHeader();
+   void renderHeader() const;
    void onOutGameChat();                  // What to do if user presses [F5]
 
 public:

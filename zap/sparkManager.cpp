@@ -9,6 +9,7 @@
 #include "gameObjectRender.h"
 #include "Colors.h"
 #include "config.h"
+#include "Intervals.h"
 
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
@@ -120,7 +121,7 @@ void FxManager::DebrisChunk::render() const
    glPushMatrix();
 
    glTranslate(pos);
-   glRotatef(rd(angle), 0, 0, 1);
+   glRotate(angle * RADIANS_TO_DEGREES);
 
    F32 alpha = 1;
    if(ttl < 250)
@@ -140,29 +141,50 @@ void FxManager::TextEffect::idle(U32 timeDelta)
 {
    F32 dTsecs = F32(timeDelta) * 0.001f;     // Convert timeDelta to seconds
 
+   if(timeDelta > delay)
+      delay = 0;
+   else
+      delay -= timeDelta;
+
+   if(delay > 0)
+      return;
+
    pos += vel * dTsecs;
+
    if(size < MAX_TEXTEFFECT_SIZE)
       size += growthRate * dTsecs;
 
-   ttl -= timeDelta;
+   if(size > MAX_TEXTEFFECT_SIZE)
+      size = MAX_TEXTEFFECT_SIZE;
+
+   if(timeDelta > ttl)
+      ttl = 0;
+   else
+      ttl -= timeDelta;
 }
 
 
-void FxManager::TextEffect::render() const
+void FxManager::TextEffect::render(const Point &centerOffset) const
 {
    F32 alpha = 1;
-   if(ttl < 300)
-      alpha = F32(ttl) / 300.f;     // Fade as item nears the end of its life
+
+   static const F32 FadeTime = 300;
+
+   if(ttl < FadeTime)
+      alpha = ttl / FadeTime;     // Fade as item nears the end of its life
+
    glColor(color, alpha);
-   //glLineWidth(size);
+
    glPushMatrix();
+
       glTranslate(pos);
       glScale(size / MAX_TEXTEFFECT_SIZE);  // We'll draw big and scale down
+
       FontManager::pushFontContext(TextEffectContext);
-         drawStringc(0.0f, 0.0f, 120.0f, text.c_str());
+         drawStringc(0, 0, 120, text.c_str());
       FontManager::popFontContext();
+
    glPopMatrix();
-   //glLineWidth(gDefaultLineWidth);
 }
 
 
@@ -182,20 +204,32 @@ void FxManager::emitDebrisChunk(const Vector<Point> &points, const Color &color,
 }
 
 
-void FxManager::emitTextEffect(const string &text, const Color &color, const Point &pos)
+// Specify relative = true for in-game position relative to ship, = false if pos represents screen coords
+void FxManager::emitTextEffect(const string &text, const Color &color, const Point &pos, bool relative)
+{
+   emitDelayedTextEffect(0, text, color, pos, relative);
+}
+
+
+// Delay is in ms
+void FxManager::emitDelayedTextEffect(U32 delay, const string &text, const Color &color, const Point &pos, bool relative)
 {
    TextEffect textEffect;
 
-   textEffect.text  = text;
-   textEffect.color = color;
-   textEffect.pos   = pos;
+   textEffect.text     = text;
+   textEffect.color    = color;
+   textEffect.pos      = pos;
 
    textEffect.vel  = Point(0,-130);
    textEffect.size = 0;
    textEffect.growthRate = 20;
-   textEffect.ttl = 1500;
+   textEffect.ttl = TWO_SECONDS;
+   textEffect.delay = delay;
 
-   mTextEffects.push_back(textEffect);
+   if(relative)
+      mTextEffects.push_back(textEffect);
+   else
+      mScreenTextEffects.push_back(textEffect);
 }
 
 
@@ -230,7 +264,7 @@ void FxManager::idle(U32 timeDelta)
             theSpark->pos += theSpark->vel * dTsecs;
             if ((SparkType) j == SparkTypePoint)
             {
-               if(theSpark->ttl > 1000)
+               if(theSpark->ttl > ONE_SECOND)
                   theSpark->alpha = 1;
                else
                   theSpark->alpha = F32(theSpark->ttl) / 1000.f;
@@ -247,8 +281,7 @@ void FxManager::idle(U32 timeDelta)
          }
       }
 
-
-   // Kill off any old debris chunks, advance the others
+   // Kill off any old debris chunks, idle the others
    for(S32 i = 0; i < mDebrisChunks.size(); i++)
    {
       if(mDebrisChunks[i].ttl < (S32)timeDelta)
@@ -260,17 +293,29 @@ void FxManager::idle(U32 timeDelta)
          mDebrisChunks[i].idle(timeDelta);
    }
 
-
    // Same for our TextEffects
    for(S32 i = 0; i < mTextEffects.size(); i++)
    {
-      if(mTextEffects[i].ttl < (S32)timeDelta)
+      if(mTextEffects[i].delay == 0 && mTextEffects[i].ttl < timeDelta)
       {
          mTextEffects.erase_fast(i);
          i--;
       }
       else
          mTextEffects[i].idle(timeDelta);
+   }
+
+
+   // Same for our ScreenTextEffects
+   for(S32 i = 0; i < mScreenTextEffects.size(); i++)
+   {
+      if(mScreenTextEffects[i].delay == 0 && mScreenTextEffects[i].ttl < timeDelta)
+      {
+         mScreenTextEffects.erase_fast(i);
+         i--;
+      }
+      else
+         mScreenTextEffects[i].idle(timeDelta);
    }
 
 
@@ -289,8 +334,10 @@ void FxManager::idle(U32 timeDelta)
 }
 
 
-void FxManager::render(S32 renderPass, F32 commanderZoomFraction) const
+void FxManager::render(S32 renderPass, F32 commanderZoomFraction, const Point &centerOffset) const
 {
+   TNLAssert(commanderZoomFraction == 0, "If this never trips, we can remove this param!");  // 28-Apr-2014 Wat
+
    // The teleporter effects should render under the ships and such
    if(renderPass == 0)
    {
@@ -334,8 +381,23 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction) const
          mDebrisChunks[i].render();
 
       for(S32 i = 0; i < mTextEffects.size(); i++)
-         mTextEffects[i].render();
+         mTextEffects[i].render(centerOffset);
    }
+}
+
+
+void FxManager::renderScreenEffects() const
+{
+   static const Point center(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2,
+                             DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
+   glPushMatrix();
+   glTranslate(center);
+   glScale(0.6667f); 
+
+   for(S32 i = 0; i < mScreenTextEffects.size(); i++)
+      mScreenTextEffects[i].render(center);
+
+   glPopMatrix();
 }
 
 
@@ -408,6 +470,16 @@ void FxManager::clearSparks()
          firstFreeIndex[j]--;
          *theSpark = mSparks[j][firstFreeIndex[j]];
       }
+}
+
+
+// Clear out any lingering textEffects, runs at the end of a level
+void FxManager::onGameReallyAndTrulyOver()
+{
+   clearSparks();
+   mDebrisChunks.clear();
+   mTextEffects.clear();
+   mScreenTextEffects.clear();
 }
 
 
@@ -517,12 +589,10 @@ void FxTrail::reset()
 
 Point FxTrail::getLastPos()
 {
-   if(mNodes.size())
-   {
+   if(mNodes.size() > 0)
       return mNodes[0].pos;
-   }
-   else
-      return Point(0,0);
+
+   return Point(0,0);
 }
 
 
@@ -545,14 +615,11 @@ void FxTrail::unregisterTrail()
       if(w == this)
       {
          if(p)
-         {
             p->mNext = w->mNext;
-         }
          else
-         {
             mHead = w->mNext;
-         }
       }
+
       p = w;
       w = w->mNext;
    }
