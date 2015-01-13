@@ -23,22 +23,38 @@ namespace Zap
 typedef bool (*TestFunc)(U8);
 
 // Interface for dealing with objects that can be in our spatial database.
-class  GridDatabase;
+class GridDatabase;
 class EditorObjectDatabase;
+struct DatabaseBucketEntry;
+class DatabaseObject;
+
+struct DatabaseBucketEntryBase
+{
+   DatabaseBucketEntry *nextInBucket;
+};
+struct DatabaseBucketEntry : public DatabaseBucketEntryBase
+{
+   DatabaseObject *theObject;
+   DatabaseBucketEntryBase *prevInBucket;
+   DatabaseBucketEntry *nextInBucketForThisObject;
+};
+
 
 class DatabaseObject : public GeomObject
 {
 
    typedef GeomObject Parent;
 
-friend class GridDatabase;
-friend class EditorObjectDatabase;
+   friend class GridDatabase;
+   friend class EditorObjectDatabase;
+
 
 private:
    U32 mLastQueryId;
    Rect mExtent;
    bool mExtentSet;     // A flag to mark whether extent has been set on this object
    GridDatabase *mDatabase;
+   DatabaseBucketEntry *mBucketList;
 
 protected:
    U8 mObjectTypeNumber;
@@ -110,15 +126,9 @@ public:
       BucketMask = BucketRowCount - 1,
    };
 
-   struct BucketEntry
-   {
-      DatabaseObject *theObject;
-      BucketEntry *nextInBucket;
-   };
+   static ClassChunker<DatabaseBucketEntry> *mChunker;
 
-   static ClassChunker<BucketEntry> *mChunker;
-
-   BucketEntry *mBuckets[BucketRowCount][BucketRowCount];
+   DatabaseBucketEntryBase mBuckets[BucketRowCount][BucketRowCount];
 
    explicit GridDatabase(bool createWallSegmentManager = true);   // Constructor
    // GridDatabase::GridDatabase(const GridDatabase &source);
