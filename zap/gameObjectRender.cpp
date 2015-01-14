@@ -3472,10 +3472,19 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
 }
 
 
-void renderWalls(const GridDatabase *gameObjectDatabase, const Vector<Point> &wallEdgePoints, 
-                 const Vector<Point> &selectedWallEdgePoints, const Color &outlineColor, 
-                 const Color &fillColor, F32 currentScale, bool dragMode, bool drawSelected,
-                 const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha)
+void renderWalls(const GridDatabase *gameObjectDatabase, 
+                 const Vector<Point> &wallEdgePoints, 
+                 const Vector<Point> &selectedWallEdgePointsWholeWalls,
+                 const Vector<Point> &selectedWallEdgePointsDraggedVertices,
+                 const Color &outlineColor,
+                 const Color &fillColor, 
+                 F32 currentScale, 
+                 bool dragMode, 
+                 bool drawSelected,
+                 const Point &selectedItemOffset, 
+                 bool previewMode, 
+                 bool showSnapVertices, 
+                 F32 alpha)
 {
    bool moved = (selectedItemOffset.x != 0 || selectedItemOffset.y != 0);
 
@@ -3556,14 +3565,15 @@ void renderWalls(const GridDatabase *gameObjectDatabase, const Vector<Point> &wa
 
             if(obj->isSelected())  
                wallSegment->renderFill(selectedItemOffset, fillColor * alpha, true);
-
-            if(obj->isSelected())     
-               wallSegment->renderFill(Point(0,0), Color(.1), true);  // false??
          }
       }
 
-      // Render wall outlines for selected walls only
-      renderWallEdges(selectedWallEdgePoints, selectedItemOffset, outlineColor);
+      // Render wall outlines for walls being dragged in their entirety
+      renderWallEdges(selectedWallEdgePointsWholeWalls, selectedItemOffset, outlineColor);
+
+      // Render wall outlines for walls/polywalls with vertices being dragged
+      renderWallEdges(selectedWallEdgePointsDraggedVertices, Point(0,0), outlineColor);
+
    }
 
    if(showSnapVertices)

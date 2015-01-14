@@ -282,8 +282,10 @@ private:
    boost::scoped_ptr<PluginMenuUI> mPluginMenu;      
    map<string, Vector<string> > mPluginMenuValues;
 
-   Vector<Point> mWallEdgePoints;               // For rendering
-   Vector<Point> mSelectedWallEdgePoints;       // Also for rendering
+   // These are for rendering
+   Vector<Point> mWallEdgePoints;
+   Vector<Point> mSelectedWallEdgePointsWholeWalls;
+   Vector<Point> mSelectedWallEdgePointsDraggedVertices;
 
    void showCouldNotFindScriptMessage(const string &scriptName);
    void showPluginError(const string &msg);

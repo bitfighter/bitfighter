@@ -211,7 +211,10 @@ void WallEdgeManager::clipAllWallEdges(const Vector<WallSegment const *> &wallSe
    S32 count = wallSegments.size();
 
    if(count == 0)
+   {
+      wallEdges.clear();
       return;
+   }
 
    Vector<const Vector<Point> *> inputPolygons;
    Vector<Vector<Point> > solution;

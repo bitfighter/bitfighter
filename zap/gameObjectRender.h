@@ -268,10 +268,19 @@ extern void renderStaticBitfighterLogo();
 
 extern void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge);
 
-extern void renderWalls(const GridDatabase *gameObjectDatabase, const Vector<Point> &wallEdgePoints, 
-                        const Vector<Point> &selectedWallEdgePoints, const Color &outlineColor, 
-                        const Color &fillColor, F32 currentScale, bool dragMode, bool drawSelected,
-                        const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha);
+extern void renderWalls(const GridDatabase *gameObjectDatabase, 
+                        const Vector<Point> &wallEdgePoints, 
+                        const Vector<Point> &selectedWallEdgePointsWholeWalls,
+                        const Vector<Point> &selectedWallEdgePointsDraggedVertices,
+                        const Color &outlineColor,
+                        const Color &fillColor, 
+                        F32 currentScale, 
+                        bool dragMode, 
+                        bool drawSelected,
+                        const Point &selectedItemOffset, 
+                        bool previewMode, 
+                        bool showSnapVertices, 
+                        F32 alpha);
 
 
 extern void renderWallSpine(const WallItem *wallItem, const Vector<Point> *outline, const Color &color, 

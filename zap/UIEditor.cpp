@@ -1003,14 +1003,17 @@ void EditorUserInterface::onSelectionChanged()
    rebuildSelectionOutline();
 }
 
+
 template <class T>
-static void addSelectedSegmentsToList(const Vector<DatabaseObject *> *walls, Vector<const WallSegment *> &segments)
+static void addSelectedSegmentsToList(const Vector<DatabaseObject *> *walls, 
+                                      bool wholeWallOnly, 
+                                      Vector<const WallSegment *> &segments)
 {
    for(S32 i = 0; i < walls->size(); i++)
    {
       WallItem *wall = static_cast<WallItem *>(walls->get(i));
          
-      if(wall->isSelected() || wall->anyVertsSelected())
+      if(wall->isSelected() || (!wholeWallOnly && wall->anyVertsSelected()))
       {
          const Vector<WallSegment *> wallsegs = static_cast<BarrierX *>(wall)->getSegments();
 
@@ -1021,8 +1024,8 @@ static void addSelectedSegmentsToList(const Vector<DatabaseObject *> *walls, Vec
 }
 
 // Declare these specific implementations of the above template so here so project will link
-template void addSelectedSegmentsToList<WallItem>(const Vector<DatabaseObject *> *walls, Vector<const WallSegment *> &segments);
-template void addSelectedSegmentsToList<PolyWall>(const Vector<DatabaseObject *> *walls, Vector<const WallSegment *> &segments);
+template void addSelectedSegmentsToList<WallItem>(const Vector<DatabaseObject *> *walls, bool, Vector<const WallSegment *> &segments);
+template void addSelectedSegmentsToList<PolyWall>(const Vector<DatabaseObject *> *walls, bool, Vector<const WallSegment *> &segments);
                                           
 
 // Return a list of all selected segments
@@ -1033,23 +1036,52 @@ static Vector<WallSegment const *> getSelectedWallsAndPolywallSegments(const Lev
    const Vector<DatabaseObject *> *walls = level->findObjects_fast(WallItemTypeNumber);
    const Vector<DatabaseObject *> *polywalls = level->findObjects_fast(PolyWallTypeNumber);
 
-   addSelectedSegmentsToList<WallItem>(walls, segments);
-   addSelectedSegmentsToList<PolyWall>(polywalls, segments);
+   addSelectedSegmentsToList<WallItem>(walls,     false, segments);
+   addSelectedSegmentsToList<PolyWall>(polywalls, false, segments);
 
    return segments;
 }
 
 
+static Vector<WallSegment const *> getSelectedWallSegments(const Level *level)
+{
+   Vector<WallSegment const *> segments;
+
+   const Vector<DatabaseObject *> *walls = level->findObjects_fast(WallItemTypeNumber);
+
+   addSelectedSegmentsToList<WallItem>(walls, true, segments);
+
+   return segments;
+}
+
+
+static Vector<WallSegment const *> getSelectedWallSegmentsMovingVertices(const Level *level)
+{
+   Vector<WallSegment const *> segments;
+
+   const Vector<DatabaseObject *> *walls = level->findObjects_fast(WallItemTypeNumber);
+   addSelectedSegmentsToList<WallItem>(walls, false, segments);
+
+   const Vector<DatabaseObject *> *polywalls = level->findObjects_fast(PolyWallTypeNumber);
+
+   addSelectedSegmentsToList<WallItem>(polywalls, false, segments);
+
+
+   return segments;
+}
+
+
+
 // Rebuilds outline of selected walls
 void EditorUserInterface::rebuildSelectionOutline()
 {
-   Vector<WallSegment const *> segments = getSelectedWallsAndPolywallSegments(mLevel.get());
+   Vector<WallSegment const *> segments;
+   
+   segments = getSelectedWallSegments(mLevel.get());
+   WallEdgeManager::clipAllWallEdges(segments, mSelectedWallEdgePointsWholeWalls);        // Populate mSelectedWallEdgePoints from segments
 
-   // If no walls are selected we can skip a lot of work
-   if(segments.size() == 0)          
-      mSelectedWallEdgePoints.clear();    
-   else
-      WallEdgeManager::clipAllWallEdges(segments, mSelectedWallEdgePoints);    // Populate mSelectedWallEdgePoints from segments
+   segments = getSelectedWallSegmentsMovingVertices(mLevel.get());
+   WallEdgeManager::clipAllWallEdges(segments, mSelectedWallEdgePointsDraggedVertices);   // Populate mSelectedWallEdgePoints from segments
 }
 
 
@@ -1989,11 +2021,22 @@ void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, 
    const Color &fillColor = mNormalizedScreenshotMode ? Colors::DefaultWallFillColor :
          mPreviewMode ? mGameSettings->getWallFillColor() : Colors::EDITOR_WALL_FILL_COLOR;
 
-   const Color &outlineColor = mNormalizedScreenshotMode ? Colors::DefaultWallOutlineColor: mGameSettings->getWallOutlineColor();
+   const Color &outlineColor = mNormalizedScreenshotMode ? Colors::DefaultWallOutlineColor : 
+                                                           mGameSettings->getWallOutlineColor();
 
-   renderWalls(mLevel.get(), mWallEdgePoints, mSelectedWallEdgePoints, outlineColor,
-               fillColor, mCurrentScale, mDraggingObjects, drawSelected, offset, mPreviewMode, 
-               getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
+   renderWalls(mLevel.get(), 
+               mWallEdgePoints, 
+               mSelectedWallEdgePointsWholeWalls,
+               mSelectedWallEdgePointsDraggedVertices,
+               outlineColor,
+               fillColor, 
+               mCurrentScale, 
+               mDraggingObjects, 
+               drawSelected, 
+               offset, 
+               mPreviewMode, 
+               getSnapToWallCorners(), 
+               getRenderingAlpha(isLevelGenDatabase));
 
 
    // Render walls as ordinary objects; this will draw wall centerlines
