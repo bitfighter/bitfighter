@@ -87,6 +87,12 @@ LineItem *LineItem::clone() const
 }
 
 
+F32 LineItem::getEditorRadius(F32 currentScale) const
+{
+   return (F32)EditorObject::VERTEX_SIZE;
+}
+
+
 void LineItem::render() const
 {
 #ifndef ZAP_DEDICATED

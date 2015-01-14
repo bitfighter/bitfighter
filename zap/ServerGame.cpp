@@ -1590,9 +1590,14 @@ void ServerGame::processVoting(U32 timeDelta)
                i.push_back(mVoteNumber / 60000);
                break;
             case VoteSetTime:
-               msg = "/YES or /NO : %i0 : Set time %i1 minutes %i2 seconds";
-               i.push_back(mVoteNumber / 60000);
-               i.push_back((mVoteNumber / 1000) % 60);
+               if(mVoteNumber == 0)
+                  msg = "/YES or /NO : %i0 : Set time to unlimited";
+               else
+               {
+                  msg = "/YES or /NO : %i0 : Set time %i1 minutes %i2 seconds";
+                  i.push_back(mVoteNumber / 60000);
+                  i.push_back((mVoteNumber / 1000) % 60);
+               }
                break;
             case VoteSetScore:
                msg = "/YES or /NO : %i0 : Set score %i1";
@@ -1671,7 +1676,7 @@ void ServerGame::processVoting(U32 timeDelta)
                   break;   
 
                case VoteSetTime:
-                  getGameType()->extendGameTime(S32(mVoteNumber - getGameType()->getRemainingGameTimeInMs()));
+                  getGameType()->setGameTime(mVoteNumber);
                   getGameType()->broadcastNewRemainingTime();                                   
                   break;
 

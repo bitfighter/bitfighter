@@ -247,7 +247,7 @@ const Color &WallItem::getEditorRenderColor() const
 // Size of object in editor 
 F32 WallItem::getEditorRadius(F32 currentScale) const
 {
-   return (F32)WallItem::VERTEX_SIZE;   // Keep vertex hit targets the same regardless of scale
+   return (F32)EditorObject::VERTEX_SIZE;   // Keep vertex hit targets the same regardless of scale
 }
 
 

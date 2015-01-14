@@ -162,6 +162,8 @@ public:
    EditorObject();            // Constructor
    virtual ~EditorObject();   // Destructor
 
+   static const S32 VERTEX_SIZE = 5;
+
    virtual void onAddedToEditor();
 
    // Messages and such for the editor

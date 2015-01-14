@@ -15,7 +15,7 @@ namespace Zap
 {
 
 U32 GridDatabase::mQueryId = 0;
-ClassChunker<GridDatabase::BucketEntry> *GridDatabase::mChunker = NULL;
+ClassChunker<DatabaseBucketEntry> *GridDatabase::mChunker = NULL;
 U32 GridDatabase::mCountGridDatabase = 0;
 
 static U32 getNextId() 
@@ -28,13 +28,13 @@ static U32 getNextId()
 GridDatabase::GridDatabase()
 {
    if(mChunker == NULL)
-      mChunker = new ClassChunker<BucketEntry>();        // Static shared by all databases, reference counted and deleted in destructor
+      mChunker = new ClassChunker<DatabaseBucketEntry>();        // Static shared by all databases, reference counted and deleted in destructor
 
    mCountGridDatabase++;
 
    for(U32 i = 0; i < BucketRowCount; i++)
       for(U32 j = 0; j < BucketRowCount; j++)
-         mBuckets[i][j] = NULL;
+         mBuckets[i][j].nextInBucket = NULL;
 
    mDatabaseId = getNextId();
 }
@@ -105,6 +105,7 @@ void GridDatabase::addToDatabase(DatabaseObject *object)
    TNLAssert(object->mDatabase != this, "Already added to database, trying to add to same database again!");
    TNLAssert(!object->mDatabase,        "Already added to database, trying to add to different database!");
    TNLAssert(object->getExtentSet(),    "Object extents were never set!");
+   TNLAssert(!object->mBucketList,      "BucketList must be NULL");
 
    // WallItems should not be added to the database during a regular game, but the editor will add them...
    //TNLAssert(object->getObjectTypeNumber() != WallItemTypeNumber, "Should not add wall items to the database!");
@@ -120,10 +121,16 @@ void GridDatabase::addToDatabase(DatabaseObject *object)
    for(S32 x = bins.minx; bins.maxx - x >= 0; x++)
       for(S32 y = bins.miny; bins.maxy - y >= 0; y++)
       {
-         BucketEntry *be = mChunker->alloc();
+         DatabaseBucketEntry *be = mChunker->alloc();
+         DatabaseBucketEntryBase *base = &mBuckets[x & BucketMask][y & BucketMask];
          be->theObject = object;
-         be->nextInBucket = mBuckets[x & BucketMask][y & BucketMask];
-         mBuckets[x & BucketMask][y & BucketMask] = be;
+         if(base->nextInBucket)
+            base->nextInBucket->prevInBucket = be;
+         be->nextInBucket = base->nextInBucket;
+         be->prevInBucket = base;
+         base->nextInBucket = be;
+         be->nextInBucketForThisObject = object->mBucketList;
+         object->mBucketList = be;
       }
 
    // Add the object to our non-spatial "database" as well
@@ -161,14 +168,15 @@ void GridDatabase::removeEverythingFromDatabase()
    {
       for(S32 y = 0; y < BucketRowCount; y++)
       {
-         for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; )
+         for(DatabaseBucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask].nextInBucket; walk; )
          {
-            BucketEntry *rem = walk;
+            DatabaseBucketEntry *rem = walk;
             walk->theObject->mDatabase = NULL;  // make sure object don't point to this database anymore
+            walk->theObject->mBucketList = NULL;
             walk = rem->nextInBucket;
             mChunker->free(rem);
          }
-         mBuckets[x & BucketMask][y & BucketMask] = NULL;
+         mBuckets[x & BucketMask][y & BucketMask].nextInBucket = NULL;
       }
    }
 
@@ -217,21 +225,16 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
    static IntRect bins;
    fillBins(extents, bins);
 
-   for(S32 x = bins.minx; bins.maxx - x >= 0; x++)
+   while(object->mBucketList)
    {
-      for(S32 y = bins.miny; bins.maxy - y >= 0; y++)
-      {
-         for(BucketEntry **walk = &mBuckets[x & BucketMask][y & BucketMask]; *walk; walk = &((*walk)->nextInBucket))
-         {
-            if((*walk)->theObject == object)
-            {
-               BucketEntry *rem = *walk;
-               *walk = rem->nextInBucket;
-               mChunker->free(rem);
-               break;
-            }
-         }
-      }
+      DatabaseBucketEntry *b = object->mBucketList;
+      TNLAssert(b->theObject == object, "Object mismatch");
+      TNLAssert(b->prevInBucket->nextInBucket == b, "Broken linked list");
+      if(b->nextInBucket)
+         b->nextInBucket->prevInBucket = b->prevInBucket;
+      b->prevInBucket->nextInBucket = b->nextInBucket;
+      object->mBucketList = b->nextInBucketForThisObject;
+      mChunker->free(b);
    }
 
    // Find and delete object from our non-spatial databases
@@ -317,7 +320,7 @@ void GridDatabase::findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> 
 
    for(S32 x = bins->minx; bins->maxx - x >= 0; x++)
       for(S32 y = bins->miny; bins->maxy - y >= 0; y++)
-         for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
+         for(DatabaseBucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask].nextInBucket; walk; walk = walk->nextInBucket)
          {
             DatabaseObject *theObject = walk->theObject;
 
@@ -380,7 +383,7 @@ void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fill
 
    for(S32 x = bins->minx; bins->maxx - x >= 0; x++)
       for(S32 y = bins->miny; bins->maxy - y >= 0; y++)
-         for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
+         for(DatabaseBucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask].nextInBucket; walk; walk = walk->nextInBucket)
          {
             DatabaseObject *theObject = walk->theObject;
 
@@ -447,7 +450,7 @@ void GridDatabase::dumpObjects()
 {
    for(S32 x = 0; x < BucketRowCount; x++)
       for(S32 y = 0; y < BucketRowCount; y++)
-         for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
+         for(DatabaseBucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask].nextInBucket; walk; walk = walk->nextInBucket)
          {
             DatabaseObject *object = walk->theObject;
             logprintf("Found object in (%d,%d) with extents %s", x, y, object->getExtent().toString().c_str());
@@ -542,6 +545,7 @@ void DatabaseObject::initialize()
    mExtent = Rect(); 
    mExtentSet = false;
    mDatabase = NULL;
+   mBucketList = NULL;
 }
 
 
@@ -776,25 +780,32 @@ void GridDatabase::updateExtents(DatabaseObject *object, const Rect &newExtents)
       // Instead, use maxx - x >= 0, it will better handle overflows and avoid endless loop (MIN_S32 - MAX_S32 = +1)
 
       // Remove from the extents database for current extents...
-      for(S32 x = minxold; maxxold - x >= 0; x++)
-         for(S32 y = minyold; maxyold - y >= 0; y++)
-            for(GridDatabase::BucketEntry **walk = &mBuckets[x & BucketMask][y & BucketMask]; 
-                                 *walk; walk = &((*walk)->nextInBucket))
-               if((*walk)->theObject == object)
-               {
-                  GridDatabase::BucketEntry *rem = *walk;
-                  *walk = rem->nextInBucket;
-                  mChunker->free(rem);
-                  break;
-               }
+      while(object->mBucketList)
+      {
+         DatabaseBucketEntry *b = object->mBucketList;
+         TNLAssert(b->theObject == object, "Object mismatch");
+         TNLAssert(b->prevInBucket->nextInBucket == b, "Broken linked list");
+         if(b->nextInBucket)
+            b->nextInBucket->prevInBucket = b->prevInBucket;
+         b->prevInBucket->nextInBucket = b->nextInBucket;
+         object->mBucketList = b->nextInBucketForThisObject;
+         mChunker->free(b);
+      }
+
       // ...and re-add for the new extent
       for(S32 x = minx; maxx - x >= 0; x++)
          for(S32 y = miny; maxy - y >= 0; y++)
          {
-            GridDatabase::BucketEntry *be = mChunker->alloc();
+            DatabaseBucketEntry *be = mChunker->alloc();
+            DatabaseBucketEntryBase *base = &mBuckets[x & BucketMask][y & BucketMask];
             be->theObject = object;
-            be->nextInBucket = mBuckets[x & BucketMask][y & BucketMask];
-            mBuckets[x & BucketMask][y & BucketMask] = be;
+            if(base->nextInBucket)
+               base->nextInBucket->prevInBucket = be;
+            be->nextInBucket = base->nextInBucket;
+            be->prevInBucket = base;
+            base->nextInBucket = be;
+            be->nextInBucketForThisObject = object->mBucketList;
+            object->mBucketList = be;
          }
    }
 }

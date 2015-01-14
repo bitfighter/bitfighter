@@ -193,7 +193,7 @@ const Vector<Point> *PolyWall::getCollisionPoly() const
 // Size of object in editor 
 F32 PolyWall::getEditorRadius(F32 currentScale) const
 {
-   return (F32)WallItem::VERTEX_SIZE;   // Keep vertex hit targets the same regardless of scale
+   return (F32)EditorObject::VERTEX_SIZE;   // Keep vertex hit targets the same regardless of scale
 }
 
 

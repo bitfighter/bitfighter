@@ -73,8 +73,6 @@ public:
 
    //const Vector<Point> *getCollisionPoly() const;
 
-   static const S32 VERTEX_SIZE = 5;
-
    ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(WallItem);
 
