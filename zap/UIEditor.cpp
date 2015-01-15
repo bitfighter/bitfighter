@@ -4632,6 +4632,7 @@ void EditorUserInterface::onMouseUp()
          if(j == obj->getVertCount())
             obj->setSelected(true);
       }
+
       mDragSelecting = false;
       onSelectionChanged();
    }
@@ -4669,7 +4670,7 @@ void EditorUserInterface::onFinishedDragging()
    // 2. moving something; or
    // 3. we moved something to the dock and nothing was deleted, e.g. when dragging a vertex
    // need to save an undo state if anything changed
-   if(mDraggingDockItem == NULL)    // Not dragging from dock - user is moving object around screen, or dragging vertex to dock
+   if(mDraggingDockItem.isNull())    // Not dragging from dock - user is moving object around screen, or dragging vertex to dock
       onFinishedDragging_movingObject();
 }
 
@@ -4746,12 +4747,12 @@ void EditorUserInterface::onFinishedDragging_movingObject()
             j++;
          }
 
-         if(obj->isSelected() && isWallType(obj->getObjectTypeNumber()))      // Wall or polywall
+         if(isWallType(obj->getObjectTypeNumber()) && (obj->isSelected() || obj->anyVertsSelected()))      // Wall or polywall
             wallMoved = true;
       }
 
-         if(wallMoved)
-            rebuildWallGeometry(mLevel.get());
+      if(wallMoved)
+         rebuildWallGeometry(mLevel.get());
 
       mUndoManager.endTransaction();
 
