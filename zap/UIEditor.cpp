@@ -4675,7 +4675,7 @@ void EditorUserInterface::onFinishedDragging()
 }
 
 
-void EditorUserInterface::onFinishedDragging_droppedItemOnDock()
+void EditorUserInterface::onFinishedDragging_droppedItemOnDock()     // Delete type action
 {
    // Only delete items in normal dock mode
    if(mDockMode == DOCKMODE_ITEMS)
