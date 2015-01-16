@@ -1888,6 +1888,7 @@ void EditorUserInterface::render() const
       delta = mDraggingObjects ? mSnapDelta : Point(0,0);
 
       // == Render walls and polyWalls ==
+      renderShadowWalls();
       renderWallsAndPolywalls(&mLevelGenDatabase, delta, false, true );
       renderWallsAndPolywalls(editorDb, delta, false, false);
 
@@ -2016,13 +2017,41 @@ void EditorUserInterface::renderObjects(const GridDatabase *database, RenderMode
 }
 
 
+// Render the gray shadows of walls that are being manipulated
+void EditorUserInterface::renderShadowWalls() const
+{
+   // TODO: There may be some overlap between this fn and rederWallsAndPolywalls
+
+   if(!mDraggingObjects)
+      return;
+
+   for(S32 i = 0; i < mSelectedObjectsForDragging.size(); i++)
+      if(isWallType(mSelectedObjectsForDragging[i]->getObjectTypeNumber()))
+      {
+         if(mSelectedObjectsForDragging[i]->getObjectTypeNumber() == PolyWallTypeNumber)
+            renderPolygonFill(mSelectedObjectsForDragging[i]->getFill(), Colors::gray67);
+         else if(mSelectedObjectsForDragging[i]->getObjectTypeNumber() == WallItemTypeNumber)
+         {
+            WallItem *barrier = static_cast<WallItem *>(mSelectedObjectsForDragging[i]);
+
+            for(S32 j = 0; j < barrier->getSegmentCount(); j++)
+            {
+               const WallSegment *wallSegment = barrier->getSegment(j);
+               wallSegment->renderFill(Point(0, 0), Colors::gray67, false);
+            }
+         }
+      }
+}
+
+
 // Render walls (both normal walls and polywalls, outlines and fills) and centerlines
 void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, const Point &offset,
                                                   bool drawSelected, bool isLevelGenDatabase) const
 {
    // Guarantee walls are a standard color for editor screenshot uploads to the level database
    const Color &fillColor = mNormalizedScreenshotMode ? Colors::DefaultWallFillColor :
-         mPreviewMode ? mGameSettings->getWallFillColor() : Colors::EDITOR_WALL_FILL_COLOR;
+                                                        mPreviewMode ? mGameSettings->getWallFillColor() : 
+                                                                       Colors::EDITOR_WALL_FILL_COLOR;
 
    const Color &outlineColor = mNormalizedScreenshotMode ? Colors::DefaultWallOutlineColor : 
                                                            mGameSettings->getWallOutlineColor();
@@ -2034,7 +2063,7 @@ void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, 
                outlineColor,
                fillColor, 
                mCurrentScale, 
-               mDraggingObjects, 
+               mDraggingObjects, // <== bool
                drawSelected, 
                offset, 
                mPreviewMode, 
