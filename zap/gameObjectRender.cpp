@@ -2452,9 +2452,9 @@ void renderCore(const Point &pos, const Color &coreColor, U32 time,
                pos.x, pos.y
          };
 
-         F32 colors[] = {
-               0.2f, 0.2f, 0.2f, 1,    // Colors::gray20
-               0,    0,    0,    1,    // Colors::black
+         static F32 colors[] = {
+               Colors::gray20.r, Colors::gray20.g, Colors::gray20.b, 1,
+               Colors::black .r, Colors::black .g, Colors::black .b, 1,
          };
 
          renderColorVertexArray(vertices2, colors, 2, GL_LINES);
