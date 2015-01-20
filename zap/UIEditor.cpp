@@ -2020,8 +2020,6 @@ void EditorUserInterface::renderObjects(const GridDatabase *database, RenderMode
 // Render the gray shadows of walls that are being manipulated
 void EditorUserInterface::renderShadowWalls() const
 {
-   // TODO: There may be some overlap between this fn and rederWallsAndPolywalls
-
    if(!mDraggingObjects)
       return;
 
@@ -2029,7 +2027,7 @@ void EditorUserInterface::renderShadowWalls() const
       if(isWallType(mSelectedObjectsForDragging[i]->getObjectTypeNumber()))
       {
          if(mSelectedObjectsForDragging[i]->getObjectTypeNumber() == PolyWallTypeNumber)
-            renderPolygonFill(mSelectedObjectsForDragging[i]->getFill(), Colors::gray67);
+            renderPolygonFill(mSelectedObjectsForDragging[i]->getFill(), Colors::EDITOR_SHADOW_WALL_COLOR);
          else if(mSelectedObjectsForDragging[i]->getObjectTypeNumber() == WallItemTypeNumber)
          {
             WallItem *barrier = static_cast<WallItem *>(mSelectedObjectsForDragging[i]);
@@ -2037,7 +2035,7 @@ void EditorUserInterface::renderShadowWalls() const
             for(S32 j = 0; j < barrier->getSegmentCount(); j++)
             {
                const WallSegment *wallSegment = barrier->getSegment(j);
-               wallSegment->renderFill(Point(0, 0), Colors::gray67, false);
+               wallSegment->renderFill(Point(0, 0), Colors::EDITOR_SHADOW_WALL_COLOR, false);
             }
          }
       }

@@ -2874,7 +2874,7 @@ void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F
    // Fill the box with a dark gray to make the number easier to read
    if(hollow && number != -1)
    {
-      glColor(.25);
+      glColor(Colors::gray25);
       drawFilledSquare(v, size / scale);
    }
       
@@ -3487,69 +3487,12 @@ void renderWalls(const Vector<DatabaseObject *> *walls,
                  bool showSnapVertices, 
                  F32 alpha)
 {
-   bool moved = (selectedItemOffset.x != 0 || selectedItemOffset.y != 0);
-
    S32 wallCount     = walls->size();
    S32 polyWallCount = polyWalls->size();
 
    S32 count = wallCount + polyWallCount;
 
-   if(!drawSelected)    // Essentially pass 1, drawn earlier in the process
-   {
-      // Render walls that have been moved first (i.e. render their shadows)
-      if(moved)
-      {
-         for(S32 i = 0; i < count; i++)
-         {
-            // TODO figure out how to remove dynamic_cast
-            BfObject *obj = static_cast<BfObject *>((i < wallCount) ? walls->get(i) : polyWalls->get(i - wallCount));
-            BarrierX *barrier = dynamic_cast<BarrierX *>(obj);
-
-            for(S32 j = 0; j < barrier->getSegmentCount(); j++)
-            {
-              const WallSegment *wallSegment = barrier->getSegment(j);
-
-               if(obj->isSelected())     
-                  wallSegment->renderFill(Point(0,0), Color(.1), true);  // false??
-            }
-         }
-      }
-
-      // hack for now
-      Color color;
-      if(alpha < 1)
-         color = Colors::gray67;
-      else
-         color = fillColor * alpha;
-     
-      for(S32 i = 0; i < count; i++)
-      {
-         BarrierX *barrier;
-         BfObject *obj;
-         
-         if(i < wallCount)
-         {
-            barrier = static_cast<BarrierX *>(static_cast<WallItem *>(walls->get(i)));
-            obj     = static_cast<BfObject *>(walls->get(i));
-         }
-         else
-         {
-            barrier = static_cast<BarrierX *>(static_cast<PolyWall *>(polyWalls->get(i - wallCount)));
-            obj     = static_cast<BfObject *>(polyWalls->get(i - wallCount));
-         }
-
-         for(S32 j = 0; j < barrier->getSegmentCount(); j++)
-         {
-            const WallSegment *wallSegment = barrier->getSegment(j);
-
-            if(!moved || !obj->isSelected())         
-               wallSegment->renderFill(selectedItemOffset, color, false);      // RenderFill ignores offset for unselected walls
-         }
-      }
-
-      renderWallEdges(wallEdgePoints, outlineColor);                 // Render wall outlines with unselected walls
-   }
-   else  // Render selected/moving walls last so they appear on top; this is pass 2, 
+   if(drawSelected)     
    {
       for(S32 i = 0; i < count; i++)
       {
@@ -3572,12 +3515,51 @@ void renderWalls(const Vector<DatabaseObject *> *walls,
       // Render wall outlines for walls/polywalls with vertices being dragged
       renderWallEdges(selectedWallEdgePointsDraggedVertices, Point(0,0), outlineColor);
    }
+   else  // Render selected/moving walls last so they appear on top; this is pass 2, 
+   {
+      // hack for now
+      Color color;
+      if(alpha < 1)
+         color = Colors::gray67;
+      else
+         color = fillColor * alpha;
+
+      // This is what keeps wall rendering from rendering over the shadow walls when dragging a wall around
+      bool moved = (selectedItemOffset.x != 0 || selectedItemOffset.y != 0);
+
+      for(S32 i = 0; i < count; i++)
+      {
+         BarrierX *barrier;
+         BfObject *obj;
+
+         if(i < wallCount)
+         {
+            barrier = static_cast<BarrierX *>(static_cast<WallItem *>(walls->get(i)));
+            obj = static_cast<BfObject *>(walls->get(i));
+         }
+         else
+         {
+            barrier = static_cast<BarrierX *>(static_cast<PolyWall *>(polyWalls->get(i - wallCount)));
+            obj = static_cast<BfObject *>(polyWalls->get(i - wallCount));
+         }
+
+         for(S32 j = 0; j < barrier->getSegmentCount(); j++)
+         {
+            if(!moved || !obj->isSelected())
+            {
+               // RenderFill ignores offset for unselected walls
+               barrier->getSegment(j)->renderFill(selectedItemOffset, color, false);
+            }
+         }
+      }
+
+      renderWallEdges(wallEdgePoints, outlineColor);                 // Render wall outlines with unselected walls
+   }
 
    if(showSnapVertices)
    {
       glLineWidth(gLineWidth1);
 
-      //glColor(Colors::magenta);
       for(S32 i = 0; i < wallEdgePoints.size(); i++)
          renderSmallSolidVertex(currentScale, wallEdgePoints[i], dragMode);
 

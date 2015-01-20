@@ -24,7 +24,9 @@ namespace Colors
    const Color white(1,1,1);
 
    // Grays
+   const Color gray10(0.10);
    const Color gray20(0.20);
+   const Color gray25(0.25);
    const Color gray40(0.40);
    const Color gray50(0.50);
    const Color gray60(0.60);
@@ -92,6 +94,7 @@ namespace Colors
    const Color EDITOR_HIGHLIGHT_COLOR(Colors::white);
    const Color EDITOR_SELECT_COLOR(Colors::yellow);
    const Color EDITOR_PLAIN_COLOR(Colors::gray75);
+   const Color EDITOR_SHADOW_WALL_COLOR(Colors::gray10);
 
    const Color EDITOR_WALL_FILL_COLOR(.5f, .5f, 1.0f);
 
