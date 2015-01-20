@@ -3472,8 +3472,9 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
 }
 
 
-void renderWalls(const GridDatabase *gameObjectDatabase, 
-                 const Vector<Point> &wallEdgePoints, 
+void renderWalls(const Vector<DatabaseObject *> *walls,
+                 const Vector<DatabaseObject *> *polyWalls,
+                 const Vector<Point> &wallEdgePoints,
                  const Vector<Point> &selectedWallEdgePointsWholeWalls,
                  const Vector<Point> &selectedWallEdgePointsDraggedVertices,
                  const Color &outlineColor,
@@ -3487,9 +3488,6 @@ void renderWalls(const GridDatabase *gameObjectDatabase,
                  F32 alpha)
 {
    bool moved = (selectedItemOffset.x != 0 || selectedItemOffset.y != 0);
-
-   const Vector<DatabaseObject *> *walls = gameObjectDatabase->findObjects_fast(WallItemTypeNumber);
-   const Vector<DatabaseObject *> *polyWalls = gameObjectDatabase->findObjects_fast(PolyWallTypeNumber);
 
    S32 wallCount     = walls->size();
    S32 polyWallCount = polyWalls->size();
@@ -3573,7 +3571,6 @@ void renderWalls(const GridDatabase *gameObjectDatabase,
 
       // Render wall outlines for walls/polywalls with vertices being dragged
       renderWallEdges(selectedWallEdgePointsDraggedVertices, Point(0,0), outlineColor);
-
    }
 
    if(showSnapVertices)

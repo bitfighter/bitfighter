@@ -2056,7 +2056,8 @@ void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, 
    const Color &outlineColor = mNormalizedScreenshotMode ? Colors::DefaultWallOutlineColor : 
                                                            mGameSettings->getWallOutlineColor();
 
-   renderWalls(mLevel.get(), 
+   renderWalls(mLevel->findObjects_fast(WallItemTypeNumber),
+               mLevel->findObjects_fast(PolyWallTypeNumber),
                mWallEdgePoints, 
                mSelectedWallEdgePointsWholeWalls,
                mSelectedWallEdgePointsDraggedVertices,

@@ -268,7 +268,8 @@ extern void renderStaticBitfighterLogo();
 
 extern void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge);
 
-extern void renderWalls(const GridDatabase *gameObjectDatabase, 
+extern void renderWalls(const Vector<DatabaseObject *> *walls,
+                        const Vector<DatabaseObject *> *polyWalls,
                         const Vector<Point> &wallEdgePoints, 
                         const Vector<Point> &selectedWallEdgePointsWholeWalls,
                         const Vector<Point> &selectedWallEdgePointsDraggedVertices,
