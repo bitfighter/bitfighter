@@ -3568,7 +3568,26 @@ void renderWalls(const Vector<DatabaseObject *> *walls,
 }
 
 
-// Renders wall "spine", actually
+// Render the gray shadows of walls that are being manipulated.  Ignore any passed objects that are
+// not walls or polywalls.  These shadows are rendered before the wall being dragged.
+void renderShadowWalls(const Vector<BfObject *> &objects)
+{
+   for(S32 i = 0; i < objects.size(); i++)
+   {
+      if(objects[i]->getObjectTypeNumber() == PolyWallTypeNumber)
+         renderPolygonFill(objects[i]->getFill(), Colors::EDITOR_SHADOW_WALL_COLOR);
+
+      else if(objects[i]->getObjectTypeNumber() == WallItemTypeNumber)
+      {
+         WallItem *barrier = static_cast<WallItem *>(objects[i]);
+
+         for(S32 j = 0; j < barrier->getSegmentCount(); j++)
+            barrier->getSegment(j)->renderFill(Point(0, 0), Colors::EDITOR_SHADOW_WALL_COLOR, false);
+      }
+   }
+}
+
+
 void renderWallSpine(const WallItem *wallItem, const Vector<Point> *outline, const Color &color, 
                        F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {

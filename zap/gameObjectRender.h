@@ -283,6 +283,7 @@ extern void renderWalls(const Vector<DatabaseObject *> *walls,
                         bool showSnapVertices, 
                         F32 alpha);
 
+extern void renderShadowWalls(const Vector<BfObject *> &objects);
 
 extern void renderWallSpine(const WallItem *wallItem, const Vector<Point> *outline, const Color &color, 
                             F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);

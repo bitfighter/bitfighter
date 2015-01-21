@@ -300,7 +300,6 @@ private:
    void render() const;
    void renderObjects(const GridDatabase *database, RenderModes renderMode, bool isLevelgenOverlay) const;
    void renderWallsAndPolywalls(const GridDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase) const;
-   void renderShadowWalls() const;
 
    void autoSave();                    // Hope for the best, prepare for the worst
    bool doSaveLevel(const string &saveName, bool showFailMessages);

@@ -1888,7 +1888,10 @@ void EditorUserInterface::render() const
       delta = mDraggingObjects ? mSnapDelta : Point(0,0);
 
       // == Render walls and polyWalls ==
-      renderShadowWalls();
+      // Shadows only drawn under walls that are being dragged.  No dragging, no shadows.
+      if(mDraggingObjects)   
+         renderShadowWalls(mSelectedObjectsForDragging);
+
       renderWallsAndPolywalls(&mLevelGenDatabase, delta, false, true );
       renderWallsAndPolywalls(editorDb, delta, false, false);
 
@@ -2014,31 +2017,6 @@ void EditorUserInterface::renderObjects(const GridDatabase *database, RenderMode
          }
       }
    }
-}
-
-
-// Render the gray shadows of walls that are being manipulated
-void EditorUserInterface::renderShadowWalls() const
-{
-   if(!mDraggingObjects)
-      return;
-
-   for(S32 i = 0; i < mSelectedObjectsForDragging.size(); i++)
-      if(isWallType(mSelectedObjectsForDragging[i]->getObjectTypeNumber()))
-      {
-         if(mSelectedObjectsForDragging[i]->getObjectTypeNumber() == PolyWallTypeNumber)
-            renderPolygonFill(mSelectedObjectsForDragging[i]->getFill(), Colors::EDITOR_SHADOW_WALL_COLOR);
-         else if(mSelectedObjectsForDragging[i]->getObjectTypeNumber() == WallItemTypeNumber)
-         {
-            WallItem *barrier = static_cast<WallItem *>(mSelectedObjectsForDragging[i]);
-
-            for(S32 j = 0; j < barrier->getSegmentCount(); j++)
-            {
-               const WallSegment *wallSegment = barrier->getSegment(j);
-               wallSegment->renderFill(Point(0, 0), Colors::EDITOR_SHADOW_WALL_COLOR, false);
-            }
-         }
-      }
 }
 
 
