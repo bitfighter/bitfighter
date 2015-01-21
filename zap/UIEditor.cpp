@@ -2009,7 +2009,10 @@ void EditorUserInterface::renderObjects(const GridDatabase *database, RenderMode
          setColor(obj->isSelected(), obj->isLitUp(), isLevelgenOverlay);
 
          if(mPreviewMode)
-            obj->render();
+         {
+            if(!isWall)
+               obj->render();
+         }
          else
          {
             obj->renderEditor(mCurrentScale, getSnapToWallCorners(), mVertexEditMode);
