@@ -3545,11 +3545,11 @@ void renderWalls(const Vector<DatabaseObject *> *walls,
 
          for(S32 j = 0; j < barrier->getSegmentCount(); j++)
          {
-            if(!moved || !obj->isSelected())
-            {
-               // RenderFill ignores offset for unselected walls
-               barrier->getSegment(j)->renderFill(selectedItemOffset, color, false);
-            }
+            if(moved && obj->isSelected())
+               continue;
+            
+            // RenderFill ignores offset for unselected walls
+            barrier->getSegment(j)->renderFill(selectedItemOffset, color, false);
          }
       }
 
