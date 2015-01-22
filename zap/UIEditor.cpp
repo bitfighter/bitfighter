@@ -2849,7 +2849,8 @@ void EditorUserInterface::onMouseMoved()
 
    setMousePos();
 
-   // Doing this with MOUSE_RIGHT allows you to drag a vertex you just placed by holding the right-mouse button
+   // If any button is down, we consider ourselves to be in drag mode.
+   // Doing this with MOUSE_RIGHT allows you to drag a vertex you just placed by holding the right-mouse button.
    if(InputCodeManager::getState(MOUSE_LEFT) || InputCodeManager::getState(MOUSE_RIGHT) || InputCodeManager::getState(MOUSE_MIDDLE))
    {
       onMouseDragged();
