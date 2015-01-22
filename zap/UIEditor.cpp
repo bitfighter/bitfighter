@@ -2847,7 +2847,7 @@ void EditorUserInterface::onMouseMoved()
 
    mIgnoreMouseInput = true;
 
-   mMousePos.set(DisplayManager::getScreenInfo()->getMousePos());
+   setMousePos();
 
    // Doing this with MOUSE_RIGHT allows you to drag a vertex you just placed by holding the right-mouse button
    if(InputCodeManager::getState(MOUSE_LEFT) || InputCodeManager::getState(MOUSE_RIGHT) || InputCodeManager::getState(MOUSE_MIDDLE))
@@ -2882,6 +2882,13 @@ void EditorUserInterface::onMouseMoved()
    }
 
    Cursor::enableCursor();
+}
+
+
+// Stores the current mouse position in mMousePos
+void EditorUserInterface::setMousePos()
+{
+   mMousePos.set(DisplayManager::getScreenInfo()->getMousePos());
 }
 
 
@@ -4093,7 +4100,7 @@ void EditorUserInterface::onMouseClicked_left()
    bool spaceDown = InputCodeManager::getState(KEY_SPACE);
 
    mDraggingDockItem = NULL;
-   mMousePos.set(DisplayManager::getScreenInfo()->getMousePos());
+   setMousePos();
    mJustInsertedVertex = false;
 
    if(mCreatingPoly || mCreatingPolyline)       // Save any polygon/polyline we might be creating
@@ -4228,7 +4235,7 @@ void EditorUserInterface::onMouseClicked_right()
    if(InputCodeManager::getState(MOUSE_LEFT) && !InputCodeManager::checkModifier(KEY_CTRL))  // Prevent weirdness
       return;  
 
-   mMousePos.set(DisplayManager::getScreenInfo()->getMousePos());
+   setMousePos();
 
    if(mCreatingPoly || mCreatingPolyline)
    {
@@ -4615,7 +4622,7 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
 
 void EditorUserInterface::onMouseUp()
 {
-   mMousePos.set(DisplayManager::getScreenInfo()->getMousePos());
+   setMousePos();
 
    if(mDragSelecting)      // We were drawing a rubberband selection box
    {
