@@ -2003,21 +2003,21 @@ void EditorUserInterface::renderObjects(const GridDatabase *database, RenderMode
       bool isSelected = obj->isSelected() || obj->isLitUp();
       bool isWall = isWallType(obj->getObjectTypeNumber());
 
-      if(isSelected == wantSelected && isWall == wantWalls)     
-      {
-         // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
-         setColor(obj->isSelected(), obj->isLitUp(), isLevelgenOverlay);
+      if(isSelected != wantSelected || isWall != wantWalls)
+         continue;
 
-         if(mPreviewMode)
-         {
-            if(!isWall)
-               obj->render();
-         }
-         else
-         {
-            obj->renderEditor(mCurrentScale, getSnapToWallCorners(), mVertexEditMode);
-            obj->renderAndLabelHighlightedVertices(mCurrentScale);
-         }
+      // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
+      setColor(obj->isSelected(), obj->isLitUp(), isLevelgenOverlay);
+
+      if(mPreviewMode)
+      {
+         if(!isWall)
+            obj->render();
+      }
+      else
+      {
+         obj->renderEditor(mCurrentScale, getSnapToWallCorners(), mVertexEditMode);
+         obj->renderAndLabelHighlightedVertices(mCurrentScale);
       }
    }
 }
