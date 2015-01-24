@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "gtest/gtest_prod.h"
+
 using namespace std;
 using namespace TNL;
 
@@ -159,7 +161,11 @@ public:
 
    S32 getBotCount() const;
 
-   friend class ObjectTest;
+   ///// Testing
+   friend class EditorTest;
+   FRIEND_TEST(EditorTest, findSnapVertexTest);
+
+   friend class ObjectTest;      // TODO: This is probably not handled quite right...
 };
 
 

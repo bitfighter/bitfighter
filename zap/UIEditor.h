@@ -400,6 +400,8 @@ public:
    void onKeyUp(InputCode inputCode);
    void onMouseUp();
 
+   void setMousePos();
+
    void onMouseMoved();
    void onMouseDragged();
    void onMouseDragged_startDragging();
@@ -498,6 +500,11 @@ public:
 
    void findPlugins();
    U32 findPluginDockWidth();
+
+
+   ///// Testing
+   friend class EditorTest;
+   FRIEND_TEST(EditorTest, findSnapVertexTest);
 };
 
 
