@@ -42,14 +42,39 @@ TEST(EditorTest, findSnapVertexTest)
    ASSERT_FALSE(wall->vertSelected(3));
    ASSERT_FALSE(wall->vertSelected(4));
 
-   editorUi->mMousePos.set(3,3);    // In canvas coords; near vertex 2
+   editorUi->mMousePos.set(3,3);          // In canvas coords; near vertex 2
    editorUi->findSnapVertex();
-
    EXPECT_EQ(2, editorUi->mSnapVertexIndex);
 
+   editorUi->mMousePos.set(95,105);       // Near vertex 4, which is not selected --> closest selected is 2
+   editorUi->findSnapVertex();
+   EXPECT_EQ(2, editorUi->mSnapVertexIndex);
+
+   editorUi->mMousePos.set(-88,-106);     // Near vertex 0, which is selected  
+   editorUi->findSnapVertex();
+   EXPECT_EQ(0, editorUi->mSnapVertexIndex);
+
+   wall->unselectVert(0);
+   ASSERT_FALSE(wall->vertSelected(0));
+   ASSERT_TRUE(wall->vertSelected(1));
+   ASSERT_TRUE(wall->vertSelected(2));
+   ASSERT_FALSE(wall->vertSelected(3));
+   ASSERT_FALSE(wall->vertSelected(4));
+
+   editorUi->mMousePos.set(-88, -106);    // Near vertex 0, which is not selected   --> closest selected is 1
+   editorUi->findSnapVertex();
+   EXPECT_EQ(1, editorUi->mSnapVertexIndex);
+
+   editorUi->mMousePos.set(3, 3);         // In canvas coords; near vertex 2
+   editorUi->findSnapVertex();
+   EXPECT_EQ(2, editorUi->mSnapVertexIndex);
+
+   // Cleanup
    delete newClientGame();
 
-   // NOTE: in editor, ctrl-L and F1 crash
+   // NOTE: in editor, ctrl-L and F1 crash, # when teleporter is selcted crash
+   // rotate a z shaped wall roteates around random point (centroid calc wrong?)
+   // Setting game time to 0 should make time unlimited
 }
 
 
