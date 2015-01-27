@@ -62,7 +62,8 @@ string SavedMenuItem::getParamVal()
 
 
 // Constructor
-GameParamUserInterface::GameParamUserInterface(ClientGame *game) : Parent(game)
+GameParamUserInterface::GameParamUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mMenuTitle = "GAME PARAMETERS MENU";
    mMenuSubTitle = "";

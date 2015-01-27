@@ -20,16 +20,19 @@
 namespace Zap
 {
 
-MessageUserInterface::MessageUserInterface(ClientGame *game) : Parent(game)
+MessageUserInterface::MessageUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    // Do nothing
 }
+
 
 // Destructor
 MessageUserInterface::~MessageUserInterface()
 {
    // Do nothing
 }
+
 
 void MessageUserInterface::onActivate()
 {

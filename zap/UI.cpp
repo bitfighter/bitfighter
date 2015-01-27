@@ -48,7 +48,7 @@ S32 UserInterface::messageMargin = UserInterface::vertMargin + UI::LoadoutIndica
 ////////////////////////////////////////
 
 // Constructor
-UserInterface::UserInterface(ClientGame *clientGame)
+UserInterface::UserInterface(ClientGame *clientGame, UIManager *uiManager)
 {
    TNLAssert(clientGame, "Need a ClientGame to get settings!");
 
@@ -56,6 +56,7 @@ UserInterface::UserInterface(ClientGame *clientGame)
    mGameSettings = mClientGame->getSettings();
    mTimeSinceLastInput = 0;
    mDisableShipKeyboardInput = true;
+   mUiManager = uiManager;
 }
 
 

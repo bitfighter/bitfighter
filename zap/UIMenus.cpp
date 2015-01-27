@@ -63,13 +63,15 @@ extern void shutdownBitfighter();
 ////////////////////////////////////
 
 // Constructor
-MenuUserInterface::MenuUserInterface(ClientGame *game) : UserInterface(game)
+MenuUserInterface::MenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   UserInterface(game, uiManager)
 {
    initialize();
 }
 
 
-MenuUserInterface::MenuUserInterface(ClientGame *game, const string &title) : UserInterface(game)
+MenuUserInterface::MenuUserInterface(ClientGame *game, UIManager *uiManager, const string &title) : 
+   UserInterface(game, uiManager)
 {
    initialize();
 
@@ -812,7 +814,8 @@ bool MenuUserInterfaceWithIntroductoryAnimation::mFirstTime = true;
 
 
 // Constructor
-MenuUserInterfaceWithIntroductoryAnimation::MenuUserInterfaceWithIntroductoryAnimation(ClientGame *game) : Parent(game)
+MenuUserInterfaceWithIntroductoryAnimation::MenuUserInterfaceWithIntroductoryAnimation(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mShowingAnimation = false;
 }
@@ -940,7 +943,8 @@ static void quitSelectedCallback(ClientGame *game, U32 unused)
 //////////
 
 // Constructor
-MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
+MainMenuUserInterface::MainMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mMenuTitle = "";
    mMOTD[0] = 0;
@@ -1091,7 +1095,8 @@ void MainMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-OptionsMenuUserInterface::OptionsMenuUserInterface(ClientGame *game) : Parent(game)
+OptionsMenuUserInterface::OptionsMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mMenuTitle = "OPTIONS MENU";
 }
@@ -1257,7 +1262,8 @@ void OptionsMenuUserInterface::onEscape()
 
 
 // Constructor
-InputOptionsMenuUserInterface::InputOptionsMenuUserInterface(ClientGame *game) : Parent(game)
+InputOptionsMenuUserInterface::InputOptionsMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mMenuTitle = "INPUT OPTIONS";
 }
@@ -1450,7 +1456,8 @@ void InputOptionsMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-SoundOptionsMenuUserInterface::SoundOptionsMenuUserInterface(ClientGame *game) : Parent(game)
+SoundOptionsMenuUserInterface::SoundOptionsMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mMenuTitle = "SOUND OPTIONS";
 }
@@ -1549,7 +1556,8 @@ void SoundOptionsMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-InGameHelpOptionsUserInterface::InGameHelpOptionsUserInterface(ClientGame *game) : Parent(game)
+InGameHelpOptionsUserInterface::InGameHelpOptionsUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mMenuTitle = "IN-GAME HELP OPTIONS";
 }
@@ -1607,7 +1615,8 @@ void InGameHelpOptionsUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-RobotOptionsMenuUserInterface::RobotOptionsMenuUserInterface(ClientGame *game) : Parent(game)
+RobotOptionsMenuUserInterface::RobotOptionsMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mMenuTitle = "ROBOT OPTIONS";
 }
@@ -1664,7 +1673,8 @@ void RobotOptionsMenuUserInterface::saveSettings()
 ////////////////////////////////////////
 
 // Constructor
-ServerPasswordsMenuUserInterface::ServerPasswordsMenuUserInterface(ClientGame *game) : Parent(game)
+ServerPasswordsMenuUserInterface::ServerPasswordsMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mMenuTitle = "SERVER PASSWORDS";
 }
@@ -1736,7 +1746,8 @@ void ServerPasswordsMenuUserInterface::saveSettings()
 ////////////////////////////////////////
 
 // Constructor
-NameEntryUserInterface::NameEntryUserInterface(ClientGame *game) : Parent(game)
+NameEntryUserInterface::NameEntryUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mMenuTitle = "";
    mReason = NetConnection::ReasonNone;
@@ -1868,7 +1879,8 @@ void NameEntryUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-HostMenuUserInterface::HostMenuUserInterface(ClientGame *game) : MenuUserInterface(game)
+HostMenuUserInterface::HostMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   MenuUserInterface(game, uiManager)
 {
    mMenuTitle ="HOST A GAME";
 
@@ -1993,7 +2005,8 @@ void HostMenuUserInterface::render() const
 ////////////////////////////////////////
 
 // Constructor
-GameMenuUserInterface::GameMenuUserInterface(ClientGame *game) : MenuUserInterface(game)
+GameMenuUserInterface::GameMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   MenuUserInterface(game, uiManager)
 {
    mMenuTitle = "GAME MENU";
 }
@@ -2162,7 +2175,8 @@ void GameMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-LevelMenuUserInterface::LevelMenuUserInterface(ClientGame *game) : MenuUserInterface(game)
+LevelMenuUserInterface::LevelMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   MenuUserInterface(game, uiManager)
 {
    // Do nothing
 }
@@ -2260,7 +2274,8 @@ void LevelMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-RobotsMenuUserInterface::RobotsMenuUserInterface(ClientGame *game) : MenuUserInterface(game)
+RobotsMenuUserInterface::RobotsMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   MenuUserInterface(game, uiManager)
 {
    // Do nothing
 }
@@ -2340,7 +2355,8 @@ void RobotsMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-LevelMenuSelectUserInterface::LevelMenuSelectUserInterface(ClientGame *game) : Parent(game)
+LevelMenuSelectUserInterface::LevelMenuSelectUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    // When you start typing a name, any character typed within the mStillTypingNameTimer period will be considered
    // to be the next character of the name, rather than a new entry
@@ -2550,7 +2566,8 @@ void LevelMenuSelectUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-PlayerMenuUserInterface::PlayerMenuUserInterface(ClientGame *game) : Parent(game)
+PlayerMenuUserInterface::PlayerMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    // Do nothing
 }
@@ -2653,7 +2670,8 @@ void PlayerMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-TeamMenuUserInterface::TeamMenuUserInterface(ClientGame *game) : Parent(game)
+TeamMenuUserInterface::TeamMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mMenuSubTitle = "[Human Players | Bots | Score]";
 }

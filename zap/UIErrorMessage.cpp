@@ -14,7 +14,8 @@ namespace Zap
 {
 
 // Constructor
-AbstractMessageUserInterface::AbstractMessageUserInterface(ClientGame *game) : Parent(game)
+   AbstractMessageUserInterface::AbstractMessageUserInterface(ClientGame *game, UIManager *uiManager) :
+   Parent(game, uiManager)
 {
    reset();
 }
@@ -140,7 +141,8 @@ void AbstractMessageUserInterface::render() const
 ////////////////////////////////////////
 
 // Constructor
-ErrorMessageUserInterface::ErrorMessageUserInterface(ClientGame *game) : Parent(game)
+ErrorMessageUserInterface::ErrorMessageUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    // Do nothing
 }

@@ -57,8 +57,8 @@ static const S32 SRV_MSG_WRAP_WIDTH = 750;
 
 
 // Constructor
-GameUserInterface::GameUserInterface(ClientGame *game) : 
-                  Parent(game), 
+GameUserInterface::GameUserInterface(ClientGame *game, UIManager *uiManager) :
+                  Parent(game, uiManager), 
                   mVoiceRecorder(game),  //   lines expr  topdown   wrap width          font size          line gap
                   mServerMessageDisplayer(game,  6, true,  true,  SRV_MSG_WRAP_WIDTH, SRV_MSG_FONT_SIZE, SRV_MSG_FONT_GAP),
                   mChatMessageDisplayer1 (game,  5, true,  false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),

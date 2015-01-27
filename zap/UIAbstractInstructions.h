@@ -47,8 +47,8 @@ protected:
             const ControlStringsEditor *helpBindings, S32 bindingCount);
 
 public:
-   explicit AbstractInstructionsUserInterface(ClientGame *clientGame);  // Constructor
-   virtual ~AbstractInstructionsUserInterface();                        // Destructor
+   explicit AbstractInstructionsUserInterface(ClientGame *clientGame, UIManager *uiManager); // Constructor
+   virtual ~AbstractInstructionsUserInterface();                                             // Destructor
 };
 
 }

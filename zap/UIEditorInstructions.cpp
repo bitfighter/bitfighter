@@ -34,8 +34,8 @@ using UI::SymbolString;
 using UI::SymbolStringSet;
 
 // Constructor
-EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) : 
-   Parent(game),
+EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game, UIManager *uiManager) :
+   Parent(game, uiManager),
    mAnimTimer(ONE_SECOND),
    mConsoleInstructions(10)
 {

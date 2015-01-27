@@ -86,7 +86,8 @@ static const char *gameCredits[] = {
 static bool quitting = false;
 
 // Constructor
-CreditsUserInterface::CreditsUserInterface(ClientGame *game) : Parent(game)
+CreditsUserInterface::CreditsUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mScroller = new CreditsScroller();
 }
@@ -281,7 +282,8 @@ bool CreditsScroller::isActive() const
 ////////////////////////////////////////
 
 // Constructor
-SplashUserInterface::SplashUserInterface(ClientGame *game) : Parent(game)
+SplashUserInterface::SplashUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mPhase = SplashPhaseNone;
 }

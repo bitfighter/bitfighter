@@ -48,7 +48,8 @@ KeyDefMenuItem::~KeyDefMenuItem()
 
 
 // Constructor
-KeyDefMenuUserInterface::KeyDefMenuUserInterface(ClientGame *game) : Parent(game)
+KeyDefMenuUserInterface::KeyDefMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mMenuTitle = "Define Keys";
    mMenuSubTitle = "";

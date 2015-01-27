@@ -32,8 +32,8 @@ using UI::SymbolStringSet;
 
 
 // Constructor
-AbstractInstructionsUserInterface::AbstractInstructionsUserInterface(ClientGame *clientGame) : 
-                                       Parent(clientGame),
+AbstractInstructionsUserInterface::AbstractInstructionsUserInterface(ClientGame *clientGame, UIManager *uiManager) :
+                                       Parent(clientGame, uiManager),
                                        mSpecialKeysInstrLeft(LineGap), 
                                        mSpecialKeysBindingsLeft(LineGap), 
                                        mSpecialKeysInstrRight(LineGap), 

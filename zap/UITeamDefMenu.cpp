@@ -84,8 +84,8 @@ static bool checkNameLengths()
 
 
 // Constructor
-TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) : 
-   Parent(game),
+TeamDefUserInterface::TeamDefUserInterface(ClientGame *game, UIManager *uiManager) :
+   Parent(game, uiManager),
    mMenuSubTitle(8),
    mMenuTitle("CONFIGURE TEAMS")
 {

@@ -140,8 +140,8 @@ QueryServersUserInterface::ColumnInfo::~ColumnInfo()
 ////////////////////////////////////////
 
 // Constructor
-QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : 
-   UserInterface(game), 
+QueryServersUserInterface::QueryServersUserInterface(ClientGame *game, UIManager *uiManager) :
+   UserInterface(game, uiManager), 
    ChatParent(game)
 {
    mSortColumn    = mGameSettings->getQueryServerSortColumn();

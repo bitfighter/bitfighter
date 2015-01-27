@@ -29,7 +29,7 @@ protected:
    void onActivate();
 
 public:
-   explicit EditorMenuUserInterface(ClientGame *game);    // Constructor
+   explicit EditorMenuUserInterface(ClientGame *game, UIManager *uiManager);    // Constructor
    virtual ~EditorMenuUserInterface();
 
    void unlockQuit();

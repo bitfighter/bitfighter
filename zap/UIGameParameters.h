@@ -66,7 +66,7 @@ private:
 
 
 public:
-   explicit GameParamUserInterface(ClientGame *game);   // Constructor
+   explicit GameParamUserInterface(ClientGame *game, UIManager *uiManager);   // Constructor
    virtual ~GameParamUserInterface();
 
    void onActivate();

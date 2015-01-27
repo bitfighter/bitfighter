@@ -35,7 +35,7 @@ private:
    Vector<ScoreGroup> mScoreGroups;
 
 public:
-   explicit HighScoresUserInterface(ClientGame *game);    // Constructor
+   explicit HighScoresUserInterface(ClientGame *game, UIManager *uiManager);    // Constructor
    virtual ~HighScoresUserInterface();
 
    void onActivate();

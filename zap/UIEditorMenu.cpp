@@ -26,7 +26,8 @@ namespace Zap
 {
 
 // Constructor
-EditorMenuUserInterface::EditorMenuUserInterface(ClientGame *game) : Parent(game)
+EditorMenuUserInterface::EditorMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mMenuTitle = "EDITOR MENU";
 }

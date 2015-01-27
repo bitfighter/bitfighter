@@ -27,7 +27,8 @@ namespace Zap
 using namespace std;
 
 // Constructor
-TextEntryUserInterface::TextEntryUserInterface(ClientGame *game) : Parent(game)  
+TextEntryUserInterface::TextEntryUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    title = "ENTER TEXT:";
    instr1 = "";
@@ -151,7 +152,8 @@ void TextEntryUserInterface::setString(string str)
 ////////////////////////////////////////
 
 // Constructor
-LevelNameEntryUserInterface::LevelNameEntryUserInterface(ClientGame *game) : Parent(game)     
+LevelNameEntryUserInterface::LevelNameEntryUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    title = "ENTER LEVEL TO EDIT:";
    instr1 = "Enter an existing level, or create your own!";
@@ -326,7 +328,8 @@ void LevelNameEntryUserInterface::render() const
 ////////////////////////////////////////
 
 // Constructor
-PasswordEntryUserInterface::PasswordEntryUserInterface(ClientGame *game) : Parent(game)
+PasswordEntryUserInterface::PasswordEntryUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    setSecret(true);
 }
@@ -367,9 +370,10 @@ void PasswordEntryUserInterface::render() const
 ////////////////////////////////////////
 
 // Constructor
-ServerAccessPasswordEntryUserInterface::ServerAccessPasswordEntryUserInterface(ClientGame *game) : Parent(game)
+ServerAccessPasswordEntryUserInterface::ServerAccessPasswordEntryUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
-   /* Do nothing */
+   // Do nothing
 }
 
 
@@ -401,12 +405,14 @@ void ServerAccessPasswordEntryUserInterface::setAddressToConnectTo(const Address
 ////////////////////////////////////////
 
 // Constructor
-ServerPasswordEntryUserInterface::ServerPasswordEntryUserInterface(ClientGame *game) : Parent(game)     
+ServerPasswordEntryUserInterface::ServerPasswordEntryUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    title = "ENTER SERVER PASSWORD:";
    instr1 = "";
    instr2 = "Enter the password required for access to the server";
 }
+
 
 // Destructor
 ServerPasswordEntryUserInterface::~ServerPasswordEntryUserInterface()
@@ -420,7 +426,8 @@ ServerPasswordEntryUserInterface::~ServerPasswordEntryUserInterface()
 
 
 // Constructor
-LevelChangeOrAdminPasswordEntryUserInterface::LevelChangeOrAdminPasswordEntryUserInterface(ClientGame *game) : Parent(game)     
+LevelChangeOrAdminPasswordEntryUserInterface::LevelChangeOrAdminPasswordEntryUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    title = "ENTER PASSWORD:";
    instr1 = "";

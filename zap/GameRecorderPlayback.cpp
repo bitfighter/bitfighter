@@ -297,7 +297,8 @@ static void processPlaybackSelectionCallback(ClientGame *game, U32 index)
 }
 
 
-PlaybackSelectUserInterface::PlaybackSelectUserInterface(ClientGame *game) : LevelMenuSelectUserInterface(game)
+PlaybackSelectUserInterface::PlaybackSelectUserInterface(ClientGame *game, UIManager *uiManager) : 
+   LevelMenuSelectUserInterface(game, uiManager)
 {
    // Do nothing
 }
@@ -370,7 +371,8 @@ static void processPlaybackDownloadCallback(ClientGame *game, U32 index)
 }
 
 
-PlaybackServerDownloadUserInterface::PlaybackServerDownloadUserInterface(ClientGame *game) : LevelMenuSelectUserInterface(game)
+PlaybackServerDownloadUserInterface::PlaybackServerDownloadUserInterface(ClientGame *game, UIManager *uiManager) : 
+   LevelMenuSelectUserInterface(game, uiManager)
 {
    // Do nothing
 }
@@ -418,7 +420,8 @@ void PlaybackServerDownloadUserInterface::receivedLevelList(const Vector<string>
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-PlaybackGameUserInterface::PlaybackGameUserInterface(ClientGame *game) : UserInterface(game)
+PlaybackGameUserInterface::PlaybackGameUserInterface(ClientGame *game, UIManager *uiManager) : 
+   UserInterface(game, uiManager)
 {
    mGameInterface = game->getUIManager()->getUI<GameUserInterface>();
    mSpeed = 0;

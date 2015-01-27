@@ -88,7 +88,7 @@ private:
    UI::SymbolStringSet getGameTypesPage() const;
 
 public:
-   explicit InstructionsUserInterface(ClientGame *game);      // Constructor
+   explicit InstructionsUserInterface(ClientGame *game, UIManager *uiManager);      // Constructor
    virtual ~InstructionsUserInterface();
 
    void render() const;

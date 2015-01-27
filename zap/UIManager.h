@@ -81,11 +81,9 @@ public:
       T *ui = static_cast<T *>(mUis[typeinfo]);
 
       // Lazily initialize if UI has not yet been instantiated; store for later use
-      if(!ui)  
+      if(!ui)
       {
-         // TODO: set UI Manager in constructor
-         ui = new T(mGame);
-         ui->setUiManager(this);
+         ui = new T(mGame, this);
          mUis[typeinfo] = ui;
       }
 

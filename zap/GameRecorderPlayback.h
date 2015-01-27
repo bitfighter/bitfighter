@@ -52,7 +52,7 @@ public:
 class PlaybackSelectUserInterface : public LevelMenuSelectUserInterface
 {
 public:
-   explicit PlaybackSelectUserInterface(ClientGame *game);
+   explicit PlaybackSelectUserInterface(ClientGame *game, UIManager *uiManager);
    void onActivate();
    void processSelection(U32 index);
 };
@@ -61,7 +61,7 @@ public:
 class PlaybackServerDownloadUserInterface : public LevelMenuSelectUserInterface
 {
 public:
-   explicit PlaybackServerDownloadUserInterface(ClientGame *game);
+   explicit PlaybackServerDownloadUserInterface(ClientGame *game, UIManager *uiManager);
    void onActivate();
    void processSelection(U32 index);
    void receivedLevelList(const Vector<string> &levels);
@@ -78,7 +78,7 @@ class PlaybackGameUserInterface : public UserInterface
    U32 mSpeedRemainder;
    bool mVisible;
 public:
-   explicit PlaybackGameUserInterface(ClientGame *game);
+   explicit PlaybackGameUserInterface(ClientGame *game, UIManager *uiManager);
    void onActivate();
    void onReactivate();
 

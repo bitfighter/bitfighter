@@ -120,8 +120,8 @@ private:
    bool mRenderUnderlyingUI;
 
 public:
-   explicit ChatUserInterface(ClientGame *game);      // Constructor
-   virtual ~ChatUserInterface();                      // Constructor
+   explicit ChatUserInterface(ClientGame *game, UIManager *uiManager);  // Constructor
+   virtual ~ChatUserInterface();                                        // Destructor
 
    // UI related
    void render() const;
@@ -151,7 +151,7 @@ private:
    void onOutGameChat();                  // What to do if user presses [F5]
 
 public:
-   explicit SuspendedUserInterface(ClientGame *game);    // Constructor
+   explicit SuspendedUserInterface(ClientGame *game, UIManager *uiManager);    // Constructor
    virtual ~SuspendedUserInterface();
 };
 

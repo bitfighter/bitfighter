@@ -41,7 +41,7 @@ private:
    void onPageChanged();
 
 public:
-   explicit EditorInstructionsUserInterface(ClientGame *game);      // Constructor
+   explicit EditorInstructionsUserInterface(ClientGame *game, UIManager *uiManager);   // Constructor
    virtual ~EditorInstructionsUserInterface();
 
    void render() const;

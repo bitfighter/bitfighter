@@ -384,7 +384,9 @@ void AbstractChat::renderChatters(S32 xpos, S32 ypos) const
 ////////////////////////////////////////
 
 // Constructor
-ChatUserInterface::ChatUserInterface(ClientGame *game) : Parent(game), ChatParent(game)
+ChatUserInterface::ChatUserInterface(ClientGame *game, UIManager *uiManager) :
+   Parent(game, uiManager), 
+   ChatParent(game)
 {
    mRenderUnderlyingUI = false;
 }
@@ -578,10 +580,12 @@ void ChatUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-SuspendedUserInterface::SuspendedUserInterface(ClientGame *game) : Parent(game)
+SuspendedUserInterface::SuspendedUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    // Do nothing
 }
+
 
 // Destructor
 SuspendedUserInterface::~SuspendedUserInterface()

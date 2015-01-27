@@ -30,7 +30,7 @@ private:
    U32 mVertOffset;
 
 public:
-   explicit MessageUserInterface(ClientGame *game);     // Constructor
+   explicit MessageUserInterface(ClientGame *game, UIManager *uiManager);     // Constructor
    virtual ~MessageUserInterface();
 
    char *mMessage[mNumLines];

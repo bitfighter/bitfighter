@@ -39,8 +39,8 @@ protected:
 
 public:
    // Constructors
-   explicit QuickMenuUI(ClientGame *game);
-   QuickMenuUI(ClientGame *game, const string &title);
+   explicit QuickMenuUI(ClientGame *game, UIManager *uiManager);
+   QuickMenuUI(ClientGame *game, UIManager *uiManager, const string &title);
    virtual ~QuickMenuUI();
 
    void render() const;
@@ -69,7 +69,7 @@ private:
    string getTitle() const;
 
 public:
-   explicit EditorAttributeMenuUI(ClientGame *game);    // Constructor
+   explicit EditorAttributeMenuUI(ClientGame *game, UIManager *uiManager);    // Constructor
    virtual ~EditorAttributeMenuUI();                    // Destructor
 
    virtual bool startEditingAttrs(BfObject *object);
@@ -86,8 +86,8 @@ class PluginMenuUI : public QuickMenuUI
    typedef QuickMenuUI Parent;
 
 public:
-   PluginMenuUI(ClientGame *game, const string &title);    // Constructor
-   virtual ~PluginMenuUI();                                // Destructor
+   PluginMenuUI(ClientGame *game, UIManager *uiManager, const string &title); // Constructor
+   virtual ~PluginMenuUI();                                                   // Destructor
 
    void setTitle(const string &title);
    virtual void doneEditing();
@@ -105,8 +105,8 @@ private:
    S32 mData;          // See SimpleTextEntryType in UIEditor.h
 
 public:
-   SimpleTextEntryMenuUI(ClientGame *game, const string &title, S32 data);    // Constructor
-   virtual ~SimpleTextEntryMenuUI();                                          // Destructor
+   SimpleTextEntryMenuUI(ClientGame *game, UIManager *uiManager, const string &title, S32 data);   // Constructor
+   virtual ~SimpleTextEntryMenuUI();                                                               // Destructor
 
    virtual void doneEditing();
 };

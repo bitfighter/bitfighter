@@ -324,8 +324,8 @@ protected:
    bool usesEditorScreenMode() const;
 
 public:
-   explicit EditorUserInterface(ClientGame *game);    // Constructor
-   virtual ~EditorUserInterface();                    // Destructor
+   explicit EditorUserInterface(ClientGame *game, UIManager *uiManager);   // Constructor
+   virtual ~EditorUserInterface();                                         // Destructor
 
    Level *getLevel() const;           // Need external access to this in one static function
 

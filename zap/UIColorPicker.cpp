@@ -48,8 +48,17 @@ const S32 colorBrightness_w = 25;
 const S32 colorBrightness_w_space = 50;
 const S32 colorBrightness_h = 400;
 
-UIColorPicker::UIColorPicker(ClientGame *game) : Parent(game) {mMouseDown = 0;}
-UIColorPicker::~UIColorPicker(){ /* Do nothing */ }
+UIColorPicker::UIColorPicker(ClientGame *game, UIManager *uiManager) :
+   Parent(game, uiManager) 
+{
+   mMouseDown = 0;
+}
+
+
+UIColorPicker::~UIColorPicker()
+{ 
+   // Do nothing
+}
 
 
 void UIColorPicker::onActivate()

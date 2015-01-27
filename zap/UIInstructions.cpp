@@ -62,9 +62,10 @@ static const TypeDescr typeDescriptions[] = {
 
 
 // Constructor
-InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(game),
-                                                                         mLoadoutInstructions(LineGap),
-                                                                         mPageHeaders(LineGap)
+InstructionsUserInterface::InstructionsUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager),
+   mLoadoutInstructions(LineGap),
+   mPageHeaders(LineGap)
 {
    // Quick sanity check...
    TNLAssert(ARRAYSIZE(pageHeaders) == InstructionMaxPages, "pageHeaders not aligned with enum IntructionPages!!!");

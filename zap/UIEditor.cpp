@@ -105,7 +105,8 @@ PluginInfo::PluginInfo(string prettyName, string fileName, string description, s
 
 
 // Constructor
-EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
+EditorUserInterface::EditorUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mWasTesting = false;
    mIgnoreMouseInput = false;
@@ -697,7 +698,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 
    // There are menu items!
    // Build a menu from the menuItems returned by the plugin
-   mPluginMenu.reset(new PluginMenuUI(getGame(), title));      // Using a smart pointer here, for auto deletion
+   mPluginMenu.reset(new PluginMenuUI(getGame(), getUIManager(), title));  // Use smart pointer for auto cleanup
 
    for(S32 i = 0; i < menuItems.size(); i++)
       mPluginMenu->addWrappedMenuItem(menuItems[i]);
@@ -4459,7 +4460,7 @@ void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType
       menuItem->setTextEditedCallback(callback);
 
    // Create our menu, use scoped_ptr since we only need once instance of this menu
-   mSimpleTextEntryMenu.reset(new SimpleTextEntryMenuUI(getGame(), menuTitle, entryType));
+   mSimpleTextEntryMenu.reset(new SimpleTextEntryMenuUI(getGame(), getUIManager(), menuTitle, entryType));
    mSimpleTextEntryMenu->addMenuItem(menuItem);                // addMenuItem wraps the menu item in a smart pointer
    mSimpleTextEntryMenu->setAssociatedObject(selectedObject);  // Add our object for usage in the menu item callback
 

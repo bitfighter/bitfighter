@@ -26,13 +26,15 @@ namespace Zap
 {
 
 // Constructors
-QuickMenuUI::QuickMenuUI(ClientGame *game) : Parent(game)
+QuickMenuUI::QuickMenuUI(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    initialize();
 }
 
 
-QuickMenuUI::QuickMenuUI(ClientGame *game, const string &title) : Parent(game, title)
+QuickMenuUI::QuickMenuUI(ClientGame *game, UIManager *uiManager, const string &title) : 
+   Parent(game, uiManager, title)
 {
    initialize();
 }
@@ -316,7 +318,8 @@ void QuickMenuUI::addSaveAndQuitMenuItem(const char *menuText, const char *helpT
 ////////////////////////////////////////
 
 // Constructor
-EditorAttributeMenuUI::EditorAttributeMenuUI(ClientGame *game) : Parent(game)
+EditorAttributeMenuUI::EditorAttributeMenuUI(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    // Do nothing
 }
@@ -391,8 +394,8 @@ void EditorAttributeMenuUI::doneEditingAttrs(BfObject *object)
 ////////////////////////////////////////
 
 // Constructor
-PluginMenuUI::PluginMenuUI(ClientGame *game, const string &title) :
-      Parent(game, title)
+PluginMenuUI::PluginMenuUI(ClientGame *game, UIManager *uiManager, const string &title) :
+      Parent(game, uiManager, title)
 {
    // Do nothing 
 }
@@ -426,8 +429,8 @@ void PluginMenuUI::doneEditing()
 
 
 // Constructor
-SimpleTextEntryMenuUI::SimpleTextEntryMenuUI(ClientGame *game, const string &title, S32 data) :
-      Parent(game, title)
+SimpleTextEntryMenuUI::SimpleTextEntryMenuUI(ClientGame *game, UIManager *uiManager, const string &title, S32 data) :
+      Parent(game, uiManager, title)
 {
    mData = data;
 

@@ -29,8 +29,8 @@ private:
    bool mRenderUnderlyingUi;
 
 public:
-   explicit AbstractMessageUserInterface(ClientGame *game);      // Constructor
-   virtual ~AbstractMessageUserInterface();                      // Destructor
+   explicit AbstractMessageUserInterface(ClientGame *game, UIManager *uiManager);   // Constructor
+   virtual ~AbstractMessageUserInterface();                                         // Destructor
 
    static const S32 MAX_LINES = 9;
    SymbolShapePtr mMessage[MAX_LINES];
@@ -63,7 +63,7 @@ class ErrorMessageUserInterface : public AbstractMessageUserInterface
    typedef AbstractMessageUserInterface Parent;
 
 public:
-   explicit ErrorMessageUserInterface(ClientGame *game);      // Constructor
+   explicit ErrorMessageUserInterface(ClientGame *game, UIManager *uiManager);      // Constructor
    virtual ~ErrorMessageUserInterface();
 
    bool onKeyDown(InputCode inputCode);

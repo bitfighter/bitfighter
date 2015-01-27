@@ -117,7 +117,7 @@ private:
    void sort();                                                
 
 public:
-   explicit QueryServersUserInterface(ClientGame *game);       // Constructor
+   explicit QueryServersUserInterface(ClientGame *game, UIManager *uiManager);       // Constructor
    virtual ~QueryServersUserInterface();
 
    void advancePage();

@@ -35,8 +35,8 @@ protected:
    virtual void onEscape() = 0;
 
 public:
-   explicit TextEntryUserInterface(ClientGame *game);  // Constructor
-   virtual ~TextEntryUserInterface();                  // Destructor
+   explicit TextEntryUserInterface(ClientGame *game, UIManager *uiManager);   // Constructor
+   virtual ~TextEntryUserInterface();                                         // Destructor
 
    virtual void onActivate();
    virtual void render() const;
@@ -68,7 +68,7 @@ private:
    void completePartial();
 
 public:
-   explicit LevelNameEntryUserInterface(ClientGame *game);      // Constructor
+   explicit LevelNameEntryUserInterface(ClientGame *game, UIManager *uiManager);      // Constructor
    virtual ~LevelNameEntryUserInterface();
 
    virtual bool onKeyDown(InputCode inputCode);
@@ -89,7 +89,7 @@ class PasswordEntryUserInterface :  public TextEntryUserInterface
    typedef TextEntryUserInterface Parent;
 
 public:
-   explicit PasswordEntryUserInterface(ClientGame *game);    // Constructor
+   explicit PasswordEntryUserInterface(ClientGame *game, UIManager *uiManager);    // Constructor
    virtual ~PasswordEntryUserInterface();
 
    virtual void render() const;
@@ -111,7 +111,7 @@ private:
    Address mConnectAddress;
 
 public:
-   explicit ServerAccessPasswordEntryUserInterface(ClientGame *game);    // Constructor
+   explicit ServerAccessPasswordEntryUserInterface(ClientGame *game, UIManager *uiManager);    // Constructor
    virtual ~ServerAccessPasswordEntryUserInterface();
    void onAccept(const char *text);
    void onEscape();
@@ -127,7 +127,7 @@ class LevelChangeOrAdminPasswordEntryUserInterface :  public PasswordEntryUserIn
    typedef PasswordEntryUserInterface Parent;
 
 public:
-   explicit LevelChangeOrAdminPasswordEntryUserInterface(ClientGame *game);  // Constructor
+   explicit LevelChangeOrAdminPasswordEntryUserInterface(ClientGame *game, UIManager *uiManager);  // Constructor
    virtual ~LevelChangeOrAdminPasswordEntryUserInterface();
 
    void onAccept(const char *text);
@@ -143,7 +143,7 @@ class ServerPasswordEntryUserInterface : public ServerAccessPasswordEntryUserInt
    typedef ServerAccessPasswordEntryUserInterface Parent;
 
 public:
-   explicit ServerPasswordEntryUserInterface(ClientGame *game);                // Constructor
+   explicit ServerPasswordEntryUserInterface(ClientGame *game, UIManager *uiManager);  // Constructor
    virtual ~ServerPasswordEntryUserInterface();
 };
 

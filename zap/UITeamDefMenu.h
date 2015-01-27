@@ -67,7 +67,7 @@ private:
 
 
 public:
-   explicit TeamDefUserInterface(ClientGame *game);     // Constructor
+   explicit TeamDefUserInterface(ClientGame *game, UIManager *uiManager);     // Constructor
    virtual ~TeamDefUserInterface();
 
    const char *mMenuTitle;

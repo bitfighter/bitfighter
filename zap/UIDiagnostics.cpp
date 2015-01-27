@@ -47,7 +47,8 @@ static const S32 NUM_PAGES = 3;
 
 
 // Constructor
-DiagnosticUserInterface::DiagnosticUserInterface(ClientGame *game) : Parent(game)
+DiagnosticUserInterface::DiagnosticUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
 {
    mActive = false;
    mCurPage = 0;

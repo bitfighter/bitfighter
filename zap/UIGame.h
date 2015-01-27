@@ -300,8 +300,8 @@ private:
    SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0) const;
 
 public:
-   explicit GameUserInterface(ClientGame *game);  // Constructor
-   virtual ~GameUserInterface();                  // Destructor
+   explicit GameUserInterface(ClientGame *game, UIManager *uiManager);  // Constructor
+   virtual ~GameUserInterface();                                        // Destructor
 
    bool displayInputModeChangeAlert;
 
