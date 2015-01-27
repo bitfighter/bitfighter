@@ -1023,7 +1023,13 @@ void PolylineGeometry::onPointsChanged()
    if(mPolyBounds.size() == 2)
       mCentroid = (mPolyBounds[0] + mPolyBounds[1]) * 0.5f;
    else
-      mCentroid = findCentroid(mPolyBounds);
+      mCentroid = doFindCentroid(mPolyBounds);
+}
+
+
+Point PolylineGeometry::doFindCentroid(const Vector<Point> &pts) const
+{
+   return findCentroid(mPolyBounds, true);
 }
 
 
@@ -1099,5 +1105,12 @@ S32 PolygonGeometry::getMinVertCount() const
 {
    return 3;
 }
+
+
+Point PolygonGeometry::doFindCentroid(const Vector<Point> &pts) const
+{
+   return findCentroid(mPolyBounds, false);
+}
+
 
 };

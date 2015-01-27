@@ -1615,20 +1615,117 @@ bool Triangulate::mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& 
 }
 
 
+
+/////////////////////////////
+
+// Requires 3 points!
+
+// Copyright 2001 softSurfer, 2012 Dan Sunday
+// This code may be freely used and modified for any purpose
+// providing that this copyright notice is included with it.
+// SoftSurfer makes no warranty for this code, and cannot be held
+// liable for any real or imagined damage resulting from its use.
+// Users of this code must verify correctness for their application.
+
+// This algo is O(n); there may be algos O(log n), but this will do for now. --CE
+
+// isLeft(): test if a point is Left|On|Right of an infinite line.
+//    Input:  three points P0, P1, and P2
+//    Return: >0 for P2 left of the line through P0 and P1
+//            =0 for P2 on the line
+//            <0 for P2 right of the line
+//    See: Algorithm 1 on Area of Triangles
+
+// Note: replaced included isLeft function with similar function included for other algos --CE
+// Note: modified function to work with Vector<Point> --CE
+
+// simpleHull_2D(): Melkman's 2D simple polyline O(n) convex hull algorithm
+//    Input:  P[] = array of 2D vertex points for a simple polyline
+//    Output: H[] = output convex hull array of vertices (max is n)
+void simpleHull_2D(const Vector<Point> &P, Vector<Point> &H)
+{
+   // initialize a deque D[] from bottom to top so that the
+   // 1st three vertices of P[] are a ccw triangle
+   Vector<Point> D;
+   D.resize(2 * P.size() + 1);
+
+   int bot = P.size() - 2, top = bot + 3;    // initial bottom and top deque indices
+   D[bot] = D[top] = P[2];        // 3rd vertex is at both bot and top
+   if(isLeft(P[0], P[1], P[2]) > 0) {
+      D[bot + 1] = P[0];
+      D[bot + 2] = P[1];           // ccw vertices are: 2,0,1,2
+   }
+   else {
+      D[bot + 1] = P[1];
+      D[bot + 2] = P[0];           // ccw vertices are: 2,1,0,2
+   }
+
+   // compute the hull on the deque D[]
+   for(int i = 3; i < P.size(); i++) {   // process the rest of vertices
+      // test if next vertex is inside the deque hull
+      if((isLeft(D[bot], D[bot + 1], P[i]) > 0) &&
+         (isLeft(D[top - 1], D[top], P[i]) > 0))
+         continue;         // skip an interior vertex
+
+      // incrementally add an exterior vertex to the deque hull
+      // get the rightmost tangent at the deque bot
+      while(isLeft(D[bot], D[bot + 1], P[i]) <= 0)
+         ++bot;                 // remove bot of deque
+      D[--bot] = P[i];           // insert P[i] at bot of deque
+
+      // get the leftmost tangent at the deque top
+      while(isLeft(D[top - 1], D[top], P[i]) <= 0)
+         --top;                 // pop top of deque
+      D[++top] = P[i];           // push P[i] onto top of deque
+   }
+
+   // transcribe deque D[] to the output hull array H[]
+   int h;        // hull vertex counter
+   H.reserve(top - bot);
+   for(h = 0; h <= (top - bot); h++)
+      H.push_back(D[bot + h]);
+}
+
+///////////////////////////
+
+
+
+
+
 // Derived from formulae here: http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/
 //
 // This will fail if the area sum is 0; e.g. with certain self-intersecting polygons
-Point findCentroid(const Vector<Point> &polyPoints)
+Point findCentroid(const Vector<Point> &polyPoints, bool isPolyline)
 {
-   S32 size = polyPoints.size();
+   // Create a convex hull around points, and find centroid of that -- this helps resolve weirdness we get
+   // when we try to calcluate the centroid of a Z shaped line
 
-   if(size == 0)
-      return Point(0,0);
+   if(polyPoints.size() == 0)
+      return Point(0, 0);
+
+   // Handle common cases quickly
+   if(polyPoints.size() == 1)
+      return polyPoints[0];
+   if(polyPoints.size() == 2)
+      return (polyPoints[0] + polyPoints[1]) / 2;
+
+   Vector<Point> hullPoints;
+   const Vector<Point> *points;
+
+   if(isPolyline)
+   {
+      simpleHull_2D(polyPoints, hullPoints);      // Requires min 3 points to work
+      points = &hullPoints;
+   }
+   else
+      points = &polyPoints;
 
    F32 x = 0;
    F32 y = 0;
    F32 sArea = 0;  // Signed area
    F32 area = 0;   // Partial signed area
+
+   S32 size = points->size();
 
    Point p1;
    Point p2;
@@ -1636,8 +1733,8 @@ Point findCentroid(const Vector<Point> &polyPoints)
    // All vertices except last
    for(S32 i = 0; i < size - 1; i++)
    {
-      p1 = polyPoints[i];
-      p2 = polyPoints[i+1];
+      p1 = points->get(i);
+      p2 = points->get(i + 1);
 
       area = (p1.x * p2.y - p2.x * p1.y);
       sArea += area;
@@ -1647,8 +1744,8 @@ Point findCentroid(const Vector<Point> &polyPoints)
    }
 
    // Do last vertex
-   p1 = polyPoints[size - 1];
-   p2 = polyPoints[0];
+   p1 = points->get(size - 1);
+   p2 = points->get(0);
 
    area = (p1.x * p2.y - p2.x * p1.y);
    sArea += area;
@@ -1663,6 +1760,7 @@ Point findCentroid(const Vector<Point> &polyPoints)
 
    return Point(x,y);
 }
+
 
 
 // Find longest edge, so we can align text with it...

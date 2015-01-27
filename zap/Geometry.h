@@ -144,6 +144,7 @@ typedef Geometry Parent;
 
 private:
    Point mCentroid;
+   virtual Point doFindCentroid(const Vector<Point> &pts) const;
 
 protected:
    Vector<Point> mPolyBounds;
@@ -207,6 +208,8 @@ private:
    Vector<Point> mPolyFill;
    F32 mLabelAngle;
    bool mTriangluationDisabled;     // Allow optimization of adding points for polygons that will never be displayed
+
+   Point doFindCentroid(const Vector<Point> &pts) const;
 
 public:
    PolygonGeometry();      // Constructor

@@ -2438,8 +2438,6 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
 
    Point center(0,0);
 
-
-
    // If we're not going to use the origin, we're going to use the 'center of mass' of the total
    if(!useOrigin)
    {
@@ -2460,9 +2458,9 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
       if(centroidList.size() == 1)
          center = centroidList[0];
       else if(centroidList.size() == 2)
-         center = (centroidList[0] + centroidList[1]) * 0.5f;  // midpoint
+         center = (centroidList[0] + centroidList[1]) * 0.5f;  // midpoint of centroids
       else
-         center = findCentroid(centroidList);
+         center = findCentroid(centroidList, true);            // centroid of centroids
    }
 
    mUndoManager.startTransaction();

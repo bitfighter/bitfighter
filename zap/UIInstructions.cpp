@@ -828,7 +828,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                Vector<Point> f;     // fill
                Triangulate::Process(o, f);
 
-               renderLoadoutZone(Colors::blue, &o, &f, findCentroid(o), angleOfLongestSide(o));
+               renderLoadoutZone(Colors::blue, &o, &f, findCentroid(o, false), angleOfLongestSide(o));
             }
 
             break;
@@ -844,7 +844,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                Vector<Point> f;     // fill
                Triangulate::Process(o, f);
 
-               renderNexus(&o, &f, findCentroid(o), angleOfLongestSide(o), 
+               renderNexus(&o, &f, findCentroid(o, false), angleOfLongestSide(o), 
                                        Platform::getRealMilliseconds() % 5000 > 2500, 0);
             }
             break;
@@ -860,7 +860,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                Vector<Point> f;     // fill
                Triangulate::Process(o, f);
 
-               renderGoalZone(Color(0.5f, 0.5f, 0.5f), &o, &f, findCentroid(o), angleOfLongestSide(o), 
+               renderGoalZone(Color(0.5f, 0.5f, 0.5f), &o, &f, findCentroid(o, false), angleOfLongestSide(o), 
                   false, 0, 0, 0, GoalZoneFlashNone);
             }
             break;

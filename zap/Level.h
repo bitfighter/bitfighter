@@ -164,6 +164,7 @@ public:
    ///// Testing
    friend class EditorTest;
    FRIEND_TEST(EditorTest, findSnapVertexTest);
+   FRIEND_TEST(EditorTest, wallCentroidForRotationTest);
 
    friend class ObjectTest;      // TODO: This is probably not handled quite right...
 };

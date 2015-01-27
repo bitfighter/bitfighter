@@ -495,16 +495,15 @@ public:
    void addToEditor(BfObject *obj);
    void showUploadErrorMessage(S32 errorCode, const string &errorBody);
 
-
    void createNormalizedScreenshot(ClientGame* game);
 
    void findPlugins();
    U32 findPluginDockWidth();
 
-
    ///// Testing
    friend class EditorTest;
    FRIEND_TEST(EditorTest, findSnapVertexTest);
+   FRIEND_TEST(EditorTest, wallCentroidForRotationTest);
 };
 
 
