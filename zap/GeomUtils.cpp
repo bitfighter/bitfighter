@@ -41,6 +41,7 @@
 
 #include <math.h>
 #include <deque>
+#include <algorithm>
 
 using namespace TNL;
 using namespace ClipperLib;
@@ -216,35 +217,35 @@ bool triangulatedFillContains(const Vector<Point> *triangulatedFillPoints, const
 
 //// Based on http://www.opengl.org/discussion_boards/ubbthreads.php?ubb=showflat&Number=248453
 //// No idea if this is optimal or not, but it is only used in the editor, and works fine for our purposes.
-//bool isConvex(const Vector<Point> *verts)
-//{
-//  Point v1, v2;
-//  double det_value, cur_det_value;
-//  int num_vertices = verts->size();
-//  
-//  if(num_vertices < 3)
-//     return true;
-//  
-//  v1 = verts->get(0) - verts->get(num_vertices-1);
-//  v2 = verts->get(1) - verts->get(0);
-//  det_value = v1.determinant(v2);
-//  
-//  for(S32 i = 1 ; i < num_vertices-1 ; i++)
-//  {
-//    v1 = v2;
-//    v2 = verts->get(i+1) - verts->get(i);
-//    cur_det_value = v1.determinant(v2);
-//    
-//    if( (cur_det_value * det_value) < 0.0 )
-//      return false;
-//  }
-//  
-//  v1 = v2;
-//  v2 = verts->get(0) - verts->get(num_vertices-1);
-//  cur_det_value = v1.determinant(v2);
-//  
-//  return  (cur_det_value * det_value) >= 0.0;
-//}
+bool isConvex(const Vector<Point> *verts)
+{
+  Point v1, v2;
+  double det_value, cur_det_value;
+  int num_vertices = verts->size();
+  
+  if(num_vertices < 3)
+     return true;
+  
+  v1 = verts->get(0) - verts->get(num_vertices-1);
+  v2 = verts->get(1) - verts->get(0);
+  det_value = v1.determinant(v2);
+  
+  for(S32 i = 1 ; i < num_vertices-1 ; i++)
+  {
+    v1 = v2;
+    v2 = verts->get(i+1) - verts->get(i);
+    cur_det_value = v1.determinant(v2);
+    
+    if( (cur_det_value * det_value) < 0.0 )
+      return false;
+  }
+  
+  v1 = v2;
+  v2 = verts->get(0) - verts->get(num_vertices-1);
+  cur_det_value = v1.determinant(v2);
+  
+  return  (cur_det_value * det_value) >= 0.0;
+}
 
 
 // If the sum of the radii is greater than the distance between the center points,
@@ -1616,8 +1617,93 @@ bool Triangulate::mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& 
 
 
 
-/////////////////////////////
 
+
+
+////
+////
+////#include <cmath>
+//
+//bool point_order_x(const Point& p1, const Point& p2)
+//{
+//   if(p1.x < p2.x)
+//      return true;
+//   else if(p1.x == p2.x)
+//      return p1.y < p2.y;
+//   else
+//      return false;
+//}
+//
+//bool iscw(const Point &p1, const Point &p2, const Point &p3)
+//{
+//   return (p1.x - p2.x) * (p2.y - p3.y) - (p1.y - p2.y) * (p2.x - p3.x) < 0;
+//}
+//
+//bool iscw(const vector<Point>& pg){
+//   if(pg.size() < 3)
+//      throw domain_error("Can't compute iscw with less than 3 points");
+//   else
+//   {
+//      vector<Point>::size_type i = pg.size() - 1;
+//      return iscw(pg[i - 2], pg[i - 1], pg[i]);
+//   }
+//}
+//
+//
+//void simpleHull_2D(const vector<Point> &pst, vector<Point> &hull)
+//{
+//   vector<Point> points(pst);
+//   vector<Point> lupper, llower;
+//   typedef vector<Point>::size_type vcs;
+//
+//   std::sort(points.begin(), points.end(), point_order_x);
+//   vector<Point>::const_iterator it;
+//
+//   //Constructing the upper hull. 
+//   //The point with lowest x will be part of the hull
+//   lupper.push_back(points[0]);
+//   lupper.push_back(points[1]);
+//
+//   //Loop the rest of the points to obtain the upper hull
+//   for(it = points.begin() + 2; it != points.end(); ++it){
+//      lupper.push_back(*it);
+//
+//      //while size>2 and not a right turn
+//      while((lupper.size() > 2) && !iscw(lupper))
+//         lupper.erase(lupper.end() - 2);
+//   }
+//
+//   //Constructing the lower hull.
+//   it = points.end() - 1;
+//   llower.push_back(*it);
+//   llower.push_back(*(it - 1));
+//
+//   for(it = points.end() - 3; it >= points.begin(); --it){
+//      llower.push_back(*it);
+//
+//      //while size>2 and not a right turn
+//      while((llower.size() > 2) && !iscw(llower))
+//         llower.erase(llower.end() - 2);
+//
+//   }
+//
+//   //First llower is already in lupper
+//   copy(lupper.begin(),     lupper.end(), back_inserter(hull));
+//   copy(llower.begin() + 1, llower.end(), back_inserter(hull));
+//}
+//
+//
+//
+
+
+
+
+
+
+/////
+ //Requires 3 points!
+
+///////
 // Requires 3 points!
 
 // Copyright 2001 softSurfer, 2012 Dan Sunday
@@ -1626,8 +1712,6 @@ bool Triangulate::mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& 
 // SoftSurfer makes no warranty for this code, and cannot be held
 // liable for any real or imagined damage resulting from its use.
 // Users of this code must verify correctness for their application.
-
-// This algo is O(n); there may be algos O(log n), but this will do for now. --CE
 
 // isLeft(): test if a point is Left|On|Right of an infinite line.
 //    Input:  three points P0, P1, and P2
@@ -1639,6 +1723,9 @@ bool Triangulate::mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& 
 // Note: replaced included isLeft function with similar function included for other algos --CE
 // Note: modified function to work with Vector<Point> --CE
 
+// Explanation here: http://geomalgorithms.com/a12-_hull-3.html
+// Very fast, but only works on a connected simple polyline with no abnormal self-intersections
+
 // simpleHull_2D(): Melkman's 2D simple polyline O(n) convex hull algorithm
 //    Input:  P[] = array of 2D vertex points for a simple polyline
 //    Output: H[] = output convex hull array of vertices (max is n)
@@ -1647,21 +1734,27 @@ void simpleHull_2D(const Vector<Point> &P, Vector<Point> &H)
    // initialize a deque D[] from bottom to top so that the
    // 1st three vertices of P[] are a ccw triangle
    Vector<Point> D;
-   D.resize(2 * P.size() + 1);
+   D.resize(2 * P.size() + 1);      // Fills the vector with points
 
-   int bot = P.size() - 2, top = bot + 3;    // initial bottom and top deque indices
+   // initial bottom and top deque indices
+   int bot = P.size() - 2;
+   int top = bot + 3;    
+
    D[bot] = D[top] = P[2];        // 3rd vertex is at both bot and top
-   if(isLeft(P[0], P[1], P[2]) > 0) {
+   if(isLeft(P[0], P[1], P[2]) > 0) 
+   {
       D[bot + 1] = P[0];
       D[bot + 2] = P[1];           // ccw vertices are: 2,0,1,2
    }
-   else {
+   else 
+   {
       D[bot + 1] = P[1];
       D[bot + 2] = P[0];           // ccw vertices are: 2,1,0,2
    }
 
    // compute the hull on the deque D[]
-   for(int i = 3; i < P.size(); i++) {   // process the rest of vertices
+   for(int i = 3; i < P.size(); i++)   // process the rest of vertices
+   {   
       // test if next vertex is inside the deque hull
       if((isLeft(D[bot], D[bot + 1], P[i]) > 0) &&
          (isLeft(D[top - 1], D[top], P[i]) > 0))
@@ -1680,52 +1773,54 @@ void simpleHull_2D(const Vector<Point> &P, Vector<Point> &H)
    }
 
    // transcribe deque D[] to the output hull array H[]
-   int h;        // hull vertex counter
    H.reserve(top - bot);
-   for(h = 0; h <= (top - bot); h++)
+
+   for(int h = 0; h <= (top - bot); h++)
       H.push_back(D[bot + h]);
 }
 
-///////////////////////////
 
+Point simple_centroid(const Vector<Point> &points)
+{
+   Point sum;
 
+   // Calc the average of all points.  Almost certainly wrong, but works well enough in most cases
+   for(int i = 0; i < points.size(); ++i)
+      sum = sum + points[i];
 
+   return Point(sum.x / points.size(), sum.y / points.size());
+}
 
 
 // Derived from formulae here: http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/
 //
 // This will fail if the area sum is 0; e.g. with certain self-intersecting polygons
-Point findCentroid(const Vector<Point> &polyPoints, bool isPolyline)
+Point findCentroid(const Vector<Point> &points, bool isPolyline)
 {
    // Create a convex hull around points, and find centroid of that -- this helps resolve weirdness we get
    // when we try to calcluate the centroid of a Z shaped line
 
-   if(polyPoints.size() == 0)
+   if(points.size() == 0)
       return Point(0, 0);
 
    // Handle common cases quickly
-   if(polyPoints.size() == 1)
-      return polyPoints[0];
-   if(polyPoints.size() == 2)
-      return (polyPoints[0] + polyPoints[1]) / 2;
+   if(points.size() == 1)
+      return points[0];
+
+   if(points.size() == 2)
+      return (points[0] + points[1]) / 2;
+
+   if(isPolyline /*&& !isConvex(&points)*/)
+      return simple_centroid(points);
 
    Vector<Point> hullPoints;
-   const Vector<Point> *points;
-
-   if(isPolyline)
-   {
-      simpleHull_2D(polyPoints, hullPoints);      // Requires min 3 points to work
-      points = &hullPoints;
-   }
-   else
-      points = &polyPoints;
 
    F32 x = 0;
    F32 y = 0;
    F32 sArea = 0;  // Signed area
    F32 area = 0;   // Partial signed area
 
-   S32 size = points->size();
+   S32 size = points.size();
 
    Point p1;
    Point p2;
@@ -1733,8 +1828,8 @@ Point findCentroid(const Vector<Point> &polyPoints, bool isPolyline)
    // All vertices except last
    for(S32 i = 0; i < size - 1; i++)
    {
-      p1 = points->get(i);
-      p2 = points->get(i + 1);
+      p1 = points[i];
+      p2 = points[i + 1];
 
       area = (p1.x * p2.y - p2.x * p1.y);
       sArea += area;
@@ -1744,8 +1839,8 @@ Point findCentroid(const Vector<Point> &polyPoints, bool isPolyline)
    }
 
    // Do last vertex
-   p1 = points->get(size - 1);
-   p2 = points->get(0);
+   p1 = points[size - 1];
+   p2 = points[0];
 
    area = (p1.x * p2.y - p2.x * p1.y);
    sArea += area;
