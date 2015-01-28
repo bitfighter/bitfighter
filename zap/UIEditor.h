@@ -238,10 +238,13 @@ private:
    void findSnapVertex();
    S32 mSnapVertexIndex;
 
+   Point *mPointOfRotation;
+
    S32 mEdgeHit;
    S32 mHitVertex;
 
    bool canRotate() const;             // Returns true if we're able to rotate something
+   void clearPointOfRotation();
 
    SafePtr<BfObject> mNewItem;
    SafePtr<BfObject> mSnapObject;

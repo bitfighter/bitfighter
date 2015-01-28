@@ -122,6 +122,8 @@ EditorUserInterface::EditorUserInterface(ClientGame *game, UIManager *uiManager)
    mDockPluginScrollOffset = 0;
    mCurrentTeam = 0;
 
+   mPointOfRotation = NULL;
+
    mHitVertex = NONE;
    mEdgeHit   = NONE;
 
@@ -293,6 +295,7 @@ EditorUserInterface::~EditorUserInterface()
    mClipboard.clear();
 
    delete mNewItem.getPointer();
+   delete mPointOfRotation;
 }
 
 
@@ -1001,9 +1004,15 @@ string EditorUserInterface::getLevelFileName() const
 
 void EditorUserInterface::onSelectionChanged()
 {
-   GridDatabase *database = getLevel();
-
    rebuildSelectionOutline();
+   clearPointOfRotation();
+}
+
+
+void EditorUserInterface::clearPointOfRotation()
+{
+   delete mPointOfRotation;
+   mPointOfRotation = NULL;
 }
 
 
@@ -2281,6 +2290,8 @@ void EditorUserInterface::selectAll(GridDatabase *database)
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
       obj->setSelected(true);
    }
+
+   onSelectionChanged();
 }
 
 
@@ -2428,6 +2439,8 @@ bool EditorUserInterface::canRotate() const
 }
 
 
+static const Point ORIGIN;
+
 // Rotate selected objects around their center point by angle
 void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
 {
@@ -2436,11 +2449,14 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
 
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
-   Point center(0,0);
+   if(useOrigin)
+      clearPointOfRotation();
 
-   // If we're not going to use the origin, we're going to use the 'center of mass' of the total
-   if(!useOrigin)
+   else if(!mPointOfRotation)
    {
+      mPointOfRotation = new Point();
+      Vector<Point> centroidList;
+
       // Add all object centroids to a set for de-duplication.  We'll get the centroid of the set
       set<Point> centroidSet;
       for(S32 i = 0; i < objList->size(); i++)
@@ -2448,20 +2464,13 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
          BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
          if(obj->isSelected())
-            centroidSet.insert(obj->getCentroid());
+            centroidList.push_back(obj->getCentroid());
       }
 
-      // Convert to Vector for centroid finding
-      Vector<Point> centroidList(vector<Point>(centroidSet.begin(), centroidSet.end()));
-
-      // If we have only 1 or 2 selected objects, the centroid is calculated differently
-      if(centroidList.size() == 1)
-         center = centroidList[0];
-      else if(centroidList.size() == 2)
-         center = (centroidList[0] + centroidList[1]) * 0.5f;  // midpoint of centroids
-      else
-         center = findCentroid(centroidList, true);            // centroid of centroids
+      mPointOfRotation->set(findCentroid(centroidList, true));
    }
+
+   const Point *center = useOrigin ? &ORIGIN : mPointOfRotation;
 
    mUndoManager.startTransaction();
 
@@ -2474,7 +2483,7 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
       {
          mUndoManager.saveChangeAction_before(obj);
 
-         obj->rotateAboutPoint(center, angle);
+         obj->rotateAboutPoint(*center, angle);
          geomChanged(obj);
 
          mUndoManager.saveChangeAction_after(obj);
@@ -3009,7 +3018,9 @@ void EditorUserInterface::onMouseDragged_copyAndDrag(const Vector<DatabaseObject
    for(S32 i = 0; i < copiedObjects.size(); i++)
       addToEditor(copiedObjects[i]);
 
+   //onSelectionChanged();  should we call this??
    rebuildWallGeometry(mLevel.get());
+   clearPointOfRotation();
 }
 
 
