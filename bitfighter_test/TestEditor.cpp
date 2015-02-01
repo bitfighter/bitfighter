@@ -17,26 +17,6 @@
 namespace Zap
 {
 
-TEST(EditorTest, wallCentroidForRotationTest)
-{
-   ClientGame *clientGame = newClientGame();
-   EditorUserInterface *editorUi = clientGame->getUIManager()->getUI<EditorUserInterface>();
-   editorUi->setLevel(boost::shared_ptr<Level>(new Level()));
-
-   ASSERT_EQ(0, editorUi->getLevel()->getObjectCount());     // Confirm level starts empty
-
-   // 5 vertex wall in stair-step pattern, with middle vertex on 0,0
-   editorUi->getLevel()->parseLevelLine("BarrierMaker 10 -50 -100  50 -100  50 0  150 0  150 100", "NoFile");
-
-   ASSERT_EQ(1, editorUi->getLevel()->getObjectCount());     // Confirm object was added properly
-
-   WallItem *wall = static_cast<WallItem *>(editorUi->getLevel()->getObjectByIndex(0));
-
-   EXPECT_EQ(wall->getCentroid().x, 70); // 66.67
-   EXPECT_EQ(wall->getCentroid().y, 20); //-16.67
-}
-
-
 TEST(EditorTest, findSnapVertexTest)
 {
    ClientGame *clientGame = newClientGame();
@@ -91,9 +71,6 @@ TEST(EditorTest, findSnapVertexTest)
 
    // Cleanup
    delete newClientGame();
-
-   // rotate a z shaped wall roteates around random point (centroid calc wrong?)
-   // Setting game time to 0 should make time unlimited
 }
 
 

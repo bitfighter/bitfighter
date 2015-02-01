@@ -364,7 +364,7 @@ bool SpeedZone::collide(BfObject *hitObject)
    if(ignoreThisCollision)
       return false;
 
-   // This is run on both server and client side to reduce teleport lag effect.
+   // This is run on both server and client side to reduce lag
    if(isShipType(hitObject->getObjectTypeNumber()))     // Only ships & robots collide
    {
 #ifndef ZAP_DEDICATED
@@ -383,6 +383,7 @@ bool SpeedZone::collide(BfObject *hitObject)
 
 
 // Handles collisions with a SpeedZone
+// stateIndex will be one of 0-ActualState, 1-RenderState, or 2-LastProcessState
 bool SpeedZone::collided(BfObject *hitObject, U32 stateIndex)
 {
    TNLAssert(dynamic_cast<MoveObject *>(hitObject), "Not a MoveObject");
