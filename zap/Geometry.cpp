@@ -213,7 +213,7 @@ void Geometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSiz
 }
 
 
-Rect Geometry::calcExtents()
+Rect Geometry::calcExtents() const
 {
    TNLAssert(false, "Not implemented");
    return Rect();
@@ -466,7 +466,7 @@ Vector<Point> PointGeometry::getGeom() const
 }
 
 
-Rect PointGeometry::calcExtents()
+Rect PointGeometry::calcExtents() const
 {
    return Rect(mPoint, mRadius);
 }
@@ -682,7 +682,7 @@ Vector<Point> SimpleLineGeometry::getGeom() const
 
 
 
-Rect SimpleLineGeometry::calcExtents()
+Rect SimpleLineGeometry::calcExtents() const
 {
    return Rect(mFromPos, mToPos);
 }
@@ -952,7 +952,7 @@ Vector<Point> PolylineGeometry::getGeom() const
 }
 
 
-Rect PolylineGeometry::calcExtents()
+Rect PolylineGeometry::calcExtents() const
 {
    return Rect(mPolyBounds);
 }

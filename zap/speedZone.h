@@ -85,6 +85,8 @@ public:
    void onAttrsChanging();
    void onGeomChanging();
    void onGeomChanged();
+   Rect calcExtents() const;
+
 
 #ifndef ZAP_DEDICATED
    bool startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated

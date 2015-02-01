@@ -123,7 +123,7 @@ public:
 
    virtual bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
-   Rect calcExtents();
+   Rect calcExtents() const;
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

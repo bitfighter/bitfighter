@@ -44,7 +44,7 @@ public:
    void setGeom(const Vector<Point> &points);
    void setGeom(const Point &pos, const Point &dest);
    void setGeom(lua_State *L, S32 index);
-   Rect calcExtents();      // Bounding box for display scoping purposes
+   Rect calcExtents() const;      // Bounding box for display scoping purposes
 
 
    void onAddedToGame(Game *theGame);  

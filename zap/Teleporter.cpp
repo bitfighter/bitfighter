@@ -308,7 +308,7 @@ string Teleporter::toLevelCode() const
 }
 
 
-Rect Teleporter::calcExtents()
+Rect Teleporter::calcExtents() const
 {
    Rect rect(getVert(0), getVert(1));
    rect.expand(Point(Teleporter::TELEPORTER_RADIUS, Teleporter::TELEPORTER_RADIUS));

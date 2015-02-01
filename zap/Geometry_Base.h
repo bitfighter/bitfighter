@@ -80,7 +80,7 @@ public:
 
    Geometry *newCopy();
 
-   virtual Rect calcExtents();
+   virtual Rect calcExtents() const;
 
    virtual void onPointsChanged();
 

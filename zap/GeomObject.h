@@ -98,7 +98,7 @@ public:
 
    void reverseWinding();     
 
-   virtual Rect calcExtents();
+   virtual Rect calcExtents() const;
    bool hasGeometry() const;
 
    void setGeometry(const Vector<Point> &points);

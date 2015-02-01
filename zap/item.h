@@ -69,7 +69,7 @@ public:
    virtual F32 getEditorRadius(F32 currentScale) const;
    virtual string toLevelCode() const;
 
-   virtual Rect calcExtents(); 
+   virtual Rect calcExtents() const;
 
    // LuaItem interface
 

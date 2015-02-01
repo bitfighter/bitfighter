@@ -78,7 +78,7 @@ public:
    string geomToLevelCode() const;
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
-   virtual Rect calcExtents();
+   virtual Rect calcExtents() const;
 };
 
 
@@ -130,7 +130,7 @@ public:
    string geomToLevelCode() const;
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
-   virtual Rect calcExtents();
+   virtual Rect calcExtents() const;
 };
 
 
@@ -193,7 +193,7 @@ public:
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
    virtual void onPointsChanged();
 
-   virtual Rect calcExtents();
+   virtual Rect calcExtents() const;
 };
 
 

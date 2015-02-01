@@ -178,7 +178,7 @@ bool GeomObject::hasGeometry() const
 
 
 string GeomObject::geomToLevelCode() const {  return mGeometry.geomToLevelCode();     }
-Rect GeomObject::calcExtents()             {  return mGeometry.getGeometry()->calcExtents();  }
+Rect GeomObject::calcExtents() const       { return mGeometry.getGeometry()->calcExtents(); }
 
 
 // Settings

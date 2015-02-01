@@ -123,7 +123,7 @@ void MoveObject::onAddedToGame(Game *game)
 
 static const float MoveObjectCollisionElasticity = 1.7f;
 
-Rect MoveObject::calcExtents()
+Rect MoveObject::calcExtents() const
 {
    const F32 buffer = 10.0f;
 

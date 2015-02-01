@@ -288,7 +288,7 @@ void TextItem::onAddedToGame(Game *theGame)
 
 
 // Bounding box for display scoping purposes
-Rect TextItem::calcExtents()
+Rect TextItem::calcExtents() const
 {
 #ifdef ZAP_DEDICATED
    // Don't care much about it on the server, as server won't render, and nothing collides with TextItems

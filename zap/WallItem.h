@@ -31,7 +31,7 @@ public:
    string toLevelCode() const;
 
    Vector<Point> extendedEndPoints;
-   virtual Rect calcExtents();
+   virtual Rect calcExtents() const;
 
    virtual void onGeomChanged();
    virtual void onItemDragging();

@@ -217,6 +217,12 @@ void SpeedZone::onGeomChanged()
 }
 
 
+Rect SpeedZone::calcExtents() const
+{
+   return Rect(mPolyBounds);
+}
+
+
 // This object should be drawn above polygons
 S32 SpeedZone::getRenderSortValue()
 {
@@ -237,7 +243,7 @@ void SpeedZone::onAddedToGame(Game *game)
 // Bounding box for quick collision-possibility elimination
 void SpeedZone::computeExtent()
 {
-   setExtent(Rect(mPolyBounds));
+   setExtent(calcExtents());
 }
 
 

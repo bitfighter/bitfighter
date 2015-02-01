@@ -212,11 +212,10 @@ void WallItem::computeExtendedEndPoints()
 
 
 // TODO: Should return const ref rather than copy
-Rect WallItem::calcExtents()
+Rect WallItem::calcExtents() const
 {
    return getSegmentExtent();
 }
-
 
 
 const char *WallItem::getOnScreenName()     const { return "Wall";  }

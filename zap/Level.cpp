@@ -861,7 +861,7 @@ bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &er
       }
 
       object->setUserAssignedId(id, false);
-      object->setExtent(object->calcExtents());    // This looks ugly
+      object->setExtent(object->calcExtents());    // This looks ugly  <== changes speedzone extents??
       addToDatabase(object);
 
       if(stricmp(argv[0], "Polywall") == 0)

@@ -193,7 +193,7 @@ F32 Item::getEditorRadius(F32 currentScale) const
 }
 
 
-Rect Item::calcExtents()
+Rect Item::calcExtents() const
 {
    return Rect(getPos(), mRadius);
 }
