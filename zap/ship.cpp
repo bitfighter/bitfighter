@@ -611,7 +611,6 @@ void Ship::idle(IdleCallPath path)
 
          copyMoveState(ActualState, RenderState);
       }
-
    }
 
    if(path == ServerProcessingUpdatesFromClient || path == ClientIdlingLocalShip ||
