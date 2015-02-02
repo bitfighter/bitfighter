@@ -29,8 +29,6 @@ private:
    // vector (the three points of our triangle graphic), and compute its extent
    void preparePoints();
 
-   void computeExtent();                                            // Bounding box for quick collision-possibility elimination
-
 public:
    enum {
       halfWidth = 25,

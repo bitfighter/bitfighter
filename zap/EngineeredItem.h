@@ -23,7 +23,7 @@ private:
 
    static const F32 EngineeredItemRadius;
 
-   void computeExtent();
+   Rect calcExtents() const;
 
    virtual F32 getSelectionOffsetMagnitude();         // Provides base magnitude for getEditorSelectionOffset()
 
@@ -76,7 +76,6 @@ public:
 
    virtual void setPos(lua_State *L, S32 stackIndex);
    virtual void setPos(const Point &p);
-
 
 #ifndef ZAP_DEDICATED
    Point getEditorSelectionOffset(F32 currentScale);

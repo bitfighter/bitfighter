@@ -66,7 +66,6 @@ public:
    void setResource(MountableItem *resource);
    void releaseResource(const Point &releasePos, Level *level);
 
-   virtual void computeExtent() = 0;  // The object must have extents recomputed before being added
    virtual void onConstructed() = 0;  // Call this once the object has been added to the game
 };
 

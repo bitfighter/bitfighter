@@ -255,9 +255,6 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Level *level)
    pos  *= level->getLegacyGridSize();
    dest *= level->getLegacyGridSize();
 
-   setVert(pos,  0);
-   setVert(dest, 1);
-
    // See if we already have any teleports with this pos... if so, this is a "multi-dest" teleporter.
    // Note that editor handles multi-dest teleporters as separate single dest items, so multi-dest teleporters will be
    // broken into a series of single-dest teleporters when the level is added to the editor.
@@ -276,9 +273,13 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Level *level)
          return true;    // There will only be one!
       }
    }
-   // New teleporter origin
-   addDest(dest);
-   computeExtent(); // for ServerGame extent
+
+   // New teleporter destination
+
+   setVert(pos, 0);
+   setVert(dest, 1);
+
+   updateExtentInDatabase();
 
    return true;
 }
@@ -310,9 +311,14 @@ string Teleporter::toLevelCode() const
 
 Rect Teleporter::calcExtents() const
 {
-   Rect rect(getVert(0), getVert(1));
+   if(isInEditor())
+      return Rect(*getEditorHitPoly());
+
+   return Rect(getOrigin(), TELEPORTER_RADIUS);    // This Rect constructor takes a diameter, not a radius
+
+   /*Rect rect(getVert(0), getVert(1));
    rect.expand(Point(Teleporter::TELEPORTER_RADIUS, Teleporter::TELEPORTER_RADIUS));
-   return rect;
+   return rect;*/
 }
 
 
@@ -450,7 +456,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       for(U32 i = 0; i < count; i++)
          mDestManager.read(i, stream);
       
-      computeExtent();
+      updateExtentInDatabase();
       generateOutlinePoints();
 
    }
@@ -693,13 +699,6 @@ const Vector<Point> *Teleporter::getOutline() const
 const Vector<Point> *Teleporter::getEditorHitPoly() const
 {
    return Parent::getOutline();
-}
-
-
-
-void Teleporter::computeExtent()
-{
-   setExtent(Rect(getOrigin(), TELEPORTER_RADIUS));    // This Rect constructor takes a diameter, not a radius
 }
 
 
@@ -1178,7 +1177,7 @@ void Teleporter::doSetGeom(const Vector<Point> &points)
    else
       setVert(points[0], 1);  // Set default dest -- maybe not important to set this
 
-   computeExtent();
+   updateExtentInDatabase();
    setMaskBits(GeomMask);
 
    if(mTeleportCooldown.getCurrent() == 0)

@@ -128,7 +128,7 @@ void SpeedZone::preparePoints()
 
    generatePoints(getVert(0), vert1, mPolyBounds, mOutline);
 
-   computeExtent();
+   updateExtentInDatabase();
 }
 
 
@@ -219,7 +219,10 @@ void SpeedZone::onGeomChanged()
 
 Rect SpeedZone::calcExtents() const
 {
-   return Rect(mPolyBounds);
+   if(isInEditor())
+      return Rect(*getEditorHitPoly());
+
+   return Rect(*getCollisionPoly());
 }
 
 
@@ -240,13 +243,6 @@ void SpeedZone::onAddedToGame(Game *game)
 }
 
 
-// Bounding box for quick collision-possibility elimination
-void SpeedZone::computeExtent()
-{
-   setExtent(calcExtents());
-}
-
-
 const Vector<Point> *SpeedZone::getOutline() const
 {
    return &mOutline;
@@ -257,6 +253,7 @@ const Vector<Point> *SpeedZone::getEditorHitPoly() const
 {
    return Parent::getOutline();
 }
+
 
 // More precise boundary for more precise collision detection
 const Vector<Point> *SpeedZone::getCollisionPoly() const

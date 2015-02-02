@@ -39,7 +39,6 @@ public:
    void onAddedToGame(Game *theGame);
    virtual void onGhostAvailable(GhostConnection *connection);
    virtual void onGhostAddBeforeUpdate(GhostConnection *connection);
-   void computeExtent();                                             // Bounding box for quick collision-possibility elimination
 
    const Vector<Point> *getCollisionPoly() const;                    // More precise boundary for precise collision detection
    bool collide(BfObject *hitObject);

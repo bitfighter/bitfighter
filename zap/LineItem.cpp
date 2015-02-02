@@ -170,7 +170,7 @@ bool LineItem::processArguments(S32 argc, const char **argv, Level *level)
 
    readGeom(argc, argv, firstCoord, level->getLegacyGridSize());
 
-   computeExtent();
+   updateExtentInDatabase();
 
    return true;
 }
@@ -208,13 +208,6 @@ void LineItem::onGhostAvailable(GhostConnection* connection)
 void LineItem::onGhostAddBeforeUpdate(GhostConnection* connection)
 {
    Parent::onGhostAddBeforeUpdate(connection);
-   updateExtentInDatabase();
-}
-
-
-// Bounding box for quick collision-possibility elimination, and display scoping purposes
-void LineItem::computeExtent()
-{
    updateExtentInDatabase();
 }
 

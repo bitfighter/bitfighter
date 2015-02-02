@@ -397,7 +397,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
    }
 
    // It worked!  Object depolyed!
-   engineerable->computeExtent();      // Recomputes extents
+   deployedObject->updateExtentInDatabase();
 
    deployedObject->setOwner(clientInfo);
    deployedObject->addToGame(ship->getGame(), ship->getGame()->getLevel());
@@ -440,15 +440,13 @@ EngineeredItem::EngineeredItem(S32 team, const Point &anchorPoint, const Point &
    mSnapped = false;
 
    Parent::setPos(anchorPoint);  // Must be parent, or else... TNLAssert!!!
-
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 // Destructor
 EngineeredItem::~EngineeredItem()
 {
-   LUAW_DESTRUCTOR_CLEANUP;
+   // Do nothing
 }
 
 
@@ -793,10 +791,10 @@ F32 EngineeredItem::getHealth() const
 }
 
 
-void EngineeredItem::computeExtent()
+Rect EngineeredItem::calcExtents() const
 {
    const Vector<Point> *p = getCollisionPoly();
-   setExtent(Rect(*p));
+   return Rect(*p);
 }
 
 
@@ -856,7 +854,7 @@ void EngineeredItem::setPos(const Point &p)
    Parent::setPos(p);
 
    computeObjectGeometry();
-   computeExtent();           // Sets extent based on actual geometry of object
+   updateExtentInDatabase();
 }
 
 
@@ -1001,7 +999,7 @@ void EngineeredItem::unpackUpdate(GhostConnection *connection, BitStream *stream
    if(initial)
    {
       computeObjectGeometry();
-      computeExtent();
+      updateExtentInDatabase();
    }
 }
 
@@ -1070,8 +1068,8 @@ void EngineeredItem::findMountPoint(const Level *level, const Point &pos)
       mAnchorNormal.set(1,0);
    }
    
-   computeObjectGeometry();                                    // Fills mCollisionPolyPoints 
-   computeExtent();                                            // Uses mCollisionPolyPoints
+   computeObjectGeometry();      // Fills mCollisionPolyPoints 
+   updateExtentInDatabase();
 }
 
 
@@ -1741,13 +1739,15 @@ ForceField::ForceField(S32 team, Point start, Point end)
    mNetFlags.set(Ghostable);
 
    setNewGeometry(geomSimpleLine);     // Not used, keeps clone from blowing up
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 // Destructor
 ForceField::~ForceField()
 {
-   // Do nothing
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 

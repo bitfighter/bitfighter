@@ -91,7 +91,6 @@ private:
 
    void initialize(const Point &pos, const Point &dest, Ship *engineeringShip);
    void doSetGeom(lua_State *L);    // Helper
-   void computeExtent();
    void generateOutlinePoints();
 
 public:
