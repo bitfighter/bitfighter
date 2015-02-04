@@ -261,6 +261,7 @@ DamageInfo::DamageInfo()
 // Constructor
 EditorObject::EditorObject()
 {
+   mInEditor = false;
    mLitUp = false; 
    mSelected = false; 
    mVertexLitUp = 0;
@@ -378,7 +379,7 @@ void EditorObject::setVertexLitUp(S32 vertexIndex)
 
 void EditorObject::onAddedToEditor()
 {
-   // Do nothing
+   mInEditor = true;
 }
 
 
@@ -386,6 +387,12 @@ void EditorObject::onAddedToEditor()
 F32 EditorObject::getEditorRadius(F32 currentScale) const
 {
    return 10 * currentScale;   // 10 pixels is base size
+}
+
+
+bool EditorObject::isInEditor() const
+{
+   return mInEditor;
 }
 
 

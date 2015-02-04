@@ -157,6 +157,7 @@ private:
    U32 mSelectedTime;         // The time this object was last selected 
    bool mLitUp;               // True if user is hovering over the item and it's "lit up"                                     
    S32 mVertexLitUp;          // Only one vertex should be lit up at a given time -- could this be an attribute of the editor?
+   bool mInEditor;            // True when object has been added to editor, false all other times
 
 public:
    EditorObject();            // Constructor
@@ -202,6 +203,8 @@ public:
    // Keep track which vertex, if any is lit up in the currently selected item
    bool isVertexLitUp(S32 vertexIndex) const;
    void setVertexLitUp(S32 vertexIndex);
+
+   bool isInEditor() const;
 };
 
 ////////////////////////////////////////

@@ -158,6 +158,7 @@ void renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCo
 }
 
 
+// geomType: GL_LINES, GL_LINE_STRIP, GL_LINE_LOOP, GL_TRIANGLES, GL_TRIANGLE_FAN, etc.
 void renderPointVector(const Vector<Point> *points, U32 geomType)
 {
    glEnableClientState(GL_VERTEX_ARRAY);

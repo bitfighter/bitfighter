@@ -156,6 +156,7 @@ public:
 
    void clearAllObjects();
 
+
    bool makeSureTeamCountIsNotZero();        // Because zero teams can cause crashiness
 
 
