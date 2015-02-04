@@ -375,6 +375,88 @@ public:
    S32 lua_setWeapon(lua_State *L);
 };
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+class Mortar : public EngineeredItem
+{
+   typedef EngineeredItem Parent;
+
+private:
+   Timer mFireTimer;
+
+   void initialize();
+
+   F32 getSelectionOffsetMagnitude();
+
+public:
+   explicit Mortar(lua_State *L = NULL);                                   // Combined Lua / C++ default constructor
+   Mortar(S32 team, const Point &anchorPoint, const Point &anchorNormal);  // Constructor for when mortar is built with engineer
+   virtual ~Mortar();                                                      // Destructor
+
+   Mortar *clone() const;
+
+   WeaponType mWeaponFireType;
+
+   bool processArguments(S32 argc, const char **argv, Level *level);
+   string toLevelCode() const;
+
+   static const S32 defaultRespawnTime = 0;
+
+   static const F32 MORTAR_OFFSET;                    // Distance of the turret's render location from it's attachment location
+                                                      // Also serves as radius of circle of turret's body, where the turret starts
+   static const S32 TurretTurnRate = 4;               // How fast can turrets turn to aim?
+   static const S32 TurretPerceptionDistance = 800;   // Area to search for potential targets...
+
+   static const S32 AimMask = Parent::FirstFreeMask;
+
+
+   Vector<Point> getObjectGeometry(const Point &anchor, const Point &normal) const;
+   static Vector<Point> getMortarGeometry(const Point &anchor, const Point &normal);
+   
+   const Vector<Point> *getCollisionPoly() const;
+   const Vector<Point> *getOutline() const;
+
+   F32 getEditorRadius(F32 currentScale) const;
+
+   void render() const;
+   void idle(IdleCallPath path);
+   void onAddedToGame(Game *theGame);
+
+   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
+   TNL_DECLARE_CLASS(Mortar);
+
+   /////
+   // Some properties about the item that will be needed in the editor
+   const char *getEditorHelpString() const;
+   const char *getPrettyNamePlural() const;
+   const char *getOnDockName() const;
+   const char *getOnScreenName() const;
+
+   bool hasTeam();
+   bool canBeHostile();
+   bool canBeNeutral();
+
+   void onGeomChanged();
+
+   void renderDock(const Color &color) const;
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false) const;
+
+   ///// Lua interface
+	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Mortar);
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
+
+   // LuaItem methods
+   S32 lua_getRad(lua_State *L);
+   S32 lua_getPos(lua_State *L);
+   S32 lua_setWeapon(lua_State *L);
+};
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////

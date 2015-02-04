@@ -1549,9 +1549,9 @@ void ForceFieldProjector::createCaptiveForceField()
 }
 
 
-void ForceFieldProjector::onAddedToGame(Game *theGame)
+void ForceFieldProjector::onAddedToGame(Game *game)
 {
-   Parent::onAddedToGame(theGame);
+   Parent::onAddedToGame(game);
 }
 
 
@@ -2113,9 +2113,9 @@ F32 Turret::getSelectionOffsetMagnitude()
 }
 
 
-void Turret::onAddedToGame(Game *theGame)
+void Turret::onAddedToGame(Game *game)
 {
-   Parent::onAddedToGame(theGame);
+   Parent::onAddedToGame(game);
    mCurrentAngle = mAnchorNormal.ATAN2();
 }
 
@@ -2416,6 +2416,426 @@ S32 Turret::lua_getPos(lua_State *L)
 }
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+TNL_IMPLEMENT_NETOBJECT(Mortar);
+
+
+const F32 Mortar::MORTAR_OFFSET = 15;
+
+// Combined Lua / C++ default constructor
+/**
+ * @luafunc Mortar::Mortar()
+ * @luafunc Mortar::Mortar(point, team)
+ */
+Mortar::Mortar(lua_State *L) : Parent(TEAM_NEUTRAL, Point(0, 0), Point(1, 0))
+{
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, TEAM_INDX, END }}, 2 };
+      S32 profile = checkArgList(L, constructorArgList, "Mortar", "constructor");
+      
+      if(profile == 1 )
+      {
+         setPos(L, 1);
+         setTeam(TEAM_NEUTRAL);
+      }
+      if(profile == 2)
+      {
+         setPos(L, 1);
+         setTeam(L, 2);
+      }
+   }
+
+   initialize();
+}
+
+
+// Constructor for when Mortar is built with engineer
+Mortar::Mortar(S32 team, const Point &anchorPoint, const Point &anchorNormal) : Parent(team, anchorPoint, anchorNormal)
+{
+   initialize();
+}
+
+
+// Destructor
+Mortar::~Mortar()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void Mortar::initialize()
+{
+   mObjectTypeNumber = MortarTypeNumber;
+
+   mWeaponFireType = WeaponSeeker;
+   mNetFlags.set(Ghostable);
+
+   onGeomChanged();
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+Mortar *Mortar::clone() const
+{
+   return new Mortar(*this);
+}
+
+
+// Mortar <Team> <X> <Y> [HealRate]
+bool Mortar::processArguments(S32 argc2, const char **argv2, Level *level)
+{
+   S32 argc1 = 0;
+   const char *argv1[32];
+
+   for(S32 i = 0; i < argc2; i++)
+   {
+      char firstChar = argv2[i][0];
+
+      if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z'))  // starts with a letter
+      {
+         if(!strncmp(argv2[i], "W=", 2))  // W= is in 015a
+         {
+            S32 w = 0;
+            while(w < WeaponCount && stricmp(WeaponInfo::getWeaponInfo(WeaponType(w)).name.getString(), &argv2[i][2]))
+               w++;
+            if(w < WeaponCount)
+               mWeaponFireType = WeaponType(w);
+            break;
+         }
+      }
+      else
+      {
+         if(argc1 < 32)
+         {
+            argv1[argc1] = argv2[i];
+            argc1++;
+         }
+      }
+   }
+
+   if (!EngineeredItem::processArguments(argc1, argv1, level))
+      return false;
+
+   return true;
+}
+
+
+string Mortar::toLevelCode() const
+{
+   string out = Parent::toLevelCode();
+
+   if(mWeaponFireType != WeaponSeeker)
+      out = out + " " + writeLevelString((string("W=") + WeaponInfo::getWeaponInfo(mWeaponFireType).name.getString()).c_str());
+
+   return out;
+}
+
+
+Vector<Point> Mortar::getObjectGeometry(const Point &anchor, const Point &normal) const
+{
+   return getMortarGeometry(anchor, normal);
+}
+
+
+// static method
+Vector<Point> Mortar::getMortarGeometry(const Point &anchor, const Point &normal)
+{
+   Point cross(normal.y, -normal.x);
+
+   Vector<Point> polyPoints;
+   polyPoints.reserve(4);
+
+   polyPoints.push_back(anchor + cross * 25);
+   polyPoints.push_back(anchor + cross * 10 + Point(normal) * 45);
+   polyPoints.push_back(anchor - cross * 10 + Point(normal) * 45);
+   polyPoints.push_back(anchor - cross * 25);
+
+   TNLAssert(!isWoundClockwise(polyPoints), "Go the other way!");
+
+   return polyPoints;
+}
+
+
+const Vector<Point> *Mortar::getCollisionPoly() const
+{
+   return &mCollisionPolyPoints;
+}
+
+
+const Vector<Point> *Mortar::getOutline() const
+{
+   return getCollisionPoly();
+}
+
+
+F32 Mortar::getEditorRadius(F32 currentScale) const
+{
+   if(mSnapped)
+      return 25 * currentScale;
+   else 
+      return Parent::getEditorRadius(currentScale);
+}
+
+
+F32 Mortar::getSelectionOffsetMagnitude()
+{
+   return 20;
+}
+
+
+void Mortar::onAddedToGame(Game *game)
+{
+   Parent::onAddedToGame(game);
+}
+
+
+void Mortar::render() const
+{
+   renderMortar(getColor(), getPos(), mAnchorNormal, isEnabled(), mHealth, mHealRate);
+}
+
+
+void Mortar::renderDock(const Color &color) const
+{
+   renderSquareItem(getPos(), color, 1, Colors::white, 'M');
+}
+
+
+void Mortar::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
+{
+   if(mSnapped)
+   {
+      // We render the Mortar with/without health if it is neutral or not (as it
+      // starts in the game)
+      S32 team = getTeam();
+      bool enabled = team != TEAM_NEUTRAL;
+      F32 health = team == TEAM_NEUTRAL ? 0.0f : 1.0f;
+
+      renderMortar(getColor(), getPos(), mAnchorNormal, enabled, health, mHealRate);
+   }
+   else
+      renderDock(getColor());
+}
+
+
+U32 Mortar::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+{
+   U32 ret = Parent::packUpdate(connection, updateMask, stream);
+
+   return ret;
+}
+
+
+void Mortar::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   Parent::unpackUpdate(connection, stream);
+}
+
+
+// Choose target, aim, and, if possible, fire
+void Mortar::idle(IdleCallPath path)
+{
+   if(path != ServerIdleMainLoop)
+      return;
+
+   // Server only!
+
+   healObject(mCurrentMove.time);
+
+   if(!isEnabled())
+      return;
+
+   mFireTimer.update(mCurrentMove.time);
+
+   // Choose best target:
+   Point aimPos = getPos() + mAnchorNormal * MORTAR_OFFSET;
+   Point cross(mAnchorNormal.y, -mAnchorNormal.x);
+
+   Rect queryRect(aimPos, aimPos);
+   queryRect.unionPoint(aimPos + cross * TurretPerceptionDistance);
+   queryRect.unionPoint(aimPos - cross * TurretPerceptionDistance);
+   queryRect.unionPoint(aimPos + mAnchorNormal * TurretPerceptionDistance);
+   fillVector.clear();
+   findObjects((TestFunc)isTurretTargetType, fillVector, queryRect);    // Get all potential targets
+
+   BfObject *bestTarget = NULL;
+   F32 bestRange = F32_MAX;
+   Point bestDelta;
+
+   Point delta;
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      if(isShipType(fillVector[i]->getObjectTypeNumber()))
+      {
+         Ship *potential = static_cast<Ship *>(fillVector[i]);
+
+         // Is it dead or cloaked?  Carrying objects makes ship visible, except in nexus game
+         if(!potential->isVisible(false) || potential->mHasExploded)
+            continue;
+      }
+
+      // Don't target mounted items (like resourceItems and flagItems)
+      if(isMountableItemType(fillVector[i]->getObjectTypeNumber()))
+         if(static_cast<MountableItem *>(fillVector[i])->isMounted())
+            continue;
+      
+      BfObject *potential = static_cast<BfObject *>(fillVector[i]);
+      if(potential->getTeam() == getTeam())     // Is target on our team?
+         continue;                              // ...if so, skip it!
+
+      // Calculate where we have to shoot to hit this...
+      Point Vs = potential->getVel();
+      F32 S = (F32)WeaponInfo::getWeaponInfo(mWeaponFireType).projVelocity;
+      Point d = potential->getPos() - aimPos;
+
+// This could possibly be combined with Robot's getFiringSolution, as it's essentially the same thing
+      F32 t;      // t is set in next statement
+      if(!findLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), WeaponInfo::getWeaponInfo(mWeaponFireType).projLiveTime * 0.001f, t))
+         continue;
+
+      Point leadPos = potential->getPos() + Vs * t;
+
+      // Calculate distance
+      delta = (leadPos - aimPos);
+
+      Point angleCheck = delta;
+      angleCheck.normalize();
+
+      // Check that we're facing it...
+      if(angleCheck.dot(mAnchorNormal) <= -0.1f)
+         continue;
+
+      // See if we can see it...
+      Point n;
+      if(findObjectLOS((TestFunc)isWallType, ActualState, aimPos, potential->getPos(), t, n))
+         continue;
+
+      // See if we're gonna clobber our own stuff...
+      disableCollision();
+      Point delta2 = delta;
+      delta2.normalize(WeaponInfo::getWeaponInfo(mWeaponFireType).projLiveTime * (F32)WeaponInfo::getWeaponInfo(mWeaponFireType).projVelocity / 1000.f);
+      BfObject *hitObject = findObjectLOS((TestFunc) isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
+      enableCollision();
+
+      // Skip this target if there's a friendly object in the way
+      if(hitObject && hitObject->getTeam() == getTeam() &&
+        (hitObject->getPos() - aimPos).lenSquared() < delta.lenSquared())         
+         continue;
+
+      F32 dist = delta.len();
+
+      if(dist < bestRange)
+      {
+         bestDelta  = delta;
+         bestRange  = dist;
+         bestTarget = potential;
+      }
+   }
+
+   if(!bestTarget)      // No target, nothing to do
+      return;
+ 
+   // Aim towards the best target.  Note that if the Mortar is at one extreme of its range, and the target is at the other,
+   // then the Mortar will rotate the wrong-way around to aim at the target.  If we were to detect that condition here, and
+   // constrain our Mortar to turning the correct direction, that would be great!!
+   F32 destAngle = bestDelta.ATAN2();
+
+   F32 angleDelta = destAngle;
+
+   if(angleDelta > FloatPi)
+      angleDelta -= Float2Pi;
+   else if(angleDelta < -FloatPi)
+      angleDelta += Float2Pi;
+
+   if(mFireTimer.getCurrent() == 0)
+   {
+      bestDelta.normalize();
+      Point velocity;
+         
+      // String handling in C++ is such a mess!!!
+      string killer = string("got blasted by ") + getGame()->getTeamName(getTeam()).getString() + " Mortar";
+      mKillString = killer.c_str();
+
+      GameWeapon::createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, 
+                                          0, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);
+      mFireTimer.reset(WeaponInfo::getWeaponInfo(mWeaponFireType).fireDelay);
+   }
+}
+
+
+const char *Mortar::getOnScreenName()     const  { return "Mortar"; }
+const char *Mortar::getOnDockName()       const  { return "Mortar"; }
+const char *Mortar::getPrettyNamePlural() const  { return "Mortars"; }
+const char *Mortar::getEditorHelpString() const  { return "Creates shooting Mortar.  Can be on a team, neutral, or \"hostile to all\". [Y]"; }
+
+
+bool Mortar::hasTeam()      { return true; }
+bool Mortar::canBeHostile() { return true; }
+bool Mortar::canBeNeutral() { return true; }
+
+
+void Mortar::onGeomChanged()
+{ 
+   Parent::onGeomChanged();
+}
+
+
+/////
+// Lua interface
+/**
+ * @luaclass Mortar
+ * 
+ * @brief Mounted gun that shoots at enemy ships and other objects.
+ */
+//               Fn name     Param profiles  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, setWeapon,    ARRAYDEF({{ WEAP_ENUM, END }}), 1 ) \
+
+
+GENERATE_LUA_METHODS_TABLE(Mortar, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(Mortar, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const char *Mortar::luaClassName = "Mortar";
+REGISTER_LUA_SUBCLASS(Mortar, EngineeredItem);
+
+
+/**
+ * @luafunc Mortar::setWeapon(Weapon weapon)
+ *
+ * @brief Sets the weapon for this Mortar to use.
+ *
+ * @param weapon Weapon to set on the Mortar
+ *
+ * @note This is experimental and may be removed or changed from the game at any time
+ */
+S32 Mortar::lua_setWeapon(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Mortar", "setWeapon");
+
+   mWeaponFireType = getWeaponType(L, 1);
+
+   return 0;
+}
+
+
+// Override some methods
+S32 Mortar::lua_getRad(lua_State *L)
+{
+   return returnFloat(L, MORTAR_OFFSET);
+}
+
+
+S32 Mortar::lua_getPos(lua_State *L)
+{
+   return returnPoint(L, getPos() + mAnchorNormal * MORTAR_OFFSET);
+}
 
 };
 

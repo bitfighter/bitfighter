@@ -140,6 +140,7 @@ extern void renderTeleporterOutline(const Point &center, F32 radius, const Color
 extern void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentScale = 1);
 extern void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentScale);
 extern void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate = 0);
+extern void renderMortar(const Color &c, Point anchor, Point normal, bool enabled, F32 health, S32 healRate = 0);
 
 extern void renderFlag(const Point &pos, const Color &flagColor, F32 alpha = 1);
 extern void renderFlag(const Point &pos, F32 scale, const Color &flagColor);
@@ -317,6 +318,7 @@ extern void renderTeleporterEditorObject(const Point &pos, S32 radius, const Col
 #define renderForceFieldProjector
 #define renderForceField
 #define renderTurret
+#define renderMortar
 #define renderSquareItem
 #define renderNavMeshZone
 #define renderNavMeshBorders

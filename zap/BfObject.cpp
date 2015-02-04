@@ -35,7 +35,7 @@ using namespace LuaArgs;
 bool isEngineeredType(U8 x)
 {
    return
-         x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber;
+         x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber || x == MortarTypeNumber;
 }
 
 bool isShipType(U8 x)

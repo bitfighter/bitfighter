@@ -226,6 +226,9 @@ void EditorUserInterface::populateDock()
    addDockObject(new Turret(), xPos, yPos);
    yPos += spacer;
 
+   addDockObject(new Mortar(), xPos, yPos);
+   yPos += spacer;
+
    addDockObject(new Teleporter(), xPos, yPos);
    yPos += spacer;
 

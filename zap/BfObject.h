@@ -60,6 +60,7 @@ class ClientInfo;
    TYPE_NUMBER( EnergyItemTypeNumber,          true,              "EnergyItem",          "EnergyItem"          ) \
    TYPE_NUMBER( SoccerBallItemTypeNumber,      true,              "SoccerBallItem",      "SoccerBallItem"      ) \
    TYPE_NUMBER( TurretTypeNumber,              true,              "Turret",              "Turret"              ) \
+   TYPE_NUMBER( MortarTypeNumber,              true,              "Mortar",              "Mortar"              ) \
    TYPE_NUMBER( ForceFieldTypeNumber,          true,              "ForceField",          "ForceField"          ) \
    TYPE_NUMBER( ForceFieldProjectorTypeNumber, true,              "ForceFieldProjector", "ForceFieldProjector" ) \
    TYPE_NUMBER( SpeedZoneTypeNumber,           true,              "SpeedZone",           "SpeedZone"           ) \

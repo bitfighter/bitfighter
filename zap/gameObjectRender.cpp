@@ -1434,6 +1434,60 @@ void renderTurret(const Color &color, Point anchor, Point normal, bool enabled, 
 }
 
 
+void renderMortar(const Color &color, Point anchor, Point normal, bool enabled, F32 health, S32 healRate)
+{
+   const F32 FrontRadius = 15;
+   const F32 BaseWidth = 36;
+   const F32 HealthBarLength = 28;
+
+   // aimCenter is the point at which the turret would intersect the white base, if it extended that far.
+   // It is kind of the "center of rotation" of the turret.
+   // Turret is drawn centered on this point, therefore many offsets will be negative.
+   Point aimCenter = anchor + normal * Turret::TURRET_OFFSET;
+
+   // Turret is made up of the base, the front, two horizontal lines framing 
+   // the health bar, an optional healing indicator, and finally the barrel
+   static Vector<Point> basePoints, frontPoints, healthBarFrame, healIndicatorPoints, mortarPoints;
+
+   // Lazily initialize our point vectors
+   if(frontPoints.size() == 0)
+   {
+      generatePointsInARectangle(BaseWidth,        0, -Turret::TURRET_OFFSET,     basePoints);
+      generatePointsInARectangle(HealthBarLength, -3, -Turret::TURRET_OFFSET + 3, healthBarFrame);
+
+      generatePointsInARectangle(10, 20, 0, mortarPoints);
+
+      //// Remove first and last points from healing indicator to make it look cooler
+      //healIndicatorPoints.erase(healIndicatorPoints.size() - 1);     // Last
+      //healIndicatorPoints.erase(0);                                  // First
+   }
+
+   glPushMatrix();
+      glTranslate(aimCenter);
+      glRotate(normal.ATAN2() * RADIANS_TO_DEGREES - 90);
+
+      glColor(color);
+
+      renderPointVector(&frontPoints,    GL_LINE_STRIP);
+      renderPointVector(&healthBarFrame, GL_LINES);
+
+      // Render symbol if it is a regenerating turret
+      if(healRate > 0)
+         renderPointVector(&healIndicatorPoints, GL_LINE_STRIP);
+
+      // Draw base after potentially overlapping curvy bits
+      glColor(enabled ? Colors::white : Colors::gray60);
+      renderPointVector(&basePoints,     GL_LINE_LOOP);
+
+      glColor(color);
+      renderHealthBar(health, Point(0, -Turret::TURRET_OFFSET / 2), Point(1, 0), HealthBarLength, 5);
+
+      renderPointVector(&mortarPoints, GL_LINE_LOOP);
+
+   glPopMatrix();
+}
+
+
 static void drawFlag(const Color &flagColor, const Color &mastColor, F32 alpha)
 {
    glColor(flagColor, alpha);
