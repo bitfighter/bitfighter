@@ -10,6 +10,8 @@
 
 using namespace TNL;
 
+static const S32 HALF_SECOND   = 500;
+
 static const S32 ONE_SECOND    = 1000;    // milliseconds
 static const S32 ONE_MINUTE    = 60 * ONE_SECOND;
 static const S32 ONE_HOUR      = 60 * ONE_MINUTE;

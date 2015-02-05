@@ -10,6 +10,7 @@
 #include "WallItem.h"
 #include "Teleporter.h"
 #include "gameType.h"
+#include "Intervals.h"
 #include "Level.h"
 #include "PolyWall.h"
 #include "projectile.h"
@@ -765,7 +766,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
       if(mResource.isValid())
          releaseResource(getPos() + mAnchorNormal * mResource->getRadius(), getGame()->getLevel());
 
-      deleteObject(500);
+      deleteObject(HALF_SECOND);
    }
 }
 
@@ -2422,7 +2423,7 @@ S32 Turret::lua_getPos(lua_State *L)
 TNL_IMPLEMENT_NETOBJECT(Mortar);
 
 
-const F32 Mortar::MORTAR_OFFSET = 15;
+const F32 Mortar::MORTAR_OFFSET = 35;
 
 // Combined Lua / C++ default constructor
 /**
@@ -2742,15 +2743,6 @@ void Mortar::idle(IdleCallPath path)
    // Aim towards the best target.  Note that if the Mortar is at one extreme of its range, and the target is at the other,
    // then the Mortar will rotate the wrong-way around to aim at the target.  If we were to detect that condition here, and
    // constrain our Mortar to turning the correct direction, that would be great!!
-   F32 destAngle = bestDelta.ATAN2();
-
-   F32 angleDelta = destAngle;
-
-   if(angleDelta > FloatPi)
-      angleDelta -= Float2Pi;
-   else if(angleDelta < -FloatPi)
-      angleDelta += Float2Pi;
-
    if(mFireTimer.getCurrent() == 0)
    {
       bestDelta.normalize();
@@ -2760,7 +2752,7 @@ void Mortar::idle(IdleCallPath path)
       string killer = string("got blasted by ") + getGame()->getTeamName(getTeam()).getString() + " Mortar";
       mKillString = killer.c_str();
 
-      GameWeapon::createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, 
+      GameWeapon::createWeaponProjectiles(WeaponType(mWeaponFireType), mAnchorNormal, aimPos, velocity,
                                           0, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);
       mFireTimer.reset(WeaponInfo::getWeaponInfo(mWeaponFireType).fireDelay);
    }
