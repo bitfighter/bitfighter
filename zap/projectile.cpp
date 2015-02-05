@@ -1421,7 +1421,7 @@ void Seeker::initialize(const Point &pos, const Point &vel, F32 angle, BfObject 
    }
       
    mAcquiredTarget = NULL;
-   mReassessTargetTimer = ReassessTargetTime;
+   mReassessTargetTimer.setPeriod(ReassessTargetTime);
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -1543,10 +1543,9 @@ void Seeker::idle(IdleCallPath path)
    setActualAngle(newAngle);
 
    // Force re-acquire to test for closer targets after a short interval
-   mReassessTargetTimer -= deltaT;
-   if(mReassessTargetTimer < 0)
+   if(mReassessTargetTimer.update(deltaT))
    {
-      mReassessTargetTimer = ReassessTargetTime;
+      mReassessTargetTimer.reset();
       mAcquiredTarget = NULL;
    }
 }
@@ -1621,7 +1620,7 @@ void Seeker::acquireTarget()
 
       closest = distanceSq;
       mAcquiredTarget = foundObject;
-      mReassessTargetTimer = ReassessTargetTime;
+      mReassessTargetTimer.reset();
    }
 }
 

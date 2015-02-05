@@ -312,7 +312,7 @@ private:
 
    SafePtr<BfObject> mShooter;
    SafePtr<BfObject> mAcquiredTarget;
-   S32 mReassessTargetTimer;
+   Timer mReassessTargetTimer;
 
    S32 mTimeRemaining;
    bool mExploded;
