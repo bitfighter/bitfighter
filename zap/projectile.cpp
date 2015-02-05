@@ -1438,7 +1438,6 @@ static F32 normalizeAngle(F32 angle)
 }
 
 
-U32 Seeker::SpeedIncreasePerSecond = 300;
 U32 Seeker::TargetAcquisitionRadius = 400;
 F32 Seeker::MaximumAngleChangePerSecond = FloatTau / 2;
 F32 Seeker::TargetSearchAngle = FloatTau * .6f;     // Anglular spread in front of ship to search for targets
