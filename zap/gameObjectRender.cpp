@@ -1455,7 +1455,7 @@ void renderMortar(const Color &color, Point anchor, Point normal, bool enabled, 
       generatePointsInARectangle(BaseWidth,        0, -Turret::TURRET_OFFSET,     basePoints);
       generatePointsInARectangle(HealthBarLength, -3, -Turret::TURRET_OFFSET + 3, healthBarFrame);
 
-      generatePointsInARectangle(10, 20, 0, mortarPoints);
+      generatePointsInARectangle(8, 16, 0, mortarPoints);
 
       //// Remove first and last points from healing indicator to make it look cooler
       //healIndicatorPoints.erase(healIndicatorPoints.size() - 1);     // Last

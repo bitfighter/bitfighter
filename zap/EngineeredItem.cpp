@@ -668,11 +668,11 @@ bool EngineeredItem::isSnapped() const
 }
 
 
-static const F32 disabledLevel = 0.25;
+static const F32 DisabledLevel = 0.25;
 
 bool EngineeredItem::isEnabled() const
 {
-   return mHealth >= disabledLevel;
+   return mHealth >= DisabledLevel;
 }
 
 
@@ -714,7 +714,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
    setMaskBits(HealthMask);
 
    // Check if turret just died
-   if(prevHealth >= disabledLevel && mHealth < disabledLevel)        // Turret just died
+   if(prevHealth >= DisabledLevel && mHealth < DisabledLevel)        // Turret just died
    {
       // Revert team to neutral if this was a repaired turret
       if(getTeam() != mOriginalTeam)
@@ -744,7 +744,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
             player->getStatistics()->mFFsKilled++;
       }
    }
-   else if(prevHealth < disabledLevel && mHealth >= disabledLevel)   // Turret was just repaired or healed
+   else if(prevHealth < DisabledLevel && mHealth >= DisabledLevel)   // Turret was just repaired or healed
    {
       if(getTeam() == TEAM_NEUTRAL)                   // Neutral objects...
       {
@@ -941,9 +941,9 @@ U32 EngineeredItem::packUpdate(GhostConnection *connection, U32 updateMask, BitS
    if(stream->writeFlag(updateMask & HealthMask))
    {
       if(stream->writeFlag(isEnabled()))
-         stream->writeFloat((mHealth - disabledLevel) / (1 - disabledLevel), 5);
+         stream->writeFloat((mHealth - DisabledLevel) / (1 - DisabledLevel), 5);
       else
-         stream->writeFloat(mHealth / disabledLevel, 5);
+         stream->writeFloat(mHealth / DisabledLevel, 5);
 
       stream->writeFlag(mIsDestroyed);
    }
@@ -979,9 +979,9 @@ void EngineeredItem::unpackUpdate(GhostConnection *connection, BitStream *stream
    if(stream->readFlag())
    {
       if(stream->readFlag())
-         mHealth = stream->readFloat(5) * (1 - disabledLevel) + disabledLevel; // enabled
+         mHealth = stream->readFloat(5) * (1 - DisabledLevel) + DisabledLevel; // enabled
       else
-         mHealth = stream->readFloat(5) * (disabledLevel * 0.99f); // disabled, make sure (mHealth < disabledLevel)
+         mHealth = stream->readFloat(5) * (DisabledLevel * 0.99f); // disabled, make sure (mHealth < DisabledLevel)
 
 
       bool wasDestroyed = mIsDestroyed;
@@ -1034,7 +1034,7 @@ void EngineeredItem::healObject(S32 time)
       else
          mHealTimer.reset();
 
-      if(prevHealth < disabledLevel && mHealth >= disabledLevel)
+      if(prevHealth < DisabledLevel && mHealth >= DisabledLevel)
          onEnabled();
    }
 }
@@ -1264,7 +1264,7 @@ S32 EngineeredItem::lua_setHealth(lua_State *L)
  */
 S32 EngineeredItem::lua_getDisabledThreshold(lua_State *L)
 {
-   return returnFloat(L, disabledLevel);
+   return returnFloat(L, DisabledLevel);
 }
 
 
@@ -2562,13 +2562,13 @@ Vector<Point> Mortar::getMortarGeometry(const Point &anchor, const Point &normal
 
 const Vector<Point> *Mortar::getCollisionPoly() const
 {
-   return &mCollisionPolyPoints;
+   return getOutline();
 }
 
 
 const Vector<Point> *Mortar::getOutline() const
 {
-   return getCollisionPoly();
+   return &mCollisionPolyPoints;
 }
 
 
@@ -2636,7 +2636,7 @@ void Mortar::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-// Choose target, aim, and, if possible, fire
+// Choose target, and, if possible, fire
 void Mortar::idle(IdleCallPath path)
 {
    if(path != ServerIdleMainLoop)
