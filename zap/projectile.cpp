@@ -1484,77 +1484,63 @@ void Seeker::idle(IdleCallPath path)
       acquireTarget();
 
    // Do we have a target?
-   if(mAcquiredTarget)
-   {
-      // First, remove target if it is too far away.  Next tick we'll search for a new one.
-      Point delta = mAcquiredTarget->getPos() - getActualPos();
-      if(delta.lenSquared() > sq(TargetAcquisitionRadius))
-         mAcquiredTarget = NULL;
+   if(!mAcquiredTarget)
+      return;
 
-      // Else turn towards target
+   // First, remove target if it is too far away.  Next tick we'll search for a new one.
+   Point delta = mAcquiredTarget->getPos() - getActualPos();
+   if(delta.lenSquared() > sq(TargetAcquisitionRadius))
+   {
+      mAcquiredTarget = NULL;
+      return;
+   }
+
+   // Else turn towards target:
+   // Create a new velocity vector for the seeker to slowly go towards the target.
+   // Adjust the vector to always:
+   //  - keep a minimum velocity (projectile default)
+   //  - only change angle to a maxium amount from the original direction
+   //  - increase speed each tick
+
+   // Set velocity vector towards the target for now
+   Point newVelocity = delta;
+
+   // Find the angle to the target as well as the current velocity angle
+   // atan2 already normalizes these to be between -pi and pi
+   F32 angleToTarget = delta.ATAN2();
+   F32 currentAngle = getActualAngle();
+
+   // Set our new angle towards the target for now
+   F32 newAngle = currentAngle;
+
+   // Find the difference between the target angle and the angle of current travel
+   // Normalize it to be between -pi and pi
+   F32 difference = normalizeAngle(angleToTarget - currentAngle);
+
+   // This is the maximum change in angle we will allow
+   F32 maxTickAngle = MaximumAngleChangePerSecond * F32(deltaT) / 1000.f;
+
+   // If our difference in angles are greater than maximum allowed, reduce to the maximum
+   if(fabs(difference) > maxTickAngle)
+   {
+      if(difference > 0)
+      {
+         newVelocity.setAngle(currentAngle + maxTickAngle);
+         newAngle = (currentAngle + maxTickAngle);
+      }
       else
       {
-         // Create a new velocity vector for the seeker to slowly go towards the target.
-         // Adjust the vector to always:
-         //  - keep a minimum velocity (projectile default)
-         //  - only change angle to a maxium amount from the original direction
-         //  - increase speed each tick
-
-         // Set velocity vector towards the target for now
-         Point newVelocity = delta;
-
-         // Find the angle to the target as well as the current velocity angle
-         // atan2 already normalizes these to be between -pi and pi
-         F32 angleToTarget = delta.ATAN2();
-         F32 currentAngle = getActualAngle();
-
-         // Set our new angle towards the target for now
-         F32 newAngle = currentAngle;
-
-         // Find the difference between the target angle and the angle of current travel
-         // Normalize it to be between -pi and pi
-         F32 difference = normalizeAngle(angleToTarget - currentAngle);
-
-         // This is the maximum change in angle we will allow
-         F32 maxTickAngle = MaximumAngleChangePerSecond * F32(deltaT) / 1000.f;
-
-         // If our difference in angles are greater than maximum allowed, reduce to the maximum
-         if(fabs(difference) > maxTickAngle)
-         {
-            if(difference > 0)
-            {
-               newVelocity.setAngle(currentAngle + maxTickAngle);
-               newAngle = (currentAngle + maxTickAngle);
-            }
-            else
-            {
-               newVelocity.setAngle(currentAngle - maxTickAngle);
-               newAngle = (currentAngle - maxTickAngle);
-            }
-         }
-
-         // Get current speed
-         F32 speed = (F32)WeaponInfo::getWeaponInfo(mWeaponType).projVelocity;
-
-         //F32 speed = getVel().len();
-         // Set minimum speed to the default
-         //if(speed < WeaponInfo::getWeaponInfo(mWeaponType).projVelocity)
-         //   speed = WeaponInfo::getWeaponInfo(mWeaponType).projVelocity;
-         // Else, increase or decrease depending on our trajectory to the target
-         //else
-         //{
-         //   F32 tickSpeedIncrease = SpeedIncreasePerSecond * F32(deltaT) / 1000.f;
-         //   if(reduceSpeed)
-         //      speed -= tickSpeedIncrease;
-         //   else
-         //      speed += tickSpeedIncrease;
-         //}
-
-         newVelocity.normalize(speed);
-         setActualVel(newVelocity);
-         setActualAngle(newAngle);
+         newVelocity.setAngle(currentAngle - maxTickAngle);
+         newAngle = (currentAngle - maxTickAngle);
       }
    }
+
+   // Get current speed
+   F32 speed = (F32)WeaponInfo::getWeaponInfo(mWeaponType).projVelocity;
+
+   newVelocity.normalize(speed);
+   setActualVel(newVelocity);
+   setActualAngle(newAngle);
 
    // Force re-acquire to test for closer targets after a short interval
    mReassessTargetTimer -= deltaT;
@@ -1635,6 +1621,7 @@ void Seeker::acquireTarget()
 
       closest = distanceSq;
       mAcquiredTarget = foundObject;
+      mReassessTargetTimer = ReassessTargetTime;
    }
 }
 
