@@ -1047,7 +1047,7 @@ bool clipPolygonsAsTree(ClipType operation, const Vector<Vector<Point> > &subjec
  * Perform a Clipper operation on two sets of polygons, giving the result as a
  * Vector<Vector<Point> >
  */
-bool clipPolys(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, Vector<Vector<Point> > &result, bool merge)
+bool clipPolygons(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, Vector<Vector<Point> > &result, bool merge)
 {
    PolyTree solution;
    bool success = clipPolygonsAsTree(operation, subject, clip, solution);
@@ -1857,6 +1857,36 @@ Point findCentroid(const Vector<Point> &points, bool isPolyline)
 }
 
 
+// Faster circle algorithm adapted from:  http://slabode.exofire.net/circle_draw.shtml
+void generatePointsInACurve(F32 startAngle, F32 endAngle, S32 numPoints, F32 radius, Vector<Point> &points)
+{
+   TNLAssert(endAngle > startAngle, "End angle must be greater than start angle!");
+   TNLAssert(endAngle - startAngle <= FloatTau + .0001, "Difference in angles should be <= FloatTau");
+
+   points.resize(numPoints);
+
+   F32 theta = (endAngle - startAngle) / (numPoints - 1);
+
+   // Precalculate the sin and cos
+   F32 cosTheta = cosf(theta);
+   F32 sinTheta = sinf(theta);
+
+   F32 curX = radius * cosf(startAngle);
+   F32 curY = radius * sinf(startAngle);
+   F32 prevX;
+
+   // This is a repeated rotation
+   for(S32 i = 0; i < numPoints; i++)
+   {
+      points[i].set(curX, curY);
+
+      // Apply the rotation matrix
+      prevX = curX;
+      curX = (cosTheta * curX) - (sinTheta * curY);
+      curY = (sinTheta * prevX) + (cosTheta * curY);
+   }
+}
+
 
 // Find longest edge, so we can align text with it...
 F32 angleOfLongestSide(const Vector<Point> &polyPoints)
@@ -2196,7 +2226,7 @@ S32 lua_clipPolygons(lua_State* L)
 
    // try to execute the operation
    Vector<Vector<Point> > output;
-   if(!clipPolys(operation, subject, clip, output, merge))
+   if(!clipPolygons(operation, subject, clip, output, merge))
       return returnNil(L);
 
    // return the polygons if we're successful

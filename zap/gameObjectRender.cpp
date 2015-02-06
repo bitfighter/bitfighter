@@ -73,37 +73,6 @@ void drawVertLine(F32 x, F32 y1, F32 y2)
 }
 
 
-// Faster circle algorithm adapted from:  http://slabode.exofire.net/circle_draw.shtml
-void generatePointsInACurve(F32 startAngle, F32 endAngle, S32 numPoints, F32 radius, Vector<Point> &points)
-{
-   TNLAssert(endAngle > startAngle,                     "End angle must be greater than start angle!");
-   TNLAssert(endAngle - startAngle <= FloatTau + .0001, "Difference in angles should be <= FloatTau");
-
-   points.resize(numPoints);
-
-   F32 theta = (endAngle - startAngle) / (numPoints - 1);
-
-   // Precalculate the sin and cos
-   F32 cosTheta = cosf(theta);
-   F32 sinTheta = sinf(theta);
-
-   F32 curX = radius * cosf(startAngle);  
-   F32 curY = radius * sinf(startAngle);
-   F32 prevX;
-
-   // This is a repeated rotation
-   for(S32 i = 0; i < numPoints; i++)
-   {
-      points[i].set(curX, curY);
-
-      // Apply the rotation matrix
-      prevX = curX;
-      curX = (cosTheta * curX)  - (sinTheta * curY);
-      curY = (sinTheta * prevX) + (cosTheta * curY);
-   }
-}
-
-
 void generatePointsInACircle(S32 numPoints, F32 radius, Vector<Point> &points)
 {
    generatePointsInACurve(0, FloatTau, numPoints, radius, points);

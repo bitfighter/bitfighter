@@ -4,9 +4,10 @@
 //------------------------------------------------------------------------------
 
 #include "WeaponInfo.h"
+
 #ifndef BF_MASTER
-#include "BfObject.h"
-#include "projectile.h"
+#  include "BfObject.h"
+#  include "projectile.h"
 #endif
 
 

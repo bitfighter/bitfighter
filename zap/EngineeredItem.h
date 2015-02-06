@@ -384,6 +384,7 @@ class Mortar : public EngineeredItem
 
 private:
    Timer mFireTimer;
+   Vector<Point> mZone;
 
    void initialize();
 

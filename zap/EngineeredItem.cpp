@@ -14,12 +14,15 @@
 #include "Level.h"
 #include "PolyWall.h"
 #include "projectile.h"
+#include "GeomUtils.h"
+#include "clipper.hpp"
 
 #include "ServerGame.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"        // for accessing client's spark manager
 #  include "UIQuickMenu.h"
+#  include "OpenglUtils.h"
 #endif
 
 #include "Colors.h"
@@ -1068,7 +1071,7 @@ void EngineeredItem::findMountPoint(const Level *level, const Point &pos)
       setPos(pos);   
       mAnchorNormal.set(1,0);
    }
-   
+
    computeObjectGeometry();      // Fills mCollisionPolyPoints 
    updateExtentInDatabase();
 }
@@ -2423,7 +2426,7 @@ S32 Turret::lua_getPos(lua_State *L)
 TNL_IMPLEMENT_NETOBJECT(Mortar);
 
 
-const F32 Mortar::MORTAR_OFFSET = 35;
+const F32 Mortar::MORTAR_OFFSET = 25;
 
 // Combined Lua / C++ default constructor
 /**
@@ -2597,6 +2600,15 @@ void Mortar::onAddedToGame(Game *game)
 void Mortar::render() const
 {
    renderMortar(getColor(), getPos(), mAnchorNormal, isEnabled(), mHealth, mHealRate);
+
+   glPushMatrix();
+   Point aimCenter = getPos() + mAnchorNormal * Turret::TURRET_OFFSET;
+   glTranslate(aimCenter);
+
+   glRotate(mAnchorNormal.ATAN2() * RADIANS_TO_DEGREES );
+
+   renderPointVector(&mZone, GL_LINE_LOOP);
+   glPopMatrix();
 }
 
 
@@ -2656,10 +2668,7 @@ void Mortar::idle(IdleCallPath path)
    Point aimPos = getPos() + mAnchorNormal * MORTAR_OFFSET;
    Point cross(mAnchorNormal.y, -mAnchorNormal.x);
 
-   Rect queryRect(aimPos, aimPos);
-   queryRect.unionPoint(aimPos + cross * TurretPerceptionDistance);
-   queryRect.unionPoint(aimPos - cross * TurretPerceptionDistance);
-   queryRect.unionPoint(aimPos + mAnchorNormal * TurretPerceptionDistance);
+   Rect queryRect(mZone);
    fillVector.clear();
    findObjects((TestFunc)isTurretTargetType, fillVector, queryRect);    // Get all potential targets
 
@@ -2677,6 +2686,10 @@ void Mortar::idle(IdleCallPath path)
          // Is it dead or cloaked?  Carrying objects makes ship visible, except in nexus game
          if(!potential->isVisible(false) || potential->mHasExploded)
             continue;
+
+         //bool polygonContainsPoint(const Point *vertices, S32 vertexCount, const Point &poin
+         if(!polygonContainsPoint(mZone.address(), mZone.size(), potential->getPos()))
+            continue;
       }
 
       // Don't target mounted items (like resourceItems and flagItems)
@@ -2688,30 +2701,9 @@ void Mortar::idle(IdleCallPath path)
       if(potential->getTeam() == getTeam())     // Is target on our team?
          continue;                              // ...if so, skip it!
 
-      // Calculate where we have to shoot to hit this...
-      Point Vs = potential->getVel();
-      F32 S = (F32)WeaponInfo::getWeaponInfo(mWeaponFireType).projVelocity;
-      Point d = potential->getPos() - aimPos;
-
-// This could possibly be combined with Robot's getFiringSolution, as it's essentially the same thing
-      F32 t;      // t is set in next statement
-      if(!findLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), WeaponInfo::getWeaponInfo(mWeaponFireType).projLiveTime * 0.001f, t))
-         continue;
-
-      Point leadPos = potential->getPos() + Vs * t;
-
-      // Calculate distance
-      delta = (leadPos - aimPos);
-
-      Point angleCheck = delta;
-      angleCheck.normalize();
-
-      // Check that we're facing it...
-      if(angleCheck.dot(mAnchorNormal) <= -0.1f)
-         continue;
-
       // See if we can see it...
       Point n;
+      F32 t;
       if(findObjectLOS((TestFunc)isWallType, ActualState, aimPos, potential->getPos(), t, n))
          continue;
 
@@ -2773,6 +2765,54 @@ bool Mortar::canBeNeutral() { return true; }
 void Mortar::onGeomChanged()
 { 
    Parent::onGeomChanged();
+
+
+
+   Point normal = mAnchorNormal;
+   normal.normalize();
+   Point perpendicular = Point(normal.y, -normal.x);
+   Point offset = normal;
+   offset.normalize(MORTAR_OFFSET + 35);     // 35 determined by trial and error, only coincidentally equal to MORTAR_OFFSET
+
+   Vector<Point> points;
+   F32 size = 400;
+   points.push_back(Point(getPos() + perpendicular * size));
+   points.push_back(Point(getPos() + perpendicular * size + normal * 2 * size));
+   points.push_back(Point(getPos() + perpendicular * -size + normal * 2 * size));
+   points.push_back(Point(getPos() + perpendicular * -size));
+   //points.push_back(Point(getPos() + offset));
+
+
+   F32 radius = WeaponInfo::getWeaponInfo(WeaponSeeker).projVelocity / FloatPi;
+
+   perpendicular.normalize(radius);
+   Point center1 = getPos() + perpendicular + offset;
+   Point center2 = getPos() - perpendicular + offset;
+
+   Vector<Point> circle;
+
+   generatePointsInACurve(0, FloatTau, 10 + 1, radius, circle);   // +1 so we can "close the loop"
+
+
+   Vector<Vector<Point> > p, c, clipped;
+   p.push_back(points);
+
+   for(S32 i = 0; i < circle.size(); i++)
+      circle[i] += center1;
+
+   c.push_back(circle);
+
+   for(S32 i = 0; i < circle.size(); i++)
+      circle[i] += center2 - center1;
+
+   c.push_back(circle);
+
+   clipPolygons(ClipperLib::ctDifference, p, c, clipped, true);
+
+   mZone.clear();
+
+   for(S32 i = 0; i < clipped[0].size(); i++)
+      mZone.push_back(clipped[0][i]);
 }
 
 

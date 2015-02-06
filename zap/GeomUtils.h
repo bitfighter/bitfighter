@@ -148,6 +148,8 @@ bool isWoundClockwise(const Vector<Point> *inputPoly);
 bool triangulatedFillContains(const Vector<Point> *triangulatedFillPoints, const Point &point);
 bool isConvex(const Vector<Point> *verts);
 
+void generatePointsInACurve(F32 startAngle, F32 endAngle, S32 numPoints, F32 radius, Vector<Point> &points);
+
 // scale Geometric points for clipper
 Paths upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons);
 Paths upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons);
