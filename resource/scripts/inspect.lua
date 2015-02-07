@@ -5,7 +5,7 @@
 
 -----------------------------------------------------------------------------------------------------------------------
 -- inspect.lua - v1.1.1 (2011-01)
--- Enrique García Cota - enrique.garcia.cota [AT] gmail [DOT] com
+-- Enrique GarcÃ­a Cota - enrique.garcia.cota [AT] gmail [DOT] com
 -- human-readable representations of tables.
 -- inspired by http://lua-users.org/wiki/TableSerialization
 -- see license info at bottom of file
@@ -225,7 +225,7 @@ return inspect
 
 
 --
--- Copyright (c) 2011, Enrique García Cota
+-- Copyright (c) 2011, Enrique GarcÃ­a Cota
 -- All rights reserved.
 -- 
 -- Redistribution and use in source and binary forms, with or without modification, 
