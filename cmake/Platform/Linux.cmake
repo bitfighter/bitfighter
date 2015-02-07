@@ -6,7 +6,7 @@
 set(BF_LINK_FLAGS "-Wl,--as-needed")
 
 # Only link in what is absolutely necessary
-set(CMAKE_EXE_LINKER_FLAGS ${BF_LINK_FLAGS})
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${BF_LINK_FLAGS}")
 
 # 
 # Compiler specific flags
