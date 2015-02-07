@@ -132,6 +132,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mouseIgnore = false;
 
    clearSnapEnvironment();
+   mCurrentScale = STARTING_SCALE;
 
    mHitItem     = NULL;
    mNewItem     = NULL;
@@ -165,6 +166,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 
    mQuitLocked = false;
    mVertexEditMode = true;
+   mDraggingObjects = false;
 }
 
 
@@ -1411,7 +1413,7 @@ void EditorUserInterface::removeTeam(S32 teamIndex)
 
 Point EditorUserInterface::convertCanvasToLevelCoord(Point p)
 {
-   return (p - mCurrentOffset) * (1 / mCurrentScale);
+   return (p - mCurrentOffset) / mCurrentScale;
 }
 
 
@@ -3011,7 +3013,7 @@ void EditorUserInterface::onMouseMoved()
 
    findHitItemAndEdge();      //  Sets mHitItem, mHitVertex, and mEdgeHit
    findHitItemOnDock();
-
+   
    bool spaceDown = InputCodeManager::getState(KEY_SPACE);
 
    // Highlight currently selected item
@@ -3051,7 +3053,7 @@ void EditorUserInterface::onMouseDragged()
    if(InputCodeManager::getState(MOUSE_RIGHT))
       needToSaveUndoState = false;
 
-   if(mDraggingDockItem != NULL)    // We just started dragging an item off the dock
+   if(mDraggingDockItem.isValid())    // We just started dragging an item off the dock
    {
        startDraggingDockItem();  
        needToSaveUndoState = false;
@@ -3080,6 +3082,7 @@ void EditorUserInterface::onMouseDragged()
 }
 
 
+// onStartDragging
 void EditorUserInterface::onMouseDragged_StartDragging(const bool needToSaveUndoState)
 {
    if(needToSaveUndoState)
@@ -3285,7 +3288,7 @@ void EditorUserInterface::findSnapVertex()
    Point mouseLevelCoord = convertCanvasToLevelCoord(mMousePos);
 
    // If we have a hit item, and it's selected, find the closest vertex in the item
-   if(mHitItem && mHitItem->isSelected())   
+   if(mHitItem.isValid() && mHitItem->isSelected())   
    {
       // If we've hit an edge, restrict our search to the two verts that make up that edge
       if(mEdgeHit != NONE)
@@ -3316,6 +3319,7 @@ void EditorUserInterface::findSnapVertex()
             mSnapVertexIndex = j;
          }
       }
+      
       return;
    } 
 
@@ -3328,12 +3332,13 @@ void EditorUserInterface::findSnapVertex()
 
       for(S32 j = 0; j < obj->getVertCount(); j++)
       {
-         // If we find a selected vertex, there will be only one, and this is our snap point
-         if(obj->vertSelected(j))
+         F32 dist = obj->getVert(j).distSquared(mouseLevelCoord);
+
+         if(obj->vertSelected(j) && dist < closestDist)
          {
+            closestDist = dist;
             mSnapObject = obj;
             mSnapVertexIndex = j;
-            return;     
          }
       }
    }
