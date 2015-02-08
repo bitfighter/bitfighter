@@ -4419,6 +4419,10 @@ void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType
    if(!anyItemsSelected(getDatabase()))
       return;
 
+   // Are items being dragged?  If so, abort!
+   if(mDraggingObjects)
+      return;
+
    string menuTitle = "Some Interesting Title";
    string menuItemTitle = "Another Interesting Title";
    string lineValue = "";
