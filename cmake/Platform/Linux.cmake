@@ -80,6 +80,8 @@ endfunction()
 
 
 function(BF_PLATFORM_INSTALL targetName)
+	set(LINUX_PKG_RESOURCE_DIR "${CMAKE_SOURCE_DIR}/packaging/linux/")
+	
 	# Binaries
 	install(TARGETS ${targetName} RUNTIME DESTINATION bin)
 	
@@ -88,11 +90,11 @@ function(BF_PLATFORM_INSTALL targetName)
 	install(PROGRAMS ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py DESTINATION bin)
 	
 	# Install desktop files
-	install(FILES ${CMAKE_SOURCE_DIR}/debian/bitfighter.desktop DESTINATION ${CMAKE_DATA_PATH}/applications/)
-	install(FILES ${CMAKE_SOURCE_DIR}/debian/bitfighter.png DESTINATION ${CMAKE_DATA_PATH}/pixmaps/)
+	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.desktop DESTINATION ${CMAKE_DATA_PATH}/applications/)
+	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.png DESTINATION ${CMAKE_DATA_PATH}/pixmaps/)
 	
 	# Manpage
-	install(FILES ${CMAKE_SOURCE_DIR}/debian/bitfighter.1 DESTINATION ${CMAKE_DATA_PATH}/man/man1/)
+	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.1 DESTINATION ${CMAKE_DATA_PATH}/man/man1/)
 	
 	# Resources
 	install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource/ DESTINATION ${CMAKE_DATA_PATH}/bitfighter/)
