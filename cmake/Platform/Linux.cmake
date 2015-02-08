@@ -25,6 +25,15 @@ message(STATUS "CMAKE_DATA_PATH: ${CMAKE_DATA_PATH}.  Change this by invoking cm
 # Quotes need to be a part of the definition or the compiler won't understand
 add_definitions(-DLINUX_DATA_DIR="${CMAKE_DATA_PATH}")
 
+# Allow setting of other Linux paths for various resources
+if(NOT CMAKE_DESKTOP_DATA_PATH)
+	set(CMAKE_DESKTOP_DATA_PATH "/usr/share")
+endif()
+
+if(NOT CMAKE_MAN_PATH)
+	set(CMAKE_MAN_PATH "${CMAKE_DATA_PATH}/man/man1")
+endif()
+
 
 #
 # Library searching and dependencies
@@ -90,11 +99,11 @@ function(BF_PLATFORM_INSTALL targetName)
 	install(PROGRAMS ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py DESTINATION bin)
 	
 	# Install desktop files
-	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.desktop DESTINATION ${CMAKE_DATA_PATH}/applications/)
-	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.png DESTINATION ${CMAKE_DATA_PATH}/pixmaps/)
+	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.desktop DESTINATION ${CMAKE_DESKTOP_DATA_PATH}/applications/)
+	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.png DESTINATION ${CMAKE_DESKTOP_DATA_PATH}/pixmaps/)
 	
 	# Manpage
-	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.1 DESTINATION ${CMAKE_DATA_PATH}/man/man1/)
+	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.1 DESTINATION ${CMAKE_MAN_PATH}/man/man1/)
 	
 	# Resources
 	install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource/ DESTINATION ${CMAKE_DATA_PATH}/bitfighter/)
