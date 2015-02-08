@@ -4396,9 +4396,6 @@ void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType
    LineEditorFilter filter = numericFilter;
    void(*callback)(TextEntryMenuItem *, const string &, BfObject *) = NULL;  // Our input callback; triggers on input change
 
-   static U32 inputLength = 9;   // Less than S32_MAX
-
-
    // Find first selected item, and work with that
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
@@ -4466,7 +4463,7 @@ void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType
    }
 
    // Create our menu item
-   SimpleTextEntryMenuItem *menuItem = new SimpleTextEntryMenuItem(menuItemTitle, inputLength, simpleTextEntryMenuCallback);
+   SimpleTextEntryMenuItem *menuItem = new SimpleTextEntryMenuItem(menuItemTitle, U32_MAX_DIGITS, simpleTextEntryMenuCallback);
    menuItem->getLineEditor()->setFilter(filter);
 
    if(lineValue != "")   // This object has an ID already
