@@ -1,3 +1,6 @@
+
+option(INSTALL_NOTIFIER "Install the bitfighter notifier" YES)
+
 ## Global project configuration
 
 #
@@ -93,10 +96,12 @@ function(BF_PLATFORM_INSTALL targetName)
 	
 	# Binaries
 	install(TARGETS ${targetName} RUNTIME DESTINATION bin)
-	
-	# Modify python script to have the shebang
-	install(CODE "execute_process(COMMAND sed -i -e \"1s@^@#!/usr/bin/env python\\\\n\\\\n@\" ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py)")
-	install(PROGRAMS ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py DESTINATION bin)
+
+	if(INSTALL_NOTIFIER)
+		# Modify python script to have the shebang
+		install(CODE "execute_process(COMMAND sed -i -e \"1s@^@#!/usr/bin/env python\\\\n\\\\n@\" ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py)")
+		install(PROGRAMS ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py DESTINATION bin)
+	endif()
 	
 	# Install desktop files
 	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.desktop DESTINATION ${CMAKE_DESKTOP_DATA_PATH}/applications/)
