@@ -1185,6 +1185,7 @@ void EditorUserInterface::onActivate()
    mPreviewMode = false;
    mDragCopying = false;
    mJustInsertedVertex = false;
+   mShowAllIds = false;
 
    VideoSystem::actualizeScreenMode(mGameSettings, true, usesEditorScreenMode());
 
@@ -1881,6 +1882,7 @@ static F32 getRenderingAlpha(bool isScriptItem)
 }
 
 
+// Master render function
 void EditorUserInterface::render() const
 {
    GridDatabase *editorDb = getLevel();
@@ -1943,14 +1945,18 @@ void EditorUserInterface::render() const
          }
       }
 
-      // Render our snap vertex as a hollow magenta box...
-      if(mVertexEditMode &&                                                                                 // Must be in vertex-edit mode
-            !mPreviewMode && mSnapObject && mSnapObject->isSelected() && mSnapVertexIndex != NONE &&        // ...but not in preview mode...
-            mSnapObject->getGeomType() != geomPoint &&                                                      // ...and not on point objects...
-            !mSnapObject->isVertexLitUp(mSnapVertexIndex) && !mSnapObject->vertSelected(mSnapVertexIndex))  // ...or selected vertices
+      // Render our snap vertex as a hollow magenta box
+      if(mVertexEditMode &&                                                                           // Must be in vertex-edit mode
+            !mPreviewMode && mSnapObject && mSnapObject->isSelected() && mSnapVertexIndex != NONE &&  // ...but not in preview mode...
+            mSnapObject->getGeomType() != geomPoint &&                                                // ...and not on point objects...
+            !mSnapObject->isVertexLitUp(mSnapVertexIndex) &&                                          // ...or lit-up vertices...
+            !mSnapObject->vertSelected(mSnapVertexIndex))                                             // ...or selected vertices
       {
          renderVertex(SnappingVertex, mSnapObject->getVert(mSnapVertexIndex), NO_NUMBER, mCurrentScale/*, alpha*/);  
       }
+
+      if(mShowAllIds)
+         renderObjectIds(editorDb);
 
    glPopMatrix();
 
@@ -1987,6 +1993,21 @@ void EditorUserInterface::render() const
    }
 
    renderConsole();        // Rendered last, so it's always on top
+}
+
+
+void EditorUserInterface::renderObjectIds(GridDatabase *database) const
+{
+   const Vector<DatabaseObject *> *objList = database->findObjects_fast();
+
+   Point offset(50, 30);
+
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(objList->get(i));
+      if(obj->getUserAssignedId() > 0)
+         renderNumberInBox(obj->getCentroid(), obj->getUserAssignedId(), mCurrentScale);
+   }
 }
 
 
@@ -3978,6 +3999,8 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    }
    else if(inputString == "Shift+1" || inputString == "Shift+3")  // '!' or '#'
       startSimpleTextEntryMenu(SimpleTextEntryID);
+   else if(inputString == "Ctrl+Shift+3")    // i.e. ctrl-#
+      mShowAllIds = !mShowAllIds;
    else if(inputString == getEditorBindingString(BINDING_ROTATE_CENTROID))    // Spin by arbitrary amount
    {
       if(canRotate())
@@ -4426,14 +4449,10 @@ void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType
          callback = idEntryCallback;
 
          // We need to assure that we only assign an ID to ONE object
-         const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
-
          // Unselect all objects but our first selected one
          for(S32 i = 0; i < objList->size(); i++)
-         {
             if(i != selectedIndex)
                static_cast<BfObject *>(objList->get(i))->setSelected(false);
-         }
 
          onSelectionChanged();
 

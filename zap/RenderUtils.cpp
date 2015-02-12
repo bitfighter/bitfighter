@@ -8,10 +8,10 @@
 #include "UI.h"
 #include "DisplayManager.h"
 
+#include "Colors.h"
+#include "FontManager.h"
 #include "MathUtils.h"     // For MIN/MAX def
 #include "OpenglUtils.h"
-#include "FontManager.h"
-#include "Colors.h"
 #include "stringUtils.h"
 
 #include <stdarg.h>        // For va_args
@@ -278,6 +278,14 @@ S32 drawCenteredString(S32 x, S32 y, S32 size, const char *string)
 S32 drawCenteredString_fixed(S32 x, S32 y, S32 size, const char *string)
 {
    S32 xpos = x - getStringWidth(size, string) / 2;
+   drawString_fixed(xpos, y, size, string);
+   return xpos;
+}
+
+
+F32 drawCenteredString_fixed(F32 x, F32 y, S32 size, const char *string)
+{
+   F32 xpos = x - getStringWidth((F32)size, string) / 2;
    drawString_fixed(xpos, y, size, string);
    return xpos;
 }
@@ -731,6 +739,25 @@ void renderRightArrow(const Point &center, S32 size)
                     };
 
    renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+}
+
+
+void renderNumberInBox(const Point pos, S32 number, F32 scale)
+{
+   glColor(Colors::magenta);
+   string numberStr = itos(number);
+   F32 height = 13.0f;
+   F32 halfHeight = height / 2;
+   F32 padding = 4.0f;
+   
+   F32 len = getStringWidth(height, numberStr);
+
+   glColor(Colors::white, 0.75f);
+   drawFilledRect(pos.x - len / 2 - padding, pos.y + halfHeight + padding,
+                  pos.x + len / 2 + padding, pos.y - halfHeight - padding * 0.5); // 0.5 compensates for weird font spacing 
+
+   glColor(Colors::black);
+   drawCenteredString_fixed(pos.x, pos.y + halfHeight, height, FontContext::HelpContext, numberStr.c_str());
 }
 
 

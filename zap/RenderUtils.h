@@ -10,10 +10,10 @@
 #  error "RenderUtils.h shouldn't be included in dedicated build"
 #endif
 
-#include "Point.h"
 #include "Color.h"
-#include "FontContextEnum.h"
 #include "DisplayManager.h"
+#include "FontContextEnum.h"
+#include "Point.h"
 
 #include "tnlTypes.h"
 #include "tnlVector.h"
@@ -72,11 +72,12 @@ void drawFancyBox(T xLeft, U yTop, V xRight, W yBottom, X cornerInset, S32 mode)
 void drawHollowFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset);
 void drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, const Color &fillColor, F32 fillAlpha, const Color &borderColor);
 
-
 void renderUpArrow(const Point &center, S32 size);
 void renderDownArrow(const Point &center, S32 size);
 void renderLeftArrow(const Point &center, S32 size);
 void renderRightArrow(const Point &center, S32 size);
+
+void renderNumberInBox(const Point pos, S32 number, F32 scale);
 
 
 // Draw string at given location (normal and formatted versions)
@@ -125,7 +126,8 @@ void drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offset, const char *
 S32 drawCenteredString_fixed(S32 y, S32 size, const char *str);
 S32 drawCenteredString(S32 x, S32 y, S32 size, const char *str);
 S32 drawCenteredString_fixed(S32 x, S32 y, S32 size, const char *str);
-S32 drawCenteredString_fixed(F32 x, F32 y, S32 size, FontContext fontContext, const char *string);
+S32 drawCenteredString_fixed(F32 x, F32 y, S32 size, FontContext fontContext, const char *str);
+F32 drawCenteredString_fixed(F32 x, F32 y, S32 size, const char *str);
 
 F32 drawCenteredString(F32 x, F32 y, S32 size, const char *str);
 F32 drawCenteredString(F32 x, F32 y, F32 size, const char *str);
