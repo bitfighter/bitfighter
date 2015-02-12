@@ -122,7 +122,7 @@ enum InputCode {
 
    // Keep these together for isAltKey() -- KEY_ALT_1 and KEY_ALT_9 are markers for bounds of alt keys
    KEY_ALT_1, KEY_ALT_2, KEY_ALT_3, KEY_ALT_9,
-   
+
    KEY_COUNT,
    KEY_UNKNOWN, KEY_NONE,
    BUTTON_UNKNOWN

@@ -2075,7 +2075,11 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(KEY_QUOTE)]           = "'";                
    keyNames[S32(KEY_COMMA)]           = ",";                
    keyNames[S32(KEY_PERIOD)]          = ".";                
-   keyNames[S32(KEY_SLASH)]           = "/";       // last keyboardchar              
+   keyNames[S32(KEY_SLASH)]           = "/";       // last keyboardchar   
+
+   keyNames[S32(KEY_EXCLAIM)]         = "!";
+   keyNames[S32(KEY_HASH)]            = "#";
+
    keyNames[S32(KEY_PAGEUP)]          = "Page Up";          
    keyNames[S32(KEY_PAGEDOWN)]        = "Page Down";        
    keyNames[S32(KEY_END)]             = "End";              

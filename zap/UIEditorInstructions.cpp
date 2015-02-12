@@ -139,8 +139,8 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
    ControlStringsEditor controls2Right[] = {
       { "HEADER", "Object IDs" },
-      { "Edit Object ID",            "[[Shift+3]] or [[Shift+1]]" },
-      { "Toggle display of all IDs", "[[Ctrl+Shift+3]]" }
+      { "Edit Object ID",            "[[#]] or [[!]]" },
+      { "Toggle display of all IDs", "[[Ctrl+#]]" }
    };
 
 
