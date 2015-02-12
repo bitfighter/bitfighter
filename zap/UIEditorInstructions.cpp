@@ -137,11 +137,20 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    };
 
 
+   ControlStringsEditor controls2Right[] = {
+      { "HEADER", "Object IDs" },
+      { "Edit Object ID",            "[[Shift+3]] or [[Shift+1]]" },
+      { "Toggle display of all IDs", "[[Ctrl+Shift+3]]" }
+   };
+
+
+
    pack(keysInstrLeft1,  keysBindingsLeft1, controls1Left, ARRAYSIZE(controls1Left));
 
    pack(keysInstrRight1, keysBindingsRight1, controls1Right, ARRAYSIZE(controls1Right));
 
-   pack(keysInstrLeft2,  keysBindingsLeft2, controls2Left, ARRAYSIZE(controls2Left));
+   pack(keysInstrLeft2,  keysBindingsLeft2,  controls2Left,  ARRAYSIZE(controls2Left));
+   pack(keysInstrRight2, keysBindingsRight2, controls2Right, ARRAYSIZE(controls2Right));
 
 
    S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
