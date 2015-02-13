@@ -2375,8 +2375,7 @@ void EditorUserInterface::pasteSelection()
    Point firstPoint = mClipboard[0]->getVert(0);
 
    Point offsetFromFirstPoint;
-   Vector<DatabaseObject *> copiedObjects(objCount);
-   Vector<BfObject *> copiedBfObjects(objCount);
+   Vector<BfObject *> copiedObjects(objCount);     // Reserve some space
 
    mUndoManager.startTransaction();
 
@@ -2389,7 +2388,6 @@ void EditorUserInterface::pasteSelection()
       geomChanged(newObject);
 
       copiedObjects.push_back(newObject);
-      copiedBfObjects.push_back(newObject);
 
       mUndoManager.saveAction(ActionCreate, newObject);
    }
@@ -2398,12 +2396,12 @@ void EditorUserInterface::pasteSelection()
 
    getLevel()->addToDatabase(copiedObjects);
 
-   for(S32 i = 0; i < copiedObjects.size(); i++)   
-      static_cast<BfObject *>(copiedObjects[i])->onAddedToEditor();
+   for(S32 i = 0; i < copiedObjects.size(); i++)
+      copiedObjects[i]->onAddedToEditor();
 
    getLevel()->snapAllEngineeredItems(false);  // True would work?
 
-   doneAddingObjects(copiedBfObjects);
+   doneAddingObjects(copiedObjects);
    
    autoSave();
 }

@@ -21,6 +21,7 @@ namespace Zap
 {
 
 typedef bool (*TestFunc)(U8);
+class BfObject;
 
 // Interface for dealing with objects that can be in our spatial database.
 class GridDatabase;
@@ -180,6 +181,7 @@ public:
 
    void addToDatabase(DatabaseObject *databaseObject);
    void addToDatabase(const Vector<DatabaseObject *> &objects);
+   void addToDatabase(const Vector<BfObject *> &objects);
 
 
    void removeFromDatabase(DatabaseObject *theObject, bool deleteObject);

@@ -161,6 +161,15 @@ void GridDatabase::addToDatabase(const Vector<DatabaseObject *> &objects)
 }
 
 
+// Bulk add items to database -- different sig (could probably be handled with a template!)
+void GridDatabase::addToDatabase(const Vector<BfObject *> &objects)
+{
+   for(S32 i = 0; i < objects.size(); i++)
+      addToDatabase(objects[i]);
+}
+
+
+
 // Removes and deletes all objects in database
 void GridDatabase::removeEverythingFromDatabase()
 {
