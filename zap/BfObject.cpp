@@ -417,7 +417,7 @@ BfObject::BfObject()
    mObjectTypeNumber = UnknownTypeNumber;
 
    assignNewSerialNumber();
-   mUserAssignedId = getNextDefaultId();
+   assignNewUserAssignedId();
 
    mTeam = -1;
    mDisableCollisionCount = 0;
@@ -442,6 +442,12 @@ BfObject::~BfObject()
    removeFromDatabase(false);
    mGame = NULL;
    LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void BfObject::assignNewUserAssignedId()
+{
+   setUserAssignedId(getNextDefaultId(), false);
 }
 
 
@@ -750,7 +756,8 @@ BfObject *BfObject::newCopy()
    BfObject *newObject = copy();
    newObject->mGame = NULL;
 
-   newObject->assignNewSerialNumber();    // Give this object an identity of its own
+   newObject->assignNewSerialNumber();                      // Give this object an identity of its own
+   newObject->assignNewUserAssignedId(); // Make sure we don't end up with duplicate IDs!
 
    return newObject;
 }
