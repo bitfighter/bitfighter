@@ -632,6 +632,8 @@ BfObject *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *gameObjec
    BfObject *closestWall = static_cast<BfObject *>(
          findClosestWall(gameObjectDatabase, anchor, snapDist, excludedWallList, format, dummy, normal));
 
+   TNLAssert(closestWall, "Should have found something here!");
+
    // If closestWall is a polywall, and if it is wound CW, need to reverse the normal point
    if(closestWall->getObjectTypeNumber() == PolyWallTypeNumber)
    { 
@@ -640,8 +642,6 @@ BfObject *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *gameObjec
       if(isWoundClockwise(polywall->getCollisionPoly()))
          normal *= -1;
    }
-
-   TNLAssert(closestWall, "Should have found something here!");
 
    return closestWall;
 }
