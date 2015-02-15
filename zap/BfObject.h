@@ -259,6 +259,7 @@ public:
 
    void deleteObject(U32 deleteTimeInterval = 0);
    
+   void assignNewUserAssignedId();
    void setUserAssignedId(S32 id, bool permitZero);
    S32 getUserAssignedId();
 
