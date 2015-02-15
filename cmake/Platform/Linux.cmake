@@ -1,3 +1,6 @@
+
+option(INSTALL_NOTIFIER "Install the bitfighter notifier" YES)
+
 ## Global project configuration
 
 #
@@ -6,7 +9,7 @@
 set(BF_LINK_FLAGS "-Wl,--as-needed")
 
 # Only link in what is absolutely necessary
-set(CMAKE_EXE_LINKER_FLAGS ${BF_LINK_FLAGS})
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${BF_LINK_FLAGS}")
 
 # 
 # Compiler specific flags
@@ -24,6 +27,15 @@ message(STATUS "CMAKE_DATA_PATH: ${CMAKE_DATA_PATH}.  Change this by invoking cm
 
 # Quotes need to be a part of the definition or the compiler won't understand
 add_definitions(-DLINUX_DATA_DIR="${CMAKE_DATA_PATH}")
+
+# Allow setting of other Linux paths for various resources
+if(NOT CMAKE_DESKTOP_DATA_PATH)
+	set(CMAKE_DESKTOP_DATA_PATH "/usr/share")
+endif()
+
+if(NOT CMAKE_MAN_PATH)
+	set(CMAKE_MAN_PATH "${CMAKE_DATA_PATH}/man/man1")
+endif()
 
 
 #
@@ -80,19 +92,23 @@ endfunction()
 
 
 function(BF_PLATFORM_INSTALL targetName)
+	set(LINUX_PKG_RESOURCE_DIR "${CMAKE_SOURCE_DIR}/packaging/linux/")
+	
 	# Binaries
 	install(TARGETS ${targetName} RUNTIME DESTINATION bin)
-	
-	# Modify python script to have the shebang
-	install(CODE "execute_process(COMMAND sed -i -e \"1s@^@#!/usr/bin/env python\\\\n\\\\n@\" ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py)")
-	install(PROGRAMS ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py DESTINATION bin)
+
+	if(INSTALL_NOTIFIER)
+		# Modify python script to have the shebang
+		install(CODE "execute_process(COMMAND sed -i -e \"1s@^@#!/usr/bin/env python\\\\n\\\\n@\" ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py)")
+		install(PROGRAMS ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py DESTINATION bin)
+	endif()
 	
 	# Install desktop files
-	install(FILES ${CMAKE_SOURCE_DIR}/debian/bitfighter.desktop DESTINATION ${CMAKE_DATA_PATH}/applications/)
-	install(FILES ${CMAKE_SOURCE_DIR}/debian/bitfighter.png DESTINATION ${CMAKE_DATA_PATH}/pixmaps/)
+	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.desktop DESTINATION ${CMAKE_DESKTOP_DATA_PATH}/applications/)
+	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.png DESTINATION ${CMAKE_DESKTOP_DATA_PATH}/pixmaps/)
 	
 	# Manpage
-	install(FILES ${CMAKE_SOURCE_DIR}/debian/bitfighter.1 DESTINATION ${CMAKE_DATA_PATH}/man/man1/)
+	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.1 DESTINATION ${CMAKE_MAN_PATH}/man/man1/)
 	
 	# Resources
 	install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource/ DESTINATION ${CMAKE_DATA_PATH}/bitfighter/)
