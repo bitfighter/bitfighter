@@ -93,8 +93,8 @@ public:
    S32 getHealRate() const;
 
    void damageObject(DamageInfo *damageInfo);
-   void checkHealthBounds();
    bool collide(BfObject *hitObject);
+   void setHealth(F32 health);
    F32 getHealth() const;
    void healObject(S32 time);
    void mountToWall(const Point &pos, const GridDatabase *gameObjectDatabase, const GridDatabase *wallEdgeDatabase);

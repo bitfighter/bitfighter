@@ -38,11 +38,13 @@ bool isEngineeredType(U8 x)
          x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber || x == MortarTypeNumber;
 }
 
+
 bool isShipType(U8 x)
 {
    return
          x == PlayerShipTypeNumber || x == RobotShipTypeNumber;
 }
+
 
 bool isProjectileType(U8 x)
 {
@@ -51,11 +53,13 @@ bool isProjectileType(U8 x)
          x == BurstTypeNumber || x == SeekerTypeNumber;
 }
 
+
 bool isGrenadeType(U8 x)
 {
    return
          x == MineTypeNumber || x == SpyBugTypeNumber || x == BurstTypeNumber;
 }
+
 
 // Ship::findRepairTargets uses this and expects everything to be a sub-class of Item (except for teleporter)
 // This is used to determine if bursts should explode on impact or not.
@@ -64,8 +68,10 @@ bool isWithHealthType(U8 x)
    return
          x == PlayerShipTypeNumber || x == RobotShipTypeNumber           ||
          x == TurretTypeNumber     || x == ForceFieldProjectorTypeNumber ||
-         x == CoreTypeNumber       || x == TeleporterTypeNumber;
+         x == CoreTypeNumber       || x == TeleporterTypeNumber          ||
+         x == MortarTypeNumber;
 }
+
 
 bool isForceFieldDeactivatingType(U8 x)
 {
@@ -78,6 +84,7 @@ bool isForceFieldDeactivatingType(U8 x)
          x == AsteroidTypeNumber;
 }
 
+
 bool isRadiusDamageAffectableType(U8 x)
 {
    return
@@ -86,7 +93,7 @@ bool isRadiusDamageAffectableType(U8 x)
          x == ResourceItemTypeNumber || x == TestItemTypeNumber            || x == AsteroidTypeNumber   ||
          x == TurretTypeNumber       || x == ForceFieldProjectorTypeNumber || x == CoreTypeNumber       ||
          x == FlagTypeNumber         || x == SoccerBallItemTypeNumber      || x == TeleporterTypeNumber ||
-         x == SeekerTypeNumber;
+         x == SeekerTypeNumber       || x == MortarTypeNumber;
 }
 
 
@@ -112,7 +119,8 @@ bool isCollideableType(U8 x)
    return
          x == BarrierTypeNumber || x == PolyWallTypeNumber   ||
          x == TurretTypeNumber  || x == ForceFieldTypeNumber ||
-         x == CoreTypeNumber    || x == ForceFieldProjectorTypeNumber;
+         x == CoreTypeNumber    || x == ForceFieldProjectorTypeNumber ||
+         x == MortarTypeNumber;
 }
 
 
@@ -161,7 +169,7 @@ bool isWeaponCollideableType(U8 x)
          x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == ResourceItemTypeNumber        ||
          x == TurretTypeNumber     || x == CoreTypeNumber           || x == BarrierTypeNumber             ||
          x == PolyWallTypeNumber   || x == ForceFieldTypeNumber     || x == TeleporterTypeNumber          ||
-         x == SeekerTypeNumber;
+         x == SeekerTypeNumber     || x == MortarTypeNumber;
 }
 
 bool isAsteroidCollideableType(U8 x)
@@ -171,7 +179,8 @@ bool isAsteroidCollideableType(U8 x)
          x == TestItemTypeNumber   || x == ResourceItemTypeNumber        ||
          x == TurretTypeNumber     || x == ForceFieldProjectorTypeNumber ||
          x == BarrierTypeNumber    || x == PolyWallTypeNumber            ||
-         x == ForceFieldTypeNumber || x == CoreTypeNumber;
+         x == ForceFieldTypeNumber || x == CoreTypeNumber                ||
+         x == MortarTypeNumber;
 }
 
 bool isFlagCollideableType(U8 x)
@@ -197,7 +206,7 @@ bool isVisibleOnCmdrsMapType(U8 x)
          x == GoalZoneTypeNumber   || x == NexusTypeNumber          || x == LoadoutZoneTypeNumber         || 
          x == SpeedZoneTypeNumber  || x == TeleporterTypeNumber     || x == SlipZoneTypeNumber            ||
          x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == ResourceItemTypeNumber        ||
-         x == EnergyItemTypeNumber || x == RepairItemTypeNumber; 
+         x == EnergyItemTypeNumber || x == RepairItemTypeNumber     || x == MortarTypeNumber; 
 }
 
 bool isVisibleOnCmdrsMapWithSensorType(U8 x)     // Weapons visible on commander's map for sensor
@@ -211,7 +220,8 @@ bool isVisibleOnCmdrsMapWithSensorType(U8 x)     // Weapons visible on commander
          x == SpeedZoneTypeNumber  || x == TeleporterTypeNumber     || x == BurstTypeNumber               ||
          x == LineTypeNumber       || x == TextItemTypeNumber       || x == RepairItemTypeNumber          ||
          x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == EnergyItemTypeNumber          ||
-         x == BulletTypeNumber     || x == MineTypeNumber           || x == SeekerTypeNumber;
+         x == BulletTypeNumber     || x == MineTypeNumber           || x == SeekerTypeNumber              ||
+         x == MortarTypeNumber;
 }
 
 

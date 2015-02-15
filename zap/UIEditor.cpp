@@ -824,6 +824,16 @@ static bool hasTeamFlags(GridDatabase *database)
 }
 
 
+static void setTeam(BfObject *obj, S32 team)
+{
+   obj->setTeam(team);
+
+   // Set default health based on team for display purposes
+   if(isEngineeredType(obj->getObjectTypeNumber()))
+      static_cast<EngineeredItem *>(obj)->setHealth((team == TEAM_NEUTRAL) ? 0 : 1);
+}
+
+
 static bool hasTeamSpawns(GridDatabase *database)
 {
    fillVector.clear();
@@ -956,11 +966,11 @@ void EditorUserInterface::validateTeams(const Vector<DatabaseObject *> *dbObject
          continue;      // This one too
 
       if(obj->hasTeam())
-         obj->setTeam(0);               // We know there's at least one team, so there will always be a team 0
+         setTeam(obj, 0);              // We know there's at least one team, so there will always be a team 0
       else if(obj->canBeHostile() && !obj->canBeNeutral())
-         obj->setTeam(TEAM_HOSTILE); 
+         setTeam(obj, TEAM_HOSTILE); 
       else
-         obj->setTeam(TEAM_NEUTRAL);    // We won't consider the case where hasTeam == canBeNeutral == canBeHostile == false
+         setTeam(obj, TEAM_NEUTRAL);   // We won't consider the case where hasTeam == canBeNeutral == canBeHostile == false
    }
 }
 
@@ -2498,7 +2508,7 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
       if(currentTeam == TEAM_HOSTILE && !bfObject->canBeHostile())
          continue;
 
-      bfObject->setTeam(currentTeam);
+      setTeam(bfObject, currentTeam);
    }
 
 
@@ -2523,7 +2533,7 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
          if(currentTeam == TEAM_HOSTILE && !obj->canBeHostile())
             continue;
 
-         obj->setTeam(currentTeam);
+         setTeam(obj, currentTeam);
 
          mUndoManager.saveChangeAction_after(obj);
 
@@ -4256,7 +4266,7 @@ void EditorUserInterface::onMouseClicked_right()
       }
 
       mNewItem->initializeEditor();
-      mNewItem->setTeam(mCurrentTeam);
+      setTeam(mNewItem, mCurrentTeam);
       mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
    }
 }
@@ -4908,7 +4918,8 @@ void EditorUserInterface::setWarnMessage(const string &msg1, const string &msg2)
 
 void EditorUserInterface::clearWarnMessage()
 {
-   mWarnMsgTimer.reset(WARN_MESSAGE_FADE_TIME);
+   if(mWarnMsgTimer.getCurrent() > WARN_MESSAGE_FADE_TIME)
+      mWarnMsgTimer.reset(WARN_MESSAGE_FADE_TIME);
 }
 
 

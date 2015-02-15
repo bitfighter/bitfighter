@@ -706,11 +706,9 @@ void EngineeredItem::damageObject(DamageInfo *di)
    F32 prevHealth = mHealth;
 
    if(di->damageAmount > 0)
-      mHealth -= di->damageAmount * DamageReductionFactor;
+      setHealth(mHealth - di->damageAmount * DamageReductionFactor);
    else
-      mHealth -= di->damageAmount;
-
-   checkHealthBounds();
+      setHealth(mHealth - di->damageAmount);
 
    mHealTimer.reset();     // Restart healing timer...
 
@@ -773,18 +771,15 @@ void EngineeredItem::damageObject(DamageInfo *di)
 }
 
 
-void EngineeredItem::checkHealthBounds()
-{
-   if(mHealth < 0)
-      mHealth = 0;
-   else if(mHealth > 1)
-      mHealth = 1;
-}
-
-
 bool EngineeredItem::collide(BfObject *hitObject)
 {
    return true;
+}
+
+
+void EngineeredItem::setHealth(F32 health)
+{
+   mHealth = CLAMP(health, 0, 1);
 }
 
 
@@ -1234,8 +1229,9 @@ S32 EngineeredItem::lua_getHealth(lua_State *L)
 S32 EngineeredItem::lua_setHealth(lua_State *L)
 { 
    checkArgList(L, functionArgs, "EngineeredItem", "setHealth");
-   F32 newHealth = getFloat(L, 1);
-   checkHealthBounds();
+   F32 flt = getFloat(L, 1);
+   F32 newHealth = CLAMP(flt, 0, 1);
+
 
    // Just 'damage' the engineered item to take care of all of the disabling/mask/etc.
    DamageInfo di;
@@ -1594,7 +1590,7 @@ void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCorn
       Point forceFieldStart = getForceFieldStartPoint(getPos(), mAnchorNormal, scaleFact);
 
       renderForceFieldProjector(&mCollisionPolyPoints, getPos(), color, true, mHealRate);
-      //renderForceField(forceFieldStart, mField->getVert(1), color, true, scaleFact);
+
       if(mField)
          mField->render(color);
    }
@@ -2137,13 +2133,10 @@ void Turret::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, b
 {
    if(mSnapped)
    {
-      // We render the turret with/without health if it is neutral or not (as it
-      // starts in the game)
-      S32 team = getTeam();
-      bool enabled = team != TEAM_NEUTRAL;
-      F32 health = team == TEAM_NEUTRAL ? 0.0f : 1.0f;
+      // We render the turret with/without health if it is neutral or not (as it starts in the game)
+      bool enabled = getTeam() != TEAM_NEUTRAL;
 
-      renderTurret(getColor(), getPos(), mAnchorNormal, enabled, health, mCurrentAngle, mHealRate);
+      renderTurret(getColor(), getPos(), mAnchorNormal, enabled, mHealth, mCurrentAngle, mHealRate);
    }
    else
       renderDock(getColor());
@@ -2619,13 +2612,10 @@ void Mortar::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, b
 {
    if(mSnapped)
    {
-      // We render the Mortar with/without health if it is neutral or not (as it
-      // starts in the game)
-      S32 team = getTeam();
-      bool enabled = team != TEAM_NEUTRAL;
-      F32 health = team == TEAM_NEUTRAL ? 0.0f : 1.0f;
+      // We render the Mortar with/without health if it is neutral or not (as it starts in the game)
+      bool enabled = getTeam() != TEAM_NEUTRAL;
 
-      renderMortar(getColor(), getPos(), mAnchorNormal, enabled, health, mHealRate);
+      renderMortar(getColor(), getPos(), mAnchorNormal, enabled, mHealth, mHealRate);
    }
    else
       renderDock(getColor());
