@@ -542,7 +542,6 @@ static const char *moduleDescriptions[][2] = {
    { "Boost: ",    "Turbo (A), Pulse (K)" },
    { "Shield: ",   "Reflects incoming projectiles (A)" },
    { "Armor: ",    "Reduces damage, makes ship harder to control (P)" },
-   { "",           "Incoming bouncers do more damage" },
    { "Repair: ",   "Repair self and nearby damaged objects (A)" },
    { "Sensor: ",   "See further and reveal hidden objects (P)" },
    { "",           "Deploy spy bugs (A)" },
@@ -628,9 +627,7 @@ void InstructionsUserInterface::renderModulesPage() const
             renderShip(ShipShape::Normal, Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, true);
             break;
 
-         // skip 3 for 2nd line of armor
-
-         case 4:     // Repair
+         case 3:     // Repair
             {
                F32 health = (Platform::getRealMilliseconds() & 0x7FF) * 0.0005f;
 
@@ -639,14 +636,14 @@ void InstructionsUserInterface::renderModulesPage() const
             }
             break;
 
-         case 5:     // Sensor
+         case 4:     // Sensor
             renderShip(ShipShape::Normal, Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, Platform::getRealMilliseconds(), 
                        false, true, false, false);
             break;
 
-         // skip 6 for 2nd line of sensor
+         // skip 5 for 2nd line of sensor
 
-         case 7:     // Cloak
+         case 6:     // Cloak
             {
                U32 time = Platform::getRealMilliseconds();
                F32 frac = F32(time & 0x3FF);
@@ -659,7 +656,7 @@ void InstructionsUserInterface::renderModulesPage() const
             }
             break;
 
-         case 8:     // Engineer
+         case 7:     // Engineer
             {
                renderShip(ShipShape::Normal, Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
                renderResourceItem(mResourceItemPoints);
