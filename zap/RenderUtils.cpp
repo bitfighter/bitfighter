@@ -757,7 +757,7 @@ void renderNumberInBox(const Point pos, S32 number, F32 scale)
                   pos.x + len / 2 + padding, pos.y - halfHeight - padding * 0.5); // 0.5 compensates for weird font spacing 
 
    glColor(Colors::black);
-   drawCenteredString_fixed(pos.x, pos.y + halfHeight, height, FontContext::HelpContext, numberStr.c_str());
+   drawCenteredString_fixed(pos.x, pos.y + halfHeight, height, HelpContext, numberStr.c_str());
 }
 
 
