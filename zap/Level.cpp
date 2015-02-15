@@ -236,7 +236,7 @@ void Level::snapAllEngineeredItems(bool onlyUnsnapped)
       if(onlyUnsnapped && engrObj->isSnapped())
          continue;
 
-      engrObj->mountToWall(engrObj->getPos(), this, getWallEdgeDatabase(), NULL);
+      engrObj->mountToWall(engrObj->getPos(), this, getWallEdgeDatabase());
    }
 }
 

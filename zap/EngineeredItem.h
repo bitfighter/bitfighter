@@ -97,8 +97,7 @@ public:
    bool collide(BfObject *hitObject);
    F32 getHealth() const;
    void healObject(S32 time);
-   void mountToWall(const Point &pos, const GridDatabase *gameObjectDatabase,
-                    const GridDatabase *wallEdgeDatabase, const Vector<BfObject *> *excludedWallList);
+   void mountToWall(const Point &pos, const GridDatabase *gameObjectDatabase, const GridDatabase *wallEdgeDatabase);
 
    void onGeomChanged();
 
@@ -109,7 +108,6 @@ public:
    static BfObject *findAnchorPointAndNormal(const GridDatabase *gameObjectDatabase, 
                                              const GridDatabase *wallEdgeDatabase,
                                              const Point &pos, F32 snapDist, 
-                                             const Vector<BfObject *> *excludedWallList,
                                              bool format, Point &anchor, Point &normal);
 
    BfObject *getMountSegment() const;

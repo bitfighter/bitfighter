@@ -239,7 +239,7 @@ void WallEdgeManager::updateAllMountedItems(const GridDatabase *gameObjectDataba
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       EngineeredItem *engrItem = static_cast<EngineeredItem *>(fillVector[i]);
-      engrItem->mountToWall(engrItem->getVert(0), gameObjectDatabase, &mWallEdgeDatabase, NULL);
+      engrItem->mountToWall(engrItem->getVert(0), gameObjectDatabase, &mWallEdgeDatabase);
    }
 }
 

@@ -545,7 +545,6 @@ void EngineeredItem::fillAttributesVectors(Vector<string> &keys, Vector<string> 
 
 // Database could be either a database full of WallEdges or game objects
 static DatabaseObject *findClosestWall(const GridDatabase *database, const Point &pos, F32 snapDist, 
-                                       const Vector<BfObject *> *excludedWallList,
                                        bool format,
                                        Point &anchor, Point &normal)
 {
@@ -578,9 +577,10 @@ static DatabaseObject *findClosestWall(const GridDatabase *database, const Point
       if(t >= minDist)     // Wall in this direction, but not as close as other candidates
          continue;
 
-      // Skip candidate if it's on our exclusion list
-      if(excludedWallList && excludedWallList->contains(static_cast<BfObject *>(wall)))
-         continue;
+      // Skip candidate if it's selected -- when would we want to snap to a selected object?
+      //if(wall->getObjectTypeNumber() != WallEdgeTypeNumber)    // WallEdges are NOT BfObjects!
+      //   if(static_cast<BfObject *>(wall)->isSelected())
+      //      continue;
 
       // If we get to here, the wall we've found is our best candidate yet!
       anchor.set(mountPos + dir * t);
@@ -598,13 +598,12 @@ BfObject *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *gameObjec
                                                    const GridDatabase *wallEdgeDatabase,
                                                    const Point &pos, 
                                                    F32 snapDist, 
-                                                   const Vector<BfObject *> *excludedWallList,
                                                    bool format, Point &anchor, Point &normal)
 {
    // Here we're interested in finding the closest wall edge to our item -- since edges are anonymous (i.e.
    // we don't know which wall they belong to), we don't really care which edge it is, only where the item
    // will snap to.  We'll use this snap location to identify the actual wall segment later.
-   DatabaseObject *edge = findClosestWall(wallEdgeDatabase, pos, snapDist, NULL, format, anchor, normal);
+   DatabaseObject *edge = findClosestWall(wallEdgeDatabase, pos, snapDist, format, anchor, normal);
 
    if(!edge)
       return NULL;
@@ -630,7 +629,7 @@ BfObject *EngineeredItem::findAnchorPointAndNormal(const GridDatabase *gameObjec
    Point dummy;
 
    BfObject *closestWall = static_cast<BfObject *>(
-         findClosestWall(gameObjectDatabase, anchor, snapDist, excludedWallList, format, dummy, normal));
+         findClosestWall(gameObjectDatabase, anchor, snapDist, format, dummy, normal));
 
    TNLAssert(closestWall, "Should have found something here -- we already found an edge, there should be a wall there too!");
 
@@ -1061,7 +1060,7 @@ void EngineeredItem::findMountPoint(const Level *level, const Point &pos)
 
    // Anchor objects to the correct point
    if(findAnchorPointAndNormal(level, level->getWallEdgeDatabase(), pos, 
-                               MAX_SNAP_DISTANCE, NULL, true, anchor, normal))
+                               MAX_SNAP_DISTANCE, true, anchor, normal))
    {
       setPos(anchor);
       mAnchorNormal.set(normal);
@@ -1080,8 +1079,7 @@ void EngineeredItem::findMountPoint(const Level *level, const Point &pos)
 // Find mount point or turret or forcefield closest to pos; used in editor.  See findMountPoint() for in-game version.
 void EngineeredItem::mountToWall(const Point &pos, 
                                  const GridDatabase *gameObjectDatabase, 
-                                 const GridDatabase *wallEdgeDatabase, 
-                                 const Vector<BfObject *> *excludedWallList)
+                                 const GridDatabase *wallEdgeDatabase)
 {  
    Point normal, anchor;
    BfObject *mountSeg;
@@ -1090,7 +1088,6 @@ void EngineeredItem::mountToWall(const Point &pos,
                                        wallEdgeDatabase, 
                                        pos,    
                                        MAX_SNAP_DISTANCE, 
-                                       excludedWallList,
                                        true, 
                                        anchor, 
                                        normal);
@@ -2605,7 +2602,7 @@ void Mortar::render() const
    Point aimCenter = getPos() + mAnchorNormal * Turret::TURRET_OFFSET;
    glTranslate(aimCenter);
 
-   glRotate(mAnchorNormal.ATAN2() * RADIANS_TO_DEGREES );
+   glRotate(mAnchorNormal.ATAN2() * RADIANS_TO_DEGREES);
 
    renderPointVector(&mZone, GL_LINE_LOOP);
    glPopMatrix();

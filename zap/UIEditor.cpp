@@ -1389,108 +1389,27 @@ Point EditorUserInterface::snapPoint(const Point &p, bool snapWhileOnDock) const
 }
 
 
-// The purpose of the following code is to intelligently mark selected objects as unsnapped so that they will behave better
-// while being dragged or pasted.  For example, if we are moving a turret, we want it to snap to anything nearby.  However, if
-// that turret is attached to a wall that is also being moved, we don't want the turret going off and snapping to something
-// else.  To prevent that, we keep the turret's status as being snapped, even though things are usually marked as unsnapped when
-// they are being moved.
-//
-// The logic here is basically to loop through all selected objects in the passed set, keeping a list of engineer items, and of
-// the ids of various walls that are also selected.  Everything that is not an engineered object gets marked as being unsnapped.
-// After the loop, engineered items are reviewed; if the wall they were snapped to was not found during the first pass, the 
-// item is marked as no longer snapped, so it will start snapping as it moves.  If the wall was found, then the item is marked as
-// happily snapped, so it will not try to find another partner during the move.  
-//
-// The promiscuousSnapper vector keeps track of whether an engr. item is trying to snap to other things.  It is only set on the first
-// pass through here, and is based on whether the item it is snapped to (if any) is included in the selection.
-//
-// We have broken the logic up into a series of functions to facilitate processing different kinds of lists.  Kind of annoying... but
-// it seemed the best way to avoid repeating very similar logic.
-
-static Vector<EngineeredItem *> selectedSnappedEngrObjects;
-static Vector<S32> selectedSnappedEngrObjectIndices;
-static Vector<bool> promiscuousSnapper;
-static Vector<BfObject *> selectedWalls;
-
-static void markSelectedObjectsAsUnsnapped_init(S32 itemCount, bool calledDuringDragInitialization)
+void EditorUserInterface::markSelectedObjectsAsUnsnapped2(const Vector<DatabaseObject *> *objList)
 {
-   selectedSnappedEngrObjects.clear();
-   selectedWalls.clear();
-   selectedSnappedEngrObjectIndices.clear();
-
-   if(calledDuringDragInitialization)
-   {
-      promiscuousSnapper.resize(itemCount);
-      for(S32 i = 0; i < itemCount; i++)
-         promiscuousSnapper[i] = true;    // They're all a bit loose to begin with!
-   }
-}
-
-
-static void markSelectedObjectAsUnsnapped_body(BfObject *obj, S32 index, bool calledDuringDragInitialization)
-{
-   if(obj->isSelected())
-   {
-      if(isEngineeredType(obj->getObjectTypeNumber()))
-      {
-         EngineeredItem *engrObj = static_cast<EngineeredItem *>(obj);
-         if(engrObj->getMountSegment() && engrObj->isSnapped())
-         {
-            selectedSnappedEngrObjects.push_back(engrObj);
-            selectedSnappedEngrObjectIndices.push_back(index);
-         }
-         else
-            obj->setSnapped(false);
-      }
-      else        // Not an engineered object
-      {
-         if(isWallType(obj->getObjectTypeNumber()))      // Wall or polywall in this context
-            selectedWalls.push_back(static_cast<BfObject *>(obj));
-
-         obj->setSnapped(false);
-      }
-   }
-}
-
-
-static void markSelectedObjectAsUnsnapped_done(bool calledDuringDragInitialization)
-{
-   // Now review all the engineer items that are being dragged and see if the wall they are mounted to is being
-   // ` as well.  If it is, keep them snapped; if not, mark them as unsnapped. 
-   for(S32 i = 0; i < selectedSnappedEngrObjects.size(); i++)
-   {
-      BfObject *owner = reinterpret_cast<BfObject *>(selectedSnappedEngrObjects[i]->getMountSegment()->getOwner());
-
-      bool snapped = selectedWalls.contains(owner);
-      selectedSnappedEngrObjects[i]->setSnapped(snapped);
-
-      if(snapped && calledDuringDragInitialization)
-         promiscuousSnapper[selectedSnappedEngrObjectIndices[i]] = false;
-   }
-}
-
-
-void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<boost::shared_ptr<BfObject> > &objList)
-{
-   markSelectedObjectsAsUnsnapped_init(objList.size(), true);
-
-   // Mark all items being dragged as no longer being snapped -- only our primary "focus" item will be snapped
-   for(S32 i = 0; i < objList.size(); i++)
-      markSelectedObjectAsUnsnapped_body(objList[i].get(), i, true);
-
-   markSelectedObjectAsUnsnapped_done(true);
-}
-
-
-void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<DatabaseObject *> *objList)
-{
-   markSelectedObjectsAsUnsnapped_init(objList->size(), true);
-
-   // Mark all items being dragged as no longer being snapped -- only our primary "focus" item will be snapped
    for(S32 i = 0; i < objList->size(); i++)
-      markSelectedObjectAsUnsnapped_body(static_cast<BfObject *>(objList->get(i)), i, true);
+   {
+      // Only engineered items can be snapped
+      if(!isEngineeredType(objList->get(i)->getObjectTypeNumber()))
+         continue;
 
-   markSelectedObjectAsUnsnapped_done(true);
+      EngineeredItem *obj = static_cast<EngineeredItem *>(objList->get(i));
+
+      // Unselected items will remain unaffected
+      if(!obj->isSelected())
+         continue;
+      
+      // Snapped items whose mounts are selected (and hence also being dragged) will remain snapped
+      if(obj->isSnapped() && obj->getMountSegment()->isSelected())
+         continue;
+
+      // Everything else is free to snap to something else!
+      obj->setSnapped(false);
+   }
 }
 
 
@@ -2399,6 +2318,9 @@ void EditorUserInterface::pasteSelection()
    for(S32 i = 0; i < copiedObjects.size(); i++)
       copiedObjects[i]->onAddedToEditor();
 
+   // Rebuild wall outlines so engineered items will have something to snap to
+   rebuildWallGeometry(mLevel.get());
+
    getLevel()->snapAllEngineeredItems(false);  // True would work?
 
    doneAddingObjects(copiedObjects);
@@ -2997,7 +2919,7 @@ void EditorUserInterface::onMouseDragged_startDragging()
    mDraggingObjects = true; 
    mSnapDelta.set(0,0);
 
-   markSelectedObjectsAsUnsnapped(objList);
+   markSelectedObjectsAsUnsnapped2(objList);
 }
 
 
@@ -3095,13 +3017,18 @@ void EditorUserInterface::snapSelectedEngineeredItems(const Point &cumulativeOff
    {
       if(isEngineeredType(objList->get(i)->getObjectTypeNumber()))
       {
-         // Only try to mount any items that are both 1) selected and 2) marked as wanting to snap
          EngineeredItem *engrObj = static_cast<EngineeredItem *>(objList->get(i));
+
+         // Do not snap objects that are being dragged if their mounted wall is also being dragged
+         if(mDraggingObjects && engrObj->isSelected() && engrObj->isSnapped() && engrObj->getMountSegment()->isSelected())
+            continue;
+
+         // Only try to mount any items that are both 1) selected and 2) marked as wanting to snap
          S32 j = 0;
-         if(engrObj->isSelected() && promiscuousSnapper[i])
+         if(engrObj->isSelected())
          {
             engrObj->mountToWall(snapPointToLevelGrid(mSelectedObjectsForDragging[j]->getVert(0) + cumulativeOffset), 
-                                 getLevel(), mLevel->getWallEdgeDatabase(), &selectedWalls);
+                                 getLevel(), mLevel->getWallEdgeDatabase());
             j++;
          }
       }

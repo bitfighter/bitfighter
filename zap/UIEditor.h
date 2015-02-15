@@ -471,8 +471,7 @@ public:
    Point snapPoint(const Point &p, bool snapWhileOnDock = false) const;
    Point snapPointToLevelGrid(Point const &p) const;
 
-   void markSelectedObjectsAsUnsnapped(const Vector<DatabaseObject *> *objList);
-   void markSelectedObjectsAsUnsnapped(const Vector<boost::shared_ptr<BfObject> > &objList);
+   void markSelectedObjectsAsUnsnapped2(const Vector<DatabaseObject *> *objList);
 
 
    bool getSnapToWallCorners() const;     // Returns true if wall corners are active snap targets
