@@ -1366,7 +1366,7 @@ const Vector<Point> *BfObject::getEditorHitPoly() const
 }
 
 
-static const U8 TeamBits = 4;
+static const U8 TeamBits = 4;       // 4 bits = 16, we have 9 + 2 teams... so it fits!
 static const U8 TeamOffset = 2;     // To account for Neutral and Hostile teams
 
 void BfObject::readThisTeam(BitStream *stream)
