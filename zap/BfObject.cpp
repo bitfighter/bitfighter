@@ -890,6 +890,12 @@ void BfObject::setScopeAlways()
 }
 
 
+bool BfObject::isVisibleToTeam(S32 teamIndex) const
+{
+   return true;      // By default, all teams can see all objects
+}
+
+
 F32 BfObject::getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips)
 {
    GameConnection *gc = dynamic_cast<GameConnection *>(connection);

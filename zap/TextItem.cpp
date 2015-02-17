@@ -281,8 +281,15 @@ void TextItem::onAddedToGame(Game *theGame)
 {
    Parent::onAddedToGame(theGame);
 
-   if(isServer())   
+   if(isServer())
       setScopeAlways();
+}
+
+
+bool TextItem::isVisibleToTeam(S32 teamIndex) const
+{
+   // TextItems are only visible to those on the same team
+   return getTeam() == teamIndex;
 }
 
 

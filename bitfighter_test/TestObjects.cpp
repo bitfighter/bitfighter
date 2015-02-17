@@ -15,9 +15,11 @@
 #include "ClientGame.h"
 #include "Level.h"
 #include "SystemFunctions.h"
+#include "LevelFilesForTesting.h"
 
 #include "LuaScriptRunner.h"
 
+#include "Colors.h"
 #include "GeomUtils.h"
 #include "stringUtils.h"
 #include "RenderUtils.h"
@@ -39,6 +41,7 @@
 namespace Zap {
 using namespace std;
 
+
 class ObjectTest : public testing::Test
 {
    public:
@@ -54,6 +57,84 @@ class ObjectTest : public testing::Test
          }
       }
 };
+
+
+TEST(ObjectTest, TextItemPropagation)
+{
+   // Create a GamePair using our text item code, with 2 clients; one will be red, the other blue.
+   // The test will confirm which players get the red text item, the blue line, and the zone object.
+   string levelCode = getLevelCodeForItemPropagationTests();
+
+   GamePair gamePair(levelCode, 2);
+
+   // First, ensure we have two players, one red, one blue
+   ServerGame *serverGame = gamePair.server;
+
+   ASSERT_EQ(2, serverGame->getPlayerCount());
+   ASSERT_EQ(Colors::blue.toHexString(), serverGame->getTeamColor(0).toHexString());
+   ASSERT_EQ(Colors::red.toHexString(), serverGame->getTeamColor(1).toHexString());
+
+   // Do the following rigamarole to break dependency on assumption client0 is blue and client1 is red
+   ClientGame *client0 = gamePair.getClient(0);
+   ClientGame *client1 = gamePair.getClient(1);
+
+   ClientGame *blue = (serverGame->getTeamColor(client0->getLocalRemoteClientInfo()->getTeamIndex()).toHexString() == 
+                              Colors::blue.toHexString()) ? client0 : client1;
+      
+   ClientGame *red = (serverGame->getTeamColor(client0->getLocalRemoteClientInfo()->getTeamIndex()).toHexString() ==
+                              Colors::red.toHexString()) ? client0 : client1;
+
+   ASSERT_EQ(Colors::blue.toHexString(), serverGame->getTeamColor(blue->getLocalRemoteClientInfo()->getTeamIndex()).toHexString());
+   ASSERT_EQ(Colors::red.toHexString(), serverGame->getTeamColor(red->getLocalRemoteClientInfo()->getTeamIndex()).toHexString());
+
+   // Now that we know which client is which, we can check to see which objects are available where
+
+   Vector<DatabaseObject *> fillVector;
+
+   // Repair should be everywhere
+   serverGame->getLevel()->findObjects(RepairItemTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size()) << "Server repair";
+   fillVector.clear();
+   blue->getLevel()->findObjects(RepairItemTypeNumber, fillVector);
+   EXPECT_EQ(1, fillVector.size()) << "Repair, blue client";
+   fillVector.clear();
+   red->getLevel()->findObjects(RepairItemTypeNumber, fillVector);
+   EXPECT_EQ(1, fillVector.size()) << "Repair, red client";
+   fillVector.clear();
+
+   // Line is blue
+   serverGame->getLevel()->findObjects(LineTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size()) << "Server line";
+   fillVector.clear();
+   blue->getLevel()->findObjects(LineTypeNumber, fillVector);
+   EXPECT_EQ(1, fillVector.size()) << "Blue line, blue client";
+   fillVector.clear();
+   red->getLevel()->findObjects(LineTypeNumber, fillVector);
+   EXPECT_EQ(0, fillVector.size()) << "Blue line, red client";
+   fillVector.clear();
+
+   // Text is red
+   serverGame->getLevel()->findObjects(TextItemTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size()) << "Server text";
+   fillVector.clear();
+   blue->getLevel()->findObjects(TextItemTypeNumber, fillVector);
+   EXPECT_EQ(0, fillVector.size()) << "Red text, blue client";
+   fillVector.clear();
+   red->getLevel()->findObjects(TextItemTypeNumber, fillVector);
+   EXPECT_EQ(1, fillVector.size()) << "Red text, red client";
+   fillVector.clear();
+
+   // Zone should not be sent at all
+   serverGame->getLevel()->findObjects(ZoneTypeNumber, fillVector);
+   ASSERT_EQ(1, fillVector.size()) << "Server zone";
+   fillVector.clear();
+   blue->getLevel()->findObjects(ZoneTypeNumber, fillVector);
+   EXPECT_EQ(0, fillVector.size()) << "Zone, blue client";
+   fillVector.clear();
+   red->getLevel()->findObjects(ZoneTypeNumber, fillVector);
+   EXPECT_EQ(0, fillVector.size()) << "Zone, red client";
+   fillVector.clear();
+}
 
 
 /**

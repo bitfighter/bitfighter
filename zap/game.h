@@ -206,6 +206,7 @@ protected:
 
    Vector<DeleteRef> mPendingDeleteObjects;
    Vector<SafePtr<BfObject> > mScopeAlwaysList;
+
    U32 mCurrentTime;
 
    U32 mLevelDatabaseId;
@@ -351,9 +352,10 @@ public:
    GameNetInterface *getNetInterface();
    Level *getLevel();
 
-   const Vector<SafePtr<BfObject> > &getScopeAlwaysList();
+   const Vector<SafePtr<BfObject> > &getScopeAlwaysList() const;
 
-   void setScopeAlwaysObject(BfObject *theObject);
+   void setScopeAlwaysObject(BfObject *object);
+
    GameType *getGameType() const;
 
    // MD5 utilties

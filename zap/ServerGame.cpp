@@ -152,6 +152,9 @@ void ServerGame::cleanUp()
    for(S32 i = 0; i < fillVector.size(); i++)
       delete dynamic_cast<Object *>(fillVector[i]);
 
+   mLevelSwitchTimer.clear();
+   mScopeAlwaysList.clear();
+
    Parent::cleanUp();
 }
 
@@ -529,8 +532,10 @@ void ServerGame::cycleLevel(S32 nextLevel)
    if(mLevel)
       cleanUp();
 
-   mLevelSwitchTimer.clear();
-   mScopeAlwaysList.clear();
+   // We moved the clearing code into cleanup()... I think it will always be run.  But better check!
+   TNLAssert(mLevelSwitchTimer.getCurrent() == 0, "Expected this to be clear!");
+   TNLAssert(mScopeAlwaysList.size() == 0,        "Expected this to be empty!");
+
 
    for(S32 i = 0; i < getClientCount(); i++)
    {
@@ -1191,8 +1196,6 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
          delete mGameRecorderServer;
          mGameRecorderServer = NULL;
          cleanUp();
-         mLevelSwitchTimer.clear();
-         mScopeAlwaysList.clear();
 
          removeLevel(-1);
          mCurrentLevelIndex = FIRST_LEVEL;

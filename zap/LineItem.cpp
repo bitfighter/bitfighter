@@ -197,6 +197,7 @@ void LineItem::onAddedToGame(Game *game)
       setScopeAlways();
 }
 
+
 void LineItem::onGhostAvailable(GhostConnection* connection)
 {
    Parent::onGhostAvailable(connection);
@@ -205,10 +206,18 @@ void LineItem::onGhostAvailable(GhostConnection* connection)
    connection->postNetEvent(theEvent);
 }
 
+
 void LineItem::onGhostAddBeforeUpdate(GhostConnection* connection)
 {
    Parent::onGhostAddBeforeUpdate(connection);
    updateExtentInDatabase();
+}
+
+
+bool LineItem::isVisibleToTeam(S32 teamIndex) const
+{
+   // LineItems are only visible to those on the same team
+   return getTeam() == teamIndex;
 }
 
 

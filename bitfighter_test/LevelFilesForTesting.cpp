@@ -150,9 +150,29 @@ static void initialize()
       "Turret!1 0 -128 -0.1 0\n"                                  // Turret <Team> <X> <Y> [HealRate]
       "PolyWall -25.5 -176.5 -25.5 -100 -255 -100 -255 -176.5\n"  // Wall wound in reverse order
       "Turret!2 0 -128 -100.1 0\n"                              
-      
    );
    levelInfos.push_back(LevelInfo("Snapping Testing Level Part II!!!", BitmatchGame, 0, 999, ""));
+
+   // levelCodes[7]
+   // Test different item propagation scenarios
+   levelCodes.push_back(
+      "LevelFormat 2\n"
+      "GameType 10 8\n"
+      "LevelName Item propagation test level\n"
+      "LevelDescription \"\"\n"
+      "LevelCredits Invisible\n"
+      "Team Blue 0 0 1\n"
+      "Team Red 1 0 0\n"
+      "Specials\n"
+      "MinPlayers 1\n"
+      "MaxPlayers 3\n"
+      "RepairItem 0 76.5 20\n"
+      "TextItem 1 -127.5 0 127.5 0 57.845 \"Red text\"\n"
+      "LineItem 0 2 Global -127.5 229.5 0 153 127.5 204\n"
+      "Zone 178.5 51 178.5 127.5 408 127.5 408 51\n"
+   );
+   levelInfos.push_back(LevelInfo("Item propagation test level", BitmatchGame, 1, 3, ""));
+
 }
 
 
@@ -182,6 +202,13 @@ string getLevelCodeForTestingEngineer1()
 {
    initialize();
    return levelCodes[1];
+}
+
+
+string getLevelCodeForItemPropagationTests()
+{
+   initialize();
+   return levelCodes[7];
 }
 
 

@@ -21,6 +21,8 @@ string getLevelCodeForTestingEngineer1();
 string getLevelCodeForEmptyLevelWithBots(const string &botspec);
 string getLevelCodeForEngineeredItemSnapping();
 string getLevelCodeForEngineeredItemSnapping2();
+string getLevelCodeForItemPropagationTests();
+
 
 string getGenericHeader();
 

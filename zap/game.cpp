@@ -118,15 +118,15 @@ U32 Game::getCurrentTime()
 }
 
 
-const Vector<SafePtr<BfObject> > &Game::getScopeAlwaysList()
+const Vector<SafePtr<BfObject> > &Game::getScopeAlwaysList() const
 {
    return mScopeAlwaysList;
 }
 
 
-void Game::setScopeAlwaysObject(BfObject *theObject)
+void Game::setScopeAlwaysObject(BfObject *object)
 {
-   mScopeAlwaysList.push_back(theObject);
+   mScopeAlwaysList.push_back(object);
 }
 
 

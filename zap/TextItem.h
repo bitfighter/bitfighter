@@ -49,6 +49,8 @@ public:
 
    void onAddedToGame(Game *theGame);  
 
+   bool isVisibleToTeam(S32 teamIndex) const;
+
    static void textEditedCallback(TextEntryMenuItem *item, const string &text, BfObject *obj);
 
    const Vector<Point> *getCollisionPoly() const;          // More precise boundary for precise collision detection

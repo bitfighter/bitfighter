@@ -355,6 +355,7 @@ public:
    bool collisionPolyPointIntersect(Point center, F32 radius);
 
    void setScopeAlways();           
+   virtual bool isVisibleToTeam(S32 teamIndex) const;
 
    void readThisTeam(BitStream *stream);     // xxx editor?
    void writeThisTeam(BitStream *stream);    // xxx editor?

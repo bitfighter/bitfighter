@@ -40,6 +40,9 @@ public:
    virtual void onGhostAvailable(GhostConnection *connection);
    virtual void onGhostAddBeforeUpdate(GhostConnection *connection);
 
+   bool isVisibleToTeam(S32 teamIndex) const;
+
+
    const Vector<Point> *getCollisionPoly() const;                    // More precise boundary for precise collision detection
    bool collide(BfObject *hitObject);
    void idle(BfObject::IdleCallPath path);

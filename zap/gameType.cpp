@@ -1528,35 +1528,46 @@ static void markAllMountedItemsAsBeingInScope(Ship *ship, GameConnection *conn)
 }
 
 
-// Runs only on server, I think
+// Runs only on server
 void GameType::performScopeQuery(GhostConnection *connection)
 {
    GameConnection *conn = (GameConnection *) connection;
    ClientInfo *clientInfo = conn->getClientInfo();
-   BfObject *co = conn->getControlObject();
+   BfObject *controlObject = conn->getControlObject();
 
-   //TNLAssert(gc, "Invalid GameConnection in gameType.cpp!");
-   //TNLAssert(co, "Invalid ControlObject in gameType.cpp!");
+   // Put GameType in scope, always
+   conn->objectInScope(this);   
 
-   conn->objectInScope(this);   // Put GameType in scope, always
-
-   if(!conn->isReadyForRegularGhosts()) // This may prevent scoping any ships until after ClientInfo is all received on client side. (spy bugs scopes ships)
+   // This may prevent scoping any ships until after ClientInfo is all received on client side. (spy bugs scopes ships)
+   if(!conn->isReadyForRegularGhosts()) 
       return;
 
    const Vector<SafePtr<BfObject> > &scopeAlwaysList = mGame->getScopeAlwaysList();
 
-   // Make sure the "always-in-scope" objects are actually in scope
+   // Make sure the "always-in-scope" objects are actually in scope.  Hmmmmm....
    for(S32 i = 0; i < scopeAlwaysList.size(); i++)
-      if(!scopeAlwaysList[i].isNull())
-         if(scopeAlwaysList[i]->getObjectTypeNumber() != FlagTypeNumber || !((MountableItem*)(((SafePtr<BfObject> *)&scopeAlwaysList[i])->getPointer()))->isMounted())
-            conn->objectInScope(scopeAlwaysList[i]);
-
-   // readyForRegularGhosts is set once all the RPCs from the GameType
-   // have been received and acknowledged by the client
-   if(conn->isReadyForRegularGhosts() && co)
    {
-      performProxyScopeQuery(co, clientInfo);
-      conn->objectInScope(co);            // Put controlObject in scope ==> This is where the update mask gets set to 0xFFFFFFFF
+      BfObject *obj = scopeAlwaysList[i];
+
+      if(!obj)
+         continue;
+
+      if(!obj->isVisibleToTeam(conn->getClientInfo()->getTeamIndex()))
+         continue;
+
+      if(obj->getObjectTypeNumber() != FlagTypeNumber ||
+                     !((MountableItem*)(((SafePtr<BfObject> *)&obj)->getPointer()))->isMounted())
+         conn->objectInScope(obj);
+   }
+
+
+   // readyForRegularGhosts is set once all the RPCs from the GameType have been received and acknowledged by the client
+   if(conn->isReadyForRegularGhosts() && controlObject)
+   {
+      performProxyScopeQuery(controlObject, clientInfo);
+
+      // Put controlObject in scope ==> This is where the update mask gets set to 0xFFFFFFFF
+      conn->objectInScope(controlObject);    
    }
 
    // What does the spy bug see?
@@ -1624,7 +1635,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
    {
       S32 teamId = clientInfo->getTeamIndex();
       fillVector.clear();
-      bool sameQuery = false;  // helps speed up by not repeatedly finding same objects
+      bool sameQuery = false;  // Helps speed up by not repeatedly finding same objects
 
       for(S32 i = 0; i < mGame->getClientCount(); i++)
       {
@@ -1634,7 +1645,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
             continue;
 
          Ship *ship = clientInfo->getShip();
-         if(!ship)       // Can happen!
+         if(!ship)            // Can happen!
             continue;
 
          Rect queryRect(ship->getActualPos(), ship->getActualPos());
@@ -1657,7 +1668,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
    {
       // Note that if we make mine visibility controlled by server, here's where we'd put the code
       Point pos = scopeObject->getPos();
-      TNLAssert(dynamic_cast<Ship *>(scopeObject), "Control object not a ship!");
+      TNLAssert(dynamic_cast<Ship *>(scopeObject), "Control object is not a ship!");
       Ship *ship = static_cast<Ship *>(scopeObject);
 
       Rect queryRect(pos, pos);
@@ -1670,9 +1681,16 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
    // Set object-in-scope for all objects found above
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      connection->objectInScope(static_cast<BfObject *>(fillVector[i]));
+      BfObject *obj = static_cast<BfObject *>(fillVector[i]);
+
+      if(!obj->isVisibleToTeam(connection->getClientInfo()->getTeamIndex()))
+         continue;
+
+      connection->objectInScope(obj);
+
+      // If a ship is in scope, anything it is carrying is also in scope
       if(isShipType(fillVector[i]->getObjectTypeNumber()))
-         markAllMountedItemsAsBeingInScope(static_cast<Ship *>(fillVector[i]), connection);
+         markAllMountedItemsAsBeingInScope(static_cast<Ship *>(obj), connection);
    }
 
    // Make bots visible if showAllBots has been activated
