@@ -282,7 +282,7 @@ void TextItem::onAddedToGame(Game *theGame)
 {
    Parent::onAddedToGame(theGame);
 
-   if(!isGhost())
+   if(isServer())   
       setScopeAlways();
 }
 
