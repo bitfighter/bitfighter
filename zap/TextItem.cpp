@@ -145,7 +145,6 @@ void TextItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 #endif
 
 
-
 bool TextItem::hasTeam()      { return true; }
 bool TextItem::canBeHostile() { return true; }
 bool TextItem::canBeNeutral() { return true; }
