@@ -59,7 +59,96 @@ class ObjectTest : public testing::Test
 };
 
 
-TEST(ObjectTest, TextItemPropagation)
+void testObjectTransmission(S32 objTypeNumber, ServerGame *serverGame, S32 severCount,
+                                               ClientGame *blue,       S32 blueCount,
+                                               ClientGame *red,        S32 redCount)
+{
+   Vector<DatabaseObject *> fillVector;
+
+   // Repair should be everywhere
+   serverGame->getLevel()->findObjects(objTypeNumber, fillVector);
+   ASSERT_EQ(severCount, fillVector.size()) << "Server";
+   fillVector.clear();
+   blue->getLevel()->findObjects(objTypeNumber, fillVector);
+   EXPECT_EQ(blueCount, fillVector.size()) << "Blue client";
+   fillVector.clear();
+   red->getLevel()->findObjects(objTypeNumber, fillVector);
+   EXPECT_EQ(redCount, fillVector.size()) << "Red client";
+   fillVector.clear();
+}
+
+
+void checkObjects(ServerGame *serverGame, ClientGame *blue, ClientGame *red)
+{
+   {
+      SCOPED_TRACE("RepairItem");
+      testObjectTransmission(RepairItemTypeNumber, serverGame, 1, blue, 1, red, 1);
+   }
+   {
+      SCOPED_TRACE("Blue Line");
+      testObjectTransmission(LineTypeNumber, serverGame, 1, blue, 1, red, 0);
+   }
+   {
+      SCOPED_TRACE("Red Text");
+      testObjectTransmission(TextItemTypeNumber, serverGame, 1, blue, 0, red, 1);
+   }
+   {
+      SCOPED_TRACE("Zone");
+      testObjectTransmission(ZoneTypeNumber, serverGame, 1, blue, 0, red, 0);
+   }
+}
+
+
+void checkObjectsWhenBothPlayersAreOnRed(ServerGame *serverGame, ClientGame *blue, ClientGame *red)
+{
+   SCOPED_TRACE("BothPlayersAreOnRed");
+   {
+      SCOPED_TRACE("RepairItem");
+      testObjectTransmission(RepairItemTypeNumber, serverGame, 1, blue, 1, red, 1);
+   }
+   {
+      SCOPED_TRACE("Blue Line");
+      testObjectTransmission(LineTypeNumber, serverGame, 1, blue, 0, red, 0);
+   }
+   {
+      SCOPED_TRACE("Red Text");
+      testObjectTransmission(TextItemTypeNumber, serverGame, 1, blue, 1, red, 1);
+   }
+   {
+      SCOPED_TRACE("Zone");
+      testObjectTransmission(ZoneTypeNumber, serverGame, 1, blue, 0, red, 0);
+   }
+}
+
+
+void checkObjectsWhenNeutral(ServerGame *serverGame, ClientGame *blue, ClientGame *red)
+{
+   SCOPED_TRACE("Objects are Neutral");
+   {
+      SCOPED_TRACE("Blue Line");
+      testObjectTransmission(LineTypeNumber, serverGame, 1, blue, 1, red, 1);
+   }
+   {
+      SCOPED_TRACE("Red Text");
+      testObjectTransmission(TextItemTypeNumber, serverGame, 1, blue, 1, red, 1);
+   }
+}
+
+void checkObjectsWhenHostile(ServerGame *serverGame, ClientGame *blue, ClientGame *red)
+{
+   SCOPED_TRACE("Objects are Hostile");
+   {
+      SCOPED_TRACE("Blue Line");
+      testObjectTransmission(LineTypeNumber, serverGame, 1, blue, 0, red, 0);
+   }
+   {
+      SCOPED_TRACE("Red Text");
+      testObjectTransmission(TextItemTypeNumber, serverGame, 1, blue, 0, red, 0);
+   }
+}
+
+
+TEST_F(ObjectTest, TestItemPropagation)
 {
    // Create a GamePair using our text item code, with 2 clients; one will be red, the other blue.
    // The test will confirm which players get the red text item, the blue line, and the zone object.
@@ -87,53 +176,85 @@ TEST(ObjectTest, TextItemPropagation)
    ASSERT_EQ(Colors::blue.toHexString(), serverGame->getTeamColor(blue->getLocalRemoteClientInfo()->getTeamIndex()).toHexString());
    ASSERT_EQ(Colors::red.toHexString(), serverGame->getTeamColor(red->getLocalRemoteClientInfo()->getTeamIndex()).toHexString());
 
+   ASSERT_FALSE(serverGame->getClientInfos()->get(0)->getConnection()->mInCommanderMap);
+   ASSERT_FALSE(serverGame->getClientInfos()->get(1)->getConnection()->mInCommanderMap);
+
    // Now that we know which client is which, we can check to see which objects are available where
+
+   {
+      SCOPED_TRACE("Not in CommandersMap");
+      checkObjects(serverGame, blue, red);
+   }
+
+   // Turn on cmdrs map... should not affect results
+   red->setUsingCommandersMap(true);
+   blue->setUsingCommandersMap(true);
+
+   gamePair.idle(10, 5);     // Let things settle
+
+   ASSERT_TRUE(serverGame->getClientInfos()->get(0)->getConnection()->mInCommanderMap);
+   ASSERT_TRUE(serverGame->getClientInfos()->get(1)->getConnection()->mInCommanderMap);
+
+   {
+      SCOPED_TRACE("In CommandersMap");
+      checkObjects(serverGame, blue, red);
+   }
 
    Vector<DatabaseObject *> fillVector;
 
-   // Repair should be everywhere
-   serverGame->getLevel()->findObjects(RepairItemTypeNumber, fillVector);
-   ASSERT_EQ(1, fillVector.size()) << "Server repair";
-   fillVector.clear();
-   blue->getLevel()->findObjects(RepairItemTypeNumber, fillVector);
-   EXPECT_EQ(1, fillVector.size()) << "Repair, blue client";
-   fillVector.clear();
-   red->getLevel()->findObjects(RepairItemTypeNumber, fillVector);
-   EXPECT_EQ(1, fillVector.size()) << "Repair, red client";
-   fillVector.clear();
-
-   // Line is blue
-   serverGame->getLevel()->findObjects(LineTypeNumber, fillVector);
-   ASSERT_EQ(1, fillVector.size()) << "Server line";
-   fillVector.clear();
-   blue->getLevel()->findObjects(LineTypeNumber, fillVector);
-   EXPECT_EQ(1, fillVector.size()) << "Blue line, blue client";
-   fillVector.clear();
-   red->getLevel()->findObjects(LineTypeNumber, fillVector);
-   EXPECT_EQ(0, fillVector.size()) << "Blue line, red client";
-   fillVector.clear();
-
-   // Text is red
+   // Change the textitem from red to blue
    serverGame->getLevel()->findObjects(TextItemTypeNumber, fillVector);
-   ASSERT_EQ(1, fillVector.size()) << "Server text";
-   fillVector.clear();
-   blue->getLevel()->findObjects(TextItemTypeNumber, fillVector);
-   EXPECT_EQ(0, fillVector.size()) << "Red text, blue client";
-   fillVector.clear();
-   red->getLevel()->findObjects(TextItemTypeNumber, fillVector);
-   EXPECT_EQ(1, fillVector.size()) << "Red text, red client";
-   fillVector.clear();
+   ASSERT_EQ(1, fillVector.size());
+   BfObject *obj = static_cast<BfObject *>(fillVector[0]);
+   obj->setTeam(0);     // Blue team
 
-   // Zone should not be sent at all
-   serverGame->getLevel()->findObjects(ZoneTypeNumber, fillVector);
-   ASSERT_EQ(1, fillVector.size()) << "Server zone";
+   gamePair.idle(10, 5);     // Let things settle
+   {
+      SCOPED_TRACE("Blue Text");
+      testObjectTransmission(TextItemTypeNumber, serverGame, 1, blue, 1, red, 0);
+   }
+   obj->setTeam(1);          // Back to red
+
+   gamePair.idle(10, 5);     // Let things settle
+   {
+      SCOPED_TRACE("Red Text (after revert)");
+      testObjectTransmission(TextItemTypeNumber, serverGame, 1, blue, 0, red, 1);
+   }
+
+   // At the moment, chaning a player's team won't delete objects that are no longer in scope for team reasons,
+   // such as TextItems and LineItems until those items have been updated somehow.  Which they never are.  Bummer.
+   //
+   //// Now change the player's team from blue to red
+   //blue->changeOwnTeam(1);
+   //EXPECT_EQ(0, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 0 (change hasn't propagated yet)";
+   //gamePair.idle(10, 5);     // Let things settle
+   //EXPECT_EQ(1, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 1 (change should have propagated)";
+
+   //EXPECT_EQ(1, serverGame->getClientInfos()->get(0)->getTeamIndex());
+   //EXPECT_EQ(1, serverGame->getClientInfos()->get(1)->getTeamIndex());
+
+   //checkObjectsWhenBothPlayersAreOnRed(serverGame, blue, red);
+
+   // Make items neutral and see if they propagate properly
    fillVector.clear();
-   blue->getLevel()->findObjects(ZoneTypeNumber, fillVector);
-   EXPECT_EQ(0, fillVector.size()) << "Zone, blue client";
-   fillVector.clear();
-   red->getLevel()->findObjects(ZoneTypeNumber, fillVector);
-   EXPECT_EQ(0, fillVector.size()) << "Zone, red client";
-   fillVector.clear();
+   serverGame->getLevel()->findObjects(TextItemTypeNumber, fillVector);
+   serverGame->getLevel()->findObjects(LineTypeNumber, fillVector);
+   ASSERT_EQ(2, fillVector.size());
+   for(S32 i = 0; i < fillVector.size(); i++)
+      static_cast<BfObject *>(fillVector[i])->setTeam(TEAM_NEUTRAL);
+   gamePair.idle(10, 5);     // Let things settle
+   {
+      SCOPED_TRACE("Neutral!!");
+      checkObjectsWhenNeutral(serverGame, blue, red);
+   }
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+      static_cast<BfObject *>(fillVector[i])->setTeam(TEAM_HOSTILE);
+   gamePair.idle(10, 5);     // Let things settle
+   {
+      SCOPED_TRACE("Hostile!!");
+      checkObjectsWhenHostile(serverGame, blue, red);
+   }
 }
 
 

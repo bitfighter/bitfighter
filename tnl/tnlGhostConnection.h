@@ -102,6 +102,9 @@ public:
       GhostPacketNotify() { ghostList = NULL; }
    };
 
+   /// Remove any out-of-scope objects from the client
+   void descopeAndDetachObjects();
+
 protected:
 
    /// Override of EventConnection's allocNotify, to use the GhostPacketNotify structure.
@@ -287,6 +290,7 @@ inline void GhostConnection::ghostPushNonZero(GhostInfo *info)
 {
    TNLAssert(info->arrayIndex >= mGhostZeroUpdateIndex && info->arrayIndex < mGhostFreeIndex, "Out of range arrayIndex.");
    TNLAssert(mGhostArray[info->arrayIndex] == info, "Invalid array object.");
+
    if(info->arrayIndex != mGhostZeroUpdateIndex)
    {
       mGhostArray[mGhostZeroUpdateIndex]->arrayIndex = info->arrayIndex;
@@ -294,6 +298,7 @@ inline void GhostConnection::ghostPushNonZero(GhostInfo *info)
       mGhostArray[mGhostZeroUpdateIndex] = info;
       info->arrayIndex = mGhostZeroUpdateIndex;
    }
+
    mGhostZeroUpdateIndex++;
    //TNLAssert(validateGhostArray(), "Invalid ghost array!");
 }
@@ -302,7 +307,9 @@ inline void GhostConnection::ghostPushToZero(GhostInfo *info)
 {
    TNLAssert(info->arrayIndex < mGhostZeroUpdateIndex, "Out of range arrayIndex.");
    TNLAssert(mGhostArray[info->arrayIndex] == info, "Invalid array object.");
+
    mGhostZeroUpdateIndex--;
+
    if(info->arrayIndex != mGhostZeroUpdateIndex)
    {
       mGhostArray[mGhostZeroUpdateIndex]->arrayIndex = info->arrayIndex;
@@ -317,7 +324,9 @@ inline void GhostConnection::ghostPushZeroToFree(GhostInfo *info)
 {
    TNLAssert(info->arrayIndex >= mGhostZeroUpdateIndex && info->arrayIndex < mGhostFreeIndex, "Out of range arrayIndex.");
    TNLAssert(mGhostArray[info->arrayIndex] == info, "Invalid array object.");
+
    mGhostFreeIndex--;
+
    if(info->arrayIndex != mGhostFreeIndex)
    {
       mGhostArray[mGhostFreeIndex]->arrayIndex = info->arrayIndex;
