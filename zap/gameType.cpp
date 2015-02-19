@@ -2341,6 +2341,13 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
       client->getConnection()->switchedTeamCount++;  // Track number of times the player switched teams
       mGame->balanceTeams();
    }
+
+   // Some objects have gone out of scope because they are hidden from the current team.  Need to mark those somehow.
+   //for(S32 i = 0; i < getGame()->getLevel()->findObjects_fast()->size(); i++)  //{P{P
+   //{
+   //   BfObject *obj = static_cast<BfObject *>(getGame()->getLevel()->findObjects_fast()->get(i));
+   //   obj->setMaskBits(BIT(1));
+   //}
 }
 
 
