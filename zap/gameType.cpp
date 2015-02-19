@@ -2297,8 +2297,10 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
    if(team >= mLevel->getTeamCount())     // Make sure team is in range; negative values are allowed
       return;
 
-   if(client->getTeamIndex() == team)     // Don't explode if not switching team
+   if(client->getTeamIndex() == team)     // Don't change to team you're already on!
       return;
+
+   // Enough excuses!  Time to change teams!
 
    // Fire onPlayerTeamChangedEvent
    EventManager::get()->fireEvent(NULL, EventManager::PlayerTeamChangedEvent, client->getPlayerInfo());
