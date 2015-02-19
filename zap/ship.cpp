@@ -1729,14 +1729,12 @@ void Ship::onChangedClientTeam()
 
 F32 Ship::getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips)
 {
-   F32 value = Parent::getUpdatePriority(connection, updateMask, updateSkips);
+   F32 basePriority = Parent::getUpdatePriority(connection, updateMask, updateSkips);
 
    if(getControllingClient())
-      value += 2.3f;
-   else
-      value -= 2.3f;
+      return basePriority + 2.3f;
 
-   return value;
+   return basePriority - 2.3f;
 }
 
 
