@@ -2561,11 +2561,17 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    //}
 
    // Sending an empty list clears the barriers
+   // FIXME:  Why is this the chosen mechanism to do this?
    Vector<F32> v;
    s2cAddWalls(v, 0, false);
 
    for(S32 i = 0; i < mWalls.size(); i++)
-      s2cAddWalls(mWalls[i].verts, mWalls[i].width, mWalls[i].solid);
+   {
+      // If players somehow create 0-point walls, don't send them to the client
+      // or it will remove all walls previously added
+      if(mWalls[i].verts.size() != 0)
+         s2cAddWalls(mWalls[i].verts, mWalls[i].width, mWalls[i].solid);
+   }
 
    broadcastNewRemainingTime();
    s2cSetGameOver(mGameOver);
@@ -2609,7 +2615,8 @@ GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
 // Gets called multiple times as barriers are added
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAddWalls, (Vector<F32> verts, F32 width, bool solid), (verts, width, solid), NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
 {
-   // Empty wall deletes all existing walls
+   // Empty wall deletes all existing walls, called by the server at the beginning
+   // of a level to remove all walls from the ClientGame
    if(!verts.size())
       mGame->deleteObjects((TestFunc)isWallType);
    else
