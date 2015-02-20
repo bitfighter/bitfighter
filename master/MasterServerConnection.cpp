@@ -1181,19 +1181,27 @@ PlayerLevelRating *MasterServerConnection::getLevelRating(U32 databaseId, const 
 void MasterServerConnection::removeOldEntriesFromRatingsCache()
 {
    {
-      TotalLevelRatingsMap::iterator it;
+      TotalLevelRatingsMap::iterator it = totalLevelRatingsCache.begin();
 
-      for(TotalLevelRatingsMap::iterator it = totalLevelRatingsCache.begin(); it != totalLevelRatingsCache.end(); it++)
+      for(; it != totalLevelRatingsCache.end(); )
+      {
          if(it->second->isValid && !it->second->isBusy && it->second->isExpired())
-            totalLevelRatingsCache.erase(it);
+            it = totalLevelRatingsCache.erase(it);
+         else
+            ++it;
+      }
    }
 
    {
-   PlayerLevelRatingsMap::iterator it;
+      PlayerLevelRatingsMap::iterator it = playerLevelRatingsCache.begin();
 
-   for(PlayerLevelRatingsMap::iterator it = playerLevelRatingsCache.begin(); it != playerLevelRatingsCache.end(); it++)
-      if(it->second->isValid && !it->second->isBusy && it->second->isExpired())
-         playerLevelRatingsCache.erase(it);
+      for(; it != playerLevelRatingsCache.end(); )
+      {
+         if(it->second->isValid && !it->second->isBusy && it->second->isExpired())
+            it = playerLevelRatingsCache.erase(it);
+         else
+            ++it;
+      }
    }
 }
 
