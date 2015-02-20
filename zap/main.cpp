@@ -868,13 +868,14 @@ void prepareFirstLaunch()
 }
 
 
-void removeFile(const char *offendingFile)
+void removeFile(const string &offendingFile)
 {
-   // Remove game.ogg  from music folder, if it exists...
+   const char *file = offendingFile.c_str();
+
    struct stat statbuff;
-   if(stat(offendingFile, &statbuff) == 0)      // Check if exists
-      if(remove(offendingFile) != 0)
-         logprintf(LogConsumer::LogWarning, "Could not remove game.ogg from music folder during upgrade process." );
+   if(stat(file, &statbuff) == 0)      // Check if exists
+      if(remove(file) != 0)
+         logprintf(LogConsumer::LogWarning, "Could not remove file: %s, during upgrade process.", file);
 }
 
 
@@ -920,7 +921,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    {
       // Remove game.ogg  from music folder, if it exists...
       FolderManager *folderManager = settings->getFolderManager();
-      const char *offendingFile = joindir(folderManager->musicDir, "game.ogg").c_str();
+      string offendingFile = joindir(folderManager->musicDir, "game.ogg");
       
       removeFile(offendingFile);
    }
@@ -961,7 +962,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
 
       // Remove item_select.lua plugin, it was superseded by filter.lua
       FolderManager *folderManager = settings->getFolderManager();
-      const char *offendingFile = joindir(folderManager->pluginDir, "item_select.lua").c_str();
+      string offendingFile = joindir(folderManager->pluginDir, "item_select.lua");
 
       removeFile(offendingFile);
    }
