@@ -2668,17 +2668,26 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 void GameType::sendWallsToClient()
 {
    Vector<Point> v;
+   // FIXME:  Why is this the chosen mechanism to do this?
    s2cAddWalls(v, 0);     // Sending an empty list clears the barriers
 
    const Vector<DatabaseObject *> *walls = mLevel->findObjects_fast(WallItemTypeNumber);
 
    for(S32 i = 0; i < walls->size(); i++)
-      s2cAddWalls(*walls->get(i)->getOutline(), (F32)static_cast<WallItem *>(walls->get(i))->getWidth());
+   {
+      // If players somehow create 0-point walls, don't send them to the client
+      // or it will remove all walls previously added
+      if(walls->get(i)->getVertCount() != 0)
+         s2cAddWalls(*walls->get(i)->getOutline(), (F32)static_cast<WallItem *>(walls->get(i))->getWidth());
+   }
 
    const Vector<DatabaseObject *> *polyWalls = mLevel->findObjects_fast(PolyWallTypeNumber);
 
    for(S32 i = 0; i < polyWalls->size(); i++)
-      s2cAddPolyWalls(*static_cast<PolyWall *>(polyWalls->get(i))->getOutline());
+   {
+      if(polyWalls->get(i)->getVertCount() != 0)
+         s2cAddPolyWalls(*static_cast<PolyWall *>(polyWalls->get(i))->getOutline());
+   }
 }
 
 
@@ -2715,7 +2724,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAddWalls,
                             (              verts,     width), 
                             NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
 {
-   // Empty wall deletes all existing walls
+   // Empty wall deletes all existing walls, called by the server at the beginning
+   // of a level to remove all walls from the ClientGame
    if(!verts.size())
       mGame->deleteObjects((TestFunc)isWallType);
    else
