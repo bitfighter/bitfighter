@@ -198,7 +198,7 @@ void GhostConnection::prepareWritePacket()
    if(!doesGhostFrom() && !mGhosting)
       return;
 
-   if(mGhostFreeIndex > MaxGhostCount - 10)  // almost running out of GhostFreeIndex, free some objects not in scope.
+   if(mGhostFreeIndex > MaxGhostCount - 10)  // Almost running out of GhostFreeIndex, free some objects not in scope
       descopeAndDetachObjects();
 
    // First step is to check all our polled ghosts:
@@ -841,6 +841,8 @@ void GhostConnection::clearGhostInfo()
    mGhostArray.clear();
 }
 
+
+// This is called at the end of a game, when preparing a new level
 void GhostConnection::resetGhosting()
 {
    if(!doesGhostFrom())
