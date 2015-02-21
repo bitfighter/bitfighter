@@ -217,7 +217,7 @@ void LineItem::onGhostAddBeforeUpdate(GhostConnection* connection)
 bool LineItem::isVisibleToTeam(S32 teamIndex) const
 {
    // LineItems are only visible to those on the same team
-   return getTeam() == teamIndex;
+   return getTeam() == teamIndex || getTeam() == TEAM_NEUTRAL;
 }
 
 

@@ -289,7 +289,7 @@ void TextItem::onAddedToGame(Game *theGame)
 bool TextItem::isVisibleToTeam(S32 teamIndex) const
 {
    // TextItems are only visible to those on the same team
-   return getTeam() == teamIndex;
+   return getTeam() == teamIndex || getTeam() == TEAM_NEUTRAL;
 }
 
 
