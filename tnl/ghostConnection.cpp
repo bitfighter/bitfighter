@@ -45,6 +45,7 @@ GhostConnection::GhostConnection()
 
    mGhostFrom = false;
    mGhostTo = false;
+   mClearUnscopedObjects = false;
 }
 
 GhostConnection::~GhostConnection()
@@ -213,7 +214,6 @@ void GhostConnection::prepareWritePacket()
 
    for(S32 i = 0; i < mGhostZeroUpdateIndex; i++)
    {
-      // Increment the updateSkip for everyone... it's all good
       GhostInfo *walk = mGhostArray[i];
       walk->updateSkipCount++;
       if(!(walk->flags & (GhostInfo::ScopeLocalAlways)))
@@ -241,12 +241,77 @@ void GhostConnection::descopeAndDetachObjects()
    }
 }
 
+
+void GhostConnection::clearUnscopedObjects()
+{
+   // Set the flag to true... later, we'll actually do the work
+   mClearUnscopedObjects = true;
+
+   if(mClearUnscopedObjects)
+   {
+      removeUnscopedObjects();
+      mClearUnscopedObjects = false;
+   }
+
+}
+
+
+void GhostConnection::removeUnscopedObjects()
+{
+   markAllObjectsAsOutOfScope(false);     // Set all objects to being out-of-scope
+   performScopeQuery();                   // Mark any objects that are actually in-scope
+   detatchOutOfScopeObjects();            // Get rid of any objects that were not so-marked
+}
+
+
+void GhostConnection::markAllObjectsAsOutOfScope(bool updateSkipCount)
+{
+   for(S32 i = mGhostZeroUpdateIndex; i < mGhostFreeIndex; i++)
+   {
+      GhostInfo *walk = mGhostArray[i];
+
+      if(walk->flags & GhostInfo::ScopeLocalAlways)
+         continue;
+
+      walk->flags &= ~GhostInfo::InScope;
+
+      if(updateSkipCount)
+         walk->updateSkipCount++;
+   }
+}
+
+
+void GhostConnection::performScopeQuery()
+{
+   if(mScopeObject)
+      mScopeObject->performScopeQuery(this);
+}
+
+
+void GhostConnection::detatchOutOfScopeObjects()
+{
+   for(S32 i = mGhostZeroUpdateIndex; i < mGhostFreeIndex; i++)
+   {
+      GhostInfo *walk = mGhostArray[i];
+
+      if(walk->flags & GhostInfo::ScopeLocalAlways)
+         continue;
+
+      if(walk->flags & GhostInfo::InScope)
+         continue;
+
+      detachObject(walk);
+   }
+}
+
+
 bool GhostConnection::isDataToTransmit()
 {
    // Once we've run the scope query - if there are no objects that need to be updated,
    // we return false
    return Parent::isDataToTransmit() || mGhostZeroUpdateIndex != 0;
 }
+
 
 void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
 {
@@ -852,11 +917,14 @@ void GhostConnection::resetGhosting()
    
    mGhosting = false;
    mScoping = false;
+   mClearUnscopedObjects = false;
+
    rpcEndGhosting();
    mGhostingSequence++;
    clearGhostInfo();
    //TNLAssert(validateGhostArray(), "Invalid ghost array!");
 }
+
 
 //-----------------------------------------------------------------------------
 

@@ -121,6 +121,20 @@ void checkObjectsWhenBothPlayersAreOnRed(ServerGame *serverGame, ClientGame *blu
 }
 
 
+void checkObjectsWhenBothPlayersAreOnBlue(ServerGame *serverGame, ClientGame *blue, ClientGame *red)
+{
+   SCOPED_TRACE("BothPlayersAreOnBlue");
+   {
+      SCOPED_TRACE("Blue Line");
+      testObjectTransmission(LineTypeNumber, serverGame, 1, blue, 1, red, 1);
+   }
+   {
+      SCOPED_TRACE("Red Text");
+      testObjectTransmission(TextItemTypeNumber, serverGame, 1, blue, 0, red, 0);
+   }
+}
+
+
 void checkObjectsWhenNeutral(ServerGame *serverGame, ClientGame *blue, ClientGame *red)
 {
    SCOPED_TRACE("Objects are Neutral");
@@ -221,19 +235,31 @@ TEST_F(ObjectTest, TestItemPropagation)
       testObjectTransmission(TextItemTypeNumber, serverGame, 1, blue, 0, red, 1);
    }
 
-   // At the moment, chaning a player's team won't delete objects that are no longer in scope for team reasons,
-   // such as TextItems and LineItems until those items have been updated somehow.  Which they never are.  Bummer.
-   //
-   //// Now change the player's team from blue to red
-   //blue->changeOwnTeam(1);
-   //EXPECT_EQ(0, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 0 (change hasn't propagated yet)";
-   //gamePair.idle(10, 5);     // Let things settle
-   //EXPECT_EQ(1, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 1 (change should have propagated)";
+   // Now change the player's team from blue to red
+   blue->changeOwnTeam(1);
+   EXPECT_EQ(0, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 0 (change hasn't propagated yet)";
+   gamePair.idle(10, 5);     // Let things settle
+   EXPECT_EQ(1, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 1 (change should have propagated)";
 
-   //EXPECT_EQ(1, serverGame->getClientInfos()->get(0)->getTeamIndex());
-   //EXPECT_EQ(1, serverGame->getClientInfos()->get(1)->getTeamIndex());
+   EXPECT_EQ(1, serverGame->getClientInfos()->get(0)->getTeamIndex());
+   EXPECT_EQ(1, serverGame->getClientInfos()->get(1)->getTeamIndex());
 
-   //checkObjectsWhenBothPlayersAreOnRed(serverGame, blue, red);
+   checkObjectsWhenBothPlayersAreOnRed(serverGame, blue, red);
+
+
+   // And put both players on blue
+   blue->changeOwnTeam(0);
+   red->changeOwnTeam(0);
+
+   EXPECT_EQ(1, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 1 (change hasn't propagated yet)";
+   EXPECT_EQ(1, red->getLocalRemoteClientInfo()->getTeamIndex())  << "Expect this client to be on team 1 (change hasn't propagated yet)";
+   gamePair.idle(10, 5);     // Let things settle
+   EXPECT_EQ(0, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 0 (change should have propagated)";
+   EXPECT_EQ(0, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 0 (change should have propagated)";
+
+   EXPECT_EQ(0, serverGame->getClientInfos()->get(0)->getTeamIndex());
+   EXPECT_EQ(0, serverGame->getClientInfos()->get(1)->getTeamIndex());
+   checkObjectsWhenBothPlayersAreOnBlue(serverGame, blue, red);
 
    // Make items neutral and see if they propagate properly
    fillVector.clear();
