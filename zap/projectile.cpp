@@ -1833,7 +1833,7 @@ void Seeker::renderItem(const Point &pos) const
 
 bool Seeker::shouldRender() const
 {
-   return isCollisionEnabled();  // (exploded) always disables collision.
+   return !mExploded;
 }
 
 
