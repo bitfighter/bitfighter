@@ -96,8 +96,7 @@ F32 LineItem::getEditorRadius(F32 currentScale) const
 void LineItem::render() const
 {
 #ifndef ZAP_DEDICATED
-   if(shouldRender())
-      renderLine(getOutline(), getColor());
+   renderLine(getOutline(), getColor());
 #endif
 }
 
