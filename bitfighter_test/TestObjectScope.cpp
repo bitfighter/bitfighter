@@ -25,6 +25,30 @@ namespace Zap {
 using namespace std;
 
 
+typedef S32 Results[3];
+
+struct TestInfo {
+   string itemToTest;
+   S32 objectTypeNumber;
+   Results startingCondition;
+   Results itemMovedToRed;
+   Results itemMovedToBlue;
+   Results playersMovedToRed;
+   Results playersMovedToBlue;
+   Results itemMovedToNeutral;
+   Results itemsMovedToHostile;
+};
+
+
+TestInfo itemsToTestArr[] =
+{     //                                                                      start      item to red |item to blue|plyrs on red|plyrs on blue |neut. items |host. items 
+   {"RepairItem 0 76.5 20",                             RepairItemTypeNumber, {1, 1, 1},   {1, 1, 1},   {1, 1, 1},   {1, 1, 1},   {1, 1, 1},   {1, 1, 1},   {1, 1, 1}},
+   {"TextItem 0 -127.5 0 127.5 0 57.845 \"Blue text\"", TextItemTypeNumber,   {1, 1, 0},   {1, 0, 1},   {1, 1, 0},   {1, 1, 1},   {1, 0, 0},   {1, 1, 1},   {1, 0, 0}},
+   {"LineItem 0 2 Global -127.5 229.5 0 153",           LineTypeNumber,       {1, 1, 1},   {1, 1, 1},   {1, 1, 1},   {1, 1, 1},   {1, 1, 1},   {1, 1, 1},   {1, 1, 1}},   // Global -- visible on every team
+   {"LineItem 0 2 -127.5 229.5 0 153 127.5 204",        LineTypeNumber,       {1, 1, 0},   {1, 0, 1},   {1, 1, 0},   {1, 1, 1},   {1, 0, 0},   {1, 1, 1},   {1, 0, 0}},   // Not global -- visible to own team only
+   {"Zone 178.5 51 178.5 127.5 408 127.5 408 51",       ZoneTypeNumber,       {1, 0, 0},   {1, 0, 0},   {1, 0, 0},   {1, 0, 0},   {1, 0, 0},   {1, 0, 0},   {1, 0, 0}}
+};
+
 
 void testObjectTransmission(S32 objTypeNumber, ServerGame *serverGame, S32 severCount,
                                                ClientGame *blue,       S32 blueCount,
@@ -41,212 +65,144 @@ void testObjectTransmission(S32 objTypeNumber, ServerGame *serverGame, S32 sever
    fillVector.clear();
    red->getLevel()->findObjects(objTypeNumber, fillVector);
    EXPECT_EQ(redCount, fillVector.size()) << "Red client";
-   fillVector.clear();
 }
 
 
-void checkObjects(ServerGame *serverGame, ClientGame *blue, ClientGame *red)
+void testScope(ServerGame *serverGame, ClientGame *blue, ClientGame *red, const TestInfo &testInfo, const Results &results)
 {
-   {
-      SCOPED_TRACE("RepairItem");
-      testObjectTransmission(RepairItemTypeNumber, serverGame, 1, blue, 1, red, 1);
-   }
-   {
-      SCOPED_TRACE("Blue Line");
-      testObjectTransmission(LineTypeNumber, serverGame, 1, blue, 1, red, 0);
-   }
-   {
-      SCOPED_TRACE("Red Text");
-      testObjectTransmission(TextItemTypeNumber, serverGame, 1, blue, 0, red, 1);
-   }
-   {
-      SCOPED_TRACE("Zone");
-      testObjectTransmission(ZoneTypeNumber, serverGame, 1, blue, 0, red, 0);
-   }
+   testObjectTransmission(testInfo.objectTypeNumber, 
+                          serverGame, results[0], 
+                          blue,       results[1], 
+                          red,        results[2]);
 }
 
 
-void checkObjectsWhenBothPlayersAreOnRed(ServerGame *serverGame, ClientGame *blue, ClientGame *red)
-{
-   SCOPED_TRACE("BothPlayersAreOnRed");
-   {
-      SCOPED_TRACE("RepairItem");
-      testObjectTransmission(RepairItemTypeNumber, serverGame, 1, blue, 1, red, 1);
-   }
-   {
-      SCOPED_TRACE("Blue Line");
-      testObjectTransmission(LineTypeNumber, serverGame, 1, blue, 0, red, 0);
-   }
-   {
-      SCOPED_TRACE("Red Text");
-      testObjectTransmission(TextItemTypeNumber, serverGame, 1, blue, 1, red, 1);
-   }
-   {
-      SCOPED_TRACE("Zone");
-      testObjectTransmission(ZoneTypeNumber, serverGame, 1, blue, 0, red, 0);
-   }
-}
+Vector<TestInfo> testInfos = Vector<TestInfo>(itemsToTestArr, ARRAYSIZE(itemsToTestArr));
 
-
-void checkObjectsWhenBothPlayersAreOnBlue(ServerGame *serverGame, ClientGame *blue, ClientGame *red)
-{
-   SCOPED_TRACE("BothPlayersAreOnBlue");
-   {
-      SCOPED_TRACE("Blue Line");
-      testObjectTransmission(LineTypeNumber, serverGame, 1, blue, 1, red, 1);
-   }
-   {
-      SCOPED_TRACE("Red Text");
-      testObjectTransmission(TextItemTypeNumber, serverGame, 1, blue, 0, red, 0);
-   }
-}
-
-
-void checkObjectsWhenNeutral(ServerGame *serverGame, ClientGame *blue, ClientGame *red)
-{
-   SCOPED_TRACE("Objects are Neutral");
-   {
-      SCOPED_TRACE("Blue Line");
-      testObjectTransmission(LineTypeNumber, serverGame, 1, blue, 1, red, 1);
-   }
-   {
-      SCOPED_TRACE("Red Text");
-      testObjectTransmission(TextItemTypeNumber, serverGame, 1, blue, 1, red, 1);
-   }
-}
-
-void checkObjectsWhenHostile(ServerGame *serverGame, ClientGame *blue, ClientGame *red)
-{
-   SCOPED_TRACE("Objects are Hostile");
-   {
-      SCOPED_TRACE("Blue Line");
-      testObjectTransmission(LineTypeNumber, serverGame, 1, blue, 0, red, 0);
-   }
-   {
-      SCOPED_TRACE("Red Text");
-      testObjectTransmission(TextItemTypeNumber, serverGame, 1, blue, 0, red, 0);
-   }
-}
 
 
 TEST(ObjectScopeTest, TestItemPropagation)
 {
-   // Create a GamePair using our text item code, with 2 clients; one will be red, the other blue.
-   // The test will confirm which players get the red text item, the blue line, and the zone object.
-   string levelCode = getLevelCodeForItemPropagationTests();
-
-   GamePair gamePair(levelCode, 2);
-
-   // First, ensure we have two players, one red, one blue
-   ServerGame *serverGame = gamePair.server;
-
-   ASSERT_EQ(2, serverGame->getPlayerCount());
-   ASSERT_EQ(Colors::blue.toHexString(), serverGame->getTeamColor(0).toHexString());
-   ASSERT_EQ(Colors::red.toHexString(), serverGame->getTeamColor(1).toHexString());
-
-   // Do the following rigamarole to break dependency on assumption client0 is blue and client1 is red
-   ClientGame *client0 = gamePair.getClient(0);
-   ClientGame *client1 = gamePair.getClient(1);
-
-   ClientGame *blue = (serverGame->getTeamColor(client0->getLocalRemoteClientInfo()->getTeamIndex()).toHexString() == 
-                              Colors::blue.toHexString()) ? client0 : client1;
-      
-   ClientGame *red = (serverGame->getTeamColor(client0->getLocalRemoteClientInfo()->getTeamIndex()).toHexString() ==
-                              Colors::red.toHexString()) ? client0 : client1;
-
-   ASSERT_EQ(Colors::blue.toHexString(), serverGame->getTeamColor(blue->getLocalRemoteClientInfo()->getTeamIndex()).toHexString());
-   ASSERT_EQ(Colors::red.toHexString(), serverGame->getTeamColor(red->getLocalRemoteClientInfo()->getTeamIndex()).toHexString());
-
-   ASSERT_FALSE(serverGame->getClientInfos()->get(0)->getConnection()->mInCommanderMap);
-   ASSERT_FALSE(serverGame->getClientInfos()->get(1)->getConnection()->mInCommanderMap);
-
-   // Now that we know which client is which, we can check to see which objects are available where
-
+   for(S32 i = 0; i < testInfos.size(); i++)
    {
-      SCOPED_TRACE("Not in CommandersMap");
-      checkObjects(serverGame, blue, red);
-   }
+      // Create a GamePair using our text item code, with 2 clients; one will be red, the other blue.
+      // The test will confirm which players get the red text item, the blue line, and the zone object.
+      string levelCode = getLevelCodeForItemPropagationTests(testInfos[i].itemToTest);
 
-   // Turn on cmdrs map... should not affect results
-   red->setUsingCommandersMap(true);
-   blue->setUsingCommandersMap(true);
+      GamePair gamePair(levelCode, 2);
 
-   gamePair.idle(10, 5);     // Let things settle
+      // First, ensure we have two players, one red, one blue
+      ServerGame *serverGame = gamePair.server;
 
-   ASSERT_TRUE(serverGame->getClientInfos()->get(0)->getConnection()->mInCommanderMap);
-   ASSERT_TRUE(serverGame->getClientInfos()->get(1)->getConnection()->mInCommanderMap);
+      ASSERT_EQ(2, serverGame->getPlayerCount());
+      ASSERT_EQ(Colors::blue.toHexString(), serverGame->getTeamColor(0).toHexString());
+      ASSERT_EQ(Colors::red.toHexString(), serverGame->getTeamColor(1).toHexString());
 
-   {
-      SCOPED_TRACE("In CommandersMap");
-      checkObjects(serverGame, blue, red);
-   }
+      // Do the following rigamarole to break dependency on assumption client0 is blue and client1 is red
+      ClientGame *client0 = gamePair.getClient(0);
+      ClientGame *client1 = gamePair.getClient(1);
 
-   Vector<DatabaseObject *> fillVector;
+      ClientGame *blue = (serverGame->getTeamColor(client0->getLocalRemoteClientInfo()->getTeamIndex()).toHexString() ==
+         Colors::blue.toHexString()) ? client0 : client1;
 
-   // Change the textitem from red to blue
-   serverGame->getLevel()->findObjects(TextItemTypeNumber, fillVector);
-   ASSERT_EQ(1, fillVector.size());
-   BfObject *obj = static_cast<BfObject *>(fillVector[0]);
-   obj->setTeam(0);     // Blue team
+      ClientGame *red = (serverGame->getTeamColor(client0->getLocalRemoteClientInfo()->getTeamIndex()).toHexString() ==
+         Colors::red.toHexString()) ? client0 : client1;
 
-   gamePair.idle(10, 5);     // Let things settle
-   {
-      SCOPED_TRACE("Blue Text");
-      testObjectTransmission(TextItemTypeNumber, serverGame, 1, blue, 1, red, 0);
-   }
-   obj->setTeam(1);          // Back to red
+      ASSERT_EQ(Colors::blue.toHexString(), serverGame->getTeamColor(blue->getLocalRemoteClientInfo()->getTeamIndex()).toHexString());
+      ASSERT_EQ(Colors::red.toHexString(), serverGame->getTeamColor(red->getLocalRemoteClientInfo()->getTeamIndex()).toHexString());
 
-   gamePair.idle(10, 5);     // Let things settle
-   {
-      SCOPED_TRACE("Red Text (after revert)");
-      testObjectTransmission(TextItemTypeNumber, serverGame, 1, blue, 0, red, 1);
-   }
+      ASSERT_FALSE(serverGame->getClientInfos()->get(0)->getConnection()->mInCommanderMap);
+      ASSERT_FALSE(serverGame->getClientInfos()->get(1)->getConnection()->mInCommanderMap);
 
-   // Now change the player's team from blue to red
-   blue->changeOwnTeam(1);
-   EXPECT_EQ(0, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 0 (change hasn't propagated yet)";
-   gamePair.idle(10, 5);     // Let things settle
-   EXPECT_EQ(1, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 1 (change should have propagated)";
+      // Now that we know which client is which, we can check to see which objects are available where
+      {
+         SCOPED_TRACE("Not in CommandersMap // " + testInfos[i].itemToTest);
+         testScope(serverGame, blue, red, testInfos[i], testInfos[i].startingCondition);
+      }
 
-   EXPECT_EQ(1, serverGame->getClientInfos()->get(0)->getTeamIndex());
-   EXPECT_EQ(1, serverGame->getClientInfos()->get(1)->getTeamIndex());
+      // Turn on cmdrs map... should not affect results
+      red->setUsingCommandersMap(true);
+      blue->setUsingCommandersMap(true);
 
-   checkObjectsWhenBothPlayersAreOnRed(serverGame, blue, red);
+      gamePair.idle(10, 5);     // Let things settle
 
+      ASSERT_TRUE(serverGame->getClientInfos()->get(0)->getConnection()->mInCommanderMap);
+      ASSERT_TRUE(serverGame->getClientInfos()->get(1)->getConnection()->mInCommanderMap);
+      {
+         SCOPED_TRACE("In CommandersMap // " + testInfos[i].itemToTest);
+         testScope(serverGame, blue, red, testInfos[i], testInfos[i].startingCondition);
+      }
 
-   // And put both players on blue
-   blue->changeOwnTeam(0);
-   red->changeOwnTeam(0);
+      Vector<DatabaseObject *> fillVector;
 
-   EXPECT_EQ(1, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 1 (change hasn't propagated yet)";
-   EXPECT_EQ(1, red->getLocalRemoteClientInfo()->getTeamIndex())  << "Expect this client to be on team 1 (change hasn't propagated yet)";
-   gamePair.idle(10, 5);     // Let things settle
-   EXPECT_EQ(0, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 0 (change should have propagated)";
-   EXPECT_EQ(0, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 0 (change should have propagated)";
+      // Change the textitem from red to blue
+      serverGame->getLevel()->findObjects(testInfos[i].objectTypeNumber, fillVector);
+      ASSERT_EQ(1, fillVector.size());
+      BfObject *obj = static_cast<BfObject *>(fillVector[0]);
+      obj->setTeam(0);     // Blue team
 
-   EXPECT_EQ(0, serverGame->getClientInfos()->get(0)->getTeamIndex());
-   EXPECT_EQ(0, serverGame->getClientInfos()->get(1)->getTeamIndex());
-   checkObjectsWhenBothPlayersAreOnBlue(serverGame, blue, red);
+      gamePair.idle(10, 5);     // Let things settle
+      {
+         SCOPED_TRACE("Item Moved To Blue // " + testInfos[i].itemToTest);
+         testScope(serverGame, blue, red, testInfos[i], testInfos[i].itemMovedToBlue);
+      }
+      obj->setTeam(1);          // Back to red
 
-   // Make items neutral and see if they propagate properly
-   fillVector.clear();
-   serverGame->getLevel()->findObjects(TextItemTypeNumber, fillVector);
-   serverGame->getLevel()->findObjects(LineTypeNumber, fillVector);
-   ASSERT_EQ(2, fillVector.size());
-   for(S32 i = 0; i < fillVector.size(); i++)
-      static_cast<BfObject *>(fillVector[i])->setTeam(TEAM_NEUTRAL);
-   gamePair.idle(10, 5);     // Let things settle
-   {
-      SCOPED_TRACE("Neutral!!");
-      checkObjectsWhenNeutral(serverGame, blue, red);
-   }
+      gamePair.idle(10, 5);     // Let things settle
+      {
+         SCOPED_TRACE("Item Moved To Red // " + testInfos[i].itemToTest);
+         testScope(serverGame, blue, red, testInfos[i], testInfos[i].itemMovedToRed);
+      }
 
-   for(S32 i = 0; i < fillVector.size(); i++)
-      static_cast<BfObject *>(fillVector[i])->setTeam(TEAM_HOSTILE);
-   gamePair.idle(10, 5);     // Let things settle
-   {
-      SCOPED_TRACE("Hostile!!");
-      checkObjectsWhenHostile(serverGame, blue, red);
+      // Now change the player's team from blue to red
+      blue->changeOwnTeam(1);
+      EXPECT_EQ(0, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 0 (change hasn't propagated yet)";
+      gamePair.idle(10, 5);     // Let things settle
+      EXPECT_EQ(1, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 1 (change should have propagated)";
+
+      EXPECT_EQ(1, serverGame->getClientInfos()->get(0)->getTeamIndex());
+      EXPECT_EQ(1, serverGame->getClientInfos()->get(1)->getTeamIndex());
+      {
+         SCOPED_TRACE("Blue Player Moved To Red, Items On Red // " + testInfos[i].itemToTest);
+         testScope(serverGame, blue, red, testInfos[i], testInfos[i].playersMovedToRed);
+      }
+
+      // And put both players on blue
+      blue->changeOwnTeam(0);
+      red->changeOwnTeam(0);
+
+      EXPECT_EQ(1, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 1 (change hasn't propagated yet)";
+      EXPECT_EQ(1, red->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 1 (change hasn't propagated yet)";
+      gamePair.idle(10, 5);     // Let things settle
+      EXPECT_EQ(0, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 0 (change should have propagated)";
+      EXPECT_EQ(0, blue->getLocalRemoteClientInfo()->getTeamIndex()) << "Expect this client to be on team 0 (change should have propagated)";
+
+      EXPECT_EQ(0, serverGame->getClientInfos()->get(0)->getTeamIndex());
+      EXPECT_EQ(0, serverGame->getClientInfos()->get(1)->getTeamIndex());
+      {
+         SCOPED_TRACE("Both Players Moved To Blue, Items On Red // " + testInfos[i].itemToTest);
+         testScope(serverGame, blue, red, testInfos[i], testInfos[i].playersMovedToBlue);
+      }
+
+      // Make items neutral and see if they propagate properly
+      fillVector.clear();
+      serverGame->getLevel()->findObjects(testInfos[i].objectTypeNumber, fillVector);
+      ASSERT_EQ(1, fillVector.size());
+      for(S32 j = 0; j < fillVector.size(); j++)
+         static_cast<BfObject *>(fillVector[j])->setTeam(TEAM_NEUTRAL);
+      gamePair.idle(10, 5);     // Let things settle
+      {
+         SCOPED_TRACE("Items On Neutral // " + testInfos[i].itemToTest);
+         testScope(serverGame, blue, red, testInfos[i], testInfos[i].itemMovedToNeutral);
+      }
+
+      for(S32 j = 0; j < fillVector.size(); j++)
+         static_cast<BfObject *>(fillVector[j])->setTeam(TEAM_HOSTILE);
+      gamePair.idle(10, 5);     // Let things settle
+      {
+         SCOPED_TRACE("Items On Hostile // " + testInfos[i].itemToTest);
+         testScope(serverGame, blue, red, testInfos[i], testInfos[i].itemsMovedToHostile);
+      }
    }
 }
 

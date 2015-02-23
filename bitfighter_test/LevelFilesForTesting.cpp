@@ -166,13 +166,8 @@ static void initialize()
       "Specials\n"
       "MinPlayers 1\n"
       "MaxPlayers 3\n"
-      "RepairItem 0 76.5 20\n"
-      "TextItem 1 -127.5 0 127.5 0 57.845 \"Red text\"\n"
-      "LineItem 0 2 Global -127.5 229.5 0 153 127.5 204\n"
-      "Zone 178.5 51 178.5 127.5 408 127.5 408 51\n"
    );
    levelInfos.push_back(LevelInfo("Item propagation test level", BitmatchGame, 1, 3, ""));
-
 }
 
 
@@ -205,10 +200,10 @@ string getLevelCodeForTestingEngineer1()
 }
 
 
-string getLevelCodeForItemPropagationTests()
+string getLevelCodeForItemPropagationTests(const string &object)
 {
    initialize();
-   return levelCodes[7];
+   return levelCodes[7] + object + "\n";
 }
 
 
