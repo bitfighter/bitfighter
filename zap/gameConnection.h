@@ -345,8 +345,8 @@ public:
    TNL_DECLARE_NETCONNECTION(GameConnection);
 
    ///// Testing
-   friend class ObjectTest;
-   FRIEND_TEST(ObjectTest, TestItemPropagation);
+   friend class ObjectScopeTest;
+   FRIEND_TEST(ObjectScopeTest, TestItemPropagation);
 
 };
 
