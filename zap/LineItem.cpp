@@ -420,7 +420,7 @@ S32 LineItem::lua_setGlobal(lua_State *L)
  *
  * @brief Returns the LineItem's global parameter.
  *
- * @return `true` if global is enabled, `false` if not.
+ * @return 'true' if global is enabled, 'false if not.
  */
 S32 LineItem::lua_getGlobal(lua_State *L)
 {
