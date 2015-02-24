@@ -1403,7 +1403,7 @@ ForceFieldProjector::~ForceFieldProjector()
    LUAW_DESTRUCTOR_CLEANUP;
 
    if(mNeedToCleanUpField)
-      delete mField;
+      delete mField.getPointer();
 }
 
 
