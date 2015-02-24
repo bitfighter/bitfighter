@@ -1705,7 +1705,7 @@ S32 ForceFieldProjector::lua_setTeam(lua_State *L)
 
       DatabaseObject *collObj = ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end);
 
-      delete mField;
+      delete mField.getPointer();
       mField = new ForceField(getTeam(), start, end);
       mField->addToGame(getGame(), getGame()->getLevel());
    }
