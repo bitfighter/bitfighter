@@ -19,7 +19,7 @@ using namespace std;
 
 
 // Uncomment to test compiling on Windows
-//#define GAME_JOLT
+#define GAME_JOLT
 //#define fork() false;
 //#define execl() 
 //#ifndef TNL_OS_WIN32
@@ -43,7 +43,7 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
 
    DatabaseWriter databaseWriter = DbWriter::getDatabaseWriter(settings);
 
-   string databaseName = settings->getVal<string>("Phpbb3Database");
+   string databaseName = settings->getVal<string>(Master::IniKey::Phpbb3Database);
    Vector<string> credentialStrings = databaseWriter.getGameJoltCredentialStrings(databaseName, quotedNameList, 1);
 
    string urlList = "";
@@ -85,10 +85,10 @@ static void onPlayerAuthenticatedOrQuit(const MasterSettings *settings, const Ma
 {
 #ifdef GAME_JOLT  
 
-   if(!settings->getVal<YesNo>("UseGameJolt"))
+   if(!settings->getVal<YesNo>(Master::IniKey::UseGameJolt))
       return;
 
-   string secret = settings->getVal<string>("GameJoltSecret");
+   string secret = settings->getVal<string>(Master::IniKey::GameJoltSecret);
 
    if(secret == "")
    {
@@ -140,10 +140,10 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
 {
 #ifdef GAME_JOLT    
 
-   if(!settings->getVal<YesNo>("UseGameJolt"))
+   if(!settings->getVal<YesNo>(Master::IniKey::UseGameJolt))
       return;
 
-   string secret = settings->getVal<string>("GameJoltSecret");
+   string secret = settings->getVal<string>(Master::IniKey::GameJoltSecret);
 
    if(secret == "")
    {
@@ -197,10 +197,10 @@ void onPlayerAwardedAchievement(const MasterSettings *settings, const string &aw
 {
 #ifdef GAME_JOLT  
 
-   if(!settings->getVal<YesNo>("UseGameJolt"))
+   if(!settings->getVal<YesNo>(Master::IniKey::UseGameJolt))
       return;
 
-   string secret = settings->getVal<string>("GameJoltSecret");
+   string secret = settings->getVal<string>(Master::IniKey::GameJoltSecret);
 
    if(secret == "")
    {
