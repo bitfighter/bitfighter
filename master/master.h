@@ -111,6 +111,7 @@ private:
    U32 mStartTime;
    MasterSettings *mSettings;
    NetInterface *mNetInterface;
+   string mLastMotd;
 
    Timer mCleanupTimer;
    Timer mReadConfigTimer;
@@ -126,6 +127,9 @@ private:
    Vector<MasterServerConnection *> mClientList;
 
    NetInterface *createNetInterface() const;
+
+   bool motdHasChanged() const;
+   void broadcastMotd() const;
 
 public:
    MasterServer(MasterSettings *settings);      // Constructor

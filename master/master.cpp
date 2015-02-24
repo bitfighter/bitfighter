@@ -165,6 +165,8 @@ MasterServer::MasterServer(MasterSettings *settings)
    mPingGameJoltTimer.reset(THIRTY_SECONDS);    // Game Jolt recommended frequency... sessions time out after 2 mins
 
    mJsonWritingSuspended = false;
+
+   mLastMotd = mSettings->getMotd();            // When this changes, we'll broadcast a new MOTD to clients
    
    mDatabaseAccessThread = new DatabaseAccessThread();    // Deleted in destructor
 
@@ -266,6 +268,13 @@ NetInterface *MasterServer::getNetInterface() const
 }
 
 
+// Returns true if motd has changed since we were last here
+bool MasterServer::motdHasChanged() const
+{
+   return mSettings->getMotd() != mLastMotd;
+}
+
+
 void MasterServer::idle(const U32 timeDelta)
 {
    mNetInterface->checkIncomingPackets();
@@ -276,6 +285,12 @@ void MasterServer::idle(const U32 timeDelta)
    {
       mSettings->readConfigFile();
       mReadConfigTimer.reset();
+
+      if(motdHasChanged())
+      {
+         broadcastMotd();
+         mLastMotd = mSettings->getMotd();
+      }
    }
 
    // Cleanup, cleanup, everybody cleanup!
@@ -354,6 +369,20 @@ void MasterServer::idle(const U32 timeDelta)
    }
 
    mDatabaseAccessThread->idle();
+}
+
+
+// Send MOTD to all connected clients -- used when MOTD has changed
+void MasterServer::broadcastMotd() const
+{
+   S32 latestVersion = mSettings->getVal<U32>(IniKey::LatestReleasedBuildVersion);
+
+   for(S32 i = 0; i < mClientList.size(); i++)
+   {
+      // Only send the new message to the most recent clients
+      if(mClientList[i]->getClientBuild() == latestVersion)
+         mClientList[i]->sendMotd();
+   }
 }
 
 

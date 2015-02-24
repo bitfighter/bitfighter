@@ -1486,6 +1486,12 @@ void MasterServerConnection::sendMotd()
 }
 
 
+U32 MasterServerConnection::getClientBuild() const
+{
+   return mClientBuild;
+}
+
+
 Vector<Address> gListAddressHide;  // --> move to settings struct
 
 
@@ -1673,6 +1679,7 @@ void MasterServerConnection::writeConnectAccept(BitStream *stream)
    if(mCMProtocolVersion >= 8)
       stream->write(mClientId);
 }
+
 
 void MasterServerConnection::onConnectionEstablished()
 {
@@ -1931,12 +1938,16 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mChangeName, (StringTableEn
       mMaster->writeJsonNow();  // update server name in ".json"
    }
 }
+
+
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mServerDescription, (StringTableEntry descr))
 {
    mServerDescr = descr;
 }
 
+
 TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, true);
+
 
 Vector< GameConnectRequest* > MasterServerConnection::gConnectList;
 Vector<SafePtr<MasterServerConnection> > MasterServerConnection::gLeaveChatTimerList;

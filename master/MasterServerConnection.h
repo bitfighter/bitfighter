@@ -111,17 +111,12 @@ private:
    U16 mGamesPlayed;
    U16 getGamesPlayed();
 
-   void sendMotd();
-
    MasterConnectionType mConnectionType;
    static MasterServer *mMaster;
 
    void sendM2cQueryServersResponse(U32 queryId, const Vector<IPAddress> &addresses, const Vector<S32> &serverIdList);
 
 
-public:
-
-   ///
 public:
    static Vector<GameConnectRequest *> gConnectList;
 
@@ -225,6 +220,8 @@ public:
 
    static void setMasterServer(MasterServer *master);
 
+   void sendMotd();
+
    S32 getClientId() const;
 
    MasterServerConnection *findClient(Nonce &clientId);   // Should be const, but that won't compile for reasons not yet determined!!
@@ -271,7 +268,7 @@ public:
    PlayerLevelRating *getLevelRating(U32 databaseId, const StringTableEntry &mPlayerOrServerName);
 
    static void removeOldEntriesFromRatingsCache();          // Keep our caches from growing too large
-
+   U32 getClientBuild() const;
 
    void sendPlayerLevelRating(U32 databaseId, S32 rating);  // Helper that wraps m2cSendPlayerLevelRating
 

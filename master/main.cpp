@@ -184,7 +184,7 @@ int main(int argc, const char **argv)
       lastTime = currentTime;
 
       // Sane sanity check
-      if(timeDelta > 5000)
+      if(timeDelta > FIVE_SECONDS)
          timeDelta = 10;
 
       masterServer.idle(timeDelta);
