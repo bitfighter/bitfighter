@@ -143,11 +143,12 @@ MasterServerConnection::PHPBB3AuthenticationStatus MasterServerConnection::verif
    //          2 = alphanumeric (only allows alphanumeric characters in the username)
    //
    // We'll use level 1 for now, so users can put special characters in their username
-   authenticator.initialize(mMaster->getSetting<string>("MySqlAddress"), 
-                              mMaster->getSetting<string>("DbUsername"), 
-                              mMaster->getSetting<string>("DbPassword"), 
-                              mMaster->getSetting<string>("Phpbb3Database"), 
-                              mMaster->getSetting<string>("Phpbb3TablePrefix"), 
+   
+   authenticator.initialize(mMaster->getSetting<string>(Master::IniKey::MySqlAddress), 
+                              mMaster->getSetting<string>(Master::IniKey::DbUsername), 
+                              mMaster->getSetting<string>(Master::IniKey::DbPassword), 
+                              mMaster->getSetting<string>(Master::IniKey::Phpbb3Database), 
+                              mMaster->getSetting<string>(Master::IniKey::Phpbb3TablePrefix), 
                               1);
 
    S32 errorcode;

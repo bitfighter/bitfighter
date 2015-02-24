@@ -19,7 +19,7 @@ using namespace std;
 
 
 // Uncomment to test compiling on Windows
-#define GAME_JOLT
+//#define GAME_JOLT
 //#define fork() false;
 //#define execl() 
 //#ifndef TNL_OS_WIN32
