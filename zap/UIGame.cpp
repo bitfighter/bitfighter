@@ -1968,7 +1968,7 @@ void GameUserInterface::VoiceRecorder::render() const
       U32 totalLineCount = 50;
 
       // Render low/high volume lines
-      glColor(1, 1 ,1);
+      glColor(Colors::white);
       F32 vertices[] = {
             10.0f,                        130.0f,
             10.0f,                        145.0f,
