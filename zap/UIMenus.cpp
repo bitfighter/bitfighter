@@ -949,6 +949,7 @@ MainMenuUserInterface::MainMenuUserInterface(ClientGame *game, UIManager *uiMana
    mMenuTitle = "";
    mMotd = "";
    mMenuSubTitle = "";
+   mMotdPos = S32_MIN;
 
    mRenderInstructions = false;
 
@@ -989,8 +990,6 @@ void MainMenuUserInterface::onActivate()
 void MainMenuUserInterface::setMOTD(const string &motd)
 {
    mMotd = motd;
-
-   mMotdArriveTime = getGame()->getCurrentTime();    // Used for scrolling the message
 }
 
 
@@ -1004,25 +1003,20 @@ void MainMenuUserInterface::setNeedToUpgrade(bool needToUpgrade)
 }
 
 
+static const S32 MotdFontSize = 20;
+
 void MainMenuUserInterface::render() const
 {
    S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
-   static const S32 MOTD_VERT_POS = 540;
+   static const S32 MotdVertPos = 540;
 
    // Draw our Message-Of-The-Day, if we have one
    if(!mMotd.empty())
    {
-      // Draw message, scrolling
-      U32 width = getStringWidth(20, mMotd);
-      U32 totalWidth = width + canvasWidth;
-      U32 pixelsPerSec = 100;
-      U32 delta = getGame()->getCurrentTime() - mMotdArriveTime;
-      delta = U32(delta * pixelsPerSec * 0.001) % totalWidth;
-
       FontManager::pushFontContext(MotdContext);
       glColor(Colors::white);
-      drawString(canvasWidth - delta, MOTD_VERT_POS, 20, mMotd.c_str());
+      drawString(mMotdPos, MotdVertPos, MotdFontSize, mMotd.c_str());
       FontManager::popFontContext();
    }
 
@@ -1045,6 +1039,19 @@ void MainMenuUserInterface::idle(U32 timeDelta)
    {
       mColorTimer2.reset(ColorTime2);
       mTransDir2 = !mTransDir2;
+   }
+
+
+   // Update MOTD scroller
+   static const U32 PixelsPerSec = 100;
+   S32 width = getStringWidth(MotdFontSize, mMotd);
+
+   if(!mMotd.empty())
+   {
+      if(mMotdPos < -1 * width)
+         mMotdPos = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+      else
+         mMotdPos -= timeDelta * PixelsPerSec * 0.001;
    }
 }
 
