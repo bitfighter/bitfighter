@@ -20,13 +20,12 @@
 #include "Console.h"             // Our console object
 #include "Cursor.h"
 #include "DisplayManager.h"
-#include "EnergyGaugeRenderer.h"
 #include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "FontManager.h"
 #include "gameObjectRender.h"
 #include "GameRecorderPlayback.h"
 #include "gameType.h"
-#include "HealthGaugeRenderer.h"
+#include "GaugeRenderer.h"
 #include "Intervals.h"
 #include "Level.h"
 #include "projectile.h"          // For SpyBug

@@ -129,14 +129,13 @@ set(CLIENT_SOURCES
 	EditorTeam.cpp
 	EditorUndoManager.cpp
 	EditorWorkUnit.cpp
-	EnergyGaugeRenderer.cpp
 	engineerHelper.cpp
 	Event.cpp
 	FontManager.cpp
 	FpsRenderer.cpp
 	gameObjectRender.cpp
 	GameRecorderPlayback.cpp
-	HealthGaugeRenderer.cpp
+	GaugeRenderer.cpp
 	HelpItemManager.cpp
 	HelperManager.cpp
 	helperMenu.cpp
