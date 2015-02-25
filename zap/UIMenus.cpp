@@ -989,7 +989,7 @@ void MainMenuUserInterface::setMOTD(const char *motd)
 {
    strncpy(mMOTD, motd, MOTD_LEN);     
 
-   motdArriveTime = getGame()->getCurrentTime();    // Used for scrolling the message
+   mMotdArriveTime = getGame()->getCurrentTime();    // Used for scrolling the message
 }
 
 
@@ -1016,7 +1016,7 @@ void MainMenuUserInterface::render() const
       U32 width = getStringWidth(20, mMOTD);
       U32 totalWidth = width + canvasWidth;
       U32 pixelsPerSec = 100;
-      U32 delta = getGame()->getCurrentTime() - motdArriveTime;
+      U32 delta = getGame()->getCurrentTime() - mMotdArriveTime;
       delta = U32(delta * pixelsPerSec * 0.001) % totalWidth;
 
       FontManager::pushFontContext(MotdContext);

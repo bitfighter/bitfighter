@@ -155,7 +155,7 @@ class MainMenuUserInterface : public MenuUserInterfaceWithIntroductoryAnimation
 
 private:
    char mMOTD[MOTD_LEN];
-   U32 motdArriveTime;
+   U32 mMotdArriveTime;
    Timer mColorTimer;
    Timer mColorTimer2;
    
