@@ -23,6 +23,8 @@ TEST(MasterTest, Sanity)
    MasterSettings masterSettings("");     // Don't read from an INI file
    MasterServer master(&masterSettings);
 
+   
+
    Address addr;
    GameSettingsPtr gameSettings = GameSettingsPtr(new GameSettings());
 
