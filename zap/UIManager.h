@@ -215,7 +215,7 @@ public:
    void gotPasswordOrPermissionsReply(const ClientGame *game, const char *message);
 
    // MainMenuUi
-   void setMOTD(const char *motd);
+   void setMOTD(const string &motd);
    void setNeedToUpgrade(bool needToUpgrade);
 
    // PlayerUI

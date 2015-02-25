@@ -251,7 +251,7 @@ public:
    bool isOnVoiceMuteList(const string &name);
 
    void connectionToServerRejected(const char *reason);
-   void setMOTD(const char *motd);
+   void setMOTD(const string &motd);
    void setNeedToUpgrade(bool needToUpgrade);
 
    void setHighScores(const Vector<StringTableEntry> &groupNames, const Vector<string> &names, const Vector<string> &scores) const;

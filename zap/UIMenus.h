@@ -154,7 +154,7 @@ class MainMenuUserInterface : public MenuUserInterfaceWithIntroductoryAnimation
    typedef MenuUserInterfaceWithIntroductoryAnimation Parent;
 
 private:
-   char mMOTD[MOTD_LEN];
+   string mMotd;
    U32 mMotdArriveTime;
    Timer mColorTimer;
    Timer mColorTimer2;
@@ -178,7 +178,7 @@ public:
    void onEscape();
    void render() const;
    void idle(U32 timeDelta); 
-   void setMOTD(const char *motd);              // Message of the day, from Master
+   void setMOTD(const string &motd);            // Message of the day, from Master
    void onActivate();
    void setNeedToUpgrade(bool needToUpgrade);   // Is client in need of an upgrade?
 

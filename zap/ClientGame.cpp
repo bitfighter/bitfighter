@@ -1178,7 +1178,7 @@ void ClientGame::connectionToServerRejected(const char *reason)
 }
 
 
-void ClientGame::setMOTD(const char *motd)
+void ClientGame::setMOTD(const string &motd)
 {
    mUIManager->setMOTD(motd); 
 }

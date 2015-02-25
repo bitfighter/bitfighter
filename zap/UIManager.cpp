@@ -701,7 +701,7 @@ void UIManager::renderLevelListDisplayer()
 }
 
 
-void UIManager::setMOTD(const char *motd)
+void UIManager::setMOTD(const string &motd)
 {
    getUI<MainMenuUserInterface>()->setMOTD(motd); 
 }

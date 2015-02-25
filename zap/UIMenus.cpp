@@ -947,8 +947,9 @@ MainMenuUserInterface::MainMenuUserInterface(ClientGame *game, UIManager *uiMana
    Parent(game, uiManager)
 {
    mMenuTitle = "";
-   mMOTD[0] = 0;
+   mMotd = "";
    mMenuSubTitle = "";
+
    mRenderInstructions = false;
 
    mNeedToUpgrade = false;           // Assume we're up-to-date until we hear from the master
@@ -985,9 +986,9 @@ void MainMenuUserInterface::onActivate()
 
 
 // Set the MOTD we received from the master
-void MainMenuUserInterface::setMOTD(const char *motd)
+void MainMenuUserInterface::setMOTD(const string &motd)
 {
-   strncpy(mMOTD, motd, MOTD_LEN);     
+   mMotd = motd;
 
    mMotdArriveTime = getGame()->getCurrentTime();    // Used for scrolling the message
 }
@@ -1010,10 +1011,10 @@ void MainMenuUserInterface::render() const
    static const S32 MOTD_VERT_POS = 540;
 
    // Draw our Message-Of-The-Day, if we have one
-   if(strcmp(mMOTD, "") != 0)
+   if(!mMotd.empty())
    {
       // Draw message, scrolling
-      U32 width = getStringWidth(20, mMOTD);
+      U32 width = getStringWidth(20, mMotd);
       U32 totalWidth = width + canvasWidth;
       U32 pixelsPerSec = 100;
       U32 delta = getGame()->getCurrentTime() - mMotdArriveTime;
@@ -1021,7 +1022,7 @@ void MainMenuUserInterface::render() const
 
       FontManager::pushFontContext(MotdContext);
       glColor(Colors::white);
-      drawString(canvasWidth - delta, MOTD_VERT_POS, 20, mMOTD);
+      drawString(canvasWidth - delta, MOTD_VERT_POS, 20, mMotd.c_str());
       FontManager::popFontContext();
    }
 
