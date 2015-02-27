@@ -19,18 +19,13 @@
 
 namespace Zap {   namespace UI {
 
-static const S32 GaugeWidth = 200;
-static const S32 SafetyLineExtend = 4;      // How far the safety line extends above/below the main bar
-
-static void renderGauge(F32 ether, F32 maxEther, const F32 colors[], S32 bottomMargin, S32 height, F32 safetyThresh = -1)
+void GaugeRenderer::render(F32 ether, F32 maxEther, const F32 colors[], S32 bottomMargin, S32 height, F32 safetyThresh)
 {
-   static const S32 GaugeLeftMargin = UserInterface::horizMargin;
-
    // Coordinates of upper left corner of main guage bar
-   const F32 xul = F32(GaugeLeftMargin);
+   const F32 xul = F32(GaugeRenderer::GaugeLeftMargin);
    const F32 yul = F32(DisplayManager::getScreenInfo()->getGameCanvasHeight() - bottomMargin - height);
 
-   F32 full = ether / maxEther * GaugeWidth;
+   F32 full = ether / maxEther * GaugeRenderer::GaugeWidth;
 
    // Main bar outline
    F32 vertices[] = {
@@ -50,7 +45,7 @@ static void renderGauge(F32 ether, F32 maxEther, const F32 colors[], S32 bottomM
    // Show safety line... or not as the case may be
    if(safetyThresh >= 0)
    {
-      S32 cutoffx = safetyThresh * GaugeWidth / maxEther;
+      F32 cutoffx = safetyThresh * GaugeWidth / maxEther;
 
       glColor(Colors::yellow);
       drawVertLine(xul + cutoffx, yul - SafetyLineExtend - 1, yul + height + SafetyLineExtend);
@@ -60,9 +55,6 @@ static void renderGauge(F32 ether, F32 maxEther, const F32 colors[], S32 bottomM
 
 void EnergyGaugeRenderer::render(S32 energy)
 {
-   static const S32 GaugeHeight = 15;
-   static const S32 GaugeBottomMargin = UserInterface::vertMargin + 10;
-
    // Create fade
    static const F32 colors[] = {
       Colors::blue.r, Colors::blue.g, Colors::blue.b, 1,   // Fade from
@@ -71,7 +63,7 @@ void EnergyGaugeRenderer::render(S32 energy)
       Colors::cyan.r, Colors::cyan.g, Colors::cyan.b, 1,
    };
 
-   renderGauge(energy, Ship::EnergyMax, colors, GaugeBottomMargin, GaugeHeight);
+   GaugeRenderer::render(energy, Ship::EnergyMax, colors, GaugeBottomMargin, GaugeHeight);
 
 #ifdef SHOW_SERVER_SITUATION
    ServerGame *serverGame = GameManager::getServerGame();
@@ -103,7 +95,7 @@ void HealthGaugeRenderer::render(F32 health)
       Colors::paleRed.r, Colors::paleRed.g, Colors::paleRed.b, 1,
    };
 
-   renderGauge(health, 1, colors, GaugeBottomMargin, GaugeHeight);
+   GaugeRenderer::render(health, 1, colors, GaugeBottomMargin, GaugeHeight);
 }
 
 

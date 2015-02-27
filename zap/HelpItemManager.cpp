@@ -14,7 +14,7 @@
 #include "UIGame.h"              // For obtaining loadout indicator width
 #include "UIManager.h"
 #include "LoadoutIndicator.h"    // For indicator static dimensions
-#include "EnergyGaugeRenderer.h"
+#include "GaugeRenderer.h"
 #include "DisplayManager.h"          // For canvas width
 #include "ScissorsManager.h"
 
@@ -323,12 +323,12 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
    }
    else if(helpItem == EnergyGaugeItem)
    {
-      const S32 indicatorLeft  = UI::EnergyGaugeRenderer::GaugeLeftMargin - indicatorHorizontalGap;
-      const S32 indicatorRight = UI::EnergyGaugeRenderer::GaugeLeftMargin + UI::EnergyGaugeRenderer::GuageWidth + indicatorHorizontalGap;
+      const S32 indicatorLeft  = UI::GaugeRenderer::GaugeLeftMargin - indicatorHorizontalGap;
+      const S32 indicatorRight = UI::GaugeRenderer::GaugeLeftMargin + UI::GaugeRenderer::GaugeWidth + indicatorHorizontalGap;
       const S32 indicatorTop   = DisplayManager::getScreenInfo()->getGameCanvasHeight() - 
                                           (UI::EnergyGaugeRenderer::GaugeBottomMargin + 
                                            UI::EnergyGaugeRenderer::GaugeHeight + 
-                                           UI::EnergyGaugeRenderer::SafetyLineExtend + 
+                                           UI::GaugeRenderer::SafetyLineExtend + 
                                            indicatorVerticalGap);
 
       const S32 textMiddle = (textTop + textBottom) / 2;
