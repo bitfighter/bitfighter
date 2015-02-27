@@ -481,6 +481,8 @@ public:
    TNL_DECLARE_RPC(c2sClearScriptCache, ());
    TNL_DECLARE_RPC(c2sTriggerTeamChange, (StringTableEntry playerName, S32 teamIndex));
    TNL_DECLARE_RPC(c2sKickPlayer, (StringTableEntry playerName));
+   TNL_DECLARE_RPC(c2sLockTeams, (bool locked));
+   TNL_DECLARE_RPC(s2cTeamsLocked, (bool locked));
 
    TNL_DECLARE_RPC(s2cSetIsSpawnDelayed, (StringTableEntry name, bool idle));
    TNL_DECLARE_RPC(s2cSetPlayerEngineeringTeleporter, (StringTableEntry name, bool isEngineeringTeleporter));

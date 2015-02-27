@@ -77,6 +77,8 @@ namespace Zap
    { "rename",             &ChatCommands::renamePlayerHandler,       { NAME, STR },  2, ADMIN_COMMANDS,  0,  1,  {"<from>","<to>"},       "Give a player a new name" },
    { "maxbots",            &ChatCommands::setMaxBotsHandler,         { xINT },       1, ADMIN_COMMANDS,  0,  1,  {"<count>"},             "Set the maximum bots allowed for this server" },
    { "shuffle",            &ChatCommands::shuffleTeams,              { },            0, ADMIN_COMMANDS,  0,  1,  { "" },                  "Randomly reshuffle teams" },
+   { "lockteams",          &ChatCommands::lockTeams,                 { },            0, ADMIN_COMMANDS,  0,  1,  { "" },                  "Lock teams - teams same every game, players may not change" },
+   { "unlockteams",        &ChatCommands::unlockTeams,               { },            0, ADMIN_COMMANDS,  0,  1,  { "" },                  "Unlock teams - Teams revert to normal behavior" },
 #ifdef TNL_DEBUG
    { "pause",              &ChatCommands::pauseHandler,              { },            0, ADMIN_COMMANDS,  0,  1,  { "" },                  "TODO: add 'PAUSED' display while paused" },
 #endif

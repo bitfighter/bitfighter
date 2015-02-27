@@ -109,6 +109,7 @@ namespace Colors
    const Color MasterServerBlue(0.8, 0.8, 1);            // Messages about successful master server statii
    const Color HelpItemRenderColor(Colors::green);       // Render color for inline-help messages
    const Color DisabledGray(Colors::gray40);             // Color for disabled commands and menu options
+   const Color AnnounceColor(Colors::cyan);              // Color for announcements
 };
 
 }

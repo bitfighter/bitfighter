@@ -899,51 +899,81 @@ void shuffleTeams(ClientGame *game, const Vector<string> &words)
 }
 
 
+void lockTeams(ClientGame *game, const Vector<string> &words)
+{
+   if(!game->hasAdmin("!!! Need admin permissions to lock teams"))
+      return;
+
+   if(game->areTeamsLocked())
+   {
+      game->displayErrorMessage("!!! Teams already locked");
+      return;
+   }
+
+   game->getGameType()->c2sLockTeams(true);
+}
+
+
+void unlockTeams(ClientGame *game, const Vector<string> &words)
+{
+   if(!game->hasAdmin("!!! Need admin permissions to unlock teams"))
+      return;
+
+   if(!game->areTeamsLocked())
+   {
+      game->displayErrorMessage("!!! Teams not locked");
+      return;
+   }
+
+   game->getGameType()->c2sLockTeams(false);
+}
+
+
 void banPlayerHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->hasAdmin("!!! Need admin permissions to ban players"))
+   if(!game->hasAdmin("!!! Need admin permissions to ban players"))
+      return;
+
+   if(words.size() < 2)
    {
-      if(words.size() < 2)
-      {
-         game->displayErrorMessage("!!! /ban <player name> [duration in minutes]");
-         return;
-      }
-
-      ClientInfo *bannedClientInfo = game->findClientInfo(words[1].c_str());
-
-      if(!bannedClientInfo)
-      {
-         game->displayErrorMessage("!!! Player name not found");
-         return;
-      }
-
-      if(bannedClientInfo->isRobot())
-      {
-         game->displayErrorMessage("!!! Cannot ban robots, you silly fool!");
-         return;
-      }
-
-      // This must be done before the admin check below
-      if(bannedClientInfo->isOwner())
-      {
-         game->displayErrorMessage("!!! Cannot ban a server owner");
-         return;
-      }
-
-      if(bannedClientInfo->isAdmin())
-      {
-         // Owners can ban admins
-         if(!game->hasOwner("!!! Cannot ban an admin"))
-            return;
-      }
-
-      S32 banDuration = 0;
-      if (words.size() > 2)
-         banDuration = atoi(words[2].c_str());
-
-      if(game->getGameType())
-         game->getGameType()->c2sBanPlayer(words[1].c_str(), banDuration);
+      game->displayErrorMessage("!!! /ban <player name> [duration in minutes]");
+      return;
    }
+
+   ClientInfo *bannedClientInfo = game->findClientInfo(words[1].c_str());
+
+   if(!bannedClientInfo)
+   {
+      game->displayErrorMessage("!!! Player name not found");
+      return;
+   }
+
+   if(bannedClientInfo->isRobot())
+   {
+      game->displayErrorMessage("!!! Cannot ban robots, you silly fool!");
+      return;
+   }
+
+   // This must be done before the admin check below
+   if(bannedClientInfo->isOwner())
+   {
+      game->displayErrorMessage("!!! Cannot ban a server owner");
+      return;
+   }
+
+   if(bannedClientInfo->isAdmin())
+   {
+      // Owners can ban admins
+      if(!game->hasOwner("!!! Cannot ban an admin"))
+         return;
+   }
+
+   S32 banDuration = 0;
+   if (words.size() > 2)
+      banDuration = atoi(words[2].c_str());
+
+   if(game->getGameType())
+      game->getGameType()->c2sBanPlayer(words[1].c_str(), banDuration);
 }
 
 

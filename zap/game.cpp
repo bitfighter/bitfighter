@@ -82,6 +82,7 @@ Game::Game(const Address &theBindAddress, GameSettingsPtr settings)
 
    mCurrentTime = 0;
    mGameSuspended = false;
+   mTeamsLocked = false;
 
    mRobotCount = 0;
    mPlayerCount = 0;
@@ -480,6 +481,18 @@ void Game::setLevel(const boost::shared_ptr<Level> &level)
 {
    mLevel = level;
    mLevel->onAddedToGame(this);
+}
+
+
+bool Game::areTeamsLocked() const
+{
+   return mTeamsLocked;
+}
+
+
+void Game::setTeamsLocked(bool locked)
+{
+   mTeamsLocked = locked;
 }
 
 

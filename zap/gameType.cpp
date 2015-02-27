@@ -3306,7 +3306,6 @@ GAMETYPE_RPC_C2S(GameType, c2sTriggerTeamChange, (StringTableEntry playerName, S
 }
 
 
-
 GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry kickeeName), (kickeeName))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
@@ -3352,6 +3351,39 @@ GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry kickeeName), (kickee
    messageVals.push_back(sourceClientInfo->getName());    // --> Name of player doing the administering
 
    broadcastMessage(GameConnection::ColorInfo, SFXIncomingMessage, "%e0 was kicked from the game by %e1.", messageVals);
+}
+
+
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sLockTeams, (bool locked), (locked), NetClassGroupGameMask, RPCGuaranteed, RPCToGhostParent, 0)
+{
+   GameConnection *source = (GameConnection *)getRPCSourceConnection();
+   ClientInfo *sourceClientInfo = source->getClientInfo();
+
+   if(!sourceClientInfo->isAdmin())
+      return;
+
+   if(getGame()->areTeamsLocked() == locked)
+      return;
+
+   getGame()->setTeamsLocked(locked);
+
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+      RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cTeamsLocked, (locked));
+      mGame->getClientInfo(i)->getConnection()->postNetEvent(theEvent);
+   }
+   
+}
+
+
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cTeamsLocked, (bool locked), (locked), NetClassGroupGameMask, RPCGuaranteed, RPCToGhost, 0)
+{
+   mGame->setTeamsLocked(locked);
+
+   if(locked)
+      mGame->displayMessage(Colors::AnnounceColor, "Teams have been locked");
+   else
+      mGame->displayMessage(Colors::AnnounceColor, "Teams are now unlocked");
 }
 
 

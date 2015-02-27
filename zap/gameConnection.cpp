@@ -1008,7 +1008,7 @@ Color colors[] =
    Colors::cmdChatColor,   // ColorRed  
    Colors::green,          // ColorGreen
    Colors::blue,           // ColorBlue
-   Colors::cyan,           // ColorAqua
+   Colors::AnnounceColor,  // ColorAqua, AnnounceColor
    Colors::yellow,         // ColorYellow
    Color(0.6f, 1, 0.8f),   // ColorNuclearGreen, SuccessColor
 };

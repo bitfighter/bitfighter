@@ -175,6 +175,7 @@ class Game
 private:
    U32 mTimeUnconnectedToMaster;          // Time that we've been disconnected to the master
    bool mHaveTriedToConnectToMaster;
+   bool mTeamsLocked;
 
    S32 mPlayerCount;     // Humans only, please!
    S32 mRobotCount;
@@ -320,6 +321,9 @@ public:
 
    void setLevel(Level *level);
    void setLevel(const boost::shared_ptr<Level> &level);
+
+   bool areTeamsLocked() const;
+   void setTeamsLocked(bool locked);
    
    virtual void addWallItem(WallItem *wallItem, GridDatabase *database);     
 

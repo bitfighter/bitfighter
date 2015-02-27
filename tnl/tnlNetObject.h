@@ -400,8 +400,8 @@ inline U32 NetObject::getHashId() const
 
 /// Direction that a NetObject RPC method call should travel.
 enum NetObjectRPCDirection {
-   RPCToGhost = 1,
-   RPCToGhostParent = 2,
+   RPCToGhost = 1,         // Server ==> Client
+   RPCToGhostParent = 2    // Client ==> Server
 };
 
 /// Event class for handling RPC method invocations on NetObjects.

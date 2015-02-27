@@ -126,6 +126,8 @@ void shuffleTeams              (ClientGame *game, const Vector<string> &args);
 void downloadMapHandler        (ClientGame *game, const Vector<string> &args);
 void rateMapHandler            (ClientGame *game, const Vector<string> &args);
 void pauseHandler              (ClientGame *game, const Vector<string> &args);
+void lockTeams                 (ClientGame *game, const Vector<string> &args);
+void unlockTeams               (ClientGame *game, const Vector<string> &args);
 
 
 // The following are only available in debug builds!
