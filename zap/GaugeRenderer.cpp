@@ -63,7 +63,7 @@ void EnergyGaugeRenderer::render(S32 energy)
       Colors::cyan.r, Colors::cyan.g, Colors::cyan.b, 1,
    };
 
-   GaugeRenderer::render(energy, Ship::EnergyMax, colors, GaugeBottomMargin, GaugeHeight);
+   GaugeRenderer::render(energy, Ship::EnergyMax, colors, GaugeBottomMargin, GaugeHeight, Ship::EnergyCooldownThreshold);
 
 #ifdef SHOW_SERVER_SITUATION
    ServerGame *serverGame = GameManager::getServerGame();
