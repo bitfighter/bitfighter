@@ -107,8 +107,6 @@ ClientGame::~ClientGame()
 // Gets run when we join a game that we ourselves are hosting.  Is also used in tests for creating linked pairs of client/server games.
 void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
 {
-   mClientInfo->setRole(ClientInfo::RoleOwner);       // Local connection is always owner
-
    mUIManager->activateGameUI();
 
    GameConnection *gameConnection = new GameConnection(this);
@@ -132,7 +130,7 @@ void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
 // Also get here when hosting a game
 void ClientGame::joinRemoteGame(Address remoteAddress, bool isFromMaster)
 {
-   mClientInfo->setRole(ClientInfo::RoleNone);        // Start out with no permissions, server will upgrade if the proper pws are provided
+   mClientInfo->setRole(ClientInfo::RoleNone);  // Start out with no permissions, server will upgrade if the proper pws are provided
    
    MasterServerConnection *connToMaster = getConnectionToMaster();
 
@@ -1284,12 +1282,14 @@ bool ClientGame::hasOwner(const char *failureMessage)
 
 
 // Returns true if we have admin privs, displays error message and returns false if not
-bool ClientGame::hasAdmin(const char *failureMessage)
+bool ClientGame::hasAdmin(const char *failureMessage) const
 {
    if(mClientInfo->isAdmin())
       return true;
    
-   displayErrorMessage(failureMessage);
+   if(failureMessage != "")
+      displayErrorMessage(failureMessage);
+
    return false;
 }
 
@@ -1743,7 +1743,23 @@ void ClientGame::changeOwnTeam(S32 teamIndex) const
    if(!getGameType())
       return;
 
+   // Disqualifying reasons
+   if(!hasAdmin() && areTeamsLocked() && getPlayerCount() > 1)
+      return;
+
    getGameType()->c2sChangeTeams(teamIndex);
+}
+
+
+// Server has told us that the teams are now locked (or unlocked).  Act accordingly!
+void ClientGame::setTeamsLocked(bool locked)
+{
+   Parent::setTeamsLocked(locked);
+
+   if(locked)
+      displayMessage(Colors::AnnounceColor, "Teams have been locked");
+   else
+      displayMessage(Colors::AnnounceColor, "Teams are now unlocked");
 }
 
 

@@ -95,6 +95,9 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
    mNetInterface->setAllowsConnections(true);
    mMasterUpdateTimer.reset(UpdateServerStatusTime);
 
+   // How long will teams stay locked after last admin departs?
+   mNoAdminAutoUnlockTeamsTimer.setPeriod(TeamHistoryManager::LockedTeamsNoAdminsGracePeriod);
+
    mSuspendor = NULL;
 
    mGameInfo = NULL;
@@ -553,51 +556,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    mRobotManager.onLevelChanged();
 
-   bool loaded = false;
-
-   while(!loaded)
-   {
-      mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel); // Set mCurrentLevelIndex to refer to the next level we'll play
-
-      logprintf(LogConsumer::ServerFilter, "Loading %s [%s]... \\", getLevelNameFromIndex(mCurrentLevelIndex).getString(), 
-                                                                    mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
-
-      // Load the level for real this time (we loaded it once before, when we started the server, but only to grab a few params)
-      if(loadLevel())
-      {
-         loaded = true;
-         logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
-      }
-      else
-      {
-         logprintf(LogConsumer::ServerFilter, "FAILED!");
-
-         if(mHostOnServer)
-         {
-            makeEmptyLevelIfNoGameType();
-            loaded = true;
-         }
-         else if(mLevelSource->getLevelCount() > 1)
-            removeLevel(mCurrentLevelIndex);
-         else
-         {
-            // No more working levels to load...  quit?
-            logprintf(LogConsumer::LogError, "All the levels I was asked to load are corrupt.  Exiting!");
-
-            mShutdownTimer.reset(1); 
-            mShuttingDown = true;
-            mShutdownReason = "All the levels I was asked to load are corrupt or missing; "
-                              "Sorry dude -- hosting mode shutting down.";
-
-            // To avoid crashing...
-            makeEmptyLevelIfNoGameType();
-
-            return;
-         }
-      }
-   }
-
-   computeWorldObjectExtents();                       // Compute world Extents nice and early
+   if(!loadNextLevel(nextLevel))
+      return;
 
    if(!mGameRecorderServer && !mShuttingDown && getSettings()->getSetting<YesNo>(IniKey::GameRecording))
       mGameRecorderServer = new GameRecorderServer(this);
@@ -660,7 +620,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    {
       ClientInfo *clientInfo = getClientInfo(i);   // Could be a robot when level have "Robot" line, or a levelgen adds one
          
-      getGameType()->serverAddClient(clientInfo);
+      getGameType()->serverAddClient(clientInfo, areTeamsLocked() ? &mTeamHistoryManager : NULL);
 
       GameConnection *connection = clientInfo->getConnection();
       if(connection)
@@ -674,12 +634,137 @@ void ServerGame::cycleLevel(S32 nextLevel)
    for(S32 i = 0; i < getClientCount(); i++)
       EventManager::get()->fireEvent(NULL, EventManager::PlayerJoinedEvent, getClientInfo(i)->getPlayerInfo());
 
-
    mRobotManager.balanceTeams();
 
    sendLevelStatsToMaster();     // Give the master some information about this level for its database
 
    suspendIfNoActivePlayers();   // Does nothing if we're already suspended
+}
+
+
+// Find the next valid level, and load it with loadLevel()
+bool ServerGame::loadNextLevel(S32 nextLevel)
+{
+   bool loaded = false;
+
+   while(!loaded)
+   {
+      mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel); // Set mCurrentLevelIndex to refer to the next level we'll play
+
+      logprintf(LogConsumer::ServerFilter, "Loading %s [%s]... \\", getLevelNameFromIndex(mCurrentLevelIndex).getString(),
+         mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
+
+      // Load the level for real this time (we loaded it once before, when we started the server, but only to grab a few params)
+      if(loadLevel())
+      {
+         loaded = true;
+         logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
+      }
+      else
+      {
+         logprintf(LogConsumer::ServerFilter, "FAILED!");
+
+         if(mHostOnServer)
+         {
+            makeEmptyLevelIfNoGameType();
+            loaded = true;
+         }
+         else if(mLevelSource->getLevelCount() > 1)
+            removeLevel(mCurrentLevelIndex);
+         else
+         {
+            // No more working levels to load...  quit?
+            logprintf(LogConsumer::LogError, "All the levels I was asked to load are corrupt.  Exiting!");
+
+            mShutdownTimer.reset(1);
+            mShuttingDown = true;
+            mShutdownReason = "All the levels I was asked to load are corrupt or missing; "
+               "Sorry dude -- hosting mode shutting down.";
+
+            // To avoid crashing...
+            makeEmptyLevelIfNoGameType();
+
+            return false;
+         }
+      }
+   }
+
+   computeWorldObjectExtents();                       // Compute world Extents nice and early
+   return true;
+}
+
+
+// Returns true if the level is successfully loaded, false if it wasn't
+bool ServerGame::loadLevel()
+{
+   mLevel = boost::shared_ptr<Level>(mLevelSource->getLevel(mCurrentLevelIndex));
+
+   TNLAssert(!mLevel->getAddedToGame(), "Can't reuse Levels!");
+
+   // NULL level means file was not loaded.  Danger Will Robinson!
+   if(!mLevel)
+   {
+      logprintf(LogConsumer::LogError, "Error: Cannot load %s",
+         mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
+      return false;
+   }
+
+   mLevel->onAddedToGame(this);     // Gets the TeamManager up and running and populated, adds bots
+
+
+   // Add walls first, so engineered items will have something to snap to
+   Vector<DatabaseObject *> walls;
+   mLevel->findObjects(WallItemTypeNumber, walls);
+
+   for(S32 i = 0; i < walls.size(); i++)
+      addWallItem(static_cast<WallItem *>(walls[i]), NULL);        // Just does this --> Barrier::constructBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
+
+
+   Vector<Point> points;
+   mLevel->buildWallEdgeGeometry(points);
+
+
+   const Vector<DatabaseObject *> objects = *mLevel->findObjects_fast();
+   for(S32 i = 0; i < objects.size(); i++)
+   {
+      // Walls have already been handled in addWallItem call above
+      if(isWallType(objects[i]->getObjectTypeNumber()))
+         continue;
+
+      BfObject *object = static_cast<BfObject *>(objects[i]);
+
+      // Mark the item as being a ghost (client copy of a server object) so that the object will not trigger server-side tests
+      // The only time this code is run on the client is when loading into the editor.
+      if(!isServer())
+         object->markAsGhost();
+
+      object->addToGame(this, NULL);
+   }
+
+   mLevel->addBots(this);
+
+   // Levelgens:
+   // Run level's levelgen script (if any)
+   runLevelGenScript(getGameType()->getScriptName());
+
+   // Global levelgens are run on every level.  Run any that are defined.
+   Vector<string> scriptList;
+   parseString(getSettings()->getSetting<string>(IniKey::GlobalLevelScript), scriptList, '|');
+
+   for(S32 i = 0; i < scriptList.size(); i++)
+      runLevelGenScript(scriptList[i]);
+
+   // Fire an update to make sure certain events run on level start (like onShipSpawned)
+   EventManager::get()->update();
+
+   // Check after script, script might add or delete Teams
+   if(mLevel->makeSureTeamCountIsNotZero())
+      logprintf(LogConsumer::LogLevelError, "Warning: Missing Team in %s",
+      mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
+
+   getGameType()->onLevelLoaded();
+
+   return true;
 }
 
 
@@ -752,6 +837,31 @@ void ServerGame::resetAllClientTeams()
 }
 
 
+// Because team locking will last longer than one game, and because our GameType object goes 
+// away at the end of each game, we need to track locking here.  Since we are tracking it here,
+// we might as well do our client-side annoucements here as well.
+void ServerGame::setTeamsLocked(bool locked)
+{
+   if(locked == areTeamsLocked())
+      return;
+
+   Parent::setTeamsLocked(locked);
+
+   getGameType()->announceTeamsLocked(locked);
+
+   if(locked)
+   { 
+      // Save current team configuration
+      for(S32 i = 0; i < mClientInfos.size(); i++)
+         mTeamHistoryManager.addPlayer(mClientInfos[i]->getName().getString(), 
+                                       getTeamCount(), 
+                                       mClientInfos[i]->getTeamIndex());
+   }
+   else
+      mTeamHistoryManager.onTeamsUnlocked();
+}
+
+
 // Currently only used by tests to temporarily disable bot leveling while setting up various team configurations
 bool ServerGame::getAutoLevelingEnabled() const
 {
@@ -782,8 +892,8 @@ static bool checkIfLevelIsOk(bool skipUploads, const LevelInfo &levelInfo, S32 p
    if(playerCount > maxPlayers)
       return false;
 
-   if(skipUploads)   // Skip levels starting with our upload prefix (currently "upload_")
-      if(!strncmp(levelInfo.filename.c_str(), UploadPrefix.c_str(), UploadPrefix.length()))
+   if(skipUploads)   // Skip levels starting with UploadPrefix (currently "upload_")
+      if(strncmp(levelInfo.filename.c_str(), UploadPrefix.c_str(), UploadPrefix.length()) == 0)
          return false;
 
    return true;
@@ -879,10 +989,12 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
    return currentLevelIndex;
 }
 
+
 bool ServerGame::isOrIsAboutToBeSuspended()
 {
    return mGameSuspended || mTimeToSuspend.getCurrent() > 0;
 }
+
 
 bool ServerGame::clientCanSuspend(ClientInfo *info)
 {
@@ -999,96 +1111,6 @@ void ServerGame::unsuspendIfActivePlayers()
 }
 
 
-// Need to handle both forward and backward slashes... will return pathname with trailing delimeter.
-inline string getPathFromFilename(const string &filename)
-{
-   std::size_t pos1 = filename.rfind("/");
-   std::size_t pos2 = filename.rfind("\\");
-
-   if(pos1 == string::npos)
-      pos1 = 0;
-
-   if(pos2 == string::npos)
-      pos2 = 0;
-
-   return filename.substr( 0, max(pos1, pos2) + 1 );
-}
-
-
-// Returns true if the level is successfully loaded, false if it wasn't
-bool ServerGame::loadLevel()
-{
-   mLevel = boost::shared_ptr<Level>(mLevelSource->getLevel(mCurrentLevelIndex));
-
-   TNLAssert(!mLevel->getAddedToGame(), "Can't reuse Levels!");
-
-   // NULL level means file was not loaded.  Danger Will Robinson!
-   if(!mLevel)
-   {
-      logprintf(LogConsumer::LogError, "Error: Cannot load %s", 
-                                        mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
-      return false;
-   }
-
-   mLevel->onAddedToGame(this);     // Gets the TeamManager up and running and populated, adds bots
-
-
-   // Add walls first, so engineered items will have something to snap to
-   Vector<DatabaseObject *> walls;
-   mLevel->findObjects(WallItemTypeNumber, walls);
-
-   for(S32 i = 0; i < walls.size(); i++)
-      addWallItem(static_cast<WallItem *>(walls[i]), NULL);        // Just does this --> Barrier::constructBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
-
-
-   Vector<Point> points;
-   mLevel->buildWallEdgeGeometry(points);
-
-
-   const Vector<DatabaseObject *> objects = *mLevel->findObjects_fast();
-   for(S32 i = 0; i < objects.size(); i++)
-   {
-      // Walls have already been handled in addWallItem call above
-      if(isWallType(objects[i]->getObjectTypeNumber()))
-         continue;
-
-      BfObject *object = static_cast<BfObject *>(objects[i]);
-
-      // Mark the item as being a ghost (client copy of a server object) so that the object will not trigger server-side tests
-      // The only time this code is run on the client is when loading into the editor.
-      if(!isServer())
-         object->markAsGhost();
-
-      object->addToGame(this, NULL);
-   }
-
-   mLevel->addBots(this);
-
-   // Levelgens:
-   // Run level's levelgen script (if any)
-   runLevelGenScript(getGameType()->getScriptName());
-
-   // Global levelgens are run on every level.  Run any that are defined.
-   Vector<string> scriptList;
-   parseString(getSettings()->getSetting<string>(IniKey::GlobalLevelScript), scriptList, '|');
-
-   for(S32 i = 0; i < scriptList.size(); i++)
-      runLevelGenScript(scriptList[i]);
-
-   // Fire an update to make sure certain events run on level start (like onShipSpawned)
-   EventManager::get()->update();
-
-   // Check after script, script might add or delete Teams
-   if(mLevel->makeSureTeamCountIsNotZero())
-      logprintf(LogConsumer::LogLevelError, "Warning: Missing Team in %s", 
-                                            mLevelSource->getLevelFileDescriptor(mCurrentLevelIndex).c_str());
-
-   getGameType()->onLevelLoaded();
-
-   return true;
-}
-
-
 void ServerGame::runLevelGenScript(const string &scriptName)
 {
    if(scriptName == "")    // No script specified!
@@ -1151,15 +1173,25 @@ Vector<Vector<S32> > ServerGame::getCategorizedPlayerCountsByTeam() const
 
 // ClientInfos will be stored as RefPtrs, so they will be deleted when all refs are removed... 
 // In other words, ServerGame will manage cleanup.
+// Called from onConnectionEstablished_server()
+// onClientJoined // onPlayerJoined
 void ServerGame::addClient(ClientInfo *clientInfo)
 {
    TNLAssert(!clientInfo->isRobot(), "This only gets called for players");
 
    GameConnection *conn = clientInfo->getConnection();
 
-   // If client has level change or admin permissions, send a list of levels and their types to the connecting client
-   if(clientInfo->isLevelChanger() || clientInfo->isAdmin())
+   // If client has level change send a list of levels and their types to the connecting client
+   if(clientInfo->isLevelChanger())
       conn->sendLevelList();
+
+   // Let client know that teams are locked... if in fact they are locked.  
+   // Also tell the TeamHistoryManager that we're here.
+   if(areTeamsLocked())
+   {
+      conn->s2cTeamsLocked(true);
+      mTeamHistoryManager.onPlayerJoined(clientInfo->getName().getString());
+   }
 
    // If we're shutting down, display a notice to the user... but still let them connect normally
    if(mShuttingDown)
@@ -1168,8 +1200,12 @@ void ServerGame::addClient(ClientInfo *clientInfo)
             "Sorry -- server shutting down", false);
 
    TNLAssert(getGameType(), "No gametype?");     // Added 12/20/2013 by wat to try to understand if this ever happens
-   getGameType()->serverAddClient(clientInfo);
+
+   getGameType()->serverAddClient(clientInfo, areTeamsLocked() ? &mTeamHistoryManager : NULL);
    addToClientList(clientInfo);
+
+   if(anyAdminsInGame())
+      mNoAdminAutoUnlockTeamsTimer.clear();
 
    mRobotManager.balanceTeams();
    
@@ -1181,10 +1217,32 @@ void ServerGame::addClient(ClientInfo *clientInfo)
 }
 
 
+bool ServerGame::anyAdminsInGame() const
+{
+   for(S32 i = 0; i < mClientInfos.size(); i++)
+      if(mClientInfos[i]->isAdmin())
+         return true;
+
+   return false;
+}
+
+
+// onClientQuit // onPlayerQuit
 void ServerGame::removeClient(ClientInfo *clientInfo)
 {
    TNLAssert(getGameType(), "Expect GameType here!");
    getGameType()->removeClient(clientInfo);
+
+   if(getPlayerCount() == 0)     // Last player just quit, bummer!
+      setTeamsLocked(false);     // Unlock now!
+   else
+   {
+      if(!anyAdminsInGame())
+         mNoAdminAutoUnlockTeamsTimer.reset();
+
+      if(areTeamsLocked())
+         mTeamHistoryManager.onPlayerQuit(clientInfo->getName().getString());
+   }
 
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
@@ -1210,7 +1268,7 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
             mMasterUpdateTimer.setPeriod(UpdateServerWhenHostGoesEmpty);
       }
    }
-   else if(getPlayerCount() == 0 && !mShuttingDown && isDedicated())  // only dedicated server can have zero players
+   else if(getPlayerCount() == 0 && !mShuttingDown && isDedicated())  // Only dedicated server can have zero players
       cycleLevel(mSettings->getSetting<YesNo>(IniKey::RandomLevels) ? +RANDOM_LEVEL : +NEXT_LEVEL);    // Advance to beginning of next level
    else
       mRobotManager.balanceTeams();
@@ -1530,9 +1588,13 @@ void ServerGame::idle(U32 timeDelta)
       return;
    }
 
-
    if(mGameRecorderServer)
       mGameRecorderServer->idle(timeDelta);
+
+   if(mNoAdminAutoUnlockTeamsTimer.update(timeDelta))
+      setTeamsLocked(false);
+
+   mTeamHistoryManager.idle(timeDelta);
 
    // Update to other clients right after idling everything else, so clients get more up to date information
    mNetInterface->processConnections(); 
@@ -1993,6 +2055,20 @@ void ServerGame::onObjectRemoved(BfObject *obj)
    if(mGameRecorderServer && obj->isGhostable())
       mGameRecorderServer->objectLocalClearAlways(obj);   
 }
+
+
+// We get alerted whenever a client has changed roles.  Neat!
+void ServerGame::onClientChangedRoles(ClientInfo *clientInfo)
+{
+   // Though unlikely, it is possible that player was demoted -- so don't make
+   // assumptions about his new role, or whether there are other admins in the game.
+   if(anyAdminsInGame())
+      mNoAdminAutoUnlockTeamsTimer.clear();     // Stop timer
+   else if(mNoAdminAutoUnlockTeamsTimer.getCurrent() == 0)
+      mNoAdminAutoUnlockTeamsTimer.reset();     // Start timer
+}
+
+
 GameRecorderServer *ServerGame::getGameRecorder()
 {
    return mGameRecorderServer;

@@ -106,7 +106,7 @@ namespace Zap
 };
 
 
-const S32 ChatHelper::chatCmdSize = ARRAYSIZE(chatCmds); // So instructions will now how big chatCmds is
+const S32 ChatHelper::chatCmdSize = ARRAYSIZE(chatCmds); // So instructions will know how big chatCmds is
 static const S32 CHAT_COMPOSE_FONT_SIZE = 12;
 
 static void makeCommandCandidateList();      // Forward delcaration

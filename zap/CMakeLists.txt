@@ -98,6 +98,7 @@ set(SHARED_SOURCES
 	stringUtils.cpp
 	SystemFunctions.cpp
 	teamInfo.cpp
+	TeamHistoryManager.cpp
 	Teleporter.cpp
 	TextItem.cpp
 	Timer.cpp

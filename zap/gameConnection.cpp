@@ -299,9 +299,14 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
 }
 
 
+TNL_IMPLEMENT_RPC(GameConnection, s2cTeamsLocked, (bool locked), (locked),
+   NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
+{
+   mClientGame->setTeamsLocked(locked);
+}
+
+
 const U32 maxDataBufferSize = 1024*1024*8;  // 8 MB
-
-
 
 void GameConnection::submitPassword(const char *password)
 {
@@ -428,8 +433,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
       if(!mClientInfo->isLevelChanger())
          sendLevelList();
 
-      mClientInfo->setRole(ClientInfo::RoleOwner);
-      s2cSetRole(ClientInfo::RoleOwner, true);                    // Tell client they have been granted access
+      mClientInfo->setRole(ClientInfo::RoleOwner, true);
 
       if(mSettings->getSetting<YesNo>(IniKey::AllowAdminMapUpload))
       {
@@ -453,8 +457,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
       if(!mClientInfo->isLevelChanger())
          sendLevelList();
       
-      mClientInfo->setRole(ClientInfo::RoleAdmin);               // Enter admin PW and...
-      s2cSetRole(ClientInfo::RoleAdmin, true);                   // Tell client they have been granted access
+      mClientInfo->setRole(ClientInfo::RoleAdmin, true);          // Enter admin PW and...
 
       if(mSettings->getSetting<YesNo>(IniKey::AllowAdminMapUpload))
       {
@@ -473,8 +476,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
       logprintf(LogConsumer::ServerFilter, "User [%s] granted level change permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
 
-      mClientInfo->setRole(ClientInfo::RoleLevelChanger);
-      s2cSetRole(ClientInfo::RoleLevelChanger, true);      // Tell client they have been granted access
+      mClientInfo->setRole(ClientInfo::RoleLevelChanger, true);
 
       sendLevelList();                       // Send client the level list
 
@@ -721,16 +723,14 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
          for(S32 i = 0; i < mServerGame->getClientCount(); i++)
          {
             ClientInfo *clientInfo = mServerGame->getClientInfo(i);
-            GameConnection *conn = clientInfo->getConnection();
 
             if(!clientInfo->isLevelChanger())
             {
-               clientInfo->setRole(ClientInfo::RoleLevelChanger);
+               clientInfo->setRole(ClientInfo::RoleLevelChanger, false);    // Silently
+
+               GameConnection *conn = clientInfo->getConnection();
                if(conn)
-               {
                   conn->sendLevelList();
-                  conn->s2cSetRole(ClientInfo::RoleLevelChanger, false);     // Silently
-               }
             }
          }
       }
@@ -739,15 +739,12 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
          for(S32 i = 0; i < mServerGame->getClientCount(); i++)
          {
             ClientInfo *clientInfo = mServerGame->getClientInfo(i);
-            GameConnection *conn = clientInfo->getConnection();
 
             if(clientInfo->isLevelChanger() && (!clientInfo->isAdmin()))
             {
-               clientInfo->setRole(ClientInfo::RoleNone);
-               if(conn)
-                  conn->s2cSetRole(ClientInfo::RoleNone, false);
+               clientInfo->setRole(ClientInfo::RoleNone, false);
 
-               // Announce the change
+               // Announce the change to other players
                mServerGame->getGameType()->s2cClientChangedRoles(clientInfo->getName(), ClientInfo::RoleNone);
             }
          }
@@ -763,13 +760,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
          for(S32 i = 0; i < mServerGame->getClientCount(); i++)
          {
             ClientInfo *clientInfo = mServerGame->getClientInfo(i);
-            GameConnection *conn = clientInfo->getConnection();
 
             if(clientInfo->isAdmin() && (!clientInfo->isOwner()))
             {
-               clientInfo->setRole(ClientInfo::RoleNone);
-               if(conn)
-                  conn->s2cSetRole(ClientInfo::RoleNone, false);
+               clientInfo->setRole(ClientInfo::RoleNone, false);     // Silently
 
                // Announce the change
                mServerGame->getGameType()->s2cClientChangedRoles(clientInfo->getName(), ClientInfo::RoleNone);
@@ -2177,13 +2171,13 @@ void GameConnection::setClientInfo(ClientInfo *clientInfo)
 }
 
 
-// We've just established a local connection to a server running in the same process
+// We've just established a local connection to a server running in the same process.
+// Called from ClientGame::joinLocalGame()
 void GameConnection::onLocalConnection()
 {
-   getClientInfo()->setRole(ClientInfo::RoleOwner);           // Set Owner role on server
+   getClientInfo()->setRole(ClientInfo::RoleOwner, false);    // Set Owner role on server (and client)
    sendLevelList();
 
-   s2cSetRole(ClientInfo::RoleOwner, false);                  // Set Owner role on the client
    setServerName(mServerGame->getSettings()->getHostName());  // Server name is whatever we've set locally
 
    // Tell local host if we're authenticated... no need to verify
@@ -2314,6 +2308,7 @@ void GameConnection::onConnectionEstablished_client()
 }
 
 
+// Server only, obviously
 void GameConnection::onConnectionEstablished_server()
 {
    setConnectionSpeed(2);                 // High speed, most servers have sufficient bandwidth
@@ -2350,15 +2345,13 @@ void GameConnection::onConnectionEstablished_server()
    {
       mSendableFlags &= ~ServerFlagAllowUpload;
       mSendableFlags |= ServerFlagHostingLevels;
-      mClientInfo->setRole(ClientInfo::RoleOwner);
-      s2cSetRole(ClientInfo::RoleOwner, false);
+      mClientInfo->setRole(ClientInfo::RoleOwner, false);         // Silently
       mServerGame->mHoster = this;
       mServerGame->mInfoFlags &= ~HostModeFlag;
    }
    else if(settings->getLevelChangePassword() == "")   // Grant level change permissions if level change PW is blank
    {
-      mClientInfo->setRole(ClientInfo::RoleLevelChanger);
-      s2cSetRole(ClientInfo::RoleLevelChanger, false);          // Tell client, but don't display notification
+      mClientInfo->setRole(ClientInfo::RoleLevelChanger, false);  // Silently
       sendLevelList();
    }
 
@@ -2374,6 +2367,13 @@ void GameConnection::onConnectionEstablished_server()
 
    if(mServerGame->isSuspended())
       s2rSetSuspendGame(true);
+}
+
+
+// Called from ClientInfo::setRole()
+void GameConnection::sendPermissionsToClient(ClientInfo::ClientRole role, bool displayNoticeToPlayers)
+{
+   s2cSetRole(role, displayNoticeToPlayers);   // Tell client their access level
 }
 
 

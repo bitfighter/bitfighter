@@ -19,6 +19,7 @@
 #include "ServerGame.h"
 #include "Spawn.h"
 #include "Teleporter.h"
+#include "TeamHistoryManager.h"
 #include "version.h"
 #include "WallItem.h"
 
@@ -1718,7 +1719,8 @@ const Color &GameType::getTeamColor(S32 teamIndex) const
 // Adds a new client to the game when a player or bot joins, or when a level cycles.
 // Note that when a new game starts, players will be added in order from
 // strongest to weakest.  Bots will be added to their predefined teams, or if that is invalid, to the lowest ranked team.
-void GameType::serverAddClient(ClientInfo *clientInfo)
+// teamHistoryManager will be NULL for robots and when teams are not locked.
+void GameType::serverAddClient(ClientInfo *clientInfo, TeamHistoryManager *teamHistoryManager)
 {
    if(!clientInfo->isRobot())
    {
@@ -1731,48 +1733,20 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
       }
    }
 
-   // Figure out how many players the team with the fewest players has, not including leveling bots, which can be ignored 
-   // if autoleveling is enabled (unless we are adding a bot for the purposes of autoleveling, in which case we do need
-   // to count them)
-   Vector<Vector<S32> > counts = static_cast<ServerGame *>(getGame())->getCategorizedPlayerCountsByTeam();
-   bool countAutoLevelBots = clientInfo->getClientClass() == ClientInfo::ClassRobotAddedByAutoleveler ||
-                             clientInfo->getClientClass() == ClientInfo::ClassRobotAddedByLevel       ||
-                             clientInfo->getClientClass() == ClientInfo::ClassRobotAddedByLevelNoTeam;
-   S32 minPlayers = S32_MAX;
+   S32 minTeamIndex = NO_TEAM;
 
-   for(S32 i = 0; i < mLevel->getTeamCount(); i++)
+   // See if we have a "preassigned" team for this player.  We might, if teams are locked and player recently quit.
+   if(teamHistoryManager)
+      minTeamIndex = teamHistoryManager->getTeam(clientInfo->getName().getString(), mLevel->getTeamCount());
+   
+   if(minTeamIndex == NO_TEAM)
    {
-      S32 playerCount  = counts[i][ClientInfo::ClassHuman] +
-                         counts[i][ClientInfo::ClassRobotAddedByLevel] +
-                         counts[i][ClientInfo::ClassRobotAddedByLevelNoTeam] +
-                         counts[i][ClientInfo::ClassRobotAddedByAddbots] +
-                         (countAutoLevelBots ? counts[i][ClientInfo::ClassRobotAddedByAutoleveler] : 0);
-
-      if(minPlayers > playerCount)
-         minPlayers = playerCount;
-   } 
-
-   // Of the teams with minPlayers, find the one with the lowest total rating...
-   S32 minTeamIndex = NONE;
-   F32 minRating = F32_MAX;
-
-   for(S32 i = 0; i < mLevel->getTeamCount(); i++)
-   {
-      S32 playerCount  = counts[i][ClientInfo::ClassHuman] +
-                         counts[i][ClientInfo::ClassRobotAddedByLevel] +
-                         counts[i][ClientInfo::ClassRobotAddedByLevelNoTeam] +
-                         counts[i][ClientInfo::ClassRobotAddedByAddbots] +
-                         (countAutoLevelBots ? counts[i][ClientInfo::ClassRobotAddedByAutoleveler] : 0);
-
-      Team *team = (Team *)mLevel->getTeam(i);
-      if(playerCount == minPlayers && team->getRating() < minRating)
-      {
-         minTeamIndex = i;
-         minRating = team->getRating();
-      }
+      minTeamIndex = findTeamWithFewestPlayers(clientInfo->getClientClass());
+      if(teamHistoryManager)
+         teamHistoryManager->addPlayer(clientInfo->getName().getString(), mLevel->getTeamCount(), minTeamIndex);
    }
 
-   TNLAssert(minTeamIndex != NONE, "Preposterous!!");
+   TNLAssert(minTeamIndex != NO_TEAM, "Preposterous!!");
 
 
    // Robots may have already been assigned a team number; if so, use it in place of team determined above
@@ -1799,6 +1773,55 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
       s2cClientJoinedTeam(clientInfo->getName(), clientInfo->getTeamIndex(), isTeamGame() && !isGameOver());
 
    spawnShip(clientInfo);
+}
+
+
+// Figure out how many players the team with the fewest players has, not including leveling bots, which can be ignored 
+// if autoleveling is enabled (unless we are adding a bot for the purposes of autoleveling, in which case we do need
+// to count them)
+S32 GameType::findTeamWithFewestPlayers(ClientInfo::ClientClass clientClass) const
+{
+   Vector<Vector<S32> > counts = static_cast<ServerGame *>(getGame())->getCategorizedPlayerCountsByTeam();
+
+   bool countAutoLevelBots = clientClass == ClientInfo::ClassRobotAddedByAutoleveler ||
+                             clientClass == ClientInfo::ClassRobotAddedByLevel       ||
+                             clientClass == ClientInfo::ClassRobotAddedByLevelNoTeam;
+   S32 minPlayers = S32_MAX;
+
+   for(S32 i = 0; i < mLevel->getTeamCount(); i++)
+   {
+      S32 playerCount = counts[i][ClientInfo::ClassHuman] +
+                        counts[i][ClientInfo::ClassRobotAddedByLevel] +
+                        counts[i][ClientInfo::ClassRobotAddedByLevelNoTeam] +
+                        counts[i][ClientInfo::ClassRobotAddedByAddbots] +
+                        (countAutoLevelBots ? counts[i][ClientInfo::ClassRobotAddedByAutoleveler] : 0);
+
+      if(minPlayers > playerCount)
+         minPlayers = playerCount;
+   }
+
+
+   // Of the teams with minPlayers, find the one with the lowest total rating...
+   S32 minTeamIndex = NO_TEAM;
+   F32 minRating = F32_MAX;
+
+   for(S32 i = 0; i < mLevel->getTeamCount(); i++)
+   {
+      S32 playerCount  = counts[i][ClientInfo::ClassHuman] +
+                         counts[i][ClientInfo::ClassRobotAddedByLevel] +
+                         counts[i][ClientInfo::ClassRobotAddedByLevelNoTeam] +
+                         counts[i][ClientInfo::ClassRobotAddedByAddbots] +
+                         (countAutoLevelBots ? counts[i][ClientInfo::ClassRobotAddedByAutoleveler] : 0);
+
+      Team *team = (Team *)mLevel->getTeam(i);
+      if(playerCount == minPlayers && team->getRating() < minRating)
+      {
+         minTeamIndex = i;
+         minRating = team->getRating();
+      }
+   }
+
+   return minTeamIndex;
 }
 
 
@@ -2243,8 +2266,10 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
    if(isGameOver()) // No changing team while on game over
       return;
 
-   // If we're not admin and we're waiting for our switch-expiration to reset, no changing (except in one-player game)
-   if(!clientInfo->isAdmin() && source->mSwitchTimer.getCurrent() && getGame()->getPlayerCount() > 1)
+   // Check for reasons we might not be able to switch teams
+   if(!clientInfo->isAdmin() &&                                            // Admins can change whenever
+      (mGame->areTeamsLocked() || source->mSwitchTimer.getCurrent()) &&    // Either locked, or switched recently
+      getGame()->getPlayerCount() > 1)                                     // Multi-player games... singletons can switch freely
    {
       // Alert them again
       NetObject::setRPCDestConnection(source);
@@ -3362,33 +3387,17 @@ GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry kickeeName), (kickee
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sLockTeams, (bool locked), (locked), NetClassGroupGameMask, RPCGuaranteed, RPCToGhostParent, 0)
 {
    GameConnection *source = (GameConnection *)getRPCSourceConnection();
-   ClientInfo *sourceClientInfo = source->getClientInfo();
+   ClientInfo *clientInfo = source->getClientInfo();
 
-   if(!sourceClientInfo->isAdmin())
+   // Only admins can lock teams!
+   if(!clientInfo->isAdmin())
       return;
 
-   if(getGame()->areTeamsLocked() == locked)
+   // Already locked!
+   if(mGame->areTeamsLocked() == locked)
       return;
 
-   getGame()->setTeamsLocked(locked);
-
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
-   {
-      RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cTeamsLocked, (locked));
-      mGame->getClientInfo(i)->getConnection()->postNetEvent(theEvent);
-   }
-   
-}
-
-
-TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cTeamsLocked, (bool locked), (locked), NetClassGroupGameMask, RPCGuaranteed, RPCToGhost, 0)
-{
    mGame->setTeamsLocked(locked);
-
-   if(locked)
-      mGame->displayMessage(Colors::AnnounceColor, "Teams have been locked");
-   else
-      mGame->displayMessage(Colors::AnnounceColor, "Teams are now unlocked");
 }
 
 
@@ -3491,6 +3500,13 @@ void GameType::sendAnnouncementFromController(const StringPtr &message)
 
       clientInfo->getConnection()->postNetEvent(theEvent);
    }
+}
+
+
+void GameType::announceTeamsLocked(bool locked)
+{
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
+      mGame->getClientInfo(i)->getConnection()->s2cTeamsLocked(locked);
 }
 
 

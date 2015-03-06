@@ -16,6 +16,7 @@
 #include "teamInfo.h"            // For ClassManager
 #include "BfObject.h"            // For TypeNumber def
 
+#include "Intervals.h"
 #include "Timer.h"
 #include "Rect.h"
 
@@ -323,7 +324,7 @@ public:
    void setLevel(const boost::shared_ptr<Level> &level);
 
    bool areTeamsLocked() const;
-   void setTeamsLocked(bool locked);
+   virtual void setTeamsLocked(bool locked);
    
    virtual void addWallItem(WallItem *wallItem, GridDatabase *database);     
 

@@ -200,6 +200,7 @@ public:
    void changePlayerTeam(const StringTableEntry &playerName, S32 teamIndex) const;
    void changeOwnTeam(S32 teamIndex) const;
    void switchTeams();     // User selected Switch Teams meunu item
+   void setTeamsLocked(bool locked);
 
 
    // Some FxManager passthroughs
@@ -236,7 +237,7 @@ public:
 
    // Check for permissions
    bool hasOwner(const char *failureMessage);
-   bool hasAdmin(const char *failureMessage);
+   bool hasAdmin(const char *failureMessage = "") const;
    bool hasLevelChange(const char *failureMessage);
 
    void gotEngineerResponseEvent(EngineerResponseEvent event);

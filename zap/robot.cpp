@@ -305,7 +305,7 @@ void Robot::onAddedToGame(Game *game)
    }
 
    disableCollision();
-   game->getGameType()->serverAddClient(mClientInfo.getPointer());
+   game->getGameType()->serverAddClient(mClientInfo.getPointer(), NULL);
    enableCollision();
 
    Parent::onAddedToGame(game);

@@ -38,7 +38,7 @@ class ClientInfo : public SafePtrData, public RefPtrData
 {
 public:
    // Each role has all permissions a lesser one is granted
-   // Note:  changing this will break network compatibility
+   // Note:  Adding/deleting values from this enum will break network compatibility
    enum ClientRole {
       RoleNone,
       RoleLevelChanger,
@@ -169,11 +169,11 @@ public:
    Int<BADGE_COUNT> getBadges();
    bool hasBadge(MeritBadges badge);
 
-   void setRole(ClientRole role);
-   ClientRole getRole();
-   bool isLevelChanger();
-   bool isAdmin();
-   bool isOwner();
+   void setRole(ClientRole role, bool displayNoticeToPlayers = true);
+   ClientRole getRole() const;
+   bool isLevelChanger() const;
+   bool isAdmin() const;
+   bool isOwner() const;
 
    virtual bool isRobot() const = 0;
 

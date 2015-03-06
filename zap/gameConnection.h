@@ -264,6 +264,7 @@ public:
    TNL_DECLARE_RPC(c2sRequestCancelShutdown, ());
    TNL_DECLARE_RPC(s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator));
    TNL_DECLARE_RPC(s2cCancelShutdown, ());
+   TNL_DECLARE_RPC(s2cTeamsLocked, (bool locked));
 
    TNL_DECLARE_RPC(s2cSetIsBusy, (StringTableEntry name, bool isBusy));
 
@@ -306,6 +307,8 @@ public:
    void ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const U8 *levelgendata, U32 levelgensize);
    void ReceivedRecordedGameplay(const U8 *filedata, U32 filedatasize);
    F32 getFileProgressMeter();
+
+   void sendPermissionsToClient(ClientInfo::ClientRole role, bool displayNoticeToPlayers);
 
 
    Vector<SafePtr<ByteBuffer> > mPendingTransferData; // Only used for progress meter

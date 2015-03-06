@@ -490,6 +490,7 @@ bool Game::areTeamsLocked() const
 }
 
 
+// Be sure to see overrides!
 void Game::setTeamsLocked(bool locked)
 {
    mTeamsLocked = locked;

@@ -75,14 +75,33 @@ string extractDirectory(const string &path )
   return path.substr( 0, path.find_last_of( "\\/" )); // Paths should never end with the slash
 }
 
+
 string extractFilename(const string &path )
 {
   return path.substr( path.find_last_of( "\\/" ) + 1 );
 }
 
+
 string extractExtension(const string &path )
 {
   return path.substr( path.find_last_of( '.' ) + 1 );
+}
+
+
+// Need to handle both forward and backward slashes... will return pathname with trailing delimeter.
+// Can be replaced with extractDirectory?
+string getPathFromFilename(const string &filename)
+{
+   std::size_t pos1 = filename.rfind("/");
+   std::size_t pos2 = filename.rfind("\\");
+
+   if(pos1 == string::npos)
+      pos1 = 0;
+
+   if(pos2 == string::npos)
+      pos2 = 0;
+
+   return filename.substr(0, max(pos1, pos2) + 1);
 }
 
 

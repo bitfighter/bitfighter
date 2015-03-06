@@ -8,6 +8,7 @@
 #include "gameConnection.h"
 #include "playerInfo.h"
 #include "EngineeredItem.h"   // For EngineerModuleDeployer def
+#include "ServerGame.h"
 
 #include "voiceCodec.h"       // This should be removed
 
@@ -327,31 +328,43 @@ bool ClientInfo::isAuthenticated()
 }
 
 
-ClientInfo::ClientRole ClientInfo::getRole()
+ClientInfo::ClientRole ClientInfo::getRole() const
 {
    return mRole;
 }
 
 
-void ClientInfo::setRole(ClientRole role)
+// When run on the server, will automatically notify the relevant client
+// Runs on client and server
+void ClientInfo::setRole(ClientRole role, bool displayNoticeToPlayers)
 {
    mRole = role;
+   
+   GameConnection *conn = getConnection();   // Might be null during tests 
+
+   // Notify clients... but only if we're a server!
+   if(conn && conn->isConnectionToClient())
+      conn->sendPermissionsToClient(mRole, displayNoticeToPlayers);
+
+   // We could implement this on Game, and override on ServerGame... we don't care on ClientGame, not at all!
+   if(mGame->isServer())
+      static_cast<ServerGame *>(mGame)->onClientChangedRoles(this);
 }
 
 
-bool ClientInfo::isLevelChanger()
+bool ClientInfo::isLevelChanger() const
 {
    return mRole >= RoleLevelChanger;
 }
 
 
-bool ClientInfo::isAdmin()
+bool ClientInfo::isAdmin() const
 {
    return mRole >= RoleAdmin;
 }
 
 
-bool ClientInfo::isOwner()
+bool ClientInfo::isOwner() const
 {
    return mRole >= RoleOwner;
 }

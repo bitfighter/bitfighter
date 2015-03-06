@@ -9,7 +9,6 @@
 
 #include "flagItem.h"
 #include "gameStats.h"           // For VersionedGameStats
-//#include "barrier.h"             // For WallRec def
 
 #include "game.h"                // For MaxTeams
 #include "gameConnection.h"      // For MessageColors enum
@@ -39,6 +38,7 @@ class Team;
 class SpyBug;
 class MenuUserInterface;
 class Zone;
+class TeamHistoryManager;
 
 
 ////////////////////////////////////////
@@ -108,6 +108,8 @@ private:
    void launchKillStreakTextEffects(const ClientInfo *clientInfo) const;
    void fewerBots(ClientInfo *clientInfo);
    void moreBots(ClientInfo *clientInfo);
+
+   S32 findTeamWithFewestPlayers(ClientInfo::ClientClass clientClass) const;
 
 protected:
    Timer mScoreboardUpdateTimer;
@@ -321,7 +323,7 @@ public:
    void startSuddenDeath();
 
 
-   void serverAddClient(ClientInfo *clientInfo);         
+   void serverAddClient(ClientInfo *clientInfo, TeamHistoryManager *teamHistoryManager);
 
    void removeClient(ClientInfo *clientInfo);   // Remove a client from the game
 
@@ -482,7 +484,6 @@ public:
    TNL_DECLARE_RPC(c2sTriggerTeamChange, (StringTableEntry playerName, S32 teamIndex));
    TNL_DECLARE_RPC(c2sKickPlayer, (StringTableEntry playerName));
    TNL_DECLARE_RPC(c2sLockTeams, (bool locked));
-   TNL_DECLARE_RPC(s2cTeamsLocked, (bool locked));
 
    TNL_DECLARE_RPC(s2cSetIsSpawnDelayed, (StringTableEntry name, bool idle));
    TNL_DECLARE_RPC(s2cSetPlayerEngineeringTeleporter, (StringTableEntry name, bool isEngineeringTeleporter));
@@ -502,6 +503,8 @@ public:
    void processServerCommand(ClientInfo *clientInfo, const char *cmd, Vector<StringPtr> args);
    bool canClientAddBots(GameConnection *source, bool checkDefaultBot = true);
    bool addBotFromClient(Vector<StringTableEntry> args);
+
+   void announceTeamsLocked(bool locked);
 
    map <pair<U16,U16>, Vector<Point> > cachedBotFlightPlans;  // cache of zone-to-zone flight plans, shared for all bots
 };

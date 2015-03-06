@@ -86,15 +86,6 @@ GamePair::GamePair(const string &levelCode, S32 clientCount)
 }
 
 
-//// Or don't provide any levelcode -- your choice!
-//GamePair::GamePair(S32 clientCount)
-//{
-//   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
-//
-//   initialize(settings, "", clientCount);
-//}
-//
-
 void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32 clientCount)
 {
    // Need to start Lua before we add any clients.  Might as well do it now.
@@ -154,7 +145,7 @@ void GamePair::idle(U32 timeDelta, U32 cycles)
 
 
 // Simulates player joining game from new client
-void GamePair::addClient(const string &name, S32 teamIndex)
+ClientGame *GamePair::addClient(const string &name, S32 teamIndex)
 {
    ServerGame *server = GameManager::getServerGame();
    ClientGame *client = newClientGame();
@@ -162,7 +153,11 @@ void GamePair::addClient(const string &name, S32 teamIndex)
 
    client->userEnteredLoginCredentials(name, "password", false);    // Simulates entry from NameEntryUserInterface
 
-   client->joinLocalGame(server->getNetInterface());
+   client->joinLocalGame(server->getNetInterface());     // Client will have owner privs!
+
+   //GameConnection *conn = server->getClientInfos()->last()->getConnection();
+   //server->
+
 
    // We need to turn off TNL's bandwidth controls so our tests can run faster.  FASTER!!@!
    client->getConnectionToServer()->useZeroLatencyForTesting();
@@ -177,6 +172,8 @@ void GamePair::addClient(const string &name, S32 teamIndex)
       TNLAssert(teamIndex < server->getTeamCount(), "Bad team!");
       server->getGameType()->changeClientTeam(clientInfo, teamIndex);
    }
+
+   return client;
 }
 
 
@@ -191,11 +188,19 @@ void GamePair::removeClient(S32 index)
    // Disconnect before deleting
    ClientGame *clientGame = GameManager::getClientGames()->get(index);
 
-   clientGame->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+   if(clientGame->getConnectionToServer())
+      clientGame->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
    this->idle(10, 5);      // Let things settle
 
    GameManager::deleteClientGame(index);
+}
+
+
+void GamePair::removeAllClients()
+{
+   while(GameManager::getClientGames()->size() > 0)
+      removeClient(GameManager::getClientGames()->size() - 1);
 }
 
 
