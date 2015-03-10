@@ -1447,21 +1447,20 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClas
          mSettings->getSetting<YesNo>(IniKey::AllowMapUpload),
          mSettings->getSetting<YesNo>(IniKey::RandomLevels) );
    
-      LevelSource * levelSource = mSettings->chooseLevelSource(NULL);
+      LevelSource *levelSource = mSettings->chooseLevelSource(NULL);    // returns a FileListLevelSource or a FolderLevelSource
       delete mLevelSource;
       mLevelSource = levelSource;
 
       c2sRemoveLevel(-1); // clears all levels
       for(S32 i = 0; i < levelSource->getLevelCount(); i++)
       {
-         string filename = mSettings->getFolderManager()->findLevelFile(levelSource->getLevelFileName(i));
-         levelSource->populateLevelInfoFromSource(filename, i);
-         c2sAddLevel(
-            levelSource->getLevelName(i),
-            levelSource->getLevelType(i),
-            levelSource->getLevelInfo(i).minRecPlayers,
-            levelSource->getLevelInfo(i).maxRecPlayers,
-            i); // index
+         if(levelSource->populateLevelInfoFromSourceByIndex(i))
+            c2sAddLevel(
+               levelSource->getLevelName(i),
+               levelSource->getLevelType(i),
+               levelSource->getLevelInfo(i).minRecPlayers,
+               levelSource->getLevelInfo(i).maxRecPlayers,
+               i); // index
       }
 
       s2cRequestLevel(0);

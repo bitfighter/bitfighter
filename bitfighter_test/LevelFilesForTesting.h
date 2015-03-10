@@ -22,6 +22,7 @@ string getLevelCodeForEmptyLevelWithBots(const string &botspec);
 string getLevelCodeForEngineeredItemSnapping();
 string getLevelCodeForEngineeredItemSnapping2();
 string getLevelCodeForItemPropagationTests(const string &object);
+string getMultiTeamLevelCode(S32 teams);
 
 
 string getGenericHeader();

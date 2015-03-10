@@ -86,7 +86,25 @@ GamePair::GamePair(const string &levelCode, S32 clientCount)
 }
 
 
+// Create a pair of games suitable for testing client/server interaction.  Provide some levelcode to get things started.
+GamePair::GamePair(const Vector<string> &levelCode, S32 clientCount)
+{
+   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
+
+   initialize(settings, levelCode, clientCount);
+}
+
+
 void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32 clientCount)
+{
+   Vector<string> levelCodeVec;
+   levelCodeVec.push_back(levelCode);
+
+   initialize(settings, levelCodeVec, clientCount);
+}
+
+
+void GamePair::initialize(GameSettingsPtr settings, const Vector<string> &levelCode, S32 clientCount)
 {
    // Need to start Lua before we add any clients.  Might as well do it now.
    LuaScriptRunner::startLua(settings->getFolderManager()->getLuaDir());

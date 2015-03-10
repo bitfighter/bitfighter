@@ -286,6 +286,8 @@ string LevelSource::getLevelFileName(S32 index)
    else
       return mLevelInfos[index].filename;
 }
+
+
 void LevelSource::setLevelFileName(S32 index, const string &filename)
 {
    mLevelInfos[index].filename = filename;
@@ -325,9 +327,11 @@ Vector<string> LevelSource::findAllLevelFilesInFolder(const string &levelDir)
 }
 
 
-bool LevelSource::populateLevelInfoFromSource(const string &fullFilename, S32 index)
+bool LevelSource::populateLevelInfoFromSourceByIndex(S32 index)
 {
-   return populateLevelInfoFromSource(fullFilename, mLevelInfos[index]);
+   // If findLevelFile fails, it will return "", which populateLevelInfoFromSource will handle properly
+   string filename = FolderManager::findLevelFile(mLevelInfos[index].folder, mLevelInfos[index].filename);
+   return populateLevelInfoFromSource(filename, mLevelInfos[index]);
 }
 
 
@@ -361,9 +365,7 @@ bool MultiLevelSource::loadLevels(FolderManager *folderManager)
 
    for(S32 i = 0; i < mLevelInfos.size(); i++)
    {
-      string filename = folderManager->findLevelFile(mLevelInfos[i].folder, mLevelInfos[i].filename);
-
-      if(Parent::populateLevelInfoFromSource(filename, i))
+      if(Parent::populateLevelInfoFromSourceByIndex(i))
          anyLoaded = true;
       else
       {
@@ -415,6 +417,10 @@ string MultiLevelSource::getLevelFileDescriptor(S32 index) const
 // Reads 4kb of file and uses what it finds there to populate the levelInfo
 bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo)
 {
+   // Check if we got a dud... (FolderManager::findLevelFile() will, for example, return "" if it fails)
+   if(fullFilename.empty())
+      return false;
+
 	FILE *f = fopen(fullFilename.c_str(), "rb");
 	if(!f)
    {
@@ -632,13 +638,26 @@ Vector<string> FileListLevelSource::findAllFilesInPlaylist(const string &fileNam
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Constructor
+// Constructor -- single level
 StringLevelSource::StringLevelSource(const string &levelCode)
 {
-   mLevelCode = levelCode;
+   mLevelCodes.push_back(levelCode);
 
    LevelInfo levelInfo;
    mLevelInfos.push_back(levelInfo);
+}
+
+
+// Constructor -- mulitlpe levels (only used for testing, at the moment)
+StringLevelSource::StringLevelSource(const Vector<string> &levelCodes)
+{
+   mLevelCodes = levelCodes;
+
+   for(S32 i = 0; i < levelCodes.size(); i++)
+   {
+      LevelInfo levelInfo;
+      mLevelInfos.push_back(levelInfo);
+   }
 }
 
 
@@ -649,10 +668,16 @@ StringLevelSource::~StringLevelSource()
 }
 
 
+bool StringLevelSource::populateLevelInfoFromSourceByIndex(S32 levelInfoIndex)
+{
+   getLevelInfoFromCodeChunk(mLevelCodes[levelInfoIndex], mLevelInfos[levelInfoIndex]);
+   return true;
+}
+
+
 bool StringLevelSource::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo)
 {
-   getLevelInfoFromCodeChunk(mLevelCode, levelInfo);
-
+   TNLAssert(false, "This is never called!");
    return true;
 }
 
@@ -661,7 +686,7 @@ Level *StringLevelSource::getLevel(S32 index) const
 {
    Level *level = new Level();
 
-   level->loadLevelFromString(mLevelCode, "");
+   level->loadLevelFromString(mLevelCodes[index], "");
    return level; 
 }
 
@@ -669,7 +694,7 @@ Level *StringLevelSource::getLevel(S32 index) const
 // Returns a textual level descriptor good for logging and error messages and such
 string StringLevelSource::getLevelFileDescriptor(S32 index) const
 {
-   return "string input (" + itos((U32) mLevelCode.length()) + " chars)";
+   return "string input (" + itos((U32) mLevelCodes[index].length()) + " chars)";
 }
 
 

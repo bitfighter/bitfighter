@@ -372,14 +372,9 @@ string ServerGame::loadNextLevelInfo()
       return string("No levels loaded");
    }
 
-   FolderManager *folderManager = getSettings()->getFolderManager();
-
-   string filename = folderManager->findLevelFile(mLevelSource->getLevelFileName(mLevelLoadIndex));
-   TNLAssert(filename != "", "Expected a filename here!");
-
    // populateLevelInfoFromSource() will return true if the level was processed successfully
    string levelName;
-   if(mLevelSource->populateLevelInfoFromSource(filename, mLevelLoadIndex))
+   if(mLevelSource->populateLevelInfoFromSourceByIndex(mLevelLoadIndex))
    {
       levelName = mLevelSource->getLevelName(mLevelLoadIndex);    // This will be the name specified in the level file we just populated
       mLevelLoadIndex++;

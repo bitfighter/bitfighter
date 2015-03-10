@@ -48,13 +48,14 @@ void packUnpack(T input, T &output, U32 mask = 0xFFFFFFFF)
 struct GamePair
 {
 	GamePair(const string &levelCode = "", S32 clients = 1);
+   GamePair(const Vector<string> &levelCode, S32 clients = 1);
    GamePair(GameSettingsPtr settings);
    GamePair(GameSettingsPtr settings, const string &levelCode);
-
 
 	~GamePair();
 
    void initialize(GameSettingsPtr settings, const string &levelcode, S32 clientCount);
+   void initialize(GameSettingsPtr settings, const Vector<string> &levelCode, S32 clientCount);
 
 
 	static void idle(U32 timeDelta, U32 cycles = 1);

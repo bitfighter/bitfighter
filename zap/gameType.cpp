@@ -2280,14 +2280,17 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
    }
 
    // Vote to change team might have different problems than the old way...
-   if( (!clientInfo->isLevelChanger() || getGame()->getSettings()->getLevelChangePassword() == "") && 
+   // Admins can always change without a vote; lower levels can only do so if levelChangePassword has not been set.
+   // But in a 1 player game, players can always change; voting would be meaningless.
+   if( (!clientInfo->isAdmin()) && 
+       (!clientInfo->isLevelChanger() || getGame()->getSettings()->getLevelChangePassword().empty()) && 
         getGame()->getPlayerCount() > 1 )
    {
       if(((ServerGame *)getGame())->voteStart(clientInfo, ServerGame::VoteChangeTeam, team))
          return;
    }
 
-   // Don't let spawn delay kick in for caller.  This prevents a race condition with spawn undelay and becoming unbusy
+   // Don't let spawn delay kick in for caller.  This prevents a race condition with spawn undelay and becoming unbusy.
    source->resetTimeSinceLastMove();
 
    changeClientTeam(clientInfo, team);

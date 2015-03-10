@@ -589,9 +589,7 @@ LevelSource *GameSettings::chooseLevelSource(Game *game)
 		return new FileListLevelSource(getPlaylist(), getFolderManager()->getLevelDir(), this);
 	}
 	else
-	{
 		return new FolderLevelSource(getLevelList(), getFolderManager()->getLevelDir());
-	}
 }
 
 

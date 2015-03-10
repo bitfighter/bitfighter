@@ -95,12 +95,13 @@ public:
    GameTypeId      getLevelType(S32 index);
 
    virtual bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo) = 0;
+   virtual bool populateLevelInfoFromSourceByIndex(S32 levelInfoIndex);
+
    virtual Level *getLevel(S32 index) const = 0;
    virtual bool loadLevels(FolderManager *folderManager);
    virtual string getLevelFileDescriptor(S32 index) const = 0;
    virtual bool isEmptyLevelDirOk() const = 0;
 
-   bool populateLevelInfoFromSource(const string &sourceName, S32 levelInfoIndex);
 
    static Vector<string> findAllLevelFilesInFolder(const string &levelDir);
 
@@ -178,16 +179,18 @@ class StringLevelSource : public LevelSource
    typedef LevelSource Parent;
 
 private:
-   string mLevelCode;
+   Vector<string> mLevelCodes;
 
 public:
-   StringLevelSource(const string &levelCode);     // Constructor
-   virtual ~StringLevelSource();                   // Destructor
+   StringLevelSource(const string &levelCode);           // Constructor
+   StringLevelSource(const Vector<string> &levelCode);   // Constructor
+   virtual ~StringLevelSource();                         // Destructor
 
    Level *getLevel(S32 index) const;
    string getLevelFileDescriptor(S32 index) const;
    bool isEmptyLevelDirOk() const;
 
+   bool populateLevelInfoFromSourceByIndex(S32 levelInfoIndex);
    bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo);
 };
 
