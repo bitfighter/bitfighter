@@ -574,13 +574,12 @@ void GameType::idle_server(U32 deltaT)
 
          if(getGame()->getSettings()->getIniSettings()->allowTeamChanging)
          {
-            if(conn->mSwitchTimer.getCurrent())             // Are we still counting down until the player can switch?
-               if(conn->mSwitchTimer.update(deltaT))        // Has the time run out?
-               {
-                  NetObject::setRPCDestConnection(conn);    // Limit who gets this message
-                  s2cCanSwitchTeams(true);                  // If so, let the client know they can switch again
-                  NetObject::setRPCDestConnection(NULL);
-               }
+            if(conn->mSwitchTimer.update(deltaT))        // Has the switch-ban timer expired?
+            {
+               NetObject::setRPCDestConnection(conn);    // Limit who gets this message
+               s2cCanSwitchTeams(true);                  // Let the client know they can switch again
+               NetObject::setRPCDestConnection(NULL);
+            }
          }
 
          conn->addTimeSinceLastMove(deltaT);                // Increment timer       
@@ -2142,7 +2141,8 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
    if(isGameOver()) // No changing team while on game over
       return;
 
-   if(!clientInfo->isAdmin() && source->mSwitchTimer.getCurrent())    // If we're not admin and we're waiting for our switch-expiration to reset,
+   // If we're not admin and we're waiting for our switch-expiration to reset, no changing (except in one-player game)
+   if(!clientInfo->isAdmin() && source->mSwitchTimer.getCurrent() && getGame()->getPlayerCount() > 1)
    {
       // Alert them again
       NetObject::setRPCDestConnection(source);
@@ -2305,6 +2305,10 @@ void GameType::serverRemoveClient(ClientInfo *clientInfo)
    // Note that we do not need to delete clientConnection... TNL handles that, and the destructor gets runs shortly after we get here
 
    static_cast<ServerGame *>(getGame())->suspendIfNoActivePlayers();
+
+   // If we've only got one client left, make sure they can switch teams
+   if(getGame()->getClientCount() == 1)
+      s2cCanSwitchTeams(true);
 }
 
 void GameType::setTimeRemaining(U32 timeLeft, bool isUnlimited)
