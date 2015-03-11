@@ -1175,18 +1175,23 @@ PlayerLevelRating *MasterServerConnection::getLevelRating(U32 databaseId, const 
 }
 
 
-
 // Cycle through and remove expired cache entries -- static method
 // Items are deleted if they are expired and are not busy
 void MasterServerConnection::removeOldEntriesFromRatingsCache()
 {
+   // See here for how to remove an element while iterating over an associative
+   // container:   http://stackoverflow.com/a/4600592
    {
       TotalLevelRatingsMap::iterator it = totalLevelRatingsCache.begin();
 
-      for(; it != totalLevelRatingsCache.end(); )
+      while(it != totalLevelRatingsCache.end())
       {
          if(it->second->isValid && !it->second->isBusy && it->second->isExpired())
-            it = totalLevelRatingsCache.erase(it);
+         {
+            TotalLevelRatingsMap::iterator tmp = it;
+            ++it;
+            totalLevelRatingsCache.erase(tmp);
+         }
          else
             ++it;
       }
@@ -1195,10 +1200,14 @@ void MasterServerConnection::removeOldEntriesFromRatingsCache()
    {
       PlayerLevelRatingsMap::iterator it = playerLevelRatingsCache.begin();
 
-      for(; it != playerLevelRatingsCache.end(); )
+      while(it != playerLevelRatingsCache.end())
       {
          if(it->second->isValid && !it->second->isBusy && it->second->isExpired())
-            it = playerLevelRatingsCache.erase(it);
+         {
+            PlayerLevelRatingsMap::iterator tmp = it;
+            ++it;
+            playerLevelRatingsCache.erase(tmp);
+         }
          else
             ++it;
       }
