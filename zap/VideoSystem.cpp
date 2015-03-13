@@ -19,15 +19,7 @@
 
 #include "tnlLog.h"
 
-//#include "SDL.h"
-
-#if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
-#  include "SDL_opengles.h"
-//   // Needed for GLES compatibility
-#  define glOrtho glOrthof
-//#else
-//#  include "SDL_opengl.h"
-#endif
+#include "glinc.h"
 
 #if !SDL_VERSION_ATLEAST(2,0,0)
 #  include "SDL_syswm.h"
