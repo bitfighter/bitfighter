@@ -3,10 +3,6 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-/*
- *  Most of this was taken directly from freeglut sources
- */
-
 #ifndef OPENGLUTILS_H_
 #define OPENGLUTILS_H_
 
