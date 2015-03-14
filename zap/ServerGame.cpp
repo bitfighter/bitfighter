@@ -618,6 +618,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
       getGameType()->serverAddClient(clientInfo, areTeamsLocked() ? &mTeamHistoryManager : NULL);
 
       GameConnection *connection = clientInfo->getConnection();
+      TNLAssert(connection, "Why no connection here?"); // If this trips, comment circumstances and delete 3/10/2015 CE
       if(connection)
       {
          connection->setObjectMovedThisGame(false);
