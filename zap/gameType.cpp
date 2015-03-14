@@ -3323,7 +3323,7 @@ GAMETYPE_RPC_C2S(GameType, c2sTriggerTeamChange, (StringTableEntry playerName, S
    ClientInfo *sourceClientInfo = source->getClientInfo();
 
    if(!sourceClientInfo->isAdmin())
-      return;  // Error message handled client-side
+      return;  // Error message handled client-side; should never get here with a healthy client
 
    ClientInfo *playerClientInfo = mGame->findClientInfo(playerName);
 
