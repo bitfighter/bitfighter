@@ -1051,7 +1051,7 @@ void MainMenuUserInterface::idle(U32 timeDelta)
       if(mMotdPos < -1 * width)
          mMotdPos = DisplayManager::getScreenInfo()->getGameCanvasWidth();
       else
-         mMotdPos -= timeDelta * PixelsPerSec * 0.001;
+         mMotdPos -= (S32)(timeDelta * PixelsPerSec * 0.001);
    }
 }
 
