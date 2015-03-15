@@ -6,12 +6,16 @@
 #include "TestUtils.h"
 #include "gameType.h"
 #include "GameManager.h"
+#include "UIGame.h"
 #include "ServerGame.h"
 #include "ClientGame.h"
+#include "ChatHelper.h"
+#include "helperMenu.h"
 #include "FontManager.h"
 #include "UIManager.h"
 #include "SystemFunctions.h"
 #include "Level.h"
+#include "tnlAssert.h"
 
 #include "../zap/stringUtils.h"
 #include "gtest/gtest.h"
@@ -162,25 +166,28 @@ void GamePair::idle(U32 timeDelta, U32 cycles)
 }
 
 
-// Simulates player joining game from new client
+// Simulates player joining game from new client; teamIndex is optional
 ClientGame *GamePair::addClient(const string &name, S32 teamIndex)
 {
-   ServerGame *server = GameManager::getServerGame();
    ClientGame *client = newClientGame();
-   GameManager::addClientGame(client);
-
    client->userEnteredLoginCredentials(name, "password", false);    // Simulates entry from NameEntryUserInterface
 
+   GameManager::addClientGame(client);
+   return addClient(client);
+}
+
+
+// teamIndex is optional
+ClientGame *GamePair::addClient(ClientGame *client, S32 teamIndex)
+{
+   ServerGame *server = GameManager::getServerGame();
+
    client->joinLocalGame(server->getNetInterface());     // Client will have owner privs!
-
-   //GameConnection *conn = server->getClientInfos()->last()->getConnection();
-   //server->
-
 
    // We need to turn off TNL's bandwidth controls so our tests can run faster.  FASTER!!@!
    client->getConnectionToServer()->useZeroLatencyForTesting();
 
-   ClientInfo *clientInfo = server->findClientInfo(name.c_str());
+   ClientInfo *clientInfo = server->findClientInfo(client->getClientInfo()->getName().getString());
 
    if(!clientInfo->isRobot())
       clientInfo->getConnection()->useZeroLatencyForTesting();
@@ -192,6 +199,12 @@ ClientGame *GamePair::addClient(const string &name, S32 teamIndex)
    }
 
    return client;
+}
+
+
+S32 GamePair::getClientCount() const
+{
+   return GameManager::getClientGames()->size();
 }
 
 
@@ -209,7 +222,7 @@ void GamePair::removeClient(S32 index)
    if(clientGame->getConnectionToServer())
       clientGame->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
 
-   this->idle(10, 5);      // Let things settle
+   this->idle(5, 5);      // Let things settle
 
    GameManager::deleteClientGame(index);
 }
@@ -219,6 +232,34 @@ void GamePair::removeAllClients()
 {
    while(GameManager::getClientGames()->size() > 0)
       removeClient(GameManager::getClientGames()->size() - 1);
+}
+
+
+// Used at all?
+void GamePair::deleteDisconnectedClients()
+{
+   for(S32 i = GameManager::getClientGames()->size() - 1; i >= 0; i--)  // Backwards to avoid index issues
+      if(!GameManager::getClientGames()->get(i)->isConnectedToServer())
+         removeClient(i);
+}
+
+
+// Properly set up and execute a chat command for the given client.  This simulates the user hitting enter after
+// typing their command, including creating and dismissing the chat helper.
+void GamePair::runChatCmd(S32 clientIndex, const string &command)
+{
+   ASSERT_TRUE(clientIndex >= 0 && clientIndex < getClientCount()) << "Test is malfunctioning!";
+
+   ClientGame *client = getClient(clientIndex);
+   GameUserInterface *ui = dynamic_cast<GameUserInterface *>(client->getUIManager()->getCurrentUI());
+   ASSERT_TRUE(ui) << "Are we in the game?";
+
+   ui->activateHelper(HelperMenu::ChatHelperType, false);      // Need this active when entering chat cmd
+   ChatHelper *helper = dynamic_cast<ChatHelper *>(ui->mHelperManager.mHelperStack.last());
+   ASSERT_TRUE(helper) << "Where is our helper?";
+   helper->mLineEditor.setString(command);
+   helper->mCurrentChatType = ChatHelper::GlobalChat;
+   helper->issueChat();
 }
 
 
@@ -237,7 +278,7 @@ void GamePair::removeClient(const string &name)
       }
    }
 
-   TNLAssert(index >= 0, "Could not find specified player!");
+   ASSERT_TRUE(index >= 0) << "Could not find specified player!";
    removeClient(index);
 }
 

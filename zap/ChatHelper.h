@@ -20,7 +20,7 @@ class ChatHelper : public HelperMenu
    typedef HelperMenu Parent;
 
 public:
-    enum ChatType {               // Types of in-game chat messages:
+    enum ChatType {      // Types of in-game chat messages:
       GlobalChat,                // Goes to everyone in game
       TeamChat,                  // Goes to teammates only
       CmdChat,                   // Entering a command
@@ -66,6 +66,9 @@ public:
    bool isChatDisabled() const;
 
    static void runCommand(ClientGame *game, const char *input);
+
+   ///// Testing
+   friend class GamePair;
 };
 
 };

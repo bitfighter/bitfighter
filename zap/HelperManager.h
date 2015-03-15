@@ -84,6 +84,9 @@ public:
    const char *getChatMessage() const;
 
    const HelperMenu *getActiveHelper() const;
+
+   ///// Testing
+   friend class GamePair;
 };
 
 

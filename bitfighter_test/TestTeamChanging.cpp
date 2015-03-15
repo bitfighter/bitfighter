@@ -10,6 +10,10 @@
 #include "ClientGame.h"
 #include "gameType.h"
 #include "ServerGame.h"
+#include "UIManager.h"
+#include "UIMenus.h"
+
+#include "tnlNetConnection.h"
 
 #include "gtest/gtest.h"
 
@@ -20,11 +24,30 @@ namespace Zap {
 
    void letTeamChangeAbuseTimerExpire(GamePair &gamePair)
    {
-      gamePair.idle(ServerGame::MaxTimeDelta, GameType::SwitchTeamsDelay / ServerGame::MaxTimeDelta + 1);  
+      gamePair.idle(ServerGame::MaxTimeDelta, GameType::SwitchTeamsDelay / ServerGame::MaxTimeDelta + 1);
    }
 
-	
-   TEST(TeamChangingTests, TestTeamLocking)
+
+   S32 countAdmins(GamePair &gamePair)
+   {
+      S32 ct = 0;
+      for(S32 i = 0; i < gamePair.getClientCount(); i++)
+         if(gamePair.getClient(i)->hasAdmin())
+            ct++;
+      return ct;
+   }
+
+
+   S32 findFirstAdmin(GamePair &gamePair)
+   {
+      for(S32 i = 0; i < gamePair.getClientCount(); i++)
+         if(gamePair.getClient(i)->hasAdmin())
+            return i;
+      return -1;
+   }
+
+
+   TEST(TeamChangingTests, testTeamLocking)
    {
       GamePair gamePair(getLevelCodeForItemPropagationTests(""), 2); // This level has 2 teams; good for testing team changing
 
@@ -39,9 +62,12 @@ namespace Zap {
       ASSERT_FALSE(info0->isAdmin());
       ASSERT_FALSE(info1->isAdmin());
 
-
       S32 team0 = gamePair.getClient(0)->getCurrentTeamIndex();
       S32 team1 = gamePair.getClient(1)->getCurrentTeamIndex();
+
+      // We'll need these UIs active later when we quit and rejoin the game
+      gamePair.getClient(0)->activateMainMenuUI();
+      gamePair.getClient(1)->activateMainMenuUI();
 
       ASSERT_NE(team0, team1) << "Players start on different teams";
 
@@ -91,6 +117,42 @@ namespace Zap {
       EXPECT_EQ(gamePair.getClient(0)->getCurrentTeamIndex(), team0) << "Should not have changed teams... teams are locked";
       EXPECT_TRUE(newClient->areTeamsLocked());
 
+      ///// Player quits, then rejoins -- should be reassigned to old team
+      EXPECT_TRUE(server->areTeamsLocked());
+      gamePair.idle(5, 5);
+      EXPECT_EQ(gamePair.getClient(0)->getCurrentTeamIndex(), team0);
+      EXPECT_EQ(gamePair.getClient(1)->getCurrentTeamIndex(), team1);
+      ASSERT_NE(team0, team1);
+      ASSERT_EQ(3, server->getClientCount());
+      gamePair.getClient(0)->closeConnectionToGameServer();
+      gamePair.getClient(1)->closeConnectionToGameServer();
+      gamePair.idle(5, 5);
+      ASSERT_EQ(1, server->getClientCount());
+      gamePair.addClient(gamePair.getClient(1));
+      gamePair.idle(5, 5);
+      gamePair.addClient(gamePair.getClient(0));
+      gamePair.idle(5, 5);
+      ASSERT_EQ(3, server->getClientCount());
+      EXPECT_EQ(gamePair.getClient(0)->getCurrentTeamIndex(), team0);
+      EXPECT_EQ(gamePair.getClient(1)->getCurrentTeamIndex(), team1);
+      // Retry same thing, but readd clients in a different order -- should get same result
+
+      // Pressing escape should disconnect the game, and drop back to the main menu interface, which we activated earlier
+      gamePair.getClient(0)->getUIManager()->getCurrentUI()->onKeyDown(KEY_ESCAPE);
+      gamePair.getClient(1)->getUIManager()->getCurrentUI()->onKeyDown(KEY_ESCAPE);
+
+      gamePair.getClient(0)->closeConnectionToGameServer();
+      gamePair.getClient(1)->closeConnectionToGameServer();
+      gamePair.idle(5, 5);
+      ASSERT_EQ(1, server->getClientCount());
+      gamePair.addClient(gamePair.getClient(0));
+      gamePair.idle(5, 5);
+      gamePair.addClient(gamePair.getClient(1));
+      gamePair.idle(5, 5);
+      ASSERT_EQ(3, server->getClientCount());
+      EXPECT_EQ(gamePair.getClient(0)->getCurrentTeamIndex(), team0);
+      EXPECT_EQ(gamePair.getClient(1)->getCurrentTeamIndex(), team1);
+
       ///// Unlock teams again -- everyone can change
       server->setTeamsLocked(false);
       letTeamChangeAbuseTimerExpire(gamePair);
@@ -104,13 +166,16 @@ namespace Zap {
       ASSERT_EQ(gamePair.getClient(0)->getCurrentTeamIndex(), team0) << "Back on team0";
 
       ///// Neither player is an admin, so neither can lock teams themselves
-      server->getClientInfo(0)->setRole(ClientInfo::RoleLevelChanger);  // Not quite admin!
+      // Somewhere along the way, order of clients on the server got out of whack... it's not a problem, but
+      // we need to demote all the players to ensure we've really nailed the first two, which we need for the 
+      // subsequent tests.
+      for(S32 i = 0; i < gamePair.getClientCount(); i++)
+         server->getClientInfo(i)->setRole(ClientInfo::RoleLevelChanger);  // Not quite admin!
       gamePair.idle(5, 5);
-      ASSERT_FALSE(info0->isAdmin());
-      ASSERT_FALSE(info1->isAdmin());
+      ASSERT_EQ(0, countAdmins(gamePair));
       ASSERT_FALSE(server->areTeamsLocked());
 
-      ChatHelper::runCommand(gamePair.getClient(0), "/lockteams");   // User chat command
+      gamePair.runChatCmd(0, "/lockteams");   // User chat command
       gamePair.idle(5, 5);
       ASSERT_FALSE(server->areTeamsLocked());
       EXPECT_FALSE(gamePair.getClient(0)->areTeamsLocked()) << "Set should have failed, client should still see teams as unlocked";
@@ -119,18 +184,20 @@ namespace Zap {
       // Make player an admin
       server->getClientInfo(0)->setRole(ClientInfo::RoleAdmin);
       gamePair.idle(5, 5);
-      EXPECT_TRUE(info0->isAdmin());
-      ChatHelper::runCommand(gamePair.getClient(0), "/lockteams");   // User chat command
+
+      S32 admin = findFirstAdmin(gamePair);
+      EXPECT_NE(-1, admin) << "Couldn't find our admin!";
+      gamePair.runChatCmd(admin, "/lockteams");   // User chat command
       gamePair.idle(5, 5);
       EXPECT_TRUE(server->areTeamsLocked());
       EXPECT_TRUE(gamePair.getClient(0)->areTeamsLocked());
       EXPECT_TRUE(gamePair.getClient(1)->areTeamsLocked());
 
       // Demote player
-      server->getClientInfo(0)->setRole(ClientInfo::RoleLevelChanger); 
+      server->getClientInfo(0)->setRole(ClientInfo::RoleLevelChanger);
       gamePair.idle(5, 5);
-      EXPECT_FALSE(info0->isAdmin());
-      ChatHelper::runCommand(gamePair.getClient(0), "/unlockteams");   // User chat command
+      EXPECT_FALSE(gamePair.getClient(admin)->hasAdmin());
+      gamePair.runChatCmd(0, "/unlockteams");   // User chat command
       gamePair.idle(5, 5);
       EXPECT_TRUE(server->areTeamsLocked()) << "Unlock should not have worked -- player has no privs";
       EXPECT_TRUE(gamePair.getClient(0)->areTeamsLocked());
@@ -139,80 +206,107 @@ namespace Zap {
       // Promote player again, and retry
       server->getClientInfo(0)->setRole(ClientInfo::RoleOwner);
       gamePair.idle(5, 5);
-      EXPECT_TRUE(info0->isAdmin());
-      ChatHelper::runCommand(gamePair.getClient(0), "/unlockteams");   // User chat command
+      EXPECT_TRUE(gamePair.getClient(admin)->hasAdmin());
+      gamePair.runChatCmd(admin, "/unlockteams");   // User chat command
       gamePair.idle(5, 5);
       EXPECT_FALSE(server->areTeamsLocked()) << "Unlock should have worked -- player is admin";
       EXPECT_FALSE(gamePair.getClient(0)->areTeamsLocked()) << "Clients should see it too";
       EXPECT_FALSE(gamePair.getClient(1)->areTeamsLocked());
 
       // Relock, and demote player 0
-      ChatHelper::runCommand(gamePair.getClient(0), "/lockteams");   // User chat command
+      gamePair.runChatCmd(admin, "/lockteams");   // User chat command
       gamePair.idle(5, 5);
       server->getClientInfo(0)->setRole(ClientInfo::RoleNone);
       gamePair.idle(5, 5);
 
       ///// Admin quits and quickly rejoins -- teams should not unlock automatically (15s grace period)
+      ASSERT_EQ(-1, findFirstAdmin(gamePair)) << "Expect no admins in game at the moment";
       server->getClientInfo(2)->setRole(ClientInfo::RoleAdmin);
       gamePair.idle(5, 5);
-      EXPECT_FALSE(info0->isAdmin());
-      EXPECT_FALSE(info1->isAdmin());
-      EXPECT_TRUE(newInfo->isAdmin());
+      admin = findFirstAdmin(gamePair);
+      EXPECT_EQ(1, countAdmins(gamePair)) << "Now we have an admin";
       EXPECT_TRUE(server->areTeamsLocked());
 
       // We have one admin, server is locked... when suddenly...
       // Admin quits.  No admins in game for 15 seconds == teams unlock
-      S32 oldTeam = newClient->getCurrentTeamIndex();
-      newClient->closeConnectionToGameServer();
+      S32 oldTeam = gamePair.getClient(admin)->getCurrentTeamIndex();
+      string adminPlayerName = gamePair.getClient(admin)->getClientInfo()->getName().getString();
+      ASSERT_TRUE(gamePair.getClient(admin)->hasAdmin());
+      //gamePair.getClient(admin)->closeConnectionToGameServer();
+      gamePair.removeClient(admin);
       S32 time = FIVE_SECONDS;
       gamePair.idle(100, time / 100);    // 5 seconds
       ASSERT_LT(time, TeamHistoryManager::LockedTeamsNoAdminsGracePeriod) << "Tests only work if this is true... time = time idling since admin quit";
+      EXPECT_EQ(0, countAdmins(gamePair)) << "Our admin quit, so we should have none in the game";
 
       // Admin rejoins
-      newClient = gamePair.addClient(newPlayerName);     // He's baaaack!
+      newClient = gamePair.addClient(adminPlayerName);     // He's baaaack!
       newInfo = newClient->getClientInfo();
-      server->getClientInfo(2)->setRole(ClientInfo::RoleAdmin);
       gamePair.idle(5, 5);
+      ASSERT_TRUE(newClient->hasAdmin()) << "With GamePair, players join as Owners";
       EXPECT_TRUE(server->areTeamsLocked()) << "Teams should still be locked";
       EXPECT_EQ(oldTeam, newClient->getCurrentTeamIndex()) << "Should have rejoined same team (teams are locked, after all!)";
 
       ///// Admin quits and stays quitted -- teams should unlock automatically after 60 seconds      
-      server->getClientInfo(2)->setRole(ClientInfo::RoleAdmin);
-      gamePair.idle(5, 5);
-      EXPECT_FALSE(info0->isAdmin());
-      EXPECT_FALSE(info1->isAdmin());
-      EXPECT_TRUE(newInfo->isAdmin());
-
-      ChatHelper::runCommand(gamePair.getClient(0), "/lockteams");   // User chat command
+      ASSERT_EQ(1, countAdmins(gamePair));
+      admin = findFirstAdmin(gamePair);
+      gamePair.runChatCmd(0, "/lockteams");   // User chat command
       gamePair.idle(5, 5);
       EXPECT_TRUE(server->areTeamsLocked());
 
       // Admin quits
-      newClient->closeConnectionToGameServer();
+      gamePair.removeClient(admin);
       gamePair.idle(500, 50);    // 25 seconds
+      ASSERT_EQ(0, countAdmins(gamePair));
       EXPECT_EQ(2, server->getClientInfos()->size());
       gamePair.idle(1000, 40);   // 40 more seconds
+
       // Teams should be unlocked, and clients should know about it
       EXPECT_FALSE(server->areTeamsLocked());
-      EXPECT_FALSE(gamePair.getClient(0)->areTeamsLocked());
-      EXPECT_FALSE(gamePair.getClient(1)->areTeamsLocked());
+      gamePair.idle(5, 5);
+      for(S32 i = 0; i < gamePair.getClientCount(); i++)
+         EXPECT_FALSE(gamePair.getClient(i)->areTeamsLocked()) << "Client " + itos(i) + " thinks teams are locked";
 
       ASSERT_GT(65 * 1000, TeamHistoryManager::LockedTeamsForgetClientTime) << "Tests only work if this is true... 65 = time idling since admin quit";
 
       ///// Admin quits, but another admin quickly joins... teams stay locked
       // TODO: Test this!
 
-      // Verify that admins can reshuffle teams while they are locked (but players can't)
-      // TODO: Test this!
+      ///// Verify that admins can reshuffle teams while they are locked (need admin perms to use shuffle command)
+      // Promote first player to admin
+      EXPECT_EQ(0, countAdmins(gamePair));
+      admin = 0;
+      gamePair.server->getSettings()->setAdminPassword("admin_pw", false);    // Make sure we have a PW
+      string pwcmd = "/password " + gamePair.server->getSettings()->getAdminPassword();
+      gamePair.runChatCmd(admin, pwcmd.c_str());
+      gamePair.idle(5, 5);
+      ASSERT_TRUE(gamePair.getClient(admin)->hasAdmin());
+      EXPECT_TRUE(1, countAdmins(gamePair));
+      gamePair.runChatCmd(admin, "/lockteams");
+      gamePair.idle(5, 5);
+      EXPECT_TRUE(server->areTeamsLocked());
+      ASSERT_TRUE(gamePair.getClient(admin)->getConnectionToServer()) << "Needs to be true in shuffle cmd";
 
+      gamePair.runChatCmd(admin, "/shuffle");
+
+      // Press space to shuffle
+      // Press enter to accept
+      gamePair.idle(5, 5);
+      // 
+      // TODO: Figure this out
       // All players quit -- game unlocks immediately
       server->getClientInfo(0)->setRole(ClientInfo::RoleAdmin);
       gamePair.idle(5, 5);
-      ASSERT_TRUE(info0->isAdmin());
-      ChatHelper::runCommand(gamePair.getClient(0), "/lockteams");   // User chat command, requires admin privs
+      EXPECT_TRUE(1, countAdmins(gamePair));
+      admin = findFirstAdmin(gamePair);
+      gamePair.runChatCmd(admin, "/lockteams");   // User chat command, requires admin privs
       gamePair.idle(5, 5);
       EXPECT_TRUE(server->areTeamsLocked());
       gamePair.removeAllClients();
+      gamePair.idle(5, 5);
+      EXPECT_FALSE(server->areTeamsLocked());
+      // Adding another player should change nothing
+      gamePair.addClient("Last");
       gamePair.idle(5, 5);
       EXPECT_FALSE(server->areTeamsLocked());
    }
@@ -232,7 +326,7 @@ namespace Zap {
       ASSERT_EQ(1, server->getClientInfos()->get(1)->getTeamIndex());
 
       // Change game -- verify that players changed teams
-      ChatHelper::runCommand(gamePair.getClient(0), "/restart");
+      gamePair.runChatCmd(0, "/restart");
       gamePair.idle(5, 5);
       // Not sure which team players will be on, but should not be on same team
       ASSERT_NE(server->getClientInfos()->get(0)->getTeamIndex(), server->getClientInfos()->get(1)->getTeamIndex());
@@ -244,12 +338,12 @@ namespace Zap {
       ASSERT_EQ(2, server->getClientInfos()->size());
       ASSERT_EQ(2, server->getClientInfos()->get(0)->getTeamIndex());
       ASSERT_EQ(2, server->getClientInfos()->get(1)->getTeamIndex());
-      ChatHelper::runCommand(gamePair.getClient(0), "/lockteams");
+      gamePair.runChatCmd(0, "/lockteams");
       gamePair.idle(5, 5);
       ASSERT_TRUE(server->areTeamsLocked());
 
       // Change game -- are teams the same?  Should be!
-      ChatHelper::runCommand(gamePair.getClient(0), "/restart");
+      gamePair.runChatCmd(0, "/restart");
       gamePair.idle(5, 5);
       ASSERT_EQ(2, server->getClientInfos()->get(0)->getTeamIndex());
       ASSERT_EQ(2, server->getClientInfos()->get(1)->getTeamIndex());
@@ -272,7 +366,7 @@ namespace Zap {
       gamePair.getClient(3)->changeOwnTeam(1);
       gamePair.getClient(4)->changeOwnTeam(2);
       gamePair.idle(5, 5);
-      ChatHelper::runCommand(gamePair.getClient(0), "/lockteams");
+      gamePair.runChatCmd(0, "/lockteams");
       gamePair.idle(5, 5);
       server->countTeamPlayers();
       ASSERT_EQ(1, server->getTeam(0)->getPlayerCount());      // Just to be sure!
@@ -282,12 +376,12 @@ namespace Zap {
       // Set players such that player on team 2 is weakest
       server->getClientInfo(4)->addDeath();
       // Now change game to level with just two teams -- player on team 3 should now be on team 2
-      ChatHelper::runCommand(gamePair.getClient(0), "/next");
+      gamePair.runChatCmd(0, "/next");
       gamePair.idle(5, 5);
       ASSERT_EQ(2, server->getTeamCount());
       ASSERT_TRUE(server->areTeamsLocked());
       // Switch back to level with 3 teams
-      ChatHelper::runCommand(gamePair.getClient(0), "/prev");
+      gamePair.runChatCmd(0, "/prev");
       gamePair.idle(5, 5);
       ASSERT_EQ(3, server->getTeamCount());
       ASSERT_TRUE(server->areTeamsLocked());
@@ -297,7 +391,7 @@ namespace Zap {
       ASSERT_EQ(3, server->getTeam(1)->getPlayerCount());
       ASSERT_EQ(1, server->getTeam(2)->getPlayerCount());
       // Restart level; team config should not change
-      ChatHelper::runCommand(gamePair.getClient(0), "/restart");
+      gamePair.runChatCmd(0, "/restart");
       gamePair.idle(5, 5);
       server->countTeamPlayers();
       ASSERT_EQ(3, server->getTeamCount());
@@ -306,9 +400,9 @@ namespace Zap {
       ASSERT_EQ(1, server->getTeam(2)->getPlayerCount());
 
       // Unlock teams, restart level; team config should change
-      ChatHelper::runCommand(gamePair.getClient(0), "/unlockteams");
+      gamePair.runChatCmd(0, "/unlockteams");
       gamePair.idle(5, 5);
-      ChatHelper::runCommand(gamePair.getClient(0), "/restart");
+      gamePair.runChatCmd(0, "/restart");
       gamePair.idle(5, 5);
       server->countTeamPlayers();
       ASSERT_FALSE(server->areTeamsLocked());
@@ -319,9 +413,9 @@ namespace Zap {
 
       ///// Make sure locked teams aren't overly sticky:
       //    Relock teams, restart level; team config should not change, but it should be new config
-      ChatHelper::runCommand(gamePair.getClient(0), "/lockteams");
+      gamePair.runChatCmd(0, "/lockteams");
       gamePair.idle(5, 5);
-      ChatHelper::runCommand(gamePair.getClient(0), "/restart");
+      gamePair.runChatCmd(0, "/restart");
       gamePair.idle(5, 5);
       server->countTeamPlayers();
       ASSERT_TRUE(server->areTeamsLocked());

@@ -455,6 +455,9 @@ public:
    bool isInScoreboardMode();
 
    Move *getCurrentMove();
+
+   ///// Testing
+   friend class GamePair;
 };
 
 
