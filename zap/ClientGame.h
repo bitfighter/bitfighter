@@ -80,6 +80,7 @@ public:
 
    void joinLocalGame(GameNetInterface *remoteInterface);
    void joinRemoteGame(Address remoteAddress, bool isFromMaster);
+   void activateMainMenuUI();
 
    ServerGame *getServerGame() const;
 

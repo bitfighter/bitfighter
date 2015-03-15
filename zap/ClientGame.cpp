@@ -104,6 +104,12 @@ ClientGame::~ClientGame()
 }
 
 
+void ClientGame::activateMainMenuUI()
+{
+   getUIManager()->activate<MainMenuUserInterface>();
+}
+
+
 // Gets run when we join a game that we ourselves are hosting.  Is also used in tests for creating linked pairs of client/server games.
 void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
 {

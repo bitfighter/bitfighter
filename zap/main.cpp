@@ -575,7 +575,7 @@ void createClientGame(GameSettingsPtr settings)
          const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
          for(S32 i = 0; i < clientGames->size(); i++)
          {
-            clientGames->get(i)->getUIManager()->activate<MainMenuUserInterface>();
+            clientGames->get(i)->activateMainMenuUI();
             clientGames->get(i)->setReadyToConnectToMaster(true);
          }
 
