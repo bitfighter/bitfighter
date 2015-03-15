@@ -340,7 +340,7 @@ void ClientInfo::setRole(ClientRole role, bool displayNoticeToPlayers)
 {
    mRole = role;
    
-   GameConnection *conn = getConnection();   // Might be null during tests 
+   GameConnection *conn = getConnection();   // Might be null during tests
 
    // Notify clients... but only if we're a server!
    if(conn && conn->isConnectionToClient())
