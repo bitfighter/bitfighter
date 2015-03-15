@@ -152,6 +152,7 @@ set(CLIENT_SOURCES
 	OpenglUtils.cpp
 	quickChatHelper.cpp
 	RenderUtils.cpp
+	RenderManager.cpp
 	ScissorsManager.cpp
 	ScreenShooter.cpp
 	ShipShape.cpp

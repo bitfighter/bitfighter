@@ -87,6 +87,7 @@ using namespace TNL;
 #  include "VideoSystem.h"
 #  include "ClientGame.h"
 #  include "FontManager.h"
+#  include "RenderManager.h"
 #endif
 
 #include "ServerGame.h"
@@ -474,6 +475,7 @@ void shutdownBitfighter()
       SDL_QuitSubSystem(SDL_INIT_VIDEO);
 
       FontManager::cleanup();
+      RenderManager::shutdown();
 #endif
    }
 
@@ -1245,6 +1247,8 @@ int main(int argc, char **argv)
 
       if(!VideoSystem::init())                // Initialize video and window system
          shutdownBitfighter();
+
+      RenderManager::init();
 
 #if SDL_VERSION_ATLEAST(2,0,0)
       SDL_StartTextInput();
