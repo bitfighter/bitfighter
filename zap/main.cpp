@@ -82,15 +82,12 @@ using namespace TNL;
 #  include "Event.h"
 #  include "SDL.h"
 
-#  if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
-#    include "SDL_opengles.h"
-#  else
-#    include "SDL_opengl.h"
-#  endif
+#  include "glinc.h"
 
 #  include "VideoSystem.h"
 #  include "ClientGame.h"
 #  include "FontManager.h"
+#  include "RenderManager.h"
 #endif
 
 #include "ServerGame.h"
@@ -478,6 +475,7 @@ void shutdownBitfighter()
       SDL_QuitSubSystem(SDL_INIT_VIDEO);
 
       FontManager::cleanup();
+      RenderManager::shutdown();
 #endif
    }
 
@@ -1249,6 +1247,8 @@ int main(int argc, char **argv)
 
       if(!VideoSystem::init())                // Initialize video and window system
          shutdownBitfighter();
+
+      RenderManager::init();
 
 #if SDL_VERSION_ATLEAST(2,0,0)
       SDL_StartTextInput();

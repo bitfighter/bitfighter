@@ -3,23 +3,13 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-/*
- *  Most of this was taken directly from freeglut sources
- */
-
 #ifndef OPENGLUTILS_H_
 #define OPENGLUTILS_H_
 
 #include "tnlTypes.h"
 #include "FontContextEnum.h"
 
-#if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
-#  include "SDL_opengles.h"
-   // Needed for GLES compatibility
-#  define glOrtho glOrthof
-#else
-#  include "SDL_opengl.h"
-#endif
+#include "glinc.h"
 
 
 namespace TNL {

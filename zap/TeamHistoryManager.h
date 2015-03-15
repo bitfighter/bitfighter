@@ -10,6 +10,8 @@
 #include "tnlVector.h"
 #include "Timer.h"
 
+#include <string>
+
 using namespace std;
 
 namespace Zap

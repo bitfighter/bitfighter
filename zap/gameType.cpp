@@ -680,7 +680,7 @@ void GameType::idle_server(U32 deltaT)
 
          if(getGame()->getSettings()->getSetting<YesNo>(IniKey::AllowTeamChanging))
          {
-            if(conn->mSwitchTimer.update(deltaT))        // Has the swithc-ban timer expired?
+            if(conn->mSwitchTimer.update(deltaT))        // Has the switch-ban timer expired?
             {
                NetObject::setRPCDestConnection(conn);    // Limit who gets this message
                s2cCanSwitchTeams(true);                  // Let the client know they can switch again
