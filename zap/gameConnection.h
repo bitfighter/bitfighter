@@ -79,6 +79,8 @@ private:
    StringTableEntry mServerName;
    GameSettings *mSettings;
 
+   bool userAlreadyHasPermissions(const string &ownerPW, const string &adminPW, const string &levChangePW, const char *pass);
+
    void markCurrentLevelAsDeleted();
    string undeleteMostRecentlyDeletedLevel();               // Undoes above function
 
@@ -137,9 +139,9 @@ public:
 
 
 #ifndef ZAP_DEDICATED
-   explicit GameConnection(ClientGame *game);      // Constructor for ClientGame
+   explicit GameConnection(ClientGame *game, bool isLocalConnection);   // Constructor for ClientGame
 #endif
-   GameConnection();                      // Constructor for ServerGame
+   GameConnection();                                                    // Constructor for ServerGame
    virtual ~GameConnection();             // Destructor
 
 

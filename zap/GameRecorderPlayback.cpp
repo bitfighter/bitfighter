@@ -85,7 +85,7 @@ static void resetRenderState(ClientGame *game)
 }
 
 
-GameRecorderPlayback::GameRecorderPlayback(ClientGame *game, const char *filename) : GameConnection(game)
+GameRecorderPlayback::GameRecorderPlayback(ClientGame *game, const char *filename) : GameConnection(game, false)
 {
    mFile = NULL;
    mGame = game;

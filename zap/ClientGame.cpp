@@ -110,7 +110,7 @@ void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
 
    getUIManager()->activateGameUI();
 
-   GameConnection *gameConnection = new GameConnection(this);
+   GameConnection *gameConnection = new GameConnection(this, true);
  
    setConnectionToServer(gameConnection);
 
@@ -149,7 +149,7 @@ void ClientGame::joinRemoteGame(Address remoteAddress, bool isFromMaster)
 
    else                       // Try a direct connection
    {
-      GameConnection *gameConnection = new GameConnection(this);
+      GameConnection *gameConnection = new GameConnection(this, false);
 
       setConnectionToServer(gameConnection);
 
