@@ -819,7 +819,7 @@ RemoteClientInfo::~RemoteClientInfo()
 
 GameConnection *RemoteClientInfo::getConnection()
 {
-   TNLAssert(false, "Can't get a GameConnection from a RemoteClientInfo!");
+   //TNLAssert(false, "Can't get a GameConnection from a RemoteClientInfo!");
    return NULL;
 }
 
