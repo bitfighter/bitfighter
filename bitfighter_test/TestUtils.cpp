@@ -172,7 +172,11 @@ ClientGame *GamePair::addClient(const string &name, S32 teamIndex)
    ClientGame *client = newClientGame();
    client->userEnteredLoginCredentials(name, "password", false);    // Simulates entry from NameEntryUserInterface
 
+   // Get a base UI going, so if we enter the game, and exit again, we'll have a place to land
+   client->activateMainMenuUI();
+
    GameManager::addClientGame(client);
+
    return addClient(client);
 }
 
@@ -232,15 +236,6 @@ void GamePair::removeAllClients()
 {
    while(GameManager::getClientGames()->size() > 0)
       removeClient(GameManager::getClientGames()->size() - 1);
-}
-
-
-// Used at all?
-void GamePair::deleteDisconnectedClients()
-{
-   for(S32 i = GameManager::getClientGames()->size() - 1; i >= 0; i--)  // Backwards to avoid index issues
-      if(!GameManager::getClientGames()->get(i)->isConnectedToServer())
-         removeClient(i);
 }
 
 

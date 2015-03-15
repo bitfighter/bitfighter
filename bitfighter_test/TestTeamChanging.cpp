@@ -52,10 +52,10 @@ namespace Zap {
       GamePair gamePair(getLevelCodeForItemPropagationTests(""), 2); // This level has 2 teams; good for testing team changing
 
       ServerGame *server = gamePair.server;
-
       ClientInfo *info0 = gamePair.getClient(0)->getClientInfo();
       ClientInfo *info1 = gamePair.getClient(1)->getClientInfo();
 
+      // Clients can't demote themselves, so we'll have to force this on the server
       server->getClientInfo(0)->setRole(ClientInfo::RoleNone);
       server->getClientInfo(1)->setRole(ClientInfo::RoleNone);
       gamePair.idle(5, 5);
@@ -64,10 +64,6 @@ namespace Zap {
 
       S32 team0 = gamePair.getClient(0)->getCurrentTeamIndex();
       S32 team1 = gamePair.getClient(1)->getCurrentTeamIndex();
-
-      // We'll need these UIs active later when we quit and rejoin the game
-      gamePair.getClient(0)->activateMainMenuUI();
-      gamePair.getClient(1)->activateMainMenuUI();
 
       ASSERT_NE(team0, team1) << "Players start on different teams";
 
@@ -137,7 +133,7 @@ namespace Zap {
       EXPECT_EQ(gamePair.getClient(1)->getCurrentTeamIndex(), team1);
       // Retry same thing, but readd clients in a different order -- should get same result
 
-      // Pressing escape should disconnect the game, and drop back to the main menu interface, which we activated earlier
+      // Pressing escape should disconnect the game, and drop back to the main menu interface
       gamePair.getClient(0)->getUIManager()->getCurrentUI()->onKeyDown(KEY_ESCAPE);
       gamePair.getClient(1)->getUIManager()->getCurrentUI()->onKeyDown(KEY_ESCAPE);
 

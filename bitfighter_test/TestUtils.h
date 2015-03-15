@@ -73,7 +73,6 @@ struct GamePair
    void removeClient(const string &name);
    void removeClient(S32 index);
    void removeAllClients();
-   void deleteDisconnectedClients();
 };
 
 
