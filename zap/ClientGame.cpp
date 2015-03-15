@@ -1239,7 +1239,7 @@ void ClientGame::gotPermissionsReply(ClientInfo::ClientRole role)
 
 void ClientGame::gotWrongPassword()
 {
-   mUIManager->gotPasswordOrPermissionsReply(this, "Incorrect password");
+   mUIManager->gotPasswordOrPermissionsReply(this, "!!! Incorrect password");
 }
 
 
