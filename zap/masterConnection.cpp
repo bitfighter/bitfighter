@@ -252,7 +252,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
 
       // Client is creating new connection to game server
       ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-      GameConnection *gameConnection = new GameConnection(clientGame);
+      GameConnection *gameConnection = new GameConnection(clientGame, false);
       clientGame->setConnectionToServer(gameConnection);
 
       gameConnection->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, true);

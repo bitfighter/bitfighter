@@ -53,14 +53,23 @@ GameConnection::GameConnection()
 }
 
 
+// Default permissions we give to clients hosting their own local server
+static const ClientInfo::ClientRole LocalConnectionPermissions = ClientInfo::RoleOwner;
+
+
 #ifndef ZAP_DEDICATED
 // Constructor on client side
-GameConnection::GameConnection(ClientGame *clientGame)
+GameConnection::GameConnection(ClientGame *clientGame, bool isLocalConnection)
 {
    initialize();
 
    mSettings = clientGame->getSettings();
    mClientInfo = clientGame->getClientInfo();      // Now have a FullClientInfo representing the local player
+
+   // By doing this here, we'll avoid a message stating we've already got these permissions
+   // Note to hackers: setting these permissions here will not affect the server; you can't escalate by changing this. Sorry!
+   if(isLocalConnection)
+      mClientInfo->setRole(LocalConnectionPermissions, false);
 
    TNLAssert(mClientInfo->getName() != "", "Client has invalid name!");
 
@@ -103,6 +112,7 @@ void GameConnection::initialize()
 
    resetConnectionStatus();
 }
+
 
 // Destructor
 GameConnection::~GameConnection()
@@ -415,6 +425,43 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetAuthenticated, (StringTableEntry name, b
 }
 
 
+// Return true if passwords match, false if not 
+static bool checkPass(const string &password, const char *enteredPassword)
+{
+   return strcmp(Md5::getSaltedHashFromString(password).c_str(), enteredPassword) == 0;
+}
+
+
+// Check if the user is entering a password for permissions they already have.  Show the user a message -- this will
+// fix the issue of a user already having admin permissions (for example), but not realizing it, and entering the password
+// and being shown an error message.  It's mostly an annoyance, but... it's annoying.
+//
+// This won't handle every case (like entering a slightly-off password, because the only way we know which permissions
+// you are requesting is by the password you are entering), but it is better than nothing.
+bool GameConnection::userAlreadyHasPermissions(const string &ownerPW, const string &adminPW, const string &levChangePW, const char *pass)
+{
+   if(mClientInfo->isOwner())
+   {
+      s2cDisplayErrorMessage("!!! You already have owner permissions");
+      return true;
+   }
+
+   if(mClientInfo->isAdmin() && adminPW != "" && (checkPass(adminPW, pass) || checkPass(levChangePW, pass)))
+   {
+      s2cDisplayErrorMessage("!!! You already have admin permissions");
+      return true;
+   }
+
+   if(mClientInfo->isLevelChanger() && checkPass(levChangePW, pass))
+   {
+      s2cDisplayErrorMessage("!!! You already have level change permissions");
+      return true;
+   }
+
+   return false;
+}
+
+
 TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
@@ -424,7 +471,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
 
    GameType *gameType = mServerGame->getGameType();
 
-   if(!mClientInfo->isOwner() && ownerPW != "" && !strcmp(Md5::getSaltedHashFromString(ownerPW).c_str(), pass))
+   if(userAlreadyHasPermissions(ownerPW, adminPW, levChangePW, pass))
+      return;
+
+   if(ownerPW != "" &&  checkPass(ownerPW, pass))
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted owner permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -449,7 +499,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
    }
 
    // If admin password is blank, no one can get admin permissions except the local host, if there is one...
-   else if(!mClientInfo->isAdmin() && adminPW != "" && !strcmp(Md5::getSaltedHashFromString(adminPW).c_str(), pass))
+   else if(adminPW != "" && checkPass(adminPW, pass))
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted admin permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -471,7 +521,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
    }
 
    // If level change password is blank, it should already been granted to all clients
-   else if(!mClientInfo->isLevelChanger() && !strcmp(Md5::getSaltedHashFromString(levChangePW).c_str(), pass)) 
+   else if(checkPass(levChangePW, pass))
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted level change permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -492,7 +542,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
                                                getNetAddressString(), mClientInfo->getName().getString());
       mWrongPasswordCount++;
       if(mWrongPasswordCount > MAX_WRONG_PASSWORD)
-         disconnect(NetConnection::ReasonError, "Too many wrong password");
+         disconnect(NetConnection::ReasonError, "Too many wrong passwords");
    }
 }
 
@@ -2174,7 +2224,7 @@ void GameConnection::setClientInfo(ClientInfo *clientInfo)
 // Called from ClientGame::joinLocalGame()
 void GameConnection::onLocalConnection()
 {
-   getClientInfo()->setRole(ClientInfo::RoleOwner, false);    // Set Owner role on server (and client)
+   getClientInfo()->setRole(LocalConnectionPermissions, false);    // Set Owner role on server (and client)
    sendLevelList();
 
    setServerName(mServerGame->getSettings()->getHostName());  // Server name is whatever we've set locally
@@ -2344,7 +2394,7 @@ void GameConnection::onConnectionEstablished_server()
    {
       mSendableFlags &= ~ServerFlagAllowUpload;
       mSendableFlags |= ServerFlagHostingLevels;
-      mClientInfo->setRole(ClientInfo::RoleOwner, false);         // Silently
+      mClientInfo->setRole(ClientInfo::RoleOwner, false);         // Silently; should be LocalConnectionPermissions ??
       mServerGame->mHoster = this;
       mServerGame->mInfoFlags &= ~HostModeFlag;
    }
