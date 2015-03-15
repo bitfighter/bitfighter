@@ -232,7 +232,7 @@ namespace Zap {
       gamePair.removeClient(admin);
       S32 time = FIVE_SECONDS;
       gamePair.idle(100, time / 100);    // 5 seconds
-      ASSERT_LT(time, TeamHistoryManager::LockedTeamsNoAdminsGracePeriod) << "Tests only work if this is true... time = time idling since admin quit";
+      ASSERT_LT(time, +TeamHistoryManager::LockedTeamsNoAdminsGracePeriod) << "Tests only work if this is true... time = time idling since admin quit";
       EXPECT_EQ(0, countAdmins(gamePair)) << "Our admin quit, so we should have none in the game";
 
       // Admin rejoins
@@ -263,7 +263,7 @@ namespace Zap {
       for(S32 i = 0; i < gamePair.getClientCount(); i++)
          EXPECT_FALSE(gamePair.getClient(i)->areTeamsLocked()) << "Client " + itos(i) + " thinks teams are locked";
 
-      ASSERT_GT(65 * 1000, TeamHistoryManager::LockedTeamsForgetClientTime) << "Tests only work if this is true... 65 = time idling since admin quit";
+      ASSERT_GT(65 * 1000, +TeamHistoryManager::LockedTeamsForgetClientTime) << "Tests only work if this is true... 65 = time idling since admin quit";
 
       ///// Admin quits, but another admin quickly joins... teams stay locked
       // TODO: Test this!
@@ -277,7 +277,7 @@ namespace Zap {
       gamePair.runChatCmd(admin, pwcmd.c_str());
       gamePair.idle(5, 5);
       ASSERT_TRUE(gamePair.getClient(admin)->hasAdmin());
-      EXPECT_TRUE(1, countAdmins(gamePair));
+      EXPECT_EQ(1, countAdmins(gamePair));
       gamePair.runChatCmd(admin, "/lockteams");
       gamePair.idle(5, 5);
       EXPECT_TRUE(server->areTeamsLocked());
@@ -293,7 +293,7 @@ namespace Zap {
       // All players quit -- game unlocks immediately
       server->getClientInfo(0)->setRole(ClientInfo::RoleAdmin);
       gamePair.idle(5, 5);
-      EXPECT_TRUE(1, countAdmins(gamePair));
+      EXPECT_EQ(1, countAdmins(gamePair));
       admin = findFirstAdmin(gamePair);
       gamePair.runChatCmd(admin, "/lockteams");   // User chat command, requires admin privs
       gamePair.idle(5, 5);
