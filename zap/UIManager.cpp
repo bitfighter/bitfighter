@@ -205,7 +205,7 @@ void UIManager::onConnectionTerminated(const Address &serverAddress, NetConnecti
 {
    if(cameFrom<EditorUserInterface>())
      reactivate(getUI<EditorUserInterface>());
-   else if(getPrevUI() != NULL)    // Avoids Assert "There has been a failure in previous UI queuing!" in tests
+   else if(cameFrom<MainMenuUserInterface>())    // Avoids Assert "There has been a failure in previous UI queuing!" in tests
      reactivate(getUI<MainMenuUserInterface>());
 
 
