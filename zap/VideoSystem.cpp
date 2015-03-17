@@ -463,7 +463,7 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
 
    // This needs to happen after font re-initialization because I think fontstash interferes
    // with the oglconsole font somehow...
-   gConsole.onScreenModeChanged();
+   GameManager::gameConsole.onScreenModeChanged();
 }
 
 

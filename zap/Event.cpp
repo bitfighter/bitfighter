@@ -6,6 +6,7 @@
 #include "Event.h"
 
 #include "Console.h"
+#include "GameManager.h"
 #include "UIManager.h"
 #include "UIMenus.h"       // ==> Could be refactored out with some work
 #include "IniFile.h"
@@ -578,7 +579,7 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
   
    glViewport(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
 
-   gConsole.onScreenResized();
+   GameManager::gameConsole.onScreenResized();
 
    glScissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());    // See comment on identical line in main.cpp
 }

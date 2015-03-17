@@ -8,6 +8,7 @@
 #ifndef BF_NO_CONSOLE
 
 #  include "DisplayManager.h"   // For ScreenInfo object
+#  include "GameManager.h"
 #  include "tnlAssert.h"        // For TNLAssert, of course
 
 #  include <stdio.h>            // For vsnprintf
@@ -20,8 +21,6 @@
 namespace Zap
 {
 
-
-Console gConsole;    // For the moment, we'll just have one console for everything.  This may change later, but probably won't.
 
 // Constructor
 Console::Console()
@@ -52,7 +51,7 @@ void Console::initialize()
 #ifndef BF_NO_CONSOLE
 
    TNLAssert(DisplayManager::getScreenInfo()->isActualized(), "Must run VideoSystem::actualizeScreenMode() before initializing console!");
-   TNLAssert(!mConsole,                  "Only intialize once!");
+   TNLAssert(!mConsole, "Only intialize once!");
 
    mConsole = OGLCONSOLE_Create(); 
 
@@ -120,7 +119,7 @@ bool Console::isOk()
 // Structure of this code borrowed from naev
 void Console::processConsoleCommandCallback(OGLCONSOLE_Console console, char *cmdline)
 {
-   gConsole.processCommand(cmdline);
+   GameManager::gameConsole.processCommand(cmdline);
 }
 
 

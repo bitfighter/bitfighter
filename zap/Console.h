@@ -64,9 +64,6 @@ public:
 };
 
 
-// Provide transparent access to our global console instance
-extern Console gConsole;
-
 };
 
 #endif

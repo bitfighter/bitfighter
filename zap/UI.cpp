@@ -148,7 +148,7 @@ void UserInterface::renderConsole() const
    if(scissorMode) 
       glDisable(GL_SCISSOR_TEST);
 
-   gConsole.render();
+   GameManager::gameConsole.render();
 
    if(scissorMode) 
       glEnable(GL_SCISSOR_TEST);

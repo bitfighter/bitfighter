@@ -10,6 +10,7 @@
 #include "ChatCommands.h"
 #include "ClientGame.h"
 #include "Console.h"
+#include "GameManager.h"
 #include "LevelSource.h"      // For LevelInfo used in level name tab-completion
 #include "UIChat.h"           // For font sizes and such
 #include "UIInstructions.h"   // For code to activate help screen
@@ -532,7 +533,7 @@ static void makeCommandCandidateList()
 void ChatHelper::onTextInput(char ascii)
 {
    // Pass the key on to the console for processing
-   if(gConsole.onKeyDown(ascii))
+   if(GameManager::gameConsole.onKeyDown(ascii))
       return;
 
    // Make sure we have a chat box open

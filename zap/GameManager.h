@@ -7,6 +7,7 @@
 #define _GAME_MANAGER_H_
 
 #include "tnlVector.h"
+#include "Console.h"
 
 using namespace TNL;
 
@@ -14,8 +15,9 @@ namespace Zap
 {
 
 class ServerGame;
+
 #ifndef ZAP_DEDICATED
-class ClientGame;
+   class ClientGame;
 #endif
 
 // Singleton class for keeping track of various Game objects
@@ -39,8 +41,13 @@ private:
    static HostingModePhase mHostingModePhase;
 
 public:
+   static Console gameConsole;
+
    GameManager();
    virtual ~GameManager();
+
+   static void initialize();
+   
 
    // ServerGame related
    static void setServerGame(ServerGame *serverGame);

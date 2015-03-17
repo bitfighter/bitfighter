@@ -6,6 +6,7 @@
 #include "GameManager.h"
 
 #include "ServerGame.h"
+#include "Console.h"
 
 #ifndef ZAP_DEDICATED
 #  include "UIErrorMessage.h"
@@ -23,6 +24,7 @@ ServerGame *GameManager::mServerGame = NULL;
    Vector<ClientGame *> GameManager::mClientGames;
 #endif
 GameManager::HostingModePhase GameManager::mHostingModePhase = GameManager::NotHosting;
+Console GameManager::gameConsole;    // For the moment, we'll just have one console for everything.  This may change later, but probably won't.
 
 
 // Constructor
@@ -36,6 +38,12 @@ GameManager::GameManager()
 GameManager::~GameManager()
 {
    // Do nothing
+}
+
+
+void GameManager::initialize()
+{
+   gameConsole.initialize();
 }
 
 

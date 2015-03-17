@@ -398,7 +398,7 @@ class OglConsoleLogConsumer : public LogConsumer    // Dumps to oglConsole
 private:
    void writeString(const char *string) 
    {
-      gConsole.output(string);
+      GameManager::gameConsole.output(string);
    }
 };
 
@@ -1116,7 +1116,7 @@ int main(int argc, char **argv)
 
       VideoSystem::actualizeScreenMode(&gSettings, false, false);
       FontManager::setFont(FontRoman);
-      gConsole.initialize();
+      GameManager::gameConsole.initialize();
 
       ClientGame game(Address(), new UIManager());
       game.getUIManager()->getUI<EditorUserInterface>()->setLevelFileName(levelpath);
@@ -1267,7 +1267,7 @@ int main(int argc, char **argv)
       // of a string.  Which will crash if the fonts haven't been loaded, which happens as part of actualizeScreenMode.  So there.
       createClientGame(settings);         
 
-      gConsole.initialize();     // Initialize console *after* the screen mode has been actualized
+      GameManager::initialize();    // Initialize *after* the screen mode has been actualized
 
       // Fonts are initialized in VideoSystem::actualizeScreenMode because of OpenGL + texture loss/creation
       FontManager::setFont(FontRoman);     // Default font
