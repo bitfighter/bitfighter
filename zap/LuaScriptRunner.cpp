@@ -20,7 +20,6 @@
 #include "TeamConstants.h"
 
 #include "config.h"
-#include "Console.h"           // For gConsole
 #include "GameSettings.h"
 
 #include "stringUtils.h"
