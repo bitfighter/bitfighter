@@ -23,6 +23,7 @@ set(SHARED_SOURCES
 	Color.cpp
 	config.cpp
 	Console.cpp
+	ConsoleLogConsumer.cpp
 	controlObjectConnection.cpp
 	CoreGame.cpp
 	CTFGame.cpp

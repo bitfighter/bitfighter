@@ -244,8 +244,6 @@ void display()
 #endif // ZAP_DEDICATED
 
 
-void shutdownBitfighter();    // Forward declaration
-
 // If the server game exists, and is shutting down, close any ClientGame connections we might have to it, then delete it.
 // If there are no client games, delete it and return to the OS.
 void checkIfServerGameIsShuttingDown(U32 timeDelta)
@@ -268,7 +266,7 @@ void checkIfServerGameIsShuttingDown(U32 timeDelta)
       else                                
 #endif
          // Either we have no clients, or this is a dedicated build so...
-         shutdownBitfighter();    // ...shut down the whole shebang, return to OS, never come back
+         GameManager::shutdownBitfighter();    // ...shut down the whole shebang, return to OS, never come back
    }
 }
 
@@ -359,7 +357,7 @@ void idle()
       TNLAssert(clientGames->size() > 0, "Why are we here if there is no client game??");
 
       if(event.type == SDL_QUIT) // Handle quit here
-         shutdownBitfighter();
+         GameManager::shutdownBitfighter();
 
       // Pass the event to all clientGames
       for(S32 i = 0; i < clientGames->size(); i++)
@@ -388,28 +386,11 @@ void dedicatedServerLoop()
       idle();     // Idly!
 }
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Include class here to avoid contaminating tnlLog with the filth that is oglConsole
-// If BF_NO_CONSOLE is defined, console output will be merged into normal stdout logging elsewhere
-class OglConsoleLogConsumer : public LogConsumer    // Dumps to oglConsole
-{
-private:
-   void writeString(const char *string) 
-   {
-      GameManager::gameConsole.output(string);
-   }
-};
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 // Our logfiles
 StdoutLogConsumer gStdoutLog;          // Logs to OS console, when there is one
-#ifndef BF_NO_CONSOLE
-   OglConsoleLogConsumer gOglConsoleLog;  // Logs to our in-game console, when available
-#endif
 
 FileLogConsumer gMainLog;
 FileLogConsumer gServerLog;            // We'll apply a filter later on, in main()
@@ -417,85 +398,6 @@ FileLogConsumer gServerLog;            // We'll apply a filter later on, in main
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
-
-// Run when we're quitting the game, returning to the OS.  Saves settings and does some final cleanup to keep things orderly.
-// There are currently only 6 ways to get here (i.e. 6 legitimate ways to exit Bitfighter): 
-// 1) Hit escape during initial name entry screen
-// 2) Hit escape from the main menu
-// 3) Choose Quit from main menu
-// 4) Host a game with no levels as a dedicated server
-// 5) Admin issues a shutdown command to a remote dedicated server
-// 6) Click the X on the window to close the game window   <=== NOTE: This scenario fails for me when running a dedicated server on windows.
-// and two illigitimate ways
-// 7) Lua panics!!
-// 8) Video system fails to initialize
-void shutdownBitfighter()
-{
-   GameSettings *settings = NULL;
-
-   // Avoid this function being called twice when we exit via methods 1-4 above
-#ifndef ZAP_DEDICATED
-   if(GameManager::getClientGames()->size() == 0)
-#endif
-      if(GameManager::getServerGame())
-         exitToOs();
-
-// Grab a pointer to settings wherever we can.  Note that all Games (client or server) currently refer to the same settings object.
-#ifndef ZAP_DEDICATED
-   if(GameManager::getClientGames()->size() > 0)
-      settings = GameManager::getClientGames()->get(0)->getSettings();
-
-   GameManager::deleteClientGames();
-
-#endif
-
-   if(GameManager::getServerGame())
-   {
-      settings = GameManager::getServerGame()->getSettings();
-      GameManager::deleteServerGame();
-   }
-
-
-   TNLAssert(settings, "Should always have a value here!");
-
-   EventManager::shutdown();
-   LuaScriptRunner::shutdown();
-   SoundSystem::shutdown();
-
-   if(!settings->isDedicatedServer())
-   {
-#ifndef ZAP_DEDICATED
-      Joystick::shutdownJoystick();
-
-      // Save current window position if in windowed mode
-      if(settings->getSetting<DisplayMode>(IniKey::WindowMode) == DISPLAY_MODE_WINDOWED)
-         settings->setWindowPosition(VideoSystem::getWindowPositionX(), VideoSystem::getWindowPositionY());
-
-      SDL_QuitSubSystem(SDL_INIT_VIDEO);
-
-      FontManager::cleanup();
-      RenderManager::shutdown();
-#endif
-   }
-
-#ifndef BF_NO_CONSOLE
-   // Avoids annoying shutdown crashes when logging is still trying to output to oglconsole
-   gOglConsoleLog.setMsgTypes(LogConsumer::LogNone);
-#endif
-
-   settings->save();                                  // Write settings to bitfighter.ini
-
-   delete settings;
-
-   DisplayManager::cleanup();
-
-   NetClassRep::logBitUsage();
-   logprintf("Bye!");
-
-   exitToOs();    // Do not pass Go
-}
-
 
 void setupLogging(IniSettings *iniSettings)
 {
@@ -596,18 +498,17 @@ void createClientGame(GameSettingsPtr settings)
 }
 
 
+// Specify which events each logfile will listen for
+S32 events = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage | LogConsumer::LogConnection;
+
+
 void setupLogging(const string &logDir)
 {
-   // Specify which events each logfile will listen for
-   S32 events        = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage | LogConsumer::LogConnection;
-   S32 consoleEvents = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage | LogConsumer::ConsoleMsg;
-
    gMainLog.init(joindir(logDir, "bitfighter.log"), "w");
    //gMainLog.setMsgTypes(events);  ==> set from INI settings     
    gMainLog.logprintf("------ Bitfighter Log File ------");
 
 #ifndef BF_NO_CONSOLE
-   gOglConsoleLog.setMsgTypes(consoleEvents);   // writes to in-game console
    gStdoutLog.setMsgTypes(events);              // writes to stdout
 #else
    gStdoutLog.setMsgTypes(events | consoleEvents);              // writes to stdout
@@ -1116,7 +1017,7 @@ int main(int argc, char **argv)
 
       VideoSystem::actualizeScreenMode(&gSettings, false, false);
       FontManager::setFont(FontRoman);
-      GameManager::gameConsole.initialize();
+      GameManager::gameConsole->initialize();
 
       ClientGame game(Address(), new UIManager());
       game.getUIManager()->getUI<EditorUserInterface>()->setLevelFileName(levelpath);
@@ -1164,8 +1065,6 @@ int main(int argc, char **argv)
       // Set the default paths
       setDefaultPaths(argVector);
    }
-   //else
-   //   printf("Standalone run detected\n");
 
    settings->setExecutablePath(string(argv[0]));
    settings->readCmdLineParams(argVector);      // Read cmd line params, needed to resolve folder locations
@@ -1191,7 +1090,10 @@ int main(int argc, char **argv)
    if(!isStandalone)
       checkOnlineUpdate(settings.get());
 
+   GameManager gameManager;
+
    // Make any adjustments needed when we run for the first time after an upgrade
+   // Make sure logging is set up by the time we get here
    // Skip if this is the first run
    if(!isFirstLaunchEver)
       checkIfThisIsAnUpdate(settings.get(), isStandalone);
@@ -1246,7 +1148,7 @@ int main(int argc, char **argv)
 #endif
 
       if(!VideoSystem::init())                // Initialize video and window system
-         shutdownBitfighter();
+         GameManager::shutdownBitfighter();
 
       RenderManager::init();
 
@@ -1267,7 +1169,7 @@ int main(int argc, char **argv)
       // of a string.  Which will crash if the fonts haven't been loaded, which happens as part of actualizeScreenMode.  So there.
       createClientGame(settings);         
 
-      GameManager::initialize();    // Initialize *after* the screen mode has been actualized
+      gameManager.initialize();    // Initialize *after* the screen mode has been actualized
 
       // Fonts are initialized in VideoSystem::actualizeScreenMode because of OpenGL + texture loss/creation
       FontManager::setFont(FontRoman);     // Default font

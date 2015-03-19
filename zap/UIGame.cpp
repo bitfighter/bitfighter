@@ -1321,7 +1321,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    if(Parent::onKeyDown(inputCode))    // Let parent try handling the key
       return true;
 
-   if(GameManager::gameConsole.onKeyDown(inputCode))   // Pass the key on to the console for processing
+   if(GameManager::gameConsole->onKeyDown(inputCode))   // Pass the key on to the console for processing
       return true;
 
    if(checkInputCode(BINDING_HELP, inputCode))   // Turn on help screen
@@ -1344,8 +1344,8 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    // Only open when there are no active helpers
    if(!mHelperManager.isHelperActive() && inputCode == KEY_SLASH && InputCodeManager::checkModifier(KEY_CTRL))
    {
-      if(GameManager::gameConsole.isOk())        // Console is only not Ok if something bad has happened somewhere
-         GameManager::gameConsole.toggleVisibility();
+      if(GameManager::gameConsole->isOk())        // Console is only not Ok if something bad has happened somewhere
+         GameManager::gameConsole->toggleVisibility();
 
       return true;
    }
@@ -1404,7 +1404,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
 
 #endif
 
-   if(!GameManager::gameConsole.isVisible())
+   if(!GameManager::gameConsole->isVisible())
    {
       if(!isChatting())
          return processPlayModeKey(inputCode);
@@ -1439,8 +1439,8 @@ void GameUserInterface::onMissionKeyReleased()
 
 void GameUserInterface::onTextInput(char ascii)
 {
-   if(GameManager::gameConsole.isVisible())
-      GameManager::gameConsole.onKeyDown(ascii);
+   if(GameManager::gameConsole->isVisible())
+      GameManager::gameConsole->onKeyDown(ascii);
 
    mHelperManager.onTextInput(ascii);
 }
@@ -1838,7 +1838,7 @@ Move *GameUserInterface::getCurrentMove()
 {
    Move *move = &mCurrentMove;
 
-   if(!mDisableShipKeyboardInput && getUIManager()->isCurrentUI<GameUserInterface>() && !GameManager::gameConsole.isVisible())
+   if(!mDisableShipKeyboardInput && getUIManager()->isCurrentUI<GameUserInterface>() && !GameManager::gameConsole->isVisible())
    {
       // Some helpers (like TeamShuffle) like to disable movement when they are active
       if(mHelperManager.isMovementDisabled())

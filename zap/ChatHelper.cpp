@@ -533,7 +533,7 @@ static void makeCommandCandidateList()
 void ChatHelper::onTextInput(char ascii)
 {
    // Pass the key on to the console for processing
-   if(GameManager::gameConsole.onKeyDown(ascii))
+   if(GameManager::gameConsole->onKeyDown(ascii))
       return;
 
    // Make sure we have a chat box open

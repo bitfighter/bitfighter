@@ -41,13 +41,13 @@ private:
    static HostingModePhase mHostingModePhase;
 
 public:
-   static Console gameConsole;
+   static ::Console *gameConsole;
 
    GameManager();
    virtual ~GameManager();
 
    static void initialize();
-   
+   static void shutdownBitfighter();
 
    // ServerGame related
    static void setServerGame(ServerGame *serverGame);

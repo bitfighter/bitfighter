@@ -119,7 +119,7 @@ bool Console::isOk()
 // Structure of this code borrowed from naev
 void Console::processConsoleCommandCallback(OGLCONSOLE_Console console, char *cmdline)
 {
-   GameManager::gameConsole.processCommand(cmdline);
+   GameManager::gameConsole->processCommand(cmdline);
 }
 
 

@@ -518,9 +518,9 @@ void EditorUserInterface::runLevelGenScript()
 // game is an unused parameter needed to make the method fit the signature of the callbacks used by UIMenus
 static void openConsole(ClientGame *game)
 {
-   if(GameManager::gameConsole.isOk())
+   if(GameManager::gameConsole->isOk())
    {
-      GameManager::gameConsole.show();
+      GameManager::gameConsole->show();
       return;
    }
    // else show error message  <== TODO DO ThiS!
@@ -3822,7 +3822,7 @@ Point EditorUserInterface::getDisplayCenter() const
 void EditorUserInterface::onTextInput(char ascii)
 {
    // Pass the key on to the console for processing
-   if(GameManager::gameConsole.onKeyDown(ascii))
+   if(GameManager::gameConsole->onKeyDown(ascii))
        return;
 }
 
@@ -3833,11 +3833,11 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    if(Parent::onKeyDown(inputCode))
       return true;
 
-   if(GameManager::gameConsole.onKeyDown(inputCode))      // Pass the key on to the console for processing
+   if(GameManager::gameConsole->onKeyDown(inputCode))      // Pass the key on to the console for processing
       return true;
 
    // If console is open, then we want to capture text, so return false
-   if(GameManager::gameConsole.isVisible())
+   if(GameManager::gameConsole->isVisible())
       return false;
 
    string inputString = InputCodeManager::getCurrentInputString(inputCode);

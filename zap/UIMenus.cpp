@@ -57,8 +57,6 @@ S32 QSORT_CALLBACK menuItemValueSort(boost::shared_ptr<MenuItem> *a, boost::shar
 }
 
 
-extern void shutdownBitfighter();
-
 ////////////////////////////////////
 ////////////////////////////////////
 
@@ -936,7 +934,7 @@ static void creditsSelectedCallback(ClientGame *game, U32 unused)
 
 static void quitSelectedCallback(ClientGame *game, U32 unused)
 {
-   shutdownBitfighter();
+   GameManager::shutdownBitfighter();
 }
 
 
@@ -1095,7 +1093,7 @@ void MainMenuUserInterface::showUpgradeAlert()
 
 void MainMenuUserInterface::onEscape()
 {
-   shutdownBitfighter();    // Quit!
+   GameManager::shutdownBitfighter();    // Quit!
 }
 
 
@@ -1879,7 +1877,7 @@ void NameEntryUserInterface::renderExtras() const
 // Save options to INI file, and return to our regularly scheduled program
 void NameEntryUserInterface::onEscape()
 {
-   shutdownBitfighter();
+   GameManager::shutdownBitfighter();
 }
 
 

@@ -129,7 +129,7 @@ void abortHosting_noLevels(ServerGame *serverGame)
 
    if(clientGames->size() == 0)
 #endif
-      shutdownBitfighter();      // Quit in an orderly fashion
+      GameManager::shutdownBitfighter();      // Quit in an orderly fashion
 }
 
 ////////////////////////////////////////

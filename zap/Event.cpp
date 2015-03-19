@@ -579,7 +579,7 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
   
    glViewport(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
 
-   GameManager::gameConsole.onScreenResized();
+   GameManager::gameConsole->onScreenResized();
 
    glScissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());    // See comment on identical line in main.cpp
 }

@@ -9,6 +9,7 @@
 
 #include "DisplayManager.h"
 #include "FontManager.h"
+#include "GameManager.h"
 #include "tnlLog.h"
 
 #include "stringUtils.h"
@@ -19,8 +20,8 @@
 
 namespace Zap
 {
+void exitToOs()            { TNLAssert(false, "Should never be called!"); }
 void exitToOs(S32 errcode) { TNLAssert(false, "Should never be called!"); }
-void shutdownBitfighter()  { TNLAssert(false, "Should never be called!"); };
 }
 
 /**
