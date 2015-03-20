@@ -22,6 +22,7 @@ using namespace TNL;
 
 class ServerGame;
 class ClientGame;
+class GameUserInterface;
 
 ClientGame *newClientGame();
 ClientGame *newClientGame(const GameSettingsPtr &settings);
@@ -68,6 +69,8 @@ struct GamePair
    S32 getClientCount() const;
    ClientGame *getClient(S32 index);
 
+   GameUserInterface *getGameUI(S32 clientIndex);
+   void sendKeyPress(S32 clientIndex, InputCode inputCode);
    void runChatCmd(S32 clientIndex, const string &command);
 
    void removeClient(const string &name);

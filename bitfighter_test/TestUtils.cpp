@@ -12,8 +12,10 @@
 #include "ChatHelper.h"
 #include "helperMenu.h"
 #include "FontManager.h"
+#include "DisplayManager.h"
 #include "UIManager.h"
 #include "SystemFunctions.h"
+#include "VideoSystem.h"
 #include "Level.h"
 #include "tnlAssert.h"
 
@@ -26,6 +28,8 @@ using namespace std;
 
 namespace Zap
 {
+
+   static GameManager gameManager;
 
 // Create a new ClientGame with one dummy team -- be sure to delete this somewhere!
 ClientGame *newClientGame()
@@ -110,6 +114,9 @@ void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32
 
 void GamePair::initialize(GameSettingsPtr settings, const Vector<string> &levelCode, S32 clientCount)
 {
+   VideoSystem::init();
+   VideoSystem::actualizeScreenMode(settings.get(), false, false);
+   gameManager.initialize();
    // Need to start Lua before we add any clients.  Might as well do it now.
    LuaScriptRunner::startLua(settings->getFolderManager()->getLuaDir());
 
@@ -239,15 +246,29 @@ void GamePair::removeAllClients()
 }
 
 
+GameUserInterface *GamePair::getGameUI(S32 clientIndex)
+{
+   EXPECT_TRUE(clientIndex >= 0 && clientIndex < getClientCount()) << "Index out of bounds!";
+   ClientGame *client = getClient(clientIndex);
+   GameUserInterface *ui = dynamic_cast<GameUserInterface *>(client->getUIManager()->getCurrentUI());
+   EXPECT_TRUE(ui != NULL) << "Are we in the game?";
+
+   return ui;
+}
+
+
+void GamePair::sendKeyPress(S32 clientIndex, InputCode inputCode)
+{
+   GameUserInterface *ui = getGameUI(clientIndex);
+   ui->onKeyDown(inputCode);
+}
+
+
 // Properly set up and execute a chat command for the given client.  This simulates the user hitting enter after
 // typing their command, including creating and dismissing the chat helper.
 void GamePair::runChatCmd(S32 clientIndex, const string &command)
 {
-   ASSERT_TRUE(clientIndex >= 0 && clientIndex < getClientCount()) << "Test is malfunctioning!";
-
-   ClientGame *client = getClient(clientIndex);
-   GameUserInterface *ui = dynamic_cast<GameUserInterface *>(client->getUIManager()->getCurrentUI());
-   ASSERT_TRUE(ui) << "Are we in the game?";
+   GameUserInterface *ui = getGameUI(clientIndex);
 
    ui->activateHelper(HelperMenu::ChatHelperType, false);      // Need this active when entering chat cmd
    ChatHelper *helper = dynamic_cast<ChatHelper *>(ui->mHelperManager.mHelperStack.last());

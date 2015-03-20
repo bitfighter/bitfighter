@@ -284,9 +284,8 @@ namespace Zap {
       ASSERT_TRUE(gamePair.getClient(admin)->getConnectionToServer()) << "Needs to be true in shuffle cmd";
 
       gamePair.runChatCmd(admin, "/shuffle");
-
-      // Press space to shuffle
-      // Press enter to accept
+      gamePair.sendKeyPress(admin, KEY_SPACE);   // Press space to shuffle
+      gamePair.sendKeyPress(admin, KEY_ENTER);   // Press enter to accept
       gamePair.idle(5, 5);
       // 
       // TODO: Figure this out
