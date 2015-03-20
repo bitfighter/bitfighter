@@ -102,7 +102,6 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
    // Idle for a while
    GamePair::idle(10, 5);
 
-   
    // First test the ServerGame
    Vector<DatabaseObject *> fillVector;
    serverGame->getLevel()->findObjects(TestItemTypeNumber, fillVector);

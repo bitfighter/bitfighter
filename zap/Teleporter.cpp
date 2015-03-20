@@ -275,7 +275,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Level *level)
    }
 
    // New teleporter destination
-
+   addDest(dest);    // <== Need to let mDestinationManager know about this...
    setVert(pos, 0);
    setVert(dest, 1);
 
