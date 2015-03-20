@@ -180,6 +180,8 @@ ClientGame *GamePair::addClient(const string &name, S32 teamIndex)
 
    GameManager::addClientGame(client);
 
+   idle(5, 5);
+
    return addClient(client);
 }
 
