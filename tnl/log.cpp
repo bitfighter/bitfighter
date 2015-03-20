@@ -26,7 +26,7 @@
 
 #include "tnlLog.h"
 #include "tnlDataChunker.h"
-#include "../zap/oglconsole.h"   // For logging to the console
+
 #include <time.h>
 #include <string.h>
 #include <stdio.h>               // For newer versions of gcc?
