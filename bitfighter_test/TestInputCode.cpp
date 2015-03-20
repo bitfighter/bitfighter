@@ -30,9 +30,13 @@ TEST(InputStringTest, validStrings)
    EXPECT_TRUE(InputCodeManager::isValidInputString("Right Arrow"));
    EXPECT_TRUE(InputCodeManager::isValidInputString("Alt+Keypad Enter"));
 
+   // Special cases, things that aren't really keys, but are treated as such, required for help (I think)
+   EXPECT_TRUE(InputCodeManager::isValidInputString("#"));
+   EXPECT_TRUE(InputCodeManager::isValidInputString("!"));
+
    // Invalid keys
    EXPECT_FALSE(InputCodeManager::isValidInputString("123"));              // Garbage
-   EXPECT_FALSE(InputCodeManager::isValidInputString("#"));                // Not a key
+   EXPECT_FALSE(InputCodeManager::isValidInputString("&"));                // Not a key... but maybe it should be
    EXPECT_FALSE(InputCodeManager::isValidInputString("Flux+P"));           // Invalid modifier
    EXPECT_FALSE(InputCodeManager::isValidInputString("Shift+Shift+G"));    // Double modifier
    EXPECT_FALSE(InputCodeManager::isValidInputString("Shift+Alt+Q"));      // Out-of-order modifiers
