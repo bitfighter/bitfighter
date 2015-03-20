@@ -3,6 +3,9 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
+// TODO,FIXME:  Replace oglconsole with something better like this:
+//    http://soulride.cvs.sourceforge.net/viewvc/soulride/soulride/src/console.cpp?view=markup
+
 #include "Console.h"       // Our header
 
 #ifndef BF_NO_CONSOLE
