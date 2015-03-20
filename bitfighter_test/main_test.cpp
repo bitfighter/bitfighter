@@ -10,11 +10,12 @@
 #include "DisplayManager.h"
 #include "FontManager.h"
 #include "GameManager.h"
-#include "tnlLog.h"
+#include "GameSettings.h"
+#include "VideoSystem.h"
 
 #include "stringUtils.h"
 
-#include "tnl.h"
+#include "tnlLog.h"
 
 #include <gtest/gtest.h>
 
@@ -45,8 +46,31 @@ bool checkResources()
 }
 
 
+// This is a global setup object; it will be called before and after any tests are run
+class GlobalTestEnvironment {
+public:
+   virtual ~GlobalTestEnvironment() {}
+
+
+   // Override this to define how to set up the environment
+   virtual void SetUp() 
+   { 
+      GameSettings settings;
+      VideoSystem::init();
+      VideoSystem::actualizeScreenMode(&settings, false, false);
+      GameManager::initialize();
+   }
+
+
+   // Override this to define how to tear down the environment
+   virtual void TearDown() {}
+};
+
+
 int main(int argc, char **argv) 
 {
+   GlobalTestEnvironment *AddGlobalTestEnvironment(GlobalTestEnvironment* env);
+
    // Uncomment to see lots of events... we should do this from time to time and eliminate as many messages as possible
    //const S32 consoleEvents = LogConsumer::AllErrorTypes |
    //                          LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage |
