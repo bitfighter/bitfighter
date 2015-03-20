@@ -26,7 +26,7 @@ class Console: public LuaScriptRunner
    typedef LuaScriptRunner Parent;
 
 private:
-   OGLCONSOLE_Console mConsole;
+   ::OGLCONSOLE_Console mConsole;
 
 protected:
    void killScript();
