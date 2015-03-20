@@ -129,6 +129,7 @@ TEST(GameTest, TeamGameWinners)
    gamePair.addClient("Player 2", teamIndex);
    AbstractTeam *team2 = game->getTeam(teamIndex);
    ASSERT_EQ(0, game->getTeam(teamIndex)->getScore());
+   //typedef pair<GameEndStatus, S32> TeamGameResults;
    EXPECT_EQ(HasWinner, game->getTeamBasedGameWinner().first);       // Scores: 0,0  -- tied, but only second team has players
    EXPECT_EQ(teamIndex, game->getTeamBasedGameWinner().second); 
    EXPECT_TRUE(gameType->onGameOver());
