@@ -144,8 +144,9 @@ TEST_F(LuaEnvironmentTest, findAllObjects)
 
    EXPECT_TRUE(levelgen->runString("t = { }"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 0)"));
-   EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t)"));
+   EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects()"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 3)"));
+
 
    EXPECT_TRUE(levelgen->runString("t = { }"));
 
