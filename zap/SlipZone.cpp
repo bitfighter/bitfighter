@@ -8,7 +8,7 @@
 
 #include "game.h"
 #include "Level.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "LuaBase.h"
 
 #include "stringUtils.h"

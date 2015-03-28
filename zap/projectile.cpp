@@ -12,7 +12,7 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
-#  include "gameObjectRender.h"
+#  include "GameObjectRender.h"
 #  include "RenderUtils.h"
 #endif
 

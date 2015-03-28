@@ -18,7 +18,7 @@
 #  include "UIManager.h"
 #endif
 
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 
 #include "Intervals.h"
 #include "stringUtils.h"   // For itos

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 #include "UIColorPicker.h"
 
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "UIManager.h"
 #include "FontManager.h"
 #include "Cursor.h"

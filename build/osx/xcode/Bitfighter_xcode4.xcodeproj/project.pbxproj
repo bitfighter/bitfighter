@@ -848,7 +848,7 @@
 		73D2F2A512E2D7E700EA5EBE /* gameNetInterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gameNetInterface.cpp; path = ../../../zap/gameNetInterface.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2A612E2D7E700EA5EBE /* gameNetInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gameNetInterface.h; path = ../../../zap/gameNetInterface.h; sourceTree = SOURCE_ROOT; };
 		73D2F2A912E2D7E700EA5EBE /* gameObjectRender.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gameObjectRender.cpp; path = ../../../zap/gameObjectRender.cpp; sourceTree = SOURCE_ROOT; };
-		73D2F2AA12E2D7E700EA5EBE /* gameObjectRender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gameObjectRender.h; path = ../../../zap/gameObjectRender.h; sourceTree = SOURCE_ROOT; };
+		73D2F2AA12E2D7E700EA5EBE /* GameObjectRender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GameObjectRender.h; path = ../../../zap/GameObjectRender.h; sourceTree = SOURCE_ROOT; };
 		73D2F2AB12E2D7E700EA5EBE /* gameType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gameType.cpp; path = ../../../zap/gameType.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2AC12E2D7E700EA5EBE /* gameType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gameType.h; path = ../../../zap/gameType.h; sourceTree = SOURCE_ROOT; };
 		73D2F2AE12E2D7E700EA5EBE /* gameWeapons.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gameWeapons.cpp; path = ../../../zap/gameWeapons.cpp; sourceTree = SOURCE_ROOT; };
@@ -1944,7 +1944,7 @@
 				73D2F2A512E2D7E700EA5EBE /* gameNetInterface.cpp */,
 				73D2F2A612E2D7E700EA5EBE /* gameNetInterface.h */,
 				73D2F2A912E2D7E700EA5EBE /* gameObjectRender.cpp */,
-				73D2F2AA12E2D7E700EA5EBE /* gameObjectRender.h */,
+				73D2F2AA12E2D7E700EA5EBE /* GameObjectRender.h */,
 				73D2F2AB12E2D7E700EA5EBE /* gameType.cpp */,
 				73D2F2AC12E2D7E700EA5EBE /* gameType.h */,
 				73D2F2AE12E2D7E700EA5EBE /* gameWeapons.cpp */,

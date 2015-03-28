@@ -6,7 +6,7 @@
 #include "barrier.h"
 
 #include "game.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "GeomUtils.h"
 #include "Level.h"
 #include "WallItem.h"      // For WallSegment def

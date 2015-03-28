@@ -5,7 +5,7 @@
 
 #include "PolyWall.h"
 
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "GameSettings.h"
 #include "Level.h"
 #include "LuaBase.h"

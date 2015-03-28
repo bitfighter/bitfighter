@@ -7,7 +7,7 @@
 
 #include "goalZone.h"
 #include "game.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "Level.h"
 
 namespace Zap

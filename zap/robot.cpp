@@ -8,7 +8,7 @@
 #include "Level.h"
 #include "playerInfo.h"          // For RobotPlayerInfo constructor
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "GameSettings.h"
 
 #include "ServerGame.h"

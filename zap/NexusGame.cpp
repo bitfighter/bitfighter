@@ -11,7 +11,7 @@
 #include "stringUtils.h"      // For ftos et al
 
 #ifndef ZAP_DEDICATED
-#  include "gameObjectRender.h"
+#  include "GameObjectRender.h"
 #  include "ClientGame.h"
 #  include "UIMenuItems.h"
 #  include "RenderUtils.h"

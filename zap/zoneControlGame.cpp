@@ -6,7 +6,7 @@
 #include "zoneControlGame.h"
 
 #include "goalZone.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "game.h"
 #include "Level.h"
 

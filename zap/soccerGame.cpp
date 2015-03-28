@@ -13,7 +13,7 @@
 
 #include "Colors.h"
 
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 
 
 namespace Zap

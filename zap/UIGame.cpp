@@ -23,7 +23,7 @@
 #include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "FontManager.h"
 #include "GameManager.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "GameRecorderPlayback.h"
 #include "gameType.h"
 #include "GaugeRenderer.h"

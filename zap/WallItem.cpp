@@ -7,7 +7,7 @@
 
 #include "barrier.h"
 #include "Colors.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "GeomUtils.h"
 #include "Level.h"
 #include "stringUtils.h"

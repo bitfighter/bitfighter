@@ -17,7 +17,7 @@
 
 #include "Colors.h"
 
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "RenderUtils.h"
 
 

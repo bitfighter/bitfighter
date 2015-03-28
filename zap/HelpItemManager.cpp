@@ -21,7 +21,7 @@
 #include "SymbolShape.h"
 #include "Colors.h"
 #include "RenderUtils.h"
-#include "gameObjectRender.h"    // For drawHorizLine
+#include "GameObjectRender.h"    // For drawHorizLine
 #include "MathUtils.h"           // For min()
 
 

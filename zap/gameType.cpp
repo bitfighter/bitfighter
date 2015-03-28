@@ -24,7 +24,7 @@
 #include "WallItem.h"
 
 #ifndef ZAP_DEDICATED
-#  include "gameObjectRender.h"
+#  include "GameObjectRender.h"
 #  include "ClientGame.h"
 #  include "UIMenus.h"
 #endif

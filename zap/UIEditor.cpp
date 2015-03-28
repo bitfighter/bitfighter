@@ -47,7 +47,7 @@
 
 #include "luaLevelGenerator.h"
 #include "LevelDatabaseUploadThread.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "SystemFunctions.h"
 
 #include "GameManager.h"

@@ -10,7 +10,7 @@
 
 #ifndef ZAP_DEDICATED
 #  include "RenderUtils.h"
-#  include "gameObjectRender.h"
+#  include "GameObjectRender.h"
 #endif
 
 #include "Colors.h"

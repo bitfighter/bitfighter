@@ -3,7 +3,7 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 
 #include "BotNavMeshZone.h"      // For Border def
 #include "config.h"              // Only for testing burst graphics below

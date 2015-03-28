@@ -6,7 +6,7 @@
 #include "EngineeredItem.h"
 
 #include "gameWeapons.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "WallItem.h"
 #include "Teleporter.h"
 #include "gameType.h"

@@ -12,7 +12,7 @@
 #include "ClientGame.h"
 #include "JoystickRender.h"
 #include "config.h"
-#include "gameObjectRender.h"    // For drawSquare
+#include "GameObjectRender.h"    // For drawSquare
 
 #include "RenderUtils.h"
 

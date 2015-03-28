@@ -12,7 +12,7 @@
 #include "ServerGame.h"
 #include "tnlGhostConnection.h"
 #include "stringUtils.h"      // For itos
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "ClientInfo.h"
 
 namespace Zap

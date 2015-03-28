@@ -13,7 +13,7 @@
 #include "ClientGame.h"
 #include "Colors.h"
 #include "DisplayManager.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "Cursor.h"
 
 #include "stringUtils.h"

@@ -6,7 +6,7 @@
 #include "goalZone.h"
 #include "ship.h"
 #include "Level.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "game.h"
 #include "stringUtils.h"
 

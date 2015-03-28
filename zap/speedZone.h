@@ -10,7 +10,7 @@
 #include "BfObject.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 
 namespace Zap
 {

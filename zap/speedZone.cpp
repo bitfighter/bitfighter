@@ -9,7 +9,7 @@
 #include "game.h"
 #include "gameConnection.h"
 #include "gameNetInterface.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "gameType.h"
 #include "Level.h"
 #include "ship.h"

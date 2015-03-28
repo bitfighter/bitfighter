@@ -9,7 +9,7 @@
 #include "ship.h"
 
 #include "Colors.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "RenderUtils.h"
 
 #ifdef SHOW_SERVER_SITUATION

@@ -10,7 +10,7 @@
 #include "gameConnection.h"
 #include "ClientInfo.h"
 
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "stringUtils.h"         // For itos()
 
 

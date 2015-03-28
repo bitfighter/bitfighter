@@ -8,7 +8,7 @@
 #include "Level.h"
 #include "game.h"
 
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "stringUtils.h"
 
 namespace Zap

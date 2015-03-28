@@ -9,7 +9,7 @@
 #include "Level.h"
 
 #include "stringUtils.h"         // For itos()
-#include "gameObjectRender.h"    // For renderSquareItem(), renderFlag(), drawCircle()
+#include "GameObjectRender.h"    // For renderSquareItem(), renderFlag(), drawCircle()
 #include "moveObject.h"          // For Circle, Asteroid class defs
 
 #include "gameConnection.h"

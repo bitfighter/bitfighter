@@ -10,7 +10,7 @@
 #include "Colors.h"
 #include "GeomUtils.h"
 
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 
 namespace Zap
 {

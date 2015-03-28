@@ -11,7 +11,7 @@
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "RenderUtils.h"
-#  include "gameObjectRender.h"
+#  include "GameObjectRender.h"
 #  include "UIQuickMenu.h"
 #endif
 

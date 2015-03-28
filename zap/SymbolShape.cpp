@@ -9,7 +9,7 @@
 #include "InputCode.h"
 #include "JoystickRender.h"
 
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "Colors.h"
 
 #include "RenderUtils.h"

@@ -13,7 +13,7 @@
 #include "Level.h"
 
 #include "Colors.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 
 #include "stringUtils.h"
 #include "MathUtils.h"           // For sq

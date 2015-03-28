@@ -8,7 +8,7 @@
 #include "UIManager.h"
 
 #include "ClientGame.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "Teleporter.h"
 #include "speedZone.h"        // For SpeedZone::height
 #include "Colors.h"

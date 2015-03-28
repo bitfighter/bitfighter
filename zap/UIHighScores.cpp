@@ -9,7 +9,7 @@
 #include "UIManager.h"
 
 #include "ClientGame.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "masterConnection.h"   
 #include "DisplayManager.h"          // For canvas dimensions
 

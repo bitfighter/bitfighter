@@ -10,7 +10,7 @@
 #include "DisplayManager.h"
 #include "FontManager.h"
 #include "Colors.h"
-#include "gameObjectRender.h"    // For renderFlag()
+#include "GameObjectRender.h"    // For renderFlag()
 
 #include "stringUtils.h"
 #include "RenderUtils.h"

@@ -36,7 +36,7 @@
 #include "SystemFunctions.h"
 #include "masterConnection.h"
 
-#include "gameObjectRender.h"    // For renderBitfighterLogo, mGL->glColor
+#include "GameObjectRender.h"    // For renderBitfighterLogo, mGL->glColor
 #include "stringUtils.h"
 #include "RenderUtils.h"
 

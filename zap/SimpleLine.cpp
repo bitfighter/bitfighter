@@ -6,7 +6,7 @@
 #include "SimpleLine.h"
 
 #ifndef ZAP_DEDICATED
-#  include "gameObjectRender.h"
+#  include "GameObjectRender.h"
 #  include "RenderUtils.h"
 #endif
 

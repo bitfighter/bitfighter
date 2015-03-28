@@ -8,12 +8,12 @@
 #include "Level.h"
 #include "game.h"
 #include "ship.h"
-#include "gameObjectRender.h"    // For renderPolyLineVertices()
+#include "GameObjectRender.h"    // For renderPolyLineVertices()
 #include "stringUtils.h"         // For itos
 #include "tnlGhostConnection.h"
 
 #ifndef ZAP_DEDICATED
-#  include "gameObjectRender.h"  // For renderPolyLineVertices()
+#  include "GameObjectRender.h"  // For renderPolyLineVertices()
 #  include "RenderUtils.h"
 #  include "ClientGame.h"
 #  include "UIQuickMenu.h"       // For EditorAttributeMenuUI def

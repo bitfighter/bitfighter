@@ -21,7 +21,7 @@
 #include "Level.h"
 #include "WallItem.h"
 
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "stringUtils.h"
 #include "GeomUtils.h"
 

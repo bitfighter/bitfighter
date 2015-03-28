@@ -135,7 +135,7 @@ set(CLIENT_SOURCES
 	Event.cpp
 	FontManager.cpp
 	FpsRenderer.cpp
-	gameObjectRender.cpp
+	GameObjectRender.cpp
 	GameRecorderPlayback.cpp
 	GaugeRenderer.cpp
 	HelpItemManager.cpp

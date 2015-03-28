@@ -19,7 +19,7 @@
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 
 
 namespace Zap { 

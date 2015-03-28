@@ -7,7 +7,7 @@
 
 #include "UIManager.h"
 
-#include "gameObjectRender.h"    // For renderBitfighterLogo
+#include "GameObjectRender.h"    // For renderBitfighterLogo
 #include "DisplayManager.h"
 #include "Colors.h"
 

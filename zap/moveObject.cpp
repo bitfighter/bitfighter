@@ -20,7 +20,7 @@
 
 #include "LuaScriptRunner.h"
 
-#include "gameObjectRender.h"  // This has stub methods when compiled as ZAP_DEDICATED
+#include "GameObjectRender.h"  // This has stub methods when compiled as ZAP_DEDICATED
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"

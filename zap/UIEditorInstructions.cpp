@@ -12,7 +12,7 @@
 #include "ClientGame.h"       // For usage with getGame()
 #include "DisplayManager.h"
 #include "FontManager.h"
-#include "gameObjectRender.h"
+#include "GameObjectRender.h"
 #include "VertexStylesEnum.h"
 #include "WallItem.h"     
 
