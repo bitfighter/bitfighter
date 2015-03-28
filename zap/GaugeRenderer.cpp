@@ -10,7 +10,7 @@
 
 #include "Colors.h"
 #include "gameObjectRender.h"
-#include "OpenglUtils.h"
+#include "RenderUtils.h"
 
 #ifdef SHOW_SERVER_SITUATION
 #  include "GameManager.h"
@@ -35,20 +35,20 @@ void GaugeRenderer::render(F32 ether, F32 maxEther, const F32 colors[], S32 bott
       xul + full, yul,
    };
 
-   renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
+   mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
 
    // Gauge outline
-   glColor(Colors::white);
-   drawVertLine(xul, yul, yul + height);
-   drawVertLine(xul + GaugeWidth, yul, yul + height);
+   mGL->glColor(Colors::white);
+   RenderUtils::drawVertLine(xul, yul, yul + height);
+   RenderUtils::drawVertLine(xul + GaugeWidth, yul, yul + height);
 
    // Show safety line... or not as the case may be
    if(safetyThresh >= 0)
    {
       F32 cutoffx = safetyThresh * GaugeWidth / maxEther;
 
-      glColor(Colors::yellow);
-      drawVertLine(xul + cutoffx, yul - SafetyLineExtend - 1, yul + height + SafetyLineExtend);
+      mGL->glColor(Colors::yellow);
+      RenderUtils::drawVertLine(xul + cutoffx, yul - SafetyLineExtend - 1, yul + height + SafetyLineExtend);
    }
 }
 

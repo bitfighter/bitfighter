@@ -7,6 +7,8 @@
 #define JOYSTICKRENDER_H_
 
 #include "tnlTypes.h"
+
+#include "RenderManager.h"
 #include "Point.h"
 #include "InputCodeEnum.h"
 
@@ -17,7 +19,7 @@ namespace Zap
 
 class Color;
 
-class JoystickRender
+class JoystickRender: RenderManager
 {
 private:
    static const S32 buttonHalfHeight = 9;   // This is the default half-height of a button

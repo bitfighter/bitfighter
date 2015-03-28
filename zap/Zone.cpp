@@ -60,14 +60,14 @@ void Zone::render() const
 
 void Zone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
-   renderZone(Colors::white, getOutline(), getFill());
+   GameObjectRender::renderZone(Colors::white, getOutline(), getFill());
    PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled, true);
 }
 
 
 void Zone::renderDock(const Color &color) const
 {
-   renderZone(Colors::white, getOutline(), getFill());
+   GameObjectRender::renderZone(Colors::white, getOutline(), getFill());
 }
 
 

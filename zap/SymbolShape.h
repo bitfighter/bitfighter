@@ -10,6 +10,7 @@
 #include "InputCodeEnum.h"
 
 #include "Joystick.h"      // For ButtonSymbol enum
+#include "RenderManager.h"
 
 #include "Color.h"
 #include "Point.h"
@@ -40,7 +41,7 @@ enum Alignment {
 ////////////////////////////////////////
 
 // Parent for various Shape classes below
-class SymbolShape 
+class SymbolShape : public RenderManager
 {
 protected:
    S32 mWidth, mHeight;

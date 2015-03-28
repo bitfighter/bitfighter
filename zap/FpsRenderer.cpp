@@ -13,7 +13,6 @@
 #include "Colors.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 namespace Zap { 
 
@@ -35,7 +34,7 @@ FpsRenderer::FpsRenderer(ClientGame *game)
 
    mFPSVisible = false;
 
-   setExpectedWidth(getStringWidth(FPSContext, FontSize, "888 fps"));
+   setExpectedWidth(RenderUtils::getStringWidth(FPSContext, FontSize, "888 fps"));
 
    mFrameIndex = 0;
 
@@ -122,14 +121,14 @@ void FpsRenderer::render(S32 canvasWidth) const
    const S32 xpos = canvasWidth - horizMargin - S32(getInsideEdge());
    const S32 fontGap = 5;
 
-   glColor(Colors::white);
-   drawStringfr(xpos, vertMargin,                      FontSize, "%1.0f fps", mFPSAvg);
-   glColor(Colors::yellow);
-   drawStringfr(xpos, vertMargin + FontSize + fontGap, FontSize, "%1.0f ms",  mPingAvg);
+   mGL->glColor(Colors::white);
+   RenderUtils::drawStringfr(xpos, vertMargin,                      FontSize, "%1.0f fps", mFPSAvg);
+   mGL->glColor(Colors::yellow);
+   RenderUtils::drawStringfr(xpos, vertMargin + FontSize + fontGap, FontSize, "%1.0f ms",  mPingAvg);
 
    // vertex display is green at zero and red at 1000 or more visible vertices
-   glColor4f(visibleVertices / 1000.0f, 1.0f - visibleVertices / 1000.0f, 0.0f, 1);
-   drawStringfr(xpos, vertMargin + 2 * (FontSize + fontGap), FontSize, "%d vts",  visibleVertices);
+   mGL->glColor(visibleVertices / 1000.0f, 1.0f - visibleVertices / 1000.0f, 0.0f, 1);
+   RenderUtils::drawStringfr(xpos, vertMargin + 2 * (FontSize + fontGap), FontSize, "%d vts",  visibleVertices);
    
    FontManager::popFontContext();
 }

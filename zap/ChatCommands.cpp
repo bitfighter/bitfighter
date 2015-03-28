@@ -19,7 +19,6 @@
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 
 namespace ChatCommands
@@ -501,12 +500,12 @@ void lineWidthHandler(ClientGame *game, const Vector<string> &words)
       if(linewidth < 0.125f)
          linewidth = 0.125f;
 
-      gDefaultLineWidth = linewidth;
-      gLineWidth1 = linewidth * 0.5f;
-      gLineWidth3 = linewidth * 1.5f;
-      gLineWidth4 = linewidth * 2;
+      RenderUtils::DEFAULT_LINE_WIDTH = linewidth;
+      RenderUtils::LINE_WIDTH_1 = linewidth * 0.5f;
+      RenderUtils::LINE_WIDTH_3 = linewidth * 1.5f;
+      RenderUtils::LINE_WIDTH_4 = linewidth * 2;
 
-      glLineWidth(gDefaultLineWidth);    //make this change happen instantly
+      glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);    //make this change happen instantly
    }
 }
 

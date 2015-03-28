@@ -13,7 +13,8 @@
 #include "tnlGhostConnection.h"
 
 #ifndef ZAP_DEDICATED
-#  include "OpenglUtils.h"
+#  include "gameObjectRender.h"  // For renderPolyLineVertices()
+#  include "RenderUtils.h"
 #  include "ClientGame.h"
 #  include "UIQuickMenu.h"       // For EditorAttributeMenuUI def
 #endif
@@ -96,7 +97,7 @@ F32 LineItem::getEditorRadius(F32 currentScale) const
 void LineItem::render() const
 {
 #ifndef ZAP_DEDICATED
-   renderLine(getOutline(), getColor());
+   RenderUtils::drawLine(getOutline(), getColor());
 #endif
 }
 
@@ -124,13 +125,13 @@ bool LineItem::shouldRender() const
 void LineItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
-   if(isSelected() || isLitUp())           
-      renderLine(getOutline());
+   if(isSelected() || isLitUp())
+      RenderUtils::drawLine(getOutline());
    else
-      renderLine(getOutline(), getEditorRenderColor());
+      RenderUtils::drawLine(getOutline(), getEditorRenderColor());
 
    if(renderVertices)
-      renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
+      GameObjectRender::renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
 #endif
 }
 

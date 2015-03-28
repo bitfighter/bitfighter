@@ -18,7 +18,6 @@
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 #include "tnlRandom.h"
 
@@ -164,11 +163,11 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game, UIManager
 #ifdef TNL_ENABLE_ASSERTS
    // Make sure columns are wide enough for their labels
    static const S32 MIN_PAD = 3;  // appears to only be used for TNLAssert
-   TNLAssert(columns[1].xStart - columns[0].xStart + 2 * MIN_PAD > getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[0].name), "Col[0] too narrow!");
-   TNLAssert(columns[2].xStart - columns[1].xStart + 2 * MIN_PAD > getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[1].name), "Col[1] too narrow!");
-   TNLAssert(columns[3].xStart - columns[2].xStart + 2 * MIN_PAD > getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[2].name), "Col[2] too narrow!");
-   TNLAssert(columns[4].xStart - columns[3].xStart + 2 * MIN_PAD > getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[3].name), "Col[3] too narrow!");
-   TNLAssert(DisplayManager::getScreenInfo()->getGameCanvasWidth() - columns[4].xStart + 2 * MIN_PAD > getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[4].name), "Col[4] too narrow!");
+   TNLAssert(columns[1].xStart - columns[0].xStart + 2 * MIN_PAD > RenderUtils::getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[0].name), "Col[0] too narrow!");
+   TNLAssert(columns[2].xStart - columns[1].xStart + 2 * MIN_PAD > RenderUtils::getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[1].name), "Col[1] too narrow!");
+   TNLAssert(columns[3].xStart - columns[2].xStart + 2 * MIN_PAD > RenderUtils::getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[2].name), "Col[2] too narrow!");
+   TNLAssert(columns[4].xStart - columns[3].xStart + 2 * MIN_PAD > RenderUtils::getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[3].name), "Col[3] too narrow!");
+   TNLAssert(DisplayManager::getScreenInfo()->getGameCanvasWidth() - columns[4].xStart + 2 * MIN_PAD > RenderUtils::getStringWidth(COLUMN_HEADER_TEXTSIZE, columns[4].name), "Col[4] too narrow!");
 #endif
 
    selectedId = 0xFFFFFF;
@@ -716,18 +715,18 @@ S32 QueryServersUserInterface::getSelectedIndex() const
 static void renderDedicatedIcon()
 {
    // Add a "D"
-   drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "D");
+   RenderUtils::drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "D");
 }
 
 
 static void renderTestIcon()
 {
    // Add a "T"
-   drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "T");
+   RenderUtils::drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "T");
 }
 
 
-static void renderLockIcon()
+void QueryServersUserInterface::renderLockIcon() const
 {
    F32 vertices[] = {
          0,2,
@@ -735,7 +734,7 @@ static void renderLockIcon()
          3,4,
          3,2
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
 
    F32 vertices2[] = {
          2.6f, 2,
@@ -747,28 +746,28 @@ static void renderLockIcon()
          0.4f, 1.3f,
          0.4f, 2
    };
-   renderVertexArray(vertices2, ARRAYSIZE(vertices2) / 2, GL_LINE_STRIP);
+   mGL->renderVertexArray(vertices2, ARRAYSIZE(vertices2) / 2, GL_LINE_STRIP);
 }
 
 
-static void setLocalRemoteColor(bool isLocal)
+void QueryServersUserInterface::setLocalRemoteColor(bool isLocal) const
 {
    if(isLocal)
-      glColor(Colors::cyan);
+      mGL->glColor(Colors::cyan);
    else
-      glColor(Colors::white);
+      mGL->glColor(Colors::white);
 }
 
 
 // Set color based on ping time
-static void setPingTimeColor(U32 pingTime)
+void QueryServersUserInterface::setPingTimeColor(U32 pingTime) const
 {
    if(pingTime < 100)
-      glColor(Colors::green);
+      mGL->glColor(Colors::green);
    else if(pingTime < 250)
-      glColor(Colors::yellow);
+      mGL->glColor(Colors::yellow);
    else
-      glColor(Colors::red);
+      mGL->glColor(Colors::red);
 }
 
 
@@ -804,16 +803,16 @@ void QueryServersUserInterface::render() const
 
    if(connectedToMaster)
    {
-      glColor(Colors::MasterServerBlue);
-      drawCenteredStringf(vertMargin - 8, 12, "Connected to %s", masterConn->getMasterName().c_str() );
+      mGL->glColor(Colors::MasterServerBlue);
+      RenderUtils::drawCenteredStringf(vertMargin - 8, 12, "Connected to %s", masterConn->getMasterName().c_str() );
    }
    else
    {
-      glColor(Colors::red);
+      mGL->glColor(Colors::red);
       if(mGivenUpOnMaster && mGameSettings->getIniSettings()->prevServerListFromMaster.size() != 0)
-         drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Using server list from last successful connect.");
+         RenderUtils::drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Using server list from last successful connect.");
       else
-         drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Firewall issues? Do you have the latest version?");
+         RenderUtils::drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Firewall issues? Do you have the latest version?");
    }
 
    // Show some chat messages
@@ -822,12 +821,12 @@ void QueryServersUserInterface::render() const
        S32 dividerPos = getDividerPos();
 
       // Horizontal divider between game list and chat window
-      glColor(Colors::white);
+      mGL->glColor(Colors::white);
       F32 vertices[] = {
             (F32)horizMargin,               (F32)dividerPos,
             (F32)canvasWidth - horizMargin, (F32)dividerPos
       };
-      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
 
 
       S32 ypos = dividerPos + 3;      // 3 = gap after divider
@@ -839,8 +838,8 @@ void QueryServersUserInterface::render() const
    }
 
    // Instructions at bottom of server selection section
-   glColor(Colors::white);
-   drawCenteredString(getDividerPos() - SEL_SERVER_INSTR_SIZE - SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE + 1, SEL_SERVER_INSTR_SIZE, 
+   mGL->glColor(Colors::white);
+   RenderUtils::drawCenteredString(getDividerPos() - SEL_SERVER_INSTR_SIZE - SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE + 1, SEL_SERVER_INSTR_SIZE, 
                       "UP, DOWN to select, ENTER to join | Click on column to sort | ESC exits");
 
    if(servers.size() != 0)      // There are servers to display...
@@ -865,8 +864,8 @@ void QueryServersUserInterface::render() const
 
          if(s.isLocalServer)
          {
-            glColor(Colors::red, .25);
-            drawFilledRect(0, y, canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4);
+            mGL->glColor(Colors::red, .25);
+            RenderUtils::drawFilledRect(0, y, canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4);
          }
       }
 
@@ -886,36 +885,36 @@ void QueryServersUserInterface::render() const
          if(i == selectedIndex)
          {
             // Render server description at bottom
-            glColor(s.msgColor);
+            mGL->glColor(s.msgColor);
             U32 serverDescrLoc = TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + 2;
-            drawString(horizMargin, serverDescrLoc, SERVER_DESCR_TEXTSIZE, s.serverDescr.c_str());    
+            RenderUtils::drawString(horizMargin, serverDescrLoc, SERVER_DESCR_TEXTSIZE, s.serverDescr.c_str());    
          }
 
          // Truncate server name to fit in the first column...
          string sname = "";
 
          // ...but first, see if the name will fit without truncation... if so, don't bother
-         if(getStringWidth(SERVER_ENTRY_TEXTSIZE, s.serverName.c_str()) < colwidth)
+         if(RenderUtils::getStringWidth(SERVER_ENTRY_TEXTSIZE, s.serverName.c_str()) < colwidth)
             sname = s.serverName;
          else
             for(std::size_t j = 0; j < s.serverName.length(); j++)
-               if(getStringWidth(SERVER_ENTRY_TEXTSIZE, (sname + s.serverName.substr(j, 1)).c_str() ) < colwidth)
+               if(RenderUtils::getStringWidth(SERVER_ENTRY_TEXTSIZE, (sname + s.serverName.substr(j, 1)).c_str() ) < colwidth)
                   sname += s.serverName[j];
                else
                   break;
 
          setLocalRemoteColor(s.isLocalServer);
 
-         drawString(columns[0].xStart, y, SERVER_ENTRY_TEXTSIZE, sname.c_str());
+         RenderUtils::drawString(columns[0].xStart, y, SERVER_ENTRY_TEXTSIZE, sname.c_str());
 
          // Render icons
-         glColor(Colors::green);
+         mGL->glColor(Colors::green);
          if(s.dedicated || s.test || s.pingTimedOut || !s.everGotQueryResponse)
          {
             glPushMatrix();
-               glTranslate(columns[1].xStart + 5, y + 2, 0);
+               mGL->glTranslate(columns[1].xStart + 5, y + 2, 0);
                if( s.pingTimedOut || !s.everGotQueryResponse )
-                  drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
+                  RenderUtils::drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
                else if(s.test)
                   renderTestIcon();
                else
@@ -925,30 +924,30 @@ void QueryServersUserInterface::render() const
          if(s.passwordRequired || s.pingTimedOut || !s.everGotQueryResponse)
          {
             glPushMatrix();
-               glTranslate(F32(columns[1].xStart + 25), F32(y + 2));
+               mGL->glTranslate(F32(columns[1].xStart + 25), F32(y + 2));
                if(s.pingTimedOut || !s.everGotQueryResponse)
-                  drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
+                  RenderUtils::drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
                else
                {
-                  glScale(3.65f);
+                  mGL->glScale(3.65f);
                   renderLockIcon();
                }
             glPopMatrix();
          }
 
          setPingTimeColor(s.pingTime);
-         drawStringf(columns[2].xStart, y, SERVER_ENTRY_TEXTSIZE, "%d", s.pingTime);
+         RenderUtils::drawStringf(columns[2].xStart, y, SERVER_ENTRY_TEXTSIZE, "%d", s.pingTime);
 
          Color color = getPlayerCountColor(s.playerCount, s.maxPlayers);
-         glColor(color);
+         mGL->glColor(color);
 
-         drawStringf(columns[3].xStart,      y, SERVER_ENTRY_TEXTSIZE, "%d",  s.playerCount);
-         drawStringf(columns[3].xStart + 78, y, SERVER_ENTRY_TEXTSIZE, "%d",  s.botCount);
-         glColor(color * 0.5); // Dim the max players
-         drawStringf(columns[3].xStart + 30, y, SERVER_ENTRY_TEXTSIZE, "/%d", s.maxPlayers);
+         RenderUtils::drawStringf(columns[3].xStart,      y, SERVER_ENTRY_TEXTSIZE, "%d",  s.playerCount);
+         RenderUtils::drawStringf(columns[3].xStart + 78, y, SERVER_ENTRY_TEXTSIZE, "%d",  s.botCount);
+         mGL->glColor(color * 0.5); // Dim the max players
+         RenderUtils::drawStringf(columns[3].xStart + 30, y, SERVER_ENTRY_TEXTSIZE, "/%d", s.maxPlayers);
 
          setLocalRemoteColor(s.isLocalServer);
-         drawString(columns[4].xStart, y, SERVER_ENTRY_TEXTSIZE, s.serverAddress.toString());
+         RenderUtils::drawString(columns[4].xStart, y, SERVER_ENTRY_TEXTSIZE, s.serverAddress.toString());
       }
    }
    // Show some special messages if there are no servers, or we're not connected to the master
@@ -969,22 +968,22 @@ void QueryServersUserInterface::renderTopBanner() const
    const S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
    // Top banner
-   glColor(Colors::black);
+   mGL->glColor(Colors::black);
    F32 vertices[] = {
          0,                0,
          (F32)canvasWidth, 0,
          (F32)canvasWidth, (F32)BANNER_HEIGHT,
          0,                (F32)BANNER_HEIGHT
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
 
-   glColor(Colors::green);
-   drawCenteredString(vertMargin + 12, 24, "BITFIGHTER GAME LOBBY");
+   mGL->glColor(Colors::green);
+   RenderUtils::drawCenteredString(vertMargin + 12, 24, "BITFIGHTER GAME LOBBY");
 
    const S32 FONT_SIZE = 12;
-   glColor(Colors::white);
-   drawStringf(horizMargin, vertMargin, FONT_SIZE, "SERVERS: %d", servers.size());
-   drawStringfr(canvasWidth - horizMargin, vertMargin, FONT_SIZE, "PAGE %d/%d", mPage + 1, getLastPage() + 1);
+   mGL->glColor(Colors::white);
+   RenderUtils::drawStringf(horizMargin, vertMargin, FONT_SIZE, "SERVERS: %d", servers.size());
+   RenderUtils::drawStringfr(canvasWidth - horizMargin, vertMargin, FONT_SIZE, "PAGE %d/%d", mPage + 1, getLastPage() + 1);
 }
 
 
@@ -993,14 +992,14 @@ void QueryServersUserInterface::renderColumnHeaders() const
    S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
    // Draw vertical dividing lines
-   glColor(0.7f);
+   mGL->glColor(0.7f);
 
    for(S32 i = 1; i < columns.size(); i++)
-      drawVertLine(columns[i].xStart - 4, COLUMN_HEADER_TOP, TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + 2);
+      RenderUtils::drawVertLine(columns[i].xStart - 4, COLUMN_HEADER_TOP, TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + 2);
 
    // Horizontal lines under column headers
-   drawHorizLine(0, canvasWidth, COLUMN_HEADER_TOP);
-   drawHorizLine(0, canvasWidth, COLUMN_HEADER_TOP + COLUMN_HEADER_TEXTSIZE + 7);
+   RenderUtils::drawHorizLine(0, canvasWidth, COLUMN_HEADER_TOP);
+   RenderUtils::drawHorizLine(0, canvasWidth, COLUMN_HEADER_TOP + COLUMN_HEADER_TEXTSIZE + 7);
 
    // Column headers (will partially overwrite horizontal lines) 
    S32 x1 = max(columns[mSortColumn].xStart - 3, 1);    // Going to 0 makes line look too thin...
@@ -1010,11 +1009,11 @@ void QueryServersUserInterface::renderColumnHeaders() const
    else
       x2 = columns[mSortColumn+1].xStart - 5;
 
-   drawFilledRect(x1, COLUMN_HEADER_TOP, x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1, Colors::gray20, Colors::white);
+   RenderUtils::drawFilledRect(x1, COLUMN_HEADER_TOP, x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1, Colors::gray20, Colors::white);
 
    // And now the column header text itself
    for(S32 i = 0; i < columns.size(); i++) 
-      drawString(columns[i].xStart, COLUMN_HEADER_TOP + 3, COLUMN_HEADER_TEXTSIZE, columns[i].name);
+      RenderUtils::drawString(columns[i].xStart, COLUMN_HEADER_TOP + 3, COLUMN_HEADER_TEXTSIZE, columns[i].name);
 
    // Highlight selected column
    if(mHighlightColumn != mSortColumn) 
@@ -1026,8 +1025,8 @@ void QueryServersUserInterface::renderColumnHeaders() const
       else
          x2 = columns[mHighlightColumn+1].xStart - 5;
 
-      glColor(Colors::white);
-      drawRect(x1, COLUMN_HEADER_TOP, x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1, GL_LINE_LOOP);
+      mGL->glColor(Colors::white);
+      RenderUtils::drawRect(x1, COLUMN_HEADER_TOP, x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1, GL_LINE_LOOP);
    }
 }
 
@@ -1063,7 +1062,7 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2) c
       lines = 1;
    }
 
-   const S32 strwid = getStringWidth(fontsize, msg1);
+   const S32 strwid = RenderUtils::getStringWidth(fontsize, msg1);
    const S32 msgboxMargin = 20;
 
    S32 ypos = mShowChat ? TOP_OF_SERVER_LIST + 25 + (getDividerPos() - TOP_OF_SERVER_LIST) * 2 / 5 : canvasHeight / 2;
@@ -1077,13 +1076,13 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2) c
 
    static const S32 CORNER_INSET = 15;
 
-   drawFilledFancyBox(xpos1, ypos1, xpos2, ypos2, CORNER_INSET, Colors::red40, 1.0, Colors::red);
+   RenderUtils::drawFilledFancyBox(xpos1, ypos1, xpos2, ypos2, CORNER_INSET, Colors::red40, 1.0, Colors::red);
 
    // Draw text
-   glColor(Colors::white);
+   mGL->glColor(Colors::white);
 
-   drawCenteredString(ypos - lines * (fontsize + fontgap), fontsize, msg1);
-   drawCenteredString(ypos - (fontsize + fontgap), fontsize, msg2);
+   RenderUtils::drawCenteredString(ypos - lines * (fontsize + fontgap), fontsize, msg1);
+   RenderUtils::drawCenteredString(ypos - (fontsize + fontgap), fontsize, msg2);
 }
 
 
@@ -1602,7 +1601,7 @@ Button::~Button()
 
 bool Button::isMouseOver(F32 mouseX, F32 mouseY) const
 {
-   return(mouseX >= mX && mouseX <= mX + mPadding * 2 + getStringWidth(mTextSize, mLabel) &&
+   return(mouseX >= mX && mouseX <= mX + mPadding * 2 + RenderUtils::getStringWidth(mTextSize, mLabel) &&
           mouseY >= mY && mouseY <= mY + mTextSize + mPadding * 2);
 }
 
@@ -1625,7 +1624,7 @@ void Button::render(F32 mouseX, F32 mouseY) const
    if(!isActive())
       return;
 
-   S32 labelLen = getStringWidth(mTextSize, mLabel);
+   S32 labelLen = RenderUtils::getStringWidth(mTextSize, mLabel);
 
    Color color;
 
@@ -1639,8 +1638,8 @@ void Button::render(F32 mouseX, F32 mouseY) const
 
    static const S32 INSET = 4;
 
-   drawFilledFancyBox(mX, mY, mX + mPadding * 2 + labelLen, mY + mTextSize + mPadding * 2, INSET, mBgColor, 1.0f, color);
-   drawString(mX + mPadding, mY + mPadding, mTextSize, mLabel);
+   RenderUtils::drawFilledFancyBox(mX, mY, mX + mPadding * 2 + labelLen, mY + mTextSize + mPadding * 2, INSET, mBgColor, 1.0f, color);
+   RenderUtils::drawString(mX + mPadding, mY + mPadding, mTextSize, mLabel);
 }
  
 

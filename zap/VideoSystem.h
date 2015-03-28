@@ -7,6 +7,8 @@
 #define VIDEOSYSTEM_H_
 
 #include "ConfigEnum.h"    // For DisplayMode enum
+#include "RenderManager.h"
+
 #include "tnlTypes.h"
 
 using namespace TNL;
@@ -16,7 +18,7 @@ namespace Zap
 
 class GameSettings;
 
-class VideoSystem
+class VideoSystem: RenderManager
 {
 public:
    VideoSystem();

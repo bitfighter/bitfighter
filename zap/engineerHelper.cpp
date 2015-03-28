@@ -15,7 +15,6 @@
 #include "gameObjectRender.h"    // For drawSquare
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 namespace Zap
 {
@@ -75,7 +74,7 @@ S32 EngineerHelper::getWidthOfItems() const
    // we pass.  Therefore, to make everything look nice, we need to subtract that bit off here so we don't end up with a 
    // much wider menu than necessary.  Add the horizMargin to make things look balanced.
    S32 maxItemWidth = getMaxItemWidth(engineerItemInfo, ARRAYSIZE(engineerItemInfo));
-   S32 titleWidth = getStringWidth(MENU_FONT_SIZE, menuTitle) - (ITEM_INDENT + 2 * ITEM_HELP_PADDING) +
+   S32 titleWidth = RenderUtils::getStringWidth(MENU_FONT_SIZE, menuTitle) - (ITEM_INDENT + 2 * ITEM_HELP_PADDING) +
                                          UserInterface::horizMargin;
 
    return max(maxItemWidth, titleWidth);
@@ -117,10 +116,10 @@ void EngineerHelper::render() const
    {
       S32 xPos = UserInterface::horizMargin;
 
-      glColor(Colors::green);
-      drawStringf(xPos, yPos, MENU_FONT_SIZE, "Placing %s.", engineerItemInfo[mSelectedIndex].name);
+      mGL->glColor(Colors::green);
+      RenderUtils::drawStringf(xPos, yPos, MENU_FONT_SIZE, "Placing %s.", engineerItemInfo[mSelectedIndex].name);
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
-      drawString(xPos, yPos, MENU_FONT_SIZE, engineerInstructions[mSelectedIndex]);
+      RenderUtils::drawString(xPos, yPos, MENU_FONT_SIZE, engineerInstructions[mSelectedIndex]);
    }
 }
 
@@ -237,13 +236,13 @@ void EngineerHelper::renderDeploymentMarker(const Ship *ship) const
       {
          case EngineeredTurret:
          case EngineeredForceField:
-            glColor(canDeploy ? Colors::green : Colors::red);
-            drawSquare(deployPosition, 5);
+            mGL->glColor(canDeploy ? Colors::green : Colors::red);
+            RenderUtils::drawSquare(deployPosition, 5);
             break;
 
          case EngineeredTeleporterEntrance:
          case EngineeredTeleporterExit:
-            renderTeleporterOutline(deployPosition, 75.f, canDeploy ? Colors::green : Colors::red);
+            GameObjectRender::renderTeleporterOutline(deployPosition, 75.f, canDeploy ? Colors::green : Colors::red);
             break;
 
          default:

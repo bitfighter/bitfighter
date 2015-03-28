@@ -6,6 +6,7 @@
 #ifndef _FPS_RENDERER_
 #define _FPS_RENDERER_
 
+#include "RenderManager.h"
 #include "SlideOutWidget.h"
 
 using namespace TNL;

@@ -54,7 +54,7 @@ SlipZone *SlipZone::clone() const
 
 void SlipZone::render() const
 {
-   renderSlipZone(getOutline(), getFill(), getCentroid());
+   GameObjectRender::renderSlipZone(getOutline(), getFill(), getCentroid());
 }
 
 

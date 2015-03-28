@@ -8,6 +8,7 @@
 
 #include "tnlTypes.h"
 #include "Point.h"
+#include "RenderManager.h"
 
 using namespace TNL;
 
@@ -22,7 +23,7 @@ class ScreenInfo;
 namespace UI
 {
 
-class TimeLeftRenderer
+class TimeLeftRenderer: RenderManager
 {
 private:
    ScreenInfo *mScreenInfo;

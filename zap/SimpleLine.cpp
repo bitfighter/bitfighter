@@ -4,8 +4,11 @@
 //------------------------------------------------------------------------------
 
 #include "SimpleLine.h"
-#include "gameObjectRender.h"
 
+#ifndef ZAP_DEDICATED
+#  include "gameObjectRender.h"
+#  include "RenderUtils.h"
+#endif
 
 namespace Zap
 {
@@ -39,7 +42,7 @@ F32 SimpleLine::getEditorRadius(F32 currentScale) const
 void SimpleLine::renderDock(const Color &color) const
 {
 #ifndef ZAP_DEDICATED
-   drawFilledSquare(getVert(0), 5, getEditorRenderColor()); // Draw origin of item to give user something to grab on the dock
+   RenderUtils::drawFilledSquare(getVert(0), 5, getEditorRenderColor()); // Draw origin of item to give user something to grab on the dock
 #endif
 }
 
@@ -71,7 +74,7 @@ Point SimpleLine::getInitialPlacementOffset(U32 gridSize)  const
 void SimpleLine::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
-   renderHeavysetArrow(getVert(0), getVert(1), getEditorRenderColor(), isSelected(), isLitUp());
+   GameObjectRender::renderHeavysetArrow(getVert(0), getVert(1), getEditorRenderColor(), isSelected(), isLitUp());
 #endif
 }
 

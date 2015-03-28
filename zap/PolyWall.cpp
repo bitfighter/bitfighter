@@ -109,14 +109,14 @@ void PolyWall::renderDock(const Color &color) const
 {
    static const Color wallOutlineColor(GameSettings::get()->getWallOutlineColor());
 
-   renderPolygonFill(getFill(), Colors::EDITOR_WALL_FILL_COLOR);
-   renderPolygonOutline(getOutline(), wallOutlineColor);
+   GameObjectRender::renderPolygonFill(getFill(), Colors::EDITOR_WALL_FILL_COLOR);
+   GameObjectRender::renderPolygonOutline(getOutline(), wallOutlineColor);
 }
 
 
 void PolyWall::render() const
 {
-   renderWallFill(getFill(), GameSettings::get()->getWallFillColor(), true);
+   GameObjectRender::renderWallFill(getFill(), GameSettings::get()->getWallFillColor(), true);
    //renderZone(color, outline, fill);
    //renderLoadoutZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle());
 }

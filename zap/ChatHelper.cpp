@@ -21,7 +21,6 @@
 #include "Colors.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 #include "stringUtils.h"
 
 namespace Zap
@@ -181,8 +180,8 @@ void ChatHelper::render() const
    S32 xPos = UserInterface::horizMargin;
 
    // Define some vars for readability:
-   S32 promptWidth = getStringWidth(CHAT_COMPOSE_FONT_SIZE, promptStr);
-   S32 nameSize   = getStringWidthf(CHAT_COMPOSE_FONT_SIZE, "%s: ", getGame()->getClientInfo()->getName().getString());
+   S32 promptWidth = RenderUtils::getStringWidth(CHAT_COMPOSE_FONT_SIZE, promptStr);
+   S32 nameSize   = RenderUtils::getStringWidthf(CHAT_COMPOSE_FONT_SIZE, "%s: ", getGame()->getClientInfo()->getName().getString());
    S32 nameWidth  = max(nameSize, promptWidth);
    // Above block repeated below...
 
@@ -209,28 +208,30 @@ void ChatHelper::render() const
    // Render text entry box like thingy
    F32 top = (F32)ypos - 3;
 
-   F32 vertices[] = {
-         (F32)xPos,            top,
-         (F32)xPos + boxWidth, top,
-         (F32)xPos + boxWidth, top + BOX_HEIGHT,
-         (F32)xPos,            top + BOX_HEIGHT
-   };
+//   F32 vertices[] = {
+//         (F32)xPos,            top,
+//         (F32)xPos + boxWidth, top,
+//         (F32)xPos + boxWidth, top + BOX_HEIGHT,
+//         (F32)xPos,            top + BOX_HEIGHT
+//   };
+//
+//   for(S32 i = 1; i >= 0; i--)
+//   {
+//      glColor(baseColor, i ? .25f : .4f);
+//      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
+//   }
 
-   for(S32 i = 1; i >= 0; i--)
-   {
-      glColor(baseColor, i ? .25f : .4f);
-      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
-   }
+   RenderUtils::drawFilledRect(xPos, top, xPos + boxWidth, top + BOX_HEIGHT, baseColor, .25f, baseColor, .4f);
 
-   glColor(baseColor);
+   RenderUtils::glColor(baseColor);
 
    // Display prompt
    S32 xStartPos   = xPos + 3 + promptWidth;
 
-   drawString(xPos + 3, ypos, CHAT_COMPOSE_FONT_SIZE, promptStr);  // draw prompt
+   RenderUtils::drawString(xPos + 3, ypos, CHAT_COMPOSE_FONT_SIZE, promptStr);  // draw prompt
 
    // Display typed text
-   S32 displayWidth = drawStringAndGetWidth(xStartPos, ypos, CHAT_COMPOSE_FONT_SIZE, mLineEditor.getDisplayString().c_str());
+   S32 displayWidth = RenderUtils::drawStringAndGetWidth(xStartPos, ypos, CHAT_COMPOSE_FONT_SIZE, mLineEditor.getDisplayString().c_str());
 
    // If we've just finished entering a chat cmd, show next parameter
    if(isCmdChat())
@@ -252,8 +253,8 @@ void ChatHelper::render() const
                S32 numberOfQuotes = count(line.begin(), line.end(), '"');
                if(chatCmds[i].cmdArgCount >= words.size() && line[line.size() - 1] == ' ' && numberOfQuotes % 2 == 0)
                {
-                  glColor(baseColor * .5);
-                  drawString(xStartPos + displayWidth, ypos, CHAT_COMPOSE_FONT_SIZE, chatCmds[i].helpArgString[words.size() - 1].c_str());
+                  RenderUtils::glColor(baseColor * .5);
+                  RenderUtils::drawString(xStartPos + displayWidth, ypos, CHAT_COMPOSE_FONT_SIZE, chatCmds[i].helpArgString[words.size() - 1].c_str());
                }
 
                break;
@@ -262,7 +263,7 @@ void ChatHelper::render() const
       }
    }
 
-   glColor(baseColor);
+   RenderUtils::glColor(baseColor);
    mLineEditor.drawCursor(xStartPos, ypos, CHAT_COMPOSE_FONT_SIZE);
 
    // Restore scissors settings -- only used during scrolling

@@ -327,7 +327,7 @@ void Barrier::renderLayer(S32 layerIndex)
    static const Color fillColor(GameSettings::get()->getWallFillColor());
 
    if(layerIndex == 0)           // First pass: draw the fill
-      renderWallFill(&mRenderFillGeometry, fillColor, mIsPolywall);
+      GameObjectRender::renderWallFill(&mRenderFillGeometry, fillColor, mIsPolywall);
 #endif
 }
 
@@ -339,7 +339,7 @@ void Barrier::renderEdges(const GameSettings *settings, S32 layerIndex)
    static const Color outlineColor(settings->getWallOutlineColor());
 
    if(layerIndex == 1)
-      renderWallEdges(mRenderLineSegments, outlineColor);
+      GameObjectRender::renderWallEdges(mRenderLineSegments, outlineColor);
 }
 
 

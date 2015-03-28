@@ -6,8 +6,12 @@
 #include "polygon.h"
 
 #include "Colors.h"
-#include "gameObjectRender.h"
 #include "GeomUtils.h"
+
+#ifndef ZAP_DEDICATED
+#  include "gameObjectRender.h"
+#  include "RenderUtils.h"
+#endif
 
 namespace Zap
 {
@@ -41,7 +45,7 @@ void PolygonObject::renderEditor(F32 currentScale, bool snappingToWallCornersEna
       renderPolyHighlight();
 
    if(renderVertices)
-      renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
+      GameObjectRender::renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
 #endif
 }
 
@@ -58,13 +62,11 @@ void PolygonObject::highlightDockItem() const
 }
 
 
-extern F32 gLineWidth3;
-
 void PolygonObject::renderPolyHighlight() const
 {
 #ifndef ZAP_DEDICATED
    const Color &color = isSelected() ? Colors::EDITOR_SELECT_COLOR : Colors::EDITOR_HIGHLIGHT_COLOR;
-   renderPolygonOutline(getOutline(), color, 1, gLineWidth3);
+   GameObjectRender::renderPolygonOutline(getOutline(), color, 1, RenderUtils::LINE_WIDTH_3);
 #endif
 }
 

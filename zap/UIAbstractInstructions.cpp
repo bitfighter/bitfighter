@@ -11,12 +11,9 @@
 #include "Colors.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 namespace Zap
 {
-
-extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 
 
 // Define static consts
@@ -100,21 +97,21 @@ void AbstractInstructionsUserInterface::render(const char *header, S32 page, S32
 {
    static const char* prefix = "INSTRUCTIONS - ";
    static S32 fontSize = 25;
-   static S32 prefixWidth = getStringWidth(fontSize, prefix);
+   static S32 prefixWidth = RenderUtils::getStringWidth(fontSize, prefix);
 
    // Draw header first as different color, then everything else
-   glColor(Colors::cyan);
-   drawString(3 + prefixWidth, 3, fontSize, header);
+   mGL->glColor(Colors::cyan);
+   RenderUtils::drawString(3 + prefixWidth, 3, fontSize, header);
 
-   glColor(Colors::red);
-   drawString(3, 3, fontSize, prefix);
+   mGL->glColor(Colors::red);
+   RenderUtils::drawString(3, 3, fontSize, prefix);
 
-   drawStringf(625, 3, fontSize, "PAGE %d/%d", page, pages);
-   drawCenteredString(571, 20, "LEFT - previous page   |   RIGHT, SPACE - next page   |   ESC exits");
+   RenderUtils::drawStringf(625, 3, fontSize, "PAGE %d/%d", page, pages);
+   RenderUtils::drawCenteredString(571, 20, "LEFT - previous page   |   RIGHT, SPACE - next page   |   ESC exits");
 
-   glColor(Colors::gray70);
-   drawHorizLine(0, 800, 32);
-   drawHorizLine(0, 800, 569);
+   mGL->glColor(Colors::gray70);
+   RenderUtils::drawHorizLine(0, 800, 32);
+   RenderUtils::drawHorizLine(0, 800, 569);
 }
 
 
@@ -135,15 +132,15 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolString
 
    Color secColor =   Colors::yellow;
 
-   glColor(secColor);
-   drawString(cmdCol,   ypos, headerSize, "Code Example");
-   drawString(descrCol, ypos, headerSize, "Description");
+   mGL->glColor(secColor);
+   RenderUtils::drawString(cmdCol,   ypos, headerSize, "Code Example");
+   RenderUtils::drawString(descrCol, ypos, headerSize, "Description");
 
    Vector<SymbolShapePtr> symbols;
 
    ypos += cmdSize + cmdGap;
-   glColor(&Colors::gray70);
-   drawHorizLine(cmdCol, 750, ypos);
+   mGL->glColor(&Colors::gray70);
+   RenderUtils::drawHorizLine(cmdCol, 750, ypos);
 
    ypos += 10;     // Small gap before cmds start
    ypos += cmdSize;
@@ -152,8 +149,8 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolString
    {
       if(cmdList[i].command[0] == '-')      // Horiz spacer
       {
-         glColor(Colors::gray40);
-         drawHorizLine(cmdCol, cmdCol + 335, ypos + (cmdSize + cmdGap) / 4);
+         mGL->glColor(Colors::gray40);
+         RenderUtils::drawHorizLine(cmdCol, cmdCol + 335, ypos + (cmdSize + cmdGap) / 4);
       }
       else
       {

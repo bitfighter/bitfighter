@@ -3,8 +3,8 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "UI.h"
 #include "sparkManager.h"
+#include "UI.h"
 #include "Teleporter.h"
 #include "gameObjectRender.h"
 #include "Colors.h"
@@ -12,7 +12,6 @@
 #include "Intervals.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 #include "MathUtils.h"
 #include "FontManager.h"
 
@@ -120,16 +119,16 @@ void FxManager::DebrisChunk::render() const
 {
    glPushMatrix();
 
-   glTranslate(pos);
-   glRotate(angle * RADIANS_TO_DEGREES);
+   mGL->glTranslate(pos);
+   mGL->glRotate(angle * RADIANS_TO_DEGREES);
 
    F32 alpha = 1;
    if(ttl < 250)
       alpha = ttl / 250.f;
 
-   glColor(color, alpha);
+   mGL->glColor(color, alpha);
 
-   renderPointVector(&points, GL_LINE_LOOP);
+   mGL->renderPointVector(&points, GL_LINE_LOOP);
 
    glPopMatrix();
 }
@@ -173,15 +172,15 @@ void FxManager::TextEffect::render(const Point &centerOffset) const
    if(ttl < FadeTime)
       alpha = ttl / FadeTime;     // Fade as item nears the end of its life
 
-   glColor(color, alpha);
+   mGL->glColor(color, alpha);
 
    glPushMatrix();
 
-      glTranslate(pos);
-      glScale(size / MAX_TEXTEFFECT_SIZE);  // We'll draw big and scale down
+      mGL->glTranslate(pos);
+      mGL->glScale(size / MAX_TEXTEFFECT_SIZE);  // We'll draw big and scale down
 
       FontManager::pushFontContext(TextEffectContext);
-         drawStringc(0, 0, 120, text.c_str());
+         RenderUtils::drawStringc(0, 0, 120, text.c_str());
       FontManager::popFontContext();
 
    glPopMatrix();
@@ -351,7 +350,7 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction, const Point &c
 
          Vector<Point> dummy;
          
-         renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, commanderZoomFraction,
+         GameObjectRender::renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, commanderZoomFraction,
                           radius, Teleporter::TeleportInRadius, alpha, &dummy);
       }
    }
@@ -360,7 +359,7 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction, const Point &c
    {
       for(S32 i = SparkTypeCount - 1; i >= 0; i --)     // Loop through our different spark types
       {
-         glPointSize(gDefaultLineWidth);
+         glPointSize(RenderUtils::DEFAULT_LINE_WIDTH);
 
          glEnableClientState(GL_COLOR_ARRAY);
          glEnableClientState(GL_VERTEX_ARRAY);
@@ -391,11 +390,11 @@ void FxManager::renderScreenEffects() const
    static const Point center(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2,
                              DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
    glPushMatrix();
-   glTranslate(center);
-   glScale(0.6667f); 
+      mGL->glTranslate(center);
+      mGL->glScale(0.6667f);
 
-   for(S32 i = 0; i < mScreenTextEffects.size(); i++)
-      mScreenTextEffects[i].render(center);
+      for(S32 i = 0; i < mScreenTextEffects.size(); i++)
+         mScreenTextEffects[i].render(center);
 
    glPopMatrix();
 }
@@ -577,7 +576,7 @@ void FxTrail::render() const
       FxTrailVertexArray[(2*i) + 1] = mNodes[i].pos.y;
    }
 
-   renderColorVertexArray(FxTrailVertexArray, FxTrailColorArray, mNodes.size(), GL_LINE_STRIP);
+   mGL->renderColorVertexArray(FxTrailVertexArray, FxTrailColorArray, mNodes.size(), GL_LINE_STRIP);
 }
 
 

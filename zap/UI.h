@@ -10,6 +10,7 @@
 #  error "UI.h shouldn't be included in dedicated build"
 #endif
 
+#include "RenderManager.h"
 #include "lineEditor.h"
 #include "InputCode.h"
 #include "SymbolShape.h"
@@ -28,10 +29,6 @@ namespace Zap
 
 using namespace UI;
 
-extern F32 gLineWidth1;
-extern F32 gDefaultLineWidth;
-extern F32 gLineWidth3;
-extern F32 gLineWidth4;
 
 static const F32 HIGHLIGHTED_OBJECT_BUFFER_WIDTH = 14.0;      // Width to buffer objects higlighted by inline help system
 
@@ -45,7 +42,7 @@ class UIManager;
 class Color;
 class MasterServerConnection;
 
-class UserInterface
+class UserInterface: public RenderManager
 {
    friend class UIManager;    // Give UIManager access to private and protected members
 

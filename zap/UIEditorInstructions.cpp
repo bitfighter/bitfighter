@@ -20,7 +20,6 @@
 #include "Intervals.h"
 
 #include "GeomUtils.h"        // For polygon triangulation
-#include "OpenglUtils.h"
 #include "RenderUtils.h"
 #include "stringUtils.h"
 
@@ -153,7 +152,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    pack(keysInstrRight2, keysBindingsRight2, controls2Right, ARRAYSIZE(controls2Right));
 
 
-   S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
+   S32 centeringOffset = RenderUtils::getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
 
    // Use default width here as the editor could be using a different canvas size
    S32 screenWidth = DisplayManager::getScreenInfo()->getDefaultCanvasWidth();
@@ -342,15 +341,15 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page) const
    }
 
    y = 486;
-   glColor(secColor);
-   drawCenteredString(y, 20, "These special keys are also usually active:");
+   mGL->glColor(secColor);
+   RenderUtils::drawCenteredString(y, 20, "These special keys are also usually active:");
 
    y += 45;
 
    mSpecialKeysInstrLeft.render (mCol1, y, UI::AlignmentLeft);
    mSpecialKeysInstrRight.render(mCol3, y, UI::AlignmentLeft);
 
-   S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
+   S32 centeringOffset = RenderUtils::getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
 
    mSpecialKeysBindingsLeft.render (mCol2 + centeringOffset, y, UI::AlignmentCenter);
    mSpecialKeysBindingsRight.render(mCol4 + centeringOffset, y, UI::AlignmentCenter);
@@ -439,19 +438,19 @@ void EditorInstructionsUserInterface::renderPageWalls() const
       for(S32 i = 0; i < wallSegments.size(); i++)
          wallSegments[i]->renderFill(Point(0,0), Colors::EDITOR_WALL_FILL_COLOR, false);
 
-      renderWallEdges(edges, mGameSettings->getWallOutlineColor());
+      GameObjectRender::renderWallEdges(edges, mGameSettings->getWallOutlineColor());
 
       for(S32 i = 0; i < wallSegments.size(); i++)
          delete wallSegments[i];
    }
 
-   glColor(mAnimStage <= 11 ? Colors::yellow : Colors::NeutralTeamColor);
+   mGL->glColor(mAnimStage <= 11 ? Colors::yellow : Colors::NeutralTeamColor);
 
-   glLineWidth(gLineWidth3);
+   glLineWidth(RenderUtils::LINE_WIDTH_3);
 
-   renderPointVector(&points, GL_LINES);
+   mGL->renderPointVector(&points, GL_LINES);
 
-   glLineWidth(gDefaultLineWidth);
+   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
 
    FontManager::pushFontContext(OldSkoolContext);
@@ -461,11 +460,11 @@ void EditorInstructionsUserInterface::renderPageWalls() const
       S32 vertNum = S32(((F32)i  / 2) + 0.5);     // Ick!
 
       if(i < (points.size() - ((mAnimStage > 6) ? 0 : 1) ) && !(i == 4 && (mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)))
-         renderVertex(SelectedItemVertex, points[i], vertNum, 1);
+         GameObjectRender::renderVertex(SelectedItemVertex, points[i], vertNum, 1);
       else if(mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)
-         renderVertex(SelectedVertex, points[i], vertNum);
+         GameObjectRender::renderVertex(SelectedVertex, points[i], vertNum);
       else  // mAnimStage > 11, moving vertices about
-         renderVertex(HighlightedVertex, points[i], -1, 1);
+         GameObjectRender::renderVertex(HighlightedVertex, points[i], -1, 1);
    }
 
    FontManager::popFontContext();

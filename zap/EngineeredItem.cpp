@@ -22,7 +22,6 @@
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"        // for accessing client's spark manager
 #  include "UIQuickMenu.h"
-#  include "OpenglUtils.h"
 #endif
 
 #include "Colors.h"
@@ -1566,7 +1565,7 @@ void ForceFieldProjector::render() const
 #ifndef ZAP_DEDICATED
    // We're not in editor (connected to game)
    if (getGame() && static_cast<ClientGame*>(getGame())->isConnectedToServer())
-      renderForceFieldProjector(&mCollisionPolyPoints, getPos(), getColor(), isEnabled(), mHealRate);
+      GameObjectRender::renderForceFieldProjector(&mCollisionPolyPoints, getPos(), getColor(), isEnabled(), mHealRate);
    else
       renderEditor(0, false);
 #endif
@@ -1575,7 +1574,7 @@ void ForceFieldProjector::render() const
 
 void ForceFieldProjector::renderDock(const Color &color) const
 {
-   renderSquareItem(getPos(), color, 1, Colors::white, '>');
+   GameObjectRender::renderSquareItem(getPos(), color, 1, Colors::white, '>');
 }
 
 
@@ -1589,7 +1588,7 @@ void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCorn
    {
       Point forceFieldStart = getForceFieldStartPoint(getPos(), mAnchorNormal, scaleFact);
 
-      renderForceFieldProjector(&mCollisionPolyPoints, getPos(), color, true, mHealRate);
+      GameObjectRender::renderForceFieldProjector(&mCollisionPolyPoints, getPos(), color, true, mHealRate);
 
       if(mField)
          mField->render(color);
@@ -1928,7 +1927,7 @@ void ForceField::render() const
 
 void ForceField::render(const Color &color) const
 {
-   renderForceField(mStart, mEnd, color, mFieldUp);
+   GameObjectRender::renderForceField(mStart, mEnd, color, mFieldUp);
 }
 
 
@@ -2119,13 +2118,13 @@ void Turret::onAddedToGame(Game *game)
 
 void Turret::render() const
 {
-   renderTurret(getColor(), getPos(), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle, mHealRate);
+   GameObjectRender::renderTurret(getColor(), getPos(), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle, mHealRate);
 }
 
 
 void Turret::renderDock(const Color &color) const
 {
-   renderSquareItem(getPos(), color, 1, Colors::white, 'T');
+   GameObjectRender::renderSquareItem(getPos(), color, 1, Colors::white, 'T');
 }
 
 
@@ -2136,7 +2135,7 @@ void Turret::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, b
       // We render the turret with/without health if it is neutral or not (as it starts in the game)
       bool enabled = getTeam() != TEAM_NEUTRAL;
 
-      renderTurret(getColor(), getPos(), mAnchorNormal, enabled, mHealth, mCurrentAngle, mHealRate);
+      GameObjectRender::renderTurret(getColor(), getPos(), mAnchorNormal, enabled, mHealth, mCurrentAngle, mHealRate);
    }
    else
       renderDock(getColor());
@@ -2589,22 +2588,23 @@ void Mortar::onAddedToGame(Game *game)
 
 void Mortar::render() const
 {
-   renderMortar(getColor(), getPos(), mAnchorNormal, isEnabled(), mHealth, mHealRate);
+   GameObjectRender::renderMortar(getColor(), getPos(), mAnchorNormal, isEnabled(), mHealth, mHealRate);
 
-   glPushMatrix();
-   Point aimCenter = getPos() + mAnchorNormal * Turret::TURRET_OFFSET;
-   glTranslate(aimCenter);
-
-   glRotate(mAnchorNormal.ATAN2() * RADIANS_TO_DEGREES);
-
-   renderPointVector(&mZone, GL_LINE_LOOP);
-   glPopMatrix();
+   // Render target zone?
+//   glPushMatrix();
+//   Point aimCenter = getPos() + mAnchorNormal * Turret::TURRET_OFFSET;
+//   glTranslate(aimCenter);
+//
+//   glRotate(mAnchorNormal.ATAN2() * RADIANS_TO_DEGREES);
+//
+//   renderPointVector(&mZone, GL_LINE_LOOP);
+//   glPopMatrix();
 }
 
 
 void Mortar::renderDock(const Color &color) const
 {
-   renderSquareItem(getPos(), color, 1, Colors::white, 'M');
+   GameObjectRender::renderSquareItem(getPos(), color, 1, Colors::white, 'M');
 }
 
 
@@ -2615,7 +2615,7 @@ void Mortar::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, b
       // We render the Mortar with/without health if it is neutral or not (as it starts in the game)
       bool enabled = getTeam() != TEAM_NEUTRAL;
 
-      renderMortar(getColor(), getPos(), mAnchorNormal, enabled, mHealth, mHealRate);
+      GameObjectRender::renderMortar(getColor(), getPos(), mAnchorNormal, enabled, mHealth, mHealRate);
    }
    else
       renderDock(getColor());

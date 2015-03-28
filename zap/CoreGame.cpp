@@ -10,6 +10,7 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
+#  include "RenderUtils.h"
 #  include "gameObjectRender.h"
 #  include "UIQuickMenu.h"
 #endif
@@ -371,7 +372,7 @@ void CoreItem::renderItem(const Point &pos) const
       GameType *gameType = static_cast<Level *>(getDatabase())->getGameType();
       S32 time = gameType->getTotalGamePlayedInMs();
       PanelGeom panelGeom = getPanelGeom();
-      renderCore(pos, getColor(), time, &panelGeom, mPanelHealth, mStartingPanelHealth);
+      GameObjectRender::renderCore(pos, getColor(), time, &panelGeom, mPanelHealth, mStartingPanelHealth);
    }
 #endif
 }
@@ -387,7 +388,7 @@ void CoreItem::renderDock(const Color &color) const
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
-   renderCoreSimple(pos, Colors::white, 10);
+   GameObjectRender::renderCoreSimple(pos, Colors::white, 10);
 #endif
 }
 
@@ -396,7 +397,7 @@ void CoreItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled,
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
-   renderCoreSimple(pos, getColor(), CoreRadius * 2);
+   GameObjectRender::renderCoreSimple(pos, getColor(), CoreRadius * 2);
 #endif
 }
 
@@ -407,7 +408,7 @@ void CoreItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled,
 void CoreGameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const
 {
    Point center(xpos, ypos + 16);
-   renderCoreSimple(center, getGame()->getTeam(teamIndex)->getColor(), 20);
+   GameObjectRender::renderCoreSimple(center, getGame()->getTeam(teamIndex)->getColor(), 20);
 
    // Flash the ornament if the Core is being attacked
    if(isTeamCoreBeingAttacked(teamIndex)) 
@@ -422,7 +423,7 @@ void CoreGameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) c
          alpha = 0.6f;
       }
          
-      drawCircle(center, 15, color, alpha);
+      RenderUtils::drawCircle(center, 15, color, alpha);
    }
 }
 

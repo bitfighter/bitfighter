@@ -87,7 +87,7 @@ void GoalZone::render() const
    static const GoalZoneFlashStyle flashStyle = 
             GameSettings::get()->getSetting<GoalZoneFlashStyle>(IniKey::GoalZoneFlashStyle);
 
-   renderGoalZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore, 
+   GameObjectRender::renderGoalZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore,
                   mFlashCount ? F32(mFlashTimer.getCurrent()) / FlashDelay : 0, flashStyle);
 }
 
@@ -98,14 +98,14 @@ void GoalZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled,
    static const GoalZoneFlashStyle flashStyle = 
             GameSettings::get()->getSetting<GoalZoneFlashStyle>(IniKey::GoalZoneFlashStyle);
 
-   renderGoalZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), false, 0, 0, 0, flashStyle);
+   GameObjectRender::renderGoalZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), false, 0, 0, 0, flashStyle);
    PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled, true);
 }
 
 
 void GoalZone::renderDock(const Color &color) const
 {
-  renderGoalZone(color, getOutline(), getFill());
+   GameObjectRender::renderGoalZone(color, getOutline(), getFill());
 }
 
 

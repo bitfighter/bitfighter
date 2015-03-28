@@ -392,7 +392,7 @@ void RepairItem::onClientPickup()
 void RepairItem::renderItem(const Point &pos) const
 {
    if(shouldRender())
-      renderRepairItem(pos);
+      GameObjectRender::renderRepairItem(pos);
 }
 
 
@@ -406,7 +406,7 @@ S32 RepairItem::getDockRadius() const  {  return 11;  }
 
 void RepairItem::renderDock(const Color &color) const
 {
-   renderRepairItem(getPos(), true, 0, 1);
+   GameObjectRender::renderRepairItem(getPos(), true, 0, 1);
 }
 
 
@@ -520,7 +520,7 @@ void EnergyItem::onClientPickup()
 void EnergyItem::renderItem(const Point &pos) const
 {
    if(shouldRender())
-      renderEnergyItem(pos);
+      GameObjectRender::renderEnergyItem(pos);
 }
 
 

@@ -63,7 +63,7 @@ LoadoutZone *LoadoutZone::clone() const
 
 void LoadoutZone::render() const
 {
-   renderLoadoutZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle());
+   GameObjectRender::renderLoadoutZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle());
 }
 
 
@@ -76,7 +76,7 @@ void LoadoutZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabl
 
 void LoadoutZone::renderDock(const Color &color) const
 {
-   renderZone(color, getOutline(), getFill());
+   GameObjectRender::renderZone(color, getOutline(), getFill());
 }
 
 

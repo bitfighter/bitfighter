@@ -9,6 +9,7 @@
 #include "teamInfo.h"      // For Team def
 #include "lineEditor.h"
 #include "Color.h"
+#include "RenderManager.h"
 
 #include <string>
 
@@ -47,7 +48,7 @@ class MenuUserInterface;
 ////////////////////////////////////
 ////////////////////////////////////
 
-class MenuItem
+class MenuItem: public RenderManager
 {
 private:
    S32 mIndex;

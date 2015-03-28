@@ -8,7 +8,11 @@
 #include "gameConnection.h"
 #include "Level.h"
 
-#include "gameObjectRender.h"
+#ifndef ZAP_DEDICATED
+#  include "RenderUtils.h"
+#  include "gameObjectRender.h"
+#endif
+
 #include "Colors.h"
 #include "stringUtils.h"
 
@@ -170,7 +174,7 @@ void Item::setRadius(F32 radius)
 void Item::renderItem(const Point &pos) const
 {
 #ifndef ZAP_DEDICATED
-   drawFilledSquare(pos, 10, Colors::cyan);
+   RenderUtils::drawFilledSquare(pos, 10, Colors::cyan);
 #endif
 }
 

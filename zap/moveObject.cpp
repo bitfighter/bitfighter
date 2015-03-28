@@ -1445,13 +1445,13 @@ bool Asteroid::shouldRender() const
 void Asteroid::renderItem(const Point &pos) const
 {
    if(shouldRender())
-      renderAsteroid(pos, mDesign, mRadius / 89.f);
+      GameObjectRender::renderAsteroid(pos, mDesign, mRadius / 89.f);
 }
 
 
 void Asteroid::renderDock(const Color &color) const
 {
-   renderAsteroid(getActualPos(), 2, .1f);
+   GameObjectRender::renderAsteroid(getActualPos(), 2, .1f);
 }
 
 
@@ -1804,7 +1804,7 @@ void TestItem::idle(BfObject::IdleCallPath path)
 
 void TestItem::renderItem(const Point &pos) const
 {
-   renderTestItem(mOutlinePoints);
+   GameObjectRender::renderTestItem(mOutlinePoints);
 }
 
 
@@ -1817,7 +1817,7 @@ void TestItem::setOutline()
 
 void TestItem::renderDock(const Color &color) const
 {
-   renderTestItem(getActualPos(), 8);
+   GameObjectRender::renderTestItem(getActualPos(), 8);
 }
 
 
@@ -1930,13 +1930,13 @@ void ResourceItem::setOutline()
 
 void ResourceItem::renderItem(const Point &pos) const
 {
-   renderResourceItem(mOutlinePoints);
+   GameObjectRender::renderResourceItem(mOutlinePoints);
 }
 
 
 void ResourceItem::renderItemAlpha(const Point &pos, F32 alpha) const
 {
-   renderResourceItem(mOutlinePoints, alpha);
+   GameObjectRender::renderResourceItem(mOutlinePoints, alpha);
 }
 
 
@@ -1946,7 +1946,7 @@ void ResourceItem::renderDock(const Color &color) const
    points.clear();
    generateOutlinePoints(getActualPos(), 0.4f, points);
 
-   renderResourceItem(points);
+   GameObjectRender::renderResourceItem(points);
 }
 
 

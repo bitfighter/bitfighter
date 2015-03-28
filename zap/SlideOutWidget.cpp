@@ -8,7 +8,6 @@
 #include "DisplayManager.h"          // For DisplayManager::getScreenInfo() def
 #include "Point.h"
 #include "Colors.h"
-#include "OpenglUtils.h"
 
 #include "tnlVector.h"
 
@@ -245,12 +244,12 @@ void SlideOutWidget::renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 
 
 
    // Fill
-   glColor(Colors::black, 0.70f);
-   renderPointVector(&points, GL_TRIANGLE_FAN);
+   mGL->glColor(Colors::black, 0.70f);
+   mGL->renderPointVector(&points, GL_TRIANGLE_FAN);
 
    // Border
-   glColor(borderColor);
-   renderPointVector(&points, GL_LINE_STRIP);
+   mGL->glColor(borderColor);
+   mGL->renderPointVector(&points, GL_LINE_STRIP);
 }
 
 

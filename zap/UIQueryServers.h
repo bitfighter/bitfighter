@@ -114,7 +114,11 @@ private:
 
    void addServersToPingList(const Vector<ServerAddr> &serverList); 
    void forgetServersNoLongerOnList(const Vector<ServerAddr> &serverListFromMaster);
-   void sort();                                                
+   void sort();
+
+   void setPingTimeColor(U32 pingTime) const;
+   void setLocalRemoteColor(bool isLocal) const;
+   void renderLockIcon() const;
 
 public:
    explicit QueryServersUserInterface(ClientGame *game, UIManager *uiManager);       // Constructor

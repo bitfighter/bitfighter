@@ -222,6 +222,12 @@ private:
    bool anyItemsSelected(const GridDatabase *database) const;  // Are any items selected?
    bool anythingSelected() const;                              // Are any items/vertices selected?
 
+   static void renderAttribText(S32 xpos, S32 ypos, S32 textsize, const Color &keyColor,
+         const Color &valColor, const Vector<string> &keys, const Vector<string> &vals);
+   static void setColor(bool isSelected, bool isLitUp, bool isScriptItem);
+   static void renderDockItemLabel(const Point &pos, const char *label);
+   static void renderDockItem(const BfObject *object, const Color &color, F32 currentScale, S32 snapVertexIndex);
+
 public:
    S32 getItemSelectedCount();                     // How many are objects are selected?
 

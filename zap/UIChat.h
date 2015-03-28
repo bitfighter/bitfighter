@@ -43,7 +43,7 @@ public:
 ///////////////////////////////////////
 
 // All our chat classes will inherit from this
-class AbstractChat
+class AbstractChat: RenderManager
 {
 private:
    static std::map<string, Color> mFromColors;       // Map nicknames to colors

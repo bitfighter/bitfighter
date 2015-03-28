@@ -20,7 +20,6 @@
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 namespace Zap
 {
@@ -87,7 +86,7 @@ void QuickMenuUI::render() const
 
    S32 yStart = S32(mMenuLocation.y) - menuHeight;
 
-   S32 width = max(getMenuWidth(), getStringWidth(getTextSize(MENU_ITEM_SIZE_SMALL), title.c_str()));
+   S32 width = max(getMenuWidth(), RenderUtils::getStringWidth(getTextSize(MENU_ITEM_SIZE_SMALL), title.c_str()));
 
    S32 hpad = 8;
 
@@ -120,7 +119,7 @@ void QuickMenuUI::render() const
    S32 right = naturalRight + keepingItOnScreenAdjFactorX;
 
    // Background rectangle
-   drawFilledRect(left,  naturalTop    + keepingItOnScreenAdjFactorY, 
+   RenderUtils::drawFilledRect(left,  naturalTop    + keepingItOnScreenAdjFactorY,
                   right, naturalBottom + keepingItOnScreenAdjFactorY, 
                   Color(.1), Color(.5));
 
@@ -129,8 +128,8 @@ void QuickMenuUI::render() const
    right -= 4;
 
    // First draw the menu title
-   glColor(Colors::red);
-   drawCenteredString(cenX, yStart, getTextSize(MENU_ITEM_SIZE_SMALL), title.c_str());
+   mGL->glColor(Colors::red);
+   RenderUtils::drawCenteredString(cenX, yStart, getTextSize(MENU_ITEM_SIZE_SMALL), title.c_str());
 
    // Then the menu items
    yStart += getGap(MENU_ITEM_SIZE_NORMAL) + getTextSize(MENU_ITEM_SIZE_SMALL) + 2;
@@ -176,7 +175,7 @@ void QuickMenuUI::render() const
 
    /////
    // Render instructions just below the menu
-   glColor(Colors::menuHelpColor);
+   mGL->glColor(Colors::menuHelpColor);
 
    // Move instruction to top of the menu if there is not room to display it below.  I realize this code is a bit of a mess... not
    // sure how to write it more clearly, though I'm sure it could be done.
@@ -188,7 +187,7 @@ void QuickMenuUI::render() const
    S32 HELP_TEXT_SIZE = getTextSize(MENU_ITEM_SIZE_NORMAL);
 
    // Amount help "sticks out" beyond menu box:
-   S32 xoff = (getStringWidth(HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp().c_str()) - width) / 2; 
+   S32 xoff = (RenderUtils::getStringWidth(HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp().c_str()) - width) / 2;
    if(xoff > 0)
       instrXPos += max(xoff - left, min(DisplayManager::getScreenInfo()->getGameCanvasWidth() - xoff - right, 0));
 
@@ -198,7 +197,7 @@ void QuickMenuUI::render() const
    else
       instrYPos = naturalTop + keepingItOnScreenAdjFactorY - HELP_TEXT_SIZE - getGap(MENU_ITEM_SIZE_NORMAL) - vpad;   // No room below, help goes above
 
-   drawCenteredString(instrXPos, instrYPos, HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp().c_str());
+   RenderUtils::drawCenteredString(instrXPos, instrYPos, HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp().c_str());
 
 }
 

@@ -41,7 +41,7 @@ static const FontContext Context = ErrorMsgContext;
 void AbstractMessageUserInterface::setMessage(const string &message)
 {
    Vector<string> wrappedLines;
-   wrapString(message, UIManager::MessageBoxWrapWidth, TextHeight, Context, wrappedLines);
+   RenderUtils::wrapString(message, UIManager::MessageBoxWrapWidth, TextHeight, Context, wrappedLines);
 
    InputCodeManager *inputCodeManager = mGameSettings->getInputCodeManager();
 

@@ -19,7 +19,7 @@ struct CreditsInfo
 };
 
 
-class CreditsScroller
+class CreditsScroller: RenderManager
 {
 
 public:

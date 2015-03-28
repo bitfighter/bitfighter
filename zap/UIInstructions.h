@@ -8,6 +8,7 @@
 
 #include "UIAbstractInstructions.h"
 #include "Point.h"
+#include "SharedConstants.h"
 
 namespace Zap
 {
@@ -72,6 +73,9 @@ private:
    void renderPageGameIndicators() const;
    void renderPageCommands(U32 index, const char *msg = "") const;
    void renderPageGameTypes() const;
+
+   void renderBadgeLine(S32 y, S32 textSize, MeritBadges badge, S32 radius, const char *name, const char *descr) const;
+   S32 renderBadges(S32 y, S32 textSize, S32 descSize)  const;
 
    void nextPage();
    void prevPage();

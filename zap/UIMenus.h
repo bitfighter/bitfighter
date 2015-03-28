@@ -46,6 +46,9 @@ private:
 
    virtual void initialize();
 
+   void renderMenuInstructions(GameSettings *settings) const;
+   void renderArrow(S32 pos, bool pointingUp) const;
+
 protected:
    Vector<boost::shared_ptr<MenuItem> > mMenuItems;
 

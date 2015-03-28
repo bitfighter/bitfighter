@@ -2245,17 +2245,17 @@ void Ship::renderLayer(S32 layerIndex)
    // Caclulate rotAmount to add the spinny effect you see when a ship spawns or comes through a teleport
    const F32 warpInScale = (WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
 
-   renderShip(layerIndex, getRenderPos(), getActualPos(), vel, angle, deltaAngle,
+   GameObjectRender::renderShip(layerIndex, getRenderPos(), getActualPos(), vel, angle, deltaAngle,
               mShapeType, color, alpha, clientGame->getCurrentTime(), shipName, nameScale, warpInScale, 
               isLocalShip, isBusy, isAuthenticated, showCoordinates, mHealth, mRadius, getTeam(), 
               boostActive, shieldActive, repairActive, sensorActive, hasArmor, engineeringTeleport, killStreak, 
               gamesPlayed);
 
    if(mSpawnShield.getCurrent() != 0)  // Add spawn shield -- has a period of being on solidly, then blinks yellow 
-      renderSpawnShield(getRenderPos(), mSpawnShield.getCurrent(), clientGame->getCurrentTime());
+      GameObjectRender::renderSpawnShield(getRenderPos(), mSpawnShield.getCurrent(), clientGame->getCurrentTime());
 
    if(mLoadout.isModulePrimaryActive(ModuleRepair) && alpha != 0)     // Don't bother when completely transparent
-      renderShipRepairRays(getRenderPos(), this, mRepairTargets, alpha);
+      GameObjectRender::renderShipRepairRays(getRenderPos(), this, mRepairTargets, alpha);
 
    // Render mounted items
    for(S32 i = 0; i < mMountedItems.size(); i++)

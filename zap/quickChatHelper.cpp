@@ -14,7 +14,6 @@
 #include "IniFile.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 #include <ctype.h>
 
@@ -125,15 +124,15 @@ void QuickChatHelper::render() const
 
    if(!nodeTree.size())
    {
-      glColor(Colors::ErrorMessageTextColor);
-      drawCenteredString(yPos, MENU_FONT_SIZE, "Quick Chat messages improperly configured.  Please see bitfighter.ini.");
+      mGL->glColor(Colors::ErrorMessageTextColor);
+      RenderUtils::drawCenteredString(yPos, MENU_FONT_SIZE, "Quick Chat messages improperly configured.  Please see bitfighter.ini.");
       return;
    }
 
    if(mCurrentRenderCount == 0)    // Nothing to render, let's go home
    {
-      glColor(Colors::red); 
-      drawString(0, yPos, MENU_FONT_SIZE, "No messages here (misconfiguration?)");
+      mGL->glColor(Colors::red);
+      RenderUtils::drawString(0, yPos, MENU_FONT_SIZE, "No messages here (misconfiguration?)");
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
       return;
    }
@@ -164,7 +163,7 @@ S32 QuickChatHelper::getWidthOfItems() const
 
    for(S32 i = 0; i < nodeTree.size(); i++)
    {
-      S32 width = getStringWidth(MENU_FONT_SIZE, nodeTree[i].caption.c_str());
+      S32 width = RenderUtils::getStringWidth(MENU_FONT_SIZE, nodeTree[i].caption.c_str());
 
       if(width > maxWidth)
          maxWidth = width;

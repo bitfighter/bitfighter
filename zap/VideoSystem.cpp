@@ -14,6 +14,7 @@
 #include "version.h"
 #include "FontManager.h"
 #include "UIManager.h"
+#include "RenderUtils.h"
 
 #include "stringUtils.h"
 
@@ -278,8 +279,6 @@ S32 VideoSystem::getWindowPositionY()
 }
 
 
-extern void setDefaultBlendFunction();
-
 // Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
 // This has the unfortunate side-effect of triggering a mouse move event.
 void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInterfaces, bool currentUIUsesEditorScreenMode)
@@ -427,8 +426,8 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
 
    glEnable(GL_SCISSOR_TEST);    // Turn on clipping
 
-   setDefaultBlendFunction();
-   glLineWidth(gDefaultLineWidth);
+   mGL->setDefaultBlendFunction();
+   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
    // Enable Line smoothing everywhere!  Make sure to disable temporarily for filled polygons and such
    if(settings->getSetting<YesNo>(IniKey::LineSmoothing))

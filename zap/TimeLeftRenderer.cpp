@@ -14,7 +14,6 @@
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 
 namespace Zap { 
@@ -146,7 +145,7 @@ S32 TimeLeftRenderer::renderHeadlineScores(const Game *game, S32 ypos) const
    S32 teamCount = game->getTeamCount();
    S32 maxWidth = S32_MIN;
 
-   glColor(Colors::white);
+   mGL->glColor(Colors::white);
 
    for(S32 i = teamCount - 1; i >= 0; i--)
    {
@@ -157,7 +156,7 @@ S32 TimeLeftRenderer::renderHeadlineScores(const Game *game, S32 ypos) const
       // This is a total hack based on visual inspection trying to get scores ending in 1 to align with others
       // in a way that is nice.  This is totally font dependent, sadly...
 
-      S32 width = drawStringfr((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin), ypos, BigScoreTextSize, "%d", score);
+      S32 width = RenderUtils::drawStringfr((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin), ypos, BigScoreTextSize, "%d", score);
       maxWidth = max(maxWidth, width);
 
       ypos -= BigScoreTextSize + BigScoreTextGap;
@@ -174,7 +173,7 @@ static void drawStringDigitByDigit(S32 x, S32 y, S32 textsize, const string &s)
    // this loop will crash, as i will be decremented below 0, and, well... bring on the velocoraptor.  
    // See http://xkcd.com/292/ for clarification.
    for(S32 i = (S32)s.length() - 1; i >= 0; i--)
-      x -= drawStringr(x, y, textsize, s.substr(i, 1).c_str());
+      x -= RenderUtils::drawStringr(x, y, textsize, s.substr(i, 1).c_str());
 }
 
 
@@ -228,7 +227,7 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
    topOneFixFactor = topScore % 10 == 1 ? oneAdjFact : 0;
 
    topScoreStr = itos(topScore);
-   topScoreLen = getStringWidth(textsize, topScoreStr.c_str()) + topOneFixFactor;
+   topScoreLen = RenderUtils::getStringWidth(textsize, topScoreStr.c_str()) + topOneFixFactor;
 
    if(renderTwoNames)
    {
@@ -249,7 +248,7 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
       
       botOneFixFactor = botScore % 10 == 1 ? oneAdjFact : 0;
       botScoreStr = itos(botScore);
-      botScoreLen = getStringWidth(textsize, botScoreStr.c_str()) + botOneFixFactor;
+      botScoreLen = RenderUtils::getStringWidth(textsize, botScoreStr.c_str()) + botOneFixFactor;
    }
 
    // 5 here is the gap between the names and the scores
@@ -257,24 +256,24 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
 
    if(render)
    {
-      glColor(winnerColor);
+      mGL->glColor(winnerColor);
 
       drawStringDigitByDigit((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - topOneFixFactor, 
                              ypos - firstNameOffset, textsize, topScoreStr);
-      drawStringr           ((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth,        
+      RenderUtils:: drawStringr           ((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth,
                              ypos - firstNameOffset, textsize, topName);
 
       // Render bottom score if we have one
       if(renderTwoNames)
       {
          if(topScore == botScore)      // If players are tied, render both with winner's color
-            glColor(winnerColor);
+            mGL->glColor(winnerColor);
          else
-            glColor(loserColor);
+            mGL->glColor(loserColor);
 
          drawStringDigitByDigit((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - botOneFixFactor, 
                                 ypos, textsize, botScoreStr);
-         drawStringr           ((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth,        
+         RenderUtils::drawStringr           ((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth,
                                 ypos, textsize, botName);
       }
    }
@@ -295,9 +294,9 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
    static const char *UnlimMsg       = "Unlim.";
 
    // Precalc some widths we'll need from time to time
-   static const U32 w0        = getStringWidth(TimeTextSize, "0");
-   static const U32 wUnlim    = getStringWidth(TimeTextSize, UnlimMsg);
-   static const U32 wSudDeath = getStringWidth(TimeTextSize, SuddenDeathMsg);
+   static const U32 w0        = RenderUtils::getStringWidth(TimeTextSize, "0");
+   static const U32 wUnlim    = RenderUtils::getStringWidth(TimeTextSize, UnlimMsg);
+   static const U32 wSudDeath = RenderUtils::getStringWidth(TimeTextSize, SuddenDeathMsg);
 
    U32 timeWidth;
    if(gameType->isTimeUnlimited())
@@ -311,7 +310,7 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
       U32 minsRemaining = gameType->getRemainingGameTimeInMs() / (60 * 1000);
       const U32 tenSecsRemaining = gameType->getRemainingGameTimeInMs() / 1000 % 60 / 10;
       string timestr = itos(minsRemaining) + ":" + itos(tenSecsRemaining);
-      timeWidth = getStringWidth(TimeTextSize, timestr.c_str()) + w0;
+      timeWidth = RenderUtils::getStringWidth(TimeTextSize, timestr.c_str()) + w0;
 
       // Add a little extra for the leading 0 that's drawn for one digit times
       if(minsRemaining < 10)
@@ -332,27 +331,27 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
 
    if(render)
    {
-      glColor(Colors::cyan);
+      mGL->glColor(Colors::cyan);
       // Align with top of time, + 6 is a font-dependent fudge factor
-      wt = drawStringfr(smallTextRPos, timeTop + 6, siSize, gameType->getShortName());
+      wt = RenderUtils::drawStringfr(smallTextRPos, timeTop + 6, siSize, gameType->getShortName());
 
-      glColor(Colors::red);
+      mGL->glColor(Colors::red);
       // Align with bottom of time
-      wb = drawStringfr(smallTextRPos, timeTop + TimeTextSize - siSize - stwSizeBonus, siSize + stwSizeBonus, 
+      wb = RenderUtils::drawStringfr(smallTextRPos, timeTop + TimeTextSize - siSize - stwSizeBonus, siSize + stwSizeBonus,
                         itos(gameType->getWinningScore()).c_str()); 
 
-      glColor(gameType->isOvertime() ? Colors::red : Colors::white);
+      mGL->glColor(gameType->isOvertime() ? Colors::red : Colors::white);
       if(gameType->isTimeUnlimited())  
-         drawString(timeLeft, timeTop, TimeTextSize, UnlimMsg);
+         RenderUtils::drawString(timeLeft, timeTop, TimeTextSize, UnlimMsg);
       else if(gameType->isSuddenDeath())
-         drawString(timeLeft, timeTop, TimeTextSize, SuddenDeathMsg);
+         RenderUtils::drawString(timeLeft, timeTop, TimeTextSize, SuddenDeathMsg);
       else
-         drawTime(timeLeft, timeTop, TimeTextSize, gameType->getRemainingGameTimeInMs());
+         RenderUtils::drawTime(timeLeft, timeTop, TimeTextSize, gameType->getRemainingGameTimeInMs());
    }
    else
    {
-      wt = getStringWidth(siSize, gameType->getShortName());
-      wb = getStringWidth(siSize + stwSizeBonus, itos(gameType->getWinningScore()).c_str());
+      wt = RenderUtils::getStringWidth(siSize, gameType->getShortName());
+      wb = RenderUtils::getStringWidth(siSize + stwSizeBonus, itos(gameType->getWinningScore()).c_str());
    }
 
    const S32 leftLineOverhangAmount = 4;
@@ -361,13 +360,13 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
 
    if(render)
    {
-      glColor(Colors::gray40);
-      drawHorizLine(farLeftCoord, (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin), timeTop - grayLineVertPadding);
-      drawVertLine(grayLinePos, timeTop + visualVerticalTextAlignmentHackyFacty, timeTop + TimeTextSize);
+      mGL->glColor(Colors::gray40);
+      RenderUtils::drawHorizLine(farLeftCoord, (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin), timeTop - grayLineVertPadding);
+      RenderUtils::drawVertLine(grayLinePos, timeTop + visualVerticalTextAlignmentHackyFacty, timeTop + TimeTextSize);
    }
 
    // Adjusting this topCord will control how much space above the horiz gray line there is before the flags or other junk is drawn
-   const S32 topCoord = timeTop - 2 * grayLineVertPadding - (S32)gDefaultLineWidth - 8;
+   const S32 topCoord = timeTop - 2 * grayLineVertPadding - (S32)RenderUtils::DEFAULT_LINE_WIDTH - 8;
 
    return Point(farLeftCoord, topCoord);
 }

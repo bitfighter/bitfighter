@@ -21,7 +21,6 @@
 #include "masterConnection.h"    // For MasterServerConnection def
 #include "VideoSystem.h"
 #include "SoundSystem.h"
-#include "OpenglUtils.h"
 #include "LoadoutIndicator.h"    // For LoadoutIndicatorHeight
 #include "ScreenShooter.h"
 
@@ -131,8 +130,8 @@ void UserInterface::renderMasterStatus(const MasterServerConnection *connectionT
 {
    if(connectionToMaster && connectionToMaster->getConnectionState() != NetConnection::Connected)
    {
-      glColor(Colors::white);
-      drawStringf(10, 550, 15, "Master Server - %s", 
+      mGL->glColor(Colors::white);
+      RenderUtils::drawStringf(10, 550, 15, "Master Server - %s",
                GameConnection::getConnectionStateString(connectionToMaster->getConnectionState()));
    }
 }
@@ -171,7 +170,7 @@ void UserInterface::renderMessageBox(const string &titleStr, const string &instr
    SymbolShapePtr instr = SymbolShapePtr(new SymbolString(instrStr, inputCodeManager, Context, TextSize, false));
 
    Vector<string> wrappedLines;
-   wrapString(messageStr, UIManager::MessageBoxWrapWidth, TextSize, Context, wrappedLines);
+   RenderUtils::wrapString(messageStr, UIManager::MessageBoxWrapWidth, TextSize, Context, wrappedLines);
 
    Vector<SymbolShapePtr> message(wrappedLines.size());
 
@@ -185,7 +184,7 @@ void UserInterface::renderMessageBox(const string &titleStr, const string &instr
 void UserInterface::renderCenteredFancyBox(S32 boxTop, S32 boxHeight, S32 inset, S32 cornerInset, const Color &fillColor, 
                                            F32 fillAlpha, const Color &borderColor)
 {
-   drawFilledFancyBox(inset, boxTop, DisplayManager::getScreenInfo()->getGameCanvasWidth() - inset, boxTop + boxHeight, cornerInset, fillColor, fillAlpha, borderColor);
+   RenderUtils::drawFilledFancyBox(inset, boxTop, DisplayManager::getScreenInfo()->getGameCanvasWidth() - inset, boxTop + boxHeight, cornerInset, fillColor, fillAlpha, borderColor);
 }
 
 
@@ -260,9 +259,9 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
 // Static method
 void UserInterface::dimUnderlyingUI(F32 amount)
 {
-   glColor(Colors::black, amount); 
+   mGL->glColor(Colors::black, amount);
 
-   drawFilledRect (0, 0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
+   RenderUtils::drawFilledRect (0, 0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
 }
 
 
@@ -270,9 +269,9 @@ void UserInterface::dimUnderlyingUI(F32 amount)
 void UserInterface::drawMenuItemHighlight(S32 x1, S32 y1, S32 x2, S32 y2, bool disabled)
 {
    if(disabled)
-      drawFilledRect(x1, y1, x2, y2, Colors::gray40, Colors::gray80);
+      RenderUtils::drawFilledRect(x1, y1, x2, y2, Colors::gray40, Colors::gray80);
    else
-      drawFilledRect(x1, y1, x2, y2, Colors::blue40, Colors::blue);
+      RenderUtils::drawFilledRect(x1, y1, x2, y2, Colors::blue40, Colors::blue);
 }
 
 
@@ -412,22 +411,22 @@ void UserInterface::renderDiagnosticKeysOverlay()
      S32 vpos = DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2;
      S32 hpos = horizMargin;
 
-     glColor(Colors::white);
+     mGL->glColor(Colors::white);
 
      // Key states
      for (U32 i = 0; i < MAX_INPUT_CODES; i++)
         if(InputCodeManager::getState((InputCode) i))
-           hpos += drawStringAndGetWidth( hpos, vpos, 18, InputCodeManager::inputCodeToString((InputCode) i) );
+           hpos += RenderUtils::drawStringAndGetWidth( hpos, vpos, 18, InputCodeManager::inputCodeToString((InputCode) i) );
 
       vpos += 23;
       hpos = horizMargin;
-      glColor(Colors::magenta);
+      mGL->glColor(Colors::magenta);
 
       for(U32 i = 0; i < Joystick::MaxSdlButtons; i++)
          if(Joystick::ButtonMask & (1 << i))
          {
-            drawStringf( hpos, vpos, 18, "RawBut [%d]", i );
-            hpos += getStringWidthf(18, "RawBut [%d]", i ) + 5;
+            RenderUtils::drawStringf( hpos, vpos, 18, "RawBut [%d]", i );
+            hpos += RenderUtils::getStringWidthf(18, "RawBut [%d]", i ) + 5;
          }
    }
 }   

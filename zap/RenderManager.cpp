@@ -4,6 +4,9 @@
 //------------------------------------------------------------------------------
 
 #include "RenderManager.h"
+#include "Color.h"
+#include "Point.h"
+
 #include "tnlTypes.h"
 #include "tnlLog.h"
 
@@ -101,6 +104,160 @@ GLES1::~GLES1()
 
 void GLES1::init() {
    // No initialization for the fixed-function pipeline!
+}
+
+
+// API methods
+
+void GLES1::glColor(const Color &c, float alpha)
+{
+    glColor4f(c.r, c.g, c.b, alpha);
+}
+
+
+void GLES1::glColor(const Color *c, float alpha)
+{
+    glColor4f(c->r, c->g, c->b, alpha);
+}
+
+
+void GLES1::glColor(F32 c, float alpha)
+{
+   glColor4f(c, c, c, alpha);
+}
+
+
+void GLES1::glColor(F32 r, F32 g, F32 b)
+{
+   glColor4f(r, g, b, 1.0f);
+}
+
+
+void GLES1::glColor(F32 r, F32 g, F32 b, F32 alpha)
+{
+   glColor4f(r, g, b, alpha);
+}
+
+
+void GLES1::glScale(const Point &scaleFactor)
+{
+    glScalef(scaleFactor.x, scaleFactor.y, 1);
+}
+
+
+void GLES1::glScale(F32 scaleFactor)
+{
+    glScalef(scaleFactor, scaleFactor, 1);
+}
+
+
+void GLES1::glScale(F32 xScaleFactor, F32 yScaleFactor)
+{
+    glScalef(xScaleFactor, yScaleFactor, 1);
+}
+
+
+void GLES1::glTranslate(const Point &pos)
+{
+   glTranslatef(pos.x, pos.y, 0);
+}
+
+
+void GLES1::glTranslate(F32 x, F32 y)
+{
+   glTranslatef(x, y, 0);
+}
+
+
+void GLES1::glTranslate(F32 x, F32 y, F32 z)
+{
+   glTranslatef(x, y, z);
+}
+
+
+void GLES1::glRotate(F32 angle)
+{
+   glRotatef(angle, 0, 0, 1.0f);
+}
+
+
+void GLES1::setDefaultBlendFunction()
+{
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+
+void GLES1::renderVertexArray(const S8 verts[], S32 vertCount, S32 geomType)
+{
+   glEnableClientState(GL_VERTEX_ARRAY);
+
+   glVertexPointer(2, GL_BYTE, 0, verts);
+   glDrawArrays(geomType, 0, vertCount);
+
+   glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+
+void GLES1::renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType)
+{
+   glEnableClientState(GL_VERTEX_ARRAY);
+
+   glVertexPointer(2, GL_SHORT, 0, verts);
+   glDrawArrays(geomType, 0, vertCount);
+
+   glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+
+void GLES1::renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType)
+{
+   glEnableClientState(GL_VERTEX_ARRAY);
+
+   glVertexPointer(2, GL_FLOAT, 0, verts);
+   glDrawArrays(geomType, 0, vertCount);
+
+   glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+
+void GLES1::renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, S32 geomType)
+{
+   glEnableClientState(GL_VERTEX_ARRAY);
+   glEnableClientState(GL_COLOR_ARRAY);
+
+   glVertexPointer(2, GL_FLOAT, 0, vertices);
+   glColorPointer(4, GL_FLOAT, 0, colors);
+   glDrawArrays(geomType, 0, vertCount);
+
+   glDisableClientState(GL_COLOR_ARRAY);
+   glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+
+// geomType: GL_LINES, GL_LINE_STRIP, GL_LINE_LOOP, GL_TRIANGLES, GL_TRIANGLE_FAN, etc.
+void GLES1::renderPointVector(const Vector<Point> *points, U32 geomType)
+{
+   glEnableClientState(GL_VERTEX_ARRAY);
+
+   glVertexPointer(2, GL_FLOAT, 0, points->address());
+   glDrawArrays(geomType, 0, points->size());
+
+   glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+
+void GLES1::renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType)
+{
+   glPushMatrix();
+      glTranslate(offset);
+      renderPointVector(points, geomType);
+   glPopMatrix();
+}
+
+
+void GLES1::renderLine(const Vector<Point> *points)
+{
+   renderPointVector(points, GL_LINE_STRIP);
 }
 
 #endif

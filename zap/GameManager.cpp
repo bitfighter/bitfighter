@@ -7,7 +7,6 @@
 
 #include "DisplayManager.h"
 #include "FontManager.h"
-#include "RenderManager.h"
 #include "ServerGame.h"
 #include "SoundSystem.h"
 #include "VideoSystem.h"

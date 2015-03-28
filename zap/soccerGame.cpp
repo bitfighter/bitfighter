@@ -421,7 +421,7 @@ void SoccerBallItem::onAddedToGame(Game *game)
 
 void SoccerBallItem::renderItem(const Point &pos) const
 {
-   renderSoccerBall(pos);
+   GameObjectRender::renderSoccerBall(pos);
 }
 
 
@@ -444,7 +444,7 @@ const Color &SoccerBallItem::getColor() const
 
 void SoccerBallItem::renderDock(const Color &color) const
 {
-   renderSoccerBall(getRenderPos(), 7);
+   GameObjectRender::renderSoccerBall(getRenderPos(), 7);
 }
 
 

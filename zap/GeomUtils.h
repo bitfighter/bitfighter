@@ -149,6 +149,9 @@ bool triangulatedFillContains(const Vector<Point> *triangulatedFillPoints, const
 bool isConvex(const Vector<Point> *verts);
 
 void generatePointsInACurve(F32 startAngle, F32 endAngle, S32 numPoints, F32 radius, Vector<Point> &points);
+void generatePointsInACircle(S32 numPoints, F32 radius, Vector<Point> &points);
+void generatePointsInASemiCircle(S32 numPoints, F32 radius, Vector<Point> &points);
+void generatePointsInARectangle(F32 width, F32 y1, F32 y2, Vector<Point> &points);
 
 // scale Geometric points for clipper
 Paths upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons);

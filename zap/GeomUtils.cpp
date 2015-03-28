@@ -1888,6 +1888,32 @@ void generatePointsInACurve(F32 startAngle, F32 endAngle, S32 numPoints, F32 rad
 }
 
 
+void generatePointsInACircle(S32 numPoints, F32 radius, Vector<Point> &points)
+{
+   generatePointsInACurve(0, FloatTau, numPoints, radius, points);
+}
+
+
+void generatePointsInASemiCircle(S32 numPoints, F32 radius, Vector<Point> &points)
+{
+   generatePointsInACurve(0, FloatPi, numPoints, radius, points);
+}
+
+
+// [-I-] ==> y1, y2 are the coords at the top and bottom vertex of the I, width the the edge-to-edge width of the brackets
+void generatePointsInARectangle(F32 width, F32 y1, F32 y2, Vector<Point> &points)
+{
+   F32 halfWidth = width * 0.5f;
+
+   points.resize(4);
+
+   points[0].set(-halfWidth, y1);
+   points[1].set( halfWidth, y1);
+   points[2].set( halfWidth, y2);
+   points[3].set(-halfWidth, y2);
+}
+
+
 // Find longest edge, so we can align text with it...
 F32 angleOfLongestSide(const Vector<Point> &polyPoints)
 {

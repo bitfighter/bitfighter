@@ -11,7 +11,6 @@
 #include "Colors.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 #include "stringUtils.h"
 
 
@@ -92,12 +91,12 @@ static S32 getComponentRectWidth(S32 textWidth)
 static S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
 {
    // Draw the weapon or module name (n.b.: If you change the lcase, do the same in getComponentIndicatorWidth)
-   S32 textWidth = drawStringAndGetWidth(xPos + IndicatorHorizPadding, yPos + IndicatorVertPadding - 1, 
+   S32 textWidth = RenderUtils::drawStringAndGetWidth(xPos + IndicatorHorizPadding, yPos + IndicatorVertPadding - 1,
                                          IndicatorFontSize, lcase(name).c_str());
 
    S32 rectWidth = getComponentRectWidth(textWidth);
 
-   drawFancyBox(xPos, yPos, xPos + rectWidth, yPos + IndicatorHeight, IndicatorVertPadding, GL_LINE_LOOP);
+   RenderUtils::drawFancyBox(xPos, yPos, xPos + rectWidth, yPos + IndicatorHeight, IndicatorVertPadding, GL_LINE_LOOP);
 
    return rectWidth;
 }
@@ -105,7 +104,7 @@ static S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
 
 static S32 getComponentIndicatorWidth(const char *name)
 {
-   return getComponentRectWidth(getStringWidth(IndicatorFontSize, lcase(name).c_str()));
+   return getComponentRectWidth(RenderUtils::getStringWidth(IndicatorFontSize, lcase(name).c_str()));
 }
 
 
@@ -118,9 +117,9 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    if(!loadout.isValid())  
       return 0;
 
-   static const Color *INDICATOR_INACTIVE_COLOR = &Colors::green80;      
-   static const Color *INDICATOR_ACTIVE_COLOR   = &Colors::red80;        
-   static const Color *INDICATOR_PASSIVE_COLOR  = &Colors::yellow;
+   static const Color &INDICATOR_INACTIVE_COLOR = Colors::green80;
+   static const Color &INDICATOR_ACTIVE_COLOR   = Colors::red80;
+   static const Color &INDICATOR_PASSIVE_COLOR  = Colors::yellow;
 
    S32 xPos = LoadoutIndicator::LoadoutIndicatorLeftPos;
 
@@ -129,7 +128,7 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    // First, the weapons
    for(S32 i = 0; i < ShipWeaponCount; i++)
    {
-      glColor(loadout.isWeaponActive(i) ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
+      RenderUtils::glColor(loadout.isWeaponActive(i) ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
 
       S32 width = renderComponentIndicator(xPos, top, WeaponInfo::getWeaponInfo(loadout.getWeapon(i)).name.getString());
 
@@ -145,16 +144,16 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
 
       if(gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUsePassive)
       {
-         glColor(INDICATOR_PASSIVE_COLOR);
+         RenderUtils::glColor(INDICATOR_PASSIVE_COLOR);
       }
       else if(loadout.isModulePrimaryActive(module))
-         glColor(INDICATOR_ACTIVE_COLOR);
+         RenderUtils::glColor(INDICATOR_ACTIVE_COLOR);
       else 
-         glColor(INDICATOR_INACTIVE_COLOR);
+         RenderUtils::glColor(INDICATOR_INACTIVE_COLOR);
 
       // Always change to orange if module secondary is fired
       if(gModuleInfo[module].hasSecondary() && loadout.isModuleSecondaryActive(module))
-         glColor(Colors::orange67);
+         RenderUtils::glColor(Colors::orange67);
 
       S32 width = renderComponentIndicator(xPos, top, ModuleInfo::getModuleInfo(module)->getName());
 

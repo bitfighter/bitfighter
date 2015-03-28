@@ -12,7 +12,6 @@
 #include "gameObjectRender.h"
 #include "Colors.h"
 
-#include "OpenglUtils.h"
 #include "RenderUtils.h"
 #include "stringUtils.h"
 
@@ -931,9 +930,9 @@ SymbolHorizLine::~SymbolHorizLine()
 void SymbolHorizLine::render(const Point &center) const
 {
    if(mHasColor)
-      glColor(mColor);
+      mGL->glColor(mColor);
 
-   drawHorizLine(center.x - mWidth / 2, center.x + mWidth / 2, center.y - mHeight / 2 + mVertOffset);
+   RenderUtils::drawHorizLine(center.x - mWidth / 2, center.x + mWidth / 2, center.y - mHeight / 2 + mVertOffset);
 }
 
 
@@ -962,9 +961,9 @@ SymbolRoundedRect::~SymbolRoundedRect()
 void SymbolRoundedRect::render(const Point &center) const
 {
    if(mHasColor)
-      glColor(mColor);
+      mGL->glColor(mColor);
 
-   drawRoundedRect(center - Point(0, (mHeight - SpacingAdjustor) / 2 - BorderDecorationVertCenteringOffset - 1), 
+   RenderUtils::drawRoundedRect(center - Point(0, (mHeight - SpacingAdjustor) / 2 - BorderDecorationVertCenteringOffset - 1),
                    mWidth - SpacingAdjustor, mHeight - SpacingAdjustor, mRadius);
 }
 
@@ -990,9 +989,9 @@ SymbolSmallRoundedRect::~SymbolSmallRoundedRect()
 void SymbolSmallRoundedRect::render(const Point &center) const
 {
    if(mHasColor)
-      glColor(mColor);
+      mGL->glColor(mColor);
 
-   drawRoundedRect(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - SpacingAdjustor + 2), 
+   RenderUtils::drawRoundedRect(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - SpacingAdjustor + 2),
                    mWidth - SpacingAdjustor, mHeight - SpacingAdjustor, mRadius);
 }
 
@@ -1021,16 +1020,16 @@ void SymbolHorizEllipse::render(const Point &center) const
    S32 h = mHeight / 2;
 
    if(mHasColor)
-      glColor(mColor);
+      mGL->glColor(mColor);
 
    Point cen = center - Point(0, h - 1);
 
    // First the fill
-   drawFilledEllipse(cen, w, h, 0);
+   RenderUtils::drawFilledEllipse(cen, w, h, 0);
 
    // Outline in white
-   glColor(Colors::white);
-   drawEllipse(cen, w, h, 0);
+   mGL->glColor(Colors::white);
+   RenderUtils::drawEllipse(cen, w, h, 0);
 }
 
 
@@ -1053,28 +1052,13 @@ SymbolRightTriangle::~SymbolRightTriangle()
 }
 
 
-static void drawButtonRightTriangle(const Point &center)
-{
-   Point p1(center + Point(-6, -15));
-   Point p2(center + Point(-6,   4));
-   Point p3(center + Point(21,  -6));
-
-   F32 vertices[] = {
-         p1.x, p1.y,
-         p2.x, p2.y,
-         p3.x, p3.y
-   };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
-}
-
-
 void SymbolRightTriangle::render(const Point &center) const
 {
    if(mHasColor)
-      glColor(mColor);
+      mGL->glColor(mColor);
 
-   Point cen(center.x -mWidth / 4, center.y);  // Need to off-center the label slightly for this button
-   drawButtonRightTriangle(cen);
+   Point cen((center.x -mWidth / 4) - 9, center.y + 6);  // Need to off-center the label slightly for this button
+   JoystickRender::drawButtonRightTriangle(cen);
 }
 
 
@@ -1099,10 +1083,10 @@ SymbolCircle::~SymbolCircle()
 void SymbolCircle::render(const Point &pos) const
 {
    if(mHasColor)
-      glColor(mColor);
+      mGL->glColor(mColor);
 
    // Adjust our position's y coordinate to be the center of the circle
-   drawCircle(pos - Point(0, (mHeight) / 2 - BorderDecorationVertCenteringOffset - SpacingAdjustor), F32(mWidth - SpacingAdjustor) / 2);
+   RenderUtils::drawCircle(pos - Point(0, (mHeight) / 2 - BorderDecorationVertCenteringOffset - SpacingAdjustor), F32(mWidth - SpacingAdjustor) / 2);
 }
 
 
@@ -1111,7 +1095,7 @@ static const S32 LabelAutoShrinkThreshold = 15;
 S32 SymbolCircle::getLabelSizeAdjustor(const string &label, S32 labelSize) const
 {
    // Shrink labels a little when the text is uncomfortably big for the button
-   if(getStringWidth(labelSize, label.c_str()) > LabelAutoShrinkThreshold)
+   if(RenderUtils::getStringWidth(labelSize, label.c_str()) > LabelAutoShrinkThreshold)
       return mLabelSizeAdjustor - 2;
    
    return mLabelSizeAdjustor;
@@ -1120,7 +1104,7 @@ S32 SymbolCircle::getLabelSizeAdjustor(const string &label, S32 labelSize) const
 
 Point SymbolCircle::getLabelOffset(const string &label, S32 labelSize) const
 {
-   if(getStringWidth(labelSize, label.c_str()) > LabelAutoShrinkThreshold)
+   if(RenderUtils::getStringWidth(labelSize, label.c_str()) > LabelAutoShrinkThreshold)
       return mLabelOffset + Point(0, -1);
 
    return mLabelOffset;
@@ -1199,7 +1183,7 @@ void SymbolGear::render(const Point &pos) const
 {
    // We are given the bottom y position of the line, but the icon expects the center
    Point center(pos.x, (pos.y - mHeight/2) + 2); // Slight downward adjustment to position to better align with text
-   renderLoadoutZoneIcon(center, mWidth / 2);
+   GameObjectRender::renderLoadoutZoneIcon(center, mWidth / 2);
 }
 
 
@@ -1224,7 +1208,7 @@ void SymbolGoal::render(const Point &pos) const
 {
    // We are given the bottom y position of the line, but the icon expects the center
    Point center(pos.x, (pos.y - mHeight/2) + 2); // Slight downward adjustment to position to better align with text
-   renderGoalZoneIcon(center, mWidth/2);
+   GameObjectRender::renderGoalZoneIcon(center, mWidth/2);
 }
 
 
@@ -1249,7 +1233,7 @@ void SymbolNexus::render(const Point &pos) const
 {
    // We are given the bottom y position of the line, but the icon expects the center
    Point center(pos.x, (pos.y - mHeight/2) + 2); // Slight downward adjustment to position to better align with text
-   renderNexusIcon(center, mWidth/2);
+   GameObjectRender::renderNexusIcon(center, mWidth/2);
 }
 
 
@@ -1295,7 +1279,7 @@ void SymbolSpinner::render(const Point &pos) const
          break;
    }
 
-   drawStringc(pos - Point(0, SpacingAdjustor / 2), mHeight / 2.0f, charstr);
+   RenderUtils::drawStringc(pos - Point(0, SpacingAdjustor / 2), mHeight / 2.0f, charstr);
 }
 
 
@@ -1322,7 +1306,7 @@ void SymbolBullet::render(const Point &pos) const
 {
    // We are given the bottom y position of the line, but the icon expects the center
    Point center(pos.x, (pos.y - 7));
-   drawFilledSquare(center, (F32)BulletRad);
+   RenderUtils::drawFilledSquare(center, (F32)BulletRad);
 }
 
 
@@ -1332,7 +1316,7 @@ void SymbolBullet::render(const Point &pos) const
 
 // Constructor with no vertical offset
 SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, const Color *color) : 
-                              Parent(getStringWidth(context, fontSize, text.c_str()), fontSize, color)
+                              Parent(RenderUtils::getStringWidth(context, fontSize, text.c_str()), fontSize, color)
 {
    mText = text;
    mFontContext = context;
@@ -1342,7 +1326,7 @@ SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, co
 
 // Constructor with vertical offset
 SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, const Point &labelOffset, const Color *color) : 
-                                       Parent(getStringWidth(context, fontSize, text.c_str()), fontSize, color)
+                                       Parent(RenderUtils::getStringWidth(context, fontSize, text.c_str()), fontSize, color)
 {
    mText = text;
    mFontContext = context;
@@ -1363,10 +1347,10 @@ SymbolText::~SymbolText()
 void SymbolText::render(const Point &center) const
 {
    if(mHasColor)
-      glColor(mColor);
+      mGL->glColor(mColor);
 
    FontManager::pushFontContext(mFontContext);
-   drawStringc(center + mLabelOffset, (F32)mFontSize, mText.c_str());
+   RenderUtils::drawStringc(center + mLabelOffset, (F32)mFontSize, mText.c_str());
    FontManager::popFontContext();
 }
 
@@ -1399,7 +1383,7 @@ static S32 getKeyWidth(const string &text, S32 height)
    if(text == "Up Arrow" || text == "Down Arrow" || text == "Left Arrow" || text == "Right Arrow")
       width = 0;     // Make a square button; will return height below (and since it's a square...)
    else
-      width = getStringWidth(KeyContext, KeyFontSize, text.c_str()) + Margin * 2;
+      width = RenderUtils::getStringWidth(KeyContext, KeyFontSize, text.c_str()) + Margin * 2;
 
    return max(width, height) + SymbolPadding;
 }
@@ -1429,23 +1413,23 @@ void SymbolKey::render(const Point &center) const
    const Point textVertAdj = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset - 4);
 
    if(mHasColor)
-      glColor(mColor);
+      mGL->glColor(mColor);
 
    // Handle some special cases:
    if(mText == "Up Arrow")
-      renderUpArrow(center + textVertAdj + Point(0, -5.5), KeyFontSize);
+      GameObjectRender::renderUpArrow(center + textVertAdj + Point(0, -5.5), KeyFontSize);
    else if(mText == "Down Arrow")
-      renderDownArrow(center + textVertAdj + Point(0, -6), KeyFontSize);
+      GameObjectRender::renderDownArrow(center + textVertAdj + Point(0, -6), KeyFontSize);
    else if(mText == "Left Arrow")
-      renderLeftArrow(center + textVertAdj + Point(0, -6), KeyFontSize);
+      GameObjectRender::renderLeftArrow(center + textVertAdj + Point(0, -6), KeyFontSize);
    else if(mText == "Right Arrow")
-      renderRightArrow(center + textVertAdj + Point(0, -6), KeyFontSize);
+      GameObjectRender::renderRightArrow(center + textVertAdj + Point(0, -6), KeyFontSize);
    else
       Parent::render(center + textVertAdj);
 
    S32 width =  max(mWidth - 2 * Gap, mHeight);
 
-   drawHollowRect(center + boxVertAdj, width, mHeight);
+   RenderUtils::drawHollowRect(center + boxVertAdj, width, mHeight);
 }
 
 

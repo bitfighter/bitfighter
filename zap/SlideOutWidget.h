@@ -9,6 +9,7 @@
 
 #include "tnlTypes.h"
 #include "Timer.h"
+#include "RenderManager.h"
 
 
 using namespace TNL; 
@@ -19,7 +20,7 @@ namespace Zap
 
 class Color;
 
-class SlideOutWidget
+class SlideOutWidget: public RenderManager
 {
 private:
    bool mActivating;

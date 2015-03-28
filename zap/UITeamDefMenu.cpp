@@ -18,7 +18,6 @@
 #include "Colors.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 #include "stringUtils.h"
 #include "MathUtils.h"
 
@@ -194,12 +193,12 @@ void TeamDefUserInterface::render() const
    const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    FontManager::pushFontContext(MenuHeaderContext);
-   glColor(Colors::green);
-   drawCenteredUnderlinedString(vertMargin, 30, mMenuTitle);
+   mGL->glColor(Colors::green);
+   RenderUtils::drawCenteredUnderlinedString(vertMargin, 30, mMenuTitle);
    
-   drawCenteredString(canvasHeight - vertMargin - 20, 18, "Arrow Keys to choose | ESC to exit");
+   RenderUtils::drawCenteredString(canvasHeight - vertMargin - 20, 18, "Arrow Keys to choose | ESC to exit");
 
-   glColor(Colors::white);
+   mGL->glColor(Colors::white);
 
    S32 x = canvasWidth / 2;
 
@@ -231,11 +230,11 @@ void TeamDefUserInterface::render() const
    TNLAssert(selectedIndex < size, "Out of bounds!");
 
    // Draw the fixed teams
-   glColor(Colors::NeutralTeamColor);
-   drawCenteredStringf(yStart, fontsize, "Neutral Team (can't change)");
+   mGL->glColor(Colors::NeutralTeamColor);
+   RenderUtils::drawCenteredStringf(yStart, fontsize, "Neutral Team (can't change)");
 
-   glColor(Colors::HostileTeamColor);  
-   drawCenteredStringf(yStart + fontsize + fontgap, fontsize, "Hostile Team (can't change)");
+   mGL->glColor(Colors::HostileTeamColor);
+   RenderUtils::drawCenteredStringf(yStart + fontsize + fontgap, fontsize, "Hostile Team (can't change)");
 
    const Level *level = getConstLevel();
 
@@ -281,25 +280,25 @@ void TeamDefUserInterface::render() const
          string nameColorStr = namestr + spacer1 + colorstr + " " + getEntryMessage();
 
          // Draw item text
-         glColor(color);
-         drawCenteredString(y, fontsize, nameColorStr.c_str());
+         mGL->glColor(color);
+         RenderUtils::drawCenteredString(y, fontsize, nameColorStr.c_str());
 
          // Draw cursor if we're editing
          if(j == selectedIndex)
          {
             if(mEditingName)
             {
-               S32 x = getCenteredStringStartingPos(fontsize, nameColorStr.c_str()) + 
-                       getStringWidth(fontsize, numstr.c_str());
+               S32 x = RenderUtils::getCenteredStringStartingPos(fontsize, nameColorStr.c_str()) +
+                       RenderUtils::getStringWidth(fontsize, numstr.c_str());
 
                mTeamNameEditors[j].drawCursor(x, y, fontsize);
             }
             else if(mEditingColor)
             {
-               S32 x = getCenteredStringStartingPos(fontsize, nameColorStr.c_str()) + 
-                       getStringWidth(fontsize, namestr.c_str()) +
-                       getStringWidth(fontsize, spacer1.c_str()) +
-                       getStringWidth(fontsize, "#");
+               S32 x = RenderUtils::getCenteredStringStartingPos(fontsize, nameColorStr.c_str()) +
+                       RenderUtils::getStringWidth(fontsize, namestr.c_str()) +
+                       RenderUtils::getStringWidth(fontsize, spacer1.c_str()) +
+                       RenderUtils::getStringWidth(fontsize, "#");
 
                mHexColorEditors[j].drawCursor(x, y, fontsize);
             }
@@ -313,8 +312,8 @@ void TeamDefUserInterface::render() const
       if(errorMsgTimer.getCurrent() < (U32)ONE_SECOND)
          alpha = (F32) errorMsgTimer.getCurrent() / ONE_SECOND;
 
-      glColor(Colors::red, alpha);
-      drawCenteredString(canvasHeight - vertMargin - 141, fontsize, errorMsg.c_str());
+      mGL->glColor(Colors::red, alpha);
+      RenderUtils::drawCenteredString(canvasHeight - vertMargin - 141, fontsize, errorMsg.c_str());
    }
 }
 

@@ -9,14 +9,14 @@
 #include "ship.h"
 #include "Level.h"
 
-#include "gameObjectRender.h"    // For renderTextItem()
 #include "Colors.h"
 
 #include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
-#  include "RenderUtils.h"
 #  include "ClientGame.h"
+#  include "gameObjectRender.h"    // For renderTextItem()
+#  include "RenderUtils.h"
 #  include "UIQuickMenu.h"
 #endif
 
@@ -95,7 +95,7 @@ void TextItem::newObjectFromDock(F32 gridSize)
 void TextItem::render() const
 {
 #ifndef ZAP_DEDICATED
-   renderTextItem(getVert(0), getVert(1), mSize, mText, getColor());
+   GameObjectRender::renderTextItem(getVert(0), getVert(1), mSize, mText, getColor());
 #endif
 }
 
@@ -259,7 +259,7 @@ void TextItem::recalcTextSize()
    const F32 dummyTextSize = 120;
 
    F32 lineLen = getVert(0).distanceTo(getVert(1));      // In in-game units
-   F32 strWidth = F32(getStringWidth(dummyTextSize, mText.c_str())) / dummyTextSize; 
+   F32 strWidth = F32(RenderUtils::getStringWidth(dummyTextSize, mText.c_str())) / dummyTextSize;
    F32 size = lineLen / strWidth;
 
   setSize(size);
@@ -291,7 +291,7 @@ Rect TextItem::calcExtents() const
 	return(Rect(getVert(0), getVert(1)));
 #else
 
-   //F32 len = getStringWidth(mSize, mText.c_str());  // Somehow can't use this or else running with -dedicated will crash...
+   //F32 len = RenderUtils::getStringWidth(mSize, mText.c_str());  // Somehow can't use this or else running with -dedicated will crash...
    F32 len = getVert(0).distanceTo(getVert(1));       // This will work, assuming all Text never go past the verticies.
    //F32 buf = mSize / 2;     // Provides some room to accomodate descenders on letters like j and g.
 

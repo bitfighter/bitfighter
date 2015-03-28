@@ -8,7 +8,7 @@
 #include "GameSettings.h"
 #include "DisplayManager.h"
 
-#include "OpenglUtils.h"         // For various rendering helpers
+#include "RenderUtils.h"         // For various rendering helpers
 #include "stringUtils.h"         // For getFileSeparator()
 #include "MathUtils.h"           // For MIN/MAX
 
@@ -131,6 +131,12 @@ FontManager::FontManager()
 }
 
 
+FontManager::~FontManager()
+{
+   // Do nothing
+}
+
+
 // Runs intialize preserving mUsingExternalFonts
 void FontManager::reinitialize(GameSettings *settings)
 {
@@ -143,6 +149,8 @@ void FontManager::reinitialize(GameSettings *settings)
 void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 {
    cleanup();  // Makes sure its been cleaned up first, many tests call init without cleanup
+
+   TNLAssert(mGL != NULL, "GL Renderer is NULL.  Bad things will happen!");
 
    mUsingExternalFonts = useExternalFonts;
 
@@ -340,9 +348,9 @@ void FontManager::drawStrokeCharacter(const SFG_StrokeFont *font, S32 character)
         characterVertexArray[2*j]     = strip->Vertices[j].X;
         characterVertexArray[(2*j)+1] = strip->Vertices[j].Y;
       }
-      renderVertexArray(characterVertexArray, strip->Number, GL_LINE_STRIP);
+      mGL->renderVertexArray(characterVertexArray, strip->Number, GL_LINE_STRIP);
    }
-   glTranslate(schar->Right, 0);
+   mGL->glTranslate(schar->Right, 0);
 }
 
 
@@ -415,8 +423,6 @@ F32 FontManager::getTtfFontStringLength(BfFont *font, const char *string)
 }
 
 
-extern F32 gDefaultLineWidth;
-
 void FontManager::renderString(F32 size, const char *string)
 {
    BfFont *font = getFont(currentFontId);
@@ -428,16 +434,16 @@ void FontManager::renderString(F32 size, const char *string)
 
       // Clamp to range of 0.5 - 1 then multiply by line width (2 by default)
       F32 linewidth =
-            CLAMP(size * DisplayManager::getScreenInfo()->getPixelRatio() * modelview[0] * 0.05f, 0.5f, 1.0f) * gDefaultLineWidth;
+            CLAMP(size * DisplayManager::getScreenInfo()->getPixelRatio() * modelview[0] * 0.05f, 0.5f, 1.0f) * RenderUtils::DEFAULT_LINE_WIDTH;
 
       glLineWidth(linewidth);
 
       F32 scaleFactor = size / 120.0f;  // Where does this magic number come from?
-      glScale(scaleFactor, -scaleFactor);
+      mGL->glScale(scaleFactor, -scaleFactor);
       for(S32 i = 0; string[i]; i++)
          FontManager::drawStrokeCharacter(font->getStrokeFont(), string[i]);
 
-      glLineWidth(gDefaultLineWidth);
+      glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
    }
    else
    {
@@ -454,7 +460,7 @@ void FontManager::renderString(F32 size, const char *string)
       F32 rk = 1/k;
 
       // Flip upside down because y = -y
-      glScale(rk, -rk);
+      mGL->glScale(rk, -rk);
       // `size * k` becomes `size` due to the glScale above
       drawTTFString(font, string, size * k * legacyNormalizationFactor);
    }

@@ -9,11 +9,9 @@
 #include "SymbolShape.h"
 #include "FontManager.h"
 #include "Colors.h"
-#include "gameObjectRender.h"
 #include "SymbolShape.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 namespace Zap
 {
@@ -59,8 +57,8 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
    points[5] = (center + Point( 1, -4) * radius);
    points[6] = (center + Point( 1, -2) * radius);
 
-   glColor(getButtonColor(upActivated));
-   renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
+   mGL->glColor(getButtonColor(upActivated));
+   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
 
    // Down arrow
    points[0] = (center + Point(-1, 2) * radius);
@@ -71,8 +69,8 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
    points[5] = (center + Point( 1, 4) * radius);
    points[6] = (center + Point( 1, 2) * radius);
 
-   glColor(getButtonColor(downActivated));
-   renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
+   mGL->glColor(getButtonColor(downActivated));
+   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
 
    // Left arrow
    points[0] = (center + Point(-2, -1) * radius);
@@ -83,8 +81,8 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
    points[5] = (center + Point(-4,  1) * radius);
    points[6] = (center + Point(-2,  1) * radius);
 
-   glColor(getButtonColor(leftActivated));
-   renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
+   mGL->glColor(getButtonColor(leftActivated));
+   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
 
    // Right arrow
    points[0] = (center + Point(2, -1) * radius);
@@ -95,23 +93,23 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
    points[5] = (center + Point(4,  1) * radius);
    points[6] = (center + Point(2,  1) * radius);
 
-   glColor(getButtonColor(rightActivated));
-   renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
+   mGL->glColor(getButtonColor(rightActivated));
+   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
 
    // Label the graphic
-   glColor(Colors::white);
+   mGL->glColor(Colors::white);
    if(strcmp(msg1, "") == 0)    // That is, != "".  Remember, kids, strcmp returns 0 when strings are identical!
    {
       S32 size = 12;
-      S32 width = getStringWidth(size, msg1);
-      drawString(center.x - width / 2, center.y + 27, size, msg1);
+      S32 width = RenderUtils::getStringWidth(size, msg1);
+      RenderUtils::drawString(center.x - width / 2, center.y + 27, size, msg1);
    }
 
    if(strcmp(msg2, "") == 0)
    {
       S32 size = 10;
-      S32 width = getStringWidth(size, msg2);
-      drawString(center.x - width / 2, center.y + 42, size, msg2);
+      S32 width = RenderUtils::getStringWidth(size, msg2);
+      RenderUtils::drawString(center.x - width / 2, center.y + 42, size, msg2);
    }
 }
 
@@ -168,9 +166,9 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, U32 joysti
 {
    // Set the basic color, could be overridden later
    if(overrideRenderColor)
-      glColor(overrideRenderColor);
+      mGL->glColor(overrideRenderColor);
    else
-      glColor(Colors::white);
+      mGL->glColor(Colors::white);
 
 
    // Render keyboard keys, just in case
@@ -202,27 +200,27 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, U32 joysti
    {
       case Joystick::ButtonShapeRect:
          //shapeRect.render(center);
-         drawRoundedRect(center, rectButtonWidth, rectButtonHeight, 3);
+         RenderUtils::drawRoundedRect(center, rectButtonWidth, rectButtonHeight, 3);
          break;
       case Joystick::ButtonShapeSmallRect:
          //shapeSmallRect.render(center);
-         drawRoundedRect(center, smallRectButtonWidth, smallRectButtonHeight, 3);
+         RenderUtils::drawRoundedRect(center, smallRectButtonWidth, smallRectButtonHeight, 3);
          break;
       case Joystick::ButtonShapeRoundedRect:
          //shapeRoundedRect.render(center);
-         drawRoundedRect(center, rectButtonWidth, rectButtonHeight, 5);
+         RenderUtils::drawRoundedRect(center, rectButtonWidth, rectButtonHeight, 5);
          break;
       case Joystick::ButtonShapeSmallRoundedRect:
          //shapeSmallRoundedRect.render(center);
-         drawRoundedRect(center, smallRectButtonWidth, smallRectButtonHeight, 5);
+         RenderUtils::drawRoundedRect(center, smallRectButtonWidth, smallRectButtonHeight, 5);
          break;
       case Joystick::ButtonShapeHorizEllipse:
          if(!overrideRenderColor)
-            glColor(buttonColor);
+            mGL->glColor(buttonColor);
          //shapeHorizEllipse.render(center);
-         drawFilledEllipse(center, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, 0);
-         glColor(Colors::white);
-         drawEllipse(center, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, 0);
+         RenderUtils::drawFilledEllipse(center, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, 0);
+         mGL->glColor(Colors::white);
+         RenderUtils::drawEllipse(center, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, 0);
          break;
       case Joystick::ButtonShapeRightTriangle:
          //shapeRightTriangle.render(center);
@@ -232,7 +230,7 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, U32 joysti
       case Joystick::ButtonShapeRound:
       default:
          //shapeCircle.render(center);
-         drawCircle(center, (F32)buttonHalfHeight);
+         RenderUtils::drawCircle(center, (F32)buttonHalfHeight);
          break;
    }
 
@@ -241,9 +239,9 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, U32 joysti
 
    // Change color of label to the preset (default white)
    if(overrideRenderColor)
-      glColor(overrideRenderColor);
+      mGL->glColor(overrideRenderColor);
    else
-      glColor(buttonColor);
+      mGL->glColor(buttonColor);
 
 
    switch(Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].buttonSymbol)
@@ -268,7 +266,7 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, U32 joysti
          break;
       case Joystick::ButtonSymbolNone:
       default:
-         drawString(location.x - getStringWidth(labelSize, label) / 2, location.y + 2, labelSize, label);
+         RenderUtils::drawString(location.x - RenderUtils::getStringWidth(labelSize, label) / 2, location.y + 2, labelSize, label);
          break;
    }
 
@@ -278,7 +276,7 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, U32 joysti
 
 void JoystickRender::drawPlaystationCross(const Point &center)
 {
-   glColor(Colors::paleBlue);
+   mGL->glColor(Colors::paleBlue);
    Point p1(center + Point(-5, -5));
    Point p2(center + Point(5, 5));
    Point p3(center + Point(-5, 5));
@@ -290,20 +288,20 @@ void JoystickRender::drawPlaystationCross(const Point &center)
          p3.x, p3.y,
          p4.x, p4.y
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
 }
 
 
 void JoystickRender::drawPlaystationCircle(const Point &center)
 {
-   glColor(Colors::paleRed);
-   drawCircle(center, 6);
+   mGL->glColor(Colors::paleRed);
+   RenderUtils::drawCircle(center, 6);
 }
 
 
 void JoystickRender::drawPlaystationSquare(const Point &center)
 {
-   glColor(Colors::palePurple);
+   mGL->glColor(Colors::palePurple);
    Point p1(center + Point(-5, -5));
    Point p2(center + Point(-5, 5));
    Point p3(center + Point(5, 5));
@@ -315,7 +313,7 @@ void JoystickRender::drawPlaystationSquare(const Point &center)
          p3.x, p3.y,
          p4.x, p4.y
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
 }
 
 
@@ -330,7 +328,7 @@ void JoystickRender::drawPlaystationTriangle(const Point &center)
          p2.x, p2.y,
          p3.x, p3.y
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
 }
 
 
@@ -345,7 +343,7 @@ void JoystickRender::drawSmallLeftTriangle(const Point & center)
          p2.x, p2.y,
          p3.x, p3.y
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
 }
 
 
@@ -360,7 +358,7 @@ void JoystickRender::drawSmallRightTriangle(const Point & center)
          p2.x, p2.y,
          p3.x, p3.y
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
 }
 
 
@@ -375,7 +373,7 @@ void JoystickRender::drawButtonRightTriangle(const Point &center)
          p2.x, p2.y,
          p3.x, p3.y
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
 }
 
 ////////// End rendering functions

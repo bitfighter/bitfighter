@@ -15,6 +15,7 @@
 
 #ifndef ZAP_DEDICATED
 #  include "quickChatHelper.h"
+#  include "RenderUtils.h"
 #endif
 
 #include "stringUtils.h"   // For itos
@@ -354,11 +355,6 @@ void loadLevelSkipList(CIniFile *ini, GameSettings *settings)
 }
 
 
-extern F32 gLineWidth1;
-extern F32 gDefaultLineWidth;
-extern F32 gLineWidth3;
-extern F32 gLineWidth4;
-
 
 typedef Vector<AbstractSetting<IniKey::SettingsItem> *> SettingsList;
 
@@ -389,10 +385,10 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
 
 #ifndef ZAP_DEDICATED
-   gDefaultLineWidth = ini->GetValueF(section, "LineWidth", 2);
-   gLineWidth1 = gDefaultLineWidth * 0.5f;
-   gLineWidth3 = gDefaultLineWidth * 1.5f;
-   gLineWidth4 = gDefaultLineWidth * 2;
+   RenderUtils::DEFAULT_LINE_WIDTH = ini->GetValueF(section, "LineWidth", 2);
+   RenderUtils::LINE_WIDTH_1 = RenderUtils::DEFAULT_LINE_WIDTH * 0.5f;
+   RenderUtils::LINE_WIDTH_3 = RenderUtils::DEFAULT_LINE_WIDTH * 1.5f;
+   RenderUtils::LINE_WIDTH_4 = RenderUtils::DEFAULT_LINE_WIDTH * 2;
 #endif
 }
 
@@ -1006,8 +1002,8 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 #ifndef ZAP_DEDICATED
    // Don't save new value if out of range, so it will go back to the old value. 
    // Just in case a user screw up with /linewidth command using value too big or too small.
-   if(gDefaultLineWidth >= 0.5 && gDefaultLineWidth <= 5)
-      ini->SetValueF (section, "LineWidth", gDefaultLineWidth);
+   if(RenderUtils::DEFAULT_LINE_WIDTH >= 0.5 && RenderUtils::DEFAULT_LINE_WIDTH <= 5)
+      ini->SetValueF (section, "LineWidth", RenderUtils::DEFAULT_LINE_WIDTH);
 #endif
 }
 

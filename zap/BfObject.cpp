@@ -5,7 +5,6 @@
 
 #include "BfObject.h"
 
-#include "gameObjectRender.h"    // For drawHollowSquare
 #include "gameConnection.h"
 #include "game.h"
 #include "ClientInfo.h"
@@ -15,6 +14,7 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
+#  include "RenderUtils.h"    // For drawHollowSquare
 #endif
 
 #include "ServerGame.h"
@@ -703,7 +703,7 @@ void BfObject::renderAndLabelHighlightedVertices(F32 currentScale)
 
          Point center = getVert(i) + getEditorSelectionOffset(currentScale);
 
-         drawHollowSquare(center, radius / currentScale, color);
+         RenderUtils::drawHollowSquare(center, radius / currentScale, color);
       }
 }
 #endif
@@ -720,7 +720,7 @@ Point BfObject::getDockLabelPos() const
 void BfObject::highlightDockItem() const
 {
 #ifndef ZAP_DEDICATED
-   drawHollowSquare(getPos(), (F32)getDockRadius(), Colors::EDITOR_HIGHLIGHT_COLOR);
+   RenderUtils::drawHollowSquare(getPos(), (F32)getDockRadius(), Colors::EDITOR_HIGHLIGHT_COLOR);
 #endif
 }
 

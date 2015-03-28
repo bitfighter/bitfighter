@@ -8,6 +8,8 @@
 
 #include "tnlTypes.h"
 
+#include "RenderManager.h"
+
 using namespace TNL;
 
 namespace Zap
@@ -18,7 +20,7 @@ class GameConnection;
 namespace UI
 {
 
-class ConnectionStatsRenderer
+class ConnectionStatsRenderer: RenderManager
 {
    bool mVisible;
    bool mGraphVisible;

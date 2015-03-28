@@ -286,7 +286,7 @@ void FlagItem::renderItem(const Point &pos) const
    if(mIsMounted)
       offset.set(15, -15);
 
-   renderFlag(pos + offset, getColor());
+   GameObjectRender::renderFlag(pos + offset, getColor());
 }
 
 
@@ -300,7 +300,7 @@ void FlagItem::renderItemAlpha(const Point &pos, F32 alpha) const
 void FlagItem::renderDock(const Color &color) const
 {
 #ifndef ZAP_DEDICATED
-   renderFlag(getActualPos(), 0.6f, color);
+   GameObjectRender::renderFlag(getActualPos(), 0.6f, color);
 #endif
 }
 

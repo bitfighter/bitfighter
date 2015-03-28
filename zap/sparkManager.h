@@ -6,6 +6,7 @@
 #ifndef _FXMANAGER_H_
 #define _FXMANAGER_H_
 
+#include "RenderManager.h"
 #include "Point.h"
 #include "Color.h"
 #include "SparkTypesEnum.h"
@@ -15,7 +16,7 @@
 namespace Zap { namespace UI
 {
 
-class FxManager
+class FxManager: RenderManager
 {
    struct Spark
    {
@@ -92,7 +93,7 @@ public:
 
 };
 
-class FxTrail
+class FxTrail: RenderManager
 {
 private:
    struct TrailNode

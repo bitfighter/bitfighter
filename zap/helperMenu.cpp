@@ -17,8 +17,8 @@
 
 #include "Colors.h"
 
+#include "gameObjectRender.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 
 namespace Zap
@@ -124,8 +124,6 @@ static S32 getDisplayItemCount(const OverlayMenuItem *items, S32 itemCount)
 }
 
 
-extern void drawHorizLine(S32 x1, S32 x2, S32 y);
-
 // Set a bunch of display geometry parameters -- there are more in the .h file
 static const S32 MENU_LEGEND_FONT_SIZE = 11;    // Smaller font of lengend items on QuickChat menus
 static const S32 TITLE_FONT_SIZE       = 20;    // Size of title of menu
@@ -168,7 +166,7 @@ void HelperMenu::drawItemMenu(S32 widthOfButtons, S32 widthOfTextBlock) const
       return;
 
    glPushMatrix();
-   glTranslate(getInsideEdge(), 0);
+   mGL->glTranslate(getInsideEdge(), 0);
 
    static const Color baseColor(Colors::red);
 
@@ -197,17 +195,17 @@ void HelperMenu::drawItemMenu(S32 widthOfButtons, S32 widthOfTextBlock) const
    renderSlideoutWidgetFrame(0, MENU_TOP, getWidth(), menuBottom - MENU_TOP, frameColor);
 
    // Draw the title (above gray line)
-   glColor(baseColor);
+   mGL->glColor(baseColor);
    
    FontManager::pushFontContext(HelperMenuHeadlineContext);
-   drawCenteredString(grayLineCenter, yPos, TITLE_FONT_SIZE, mTitle);
+   RenderUtils::drawCenteredString(grayLineCenter, yPos, TITLE_FONT_SIZE, mTitle);
    FontManager::popFontContext();
 
    yPos += TitleHeight;
 
    // Gray line
-   glColor(Colors::gray20);
-   drawHorizLine(grayLineLeft, grayLineRight, yPos + 2);
+   mGL->glColor(Colors::gray20);
+   RenderUtils::drawHorizLine(grayLineLeft, grayLineRight, yPos + 2);
 
    yPos += GrayLineBuffer;
 
@@ -319,17 +317,17 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
       JoystickRender::renderControllerButton(LeftMargin + horizOffset + (F32)buttonWidth / 2, 
                                              (F32)yPos - 1, Joystick::SelectedPresetIndex, code, 
                                              buttonOverrideColor); 
-      glColor(itemColor);  
+      mGL->glColor(itemColor);
 
       S32 xPos = LeftMargin + buttonWidth + ButtonLabelGap + horizOffset;
-      S32 textWidth = drawStringAndGetWidth(xPos, yPos, MENU_FONT_SIZE, items[i].name); 
+      S32 textWidth = RenderUtils::drawStringAndGetWidth(xPos, yPos, MENU_FONT_SIZE, items[i].name);
 
       // Render help string, if one is available
       if(strcmp(items[i].help, "") != 0)
       {
-         glColor(items[i].helpColor);    
+         mGL->glColor(items[i].helpColor);
          xPos += textWidth + ButtonLabelGap;
-         drawString(xPos, yPos, MENU_FONT_SIZE, items[i].help);
+         RenderUtils::drawString(xPos, yPos, MENU_FONT_SIZE, items[i].help);
       }
 
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
@@ -341,11 +339,11 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
 
 void HelperMenu::renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &baseColor, InputMode inputMode) const
 {
-   glColor(baseColor);
+   mGL->glColor(baseColor);
 
    // RenderedSize will be -1 if the button is not defined
    if(inputMode == InputModeKeyboard)
-      drawStringfc((F32)xPos, (F32)yPos, (F32)MENU_LEGEND_FONT_SIZE, 
+      RenderUtils::drawStringfc((F32)xPos, (F32)yPos, (F32)MENU_LEGEND_FONT_SIZE,
                   "Press [%s] to cancel", InputCodeManager::inputCodeToString(KEY_ESCAPE));
    else
    {
@@ -369,7 +367,7 @@ void HelperMenu::renderLegend(S32 x, S32 y, const Vector<HelperMenuLegendItem> &
 
    // First, get the total width so we can center poperly
    for(S32 i = 0; i < legend.size(); i++)
-      width += getStringWidth(MENU_LEGEND_FONT_SIZE, legend[i].text.c_str()) + SPACE_BETWEEN_LEGEND_ITEMS;
+      width += RenderUtils::getStringWidth(MENU_LEGEND_FONT_SIZE, legend[i].text.c_str()) + SPACE_BETWEEN_LEGEND_ITEMS;
 
    width -= SPACE_BETWEEN_LEGEND_ITEMS;
 
@@ -377,8 +375,8 @@ void HelperMenu::renderLegend(S32 x, S32 y, const Vector<HelperMenuLegendItem> &
 
    for(S32 i = 0; i < legend.size(); i++)
    {
-      glColor(legend[i].color);
-      x += drawStringAndGetWidth(x, y, MENU_LEGEND_FONT_SIZE, legend[i].text.c_str()) + SPACE_BETWEEN_LEGEND_ITEMS;
+      mGL->glColor(legend[i].color);
+      x += RenderUtils::drawStringAndGetWidth(x, y, MENU_LEGEND_FONT_SIZE, legend[i].text.c_str()) + SPACE_BETWEEN_LEGEND_ITEMS;
    }
 }
 
@@ -390,7 +388,7 @@ S32 HelperMenu::getMaxItemWidth(const OverlayMenuItem *items, S32 count) const
 
    for(S32 i = 0; i < count; i++)
    {
-      S32 width = getStringWidth(HelperMenuContext, MENU_FONT_SIZE, items[i].name) + getStringWidth(MENU_FONT_SIZE, items[i].help);
+      S32 width = RenderUtils::getStringWidth(HelperMenuContext, MENU_FONT_SIZE, items[i].name) + RenderUtils::getStringWidth(MENU_FONT_SIZE, items[i].help);
       if(width > maxWidth)
          maxWidth = width;
    }

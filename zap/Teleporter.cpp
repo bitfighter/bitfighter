@@ -840,7 +840,7 @@ void Teleporter::render() const
       F32 zoomFraction = getGame() ? getGame()->getCommanderZoomFraction() : 1;
 
       U32 renderStyle = mEngineered ? 2 : 0;
-      renderTeleporter(getOrigin(), renderStyle, true, Platform::getRealMilliseconds(), zoomFraction, radiusFraction, 
+      GameObjectRender::renderTeleporter(getOrigin(), renderStyle, true, Platform::getRealMilliseconds(), zoomFraction, radiusFraction,
                        (F32)TELEPORTER_RADIUS, 1.0, mDestManager.getDestList(), trackerCount);
    }
 
@@ -857,7 +857,7 @@ void Teleporter::render() const
 
       if(sizeFraction > 0)
          for(S32 i = getDestCount() - 1; i >= 0; i--)
-            renderTeleporterOutline(mDestManager.getDest(i), (F32)TELEPORTER_RADIUS * sizeFraction, Colors::richGreen);
+            GameObjectRender::renderTeleporterOutline(mDestManager.getDest(i), (F32)TELEPORTER_RADIUS * sizeFraction, Colors::richGreen);
    }
 #endif
 }
@@ -906,7 +906,7 @@ void Teleporter::renderEditor(F32 currentScale, bool snappingToWallCornersEnable
 {
 #ifndef ZAP_DEDICATED
    Parent::renderEditor(currentScale, snappingToWallCornersEnabled);
-   renderTeleporterEditorObject(getOrigin(), TELEPORTER_RADIUS, getEditorRenderColor());
+   GameObjectRender::renderTeleporterEditorObject(getOrigin(), TELEPORTER_RADIUS, getEditorRenderColor());
 #endif
 }
 

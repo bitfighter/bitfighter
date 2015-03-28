@@ -57,7 +57,6 @@
 #include "stringUtils.h"
 #include "GeomUtils.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 #include "ScreenShooter.h"
 #include "FontManager.h"
 
@@ -1497,7 +1496,7 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb) co
       glEnable(GL_DEPTH_WRITEMASK);
       glDepthFunc(GL_LESS);
       glPushMatrix();
-      glTranslate(0, 0, -0.95f);
+      mGL->glTranslate(0, 0, -0.95f);
 
       // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
       glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);  
@@ -1510,16 +1509,16 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb) co
          BfObject *editorObj = dynamic_cast<BfObject *>(fillVector[i]);
 
          if(i != 0 && editorObj->getTeam() != prevTeam)
-            glTranslate(0, 0, 0.05f);
+            mGL->glTranslate(0, 0, 0.05f);
          prevTeam = editorObj->getTeam();
 
          Point pos = editorObj->getPos();
          pos *= mCurrentScale;
          pos += mCurrentOffset;
-         renderSpyBugVisibleRange(pos, editorObj->getColor(), mCurrentScale);
+         GameObjectRender::renderSpyBugVisibleRange(pos, editorObj->getColor(), mCurrentScale);
       }
 
-      setDefaultBlendFunction();
+      mGL->setDefaultBlendFunction();
 
       glPopMatrix();
       glDisable(GL_DEPTH_WRITEMASK);
@@ -1538,7 +1537,7 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb) co
          Point pos = editorObj->getPos();
          pos *= mCurrentScale;
          pos += mCurrentOffset;
-         renderTurretFiringRange(pos, editorObj->getColor(), mCurrentScale);
+         GameObjectRender::renderTurretFiringRange(pos, editorObj->getColor(), mCurrentScale);
       }
    }
 }
@@ -1571,7 +1570,7 @@ void EditorUserInterface::renderDock() const
 
    S32 dockHeight = getDockHeight();
 
-   drawFilledFancyBox(canvasWidth - mDockWidth - horizMargin, canvasHeight - vertMargin - dockHeight,
+   RenderUtils::drawFilledFancyBox(canvasWidth - mDockWidth - horizMargin, canvasHeight - vertMargin - dockHeight,
                   canvasWidth - horizMargin,              canvasHeight - vertMargin,
                   8, fillColor, .7f, (mouseOnDock() ? Colors::yellow : Colors::white));
 
@@ -1602,7 +1601,7 @@ void EditorUserInterface::renderInfoPanel() const
    PanelRight  = PanelLeft + 180;      // left + width
    PanelInnerMargin = 4;
 
-   drawFilledFancyBox(PanelLeft, PanelTop, PanelRight, PanelBottom, 6, Colors::richGreen, .7f, Colors::white);
+   RenderUtils::drawFilledFancyBox(PanelLeft, PanelTop, PanelRight, PanelBottom, 6, Colors::richGreen, .7f, Colors::white);
 
 
    // Draw coordinates on panel -- if we're moving an item, show the coords of the snap vertex, otherwise show the coords of the
@@ -1615,7 +1614,7 @@ void EditorUserInterface::renderInfoPanel() const
       pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
 
 
-   glColor(Colors::white);
+   mGL->glColor(Colors::white);
    renderPanelInfoLine(1, "Cursor X,Y: %2.1f,%2.1f", pos.x, pos.y);
 
    // And scale
@@ -1627,7 +1626,7 @@ void EditorUserInterface::renderInfoPanel() const
    bool needToSave = mUndoManager.needToSave();
 
    // Color level name by whether it needs to be saved or not
-   glColor(needToSave ? Colors::red : Colors::green);     
+   mGL->glColor(needToSave ? Colors::red : Colors::green);
 
    // Filename without extension
    string filename = getLevelFileName();
@@ -1646,27 +1645,27 @@ void EditorUserInterface::renderPanelInfoLine(S32 line, const char *format, ...)
    vsnprintf(text, sizeof(text), format, args); 
    va_end(args);
 
-   drawString(xpos, DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - PANEL_TEXT_SIZE - 
+   RenderUtils::drawString(xpos, DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - PANEL_TEXT_SIZE -
                     line * PANEL_SPACING + 6, PANEL_TEXT_SIZE, text);
 }
 
 
 // Helper to render attributes in a colorful and lady-like fashion
-static void renderAttribText(S32 xpos, S32 ypos, S32 textsize, 
+void EditorUserInterface::renderAttribText(S32 xpos, S32 ypos, S32 textsize,
                              const Color &keyColor, const Color &valColor, 
                              const Vector<string> &keys, const Vector<string> &vals)
 {
    TNLAssert(keys.size() == vals.size(), "Expected equal number of keys and values!");
    for(S32 i = 0; i < keys.size(); i++)
    {
-      glColor(keyColor);
-      xpos += drawStringAndGetWidth(xpos, ypos, textsize, keys[i].c_str());
-      xpos += drawStringAndGetWidth(xpos, ypos, textsize, ": ");
+      mGL->glColor(keyColor);
+      xpos += RenderUtils::drawStringAndGetWidth(xpos, ypos, textsize, keys[i].c_str());
+      xpos += RenderUtils::drawStringAndGetWidth(xpos, ypos, textsize, ": ");
 
-      glColor(valColor);
-      xpos += drawStringAndGetWidth(xpos, ypos, textsize, vals[i].c_str());
+      mGL->glColor(valColor);
+      xpos += RenderUtils::drawStringAndGetWidth(xpos, ypos, textsize, vals[i].c_str());
       if(i < keys.size() - 1)
-         xpos += drawStringAndGetWidth(xpos, ypos, textsize, "; ");
+         xpos += RenderUtils::drawStringAndGetWidth(xpos, ypos, textsize, "; ");
    }
 }
 
@@ -1694,13 +1693,13 @@ void EditorUserInterface::renderItemInfoPanel() const
    {
       itemName    = mDockItemHit->getOnScreenName();
 
-      glColor(Colors::green);
-      drawString(xpos, ypos, 12, mDockItemHit->getEditorHelpString());
+      mGL->glColor(Colors::green);
+      RenderUtils::drawString(xpos, ypos, 12, mDockItemHit->getEditorHelpString());
 
       ypos -= S32(upperLineTextSize * 1.3);
 
-      glColor(Colors::white);
-      drawString(xpos, ypos, upperLineTextSize, itemName.c_str());
+      mGL->glColor(Colors::white);
+      RenderUtils::drawString(xpos, ypos, upperLineTextSize, itemName.c_str());
    }
 
    // Handle everything else
@@ -1743,11 +1742,11 @@ void EditorUserInterface::renderItemInfoPanel() const
 
       if(hitCount == 1)
       {
-         glColor(Colors::yellow);
-         S32 w = drawStringAndGetWidth(xpos, ypos, PANEL_TEXT_SIZE, instructs);
+         mGL->glColor(Colors::yellow);
+         S32 w = RenderUtils::drawStringAndGetWidth(xpos, ypos, PANEL_TEXT_SIZE, instructs);
          if(w > 0)
-            w += drawStringAndGetWidth(xpos + w, ypos, PANEL_TEXT_SIZE, "; ");
-         drawString(xpos + w, ypos, PANEL_TEXT_SIZE, "[#] to edit Id");
+            w += RenderUtils::drawStringAndGetWidth(xpos + w, ypos, PANEL_TEXT_SIZE, "; ");
+         RenderUtils::drawString(xpos + w, ypos, PANEL_TEXT_SIZE, "[#] to edit Id");
 
          renderAttribText(xpos, ypos - PANEL_SPACING, PANEL_TEXT_SIZE, Colors::cyan, Colors::white, keys, values);
       }
@@ -1761,15 +1760,15 @@ void EditorUserInterface::renderItemInfoPanel() const
          if(hitCount > 1)
             itemName += " (" + itos(hitCount) + ")";
 
-         glColor(Colors::yellow);
-         drawString(xpos, ypos, upperLineTextSize, itemName.c_str());
+         mGL->glColor(Colors::yellow);
+         RenderUtils::drawString(xpos, ypos, upperLineTextSize, itemName.c_str());
       }
 
       ypos -= S32(upperLineTextSize * 1.3);
       if(mInfoMsg != "")
       {
-         glColor(Colors::white);
-         drawString(xpos, ypos, upperLineTextSize, mInfoMsg.c_str());
+         mGL->glColor(Colors::white);
+         RenderUtils::drawString(xpos, ypos, upperLineTextSize, mInfoMsg.c_str());
       }
    }
 }
@@ -1781,25 +1780,25 @@ void EditorUserInterface::renderReferenceShip() const
    static F32 thrusts[4] =  { 1, 0, 0, 0 };
 
    glPushMatrix();
-      glTranslate(mMousePos);
-      glScale(mCurrentScale);
-      glRotate(90);
-      renderShip(ShipShape::Normal, Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
-      glRotate(-90);
+      mGL->glTranslate(mMousePos);
+      mGL->glScale(mCurrentScale);
+      mGL->glRotate(90);
+      GameObjectRender::renderShip(ShipShape::Normal, Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
+      mGL->glRotate(-90);
 
       // Draw collision circle
       const F32 spaceAngle = 0.0278f * FloatTau;
-      glColor(Colors::green, 0.35f);
-      glLineWidth(gLineWidth1);
-      drawDashedCircle(Point(0,0), (F32)Ship::CollisionRadius, 10, spaceAngle, 0);
-      glLineWidth(gDefaultLineWidth);
+      mGL->glColor(Colors::green, 0.35f);
+      glLineWidth(RenderUtils::LINE_WIDTH_1);
+      RenderUtils::drawDashedCircle(Point(0,0), (F32)Ship::CollisionRadius, 10, spaceAngle, 0);
+      glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
       // And show how far it can see
       const S32 horizDist = Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL;
       const S32 vertDist  = Game::PLAYER_VISUAL_DISTANCE_VERTICAL;
 
-      glColor(Colors::paleBlue, 0.35f);
-      drawFilledRect(-horizDist, -vertDist, horizDist, vertDist);
+      mGL->glColor(Colors::paleBlue, 0.35f);
+      RenderUtils::drawFilledRect(-horizDist, -vertDist, horizDist, vertDist);
 
    glPopMatrix();
 }
@@ -1820,12 +1819,12 @@ void EditorUserInterface::render() const
    if(mPreviewMode)
       renderTurretAndSpyBugRanges(editorDb);    // Render range of all turrets and spybugs in editorDb
    else
-      renderGrid(mCurrentScale, mCurrentOffset, convertLevelToCanvasCoord(Point(0,0)), 
+      GameObjectRender::renderGrid(mCurrentScale, mCurrentOffset, convertLevelToCanvasCoord(Point(0,0)),
                  (F32)mGridSize, mSnapContext == FULL_SNAPPING, showMinorGridLines());
 
    glPushMatrix();
-      glTranslate(getCurrentOffset());
-      glScale(getCurrentScale());
+      mGL->glTranslate(getCurrentOffset());
+      mGL->glScale(getCurrentScale());
 
       // mSnapDelta only gets recalculated during a dragging event -- if an item is no longer being dragged, we
       // don't want to use the now stale value in mSnapDelta, but rather (0,0) to reflect the rahter obvoius fact
@@ -1836,7 +1835,7 @@ void EditorUserInterface::render() const
       // == Render walls and polyWalls ==
       // Shadows only drawn under walls that are being dragged.  No dragging, no shadows.
       if(mDraggingObjects)   
-         renderShadowWalls(mSelectedObjectsForDragging);
+         GameObjectRender::renderShadowWalls(mSelectedObjectsForDragging);
 
       renderWallsAndPolywalls(&mLevelGenDatabase, delta, false, true );
       renderWallsAndPolywalls(editorDb, delta, false, false);
@@ -1881,7 +1880,7 @@ void EditorUserInterface::render() const
             !mSnapObject->isVertexLitUp(mSnapVertexIndex) &&                                          // ...or lit-up vertices...
             !mSnapObject->vertSelected(mSnapVertexIndex))                                             // ...or selected vertices
       {
-         renderVertex(SnappingVertex, mSnapObject->getVert(mSnapVertexIndex), NO_NUMBER, mCurrentScale/*, alpha*/);  
+         GameObjectRender::renderVertex(SnappingVertex, mSnapObject->getVert(mSnapVertexIndex), NO_NUMBER, mCurrentScale/*, alpha*/);
       }
 
       if(mShowAllIds)
@@ -1910,8 +1909,8 @@ void EditorUserInterface::render() const
 
    if(mAutoScrollWithMouse)
    {
-      glColor(Colors::white);
-      drawFourArrows(mScrollWithMouseLocation);
+      mGL->glColor(Colors::white);
+      GameObjectRender::drawFourArrows(mScrollWithMouseLocation);
    }
 
    if(!mNormalizedScreenshotMode)
@@ -1935,21 +1934,21 @@ void EditorUserInterface::renderObjectIds(GridDatabase *database) const
    {
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
       if(obj->getUserAssignedId() > 0)
-         renderNumberInBox(obj->getCentroid(), obj->getUserAssignedId(), mCurrentScale);
+         GameObjectRender::renderNumberInBox(obj->getCentroid(), obj->getUserAssignedId(), mCurrentScale);
    }
 }
 
 
-static void setColor(bool isSelected, bool isLitUp, bool isScriptItem)
+void EditorUserInterface::setColor(bool isSelected, bool isLitUp, bool isScriptItem)
 {
    F32 alpha = isScriptItem ? .6f : 1;     // So script items will appear somewhat translucent
 
    if(isSelected)
-      glColor(Colors::EDITOR_SELECT_COLOR, alpha);       // yellow
+      mGL->glColor(Colors::EDITOR_SELECT_COLOR, alpha);       // yellow
    else if(isLitUp)
-      glColor(Colors::EDITOR_HIGHLIGHT_COLOR, alpha);    // white
+      mGL->glColor(Colors::EDITOR_HIGHLIGHT_COLOR, alpha);    // white
    else  // Normal
-      glColor(Colors::EDITOR_PLAIN_COLOR, alpha);
+      mGL->glColor(Colors::EDITOR_PLAIN_COLOR, alpha);
 }
 
 
@@ -2000,7 +1999,7 @@ void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, 
    const Color &outlineColor = mNormalizedScreenshotMode ? Colors::DefaultWallOutlineColor : 
                                                            mGameSettings->getWallOutlineColor();
 
-   renderWalls(mLevel->findObjects_fast(WallItemTypeNumber),
+   GameObjectRender::renderWalls(mLevel->findObjects_fast(WallItemTypeNumber),
                mLevel->findObjects_fast(PolyWallTypeNumber),
                mWallEdgePoints, 
                mSelectedWallEdgePointsWholeWalls,
@@ -2026,16 +2025,16 @@ void EditorUserInterface::renderObjectsUnderConstruction() const
 {
    // Add a vert (and deleted it later) to help show what this item would look like if the user placed the vert in the current location
    mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
-   glLineWidth(gLineWidth3);
+   glLineWidth(RenderUtils::LINE_WIDTH_3);
 
    if(mCreatingPoly) // Wall
-      glColor(Colors::EDITOR_SELECT_COLOR);
+      mGL->glColor(Colors::EDITOR_SELECT_COLOR);
    else              // LineItem --> Caution! we're rendering an object that doesn't exist yet; its game is NULL
-      glColor(mLevel->getTeamColor(mCurrentTeam));
+      mGL->glColor(mLevel->getTeamColor(mCurrentTeam));
 
-   renderLine(mNewItem->getOutline());
+   RenderUtils::drawLine(mNewItem->getOutline());
 
-   glLineWidth(gDefaultLineWidth);
+   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
    for(S32 j = mNewItem->getVertCount() - 1; j >= 0; j--)      // Go in reverse order so that placed vertices are drawn atop unplaced ones
    {
@@ -2043,9 +2042,9 @@ void EditorUserInterface::renderObjectsUnderConstruction() const
             
       // Draw vertices
       if(j == mNewItem->getVertCount() - 1)                    // This is our most current vertex
-         renderVertex(HighlightedVertex, v, NO_NUMBER, mCurrentScale);
+         GameObjectRender::renderVertex(HighlightedVertex, v, NO_NUMBER, mCurrentScale);
       else
-         renderVertex(SelectedItemVertex, v, j, mCurrentScale);
+         GameObjectRender::renderVertex(SelectedItemVertex, v, j, mCurrentScale);
    }
    mNewItem->deleteVert(mNewItem->getVertCount() - 1); 
 }
@@ -2057,21 +2056,17 @@ void EditorUserInterface::renderDragSelectBox() const
    if(!mDragSelecting)   
       return;
    
-   glColor(Colors::white);
+   mGL->glColor(Colors::white);
    Point downPos = convertLevelToCanvasCoord(mMouseDownPos);
-   drawHollowRect(downPos, mMousePos);
+   RenderUtils::drawHollowRect(downPos, mMousePos);
 }
 
 
 static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
 
-// Forward declarations to allow us to put functions in human readable order
-static void renderDockItemLabel(const Point &pos, const char *label);
-static void renderDockItem(BfObject *object, F32 currentScale, S32 snapVertexIndex);
-
-static void renderDockItem(const BfObject *object, const Color &color, F32 currentScale, S32 snapVertexIndex)
+void EditorUserInterface::renderDockItem(const BfObject *object, const Color &color, F32 currentScale, S32 snapVertexIndex)
 {
-   glColor(Colors::EDITOR_PLAIN_COLOR);
+   mGL->glColor(Colors::EDITOR_PLAIN_COLOR);
 
    object->renderDock(color);
    renderDockItemLabel(object->getDockLabelPos(), object->getOnDockName());
@@ -2092,12 +2087,12 @@ void EditorUserInterface::renderDockItems() const
 }
 
 
-static void renderDockItemLabel(const Point &pos, const char *label)
+void EditorUserInterface::renderDockItemLabel(const Point &pos, const char *label)
 {
    F32 xpos = pos.x;
    F32 ypos = pos.y - DOCK_LABEL_SIZE / 2;
-   glColor(Colors::white);
-   drawStringc(xpos, ypos + (F32)DOCK_LABEL_SIZE, (F32)DOCK_LABEL_SIZE, label);
+   mGL->glColor(Colors::white);
+   RenderUtils::drawStringc(xpos, ypos + (F32)DOCK_LABEL_SIZE, (F32)DOCK_LABEL_SIZE, label);
 }
 
 
@@ -2112,16 +2107,16 @@ void EditorUserInterface::renderDockPlugins() const
          S32 x = DisplayManager::getScreenInfo()->getGameCanvasWidth() - mDockWidth - horizMargin;
          F32 y = 1.5f * vertMargin + PLUGIN_LINE_SPACING * (i - mDockPluginScrollOffset);
 
-         drawHollowRect(x + horizMargin / 3, y, x + mDockWidth - horizMargin / 3, y + PLUGIN_LINE_SPACING, Colors::white);
+         RenderUtils::drawHollowRect(x + horizMargin / 3, y, x + mDockWidth - horizMargin / 3, y + PLUGIN_LINE_SPACING, Colors::white);
       }
 
-      glColor(Colors::white);
+      mGL->glColor(Colors::white);
 
       S32 y = (S32) (1.5 * vertMargin + PLUGIN_LINE_SPACING * (i - mDockPluginScrollOffset + 0.33));
-      drawString((S32) (DisplayManager::getScreenInfo()->getGameCanvasWidth() - mDockWidth - horizMargin / 2), y, DOCK_LABEL_SIZE, mPluginInfos[i].prettyName.c_str());
+      RenderUtils::drawString((S32) (DisplayManager::getScreenInfo()->getGameCanvasWidth() - mDockWidth - horizMargin / 2), y, DOCK_LABEL_SIZE, mPluginInfos[i].prettyName.c_str());
 
-      S32 bindingWidth = getStringWidth(DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
-      drawString((S32) (DisplayManager::getScreenInfo()->getGameCanvasWidth() - bindingWidth - horizMargin * 1.5), y, DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
+      S32 bindingWidth = RenderUtils::getStringWidth(DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
+      RenderUtils::drawString((S32) (DisplayManager::getScreenInfo()->getGameCanvasWidth() - bindingWidth - horizMargin * 1.5), y, DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
    }
 }
 
@@ -2135,22 +2130,22 @@ void EditorUserInterface::renderSaveMessage() const
          alpha = (F32) mSaveMsgTimer.getCurrent() / 1000;
 
       const S32 textsize = 25;
-      const S32 len = getStringWidth(textsize, mSaveMsg.c_str()) + 20;
+      const S32 len = RenderUtils::getStringWidth(textsize, mSaveMsg.c_str()) + 20;
       const S32 inset = min((DisplayManager::getScreenInfo()->getGameCanvasWidth() - len)  / 2, 200);
       const S32 boxTop = 515;
       const S32 boxBottom = 555;
       const S32 cornerInset = 10;
 
       // Fill
-      glColor(Colors::black, alpha * 0.80f);
-      drawFancyBox(inset, boxTop, DisplayManager::getScreenInfo()->getGameCanvasWidth() - inset, boxBottom, cornerInset, GL_TRIANGLE_FAN);
+      mGL->glColor(Colors::black, alpha * 0.80f);
+      RenderUtils::drawFancyBox(inset, boxTop, DisplayManager::getScreenInfo()->getGameCanvasWidth() - inset, boxBottom, cornerInset, GL_TRIANGLE_FAN);
 
       // Border
-      glColor(Colors::blue, alpha);
-      drawFancyBox(inset, boxTop, DisplayManager::getScreenInfo()->getGameCanvasWidth() - inset, boxBottom, cornerInset, GL_LINE_LOOP);
+      mGL->glColor(Colors::blue, alpha);
+      RenderUtils::drawFancyBox(inset, boxTop, DisplayManager::getScreenInfo()->getGameCanvasWidth() - inset, boxBottom, cornerInset, GL_LINE_LOOP);
 
-      glColor(mSaveMsgColor, alpha);
-      drawCenteredString(520, textsize, mSaveMsg.c_str());
+      mGL->glColor(mSaveMsgColor, alpha);
+      RenderUtils::drawCenteredString(520, textsize, mSaveMsg.c_str());
    }
 }
 
@@ -2167,28 +2162,28 @@ void EditorUserInterface::renderWarnings() const
       if (mWarnMsgTimer.getCurrent() < WARN_MESSAGE_FADE_TIME)
          alpha = (F32) mWarnMsgTimer.getCurrent() / WARN_MESSAGE_FADE_TIME;
 
-      glColor(mWarnMsgColor, alpha);
-      drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() / 4, 25, mWarnMsg1.c_str());
-      drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() / 4 + 30, 25, mWarnMsg2.c_str());
+      mGL->glColor(mWarnMsgColor, alpha);
+      RenderUtils::drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() / 4, 25, mWarnMsg1.c_str());
+      RenderUtils::drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() / 4 + 30, 25, mWarnMsg2.c_str());
    }
 
    if(mLevelErrorMsgs.size() || mLevelWarnings.size())
    {
       S32 ypos = vertMargin + 20;
 
-      glColor(Colors::ErrorMessageTextColor);
+      mGL->glColor(Colors::ErrorMessageTextColor);
 
       for(S32 i = 0; i < mLevelErrorMsgs.size(); i++)
       {
-         drawCenteredString(ypos, 20, mLevelErrorMsgs[i].c_str());
+         RenderUtils::drawCenteredString(ypos, 20, mLevelErrorMsgs[i].c_str());
          ypos += 25;
       }
 
-      glColor(Colors::yellow);
+      mGL->glColor(Colors::yellow);
 
       for(S32 i = 0; i < mLevelWarnings.size(); i++)
       {
-         drawCenteredString(ypos, 20, mLevelWarnings[i].c_str());
+         RenderUtils::drawCenteredString(ypos, 20, mLevelWarnings[i].c_str());
          ypos += 25;
       }
    }
@@ -5253,8 +5248,8 @@ U32 EditorUserInterface::findPluginDockWidth()
    U32 maxBindingWidth = 0;
    for(S32 i = 0; i < mPluginInfos.size(); i++)
    {
-      U32 nameWidth = getStringWidth(DOCK_LABEL_SIZE, mPluginInfos[i].prettyName.c_str());
-      U32 bindingWidth = getStringWidth(DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
+      U32 nameWidth = RenderUtils::getStringWidth(DOCK_LABEL_SIZE, mPluginInfos[i].prettyName.c_str());
+      U32 bindingWidth = RenderUtils::getStringWidth(DOCK_LABEL_SIZE, mPluginInfos[i].binding.c_str());
       maxNameWidth = max(maxNameWidth, nameWidth);
       maxBindingWidth = max(maxBindingWidth, bindingWidth);
    }

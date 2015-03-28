@@ -43,7 +43,7 @@ private:
    void calculateRenderSizes();
 
 public:
-   explicit TeamShuffleHelper();             // Constructor
+   TeamShuffleHelper();             // Constructor
    virtual ~TeamShuffleHelper();
 
    HelperMenuType getType();

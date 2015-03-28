@@ -10,6 +10,7 @@
 
 #include "FontContextEnum.h"
 #include "freeglut_stroke.h"     // Our stroke font handler -- include here to resolve namespace grief
+#include "RenderManager.h"
 
 extern "C" { 
 #  include "../fontstash/fontstash.h" 
@@ -27,8 +28,9 @@ namespace Zap
 
 class BfFont;
 class GameSettings;
+class GL;
 
-class FontManager 
+class FontManager: RenderManager
 {
 
 private:
@@ -41,7 +43,8 @@ private:
    static F32 getTtfFontStringLength(BfFont *font, const char* string);
 
 public:
-   FontManager();    // Constructor
+   FontManager();          // Constructor
+   virtual ~FontManager(); // Destructor
 
    static void initialize(GameSettings *settings, bool useExternalFonts = true);
    static void reinitialize(GameSettings *settings);

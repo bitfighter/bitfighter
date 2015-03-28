@@ -195,9 +195,9 @@ void WallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled,
 {
 #ifndef ZAP_DEDICATED
    if(isSelected() || isLitUp())
-      renderWallSpine(this, getOutline(), currentScale, snappingToWallCornersEnabled, renderVertices);
+      GameObjectRender::renderWallSpine(this, getOutline(), currentScale, snappingToWallCornersEnabled, renderVertices);
    else
-      renderWallSpine(this, getOutline(), getEditorRenderColor(), currentScale, snappingToWallCornersEnabled, renderVertices);
+      GameObjectRender::renderWallSpine(this, getOutline(), getEditorRenderColor(), currentScale, snappingToWallCornersEnabled, renderVertices);
 #endif
 }
 
@@ -513,9 +513,9 @@ void WallSegment::renderFill(const Point &offset, const Color &color, bool isSel
 {
 #ifndef ZAP_DEDICATED
    if(isSelected)
-      renderWallFill(&mTriangulatedFillPoints, color, offset, true);    // true ==> all segment fills are triangulated
+      GameObjectRender::renderWallFill(&mTriangulatedFillPoints, color, offset, true);    // true ==> all segment fills are triangulated
    else
-      renderWallFill(&mTriangulatedFillPoints, color, true);
+      GameObjectRender::renderWallFill(&mTriangulatedFillPoints, color, true);
 #endif
 }
 

@@ -240,7 +240,7 @@ S32 Spawn::getDefaultRespawnTime()
 void Spawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
-   renderSpawn(getPos(), 1/currentScale, getColor());
+   GameObjectRender::renderSpawn(getPos(), 1/currentScale, getColor());
 #endif
 }
 
@@ -552,7 +552,7 @@ void AsteroidSpawn::renderLayer(S32 layerIndex)
 #ifndef ZAP_DEDICATED
    // Draw on top of most things, including walls (like RepairItem)
    if(layerIndex == 1)
-      renderAsteroidSpawn(getPos(), mTimer.getCurrent());
+      GameObjectRender::renderAsteroidSpawn(getPos(), mTimer.getCurrent());
 #endif
 }
 
@@ -560,7 +560,7 @@ void AsteroidSpawn::renderLayer(S32 layerIndex)
 void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
-   renderAsteroidSpawnEditor(getPos(), 1/currentScale);
+   GameObjectRender::renderAsteroidSpawnEditor(getPos(), 1/currentScale);
 #endif
 }
 
@@ -568,7 +568,7 @@ void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEna
 void AsteroidSpawn::renderDock(const Color &color) const
 {
 #ifndef ZAP_DEDICATED
-   renderAsteroidSpawnEditor(getPos());
+   GameObjectRender::renderAsteroidSpawnEditor(getPos());
 #endif
 }
 
@@ -719,7 +719,7 @@ void FlagSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
-   renderFlagSpawn(pos, currentScale, getColor());
+   GameObjectRender::renderFlagSpawn(pos, currentScale, getColor());
 #endif
 }
 

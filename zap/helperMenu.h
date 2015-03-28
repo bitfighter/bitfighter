@@ -8,6 +8,7 @@
 
 #include "SlideOutWidget.h"    // Parent class
 #include "AToBScroller.h"      // Parent class, for internal transitions
+#include "RenderManager.h"
 
 #include "InputModeEnum.h"
 #include "InputCodeEnum.h"

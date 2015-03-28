@@ -7,6 +7,7 @@
 #define _GAUGE_RENDERER_
 
 #include "tnlTypes.h"
+#include "RenderManager.h"
 #include "UI.h"
 
 using namespace TNL;
@@ -14,7 +15,7 @@ using namespace TNL;
 namespace Zap {   namespace UI
 {
 
-class GaugeRenderer
+class GaugeRenderer: RenderManager
 {
 public:
    static const S32 GaugeLeftMargin = UserInterface::horizMargin;

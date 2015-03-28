@@ -13,7 +13,6 @@
 #include "Colors.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 #include <stdio.h>
 
@@ -148,24 +147,24 @@ void MessageUserInterface::render() const
             wInset + mVertOffset,               canvasHeight - hInset
       };
 
-      glColor(Colors::red30, fadeFactor * 0.95f);  // Draw a box
-      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
+      mGL->glColor(Colors::red30, fadeFactor * 0.95f);  // Draw a box
+      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
 
-      glColor(Colors::white, fadeFactor);          // Add a border
-      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+      mGL->glColor(Colors::white, fadeFactor);          // Add a border
+      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
    }
 
    // Draw title, message, and footer
-   glColor(mMessageColor, fadeFactor);
+   mGL->glColor(mMessageColor, fadeFactor);
 
    if(strcmp(mTitle, ""))  // If they are different
-      drawCenteredString(vertMargin + hInset + mVertOffset, 30, mTitle);
+      RenderUtils::drawCenteredString(vertMargin + hInset + mVertOffset, 30, mTitle);
 
    for(S32 i = 0; i < mNumLines; i++)
-      drawCenteredString(vertMargin + 40 + hInset + i * 24 + mVertOffset, 18, mMessage[i]);
+      RenderUtils::drawCenteredString(vertMargin + 40 + hInset + i * 24 + mVertOffset, 18, mMessage[i]);
 
    if (!mFadeTime)
-      drawCenteredString(canvasHeight - vertMargin - hInset - 18 + mVertOffset, 18, "Hit any key to continue");
+      RenderUtils::drawCenteredString(canvasHeight - vertMargin - hInset - 18 + mVertOffset, 18, "Hit any key to continue");
 }
 
 };

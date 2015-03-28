@@ -48,7 +48,7 @@ struct ColorString
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class ChatMessageDisplayer
+class ChatMessageDisplayer: RenderManager
 {
 private:
    U32 mFirst, mLast;
@@ -90,7 +90,7 @@ public:
 ////////////////////////////////////////
 
 // For displaying levels as they're loaded in host mode
-class LevelListDisplayer
+class LevelListDisplayer: RenderManager
 {
 private:
    Vector<string> mLevelLoadDisplayNames;    
@@ -195,6 +195,7 @@ private:
                              S32 x, S32 y, U32 lineHeight, S32 rightEdge, S32 *colWidths) const;
    void renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y, const S32 *colIndexWidths, bool isTeamGame) const;
    void renderTeamName(S32 index, bool isWinningTeam, S32 left, S32 right, S32 top) const;
+   static void renderPlayerSymbolAndSetColor(ClientInfo *player, S32 x, S32 y, S32 size);
 
    Point getShipRenderPos() const;
 

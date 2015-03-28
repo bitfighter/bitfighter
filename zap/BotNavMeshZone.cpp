@@ -74,10 +74,10 @@ void BotNavMeshZone::renderLayer(S32 layerIndex)
 {
 #ifndef ZAP_DEDICATED
    if(layerIndex == 0)
-      renderNavMeshZone(getOutline(), getFill(), getCentroid(), mZoneId);
+      GameObjectRender::renderNavMeshZone(getOutline(), getFill(), getCentroid(), mZoneId);
 
    else if(layerIndex == 1)
-      renderNavMeshBorders(mNeighbors);
+      GameObjectRender::renderNavMeshBorders(mNeighbors);
 #endif
 }
 

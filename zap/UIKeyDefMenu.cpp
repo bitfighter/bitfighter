@@ -17,7 +17,6 @@
 #include "Intervals.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 #include <string>
 #include <math.h>
@@ -213,15 +212,15 @@ void KeyDefMenuUserInterface::render() const
    if(getGame()->getConnectionToServer())
       getUIManager()->renderAndDimGameUserInterface();
 
-   glColor(Colors::white);
-   drawCenteredString(vertMargin, 30, mMenuTitle);
-   drawCenteredString(vertMargin + 35, 18, mMenuSubTitle);
+   mGL->glColor(Colors::white);
+   RenderUtils::drawCenteredString(vertMargin, 30, mMenuTitle);
+   RenderUtils::drawCenteredString(vertMargin + 35, 18, mMenuSubTitle);
 
-   glColor(Colors::menuHelpColor);
-   drawCenteredString(vertMargin + 63, 14, "You can define different keys for keyboard or joystick mode.  Switch in Options menu.");
+   mGL->glColor(Colors::menuHelpColor);
+   RenderUtils::drawCenteredString(vertMargin + 63, 14, "You can define different keys for keyboard or joystick mode.  Switch in Options menu.");
 
-   glColor(Colors::white);
-   drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - 20, 18, mMenuFooter);
+   mGL->glColor(Colors::white);
+   RenderUtils::drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - 20, 18, mMenuFooter);
 
    TNLAssert(selectedIndex < menuItems.size(), "Index out of bounds!");
    //if(selectedIndex >= menuItems.size())
@@ -237,20 +236,20 @@ void KeyDefMenuUserInterface::render() const
 		S32 xPos = (menuItems[i].column - 1) * Column_Width + horizMargin * 2;
 
       if(selectedIndex == i)       // Highlight selected item
-         drawFilledRect(xPos - horizMargin, y, 
+         RenderUtils::drawFilledRect(xPos - horizMargin, y,
                         xPos + Column_Width - horizMargin, y + height + 1, 
                         Colors::blue40, Colors::blue);
 
       // Draw item text
-      glColor(Colors::cyan);
-      drawString(xPos, y + offset, 15, menuItems[i].text);
+      mGL->glColor(Colors::cyan);
+      RenderUtils::drawString(xPos, y + offset, 15, menuItems[i].text);
 
 		xPos += Column_Width * 14 / 20;
 
       if(mChangingItem == i)
       {
-         glColor(Colors::red);
-         drawString(xPos, y + offset + 1, 13, "Press Key or Button");
+         mGL->glColor(Colors::red);
+         RenderUtils::drawString(xPos, y + offset + 1, 13, "Press Key or Button");
       }
       else
       {
@@ -265,17 +264,17 @@ void KeyDefMenuUserInterface::render() const
    S32 yPos = yStart + maxMenuItemsInAnyCol * height + 10;
 
    // Draw the help string
-   glColor(Colors::green);
-   drawCenteredString(yPos, 15, menuItems[selectedIndex].helpString.c_str());
+   mGL->glColor(Colors::green);
+   RenderUtils::drawCenteredString(yPos, 15, menuItems[selectedIndex].helpString.c_str());
 
    yPos += 20;
 
    // Draw some suggestions
-   glColor(Colors::yellow);
+   mGL->glColor(Colors::yellow);
    if(getGame()->getInputMode() == InputModeJoystick)
-      drawCenteredString(yPos, 15, "HINT: You will be using the left joystick to steer, the right to fire");
+      RenderUtils::drawCenteredString(yPos, 15, "HINT: You will be using the left joystick to steer, the right to fire");
    else
-      drawCenteredString(yPos, 15, "HINT: You will be using the mouse to aim, so make good use of your mouse buttons");
+      RenderUtils::drawCenteredString(yPos, 15, "HINT: You will be using the mouse to aim, so make good use of your mouse buttons");
 
    if(errorMsgTimer.getCurrent())
    {
@@ -284,8 +283,8 @@ void KeyDefMenuUserInterface::render() const
       if(errorMsgTimer.getCurrent() < 1000)
          alpha = (F32) errorMsgTimer.getCurrent() / 1000;
 
-      glColor(Colors::red, alpha);
-      drawCenteredString(yPos, 15, errorMsg.c_str());
+      mGL->glColor(Colors::red, alpha);
+      RenderUtils::drawCenteredString(yPos, 15, errorMsg.c_str());
    }
 }
 

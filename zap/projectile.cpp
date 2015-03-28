@@ -12,10 +12,11 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
+#  include "gameObjectRender.h"
+#  include "RenderUtils.h"
 #endif
 
 #include "Colors.h"
-#include "gameObjectRender.h"
 
 #include "stringUtils.h"
 #include "MathUtils.h"
@@ -434,7 +435,7 @@ bool Projectile::canAddToEditor() { return false; }      // No projectiles in th
 void Projectile::renderItem(const Point &pos) const
 {
    if(shouldRender())
-      renderProjectile(pos, mType, getGame()->getCurrentTime() - getCreationTime());
+      GameObjectRender::renderProjectile(pos, mType, getGame()->getCurrentTime() - getCreationTime());
 }
 
 
@@ -753,7 +754,7 @@ void Burst::renderItem(const Point &pos) const
 
    F32 initTTL = (F32) WeaponInfo::getWeaponInfo(WeaponBurst).projLiveTime;
 
-   renderGrenade( pos, (initTTL - (F32) (getGame()->getCurrentTime() - getCreationTime())) / initTTL);
+   GameObjectRender::renderGrenade( pos, (initTTL - (F32) (getGame()->getCurrentTime() - getCreationTime())) / initTTL);
 }
 
 
@@ -1044,14 +1045,14 @@ void Mine::renderItem(const Point &pos) const
       armed = mArmed;
    }
 
-   renderMine(pos, armed, visible);
+   GameObjectRender::renderMine(pos, armed, visible);
 #endif
 }
 
 
 void Mine::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
-   renderMine(getActualPos(), true, true);
+   GameObjectRender::renderMine(getActualPos(), true, true);
 }
 
 
@@ -1060,8 +1061,8 @@ void Mine::renderDock(const Color &color) const
 #ifndef ZAP_DEDICATED
    Point pos = getActualPos();
 
-   drawCircle(pos, 9, &Colors::gray70);
-   drawLetter('M', pos, Colors::gray70, 1);
+   RenderUtils::drawCircle(pos, 9, &Colors::gray70);
+   RenderUtils::drawLetter('M', pos, Colors::gray70, 1);
 #endif
 }
 
@@ -1271,14 +1272,14 @@ void SpyBug::renderItem(const Point &pos) const
       visible = true;      // We get here in editor when in preview mode
 
 
-   renderSpyBug(pos, getColor(), visible, true);
+   GameObjectRender::renderSpyBug(pos, getColor(), visible, true);
 #endif
 }
 
 
 void SpyBug::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
-   renderSpyBug(getPos(), getColor(), true, true);
+   GameObjectRender::renderSpyBug(getPos(), getColor(), true, true);
 }
 
 
@@ -1289,10 +1290,10 @@ void SpyBug::renderDock(const Color &color) const
 
    Point pos = getRenderPos();
 
-   drawFilledCircle(pos, radius, color);
+   RenderUtils::drawFilledCircle(pos, radius, color);
 
-   drawCircle(pos, radius, &Colors::gray70);
-   drawLetter('S', pos, Color(getTeam() < 0 ? .5 : .7), 1);    // Use darker gray for neutral spybugs so S will show up clearer
+   RenderUtils::drawCircle(pos, radius, &Colors::gray70);
+   RenderUtils::drawLetter('S', pos, Color(getTeam() < 0 ? .5 : .7), 1);    // Use darker gray for neutral spybugs so S will show up clearer
 #endif
 }
 
@@ -1826,7 +1827,7 @@ void Seeker::renderItem(const Point &pos) const
       return;
 
    S32 startLiveTime = WeaponInfo::getWeaponInfo(mWeaponType).projLiveTime;
-   renderSeeker(pos, getActualAngle(), getActualVel().len(), startLiveTime - (getGame()->getCurrentTime() - getCreationTime()));
+   GameObjectRender::renderSeeker(pos, getActualAngle(), getActualVel().len(), startLiveTime - (getGame()->getCurrentTime() - getCreationTime()));
 #endif
 }
 

@@ -12,7 +12,6 @@
 #include "SymbolShape.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 
 #include <cmath>
@@ -122,7 +121,7 @@ void TeamShuffleHelper::calculateRenderSizes()
    for(S32 i = 0; i < mTeams.size(); i++)
       for(S32 j = 0; j < mTeams[i].size(); j++)
       {
-         S32 width = getStringWidth(TEXT_SIZE, getGame()->Game::getClientInfo(j)->getName().getString());
+         S32 width = RenderUtils::getStringWidth(TEXT_SIZE, getGame()->Game::getClientInfo(j)->getName().getString());
 
          if(width > columnWidth)
          {
@@ -143,10 +142,6 @@ void TeamShuffleHelper::calculateRenderSizes()
 }
 
 
-extern void drawHorizLine(S32 x1, S32 x2, S32 y);
-extern void drawFilledRoundedRect(const Point &pos, S32 width, S32 height, const Color &fillColor, 
-                                  const Color &outlineColor, S32 radius, F32 alpha = 1.0);
-
 void TeamShuffleHelper::render() const
 {
    FontManager::pushFontContext(TeamShuffleContext);
@@ -165,22 +160,22 @@ void TeamShuffleHelper::render() const
          Color c = getGame()->getTeamColor(teamIndex);      // Creates a copy of color
          c *= .2f;
 
-         drawFilledRoundedRect(Point(x + columnWidth / 2, y + rowHeight / 2), 
+         RenderUtils::drawFilledRoundedRect(Point(x + columnWidth / 2, y + rowHeight / 2),
                                columnWidth, rowHeight, 
                                c, getGame()->getTeamColor(teamIndex), 8);
 
-         glColor(getGame()->getTeamColor(teamIndex));
-         drawString(x + hpad, y + vpad, TEXT_SIZE, getGame()->getTeamName(teamIndex).getString());
+         mGL->glColor(getGame()->getTeamColor(teamIndex));
+         RenderUtils::drawString(x + hpad, y + vpad, TEXT_SIZE, getGame()->getTeamName(teamIndex).getString());
 
-         drawHorizLine(x + hpad, x + columnWidth - hpad, y + vpad + TEXT_SIZE + 3);
+         RenderUtils::drawHorizLine(x + hpad, x + columnWidth - hpad, y + vpad + TEXT_SIZE + 3);
 
-         glColor(Colors::white);
+         mGL->glColor(Colors::white);
          for(S32 k = 0; k < mTeams[teamIndex].size(); k++)
-            drawString(x + hpad, y + S32(vpad + (k + 1) * TEXT_SIZE_FACTOR * TEXT_SIZE + 3),
+            RenderUtils::drawString(x + hpad, y + S32(vpad + (k + 1) * TEXT_SIZE_FACTOR * TEXT_SIZE + 3),
                   TEXT_SIZE, mTeams[teamIndex][k]->getName().getString());
       }
 
-   glColor(Colors::green);
+   mGL->glColor(Colors::green);
 
    static const UI::SymbolString Instructions(
          "[[Enter]] to accept | [[Space]] to reshuffle | [[Esc]] to cancel", 

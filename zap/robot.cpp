@@ -515,7 +515,7 @@ void Robot::renderLayer(S32 layerIndex)
       Parent::renderLayer(layerIndex);
 
    else if(layerIndex == 1 && flightPlan.size() != 0)    // WARNING!!  Client hosting is rendering server objects
-      renderFlightPlan(getActualPos(), flightPlan.last(), flightPlan);
+      GameObjectRender::renderFlightPlan(getActualPos(), flightPlan.last(), flightPlan);
 #endif
 }
 

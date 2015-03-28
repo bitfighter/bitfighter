@@ -806,7 +806,7 @@ void GameType::renderObjectiveArrow(const BfObject *target, const Color &color,
    // to run, so even when we have 100 objective arrows, that's not very much time!  Usually we have just a handful.
    F32 highlightAlpha = getGame()->getObjectiveArrowHighlightAlpha();
 
-   drawObjectiveArrow(point, mGame->getCommanderZoomFraction(), color, 
+   GameObjectRender::drawObjectiveArrow(point, mGame->getCommanderZoomFraction(), color,
                       canvasWidth, canvasHeight, alphaMod, highlightAlpha);
 }
 
@@ -820,7 +820,7 @@ void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color &outl
       return;
 
    F32 highlightAlpha = getGame()->getObjectiveArrowHighlightAlpha();
-   drawObjectiveArrow(nearestPoint, mGame->getCommanderZoomFraction(), outlineColor, 
+   GameObjectRender::drawObjectiveArrow(nearestPoint, mGame->getCommanderZoomFraction(), outlineColor,
                       canvasWidth, canvasHeight, alphaMod, highlightAlpha);
 }
 
@@ -2120,7 +2120,7 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
 // Here we'll render big flags, which will work most of the time.  Core will override, other types will not use.
 void GameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const
 {
-   renderScoreboardOrnamentTeamFlags(xpos, ypos, getGame()->getTeam(teamIndex)->getColor(), teamHasFlag(teamIndex));
+   GameObjectRender::renderScoreboardOrnamentTeamFlags(xpos, ypos, getGame()->getTeam(teamIndex)->getColor(), teamHasFlag(teamIndex));
 }
 
 

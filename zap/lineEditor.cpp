@@ -224,7 +224,7 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize) const
    
    if(mMasked)
    {
-      offset = getStringWidth(fontSize, string(mCursorOffset, MASK_CHAR).c_str());
+      offset = RenderUtils::getStringWidth(fontSize, string(mCursorOffset, MASK_CHAR).c_str());
    }
    else
    {
@@ -240,7 +240,7 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize) const
          offsetCharacters *= chunkSize;
       }
       
-      offset = getStringWidth(fontSize, mLine.substr(offsetCharacters, mCursorOffset - offsetCharacters).c_str());
+      offset = RenderUtils::getStringWidth(fontSize, mLine.substr(offsetCharacters, mCursorOffset - offsetCharacters).c_str());
    }
 
    drawCursor(x, y, fontSize, offset);
@@ -257,9 +257,9 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize, S32 offset) const
    static const S32 width = 2;
 
    // This would be used for overwrite mode, if we supported it
-//   S32 width = MAX(2, getStringWidth(fontSize, mLine.substr(mCursorOffset, 1).c_str()));
+//   S32 width = MAX(2, RenderUtils::getStringWidth(fontSize, mLine.substr(mCursorOffset, 1).c_str()));
 
-   drawFilledRect(x + offset, y, x + offset + width, y + fontSize + 3, Colors::white, 0.3f);
+   RenderUtils::drawFilledRect(x + offset, y, x + offset + width, y + fontSize + 3, Colors::white, 0.3f);
 }
 
 
@@ -314,7 +314,7 @@ bool LineEditor::handleKey(InputCode inputCode)
 
    if(inputCode == KEY_W && InputCodeManager::checkModifier(KEY_CTRL))
    {
-      size_t spacePos = mLine.rfind(" ", mCursorOffset - 2);
+      std::size_t spacePos = mLine.rfind(" ", mCursorOffset - 2);
       if(spacePos == string::npos)
       {
          spacePos = 0;

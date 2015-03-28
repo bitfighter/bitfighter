@@ -181,7 +181,7 @@ void SpeedZone::generatePoints(const Point &start, const Point &end, Vector<Poin
 
 void SpeedZone::render() const
 {
-   renderSpeedZone(mPolyBounds);
+   GameObjectRender::renderSpeedZone(mPolyBounds);
 }
 
 
