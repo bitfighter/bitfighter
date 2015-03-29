@@ -15,6 +15,8 @@
 #include "MathUtils.h"
 #include "FontManager.h"
 
+#include "glinc.h"
+
 #include "tnlRandom.h"
 
 using namespace TNL;
@@ -361,19 +363,14 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction, const Point &c
       {
          glPointSize(RenderUtils::DEFAULT_LINE_WIDTH);
 
-         glEnableClientState(GL_COLOR_ARRAY);
-         glEnableClientState(GL_VERTEX_ARRAY);
-
-         glVertexPointer(2, GL_FLOAT, sizeof(Spark), &mSparks[i][0].pos);     // Where to find the vertices -- see OpenGL docs
-         glColorPointer (4, GL_FLOAT, sizeof(Spark), &mSparks[i][0].color);   // Where to find the colors -- see OpenGL docs
+         // This actually works...
+         const F32 *vertexPointer = &mSparks[i][0].pos.x;
+         const F32 *colorPointer  = &mSparks[i][0].color.r;
 
          if((SparkType) i == SparkTypePoint)
-            glDrawArrays(GL_POINTS, 0, firstFreeIndex[i]);
+            mGL->renderColorVertexArray(vertexPointer, colorPointer, firstFreeIndex[i], GL_POINTS, sizeof(Spark));
          else if((SparkType) i == SparkTypeLine)
-            glDrawArrays(GL_LINES, 0, firstFreeIndex[i]);
-
-         glDisableClientState(GL_COLOR_ARRAY);
-         glDisableClientState(GL_VERTEX_ARRAY);
+            mGL->renderColorVertexArray(vertexPointer, colorPointer, firstFreeIndex[i], GL_LINES, sizeof(Spark));
       }
 
       for(S32 i = 0; i < mDebrisChunks.size(); i++)

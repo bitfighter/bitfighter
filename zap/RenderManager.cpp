@@ -209,25 +209,28 @@ void GLES1::renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType)
 }
 
 
-void GLES1::renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType)
+void GLES1::renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType,
+      S32 start, S32 stride)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
 
-   glVertexPointer(2, GL_FLOAT, 0, verts);
-   glDrawArrays(geomType, 0, vertCount);
+   glVertexPointer(2, GL_FLOAT, stride, verts);
+   glDrawArrays(geomType, start, vertCount);
 
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 
-void GLES1::renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, S32 geomType)
+void GLES1::renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, S32 geomType,
+      S32 start, S32 stride)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
    glEnableClientState(GL_COLOR_ARRAY);
 
-   glVertexPointer(2, GL_FLOAT, 0, vertices);
-   glColorPointer(4, GL_FLOAT, 0, colors);
-   glDrawArrays(geomType, 0, vertCount);
+   // stride is the byte offset between consecutive vertices or colors
+   glVertexPointer(2, GL_FLOAT, stride, vertices);
+   glColorPointer(4, GL_FLOAT, stride, colors);
+   glDrawArrays(geomType, start, vertCount);
 
    glDisableClientState(GL_COLOR_ARRAY);
    glDisableClientState(GL_VERTEX_ARRAY);

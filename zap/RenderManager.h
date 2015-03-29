@@ -64,8 +64,10 @@ public:
    virtual void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType) = 0;  // Same, but with points offset some distance
    virtual void renderVertexArray(const S8 verts[], S32 vertCount, S32 geomType) = 0;
    virtual void renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType) = 0;
-   virtual void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType) = 0;
-   virtual void renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, S32 geomType) = 0;
+   virtual void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType,
+         S32 start = 0, S32 stride = 0) = 0;
+   virtual void renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, S32 geomType,
+         S32 start = 0, S32 stride = 0) = 0;
    virtual void renderLine(const Vector<Point> *points) = 0;
 
    virtual void glScale(const Point &scaleFactor) = 0;
@@ -113,8 +115,10 @@ public:
    void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType);  // Same, but with points offset some distance
    void renderVertexArray(const S8 verts[], S32 vertCount, S32 geomType);
    void renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType);
-   void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType);
-   void renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, S32 geomType);
+   void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType,
+         S32 start = 0, S32 stride = 0);
+   void renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, S32 geomType,
+         S32 start = 0, S32 stride = 0);
    void renderLine(const Vector<Point> *points);
 
    void glScale(const Point &scaleFactor);

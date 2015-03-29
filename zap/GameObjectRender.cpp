@@ -1895,16 +1895,14 @@ void GameObjectRender::renderSpeedZone(const Vector<Point> &points)
 {
    mGL->glColor(Colors::red);
 
+   S32 pointSize = points.size() / 2;
+
    for(S32 j = 0; j < 2; j++)
    {
-      S32 start = j * points.size() / 2;    // GoFast comes in two equal shapes
+      S32 start = j * pointSize;    // GoFast comes in two equal shapes
 
-      glEnableClientState(GL_VERTEX_ARRAY);
-
-      glVertexPointer(2, GL_FLOAT, sizeof(Point), points.address());    
-      glDrawArrays(GL_LINE_LOOP, start, points.size() / 2);
-
-      glDisableClientState(GL_VERTEX_ARRAY);
+      // First pointer of first member works as array start
+      mGL->renderVertexArray(&points[0].x, pointSize, GL_LINE_LOOP, start, sizeof(Point));
    }
 }
 
