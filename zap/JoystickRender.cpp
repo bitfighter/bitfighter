@@ -58,7 +58,7 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
    points[6] = (center + Point( 1, -2) * radius);
 
    mGL->glColor(getButtonColor(upActivated));
-   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
+   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GLOPT::LineLoop);
 
    // Down arrow
    points[0] = (center + Point(-1, 2) * radius);
@@ -70,7 +70,7 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
    points[6] = (center + Point( 1, 2) * radius);
 
    mGL->glColor(getButtonColor(downActivated));
-   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
+   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GLOPT::LineLoop);
 
    // Left arrow
    points[0] = (center + Point(-2, -1) * radius);
@@ -82,7 +82,7 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
    points[6] = (center + Point(-2,  1) * radius);
 
    mGL->glColor(getButtonColor(leftActivated));
-   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
+   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GLOPT::LineLoop);
 
    // Right arrow
    points[0] = (center + Point(2, -1) * radius);
@@ -94,7 +94,7 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
    points[6] = (center + Point(2,  1) * radius);
 
    mGL->glColor(getButtonColor(rightActivated));
-   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
+   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GLOPT::LineLoop);
 
    // Label the graphic
    mGL->glColor(Colors::white);
@@ -288,7 +288,7 @@ void JoystickRender::drawPlaystationCross(const Point &center)
          p3.x, p3.y,
          p4.x, p4.y
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
 }
 
 
@@ -313,7 +313,7 @@ void JoystickRender::drawPlaystationSquare(const Point &center)
          p3.x, p3.y,
          p4.x, p4.y
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop);
 }
 
 
@@ -328,7 +328,7 @@ void JoystickRender::drawPlaystationTriangle(const Point &center)
          p2.x, p2.y,
          p3.x, p3.y
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop);
 }
 
 
@@ -343,7 +343,7 @@ void JoystickRender::drawSmallLeftTriangle(const Point & center)
          p2.x, p2.y,
          p3.x, p3.y
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop);
 }
 
 
@@ -358,7 +358,7 @@ void JoystickRender::drawSmallRightTriangle(const Point & center)
          p2.x, p2.y,
          p3.x, p3.y
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop);
 }
 
 
@@ -373,7 +373,7 @@ void JoystickRender::drawButtonRightTriangle(const Point &center)
          p2.x, p2.y,
          p3.x, p3.y
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop);
 }
 
 ////////// End rendering functions

@@ -84,7 +84,7 @@ void GameObjectRender::renderHealthBar(F32 health, const Point &center, const Po
       vertexArray.push_back(segMid + cross * F32(width) * 0.5);
    }
 
-   mGL->renderPointVector(&vertexArray, GL_LINES);
+   mGL->renderPointVector(&vertexArray, GLOPT::Lines);
 }
 
 
@@ -94,12 +94,12 @@ void GameObjectRender::renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sen
    // Armor
    if(hasArmor)
    {
-      glLineWidth(RenderUtils::LINE_WIDTH_3);
+      mGL->glLineWidth(RenderUtils::LINE_WIDTH_3);
       mGL->glColor(Colors::yellow, alpha);
 
       RenderUtils::drawPolygon(5, 30, FloatHalfPi);
 
-      glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+      mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
    }
 
    // Shields
@@ -136,10 +136,10 @@ void GameObjectRender::renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sen
    // Repair
    if(repairActive)
    {
-      glLineWidth(RenderUtils::LINE_WIDTH_3);
+      mGL->glLineWidth(RenderUtils::LINE_WIDTH_3);
       mGL->glColor(Colors::red, alpha);
       RenderUtils::drawCircle(18);
-      glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+      mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
    }
 }
 
@@ -170,7 +170,7 @@ void GameObjectRender::renderShipFlame(ShipFlame *flames, S32 flameCount, F32 th
                yThrusterX, yThrusterY,
                flameLayer->points[4], flameLayer->points[5]
          };
-         mGL->renderVertexArray(vertices, 3, GL_LINE_STRIP);
+         mGL->renderVertexArray(vertices, 3, GLOPT::LineStrip);
       }
 }
 
@@ -197,19 +197,19 @@ void GameObjectRender::renderShip(ShipShape::ShipShapeType shapeType, const Colo
 
    // Flame ports...
    mGL->glColor(Colors::gray50, alpha);
-   mGL->renderVertexArray(shipShapeInfo->flamePortPoints, shipShapeInfo->flamePortPointCount, GL_LINES);
+   mGL->renderVertexArray(shipShapeInfo->flamePortPoints, shipShapeInfo->flamePortPointCount, GLOPT::Lines);
 
    // Inner hull with colored insides
    mGL->glColor(shipColor, alpha);
    for(S32 i = 0; i < shipShapeInfo->innerHullPieceCount; i++)
-      mGL->renderVertexArray(shipShapeInfo->innerHullPieces[i].points, shipShapeInfo->innerHullPieces[i].pointCount, GL_LINE_STRIP);
+      mGL->renderVertexArray(shipShapeInfo->innerHullPieces[i].points, shipShapeInfo->innerHullPieces[i].pointCount, GLOPT::LineStrip);
 
    // Render health bar
    renderHealthBar(health, Point(0,1.5), Point(0,1), 28, 4);
 
    // Grey outer hull drawn last, on top
    mGL->glColor(Colors::gray70, alpha);
-   mGL->renderVertexArray(shipShapeInfo->outerHullPoints, shipShapeInfo->outerHullPointCount, GL_LINE_LOOP);
+   mGL->renderVertexArray(shipShapeInfo->outerHullPoints, shipShapeInfo->outerHullPointCount, GLOPT::LineLoop);
 
    // Now render any module states
    renderActiveModuleOverlays(alpha, radius, sensorTime, shieldActive, sensorActive, repairActive, hasArmor);
@@ -262,7 +262,7 @@ void GameObjectRender::renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 games
 
    //FontManager::pushFontContext(FPSContext);
 
-//   glLineWidth(RenderUtils::LINE_WIDTH_1);
+//   mGL->glLineWidth(RenderUtils::LINE_WIDTH_1);
 //
 //
 //   if(sym > 0)
@@ -287,7 +287,7 @@ void GameObjectRender::renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 games
    //F32 rad = height / 4.0f;
    //S32 yoffset = 0;     // Tricky way to vertically align the squares when there are only 1 or 2
 
-//   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+//   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
    //FontManager::popFontContext();
 
@@ -320,7 +320,7 @@ void GameObjectRender::renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 games
    //
    //
    //
-   //glPushMatrix();
+   //mGL->glPushMatrix();
    //// Changed position on me?
    //x = x - 8;
    //y = y - 6;
@@ -329,47 +329,47 @@ void GameObjectRender::renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 games
    //   case 0:
    //      mGL->glColor(Colors::bronze);
    //      mGL->glTranslate(x, y + 1, 0);
-   //      mGL->renderVertexArray(chevronPoints, 4, GL_LINES);
+   //      mGL->renderVertexArray(chevronPoints, 4, GLOPT::Lines);
    //      break;
    //   case 1:
    //      mGL->glColor(Colors::bronze);
    //      mGL->glTranslate(x, y - 2, 0);
-   //      mGL->renderVertexArray(chevronPoints, 8, GL_LINES);
+   //      mGL->renderVertexArray(chevronPoints, 8, GLOPT::Lines);
    //      break;
    //   case 2:
    //      mGL->glColor(Colors::bronze);
    //      mGL->glTranslate(x, y - 5, 0);
-   //      mGL->renderVertexArray(chevronPoints, 12, GL_LINES);
+   //      mGL->renderVertexArray(chevronPoints, 12, GLOPT::Lines);
    //      break;
    //   case 3:
    //      mGL->glColor(Colors::silver);
    //      mGL->glTranslate(x, y, 0);
-   //      mGL->renderVertexArray(barPoints, 2, GL_LINES);
+   //      mGL->renderVertexArray(barPoints, 2, GLOPT::Lines);
    //      break;
    //   case 4:
    //      mGL->glColor(Colors::silver);
    //      mGL->glTranslate(x, y - 3, 0);
-   //      mGL->renderVertexArray(barPoints, 4, GL_LINES);
+   //      mGL->renderVertexArray(barPoints, 4, GLOPT::Lines);
    //      break;
    //   case 5:
    //      mGL->glColor(Colors::silver);
    //      mGL->glTranslate(x, y - 6, 0);
-   //      mGL->renderVertexArray(barPoints, 6, GL_LINES);
+   //      mGL->renderVertexArray(barPoints, 6, GLOPT::Lines);
    //      break;
    //   case 6:
-   //      glLineWidth(RenderUtils::LINE_WIDTH_1);
+   //      mGL->glLineWidth(RenderUtils::LINE_WIDTH_1);
    //      mGL->glColor(Colors::gold);
    //      drawStar(Point(x,y), 5, height / 2.0f, rad);
-   //      glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   //      mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
    //      break;
    //   case 7:
-   //      glLineWidth(RenderUtils::LINE_WIDTH_1);
+   //      mGL->glLineWidth(RenderUtils::LINE_WIDTH_1);
    //      mGL->glColor(Colors::gold);
    //      drawFilledStar(Point(x,y), 5, height / 2.0f, rad);
-   //      glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   //      mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
    //      break;
    //}
-   //glPopMatrix();
+   //mGL->glPopMatrix();
 
 
    static const F32 rectPoints[] = {
@@ -412,91 +412,91 @@ void GameObjectRender::renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 games
 //         1, 1,
 //   };
 
-   glPushMatrix();
+   mGL->glPushMatrix();
 
    mGL->glTranslate(x - 10, y - 6, 0);
    
-   glLineWidth(RenderUtils::LINE_WIDTH_1);
+   mGL->glLineWidth(RenderUtils::LINE_WIDTH_1);
 
    mGL->glColor(Colors::gray20);
-   mGL->renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
-   mGL->renderVertexArray(&rectPoints[8], 4, GL_LINE_LOOP);
-   mGL->renderVertexArray(&rectPoints[16], 4, GL_LINE_LOOP);
-   mGL->renderVertexArray(&rectPoints[24], 4, GL_LINE_LOOP);
+   mGL->renderVertexArray(rectPoints, 4, GLOPT::LineLoop);
+   mGL->renderVertexArray(&rectPoints[8], 4, GLOPT::LineLoop);
+   mGL->renderVertexArray(&rectPoints[16], 4, GLOPT::LineLoop);
+   mGL->renderVertexArray(&rectPoints[24], 4, GLOPT::LineLoop);
 
    switch(sym)
    {
       case 0:
          //glColor(Colors::red);
-         //renderVertexArray(triPoints, 3, GL_TRIANGLE_FAN);
+         //renderVertexArray(triPoints, 3, GLOPT::TriangleFan);
          mGL->glColor(Colors::green80);
-         mGL->renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
+         mGL->renderVertexArray(rectPoints, 4, GLOPT::LineLoop);
          break;
       case 1:
          mGL->glColor(Colors::green80);
-         mGL->renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
+         mGL->renderVertexArray(rectPoints, 4, GLOPT::TriangleFan);
+         mGL->renderVertexArray(rectPoints, 4, GLOPT::LineLoop);
          break;
       case 2:
          mGL->glColor(Colors::green80);
-         mGL->renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
+         mGL->renderVertexArray(rectPoints, 4, GLOPT::TriangleFan);
+         mGL->renderVertexArray(rectPoints, 4, GLOPT::LineLoop);
          //glColor(Colors::red);
-         //renderVertexArray(&triPoints[6], 3, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(&rectPoints[8], 4, GL_LINE_LOOP);
+         //renderVertexArray(&triPoints[6], 3, GLOPT::TriangleFan);
+         mGL->renderVertexArray(&rectPoints[8], 4, GLOPT::LineLoop);
          break;
       case 3:
          mGL->glColor(Colors::green80);
-         mGL->renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(&rectPoints[8], 4, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
-         mGL->renderVertexArray(&rectPoints[8], 4, GL_LINE_LOOP);
+         mGL->renderVertexArray(rectPoints, 4, GLOPT::TriangleFan);
+         mGL->renderVertexArray(&rectPoints[8], 4, GLOPT::TriangleFan);
+         mGL->renderVertexArray(rectPoints, 4, GLOPT::LineLoop);
+         mGL->renderVertexArray(&rectPoints[8], 4, GLOPT::LineLoop);
          break;
       case 4:
          mGL->glColor(Colors::green80);
-         mGL->renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(&rectPoints[8], 4, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
-         mGL->renderVertexArray(&rectPoints[8], 4, GL_LINE_LOOP);
+         mGL->renderVertexArray(rectPoints, 4, GLOPT::TriangleFan);
+         mGL->renderVertexArray(&rectPoints[8], 4, GLOPT::TriangleFan);
+         mGL->renderVertexArray(rectPoints, 4, GLOPT::LineLoop);
+         mGL->renderVertexArray(&rectPoints[8], 4, GLOPT::LineLoop);
          //glColor(Colors::red);
-         //renderVertexArray(&triPoints[12], 3, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(&rectPoints[16], 4, GL_LINE_LOOP);
+         //renderVertexArray(&triPoints[12], 3, GLOPT::TriangleFan);
+         mGL->renderVertexArray(&rectPoints[16], 4, GLOPT::LineLoop);
          break;
       case 5:
          mGL->glColor(Colors::green80);
-         mGL->renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(&rectPoints[8], 4, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(&rectPoints[16], 4, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
-         mGL->renderVertexArray(&rectPoints[8], 4, GL_LINE_LOOP);
-         mGL->renderVertexArray(&rectPoints[16], 4, GL_LINE_LOOP);
+         mGL->renderVertexArray(rectPoints, 4, GLOPT::TriangleFan);
+         mGL->renderVertexArray(&rectPoints[8], 4, GLOPT::TriangleFan);
+         mGL->renderVertexArray(&rectPoints[16], 4, GLOPT::TriangleFan);
+         mGL->renderVertexArray(rectPoints, 4, GLOPT::LineLoop);
+         mGL->renderVertexArray(&rectPoints[8], 4, GLOPT::LineLoop);
+         mGL->renderVertexArray(&rectPoints[16], 4, GLOPT::LineLoop);
          break;
       case 6:
          mGL->glColor(Colors::green80);
-         mGL->renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(&rectPoints[8], 4, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(&rectPoints[16], 4, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
-         mGL->renderVertexArray(&rectPoints[8], 4, GL_LINE_LOOP);
-         mGL->renderVertexArray(&rectPoints[16], 4, GL_LINE_LOOP);
+         mGL->renderVertexArray(rectPoints, 4, GLOPT::TriangleFan);
+         mGL->renderVertexArray(&rectPoints[8], 4, GLOPT::TriangleFan);
+         mGL->renderVertexArray(&rectPoints[16], 4, GLOPT::TriangleFan);
+         mGL->renderVertexArray(rectPoints, 4, GLOPT::LineLoop);
+         mGL->renderVertexArray(&rectPoints[8], 4, GLOPT::LineLoop);
+         mGL->renderVertexArray(&rectPoints[16], 4, GLOPT::LineLoop);
          //glColor(Colors::red);
-         //renderVertexArray(&triPoints[18], 3, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(&rectPoints[24], 4, GL_LINE_LOOP);
+         //renderVertexArray(&triPoints[18], 3, GLOPT::TriangleFan);
+         mGL->renderVertexArray(&rectPoints[24], 4, GLOPT::LineLoop);
          break;
       case 7:
          mGL->glColor(Colors::green80);
-         mGL->renderVertexArray(rectPoints, 4, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(&rectPoints[8], 4, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(&rectPoints[16], 4, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(&rectPoints[24], 4, GL_TRIANGLE_FAN);
-         mGL->renderVertexArray(rectPoints, 4, GL_LINE_LOOP);
-         mGL->renderVertexArray(&rectPoints[8], 4, GL_LINE_LOOP);
-         mGL->renderVertexArray(&rectPoints[16], 4, GL_LINE_LOOP);
-         mGL->renderVertexArray(&rectPoints[24], 4, GL_LINE_LOOP);
+         mGL->renderVertexArray(rectPoints, 4, GLOPT::TriangleFan);
+         mGL->renderVertexArray(&rectPoints[8], 4, GLOPT::TriangleFan);
+         mGL->renderVertexArray(&rectPoints[16], 4, GLOPT::TriangleFan);
+         mGL->renderVertexArray(&rectPoints[24], 4, GLOPT::TriangleFan);
+         mGL->renderVertexArray(rectPoints, 4, GLOPT::LineLoop);
+         mGL->renderVertexArray(&rectPoints[8], 4, GLOPT::LineLoop);
+         mGL->renderVertexArray(&rectPoints[16], 4, GLOPT::LineLoop);
+         mGL->renderVertexArray(&rectPoints[24], 4, GLOPT::LineLoop);
          break;
    }
-   glPopMatrix();
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glPopMatrix();
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
 
@@ -508,7 +508,7 @@ void GameObjectRender::renderShipName(const string &shipName, bool isAuthenticat
    F32 textAlpha = alpha;
    F32 textSize = 14 * nameScale;
 
-   glLineWidth(RenderUtils::LINE_WIDTH_1);
+   mGL->glLineWidth(RenderUtils::LINE_WIDTH_1);
 
 
    // Set name color based on killStreak length
@@ -527,7 +527,7 @@ void GameObjectRender::renderShipName(const string &shipName, bool isAuthenticat
    if(isAuthenticated)
       RenderUtils::drawHorizLine(-len * 0.5f, len * 0.5f, ypos + 3);     // 3 provides a little gap beneath the text
 
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
 
@@ -538,7 +538,7 @@ void GameObjectRender::renderShip(S32 layerIndex, const Point &renderPos, const 
                 bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
                 bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed)
 {
-   glPushMatrix();
+   mGL->glPushMatrix();
    mGL->glTranslate(renderPos);
 
    // Draw the ship name, if there is one, before the mGL->glRotate below, but only on layer 1...
@@ -574,12 +574,12 @@ void GameObjectRender::renderShip(S32 layerIndex, const Point &renderPos, const 
       // scrambling thing here as well...
       mGL->glColor(Colors::black);
 
-      glDisable(GL_BLEND);
+      mGL->glDisable(GLOPT::Blend);
 
       F32 vertices[] = { 20,-15,  0,25,  20,-15 };
-      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
+      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::TriangleFan);
 
-      glEnable(GL_BLEND);
+      mGL->glEnable(GLOPT::Blend);
    }
 
    else     // LayerIndex == 1
@@ -592,7 +592,7 @@ void GameObjectRender::renderShip(S32 layerIndex, const Point &renderPos, const 
                  shieldActive, sensorActive, repairActive, hasArmor);
    }
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -617,7 +617,7 @@ void GameObjectRender::renderSpawnShield(const Point &pos, U32 shieldTime, U32 r
 // Render repair rays to all the repairing objects
 void GameObjectRender::renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<BfObject> > &repairTargets, F32 alpha)
 {
-   glLineWidth(RenderUtils::LINE_WIDTH_3);
+   mGL->glLineWidth(RenderUtils::LINE_WIDTH_3);
    mGL->glColor(Colors::red, alpha);
 
    for(S32 i = 0; i < repairTargets.size(); i++)
@@ -633,10 +633,10 @@ void GameObjectRender::renderShipRepairRays(const Point &pos, const Ship *ship, 
             vertexArray.push_back(targetRepairLocations[i]);
          }
 
-         mGL->renderPointVector(&vertexArray, GL_LINES);
+         mGL->renderPointVector(&vertexArray, GLOPT::Lines);
       }
    }
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
 
@@ -645,12 +645,12 @@ void GameObjectRender::renderShipCoords(const Point &coords, bool localShip, F32
    string str = string("@") + itos((S32) coords.x) + "," + itos((S32) coords.y);
    const U32 textSize = 18;
 
-   glLineWidth(RenderUtils::LINE_WIDTH_1);
+   mGL->glLineWidth(RenderUtils::LINE_WIDTH_1);
    mGL->glColor(Colors::white, 0.5f * alpha);
 
    RenderUtils::drawStringc(0, 30 + (localShip ? 0 : textSize + 3) + textSize, textSize, str.c_str() );
 
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
 
@@ -669,10 +669,10 @@ void GameObjectRender::drawFourArrows(const Point &pos)
       -15,   0, -10,  -5,
    };
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(pos);
-      mGL->renderVertexArray(pointList, ARRAYSIZE(pointList) / 2, GL_LINES);
-   glPopMatrix();
+      mGL->renderVertexArray(pointList, ARRAYSIZE(pointList) / 2, GLOPT::Lines);
+   mGL->glPopMatrix();
 
 }
 
@@ -753,7 +753,7 @@ void GameObjectRender::renderTeleporter(const Point &pos, U32 type, bool spiralI
    }
 
    // Now the drawing!
-   glPushMatrix();
+   mGL->glPushMatrix();
 
    // This piece draws the destination lines in the commander's map
    // It knows it's in the commander's map if the zoomFraction is greater than zero
@@ -789,7 +789,7 @@ void GameObjectRender::renderTeleporter(const Point &pos, U32 type, bool spiralI
                midx - asina * width, midy - acosa * width,
                pos.x - asina * width, pos.y - acosa * width
          };
-         mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
+         mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::TriangleFan);
 
          // Render blended part
          F32 x = dests->get(i).x;
@@ -806,7 +806,7 @@ void GameObjectRender::renderTeleporter(const Point &pos, U32 type, bool spiralI
                1, 1, 1, 0,
                1, 1, 1, .25f * alpha
          };
-         mGL->renderColorVertexArray(vertices2, colors, ARRAYSIZE(vertices2) / 2, GL_TRIANGLE_FAN);
+         mGL->renderColorVertexArray(vertices2, colors, ARRAYSIZE(vertices2) / 2, GLOPT::TriangleFan);
       }
 
       //   glDisable(GL_POLYGON_SMOOTH);
@@ -946,19 +946,19 @@ void GameObjectRender::renderTeleporter(const Point &pos, U32 type, bool spiralI
          teleporterColorArray[(8*j)+7] = alpha * alphaMod * (1 - frac);
       }
 
-      mGL->renderColorVertexArray(teleporterVertexArray, teleporterColorArray, arrayCount, GL_TRIANGLE_STRIP);
+      mGL->renderColorVertexArray(teleporterVertexArray, teleporterColorArray, arrayCount, GLOPT::TriangleStrip);
    }
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
 void GameObjectRender::renderTeleporterOutline(const Point &center, F32 radius, const Color &color)
 {
    mGL->glColor(color);
-   glLineWidth(RenderUtils::LINE_WIDTH_3);
+   mGL->glLineWidth(RenderUtils::LINE_WIDTH_3);
    RenderUtils::drawPolygon(center, 12, radius, 0);
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
 
@@ -992,7 +992,7 @@ void GameObjectRender::renderSpyBugVisibleRange(const Point &pos, const Color &c
 
    F32 range = SpyBug::SPY_BUG_RANGE * currentScale;
 
-   RenderUtils::drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GL_TRIANGLE_FAN);
+   RenderUtils::drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GLOPT::TriangleFan);
 }
 
 
@@ -1002,7 +1002,7 @@ void GameObjectRender::renderTurretFiringRange(const Point &pos, const Color &co
 
    F32 range = Turret::TurretPerceptionDistance * currentScale;
 
-   RenderUtils::drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GL_TRIANGLE_FAN);
+   RenderUtils::drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GLOPT::TriangleFan);
 }
 
 
@@ -1038,27 +1038,27 @@ void GameObjectRender::renderTurret(const Color &color, Point anchor, Point norm
       barrel.resize(2);    // Set the dimensions of the vector that we'll need
    }
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(aimCenter);
       mGL->glRotate(normal.ATAN2() * RADIANS_TO_DEGREES - 90);
 
       mGL->glColor(color);
 
-      mGL->renderPointVector(&frontPoints,    GL_LINE_STRIP);
-      mGL->renderPointVector(&healthBarFrame, GL_LINES);
+      mGL->renderPointVector(&frontPoints,    GLOPT::LineStrip);
+      mGL->renderPointVector(&healthBarFrame, GLOPT::Lines);
 
       // Render symbol if it is a regenerating turret
       if(healRate > 0)
-         mGL->renderPointVector(&healIndicatorPoints, GL_LINE_STRIP);
+         mGL->renderPointVector(&healIndicatorPoints, GLOPT::LineStrip);
 
       // Draw base after potentially overlapping curvy bits
       mGL->glColor(enabled ? Colors::white : Colors::gray60);
-      mGL->renderPointVector(&basePoints,     GL_LINE_LOOP);
+      mGL->renderPointVector(&basePoints,     GLOPT::LineLoop);
 
       mGL->glColor(color);
       renderHealthBar(health, Point(0, -Turret::TURRET_OFFSET / 2), Point(1, 0), HealthBarLength, 5);
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 
    // Now render the turret barrel
    Point aimDelta(cos(barrelAngle), sin(barrelAngle));
@@ -1066,9 +1066,9 @@ void GameObjectRender::renderTurret(const Color &color, Point anchor, Point norm
    barrel[0].set(aimCenter + aimDelta * FrontRadius);
    barrel[1].set(aimCenter + aimDelta * FrontRadius * 2);
 
-   glLineWidth(RenderUtils::LINE_WIDTH_3);
-   mGL->renderPointVector(&barrel, GL_LINES);
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::LINE_WIDTH_3);
+   mGL->renderPointVector(&barrel, GLOPT::Lines);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
 
@@ -1100,29 +1100,29 @@ void GameObjectRender::renderMortar(const Color &color, Point anchor, Point norm
       //healIndicatorPoints.erase(0);                                  // First
    }
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(aimCenter);
       mGL->glRotate(normal.ATAN2() * RADIANS_TO_DEGREES - 90);
 
       mGL->glColor(color);
 
-      mGL->renderPointVector(&frontPoints,    GL_LINE_STRIP);
-      mGL->renderPointVector(&healthBarFrame, GL_LINES);
+      mGL->renderPointVector(&frontPoints,    GLOPT::LineStrip);
+      mGL->renderPointVector(&healthBarFrame, GLOPT::Lines);
 
       // Render symbol if it is a regenerating turret
       if(healRate > 0)
-         mGL->renderPointVector(&healIndicatorPoints, GL_LINE_STRIP);
+         mGL->renderPointVector(&healIndicatorPoints, GLOPT::LineStrip);
 
       // Draw base after potentially overlapping curvy bits
       mGL->glColor(enabled ? Colors::white : Colors::gray60);
-      mGL->renderPointVector(&basePoints,     GL_LINE_LOOP);
+      mGL->renderPointVector(&basePoints,     GLOPT::LineLoop);
 
       mGL->glColor(color);
       renderHealthBar(health, Point(0, -Turret::TURRET_OFFSET / 2), Point(1, 0), HealthBarLength, 5);
 
-      mGL->renderPointVector(&mortarPoints, GL_LINE_LOOP);
+      mGL->renderPointVector(&mortarPoints, GLOPT::LineLoop);
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -1132,7 +1132,7 @@ void GameObjectRender::renderFlag(const Color &flagColor, const Color &mastColor
 
    // First, the flag itself
    static F32 flagPoints[] = { -15,-15, 15,-5,  15,-5, -15,5,  -15,-10, 10,-5,  10,-5, -15,0 };
-   mGL->renderVertexArray(flagPoints, ARRAYSIZE(flagPoints) / 2, GL_LINES);
+   mGL->renderVertexArray(flagPoints, ARRAYSIZE(flagPoints) / 2, GLOPT::Lines);
 
    // Now the flag's mast
    mGL->glColor(mastColor, alpha);
@@ -1150,21 +1150,21 @@ void GameObjectRender::renderFlag(const Color &flagColor, F32 alpha)
 
 void GameObjectRender::doRenderFlag(F32 x, F32 y, F32 scale, const Color &flagColor, const Color &mastColor, F32 alpha)
 {
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(x, y);
       mGL->glScale(scale);
       renderFlag(flagColor, mastColor, alpha);
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
 void GameObjectRender::doRenderFlag(F32 x, F32 y, F32 scale, const Color &flagColor, F32 alpha)
 {
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(x, y);
       mGL->glScale(scale);
       renderFlag(flagColor, alpha);
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -1202,7 +1202,7 @@ void GameObjectRender::renderSmallFlag(const Point &pos, const Color &c, F32 par
 {
    F32 alpha = 0.75f * parentAlpha;
    
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(pos);
       mGL->glScale(0.2f);
 
@@ -1224,8 +1224,8 @@ void GameObjectRender::renderSmallFlag(const Point &pos, const Color &c, F32 par
               1,   1,   1, alpha
       };
 
-      mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
-   glPopMatrix();
+      mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
+   mGL->glPopMatrix();
 }
 
 
@@ -1233,13 +1233,13 @@ void GameObjectRender::renderFlagSpawn(const Point &pos, F32 currentScale, const
 {
    static const Point p(-4, 0);
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(pos);
       mGL->glScale(0.4f / currentScale);
       renderFlag(color);
 
       RenderUtils::drawCircle(p, 26, &Colors::white);
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -1260,36 +1260,36 @@ F32 GameObjectRender::renderCenteredString(const Point &pos, F32 size, const cha
 
 void GameObjectRender::renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *text, F32 scaleFact)
 {
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glScale(scaleFact);
       mGL->glTranslate(centroid);
       mGL->glRotate(angle * RADIANS_TO_DEGREES);
       renderCenteredString(Point(0,0), size, text);
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
 void GameObjectRender::renderPolygonOutline(const Vector<Point> *outline)
 {
-   mGL->renderPointVector(outline, GL_LINE_LOOP);
+   mGL->renderPointVector(outline, GLOPT::LineLoop);
 }
 
 
 void GameObjectRender::renderPolygonOutline(const Vector<Point> *outlinePoints, const Color &outlineColor, F32 alpha, F32 lineThickness)
 {
    mGL->glColor(outlineColor, alpha);
-   glLineWidth(lineThickness);
+   mGL->glLineWidth(lineThickness);
 
    renderPolygonOutline(outlinePoints);
 
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
 
 void GameObjectRender::renderPolygonFill(const Vector<Point> *triangulatedFillPoints, const Color &fillColor, F32 alpha)
 {
    mGL->glColor(fillColor, alpha);
-   mGL->renderPointVector(triangulatedFillPoints, GL_TRIANGLES);
+   mGL->renderPointVector(triangulatedFillPoints, GLOPT::Triangles);
 }
 
 
@@ -1330,12 +1330,12 @@ void GameObjectRender::renderGoalZoneIcon(const Point &center, S32 radius)
 {
    static const F32 flagPoints[] = { -6, 10,  -6,-10,  12, -3.333f,  -6, 3.333f, };
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(center);
       mGL->glScale(radius * 0.041667f);  // 1 / 24 since we drew it to in-game radius of 24 (a ship's radius)
       RenderUtils::drawPolygon(4, (F32)radius, 0.0f);
-      mGL->renderVertexArray(flagPoints, ARRAYSIZE(flagPoints) / 2, GL_LINE_STRIP);
-   glPopMatrix();
+      mGL->renderVertexArray(flagPoints, ARRAYSIZE(flagPoints) / 2, GLOPT::LineStrip);
+   mGL->glPopMatrix();
 }
 
 
@@ -1354,7 +1354,7 @@ void GameObjectRender::renderNavMeshZone(const Vector<Point> *outline, const Vec
 // Only used in-game
 void GameObjectRender::renderNavMeshBorders(const Vector<NeighboringZone> &borders)
 {
-   glLineWidth(4.);
+   mGL->glLineWidth(4.);
 
    mGL->glColor(Colors::cyan);
 
@@ -1365,10 +1365,10 @@ void GameObjectRender::renderNavMeshBorders(const Vector<NeighboringZone> &borde
             borders[i].borderStart.x, borders[i].borderStart.y,
             borders[i].borderEnd.x, borders[i].borderEnd.y,
       };
-      mGL->renderVertexArray(vertices, 2, GL_LINES);
+      mGL->renderVertexArray(vertices, 2, GLOPT::Lines);
    }
 
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
 
@@ -1469,19 +1469,19 @@ void GameObjectRender::renderNexusIcon(const Point &center, S32 radius, F32 angl
    static const Point arcPoint2 = Point(vertRadius * root3div2, vertRadius * 0.5f);
    static const Point arcPoint3 = Point(-vertRadius * root3div2, vertRadius * 0.5f);
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(center);
       mGL->glScale(radius * 0.05f);  // 1/20.  Default radius is 20 in-game
       mGL->glRotate(angleRadians * RADIANS_TO_DEGREES);
 
       // Draw our center spokes
-      mGL->renderVertexArray(spokes, ARRAYSIZE(spokes) / 2, GL_LINES);
+      mGL->renderVertexArray(spokes, ARRAYSIZE(spokes) / 2, GLOPT::Lines);
 
       // Draw design
       RenderUtils::drawArc(arcPoint1, arcRadius, 0.583f * FloatTau, 1.25f  * FloatTau);
       RenderUtils::drawArc(arcPoint2, arcRadius, 0.917f * FloatTau, 1.583f * FloatTau);
       RenderUtils::drawArc(arcPoint3, arcRadius, 0.25f  * FloatTau, 0.917f * FloatTau);
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -1522,13 +1522,13 @@ void GameObjectRender::renderSlipZoneIcon(const Point &center, S32 radius, F32 a
    };
 
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(center);
       mGL->glScale(radius * 0.05f);  // 1/20.  Default radius is 20 in-game
 
       mGL->glColor(Colors::cyan);
-      mGL->renderVertexArray(lines, ARRAYSIZE(lines) / 2, GL_LINES);
-   glPopMatrix();
+      mGL->renderVertexArray(lines, ARRAYSIZE(lines) / 2, GLOPT::Lines);
+   mGL->glPopMatrix();
 }
 
 
@@ -1537,10 +1537,10 @@ void GameObjectRender::renderSlipZone(const Vector<Point> *bounds, const Vector<
    Color theColor (0, 0.5, 0);  // Go for a pale green, for now...
 
    mGL->glColor(theColor * 0.5);
-   mGL->renderPointVector(boundsFill, GL_TRIANGLES);
+   mGL->renderPointVector(boundsFill, GLOPT::Triangles);
 
    mGL->glColor(theColor * 0.7f);
-   mGL->renderPointVector(bounds, GL_LINE_LOOP);
+   mGL->renderPointVector(bounds, GLOPT::LineLoop);
 
    renderSlipZoneIcon(centroid, 20);
 }
@@ -1555,42 +1555,42 @@ void GameObjectRender::renderProjectile(const Point &pos, U32 type, U32 time)
    if(bultype == 1)    // Default stars
    { 
       mGL->glColor(pi->projColors[0]);
-      glPushMatrix();
+      mGL->glPushMatrix();
          mGL->glTranslate(pos);
          mGL->glScale(pi->scaleFactor);
 
-         glPushMatrix();
+         mGL->glPushMatrix();
             mGL->glRotate((time % 720) * 0.5f);
 
             static S16 projectilePoints1[] = { -2,2,  0,6,  2,2,  6,0,  2,-2,  0,-6,  -2,-2,  -6,0 };
-            mGL->renderVertexArray(projectilePoints1, ARRAYSIZE(projectilePoints1) / 2, GL_LINE_LOOP);
+            mGL->renderVertexArray(projectilePoints1, ARRAYSIZE(projectilePoints1) / 2, GLOPT::LineLoop);
 
-         glPopMatrix();
+         mGL->glPopMatrix();
 
          mGL->glRotate(180 - F32(time % 360));
          mGL->glColor(pi->projColors[1]);
 
          static S16 projectilePoints2[] = { -2,2,  0,8,  2,2,  8,0,  2,-2,  0,-8, -2,-2,  -8,0 };
-         mGL->renderVertexArray(projectilePoints2, ARRAYSIZE(projectilePoints2) / 2, GL_LINE_LOOP);
+         mGL->renderVertexArray(projectilePoints2, ARRAYSIZE(projectilePoints2) / 2, GLOPT::LineLoop);
 
-      glPopMatrix();
+      mGL->glPopMatrix();
 
    } else if (bultype == 2) { // Tiny squares rotating quickly, good machine gun
 
       mGL->glColor(pi->projColors[0]);
-      glPushMatrix();
+      mGL->glPushMatrix();
       mGL->glTranslate(pos);
       mGL->glScale(pi->scaleFactor);
 
-      glPushMatrix();
+      mGL->glPushMatrix();
 
       mGL->glRotate(F32(time % 720));
       mGL->glColor(pi->projColors[1]);
 
       static S16 projectilePoints3[] = { -2,2,  2,2,  2,-2,  -2,-2 };
-      mGL->renderVertexArray(projectilePoints3, ARRAYSIZE(projectilePoints3) / 2, GL_LINE_LOOP);
+      mGL->renderVertexArray(projectilePoints3, ARRAYSIZE(projectilePoints3) / 2, GLOPT::LineLoop);
 
-      glPopMatrix();
+      mGL->glPopMatrix();
 
    } else if (bultype == 3) {  // Rosette of circles  MAKES SCREEN GO BEZERK!!
 
@@ -1626,7 +1626,7 @@ void GameObjectRender::renderProjectile(const Point &pos, U32 type, U32 time)
 
 void GameObjectRender::renderSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRemaining)
 {
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(pos);
       mGL->glRotate(angleRadians * RADIANS_TO_DEGREES);
 
@@ -1638,14 +1638,14 @@ void GameObjectRender::renderSeeker(const Point &pos, F32 angleRadians, F32 spee
             -8 - (4 * speedRatio), 0,
             -8, 1,
       };
-      mGL->renderVertexArray(innerFlame, 3, GL_LINE_STRIP);
+      mGL->renderVertexArray(innerFlame, 3, GLOPT::LineStrip);
       mGL->glColor(Colors::orange50, 0.6f);
       F32 outerFlame[] = {
             -8, -3,
             -8 - (8 * speedRatio), 0,
             -8, 3,
       };
-      mGL->renderVertexArray(outerFlame, 3, GL_LINE_STRIP);
+      mGL->renderVertexArray(outerFlame, 3, GLOPT::LineStrip);
 
       // The body of the seeker
       mGL->glColor(1, 0, 0.35f, 1);  // A redder magenta
@@ -1654,8 +1654,8 @@ void GameObjectRender::renderSeeker(const Point &pos, F32 angleRadians, F32 spee
             -8,  4,
              8,  0
       };
-      mGL->renderVertexArray(vertices, 3, GL_LINE_LOOP);
-   glPopMatrix();
+      mGL->renderVertexArray(vertices, 3, GLOPT::LineLoop);
+   mGL->glPopMatrix();
 }
 
 
@@ -1674,7 +1674,7 @@ void GameObjectRender::renderMine(const Point &pos, bool armed, bool visible)
    }
    else           // Invisible enemy mine
    {
-      glLineWidth(RenderUtils::LINE_WIDTH_1);
+      mGL->glLineWidth(RenderUtils::LINE_WIDTH_1);
       mod = 0.80f;
       vis = 0.18f;
    }
@@ -1687,7 +1687,7 @@ void GameObjectRender::renderMine(const Point &pos, bool armed, bool visible)
       mGL->glColor(mod, 0, 0, vis);
       RenderUtils::drawCircle(pos, 6);
    }
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
 #ifndef min
@@ -1752,12 +1752,12 @@ void GameObjectRender::renderSpyBug(const Point &pos, const Color &teamColor, bo
    }
    else
    {
-      glLineWidth(RenderUtils::LINE_WIDTH_1);
+      mGL->glLineWidth(RenderUtils::LINE_WIDTH_1);
       mGL->glColor(mod);
       RenderUtils::drawCircle(pos, 5);
    }
 
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
 
@@ -1786,7 +1786,7 @@ void GameObjectRender::renderRepairItem(const Point &pos, bool forEditor, const 
       size = 18;
    }
 
-   glPushMatrix();
+   mGL->glPushMatrix();
    mGL->glTranslate(pos);
 
    mGL->glColor(overrideColor == NULL ? Colors::white : *overrideColor, alpha);
@@ -1807,19 +1807,19 @@ void GameObjectRender::renderRepairItem(const Point &pos, bool forEditor, const 
          -crossWidth,  crossLen,
           crossWidth,  crossLen
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop);
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
 void GameObjectRender::renderEnergySymbol(const Point &pos, F32 scaleFactor)
 {
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(pos);
       mGL->glScale(scaleFactor);
       renderEnergySymbol();
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -1830,7 +1830,7 @@ void GameObjectRender::renderEnergySymbol()
    mGL->glColor(Colors::orange67, 1);
 
    static S16 energySymbolPoints[] = { 20,-20,  3,-2,  12,5,  -20,20,  -2,3,  -12,-5 };
-   mGL->renderVertexArray(energySymbolPoints, ARRAYSIZE(energySymbolPoints) / 2, GL_LINE_LOOP);
+   mGL->renderVertexArray(energySymbolPoints, ARRAYSIZE(energySymbolPoints) / 2, GLOPT::LineLoop);
 }
 
 
@@ -1838,18 +1838,18 @@ void GameObjectRender::renderEnergyItem(const Point &pos, bool forEditor)
 {
    F32 scaleFactor = forEditor ? .45f : 1;    // Resize for editor
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(pos);
 
       F32 size = 18;
       RenderUtils::drawHollowSquare(Point(0,0), size, Colors::white);
-      glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+      mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
       // Scale down the symbol a little so it fits in the box
       mGL->glScale(scaleFactor * 0.7f);
       renderEnergySymbol();
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -1863,7 +1863,7 @@ void GameObjectRender::renderEnergyItem(const Point &pos)
 void GameObjectRender::renderWallFill(const Vector<Point> *points, const Color &fillColor, bool polyWall)
 {
    mGL->glColor(fillColor);
-   mGL->renderPointVector(points, polyWall ? GL_TRIANGLES : GL_TRIANGLE_FAN);
+   mGL->renderPointVector(points, polyWall ? GLOPT::Triangles : GLOPT::TriangleFan);
 }
 
 
@@ -1871,7 +1871,7 @@ void GameObjectRender::renderWallFill(const Vector<Point> *points, const Color &
 void GameObjectRender::renderWallFill(const Vector<Point> *points, const Color &fillColor, const Point &offset, bool polyWall)
 {
    mGL->glColor(fillColor);
-   mGL->renderPointVector(points, offset, polyWall ? GL_TRIANGLES : GL_TRIANGLE_FAN);
+   mGL->renderPointVector(points, offset, polyWall ? GLOPT::Triangles : GLOPT::TriangleFan);
 }
 
 
@@ -1879,7 +1879,7 @@ void GameObjectRender::renderWallFill(const Vector<Point> *points, const Color &
 void GameObjectRender::renderWallEdges(const Vector<Point> &edges, const Color &outlineColor, F32 alpha)
 {
    mGL->glColor(outlineColor, alpha);
-   mGL->renderPointVector(&edges, GL_LINES);
+   mGL->renderPointVector(&edges, GLOPT::Lines);
 }
 
 
@@ -1887,7 +1887,7 @@ void GameObjectRender::renderWallEdges(const Vector<Point> &edges, const Color &
 void GameObjectRender::renderWallEdges(const Vector<Point> &edges, const Point &offset, const Color &outlineColor, F32 alpha)
 {
    mGL->glColor(outlineColor, alpha);
-   mGL->renderPointVector(&edges, offset, GL_LINES);
+   mGL->renderPointVector(&edges, offset, GLOPT::Lines);
 }
 
 
@@ -1902,7 +1902,7 @@ void GameObjectRender::renderSpeedZone(const Vector<Point> &points)
       S32 start = j * pointSize;    // GoFast comes in two equal shapes
 
       // First pointer of first member works as array start
-      mGL->renderVertexArray(&points[0].x, pointSize, GL_LINE_LOOP, start, sizeof(Point));
+      mGL->renderVertexArray(&points[0].x, pointSize, GLOPT::LineLoop, start, sizeof(Point));
    }
 }
 
@@ -1918,13 +1918,13 @@ void GameObjectRender::renderTestItem(const Point &pos, S32 size, F32 alpha)
 void GameObjectRender::renderTestItem(const Vector<Point> &points, F32 alpha)
 {
    mGL->glColor(Colors::yellow, alpha);
-   mGL->renderVertexArray((F32 *)&points[0], points.size(), GL_LINE_LOOP);
+   mGL->renderVertexArray((F32 *)&points[0], points.size(), GLOPT::LineLoop);
 }
 
 
 void GameObjectRender::renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
 {
-   glPushMatrix();
+   mGL->glPushMatrix();
    mGL->glTranslate(pos);
 
    mGL->glColor(color ? *color : Color(.7), alpha);
@@ -1935,9 +1935,9 @@ void GameObjectRender::renderAsteroid(const Point &pos, S32 design, F32 scaleFac
       vertexArray[2*i]     = AsteroidCoords[design][i][0] * scaleFact;
       vertexArray[(2*i)+1] = AsteroidCoords[design][i][1] * scaleFact;
    }
-   mGL->renderVertexArray(vertexArray, ASTEROID_POINTS, GL_LINE_LOOP);
+   mGL->renderVertexArray(vertexArray, ASTEROID_POINTS, GLOPT::LineLoop);
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -1972,14 +1972,14 @@ void GameObjectRender::renderAsteroidSpawn(const Point &pos, S32 time)
 //
 //   mGL->glColor(Colors::green, 0.5f);
 //
-//   glPushMatrix();
+//   mGL->glPushMatrix();
 //      mGL->glTranslate(pos);
 //
 //      // Inner
-//      mGL->renderVertexArray(lines, 8, GL_LINE_LOOP);
+//      mGL->renderVertexArray(lines, 8, GLOPT::LineLoop);
 //      // Outer
-//      mGL->renderVertexArray(&lines[16], 8, GL_LINE_LOOP);
-//   glPopMatrix();
+//      mGL->renderVertexArray(&lines[16], 8, GLOPT::LineLoop);
+//   mGL->glPopMatrix();
 }
 
 
@@ -1988,33 +1988,33 @@ void GameObjectRender::renderAsteroidSpawnEditor(const Point &pos, F32 scale)
    scale *= 0.8f;
    static const Point p(0,0);
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(pos.x, pos.y);
       mGL->glScale(scale);
       renderAsteroid(p, 2, 0.1f);
 
       RenderUtils::drawCircle(13, &Colors::white);
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 //
 //void GameObjectRender::renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha)
 //{
-//   glPushMatrix();
+//   mGL->glPushMatrix();
 //      mGL->glTranslate(pos);
 //      mGL->glScale(scaleFactor);
 //      mGL->glColor(color == NULL ? Colors::white : *color, alpha);
 //
 //      static F32 resourcePoints[] = { -8,8,  0,20,  8,8,  20,0,  8,-8,  0,-20,  -8,-8,  -20,0 };
-//      mGL->renderVertexArray(resourcePoints, ARRAYSIZE(resourcePoints) / 2, GL_LINE_LOOP);
-//   glPopMatrix();
+//      mGL->renderVertexArray(resourcePoints, ARRAYSIZE(resourcePoints) / 2, GLOPT::LineLoop);
+//   mGL->glPopMatrix();
 //}
 
 
 void GameObjectRender::renderResourceItem(const Vector<Point> &points, F32 alpha)
 {
    mGL->glColor(Colors::white, alpha);
-   mGL->renderVertexArray((F32 *)&points[0], points.size(), GL_LINE_LOOP);
+   mGL->renderVertexArray((F32 *)&points[0], points.size(), GLOPT::LineLoop);
 }
 
 
@@ -2051,7 +2051,7 @@ void GameObjectRender::renderCore(const Point &pos, const Color &coreColor, U32 
             panelGeom->getStart(i).x, panelGeom->getStart(i).y,
             panelGeom->getEnd(i).x, panelGeom->getEnd(i).y
       };
-      mGL->renderVertexArray(vertices, 2, GL_LINES);
+      mGL->renderVertexArray(vertices, 2, GLOPT::Lines);
 
       // Draw health stakes
       if(panelHealth[i] > 0)
@@ -2066,7 +2066,7 @@ void GameObjectRender::renderCore(const Point &pos, const Color &coreColor, U32 
                Colors::black .r, Colors::black .g, Colors::black .b, 1,
          };
 
-         mGL->renderColorVertexArray(vertices2, colors, 2, GL_LINES);
+         mGL->renderColorVertexArray(vertices2, colors, 2, GLOPT::Lines);
       }
    }
 
@@ -2094,7 +2094,7 @@ void GameObjectRender::renderCore(const Point &pos, const Color &coreColor, U32 
          colorArray[(4*count)+3]  = theta / FloatTau;
          count++;
       }
-      mGL->renderColorVertexArray(vertexArray, colorArray, ARRAYSIZE(vertexArray)/2, GL_LINE_LOOP);
+      mGL->renderColorVertexArray(vertexArray, colorArray, ARRAYSIZE(vertexArray)/2, GLOPT::LineLoop);
    }
 
    mGL->glColor(baseColor);
@@ -2129,14 +2129,14 @@ void GameObjectRender::renderTextItem(const Point &pos, const Point &dir, F32 si
       // of ordinary text in cases tested.  What should happen is the Bitfighter logo should, as closely as possible, match the 
       // size and extent of the text "Bitfighter".
       F32 scaleFactor = size / 129.0f;
-      glPushMatrix();
+      mGL->glPushMatrix();
          mGL->glTranslate(pos);
          mGL->glScale(scaleFactor);
          mGL->glRotate(pos.angleTo(dir) * RADIANS_TO_DEGREES);
          mGL->glTranslate(-119, -45);      // Determined experimentally
 
          renderBitfighterLogo(0, 1);
-      glPopMatrix();
+      mGL->glPopMatrix();
 
       return;
    }
@@ -2178,14 +2178,14 @@ void GameObjectRender::renderForceFieldProjector(const Vector<Point> *geom, cons
             -2, -5,
       };
 
-      glPushMatrix();
+      mGL->glPushMatrix();
          mGL->glTranslate(centerPoint);
          mGL->glRotate(angle * RADIANS_TO_DEGREES);
-         mGL->renderVertexArray(symbol, ARRAYSIZE(symbol) / 2, GL_LINE_STRIP);
-      glPopMatrix();
+         mGL->renderVertexArray(symbol, ARRAYSIZE(symbol) / 2, GLOPT::LineStrip);
+      mGL->glPopMatrix();
    }
 
-   mGL->renderPointVector(geom, GL_LINE_LOOP);
+   mGL->renderPointVector(geom, GLOPT::LineLoop);
 }
 
 
@@ -2200,7 +2200,7 @@ void GameObjectRender::renderForceField(Point start, Point end, const Color &col
 
    mGL->glColor(fieldUp ? c : c * 0.5);
 
-   mGL->renderPointVector(&geom, GL_LINE_LOOP);
+   mGL->renderPointVector(&geom, GLOPT::LineLoop);
 }
 
 
@@ -2330,54 +2330,49 @@ void GameObjectRender::renderStaticBitfighterLogo()
 //  512 = R
 void GameObjectRender::renderBitfighterLogo(U32 mask)
 {
-   glEnableClientState(GL_VERTEX_ARRAY);
-
-   glVertexPointer(2, GL_SHORT, sizeof(pixLoc), &gLogoPoints[0]);
-
    U32 pos = 0;
+   const S16 *vertexPointer = &gLogoPoints[0].x;
 
    if(mask & 1 << 0)
-      glDrawArrays(GL_LINE_LOOP,   0, LetterLoc1);
+      mGL->renderVertexArray(vertexPointer, LetterLoc1, GLOPT::LineLoop, 0, sizeof(pixLoc));
    pos += LetterLoc1;
    if(mask & 1 << 1)
-      glDrawArrays(GL_LINE_LOOP, pos, LetterLoc2);
+      mGL->renderVertexArray(vertexPointer, LetterLoc2, GLOPT::LineLoop, pos, sizeof(pixLoc));
    pos += LetterLoc2;
    if(mask & 1 << 2)
-      glDrawArrays(GL_LINE_LOOP, pos, LetterLoc3);
+      mGL->renderVertexArray(vertexPointer, LetterLoc3, GLOPT::LineLoop, pos, sizeof(pixLoc));
    pos += LetterLoc3;
    if(mask & 1 << 3)
-      glDrawArrays(GL_LINE_LOOP, pos, LetterLoc4);
+      mGL->renderVertexArray(vertexPointer, LetterLoc4, GLOPT::LineLoop, pos, sizeof(pixLoc));
    pos += LetterLoc4;
    if(mask & 1 << 4)
-      glDrawArrays(GL_LINE_LOOP, pos, LetterLoc5);
+      mGL->renderVertexArray(vertexPointer, LetterLoc5, GLOPT::LineLoop, pos, sizeof(pixLoc));
    pos += LetterLoc5;
    if(mask & 1 << 5)
-      glDrawArrays(GL_LINE_LOOP, pos, LetterLoc6);
+      mGL->renderVertexArray(vertexPointer, LetterLoc6, GLOPT::LineLoop, pos, sizeof(pixLoc));
    pos += LetterLoc6;
    if(mask & 1 << 6)
-      glDrawArrays(GL_LINE_LOOP, pos, LetterLoc7);
+      mGL->renderVertexArray(vertexPointer, LetterLoc7, GLOPT::LineLoop, pos, sizeof(pixLoc));
    pos += LetterLoc7;
    if(mask & 1 << 7)
-      glDrawArrays(GL_LINE_LOOP, pos, LetterLoc8);
+      mGL->renderVertexArray(vertexPointer, LetterLoc8, GLOPT::LineLoop, pos, sizeof(pixLoc));
    pos += LetterLoc8;
 
    if(mask & 1 << 8)
-      glDrawArrays(GL_LINE_LOOP, pos, LetterLoc9);
+      mGL->renderVertexArray(vertexPointer, LetterLoc9, GLOPT::LineLoop, pos, sizeof(pixLoc));
    pos += LetterLoc9;
    if(mask & 1 << 8)
-      glDrawArrays(GL_LINE_LOOP, pos, LetterLoc10);
+      mGL->renderVertexArray(vertexPointer, LetterLoc10, GLOPT::LineLoop, pos, sizeof(pixLoc));
    pos += LetterLoc10;
    if(mask & 1 << 8)
-      glDrawArrays(GL_LINE_LOOP, pos, LetterLoc11);
+      mGL->renderVertexArray(vertexPointer, LetterLoc11, GLOPT::LineLoop, pos, sizeof(pixLoc));
    pos += LetterLoc11;
 
    if(mask & 1 << 9)
-      glDrawArrays(GL_LINE_LOOP, pos, LetterLoc12);
+      mGL->renderVertexArray(vertexPointer, LetterLoc12, GLOPT::LineLoop, pos, sizeof(pixLoc));
    pos += LetterLoc12;
    if(mask & 1 << 9)
-      glDrawArrays(GL_LINE_LOOP, pos, LetterLoc13);
-
-   glDisableClientState(GL_VERTEX_ARRAY);
+      mGL->renderVertexArray(vertexPointer, LetterLoc13, GLOPT::LineLoop, pos, sizeof(pixLoc));
 }
 
 
@@ -2388,11 +2383,11 @@ void GameObjectRender::renderBitfighterLogo(S32 yPos, F32 scale, U32 mask)
    
    // 3609 is the diff btwn the min and max x coords below, 594 is same for y
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate((DisplayManager::getScreenInfo()->getGameCanvasWidth() - 3609 * fact) / 2, yPos - 594 * fact / 2);
       mGL->glScale(fact);                   // Scale it down...
       renderBitfighterLogo(mask);
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -2400,11 +2395,11 @@ void GameObjectRender::renderBitfighterLogo(const Point &pos, F32 size, U32 lett
 {
    const F32 sizeToLogoRatio = 0.0013f;  // Shot in the dark!
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(pos);
       mGL->glScale(sizeToLogoRatio * size);
       renderBitfighterLogo(letterMask);
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -2502,14 +2497,14 @@ void GameObjectRender::drawDivetedTriangle(F32 height, F32 len)
    pts.push_back(Point(.5 * len, 2 * h3 - lc30));   // L
 
    
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(200, 200, 0);
       mGL->glRotate(GLfloat(Platform::getRealMilliseconds() / 10 % 360));
       mGL->glScale(6);
 
       renderPolygonOutline(&pts, Colors::red);
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -2539,7 +2534,7 @@ void GameObjectRender::drawGear(const Point &center, S32 teeth, F32 radius1, F32
       theta += a / 2 - (ang1rad / 2 + ang2rad / 2);
    }
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(center);
       mGL->glRotate(angleRadians * RADIANS_TO_DEGREES);
 
@@ -2547,20 +2542,20 @@ void GameObjectRender::drawGear(const Point &center, S32 teeth, F32 radius1, F32
 
       RenderUtils::drawCircle(innerCircleRadius);
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
 void GameObjectRender::render25FlagsBadge(F32 x, F32 y, F32 rad)
 {
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(x, y, 0);
       mGL->glScale(.05f * rad);
       mGL->glColor(Colors::gray40);
       RenderUtils::drawEllipse(Point(-16, 15), 6, 2, 0);
 
       renderFlag(-.10f * rad, -.10f * rad, Colors::red50);
-   glPopMatrix();
+   mGL->glPopMatrix();
 
    F32 ts = rad - 3;
    F32 width = RenderUtils::getStringWidth(ts, "25");
@@ -2593,7 +2588,7 @@ void GameObjectRender::renderDeveloperBadge(F32 x, F32 y, F32 rad)
    // Render grid atop our cells
    mGL->glColor(Colors::gray20);
 
-   glLineWidth(1);
+   mGL->glLineWidth(1);
    
    RenderUtils::drawHorizLine(x - rad, x + rad, y - rad);
    RenderUtils::drawHorizLine(x - rad, x + rad, y - r3);
@@ -2605,7 +2600,7 @@ void GameObjectRender::renderDeveloperBadge(F32 x, F32 y, F32 rad)
    RenderUtils::drawVertLine(x + r3,  y - rad, y + rad);
    RenderUtils::drawVertLine(x + rad, y - rad, y + rad);
 
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
 
@@ -2689,27 +2684,27 @@ void GameObjectRender::renderRagingRabidRabbitBadge(F32 x, F32 y, F32 rad)
    };
 
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(x, y, 0);
       mGL->glScale(.1f * rad);
 
       mGL->glColor(Colors::gray50);
-      mGL->renderVertexArray(rabbit, ARRAYSIZE(rabbit) / 2, GL_LINE_LOOP);
+      mGL->renderVertexArray(rabbit, ARRAYSIZE(rabbit) / 2, GLOPT::LineLoop);
 
       mGL->glColor(Colors::red);
-      mGL->renderVertexArray(eye, ARRAYSIZE(eye) / 2, GL_LINE_LOOP);
-   glPopMatrix();
+      mGL->renderVertexArray(eye, ARRAYSIZE(eye) / 2, GLOPT::LineLoop);
+   mGL->glPopMatrix();
 }
 
 
 void GameObjectRender::renderLastSecondWinBadge(F32 x, F32 y, F32 rad)
 {
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(x, y, 0);
       mGL->glScale(.05f * rad);
 
       renderFlag(-.10f * rad, -.10f * rad, Colors::blue);
-   glPopMatrix();
+   mGL->glPopMatrix();
 
    F32 tx = x + .40f * rad;
    F32 ty = y + .40f * rad;
@@ -2770,27 +2765,27 @@ void GameObjectRender::renderHatTrickBadge(F32 x, F32 y, F32 rad)
 
 
    // Waldo?
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(x, y, 0);
       mGL->glScale(.1f * rad);
 
-      // GL_TRIANGLE_FAN, then GL_LINE_LOOP for anti-aliasing
+      // GLOPT::TriangleFan, then GLOPT::LineLoop for anti-aliasing
       mGL->glColor(Colors::red);
-      mGL->renderVertexArray(brim, ARRAYSIZE(brim) / 2, GL_TRIANGLE_FAN);
-      mGL->renderVertexArray(brim, ARRAYSIZE(brim) / 2, GL_LINE_LOOP);
+      mGL->renderVertexArray(brim, ARRAYSIZE(brim) / 2, GLOPT::TriangleFan);
+      mGL->renderVertexArray(brim, ARRAYSIZE(brim) / 2, GLOPT::LineLoop);
 
       mGL->glColor(Colors::white);
-      mGL->renderVertexArray(outline, ARRAYSIZE(outline) / 2, GL_TRIANGLE_FAN);
-      glLineWidth(RenderUtils::LINE_WIDTH_1);
-      mGL->renderVertexArray(outline, ARRAYSIZE(outline) / 2, GL_LINE_LOOP);
-      glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+      mGL->renderVertexArray(outline, ARRAYSIZE(outline) / 2, GLOPT::TriangleFan);
+      mGL->glLineWidth(RenderUtils::LINE_WIDTH_1);
+      mGL->renderVertexArray(outline, ARRAYSIZE(outline) / 2, GLOPT::LineLoop);
+      mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
       mGL->glColor(Colors::red);
-      mGL->renderVertexArray(stripe, ARRAYSIZE(stripe) / 2, GL_LINE_STRIP);
+      mGL->renderVertexArray(stripe, ARRAYSIZE(stripe) / 2, GLOPT::LineStrip);
 
       mGL->glColor(Colors::red);
-      mGL->renderVertexArray(pompom, ARRAYSIZE(pompom) / 2, GL_LINES);
-   glPopMatrix();
+      mGL->renderVertexArray(pompom, ARRAYSIZE(pompom) / 2, GLOPT::Lines);
+   mGL->glPopMatrix();
 }
 
 
@@ -2895,12 +2890,12 @@ void GameObjectRender::renderGrid(F32 currentScale, const Point &offset, const P
 
    // Draw axes
    mGL->glColor(0.7f * snapFadeFact);
-   glLineWidth(RenderUtils::LINE_WIDTH_3);
+   mGL->glLineWidth(RenderUtils::LINE_WIDTH_3);
 
    RenderUtils::drawHorizLine((F32)0, (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), (F32)origin.y);
    RenderUtils::drawVertLine((F32)origin.x, (F32)0, (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight());
 
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
 
@@ -2933,15 +2928,16 @@ void GameObjectRender::renderStars(const Point *stars, const Color *colors, S32 
    lowerRight.y = floor(lowerRight.y) + 0.5f;
 
    // Render some stars
-   glPointSize( RenderUtils::LINE_WIDTH_1 );
+   mGL->glPointSize(RenderUtils::LINE_WIDTH_1);
 
-   glEnableClientState(GL_VERTEX_ARRAY);
+//   glEnableClientState(GL_VERTEX_ARRAY);
 
-   glEnable(GL_BLEND);
+   mGL->glEnable(GLOPT::Blend);
    mGL->glColor(Colors::gray60, alpha);
 
-   glVertexPointer(2, GL_FLOAT, sizeof(Point), &stars[0]);    // Each star is a pair of floats between 0 and 1
+//   glVertexPointer(2, GLOPT::Float, sizeof(Point), &stars[0]);    // Each star is a pair of floats between 0 and 1
 
+   const F32 *vertexPointer = &stars[0].x;
 
    // Do some calculations for the parallax
    S32 xDist = (S32) (cameraPos.x / starDist);
@@ -2956,21 +2952,23 @@ void GameObjectRender::renderStars(const Point *stars, const Color *colors, S32 
    for(F32 xPage = upperLeft.x + fx1; xPage < lowerRight.x + fx2 && !(F32(xPage + 1.f) == xPage); xPage++)
       for(F32 yPage = upperLeft.y + fy1; yPage < lowerRight.y + fy2 && !(F32(yPage + 1.f) == yPage); yPage++)
       {
-         glPushMatrix();
+         mGL->glPushMatrix();
          mGL->glScale(starChunkSize);   // Creates points with coords btwn 0 and starChunkSize
 
          mGL->glTranslate(xPage + (cameraPos.x / starDist), yPage + (cameraPos.y / starDist));
 
-         glDrawArrays(GL_POINTS, 0, numStars);
+//         glDrawArrays(GLOPT::Points, 0, numStars);
+
+         mGL->renderVertexArray(vertexPointer, numStars, GLOPT::Points, 0, sizeof(Point));
          
          //glColor(.1,.1,.1);
          // for(S32 i = 0; i < 50; i++)
-         //   glDrawArrays(GL_LINE_LOOP, i * 6, 6);
+         //   glDrawArrays(GLOPT::LineLoop, i * 6, 6);
 
-         glPopMatrix();
+         mGL->glPopMatrix();
       }
 
-   glDisableClientState(GL_VERTEX_ARRAY);
+//   glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 
@@ -3060,12 +3058,12 @@ void GameObjectRender::renderWalls(const Vector<DatabaseObject *> *walls,
 
    if(showSnapVertices)
    {
-      glLineWidth(RenderUtils::LINE_WIDTH_1);
+      mGL->glLineWidth(RenderUtils::LINE_WIDTH_1);
 
       for(S32 i = 0; i < wallEdgePoints.size(); i++)
          renderSmallSolidVertex(currentScale, wallEdgePoints[i], dragMode);
 
-      glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+      mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
    }
 }
 
@@ -3101,7 +3099,7 @@ void GameObjectRender::renderWallSpine(const WallItem *wallItem, const Vector<Po
 void GameObjectRender::renderWallSpine(const WallItem *wallItem, const Vector<Point> *outline,
                        F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
-   mGL->renderPointVector(outline, GL_LINE_STRIP);
+   mGL->renderPointVector(outline, GLOPT::LineStrip);
 
    if(renderVertices)
       renderPolyLineVertices(wallItem, snappingToWallCornersEnabled, currentScale);
@@ -3159,7 +3157,7 @@ void GameObjectRender::drawObjectiveArrow(const Point &nearestPoint, F32 zoomFra
    for(S32 i = 0; i < 2; i++)
    {
       mGL->glColor(i == 1 ? fillColor : outlineColor, alpha);
-      mGL->renderVertexArray((F32 *)(vertices), ARRAYSIZE(vertices), i == 1 ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
+      mGL->renderVertexArray((F32 *)(vertices), ARRAYSIZE(vertices), i == 1 ? GLOPT::TriangleFan : GLOPT::LineLoop);
    }
 
    // Highlight the objective arrow, if need be.  This will be called rarely, so efficiency here is 
@@ -3171,7 +3169,7 @@ void GameObjectRender::drawObjectiveArrow(const Point &nearestPoint, F32 zoomFra
       offsetPolygon(&inPoly, outPoly, HIGHLIGHTED_OBJECT_BUFFER_WIDTH);
 
       mGL->glColor(Colors::HelpItemRenderColor, highlightAlpha * alpha);
-      mGL->renderVertexArray((F32 *)(outPoly.address()), outPoly.size(), GL_LINE_LOOP);
+      mGL->renderVertexArray((F32 *)(outPoly.address()), outPoly.size(), GLOPT::LineLoop);
    }
 
    //   Point cen = rp - arrowDir * 12;
@@ -3186,11 +3184,11 @@ void GameObjectRender::drawObjectiveArrow(const Point &nearestPoint, F32 zoomFra
 
 void GameObjectRender::renderScoreboardOrnamentTeamFlags(S32 xpos, S32 ypos, const Color &color, bool teamHasFlag)
 {
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(F32(xpos), F32(ypos + 15), 0);
       mGL->glScale(.75);
       renderFlag(color);
-   glPopMatrix();
+   mGL->glPopMatrix();
 
    // Add an indicator for the team that has the flag
    if(teamHasFlag)
@@ -3203,11 +3201,11 @@ void GameObjectRender::renderScoreboardOrnamentTeamFlags(S32 xpos, S32 ypos, con
 
 void GameObjectRender::renderSpawn(const Point &pos, F32 scale, const Color &color)
 {   
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(pos.x, pos.y);
       mGL->glScale(scale);    // Make item draw at constant size, regardless of zoom
       renderSquareItem(Point(0,0), color, 1, Colors::white, 'S');
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -3221,10 +3219,10 @@ void GameObjectRender::renderFlightPlan(const Point &from, const Point &to, cons
    Vector<Point> line(2);
    line.push_back(from);
    line.push_back(to);
-   mGL->renderPointVector(&line, GL_LINE_STRIP);
+   mGL->renderPointVector(&line, GLOPT::LineStrip);
 
    // Render the flight plan itself
-   mGL->renderPointVector(&flightPlan, GL_LINE_STRIP);
+   mGL->renderPointVector(&flightPlan, GLOPT::LineStrip);
 }
 
 
@@ -3234,7 +3232,7 @@ void GameObjectRender::renderHeavysetArrow(const Point &pos, const Point &dest, 
    for(S32 i = 1; i >= 0; i--)
    {
       // Draw heavy colored line with colored core
-      glLineWidth(i ? RenderUtils::LINE_WIDTH_4 : RenderUtils::DEFAULT_LINE_WIDTH);
+      mGL->glLineWidth(i ? RenderUtils::LINE_WIDTH_4 : RenderUtils::DEFAULT_LINE_WIDTH);
       mGL->glColor(color, i ? .35f : 1);         // Get color from child class
 
       F32 ang = pos.angleTo(dest);
@@ -3248,7 +3246,7 @@ void GameObjectRender::renderHeavysetArrow(const Point &pos, const Point &dest, 
             dest.x, dest.y,
             dest.x - cos(ang - angoff) * al, dest.y - sin(ang - angoff) * al
       };
-      mGL->renderVertexArray(vertices, 4, GL_LINES);
+      mGL->renderVertexArray(vertices, 4, GLOPT::Lines);
 
       // Draw highlighted core on 2nd pass if item is selected, but not while it's being edited
       if(i == 0 && (isSelected || isLitUp))
@@ -3259,7 +3257,7 @@ void GameObjectRender::renderHeavysetArrow(const Point &pos, const Point &dest, 
             dest.x, dest.y
       };
 
-      mGL->renderVertexArray(vertices2, 2, GL_LINES);
+      mGL->renderVertexArray(vertices2, 2, GLOPT::Lines);
    }
 }
 
@@ -3268,9 +3266,9 @@ void GameObjectRender::renderTeleporterEditorObject(const Point &pos, S32 radius
 {
    mGL->glColor(color);
 
-   glLineWidth(RenderUtils::LINE_WIDTH_3);
+   mGL->glLineWidth(RenderUtils::LINE_WIDTH_3);
    RenderUtils::drawPolygon(pos, 12, (F32)radius, 0);
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
 
@@ -3290,7 +3288,7 @@ void GameObjectRender::renderUpArrow(const Point &center, S32 size)
                       center.x, top,     center.x + capHeight, top + capHeight
                     };
 
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
 }
 
 
@@ -3306,7 +3304,7 @@ void GameObjectRender::renderDownArrow(const Point &center, S32 size)
                       center.x, bot,     center.x + capHeight, bot - capHeight
                     };
 
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
 }
 
 
@@ -3322,7 +3320,7 @@ void GameObjectRender::renderLeftArrow(const Point &center, S32 size)
                       left, center.y,     left + capHeight, center.y + capHeight
                     };
 
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
 }
 
 
@@ -3338,7 +3336,7 @@ void GameObjectRender::renderRightArrow(const Point &center, S32 size)
                       right, center.y,     right - capHeight, center.y + capHeight
                     };
 
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
 }
 
 

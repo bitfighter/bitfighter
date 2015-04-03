@@ -7,12 +7,12 @@
 #define _UI_MANAGER_H_
 
 #include "SoundEffect.h"
+#include "RenderManager.h"
 
 #include "SoundSystemEnums.h"
 #include "SparkTypesEnum.h"
 #include "PlayerActionEnum.h"
 
-#include "game.h"
 #include "HelpItemManager.h"     // For HelpItem def
 #include "LoadoutTracker.h"
 
@@ -44,7 +44,7 @@ class ClientGame;
 class UserInterface;
 class GameSettings;
 
-class UIManager
+class UIManager: RenderManager
 {
 public:
    static const S32 MessageBoxWrapWidth;

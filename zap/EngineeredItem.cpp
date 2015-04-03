@@ -2591,14 +2591,14 @@ void Mortar::render() const
    GameObjectRender::renderMortar(getColor(), getPos(), mAnchorNormal, isEnabled(), mHealth, mHealRate);
 
    // Render target zone?
-//   glPushMatrix();
+//   mGL->glPushMatrix();
 //   Point aimCenter = getPos() + mAnchorNormal * Turret::TURRET_OFFSET;
 //   glTranslate(aimCenter);
 //
 //   glRotate(mAnchorNormal.ATAN2() * RADIANS_TO_DEGREES);
 //
-//   renderPointVector(&mZone, GL_LINE_LOOP);
-//   glPopMatrix();
+//   renderPointVector(&mZone, GLOPT::LineLoop);
+//   mGL->glPopMatrix();
 }
 
 

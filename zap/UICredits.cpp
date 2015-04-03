@@ -162,7 +162,7 @@ bool CreditsUserInterface::onKeyDown(InputCode inputCode)
 // Constructor
 CreditsScroller::CreditsScroller()
 {
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
    // Loop through each line in the credits looking for section breaks ("-")
    // thus creating groups, the first of which is generally the job, followed
@@ -250,7 +250,7 @@ void CreditsScroller::render() const
          (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), 150,
          (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), 0
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::TriangleFan);
 
    GameObjectRender::renderStaticBitfighterLogo();    // And add our logo at the top of the page
 }

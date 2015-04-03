@@ -22,9 +22,6 @@
 #  define SDLMod SDL_Keymod
 #endif
 
-#include "glinc.h"
-
-
 #include <cmath>
 
 namespace Zap
@@ -577,11 +574,11 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
 
    DisplayManager::getScreenInfo()->setWindowSize(newWidth, newHeight);
   
-   glViewport(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
+   mGL->glViewport(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
 
    GameManager::gameConsole->onScreenResized();
 
-   glScissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());    // See comment on identical line in main.cpp
+   mGL->glScissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());    // See comment on identical line in main.cpp
 }
 
 

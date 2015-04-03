@@ -37,7 +37,7 @@
 #ifndef FREEGLUT_STROKE_H_
 #define FREEGLUT_STROKE_H_
 
-#include "glinc.h"
+typedef float GLfloat;
 
 typedef struct tagSFG_StrokeVertex SFG_StrokeVertex;
 struct tagSFG_StrokeVertex

@@ -734,7 +734,7 @@ void QueryServersUserInterface::renderLockIcon() const
          3,4,
          3,2
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop);
 
    F32 vertices2[] = {
          2.6f, 2,
@@ -746,7 +746,7 @@ void QueryServersUserInterface::renderLockIcon() const
          0.4f, 1.3f,
          0.4f, 2
    };
-   mGL->renderVertexArray(vertices2, ARRAYSIZE(vertices2) / 2, GL_LINE_STRIP);
+   mGL->renderVertexArray(vertices2, ARRAYSIZE(vertices2) / 2, GLOPT::LineStrip);
 }
 
 
@@ -826,7 +826,7 @@ void QueryServersUserInterface::render() const
             (F32)horizMargin,               (F32)dividerPos,
             (F32)canvasWidth - horizMargin, (F32)dividerPos
       };
-      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
 
 
       S32 ypos = dividerPos + 3;      // 3 = gap after divider
@@ -911,7 +911,7 @@ void QueryServersUserInterface::render() const
          mGL->glColor(Colors::green);
          if(s.dedicated || s.test || s.pingTimedOut || !s.everGotQueryResponse)
          {
-            glPushMatrix();
+            mGL->glPushMatrix();
                mGL->glTranslate(columns[1].xStart + 5, y + 2, 0);
                if( s.pingTimedOut || !s.everGotQueryResponse )
                   RenderUtils::drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
@@ -919,11 +919,11 @@ void QueryServersUserInterface::render() const
                   renderTestIcon();
                else
                   renderDedicatedIcon();
-            glPopMatrix();
+            mGL->glPopMatrix();
          }
          if(s.passwordRequired || s.pingTimedOut || !s.everGotQueryResponse)
          {
-            glPushMatrix();
+            mGL->glPushMatrix();
                mGL->glTranslate(F32(columns[1].xStart + 25), F32(y + 2));
                if(s.pingTimedOut || !s.everGotQueryResponse)
                   RenderUtils::drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
@@ -932,7 +932,7 @@ void QueryServersUserInterface::render() const
                   mGL->glScale(3.65f);
                   renderLockIcon();
                }
-            glPopMatrix();
+            mGL->glPopMatrix();
          }
 
          setPingTimeColor(s.pingTime);
@@ -975,7 +975,7 @@ void QueryServersUserInterface::renderTopBanner() const
          (F32)canvasWidth, (F32)BANNER_HEIGHT,
          0,                (F32)BANNER_HEIGHT
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::TriangleFan);
 
    mGL->glColor(Colors::green);
    RenderUtils::drawCenteredString(vertMargin + 12, 24, "BITFIGHTER GAME LOBBY");
@@ -1026,7 +1026,7 @@ void QueryServersUserInterface::renderColumnHeaders() const
          x2 = columns[mHighlightColumn+1].xStart - 5;
 
       mGL->glColor(Colors::white);
-      RenderUtils::drawRect(x1, COLUMN_HEADER_TOP, x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1, GL_LINE_LOOP);
+      RenderUtils::drawRect(x1, COLUMN_HEADER_TOP, x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1, GLOPT::LineLoop);
    }
 }
 

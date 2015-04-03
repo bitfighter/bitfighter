@@ -120,7 +120,7 @@ void UIColorPicker::drawArrow(F32 *p)
 {
    p[2] = p[0] + 20; p[3] = p[1] - 10;
    p[4] = p[0] + 20; p[5] = p[1] + 10;
-   mGL->renderVertexArray(p, 3, GL_LINE_LOOP);
+   mGL->renderVertexArray(p, 3, GLOPT::LineLoop);
 }
 
 
@@ -163,39 +163,39 @@ void UIColorPicker::render() const
       maxCol,      0,      0, 1,
    };
 
-   mGL->renderColorVertexArray(colorWheelPoints, colorArray, 8, GL_TRIANGLE_FAN);
+   mGL->renderColorVertexArray(colorWheelPoints, colorArray, 8, GLOPT::TriangleFan);
 
 
    colorArray[0]  = r2;  colorArray[1]  = g2;  colorArray[2]  = b2;
    colorArray[4]  = r2;  colorArray[5]  = g2;  colorArray[6]  = b2; 
    colorArray[8]  = 0;   colorArray[9]  = 0;   colorArray[10] = 0; 
    colorArray[12] = 0;   colorArray[13] = 0;   colorArray[14] = 0;
-   mGL->renderColorVertexArray(colorBrightnessPoints, colorArray, 4, GL_TRIANGLE_FAN);
+   mGL->renderColorVertexArray(colorBrightnessPoints, colorArray, 4, GLOPT::TriangleFan);
 
    colorArray[0]  = 1;  colorArray[1]  = g;  colorArray[2]  = b;
    colorArray[4]  = 1;  colorArray[5]  = g;  colorArray[6]  = b;
    colorArray[9]  = g;  colorArray[10] = b;
    colorArray[13] = g;  colorArray[14] = b;
-   mGL->renderColorVertexArray(colorBrightnessPointsRed, colorArray, 4, GL_TRIANGLE_FAN);
+   mGL->renderColorVertexArray(colorBrightnessPointsRed, colorArray, 4, GLOPT::TriangleFan);
 
    colorArray[0]  = r; colorArray[1]  = 1;
    colorArray[4]  = r; colorArray[5]  = 1;
    colorArray[8]  = r; colorArray[9]  = 0;
    colorArray[12] = r; colorArray[13] = 0;
-   mGL->renderColorVertexArray(colorBrightnessPointsGreen, colorArray, 4, GL_TRIANGLE_FAN);
+   mGL->renderColorVertexArray(colorBrightnessPointsGreen, colorArray, 4, GLOPT::TriangleFan);
 
    colorArray[1]  = g; colorArray[2]  = 1;
    colorArray[5]  = g; colorArray[6]  = 1;
    colorArray[9]  = g; colorArray[10] = 0;
    colorArray[13] = g; colorArray[14] = 0;
-   mGL->renderColorVertexArray(colorBrightnessPointsBlue, colorArray, 4, GL_TRIANGLE_FAN);
+   mGL->renderColorVertexArray(colorBrightnessPointsBlue, colorArray, 4, GLOPT::TriangleFan);
 
    mGL->glColor(Colors::white);
-   mGL->renderVertexArray(&colorWheelPoints[2],       6, GL_LINE_LOOP);
-   mGL->renderVertexArray(colorBrightnessPoints,      4, GL_LINE_LOOP);
-   mGL->renderVertexArray(colorBrightnessPointsRed,   4, GL_LINE_LOOP);
-   mGL->renderVertexArray(colorBrightnessPointsGreen, 4, GL_LINE_LOOP);
-   mGL->renderVertexArray(colorBrightnessPointsBlue,  4, GL_LINE_LOOP);
+   mGL->renderVertexArray(&colorWheelPoints[2],       6, GLOPT::LineLoop);
+   mGL->renderVertexArray(colorBrightnessPoints,      4, GLOPT::LineLoop);
+   mGL->renderVertexArray(colorBrightnessPointsRed,   4, GLOPT::LineLoop);
+   mGL->renderVertexArray(colorBrightnessPointsGreen, 4, GLOPT::LineLoop);
+   mGL->renderVertexArray(colorBrightnessPointsBlue,  4, GLOPT::LineLoop);
 
 
    F32 pointerArrow[8];
@@ -240,7 +240,7 @@ void UIColorPicker::render() const
 
       mGL->glColor(maxCol > 0.6 ?  0.0f : 1.0f);
 
-      mGL->renderVertexArray(pointerArrow, 4, GL_LINES);
+      mGL->renderVertexArray(pointerArrow, 4, GLOPT::Lines);
    }
 
 
@@ -260,21 +260,21 @@ void UIColorPicker::render() const
    // Ship
    static F32 thrusts[4] =  { 1, 0, 0, 0 };
 
-   glPushMatrix();
+   mGL->glPushMatrix();
    mGL->glTranslate(165, y + h / 2);
    mGL->glRotate(-90);
 
    GameObjectRender::renderShip(ShipShape::Normal, *this, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 
    // Turret
-   glPushMatrix();
+   mGL->glPushMatrix();
    mGL->glTranslate(240, y + h / 2);
 
    GameObjectRender::renderTurret(*this, Point(0, 15), Point(0, -1), true, 1, 0, 0);
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 

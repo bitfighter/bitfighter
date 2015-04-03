@@ -16,12 +16,12 @@ ShipShapeInfo ShipShape::shipShapeInfos[ShapeTypeCount] =
    // Normal
    {
       // Outer hull
-      // uses GL_LINE_LOOP
+      // uses GLOPT::LineLoop
       3,
       { -20, -15,   0, 25,   20, -15 },
 
       // Inner hull
-      // uses GL_LINE_STRIP because it can come in pieces
+      // uses GLOPT::LineStrip because it can come in pieces
       1,
       {
          {
@@ -35,12 +35,12 @@ ShipShapeInfo ShipShape::shipShapeInfos[ShapeTypeCount] =
       { -20, -15,   0,  25,   20, -15 },
 
       // Flame ports
-      // Uses GL_LINES - each pair is drawn as a separate line
+      // Uses GLOPT::Lines - each pair is drawn as a separate line
       8,
       { -12.5, 0,   -12.5, 10,    -12.5, 10,   -7.5, 10,    7.5, 10,   12.5, 10,   12.5, 10,   12.5, 0 },
 
       // Flames
-      // Uses GL_LINE_STRIP
+      // Uses GLOPT::LineStrip
       // Forward
       1,
       {

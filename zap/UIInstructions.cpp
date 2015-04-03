@@ -589,7 +589,7 @@ void InstructionsUserInterface::renderModulesPage() const
       mGL->glColor(Colors::white);
       RenderUtils::drawString(x, y, textsize, moduleDescriptions[i][1]);
 
-      glPushMatrix();
+      mGL->glPushMatrix();
       mGL->glTranslate(60, y + 10.0f);
       mGL->glScale(0.7f);
       mGL->glRotate(-90);
@@ -614,7 +614,7 @@ void InstructionsUserInterface::renderModulesPage() const
                      1, 1, 0, 1,  // Colors::yellow
                      0, 0, 0, 1,  // Colors::black
                };
-               mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
+               mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
             }
             break;
 
@@ -662,7 +662,7 @@ void InstructionsUserInterface::renderModulesPage() const
             }
             break;
       }
-      glPopMatrix();
+      mGL->glPopMatrix();
       y += 45;
    }
 }
@@ -735,7 +735,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
       for(S32 j = 0; j < desc.size(); j++)
          GameObjectRender::renderCenteredString(start + Point(0, 25 + j * FontSize * 1.2), 17, desc[j].c_str());
 
-      glPushMatrix();
+      mGL->glPushMatrix();
       mGL->glTranslate(objStart);
       mGL->glScale(0.7f);
 
@@ -889,11 +889,11 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                PanelGeom panelGeom;
                CoreItem::fillPanelGeom(pos, time, panelGeom);
 
-               glPushMatrix();
+               mGL->glPushMatrix();
                   mGL->glTranslate(pos);
                   mGL->glScale(0.55f);
                   GameObjectRender::renderCore(pos, Colors::blue, time, &panelGeom, health, 1.0f);
-               glPopMatrix();
+               mGL->glPopMatrix();
             }
             break;
 
@@ -907,7 +907,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
             break;
 
       }
-      glPopMatrix();
+      mGL->glPopMatrix();
       objStart.y += 75;
       start.y += 75;
    }
@@ -955,7 +955,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
          (F32)cmdCol, (F32)ypos,
          (F32)750,    (F32)ypos
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
 
    ypos += 5;     // Small gap before cmds start
 

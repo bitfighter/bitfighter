@@ -245,11 +245,11 @@ void SlideOutWidget::renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 
 
    // Fill
    mGL->glColor(Colors::black, 0.70f);
-   mGL->renderPointVector(&points, GL_TRIANGLE_FAN);
+   mGL->renderPointVector(&points, GLOPT::TriangleFan);
 
    // Border
    mGL->glColor(borderColor);
-   mGL->renderPointVector(&points, GL_LINE_STRIP);
+   mGL->renderPointVector(&points, GLOPT::LineStrip);
 }
 
 

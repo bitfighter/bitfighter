@@ -20,6 +20,8 @@
 #ifndef FONTSTASH_H
 #define FONTSTASH_H
 
+typedef unsigned int GLuint;
+
 struct sth_stash* sth_create(int cachew, int cacheh);
 
 int sth_add_font(struct sth_stash* stash, const char* path);

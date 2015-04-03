@@ -32,8 +32,6 @@
 
 #include "SoundSystem.h"
 
-#include "glinc.h"
-
 
 namespace Zap
 {
@@ -467,17 +465,17 @@ void UIManager::renderCurrent()
    if(mMenuTransitionTimer.getCurrent() && mLastUI)
    {
       // Save viewport
-      GLint viewport[4];
-      glGetIntegerv(GL_VIEWPORT, viewport);    
+      S32 viewport[4];
+      mGL->glGetValue(GLOPT::Viewport, viewport);
 
-      glViewport(viewport[0] + GLint((mLastWasLower ? 1 : -1) * viewport[2] * (1 - mMenuTransitionTimer.getFraction())), 0, viewport[2], viewport[3]);
+      mGL->glViewport(viewport[0] + S32((mLastWasLower ? 1 : -1) * viewport[2] * (1 - mMenuTransitionTimer.getFraction())), 0, viewport[2], viewport[3]);
       mLastUI->render();
 
-      glViewport(viewport[0] - GLint((mLastWasLower ? 1 : -1) * viewport[2] * mMenuTransitionTimer.getFraction()), 0, viewport[2], viewport[3]);
+      mGL->glViewport(viewport[0] - S32((mLastWasLower ? 1 : -1) * viewport[2] * mMenuTransitionTimer.getFraction()), 0, viewport[2], viewport[3]);
       mCurrentInterface->render();
 
       // Restore viewport for posterity
-      glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+      mGL->glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
       return;
    }

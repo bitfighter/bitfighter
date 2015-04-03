@@ -148,10 +148,10 @@ void MessageUserInterface::render() const
       };
 
       mGL->glColor(Colors::red30, fadeFactor * 0.95f);  // Draw a box
-      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
+      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::TriangleFan);
 
       mGL->glColor(Colors::white, fadeFactor);          // Add a border
-      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop);
    }
 
    // Draw title, message, and footer

@@ -19,8 +19,6 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 
-#include "glinc.h"
-
 using namespace TNL;
 
 
@@ -214,21 +212,21 @@ public:
    template<typename T, typename U, typename V, typename W>
    static void drawFilledRect(T x1, U y1, V x2, W y2)
    {
-      drawRect(static_cast<F32>(x1), static_cast<F32>(y1), static_cast<F32>(x2), static_cast<F32>(y2), GL_TRIANGLE_FAN);
+      drawRect(static_cast<F32>(x1), static_cast<F32>(y1), static_cast<F32>(x2), static_cast<F32>(y2), GLOPT::TriangleFan);
    }
 
 
    template<typename T, typename U, typename V, typename W>
    static void drawHollowRect(T x1, U y1, V x2, W y2)
    {
-      drawRect(static_cast<F32>(x1), static_cast<F32>(y1), static_cast<F32>(x2), static_cast<F32>(y2), GL_LINE_LOOP);
+      drawRect(static_cast<F32>(x1), static_cast<F32>(y1), static_cast<F32>(x2), static_cast<F32>(y2), GLOPT::LineLoop);
    }
 
 
    template<typename T, typename U, typename V, typename W>
    static void drawHollowRect(T x1, U y1, V x2, W y2, const Color &outlineColor)
    {
-      glColor4f(outlineColor.r, outlineColor.g, outlineColor.b, 1.0);
+      mGL->glColor(outlineColor.r, outlineColor.g, outlineColor.b, 1.0);
       drawHollowRect(x1, y1, x2, y2);
    }
 

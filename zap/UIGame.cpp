@@ -735,26 +735,26 @@ void GameUserInterface::renderLostConnectionMessage() const
       const S32 y1 = 142;
 
       mGL->glColor(Colors::black);
-      RenderUtils::drawRect(x1 +  1, y1 + 20, x1 + 8, y1 + 30, GL_TRIANGLE_FAN);
-      RenderUtils::drawRect(x1 + 11, y1 + 15, x1 + 18, y1 + 30, GL_TRIANGLE_FAN);
-      RenderUtils::drawRect(x1 + 21, y1 + 10, x1 + 28, y1 + 30, GL_TRIANGLE_FAN);
-      RenderUtils::drawRect(x1 + 31, y1 + 05, x1 + 38, y1 + 30, GL_TRIANGLE_FAN);
-      RenderUtils::drawRect(x1 + 41, y1 + 00, x1 + 48, y1 + 30, GL_TRIANGLE_FAN);
+      RenderUtils::drawRect(x1 +  1, y1 + 20, x1 + 8, y1 + 30, GLOPT::TriangleFan);
+      RenderUtils::drawRect(x1 + 11, y1 + 15, x1 + 18, y1 + 30, GLOPT::TriangleFan);
+      RenderUtils::drawRect(x1 + 21, y1 + 10, x1 + 28, y1 + 30, GLOPT::TriangleFan);
+      RenderUtils::drawRect(x1 + 31, y1 + 05, x1 + 38, y1 + 30, GLOPT::TriangleFan);
+      RenderUtils::drawRect(x1 + 41, y1 + 00, x1 + 48, y1 + 30, GLOPT::TriangleFan);
       mGL->glColor(Colors::gray40);
-      RenderUtils::drawRect(x1 +  1, y1 + 20, x1 + 8, y1 + 30, GL_LINE_LOOP);
-      RenderUtils::drawRect(x1 + 11, y1 + 15, x1 + 18, y1 + 30, GL_LINE_LOOP);
-      RenderUtils::drawRect(x1 + 21, y1 + 10, x1 + 28, y1 + 30, GL_LINE_LOOP);
-      RenderUtils::drawRect(x1 + 31, y1 + 05, x1 + 38, y1 + 30, GL_LINE_LOOP);
-      RenderUtils::drawRect(x1 + 41, y1 + 00, x1 + 48, y1 + 30, GL_LINE_LOOP);
+      RenderUtils::drawRect(x1 +  1, y1 + 20, x1 + 8, y1 + 30, GLOPT::LineLoop);
+      RenderUtils::drawRect(x1 + 11, y1 + 15, x1 + 18, y1 + 30, GLOPT::LineLoop);
+      RenderUtils::drawRect(x1 + 21, y1 + 10, x1 + 28, y1 + 30, GLOPT::LineLoop);
+      RenderUtils::drawRect(x1 + 31, y1 + 05, x1 + 38, y1 + 30, GLOPT::LineLoop);
+      RenderUtils::drawRect(x1 + 41, y1 + 00, x1 + 48, y1 + 30, GLOPT::LineLoop);
 
 
       if((Platform::getRealMilliseconds() & 0x300) != 0) // Draw flashing red "X" on empty connection bars
       {
          static const F32 vertices[] = {x1 + 5, y1 - 5, x1 + 45, y1 + 35,  x1 + 5, y1 + 35, x1 + 45, y1 - 5 };
          mGL->glColor(Colors::red);
-         glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH * 2.f);
-         mGL->renderVertexArray(vertices, 4, GL_LINES);
-         glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+         mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH * 2.f);
+         mGL->renderVertexArray(vertices, 4, GLOPT::Lines);
+         mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
       }
    }
 }
@@ -907,7 +907,7 @@ void GameUserInterface::renderProgressBar() const
                left + w, F32(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - height),
                left,     F32(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - height)
          };
-         mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GL_LINE_LOOP : GL_TRIANGLE_FAN);
+         mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GLOPT::LineLoop : GLOPT::TriangleFan);
       }
    }
 }
@@ -971,7 +971,7 @@ void GameUserInterface::renderReticle() const
 #undef COLOR_RGB
 #undef RETICLE_COLOR
 
-   mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
+   mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
 }
 
 
@@ -1711,13 +1711,13 @@ void GameUserInterface::renderChatMsgs() const
 void GameUserInterface::renderAnnouncement(S32 pos) const
 {
    mGL->glColor(Colors::red);
-   glLineWidth(RenderUtils::LINE_WIDTH_4);
+   mGL->glLineWidth(RenderUtils::LINE_WIDTH_4);
 
    S32 x = RenderUtils::drawStringAndGetWidth(UserInterface::horizMargin, pos, 16, "*** ");
    x += RenderUtils::drawStringAndGetWidth(UserInterface::horizMargin + x, pos, 16, mAnnouncement.c_str());
    RenderUtils::drawString(UserInterface::horizMargin + x, pos, 16, " ***");
 
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
 
@@ -1974,7 +1974,7 @@ void GameUserInterface::VoiceRecorder::render() const
             F32(10 + totalLineCount * 2), 130.0f,
             F32(10 + totalLineCount * 2), 145.0f
       };
-      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices)/2, GL_LINES);
+      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices)/2, GLOPT::Lines);
 
       F32 halfway = totalLineCount * 0.5f;
       F32 full = amt * totalLineCount;
@@ -2015,7 +2015,7 @@ void GameUserInterface::VoiceRecorder::render() const
          vertexArray[(4*(i-1))+3] = F32(145);
       }
 
-      mGL->renderColorVertexArray(vertexArray, colorArray, S32(full*2), GL_LINES);
+      mGL->renderColorVertexArray(vertexArray, colorArray, S32(full*2), GLOPT::Lines);
    }
 }
 
@@ -2506,8 +2506,8 @@ void GameUserInterface::renderBasicInterfaceOverlay() const
       if(progress != 0)
       {
          mGL->glColor(Colors::yellow);
-         RenderUtils::drawRect(25.f, 200.f, progress * (DisplayManager::getScreenInfo()->getGameCanvasWidth()-50) + 25.f, 210.f, GL_TRIANGLE_FAN);
-         RenderUtils::drawRect(25, 200, DisplayManager::getScreenInfo()->getGameCanvasWidth()-25, 210, GL_LINE_LOOP);
+         RenderUtils::drawRect(25.f, 200.f, progress * (DisplayManager::getScreenInfo()->getGameCanvasWidth()-50) + 25.f, 210.f, GLOPT::TriangleFan);
+         RenderUtils::drawRect(25, 200, DisplayManager::getScreenInfo()->getGameCanvasWidth()-25, 210, GLOPT::LineLoop);
       }
    }
    
@@ -2793,7 +2793,7 @@ void GameUserInterface::renderGameNormal() const
 
    visExt = getGame()->computePlayerVisArea(ship);
 
-   glPushMatrix();
+   mGL->glPushMatrix();
 
    static const Point center(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2,
                              DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
@@ -2859,7 +2859,7 @@ void GameUserInterface::renderGameNormal() const
    if(mDebugShowObjectIds)
       renderObjectIds();
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 
    // Render current ship's energy
    if(ship)
@@ -2972,7 +2972,7 @@ void GameUserInterface::renderGameCommander() const
    visSize = ship ? getGame()->computePlayerVisArea(ship) * 2 : worldExtents;
 
 
-   glPushMatrix();
+   mGL->glPushMatrix();
 
    // Put (0,0) at the center of the screen
    mGL->glTranslate(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.5f,
@@ -3086,7 +3086,7 @@ void GameUserInterface::renderGameCommander() const
 
    getUIManager()->getUI<GameUserInterface>()->renderEngineeredItemDeploymentMarker(ship);
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 
 
    // Render current ship's energy
@@ -3136,13 +3136,13 @@ void GameUserInterface::renderGameCommander() const
 //         mapX + mapWidth, mapY + mapHeight,
 //         mapX + mapWidth, mapY
 //   };
-//   mGL->renderVertexArray(vertices, 4, GL_LINE_LOOP);
+//   mGL->renderVertexArray(vertices, 4, GLOPT::LineLoop);
 //
 //
-//   glEnable(GL_SCISSOR_BOX);                    // Crop to overlay map display area
-//   glScissor(mapX, mapY + mapHeight, mapWidth, mapHeight);  // Set cropping window
+//   mGL->glEnable(GL_SCISSOR_BOX);                    // Crop to overlay map display area
+//   mGL->glScissor(mapX, mapY + mapHeight, mapWidth, mapHeight);  // Set cropping window
 //
-//   glPushMatrix();   // Set scaling and positioning of the overlay
+//   mGL->glPushMatrix();   // Set scaling and positioning of the overlay
 //
 //   glTranslate(mapX + mapWidth / 2.f, mapY + mapHeight / 2.f);          // Move map off to the corner
 //   glScale(mapScale);                                     // Scale map
@@ -3173,8 +3173,8 @@ void GameUserInterface::renderGameCommander() const
 // //     if(!(renderObjects[i]->getObjectTypeMask() & SpyBugType && playerTeam != renderObjects[i]->getTeam()))
 //         renderObjects[i]->render(1);
 //
-//   glPopMatrix();
-//   glDisable(GL_SCISSOR_BOX);     // Stop cropping
+//   mGL->glPopMatrix();
+//   mGL->glDisable(GL_SCISSOR_BOX);     // Stop cropping
 //}
 
 ////////////////////////////////////////////////////////////

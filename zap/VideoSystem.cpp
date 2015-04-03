@@ -20,8 +20,6 @@
 
 #include "tnlLog.h"
 
-#include "glinc.h"
-
 #if !SDL_VERSION_ATLEAST(2,0,0)
 #  include "SDL_syswm.h"
 #endif
@@ -390,25 +388,25 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    // Now save the new window dimensions in ScreenInfo
    DisplayManager::getScreenInfo()->setWindowSize(sdlWindowWidth, sdlWindowHeight);
 
-   glClearColor( 0, 0, 0, 0 );
+   mGL->glClearColor(0, 0, 0, 0);
 
-   glViewport(0, 0, sdlWindowWidth, sdlWindowHeight);
+   mGL->glViewport(0, 0, sdlWindowWidth, sdlWindowHeight);
 
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
+   mGL->glMatrixMode(GLOPT::Projection);
+   mGL->glLoadIdentity();
 
    // The best understanding I can get for glOrtho is that these are the coordinates you want to appear at the four corners of the
    // physical screen. If you want a "black border" down one side of the screen, you need to make left negative, so that 0 would
    // appear some distance in from the left edge of the physical screen.  The same applies to the other coordinates as well.
-   glOrtho(orthoLeft, orthoRight, orthoBottom, orthoTop, 0, 1);
+   mGL->glOrtho(orthoLeft, orthoRight, orthoBottom, orthoTop, 0, 1);
 
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
+   mGL->glMatrixMode(GLOPT::Modelview);
+   mGL->glLoadIdentity();
 
    // Do the scissoring
    if(displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
    {
-      glScissor(DisplayManager::getScreenInfo()->getHorizPhysicalMargin(),    // x
+      mGL->glScissor(DisplayManager::getScreenInfo()->getHorizPhysicalMargin(),    // x
                 DisplayManager::getScreenInfo()->getVertPhysicalMargin(),     // y
                 DisplayManager::getScreenInfo()->getDrawAreaWidth(),          // width
                 DisplayManager::getScreenInfo()->getDrawAreaHeight());        // height
@@ -421,22 +419,22 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
       // causing some lines to wrap around the screen, or by writing other
       // parts of RAM that can crash Bitfighter, graphics driver, or the entire computer.
       // This is probably a bug in the Linux Intel graphics driver.
-      glScissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
+      mGL->glScissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
    }
 
-   glEnable(GL_SCISSOR_TEST);    // Turn on clipping
+   mGL->glEnable(GLOPT::ScissorTest);    // Turn on clipping
 
    mGL->setDefaultBlendFunction();
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
    // Enable Line smoothing everywhere!  Make sure to disable temporarily for filled polygons and such
    if(settings->getSetting<YesNo>(IniKey::LineSmoothing))
    {
-      glEnable(GL_LINE_SMOOTH);
+      mGL->glEnable(GLOPT::LineSmooth);
       //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
    }
 
-   glEnable(GL_BLEND);
+   mGL->glEnable(GLOPT::Blend);
 
    // Now set the window position
    if(displayMode == DISPLAY_MODE_WINDOWED)

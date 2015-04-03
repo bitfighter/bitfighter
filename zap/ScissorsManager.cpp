@@ -18,18 +18,18 @@ void ScissorsManager::enable(bool enable, DisplayMode displayMode, F32 x, F32 y,
    if(!enable)
       return;
 
-   glGetBooleanv(GL_SCISSOR_TEST, &mScissorsWasEnabled);
+   mGL->glGetValue(GLOPT::ScissorTest, &mScissorsWasEnabled);
 
    if(mScissorsWasEnabled)
-      glGetIntegerv(GL_SCISSOR_BOX, &mScissorBox[0]);
+      mGL->glGetValue(GLOPT::ScissorBox, &mScissorBox[0]);
 
    static Point p1, p2;
    p1 = DisplayManager::getScreenInfo()->convertCanvasToWindowCoord(x,     DisplayManager::getScreenInfo()->getGameCanvasHeight() - y - height, displayMode);
    p2 = DisplayManager::getScreenInfo()->convertCanvasToWindowCoord(width, height,                                         displayMode);
 
-   glScissor(GLint(p1.x), GLint(p1.y), GLsizei(p2.x), GLsizei(p2.y));
+   mGL->glScissor(S32(p1.x), S32(p1.y), S32(p2.x), S32(p2.y));
 
-   glEnable(GL_SCISSOR_TEST);
+   mGL->glEnable(GLOPT::ScissorTest);
 }
 
 
@@ -40,9 +40,9 @@ void ScissorsManager::disable()
       return;
 
    if(mScissorsWasEnabled)
-      glScissor(mScissorBox[0], mScissorBox[1], mScissorBox[2], mScissorBox[3]);
+      mGL->glScissor(mScissorBox[0], mScissorBox[1], mScissorBox[2], mScissorBox[3]);
    else
-      glDisable(GL_SCISSOR_TEST);
+      mGL->glDisable(GLOPT::ScissorTest);
 
    mManagerEnabled = false;
 }

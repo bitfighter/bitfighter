@@ -142,15 +142,15 @@ void UserInterface::renderConsole() const
 #ifndef BF_NO_CONSOLE
    // Temporarily disable scissors mode so we can use the full width of the screen
    // to show our console text, black bars be damned!
-   bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
+   bool scissorMode = mGL->glIsEnabled(GLOPT::ScissorTest);
 
    if(scissorMode) 
-      glDisable(GL_SCISSOR_TEST);
+      mGL->glDisable(GLOPT::ScissorTest);
 
    GameManager::gameConsole->render();
 
    if(scissorMode) 
-      glEnable(GL_SCISSOR_TEST);
+      mGL->glEnable(GLOPT::ScissorTest);
 #endif
 }
 
@@ -261,7 +261,7 @@ void UserInterface::dimUnderlyingUI(F32 amount)
 {
    mGL->glColor(Colors::black, amount);
 
-   RenderUtils::drawFilledRect (0, 0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
+   RenderUtils::drawFilledRect(0, 0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
 }
 
 

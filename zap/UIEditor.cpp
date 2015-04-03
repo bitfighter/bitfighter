@@ -1491,15 +1491,15 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb) co
    {
       // Use Z Buffer to make use of not drawing overlap visible area of same team SpyBug, but does overlap different team
       fillVector.sort(sortByTeam); // Need to sort by team, or else won't properly combine the colors.
-      glClear(GL_DEPTH_BUFFER_BIT);
-      glEnable(GL_DEPTH_TEST);
-      glEnable(GL_DEPTH_WRITEMASK);
-      glDepthFunc(GL_LESS);
-      glPushMatrix();
+      mGL->glClear(GLOPT::DepthBufferBit);
+      mGL->glEnable(GLOPT::DepthTest);
+      mGL->glEnable(GLOPT::DepthWritemask);
+      mGL->glDepthFunc(GLOPT::Less);
+      mGL->glPushMatrix();
       mGL->glTranslate(0, 0, -0.95f);
 
       // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
-      glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);  
+      mGL->glBlendFunc(GLOPT::OneMinusDstColor, GLOPT::One);
 
       S32 prevTeam = -10;
 
@@ -1520,9 +1520,9 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb) co
 
       mGL->setDefaultBlendFunction();
 
-      glPopMatrix();
-      glDisable(GL_DEPTH_WRITEMASK);
-      glDisable(GL_DEPTH_TEST);
+      mGL->glPopMatrix();
+      mGL->glDisable(GLOPT::DepthWritemask);
+      mGL->glDisable(GLOPT::DepthTest);
    }
 
    // Next draw turret firing ranges for selected or highlighted turrets only
@@ -1779,7 +1779,7 @@ void EditorUserInterface::renderReferenceShip() const
    // Render ship at cursor to show scale
    static F32 thrusts[4] =  { 1, 0, 0, 0 };
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(mMousePos);
       mGL->glScale(mCurrentScale);
       mGL->glRotate(90);
@@ -1789,9 +1789,9 @@ void EditorUserInterface::renderReferenceShip() const
       // Draw collision circle
       const F32 spaceAngle = 0.0278f * FloatTau;
       mGL->glColor(Colors::green, 0.35f);
-      glLineWidth(RenderUtils::LINE_WIDTH_1);
+      mGL->glLineWidth(RenderUtils::LINE_WIDTH_1);
       RenderUtils::drawDashedCircle(Point(0,0), (F32)Ship::CollisionRadius, 10, spaceAngle, 0);
-      glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+      mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
       // And show how far it can see
       const S32 horizDist = Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL;
@@ -1800,7 +1800,7 @@ void EditorUserInterface::renderReferenceShip() const
       mGL->glColor(Colors::paleBlue, 0.35f);
       RenderUtils::drawFilledRect(-horizDist, -vertDist, horizDist, vertDist);
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -1822,7 +1822,7 @@ void EditorUserInterface::render() const
       GameObjectRender::renderGrid(mCurrentScale, mCurrentOffset, convertLevelToCanvasCoord(Point(0,0)),
                  (F32)mGridSize, mSnapContext == FULL_SNAPPING, showMinorGridLines());
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(getCurrentOffset());
       mGL->glScale(getCurrentScale());
 
@@ -1886,7 +1886,7 @@ void EditorUserInterface::render() const
       if(mShowAllIds)
          renderObjectIds(editorDb);
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 
    if(!mNormalizedScreenshotMode)
    {
@@ -2025,7 +2025,7 @@ void EditorUserInterface::renderObjectsUnderConstruction() const
 {
    // Add a vert (and deleted it later) to help show what this item would look like if the user placed the vert in the current location
    mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
-   glLineWidth(RenderUtils::LINE_WIDTH_3);
+   mGL->glLineWidth(RenderUtils::LINE_WIDTH_3);
 
    if(mCreatingPoly) // Wall
       mGL->glColor(Colors::EDITOR_SELECT_COLOR);
@@ -2034,7 +2034,7 @@ void EditorUserInterface::renderObjectsUnderConstruction() const
 
    RenderUtils::drawLine(mNewItem->getOutline());
 
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
    for(S32 j = mNewItem->getVertCount() - 1; j >= 0; j--)      // Go in reverse order so that placed vertices are drawn atop unplaced ones
    {
@@ -2138,11 +2138,11 @@ void EditorUserInterface::renderSaveMessage() const
 
       // Fill
       mGL->glColor(Colors::black, alpha * 0.80f);
-      RenderUtils::drawFancyBox(inset, boxTop, DisplayManager::getScreenInfo()->getGameCanvasWidth() - inset, boxBottom, cornerInset, GL_TRIANGLE_FAN);
+      RenderUtils::drawFancyBox(inset, boxTop, DisplayManager::getScreenInfo()->getGameCanvasWidth() - inset, boxBottom, cornerInset, GLOPT::TriangleFan);
 
       // Border
       mGL->glColor(Colors::blue, alpha);
-      RenderUtils::drawFancyBox(inset, boxTop, DisplayManager::getScreenInfo()->getGameCanvasWidth() - inset, boxBottom, cornerInset, GL_LINE_LOOP);
+      RenderUtils::drawFancyBox(inset, boxTop, DisplayManager::getScreenInfo()->getGameCanvasWidth() - inset, boxBottom, cornerInset, GLOPT::LineLoop);
 
       mGL->glColor(mSaveMsgColor, alpha);
       RenderUtils::drawCenteredString(520, textsize, mSaveMsg.c_str());
@@ -5116,7 +5116,7 @@ void EditorUserInterface::createNormalizedScreenshot(ClientGame* game)
    mPreviewMode = true;
    mNormalizedScreenshotMode = true;
 
-   glClear(GL_COLOR_BUFFER_BIT);
+   mGL->glClear(GLOPT::ColorBufferBit);
    centerView(true);
 
    render();

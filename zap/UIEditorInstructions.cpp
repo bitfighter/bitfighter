@@ -446,11 +446,11 @@ void EditorInstructionsUserInterface::renderPageWalls() const
 
    mGL->glColor(mAnimStage <= 11 ? Colors::yellow : Colors::NeutralTeamColor);
 
-   glLineWidth(RenderUtils::LINE_WIDTH_3);
+   mGL->glLineWidth(RenderUtils::LINE_WIDTH_3);
 
-   mGL->renderPointVector(&points, GL_LINES);
+   mGL->renderPointVector(&points, GLOPT::Lines);
 
-   glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
 
    FontManager::pushFontContext(OldSkoolContext);

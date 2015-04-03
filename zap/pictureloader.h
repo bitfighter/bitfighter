@@ -5,8 +5,6 @@
 
 #include "tnlTypes.h"
 
-#include "glinc.h"
-
 using namespace TNL;
 
 struct PictureLoader

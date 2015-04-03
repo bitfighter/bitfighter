@@ -18,7 +18,12 @@
 #include "FontOrbitronMedium.h"
 
 #include "../fontstash/stb_truetype.h"
-#include <tnlPlatform.h>
+
+#include "tnlPlatform.h"
+
+extern "C" {
+#  include "../fontstash/fontstash.h"
+}
 
 #include <string>
 
@@ -176,7 +181,7 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
       fontList[FontModernVision]   = new BfFont("Modern-Vision.ttf",   settings);
 
       // set texture blending function
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      mGL->setDefaultBlendFunction();
    }
 }
 
@@ -348,7 +353,7 @@ void FontManager::drawStrokeCharacter(const SFG_StrokeFont *font, S32 character)
         characterVertexArray[2*j]     = strip->Vertices[j].X;
         characterVertexArray[(2*j)+1] = strip->Vertices[j].Y;
       }
-      mGL->renderVertexArray(characterVertexArray, strip->Number, GL_LINE_STRIP);
+      mGL->renderVertexArray(characterVertexArray, strip->Number, GLOPT::LineStrip);
    }
    mGL->glTranslate(schar->Right, 0);
 }
@@ -430,20 +435,20 @@ void FontManager::renderString(F32 size, const char *string)
    if(font->isStrokeFont())
    {
       static F32 modelview[16];
-      glGetFloatv(GL_MODELVIEW_MATRIX, modelview);    // Fills modelview[]
+      mGL->glGetValue(GLOPT::ModelviewMatrix, modelview);    // Fills modelview[]
 
       // Clamp to range of 0.5 - 1 then multiply by line width (2 by default)
       F32 linewidth =
             CLAMP(size * DisplayManager::getScreenInfo()->getPixelRatio() * modelview[0] * 0.05f, 0.5f, 1.0f) * RenderUtils::DEFAULT_LINE_WIDTH;
 
-      glLineWidth(linewidth);
+      mGL->glLineWidth(linewidth);
 
       F32 scaleFactor = size / 120.0f;  // Where does this magic number come from?
       mGL->glScale(scaleFactor, -scaleFactor);
       for(S32 i = 0; string[i]; i++)
          FontManager::drawStrokeCharacter(font->getStrokeFont(), string[i]);
 
-      glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+      mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
    }
    else
    {

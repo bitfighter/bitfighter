@@ -6,11 +6,11 @@
 #ifndef _SCISSORS_MANAGER_H_
 #define _SCISSORS_MANAGER_H_
 
-#include "Point.h"
-#include "ConfigEnum.h"          // For DisplayMode def
 #include "tnlTypes.h"
 
-#include "glinc.h"
+#include "Point.h"
+#include "ConfigEnum.h"          // For DisplayMode def
+#include "RenderManager.h"
 
 using namespace TNL; 
 
@@ -22,11 +22,11 @@ class ClientGame;
 
 // Class for managing scissor settings and reducing repeated code
 
-class ScissorsManager
+class ScissorsManager: RenderManager
 {
 private:
-   GLboolean mScissorsWasEnabled;
-   GLint mScissorBox[4];
+   U8 mScissorsWasEnabled;
+   S32 mScissorBox[4];
    bool mManagerEnabled;
 
 public:

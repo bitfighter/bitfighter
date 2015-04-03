@@ -6,12 +6,12 @@
 #ifndef SCREENSHOOTER_H_
 #define SCREENSHOOTER_H_
 
-
-#include "tnlTypes.h"
-
 #ifdef TNL_OS_MOBILE
 #define BF_NO_SCREENSHOTS
 #endif
+
+#include "tnlTypes.h"
+#include "RenderManager.h"
 
 #ifndef BF_NO_SCREENSHOTS
 
@@ -28,7 +28,7 @@ namespace Zap
 class UIManager;
 class GameSettings;
 
-class ScreenShooter
+class ScreenShooter: RenderManager
 {
 private:
    static const S32 BitDepth = 8;

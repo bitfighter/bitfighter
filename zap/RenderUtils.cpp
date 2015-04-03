@@ -54,13 +54,13 @@ void RenderUtils::glColor(const Color &color, float alpha)
 
 void RenderUtils::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
 {
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(x, y);
       mGL->glRotate(angle * RADIANS_TO_DEGREES);
 
       FontManager::renderString(size, string);
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -705,14 +705,14 @@ void RenderUtils::drawLetter(char letter, const Point &pos, const Color &color, 
 
 void RenderUtils::drawLine(const Vector<Point> *points)
 {
-   mGL->renderPointVector(points, GL_LINE_STRIP);
+   mGL->renderPointVector(points, GLOPT::LineStrip);
 }
 
 
 void RenderUtils::drawLine(const Vector<Point> *points, const Color &color)
 {
    mGL->glColor(color);
-   mGL->renderPointVector(points, GL_LINE_STRIP);
+   mGL->renderPointVector(points, GLOPT::LineStrip);
 }
 
 
@@ -731,14 +731,14 @@ void RenderUtils::drawVertLine(S32 x, S32 y1, S32 y2)
 void RenderUtils::drawHorizLine(F32 x1, F32 x2, F32 y)
 {
    F32 vertices[] = { x1, y,   x2, y };
-   mGL->renderVertexArray(vertices, 2, GL_LINES);
+   mGL->renderVertexArray(vertices, 2, GLOPT::Lines);
 }
 
 
 void RenderUtils::drawVertLine(F32 x, F32 y1, F32 y2)
 {
    F32 vertices[] = { x, y1,   x, y2 };
-   mGL->renderVertexArray(vertices, 2, GL_LINES);
+   mGL->renderVertexArray(vertices, 2, GLOPT::Lines);
 }
 
 
@@ -771,10 +771,10 @@ void RenderUtils::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fi
 void RenderUtils::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor, F32 outlineAlpha)
 {
    mGL->glColor(fillColor, fillAlpha);
-   drawRect(x1, y1, x2, y2, GL_TRIANGLE_FAN);
+   drawRect(x1, y1, x2, y2, GLOPT::TriangleFan);
 
    mGL->glColor(outlineColor, outlineAlpha);
-   drawRect(x1, y1, x2, y2, GL_LINE_LOOP);
+   drawRect(x1, y1, x2, y2, GLOPT::LineLoop);
 }
 
 
@@ -808,7 +808,7 @@ void RenderUtils::drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32
 
 void RenderUtils::drawHollowFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset)
 {
-   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, GL_LINE_LOOP);
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, GLOPT::LineLoop);
 }
 
 
@@ -816,11 +816,11 @@ void RenderUtils::drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBotto
 {
    // Fill
    mGL->glColor(fillColor, fillAlpha);
-   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, GL_TRIANGLE_FAN);
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, GLOPT::TriangleFan);
 
    // Border
    mGL->glColor(borderColor, 1.f);
-   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, GL_LINE_LOOP);
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, GLOPT::LineLoop);
 }
 
 
@@ -836,10 +836,10 @@ void RenderUtils::drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endA
 
    generatePointsInACurve(startAngle, endAngle, numPoints, radius, points);
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(pos);
-      mGL->renderPointVector(&points, GL_LINE_STRIP);
-   glPopMatrix();
+      mGL->renderPointVector(&points, GLOPT::LineStrip);
+   mGL->glPopMatrix();
 }
 
 
@@ -865,7 +865,7 @@ void RenderUtils::drawAngledRay(const Point &center, F32 innerRadius, F32 outerR
          center.x + cos(angle) * outerRadius, center.y + sin(angle) * outerRadius,
    };
 
-   mGL->renderVertexArray(vertices, 2, GL_LINE_STRIP);
+   mGL->renderVertexArray(vertices, 2, GLOPT::LineStrip);
 }
 
 
@@ -935,7 +935,7 @@ void RenderUtils::drawRoundedRect(const Point &pos, F32 width, F32 height, F32 r
          pos.x - width2, pos.y - height2 + rad
    };
 
-   mGL->renderVertexArray(vertices, 8, GL_LINES);
+   mGL->renderVertexArray(vertices, 8, GLOPT::Lines);
 
    // Now add some quarter-rounds in the corners, start in UL, proceed CW
    p.set(pos.x - width2 + rad, pos.y - height2 + rad);
@@ -976,7 +976,7 @@ void RenderUtils::drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F3
    filledArcVertexArray[(2*count) + 1] = pos.y;
    count++;
 
-   mGL->renderVertexArray(filledArcVertexArray, count, GL_TRIANGLE_FAN);
+   mGL->renderVertexArray(filledArcVertexArray, count, GLOPT::TriangleFan);
 }
 
 
@@ -996,13 +996,13 @@ void RenderUtils::drawFilledRoundedRect(const Point &pos, F32 width, F32 height,
    drawFilledArc(Point(pos.x - width / 2 + radius, pos.y + height / 2 - radius), radius,  FloatHalfPi, FloatPi);
 
    drawRect(pos.x - width / 2, pos.y - height / 2 + radius,
-            pos.x + width / 2, pos.y + height / 2 - radius, GL_TRIANGLE_FAN);
+            pos.x + width / 2, pos.y + height / 2 - radius, GLOPT::TriangleFan);
 
    drawRect(pos.x - width / 2 + radius, pos.y - height / 2,
-            pos.x + width / 2 - radius, pos.y - height / 2 + radius, GL_TRIANGLE_FAN);
+            pos.x + width / 2 - radius, pos.y - height / 2 + radius, GLOPT::TriangleFan);
 
    drawRect(pos.x - width / 2 + radius, pos.y + height / 2,
-            pos.x + width / 2 - radius, pos.y + height / 2 - radius, GL_TRIANGLE_FAN);
+            pos.x + width / 2 - radius, pos.y + height / 2 - radius, GLOPT::TriangleFan);
 
    mGL->glColor(outlineColor, alpha);
    drawRoundedRect(pos, width, height, radius);
@@ -1038,17 +1038,17 @@ void RenderUtils::drawPolygon(S32 sides, F32 radius, F32 angle)
    Vector<Point> points;
    generatePointsInACurve(angle, angle + FloatTau, sides + 1, radius, points);   // +1 so we can "close the loop"
 
-   mGL->renderPointVector(&points, GL_LINE_STRIP);
+   mGL->renderPointVector(&points, GLOPT::LineStrip);
 }
 
 
 // Draw an n-sided polygon
 void RenderUtils::drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle)
 {
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(pos);
       drawPolygon(sides, radius, angle);
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -1072,7 +1072,7 @@ void RenderUtils::drawStar(const Point &pos, S32 points, F32 radius, F32 innerRa
       r = inout ? radius : innerRadius;
    }
 
-   mGL->renderPointVector(&pts, GL_LINE_LOOP);
+   mGL->renderPointVector(&pts, GLOPT::LineLoop);
 }
 
 
@@ -1120,36 +1120,36 @@ void RenderUtils::drawFilledStar(const Point &pos, S32 points, F32 radius, F32 i
 
    pts.push_back(first);
 
-   mGL->renderPointVector(&pts, GL_TRIANGLES);       // Points
-   mGL->renderPointVector(&core, GL_TRIANGLE_FAN);        // Inner pentagon
-   mGL->renderPointVector(&outline, GL_LINE_LOOP);   // Outline to make things look smoother, at least when star is small
+   mGL->renderPointVector(&pts, GLOPT::Triangles);       // Points
+   mGL->renderPointVector(&core, GLOPT::TriangleFan);        // Inner pentagon
+   mGL->renderPointVector(&outline, GLOPT::LineLoop);   // Outline to make things look smoother, at least when star is small
 }
 
 
 // Draw an ellipse at pos, with axes width and height, canted at angle
 void RenderUtils::drawEllipse(const Point &pos, F32 width, F32 height, F32 angle)
 {
-   drawFilledEllipseUtil(pos, width, height, angle, GL_LINE_LOOP);
+   drawFilledEllipseUtil(pos, width, height, angle, GLOPT::LineLoop);
 }
 
 
 // Draw an ellipse at pos, with axes width and height, canted at angle
 void RenderUtils::drawEllipse(const Point &pos, S32 width, S32 height, F32 angle)
 {
-   drawFilledEllipseUtil(pos, (F32)width, (F32)height, angle, GL_LINE_LOOP);
+   drawFilledEllipseUtil(pos, (F32)width, (F32)height, angle, GLOPT::LineLoop);
 }
 
 
 // Well...  draws a filled ellipse, much as you'd expect
 void RenderUtils::drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle)
 {
-   drawFilledEllipseUtil(pos, width, height, angle, GL_TRIANGLE_FAN);
+   drawFilledEllipseUtil(pos, width, height, angle, GLOPT::TriangleFan);
 }
 
 
 void RenderUtils::drawFilledEllipse(const Point &pos, S32 width, S32 height, F32 angle)
 {
-   drawFilledEllipseUtil(pos, (F32)width, (F32)height, angle, GL_TRIANGLE_FAN);
+   drawFilledEllipseUtil(pos, (F32)width, (F32)height, angle, GLOPT::TriangleFan);
 }
 
 
@@ -1181,14 +1181,14 @@ void RenderUtils::drawFilledSector(const Point &pos, F32 radius, F32 start, F32 
       count++;
    }
 
-   mGL->renderVertexArray(filledSectorVertexArray, count, GL_TRIANGLE_FAN);
+   mGL->renderVertexArray(filledSectorVertexArray, count, GLOPT::TriangleFan);
 }
 
 
 // Pos is the square's center
 void RenderUtils::drawSquare(const Point &pos, F32 radius, bool filled)
 {
-   drawRect(pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius, filled ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
+   drawRect(pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius, filled ? GLOPT::TriangleFan : GLOPT::LineLoop);
 }
 
 
@@ -1227,10 +1227,10 @@ void RenderUtils::drawFilledSquare(const Point &pos, F32 radius, const Color &co
 
 void RenderUtils::drawCircle(const Point &center, F32 radius, const Color *color, F32 alpha)
 {
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(center);
       drawCircle(radius, color, alpha);
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -1248,10 +1248,10 @@ void RenderUtils::drawCircle(F32 radius, const Color *color, F32 alpha)
    if(color)
       mGL->glColor(color, alpha);
 
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glScale(radius);
-      mGL->renderPointVector(&points, GL_LINE_STRIP);
-   glPopMatrix();
+      mGL->renderPointVector(&points, GLOPT::LineStrip);
+   mGL->glPopMatrix();
 }
 
 
@@ -1267,7 +1267,7 @@ void RenderUtils::drawFadingHorizontalLine(S32 x1, S32 x2, S32 yPos, const Color
          color.r, color.g, color.b, 0,
    };
 
-   mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
+   mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
 }
 
 

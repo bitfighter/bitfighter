@@ -79,7 +79,7 @@ static const char *ScoreToWinStr = "Score to Win:";
 
 void LevelInfoDisplayer::render() const
 {
-   glPushMatrix();
+   mGL->glPushMatrix();
    mGL->glTranslate(0, getInsideEdge(), 0);
 
    GameType *gameType = mGame->getGameType();
@@ -214,12 +214,12 @@ void LevelInfoDisplayer::render() const
       yPos += creditsHeight;
    }
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 
    /////
    // Auxilliary side panel
 
-   glPushMatrix();
+   mGL->glPushMatrix();
    mGL->glTranslate(-getInsideEdge(), 0, 0);
 
    bool showTwoLinesOfInstructions = gameType->getInstructionString()[1];     // Show 'em if we got 'em
@@ -272,7 +272,7 @@ void LevelInfoDisplayer::render() const
                           Colors::cyan, Colors::red, ScoreToWinStr, itos(gameType->getWinningScore()).c_str());
    yPos += scoreToWinHeight;
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 
    FontManager::popFontContext();
 }

@@ -8,6 +8,7 @@
 
 #include "InputCode.h"
 #include "ConfigEnum.h"
+#include "RenderManager.h"
 #include "tnlTypes.h"
 
 union SDL_Event;     // Outside Zap namespace, please!
@@ -20,7 +21,7 @@ class ClientGame;
 class UserInterface;
 
 
-class Event 
+class Event: RenderManager
 {
 private:
    static bool mAllowTextInput;   // Flag to allow text translation pass-through

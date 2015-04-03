@@ -82,8 +82,6 @@ using namespace TNL;
 #  include "Event.h"
 #  include "SDL.h"
 
-#  include "glinc.h"
-
 #  include "VideoSystem.h"
 #  include "ClientGame.h"
 #  include "FontManager.h"
@@ -195,28 +193,31 @@ void hostGame(ServerGame *serverGame)
 
 #ifndef ZAP_DEDICATED
 
+GL *mGL = NULL;
+
 // Clear screen -- force clear of "black bars" area to avoid flickering on some video cards
 static void clearScreen()
 {
-   bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
+   bool scissorMode = mGL->glIsEnabled(GLOPT::ScissorTest);
 
    if(scissorMode)
-      glDisable(GL_SCISSOR_TEST);
+      mGL->glDisable(GLOPT::ScissorTest);
 
-   glClear(GL_COLOR_BUFFER_BIT);
+   mGL->glClear(GLOPT::ColorBufferBit);
 
    if(scissorMode)
-      glEnable(GL_SCISSOR_TEST);
+      mGL->glEnable(GLOPT::ScissorTest);
 }
 
 
 // Draw the screen
 void display()
 {
+
    clearScreen();
 
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
+   mGL->glMatrixMode(GLOPT::Modelview);
+   mGL->glLoadIdentity();
 
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
 
@@ -1150,7 +1151,8 @@ int main(int argc, char **argv)
       if(!VideoSystem::init())                // Initialize video and window system
          GameManager::shutdownBitfighter();
 
-      RenderManager::init();
+      RenderManager::init();                  // Initialize the OpenGL abstraction layer
+      mGL = RenderManager::getGL();
 
 #if SDL_VERSION_ATLEAST(2,0,0)
       SDL_StartTextInput();

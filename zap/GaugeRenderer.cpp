@@ -35,7 +35,7 @@ void GaugeRenderer::render(F32 ether, F32 maxEther, const F32 colors[], S32 bott
       xul + full, yul,
    };
 
-   mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
+   mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GLOPT::TriangleFan);
 
    // Gauge outline
    mGL->glColor(Colors::white);

@@ -109,7 +109,7 @@ void ConnectionStatsRenderer::render(GameConnection *conn) const
       const S32 y_size = 150;
 
       mGL->glColor(Colors::white);
-      RenderUtils::drawRect(x1, y, x2, y + y_size, GL_LINE_LOOP);
+      RenderUtils::drawRect(x1, y, x2, y + y_size, GLOPT::LineLoop);
 
       const U32 ArraySizeGraph = ArraySize - 1;
 
@@ -141,7 +141,7 @@ void ConnectionStatsRenderer::render(GameConnection *conn) const
 
       RenderUtils::drawStringf(x1 + 2, y, 10, "%1.1f kbps", max * (1/128.f));
       mGL->glColor(Colors::red);
-      mGL->renderVertexArray(graphs, ArraySizeGraph, GL_LINE_STRIP);
+      mGL->renderVertexArray(graphs, ArraySizeGraph, GLOPT::LineStrip);
 
       i1 = mCurrentIndex;
       i2 = i1+1 >= ArraySize ? 0 : i1+1;
@@ -152,7 +152,7 @@ void ConnectionStatsRenderer::render(GameConnection *conn) const
          i2 = i2 + 1 >= ArraySize ? 0 : i2 + 1;
       }
       mGL->glColor(Colors::green);
-      mGL->renderVertexArray(graphs, ArraySizeGraph, GL_LINE_STRIP);
+      mGL->renderVertexArray(graphs, ArraySizeGraph, GLOPT::LineStrip);
       y += y_size;
    }
 }

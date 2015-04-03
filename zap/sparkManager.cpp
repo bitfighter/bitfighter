@@ -15,8 +15,6 @@
 #include "MathUtils.h"
 #include "FontManager.h"
 
-#include "glinc.h"
-
 #include "tnlRandom.h"
 
 using namespace TNL;
@@ -119,7 +117,7 @@ void FxManager::DebrisChunk::idle(U32 timeDelta)
 
 void FxManager::DebrisChunk::render() const
 {
-   glPushMatrix();
+   mGL->glPushMatrix();
 
    mGL->glTranslate(pos);
    mGL->glRotate(angle * RADIANS_TO_DEGREES);
@@ -130,9 +128,9 @@ void FxManager::DebrisChunk::render() const
 
    mGL->glColor(color, alpha);
 
-   mGL->renderPointVector(&points, GL_LINE_LOOP);
+   mGL->renderPointVector(&points, GLOPT::LineLoop);
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -176,7 +174,7 @@ void FxManager::TextEffect::render(const Point &centerOffset) const
 
    mGL->glColor(color, alpha);
 
-   glPushMatrix();
+   mGL->glPushMatrix();
 
       mGL->glTranslate(pos);
       mGL->glScale(size / MAX_TEXTEFFECT_SIZE);  // We'll draw big and scale down
@@ -185,7 +183,7 @@ void FxManager::TextEffect::render(const Point &centerOffset) const
          RenderUtils::drawStringc(0, 0, 120, text.c_str());
       FontManager::popFontContext();
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -361,16 +359,16 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction, const Point &c
    {
       for(S32 i = SparkTypeCount - 1; i >= 0; i --)     // Loop through our different spark types
       {
-         glPointSize(RenderUtils::DEFAULT_LINE_WIDTH);
+         mGL->glPointSize(RenderUtils::DEFAULT_LINE_WIDTH);
 
          // This actually works...
          const F32 *vertexPointer = &mSparks[i][0].pos.x;
          const F32 *colorPointer  = &mSparks[i][0].color.r;
 
          if((SparkType) i == SparkTypePoint)
-            mGL->renderColorVertexArray(vertexPointer, colorPointer, firstFreeIndex[i], GL_POINTS, sizeof(Spark));
+            mGL->renderColorVertexArray(vertexPointer, colorPointer, firstFreeIndex[i], GLOPT::Points, 0, sizeof(Spark));
          else if((SparkType) i == SparkTypeLine)
-            mGL->renderColorVertexArray(vertexPointer, colorPointer, firstFreeIndex[i], GL_LINES, sizeof(Spark));
+            mGL->renderColorVertexArray(vertexPointer, colorPointer, firstFreeIndex[i], GLOPT::Lines, 0, sizeof(Spark));
       }
 
       for(S32 i = 0; i < mDebrisChunks.size(); i++)
@@ -386,14 +384,14 @@ void FxManager::renderScreenEffects() const
 {
    static const Point center(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2,
                              DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
-   glPushMatrix();
+   mGL->glPushMatrix();
       mGL->glTranslate(center);
       mGL->glScale(0.6667f);
 
       for(S32 i = 0; i < mScreenTextEffects.size(); i++)
          mScreenTextEffects[i].render(center);
 
-   glPopMatrix();
+   mGL->glPopMatrix();
 }
 
 
@@ -573,7 +571,7 @@ void FxTrail::render() const
       FxTrailVertexArray[(2*i) + 1] = mNodes[i].pos.y;
    }
 
-   mGL->renderColorVertexArray(FxTrailVertexArray, FxTrailColorArray, mNodes.size(), GL_LINE_STRIP);
+   mGL->renderColorVertexArray(FxTrailVertexArray, FxTrailColorArray, mNodes.size(), GLOPT::LineStrip);
 }
 
 
