@@ -9,6 +9,10 @@
 #include "Point.h"
 #include "Colors.h"
 
+#ifdef TNL_OS_WIN32 
+#  include <windows.h>     // For ARRAYSIZE def
+#endif
+
 #include "tnlVector.h"
 
 namespace Zap

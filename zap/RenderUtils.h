@@ -19,6 +19,10 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 
+#ifdef TNL_OS_WIN32 
+#  include <windows.h>     // For ARRAYSIZE def
+#endif
+
 using namespace TNL;
 
 

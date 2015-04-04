@@ -247,9 +247,9 @@ void GLES1::glLoadIdentity()
 }
 
 
-void GLES1::glOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 near, F64 far)
+void GLES1::glOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx)
 {
-   ::glOrtho(left, right, bottom, top, near, far);
+   ::glOrtho(left, right, bottom, top, nearx, farx);
 }
 
 
