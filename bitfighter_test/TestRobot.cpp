@@ -4,10 +4,12 @@
 //------------------------------------------------------------------------------
 
 #include "TestUtils.h"
+
 #include "../zap/ClientGame.h"
 #include "../zap/ServerGame.h"
 #include "../zap/gameType.h"
 #include "../zap/luaLevelGenerator.h"
+
 #include "gtest/gtest.h"
 
 namespace Zap
