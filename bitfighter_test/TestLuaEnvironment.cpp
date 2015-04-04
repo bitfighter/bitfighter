@@ -150,13 +150,13 @@ TEST_F(LuaEnvironmentTest, findAllObjects)
 
    EXPECT_TRUE(levelgen->runString("t = { }"));
 
-   EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t, ObjType.ResourceItem)"));
+   EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects(ObjType.ResourceItem)"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 2)"));
-   EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t, ObjType.ResourceItem)"));
+   EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects(ObjType.ResourceItem)"));
 
    EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects()"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 3)"));
-   EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t, ObjType.ResourceItem)"));
+   EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects(ObjType.ResourceItem)"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 2)")) << "t had 3 items, but should have been cleared before adding 2 more";
    EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects(ObjType.ResourceItem)"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 2)"));

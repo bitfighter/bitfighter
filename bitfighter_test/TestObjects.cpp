@@ -170,11 +170,10 @@ TEST_F(ObjectTest, GhostingSanity)
    {
       NetClassRep *netClassRep = TNL::NetClassRep::getClass(NetClassGroupGame, NetClassTypeObject, i);
 
-      // Expect that all objects on the server are on the client, with the
-      // exception of PolyWalls and ForceFields, because these do not follow the
-      // normal ghosting model.
+      // Expect that all objects on the server are on the client, with the exception of PolyWalls, 
+      // which are transormed into Barriers, and Robots, which are transformed into Ships on the client
       string className = netClassRep->getClassName();
-      if(className != "PolyWall" && className != "ForceField")
+      if(className != "PolyWall" && className != "Robot")
          EXPECT_EQ(ghostingRecords[i].server, ghostingRecords[i].client) << " className=" << className;
       else
          EXPECT_NE(ghostingRecords[i].server, ghostingRecords[i].client) << " className=" << className;
