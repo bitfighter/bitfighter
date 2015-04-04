@@ -271,12 +271,15 @@ void Game::addToClientList(ClientInfo *clientInfo)
    // Adding the same ClientInfo twice is never The Right Thing To Do
    //
    // NOTE - This can happen when a Robot line is found in a level file.  For some reason
-   // it tries to get added twice to the game
+   // it tries to get added twice to the game.  TODO: Fix this!
    for(S32 i = 0; i < mClientInfos.size(); i++)
       if(mClientInfos[i] == clientInfo)
          return;
 
    mClientInfos.push_back(clientInfo);
+
+   // FYI: Not all clientInfos will have a connection here; Robots won't, and clients storing ClientInfos about other clients
+   // won't, either
 
    if(clientInfo->isRobot())
       mRobotCount++;

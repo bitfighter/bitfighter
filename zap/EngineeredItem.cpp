@@ -828,21 +828,22 @@ Vector<Point> EngineeredItem::getObjectGeometry(const Point &anchor, const Point
 }
 
 
-// Function needed to provide this signature at this level
 void EngineeredItem::setPos(lua_State *L, S32 stackIndex)
 {
    Parent::setPos(L, stackIndex);
 
-   // Find a database that will contain objects we could snap to.  If object is already in a database,
-   // that is our first choice.  Otherwise, we'll see if there is one associated with the game, because
-   // that is where we'll likely end up.  Otherwise, it's no snapping today.
+   // Find a database that contains objects we could snap to; if we don't have one, it's no snapping today
+
+   if(!getGame())
+      return;
+
    Level *level = getGame()->getLevel();
 
-   //if(!database && getGame() && getGame()->getLevel())
-   //   database = getGame()->getLevel();
+   if(!level)
+      return;
 
-   if(level)
-      findMountPoint(level, getPos());
+   // Snap!
+   findMountPoint(level, getPos());
 }
 
 

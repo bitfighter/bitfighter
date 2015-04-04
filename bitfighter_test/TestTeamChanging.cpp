@@ -292,7 +292,7 @@ namespace Zap {
       // All players quit -- game unlocks immediately
       server->getClientInfo(0)->setRole(ClientInfo::RoleAdmin);
       gamePair.idle(5, 5);
-      EXPECT_EQ(1, countAdmins(gamePair));
+      EXPECT_EQ(1, countAdmins(gamePair));   // actual 2
       admin = findFirstAdmin(gamePair);
       gamePair.runChatCmd(admin, "/lockteams");   // User chat command, requires admin privs
       gamePair.idle(5, 5);

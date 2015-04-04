@@ -133,8 +133,7 @@ TEST_F(LuaEnvironmentTest, immutability)
 
 TEST_F(LuaEnvironmentTest, findAllObjects)
 {
-   EXPECT_TRUE(levelgen->runString("t = { }"));
-   EXPECT_TRUE(levelgen->runString("bf:findAllObjects(t)"));
+   EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects()"));
    ASSERT_TRUE(levelgen->runString("assert(#t == 0)"));
 
    // Level will have 3 items: 2 ResourceItems, and one TestItem
@@ -146,9 +145,6 @@ TEST_F(LuaEnvironmentTest, findAllObjects)
    EXPECT_TRUE(levelgen->runString("assert(#t == 0)"));
    EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects()"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 3)"));
-
-
-   EXPECT_TRUE(levelgen->runString("t = { }"));
 
    EXPECT_TRUE(levelgen->runString("t = bf:findAllObjects(ObjType.ResourceItem)"));
    EXPECT_TRUE(levelgen->runString("assert(#t == 2)"));
