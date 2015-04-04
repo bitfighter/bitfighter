@@ -76,14 +76,14 @@ static void testThatLinesAreNotLongerThanMax(const Vector<string> &lines, S32 ma
 {
    for(S32 i = 0; i < lines.size(); i++)    
    {
-      if(getStringWidth(fontSize, lines[i].c_str()) > maxLen)
+      if(RenderUtils::getStringWidth(fontSize, lines[i].c_str()) > maxLen)
       {
-         int x = getStringWidth(fontSize, lines[i].c_str());
+         int x = RenderUtils::getStringWidth(fontSize, lines[i].c_str());
          int y = 0;
       }
-      EXPECT_GE(maxLen, getStringWidth(fontSize, lines[i].c_str())) << 
+      EXPECT_GE(maxLen, RenderUtils::getStringWidth(fontSize, lines[i].c_str())) <<
             "TestThatLinesAreNotLongerThanMax failed on iteration " << i <<"; fontSize=" << fontSize << 
-                                                       "; strlen=" << getStringWidth(fontSize, lines[i].c_str()) <<
+                                                       "; strlen=" << RenderUtils::getStringWidth(fontSize, lines[i].c_str()) <<
                                                        "; line=" << lines[i];
 
       // Make sure there is no leading or trailing whitespace
@@ -101,8 +101,9 @@ static void wouldOneMoreCharMakeTheLineTooLong(const Vector<string> &lines, S32 
    {
       string line = lines[i] + lines[i + 1][0];    // Add first char of next item
 
-      EXPECT_GE(getStringWidth(fontSize, line.c_str()), maxLen) << 
-            "WouldOneMoreCharMakeTheLineTooLong failed on iteration " << i <<"; len = " << getStringWidth(10, line.c_str());
+      EXPECT_GE(RenderUtils::getStringWidth(fontSize, line.c_str()), maxLen) <<
+            "WouldOneMoreCharMakeTheLineTooLong failed on iteration " << i <<"; "
+            "len = " << RenderUtils::getStringWidth(10, line.c_str());
    }
 }
 
@@ -115,8 +116,9 @@ static void wouldOneMoreWordMakeTheLineTooLong(const Vector<string> &lines, S32 
       parseString(lines[i + 1], words);
       string line = lines[i] + ' ' + words[0];
 
-      EXPECT_GE(getStringWidth(fontSize, line.c_str()), maxLen) <<
-         "WouldOneMoreWordMakeTheLineTooLong failed on iteration " << i << "; len = " << getStringWidth(10, line.c_str());
+      EXPECT_GE(RenderUtils::getStringWidth(fontSize, line.c_str()), maxLen) <<
+         "WouldOneMoreWordMakeTheLineTooLong failed on iteration " << i << "; "
+         "len = " << RenderUtils::getStringWidth(10, line.c_str());
    }
 }
 

@@ -17,6 +17,10 @@
 
 #include "tnlLog.h"
 
+#ifdef TNL_OS_WIN32 
+#  include <windows.h>     // For ARRAYSIZE def
+#endif
+
 #include <gtest/gtest.h>
 
 namespace Zap
