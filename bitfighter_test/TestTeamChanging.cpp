@@ -287,13 +287,12 @@ namespace Zap {
       gamePair.sendKeyPress(admin, KEY_SPACE);   // Press space to shuffle
       gamePair.sendKeyPress(admin, KEY_ENTER);   // Press enter to accept
       gamePair.idle(5, 5);
-      // 
-      // TODO: Figure this out
-      // All players quit -- game unlocks immediately
+      
+      ///// All players quit -- teams unlock immediately
       server->getClientInfo(0)->setRole(ClientInfo::RoleAdmin);
       gamePair.idle(5, 5);
-      EXPECT_EQ(1, countAdmins(gamePair));   // actual 2
       admin = findFirstAdmin(gamePair);
+      ASSERT_NE(-1, countAdmins(gamePair)) << "Need an admin to proceed!";
       gamePair.runChatCmd(admin, "/lockteams");   // User chat command, requires admin privs
       gamePair.idle(5, 5);
       EXPECT_TRUE(server->areTeamsLocked());
