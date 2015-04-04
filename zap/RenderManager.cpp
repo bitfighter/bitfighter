@@ -79,14 +79,14 @@ void RenderManager::init()
 
 void RenderManager::shutdown()
 {
-   TNLAssert(mGL != NULL, "GL Renderer should have been created!");
+   TNLAssert(mGL != NULL, "GL Renderer should have been created; never called RenderManager::init()?");
    delete mGL;
 }
 
 
 GL *RenderManager::getGL()
 {
-   TNLAssert(mGL != NULL, "GL Renderer should not be NULL!");
+   TNLAssert(mGL != NULL, "GL Renderer should not be NULL!  Run RenderManager::init() before calling this!");
    return mGL;
 }
 

@@ -129,6 +129,7 @@ static BfFont *fontList[FontCount] = {NULL};
 sth_stash *FontManager::mStash = NULL;
 bool FontManager::mUsingExternalFonts = true;
 
+// Constructor
 FontManager::FontManager()
 {
    for(S32 i = 0; i < FontCount; i++)
@@ -136,6 +137,7 @@ FontManager::FontManager()
 }
 
 
+// Destructor
 FontManager::~FontManager()
 {
    // Do nothing
@@ -155,7 +157,7 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 {
    cleanup();  // Makes sure its been cleaned up first, many tests call init without cleanup
 
-   TNLAssert(mGL != NULL, "GL Renderer is NULL.  Bad things will happen!");
+   TNLAssert(RenderManager::getGL() != NULL, "RenderManager is NULL.  Bad things will happen!");
 
    mUsingExternalFonts = useExternalFonts;
 
@@ -180,8 +182,8 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
       fontList[FontPlayBold]       = new BfFont("Play-Bold.ttf",       settings);
       fontList[FontModernVision]   = new BfFont("Modern-Vision.ttf",   settings);
 
-      // set texture blending function
-      mGL->setDefaultBlendFunction();
+      // Set texture blending function
+      RenderManager::getGL()->setDefaultBlendFunction();
    }
 }
 

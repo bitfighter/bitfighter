@@ -141,8 +141,6 @@ TEST(StringUtilsTest, ParseStringTests)
 // Test wrapping based on character counts
 TEST(StringUtilsTest, WrapStringsMaxChars)
 {
-   FontManager::initialize(NULL, false);
-
    string s = "hello there";
    Vector<string> lines = wrapString(s, 8);
    ASSERT_EQ(2, lines.size());
@@ -184,7 +182,6 @@ TEST(StringUtilsTest, WrapStringsMaxChars)
 TEST(StringUtilsTest, WrapStringsLineWidth)
 {
    Vector<string> lines, lines2;
-   FontManager::initialize(NULL, false);
 
    lines = wrapString("", 200, 10);
    EXPECT_EQ(0, lines.size());

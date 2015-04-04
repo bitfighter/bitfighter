@@ -42,9 +42,6 @@ ClientGame *newClientGame(const GameSettingsPtr &settings)
 {
    Address addr;
    
-   // Need to initialize FontManager to use ClientGame... use false to avoid hassle of locating font files.
-   // False will tell the FontManager to only use internally defined fonts; any TTF fonts will be replaced with Roman.
-   FontManager::initialize(settings.get(), false);   
    ClientGame *game = new ClientGame(addr, settings, new UIManager());    // ClientGame destructor will clean up UIManager
 
    //game->addTeam(new Team());     // Teams will be deleted by ClientGame destructor

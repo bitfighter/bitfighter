@@ -213,7 +213,6 @@ static void clearScreen()
 // Draw the screen
 void display()
 {
-
    clearScreen();
 
    mGL->glMatrixMode(GLOPT::Modelview);
@@ -1121,7 +1120,7 @@ int main(int argc, char **argv)
    {
 #ifndef ZAP_DEDICATED
       // Dedicated ClientGame needs fonts, but not external ones
-      FontManager::initialize(settings.get(), false);
+      FontManager::initialize(settings.get(), mGL, false);
 #endif
       ServerGame *serverGame = GameManager::getServerGame();
       
