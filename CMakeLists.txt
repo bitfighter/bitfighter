@@ -8,6 +8,7 @@ cmake_minimum_required (VERSION 2.8.8)
 
 option(USE_SDL2 "Use SDL2" YES)
 option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
+option(USE_GLES2 "Force usage of OpenGL ES 2 for the bitfighter client.  Requires SDL2." NO)
 option(USE_LUAJIT_IN_TREE "Force usage of in-tree LuaJIT." NO)
 
 
@@ -65,7 +66,7 @@ endif()
 
 # Searches for OpenGL and enables GLES if GL isnt found in the system
 message(STATUS "Determining system GL provider")
-if(NOT USE_GLES)
+if(NOT USE_GLES AND NOT USE_GLES2)
 	message(STATUS "Atempting to use standard OpenGL")
 	find_package(OpenGL)
 	set(USE_STANDARD_GL 1)
@@ -73,13 +74,22 @@ if(NOT USE_GLES)
 	set(GL_INCLUDE_DIR ${OPENGL_INCLUDE_DIR})
 endif()
 
-if(USE_GLES OR NOT USE_STANDARD_GL)
+if(NOT USE_GLES2 AND (USE_GLES OR NOT USE_STANDARD_GL) )
 	message(STATUS "Atempting to use OpenGL ES")
 	add_definitions(-DBF_USE_GLES)
 	add_definitions(-DBF_NO_CONSOLE)
 	find_package(OpenGLES)
 	set(GL_LIBRARY ${OPENGLES_LIBRARY})
 	set(GL_INCLUDE_DIR ${OPENGLES_INCLUDE_DIR})
+endif()
+
+if(USE_GLES2)
+	message(STATUS "Atempting to use OpenGL ES 2")
+ 	add_definitions(-DBF_USE_GLES2)
+	add_definitions(-DBF_NO_CONSOLE)
+	find_package(OpenGLES2)
+	set(GL_LIBRARY ${OPENGLES2_LIBRARY})
+	set(GL_INCLUDE_DIR ${OPENGLES2_INCLUDE_DIR})
 endif()
 
 

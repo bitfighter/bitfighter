@@ -9,8 +9,9 @@
 
 #ifndef _GLINC_H_
 #define _GLINC_H_
-
-#if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
+#if defined(BF_USE_GLES2)
+#  include "SDL_opengles2.h"
+#elif defined(BF_USE_GLES)
 #  include "SDL_opengles.h"
    // Needed for GLES compatibility
 #  define glOrtho glOrthof
