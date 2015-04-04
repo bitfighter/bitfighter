@@ -1120,7 +1120,7 @@ int main(int argc, char **argv)
    {
 #ifndef ZAP_DEDICATED
       // Dedicated ClientGame needs fonts, but not external ones
-      FontManager::initialize(settings.get(), mGL, false);
+      FontManager::initialize(settings.get(), false);
 #endif
       ServerGame *serverGame = GameManager::getServerGame();
       

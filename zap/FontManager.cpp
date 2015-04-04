@@ -157,7 +157,7 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 {
    cleanup();  // Makes sure its been cleaned up first, many tests call init without cleanup
 
-   TNLAssert(RenderManager::getGL() != NULL, "RenderManager is NULL.  Bad things will happen!");
+   TNLAssert(mGL != NULL, "RenderManager is NULL.  Bad things will happen!");
 
    mUsingExternalFonts = useExternalFonts;
 
@@ -183,7 +183,7 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
       fontList[FontModernVision]   = new BfFont("Modern-Vision.ttf",   settings);
 
       // Set texture blending function
-      RenderManager::getGL()->setDefaultBlendFunction();
+      mGL->setDefaultBlendFunction();
    }
 }
 
