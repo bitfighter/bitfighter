@@ -166,43 +166,61 @@ void GamePair::idle(U32 timeDelta, U32 cycles)
 }
 
 
-// Simulates player joining game from new client; teamIndex is optional
-ClientGame *GamePair::addClient(const string &name, S32 teamIndex)
+ClientGame *GamePair::addClientAndSetRole(const string &name, ClientInfo::ClientRole role)
 {
-   ClientGame *client = newClientGame();
-   client->userEnteredLoginCredentials(name, "password", false);    // Simulates entry from NameEntryUserInterface
+   ClientGame *client = addClient(name);
+   ClientInfo *clientInfo = server->findClientInfo(name);
+   clientInfo->setRole(role);
+
+   return client;
+}
+
+
+ClientGame *GamePair::addClientAndSetTeam(const string &name, S32 teamIndex)
+{
+   ClientGame *clientGame = addClient(name);
+
+   TNLAssert(teamIndex != NO_TEAM, "Invalid team!");
+   TNLAssert(teamIndex < server->getTeamCount(), "Bad team!");
+
+   ClientInfo *clientInfo = server->findClientInfo(name);
+   server->getGameType()->changeClientTeam(clientInfo, teamIndex);
+
+   return clientGame;
+}
+
+
+// Simulates player joining game from new client
+ClientGame *GamePair::addClient(const string &name)
+{
+   ClientGame *clientGame = newClientGame();
+   clientGame->userEnteredLoginCredentials(name, "password", false);    // Simulates entry from NameEntryUserInterface
 
    // Get a base UI going, so if we enter the game, and exit again, we'll have a place to land
-   client->activateMainMenuUI();
+   clientGame->activateMainMenuUI();
 
-   GameManager::addClientGame(client);
+   GameManager::addClientGame(clientGame);
 
-   return addClient(client, teamIndex);
+   return addClient(clientGame);
 }
 
 
 // teamIndex is optional
-ClientGame *GamePair::addClient(ClientGame *client, S32 teamIndex)
+ClientGame *GamePair::addClient(ClientGame *clientGame)
 {
    ServerGame *server = GameManager::getServerGame();
 
-   client->joinLocalGame(server->getNetInterface());     // Client will have owner privs!
+   clientGame->joinLocalGame(server->getNetInterface());     // Client will have owner privs!
 
    // We need to turn off TNL's bandwidth controls so our tests can run faster.  FASTER!!@!
-   client->getConnectionToServer()->useZeroLatencyForTesting();
+   clientGame->getConnectionToServer()->useZeroLatencyForTesting();
 
-   ClientInfo *clientInfo = server->findClientInfo(client->getClientInfo()->getName().getString());
+   ClientInfo *clientInfo = server->findClientInfo(clientGame->getClientInfo()->getName().getString());
 
    if(!clientInfo->isRobot())
       clientInfo->getConnection()->useZeroLatencyForTesting();
 
-   if(teamIndex != NO_TEAM)
-   {
-      TNLAssert(teamIndex < server->getTeamCount(), "Bad team!");
-      server->getGameType()->changeClientTeam(clientInfo, teamIndex);
-   }
-
-   return client;
+   return clientGame;
 }
 
 
@@ -215,6 +233,16 @@ S32 GamePair::getClientCount() const
 ClientGame *GamePair::getClient(S32 index)
 {
    return GameManager::getClientGames()->get(index);
+}
+
+
+S32 GamePair::getClientIndex(const string &name)
+{
+   for(S32 i = 0; i < getClientCount(); i++)
+      if(strcmp(getClient(i)->getClientInfo()->getName().getString(), name.c_str()) == 0)
+         return i;
+
+   return NONE;
 }
 
 

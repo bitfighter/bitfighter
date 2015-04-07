@@ -114,7 +114,7 @@ TEST(GameTest, TeamGameWinners)
 
    // One player, on first team, score 0,0
    S32 teamIndex = index1;
-   gamePair.addClient("Player 1", teamIndex);
+   gamePair.addClientAndSetTeam("Player 1", teamIndex);
    AbstractTeam *team1 = game->getTeam(teamIndex);
    ASSERT_EQ(0, game->getTeam(teamIndex)->getScore());
    EXPECT_EQ(HasWinner, game->getTeamBasedGameWinner().first);       // Scores: 0,0  -- tied, but only first team has players
@@ -126,7 +126,7 @@ TEST(GameTest, TeamGameWinners)
 
    // One player, on second team, score 0,0
    teamIndex = index2;
-   gamePair.addClient("Player 2", teamIndex);
+   gamePair.addClientAndSetTeam("Player 2", teamIndex);
    game->countTeamPlayers();
    ASSERT_EQ(1, game->getTeam(teamIndex)->getPlayerCount()) << "We just added a player to this team!";
    AbstractTeam *team2 = game->getTeam(teamIndex);
@@ -137,7 +137,7 @@ TEST(GameTest, TeamGameWinners)
 
    // One player each on teams 1 and 2, score 0,0
    teamIndex = index1;
-   gamePair.addClient("Player 1", teamIndex);
+   gamePair.addClientAndSetTeam("Player 1", teamIndex);
    EXPECT_EQ(Tied, game->getTeamBasedGameWinner().first);      // Scores: 0,0  -- tied
    EXPECT_FALSE(gameType->onGameOver());
 
@@ -164,7 +164,7 @@ TEST(GameTest, TeamGameWinners)
    // Add a third team with 1 player... game still tied at 1,1,0
    game->addTeam(new Team("Team 3", Colors::yellow));
    ASSERT_EQ(3, game->getTeamCount());
-   gamePair.addClient("Player 3", index3);
+   gamePair.addClientAndSetTeam("Player 3", index3);
    AbstractTeam *team3 = game->getTeam(index3);
    EXPECT_EQ(Tied, game->getTeamBasedGameWinner().first); 
    EXPECT_FALSE(gameType->onGameOver());

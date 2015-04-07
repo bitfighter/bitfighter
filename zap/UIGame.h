@@ -458,7 +458,7 @@ public:
    Move *getCurrentMove();
 
    ///// Testing
-   friend class GamePair;
+   friend struct GamePair;
 };
 
 

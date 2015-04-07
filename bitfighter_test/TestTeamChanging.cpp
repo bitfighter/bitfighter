@@ -104,7 +104,7 @@ namespace Zap {
 
       ///// New player joins while teams are locked... he should see that teams are locked and not be able to change.
       string newPlayerName = "New Player";
-      ClientGame *newClient = gamePair.addClient(newPlayerName, team0);
+      ClientGame *newClient = gamePair.addClientAndSetTeam(newPlayerName, team0);
       ClientInfo *newInfo = newClient->getClientInfo();
       gamePair.idle(5, 5);
       EXPECT_EQ(team0, newClient->getCurrentTeamIndex());
@@ -266,7 +266,51 @@ namespace Zap {
       ASSERT_GT(65 * 1000, +TeamHistoryManager::LockedTeamsForgetClientTime) << "Tests only work if this is true... 65 = time idling since admin quit";
 
       ///// Admin quits, but another admin quickly joins... teams stay locked
-      // TODO: Test this!
+      // Add three players, none admin
+      EXPECT_EQ(0, countAdmins(gamePair)) << "Expect no admins in game";
+      ClientGame *newClient1 = gamePair.addClientAndSetRole("Pl1", ClientInfo::RoleLevelChanger);
+      ClientGame *newClient2 = gamePair.addClientAndSetRole("Pl2", ClientInfo::RoleNone);
+      ClientGame *newClient3 = gamePair.addClientAndSetRole("Pl3", ClientInfo::RoleNone);
+      gamePair.idle(5, 5);
+      EXPECT_EQ(0, countAdmins(gamePair)) << "Expect no admins in game";
+      // Promote one to admin
+      admin = gamePair.getClientIndex("Pl1");
+      ASSERT_NE(NONE, admin) << "Couldn't find our player??";
+      server->findClientInfo("Pl1")->setRole(ClientInfo::RoleAdmin);
+      gamePair.idle(5, 5);
+      EXPECT_EQ(1, countAdmins(gamePair)) << "Expect one admin in game";
+      // Lock teams
+      EXPECT_FALSE(server->areTeamsLocked());
+      gamePair.runChatCmd(admin, "/lockteams");
+      gamePair.idle(5, 5);
+      EXPECT_TRUE(server->areTeamsLocked());
+      // Admin quits
+      gamePair.removeClient(admin);
+      gamePair.idle(5, 5);    // 25ms elapses
+      // Teams still locked (no-admin unlock delay hasn't elapsed)
+      EXPECT_TRUE(server->areTeamsLocked());
+      // 3 seconds pass
+      gamePair.idle(100, 30);    // 3 seconds more elapse -- unlock delay still hasn't passed
+      EXPECT_TRUE(server->areTeamsLocked());
+      // New player joins (new players are admin by default)
+      ClientGame *newClient4 = gamePair.addClient("Pl4");
+      EXPECT_EQ(1, countAdmins(gamePair)) << "Expect one admin in game";
+      admin = gamePair.getClientIndex("Pl4");
+      // Teams still locked
+      EXPECT_TRUE(server->areTeamsLocked());
+      // Time passes... (enough for teams to auto unlock if there is no admin)
+      gamePair.idle(500, TeamHistoryManager::LockedTeamsNoAdminsGracePeriod / 500);
+      // Teams still locked
+      EXPECT_TRUE(server->areTeamsLocked());
+      // Basically we'll retest a scneario tested elsewhere below because we're so perfeclty poised to do so
+      // Admin quits
+      gamePair.removeClient(admin);
+      gamePair.idle(5, 5);
+      EXPECT_EQ(0, countAdmins(gamePair)) << "Expect no admins in game";
+      // Time again passes
+      gamePair.idle(500, TeamHistoryManager::LockedTeamsNoAdminsGracePeriod / 500);
+      // Teams are unlocked
+      EXPECT_FALSE(server->areTeamsLocked());
 
       ///// Verify that admins can reshuffle teams while they are locked (need admin perms to use shuffle command)
       // Promote first player to admin

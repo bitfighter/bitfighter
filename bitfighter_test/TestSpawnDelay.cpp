@@ -91,7 +91,7 @@ static void doScenario2(GamePair &gamePair)
 
    const char *player1Name = "TestPlayer0";
    const char *player2Name = "TestUser2";
-   gamePair.addClient(player2Name, 0);
+   gamePair.addClientAndSetTeam(player2Name, 0);
 
    ClientGame *client1 = gamePair.getClient(0);
    ClientGame *client2 = gamePair.getClient(1);

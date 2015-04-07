@@ -9,6 +9,8 @@
 #include "GameSettings.h"    // For GameSettingsPtr def
 #include "TeamConstants.h"
 
+#include "../zap/ClientInfo.h"
+
 #include <tnl.h>
 #include <tnlGhostConnection.h>
 
@@ -61,13 +63,18 @@ struct GamePair
 	static void idle(U32 timeDelta, U32 cycles = 1);
 	ServerGame *server;
 
-   ClientGame *addClient(const string &name, S32 teamIndex = NO_TEAM);
-   ClientGame *addClient(ClientGame *clientGame, S32 teamIndex = NO_TEAM);
+   ClientGame *addClient(const string &name);
+   ClientGame *addClient(ClientGame *clientGame);
+
+   
+   ClientGame *addClientAndSetTeam(const string &name, S32 teamIndex);
+   ClientGame *addClientAndSetRole(const string &name, ClientInfo::ClientRole role);
 
    void addBotClient(const string &name, S32 teamIndex = NO_TEAM);
 
    S32 getClientCount() const;
    ClientGame *getClient(S32 index);
+   S32 getClientIndex(const string &name);
 
    GameUserInterface *getGameUI(S32 clientIndex);
    void sendKeyPress(S32 clientIndex, InputCode inputCode);

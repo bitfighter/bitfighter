@@ -140,9 +140,9 @@ static void setTeams(GamePair &gamePair, const string &teamConfig)
       for(U32 j = 0; j < words[i].size(); j++)     // Iterate over chars
       {
          if(words[i][j] == 'H')
-            gamePair.addClient("Human " + itos(i) + " " + itos(j), i);
+            gamePair.addClientAndSetTeam("Human " + itos(i) + " " + itos(j), i);
          else if(words[i][j] == 'B')
-            gamePair.addBotClient("Bot " + itos(i) + " " + itos(j), i);
+            gamePair.addClientAndSetTeam("Bot " + itos(i) + " " + itos(j), i);
          else
             TNLAssert(false, "Invalid char!");
          //printf("%s == > %s\n", teamConfig.c_str(), getTeams(gamePair).c_str());
@@ -196,7 +196,7 @@ TEST(RobotManagerTest, moreLessBots)
    gamePair.server->moreBots();      EXPECT_EQ("HHHBB BBBBB", getTeams(gamePair));  
 
    // New player joins other team; autoleveling should be enabled -- since target game size is 5v5, bot will be removed
-   gamePair.addClient("newclient", 1);    EXPECT_EQ("HHHBB HBBBB",      getTeams(gamePair));
+   gamePair.addClientAndSetTeam("newclient", 1);    EXPECT_EQ("HHHBB HBBBB", getTeams(gamePair));
 
    // With autoleveling on, changing teams should trigger balancing
    ClientInfo *clientInfo = gamePair.server->findClientInfo("newclient");
@@ -204,8 +204,8 @@ TEST(RobotManagerTest, moreLessBots)
    gamePair.server->getGameType()->changeClientTeam(clientInfo, 1);  EXPECT_EQ("HHHBB HBBBB", getTeams(gamePair));
 
    // Remove the player again, and try again with the other team
-   gamePair.removeClient("newclient");    EXPECT_EQ("HHHBB BBBBB",      getTeams(gamePair));
-   gamePair.addClient("newclient", 0);    EXPECT_EQ("HHHHB BBBBB",      getTeams(gamePair));
+   gamePair.removeClient("newclient");             EXPECT_EQ("HHHBB BBBBB",      getTeams(gamePair));
+   gamePair.addClientAndSetTeam("newclient", 0);   EXPECT_EQ("HHHHB BBBBB", getTeams(gamePair));
 
    // /kickbot -- disables autoleveling
    gamePair.server->kickSingleBotFromLargestTeamWithBots();  EXPECT_EQ("HHHH BBBBB", getTeams(gamePair));
@@ -220,9 +220,9 @@ TEST(RobotManagerTest, moreLessBots)
    gamePair.server->getGameType()->changeClientTeam(clientInfo, 0);  EXPECT_EQ("HHHH B", getTeams(gamePair));
 
    // With autoleveling off, no bots will be added when new client joins
-   gamePair.addClient("newclient2", 0);    EXPECT_EQ("HHHHH B",      getTeams(gamePair));
-   gamePair.removeClient("newclient2");    EXPECT_EQ("HHHH B",       getTeams(gamePair));
-   gamePair.addClient("newclient2", 1);    EXPECT_EQ("HHHH HB",      getTeams(gamePair));
+   gamePair.addClientAndSetTeam("newclient2", 0);  EXPECT_EQ("HHHHH B", getTeams(gamePair));
+   gamePair.removeClient("newclient2");            EXPECT_EQ("HHHH B",  getTeams(gamePair));
+   gamePair.addClientAndSetTeam("newclient2", 1);  EXPECT_EQ("HHHH HB", getTeams(gamePair));
 
    // /addbot
    gamePair.server->addBot(emptyBotArgs, ClientInfo::ClassRobotAddedByAddbots);   EXPECT_EQ("HHHH HAB",    getTeams(gamePair));

@@ -68,7 +68,7 @@ public:
    static void runCommand(ClientGame *game, const char *input);
 
    ///// Testing
-   friend class GamePair;
+   friend struct GamePair;
 };
 
 };
