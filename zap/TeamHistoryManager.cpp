@@ -43,6 +43,10 @@ void TeamHistoryManager::addPlayer(const string &name, S32 teamCount, S32 teamIn
 {
    TNLAssert(teamCount > 0, "Surely there's at least one team here!");
 
+   // No need to track which team players are on in a 1-team game... so we won't!
+   if(teamCount <= 1)
+      return;
+
    // See if we already know this player
    if(mNames.getIndex(name) == -1)
    {

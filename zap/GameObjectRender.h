@@ -219,6 +219,7 @@ public:
 
    static void renderSoccerBall(const Point &pos, F32 size);
    static void renderSoccerBall(const Point &pos);
+   static void renderLock();
 
    static void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color &color);
 

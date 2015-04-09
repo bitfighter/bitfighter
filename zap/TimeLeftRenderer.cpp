@@ -20,11 +20,8 @@ namespace Zap {
 
 namespace UI {
 
-
-static const S32 TimeTextSize     = 30;
 static const S32 BigScoreTextSize = 28;
 static const S32 BigScoreTextGap  =  5;
-
 
 // Constructor
 TimeLeftRenderer::TimeLeftRenderer()
@@ -77,12 +74,42 @@ void TimeLeftRenderer::updateLeadingPlayerAndScore(const Game *game)
 }
 
 
+F32 renderLock(GL *gl, F32 xPos, bool render)
+{
+   static const F32 lockHeight = 3.4;   // pixels --> see rendering code
+   static const F32 lockWidth = 3;
+   static const F32 renderHeight = 12.0f;
+   static const F32 scale = renderHeight / lockHeight;
+   static const F32 margin = 4;
+   static const F32 renderWidth = lockWidth * scale;
+   static const S32 totalWidth = renderWidth + margin;
+
+   if(render)
+   {
+      gl->glPushMatrix();
+
+      gl->glTranslate(xPos - totalWidth,
+                      DisplayManager::getScreenInfo()->getGameCanvasHeight() -
+                            TimeLeftRenderer::TimeLeftIndicatorMargin -                
+                            renderHeight - 5);     
+      gl->glScale(scale);
+
+      GameObjectRender::renderLock();
+
+      gl->glPopMatrix();
+   }
+
+   return totalWidth;
+}
+
+
+
 // When render param is true, will render as expected; when false, will simply return dimensions
-Point TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible, bool render) const
+Point TimeLeftRenderer::render(const GameType *gameType, bool scoreboardVisible, bool teamsLocked, bool render) const
 {
    FontManager::pushFontContext(TimeLeftHeadlineContext);
 
-   Point corner = renderTimeLeft(gameType, render);
+   Point corner = renderTimeLeft(gameType, teamsLocked, render);
    S32 timeTop  = (S32)corner.y;
 
    // Convert the coordinates we got above into dimensions
@@ -284,7 +311,7 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
 
 // Returns y-coord of top of display, and width of display, which we can use to position other elements 
 // If render is true, will draw display, if false, will only calculate dimensions
-Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) const
+Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool includeLock, bool render) const
 {
    const S32 siSize = 12;                 // Size of stacked indicators
    const S32 grayLineHorizPadding = 4;
@@ -317,17 +344,20 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
          timeWidth += w0;
    }
 
+   S32 canvasWidth = mScreenInfo->getGameCanvasWidth();
+
    // grayLinePos --> Where the vertical gray line is drawn
-   const S32 grayLinePos = (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - timeWidth - grayLineHorizPadding;  
+   const S32 grayLinePos = (canvasWidth - TimeLeftIndicatorMargin) - timeWidth - grayLineHorizPadding;
    const S32 smallTextRPos = grayLinePos - grayLineHorizPadding;                // Right-align the stacked text here
    
    // Left and top coordinates of the time display
-   const S32 timeLeft = (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - timeWidth;
+   const S32 timeLeft = (canvasWidth - TimeLeftIndicatorMargin) - timeWidth;
    const S32 timeTop  = mScreenInfo->getGameCanvasHeight() - TimeTextSize - TimeLeftIndicatorMargin;
 
    S32 wt, wb;    // Width of top and bottom items respectively
 
    S32 stwSizeBonus = 1;
+
 
    if(render)
    {
@@ -340,6 +370,7 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
       wb = RenderUtils::drawStringfr(smallTextRPos, timeTop + TimeTextSize - siSize - stwSizeBonus, siSize + stwSizeBonus,
                         itos(gameType->getWinningScore()).c_str()); 
 
+      // Draw the time itself
       mGL->glColor(gameType->isOvertime() ? Colors::red : Colors::white);
       if(gameType->isTimeUnlimited())  
          RenderUtils::drawString(timeLeft, timeTop, TimeTextSize, UnlimMsg);
@@ -348,22 +379,25 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
       else
          RenderUtils::drawTime(timeLeft, timeTop, TimeTextSize, gameType->getRemainingGameTimeInMs());
    }
-   else
+   else     // Not rendering
    {
       wt = RenderUtils::getStringWidth(siSize, gameType->getShortName());
       wb = RenderUtils::getStringWidth(siSize + stwSizeBonus, itos(gameType->getWinningScore()).c_str());
    }
 
-   const S32 leftLineOverhangAmount = 4;
-   const S32 visualVerticalTextAlignmentHackyFacty = 6;     // This is that little gap btwn the gray vert and horiz lines
-   const S32 farLeftCoord = smallTextRPos - max(wt, wb) - leftLineOverhangAmount;
+   static const S32 leftLineOverhangAmount = 4;
+   static const S32 visualVerticalTextAlignmentHackyFacty = 6;     // This is that little gap btwn the gray vert and horiz lines
+   S32 farLeftCoord = smallTextRPos - max(wt, wb) - leftLineOverhangAmount;
 
    if(render)
    {
       mGL->glColor(Colors::gray40);
-      RenderUtils::drawHorizLine(farLeftCoord, (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin), timeTop - grayLineVertPadding);
+      RenderUtils::drawHorizLine(farLeftCoord, (canvasWidth - TimeLeftIndicatorMargin), timeTop - grayLineVertPadding);
       RenderUtils::drawVertLine(grayLinePos, timeTop + visualVerticalTextAlignmentHackyFacty, timeTop + TimeTextSize);
    }
+
+   if(includeLock)
+      farLeftCoord -= renderLock(mGL, farLeftCoord, render);
 
    // Adjusting this topCord will control how much space above the horiz gray line there is before the flags or other junk is drawn
    const S32 topCoord = timeTop - 2 * grayLineVertPadding - (S32)RenderUtils::DEFAULT_LINE_WIDTH - 8;

@@ -726,30 +726,6 @@ static void renderTestIcon()
 }
 
 
-void QueryServersUserInterface::renderLockIcon() const
-{
-   F32 vertices[] = {
-         0,2,
-         0,4,
-         3,4,
-         3,2
-   };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop);
-
-   F32 vertices2[] = {
-         2.6f, 2,
-         2.6f, 1.3f,
-         2.4f, 0.9f,
-         1.9f, 0.6f,
-         1.1f, 0.6f,
-         0.6f, 0.9f,
-         0.4f, 1.3f,
-         0.4f, 2
-   };
-   mGL->renderVertexArray(vertices2, ARRAYSIZE(vertices2) / 2, GLOPT::LineStrip);
-}
-
-
 void QueryServersUserInterface::setLocalRemoteColor(bool isLocal) const
 {
    if(isLocal)
@@ -925,12 +901,13 @@ void QueryServersUserInterface::render() const
          {
             mGL->glPushMatrix();
                mGL->glTranslate(F32(columns[1].xStart + 25), F32(y + 2));
+
                if(s.pingTimedOut || !s.everGotQueryResponse)
                   RenderUtils::drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
                else
                {
                   mGL->glScale(3.65f);
-                  renderLockIcon();
+                  GameObjectRender::renderLock();
                }
             mGL->glPopMatrix();
          }

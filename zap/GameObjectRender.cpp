@@ -2025,6 +2025,33 @@ void GameObjectRender::renderSoccerBall(const Point &pos, F32 size)
 }
 
 
+// Unscaled, the lock is 3.4 px tall, 3 px wide.  If these change, TimeLeftRenderer will need to change as well.
+void GameObjectRender::renderLock()
+{
+   static F32 vertices[] = {
+         0, 2,
+         0, 4,
+         3, 4,
+         3, 2
+   };
+
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop);
+
+   static F32 vertices2[] = {
+         2.6f, 2,
+         2.6f, 1.3f,
+         2.4f, 0.9f,
+         1.9f, 0.6f,
+         1.1f, 0.6f,
+         0.6f, 0.9f,
+         0.4f, 1.3f,
+         0.4f, 2
+   };
+
+   mGL->renderVertexArray(vertices2, ARRAYSIZE(vertices2) / 2, GLOPT::LineStrip);
+}
+
+
 void GameObjectRender::renderCore(const Point &pos, const Color &coreColor, U32 time,
                 const PanelGeom *panelGeom, const F32 panelHealth[], F32 panelStartingHealth)
 {

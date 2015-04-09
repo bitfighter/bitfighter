@@ -1281,7 +1281,7 @@ bool GameUserInterface::scoreboardIsVisible() const
 
 Point GameUserInterface::getTimeLeftIndicatorWidthAndHeight() const
 {
-   return mTimeLeftRenderer.render(getGame()->getGameType(), scoreboardIsVisible(), false);
+   return mTimeLeftRenderer.render(getGame()->getGameType(), scoreboardIsVisible(), getGame()->areTeamsLocked(), false);
 }
 
 
@@ -2523,9 +2523,9 @@ void GameUserInterface::renderBasicInterfaceOverlay() const
    if(showScore && getGame()->getTeamCount() > 0)      // How could teamCount be 0?
       renderScoreboard();
    
-   // Render timer and associated doodads in the lower-right corner
-   mTimeLeftRenderer.render(gameType, showScore, true);
-
+   // Render timer and associated doodads in the lower-right corner (includes teams-locked indicator)
+   mTimeLeftRenderer.render(gameType, showScore, getGame()->areTeamsLocked(), true);
+   
    renderTalkingClients();
    renderDebugStatus();
 }
