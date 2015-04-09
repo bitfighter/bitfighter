@@ -2249,39 +2249,43 @@ enum ColIndex {
 };
 
 
-void GameUserInterface::renderScoreboard() const
+S32 getMaxPlayersOnAnyTeam(ClientGame *clientGame, S32 teams, bool isTeamGame)
 {
-   // This is probably not needed... if gameType were NULL, we'd have crashed and burned long ago
-   GameType *gameType = getGame()->getGameType();
-   TNLAssert(gameType, "This assert added 8/20/2013; can probably be removed as gameType will never be NULL here!");
-   if(!gameType)
-      return;
-
-   const bool isTeamGame = gameType->isTeamGame();
-
-#ifdef USE_DUMMY_PLAYER_SCORES
-   S32 maxTeamPlayers = getDummyMaxPlayers();
-   S32 teams = isTeamGame ? getDummyTeamCount() : 1;
-#else
-   ClientGame *clientGame = getGame();
-
-   getGame()->countTeamPlayers();
-   const S32 teams = isTeamGame ? clientGame->getTeamCount() : 1;
    S32 maxTeamPlayers = 0;
 
    // Check to make sure at least one team has at least one player...
    for(S32 i = 0; i < teams; i++)
    {
-      Team *team = (Team *)getGame()->getTeam(i);
+      Team *team = (Team *)clientGame->getTeam(i);
+      S32 teamPlayers = team->getPlayerBotCount();
 
       if(!isTeamGame)
-         maxTeamPlayers += team->getPlayerBotCount();
+         maxTeamPlayers += teamPlayers;
 
-      else if(team->getPlayerBotCount() > maxTeamPlayers)
-         maxTeamPlayers = team->getPlayerBotCount();
+      else if(teamPlayers > maxTeamPlayers)
+         maxTeamPlayers = teamPlayers;
    }
+
+   return maxTeamPlayers;
+}
+
+
+void GameUserInterface::renderScoreboard() const
+{
+   ClientGame *clientGame = getGame();
+   GameType *gameType = clientGame->getGameType();
+
+   const bool isTeamGame = gameType->isTeamGame();
+
+#ifdef USE_DUMMY_PLAYER_SCORES
+   S32 teams = isTeamGame ? getDummyTeamCount() : 1;
+   S32 maxTeamPlayers = getDummyMaxPlayers();
+#else
+   clientGame->countTeamPlayers();
+   const S32 teams = isTeamGame ? clientGame->getTeamCount() : 1;
+   S32 maxTeamPlayers = getMaxPlayersOnAnyTeam(clientGame, teams, isTeamGame);
 #endif
-   // ...if not, then go home!
+
    if(maxTeamPlayers == 0)
       return;
 
