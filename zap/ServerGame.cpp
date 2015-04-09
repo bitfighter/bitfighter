@@ -610,12 +610,40 @@ void ServerGame::cycleLevel(S32 nextLevel)
    // Sorting also puts idle players at the end of the list, regardless of their rating
    mClientInfos.sort(AddOrderSort);
 
-   // Backwards!  So the lowest scorer goes on the larger team (if there is uneven teams)
-   for(S32 i = getClientCount() - 1; i > -1; i--)
+   Vector<S32> unassigned;
+
+   if(areTeamsLocked())
    {
-      ClientInfo *clientInfo = getClientInfo(i);   // Could be a robot when level have "Robot" line, or a levelgen adds one
-         
-      getGameType()->serverAddClient(clientInfo, areTeamsLocked() ? &mTeamHistoryManager : NULL);
+      // Two passes!  All pre-assigned players get added first, then unassigned ones
+      for(S32 i = 0; i < getClientCount(); i++)
+      {
+         ClientInfo *clientInfo = getClientInfo(i);
+
+         if(mTeamHistoryManager.getTeam(clientInfo->getName().getString(), mLevel->getTeamCount()) != NO_TEAM)
+            getGameType()->serverAddClient(clientInfo, &mTeamHistoryManager);
+         else
+            unassigned.push_back(i);
+      }
+
+      // Now assign any still-unassigned teams
+      for(S32 i = 0; i < unassigned.size(); i++)
+      {
+         ClientInfo *clientInfo = getClientInfo(unassigned[i]);  
+
+         getGameType()->serverAddClient(clientInfo, &mTeamHistoryManager);
+      }
+   }
+   else  // Teams not locked, just add all the clients
+   {
+      // Backwards!  So the lowest scorer goes on the larger team (if there is uneven teams)
+      for(S32 i = getClientCount() - 1; i > -1; i--)
+         getGameType()->serverAddClient(getClientInfo(i), NULL);
+   }
+
+   // Initialize all our connections
+   for(S32 i = 0; i < getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = getClientInfo(i);
 
       GameConnection *connection = clientInfo->getConnection();
       //TNLAssert(connection, "Why no connection here?");  // If this trips, comment circumstances and delete 3/10/2015 CE (trips during certain tests)

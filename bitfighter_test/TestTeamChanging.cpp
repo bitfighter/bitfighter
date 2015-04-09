@@ -463,6 +463,135 @@ namespace Zap {
    }
 
 
+   static void checkTeams(ServerGame *server, S32 teamCount, S32 t0, S32 t1, S32 t2, S32 t3, S32 t4)
+   {
+      EXPECT_EQ(teamCount, server->getTeamCount());
+      EXPECT_EQ(t0, server->findClientInfo("Pl1")->getTeamIndex());
+      EXPECT_EQ(t1, server->findClientInfo("Pl2")->getTeamIndex());
+      EXPECT_EQ(t2, server->findClientInfo("Pl3")->getTeamIndex());
+      EXPECT_EQ(t3, server->findClientInfo("Pl4")->getTeamIndex());
+      EXPECT_EQ(t4, server->findClientInfo("Pl5")->getTeamIndex());
+   }
+
+
+   static void checkTeams(ServerGame *server, S32 teamCount, S32 t0, S32 t1, S32 t2, S32 t3, S32 t4, S32 t5)
+   {
+      EXPECT_EQ(teamCount, server->getTeamCount());
+
+      EXPECT_EQ(t0, server->findClientInfo("Pl1")->getTeamIndex());
+      EXPECT_EQ(t1, server->findClientInfo("Pl2")->getTeamIndex());
+      EXPECT_EQ(t2, server->findClientInfo("Pl3")->getTeamIndex());
+      EXPECT_EQ(t3, server->findClientInfo("Pl4")->getTeamIndex());
+      EXPECT_EQ(t4, server->findClientInfo("Pl5")->getTeamIndex());
+      EXPECT_EQ(t5, server->findClientInfo("Pl6")->getTeamIndex());
+   }
+
+
+   // If teams are locked during 2-team game, then we start 3-team game, and players joins, then make sure
+   // everything is ok when we go back to 2-team game, and that he is assigned to old team when we go back
+   // to 3-team game... and finally, back to his old team in 2-team game.  Whew!
+   TEST(TeamChangingTests, TestPlayersJoiningWhileTeamsAreLocked)
+   {
+      Vector<string> levelCodes;
+      levelCodes.push_back(getMultiTeamLevelCode(2));
+      levelCodes.push_back(getMultiTeamLevelCode(3));
+
+      GamePair gamePair = GamePair(levelCodes, 0);
+      ServerGame *server = gamePair.server;
+
+      // Make everyone an admin to make issuing chat cmds easier
+      gamePair.addClientAndSetRole("Pl1", ClientInfo::RoleAdmin);
+      gamePair.addClientAndSetRole("Pl2", ClientInfo::RoleAdmin);
+      gamePair.addClientAndSetRole("Pl3", ClientInfo::RoleAdmin);
+      gamePair.addClientAndSetRole("Pl4", ClientInfo::RoleAdmin);
+      gamePair.addClientAndSetRole("Pl5", ClientInfo::RoleAdmin);
+      gamePair.idle(5, 5);
+
+      S32 t2_0 = server->findClientInfo("Pl1")->getTeamIndex();
+      S32 t2_1 = server->findClientInfo("Pl2")->getTeamIndex();
+      S32 t2_2 = server->findClientInfo("Pl3")->getTeamIndex();
+      S32 t2_3 = server->findClientInfo("Pl4")->getTeamIndex();
+      S32 t2_4 = server->findClientInfo("Pl5")->getTeamIndex();
+      {
+         SCOPED_TRACE("2-1");
+         checkTeams(server, 2, t2_0, t2_1, t2_2, t2_3, t2_4);
+      }
+      gamePair.idle(5, 5);
+      gamePair.runChatCmd(0, "/lockteams");
+      gamePair.idle(5, 5);
+      ASSERT_TRUE(server->areTeamsLocked());
+      // Switch to 3-team game
+      gamePair.runChatCmd(0, "/next");
+      gamePair.idle(5, 5);
+      EXPECT_TRUE(server->areTeamsLocked());
+      // Record teams in 3-team game
+      S32 t3_0 = server->findClientInfo("Pl1")->getTeamIndex();
+      S32 t3_1 = server->findClientInfo("Pl2")->getTeamIndex();
+      S32 t3_2 = server->findClientInfo("Pl3")->getTeamIndex();
+      S32 t3_3 = server->findClientInfo("Pl4")->getTeamIndex();
+      S32 t3_4 = server->findClientInfo("Pl5")->getTeamIndex();
+      {
+         SCOPED_TRACE("3-1");
+         checkTeams(server, 3, t3_0, t3_1, t3_2, t3_3, t3_4);
+      }
+      // Back to original 2-team game
+      gamePair.runChatCmd(0, "/next");
+      gamePair.idle(5, 5);
+      EXPECT_TRUE(server->areTeamsLocked());
+      {
+         SCOPED_TRACE("2-2");
+         checkTeams(server, 2, t2_0, t2_1, t2_2, t2_3, t2_4);
+      }
+      // Back to 3-team game
+      gamePair.runChatCmd(0, "/next");
+      gamePair.idle(5, 5);
+      EXPECT_TRUE(server->areTeamsLocked());
+      {
+         SCOPED_TRACE("3-2");
+         checkTeams(server, 3, t3_0, t3_1, t3_2, t3_3, t3_4);
+      }
+      // And back to you, two
+      // Back to 3-team game
+      gamePair.runChatCmd(0, "/next");
+      gamePair.idle(5, 5);
+      EXPECT_TRUE(server->areTeamsLocked());
+      {
+         SCOPED_TRACE("2-3a");
+         checkTeams(server, 2, t2_0, t2_1, t2_2, t2_3, t2_4);
+      }
+      // Ok, that seems to be working
+      // Add player
+      ClientGame *newClient = gamePair.addClient("Pl6");
+      S32 t2_5 = server->findClientInfo("Pl6")->getTeamIndex();
+      EXPECT_EQ(1, t2_5) << "6th player should go on team 1 (0,1,0,1,0,_1_)";
+      {
+         SCOPED_TRACE("2-3b");
+         checkTeams(server, 2, t2_0, t2_1, t2_2, t2_3, t2_4, t2_5);
+      }
+      // Back to 3-team game; new player hasn't been assigned to a team here; will probably go on team 0, which has fewest players
+      gamePair.runChatCmd(0, "/next");
+      gamePair.idle(5, 5);
+      S32 t3_5 = server->findClientInfo("Pl6")->getTeamIndex();
+      EXPECT_EQ(2, t3_5) << "6th player should go on team 2 (0,1,2,0,1,_2_)";
+      {
+         SCOPED_TRACE("3-3");
+         checkTeams(server, 3, t3_0, t3_1, t3_2, t3_3, t3_4, t3_5);
+      }
+      gamePair.runChatCmd(0, "/next");
+      gamePair.idle(5, 5);
+      {
+         SCOPED_TRACE("2-4");
+         checkTeams(server, 2, t2_0, t2_1, t2_2, t2_3, t2_4, t2_5);
+      }
+      gamePair.runChatCmd(0, "/next");
+      gamePair.idle(5, 5);
+      {
+         SCOPED_TRACE("3-4");
+         checkTeams(server, 3, t3_0, t3_1, t3_2, t3_3, t3_4, t3_5);
+      }
+   }
+
+
    TEST(TeamChangingTests, TestTeamSwitchingAbuse)
    {
       GamePair gamePair(getLevelCodeForItemPropagationTests(""), 2); // This level has 2 teams; good for testing team changing

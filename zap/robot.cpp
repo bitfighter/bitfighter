@@ -305,7 +305,7 @@ void Robot::onAddedToGame(Game *game)
    }
 
    disableCollision();
-   game->getGameType()->serverAddClient(mClientInfo.getPointer(), NULL);
+   game->getGameType()->serverAddClient(mClientInfo.getPointer(), NULL);   // Bool param will be ignored
    enableCollision();
 
    Parent::onAddedToGame(game);

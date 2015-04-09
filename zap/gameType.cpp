@@ -1735,13 +1735,15 @@ void GameType::serverAddClient(ClientInfo *clientInfo, TeamHistoryManager *teamH
 
    S32 minTeamIndex = NO_TEAM;
 
-   // See if we have a "preassigned" team for this player.  We might, if teams are locked and player recently quit.
+   // See if we have a "preassigned" team for this player.  We might, if teams are locked and player has played this team config before.
    if(teamHistoryManager)
       minTeamIndex = teamHistoryManager->getTeam(clientInfo->getName().getString(), mLevel->getTeamCount());
    
    if(minTeamIndex == NO_TEAM)
    {
       minTeamIndex = findTeamWithFewestPlayers(clientInfo->getClientClass());
+
+      // Save player's team assignment
       if(teamHistoryManager)
          teamHistoryManager->addPlayer(clientInfo->getName().getString(), mLevel->getTeamCount(), minTeamIndex);
    }
