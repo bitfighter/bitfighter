@@ -357,8 +357,8 @@ class RefPtrData
    friend class RefObjectRef;
 
 public:
-   RefPtrData() {mRefCount = 0;}
-   RefPtrData(const RefPtrData &copy) {mRefCount = 0;}
+   RefPtrData();
+   RefPtrData(const RefPtrData &copy);
    virtual ~RefPtrData();
 
    /// Object destroy self call (from RefPtr).
@@ -366,17 +366,8 @@ public:
    /// @note Override if this class has specially allocated memory.
    virtual void destroySelf();
 
-   void incRef()
-   {
-      mRefCount++;
-   }
-
-   void decRef()
-   {
-      mRefCount--;
-      if(!mRefCount)
-         destroySelf();
-   }
+   void incRef();
+   void decRef();
 };
 
 

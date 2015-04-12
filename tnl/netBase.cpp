@@ -184,15 +184,51 @@ SafePtrData::~SafePtrData()
    }
 }
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+RefPtrData::RefPtrData()
+{ 
+   mRefCount = 0; 
+}
+
+
+RefPtrData::RefPtrData(const RefPtrData &copy)
+{ 
+   mRefCount = 0; 
+}
+
+
 void RefPtrData::destroySelf()
 {
    delete this;
 }
 
+
 RefPtrData::~RefPtrData()
 {
    TNLAssert(mRefCount == 0, "Error! Object deleted with non-zero reference count!");
 }
+
+
+void RefPtrData::incRef()
+{
+   if(dynamic_cast<Object *>(this))
+   {
+      if(dynamic_cast<Object *>(this)->getClassRep() != NULL && strcmp(dynamic_cast<Object *>(this)->getClassName(), "Ship") == 0)
+         printf("Incrementing ref to %p \n", this);
+   }
+   mRefCount++;
+}
+
+
+void RefPtrData::decRef()
+{
+   mRefCount--;
+   if(!mRefCount)
+      destroySelf();
+}
+
 
 //--------------------------------------
 NetClassRep* Object::getClassRep() const
