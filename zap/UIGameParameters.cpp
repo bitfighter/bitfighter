@@ -141,6 +141,7 @@ static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
    GameType *gt = dynamic_cast<GameType *>(theObject);   
 
    TNLAssert(gt, "Whoa!");
+   TNLAssert(game->getLevel(), "Whoa!");
    
    game->getLevel()->setGameType(gt);     // gt will be put into a RefPtr, which will handle cleanup
 
