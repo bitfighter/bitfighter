@@ -404,7 +404,7 @@ void Level::setGameType(GameType *gameType)
 {
    mGameType = gameType;      // mGameType is a referenced counted pointer, so cleanup will happen automatically
 
-   if(mGameType)
+   if(mGameType.isValid())
       mGameType->setLevel(this);
 }
 
