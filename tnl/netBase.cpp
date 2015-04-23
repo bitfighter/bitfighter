@@ -213,20 +213,27 @@ RefPtrData::~RefPtrData()
 
 void RefPtrData::incRef()
 {
-   if(dynamic_cast<Object *>(this))
-   {
-      if(dynamic_cast<Object *>(this)->getClassRep() != NULL && strcmp(dynamic_cast<Object *>(this)->getClassName(), "Ship") == 0)
-         printf("Incrementing ref to %p \n", this);
-   }
    mRefCount++;
 }
 
 
 void RefPtrData::decRef()
 {
-   mRefCount--;
+   // Check if count is already 0; if so, we can delete without stress.  Check ensures the following:
+   // TestItem *test = new TestItem();  SafePtr<TestItem> testPtr = test;  delete test;
+   // makes testPtr.isNull() == true
+   if(mRefCount > 0)
+      mRefCount--;
+
    if(!mRefCount)
       destroySelf();
+}
+
+
+// Used primarily for asserting things
+U32 RefPtrData::getRefCount()
+{
+   return mRefCount;
 }
 
 

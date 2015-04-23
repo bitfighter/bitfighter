@@ -71,7 +71,7 @@ GameConnection::GameConnection(ClientGame *clientGame, bool isLocalConnection)
    if(isLocalConnection)
       mClientInfo->setRole(LocalConnectionPermissions, false);
 
-   TNLAssert(mClientInfo->getName() != "", "Client has invalid name!");
+   TNLAssert(mClientInfo->getName() != "", "Client has no name!");
 
    setSimulatedNetParams(mSettings->getSimulatedLoss(), mSettings->getSimulatedLag());
 }

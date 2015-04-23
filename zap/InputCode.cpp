@@ -318,6 +318,25 @@ bool InputCodeManager::getState(InputCode inputCode)
 static const InputCode modifiers[] = { KEY_CTRL, KEY_ALT, KEY_SHIFT, KEY_META, KEY_SUPER };
 static const char InputStringJoiner = '+';
 
+static InputCode getBaseKey(InputCode inputCode)
+{
+   // First, find the base key -- this will be the last non-modifier key we find, or one where the base key is the same as inputCode,
+   // assuming the standard modifier-key combination
+   for(S32 i = 0; i < MAX_INPUT_CODES; i++)
+   {
+      InputCode code = (InputCode)i;
+
+      if(InputCodeManager::isKeyboardKey(code) && !InputCodeManager::isModifier(code) && InputCodeManager::getState(code))
+         if(code == inputCode)
+            return inputCode;
+
+         // Otherwise, keep looking
+   }
+
+   return KEY_NONE;
+}
+
+
 // At any given time, for any combination of keys being pressed, there will be an official "input string" that looks a bit 
 // like [Ctrl+T] or whatever.  
 // This may be different than the keys actually being pressed.  For example, if the A and B keys are down, the inputString will be [A].
@@ -326,24 +345,7 @@ static const char InputStringJoiner = '+';
 // Modifiers will appear in order specified above... i.e. Ctrl+Shift+A, not Shift+Ctrl+A
 string InputCodeManager::getCurrentInputString(InputCode inputCode)
 {
-   InputCode baseKey = KEY_NONE;
-
-   // First, find the base key -- this will be the last non-modifier key we find, or one where the base key is the same as inputCode,
-   // assuming the standard modifier-key combination
-   for(S32 i = 0; i < MAX_INPUT_CODES; i++)
-   {
-      InputCode code = (InputCode) i;
-
-      if(isKeyboardKey(code) && !isModifier(code) && getState(code))
-      {
-         baseKey = code;
-
-         if(code == inputCode)
-            break;
-
-         // Othewise, keep looking
-      }
-   }
+   InputCode baseKey = getBaseKey(inputCode);
 
    if(baseKey == KEY_NONE)
       return "";
@@ -1886,7 +1888,7 @@ const Vector<string> *InputCodeManager::getModifierNames()
 }
 
 
-InputCode InputCodeManager::getBaseKey(InputCode inputCode)
+InputCode InputCodeManager::getBaseKeySpecialSequence(InputCode inputCode)
 {
    switch(inputCode)
    {
@@ -1923,7 +1925,7 @@ InputCode InputCodeManager::getBaseKey(InputCode inputCode)
 
 string InputCodeManager::getBaseKeyString(InputCode inputCode)
 {
-   return inputCodeToString(getBaseKey(inputCode));
+   return inputCodeToString(getBaseKeySpecialSequence(inputCode));
 }
 
 

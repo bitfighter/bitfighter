@@ -272,7 +272,6 @@ private:
    void insertNewItem(U8 itemTypeNumber);    // Insert a new object into the specified database
 
    bool mWasTesting;
-   GameType *mEditorGameType;    // Used to store our GameType while we're testing
 
    void onFinishedDragging();    // Called when we're done dragging an object
    void onFinishedDragging_droppedItemOnDock();
@@ -326,6 +325,7 @@ private:
    void doneChangingGeoms(const Vector<BfObject *> &bfObjects);
    void doneChangingGeoms(BfObject *bfObject);
 
+   void showLevelHasErrorMessage(bool gameTypeError);
 
 protected:
    void onActivate();
@@ -341,8 +341,8 @@ public:
 
    Level *getLevel() const;           // Need external access to this in one static function
 
-   void setLevelFileName(string name);
-   void setLevelGenScriptName(string name);
+   void setLevelFileName(const string &name);
+   //void setLevelGenScriptName(const string &name);
 
    string getLevelFileName() const;
    void cleanUp();
@@ -390,6 +390,8 @@ public:
 
    // Handle input
    bool onKeyDown(InputCode inputCode);                         // Handle all keyboard inputs, mouse clicks, and button presses
+   bool handleKeyPress(InputCode inputCode, const string &inputString);
+   
    void onTextInput(char ascii);                                // Handle all text input characters
    bool checkPluginKeyBindings(string inputString);             // Handle keys bound to plugins
    void specialAttributeKeyHandler(InputCode inputCode, char ascii);

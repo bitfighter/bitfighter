@@ -353,6 +353,7 @@ public:
 
 class RefPtrData
 {
+private:
    U32 mRefCount;                  ///< Reference counter for RefPtr objects.
    friend class RefObjectRef;
 
@@ -368,6 +369,7 @@ public:
 
    void incRef();
    void decRef();
+   U32 getRefCount();
 };
 
 

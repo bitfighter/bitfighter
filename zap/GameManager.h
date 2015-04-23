@@ -49,6 +49,9 @@ public:
    static void initialize();
    static void shutdownBitfighter();
 
+   static bool hostGame(); 
+   static void abortHosting_noLevels();
+
    // ServerGame related
    static void setServerGame(ServerGame *serverGame);
    static ServerGame *getServerGame();
@@ -61,6 +64,8 @@ public:
    static void addClientGame(ClientGame *clientGame);
    static void deleteClientGame(S32 index);     // Delete specified game
    static void deleteClientGames();             // Delete all games
+
+   static void localClientQuits(ClientGame *game);
 #endif
 
    static void idleClientGames(U32 timeDelta);

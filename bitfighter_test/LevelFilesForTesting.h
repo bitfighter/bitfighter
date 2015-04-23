@@ -17,6 +17,7 @@ using namespace std;
 using namespace TNL;
 
 string getLevelCode1();
+string getLevelCode3();
 string getLevelCodeForTestingEngineer1();
 string getLevelCodeForEmptyLevelWithBots(const string &botspec);
 string getLevelCodeForEngineeredItemSnapping();

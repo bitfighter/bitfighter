@@ -94,6 +94,8 @@ public:
    virtual bool isDatabasable();    // Can this item actually be inserted into a database?
 
    virtual DatabaseObject *clone() const;
+
+   virtual void deleteThyself();
 };
 
 

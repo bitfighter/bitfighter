@@ -24,6 +24,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLuaEnvironment.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMaster.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMove.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestObjectCleanup.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestObjects.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestObjectScope.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestPolylineGeometry.cpp

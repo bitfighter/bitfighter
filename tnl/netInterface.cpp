@@ -194,6 +194,7 @@ NetConnection *NetInterface::findPendingConnection(const Address &address)
    return NULL;
 }
 
+
 void NetInterface::findAndRemovePendingConnection(const Address &address)
 {
    // Search through the list by Address and remove any connection

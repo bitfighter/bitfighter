@@ -1704,8 +1704,6 @@ Point ClientGame::worldToScreenPoint(const Point *point, S32 canvasWidth, S32 ca
 // Add wall to game -- only get here via editor plugin
 void ClientGame::addWallItem(WallItem *wallItem, GridDatabase *database)
 {
-//   Parent::addWallItem(wallItem, database);  //{P{P
-
    // Do we want to run onGeomChanged here instead?  If so, we can combine with addPolyWall.
    wallItem->computeExtendedEndPoints();
 }

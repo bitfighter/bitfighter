@@ -192,6 +192,11 @@ string getLevelCode1()
    return levelCodes[0];
 }
 
+string getLevelCode3()
+{
+   initialize();
+   return levelCodes[2];
+}
 
 string getLevelCodeForTestingEngineer1()
 {

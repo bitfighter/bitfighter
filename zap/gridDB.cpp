@@ -196,7 +196,10 @@ void GridDatabase::removeEverythingFromDatabase()
    mPolyWalls.clear();
    mWallitems.clear();
 
-   mAllObjects.deleteAndClear();
+   for(S32 i = 0; i < mAllObjects.size(); i++)
+      mAllObjects[i]->deleteThyself();
+
+   mAllObjects.clear();
 }
 
 
@@ -269,7 +272,7 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
       eraseObject_fast(&mWallitems, object);
 
    if(deleteObject)
-      delete object;      
+      object->deleteThyself();
 }
 
 
@@ -862,6 +865,13 @@ bool DatabaseObject::isDatabasable()
 const Vector<Point> *DatabaseObject::getCollisionPoly() const
 {
    return NULL;
+}
+
+
+// Overridden by BfObject
+void DatabaseObject::deleteThyself()
+{
+   delete this;
 }
 
 

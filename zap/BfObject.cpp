@@ -455,6 +455,15 @@ BfObject::~BfObject()
 }
 
 
+// BfObjects inherit from NetObjects, which delete themselves if their reference count hits 0.  Using this
+// mechanism is safer than an outright delete, which will fail if there are more than one pointers to
+// the "this" object.
+void BfObject::deleteThyself()
+{
+   decRef();
+}
+
+
 void BfObject::assignNewUserAssignedId()
 {
    setUserAssignedId(getNextDefaultId(), false);

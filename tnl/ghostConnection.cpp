@@ -868,6 +868,7 @@ void GhostConnection::deleteLocalGhosts()
       if(mLocalGhosts[i])
       {
          mLocalGhosts[i]->onGhostRemove();
+         //TNLAssert(mLocalGhosts[i]->getRefCount() == 1, "Object won't be deleted as expected!");
          mLocalGhosts[i]->decRef(); // This deletes the object
          mLocalGhosts[i] = NULL;
       }

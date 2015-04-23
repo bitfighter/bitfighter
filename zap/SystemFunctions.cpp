@@ -63,13 +63,14 @@ void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool test
 
    if(levelSource->getLevelCount() == 0 && !hostOnServer)     // No levels!
    {
-      abortHosting_noLevels(GameManager::getServerGame());
+      GameManager::abortHosting_noLevels();
       GameManager::deleteServerGame();
       return;
    }
 
    GameManager::getServerGame()->resetLevelLoadIndex();
 
+   // Does this actually do anything??
    if(hostOnServer)
       GameManager::setHostingModePhase(GameManager::DoneLoadingLevels);
 
@@ -86,51 +87,6 @@ void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool test
 
 void shutdownBitfighter();    // Forward declaration
 
-// If we can't load any levels, here's the plan...
-void abortHosting_noLevels(ServerGame *serverGame)
-{
-   if(serverGame->isDedicated())  
-   {
-      FolderManager *folderManager = serverGame->getSettings()->getFolderManager();
-      const char *levelDir = folderManager->getLevelDir().c_str();
-
-      logprintf(LogConsumer::LogError,     "No levels found in folder %s.  Cannot host a game.", levelDir);
-      logprintf(LogConsumer::ServerFilter, "No levels found in folder %s.  Cannot host a game.", levelDir);
-   }
-
-
-#ifndef ZAP_DEDICATED
-   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
-
-   for(S32 i = 0; i < clientGames->size(); i++)    // <<=== Should probably only display this message on the clientGame that initiated hosting
-   {
-      UIManager *uiManager = clientGames->get(i)->getUIManager();
-
-      ErrorMessageUserInterface *errUI = uiManager->getUI<ErrorMessageUserInterface>();
-
-      FolderManager *folderManager = serverGame->getSettings()->getFolderManager();
-      string levelDir = folderManager->getLevelDir();
-
-      errUI->reset();
-      errUI->setTitle("HOUSTON, WE HAVE A PROBLEM");
-      errUI->setMessage("No levels were loaded.  Cannot host a game.  "
-                        "Check the LevelDir parameter in your INI file, "
-                        "or your command-line parameters to make sure "
-                        "you have correctly specified a folder containing "
-                        "valid level files.\n\n"
-                        "Trying to load levels from folder:\n" +
-                     (levelDir == "" ? string("<<Unresolvable>>") : levelDir));
-
-      errUI->setInstr("Press [[Esc]] to continue");
-
-      uiManager->activate<ErrorMessageUserInterface>();
-      uiManager->disableLevelLoadDisplay(false); 
-   }
-
-   if(clientGames->size() == 0)
-#endif
-      GameManager::shutdownBitfighter();      // Quit in an orderly fashion
-}
 
 ////////////////////////////////////////
 ////////////////////////////////////////

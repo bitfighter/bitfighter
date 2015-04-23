@@ -328,7 +328,7 @@ bool UserInterface::checkInputCode(BindingNameEnum binding, InputCode inputCode)
 
    // Handle modified keys
    if(InputCodeManager::isModified(bindingCode))
-      return inputCode == InputCodeManager::getBaseKey(bindingCode) && 
+      return inputCode == InputCodeManager::getBaseKeySpecialSequence(bindingCode) &&
              InputCodeManager::checkModifier(InputCodeManager::getModifier(bindingCode));
 
    // Else just do a simple key check.  filterInputCode deals with the numeric keypad.

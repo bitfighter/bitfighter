@@ -59,6 +59,7 @@ public:
    // Override this to define how to set up the environment
    virtual void SetUp() 
    { 
+      InputCodeManager::initializeKeyNames();
       RenderManager::init();
       GameSettings settings;
       FontManager::initialize(settings.get(), false);

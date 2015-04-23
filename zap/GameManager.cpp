@@ -59,7 +59,78 @@ void GameManager::initialize()
    gameConsole->initialize();
    ConsoleLog = new ConsoleLogConsumer(gameConsole);  // Logs to our in-game console, when available
 #endif
+}
 
+
+// All levels loaded, we're ready to go
+bool GameManager::hostGame()
+{
+   TNLAssert(mServerGame, "Need a ServerGame to host, silly!");
+
+   if(!mServerGame->startHosting())
+   {
+      abortHosting_noLevels();
+      return false;
+   }
+
+#ifndef ZAP_DEDICATED
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+
+   for(S32 i = 0; i < clientGames->size(); i++)
+   {
+      clientGames->get(i)->getUIManager()->disableLevelLoadDisplay(true);
+      clientGames->get(i)->joinLocalGame(mServerGame->getNetInterface());  // ...then we'll play, too!
+   }
+#endif
+
+   return true;
+}
+
+
+// If we can't load any levels, here's the plan...
+void GameManager::abortHosting_noLevels()
+{
+   if(mServerGame->isDedicated())
+   {
+      FolderManager *folderManager = mServerGame->getSettings()->getFolderManager();
+      const char *levelDir = folderManager->getLevelDir().c_str();
+
+      logprintf(LogConsumer::LogError, "No levels found in folder %s.  Cannot host a game.", levelDir);
+      logprintf(LogConsumer::ServerFilter, "No levels found in folder %s.  Cannot host a game.", levelDir);
+   }
+
+
+#ifndef ZAP_DEDICATED
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+
+   for(S32 i = 0; i < clientGames->size(); i++)    // <<=== Should probably only display this message on the clientGame that initiated hosting
+   {
+      UIManager *uiManager = clientGames->get(i)->getUIManager();
+
+      ErrorMessageUserInterface *errUI = uiManager->getUI<ErrorMessageUserInterface>();
+
+      FolderManager *folderManager = mServerGame->getSettings()->getFolderManager();
+      string levelDir = folderManager->getLevelDir();
+
+      errUI->reset();
+      errUI->setTitle("HOUSTON, WE HAVE A PROBLEM");
+      errUI->setMessage("No levels were loaded.  Cannot host a game.  "
+         "Check the LevelDir parameter in your INI file, "
+         "or your command-line parameters to make sure "
+         "you have correctly specified a folder containing "
+         "valid level files.\n\n"
+         "Trying to load levels from folder:\n" +
+         (levelDir == "" ? string("<<Unresolvable>>") : levelDir));
+
+      errUI->setInstr("Press [[Esc]] to continue");
+
+      uiManager->activate<ErrorMessageUserInterface>();
+      uiManager->disableLevelLoadDisplay(false);
+   }
+
+   if(clientGames->size() == 0)
+#endif
+      GameManager::shutdownBitfighter();      // Quit in an orderly fashion
 }
 
 
@@ -96,6 +167,16 @@ void GameManager::idleServerGame(U32 timeDelta)
 /////
 
 #ifndef ZAP_DEDICATED
+
+// Called when user quits/returns to editor when playing game
+// Code seems rather brutal to me, but that's the harsh reality of life in space
+void GameManager::localClientQuits(ClientGame *game)
+{
+   game->closeConnectionToGameServer();
+   deleteServerGame();
+}
+
+
 const Vector<ClientGame *> *GameManager::getClientGames()
 {
    return &mClientGames;

@@ -293,7 +293,7 @@ public:
 
    static const Vector<string> *getModifierNames();
 
-   static InputCode getBaseKey(InputCode inputCode);
+   static InputCode getBaseKeySpecialSequence(InputCode inputCode);
    static string getBaseKeyString(InputCode inputCode);
 
    static JoystickButton inputCodeToJoystickButton(InputCode inputCode);

@@ -2046,9 +2046,7 @@ void GameMenuUserInterface::onReactivate()
 
 static void endGameCallback(ClientGame *game, U32 unused)
 {
-   game->closeConnectionToGameServer();
-
-   GameManager::deleteServerGame();
+   GameManager::localClientQuits(game);
 }
 
 

@@ -169,7 +169,7 @@ void EditorUserInterface::setLevel(const boost::shared_ptr<Level> &level)
 {
    TNLAssert(level.get(), "Level should not be NULL!");
    mLevel = level;
-   getGame()->setLevel(level);
+   //getGame()->setLevel(level);
    mUndoManager.setLevel(level, this);
 
    // Do some special preparations for walls/polywalls -- the editor needs to know about wall edges and such
@@ -207,6 +207,7 @@ void EditorUserInterface::populateDock()
 {
    // Out with the old
    mDockItems.clearAllObjects();
+   GameTypeId gameTypeId = mLevel->getGameType()->getGameTypeId();
 
    F32 xPos = (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin - ITEMS_DOCK_WIDTH / 2;
    F32 yPos = 35;
@@ -237,9 +238,9 @@ void EditorUserInterface::populateDock()
    addDockObject(new TextItem(), xPos, yPos);
    yPos += spacer;
 
-   if(mLevel->getGameType()->getGameTypeId() == SoccerGame)
+   if(gameTypeId == SoccerGame)
       addDockObject(new SoccerBallItem(), xPos, yPos);
-   else if(mLevel->getGameType()->getGameTypeId() == CoreGame)
+   else if(gameTypeId == CoreGame)
       addDockObject(new CoreItem(), xPos, yPos);
    else
       addDockObject(new FlagItem(), xPos, yPos);
@@ -271,7 +272,7 @@ void EditorUserInterface::populateDock()
    addDockObject(new LoadoutZone(), xPos, yPos);
    yPos += 25;
 
-   if(mLevel->getGameType()->getGameTypeId() == NexusGame)
+   if(gameTypeId == NexusGame)
    {
       addDockObject(new NexusZone(), xPos, yPos);
       yPos += 25;
@@ -361,7 +362,7 @@ void EditorUserInterface::rebuildEverything(Level *level)
 }
 
 
-void EditorUserInterface::setLevelFileName(string name)
+void EditorUserInterface::setLevelFileName(const string &name)
 {
    mEditFileName = name;
    if(name != "" && name.find('.') == string::npos)      // Append extension, if one is needed
@@ -829,7 +830,7 @@ static void setTeam(BfObject *obj, S32 team)
 
    // Set default health based on team for display purposes
    if(isEngineeredType(obj->getObjectTypeNumber()))
-      static_cast<EngineeredItem *>(obj)->setHealth((team == TEAM_NEUTRAL) ? 0 : 1);
+      static_cast<EngineeredItem *>(obj)->setHealth((team == TEAM_NEUTRAL) ? 0.0f : 1.0f);
 }
 
 
@@ -890,17 +891,18 @@ void EditorUserInterface::validateLevel()
    // "Unversal errors" -- levelgens can't (yet) change gametype
 
    GameType *gameType = mLevel->getGameType();
+   GameTypeId gameTypeId = mLevel->getGameType()->getGameTypeId();
 
    // Check for soccer ball in a a game other than SoccerGameType. Doesn't crash no more.
-   if(foundSoccerBall && gameType->getGameTypeId() != SoccerGame)
+   if(foundSoccerBall && gameTypeId != SoccerGame)
       mLevelWarnings.push_back("WARNING: Soccer ball can only be used in soccer game.");
 
    // Check for the nexus object in a non-hunter game. Does not affect gameplay in non-hunter game.
-   if(foundNexus && gameType->getGameTypeId() != NexusGame)
+   if(foundNexus && gameTypeId != NexusGame)
       mLevelWarnings.push_back("WARNING: Nexus object can only be used in Nexus game.");
 
    // Check for missing nexus object in a hunter game.  This cause mucho dolor!
-   if(!foundNexus && gameType->getGameTypeId() == NexusGame)
+   if(!foundNexus && gameTypeId == NexusGame)
       mLevelErrorMsgs.push_back("ERROR: Nexus game must have a Nexus.");
 
    if(foundFlags && !gameType->isFlagGame())
@@ -919,7 +921,7 @@ void EditorUserInterface::validateLevel()
    }
 
 
-   if(gameType->getGameTypeId() == CoreGame)
+   if(gameTypeId == CoreGame)
    {
       for(S32 i = 0; i < teamCount; i++)      // Initialize vector
          foundSpawn[i] = false;
@@ -1144,12 +1146,11 @@ void EditorUserInterface::onActivate()
    FolderManager *folderManager = mGameSettings->getFolderManager();
 
    // Check if we have a level name:
-   if(getLevelFileName() == UnnamedFile)     // We need to take a detour to get a level name
+   if(getLevelFileName() == UnnamedFile)           // We need to take a detour to get a level name
    {
-
-      if(folderManager->getLevelDir().empty())      // Never did resolve a leveldir... no editing for you!
+      if(folderManager->getLevelDir().empty())     // Never did resolve a leveldir... no editing for you!
       {
-         getUIManager()->reactivatePrevUI();     // Must come before the error msg, so it will become the previous UI when that one exits
+         getUIManager()->reactivatePrevUI();       // Must come before the error msg, so it will become the previous UI when that one exits
 
          ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
          ui->reset();
@@ -1235,17 +1236,17 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
       mWasTesting = false;
       mSaveMsgTimer.clear();
 
-      //getGame()->setGameType(mEditorGameType); 
-
-      remove("editor.tmp");      // Delete temp file
+      remove("editor.tmp");         // Delete temp file
+      //getGame()->setLevel(mLevel.get());  // Point the game at our old level
    }
-
 
    if(mCurrentTeam >= getTeamCount())
       mCurrentTeam = 0;
 
    if(UserInterface::getUIManager()->getPrevUI()->usesEditorScreenMode() != usesEditorScreenMode())
       VideoSystem::actualizeScreenMode(mGameSettings, true, usesEditorScreenMode());
+
+   //TNLAssert(getGame()->getLevel() == mLevel.get(), "I want my level back!!");
 }
 
 
@@ -3054,7 +3055,7 @@ BfObject *EditorUserInterface::copyDockItem(BfObject *source)
 // User just dragged an item off the dock
 void EditorUserInterface::startDraggingDockItem()
 {
-   BfObject *item(copyDockItem(mDraggingDockItem));
+   BfObject *item(copyDockItem(mDraggingDockItem));   // This is a new object, will need to be deleted somewhere, somehow
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
    Point pos = convertCanvasToLevelCoord(mMousePos) - item->getInitialPlacementOffset(mGridSize);
@@ -3837,6 +3838,12 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
 
    string inputString = InputCodeManager::getCurrentInputString(inputCode);
 
+   return handleKeyPress(inputCode, inputString);
+}
+
+
+bool EditorUserInterface::handleKeyPress(InputCode inputCode, const string &inputString)
+{
    if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)       // Enter - Edit props
       startAttributeEditor();
 
@@ -5046,39 +5053,13 @@ void testLevelStart_local(ClientGame *game)
 
 void EditorUserInterface::testLevel()
 {
-   bool gameTypeError = false;
-   if(!mLevel->getGameType())     // Not sure this could really happen anymore...  TODO: Make sure we always have a valid gametype
-      gameTypeError = true;
+   bool gameTypeError = !mLevel->getGameType(); // Not sure this could really happen anymore...  TODO: Make sure we always have a valid gametype
 
    // With all the map loading error fixes, game should never crash!
    validateLevel();
    if(mLevelErrorMsgs.size() || mLevelWarnings.size() || gameTypeError)
    {
-      ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
-
-      ui->reset();
-      ui->setTitle("LEVEL HAS PROBLEMS");
-      ui->setRenderUnderlyingUi(false);      // Use black background... it's comforting
-
-      string msg = "";
-
-      for(S32 i = 0; i < mLevelErrorMsgs.size(); i++)
-         msg += mLevelErrorMsgs[i] + "\n";
-
-      for(S32 i = 0; i < mLevelWarnings.size(); i++)
-         msg += mLevelWarnings[i] + "\n";
-
-      if(gameTypeError)
-      {
-         msg += "ERROR: GameType is invalid.\n";
-         msg += "(Fix in Level Parameters screen [[GameParameterEditor]])";
-      }
-
-      ui->setMessage(msg);
-      ui->setInstr("Press [[Y]] to start,  [[Esc]] to cancel");
-      ui->registerKey(KEY_Y, testLevelStart_local);      // testLevelStart_local() just calls testLevelStart() below
-      getUIManager()->activate(ui);
-
+      showLevelHasErrorMessage(gameTypeError);
       return;
    }
 
@@ -5086,28 +5067,56 @@ void EditorUserInterface::testLevel()
 }
 
 
+void EditorUserInterface::showLevelHasErrorMessage(bool gameTypeError)
+{
+   ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
+
+   ui->reset();
+   ui->setTitle("LEVEL HAS PROBLEMS");
+   ui->setRenderUnderlyingUi(false);      // Use black background... it's comforting
+
+   string msg = "";
+
+   for(S32 i = 0; i < mLevelErrorMsgs.size(); i++)
+      msg += mLevelErrorMsgs[i] + "\n";
+
+   for(S32 i = 0; i < mLevelWarnings.size(); i++)
+      msg += mLevelWarnings[i] + "\n";
+
+   if(gameTypeError)
+   {
+      msg += "ERROR: GameType is invalid.\n";
+      msg += "(Fix in Level Parameters screen [[GameParameterEditor]])";
+   }
+
+   ui->setMessage(msg);
+   ui->setInstr("Press [[Y]] to start,  [[Esc]] to cancel");
+   ui->registerKey(KEY_Y, testLevelStart_local);      // testLevelStart_local() just calls testLevelStart() below
+   getUIManager()->activate(ui);
+}
+
+
 void EditorUserInterface::testLevelStart()
 {
    Cursor::disableCursor();                           // Turn off cursor
 
-   mEditorGameType = mLevel->getGameType();           // Sock our current gametype away, will use it when we reenter the editor
-
    if(!doSaveLevel(LevelSource::TestFileName, true))
-      getUIManager()->reactivatePrevUI();  // Saving failed, can't test, reactivate editor
-   else
    {
-      mWasTesting = true;
-
-      Vector<string> levelList;
-      levelList.push_back(LevelSource::TestFileName);
-
-      LevelSourcePtr levelSource = LevelSourcePtr(
-            new FolderLevelSource(levelList, mGameSettings->getFolderManager()->getLevelDir()));
-
-      //getGame()->setGameType(NULL); // Prevents losing seconds on game timer (test level from editor, save, and reload level)
-
-      initHosting(getGame()->getSettingsPtr(), levelSource, true, false);
+      getUIManager()->reactivatePrevUI();             // Saving failed, can't test, reactivate editor
+      return;
    }
+
+   // Level saved OK
+
+   mWasTesting = true;
+
+   Vector<string> levelList;
+   levelList.push_back(LevelSource::TestFileName);
+
+   LevelSourcePtr levelSource = LevelSourcePtr(
+         new FolderLevelSource(levelList, mGameSettings->getFolderManager()->getLevelDir()));
+
+   initHosting(getGame()->getSettingsPtr(), levelSource, true, false);
 }
 
 

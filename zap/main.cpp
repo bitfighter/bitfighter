@@ -168,29 +168,6 @@ void exitToOs()
 #endif
 
 
-// All levels loaded, we're ready to go
-void hostGame(ServerGame *serverGame)
-{
-   TNLAssert(serverGame, "Need a ServerGame to host, silly!");
-
-   if(!serverGame->startHosting())
-   {
-      abortHosting_noLevels(serverGame);
-      return;
-   }
-
-#ifndef ZAP_DEDICATED
-   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
-
-   for(S32 i = 0; i < clientGames->size(); i++)
-   {
-      clientGames->get(i)->getUIManager()->disableLevelLoadDisplay(true);
-      clientGames->get(i)->joinLocalGame(serverGame->getNetInterface());  // ...then we'll play, too!
-   }
-#endif
-}
-
-
 #ifndef ZAP_DEDICATED
 
 GL *mGL = NULL;
@@ -291,7 +268,7 @@ void loadAnotherLevelOrStartHosting()
    }
 
    else if(GameManager::getHostingModePhase() == GameManager::DoneLoadingLevels)
-      hostGame(GameManager::getServerGame());
+      GameManager::hostGame();
 }
 
 

@@ -592,6 +592,16 @@ namespace Zap {
    }
 
 
+   TEST(TeamChangingTests, xxx)
+   {
+      {
+         RefPtr<Ship> s2 = new Ship();
+         //delete s2.getPointer();
+      }
+
+      int x = 0;
+   }
+
    TEST(TeamChangingTests, TestTeamSwitchingAbuse)
    {
       GamePair gamePair(getLevelCodeForItemPropagationTests(""), 2); // This level has 2 teams; good for testing team changing

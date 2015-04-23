@@ -261,6 +261,8 @@ public:
    virtual bool isMoveObject();
    virtual Point getVel() const;
 
+   void deleteThyself();
+
    U32 getCreationTime() const;
    void setCreationTime(U32 creationTime);
 

@@ -447,7 +447,7 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
       else // if(isAltKey(inputCode))
          modifiers.push_back(InputCodeManager::inputCodeToString(KEY_ALT));
       
-      return SymbolString::getModifiedKeySymbol(InputCodeManager::getBaseKey(inputCode), modifiers, color);
+      return SymbolString::getModifiedKeySymbol(InputCodeManager::getBaseKeySpecialSequence(inputCode), modifiers, color);
    }
    else if(InputCodeManager::isControllerButton(inputCode))
    {
