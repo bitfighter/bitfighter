@@ -15,6 +15,9 @@ using boost::shared_ptr;
 
 namespace Zap
 {
+
+class UIManager;
+
 class EditorPlugin : public LuaScriptRunner
 {
    typedef LuaScriptRunner Parent;
@@ -24,6 +27,7 @@ private:
 
    GridDatabase *mGridDatabase;
    Game *mGame;
+   UIManager *mUiManager;
    string mDescription;
    string mRequestedBinding;
 
@@ -33,7 +37,7 @@ protected:
 public:
    // Constructors
    EditorPlugin();      // Dummy 0-args constructor, here to make boost happy!
-   EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, Level *gridDatabase, Game *game);
+   EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, Level *gridDatabase, ClientGame *game);
 
    virtual ~EditorPlugin();  // Destructor
 

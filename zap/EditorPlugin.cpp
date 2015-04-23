@@ -20,7 +20,7 @@ EditorPlugin::EditorPlugin() { TNLAssert(false, "Don't use this constructor!"); 
 
 // Constructor
 EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, 
-                           Level *level, Game *game)
+                           Level *level, ClientGame *game)
 {
    mScriptName = scriptName;
    mScriptArgs = scriptArgs;
@@ -30,6 +30,7 @@ EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scrip
    mLevel = level;
 
    mGame = game;
+   mUiManager = static_cast<ClientGame *>(game)->getUIManager();
    mLuaGame = game;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -273,11 +274,7 @@ GENERATE_LUA_FUNARGS_TABLE(EditorPlugin, LUA_METHODS);
  */
 S32 EditorPlugin::lua_getGridSize(lua_State *L)
 {
-   ClientGame *clientGame = dynamic_cast<ClientGame*>(mGame);
-   if(clientGame)
-      returnFloat(L, clientGame->getUIManager()->getUI<EditorUserInterface>()->getGridSize());
-
-   return returnNil(L);    
+   return returnFloat(L, mUiManager->getUI<EditorUserInterface>()->getGridSize());
 }
 
 
@@ -404,9 +401,7 @@ S32 EditorPlugin::lua_showMessage(lua_State *L)
    if(profile >= 1)
       good = lua_toboolean(L, -1);
 
-   ClientGame* cg = dynamic_cast<ClientGame*>(mGame);
-   if(cg)
-      cg->getUIManager()->getUI<EditorUserInterface>()->setSaveMessage(msg, good);
+   mUiManager->getUI<EditorUserInterface>()->setSaveMessage(msg, good);
 
    clearStack(L);
 
@@ -431,9 +426,7 @@ S32 EditorPlugin::lua_setDisplayCenter(lua_State *L)
 
    Point center = getPointOrXY(L, 1);
 
-   ClientGame* clientGame = dynamic_cast<ClientGame*>(mGame);
-   if(clientGame)
-      clientGame->getUIManager()->getUI<EditorUserInterface>()->setDisplayCenter(center);
+   mUiManager->getUI<EditorUserInterface>()->setDisplayCenter(center);
 
    clearStack(L);
 
@@ -464,9 +457,7 @@ S32 EditorPlugin::lua_setDisplayZoom(lua_State *L)
 
    F32 scale = getFloat(L, 1);
 
-   ClientGame* clientGame = dynamic_cast<ClientGame*>(mGame);
-   if(clientGame)
-      clientGame->getUIManager()->getUI<EditorUserInterface>()->setDisplayScale(scale);
+   mUiManager->getUI<EditorUserInterface>()->setDisplayScale(scale);
 
    clearStack(L);
 
@@ -510,9 +501,7 @@ S32 EditorPlugin::lua_setDisplayExtents(lua_State *L)
 
    Rect extents(getPointOrXY(L, 1), getPointOrXY(L, 2));
 
-   ClientGame* clientGame = dynamic_cast<ClientGame*>(mGame);
-   if(clientGame)
-      clientGame->getUIManager()->getUI<EditorUserInterface>()->setDisplayExtents(extents, 1.3f);
+   mUiManager->getUI<EditorUserInterface>()->setDisplayExtents(extents, 1.3f);
 
    clearStack(L);
 
@@ -530,13 +519,7 @@ S32 EditorPlugin::lua_setDisplayExtents(lua_State *L)
  */
 S32 EditorPlugin::lua_getDisplayCenter(lua_State *L)
 {
-   ClientGame* clientGame = dynamic_cast<ClientGame*>(mGame);
-   if(!clientGame)
-      return returnNil(L);
-
-   Point center = clientGame->getUIManager()->getUI<EditorUserInterface>()->getDisplayCenter();
-
-   return returnPoint(L, center);  
+   return returnPoint(L, mUiManager->getUI<EditorUserInterface>()->getDisplayCenter());
 }
 
 
@@ -555,13 +538,7 @@ S32 EditorPlugin::lua_getDisplayCenter(lua_State *L)
  */
 S32 EditorPlugin::lua_getDisplayZoom(lua_State *L)
 {
-   ClientGame* clientGame = dynamic_cast<ClientGame*>(mGame);
-   if(!clientGame)
-      return returnNil(L);
-
-   F32 zoomLevel = clientGame->getUIManager()->getUI<EditorUserInterface>()->getCurrentScale();
-
-   return returnFloat(L, zoomLevel);
+   return returnFloat(L, mUiManager->getUI<EditorUserInterface>()->getCurrentScale());
 }
 
 
@@ -575,11 +552,7 @@ S32 EditorPlugin::lua_getDisplayZoom(lua_State *L)
  */
 S32 EditorPlugin::lua_getDisplayExtents(lua_State *L)
 {
-   ClientGame* clientGame = dynamic_cast<ClientGame*>(mGame);
-   if(!clientGame)
-      return returnNil(L);
-
-   Rect rect = clientGame->getUIManager()->getUI<EditorUserInterface>()->getDisplayExtents();
+   Rect rect = mUiManager->getUI<EditorUserInterface>()->getDisplayExtents();
 
    Vector<Point> points(2);
    points.push_back(rect.min);
