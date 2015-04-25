@@ -174,6 +174,10 @@ void TeamDefUserInterface::resetEditors()
 
    for(S32 i = 0; i < teamCount; i++)
       mTeamNameEditors[i].setString(level->getTeamName(i).getString());
+
+   // Make sure hex values are correct
+   if(mColorEntryMode == ColorEntryModeHex)
+      updateAllHexEditors();
 }
 
 
@@ -548,10 +552,9 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       if(mColorEntryMode >= ColorEntryModeCount)
          mColorEntryMode = ColorEntryMode(0);
 
-      // Make sure hex value is correct
+      // Make sure hex values are correct
       if(mColorEntryMode == ColorEntryModeHex)
-         for(S32 i = 0; i < ui->getTeamCount(); i++)
-            mHexColorEditors[i].setString(ui->getTeam(i)->getColor().toHexString());
+         updateAllHexEditors();
 
       mGameSettings->setSetting<ColorEntryMode>(IniKey::ColorEntryMode, mColorEntryMode);
       return true;
@@ -604,6 +607,15 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
    }
 
    return false;
+}
+
+
+void TeamDefUserInterface::updateAllHexEditors()
+{
+   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
+
+   for(S32 i = 0; i < ui->getTeamCount(); i++)
+      mHexColorEditors[i].setString(ui->getTeam(i)->getColor().toHexString());
 }
 
 

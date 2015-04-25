@@ -55,6 +55,8 @@ private:
    void startEditing();
    void resetEditors();
 
+   void updateAllHexEditors();
+
    Level *getLevel();
    const Level *getConstLevel() const;
 
@@ -65,8 +67,6 @@ private:
 
    void addTeamsFromPresets(Level *level, S32 count);
    void setTeamFromPreset(Level *level, S32 teamIndex, S32 preset);
-
-
 
 public:
    explicit TeamDefUserInterface(ClientGame *game, UIManager *uiManager);     // Constructor
