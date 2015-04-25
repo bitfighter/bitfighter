@@ -313,7 +313,7 @@ void TeamDefUserInterface::render() const
          alpha = (F32) errorMsgTimer.getCurrent() / ONE_SECOND;
 
       mGL->glColor(Colors::red, alpha);
-      RenderUtils::drawCenteredString(canvasHeight - vertMargin - 141, fontsize, errorMsg.c_str());
+      RenderUtils::drawCenteredString(canvasHeight - vertMargin - 161, fontsize, errorMsg.c_str());
    }
 }
 
