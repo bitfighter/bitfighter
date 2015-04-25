@@ -597,14 +597,8 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       }
 
       // Replace selection with preset of number pressed
-      U32 index = (inputCode - KEY_1);
-      mTeamNameEditors[selectedIndex].setString(TeamPresets[index].name);
-      mHexColorEditors[selectedIndex].setString(TeamPresets[index].color.toHexString());
-
-      Level *level = getLevel();
-
-      level->setTeamName(selectedIndex, TeamPresets[index].name);
-      level->setTeamColor(selectedIndex, TeamPresets[index].color);
+      U32 preset = (inputCode - KEY_1);
+      setTeamFromPreset(getLevel(), selectedIndex, preset);
 
       return true;
    }
@@ -621,7 +615,16 @@ void TeamDefUserInterface::addTeamsFromPresets(Level *level, S32 count)
    {
       AbstractTeam *team = new EditorTeam(TeamPresets[i]);    // Team manager will clean up
       level->addTeam(team);
+
+      setTeamFromPreset(level, i, i);
    }
+}
+
+
+void TeamDefUserInterface::setTeamFromPreset(Level *level, S32 teamIndex, S32 preset)
+{
+   mTeamNameEditors[teamIndex].setString(TeamPresets[preset].name);
+   mHexColorEditors[teamIndex].setString(TeamPresets[preset].color.toHexString());
 }
 
 

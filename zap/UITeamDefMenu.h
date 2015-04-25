@@ -64,6 +64,8 @@ private:
    bool onKeyDown_editingColor(InputCode inputCode);
 
    void addTeamsFromPresets(Level *level, S32 count);
+   void setTeamFromPreset(Level *level, S32 teamIndex, S32 preset);
+
 
 
 public:
