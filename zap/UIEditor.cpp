@@ -184,7 +184,7 @@ void EditorUserInterface::setLevel(const boost::shared_ptr<Level> &level)
    //}
 
    // Tell mDockItems to use the same team info as we use for the regular items
-   mDockItems.setTeamInfosPtr(mLevel->getTeamInfosPtr());
+   mDockItems.setTeamManager(mLevel->getTeamManager());
 }
 
 
@@ -987,10 +987,10 @@ void EditorUserInterface::teamsHaveChanged()
    else
       for(S32 i = 0; i < getTeamCount(); i++)
       {
-         TeamInfo team = getTeam(i);
+         const AbstractTeam *team = getTeam(i);
 
-         if(mOldTeams[i].getColor() != team.getColor() ||          // Color(s) or
-            mOldTeams[i].getName()  != team.getName().getString()) // names(s) have changed
+         if(mOldTeams[i].getColor() != team->getColor() ||          // Color(s) or
+            mOldTeams[i].getName()  != team->getName().getString()) // names(s) have changed
          {
             teamsChanged = true;
             break;
@@ -1256,9 +1256,9 @@ S32 EditorUserInterface::getTeamCount() const
 }
 
 
-const TeamInfo &EditorUserInterface::getTeam(S32 teamId)
+const AbstractTeam *EditorUserInterface::getTeam(S32 teamId)
 {
-   return mLevel->getTeamInfo(teamId);
+   return mLevel->getTeam(teamId);
 }
 
 
@@ -1274,10 +1274,10 @@ bool EditorUserInterface::getNeedToSave() const
 }
 
 
-void EditorUserInterface::addTeam(const TeamInfo &teamInfo)
-{
-   mLevel->addTeam(teamInfo);
-}
+//void EditorUserInterface::addTeam(const TeamInfo &teamInfo)
+//{
+//   mLevel->addTeam(teamInfo);
+//}
 
 
 void EditorUserInterface::addTeam(EditorTeam *team, S32 teamIndex)

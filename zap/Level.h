@@ -51,10 +51,9 @@ private:
    U32 mLevelDatabaseId;
 
    Vector<string> mRobotLines;
-   boost::shared_ptr<Vector<TeamInfo> > mTeamInfos;
    Vector<string> mTeamChangeLines;
 
-   TeamManager mTeamManager;
+   boost::shared_ptr<TeamManager> mTeamManager;
 
    // Zone-related
    GridDatabase mBotZoneDatabase;
@@ -83,7 +82,6 @@ public:
    void buildWallEdgeGeometry(Vector<Point> &wallEdgePoints);
    void snapAllEngineeredItems(bool onlyUnsnapped);
 
-   boost::shared_ptr<Vector<TeamInfo> > getTeamInfosClone() const;
    string toLevelCode() const;
 
    U32 getLevelDatabaseId() const;
@@ -113,10 +111,6 @@ public:
 
    void addBots(Game *game);
 
-   // These methods for giving a brain transplant to mDockItems
-   void setTeamInfosPtr(const boost::shared_ptr<Vector<TeamInfo> > &teamInfos);
-   boost::shared_ptr<Vector<TeamInfo> > getTeamInfosPtr() const;
-
    // Manipulating objects
    void deleteObject(S32 serialNumber);
    void swapObject(S32 replaceThisObject, const BfObject *withThisObject);
@@ -130,8 +124,10 @@ public:
 
 
    // Team methods
+   boost::shared_ptr<TeamManager> getTeamManager();
+   void setTeamManager(boost::shared_ptr<TeamManager> teamManager);
+
    S32 getTeamCount() const;
-   const TeamInfo &getTeamInfo(S32 index) const;
 
    StringTableEntry getTeamName(S32 index) const;
    void setTeamName(S32 index, const string &name);
@@ -142,9 +138,7 @@ public:
    void removeTeam(S32 teamIndex); 
 
    void addTeam(AbstractTeam *team);
-   void addTeam(const TeamInfo &teamInfo);
    void addTeam(AbstractTeam *team, S32 index);
-   void addTeam(const TeamInfo &teamInfo, S32 index);    
 
    AbstractTeam *getTeam(S32 teamIndex) const;
    void setTeamHasFlag(S32 teamIndex, bool hasFlag);

@@ -60,7 +60,7 @@ void Level::initialize()
    mLegacyGridSize = 1; 
    mDatabaseId = 0; 
    mGame = NULL;
-   mTeamInfos.reset(new Vector<TeamInfo>);      // mTeamInfos is a shared_ptr, which will handle cleanup
+   mTeamManager.reset(new TeamManager());    // mTeamManager is a shared_ptr, so cleanup is handled
    mLevelDatabaseId = LevelDatabase::NOT_IN_DATABASE;
 }
 
@@ -71,7 +71,7 @@ Level *Level::clone()
 
    newLevel->copyObjects(this);
    newLevel->setGameType(getGameType()->clone());
-   newLevel->setTeamInfosPtr(getTeamInfosClone());
+   newLevel->setTeamManager(mTeamManager);
 
    return newLevel;
 }
@@ -93,13 +93,6 @@ void Level::onAddedToGame(Game *game)
    // On client, might not have a GameType yet... need to wait for one to be sent from server
    if(mGameType)
       mGameType->addToGame(game);
-
-   for(S32 i = 0; i < mTeamInfos->size(); i++)
-   {
-      AbstractTeam *team = game->getNewTeam();  // Will be deleted by TeamManager
-      team->set(mTeamInfos->get(i));
-      mTeamManager.addTeam(team);
-   }
 }
 
 
@@ -265,11 +258,8 @@ void Level::validateLevel()
    if(!mGameType)
       mGameType.set(new GameType(this));    // Cleaned up... where, exactly?
 
-   if(mTeamInfos->size() == 0)
-   {
-      TeamInfo teamInfo;
-      mTeamInfos->push_back(teamInfo);
-   }
+   if(mTeamManager->getTeamCount() == 0)
+      mTeamManager->addTeam(new Team());
 }
 
 
@@ -329,20 +319,6 @@ static string getString(S32 argc, const char **argv)
    }
 
    return trim(str);    // TODO: Is trim really necessary?  Write a test and find out!
-}
-
-
-// Return a copy of the teamInfos for this level
-boost::shared_ptr<Vector<TeamInfo> > Level::getTeamInfosClone() const
-{
-   boost::shared_ptr<Vector<TeamInfo> > teamInfos;
-   teamInfos.reset(new Vector<TeamInfo>);
-   teamInfos->reserve(mTeamInfos->size());
-
-   for(S32 i = 0; i < mTeamInfos->size(); i++)
-      teamInfos->push_back(mTeamInfos->get(i));
-
-   return teamInfos;
 }
 
 
@@ -478,10 +454,7 @@ bool Level::getAddedToGame() const
 
 S32 Level::getTeamCount() const
 {
-   if(mGame)
-      return mTeamManager.getTeamCount();
-   
-   return mTeamInfos->size();
+   return mTeamManager->getTeamCount();
 }
 
 
@@ -508,135 +481,94 @@ const Color &Level::getTeamColor(S32 index) const
    if(index == TEAM_HOSTILE)
       return Colors::HostileTeamColor;
 
-   if(mGame)
-      return mTeamManager.getTeamColor(index);
-   else
-      return mTeamInfos->get(index).getColor();
+   return mTeamManager->getTeamColor(index);
 }
 
 
 void Level::setTeamColor(S32 index, const Color &color)
 {
-   TNLAssert(mGame, "Expected game!");
-
-   mTeamManager.setTeamColor(index, color);
+   mTeamManager->setTeamColor(index, color);
 }
-
 
 
 void Level::setTeamName(S32 index, const string &name)
 {
-   TNLAssert(mGame, "Expected game!");
-
-   mTeamManager.setTeamName(index, name.c_str());
+   mTeamManager->setTeamName(index, name.c_str());
 }
 
 
 StringTableEntry Level::getTeamName(S32 index) const
 {
-   if(mGame)
-      return mTeamManager.getTeamName(index);
-   else
-      return mTeamInfos->get(index).getName();
+   return mTeamManager->getTeamName(index);
 }
 
 
 void Level::removeTeam(S32 teamIndex)
 { 
-   if(mGame)
-      mTeamManager.removeTeam(teamIndex);
-   else
-      mTeamInfos->erase(teamIndex);
+   mTeamManager->removeTeam(teamIndex);
 }
 
 
 void Level::addTeam(AbstractTeam *team)
 { 
-   TNLAssert(mGame, "Expected to have been added to a game by now!");
-   mTeamManager.addTeam(team);
-}
-
-
-void Level::addTeam(const TeamInfo &teamInfo)
-{ 
-   mTeamInfos->push_back(teamInfo);
+   mTeamManager->addTeam(team);
 }
 
 
 void Level::addTeam(AbstractTeam *team, S32 index)
 { 
-   TNLAssert(mGame, "Expected to have been added to a game by now!");
-   mTeamManager.addTeam(team, index);
-}
-
-
-void Level::addTeam(const TeamInfo &teamInfo, S32 index)
-{ 
-   mTeamInfos->insert(index, teamInfo);
+   //TNLAssert(mGame, "Expected to have been added to a game by now!");
+   mTeamManager->addTeam(team, index);
 }
 
 
 AbstractTeam *Level::getTeam(S32 teamIndex) const 
 { 
-   return mTeamManager.getTeam(teamIndex);        
-}
-
-
-void Level::setTeamInfosPtr(const boost::shared_ptr<Vector<TeamInfo> > &teamInfos)
-{
-   mTeamInfos = teamInfos;
-}
-
-
-boost::shared_ptr<Vector<TeamInfo> > Level::getTeamInfosPtr() const
-{
-   return mTeamInfos;
+   return mTeamManager->getTeam(teamIndex);
 }
 
 
 void Level::setTeamHasFlag(S32 teamIndex, bool hasFlag)
 {
-   TNLAssert(mGame, "Expected to have been added to a game by now!");
-   mTeamManager.setTeamHasFlag(teamIndex, hasFlag);
+   mTeamManager->setTeamHasFlag(teamIndex, hasFlag);
 }
 
 
 bool Level::getTeamHasFlag(S32 teamIndex) const 
 { 
-   TNLAssert(mGame, "Expected to have been added to a game by now!");
-   return mTeamManager.getTeamHasFlag(teamIndex); 
+   return mTeamManager->getTeamHasFlag(teamIndex);
 }
 
 
 // Perhaps unused
 void Level::replaceTeam(AbstractTeam *team, S32 index)
 { 
-   TNLAssert(mGame, "Expected to have been added to a game by now!");
-   mTeamManager.replaceTeam(team, index);
+   mTeamManager->replaceTeam(team, index);
 }
 
 
 void Level::clearTeams()
 { 
-   if(mGame)
-      return mTeamManager.clearTeams();
-  else
-      mTeamInfos->clear();
+   return mTeamManager->clearTeams();
 }
 
 
-const TeamInfo &Level::getTeamInfo(S32 index) const
+// Used when linking the teamManager used by the dock to that used by the level we're editing
+void Level::setTeamManager(boost::shared_ptr<TeamManager> teamManager)
 {
-   return mTeamInfos->get(index);
+   mTeamManager = teamManager;
+}
+
+
+boost::shared_ptr<TeamManager> Level::getTeamManager()
+{
+   return mTeamManager;
 }
 
 
 string Level::getTeamLevelCode(S32 index) const
 {
-   if(mGame)
-      return mTeamManager.getTeam(index)->toLevelCode();
-   else
-      return mTeamInfos->get(index).toLevelCode();
+   return mTeamManager->getTeam(index)->toLevelCode();
 }
 
 
@@ -895,13 +827,13 @@ bool Level::processLevelParam(S32 argc, const char **argv)
 {
    if(stricmp(argv[0], "Team") == 0)
    {
-      if(mTeamInfos->size() >= Game::MAX_TEAMS)     
+      if(mTeamManager->getTeamCount() >= Game::MAX_TEAMS)
          logprintf(LogConsumer::LogLevelError, "Level has too many teams: you can only have %d!", Game::MAX_TEAMS);
       else
       {
-         TeamInfo teamInfo;
-         if(teamInfo.processArguments(argc, argv))
-            addTeam(teamInfo);
+         Team *team = new Team();      // TeamManager will cleanup
+         if(team->processArguments(argc, argv))
+            addTeam(team);
          else
             logprintf(LogConsumer::LogLevelError, "Invalid Team delcaration in level file: Team %s", getString(argc, argv).c_str());
       }
@@ -976,7 +908,7 @@ bool Level::processLevelParam(S32 argc, const char **argv)
 S32 Level::getBotCount() const
 {
    TNLAssert(mGame, "Expected to have been added to a game by now!");
-   return mTeamManager.getBotCount();
+   return mTeamManager->getBotCount();
 }
 
 

@@ -534,7 +534,7 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
    if(inputCode == KEY_C)  // Want a mouse button?   || inputCode == MOUSE_LEFT)
    {
       UIColorPicker *uiCol = getUIManager()->getUI<UIColorPicker>();
-      uiCol->set(ui->getTeam(selectedIndex).getColor());
+      uiCol->set(ui->getTeam(selectedIndex)->getColor());
       getUIManager()->activate(uiCol);
 
       return true;
@@ -597,8 +597,8 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
 
       Level *level = getLevel();
 
-      level->setTeamName(index, TeamPresets[index].name);
-      level->setTeamColor(index, TeamPresets[index].color);
+      level->setTeamName(selectedIndex, TeamPresets[index].name);
+      level->setTeamColor(selectedIndex, TeamPresets[index].color);
 
       return true;
    }
@@ -623,8 +623,8 @@ void TeamDefUserInterface::addTeamsFromPresets(Level *level, S32 count)
 void TeamDefUserInterface::startEditing()
 {
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
-   origName  = ui->getTeam(selectedIndex).getName().getString();
-   origColor = ui->getTeam(selectedIndex).getColor();
+   origName  = ui->getTeam(selectedIndex)->getName().getString();
+   origColor = ui->getTeam(selectedIndex)->getColor();
 }
 
 
