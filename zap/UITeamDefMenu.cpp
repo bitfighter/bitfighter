@@ -542,10 +542,16 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
 
    if(inputCode == KEY_M)      // Toggle ColorEntryMode
    {
+      // Advance to the next entry mode
       mColorEntryMode = ColorEntryMode(mColorEntryMode + 1);
 
       if(mColorEntryMode >= ColorEntryModeCount)
          mColorEntryMode = ColorEntryMode(0);
+
+      // Make sure hex value is correct
+      if(mColorEntryMode == ColorEntryModeHex)
+         for(S32 i = 0; i < ui->getTeamCount(); i++)
+            mHexColorEditors[i].setString(ui->getTeam(i)->getColor().toHexString());
 
       mGameSettings->setSetting<ColorEntryMode>(IniKey::ColorEntryMode, mColorEntryMode);
       return true;
