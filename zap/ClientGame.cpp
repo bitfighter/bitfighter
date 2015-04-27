@@ -415,8 +415,8 @@ S32 ClientGame::getCurrentTeamIndex() const
 void ClientGame::switchTeams()
 {
    TNLAssert(getGameType(), "Expect GameType here!");
-   if(!getGameType())    // I think these GameType checks are not needed
-      return;
+   //if(!getGameType())    // I think these GameType checks are not needed
+   //   return;
 
    // If there are only two teams, just switch teams and skip the rigamarole
    if(getTeamCount() == 2)
@@ -1747,11 +1747,9 @@ void ClientGame::changeOwnTeam(S32 teamIndex) const
    if(!getGameType())
       return;
 
-   // Disqualifying reasons
-   if(!hasAdmin() && areTeamsLocked() && getPlayerCount() > 1)
-      return;
-
-   getGameType()->c2sChangeTeams(teamIndex);
+   // Can change if any of these are true.  All this will be checked again on the server, so don't get any smart ideas!
+   if(hasAdmin() || !areTeamsLocked() || getPlayerCount() == 1)
+      getGameType()->c2sChangeTeams(teamIndex);
 }
 
 
