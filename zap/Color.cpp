@@ -56,20 +56,37 @@ Color::Color(U32 rgbInt)
 }
 
 
-Color::Color(const string &hex)
+Color::Color(string hex)      // Pass by val so we can modify the string if need be
 {
-   if(hex.length() != 6)
+   if(hex.length() == 0)
    {
-      r = 1;
-      g = 1;
-      b = 1;
-
-      return;
+      r = g = b = 0;
    }
+   else if(hex.length() == 1)
+   {
+      r = strtol(hex.c_str(), NULL, 16) / 15.0f;
+      g = b = r;
+   }
+   else if(hex.length() == 2)
+   {
+      r = strtol(hex.c_str(), NULL, 16) / 255.0f;
+      g = b = r;
+   }
+   else if(hex.length() == 3)
+   {
+      r = strtol(hex.substr(0, 1).c_str(), NULL, 16) / 15.0f;
+      g = strtol(hex.substr(1, 1).c_str(), NULL, 16) / 15.0f;
+      b = strtol(hex.substr(2, 1).c_str(), NULL, 16) / 15.0f;
+   }
+   else
+   {
+      if(hex.length() < 6)
+         hex.append(6 - hex.length(), '0');
 
-   r = strtol(hex.substr(0,2).c_str(), NULL, 16) / 255.0f;
-   g = strtol(hex.substr(2,2).c_str(), NULL, 16) / 255.0f;
-   b = strtol(hex.substr(4,2).c_str(), NULL, 16) / 255.0f;
+      r = strtol(hex.substr(0, 2).c_str(), NULL, 16) / 255.0f;
+      g = strtol(hex.substr(2, 2).c_str(), NULL, 16) / 255.0f;
+      b = strtol(hex.substr(4, 2).c_str(), NULL, 16) / 255.0f;
+   }
 }
 
 

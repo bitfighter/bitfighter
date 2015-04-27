@@ -361,7 +361,7 @@ void TeamDefUserInterface::onTextInput(char ascii)
    else if(mEditingColor)
    {
       if(isHex(ascii))
-         mHexColorEditors[selectedIndex].addChar(ascii);
+         mHexColorEditors[selectedIndex].addChar(toupper(ascii));
    }
 }
 
@@ -657,6 +657,9 @@ void TeamDefUserInterface::doneEditingColor()
    {
       Level *level = getLevel();
       level->setTeamColor(selectedIndex, Color(mHexColorEditors[selectedIndex].getString()));
+
+      // Finally, let's "normalize" the hex display to reflect how we're interpreting the color entered
+      mHexColorEditors[selectedIndex].setString(level->getTeamColor(selectedIndex).toHexString());
    }
 }
 
