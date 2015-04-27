@@ -2149,8 +2149,10 @@ void GameType::addClientGameMenuOptions(ClientGame *game, MenuUserInterface *men
 
       ClientInfo *clientInfo = gc->getClientInfo();
 
-      if(mCanSwitchTeams || clientInfo->isAdmin())
+      if((mCanSwitchTeams && !game->areTeamsLocked()) || clientInfo->isAdmin())
          menu->addMenuItem(new MenuItem("SWITCH TEAMS", switchTeamsCallback, "", KEY_S, KEY_T));
+      else if(game->areTeamsLocked())
+         menu->addMenuItem(new MessageMenuItem("TEAMS ARE LOCKED", Colors::red));
       else
       {
          menu->addMenuItem(new MessageMenuItem("WAITING FOR SERVER TO ALLOW", Colors::red));
@@ -2169,6 +2171,8 @@ static void switchPlayersTeamCallback(ClientGame *game, U32 unused)
 // Add any additional game-specific admin menu items, processed below
 void GameType::addAdminGameMenuOptions(MenuUserInterface *menu)
 {
+   TNLAssert(static_cast<ClientGame *>(getGame())->getConnectionToServer()->getClientInfo()->isAdmin(), "Admins only here!");
+
    if(isTeamGame() && mLevel->getTeamCount() > 1)
       menu->addMenuItem(new MenuItem("CHANGE A PLAYER'S TEAM", switchPlayersTeamCallback, "", KEY_C));
 }
