@@ -1143,6 +1143,7 @@ void EditorUserInterface::onAfterRunScriptFromConsole()
 
 void EditorUserInterface::onActivate()
 {
+   mPotentiallyDraggedVertex = NONE;
    FolderManager *folderManager = mGameSettings->getFolderManager();
 
    // Check if we have a level name:
@@ -2853,6 +2854,7 @@ void EditorUserInterface::setMousePos()
 }
 
 
+// onDrag
 void EditorUserInterface::onMouseDragged()
 {
    if(InputCodeManager::getState(MOUSE_MIDDLE) && mMousePos != mScrollWithMouseLocation)
@@ -2870,9 +2872,24 @@ void EditorUserInterface::onMouseDragged()
    if(mDraggingDockItem.isValid())      // We just started dragging an item off the dock
       startDraggingDockItem();  
 
-   findSnapVertex();                               // Sets mSnapObject and mSnapVertexIndex
-   if(!mSnapObject || mSnapVertexIndex == NONE)    // If we've just started dragging a dock item, this will be it
-      return;
+   // Will always be NONE except when you've just unselected a vertex as part of initiating a drag
+   if(mPotentiallyDraggedVertex == NONE)     
+   {
+      // Typical case
+      findSnapVertex();                               // Sets mSnapObject and mSnapVertexIndex
+      if(!mSnapObject || mSnapVertexIndex == NONE)    // If we've just started dragging a dock item, this will be it
+         return;
+   }
+   else
+   {
+      // Handle annoying case of dragging some vertices around after clicking on one while holding shift because
+      // you were just selecting a bunch of vertices, and accidentally unselecting the drag vertex
+      TNLAssert(!mPotentiallyDraggedVertexOwner->vertSelected(mPotentiallyDraggedVertex), "Expected not selected!");
+      mPotentiallyDraggedVertexOwner->aselectVert(mPotentiallyDraggedVertex);
+      mSnapObject = mPotentiallyDraggedVertexOwner;   // Probably correct
+      mSnapVertexIndex = mPotentiallyDraggedVertex;
+      mPotentiallyDraggedVertex = NONE;
+   }
 
    if(!mDraggingObjects) 
       onMouseDragged_startDragging();
@@ -4146,8 +4163,14 @@ void EditorUserInterface::onMouseClicked_left()
          // Check for vertices
          if(mVertexEditMode && !spaceDown && mHitItem && mHitVertex != NONE && mHitItem->getGeomType() != geomPoint)
          {
+            // Save info about this vertex just in case we're actually starting to drag... it would be a shame
+            // to annoy the user by unselecting this vertex if they were trying to move some vertices!
             if(mHitItem->vertSelected(mHitVertex))
+            {
                mHitItem->unselectVert(mHitVertex);
+               mPotentiallyDraggedVertexOwner = mHitItem;
+               mPotentiallyDraggedVertex = mHitVertex;
+            }
             else
                mHitItem->aselectVert(mHitVertex);
          }
@@ -4599,7 +4622,8 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
 void EditorUserInterface::onMouseUp()
 {
    setMousePos();
-
+   mPotentiallyDraggedVertex = NONE;
+   
    if(mDragSelecting)      // We were drawing a rubberband selection box
    {
       Rect r(convertCanvasToLevelCoord(mMousePos), mMouseDownPos);

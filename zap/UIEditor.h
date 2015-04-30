@@ -249,6 +249,7 @@ private:
 
    S32 mEdgeHit;
    S32 mHitVertex;
+   S32 mPotentiallyDraggedVertex;
 
    bool canRotate() const;             // Returns true if we're able to rotate something
    void clearPointOfRotation();
@@ -259,13 +260,13 @@ private:
 
    SafePtr<BfObject> mDraggingDockItem;
    SafePtr<BfObject> mDockItemHit;
+   SafePtr<BfObject> mPotentiallyDraggedVertexOwner;
 
    Vector<BfObject *> mSelectedObjectsForDragging;
 
    S32 mDockPluginScrollOffset;
    U32 mDockWidth;
    bool mIgnoreMouseInput;
-
 
    bool mouseOnDock() const;          // Return whether mouse is currently over the dock
 
