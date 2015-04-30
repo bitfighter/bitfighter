@@ -4154,6 +4154,7 @@ void EditorUserInterface::onMouseClicked_left()
          {
             if(mHitItem->vertSelected(mHitVertex))
             {
+               // These will be unselected when the mouse is released, unless we are initiating a drag event
                mDelayedUnselectObject = mHitItem;
                mDelayedUnselectVertex = mHitVertex;
             }
