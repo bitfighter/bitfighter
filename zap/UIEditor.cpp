@@ -1143,7 +1143,7 @@ void EditorUserInterface::onAfterRunScriptFromConsole()
 
 void EditorUserInterface::onActivate()
 {
-   mPotentiallyDraggedVertex = NONE;
+   mPotentiallyDraggedVertexOwner = NULL;
    FolderManager *folderManager = mGameSettings->getFolderManager();
 
    // Check if we have a level name:
@@ -2873,7 +2873,7 @@ void EditorUserInterface::onMouseDragged()
       startDraggingDockItem();  
 
    // Will always be NONE except when you've just unselected a vertex as part of initiating a drag
-   if(mPotentiallyDraggedVertex == NONE)     
+   if(mPotentiallyDraggedVertexOwner == NULL)
    {
       // Typical case
       findSnapVertex();                               // Sets mSnapObject and mSnapVertexIndex
@@ -2884,11 +2884,23 @@ void EditorUserInterface::onMouseDragged()
    {
       // Handle annoying case of dragging some vertices around after clicking on one while holding shift because
       // you were just selecting a bunch of vertices, and accidentally unselecting the drag vertex
-      TNLAssert(!mPotentiallyDraggedVertexOwner->vertSelected(mPotentiallyDraggedVertex), "Expected not selected!");
-      mPotentiallyDraggedVertexOwner->aselectVert(mPotentiallyDraggedVertex);
-      mSnapObject = mPotentiallyDraggedVertexOwner;   // Probably correct
-      mSnapVertexIndex = mPotentiallyDraggedVertex;
-      mPotentiallyDraggedVertex = NONE;
+      if(mPotentiallyDraggedVertex == NONE)
+      {
+         TNLAssert(!mPotentiallyDraggedVertexOwner->isSelected(), "Expected not selected!");
+         mPotentiallyDraggedVertexOwner->setSelected(true);
+         //findSnapVertex();                               // Sets mSnapObject and mSnapVertexIndex
+      }
+      else
+      {
+         TNLAssert(!mPotentiallyDraggedVertexOwner->vertSelected(mPotentiallyDraggedVertex), "Expected not selected!");
+         mPotentiallyDraggedVertexOwner->aselectVert(mPotentiallyDraggedVertex);
+         //mSnapObject = mPotentiallyDraggedVertexOwner;   // Probably correct
+         //mSnapVertexIndex = mPotentiallyDraggedVertex;
+      }
+
+      mPotentiallyDraggedVertexOwner = NULL;
+
+      findSnapVertex();                               // Sets mSnapObject and mSnapVertexIndex
    }
 
    if(!mDraggingObjects) 
@@ -4168,15 +4180,24 @@ void EditorUserInterface::onMouseClicked_left()
             if(mHitItem->vertSelected(mHitVertex))
             {
                mHitItem->unselectVert(mHitVertex);
+
                mPotentiallyDraggedVertexOwner = mHitItem;
                mPotentiallyDraggedVertex = mHitVertex;
             }
             else
                mHitItem->aselectVert(mHitVertex);
          }
-         else if(mHitItem)
+         else if(mHitItem)    // Item level
          {
             mHitItem->setSelected(!mHitItem->isSelected());    // Toggle selection of hit item
+
+            // We just unselected an item
+            if(!mHitItem->isSelected())
+            {
+               mPotentiallyDraggedVertexOwner = mHitItem;
+               mPotentiallyDraggedVertex = NONE;
+            }
+
             onSelectionChanged();
          }
          else
@@ -4622,7 +4643,7 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
 void EditorUserInterface::onMouseUp()
 {
    setMousePos();
-   mPotentiallyDraggedVertex = NONE;
+   mPotentiallyDraggedVertexOwner = NULL;
    
    if(mDragSelecting)      // We were drawing a rubberband selection box
    {
