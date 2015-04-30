@@ -75,7 +75,7 @@ namespace Zap
    EDITOR_BINDING( BINDING_FLIP_HORIZ,        "FlipItemHorizontal", keyFlipItemHoriz,   "H"             ) \
    EDITOR_BINDING( BINDING_PASTE_SELECTION,   "PasteSelection",     keyPasteSelection,  "Ctrl+V"        ) \
    EDITOR_BINDING( BINDING_FLIP_VERTICAL,     "FlipItemVertical",   keyFlipItemVertl,   "V"             ) \
-   EDITOR_BINDING( BINDING_RELOAD_LEVEL,      "ReloadLevel",        keyReloadLevel,     "Ctrl+Shift+L"  ) \
+   EDITOR_BINDING( BINDING_RELOAD_LEVEL,      "ReloadLevel",        keyReloadLevel,     "Ctrl+Alt+Shift+L"  ) \
    EDITOR_BINDING( BINDING_REDO_ACTION,       "RedoAction",         keyRedoAction,      "Ctrl+Shift+Z"  ) \
    EDITOR_BINDING( BINDING_UNDO_ACTION,       "UndoAction",         keyUndoAction,      "Ctrl+Z"        ) \
    EDITOR_BINDING( BINDING_RESET_VIEW,        "ResetView",          keyResetView,       "Z"             ) \
