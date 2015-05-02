@@ -1251,6 +1251,7 @@ void EditorUserInterface::onAfterRunScriptFromConsole()
 
 void EditorUserInterface::onActivate()
 {
+   mDelayedUnselectObject = NULL;
    GameSettings *settings = getGame()->getSettings();
 
    FolderManager *folderManager = settings->getFolderManager();
@@ -3032,6 +3033,7 @@ void EditorUserInterface::onMouseMoved()
 }
 
 
+// onDrag
 void EditorUserInterface::onMouseDragged()
 {
    if(InputCodeManager::getState(MOUSE_MIDDLE) && mMousePos != mScrollWithMouseLocation)
@@ -3062,6 +3064,8 @@ void EditorUserInterface::onMouseDragged()
    findSnapVertex();                               // Sets mSnapObject and mSnapVertexIndex
    if(!mSnapObject || mSnapVertexIndex == NONE)    // If we've just started dragging a dock item, this will be it
       return;
+
+   mDelayedUnselectObject = NULL;
 
    if(!mDraggingObjects) 
       onMouseDragged_StartDragging(needToSaveUndoState);
@@ -4201,20 +4205,34 @@ void EditorUserInterface::onMouseClicked_left()
       //     add what was clicked to the selection
       //  else
       //    toggle the selection of what was clicked
-
+      //
+      // Also... if we are unselecting something, don't make that unselection take effect until mouse-up, in case
+      // it is the beginning of a drag; that way we don't unselect when we mean to drag when shift is down
       if(InputCodeManager::checkModifier(KEY_SHIFT))  // ==> Shift key is down
       {
          // Check for vertices
          if(mVertexEditMode && !spaceDown && mHitItem && mHitVertex != NONE && mHitItem->getGeomType() != geomPoint)
          {
             if(mHitItem->vertSelected(mHitVertex))
-               mHitItem->unselectVert(mHitVertex);
+            {
+               // These will be unselected when the mouse is released, unless we are initiating a drag event
+               mDelayedUnselectObject = mHitItem;
+               mDelayedUnselectVertex = mHitVertex;
+            }
             else
                mHitItem->aselectVert(mHitVertex);
          }
-         else if(mHitItem)
+         else if(mHitItem)    // Item level
          {
-            mHitItem->setSelected(!mHitItem->isSelected());    // Toggle selection of hit item
+            // Unselecting an item
+            if(mHitItem->isSelected())
+            {
+               mDelayedUnselectObject = mHitItem;
+               mDelayedUnselectVertex = NONE;
+            }
+            else
+               mHitItem->setSelected(true);
+
             onSelectionChanged();
          }
          else
@@ -4659,6 +4677,19 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
          break;
       case MOUSE_LEFT:
       case MOUSE_RIGHT:  
+         if(mDelayedUnselectObject != NULL)
+         {
+            if(mDelayedUnselectVertex != NONE)
+               mDelayedUnselectObject->unselectVert(mDelayedUnselectVertex);
+            else
+            {
+               mDelayedUnselectObject->setSelected(false);
+               onSelectionChanged();
+            }
+
+            mDelayedUnselectObject = NULL;
+         }
+
          mMousePos.set(DisplayManager::getScreenInfo()->getMousePos());
 
          if(mDragSelecting)      // We were drawing a rubberband selection box

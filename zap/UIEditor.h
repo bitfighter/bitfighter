@@ -254,6 +254,9 @@ private:
    SafePtr<BfObject> mDraggingDockItem;
    SafePtr<BfObject> mDockItemHit;
 
+   SafePtr<BfObject> mDelayedUnselectObject;
+   S32 mDelayedUnselectVertex;
+
    S32 mDockPluginScrollOffset;
    U32 mDockWidth;
    bool mouseOnDock();                // Return whether mouse is currently over the dock
