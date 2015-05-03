@@ -1591,9 +1591,13 @@ void ServerGame::idle(U32 timeDelta)
          if(!clientInfo->isRobot())
          {
             GameConnection *connection = clientInfo->getConnection();
-            
-            if(!connection->getObjectMovedThisGame() && !connection->isLocalConnection())    // Don't kick the host, please!
+
+            if(!connection->getObjectMovedThisGame() &&        // Player hasn't moved in this level
+                  !connection->isLocalConnection()   &&        // Don't kick the host, please!
+                  connection->getBusyTime() > THIRTY_SECONDS)  // Player hasn't been busy for less than 30 seconds
+            {
                connection->disconnect(NetConnection::ReasonIdle, "");
+            }
          }
       }
 

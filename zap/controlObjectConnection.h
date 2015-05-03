@@ -63,6 +63,8 @@ private:
 
    bool mObjectMovedThisGame;
 
+   U32 mBusyTime;          // How long have we been busy (see mIsBusy)
+
    void onGotNewMove(const Move &move);
 
 protected:
@@ -105,6 +107,10 @@ public:
    void addTimeSinceLastMove(U32 time);
    U32 getTimeSinceLastMove();
    void resetTimeSinceLastMove();
+
+   void addBusyTime(U32 time);
+   U32 getBusyTime();
+   void resetBusyTime();
 
    void setObjectMovedThisGame(bool moved);
    bool getObjectMovedThisGame();
