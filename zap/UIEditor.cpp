@@ -5409,6 +5409,14 @@ void uploadToDbCallback(ClientGame *game)
 
 void uploadToDbPromptCallback(ClientGame *game, U32 unused)
 {
+   EditorUserInterface *editorUI = game->getUIManager()->getUI<EditorUserInterface>();
+
+   if(editorUI->getNeedToSave())
+   {
+      game->getUIManager()->displayMessageBox("Error", "Press [[Esc]] to continue", "Level must be saved before uploading");
+      return;
+   }
+
    ErrorMessageUserInterface *ui = game->getUIManager()->getUI<ErrorMessageUserInterface>();
 
    ui->reset();
