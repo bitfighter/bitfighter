@@ -1595,6 +1595,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
 
       toggleCommanderMap();
 
+      // Suppress key repeat by disabling cmdrs map until keyUp event is received
       mCmdrsMapKeyRepeatSuppressionSystemApprovesToggleCmdrsMap = false;
       
       // Now that we've demonstrated use of cmdrs map, no need to tell player about it

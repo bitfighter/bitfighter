@@ -204,7 +204,6 @@ void QuickMenuUI::render() const
    // And draw the text
    mGL->glColor(Colors::menuHelpColor);
    RenderUtils::drawCenteredString(instrXPos, instrYPos, HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp().c_str());
-
 }
 
 
