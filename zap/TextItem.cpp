@@ -119,7 +119,8 @@ const char *TextItem::getEditorHelpString() const  { return "Draws text on map. 
 bool TextItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
    // "Blah" will be overwritten when startEditingAttrs() is called
-   TextEntryMenuItem *menuItem = new TextEntryMenuItem("Text: ", getText(), "", "", MAX_TEXTITEM_LEN);
+   TextEntryMenuItem *menuItem = new TextEntryMenuItem("Text: ", getText(), "", 
+                                                       "Use \\n for newline", MAX_TEXTITEM_LEN);
                                                        menuItem->setTextEditedCallback(textEditedCallback);
     attributeMenu->addMenuItem(menuItem);
 
