@@ -175,8 +175,6 @@ void QuickMenuUI::render() const
 
    /////
    // Render instructions just below the menu
-   mGL->glColor(Colors::menuHelpColor);
-
    // Move instruction to top of the menu if there is not room to display it below.  I realize this code is a bit of a mess... not
    // sure how to write it more clearly, though I'm sure it could be done.
    S32 instrXPos, instrYPos;
@@ -187,7 +185,8 @@ void QuickMenuUI::render() const
    S32 HELP_TEXT_SIZE = getTextSize(MENU_ITEM_SIZE_NORMAL);
 
    // Amount help "sticks out" beyond menu box:
-   S32 xoff = (RenderUtils::getStringWidth(HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp().c_str()) - width) / 2;
+   S32 helpWidth = RenderUtils::getStringWidth(HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp().c_str());
+   S32 xoff = (helpWidth - width) / 2;
    if(xoff > 0)
       instrXPos += max(xoff - left, min(DisplayManager::getScreenInfo()->getGameCanvasWidth() - xoff - right, 0));
 
@@ -197,6 +196,13 @@ void QuickMenuUI::render() const
    else
       instrYPos = naturalTop + keepingItOnScreenAdjFactorY - HELP_TEXT_SIZE - getGap(MENU_ITEM_SIZE_NORMAL) - vpad;   // No room below, help goes above
 
+   // Dim out area behind instructions
+   F32 margin = 5.0f;
+   mGL->glColor(Colors::black, 0.7);
+   RenderUtils::drawFilledRect(instrXPos - helpWidth / 2.0f - margin, instrYPos, instrXPos + helpWidth / 2.0f + margin, instrYPos + HELP_TEXT_SIZE + margin);
+
+   // And draw the text
+   mGL->glColor(Colors::menuHelpColor);
    RenderUtils::drawCenteredString(instrXPos, instrYPos, HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp().c_str());
 
 }
