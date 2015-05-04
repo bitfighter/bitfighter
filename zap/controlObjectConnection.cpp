@@ -30,6 +30,7 @@ ControlObjectConnection::ControlObjectConnection()
 
    mObjectMovedThisGame = false;
    mIsBusy = false;
+   mBusyTime = 0;
    mNeedReplayMoves = false;
 }
 
@@ -331,6 +332,24 @@ void ControlObjectConnection::addTimeSinceLastMove(U32 time)
 void ControlObjectConnection::resetTimeSinceLastMove()
 {
    mTimeSinceLastMove = 0;
+}
+
+
+U32 ControlObjectConnection::getBusyTime()
+{
+   return mBusyTime;
+}
+
+
+void ControlObjectConnection::addBusyTime(U32 time)
+{
+   mBusyTime += time;
+}
+
+
+void ControlObjectConnection::resetBusyTime()
+{
+   mBusyTime = 0;
 }
 
 

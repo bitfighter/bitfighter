@@ -1443,7 +1443,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool isBusy), (isBusy), NetClas
    if(isBusy)
       addTimeSinceLastMove(SPAWN_DELAY_TIME - 2000);
    else
+   {
       resetTimeSinceLastMove();
+      resetBusyTime();
+   }
 }
 
 
@@ -2181,7 +2184,10 @@ void GameConnection::updateTimers_server(U32 timeDelta)
    addToTimeCredit(timeDelta);
 
    if(mClientInfo->updateReturnToGameTimer(timeDelta))     // Time to spawn a delayed player!
-       undelaySpawn();     
+      undelaySpawn();
+
+   if(mIsBusy)
+      addBusyTime(timeDelta);
 }
 
 
