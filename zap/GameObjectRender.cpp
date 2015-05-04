@@ -2149,27 +2149,55 @@ void GameObjectRender::renderSoccerBall(const Point &pos)
 
 void GameObjectRender::renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color &color)
 {
+   // Handle special case
    if(text == "Bitfighter")
    {
-      mGL->glColor(Colors::green);
-      // All factors in here determined experimentally, seem to work at a variety of sizes and approximate the width and height
-      // of ordinary text in cases tested.  What should happen is the Bitfighter logo should, as closely as possible, match the 
-      // size and extent of the text "Bitfighter".
-      F32 scaleFactor = size / 129.0f;
-      mGL->glPushMatrix();
-         mGL->glTranslate(pos);
-         mGL->glScale(scaleFactor);
-         mGL->glRotate(pos.angleTo(dir) * RADIANS_TO_DEGREES);
-         mGL->glTranslate(-119, -45);      // Determined experimentally
-
-         renderBitfighterLogo(0, 1);
-      mGL->glPopMatrix();
-
+      renderBitfighterLogo(pos, dir, size);
       return;
    }
 
    mGL->glColor(color);
-   RenderUtils::drawAngleString(pos.x, pos.y, size, pos.angleTo(dir), text.c_str());
+
+   // Note that the LineEditor creates strings containing "\\n" when the user enters "\n".  We need to 
+   // swap these out with a true newline char for the splitMultiLineString function to work.
+   Vector<string> lines;
+   splitMultiLineString(replaceString(text ,"\\n", "\n"), lines);     // Split with '\n'
+
+   F32 angle = pos.angleTo(dir);    // In radians, I daresay!
+   F32 ypos = pos.y;
+   F32 xpos = pos.x;
+
+   F32 lineHeight = size * 1.25;
+   F32 xspace = -lineHeight * sin(angle);
+   F32 yspace =  lineHeight * cos(angle);
+
+   for(S32 i = 0; i < lines.size(); i++)
+   {
+      RenderUtils::drawAngleString(xpos, ypos, size, angle, lines[i].c_str());
+      xpos += xspace;
+      ypos += yspace;
+   }
+
+}
+
+
+void GameObjectRender::renderBitfighterLogo(const Point &pos, const Point &dir, F32 size)
+{
+   mGL->glColor(Colors::green);
+
+   // All factors in here determined experimentally, seem to work at a variety of sizes and approximate the width and height
+   // of ordinary text in cases tested.  What should happen is the Bitfighter logo should, as closely as possible, match the 
+   // size and extent of the text "Bitfighter".
+   F32 scaleFactor = size / 129.0f;
+
+   mGL->glPushMatrix();
+   mGL->glTranslate(pos);
+   mGL->glScale(scaleFactor);
+   mGL->glRotate(pos.angleTo(dir) * RADIANS_TO_DEGREES);
+   mGL->glTranslate(-119, -45);      // Determined experimentally
+
+   renderBitfighterLogo(0, 1);
+   mGL->glPopMatrix();
 }
 
 

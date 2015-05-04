@@ -113,7 +113,7 @@ F32 Point::distSquared(const Point &pt) const
 
 F32 Point::angleTo(const Point &p) const
 {
-   return atan2(p.y-y, p.x-x);
+   return atan2(p.y-y, p.x-x);      // That's radians, folks!
 }
 
 Point Point::rotate(F32 ang)

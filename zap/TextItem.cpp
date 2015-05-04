@@ -111,7 +111,7 @@ void TextItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled,
 const char *TextItem::getOnScreenName()     const  { return "Text";      }
 const char *TextItem::getOnDockName()       const  { return "TextItem";  }
 const char *TextItem::getPrettyNamePlural() const  { return "TextItems"; }
-const char *TextItem::getEditorHelpString() const  { return "Draws a bit of text on the map.  Visible only to team, or to all if neutral."; }
+const char *TextItem::getEditorHelpString() const  { return "Draws text on map.  Visible only to team, or to all if neutral."; }
 
 
 #ifndef ZAP_DEDICATED
@@ -257,10 +257,20 @@ void TextItem::recalcTextSize()
 {
 #ifndef ZAP_DEDICATED
    const F32 dummyTextSize = 120;
+   F32 maxWidth = -1;
+
+   // Size text according to the longest line in a multi-line item
+   Vector<string> lines;
+   splitMultiLineString(replaceString(mText, "\\n", "\n"), lines);     // Split with '\n'
+   for(S32 i = 0; i < lines.size(); i++)
+   {
+      F32 strWidth = F32(RenderUtils::getStringWidth(dummyTextSize, lines[i].c_str())) / dummyTextSize;
+      if(strWidth > maxWidth)
+         maxWidth = strWidth;
+   }
 
    F32 lineLen = getVert(0).distanceTo(getVert(1));      // In in-game units
-   F32 strWidth = F32(RenderUtils::getStringWidth(dummyTextSize, mText.c_str())) / dummyTextSize;
-   F32 size = lineLen / strWidth;
+   F32 size = lineLen / maxWidth;
 
   setSize(size);
 #endif

@@ -234,6 +234,8 @@ public:
    static void renderBitfighterLogo(U32 mask);
    static void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask = 1023);
    static void renderBitfighterLogo(const Point &pos, F32 size, U32 letterMask = 1023);
+   static void renderBitfighterLogo(const Point &pos, const Point &dir, F32 size);
+
    static void renderStaticBitfighterLogo();
 
    static void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge);
