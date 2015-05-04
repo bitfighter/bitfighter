@@ -70,6 +70,7 @@ GameUserInterface::GameUserInterface(ClientGame *game, UIManager *uiManager) :
    mInScoreboardMode = false;
    displayInputModeChangeAlert = false;
    mMissionOverlayActive = false;
+   mCmdrsMapKeyRepeatSuppressionSystemApprovesToggleCmdrsMap = true;
 
    mHelperManager.initialize(game);
 
@@ -148,6 +149,7 @@ void GameUserInterface::onActivate()
    mMissionOverlayActive = false;      // Turn off the mission overlay (if it was on)
    Cursor::disableCursor();            // Turn off cursor
    onMouseMoved();                     // Make sure ship pointed is towards mouse
+   mCmdrsMapKeyRepeatSuppressionSystemApprovesToggleCmdrsMap = true;
 
 
    // Clear out any lingering server or chat messages
@@ -226,6 +228,7 @@ void GameUserInterface::onReactivate()
    }
 
    onMouseMoved();   // Call onMouseMoved to get ship pointed at current cursor location
+   mCmdrsMapKeyRepeatSuppressionSystemApprovesToggleCmdrsMap = true;
 }
 
 
@@ -1587,7 +1590,12 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    }
    else if(checkInputCode(BINDING_CMDRMAP, inputCode))
    {
+      if(!mCmdrsMapKeyRepeatSuppressionSystemApprovesToggleCmdrsMap)
+         return true;
+
       toggleCommanderMap();
+
+      mCmdrsMapKeyRepeatSuppressionSystemApprovesToggleCmdrsMap = false;
       
       // Now that we've demonstrated use of cmdrs map, no need to tell player about it
       mHelpItemManager.removeInlineHelpItem(CmdrsMapItem, true);  
@@ -1761,6 +1769,8 @@ void GameUserInterface::onKeyUp(InputCode inputCode)
       if(mVoiceRecorder.mRecordingAudio)  // Turning recorder off
          mVoiceRecorder.stop();
    }
+   else if(checkInputCode(BINDING_CMDRMAP, inputCode))
+      mCmdrsMapKeyRepeatSuppressionSystemApprovesToggleCmdrsMap = true;
 }
 
 
