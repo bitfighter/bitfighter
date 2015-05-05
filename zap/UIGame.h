@@ -145,6 +145,8 @@ private:
 
    bool mAlreadySeenLevelupMsg[UserSettings::LevelCount];     // Tracks which levelup messages we've already seen
 
+   bool mCmdrsMapKeyRepeatSuppressionSystemApprovesToggleCmdrsMap;
+
 
    LevelListDisplayer mLevelListDisplayer;
 
