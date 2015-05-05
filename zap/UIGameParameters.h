@@ -64,6 +64,8 @@ private:
    typedef map<const string, boost::shared_ptr<MenuItem> > MenuItemMap;
    MenuItemMap mMenuItemMap;
 
+   string mLevelFilename;            // Level filename when the UI is activated
+
 
 public:
    explicit GameParamUserInterface(ClientGame *game, UIManager *uiManager);   // Constructor
