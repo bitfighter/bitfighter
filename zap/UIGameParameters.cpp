@@ -68,6 +68,8 @@ GameParamUserInterface::GameParamUserInterface(ClientGame *game, UIManager *uiMa
    mMenuTitle = "GAME PARAMETERS MENU";
    mMenuSubTitle = "";
    mMaxMenuSize = S32_MAX;                // We never want scrolling on this menu!
+
+   mLevelFilename = "";
 }
 
 
@@ -88,6 +90,11 @@ void GameParamUserInterface::onActivate()
    // Force rebuild of all params for current gameType; this will make sure we have the latest info if we've loaded a new level,
    // but will also preserve any values entered for gameTypes that are not current.
    clearCurrentGameTypeParams(gameType);
+   
+   // Load filename from editor only when we activate the menu
+   mLevelFilename = stripExtension(getUIManager()->getUI<EditorUserInterface>()->getLevelFileName());
+   if(mLevelFilename == EditorUserInterface::UnnamedFile)
+      mLevelFilename = "";
 
    updateMenuItems(gameType);   
    mOrigGameParams = level->toLevelCode();   // Save a copy of the params coming in for comparison when we leave to see what changed
@@ -154,6 +161,12 @@ void GameParamUserInterface::updateMenuItems(const GameType *gameType)
 {
    TNLAssert(gameType, "Missing game type!");
 
+   string filename = mLevelFilename;
+   // Grab the level filename from the menuitem if it has been built already.
+   // This let's us persist a changed filename without having to leave the menu first
+   if(getMenuItemCount() > 0)
+      filename = getMenuItem(1)->getValue();
+
    clearMenuItems();
 
    // Note that on some gametypes instructions[1] is NULL
@@ -168,12 +181,8 @@ void GameParamUserInterface::updateMenuItems(const GameType *gameType)
                                   instructs));
 
 
-   string fn = stripExtension(getUIManager()->getUI<EditorUserInterface>()->getLevelFileName());
-   if(fn == EditorUserInterface::UnnamedFile)
-      fn = "";
-
    addMenuItem(new TextEntryMenuItem("Filename:",                         // name
-                                     fn,                                  // val
+                                     filename,                            // val
                                      EditorUserInterface::UnnamedFile,    // empty val
                                      "File where this level is stored",   // help
                                      MAX_FILE_NAME_LEN));
@@ -204,7 +213,13 @@ void GameParamUserInterface::updateMenuItems(const GameType *gameType)
 // Runs as we're exiting the menu
 void GameParamUserInterface::onEscape()
 {
-   getUIManager()->getUI<EditorUserInterface>()->setLevelFileName(getMenuItem(1)->getValue());  
+   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
+
+   string newFilename = getMenuItem(1)->getValue();
+
+   bool filenameChanged = mLevelFilename != newFilename;
+   if(filenameChanged)
+      ui->setLevelFileName(newFilename);
 
    GameType *gameType = getUIManager()->getUI<EditorUserInterface>()->getLevel()->getGameType();
 
@@ -218,7 +233,7 @@ void GameParamUserInterface::onEscape()
       gameType->saveMenuItem(menuItem, keys->get(i));
    }
 
-   if(anythingChanged())
+   if(anythingChanged() || filenameChanged)
    {
       EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
       // TODO -->Save undo state here!!!

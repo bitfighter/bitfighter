@@ -132,7 +132,8 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
       { "-", "" },      // Horiz. line
          { "Press or Hold [[NoGridSnapping]] to suspend grid snapping", "" },
          { "[[NoSnapping]] to suspend vertex snapping",                 "" },
-         { "Hold [[PreviewMode]] to view a reference ship",             "" }
+         { "Hold [[PreviewMode]] to view a reference ship",             "" },
+         { "Press [[ToggleEditMode]] to toggle object/vertex selection modes", "" }
    };
 
 
