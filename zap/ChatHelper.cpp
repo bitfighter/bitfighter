@@ -113,6 +113,9 @@ namespace Zap
 };
 
 
+#undef HEADER_TEXT
+
+
 const S32 ChatHelper::chatCmdSize = ARRAYSIZE(chatCmds); // So instructions will know how big chatCmds is
 static const S32 CHAT_COMPOSE_FONT_SIZE = 12;
 
