@@ -57,10 +57,13 @@ namespace Zap
    { "setscore",    &ChatCommands::setWinningScoreHandler, { xINT },  1, LEVEL_COMMANDS,  0,  1,  {"<score>"},                                "Set score to win the level" },
    { "resetscore",  &ChatCommands::resetScoreHandler,      {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Reset all scores to zero" },
 
-   { "addbot",      &ChatCommands::addBotHandler,          { STR, TEAM, STR },       3, BOT_COMMANDS,    1,  2,  {"[file]", "[team name or num]","[args]"},          "Add bot from [file] to [team num], pass [args] to bot" },
-   { "addbots",     &ChatCommands::addBotsHandler,         { xINT, STR, TEAM, STR }, 4, BOT_COMMANDS,    1,  2,  {"[count]","[file]","[team name or num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
-   { "kickbot",     &ChatCommands::kickBotHandler,         {  },                     1, BOT_COMMANDS,    1,  1,  {  },                                               "Kick a bot" },
-   { "kickbots",    &ChatCommands::kickBotsHandler,        {  },                     1, BOT_COMMANDS,    1,  1,  {  },                                               "Remove all bots from game" },
+   { "addbot",      &ChatCommands::addBotHandler,          { STR, TEAM, STR },       3, BOT_COMMANDS,    0,  2,  {"[file]", "[team name or num]","[args]"},          "Add bot from [file] to [team num], pass [args] to bot" },
+   { "addbots",     &ChatCommands::addBotsHandler,         { xINT, STR, TEAM, STR }, 4, BOT_COMMANDS,    0,  2,  {"[count]","[file]","[team name or num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
+   { "kickbot",     &ChatCommands::kickBotHandler,         {  },                     0, BOT_COMMANDS,    0,  1,  {  },                                               "Kick a bot" },
+   { "kickbots",    &ChatCommands::kickBotsHandler,        {  },                     0, BOT_COMMANDS,    0,  1,  {  },                                               "Remove all bots from game" },
+   { "morebots",    &ChatCommands::moreBotsHandler,        {  },                     0, BOT_COMMANDS,    1,  1,  {  },                                               "Add bots (keep teams balanced)"},
+   { "lessbots",    &ChatCommands::lessBotsHandler,        {  },                     0, BOT_COMMANDS,    1,  1,  {  },                                               "Remove some bots (keep teams balanced)"},
+
 
    { "announce",           &ChatCommands::announceHandler,           { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<announcement>"},      "Announce an important message" },
    { "kick",               &ChatCommands::kickPlayerHandler,         { NAME },       1, ADMIN_COMMANDS,  0,  1,  {"<name>"},              "Kick a player from the game" },
@@ -79,13 +82,10 @@ namespace Zap
    { "shuffle",            &ChatCommands::shuffleTeams,              { },            0, ADMIN_COMMANDS,  0,  1,  { "" },                  "Randomly reshuffle teams" },
    { "lockteams",          &ChatCommands::lockTeams,                 { },            0, ADMIN_COMMANDS,  0,  1,  { "" },                  "Lock teams - teams same every game, players may not change" },
    { "unlockteams",        &ChatCommands::unlockTeams,               { },            0, ADMIN_COMMANDS,  0,  1,  { "" },                  "Unlock teams - Teams revert to normal behavior" },
-#ifdef TNL_DEBUG
-   { "pause",              &ChatCommands::pauseHandler,              { },            0, ADMIN_COMMANDS,  0,  1,  { "" },                  "TODO: add 'PAUSED' display while paused" },
-#endif
 
-   { "setownerpass",       &ChatCommands::setOwnerPassHandler,       { STR },        1, OWNER_COMMANDS,  0,  1,  {"[passwd]"},            "Set owner password" },
-   { "setadminpass",       &ChatCommands::setAdminPassHandler,       { STR },        1, OWNER_COMMANDS,  0,  1,  {"[passwd]"},            "Set admin password" },
-   { "shutdown",           &ChatCommands::shutdownServerHandler,     { xINT, STR },  2, OWNER_COMMANDS,  0,  1,  {"[time]","[message]"},  "Start orderly shutdown of server (def. = 10 secs)" },
+   { "setownerpass", &ChatCommands::setOwnerPassHandler,       { STR },        1, OWNER_COMMANDS,  0,  1,  {"[passwd]"},            "Set owner password" },
+   { "setadminpass", &ChatCommands::setAdminPassHandler,       { STR },        1, OWNER_COMMANDS,  0,  1,  {"[passwd]"},            "Set admin password" },
+   { "shutdown",     &ChatCommands::shutdownServerHandler,     { xINT, STR },  2, OWNER_COMMANDS,  0,  1,  {"[time]","[message]"},  "Start orderly shutdown of server (def. = 10 secs)" },
 
    { "showcoords", &ChatCommands::showCoordsHandler,    {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show ship coordinates" },
    { "showzones",  &ChatCommands::showZonesHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },          "Show bot nav mesh zones" },
@@ -101,7 +101,8 @@ namespace Zap
 
    // The following are only available in debug builds!
 #ifdef TNL_DEBUG
-   { "showobjectoutlines", &ChatCommands::showObjectOutlinesHandler, {  },  0, DEVELOPER_COMMANDS, 1, 1, { },         "Show HelpItem object outlines on all objects" },    
+   {"pause",               &ChatCommands::pauseHandler,              {  },  0, DEVELOPER_COMMANDS, 0, 1, { }, "TODO: add 'PAUSED' display while paused"},
+   { "showobjectoutlines", &ChatCommands::showObjectOutlinesHandler, {  },  0, DEVELOPER_COMMANDS, 0, 1, { }, "Show HelpItem object outlines on all objects" },    
 #endif
 };
 
@@ -120,6 +121,7 @@ ChatHelper::ChatHelper()
 
    setAnimationTime(65);    // Menu appearance time
 }
+
 
 // Destructor
 ChatHelper::~ChatHelper()

@@ -119,6 +119,9 @@ public:
    bool canRateLevel() const;
    void levelIsNotReallyInTheDatabase();
 
+   void moreBots();
+   void lessBots();
+
    void setLevelDatabaseId(U32 id);
 
    string getCurrentLevelFileName() const;

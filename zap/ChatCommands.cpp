@@ -858,6 +858,18 @@ void kickBotsHandler(ClientGame *game, const Vector<string> &words)
 }
 
 
+void moreBotsHandler(ClientGame *game, const Vector<string> &words)
+{
+   game->moreBots();
+}
+
+
+void lessBotsHandler(ClientGame *game, const Vector<string> &words)
+{
+   game->lessBots();
+}
+
+
 void setMaxBotsHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasAdmin("!!! Need admin permission to change server settings"))

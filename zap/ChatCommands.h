@@ -65,7 +65,6 @@ using namespace Zap;
 
 namespace ChatCommands 
 {
-
 void announceHandler           (ClientGame *game, const Vector<string> &args);
 void mVolHandler               (ClientGame *game, const Vector<string> &args);    
 void sVolHandler               (ClientGame *game, const Vector<string> &args);    
@@ -117,6 +116,8 @@ void addBotsHandler            (ClientGame *game, const Vector<string> &args);
 void kickBotHandler            (ClientGame *game, const Vector<string> &args);
 void kickBotsHandler           (ClientGame *game, const Vector<string> &args);
 void showBotsHandler           (ClientGame *game, const Vector<string> &args);
+void moreBotsHandler           (ClientGame *game, const Vector<string> &args);
+void lessBotsHandler           (ClientGame *game, const Vector<string> &args);
 void setMaxBotsHandler         (ClientGame *game, const Vector<string> &args);
 void banPlayerHandler          (ClientGame *game, const Vector<string> &args);
 void banIpHandler              (ClientGame *game, const Vector<string> &args);

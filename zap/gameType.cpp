@@ -2798,17 +2798,7 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
 {
    ServerGame *serverGame = static_cast<ServerGame *>(mGame);
 
-   if(stricmp(cmd, "FewerBots") == 0)
-   {
-      if(canClientAddBots(clientInfo->getConnection()))
-         fewerBots(clientInfo);
-   }
-   else if(stricmp(cmd, "MoreBots") == 0)
-   {
-      if(canClientAddBots(clientInfo->getConnection()))
-         moreBots(clientInfo);   
-   }
-   else if(stricmp(cmd, "yes") == 0)
+  if(stricmp(cmd, "yes") == 0)
       serverGame->voteClient(clientInfo, true);
    else if(stricmp(cmd, "no") == 0)
       serverGame->voteClient(clientInfo, false);

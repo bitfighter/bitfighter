@@ -2285,38 +2285,14 @@ RobotsMenuUserInterface::~RobotsMenuUserInterface()
 // Can only get here if the player has the appropriate permissions, so no need for a further check
 static void moreRobotsAcceptCallback(ClientGame *game, U32 index)
 {
-   GameType *gameType = game->getGameType();
-
-   if(gameType)
-   {
-      Vector<StringPtr> args;
-      gameType->c2sSendCommand("MoreBots", args);
-   }
-
-   // Player has demonstrated ability to add bots... no need to show help item
-   game->getUIManager()->getUI<GameUserInterface>()->removeInlineHelpItem(AddBotsItem, true);
-
-   // Back to the game!   
-   game->getUIManager()->reactivateGameUI();
+   game->moreBots();
 }
 
 
 // Can only get here if the player has the appropriate permissions, so no need for a further check
 static void fewerRobotsAcceptCallback(ClientGame *game, U32 index)
 {
-   if(game->getBotCount() == 0)
-      game->displayErrorMessage("!!! There are no robots to kick");
-
-   GameType *gameType = game->getGameType();
-
-   if(gameType)
-   {
-      Vector<StringPtr> args;
-      gameType->c2sSendCommand("FewerBots", args);
-   }
-
-   // Back to the game!
-   game->getUIManager()->reactivateGameUI();
+   game->lessBots();
 }
 
 

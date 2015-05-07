@@ -1813,6 +1813,48 @@ bool ClientGame::showAllObjectOutlines() const
 }
 
 
+// We can get here from the menu or via chat command
+void ClientGame::moreBots()
+{
+   GameType *gameType = getGameType();
+   TNLAssert(gameType, "When no GT here? (moreBots)");
+
+   if(gameType)
+   {
+      Vector<StringPtr> args;  // Empty args
+      gameType->c2sSendCommand("MoreBots", args);
+   }
+
+   // Player has demonstrated ability to add bots... no need to show help item
+   getUIManager()->removeInlineHelpItem(AddBotsItem, true);
+
+   // Back to the game!   
+   getUIManager()->reactivateGameUI();
+}
+
+
+void ClientGame::lessBots()
+{
+   GameType *gameType = getGameType();
+   TNLAssert(gameType, "When no GT here? (lessBots)");
+
+   if(getBotCount() == 0)
+   {
+      displayErrorMessage("!!! There are no robots to kick");
+      return;
+   }
+
+   if(gameType)
+   {
+      Vector<StringPtr> args;    // Empty args
+      gameType->c2sSendCommand("FewerBots", args);
+   }
+
+   // Back to the game!
+   getUIManager()->reactivateGameUI();
+}
+
+
 
 };
 
