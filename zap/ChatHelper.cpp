@@ -41,11 +41,11 @@ namespace Zap
    { "mute",     &ChatCommands::muteHandler,        { NAME },      1,      ADV_COMMANDS,     1,     1,    {"<name>"},             "Toggle hiding chat messages from <name>" },
    { "vmute",    &ChatCommands::voiceMuteHandler,   { NAME },      1,      ADV_COMMANDS,     1,     1,    {"<name>"},             "Toggle muting voice chat from <name>" },
                  
-   { "mvol",     &ChatCommands::mVolHandler,      { xINT },      1,      SOUND_COMMANDS,   2,     1,    {"<0-10>"},             "Set music volume"      },
-   { "svol",     &ChatCommands::sVolHandler,      { xINT },      1,      SOUND_COMMANDS,   2,     1,    {"<0-10>"},             "Set SFX volume"        },
-   { "vvol",     &ChatCommands::vVolHandler,      { xINT },      1,      SOUND_COMMANDS,   2,     1,    {"<0-10>"},             "Set voice chat volume" },
-   { "mnext",    &ChatCommands::mNextHandler,     {  },          0,      SOUND_COMMANDS,   2,     1,    {  },                   "Play next track in the music list" },
-   { "mprev",    &ChatCommands::mPrevHandler,     {  },          0,      SOUND_COMMANDS,   2,     1,    {  },                   "Play previous track in the music list" },
+   { "mvol",     &ChatCommands::mVolHandler,        { xINT },      1,      SOUND_COMMANDS,   2,     1,    {"<0-10>"},             "Set music volume"      },
+   { "svol",     &ChatCommands::sVolHandler,        { xINT },      1,      SOUND_COMMANDS,   2,     1,    {"<0-10>"},             "Set SFX volume"        },
+   { "vvol",     &ChatCommands::vVolHandler,        { xINT },      1,      SOUND_COMMANDS,   2,     1,    {"<0-10>"},             "Set voice chat volume" },
+   { "mnext",    &ChatCommands::mNextHandler,       {  },          0,      SOUND_COMMANDS,   2,     1,    {  },                   "Play next track in the music list" },
+   { "mprev",    &ChatCommands::mPrevHandler,       {  },          0,      SOUND_COMMANDS,   2,     1,    {  },                   "Play previous track in the music list" },
 
    { "add",         &ChatCommands::addTimeHandler,         { xINT },  1, LEVEL_COMMANDS,  0,  1,  {"<time in minutes>"},                      "Add time to the current game" },
    { "next",        &ChatCommands::nextLevelHandler,       {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Start next level" },
