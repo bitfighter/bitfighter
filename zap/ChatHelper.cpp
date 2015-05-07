@@ -23,10 +23,13 @@
 #include "RenderUtils.h"
 #include "stringUtils.h"
 
+#define HEADER_TEXT(category, group, text) \
+   {"", NULL, { }, 0, category, group, 0, { }, text}
+
 namespace Zap
 {
    CommandInfo chatCmds[] = {   
-   //  cmdName          cmdCallback                 cmdArgInfo cmdArgCount   helpCategory helpGroup lines,  helpArgString            helpTextString
+   //  cmdName          cmdCallback                 cmdArgInfo cmdArgCount helpCategory helpGroup lines,  helpArgString            helpTextString
 
    { "dlmap",    &ChatCommands::downloadMapHandler, { STR },       1,      ADV_COMMANDS,     0,     1,    {"<level>"},            "Download the level from the online level database" },
    { "rate",     &ChatCommands::rateMapHandler,     { STR },       1,      ADV_COMMANDS,     0,     1,    {"<up | neutral | down>"}, "Rate this level on the level database (up or down)" },
@@ -57,12 +60,15 @@ namespace Zap
    { "setscore",    &ChatCommands::setWinningScoreHandler, { xINT },  1, LEVEL_COMMANDS,  0,  1,  {"<score>"},                                "Set score to win the level" },
    { "resetscore",  &ChatCommands::resetScoreHandler,      {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Reset all scores to zero" },
 
-   { "addbot",      &ChatCommands::addBotHandler,          { STR, TEAM, STR },       3, BOT_COMMANDS,    0,  2,  {"[file]", "[team name or num]","[args]"},          "Add bot from [file] to [team num], pass [args] to bot" },
-   { "addbots",     &ChatCommands::addBotsHandler,         { xINT, STR, TEAM, STR }, 4, BOT_COMMANDS,    0,  2,  {"[count]","[file]","[team name or num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
-   { "kickbot",     &ChatCommands::kickBotHandler,         {  },                     0, BOT_COMMANDS,    0,  1,  {  },                                               "Kick a bot" },
-   { "kickbots",    &ChatCommands::kickBotsHandler,        {  },                     0, BOT_COMMANDS,    0,  1,  {  },                                               "Remove all bots from game" },
-   { "morebots",    &ChatCommands::moreBotsHandler,        {  },                     0, BOT_COMMANDS,    1,  1,  {  },                                               "Add bots (keep teams balanced)"},
-   { "lessbots",    &ChatCommands::lessBotsHandler,        {  },                     0, BOT_COMMANDS,    1,  1,  {  },                                               "Remove some bots (keep teams balanced)"},
+   HEADER_TEXT(BOT_COMMANDS, 0, "These commands add bot players that continue to play in future levels"),
+   { "morebots",    &ChatCommands::moreBotsHandler,        {  },                     0, BOT_COMMANDS,    0,  1,  {  },                                               "Add some bots (keep teams balanced)"},
+   { "lessbots",    &ChatCommands::lessBotsHandler,        {  },                     0, BOT_COMMANDS,    0,  1,  {  },                                               "Remove some bots (keep teams balanced)"},
+
+   HEADER_TEXT(BOT_COMMANDS, 1, "These commands add bots to the current game; they will not play in future levels"),
+   { "addbot",      &ChatCommands::addBotHandler,          { STR, TEAM, STR },       3, BOT_COMMANDS,    1,  2,  {"[file]", "[team name or num]","[args]"},          "Add bot from [file] to [team num], pass [args] to bot" },
+   { "addbots",     &ChatCommands::addBotsHandler,         { xINT, STR, TEAM, STR }, 4, BOT_COMMANDS,    1,  2,  {"[count]","[file]","[team name or num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
+   { "kickbot",     &ChatCommands::kickBotHandler,         {  },                     0, BOT_COMMANDS,    1,  1,  {  },                                               "Kick a bot" },
+   { "kickbots",    &ChatCommands::kickBotsHandler,        {  },                     0, BOT_COMMANDS,    1,  1,  {  },                                               "Remove all bots from game" },
 
 
    { "announce",           &ChatCommands::announceHandler,           { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<announcement>"},      "Announce an important message" },

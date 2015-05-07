@@ -274,7 +274,7 @@ void InstructionsUserInterface::render() const
          break;
       case InstructionAdvancedCommands:
          renderPageCommands(InstructionAdvancedCommands - FIRST_COMMAND_PAGE, 
-                            "Tip: Define QuickChat items to quickly enter commands (see INI for details)");
+                            "Tip: Define QuickChat items to quickly enter commands (see INI file for details)");
          break;
       case InstructionSoundCommands:
          renderPageCommands(InstructionSoundCommands - FIRST_COMMAND_PAGE);            // Sound control commands
@@ -922,8 +922,8 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
 
    S32 ypos = 65;
 
-   S32 cmdCol = horizMargin;                                                         // Action column
-   S32 descrCol = horizMargin + S32(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.25) + 55;   // Control column
+   const S32 cmdCol = horizMargin;                                                                             // Action column
+   const S32 descrCol = horizMargin + S32(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.25) + 55;  // Control column
 
    ypos += mPageHeaders.render(cmdCol, ypos, AlignmentLeft) - FontSize;    // Account for different positioning of SymbolStrings and RenderUtils::drawString()
 
@@ -934,9 +934,10 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
       ypos += 28;
    }
 
-   Color cmdColor =   Colors::cyan;
-   Color descrColor = Colors::white;
-   Color secColor =   Colors::yellow;
+   Color cmdColor        = Colors::cyan;
+   Color descrColor      = Colors::white;
+   Color secColor        = Colors::yellow;
+   Color headerHelpColor = Colors::red;
 
    Color argColor;
    argColor.interp(.5, Colors::cyan, Colors::black);
@@ -986,28 +987,39 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
       }
 
       mGL->glColor(cmdColor);
-      
-      // Assemble command & args from data in the chatCmds struct
-      string cmdString = "/" + chatCmds[i].cmdName;
-      string args = "";
 
-      for(S32 j = 0; j < chatCmds[i].cmdArgCount; j++)
-         args += " " + chatCmds[i].helpArgString[j];
-
-      S32 w = RenderUtils::drawStringAndGetWidth(cmdCol, ypos, cmdSize, cmdString.c_str());
-      mGL->glColor(argColor);
-      RenderUtils::drawString(cmdCol + w, ypos, cmdSize, args.c_str());
-
-      if(chatCmds[i].lines == 1)    // Everything on one line, the normal case
+      // Lines like this give us some header text for a section
+      //    {"", NULL, { }, 0, BOT_COMMANDS, 0, 1, { }, "Header text"},
+      if(chatCmds[i].cmdName.empty())
       {
-         mGL->glColor(descrColor);
-         RenderUtils::drawString(descrCol, ypos, cmdSize, chatCmds[i].helpTextString.c_str());
+         mGL->glColor(headerHelpColor);
+         RenderUtils::drawString(cmdCol, ypos, cmdSize, chatCmds[i].helpTextString.c_str());
       }
-      else                          // Draw the command on one line, explanation on the next, with a bit of indent
+      else
       {
-         ypos += cmdSize + cmdGap;
-         mGL->glColor(descrColor);
-         RenderUtils::drawString(cmdCol + 50, ypos, cmdSize, chatCmds[i].helpTextString.c_str());
+
+         // Assemble command & args from data in the chatCmds struct
+         string cmdString = "/" + chatCmds[i].cmdName;
+         string args = "";
+
+         for(S32 j = 0; j < chatCmds[i].cmdArgCount; j++)
+            args += " " + chatCmds[i].helpArgString[j];
+
+         S32 w = RenderUtils::drawStringAndGetWidth(cmdCol, ypos, cmdSize, cmdString.c_str());
+         mGL->glColor(argColor);
+         RenderUtils::drawString(cmdCol + w, ypos, cmdSize, args.c_str());
+
+         if(chatCmds[i].lines == 1)    // Everything on one line, the normal case
+         {
+            mGL->glColor(descrColor);
+            RenderUtils::drawString(descrCol, ypos, cmdSize, chatCmds[i].helpTextString.c_str());
+         }
+         else                          // Draw the command on one line, explanation on the next, with a bit of indent
+         {
+            ypos += cmdSize + cmdGap;
+            mGL->glColor(descrColor);
+            RenderUtils::drawString(cmdCol + 50, ypos, cmdSize, chatCmds[i].helpTextString.c_str());
+         }
       }
 
       ypos += cmdSize + cmdGap;
