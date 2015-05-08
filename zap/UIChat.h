@@ -77,7 +77,7 @@ public:
    void clearChat();                      // Clear message being composed
    virtual void issueChat();              // Send chat message
 
-   void leaveGlobalChat();                // Send msg to master telling them we're leaving chat
+   void leaveLobbyChat();                 // Send msg to master telling them we're leaving chat
 
    void renderMessages(U32 yPos, U32 lineCountToDisplay) const;
    void renderMessageComposition(S32 ypos) const;   // Render outgoing chat message composition line
@@ -85,11 +85,11 @@ public:
    void renderChatters(S32 xpos, S32 ypos) const;   // Render list of other people in chat room
    void deliverPrivateMessage(const char *sender, const char *message);
 
-   // Handle players joining and leaving the chat session
-   bool isPlayerInGlobalChat(const StringTableEntry &playerNick);
-   void setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks);
-   void playerJoinedGlobalChat(const StringTableEntry &playerNick);
-   void playerLeftGlobalChat(const StringTableEntry &playerNick);
+   // Handle players joining and leaving lobby chat
+   bool isPlayerInLobbyChat(const StringTableEntry &playerNick);
+   void setPlayersInLobbyChat(const Vector<StringTableEntry> &playerNicks);
+   void playerJoinedLobbyChat(const StringTableEntry &playerNick);
+   void playerLeftLobbyChat(const StringTableEntry &playerNick);
 
 
    // Sizes and other things to help with positioning
@@ -99,7 +99,7 @@ public:
    static const S32 CHAT_NAMELIST_SIZE = 11;  // Size of names of people in chatroom
 
 
-   static Vector<StringTableEntry> mPlayersInGlobalChat;
+   static Vector<StringTableEntry> mPlayersInLobbyChat;
 };
 
 
@@ -116,7 +116,7 @@ private:
 
    virtual void renderHeader() const;
    //virtual void renderFooter();
-   virtual void onOutGameChat();       // What to do if user presses [F5]
+   virtual void onLobbyChat();       // What to do if user presses [F5]
    bool mRenderUnderlyingUI;
 
 public:
@@ -148,7 +148,7 @@ class SuspendedUserInterface : public ChatUserInterface
 
 private:
    void renderHeader() const;
-   void onOutGameChat();                  // What to do if user presses [F5]
+   void onLobbyChat();                  // What to do if user presses [F5]
 
 public:
    explicit SuspendedUserInterface(ClientGame *game, UIManager *uiManager);    // Constructor

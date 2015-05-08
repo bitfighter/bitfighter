@@ -65,7 +65,7 @@ public:
 
       // Master server events
       LogConnectionManager    = BIT(4),      // Log server attempts to manage connections between clients and servers
-      LogChat                 = BIT(5),      // Log global chat messages relayed through master
+      LogChat                 = BIT(5),      // Log lobby chat messages relayed through master
 
       // TNL network events
       LogConnectionProtocol	= BIT(6),      // Details about packets sent/recv'd

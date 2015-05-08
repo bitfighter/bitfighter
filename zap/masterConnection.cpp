@@ -396,7 +396,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendChat, (StringTableEntr
    if(mGame->isServer())
       return;
 
-   static_cast<ClientGame *>(mGame)->gotGlobalChatMessage(playerNick.getString(), message.getString(), isPrivate);
+   static_cast<ClientGame *>(mGame)->gotLobbyChatMessage(playerNick.getString(), message.getString(), isPrivate);
 }
 
 
@@ -407,7 +407,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayersInGlobalChat, (Vect
    if(mGame->isServer())
       return;
 
-   static_cast<ClientGame *>(mGame)->setPlayersInGlobalChat(playerNicks);
+   static_cast<ClientGame *>(mGame)->setPlayersInLobbyChat(playerNicks);
 }
 
 
@@ -418,7 +418,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerJoinedGlobalChat, (S
    if(mGame->isServer())
       return;
 
-   static_cast<ClientGame *>(mGame)->playerJoinedGlobalChat(playerNick);
+   static_cast<ClientGame *>(mGame)->playerJoinedLobbyChat(playerNick);
 }
 
 
@@ -429,7 +429,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerLeftGlobalChat, (Str
    if(mGame->isServer())
       return;
 
-   static_cast<ClientGame *>(mGame)->playerLeftGlobalChat(playerNick);
+   static_cast<ClientGame *>(mGame)->playerLeftLobbyChat(playerNick);
 }
 
 

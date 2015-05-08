@@ -94,8 +94,8 @@ enum SFXProfiles
    // Other noises
    SFXAchievementEarned,
 
-   SFXPlayerEnteredGlobalChat,
-   SFXPlayerLeftGlobalChat,
+   SFXPlayerEnteredLobbyChat,
+   SFXPlayerLeftLobbyChat,
 
    NumSFXBuffers     // Count of the number of SFX sounds we have
 };

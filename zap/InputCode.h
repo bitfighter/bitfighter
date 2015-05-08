@@ -56,7 +56,7 @@ namespace Zap
    BINDING( BINDING_MISSION,            "Mission",             true,  inputMISSION,      KEY_F2,           KEY_F2           ) \
    BINDING( BINDING_TOGGLE_RATING,      "ToggleRating",        true,  inputTOGGLERATING, KEY_EQUALS,       KEY_EQUALS       ) \
    BINDING( BINDING_HELP,               "Help",                false, keyHELP,           KEY_F1,           KEY_F1           ) \
-   BINDING( BINDING_OUTGAMECHAT,        "OutOfGameChat",       false, keyOUTGAMECHAT,    KEY_F5,           KEY_F5           ) \
+   BINDING( BINDING_LOBBYCHAT,          "OutOfGameChat",       false, keyLOBBYCHAT,      KEY_F5,           KEY_F5           ) \
    BINDING( BINDING_FPS,                "FPS",                 false, keyFPS,            KEY_F6,           KEY_F6           ) \
    BINDING( BINDING_DIAG,               "Diagnostics",         false, keyDIAG,           KEY_F7,           KEY_F7           ) \
    BINDING( BINDING_LOAD_PRESET_1,      "LoadLoadoutPreset1",  false, keyLoadPreset1,    KEY_ALT_1,        KEY_ALT_1        ) \

@@ -111,7 +111,7 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendChat,
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, M_RPC_PRE_017) {}
 
 
-// For managing list of players in global chat
+// For managing list of players in lobby chat
 TNL_IMPLEMENT_RPC(MasterServerInterface, c2mJoinGlobalChat, 
    (), 
    (),

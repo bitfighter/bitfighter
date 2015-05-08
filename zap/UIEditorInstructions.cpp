@@ -186,7 +186,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    ControlStringsEditor helpBindRight[] = 
    {
       { "Game Params Editor", "[[GameParameterEditor]]" },
-      { "Universal Chat",     "[[OutOfGameChat]]"       }
+      { "Lobby Chat",     "[[OutOfGameChat]]"       }
    };
 
    pack(mSpecialKeysInstrRight, mSpecialKeysBindingsRight, helpBindRight, ARRAYSIZE(helpBindRight));

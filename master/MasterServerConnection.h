@@ -157,7 +157,7 @@ public:
    bool mIsDebugClient;                         // True if client is running from a debug build
 
    StringTableEntry mServerDescr;               // Server description
-   bool isInGlobalChat;
+   bool isInLobbyChat;
 
    bool mIsMasterAdmin;
 
@@ -167,7 +167,7 @@ public:
 
 public:
    static Vector<SafePtr<MasterServerConnection> > gLeaveChatTimerList;
-   U32 mLeaveGlobalChatTimer;
+   U32 mLeaveLobbyChatTimer;
    bool mChatTooFast;
 
    /// Constructor initializes the linked list info with "safe" values

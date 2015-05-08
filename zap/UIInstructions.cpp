@@ -91,7 +91,7 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game, UIManager
 
    const ControlStringsEditor helpBindRight[] = 
    { 
-      { "Universal Chat",    "[[OutOfGameChat]]" },
+      { "Lobby Chat",        "[[OutOfGameChat]]" },
       { "Display FPS / Lag", "[[FPS]]"           },
       { "Diagnostics",       "[[Diagnostics]]"   }
    };

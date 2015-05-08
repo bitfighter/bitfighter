@@ -191,10 +191,10 @@ public:
    void setHighScores(const Vector<StringTableEntry> &groupNames, const Vector<string> &names, const Vector<string> &scores);
 
    // ChatUI:
-   void gotGlobalChatMessage(const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf);
-   void setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks);
-   void playerJoinedGlobalChat(const StringTableEntry &playerNick);
-   void playerLeftGlobalChat  (const StringTableEntry &playerNick);
+   void gotLobbyChatMessage(const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf);
+   void setPlayersInLobbyChat(const Vector<StringTableEntry> &playerNicks);
+   void playerJoinedLobbyChat(const StringTableEntry &playerNick);
+   void playerLeftLobbyChat(const StringTableEntry &playerNick);
 
    // QueryServersUI:
    void gotServerListFromMaster(const Vector<ServerAddr> &serverList);

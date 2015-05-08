@@ -171,7 +171,7 @@ public:
    void gotServerListFromMaster(const Vector<ServerAddr> &serverList);
 
    // Got some shizzle
-   void gotGlobalChatMessage(const char *playerNick, const char *message, bool isPrivate);
+   void gotLobbyChatMessage(const char *playerNick, const char *message, bool isPrivate);
    void gotChatMessage(const StringTableEntry &clientName, const StringPtr &message, bool global);
    void gotChatPM(const StringTableEntry &fromName, const StringTableEntry &toName, const StringPtr &message);
    void gotAnnouncement(const string &announcement);
@@ -194,9 +194,9 @@ public:
    void sendChat(bool isGlobal, const StringPtr &message);
    void sendChatSTE(bool global, const StringTableEntry &message) const;
    void sendCommand(const StringTableEntry &cmd, const Vector<StringPtr> &args);
-   void setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks);
-   void playerJoinedGlobalChat(const StringTableEntry &playerNick);
-   void playerLeftGlobalChat(const StringTableEntry &playerNick);
+   void setPlayersInLobbyChat(const Vector<StringTableEntry> &playerNicks);
+   void playerJoinedLobbyChat(const StringTableEntry &playerNick);
+   void playerLeftLobbyChat(const StringTableEntry &playerNick);
 
 
    // Team related

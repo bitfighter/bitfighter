@@ -94,9 +94,9 @@ bool DiagnosticUserInterface::onKeyDown(InputCode inputCode)
       if(mCurPage >= NUM_PAGES)
          quit();
    }
-   else if(checkInputCode(BINDING_OUTGAMECHAT, inputCode))
+   else if(checkInputCode(BINDING_LOBBYCHAT, inputCode))
    {
-      // Do nothing -- no global chat from diagnostics screen... it's perverse!
+      // Do nothing -- no lobby chat from diagnostics screen... it would be perverse!
    }
    else if(Parent::onKeyDown(inputCode))
    { 

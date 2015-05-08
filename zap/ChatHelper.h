@@ -20,11 +20,11 @@ class ChatHelper : public HelperMenu
    typedef HelperMenu Parent;
 
 public:
-    enum ChatType {      // Types of in-game chat messages:
-      GlobalChat,                // Goes to everyone in game
-      TeamChat,                  // Goes to teammates only
-      CmdChat,                   // Entering a command
-      NoChat                     // None of the above
+    enum ChatType {  // Types of in-game chat messages:
+      GlobalChat,       // Goes to everyone in game
+      TeamChat,         // Goes to teammates only
+      CmdChat,          // Entering a command
+      NoChat            // None of the above
    };
 
    static const S32 chatCmdSize;

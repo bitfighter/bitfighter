@@ -367,7 +367,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
       
       handled = true;
    }
-   else if(checkInputCode(BINDING_OUTGAMECHAT, inputCode))  // Turn on Global Chat overlay
+   else if(checkInputCode(BINDING_LOBBYCHAT, inputCode))  // Turn on Lobby Chat overlay
    {
       // Don't activate if we're already in chat or if we're on the Name Entry
       // screen (since we don't have a nick yet)

@@ -61,7 +61,7 @@ MasterServerConnection::MasterServerConnection()
    mLastActivityTime = 0;
    setIsConnectionToClient();
    setIsAdaptive();
-   isInGlobalChat = false;
+   isInLobbyChat = false;
    mAuthenticated = false;
    mIsDebugClient = false;
    mIsIgnoredFromList = false;
@@ -76,13 +76,13 @@ MasterServerConnection::MasterServerConnection()
 /// Destructor removes the connection from the doubly linked list of server connections
 MasterServerConnection::~MasterServerConnection()
 {
-   // If we're in global chat, announce to anyone else in global chat that we are leaving
-   if(isInGlobalChat)
+   // If we're in lobby chat, announce to anyone else in lobby chat that we are leaving
+   if(isInLobbyChat)
    {
       const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
       for(S32 i = 0; i < clientList->size(); i++)
-         if(clientList->get(i)->isInGlobalChat && clientList->get(i) != this)
+         if(clientList->get(i)->isInLobbyChat && clientList->get(i) != this)
             clientList->get(i)->m2cPlayerLeftGlobalChat(mPlayerOrServerName);
    }
 
@@ -266,7 +266,7 @@ void MasterServerConnection::processAutentication(StringTableEntry newName, PHPB
 
       if(mPlayerOrServerName != newName)
       {
-         if(isInGlobalChat)         // Need to tell clients new name, in case of delayed authentication
+         if(isInLobbyChat)         // Need to tell clients new name, in case of delayed authentication
          {
             const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
@@ -274,7 +274,7 @@ void MasterServerConnection::processAutentication(StringTableEntry newName, PHPB
             {
                MasterServerConnection *client = clientList->get(i);
 
-               if(client != this && client->isInGlobalChat)
+               if(client != this && client->isInLobbyChat)
                {
                   client->m2cPlayerLeftGlobalChat(mPlayerOrServerName);
                   client->m2cPlayerJoinedGlobalChat(newName);
@@ -1717,7 +1717,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mJoinGlobalChat, ())
    const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
    for(S32 i = 0; i < clientList->size(); i++)
-      if(clientList->get(i) != this && clientList->get(i)->isInGlobalChat)
+      if(clientList->get(i) != this && clientList->get(i)->isInLobbyChat)
          names.push_back(clientList->get(i)->mPlayerOrServerName);
 
    if(names.size() > 0)
@@ -1726,32 +1726,26 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mJoinGlobalChat, ())
    if(mIsIgnoredFromList)              // don't list name in lobby, too.
       return;
 
-   mLeaveGlobalChatTimer = 0;          // don't continue with delayed chat leave.
-   if(isInGlobalChat)                  // Already in Global Chat
+   mLeaveLobbyChatTimer = 0;           // don't continue with delayed chat leave.
+   if(isInLobbyChat)                   // Already in Lobby Chat
       return;
 
-   isInGlobalChat = true;
+   isInLobbyChat = true;
       
    for(S32 i = 0; i < clientList->size(); i++)
-      if(clientList->get(i) != this && clientList->get(i)->isInGlobalChat)
+      if(clientList->get(i) != this && clientList->get(i)->isInLobbyChat)
          clientList->get(i)->m2cPlayerJoinedGlobalChat(mPlayerOrServerName);
 }
 
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mLeaveGlobalChat, ())
 {
-   if(!isInGlobalChat)  // was not in Global Chat
+   if(!isInLobbyChat)  // was not in Lobby Chat
       return;
 
    // using delayed leave, to avoid quickly join / leave problem.
-   mLeaveGlobalChatTimer = Platform::getRealMilliseconds() - 20; // "-20" make up for inaccurate getRealMilliseconds going backwards by 1 or 2 milliseconds.
+   mLeaveLobbyChatTimer = Platform::getRealMilliseconds() - 20; // "-20" make up for inaccurate getRealMilliseconds going backwards by 1 or 2 milliseconds.
    gLeaveChatTimerList.push_back(this);
-
-   //isInGlobalChat = false;
-   //Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
-   //for(S32 i = 0; i < clientList->size(); i++)
-   //   if (clientList->get(i) != this && clientList->get(i)->isInGlobalChat)
-   //      clientList->get(i)->m2cPlayerLeftGlobalChat(mPlayerOrServerName);
 }
 
 

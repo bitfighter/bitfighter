@@ -242,7 +242,7 @@ void QueryServersUserInterface::onActivate()
    mLocalServerNonce.getRandom();
    mRemoteServerNonce.getRandom();
 
-   mPlayersInGlobalChat.clear();
+   mPlayersInLobbyChat.clear();
 
    contactEveryone();
 }
@@ -1090,7 +1090,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
    mJustMovedMouse = (inputCode == MOUSE_LEFT || inputCode == MOUSE_MIDDLE || inputCode == MOUSE_RIGHT);
    mDraggingDivider = false;
 
-   if(checkInputCode(BINDING_OUTGAMECHAT, inputCode))
+   if(checkInputCode(BINDING_LOBBYCHAT, inputCode))
    {
       // Toggle half-height servers, full-height servers, full chat overlay
 
@@ -1146,7 +1146,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
 
             if(servers.size() > currentIndex)      // Index is valid
             {
-               leaveGlobalChat();
+               leaveLobbyChat();
 
                bool neverConnectDirect = mGameSettings->getSetting<YesNo>(IniKey::NeverConnectDirect);
 
@@ -1168,7 +1168,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
    else if(inputCode == KEY_ESCAPE)  // Return to main menu
    {
       playBoop();
-      leaveGlobalChat();
+      leaveLobbyChat();
       getUIManager()->reactivatePrevUI();      // MainMenuUserInterface
    }
    else if(inputCode == KEY_LEFT)
@@ -1525,8 +1525,8 @@ void QueryServersUserInterface::issueChat()
       if(words.size() < 2)
          newMessage("", "USAGE: /mute <player name>", false, true, true);
 
-      // Player is not found in the global chat list
-      else if(!isPlayerInGlobalChat(words[1].c_str()))
+      // Player is not found in the lobby chat list
+      else if(!isPlayerInLobbyChat(words[1].c_str()))
          newMessage("", "PLAYER NOT FOUND", false, true, true);
 
       // If already muted, un-mute!

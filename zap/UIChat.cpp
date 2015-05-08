@@ -47,7 +47,7 @@ ChatMessage::~ChatMessage()
 }
 
 
-Vector<StringTableEntry> AbstractChat::mPlayersInGlobalChat;
+Vector<StringTableEntry> AbstractChat::mPlayersInLobbyChat;
 
 const char *ARROW = ">";
 const S32 AFTER_ARROW_SPACE = 5;
@@ -111,50 +111,50 @@ void AbstractChat::newMessage(const string &from, const string &message, bool is
 }
 
 
-void AbstractChat::setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks)
+void AbstractChat::setPlayersInLobbyChat(const Vector<StringTableEntry> &playerNicks)
 {
-   mPlayersInGlobalChat.clear();
+   mPlayersInLobbyChat.clear();
 
    for(S32 i = 0; i < playerNicks.size(); i++)
-      mPlayersInGlobalChat.push_back(playerNicks[i]);
+      mPlayersInLobbyChat.push_back(playerNicks[i]);
 }
 
 
-void AbstractChat::playerJoinedGlobalChat(const StringTableEntry &playerNick)
+void AbstractChat::playerJoinedLobbyChat(const StringTableEntry &playerNick)
 {
-   mPlayersInGlobalChat.push_back(playerNick);
+   mPlayersInLobbyChat.push_back(playerNick);
 
    // Make the following be from us, so it will be colored white
    string msg = "----- Player " + string(playerNick.getString()) + " joined the conversation -----";
    newMessage(mGame->getClientInfo()->getName().getString(), msg, false, true, true);
-   SoundSystem::playSoundEffect(SFXPlayerEnteredGlobalChat, mGame->getSettings()->getSetting<F32>(IniKey::EffectsVolume));   // Make sound?
+   SoundSystem::playSoundEffect(SFXPlayerEnteredLobbyChat, mGame->getSettings()->getSetting<F32>(IniKey::EffectsVolume));   // Make sound?
 }
 
 
-void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
+void AbstractChat::playerLeftLobbyChat(const StringTableEntry &playerNick)
 {
    ChatUserInterface *ui = mGame->getUIManager()->getUI<ChatUserInterface>();
 
-   for(S32 i = 0; i < ui->mPlayersInGlobalChat.size(); i++)
-      if(ui->mPlayersInGlobalChat[i] == playerNick)
+   for(S32 i = 0; i < ui->mPlayersInLobbyChat.size(); i++)
+      if(ui->mPlayersInLobbyChat[i] == playerNick)
       {
-         ui->mPlayersInGlobalChat.erase_fast(i);
+         ui->mPlayersInLobbyChat.erase_fast(i);
 
          string msg = "----- Player " + string(playerNick.getString()) + " left the conversation -----";
          newMessage(mGame->getClientInfo()->getName().getString(), msg, false, true, true);
          
-         SoundSystem::playSoundEffect(SFXPlayerLeftGlobalChat, mGame->getSettings()->getSetting<F32>(IniKey::EffectsVolume));   // Me make sound!
+         SoundSystem::playSoundEffect(SFXPlayerLeftLobbyChat, mGame->getSettings()->getSetting<F32>(IniKey::EffectsVolume));   // Me make sound!
          break;
       }
 }
 
 
-bool AbstractChat::isPlayerInGlobalChat(const StringTableEntry &playerNick)
+bool AbstractChat::isPlayerInLobbyChat(const StringTableEntry &playerNick)
 {
    ChatUserInterface *ui = mGame->getUIManager()->getUI<ChatUserInterface>();
 
-   for(S32 i = 0; i < ui->mPlayersInGlobalChat.size(); i++)
-      if(ui->mPlayersInGlobalChat[i] == playerNick)
+   for(S32 i = 0; i < ui->mPlayersInLobbyChat.size(); i++)
+      if(ui->mPlayersInLobbyChat[i] == playerNick)
          return true;
 
    return false;
@@ -206,7 +206,7 @@ Color AbstractChat::getNextColor() const
 
 
 // Announce we're ducking out for a spell...
-void AbstractChat::leaveGlobalChat()
+void AbstractChat::leaveLobbyChat()
 {
    MasterServerConnection *conn = mGame->getConnectionToMaster();
 
@@ -328,7 +328,7 @@ void AbstractChat::deliverPrivateMessage(const char *sender, const char *message
 
       gameUI->onChatMessageReceived(Colors::privateF5MessageDisplayedInGameColor,
          "Private message from %s: Press [%s] to enter chat mode", 
-         sender, gameUI->getInputCodeString(BINDING_OUTGAMECHAT));
+         sender, gameUI->getInputCodeString(BINDING_LOBBYCHAT));
 
       gameUI->onChatMessageReceived(Colors::privateF5MessageDisplayedInGameColor, "%s %s", ARROW, message);
    }
@@ -363,19 +363,20 @@ void AbstractChat::clearChat()
 
 void AbstractChat::renderChatters(S32 xpos, S32 ypos) const
 {
-   if(mPlayersInGlobalChat.size() == 0)
+   if(mPlayersInLobbyChat.size() == 0)
    {
       mGL->glColor(Colors::white);
-      RenderUtils::drawString(xpos, ypos, CHAT_NAMELIST_SIZE, "No other players currently in lobby/chat room");
+      RenderUtils::drawString(xpos, ypos, CHAT_NAMELIST_SIZE, "No other players currently in lobby chat room");
    }
    else
-      for(S32 i = 0; i < mPlayersInGlobalChat.size(); i++)
+      for(S32 i = 0; i < mPlayersInLobbyChat.size(); i++)
       {
-         const char *name = mPlayersInGlobalChat[i].getString();
+         const char *name = mPlayersInLobbyChat[i].getString();
 
          mGL->glColor(getColor(name));      // use it
 
-         xpos += RenderUtils::drawStringAndGetWidthf((F32)xpos, (F32)ypos, CHAT_NAMELIST_SIZE, "%s%s", name, (i < mPlayersInGlobalChat.size() - 1) ? "; " : "");
+         xpos += RenderUtils::drawStringAndGetWidthf((F32)xpos, (F32)ypos, CHAT_NAMELIST_SIZE, "%s%s", 
+                                                     name, (i < mPlayersInLobbyChat.size() - 1) ? "; " : "");
       }
 }
 
@@ -493,7 +494,7 @@ void ChatUserInterface::renderHeader() const
 {
    // Draw title, subtitle, and footer
    mGL->glColor(Colors::green);
-   RenderUtils::drawCenteredString(vertMargin, MENU_TITLE_SIZE, "GAME LOBBY / GLOBAL CHAT");
+   RenderUtils::drawCenteredString(vertMargin, MENU_TITLE_SIZE, "LOBBY CHAT");
 
    mGL->glColor(Colors::red);
    string subtitle = "Not currently connected to any game server";
@@ -516,7 +517,7 @@ bool ChatUserInterface::onKeyDown(InputCode inputCode)
 {
    if(Parent::onKeyDown(inputCode))
       { /* Do nothing */ }
-   else if(inputCode == KEY_ESCAPE || checkInputCode(BINDING_OUTGAMECHAT, inputCode))
+   else if(inputCode == KEY_ESCAPE || checkInputCode(BINDING_LOBBYCHAT, inputCode))
       onEscape();
    else if (inputCode == KEY_ENTER)                // Submits message
       issueChat();
@@ -545,14 +546,14 @@ void ChatUserInterface::onActivate()
 
    // Only clear the chat list if the previous UI was NOT UIQueryServers
    if(getUIManager()->getPrevUI() != getUIManager()->getUI<QueryServersUserInterface>())
-      mPlayersInGlobalChat.clear();
+      mPlayersInLobbyChat.clear();
 
    mRenderUnderlyingUI = true;
    mDisableShipKeyboardInput = true;       // Prevent keystrokes from getting to game
 }
 
 
-void ChatUserInterface::onOutGameChat()
+void ChatUserInterface::onLobbyChat()
 {
    // Escape chat only if the previous UI isn't UIQueryServers
    // This is to prevent spamming the chat window with joined/left messages
@@ -568,7 +569,7 @@ void ChatUserInterface::onEscape()
    // Don't leave if UIQueryServers is a parent unless we're in-game...
    // Is UIQueryServers supposed to be a parent of UIGame??
    if(!getUIManager()->cameFrom<QueryServersUserInterface>() || getUIManager()->cameFrom<GameUserInterface>())
-      leaveGlobalChat();
+      leaveLobbyChat();
 
    getUIManager()->reactivatePrevUI();
    playBoop();
@@ -622,7 +623,7 @@ void SuspendedUserInterface::renderHeader() const
 }
 
 
-void SuspendedUserInterface::onOutGameChat()
+void SuspendedUserInterface::onLobbyChat()
 {
    // Do nothing
 }

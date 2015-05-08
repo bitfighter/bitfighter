@@ -349,18 +349,18 @@ void MasterServer::idle(const U32 timeDelta)
    {
       MasterServerConnection *c = MasterServerConnection::gLeaveChatTimerList[i];      
 
-      if(!c || c->mLeaveGlobalChatTimer == 0)
+      if(!c || c->mLeaveLobbyChatTimer == 0)
          MasterServerConnection::gLeaveChatTimerList.erase(i);                         
       else
       {
-         if(currentTime - c->mLeaveGlobalChatTimer > (U32)ONE_SECOND)
+         if(currentTime - c->mLeaveLobbyChatTimer > (U32)ONE_SECOND)
          {
-            c->isInGlobalChat = false;
+            c->isInLobbyChat = false;
 
             const Vector<MasterServerConnection *> *clientList = getClientList();
 
             for(S32 j = 0; j < clientList->size(); j++)
-               if(clientList->get(j) != c && clientList->get(j)->isInGlobalChat)
+               if(clientList->get(j) != c && clientList->get(j)->isInLobbyChat)
                   clientList->get(j)->m2cPlayerLeftGlobalChat(c->mPlayerOrServerName);
 
             MasterServerConnection::gLeaveChatTimerList.erase(i);

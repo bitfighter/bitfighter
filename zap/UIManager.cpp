@@ -601,8 +601,8 @@ void UIManager::setHighScores(const Vector<StringTableEntry> &groupNames, const 
 }
 
 
-// Message relayed through master -- global chat system
-void UIManager::gotGlobalChatMessage(const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf)
+// Message relayed through master -- lobby chat system
+void UIManager::gotLobbyChatMessage(const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf)
 {
    getUI<ChatUserInterface>()->newMessage(from, message, isPrivate, isSystem, fromSelf);
 }
@@ -614,21 +614,21 @@ void UIManager::gotServerListFromMaster(const Vector<ServerAddr> &serverList)
 }
 
 
-void UIManager::setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks)
+void UIManager::setPlayersInLobbyChat(const Vector<StringTableEntry> &playerNicks)
 {
-   getUI<ChatUserInterface>()->setPlayersInGlobalChat(playerNicks);
+   getUI<ChatUserInterface>()->setPlayersInLobbyChat(playerNicks);
 }
 
 
-void UIManager::playerJoinedGlobalChat(const StringTableEntry &playerNick)
+void UIManager::playerJoinedLobbyChat(const StringTableEntry &playerNick)
 {
-   getUI<ChatUserInterface>()->playerJoinedGlobalChat(playerNick);
+   getUI<ChatUserInterface>()->playerJoinedLobbyChat(playerNick);
 }
 
 
-void UIManager::playerLeftGlobalChat(const StringTableEntry &playerNick)
+void UIManager::playerLeftLobbyChat(const StringTableEntry &playerNick)
 {
-   getUI<ChatUserInterface>()->playerLeftGlobalChat(playerNick);
+   getUI<ChatUserInterface>()->playerLeftLobbyChat(playerNick);
 }
 
 

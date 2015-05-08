@@ -168,7 +168,7 @@ void KeyDefMenuUserInterface::onActivate()
                                          "Toggles your weapons, use as an alternative to Select Weapon commands"));
       menuItems.push_back(KeyDefMenuItem("Quick Chat",              2, BINDING_QUICKCHAT, ""));
       menuItems.push_back(KeyDefMenuItem("Team Chat",               2, BINDING_TEAMCHAT,  ""));
-      menuItems.push_back(KeyDefMenuItem("Global Chat",             2, BINDING_GLOBCHAT,  ""));
+      menuItems.push_back(KeyDefMenuItem("Global Chat",             2, BINDING_GLOBCHAT, ""));
       menuItems.push_back(KeyDefMenuItem("Enter Command",           2, BINDING_CMDCHAT,   ""));
 
       menuItems.push_back(KeyDefMenuItem("Record Voice Msg",        2, BINDING_TOGVOICE,  ""));

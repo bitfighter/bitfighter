@@ -87,7 +87,7 @@ public:
    // Incoming out-of-game chat message from master
    TNL_DECLARE_RPC_OVERRIDE(m2cSendChat, (StringTableEntry clientName, bool isPrivate, StringPtr message));      
    
-   // For managing list of players in global chat
+   // For managing list of players in lobby chat
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayerJoinedGlobalChat, (StringTableEntry playerNick));
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayerLeftGlobalChat, (StringTableEntry playerNick));
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayersInGlobalChat, (Vector<StringTableEntry> playerNicks));

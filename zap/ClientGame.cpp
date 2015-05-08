@@ -202,7 +202,7 @@ void ClientGame::onConnectedToMaster()
 
    // Clear old player list that might be there from client's lost connection to master while in game lobby
    Vector<StringTableEntry> emptyPlayerList;
-   setPlayersInGlobalChat(emptyPlayerList);
+   setPlayersInLobbyChat(emptyPlayerList);
 
    // Request ratings for current level if we don't already have them
 
@@ -859,10 +859,10 @@ void ClientGame::setGameType(GameType *gameType)
 }
 
 
-// Message relayed through master -- global chat system
-void ClientGame::gotGlobalChatMessage(const char *playerNick, const char *message, bool isPrivate)
+// Message relayed through master -- lobby chat system
+void ClientGame::gotLobbyChatMessage(const char *playerNick, const char *message, bool isPrivate)
 {
-   mUIManager->gotGlobalChatMessage(playerNick, message, isPrivate, false, false);
+   mUIManager->gotLobbyChatMessage(playerNick, message, isPrivate, false, false);
 }
 
 
@@ -872,8 +872,8 @@ void ClientGame::gotChatMessage(const StringTableEntry &clientName, const String
    if(isOnMuteList(clientName.getString()))
       return;
 
-   const Color *color = global ? &Colors::globalChatColor : &Colors::teamChatColor;
-   mUIManager->onChatMessageReceived(*color, "%s: %s", clientName.getString(), message.getString());
+   const Color &color = global ? Colors::globalChatColor : Colors::teamChatColor;
+   mUIManager->onChatMessageReceived(color, "%s: %s", clientName.getString(), message.getString());
 
    if(string(clientName.getString()) != getPlayerName())
       addInlineHelpItem(HowToChatItem);
@@ -933,21 +933,21 @@ void ClientGame::gameTypeIsAboutToBeDeleted()
 }
 
 
-void ClientGame::setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks)
+void ClientGame::setPlayersInLobbyChat(const Vector<StringTableEntry> &playerNicks)
 {
-   mUIManager->setPlayersInGlobalChat(playerNicks);
+   mUIManager->setPlayersInLobbyChat(playerNicks);
 }
 
 
-void ClientGame::playerJoinedGlobalChat(const StringTableEntry &playerNick)
+void ClientGame::playerJoinedLobbyChat(const StringTableEntry &playerNick)
 {
-   mUIManager->playerJoinedGlobalChat(playerNick);
+   mUIManager->playerJoinedLobbyChat(playerNick);
 }
 
 
-void ClientGame::playerLeftGlobalChat(const StringTableEntry &playerNick)
+void ClientGame::playerLeftLobbyChat(const StringTableEntry &playerNick)
 {
-   mUIManager->playerLeftGlobalChat(playerNick);
+   mUIManager->playerLeftLobbyChat(playerNick);
 }
 
 

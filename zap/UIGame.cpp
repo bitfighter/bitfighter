@@ -1304,11 +1304,11 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       else if(getGame()->isSpawnDelayed())
       {
          // Allow scoreboard and the various chats while idle
-         if(!checkInputCode(BINDING_OUTGAMECHAT, inputCode)  &&
-            !checkInputCode(BINDING_GLOBCHAT,    inputCode)  &&
-            !checkInputCode(BINDING_TEAMCHAT,    inputCode)  &&
-            !checkInputCode(BINDING_CMDCHAT,     inputCode)  &&
-            !checkInputCode(BINDING_SCRBRD,      inputCode))
+         if(!checkInputCode(BINDING_LOBBYCHAT, inputCode) &&
+            !checkInputCode(BINDING_GLOBCHAT,  inputCode)  &&
+            !checkInputCode(BINDING_TEAMCHAT,  inputCode)  &&
+            !checkInputCode(BINDING_CMDCHAT,   inputCode)  &&
+            !checkInputCode(BINDING_SCRBRD,    inputCode))
          {
             getGame()->undelaySpawn();
             if(inputCode != KEY_ESCAPE)  // Don't swollow escape: Lagged out and can't un-idle to bring up the menu?
@@ -1317,7 +1317,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       }
    }
 
-   if(checkInputCode(BINDING_OUTGAMECHAT, inputCode))
+   if(checkInputCode(BINDING_LOBBYCHAT, inputCode))
       getGame()->setBusyChatting(true);
 
    if(Parent::onKeyDown(inputCode))    // Let parent try handling the key
