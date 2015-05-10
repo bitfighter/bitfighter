@@ -836,7 +836,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       removeFile(offendingFile);
    }
 
-   // 019b, 019c, 019d - no major changes with preferences
+   // 019b, 019c, 019d, 019e - no major changes with preferences
 
    // 019b: Nothing to update
 
