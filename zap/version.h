@@ -31,7 +31,7 @@
 #define VERSION_019b 9517
 #define VERSION_019c 9708
 #define VERSION_019d 10314
-#define VERSION_019e 10558
+#define VERSION_019e 10572
 
 #define BUILD_VERSION VERSION_019e // Version of the game according to hg, will be unique every release (must be int)
                                    // Get from "hg summary"
