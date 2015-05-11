@@ -35,7 +35,8 @@ typedef int socklen_t;
 #define NO_IPX_SUPPORT
 
 #elif defined ( TNL_OS_WIN32 )
-#include <winsock.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #if defined(TNL_COMPILER_MINGW)
    // mingw does not include support for IPX sockets
    typedef void* SOCKADDR_IPX;
@@ -757,14 +758,22 @@ bool Address::set(const char *addressString)
             mIsValid = false;
             return false;
 #else
-            struct hostent *hp;
-            if((hp = gethostbyname(remoteAddr)) == NULL)
+            addrinfo hints;
+            memset(&hints, 0, sizeof(hints));
+            hints.ai_family = AF_UNSPEC;
+            addrinfo* result = NULL;
+            int rv;
+
+            if((rv = getaddrinfo(remoteAddr, NULL, &hints, &result)) != 0)
             {
                mIsValid = false;
                return false;
             }
             else
-               memcpy(&ipAddr.sin_addr.s_addr, hp->h_addr, sizeof(IN_ADDR));
+            {
+               memcpy(&ipAddr, result->ai_addr, sizeof(ipAddr));
+               ipAddr.sin_port = 0;
+            }
 #endif
          }
       }
