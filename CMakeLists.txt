@@ -10,6 +10,8 @@ option(USE_SDL2 "Use SDL2" YES)
 option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
 option(USE_GLES2 "Force usage of OpenGL ES 2 for the bitfighter client.  Requires SDL2." NO)
 option(USE_LUAJIT_IN_TREE "Force usage of in-tree LuaJIT." NO)
+option(LUAJIT_DISABLE_JIT "Disable JIT compiler in LuaJIT." NO)
+option(MASTER_MINIMAL "Build master server without MySQL (only SQLite)." NO)
 
 
 #

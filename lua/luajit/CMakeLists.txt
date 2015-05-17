@@ -1,9 +1,6 @@
 # We must use the LuaJIT internal build system
 include(ExternalProject)
 
-# Options
-option(LUAJIT_DISABLE_JIT "Disable the JIT compiler in LuaJIT.  Try this if LuaJIT doesn't compile for your platform" NO)
-
 
 set(LUAJIT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/lua/luajit/src")
 set(LUAJIT_LIBRARY "libluajit.a")
