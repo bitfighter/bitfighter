@@ -65,6 +65,7 @@
 #include "zapjournal.h"
 
 #include "GameManager.h"
+#include "physfs.hpp"
 
 #include "StackTracer.h"
 
@@ -1125,7 +1126,16 @@ int main(int argc, char **argv)
 #endif
 
       if(!VideoSystem::init())                // Initialize video and window system
+      {
+         logprintf(LogConsumer::LogFatalError, "Failed to initialize VideoSystem!");
          GameManager::shutdownBitfighter();
+      }
+
+      if(!PHYSFS_init(argv[0]))
+      {
+         logprintf(LogConsumer::LogFatalError, "Failed to initialize PhysFS!");
+         GameManager::shutdownBitfighter();
+      }
 
       RenderManager::init();                  // Initialize the OpenGL abstraction layer
       mGL = RenderManager::getGL();

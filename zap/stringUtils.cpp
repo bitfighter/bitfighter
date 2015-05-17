@@ -5,13 +5,15 @@
 
 #include "stringUtils.h"
 
+#include "physfs.hpp"      // C++ wrapper version
+
 #include "tnlPlatform.h"   // For Vector, types, and dSprintf
 #include "tnlVector.h"
 #include "tnlLog.h"
 
 
 #if !defined(ZAP_DEDICATED) && !defined(BF_MASTER)
-#include "RenderUtils.h"
+#  include "RenderUtils.h"
 #endif
 
 #include <stdio.h>
@@ -527,13 +529,14 @@ void s_fprintf(FILE *stream, const char *format, ...)
 }
 
 
+// With physfs, file delimeter is forward slash
 string getFileSeparator()
 {
-#ifdef TNL_OS_WIN32
-   return "\\";
-#else
+//#ifdef TNL_OS_WIN32
+//   return "\\";
+//#else
    return "/";
-#endif
+//#endif
 }
 
 
@@ -871,6 +874,41 @@ bool writeFile(const string &path, const string &contents, bool append)
 
    file.close();
    return true;
+}
+
+
+bool readFilePhysFs(const string &path, string &contents)
+{
+   try
+   {
+      PhysFS::fstream file(path, PhysFS::READ);
+
+      if(!file)
+      {
+         contents = "";
+         return false;
+      }
+
+      string line;
+      getline(file, line);
+
+      // Resize the string to hold the file contents
+      file.seekg(0, ios::end);
+      contents.resize((string::size_type)file.tellg());
+      file.seekg(0, ios::beg);
+
+      file.read(&contents[0], contents.size());
+
+      // Remove the UTF-8 BOM if it exists
+      // These are the first three bytes:  EF BB BF
+      trim_left_in_place(contents, "\357\273\277");
+
+      return true;
+   }
+   catch(...)
+   {
+      return false;
+   }
 }
 
 

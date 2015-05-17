@@ -18,6 +18,7 @@
 #  include "RenderUtils.h"
 #endif
 
+#include "physfs.hpp"
 #include "stringUtils.h"   // For itos
 #include "MathUtils.h"     // For MIN
 
@@ -1236,6 +1237,7 @@ string FolderManager::getLuaDir()        const { return luaDir;        }
 void FolderManager::setLevelDir(const string &lvlDir)
 {
    levelDir = lvlDir;
+   PhysFS::mount(levelDir, levelDir, false);
 }
 
 

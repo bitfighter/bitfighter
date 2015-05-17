@@ -239,7 +239,16 @@ void Level::snapAllEngineeredItems(bool onlyUnsnapped)
 bool Level::loadLevelFromFile(const string &filename)
 {
    string contents;
-   bool fileExists = readFile(filename, contents);
+   bool fileExists;
+
+   try
+   {
+      fileExists = readFilePhysFs(filename, contents);
+   }
+   catch(...)
+   {
+      return false;
+   }
 
    loadLevelFromString(contents, filename);
 

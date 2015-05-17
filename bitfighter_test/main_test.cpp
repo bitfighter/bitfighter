@@ -12,6 +12,7 @@
 #include "GameManager.h"
 #include "GameSettings.h"
 #include "VideoSystem.h"
+#include "physfs.hpp"
 
 #include "stringUtils.h"
 
@@ -64,6 +65,7 @@ public:
       GameSettings settings;
       FontManager::initialize(settings.get(), false);
       VideoSystem::init();
+      PhysFS::init("");    // Should be argv[0]... see how this works instead
       VideoSystem::actualizeScreenMode(&settings, false, false);
       GameManager::initialize();
    }
