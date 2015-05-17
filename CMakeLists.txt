@@ -95,6 +95,7 @@ endif()
 
 # Other needed libraries that don't have in-tree fallback options
 find_package(Threads REQUIRED)
+find_package(physfs REQUIRED)
 find_package(PNG)
 find_package(MySQL)
 find_package(OGG)

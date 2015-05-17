@@ -1,0 +1,5 @@
+cmake -G "Visual Studio 10" -DPHYSFS_BUILD_STATIC=0 -DPHYSFS_HAVE_CDROM_SUPPORT=0 -DZLIB_INCLUDE_DIR=C:\hg\bitfighter\zlib -DZLIB_LIBRARY=C:\hg\bitfighter\lib\zlib.lib ..
+
+cmake -G "Visual Studio 10" -DPHYSFS_BUILD_STATIC=0 -DPHYSFS_NO_CDROM_SUPPORT=1 -DZLIB_INCLUDE_DIR=/c/hg/bitfighter/zlib -DZLIB_LIBRARY=/c/hg/bitfighter/lib/zlib.lib ..
+
+In the visual studio project, select 'Release'.  Then edit the 'physfs' project to use code generation of /MT instead of /MD (so we don't get linking MSVCblah.dll problems)

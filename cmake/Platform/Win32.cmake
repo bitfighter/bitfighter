@@ -106,11 +106,13 @@ set(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/zlib")
 # libpng needs two for some weird reason
 set(PNG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libpng")
 set(PNG_PNG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libpng")
+set(PHYSFS_INCLUDE_DIR ${BF_LIB_DIR}/include/physfs)
 
 # Directly specify some libs (because of deficiences in CMake modules?)
 set(OPENAL_LIBRARY "${BF_LIB_DIR}/OpenAL32.lib")
 set(ZLIB_LIBRARY   "${BF_LIB_DIR}/zlib.lib")
 set(PNG_LIBRARY    "${BF_LIB_DIR}/libpng14.lib")
+set(PHYSFS_LIBRARY "${BF_LIB_DIR}/physfs.lib")
 	
 find_package(VorbisFile)
 
