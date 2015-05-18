@@ -18,7 +18,7 @@
 #  include "RenderUtils.h"
 #endif
 
-#include "physfs.hpp"
+#include "../physfs-cpp/include/physfs.h"
 #include "stringUtils.h"   // For itos
 #include "MathUtils.h"     // For MIN
 

@@ -134,6 +134,7 @@ string chopComment(const string &line);
 bool writeFile(const string &path, const string &contents, bool append = false);
 bool readFile(const string &path, string &contents);
 
+bool readFilePhysFs(const string &path, string &contents);
 
 string getExecutableDir();
 

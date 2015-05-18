@@ -65,8 +65,7 @@
 #include "zapjournal.h"
 
 #include "GameManager.h"
-#include "physfs.hpp"
-
+#include "../physfs-cpp/include/physfs.h"
 #include "StackTracer.h"
 
 using namespace TNL;
@@ -1131,11 +1130,7 @@ int main(int argc, char **argv)
          GameManager::shutdownBitfighter();
       }
 
-      if(!PHYSFS_init(argv[0]))
-      {
-         logprintf(LogConsumer::LogFatalError, "Failed to initialize PhysFS!");
-         GameManager::shutdownBitfighter();
-      }
+      PhysFS::init(argv[0]);
 
       RenderManager::init();                  // Initialize the OpenGL abstraction layer
       mGL = RenderManager::getGL();
