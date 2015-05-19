@@ -5,7 +5,7 @@
 
 #include "stringUtils.h"
 
-#include "..\physfs-cpp\include\physfs.h"      // C++ wrapper version
+#include "physfs.hpp"      // C++ wrapper version
 
 #include "tnlPlatform.h"   // For Vector, types, and dSprintf
 #include "tnlVector.h"

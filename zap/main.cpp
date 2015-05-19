@@ -65,7 +65,7 @@
 #include "zapjournal.h"
 
 #include "GameManager.h"
-#include "../physfs-cpp/include/physfs.h"
+#include "physfs.hpp"
 #include "StackTracer.h"
 
 using namespace TNL;

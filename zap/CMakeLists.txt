@@ -69,6 +69,7 @@ set(SHARED_SOURCES
 	move.cpp
 	moveObject.cpp
 	NexusGame.cpp
+	physfs.cpp
 	PickupItem.cpp
 	playerInfo.cpp
 	Point.cpp
