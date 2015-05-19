@@ -6,6 +6,7 @@
 #include "LevelSource.h"
 
 #include "config.h"           // For FolderManager
+#include "physfs.hpp"
 #include "gameType.h"
 #include "GameSettings.h"
 #include "Level.h"
@@ -150,6 +151,7 @@ void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &level
    istringstream stream(code);
    string line;
 
+   // Read until all these are true
    bool foundGameType   = false, foundLevelName  = false, foundMinPlayers = false, 
         foundMaxPlayers = false, foundScriptName = false;
 
@@ -330,7 +332,7 @@ Vector<string> LevelSource::findAllLevelFilesInFolder(const string &levelDir)
 bool LevelSource::populateLevelInfoFromSourceByIndex(S32 index)
 {
    // If findLevelFile fails, it will return "", which populateLevelInfoFromSource will handle properly
-   string filename = FolderManager::findLevelFile(mLevelInfos[index].folder, mLevelInfos[index].filename);
+   string filename = mLevelInfos[index].filename; // FolderManager::findLevelFile(mLevelInfos[index].folder, mLevelInfos[index].filename);
    return populateLevelInfoFromSource(filename, mLevelInfos[index]);
 }
 
@@ -385,9 +387,9 @@ Level *MultiLevelSource::getLevel(S32 index) const
 
    const LevelInfo *levelInfo = &mLevelInfos[index];
 
-   string filename = FolderManager::findLevelFile(levelInfo->folder, levelInfo->filename);
+   string filename = levelInfo->filename; //FolderManager::findLevelFile(levelInfo->folder, levelInfo->filename);
 
-   if(filename == "")
+   if(!PhysFS::exists(filename))
    {
       logprintf("Unable to find level file \"%s\".  Skipping...", levelInfo->filename.c_str());
       return NULL;
@@ -414,23 +416,25 @@ string MultiLevelSource::getLevelFileDescriptor(S32 index) const
 
 
 // Populates levelInfo with data from fullFilename -- returns true if successful, false otherwise
-// Reads 4kb of file and uses what it finds there to populate the levelInfo
 bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo)
 {
-   // Check if we got a dud... (FolderManager::findLevelFile() will, for example, return "" if it fails)
+   // Check if we got a dud...
    if(fullFilename.empty())
       return false;
 
-	FILE *f = fopen(fullFilename.c_str(), "rb");
-	if(!f)
-   {
-      logprintf(LogConsumer::LogWarning, "Could not read level file %s [%s]... Skipping...",
-                                          levelInfo.filename.c_str(), fullFilename.c_str());
-      return false;
-   }
-
    Level level;
-   level.loadLevelFromFile(fullFilename);
+   if(!level.loadLevelFromFile(fullFilename))
+      return false;
+
+   //char data[1024 * 4];  // Should be enough to fit all parameters at the beginning of level; we don't need to read everything
+   //S32 size = (S32)fread(data, 1, sizeof(data), f);
+   //fclose(f);
+
+   //getLevelInfoFromCodeChunk(level., levelInfo);     // Fills levelInfo with data from file
+   levelInfo = level.getLevelInfo();
+   levelInfo.ensureLevelInfoHasValidName();
+   return true;
+}
 
 // some ideas for getting the area of a level:
 //   if(loadLevel())
@@ -515,21 +519,6 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
 //   ////////////////////////////
 //
 //
-
-
-
-
-
-   char data[1024 * 4];  // Should be enough to fit all parameters at the beginning of level; we don't need to read everything
-   S32 size = (S32)fread(data, 1, sizeof(data), f);
-   fclose(f);
-
-   getLevelInfoFromCodeChunk(string(data, size), levelInfo);     // Fills levelInfo with data from file
-
-
-   levelInfo.ensureLevelInfoHasValidName();
-   return true;
-}
 
 
 bool MultiLevelSource::isEmptyLevelDirOk() const

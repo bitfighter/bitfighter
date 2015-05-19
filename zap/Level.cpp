@@ -41,6 +41,7 @@ Level::Level()
 Level::Level(const string &levelCode)
 {
    initialize();
+   mLevelInfo.filename = "levelcode";
    loadLevelFromString(levelCode);
 }
 
@@ -62,6 +63,7 @@ void Level::initialize()
    mGame = NULL;
    mTeamManager.reset(new TeamManager());    // mTeamManager is a shared_ptr, so cleanup is handled
    mLevelDatabaseId = LevelDatabase::NOT_IN_DATABASE;
+   mLoaded = false;
 }
 
 
@@ -163,6 +165,8 @@ void Level::loadLevelFromString(const string &contents, const string &filename)
    istringstream iss(contents);
    string line;
 
+   mLevelInfo.filename = filename;
+
    Md5::IncrementalHasher md5;
 
    while(std::getline(iss, line))
@@ -209,7 +213,6 @@ void Level::buildWallEdgeGeometry(Vector<Point> &wallEdgePoints)
          wallSegments.push_back(barrier->getSegment(j));
    }
 
-
    mWallEdgeManager.rebuildEdges(wallSegments, wallEdgePoints);      // Fills wallEdgePoints
 }
 
@@ -244,6 +247,7 @@ bool Level::loadLevelFromFile(const string &filename)
    try
    {
       fileExists = readFilePhysFs(filename, contents);
+      mLevelInfo.filename = filename;
    }
    catch(...)
    {
@@ -252,12 +256,21 @@ bool Level::loadLevelFromFile(const string &filename)
 
    loadLevelFromString(contents, filename);
 
+   mLoaded = true;
+
 #ifdef SAM_ONLY
    // In case the level crash the game trying to load, want to know which file is the problem. 
    logprintf("Loading %s", filename.c_str());
 #endif
 
    return fileExists;
+}
+
+
+LevelInfo &Level::getLevelInfo()
+{
+   TNLAssert(mLoaded, "Must load level first!");
+   return mLevelInfo;
 }
 
 
@@ -391,6 +404,8 @@ void Level::setGameType(GameType *gameType)
 
    if(mGameType.isValid())
       mGameType->setLevel(this);
+
+   mLevelInfo.mLevelType = gameType->getGameTypeId();
 }
 
 
@@ -846,71 +861,90 @@ bool Level::processLevelParam(S32 argc, const char **argv)
          else
             logprintf(LogConsumer::LogLevelError, "Invalid Team delcaration in level file: Team %s", getString(argc, argv).c_str());
       }
+
+      return true;
    }
 
    // TODO: Create better way to change team details from level scripts: https://code.google.com/p/bitfighter/issues/detail?id=106
    // For level script. Could be removed when there is a better way to change team names and colors.
    // Is this even used anywhere?!?
-   else if(stricmp(argv[0], "TeamChange") == 0)   
+   if(stricmp(argv[0], "TeamChange") == 0)   
    {
       if(argc >= 2)   // Enough arguments?
          mTeamChangeLines.push_back(getString(argc, argv)); // getString strips off "TeamChange" prefix
       else
          logprintf(LogConsumer::LogLevelError, "TeamChange parameter did not have enough arguments!");
+
+      return true;
    }
 
-   else if(stricmp(argv[0], "Specials") == 0)
+   if(stricmp(argv[0], "Specials") == 0)
    {         
       for(S32 i = 1; i < argc; i++)
          if(!mGameType->processSpecialsParam(argv[i]))
             logprintf(LogConsumer::LogLevelError, "Invalid specials parameter: %s", argv[i]);
+
+      return true;
    }
 
-   else if(stricmp(argv[0], "Script") == 0)
+   if(stricmp(argv[0], "Script") == 0)
    {
       Vector<string> args;
 
-      // argv[0] is always "Script"
+      // argv[0] is always "Script", so we'll skip it and start from index 1
       for(S32 i = 1; i < argc; i++)
          args.push_back(argv[i]);
 
       mGameType->setScript(args);
+
+      // Save the script name
+      mLevelInfo.mScriptFileName = (args.size() > 0) ? args[0] : "";
+
+      return true;
    }
 
-   else if(stricmp(argv[0], "LevelName") == 0)
+   if(stricmp(argv[0], "LevelName") == 0)
    {
       string s = getString(argc, argv);
       mGameType->setLevelName(s.substr(0, MAX_GAME_NAME_LEN).c_str());
+
+      mLevelInfo.mLevelName = mGameType->getLevelName();
+      return true;
    }
    
-   else if(stricmp(argv[0], "LevelDescription") == 0)
+   if(stricmp(argv[0], "LevelDescription") == 0)
    {
       string s = getString(argc, argv);
       mGameType->setLevelDescription(s.substr(0, MAX_GAME_DESCR_LEN));
+      return true;
    }
 
-   else if(stricmp(argv[0], "LevelCredits") == 0)
+   if(stricmp(argv[0], "LevelCredits") == 0)
    {
       string s = getString(argc, argv);
       mGameType->setLevelCredits(s.substr(0, MAX_GAME_DESCR_LEN).c_str());
+      return true;
    }
 
-   else if(stricmp(argv[0], "MinPlayers") == 0)     // Recommend a min number of players for this map
+   if(stricmp(argv[0], "MinPlayers") == 0)     // Recommend a min number of players for this map
    {
       if(argc > 1)
          mGameType->setMinRecPlayers(atoi(argv[1]));
+
+      mLevelInfo.minRecPlayers = mGameType->getMinRecPlayers();
+      return true;
    }
 
-   else if(stricmp(argv[0], "MaxPlayers") == 0)     // Recommend a max number of players for this map
+   if(stricmp(argv[0], "MaxPlayers") == 0)     // Recommend a max number of players for this map
    {
       if(argc > 1)
          mGameType->setMaxRecPlayers(atoi(argv[1]));
+
+      mLevelInfo.maxRecPlayers = mGameType->getMaxRecPlayers();
+      return true;
    }
 
-   else
-      return false;     // Line not processed; perhaps the caller can handle it?
-
-   return true;         // Line processed; caller can ignore it
+   return false;     // Line not processed; perhaps the caller can handle it?
 }
 
 

@@ -5144,8 +5144,8 @@ void EditorUserInterface::testLevelStart()
    levelList.push_back(LevelSource::TestFileName);
 
    LevelSourcePtr levelSource = LevelSourcePtr(
-         new FolderLevelSource(levelList, mGameSettings->getFolderManager()->getLevelDir()));
-
+      new FolderLevelSource(levelList, "")); // mGameSettings->getFolderManager()->getLevelDir()));
+   
    initHosting(getGame()->getSettingsPtr(), levelSource, true, false);
 }
 

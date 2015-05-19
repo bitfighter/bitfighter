@@ -1053,7 +1053,9 @@ int main(int argc, char **argv)
    // only way to specify a non-standard location is via the command line, which we've now read.
    setupLogging(folderManager->getLogDir());
 
-   InputCodeManager::initializeKeyNames();      // Used by loadSettingsFromINI()
+   InputCodeManager::initializeKeyNames();   // Used by loadSettingsFromINI()
+
+   PhysFS::init(argv[0]);                    // Has to happen before we process the INI, because that sets paths
 
    // Load our primary settings file
    GameSettings::iniFile.SetPath(joindir(folderManager->getIniDir(), "bitfighter.ini"));
@@ -1129,8 +1131,6 @@ int main(int argc, char **argv)
          logprintf(LogConsumer::LogFatalError, "Failed to initialize VideoSystem!");
          GameManager::shutdownBitfighter();
       }
-
-      PhysFS::init(argv[0]);
 
       RenderManager::init();                  // Initialize the OpenGL abstraction layer
       mGL = RenderManager::getGL();

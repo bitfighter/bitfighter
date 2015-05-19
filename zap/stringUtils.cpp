@@ -879,6 +879,7 @@ bool writeFile(const string &path, const string &contents, bool append)
 
 bool readFilePhysFs(const string &path, string &contents)
 {
+   TNLAssert(path != "", "Invalid filename!");
    try
    {
       PhysFS::fstream file(path, PhysFS::READ);
@@ -905,7 +906,7 @@ bool readFilePhysFs(const string &path, string &contents)
 
       return true;
    }
-   catch(...)
+   catch(std::invalid_argument)
    {
       return false;
    }

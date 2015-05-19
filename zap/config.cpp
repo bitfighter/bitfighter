@@ -1237,7 +1237,7 @@ string FolderManager::getLuaDir()        const { return luaDir;        }
 void FolderManager::setLevelDir(const string &lvlDir)
 {
    levelDir = lvlDir;
-   PhysFS::mount(levelDir, levelDir, false);
+   PhysFS::mount(levelDir, "/", false);      // Mount the levels folder at the root of our virtual filesystem
 }
 
 
@@ -1356,7 +1356,7 @@ void FolderManager::resolveLevelDir(GameSettings *settings)
 
    if(resolved != "")
    {
-      levelDir = resolved;
+      setLevelDir(resolved);
       return;
    }
 
@@ -1365,7 +1365,7 @@ void FolderManager::resolveLevelDir(GameSettings *settings)
       string candidate = strictjoindir(rootDataDir, "levels");    // Try rootDataDir/levels
       if(fileExists(candidate))   
       {
-         levelDir = candidate;
+         setLevelDir(candidate);
          return;
       }
    }
@@ -1383,7 +1383,7 @@ void FolderManager::resolveLevelDir(GameSettings *settings)
          candidate = strictjoindir(iniLevelDir, cmdLineLevelDir);    // Check if cmdLineLevelDir is a subfolder of iniLevelDir
          if(fileExists(candidate))
          {
-            levelDir = candidate;
+            setLevelDir(candidate);
             return;
          }
       }
@@ -1392,16 +1392,16 @@ void FolderManager::resolveLevelDir(GameSettings *settings)
       // Ok, forget about cmdLineLevelDir.  Getting desperate here.  Try just the straight folder name specified in the INI file.
       if(fileExists(iniLevelDir))
       {
-         levelDir = iniLevelDir;
+         setLevelDir(iniLevelDir);
          return;
       }
    }
 
    // Maybe there is just a local folder called levels?
    if(fileExists("levels"))
-      levelDir = "levels";
+      setLevelDir("levels");
    else
-      levelDir = "";    // Surrender
+      setLevelDir("");    // Surrender
 }
 
 
@@ -1446,6 +1446,7 @@ string FolderManager::findLevelFile(const string &filename) const
 }
 
 
+// This function will go away with complete adoption of physfs
 string FolderManager::findLevelFile(const string &leveldir, const string &filename)
 {
 #ifdef TNL_OS_XBOX         // This logic completely untested for OS_XBOX... basically disables -leveldir param

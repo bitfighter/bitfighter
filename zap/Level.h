@@ -8,6 +8,7 @@
 
 #include "gridDB.h"     // Parent class
 
+#include "LevelSource.h"      // For LevelInfo def
 #include "teamInfo.h"
 #include "WallEdgeManager.h"
 
@@ -44,7 +45,11 @@ private:
    RefPtr<GameType> mGameType;
    string mLevelHash;
 
-   Game *mGame;             // Game we've been added to -- NULL until onAddedToGame() is called
+   bool mLoaded;
+
+   LevelInfo mLevelInfo;      // Summary of the level
+
+   Game *mGame;               // Game we've been added to -- NULL until onAddedToGame() is called
 
    WallEdgeManager mWallEdgeManager;
 
@@ -78,6 +83,8 @@ public:
    void loadLevelFromString(const string &contents, const string &filename = "");
    bool loadLevelFromFile(const string &filename);
    void validateLevel();
+
+   LevelInfo &getLevelInfo();
 
    void buildWallEdgeGeometry(Vector<Point> &wallEdgePoints);
    void snapAllEngineeredItems(bool onlyUnsnapped);

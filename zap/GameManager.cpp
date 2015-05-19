@@ -95,7 +95,7 @@ void GameManager::abortHosting_noLevels()
       FolderManager *folderManager = mServerGame->getSettings()->getFolderManager();
       const char *levelDir = folderManager->getLevelDir().c_str();
 
-      logprintf(LogConsumer::LogError, "No levels found in folder %s.  Cannot host a game.", levelDir);
+      logprintf(LogConsumer::LogError,     "No levels found in folder %s.  Cannot host a game.", levelDir);
       logprintf(LogConsumer::ServerFilter, "No levels found in folder %s.  Cannot host a game.", levelDir);
    }
 
