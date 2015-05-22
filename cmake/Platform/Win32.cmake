@@ -10,6 +10,8 @@ else()
 	set(BF_LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
 endif()
 
+set(BF_LIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lib/include)
+
 #
 # Linker flags
 # 
@@ -93,20 +95,20 @@ endif()
 #
 
 # Set some search paths
-set(SDL2_SEARCH_PATHS       ${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libsdl)
-set(OGG_SEARCH_PATHS        ${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libogg)
-set(VORBIS_SEARCH_PATHS	    ${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libvorbis)
-set(VORBISFILE_SEARCH_PATHS	${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libvorbis)
-set(SPEEX_SEARCH_PATHS      ${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libspeex)
-set(MODPLUG_SEARCH_PATHS    ${BF_LIB_DIR} ${CMAKE_SOURCE_DIR}/libmodplug)
+set(SDL2_SEARCH_PATHS       ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libsdl)
+set(OGG_SEARCH_PATHS        ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libogg)
+set(VORBIS_SEARCH_PATHS	    ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libvorbis)
+set(VORBISFILE_SEARCH_PATHS	${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libvorbis)
+set(SPEEX_SEARCH_PATHS      ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libspeex)
+set(MODPLUG_SEARCH_PATHS    ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libmodplug)
 
 # Directly set include dirs for some libraries
-set(OPENAL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/openal/include")
-set(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/zlib")
+set(OPENAL_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/openal/include")
+set(ZLIB_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/zlib")
 # libpng needs two for some weird reason
-set(PNG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libpng")
-set(PNG_PNG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libpng")
-set(PHYSFS_INCLUDE_DIR ${BF_LIB_DIR}/include/physfs)
+set(PNG_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/libpng")
+set(PNG_PNG_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/libpng")
+set(PHYSFS_INCLUDE_DIR ${BF_LIB_INCLUDE_DIR}/physfs)
 
 # Directly specify some libs (because of deficiences in CMake modules?)
 set(OPENAL_LIBRARY "${BF_LIB_DIR}/OpenAL32.lib")
