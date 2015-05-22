@@ -77,7 +77,7 @@ public:
 
 Version getLinkedVersion();
 
-void init(char const * argv0);
+bool init(char const * argv0);
 
 void deinit();
 

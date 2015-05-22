@@ -156,8 +156,8 @@ namespace PhysFS {
       return version;
    }
 
-   void init(const char* argv0) {
-      PHYSFS_init(argv0);
+   bool init(const char* argv0) {
+      return PHYSFS_init(argv0);
    }
 
    void deinit() {

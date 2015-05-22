@@ -1055,7 +1055,11 @@ int main(int argc, char **argv)
 
    InputCodeManager::initializeKeyNames();   // Used by loadSettingsFromINI()
 
-   PhysFS::init(argv[0]);                    // Has to happen before we process the INI, because that sets paths
+   if(!PhysFS::init(argv[0]))                // Has to happen before we process the INI, because that sets paths
+   {
+      logprintf(LogConsumer::LogFatalError, "Could not start virtual file system physfs; Exiting.");
+      exitToOs(1);
+   }
 
    // Load our primary settings file
    GameSettings::iniFile.SetPath(joindir(folderManager->getIniDir(), "bitfighter.ini"));
