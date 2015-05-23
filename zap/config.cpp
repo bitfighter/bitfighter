@@ -1245,7 +1245,7 @@ void FolderManager::setLevelDir(const string &lvlDir)
 void FolderManager::resolveDirs(GameSettings *settings)
 {
    FolderManager *folderManager = settings->getFolderManager();
-   FolderManager cmdLineDirs = settings->getCmdLineFolderManager();     // Versions specified on the cmd line
+   FolderManager cmdLineDirs    = settings->getCmdLineFolderManager();     // Versions specified on the cmd line
 
    string rootDataDir = cmdLineDirs.rootDataDir;
 
