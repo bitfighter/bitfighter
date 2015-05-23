@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include "physfs.hpp"
 
+#include "tnlAssert.h"
+
 using std::streambuf;
 using std::ios_base;
 
@@ -242,7 +244,11 @@ namespace PhysFS {
    }
 
    string getRealDir(const string& filename) {
-      return PHYSFS_getRealDir(filename.c_str());
+      const char *res = PHYSFS_getRealDir(filename.c_str());
+      if(!res)
+         return "";
+
+      return string(res);
    }
 
    StringList enumerateFiles(const string& directory) {
@@ -288,6 +294,8 @@ namespace PhysFS {
    }
 
    void mount(const string& newDir, const string& mountPoint, bool appendToPath) {
+      TNLAssert(newDir != "", "Can't mount empty folder!");
+      TNLAssert(PhysFS::isInit(), "Must initialize PhysFS first!");
       PHYSFS_mount(newDir.c_str(), mountPoint.c_str(), appendToPath);
    }
 
