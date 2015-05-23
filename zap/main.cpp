@@ -1026,6 +1026,12 @@ int main(int argc, char **argv)
    bool isStandalone = standaloneDetected();
    bool isFirstLaunchEver = false;  // Is this the first time we've run for this user?
 
+   if(!PhysFS::init(argv[0]))                // Has to happen before we process the INI or any path data
+   {
+      logprintf(LogConsumer::LogFatalError, "Could not start virtual file system physfs; Exiting.");
+      exitToOs(1);
+   }
+
    // Set default -rootdatadir, -sfxdir, and others if they are not set already, unless
    // we're in standalone mode.  This allows use to have default environment setups on
    // each platform
@@ -1054,12 +1060,6 @@ int main(int argc, char **argv)
    setupLogging(folderManager->getLogDir());
 
    InputCodeManager::initializeKeyNames();   // Used by loadSettingsFromINI()
-
-   if(!PhysFS::init(argv[0]))                // Has to happen before we process the INI, because that sets paths
-   {
-      logprintf(LogConsumer::LogFatalError, "Could not start virtual file system physfs; Exiting.");
-      exitToOs(1);
-   }
 
    // Load our primary settings file
    GameSettings::iniFile.SetPath(joindir(folderManager->getIniDir(), "bitfighter.ini"));
