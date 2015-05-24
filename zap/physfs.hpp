@@ -103,6 +103,10 @@ void removeFromSearchPath(string const & oldDir);
 
 StringList getSearchPath();
 
+void clearSearchPath();                      // Added for BF
+
+void mountAll(const StringList &folderList); // Added for BF
+
 void getSearchPath(StringCallback callback, void * extra);
 
 void setSaneConfig(string const & orgName, string const & appName, string const & archiveExt, bool includeCdRoms, bool archivesFirst);

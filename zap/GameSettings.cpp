@@ -311,6 +311,12 @@ string GameSettings::getCmdLineParamString(ParamId paramId)
 }
 
 
+Vector<string> GameSettings::getCmdLineParamStringList(ParamId paramId)
+{
+   return mCmdLineParams[paramId];
+}
+
+
 U32 GameSettings::getCmdLineParamU32(ParamId paramId)
 {
    return mCmdLineParams[paramId].size() > 0 ? U32(atoi(mCmdLineParams[paramId].get(0).c_str())) : 0;
@@ -342,7 +348,7 @@ FolderManager GameSettings::getCmdLineFolderManager()
 {
     return FolderManager( getCmdLineParamString(LEVEL_DIR), 
                           getCmdLineParamString(ROBOT_DIR), 
-                          getCmdLineParamString(SFX_DIR),
+                          getCmdLineParamStringList(SFX_DIR),
                           getCmdLineParamString(MUSIC_DIR),
                           getCmdLineParamString(INI_DIR),
                           getCmdLineParamString(LOG_DIR),

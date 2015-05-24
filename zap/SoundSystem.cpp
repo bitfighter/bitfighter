@@ -15,6 +15,7 @@
 
 #include "MathUtils.h"
 #include "stringUtils.h"
+#include "physfs.hpp"
 
 #include "Point.h"
 
@@ -267,7 +268,7 @@ SoundSystem::~SoundSystem()
 
 // Initialize the sound sub-system
 // Use ALURE to ease the use of OpenAL
-void SoundSystem::init(SfxSet sfxSet, const string &sfxDir, const string &musicDir, float musicVolLevel)
+void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const string &musicDir, float musicVolLevel)
 {
    // Initialize the sound device
    if(!alureInitDevice(NULL, NULL))    // <=== causes crash on exit
@@ -309,6 +310,10 @@ void SoundSystem::init(SfxSet sfxSet, const string &sfxDir, const string &musicD
    else
       gSFXProfiles = sfxProfilesModern;
 
+   // Prepare physfs for searching for sfx
+   PhysFS::clearSearchPath();
+   PhysFS::mountAll(sfxDirs.getConstStlVector());
+
    // Iterate through all sounds
    for(U32 i = 0; i < NumSFXBuffers; i++)
    {
@@ -316,8 +321,19 @@ void SoundSystem::init(SfxSet sfxSet, const string &sfxDir, const string &musicD
       if(!gSFXProfiles[i].fileName)
          break;
 
+      //string fileBuffer = joindir(sfxDir, gSFXProfiles[i].fileName);
+
       // Grab sound file location
-      string fileBuffer = joindir(sfxDir, gSFXProfiles[i].fileName);
+      string realDir    = PhysFS::getRealDir(gSFXProfiles[i].fileName);
+      string fileBuffer = joindir(realDir, gSFXProfiles[i].fileName);
+
+      if(fileBuffer == "")
+      {
+         string path = listToString(PhysFS::getSearchPath(), ";");
+         logprintf(LogConsumer::LogError, "Could not find sound file '%s' in path '%s': Game will proceed without sound.", 
+                                          gSFXProfiles[i].fileName, path.c_str());
+         return;
+      }
 
       // Stick sound into a buffer
       if(alureBufferDataFromFile(fileBuffer.c_str(), gSfxBuffers[i]) == AL_FALSE)

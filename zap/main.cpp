@@ -1096,7 +1096,7 @@ int main(int argc, char **argv)
 
 
    // Even dedicated server needs sound these days
-   SoundSystem::init(settings->getSetting<SfxSet>(IniKey::SFXSet), folderManager->getSfxDir(),
+   SoundSystem::init(settings->getSetting<SfxSet>(IniKey::SFXSet), folderManager->getSfxDirs(),
                      folderManager->getMusicDir(), settings->getMusicVolume());
    
    if(settings->isDedicatedServer())

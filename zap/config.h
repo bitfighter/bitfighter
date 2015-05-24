@@ -46,7 +46,7 @@ class FolderManager
 private:
    string levelDir;
    string robotDir;
-   string sfxDir;
+   Vector<string> sfxDirs;
    string musicDir;
    string iniDir;
    string logDir;
@@ -60,9 +60,9 @@ private:
 public:
    // Constructors
    FolderManager();
-   FolderManager(const string &levelDir,    const string &robotDir,  const string &sfxDir,        const string &musicDir, 
-                 const string &iniDir,      const string &logDir,    const string &screenshotDir, const string &luaDir,
-                 const string &rootDataDir, const string &pluginDir, const string &fontsDir,      const string &recordDir);
+   FolderManager(const string &levelDir,    const string &robotDir,  const Vector<string> &sfxDir, const string &musicDir, 
+                 const string &iniDir,      const string &logDir,    const string &screenshotDir,  const string &luaDir,
+                 const string &rootDataDir, const string &pluginDir, const string &fontsDir,       const string &recordDir);
 
    virtual ~FolderManager();     // Destructor
 
@@ -71,7 +71,9 @@ public:
    string getRecordDir() const;
    string getFontsDir() const;
    string getScreenshotDir() const;
-   string getSfxDir() const;
+   const Vector<string> &getSfxDirs() const;
+   void addSfxDir(const string &dir, bool appendToPath);
+   void FolderManager::addSfxDirs(const Vector<string> &dirs);
    string getRobotDir() const;
    string getMusicDir() const;
    string getRootDataDir() const;
@@ -81,7 +83,7 @@ public:
 
 
    void resolveDirs(GameSettings *settings);                                  
-   void resolveDirs(const string &root);
+   //void resolveDirs(const string &root);
    void resolveLevelDir(GameSettings *settings);                                 
    string resolveLevelDir(const string &levelDir);
 

@@ -600,7 +600,7 @@ Vector<string> FileListLevelSource::findAllFilesInPlaylist(const string &fileNam
    Vector<string> levels;
    string contents;
 
-   readFile(fileName, contents);
+   readFilePhysFs(fileName, contents);             // Read the playlist here
    Vector<string> lines = parseString(contents);
 
    for(S32 i = 0; i < lines.size(); i++)
@@ -609,15 +609,18 @@ Vector<string> FileListLevelSource::findAllFilesInPlaylist(const string &fileNam
       if(filename == "")    // Probably a comment or blank line
          continue;
 
-      string fullFileName = FolderManager::findLevelFile(levelDir, filename);
+      /*string fullFileName = FolderManager::findLevelFile(levelDir, filename);
 
       if(fullFileName == "")
       {
          logprintf("Unable to find level file \"%s\".  Skipping...", filename.c_str());
          continue;
       }
-
-      levels.push_back(filename);      // We will append the folder name later
+*/
+      if(PhysFS::exists(fileName) && !PhysFS::isDirectory(fileName))
+         levels.push_back(filename);      
+      else
+         logprintf("Unable to find level file \"%s\".  Skipping...", filename.c_str());
    }
 
    return levels;

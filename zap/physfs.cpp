@@ -217,6 +217,8 @@ namespace PhysFS {
    }
 
    StringList getSearchPath() {
+      TNLAssert(PhysFS::isInit(), "Must initialize PhysFS first!");
+
       StringList pathList;
       char ** pathBegin = PHYSFS_getSearchPath();
       for(char ** path = pathBegin; *path != NULL; path++) {
@@ -227,8 +229,25 @@ namespace PhysFS {
    }
 
    void getSearchPath(StringCallback callback, void * extra) {
+      TNLAssert(PhysFS::isInit(), "Must initialize PhysFS first!");
+
       PHYSFS_getSearchPathCallback(callback, extra);
    }
+
+   void clearSearchPath() {
+      StringList dirs = getSearchPath();
+
+      // PhysFS uses a linked list to store folders, so forward traversal is the most efficient
+      // (see http://libphysfs.sourcearchive.com/documentation/2.0.0/physfs_8h_1eef17d8edd5525928e97d32e3e58428.html)
+      for(int i = 0; i < dirs.size(); i++)   
+         removeFromSearchPath(dirs[i]);
+   }
+
+   void mountAll(const StringList &folderList) {
+      for(int i = 0; i < folderList.size(); i++)
+         mount(folderList[i], "", true);
+   }
+
 
    void setSaneConfig(const string& orgName, const string& appName,
       const string& archiveExt, bool includeCdRoms, bool archivesFirst) {

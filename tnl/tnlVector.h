@@ -119,6 +119,7 @@ public:
    const T& last() const;
 
    std::vector<T>& getStlVector();
+   const std::vector<T>& getConstStlVector() const;
    T*   address();
    const T*   address() const;
    void reverse();
@@ -155,6 +156,14 @@ template<class T> inline std::vector<T>& Vector<T>::getStlVector()
 {
    return this->innerVector;
 }
+
+
+// returns an unmodifiable reference to the internal std::vector object
+template<class T> inline const std::vector<T>& Vector<T>::getConstStlVector() const
+{
+   return this->innerVector;
+}
+
 
 template<class T> inline T* Vector<T>::address()
 {

@@ -145,6 +145,7 @@ private:
    // Helper functions:
    // This first lot return the first value following the cmd line parameter cast to various types
    string getCmdLineParamString(ParamId paramId);
+   Vector<string> getCmdLineParamStringList(ParamId paramId);
    U32 getCmdLineParamU32(ParamId paramId);
    F32 getCmdLineParamF32(ParamId paramId);
 
