@@ -1179,14 +1179,14 @@ FolderManager::FolderManager()
    rootDataDir = root;
 
    // root used to specify the following folders
-   robotDir = joindir(root, "robots");
-   pluginDir = joindir(root, "editor_plugins");
-   luaDir = joindir(root, "scripts");
-   iniDir = joindir(root, "");
-   logDir = joindir(root, "");
+   robotDir      = joindir(root, "robots");          
+   pluginDir     = joindir(root, "editor_plugins"); 
+   luaDir        = joindir(root, "scripts");           
+   iniDir        = joindir(root, "");                  
+   logDir        = joindir(root, "");                  
    screenshotDir = joindir(root, "screenshots");
-   musicDir = joindir(root, "music");
-   recordDir = joindir(root, "record");
+   musicDir      = joindir(root, "music");           
+   recordDir     = joindir(root, "record");         
 
    // root not used for these folders
    //addSfxDir("sfx", true);     --> Will be added later in resolveDirs()
