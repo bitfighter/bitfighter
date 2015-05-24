@@ -57,6 +57,8 @@ private:
    string fontsDir;
    string recordDir;
 
+   bool mResolved;
+
 public:
    // Constructors
    FolderManager();

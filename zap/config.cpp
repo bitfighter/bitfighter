@@ -1193,6 +1193,8 @@ FolderManager::FolderManager()
    fontsDir = joindir("", "fonts");
 
    DbWriter::DatabaseWriter::sqliteFile = logDir + DbWriter::DatabaseWriter::sqliteFile;
+
+   mResolved = false;
 }
 
 
@@ -1213,7 +1215,7 @@ FolderManager::FolderManager(const string &levelDir,    const string &robotDir, 
                fontsDir      (fontsDir),
                recordDir     (recordDir)
 {
-   // Do nothing (more)
+   mResolved = false;
 }
 
 
@@ -1237,21 +1239,25 @@ static string resolutionHelper(const string &cmdLineDir, const string &rootDataD
 
 //struct CmdLineSettings;
 
+#define CHK_RESOLVED() TNLAssert(mResolved, "Must call resolveDirs() before using this getter!")
+
 // Getters
-string FolderManager::getLevelDir()         const { return levelDir;      }
-string FolderManager::getIniDir()           const { return iniDir;        }
-string FolderManager::getRecordDir()        const { return recordDir;     }
-string FolderManager::getRobotDir()         const { return robotDir;      }
-string FolderManager::getFontsDir()         const { return fontsDir;      }
-string FolderManager::getScreenshotDir()    const { return screenshotDir; }
-string FolderManager::getMusicDir()         const { return musicDir;      }
-string FolderManager::getRootDataDir()      const { return rootDataDir;   }
-string FolderManager::getLogDir()           const { return logDir;        }
-string FolderManager::getPluginDir()        const { return pluginDir;     }
-string FolderManager::getLuaDir()           const { return luaDir;        }
+string FolderManager::getIniDir()           const { return iniDir; }    // This one is usable before resolveDirs()
+string FolderManager::getLevelDir()         const { CHK_RESOLVED();  return levelDir; }
+string FolderManager::getRecordDir()        const { CHK_RESOLVED();  return recordDir; }
+string FolderManager::getRobotDir()         const { CHK_RESOLVED();  return robotDir; }
+string FolderManager::getFontsDir()         const { CHK_RESOLVED();  return fontsDir; }
+string FolderManager::getScreenshotDir()    const { CHK_RESOLVED();  return screenshotDir; }
+string FolderManager::getMusicDir()         const { CHK_RESOLVED();  return musicDir; }
+string FolderManager::getRootDataDir()      const { CHK_RESOLVED();  return rootDataDir; }
+string FolderManager::getLogDir()           const { CHK_RESOLVED();  return logDir; }
+string FolderManager::getPluginDir()        const { CHK_RESOLVED();  return pluginDir; }
+string FolderManager::getLuaDir()           const { CHK_RESOLVED();  return luaDir; }
 
 
-const Vector<string> &FolderManager::getSfxDirs() const { return sfxDirs; }
+const Vector<string> &FolderManager::getSfxDirs() const { CHK_RESOLVED();  return sfxDirs; }
+
+#undef CHK_RESOLVED
 
 
 void FolderManager::addSfxDir(const string &dir, bool appendToPath)
@@ -1309,6 +1315,8 @@ void FolderManager::resolveDirs(GameSettings *settings)
    folderManager->fontsDir = resolutionHelper(cmdLineDirs.fontsDir, "", "fonts");
 
    DatabaseWriter::sqliteFile = folderManager->logDir + DatabaseWriter::sqliteFile;
+
+   mResolved = true;
 }
 
 
