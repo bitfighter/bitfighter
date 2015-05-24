@@ -68,29 +68,30 @@ endif()
 
 #
 # Library searching and dependencies
-#
+#  
+set(BF_LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
+set(BF_LIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lib/include)
 
 # Set some search paths
-set(SDL2_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libsdl)
-set(OGG_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libogg)
-set(VORBIS_SEARCH_PATHS	${CMAKE_SOURCE_DIR}/lib	${CMAKE_SOURCE_DIR}/libvorbis)
-set(VORBISFILE_SEARCH_PATHS	${CMAKE_SOURCE_DIR}/lib	${CMAKE_SOURCE_DIR}/libvorbis)
-set(SPEEX_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libspeex)
-set(MODPLUG_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/libmodplug)
-set(ALURE_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/alure)
+set(SDL2_SEARCH_PATHS       ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libsdl)
+set(OGG_SEARCH_PATHS        ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libogg)
+set(VORBIS_SEARCH_PATHS	    ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libvorbis)
+set(VORBISFILE_SEARCH_PATHS	${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libvorbis)
+set(SPEEX_SEARCH_PATHS      ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libspeex)
+set(MODPLUG_SEARCH_PATHS    ${BF_LIB_DIR} ${BF_LIB_INCLUDE_DIR}/libmodplug)
 
 # Directly set include dirs for some libraries
-set(OPENAL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/openal/include")
-set(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/zlib")
+set(OPENAL_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/openal/include")
+set(ZLIB_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/zlib")
 # libpng needs two for some weird reason
-set(PNG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libpng")
-set(PNG_PNG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libpng")
+set(PNG_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/libpng")
+set(PNG_PNG_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/libpng")
 
 # Directly specify some libs
-set(OPENAL_LIBRARY "${CMAKE_SOURCE_DIR}/lib/OpenAL-Soft.framework")
-set(PNG_LIBRARY "${CMAKE_SOURCE_DIR}/lib/libpng.framework")
+set(OPENAL_LIBRARY "${BF_LIB_DIR}/OpenAL-Soft.framework")
+set(PNG_LIBRARY "${BF_LIB_DIR}/libpng.framework")
 
-set(SPARKLE_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib)
+set(SPARKLE_SEARCH_PATHS ${BF_LIB_DIR})
 # OSX doesn't use vorbisfile (or it's built-in to normal vorbis, I think)
 set(VORBISFILE_LIBRARIES "")
 

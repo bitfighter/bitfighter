@@ -268,7 +268,7 @@ static const U32 S32_MAX_DIGITS = 11;                             ///< S16_MIN =
 #  define FN_CDECL
 
 #elif defined(__WIN32__) || defined(_WIN32) || defined(__CYGWIN__)
-#  define TNL_OS_STRING "Win32"
+#  define TNL_OS_STRING "Windows"
 #  define TNL_OS_WIN32
 
 #ifdef TNL_COMPILER_MINGW
@@ -298,7 +298,7 @@ static const U32 S32_MAX_DIGITS = 11;                             ///< S16_MIN =
 #    define TNL_OS_STRING "iOS"
 #    define TNL_OS_IOS
 #  else
-#    define TNL_OS_STRING "Mac OS X"
+#    define TNL_OS_STRING "OS X"
 #    define TNL_OS_MAC_OSX
 #  endif
 #  define FN_CDECL
@@ -321,9 +321,12 @@ static const U32 S32_MAX_DIGITS = 11;                             ///< S16_MIN =
 
 
 // Other values that might be needed here are: 
-// defined(_M_AMD64)|| defined(__amd64__) || defined(_M_IA64) || defined(__amd64) || defined(__ia64__) || defined(_IA64) || defined(__IA64__) || defined(__i686__)
-#if defined(_M_IX86) || defined(_M_X64) || defined(i386) || defined(__x86_64__) || defined(__x86_64__) || defined(__x86_64)
-#  define TNL_CPU_STRING "Intel x86"
+#if defined(_M_IX86) || defined(i386) || defined(_M_X64) || defined(__x86_64__) || defined(__x86_64)
+#  if defined(_M_X64) || defined(__x86_64__) || defined(__x86_64)
+#    define TNL_CPU_STRING "Intel x86-64"
+#  else
+#    define TNL_CPU_STRING "Intel x86"
+#  endif
 #  define TNL_CPU_X86
 #  define TNL_LITTLE_ENDIAN
 #  define TNL_SUPPORTS_NASM
