@@ -75,7 +75,7 @@ public:
    string getScreenshotDir() const;
    const Vector<string> &getSfxDirs() const;
    void addSfxDir(const string &dir, bool appendToPath);
-   void FolderManager::addSfxDirs(const Vector<string> &dirs);
+   void addSfxDirs(const Vector<string> &dirs);
    string getRobotDir() const;
    string getMusicDir() const;
    string getRootDataDir() const;
