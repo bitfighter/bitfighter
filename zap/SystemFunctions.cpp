@@ -131,7 +131,10 @@ bool writeToConsole()
 // before being copied to the user's data path
 string getInstalledDataDir()
 {
-   string path;
+   static string path;     // Value will be cached
+
+   if(!path.empty())
+      return path;
 
 #if defined(TNL_OS_LINUX)
    // In Linux, the data dir can be anywhere!  Usually in something like /usr/share/bitfighter
