@@ -31,10 +31,11 @@
 #include <istream>
 
 #ifdef HAS_VORBISIDEC
-#include <tremor/ivorbiscodec.h>
-#include <tremor/ivorbisfile.h>
+#  include <tremor/ivorbiscodec.h>
+#  include <tremor/ivorbisfile.h>
 #else
-#include <vorbis/vorbisfile.h>
+//#  include <vorbis/vorbisfile.h>
+#  include "../lib/include/libvorbis/vorbis/vorbisfile.h"
 #endif
 
 

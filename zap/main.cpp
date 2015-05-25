@@ -80,7 +80,8 @@ using namespace TNL;
 #  include "Cursor.h"          // For cursor defs
 #  include "Joystick.h"
 #  include "Event.h"
-#  include "SDL.h"
+//#  include "SDL.h"
+#  include "../lib/include/libsdl/SDL2/SDL.h"
 
 #  include "VideoSystem.h"
 #  include "ClientGame.h"

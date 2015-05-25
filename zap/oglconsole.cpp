@@ -17,7 +17,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "SDL.h"
+//#include "SDL.h"
+#  include "../lib/include/libsdl/SDL2/SDL.h"
+
 
 // Begin Bitfighter specific block
 #ifndef ZAP_DEDICATED

@@ -12,8 +12,10 @@
 #  include <windows.h>        // For ARRAYSIZE def
 #endif
 
-#include "SDL_mouse.h"     
-#include "SDL_version.h"
+//#include "SDL_mouse.h"
+//#include "SDL_version.h"
+#include "../lib/include/libsdl/SDL2/SDL_mouse.h"
+#include "../lib/include/libsdl/SDL2/SDL_version.h"
 
 namespace Zap
 {

@@ -40,8 +40,10 @@
  *  @{
  */
 
-#include "speex/speex_bits.h"
-#include "speex/speex_types.h"
+//#include "speex/speex_bits.h"
+//#include "speex/speex_types.h"
+#include "../lib/include/libspeex/speex/speex_bits.h"
+#include "../lib/include/libspeex/speex/speex_types.h"
 
 #ifdef __cplusplus
 extern "C" {

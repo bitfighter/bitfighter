@@ -19,8 +19,9 @@
 #endif
 
 #include "physfs.hpp"
-#include "stringUtils.h"   // For itos
-#include "MathUtils.h"     // For MIN
+#include "stringUtils.h"         // For itos
+#include "SystemFunctions.h"
+#include "MathUtils.h"           // For MIN
 
 #include "tnlLog.h"
 
@@ -1308,8 +1309,8 @@ void FolderManager::resolveDirs(GameSettings *settings)
 
    // rootDataDir not used for these folders
 
-   folderManager->addSfxDirs(cmdLineDirs.sfxDirs);    // Add any user specified folders
-   folderManager->addSfxDir("sfx", true);             // And add the system default as a fallback
+   folderManager->addSfxDirs(cmdLineDirs.sfxDirs);                                        // Add any user specified folders
+   folderManager->addSfxDir(getInstalledDataDir() + getFileSeparator() + "sfx", true);    // And add the system default as a fallback
 
 
    folderManager->fontsDir = resolutionHelper(cmdLineDirs.fontsDir, "", "fonts");
