@@ -321,8 +321,6 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
       if(!gSFXProfiles[i].fileName)
          break;
 
-      //string fileBuffer = joindir(sfxDir, gSFXProfiles[i].fileName);
-
       // Grab sound file location
       string realDir    = PhysFS::getRealDir(gSFXProfiles[i].fileName);
       string fileBuffer = joindir(realDir, gSFXProfiles[i].fileName);

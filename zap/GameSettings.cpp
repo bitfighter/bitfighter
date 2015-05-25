@@ -100,7 +100,7 @@ ParamInfo paramDefs[] = {
 { "sfxdir",                ONE_REQUIRED,   SFX_DIR,               3, "<path>",                "Folder where user sounds are stored; will overwrite defaults; can specify multiple times", "You must specify your sounds folder with the -sfxdir option"},
 { "musicdir",              ONE_REQUIRED,   MUSIC_DIR,             3, "<path>",                "Folder where game music stored",                                                           "You must specify your music folder with the -musicdir option" },
 { "plugindir",             ONE_REQUIRED,   PLUGIN_DIR,            3, "<path>",                "Folder where editor plugins are stored",                                                   "You must specify your plugins folder with the -plugindir option" },
-{ "fontsdir",              ONE_REQUIRED,   FONTS_DIR,             3, "<path>",                "Folder where fonts are stored",                                                            "You must specify your fonts folder with the -fontsdir option" },
+{ "fontsdir",              ONE_REQUIRED,   FONTS_DIR,             3, "<path>",                "Folder where fonts are stored; will overwrite defaults; can specify multiple times",       "You must specify your fonts folder with the -fontsdir option" },
 { "recorddir",             ONE_REQUIRED,   RECORD_DIR,            3, "<path>",                "Folder where recording gameplay are stored",                                               "You must specify your recorded gameplay folder with the -recorddir option" },
 
 // Developer-oriented options
@@ -346,18 +346,18 @@ FolderManager *GameSettings::getFolderManager()
 
 FolderManager GameSettings::getCmdLineFolderManager()
 {
-    return FolderManager( getCmdLineParamString(LEVEL_DIR), 
-                          getCmdLineParamString(ROBOT_DIR), 
-                          getCmdLineParamStringList(SFX_DIR),
-                          getCmdLineParamString(MUSIC_DIR),
-                          getCmdLineParamString(INI_DIR),
-                          getCmdLineParamString(LOG_DIR),
-                          getCmdLineParamString(SCREENSHOT_DIR),
-                          getCmdLineParamString(SCRIPTS_DIR),
-                          getCmdLineParamString(ROOT_DATA_DIR),
-                          getCmdLineParamString(PLUGIN_DIR),
-                          getCmdLineParamString(FONTS_DIR),
-                          getCmdLineParamString(RECORD_DIR));
+    return FolderManager(getCmdLineParamString(LEVEL_DIR), 
+                         getCmdLineParamString(ROBOT_DIR), 
+                         getCmdLineParamStringList(SFX_DIR),
+                         getCmdLineParamString(MUSIC_DIR),
+                         getCmdLineParamString(INI_DIR),
+                         getCmdLineParamString(LOG_DIR),
+                         getCmdLineParamString(SCREENSHOT_DIR),
+                         getCmdLineParamString(SCRIPTS_DIR),
+                         getCmdLineParamString(ROOT_DATA_DIR),
+                         getCmdLineParamString(PLUGIN_DIR),
+                         getCmdLineParamStringList(FONTS_DIR),
+                         getCmdLineParamString(RECORD_DIR));
 }
 
 

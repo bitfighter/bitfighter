@@ -46,7 +46,6 @@ class FolderManager
 private:
    string levelDir;
    string robotDir;
-   Vector<string> sfxDirs;
    string musicDir;
    string iniDir;
    string logDir;
@@ -54,34 +53,39 @@ private:
    string luaDir;
    string rootDataDir;
    string pluginDir;
-   string fontsDir;
    string recordDir;
+   Vector<string> sfxDirs;
+   Vector<string> fontDirs;
 
    bool mResolved;
 
 public:
    // Constructors
    FolderManager();
-   FolderManager(const string &levelDir,    const string &robotDir,  const Vector<string> &sfxDir, const string &musicDir, 
-                 const string &iniDir,      const string &logDir,    const string &screenshotDir,  const string &luaDir,
-                 const string &rootDataDir, const string &pluginDir, const string &fontsDir,       const string &recordDir);
+   FolderManager(const string &levelDir,    const string &robotDir,  const Vector<string> &sfxDirs,  const string &musicDir, 
+                 const string &iniDir,      const string &logDir,    const string &screenshotDir,    const string &luaDir,
+                 const string &rootDataDir, const string &pluginDir, const Vector<string> &fontDirs, const string &recordDir);
 
    virtual ~FolderManager();     // Destructor
 
    string getLevelDir() const;
    string getIniDir() const;
    string getRecordDir() const;
-   string getFontsDir() const;
    string getScreenshotDir() const;
-   const Vector<string> &getSfxDirs() const;
-   void addSfxDir(const string &dir, bool appendToPath);
-   void addSfxDirs(const Vector<string> &dirs);
    string getRobotDir() const;
    string getMusicDir() const;
    string getRootDataDir() const;
    string getLogDir() const;
    string getPluginDir() const;
    string getLuaDir() const;
+
+   const Vector<string> &getSfxDirs() const;
+   void addSfxDir(const string &dir, bool appendToPath);
+   void addSfxDirs(const Vector<string> &dirs);
+
+   const Vector<string> &getFontDirs() const;
+   void addFontDir(const string &dir, bool appendToPath);
+   void addFontDirs(const Vector<string> &dirs);
 
 
    void resolveDirs(GameSettings *settings);                                  

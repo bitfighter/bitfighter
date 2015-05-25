@@ -164,13 +164,13 @@ void DiagnosticUserInterface::initFoldersBlock(FolderManager *folderManager, S32
    vals.push_back(folderManager->getScreenshotDir());
       
    names.push_back("SFX Dirs:");
-   vals.push_back(listToString(folderManager->getSfxDirs(), ";"));
+   vals.push_back(listToString(folderManager->getSfxDirs(), "; "));
 
    names.push_back("Music Dir:");
    vals.push_back(folderManager->getMusicDir());
 
-   names.push_back("Fonts Dir:");
-   vals.push_back(folderManager->getFontsDir());
+   names.push_back("Fonts Dirs:");
+   vals.push_back(listToString(folderManager->getFontDirs(), "; "));
 
    names.push_back("");
    vals.push_back("");

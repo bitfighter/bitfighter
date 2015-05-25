@@ -1191,7 +1191,7 @@ FolderManager::FolderManager()
 
    // root not used for these folders
    //addSfxDir("sfx", true);     --> Will be added later in resolveDirs()
-   fontsDir = joindir("", "fonts");
+   //fontsDir = joindir("", "fonts");
 
    DbWriter::DatabaseWriter::sqliteFile = logDir + DbWriter::DatabaseWriter::sqliteFile;
 
@@ -1200,9 +1200,9 @@ FolderManager::FolderManager()
 
 
 // Constructor
-FolderManager::FolderManager(const string &levelDir,    const string &robotDir,  const Vector<string> &sfxDirs, const string &musicDir, 
-                             const string &iniDir,      const string &logDir,    const string &screenshotDir,   const string &luaDir,
-                             const string &rootDataDir, const string &pluginDir, const string &fontsDir,        const string &recordDir) :
+FolderManager::FolderManager(const string &levelDir,    const string &robotDir,  const Vector<string> &sfxDirs,  const string &musicDir, 
+                             const string &iniDir,      const string &logDir,    const string &screenshotDir,    const string &luaDir,
+                             const string &rootDataDir, const string &pluginDir, const Vector<string> &fontDirs, const string &recordDir) :
                levelDir      (levelDir),
                robotDir      (robotDir),
                sfxDirs       (sfxDirs),
@@ -1213,7 +1213,7 @@ FolderManager::FolderManager(const string &levelDir,    const string &robotDir, 
                luaDir        (luaDir),
                rootDataDir   (rootDataDir),
                pluginDir     (pluginDir),
-               fontsDir      (fontsDir),
+               fontDirs      (fontDirs),
                recordDir     (recordDir)
 {
    mResolved = false;
@@ -1247,7 +1247,6 @@ string FolderManager::getIniDir()           const { return iniDir; }    // This 
 string FolderManager::getLevelDir()         const { CHK_RESOLVED();  return levelDir; }
 string FolderManager::getRecordDir()        const { CHK_RESOLVED();  return recordDir; }
 string FolderManager::getRobotDir()         const { CHK_RESOLVED();  return robotDir; }
-string FolderManager::getFontsDir()         const { CHK_RESOLVED();  return fontsDir; }
 string FolderManager::getScreenshotDir()    const { CHK_RESOLVED();  return screenshotDir; }
 string FolderManager::getMusicDir()         const { CHK_RESOLVED();  return musicDir; }
 string FolderManager::getRootDataDir()      const { CHK_RESOLVED();  return rootDataDir; }
@@ -1256,7 +1255,8 @@ string FolderManager::getPluginDir()        const { CHK_RESOLVED();  return plug
 string FolderManager::getLuaDir()           const { CHK_RESOLVED();  return luaDir; }
 
 
-const Vector<string> &FolderManager::getSfxDirs() const { CHK_RESOLVED();  return sfxDirs; }
+const Vector<string> &FolderManager::getSfxDirs()  const { CHK_RESOLVED();  return sfxDirs; }
+const Vector<string> &FolderManager::getFontDirs() const { CHK_RESOLVED();  return fontDirs; }
 
 #undef CHK_RESOLVED
 
@@ -1274,6 +1274,22 @@ void FolderManager::addSfxDirs(const Vector<string> &dirs)
 {
    for(S32 i = 0; i < dirs.size(); i++)
       addSfxDir(dirs[i], true);
+}
+
+
+void FolderManager::addFontDir(const string &dir, bool appendToPath)
+{
+   if(appendToPath)
+      fontDirs.push_back(dir);
+   else
+      fontDirs.push_front(dir);
+}
+
+
+void FolderManager::addFontDirs(const Vector<string> &dirs)
+{
+   for(S32 i = 0; i < dirs.size(); i++)
+      addFontDir(dirs[i], true);
 }
 
 
@@ -1309,11 +1325,11 @@ void FolderManager::resolveDirs(GameSettings *settings)
 
    // rootDataDir not used for these folders
 
-   folderManager->addSfxDirs(cmdLineDirs.sfxDirs);                                        // Add any user specified folders
-   folderManager->addSfxDir(getInstalledDataDir() + getFileSeparator() + "sfx", true);    // And add the system default as a fallback
+   folderManager->addSfxDirs(cmdLineDirs.sfxDirs);                                         // Add any user specified folders
+   folderManager->addSfxDir (getInstalledDataDir() + getFileSeparator() + "sfx", true);    // And add the system default as a fallback
 
-
-   folderManager->fontsDir = resolutionHelper(cmdLineDirs.fontsDir, "", "fonts");
+   folderManager->addFontDirs(cmdLineDirs.fontDirs);                                       // Add any user specified folders
+   folderManager->addFontDir(getInstalledDataDir() + getFileSeparator() + "fonts", true);  // And add the system default as a fallback
 
    DatabaseWriter::sqliteFile = folderManager->logDir + DatabaseWriter::sqliteFile;
 
