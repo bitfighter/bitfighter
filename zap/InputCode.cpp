@@ -11,8 +11,7 @@
 #include "tnlLog.h"              // For logprintf
 
 #ifndef ZAP_DEDICATED
-//#  include "SDL.h"
-#  include "../lib/include/libsdl/SDL2/SDL.h"
+#  include "SDL.h"
 #endif
 
 

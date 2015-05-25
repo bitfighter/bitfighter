@@ -13,8 +13,7 @@
 #endif
 
 #ifndef BF_NO_VOICECHAT
-//#  include "libspeex/speex.h"
-#  include "../lib/include/libspeex/speex/speex.h"
+#  include "speex/speex.h"
 #else
    typedef struct SpeexBits {} SpeexBits;
 #endif

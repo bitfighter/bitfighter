@@ -12,12 +12,9 @@
 
 #include "tnlLog.h"
 
-//#include "SDL.h"
-//#include "SDL_joystick.h"
-//#include "SDL_stdinc.h"
-#include "../lib/include/libsdl/SDL2/SDL.h"
-#include "../lib/include/libsdl/SDL2/SDL_joystick.h"
-#include "../lib/include/libsdl/SDL2/SDL_stdinc.h"
+#include "SDL.h"
+#include "SDL_joystick.h"
+#include "SDL_stdinc.h"
 
 #include <map>
 

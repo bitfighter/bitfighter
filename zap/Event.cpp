@@ -15,8 +15,7 @@
 #include "ClientGame.h"
 #include "Cursor.h"
 
-//#include "SDL.h" 
-#include "../lib/include/libsdl/SDL2/SDL.h"
+#include "SDL.h" 
 
 #if SDL_VERSION_ATLEAST(2,0,0)
 #  define SDLKey SDL_Keycode

@@ -16,9 +16,7 @@
    // Needed for GLES compatibility
 #  define glOrtho glOrthof
 #else
-//#  include "SDL_opengl.h"
-#  include "../lib/include/libsdl/SDL2/SDL_opengl.h"
-
+#  include "SDL_opengl.h"
 #endif
 
 #endif // _GLINC_H_

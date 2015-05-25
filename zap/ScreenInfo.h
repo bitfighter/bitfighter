@@ -11,8 +11,7 @@
 #include "ConfigEnum.h"
 
 #ifndef ZAP_DEDICATED
-//#  include "SDL.h"      // For SDL_VERSION_ATLEAST macro
-#  include "../lib/include/libsdl/SDL2/SDL.h"
+#  include "SDL.h"      // For SDL_VERSION_ATLEAST macro
 #endif
 
 

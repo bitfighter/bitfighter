@@ -30,8 +30,7 @@
 
 #include <istream>
 
-//#include <libmodplug/modplug.h>
-#include "../lib/include/libmodplug/libmodplug/modplug.h"
+#include <libmodplug/modplug.h>
 
 
 #ifdef DYNLOAD
