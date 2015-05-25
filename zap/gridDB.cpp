@@ -905,6 +905,8 @@ bool DatabaseObject::checkForCollision(const Point &rayStart, const Point &rayEn
          surfaceNormal = (rayStart + (rayEnd - rayStart) * collisionTime) - center;
          return true;
       }
+
+      return false;
    }
 }
 
