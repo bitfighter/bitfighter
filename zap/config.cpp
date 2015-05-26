@@ -1263,6 +1263,9 @@ const Vector<string> &FolderManager::getFontDirs() const { CHK_RESOLVED();  retu
 
 void FolderManager::addSfxDir(const string &dir, bool appendToPath)
 {
+   if(!fileExists(dir))
+      return;
+
    if(appendToPath)
       sfxDirs.push_back(dir);
    else
@@ -1279,6 +1282,9 @@ void FolderManager::addSfxDirs(const Vector<string> &dirs)
 
 void FolderManager::addFontDir(const string &dir, bool appendToPath)
 {
+   if(!fileExists(dir))
+      return;
+
    if(appendToPath)
       fontDirs.push_back(dir);
    else
