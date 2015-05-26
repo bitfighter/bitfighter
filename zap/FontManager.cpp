@@ -167,7 +167,7 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 
    mUsingExternalFonts = useExternalFonts;
 
-   // Our stroke fonts
+   // Our stroke fonts -- these are always available
    fontList[FontRoman]               = new BfFont(&fgStrokeRoman);
    fontList[FontOrbitronLightStroke] = new BfFont(&fgStrokeOrbitronLight);
    fontList[FontOrbitronMedStroke]   = new BfFont(&fgStrokeOrbitronMed);
