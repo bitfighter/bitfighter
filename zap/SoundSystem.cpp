@@ -282,6 +282,7 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
    // Create source pool for all game sounds
    gFreeSources.resize(NumSamples);
    alGenSources(NumSamples, gFreeSources.address());
+
    if(alGetError() != AL_NO_ERROR)
    {
       logprintf(LogConsumer::LogError, "Failed to create OpenAL sources!\n");
@@ -323,9 +324,9 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
 
       // Grab sound file location
       string realDir    = PhysFS::getRealDir(gSFXProfiles[i].fileName);
-      string fileBuffer = joindir(realDir, gSFXProfiles[i].fileName);
+      string sfxFile = joindir(realDir, gSFXProfiles[i].fileName);
 
-      if(fileBuffer == "")
+      if(sfxFile == "")
       {
          string path = listToString(PhysFS::getSearchPath(), ";");
          logprintf(LogConsumer::LogError, "Could not find sound file '%s' in path '%s': Game will proceed without sound.", 
@@ -334,9 +335,9 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
       }
 
       // Stick sound into a buffer
-      if(alureBufferDataFromFile(fileBuffer.c_str(), gSfxBuffers[i]) == AL_FALSE)
+      if(alureBufferDataFromFile(sfxFile.c_str(), gSfxBuffers[i]) == AL_FALSE)
       {
-         logprintf(LogConsumer::LogError, "Failure (1) loading sound file '%s': Game will proceed without sound.", fileBuffer.c_str());
+         logprintf(LogConsumer::LogError, "Failure (1) loading sound file '%s': Game will proceed without sound.", sfxFile.c_str());
          return;
       }
    }
