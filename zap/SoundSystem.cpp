@@ -232,7 +232,7 @@ Point mListenerVelocity;
 
 SFXProfile *gSFXProfiles;
 
-static ALuint gSfxBuffers[NumSFXBuffers];
+static ALuint sfxBuffers[NumSFXBuffers];
 static Vector<ALuint> gFreeSources;
 static Vector<ALuint> gVoiceFreeBuffers;
 static Vector<SFXHandle> gPlayList;
@@ -290,7 +290,7 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
    }
 
    // Create sound buffers for the sound effect pool
-   alGenBuffers(NumSFXBuffers, gSfxBuffers);
+   alGenBuffers(NumSFXBuffers, sfxBuffers);
    if(alGetError() != AL_NO_ERROR)
    {
       logprintf(LogConsumer::LogError, "Failed to create OpenAL buffers!\n");
@@ -335,9 +335,9 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
       }
 
       // Stick sound into a buffer
-      if(alureBufferDataFromFile(sfxFile.c_str(), gSfxBuffers[i]) == AL_FALSE)
+      if(alureBufferDataFromFile(sfxFile.c_str(), sfxBuffers[i]) == AL_FALSE)
       {
-         logprintf(LogConsumer::LogError, "Failure (1) loading sound file '%s': Game will proceed without sound.", sfxFile.c_str());
+         logprintf(LogConsumer::LogError, "Failure (1) loading sound file '%s': Game will proceed without sound.", sfxFile    .c_str());
          return;
       }
    }
@@ -434,7 +434,7 @@ void SoundSystem::shutdown()
    gFreeSources.clear();
 
    // Clean up SoundEffect buffers
-   alDeleteBuffers(NumSFXBuffers, gSfxBuffers);
+   alDeleteBuffers(NumSFXBuffers, sfxBuffers);
 
    // Clean up voice buffers
    for (S32 i = 0; i < 32; i++)
@@ -563,7 +563,7 @@ void SoundSystem::unqueueBuffers(S32 sourceIndex)
          // or already loaded.
          U32 i;
          for(i = 0 ; i < NumSFXBuffers; i++)
-            if(buffer == gSfxBuffers[i])
+            if(buffer == sfxBuffers[i])
                break;
          if(i == NumSFXBuffers)
             gVoiceFreeBuffers.push_back(buffer);
@@ -963,7 +963,7 @@ void SoundSystem::playOnSource(SFXHandle& effect, F32 sfxVol, F32 voiceVol)
       alSourceQueueBuffers(source, 1, &buffer);
    }
    else
-      alSourcei(source, AL_BUFFER, gSfxBuffers[effect->mSFXIndex]);
+      alSourcei(source, AL_BUFFER, sfxBuffers[effect->mSFXIndex]);
 
    alSourcei(source, AL_LOOPING, effect->mProfile->isLooping);
    alSourcef(source, AL_REFERENCE_DISTANCE, effect->mProfile->fullGainDistance);
