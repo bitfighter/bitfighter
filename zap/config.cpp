@@ -1231,10 +1231,8 @@ static string resolutionHelper(const string &cmdLineDir, const string &rootDataD
 {
    if(cmdLineDir != "")             // Direct specification of ini path takes precedence...
       return cmdLineDir;
-   else if(rootDataDir != "")       // ...over specification via rootdatadir param
+   else                             // ...over specification via rootdatadir param
       return joindir(rootDataDir, subdir);
-   else 
-      return subdir;
 }
 
 
