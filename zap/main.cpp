@@ -690,13 +690,11 @@ void copyResourcesToUserData()
       string installedResourceDir = installDataDir + fileSeparator + dirArray[i];
 
       Vector<string> fillFiles;
-      getFilesFromFolder(installedResourceDir, fillFiles);
+      getFilesFromFolder(installedResourceDir, fillFiles, true);
 
       for(S32 i = 0; i < fillFiles.size(); i++)
       {
-         string sourceFile = installedResourceDir + fileSeparator + fillFiles[i];
-//         printf("Attempting to copy file: %s\n", sourceFile.c_str());
-         if(!copyFileToDir(sourceFile, userResourceDir))
+         if(!copyFileToDir(fillFiles[i], userResourceDir))
          {
             printf("File copy failed.  File: %s to directory: %s\n", fillFiles[i].c_str(), userResourceDir.c_str());
             return;
@@ -790,9 +788,8 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    {
       // Remove game.ogg  from music folder, if it exists...
       FolderManager *folderManager = settings->getFolderManager();
-      string offendingFile = joindir(folderManager->getMusicDir(), "game.ogg");
-      
-      removeFile(offendingFile);
+      removeFile(joindir(folderManager->getMusicDir(), "game.ogg"));
+      removeFile(joindir(getInstalledDataDir(), "game.ogg"));
    }
 
    // 018a:
@@ -831,9 +828,12 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
 
       // Remove item_select.lua plugin, it was superseded by filter.lua
       FolderManager *folderManager = settings->getFolderManager();
-      string offendingFile = joindir(folderManager->getPluginDir(), "item_select.lua");
 
-      removeFile(offendingFile);
+      // Look for item in the editor_plugins subfolder under the rootDataDir.  Is there anywhere else this could be lurking?
+      // Also look in the install folder, to prevent file from being replicated if resources are copied out of here.  If the 
+      // delete fails, no biggie... all that happens is we get back a stern error code.
+      removeFile(joindir(joindir(folderManager->getRootDataDir(), "editor_plugins"), "item_select.lua"));
+      removeFile(joindir(joindir(getInstalledDataDir(), "editor_plugins"), "item_select.lua"));
    }
 
    // 019b, 019c, 019d, 019e - no major changes with preferences

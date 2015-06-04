@@ -94,7 +94,7 @@ bool caseInsensitiveStringCompare(const string &str1, const string &str2);
 string getFileSeparator();
 bool fileExists(const string &path);               // Does file exist?
 bool makeSureFolderExists(const string &dir);      // Like the man said: Make sure folder exists
-bool getFilesFromFolder(const string &dir, Vector<string> &files, const string extensions[] = 0, S32 extensionCount = 0);
+bool getFilesFromFolder(const string &dir, Vector<string> &files, bool returnFullPaths, const string extensions[] = 0, S32 extensionCount = 0);
 bool safeFilename(const char *str);
 bool copyFile(const string &sourceFilename, const string &destFilename);
 bool copyFileToDir(const string &sourceFilename, const string &destDir);
@@ -104,6 +104,11 @@ bool copyFileToDir(const string &sourceFilename, const string &destDir);
 string joindir(const string &path, const string &filename);
 string strictjoindir(const string &part1, const string &part2);
 string strictjoindir(const string &part1, const string &part2, const string &part3);
+
+// Find first instance of a file in a list of paths
+string checkName(const string &filename, const Vector<string> &folders);
+string checkName(const string &filename, const Vector<string> &folders, const char *extensions[]);
+
 
 // By default we'll mimic the behavior or PHP.  Because that's something to aspire to!
 // http://lu1.php.net/trim

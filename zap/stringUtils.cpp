@@ -79,15 +79,15 @@ string extractDirectory(const string &path )
 }
 
 
-string extractFilename(const string &path )
+string extractFilename(const string &path)
 {
-  return path.substr( path.find_last_of( "\\/" ) + 1 );
+  return path.substr(path.find_last_of( "\\/" ) + 1);
 }
 
 
-string extractExtension(const string &path )
+string extractExtension(const string &path)
 {
-  return path.substr( path.find_last_of( '.' ) + 1 );
+  return path.substr(path.find_last_of( '.' ) + 1);
 }
 
 
@@ -529,14 +529,53 @@ void s_fprintf(FILE *stream, const char *format, ...)
 }
 
 
-// With physfs, file delimeter is forward slash
 string getFileSeparator()
 {
-//#ifdef TNL_OS_WIN32
-//   return "\\";
-//#else
+#ifdef TNL_OS_WIN32
+   return "\\";
+#else
    return "/";
-//#endif
+#endif
+}
+
+
+// Find first instance of a file in a list of paths, with mulitple possible extensions -- returns full path to found file
+string checkName(const string &filename, const Vector<string> &folders, const char *extensions[])
+{
+   string name;
+   if(filename.find('.') != string::npos || extensions == NULL)       // filename has an extension
+   {
+      for(S32 i = 0; i < folders.size(); i++)
+      {
+         name = strictjoindir(folders[i], filename);
+         if(fileExists(name))
+            return name;
+         i++;
+      }
+   }
+   else        // Filename has no extension, and we have a list of potential extensions
+   {
+      S32 i = 0;
+      while(strcmp(extensions[i], "") != 0)
+      {
+         for(S32 j = 0; j < folders.size(); j++)
+         {
+            name = strictjoindir(folders[j], filename + extensions[i]);
+            if(fileExists(name))
+               return name;
+         }
+         i++;
+      }
+   }
+
+   return "";
+}
+
+
+// Find first instance of a file in a list of paths -- returns full path to found file
+string checkName(const string &filename, const Vector<string> &folders)
+{
+   return checkName(filename, folders, NULL);
 }
 
 
@@ -570,7 +609,7 @@ bool makeSureFolderExists(const string &folder)
 
 
 // Read files from folder
-bool getFilesFromFolder(const string &dir, Vector<string> &files, const string extensions[], S32 extensionCount)
+bool getFilesFromFolder(const string &dir, Vector<string> &files, bool returnFullPaths, const string extensions[], S32 extensionCount)
 {
    DIR *dp;
    struct dirent *dirp;
@@ -592,7 +631,12 @@ bool getFilesFromFolder(const string &dir, Vector<string> &files, const string e
             {
                string ext = lcase(extractExtension(extensions[i]));
                if(ext == extension)
-                  files.push_back(name);
+               {
+                  if(returnFullPaths)
+                     files.push_back(strictjoindir(dir, name));
+                  else
+                     files.push_back(name);
+               }
             }
          }
       }
@@ -686,7 +730,8 @@ string joindir(const string &path, const string &filename)
 // Join without checking for blank parts
 string strictjoindir(const string &part1, const string &part2)
 {
-   if(part1.length() == 0) return part2;      //avoid crash on zero length string.
+   if(part1.length() == 0)       // Avoid crash on zero length string
+      return part2;      
 
    // Does path already have a trailing delimeter?  If so, we'll use that.
    if(part1[part1.length() - 1] == '\\' || part1[part1.length() - 1] == '/')

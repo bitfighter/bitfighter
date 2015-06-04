@@ -317,7 +317,7 @@ namespace Zap
       // Build our level list by looking at the filesystem 
       const string extList[] = {"level"};
 
-      if(!getFilesFromFolder(levelDir, levelList, extList, ARRAYSIZE(extList)))    // Returns true if error 
+      if(!getFilesFromFolder(levelDir, levelList, false, extList, ARRAYSIZE(extList)))    // Returns true if error 
       {
          logprintf(LogConsumer::LogError, "Could not read any levels from the levels folder \"%s\".", levelDir.c_str());
          return levelList;

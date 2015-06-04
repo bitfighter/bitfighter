@@ -355,7 +355,7 @@ FolderManager GameSettings::getCmdLineFolderManager()
                          getCmdLineParamString(SCREENSHOT_DIR),
                          getCmdLineParamString(SCRIPTS_DIR),
                          getCmdLineParamString(ROOT_DATA_DIR),
-                         getCmdLineParamString(PLUGIN_DIR),
+                         getCmdLineParamStringList(PLUGIN_DIR),
                          getCmdLineParamStringList(FONTS_DIR),
                          getCmdLineParamString(RECORD_DIR));
 }

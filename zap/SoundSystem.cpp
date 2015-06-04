@@ -15,7 +15,6 @@
 
 #include "MathUtils.h"
 #include "stringUtils.h"
-#include "physfs.hpp"
 
 #include "Point.h"
 
@@ -247,8 +246,7 @@ bool SoundSystem::mMenuMusicValid = false;
 bool SoundSystem::mGameMusicValid = false;
 bool SoundSystem::mCreditsMusicValid = false;
 
-Vector<string> SoundSystem::mGameMusicList;
-S32 SoundSystem::mCurrentlyPlayingIndex = 0;
+FileList SoundSystem::mGameMusicList;
 Timer SoundSystem::mMusicFadeTimer;
 
 // Constructor
@@ -303,7 +301,7 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
    alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
 
    if(alGetError() != AL_NO_ERROR)
-      logprintf(LogConsumer::LogWarning, "Failed to set proper sound gain distance model!  Sounds will be off..\n");
+      logprintf(LogConsumer::LogWarning, "Failed to set proper sound gain distance model!  Sounds will be disabled.\n");
 
    // Choose the sound set
    if(sfxSet == SfxSetClassic)
@@ -311,9 +309,13 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
    else
       gSFXProfiles = sfxProfilesModern;
 
-   // Prepare physfs for searching for sfx
-   PhysFS::clearSearchPath();
-   PhysFS::mountAll(sfxDirs.getConstStlVector());
+   // Set up music list for streaming later.  For now, we'll load these file types.  Not all have been tested.  More may play.  Who knows?
+   const string extList[] = { ".669", ".ABC", ".AMF", ".AMS", ".DBM", ".DMF", ".DSM", ".FAR", ".IT",
+                              ".MDL", ".Med", ".MID", ".MOD", ".MT2", ".MTM", ".OKT", ".OGG", ".PAT",
+                              ".PSM", ".PTM", ".S3M", ".STM", ".Ult", ".UMX", ".Wav", ".XM" };
+
+   FileList fileList;
+   fileList.addFilesFromFolders(sfxDirs, extList, ARRAYSIZE(extList));
 
    // Iterate through all sounds
    for(U32 i = 0; i < NumSFXBuffers; i++)
@@ -323,12 +325,11 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
          break;
 
       // Grab sound file location
-      string realDir    = PhysFS::getRealDir(gSFXProfiles[i].fileName);
-      string sfxFile = joindir(realDir, gSFXProfiles[i].fileName);
+      string sfxFile = fileList.getFullFilename(gSFXProfiles[i].fileName);
 
       if(sfxFile == "")
       {
-         string path = listToString(PhysFS::getSearchPath(), ";");
+         string path = listToString(sfxDirs, ";");
          logprintf(LogConsumer::LogError, "Could not find sound file '%s' in path '%s': Game will proceed without sound.", 
                                           gSFXProfiles[i].fileName, path.c_str());
          return;
@@ -342,41 +343,19 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
       }
    }
 
-   // Set up music list for streaming later.  For now, we'll load these file types.  Not all have been tested.  More may play.  Who knows?
-   const string extList[] = { ".669", ".ABC", ".AMF", ".AMS", ".DBM", ".DMF", ".DSM", ".FAR", ".IT", 
-                              ".MDL", ".Med", ".MID", ".MOD", ".MT2", ".MTM", ".OKT", ".OGG", ".PAT", 
-                              ".PSM", ".PTM", ".S3M", ".STM", ".Ult", ".UMX", ".Wav", ".XM" };
+   mGameMusicList.addFilesFromFolder(mMusicDir, extList, ARRAYSIZE(extList));
 
-   if(!getFilesFromFolder(mMusicDir, mGameMusicList, extList, ARRAYSIZE(extList)))
+   if(!mGameMusicList.isOk())
       logprintf(LogConsumer::LogWarning, "Could not read music files from folder \"%s\".  Game will proceed without music", musicDir.c_str());
    else if(mGameMusicList.size() == 0)
       logprintf(LogConsumer::LogWarning, "No music files found in folder \"%s\".  Game will proceed without music", musicDir.c_str());
    else     // Got us some music!
    {
-      // Remove the menu music from the file list
-      for(S32 i = 0; i < mGameMusicList.size(); i++)
-      {
-         if(mGameMusicList[i] == mMenuMusicFile)
-         {
-            mMenuMusicValid = true;
-            mGameMusicList.erase_fast(i);
-            break;
-         }
-      }
-
-      // Remove the credits music from the file list
-      for(S32 i = 0; i < mGameMusicList.size(); i++)
-      {
-         if(mGameMusicList[i] == mCreditsMusicFile)
-         {
-            mCreditsMusicValid = true;
-            mGameMusicList.erase_fast(i);
-            break;
-         }
-      }
-
-      // We have game music!
-      if(mGameMusicList.size() > 0)
+      // Remove the menu music and credits music from the file list -- we don't want to play these in-game
+      mGameMusicList.removeFile(mMenuMusicFile);
+      mGameMusicList.removeFile(mCreditsMusicFile);
+      
+      if(mGameMusicList.size() > 0)    // We have game music!
          mGameMusicValid = true;
 
       if(musicSystemValid())
@@ -731,25 +710,24 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol, MusicLocation musicL
             loopcount = -1;  // Play indefinitely
          }
          else if(mMusicData.currentLocation == MusicLocationGame && mGameMusicValid)
-            musicFile = mGameMusicList[mCurrentlyPlayingIndex];
+            musicFile = mGameMusicList.getCurrentFullFilename();
          else if(mMusicData.currentLocation == MusicLocationCredits && mCreditsMusicValid)
             musicFile = mCreditsMusicFile;
 
          if(musicFile == "")
          {
-            logprintf(LogConsumer::LogError, "Music is invalid for this location");
+            logprintf(LogConsumer::LogError, "Could not find any music files!");
             mMusicData.state = MusicStateStopped;
             break;
          }
 
          // Grab the full path
-         string fullMusicPath = joindir(mMusicDir, musicFile);
-         mMusicData.stream = alureCreateStreamFromFile(fullMusicPath.c_str(), MusicChunkSize, 0, NULL);
+         mMusicData.stream = alureCreateStreamFromFile(musicFile.c_str(), MusicChunkSize, 0, NULL);
 
          // Stream failed
          if(!mMusicData.stream)
          {
-            logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", fullMusicPath.c_str());
+            logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", musicFile.c_str());
             mMusicData.state = MusicStateStopped;
             break;
          }
@@ -757,7 +735,7 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol, MusicLocation musicL
          // Play stream
          if(!alurePlaySourceStream(mMusicData.source, mMusicData.stream, NumMusicStreamBuffers, loopcount, music_end_callback, NULL))
          {
-            logprintf(LogConsumer::LogError, "Failed to play music file: %s", mGameMusicList[mCurrentlyPlayingIndex].c_str());
+            logprintf(LogConsumer::LogError, "Failed to play music file: %s", musicFile.c_str());
             mMusicData.state = MusicStateStopped;
             break;
          }
@@ -1040,9 +1018,9 @@ void SoundSystem::music_end_callback(void* userdata, ALuint source)
    // Clean up the stream
    alureDestroyStream(mMusicData.stream, 0, NULL);
 
-   // If in-game, go to the next track, loop if at the end
+   // If in-game, go to the next track
    if(mMusicData.currentLocation == MusicLocationGame)
-      mCurrentlyPlayingIndex = (mCurrentlyPlayingIndex + 1) % mGameMusicList.size();
+      mGameMusicList.nextFile(true);    // Loops if we hit the end of the list
 
    mMusicData.state = MusicStateStopped;
 
@@ -1104,10 +1082,9 @@ void SoundSystem::playPrevTrack()
    if(!mGameMusicValid)
       return;
 
-   // Hacky: decrement the playing index by 2 because the music callback will increment by 1
-   mCurrentlyPlayingIndex = (mCurrentlyPlayingIndex - 2) % mGameMusicList.size();
-   if(mCurrentlyPlayingIndex < 0)
-      mCurrentlyPlayingIndex += mGameMusicList.size();
+   // Once to move us to previous file, a seocond time because after we fade out, we'll automatically advance to next track
+   mGameMusicList.prevFile();
+   mGameMusicList.prevFile();
 
    // Sending the stop command should automatically trigger the previous track
    mMusicData.command = MusicCommandFadeOut;

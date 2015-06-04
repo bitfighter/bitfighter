@@ -15,6 +15,7 @@
 #include "UITeamDefMenu.h"
 
 #include "EditorWorkUnit.h"
+#include "FileList.h"
 
 #include "LineItem.h"
 #include "PolyWall.h"
@@ -751,14 +752,14 @@ namespace Zap
 
    void EditorUserInterface::showCouldNotFindScriptMessage(const string &scriptName)
    {
-      string pluginDir = mGameSettings->getFolderManager()->getPluginDir();
+      Vector<string> pluginDirs = mGameSettings->getFolderManager()->getPluginDirs();
 
       Vector<string> messages;
       messages.push_back("Plugin not Found");
       messages.push_back("Press [[Esc]] to return to the editor");
 
       messages.push_back("Could not find the plugin called " + scriptName + "\n"
-         "I looked in the " + pluginDir + " folder.\n\n"
+         "I looked in these folders: " + listToString(pluginDirs, "; ") + ".\n\n"
          "You likely have a typo in the [EditorPlugins] section of your INI file.");
 
       mMessageBoxQueue.push_back(messages);
@@ -5171,11 +5172,15 @@ namespace Zap
 
    void EditorUserInterface::findPlugins()
    {
+      FileList fileList;
+
       mPluginInfos.clear();
-      string dirName = mGameSettings->getFolderManager()->getPluginDir();
-      Vector<string> plugins;
+      Vector<string> folders = mGameSettings->getFolderManager()->getPluginDirs();
+      map<string, string> plugins;
       string extension = ".lua";
-      getFilesFromFolder(dirName, plugins, &extension, 1);
+
+      for(S32 i = 0; i < folders.size(); i++)
+         fileList.addFilesFromFolder(folders[i], &extension, 1);
 
       // Reference to original
       Vector<PluginBinding> &bindings = mGameSettings->getIniSettings()->pluginBindings;
@@ -5194,27 +5199,27 @@ namespace Zap
       }
 
       // Loop through all of our detected plugins
-      for(S32 i = 0; i < plugins.size(); i++)
+      for(; !fileList.isLast(); fileList.nextFile())
       {
          // Try to find the title
          string title;
          Vector<boost::shared_ptr<MenuItem> > menuItems;  // Unused
 
-         EditorPlugin plugin(dirName + "/" + plugins[i], Vector<string>(), mLoadTarget, getGame());
+         EditorPlugin plugin(fileList.getCurrentFullFilename(), Vector<string>(), mLoadTarget, getGame());
 
          if(plugin.prepareEnvironment() && plugin.loadScript(false))
             plugin.runGetArgsMenu(title, menuItems);
 
          // If the title is blank or couldn't be found, use the file name
          if(title == "")
-            title = plugins[i];
+            title = fileList.getCurrentFilename();
 
-         PluginInfo info(title, plugins[i], plugin.getDescription(), plugin.getRequestedBinding());
+         PluginInfo info(title, fileList.getCurrentFilename(), plugin.getDescription(), plugin.getRequestedBinding());
 
          // Check for a binding from the INI, if it exists set it for this plugin
          for(S32 j = 0; j < bindings.size(); j++)
          {
-            if(bindings[j].script == plugins[i])
+            if(bindings[j].script == fileList.getCurrentFilename())
             {
                info.binding = bindings[j].key;
                break;
@@ -5295,6 +5300,5 @@ namespace Zap
       }
       return maxNameWidth + maxBindingWidth + 2 * horizMargin;
    }
-
 
 };

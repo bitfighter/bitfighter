@@ -6,6 +6,7 @@
 #include "GameRecorder.h"
 #include "tnlBitStream.h"
 #include "tnlNetObject.h"
+#include "FileList.h"
 #include "gameType.h"
 #include "ServerGame.h"
 #include "stringUtils.h"
@@ -134,24 +135,30 @@ static string newRecordingFileName(const string &dir, const string &levelName, c
 {
    makeSureFolderExists(dir);
 
-   Vector<string> files;
-   getFilesFromFolder(dir, files);
+   FileList fileList;
+   fileList.addFilesFromFolder(dir);
 
+   // Files are named with a numeric id... find max value already in use
    S32 max_id = 0;
-   for(S32 i = 0; i < files.size(); i++)
+   
+   while(!fileList.isLast())
    {
-      S32 id = atoi(files[i].c_str()); // do not use stoi unless using inside throw/cactch, stoi throws errors, if unhandled it kills program.
+      S32 id = atoi(fileList.getCurrentFilename().c_str()); // Don't use stoi here; stoi throws errors, kills program if unhandled
       if(max_id < id && id < S32_MAX)
          max_id = id;
+
+      fileList.nextFile();
    }
 
    string file = itos(max_id + 1);
-
    string file2 = makeFilenameFromString(levelName.c_str());
+
    if(file2.size() == 0)
       file2 = makeFilenameFromString(hostName.c_str());
-   if(file2.size() != 0)
+
+   if(file2.size() > 0)
       file = file + "_" + file2;
+
    return file;
 }
 

@@ -1181,7 +1181,6 @@ FolderManager::FolderManager()
 
    // root used to specify the following folders
    robotDir      = joindir(root, "robots");          
-   pluginDir     = joindir(root, "editor_plugins"); 
    luaDir        = joindir(root, "scripts");           
    iniDir        = joindir(root, "");                  
    logDir        = joindir(root, "");                  
@@ -1200,9 +1199,9 @@ FolderManager::FolderManager()
 
 
 // Constructor
-FolderManager::FolderManager(const string &levelDir,    const string &robotDir,  const Vector<string> &sfxDirs,  const string &musicDir, 
-                             const string &iniDir,      const string &logDir,    const string &screenshotDir,    const string &luaDir,
-                             const string &rootDataDir, const string &pluginDir, const Vector<string> &fontDirs, const string &recordDir) :
+FolderManager::FolderManager(const string &levelDir,    const string &robotDir,           const Vector<string> &sfxDirs,  const string &musicDir, 
+                             const string &iniDir,      const string &logDir,             const string &screenshotDir,    const string &luaDir,
+                             const string &rootDataDir, const Vector<string> &pluginDirs, const Vector<string> &fontDirs, const string &recordDir) :
                levelDir      (levelDir),
                robotDir      (robotDir),
                sfxDirs       (sfxDirs),
@@ -1212,7 +1211,7 @@ FolderManager::FolderManager(const string &levelDir,    const string &robotDir, 
                screenshotDir (screenshotDir),
                luaDir        (luaDir),
                rootDataDir   (rootDataDir),
-               pluginDir     (pluginDir),
+               pluginDirs    (pluginDirs),
                fontDirs      (fontDirs),
                recordDir     (recordDir)
 {
@@ -1249,52 +1248,40 @@ string FolderManager::getScreenshotDir()    const { CHK_RESOLVED();  return scre
 string FolderManager::getMusicDir()         const { CHK_RESOLVED();  return musicDir; }
 string FolderManager::getRootDataDir()      const { CHK_RESOLVED();  return rootDataDir; }
 string FolderManager::getLogDir()           const { CHK_RESOLVED();  return logDir; }
-string FolderManager::getPluginDir()        const { CHK_RESOLVED();  return pluginDir; }
 string FolderManager::getLuaDir()           const { CHK_RESOLVED();  return luaDir; }
 
 
-const Vector<string> &FolderManager::getSfxDirs()  const { CHK_RESOLVED();  return sfxDirs; }
-const Vector<string> &FolderManager::getFontDirs() const { CHK_RESOLVED();  return fontDirs; }
+const Vector<string> &FolderManager::getSfxDirs()    const { CHK_RESOLVED();  return sfxDirs;    }
+const Vector<string> &FolderManager::getFontDirs()   const { CHK_RESOLVED();  return fontDirs;   }
+const Vector<string> &FolderManager::getPluginDirs() const { CHK_RESOLVED();  return pluginDirs; }
 
 #undef CHK_RESOLVED
 
 
-void FolderManager::addSfxDir(const string &dir, bool appendToPath)
-{
-   if(!fileExists(dir))
-      return;
-
-   if(appendToPath)
-      sfxDirs.push_back(dir);
-   else
-      sfxDirs.push_front(dir);
-}
-
-
-void FolderManager::addSfxDirs(const Vector<string> &dirs)
-{
-   for(S32 i = 0; i < dirs.size(); i++)
-      addSfxDir(dirs[i], true);
-}
-
-
-void FolderManager::addFontDir(const string &dir, bool appendToPath)
-{
-   if(!fileExists(dir))
-      return;
-
-   if(appendToPath)
-      fontDirs.push_back(dir);
-   else
-      fontDirs.push_front(dir);
-}
+#define ADD_FOLDER_METHODS(methodName1, methodName2, folderDirs)         \
+   void FolderManager::methodName1(const string &dir, bool appendToPath) \
+   {                                                                     \
+      if(!fileExists(dir))                                               \
+         return;                                                         \
+                                                                         \
+      if(appendToPath)                                                   \
+         folderDirs.push_back(dir);                                      \
+      else                                                               \
+         folderDirs.push_front(dir);                                     \
+   }                                                                     \
+                                                                         \
+   void FolderManager::methodName2(const Vector<string> &dirs)           \
+   {                                                                     \
+      for(S32 i = 0; i < dirs.size(); i++)                               \
+         methodName1(dirs[i], true);                                     \
+   }                                                                     \
 
 
-void FolderManager::addFontDirs(const Vector<string> &dirs)
-{
-   for(S32 i = 0; i < dirs.size(); i++)
-      addFontDir(dirs[i], true);
-}
+ADD_FOLDER_METHODS(addPluginDir, addPluginDirs, pluginDirs)
+ADD_FOLDER_METHODS(addSfxDir,    addSfxDirs,    sfxDirs)
+ADD_FOLDER_METHODS(addFontDir,   addFontDirs,   fontDirs)
+
+#undef ADD_FOLDER_METHODS
 
 
 // Setters
@@ -1319,7 +1306,6 @@ void FolderManager::resolveDirs(GameSettings *settings)
 
    // rootDataDir used to specify the following folders
    folderManager->robotDir = resolutionHelper(cmdLineDirs.robotDir, rootDataDir, "robots");
-   folderManager->pluginDir = resolutionHelper(cmdLineDirs.pluginDir, rootDataDir, "editor_plugins");
    folderManager->luaDir = resolutionHelper(cmdLineDirs.luaDir, rootDataDir, "scripts");
    folderManager->iniDir = resolutionHelper(cmdLineDirs.iniDir, rootDataDir, "");
    folderManager->logDir = resolutionHelper(cmdLineDirs.logDir, rootDataDir, "");
@@ -1327,13 +1313,15 @@ void FolderManager::resolveDirs(GameSettings *settings)
    folderManager->musicDir = resolutionHelper(cmdLineDirs.musicDir, rootDataDir, "music");
    folderManager->recordDir = resolutionHelper(cmdLineDirs.recordDir, rootDataDir, "record");
 
+   folderManager->addPluginDirs(cmdLineDirs.pluginDirs);
+   folderManager->addPluginDir (joindir(rootDataDir, "editor_plugins"), true);
+
    // rootDataDir not used for these folders
+   folderManager->addSfxDirs(cmdLineDirs.sfxDirs);                             // Add any user specified folders
+   folderManager->addSfxDir (joindir(getInstalledDataDir(), "sfx"), true);     // And add the system default as a fallback
 
-   folderManager->addSfxDirs(cmdLineDirs.sfxDirs);                                         // Add any user specified folders
-   folderManager->addSfxDir (getInstalledDataDir() + getFileSeparator() + "sfx", true);    // And add the system default as a fallback
-
-   folderManager->addFontDirs(cmdLineDirs.fontDirs);                                       // Add any user specified folders
-   folderManager->addFontDir(getInstalledDataDir() + getFileSeparator() + "fonts", true);  // And add the system default as a fallback
+   folderManager->addFontDirs(cmdLineDirs.fontDirs);                           // Add any user specified folders
+   folderManager->addFontDir (joindir(getInstalledDataDir(), "fonts"), true);  // And add the system default as a fallback
 
    DatabaseWriter::sqliteFile = folderManager->logDir + DatabaseWriter::sqliteFile;
 
@@ -1455,38 +1443,6 @@ void FolderManager::resolveLevelDir(GameSettings *settings)
 }
 
 
-static string checkName(const string &filename, const Vector<string> &folders, const char *extensions[])
-{
-   string name;
-   if(filename.find('.') != string::npos)       // filename has an extension
-   {
-      for(S32 i = 0; i < folders.size(); i++)
-      {
-         name = strictjoindir(folders[i], filename);
-         if(fileExists(name))
-            return name;
-         i++;
-      }
-   }
-   else
-   {
-      S32 i = 0; 
-      while(strcmp(extensions[i], ""))
-      {
-         for(S32 j = 0; j < folders.size(); j++)
-         {
-            name = strictjoindir(folders[j], filename + extensions[i]);
-            if(fileExists(name))
-               return name;
-         }
-         i++;
-      }
-   }
-
-   return "";
-}
-
-
 string FolderManager::findLevelFile(const string &filename) const
 {
    return findLevelFile(levelDir, filename);
@@ -1530,15 +1486,6 @@ Vector<string> FolderManager::getHelperScriptFolderList() const
 }
 
 
-Vector<string> FolderManager::getPluginFolderList() const
-{
-   Vector<string> folders;
-   folders.push_back(pluginDir);
-
-   return folders;
-}
-
-
 string FolderManager::findLevelGenScript(const string &filename) const
 {
    const char *extensions[] = { ".levelgen", ".lua", "" };
@@ -1559,7 +1506,7 @@ string FolderManager::findPlugin(const string &filename) const
 {
    const char *extensions[] = { ".lua", "" };
 
-   return checkName(filename, getPluginFolderList(), extensions);
+   return checkName(filename, pluginDirs, extensions);
 }
 
 

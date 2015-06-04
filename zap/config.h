@@ -52,8 +52,8 @@ private:
    string screenshotDir;
    string luaDir;
    string rootDataDir;
-   string pluginDir;
    string recordDir;
+   Vector<string> pluginDirs;
    Vector<string> sfxDirs;
    Vector<string> fontDirs;
 
@@ -62,9 +62,9 @@ private:
 public:
    // Constructors
    FolderManager();
-   FolderManager(const string &levelDir,    const string &robotDir,  const Vector<string> &sfxDirs,  const string &musicDir, 
-                 const string &iniDir,      const string &logDir,    const string &screenshotDir,    const string &luaDir,
-                 const string &rootDataDir, const string &pluginDir, const Vector<string> &fontDirs, const string &recordDir);
+   FolderManager(const string &levelDir,    const string &robotDir,           const Vector<string> &sfxDirs,  const string &musicDir, 
+                 const string &iniDir,      const string &logDir,             const string &screenshotDir,    const string &luaDir,
+                 const string &rootDataDir, const Vector<string> &pluginDirs, const Vector<string> &fontDirs, const string &recordDir);
 
    virtual ~FolderManager();     // Destructor
 
@@ -76,8 +76,11 @@ public:
    string getMusicDir() const;
    string getRootDataDir() const;
    string getLogDir() const;
-   string getPluginDir() const;
    string getLuaDir() const;
+
+   const Vector<string> &getPluginDirs() const;
+   void addPluginDir(const string &dir, bool appendToPath);
+   void addPluginDirs(const Vector<string> &dirs);
 
    const Vector<string> &getSfxDirs() const;
    void addSfxDir(const string &dir, bool appendToPath);
@@ -97,7 +100,6 @@ public:
    static string findLevelFile(const string &levelDir, const string &filename);
 
    Vector<string> getScriptFolderList() const;
-   Vector<string> getPluginFolderList() const;
    Vector<string> getHelperScriptFolderList() const;
 
    string findLevelGenScript(const string &fileName) const;

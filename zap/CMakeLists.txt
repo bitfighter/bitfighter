@@ -31,6 +31,7 @@ set(SHARED_SOURCES
 	DisplayManager.cpp
 	EngineeredItem.cpp
 	EventManager.cpp
+	FileList.cpp
 	flagItem.cpp
 	game.cpp
 	gameConnection.cpp

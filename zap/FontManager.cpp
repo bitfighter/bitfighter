@@ -8,7 +8,7 @@
 #include "GameSettings.h"
 #include "DisplayManager.h"
 
-#include "physfs.hpp"
+//#include "physfs.hpp"
 #include "RenderUtils.h"         // For various rendering helpers
 #include "stringUtils.h"         // For getFileSeparator()
 #include "MathUtils.h"           // For MIN/MAX
@@ -78,12 +78,14 @@ BfFont::BfFont(const string &fontFile, GameSettings *settings)
    }
 
    // Prepare physfs for searching for sfx
-   PhysFS::clearSearchPath();
-   PhysFS::mountAll(settings->getFolderManager()->getFontDirs().getConstStlVector());
+   //PhysFS::clearSearchPath();
+   //PhysFS::mountAll(settings->getFolderManager()->getFontDirs().getConstStlVector());
 
    if(mStashFontId <= 0) {
-      string realDir = PhysFS::getRealDir(fontFile);
-      string file = joindir(realDir, fontFile);
+      //string realDir = PhysFS::getRealDir(fontFile);
+      //string file = joindir(realDir, fontFile);
+      string file = checkName(fontFile, settings->getFolderManager()->getFontDirs());
+
       mStashFontId = sth_add_font(FontManager::getStash(), file.c_str());
    }
 

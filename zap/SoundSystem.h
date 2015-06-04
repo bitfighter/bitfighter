@@ -9,6 +9,7 @@
 #include "SoundSystemEnums.h"
 #include "ConfigEnum.h"     // For sfxSets
 #include "Timer.h"
+#include "FileList.h"
 
 #ifdef ZAP_DEDICATED
 #  define BF_NO_AUDIO
@@ -109,8 +110,7 @@ private:
    static bool mGameMusicValid;
    static bool mCreditsMusicValid;
 
-   static Vector<string> mGameMusicList;
-   static S32 mCurrentlyPlayingIndex;
+   static FileList mGameMusicList;
 
    static Timer mMusicFadeTimer;
    static const U32 MusicFadeOutDelay = 500;
