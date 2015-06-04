@@ -41,6 +41,7 @@ public:
    void addFilesFromFolder(const string &dir, const string extensions[], S32 extensionCount);
    void addFilesFromFolders(const Vector<string> &dirs, const string extensions[], S32 extensionCount);
    void removeFile(const string &file);
+   bool hasFile(const string &file) const;
    bool isOk() const;
    S32 size() const;
 };

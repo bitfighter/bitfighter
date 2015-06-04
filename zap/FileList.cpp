@@ -99,6 +99,12 @@ void FileList::removeFile(const string &file)
 }
 
 
+bool FileList::hasFile(const string &file) const
+{
+   return mFileMap.find(file) != mFileMap.end();
+}
+
+
 void FileList::addFile(const string &dir, const string &filename)
 {
    // Only add the element if it does not yet exist... i.e. do not clobber existing, earlier values

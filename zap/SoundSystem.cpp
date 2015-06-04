@@ -322,7 +322,10 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
    {
       // End when we find a sound sans filename
       if(!gSFXProfiles[i].fileName)
+      {
+         TNLAssert(false, "I don't think we need this block... can delete if this never trips...");      // Wat 6/4/2015
          break;
+      }
 
       // Grab sound file location
       string sfxFile = fileList.getFullFilename(gSFXProfiles[i].fileName);
@@ -351,12 +354,34 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
       logprintf(LogConsumer::LogWarning, "No music files found in folder \"%s\".  Game will proceed without music", musicDir.c_str());
    else     // Got us some music!
    {
-      // Remove the menu music and credits music from the file list -- we don't want to play these in-game
-      mGameMusicList.removeFile(mMenuMusicFile);
-      mGameMusicList.removeFile(mCreditsMusicFile);
+      // Remove the menu music from the file list
+      if(mGameMusicList.hasFile(mMenuMusicFile))
+      {
+         string musicKey = mMenuMusicFile;
+         mMenuMusicFile = mGameMusicList.getFullFilename(musicKey);     // Get full name with path
+         mGameMusicList.removeFile(musicKey);                           // Remove from the list so we don't play this in-game
+         mMenuMusicValid = true;
+      }
+      else
+         logprintf(LogConsumer::LogWarning, "Could not find menu music file '%s' in folder '%s'", 
+                        mMenuMusicFile.c_str(), mMusicDir.c_str());
+
+      // Remove the credits music from the file list
+      if(mGameMusicList.hasFile(mCreditsMusicFile))
+      {
+         string musicKey = mCreditsMusicFile;
+         mCreditsMusicFile = mGameMusicList.getFullFilename(musicKey);  // Get full name with path
+         mGameMusicList.removeFile(musicKey);                           // Remove from the list so we don't play this in-game
+         mCreditsMusicValid = true;
+      }
+      else
+         logprintf(LogConsumer::LogWarning, "Could not find credits music file '%s' in folder '%s'", 
+                        mCreditsMusicFile.c_str(), mMusicDir.c_str());
       
       if(mGameMusicList.size() > 0)    // We have game music!
          mGameMusicValid = true;
+      else
+         logprintf(LogConsumer::LogWarning, "Could not find any suitable game music in folder '%s'", mMusicDir.c_str());
 
       if(musicSystemValid())
       {
@@ -704,6 +729,7 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol, MusicLocation musicL
          // Determine which music file to play based on our location
          string musicFile = "";
          ALsizei loopcount = 0;
+
          if(mMusicData.currentLocation == MusicLocationMenus && mMenuMusicValid)
          {
             musicFile = mMenuMusicFile;
@@ -716,7 +742,6 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol, MusicLocation musicL
 
          if(musicFile == "")
          {
-            logprintf(LogConsumer::LogError, "Could not find any music files!");
             mMusicData.state = MusicStateStopped;
             break;
          }
