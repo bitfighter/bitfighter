@@ -54,9 +54,6 @@ enum ModulePrimaryUseType
 static const S32 ShipModuleCount = 2;                // Modules a ship can carry
 static const S32 ShipWeaponCount = 3;                // Weapons a ship can carry
 
-static const string DefaultLoadout = "Turbo, Shield, Phaser, Mine, Burst";
-
-
 struct ModuleInfo
 {
    // Detection ranges for sensor against cloaked players

@@ -260,7 +260,13 @@ void ClientInfo::resetLoadout(bool levelHasLoadoutZone)
 
 void ClientInfo::resetLoadout()
 {
-   mOnDeckLoadout.setLoadout(DefaultLoadout);
+   mOnDeckLoadout.setLoadout(getDefaultLoadout());
+}
+
+
+string ClientInfo::getDefaultLoadout() const
+{
+   return "Turbo, Shield, Phaser, Mine, Burst";
 }
 
 

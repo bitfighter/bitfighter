@@ -119,6 +119,7 @@ public:
    const LoadoutTracker &getOnDeckLoadout() const;
    const LoadoutTracker &getOldLoadout() const;
 
+   string getDefaultLoadout() const;
    void resetActiveLoadout();
    void saveActiveLoadout(const LoadoutTracker &loadout);
    void updateLoadout(bool useOnDeck, bool engineerAllowed, bool silent = false);

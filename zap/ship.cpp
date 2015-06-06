@@ -126,7 +126,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos)
    mShapeType = ShipShape::Normal;
 #endif
 
-   mLoadout.setLoadout(DefaultLoadout);
+   mLoadout.setLoadout(clientInfo->getDefaultLoadout());
 
    // Added to keep the old loadout and keep the currently selected weapon. (Ship delete/new on player's respawn)
    if(clientInfo && clientInfo->getOldLoadout().getModule(0) != ModuleNone)
