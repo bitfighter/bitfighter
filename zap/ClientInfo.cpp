@@ -19,7 +19,8 @@ namespace Zap
 {
 
 // Constructor
-ClientInfo::ClientInfo()
+ClientInfo::ClientInfo() :
+   mDefaultLoadout("Turbo, Shield, Phaser, Mine, Burst")
 {
    mPlayerInfo = NULL;
    mGame = NULL;
@@ -266,7 +267,7 @@ void ClientInfo::resetLoadout()
 
 string ClientInfo::getDefaultLoadout() const
 {
-   return "Turbo, Shield, Phaser, Mine, Burst";
+   return mDefaultLoadout;
 }
 
 

@@ -96,6 +96,7 @@ protected:
 
    bool mNeedReturnToGameTimer;
    Timer mReturnToGameTimer;
+   string mDefaultLoadout;
 
 public:
    ClientInfo();           // Constructor
