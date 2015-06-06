@@ -106,6 +106,7 @@ using namespace TNL;
 #include <math.h>
 #include <stdarg.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #ifdef WIN32
 // For writeToConsole()
@@ -1008,6 +1009,11 @@ int main(int argc, char **argv)
 #ifdef USE_EXCEPTION_BACKTRACE
    signal(SIGSEGV, exceptionHandler);   // install our handler
 #endif
+
+   // We don't use srand much; we mostly use the builtin TNL random generator.
+   // However, it is used in a couple of places (shuffling the game music, for example),
+   // so we need to set the seed.
+   srand(time(NULL));         
 
    // Everything seems to need ScreenInfo from the DisplayManager
    DisplayManager::initialize();

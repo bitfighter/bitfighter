@@ -385,6 +385,8 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
 
       if(musicSystemValid())
       {
+         mGameMusicList.shuffle();
+
          // Set static volume
          mMusicData.volume = musicVolLevel;
 

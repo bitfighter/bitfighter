@@ -7,6 +7,7 @@
 
 #include "stringUtils.h"
 
+#include <algorithm>       // For std::random_shuffle
 #include <sys/stat.h>      // For testing existence of folders
 
 #ifdef TNL_OS_WIN32
@@ -14,6 +15,7 @@
 #else
 #  include <dirent.h>            // Need standard copy for *NIXes
 #endif
+
 namespace Zap
 {
 
@@ -22,6 +24,7 @@ namespace Zap
 FileList::FileList()
 {
    mOk = false;
+   currentItemIndex = -1;
 }
 
 
@@ -33,7 +36,7 @@ bool FileList::isOk() const
 
 bool FileList::isLast() const
 {
-   return mIterator == mFileMap.end();
+   return currentItemIndex == mFileMap.size() - 1;
 }
 
 
@@ -43,19 +46,21 @@ S32 FileList::size() const
 }
 
 
-FileListIterator FileList::getIterator()
+// Get filename (no path)
+string FileList::getCurrentFilename() const
 {
-   return mFileMap.begin();
-   //for(it_type iterator = m.begin(); iterator != m.end(); iterator++) {
+   return mFileMap.find(mAccessList[currentItemIndex])->first;
 }
 
 
+// Get filename with path
 string FileList::getCurrentFullFilename() const
 {
-   return mIterator->second;
+   return mFileMap.find(mAccessList[currentItemIndex])->second;
 }
 
 
+// Get filename with path give filename w/o path
 string FileList::getFullFilename(const string &filename)
 {
    FileListIterator iterator = mFileMap.find(filename);
@@ -67,35 +72,33 @@ string FileList::getFullFilename(const string &filename)
 }
 
 
-string FileList::getCurrentFilename() const
-{
-   return mIterator->first;
-}
-
-
 // Advance iterator to next file, wrap around to the beginning if we've hit the end
 void FileList::nextFile(bool wrap)
 {
-   mIterator++;
-
    if(wrap && isLast())
-      mIterator = mFileMap.begin();
+      currentItemIndex = 0;
+   else
+      currentItemIndex++;
 }
 
 
 // Move iterator to previous file, wrap around to the end if we've hit the beginning
 void FileList::prevFile()
 {
-   if(mIterator == mFileMap.begin())
-      mIterator = mFileMap.end();
-
-   mIterator--;
+   if(currentItemIndex == 0)
+      currentItemIndex = mFileMap.size() - 1;
+   else
+      currentItemIndex--;
 }
 
 
 void FileList::removeFile(const string &file)
 {
    mFileMap.erase(file);
+   S32 index = mAccessList.getIndex(file);
+   TNLAssert(index != -1, "Oops!");
+   mAccessList.erase_fast(index);   // Does not preserve order... is this OK?  In all uses so far, it is...
+   currentItemIndex = 0;            // Reset index
 }
 
 
@@ -105,11 +108,15 @@ bool FileList::hasFile(const string &file) const
 }
 
 
+// Private, internal method
 void FileList::addFile(const string &dir, const string &filename)
 {
    // Only add the element if it does not yet exist... i.e. do not clobber existing, earlier values
    if(mFileMap.find(filename) == mFileMap.end())
-      mFileMap[filename] = strictjoindir(dir, filename);  
+   {
+      mFileMap[filename] = strictjoindir(dir, filename);
+      mAccessList.push_back(filename);
+   }
 }
 
 
@@ -117,7 +124,7 @@ void FileList::addFilesFromFolder(const string &dir)
 {
    addFilesFromFolder(dir, NULL, 0);
 
-   mIterator = mFileMap.begin();    // Reset iterator
+   currentItemIndex = 0;    // Reset index
 }
 
 
@@ -163,7 +170,15 @@ void FileList::addFilesFromFolder(const string &dir, const string extensions[], 
    closedir(dp);
 
    mOk = true;
-   mIterator = mFileMap.begin();    // Reset iterator5
+
+   currentItemIndex = 0;    // Reset index
+}
+
+
+// Randomize the order by which files will be accessed
+void FileList::shuffle()
+{
+   std::random_shuffle(mAccessList.getStlVector().begin(), mAccessList.getStlVector().end());
 }
 
 
