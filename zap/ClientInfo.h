@@ -96,7 +96,7 @@ protected:
 
    bool mNeedReturnToGameTimer;
    Timer mReturnToGameTimer;
-   string mDefaultLoadout;
+   LoadoutTracker mDefaultLoadout;
 
 public:
    ClientInfo();           // Constructor
@@ -120,7 +120,9 @@ public:
    const LoadoutTracker &getOnDeckLoadout() const;
    const LoadoutTracker &getOldLoadout() const;
 
-   string getDefaultLoadout() const;
+   const LoadoutTracker &getDefaultLoadout() const;
+   void setDefaultLoadout(const LoadoutTracker &loadout);
+
    void resetActiveLoadout();
    void saveActiveLoadout(const LoadoutTracker &loadout);
    void updateLoadout(bool useOnDeck, bool engineerAllowed, bool silent = false);

@@ -265,9 +265,15 @@ void ClientInfo::resetLoadout()
 }
 
 
-string ClientInfo::getDefaultLoadout() const
+const LoadoutTracker &ClientInfo::getDefaultLoadout() const
 {
    return mDefaultLoadout;
+}
+
+
+void ClientInfo::setDefaultLoadout(const LoadoutTracker &loadout)
+{
+   mDefaultLoadout = loadout;
 }
 
 

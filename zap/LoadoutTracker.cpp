@@ -85,6 +85,18 @@ bool LoadoutTracker::update(const LoadoutTracker &loadout)
 }
 
 
+void LoadoutTracker::setLoadout(const LoadoutTracker &loadout)
+{
+   resetLoadout();
+
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      setModule(i, loadout.getModule(i));
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      setWeapon(i, loadout.getWeapon(i));
+}
+
+
 // Takes a vector of U8s repesenting loadout... M,M,W,W,W
 void LoadoutTracker::setLoadout(const Vector<U8> &items)
 {
@@ -105,74 +117,74 @@ void LoadoutTracker::setLoadout(const Vector<U8> &items)
 
    // If everything checks out, we can fill the loadout
    for(S32 i = 0; i < ShipModuleCount; i++)
-      mModules[i] = (ShipModule) items[i];
+      setModule(i, (ShipModule)items[i]);
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
-      mWeapons[i] = (WeaponType) items[i + ShipModuleCount];
+      setWeapon(i, (WeaponType)items[i + ShipModuleCount]);
 }
 
 
-void LoadoutTracker::setLoadout(const string &loadoutStr)
-{
-   // If we have a loadout string, try to get something useful out of it.
-   // Note that even if we are able to parse the loadout successfully, it might still be invalid for a 
-   // particular server or gameType... engineer, for example, is not allowed everywhere.
-   if(loadoutStr == "")
-      return;
-
-   Vector<string> words;
-   parseString(loadoutStr, words, ',');
-
-   if(words.size() != ShipModuleCount + ShipWeaponCount)      // Invalid loadout string
-   {
-      logprintf(LogConsumer::ConfigurationError, "Misconfigured loadout preset found in INI");
-      return;
-   }
-
-   bool found;
-
-   for(S32 i = 0; i < ShipModuleCount; i++)
-   {
-      found = false;
-      const char *word = words[i].c_str();
-
-      for(S32 j = 0; j < ModuleCount; j++)
-         if(stricmp(word, ModuleInfo::getModuleInfo((ShipModule) j)->getName()) == 0)     // Case insensitive
-         {
-            mModules[i] = ShipModule(j);
-            found = true;
-            break;
-         }
-
-      if(!found)
-      {
-         logprintf(LogConsumer::ConfigurationError, "Unknown module found in loadout preset in INI file: %s", word);
-         resetLoadout();
-         return;
-      }
-   }
-
-   for(S32 i = 0; i < ShipWeaponCount; i++)
-   {
-      found = false;
-      const char *word = words[i + ShipModuleCount].c_str();
-
-      for(S32 j = 0; j < WeaponCount; j++)
-         if(stricmp(word, WeaponInfo::getWeaponInfo(WeaponType(j)).name.getString()) == 0)
-         {
-            mWeapons[i] = WeaponType(j);
-            found = true;
-            break;
-         }
-
-      if(!found)
-      {
-         logprintf(LogConsumer::ConfigurationError, "Unknown weapon found in loadout preset in INI file: %s", word);
-         resetLoadout();
-         return;
-      }
-   }
-}
+//void LoadoutTracker::setLoadout(const string &loadoutStr)
+//{
+//   // If we have a loadout string, try to get something useful out of it.
+//   // Note that even if we are able to parse the loadout successfully, it might still be invalid for a 
+//   // particular server or gameType... engineer, for example, is not allowed everywhere.
+//   if(loadoutStr == "")
+//      return;
+//
+//   Vector<string> words;
+//   parseString(loadoutStr, words, ',');
+//
+//   if(words.size() != ShipModuleCount + ShipWeaponCount)      // Invalid loadout string
+//   {
+//      logprintf(LogConsumer::ConfigurationError, "Misconfigured loadout preset found in INI");
+//      return;
+//   }
+//
+//   bool found;
+//
+//   for(S32 i = 0; i < ShipModuleCount; i++)
+//   {
+//      found = false;
+//      const char *word = words[i].c_str();
+//
+//      for(S32 j = 0; j < ModuleCount; j++)
+//         if(stricmp(word, ModuleInfo::getModuleInfo((ShipModule) j)->getName()) == 0)     // Case insensitive
+//         {
+//            mModules[i] = ShipModule(j);
+//            found = true;
+//            break;
+//         }
+//
+//      if(!found)
+//      {
+//         logprintf(LogConsumer::ConfigurationError, "Unknown module found in loadout preset in INI file: %s", word);
+//         resetLoadout();
+//         return;
+//      }
+//   }
+//
+//   for(S32 i = 0; i < ShipWeaponCount; i++)
+//   {
+//      found = false;
+//      const char *word = words[i + ShipModuleCount].c_str();
+//
+//      for(S32 j = 0; j < WeaponCount; j++)
+//         if(stricmp(word, WeaponInfo::getWeaponInfo(WeaponType(j)).name.getString()) == 0)
+//         {
+//            mWeapons[i] = WeaponType(j);
+//            found = true;
+//            break;
+//         }
+//
+//      if(!found)
+//      {
+//         logprintf(LogConsumer::ConfigurationError, "Unknown weapon found in loadout preset in INI file: %s", word);
+//         resetLoadout();
+//         return;
+//      }
+//   }
+//}
 
 
 void LoadoutTracker::setModule(U32 moduleIndex, ShipModule module)

@@ -240,7 +240,8 @@ public:
    TNL_DECLARE_RPC(s2cCreditEnergy, (SignedInt<18> energy));
    TNL_DECLARE_RPC(s2cSetFastRechargeTime, (U32 time));
 
-   TNL_DECLARE_RPC(c2sRequestLoadout, (Vector<U8> loadout));   // Client has changed his loadout configuration
+   TNL_DECLARE_RPC(c2sSetDefaultLoadout, (Vector<U8> loadout));   // Client's preferred starting loadout
+   TNL_DECLARE_RPC(c2sRequestLoadout, (Vector<U8> loadout));      // Client has changed his loadout configuration
 
    TNL_DECLARE_RPC(s2cDisplayMessageESI, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx,
                    StringTableEntry formatString, Vector<StringTableEntry> e, Vector<StringPtr> s, Vector<S32> i));
