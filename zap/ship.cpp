@@ -126,11 +126,14 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos)
    mShapeType = ShipShape::Normal;
 #endif
 
-   mLoadout.setLoadout(clientInfo->getDefaultLoadout());
+   if(clientInfo)
+   {
+      mLoadout.setLoadout(clientInfo->getDefaultLoadout());
 
-   // Added to keep the old loadout and keep the currently selected weapon. (Ship delete/new on player's respawn)
-   if(clientInfo && clientInfo->getOldLoadout().getModule(0) != ModuleNone)
-      mLoadout = clientInfo->getOldLoadout();
+      // Added to keep the old loadout and keep the currently selected weapon. (Ship delete/new on player's respawn)
+      if(clientInfo->getOldLoadout().getModule(0) != ModuleNone)
+         mLoadout = clientInfo->getOldLoadout();
+   }
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
