@@ -112,10 +112,12 @@ set(ZLIB_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/zlib")
 # libpng needs two for some weird reason
 set(PNG_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/libpng")
 set(PNG_PNG_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/libpng")
+set(PHYSFS_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/physfs")
 
 # Directly specify some libs
 set(OPENAL_LIBRARY "${BF_LIB_DIR}/OpenAL-Soft.framework")
 set(PNG_LIBRARY "${BF_LIB_DIR}/libpng.framework")
+set(PHYSFS_LIBRARY "${BF_LIB_DIR}/physfs.framework")
 
 set(SPARKLE_SEARCH_PATHS ${BF_LIB_DIR})
 # OSX doesn't use vorbisfile (or it's built-in to normal vorbis, I think)
