@@ -13,8 +13,8 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 
-// BAD - no testing junk should be in our normal classes
-#include "../gtest/include/gtest/gtest.h"  // Put this as header path in cmake?
+#include "gtest/gtest_prod.h"
+
 
 namespace Zap
 {
