@@ -24,7 +24,7 @@
 
 #include <time.h>
 
-#include "gtest/gtest_prod.h"
+#include "Test.h"
 
 
 using namespace TNL;
@@ -351,7 +351,6 @@ public:
    TNL_DECLARE_NETCONNECTION(GameConnection);
 
    ///// Testing
-   friend class ObjectScopeTest;
    FRIEND_TEST(ObjectScopeTest, TestItemPropagation);
 
 };
