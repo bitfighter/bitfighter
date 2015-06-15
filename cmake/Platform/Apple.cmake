@@ -10,9 +10,21 @@ message(STATUS "MACOSX_DEPLOYMENT_TARGET: ${OSX_DEPLOY_TARGET}")
 
 # These mandatory variables should be set with cross-compiling
 if(NOT XCOMPILE)
-	# MACOSX_DEPLOYMENT_TARGET must be set in the environment to compile properly
+	# Detect current OSX version
+	set(OSX_VERSION 0)
+	find_program(sw_vers sw_vers)
+	execute_process(COMMAND ${sw_vers} "-productVersion" OUTPUT_VARIABLE OSX_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+	string(REGEX REPLACE "([0-9]+.[0-9]+).*" "\\1" OSX_VERSION ${OSX_VERSION})
+	
+	message(STATUS "OSX Version: ${OSX_VERSION}")
+    
 	if(NOT OSX_DEPLOY_TARGET)
-		message(FATAL_ERROR "MACOSX_DEPLOYMENT_TARGET environment variable not set.  Set this like so: 'export MACOSX_DEPLOYMENT_TARGET=10.6'")
+		# MACOSX_DEPLOYMENT_TARGET must be set in the environment to compile properly on OSX 10.6 and earlier
+		if(${OSX_VERSION} VERSION_LESS "10.7")
+			message(FATAL_ERROR "MACOSX_DEPLOYMENT_TARGET environment variable not set.  Set this like so: 'export MACOSX_DEPLOYMENT_TARGET=10.6'")
+		else()
+			set(OSX_DEPLOY_TARGET ${OSX_VERSION})
+		endif()
 	endif()
 
 
@@ -38,10 +50,18 @@ if(NOT XCOMPILE)
 		else()
 			set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk/")
 		endif()
+
 	# Here we use whatever the default SDK is for x86_64, but will deploy to OSX 10.6
-	else()
+	elseif(OSX_DEPLOY_TARGET VERSION_LESS "10.7")
 		set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX${OSX_DEPLOY_TARGET}.sdk/")
+
+	# For OSX 10.7+, we need to find the path to the SDK
+	else()
+		find_program(xcodebuild xcodebuild)
+		execute_process(COMMAND ${xcodebuild} -version -sdk macosx${OSX_DEPLOY_TARGET} Path OUTPUT_VARIABLE CMAKE_OSX_SYSROOT OUTPUT_STRIP_TRAILING_WHITESPACE)
 	endif()
+	
+	message(STATUS "CMAKE_OSX_SYSROOT: ${CMAKE_OSX_SYSROOT}")
 endif()
 
 message(STATUS "Compiling for OSX architectures: ${CMAKE_OSX_ARCHITECTURES}")
@@ -66,6 +86,12 @@ if(OSX_DEPLOY_TARGET VERSION_EQUAL "10.4")
 endif()
 
 
+# OSX 10.8 and greater need this to find some dependencies
+if(OSX_DEPLOY_TARGET VERSION_GREATER "10.7")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
+endif()
+
+
 #
 # Library searching and dependencies
 #  
@@ -86,10 +112,12 @@ set(ZLIB_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/zlib")
 # libpng needs two for some weird reason
 set(PNG_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/libpng")
 set(PNG_PNG_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/libpng")
+set(PHYSFS_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/physfs")
 
 # Directly specify some libs
 set(OPENAL_LIBRARY "${BF_LIB_DIR}/OpenAL-Soft.framework")
 set(PNG_LIBRARY "${BF_LIB_DIR}/libpng.framework")
+set(PHYSFS_LIBRARY "${BF_LIB_DIR}/physfs.framework")
 
 set(SPARKLE_SEARCH_PATHS ${BF_LIB_DIR})
 # OSX doesn't use vorbisfile (or it's built-in to normal vorbis, I think)

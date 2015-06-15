@@ -9,6 +9,7 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include <map>
+#include <string>
 
 using namespace std;
 using namespace TNL;
