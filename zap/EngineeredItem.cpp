@@ -1383,6 +1383,8 @@ ForceFieldProjector::ForceFieldProjector(lua_State *L) : Parent(TEAM_NEUTRAL, Po
       }
 
       findMountPoint(getGame()->getLevel(), getPos());
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 
    initialize();
@@ -1968,6 +1970,8 @@ Turret::Turret(lua_State *L) : Parent(TEAM_NEUTRAL, Point(0,0), Point(1,0))
          setPos(L, 1);
          setTeam(L, 2);
       }
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 
    initialize();
@@ -2440,6 +2444,8 @@ Mortar::Mortar(lua_State *L) : Parent(TEAM_NEUTRAL, Point(0, 0), Point(1, 0))
          setPos(L, 1);
          setTeam(L, 2);
       }
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 
    initialize();

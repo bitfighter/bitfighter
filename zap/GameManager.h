@@ -58,6 +58,7 @@ public:
    static void deleteServerGame();
    static void idleServerGame(U32 timeDelta);
 
+
    // ClientGame related
 #ifndef ZAP_DEDICATED
    static const Vector<ClientGame *> *getClientGames();

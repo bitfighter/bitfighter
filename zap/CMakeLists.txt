@@ -63,6 +63,7 @@ set(SHARED_SOURCES
 	LuaGlobals.cpp
 	luaGameInfo.cpp
 	luaLevelGenerator.cpp
+	LuaObject.cpp
 	LuaScriptRunner.cpp
 	masterConnection.cpp
 	MathUtils.cpp

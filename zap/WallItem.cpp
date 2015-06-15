@@ -44,6 +44,8 @@ WallItem::WallItem(lua_State *L)
          lua_pop(L, 1);                      // Clean up stack for setGeom, which only expects points
          lua_setGeom(L);
       }
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;

@@ -330,6 +330,8 @@ SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, SoccerBa
          setPos(L, 1);
 
       mLuaBall = true;
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 
    mInitialPos = getPos();

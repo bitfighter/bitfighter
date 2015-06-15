@@ -30,6 +30,8 @@ Zone::Zone(lua_State *L)
          
       if(profile == 1)
          setGeom(L, 1);
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 
    setTeam(TEAM_NEUTRAL);

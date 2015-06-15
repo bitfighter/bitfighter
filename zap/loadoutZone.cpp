@@ -42,6 +42,8 @@ LoadoutZone::LoadoutZone(lua_State *L)
          setGeom(L, 1);
          setTeam(L, 2);
       }
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;

@@ -6,7 +6,7 @@
 #ifndef _PLAYERINFO_H_
 #define _PLAYERINFO_H_
 
-#include "gameType.h"      // For PlayerInfo below...
+#include "gameType.h"   // For PlayerInfo below...
 
 namespace Zap
 {

@@ -8,6 +8,7 @@
 #include "game.h"
 #include "Level.h"
 #include "gameConnection.h"
+#include "GameManager.h"
 #include "ClientInfo.h"
 
 #include "GameObjectRender.h"
@@ -349,6 +350,8 @@ RepairItem::RepairItem(lua_State *L) : Parent((F32)REPAIR_ITEM_RADIUS, DEFAULT_R
          setPos(L, 1);
          mRepopDelay = getInt(L, 2);
       }
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 }
 
@@ -465,6 +468,8 @@ EnergyItem::EnergyItem(lua_State *L) : Parent(20, DEFAULT_RESPAWN_TIME)    // Co
          setPos(L, 1);
          mRepopDelay = getInt(L, 2);
       }
+
+      LUA_REGISTER_WITH_TRACKER;
    }
    
    mObjectTypeNumber = EnergyItemTypeNumber;

@@ -25,6 +25,11 @@ namespace Zap
 // Combined default C++ / Lua constructor
 MenuItem::MenuItem(lua_State *L)
 {
+   if(L)
+   {
+      LUA_REGISTER_WITH_TRACKER;
+   }
+
    initialize();
 }
 
@@ -597,6 +602,8 @@ ToggleMenuItem::ToggleMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NONE, KE
    mWrap = getCheckedBool(L, 4, methodName, false);
    mHelp = getString(L, 4, "");
 
+   LUA_REGISTER_WITH_TRACKER;
+
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
@@ -627,6 +634,8 @@ YesNoMenuItem::YesNoMenuItem(lua_State *L) : Parent("", Vector<string>(), 0, tru
    // Optional (but recommended) items
    setIndex(getInt(L, 2, 1) - 1);                // - 1 for compatibility with Lua's 1-based array index
    mHelp = getString(L, 3, "");
+
+   LUA_REGISTER_WITH_TRACKER;
 }
 
 
@@ -978,6 +987,8 @@ CounterMenuItem::CounterMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NONE, 
       logprintf(LogConsumer::ConsoleMsg, "Usage: CounterMenuItem(<display val (str)> [step (i)] [min val (i)] [max val (i)] [units (str)] [min msg (str)] [help (str)] <value (int))");
       throw e;
    }
+
+   LUA_REGISTER_WITH_TRACKER;
 }
 
 
@@ -1444,6 +1455,8 @@ TextEntryMenuItem::TextEntryMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NO
    mEmptyVal = getString(L, 3, "");
    mLineEditor.mMaxLen = getInt(L, 4, 32);
    mHelp = getString(L, 5, "");
+
+   LUA_REGISTER_WITH_TRACKER;
 }
 
 

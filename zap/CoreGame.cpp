@@ -330,6 +330,8 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
          setTeam(L, 2);
          setStartingHealth(getFloat(L, 3));
       }
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;

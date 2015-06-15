@@ -1191,9 +1191,7 @@ public:
 
 // This goes in the constructor of the "wrapped class"
 #define LUAW_CONSTRUCTOR_INITIALIZATIONS \
-   mLuaProxy = NULL
-
-
+   mLuaProxy = NULL;                     
 
 // The following macros are used in the header of the 'wrapped class'.  Each one sets up the class
 // in a slightly different manner
@@ -1204,7 +1202,7 @@ public:
    LuaProxy<className> *mLuaProxy; \
    LuaProxy<className> *getLuaProxy() { return mLuaProxy; } \
    virtual void setLuaProxy(LuaProxy<className> *obj) { mLuaProxy = obj; } \
-   virtual void push(lua_State *L) { luaW_push(L, this); }
+   virtual void push(lua_State *L) { luaW_push(L, this); } 
 
 // This one is for an abstract class and cannot be instantiated or returned as an object in Lua
 #define  LUAW_DECLARE_ABSTRACT_CLASS(className) \
@@ -1219,21 +1217,25 @@ public:
    LuaProxy<className> *getLuaProxy() { return mLuaProxy; } \
    virtual void setLuaProxy(LuaProxy<className> *obj) { mLuaProxy = obj; } \
    virtual void push(lua_State *L) { luaW_push(L, this); } \
-   className(lua_State *L) { THROW_LUA_EXCEPTION(L, "Illegal attempt to instantiate a non-instantiable class!"); }
+   className(lua_State *L) { THROW_LUA_EXCEPTION(L, "Illegal attempt to instantiate a non-instantiable class!"); } 
 
 // This is the same as the CUSTOM_CONSTRUCTOR variant, except it sets up a constructor for you.  It
 // allows instantiation and access from Lua
 // TODO- Convert everything to use the above, rename it, and get rid of this one -- what? i don't understand ~raptor
-#define  LUAW_DECLARE_CLASS(className) \
-   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(className) \
+#define  LUAW_DECLARE_CLASS(className)                      \
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(className)         \
    className(lua_State *L) { LUAW_CONSTRUCTOR_INITIALIZATIONS; } 
 
 
+#define LUA_REGISTER_WITH_TRACKER \
+{                                 \
+   LuaObject::trackThisItem();    \
+}
+
 
 // And this goes in the destructor of the "wrapped class"
-#define LUAW_DESTRUCTOR_CLEANUP \
-   if(mLuaProxy) mLuaProxy->setDefunct(true)
-
+#define LUAW_DESTRUCTOR_CLEANUP                       \
+   if(mLuaProxy) mLuaProxy->setDefunct(true);   
 
 
 // Runs a method on a proxied object.  Returns nil if the proxied object no longer exists, so Lua scripts may need to check for this.

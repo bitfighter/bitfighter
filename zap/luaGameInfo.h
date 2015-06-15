@@ -6,16 +6,15 @@
 #ifndef _LUAGAME_H_
 #define _LUAGAME_H_
 
-
 #include "LuaBase.h"
 #include "LuaWrapper.h"
+
 
 namespace Zap
 {
 
 // Forward declarations
 class ServerGame;
-
 
 class LuaGameInfo
 {

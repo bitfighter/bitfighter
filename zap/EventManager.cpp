@@ -73,6 +73,7 @@ EventManager::EventManager(lua_State *L)
    TNLAssert(false, "Should never be called!");
 }
 
+
 // Destructor
 EventManager::~EventManager()
 {

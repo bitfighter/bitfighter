@@ -6,6 +6,7 @@
 #ifndef _MENU_ITEMS_H_
 #define _MENU_ITEMS_H_
 
+#include "LuaObject.h"
 #include "teamInfo.h"      // For Team def
 #include "lineEditor.h"
 #include "Color.h"
@@ -48,7 +49,7 @@ class MenuUserInterface;
 ////////////////////////////////////
 ////////////////////////////////////
 
-class MenuItem: public RenderManager
+class MenuItem: public RenderManager, public LuaObject
 {
 private:
    S32 mIndex;

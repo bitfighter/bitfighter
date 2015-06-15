@@ -1365,7 +1365,8 @@ const S32 Asteroid::ASTEROID_INITIAL_SIZELEFT  = 3;
  *   @luafunc Asteroid::Asteroid(geom)
  */
 // Combined Lua / C++ default constructor
-Asteroid::Asteroid(lua_State *L) : Parent(Point(0,0), ASTEROID_SPEED, getAsteroidRadius(ASTEROID_INITIAL_SIZELEFT), getAsteroidMass(ASTEROID_INITIAL_SIZELEFT))
+Asteroid::Asteroid(lua_State *L) : 
+      Parent(Point(0,0), ASTEROID_SPEED, getAsteroidRadius(ASTEROID_INITIAL_SIZELEFT), getAsteroidMass(ASTEROID_INITIAL_SIZELEFT))
 {
    mSizeLeft = ASTEROID_INITIAL_SIZELEFT;  // higher = bigger
 
@@ -1384,6 +1385,8 @@ Asteroid::Asteroid(lua_State *L) : Parent(Point(0,0), ASTEROID_SPEED, getAsteroi
       {
          setPos(L, 1);
       }
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -1771,8 +1774,10 @@ TestItem::TestItem(lua_State *L) : Parent(Point(0, 0), true, (F32)TEST_ITEM_RADI
 
       if(checkArgList(L, constructorArgList, "TestItem", "constructor") == 1)
          setPos(L, 1);
+
+      LUA_REGISTER_WITH_TRACKER;
    }
-   
+
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = TestItemTypeNumber;
 
@@ -1888,6 +1893,8 @@ ResourceItem::ResourceItem(lua_State *L) : Parent(Point(0,0), true, (F32)RESOURC
 
       if(checkArgList(L, constructorArgList, "ResourceItem", "constructor") == 1)
          setPos(L, 1);
+
+      LUA_REGISTER_WITH_TRACKER;
    }
    
    mNetFlags.set(Ghostable);

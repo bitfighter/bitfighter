@@ -62,6 +62,8 @@ SpeedZone::SpeedZone(lua_State *L)
          setGeom(L, 1);
          setSpeed(getInt(L, 2));
       }
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 
    preparePoints();           // If this is constructed by Lua, we need to have some default geometry in place

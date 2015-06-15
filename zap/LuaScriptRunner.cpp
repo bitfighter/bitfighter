@@ -92,6 +92,7 @@ LuaScriptRunner::~LuaScriptRunner()
    deleteScript(getScriptId());
 
    LUAW_DESTRUCTOR_CLEANUP;
+   //if(mLuaProxy) mLuaProxy->setDefunct(true);
 }
 
 

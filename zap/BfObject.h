@@ -8,6 +8,8 @@
 
 #include "gridDB.h"           // Base class
 #include "LuaScriptRunner.h"  // Base class
+#include "LuaObject.h"        // Base class
+
 #include "move.h"
 #include "LuaWrapper.h"
 #include "HelpItemManager.h"  // HelpItem enum
@@ -218,7 +220,7 @@ class WallSegment;
 class ClientInfo;
 class Level;
 
-class BfObject : public DatabaseObject, public NetObject, public EditorObject
+class BfObject : public DatabaseObject, public NetObject, public EditorObject, public LuaObject
 {
    typedef NetObject Parent;
 

@@ -7,6 +7,7 @@
 #define _LUA_SCRIPT_RUNNER_H
 
 #include "LuaBase.h"          // Parent class
+
 #include "EventManager.h"
 #include "LuaWrapper.h"
 

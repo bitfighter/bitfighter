@@ -43,6 +43,8 @@ PolyWall::PolyWall(lua_State *L)
 
       if(profile == 1)
          lua_setGeom(L);
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 }
 

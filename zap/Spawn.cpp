@@ -176,6 +176,8 @@ Spawn::Spawn(lua_State *L) : AbstractSpawn(Point(0,0))
          setPos(L, 1);
          setTeam(L, 2);
       }
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 }
 
@@ -450,6 +452,8 @@ AsteroidSpawn::AsteroidSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_
 
       if(profile == 2)
          setRespawnTime(getInt(L, 2));
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 }
 
@@ -636,6 +640,8 @@ FlagSpawn::FlagSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
 
       if(profile == 3)      
          setRespawnTime(getInt(L, 3));
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 }
 

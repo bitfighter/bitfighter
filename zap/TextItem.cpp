@@ -50,6 +50,8 @@ TextItem::TextItem(lua_State *L)
          setGeom(L, 1);
          setText(L, 2);
       }
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;

@@ -8,7 +8,6 @@
 
 #include "LuaScriptRunner.h"  // Parent class
 
-
 using namespace std;
 
 namespace Zap

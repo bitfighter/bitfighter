@@ -10,13 +10,16 @@
 #include "GeomUtils.h"
 
 #include "tnlLog.h"
+#include "tnlNetBase.h"
 
 namespace Zap
 {
 
+// Statics
 U32 GridDatabase::mQueryId = 0;
 ClassChunker<DatabaseBucketEntry> *GridDatabase::mChunker = NULL;
 U32 GridDatabase::mCountGridDatabase = 0;
+
 
 static U32 getNextId() 
 {

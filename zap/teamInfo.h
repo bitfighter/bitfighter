@@ -7,6 +7,7 @@
 #define _TEAM_INFO_H_
 
 #include "LuaBase.h"          // Parent class
+#include "LuaObject.h"
 
 #include "TeamPreset.h"       // For TeamPreset def
 #include "LuaWrapper.h"
@@ -90,7 +91,7 @@ public:
 class FlagSpawn;
 
 // Class for managing teams in the game
-class Team : public AbstractTeam
+class Team : public AbstractTeam, public LuaObject
 {  
    typedef AbstractTeam Parent;
 
@@ -108,7 +109,7 @@ private:
 
 public:
    // Constructors
-   Team();                                                
+   Team(lua_State *L = NULL);
    Team(const char *name, const Color &color);            
    Team(const char *name, F32 r, F32 g, F32 b, S32 score);
    Team(const TeamInfo &teamInfo);
@@ -135,7 +136,7 @@ public:
    void incrementBotCount();
 
    ///// Lua interface
-   LUAW_DECLARE_CLASS(Team);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Team);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];

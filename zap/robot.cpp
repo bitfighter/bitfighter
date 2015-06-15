@@ -65,6 +65,8 @@ Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0)),
 
       lua_pop(L, i - 1);
       TNLAssert(lua_gettop(L) == 0, "Stack dirty");
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 
    mHasSpawned = false;

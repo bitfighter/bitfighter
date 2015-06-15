@@ -6,7 +6,6 @@
 #ifndef _ROBOT_H_
 #define _ROBOT_H_
 
-
 #include "ship.h"             // Parent class
 
 namespace Zap

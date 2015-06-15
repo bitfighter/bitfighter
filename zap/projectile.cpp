@@ -53,6 +53,8 @@ Projectile::Projectile(lua_State *L)
          if(WeaponInfo::getWeaponInfo(newType).projectileType != NotAProjectile)
             type = newType;
       }
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 
    initialize(type, Point(0,0), Point(0,0), NULL);
@@ -540,6 +542,11 @@ Burst::Burst(const Point &pos, const Point &vel, BfObject *shooter, F32 radius) 
 // Combined Lua / C++ default constructor -- used in Lua only at the moment
 Burst::Burst(lua_State *L)
 {
+   if(L)
+   {
+      LUA_REGISTER_WITH_TRACKER;
+   }
+
    initialize(Point(0,0), Point(0,0), NULL);
 }
 
@@ -826,6 +833,8 @@ Mine::Mine(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL, BurstRadius)
 
       if(profile == 1)
          setPos(L, 1);
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 }
 
@@ -1125,6 +1134,8 @@ SpyBug::SpyBug(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL)
          setPos(L, 1);
          setTeam(L, 2);
       }
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 }
 
@@ -1382,6 +1393,11 @@ Seeker::Seeker(const Point &pos, const Point &vel, F32 angle, BfObject *shooter)
 // Combined Lua / C++ default constructor
 Seeker::Seeker(lua_State *L)
 {
+   if(L)
+   {
+      LUA_REGISTER_WITH_TRACKER;
+   }
+
    initialize(Point(0,0), Point(0,0), 0, NULL);
 }
 

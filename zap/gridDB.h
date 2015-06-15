@@ -30,10 +30,13 @@ class Level;
 struct DatabaseBucketEntry;
 class DatabaseObject;
 
+
 struct DatabaseBucketEntryBase
 {
    DatabaseBucketEntry *nextInBucket;
 };
+
+
 struct DatabaseBucketEntry : public DatabaseBucketEntryBase
 {
    DatabaseObject *theObject;
@@ -48,7 +51,6 @@ class DatabaseObject : public GeomObject
 
    friend class GridDatabase;
    friend class EditorObjectDatabase;
-
 
 private:
    U32 mLastQueryId;
@@ -198,7 +200,7 @@ public:
 };
 
 
-};
+}
 
 
 // Reusable container for searching gridDatabases

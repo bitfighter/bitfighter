@@ -230,9 +230,14 @@ void AbstractTeam::addScore(S32 score)
 ////////////////////////////////////////
 
 
-// Default constructor
-Team::Team()
+// Combined Lua/default constructor
+Team::Team(lua_State *L)
 {
+   if(L)
+   {
+      LUA_REGISTER_WITH_TRACKER;
+   }
+
    initialize();
 }
 
@@ -258,6 +263,7 @@ Team::Team(const char *name, F32 r, F32 g, F32 b, S32 score)
 }
 
 
+// Constructor
 Team::Team(const TeamInfo &teamInfo)
 {
    initialize();

@@ -161,6 +161,8 @@ Teleporter::Teleporter(lua_State *L)
 
       if(profile > 0)
          doSetGeom(L);
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 }
 

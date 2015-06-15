@@ -159,6 +159,8 @@ void ServerGame::cleanUp()
    mScopeAlwaysList.clear();
 
    Parent::cleanUp();
+
+   LuaObject::eraseAllPotentiallyUntrackedObjects();
 }
 
 

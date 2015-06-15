@@ -45,6 +45,8 @@ FlagItem::FlagItem(lua_State *L) : Parent(Point(0,0), true, (F32)Ship::Collision
          setPos(L, 1);
          setTeam(L, 2);
       }
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 }
 

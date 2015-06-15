@@ -34,6 +34,8 @@ SlipZone::SlipZone(lua_State *L)
 
       if(profile == 1)         // Geom
          setGeom(L,  1);
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;

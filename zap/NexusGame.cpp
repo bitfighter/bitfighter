@@ -987,6 +987,8 @@ NexusZone::NexusZone(lua_State *L)
          
       if(profile == 1)
          setGeom(L, 1);
+
+      LUA_REGISTER_WITH_TRACKER;
    }
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;

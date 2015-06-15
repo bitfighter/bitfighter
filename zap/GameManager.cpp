@@ -28,9 +28,11 @@ namespace Zap
 
 // Declare statics
 ServerGame *GameManager::mServerGame = NULL;
+
 #ifndef ZAP_DEDICATED
    Vector<ClientGame *> GameManager::mClientGames;
 #endif
+
 GameManager::HostingModePhase GameManager::mHostingModePhase = GameManager::NotHosting;
 Console *GameManager::gameConsole = NULL;    // For the moment, we'll just have one console for everything.  This may change later, but probably won't.
 

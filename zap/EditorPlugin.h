@@ -6,7 +6,9 @@
 #ifndef _EDITOR_PLUGIN_H_
 #define _EDITOR_PLUGIN_H_
 
-#include "luaLevelGenerator.h"      // Parent class
+#include "luaLevelGenerator.h"   // Parent class
+#include "LuaObject.h"           // Parent class
+
 #include "UIMenuItems.h"
 
 #include <boost/shared_ptr.hpp>
@@ -18,7 +20,7 @@ namespace Zap
 
 class UIManager;
 
-class EditorPlugin : public LuaScriptRunner
+class EditorPlugin : public LuaScriptRunner, public LuaObject
 {
    typedef LuaScriptRunner Parent;
 
