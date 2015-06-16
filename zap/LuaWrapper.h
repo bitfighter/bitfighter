@@ -491,7 +491,7 @@ bool luaW_hold(lua_State* L, T* obj)
     luaW_wrapperfield<T>(L, LUAW_HOLDS_KEY); // ... holds
     LuaWrapper<T>::identifier(L, obj); // ... holds id
     lua_pushvalue(L, -1); // ... holds id id
-    lua_gettable(L, -3); // ... holds id hold
+    lua_gettable(L, -3); // ... holds id holds
     // If it's not held, hold it
     if (!lua_toboolean(L, -1))
     {
