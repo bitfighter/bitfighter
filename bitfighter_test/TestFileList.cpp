@@ -14,7 +14,7 @@ namespace Zap
    TEST(FileListTest, basics)
    {
       FileList fileList;
-      ASSERT_FALSE(fileList.isOk) << "Needs to be initialized with valid files first!";
+      ASSERT_FALSE(fileList.isOk()) << "Needs to be initialized with valid files first!";
    }
 
 

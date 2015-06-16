@@ -11,7 +11,7 @@
 #include "TeamConstants.h"    // For TEAM_NEUTRAL constant
 #include "WeaponInfo.h"
 
-#include "gtest/gtest_prod.h"
+#include "Test.h"
 
 namespace Zap
 {
@@ -150,7 +150,6 @@ public:
    S32 lua_setGeom(lua_State *L);
 
    ///// Testing
-   friend class LevelLoaderTest;
    FRIEND_TEST(LevelLoaderTest, EngineeredItemMounting2);
 };
 

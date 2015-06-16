@@ -13,8 +13,7 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 
-#include "gtest/gtest_prod.h"
-
+#include "Test.h"
 
 namespace Zap
 {
