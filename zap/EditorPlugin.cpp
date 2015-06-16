@@ -99,7 +99,7 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<boost::shared_ptr<Me
       {
          if(lua_istable(L, i))
          {
-            // check any supplied tables for menu items and put them into menuItems
+            // Check any supplied tables for menu items and put them into menuItems
             getMenuItemVectorFromTable(L, i, "getArgsMenu", menuItems);
          }
          else if(lua_isstring(L, i))

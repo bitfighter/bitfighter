@@ -18,6 +18,7 @@ public:
    virtual ~LuaObject();      // Destructor
 
    void trackThisItem();
+   void untrackThisItem();
    static void eraseAllPotentiallyUntrackedObjects();
    
 };

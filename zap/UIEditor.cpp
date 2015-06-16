@@ -684,12 +684,13 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    string title;
    Vector<boost::shared_ptr<MenuItem> > menuItems;
 
-   bool error = plugin->runGetArgsMenu(title, menuItems);     // Fills menuItems
+   bool error = plugin->runGetArgsMenu(title, menuItems);   // Fills menuItems
 
    if(error)
    {
       showPluginError("configuring its options menu.");
       mPluginRunner.reset();
+      LuaObject::eraseAllPotentiallyUntrackedObjects();     // Cleanup any objects thing our script might have created
       return;
    }
 
@@ -697,6 +698,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    {
       onPluginExecuted(Vector<string>());        // No menu items?  Let's run the script directly!
       mPluginRunner.reset();
+      LuaObject::eraseAllPotentiallyUntrackedObjects();     // Cleanup any objects thing our script might have created
       return;
    }
 
@@ -705,7 +707,10 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    mPluginMenu.reset(new PluginMenuUI(getGame(), getUIManager(), title));  // Use smart pointer for auto cleanup
 
    for(S32 i = 0; i < menuItems.size(); i++)
+   {
       mPluginMenu->addWrappedMenuItem(menuItems[i]);
+      menuItems[i]->untrackThisItem();      // C++ will delete this, so remove it from the Lua tracking system
+   }
 
    mPluginMenu->addSaveAndQuitMenuItem("Run plugin", "Saves values and runs plugin");
 
@@ -718,6 +723,8 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    if(mPluginMenuValues.count(key) == 1)    // i.e. the key exists; use count to avoid creating new entry if it does not exist
       for(S32 i = 0; i < mPluginMenuValues[key].size(); i++)
          mPluginMenu->getMenuItem(i)->setValue(mPluginMenuValues[key].get(i));
+
+   LuaObject::eraseAllPotentiallyUntrackedObjects();     // Cleanup any objects the script created but didn't hand over to C++
 
    getUIManager()->activate(mPluginMenu.get());
 }
