@@ -149,7 +149,7 @@ public:
    bool loadScript(bool cacheScript);  // Loads script from file into a Lua chunk, then runs it
    bool runScript(bool cacheScript);   // Load the script, execute the chunk to get it in memory, then run its main() function
 
-   bool runCmd(const char *function, S32 returnValues);
+   bool runFunction(const char *function, S32 returnValues);
 
    const char *getScriptId();
    static bool loadFunction(lua_State *L, const char *scriptId, const char *functionName);
@@ -173,7 +173,7 @@ public:
 
       // Note that we don't care if this generates an error... if it does the error handler will
       // print a nice message, then call killScript().
-      runCmd("_tickTimer", 0);
+      runFunction("_tickTimer", 0);
    }
 
 

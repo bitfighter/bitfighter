@@ -323,13 +323,13 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    setLuaArgs(args);
-   bool error = runCmd("main", 0);
+   bool error = runFunction("main", 0);
    return !error;
 }
 
 
 // Returns true if there was an error, false if everything ran ok
-bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
+bool LuaScriptRunner::runFunction(const char *function, S32 returnValues)
 {
    try 
    {
@@ -348,6 +348,7 @@ bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
       }
 
       S32 error = lua_pcall(L, args, returnValues, -2 - args);  // -- _stackTracer, <<return values>>
+
       if(error)
       {
          string msg = lua_tostring(L, -1);

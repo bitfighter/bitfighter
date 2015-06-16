@@ -440,7 +440,7 @@ void EventManager::fireEvent(EventType eventType, S32 score, S32 team, LuaPlayer
 bool EventManager::fire(lua_State *L, LuaScriptRunner *scriptRunner, const char *function, ScriptContext context)
 {
    setScriptContext(L, context);
-   return scriptRunner->runCmd(function, 0);
+   return scriptRunner->runFunction(function, 0);
 }
 
 

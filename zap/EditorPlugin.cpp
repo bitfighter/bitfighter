@@ -68,7 +68,7 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<boost::shared_ptr<Me
    clearStack(L);
 
    static const S32 numResults = 4;
-   bool error = runCmd("getArgsMenu", numResults);
+   bool error = runFunction("getArgsMenu", numResults);
 
    if(error)        
    {

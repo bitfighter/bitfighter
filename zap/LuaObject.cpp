@@ -53,7 +53,6 @@ void LuaObject::eraseAllPotentiallyUntrackedObjects()
    // of mPotentiallyUntrackedObjects, which would cause crashes if we were iterating over it directly
    set<LuaObject *> temp = mPotentiallyUntrackedObjects;
 
-
    logprintf("Cleaning up %d untracked objects!",mPotentiallyUntrackedObjects.size());//xyzzy
 
    for(set<LuaObject *>::iterator it = temp.begin(); it != temp.end(); it++)

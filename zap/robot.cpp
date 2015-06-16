@@ -232,7 +232,7 @@ string Robot::runGetName()
    //                             3) something is hopelessly corrupt (see 1)
    // Note that it is valid for getName to return a nil (or not be implemented in the bot itself) in which case a default name will be chosen.
    // If error is true, runCmd will terminate bot script by running killScript(), so we don't need to worry about making things too nice.
-   bool error = runCmd("getName", 1);     
+   bool error = runFunction("getName", 1);     
 
    string name = "";
 

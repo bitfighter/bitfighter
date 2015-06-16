@@ -505,14 +505,12 @@ void EditorUserInterface::runLevelGenScript()
    if(scriptName == "")      // No script included!!
       return;
 
+   const Vector<string> *scriptArgs = gameType->getScriptArgs();  // As entered on game params menu
+
+   clearLevelGenItems();                                          // Clear out any items from the last run
+
    logprintf(LogConsumer::ConsoleMsg, "Running script %s", gameType->getScriptLine().c_str());
-
-   const Vector<string> *scriptArgs = gameType->getScriptArgs();
-
-   clearLevelGenItems();      // Clear out any items from the last run
-
-   FolderManager *folderManager = mGameSettings->getFolderManager();
-   runScript(&mLevelGenDatabase, folderManager, scriptName, *scriptArgs);
+   runScript(&mLevelGenDatabase, mGameSettings->getFolderManager(), scriptName, *scriptArgs);
 }
 
 
@@ -546,6 +544,10 @@ void EditorUserInterface::runScript(Level *level, const FolderManager *folderMan
 
    // Error reporting handled within -- we won't cache these scripts for easier development   
    bool error = !levelGen.runScript(false);
+
+   // The above line will add any created objects to the game, which removes them from the tracking list,
+   // so anything left can be safely discarded
+   LuaObject::eraseAllPotentiallyUntrackedObjects();
 
    if(error)
    {
@@ -690,7 +692,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    {
       showPluginError("configuring its options menu.");
       mPluginRunner.reset();
-      LuaObject::eraseAllPotentiallyUntrackedObjects();     // Cleanup any objects thing our script might have created
+      LuaObject::eraseAllPotentiallyUntrackedObjects();     // Cleanup any objects thing our script might have createdZ
       return;
    }
 
@@ -698,7 +700,6 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    {
       onPluginExecuted(Vector<string>());        // No menu items?  Let's run the script directly!
       mPluginRunner.reset();
-      LuaObject::eraseAllPotentiallyUntrackedObjects();     // Cleanup any objects thing our script might have created
       return;
    }
 
@@ -922,7 +923,6 @@ void EditorUserInterface::validateLevel()
       if(TeamListToString(teamList, foundSpawn))     // Compose error message
          mLevelErrorMsgs.push_back("ERROR: Need spawn point for " + teamList);
    }
-
 
    if(gameTypeId == CoreGame)
    {
