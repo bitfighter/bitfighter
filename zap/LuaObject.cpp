@@ -47,7 +47,6 @@ void LuaObject::untrackThisItem()
 }
 
 
-
 void LuaObject::eraseAllPotentiallyUntrackedObjects()
 {
    // Create a temporary copy of our set... as we delete untracked items, it will change the contents
