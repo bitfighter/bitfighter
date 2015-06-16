@@ -567,10 +567,11 @@ void luaW_postconstructor(lua_State* L, int numargs)
 template <typename T>
 inline int luaW_new(lua_State* L, int args)
 {
-    T* obj = LuaWrapper<T>::allocator(L);
-    luaW_push<T>(L, obj);
+    T* obj = LuaWrapper<T>::allocator(L);    // Create our new T
+    luaW_push<T>(L, obj);                    // Push it on the stack for Lua to find
 //    luaW_hold<T>(L, obj);  // luaW_hold is called in luaW_push with our proxy system in place
     luaW_postconstructor<T>(L, args);
+
     return 1;
 }
 
@@ -815,7 +816,7 @@ void luaW_setfuncs(lua_State* L, const char* classname, const luaL_Reg* table,
 
     const luaL_Reg defaulttable[] =
     {
-        { "new", luaW_new<T> },
+        { "new", luaW_new<T> },        // Every wrapped object gets a new method
         { NULL, NULL }
     };
     const luaL_Reg defaultmetatable[] = 
