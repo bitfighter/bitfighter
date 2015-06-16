@@ -1238,7 +1238,7 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "addItem");
 
-   TNLAssert(getLuaGame() != NULL, "Game must not be NULL!");
+   TNLAssert(mLuaGame != NULL, "Game must not be NULL!");
    TNLAssert(mLevel != NULL, "Grid Database must not be NULL!");
 
    // First check to see if item is a BfObject
@@ -1247,6 +1247,8 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
 
    if(obj)
    {
+      obj->untrackThisItem();    // We're handing the obj over to C++, which will take care of deletion
+
       // Silently ignore illegal items when being run from the editor.  For the moment, if mGame is not a server, then
       // we are running from the editor.  This could conceivably change, but for the moment it seems to hold true.
       if(getLuaGame()->isServer() || obj->canAddToEditor())
@@ -1254,16 +1256,13 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
          // Some objects require special handling
          if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
          {
-            if(mLuaGame)
-            {
-               obj->addToGame(mLuaGame, mLevel);
-               obj->onGeomChanged();
-            }
+            obj->addToGame(mLuaGame, mLevel);
+            obj->onGeomChanged();
          }
          else if(obj->getObjectTypeNumber() == WallItemTypeNumber)
             mLevel->addWallItem(static_cast<WallItem *>(obj), mLuaGame);
          else
-            obj->addToGame(getLuaGame(), mLevel);
+            obj->addToGame(mLuaGame, mLevel);
       }
    }
 
