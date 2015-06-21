@@ -311,8 +311,8 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
 
    // Set up music list for streaming later.  For now, we'll load these file types.  Not all have been tested.  More may play.  Who knows?
    const string extList[] = { ".669", ".ABC", ".AMF", ".AMS", ".DBM", ".DMF", ".DSM", ".FAR", ".IT",
-                              ".MDL", ".Med", ".MID", ".MOD", ".MT2", ".MTM", ".OKT", ".OGG", ".PAT",
-                              ".PSM", ".PTM", ".S3M", ".STM", ".Ult", ".UMX", ".Wav", ".XM" };
+                              ".MDL", ".Med", ".MID", ".MOD", ".MP3", ".MT2", ".MTM", ".OKT", ".OGG",
+                              ".PAT", ".PSM", ".PTM", ".S3M", ".STM", ".Ult", ".UMX", ".Wav", ".XM" };
 
    FileList fileList;
    fileList.addFilesFromFolders(sfxDirs, extList, ARRAYSIZE(extList));

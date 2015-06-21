@@ -192,7 +192,7 @@ void DeleteCriticalSection(CRITICAL_SECTION *cs)
 
 #endif
 
-#ifdef DYNLOAD
+#if defined (DYNLOAD) || defined (DYNLOAD_MPG123)
 #ifdef _WIN32
 void *OpenLib(const char *libname)
 { return LoadLibraryA(libname); }

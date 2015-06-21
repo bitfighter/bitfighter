@@ -61,7 +61,7 @@ static const bool LittleEndian = (endian_test.b[0] != 0);
 static const bool BigEndian = !LittleEndian;
 
 
-#ifdef DYNLOAD
+#if defined (DYNLOAD) || defined (DYNLOAD_MPG123)
 void *OpenLib(const char *libname);
 void CloseLib(void *handle);
 void *GetLibProc(void *handle, const char *funcname);
@@ -210,26 +210,28 @@ class FileStreamBuf : public std::streambuf {
     virtual pos_type seekpos(pos_type pos, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out);
 
 public:
+    const char *fname;
     bool IsOpen()
     { return usrFile != NULL; }
 
     FileStreamBuf(const char *filename, ALint mode)
-      : usrFile(NULL), fio(Funcs)
-    { usrFile = fio.open(filename, mode); }
+      : usrFile(NULL), fio(Funcs), fname(NULL)
+    { usrFile = fio.open(filename, mode); fname = filename; }
     virtual ~FileStreamBuf()
     { if(usrFile) fio.close(usrFile); }
 };
 
 class InStream : public std::istream {
 public:
+    bool isFile;
     InStream(const char *filename)
-      : std::istream(new FileStreamBuf(filename, 0))
+      : std::istream(new FileStreamBuf(filename, 0)), isFile(true)
     {
         if(!(static_cast<FileStreamBuf*>(rdbuf())->IsOpen()))
             clear(failbit);
     }
     InStream(const MemDataInfo &memInfo)
-      : std::istream(new MemStreamBuf(memInfo))
+      : std::istream(new MemStreamBuf(memInfo)), isFile(false)
     { }
     virtual ~InStream()
     { delete rdbuf(); }
