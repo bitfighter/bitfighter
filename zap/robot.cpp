@@ -282,6 +282,8 @@ void Robot::onAddedToGame(Game *game)
    mClientInfo->setShip(this);
 
    setOwner(mClientInfo);
+
+   setLoadout(mClientInfo->getDefaultLoadout());
    
    mHasExploded = true;        // Because we start off "dead", but will respawn real soon now...
    disableCollision();
