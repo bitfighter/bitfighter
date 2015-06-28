@@ -6,6 +6,8 @@
 
 #include "tnlAssert.h"
 
+using namespace TNL;
+
 using std::streambuf;
 using std::ios_base;
 
