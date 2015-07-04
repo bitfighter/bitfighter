@@ -23,8 +23,14 @@ function point.cross(v1,v2)
 end
 
 function point.normalize(v)
-  local s=1.0/math.sqrt(v.x*v.x+v.y*v.y);
-  return point.new(v.x*s,v.y*s)
+  local l = point.length(v)
+  if l > 0 then
+    local inv = 1.0/l
+    v.x=v.x*inv
+    v.y=v.y*inv
+  end
+
+  return v
 end
 
 function point.length(v)
@@ -73,7 +79,7 @@ mt.__mul = function(v1,v2)
     else
       -- vector * vector
       return point.new(v1.x*v2.x,v1.y*v2.y)
-	end
+    end
   end
 end
 mt.__div = function(v1,s) return point.new(v1.x/s,v1.y/s) end
