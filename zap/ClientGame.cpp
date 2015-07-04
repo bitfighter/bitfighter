@@ -882,17 +882,20 @@ void ClientGame::gotChatMessage(const StringTableEntry &clientName, const String
 
 void ClientGame::gotChatPM(const StringTableEntry &fromName, const StringTableEntry &toName, const StringPtr &message)
 {
-   ClientInfo *fullClientInfo = getClientInfo();
-
    Color color = Colors::yellow;
 
-   if(fullClientInfo->getName() == toName && toName == fromName)      // Message sent to self
+   // Here our client may be named two different things depending on if there
+   // is another player with the same name.  We'll need to use the server-
+   // assigned name
+   const StringTableEntry &assignedName = mLocalRemoteClientInfo->getName();
+
+   if(assignedName == toName && toName == fromName)      // Message sent to self
       mUIManager->onChatMessageReceived(color, "%s: %s", toName.getString(), message.getString());
 
-   else if(fullClientInfo->getName() == toName)                       // To this player
+   else if(assignedName == toName)                       // To this player
       mUIManager->onChatMessageReceived(color, "from %s: %s", fromName.getString(), message.getString());
 
-   else if(fullClientInfo->getName() == fromName)                     // From this player
+   else if(assignedName == fromName)                     // From this player
       mUIManager->onChatMessageReceived(color, "to %s: %s", toName.getString(), message.getString());
 
    else  
