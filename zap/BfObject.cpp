@@ -1809,7 +1809,7 @@ S32 CentroidObject::lua_getPos(lua_State *L)
 
 S32 CentroidObject::lua_setPos(lua_State *L)
 {
-   checkArgList(L, functionArgs, "BfObject", "setLoc");
+   checkArgList(L, functionArgs, "BfObject", "setPos");
 
    offset(getPointOrXY(L, 1) - getCentroid());
 
