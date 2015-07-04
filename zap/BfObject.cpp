@@ -1813,6 +1813,8 @@ S32 CentroidObject::lua_setPos(lua_State *L)
 
    offset(getPointOrXY(L, 1) - getCentroid());
 
+   onGeomChanged();
+
    return 0;
 }
 };
