@@ -477,7 +477,8 @@ void createClientGame(GameSettingsPtr settings)
 
 
 // Specify which events each logfile will listen for
-S32 events = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage | LogConsumer::LogConnection;
+S32 events = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator | LogConsumer::LuaScriptError | 
+             LogConsumer::LuaBotMessage | LogConsumer::LogConnection;
 
 
 void setupLogging(const string &logDir)

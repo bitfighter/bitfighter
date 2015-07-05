@@ -102,9 +102,11 @@ protected:
 
    static void deleteScript(const char *name);  // Remove saved script from the Lua registry
 
-   static void registerLooseFunctions(lua_State *L);   // Register some functions not associated with a particular class
+   static void registerLooseFunctions(lua_State *L);     // Register some functions not associated with a particular class
 
    static S32 findObjectById(lua_State *L, const Vector<DatabaseObject *> *objects);
+
+   static bool envContainsProperScriptId(const char *name);     // Only used for supporting asserts
 
 
 // Sets a var in the script's environment to give access to the caller's "this" obj, with the var name "name".
@@ -114,9 +116,9 @@ void setSelf(lua_State *L, T *self, const char *name)
 {
    lua_getfield(L, LUA_REGISTRYINDEX, self->getScriptId()); // Put script's env table onto the stack  -- env_table
                                                          
-   lua_pushstring(L, name);                                 //                                        -- env_table, "plugin"
-   luaW_push(L, self);                                      //                                        -- env_table, "plugin", *this
-   lua_rawset(L, -3);                                       // env_table["plugin"] = *this            -- env_table
+   lua_pushstring(L, name);                                 //                                        -- env_table, name
+   luaW_push(L, self);                                      //                                        -- env_table, name, *this
+   lua_rawset(L, -3);                                       // env_table[name] = *this                -- env_table
                                                                                                     
    lua_pop(L, -1);                                          // Cleanup                                -- <<empty stack>>
 
@@ -137,6 +139,8 @@ public:
    virtual const char *getErrorMessagePrefix();
 
    static lua_State *getL();
+   static const char *getScriptId(lua_State *L);
+
    static bool startLua(const string &scriptingDir);  // Create L
    static void shutdown();                            // Delete L
 

@@ -217,6 +217,8 @@ bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const cha
       }
 
       menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));   // Add the MenuItem to our list
+      menuItem->untrackThisItem();     // Item is now in the hands of C++!
+
       lua_pop(L, 1);                   // Remove extracted element from stack                                -- menuName table table nextIndex
    }                                                                                                   // OR -- menuName table 0 on last iteration
 

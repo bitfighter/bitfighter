@@ -82,15 +82,16 @@ public:
       LogLuaObjectLifecycle   = BIT(15),     // Creation and destruciton of lua objects
       LuaLevelGenerator       = BIT(16),     // Messages from the LuaLevelGenerator     
       LuaBotMessage           = BIT(17),     // Message from a bot, to go to lua msg console
+      LuaScriptError          = BIT(18),     // A serious scripting error ocurred
 
-      ServerFilter            = BIT(18),     // For logging messages specific to hosting games
-      StatisticsFilter        = BIT(19),     // For logging player/game statistics
+      ServerFilter            = BIT(19),     // For logging messages specific to hosting games
+      StatisticsFilter        = BIT(20),     // For logging player/game statistics
 
-      DatabaseFilter          = BIT(20),     // For logging issues with writing to database
-      ConfigurationError      = BIT(21),     // For logging configuation issues
+      DatabaseFilter          = BIT(21),     // For logging issues with writing to database
+      ConfigurationError      = BIT(22),     // For logging configuation issues
 
-      LogLevelError           = BIT(22),     // Logs errors and warnings in levels
-      ConsoleMsg              = BIT(23),     // Message that goes only to the console
+      LogLevelError           = BIT(23),     // Logs errors and warnings in levels
+      ConsoleMsg              = BIT(24),     // Message that goes only to the console
       
       All = 0xFFFFFFFF,
       AllErrorTypes = LogFatalError | LogError | LogWarning | LogLevelError | ConfigurationError

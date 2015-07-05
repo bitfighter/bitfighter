@@ -14,9 +14,10 @@ struct LuaException : public std::exception
 {
    std::string msg;
 
-   explicit LuaException(std::string str) : msg(str) { /* do nothing */ }    // Constructor
-   virtual ~LuaException() throw()                   { /* do nothing */ }    // Destructor, required by gcc to avoid "looser throw" error
-   const char* what() const throw()         { return msg.c_str(); }
+   explicit LuaException(const std::string &str) : msg(str) { /* do nothing */ }    // Constructor
+   virtual ~LuaException() throw()                          { /* do nothing */ }    // Destructor required by gcc to avoid "looser throw" error
+
+   const char *what() const throw()                         { return msg.c_str(); }
 };
 
 

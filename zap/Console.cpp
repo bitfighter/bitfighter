@@ -12,6 +12,7 @@
 
 #  include "DisplayManager.h"   // For ScreenInfo object
 #  include "GameManager.h"
+#  include "LuaObject.h"
 #  include "tnlAssert.h"        // For TNLAssert, of course
 
 #  include <stdio.h>            // For vsnprintf
@@ -144,8 +145,7 @@ void Console::processCommand(const char *cmdline)
    else
       consoleCommand += "\n" + string(cmdline);
 
-   S32 status = luaL_loadbuffer(L, consoleCommand.c_str(), consoleCommand.length(), "ConsoleInput" );
-      
+   S32 status = luaL_loadbuffer(L, consoleCommand.c_str(), consoleCommand.length(), "ConsoleInput");
       
    if(status == LUA_ERRSYNTAX)      // cmd is not a complete Lua statement yet -- need to add more input
    {
@@ -171,6 +171,7 @@ void Console::processCommand(const char *cmdline)
          output("%s\n", lua_tostring(L, -1));
          lua_pop(L, 1);
       }
+
       if(lua_gettop(L) > 0) 
       {
          lua_getglobal(L, "print");
@@ -183,6 +184,9 @@ void Console::processCommand(const char *cmdline)
    }
 
    clearStack(L);
+
+   // Don't call LuaObject::eraseAllPotentiallyUntrackedObjects() here; we might create an object 
+   // in one command and want to use it in another... better to wait until we close the console.
 
 #endif
 }

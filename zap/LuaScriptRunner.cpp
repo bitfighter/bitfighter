@@ -28,6 +28,7 @@
 
 #include "tnlLog.h"            // For logprintf
 #include "tnlRandom.h"
+#include "tnlAssert.h"
 
 #include <iostream>            // For enum code
 #include <sstream>             // For enum code
@@ -49,10 +50,7 @@ deque<string> LuaScriptRunner::mCachedScripts;
 void LuaScriptRunner::clearScriptCache()
 {
 	while(mCachedScripts.size() != 0)
-	{
-		deleteScript(mCachedScripts.front().c_str());
 		mCachedScripts.pop_front();
-	}
 }
 
 
@@ -88,11 +86,14 @@ LuaScriptRunner::~LuaScriptRunner()
    // Clean-up any game objects that were added in Lua with '.new()' but not added
    // with bf:addItem()
 
+   const char *scriptId = getScriptId();
+
+   LuaObject::eraseAllPotentiallyUntrackedObjects(scriptId);
+
    // And delete the script's environment table from the Lua instance
-   deleteScript(getScriptId());
+   deleteScript(scriptId);
 
    LUAW_DESTRUCTOR_CLEANUP;
-   //if(mLuaProxy) mLuaProxy->setDefunct(true);
 }
 
 
@@ -132,17 +133,25 @@ const char *LuaScriptRunner::getScriptId()
 // Return false if there was an error, true if not
 bool LuaScriptRunner::runScript(bool cacheScript)
 {
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
+
    return prepareEnvironment() && loadScript(cacheScript) && runMain();
 }
+
+
+static const char *LUA_SCRIPTIDKEY = "__ScriptId__";
 
 
 // Sets the environment for the function on the top of the stack to that associated with name
 // Starts with a function on the stack
 void LuaScriptRunner::setEnvironment()
-{                                    
+{               
    // Grab the script's environment table from the registry, place it on the stack
    lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Push REGISTRY[scriptId] onto stack           -- function, table
+
    lua_setfenv(L, -2);                                   // Set that table to be the env for function    -- function
+   lua_pushstring(L, getScriptId());
+   lua_setglobal(L, LUA_SCRIPTIDKEY);
 }
 
 
@@ -168,6 +177,8 @@ bool LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const cha
 // Only used for loading helper functions
 bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, ScriptContext context)
 {
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
+
    setScriptContext(L, context);
 
    lua_getfield(L, LUA_REGISTRYINDEX, key);     // Get function out of the registry      -- functionName()
@@ -181,6 +192,8 @@ bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, Sc
       clearStack(L);
       return false;
    }
+
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    return true;
 }
@@ -213,6 +226,8 @@ bool LuaScriptRunner::loadCompileRunEnvironmentScript(const string &scriptName) 
       clearStack(L);
       return false;
    }
+
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    return true;
 }
@@ -258,8 +273,7 @@ bool LuaScriptRunner::loadScript(bool cacheScript)
          {
             if(cacheSize > MAX_CACHE_SIZE)
             {
-               // Remove oldest script from the cache
-               deleteScript(mCachedScripts.front().c_str());
+               // Remove oldest script from the cache -- don't delete it as the script could still be running
                mCachedScripts.pop_front();
             }
 
@@ -338,7 +352,7 @@ bool LuaScriptRunner::runFunction(const char *function, S32 returnValues)
       pushStackTracer();                                        // -- <<args>>, _stackTracer
 
       if(!loadFunction(L, getScriptId(), function))             // -- <<args>>, _stackTracer, function
-         throw LuaException("Cannot load method" + string(function) +"()!\n");
+         throw LuaException("Cannot load method " + string(function) +"()!\n");
 
       // Reorder the stack a little
       if(args > 0)
@@ -354,7 +368,9 @@ bool LuaScriptRunner::runFunction(const char *function, S32 returnValues)
          string msg = lua_tostring(L, -1);
          lua_pop(L, 1);    // Remove the message from the stack, so it won't appear in our stack dump
 
-         throw LuaException("In method " + string(function) +"():\n" + msg);
+         string text = "In method " + string(function) +"():\n" + msg;
+
+         throw LuaException(text);
       }
 
       lua_remove(L, 1);    // Remove _stackTracer               // -- <<return values>>
@@ -504,8 +520,24 @@ void LuaScriptRunner::deleteScript(const char *name)
    if(L)    
    {
       lua_pushnil(L);                                       //                             -- nil
-      lua_setfield(L, LUA_REGISTRYINDEX, name);             // REGISTRY[scriptId] = nil    -- <<empty stack>>
+      lua_setfield(L, LUA_REGISTRYINDEX, name);             // REGISTRY[name] = nil        -- <<empty stack>>
    }
+}
+
+
+// Gets the id of the currently running script -- only called from C++ code when adding or removing an item from the tracking system
+// static function
+const char *LuaScriptRunner::getScriptId(lua_State *L)
+{
+   lua_getglobal(L, LUA_SCRIPTIDKEY);              // ... <scriptId>
+
+   const char *bfPtr = lua_tostring(L, -1);        // ... <scriptId>
+
+   TNLAssert(bfPtr != NULL || dumpStack(L), "Expected non-NULL value here!");
+
+   lua_pop(L, 1);                                  // ...
+
+   return bfPtr;
 }
 
 
@@ -514,22 +546,31 @@ bool LuaScriptRunner::prepareEnvironment()
    if(!L)
    {
       logprintf(LogConsumer::LogError, "%s %s.", getErrorMessagePrefix(), 
-                "Lua interpreter doesn't exist.  Aborting environment setup");
+                "Lua interpreter doesn't exist.  Aborting environment setup.");
       return false;
    }
 
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    lua_pushvalue(L, LUA_GLOBALSINDEX);                      // -- globalEnv
-   luaTableCopy(L);                                         // -- localEnvCopy
+   luaTableCopy(L);                                         // -- copy of globalEnv; i.e. localEnvCopy
    TNLAssert(!lua_isnoneornil(L, -1), "Failed to copy _G");
-   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());       // --
+
+   // Store our copy of the global environment in the registry keyed off the script's unique id.  
+   // This variable will be used to execute the associated script.  We'll use this
+   // to help track and clean up orphaned objects when the script terminates.  Note that this variable will
+   // be accessible from Lua, and will contain a unique instance name for each script, not the script name
+   // itself.  If a script is run twice, the value of this variable will be different.
+
+   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());       // -- localEnvCopy
 
    // Make non-static Lua methods in this class available via "bf".  We have to
    // static_cast here because it is possible for two 'setSelf' methods to be
    // called from a subclass that calls its own prepareEnvironment() method and
    // subsequently this one (its parent), e.g. in the case of bots.
-   setSelf(L, static_cast<LuaScriptRunner*>(this), "bf");
+   setSelf(L, static_cast<LuaScriptRunner *>(this), "bf");
+
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    return true;
 }

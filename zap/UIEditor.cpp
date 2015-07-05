@@ -545,10 +545,6 @@ void EditorUserInterface::runScript(Level *level, const FolderManager *folderMan
    // Error reporting handled within -- we won't cache these scripts for easier development   
    bool error = !levelGen.runScript(false);
 
-   // The above line will add any created objects to the game, which removes them from the tracking list,
-   // so anything left can be safely discarded
-   LuaObject::eraseAllPotentiallyUntrackedObjects();
-
    if(error)
    {
       ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
@@ -692,7 +688,6 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    {
       showPluginError("configuring its options menu.");
       mPluginRunner.reset();
-      LuaObject::eraseAllPotentiallyUntrackedObjects();     // Cleanup any objects thing our script might have createdZ
       return;
    }
 
@@ -708,10 +703,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    mPluginMenu.reset(new PluginMenuUI(getGame(), getUIManager(), title));  // Use smart pointer for auto cleanup
 
    for(S32 i = 0; i < menuItems.size(); i++)
-   {
       mPluginMenu->addWrappedMenuItem(menuItems[i]);
-      menuItems[i]->untrackThisItem();      // C++ will delete this, so remove it from the Lua tracking system
-   }
 
    mPluginMenu->addSaveAndQuitMenuItem("Run plugin", "Saves values and runs plugin");
 
@@ -724,8 +716,6 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    if(mPluginMenuValues.count(key) == 1)    // i.e. the key exists; use count to avoid creating new entry if it does not exist
       for(S32 i = 0; i < mPluginMenuValues[key].size(); i++)
          mPluginMenu->getMenuItem(i)->setValue(mPluginMenuValues[key].get(i));
-
-   LuaObject::eraseAllPotentiallyUntrackedObjects();     // Cleanup any objects the script created but didn't hand over to C++
 
    getUIManager()->activate(mPluginMenu.get());
 }
@@ -748,7 +738,6 @@ void EditorUserInterface::onPluginExecuted(const Vector<string> &args)
    rebuildEverything(getLevel());
    findSnapVertex();
 
-   LuaObject::eraseAllPotentiallyUntrackedObjects();
    mPluginRunner.reset();
 }
 

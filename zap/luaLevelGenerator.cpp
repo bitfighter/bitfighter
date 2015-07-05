@@ -79,8 +79,13 @@ bool LuaLevelGenerator::prepareEnvironment()
    // Set this first so we have this object available in the helper functions in case we need overrides
    setSelf(L, this, "levelgen");
 
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
+
    if(!loadCompileRunEnvironmentScript("timer.lua") || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY, LevelgenContext))
       return false;
+
+   // Stack is dirty here
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    return true;
 }

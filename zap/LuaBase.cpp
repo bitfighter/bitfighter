@@ -115,7 +115,7 @@ S32 checkArgList(lua_State *L, const LuaFunctionArgList &functionArgList, const 
    // If we want a stack trace for parameter errors, we need to force it here... not sure how, exactly
    string luaError = "Could not validate params for function " + string(className) + "::" + string(functionName) + "()\n" +
             "Expected" + (functionArgList.profileCount > 1 ? " one of the following:" : ":") + prettyPrintParamList(functionArgList);
-
+   logprintf(LogConsumer::LogLevelLoaded, luaError.c_str());
    THROW_LUA_EXCEPTION(L, luaError.c_str());
 
    return -1;     // No valid profile found, but we never get here, so it doesn't really matter what we return, does it?
@@ -659,14 +659,14 @@ const char *getString(lua_State *L, S32 index, const char *defaultVal)
 }
 
 
-// Pop a string or string-like object off stack and return it
+// Get a string or string-like object off stack and return it; the object will remain on the stack
 const char *getString(lua_State *L, S32 index)
 {
    return lua_tostring(L, index);
 }
 
 
-// Pop a string or string-like object off stack, check its type, and return it
+// Gets a string or string-like object off stack, check its type, and return it (or throw); the object will remain on the stack
 const char *getCheckedString(lua_State *L, S32 index, const char *methodName)
 {
    if(!lua_isstring(L, index))
