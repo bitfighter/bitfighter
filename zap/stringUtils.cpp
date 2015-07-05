@@ -642,7 +642,10 @@ bool getFilesFromFolder(const string &dir, Vector<string> &files, bool returnFul
       }
       else
          if(name != "." && name != "..")  // Don't include . and ..
-            files.push_back(name);
+            if(returnFullPaths)
+               files.push_back(strictjoindir(dir, name));
+            else
+               files.push_back(name);
    }
 
    closedir(dp);

@@ -400,6 +400,7 @@ bool FlagItem::isAtHome()
 //               Fn name       Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, isInInitLoc,  ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getFlagCount, ARRAYDEF({{ END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(FlagItem, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(FlagItem, LUA_METHODS);
@@ -422,6 +423,22 @@ REGISTER_LUA_SUBCLASS(FlagItem, MountableItem);
 S32 FlagItem::lua_isInInitLoc(lua_State *L)
 { 
    return returnBool(L, isAtHome()); 
+}
+
+
+/**
+ * @luafunc int FlagItem::getFlagCount()
+ *
+ * @brief Returns the number of flags that this flag represents.
+ *
+ * @descr This will return `1` for all gametypes except Nexus, where it can be
+ * 1 or greater.
+ *
+ * @return flag count in Nexus, otherwise return `1`
+ */
+S32 FlagItem::lua_getFlagCount(lua_State *L)
+{
+   return returnInt(L, getFlagCount());
 }
 
 

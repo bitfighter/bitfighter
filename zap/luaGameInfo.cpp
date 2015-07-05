@@ -241,12 +241,12 @@ S32 LuaGameInfo::lua_getEventScore(lua_State *L)
 
 
 /**
- * @luafunc table LuaGameInfo::getPlayers(int teamIndex)
+ * @luafunc table LuaGameInfo::getPlayers()
  *
- * @brief Get a list of the players on a team.
+ * @brief Get a list of the players in the game.
  *
- * @return A table containing the LuaPlayerInfo for each player (and robot) on
- * the team.
+ * @return A table containing the LuaPlayerInfo for each player (and robot) in
+ * the game
  */
 S32 LuaGameInfo::lua_getPlayers(lua_State *L) 
 {

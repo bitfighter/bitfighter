@@ -311,8 +311,8 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
 
    // Set up music list for streaming later.  For now, we'll load these file types.  Not all have been tested.  More may play.  Who knows?
    const string extList[] = { ".669", ".ABC", ".AMF", ".AMS", ".DBM", ".DMF", ".DSM", ".FAR", ".IT",
-                              ".MDL", ".Med", ".MID", ".MOD", ".MT2", ".MTM", ".OKT", ".OGG", ".PAT",
-                              ".PSM", ".PTM", ".S3M", ".STM", ".Ult", ".UMX", ".Wav", ".XM" };
+                              ".MDL", ".Med", ".MID", ".MOD", ".MP3", ".MT2", ".MTM", ".OKT", ".OGG",
+                              ".PAT", ".PSM", ".PTM", ".S3M", ".STM", ".Ult", ".UMX", ".Wav", ".XM" };
 
    FileList fileList;
    fileList.addFilesFromFolders(sfxDirs, extList, ARRAYSIZE(extList));
@@ -750,25 +750,48 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol, MusicLocation musicL
 
          // Grab the full path
          mMusicData.stream = alureCreateStreamFromFile(musicFile.c_str(), MusicChunkSize, 0, NULL);
+         bool failed = false;
 
          // Stream failed
-         if(!mMusicData.stream)
+         if(mMusicData.stream == NULL)
          {
-            logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", musicFile.c_str());
-            mMusicData.state = MusicStateStopped;
-            break;
+            logprintf(LogConsumer::LogError, "Failed to create music stream for %s: %s", musicFile.c_str(), alureGetErrorString());
+            failed = true;
          }
 
          // Play stream
-         if(!alurePlaySourceStream(mMusicData.source, mMusicData.stream, NumMusicStreamBuffers, loopcount, music_end_callback, NULL))
+         else if(!alurePlaySourceStream(mMusicData.source, mMusicData.stream, NumMusicStreamBuffers, loopcount, music_end_callback, NULL))
          {
-            logprintf(LogConsumer::LogError, "Failed to play music file: %s", musicFile.c_str());
-            mMusicData.state = MusicStateStopped;
-            break;
+            logprintf(LogConsumer::LogError, "Failed to play music file %s: %s", musicFile.c_str(), alureGetErrorString());
+            failed = true;
          }
 
+         // If we've failed we will load the next song unless we've failed too
+         // much
+         static U32 failedCount = 0;
+         if(failed)
+         {
+            failedCount++;
+
+            if(failedCount >= 10)  // Arbitrary
+            {
+               logprintf("Too many failed music files in a row.  Stopping music.");
+               mMusicData.state = MusicStateStopped;
+               failedCount = 0;
+            }
+            else
+            {
+               // Attempt to load next song
+               mMusicData.state = MusicStateLoading;
+               mGameMusicList.nextFile(true);
+            }
+
+            break;
+         }
+         failedCount = 0;  // Reset if we've made it here
+
          // Debug
-//         logprintf("Playing: %s", fullMusicPath.c_str());
+//         logprintf("Playing: %s", musicFile.c_str());
 
          if(mMusicFadeTimer.getCurrent() != 0)
             mMusicData.state = MusicStateFadingIn;

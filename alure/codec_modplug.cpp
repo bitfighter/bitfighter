@@ -26,6 +26,7 @@
 #include "main.h"
 
 #include <string.h>
+#include <stdio.h>
 #include <assert.h>
 
 #include <istream>
@@ -140,6 +141,23 @@ public:
       : alureStream(_fstream), modFile(NULL), lastOrder(0)
     {
         if(!mod_handle) return;
+
+        // Pre-filter out mp3s because they are frequently detected as false
+        // positives.  mp3s have no good signature so just use the file ext.
+        InStream* instream = static_cast<InStream*>(fstream);
+
+        if(instream->isFile)
+        {
+            FileStreamBuf *file = static_cast<FileStreamBuf*>(fstream->rdbuf());
+            const char *ext = strrchr(file->fname, '.') + 1;
+
+            if((*ext && toupper(*ext) == 'M') &&
+                    (*(ext+1) && toupper(*(ext+1)) == 'P') &&
+                    (*(ext+2) && *(ext+2) == '3'))
+            {
+                return;
+            }
+        }
 
         std::vector<char> data(1024);
         ALuint total = 0;

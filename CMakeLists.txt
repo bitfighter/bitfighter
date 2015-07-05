@@ -23,6 +23,7 @@ option(USE_GLES2 "Force usage of OpenGL ES 2 for the bitfighter client.  Require
 option(USE_LUAJIT_IN_TREE "Force usage of in-tree LuaJIT." NO)
 option(LUAJIT_DISABLE_JIT "Disable JIT compiler in LuaJIT." NO)
 option(MASTER_MINIMAL "Build master server without MySQL (only SQLite)." NO)
+option(ALURE_DISABLE_MP3 "Disable dynamic loading of libmpg123.  Disables mp3 completely." NO)
 
 
 #
