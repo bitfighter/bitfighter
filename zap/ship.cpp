@@ -2838,6 +2838,9 @@ S32 Ship::lua_setPos(lua_State *L)
 {
    S32 r = Parent::lua_setPos(L);
    Teleporter::checkAllTeleporters(this);
+
+   setMaskBits(PositionMask);  // Update clients
+
    return r;
 }
 
