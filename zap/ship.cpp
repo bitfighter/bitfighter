@@ -2595,6 +2595,8 @@ S32 Ship::lua_setHealth(lua_State *L)
 
    if(mHealth <= 0)
    {
+      lua_pop(L, 1);  // Remove from stack as event gets triggered immediately
+
       DamageInfo di;
       di.damagingObject = NULL;
       killAndScore(&di);
