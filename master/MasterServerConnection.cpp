@@ -10,6 +10,7 @@
 #include "DatabaseAccessThread.h"
 #include "authenticator.h"
 #include "GameJoltConnector.h"
+#include "EasterEgg.h"
 
 #include "../zap/version.h"
 #include "../zap/stringUtils.h"
@@ -1487,6 +1488,15 @@ string MasterServerConnection::cleanName(string name)    // Makes copy of name t
 }
 
 
+void MasterServerConnection::sendEasterEgg()
+{
+   EasterEgg *egg = mMaster->getEasterEggBasket()->getCurrentEasterEgg();
+   // Send easter-egg data if the master has determined it's time
+   if(egg != NULL)
+      m2cSendEasterEgg(*egg);
+}
+
+
 void MasterServerConnection::sendMotd()
 {
    // Figure out which MOTD to send to client, based on game version (stored in mVersionString)
@@ -1703,6 +1713,9 @@ void MasterServerConnection::onConnectionEstablished()
 
       // Send message of the day
       sendMotd();
+
+      // Possibly send extra easter-egg / thematic info
+      sendEasterEgg();
 
       // for "Host on server" 019d and later, Maybe improve this to only show it when server is available...
       m2cHostOnServerAvailable(true);

@@ -8,6 +8,7 @@
 
 #include "../zap/gameStats.h"    // Must be included before tnlRPC.h to compile in gcc
 #include "../zap/SharedConstants.h"
+#include "EasterEgg.h"
 #include "tnlEventConnection.h"
 #include "tnlRPC.h"
 
@@ -122,6 +123,9 @@ public:
    /// m2cSetMOTD is sent to a client when the connection is established.  The
    /// client's BUILD_VERSION is used to pick which MOTD will be sent.
    TNL_DECLARE_RPC(m2cSetMOTD, (TNL::StringPtr masterName, TNL::StringPtr motdString));
+
+   /// m2cSendEasterEgg
+   TNL_DECLARE_RPC(m2cSendEasterEgg, (EasterEgg egg));
 
    // If the user has a verified name, send this message back so they know the "correct spelling" of the name
    // 018a version

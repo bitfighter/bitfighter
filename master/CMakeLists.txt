@@ -5,6 +5,7 @@
 
 set(MASTER_SOURCES
 	database.cpp
+	EasterEgg.cpp
 	GameJoltConnector.cpp
 	master.cpp
 	masterInterface.cpp
