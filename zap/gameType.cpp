@@ -2798,9 +2798,9 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
 {
    ServerGame *serverGame = static_cast<ServerGame *>(mGame);
 
-  if(stricmp(cmd, "yes") == 0)
+   if(stricmp(cmd, "yes") == 0 || stricmp(cmd, "y") == 0)
       serverGame->voteClient(clientInfo, true);
-   else if(stricmp(cmd, "no") == 0)
+   else if(stricmp(cmd, "no") == 0 || stricmp(cmd, "n") == 0)
       serverGame->voteClient(clientInfo, false);
    else if(stricmp(cmd, "loadini") == 0 || stricmp(cmd, "loadsetting") == 0)
    {
