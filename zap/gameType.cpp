@@ -2651,9 +2651,9 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
       if(canClientAddBots(clientInfo->getConnection()))
          moreBots(clientInfo);   
    }
-   else if(stricmp(cmd, "yes") == 0)
+   else if(stricmp(cmd, "yes") == 0 || stricmp(cmd, "y") == 0)
       serverGame->voteClient(clientInfo, true);
-   else if(stricmp(cmd, "no") == 0)
+   else if(stricmp(cmd, "no") == 0 || stricmp(cmd, "n") == 0)
       serverGame->voteClient(clientInfo, false);
    else if(stricmp(cmd, "loadini") == 0 || stricmp(cmd, "loadsetting") == 0)
    {
