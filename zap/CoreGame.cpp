@@ -523,6 +523,9 @@ void CoreItem::damageObject(DamageInfo *theInfo)
 
    if(coreDestroyed)
    {
+      // Send Lua event
+      EventManager::get()->fireEvent(EventManager::CoreDestroyedEvent, this);
+
       // We've scored!
       GameType *gameType = getGame()->getGameType();
       if(gameType)
