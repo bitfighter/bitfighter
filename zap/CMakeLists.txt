@@ -119,6 +119,7 @@ set(SHARED_SOURCES
 # of these probably suggests some problem with our code
 set(EXTRA_SOURCES
 	${CMAKE_SOURCE_DIR}/master/database.cpp
+	${CMAKE_SOURCE_DIR}/master/EasterEgg.cpp
 	${CMAKE_SOURCE_DIR}/master/masterInterface.cpp
 )
 

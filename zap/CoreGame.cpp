@@ -590,6 +590,9 @@ bool CoreItem::checkIfCoreIsDestroyed() const
 
 void CoreItem::coreDestroyed(const DamageInfo *damageInfo)
 {
+   // Send Lua event
+   EventManager::get()->fireEvent(EventManager::CoreDestroyedEvent, this);
+
    // We've scored!  But this only matters in a Core game...
    GameType *gameType = getGame()->getGameType();
    if(gameType && gameType->getGameTypeId() == CoreGame)

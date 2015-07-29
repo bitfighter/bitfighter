@@ -222,6 +222,8 @@ public:
 
    void sendMotd();
 
+   void sendEasterEgg();
+
    S32 getClientId() const;
 
    MasterServerConnection *findClient(Nonce &clientId);   // Should be const, but that won't compile for reasons not yet determined!!

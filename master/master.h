@@ -49,6 +49,10 @@ using namespace Zap;
    /* GameJolt settings */                                                                                                                               \
    SETTINGS_ITEM(YesNo,     UseGameJolt,                "GameJolt", "UseGameJolt",                          Yes,                        NULL, NULL, "" ) \
    SETTINGS_ITEM(string,    GameJoltSecret,             "GameJolt", "GameJoltSecret",                       "",                         NULL, NULL, "" ) \
+                                                                                                                                                         \
+   /* Easter Egg settings */                                                                                                                             \
+   SETTINGS_ITEM(YesNo,     UseEasterEggs,              "EasterEgg", "UseEasterEggs",                       Yes,                        NULL, NULL, "" ) \
+   SETTINGS_ITEM(string,    EasterEggFile,              "EasterEgg", "EasterEggFile",                       "easteregg.ini",            NULL, NULL, "" ) \
 
 
 namespace Zap {
@@ -104,17 +108,20 @@ public:
 
 
 class DatabaseAccessThread;
+class EasterEggBasket;
 
 class MasterServer 
 {
 private:
    U32 mStartTime;
    MasterSettings *mSettings;
+   EasterEggBasket *mEasterEggBasket;
    NetInterface *mNetInterface;
    string mLastMotd;
 
    Timer mCleanupTimer;
    Timer mReadConfigTimer;
+   Timer mLoadEasterEggsTimer;
 
    Timer mJsonWriteTimer;
    bool mJsonWritingSuspended;
@@ -159,6 +166,8 @@ public:
 
    void removeServer(S32 index);
    void removeClient(S32 index);
+
+   EasterEggBasket *getEasterEggBasket();
 
    void idle(const U32 timeDelta);
 };

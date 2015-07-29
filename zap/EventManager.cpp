@@ -5,6 +5,7 @@
 
 #include "EventManager.h"
 
+#include "CoreGame.h"
 #include "playerInfo.h"          // For RobotPlayerInfo constructor
 #include "robot.h"
 #include "Zone.h"
@@ -275,6 +276,24 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
       lua_pushinteger(L, deltaT);   // -- deltaT
+      fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
+   }
+}
+
+
+// onCoreDestroyed
+void EventManager::fireEvent(EventType eventType, CoreItem *core)
+{
+   if(suppressEvents(eventType))
+      return;
+
+   lua_State *L = LuaScriptRunner::getL();
+
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
+
+   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   {
+      core->push(L);                // -- core
       fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
    }
 }

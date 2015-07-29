@@ -7,6 +7,7 @@
 
 #include "database.h"            // For writing to the database
 #include "DatabaseAccessThread.h"
+#include "EasterEgg.h"
 #include "GameJoltConnector.h"
 
 #include "../zap/stringUtils.h"  // For itos, replaceString
@@ -171,6 +172,11 @@ MasterServer::MasterServer(MasterSettings *settings)
    mDatabaseAccessThread = new DatabaseAccessThread();    // Deleted in destructor
 
    MasterServerConnection::setMasterServer(this);
+
+   mEasterEggBasket = new EasterEggBasket(mSettings->getVal<string>(IniKey::EasterEggFile));
+   mEasterEggBasket->loadEasterEggs();
+
+   mLoadEasterEggsTimer.reset(ONE_HOUR);
 }
 
 
@@ -180,6 +186,8 @@ MasterServer::~MasterServer()
    delete mNetInterface;
 
    delete mDatabaseAccessThread;
+
+   delete mEasterEggBasket;
 }
 
 
@@ -319,6 +327,13 @@ void MasterServer::idle(const U32 timeDelta)
    }
 
 
+   if(mLoadEasterEggsTimer.update(timeDelta))
+   {
+      mEasterEggBasket->loadEasterEggs();
+      mLoadEasterEggsTimer.reset();
+   }
+
+
    // Process connections -- cycle through them and check if any have timed out
    U32 currentTime = Platform::getRealMilliseconds();
 
@@ -389,6 +404,12 @@ void MasterServer::broadcastMotd() const
 DatabaseAccessThread *MasterServer::getDatabaseAccessThread()
 {
    return mDatabaseAccessThread;
+}
+
+
+EasterEggBasket *MasterServer::getEasterEggBasket()
+{
+   return mEasterEggBasket;
 }
 
 }  // namespace

@@ -82,6 +82,7 @@ public:
                                                      Int<BADGE_COUNT> badges, U16 gamesPlayed, StringPtr correctedName));
 
    TNL_DECLARE_RPC_OVERRIDE(m2cSetMOTD, (StringPtr masterName, StringPtr motdString));
+   TNL_DECLARE_RPC_OVERRIDE(m2cSendEasterEgg, (EasterEgg egg));
    TNL_DECLARE_RPC_OVERRIDE(m2cSendUpdgradeStatus, (bool needToUpgrade));
 
    // Incoming out-of-game chat message from master

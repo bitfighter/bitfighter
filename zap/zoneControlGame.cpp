@@ -127,11 +127,11 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
       }
    }
 
-   updateScore(s, CaptureZone);
-
    z->setCapturer(s->getClientInfo());                   // Assign zone to capturing player
    z->setTeam(s->getTeam());                             // Assign zone to capturing team
    s->getClientInfo()->getStatistics()->mFlagScore++;    // Record the capture
+
+   updateScore(s, CaptureZone);
 
    // Does team control all zones? ...
    for(S32 i = 0; i < zoneCount; i++)

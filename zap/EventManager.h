@@ -18,6 +18,7 @@ namespace Zap
 {
 
 class Robot;
+class CoreItem;
 class Ship;
 class LuaPlayerInfo;
 class LuaScriptRunner;
@@ -53,6 +54,7 @@ class EventManager
    EVENT(ShipLeftZoneEvent,      "ShipLeftZone",      "onShipLeftZone",      "onShipLeftZone(Ship ship, Zone zone)"                                   ) \
    EVENT(ScoreChangedEvent,      "ScoreChanged",      "onScoreChanged",      "onScoreChanged(num scoreChange, num teamIndex, PlayerInfo player)"      ) \
    EVENT(GameOverEvent,          "GameOver",          "onGameOver",          "onGameOver()"                                                           ) \
+   EVENT(CoreDestroyedEvent,     "CoreDestroyed",     "onCoreDestroyed",     "onCoreDestroyed(Core core)"                                             ) \
 
 public:
 
@@ -107,6 +109,7 @@ public:
    // We'll have several different signatures for this one...
    void fireEvent(EventType eventType);
    void fireEvent(EventType eventType, U32 deltaT);      // Tick
+   void fireEvent(EventType eventType, CoreItem *core);  // CoreDestroyed
    void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned
    void fireEvent(EventType eventType, Ship *ship, BfObject *damagingObject, BfObject *shooter);  // ShipKilled
    void fireEvent(LuaScriptRunner *sender, EventType eventType, const char *message, LuaPlayerInfo *playerInfo, bool global);  // MsgReceived

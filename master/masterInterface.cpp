@@ -30,6 +30,7 @@ static const S32 M_RPC_018  = 2;
 static const S32 M_RPC_019  = 3;
 static const S32 M_RPC_019a = 4;
 static const S32 M_RPC_019d = 5;
+static const S32 M_RPC_020  = 6;
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, c2mQueryServers,
    (U32 queryId), (queryId),
@@ -97,6 +98,10 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSetMOTD,
    (TNL::StringPtr masterName, TNL::StringPtr motdString), 
    (masterName, motdString),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, M_RPC_PRE_017) {}
+
+TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendEasterEgg,
+   (EasterEgg egg), (egg),
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, M_RPC_020) {}
 
 
 // Out-of-game chat relay functions:
