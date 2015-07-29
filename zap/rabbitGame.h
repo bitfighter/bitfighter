@@ -80,9 +80,6 @@ public:
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;
 
-
-   bool isSpawnWithLoadoutGame();
-
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
    TNL_DECLARE_RPC(s2cRabbitMessage, (U32 msgIndex, StringTableEntry clientName));

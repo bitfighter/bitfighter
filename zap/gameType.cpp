@@ -489,7 +489,6 @@ void GameType::printRules()
 
 
       printf("Game type: %s [%s]\n", gameType->getGameTypeName(), indTeam.c_str());
-      printf("Configure ship: %s",   gameType->isSpawnWithLoadoutGame() ? "By respawning (no need for loadout zones)" : "By entering loadout zone");
       printf("\nEvent: Individual Score / Team Score\n");
       printf(  "====================================\n");
       for(S32 j = 0; j < ScoringEventsCount; j++)
@@ -4098,12 +4097,6 @@ S32 GameType::getFlagCount()
 bool GameType::isCarryingItems(Ship *ship)
 {
    return ship->getMountedItemCount() > 0;
-}
-
-
-bool GameType::isSpawnWithLoadoutGame()
-{
-   return false;
 }
 
 

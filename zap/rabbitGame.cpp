@@ -498,13 +498,6 @@ bool RabbitGameType::isFlagGame()          const { return true; }
 bool RabbitGameType::canBeTeamGame()       const { return true;  }
 bool RabbitGameType::canBeIndividualGame() const { return true;  }
 
-
-bool RabbitGameType::isSpawnWithLoadoutGame()
-{
-   return true;
-}
-
-
 };  //namespace Zap
 
 

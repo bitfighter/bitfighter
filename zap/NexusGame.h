@@ -55,8 +55,6 @@ public:
 
    S32 getNexusTimeLeftMs() const;     // Get time until the nexus changes state in MilliSeconds
 
-   bool isSpawnWithLoadoutGame();
-
    void onOvertimeStarted();
 
    void shipTouchFlag(Ship *ship, FlagItem *flag);

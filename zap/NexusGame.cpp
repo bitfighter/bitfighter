@@ -155,12 +155,6 @@ bool NexusGameType::nexusShouldChange()
 }
 
 
-bool NexusGameType::isSpawnWithLoadoutGame()
-{
-   return true;
-}
-
-
 void NexusGameType::addNexus(NexusZone *nexus)
 {
    mNexus.push_back(nexus);
