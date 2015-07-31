@@ -110,6 +110,8 @@ void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32
 
 void GamePair::initialize(GameSettingsPtr settings, const Vector<string> &levelCode, S32 clientCount)
 {
+   settings->resolveDirs();
+
    // Need to start Lua before we add any clients.  Might as well do it now.
    LuaScriptRunner::startLua(settings->getFolderManager()->getLuaDir());
 
