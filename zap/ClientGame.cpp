@@ -258,6 +258,7 @@ void ClientGame::startLoadingLevel(bool engineerEnabled)
 }
 
 
+// Called from s2cSyncMessagesComplete 
 void ClientGame::doneLoadingLevel()
 {
    computeWorldObjectExtents();              // Make sure our world extents reflect all the objects we've loaded
