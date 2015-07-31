@@ -1335,6 +1335,7 @@ void GameType::onLevelLoaded()
    TNLAssert(dynamic_cast<ServerGame *>(mGame), "Wrong game here!");
    TNLAssert(mLevel, "Expect a level here!");
 
+   // Collect some info about the level for easy reference later
    mLevelHasLoadoutZone      = mLevel->hasObjectOfType(LoadoutZoneTypeNumber);
    mLevelHasPredeployedFlags = mLevel->hasObjectOfType(FlagTypeNumber);
    mLevelHasFlagSpawns       = mLevel->hasObjectOfType(FlagSpawnTypeNumber);
@@ -2736,7 +2737,6 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    mBetweenLevels = false;
    c2sSyncMessagesComplete(sequence);     // Tells server we're ready to go!
 
-   TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check  Jun 2014 Wat
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
    clientGame->doneLoadingLevel();
