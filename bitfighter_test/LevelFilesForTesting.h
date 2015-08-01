@@ -24,6 +24,7 @@ string getLevelCodeForEngineeredItemSnapping();
 string getLevelCodeForEngineeredItemSnapping2();
 string getLevelCodeForItemPropagationTests(const string &object);
 string getMultiTeamLevelCode(S32 teams);
+string getLevelWithVariableNumberOfLoadoutZones(const Vector<S32> &loadoutZoneCount);
 
 
 string getGenericHeader();

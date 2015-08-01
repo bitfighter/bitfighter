@@ -286,4 +286,27 @@ string getMultiTeamLevelCode(S32 teams)
    return code;
 }
 
+
+string getLevelWithVariableNumberOfLoadoutZones(const Vector<S32> &loadoutZoneCount)
+{
+   string code = getMultiTeamLevelCode(loadoutZoneCount.size());
+
+   for(S32 i = 0; i < loadoutZoneCount.size(); i++)
+   {
+      for(S32 j = 0; j < loadoutZoneCount[i]; j++)
+      {
+         S32 base = 100 * i + j;
+
+         // Wee little triangle!
+         string corner1 = itos(base) + " " + itos(base);
+         string corner2 = itos(base) + " " + itos(base + 1);
+         string corner3 = itos(base + 1) + " " + itos(base + 1);
+
+         code += "LoadoutZone " + itos(i) + " " + corner1 + " " + corner2 + " " + corner3 + "\n";
+      }
+   }
+
+   return code;
+}
+
 };
