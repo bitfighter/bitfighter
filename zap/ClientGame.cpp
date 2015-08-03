@@ -718,7 +718,7 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
 
    // If we're in a loadout zone, don't show any message -- new loadout will become active immediately, 
    // and we'll get a different msg from the server.  Avoids unnecessary messages.
-   if(ship->isInZone(LoadoutZoneTypeNumber))
+   if(ship->isInZone(LoadoutZoneTypeNumber, ship->getTeam()))
       return;
 
    if(ship->isLoadoutSameAsCurrent(loadout))
@@ -730,8 +730,8 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
       // Show new loadout
       displaySuccessMessage("%s %s", baseSuccesString.c_str(), loadout.toString(false).c_str());
 
-      displaySuccessMessage(gt->levelHasLoadoutZone() ? "Enter Loadout Zone to activate changes" : 
-                                                         "Changes will be activated when you respawn");
+      displaySuccessMessage(levelHasLoadoutZoneForTeam(ship->getTeam()) ? "Enter Loadout Zone to activate changes" : 
+                                                                          "Changes will be activated when you respawn");
    }
 }
 

@@ -356,7 +356,7 @@ F32 Ship::processMove(U32 stateIndex)
 // If ship is in multiple zones, an aribtrary one will be returned, and the level designer will be flogged.
 BfObject *Ship::isInAnyZone() const
 {
-   findObjectsUnderShip((TestFunc)isZoneType);  // Fills fillVector
+   findObjectsUnderShip((TestFunc)isZoneType);  // Clears and fills fillVector
    return doIsInZone(fillVector);
 }
 
@@ -365,13 +365,23 @@ BfObject *Ship::isInAnyZone() const
 // If ship is in multiple zones of type zoneTypeNumber, an aribtrary one will be returned, and the level designer will be flogged.
 BfObject *Ship::isInZone(U8 zoneTypeNumber) const
 {
-   findObjectsUnderShip(zoneTypeNumber);        // Fills fillVector
+   findObjectsUnderShip(zoneTypeNumber);        // Clears and fills fillVector
    return doIsInZone(fillVector);
 }
 
 
+// Returns the zone in question if this ship is in a zone of type zoneType, and if it belongs to the specified team.
+// If ship is in multiple zones of type zoneTypeNumber, an aribtrary one will be returned, and the level designer will be flogged.
+BfObject *Ship::isInZone(U8 zoneTypeNumber, S32 teamIndex) const
+{
+   findObjectsUnderShip(zoneTypeNumber);        // Clears and fills fillVector
+   return doIsInZone(fillVector, teamIndex);
+}
+
+
 // Private helper for isInZone() and isInAnyZone() -- these fill fillVector, and we operate on it below
-BfObject *Ship::doIsInZone(const Vector<DatabaseObject *> &objects) const
+// Note: teamIndex defaults to NO_TEAM
+BfObject *Ship::doIsInZone(const Vector<DatabaseObject *> &objects, S32 teamIndex) const
 {
    if(objects.size() == 0)  // Ship isn't in extent of any objectType objects, can bail here
       return NULL;
@@ -382,12 +392,17 @@ BfObject *Ship::doIsInZone(const Vector<DatabaseObject *> &objects) const
    {
       BfObject *zone = static_cast<BfObject *>(objects[i]);
 
+      // Ignore zones not on the specified team
+      if(teamIndex != NO_TEAM && zone->getTeam() != teamIndex)
+         continue;
+
       // Get points that define the zone boundaries
       const Vector<Point> *polyPoints = zone->getCollisionPoly();
 
       if( polyPoints->size() != 0 && polygonContainsPoint(polyPoints->address(), polyPoints->size(), getActualPos()) )
          return zone;
    }
+
    return NULL;
 }
 
@@ -1582,7 +1597,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          // Looks like the user has successfully updated their loadout... we want to show a congratulations message.  However,
          // we don't want to do this if it has changed because the level reset, nor if it changed due to a respawn.  If the
          // level has a loadout zone, it means that the loadout was not changed due to a spawn event.
-         if(!wasInitialUpdate && getGame()->levelHasLoadoutZone())
+         if(!wasInitialUpdate && getGame()->levelHasLoadoutZoneForTeam(getTeam()))
             getGame()->addInlineHelpItem(LoadoutFinishedItem);
       }
    }

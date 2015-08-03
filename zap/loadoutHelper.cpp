@@ -370,8 +370,10 @@ void LoadoutHelper::onWidgetClosed()
    // We only want to display this help item if the loadout actually changed
    if(mLoadoutChanged)
    {
-      bool hasLoadout = getGame()->levelHasLoadoutZone();
-      getGame()->getUIManager()->addInlineHelpItem(hasLoadout ?  LoadoutChangedZoneItem : LoadoutChangedNoZoneItem);
+      ClientGame *game = getGame();
+
+      bool hasLoadout = game->levelHasLoadoutZoneForTeam(game->getClientInfo()->getTeamIndex());
+      game->getUIManager()->addInlineHelpItem(hasLoadout ?  LoadoutChangedZoneItem : LoadoutChangedNoZoneItem);
    }
 }
 

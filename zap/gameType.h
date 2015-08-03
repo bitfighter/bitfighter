@@ -63,7 +63,6 @@ private:
 
    Point getSpawnPoint(S32 team);   // Pick a spawn point for ship or robot
 
-   bool mLevelHasLoadoutZone;
    bool mLevelHasPredeployedFlags;
    bool mLevelHasFlagSpawns;
 
@@ -208,8 +207,6 @@ public:
    F32 getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips);
 
    static void printRules();             // Dump game-rule info
-
-   bool levelHasLoadoutZone();           // Does the level have a loadout zone?
 
    enum
    {

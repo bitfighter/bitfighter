@@ -5,11 +5,11 @@
 
 #include "BotNavMeshZone.h"
 
-#include "ship.h"                   // For Ship::CollisionRadius
-#include "Teleporter.h"             // For Teleporter::TELEPORTER_RADIUS
-#include "GameObjectRender.h"
 #include "barrier.h"                // For Barrier methods in generating zones
 #include "EngineeredItem.h"         // For Turret and ForceFieldProjector methods in generating zones
+#include "GameObjectRender.h"
+#include "ship.h"                   // For Ship::CollisionRadius
+#include "Teleporter.h"             // For Teleporter::TELEPORTER_RADIUS
 #include "GeomUtils.h"
 #include "MathUtils.h"
 

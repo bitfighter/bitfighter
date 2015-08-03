@@ -435,7 +435,7 @@ public:
    Timer &getGlowZoneTimer();
    S32 getGlowingZoneTeam();
    string getScriptName() const;
-   bool levelHasLoadoutZone();
+   bool levelHasLoadoutZoneForTeam(S32 teamIndex);
    void updateShipLoadout(BfObject *shipObject);
 
    void sendChat(const StringTableEntry &senderName, ClientInfo *senderClientInfo, const StringPtr &message, bool global, S32 teamIndex);

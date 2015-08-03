@@ -253,7 +253,8 @@ void ClientInfo::resetLoadout(bool levelHasLoadoutZone)
    resetLoadout();
    mActiveLoadout.resetLoadout();
 
-   // If the current level has a loadout zone, put last level's load-out on-deck
+   // If the current level has a loadout zone, put last level's loadout on-deck.  If it doesn't, we don't want to change
+   // the user's loadout next time they spawn without the user taking some action.
    if(levelHasLoadoutZone)
       requestLoadout(loadout);
 }

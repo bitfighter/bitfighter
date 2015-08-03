@@ -113,7 +113,6 @@ void GameType::initialize(Level *level, S32 winningScore)
    mCanSwitchTeams = true;       // Players can switch right away
    mZoneGlowTimer.setPeriod(mZoneGlowTime);
    mGlowingZoneTeam = -1;        // By default, all zones glow
-   mLevelHasLoadoutZone = false;
    mLevelHasPredeployedFlags = false;
    mLevelHasFlagSpawns = false;
    mShowAllBots = false;
@@ -1336,7 +1335,6 @@ void GameType::onLevelLoaded()
    TNLAssert(mLevel, "Expect a level here!");
 
    // Collect some info about the level for easy reference later
-   mLevelHasLoadoutZone      = mLevel->hasObjectOfType(LoadoutZoneTypeNumber);
    mLevelHasPredeployedFlags = mLevel->hasObjectOfType(FlagTypeNumber);
    mLevelHasFlagSpawns       = mLevel->hasObjectOfType(FlagSpawnTypeNumber);
 
@@ -1407,9 +1405,9 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
       // Fire ShipSpawned event for players
       EventManager::get()->fireEvent(EventManager::ShipSpawnedEvent, newShip);
 
-      if(!levelHasLoadoutZone())
+      if(!getGame()->levelHasLoadoutZoneForTeam(clientInfo->getTeamIndex()))
       {
-         // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
+         // Set loadout if there is no loadout zone
          clientInfo->updateLoadout(true, mEngineerEnabled);
       }
       else
@@ -2201,9 +2199,6 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringP
    mEngineerEnabled = engineerEnabled;
    mEngineerUnrestrictedEnabled = engineerAbuseEnabled;
 
-   // Need to send this to the client because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
-   mLevelHasLoadoutZone = levelHasLoadoutZone;        
-
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
    clientGame->startLoadingLevel(engineerEnabled);
    clientGame->setLevelDatabaseId(levelDatabaseId);
@@ -2658,7 +2653,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
 
    s2cSetLevelInfo(mLevelName, mLevelDescription.c_str(), "music name here", mWinningScore, mLevelCredits, 
-                   getObjectsLoaded(), mLevelHasLoadoutZone, mEngineerEnabled, 
+                   getObjectsLoaded(), false, mEngineerEnabled, 
                    mEngineerUnrestrictedEnabled, mGame->getLevelDatabaseId());
 
    for(S32 i = 0; i < mLevel->getTeamCount(); i++)
@@ -4097,12 +4092,6 @@ S32 GameType::getFlagCount()
 bool GameType::isCarryingItems(Ship *ship)
 {
    return ship->getMountedItemCount() > 0;
-}
-
-
-bool GameType::levelHasLoadoutZone()
-{
-   return mLevelHasLoadoutZone;
 }
 
 

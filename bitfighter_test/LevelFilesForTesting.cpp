@@ -5,6 +5,7 @@
 
 #include "LevelFilesForTesting.h"
 #include "LevelSource.h"
+#include "TeamConstants.h"
 
 #include "stringUtils.h"
 #include "tnlVector.h"
@@ -287,24 +288,32 @@ string getMultiTeamLevelCode(S32 teams)
 }
 
 
-string getLevelWithVariableNumberOfLoadoutZones(const Vector<S32> &loadoutZoneCount)
+static string makeLoadoutZone(S32 teamIndex, S32 baseCoord)
+{
+   // Wee little triangle!
+   string corner1 = itos(baseCoord)     + " " + itos(baseCoord);
+   string corner2 = itos(baseCoord)     + " " + itos(baseCoord + 1);
+   string corner3 = itos(baseCoord + 1) + " " + itos(baseCoord + 1);
+
+   return "LoadoutZone " + itos(teamIndex) + " " + corner1 + " " + corner2 + " " + corner3 + "\n";
+}
+
+
+string getLevelWithVariableNumberOfLoadoutZones(const Vector<S32> &loadoutZoneCount,
+                                                S32 neutralLoadoutZoneCount,
+                                                S32 hostileLoadoutZoneCount)
 {
    string code = getMultiTeamLevelCode(loadoutZoneCount.size());
 
    for(S32 i = 0; i < loadoutZoneCount.size(); i++)
-   {
       for(S32 j = 0; j < loadoutZoneCount[i]; j++)
-      {
-         S32 base = 100 * i + j;
+         code += makeLoadoutZone(i, 100 * i + j);
 
-         // Wee little triangle!
-         string corner1 = itos(base) + " " + itos(base);
-         string corner2 = itos(base) + " " + itos(base + 1);
-         string corner3 = itos(base + 1) + " " + itos(base + 1);
+   for(S32 i = 0; i < neutralLoadoutZoneCount; i++)
+      code += makeLoadoutZone(TEAM_NEUTRAL, 100 * (loadoutZoneCount.size() + i));
 
-         code += "LoadoutZone " + itos(i) + " " + corner1 + " " + corner2 + " " + corner3 + "\n";
-      }
-   }
+   for(S32 i = 0; i < hostileLoadoutZoneCount; i++)
+      code += makeLoadoutZone(TEAM_HOSTILE, 100 * (loadoutZoneCount.size() + neutralLoadoutZoneCount + i));
 
    return code;
 }

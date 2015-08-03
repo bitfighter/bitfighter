@@ -8,6 +8,7 @@
 
 #include "moveObject.h"
 #include "LoadoutTracker.h"
+#include "TeamConstants.h"
 
 #include "Timer.h"
 
@@ -65,7 +66,7 @@ private:
    }
 
 
-   BfObject *doIsInZone(const Vector<DatabaseObject *> &objects) const; // Private helper for isInZone() and isInAnyZone()
+   BfObject *doIsInZone(const Vector<DatabaseObject *> &objects, S32 teamIndex = NO_TEAM) const; // Private helper for isInZone() and isInAnyZone()
 
    // Idle helpers
    bool checkForSpeedzones(U32 stateIndex = ActualState); // Check to see if we collided with a GoFast
@@ -304,6 +305,7 @@ public:
    F32 getUpdatePriority(GhostConnection *connection, U32 updateMask, S32 updateSkips);
 
    BfObject *isInZone(U8 zoneType) const; // Return whether the ship is currently in a zone of the specified type, and which one
+   BfObject *isInZone(U8 zoneType, S32 teamIndex) const; // Return whether the ship is currently in a zone of the specified type and team
    BfObject *isInAnyZone() const;         // Return whether the ship is currently in any zone, and which one
 
    DatabaseObject *isOnObject(U8 objectType, U32 stateIndex = ActualState); // Returns the object in question if this ship is on an object of type objectType

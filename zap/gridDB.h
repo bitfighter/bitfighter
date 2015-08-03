@@ -114,12 +114,16 @@ private:
    static U32 mQueryId;
    static U32 mCountGridDatabase;      // Reference counter for destruction of mChunker
 
+   // For tracking objects by type
    Vector<DatabaseObject *> mAllObjects;
    Vector<DatabaseObject *> mGoalZones;
    Vector<DatabaseObject *> mFlags;
    Vector<DatabaseObject *> mSpyBugs;
    Vector<DatabaseObject *> mPolyWalls;
    Vector<DatabaseObject *> mWallitems;
+
+   // For tracking objects by type and team
+   Vector<Vector<DatabaseObject *> > mLoadoutZones;
 
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins) const;
    void findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins) const;
@@ -196,6 +200,7 @@ public:
    S32 getObjectCount() const;                          // Return the number of objects currently in the database
    S32 getObjectCount(U8 typeNumber) const;             // Return the number of objects currently in the database of specified type
    bool hasObjectOfType(U8 typeNumber) const;
+   bool hasObjectOfType(U8 typeNumber, S32 teamIndex) const;
    DatabaseObject *getObjectByIndex(S32 index) const;   // Kind of hacky, kind of useful
 };
 

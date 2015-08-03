@@ -1134,11 +1134,14 @@ string Game::getScriptName() const
 }
 
 
-bool Game::levelHasLoadoutZone()
+bool Game::levelHasLoadoutZoneForTeam(S32 teamIndex)
 {
-   // If we are idling after we have disconnected, we will no longer have a GameType (all ghosted objects
-   // get deleted on disconnect), but some display methods call this... so don't freak out of GameType is NULL.
-   return getGameType() && getGameType()->levelHasLoadoutZone();
+   if(teamIndex == NO_TEAM)
+      return false;
+
+   // We'll count neutral loadout zones as being on the same team because they act like they're on every team
+   return getLevel()->hasObjectOfType(LoadoutZoneTypeNumber, teamIndex) || 
+          getLevel()->hasObjectOfType(LoadoutZoneTypeNumber, TEAM_NEUTRAL);
 }
 
 

@@ -498,8 +498,10 @@ void ServerGame::cycleLevel(S32 nextLevel)
                mShuttingDown = true;
                mShutdownReason = "Host failed to send level list";
             }
+
             return; // we haven't cleared anything so its like level never changed, yet.
          }
+
          mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel);
          nextLevel = mCurrentLevelIndex;
          S32 hostLevelIndex = mLevelSource->getLevelInfo(mCurrentLevelIndex).mHosterLevelIndex;
@@ -533,7 +535,6 @@ void ServerGame::cycleLevel(S32 nextLevel)
    // We moved the clearing code into cleanup()... I think it will always be run.  But better check!
    TNLAssert(mLevelSwitchTimer.getCurrent() == 0, "Expected this to be clear!");
    TNLAssert(mScopeAlwaysList.size() == 0,        "Expected this to be empty!");
-
 
    for(S32 i = 0; i < getClientCount(); i++)
    {
@@ -604,7 +605,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    // Reset loadouts now that we have GameType set up
    for(S32 i = 0; i < getClientCount(); i++)
-      getClientInfo(i)->resetLoadout(levelHasLoadoutZone());
+      getClientInfo(i)->resetLoadout(levelHasLoadoutZoneForTeam(getClientInfo(i)->getTeamIndex()));
 
    // Now add players to the gameType, from highest rating to lowest in an attempt to create ratings-based teams
    // Sorting also puts idle players at the end of the list, regardless of their rating

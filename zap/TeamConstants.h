@@ -20,6 +20,8 @@ static const S32 NO_TEAM = -3;      // Not exposed to lua, not used in level fil
 
 static const S32 NONE = -1;         // Used for a variety of purposes
 
+static const S32 TEAM_OFFSET = 2;
+
 };
 
 #endif

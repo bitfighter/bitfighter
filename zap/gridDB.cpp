@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "gridDB.h"
+#include "loadoutZone.h"
 #include "moveObject.h"    // For def of ActualState
 #include "Level.h"
 
@@ -87,12 +88,13 @@ static void sortObjects(Vector<DatabaseObject *> &objects)
 void GridDatabase::copyObjects(const GridDatabase *source)
 {
    // Preallocate some memory to make copying a little more efficient
-   mAllObjects.reserve(source->mAllObjects.size());
-   mGoalZones .reserve(source->mGoalZones.size());
-   mFlags     .reserve(source->mFlags.size());
-   mSpyBugs   .reserve(source->mSpyBugs.size());
-   mPolyWalls .reserve(source->mPolyWalls.size());
-   mWallitems .reserve(source->mWallitems.size());
+   mAllObjects  .reserve(source->mAllObjects.size());
+   mGoalZones   .reserve(source->mGoalZones.size());
+   mFlags       .reserve(source->mFlags.size());
+   mSpyBugs     .reserve(source->mSpyBugs.size());
+   mPolyWalls   .reserve(source->mPolyWalls.size());
+   mWallitems   .reserve(source->mWallitems.size());
+   mLoadoutZones.reserve(source->mLoadoutZones.size());
 
    for(S32 i = 0; i < source->mAllObjects.size(); i++)
       addToDatabase(source->mAllObjects[i]->clone());
@@ -151,7 +153,15 @@ void GridDatabase::addToDatabase(DatabaseObject *object)
       mPolyWalls.push_back(object);
    else if(type == WallItemTypeNumber)
       mWallitems.push_back(object);
+   else if(type == LoadoutZoneTypeNumber)
+   {
+      S32 indx = static_cast<LoadoutZone *>(object)->getTeam() + TEAM_OFFSET;
 
+      if(mLoadoutZones.size() <= indx)
+         mLoadoutZones.resize(indx + 1);     // + 1 because indx of 0 requires 1 element to store it
+
+      mLoadoutZones[indx].push_back(object);
+   }
    //sortObjects(mAllObjects);  // problem: Barriers in-game don't have mGeometry (it is NULL)
 }
 
@@ -198,6 +208,7 @@ void GridDatabase::removeEverythingFromDatabase()
    mSpyBugs.clear();
    mPolyWalls.clear();
    mWallitems.clear();
+   mLoadoutZones.clear();
 
    for(S32 i = 0; i < mAllObjects.size(); i++)
       mAllObjects[i]->deleteThyself();
@@ -273,6 +284,14 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
       eraseObject_fast(&mPolyWalls, object);
    else if(type == WallItemTypeNumber)
       eraseObject_fast(&mWallitems, object);
+   else if(type == LoadoutZoneTypeNumber)
+   {
+      S32 indx = static_cast<LoadoutZone *>(object)->getTeam() + TEAM_OFFSET;
+
+      TNLAssert(indx < mLoadoutZones.size(), "Vec should have this element!");
+
+      eraseObject_fast(&mLoadoutZones[indx], object);
+   }
 
    if(deleteObject)
       object->deleteThyself();
@@ -717,6 +736,8 @@ S32 GridDatabase::getObjectCount(U8 typeNumber) const
    if(typeNumber == WallItemTypeNumber)
       return mWallitems.size();
 
+   if(typeNumber == LoadoutZoneTypeNumber)
+      return mLoadoutZones.size();
 
    TNLAssert(false, "Unsupported type!");
    return 0;
@@ -740,9 +761,27 @@ bool GridDatabase::hasObjectOfType(U8 typeNumber) const
    if(typeNumber == WallItemTypeNumber)
       return mWallitems.size() > 0;
 
+   if(typeNumber == LoadoutZoneTypeNumber)
+      return mLoadoutZones.size() > 0;
+
+
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if(mAllObjects[i]->getObjectTypeNumber() == typeNumber)
          return true;
+
+   return false;
+}
+
+
+bool GridDatabase::hasObjectOfType(U8 typeNumber, S32 teamIndex) const
+{
+   if(mLoadoutZones.size() <= teamIndex + TEAM_OFFSET)
+      return false;
+
+   if(typeNumber == LoadoutZoneTypeNumber)
+      return mLoadoutZones[teamIndex + TEAM_OFFSET].size() > 0;
+
+   TNLAssert(false, "Unsupported type!");
 
    return false;
 }
