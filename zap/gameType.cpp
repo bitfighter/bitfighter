@@ -2182,10 +2182,10 @@ void GameType::addAdminGameMenuOptions(MenuUserInterface *menu)
 // Also serves to tell the client we're on a new level.
 GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringPtr levelDesc, StringPtr musicName, S32 teamScoreLimit,
                                                 StringTableEntry levelCreds, S32 objectCount, 
-                                                bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId),
+                                                bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId),
                                             (levelName, levelDesc, musicName, teamScoreLimit,
                                                 levelCreds, objectCount,  
-                                                levelHasLoadoutZone, engineerEnabled, engineerAbuseEnabled, levelDatabaseId))
+                                                engineerEnabled, engineerAbuseEnabled, levelDatabaseId))
 {
 #ifndef ZAP_DEDICATED
    setLevelName(levelName);
@@ -2653,7 +2653,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
 
    s2cSetLevelInfo(mLevelName, mLevelDescription.c_str(), "music name here", mWinningScore, mLevelCredits, 
-                   getObjectsLoaded(), false, mEngineerEnabled, 
+                   getObjectsLoaded(), mEngineerEnabled, 
                    mEngineerUnrestrictedEnabled, mGame->getLevelDatabaseId());
 
    for(S32 i = 0; i < mLevel->getTeamCount(); i++)

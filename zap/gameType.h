@@ -370,7 +370,7 @@ public:
    virtual void onGhostAvailable(GhostConnection *theConnection);
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringPtr levelDesc, StringPtr musicName, S32 teamScoreLimit,
                                      StringTableEntry levelCreds, S32 objectCount, 
-                                     bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId));
+                                     bool engineerEnabled, bool engineerAbuseEnabled, U32 levelDatabaseId));
    TNL_DECLARE_RPC(s2cAddWalls,     (Vector<Point> barrier, F32 width));
    TNL_DECLARE_RPC(s2cAddPolyWalls, (Vector<Point> barrier));
 
