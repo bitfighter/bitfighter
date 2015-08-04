@@ -78,10 +78,10 @@ TEST(LoadoutTest, TestLevelHasLoadoutZoneForTeam)
       S32 neutralLoadoutZoneCount(1);
       S32 hostileLoadoutZoneCount(1);
       Vector<S32> results({ true, true, true, true, true, true });
-
+         
       doTest(teamLoadoutZoneCount, neutralLoadoutZoneCount, hostileLoadoutZoneCount, results);
    }
 }
 
    
-};
+}
