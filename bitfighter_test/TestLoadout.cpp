@@ -57,7 +57,7 @@ TEST(LoadoutTest, TestLevelHasLoadoutZoneForTeam)
       Vector<S32> teamLoadoutZoneCount({ 0,1,0 });
       S32 neutralLoadoutZoneCount(1);
       S32 hostileLoadoutZoneCount(0);
-      Vector<S32> results({ 1,1,1 });
+      Vector<S32> results({ true, true, true });     
 
       doTest(teamLoadoutZoneCount, neutralLoadoutZoneCount, hostileLoadoutZoneCount, results);
    }
@@ -67,7 +67,7 @@ TEST(LoadoutTest, TestLevelHasLoadoutZoneForTeam)
       Vector<S32> teamLoadoutZoneCount({ 0,9,0,1 });
       S32 neutralLoadoutZoneCount(0);
       S32 hostileLoadoutZoneCount(2);
-      Vector<S32> results({ 0,1,0,1 });
+      Vector<S32> results({ false, true, false, true });
 
       doTest(teamLoadoutZoneCount, neutralLoadoutZoneCount, hostileLoadoutZoneCount, results);
    }
@@ -77,7 +77,7 @@ TEST(LoadoutTest, TestLevelHasLoadoutZoneForTeam)
       Vector<S32> teamLoadoutZoneCount({ 3,2,0,0,0,1 });
       S32 neutralLoadoutZoneCount(1);
       S32 hostileLoadoutZoneCount(1);
-      Vector<S32> results({ 1,1,1,1,1,1 });
+      Vector<S32> results({ true, true, true, true, true, true });
 
       doTest(teamLoadoutZoneCount, neutralLoadoutZoneCount, hostileLoadoutZoneCount, results);
    }
