@@ -68,6 +68,8 @@ protected:
 
    const char *mDisplayValAppendage;      // Typically the ">" that is appended to menu items
 
+   virtual string getUnits() const;
+
 public:
    // Constructors
    MenuItem(lua_State *L = NULL);         // Combined default C++ / Lua constructor  ==> used at all?
@@ -98,8 +100,6 @@ public:
    void setMenu(MenuUserInterface *menu);
 
    string getPrompt() const;
-
-   virtual string getUnits() const;
 
    virtual void setSecret(bool secret);
 
@@ -281,6 +281,7 @@ protected:
    virtual S32 getBigIncrement();    // How much our counter is incremented when shift is down (multiplier)
    virtual void backspace();
    virtual void enterDigit(S32 digit);
+   virtual string getUnits() const;
 
 public:
    CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, 
@@ -299,8 +300,6 @@ public:
    virtual string getValue() const;
    virtual const char *getSpecialEditingInstructions();
    virtual bool handleKey(InputCode inputCode);
-
-   virtual string getUnits() const;
 
    virtual void snap();
 
@@ -354,6 +353,7 @@ protected:
    virtual S32 getBigIncrement();
    virtual void backspace();
    virtual void enterDigit(S32 digit);
+   virtual string getUnits() const;
 
 public:
    TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
@@ -361,7 +361,6 @@ public:
    virtual ~TimeCounterMenuItem();
 
    virtual bool handleKey(InputCode inputCode);
-   virtual string getUnits() const;
 
    virtual MenuItemTypes getItemType();
    virtual void setValue (const string &val);
