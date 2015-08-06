@@ -223,7 +223,7 @@ void MenuItem::setIntValue(S32 val)               { /* Do nothing */ }
 void MenuItem::setFilter(LineEditorFilter filter) { /* Do nothing */ }
 
 
-string MenuItem::getValueForWritingToLevelFile()
+string MenuItem::getValueForWritingToLevelFile() const
 {
    return itos(getIntValue());
 }
@@ -385,7 +385,7 @@ ToggleMenuItem::~ToggleMenuItem()
 }
 
 
-string ToggleMenuItem::getOptionText()
+string ToggleMenuItem::getOptionText() const
 {
    return mIndex < U32(mOptions.size()) ? mOptions[mIndex] : "INDEX OUT OF RANGE";
 }
@@ -638,7 +638,7 @@ YesNoMenuItem::~YesNoMenuItem()
 }
 
 
-string YesNoMenuItem::getValueForWritingToLevelFile()
+string YesNoMenuItem::getValueForWritingToLevelFile() const
 {
    return mIndex ? "yes" : "no";
 }
@@ -763,7 +763,7 @@ void CounterMenuItem::setIntValue(S32 val)
 }
 
 
-string CounterMenuItem::getOptionText()
+string CounterMenuItem::getOptionText() const
 {
    return (mValue == mMinValue && mMinMsg != "") ? mMinMsg : itos(mValue) + " " + getUnits();
 }
@@ -895,13 +895,13 @@ string CounterMenuItem::getUnits() const
 
 void CounterMenuItem::snap()
 {
-   /* Do nothing */
+   // Do nothing 
 }
 
 
 void CounterMenuItem::activatedWithShortcutKey()
 {
-   /* Do nothing */
+   // Do nothing 
 }
 
 
@@ -985,12 +985,52 @@ CounterMenuItem::CounterMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NONE, 
 ////////////////////////////////////
 ////////////////////////////////////
 
+// Constructor
+TenthsCounterMenuItem::TenthsCounterMenuItem(const string &title, F32 value, S32 minVal, S32 maxVal, 
+                                             const string &units, const string &minMsg, 
+                                             const string &help, InputCode k1, InputCode k2) :
+   Parent(title, value * 10, 1 , minVal * 10, maxVal * 10, units, minMsg, help, k1, k2)
+{
+   // Do nothing
+}
+
+
+// Destructor
+TenthsCounterMenuItem::~TenthsCounterMenuItem()
+{
+   // Do nothing
+}
+
+
+string TenthsCounterMenuItem::getOptionText() const
+{
+   return (mValue == mMinValue && mMinMsg != "") ? mMinMsg : getValueForWritingToLevelFile() + " " + getUnits();
+}
+
+
+F32 TenthsCounterMenuItem::getF32Value() const
+{
+   return mValue / 10.0;
+}
+
+
+string TenthsCounterMenuItem::getValueForWritingToLevelFile() const
+{
+   return ftos(mValue / 10.0, 1);
+}
+
+
+
+////////////////////////////////////
+////////////////////////////////////
+
 TimeCounterMenuItem::TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help,
                                          S32 step, InputCode k1, InputCode k2) :
    CounterMenuItem(title, value, step, 0, maxVal, "", zeroMsg, help, k1, k2)
 {
    mEditingSeconds = false;
 }
+
 
 // Destructor
 TimeCounterMenuItem::~TimeCounterMenuItem()
@@ -1067,7 +1107,7 @@ void TimeCounterMenuItem::setValue(const string &val)
 }
 
 
-string TimeCounterMenuItem::getOptionText()
+string TimeCounterMenuItem::getOptionText() const
 {
    return (mValue == mMinValue && mMinMsg != "") ?
          mMinMsg :
@@ -1077,7 +1117,7 @@ string TimeCounterMenuItem::getOptionText()
 }
 
 
-string TimeCounterMenuItem::getValueForWritingToLevelFile()
+string TimeCounterMenuItem::getValueForWritingToLevelFile() const
 {
    return ftos((F32) mValue / 60.0f, 3);  // Time in minutes, with fraction
 }
@@ -1112,7 +1152,7 @@ void TimeCounterMenuItemSeconds::setValue(const string &val)
 }
 
 
-string TimeCounterMenuItemSeconds::getValueForWritingToLevelFile()
+string TimeCounterMenuItemSeconds::getValueForWritingToLevelFile() const
 {
    return itos(mValue);
 }
@@ -1140,7 +1180,7 @@ PlayerMenuItem::~PlayerMenuItem()
 }
 
 
-string PlayerMenuItem::getOptionText()
+string PlayerMenuItem::getOptionText() const
 {
    string text = getPrompt();
 
@@ -1200,7 +1240,7 @@ TeamMenuItem::~TeamMenuItem()
 }
 
 
-string TeamMenuItem::getOptionText()
+string TeamMenuItem::getOptionText() const
 {
    Team *team = (Team *)mTeam;
 
@@ -1234,7 +1274,7 @@ MenuItemTypes TeamMenuItem::getItemType()
 
 void TeamMenuItem::activatedWithShortcutKey()
 {
-   /* Do nothing */
+   // Do nothing
 }
 
 
@@ -1266,7 +1306,7 @@ void TextEntryMenuItem::initialize()
 }
 
 
-string TextEntryMenuItem::getOptionText()
+string TextEntryMenuItem::getOptionText() const
 {
    return mLineEditor.getString() != "" ? mLineEditor.getDisplayString() : mEmptyVal;
 }
@@ -1347,7 +1387,7 @@ void TextEntryMenuItem::setLineEditor(LineEditor editor)
 }
 
 
-string TextEntryMenuItem::getValueForWritingToLevelFile()
+string TextEntryMenuItem::getValueForWritingToLevelFile() const
 {
    return mLineEditor.getString() != "" ? mLineEditor.getString() : mEmptyVal;
 }

@@ -70,8 +70,8 @@ protected:
 
 public:
    // Constructors
-   explicit MenuItem(lua_State *L = NULL);         // Combined default C++ / Lua constructor  ==> used at all?
-   explicit MenuItem(const string &displayVal);
+   MenuItem(lua_State *L = NULL);         // Combined default C++ / Lua constructor  ==> used at all?
+   MenuItem(const string &displayVal);
    MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32), const string &help, 
             InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    MenuItem(S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const string &help, 
@@ -111,7 +111,7 @@ public:
    
    virtual const char *getSpecialEditingInstructions();
    virtual S32 getIntValue() const;
-   virtual string getValueForWritingToLevelFile();
+   virtual string getValueForWritingToLevelFile() const;
    virtual string getValue() const;      // Basic menu item returns its text when selected... overridden by other types
    virtual void setValue(const string &val);
    virtual void setIntValue(S32 val);
@@ -189,7 +189,7 @@ class ToggleMenuItem : public ValueMenuItem
    typedef ValueMenuItem Parent;
 
 private:
-   string getOptionText();    // Helper function
+   string getOptionText() const;    // Helper function
    
 protected:
    U32 mIndex;
@@ -242,7 +242,7 @@ public:
    YesNoMenuItem(string title, bool currOption, const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    virtual ~YesNoMenuItem();  // Destructor
 
-   virtual string getValueForWritingToLevelFile();
+   virtual string getValueForWritingToLevelFile() const;
    virtual void setValue(const string &val);
    virtual S32 getIntValue() const;
    virtual void setIntValue(S32 value);
@@ -265,7 +265,7 @@ class CounterMenuItem : public ValueMenuItem
    typedef ValueMenuItem Parent;
 
 private:
-   virtual string getOptionText();     // Helper function, overridden in TimeCounterMenuItem
+   virtual string getOptionText() const;     // Helper function, overridden in TimeCounterMenuItem
    virtual void initialize();
 
 protected:
@@ -319,12 +319,35 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class TimeCounterMenuItem : public CounterMenuItem
+class TenthsCounterMenuItem : public CounterMenuItem
 {
-private:
    typedef CounterMenuItem Parent;
 
-   string getOptionText();
+private:
+   virtual string getOptionText() const;
+
+public:
+   // Constructor
+   TenthsCounterMenuItem(const string &title, F32 value, S32 minVal, S32 maxVal, 
+                         const string &units, const string &minMsg, 
+                         const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+
+   virtual ~TenthsCounterMenuItem();      // Destructor
+
+   F32 getF32Value() const;
+   virtual string getValueForWritingToLevelFile() const;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class TimeCounterMenuItem : public CounterMenuItem
+{
+   typedef CounterMenuItem Parent;
+
+private:
+   string getOptionText() const;
    bool mEditingSeconds;
 
 protected:
@@ -342,7 +365,7 @@ public:
 
    virtual MenuItemTypes getItemType();
    virtual void setValue (const string &val);
-   virtual string getValueForWritingToLevelFile();
+   virtual string getValueForWritingToLevelFile() const;
 };
 
 
@@ -361,7 +384,7 @@ public:
    virtual ~TimeCounterMenuItemSeconds();
 
    virtual void setValue (const string &val);
-   virtual string getValueForWritingToLevelFile();
+   virtual string getValueForWritingToLevelFile() const;
 
    virtual void snap();
 };
@@ -375,7 +398,7 @@ class TextEntryMenuItem : public ValueMenuItem
 
 private:
    string mEmptyVal;
-   string getOptionText();    // Helper function
+   string getOptionText() const;    // Helper function
 
    virtual void initialize();
 
@@ -401,7 +424,7 @@ public:
    LineEditor *getLineEditor();
    void setLineEditor(LineEditor editor);
 
-   virtual string getValueForWritingToLevelFile();
+   virtual string getValueForWritingToLevelFile() const;
 
    virtual string getValue() const;
    void setValue(const string &val);
@@ -468,8 +491,8 @@ public:
 class PlayerMenuItem : public MenuItem
 {
 private:
-   PlayerType mType;          // Type of player, for name menu
-   string getOptionText();    // Helper function
+   PlayerType mType;                // Type of player, for name menu
+   string getOptionText() const;    // Helper function
 
 public:
    // Constructor
@@ -492,8 +515,8 @@ class TeamMenuItem : public MenuItem
 {
 private:
    AbstractTeam *mTeam;
-   bool mIsCurrent;           // Is this a player's current team? 
-   string getOptionText();    // Helper function
+   bool mIsCurrent;                 // Is this a player's current team? 
+   string getOptionText() const;    // Helper function
 
 public:
    TeamMenuItem(S32 index, AbstractTeam *team, void (*callback)(ClientGame *, U32), InputCode inputCode, bool isCurrent);
