@@ -773,7 +773,7 @@ void CounterMenuItem::setIntValue(S32 val)
 
 string CounterMenuItem::getOptionText() const
 {
-   return (mValue == mMinValue && mMinMsg != "") ? mMinMsg : itos(mValue) + " " + getUnits();
+   return (mValue == mMinValue && mMinMsg != "") ? mMinMsg : itos(mValue) + getUnits();
 }
 
 
@@ -897,7 +897,10 @@ const char *CounterMenuItem::getSpecialEditingInstructions()
 
 string CounterMenuItem::getUnits() const
 {
-   return mUnits;
+   if(mUnits == "")
+      return "";
+
+   return " " + mUnits;
 }
 
 
@@ -1014,7 +1017,7 @@ TenthsCounterMenuItem::~TenthsCounterMenuItem()
 
 string TenthsCounterMenuItem::getOptionText() const
 {
-   return (mValue == mMinValue && mMinMsg != "") ? mMinMsg : getValueForWritingToLevelFile() + " " + getUnits();
+   return (mValue == mMinValue && mMinMsg != "") ? mMinMsg : getValueForWritingToLevelFile() + getUnits();
 }
 
 
@@ -1099,9 +1102,10 @@ bool TimeCounterMenuItem::handleKey(InputCode inputCode)
    return true;
 }
 
+
 string TimeCounterMenuItem::getUnits() const
 {
-   return mValue >= 60 ? "mins" : "secs";
+   return mValue >= 60 ? " mins" : " secs";
 }
 
 
@@ -1122,8 +1126,7 @@ string TimeCounterMenuItem::getOptionText() const
    return (mValue == mMinValue && mMinMsg != "") ?
          mMinMsg :
          // If not minimum, make sure we return min/seconds
-         ((mValue < 60) ? itos(mValue) : itos(mValue / 60) + ":" + ((mValue % 60) < 10 ? "0" : "") + itos(mValue % 60)) +
-         " " + getUnits();
+         ((mValue < 60) ? itos(mValue) : itos(mValue / 60) + ":" + ((mValue % 60) < 10 ? "0" : "") + itos(mValue % 60)) + getUnits();
 }
 
 
