@@ -8,6 +8,8 @@
 #include "ClientGame.h"
 #include "ServerGame.h"
 
+#include "UIMenuItems.h"
+
 #include "gtest/gtest.h"
 
 namespace Zap
@@ -83,5 +85,16 @@ TEST(LoadoutTest, TestLevelHasLoadoutZoneForTeam)
    }
 }
 
+
+//TODO: Move this to a new test file!!!  Doesn't belong here!!
+TEST(LoadoutTest, TestTenthsCounter) 
+{
+   F32 val = 4.3f;
+   TenthsCounterMenuItem menuItem("Test", val, 2, 40, "what", "ever", "man");
+
+   EXPECT_FLOAT_EQ(val, menuItem.getF32Value());
+   EXPECT_EQ("4.3", menuItem.getValueForWritingToLevelFile());    // 4.3
+   EXPECT_EQ(itos(S32(val * 10)), menuItem.getValue());           // 43
+}
    
 }
