@@ -162,6 +162,7 @@ S32 returnWeaponType(lua_State *L, WeaponType weapon);
 void clearStack(lua_State *L);
 
 F32 getFloat(lua_State *L, S32 index);
+F32 getFloat(lua_State *L, S32 index, F32 defaultVal);
 F32 getCheckedFloat(lua_State *L, S32 index, const char *methodName);
 
 bool getBool(lua_State *L, S32 index);

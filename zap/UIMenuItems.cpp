@@ -18,6 +18,7 @@
 #include "stringUtils.h"
 #include "RenderUtils.h"
 
+#include <cmath>
 
 namespace Zap
 {
@@ -340,6 +341,14 @@ void ValueMenuItem::initialize()
 
 
 S32 clamp(S32 val, S32 min, S32 max)
+{
+   if(val < min) return min;
+   if(val > max) return max;
+   return val;
+}
+
+
+F32 clamp(F32 val, F32 min, F32 max)
 {
    if(val < min) return min;
    if(val > max) return max;
@@ -999,37 +1008,284 @@ CounterMenuItem::CounterMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NONE, 
 ////////////////////////////////////
 
 // Constructor
-TenthsCounterMenuItem::TenthsCounterMenuItem(const string &title, F32 value, S32 minVal, S32 maxVal, 
-                                             const string &units, const string &minMsg, 
-                                             const string &help, InputCode k1, InputCode k2) :
-   Parent(title, value * 10, 1 , minVal * 10, maxVal * 10, units, minMsg, help, k1, k2)
+FloatCounterMenuItem::FloatCounterMenuItem(const string &title,
+      F32 value, F32 step, F32 minVal, F32 maxVal, S32 decimalPlaces,
+      const string &units, const string &minMsg, const string &help, InputCode k1, InputCode k2) :
+   Parent(title, NULL, help, k1, k2)
 {
-   // Do nothing
+   initialize();
+
+   mStep = step;
+   mMinValue = minVal;
+   mMaxValue = maxVal;
+   mUnits = units;
+   mMinMsg = minMsg;
+   mDecimalPlaces = decimalPlaces;
+   mPrecision = std::pow(10, mDecimalPlaces);
+
+   setFloatValue(value);     // Needs to be done after mMinValue and mMaxValue are set
 }
 
 
 // Destructor
-TenthsCounterMenuItem::~TenthsCounterMenuItem()
+FloatCounterMenuItem::~FloatCounterMenuItem()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void FloatCounterMenuItem::initialize()
+{
+   mEnterAdvancesItem = true;
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+void FloatCounterMenuItem::setFloatValue(F32 val)
+{
+   F32 rounded = floor(val * mPrecision + 0.5) / mPrecision;
+
+   mValue = clamp(rounded, mMinValue, mMaxValue);
+}
+
+
+void FloatCounterMenuItem::setValue(const string &val)
+{
+   setFloatValue(Zap::stof(val));
+}
+
+
+void FloatCounterMenuItem::setIntValue(S32 val)
+{
+   // This may change your integer to be the min/max
+   setFloatValue(F32(val));
+}
+
+
+string FloatCounterMenuItem::getOptionText()
+{
+   return (mValue == mMinValue && mMinMsg != "") ? mMinMsg : getValue() + " " + getUnits();
+}
+
+
+void FloatCounterMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
+{
+   RenderUtils::drawCenteredStringPair(xpos, ypos, textsize, MenuContext, InputContext, *getColor(isSelected), *getValueColor(isSelected),
+                          getPrompt().c_str(), getOptionText().c_str());
+}
+
+
+S32 FloatCounterMenuItem::getWidth(S32 textsize)
+{
+   return RenderUtils::getStringPairWidth(textsize, MenuContext, InputContext, getPrompt().c_str(), getOptionText().c_str());
+}
+
+
+bool FloatCounterMenuItem::handleKey(InputCode inputCode)
+{
+   if(inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT || inputCode == MOUSE_WHEEL_UP)
+   {
+      if(InputCodeManager::checkModifier(KEY_SHIFT))
+      {
+         increment(getBigIncrement());
+         snap();
+      }
+      else
+         increment(1);
+
+      return true;
+   }
+   else if(inputCode == KEY_LEFT || inputCode == MOUSE_RIGHT || inputCode == MOUSE_WHEEL_DOWN)
+   {
+      if(InputCodeManager::checkModifier(KEY_SHIFT))
+      {
+         decrement(getBigIncrement());
+         snap();
+      }
+      else
+         decrement(1);
+
+      return true;
+   }
+
+   else if(inputCode == KEY_BACKSPACE || inputCode == KEY_KEYPAD_PERIOD)
+      backspace();
+
+   else if(inputCode >= KEY_0 && inputCode <= KEY_9)
+      enterDigit(inputCode - KEY_0);
+
+   else if(inputCode >= KEY_KEYPAD0 && inputCode <= KEY_KEYPAD9)
+      enterDigit(inputCode - KEY_KEYPAD0);
+
+
+   return false;
+}
+
+
+void FloatCounterMenuItem::increment(S32 fact)
+{
+   setFloatValue(mValue + mStep * fact);
+}
+
+
+void FloatCounterMenuItem::decrement(S32 fact)
+{
+   setFloatValue(mValue - mStep * fact);
+}
+
+
+F32 FloatCounterMenuItem::getBigIncrement()
+{
+   return 10.f;
+}
+
+void FloatCounterMenuItem::backspace()
+{
+   setFloatValue(mValue /= 10);
+}
+
+
+void FloatCounterMenuItem::enterDigit(S32 digit)
+{
+   logprintf("value 1: %f", mValue);
+   if(mValue > F32((F64(F32_MAX) + 9) *.1))
+      mValue = F32_MAX;
+   else
+      mValue *= 10;
+
+   logprintf("value 2: %f", mValue);
+   if(mValue + digit < mValue) // Check for overflow
+      mValue = F32_MAX;
+   else
+      mValue += (digit / F32(mPrecision));
+
+   logprintf("value 3: %f", mValue);
+   if(mValue > mMaxValue)
+      mValue = mMaxValue;
+}
+
+
+MenuItemTypes FloatCounterMenuItem::getItemType()
+{
+   return FloatCounterMenuItemType;
+}
+
+
+S32 FloatCounterMenuItem::getIntValue() const
+{
+   // This is rounded!  So it may not be what you want!
+   return S32(mValue);
+}
+
+
+string FloatCounterMenuItem::getValue() const
+{
+   return ftos(mValue, mDecimalPlaces);
+}
+
+
+const char *FloatCounterMenuItem::getSpecialEditingInstructions()
+{
+   return "Use [<-] and [->] keys or mouse wheel to change value. Hold [Shift] for bigger change.";
+}
+
+
+string FloatCounterMenuItem::getUnits() const
+{
+   return mUnits;
+}
+
+
+void FloatCounterMenuItem::snap()
 {
    // Do nothing
 }
 
 
-string TenthsCounterMenuItem::getOptionText() const
+void FloatCounterMenuItem::activatedWithShortcutKey()
 {
-   return (mValue == mMinValue && mMinMsg != "") ? mMinMsg : getValueForWritingToLevelFile() + getUnits();
+   // Do nothing
 }
 
 
-F32 TenthsCounterMenuItem::getF32Value() const
-{
-   return mValue / 10.0;
-}
+//////////
+// Lua interface
+
+/**
+ * @luaclass FloatCounterMenuItem
+ *
+ * @brief Menu item for entering a floating value, with increment and decrement
+ * controls.
+ *
+ * @luafunc FloatCounterMenuItem::FloatCounterMenuItem(string name, num startingVal, num step, num minVal, num maxVal, num decimalPlaces, string units, string minText, string help)
+ *
+ * @param name The text shown on the menu item.
+ * @param startingVal The starting value of the menu item.
+ * @param step The amount by which to increase or decrease the value when the
+ * arrow keys are used.
+ * @param minVal The minimum allowable value that can be entered.
+ * @param maxVal The maximum allowable value that can be entered.
+ * @param decimalPlaces The number of decimal places of accuracy to use.
+ * @param units The units to be shown alongside the numeric item. Pass "" if you
+ * don't want to display units.
+ * @param minText The text shown on the menu item when the minimum value has
+ * been reached. Pass "" to simply display the minimum value.
+ * @param help A bit of help text.
+ *
+ * The MenuItem will return the value entered.
+ *
+ * For example:
+ *
+ * @code
+ *   m = FloatCounterMenuItem.new("Angle", 1.5, 0.1, 0.1, 100, 3, "radians", "", "Angle of object to rotate")
+ * @endcode
+ */
+//                Fn name                  Param profiles            Profile count
+#define LUA_METHODS(CLASS, METHOD) \
+
+GENERATE_LUA_FUNARGS_TABLE(FloatCounterMenuItem, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(FloatCounterMenuItem, LUA_METHODS);
+
+#undef LUA_METHODS
 
 
-string TenthsCounterMenuItem::getValueForWritingToLevelFile() const
+const char *FloatCounterMenuItem::luaClassName = "FloatCounterMenuItem";
+REGISTER_LUA_SUBCLASS(FloatCounterMenuItem, MenuItem);
+
+
+// Lua Constructor, called from scripts
+FloatCounterMenuItem::FloatCounterMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NONE, KEY_NONE)
 {
-   return ftos(mValue / 10.0, 1);
+   const char *methodName = "FloatCounterMenuItem constructor";
+
+   initialize();
+
+   try
+   {
+      // Required items -- will throw if they are missing or misspecified
+      mDisplayVal = getCheckedString(L, 1, methodName);
+      // mValue =  getInt(L, 2, methodName);  ==> set this later, after we've determined mMinValue and mMaxValue
+
+      // Optional (but recommended) items
+      mStep =     getFloat(L, 3, 0.1);
+      mMinValue = getFloat(L, 4, 0.1);
+      mMaxValue = getFloat(L, 5, 1000);
+      mDecimalPlaces = getInt(L, 6, 3);
+      mUnits =    getString(L, 7, "");
+      mMinMsg =   getString(L, 8, "");
+      mHelp =     getString(L, 9, "");
+
+      // Second required item
+      setFloatValue(getCheckedFloat(L, 2, methodName));    // Set this one last so we'll know mMinValue and mMaxValue
+   }
+   catch(LuaException &e)
+   {
+      logprintf(LogConsumer::LogError, "Error constructing FloatCounterMenuItem -- please see documentation");
+      logprintf(LogConsumer::ConsoleMsg, "Usage: FloatCounterMenuItem(<display val (str)> [step (f)] [min val (f)] [max val (f)] [decimal places (i)] [units (str)] [min msg (str)] [help (str)] <value (int))");
+      throw e;
+   }
+
+   LUA_REGISTER_WITH_TRACKER;
 }
 
 

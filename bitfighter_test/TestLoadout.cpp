@@ -90,11 +90,10 @@ TEST(LoadoutTest, TestLevelHasLoadoutZoneForTeam)
 TEST(LoadoutTest, TestTenthsCounter) 
 {
    F32 val = 4.3f;
-   TenthsCounterMenuItem menuItem("Test", val, 2, 40, "what", "ever", "man");
+   FloatCounterMenuItem menuItem("Test", val, 0.1, 2.1, 40.5, 1, "what", "ever", "man");
 
-   EXPECT_FLOAT_EQ(val, menuItem.getF32Value());
-   EXPECT_EQ("4.3", menuItem.getValueForWritingToLevelFile());    // 4.3
-   EXPECT_EQ(itos(S32(val * 10)), menuItem.getValue());           // 43
+   EXPECT_EQ("4.3", menuItem.getValue());    // 4.3
+   EXPECT_FLOAT_EQ(val, stof(menuItem.getValue()));
 }
    
 }
