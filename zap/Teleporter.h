@@ -171,6 +171,12 @@ public:
    void setEndpoint(const Point &point);
    const Vector<Point> *getDestList() const;
 
+#ifndef ZAP_DEDICATED
+   bool startEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
+#endif
+
    // Some properties about the item that will be needed in the editor
    const char *getOnScreenName() const;
    const char *getOnDockName() const;
@@ -196,6 +202,8 @@ public:
    S32 lua_getDestCount(lua_State *L);
    S32 lua_setEngineered(lua_State *L);
    S32 lua_getEngineered(lua_State *L);
+   S32 lua_setDelay(lua_State *L);
+   S32 lua_getDelay(lua_State *L);
 
    // Overrides
    S32 lua_setGeom(lua_State *L);
