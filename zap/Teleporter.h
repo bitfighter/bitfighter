@@ -18,6 +18,7 @@ namespace Zap
 {
 
 class Teleporter;
+class EditorAttributeMenuUI;
 
 // Manage destinations for a teleporter
 struct DestManager 
@@ -114,6 +115,8 @@ public:
 
    void clearDests();
 
+   U32 getDelay();
+
    void doSetGeom(const Vector<Point> &points);    // Public so tests can have access
 
 
@@ -172,6 +175,12 @@ public:
    void setEndpoint(const Point &point);
    const Vector<Point> *getDestList() const;
 
+#ifndef ZAP_DEDICATED
+   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
+#endif
+
    // Some properties about the item that will be needed in the editor
    const char *getOnScreenName();
    const char *getOnDockName();
@@ -197,6 +206,8 @@ public:
    S32 lua_getDestCount(lua_State *L);
    S32 lua_setEngineered(lua_State *L);
    S32 lua_getEngineered(lua_State *L);
+   S32 lua_setDelay(lua_State *L);
+   S32 lua_getDelay(lua_State *L);
 
    // Overrides
    S32 lua_setGeom(lua_State *L);

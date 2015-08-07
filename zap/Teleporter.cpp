@@ -19,7 +19,8 @@
 #include "gameConnection.h"
 
 #ifndef ZAP_DEDICATED
-#   include "ClientGame.h"
+#  include "ClientGame.h"
+#  include "UIEditorMenus.h"
 #endif
 
 using namespace TNL;
@@ -945,6 +946,39 @@ void Teleporter::onGeomChanged()
 }   
 
 
+U32 Teleporter::getDelay()
+{
+   return mTeleporterCooldown;
+}
+
+
+#ifndef ZAP_DEDICATED
+
+// Get the menu looking like what we want
+void Teleporter::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->addMenuItem(new FloatCounterMenuItem("Delay:",
+         mTeleporterCooldown / 1000.f, 0.1, 0.1, 10000., 1, "seconds",
+         "Almost no delay", "Adjust teleporter cooldown for re-entry"));
+}
+
+
+// Retrieve the values we need from the menu
+void Teleporter::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   mTeleporterCooldown = Zap::stof(attributeMenu->getMenuItem(0)->getValue()) * 1000;
+}
+
+
+// Render some attributes when item is selected but not being edited
+void Teleporter::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
+{
+   keys.push_back("Delay");   values.push_back(ftos(mTeleporterCooldown / 1000.f, 3));
+}
+
+#endif
+
+
 const char *Teleporter::getOnScreenName()     { return "Teleporter";    }
 const char *Teleporter::getPrettyNamePlural() { return "Teleporters"; }
 const char *Teleporter::getOnDockName()       { return "Teleporter";    }
@@ -980,6 +1014,8 @@ bool Teleporter::canBeNeutral() { return false; }
    METHOD(CLASS, setGeom,       ARRAYDEF({ { PT,   END }, { LINE, END } }), 2 ) \
    METHOD(CLASS, getEngineered, ARRAYDEF({ {       END }                }), 1 ) \
    METHOD(CLASS, setEngineered, ARRAYDEF({ { BOOL, END }                }), 1 ) \
+   METHOD(CLASS, getDelay,      ARRAYDEF({ {       END }                }), 1 ) \
+   METHOD(CLASS, setDelay,      ARRAYDEF({ { NUM,  END }                }), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(Teleporter, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(Teleporter, LUA_METHODS);
@@ -1115,6 +1151,42 @@ S32 Teleporter::lua_setEngineered(lua_State *L)
    setMaskBits(InitMask);
 
    return returnBool(L, mEngineered);
+}
+
+
+/**
+ * @luafunc bool Teleporter::getDelay()
+ *
+ * @return milliseconds between teleporter usages
+ *
+ * @desc This is the minimum time a ship must wait to use the teleporter after
+ * another ship has just entered
+ */
+S32 Teleporter::lua_getDelay(lua_State *L)
+{
+   return returnInt(L, mTeleporterCooldown);
+}
+
+
+/**
+ * @luafunc Teleporter::setDelay(num delay)
+ *
+ * @brief Sets the minimum cooldown delay in milliseconds, for when the next
+ * ship may enter this teleporter.
+ *
+ * @param delay milliseconds to delay next teleporter usage. Example: 500 (1/2 second)
+ *
+ * @note This cannot go below 100 milliseconds for practical networking
+ * purposes. A setting of 0 will still be 100 milliseconds.
+ */
+S32 Teleporter::lua_setDelay(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Teleporter", "setDelay");
+
+   mTeleporterCooldown = MAX(100, getInt(L, 1));
+   setMaskBits(InitMask);
+
+   return 0;
 }
 
 

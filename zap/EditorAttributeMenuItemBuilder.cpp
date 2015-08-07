@@ -11,9 +11,10 @@
 #include "EngineeredItem.h"
 #include "Spawn.h"
 #include "PickupItem.h"
-
 #include "TextItem.h"
+#include "Teleporter.h"
 
+#include "stringUtils.h"
 
 namespace Zap
 {
@@ -185,6 +186,30 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
          return attributeMenuUI;
       }
 
+      case TeleporterTypeNumber:
+      {
+         static EditorAttributeMenuUI *attributeMenuUI = NULL;
+
+         if(attributeMenuUI == NULL)
+         {
+            ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+
+            attributeMenuUI = new EditorAttributeMenuUI(clientGame);
+
+            // Values don't matter, they will be overwritten when startEditingAttrs() is called
+            FloatCounterMenuItem *menuItem = new FloatCounterMenuItem("Delay:",
+                  1.5f, 0.1, 0.1, 10000., 1, "seconds", "Almost no delay",
+                  "Adjust teleporter cooldown for re-entry");
+
+            attributeMenuUI->addMenuItem(menuItem);
+
+            // Add our standard save and exit option to the menu
+            attributeMenuUI->addSaveAndQuitMenuItem();
+         }
+
+         return attributeMenuUI;
+      }
+
       default:
          return obj->getAttributeMenu();
    }
@@ -222,6 +247,10 @@ void EditorAttributeMenuItemBuilder::startEditingAttrs(EditorAttributeMenuUI *at
 
       case TextItemTypeNumber:
          attributeMenu->getMenuItem(0)->setValue(static_cast<TextItem *>(obj)->getText());
+         break;
+
+      case TeleporterTypeNumber:
+         attributeMenu->getMenuItem(0)->setValue(Zap::ftos((static_cast<Teleporter *>(obj)->getDelay() / 1000.f), 3));
          break;
 
       default:
