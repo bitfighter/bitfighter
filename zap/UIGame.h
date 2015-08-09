@@ -48,7 +48,7 @@ struct ColorString
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class ChatMessageDisplayer: RenderManager
+class ChatMessageDisplayer: public RenderManager
 {
 private:
    U32 mFirst, mLast;
@@ -90,7 +90,7 @@ public:
 ////////////////////////////////////////
 
 // For displaying levels as they're loaded in host mode
-class LevelListDisplayer: RenderManager
+class LevelListDisplayer: public RenderManager
 {
 private:
    Vector<string> mLevelLoadDisplayNames;    

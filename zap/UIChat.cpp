@@ -29,6 +29,7 @@ ChatMessage::ChatMessage()
    /* Do nothing */
 }
 
+
 // "Real" constructor
 ChatMessage::ChatMessage(string frm, string msg, Color col, bool isPriv, bool isSys)
 {
@@ -39,6 +40,7 @@ ChatMessage::ChatMessage(string frm, string msg, Color col, bool isPriv, bool is
    isPrivate = isPriv;
    isSystem = isSys;
 }
+
 
 // Destructor
 ChatMessage::~ChatMessage()
@@ -69,10 +71,12 @@ AbstractChat::AbstractChat(ClientGame *game)
    mChatCursorPos = 0;
 }
 
+
 AbstractChat::~AbstractChat()
 {
    // Do nothing
 }
+
 
 Color AbstractChat::getColor(string name) const
 {

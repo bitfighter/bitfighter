@@ -3341,13 +3341,13 @@ static string getSubstVarVal(ClientGame *game, const string &var)
 void ChatMessageDisplayer::onChatMessageReceived(const Color &msgColor, const string &msg)
 {
    FontManager::pushFontContext(ChatMessageContext);
-   Vector<string> lines = wrapString(substitueVars(msg), mWrapWidth, mFontSize, "      ");
+   Vector<string> lines = wrapString(substitueVars(msg), mWrapWidth, mFontSize, "      ");   // Six spaces, if you're wondering...
    FontManager::popFontContext();
 
    // All lines from this message will share a groupId.  We'll use that to expire the group as a whole.
    for(S32 i = 0; i < lines.size(); i++)
    {
-      advanceFirst();
+      advanceFirst();      // Make room for a new message at the top of the list
       mMessages[mFirst % mMessages.size()].set(lines[i], msgColor, mNextGroupId); 
    }
 

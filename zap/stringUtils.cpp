@@ -1118,6 +1118,7 @@ Vector<string> wrapString(const string &chunk, S32 charCount, const string &inde
    return doWrapString(chunk, charCount, &getCharCount, 0, indentPrefix);
 }
 
+
 #if !defined(ZAP_DEDICATED) && !defined(BF_MASTER)
 // Wrap strings based on rendered string width
 Vector<string> wrapString(const string &chunk, S32 lineWidth, S32 fontSize, const string &indentPrefix)
