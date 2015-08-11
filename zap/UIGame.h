@@ -35,45 +35,60 @@ class GameUserInterface;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-struct ColorString
+struct ColorTimerString
 {
    Color color;
    string str;
    U32 groupId;
+   Timer timer;
 
-   void set(const string &s, const Color &c, U32 groupId = 0);
+   void set(const string &s, const Color &c, S32 time, U32 groupId);
+   void idle(U32 timeDelta);
 };
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
 class ChatMessageDisplayer: public RenderManager
 {
 private:
+   enum MessageDisplayMode {
+      ShortTimeout,            // Traditional message display mode (6 MessageDisplayCount lines, messages timeout after DisplayMessageTimeout)
+      ShortFixed,              // Same length as ShortTimeout, but without timeout
+      LongFixed,               // Long form: Display MessageStoreCount messages, no timout
+      MessageDisplayModes
+   };
+
    U32 mFirst, mLast;
-   bool mExpire;
    bool mTopDown;    // Render from top down or bottom up?
    S32 mWrapWidth;
    S32 mFontSize, mFontGap;
    bool mFull;       // Our message displayer is full up
-
+   MessageDisplayMode mDisplayMode;
+   S32 mMessagesToShowInShortMode;
+   
    U32 mNextGroupId;
 
    void advanceFirst();
    void advanceLast();
 
    Timer mChatScrollTimer;
-   Timer mDisplayChatMessageTimer;
 
    ClientGame *mGame;
 
-   // These are the messages and their colors
-   Vector<ColorString> mMessages;
+   // These are the messages, their colors, and their expiration timers 
+   Vector<ColorTimerString> mMessages;
+   string substitueVars(const string &str) const;
+
+   // Translate the show message style enum into behaviors
+   S32 getNumberOfMessagesToShow() const;
+   bool showExpiredMessages() const;
 
 public:
    // Constructor
-   ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool msgsExpire, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontGap);
+   ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontGap);
    virtual ~ChatMessageDisplayer();
 
    void reset();
@@ -82,7 +97,7 @@ public:
    void render(S32 ypos, bool helperVisible, bool anouncementActive, F32 alpha) const;   // Render incoming chat msgs
 
    void onChatMessageReceived(const Color &msgColor, const string &msg);
-   string substitueVars(const string &str);
+   void toggleDisplayMode();
 };
 
 
@@ -124,16 +139,6 @@ class GameUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 private:
-   enum MessageDisplayMode {
-      ShortTimeout,            // Traditional message display mode (6 MessageDisplayCount lines, messages timeout after DisplayMessageTimeout)
-      ShortFixed,              // Same length as ShortTimeout, but without timeout
-      LongFixed,               // Long form: Display MessageStoreCount messages, no timout
-      MessageDisplayModes
-   };
-
-
-   MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
-
    Move mCurrentMove;
    Move mTransformedMove;
    Point mMousePoint;
@@ -262,9 +267,7 @@ private:
    } mVoiceRecorder;
 
    ChatMessageDisplayer mServerMessageDisplayer;   // Messages from the server
-   ChatMessageDisplayer mChatMessageDisplayer1;    // Short form, message expire
-   ChatMessageDisplayer mChatMessageDisplayer2;    // Short form, messages do not expire
-   ChatMessageDisplayer mChatMessageDisplayer3;    // Long form, messages do not expire
+   ChatMessageDisplayer mChatMessageDisplayer;     // Normal chat messages
 
    UI::FpsRenderer mFpsRenderer;
    UI::LevelInfoDisplayer mLevelInfoDisplayer;

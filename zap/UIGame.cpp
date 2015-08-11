@@ -58,11 +58,9 @@ static const S32 SRV_MSG_WRAP_WIDTH = 750;
 // Constructor
 GameUserInterface::GameUserInterface(ClientGame *game, UIManager *uiManager) :
                   Parent(game, uiManager), 
-                  mVoiceRecorder(game),  //   lines expr  topdown   wrap width          font size          line gap
-                  mServerMessageDisplayer(game,  6, true,  true,  SRV_MSG_WRAP_WIDTH, SRV_MSG_FONT_SIZE, SRV_MSG_FONT_GAP),
-                  mChatMessageDisplayer1 (game,  5, true,  false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
-                  mChatMessageDisplayer2 (game,  5, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
-                  mChatMessageDisplayer3 (game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
+                  mVoiceRecorder(game),  //    lines  topdown    wrap width          font size          line gap
+                  mServerMessageDisplayer(game,  6,   true,   SRV_MSG_WRAP_WIDTH,  SRV_MSG_FONT_SIZE, SRV_MSG_FONT_GAP),
+                  mChatMessageDisplayer  (game,  5,   false,  CHAT_WRAP_WIDTH,     CHAT_FONT_SIZE,    CHAT_FONT_GAP),
                   mFpsRenderer(game),
                   mLevelInfoDisplayer(game),
                   mHelpItemManager(mGameSettings)
@@ -73,8 +71,6 @@ GameUserInterface::GameUserInterface(ClientGame *game, UIManager *uiManager) :
    mCmdrsMapKeyRepeatSuppressionSystemApprovesToggleCmdrsMap = true;
 
    mHelperManager.initialize(game);
-
-   mMessageDisplayMode = ShortTimeout;
 
    // Some debugging settings
    mDebugShowShipCoords   = false;
@@ -154,9 +150,7 @@ void GameUserInterface::onActivate()
 
    // Clear out any lingering server or chat messages
    mServerMessageDisplayer.reset();
-   mChatMessageDisplayer1.reset();
-   mChatMessageDisplayer2.reset();
-   mChatMessageDisplayer3.reset();
+   mChatMessageDisplayer.reset();
 
    mConnectionStatsRenderer.reset();
 
@@ -383,9 +377,7 @@ void GameUserInterface::idle(U32 timeDelta)
 
    // Messages
    mServerMessageDisplayer.idle(timeDelta);
-   mChatMessageDisplayer1.idle(timeDelta);
-   mChatMessageDisplayer2.idle(timeDelta);
-   mChatMessageDisplayer3.idle(timeDelta);
+   mChatMessageDisplayer.idle(timeDelta);
 
    mFpsRenderer.idle(timeDelta);
    mConnectionStatsRenderer.idle(timeDelta, getGame()->getConnectionToServer());
@@ -1695,7 +1687,6 @@ F32 GameUserInterface::getBackgroundTextDimFactor(bool chatRelated) const
 }
 
 
-// Display proper chat queue based on mMessageDisplayMode.  These displayers are configured in the constructor. 
 void GameUserInterface::renderChatMsgs() const
 {
    bool chatDisabled = !mHelperManager.isChatAllowed();
@@ -1703,13 +1694,7 @@ void GameUserInterface::renderChatMsgs() const
 
    F32 alpha = 1; // getBackgroundTextDimFactor(true);
 
-   if(mMessageDisplayMode == ShortTimeout)
-      mChatMessageDisplayer1.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, announcementActive, alpha);
-   else if(mMessageDisplayMode == ShortFixed)
-      mChatMessageDisplayer2.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, announcementActive, alpha);
-   else
-      mChatMessageDisplayer3.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, announcementActive, alpha);
-
+   mChatMessageDisplayer.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, announcementActive, alpha);
    mServerMessageDisplayer.render(messageMargin, chatDisabled, false, alpha);
 
    if(announcementActive)
@@ -2704,21 +2689,14 @@ void GameUserInterface::onChatMessageReceived(const Color &msgColor, const char 
    vsnprintf(buffer, sizeof(buffer), format, args);
    va_end(args);
 
-   mChatMessageDisplayer1.onChatMessageReceived(msgColor, buffer);      // Standard chat stream
-   mChatMessageDisplayer2.onChatMessageReceived(msgColor, buffer);      // Short, non-expiring chat stream
-   mChatMessageDisplayer3.onChatMessageReceived(msgColor, buffer);      // Long, non-expiring chat stream
+   mChatMessageDisplayer.onChatMessageReceived(msgColor, buffer);      // Our basic chat stream
 }
 
 
 // Set which chat message display mode we're in (Ctrl-M)
 void GameUserInterface::toggleChatDisplayMode()
 {
-   S32 m = mMessageDisplayMode + 1;
-
-   if(m >= MessageDisplayModes)
-      m = 0;
-
-   mMessageDisplayMode = MessageDisplayMode(m);
+   mChatMessageDisplayer.toggleDisplayMode();
 }
 
 
@@ -3223,33 +3201,44 @@ void GameUserInterface::renderSuspended() const
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-void ColorString::set(const string &s, const Color &c, U32 id)    // id defaults to 0
+void ColorTimerString::set(const string &s, const Color &c, S32 time, U32 id)    // id defaults to 0
 {
    str = s;
    color = c;
    groupId = id;
+   timer.reset(time);
+}
+
+
+void ColorTimerString::idle(U32 timeDelta)
+{
+   timer.update(timeDelta);
 }
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+static const S32 MAX_MESSAGES = 24;
+
 // Constructor
-ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool expire, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontWidth)
+ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontWidth)
 {
-   mDisplayChatMessageTimer.setPeriod(5000);    // How long messages stay visible (ms)
    mChatScrollTimer.setPeriod(100);             // Transition time when new msg arrives (ms) 
 
-   mMessages.resize(msgCount + 1);              // Have an extra message for scrolling effect.  Will only display msgCount messages.
+   mMessages.resize(MAX_MESSAGES + 1);          // Have an extra message for scrolling effect.  Will only display msgCount messages.
 
    reset();
 
+   mMessagesToShowInShortMode = msgCount;
+
    mGame      = game;
-   mExpire    = expire;
    mTopDown   = topDown;
    mWrapWidth = wrapWidth;
    mFontSize  = fontSize;
    mFontGap   = fontWidth;
+
+   mDisplayMode = MessageDisplayMode(0);
    
    mNextGroupId = 0;
 }
@@ -3266,6 +3255,8 @@ void ChatMessageDisplayer::reset()
 {
    mFirst = mLast = 0;
    mFull = false;
+   for(S32 i = 0; i < mMessages.size(); i++)
+      mMessages[i].timer.clear();
 }
 
 
@@ -3273,19 +3264,17 @@ void ChatMessageDisplayer::idle(U32 timeDelta)
 {
    mChatScrollTimer.update(timeDelta);
 
-   // Clear out any expired messages
-   if(mExpire && mDisplayChatMessageTimer.update(timeDelta))
-   {
-      mDisplayChatMessageTimer.reset();
+   // Advance our message timers
+   for(S32 i = 0; i < mMessages.size(); i++)
+      mMessages[i].idle(timeDelta);
+}
 
-      if(mFirst > mLast)
-      {
-         if(mTopDown)
-            mChatScrollTimer.reset();
 
-         advanceLast();         
-      }
-   }
+void ChatMessageDisplayer::toggleDisplayMode()
+{
+   mDisplayMode = MessageDisplayMode((S32)mDisplayMode + 1);
+   if(mDisplayMode == MessageDisplayModes)
+      mDisplayMode =  MessageDisplayMode(0);
 }
 
 
@@ -3337,6 +3326,8 @@ static string getSubstVarVal(ClientGame *game, const string &var)
 }
 
 
+static const S32 EXPIRE_TIME = FIVE_SECONDS;    // Time messages are visible before disappearing
+
 // Add it to the list, will be displayed in render()
 void ChatMessageDisplayer::onChatMessageReceived(const Color &msgColor, const string &msg)
 {
@@ -3348,13 +3339,10 @@ void ChatMessageDisplayer::onChatMessageReceived(const Color &msgColor, const st
    for(S32 i = 0; i < lines.size(); i++)
    {
       advanceFirst();      // Make room for a new message at the top of the list
-      mMessages[mFirst % mMessages.size()].set(lines[i], msgColor, mNextGroupId); 
+      mMessages[mFirst % mMessages.size()].set(lines[i], msgColor, EXPIRE_TIME, mNextGroupId); 
    }
 
    mNextGroupId++;
-
-   // When displaying messages from the top of the screen, the animation happens when we expire messages
-   mDisplayChatMessageTimer.reset();
 
    if(!mTopDown)
       mChatScrollTimer.reset();
@@ -3362,7 +3350,7 @@ void ChatMessageDisplayer::onChatMessageReceived(const Color &msgColor, const st
 
 
 // Check if we have any %variables% that need substituting
-string ChatMessageDisplayer::substitueVars(const string &str)
+string ChatMessageDisplayer::substitueVars(const string &str) const
 {
    string s = str;      // Make working copy
 
@@ -3397,6 +3385,24 @@ string ChatMessageDisplayer::substitueVars(const string &str)
    }
 
    return s;
+}
+
+
+// How many messages do we show, given our current display mode?
+S32 ChatMessageDisplayer::getNumberOfMessagesToShow() const
+{
+   if(mDisplayMode == ShortTimeout || mDisplayMode == ShortFixed)
+      return mMessagesToShowInShortMode;
+
+   TNLAssert(mDisplayMode == LongFixed, "Unknown display mode!");
+
+   return MAX_MESSAGES;     // Enough to fill the screen
+}
+
+
+bool ChatMessageDisplayer::showExpiredMessages() const
+{
+   return mDisplayMode != ShortTimeout;      // All other display modes show expired messages
 }
 
 
@@ -3456,7 +3462,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
    if(anouncementActive)
    {
       // Render one less line if we're past the size threshold for this displayer
-      if(mFirst >= (U32)mMessages.size() - 1)
+      if(mFirst >= mMessages.size() - 1)
          last++;
 
       y -= lineHeight;
@@ -3464,16 +3470,25 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
 
    FontManager::pushFontContext(ChatMessageContext);
 
+   S32 displayed = 0;
+
    // Draw message lines
    for(U32 i = mFirst; i != last - renderExtra; i--)
    {
       U32 index = i % (U32)mMessages.size();    // Handle wrapping in our message list
 
-      mGL->glColor(mMessages[index].color, alpha);
+      if(showExpiredMessages() || mMessages[index].timer.getCurrent() > 0)
+      {
+         mGL->glColor(mMessages[index].color, alpha);
 
-      RenderUtils::drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
+         RenderUtils::drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
 
-      y -= lineHeight;
+         y -= lineHeight;
+
+         displayed++;
+         if(displayed >= getNumberOfMessagesToShow())
+            break;
+      }
    }
 
    FontManager::popFontContext();
@@ -3489,7 +3504,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
 
 LevelListDisplayer::LevelListDisplayer()
 {
-   mLevelLoadDisplayFadeTimer.setPeriod(1000);
+   mLevelLoadDisplayFadeTimer.setPeriod(ONE_SECOND);
    mLevelLoadDisplay = true;
    mLevelLoadDisplayTotal = 0;
 }
