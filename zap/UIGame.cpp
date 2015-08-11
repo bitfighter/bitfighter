@@ -3314,7 +3314,7 @@ static string getSubstVarVal(ClientGame *game, const string &var)
 }
 
 
-static const S32 EXPIRE_TIME = FIVE_SECONDS;    // Time messages are visible before disappearing
+static const S32 EXPIRE_TIME = SEVEN_SECONDS;    // Time messages are visible before disappearing
 
 // Add it to the list, will be displayed in render()
 void ChatMessageDisplayer::onChatMessageReceived(const Color &msgColor, const string &msg)
