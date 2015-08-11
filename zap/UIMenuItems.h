@@ -70,7 +70,6 @@ protected:
    void (*mCallback)(ClientGame *, U32);
 
    const char *mDisplayValAppendage;      // Typically the ">" that is appended to menu items
-   +
 
    virtual string getUnits() const;
 
