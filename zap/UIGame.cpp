@@ -3295,22 +3295,6 @@ void ChatMessageDisplayer::advanceFirst()
 }
 
 
-// Clear out messages from the back of our list; expire all messages with same id together.
-void ChatMessageDisplayer::advanceLast()
-{
-   mLast++;
-
-   U32 id = mMessages[mLast % mMessages.size()].groupId;
-
-   while(mMessages[(mLast + 1) % mMessages.size()].groupId == id && mFirst > mLast)
-      mLast++;
-
-   mFull = false;
-
-   TNLAssert(mLast <= mFirst, "index error! -- add check to correct this!");
-}
-
-
 // Replace %vars% in chat messages 
 // Currently only evaluates names of keybindings (as used in the INI file), and %playerName%
 // Vars are case insensitive

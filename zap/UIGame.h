@@ -72,7 +72,6 @@ private:
    U32 mNextGroupId;
 
    void advanceFirst();
-   void advanceLast();
 
    Timer mChatScrollTimer;
 
