@@ -3201,30 +3201,36 @@ void GameUserInterface::renderSuspended() const
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+static const S32 MAX_MESSAGES = 24;
+static const S32 SCROLL_TIME = 100;
+static const S32 FADE_TIME = 100;
+
 void ColorTimerString::set(const string &s, const Color &c, S32 time, U32 id)    // id defaults to 0
 {
    str = s;
    color = c;
    groupId = id;
    timer.reset(time);
+   fadeTimer.clear();
 }
 
 
 void ColorTimerString::idle(U32 timeDelta)
 {
-   timer.update(timeDelta);
+   if(timer.update(timeDelta))
+      fadeTimer.reset(FADE_TIME);
+   else
+      fadeTimer.update(timeDelta);
 }
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-static const S32 MAX_MESSAGES = 24;
-
 // Constructor
 ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontWidth)
 {
-   mChatScrollTimer.setPeriod(100);             // Transition time when new msg arrives (ms) 
+   mChatScrollTimer.setPeriod(SCROLL_TIME);     // Transition time when new msg arrives (ms) 
 
    mMessages.resize(MAX_MESSAGES + 1);          // Have an extra message for scrolling effect.  Will only display msgCount messages.
 
@@ -3259,6 +3265,7 @@ void ChatMessageDisplayer::reset()
    for(S32 i = 0; i < mMessages.size(); i++)
    {
       mMessages[i].timer.clear();
+      mMessages[i].fadeTimer.clear();
       mMessages[i].str = "";
    }
 }
@@ -3465,8 +3472,11 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
    {
       U32 index = i % (U32)mMessages.size();    // Handle wrapping in our message list
 
-      if(showExpiredMessages() || mMessages[index].timer.getCurrent() > 0)
+      if(showExpiredMessages() || mMessages[index].timer.getCurrent() > 0 || mMessages[index].fadeTimer.getCurrent() > 0)
       {
+         // Fade if we're fading
+         if(!showExpiredMessages() && mMessages[index].timer.getCurrent() == 0 || mMessages[index].fadeTimer.getCurrent() > 0)
+            alpha *= mMessages[index].fadeTimer.getFraction();
          mGL->glColor(mMessages[index].color, alpha);
 
          RenderUtils::drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());

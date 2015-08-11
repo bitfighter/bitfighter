@@ -48,6 +48,7 @@ F32 Timer::getFraction() const
 {
    if(!mPeriod)
       return 0;
+
    return mCurrentCounter / F32(mPeriod);
 }
 

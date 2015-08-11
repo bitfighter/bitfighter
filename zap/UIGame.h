@@ -41,6 +41,7 @@ struct ColorTimerString
    string str;
    U32 groupId;
    Timer timer;
+   Timer fadeTimer;
 
    void set(const string &s, const Color &c, S32 time, U32 groupId);
    void idle(U32 timeDelta);
