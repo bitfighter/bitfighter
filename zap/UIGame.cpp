@@ -3243,6 +3243,7 @@ ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool 
    mNextGroupId = 0;
 }
 
+
 // Destructor
 ChatMessageDisplayer::~ChatMessageDisplayer()
 {
@@ -3256,7 +3257,10 @@ void ChatMessageDisplayer::reset()
    mFirst = mLast = 0;
    mFull = false;
    for(S32 i = 0; i < mMessages.size(); i++)
+   {
       mMessages[i].timer.clear();
+      mMessages[i].str = "";
+   }
 }
 
 
