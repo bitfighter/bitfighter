@@ -3474,10 +3474,11 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
 
       if(showExpiredMessages() || mMessages[index].timer.getCurrent() > 0 || mMessages[index].fadeTimer.getCurrent() > 0)
       {
-         // Fade if we're fading
-         if(!showExpiredMessages() && mMessages[index].timer.getCurrent() == 0 || mMessages[index].fadeTimer.getCurrent() > 0)
-            alpha *= mMessages[index].fadeTimer.getFraction();
-         mGL->glColor(mMessages[index].color, alpha);
+         F32 myAlpha = alpha;
+         // Fade if we're in the fade phase
+         if(!showExpiredMessages() && mMessages[index].timer.getCurrent() == 0 && mMessages[index].fadeTimer.getCurrent() > 0)
+            myAlpha *= mMessages[index].fadeTimer.getFraction();
+         mGL->glColor(mMessages[index].color, myAlpha);
 
          RenderUtils::drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
 
