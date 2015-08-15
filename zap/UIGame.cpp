@@ -212,7 +212,7 @@ void GameUserInterface::onReactivate()
    mDisableShipKeyboardInput = false;
    Cursor::disableCursor();    // Turn off cursor
 
-   if(!isChatting())
+   if(!isChattingOrTypingCommand())
       getGame()->setBusyChatting(false);
 
    for(S32 i = 0; i < ShipModuleCount; i++)
@@ -650,7 +650,13 @@ void GameUserInterface::resetInGameHelpMessages()
 // Returns true if player is composing a chat message
 bool GameUserInterface::isChatting() const
 {
-   return mHelperManager.isHelperActive(HelperMenu::ChatHelperType);
+   return mHelperManager.isComposingPlayerChat();
+}
+
+
+bool GameUserInterface::isChattingOrTypingCommand() const
+{
+   return mHelperManager.isHelperActive(HelperMenu::ChatHelperType);    // Used for entering chats or commands
 }
 
 
@@ -1400,7 +1406,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
 
    if(!GameManager::gameConsole->isVisible())
    {
-      if(!isChatting())
+      if(!isChattingOrTypingCommand())
          return processPlayModeKey(inputCode);
    }
 
@@ -1694,8 +1700,8 @@ void GameUserInterface::renderChatMsgs() const
 
    F32 alpha = 1; // getBackgroundTextDimFactor(true);
 
-   mChatMessageDisplayer.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, announcementActive, alpha);
-   mServerMessageDisplayer.render(messageMargin, chatDisabled, false, alpha);
+   mChatMessageDisplayer.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, 1 - mHelperManager.getFraction(), isChatting(), announcementActive, alpha);
+   mServerMessageDisplayer.render(messageMargin, chatDisabled, 1, false, false, alpha);
 
    if(announcementActive)
       renderAnnouncement(IN_GAME_CHAT_DISPLAY_POS);
@@ -3281,6 +3287,7 @@ void ChatMessageDisplayer::idle(U32 timeDelta)
 }
 
 
+// User pressed Ctrl+M to cycle through the different message displays
 void ChatMessageDisplayer::toggleDisplayMode()
 {
    mDisplayMode = MessageDisplayMode((S32)mDisplayMode + 1);
@@ -3384,8 +3391,11 @@ string ChatMessageDisplayer::substitueVars(const string &str) const
 
 
 // How many messages do we show, given our current display mode?
-S32 ChatMessageDisplayer::getNumberOfMessagesToShow() const
+S32 ChatMessageDisplayer::getNumberOfMessagesToShow(bool composingMessage) const
 {
+   if(composingMessage)
+      return MAX_MESSAGES;
+
    if(mDisplayMode == ShortTimeout || mDisplayMode == ShortFixed)
       return mMessagesToShowInShortMode;
 
@@ -3395,14 +3405,15 @@ S32 ChatMessageDisplayer::getNumberOfMessagesToShow() const
 }
 
 
-bool ChatMessageDisplayer::showExpiredMessages() const
+bool ChatMessageDisplayer::showExpiredMessages(bool composingMessage) const
 {
-   return mDisplayMode != ShortTimeout;      // All other display modes show expired messages
+   return composingMessage || (mDisplayMode != ShortTimeout);      // All other display modes show expired messages
 }
 
 
 // Render any incoming player chat msgs
-void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anouncementActive, F32 alpha) const
+void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, F32 helperFadeIn, bool composingMessage, 
+                                  bool anouncementActive, F32 alpha) const
 {
    // Are we in the act of transitioning between one message and another?
    bool isScrolling = (mChatScrollTimer.getCurrent() > 0);  
@@ -3472,12 +3483,21 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
    {
       U32 index = i % (U32)mMessages.size();    // Handle wrapping in our message list
 
-      if(showExpiredMessages() || mMessages[index].timer.getCurrent() > 0 || mMessages[index].fadeTimer.getCurrent() > 0)
+      if(showExpiredMessages(composingMessage) || mMessages[index].timer.getCurrent() > 0 || mMessages[index].fadeTimer.getCurrent() > 0)
       {
+         // Is this line and "extra" line that's only being shown because we're composing a chat message?
+         bool showingBonusMessages = composingMessage &&
+                                     ((mMessages[index].timer.getCurrent() == 0 && mDisplayMode == ShortTimeout) ||
+                                     displayed >= getNumberOfMessagesToShow(false));
+
          F32 myAlpha = alpha;
          // Fade if we're in the fade phase
-         if(!showExpiredMessages() && mMessages[index].timer.getCurrent() == 0 && mMessages[index].fadeTimer.getCurrent() > 0)
+         if(!showExpiredMessages(composingMessage) && mMessages[index].timer.getCurrent() == 0 && mMessages[index].fadeTimer.getCurrent() > 0)
             myAlpha *= mMessages[index].fadeTimer.getFraction();
+
+         if(showingBonusMessages)
+            myAlpha *= helperFadeIn;
+
          mGL->glColor(mMessages[index].color, myAlpha);
 
          RenderUtils::drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
@@ -3485,7 +3505,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
          y -= lineHeight;
 
          displayed++;
-         if(displayed >= getNumberOfMessagesToShow())
+         if(displayed >= getNumberOfMessagesToShow(composingMessage) && helperFadeIn == 0)
             break;
       }
    }

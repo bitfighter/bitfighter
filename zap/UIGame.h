@@ -83,8 +83,8 @@ private:
    string substitueVars(const string &str) const;
 
    // Translate the show message style enum into behaviors
-   S32 getNumberOfMessagesToShow() const;
-   bool showExpiredMessages() const;
+   S32 getNumberOfMessagesToShow(bool composingMessage) const;
+   bool showExpiredMessages(bool composingMessage) const;
 
 public:
    // Constructor
@@ -94,7 +94,7 @@ public:
    void reset();
 
    void idle(U32 timeDelta);
-   void render(S32 ypos, bool helperVisible, bool anouncementActive, F32 alpha) const;   // Render incoming chat msgs
+   void render(S32 ypos, bool helperVisible, F32 helperFadeIn, bool composingMessage, bool anouncementActive, F32 alpha) const;   // Render incoming chat msgs
 
    void onChatMessageReceived(const Color &msgColor, const string &msg);
    void toggleDisplayMode();
@@ -349,6 +349,7 @@ public:
 
 
    bool isChatting() const;               // Returns true if player is composing a chat message
+   bool isChattingOrTypingCommand() const;
 
    void resetCommandersMap();             // Turn off commander's map when connecting to server
    F32 getCommanderZoomFraction() const; 

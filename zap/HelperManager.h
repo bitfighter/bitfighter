@@ -62,6 +62,7 @@ public:
    void renderEngineeredItemDeploymentMarker(const Ship *ship) const;
 
    bool isChatAllowed() const;
+   bool isComposingPlayerChat() const;
    bool isMovementDisabled() const;
    bool isHelperActive() const;
    bool isHelperActive(HelperMenu::HelperMenuType helperType) const;

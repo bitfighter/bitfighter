@@ -126,6 +126,13 @@ bool HelperManager::isChatAllowed() const
 }
 
 
+// True if Global or Team chat is currently active; false otherwise
+bool HelperManager::isComposingPlayerChat() const
+{
+   return isHelperActive(HelperMenu::ChatHelperType) && !static_cast<ChatHelper *>(mHelperStack.last())->isCmdChat();
+}
+
+
 bool HelperManager::isMovementDisabled() const
 {
    return mHelperStack.size() > 0 && mHelperStack.last()->isMovementDisabled();
@@ -308,7 +315,6 @@ const char *HelperManager::getChatMessage() const
 }
 
 
-// For testing
 const HelperMenu *HelperManager::getActiveHelper() const
 {
    return mHelperStack.last();
