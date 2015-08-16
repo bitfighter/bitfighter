@@ -100,10 +100,13 @@ void HelperManager::render() const
 // Returns 1 when item is fully displayed, 0 when hidden, and something in between when the item is in transition
 F32 HelperManager::getFraction() const
 {
-   if(mHelperStack.size() == 0)
-      return 1;
+   if(mHelperStack.size() > 0)
+      return mHelperStack.last()->getFraction();
 
-   return mHelperStack.last()->getFraction();
+   if(mOffDeckHelper)
+      return mOffDeckHelper->getFraction();
+
+   return 1;
 }
 
 

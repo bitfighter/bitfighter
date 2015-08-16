@@ -3478,24 +3478,29 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, F32 helperF
 
    S32 displayed = 0;
 
+   bool bonusMessagesVisible = helperFadeIn > 0;
+
    // Draw message lines
    for(U32 i = mFirst; i != last - renderExtra; i--)
    {
       U32 index = i % (U32)mMessages.size();    // Handle wrapping in our message list
 
-      if(showExpiredMessages(composingMessage) || mMessages[index].timer.getCurrent() > 0 || mMessages[index].fadeTimer.getCurrent() > 0)
+      if(showExpiredMessages(composingMessage || bonusMessagesVisible) || 
+         mMessages[index].timer.getCurrent() > 0 || 
+         mMessages[index].fadeTimer.getCurrent() > 0)
       {
          // Is this line and "extra" line that's only being shown because we're composing a chat message?
-         bool showingBonusMessages = composingMessage &&
-                                     ((mMessages[index].timer.getCurrent() == 0 && mDisplayMode == ShortTimeout) ||
-                                     displayed >= getNumberOfMessagesToShow(false));
+         bool thisIsBonusMessage = bonusMessagesVisible &&
+                                   ((mMessages[index].timer.getCurrent() == 0 && mDisplayMode == ShortTimeout) ||
+                                   displayed >= getNumberOfMessagesToShow(false));
 
          F32 myAlpha = alpha;
+
          // Fade if we're in the fade phase
          if(!showExpiredMessages(composingMessage) && mMessages[index].timer.getCurrent() == 0 && mMessages[index].fadeTimer.getCurrent() > 0)
             myAlpha *= mMessages[index].fadeTimer.getFraction();
 
-         if(showingBonusMessages)
+         if(thisIsBonusMessage)
             myAlpha *= helperFadeIn;
 
          mGL->glColor(mMessages[index].color, myAlpha);
@@ -3505,7 +3510,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, F32 helperF
          y -= lineHeight;
 
          displayed++;
-         if(displayed >= getNumberOfMessagesToShow(composingMessage) && helperFadeIn == 0)
+         if(displayed >= getNumberOfMessagesToShow(composingMessage) && !bonusMessagesVisible)
             break;
       }
    }
