@@ -151,12 +151,6 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings,
    // Set alignment at smallest for compatibility
    mGL->glPixelStore(GLOPT::PackAlignment, 1);
 
-   // Grab the front buffer with the new viewport
-#ifndef BF_USE_GLES
-   // GLES doesn't need this?
-   mGL->glReadBuffer(GLOPT::Back);
-#endif
-
    // Read pixels from buffer - slow operation
    mGL->glReadPixels(0, 0, width, height, GLOPT::Rgb, GLOPT::UnsignedByte, screenBuffer);
 

@@ -7,11 +7,10 @@
 //    http://soulride.cvs.sourceforge.net/viewvc/soulride/soulride/src/console.cpp?view=markup
 
 #include "Console.h"       // Our header
+#include "GameManager.h"
 
 #ifndef BF_NO_CONSOLE
-
 #  include "DisplayManager.h"   // For ScreenInfo object
-#  include "GameManager.h"
 #  include "LuaObject.h"
 #  include "tnlAssert.h"        // For TNLAssert, of course
 
@@ -19,7 +18,6 @@
 #  include <stdarg.h>           // For va_args support
 
    using namespace TNL;
-
 #endif
 
 namespace Zap

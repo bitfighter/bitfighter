@@ -480,6 +480,8 @@ void createClientGame(GameSettingsPtr settings)
 S32 events = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator | LogConsumer::LuaScriptError | 
              LogConsumer::LuaBotMessage | LogConsumer::LogConnection;
 
+S32 consoleEvents = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator |
+                                 LogConsumer::LuaBotMessage | LogConsumer::ConsoleMsg;
 
 void setupLogging(const string &logDir)
 {

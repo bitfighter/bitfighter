@@ -10,7 +10,7 @@
 namespace Zap
 {
 
-static const S32 consoleEvents = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator | 
+static const S32 consoleEvents = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator |
                                  LogConsumer::LuaBotMessage | LogConsumer::ConsoleMsg;
 
 #ifndef BF_NO_CONSOLE

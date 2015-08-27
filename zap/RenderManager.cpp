@@ -249,7 +249,11 @@ void GLES1::glLoadIdentity()
 
 void GLES1::glOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx)
 {
+#ifdef BF_USE_GLES
+   ::glOrthof(left, right, bottom, top, nearx, farx);
+#else
    ::glOrtho(left, right, bottom, top, nearx, farx);
+#endif
 }
 
 
@@ -268,12 +272,6 @@ void GLES1::glClearColor(F32 red, F32 green, F32 blue, F32 alpha)
 void GLES1::glPixelStore(U32 name, S32 param)
 {
    ::glPixelStorei(name, param);
-}
-
-
-void GLES1::glReadBuffer(U32 mode)
-{
-   ::glReadBuffer(mode);
 }
 
 

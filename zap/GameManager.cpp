@@ -36,7 +36,9 @@ ServerGame *GameManager::mServerGame = NULL;
 GameManager::HostingModePhase GameManager::mHostingModePhase = GameManager::NotHosting;
 Console *GameManager::gameConsole = NULL;    // For the moment, we'll just have one console for everything.  This may change later, but probably won't.
 
+#ifndef BF_NO_CONSOLE
 static ConsoleLogConsumer *ConsoleLog;
+#endif
 
 // Constructor
 GameManager::GameManager()
@@ -48,10 +50,12 @@ GameManager::GameManager()
 // Destructor
 GameManager::~GameManager()
 {
+#ifndef BF_NO_CONSOLE
    delete gameConsole;
    gameConsole = NULL;
 
    delete ConsoleLog;
+#endif
 }
 
 

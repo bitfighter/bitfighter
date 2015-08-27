@@ -122,7 +122,6 @@ public:
    virtual void glClear(U32 mask) = 0;
    virtual void glClearColor(F32 red, F32 green, F32 blue, F32 alpha) = 0;
    virtual void glPixelStore(U32 name, S32 param) = 0;
-   virtual void glReadBuffer(U32 mode) = 0;
    virtual void glReadPixels(S32 x, S32 y, U32 width, U32 height, U32 format, U32 type, void *data) = 0;
    virtual void glViewport(S32 x, S32 y, U32 width, U32 height) = 0;
 
@@ -206,7 +205,6 @@ public:
    void glClear(U32 mask);
    void glClearColor(F32 red, F32 green, F32 blue, F32 alpha);
    void glPixelStore(U32 name, S32 param);
-   void glReadBuffer(U32 mode);
    void glReadPixels(S32 x, S32 y, U32 width, U32 height, U32 format, U32 type, void *data);
    void glViewport(S32 x, S32 y, U32 width, U32 height);
 
