@@ -67,12 +67,7 @@ void RenderManager::init()
 {
    TNLAssert(mGL == NULL, "GL Renderer should only be created once!");
 
-#ifdef BF_USE_GLES2
-   mGL = new GLES2();
-#else
-   mGL = new GLES1();
-#endif
-
+   mGL = new GL();
    mGL->init();
 }
 
@@ -92,7 +87,9 @@ GL *RenderManager::getGL()
 
 ////////////////////////////////////
 ////////////////////////////////////
-// OpenGL API abstractions
+/// OpenGL API abstraction
+///
+/// Each method has a GL/GLES 1 and GLES 2 implementation
 
 
 GL::GL()
@@ -107,243 +104,335 @@ GL::~GL()
 }
 
 
+void GL::init() {
 #ifdef BF_USE_GLES2
-
-GLES2::GLES2()
-{
-   // Do nothing
-}
-
-
-GLES2::~GLES2()
-{
-   // Do nothing
-}
-
-
-void GLES2::init() {
-   // TODO Shader initialization goes here
-}
-
+   // TODO - Shaders and stuff
 #else
-
-GLES1::GLES1()
-{
-   // Do nothing
-}
-
-
-GLES1::~GLES1()
-{
-   // Do nothing
-}
-
-void GLES1::init() {
    // No initialization for the fixed-function pipeline!
+#endif
 }
 
 
 // API methods
 
-void GLES1::glColor(const Color &c, float alpha)
+void GL::glColor(const Color &c, float alpha)
 {
-    glColor4f(c.r, c.g, c.b, alpha);
-}
-
-
-void GLES1::glColor(const Color *c, float alpha)
-{
-    glColor4f(c->r, c->g, c->b, alpha);
-}
-
-
-void GLES1::glColor(F32 c, float alpha)
-{
-   glColor4f(c, c, c, alpha);
-}
-
-
-void GLES1::glColor(F32 r, F32 g, F32 b)
-{
-   glColor4f(r, g, b, 1.0f);
-}
-
-
-void GLES1::glColor(F32 r, F32 g, F32 b, F32 alpha)
-{
-   glColor4f(r, g, b, alpha);
-}
-
-
-void GLES1::glScale(const Point &scaleFactor)
-{
-    glScalef(scaleFactor.x, scaleFactor.y, 1);
-}
-
-
-void GLES1::glScale(F32 scaleFactor)
-{
-    glScalef(scaleFactor, scaleFactor, 1);
-}
-
-
-void GLES1::glScale(F32 xScaleFactor, F32 yScaleFactor)
-{
-    glScalef(xScaleFactor, yScaleFactor, 1);
-}
-
-
-void GLES1::glTranslate(const Point &pos)
-{
-   glTranslatef(pos.x, pos.y, 0);
-}
-
-
-void GLES1::glTranslate(F32 x, F32 y)
-{
-   glTranslatef(x, y, 0);
-}
-
-
-void GLES1::glTranslate(F32 x, F32 y, F32 z)
-{
-   glTranslatef(x, y, z);
-}
-
-
-void GLES1::glRotate(F32 angle)
-{
-   glRotatef(angle, 0, 0, 1.0f);
-}
-
-
-void GLES1::glLineWidth(F32 angle)
-{
-   ::glLineWidth(angle);
-}
-
-
-void GLES1::glViewport(S32 x, S32 y, S32 width, S32 height)
-{
-   ::glViewport(x, y, width, height);
-}
-
-
-void GLES1::glScissor(S32 x, S32 y, S32 width, S32 height)
-{
-   ::glScissor(x, y, width, height);
-}
-
-
-void GLES1::glPointSize(F32 size)
-{
-   ::glPointSize(size);
-}
-
-
-void GLES1::glLoadIdentity()
-{
-   ::glLoadIdentity();
-}
-
-
-void GLES1::glOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx)
-{
-#ifdef BF_USE_GLES
-   ::glOrthof(left, right, bottom, top, nearx, farx);
+#ifdef BF_USE_GLES2
+   // TODO
 #else
-   ::glOrtho(left, right, bottom, top, nearx, farx);
+   glColor4f(c.r, c.g, c.b, alpha);
 #endif
 }
 
 
-void GLES1::glClear(U32 mask)
+void GL::glColor(const Color *c, float alpha)
 {
-   ::glClear(mask);
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   glColor4f(c->r, c->g, c->b, alpha);
+#endif
 }
 
 
-void GLES1::glClearColor(F32 red, F32 green, F32 blue, F32 alpha)
+void GL::glColor(F32 c, float alpha)
 {
-   ::glClearColor(red, green, blue, alpha);
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   glColor4f(c, c, c, alpha);
+#endif
 }
 
 
-void GLES1::glPixelStore(U32 name, S32 param)
+void GL::glColor(F32 r, F32 g, F32 b)
 {
-   ::glPixelStorei(name, param);
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   glColor4f(r, g, b, 1.0f);
+#endif
 }
 
 
-void GLES1::glReadPixels(S32 x, S32 y, U32 width, U32 height, U32 format, U32 type, void *data)
+void GL::glColor(F32 r, F32 g, F32 b, F32 alpha)
 {
-   ::glReadPixels(x, y, width, height, format, type, data);
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   glColor4f(r, g, b, alpha);
+#endif
 }
 
 
-void GLES1::glViewport(S32 x, S32 y, U32 width, U32 height)
+void GL::glScale(const Point &scaleFactor)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   glScalef(scaleFactor.x, scaleFactor.y, 1);
+#endif
+}
+
+
+void GL::glScale(F32 scaleFactor)
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   glScalef(scaleFactor, scaleFactor, 1);
+#endif
+}
+
+
+void GL::glScale(F32 xScaleFactor, F32 yScaleFactor)
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   glScalef(xScaleFactor, yScaleFactor, 1);
+#endif
+}
+
+
+void GL::glTranslate(const Point &pos)
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   glTranslatef(pos.x, pos.y, 0);
+#endif
+}
+
+
+void GL::glTranslate(F32 x, F32 y)
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   glTranslatef(x, y, 0);
+#endif
+}
+
+
+void GL::glTranslate(F32 x, F32 y, F32 z)
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   glTranslatef(x, y, z);
+#endif
+}
+
+
+void GL::glRotate(F32 angle)
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   glRotatef(angle, 0, 0, 1.0f);
+#endif
+}
+
+
+void GL::glLineWidth(F32 angle)
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   ::glLineWidth(angle);
+#endif
+}
+
+
+void GL::glViewport(S32 x, S32 y, S32 width, S32 height)
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    ::glViewport(x, y, width, height);
+#endif
 }
 
 
-void GLES1::setDefaultBlendFunction()
+void GL::glScissor(S32 x, S32 y, S32 width, S32 height)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   ::glScissor(x, y, width, height);
+#endif
+}
+
+
+void GL::glPointSize(F32 size)
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   ::glPointSize(size);
+#endif
+}
+
+
+void GL::glLoadIdentity()
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   ::glLoadIdentity();
+#endif
+}
+
+
+void GL::glOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx)
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+#  ifdef BF_USE_GLES
+   ::glOrthof(left, right, bottom, top, nearx, farx);
+#  else
+   ::glOrtho(left, right, bottom, top, nearx, farx);
+#  endif
+#endif
+}
+
+
+void GL::glClear(U32 mask)
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   ::glClear(mask);
+#endif
+}
+
+
+void GL::glClearColor(F32 red, F32 green, F32 blue, F32 alpha)
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   ::glClearColor(red, green, blue, alpha);
+#endif
+}
+
+
+void GL::glPixelStore(U32 name, S32 param)
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   ::glPixelStorei(name, param);
+#endif
+}
+
+
+void GL::glReadPixels(S32 x, S32 y, U32 width, U32 height, U32 format, U32 type, void *data)
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   ::glReadPixels(x, y, width, height, format, type, data);
+#endif
+}
+
+
+void GL::glViewport(S32 x, S32 y, U32 width, U32 height)
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   ::glViewport(x, y, width, height);
+#endif
+}
+
+
+void GL::setDefaultBlendFunction()
+{
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+#endif
 }
 
 
-void GLES1::glBlendFunc(U32 sourceFactor, U32 destFactor)
+void GL::glBlendFunc(U32 sourceFactor, U32 destFactor)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    ::glBlendFunc(sourceFactor, destFactor);
+#endif
 }
 
 
-void GLES1::glDepthFunc(U32 function)
+void GL::glDepthFunc(U32 function)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    ::glDepthFunc(function);
+#endif
 }
 
 
-void GLES1::renderVertexArray(const S8 verts[], S32 vertCount, S32 geomType,
+void GL::renderVertexArray(const S8 verts[], S32 vertCount, S32 geomType,
       S32 start, S32 stride)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    glEnableClientState(GL_VERTEX_ARRAY);
 
    glVertexPointer(2, GL_BYTE, stride, verts);
    glDrawArrays(geomType, start, vertCount);
 
    glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 }
 
 
-void GLES1::renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType,
+void GL::renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType,
       S32 start, S32 stride)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    glEnableClientState(GL_VERTEX_ARRAY);
 
    glVertexPointer(2, GL_SHORT, stride, verts);
    glDrawArrays(geomType, start, vertCount);
 
    glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 }
 
 
-void GLES1::renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType,
+void GL::renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType,
       S32 start, S32 stride)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    glEnableClientState(GL_VERTEX_ARRAY);
 
    glVertexPointer(2, GL_FLOAT, stride, verts);
    glDrawArrays(geomType, start, vertCount);
 
    glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 }
 
 
-void GLES1::renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount,
+void GL::renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount,
       S32 geomType, S32 start, S32 stride)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    glEnableClientState(GL_VERTEX_ARRAY);
    glEnableClientState(GL_COLOR_ARRAY);
 
@@ -354,92 +443,138 @@ void GLES1::renderColorVertexArray(const F32 vertices[], const F32 colors[], S32
 
    glDisableClientState(GL_COLOR_ARRAY);
    glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 }
 
 
 // geomType: GL_LINES, GL_LINE_STRIP, GL_LINE_LOOP, GL_TRIANGLES, GL_TRIANGLE_FAN, etc.
-void GLES1::renderPointVector(const Vector<Point> *points, U32 geomType)
+void GL::renderPointVector(const Vector<Point> *points, U32 geomType)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    glEnableClientState(GL_VERTEX_ARRAY);
 
    glVertexPointer(2, GL_FLOAT, 0, points->address());
    glDrawArrays(geomType, 0, points->size());
 
    glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 }
 
 
-void GLES1::renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType)
+void GL::renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    ::glPushMatrix();
       glTranslate(offset);
       renderPointVector(points, geomType);
    ::glPopMatrix();
+#endif
 }
 
 
-void GLES1::renderLine(const Vector<Point> *points)
+void GL::renderLine(const Vector<Point> *points)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    renderPointVector(points, GL_LINE_STRIP);
+#endif
 }
 
 
-void GLES1::glGetValue(U32 name, U8 *fill)
+void GL::glGetValue(U32 name, U8 *fill)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    ::glGetBooleanv(name, fill);
+#endif
 }
 
 
-void GLES1::glGetValue(U32 name, S32 *fill)
+void GL::glGetValue(U32 name, S32 *fill)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    ::glGetIntegerv(name, fill);
+#endif
 }
 
 
-void GLES1::glGetValue(U32 name, F32 *fill)
+void GL::glGetValue(U32 name, F32 *fill)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    ::glGetFloatv(name, fill);
+#endif
 }
 
 
-void GLES1::glPushMatrix()
+void GL::glPushMatrix()
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    ::glPushMatrix();
+#endif
 }
 
 
-void GLES1::glPopMatrix()
+void GL::glPopMatrix()
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    ::glPopMatrix();
+#endif
 }
 
 
-void GLES1::glMatrixMode(U32 mode)
+void GL::glMatrixMode(U32 mode)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    ::glMatrixMode(mode);
+#endif
 }
 
 
-void GLES1::glEnable(U32 option)
+void GL::glEnable(U32 option)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    ::glEnable(option);
+#endif
 }
 
 
-void GLES1::glDisable(U32 option)
+void GL::glDisable(U32 option)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    ::glDisable(option);
+#endif
 }
 
 
-bool GLES1::glIsEnabled(U32 option)
+bool GL::glIsEnabled(U32 option)
 {
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    // Returns GL_TRUE == 1, or GL_FALSE == 0, so cast to bool works
    return ::glIsEnabled(option);
-}
-
-
 #endif
+}
 
 
 } /* namespace Zap */

@@ -76,99 +76,15 @@ public:
 };
 
 
-// This class is the interface layer for all OpenGL calls.  Each method must
-// be implemented in a child class
+// This implementation is for using the OpenGL ES 1.1 API (which is a subset
+// of desktop OpenGL 1.1 compatible [a subset]).
 class GL
 {
 public:
    GL();          // Constructor
    virtual ~GL(); // Destructor
 
-   // Interface methods
-   virtual void init() = 0;
-
-
-   virtual void glColor(const Color &c, float alpha = 1.0) = 0;
-   virtual void glColor(const Color *c, float alpha = 1.0) = 0;
-   virtual void glColor(F32 c, float alpha = 1.0) = 0;
-   virtual void glColor(F32 r, F32 g, F32 b) = 0;
-   virtual void glColor(F32 r, F32 g, F32 b, F32 alpha) = 0;
-
-   virtual void renderPointVector(const Vector<Point> *points, U32 geomType) = 0;
-   virtual void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType) = 0;  // Same, but with points offset some distance
-   virtual void renderVertexArray(const S8 verts[], S32 vertCount, S32 geomType,
-         S32 start = 0, S32 stride = 0) = 0;
-   virtual void renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType,
-         S32 start = 0, S32 stride = 0) = 0;
-   virtual void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType,
-         S32 start = 0, S32 stride = 0) = 0;
-   virtual void renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount,
-         S32 geomType, S32 start = 0, S32 stride = 0) = 0;
-   virtual void renderLine(const Vector<Point> *points) = 0;
-
-   virtual void glScale(const Point &scaleFactor) = 0;
-   virtual void glScale(F32 scaleFactor) = 0;
-   virtual void glScale(F32 xScaleFactor, F32 yScaleFactor) = 0;
-   virtual void glTranslate(const Point &pos) = 0;
-   virtual void glTranslate(F32 x, F32 y) = 0;
-   virtual void glTranslate(F32 x, F32 y, F32 z) = 0;
-   virtual void glRotate(F32 angle) = 0;
-   virtual void glLineWidth(F32 width) = 0;
-   virtual void glViewport(S32 x, S32 y, S32 width, S32 height) = 0;
-   virtual void glScissor(S32 x, S32 y, S32 width, S32 height) = 0;
-   virtual void glPointSize(F32 size) = 0;
-   virtual void glLoadIdentity() = 0;
-   virtual void glOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 near, F64 far) = 0;
-   virtual void glClear(U32 mask) = 0;
-   virtual void glClearColor(F32 red, F32 green, F32 blue, F32 alpha) = 0;
-   virtual void glPixelStore(U32 name, S32 param) = 0;
-   virtual void glReadPixels(S32 x, S32 y, U32 width, U32 height, U32 format, U32 type, void *data) = 0;
-   virtual void glViewport(S32 x, S32 y, U32 width, U32 height) = 0;
-
-   virtual void glBlendFunc(U32 sourceFactor, U32 destFactor) = 0;
-   virtual void setDefaultBlendFunction() = 0;
-   virtual void glDepthFunc(U32 func) = 0;
-
-   virtual void glGetValue(U32 name, U8 *gl_bool) = 0;
-   virtual void glGetValue(U32 name, S32 *gl_int) = 0;
-   virtual void glGetValue(U32 name, F32 *gl_float) = 0;
-
-   virtual void glPushMatrix() = 0;
-   virtual void glPopMatrix() = 0;
-   virtual void glMatrixMode(U32 mode) = 0;
-
-   virtual void glEnable(U32 option) = 0;
-   virtual void glDisable(U32 option) = 0;
-   virtual bool glIsEnabled(U32 option) = 0;
-};
-
-
-#ifdef BF_USE_GLES2
-
-class GLES2: public GL
-{
-public:
-   GLES2();          // Constructor
-   virtual ~GLES2(); // Destructor
-
    void init();
-
-   // Ideas on reimplementing the fixed-function pipeline.
-   //
-   // Matrix stack:
-   //    https://stackoverflow.com/a/21216491
-};
-#else
-// This implementation is for using the OpenGL ES 1.1 API (which is a subset
-// of desktop OpenGL 1.1 compatible [a subset]).
-class GLES1: public GL
-{
-public:
-   GLES1();          // Constructor
-   virtual ~GLES1(); // Destructor
-
-   void init();
-
 
    // GL methods
    void glColor(const Color &c, float alpha = 1.0);
@@ -224,7 +140,6 @@ public:
    void glDisable(U32 option);
    bool glIsEnabled(U32 option);
 };
-#endif
 
 
 } /* namespace Zap */
