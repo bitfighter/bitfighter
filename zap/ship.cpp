@@ -799,15 +799,11 @@ void Ship::findRepairTargets()
       if(item->isDestroyed() || item->getHealth() >= 1)
          continue;
 
-      // ...or ones not on our team or neutral
-      if(item->getTeam() != TEAM_NEUTRAL && item->getTeam() != getTeam())
+      // ...and only repair things on a compatible team (but don't exclude self)
+      if(!canRepairObjectsOnTeam(item->getTeam()) && item != this)
          continue;
 
-      // ...or same team in non-team game, except self
-      if(!getGame()->getGameType()->isTeamGame() && item->getTeam() == getTeam() && item != this)
-         continue;
-
-      // Find the radius of the repairable.  Handle teleporter special case
+      // Find the radius of the repairable.  Handle teleporter special case.
       F32 itemRadius = 0;
       if(item->getObjectTypeNumber() == TeleporterTypeNumber)
          itemRadius = Teleporter::TELEPORTER_RADIUS;
@@ -827,6 +823,21 @@ void Ship::findRepairTargets()
 
       mRepairTargets.push_back(item);
    }
+}
+
+
+// Return true if this ship can repair (or be repaired by) something on the specified team
+bool Ship::canRepairObjectsOnTeam(S32 teamIndex) const
+{
+   // TeamIndex must be neutral, or on our team...
+   if(teamIndex != TEAM_NEUTRAL && teamIndex != getTeam())
+      return false;
+
+   // ...or same team in non-team game
+   if(!getGame()->getGameType()->isTeamGame() && teamIndex == getTeam())
+      return false;
+
+   return true;
 }
 
 
@@ -2243,11 +2254,12 @@ void Ship::renderLayer(S32 layerIndex)
    const string shipName          = clientInfo ? clientInfo->getName().getString()     : ""; 
    const U32 killStreak           = clientInfo ? clientInfo->getKillStreak()           : 0;  
    const U32 gamesPlayed          = clientInfo ? clientInfo->getGamesPlayed()          : 0;  
-                                                                                       
-   const bool boostActive  = mLoadout.isModulePrimaryActive(ModuleBoost);
-   const bool shieldActive = mLoadout.isModulePrimaryActive(ModuleShield);
-   const bool repairActive = mLoadout.isModulePrimaryActive(ModuleRepair) && mHealth < 1;
-   const bool hasArmor     = mLoadout.hasModule(ModuleArmor);
+
+   const bool drawRepairIcon = canRepairObjectsOnTeam(clientInfo->getTeamIndex());
+   const bool boostActive    = mLoadout.isModulePrimaryActive(ModuleBoost);
+   const bool shieldActive   = mLoadout.isModulePrimaryActive(ModuleShield);
+   const bool repairActive   = mLoadout.isModulePrimaryActive(ModuleRepair) && mHealth < 1;
+   const bool hasArmor       = mLoadout.hasModule(ModuleArmor);
 
    // If the local player is cloaked, and is close enough to the render ship, it will activate 
    // the ship's sensor module, and we'll need to draw it.  Here, we determine if that has happened.
@@ -2266,8 +2278,8 @@ void Ship::renderLayer(S32 layerIndex)
    GameObjectRender::renderShip(layerIndex, getRenderPos(), getActualPos(), vel, angle, deltaAngle,
               mShapeType, color, alpha, clientGame->getCurrentTime(), shipName, nameScale, warpInScale, 
               isLocalShip, isBusy, isAuthenticated, showCoordinates, mHealth, mRadius, getTeam(), 
-              boostActive, shieldActive, repairActive, sensorActive, hasArmor, engineeringTeleport, killStreak, 
-              gamesPlayed);
+              drawRepairIcon, boostActive, shieldActive, repairActive, sensorActive, hasArmor, 
+              engineeringTeleport, killStreak, gamesPlayed);
 
    if(mSpawnShield.getCurrent() != 0)  // Add spawn shield -- has a period of being on solidly, then blinks yellow 
       GameObjectRender::renderSpawnShield(getRenderPos(), mSpawnShield.getCurrent(), clientGame->getCurrentTime());

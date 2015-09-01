@@ -82,6 +82,8 @@ private:
 
    LoadoutTracker checkAndBuildLoadout(lua_State *L, S32 profile);
 
+   bool canRepairObjectsOnTeam(S32 teamIndex) const;
+
 protected:
    SafePtr <ClientInfo> mClientInfo;
    StringTableEntry mPlayerName;

@@ -500,8 +500,8 @@ void GameObjectRender::renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 games
 }
 
 
-void GameObjectRender::renderShipName(const string &shipName, bool isAuthenticated, bool isBusy,
-                           U32 killStreak, U32 gamesPlayed, F32 nameScale, F32 alpha)
+void GameObjectRender::renderShipName(const string &shipName, bool isAuthenticated, bool isBusy, bool drawRepairIcon,
+                                      U32 killStreak, U32 gamesPlayed, F32 nameScale, F32 alpha)
 {
    string renderName = isBusy ? "<<" + shipName + ">>" : shipName;
 
@@ -521,6 +521,10 @@ void GameObjectRender::renderShipName(const string &shipName, bool isAuthenticat
    F32 ypos = textSize + 30;
    S32 len = RenderUtils::drawStringc(0.0f, ypos, textSize, renderName.c_str());
 
+   // Indicate player has repair if drawRepairIcon is true -- icon goes to the left of the player name
+   if(drawRepairIcon)
+      renderRepairItem(Point(-len / 2.0f - 12, ypos - textSize / 2 + 1), true, NULL, 0.5);
+
 //   renderGamesPlayedMark(-len / 2, ypos, textSize, gamesPlayed);
 
    // Underline name if player is authenticated
@@ -532,11 +536,11 @@ void GameObjectRender::renderShipName(const string &shipName, bool isAuthenticat
 
 
 void GameObjectRender::renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel,
-                F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color &color, F32 alpha, 
-                U32 renderTime, const string &shipName, F32 nameScale, F32 warpInScale, bool isLocalShip, bool isBusy, 
-                bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
-                bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
-                bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed)
+                                  F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color &color, F32 alpha, 
+                                  U32 renderTime, const string &shipName, F32 nameScale, F32 warpInScale, bool isLocalShip, bool isBusy, 
+                                  bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
+                                  bool drawRepairIcon, bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
+                                  bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed)
 {
    mGL->glPushMatrix();
    mGL->glTranslate(renderPos);
@@ -545,7 +549,7 @@ void GameObjectRender::renderShip(S32 layerIndex, const Point &renderPos, const 
    // Don't label the local ship.
    if(!isLocalShip && layerIndex == 1 && shipName != "")  
    {
-      renderShipName(shipName, isAuthenticated, isBusy, killStreak, gamesPlayed, nameScale, alpha);
+      renderShipName(shipName, isAuthenticated, isBusy, drawRepairIcon, killStreak, gamesPlayed, nameScale, alpha);
 
       // Show if the player is engineering a teleport
       if(engineeringTeleport)

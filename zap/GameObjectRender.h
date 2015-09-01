@@ -79,10 +79,10 @@ public:
 
    static void renderHealthBar(F32 health, const Point &center, const Point &dir, F32 length, F32 width);
    static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bool shieldActive,
-         bool sensorActive, bool repairActive, bool hasArmor);
+                                          bool sensorActive, bool repairActive, bool hasArmor);
    static void renderShipFlame(ShipFlame *flames, S32 flameCount, F32 thrust, F32 alpha, bool yThruster);
-   static void renderShipName(const string &shipName, bool isAuthenticated, bool isBusy,
-         U32 killStreak, U32 gamesPlayed, F32 nameScale, F32 alpha);
+   static void renderShipName(const string &shipName, bool isAuthenticated, bool isBusy, bool drawRepairIcon,
+                              U32 killStreak, U32 gamesPlayed, F32 nameScale, F32 alpha);
 
    // Renders the core ship, good for instructions and such
    static void renderShip(ShipShape::ShipShapeType shapeType, const Color &shipColor, F32 alpha, F32 thrusts[],
@@ -94,7 +94,7 @@ public:
                           F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color &color, F32 alpha,
                           U32 renderTime, const string &shipName, F32 nameScale, F32 warpInScale, bool isLocalShip, bool isBusy,
                           bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team,
-                          bool boostActive, bool shieldActive, bool repairActive, bool sensorActive,
+                          bool drawRepairIcon, bool boostActive, bool shieldActive, bool repairActive, bool sensorActive,
                           bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed);
 
    static void renderSpawnShield(const Point &pos, U32 shieldTime, U32 renderTime);
