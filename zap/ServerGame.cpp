@@ -1255,8 +1255,8 @@ bool ServerGame::anyAdminsInGame() const
 // onClientQuit // onPlayerQuit
 void ServerGame::removeClient(ClientInfo *clientInfo)
 {
-   TNLAssert(getGameType(), "Expect GameType here!");
-   getGameType()->removeClient(clientInfo);
+   if(mLevel)     // Could be NULL when quitting the game while remote clients are connected
+      getGameType()->removeClient(clientInfo);
 
    if(getPlayerCount() == 0)     // Last player just quit, bummer!
       setTeamsLocked(false);     // Unlock now!
