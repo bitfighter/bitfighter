@@ -609,7 +609,7 @@ bool makeSureFolderExists(const string &folder)
 
 
 // Read files from folder
-bool getFilesFromFolder(const string &dir, Vector<string> &files, bool returnFullPaths, const string extensions[], S32 extensionCount)
+bool getFilesFromFolder(const string &dir, Vector<string> &files, ReturnFileType returnType, const string extensions[], S32 extensionCount)
 {
    DIR *dp;
    struct dirent *dirp;
@@ -632,7 +632,7 @@ bool getFilesFromFolder(const string &dir, Vector<string> &files, bool returnFul
                string ext = lcase(extractExtension(extensions[i]));
                if(ext == extension)
                {
-                  if(returnFullPaths)
+                  if(returnType == FULL_PATH)
                      files.push_back(strictjoindir(dir, name));
                   else
                      files.push_back(name);
@@ -642,7 +642,7 @@ bool getFilesFromFolder(const string &dir, Vector<string> &files, bool returnFul
       }
       else
          if(name != "." && name != "..")  // Don't include . and ..
-            if(returnFullPaths)
+            if(returnType == FULL_PATH)
                files.push_back(strictjoindir(dir, name));
             else
                files.push_back(name);

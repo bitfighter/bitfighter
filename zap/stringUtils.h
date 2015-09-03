@@ -94,7 +94,13 @@ bool caseInsensitiveStringCompare(const string &str1, const string &str2);
 string getFileSeparator();
 bool fileExists(const string &path);               // Does file exist?
 bool makeSureFolderExists(const string &dir);      // Like the man said: Make sure folder exists
-bool getFilesFromFolder(const string &dir, Vector<string> &files, bool returnFullPaths, const string extensions[] = 0, S32 extensionCount = 0);
+
+enum ReturnFileType {
+   FULL_PATH,
+   FILENAME_ONLY
+};
+
+bool getFilesFromFolder(const string &dir, Vector<string> &files, ReturnFileType returnType, const string extensions[] = 0, S32 extensionCount = 0);
 bool safeFilename(const char *str);
 bool copyFile(const string &sourceFilename, const string &destFilename);
 bool copyFileToDir(const string &sourceFilename, const string &destDir);

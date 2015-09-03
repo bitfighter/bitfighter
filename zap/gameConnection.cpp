@@ -1760,7 +1760,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestRecordedGameplay, (StringPtr file), 
    {
       Vector<string> levels;
       const string &dir = mServerGame->getSettings()->getFolderManager()->getRecordDir();
-      getFilesFromFolder(dir, levels, false);
+      getFilesFromFolder(dir, levels, FILENAME_ONLY);
       GameRecorderServer *g = mServerGame->getGameRecorder();
       if(g)
       {

@@ -694,7 +694,7 @@ void copyResourcesToUserData()
       string installedResourceDir = installDataDir + fileSeparator + dirArray[i];
 
       Vector<string> fillFiles;
-      getFilesFromFolder(installedResourceDir, fillFiles, true);
+      getFilesFromFolder(installedResourceDir, fillFiles, FULL_PATH);
 
       for(S32 i = 0; i < fillFiles.size(); i++)
       {
