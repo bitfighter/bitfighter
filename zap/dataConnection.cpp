@@ -17,13 +17,13 @@ namespace Zap {
 
 FileType getResourceType(const char *fileType)
 {
-   if(!stricmp(fileType, "bot"))
+   if(stricmp(fileType, "bot") == 0)
       return BOT_TYPE;
 
-   if(!stricmp(fileType, "level"))
+   if(stricmp(fileType, "level") == 0)
       return LEVEL_TYPE;
 
-   if(!stricmp(fileType, "levelgen"))
+   if(stricmp(fileType, "levelgen") == 0)
       return LEVELGEN_TYPE;
 
    return INVALID_RESOURCE_TYPE;
