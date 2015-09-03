@@ -623,11 +623,11 @@ bool getFilesFromFolder(const string &dir, Vector<string> &files, bool returnFul
 
       if(extensionCount > 0) 
       {
-         string extension = lcase(extractExtension(name));
+         string extension = lcase(extractExtension(name));     // Ignore extension case
 
          for(S32 i = 0; i < extensionCount; i++)
          {
-            if(name.length() > extensions[i].length() + 1)  // +1 -> include the dot '.'
+            if(name.length() > extensions[i].length() + 1)     // +1 -> include the dot '.'
             {
                string ext = lcase(extractExtension(extensions[i]));
                if(ext == extension)
