@@ -1325,10 +1325,7 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
  */
 S32 LuaScriptRunner::lua_getGameInfo(lua_State *L)
 {
-   TNLAssert(getLuaGame() != NULL, "Game must not be NULL!");
-   TNLAssert(dynamic_cast<ServerGame*>(getLuaGame()), "Not ServerGame??");
-
-   if(!getLuaGame()->isServer())
+   if(getLuaGame() == NULL || getLuaGame()->isServer() == false)
    {
       logprintf(LogConsumer::LuaBotMessage, "'getGameInfo' can only be called in-game");
       returnNil(L);
