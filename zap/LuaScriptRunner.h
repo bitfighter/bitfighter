@@ -129,7 +129,6 @@ void setSelf(lua_State *L, T *self, const char *name)
 protected:
    virtual void killScript();
 
-
 public:
    LuaScriptRunner();               // Constructor
    virtual ~LuaScriptRunner();      // Destructor
@@ -197,6 +196,7 @@ public:
 
    S32 lua_addItem(lua_State *L);
 
+   S32 lua_getBotScripts(lua_State *L);
    S32 lua_getGameInfo(lua_State *L);
    S32 lua_getPlayerCount(lua_State *L);
 
@@ -273,7 +273,6 @@ const LuaFunctionProfile class_::functionArgs[] =   \
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
 
 };
 

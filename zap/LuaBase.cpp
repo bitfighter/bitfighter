@@ -764,6 +764,22 @@ S32 returnString(lua_State *L, const char *str)
 }
 
 
+// Returns a table of containing multiple strings
+S32 returnStrings(lua_State *L, const Vector<string> &strings)
+{
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not clean!");
+
+   lua_createtable(L, strings.size(), 0);                            // -- stringlist
+   for(S32 i = 0; i < strings.size(); i++)
+   {
+      lua_pushlstring(L, strings[i].c_str(), strings[i].length());   // -- stringlist, string
+      lua_rawseti(L, -2, i + 1);                                     // -- stringlist
+   }
+
+   return 1;
+}
+
+
 // Returns nil to calling Lua function
 S32 returnNil(lua_State *L)
 {

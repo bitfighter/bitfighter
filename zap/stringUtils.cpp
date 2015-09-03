@@ -75,19 +75,27 @@ const char *SaveException::what() const throw ()
 string extractDirectory(const string &path )
 {
    // Works on Windows and Linux/Mac!  (just don't have a path with a backslash on Linux/Mac)
-  return path.substr( 0, path.find_last_of( "\\/" )); // Paths should never end with the slash
+   return path.substr( 0, path.find_last_of( "\\/" )); // Paths should never end with the slash
 }
 
 
 string extractFilename(const string &path)
 {
-  return path.substr(path.find_last_of( "\\/" ) + 1);
+   return path.substr(path.find_last_of( "\\/" ) + 1);
 }
 
 
 string extractExtension(const string &path)
 {
-  return path.substr(path.find_last_of( '.' ) + 1);
+   return path.substr(path.find_last_of( '.' ) + 1);
+}
+
+
+string extractFilenameNoExtension(const string &path)
+{
+   string name = extractFilename(path);
+
+   return name.substr(0, name.find_last_of( '.' ));
 }
 
 

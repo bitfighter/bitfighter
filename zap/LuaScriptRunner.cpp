@@ -1011,6 +1011,7 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
       METHOD(CLASS, addItem,               ARRAYDEF({{ BFOBJ, END }}), 1 )  \
       METHOD(CLASS, getGameInfo,           ARRAYDEF({{ END }}), 1 )         \
       METHOD(CLASS, getPlayerCount,        ARRAYDEF({{ END }}), 1 )         \
+      METHOD(CLASS, getBotScripts,         ARRAYDEF({{ END }}), 1 )         \
       METHOD(CLASS, subscribe,             ARRAYDEF({{ EVENT, END }}), 1 )  \
       METHOD(CLASS, unsubscribe,           ARRAYDEF({{ EVENT, END }}), 1 )  \
 
@@ -1309,6 +1310,43 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
    }
 
    return 0;
+}
+
+
+/**
+ * @luafunc LuaGameInfo LuaScriptRunner::getAvailableBots()
+ *
+ * @brief Returns a list of bot scripts available on the server.  
+ *
+ * @note Script names will not have the .bot suffix; works in bots, plugins, and levelgens.
+ *
+ * @code
+ *   -- Print a list of all bot scripts on the server to the console
+ *   scripts = bf:getBotScripts()
+ *   for k,v in pairs(scripts) do 
+ *      print(scripts[k])
+ *   end
+ * @endcode
+ *
+ * @return A table containing a list of names of bot scripts.
+ */
+S32 LuaScriptRunner::lua_getBotScripts(lua_State *L)
+{
+   const string extList[] = { "bot" };
+
+   Vector<string> botList;
+
+   TNLAssert(getLuaGame(), "Should always have a value");
+
+   // Where the bots are
+   const string botdir = getLuaGame()->getSettings()->getFolderManager()->getRobotDir();
+
+   getFilesFromFolder(botdir, botList, FILENAME_ONLY, extList, ARRAYSIZE(extList));
+
+   for(S32 i = 0; i < botList.size(); i++)
+      botList[i] = extractFilenameNoExtension(botList[i]);
+
+   return returnStrings(L, botList);
 }
 
 

@@ -42,6 +42,7 @@ struct SaveException : public exception
 string extractDirectory(const string &path);
 string extractFilename(const string &path);
 string extractExtension(const string &path);
+string extractFilenameNoExtension(const string &path);
 string getPathFromFilename(const string &filename);
 
 string itos(S32 i);
