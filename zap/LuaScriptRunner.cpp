@@ -1365,11 +1365,11 @@ S32 LuaScriptRunner::lua_getGameInfo(lua_State *L)
 {
    if(getLuaGame() == NULL || getLuaGame()->isServer() == false)
    {
-      logprintf(LogConsumer::LuaBotMessage, "'getGameInfo' can only be called in-game");
+      logprintf(LogConsumer::LuaBotMessage, "'getGameInfo' can only be called while playing a game");
       returnNil(L);
    }
 
-   return returnGameInfo(L, static_cast<ServerGame*>(getLuaGame()));
+   return returnGameInfo(L, static_cast<ServerGame *>(getLuaGame()));
 }
 
 
