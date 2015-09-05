@@ -1693,7 +1693,7 @@ S32 BfObject::lua_clone(lua_State *L)
  * 
  * @descr This is useful for editor plugins only.
  * 
- * @return Returns `true` if the object is selected, `false` if not.
+ * @return Returns 'true' if the object is selected, 'false' if not.
  */
 S32 BfObject::lua_isSelected(lua_State *L)
 {
@@ -1708,7 +1708,7 @@ S32 BfObject::lua_isSelected(lua_State *L)
  * 
  * @descr This is useful for editor plugins only.
  * 
- * @param selected `true` to select the object, `false` to deselect it.
+ * @param selected 'true' to select the object, 'false' to deselect it.
  */
 S32 BfObject::lua_setSelected(lua_State *L)
 {
@@ -1749,7 +1749,7 @@ S32 BfObject::lua_getOwner(lua_State *L)
  * 
  * @note This method only works if the item in question has already been added
  * to the game via addItem(object).  The owner cannot be set beforehand. Also,
- * `playerName` must exactly match a the name of a player already in the game
+ * 'playerName' must exactly match a the name of a player already in the game
  * (case-sensitive).
  */
 S32 BfObject::lua_setOwner(lua_State *L)
