@@ -66,7 +66,7 @@ typedef pair<ClassName, vector<ClassName> > Node;
 namespace LuaArgs
 {
 
-   //                 Enum       Name
+   //                 Enum         Name
 #  define LUA_ARG_TYPE_TABLE \
    LUA_ARG_TYPE_ITEM( BOOL,        "Boolean"                                      ) \
    LUA_ARG_TYPE_ITEM( INT,         "Integer"                                      ) \
