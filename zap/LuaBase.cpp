@@ -302,10 +302,9 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
             lua_Integer i = lua_tointeger(L, stackPos);
             // Special check for common error because Lua 1-based arrays suck monkey balls
             if(i == 0)
-                  logprintf(LogConsumer::LogError, "WARNING: It appears you have tried to add an item to teamIndex 0; "
-                                                   "this is almost certainly an error.\n"
-                                                   "If you want to add an item to the first team, specify team 1.  Remember "
-                                                   "that Lua uses 1-based arrays.");
+                  logprintf(LogConsumer::LogError, "WARNING: It appears you have tried to add an item to teamIndex 0; this is\n"
+                                                   "almost certainly an error.  If you want to add an item to the first team,\n"
+                                                   "specify team 1.  Remember that Lua uses 1-based arrays.");
             i--;    // Subtract 1 because Lua indices start with 1, and we need to convert to C++ 0-based index
             return ((i >= 0 && i < Game::getServerLevel()->getTeamCount()) || 
                      (i + 1) == TEAM_NEUTRAL || (i + 1) == TEAM_HOSTILE);
