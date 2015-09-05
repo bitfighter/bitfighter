@@ -284,6 +284,8 @@ S32 LuaGameInfo::lua_getPlayers(lua_State *L)
  *
  * @brief Get a Team by index.
  *
+ * @note Remember that Lua uses 1-based indices, so the index of the first team will be 1.
+ *
  * @return The Team with the specified index.
  */
 S32 LuaGameInfo::lua_getTeam(lua_State *L)
