@@ -445,7 +445,7 @@ S32 Team::lua_getScore(lua_State *L)
  * @code
  * local gameInfo = bf:getGameInfo()
  * local team = gameInfo:getTeam(1)    -- 1 is index of first team (not 0!)
- * team:setScore(2);
+ * team:setScore(2)
  * print("New score:", team:getScore()) 
  * @endcode
  *
