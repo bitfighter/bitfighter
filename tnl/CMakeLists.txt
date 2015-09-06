@@ -29,6 +29,10 @@ set(TNL_SOURCES
 
 file(GLOB TNL_HEADERS "*.h")
 
+if(NO_THREADS)
+	add_definitions(-DTNL_NO_THREADS)
+endif()
+
 include_directories(${TOMCRYPT_INCLUDE_DIR} SYSTEM)
 add_library(tnl ${TNL_SOURCES} ${TNL_HEADERS})
 target_link_libraries(tnl tomcrypt ${CMAKE_THREAD_LIBS_INIT})

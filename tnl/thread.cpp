@@ -34,7 +34,34 @@
 namespace TNL
 {
 
-#ifdef TNL_OS_WIN32
+#if defined(TNL_NO_THREADS)
+
+Semaphore::Semaphore(U32 initialCount, U32 maximumCount) {}
+Semaphore::~Semaphore() {}
+void Semaphore::wait() {}
+void Semaphore::increment(U32 count) {}
+
+Mutex::Mutex() {}
+Mutex::~Mutex() {}
+void Mutex::lock() {}
+void Mutex::unlock() {}
+bool Mutex::tryLock() { return false; }
+
+ThreadStorage::ThreadStorage() {}
+ThreadStorage::~ThreadStorage() {}
+void *ThreadStorage::get() { return NULL; }
+void ThreadStorage::set(void *value) {}
+
+Thread::Thread() {}
+Thread::~Thread() {}
+
+bool Thread::start()
+{
+   run();
+   return true;
+}
+
+#elif defined(TNL_OS_WIN32)
 Semaphore::Semaphore(U32 initialCount, U32 maximumCount)
 {
    mSemaphore = CreateSemaphore(NULL, initialCount, maximumCount, NULL);
