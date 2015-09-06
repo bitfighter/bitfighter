@@ -1078,7 +1078,7 @@ void GameObjectRender::renderTurret(const Color &color, Point anchor, Point norm
 
 void GameObjectRender::renderMortar(const Color &color, Point anchor, Point normal, bool enabled, F32 health, S32 healRate)
 {
-   const F32 FrontRadius = 15;
+//   const F32 FrontRadius = 15;
    const F32 BaseWidth = 36;
    const F32 HealthBarLength = 28;
 

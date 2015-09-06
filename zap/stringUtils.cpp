@@ -650,10 +650,12 @@ bool getFilesFromFolder(const string &dir, Vector<string> &files, ReturnFileType
       }
       else
          if(name != "." && name != "..")  // Don't include . and ..
+         {
             if(returnType == FULL_PATH)
                files.push_back(strictjoindir(dir, name));
             else
                files.push_back(name);
+         }
    }
 
    closedir(dp);

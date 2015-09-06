@@ -170,9 +170,6 @@ void HelperMenu::drawItemMenu(S32 widthOfButtons, S32 widthOfTextBlock) const
 
    static const Color baseColor(Colors::red);
 
-   // Total height of the menu
-   const S32 totalHeight = getMenuHeight();
-
    S32 newBottom = getMenuBottomPos();
 
    static const S32 yStartPos = MENU_TOP + MENU_PADDING;   

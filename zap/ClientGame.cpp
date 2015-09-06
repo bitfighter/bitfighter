@@ -725,8 +725,6 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
       displayErrorMessage(msgToShowIfLoadoutsAreTheSame);
    else
    {
-      GameType *gt = getGameType();
-
       // Show new loadout
       displaySuccessMessage("%s %s", baseSuccesString.c_str(), loadout.toString(false).c_str());
 
@@ -1297,7 +1295,7 @@ bool ClientGame::hasAdmin(const char *failureMessage) const
    if(mClientInfo->isAdmin())
       return true;
    
-   if(failureMessage != "")
+   if(strcmp(failureMessage, "") != 0)
       displayErrorMessage(failureMessage);
 
    return false;

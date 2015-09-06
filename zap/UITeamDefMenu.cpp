@@ -258,8 +258,6 @@ void TeamDefUserInterface::render() const
          
          string colorstr;
          
-         S32 teamCount = level->getTeamCount();
-
          const Color &color = level->getTeamColor(j);
 
          if(mColorEntryMode == ColorEntryModeHex)
@@ -350,8 +348,6 @@ extern bool isPrintable(char c);
 
 void TeamDefUserInterface::onTextInput(char ascii)
 {
-   EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
-
    if(mEditingName)
    {
       if(isPrintable(ascii))

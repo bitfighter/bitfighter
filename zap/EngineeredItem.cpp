@@ -1584,13 +1584,10 @@ void ForceFieldProjector::renderDock(const Color &color) const
 void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
 #ifndef ZAP_DEDICATED
-   F32 scaleFact = 1;
    const Color &color = getColor();
 
    if(mSnapped)
    {
-      Point forceFieldStart = getForceFieldStartPoint(getPos(), mAnchorNormal, scaleFact);
-
       GameObjectRender::renderForceFieldProjector(&mCollisionPolyPoints, getPos(), color, true, mHealRate);
 
       if(mField)
@@ -1620,15 +1617,13 @@ void ForceFieldProjector::findForceFieldEnd()
       return;
 
    // Load the corner points of a maximum-length forcefield into geom
-   DatabaseObject *collObj;
-
    F32 scale = 1;
    
    Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
    Point end;
 
-   // Pass in database containing WallSegments, returns object in collObj
-   collObj = ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end);
+   // Pass in database containing WallSegments, fills out endpoint
+   ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end);
    mField->setStartAndEndPoints(start, end);
    
    setExtent(Rect(ForceField::computeGeom(start, end, scale)));
@@ -1705,7 +1700,8 @@ S32 ForceFieldProjector::lua_setTeam(lua_State *L)
       Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
       Point end;
 
-      DatabaseObject *collObj = ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end);
+      // Fills out 'end'
+      ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end);
 
       delete mField.getPointer();
       mField = new ForceField(getTeam(), start, end);

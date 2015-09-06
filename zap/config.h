@@ -46,16 +46,16 @@ class FolderManager
 private:
    string levelDir;
    string robotDir;
+   Vector<string> sfxDirs;
    string musicDir;
    string iniDir;
    string logDir;
    string screenshotDir;
    string luaDir;
    string rootDataDir;
-   string recordDir;
    Vector<string> pluginDirs;
-   Vector<string> sfxDirs;
    Vector<string> fontDirs;
+   string recordDir;
 
    bool mResolved;
 

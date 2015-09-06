@@ -995,8 +995,6 @@ static const S32 MotdFontSize = 20;
 
 void MainMenuUserInterface::render() const
 {
-   S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
-
    static const S32 MotdVertPos = 540;
 
    // Draw our Message-Of-The-Day, if we have one

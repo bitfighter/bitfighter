@@ -36,7 +36,7 @@ bool FileList::isOk() const
 
 bool FileList::isLast() const
 {
-   return currentItemIndex == mFileMap.size() - 1;
+   return currentItemIndex == S32(mFileMap.size()) - 1;
 }
 
 

@@ -234,8 +234,6 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
       setShowingPresets(false);     // Triggers update of menu title and such
 
-      bool showingMods = showingModules();
-      
       // Check if we need to switch over to weapons
       if(mCurrentIndex == ShipModuleCount)
          resetScrollTimer();
