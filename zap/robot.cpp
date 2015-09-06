@@ -1001,7 +1001,7 @@ S32 Robot::lua_setThrust(lua_State *L)
 {
    S32 profile = checkArgList(L, functionArgs, "Robot", "setThrust");
 
-   F32 ang;
+   F32 ang = 0.f;
    F32 vel = getFloat(L, 1);
 
    if(profile == 0)           // Args: NUM, NUM  (speed, angle)

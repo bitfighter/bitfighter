@@ -70,7 +70,7 @@ namespace Zap
 
 // Dock widths in pixels
 const S32 ITEMS_DOCK_WIDTH = 50;
-const S32 PLUGINS_DOCK_WIDTH = 150;
+//const S32 PLUGINS_DOCK_WIDTH = 150;
 const U32 PLUGIN_LINE_SPACING = 20;
 
 const F32 MIN_SCALE = .02f;         // Most zoomed-out scale

@@ -354,7 +354,7 @@ static const S32 smallRectButtonHeight = 15;
 static const S32 horizEllipseButtonDiameterX = 28;
 static const S32 horizEllipseButtonDiameterY = 16;
 static const S32 rightTriangleWidth = 28;
-static const S32 rightTriangleHeight = 18;
+//static const S32 rightTriangleHeight = 18;
 static const S32 RectRadius = 3;
 static const S32 RoundedRectRadius = 5;
 
@@ -1258,7 +1258,7 @@ void SymbolSpinner::render(const Point &pos) const
 {
    S32 charindx = Platform::getRealMilliseconds() / 200 % 4;
 
-   const char *charstr;
+   const char *charstr = NULL;
 
    switch(charindx)
    {

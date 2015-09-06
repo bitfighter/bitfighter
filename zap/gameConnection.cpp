@@ -2270,40 +2270,39 @@ void GameConnection::setConnectionSpeed(S32 speed)
    U32 minPacketRecvPeriod;
    U32 maxSendBandwidth;
    U32 maxRecvBandwidth;
-   if(speed <= -2)
+   switch(speed)
    {
-      minPacketSendPeriod = 80;
-      minPacketRecvPeriod = 80;
-      maxSendBandwidth = 800;
-      maxRecvBandwidth = 800;
-   }
-   else if(speed == -1)
-   {
-      minPacketSendPeriod = 50; //  <== original zap settings
-      minPacketRecvPeriod = 50;
-      maxSendBandwidth = 2000;
-      maxRecvBandwidth = 2000;
-   }
-   else if(speed == 0)
-   {
-      minPacketSendPeriod = 45;
-      minPacketRecvPeriod = 45;
-      maxSendBandwidth = 8000;
-      maxRecvBandwidth = 8000;
-   }
-   else if(speed == 1)
-   {
-      minPacketSendPeriod = 30;
-      minPacketRecvPeriod = 30;
-      maxSendBandwidth = 20000;
-      maxRecvBandwidth = 20000;
-   }
-   else if(speed >= 2)
-   {
-      minPacketSendPeriod = 20;
-      minPacketRecvPeriod = 20;
-      maxSendBandwidth = 65535;
-      maxRecvBandwidth = 65535;
+      case -2:
+         minPacketSendPeriod = 80;
+         minPacketRecvPeriod = 80;
+         maxSendBandwidth = 800;
+         maxRecvBandwidth = 800;
+         break;
+      case -1:
+         minPacketSendPeriod = 50; //  <== original zap settings
+         minPacketRecvPeriod = 50;
+         maxSendBandwidth = 2000;
+         maxRecvBandwidth = 2000;
+         break;
+      case 0:
+      default:
+         minPacketSendPeriod = 45;
+         minPacketRecvPeriod = 45;
+         maxSendBandwidth = 8000;
+         maxRecvBandwidth = 8000;
+         break;
+      case 1:
+         minPacketSendPeriod = 30;
+         minPacketRecvPeriod = 30;
+         maxSendBandwidth = 20000;
+         maxRecvBandwidth = 20000;
+         break;
+      case 2:
+         minPacketSendPeriod = 20;
+         minPacketRecvPeriod = 20;
+         maxSendBandwidth = 65535;
+         maxRecvBandwidth = 65535;
+         break;
    }
 
    //if(this->isLocalConnection())    // Local connections don't use network, maximum bandwidth

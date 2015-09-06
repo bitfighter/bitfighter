@@ -264,7 +264,7 @@ void TeamDefUserInterface::render() const
             colorstr = "#" + mHexColorEditors[j].getString();
          else
          {
-            F32 multiplier;
+            F32 multiplier = 0.f;
 
             if(mColorEntryMode == ColorEntryMode100)
                multiplier = 100;

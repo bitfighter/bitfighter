@@ -1231,7 +1231,7 @@ void ClientGame::displayMessage(const Color &msgColor, const char *format, ...) 
 
 void ClientGame::gotPermissionsReply(ClientInfo::ClientRole role)
 {
-   const char *message;
+   const char *message = NULL;
 
    if(role == ClientInfo::RoleOwner)
       message = "You've been granted ownership permissions of this server";

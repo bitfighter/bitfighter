@@ -56,7 +56,6 @@ class QueryServersUserInterface : public UserInterface, public AbstractChat
 
 private:
    bool mScrollingUpMode;     // false = scrolling down, true = scrolling up
-   bool mMouseAtBottomFixFactor;    // UGLY
 
 public:
    bool mHostOnServer;
@@ -73,7 +72,6 @@ private:
    U32 pendingPings;
    U32 pendingQueries;
    U32 mBroadcastPingSendTime;
-   U32 mLastUsedServerId;        // A unique ID we can assign to new servers
    Timer mMasterRequeryTimer;
    U32 time;
 
