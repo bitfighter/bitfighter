@@ -47,7 +47,7 @@ All times are given in milliseconds.
 
 %Timer Events
 
-The 'event' used can either be the name a function, a table that contains a function named 'run', or a bit of arbitrary Lua code.  These events
+The 'event' used can either be the name a function, or an anonymous function containing a bit of arbitrary Lua code.  These events
 are distinct from the Bitfighter-generated events documented elsewhere.
 
 Any Lua function can be called by a %Timer.
@@ -55,32 +55,33 @@ Any Lua function can be called by a %Timer.
 Examples:
 @code
    function onLevelStart()
-      -- Runs the code contained in the string after five seconds. 
+      -- Runs the anonymous function after five seconds. 
       -- Note that the string here is in quotes.
-      Timer:scheduleOnce("logprint(\"Once!\")", 5 * 1000)   
+      Timer:scheduleOnce(function() logprint("Once!") end, 5 * 1000)   
     
       -- Runs the "always" function every 30 seconds
+         -- Standard function
+      function always()
+         logprint("Timer called always")
+      end
+   
       Timer:scheduleRepeating(always, 30 * 1000)            
     
       -- Runs "run" method of maybe every two seconds
       -- until method returns false
+      -- Table: run method will be called
+      maybe = {
+         count = 3,
+         run = function(self)
+            logprint("Count down " .. self.count)
+            self.count = self.count - 1
+            return self.count > 0
+         end
+      }
+
       Timer:scheduleRepeatWhileTrue(maybe, 2 * 1000)        
    end                                                  
     
-   -- Standard function
-   function always()
-      logprint("Timer called always")
-   end
-    
-   -- Table: run method will be called
-   maybe = {
-      count = 3
-      run = function(self)
-         logprint("Count down " .. self.count)
-         self.count = self.count - 1
-         return self.count > 0
-      end
-   }
 @endcode
 
 When using a table as an "event" the first parameter to the run function should always be a
@@ -100,6 +101,22 @@ function Timer:_initialize()
 end
 
 
+function Timer:_checkArgs(name, event)
+   if type(event) == 'function' then
+      return
+   end
+
+   if type(event) == 'table' then
+      if type(event.run) == 'function' then
+         return
+      end
+      error("If you pass a table for the event in Timer:" .. name .. "(), it must have a function called run.  Here, run was a " .. type(event.run) .. "!")
+   end
+
+   error("Expected function or table in Timer:" .. name .. "()... got " .. type(event) .. "!")
+end
+
+
 --[[
 @luafunc Timer:scheduleOnce(event, delay)
 @brief   Schedules an event to run one time, after \em delay ms.
@@ -107,14 +124,11 @@ end
 @param   delay - The delay (in ms) when the the event should be run.
 --]]
 function Timer:scheduleOnce(event, deltaT)
-   if type(event) ~= 'function' then
-      error("Expected function in Timer:scheduleOnce()!")
-   end
+   self:_checkArgs("scheduleOnce", event)
    
    local record = {event = event, time = self.time + deltaT }
    self:_insert(record)
 end
-
 
 
 --[[
@@ -124,9 +138,7 @@ end
 @param   delay - The time (in ms) which \em event repeats.
 --]]
 function Timer:scheduleRepeating(event, deltaT)
-   if type(event) ~= 'function' then
-      error("Expected function in Timer:scheduleRepeating()!")
-   end
+   self:_checkArgs("scheduleRepeating", event)
 
    local record = {event = event, time = self.time + deltaT, repeating = deltaT}
    self:_insert(record)
@@ -141,9 +153,7 @@ end
 @param   delay - The time (in ms) which \em event repeats.
 --]]
 function Timer:scheduleRepeatWhileTrue(event, deltaT)
-   if type(event) ~= 'function' then
-      error("Expected function in Timer:scheduleRepeatWhileTrue()!")
-   end
+   self:_checkArgs("scheduleRepeatWhileTrue", event)   
 
    local record = {event = event, time = self.time + deltaT, repeatIf = deltaT}
    self:_insert(record)
@@ -176,15 +186,7 @@ function Timer:_tick(timeDelta)
       -- This event needs to be fired
       local reschedule = false
 
-      if type(record.event) == "string" then
-         -- Compile the string and execute it
-         record.event = loadstring(record.event)
-         if record.event == nil then
-            logprint("Timer: Error compiling string: " .. record.event)
-         end
-         reschedule = record.event()         -- Execute the compiled code
-
-      elseif type(record.event) == "table" then
+      if type(record.event) == "table" then
          reschedule = record.event:run()     -- Execute the run method on the table
 
       else
