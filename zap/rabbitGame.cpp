@@ -451,6 +451,8 @@ S32 RabbitGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
             return 5;
          case RabbitHoldsFlag:      // Points per second
             return 1;
+         case ScoreSetByScript:
+            return data;
          default:
             return naScore;
       }

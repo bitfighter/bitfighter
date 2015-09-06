@@ -371,6 +371,8 @@ S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent sco
             return 1;
          case UncaptureZone:
             return -1;
+         case ScoreSetByScript:
+            return data;
          default:
             return naScore;
       }

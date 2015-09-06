@@ -430,10 +430,10 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
 
 
 // onScoreChanged
-void EventManager::fireEvent(EventType eventType, S32 score, S32 team, LuaPlayerInfo *playerInfo)
+void EventManager::fireEvent(EventType eventType, S32 score, S32 teamIndex, LuaPlayerInfo *playerInfo)
 {
    if(suppressEvents(eventType))
-         return;
+      return;
 
    lua_State *L = LuaScriptRunner::getL();
 
@@ -441,11 +441,11 @@ void EventManager::fireEvent(EventType eventType, S32 score, S32 team, LuaPlayer
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
-      lua_pushinteger(L, score);   // -- score
-      lua_pushinteger(L, team);    // -- score, team
+      lua_pushinteger(L, score);       // -- score
+      lua_pushinteger(L, teamIndex);   // -- score, team
 
       if(playerInfo)
-         playerInfo->push(L);      // -- score, team, playerInfo
+         playerInfo->push(L);          // -- score, team, playerInfo
       else
          lua_pushnil(L);
 

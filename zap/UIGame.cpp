@@ -2768,7 +2768,7 @@ Point GameUserInterface::getShipRenderPos() const
 
    Ship *ship = getGame()->getLocalPlayerShip();
 
-   TNLAssert(ship, "Expected a valid ship here!");    // <== see comment above!
+   //TNLAssert(ship, "Expected a valid ship here!");    // <== see comment above!  This has tripped, rarely, not sure why.
 
    if(ship)
       lastRenderPos = ship->getRenderPos();

@@ -29,7 +29,6 @@
 namespace Zap
 {
 
-
    // Constructor
    Level::Level()
    {
@@ -60,7 +59,7 @@ namespace Zap
       mLegacyGridSize = 1;
       mDatabaseId = 0;
       mGame = NULL;
-      mTeamManager.reset(new TeamManager());    // mTeamManager is a shared_ptr, so cleanup is handled
+      mTeamManager.reset(new TeamManager(this));    // mTeamManager is a shared_ptr, so cleanup is handled automatically
       mLevelDatabaseId = LevelDatabase::NOT_IN_DATABASE;
    }
 

@@ -54,16 +54,21 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class TeamManager;
+
 class AbstractTeam : public RefPtrData, public TeamInfo
 {
    typedef TeamInfo Parent;
 
 protected:
-   S32 mTeamIndex;           // Team index of this team according to the level file and game
+   S32 mTeamIndex;               // Team index of this team according to the level file and game
+   TeamManager *mTeamManager;    // Pointer to the manager that "holds" this team, if any
 
 public:
    AbstractTeam();           // Constructor
    virtual ~AbstractTeam();  // Destructor
+
+   void setTeamManager(TeamManager *teamManager);
 
    static const S32 MAX_TEAM_NAME_LENGTH = 32;
 
@@ -82,6 +87,7 @@ public:
    virtual S32 getScore() const;
    virtual void setScore(S32 score);
    virtual void addScore(S32 score);
+
 };
 
 
@@ -148,20 +154,25 @@ public:
    S32 lua_getScore(lua_State *L);
    S32 lua_getPlayers(lua_State *L);
    S32 lua_getColor(lua_State *L);
+   S32 lua_setScore(lua_State *L);
 };
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class Level;
+
 class TeamManager
 {
 private:
+   Level *mLevel;                   // Level we're managing teams for
    Vector<RefPtr<AbstractTeam> > mTeams;
-   Vector<S32> mTeamHasFlagList;      // Track which team (or teams) have the flag
+   Vector<S32> mTeamHasFlagList;    // Track which team (or teams) have the flag
 
 public:
-   virtual ~TeamManager();      // Destructor
+   TeamManager(Level *level);       // Constructor
+   virtual ~TeamManager();          // Destructor
 
    const Color &getTeamColor(S32 index) const;
    StringTableEntry getTeamName(S32 index) const;
@@ -179,6 +190,7 @@ public:
    void clearTeams();
 
    S32 getBotCount() const;
+   Level *getLevel() const;
 
    // Access to mTeamHasFlagList
    bool getTeamHasFlag(S32 teamIndex) const;

@@ -401,9 +401,11 @@ S32 HTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
          case ReturnFlagToZone:
             return 0;
          case HoldFlagInZone:    // Per ScoreTime ms
-         return 1;
+            return 1;
          case RemoveFlagFromEnemyZone:
             return 0;
+         case ScoreSetByScript:
+            return data;
          default:
             return naScore;
       }

@@ -6,11 +6,12 @@
 #include "teamInfo.h"
 
 #include "GameManager.h"
+#include "Level.h"
 #include "playerInfo.h"
-#include "ServerGame.h"
 #include "robot.h"
-#include "Colors.h"
+#include "ServerGame.h"
 
+#include "Colors.h"
 #include "stringUtils.h"
 
 namespace Zap
@@ -118,6 +119,7 @@ void TeamInfo::setColor(const Color *color)
 AbstractTeam::AbstractTeam()
 {
    mTeamIndex = -1;
+   mTeamManager = NULL;
 }
 
 
@@ -125,6 +127,12 @@ AbstractTeam::AbstractTeam()
 AbstractTeam::~AbstractTeam()
 {
    // Do nothing
+}
+
+
+void AbstractTeam::setTeamManager(TeamManager *teamManager)
+{
+   mTeamManager = teamManager;
 }
 
 
@@ -234,9 +242,7 @@ void AbstractTeam::addScore(S32 score)
 Team::Team(lua_State *L)
 {
    if(L)
-   {
       LUA_REGISTER_WITH_TRACKER;
-   }
 
    initialize();
 }
@@ -360,12 +366,13 @@ void Team::incrementBotCount()
 
 //                Fn name                  Param profiles            Profile count
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, getIndex,          ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, getName,           ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, getScore,          ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, getPlayerCount,    ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, getPlayers,        ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, getColor,          ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getIndex,          ARRAYDEF({{ END }}), 1 )      \
+   METHOD(CLASS, getName,           ARRAYDEF({{ END }}), 1 )      \
+   METHOD(CLASS, getScore,          ARRAYDEF({{ END }}), 1 )      \
+   METHOD(CLASS, getPlayerCount,    ARRAYDEF({{ END }}), 1 )      \
+   METHOD(CLASS, getPlayers,        ARRAYDEF({{ END }}), 1 )      \
+   METHOD(CLASS, getColor,          ARRAYDEF({{ END }}), 1 )      \
+   METHOD(CLASS, setScore,          ARRAYDEF({{ INT, END }}), 1 ) \
 
 GENERATE_LUA_FUNARGS_TABLE(Team, LUA_METHODS);
 GENERATE_LUA_METHODS_TABLE(Team, LUA_METHODS);
@@ -421,6 +428,41 @@ S32 Team::lua_getName(lua_State *L)
 S32 Team::lua_getScore(lua_State *L)
 {
    return returnInt(L, mScore);
+}
+
+
+/**
+ * @luafunc int Team::setScore(int newScore)
+ *
+ * @brief Set the team's current score.
+ *
+ * @descr Set the team's current score; fires ScoreChangedEvent event; could trigger victory.
+ * If team score is set during level initialization (via a levelgen, for example), victory
+ * will NOT be triggered, even if the set score is higher than the winning score.
+ *
+ * @param int Score to assign to the team.
+ *
+ * @code
+ * local gameInfo = bf:getGameInfo()
+ * local team = gameInfo:getTeam(1)    -- 1 is index of first team (not 0!)
+ * team:setScore(2);
+ * print("New score:", team:getScore()) 
+ * @endcode
+ *
+ */
+S32 Team::lua_setScore(lua_State *L)
+{
+   TNLAssert(mTeamManager, "Should always have a team manager here!");
+
+   checkArgList(L, functionArgs, luaClassName, "setScore");
+
+   S32 score = getInt(L, 1);
+
+   S32 deltaScore = score - getScore();
+
+   mTeamManager->getLevel()->getGameType()->updateScore(mTeamIndex, ScoreSetByScript, deltaScore);
+
+   return 0;
 }
 
 
@@ -532,6 +574,14 @@ S32 Team::lua_getColor(lua_State *L)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+// Constructor
+TeamManager::TeamManager(Level *level)
+{
+   mLevel = level;
+}
+
+
 // Destructor
 TeamManager::~TeamManager()
 {
@@ -596,6 +646,7 @@ void TeamManager::addTeam(AbstractTeam *team)
    mTeamHasFlagList[mTeamHasFlagList.size() - 1] = false;
 
    team->setTeamIndex(mTeams.size() - 1);  // Size of mTeams - 1 should be the index
+   team->setTeamManager(this);
 }
 
 
@@ -606,6 +657,7 @@ void TeamManager::addTeam(AbstractTeam *team, S32 index)
    mTeamHasFlagList[index] = false;
 
    team->setTeamIndex(index);
+   team->setTeamManager(this);
 }
 
 
@@ -634,6 +686,7 @@ void TeamManager::replaceTeam(AbstractTeam *team, S32 index)
    mTeams[index] = team;
 
    team->setTeamIndex(index);
+   team->setTeamManager(this);
 }
 
 
@@ -655,6 +708,11 @@ S32 TeamManager::getBotCount() const
    return bots;
 }
 
+
+Level *TeamManager::getLevel() const
+{
+   return mLevel;
+}
 
 
 };

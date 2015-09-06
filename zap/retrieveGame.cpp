@@ -339,7 +339,9 @@ S32 RetrieveGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreE
          case RemoveFlagFromEnemyZone:
             return 0;
          case LostFlag:    // Not really an individual scoring event!
-         return -1;
+            return -1;
+         case ScoreSetByScript:
+            return data;
          default:
             return naScore;
       }

@@ -134,12 +134,7 @@ void CoreGameType::addCore(CoreItem *core, S32 teamIndex)
    mCores.push_back(core);
 
    if(!core->isGhost() && U32(teamIndex) < U32(getGame()->getTeamCount()) && getGame()->isServer()) // No EditorTeam
-   {
-      Team * team = dynamic_cast<Team *>(getGame()->getTeam(teamIndex));
-      TNLAssert(team, "Bad team pointer or bad type");
-      team->addScore(1);
-      s2cSetTeamScore(teamIndex, team->getScore());
-   }
+      addTeamScore(teamIndex, 1);
 }
 
 
@@ -167,10 +162,9 @@ void CoreGameType::updateScore(ClientInfo *player, S32 team, ScoringEvent event,
 
    if((event == OwnCoreDestroyed || event == EnemyCoreDestroyed) && U32(team) < U32(getGame()->getTeamCount()))
    {
-      getGame()->getTeam(team)->addScore(-1);      // Count down when a core is destoryed
-      S32 numberOfTeamsHaveSomeCores = 0;
+      addTeamScore(team, -1);
 
-      s2cSetTeamScore(team, getGame()->getTeam(team)->getScore());     // Broadcast result
+      S32 numberOfTeamsHaveSomeCores = 0;
 
       for(S32 i = 0; i < getGame()->getTeamCount(); i++)
          if(getGame()->getTeam(i)->getScore() != 0)
@@ -208,6 +202,8 @@ S32 CoreGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent
             return -5 * data;
          case EnemyCoreDestroyed:
             return 5 * data;
+         case ScoreSetByScript:
+            return data;
          default:
             return naScore;
       }
@@ -1176,24 +1172,17 @@ S32 CoreItem::lua_setTeam(lua_State *L)
    S32 results = Parent::lua_setTeam(L);
    S32 newTeamIndex = this->getTeam();
 
-   if(getGame()&&getGame()->getGameType()&&getGame()->getGameType()->getGameTypeId()==CoreGame)
+   if(getGame() && getGame()->getGameType() && getGame()->getGameType()->getGameTypeId() == CoreGame)
    {
-      if(oldTeamIndex>=0&&oldTeamIndex < getGame()->getTeamCount())
-      {
-         Team* oldTeam = dynamic_cast<Team *>(getGame()->getTeam(oldTeamIndex));
-         oldTeam->addScore(-1);
-         getGame()->getGameType()->s2cSetTeamScore(oldTeamIndex, oldTeam->getScore());
-      }
+      if(oldTeamIndex >= 0 && oldTeamIndex < getGame()->getTeamCount())
+         getGame()->getGameType()->addTeamScore(oldTeamIndex, -1);
 
-      if(newTeamIndex>=0)
-      {
-         Team* newTeam = dynamic_cast<Team *>(getGame()->getTeam(newTeamIndex));
-         newTeam->addScore(1);
-         getGame()->getGameType()->s2cSetTeamScore(newTeamIndex, newTeam->getScore());
-      }
+      if(newTeamIndex >= 0)
+         getGame()->getGameType()->addTeamScore(newTeamIndex, 1);
    }
 
    return results;
 }
+
 
 }; /* namespace Zap */

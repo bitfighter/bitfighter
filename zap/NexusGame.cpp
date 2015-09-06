@@ -602,6 +602,8 @@ S32 NexusGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEven
             return 0;
          case ReturnFlagsToNexus:
             return score;
+         case ScoreSetByScript:
+            return flags;        // flags will contain the target score increment for this event
          default:
             return naScore;
       }

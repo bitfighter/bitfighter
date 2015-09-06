@@ -262,6 +262,8 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
             return -data;
          case ScoreGoalHostileTeam:
             return -data;
+         case ScoreSetByScript:
+            return data;
          default:
             return naScore;
       }

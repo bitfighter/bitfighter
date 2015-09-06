@@ -243,6 +243,8 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
             return 0;
          case CaptureFlag:
             return 1;
+         case ScoreSetByScript:
+            return data;
          default:
             return naScore;
       }

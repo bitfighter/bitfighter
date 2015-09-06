@@ -118,14 +118,14 @@ protected:
 
    Timer mGameTimeUpdateTimer;         // Timer for when to send clients a game clock update
                        
+   static const S32 MaxMenuScore;
+
    virtual void setTimeRemaining(U32 timeLeft, bool isUnlimited);                         // Runs on server
    virtual void setTimeEnding(U32 timeLeft);    // Runs on client
 
    void notifyClientsWhoHasTheFlag();           // Notify the clients when flag status changes... only called by some game types (server only)
    bool doTeamHasFlag(S32 teamIndex) const;     // Do the actual work of figuring out if the specified team has the flag  (server only)
    void updateTeamFlagPossessionStatus(S32 teamIndex);
-
-   static const S32 MaxMenuScore;
 
 public:
    explicit GameType(S32 winningScore = DefaultWinningScore);  // Constructor
@@ -165,14 +165,19 @@ public:
 
    virtual void onFlagMounted(S32 teamIndex);         // A flag was picked up by a ship on the specified team
 
+   /////
+   // Score related
    S32 getWinningScore() const;
    void setWinningScore(S32 score);
-
-   Vector<AbstractSpawn *> getSpawnPoints(TypeNumber typeNumber, S32 teamIndex = TeamNotSpecified);
+   void addTeamScore(S32 teamIndex, S32 points);
+   S32 getLeadingScore() const;
+   S32 getLeadingTeam() const;
 
    static GameTypeId getGameTypeIdFromName(const string &name);
 
+   /////
    // Info about the level itself
+   Vector<AbstractSpawn *> getSpawnPoints(TypeNumber typeNumber, S32 teamIndex = TeamNotSpecified);
    bool hasFlagSpawns() const;      
    bool hasPredeployedFlags() const;
 
@@ -191,9 +196,6 @@ public:
    S32 getRenderingOffset() const;
    /////
    
-   S32 getLeadingScore() const;
-   S32 getLeadingTeam() const;
-
    bool isEngineerEnabled() const;
    void setEngineerEnabled(bool enabled);
    bool isEngineerUnrestrictedEnabled() const;

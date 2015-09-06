@@ -828,12 +828,15 @@ void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color &outl
 // Server only
 void GameType::gameOverManGameOver()
 {
-   if(mGameOver)     // Only do this once
+   if(mGameOver)           // Only do this once
       return;
 
    // Call game-specific end-of-game code
    if(!onGameOver())    
-      return;     // (I guess the game wasn't really over!)
+      return;              // (I guess the game wasn't really over!)
+
+   if(mBetweenLevels)      // Score was probably set by a levelgen during level construction... don't end game
+      return;              // ...right?
 
    mBetweenLevels = true;
    mGameOver = true;                     // Show scores at end of game
@@ -1329,6 +1332,7 @@ bool GameType::isTeamGame() const
 
 
 // Runs on server, after level has been loaded from a file.  Can be overridden, but isn't.
+// This is a signal the game is beginning.
 void GameType::onLevelLoaded()
 {
    TNLAssert(dynamic_cast<ServerGame *>(mGame), "Wrong game here!");
@@ -1337,6 +1341,8 @@ void GameType::onLevelLoaded()
    // Collect some info about the level for easy reference later
    mLevelHasPredeployedFlags = mLevel->hasObjectOfType(FlagTypeNumber);
    mLevelHasFlagSpawns       = mLevel->hasObjectOfType(FlagSpawnTypeNumber);
+
+   mBetweenLevels = false;
 
    //--> bots should be started when added to game; with this line, they are started twice!
    //static_cast<ServerGame *>(mGame)->startAllBots();           // Cycle through all our bots and start them up  --> bots should be started when added to game
@@ -1991,8 +1997,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
             if(i != teamIndex)  // Every team but scoring team
             {
                // Adjust score of everyone, scoring team will have it changed back again after this loop
-               ((Team *)mLevel->getTeam(i))->addScore(-teamPoints);             // Add magnitiude of negative score to all teams
-               s2cSetTeamScore(i, ((Team *)(mLevel->getTeam(i)))->getScore());  // Broadcast result
+               addTeamScore(i, -teamPoints);
 
                // Fire Lua event, but not for scoring team
                EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, -teamPoints, i + 1, playerInfo);
@@ -2002,9 +2007,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
       else
       {
          // Now add the score
-         Team *team = (Team *)mLevel->getTeam(teamIndex);
-         team->addScore(teamPoints);
-         s2cSetTeamScore(teamIndex, team->getScore());     // Broadcast new team score
+         addTeamScore(teamIndex, teamPoints);
 
          // Fire Lua event for scoring team
          EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, teamPoints, teamIndex + 1, playerInfo);
@@ -2086,6 +2089,8 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
             return 0;
          case KillOwnTurret:
             return 0;
+         case ScoreSetByScript:
+            return data;
          default:
             return naScore;
       }
@@ -2690,6 +2695,11 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
    broadcastNewRemainingTime();
    s2cSetGameOver(mGameOver);    // TODO: Is this really needed?
+
+   // This assert can in fact trip, when a levelgen does something stupid that ends the game before it really begins (like set the score of
+   // one team to be more than the winning score, but not so soon as it will be ignored)
+   // Add this to a levelgen to make it trip:
+   // Timer:scheduleOnce(function() local gameInfo = bf:getGameInfo():getTeam(1):setScore(99) end, 100)
    TNLAssert(!mGameOver, "Is this ever true here?");     // If this assert never trips... then we can get rid of the s2c above.  4/26/2014
 
    s2cSyncMessagesComplete(theConnection->getGhostingSequence());
@@ -3944,6 +3954,19 @@ void GameType::updateTeamFlagPossessionStatus(S32 teamIndex)
 
    notifyClientsWhoHasTheFlag();
 }
+
+
+void GameType::addTeamScore(S32 teamIndex, S32 points)
+{
+   TNLAssert(dynamic_cast<Team *>(getGame()->getTeam(teamIndex)), "Bad team pointer or bad type");
+   Team *team = static_cast<Team *>(getGame()->getTeam(teamIndex));
+
+   team->addScore(points);
+
+   // Notify clients
+   s2cSetTeamScore(teamIndex, team->getScore());
+}
+
 
 
 // A flag was mounted on a ship -- in some GameTypes we need to notifiy the clients so they can 

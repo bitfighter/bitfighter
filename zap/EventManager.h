@@ -115,7 +115,7 @@ public:
    void fireEvent(LuaScriptRunner *sender, EventType eventType, const char *message, LuaPlayerInfo *playerInfo, bool global);  // MsgReceived
    void fireEvent(LuaScriptRunner *player, EventType eventType, LuaPlayerInfo *playerInfo);  // PlayerJoined, PlayerLeft, PlayerTeamChanged
    void fireEvent(EventType eventType, Ship *ship, Zone *zone); // ShipEnteredZoneEvent, ShipLeftZoneEvent
-   void fireEvent(EventType eventType, S32 score, S32 team, LuaPlayerInfo *playerInfo);
+   void fireEvent(EventType eventType, S32 score, S32 teamIndex, LuaPlayerInfo *playerInfo);
 
    // Allow the pausing of event firing for debugging purposes
    void setPaused(bool isPaused);

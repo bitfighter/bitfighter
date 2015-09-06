@@ -54,6 +54,8 @@ namespace Zap
    SCORING_EVENT_ITEM(KilledByAsteroid,        "KilledByAsteroid")        /* all games                                 */ \
    SCORING_EVENT_ITEM(KilledByTurret,          "KilledByTurret")          /* all games                                 */ \
                                                                                                                           \
+   SCORING_EVENT_ITEM(ScoreSetByScript,        "ScoreSetByScript")        /* all games -> score set by script          */ \
+                                                                                                                          \
    SCORING_EVENT_ITEM(CaptureFlag,             "CaptureFlag")             /*                                           */ \
    SCORING_EVENT_ITEM(CaptureZone,             "CaptureZone")             /* zone control -> gain zone                 */ \
    SCORING_EVENT_ITEM(UncaptureZone,           "UncaptureZone")           /* zone control -> lose zone                 */ \
