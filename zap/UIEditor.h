@@ -153,8 +153,6 @@ private:
 
    string mEditFileName;            // Manipulate with get/setLevelFileName
 
-   TeamManager mTeamManager;
-
    F32 mCurrentScale;
    Point mCurrentOffset;            // Coords of UL corner of screen
 

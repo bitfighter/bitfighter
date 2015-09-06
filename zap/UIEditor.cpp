@@ -170,6 +170,7 @@ void EditorUserInterface::setLevel(const boost::shared_ptr<Level> &level)
 {
    TNLAssert(level.get(), "Level should not be NULL!");
    mLevel = level;
+
    //getGame()->setLevel(level);
    mUndoManager.setLevel(level, this);
 
