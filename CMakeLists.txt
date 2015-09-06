@@ -9,6 +9,7 @@ cmake_minimum_required (VERSION 2.8.8)
 option(USE_SDL2 "Use SDL2" YES)
 option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
 option(ALURE_DISABLE_MP3 "Disable dynamic loading of libmpg123.  Disables mp3 completely." NO)
+option(NO_THREADS "Disable usage of threads in TNL.  May cause issues." NO)
 
 
 #
@@ -84,7 +85,9 @@ endif()
 
 
 # Other needed libraries that don't have in-tree fallback options
-find_package(Threads REQUIRED)
+if(NOT NO_THREADS)
+	find_package(Threads REQUIRED)
+endif()
 find_package(PNG)
 find_package(MySQL)
 find_package(OGG)

@@ -39,6 +39,8 @@
 
 #if defined (TNL_OS_WIN32)
 #include <windows.h>
+#elif defined (TNL_NO_THREADS)
+// include nothing!
 #else
 #include <pthread.h>
 #include <semaphore.h>
@@ -54,6 +56,8 @@ class Semaphore
 {
 #ifdef TNL_OS_WIN32
    HANDLE mSemaphore;
+#elif defined(TNL_NO_THREADS)
+   // Nothing
 #else
    sem_t mSemaphore;
 #endif
@@ -78,6 +82,8 @@ class Mutex
 {
 #ifdef TNL_OS_WIN32
    CRITICAL_SECTION mLock;
+#elif defined(TNL_NO_THREADS)
+   // Nothing
 #else
    pthread_mutex_t mMutex;
 #endif
@@ -125,6 +131,8 @@ class ThreadStorage
 {
 #ifdef TNL_OS_WIN32
    DWORD mTlsIndex;
+#elif defined(TNL_NO_THREADS)
+   // Nothing
 #else
    pthread_key_t mThreadKey;
 #endif
