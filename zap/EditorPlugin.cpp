@@ -108,17 +108,13 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<boost::shared_ptr<Me
             // description, and requested keybinding (in that order), ignoring
             // empty strings.
             if(menuTitle == "")
-            {
                menuTitle = getString(L, i);
-            }
+
             else if(mDescription == "")
-            {
                mDescription = getString(L, i);
-            }
+
             else if(mRequestedBinding == "")
-            {
                mRequestedBinding = getString(L, i);
-            }
          }
       }
    }
