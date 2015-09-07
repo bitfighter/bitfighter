@@ -1493,6 +1493,7 @@ Vector<string> FolderManager::getHelperScriptFolderList() const
 }
 
 
+// Returns first found instance of a file that looks like it could be a levelgen with the specified name
 string FolderManager::findLevelGenScript(const string &filename) const
 {
    const char *extensions[] = { ".levelgen", ".lua", "" };
