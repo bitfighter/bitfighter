@@ -187,25 +187,13 @@ bool Robot::start()
 
 bool Robot::prepareEnvironment()
 {
-   try
-   {
-      if(!LuaScriptRunner::prepareEnvironment())
-         return false;
-
-      // Set this first so we have this object available in the helper functions in case we need overrides
-      setSelf(L, this, "bot");
-
-      if(!loadCompileRunEnvironmentScript("timer.lua") || !loadAndRunGlobalFunction(L, ROBOT_HELPER_FUNCTIONS_KEY, RobotContext))
-         return false;
-   }
-   catch(LuaException &e)
-   {
-      logError(e.what());
-      clearStack(L);
+   if(!LuaScriptRunner::prepareEnvironment())
       return false;
-   }
 
-   return true;
+   // Set this first so we have this object available in the helper functions in case we need overrides
+   setSelf(L, this, "bot");
+
+   return loadCompileRunEnvironmentScript("timer.lua") && loadAndRunGlobalFunction(L, ROBOT_HELPER_FUNCTIONS_KEY, RobotContext);
 }
 
 

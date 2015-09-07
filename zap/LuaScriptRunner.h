@@ -143,7 +143,7 @@ public:
    static bool startLua(const string &scriptingDir);  // Create L
    static void shutdown();                            // Delete L
 
-   static void configureNewLuaInstance(lua_State *L);    // Prepare a new Lua environment for use
+   static bool configureNewLuaInstance(lua_State *L); // Prepare a new Lua environment for use
 
    bool runString(const string &code);
    bool runMain();                                    // Run a script's main() function

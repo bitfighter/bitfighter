@@ -296,7 +296,12 @@ bool LuaScriptRunner::loadScript(bool cacheScript)
       // "loose" code and loads the functions into the current environment.  It does not directly execute any of the functions.
       // Any errors are handed off to the stack tracer we pushed onto the stack earlier.
       if(lua_pcall(L, 0, 0, -2))      // Passing 0 args, expecting none back
-         throw LuaException("Error starting script:\n" + string(lua_tostring(L, -1)));
+      {
+          // We can't load the script as requested.  Sorry!
+         string msg = "Error starting script:\n" + string(lua_tostring(L, -1));
+         logError("%s", msg.c_str());         // Also calls clearStack(L)
+         return false;
+      }
 
       clearStack(L);    // Remove the _stackTracer from the stack
       return true;
@@ -396,71 +401,79 @@ bool LuaScriptRunner::startLua(const string &scriptingDir)
    mScriptingDir = scriptingDir;
 
    // Prepare the Lua global environment
-   try 
+   L = lua_open();               // Create a new Lua interpreter; will be shutdown in the destructor
+
+   // Failure here is likely to be something systemic, something bad.  Like smallpox.
+   if(!L)
    {
-      L = lua_open();               // Create a new Lua interpreter; will be shutdown in the destructor
+      string msg = "Could not instantiate the Lua interpreter.";
 
-      // Failure here is likely to be something systemic, something bad.  Like smallpox.
-      if(!L)
-         throw LuaException("Could not instantiate the Lua interpreter.");
-
-      configureNewLuaInstance(L);   // Throws any errors it encounters
-
-      return true;
-   }
-
-   catch(const LuaException &e)
-   {
       // Lua just isn't going to work out for this session.
-      logprintf(LogConsumer::LogError, "=====FATAL LUA ERROR=====\n%s\n=========================", e.msg.c_str());
+      logprintf(LogConsumer::LogError, "=====FATAL LUA ERROR=====\n%s\n=========================", msg.c_str());
       lua_close(L);
       L = NULL;
       return false;
    }
 
-   return false;
+   if(!configureNewLuaInstance(L))
+   {
+      // An error message will have been printed by configureNewLuaInstance()
+      lua_close(L);
+      L = NULL;
+      return false;
+   }
+
+   return true;
 }
 
 
 // Prepare a new Lua environment ("L") for use -- called from startLua(), and testing.
-// This function will throw errors.  (Well, hopefully it won't, but it could!)
-void LuaScriptRunner::configureNewLuaInstance(lua_State *L)
+bool LuaScriptRunner::configureNewLuaInstance(lua_State *L)
 {
-   lua_atpanic(L, luaPanicked);  // Register our panic function
+   try 
+   {
+      lua_atpanic(L, luaPanicked);  // Register our panic function
 
 #ifdef USE_PROFILER
-   init_profiler(L);
+      init_profiler(L);
 #endif
 
-   luaL_openlibs(L);    // Load the standard libraries
+      luaL_openlibs(L);    // Load the standard libraries
 
-   // This allows the safe use of 'require' in our scripts
-   setModulePath();
+      // This allows the safe use of 'require' in our scripts
+      setModulePath();
 
-   // Register all our classes in the global namespace... they will be copied below when we copy the environment
-   registerClasses();            // Perform class and global function registration once per lua_State
-   registerLooseFunctions(L);    // Register some functions not associated with a particular class
+      // Register all our classes in the global namespace... they will be copied below when we copy the environment
+      registerClasses();            // Perform class and global function registration once per lua_State
+      registerLooseFunctions(L);    // Register some functions not associated with a particular class
 
-   // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere.
-   // These will be copied into the script's environment when we run createEnvironment.
-   setEnums(L);
-   setGlobalObjectArrays(L);
+      // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere.
+      // These will be copied into the script's environment when we run createEnvironment.
+      setEnums(L);
+      setGlobalObjectArrays(L);
 
-   // Immediately execute the lua helper functions (these are global and need to be loaded before sandboxing)
-   loadCompileRunHelper("lua_helper_functions.lua");
+      // Immediately execute the lua helper functions (these are global and need to be loaded before sandboxing)
+      loadCompileRunHelper("lua_helper_functions.lua");
 
-   // Load our vector library
-   loadCompileRunHelper("luavec.lua");
+      // Load our vector library
+      loadCompileRunHelper("luavec.lua");
 
-   // Load our helper functions and store copies of the compiled code in the registry where we can use them for starting new scripts
-   loadCompileSaveHelper("robot_helper_functions.lua",    ROBOT_HELPER_FUNCTIONS_KEY);
-   loadCompileSaveHelper("levelgen_helper_functions.lua", LEVELGEN_HELPER_FUNCTIONS_KEY);
-   loadCompileSaveHelper("timer.lua", SCRIPT_TIMER_KEY);
+      // Load our helper functions and store copies of the compiled code in the registry where we can use them for starting new scripts
+      loadCompileSaveHelper("robot_helper_functions.lua",    ROBOT_HELPER_FUNCTIONS_KEY);
+      loadCompileSaveHelper("levelgen_helper_functions.lua", LEVELGEN_HELPER_FUNCTIONS_KEY);
+      loadCompileSaveHelper("timer.lua",                     SCRIPT_TIMER_KEY);
 
+      // Perform sandboxing now
+      // Only code executed before this point can access dangerous functions
+      loadCompileRunHelper("sandbox.lua");
 
-   // Perform sandboxing now
-   // Only code executed before this point can access dangerous functions
-   loadCompileRunHelper("sandbox.lua");
+      return true;
+   }
+   catch(LuaException &e)
+   {
+      logprintf(LogConsumer::LogError, "Error configuring Lua interpreter: %s", e.msg.c_str());
+      return false;
+   }
 }
 
 
