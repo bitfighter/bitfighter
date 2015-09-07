@@ -460,18 +460,15 @@ bool EventManager::fire(lua_State *L, LuaScriptRunner *scriptRunner, const char 
 {
    setScriptContext(L, context);
 
-   bool ok = false;
-   
    try 
    {
-      ok = scriptRunner->runFunction(function, 0);
+      return scriptRunner->runFunction(function, 0);
    }
-   catch(...)
+   catch(LuaException &e)
    {
-      logprintf("???");
+      logprintf("Error firing event %s: %s", function, e.msg.c_str());
+      return false;
    }
-   
-   return ok;
 }
 
 
