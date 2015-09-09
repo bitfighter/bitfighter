@@ -353,8 +353,6 @@ public:
 
    bool isSuddenDeath() const;
 
-   //S32 getTeam(const StringTableEntry &playerName);   // Given a player's name, return their team
-
    virtual bool isDatabasable();                      // Makes no sense to insert a GameType in our spatial database!
 
    // gameType flag methods for CTF, Rabbit, Football
