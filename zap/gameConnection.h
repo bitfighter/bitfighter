@@ -95,11 +95,11 @@ public:
    bool mPackUnpackShipEnergyMeter; // Only true for game recorder
    U16 switchedTeamCount;
 
-   U8 mVote;                     // 0 = not voted,  1 = vote yes,  2 = vote no    TODO: Make 
+   U8 mVote;                        // 0 = not voted,  1 = vote yes,  2 = vote no    TODO: Make this an enum
    U32 mVoteTime;
 
    U32 mWrongPasswordCount;
-   static const U32 MAX_WRONG_PASSWORD = 20;  // too many wrong password, and client get disconnect
+   static const U32 MAX_WRONG_PASSWORD = 20;    // Too many wrong passwords, and client get disconnect
 
    Vector<LevelInfo> mLevelInfos;
 
