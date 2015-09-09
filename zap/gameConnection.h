@@ -103,8 +103,8 @@ public:
 
    Vector<LevelInfo> mLevelInfos;
 
-   static const S32 MASTER_SERVER_FAILURE_RETRY_TIME = 10000;   // 10 secs
-   static const U32 SPAWN_DELAY_TIME = 20000;                   // 20 seconds until eligible for being spawn delayed
+   static const S32 MASTER_SERVER_FAILURE_RETRY_TIME = TEN_SECONDS;
+   static const U32 SPAWN_DELAY_TIME = TWENTY_SECONDS;         // Time until eligible for being spawn delayed
 
    static const char *getConnectionStateString(S32 i);
 
