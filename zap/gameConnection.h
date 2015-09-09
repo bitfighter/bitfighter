@@ -171,8 +171,6 @@ public:
 
    void submitPassword(const char *password);
 
-   void unsuspendGame();
-
    void sendLevelList();
 
    bool isReadyForRegularGhosts();
