@@ -709,7 +709,7 @@ void setWinningScoreHandler(ClientGame *game, const Vector<string> &words)
 
 void resetScoreHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->hasLevelChange("!!! Need level change permission"))
+   if(game->hasLevelChange("!!! Need level change permission to reset the score"))
    {
       if(game->getGameType())
       {
