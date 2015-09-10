@@ -66,8 +66,9 @@ Rect::Rect(const Rect *r)
 // Construct as a bounding box around multiple points
 Rect::Rect(const Vector<Point> &p)
 {
-   // p can never be NULL
-   set(p);
+   // p can never be NULL --> in fact, it can!
+   if(&p != NULL)
+      set(p);
 }
 
 
