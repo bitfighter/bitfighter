@@ -722,6 +722,21 @@ void resetScoreHandler(ClientGame *game, const Vector<string> &words)
 }
 
 
+void runScriptHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasLevelChange("!!! Need level change permission to run scripts"))
+   {
+      if(words.size() < 2)
+      {
+         game->displayErrorMessage("!!! Specify which script to run");
+         return;
+      }
+
+      game->getConnectionToServer()->c2sRunScript(words[1]);
+   }
+}
+
+
 static bool fixupArgs(ClientGame *game, Vector<StringTableEntry> &args)
 {
    // c2sAddBot expects the args is a slightly different order than what we have; it wants team first, then bot name, then bot args

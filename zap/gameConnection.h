@@ -102,6 +102,7 @@ public:
    static const U32 MAX_WRONG_PASSWORD = 20;    // Too many wrong passwords, and client get disconnect
 
    Vector<LevelInfo> mLevelInfos;
+   Vector<string> mServerScripts;               // Levelgens available on the server
 
    static const S32 MASTER_SERVER_FAILURE_RETRY_TIME = TEN_SECONDS;
    static const U32 SPAWN_DELAY_TIME = TWENTY_SECONDS;         // Time until eligible for being spawn delayed
@@ -235,6 +236,8 @@ public:
    TNL_DECLARE_RPC(c2sRequestCommanderMap, ());
    TNL_DECLARE_RPC(c2sReleaseCommanderMap, ());
 
+   TNL_DECLARE_RPC(c2sRunScript, (string script));
+
    TNL_DECLARE_RPC(s2cCreditEnergy, (SignedInt<18> energy));
    TNL_DECLARE_RPC(s2cSetFastRechargeTime, (U32 time));
 
@@ -258,6 +261,8 @@ public:
    TNL_DECLARE_RPC(c2sAddLevel, (StringTableEntry name, RangedU32<0, GameTypesCount> type, S32 minPlayers, S32 maxPlayers, S32 index));
    TNL_DECLARE_RPC(c2sRemoveLevel, (S32 index));
    TNL_DECLARE_RPC(s2cRequestLevel, (S32 index));
+
+   TNL_DECLARE_RPC(s2cSendScriptList, (Vector<string> scripts));
 
    TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative));
    TNL_DECLARE_RPC(c2sShowNextLevel, ());

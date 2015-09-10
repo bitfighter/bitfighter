@@ -52,13 +52,15 @@ namespace Zap
    { "prev",        &ChatCommands::prevLevelHandler,       {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Replay previous level" },
    { "restart",     &ChatCommands::restartLevelHandler,    {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Restart current level" },
    { "random",      &ChatCommands::randomLevelHandler,     {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Start random level" },
-   { "map",         &ChatCommands::mapLevelHandler,        { LEVEL }, 1, LEVEL_COMMANDS,  0,  1,  {"<level name>"},                                       "Start random level" },
+   { "map",         &ChatCommands::mapLevelHandler,        { LEVEL }, 1, LEVEL_COMMANDS,  0,  1,  {"<level name>"},                           "Start random level" },
    { "shownextlevel",&ChatCommands::showNextLevelHandler,  {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Show name of the next level" },
    { "showprevlevel",&ChatCommands::showPrevLevelHandler,  {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Show name of the previous level" },
 
    { "settime",     &ChatCommands::setTimeHandler,         { xINT },  1, LEVEL_COMMANDS,  0,  1,  {"<time in minutes>"},                      "Set play time for the level" },
    { "setscore",    &ChatCommands::setWinningScoreHandler, { xINT },  1, LEVEL_COMMANDS,  0,  1,  {"<score>"},                                "Set score to win the level" },
    { "resetscore",  &ChatCommands::resetScoreHandler,      {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Reset all scores to zero" },
+
+   { "run",         &ChatCommands::runScriptHandler,       { SCRIPT },1, LEVEL_COMMANDS,  0,  1,  {"<script name>"},                          "Run a script" },
 
    HEADER_TEXT(BOT_COMMANDS, 0, "These commands add bot players that continue to play in future levels"),
    { "morebots",    &ChatCommands::moreBotsHandler,        {  },                     0, BOT_COMMANDS,    0,  1,  {  },                                               "Add some bots (keep teams balanced)"},
@@ -331,6 +333,21 @@ static void makeLevelNameList(Game *game, Vector<string> &nameCandidateList)
 }
 
 
+static void makeScriptNameList(Game *game, Vector<string> &nameCandidateList)
+{
+   nameCandidateList.clear();
+
+   TNLAssert(dynamic_cast<ClientGame*>(game), "Not a client game?");
+   ClientGame *clientGame = static_cast<ClientGame*>(game);
+
+   GameConnection *gameConnection = clientGame->getConnectionToServer();
+   if(!gameConnection)
+      return;
+
+   nameCandidateList = gameConnection->mServerScripts;
+}
+
+
 static Vector<string> commandCandidateList;
 
 static Vector<string> *getCandidateList(Game *game, CommandInfo *commandInfo, S32 arg)
@@ -352,22 +369,29 @@ static Vector<string> *getCandidateList(Game *game, CommandInfo *commandInfo, S3
             return &nameCandidateList;
          }
 
-         else if(argType == TEAM)      // ==> Team name completion
+         else if(argType == TEAM)         // ==> Team name completion
          {
             makeTeamNameList(game, nameCandidateList);
             return &nameCandidateList;
          }
 
-         else if(argType == LEVEL)      // ==> Level name completion
+         else if(argType == LEVEL)        // ==> Level name completion
          {
             makeLevelNameList(game, nameCandidateList);
             return &nameCandidateList;
          }
+
+         else if(argType == SCRIPT)       // ==> Script name completion
+         {
+            makeScriptNameList(game, nameCandidateList);
+            return &nameCandidateList;
+         }         
+
          // else no arg completion for you!
       }
    }
    
-   return NULL;                        // ==> No completion options
+   return NULL;                           // ==> No completion options
 }
 
 

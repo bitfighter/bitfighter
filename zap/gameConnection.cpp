@@ -1176,6 +1176,27 @@ void GameConnection::displayMessageE(U32 color, U32 sfx, StringTableEntry format
 }
 
 
+extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);     // Sort alphanumerically
+
+// TODO: Merge with findAllLevelsInFolder... same except for extlist and error message
+static Vector<string> findAllScriptsInFolder(const string &dir)
+{
+   Vector<string> fileList;
+
+   // Build our list by looking at the filesystem 
+   const string extList[] = {"levelgen"};
+
+   if(!getFilesFromFolder(dir, fileList, FILENAME_ONLY, extList, ARRAYSIZE(extList)))    // Returns true if error 
+   {
+      logprintf(LogConsumer::LogError, "Could not find any levelgens in the levels folder \"%s\".", dir.c_str());
+      return fileList;
+   }
+
+   fileList.sort(alphaSort);   // Just to be sure...
+   return fileList;
+}
+
+
 void GameConnection::sendLevelList()
 {
    // Send blank entry to clear the remote list
@@ -1187,6 +1208,8 @@ void GameConnection::sendLevelList()
       LevelInfo levelInfo = mServerGame->getLevelInfo(i);
       s2cAddLevel(levelInfo.mLevelName, levelInfo.mLevelType);
    }
+
+   s2cSendScriptList(findAllScriptsInFolder(mServerGame->getSettings()->getFolderManager()->getLevelDir()));
 }
 
 
@@ -1243,6 +1266,13 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cAddLevel, (StringTableEntry name, RangedU32
 }
 
 
+TNL_IMPLEMENT_RPC(GameConnection, s2cSendScriptList, (Vector<string> scripts), (scripts),
+                  NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
+{
+   mServerScripts = scripts;
+}
+
+
 // Server sends the level that got removed, or removes all levels from list when index is -1
 // Unused??
 TNL_IMPLEMENT_RPC(GameConnection, s2cRemoveLevel, (S32 index), (index),
@@ -1253,6 +1283,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cRemoveLevel, (S32 index), (index),
    else if(index < mLevelInfos.size())
       mLevelInfos.erase(index);
 }
+
 
 // Server sends the name and type of a level to the client (gets run repeatedly when client connects to the server). 
 // Sending a blank name and type will clear the list.
@@ -1344,6 +1375,24 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sShowNextLevel, (), (), NetClassGroupGameMas
    e.push_back(mServerGame->getLevelNameFromIndex(NEXT_LEVEL)); 
 
    s2cDisplayMessageE(ColorInfo, SFXNone, "Next level will be \"%e0\"", e);
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, c2sRunScript, (string scriptName), (scriptName), 
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
+{
+   if(!mClientInfo->isLevelChanger())
+      return;
+
+   string scriptFile = mSettings->getFolderManager()->findLevelGenScript(scriptName);
+
+   if(scriptFile == "")
+   {
+      s2cDisplayErrorMessage("!!! Script " + scriptName + " not found");
+      return;
+   }
+
+   mServerGame->runLevelGenScript(scriptFile);
 }
 
 
@@ -1512,7 +1561,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClas
       delete mLevelSource;
       mLevelSource = levelSource;
 
-      c2sRemoveLevel(-1); // clears all levels
+      c2sRemoveLevel(-1);  // Clear all levels
       for(S32 i = 0; i < levelSource->getLevelCount(); i++)
       {
          if(levelSource->populateLevelInfoFromSourceByIndex(i))
@@ -1525,6 +1574,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClas
       }
 
       s2cRequestLevel(0);
+
+      // Why send the level file here?
       TransferLevelFile(strictjoindir(mLevelSource->getLevelInfo(0).folder, mLevelSource->getLevelFileName(0)).c_str());
    }
 #endif

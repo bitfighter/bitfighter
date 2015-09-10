@@ -113,7 +113,6 @@ private:
    void cleanUp();
    bool loadNextLevel(S32 nextLevel);                 // Find the next valid level, and load it with loadLevel()
    bool loadLevel();                                  // Load the level pointed to by mCurrentLevelIndex
-   void runLevelGenScript(const string &scriptName);  // Run any levelgens specified by the level or in the INI
 
    AbstractTeam *getNewTeam();
 
@@ -185,9 +184,12 @@ public:
 
    void onConnectedToMaster();
 
+   void runLevelGenScript(const string &scriptName);  // Run any levelgens specified by the level or in the INI
+
+
    /////
    // Bot related
-   void startAllBots();                            // Loop through all our bots and run thier main() functions
+   void startAllBots();                               // Loop through all our bots and run thier main() functions
    
    S32 getBotCount() const;
 

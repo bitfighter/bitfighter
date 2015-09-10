@@ -23,6 +23,7 @@ enum ArgTypes {
    NAME,    // Player name (can be tab-completed)
    TEAM,    // Team name (can be tab-completed)
    LEVEL,   // Level name (can be tab-completed)
+   SCRIPT,  // Levelgen name (can be tab-completed)
    xINT,    // Integer argument
    STR,     // String argument
    PT,      // Point argument (only used by Lua scripts)
@@ -111,6 +112,7 @@ void addTimeHandler            (ClientGame *game, const Vector<string> &args);
 void setTimeHandler            (ClientGame *game, const Vector<string> &args);
 void setWinningScoreHandler    (ClientGame *game, const Vector<string> &args);
 void resetScoreHandler         (ClientGame *game, const Vector<string> &args);
+void runScriptHandler          (ClientGame *game, const Vector<string> &args);
 void addBotHandler             (ClientGame *game, const Vector<string> &args);
 void addBotsHandler            (ClientGame *game, const Vector<string> &args);
 void kickBotHandler            (ClientGame *game, const Vector<string> &args);
