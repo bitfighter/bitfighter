@@ -744,10 +744,8 @@ bool ServerGame::loadLevel()
    for(S32 i = 0; i < walls.size(); i++)
       addWallItem(static_cast<WallItem *>(walls[i]), NULL);        // Just does this --> Barrier::constructBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
 
-
    Vector<Point> points;
    mLevel->buildWallEdgeGeometry(points);
-
 
    const Vector<DatabaseObject *> objects = *mLevel->findObjects_fast();
    for(S32 i = 0; i < objects.size(); i++)
@@ -770,14 +768,20 @@ bool ServerGame::loadLevel()
 
    // Levelgens:
    // Run level's levelgen script (if any)
-   runLevelGenScript(getGameType()->getScriptName());
+   if(!runLevelGenScript(getGameType()->getScriptName()))
+      logprintf(LogConsumer::MsgType(LogConsumer::LogWarning | LogConsumer::LuaLevelGenerator), 
+                "Warning: Could not find levelgen script \"%s\" specified in level %s.", 
+                getGameType()->getScriptName().c_str(), mLevel->getLevelName().c_str());
 
    // Global levelgens are run on every level.  Run any that are defined.
    Vector<string> scriptList;
    parseString(getSettings()->getSetting<string>(IniKey::GlobalLevelScript), scriptList, '|');
 
    for(S32 i = 0; i < scriptList.size(); i++)
-      runLevelGenScript(scriptList[i]);
+      if(!runLevelGenScript(scriptList[i]))
+         logprintf(LogConsumer::MsgType(LogConsumer::LogWarning | LogConsumer::LuaLevelGenerator), 
+                "Warning: Could not find levelgen script \"%s\" specified in INI file.", 
+                scriptList[i].c_str());
 
    // Fire an update to make sure certain events run on level start (like onShipSpawned)
    EventManager::get()->update();
@@ -1136,20 +1140,17 @@ void ServerGame::unsuspendIfActivePlayers()
 }
 
 
-void ServerGame::runLevelGenScript(const string &scriptName)
+// Return true if script was run (even if it errored) false if it wasn't (file not found or whatnot)
+bool ServerGame::runLevelGenScript(const string &scriptName)
 {
    if(scriptName == "")    // No script specified!
-      return;
+      return false;
 
    // Find full name of levelgen script -- returns "" if file not found
    string fullname = getSettings()->getFolderManager()->findLevelGenScript(scriptName);  
 
    if(fullname == "")
-   {
-      logprintf(LogConsumer::MsgType(LogConsumer::LogWarning | LogConsumer::LuaLevelGenerator), 
-                "Warning: Could not find levelgen script \"%s\"", scriptName.c_str());
-      return;
-   }
+      return false;
 
    // The script file will be the first argument, subsequent args will be passed on to the script -- 
    // will be deleted when level ends in ServerGame::cleanUp()
@@ -1159,6 +1160,8 @@ void ServerGame::runLevelGenScript(const string &scriptName)
       delete levelgen;
    else
       mLevelGens.push_back(levelgen);
+
+   return true;
 }
 
 

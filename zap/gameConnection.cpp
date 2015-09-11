@@ -1384,15 +1384,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRunScript, (string scriptName), (scriptName
    if(!mClientInfo->isLevelChanger())
       return;
 
-   string scriptFile = mSettings->getFolderManager()->findLevelGenScript(scriptName);
-
-   if(scriptFile == "")
-   {
+   if(!mServerGame->runLevelGenScript(scriptName))
       s2cDisplayErrorMessage("!!! Script " + scriptName + " not found");
-      return;
-   }
-
-   mServerGame->runLevelGenScript(scriptFile);
 }
 
 

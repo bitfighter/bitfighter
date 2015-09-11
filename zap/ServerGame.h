@@ -184,7 +184,7 @@ public:
 
    void onConnectedToMaster();
 
-   void runLevelGenScript(const string &scriptName);  // Run any levelgens specified by the level or in the INI
+   bool runLevelGenScript(const string &scriptName);  // Run any levelgens specified by the level or in the INI
 
 
    /////
