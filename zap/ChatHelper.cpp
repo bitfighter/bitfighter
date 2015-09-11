@@ -352,46 +352,40 @@ static Vector<string> commandCandidateList;
 
 static Vector<string> *getCandidateList(Game *game, CommandInfo *commandInfo, S32 arg)
 {
+   TNLAssert(arg >= 0, "Huh??");
+
    if(arg == 0)         // ==> Command completion
       return &commandCandidateList;
 
-   else if(arg > 0)     // ==> Arg completion
+   // ==> Arg completion
+   if(commandInfo != NULL && arg <= commandInfo->cmdArgCount)  // Found a command
    {
-      if(commandInfo != NULL && arg <= commandInfo->cmdArgCount)     // Found a command
+      ArgTypes argType = commandInfo->cmdArgInfo[arg - 1];     // What type of arg are we expecting?
+
+      static Vector<string> nameCandidateList;                 // Reusable container
+
+      switch(argType)
       {
-         ArgTypes argType = commandInfo->cmdArgInfo[arg - 1];  // What type of arg are we expecting?
-
-         static Vector<string> nameCandidateList;     // Reusable container
-
-         if(argType == NAME)           // ==> Player name completion
-         {  
-            makePlayerNameList(game, nameCandidateList);    // Creates a list of all player names
+         case NAME:           // ==> Player name completion
+            makePlayerNameList(game, nameCandidateList);       // Creates a list of all player names
             return &nameCandidateList;
-         }
 
-         else if(argType == TEAM)         // ==> Team name completion
-         {
+         case TEAM:           // ==> Team name completion
             makeTeamNameList(game, nameCandidateList);
             return &nameCandidateList;
-         }
 
-         else if(argType == LEVEL)        // ==> Level name completion
-         {
+         case LEVEL:          // ==> Level name completion
             makeLevelNameList(game, nameCandidateList);
             return &nameCandidateList;
-         }
 
-         else if(argType == SCRIPT)       // ==> Script name completion
-         {
+         case SCRIPT:         // ==> Script name completion
             makeScriptNameList(game, nameCandidateList);
             return &nameCandidateList;
-         }         
 
-         // else no arg completion for you!
+         default:             // else no arg completion for you!
+            return NULL;
       }
    }
-   
-   return NULL;                           // ==> No completion options
 }
 
 
