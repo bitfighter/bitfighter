@@ -642,6 +642,8 @@ bool getFilesFromFolder(const string &dir, Vector<string> &files, ReturnFileType
                {
                   if(returnType == FULL_PATH)
                      files.push_back(strictjoindir(dir, name));
+                  else if(returnType == FILENAME_ONLY_NO_EXTENSION)
+                     files.push_back(extractFilenameNoExtension(name));
                   else
                      files.push_back(name);
                }
@@ -724,6 +726,12 @@ bool copyFileToDir(const string &sourceFilename, const string &destDir)
 }
 
 
+bool hasTrailingSlash(const string &path)
+{
+   return path[path.length() - 1] == '\\' || path[path.length() - 1] == '/';
+}
+
+
 // Join a directory and filename strings in a platform-specific way
 string joindir(const string &path, const string &filename)
 {
@@ -732,7 +740,7 @@ string joindir(const string &path, const string &filename)
       return filename;
 
    // Does path already have a trailing delimiter?  If so, we'll use that.
-   if(path[path.length() - 1] == '\\' || path[path.length() - 1] == '/')
+   if(hasTrailingSlash(path))
       return path + filename;
 
    // Otherwise, join with a delimeter.
@@ -747,7 +755,7 @@ string strictjoindir(const string &part1, const string &part2)
       return part2;      
 
    // Does path already have a trailing delimeter?  If so, we'll use that.
-   if(part1[part1.length() - 1] == '\\' || part1[part1.length() - 1] == '/')
+   if(hasTrailingSlash(part1))
       return part1 + part2;
 
    // Otherwise, join with a delimeter.

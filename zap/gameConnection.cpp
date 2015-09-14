@@ -1186,7 +1186,7 @@ static Vector<string> findAllScriptsInFolder(const string &dir)
    // Build our list by looking at the filesystem 
    const string extList[] = {"levelgen"};
 
-   if(!getFilesFromFolder(dir, fileList, FILENAME_ONLY, extList, ARRAYSIZE(extList)))    // Returns true if error 
+   if(!getFilesFromFolder(dir, fileList, FILENAME_ONLY_NO_EXTENSION, extList, ARRAYSIZE(extList)))    // Returns true if error 
    {
       logprintf(LogConsumer::LogError, "Could not find any levelgens in the levels folder \"%s\".", dir.c_str());
       return fileList;

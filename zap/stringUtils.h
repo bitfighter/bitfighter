@@ -98,7 +98,8 @@ bool makeSureFolderExists(const string &dir);      // Like the man said: Make su
 
 enum ReturnFileType {
    FULL_PATH,
-   FILENAME_ONLY
+   FILENAME_ONLY,
+   FILENAME_ONLY_NO_EXTENSION
 };
 
 bool getFilesFromFolder(const string &dir, Vector<string> &files, ReturnFileType returnType, const string extensions[] = 0, S32 extensionCount = 0);
