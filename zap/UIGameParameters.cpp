@@ -147,10 +147,12 @@ static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
    TNL::Object *theObject = TNL::Object::create(GameType::getGameTypeClassName(getGameTypes()[gtIndex]));
    GameType *gt = dynamic_cast<GameType *>(theObject);   
 
+   Level *level = game->getUIManager()->getUI<EditorUserInterface>()->getLevel();
+
    TNLAssert(gt, "Whoa!");
-   TNLAssert(game->getLevel(), "Whoa!");
+   TNLAssert(level, "Whoa!");
    
-   game->getLevel()->setGameType(gt);     // gt will be put into a RefPtr, which will handle cleanup
+   level->setGameType(gt);     // gt will be put into a RefPtr, which will handle cleanup
 
    // If we have a new gameType, we might have new game parameters; update the menu!
    game->getUIManager()->getUI<GameParamUserInterface>()->updateMenuItems(gt);
