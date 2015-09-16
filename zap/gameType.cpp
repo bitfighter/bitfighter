@@ -936,7 +936,7 @@ VersionedGameStats GameType::getGameStats()
          {
             GameConnection *conn = clientInfo->getConnection();
             playerStats->isHosting         = conn->isLocalConnection();
-            playerStats->switchedTeamCount = conn->switchedTeamCount;
+            playerStats->switchedTeamCount = conn->mSwitchedTeamCount;
          }
 
          playerStats->isAdmin           = clientInfo->isAdmin();
@@ -2374,7 +2374,7 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
 
    if(!client->isRobot())
    {
-      client->getConnection()->switchedTeamCount++;  // Track number of times the player switched teams
+      client->getConnection()->mSwitchedTeamCount++;  // Track number of times the player switched teams
       mGame->balanceTeams();
    }
 }

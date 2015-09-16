@@ -93,7 +93,7 @@ void GameConnection::initialize()
    // Things related to verification
    mAuthenticationCounter = 0;            // Counts number of retries
 
-   switchedTeamCount = 0;
+   mSwitchedTeamCount = 0;
    mSendableFlags = 0;
    mDataBuffer = NULL;
    mDataBufferLevelGen = NULL;

@@ -492,6 +492,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
       {
          if(mLevelSource->getLevelCount() == 0)
          {
+            TNLAssert(false, "How did we get here?");
             if(getGameType()->isGameOver())
             {
                mShutdownTimer.reset(1); 
@@ -542,7 +543,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
       GameConnection *conn = clientInfo->getConnection();
 
       conn->resetGhosting();
-      conn->switchedTeamCount = 0;
+      conn->mSwitchedTeamCount = 0;
 
       clientInfo->setScore(0);         // Reset player scores, for non team game types
       clientInfo->clearKillStreak();   // Clear any rampage the players have going... sorry, lads!

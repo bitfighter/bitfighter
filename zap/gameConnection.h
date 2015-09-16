@@ -93,7 +93,7 @@ private:
 
 public:
    bool mPackUnpackShipEnergyMeter; // Only true for game recorder
-   U16 switchedTeamCount;
+   U16 mSwitchedTeamCount;
 
    U8 mVote;                        // 0 = not voted,  1 = vote yes,  2 = vote no    TODO: Make this an enum
    U32 mVoteTime;
