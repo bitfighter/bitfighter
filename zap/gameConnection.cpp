@@ -1333,6 +1333,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cRequestLevel, (S32 index), (index),
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative), (newLevelIndex, isRelative), 
                               NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
+   // Normally we won't show an error message on this end of a c2s, as the client should never have allowed it, but in this case
+   // we need to as the "/random" chat command could get us here while bypassing client-side checks.
+   // TODO: This check should be conducted elsewhere, and the following removed.
    if(!mClientInfo->isLevelChanger())
    {
       s2cDisplayErrorMessage("!!! Need level change permission");  // currently can come from GameType::processServerCommand "/random"
