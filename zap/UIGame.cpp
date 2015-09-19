@@ -28,9 +28,9 @@
 #include "gameType.h"
 #include "GaugeRenderer.h"
 #include "Intervals.h"
-#include "Level.h"
+#include "Level.h"               // Resharper says this line is not needed... but it is
 #include "projectile.h"          // For SpyBug
-#include "robot.h"
+#include "robot.h"               // Resharper says this line is not needed... but it is
 #include "ScissorsManager.h"
 #include "ServerGame.h"
 #include "shipItems.h"           // For EngineerBuildObjects
