@@ -29,9 +29,6 @@
 #include "stringUtils.h"
 
 #include <boost/shared_ptr.hpp>
-#include <sys/stat.h>
-#include <cmath>
-#include "boost/shared_ptr.hpp"
 
 using namespace TNL;
 
