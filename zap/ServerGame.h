@@ -88,6 +88,8 @@ private:
    // For simulating CPU stutter
    Timer mStutterTimer;                   
    Timer mStutterSleepTimer;
+
+   // Timers related to team management
    Timer mNoAdminAutoUnlockTeamsTimer;
 
    U32 mAccumulatedSleepTime;
@@ -106,6 +108,7 @@ private:
    string getLevelFileNameFromIndex(S32 indx);
 
    void resetAllClientTeams();                        // Resets all player team assignments
+   void recordTeamConfiguration();                    // Save list of who is on what team
 
    bool onlyClientIs(GameConnection *client);
    bool anyAdminsInGame() const;

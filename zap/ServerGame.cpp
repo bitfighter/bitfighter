@@ -880,15 +880,19 @@ void ServerGame::setTeamsLocked(bool locked)
    getGameType()->announceTeamsLocked(locked);
 
    if(locked)
-   { 
-      // Save current team configuration
-      for(S32 i = 0; i < mClientInfos.size(); i++)
-         mTeamHistoryManager.addPlayer(mClientInfos[i]->getName().getString(), 
-                                       getTeamCount(), 
-                                       mClientInfos[i]->getTeamIndex());
-   }
+      recordTeamConfiguration();
    else
       mTeamHistoryManager.onTeamsUnlocked();
+}
+
+
+void ServerGame::recordTeamConfiguration()
+{
+   // Save current team configuration
+   for(S32 i = 0; i < mClientInfos.size(); i++)
+      mTeamHistoryManager.addPlayer(mClientInfos[i]->getName().getString(), 
+                                    getTeamCount(), 
+                                    mClientInfos[i]->getTeamIndex());
 }
 
 
