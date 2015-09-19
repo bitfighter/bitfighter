@@ -1734,6 +1734,8 @@ Ship *ClientGame::getLocalPlayerShip() const
 
 void ClientGame::changePlayerTeam(const StringTableEntry &playerName, S32 teamIndex) const
 {
+   TNLAssert(getGameType(), "Expected GameType here!");     // 9/18/2015
+
    if(!getGameType())
       return;
 
