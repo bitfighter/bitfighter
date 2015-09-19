@@ -3327,7 +3327,7 @@ GAMETYPE_RPC_C2S(GameType, c2sTriggerTeamChange, (StringTableEntry playerName, S
 
    ClientInfo *playerClientInfo = mGame->findClientInfo(playerName);
 
-   // Player disappeared
+   // Player disappeared  **POOF!**
    if(!playerClientInfo)
       return;
 
