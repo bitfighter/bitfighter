@@ -47,20 +47,20 @@ namespace Zap
    { "mnext",    &ChatCommands::mNextHandler,       {  },          0,      SOUND_COMMANDS,   2,     1,    {  },                   "Play next track in the music list" },
    { "mprev",    &ChatCommands::mPrevHandler,       {  },          0,      SOUND_COMMANDS,   2,     1,    {  },                   "Play previous track in the music list" },
 
-   { "add",         &ChatCommands::addTimeHandler,         { xINT },  1, LEVEL_COMMANDS,  0,  1,  {"<time in minutes>"},                      "Add time to the current game" },
-   { "next",        &ChatCommands::nextLevelHandler,       {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Start next level" },
-   { "prev",        &ChatCommands::prevLevelHandler,       {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Replay previous level" },
-   { "restart",     &ChatCommands::restartLevelHandler,    {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Restart current level" },
-   { "random",      &ChatCommands::randomLevelHandler,     {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Start random level" },
-   { "map",         &ChatCommands::mapLevelHandler,        { LEVEL }, 1, LEVEL_COMMANDS,  0,  1,  {"<level name>"},                           "Start random level" },
-   { "shownextlevel",&ChatCommands::showNextLevelHandler,  {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Show name of the next level" },
-   { "showprevlevel",&ChatCommands::showPrevLevelHandler,  {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Show name of the previous level" },
-
-   { "settime",     &ChatCommands::setTimeHandler,         { xINT },  1, LEVEL_COMMANDS,  0,  1,  {"<time in minutes>"},                      "Set play time for the level" },
-   { "setscore",    &ChatCommands::setWinningScoreHandler, { xINT },  1, LEVEL_COMMANDS,  0,  1,  {"<score>"},                                "Set score to win the level" },
-   { "resetscore",  &ChatCommands::resetScoreHandler,      {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Reset all scores to zero" },
-
-   { "run",         &ChatCommands::runScriptHandler,       { SCRIPT },1, LEVEL_COMMANDS,  0,  1,  {"<script name>"},                          "Run a script" },
+   { "add",         &ChatCommands::addTimeHandler,         { xINT },  1,   LEVEL_COMMANDS,   0,     1,  {"<time in minutes>"},    "Add time to the current game" },
+   { "next",        &ChatCommands::nextLevelHandler,       {  },      0,   LEVEL_COMMANDS,   0,     1,  {  },                     "Start next level" },
+   { "prev",        &ChatCommands::prevLevelHandler,       {  },      0,   LEVEL_COMMANDS,   0,     1,  {  },                     "Replay previous level" },
+   { "restart",     &ChatCommands::restartLevelHandler,    {  },      0,   LEVEL_COMMANDS,   0,     1,  {  },                     "Restart current level" },
+   { "random",      &ChatCommands::randomLevelHandler,     {  },      0,   LEVEL_COMMANDS,   0,     1,  {  },                     "Start random level" },
+   { "map",         &ChatCommands::mapLevelHandler,        { LEVEL }, 1,   LEVEL_COMMANDS,   0,     1,  {"<level name>"},         "Start random level" },
+   { "shownextlevel",&ChatCommands::showNextLevelHandler,  {  },      0,   LEVEL_COMMANDS,   0,     1,  {  },                     "Show name of the next level" },
+   { "showprevlevel",&ChatCommands::showPrevLevelHandler,  {  },      0,   LEVEL_COMMANDS,   0,     1,  {  },                     "Show name of the previous level" },
+                                                                                                    
+   { "settime",     &ChatCommands::setTimeHandler,         { xINT },  1,   LEVEL_COMMANDS,   0,     1,  {"<time in minutes>"},    "Set play time for the level" },
+   { "setscore",    &ChatCommands::setWinningScoreHandler, { xINT },  1,   LEVEL_COMMANDS,   0,     1,  {"<score>"},              "Set score to win the level" },
+   { "resetscore",  &ChatCommands::resetScoreHandler,      {  },      0,   LEVEL_COMMANDS,   0,     1,  {  },                     "Reset all scores to zero" },
+ 
+   { "run",         &ChatCommands::runScriptHandler,       { SCRIPT },1,   LEVEL_COMMANDS,   0,     1,  {"<script name>"},        "Run a script" },
 
    HEADER_TEXT(BOT_COMMANDS, 0, "These commands add bot players that continue to play in future levels"),
    { "morebots",    &ChatCommands::moreBotsHandler,        {  },                     0, BOT_COMMANDS,    0,  1,  {  },                                               "Add some bots (keep teams balanced)"},
