@@ -2986,7 +2986,7 @@ GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
 
    ServerGame *serverGame = static_cast<ServerGame *>(mGame);
 
-   // No changing score in Core
+   // No changing score in Core (would need to restore cores, which this command does not do)
    if(getGameTypeId() == CoreGame)
       return;
 
@@ -3006,7 +3006,7 @@ GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
    for(S32 i = 0; i < mLevel->getTeamCount(); i++)
    {
       // broadcast it to the clients
-      if(((Team *)mLevel->getTeam(i))->getScore() != 0)
+      if(static_cast<Team *>(mLevel->getTeam(i))->getScore() != 0)
          s2cSetTeamScore(i, 0);
 
       // Set the score internally...
