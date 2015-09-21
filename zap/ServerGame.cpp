@@ -506,7 +506,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
          mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel);
          nextLevel = mCurrentLevelIndex;
          S32 hostLevelIndex = mLevelSource->getLevelInfo(mCurrentLevelIndex).mHosterLevelIndex;
-         if(mLevelSource->getLevelFileName(mLevelSource->getLevelInfo(mCurrentLevelIndex).mHosterLevelIndex).length() == 0 && hostLevelIndex >= 0)
+         if(hostLevelIndex >= 0 && mLevelSource->getLevelFileName(hostLevelIndex).length() == 0)
          {
             mHoster->s2cRequestLevel(hostLevelIndex);
             return;
