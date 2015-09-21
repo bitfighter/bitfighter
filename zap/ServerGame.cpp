@@ -505,7 +505,9 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
          mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel);
          nextLevel = mCurrentLevelIndex;
+         
          S32 hostLevelIndex = mLevelSource->getLevelInfo(mCurrentLevelIndex).mHosterLevelIndex;
+
          if(hostLevelIndex >= 0 && mLevelSource->getLevelFileName(hostLevelIndex).length() == 0)
          {
             mHoster->s2cRequestLevel(hostLevelIndex);
@@ -1972,11 +1974,13 @@ S32 ServerGame::addLevel(const LevelInfo &levelInfo)
    return ret.first;
 }
 
+
 void ServerGame::addNewLevel(const LevelInfo &levelInfo)
 {
    mLevelSource->addNewLevel(levelInfo);
    levelAddedNotifyClients(levelInfo);
 }
+
 
 void ServerGame::removeLevel(S32 index)
 {
