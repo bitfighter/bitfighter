@@ -121,7 +121,7 @@ void TeamShuffleHelper::calculateRenderSizes()
    for(S32 i = 0; i < mTeams.size(); i++)
       for(S32 j = 0; j < mTeams[i].size(); j++)
       {
-         S32 width = RenderUtils::getStringWidth(TEXT_SIZE, getGame()->Game::getClientInfo(j)->getName().getString());
+         S32 width = RenderUtils::getStringWidth(TEXT_SIZE, mTeams[i][j]->getName().getString());
 
          if(width > columnWidth)
          {
