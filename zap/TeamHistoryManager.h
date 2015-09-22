@@ -40,7 +40,6 @@ public:
 
    void onPlayerJoined(const string &name);
    void onPlayerQuit(const string &name);
-   void onTeamsUnlocked();
    void clear();
 
    void addPlayer(const string &name, S32 teamCount, S32 teamIndex);

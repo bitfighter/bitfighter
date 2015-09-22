@@ -113,6 +113,17 @@ namespace Zap {
       EXPECT_EQ(gamePair.getClient(0)->getCurrentTeamIndex(), team0) << "Should not have changed teams... teams are locked";
       EXPECT_TRUE(newClient->areTeamsLocked());
 
+      // Throw in a couple of resets here, just for fun... should have no bearing on anything (but does use TeamHistoryManager)
+      for(S32 i = 0; i < 4; i++)
+      {
+         gamePair.runChatCmd(0, "/reset");   // User chat command
+         gamePair.idle(5, 5);
+         EXPECT_EQ(gamePair.getClient(0)->getCurrentTeamIndex(), team0);
+         EXPECT_EQ(gamePair.getClient(1)->getCurrentTeamIndex(), team1);
+         ASSERT_NE(team0, team1);
+         ASSERT_EQ(3, server->getClientCount());
+      }
+
       ///// Player quits, then rejoins -- should be reassigned to old team
       EXPECT_TRUE(server->areTeamsLocked());
       gamePair.idle(5, 5);

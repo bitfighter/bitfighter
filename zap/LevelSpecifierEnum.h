@@ -13,6 +13,7 @@ namespace Zap
       REPLAY_LEVEL = -2,
       PREVIOUS_LEVEL = -3,
       RANDOM_LEVEL = -4,
+      RESET_LEVEL = -5,
       FIRST_LEVEL = 0,
    };
 };

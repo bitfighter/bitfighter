@@ -99,13 +99,6 @@ void TeamHistoryManager::onPlayerQuit(const string &name)
 }
 
 
-// When teams are unlocked, we can purge our history
-void TeamHistoryManager::onTeamsUnlocked()
-{
-   clear();
-}
-
-
 void TeamHistoryManager::clear()
 {
    mNames.clear();

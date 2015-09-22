@@ -5,6 +5,7 @@
 
 #include "ServerGame.h"
 
+#include "gameConnection.h"      // Need Color definitions for RPCs
 #include "GameManager.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
@@ -482,7 +483,7 @@ void ServerGame::makeEmptyLevelIfNoGameType()
 
 // Clear, prepare, and load the level given by the index \nextLevel. This
 // function respects meta-indices, and otherwise expects an absolute index.
-void ServerGame::cycleLevel(S32 nextLevel)
+void ServerGame::cycleLevel(S32 nextLevel, bool isReset)
 {
    if(mHostOnServer)
    {
@@ -491,6 +492,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
          if(mLevelSource->getLevelCount() == 0)
          {
             TNLAssert(false, "How did we get here?");
+
             if(getGameType()->isGameOver())
             {
                mShutdownTimer.reset(1); 
@@ -528,6 +530,13 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    delete mGameRecorderServer;
    mGameRecorderServer = NULL;
+
+
+   if(isReset && !areTeamsLocked())
+   {
+      mTeamHistoryManager.clear();     // Doing this while teams are locked would... be bad
+      recordTeamConfiguration();
+   }
 
    // If mLevel is NULL, it's our first time here, and there won't be anything to clean up
    if(mLevel)
@@ -614,7 +623,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    Vector<S32> unassigned;
 
-   if(areTeamsLocked())
+   if(isReset || areTeamsLocked())
    {
       // Two passes!  All pre-assigned players get added first, then unassigned ones
       for(S32 i = 0; i < getClientCount(); i++)
@@ -879,10 +888,10 @@ void ServerGame::setTeamsLocked(bool locked)
 
    getGameType()->announceTeamsLocked(locked);
 
+   mTeamHistoryManager.clear();
+
    if(locked)
       recordTeamConfiguration();
-   else
-      mTeamHistoryManager.onTeamsUnlocked();
 }
 
 
@@ -1014,7 +1023,7 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
       currentLevelIndex = newLevel;
    }
 
-   //else if(nextLevel == REPLAY_LEVEL)    // Replay level, do nothing
+   //else if(nextLevel == REPLAY_LEVEL || nextLevel = RESET_LEVEL)    // Replay level, do nothing
    //   currentLevelIndex += 0;
 
    if(currentLevelIndex >= levelCount)  // Safety check in case of trying to replay level that was just deleted
@@ -1996,6 +2005,45 @@ void ServerGame::removeLevel(S32 index)
       if(clientInfo->isLevelChanger())
          clientInfo->getConnection()->s2cRemoveLevel(index);
    }
+}
+
+
+// Called from GameConnection c2s 
+void ServerGame::changeLevel(ClientInfo *requestingClientInfo, S32 newLevelIndex, bool isRelative)
+{
+   bool restart = false;
+   bool reset = false;
+
+   // Figure out which level the player requested
+   if(isRelative)
+      newLevelIndex = (getCurrentLevelIndex() + newLevelIndex ) % getLevelCount();
+   else if(newLevelIndex == REPLAY_LEVEL)
+      restart = true;
+   else if(newLevelIndex == RESET_LEVEL)
+      reset = true;
+
+   // Resolve the index (which could be a meta-index) to an absolute index
+   newLevelIndex = getAbsoluteLevelIndex(newLevelIndex);
+
+   Vector<StringTableEntry> e;
+   e.push_back(requestingClientInfo->getName()); 
+
+   // Should probably sent as a string, not a STE
+   StringTableEntry msg;
+   
+   if(reset)
+      msg.set("%e0 reset the current level.");
+   else if(restart)
+      msg.set("%e0 restarted the current level.");
+   else
+   {
+      msg.set("%e0 changed the level to %e1.");
+      e.push_back(getLevelNameFromIndex(newLevelIndex));
+   }
+
+   getGameType()->broadcastMessage(GameConnection::ColorYellow, SFXNone, msg, e);
+
+   cycleLevel(newLevelIndex, reset);
 }
 
 

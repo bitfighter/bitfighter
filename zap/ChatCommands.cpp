@@ -188,10 +188,19 @@ void prevLevelHandler(ClientGame *game, const Vector<string> &words)
 }
 
 
+// /restart
 void restartLevelHandler(ClientGame *game, const Vector<string> &words)
 {
-   if(game->hasLevelChange("!!! You don't have permission to change levels"))
+   if(game->hasLevelChange("!!! You don't have permission to restart the level"))
       game->getConnectionToServer()->c2sRequestLevelChange(REPLAY_LEVEL, false);
+}
+
+
+// /reset
+void resetGameHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasLevelChange("!!! You don't have permission to reset the level"))
+      game->getConnectionToServer()->c2sRequestLevelChange(RESET_LEVEL, false);
 }
 
 

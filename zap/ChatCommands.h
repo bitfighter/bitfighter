@@ -77,6 +77,7 @@ void getMapHandler             (ClientGame *game, const Vector<string> &args);
 void nextLevelHandler          (ClientGame *game, const Vector<string> &args);
 void prevLevelHandler          (ClientGame *game, const Vector<string> &args);
 void restartLevelHandler       (ClientGame *game, const Vector<string> &args);
+void resetGameHandler          (ClientGame *game, const Vector<string> &args);
 void randomLevelHandler        (ClientGame *game, const Vector<string> &args);
 void mapLevelHandler           (ClientGame *game, const Vector<string> &args);
 void showNextLevelHandler      (ClientGame *game, const Vector<string> &args);

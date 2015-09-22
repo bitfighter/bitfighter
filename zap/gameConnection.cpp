@@ -1330,8 +1330,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cRequestLevel, (S32 index), (index),
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative), (newLevelIndex, isRelative), 
-                              NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
+TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative), 
+                                  (newLevelIndex, isRelative), 
+                                  NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
 {
    // Normally we won't show an error message on this end of a c2s, as the client should never have allowed it, but in this case
    // we need to as the "/random" chat command could get us here while bypassing client-side checks.
@@ -1350,25 +1351,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
    // Don't let spawn delay kick in for caller.  This prevents a race condition with spawn undelay and becoming unbusy
    resetTimeSinceLastMove();
 
-   bool restart = false;
-
-   if(isRelative)
-      newLevelIndex = (mServerGame->getCurrentLevelIndex() + newLevelIndex ) % mServerGame->getLevelCount();
-   else if(newLevelIndex == REPLAY_LEVEL)
-      restart = true;
-
-   StringTableEntry msg( restart ? "%e0 restarted the current level." : "%e0 changed the level to %e1." );
-   Vector<StringTableEntry> e;
-   e.push_back(mClientInfo->getName()); 
-
-   // resolve the index (which could be a meta-index) to an absolute index
-   newLevelIndex = mServerGame->getAbsoluteLevelIndex(newLevelIndex);
-
-   mServerGame->cycleLevel(newLevelIndex);
-   if(!restart)
-      e.push_back(mServerGame->getLevelNameFromIndex(newLevelIndex));
-
-   mServerGame->getGameType()->broadcastMessage(ColorYellow, SFXNone, msg, e);
+   mServerGame->changeLevel(mClientInfo, newLevelIndex, isRelative);
 }
 
 

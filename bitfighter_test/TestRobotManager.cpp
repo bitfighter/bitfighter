@@ -282,22 +282,22 @@ TEST(RobotManagerTest, levelsThatIncludeBots)
 
    GamePair gamePair(settings, getLevelCodeForEmptyLevelWithBots("0 BB"));
 
-   gamePair.server->cycleLevel();       EXPECT_EQ("BB LL",     getTeams(gamePair)) << "Expect 2 from level, 2 from balancer";
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("BB LL",     getTeams(gamePair)) << "Expect 2 from level, 2 from balancer";
 
-   gamePair.addClient("Cookie Jarvis"); EXPECT_EQ("HB LL",     getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("HB LL",     getTeams(gamePair));
+   gamePair.addClient("Cookie Jarvis");      EXPECT_EQ("HB LL",     getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("HB LL",     getTeams(gamePair));
 
-   gamePair.addClient("Booberry");      EXPECT_EQ("HH LL",     getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("HH LL",     getTeams(gamePair));
+   gamePair.addClient("Booberry");           EXPECT_EQ("HH LL",     getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("HH LL",     getTeams(gamePair));
 
-   gamePair.addClient("Frankenberry");  EXPECT_EQ("HHH LLB",   getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("HHH LLB",   getTeams(gamePair));
+   gamePair.addClient("Frankenberry");       EXPECT_EQ("HHH LLB",   getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("HHH LLB",   getTeams(gamePair));
 
-   gamePair.addClient("Count Chocula"); EXPECT_EQ("HHH HLL",   getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("HHH HLL",   getTeams(gamePair));
+   gamePair.addClient("Count Chocula");      EXPECT_EQ("HHH HLL",   getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("HHH HLL",   getTeams(gamePair));
 
-   gamePair.addClient("Toucan Sam");    EXPECT_EQ("HHHH HLLB", getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("HHHH HLLB", getTeams(gamePair));
+   gamePair.addClient("Toucan Sam");         EXPECT_EQ("HHHH HLLB", getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("HHHH HLLB", getTeams(gamePair));
    }
 
    // Same test, but with a larger number of players specified
@@ -307,22 +307,22 @@ TEST(RobotManagerTest, levelsThatIncludeBots)
 
    GamePair gamePair(settings, getLevelCodeForEmptyLevelWithBots("0 BB"));
 
-   gamePair.server->cycleLevel();       EXPECT_EQ("BBBB LLBB", getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("BBBB LLBB", getTeams(gamePair));
 
-   gamePair.addClient("Cookie Jarvis"); EXPECT_EQ("HBBB LLBB", getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("HBBB LLBB", getTeams(gamePair));
+   gamePair.addClient("Cookie Jarvis");      EXPECT_EQ("HBBB LLBB", getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("HBBB LLBB", getTeams(gamePair));
 
-   gamePair.addClient("Booberry");      EXPECT_EQ("HHBB LLBB", getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("HHBB LLBB", getTeams(gamePair));
+   gamePair.addClient("Booberry");           EXPECT_EQ("HHBB LLBB", getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("HHBB LLBB", getTeams(gamePair));
 
-   gamePair.addClient("Frankenberry");  EXPECT_EQ("HHHB LLBB", getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("HHHB LLBB", getTeams(gamePair));
+   gamePair.addClient("Frankenberry");       EXPECT_EQ("HHHB LLBB", getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("HHHB LLBB", getTeams(gamePair));
 
-   gamePair.addClient("Count Chocula"); EXPECT_EQ("HHHB HLLB", getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("HHHB HLLB", getTeams(gamePair));
+   gamePair.addClient("Count Chocula");      EXPECT_EQ("HHHB HLLB", getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("HHHB HLLB", getTeams(gamePair));
 
-   gamePair.addClient("Toucan Sam");    EXPECT_EQ("HHHH HLLB", getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("HHHH HLLB", getTeams(gamePair));
+   gamePair.addClient("Toucan Sam");         EXPECT_EQ("HHHH HLLB", getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("HHHH HLLB", getTeams(gamePair));
 
    }
 
@@ -332,22 +332,22 @@ TEST(RobotManagerTest, levelsThatIncludeBots)
 
    GamePair gamePair(settings, getLevelCodeForEmptyLevelWithBots("0 BB"));
 
-   gamePair.server->cycleLevel();       EXPECT_EQ("0 LL",     getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("0 LL",     getTeams(gamePair));
 
-   gamePair.addClient("Cookie Jarvis"); EXPECT_EQ("H LL",     getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("H LL",     getTeams(gamePair));
+   gamePair.addClient("Cookie Jarvis");      EXPECT_EQ("H LL",     getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("H LL",     getTeams(gamePair));
    
-   gamePair.addClient("Booberry");      EXPECT_EQ("HH LL",    getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("HH LL",    getTeams(gamePair));
+   gamePair.addClient("Booberry");           EXPECT_EQ("HH LL",    getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("HH LL",    getTeams(gamePair));
    
-   gamePair.addClient("Frankenberry");  EXPECT_EQ("HHH LL",   getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("HHH LL",   getTeams(gamePair));
+   gamePair.addClient("Frankenberry");       EXPECT_EQ("HHH LL",   getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("HHH LL",   getTeams(gamePair));
    
-   gamePair.addClient("Count Chocula"); EXPECT_EQ("HHH HLL",  getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("HHH HLL",  getTeams(gamePair));
+   gamePair.addClient("Count Chocula");      EXPECT_EQ("HHH HLL",  getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("HHH HLL",  getTeams(gamePair));
    
-   gamePair.addClient("Toucan Sam");    EXPECT_EQ("HHHH HLL", getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("HHHH HLL", getTeams(gamePair));
+   gamePair.addClient("Toucan Sam");         EXPECT_EQ("HHHH HLL", getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("HHHH HLL", getTeams(gamePair));
    }
 }
 
@@ -362,23 +362,23 @@ TEST(RobotManagerTest, autolevelingWithLevelsThatIncludeBots)
    settings->setSetting(IniKey::AddRobots, No);          // Disable autoleveling
    GamePair gamePair(settings, getLevelCodeForEmptyLevelWithBots("0 LL L"));
 
-   gamePair.server->cycleLevel();       EXPECT_EQ("0 LL L",      getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("0 LL L",      getTeams(gamePair));
                                                                 
-   gamePair.addClient("TonyTiger");     EXPECT_EQ("H LL L",      getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("H LL L",      getTeams(gamePair));
+   gamePair.addClient("TonyTiger");          EXPECT_EQ("H LL L",      getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("H LL L",      getTeams(gamePair));
                                                                 
-   gamePair.addClient("SillyRabbit");   EXPECT_EQ("HH LL L",     getTeams(gamePair));
-   gamePair.server->cycleLevel();       EXPECT_EQ("HH LL L",     getTeams(gamePair));
+   gamePair.addClient("SillyRabbit");        EXPECT_EQ("HH LL L",     getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("HH LL L",     getTeams(gamePair));
                                                                 
    // moreBots will enable autoleveling, but the levels will be set based on current conditions... 12 will be ignored
-   gamePair.server->moreBots();         EXPECT_EQ("HH LL LB",    getTeams(gamePair));      
-   gamePair.server->moreBots();         EXPECT_EQ("HHB LLB LBB", getTeams(gamePair));  
-   gamePair.server->fewerBots();        EXPECT_EQ("HH LL LB",    getTeams(gamePair));  
+   gamePair.server->moreBots();              EXPECT_EQ("HH LL LB",    getTeams(gamePair));      
+   gamePair.server->moreBots();              EXPECT_EQ("HHB LLB LBB", getTeams(gamePair));  
+   gamePair.server->fewerBots();             EXPECT_EQ("HH LL LB",    getTeams(gamePair));  
 
    // Robot manager will remove level-specified bots if there are no more autoleveling bots available
-   gamePair.server->fewerBots();        EXPECT_EQ("HH L L",      getTeams(gamePair));  
+   gamePair.server->fewerBots();             EXPECT_EQ("HH L L",      getTeams(gamePair));  
    // But they'll be back after the next restart, as will an autolevel bot since the autoleveler is now active
-   gamePair.server->cycleLevel();       EXPECT_EQ("HH LL LB",    getTeams(gamePair));
+   gamePair.server->cycleLevel(NEXT_LEVEL);  EXPECT_EQ("HH LL LB",    getTeams(gamePair));
    }
 }
 

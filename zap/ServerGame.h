@@ -181,7 +181,7 @@ public:
 
    void receivedLevelFromHoster(S32 levelIndex, const string &filename);
    void makeEmptyLevelIfNoGameType();
-   void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
+   void cycleLevel(S32 newLevelIndex, bool isReset = false);
    void sendLevelStatsToMaster();
 
    void onConnectedToMaster();
@@ -255,6 +255,7 @@ public:
    S32 addLevel(const LevelInfo &info);
    void addNewLevel(const LevelInfo &info);
    void removeLevel(S32 index);
+   void changeLevel(ClientInfo *requestingClientInfo, S32 newLevelIndex, bool isRelative);
 
    void setTeamsLocked(bool locked);
 
