@@ -178,7 +178,6 @@ string ftos(F32 f)
 }
 
 
-
 F64 stof(const string &s)
 {
    return atof(s.c_str());
