@@ -235,7 +235,7 @@ public:
 
    TNL_DECLARE_RPC(c2sRequestCommanderMap, ());
    TNL_DECLARE_RPC(c2sReleaseCommanderMap, ());
-
+   
    TNL_DECLARE_RPC(c2sRunScript, (string script));
 
    TNL_DECLARE_RPC(s2cCreditEnergy, (SignedInt<18> energy));
