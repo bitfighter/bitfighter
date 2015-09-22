@@ -86,14 +86,14 @@ TEST(LoadoutTest, TestLevelHasLoadoutZoneForTeam)
 }
 
 
-//TODO: Move this to a new test file!!!  Doesn't belong here!!
+// TODO: Move this to a new test file!!!  Doesn't belong here!!
 TEST(LoadoutTest, TestTenthsCounter) 
 {
    F32 val = 4.3f;
    FloatCounterMenuItem menuItem("Test", val, 0.1, 2.1, 40.5, 1, "what", "ever", "man");
 
    EXPECT_EQ("4.3", menuItem.getValue());    // 4.3
-   EXPECT_FLOAT_EQ(val, stof(menuItem.getValue()));
+   EXPECT_FLOAT_EQ(val, Zap::stof(menuItem.getValue()));
 }
    
 }
