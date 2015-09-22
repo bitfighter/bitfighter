@@ -17,11 +17,9 @@
 #include "BanList.h"             // For banList kick duration
 #include "BotNavMeshZone.h"      // For zone clearing code
 #include "LevelSource.h"
-#include "LevelDatabase.h"
 #include "Level.h"
 #include "WallItem.h"
 
-#include "GameObjectRender.h"
 #include "stringUtils.h"
 #include "GeomUtils.h"
 
