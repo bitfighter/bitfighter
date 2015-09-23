@@ -2313,7 +2313,7 @@ void GameUserInterface::renderScoreboard() const
    // Outer scoreboard box
    RenderUtils::drawFilledFancyBox(horizMargin - Gap, scoreboardTop - (2 * Gap),
                      (canvasWidth - horizMargin) + Gap, scoreboardTop + totalHeight + 23,
-                     13, Colors::black, 0.85f, Colors::blue);
+                     13, RenderUtils::LL|RenderUtils::UR, Colors::black, 0.85f, Colors::blue);
 
    FontManager::pushFontContext(ScoreboardContext);
    
@@ -2348,7 +2348,7 @@ void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGa
    const S32 yt = scoreboardTop + (index >> 1) * sectionHeight;   // Top edge of team render area
 
    // Team header
-   if (isTeamGame)
+   if(isTeamGame)
       renderTeamName(index, isWinningTeam, xl, xr, yt);
 
    // Now for player scores.  First build a list.  Then sort it.  Then display it.
@@ -2404,7 +2404,10 @@ void GameUserInterface::renderTeamName(S32 index, bool isWinningTeam, S32 left, 
    const Color &borderColor = isWinningTeam ? Colors::white : teamColor;
    const S32 headerBoxHeight = teamFontSize + 2 * Gap;
 
-   RenderUtils::drawFilledFancyBox(left, top, right, top + headerBoxHeight, 10, teamColor, 0.6f, borderColor);
+   if(index == 1)    // UR Corner needs to be fancy
+      RenderUtils::drawFilledFancyBox(left, top, right, top + headerBoxHeight, 10, RenderUtils::UR, teamColor, 0.6f, borderColor);
+   else
+      RenderUtils::drawFilledRect(left, top, right, top + headerBoxHeight, teamColor, 0.6f, borderColor, 1.0f);
 
    // Then the team name & score
    FontManager::pushFontContext(ScoreboardHeadlineContext);

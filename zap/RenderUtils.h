@@ -44,6 +44,10 @@ public:
    static const S32 NUM_CIRCLE_SIDES;
    static const F32  CIRCLE_SIDE_THETA;
 
+   static const U8 UR = 1;
+   static const U8 LL = 2;
+
+
    /// Generic render methods
    ///
    // This method is probably wholly incompatible with GLES 2
@@ -234,17 +238,21 @@ public:
       drawHollowRect(x1, y1, x2, y2);
    }
 
-   static void drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, S32 mode);
+   static void drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, U8 corners, S32 glMode);
 
    template<typename T, typename U, typename V, typename W, typename X>
    static void drawFancyBox(T xLeft, U yTop, V xRight, W yBottom, X cornerInset, S32 mode)
    {
-      drawFancyBox(F32(xLeft), F32(yTop), F32(xRight), F32(yBottom), F32(cornerInset), mode);
+      drawFancyBox(F32(xLeft), F32(yTop), F32(xRight), F32(yBottom), F32(cornerInset), LL|UR, mode);
    }
 
 
    static void drawHollowFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset);
-   static void drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, const Color &fillColor, F32 fillAlpha, const Color &borderColor);
+   static void drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset,  
+                                  const Color &fillColor, F32 fillAlpha, const Color &borderColor);
+   static void drawHollowFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners);
+   static void drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners, 
+                                  const Color &fillColor, F32 fillAlpha, const Color &borderColor);
 
    static void drawFilledCircle(const Point &pos, F32 radius);
    static void drawFilledCircle(const Point &pos, F32 radius, const Color &color);

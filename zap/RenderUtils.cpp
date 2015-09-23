@@ -791,36 +791,48 @@ void RenderUtils::drawHollowRect(const Point &p1, const Point &p2)
 }
 
 
-void RenderUtils::drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, S32 mode)
+void RenderUtils::drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, U8 corners, S32 glMode)
 {
    F32 vertices[] = {
          xLeft, yTop,                   // Top
-         xRight - cornerInset, yTop,
+         xRight - (corners & UR ? cornerInset : 0), yTop,
          xRight, yTop + cornerInset,    // Edge
          xRight, yBottom,               // Bottom
-         xLeft + cornerInset, yBottom,
+         xLeft + (corners & LL ? cornerInset : 0), yBottom,
          xLeft, yBottom - cornerInset   // Edge
    };
 
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, mode);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, glMode);
 }
 
 
 void RenderUtils::drawHollowFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset)
 {
-   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, GLOPT::LineLoop);
+   drawHollowFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, LL|UR);
+}
+
+
+void RenderUtils::drawHollowFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners)
+{
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, corners, GLOPT::LineLoop);
 }
 
 
 void RenderUtils::drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, const Color &fillColor, F32 fillAlpha, const Color &borderColor)
 {
+   drawFilledFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, LL|UR, fillColor, fillAlpha, borderColor);
+}
+
+
+void RenderUtils::drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners, const Color &fillColor, F32 fillAlpha, const Color &borderColor)
+{
    // Fill
    mGL->glColor(fillColor, fillAlpha);
-   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, GLOPT::TriangleFan);
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, corners, GLOPT::TriangleFan);
 
    // Border
    mGL->glColor(borderColor, 1.f);
-   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, GLOPT::LineLoop);
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, corners, GLOPT::LineLoop);
 }
 
 
