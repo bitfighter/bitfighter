@@ -194,18 +194,7 @@ private:
    Timer mProgressBarFadeTimer;     // For fading out progress bar after level is loaded
    bool mShowProgressBar;
 
-   // Some rendering routines
-   void renderScoreboard() const;
-   void renderTeamScoreboard(S32 index, S32 teams, bool isTeamGame, bool isWinningTeam,
-                             S32 scoreboardTop, S32 sectionHeight, S32 teamHeaderHeight, S32 lineHeight) const;
-   void renderScoreboardLine(const Vector<ClientInfo *> &playerScores, bool isTeamGame, S32 row, 
-                             S32 x, S32 y, U32 lineHeight, S32 rightEdge, S32 *colWidths) const;
-   void renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y, const S32 *colIndexWidths, bool isTeamGame) const;
-   void renderTeamName(S32 index, bool isWinningTeam, S32 left, S32 right, S32 top) const;
-   static void renderPlayerSymbolAndSetColor(ClientInfo *player, S32 x, S32 y, S32 size);
-
    Point getShipRenderPos() const;
-
 
    // Some key press/release handler helpers
    void onMissionKeyPressed();
@@ -388,7 +377,6 @@ public:
    void renderBasicInterfaceOverlay() const;
    void renderLevelInfo() const;
    bool shouldRenderLevelInfo() const;
-   static void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio);
 
    void idle(U32 timeDelta);
 
@@ -453,7 +441,7 @@ public:
    void renderGameCommander() const;      // Render game in commander's map mode
    void renderSuspended() const;          // Render suspended game
 
-   void renderOverlayMap() const;         // Render the overlay map in normal play mode
+   //void renderOverlayMap() const;         // Render the overlay map in normal play mode
 
    void renderEngineeredItemDeploymentMarker(Ship *ship) const;
 

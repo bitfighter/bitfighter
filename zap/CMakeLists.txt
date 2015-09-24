@@ -84,6 +84,7 @@ set(SHARED_SOURCES
 	retrieveGame.cpp
 	robot.cpp
 	RobotManager.cpp
+	ScoreboardRenderer.cpp
 	ScreenInfo.cpp
 	ServerGame.cpp
 	Settings.cpp
