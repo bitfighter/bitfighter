@@ -112,7 +112,9 @@ static void renderPlayerSymbolAndSetColor(ClientInfo *player, S32 x, S32 y, S32 
 
    // Draw the player's experience level before we set the color
    FontManager::pushFontContext(OldSkoolContext);
+
    static const S32 levelSize = 7;
+
    gL->glColor(Colors::green);
    RenderUtils::drawStringf(x - 8, y + 7 , levelSize, "%d", ClientGame::getExpLevel(player->getGamesPlayed()));
    FontManager::popFontContext();
