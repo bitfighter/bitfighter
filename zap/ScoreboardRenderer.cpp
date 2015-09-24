@@ -24,7 +24,7 @@ static const S32 horizMargin = UserInterface::horizMargin;
 
 enum ColIndex {
    KdIndex,        // = 0,
-   PingIndex.      // = 1,
+   PingIndex,      // = 1,
    ScoreIndex,     // = 2,
    ColIndexCount
 };
