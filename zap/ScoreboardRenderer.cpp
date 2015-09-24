@@ -151,7 +151,7 @@ static void renderTeamName(ClientGame *clientGame, S32 index, bool isWinningTeam
    const Color &borderColor = isWinningTeam ? Colors::white : teamColor;
    const S32 headerBoxHeight = teamFontSize + 2 * Gap;
 
-   if(index == 1)    // UR Corner needs to be fancy
+   if(index == 1)    // Box in UR corner needs to be fancy to nest in outer box
       RenderUtils::drawFilledFancyBox(left, top, right, top + headerBoxHeight, 10, RenderUtils::UR, teamColor, 0.6f, borderColor);
    else
       RenderUtils::drawFilledRect(left, top, right, top + headerBoxHeight, teamColor, 0.6f, borderColor, 1.0f);
