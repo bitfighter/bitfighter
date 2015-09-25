@@ -42,6 +42,10 @@ namespace Zap
 {
 
 
+static const char *botSymbol = "B";
+static const char *levelChangerSymbol = "+";
+static const char *adminSymbol = "@";
+
 
 #ifdef USE_DUMMY_PLAYER_SCORES
 
@@ -91,11 +95,6 @@ static S32 getMaxPlayersOnAnyTeam(ClientGame *clientGame, S32 teams, bool isTeam
 
    return maxTeamPlayers;
 }
-
-
-static const char *botSymbol = "B";
-static const char *levelChangerSymbol = "+";
-static const char *adminSymbol = "@";
 
 
 static void renderScoreboardLegend(S32 humans, U32 scoreboardTop, U32 totalHeight)
@@ -197,7 +196,7 @@ static void renderTeamName(ClientGame *clientGame, S32 index, bool isWinningTeam
 }
 
 
-static void renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y, 
+static void renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y,
                                           const S32 *colIndexWidths, bool isTeamGame)
 {
    GL *gL = RenderManager::getGL();
@@ -205,9 +204,8 @@ static void renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y,
    gL->glColor(Colors::gray50);
 
    RenderUtils::drawString_fixed(leftEdge,                                                 y, ColHeaderTextSize, "Name");
-   RenderUtils::drawStringc     (rightEdge -  (KdOff   + colIndexWidths[KdIndex]    / 2),  y, ColHeaderTextSize, "Threat Level");
+   RenderUtils::drawStringc     (rightEdge -  (KdOff   + colIndexWidths[KdIndex]   / 2),   y, ColHeaderTextSize, "Threat Level");
    RenderUtils::drawStringc     (rightEdge -  (PingOff - colIndexWidths[PingIndex]  / 2),  y, ColHeaderTextSize, "Ping");
-
    // Solo games need one more header
    if(!isTeamGame)
       RenderUtils::drawStringc   (rightEdge - (ScoreOff + colIndexWidths[ScoreIndex] / 2), y, ColHeaderTextSize, "Score");
@@ -258,11 +256,25 @@ static void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio)
 }
 
 
-// Renders a line on the scoreboard, and returns the widths of the rendered items in colWidths
-static void renderScoreboardLine(const Vector<ClientInfo *> &playerScores, bool isTeamGame, S32 row,
-                                 S32 x, S32 y, U32 lineHeight, S32 rightEdge, S32 *colWidths)
+static S32 getMaxPingWidth(const Vector<ClientInfo *> &playerScores, S32 fontSize)
 {
-   const S32 playerFontSize = S32(lineHeight * 0.75f);
+   S32 maxWidth = -1;
+
+   for(S32 i = 0; i < playerScores.size(); i++)
+   {
+      S32 width = RenderUtils::getStringWidthf(fontSize, "%d", playerScores[i]->getPing());
+      if(width > maxWidth)
+         maxWidth = width;
+   }
+   
+   return maxWidth;
+}
+
+
+// Renders a line on the scoreboard, and returns the widths of the rendered items in colWidths
+static void renderScoreboardLine(const Vector<ClientInfo *> &playerScores, bool isTeamGame, S32 row, S32 playerFontSize,
+                                 S32 x, S32 y, U32 lineHeight, S32 rightEdge, S32 *colWidths, S32 maxPingWidth)
+{
    const S32 symbolFontSize = S32(lineHeight * 0.75f * 0.75f);
 
    static const S32 vertAdjustFact = (playerFontSize - symbolFontSize) / 2 - 1;
@@ -271,8 +283,8 @@ static void renderScoreboardLine(const Vector<ClientInfo *> &playerScores, bool 
 
    S32 nameWidth = RenderUtils::drawStringAndGetWidth(x, y, playerFontSize, playerScores[row]->getName().getString());
 
-   colWidths[KdIndex]   = RenderUtils::drawStringfr          (rightEdge - KdOff,   y, playerFontSize, "%2.2f", playerScores[row]->getRating());
-   colWidths[PingIndex] = RenderUtils::drawStringAndGetWidthf(rightEdge - PingOff, y, playerFontSize, "%d",    playerScores[row]->getPing());
+   colWidths[KdIndex]   = RenderUtils::drawStringfr(rightEdge - KdOff,                  y, playerFontSize, "%2.2f", playerScores[row]->getRating());
+   colWidths[PingIndex] = RenderUtils::drawStringfr(rightEdge - PingOff + maxPingWidth, y, playerFontSize, "%d",    playerScores[row]->getPing());
 
    if(!isTeamGame)
       colWidths[ScoreIndex] = RenderUtils::drawStringfr(rightEdge - ScoreOff, y, playerFontSize, "%d", playerScores[row]->getScore());
@@ -328,9 +340,12 @@ static void renderTeamScoreboard(ClientGame *clientGame, S32 index, S32 teams, b
    S32 colIndexWidths[ColIndexCount];     
    S32 maxColIndexWidths[ColIndexCount] = {0};     // Inits every element of array to 0
 
+   const S32 playerFontSize = S32(lineHeight * 0.75f);
+   const S32 maxPingWidth = getMaxPingWidth(playerScores, playerFontSize);
+
    for(S32 i = 0; i < playerScores.size(); i++)
    {
-      renderScoreboardLine(playerScores, isTeamGame, i, x, curRowY, lineHeight, xr, colIndexWidths);
+      renderScoreboardLine(playerScores, isTeamGame, i, playerFontSize, x, curRowY, lineHeight, xr, colIndexWidths, maxPingWidth);
       curRowY += lineHeight;
 
       for(S32 j = 0; j < ColIndexCount; j++)
