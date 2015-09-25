@@ -42,6 +42,36 @@ namespace Zap
 {
 
 
+
+#ifdef USE_DUMMY_PLAYER_SCORES
+
+S32 getDummyTeamCount()  { return 2; }    // Teams
+S32 getDummyMaxPlayers() { return 5; }    // Players per team
+
+// Create a set of fake player scores for testing the scoreboard -- fill scores
+void getDummyPlayerScores(ClientGame *game, Vector<ClientInfo *> &scores)
+{
+   ClientInfo *clientInfo;
+
+   S32 teams = getDummyTeamCount();
+
+   for(S32 i = 0; i < getDummyMaxPlayers(); i++)
+   {
+      string name = "PlayerName-" + itos(i);
+
+      clientInfo = new RemoteClientInfo(game, name, false, 0, ((i+1) % 4) > 0, i, i % 3, ClientInfo::ClientRole(i % 4), false, false);
+
+      clientInfo->setScore(i * 6);
+      clientInfo->setAuthenticated((i % 2), 0, (i % 3) > 0);
+      clientInfo->setPing(10 * i + 80);
+      clientInfo->setTeamIndex(i % teams);
+
+      scores.push_back(clientInfo);
+   }
+}
+#endif
+
+
 static S32 getMaxPlayersOnAnyTeam(ClientGame *clientGame, S32 teams, bool isTeamGame)
 {
    S32 maxTeamPlayers = 0;
