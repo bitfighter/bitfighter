@@ -126,12 +126,12 @@ void GameObjectRender::renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sen
 
 
    // Sensor
-   if(sensorActive)
-   {
-      mGL->glColor(Colors::white, alpha);
-      F32 radius = (sensorTime & 0x1FF) * 0.002f;    // Radius changes over time
-      RenderUtils::drawCircle(radius * Ship::CollisionRadius + 4);
-   }
+   //if(sensorActive)
+   //{
+   //   mGL->glColor(Colors::white, alpha);
+   //   F32 radius = (sensorTime & 0x1FF) * 0.002f;    // Radius changes over time
+   //   RenderUtils::drawCircle(radius * Ship::CollisionRadius + 4);
+   //}
 
    // Repair
    if(repairActive)
