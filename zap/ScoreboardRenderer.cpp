@@ -290,7 +290,7 @@ static void renderScoreboardLine(const Vector<ClientInfo *> &playerScores, bool 
       colWidths[ScoreIndex] = RenderUtils::drawStringfr(rightEdge - ScoreOff, y, playerFontSize, "%d", playerScores[row]->getScore());
 
    // Vertical scale ratio to maximum line height
-   const F32 scaleRatio = (F32)lineHeight / 30.f;
+   const F32 scaleRatio = lineHeight / 30.f;
 
    // Circle back and render the badges now that all the rendering with the name color is finished
    renderBadges(playerScores[row], x + nameWidth + 10 + Gap, y + (lineHeight / 2), scaleRatio);
