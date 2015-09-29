@@ -434,12 +434,12 @@ static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bo
 
 
    // Sensor
-   if(sensorActive)
-   {
-      glColor(Colors::white, alpha);
-      F32 radius = (sensorTime & 0x1FF) * 0.002f;    // Radius changes over time
-      drawCircle(0, 0, radius * Ship::CollisionRadius + 4);
-   }
+//   if(sensorActive)
+//   {
+//      glColor(Colors::white, alpha);
+//      F32 radius = (sensorTime & 0x1FF) * 0.002f;    // Radius changes over time
+//      drawCircle(0, 0, radius * Ship::CollisionRadius + 4);
+//   }
 
    // Repair
    if(repairActive)

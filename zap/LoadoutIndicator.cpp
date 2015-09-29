@@ -143,7 +143,8 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    {
       ShipModule module = loadout.getModule(i);
 
-      if(gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUsePassive)
+      if(gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUsePassive ||   // Armor
+         gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUseHybrid)      // Sensor
       {
          glColor(INDICATOR_PASSIVE_COLOR);
       }
