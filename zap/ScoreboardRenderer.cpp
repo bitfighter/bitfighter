@@ -293,12 +293,12 @@ static void renderScoreboardLine(const Vector<ClientInfo *> &playerScores, bool 
    const F32 scaleRatio = lineHeight / 30.f;
 
    // Circle back and render the badges now that all the rendering with the name color is finished
-   renderBadges(playerScores[row], x + nameWidth + 10 + Gap, y + (lineHeight / 2), scaleRatio);
+   renderBadges(playerScores[row],   x + nameWidth + 10 + Gap, y + (lineHeight / 2), scaleRatio);
 }
 
 
 static void renderTeamScoreboard(ClientGame *clientGame, S32 index, S32 teams, bool isTeamGame, bool isWinningTeam,
-                                              S32 scoreboardTop, S32 sectionHeight, S32 teamHeaderHeight, S32 lineHeight)
+                                 S32 scoreboardTop, S32 sectionHeight, S32 teamHeaderHeight, S32 lineHeight)
 {
    static const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
