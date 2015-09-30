@@ -578,12 +578,9 @@ string GameSettings::getlevelLoc()
 LevelSource *GameSettings::chooseLevelSource(Game *game)
 {
 	if(isUsingPlaylist())
-	{
-		printf("isUsingPlaylist, and returned playlist object\n");
 		return new FileListLevelSource(getPlaylist(), getFolderManager()->getLevelDir(), this);
-	}
-	else
-		return new FolderLevelSource(getLevelList(), getFolderManager()->getLevelDir());
+
+   return new FolderLevelSource(getLevelList(), getFolderManager()->getLevelDir());
 }
 
 
