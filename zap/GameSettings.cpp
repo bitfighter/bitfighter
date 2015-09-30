@@ -559,14 +559,7 @@ string GameSettings::getPlaylistFile()
 // A system of finding out if you are using a playlist
 bool GameSettings::isUsingPlaylist()
 {
-	if(getPlaylistFile() == "")
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
+	return getPlaylistFile() != "";
 }
 
 
