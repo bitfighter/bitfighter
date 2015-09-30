@@ -549,7 +549,7 @@ string GameSettings::getLevelDir(SettingSource source)
 
 
 // Returns the string passed to the commandline option -useplaylist
-// Will return the path if using the param, and "" if you arent
+// Will return the path if using the param, and "" if you aren't
 string GameSettings::getPlaylistFile()
 {
 	return getCmdLineParamString(USE_FILE);
