@@ -568,14 +568,9 @@ bool GameSettings::isUsingPlaylist()
 string GameSettings::getlevelLoc()
 {
 	if(isUsingPlaylist())
-	{
 		return getPlaylistFile();
-	}
-	else
-	{
-		 return getFolderManager()->getLevelDir();
-	}
-	return "";
+
+   return getFolderManager()->getLevelDir();
 }
 
 
