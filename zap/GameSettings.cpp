@@ -9,7 +9,6 @@
 #include "BanList.h"
 #include "DisplayManager.h"
 #include "stringUtils.h"      // For itos
-#include "LuaWrapper.h"       // For printing Lua class hiearchy
 #include "LevelSource.h"
 
 #include "tnlTypes.h"         // For TNL_OS_WIN32 def
@@ -24,7 +23,6 @@
 #include "IniFile.h"
 
 #include <stdio.h>
-#include <algorithm>
 
 using namespace std;
 using namespace CmdLineParams;
