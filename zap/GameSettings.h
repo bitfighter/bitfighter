@@ -265,7 +265,7 @@ public:
    string getLevelDir(SettingSource source);
    string getPlaylistFile();
    bool isUsingPlaylist();
-   string getlevelLoc();
+   string getLevelLoc();
 
    LevelSource *chooseLevelSource(Game *game); // determines what levelsource you want to use
 

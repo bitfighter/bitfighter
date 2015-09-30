@@ -565,7 +565,7 @@ bool GameSettings::isUsingPlaylist()
 
 // Returns the location of the playlist or the the directory of the levels, depending on if you are using a playlist.
 // Used in the CTORS for each object, as each object either takes a playlist file of a folder
-string GameSettings::getlevelLoc()
+string GameSettings::getLevelLoc()
 {
 	if(isUsingPlaylist())
 		return getPlaylistFile();
