@@ -156,7 +156,6 @@ class FileListLevelSource : public MultiLevelSource
    typedef MultiLevelSource Parent;
 
 private:
-   string playlistFile;
    GameSettings *mGameSettings;
 
 public:
