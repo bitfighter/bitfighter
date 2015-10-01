@@ -550,7 +550,7 @@ string GameSettings::getLevelDir(SettingSource source)
 // Will return the path if using the param, and "" if you aren't
 string GameSettings::getPlaylistFile()
 {
-	return getCmdLineParamString(USE_FILE);
+	return mPlaylistFile;
 }
 
 
@@ -808,6 +808,7 @@ static S32 parseParams(ParamRequirements argsRequired, const S32 paramPtr, const
 }
 
 
+
 void GameSettings::readCmdLineParams(const Vector<string> &argv)
 {
    S32 argc = argv.size();
@@ -876,6 +877,8 @@ void GameSettings::readCmdLineParams(const Vector<string> &argv)
    mCmdLineParams[DEDICATED].push_back("true");
 #endif
 
+   // Store some params, so we can change their value later
+   mPlaylistFile = getCmdLineParamString(USE_FILE);
 }
 
 
