@@ -602,6 +602,9 @@ void DiagnosticUserInterface::render() const
 
       GameConnection *conn = getGame()->getConnectionToServer();
 
+      string playList = mGameSettings->isUsingPlaylist() ? mGameSettings->getPlaylistFile() : "Not using a playlist";
+      RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, true, "Playlist File:", "%s", playList.c_str());
+      
       if(conn)
       {
          RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Send Lag/Pkt. Loss:", "%dms/%2.0f%%",
@@ -619,13 +622,11 @@ void DiagnosticUserInterface::render() const
          RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Send Lag/Pkt. Loss:", "%dms/%2.0f%%",
                                      mGameSettings->getSimulatedLag(),
                                      mGameSettings->getSimulatedLoss() * 100);
-
          ypos += textsize + gap;
       }
 
       ypos += textsize + gap;
       
-
       // Dump out names of loaded levels...
       mGL->glColor(Colors::white);
       string allLevels = "Levels: ";
