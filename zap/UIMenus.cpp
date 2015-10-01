@@ -1905,11 +1905,13 @@ static void startHostingCallback(ClientGame *game, U32 unused)
    initHosting(game->getSettingsPtr(), levelSource, false, false);
 }
 
+
 static void hostOnServerCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getUI<QueryServersUserInterface>()->mHostOnServer = true;
    game->getUIManager()->activate<QueryServersUserInterface>();
 }
+
 
 static void robotOptionsSelectedCallback(ClientGame *game, U32 unused)
 {
@@ -1920,7 +1922,6 @@ static void robotOptionsSelectedCallback(ClientGame *game, U32 unused)
 static void passwordOptionsSelectedCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->activate<ServerPasswordsMenuUserInterface>();
-
 }
 
 
