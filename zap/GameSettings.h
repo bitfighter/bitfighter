@@ -157,7 +157,6 @@ private:
 
    Vector<string> mConfigurationErrors;
    Vector<string> getLevelList(const string &levelDir, bool ignoreCmdLine);    
-   Vector<string> getPlaylist();       
 
 public:
    GameSettings();            // Constructor

@@ -576,7 +576,13 @@ string GameSettings::getLevelLoc()
 LevelSource *GameSettings::chooseLevelSource(Game *game)
 {
 	if(isUsingPlaylist())
-		return new FileListLevelSource(getPlaylist(), getFolderManager()->getLevelDir(), this);
+   {
+      string levelDir = getFolderManager()->getLevelDir();
+
+      // Create a list of levels for hosting a game from a file, but does not read the files or do any validation of them
+      Vector<string> list = FileListLevelSource::findAllFilesInPlaylist(getPlaylistFile(), levelDir);
+		return new FileListLevelSource(list, levelDir, this);
+   }
 
    return new FolderLevelSource(getLevelList(), getFolderManager()->getLevelDir());
 }
@@ -720,14 +726,6 @@ Vector<string> GameSettings::getLevelList(const string &levelDir, bool ignoreCmd
    }
 
    return levelList;
-}
-
-
-// Create a list of levels for hosting a game from a file, but does not read the files or do any validation of them
-Vector<string> GameSettings::getPlaylist()
-{
-   // Build our level list by reading the playlist
-   return FileListLevelSource::findAllFilesInPlaylist(getPlaylistFile(), GameSettings::getFolderManager()->getLevelDir());
 }
 
 
