@@ -1178,22 +1178,31 @@ void GameConnection::displayMessageE(U32 color, U32 sfx, StringTableEntry format
 
 extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);     // Sort alphanumerically
 
-// TODO: Merge with findAllLevelsInFolder... same except for extlist and error message
-static Vector<string> findAllScriptsInFolder(const string &dir)
+static Vector<string> findAllThingsInFolder(const string &dir, const string *extList, S32 extListSize)
 {
    Vector<string> fileList;
 
-   // Build our list by looking at the filesystem 
-   const string extList[] = {"levelgen"};
-
-   if(!getFilesFromFolder(dir, fileList, FILENAME_ONLY_NO_EXTENSION, extList, ARRAYSIZE(extList)))    // Returns true if error 
-   {
-      logprintf(LogConsumer::LogError, "Could not find any levelgens in the levels folder \"%s\".", dir.c_str());
-      return fileList;
-   }
+   // Build our list by looking at the filesystem for the objects specified
+   getFilesFromFolder(dir, fileList, FILENAME_ONLY_NO_EXTENSION, extList, extListSize); 
 
    fileList.sort(alphaSort);   // Just to be sure...
    return fileList;
+}
+
+
+static Vector<string> findAllScriptsInFolder(const string &dir)
+{
+   const string extList[] = {"levelgen"};
+
+   return findAllThingsInFolder(dir, extList, ARRAYSIZE(extList));
+}
+
+
+static Vector<string> findAllPlaylistsInFolder(const string &dir)
+{
+   const string extList[] = {"playlist"};
+
+   return findAllThingsInFolder(dir, extList, ARRAYSIZE(extList));
 }
 
 
@@ -1209,7 +1218,8 @@ void GameConnection::sendLevelList()
       s2cAddLevel(levelInfo.mLevelName, levelInfo.mLevelType);
    }
 
-   s2cSendScriptList(findAllScriptsInFolder(mServerGame->getSettings()->getFolderManager()->getLevelDir()));
+   s2cSendScriptAndPlaylistLists(findAllScriptsInFolder(mServerGame->getSettings()->getFolderManager()->getLevelDir()),
+                                 findAllPlaylistsInFolder(mServerGame->getSettings()->getFolderManager()->getLevelDir()));
 }
 
 
@@ -1266,10 +1276,12 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cAddLevel, (StringTableEntry name, RangedU32
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, s2cSendScriptList, (Vector<string> scripts), (scripts),
+TNL_IMPLEMENT_RPC(GameConnection, s2cSendScriptAndPlaylistLists, 
+                  (Vector<string> scripts, Vector<string> playlists), (scripts, playlists),
                   NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
 {
    mServerScripts = scripts;
+   mPlaylists = playlists;
 }
 
 
