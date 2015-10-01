@@ -576,7 +576,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
    ParamType type = (ParamType) paramType.value;
 
    if(!mClientInfo->isAdmin())   // Do nothing --> non-admins have no pull here.  Note that this should never happen; 
-                                 // client should filter out non-admins before we get here, but we'll check anyway in 
+      return;                    // client should filter out non-admins before we get here, but we'll check anyway in 
                                  // case the client has been hacked.  But we have no obligation to notify client if 
                                  // this has happened.
 
