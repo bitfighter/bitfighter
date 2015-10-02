@@ -199,6 +199,12 @@ Vector<string> GameConnection::getServerScripts() const
 }
 
 
+Vector<string> GameConnection::getServerPlaylists() const
+{
+   return mPlaylists;
+}
+
+
 // Player appears to be away, spawn is on hold until he returns
 TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnDelayed, (U8 waitTimeInOneTenthsSeconds), (waitTimeInOneTenthsSeconds), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {

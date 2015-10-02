@@ -162,6 +162,7 @@ public:
    void setServerName(StringTableEntry name);
 
    Vector<string> getServerScripts() const;
+   Vector<string> getServerPlaylists() const;
 
    ClientInfo *getClientInfo();
    void setClientInfo(ClientInfo *clientInfo);
