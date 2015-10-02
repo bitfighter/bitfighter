@@ -220,7 +220,7 @@ void ChatHelper::render() const
                           0.0f, F32(realYPos - 3), F32(DisplayManager::getScreenInfo()->getGameCanvasWidth()), F32(BOX_HEIGHT));
 
    // Render text entry box like thingy
-   F32 top = (F32)ypos - 3;
+   S32 top = ypos - 3;
 
 //   F32 vertices[] = {
 //         (F32)xPos,            top,
