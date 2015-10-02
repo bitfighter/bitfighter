@@ -381,6 +381,8 @@ static Vector<string> *getCandidateList(ClientGame *game, CommandInfo *commandIn
             return NULL;
       }
    }
+
+   return NULL;
 }
 
 
