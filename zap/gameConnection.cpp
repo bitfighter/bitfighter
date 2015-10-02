@@ -151,17 +151,18 @@ ClientGame *GameConnection::getClientGame()
    return mClientGame;
 }
 
-
 void GameConnection::setClientGame(ClientGame *game)
 {
    mClientGame = game;
 }
 #endif
 
+
 ServerGame *GameConnection::getServerGame()
 {
    return mServerGame;
 }
+
 
 // Clears/initializes some things between levels
 void GameConnection::resetConnectionStatus()
@@ -189,6 +190,12 @@ const char *GameConnection::getConnectionStateString(S32 i)
    TNLAssert(i < S32(ARRAYSIZE(connectStatesTable)), "Invalid index!");
 
    return connectStatesTable[i];
+}
+
+
+Vector<string> GameConnection::getServerScripts() const
+{
+   return mServerScripts;
 }
 
 

@@ -345,7 +345,7 @@ static void makeScriptNameList(Game *game, Vector<string> &nameCandidateList)
    if(!gameConnection)
       return;
 
-   nameCandidateList = gameConnection->mServerScripts;
+   nameCandidateList = gameConnection->getServerScripts();
 }
 
 

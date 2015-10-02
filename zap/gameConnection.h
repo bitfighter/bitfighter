@@ -76,6 +76,9 @@ private:
    Timer mAuthenticationTimer;
    S32 mAuthenticationCounter;
 
+   Vector<string> mServerScripts;               // Levelgens available on the server
+   Vector<string> mPlaylists;                   // Playlists available on the server
+
    void displayMessage(U32 colorIndex, U32 sfxEnum, const char *message);    // Helper function
 
    StringTableEntry mServerName;
@@ -102,8 +105,6 @@ public:
    static const U32 MAX_WRONG_PASSWORD = 20;    // Too many wrong passwords, and client get disconnect
 
    Vector<LevelInfo> mLevelInfos;
-   Vector<string> mServerScripts;               // Levelgens available on the server
-   Vector<string> mPlaylists;                   // Playlists available on the server
 
    static const S32 MASTER_SERVER_FAILURE_RETRY_TIME = TEN_SECONDS;
    static const U32 SPAWN_DELAY_TIME = TWENTY_SECONDS;         // Time until eligible for being spawn delayed
@@ -159,6 +160,8 @@ public:
 
    void setClientNameNonUnique(StringTableEntry name);
    void setServerName(StringTableEntry name);
+
+   Vector<string> getServerScripts() const;
 
    ClientInfo *getClientInfo();
    void setClientInfo(ClientInfo *clientInfo);
