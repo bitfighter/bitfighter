@@ -300,30 +300,27 @@ void ChatHelper::activateHelp(UIManager *uiManager)
 
 
 // Make a list of all players in the game
-static void makePlayerNameList(Game *game, Vector<string> &nameCandidateList)
+static void makePlayerNameList(ClientGame *clientGame, Vector<string> &nameCandidateList)
 {
    nameCandidateList.clear();
 
-   for(S32 i = 0; i < game->getClientCount(); i++)
-      nameCandidateList.push_back(((Game *)game)->getClientInfo(i)->getName().getString());
+   for(S32 i = 0; i < clientGame->getClientCount(); i++)
+      nameCandidateList.push_back(clientGame->Game::getClientInfo(i)->getName().getString());
 }
 
 
-static void makeTeamNameList(const Game *game, Vector<string> &nameCandidateList)
+static void makeTeamNameList(const ClientGame *clientGame, Vector<string> &nameCandidateList)
 {
    nameCandidateList.clear();
 
-   for(S32 i = 0; i < game->getTeamCount(); i++)
-      nameCandidateList.push_back(game->getTeamName(i).getString());
+   for(S32 i = 0; i < clientGame->getTeamCount(); i++)
+      nameCandidateList.push_back(clientGame->getTeamName(i).getString());
 }
 
 
-static void makeLevelNameList(Game *game, Vector<string> &nameCandidateList)
+static void makeLevelNameList(ClientGame *clientGame, Vector<string> &nameCandidateList)
 {
    nameCandidateList.clear();
-
-   TNLAssert(dynamic_cast<ClientGame*>(game), "Not a client game?");
-   ClientGame *clientGame = static_cast<ClientGame*>(game);
 
    GameConnection *gameConnection = clientGame->getConnectionToServer();
    if(!gameConnection)
@@ -334,12 +331,9 @@ static void makeLevelNameList(Game *game, Vector<string> &nameCandidateList)
 }
 
 
-static void makeScriptNameList(Game *game, Vector<string> &nameCandidateList)
+static void makeScriptNameList(ClientGame *clientGame, Vector<string> &nameCandidateList)
 {
    nameCandidateList.clear();
-
-   TNLAssert(dynamic_cast<ClientGame*>(game), "Not a client game?");
-   ClientGame *clientGame = static_cast<ClientGame*>(game);
 
    GameConnection *gameConnection = clientGame->getConnectionToServer();
    if(!gameConnection)
@@ -351,7 +345,7 @@ static void makeScriptNameList(Game *game, Vector<string> &nameCandidateList)
 
 static Vector<string> commandCandidateList;
 
-static Vector<string> *getCandidateList(Game *game, CommandInfo *commandInfo, S32 arg)
+static Vector<string> *getCandidateList(ClientGame *game, CommandInfo *commandInfo, S32 arg)
 {
    TNLAssert(arg >= 0, "Huh??");
 
