@@ -58,6 +58,7 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
    mLevelLoadIndex = 0;
    mShutdownOriginator = NULL;
    mHostOnServer = hostOnServer;
+   mPlaylist = settings->getPlaylistFile();
 
    // Stupid C++ spec doesn't allow ternary logic with static const if there is no definition
    // Workaround is to add '+' to force a read of the value
@@ -255,6 +256,12 @@ S32 ServerGame::getLevelCount() const
 LevelInfo ServerGame::getLevelInfo(S32 index) const
 {
    return mLevelSource->getLevelInfo(index);
+}
+
+
+string ServerGame::getPlaylist() const
+{
+   return mPlaylist;
 }
 
 

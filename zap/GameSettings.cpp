@@ -550,7 +550,7 @@ string GameSettings::getLevelDir(SettingSource source)
 // Will return the path if using the param, and "" if you aren't
 string GameSettings::getPlaylistFile()
 {
-	return mPlaylistFile;
+	return getCmdLineParamString(USE_FILE);
 }
 
 
@@ -874,9 +874,6 @@ void GameSettings::readCmdLineParams(const Vector<string> &argv)
    // Override some settings if we're compiling ZAP_DEDICATED
    mCmdLineParams[DEDICATED].push_back("true");
 #endif
-
-   // Store some params, so we can change their value later
-   mPlaylistFile = getCmdLineParamString(USE_FILE);
 }
 
 

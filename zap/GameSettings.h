@@ -113,8 +113,6 @@ private:
    string mHostName;                   // Server name used when hosting a game (default set in config.h, set in INI or on cmd line)
    string mHostDescr;                  // Brief description of host
 
-   string mPlaylistFile;
-
    string mPlayerName, mPlayerPassword;   // Resolved name/password, either from INI for cmdLine or login screen
    bool mPlayerNameSpecifiedOnCmdLine;
 
