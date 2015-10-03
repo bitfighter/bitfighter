@@ -307,6 +307,24 @@ S32 DiagnosticUserInterface::showMasterBlock(ClientGame *game, S32 textsize, S32
 }
 
 
+static string resolvePlaylist(GameSettings *gameSettings)
+{
+   ServerGame *game = GameManager::getServerGame();
+
+   if(game)
+   {
+      string playlist = game->getPlaylist();
+
+      if(playlist.empty())
+         playlist = "Not using a playlist";
+
+      return playlist;
+   }
+   else
+      return gameSettings->isUsingPlaylist() ? gameSettings->getPlaylistFile() : "Not using a playlist";
+}
+
+
 void DiagnosticUserInterface::render() const
 {
    // Draw title, subtitle, and footer
@@ -602,8 +620,7 @@ void DiagnosticUserInterface::render() const
 
       GameConnection *conn = getGame()->getConnectionToServer();
 
-      string playList = mGameSettings->isUsingPlaylist() ? mGameSettings->getPlaylistFile() : "Not using a playlist";
-      RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, true, "Playlist File:", "%s", playList.c_str());
+      RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, true, "Playlist File:", "%s", resolvePlaylist(mGameSettings).c_str());
       
       if(conn)
       {
