@@ -478,9 +478,9 @@ bool GameConnection::userAlreadyHasPermissions(const string &ownerPW, const stri
 TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   string ownerPW = mSettings->getOwnerPassword();
-   string adminPW = mSettings->getAdminPassword();
-   string levChangePW = mSettings->getLevelChangePassword();
+   const string ownerPW     = mSettings->getOwnerPassword();
+   const string adminPW     = mSettings->getAdminPassword();
+   const string levChangePW = mSettings->getLevelChangePassword();
 
    GameType *gameType = mServerGame->getGameType();
 
