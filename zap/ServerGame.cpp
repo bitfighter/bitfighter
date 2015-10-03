@@ -265,6 +265,12 @@ string ServerGame::getPlaylist() const
 }
 
 
+void ServerGame::setPlaylist(const string &playlist)
+{
+   mPlaylist = playlist;
+}
+
+
 void ServerGame::sendLevelListToLevelChangers(const string &message)
 {
    for(S32 i = 0; i < getClientCount(); i++)

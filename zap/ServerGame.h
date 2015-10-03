@@ -233,7 +233,10 @@ public:
    S32 getCurrentLevelIndex() const;
    S32 getLevelCount() const;
    LevelInfo getLevelInfo(S32 index) const;
+
    string getPlaylist() const;
+   void setPlaylist(const string &playlist);
+
    void clearLevelInfos();
    void sendLevelListToLevelChangers(const string &message = "");
 
