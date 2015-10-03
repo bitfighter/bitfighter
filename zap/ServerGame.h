@@ -228,9 +228,9 @@ public:
    bool isReadyToShutdown(U32 timeDelta, string &shutdownReason);
    void gameEnded();
 
-   S32 getCurrentLevelIndex();
-   S32 getLevelCount();
-   LevelInfo getLevelInfo(S32 index);
+   S32 getCurrentLevelIndex() const;
+   S32 getLevelCount() const;
+   LevelInfo getLevelInfo(S32 index) const;
    void clearLevelInfos();
    void sendLevelListToLevelChangers(const string &message = "");
 

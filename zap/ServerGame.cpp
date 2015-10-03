@@ -240,19 +240,19 @@ void ServerGame::voteClient(ClientInfo *clientInfo, bool voteYes)
 }
 
 
-S32 ServerGame::getCurrentLevelIndex()
+S32 ServerGame::getCurrentLevelIndex() const
 {
    return mCurrentLevelIndex;
 }
 
 
-S32 ServerGame::getLevelCount()
+S32 ServerGame::getLevelCount() const
 {
    return mLevelSource->getLevelCount();
 }
 
 
-LevelInfo ServerGame::getLevelInfo(S32 index)
+LevelInfo ServerGame::getLevelInfo(S32 index) const
 {
    return mLevelSource->getLevelInfo(index);
 }
