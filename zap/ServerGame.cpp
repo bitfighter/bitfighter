@@ -265,22 +265,6 @@ string ServerGame::getPlaylist() const
 }
 
 
-// Creates a set of LevelInfos that are empty except for the filename.  They will be fleshed out later.
-// This gets called when you first load the host menu
-//void ServerGame::buildBasicLevelInfoList(const Vector<string> &levelList)
-//{
-//   mLevelInfos.clear();
-//
-//   for(S32 i = 0; i < levelList.size(); i++)
-//      mLevelInfos.push_back(LevelInfo(levelList[i]));
-//}
-//
-//void ServerGame::clearLevelInfos()
-//{
-//   mLevelInfos.clear();
-//}
-
-
 void ServerGame::sendLevelListToLevelChangers(const string &message)
 {
    for(S32 i = 0; i < getClientCount(); i++)
