@@ -139,6 +139,8 @@ public:
       PlaylistFile,
       DeleteLevel,  
       UndeleteLevel,
+
+      // Total of 15 slots used... maximize our 4 bits!  No waste!  (well, maybe one slot is wasted...)
       SpareSlot1, SpareSlot2, SpareSlot3, SpareSlot4, SpareSlot5,   // For expansion without breaking compatibility
 
       ParamTypeCount       // Must be last ==> Cannot change this value without breaking compatibility!
