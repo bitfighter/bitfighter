@@ -176,7 +176,7 @@ public:
 
    void resetLevelLoadIndex();
    string loadNextLevelInfo();
-   bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo);
+   bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo) const;
 
    void deleteLevelGen(LuaLevelGenerator *levelgen);     // Add misbehaved levelgen to the kill list
    Vector<Vector<S32> > getCategorizedPlayerCountsByTeam() const;
@@ -238,7 +238,7 @@ public:
    void setPlaylist(const string &playlist);
 
    void clearLevelInfos();
-   void sendLevelListToLevelChangers(const string &message = "");
+   void sendLevelListToLevelChangers(const string &message = "") const;
 
    DataSender dataSender;
 

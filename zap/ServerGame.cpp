@@ -271,7 +271,7 @@ void ServerGame::setPlaylist(const string &playlist)
 }
 
 
-void ServerGame::sendLevelListToLevelChangers(const string &message)
+void ServerGame::sendLevelListToLevelChangers(const string &message) const
 {
    for(S32 i = 0; i < getClientCount(); i++)
    {
@@ -350,7 +350,7 @@ void ServerGame::setShuttingDown(bool shuttingDown, U16 time, GameConnection *wh
 }
 
 
-bool ServerGame::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo)
+bool ServerGame::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo) const
 {
    return mLevelSource->populateLevelInfoFromSource(fullFilename, levelInfo);
 }
