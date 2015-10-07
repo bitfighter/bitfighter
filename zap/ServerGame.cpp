@@ -11,6 +11,7 @@
 #include "gameNetInterface.h"
 #include "masterConnection.h"
 #include "SoundSystem.h"
+#include "LevelSpecifierEnum.h" 
 #include "luaGameInfo.h"
 #include "luaLevelGenerator.h"
 #include "robot.h"
@@ -20,6 +21,7 @@
 #include "LevelSource.h"
 #include "Level.h"
 #include "WallItem.h"
+
 
 #include "stringUtils.h"
 #include "GeomUtils.h"

@@ -11,7 +11,6 @@
 #include "BotNavMeshZone.h"
 #include "dataConnection.h"
 #include "LevelSource.h"         // For LevelSourcePtr def
-#include "LevelSpecifierEnum.h"
 #include "RobotManager.h"
 #include "TeamHistoryManager.h"
 
