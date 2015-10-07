@@ -7,6 +7,8 @@
 
 #include "Level.h"
 
+#include "ship.h"
+
 #ifndef ZAP_DEDICATED
 #  include "UIMenuItems.h"
 #endif

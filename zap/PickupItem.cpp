@@ -5,11 +5,11 @@
 
 #include "PickupItem.h"
 
+#include "ClientInfo.h"
 #include "game.h"
 #include "Level.h"
 #include "gameConnection.h"
-#include "GameManager.h"
-#include "ClientInfo.h"
+#include "ship.h"
 
 #include "GameObjectRender.h"
 #include "stringUtils.h"         // For itos()

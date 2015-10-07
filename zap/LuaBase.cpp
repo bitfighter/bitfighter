@@ -12,6 +12,7 @@
 #include "LuaWrapper.h"
 #include "game.h"
 #include "ServerGame.h"
+#include "ship.h"
 
 #include "stringUtils.h"      // For itos
 

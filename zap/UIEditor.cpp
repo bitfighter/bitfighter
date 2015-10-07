@@ -19,6 +19,7 @@
 
 #include "LineItem.h"
 #include "PolyWall.h"
+#include "ship.h"
 #include "WallItem.h"
 
 #include "ClientGame.h"  

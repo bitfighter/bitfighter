@@ -5,13 +5,11 @@
 
 #include "soccerGame.h"
 
-#include "gameNetInterface.h"
-#include "Level.h"
-#include "projectile.h"
 #include "goalZone.h"
+#include "Level.h"
+#include "ship.h"
 #include "Spawn.h"      // For AbstractSpawn def
 
-#include "Colors.h"
 
 #include "GameObjectRender.h"
 

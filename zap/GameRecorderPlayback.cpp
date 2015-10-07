@@ -7,9 +7,8 @@
 
 #include "GameRecorder.h"
 #include "tnlBitStream.h"
-#include "tnlNetObject.h"
 #include "gameType.h"
-#include "ServerGame.h"
+#include "ship.h"
 #include "stringUtils.h"
 #include "RenderUtils.h"
 

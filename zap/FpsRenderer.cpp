@@ -9,6 +9,7 @@
 #include "ClientGame.h"
 #include "FontManager.h"
 #include "barrier.h"
+#include "ship.h"
 
 #include "Colors.h"
 

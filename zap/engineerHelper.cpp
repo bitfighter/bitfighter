@@ -7,11 +7,9 @@
 
 #include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "UI.h"                  // For margin info -- can we just get rid of this as antiquated?
-#include "Color.h"               // For Color def
+#include "ship.h"       
 #include "Colors.h"
 #include "ClientGame.h"
-#include "JoystickRender.h"
-#include "config.h"
 #include "GameObjectRender.h"    // For drawSquare
 
 #include "RenderUtils.h"

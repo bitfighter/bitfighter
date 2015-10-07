@@ -9,10 +9,10 @@
 
 #include "Colors.h"
 #include "stringUtils.h"      // For ftos et al
+#include "ship.h"
 
 #ifndef ZAP_DEDICATED
 #  include "GameObjectRender.h"
-#  include "ClientGame.h"
 #  include "UIMenuItems.h"
 #  include "RenderUtils.h"
 #endif

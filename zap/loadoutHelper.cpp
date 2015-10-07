@@ -12,6 +12,7 @@
 #include "LoadoutTracker.h"
 #include "gameConnection.h"
 #include "ClientGame.h"
+#include "ship.h"
 
 
 namespace Zap

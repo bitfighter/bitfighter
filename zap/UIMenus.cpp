@@ -10,39 +10,33 @@
 #include "UIErrorMessage.h"   // Can get rid of this with a passthrough in MenuManager
 #include "UICredits.h"
 #include "UIQueryServers.h"
-#include "UIGameParameters.h"
 #include "UIHighScores.h"
 #include "UIInstructions.h"
 #include "UIKeyDefMenu.h"
 #include "UINameEntry.h"
 #include "UIManager.h"
 
-#include "Level.h"
 #include "LevelSource.h"
-#include "LevelDatabase.h"
+#include "ship.h"
 
 #include "GameManager.h"
 #include "ClientGame.h"
-#include "ServerGame.h"
 #include "gameType.h"            // Can get rid of this with some simple passthroughs
-#include "IniFile.h"
 #include "DisplayManager.h"
 #include "Joystick.h"
-#include "JoystickRender.h"
 #include "Colors.h"
 #include "Cursor.h"
 #include "VideoSystem.h"
 #include "FontManager.h"
 #include "SystemFunctions.h"
 #include "masterConnection.h"
+#include "LevelSpecifierEnum.h" 
+
 
 #include "GameObjectRender.h"    // For renderBitfighterLogo, mGL->glColor
 #include "stringUtils.h"
 #include "RenderUtils.h"
 
-#include <algorithm>
-#include <string>
-#include <math.h>
 
 #include "GameRecorderPlayback.h"
 

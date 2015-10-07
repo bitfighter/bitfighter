@@ -6,6 +6,7 @@
 #include "CoreGame.h"
 
 #include "Level.h"
+#include "ship.h"
 #include "SoundSystem.h"
 
 #ifndef ZAP_DEDICATED

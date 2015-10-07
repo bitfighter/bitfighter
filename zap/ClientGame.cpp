@@ -10,7 +10,7 @@
 #include "ChatHelper.h"
 #include "masterConnection.h"
 #include "gameNetInterface.h"
-#include "IniFile.h"             // For CIniFile def
+#include "ship.h" 
 
 #include "barrier.h"
 #include "gameType.h"

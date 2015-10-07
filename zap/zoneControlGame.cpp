@@ -5,10 +5,10 @@
 
 #include "zoneControlGame.h"
 
-#include "goalZone.h"
-#include "GameObjectRender.h"
 #include "game.h"
+#include "goalZone.h"
 #include "Level.h"
+#include "ship.h"
 
 
 namespace Zap

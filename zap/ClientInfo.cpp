@@ -9,7 +9,7 @@
 #include "playerInfo.h"
 #include "EngineeredItem.h"   // For EngineerModuleDeployer def
 #include "ServerGame.h"
-
+#include "ship.h"
 #include "voiceCodec.h"       // This should be removed
 
 

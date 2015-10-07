@@ -14,11 +14,11 @@
 #include "Colors.h"
 #include "DisplayManager.h"
 #include "Joystick.h"
-#include "JoystickRender.h"
 #include "CoreGame.h"         // For coreItem rendering
 #include "ChatCommands.h"
 #include "ChatHelper.h"       // For ChatHelper::chatCmdSize
 #include "FontManager.h"
+#include "ship.h"
 
 #include "RenderUtils.h"
 #include "GeomUtils.h"

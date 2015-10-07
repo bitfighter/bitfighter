@@ -7,15 +7,14 @@
 
 #include "gameWeapons.h"
 #include "GameObjectRender.h"
-#include "WallItem.h"
 #include "Teleporter.h"
 #include "gameType.h"
 #include "Intervals.h"
 #include "Level.h"
 #include "PolyWall.h"
-#include "projectile.h"
 #include "GeomUtils.h"
 #include "clipper.hpp"
+#include "ship.h"
 
 #include "ServerGame.h"
 
@@ -27,7 +26,6 @@
 #include "Colors.h"
 #include "stringUtils.h"
 #include "MathUtils.h"           // For findLowestRootIninterval()
-#include "GeomUtils.h"
 
 namespace Zap
 {

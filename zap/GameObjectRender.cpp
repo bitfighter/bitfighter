@@ -6,7 +6,6 @@
 #include "GameObjectRender.h"
 
 #include "BotNavMeshZone.h"      // For Border def
-#include "config.h"              // Only for testing burst graphics below
 #include "CoreGame.h"            // For CORE_PANELS
 #include "DisplayManager.h"
 #include "EngineeredItem.h"      // For TURRET_OFFSET
@@ -14,13 +13,13 @@
 #include "game.h"
 #include "projectile.h"
 #include "soccerGame.h"
-#include "speedZone.h"
 #include "Teleporter.h"          // For TELEPORTER_RADIUS
 #include "UI.h"                  // For margins only
 #include "version.h"
 #include "VertexStylesEnum.h"
 #include "WallItem.h"
 #include "PolyWall.h"
+#include "ship.h"
 
 #include "Colors.h"
 

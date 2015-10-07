@@ -5,9 +5,9 @@
 
 #include "HTFGame.h"
 
-#include "Level.h"
 #include "goalZone.h"
-#include "GameObjectRender.h"
+#include "Level.h"
+#include "ship.h"
 
 #include "game.h"
 
