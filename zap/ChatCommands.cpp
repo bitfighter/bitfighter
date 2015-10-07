@@ -731,17 +731,17 @@ void resetScoreHandler(ClientGame *game, const Vector<string> &words)
 }
 
 
-void runScriptHandler(ClientGame *game, const Vector<string> &words)
+void runScriptHandler(ClientGame *clientGame, const Vector<string> &words)
 {
-   if(game->hasLevelChange("!!! Need level change permission to run scripts"))
+   if(clientGame->hasLevelChange("!!! Need level change permission to run scripts"))
    {
       if(words.size() < 2)
       {
-         game->displayErrorMessage("!!! Specify which script to run");
+         clientGame->displayErrorMessage("!!! Specify which script to run");
          return;
       }
 
-      game->getConnectionToServer()->c2sRunScript(words[1]);
+      clientGame->getConnectionToServer()->c2sRunScript(words[1]);
    }
 }
 
