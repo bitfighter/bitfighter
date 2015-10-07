@@ -265,6 +265,7 @@ string ServerGame::getPlaylist() const
 }
 
 
+// Called from c2s with /setplaylist command.  We know the file exists by the time we get here.
 void ServerGame::setPlaylist(const string &playlist)
 {
    mPlaylist = playlist;
