@@ -302,8 +302,6 @@ void ChatHelper::activateHelp(UIManager *uiManager)
 // Make a list of all players in the game
 static void makePlayerNameList(ClientGame *clientGame, Vector<string> &nameCandidateList)
 {
-   nameCandidateList.clear();
-
    for(S32 i = 0; i < clientGame->getClientCount(); i++)
       nameCandidateList.push_back(clientGame->Game::getClientInfo(i)->getName().getString());
 }
@@ -311,8 +309,6 @@ static void makePlayerNameList(ClientGame *clientGame, Vector<string> &nameCandi
 
 static void makeTeamNameList(const ClientGame *clientGame, Vector<string> &nameCandidateList)
 {
-   nameCandidateList.clear();
-
    for(S32 i = 0; i < clientGame->getTeamCount(); i++)
       nameCandidateList.push_back(clientGame->getTeamName(i).getString());
 }
@@ -320,8 +316,6 @@ static void makeTeamNameList(const ClientGame *clientGame, Vector<string> &nameC
 
 static void makeLevelNameList(ClientGame *clientGame, Vector<string> &nameCandidateList)
 {
-   nameCandidateList.clear();
-
    GameConnection *gameConnection = clientGame->getConnectionToServer();
    if(!gameConnection)
       return;
@@ -333,8 +327,6 @@ static void makeLevelNameList(ClientGame *clientGame, Vector<string> &nameCandid
 
 static void makeScriptNameList(ClientGame *clientGame, Vector<string> &nameCandidateList)
 {
-   nameCandidateList.clear();
-
    GameConnection *gameConnection = clientGame->getConnectionToServer();
    if(!gameConnection)
       return;
@@ -358,6 +350,7 @@ static Vector<string> *getCandidateList(ClientGame *game, CommandInfo *commandIn
       ArgTypes argType = commandInfo->cmdArgInfo[arg - 1];     // What type of arg are we expecting?
 
       static Vector<string> nameCandidateList;                 // Reusable container
+      nameCandidateList.clear();
 
       switch(argType)
       {
