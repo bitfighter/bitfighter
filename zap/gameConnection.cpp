@@ -593,15 +593,28 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
 {
    ParamType type = (ParamType) paramType.value;
 
-   if(!mClientInfo->isAdmin())   // Do nothing --> non-admins have no pull here.  Note that this should never happen; 
-      return;                    // client should filter out non-admins before we get here, but we'll check anyway in 
-                                 // case the client has been hacked.  But we have no obligation to notify client if 
-                                 // this has happened.
+   // Check permissions
+   if(type == PlaylistFile)
+   {
+      if(!mClientInfo->isLevelChanger())
+         return;
+   }
+
+   else 
+   {
+      if(!mClientInfo->isAdmin())   // Do nothing --> non-admins have no pull here.  Note that this should never happen; 
+         return;                    // client should filter out non-admins before we get here, but we'll check anyway in 
+                                    // case the client has been hacked.  But we have no obligation to notify client if 
+                                    // this has happened.
+   }
 
    // Check for forbidden blank parameters -- the following commands require a value to be passed in param
-   if( (type == AdminPassword || type == OwnerPassword || type == ServerName || type == ServerDescr || type == LevelDir) &&
+   if( (type == AdminPassword || type == OwnerPassword || type == ServerName || type == ServerDescr || 
+        type == LevelDir      || type == PlaylistFile) &&
                           !strcmp(param.getString(), ""))
       return;
+
+   FolderManager *folderManager = mSettings->getFolderManager();
 
    // Add a message to the server log
    if(type == DeleteLevel)
@@ -613,6 +626,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
    else
    {
       const char *paramName;
+
       switch(type)
       {
          case LevelChangePassword: paramName = "level change password"; break;
@@ -622,6 +636,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
          case ServerName:          paramName = "server name";           break;
          case ServerDescr:         paramName = "server description";    break;
          case LevelDir:            paramName = "leveldir param";        break;
+         case PlaylistFile:        paramName = "playlist file";         break;
          default:                  paramName = "unknown"; TNLAssert(false, "Fix unknown description"); break;
       }
       logprintf(LogConsumer::ServerFilter, "User [%s] %s to [%s]", mClientInfo->getName().getString(), 
@@ -630,22 +645,37 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
 
    // Update our in-memory copies of the param, but do not save the new values to the INI
    if(type == LevelChangePassword)
+   {
       mSettings->setLevelChangePassword(param.getString(), false);
+      return;
+   }
    
    else if(type == OwnerPassword && mClientInfo->isOwner())   // Need to be owner to change this
+   {
       mSettings->setOwnerPassword(param.getString(), false);
+      return;
+   }
 
    else if(type == AdminPassword && mClientInfo->isOwner())   // Need to be owner to change this
+   {
       mSettings->setAdminPassword(param.getString(), false);
+      return;
+   }
    
    else if(type == ServerPassword)
+   {
       mSettings->setServerPassword(param.getString(), false);
+      return;
+   }
    
    else if(type == ServerName)
    {
       mSettings->setHostName(param.getString(), false);
+
       if(mServerGame->getConnectionToMaster())
-         mServerGame->getConnectionToMaster()->s2mChangeName(StringTableEntry(param.getString()));   
+         mServerGame->getConnectionToMaster()->s2mChangeName(StringTableEntry(param.getString())); 
+
+      return;
    }
    else if(type == ServerDescr)
    {
@@ -653,13 +683,12 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
 
       if(mServerGame->getConnectionToMaster())
          mServerGame->getConnectionToMaster()->s2mServerDescription(StringTableEntry(param.getString()));
-   }
 
-   // TODO: Add option here for type == Playlist
+      return;
+   }
 
    else if(type == LevelDir)
    {
-      FolderManager *folderManager = mSettings->getFolderManager();
       string folder = folderManager->resolveLevelDir(param.getString());
 
       if(mServerGame->mHostOnServer)
@@ -684,15 +713,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
 
       Vector<string> levelList = LevelSource::findAllLevelFilesInFolder(folder);
 
-      if(levelList.size() == 0)
-      {
-         s2cDisplayErrorMessage("!!! Specified folder contains no levels");
-         return;
-      }
-
-      LevelSource *newLevelSource =  mSettings->chooseLevelSource(mServerGame);
-
-      bool anyLoaded = newLevelSource->loadLevels(folderManager);    // Populates all our levelInfos by loading each file in turn
+      // LevelSourcePtr will clean up new object
+      LevelSourcePtr levelSource = LevelSourcePtr(new FolderLevelSource(mSettings->getLevelList(), folderManager->getLevelDir()));
+      
+      bool anyLoaded = levelSource->loadLevels(folderManager);    // Populates all our levelInfos by loading each file in turn
 
       if(!anyLoaded)
       {
@@ -700,25 +724,52 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
          return;
       }
 
-      LevelSourcePtr levelSource = LevelSourcePtr(newLevelSource);
-
       // Folder contains some valid levels -- save it!
-      folderManager->getLevelDir() = folder;  // FIXME This can't possibly be doing anything useful
+      folderManager->setLevelDir(folder);
+      mServerGame->setLevelSource(levelSource);
 
-      // Send the new list of levels to all levelchangers
-      for(S32 i = 0; i < mServerGame->getClientCount(); i++)
-      {
-         ClientInfo *clientInfo = mServerGame->getClientInfo(i);
-         GameConnection *conn = clientInfo->getConnection();
-
-         if(clientInfo->isLevelChanger() && conn)
-            conn->sendLevelList();
-      }
+      sendListOfLevelsToAllLevelChangers();
 
       s2cDisplaySuccessMessage("Level folder changed");
 
+      return;
    }  // end change leveldir
 
+   else if(type == PlaylistFile)
+   {
+      // Does playlist exist
+      string playlist = folderManager->findPlaylistFile(param.getString());
+
+      if(playlist.empty())
+      {
+         s2cDisplayErrorMessage("!!! Could not find playlist file");
+         return;
+      }
+  
+      // Create a list of levels for hosting a game from a file, but does not read the files or do any validation of them
+      string levelDir = folderManager->getLevelDir();
+      Vector<string> levels = FileListLevelSource::findAllFilesInPlaylist(playlist, levelDir);
+
+      // LevelSourcePtr will clean up new object
+      LevelSourcePtr levelSource = LevelSourcePtr(new FileListLevelSource(levels, levelDir, mSettings));
+      
+      bool anyLoaded = levelSource->loadLevels(folderManager);    // Populates all our levelInfos by loading each file in turn
+
+      if(!anyLoaded)
+      {
+         s2cDisplayErrorMessage("!!! Couldn't load any levels from specified playlist");
+         return;
+      }
+
+      mServerGame->setPlaylist(playlist);
+      mServerGame->setLevelSource(levelSource);
+
+      sendListOfLevelsToAllLevelChangers();
+
+      s2cDisplaySuccessMessage("Playlist updated");
+
+      return;
+   }
 
    else if(type == DeleteLevel)
       markCurrentLevelAsDeleted();
@@ -738,11 +789,11 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
 
       return;
    }
-
-
-   if(type != DeleteLevel && type != UndeleteLevel && type != LevelDir)
+   
+   if(type != DeleteLevel && type != UndeleteLevel && type != LevelDir && type != PlaylistFile)
    {
       const char *paramName;
+
       switch(type)
       {
          case LevelChangePassword: paramName = "LevelChangePassword"; break;
@@ -772,6 +823,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
    static StringTableEntry serverNameChanged    = "Server name changed";
    static StringTableEntry serverDescrChanged   = "Server description changed";
    static StringTableEntry serverLevelDeleted   = "Level added to skip list; level will stay in rotation until server restarted";
+   static StringTableEntry playlistFileChanged  = "Level playlist changed";
 
    // Pick out just the right message
    StringTableEntry msg;
@@ -851,6 +903,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
       msg = serverDescrChanged;
    else if(type == DeleteLevel)
       msg = serverLevelDeleted;
+   else if(type == PlaylistFile)
+      msg = playlistFileChanged;
 
    s2cDisplaySuccessMessage(msg);      // Notify user their bidding has been done
 }
@@ -866,6 +920,19 @@ void GameConnection::markCurrentLevelAsDeleted()
 
    // Add level to our skip list.  Deleting it from the active list of levels is more of a challenge...
    mSettings->addLevelToSkipList(filename);
+}
+
+
+void GameConnection::sendListOfLevelsToAllLevelChangers()
+{
+   for(S32 i = 0; i < mServerGame->getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = mServerGame->getClientInfo(i);
+      GameConnection *conn = clientInfo->getConnection();
+
+      if(clientInfo->isLevelChanger() && conn)
+         conn->sendLevelList();
+   }
 }
 
 

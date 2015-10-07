@@ -1456,6 +1456,12 @@ string FolderManager::findLevelFile(const string &filename) const
 }
 
 
+string FolderManager::findPlaylistFile(const string &filename) const
+{
+   return findPlaylistFile(levelDir, filename);
+}
+
+
 // This function will go away with complete adoption of physfs
 string FolderManager::findLevelFile(const string &leveldir, const string &filename)
 {
@@ -1467,6 +1473,21 @@ string FolderManager::findLevelFile(const string &leveldir, const string &filena
 
 #endif
    const char *extensions[] = { ".level", "" };
+
+   return checkName(filename, folders, extensions);
+}
+
+
+string FolderManager::findPlaylistFile(const string &leveldir, const string &filename)
+{
+#ifdef TNL_OS_XBOX         // This logic completely untested for OS_XBOX... basically disables -leveldir param
+   const char *folders[] = { "d:\\media\\levels\\", "" };
+#else
+   Vector<string> folders;
+   folders.push_back(leveldir);
+
+#endif
+   const char *extensions[] = { ".playlist", "" };
 
    return checkName(filename, folders, extensions);
 }

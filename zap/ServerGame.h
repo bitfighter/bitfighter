@@ -167,6 +167,8 @@ public:
    bool isDedicated() const;
    void setDedicated(bool dedicated);
 
+   void setLevelSource(LevelSourcePtr levelSource);
+
    bool isFull();      // More room at the inn?
 
    void addClient(ClientInfo *clientInfo);

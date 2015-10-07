@@ -97,7 +97,10 @@ public:
    string resolveLevelDir(const string &levelDir);
 
    string findLevelFile(const string &filename) const;
+   string findPlaylistFile(const string &filename) const;
+
    static string findLevelFile(const string &levelDir, const string &filename);
+   static string findPlaylistFile(const string &leveldir, const string &filename);
 
    Vector<string> getScriptFolderList() const;
    Vector<string> getHelperScriptFolderList() const;

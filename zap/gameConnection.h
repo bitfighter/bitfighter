@@ -84,6 +84,8 @@ private:
    StringTableEntry mServerName;
    GameSettings *mSettings;
 
+   void sendListOfLevelsToAllLevelChangers();
+
    bool userAlreadyHasPermissions(const string &ownerPW, const string &adminPW, const string &levChangePW, const char *pass);
 
    void markCurrentLevelAsDeleted();
@@ -134,10 +136,10 @@ public:
       ServerName,
       ServerDescr,
       LevelDir, 
-      // PlaylistFile,     // TODO for 020 uncomment this and handle it!
+      PlaylistFile,
       DeleteLevel,  
       UndeleteLevel,
-      // SpareSlot1, SpareSlot2, SpareSlot3,    // For expansion without breaking compatibility
+      SpareSlot1, SpareSlot2, SpareSlot3, SpareSlot4, SpareSlot5,   // For expansion without breaking compatibility
 
       ParamTypeCount       // Must be last ==> Cannot change this value without breaking compatibility!
    };

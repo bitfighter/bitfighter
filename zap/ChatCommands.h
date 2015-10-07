@@ -24,6 +24,7 @@ enum ArgTypes {
    TEAM,     // Team name (can be tab-completed)
    LEVEL,    // Level name (can be tab-completed)
    SCRIPT,   // Levelgen name (can be tab-completed)
+   PLAYLIST, // Playlist name (can be tab-completed)
    xINT,     // Integer argument
    STR,      // String argument
    PT,       // Point argument (only used by Lua scripts)
@@ -98,6 +99,7 @@ void setLevPassHandler         (ClientGame *game, const Vector<string> &args);
 void setServerNameHandler      (ClientGame *game, const Vector<string> &args);
 void setServerDescrHandler     (ClientGame *game, const Vector<string> &args);
 void setLevelDirHandler        (ClientGame *game, const Vector<string> &args);
+void setPlaylistHandler        (ClientGame *game, const Vector<string> &args);
 void pmHandler                 (ClientGame *game, const Vector<string> &args);
 void muteHandler               (ClientGame *game, const Vector<string> &args);
 void voiceMuteHandler          (ClientGame *game, const Vector<string> &args);

@@ -56,6 +56,7 @@ namespace Zap
    { "map",         &ChatCommands::mapLevelHandler,        { LEVEL },    1,   LEVEL_COMMANDS,   0,  1,  {"<level name>"},         "Start random level" },
    { "shownextlevel",&ChatCommands::showNextLevelHandler,  {  },         0,   LEVEL_COMMANDS,   0,  1,  {  },                     "Show name of the next level" },
    { "showprevlevel",&ChatCommands::showPrevLevelHandler,  {  },         0,   LEVEL_COMMANDS,   0,  1,  {  },                     "Show name of the previous level" },
+   { "setplaylist", &ChatCommands::setPlaylistHandler,     { PLAYLIST }, 1,   LEVEL_COMMANDS,   0,  1,  {"<playlist name>"},      "Switch to specified playlist" },
                                                                                                     
    { "settime",     &ChatCommands::setTimeHandler,         { xINT },  1,   LEVEL_COMMANDS,   0,     1,  {"<time in minutes>"},    "Set play time for the level" },
    { "setscore",    &ChatCommands::setWinningScoreHandler, { xINT },  1,   LEVEL_COMMANDS,   0,     1,  {"<score>"},              "Set score to win the level" },
@@ -335,6 +336,16 @@ static void makeScriptNameList(ClientGame *clientGame, Vector<string> &nameCandi
 }
 
 
+static void makePlaylistNameList(ClientGame *clientGame, Vector<string> &nameCandidateList)
+{
+   GameConnection *gameConnection = clientGame->getConnectionToServer();
+   if(!gameConnection)
+      return;
+
+   nameCandidateList = gameConnection->getServerPlaylists();
+}
+
+
 static Vector<string> commandCandidateList;
 
 static Vector<string> *getCandidateList(ClientGame *game, CommandInfo *commandInfo, S32 arg)
@@ -368,6 +379,10 @@ static Vector<string> *getCandidateList(ClientGame *game, CommandInfo *commandIn
 
          case SCRIPT:         // ==> Script name completion
             makeScriptNameList(game, nameCandidateList);
+            return &nameCandidateList;
+
+         case PLAYLIST:
+            makePlaylistNameList(game, nameCandidateList);
             return &nameCandidateList;
 
          default:             // else no arg completion for you!

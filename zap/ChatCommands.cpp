@@ -730,6 +730,20 @@ void resetScoreHandler(ClientGame *game, const Vector<string> &words)
    }
 }
 
+void setPlaylistHandler(ClientGame *clientGame, const Vector<string> &words)
+{
+   if(clientGame->hasLevelChange("!!! Need level change permission to change playlist"))
+   {
+      if(words.size() < 2)
+      {
+         clientGame->displayErrorMessage("!!! Specify which playlist to load");
+         return;
+      }
+
+      clientGame->getConnectionToServer()->c2sSetParam(words[1], GameConnection::PlaylistFile);
+   }
+}
+
 
 void runScriptHandler(ClientGame *clientGame, const Vector<string> &words)
 {

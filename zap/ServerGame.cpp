@@ -272,6 +272,12 @@ void ServerGame::setPlaylist(const string &playlist)
 }
 
 
+void ServerGame::setLevelSource(LevelSourcePtr levelSource)
+{
+   mLevelSource = levelSource;    // Old levelSource should get auto-deleted
+}
+
+
 void ServerGame::sendLevelListToLevelChangers(const string &message) const
 {
    for(S32 i = 0; i < getClientCount(); i++)
