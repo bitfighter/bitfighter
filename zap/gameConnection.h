@@ -9,20 +9,17 @@
 
 #include "ChatCheck.h"                 // Parent class
 #include "controlObjectConnection.h"   // Parent class
-#include "dataConnection.h"            // Parent class DataSendable
 
 #include "SharedConstants.h"           // For BADGE_COUNT constant
 #include "GameTypesEnum.h"
 #include "SoundSystemEnums.h"          // For NumSFXBuffers
 
-#include "ship.h"                      // For Ship::EnergyMax
+#include "ship.h"                      // For Ship::EnergyMax  (Resharper says we don't need this... but we do)
 #include "ClientInfo.h"
 #include "Engineerable.h"
 #include "Timer.h"
 
 #include "tnlNetConnection.h"
-
-#include <time.h>
 
 #include "Test.h"
 
