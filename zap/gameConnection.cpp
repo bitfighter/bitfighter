@@ -14,6 +14,8 @@
 #include "gameNetInterface.h"
 #include "gameType.h"
 #include "LevelSource.h"
+#include "ship.h"
+#include "LevelSpecifierEnum.h" 
 
 #include "SoundSystemEnums.h"
 #include "GameRecorder.h"

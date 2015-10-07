@@ -14,7 +14,6 @@
 #include "GameTypesEnum.h"
 #include "SoundSystemEnums.h"          // For NumSFXBuffers
 
-#include "ship.h"                      // For Ship::EnergyMax  (Resharper says we don't need this... but we do)
 #include "ClientInfo.h"
 #include "Engineerable.h"
 #include "Timer.h"
