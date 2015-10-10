@@ -611,7 +611,7 @@ Vector<string> FileListLevelSource::findAllFilesInPlaylist(const string &playlis
 {
    Vector<string> levels;
 
-   ifstream file(playlistFile);
+   ifstream file(playlistFile.c_str());
 
    if(!file.is_open())
       return levels;
