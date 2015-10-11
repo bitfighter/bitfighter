@@ -28,15 +28,17 @@
 #include "gameType.h"
 #include "GaugeRenderer.h"
 #include "Intervals.h"
-#include "Level.h"               // Resharper says this line is not needed... but it is
 #include "projectile.h"          // For SpyBug
-#include "robot.h"               // Resharper says this line is not needed... but it is
 #include "ScissorsManager.h"
 #include "ScoreboardRenderer.h"
 #include "ServerGame.h"
 #include "shipItems.h"           // For EngineerBuildObjects
 #include "SoundSystem.h"
 #include "voiceCodec.h"
+
+// Resharper says these includes are not needed... but they are
+#include "Level.h"               
+#include "robot.h"              
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
