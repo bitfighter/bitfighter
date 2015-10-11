@@ -23,7 +23,6 @@
 #include "Level.h"
 #include "LevelDatabaseRateThread.h"
 #include "LevelDatabase.h"
-#include "GameRecorderPlayback.h"
 
 #include "Colors.h"
 #include "stringUtils.h"
