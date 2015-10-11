@@ -163,6 +163,7 @@ public:
 
    Vector<string> getServerScripts() const;
    Vector<string> getServerPlaylists() const;
+   string getServerPlaylist(S32 index) const;
 
    ClientInfo *getClientInfo();
    void setClientInfo(ClientInfo *clientInfo);

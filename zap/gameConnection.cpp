@@ -207,6 +207,13 @@ Vector<string> GameConnection::getServerPlaylists() const
 }
 
 
+string GameConnection::getServerPlaylist(S32 index) const
+{
+   TNLAssert(index < mPlaylists.size(), "Invalid index!");
+   return mPlaylists[index];
+}
+
+
 // Player appears to be away, spawn is on hold until he returns
 TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnDelayed, (U8 waitTimeInOneTenthsSeconds), (waitTimeInOneTenthsSeconds), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
