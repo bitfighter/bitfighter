@@ -32,11 +32,9 @@
 #include "masterConnection.h"
 #include "LevelSpecifierEnum.h" 
 
-
 #include "GameObjectRender.h"    // For renderBitfighterLogo, mGL->glColor
 #include "stringUtils.h"
 #include "RenderUtils.h"
-
 
 #include "GameRecorderPlayback.h"
 
