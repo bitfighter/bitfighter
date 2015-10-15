@@ -4,12 +4,13 @@
 //------------------------------------------------------------------------------
 
 #include "GameSettings.h"
+#include "LevelSource.h"
 
-#include "SharedConstants.h"  // For MAX_PLAYERS
 #include "BanList.h"
 #include "DisplayManager.h"
+#include "IniFile.h"
+#include "SharedConstants.h"  // For MAX_PLAYERS
 #include "stringUtils.h"      // For itos
-#include "LevelSource.h"
 
 #include "tnlTypes.h"         // For TNL_OS_WIN32 def
 #include "tnlLog.h"           // For logprintf
@@ -19,8 +20,6 @@
 #ifdef TNL_OS_WIN32 
 #  include <windows.h>        // For ARRAYSIZE def
 #endif
-
-#include "IniFile.h"
 
 #include <stdio.h>
 
