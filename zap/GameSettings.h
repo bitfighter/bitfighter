@@ -275,13 +275,13 @@ public:
    Vector<string> getConfigurationErrors();
 
    // Other methods
-   void saveLevelChangePassword(const string &serverName, const string &password);
-   void saveAdminPassword(const string &serverName, const string &password);
-   void saveOwnerPassword(const string &serverName, const string &password);
+   void saveLevelChangePassword(const string &serverName, const string &password) const;
+   void saveAdminPassword(const string &serverName, const string &password) const;
+   void saveOwnerPassword(const string &serverName, const string &password) const;
 
-   void forgetLevelChangePassword(const string &serverName);
-   void forgetAdminPassword(const string &serverName);
-   void forgetOwnerPassword(const string &serverName);
+   void forgetLevelChangePassword(const string &serverName) const;
+   void forgetAdminPassword(const string &serverName) const;
+   void forgetOwnerPassword(const string &serverName) const;
 
    void onFinishedLoading();     // Should be run after INI and cmd line params have been read
 

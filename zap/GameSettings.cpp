@@ -614,42 +614,42 @@ Vector<string> GameSettings::getConfigurationErrors()
 }
 
 
-void GameSettings::saveLevelChangePassword(const string &serverName, const string &password)
+void GameSettings::saveLevelChangePassword(const string &serverName, const string &password) const
 {
    iniFile.SetValue("SavedLevelChangePasswords", serverName, password, true);
    iniFile.WriteFile();
 }
 
 
-void GameSettings::saveAdminPassword(const string &serverName, const string &password)
+void GameSettings::saveAdminPassword(const string &serverName, const string &password) const
 {
    iniFile.SetValue("SavedAdminPasswords", serverName, password, true);
    iniFile.WriteFile();
 }
 
 
-void GameSettings::saveOwnerPassword(const string &serverName, const string &password)
+void GameSettings::saveOwnerPassword(const string &serverName, const string &password) const
 {
    iniFile.SetValue("SavedOwnerPasswords", serverName, password, true);
    iniFile.WriteFile();
 }
 
 
-void GameSettings::forgetLevelChangePassword(const string &serverName)
+void GameSettings::forgetLevelChangePassword(const string &serverName) const
 {
    iniFile.deleteKey("SavedLevelChangePasswords", serverName);
    iniFile.WriteFile();
 }
 
 
-void GameSettings::forgetAdminPassword(const string &serverName)
+void GameSettings::forgetAdminPassword(const string &serverName) const
 {
    iniFile.deleteKey("SavedAdminPasswords", serverName);
    iniFile.WriteFile();
 }
 
 
-void GameSettings::forgetOwnerPassword(const string &serverName)
+void GameSettings::forgetOwnerPassword(const string &serverName) const
 {
    iniFile.deleteKey("SavedOwnerPasswords", serverName);
    iniFile.WriteFile();
