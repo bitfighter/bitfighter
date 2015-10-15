@@ -34,11 +34,11 @@
 #include "ServerGame.h"
 #include "shipItems.h"           // For EngineerBuildObjects
 #include "SoundSystem.h"
+#include "robot.h"              
 #include "voiceCodec.h"
 
 // Resharper says these includes are not needed... but they are
 #include "Level.h"               
-#include "robot.h"              
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
