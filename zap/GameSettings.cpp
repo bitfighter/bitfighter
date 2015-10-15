@@ -571,7 +571,8 @@ string GameSettings::getLevelLoc()
 }
 
 
-// Returns a pointer to the desired LevelSource, depending on if you are using a playlist file or not
+// Returns a pointer to the desired LevelSource, depending on if you are using a playlist file or not.
+// Note that game CAN be NULL here.
 LevelSource *GameSettings::chooseLevelSource(Game *game)
 {
 	if(isUsingPlaylist())
