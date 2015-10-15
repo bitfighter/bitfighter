@@ -45,6 +45,8 @@ string extractExtension(const string &path);
 string extractFilenameNoExtension(const string &path);
 string getPathFromFilename(const string &filename);
 
+Vector<string> findAllThingsInFolder(const string &dir, const string *extList, S32 extListSize);
+
 string itos(S32 i);
 string itos(U32 i);
 string itos(U64 i);
@@ -114,8 +116,9 @@ string strictjoindir(const string &part1, const string &part2);
 string strictjoindir(const string &part1, const string &part2, const string &part3);
 
 // Find first instance of a file in a list of paths
+string checkName(const string &filename, const string &folder, const string &extension);
 string checkName(const string &filename, const Vector<string> &folders);
-string checkName(const string &filename, const Vector<string> &folders, const char *extensions[]);
+string checkName(const string &filename, const Vector<string> &folders, const string extensions[]);
 
 
 // By default we'll mimic the behavior or PHP.  Because that's something to aspire to!

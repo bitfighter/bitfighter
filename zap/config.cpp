@@ -1472,7 +1472,7 @@ string FolderManager::findLevelFile(const string &leveldir, const string &filena
    folders.push_back(leveldir);
 
 #endif
-   const char *extensions[] = { ".level", "" };
+   const string extensions[] = { ".level", "" };
 
    return checkName(filename, folders, extensions);
 }
@@ -1487,7 +1487,7 @@ string FolderManager::findPlaylistFile(const string &leveldir, const string &fil
    folders.push_back(leveldir);
 
 #endif
-   const char *extensions[] = { ".playlist", "" };
+   const string extensions[] = { ".playlist", "" };
 
    return checkName(filename, folders, extensions);
 }
@@ -1517,7 +1517,7 @@ Vector<string> FolderManager::getHelperScriptFolderList() const
 // Returns first found instance of a file that looks like it could be a levelgen with the specified name
 string FolderManager::findLevelGenScript(const string &filename) const
 {
-   const char *extensions[] = { ".levelgen", ".lua", "" };
+   const string extensions[] = { ".levelgen", ".lua", "" };
 
    return checkName(filename, getScriptFolderList(), extensions);
 }
@@ -1525,15 +1525,23 @@ string FolderManager::findLevelGenScript(const string &filename) const
 
 string FolderManager::findScriptFile(const string &filename) const
 {
-   const char *extensions[] = { ".lua", "" };
+   const string extensions[] = { ".lua", "" };
 
    return checkName(filename, getHelperScriptFolderList(), extensions);
 }
 
 
+Vector<string> FolderManager::findAllPlaylistsInFolder(const string &dir)
+{
+   const string extList[] = { "playlist" };
+
+   return findAllThingsInFolder(dir, extList, ARRAYSIZE(extList));
+}
+
+
 string FolderManager::findPlugin(const string &filename) const
 {
-   const char *extensions[] = { ".lua", "" };
+   const string extensions[] = { ".lua", "" };
 
    return checkName(filename, pluginDirs, extensions);
 }
@@ -1541,12 +1549,7 @@ string FolderManager::findPlugin(const string &filename) const
 
 string FolderManager::findBotFile(const string &filename) const          
 {
-   Vector<string> folders;
-   folders.push_back(robotDir);
-
-   const char *extensions[] = { ".bot" };
-
-   return checkName(filename, folders, extensions);
+   return checkName(filename, robotDir, ".bot");
 }
 
 

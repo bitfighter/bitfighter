@@ -304,37 +304,34 @@ PlaybackSelectUserInterface::PlaybackSelectUserInterface(ClientGame *game, UIMan
 
 void PlaybackSelectUserInterface::onActivate()
 {
-//mLevels
    mMenuTitle = "Choose Recorded Game";
 
    const string &dir = getGame()->getSettings()->getFolderManager()->getRecordDir();
 
-   S32 oldIndex = selectedIndex;
+   S32 oldIndex = mSelectedIndex;
 
    clearMenuItems();
-   mLevels.clear();
+   mMenuDisplayItems.clear();
 
    const string extList[] = {GameRecorderServer::buildGameRecorderExtension()};
-   getFilesFromFolder(dir, mLevels, FILENAME_ONLY, extList, ARRAYSIZE(extList));
+   getFilesFromFolder(dir, mMenuDisplayItems, FILENAME_ONLY, extList, ARRAYSIZE(extList));
 
-   if(mLevels.size() == 0)
+   if(mMenuDisplayItems.size() == 0)
       mMenuTitle = "No recorded games exists";  // TODO: Need better way to display this problem
    else
-      mLevels.sort(alphaNumberSort);
+      mMenuDisplayItems.sort(alphaNumberSort);
 
-   for(S32 i = 0; i < mLevels.size(); i++)
-   {
-      addMenuItem(new MenuItem(i, mLevels[i].c_str(), processPlaybackSelectionCallback, ""));
-   }
+   for(S32 i = 0; i < mMenuDisplayItems.size(); i++)
+      addMenuItem(new MenuItem(i, mMenuDisplayItems[i].c_str(), processPlaybackSelectionCallback, ""));
 
 
    MenuUserInterface::onActivate();
 
-   selectedIndex = oldIndex;
-   if(selectedIndex >= mLevels.size())
-      selectedIndex = mLevels.size() - 1;
+   mSelectedIndex = oldIndex;
+   if(mSelectedIndex >= mMenuDisplayItems.size())
+      mSelectedIndex = mMenuDisplayItems.size() - 1;
 
-   mFirstVisibleItem = selectedIndex - 5;
+   mFirstVisibleItem = mSelectedIndex - 5;
    if(mFirstVisibleItem < 0)
       mFirstVisibleItem = 0;
 }
@@ -342,7 +339,7 @@ void PlaybackSelectUserInterface::onActivate()
 
 void PlaybackSelectUserInterface::processSelection(U32 index)
 {
-   string file = joindir(getGame()->getSettings()->getFolderManager()->getRecordDir(), mLevels[index]);
+   string file = joindir(getGame()->getSettings()->getFolderManager()->getRecordDir(), mMenuDisplayItems[index]);
    GameRecorderPlayback *gc = new GameRecorderPlayback(getGame(), file.c_str());
    if(!gc->isValid())
    {
@@ -375,6 +372,7 @@ PlaybackServerDownloadUserInterface::PlaybackServerDownloadUserInterface(ClientG
    // Do nothing
 }
 
+
 void PlaybackServerDownloadUserInterface::onActivate()
 {
    mMenuTitle = "Download Recorded Game";
@@ -387,15 +385,15 @@ void PlaybackServerDownloadUserInterface::onActivate()
 
 void PlaybackServerDownloadUserInterface::processSelection(U32 index)
 {
-   if(U32(index) >= U32(mLevels.size()))
+   if(U32(index) >= U32(mMenuDisplayItems.size()))
       return;
 
-   getGame()->getConnectionToServer()->c2sRequestRecordedGameplay(StringPtr(mLevels[index].c_str()));
+   getGame()->getConnectionToServer()->c2sRequestRecordedGameplay(StringPtr(mMenuDisplayItems[index].c_str()));
    MenuItem *item = getMenuItem(index);
 
    if(item)
    {
-      string downloadedstring = mLevels[index] + " (downloaded)";
+      string downloadedstring = mMenuDisplayItems[index] + " (downloaded)";
 
       // Call destructor and contructor without changing memory pointers... Got a better way to change multiple arguments?
       item->~MenuItem();
@@ -406,12 +404,11 @@ void PlaybackServerDownloadUserInterface::processSelection(U32 index)
 
 void PlaybackServerDownloadUserInterface::receivedLevelList(const Vector<string> &levels)
 {
-   mLevels = levels;
+   mMenuDisplayItems = levels;
    clearMenuItems();
-   for(S32 i = 0; i < mLevels.size(); i++)
-   {
-      addMenuItem(new MenuItem(i, mLevels[i].c_str(), processPlaybackDownloadCallback, ""));
-   }
+
+   for(S32 i = 0; i < mMenuDisplayItems.size(); i++)
+      addMenuItem(new MenuItem(i, mMenuDisplayItems[i].c_str(), processPlaybackDownloadCallback, ""));
 }
 
 

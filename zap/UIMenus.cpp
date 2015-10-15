@@ -80,8 +80,8 @@ void MenuUserInterface::initialize()
    mMenuTitle = "MENU";
    mMenuSubTitle = "";
 
-   selectedIndex = 0;
-   itemSelectedWithMouse = false;
+   mSelectedIndex = 0;
+   mItemSelectedWithMouse = false;
    mFirstVisibleItem = 0;
    mRenderInstructions = true;
    mRenderSpecialInstructions = true;
@@ -99,7 +99,7 @@ void MenuUserInterface::initialize()
 void MenuUserInterface::onActivate()
 {
    mDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
-   selectedIndex = 0;
+   mSelectedIndex = 0;
    mFirstVisibleItem = 0;
 
    clearFadingNotice();
@@ -171,7 +171,7 @@ void MenuUserInterface::idle(U32 timeDelta)
 
    // Call mouse handler so users can scroll scrolling menus just by holding mouse in position
    // (i.e. we don't want to limit scrolling action only to times when user moves mouse)
-   if(itemSelectedWithMouse)
+   if(mItemSelectedWithMouse)
       processMouse();
 
    mFirstVisibleItem = findFirstVisibleItem();
@@ -185,13 +185,13 @@ S32 MenuUserInterface::findFirstVisibleItem() const
 
    if(isScrollingMenu())     // Do some sort of scrolling
    {
-      // itemSelectedWithMouse lets users highlight the top or bottom item in a scrolling list,
+      // mItemSelectedWithMouse lets users highlight the top or bottom item in a scrolling list,
       // which can't be done when using the keyboard
-      if(selectedIndex - mFirstVisibleItem < (itemSelectedWithMouse ? 0 : 1))
-         offset = selectedIndex - (itemSelectedWithMouse ? 0 : 1);
+      if(mSelectedIndex - mFirstVisibleItem < (mItemSelectedWithMouse ? 0 : 1))
+         offset = mSelectedIndex - (mItemSelectedWithMouse ? 0 : 1);
 
-      else if( selectedIndex - mFirstVisibleItem > (mMaxMenuSize - (itemSelectedWithMouse ? 1 : 2)) )
-         offset = selectedIndex - (mMaxMenuSize - (itemSelectedWithMouse ? 1 : 2));
+      else if( mSelectedIndex - mFirstVisibleItem > (mMaxMenuSize - (mItemSelectedWithMouse ? 1 : 2)) )
+         offset = mSelectedIndex - (mMaxMenuSize - (mItemSelectedWithMouse ? 1 : 2));
 
       else offset = mFirstVisibleItem;
    }
@@ -341,12 +341,12 @@ void MenuUserInterface::render() const
       S32 gap = getGap(size);
       
       // Highlight selected item
-      if(selectedIndex == i + offset)
+      if(mSelectedIndex == i + offset)
          drawMenuItemHighlight(0,           y - gap / 2 + shrinkfact, 
                                canvasWidth, y + textsize + gap / 2 - shrinkfact);
 
       S32 indx = i + offset;
-      mMenuItems[indx]->render(y, textsize, selectedIndex == indx);
+      mMenuItems[indx]->render(y, textsize, mSelectedIndex == indx);
 
       y += textsize + gap;
    }
@@ -365,7 +365,7 @@ void MenuUserInterface::render() const
    }
 
    // Render a help string at the bottom of the menu
-   if(U32(selectedIndex) < U32(mMenuItems.size()))
+   if(U32(mSelectedIndex) < U32(mMenuItems.size()))
    {
       const S32 helpFontSize = 15;
       S32 ypos = canvasHeight - vertMargin - 50;
@@ -374,12 +374,12 @@ void MenuUserInterface::render() const
       if(mRenderSpecialInstructions)
       {
          mGL->glColor(Colors::menuHelpColor, 0.6f);
-         RenderUtils::drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getSpecialEditingInstructions());
+         RenderUtils::drawCenteredString(ypos, helpFontSize, mMenuItems[mSelectedIndex]->getSpecialEditingInstructions());
       }
 
       ypos -= helpFontSize + 5;
       mGL->glColor(Colors::yellow);
-      RenderUtils::drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getHelp().c_str());
+      RenderUtils::drawCenteredString(ypos, helpFontSize, mMenuItems[mSelectedIndex]->getHelp().c_str());
    }
 
    // If we have a fading notice to show
@@ -447,10 +447,10 @@ void MenuUserInterface::onMouseMoved()
    if(GameManager::getHostingModePhase() == GameManager::LoadingLevels)
       return;
 
-   itemSelectedWithMouse = true;
+   mItemSelectedWithMouse = true;
    Cursor::enableCursor();  // Show cursor when user moves mouse
 
-   selectedIndex = getSelectedMenuItem();
+   mSelectedIndex = getSelectedMenuItem();
 
    processMouse();
 }
@@ -489,36 +489,36 @@ void MenuUserInterface::processMouse()
 {
    if(isScrollingMenu())   // We have a scrolling situation here...
    {
-      if(selectedIndex <= mFirstVisibleItem)                          // Scroll up
+      if(mSelectedIndex <= mFirstVisibleItem)                          // Scroll up
       {
          if(!mScrollTimer.getCurrent() && mFirstVisibleItem > 0)
          {
             mFirstVisibleItem--;
             mScrollTimer.reset(MOUSE_SCROLL_INTERVAL);
          }
-         selectedIndex = mFirstVisibleItem;
+         mSelectedIndex = mFirstVisibleItem;
       }
-      else if(selectedIndex > mFirstVisibleItem + mMaxMenuSize - 1)  // Scroll down
+      else if(mSelectedIndex > mFirstVisibleItem + mMaxMenuSize - 1)  // Scroll down
       {
-         if(!mScrollTimer.getCurrent() && selectedIndex > mFirstVisibleItem + mMaxMenuSize - 2)
+         if(!mScrollTimer.getCurrent() && mSelectedIndex > mFirstVisibleItem + mMaxMenuSize - 2)
          {
             mFirstVisibleItem++;
             mScrollTimer.reset(MOUSE_SCROLL_INTERVAL);
          }
-         selectedIndex = mFirstVisibleItem + mMaxMenuSize - 1;
+         mSelectedIndex = mFirstVisibleItem + mMaxMenuSize - 1;
       }
       else
          mScrollTimer.clear();
    }
 
-   if(selectedIndex < 0)                          // Scrolled off top of list
+   if(mSelectedIndex < 0)                          // Scrolled off top of list
    {
-      selectedIndex = 0;
+      mSelectedIndex = 0;
       mFirstVisibleItem = 0;
    }
-   else if(selectedIndex >= mMenuItems.size())    // Scrolled off bottom of list
+   else if(mSelectedIndex >= mMenuItems.size())    // Scrolled off bottom of list
    {
-      selectedIndex = mMenuItems.size() - 1;
+      mSelectedIndex = mMenuItems.size() - 1;
       mFirstVisibleItem = getMaxFirstItemIndex();
    }
 }
@@ -591,8 +591,8 @@ bool MenuUserInterface::onKeyDown(InputCode inputCode)
 void MenuUserInterface::onTextInput(char ascii)
 {
 
-   if(U32(selectedIndex) < U32(mMenuItems.size()))
-      mMenuItems[selectedIndex]->handleTextInput(ascii);
+   if(U32(mSelectedIndex) < U32(mMenuItems.size()))
+      mMenuItems[mSelectedIndex]->handleTextInput(ascii);
 }
 
 
@@ -607,7 +607,7 @@ void MenuUserInterface::onKeyUp(InputCode inputCode)
 bool MenuUserInterface::processMenuSpecificKeys(InputCode inputCode)
 {
    // Don't process shortcut keys if the current menuitem has text input
-   if(U32(selectedIndex) < U32(mMenuItems.size()) && mMenuItems[selectedIndex]->hasTextInput())
+   if(U32(mSelectedIndex) < U32(mMenuItems.size()) && mMenuItems[mSelectedIndex]->hasTextInput())
       return false;
 
    // Check for some shortcut keys
@@ -615,10 +615,10 @@ bool MenuUserInterface::processMenuSpecificKeys(InputCode inputCode)
    {
       if(inputCode == mMenuItems[i]->key1 || inputCode == mMenuItems[i]->key2)
       {
-         selectedIndex = i;
+         mSelectedIndex = i;
 
          mMenuItems[i]->activatedWithShortcutKey();
-         itemSelectedWithMouse = false;
+         mItemSelectedWithMouse = false;
          return true;
       }
    }
@@ -649,19 +649,19 @@ bool MenuUserInterface::processKeys(InputCode inputCode)
    { 
       // Do nothing 
    }
-   else if(U32(selectedIndex) >= U32(mMenuItems.size()))  // Probably empty menu... Can only go back.
+   else if(U32(mSelectedIndex) >= U32(mMenuItems.size()))  // Probably empty menu... Can only go back.
    {
       onEscape();
    }
-   else if(mMenuItems[selectedIndex]->handleKey(inputCode))
+   else if(mMenuItems[mSelectedIndex]->handleKey(inputCode))
    {
       // Do nothing
    }
-   else if(inputCode == KEY_ENTER || (inputCode == KEY_SPACE && !mMenuItems[selectedIndex]->hasTextInput()))
+   else if(inputCode == KEY_ENTER || (inputCode == KEY_SPACE && !mMenuItems[mSelectedIndex]->hasTextInput()))
    {
       playBoop();
       if(inputCode != MOUSE_LEFT)
-         itemSelectedWithMouse = false;
+         mItemSelectedWithMouse = false;
 
       else // it was MOUSE_LEFT after all
       {
@@ -675,9 +675,9 @@ bool MenuUserInterface::processKeys(InputCode inputCode)
             return true;
       }
 
-      mMenuItems[selectedIndex]->handleKey(inputCode);
+      mMenuItems[mSelectedIndex]->handleKey(inputCode);
 
-      if(mMenuItems[selectedIndex]->enterAdvancesItem())
+      if(mMenuItems[mSelectedIndex]->enterAdvancesItem())
          advanceItem();
    }
 
@@ -688,18 +688,18 @@ bool MenuUserInterface::processKeys(InputCode inputCode)
    }
    else if(inputCode == KEY_UP || (inputCode == KEY_TAB && InputCodeManager::checkModifier(KEY_SHIFT)))   // Prev item
    {
-      selectedIndex--;
-      itemSelectedWithMouse = false;
+      mSelectedIndex--;
+      mItemSelectedWithMouse = false;
 
-      if(selectedIndex < 0)                        // Scrolling off the top
+      if(mSelectedIndex < 0)                        // Scrolling off the top
       {
          if(isScrollingMenu() && mRepeatMode)      // Allow wrapping on long menus only when not in repeat mode
          {
-            selectedIndex = 0;               // No wrap --> (first item)
+            mSelectedIndex = 0;               // No wrap --> (first item)
             return true;                     // (leave before playBoop)
          }
          else                                         // Always wrap on shorter menus
-            selectedIndex = mMenuItems.size() - 1;    // Wrap --> (select last item)
+            mSelectedIndex = mMenuItems.size() - 1;    // Wrap --> (select last item)
       }
       playBoop();
    }
@@ -736,18 +736,18 @@ void MenuUserInterface::renderExtras() const
 
 void MenuUserInterface::advanceItem()
 {
-   selectedIndex++;
-   itemSelectedWithMouse = false;
+   mSelectedIndex++;
+   mItemSelectedWithMouse = false;
 
-   if(selectedIndex >= mMenuItems.size())     // Scrolling off the bottom
+   if(mSelectedIndex >= mMenuItems.size())     // Scrolling off the bottom
    {
       if(isScrollingMenu() && mRepeatMode)    // Allow wrapping on long menus only when not in repeat mode
       {
-         selectedIndex = getMenuItemCount() - 1;                 // No wrap --> (last item)
+         mSelectedIndex = getMenuItemCount() - 1;                 // No wrap --> (last item)
          return;                                                 // (leave before playBoop)
       }
       else                     // Always wrap on shorter menus
-         selectedIndex = 0;    // Wrap --> (first item)
+         mSelectedIndex = 0;    // Wrap --> (first item)
    }
    playBoop();
 }
@@ -768,6 +768,12 @@ BfObject *MenuUserInterface::getAssociatedObject()
 void MenuUserInterface::setAssociatedObject(BfObject *obj)
 {
    mAssociatedObject = obj;
+}
+
+
+void MenuUserInterface::setSubtitle(const string &subtitle)
+{
+   mMenuSubTitle = subtitle;
 }
 
 
@@ -1917,6 +1923,12 @@ static void passwordOptionsSelectedCallback(ClientGame *game, U32 unused)
 }
 
 
+static void plalistItemSelectedCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->activate<PlaylistMenuUserInterface>();
+}
+
+
 static void playbackGamesCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->activate<PlaybackSelectUserInterface>();
@@ -1931,7 +1943,10 @@ void HostMenuUserInterface::setupMenus()
    addMenuItem(new MenuItem("START HOSTING", startHostingCallback, "", KEY_H));
 
    addMenuItem(new MenuItem(getMenuItemCount(), "ROBOTS", robotOptionsSelectedCallback,
-         "Add robots and adjust their settings", KEY_R));
+                            "Add robots and adjust their settings", KEY_R));
+
+   addMenuItem(new MenuItem(getMenuItemCount(), "PLAYLISTS", plalistItemSelectedCallback,
+                            "Select a playlist", KEY_L));
 
    addMenuItem(new TextEntryMenuItem("SERVER NAME:", mGameSettings->getHostName(),
                                      "<Bitfighter Host>", "", MaxServerNameLen,  KEY_N));
@@ -2174,8 +2189,8 @@ LevelMenuUserInterface::~LevelMenuUserInterface()
 }
 
 
-static const char *UPLOAD_LEVELS = "UPLOAD LEVELS";
-static const char *ALL_LEVELS = "All Levels";
+static const string UPLOAD_LEVELS = "UPLOAD LEVELS";
+static const string ALL_LEVELS = "All Levels";
 static const U32 ALL_LEVELS_MENUID = 0x80000001;
 static const U32 UPLOAD_LEVELS_MENUID = 0x80000002;
 
@@ -2186,9 +2201,9 @@ static void selectLevelTypeCallback(ClientGame *game, U32 level)
 
    // First entry will be "All Levels", subsequent entries will be level types populated from mLevelInfos
    if(level == ALL_LEVELS_MENUID)
-      ui->category = ALL_LEVELS;
+      ui->setCategory(ALL_LEVELS);
    else if(level == UPLOAD_LEVELS_MENUID)
-      ui->category = UPLOAD_LEVELS;
+      ui->setCategory(UPLOAD_LEVELS);
 
    else
    {
@@ -2197,7 +2212,7 @@ static void selectLevelTypeCallback(ClientGame *game, U32 level)
       if(!gc || U32(gc->mLevelInfos.size()) < level)
          return;
 
-      ui->category = gc->mLevelInfos[level - 1].getLevelTypeName();
+      ui->setCategory(gc->mLevelInfos[level - 1].getLevelTypeName());
    }
 
   game->getUIManager()->activate(ui);
@@ -2211,7 +2226,7 @@ void LevelMenuUserInterface::onActivate()
 
    // replace with getLevelCount() method on game?
    GameConnection *gc = getGame()->getConnectionToServer();
-   if(!gc || !gc->mLevelInfos.size())
+   if(gc == NULL || gc->mLevelInfos.size()== 0)
       return;
 
    clearMenuItems();
@@ -2316,117 +2331,47 @@ void RobotsMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-LevelMenuSelectUserInterface::LevelMenuSelectUserInterface(ClientGame *game, UIManager *uiManager) : 
+ItemListSelectUserInterface::ItemListSelectUserInterface(ClientGame *game, UIManager *uiManager) : 
    Parent(game, uiManager)
 {
    // When you start typing a name, any character typed within the mStillTypingNameTimer period will be considered
    // to be the next character of the name, rather than a new entry
-   mStillTypingNameTimer.setPeriod(1000);
+   mStillTypingNameTimer.setPeriod(ONE_SECOND);
+
 }
 
 
 // Destructor
-LevelMenuSelectUserInterface::~LevelMenuSelectUserInterface()
+ItemListSelectUserInterface::~ItemListSelectUserInterface()
 {
    // Do nothing
 }
 
 
-static void processLevelSelectionCallback(ClientGame *game, U32 index)             
-{
-   game->getUIManager()->getUI<LevelMenuSelectUserInterface>()->processSelection(index);
-}
-
-
-const U32 UPLOAD_LEVELS_BIT = 0x80000000;
-
-void LevelMenuSelectUserInterface::processSelection(U32 index)     
+void ItemListSelectUserInterface::onActivate()
 {
    Parent::onActivate();
-   GameConnection *gc = getGame()->getConnectionToServer();
-
-   if((index & UPLOAD_LEVELS_BIT) && (index & (~UPLOAD_LEVELS_BIT)) < U32(mLevels.size()))
-   {
-      FolderManager *folderManager = mGameSettings->getFolderManager();
-      string filename = strictjoindir(folderManager->getLevelDir(), mLevels[index & (~UPLOAD_LEVELS_BIT)]);
-
-      if(!gc->TransferLevelFile(filename.c_str()))
-         getGame()->displayErrorMessage("!!! Can't upload level: unable to read file");
-   }
-   else
-      gc->c2sRequestLevelChange(index, false);     // The selection index is the level to load
-
-   getUIManager()->reactivateGameUI();             // Back to the game
-}
-
-
-void LevelMenuSelectUserInterface::onActivate()
-{
-   Parent::onActivate();
-   mMenuTitle = "CHOOSE LEVEL [" + category + "]";
 
    mNameSoFar = "";
    mStillTypingNameTimer.clear();
 
-   // Replace with a getLevelCount() method on Game?
-   ClientGame *game = getGame();
-   GameConnection *gc = game->getConnectionToServer();
+   clearMenuItems();    // We'll repopulate below...
 
-   if(!gc || !gc->mLevelInfos.size())
-      return;
-
-   clearMenuItems();
-
-   mLevels.clear();
-
-   char c[2];
-   c[1] = 0;   // null termination
-
-   if(!strcmp(category.c_str(), UPLOAD_LEVELS))
-   {
-      // Get all the playable levels in levelDir
-      mLevels = mGameSettings->getLevelList();
-
-      for(S32 i = 0; i < mLevels.size(); i++)
-      {
-         c[0] = mLevels[i].c_str()[0];
-         addMenuItem(new MenuItem(i | UPLOAD_LEVELS_BIT, mLevels[i].c_str(), processLevelSelectionCallback, "", InputCodeManager::stringToInputCode(c)));
-      }
-   }
- 
-   for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
-   {
-      if(gc->mLevelInfos[i].mLevelName == "")   // Skip levels with blank names --> but all should have names now!
-         continue;
-
-      if(strcmp(gc->mLevelInfos[i].getLevelTypeName(), category.c_str()) == 0 || category == ALL_LEVELS)
-      {
-         const char *levelName = gc->mLevelInfos[i].mLevelName.getString();
-         c[0] = levelName[0];
-         addMenuItem(new MenuItem(i, levelName, processLevelSelectionCallback, "", InputCodeManager::stringToInputCode(c)));
-      }
-   }
-
-   sortMenuItems();
-   mFirstVisibleItem = 0;
-
-   if(itemSelectedWithMouse)
+   if(mItemSelectedWithMouse)
       onMouseMoved();
-   else
-      selectedIndex = 0;
+   //else
+   //   mSelectedIndex = 0;
 }
 
 
-void LevelMenuSelectUserInterface::idle(U32 timeDelta)
+void ItemListSelectUserInterface::idle(U32 timeDelta)
 {
-   Parent::idle(timeDelta);
    if(mStillTypingNameTimer.update(timeDelta))
       mNameSoFar = "";
 }
 
 
-// Override parent, and make keys simply go to first level with that letter, rather than selecting it automatically
-bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode)
+bool ItemListSelectUserInterface::processMenuSpecificKeys(InputCode inputCode)
 {
    string inputString = InputCodeManager::inputCodeToPrintableChar(inputCode);
 
@@ -2439,23 +2384,23 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode)
 
    if(stringContainsAllTheSameCharacter(mNameSoFarLc))
    {
-      selectedIndex = getIndexOfNext(mNameSoFarLc.substr(0, 1));
+      mSelectedIndex = getIndexOfNext(mNameSoFarLc.substr(0, 1));
 
-      if(mNameSoFar.size() > 1 && lcase(getMenuItem(selectedIndex)->getValue()).substr(0, mNameSoFar.length()) != mNameSoFarLc)
+      if(mNameSoFar.size() > 1 && lcase(getMenuItem(mSelectedIndex)->getValue()).substr(0, mNameSoFar.length()) != mNameSoFarLc)
          mNameSoFar = mNameSoFar.substr(0, mNameSoFar.length() - 1);    // Remove final char, the one we just added above
    }
    else
-      selectedIndex = getIndexOfNext(mNameSoFarLc);
+      mSelectedIndex = getIndexOfNext(mNameSoFarLc);
 
 
    mStillTypingNameTimer.reset();
-   itemSelectedWithMouse = false;
+   mItemSelectedWithMouse = false;
 
    // Move the mouse to the new selection to make things "feel better"
    MenuItemSize size = getMenuItem(mFirstVisibleItem)->getSize();
    S32 y = getYStart();
 
-   for(S32 j = mFirstVisibleItem; j < selectedIndex; j++)
+   for(S32 j = mFirstVisibleItem; j < mSelectedIndex; j++)
    {
       size = getMenuItem(j)->getSize();
       y += getTextSize(size) + getGap(size);
@@ -2484,7 +2429,7 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode)
 // Return index of next level starting with specified string; if none exists, returns current index.
 // If startingWith is only one character, the entry we're looking for could be behind us.  See tests
 // for examples of this.
-S32 LevelMenuSelectUserInterface::getIndexOfNext(const string &startingWithLc)
+S32 ItemListSelectUserInterface::getIndexOfNext(const string &startingWithLc) const
 {
    TNLAssert(startingWithLc.length() > 0, "Did not expect an empty string here!");
    TNLAssert(startingWithLc == lcase(startingWithLc), "Expected a lowercased string here");
@@ -2497,13 +2442,13 @@ S32 LevelMenuSelectUserInterface::getIndexOfNext(const string &startingWithLc)
    // But we only care about overshoots in multiChar mode because there could well be single-char hits behind us in the list.
    while(true)
    {
-      if(selectedIndex + offset >= getMenuItemCount())    // Hit end of list -- loop to beginning
-         offset = -selectedIndex;
+      if(mSelectedIndex + offset >= getMenuItemCount())    // Hit end of list -- loop to beginning
+         offset = -mSelectedIndex;
 
-      string prospectiveItem = lcase(getMenuItem(selectedIndex + offset)->getValue());
+      string prospectiveItem = lcase(getMenuItem(mSelectedIndex + offset)->getValue());
 
       if(prospectiveItem.substr(0, startingWithLc.size()) == startingWithLc)
-         return selectedIndex + offset;
+         return mSelectedIndex + offset;
 
       if(offset == 0 && !first)
          break;
@@ -2513,13 +2458,183 @@ S32 LevelMenuSelectUserInterface::getIndexOfNext(const string &startingWithLc)
    }
 
    // Found no match; return current index
-   return selectedIndex;
+   return mSelectedIndex;
 }
 
 
-void LevelMenuSelectUserInterface::onEscape()
+void ItemListSelectUserInterface::onEscape()
 {
    getUIManager()->reactivatePrevUI();    // to LevelMenuUserInterface
+}
+
+   
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+LevelMenuSelectUserInterface::LevelMenuSelectUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
+{
+   // Do nothing
+}
+
+
+// Destructor
+LevelMenuSelectUserInterface::~LevelMenuSelectUserInterface()
+{
+   // Do nothing
+}
+
+
+static void processLevelSelectionCallback(ClientGame *game, U32 index)             
+{
+   game->getUIManager()->getUI<LevelMenuSelectUserInterface>()->processSelection(index);
+}
+
+
+const U32 UPLOAD_LEVELS_BIT = 0x80000000;
+
+void LevelMenuSelectUserInterface::processSelection(U32 index)     
+{
+   Parent::onActivate();
+   GameConnection *gc = getGame()->getConnectionToServer();
+
+   if((index & UPLOAD_LEVELS_BIT) && (index & (~UPLOAD_LEVELS_BIT)) < U32(mMenuDisplayItems.size()))
+   {
+      FolderManager *folderManager = mGameSettings->getFolderManager();
+      string filename = strictjoindir(folderManager->getLevelDir(), mMenuDisplayItems[index & (~UPLOAD_LEVELS_BIT)]);
+
+      if(!gc->TransferLevelFile(filename.c_str()))
+         getGame()->displayErrorMessage("!!! Can't upload level: unable to read file");
+   }
+   else
+      gc->c2sRequestLevelChange(index, false);     // The selection index is the level to load
+
+   getUIManager()->reactivateGameUI();             // Back to the game
+}
+
+
+void LevelMenuSelectUserInterface::setCategory(const string &category)
+{
+   mCategory = category;
+}
+
+
+void LevelMenuSelectUserInterface::onActivate()
+{
+   Parent::onActivate();
+
+   // Replace with a getLevelCount() method on Game?
+   ClientGame *game = getGame();
+   GameConnection *gc = game->getConnectionToServer();
+
+   if(gc == NULL || gc->mLevelInfos.size() == 0)
+      return;
+
+   mMenuTitle = "CHOOSE LEVEL [" + mCategory + "]";
+   mMenuDisplayItems.clear();
+
+   char c[2];
+   c[1] = 0;   // null termination
+
+   if(mCategory == UPLOAD_LEVELS)
+   {
+      // Get all the playable levels in levelDir
+      mMenuDisplayItems = mGameSettings->getLevelList();
+
+      for(S32 i = 0; i < mMenuDisplayItems.size(); i++)
+      {
+         c[0] = mMenuDisplayItems[i][0];
+         addMenuItem(new MenuItem(i | UPLOAD_LEVELS_BIT, mMenuDisplayItems[i], processLevelSelectionCallback, "", InputCodeManager::stringToInputCode(c)));
+      }
+   }
+ 
+   for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
+   {
+      if(gc->mLevelInfos[i].mLevelName == "")   // Skip levels with blank names --> but all should have names now!
+         continue;
+
+      if(strcmp(gc->mLevelInfos[i].getLevelTypeName(), mCategory.c_str()) == 0 || mCategory == ALL_LEVELS)
+      {
+         const char *levelName = gc->mLevelInfos[i].mLevelName.getString();
+         c[0] = levelName[0];
+         addMenuItem(new MenuItem(i, levelName, processLevelSelectionCallback, "", InputCodeManager::stringToInputCode(c)));
+      }
+   }
+
+   sortMenuItems();
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+const static string NO_PLAYLIST = "DON'T USE PLAYLIST";
+
+// Constructor
+PlaylistMenuUserInterface::PlaylistMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
+{
+   // Do nothing
+}
+
+
+// Destructor
+PlaylistMenuUserInterface::~PlaylistMenuUserInterface()
+{
+   // Do nothing
+}
+
+
+// Selected a playlist!  What do we do now?
+static void processPlaylistSelectionCallback(ClientGame *game, U32 index)             
+{
+   game->getUIManager()->getUI<PlaylistMenuUserInterface>()->processSelection(index);
+}
+
+
+void PlaylistMenuUserInterface::processSelection(U32 index)     
+{
+   string playlistName = getMenuItem(index)->getPrompt();
+   if(playlistName == NO_PLAYLIST)
+      playlistName = "";
+
+   getGame()->setPlaylist(playlistName);
+   getUIManager()->reactivatePrevUI();    // To hosting menu
+}
+
+
+void PlaylistMenuUserInterface::onActivate()
+{
+   Parent::onActivate();
+   mMenuTitle = "CHOOSE PLAYLIST";
+
+   // Replace with a getLevelCount() method on Game?
+   ClientGame *game = getGame();
+   GameConnection *gc = game->getConnectionToServer();
+
+   Vector<string> playlists = FolderManager::findAllPlaylistsInFolder(game->getSettings()->getFolderManager()->getLevelDir());
+
+   // Any items to select from?
+   if(playlists.size() == 0)
+      return;
+
+   char c[2];
+   c[1] = 0;   // null termination
+
+   for(S32 i = 0; i < playlists.size(); i++)
+   {
+      if(playlists[i] == "")   // Skip blanks, but there should be none
+         continue;
+
+      string playlistName = playlists[i];
+      c[0] = playlistName[0];
+      addMenuItem(new MenuItem(i, playlistName, processPlaylistSelectionCallback, "", InputCodeManager::stringToInputCode(c)));
+   }
+
+   sortMenuItems();
+
+   addMenuItem(new MenuItem(playlists.size(), NO_PLAYLIST, processPlaylistSelectionCallback, "", InputCodeManager::stringToInputCode("N")));
 }
 
 
@@ -2618,12 +2733,6 @@ void PlayerMenuUserInterface::idle(U32 timeDelta)
 void PlayerMenuUserInterface::render() const
 {
    Parent::render();
-}
-
-
-void PlayerMenuUserInterface::onEscape()
-{
-   getUIManager()->reactivatePrevUI();   //mGameUserInterface
 }
 
 

@@ -110,6 +110,8 @@ public:
    string findBotFile(const string &filename) const;
    string findScriptFile(const string &filename) const;
 
+   static Vector<string> findAllPlaylistsInFolder(const string &dir);
+
    void setLevelDir(const string &levelDir);
 };
 

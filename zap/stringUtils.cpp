@@ -99,6 +99,21 @@ string extractFilenameNoExtension(const string &path)
 }
 
 
+extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);     // Sort alphanumerically
+
+Vector<string> findAllThingsInFolder(const string &dir, const string *extList, S32 extListSize)
+{
+   Vector<string> fileList;
+
+   // Build our list by looking at the filesystem for the objects specified
+   getFilesFromFolder(dir, fileList, FILENAME_ONLY_NO_EXTENSION, extList, extListSize); 
+
+   fileList.sort(alphaSort);   // Just to be sure...
+   return fileList;
+}
+
+
+
 // Need to handle both forward and backward slashes... will return pathname with trailing delimeter.
 // Can be replaced with extractDirectory?
 string getPathFromFilename(const string &filename)
@@ -546,8 +561,20 @@ string getFileSeparator()
 }
 
 
+string checkName(const string &filename, const string &folder, const string &extension)
+{
+   Vector<string> folders;
+   folders.push_back(folder);
+
+   Vector<string> extensions;
+   extensions.push_back(extension);
+
+   return checkName(filename, folders, extensions.address());
+}
+
+
 // Find first instance of a file in a list of paths, with mulitple possible extensions -- returns full path to found file
-string checkName(const string &filename, const Vector<string> &folders, const char *extensions[])
+string checkName(const string &filename, const Vector<string> &folders, const string extensions[])
 {
    string name;
    if(filename.find('.') != string::npos || extensions == NULL)       // filename has an extension
@@ -563,7 +590,7 @@ string checkName(const string &filename, const Vector<string> &folders, const ch
    else        // Filename has no extension, and we have a list of potential extensions
    {
       S32 i = 0;
-      while(strcmp(extensions[i], "") != 0)
+      while(extensions[i] != "")
       {
          for(S32 j = 0; j < folders.size(); j++)
          {

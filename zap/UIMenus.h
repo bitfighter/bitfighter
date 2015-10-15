@@ -58,8 +58,16 @@ protected:
    virtual S32 getTextSize(MenuItemSize size) const;  // Let menus set their own text size
    virtual S32 getGap(MenuItemSize size) const;       // Gap is the space between items
 
+   string mMenuTitle;
+   string mMenuSubTitle;
+
+   Color mMenuSubTitleColor;
+   bool mMenuFooterContainsInstructions;
+
    S32 mMaxMenuSize;
    S32 mFirstVisibleItem;  // Some menus have items than will fit on the screen; this is the index of the first visible item
+   S32 mSelectedIndex;     // Index of the currently highlighted menu item (public so tests can access this member)
+   bool mItemSelectedWithMouse;
 
    bool mRenderInstructions;
    bool mRenderSpecialInstructions;
@@ -92,16 +100,6 @@ public:
    MenuItem *getMenuItem(S32 index) const;
    S32 getMenuItemCount() const;
 
-   bool itemSelectedWithMouse;
-
-   S32 selectedIndex;               // Index of the currently highlighted menu item (public so tests can access this member)
-
-   string mMenuTitle;
-   string mMenuSubTitle;
-
-   Color mMenuSubTitleColor;
-   bool mMenuFooterContainsInstructions;
-
    virtual void idle(U32 timeDelta); 
 
    void getMenuResponses(Vector<string> &responses);     // Fill responses with values from menu
@@ -119,6 +117,8 @@ public:
 
    BfObject *getAssociatedObject();
    void setAssociatedObject(BfObject *obj);
+
+   void setSubtitle(const string &subtitle);
 
    void setFadingNotice(U32 time, S32 top, const string &message);  // Set a fading notice on a menu
    void clearFadingNotice();                                        // Clear a fading notice
@@ -430,30 +430,89 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class LevelMenuSelectUserInterface : public MenuUserInterface
+class ItemListSelectUserInterface : public MenuUserInterface
 {
    typedef MenuUserInterface Parent;
 
-protected:
-   Vector<string> mLevels;
 private:
    Timer mStillTypingNameTimer;
    string mNameSoFar;
 
 public:
-   explicit LevelMenuSelectUserInterface(ClientGame *game, UIManager *uiManager);   // Constructor
+   ItemListSelectUserInterface(ClientGame *game, UIManager *uiManager);   // Constructor
+   virtual ~ItemListSelectUserInterface();
+
+   virtual void onActivate();
+
+   virtual void idle(U32 timeDelta);
+
+   bool processMenuSpecificKeys(InputCode inputCode);
+
+   S32 getIndexOfNext(const string &startingWith) const;    // Public so tests can access this  TODO: Fix test access
+
+   void onEscape();
+};
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+class LevelMenuSelectUserInterface : public ItemListSelectUserInterface
+{
+   typedef ItemListSelectUserInterface Parent;
+
+private:
+   string mCategory;
+
+protected:
+   Vector<string> mMenuDisplayItems;
+
+public:
+   LevelMenuSelectUserInterface(ClientGame *game, UIManager *uiManager);   // Constructor
    virtual ~LevelMenuSelectUserInterface();
 
-   void idle(U32 timeDelta);
-
-   string category;
    void onActivate();
-   bool processMenuSpecificKeys(InputCode inputCode); // Custom key handling for level selection menus
       
-   S32 getIndexOfNext(const string &startingWith);    // Public so tests can access this
+   void processSelection(U32 index);
+
+   void setCategory(const string &category);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class PlaylistMenuUserInterface : public ItemListSelectUserInterface
+{
+private:
+   typedef ItemListSelectUserInterface Parent;
+
+public:
+   explicit PlaylistMenuUserInterface(ClientGame *game, UIManager *uiManager);      // Constructor
+   virtual ~PlaylistMenuUserInterface();
+
+   void onActivate();
 
    void processSelection(U32 index);
-   void onEscape();
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class PlayerMenuUserInterface : public MenuUserInterface
+{
+   typedef MenuUserInterface Parent;
+
+public:
+   explicit PlayerMenuUserInterface(ClientGame *game, UIManager *uiManager);  // Constructor
+   virtual ~PlayerMenuUserInterface();
+
+   void idle(U32 timeDelta);
+   void render() const;
+   void playerSelected(U32 index);
+
+   PlayerAction action;
 };
 
 
@@ -477,25 +536,6 @@ public:
    void onEscape();
 };
 
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class PlayerMenuUserInterface : public MenuUserInterface
-{
-   typedef MenuUserInterface Parent;
-
-public:
-   explicit PlayerMenuUserInterface(ClientGame *game, UIManager *uiManager);  // Constructor
-   virtual ~PlayerMenuUserInterface();
-
-   void idle(U32 timeDelta);
-   void render() const;
-   void playerSelected(U32 index);
-   void onEscape();
-
-   PlayerAction action;
-};
 
 ////////////////////////////////////////
 ////////////////////////////////////////

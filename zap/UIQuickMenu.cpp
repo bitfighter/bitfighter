@@ -154,10 +154,10 @@ void QuickMenuUI::render() const
       }
 
       // Draw background highlight if this item's selected
-      if(selectedIndex == i && !mDisableHighlight)
+      if(mSelectedIndex == i && !mDisableHighlight)
          drawMenuItemHighlight(left,  y - specialCaseFix, right, y + itemTextSize + 5);
 
-      getMenuItem(i)->render(cenX, y, itemTextSize, selectedIndex == i);
+      getMenuItem(i)->render(cenX, y, itemTextSize, mSelectedIndex == i);
 
       y += itemTextSize + itemGap;
    }
@@ -168,10 +168,10 @@ void QuickMenuUI::render() const
    //y += getGap(MENU_ITEM_SIZE_NORMAL);
 
    //// Draw background highlight if this item's selected
-   //if(selectedIndex == getMenuItemCount() - 1)
+   //if(mSelectedIndex == getMenuItemCount() - 1)
    //   drawMenuItemHighlight(left,  y - 1, right, y + INSTRUCTION_SIZE + 3);
 
-   //getLastMenuItem()->render(cenX, y, INSTRUCTION_SIZE, selectedIndex == (getMenuItemCount() - 1));
+   //getLastMenuItem()->render(cenX, y, INSTRUCTION_SIZE, mSelectedIndex == (getMenuItemCount() - 1));
 
    /////
    // Render instructions just below the menu
@@ -185,7 +185,7 @@ void QuickMenuUI::render() const
    S32 HELP_TEXT_SIZE = getTextSize(MENU_ITEM_SIZE_NORMAL);
 
    // Amount help "sticks out" beyond menu box:
-   S32 helpWidth = RenderUtils::getStringWidth(HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp().c_str());
+   S32 helpWidth = RenderUtils::getStringWidth(HELP_TEXT_SIZE, getMenuItem(mSelectedIndex)->getHelp().c_str());
    S32 xoff = (helpWidth - width) / 2;
    if(xoff > 0)
       instrXPos += max(xoff - left, min(DisplayManager::getScreenInfo()->getGameCanvasWidth() - xoff - right, 0));
@@ -203,7 +203,7 @@ void QuickMenuUI::render() const
 
    // And draw the text
    mGL->glColor(Colors::menuHelpColor);
-   RenderUtils::drawCenteredString(instrXPos, instrYPos, HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp().c_str());
+   RenderUtils::drawCenteredString(instrXPos, instrYPos, HELP_TEXT_SIZE, getMenuItem(mSelectedIndex)->getHelp().c_str());
 }
 
 

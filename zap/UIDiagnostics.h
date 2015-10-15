@@ -28,6 +28,7 @@ private:
    static S32 showNameDescrBlock(const string &hostName, const string &hostDescr, S32 ypos, S32 textsize, S32 gap);
    static S32 showMasterBlock(ClientGame *game, S32 textsize, S32 ypos, S32 gap, bool leftcol);
 
+   string resolvePlaylist(GameSettings *gameSettings) const;
 
 public:
    explicit DiagnosticUserInterface(ClientGame *game, UIManager *uiManager);     // Constructor

@@ -62,8 +62,6 @@ private:
    Timer mShutdownTimer;
    SafePtr<GameConnection> mShutdownOriginator;   // Who started the shutdown?
 
-   string mPlaylist;
-
    bool mDedicated;
    S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
 
@@ -234,9 +232,6 @@ public:
    S32 getCurrentLevelIndex() const;
    S32 getLevelCount() const;
    LevelInfo getLevelInfo(S32 index) const;
-
-   string getPlaylist() const;
-   void setPlaylist(const string &playlist);
 
    void clearLevelInfos();
    void sendLevelListToLevelChangers(const string &message = "") const;

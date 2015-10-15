@@ -192,6 +192,12 @@ protected:
    Rect mWorldExtents;                    // Extents of everything
    string mLevelFileHash;                 // MD5 hash of level file
 
+   // On the server, this will be the active playlist; on the client, it will be whatever playlist 
+   // was selected from the playlist menu before hosting (or, if user did not use that menu, whatever
+   // was specified on the cmd line); if the playlist is updated on the server, it will be sent down
+   // to the clients, so should reflect a relatively current value.
+   string mPlaylist;
+
    virtual void idle(U32 timeDelta);      // Only called from ServerGame::idle() and ClientGame::idle()
 
    virtual void cleanUp();
@@ -260,6 +266,9 @@ public:
    void clearClientList();
 
    bool isSuspended() const;
+
+   void setPlaylist(const string &playlist);
+   string getPlaylist() const;
 
    virtual string getCurrentLevelFileName() const = 0;
    virtual U32 getMaxPlayers() const;

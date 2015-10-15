@@ -223,8 +223,8 @@ void KeyDefMenuUserInterface::render() const
    RenderUtils::drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - 20, 18, mMenuFooter);
 
    TNLAssert(selectedIndex < menuItems.size(), "Index out of bounds!");
-   //if(selectedIndex >= menuItems.size())
-   //   selectedIndex = 0;
+   //if(mSelectedIndex >= menuItems.size())
+   //   mSelectedIndex = 0;
 
    S32 size = menuItems.size();
 

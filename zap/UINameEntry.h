@@ -7,8 +7,6 @@
 #define _UINAMEENTRY_H_
 
 #include "UI.h"
-#include "Timer.h"
-#include "config.h"
 
 namespace Zap
 {
@@ -17,6 +15,7 @@ namespace Zap
 class TextEntryUserInterface : public UserInterface
 {
    typedef UserInterface Parent;
+
 private:
    U32 cursorPos;
 

@@ -68,7 +68,8 @@ static Vector<DatabaseObject *> fillVector2;
 
 
 // Constructor
-Game::Game(const Address &theBindAddress, GameSettingsPtr settings)
+Game::Game(const Address &theBindAddress, GameSettingsPtr settings) :
+      mPlaylist(settings->getPlaylistFile())
 {
    mLevelDatabaseId = 0;
    mSettings = settings;
@@ -153,6 +154,20 @@ void Game::setScopeAlwaysObject(BfObject *object)
 bool Game::isSuspended() const
 {
    return mGameSuspended;
+}
+
+
+// On server, this is called from c2s with /setplaylist command.  On client, it is set from the 
+// pre-hosting playlist selection menu.  In both cases, we know the file exists by the time we get here.
+void Game::setPlaylist(const string &playlist)
+{
+   mPlaylist = playlist;
+}
+
+
+string Game::getPlaylist() const
+{
+   return mPlaylist;
 }
 
 

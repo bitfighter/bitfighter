@@ -41,7 +41,7 @@ TEST(LevelMenuSelectUserInterfaceTests, GetIndexOfNext)
 
 
    // Some random checks
-   ui->selectedIndex = 1;
+   ui->mSelectedIndex = 1;
    ASSERT_EQ(ui->getIndexOfNext("a"), 0);
    ASSERT_EQ(ui->getIndexOfNext("boy"), 3);
    ASSERT_EQ(ui->getIndexOfNext("c"), 4);
@@ -50,27 +50,27 @@ TEST(LevelMenuSelectUserInterfaceTests, GetIndexOfNext)
    ASSERT_EQ(ui->getIndexOfNext("chop"), 7);
 
    // Check cycling of the Cs
-   ui->selectedIndex = 3;
+   ui->mSelectedIndex = 3;
    ASSERT_EQ(ui->getIndexOfNext("c"), 4);
-   ui->selectedIndex = 4;
+   ui->mSelectedIndex = 4;
    ASSERT_EQ(ui->getIndexOfNext("c"), 5);
-   ui->selectedIndex = 5;
+   ui->mSelectedIndex = 5;
    ASSERT_EQ(ui->getIndexOfNext("c"), 6);
-   ui->selectedIndex = 6;
+   ui->mSelectedIndex = 6;
    ASSERT_EQ(ui->getIndexOfNext("c"), 7);
-   ui->selectedIndex = 7;
+   ui->mSelectedIndex = 7;
    ASSERT_EQ(ui->getIndexOfNext("c"), 8);
-   ui->selectedIndex = 8;
+   ui->mSelectedIndex = 8;
    ASSERT_EQ(ui->getIndexOfNext("c"), 4);
 
    // Check wrapping
-   ui->selectedIndex = 9;
+   ui->mSelectedIndex = 9;
    ASSERT_EQ(ui->getIndexOfNext("a"), 0);
-   ui->selectedIndex = 15;     // last item
+   ui->mSelectedIndex = 15;     // last item
    ASSERT_EQ(ui->getIndexOfNext("a"), 0);
 
    // Check repeated hammering on current item
-   ui->selectedIndex = 12;
+   ui->mSelectedIndex = 12;
    ASSERT_EQ(ui->getIndexOfNext("e"), 13);    // Single letter advances to next of that letter
    ASSERT_EQ(ui->getIndexOfNext("ea"), 12);
    ASSERT_EQ(ui->getIndexOfNext("eat"), 12);
@@ -82,7 +82,7 @@ TEST(LevelMenuSelectUserInterfaceTests, GetIndexOfNext)
    ASSERT_EQ(ui->getIndexOfNext("eatingx"), 12); 
    ASSERT_EQ(ui->getIndexOfNext("flummoxed"), 12); 
 
-   ui->selectedIndex = 8;
+   ui->mSelectedIndex = 8;
    ASSERT_EQ(ui->getIndexOfNext("chop"), 7);
 
    delete game;

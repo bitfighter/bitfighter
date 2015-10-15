@@ -9,6 +9,7 @@
 #include "BanList.h"
 #include "DisplayManager.h"
 #include "IniFile.h"
+#include "game.h"
 #include "SharedConstants.h"  // For MAX_PLAYERS
 #include "stringUtils.h"      // For itos
 
@@ -575,12 +576,14 @@ string GameSettings::getLevelLoc()
 // Note that game CAN be NULL here.
 LevelSource *GameSettings::chooseLevelSource(Game *game)
 {
-	if(isUsingPlaylist())
+	if(game->getPlaylist() != "")
    {
       string levelDir = getFolderManager()->getLevelDir();
 
+      string playlist = checkName(game->getPlaylist(), levelDir, ".playlist");
+
       // Create a list of levels for hosting a game from a file, but does not read the files or do any validation of them
-      Vector<string> list = FileListLevelSource::findAllFilesInPlaylist(getPlaylistFile(), levelDir);
+      Vector<string> list = FileListLevelSource::findAllFilesInPlaylist(playlist, levelDir);
 		return new FileListLevelSource(list, levelDir, this);
    }
 

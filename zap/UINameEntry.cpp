@@ -448,7 +448,7 @@ void LevelChangeOrAdminPasswordEntryUserInterface::onAccept(const char *text)
    if(submitting)
    {
       getUIManager()->reactivatePrevUI();                                      // Reactivating clears subtitle message, so reactivate first...
-      getUIManager()->getUI<GameMenuUserInterface>()->mMenuSubTitle = "** checking password **";     // ...then set the message
+      getUIManager()->getUI<GameMenuUserInterface>()->setSubtitle("** checking password **");     // ...then set the message
    }
    else
       getUIManager()->reactivatePrevUI();                                      // Otherwise, just reactivate the previous menu

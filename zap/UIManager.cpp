@@ -711,7 +711,7 @@ void UIManager::gotPasswordOrPermissionsReply(const ClientGame *game, const char
 {
    // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
    if(isCurrentUI<GameMenuUserInterface>())
-      getUI<GameMenuUserInterface>()->mMenuSubTitle = message;
+      getUI<GameMenuUserInterface>()->setSubtitle(message);
    else
       game->displayCmdChatMessage(message);     
 }

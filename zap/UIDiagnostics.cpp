@@ -307,9 +307,10 @@ S32 DiagnosticUserInterface::showMasterBlock(ClientGame *game, S32 textsize, S32
 }
 
 
-static string resolvePlaylist(GameSettings *gameSettings)
+string DiagnosticUserInterface::resolvePlaylist(GameSettings *gameSettings) const
 {
-   ServerGame *game = GameManager::getServerGame();
+   Game *game = getGame();    // Could this be NULL?
+   TNLAssert(game, "No game?");
 
    if(game)
    {
@@ -320,8 +321,8 @@ static string resolvePlaylist(GameSettings *gameSettings)
 
       return playlist;
    }
-   else
-      return gameSettings->isUsingPlaylist() ? gameSettings->getPlaylistFile() : "Not using a playlist";
+
+   return gameSettings->isUsingPlaylist() ? gameSettings->getPlaylistFile() : "Not using a playlist";
 }
 
 

@@ -1265,20 +1265,6 @@ void GameConnection::displayMessageE(U32 color, U32 sfx, StringTableEntry format
 }
 
 
-extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);     // Sort alphanumerically
-
-static Vector<string> findAllThingsInFolder(const string &dir, const string *extList, S32 extListSize)
-{
-   Vector<string> fileList;
-
-   // Build our list by looking at the filesystem for the objects specified
-   getFilesFromFolder(dir, fileList, FILENAME_ONLY_NO_EXTENSION, extList, extListSize); 
-
-   fileList.sort(alphaSort);   // Just to be sure...
-   return fileList;
-}
-
-
 static Vector<string> findAllScriptsInFolder(const string &dir)
 {
    const string extList[] = {"levelgen"};
@@ -1287,14 +1273,7 @@ static Vector<string> findAllScriptsInFolder(const string &dir)
 }
 
 
-static Vector<string> findAllPlaylistsInFolder(const string &dir)
-{
-   const string extList[] = {"playlist"};
-
-   return findAllThingsInFolder(dir, extList, ARRAYSIZE(extList));
-}
-
-
+// Server only
 void GameConnection::sendLevelList()
 {
    // Send blank entry to clear the remote list
@@ -1307,8 +1286,13 @@ void GameConnection::sendLevelList()
       s2cAddLevel(levelInfo.mLevelName, levelInfo.mLevelType);
    }
 
+
+   Vector<string> playlistList = FolderManager::findAllPlaylistsInFolder(mServerGame->getSettings()->getFolderManager()->getLevelDir());
+
+   S32 currentPlaylistIndex = playlistList.getIndex(mServerGame->getPlaylist());
+
    s2cSendScriptAndPlaylistLists(findAllScriptsInFolder(mServerGame->getSettings()->getFolderManager()->getLevelDir()),
-                                 findAllPlaylistsInFolder(mServerGame->getSettings()->getFolderManager()->getLevelDir()));
+                                 playlistList, currentPlaylistIndex);
 }
 
 
@@ -1366,11 +1350,16 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cAddLevel, (StringTableEntry name, RangedU32
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cSendScriptAndPlaylistLists, 
-                  (Vector<string> scripts, Vector<string> playlists), (scripts, playlists),
+                  (Vector<string> scripts, Vector<string> playlists, S32 currentPlaylistIndex), (scripts, playlists, currentPlaylistIndex),
                   NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
 {
    mServerScripts = scripts;
    mPlaylists = playlists;
+
+   if(currentPlaylistIndex >= 0)
+      getClientGame()->setPlaylist(mPlaylists[currentPlaylistIndex]);
+   else
+      getClientGame()->setPlaylist("");
 }
 
 

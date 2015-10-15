@@ -268,7 +268,7 @@ public:
    TNL_DECLARE_RPC(c2sRemoveLevel, (S32 index));
    TNL_DECLARE_RPC(s2cRequestLevel, (S32 index));
 
-   TNL_DECLARE_RPC(s2cSendScriptAndPlaylistLists, (Vector<string> scripts, Vector<string> playlists));
+   TNL_DECLARE_RPC(s2cSendScriptAndPlaylistLists, (Vector<string> scripts, Vector<string> playlists, S32 currentPlaylistIndex));
 
    TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative));
    TNL_DECLARE_RPC(c2sShowNextLevel, ());
