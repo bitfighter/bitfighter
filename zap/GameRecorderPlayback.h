@@ -8,7 +8,6 @@
 
 #include <stdio.h>
 #include "tnlGhostConnection.h"
-#include "tnlNetObject.h"
 #include "gameConnection.h"
 
 #include "UIMenus.h"
