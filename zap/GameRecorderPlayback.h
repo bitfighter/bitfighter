@@ -20,7 +20,10 @@ class ClientInfo;
 class GameRecorderPlayback : public GameConnection
 {
    typedef GameConnection Parent;
+
+private:
    FILE *mFile;
+
    ClientGame *mGame;
    S32 mMilliSeconds;
    U32 mSizeToRead;
@@ -52,6 +55,7 @@ class PlaybackSelectUserInterface : public LevelMenuSelectUserInterface
 {
 public:
    explicit PlaybackSelectUserInterface(ClientGame *game, UIManager *uiManager);
+
    void onActivate();
    void processSelection(U32 index);
 };
