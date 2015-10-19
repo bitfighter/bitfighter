@@ -6,17 +6,20 @@
 #ifndef _GAMERECORDERPLAYBACK_H_
 #define _GAMERECORDERPLAYBACK_H_
 
-#include <stdio.h>
-#include "tnlGhostConnection.h"
 #include "gameConnection.h"
 
 #include "UIMenus.h"
+#include "UIItemListSelectMenu.h"
 
-namespace Zap {
+#include <stdio.h>
+
+namespace Zap 
+{
 
 
 class ClientGame;
 class ClientInfo;
+
 class GameRecorderPlayback : public GameConnection
 {
    typedef GameConnection Parent;
@@ -80,6 +83,7 @@ class PlaybackGameUserInterface : public UserInterface
    U32 mSpeed;
    U32 mSpeedRemainder;
    bool mVisible;
+
 public:
    explicit PlaybackGameUserInterface(ClientGame *game, UIManager *uiManager);
    void onActivate();
