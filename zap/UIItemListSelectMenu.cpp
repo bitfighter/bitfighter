@@ -7,8 +7,6 @@
 
 #include "UIManager.h"
 
-//#include "ship.h"
-
 #include "ClientGame.h"
 #include "gameType.h"            // Can get rid of this with some simple passthroughs
 #include "DisplayManager.h"
