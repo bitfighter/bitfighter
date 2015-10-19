@@ -180,6 +180,7 @@ set(CLIENT_SOURCES
 	UIGameParameters.cpp
 	UIHighScores.cpp
 	UIInstructions.cpp
+	UIItemListSelectMenu.cpp
 	UIKeyDefMenu.cpp
 	UILevelInfoDisplayer.cpp
 	UIManager.cpp

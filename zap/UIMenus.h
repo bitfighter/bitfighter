@@ -7,11 +7,8 @@
 #define _UIMENUS_H_
 
 #include "UI.h"                  // Parent class
-
-#include "SharedConstants.h"     // For MOTD_LEN
-#include "PlayerActionEnum.h"
 #include "UIMenuItems.h"
-#include "config.h"
+#include "PlayerActionEnum.h"
 
 #include "tnlNetConnection.h"    // for TerminationReason
 
@@ -22,6 +19,10 @@ namespace Zap
 {
 
 using namespace std;
+
+
+static const string UPLOAD_LEVELS = "UPLOAD LEVELS";
+static const string ALL_LEVELS = "All Levels";
 
 
 // This class is the template for most all of our menus...
@@ -430,95 +431,6 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class ItemListSelectUserInterface : public MenuUserInterface
-{
-   typedef MenuUserInterface Parent;
-
-private:
-   Timer mStillTypingNameTimer;
-   string mNameSoFar;
-
-public:
-   ItemListSelectUserInterface(ClientGame *game, UIManager *uiManager);   // Constructor
-   virtual ~ItemListSelectUserInterface();
-
-   virtual void onActivate();
-
-   virtual void idle(U32 timeDelta);
-
-   bool processMenuSpecificKeys(InputCode inputCode);
-
-   S32 getIndexOfNext(const string &startingWith) const;    // Public so tests can access this  TODO: Fix test access
-
-   void onEscape();
-};
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-
-class LevelMenuSelectUserInterface : public ItemListSelectUserInterface
-{
-   typedef ItemListSelectUserInterface Parent;
-
-private:
-   string mCategory;
-
-protected:
-   Vector<string> mMenuDisplayItems;
-
-public:
-   LevelMenuSelectUserInterface(ClientGame *game, UIManager *uiManager);   // Constructor
-   virtual ~LevelMenuSelectUserInterface();
-
-   void onActivate();
-      
-   void processSelection(U32 index);
-
-   void setCategory(const string &category);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class PlaylistMenuUserInterface : public ItemListSelectUserInterface
-{
-private:
-   typedef ItemListSelectUserInterface Parent;
-
-public:
-   explicit PlaylistMenuUserInterface(ClientGame *game, UIManager *uiManager);      // Constructor
-   virtual ~PlaylistMenuUserInterface();
-
-   void onActivate();
-
-   void processSelection(U32 index);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class PlayerMenuUserInterface : public MenuUserInterface
-{
-   typedef MenuUserInterface Parent;
-
-public:
-   explicit PlayerMenuUserInterface(ClientGame *game, UIManager *uiManager);  // Constructor
-   virtual ~PlayerMenuUserInterface();
-
-   void idle(U32 timeDelta);
-   void render() const;
-   void playerSelected(U32 index);
-
-   PlayerAction action;
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 class AdminMenuUserInterface : public MenuUserInterface
 {
    typedef MenuUserInterface Parent;
@@ -553,6 +465,25 @@ public:
    string nameToChange;
 
    void processSelection(U32 index);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class PlayerMenuUserInterface : public MenuUserInterface
+{
+   typedef MenuUserInterface Parent;
+
+public:
+   explicit PlayerMenuUserInterface(ClientGame *game, UIManager *uiManager);  // Constructor
+   virtual ~PlayerMenuUserInterface();
+
+   void idle(U32 timeDelta);
+   void render() const;
+   void playerSelected(U32 index);
+
+   PlayerAction action;
 };
 
 };
