@@ -180,6 +180,7 @@ protected:
 
 public:
    ValueMenuItem(const string &displayValue, void (*callback)(ClientGame *, U32), const string &help, InputCode k1, InputCode k2);
+   ValueMenuItem(S32 index, const string &displayValue, void (*callback)(ClientGame *, U32), const string &help, InputCode k1, InputCode k2);
    virtual ~ValueMenuItem();
 };
 
@@ -199,9 +200,14 @@ protected:
    bool mWrap;
 
 public:
-   ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
+   // Constructors
+   ToggleMenuItem(const string &title, const Vector<string> &options, U32 currOption, bool wrap, 
                   void (*callback)(ClientGame *, U32), const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
-   virtual ~ToggleMenuItem();  // Destructor
+   ToggleMenuItem(S32 index, const string &title, const Vector<string> &options, U32 currOption, bool wrap, 
+                  void (*callback)(ClientGame *, U32), const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   virtual ~ToggleMenuItem();  
+
+   virtual void initialize(const Vector<string> &options, U32 currOption, bool wrap);
 
    virtual MenuItemTypes getItemType();
    virtual const char *getSpecialEditingInstructions();
@@ -243,6 +249,7 @@ private:
 
 public:
    YesNoMenuItem(string title, bool currOption, const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   YesNoMenuItem(S32 index, string title, bool currOption, const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    virtual ~YesNoMenuItem();  // Destructor
 
    virtual string getValueForWritingToLevelFile() const;
@@ -440,15 +447,17 @@ private:
    string mEmptyVal;
    string getOptionText() const;    // Helper function
 
-   virtual void initialize();
+   virtual void initialize(const string &emptyVal);
 
 protected:
       LineEditor mLineEditor;
       void(*mTextEditedCallback)(TextEntryMenuItem *, const string &, BfObject *);
 
 public:
-   // Contstuctor
+   // Contstuctors
    TextEntryMenuItem(const string &title, const string &val, const string &emptyVal, const string &help, U32 maxLen, 
+                     InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   TextEntryMenuItem(S32 index, const string &title, const string &val, const string &emptyVal, const string &help, U32 maxLen, 
                      InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
    virtual ~TextEntryMenuItem();  // Destructor

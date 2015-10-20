@@ -318,13 +318,22 @@ MessageMenuItem::~MessageMenuItem()
 ////////////////////////////////////
 
 
-// Constructor
+// Constructors
 ValueMenuItem::ValueMenuItem(const string &displayValue, void (*callback)(ClientGame *, U32),
                              const string &help, InputCode k1, InputCode k2) :
       Parent(displayValue, callback, help, k1, k2)
 {
    initialize();
 }
+
+
+ValueMenuItem::ValueMenuItem(S32 index, const string &displayValue, void (*callback)(ClientGame *, U32),
+                             const string &help, InputCode k1, InputCode k2) :
+      Parent(index, displayValue, callback, help, k1, k2)
+{
+   initialize();
+}
+
 
 // Destructor
 ValueMenuItem::~ValueMenuItem()
@@ -378,16 +387,19 @@ void ValueMenuItem::setUnselectedValueColor(const Color &color)
 ////////////////////////////////////
 
 // Constructor
-ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
+ToggleMenuItem::ToggleMenuItem(const string& title, const Vector<string> &options, U32 currOption,  bool wrap, 
                                void (*callback)(ClientGame *, U32), const string &help, InputCode k1, InputCode k2) :
       ValueMenuItem(title, callback, help, k1, k2)
 {
-   mOptions = options;
-   mIndex = clamp(currOption, 0, mOptions.size() - 1);
-   mWrap = wrap;
-   mEnterAdvancesItem = true;
+   initialize(options, currOption, wrap);
+}
 
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+
+ToggleMenuItem::ToggleMenuItem(S32 index, const string &title, const Vector<string> &options, U32 currOption, bool wrap, 
+                               void (*callback)(ClientGame *, U32), const string &help, InputCode k1, InputCode k2) :
+      ValueMenuItem(index, title, callback, help, k1, k2)
+{
+   initialize(options, currOption, wrap);
 }
 
 
@@ -395,6 +407,17 @@ ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOpt
 ToggleMenuItem::~ToggleMenuItem()
 {
    LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void ToggleMenuItem::initialize(const Vector<string> &options, U32 currOption, bool wrap)
+{
+   mOptions = options;
+   mIndex = clamp(currOption, 0, mOptions.size() - 1);
+   mWrap = wrap;
+   mEnterAdvancesItem = true;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -624,6 +647,15 @@ ToggleMenuItem::ToggleMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NONE, KE
 // Constructors
 YesNoMenuItem::YesNoMenuItem(string title, bool currOption, const string &help, InputCode k1, InputCode k2) :
       ToggleMenuItem(title, Vector<string>(), currOption, true, NULL, help, k1, k2)
+{
+   initialize();
+
+   setIndex(currOption);
+}
+
+
+YesNoMenuItem::YesNoMenuItem(S32 index, string title, bool currOption, const string &help, InputCode k1, InputCode k2) :
+      ToggleMenuItem(index, title, Vector<string>(), currOption, true, NULL, help, k1, k2)
 {
    initialize();
 
@@ -1556,8 +1588,17 @@ TextEntryMenuItem::TextEntryMenuItem(const string &title, const string &val, con
          ValueMenuItem(title, NULL, help, k1, k2),
          mLineEditor(LineEditor(maxLen, val))
 {
-   initialize();
+   initialize(emptyVal);
    mEmptyVal = emptyVal;
+}
+
+
+TextEntryMenuItem::TextEntryMenuItem(S32 index, const string &title, const string &val, const string &emptyVal, const string &help, U32 maxLen, InputCode k1, InputCode k2) :
+         ValueMenuItem(index, title, NULL, help, k1, k2),
+         mLineEditor(LineEditor(maxLen, val))
+{
+   initialize(emptyVal);
+   
 }
 
 
@@ -1568,8 +1609,9 @@ TextEntryMenuItem::~TextEntryMenuItem()
 }
 
 
-void TextEntryMenuItem::initialize()
+void TextEntryMenuItem::initialize(const string &emptyVal)
 {
+   mEmptyVal = emptyVal;
    mEnterAdvancesItem = true;
    mTextEditedCallback = NULL;
 
@@ -1743,7 +1785,7 @@ REGISTER_LUA_SUBCLASS(TextEntryMenuItem, MenuItem);
 // Lua Constructor
 TextEntryMenuItem::TextEntryMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NONE, KEY_NONE)
 {
-   initialize();
+   initialize(getString(L, 3, ""));
 
    const char *methodName = "TextEntryMenuItem constructor";
 
@@ -1752,7 +1794,6 @@ TextEntryMenuItem::TextEntryMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NO
 
    // Optional (but recommended) items
    mLineEditor.setString(getString(L, 2, ""));
-   mEmptyVal = getString(L, 3, "");
    mLineEditor.mMaxLen = getInt(L, 4, 32);
    mHelp = getString(L, 5, "");
 

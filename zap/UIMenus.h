@@ -304,20 +304,6 @@ public:
 
 class HostMenuUserInterface : public MenuUserInterface
 {
-   enum MenuItems {
-      OPT_HOST,
-      OPT_ROBOTS,
-      OPT_NAME,
-      OPT_DESCR,
-      OPT_PASSWORDS,
-      OPT_GETMAP,
-      OPT_RECORD,
-      OPT_PLAYBACK,
-      OPT_COUNT
-   };
-
-   static const S32 FIRST_EDITABLE_ITEM = OPT_NAME;
-
    typedef MenuUserInterface Parent;
 
 private:
@@ -344,8 +330,8 @@ class NameEntryUserInterface : public MenuUserInterfaceWithIntroductoryAnimation
    typedef MenuUserInterfaceWithIntroductoryAnimation Parent;
 
 private:
-   void renderExtras() const;
    NetConnection::TerminationReason mReason;
+   void renderExtras() const;
 
 public:
    explicit NameEntryUserInterface(ClientGame *game, UIManager *uiManager);    // Constructor

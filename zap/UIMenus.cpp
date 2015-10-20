@@ -41,6 +41,14 @@
 namespace Zap
 {
 
+enum MenuItems {
+   OPT_HOST,            OPT_ROBOTS,
+   OPT_PLAYLIST,        OPT_NAME,
+   OPT_DESCR,           OPT_PASSWORDS,
+   OPT_GETMAP,          OPT_RECORD,
+   OPT_HOST_ON_SERVER,  OPT_PLAYBACK
+};
+
 // Sorts alphanumerically by menuItem's prompt  ==> used for getting levels in the right order and such
 S32 QSORT_CALLBACK menuItemValueSort(boost::shared_ptr<MenuItem> *a, boost::shared_ptr<MenuItem> *b)
 {
@@ -1942,35 +1950,33 @@ void HostMenuUserInterface::setupMenus()
    // These menu items MUST align with the MenuItems enum
    addMenuItem(new MenuItem("START HOSTING", startHostingCallback, "", KEY_H));
 
-   addMenuItem(new MenuItem(getMenuItemCount(), "ROBOTS", robotOptionsSelectedCallback,
+   addMenuItem(new MenuItem(OPT_ROBOTS, "ROBOTS", robotOptionsSelectedCallback,
                             "Add robots and adjust their settings", KEY_R));
 
-   addMenuItem(new MenuItem(getMenuItemCount(), "PLAYLIST", playlistItemSelectedCallback,
+   addMenuItem(new MenuItem(OPT_PLAYLIST, "PLAYLIST", playlistItemSelectedCallback,
                             "Select a playlist", KEY_L));
 
-   addMenuItem(new TextEntryMenuItem("SERVER NAME:", mGameSettings->getHostName(),
-                                     "<Bitfighter Host>", "", MaxServerNameLen,  KEY_N));
+   addMenuItem(new TextEntryMenuItem(OPT_NAME, "SERVER NAME:", mGameSettings->getHostName(),
+                                       "<Bitfighter Host>", "", MaxServerNameLen,  KEY_N));
 
-   addMenuItem(new TextEntryMenuItem("DESCRIPTION:", mGameSettings->getHostDescr(),
-                                     "<Empty>", "", MaxServerDescrLen, KEY_D));
+   addMenuItem(new TextEntryMenuItem(OPT_DESCR, "DESCRIPTION:", mGameSettings->getHostDescr(),
+                                       "<Empty>", "", MaxServerDescrLen, KEY_D));
 
-   addMenuItem(new MenuItem(getMenuItemCount(), "PASSWORDS", passwordOptionsSelectedCallback,
-                            "Set server passwords/permissions", KEY_P));
+   addMenuItem(new MenuItem(OPT_PASSWORDS, "PASSWORDS", passwordOptionsSelectedCallback,
+                                       "Set server passwords/permissions", KEY_P));
 
-   addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", 
-         mGameSettings->getSetting<YesNo>(IniKey::AllowGetMap),
-                                 "", KEY_M));
+   addMenuItem(new YesNoMenuItem(OPT_GETMAP, "ALLOW MAP DOWNLOADS:", 
+                                       mGameSettings->getSetting<YesNo>(IniKey::AllowGetMap), "", KEY_M));
 
-   addMenuItem(new YesNoMenuItem("RECORD GAMES:", 
-         mGameSettings->getSetting<YesNo>(IniKey::GameRecording),
-                                 ""));
+   addMenuItem(new YesNoMenuItem(OPT_RECORD, "RECORD GAMES:", 
+                                       mGameSettings->getSetting<YesNo>(IniKey::GameRecording), ""));
 
    // Note, Don't move "HOST ON SERVER" above "RECORD GAMES" unless
    // first checking HostMenuUserInterface::saveSettings if it saves correctly
    if(getGame()->getConnectionToMaster() && getGame()->getConnectionToMaster()->isHostOnServerAvailable())
-      addMenuItem(new MenuItem("HOST ON SERVER", hostOnServerCallback, "", KEY_H));
+      addMenuItem(new MenuItem(OPT_HOST_ON_SERVER, "HOST ON SERVER", hostOnServerCallback, "", KEY_H));
 
-   addMenuItem(new MenuItem("PLAYBACK GAMES", playbackGamesCallback, ""));
+   addMenuItem(new MenuItem(OPT_PLAYBACK, "PLAYBACK GAMES", playbackGamesCallback, ""));
 }
 
 
