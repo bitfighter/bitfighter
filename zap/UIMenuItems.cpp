@@ -431,7 +431,8 @@ bool ToggleMenuItem::handleKey(InputCode inputCode)
       UserInterface::playBoop();
       return true;
    }
-   else if(inputCode == KEY_LEFT || inputCode == MOUSE_RIGHT || inputCode == MOUSE_WHEEL_UP)
+
+   if(inputCode == KEY_LEFT || inputCode == MOUSE_RIGHT || inputCode == MOUSE_WHEEL_UP)
    {      
       nextValAfterWrap = mWrap ? mOptions.size() - 1 : mIndex;
       mIndex = (mIndex == 0) ? nextValAfterWrap : mIndex - 1;
@@ -443,7 +444,7 @@ bool ToggleMenuItem::handleKey(InputCode inputCode)
       return true;
    }
 
-   else if(inputCode == KEY_ENTER || inputCode == KEY_SPACE)
+   if(inputCode == KEY_ENTER || inputCode == KEY_SPACE)
    {
       mIndex = (mIndex == (U32)mOptions.size() - 1) ? nextValAfterWrap : mIndex + 1;
 
