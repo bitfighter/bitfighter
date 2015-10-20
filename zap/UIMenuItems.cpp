@@ -433,7 +433,7 @@ bool ToggleMenuItem::handleKey(InputCode inputCode)
    }
    else if(inputCode == KEY_LEFT || inputCode == MOUSE_RIGHT || inputCode == MOUSE_WHEEL_UP)
    {      
-      U32 nextValAfterWrap = mWrap ? mOptions.size() - 1 : mIndex;
+      nextValAfterWrap = mWrap ? mOptions.size() - 1 : mIndex;
       mIndex = (mIndex == 0) ? nextValAfterWrap : mIndex - 1;
       
       if(mCallback)
