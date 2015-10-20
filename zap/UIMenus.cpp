@@ -1923,7 +1923,7 @@ static void passwordOptionsSelectedCallback(ClientGame *game, U32 unused)
 }
 
 
-static void plalistItemSelectedCallback(ClientGame *game, U32 unused)
+static void playlistItemSelectedCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->activate<PlaylistMenuUserInterface>();
 }
@@ -1945,7 +1945,7 @@ void HostMenuUserInterface::setupMenus()
    addMenuItem(new MenuItem(getMenuItemCount(), "ROBOTS", robotOptionsSelectedCallback,
                             "Add robots and adjust their settings", KEY_R));
 
-   addMenuItem(new MenuItem(getMenuItemCount(), "PLAYLISTS", plalistItemSelectedCallback,
+   addMenuItem(new MenuItem(getMenuItemCount(), "PLAYLIST", playlistItemSelectedCallback,
                             "Select a playlist", KEY_L));
 
    addMenuItem(new TextEntryMenuItem("SERVER NAME:", mGameSettings->getHostName(),
