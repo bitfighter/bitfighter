@@ -481,7 +481,7 @@ void ToggleMenuItem::handleTextInput(char ascii)
 
 void ToggleMenuItem::activatedWithShortcutKey()
 {
-   /* Do nothing */
+   // Do nothing
 }
 
 
