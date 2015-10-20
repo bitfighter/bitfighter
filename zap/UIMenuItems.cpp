@@ -335,7 +335,7 @@ ValueMenuItem::~ValueMenuItem()
 
 void ValueMenuItem::initialize()
 {
-   mSelectedValueColor = Colors::cyan;
+   mSelectedValueColor   = Colors::cyan;
    mUnselectedValueColor = Colors::cyan;
 }
 
