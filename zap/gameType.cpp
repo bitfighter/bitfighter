@@ -3024,7 +3024,7 @@ GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
 // Get here when player issues /kickbot command, or (repeatedly) when they choose FEWER ROBOTS from the game menu
 GAMETYPE_RPC_C2S(GameType, c2sKickBot, (), ())
 {
-   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   GameConnection *source = static_cast<GameConnection *>(getRPCSourceConnection());
    ClientInfo *clientInfo = source->getClientInfo();
 
    if(!clientInfo->isLevelChanger())
@@ -3406,7 +3406,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sLockTeams, (bool locked), (locked), Net
 
 GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringPtr> args), (cmd, args))
 {
-   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   GameConnection *source = static_cast<GameConnection *>(getRPCSourceConnection());
 
    processServerCommand(source->getClientInfo(), cmd.getString(), args);     
 }
