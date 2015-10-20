@@ -2293,20 +2293,20 @@ RobotsMenuUserInterface::~RobotsMenuUserInterface()
 
 
 // Can only get here if the player has the appropriate permissions, so no need for a further check
-static void moreBotsAcceptCallback(ClientGame *game, U32 index)
+static void moreBotsCallback(ClientGame *game, U32 index)
 {
    game->moreBots();
 }
 
 
 // Can only get here if the player has the appropriate permissions, so no need for a further check
-static void fewerBotsAcceptCallback(ClientGame *game, U32 index)
+static void fewerBotsCallback(ClientGame *game, U32 index)
 {
    game->lessBots();
 }
 
 
-static void removeBotsAcceptCallback(ClientGame *game, U32 index)
+static void removeBotsCallback(ClientGame *game, U32 index)
 {
    game->getGameType()->c2sKickBots();
    game->getUIManager()->reactivateGameUI();
@@ -2319,9 +2319,9 @@ void RobotsMenuUserInterface::onActivate()
 
    clearMenuItems();
 
-   addMenuItem(new MenuItem("MORE ROBOTS",       moreBotsAcceptCallback,   "Add a robot to each team",        KEY_M));
-   addMenuItem(new MenuItem("FEWER ROBOTS",      fewerBotsAcceptCallback,  "Remove a robot from each team",   KEY_F));
-   addMenuItem(new MenuItem("REMOVE ALL ROBOTS", removeBotsAcceptCallback, "Remove all robots from the game", KEY_R));
+   addMenuItem(new MenuItem("MORE ROBOTS",       moreBotsCallback,   "Add a robot to each team",        KEY_M));
+   addMenuItem(new MenuItem("FEWER ROBOTS",      fewerBotsCallback,  "Remove a robot from each team",   KEY_F));
+   addMenuItem(new MenuItem("REMOVE ALL ROBOTS", removeBotsCallback, "Remove all robots from the game", KEY_R));
 }
 
 
