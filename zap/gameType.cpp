@@ -3412,6 +3412,17 @@ GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringP
 }
 
 
+GAMETYPE_RPC_C2S(GameType, c2sMoreLessBots, (bool moreOrLess), (moreOrLess))
+{
+   GameConnection *source = static_cast<GameConnection *>(getRPCSourceConnection());
+
+   if(moreOrLess)
+      moreBots(source->getClientInfo());
+   else
+      fewerBots(source->getClientInfo());
+}
+
+
 // Send an announcement
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sSendAnnouncement, (string message), (message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhostParent, 1)
 {

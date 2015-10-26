@@ -1818,15 +1818,14 @@ void ClientGame::moreBots()
 {
    GameType *gameType = getGameType();
    TNLAssert(gameType, "When no GT here? (moreBots)");
-
-   if(gameType)
+   
+   if(hasLevelChange("!!! Must have level change permissions to manage bots"))
    {
-      Vector<StringPtr> args;  // Empty args
-      gameType->c2sSendCommand("MoreBots", args);
-   }
+      gameType->c2sMoreLessBots(true);
 
-   // Player has demonstrated ability to add bots... no need to show help item
-   getUIManager()->removeInlineHelpItem(AddBotsItem, true);
+      // Player has demonstrated ability to add bots... no need to show help item
+      getUIManager()->removeInlineHelpItem(AddBotsItem, true);   
+   }
 
    // Back to the game!   
    getUIManager()->reactivateGameUI();
@@ -1838,16 +1837,12 @@ void ClientGame::lessBots()
    GameType *gameType = getGameType();
    TNLAssert(gameType, "When no GT here? (lessBots)");
 
-   if(getBotCount() == 0)
+   if(hasLevelChange("!!! Must have level change permissions to manage bots"))
    {
-      displayErrorMessage("!!! There are no robots to kick");
-      return;
-   }
-
-   if(gameType)
-   {
-      Vector<StringPtr> args;    // Empty args
-      gameType->c2sSendCommand("FewerBots", args);
+      if(getBotCount() > 0)
+         gameType->c2sMoreLessBots(false);
+      else
+         displayErrorMessage("!!! There are no robots to kick");
    }
 
    // Back to the game!
