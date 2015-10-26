@@ -298,7 +298,6 @@ void PlaylistMenuUserInterface::onActivate()
 
    // Replace with a getLevelCount() method on Game?
    ClientGame *game = getGame();
-   GameConnection *gc = game->getConnectionToServer();
 
    Vector<string> playlists = FolderManager::findAllPlaylistsInFolder(game->getSettings()->getFolderManager()->getLevelDir());
 
@@ -349,7 +348,7 @@ static void playerSelectedCallback(ClientGame *game, U32 index)
 }
 
 
-void PlayerMenuUserInterface::playerSelected(U32 index)
+void PlayerMenuUserInterface::playerSelected(U32 index) const
 {
    // When we created the menu, names were not sorted, and item indices were assigned in "natural order".  Then
    // the menu items were sorted by name, and now the indices are now jumbled.  This bit here tries to get the

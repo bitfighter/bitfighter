@@ -467,7 +467,7 @@ public:
 
    void idle(U32 timeDelta);
    void render() const;
-   void playerSelected(U32 index);
+   void playerSelected(U32 index) const;
 
    PlayerAction action;
 };
