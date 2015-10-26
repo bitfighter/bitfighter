@@ -763,7 +763,7 @@ void MenuUserInterface::advanceItem()
 
 void MenuUserInterface::onEscape()
 {
-   // Do nothing
+   getUIManager()->reactivatePrevUI();
 }
 
 
