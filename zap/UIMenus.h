@@ -454,24 +454,6 @@ public:
 };
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-class PlayerMenuUserInterface : public MenuUserInterface
-{
-   typedef MenuUserInterface Parent;
-
-public:
-   explicit PlayerMenuUserInterface(ClientGame *game, UIManager *uiManager);  // Constructor
-   virtual ~PlayerMenuUserInterface();
-
-   void idle(U32 timeDelta);
-   void render() const;
-   void playerSelected(U32 index) const;
-
-   PlayerAction action;
-};
-
 };
 
 
