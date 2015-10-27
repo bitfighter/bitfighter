@@ -10,25 +10,15 @@
 #include "UIGame.h"
 #include "UIMenus.h"
 #include "UINameEntry.h"
-#include "UIMessage.h"
 #include "UIQueryServers.h"
 #include "UIEditor.h"            // For EditorUserInterface def
-#include "UIInstructions.h"
-#include "UIKeyDefMenu.h"
-#include "UIDiagnostics.h"
-#include "UIGameParameters.h"
 #include "UICredits.h"
-#include "UIEditorInstructions.h"
 #include "UIErrorMessage.h"
 #include "UIChat.h"
-#include "UITeamDefMenu.h"
-#include "UIGame.h"
 #include "UIHighScores.h"
-#include "DisplayManager.h"
 #include "ClientGame.h"
 
 #include "stringUtils.h"
-#include "RenderUtils.h"
 
 #include "SoundSystem.h"
 
