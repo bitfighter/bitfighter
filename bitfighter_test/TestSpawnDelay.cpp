@@ -5,13 +5,14 @@
 
 #include "TestUtils.h"
 
-#include "gameType.h"
-#include "ServerGame.h"
-#include "ClientGame.h"
 #include "ChatCommands.h"
+#include "ClientGame.h"
+#include "gameType.h"
+#include "Level.h"
+#include "ServerGame.h"
+#include "ship.h"
 #include "UIGame.h"
 #include "UIManager.h"
-#include "Level.h"
 
 #include "gtest/gtest.h"
 

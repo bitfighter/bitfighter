@@ -3,11 +3,11 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "gameType.h"
-#include "ServerGame.h"
 #include "EngineeredItem.h"
-
+#include "gameType.h"
 #include "Level.h"
+#include "ServerGame.h"
+#include "ship.h"
 
 #include "LevelFilesForTesting.h"
 #include "TestUtils.h"

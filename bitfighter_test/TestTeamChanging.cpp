@@ -6,14 +6,13 @@
 #include "LevelFilesForTesting.h"
 #include "TestUtils.h"
 
-#include "ChatHelper.h"
 #include "ClientGame.h"
 #include "gameType.h"
 #include "ServerGame.h"
+#include "ship.h"
 #include "UIManager.h"
 #include "UIMenus.h"
 
-#include "tnlNetConnection.h"
 
 #include "gtest/gtest.h"
 
