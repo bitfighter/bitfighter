@@ -6,6 +6,7 @@
 #include "ClientGame.h"
 #include "UIMenus.h"
 #include "UIManager.h"
+#include "UIItemListSelectMenu.h"
 
 #include "TestUtils.h"
 
