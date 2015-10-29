@@ -10,6 +10,7 @@
 #include "ServerGame.h"
 
 #include "LevelFilesForTesting.h"
+#include "LevelSpecifierEnum.h"
 
 #include "stringUtils.h"
 #include "TestUtils.h"
