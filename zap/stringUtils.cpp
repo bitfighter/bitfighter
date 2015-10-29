@@ -618,7 +618,7 @@ string checkName(const string &filename, const Vector<string> &folders)
 bool fileExists(const string &path)
 {
    struct stat st;
-   return (stat(path.c_str(), &st) == 0);               // Does path exist?
+   return (stat(path.c_str(), &st) == 0);    // Does path exist?
 }
 
 
