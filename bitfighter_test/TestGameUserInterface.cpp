@@ -3,13 +3,14 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "UIGame.h"
 #include "GameManager.h"
-#include "UIManager.h"
-#include "ServerGame.h"
 #include "gameType.h"
-#include "stringUtils.h"
 #include "Level.h"
+#include "ServerGame.h"
+#include "ship.h"
+#include "stringUtils.h"
+#include "UIGame.h"
+#include "UIManager.h"
 
 #include "TestUtils.h"
 #include "EventKeyDefs.h"
