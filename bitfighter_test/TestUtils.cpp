@@ -4,19 +4,19 @@
 //------------------------------------------------------------------------------
 
 #include "TestUtils.h"
-#include "gameType.h"
-#include "GameManager.h"
-#include "UIGame.h"
-#include "ServerGame.h"
-#include "ClientGame.h"
+
 #include "ChatHelper.h"
+#include "ClientGame.h"
+#include "GameManager.h"
+#include "gameType.h"
 #include "helperMenu.h"
-#include "FontManager.h"
-#include "DisplayManager.h"
-#include "UIManager.h"
-#include "SystemFunctions.h"
 #include "Level.h"
+#include "ServerGame.h"
+#include "ship.h"
+#include "SystemFunctions.h"
 #include "tnlAssert.h"
+#include "UIGame.h"
+#include "UIManager.h"
 
 #include "../zap/stringUtils.h"
 #include "gtest/gtest.h"
