@@ -158,6 +158,8 @@ void ServerGame::cleanUp()
    for(S32 i = 0; i < fillVector.size(); i++)
       delete dynamic_cast<Object *>(fillVector[i]);
 
+   mVoteTimer = 0;
+
    Parent::cleanUp();
 }
 
