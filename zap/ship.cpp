@@ -1177,12 +1177,17 @@ void Ship::damageObject(DamageInfo *theInfo)
          mImpulseVector += theInfo->impulseVector;
    }
 
-   if(theInfo->damageAmount == 0)
-      return;
-
    F32 damageAmount = theInfo->damageAmount;
 
-   if(theInfo->damageAmount > 0)
+   // No damage?  just return
+   if(damageAmount == 0)
+      return;
+
+   // Having armor reduces damage
+   static const F32 ARMOR_DAMAGE_REDUCTION_FACTOR = 0.4f;
+
+   // We have damage
+   if(damageAmount > 0)
    {
       if(!getGame()->objectCanDamageObject(theInfo->damagingObject, this))
          return;
@@ -1200,11 +1205,18 @@ void Ship::damageObject(DamageInfo *theInfo)
 
       // Having armor reduces damage
       if(hasArmor)
-      {
-         static const F32 ArmorDamageReductionFactor = 0.4f;   // Having armor reduces damage
+         damageAmount *= ARMOR_DAMAGE_REDUCTION_FACTOR;           // Any other damage, including asteroids
+   }
 
-         damageAmount *= ArmorDamageReductionFactor;           // Any other damage, including asteroids
-      }
+   // Healing (damageAmount > 0)
+   else
+   {
+      // Set healing rate to the same as the damage reduction rate.  Might be
+      // too slow at healing now?
+      static const F32 ARMOR_HEALING_FACTOR = ARMOR_DAMAGE_REDUCTION_FACTOR;
+
+      if(hasArmor)
+         damageAmount *= ARMOR_HEALING_FACTOR;
    }
 
    ClientInfo *damagerOwner = theInfo->damagingObject ? theInfo->damagingObject->getOwner() : NULL;
@@ -1213,6 +1225,7 @@ void Ship::damageObject(DamageInfo *theInfo)
    bool damageWasSelfInflicted = victimOwner && damagerOwner == victimOwner;
 
    // Healing things do negative damage, thus adding to health
+   // The multiplier here is the damageSelfMultiplier from the WeaponInfo
    mHealth -= damageAmount * (damageWasSelfInflicted ? theInfo->damageSelfMultiplier : 1);
    setMaskBits(HealthMask);
 
