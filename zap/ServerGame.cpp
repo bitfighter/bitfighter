@@ -159,6 +159,8 @@ void ServerGame::cleanUp()
    mLevelSwitchTimer.clear();
    mScopeAlwaysList.clear();
 
+   mVoteTimer = 0;
+
    Parent::cleanUp();
 }
 
