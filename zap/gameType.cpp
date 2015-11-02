@@ -164,7 +164,7 @@ GameType *GameType::clone() const
 bool GameType::onGhostAdd(GhostConnection *theConnection)
 {
 #ifndef ZAP_DEDICATED
-   Game *game = ((GameConnection *) theConnection)->getClientGame();
+   Game *game = static_cast<GameConnection *>(theConnection)->getClientGame();
    TNLAssert(game && !game->isServer(), "Should only be client here!");
 
    //setLevel(game->getLevel());
