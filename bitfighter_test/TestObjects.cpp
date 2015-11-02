@@ -157,8 +157,6 @@ TEST_F(ObjectTest, GhostingSanity)
    // Idle to allow object replication
    gamePair.idle(10, 10);
 
-   TNLAssert(clientGame->getLevel(), "We should have a level here!");
-
    // Check whether the objects created on the server made it onto the client
    const Vector<DatabaseObject *> *objects = clientGame->getLevel()->findObjects_fast();
    for(S32 i = 0; i < objects->size(); i++)
