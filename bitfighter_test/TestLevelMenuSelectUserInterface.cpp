@@ -17,7 +17,8 @@ namespace Zap
 
 TEST(LevelMenuSelectUserInterfaceTests, GetIndexOfNext)
 {
-   ClientGame *game = newClientGame();
+   GamePair pair;
+   ClientGame *game = pair.getClient(0);
 
    // Want to test getIndexOfNext(), which is a slightly complex function.  Need to start by setting up a menu.
    LevelMenuSelectUserInterface *ui = game->getUIManager()->getUI<LevelMenuSelectUserInterface>();      // Cleaned up when game goes out of scope
@@ -85,8 +86,6 @@ TEST(LevelMenuSelectUserInterfaceTests, GetIndexOfNext)
 
    ui->mSelectedIndex = 8;
    ASSERT_EQ(ui->getIndexOfNext("chop"), 7);
-
-   delete game;
 }
    
 };

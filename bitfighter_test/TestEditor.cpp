@@ -19,7 +19,9 @@ namespace Zap
 
 TEST(EditorTest, findSnapVertexTest)
 {
-   ClientGame *clientGame = newClientGame();
+   GamePair pair;
+   ClientGame *clientGame = pair.getClient(0);
+   ASSERT_TRUE(clientGame)  << "Shouldn't be NULL here...";
    EditorUserInterface *editorUi = clientGame->getUIManager()->getUI<EditorUserInterface>();
    editorUi->setLevel(boost::shared_ptr<Level>(new Level()));
 

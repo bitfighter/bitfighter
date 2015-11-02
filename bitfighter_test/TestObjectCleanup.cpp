@@ -70,6 +70,8 @@ namespace Zap
       settings->getFolderManager()->setLevelDir("levels");           // Need something for hosting to work
       settings->updatePlayerName("Alfonso");
 
+      settings->resolveDirs();
+
       Address addr;
       ClientGame *clientGame = new ClientGame(addr, settings, new UIManager());    // ClientGame destructor will clean up UIManager
 

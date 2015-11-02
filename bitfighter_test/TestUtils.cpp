@@ -195,7 +195,7 @@ ClientGame *GamePair::addClientAndSetTeam(const string &name, S32 teamIndex)
 // Simulates player joining game from new client
 ClientGame *GamePair::addClient(const string &name)
 {
-   ClientGame *clientGame = newClientGame();
+   ClientGame *clientGame = newClientGame(server->getSettingsPtr());
    clientGame->userEnteredLoginCredentials(name, "password", false);    // Simulates entry from NameEntryUserInterface
 
    // Get a base UI going, so if we enter the game, and exit again, we'll have a place to land

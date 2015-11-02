@@ -8,10 +8,7 @@
 #include "TestUtils.h"
 
 #include "../master/master.h"
-#include "../master/MasterServerConnection.h"
-#include "masterConnection.h"
 #include "ClientGame.h"
-#include "UIManager.h"
 
 namespace Zap
 {
@@ -23,12 +20,9 @@ TEST(MasterTest, Sanity)
    MasterSettings masterSettings("");     // Don't read from an INI file
    MasterServer master(&masterSettings);
 
-   
-
    Address addr;
-   GameSettingsPtr gameSettings = GameSettingsPtr(new GameSettings());
-
-   ClientGame *clientGame = newClientGame(gameSettings);
+   GamePair pair;
+   ClientGame *clientGame = pair.getClient(0);
 
 //   clientGame->setConnectionToMaster(new Zap::MasterServerConnection(clientGame)); // uses Zap::MasterServerConnection
 //   clientGame->getConnectionToMaster()->connectLocal((NetInterface*) clientGame->getNetInterface(), master.getNetInterface());
@@ -38,8 +32,6 @@ TEST(MasterTest, Sanity)
 //   EXPECT_TRUE(clientConnection != NULL);
 //   Master::MasterServerConnection *masterConnection = dynamic_cast<Master::MasterServerConnection *>(clientConnection->getRemoteConnectionObject());
 //   EXPECT_TRUE(masterConnection != NULL);
-
-   delete clientGame;
 }
 	
 };

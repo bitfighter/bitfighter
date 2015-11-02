@@ -123,6 +123,9 @@ TEST_F(ObjectTest, GhostingSanity)
    geom_speedZone.push_back(Point(400,0));
    geom_speedZone.push_back(Point(400,1));
 
+   // We'll need a level on the client... this is normally done when a new game starts
+   clientGame->setLevel(new Level());     // Level will be cleaned up by boost
+
    // Create one of each type of registered NetClass
    for(U32 i = 0; i < classCount; i++)
    {
@@ -153,6 +156,8 @@ TEST_F(ObjectTest, GhostingSanity)
 
    // Idle to allow object replication
    gamePair.idle(10, 10);
+
+   TNLAssert(clientGame->getLevel(), "We should have a level here!");
 
    // Check whether the objects created on the server made it onto the client
    const Vector<DatabaseObject *> *objects = clientGame->getLevel()->findObjects_fast();
