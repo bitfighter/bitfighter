@@ -12,18 +12,10 @@
 #include "ServerGame.h"
 #include "ClientGame.h"
 #include "Level.h"
-#include "SystemFunctions.h"
 
 #include "LuaScriptRunner.h"
 
 #include "TestUtils.h"
-
-#include <string>
-#include <cmath>
-
-#ifdef TNL_OS_WIN32
-#  include <windows.h>   // For ARRAYSIZE
-#endif
 
 namespace Zap {
 using namespace std;
