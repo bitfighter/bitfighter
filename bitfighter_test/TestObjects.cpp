@@ -85,12 +85,13 @@ TEST_F(ObjectTest, ProcessArgumentsSanity)
 }
 
 
-
+// For keeping track of which objects we've seen on the client and server
 struct GhostingRecord
 {
   bool server;
   bool client;
 };
+
 
 /**
  * Instantiate and transmit one object of every registered type from a server to
