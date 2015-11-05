@@ -94,7 +94,9 @@ TEST_F(ObjectTest, GhostingSanity)
    // Track the transmission state of each object
    U32 classCount = TNL::NetClassRep::getNetClassCount(NetClassGroupGame, NetClassTypeObject);
    Vector<GhostingRecord> ghostingRecords;
+
    ghostingRecords.resize(classCount);
+
    for(U32 i = 0; i < classCount; i++)
    {
       ghostingRecords[i].server = false;
