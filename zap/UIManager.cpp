@@ -8,6 +8,7 @@
 
 #include "UI.h"
 #include "UIGame.h"
+#include "UIItemListSelectMenu.h"
 #include "UIMenus.h"
 #include "UINameEntry.h"
 #include "UIQueryServers.h"
