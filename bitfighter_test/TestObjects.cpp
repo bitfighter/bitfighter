@@ -118,9 +118,6 @@ TEST_F(ObjectTest, GhostingSanity)
    geom_speedZone.push_back(Point(400,0));
    geom_speedZone.push_back(Point(400,1));
 
-   // We'll need a level on the client... this is normally done when a new game starts
-   clientGame->setLevel(new Level());     // Level will be cleaned up by boost
-
    // Create one of each type of registered NetClass
    for(U32 i = 0; i < classCount; i++)
    {
