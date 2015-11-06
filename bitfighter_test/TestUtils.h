@@ -50,7 +50,7 @@ void packUnpack(T input, T &output, U32 mask = 0xFFFFFFFF)
  */
 struct GamePair
 {
-	GamePair(const string &levelCode = "", S32 clients = 1);
+	GamePair(const string &levelCode = "", S32 clients = 1);    // <-- No param constructor
    GamePair(const Vector<string> &levelCode, S32 clients = 1);
    GamePair(GameSettingsPtr settings);
    GamePair(GameSettingsPtr settings, const string &levelCode);
