@@ -115,7 +115,7 @@ void GamePair::initialize(GameSettingsPtr settings, const Vector<string> &levelC
    // Need to start Lua before we add any clients.  Might as well do it now.
    LuaScriptRunner::startLua(settings->getFolderManager()->getLuaDir());
 
-   LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(levelCode));
+   LevelSourcePtr levelSource(new StringLevelSource(levelCode));
    initHosting(settings, levelSource, true, false);      // Creates a game and adds it to GameManager
 
    server = GameManager::getServerGame();                // Get the game created in initHosting
