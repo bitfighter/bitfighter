@@ -154,8 +154,7 @@ GamePair::~GamePair()
    idle(10, 5);
 
    // Clean up GameManager
-   GameManager::deleteClientGames();
-   GameManager::deleteServerGame();
+   GameManager::reset();
  
    LuaScriptRunner::clearScriptCache();
    LuaScriptRunner::shutdown();
