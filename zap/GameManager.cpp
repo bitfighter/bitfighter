@@ -170,6 +170,14 @@ void GameManager::idleServerGame(U32 timeDelta)
 }
 
 
+// Used by tests to reset state to factory settings
+void GameManager::reset()
+{
+   deleteServerGame();
+   deleteClientGames();
+}
+
+
 /////
 
 #ifndef ZAP_DEDICATED

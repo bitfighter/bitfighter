@@ -58,6 +58,8 @@ public:
    static void deleteServerGame();
    static void idleServerGame(U32 timeDelta);
 
+   static void reset();    // Only used by testing
+
 
    // ClientGame related
 #ifndef ZAP_DEDICATED
