@@ -90,16 +90,16 @@ static void doScenario2(GamePair &gamePair)
 {
    ServerGame *serverGame = gamePair.server;
 
-   const char *player1Name = "TestPlayer0";
-   const char *player2Name = "TestUser2";
-   gamePair.addClientAndSetTeam(player2Name, 0);
+   string player1Name = "TestPlayer0";
+   string player2Name = "TestUser2";
+   gamePair.addClientAndSetTeam(player2Name.c_str(), 0);
 
    ClientGame *client1 = gamePair.getClient(0);
    ClientGame *client2 = gamePair.getClient(1);
 
    // Make sure the names are what we think they are... 
-   ASSERT_STREQ(player1Name, client1->getPlayerName().c_str());
-   ASSERT_STREQ(player2Name, client2->getPlayerName().c_str());
+   ASSERT_EQ(player1Name, client1->getPlayerName());
+   ASSERT_EQ(player2Name, client2->getPlayerName());
 
 
    // Should now be 2 ships in the game -- one belonging to client1 and another belonging to client2
@@ -155,7 +155,7 @@ static void doScenario2(GamePair &gamePair)
    ASSERT_EQ(0, fillVector.size());
 
    // Client 2 should see that client 1 has been delayed
-   ASSERT_TRUE(client2->findClientInfo(player1Name)->isSpawnDelayed());
+   ASSERT_TRUE(client2->findClientInfo(player1Name.c_str())->isSpawnDelayed());
 
    // After some time has passed -- no longer in returnToGameCountdown period, ship should have appeared on server and client
    gamePair.idle(ClientInfo::SPAWN_UNDELAY_TIMER_DELAY / 100, 105);  // More time than SPAWN_UNDELAY_TIMER_DELAY
