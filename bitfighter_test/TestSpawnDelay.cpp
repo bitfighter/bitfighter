@@ -97,7 +97,7 @@ static void doScenario2(GamePair &gamePair)
    ClientGame *client1 = gamePair.getClient(0);
    ClientGame *client2 = gamePair.getClient(1);
 
-   // Make sure the names are what we think they are... 
+   // Make sure the names are what we think they are... can't move on unless they are
    ASSERT_EQ(player1Name, client1->getPlayerName());
    ASSERT_EQ(player2Name, client2->getPlayerName());
 
