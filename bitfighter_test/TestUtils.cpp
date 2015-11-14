@@ -365,7 +365,7 @@ void GamePair::removeClient(const string &name)
 }
 
 
-void GamePair::addBotClient(const string &name, S32 teamIndex)
+void GamePair::addBotClientAndSetTeam(const string &name, S32 teamIndex)
 {
    ServerGame *server = GameManager::getServerGame();
 

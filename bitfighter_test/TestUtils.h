@@ -73,7 +73,7 @@ struct GamePair
    ClientGame *addClientAndSetTeam(const string &name, S32 teamIndex);
    ClientGame *addClientAndSetRole(const string &name, ClientInfo::ClientRole role);
 
-   void addBotClient(const string &name, S32 teamIndex = NO_TEAM);
+   void addBotClientAndSetTeam(const string &name, S32 teamIndex = NO_TEAM);
 
    S32 getClientCount() const;
    ClientGame *getClient(S32 index);
