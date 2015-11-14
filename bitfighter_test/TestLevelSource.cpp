@@ -92,6 +92,10 @@ TEST(TestLevelSource, PlaylistTests)
    EXPECT_EQ(serverPlaylist.size(), clientGame->getServerPlaylists().size());
    EXPECT_EQ(serverPlaylist[0],     clientGame->getServerPlaylists()[0]);
 
+   // But out local playlist list is unchanged
+   EXPECT_EQ(clientPlaylist.size(), clientGame->getLocalPlaylists().size());
+   EXPECT_EQ(clientPlaylist[0],     clientGame->getLocalPlaylists()[0]);
+
    // Now we will disconnect, and when we get a list of available playlists, we expect to see those 
    // available on the client, which is what we'd need to see if we were to start hosting a game locally.
    GamePair::disconnectClient(0);
