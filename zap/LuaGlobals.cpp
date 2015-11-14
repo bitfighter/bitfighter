@@ -165,7 +165,7 @@ S32 lua_getMachineTime(lua_State *L)
 S32 lua_findFile(lua_State *L)
 {
    checkArgList(L, "global", "findFile");
-
+   
    string filename = getString(L, 1, "");
 
    FolderManager *folderManager = GameSettings::getFolderManager();
@@ -240,18 +240,18 @@ S32 lua_writeToFile(lua_State *L)
    string filename = extractFilename(getString(L, 1, ""));
    string contents = getString(L, 2, "");
 
+   if(filename == "" || contents == "")
+      return 0;
+
    bool append = false;
    if(profile == 1)
       append = getBool(L, 3);
 
-   if(filename != "" && contents != "")
-   {
-      FolderManager *folderManager = GameSettings::getFolderManager();
+   FolderManager *folderManager = GameSettings::getFolderManager();
 
-      string filePath = folderManager->getScreenshotDir() + getFileSeparator() + filename;
+   string filePath = folderManager->getScreenshotDir() + getFileSeparator() + filename;
 
-      writeFile(filePath, contents, append);
-   }
+   writeFile(filePath, contents, append);
 
    return 0;
 }
