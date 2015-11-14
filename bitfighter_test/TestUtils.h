@@ -65,7 +65,7 @@ struct GamePair
 	static void idle(U32 timeDelta, U32 cycles = 1);
 	ServerGame *server;
 
-   ClientGame *addClient(const string &name);
+   ClientGame *addClient(const string &name) const;
    ClientGame *addClient(const string &name, GameSettingsPtr settings) const;
    static ClientGame *addClient(ClientGame *clientGame);
 
