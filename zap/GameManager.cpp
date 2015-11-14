@@ -262,24 +262,24 @@ void GameManager::shutdownBitfighter()
 
    // Avoid this function being called twice when we exit via methods 1-4 above
 #ifndef ZAP_DEDICATED
-   if(GameManager::getClientGames()->size() == 0)
+   if(getClientGames()->size() == 0)
 #endif
-      if(GameManager::getServerGame())
+      if(getServerGame())
          exitToOs();
 
    // Grab a pointer to settings wherever we can.  Note that all Games (client or server) currently refer to the same settings object.
 #ifndef ZAP_DEDICATED
-   if(GameManager::getClientGames()->size() > 0)
-      settings = GameManager::getClientGames()->get(0)->getSettings();
+   if(getClientGames()->size() > 0)
+      settings = getClientGames()->get(0)->getSettings();
 
-   GameManager::deleteClientGames();
+   deleteClientGames();
 
 #endif
 
-   if(GameManager::getServerGame())
+   if(getServerGame())
    {
-      settings = GameManager::getServerGame()->getSettings();
-      GameManager::deleteServerGame();
+      settings = getServerGame()->getSettings();
+      deleteServerGame();
    }
 
 
