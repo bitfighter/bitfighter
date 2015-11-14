@@ -258,7 +258,7 @@ void GameSettings::setServerPassword(const string &serverPassword, bool updateIN
 }
 
 
-string GameSettings::getOwnerPassword()
+string GameSettings::getOwnerPassword() const
 {
    return mOwnerPassword;
 }
@@ -288,7 +288,7 @@ void GameSettings::setAdminPassword(const string &adminPassword, bool updateINI)
 }
 
 
-string GameSettings::getLevelChangePassword()
+string GameSettings::getLevelChangePassword() const
 {
    return mLevelChangePassword;
 }
@@ -327,13 +327,13 @@ F32 GameSettings::getCmdLineParamF32(ParamId paramId)
 }
 
 
-bool GameSettings::isCmdLineParamSpecified(ParamId paramId)
+bool GameSettings::isCmdLineParamSpecified(ParamId paramId) const
 {
    return mCmdLineParams[paramId].size() > 0;
 }
 
 
-FolderManager *GameSettings::getFolderManager()
+FolderManager *GameSettings::getFolderManager() const
 {
    if(!mFolderManager)
       mFolderManager = new FolderManager();

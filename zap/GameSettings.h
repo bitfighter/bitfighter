@@ -181,13 +181,13 @@ public:
    string getServerPassword();
    void setServerPassword(const string &ServerPassword, bool updateINI);
 
-   string getOwnerPassword();
+   string getOwnerPassword() const;
    void setOwnerPassword(const string &OwnerPassword, bool updateINI);
 
    string getAdminPassword();
    void setAdminPassword(const string &AdminPassword, bool updateINI);
 
-   string getLevelChangePassword();
+   string getLevelChangePassword() const;
    void setLevelChangePassword(const string &LevelChangePassword, bool updateINI);
 
    InputCodeManager *getInputCodeManager(); 
@@ -198,7 +198,7 @@ public:
    void setLoginCredentials(const string &name, const string &password, bool savePassword);
 
 
-   bool isCmdLineParamSpecified(ParamId paramId);                      // Returns true if parameter was present, false if not
+   bool isCmdLineParamSpecified(ParamId paramId) const;                      // Returns true if parameter was present, false if not
 
    // Variations on generating a list of levels
    Vector<string> getLevelList();                            // Generic, grab a list of levels based on current settings
@@ -210,7 +210,7 @@ public:
    Vector<string> *getMasterServerList();
    void saveMasterAddressListInIniUnlessItCameFromCmdLine();
    
-   static FolderManager *getFolderManager();
+   FolderManager *getFolderManager() const;
    FolderManager getCmdLineFolderManager();    // Return a FolderManager struct populated with settings specified on cmd line
 
    BanList *getBanList();
