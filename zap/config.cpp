@@ -1545,7 +1545,7 @@ string FolderManager::findScriptFile(const string &filename) const
 }
 
 
-Vector<string> FolderManager::findAllPlaylistsInFolder(const string &dir)
+Vector<string> FolderManager::findAllPlaylistsInFolder(const string &dir) const
 {
    // Will call defaultFindAllPlaylistsInFolderFunction() except during certain tests
    return (*mFindAllPlaylistsFunction)(dir);     

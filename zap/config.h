@@ -112,7 +112,8 @@ public:
    string findBotFile(const string &filename) const;
    string findScriptFile(const string &filename) const;
 
-   Vector<string> findAllPlaylistsInFolder(const string &dir);
+   Vector<string> findAllPlaylistsInFolder(const string &dir) const;
+
 
    void setLevelDir(const string &levelDir);
 
