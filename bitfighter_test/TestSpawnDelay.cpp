@@ -91,6 +91,9 @@ static void doScenario2(GamePair &gamePair)
    ServerGame *serverGame = gamePair.server;
 
    string player1Name = "TestPlayer0";
+   ASSERT_EQ(1, gamePair.getClientCount());                          // Should have had a client here when we arrived
+   ASSERT_EQ(player1Name, gamePair.getClient(0)->getPlayerName());   // With this name
+
    string player2Name = "TestUser2";
    gamePair.addClientAndSetTeam(player2Name.c_str(), 0);
 
