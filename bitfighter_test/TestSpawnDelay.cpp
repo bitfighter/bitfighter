@@ -104,7 +104,6 @@ static void doScenario2(GamePair &gamePair)
    ASSERT_EQ(player1Name, client1->getPlayerName());
    ASSERT_EQ(player2Name, client2->getPlayerName());
 
-
    // Should now be 2 ships in the game -- one belonging to client1 and another belonging to client2
    gamePair.idle(10, 5);               // Idle 5x; give things time to propagate
    fillVector.clear();
