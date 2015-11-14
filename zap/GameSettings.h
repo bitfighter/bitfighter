@@ -215,6 +215,8 @@ public:
 
    BanList *getBanList();
 
+   Vector<string> getPlaylists() const;
+
    string getHostAddress();
    U32 getMaxPlayers();
 

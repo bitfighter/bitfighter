@@ -334,7 +334,7 @@ void PlaylistMenuUserInterface::onActivate()
 
 Vector<string> PlaylistMenuUserInterface::getPlaylists() const
 {
-   return getGame()->getServerPlaylists();
+   return getGame()->getLocalPlaylists();    // In hosting playlist selection comes from what's available locally
 }
 
 

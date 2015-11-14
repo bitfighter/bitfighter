@@ -113,6 +113,8 @@ public:
    void startLoadingLevel(bool engineerEnabled);
    void doneLoadingLevel();
 
+   Vector<string> getLocalPlaylists() const;
+
    void gotTotalLevelRating(S16 rating);
    void gotPlayerLevelRating(S32 rating);
 

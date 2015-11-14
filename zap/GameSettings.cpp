@@ -363,6 +363,13 @@ BanList *GameSettings::getBanList()
 }
 
 
+Vector<string> GameSettings::getPlaylists() const
+{
+   string levelDir = getFolderManager()->getLevelDir();
+   return getFolderManager()->findAllPlaylistsInFolder(levelDir);
+}
+
+
 // Figure out where all our folders are
 void GameSettings::resolveDirs()
 {

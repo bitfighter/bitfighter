@@ -266,6 +266,12 @@ void ClientGame::doneLoadingLevel()
 }
 
 
+Vector<string> ClientGame::getLocalPlaylists() const
+{
+   return mSettings->getPlaylists();
+}
+
+
 ClientInfo *ClientGame::getClientInfo() const
 {
    return mClientInfo;
@@ -1854,7 +1860,7 @@ void ClientGame::lessBots()
 // Player has changed the playlist mid-game
 void ClientGame::setPlaylistAndAlertServer(const string &playlistName) const
 {
-   S32 index = mPlaylists.getIndex(playlistName);
+   S32 index = mServerPlaylists.getIndex(playlistName);
 
    if(index > -1)
       getConnectionToServer()->c2sRequestPlaylistChange(index);
