@@ -55,7 +55,7 @@ Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0)),
 
       if(profile == 2)
       {
-         mScriptName = GameSettings::getFolderManager()->findBotFile(getString(L, i++));
+         mScriptName = getGame()->getSettings()->getFolderManager()->findBotFile(getString(L, i++));
 
          while(i <= lua_gettop(L))
          {
@@ -283,8 +283,10 @@ void Robot::onAddedToGame(Game *game)
    // Check whether a script file has been specified. If not, use the default
    if(mScriptName == "")
    {
-      string scriptName = game->getSettings()->getSetting<string>(IniKey::DefaultRobotScript);
-      mScriptName = GameSettings::getFolderManager()->findBotFile(scriptName);
+      GameSettings *settings = game->getSettings();
+
+      string scriptName = settings->getSetting<string>(IniKey::DefaultRobotScript);
+      mScriptName = settings->getFolderManager()->findBotFile(scriptName);
    }
 
    mLuaGame = game;
