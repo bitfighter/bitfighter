@@ -163,9 +163,9 @@ S32 lua_getMachineTime(lua_State *L)
 S32 lua_findFile(lua_State *L)
 {
    checkArgList(L, "global", "findFile");
-   
-   string filename = getString(L, 1, "");
 
+   string filename = getString(L, 1, "");
+   
    FolderManager *folderManager = GameSettings::getFolderManager();
 
    string fullname = folderManager->findScriptFile(filename);     // Looks in luadir, levelgens dir, bots dir
