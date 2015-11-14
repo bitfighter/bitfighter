@@ -44,15 +44,17 @@ class ObjectTest : public testing::Test
  */
 TEST_F(ObjectTest, ProcessArgumentsSanity) 
 {
-   const S32 argc = 40;
-   const char *argv[argc] = {
    GamePair pair;
    ServerGame *game = pair.server;
+
+   const char *argv[] = {
       "This first string will be replaced by 'argv[0] =' below",
       "3", "4", "3", "6", "6", "4", "2", "6", "6", "3", 
       "4", "3", "4", "3", "6", "6", "4", "2", "6", "6", 
       "4", "3", "4", "3", "6", "6", "4", "2", "6", "6", 
       "4", "3", "4", "3", "6", "blah", "4", "2", "6" };
+
+   const S32 argc = ARRAYSIZE(argv);
 
    // Substitute the class name for argv[0]
    U32 count = TNL::NetClassRep::getNetClassCount(NetClassGroupGame, NetClassTypeObject);
