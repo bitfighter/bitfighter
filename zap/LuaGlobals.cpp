@@ -7,10 +7,8 @@
 #include "LuaBase.h"
 #include "stringUtils.h"
 #include "GameSettings.h"
-#include "Console.h"
 #include "version.h"
 
-#include <tnl.h>
 #include <tnlLog.h>
 #include <tnlRandom.h>
 
