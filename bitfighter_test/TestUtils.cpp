@@ -206,11 +206,13 @@ ClientGame *GamePair::addClientAndSetRole(const string &name, ClientInfo::Client
 
 ClientGame *GamePair::addClientAndSetTeam(const string &name, S32 teamIndex)
 {
+   // Add client
    ClientGame *clientGame = addClient(name);
 
    TNLAssert(teamIndex != NO_TEAM, "Invalid team!");
    TNLAssert(teamIndex < server->getTeamCount(), "Bad team!");
 
+   // And set team
    ClientInfo *clientInfo = server->findClientInfo(name);
    server->getGameType()->changeClientTeam(clientInfo, teamIndex);
 
