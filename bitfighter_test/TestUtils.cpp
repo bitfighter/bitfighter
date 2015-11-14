@@ -226,7 +226,7 @@ ClientGame *GamePair::addClient(const string &name)
 }
 
 
-ClientGame *GamePair::addClient(const string &name, GameSettingsPtr settings)
+ClientGame *GamePair::addClient(const string &name, GameSettingsPtr settings) const
 {
    if(settings == NULL)
       settings = server->getSettingsPtr();

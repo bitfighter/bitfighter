@@ -66,7 +66,7 @@ struct GamePair
 	ServerGame *server;
 
    ClientGame *addClient(const string &name);
-   ClientGame *addClient(const string &name, GameSettingsPtr settings);
+   ClientGame *addClient(const string &name, GameSettingsPtr settings) const;
    static ClientGame *addClient(ClientGame *clientGame);
 
    
