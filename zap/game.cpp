@@ -166,7 +166,7 @@ void Game::setScriptList(const Vector<string> &scripts)
 
 void Game::setServerPlaylists(const Vector<string> &playlists)
 {
-   mPlaylists = playlists;
+   mServerPlaylists = playlists;
 }
 
 
@@ -178,25 +178,25 @@ Vector<string> Game::getServerScripts() const
 
 Vector<string> Game::getServerPlaylists() const
 {
-   return mPlaylists;
+   return mServerPlaylists;
 }
 
 
 string Game::getServerPlaylist(S32 index) const
 {
-   TNLAssert(index < mPlaylists.size(), "Invalid index!");
-   return mPlaylists[index];
+   TNLAssert(index < mServerPlaylists.size(), "Invalid index!");
+   return mServerPlaylists[index];
 }
 
 
 void Game::setPlaylist(S32 index)
 {
-   TNLAssert(index < mPlaylists.size(), "Index out of bounds!");
+   TNLAssert(index < mServerPlaylists.size(), "Index out of bounds!");
 
    if(index == -1)
       mPlaylist = "";
    else
-      mPlaylist = mPlaylists[index];
+      mPlaylist = mServerPlaylists[index];
 }
 
 

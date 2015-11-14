@@ -193,7 +193,7 @@ protected:
    string mLevelFileHash;                 // MD5 hash of level file
 
    Vector<string> mServerScripts;         // Levelgens available on the server
-   Vector<string> mPlaylists;             // Playlists available on the server
+   Vector<string> mServerPlaylists;             // Playlists available on the server
 
    // On the server, this will be the active playlist; on the client, it will be whatever playlist 
    // was selected from the playlist menu before hosting (or, if user did not use that menu, whatever
