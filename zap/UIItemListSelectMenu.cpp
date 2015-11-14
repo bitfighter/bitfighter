@@ -371,7 +371,7 @@ void PlaylistInGameMenuUserInterface::setPlaylist(const string &playlistName) co
 
 Vector<string> PlaylistInGameMenuUserInterface::getPlaylists() const
 {
-   return getGame()->getServerPlaylists();
+   return getGame()->getServerPlaylists();      // In game playlist selection comes from server
 }
 
 
