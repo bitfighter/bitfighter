@@ -92,7 +92,7 @@ TEST(TestLevelSource, PlaylistTests)
    EXPECT_EQ(serverPlaylist.size(), clientGame->getServerPlaylists().size());
    EXPECT_EQ(serverPlaylist[0],     clientGame->getServerPlaylists()[0]);
 
-   // But out local playlist list is unchanged
+   // But out local playlist list is unchanged (should we be testing this? no way to encounter this in-game)
    EXPECT_EQ(clientPlaylist.size(), clientGame->getLocalPlaylists().size());
    EXPECT_EQ(clientPlaylist[0],     clientGame->getLocalPlaylists()[0]);
 
