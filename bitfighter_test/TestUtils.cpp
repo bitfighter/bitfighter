@@ -223,7 +223,8 @@ ClientGame *GamePair::addClientAndSetTeam(const string &name, S32 teamIndex)
 // Simulates player joining game from new client
 ClientGame *GamePair::addClient(const string &name) const
 {
-   return addClient(name, NULL);
+   GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
+   return addClient(name, settings);
 }
 
 
