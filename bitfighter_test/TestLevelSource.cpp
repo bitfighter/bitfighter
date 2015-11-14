@@ -73,9 +73,7 @@ TEST(TestLevelSource, PlaylistTests)
 
    LevelSourcePtr serverLevelSource(new TestPlaylistLevelSource(serverPlaylist, serverSettings->get()));
 
-
    GamePair gamePair(serverSettings, clientSettings, serverLevelSource);
-
 
    ClientGame *clientGame = gamePair.getClient(0);
    ServerGame *serverGame = gamePair.server;
