@@ -5,8 +5,10 @@
 
 #include "LuaModule.h"
 #include "LuaBase.h"
-#include "stringUtils.h"
+
+#include "GameManager.h"
 #include "GameSettings.h"
+#include "stringUtils.h"
 #include "version.h"
 
 #include <tnlLog.h>
@@ -166,7 +168,7 @@ S32 lua_findFile(lua_State *L)
 
    string filename = getString(L, 1, "");
    
-   FolderManager *folderManager = GameSettings::getFolderManager();
+   FolderManager *folderManager = GameManager::getAnyGameSettings()->getFolderManager();
 
    string fullname = folderManager->findScriptFile(filename);     // Looks in luadir, levelgens dir, bots dir
 
@@ -206,7 +208,7 @@ S32 lua_readFromFile(lua_State *L)
    if(filename == "")
       returnNil(L);
 
-   FolderManager *folderManager = GameSettings::getFolderManager();
+   FolderManager *folderManager = GameManager::getAnyGameSettings()->getFolderManager();
 
    string contents;
    readFile(folderManager->getScreenshotDir() + getFileSeparator() + filename, contents);
@@ -245,7 +247,7 @@ S32 lua_writeToFile(lua_State *L)
    if(profile == 1)
       append = getBool(L, 3);
 
-   FolderManager *folderManager = GameSettings::getFolderManager();
+   FolderManager *folderManager = GameManager::getAnyGameSettings()->getFolderManager();
 
    string filePath = folderManager->getScreenshotDir() + getFileSeparator() + filename;
 

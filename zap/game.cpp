@@ -63,10 +63,6 @@ static Vector<DatabaseObject *> fillVector2;
 ////////////////////////////////////
 ////////////////////////////////////
 
-// Statics -- should this really be a static??
-//static Level *mObjectAddTarget = NULL;
-
-
 // Constructor
 Game::Game(const Address &theBindAddress, GameSettingsPtr settings) :
       mPlaylist(settings->getPlaylistFile())
@@ -92,6 +88,11 @@ Game::Game(const Address &theBindAddress, GameSettingsPtr settings) :
    mNameToAddressThread = NULL;
 
    mSecondaryThread = new Master::DatabaseAccessThread();
+
+   // Client needs this to show playlists when hosting a game; server needs to know this to tell a remote client
+   // what playlists are available for switching to
+   string levelDir = getSettings()->getFolderManager()->getLevelDir();
+   setServerPlaylists(settings->getFolderManager()->findAllPlaylistsInFolder(levelDir));
 }
 
 
@@ -154,6 +155,48 @@ void Game::setScopeAlwaysObject(BfObject *object)
 bool Game::isSuspended() const
 {
    return mGameSuspended;
+}
+
+
+void Game::setScriptList(const Vector<string> &scripts)
+{
+   mServerScripts = scripts;
+}
+
+
+void Game::setServerPlaylists(const Vector<string> &playlists)
+{
+   mPlaylists = playlists;
+}
+
+
+Vector<string> Game::getServerScripts() const
+{
+   return mServerScripts;
+}
+
+
+Vector<string> Game::getServerPlaylists() const
+{
+   return mPlaylists;
+}
+
+
+string Game::getServerPlaylist(S32 index) const
+{
+   TNLAssert(index < mPlaylists.size(), "Invalid index!");
+   return mPlaylists[index];
+}
+
+
+void Game::setPlaylist(S32 index)
+{
+   TNLAssert(index < mPlaylists.size(), "Index out of bounds!");
+
+   if(index == -1)
+      mPlaylist = "";
+   else
+      mPlaylist = mPlaylists[index];
 }
 
 

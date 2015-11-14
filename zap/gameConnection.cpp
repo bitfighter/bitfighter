@@ -195,25 +195,6 @@ const char *GameConnection::getConnectionStateString(S32 i)
 }
 
 
-Vector<string> GameConnection::getServerScripts() const
-{
-   return mServerScripts;
-}
-
-
-Vector<string> GameConnection::getServerPlaylists() const
-{
-   return mPlaylists;
-}
-
-
-string GameConnection::getServerPlaylist(S32 index) const
-{
-   TNLAssert(index < mPlaylists.size(), "Invalid index!");
-   return mPlaylists[index];
-}
-
-
 // Player appears to be away, spawn is on hold until he returns
 TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnDelayed, (U8 waitTimeInOneTenthsSeconds), (waitTimeInOneTenthsSeconds), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
@@ -757,10 +738,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
   
       // Create a list of levels for hosting a game from a file, but does not read the files or do any validation of them
       string levelDir = folderManager->getLevelDir();
-      Vector<string> levels = FileListLevelSource::findAllFilesInPlaylist(playlist, levelDir);
+      Vector<string> levels = PlaylistLevelSource::findAllFilesInPlaylist(playlist, levelDir);
 
       // LevelSourcePtr will clean up new object
-      LevelSourcePtr levelSource = LevelSourcePtr(new FileListLevelSource(levels, levelDir, mSettings));
+      LevelSourcePtr levelSource = LevelSourcePtr(new PlaylistLevelSource(levels, levelDir, mSettings));
       
       bool anyLoaded = levelSource->loadLevels(folderManager);    // Populates all our levelInfos by loading each file in turn
 
@@ -1286,8 +1267,7 @@ void GameConnection::sendLevelList()
       s2cAddLevel(levelInfo.mLevelName, levelInfo.mLevelType);
    }
 
-
-   Vector<string> playlistList = FolderManager::findAllPlaylistsInFolder(mServerGame->getSettings()->getFolderManager()->getLevelDir());
+   Vector<string> playlistList = mServerGame->getServerPlaylists();
 
    S32 currentPlaylistIndex = playlistList.getIndex(mServerGame->getPlaylist());
 
@@ -1353,13 +1333,10 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSendScriptAndPlaylistLists,
                   (Vector<string> scripts, Vector<string> playlists, S32 currentPlaylistIndex), (scripts, playlists, currentPlaylistIndex),
                   NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
 {
-   mServerScripts = scripts;
-   mPlaylists = playlists;
-
-   if(currentPlaylistIndex >= 0)
-      getClientGame()->setPlaylist(mPlaylists[currentPlaylistIndex]);
-   else
-      getClientGame()->setPlaylist("");
+   ClientGame *game = getClientGame();
+   game->setScriptList(scripts);
+   game->setServerPlaylists(playlists);
+   game->setPlaylist(currentPlaylistIndex);
 }
 
 
@@ -1442,6 +1419,17 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
    resetTimeSinceLastMove();
 
    mServerGame->changeLevel(mClientInfo, newLevelIndex, isRelative);
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, c2sRequestPlaylistChange, (S32 playlistIndex), 
+                                  (playlistIndex), 
+                                  NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
+{
+   if(!mClientInfo->isLevelChanger())
+      return;
+
+   mServerGame->setPlaylist(playlistIndex);
 }
 
 
@@ -1626,7 +1614,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClas
          mSettings->getSetting<YesNo>(IniKey::AllowMapUpload),
          mSettings->getSetting<YesNo>(IniKey::RandomLevels) );
    
-      LevelSource *levelSource = mSettings->chooseLevelSource(NULL);    // returns a FileListLevelSource or a FolderLevelSource
+      LevelSource *levelSource = mSettings->chooseLevelSource(NULL);    // returns a PlaylistLevelSource or a FolderLevelSource
       delete mLevelSource;
       mLevelSource = levelSource;
 

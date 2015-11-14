@@ -11,7 +11,6 @@
 
 #include "../zap/ClientInfo.h"
 
-#include <tnl.h>
 #include <tnlGhostConnection.h>
 
 #include <string>
@@ -54,17 +53,21 @@ struct GamePair
    GamePair(const Vector<string> &levelCode, S32 clients = 1);
    GamePair(GameSettingsPtr settings);
    GamePair(GameSettingsPtr settings, const string &levelCode);
+   GamePair(GameSettingsPtr serverSettings, GameSettingsPtr clientSettings, LevelSourcePtr serverLevelSource);
 
 	~GamePair();
 
    void initialize(GameSettingsPtr settings, const string &levelcode, S32 clientCount);
    void initialize(GameSettingsPtr settings, const Vector<string> &levelCode, S32 clientCount);
+   void initialize(GameSettingsPtr serverSettings, GameSettingsPtr clientSettings, 
+                   LevelSourcePtr serverLevelSource, S32 clientCount, bool skipInitialIdle);
 
 	static void idle(U32 timeDelta, U32 cycles = 1);
 	ServerGame *server;
 
    ClientGame *addClient(const string &name);
-   ClientGame *addClient(ClientGame *clientGame);
+   ClientGame *addClient(const string &name, GameSettingsPtr settings);
+   static ClientGame *addClient(ClientGame *clientGame);
 
    
    ClientGame *addClientAndSetTeam(const string &name, S32 teamIndex);

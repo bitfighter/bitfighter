@@ -328,21 +328,13 @@ static void makeLevelNameList(ClientGame *clientGame, Vector<string> &nameCandid
 
 static void makeScriptNameList(ClientGame *clientGame, Vector<string> &nameCandidateList)
 {
-   GameConnection *gameConnection = clientGame->getConnectionToServer();
-   if(!gameConnection)
-      return;
-
-   nameCandidateList = gameConnection->getServerScripts();
+   nameCandidateList = clientGame->getServerScripts();
 }
 
 
 static void makePlaylistNameList(ClientGame *clientGame, Vector<string> &nameCandidateList)
 {
-   GameConnection *gameConnection = clientGame->getConnectionToServer();
-   if(!gameConnection)
-      return;
-
-   nameCandidateList = gameConnection->getServerPlaylists();
+   nameCandidateList = clientGame->getServerPlaylists();
 }
 
 

@@ -1171,6 +1171,15 @@ void writeSkipList(CIniFile *ini, const Vector<string> *levelSkipList)
 //////////////////////////////////
 //////////////////////////////////
 
+// Use this rigamarole so we can replace this function with a different one for testing
+static Vector<string> defaultFindAllPlaylistsInFolderFunction(const string &dir)
+{
+   const string extList[] = { "playlist" };
+
+   return findAllThingsInFolder(dir, extList, ARRAYSIZE(extList));
+}
+
+
 
 // Constructor
 FolderManager::FolderManager()
@@ -1194,7 +1203,7 @@ FolderManager::FolderManager()
 
    DbWriter::DatabaseWriter::sqliteFile = logDir + DbWriter::DatabaseWriter::sqliteFile;
 
-   mResolved = false;
+   initialize();
 }
 
 
@@ -1215,7 +1224,7 @@ FolderManager::FolderManager(const string &levelDir,    const string &robotDir, 
                fontDirs      (fontDirs),
                recordDir     (recordDir)
 {
-   mResolved = false;
+   initialize();
 }
 
 
@@ -1223,6 +1232,13 @@ FolderManager::FolderManager(const string &levelDir,    const string &robotDir, 
 FolderManager::~FolderManager()
 {
    // Do nothing
+}
+
+
+void FolderManager::initialize()
+{
+   mResolved = false;
+   mFindAllPlaylistsFunction = &defaultFindAllPlaylistsInFolderFunction;
 }
 
 
@@ -1234,8 +1250,6 @@ static string resolutionHelper(const string &cmdLineDir, const string &rootDataD
       return joindir(rootDataDir, subdir);
 }
 
-
-//struct CmdLineSettings;
 
 #define CHK_RESOLVED() TNLAssert(mResolved, "Must call resolveDirs() before using this getter!")
 
@@ -1533,9 +1547,8 @@ string FolderManager::findScriptFile(const string &filename) const
 
 Vector<string> FolderManager::findAllPlaylistsInFolder(const string &dir)
 {
-   const string extList[] = { "playlist" };
-
-   return findAllThingsInFolder(dir, extList, ARRAYSIZE(extList));
+   // Will call defaultFindAllPlaylistsInFolderFunction() except during certain tests
+   return (*mFindAllPlaylistsFunction)(dir);     
 }
 
 

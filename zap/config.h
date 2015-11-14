@@ -22,6 +22,8 @@
 
 #include <string>
 
+#include "Test.h"
+
 using namespace std;
 using namespace TNL;
 
@@ -55,6 +57,9 @@ private:
    string recordDir;
 
    bool mResolved;
+   Vector<string> (*mFindAllPlaylistsFunction)(const string &dir);
+
+   void initialize();
 
 public:
    // Constructors
@@ -107,9 +112,12 @@ public:
    string findBotFile(const string &filename) const;
    string findScriptFile(const string &filename) const;
 
-   static Vector<string> findAllPlaylistsInFolder(const string &dir);
+   Vector<string> findAllPlaylistsInFolder(const string &dir);
 
    void setLevelDir(const string &levelDir);
+
+   ///// Testing
+   FRIEND_TEST(TestLevelSource, PlaylistTests);
 };
 
 

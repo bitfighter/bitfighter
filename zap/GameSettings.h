@@ -123,7 +123,7 @@ private:
    string mLevelChangePassword;
 
    Vector<string> mLevelSkipList;      // Levels we'll never load, to create a pseudo delete function for remote server mgt  <=== does this ever get loaded???
-   static FolderManager *mFolderManager;
+   FolderManager *mFolderManager;
    InputCodeManager mInputCodeManager;
 
    BanList *mBanList;                  // Our ban list

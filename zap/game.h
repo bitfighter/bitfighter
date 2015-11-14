@@ -192,6 +192,9 @@ protected:
    Rect mWorldExtents;                    // Extents of everything
    string mLevelFileHash;                 // MD5 hash of level file
 
+   Vector<string> mServerScripts;         // Levelgens available on the server
+   Vector<string> mPlaylists;             // Playlists available on the server
+
    // On the server, this will be the active playlist; on the client, it will be whatever playlist 
    // was selected from the playlist menu before hosting (or, if user did not use that menu, whatever
    // was specified on the cmd line); if the playlist is updated on the server, it will be sent down
@@ -267,8 +270,20 @@ public:
 
    bool isSuspended() const;
 
+   void setPlaylist(S32 index);
    void setPlaylist(const string &playlist);
+
    string getPlaylist() const;
+
+   static Vector<string> setServerPlaylists(const string &levelDir);
+   void setServerPlaylists(const Vector<string> &playlists);
+
+   void setScriptList(const Vector<string> &scripts);
+   
+   Vector<string> getServerScripts() const;
+   Vector<string> getServerPlaylists() const;
+   string getServerPlaylist(S32 index) const;
+
 
    virtual string getCurrentLevelFileName() const = 0;
    virtual U32 getMaxPlayers() const;

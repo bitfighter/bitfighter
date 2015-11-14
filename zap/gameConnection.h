@@ -72,9 +72,6 @@ private:
    Timer mAuthenticationTimer;
    S32 mAuthenticationCounter;
 
-   Vector<string> mServerScripts;               // Levelgens available on the server
-   Vector<string> mPlaylists;                   // Playlists available on the server
-
    void displayMessage(U32 colorIndex, U32 sfxEnum, const char *message);    // Helper function
 
    StringTableEntry mServerName;
@@ -160,10 +157,6 @@ public:
 
    void setClientNameNonUnique(StringTableEntry name);
    void setServerName(StringTableEntry name);
-
-   Vector<string> getServerScripts() const;
-   Vector<string> getServerPlaylists() const;
-   string getServerPlaylist(S32 index) const;
 
    ClientInfo *getClientInfo();
    void setClientInfo(ClientInfo *clientInfo);
@@ -271,6 +264,8 @@ public:
    TNL_DECLARE_RPC(s2cSendScriptAndPlaylistLists, (Vector<string> scripts, Vector<string> playlists, S32 currentPlaylistIndex));
 
    TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative));
+   TNL_DECLARE_RPC(c2sRequestPlaylistChange, (S32 playlistIndex));
+
    TNL_DECLARE_RPC(c2sShowNextLevel, ());
    TNL_DECLARE_RPC(c2sRequestShutdown, (U16 time, StringPtr reason));
    TNL_DECLARE_RPC(c2sRequestCancelShutdown, ());

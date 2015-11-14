@@ -2077,6 +2077,12 @@ static void chooseNewLevelCallback(ClientGame *game, U32 unused)
 }
 
 
+static void choosePlaylistCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->activate<PlaylistInGameMenuUserInterface>();
+}
+
+
 static void restartGameCallback(ClientGame *game, U32 unused)
 {
    game->getConnectionToServer()->c2sRequestLevelChange(REPLAY_LEVEL, false);
@@ -2135,7 +2141,8 @@ void GameMenuUserInterface::buildMenu()
       if(gc->getClientInfo()->isLevelChanger())
       {
          addMenuItem(new MenuItem("ROBOTS",               robotsGameCallback,     "", KEY_B, KEY_R));
-         addMenuItem(new MenuItem("PLAY DIFFERENT LEVEL", chooseNewLevelCallback, "", KEY_L, KEY_P));
+         addMenuItem(new MenuItem("PLAY DIFFERENT LEVEL", chooseNewLevelCallback, "", KEY_L));
+         addMenuItem(new MenuItem("SELECT PLATLIST",      choosePlaylistCallback, "", KEY_P));
          addMenuItem(new MenuItem("ADD TIME (2 MINS)",    addTwoMinsCallback,     "", KEY_T, KEY_2));
          addMenuItem(new MenuItem("RESTART LEVEL",        restartGameCallback,    ""));
       }

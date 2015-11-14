@@ -8,11 +8,11 @@
 
 #include "UI.h"                  // Parent class
 #include "UIMenuItems.h"
-#include "PlayerActionEnum.h"
 
 #include "tnlNetConnection.h"    // for TerminationReason
 
 #include <boost/shared_ptr.hpp>
+#include "Test.h"
 
 
 namespace Zap
@@ -66,8 +66,8 @@ protected:
    bool mMenuFooterContainsInstructions;
 
    S32 mMaxMenuSize;
-   S32 mFirstVisibleItem;  // Some menus have items than will fit on the screen; this is the index of the first visible item
-   S32 mSelectedIndex;     // Index of the currently highlighted menu item (public so tests can access this member)
+   S32 mFirstVisibleItem;        // Some menus have items than will fit on the screen; this is the index of the first visible item
+   S32 mSelectedIndex;           // Index of the currently highlighted menu item (public so tests can access this member)
    bool mItemSelectedWithMouse;
 
    bool mRenderInstructions;
@@ -123,6 +123,9 @@ public:
 
    void setFadingNotice(U32 time, S32 top, const string &message);  // Set a fading notice on a menu
    void clearFadingNotice();                                        // Clear a fading notice
+
+   ///// Testing
+   FRIEND_TEST(LevelMenuSelectUserInterfaceTests, GetIndexOfNext);
 };
 
 

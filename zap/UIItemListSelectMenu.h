@@ -7,6 +7,7 @@
 #define _UI_ITEM_LIST_SELECT_MENU_H_
 
 #include "UIMenus.h"             // Parent class
+#include "PlayerActionEnum.h"
 
 #include "tnlVector.h"    
 
@@ -69,10 +70,13 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// For choosing a playlist while hosting
 class PlaylistMenuUserInterface : public ItemListSelectUserInterface
 {
-private:
    typedef ItemListSelectUserInterface Parent;
+
+private:
+   virtual Vector<string> getPlaylists() const;
 
 public:
    explicit PlaylistMenuUserInterface(ClientGame *game, UIManager *uiManager);      // Constructor
@@ -81,6 +85,25 @@ public:
    void onActivate();
 
    void processSelection(U32 index);
+   virtual void setPlaylist(const string& playlistName) const;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// For choosing a playlist in-game
+class PlaylistInGameMenuUserInterface : public PlaylistMenuUserInterface
+{
+private:
+   typedef PlaylistMenuUserInterface Parent;
+   Vector<string> getPlaylists() const;
+
+public:
+   explicit PlaylistInGameMenuUserInterface(ClientGame *game, UIManager *uiManager);      // Constructor
+   virtual ~PlaylistInGameMenuUserInterface();
+
+   void setPlaylist(const string& playlistName) const;
 };
 
 

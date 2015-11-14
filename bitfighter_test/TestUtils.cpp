@@ -81,6 +81,15 @@ GamePair::GamePair(GameSettingsPtr settings, const string &levelCode)
 }
 
 
+// NOTE: This constructor will skip the initial idle loop that connects the client to the server so that the 
+//       ClientGame and ServerGame objects can be tested in their initial state.  You'll have to call idle
+//       from the test before these are fully initialized.
+GamePair::GamePair(GameSettingsPtr serverSettings, GameSettingsPtr clientSettings, LevelSourcePtr serverLevelSource)
+{
+   initialize(serverSettings, clientSettings, serverLevelSource, 1, true);
+}
+
+
 // Create a pair of games suitable for testing client/server interaction.  Provide some levelcode to get things started.
 GamePair::GamePair(const string &levelCode, S32 clientCount)
 {
@@ -110,17 +119,26 @@ void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32
 
 void GamePair::initialize(GameSettingsPtr settings, const Vector<string> &levelCode, S32 clientCount)
 {
-   GameManager::reset();
+   LevelSourcePtr levelSource(new StringLevelSource(levelCode));
+   initialize(settings, settings, levelSource, clientCount, false);
+}
 
-   settings->resolveDirs();
+
+// Note that clientLevelSource could be NULL
+void GamePair::initialize(GameSettingsPtr serverSettings, GameSettingsPtr clientSettings, 
+                          LevelSourcePtr serverLevelSource, S32 clientCount, bool skipInitialIdle)
+{
+   GameManager::reset();      // Still needed?
+
+   serverSettings->resolveDirs();
+   clientSettings->resolveDirs();
 
    // Need to start Lua before we add any clients.  Might as well do it now.
-   LuaScriptRunner::startLua(settings->getFolderManager()->getLuaDir());
+   LuaScriptRunner::startLua(serverSettings->getFolderManager()->getLuaDir());
 
-   LevelSourcePtr levelSource(new StringLevelSource(levelCode));
-   initHosting(settings, levelSource, true, false);      // Creates a game and adds it to GameManager
+   initHosting(serverSettings, serverLevelSource, true, false);   // Creates a ServerGame and adds it to GameManager
 
-   server = GameManager::getServerGame();                // Get the game created in initHosting
+   server = GameManager::getServerGame();                         // Get the game created in initHosting
 
    // Give the host name something meaningful... in this case the name of the test
    if(::testing::UnitTest::GetInstance()->current_test_case())
@@ -130,10 +148,18 @@ void GamePair::initialize(GameSettingsPtr settings, const Vector<string> &levelC
       server->getSettings()->setHostName(string(name) + "_" + name2, false);
    }
 
-   server->startHosting();          // This will load levels and wipe out any teams
+   bool ok = server->startHosting();   // This will load levels and wipe out any teams
+   ASSERT_TRUE(ok) << "Ooops!";          
 
    for(S32 i = 0; i < clientCount; i++)
-      addClient("TestPlayer" + itos(i));
+      addClient("TestPlayer" + itos(i), clientSettings);
+
+
+   // SPECIAL CASE ALERT -- IF YOU PROVIDE A CLIENT AND SERVER PLAYLIST, WE WILL SKIP THE IDLE BELOW TO THAT WE 
+   // CAN TEST THE INITIAL STATE OF CLIENT GAME BEFORE THERE IS ANY MEANINGFUL INTERACTION WITH THE SERVER.  BE
+   // SURE TO RUN IDLE YOURSELF!
+   if(skipInitialIdle)
+      return;
 
    idle(1, 5);    // Give GameType and game objects time to propagate to client(s)
 }
@@ -196,7 +222,16 @@ ClientGame *GamePair::addClientAndSetTeam(const string &name, S32 teamIndex)
 // Simulates player joining game from new client
 ClientGame *GamePair::addClient(const string &name)
 {
-   ClientGame *clientGame = newClientGame(server->getSettingsPtr());
+   return addClient(name, NULL);
+}
+
+
+ClientGame *GamePair::addClient(const string &name, GameSettingsPtr settings)
+{
+   if(settings == NULL)
+      settings = server->getSettingsPtr();
+
+   ClientGame *clientGame = newClientGame(settings);
    clientGame->userEnteredLoginCredentials(name, "password", false);    // Simulates entry from NameEntryUserInterface
 
    // Get a base UI going, so if we enter the game, and exit again, we'll have a place to land

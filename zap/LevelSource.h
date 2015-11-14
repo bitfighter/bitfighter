@@ -126,7 +126,7 @@ public:
    bool loadLevels(FolderManager *folderManager);
    Level *getLevel(S32 index) const;
    string getLevelFileDescriptor(S32 index) const;
-   bool isEmptyLevelDirOk() const;
+   virtual bool isEmptyLevelDirOk() const;
 
    bool populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo);
 };
@@ -151,7 +151,7 @@ public:
 
 
 // This LevelSource loads levels according to instructions in a text file
-class FileListLevelSource : public MultiLevelSource
+class PlaylistLevelSource : public MultiLevelSource
 {
    typedef MultiLevelSource Parent;
 
@@ -159,12 +159,28 @@ private:
    GameSettings *mGameSettings;
 
 public:
-   FileListLevelSource(const Vector<string> &levelList, const string &folder, GameSettings *settings);     // Constructor
-   virtual ~FileListLevelSource();                                                                                                                // Destructor
+   PlaylistLevelSource(const Vector<string> &levelList, const string &folder, GameSettings *settings);     // Constructor
+   virtual ~PlaylistLevelSource();                                                                                                                // Destructor
 
-   Level *getLevel(S32 index) const;
+   virtual Level *getLevel(S32 index) const;
 
    static Vector<string> findAllFilesInPlaylist(const string &fileName, const string &levelDir);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Class for testing... levels in playlist may not exist; dummy source code will be used
+class TestPlaylistLevelSource : public PlaylistLevelSource
+{
+   typedef PlaylistLevelSource Parent;
+      
+public:
+   TestPlaylistLevelSource(const Vector<string> &levelList, GameSettings *settings);     // Constructor
+
+   Level *getLevel(S32 index) const;
+   bool isEmptyLevelDirOk() const;
 };
 
 

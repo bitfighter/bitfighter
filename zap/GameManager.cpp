@@ -243,6 +243,23 @@ GameManager::HostingModePhase GameManager::getHostingModePhase()
 }
 
 
+// Returns the first GameSettings object we can find.  This is a method of desperation.
+GameSettings *GameManager::getAnyGameSettings()
+{
+#ifndef ZAP_DEDICATED
+   if(getClientGames()->size() > 0)
+      return getClientGames()->get(0)->getSettings();
+#endif
+
+   if(getServerGame())
+      return getServerGame()->getSettings();
+
+   TNLAssert(false, "Who am I, and why am I here?");     // Bonus points if you know who said this!
+
+   return NULL;      // Should never happen
+}
+
+
 extern void exitToOs();
 
 // Run when we're quitting the game, returning to the OS.  Saves settings and does some final cleanup to keep things orderly.
@@ -269,6 +286,8 @@ void GameManager::shutdownBitfighter()
          exitToOs();
 
    // Grab a pointer to settings wherever we can.  Note that all Games (client or server) currently refer to the same settings object.
+   // This is no longer quite true -- now they point to identical objects, but ones that can be configured independently for
+   // testing purposes.
 #ifndef ZAP_DEDICATED
    if(getClientGames()->size() > 0)
       settings = getClientGames()->get(0)->getSettings();
@@ -322,7 +341,6 @@ void GameManager::shutdownBitfighter()
 
    exitToOs();    // Do not pass Go
 }
-
 
 
 } 

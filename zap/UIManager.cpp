@@ -22,6 +22,7 @@
 #include "stringUtils.h"
 
 #include "SoundSystem.h"
+#include "UIItemListSelectMenu.h"
 
 
 namespace Zap

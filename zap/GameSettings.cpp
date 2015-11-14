@@ -162,12 +162,13 @@ S32 GameSettings::UseJoystickNumber = 0;
 CIniFile GameSettings::iniFile("dummy");                 // Our INI file.  Real filename will be supplied later.
 CIniFile GameSettings::userPrefs("dummy");               // Our INI file.  Real filename will be supplied later.
 
-FolderManager *GameSettings::mFolderManager = NULL;
 string GameSettings::mExecutablePath = "bitfighter";     // Default executable name, will be overwritten
 
 // Constructor
 GameSettings::GameSettings()
 {
+   mFolderManager = new FolderManager();        // Cleaned up in destructor
+
    mBanList = new BanList(getFolderManager()->getIniDir());
    mLoadoutPresets.resize(LoadoutPresetCount);   // Make sure we have the right number of slots available
 
@@ -335,9 +336,6 @@ bool GameSettings::isCmdLineParamSpecified(ParamId paramId) const
 
 FolderManager *GameSettings::getFolderManager() const
 {
-   if(!mFolderManager)
-      mFolderManager = new FolderManager();
-
    return mFolderManager;
 }
 
@@ -583,8 +581,8 @@ LevelSource *GameSettings::chooseLevelSource(Game *game)
       string playlist = checkName(game->getPlaylist(), levelDir, ".playlist");
 
       // Create a list of levels for hosting a game from a file, but does not read the files or do any validation of them
-      Vector<string> list = FileListLevelSource::findAllFilesInPlaylist(playlist, levelDir);
-		return new FileListLevelSource(list, levelDir, this);
+      Vector<string> list = PlaylistLevelSource::findAllFilesInPlaylist(playlist, levelDir);
+		return new PlaylistLevelSource(list, levelDir, this);
    }
 
    return new FolderLevelSource(getLevelList(), getFolderManager()->getLevelDir());

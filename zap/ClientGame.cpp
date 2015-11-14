@@ -58,7 +58,8 @@ static void initializeHelpItemForObjects()
 
 
 // Constructor
-ClientGame::ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIManager *uiManager) : Game(bindAddress, settings)
+ClientGame::ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIManager *uiManager) : 
+   Game(bindAddress, settings)
 {
    mRemoteLevelDownloadFilename = "downloaded.level";
 
@@ -1849,6 +1850,15 @@ void ClientGame::lessBots()
    getUIManager()->reactivateGameUI();
 }
 
+
+// Player has changed the playlist mid-game
+void ClientGame::setPlaylistAndAlertServer(const string &playlistName) const
+{
+   S32 index = mPlaylists.getIndex(playlistName);
+
+   if(index > -1)
+      getConnectionToServer()->c2sRequestPlaylistChange(index);
+}
 
 
 };

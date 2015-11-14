@@ -6,7 +6,11 @@
 #include "LevelSource.h"
 #include "LevelFilesForTesting.h"
 
+#include "ClientGame.h"
+#include "ServerGame.h"
+
 #include "stringUtils.h"
+#include "TestUtils.h"
 
 #include "tnlNetInterface.h"
 #include "gtest/gtest.h"
@@ -40,6 +44,57 @@ TEST(TestLevelSource, tests)
    }
 }
 
+
+static Vector<string> findAllPlaylists_client(const string &dir)
+{
+   Vector<string> playlist({ "ClientOne", "ClientTwo", "ClientThree" });
+   return playlist;
+}
+
+
+static Vector<string> findAllPlaylists_server(const string &dir)
+{
+   Vector<string> playlist({ "ServerOne", "ServerTwo", "ServerThree", "ServerFour" });
+   return playlist;
+}
+
+
+TEST(TestLevelSource, PlaylistTests)
+{
+   // Client starts up, should have access to local list of levels
+   Vector<string> clientPlaylist = findAllPlaylists_client("");
+   Vector<string> serverPlaylist = findAllPlaylists_server("");
+
+   GameSettingsPtr clientSettings = GameSettingsPtr(new GameSettings());
+   clientSettings->getFolderManager()->mFindAllPlaylistsFunction = &findAllPlaylists_client;
+
+   GameSettingsPtr serverSettings = GameSettingsPtr(new GameSettings());
+   serverSettings->getFolderManager()->mFindAllPlaylistsFunction = &findAllPlaylists_server;
+
+   LevelSourcePtr serverLevelSource(new TestPlaylistLevelSource(serverPlaylist, serverSettings->get()));
+
+
+   GamePair gamePair(serverSettings, clientSettings, serverLevelSource);
+
+
+   ClientGame *clientGame = gamePair.getClient(0);
+   ServerGame *serverGame = gamePair.server;
+
+   // Ensure we're working with the playlists we think we are
+   EXPECT_EQ(serverPlaylist.size(), serverGame->getLevelCount());
+   EXPECT_EQ(serverPlaylist[0],     serverGame->getCurrentLevelFileName());
+
+   EXPECT_EQ(clientPlaylist.size(), clientGame->getServerPlaylists().size());
+   EXPECT_EQ(clientPlaylist[0],     clientGame->getServerPlaylists()[0]);
+
+   gamePair.idle(5,10);    // Initial idle... skipped with the playlist constructor
+
+   // After we connect to the server, we expect to have received a list of playlists from the server,
+   // which we should see here:
+   EXPECT_EQ(serverPlaylist.size(), clientGame->getServerPlaylists().size());
+   EXPECT_EQ(serverPlaylist[0],     clientGame->getServerPlaylists()[0]);
+
+}
 
 };
 

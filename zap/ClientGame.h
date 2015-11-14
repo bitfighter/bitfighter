@@ -274,6 +274,9 @@ public:
    void changeServerParam(GameConnection::ParamType type, const Vector<string> &words);
    bool checkName(const string &name);    // Make sure name is valid, and correct case of name if otherwise correct
 
+   void setPlaylistAndAlertServer(const string &playlistName) const;    // Player has changed the playlist mid-game
+
+
    // Alert users when they get a reply to their request for elevated permissions
    void gotPermissionsReply(ClientInfo::ClientRole role);
    void gotWrongPassword();

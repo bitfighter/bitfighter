@@ -13,8 +13,8 @@ using namespace TNL;
 
 namespace Zap
 {
-
-class ServerGame;
+   class GameSettings;
+   class ServerGame;
 
 #ifndef ZAP_DEDICATED
    class ClientGame;
@@ -77,6 +77,8 @@ public:
    static void idle(U32 timeDelta);
    static void setHostingModePhase(HostingModePhase);
    static HostingModePhase getHostingModePhase();
+
+   static GameSettings *getAnyGameSettings();
 };
 
 } 

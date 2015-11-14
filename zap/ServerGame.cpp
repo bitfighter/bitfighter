@@ -1235,7 +1235,7 @@ void ServerGame::addClient(ClientInfo *clientInfo)
             mShutdownOriginator.isNull() ? StringTableEntry() : mShutdownOriginator->getClientInfo()->getName(), 
             "Sorry -- server shutting down", false);
 
-   TNLAssert(getGameType(), "No gametype?");     // Added 12/20/2013 by wat to try to understand if this ever happens
+      TNLAssert(getGameType(), "No gametype?");     // Added 12/20/2013 by wat to try to understand if this ever happens
 
    getGameType()->serverAddClient(clientInfo, areTeamsLocked() ? &mTeamHistoryManager : NULL);
    addToClientList(clientInfo);

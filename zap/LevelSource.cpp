@@ -562,7 +562,7 @@ FolderLevelSource::~FolderLevelSource()
 ////////////////////////////////////////
 
 // Constructor -- pass in a list of level names and a folder; create LevelInfos for each
-FileListLevelSource::FileListLevelSource(const Vector<string> &levelList, const string &folder, GameSettings *settings)
+PlaylistLevelSource::PlaylistLevelSource(const Vector<string> &levelList, const string &folder, GameSettings *settings)
 {
    mGameSettings = settings;
 
@@ -572,20 +572,22 @@ FileListLevelSource::FileListLevelSource(const Vector<string> &levelList, const 
 
 
 // Destructor
-FileListLevelSource::~FileListLevelSource()
+PlaylistLevelSource::~PlaylistLevelSource()
 {
    // Do nothing
 }
 
 
-// Load specified level, put results in gameObjectDatabase.  Return md5 hash of level.
-Level *FileListLevelSource::getLevel(S32 index) const
+// Load specified level, put results in gameObjectDatabase
+Level *PlaylistLevelSource::getLevel(S32 index) const
 {
    TNLAssert(index >= 0 && index < mLevelInfos.size(), "Index out of bounds!");
 
    const LevelInfo *levelInfo = &mLevelInfos[index];
 
-   string filename = FolderManager::findLevelFile(GameSettings::getFolderManager()->getLevelDir(), levelInfo->filename);
+   FolderManager *folderManager = mGameSettings->getFolderManager();
+
+   string filename = folderManager->findLevelFile(folderManager->getLevelDir(), levelInfo->filename);
 
    if(filename == "")
    {
@@ -607,7 +609,7 @@ Level *FileListLevelSource::getLevel(S32 index) const
 
 
 // Static method
-Vector<string> FileListLevelSource::findAllFilesInPlaylist(const string &playlistFile, const string &levelDir)
+Vector<string> PlaylistLevelSource::findAllFilesInPlaylist(const string &playlistFile, const string &levelDir)
 {
    Vector<string> levels;
 
@@ -637,6 +639,35 @@ Vector<string> FileListLevelSource::findAllFilesInPlaylist(const string &playlis
    }
 
    return levels;
+}
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+TestPlaylistLevelSource::TestPlaylistLevelSource(const Vector<string> &levelList, GameSettings *settings)
+   : Parent(levelList, "DummyFolderForTesting", settings)
+{
+   // Do nothing
+}
+
+
+Level *TestPlaylistLevelSource::getLevel(S32 index) const
+{
+   TNLAssert(index >= 0 && index < mLevelInfos.size(), "Index out of bounds!");
+
+   const LevelInfo *levelInfo = &mLevelInfos[index];
+
+   Level *level = new Level();      // Will be deleted by caller
+
+   level->loadLevelFromString("");
+
+   return level;
+}
+
+
+bool TestPlaylistLevelSource::isEmptyLevelDirOk() const
+{
+   return true;      // No folder needed -- we're testing!
 }
 
 

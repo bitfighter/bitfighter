@@ -286,8 +286,14 @@ void PlaylistMenuUserInterface::processSelection(U32 index)
    if(playlistName == NO_PLAYLIST)
       playlistName = "";
 
-   getGame()->setPlaylist(playlistName);
+   setPlaylist(playlistName);             // Different implementations when hosting vs. when playing
    getUIManager()->reactivatePrevUI();    // To hosting menu
+}
+
+
+void PlaylistMenuUserInterface::setPlaylist(const string &playlistName) const
+{
+   getGame()->setPlaylist(playlistName);
 }
 
 
@@ -299,33 +305,80 @@ void PlaylistMenuUserInterface::onActivate()
    // Replace with a getLevelCount() method on Game?
    ClientGame *game = getGame();
 
-   Vector<string> playlists = FolderManager::findAllPlaylistsInFolder(game->getSettings()->getFolderManager()->getLevelDir());
+   Vector<string> playlists = getPlaylists();
+
+   clearMenuItems();
 
    // Any items to select from?
-   if(playlists.size() == 0)
-      return;
-
-   char c[2];
-   c[1] = 0;   // null termination
-
-   for(S32 i = 0; i < playlists.size(); i++)
+   if(playlists.size() > 0)
    {
-      if(playlists[i] == "")   // Skip blanks, but there should be none
-         continue;
+      char c[2];
+      c[1] = 0;   // null termination
 
-      string playlistName = playlists[i];
-      c[0] = playlistName[0];
-      addMenuItem(new MenuItem(i, playlistName, processPlaylistSelectionCallback, "", InputCodeManager::stringToInputCode(c)));
+      for(S32 i = 0; i < playlists.size(); i++)
+      {
+         if(playlists[i] == "")   // Skip blanks, but there should be none
+            continue;
+
+         string playlistName = playlists[i];
+         c[0] = playlistName[0];
+         addMenuItem(new MenuItem(i, playlistName, processPlaylistSelectionCallback, "", InputCodeManager::stringToInputCode(c)));
+      }
+
+      sortMenuItems();
    }
-
-   sortMenuItems();
 
    addMenuItem(new MenuItem(playlists.size(), NO_PLAYLIST, processPlaylistSelectionCallback, "", InputCodeManager::stringToInputCode("N")));
 }
 
 
+Vector<string> PlaylistMenuUserInterface::getPlaylists() const
+{
+   return getGame()->getServerPlaylists();
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+// Constructor
+PlaylistInGameMenuUserInterface::PlaylistInGameMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
+{
+   // Do nothing
+}
+
+
+// Destructor
+PlaylistInGameMenuUserInterface::~PlaylistInGameMenuUserInterface()
+{
+   // Do nothing
+}
+
+
+// Selected a playlist!  What do we do now?
+static void processPlaylistInGameSelectionCallback(ClientGame *game, U32 index)             
+{
+   game->getUIManager()->getUI<PlaylistInGameMenuUserInterface>()->processSelection(index);
+}
+
+
+void PlaylistInGameMenuUserInterface::setPlaylist(const string &playlistName) const
+{
+   getGame()->setPlaylistAndAlertServer(playlistName);
+}
+
+
+Vector<string> PlaylistInGameMenuUserInterface::getPlaylists() const
+{
+   return getGame()->getServerPlaylists();
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
 
 // Constructor
 PlayerMenuUserInterface::PlayerMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
