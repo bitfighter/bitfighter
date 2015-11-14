@@ -143,7 +143,7 @@ static void setTeams(GamePair &gamePair, const string &teamConfig)
          if(words[i][j] == 'H')
             gamePair.addClientAndSetTeam("Human " + itos(i) + " " + itos(j), i);
          else if(words[i][j] == 'B')
-            gamePair.addClientAndSetTeam("Bot " + itos(i) + " " + itos(j), i);
+            gamePair.addBotClient("Bot " + itos(i) + " " + itos(j), i);
          else
             TNLAssert(false, "Invalid char!");
          //printf("%s == > %s\n", teamConfig.c_str(), getTeams(gamePair).c_str());
