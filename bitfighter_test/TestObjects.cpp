@@ -44,9 +44,10 @@ class ObjectTest : public testing::Test
  */
 TEST_F(ObjectTest, ProcessArgumentsSanity) 
 {
-   ServerGame *game = newServerGame();
    const S32 argc = 40;
    const char *argv[argc] = {
+   GamePair pair;
+   ServerGame *game = pair.server;
       "This first string will be replaced by 'argv[0] =' below",
       "3", "4", "3", "6", "6", "4", "2", "6", "6", "3", 
       "4", "3", "4", "3", "6", "6", "4", "2", "6", "6", 
@@ -73,7 +74,6 @@ TEST_F(ObjectTest, ProcessArgumentsSanity)
    t("Team");
 #undef t
 
-   delete game;
 }
 
 
