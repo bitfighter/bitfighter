@@ -338,7 +338,7 @@ static void doScenario11(GamePair &gamePair)
 // The spawnDelay mechansim is complex and interacts with other weird things like levelUp messages and server suspension
 TEST(SpawnDelayTest, SpawnDelayTests)
 {
-   GamePair gamePair("");     // An empty level should work fine here
+   GamePair gamePair;     // An empty level should work fine here
    ClientGame *clientGame = gamePair.getClient(0);
    ServerGame *serverGame = gamePair.server;
 
