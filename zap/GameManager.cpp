@@ -253,7 +253,8 @@ extern void exitToOs();
 // 4) Host a game with no levels as a dedicated server
 // 5) Admin issues a shutdown command to a remote dedicated server
 // 6) Click the X on the window to close the game window   <=== NOTE: This scenario fails for me when running a dedicated server on windows.
-// and two illigitimate ways
+//
+// And two illigitimate ways
 // 7) Lua panics!!
 // 8) Video system fails to initialize
 void GameManager::shutdownBitfighter()
