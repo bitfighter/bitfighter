@@ -173,8 +173,7 @@ GamePair::~GamePair()
    GameManager::getServerGame()->setAutoLeveling(false);    // No need to run this while we're shutting down
 
    for(S32 i = 0; i < clientGames->size(); i++)
-      if(clientGames->get(i)->getConnectionToServer())
-         clientGames->get(i)->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+      disconnectClient(i);
 
    // Note that when the client disconnects, all local ghosted objects, including GameType, are deleted
    idle(10, 5);
@@ -262,6 +261,13 @@ ClientGame *GamePair::addClient(ClientGame *clientGame)
 }
 
 
+void GamePair::disconnectClient(S32 index)
+{
+   if(GameManager::getClientGames()->get(index)->getConnectionToServer())
+      GameManager::getClientGames()->get(index)->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+}
+
+
 S32 GamePair::getClientCount() const
 {
    return GameManager::getClientGames()->size();
@@ -289,8 +295,7 @@ void GamePair::removeClient(S32 index)
    // Disconnect before deleting
    ClientGame *clientGame = GameManager::getClientGames()->get(index);
 
-   if(clientGame->getConnectionToServer())
-      clientGame->getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+   disconnectClient(index);
 
    this->idle(5, 5);      // Let things settle
 

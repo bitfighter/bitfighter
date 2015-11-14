@@ -79,6 +79,8 @@ struct GamePair
    ClientGame *getClient(S32 index);
    S32 getClientIndex(const string &name);
 
+   static void disconnectClient(S32 index);
+
    GameUserInterface *getGameUI(S32 clientIndex);
    void sendKeyPress(S32 clientIndex, InputCode inputCode);
    void runChatCmd(S32 clientIndex, const string &command);
