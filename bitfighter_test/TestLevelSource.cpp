@@ -85,7 +85,7 @@ TEST(TestLevelSource, PlaylistTests)
    EXPECT_EQ(clientPlaylist.size(), clientGame->getLocalPlaylists().size());
    EXPECT_EQ(clientPlaylist[0],     clientGame->getLocalPlaylists()[0]);
 
-   gamePair.idle(5,10);    // Initial idle... skipped with the playlist constructor
+   gamePair.idle(5,10);    // Initial idle... skipped with the playlist constructor.  This connects client to server.
 
    // After we connect to the server, we expect to have received a list of playlists from the server,
    // which we should see here:
@@ -100,6 +100,8 @@ TEST(TestLevelSource, PlaylistTests)
 
    EXPECT_EQ(clientPlaylist.size(), clientGame->getLocalPlaylists().size());
    EXPECT_EQ(clientPlaylist[0],     clientGame->getLocalPlaylists()[0]);
+
+   // No longer connected, don't care about client's list of playlists on the server, won't test here
 }
 
 };
