@@ -88,11 +88,6 @@ Game::Game(const Address &theBindAddress, GameSettingsPtr settings) :
    mNameToAddressThread = NULL;
 
    mSecondaryThread = new Master::DatabaseAccessThread();
-
-   // Client needs this to show playlists when hosting a game; server needs to know this to tell a remote client
-   // what playlists are available for switching to
-   string levelDir = getSettings()->getFolderManager()->getLevelDir();
-   setServerPlaylists(settings->getFolderManager()->findAllPlaylistsInFolder(levelDir));
 }
 
 

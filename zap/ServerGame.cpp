@@ -70,6 +70,8 @@ ServerGame::ServerGame(const Address &address, GameSettingsPtr settings, LevelSo
 
    EventManager::get()->setPaused(false);
 
+   setServerPlaylists(settings->getPlaylists());
+
    mInfoFlags = 0;                           // Currently used to specify test mode and debug builds
    mCurrentLevelIndex = 0;
 
