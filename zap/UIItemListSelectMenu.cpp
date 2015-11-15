@@ -232,7 +232,11 @@ void LevelMenuSelectUserInterface::onActivate()
       for(S32 i = 0; i < mMenuDisplayItems.size(); i++)
       {
          c[0] = mMenuDisplayItems[i][0];
-         addMenuItem(new MenuItem(i | UPLOAD_LEVELS_BIT, mMenuDisplayItems[i], processLevelSelectionCallback, "", InputCodeManager::stringToInputCode(c)));
+         addMenuItem(new MenuItem(i | UPLOAD_LEVELS_BIT, 
+                                  mMenuDisplayItems[i], 
+                                  processLevelSelectionCallback, 
+                                  "", 
+                                  InputCodeManager::stringToInputCode(c)));
       }
    }
  
