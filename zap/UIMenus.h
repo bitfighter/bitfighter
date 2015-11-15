@@ -388,7 +388,6 @@ public:
 
 class LevelMenuUserInterface : public MenuUserInterface
 {
-private:
    typedef MenuUserInterface Parent;
 
 public:
@@ -405,7 +404,6 @@ public:
 
 class RobotsMenuUserInterface : public MenuUserInterface
 {
-private:
    typedef MenuUserInterface Parent;
 
 public:
