@@ -1111,7 +1111,7 @@ void EngineeredItem::mountToWall(const Point &pos,
 bool EngineeredItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
    CounterMenuItem *menuItem = new CounterMenuItem("10% Heal:", getHealRate(), 1, 0, 100, "secs", "Disabled",
-      "Time for this item to heal itself 10%");
+                                                   "Time for this item to heal itself 10%");
    attributeMenu->addMenuItem(menuItem);
 
    return true;
