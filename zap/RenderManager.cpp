@@ -29,16 +29,28 @@ const U32 GLOPT::Float = GL_FLOAT;
 const U32 GLOPT::Front = GL_FRONT;
 const U32 GLOPT::Less = GL_LESS;
 const U32 GLOPT::LineLoop = GL_LINE_LOOP;
+
+#ifndef BF_USE_GLES2
 const U32 GLOPT::LineSmooth = GL_LINE_SMOOTH;
+#endif
+
 const U32 GLOPT::LineStrip = GL_LINE_STRIP;
 const U32 GLOPT::Lines = GL_LINES;
+
+#ifndef BF_USE_GLES2
 const U32 GLOPT::Modelview = GL_MODELVIEW;
 const U32 GLOPT::ModelviewMatrix = GL_MODELVIEW_MATRIX;
+#endif
+
 const U32 GLOPT::One = GL_ONE;
 const U32 GLOPT::OneMinusDstColor = GL_ONE_MINUS_DST_COLOR;
 const U32 GLOPT::PackAlignment = GL_PACK_ALIGNMENT;
 const U32 GLOPT::Points = GL_POINTS;
+
+#ifndef BF_USE_GLES2
 const U32 GLOPT::Projection = GL_PROJECTION;
+#endif
+
 const U32 GLOPT::Rgb = GL_RGB;
 const U32 GLOPT::ScissorBox = GL_SCISSOR_BOX;
 const U32 GLOPT::ScissorTest = GL_SCISSOR_TEST;

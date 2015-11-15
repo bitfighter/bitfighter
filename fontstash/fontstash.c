@@ -1,4 +1,5 @@
 //
+// Copyright (c) 2014 Sergio Moura sergio@moura.us
 // Copyright (c) 2011-2013 Andreas Krinke andreas.krinke@gmx.de
 // Copyright (c) 2009 Mikko Mononen memon@inside.org
 //
@@ -22,15 +23,20 @@
 #include <string.h>
 #include <math.h> /* @rlyeh: floorf() */
 
-// TNL isn't used here so we extract the relevant logic for GLES
-#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || defined (__ANDROID__)
-#  define TNL_OS_MOBILE
-#endif
-
 #include "glinc.h"
 
 /* @rlyeh: removed STB_TRUETYPE_IMPLENTATION. We link it externally */
 #include "stb_truetype.h"
+
+#ifdef BF_USE_GLES2
+// OpenGL 3 is basically GLES2, I think...
+#define STH_OPENGL3
+#endif
+
+#ifdef STH_OPENGL3
+#   include "fragmentShader.h"
+#   include "vertexShader.h"
+#endif
 
 #define HASH_LUT_SIZE 256
 #define MAX_ROWS 128
@@ -40,6 +46,12 @@
 #define TTFONT_FILE 1
 #define TTFONT_MEM  2
 #define BMFONT      3
+
+#ifdef STH_OPENGL3
+#   define STH_GL_TEXTYPE   GL_RED
+#else
+#   define STH_GL_TEXTYPE   GL_ALPHA
+#endif
 
 static int idx = 1;
 
@@ -111,6 +123,12 @@ struct sth_stash
 	struct sth_texture* bm_textures;
 	struct sth_font* fonts;
 	int drawing;
+#ifdef STH_OPENGL3
+    GLuint programID;
+    GLuint matrixID;
+    GLuint textureID;
+    GLfloat projectionMatrix[16];
+#endif
 };
 
 
@@ -170,6 +188,79 @@ struct sth_stash* sth_create(int cachew, int cacheh)
 	texture = (struct sth_texture*)malloc(sizeof(struct sth_texture));
 	if (texture == NULL) goto error;
 	memset(texture,0,sizeof(struct sth_texture));
+
+#ifdef STH_OPENGL3
+    // Setup the initial projection matrix
+    stash->projectionMatrix[ 0] = 1;
+    stash->projectionMatrix[ 1] = 0;
+    stash->projectionMatrix[ 2] = 0;
+    stash->projectionMatrix[ 3] = 0;
+
+    stash->projectionMatrix[ 4] = 0;
+    stash->projectionMatrix[ 5] = 1;
+    stash->projectionMatrix[ 6] = 0;
+    stash->projectionMatrix[ 7] = 0;
+
+    stash->projectionMatrix[ 8] = 0;
+    stash->projectionMatrix[ 9] = 0;
+    stash->projectionMatrix[10] = 1;
+    stash->projectionMatrix[11] = 0;
+
+    stash->projectionMatrix[12] = 0;
+    stash->projectionMatrix[13] = 0;
+    stash->projectionMatrix[14] = 0;
+    stash->projectionMatrix[15] = 1;
+
+    // Create the Shaders
+    GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+    GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+    GLint Result = GL_FALSE;
+    int infoLogLen;
+
+    const char *vPtr = vertexShader;
+    const char *fPtr = fragmentShader;
+
+    glShaderSource(VertexShaderID, 1, &vPtr, NULL);
+    glCompileShader(VertexShaderID);
+    glGetShaderiv(VertexShaderID, GL_COMPILE_STATUS, &Result);
+    glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &infoLogLen);
+    if (infoLogLen > 0) {
+        char buf[1024];
+        glGetShaderInfoLog(VertexShaderID, infoLogLen, NULL, buf);
+        printf("Vertex shader compilation result (%u)\n%s\n", Result, buf);
+        printf("%s\n", vPtr);
+    }
+
+    glShaderSource(FragmentShaderID, 1, &fPtr, NULL);
+    glCompileShader(FragmentShaderID);
+    glGetShaderiv(FragmentShaderID, GL_COMPILE_STATUS, &Result);
+    glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &infoLogLen);
+    if (infoLogLen > 0) {
+        char buf[1024];
+        glGetShaderInfoLog(FragmentShaderID, infoLogLen, NULL, buf);
+        printf("Fragment shader compilation result (%u)\n%s\n", Result, buf);
+        printf("%s\n", fPtr);
+    }
+
+    stash->programID = glCreateProgram();
+    glAttachShader(stash->programID, VertexShaderID);
+    glAttachShader(stash->programID, FragmentShaderID);
+    glLinkProgram(stash->programID);
+    glGetShaderiv(stash->programID, GL_LINK_STATUS, &Result);
+    glGetShaderiv(stash->programID, GL_INFO_LOG_LENGTH, &infoLogLen);
+    if (infoLogLen > 0) {
+        char buf[1024];
+        glGetShaderInfoLog(stash->programID, infoLogLen, NULL, buf);
+        printf("Program link compilation result (%u)\n%s\n", Result, buf);
+    }
+
+    glDeleteShader(VertexShaderID);
+    glDeleteShader(FragmentShaderID);
+
+    // Setup a few values
+    stash->matrixID  = glGetUniformLocation(stash->programID, "MVP");
+    stash->textureID = glGetUniformLocation(stash->programID, "myTextureSampler");
+#endif
 
 	// Create first texture for the cache.
 	stash->tw = cachew;
@@ -550,6 +641,75 @@ static void flush_draw(struct sth_stash* stash)
 	{
 		if (texture->nverts > 0)
 		{			
+#ifdef STH_OPENGL3
+         GLuint buffer[2];
+
+         GLushort *elementIndices;
+         unsigned int indiceCount, idx, fOffset;
+
+         indiceCount = texture->nverts * 1.5;
+         elementIndices = malloc(sizeof(GLushort) * indiceCount);
+
+         fOffset = 0;
+         for (idx = 0; idx < indiceCount;) {
+             elementIndices[idx++] = fOffset + 0;
+             elementIndices[idx++] = fOffset + 1;
+             elementIndices[idx++] = fOffset + 3;
+
+             elementIndices[idx++] = fOffset + 1;
+             elementIndices[idx++] = fOffset + 2;
+             elementIndices[idx++] = fOffset + 3;
+             fOffset += 4;
+         }
+
+         // Start OpenGL Stuff.
+         glUseProgram(stash->programID);
+
+         // Setup mvp matrix
+         glUniformMatrix4fv(stash->matrixID, 1, GL_FALSE, stash->projectionMatrix);
+
+         glGenBuffers(2, buffer);  // buffer[0] for Vertex data and UV data / buffer[1] for indices
+
+         // Load vertexes into OpenGL
+         glBindBuffer(GL_ARRAY_BUFFER, buffer[0]);
+         glBufferData(GL_ARRAY_BUFFER, texture->nverts * 4 * sizeof(float), texture->verts, GL_STATIC_DRAW);
+
+         // Load element buffer into OpenGL
+         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer[1]);
+         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indiceCount, elementIndices, GL_STATIC_DRAW);
+
+         // Texture
+         glActiveTexture(GL_TEXTURE0);
+         glBindTexture(GL_TEXTURE_2D, texture->id);
+         glUniform1i(stash->textureID, 0);  // Set our "myTextureSampler" sampler to user Texture Unit 0
+
+         // 1st attribute buffer: vertices
+         glEnableVertexAttribArray(0);
+         glBindBuffer(GL_ARRAY_BUFFER, buffer[0]);
+         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, VERT_STRIDE, (void*)0);
+
+         // 2nd attribute buffer: uv textures
+         glEnableVertexAttribArray(1);
+         glBindBuffer(GL_ARRAY_BUFFER, buffer[0]);
+         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, VERT_STRIDE, (void*)(sizeof(float) * 2));
+
+         // Draw
+         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer[1]);   // just to be sure
+         glDrawElements(GL_TRIANGLES,      // mode
+                        indiceCount,       // count
+                        GL_UNSIGNED_SHORT, // type
+                        (void*)0           // element array buffer offset
+                        );
+
+         // Cleanup
+         glDisableVertexAttribArray(0);
+         glDisableVertexAttribArray(1);
+
+         // Delete data
+         glDeleteBuffers(2, buffer);
+
+         free(elementIndices);
+#else
 			glBindTexture(GL_TEXTURE_2D, texture->id);
 			glEnable(GL_TEXTURE_2D);
 			glEnableClientState(GL_VERTEX_ARRAY);
@@ -560,6 +720,7 @@ static void flush_draw(struct sth_stash* stash)
 			glDisable(GL_TEXTURE_2D);
 			glDisableClientState(GL_VERTEX_ARRAY);
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+#endif
 			texture->nverts = 0;
 		}
 		texture = texture->next;
@@ -717,6 +878,10 @@ void sth_delete(struct sth_stash* stash)
 	struct sth_font* curfnt = NULL;
 
 	if (!stash) return;
+
+#ifdef STH_OPENGL3
+   glDeleteProgram(stash->programID);
+#endif
 
 	tex = stash->tt_textures;
 	while(tex != NULL) {
