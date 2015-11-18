@@ -1334,10 +1334,10 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSendScriptAndPlaylistLists,
                   (Vector<string> scripts, Vector<string> playlists, S32 currentPlaylistIndex), (scripts, playlists, currentPlaylistIndex),
                   NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
 {
-   ClientGame *game = getClientGame();
-   game->setScriptList(scripts);
-   game->setServerPlaylists(playlists);
-   game->setPlaylist(currentPlaylistIndex);
+   ClientGame *clientGame = getClientGame();
+   clientGame->setScriptList(scripts);
+   clientGame->setServerPlaylists(playlists);
+   clientGame->setPlaylist(currentPlaylistIndex);
 }
 
 
