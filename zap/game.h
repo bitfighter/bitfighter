@@ -274,6 +274,7 @@ public:
    void setPlaylist(const string &playlist);
 
    string getPlaylist() const;
+   bool isUsingPlaylist() const;
 
    static Vector<string> setServerPlaylists(const string &levelDir);
    void setServerPlaylists(const Vector<string> &playlists);

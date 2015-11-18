@@ -209,6 +209,12 @@ string Game::getPlaylist() const
 }
 
 
+bool Game::isUsingPlaylist() const
+{
+   return mPlaylist != "";
+}
+
+
 GameSettings *Game::getSettings() const
 {
    return mSettings.get();
