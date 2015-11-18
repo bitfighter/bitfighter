@@ -1271,6 +1271,7 @@ void GameConnection::sendLevelList()
 
    S32 currentPlaylistIndex = playlistList.getIndex(mServerGame->getPlaylist());
 
+   // TODO: Do we really need to resend this whole list when a playlist changes?
    s2cSendScriptAndPlaylistLists(findAllScriptsInFolder(mServerGame->getSettings()->getFolderManager()->getLevelDir()),
                                  playlistList, currentPlaylistIndex);
 }
