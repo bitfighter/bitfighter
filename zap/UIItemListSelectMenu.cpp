@@ -253,7 +253,8 @@ void LevelMenuSelectUserInterface::onActivate()
       }
    }
 
-   sortMenuItems();
+   if(!getGame()->isUsingPlaylist())
+      sortMenuItems();
 }
 
 
