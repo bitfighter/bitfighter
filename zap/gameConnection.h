@@ -77,7 +77,7 @@ private:
    StringTableEntry mServerName;
    GameSettings *mSettings;
 
-   void sendListOfLevelsToAllLevelChangers();
+   void sendListOfLevelsToAllLevelChangers() const;
 
    bool userAlreadyHasPermissions(const string &ownerPW, const string &adminPW, const string &levChangePW, const char *pass);
 

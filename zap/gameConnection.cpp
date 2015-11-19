@@ -913,7 +913,7 @@ void GameConnection::markCurrentLevelAsDeleted()
 }
 
 
-void GameConnection::sendListOfLevelsToAllLevelChangers()
+void GameConnection::sendListOfLevelsToAllLevelChangers() const
 {
    for(S32 i = 0; i < mServerGame->getClientCount(); i++)
    {
