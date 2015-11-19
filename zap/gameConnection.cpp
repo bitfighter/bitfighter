@@ -484,7 +484,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
 
       // Send level list if not already LevelChanger
       if(!mClientInfo->isLevelChanger())
-         sendLevelList();
+         sendLevelList(true);
 
       mClientInfo->setRole(ClientInfo::RoleOwner, true);
 
@@ -508,7 +508,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
       mWrongPasswordCount = 0;
 
       if(!mClientInfo->isLevelChanger())
-         sendLevelList();
+         sendLevelList(true);
       
       mClientInfo->setRole(ClientInfo::RoleAdmin, true);          // Enter admin PW and...
 
@@ -531,7 +531,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
 
       mClientInfo->setRole(ClientInfo::RoleLevelChanger, true);
 
-      sendLevelList();                       // Send client the level list
+      sendLevelList(true);                       // Send client the level list
 
       // Announce change to world
       if(gameType)
@@ -718,7 +718,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
       folderManager->setLevelDir(folder);
       mServerGame->setLevelSource(levelSource);
 
-      sendListOfLevelsToAllLevelChangers();
+      sendListOfLevelsToAllLevelChangers(true);
 
       s2cDisplaySuccessMessage("Level folder changed");
 
@@ -754,7 +754,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
       mServerGame->setPlaylist(playlist);
       mServerGame->setLevelSource(levelSource);
 
-      sendListOfLevelsToAllLevelChangers();
+      sendListOfLevelsToAllLevelChangers(false);
 
       s2cDisplaySuccessMessage("Playlist updated");
 
@@ -835,7 +835,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
 
                GameConnection *conn = clientInfo->getConnection();
                if(conn)
-                  conn->sendLevelList();
+                  conn->sendLevelList(true);
             }
          }
       }
@@ -913,7 +913,7 @@ void GameConnection::markCurrentLevelAsDeleted()
 }
 
 
-void GameConnection::sendListOfLevelsToAllLevelChangers() const
+void GameConnection::sendListOfLevelsToAllLevelChangers(bool sendPlaylistList) const
 {
    for(S32 i = 0; i < mServerGame->getClientCount(); i++)
    {
@@ -921,7 +921,7 @@ void GameConnection::sendListOfLevelsToAllLevelChangers() const
       GameConnection *conn = clientInfo->getConnection();
 
       if(clientInfo->isLevelChanger() && conn)
-         conn->sendLevelList();
+         conn->sendLevelList(sendPlaylistList);
    }
 }
 
@@ -1255,7 +1255,7 @@ static Vector<string> findAllScriptsInFolder(const string &dir)
 
 
 // Server only
-void GameConnection::sendLevelList()
+void GameConnection::sendLevelList(bool sendPlaylistList)
 {
    // Send blank entry to clear the remote list
    s2cAddLevel("", NoGameType);    
@@ -1271,9 +1271,11 @@ void GameConnection::sendLevelList()
 
    S32 currentPlaylistIndex = playlistList.getIndex(mServerGame->getPlaylist());
 
-   // TODO: Do we really need to resend this whole list when a playlist changes?
-   s2cSendScriptAndPlaylistLists(findAllScriptsInFolder(mServerGame->getSettings()->getFolderManager()->getLevelDir()),
-                                 playlistList, currentPlaylistIndex);
+   if(sendPlaylistList)
+      s2cSendScriptAndPlaylistLists(findAllScriptsInFolder(mServerGame->getSettings()->getFolderManager()->getLevelDir()), 
+                                    playlistList, currentPlaylistIndex);
+   else
+      s2cSendCurrentPlaylist(currentPlaylistIndex);
 }
 
 
@@ -1338,6 +1340,15 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSendScriptAndPlaylistLists,
    clientGame->setScriptList(scripts);
    clientGame->setServerPlaylists(playlists);
    clientGame->setPlaylist(currentPlaylistIndex);
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, s2cSendCurrentPlaylist, 
+                  (S32 index), (index),
+                  NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
+{
+   ClientGame *clientGame = getClientGame();
+   clientGame->setPlaylist(index);
 }
 
 
@@ -2348,7 +2359,7 @@ void GameConnection::setClientInfo(ClientInfo *clientInfo)
 void GameConnection::onLocalConnection()
 {
    getClientInfo()->setRole(LocalConnectionPermissions, false);    // Set Owner role on server (and client)
-   sendLevelList();
+   sendLevelList(true);
 
    setServerName(mServerGame->getSettings()->getHostName());  // Server name is whatever we've set locally
 
@@ -2523,7 +2534,7 @@ void GameConnection::onConnectionEstablished_server()
    else if(settings->getLevelChangePassword() == "")   // Grant level change permissions if level change PW is blank
    {
       mClientInfo->setRole(ClientInfo::RoleLevelChanger, false);  // Silently
-      sendLevelList();
+      sendLevelList(true);
    }
 
 

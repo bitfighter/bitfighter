@@ -281,7 +281,7 @@ void ServerGame::sendLevelListToLevelChangers(const string &message) const
 
       if(clientInfo->isLevelChanger() && conn)
       {
-        conn->sendLevelList();
+        conn->sendLevelList(true);
         if(message != "")
            conn->s2cDisplayMessage(GameConnection::ColorInfo, SFXNone, message);
       }
@@ -1221,7 +1221,7 @@ void ServerGame::addClient(ClientInfo *clientInfo)
 
    // If client has level change send a list of levels and their types to the connecting client
    if(clientInfo->isLevelChanger())
-      conn->sendLevelList();
+      conn->sendLevelList(true);
 
    // Let client know that teams are locked... if in fact they are locked.  
    // Also tell the TeamHistoryManager that we're here.

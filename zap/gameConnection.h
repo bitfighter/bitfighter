@@ -77,7 +77,7 @@ private:
    StringTableEntry mServerName;
    GameSettings *mSettings;
 
-   void sendListOfLevelsToAllLevelChangers() const;
+   void sendListOfLevelsToAllLevelChangers(bool sendPlaylistList) const;
 
    bool userAlreadyHasPermissions(const string &ownerPW, const string &adminPW, const string &levChangePW, const char *pass);
 
@@ -171,7 +171,7 @@ public:
 
    void submitPassword(const char *password);
 
-   void sendLevelList();
+   void sendLevelList(bool sendPlaylistList);
 
    bool isReadyForRegularGhosts();
    void setReadyForRegularGhosts(bool ready);
@@ -262,6 +262,7 @@ public:
    TNL_DECLARE_RPC(s2cRequestLevel, (S32 index));
 
    TNL_DECLARE_RPC(s2cSendScriptAndPlaylistLists, (Vector<string> scripts, Vector<string> playlists, S32 currentPlaylistIndex));
+   TNL_DECLARE_RPC(s2cSendCurrentPlaylist, (S32 index));
 
    TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative));
    TNL_DECLARE_RPC(c2sRequestPlaylistChange, (S32 playlistIndex));
