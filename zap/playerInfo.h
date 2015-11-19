@@ -28,7 +28,6 @@ public:
    // Overridden by child classes, Is there a better way to do this?
    virtual S32 lua_getName(lua_State *L);
    virtual S32 lua_getShip(lua_State *L);
-   virtual S32 lua_getTeamIndx(lua_State *L);
    virtual S32 lua_getTeamIndex(lua_State *L);
    virtual S32 lua_getRating(lua_State *L);
    virtual S32 lua_getScore(lua_State *L);
@@ -53,7 +52,6 @@ public:
    S32 lua_getName(lua_State *L);
    S32 lua_getShip(lua_State *L);
    S32 lua_getScriptName(lua_State *L);
-   S32 lua_getTeamIndx(lua_State *L);
    S32 lua_getTeamIndex(lua_State *L);
    S32 lua_getRating(lua_State *L);
    S32 lua_getScore(lua_State *L);
@@ -79,7 +77,6 @@ public:
    S32 lua_getName(lua_State *L);
    S32 lua_getShip(lua_State *L);
    S32 lua_getScriptName(lua_State *L);
-   S32 lua_getTeamIndx(lua_State *L);
    S32 lua_getTeamIndex(lua_State *L);
    S32 lua_getRating(lua_State *L);
    S32 lua_getScore(lua_State *L);
