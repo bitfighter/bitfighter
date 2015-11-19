@@ -5,6 +5,7 @@
 
 #include "NexusGame.h"
 
+#include "HelpItemManager.h"
 #include "Level.h"
 
 #include "Colors.h"

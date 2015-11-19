@@ -12,7 +12,6 @@
 
 #include "move.h"
 #include "LuaWrapper.h"
-#include "HelpItemManager.h"  // HelpItem enum
 
 #include "tnlNetObject.h"
 

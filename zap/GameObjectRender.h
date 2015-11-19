@@ -9,7 +9,6 @@
 #include "tnl.h"
 
 #include "RenderManager.h"
-#include "Geometry.h"
 
 #include "Color.h"
 #include "Rect.h"
@@ -18,15 +17,14 @@
 
 #include "BfObject.h"            // Need to use BfObject with SafePtr.  Whether this is really needed is a different question.
 
-#include <string>
-
 using namespace TNL;
 using namespace std;
 
 namespace Zap
 {
+   enum GoalZoneFlashStyle;
 
-static const S32 NO_NUMBER = -1;
+   static const S32 NO_NUMBER = -1;
 
 class Ship;
 class WallItem;

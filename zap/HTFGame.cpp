@@ -6,6 +6,7 @@
 #include "HTFGame.h"
 
 #include "goalZone.h"
+#include "HelpItemManager.h"
 #include "Level.h"
 #include "ship.h"
 

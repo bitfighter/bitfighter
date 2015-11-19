@@ -109,6 +109,7 @@ struct UserInterfaceData;
 class WallSegmentManager;
 class Robot;
 class Level;
+enum HelpItem;
 
 class AbstractTeam;
 class Team;

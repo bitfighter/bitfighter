@@ -7,7 +7,8 @@
 
 #include "game.h"
 #include "goalZone.h"
-#include "Level.h"
+#include "HelpItemManager.h"
+#include "Level.h"               // Resharper thinks this is not needed, but it is
 #include "ship.h"
 
 namespace Zap

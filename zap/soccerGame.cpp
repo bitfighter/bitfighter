@@ -5,6 +5,7 @@
 
 #include "soccerGame.h"
 
+#include "HelpItemManager.h"
 #include "goalZone.h"
 #include "Level.h"
 #include "ship.h"

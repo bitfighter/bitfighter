@@ -5,8 +5,8 @@
 
 #include "rabbitGame.h"
 
+#include "HelpItemManager.h"
 #include "Level.h"
-
 #include "ship.h"
 
 #ifndef ZAP_DEDICATED
