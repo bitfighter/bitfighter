@@ -120,8 +120,6 @@ void GameParamUserInterface::clearCurrentGameTypeParams(const GameType *gameType
 }
 
 
-extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
-
 static const Vector<string> buildGameTypesList()
 {
    Vector<string> gameTypes;

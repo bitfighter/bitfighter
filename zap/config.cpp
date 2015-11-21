@@ -207,8 +207,6 @@ Vector<PluginBinding> IniSettings::getDefaultPluginBindings() const
 
 extern string lcase(string strToConvert);
 
-// Sorts alphanumerically
-extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
 
 static void loadForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
 {

@@ -546,8 +546,6 @@ const char *ChatHelper::getChatMessage() const
 }
 
 
-extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);     // Sort alphanumerically
-
 static void makeCommandCandidateList()
 {
    for(S32 i = 0; i < ChatHelper::chatCmdSize; i++)
