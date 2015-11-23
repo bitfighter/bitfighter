@@ -437,8 +437,11 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientConnected, (StringTa
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientDisconnected, (StringTableEntry playerNick))
 {
-   // TODO: Do something
+   if(mGame->isServer())         // Should never happen... but you never know!
+      return;
 
+
+   // TODO: Do something
 
    // If they're disconnecting, they are probably leaving LobbyChat as well
    static_cast<ClientGame *>(mGame)->playerLeftLobbyChat(playerNick);
