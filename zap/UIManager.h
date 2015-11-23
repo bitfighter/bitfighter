@@ -213,7 +213,7 @@ public:
    void disableLevelLoadDisplay(bool fade);
    void gotPasswordOrPermissionsReply(const ClientGame *game, const char *message);
 
-   // MainMenuUi
+   // MainMenuUI
    void setMOTD(const string &motd);
    void setNeedToUpgrade(bool needToUpgrade);
 
