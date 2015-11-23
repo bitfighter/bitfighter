@@ -21,6 +21,7 @@ set(MASTER_EXTRA_SOURCES
 	../zap/IniFile.cpp
 	../zap/LevelDatabase.cpp
 	../zap/Md5Utils.cpp
+	../zap/physfs.cpp
 	../zap/Settings.cpp
 	../zap/stringUtils.cpp
 	../zap/Timer.cpp
@@ -50,6 +51,7 @@ set(MASTER_LIBS
 	${SQLITE3_LIBRARIES}
 	${CMAKE_THREAD_LIBS_INIT} 
 	${MASTER_EXTRA_LIBS}
+	${PHYSFS_LIBRARY}
 )
 
 set(MASTER_INCLUDES 
@@ -57,6 +59,7 @@ set(MASTER_INCLUDES
 	${BOOST_INCLUDE_DIR}
 	${CMAKE_SOURCE_DIR}/tnl
 	${SQLITE3_INCLUDE_DIR}
+	${PHYSFS_INCLUDE_DIR}
 )
 
 
