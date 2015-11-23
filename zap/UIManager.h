@@ -116,7 +116,6 @@ public:
       activate(getUI<T>(), save);
    }
 
-
 private:
    GameSettings *mSettings;
    bool mUserHasSeenTimeoutMessage;

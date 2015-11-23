@@ -440,7 +440,6 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientDisconnected, (Strin
    if(mGame->isServer())         // Should never happen... but you never know!
       return;
 
-
    // TODO: Do something
 
    // If they're disconnecting, they are probably leaving LobbyChat as well
