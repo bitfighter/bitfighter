@@ -77,15 +77,12 @@ MasterServerConnection::MasterServerConnection()
 /// Destructor removes the connection from the doubly linked list of server connections
 MasterServerConnection::~MasterServerConnection()
 {
-   // If we're in lobby chat, announce to anyone else in lobby chat that we are leaving
-   if(isInLobbyChat)
-   {
-      const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
+   const Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
-      for(S32 i = 0; i < clientList->size(); i++)
-         if(clientList->get(i)->isInLobbyChat && clientList->get(i) != this)
-            clientList->get(i)->m2cPlayerLeftGlobalChat(mPlayerOrServerName);
-   }
+   // Notify all clients we're quitting -- m2cClientDisconnected will exit player from LobbyChat as well
+   for(S32 i = 0; i < clientList->size(); i++)
+         if(clientList->get(i)->isConnectionToClient() && clientList->get(i) != this)    // All clients except self
+            clientList->get(i)->m2cClientDisconnected(mPlayerOrServerName);
 
 
    // Remove this from the client/server lists
@@ -1724,7 +1721,7 @@ void MasterServerConnection::onConnectionEstablished()
       const  Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
       for(S32 i = 0; i < clientList->size(); i++)
-         if(clientList->get(i) != this)    // ...except self!
+         if(clientList->get(i)->isConnectionToClient() && clientList->get(i) != this)    // All clients except self
             clientList->get(i)->m2cClientConnected(mPlayerOrServerName);
    }
 }
