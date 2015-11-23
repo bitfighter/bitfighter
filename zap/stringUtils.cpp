@@ -27,13 +27,13 @@
 #include <boost/tokenizer.hpp>
 
 #ifdef TNL_OS_WIN32
-#  include <direct.h>        // For mkdir
+#  include <direct.h>            // For mkdir
 #endif
 
 #ifdef TNL_OS_WIN32
-#  include "../other/dirent.h"        // Need local copy for Windows builds
+#  include "../other/dirent.h"   // Need local copy for Windows builds
 #else
-#  include <dirent.h>        // Need standard copy for *NIXes
+#  include <dirent.h>            // Need standard copy for *NIXes
 #endif
 
 #if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
