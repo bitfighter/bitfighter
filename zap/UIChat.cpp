@@ -216,6 +216,8 @@ void AbstractChat::leaveLobbyChat()
 
    if(conn)
       conn->c2mLeaveGlobalChat();
+
+   getUIManager()->setIsInLobbyChat(false);
 }
 
 
@@ -547,6 +549,8 @@ void ChatUserInterface::onActivate()
 
    if(masterConn && masterConn->isEstablished())
       masterConn->c2mJoinGlobalChat();
+
+   getUIManager()->setIsInLobbyChat(true);
 
    // Only clear the chat list if the previous UI was NOT UIQueryServers
    if(getUIManager()->getPrevUI() != getUIManager()->getUI<QueryServersUserInterface>())

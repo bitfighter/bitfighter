@@ -119,6 +119,7 @@ public:
 private:
    GameSettings *mSettings;
    bool mUserHasSeenTimeoutMessage;
+   bool mIsInLobbyChat;
 
    UserInterface *mLastUI;             // Menu most immediately active before mCurrentUI
    bool mLastWasLower;                 // True if mLastUI was lower in the hierarchy than mCurrentUI
@@ -141,6 +142,8 @@ public:
    void clearPrevUIs();
    void renderPrevUI(const UserInterface *ui);
 
+   void setIsInLobbyChat(bool isInLobbyChat);
+   bool isInLobbyChat() const;
 
    void saveUI(UserInterface *ui);
 

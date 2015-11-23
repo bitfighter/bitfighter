@@ -952,7 +952,8 @@ void ClientGame::playerJoinedLobbyChat(const StringTableEntry &playerNick)
 
 void ClientGame::playerLeftLobbyChat(const StringTableEntry &playerNick)
 {
-   mUIManager->playerLeftLobbyChat(playerNick);
+   if(mUIManager->isInLobbyChat())
+      mUIManager->playerLeftLobbyChat(playerNick);
 }
 
 

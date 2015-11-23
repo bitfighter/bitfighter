@@ -286,6 +286,8 @@ void QueryServersUserInterface::contactEveryone()
       {
          masterConn->c2mJoinGlobalChat();    // Announce our presence in the chat room
          mAnnounced = true;
+
+         getUIManager()->setIsInLobbyChat(true);
       }
       masterConn->startServerQuery(mHostOnServer);
       mWaitingForResponseFromMaster = true;

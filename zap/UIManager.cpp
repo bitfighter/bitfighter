@@ -35,6 +35,7 @@ UIManager::UIManager()
 { 
    mGame = NULL;
    mSettings = NULL;
+   mIsInLobbyChat = false;
 
    mCurrentInterface = NULL;
 
@@ -184,6 +185,19 @@ void UIManager::saveUI(UserInterface *ui)
    if(ui)
       mPrevUIs.push_back(ui);
 }
+
+
+void UIManager::setIsInLobbyChat(bool isInLobbyChat)
+{
+   mIsInLobbyChat = isInLobbyChat;
+}
+
+
+bool UIManager::isInLobbyChat() const
+{
+   return mIsInLobbyChat;
+}
+
 
 
 // Game connection is terminated -- reactivate the appropriate UI
