@@ -11,6 +11,7 @@
 #include "ClientInfo.h"          // For ClientClass enum
 
 #include "GameSettings.h"
+#include "HelpItemManager.h"
 #include "SoundEffect.h"         // For SFXHandle
 
 #include "teamInfo.h"            // For ClassManager
@@ -109,7 +110,6 @@ struct UserInterfaceData;
 class WallSegmentManager;
 class Robot;
 class Level;
-enum HelpItem;
 
 class AbstractTeam;
 class Team;
