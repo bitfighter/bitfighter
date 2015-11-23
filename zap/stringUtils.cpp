@@ -16,6 +16,7 @@
 #  include "RenderUtils.h"
 #endif
 
+#include <fstream>
 #include <stdio.h>
 #include <stdarg.h>        // For va_args
 #include <streambuf>

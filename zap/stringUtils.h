@@ -11,14 +11,8 @@
 #endif
 
 
-#include "ConfigEnum.h"
-#include "Color.h"
-
 #include "tnlVector.h"
-
-#include <string>
 #include <map>
-#include <fstream>
 
 namespace Zap
 {
