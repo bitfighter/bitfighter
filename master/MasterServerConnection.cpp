@@ -1717,8 +1717,15 @@ void MasterServerConnection::onConnectionEstablished()
       // Possibly send extra easter-egg / thematic info
       sendEasterEgg();
 
-      // for "Host on server" 019d and later, Maybe improve this to only show it when server is available...
+      // For "Host on server" 019d and later, Maybe improve this to only show it when server is available...
       m2cHostOnServerAvailable(true);
+
+      // Notify all connected clients that someone has joined the master
+      const  Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
+
+      for(S32 i = 0; i < clientList->size(); i++)
+         if(clientList->get(i) != this)    // ...except self!
+            clientList->get(i)->m2cClientConnected(mPlayerOrServerName);
    }
 }
 
@@ -1933,10 +1940,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSendChat, (StringPtr messa
       const  Vector<MasterServerConnection *> *clientList = mMaster->getClientList();
 
       for(S32 i = 0; i < clientList->size(); i++)
-      {
          if(clientList->get(i) != this)    // ...except self!
             clientList->get(i)->m2cSendChat(mPlayerOrServerName, isPrivate, message);
-      }
    }
 
 

@@ -429,6 +429,18 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerJoinedGlobalChat, (S
 }
 
 
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientConnected, (StringTableEntry playerNick))
+{
+   // TODO: Do something
+}
+
+
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientDisconnected, (StringTableEntry playerNick))
+{
+   // TODO: Do something
+}
+
+
 // Handle players joining or leaving chat session
 // Runs on client only (but initiated by master)
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerLeftGlobalChat, (StringTableEntry playerNick))

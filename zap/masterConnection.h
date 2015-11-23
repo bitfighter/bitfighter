@@ -85,6 +85,9 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(m2cSendEasterEgg, (EasterEgg egg));
    TNL_DECLARE_RPC_OVERRIDE(m2cSendUpdgradeStatus, (bool needToUpgrade));
 
+   TNL_DECLARE_RPC_OVERRIDE(m2cClientConnected,    (StringTableEntry playerNick));
+   TNL_DECLARE_RPC_OVERRIDE(m2cClientDisconnected, (StringTableEntry playerNick));
+
    // Incoming out-of-game chat message from master
    TNL_DECLARE_RPC_OVERRIDE(m2cSendChat, (StringTableEntry clientName, bool isPrivate, StringPtr message));      
    

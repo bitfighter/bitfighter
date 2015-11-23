@@ -132,6 +132,16 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2cPlayerJoinedGlobalChat,
    (playerNick),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, M_RPC_PRE_017) {}
 
+TNL_IMPLEMENT_RPC(MasterServerInterface, m2cClientConnected, 
+   (StringTableEntry playerNick), 
+   (playerNick),
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, M_RPC_020) {}
+
+TNL_IMPLEMENT_RPC(MasterServerInterface, m2cClientDisconnected, 
+   (StringTableEntry playerNick), 
+   (playerNick),
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, M_RPC_020) {}
+
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cPlayersInGlobalChat, 
    (Vector<StringTableEntry> playerNicks), 
    (playerNicks),

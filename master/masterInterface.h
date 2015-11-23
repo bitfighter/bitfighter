@@ -150,12 +150,16 @@ public:
    /// Implemented as separate method from m2cSetMOTD in order to retain backwards compatibility
    TNL_DECLARE_RPC(m2cSendUpdgradeStatus, (bool needToUpgrade));
 
-   // For managing players who are chatting on lobby chat
-   TNL_DECLARE_RPC(c2mJoinGlobalChat, () );
-   TNL_DECLARE_RPC(c2mLeaveGlobalChat, () );
+   
+   TNL_DECLARE_RPC(m2cClientConnected, (StringTableEntry playerNick));
+   TNL_DECLARE_RPC(m2cClientDisconnected, (StringTableEntry playerNick));
 
-   TNL_DECLARE_RPC(m2cPlayerJoinedGlobalChat, (StringTableEntry playerNick) );
-   TNL_DECLARE_RPC(m2cPlayerLeftGlobalChat, (StringTableEntry playerNick) );
+   // For managing players who are chatting on lobby chat
+   TNL_DECLARE_RPC(c2mJoinGlobalChat, ());
+   TNL_DECLARE_RPC(c2mLeaveGlobalChat, ());
+
+   TNL_DECLARE_RPC(m2cPlayerJoinedGlobalChat, (StringTableEntry playerNick));
+   TNL_DECLARE_RPC(m2cPlayerLeftGlobalChat, (StringTableEntry playerNick));
    TNL_DECLARE_RPC(m2cPlayersInGlobalChat, (Vector<StringTableEntry> playerNicks));
 
 
