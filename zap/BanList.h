@@ -9,8 +9,6 @@
 #include "tnlTypes.h"
 #include "tnlUDP.h"
 
-#include <string>
-
 using namespace TNL;
 using namespace std;
 

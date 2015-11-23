@@ -10,25 +10,21 @@
 #include "DismountModesEnum.h"
 #include "ClientInfo.h"          // For ClientClass enum
 
+#include "BfObject.h"            // For TypeNumber def
 #include "GameSettings.h"
 #include "HelpItemManager.h"
 #include "SoundEffect.h"         // For SFXHandle
 
 #include "teamInfo.h"            // For ClassManager
-#include "BfObject.h"            // For TypeNumber def
 
-#include "Intervals.h"
 #include "Timer.h"
 #include "Rect.h"
 
-#include "tnlNetObject.h"
 #include "tnlTypes.h"
 #include "tnlThread.h"
 #include "tnlNonce.h"
 
 #include <boost/smart_ptr/shared_ptr.hpp>
-
-#include <string>
 
 namespace Master
 {

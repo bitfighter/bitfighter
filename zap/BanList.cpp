@@ -4,14 +4,12 @@
 //------------------------------------------------------------------------------
 
 #include "BanList.h"
-#include "config.h"
 #include "stringUtils.h"
 
 #include "tnlLog.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include <fstream>
 #include <iostream>
 
 using namespace boost::posix_time;
