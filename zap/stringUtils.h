@@ -10,8 +10,9 @@
 #  pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 #endif
 
-
 #include "tnlVector.h"
+
+#include <string>
 #include <map>
 
 namespace Zap

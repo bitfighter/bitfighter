@@ -11,6 +11,7 @@
 #include "RenderManager.h"
 
 #include "Color.h"
+#include "ConfigEnum.h"
 #include "Rect.h"
 #include "SharedConstants.h"     // For MeritBadges enum
 #include "ShipShape.h"
@@ -22,8 +23,6 @@ using namespace std;
 
 namespace Zap
 {
-   enum GoalZoneFlashStyle;
-
    static const S32 NO_NUMBER = -1;
 
 class Ship;

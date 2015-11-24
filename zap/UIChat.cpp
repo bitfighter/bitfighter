@@ -217,7 +217,7 @@ void AbstractChat::leaveLobbyChat()
    if(conn)
       conn->c2mLeaveGlobalChat();
 
-   getUIManager()->setIsInLobbyChat(false);
+   mGame->getUIManager()->setIsInLobbyChat(false);
 }
 
 

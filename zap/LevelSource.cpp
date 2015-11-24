@@ -15,6 +15,7 @@
 
 #include "tnlAssert.h"
 
+#include <fstream>
 #include <sstream>
 
 namespace Zap
