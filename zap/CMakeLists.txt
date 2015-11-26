@@ -129,6 +129,7 @@ set(CLIENT_SOURCES
 	AToBScroller.cpp
 	ChatCommands.cpp
 	ChatHelper.cpp
+	ChatMessageDisplayer.cpp
 	ConnectionStatsRenderer.cpp
 	ClientGame.cpp
 	Cursor.cpp
