@@ -10,7 +10,6 @@
 #include "GameSettings.h"
 #include "Level.h"
 
-#include "Md5Utils.h"
 #include "stringUtils.h"
 
 #include "tnlAssert.h"
