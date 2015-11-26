@@ -410,7 +410,6 @@ public:
 
    F32 getGridSize() const;
 
-
    void onKeyUp(InputCode inputCode);
    void onMouseUp();
 
