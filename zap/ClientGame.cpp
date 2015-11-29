@@ -16,6 +16,7 @@
 #include "gameType.h"
 #include "UIEditor.h"
 #include "UIManager.h"
+#include "UIMenus.h"
 #include "EditorTeam.h"
 #include "WallItem.h"
 

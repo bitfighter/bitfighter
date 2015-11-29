@@ -46,6 +46,7 @@
 #include "EditorTeam.h"
 
 #include "LevelSource.h"
+#include "VertexStylesEnum.h"
 
 #include "luaLevelGenerator.h"
 #include "LevelDatabaseUploadThread.h"

@@ -9,6 +9,7 @@
 #include "UIGame.h"
 #include "UIEditor.h"      // Only used once, could probably be refactored out
 #include "UIManager.h"
+#include "UIMenus.h"
 
 #include "ClientGame.h"
 #include "DisplayManager.h"
@@ -17,9 +18,6 @@
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
-
-#include <string>
-#include <math.h>
 
 namespace Zap
 {
