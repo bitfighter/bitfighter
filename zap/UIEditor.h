@@ -7,13 +7,11 @@
 #define _UIEDITOR_H_
 
 #include "UI.h"                  // Parent
-//#include "UIMenus.h"             // Parent
 
 #include "EditorPlugin.h"        // For plugin support
 #include "EditorUndoManager.h"   // To, like, undo stuff
 
 #include "teamInfo.h"            // For TeamManager def
-//#include "VertexStylesEnum.h"
 #include "BfObject.h"            // For BfObject definition
 #include "Timer.h"
 #include "Point.h"
@@ -21,8 +19,6 @@
 #include "Level.h"
 
 #include "tnlNetStringTable.h"
-
-//#include <string>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
