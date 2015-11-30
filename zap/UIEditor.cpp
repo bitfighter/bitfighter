@@ -88,8 +88,8 @@ S32 QSORT_CALLBACK pluginInfoSort(PluginInfo *a, PluginInfo *b)
 
 
 // Constructor
-PluginInfo::PluginInfo(string prettyName, string fileName, string description, string requestedBinding)
-   : prettyName(prettyName), fileName(fileName), description(description), requestedBinding(requestedBinding)
+PluginInfo::PluginInfo(string prettyName, string fileName, string description, string requestedBinding) :
+   prettyName(prettyName), fileName(fileName), description(description), requestedBinding(requestedBinding)
 {
    bindingCollision = false;
 }
