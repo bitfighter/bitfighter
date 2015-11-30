@@ -90,6 +90,8 @@ public:
 
    bool isConnectedToServer() const;
    bool isConnectedToMaster() const;
+   void onClientConnectedToMaster(StringTableEntry playerNick) const;
+
 
    bool isTestServer() const;
 

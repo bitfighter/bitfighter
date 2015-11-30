@@ -174,6 +174,13 @@ void ClientGame::closeConnectionToGameServer(const char *reason)
 }
 
 
+void ClientGame::onClientConnectedToMaster(StringTableEntry playerNick) const
+{
+   if(mUIManager->isCurrentUI<EditorUserInterface>() || mUIManager->cameFrom<EditorUserInterface>())
+      mUIManager->getUI<EditorUserInterface>()->onClientConnectedToMaster(playerNick);
+}
+
+
 // Returns server game
 ServerGame *ClientGame::getServerGame() const
 {

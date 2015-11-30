@@ -22,6 +22,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+#include "ChatMessageDisplayer.h"
 
 using namespace std;
 
@@ -135,6 +136,8 @@ private:
 
    bool mDragCopying;
    bool mJustInsertedVertex;
+
+   ChatMessageDisplayer mChatMessageDisplayer;
 
    Vector<string> mRobotLines;         // A list of robot lines read from a level file when loading from the editor
 
@@ -507,6 +510,9 @@ public:
 
    void findPlugins();
    U32 findPluginDockWidth();
+
+   void onClientConnectedToMaster(StringTableEntry playerNick);
+
 
    ///// Testing
    friend class EditorTest;

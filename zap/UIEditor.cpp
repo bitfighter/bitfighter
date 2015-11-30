@@ -108,7 +108,8 @@ PluginInfo::PluginInfo(string prettyName, string fileName, string description, s
 
 // Constructor
 EditorUserInterface::EditorUserInterface(ClientGame *game, UIManager *uiManager) :
-   Parent(game, uiManager)
+   Parent(game, uiManager),
+   mChatMessageDisplayer(game, 5, false, 500, 12, 3)     // msgCount, topDown, wrapWidth, fontSize, fontGap
 {
    mWasTesting = false;
    mIgnoreMouseInput = false;
@@ -197,6 +198,13 @@ void EditorUserInterface::onQuitted()
 {
    cleanUp();
    mLevel.reset();    // reset mLevel
+}
+
+
+void EditorUserInterface::onClientConnectedToMaster(StringTableEntry playerNick)
+{
+   string message = string(playerNick.getString()) + " connected to the master server";
+   mChatMessageDisplayer.onChatMessageReceived(Colors::green50, message);
 }
 
 
@@ -1173,6 +1181,7 @@ void EditorUserInterface::onActivate()
    mSaveMsgTimer.clear();
 
    mGameTypeArgs.clear();
+   mChatMessageDisplayer.reset();
 
    onActivateReactivate();
 
@@ -1915,6 +1924,8 @@ void EditorUserInterface::render() const
       renderSaveMessage();
       renderWarnings();
       renderLingeringMessage();
+      mChatMessageDisplayer.render(messageMargin, true, 1, false, false, 1);
+
    }
 
    renderConsole();        // Rendered last, so it's always on top
@@ -4882,6 +4893,8 @@ void EditorUserInterface::idle(U32 timeDelta)
    }
 
    mInfoMsg = getInfoMsg();
+
+   mChatMessageDisplayer.idle(timeDelta);
 }
 
 

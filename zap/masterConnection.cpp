@@ -431,7 +431,12 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerJoinedGlobalChat, (S
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientConnected, (StringTableEntry playerNick))
 {
-   // TODO: Do something
+   TNLAssert(dynamic_cast<ClientGame *>(mGame), "Expected a ClientGame here!");
+
+   if(mGame->isServer())         // Should never happen... but you never know!
+      return;
+
+   static_cast<ClientGame *>(mGame)->onClientConnectedToMaster(playerNick);
 }
 
 
