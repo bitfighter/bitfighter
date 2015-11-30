@@ -102,7 +102,7 @@ PluginInfo::PluginInfo(string prettyName, string fileName, string description, s
 // Constructor
 EditorUserInterface::EditorUserInterface(ClientGame *game, UIManager *uiManager) :
    Parent(game, uiManager),
-   mChatMessageDisplayer(game, 5, false, 500, 12, 3)     // msgCount, topDown, wrapWidth, fontSize, fontGap
+   mChatMessageDisplayer(game, 5, true, 500, 12, 3)     // msgCount, topDown, wrapWidth, fontSize, fontGap
 {
    mWasTesting = false;
    mIgnoreMouseInput = false;
@@ -1917,8 +1917,7 @@ void EditorUserInterface::render() const
       renderSaveMessage();
       renderWarnings();
       renderLingeringMessage();
-      mChatMessageDisplayer.render(messageMargin, true, 1, false, false, 1);
-
+      mChatMessageDisplayer.render(messageMargin, true, 0, false, false, 1);
    }
 
    renderConsole();        // Rendered last, so it's always on top
