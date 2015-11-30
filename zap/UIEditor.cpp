@@ -30,7 +30,6 @@
 #include "barrier.h"             // For DEFAULT_BARRIER_WIDTH
 #include "EngineeredItem.h"      // For Turret properties
 #include "goalZone.h"
-#include "item.h"                // For Asteroid defs
 #include "loadoutZone.h"         // For LoadoutZone def
 #include "PickupItem.h"          // For RepairItem
 #include "projectile.h"
