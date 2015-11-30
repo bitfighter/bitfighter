@@ -7,60 +7,54 @@
 
 #include "UIEditorInstructions.h"
 #include "UIEditorMenu.h"
-#include "UIQuickMenu.h"         // For access to menu methods such as setObject
 #include "UIErrorMessage.h"
 #include "UIGameParameters.h"
 #include "UIManager.h"
 #include "UINameEntry.h"         // For LevelnameEntryUI
+#include "UIQuickMenu.h"         // For access to menu methods such as setObject
 #include "UITeamDefMenu.h"
 
-#include "EditorWorkUnit.h"
-#include "FileList.h"
-
-#include "LineItem.h"
-#include "PolyWall.h"
-#include "ship.h"
-#include "WallItem.h"
-
-#include "ClientGame.h"  
-#include "CoreGame.h"            // For CoreItem def
-#include "NexusGame.h"           // For NexusZone def
-#include "soccerGame.h"          // For Soccer ball radius
-
 #include "barrier.h"             // For DEFAULT_BARRIER_WIDTH
+#include "ClientGame.h"  
+#include "Colors.h"
+#include "config.h"
+#include "CoreGame.h"            // For CoreItem def
+#include "Cursor.h"              // For various editor cursor
+#include "EditorTeam.h"
+#include "EditorWorkUnit.h"
 #include "EngineeredItem.h"      // For Turret properties
+#include "FileList.h"
 #include "goalZone.h"
+#include "Intervals.h"
+#include "LevelSource.h"
+#include "LineItem.h"
 #include "loadoutZone.h"         // For LoadoutZone def
+#include "NexusGame.h"           // For NexusZone def
 #include "PickupItem.h"          // For RepairItem
+#include "PolyWall.h"
 #include "projectile.h"
+#include "ship.h"
+#include "soccerGame.h"          // For Soccer ball radius
 #include "Spawn.h"
 #include "speedZone.h"           // For Speedzone def
 #include "Teleporter.h"          // For Teleporter def
 #include "TextItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
-
-#include "config.h"
-#include "Cursor.h"              // For various editor cursor
-#include "Colors.h"
-#include "Intervals.h"
-#include "EditorTeam.h"
-
-#include "LevelSource.h"
 #include "VertexStylesEnum.h"
+#include "WallItem.h"
 
-#include "luaLevelGenerator.h"
-#include "LevelDatabaseUploadThread.h"
-#include "GameObjectRender.h"
-#include "SystemFunctions.h"
-
-#include "GameManager.h"
 #include "DisplayManager.h"
+#include "GameManager.h"
+#include "GameObjectRender.h"
+#include "LevelDatabaseUploadThread.h"
+#include "luaLevelGenerator.h"
+#include "SystemFunctions.h"
 #include "VideoSystem.h"
 
-#include "stringUtils.h"
+#include "FontManager.h"
 #include "GeomUtils.h"
 #include "RenderUtils.h"
 #include "ScreenShooter.h"
-#include "FontManager.h"
+#include "stringUtils.h"
 
 #include <cmath>
 #include <set>
