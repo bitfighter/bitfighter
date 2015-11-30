@@ -67,6 +67,7 @@
 #include "GameManager.h"
 #include "physfs.hpp"
 #include "StackTracer.h"
+#include <UIMenus.h>
 
 using namespace TNL;
 
@@ -90,21 +91,16 @@ using namespace TNL;
 
 #include "ServerGame.h"
 #include "version.h"       // For BUILD_VERSION def
-#include "Colors.h"
 #include "DisplayManager.h"
 #include "stringUtils.h"
-#include "BanList.h"
 #include "game.h"
 #include "SoundSystem.h"
 #include "InputCode.h"     // initializeKeyNames()
 #include "ClientInfo.h"
 #include "Console.h"       // For access to console
-#include "BotNavMeshZone.h"
 #include "ship.h"
 #include "LevelSource.h"
 
-#include <math.h>
-#include <stdarg.h>
 #include <sys/stat.h>
 #include <time.h>
 
