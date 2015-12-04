@@ -1917,6 +1917,8 @@ void EditorUserInterface::render() const
       renderSaveMessage();
       renderWarnings();
       renderLingeringMessage();
+
+      // anchorPos, helperVisible, helperFadeIn, composingMessage, anouncementActive, alpha
       mChatMessageDisplayer.render(messageMargin, true, 0, false, false, 1);
    }
 
@@ -3839,6 +3841,11 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       return false;
 
    string inputString = InputCodeManager::getCurrentInputString(inputCode);
+
+   //{P{P{P DELETE ME
+      static int xxx = 1;
+      if(inputCode == KEY_KEYPAD_ENTER)
+         onClientConnectedToMaster("hello " + itos(xxx++));
 
    return handleKeyPress(inputCode, inputString);
 }
