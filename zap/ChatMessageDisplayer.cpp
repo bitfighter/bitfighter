@@ -138,7 +138,7 @@ static string getSubstVarVal(ClientGame *game, const string &var)
 }
 
 
-static const S32 EXPIRE_TIME = SEVEN_SECONDS;    // Time messages are visible before disappearing
+static const S32 MESSAGE_EXPIRE_TIME = SEVEN_SECONDS;    // Time messages are visible before disappearing
 
 // Add it to the list, will be displayed in render()
 void ChatMessageDisplayer::onChatMessageReceived(const Color &msgColor, const string &msg)
@@ -151,7 +151,7 @@ void ChatMessageDisplayer::onChatMessageReceived(const Color &msgColor, const st
    for(S32 i = 0; i < lines.size(); i++)
    {
       advanceFirst();      // Make room for a new message at the top of the list
-      mMessages[mFirst % mMessages.size()].set(lines[i], msgColor, EXPIRE_TIME, mNextGroupId); 
+      mMessages[mFirst % mMessages.size()].set(lines[i], msgColor, MESSAGE_EXPIRE_TIME, mNextGroupId); 
    }
 
    mNextGroupId++;

@@ -3842,6 +3842,11 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
 
    string inputString = InputCodeManager::getCurrentInputString(inputCode);
 
+   //{P{P{P DELETE ME
+      static int xxx = 1;
+      if(inputCode == KEY_KEYPAD_ENTER)
+         onClientConnectedToMaster("hello " + itos(xxx++));
+
    return handleKeyPress(inputCode, inputString);
 }
 
