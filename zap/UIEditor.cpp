@@ -1919,7 +1919,7 @@ void EditorUserInterface::render() const
       renderLingeringMessage();
 
       // anchorPos, helperVisible, helperFadeIn, composingMessage, anouncementActive, alpha
-      mChatMessageDisplayer.render(messageMargin, true, 0, false, false, 1);
+      mChatMessageDisplayer.render(messageMargin, 0, false, false, 1);
    }
 
    renderConsole();        // Rendered last, so it's always on top

@@ -82,7 +82,7 @@ public:
    void reset();
 
    void idle(U32 timeDelta);
-   void render(S32 ypos, bool helperVisible, F32 helperFadeIn, bool composingMessage, bool anouncementActive, F32 alpha) const;   // Render incoming chat msgs
+   void render(S32 ypos, F32 helperFadeIn, bool composingMessage, bool anouncementActive, F32 alpha) const;   // Render incoming chat msgs
 
    void onChatMessageReceived(const Color &msgColor, const string &msg);
    void toggleDisplayMode();

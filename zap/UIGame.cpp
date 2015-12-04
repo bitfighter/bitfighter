@@ -1698,13 +1698,12 @@ F32 GameUserInterface::getBackgroundTextDimFactor(bool chatRelated) const
 
 void GameUserInterface::renderChatMsgs() const
 {
-   bool chatDisabled = !mHelperManager.isChatAllowed();
    bool announcementActive = (mAnnouncementTimer.getCurrent() != 0);
 
    F32 alpha = 1; // getBackgroundTextDimFactor(true);
 
-   mChatMessageDisplayer.render(IN_GAME_CHAT_DISPLAY_POS, chatDisabled, 1 - mHelperManager.getFraction(), isChatting(), announcementActive, alpha);
-   mServerMessageDisplayer.render(messageMargin, chatDisabled, 1, false, false, alpha);
+   mChatMessageDisplayer.render(IN_GAME_CHAT_DISPLAY_POS, 1 - mHelperManager.getFraction(), isChatting(), announcementActive, alpha);
+   mServerMessageDisplayer.render(messageMargin, 1, false, false, alpha);
 
    if(announcementActive)
       renderAnnouncement(IN_GAME_CHAT_DISPLAY_POS);

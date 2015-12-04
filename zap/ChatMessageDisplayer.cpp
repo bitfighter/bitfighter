@@ -170,7 +170,7 @@ string ChatMessageDisplayer::substitueVars(const string &str) const
 
    std::size_t startPos, endPos;
 
-   inside = false;
+   inside = false; 
 
    for(std::size_t i = 0; i < s.length(); i++)
    {
@@ -222,7 +222,7 @@ bool ChatMessageDisplayer::showExpiredMessages(bool composingMessage) const
 
 
 // Render any incoming player chat msgs
-void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, F32 helperFadeIn, bool composingMessage, 
+void ChatMessageDisplayer::render(S32 anchorPos, F32 helperFadeIn, bool composingMessage, 
                                   bool anouncementActive, F32 alpha) const
 {
    // Are we in the act of transitioning between one message and another?
