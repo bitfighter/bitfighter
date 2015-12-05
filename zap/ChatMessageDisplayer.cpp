@@ -30,12 +30,16 @@ void ColorTimerString::set(const string &s, const Color &c, S32 time, U32 id)   
 }
 
 
-void ColorTimerString::idle(U32 timeDelta)
+// Returns true if item is disappearing
+bool ColorTimerString::idle(U32 timeDelta)
 {
    if(timer.update(timeDelta))
+   {
       fadeTimer.reset(FADE_TIME);
+      return false;
+   }
    else
-      fadeTimer.update(timeDelta);
+      return fadeTimer.update(timeDelta);
 }
 
 
@@ -93,7 +97,8 @@ void ChatMessageDisplayer::idle(U32 timeDelta)
 
    // Advance our message timers
    for(S32 i = 0; i < mMessages.size(); i++)
-      mMessages[i].idle(timeDelta);
+      if(mMessages[i].idle(timeDelta))
+         mLast++;
 }
 
 
