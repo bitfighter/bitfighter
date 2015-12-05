@@ -60,7 +60,7 @@ ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool 
    mFontSize  = fontSize;
    mFontGap   = fontWidth;
 
-   mDisplayMode = MessageDisplayMode(0);
+   mDisplayMode = ShortTimeout;
    
    mNextGroupId = 0;
 }
