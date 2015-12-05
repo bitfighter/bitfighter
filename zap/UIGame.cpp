@@ -379,8 +379,9 @@ void GameUserInterface::idle(U32 timeDelta)
       mModuleDoubleTapTimer[i].update(timeDelta);
 
    // Messages
-   mServerMessageDisplayer.idle(timeDelta);
-   mChatMessageDisplayer.idle(timeDelta);
+   bool chatting = isChatting();
+   mServerMessageDisplayer.idle(timeDelta, chatting);
+   mChatMessageDisplayer.idle(timeDelta, chatting);
 
    mFpsRenderer.idle(timeDelta);
    mConnectionStatsRenderer.idle(timeDelta, getGame()->getConnectionToServer());

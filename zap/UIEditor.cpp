@@ -4893,7 +4893,7 @@ void EditorUserInterface::idle(U32 timeDelta)
 
    mInfoMsg = getInfoMsg();
 
-   mChatMessageDisplayer.idle(timeDelta);
+   mChatMessageDisplayer.idle(timeDelta, false);
 }
 
 

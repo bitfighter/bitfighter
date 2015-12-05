@@ -28,9 +28,10 @@ struct ColorTimerString
    string str;
    U32 groupId;
    Timer timer;
+   bool usingFadeTimer;
    Timer fadeTimer;
 
-   void set(const string &s, const Color &c, S32 time, U32 groupId);
+   void set(const string &s, bool useFadeTimer, const Color &c, S32 time, U32 groupId);
    bool idle(U32 timeDelta);
 };
 
@@ -70,9 +71,12 @@ private:
    Vector<ColorTimerString> mMessages;
    string substitueVars(const string &str) const;
 
+   S32 getMessageCount() const;
+
    // Translate the show message style enum into behaviors
    S32 getNumberOfMessagesToShow(bool composingMessage) const;
    bool showExpiredMessages(bool composingMessage) const;
+   
 
 public:
    // Constructor
@@ -81,7 +85,7 @@ public:
 
    void reset();
 
-   void idle(U32 timeDelta);
+   void idle(U32 timeDelta, bool composingMessage);
    void render(S32 ypos, F32 helperFadeIn, bool composingMessage, bool anouncementActive, F32 alpha) const;   // Render incoming chat msgs
 
    void onChatMessageReceived(const Color &msgColor, const string &msg);

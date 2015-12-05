@@ -20,12 +20,13 @@ static const S32 SCROLL_TIME = 100;
 static const S32 FADE_TIME = 100;
 
 
-void ColorTimerString::set(const string &s, const Color &c, S32 time, U32 id)    // id defaults to 0
+void ColorTimerString::set(const string &s, bool useFadeTimer, const Color &c, S32 time, U32 id)    // id defaults to 0
 {
    str = s;
    color = c;
    groupId = id;
    timer.reset(time);
+   usingFadeTimer = useFadeTimer;
    fadeTimer.clear();
 }
 
@@ -35,11 +36,19 @@ bool ColorTimerString::idle(U32 timeDelta)
 {
    if(timer.update(timeDelta))
    {
+      // Main timer just expired!  Start the fade timer if we're using it.
+      if(!usingFadeTimer)
+         return true;
+
       fadeTimer.reset(FADE_TIME);
       return false;
    }
-   else
-      return fadeTimer.update(timeDelta);
+   
+   // Main timer did not expire... either it's still going, or it finished earlier.  If the main 
+   // timer has not yet expired, the fadeTimer will have a period of 0, which means the following
+   // statment will return false.  Otherwise, if we're really ticking the fadeTimer, we'll return 
+   // true when that timer expires.
+   return fadeTimer.update(timeDelta/5);
 }
 
 
@@ -91,14 +100,18 @@ void ChatMessageDisplayer::reset()
 }
 
 
-void ChatMessageDisplayer::idle(U32 timeDelta)
+void ChatMessageDisplayer::idle(U32 timeDelta, bool composingMessage)
 {
-   mChatScrollTimer.update(timeDelta);
+   mChatScrollTimer.update(timeDelta/5);
 
-   // Advance our message timers
+   // Advance our message timers 
    for(S32 i = 0; i < mMessages.size(); i++)
-      if(mMessages[i].idle(timeDelta))
+      if(mMessages[i].idle(timeDelta))    // Returns true if message has expired and will no longer be displayed
+      {
          mLast++;
+         if(mTopDown && (getMessageCount()) <= getNumberOfMessagesToShow(composingMessage))
+            mChatScrollTimer.reset();
+      }
 }
 
 
@@ -122,6 +135,13 @@ void ChatMessageDisplayer::advanceFirst()
       mFull = true;
    }
 }
+
+
+S32 ChatMessageDisplayer::getMessageCount() const
+{
+   return mFirst - mLast;   
+}
+
 
 
 // Replace %vars% in chat messages 
@@ -155,8 +175,8 @@ void ChatMessageDisplayer::onChatMessageReceived(const Color &msgColor, const st
    // All lines from this message will share a groupId.  We'll use that to expire the group as a whole.
    for(S32 i = 0; i < lines.size(); i++)
    {
-      advanceFirst();      // Make room for a new message at the top of the list
-      mMessages[mFirst % mMessages.size()].set(lines[i], msgColor, MESSAGE_EXPIRE_TIME, mNextGroupId); 
+      advanceFirst();      // Make room for a new message at the top of the list (essentially mFirst++)
+      mMessages[mFirst % mMessages.size()].set(lines[i], !mTopDown, msgColor, MESSAGE_EXPIRE_TIME, mNextGroupId); 
    }
 
    mNextGroupId++;
@@ -220,6 +240,7 @@ S32 ChatMessageDisplayer::getNumberOfMessagesToShow(bool composingMessage) const
 }
 
 
+// Some display modes will show messages even after their timer has expired.  Return whether the current display mode does that.
 bool ChatMessageDisplayer::showExpiredMessages(bool composingMessage) const
 {
    return composingMessage || (mDisplayMode != ShortTimeout);      // All other display modes show expired messages
@@ -233,14 +254,13 @@ void ChatMessageDisplayer::render(S32 anchorPos, F32 helperFadeIn, bool composin
    // Are we in the act of transitioning between one message and another?
    bool isScrolling = (mChatScrollTimer.getCurrent() > 0);  
 
-   // Check if there any messages to display... if not, bail
+   // Check if there any messages to display... if not, we're done
    if(mFirst == mLast && !(mTopDown && isScrolling))
       return;
 
    S32 lineHeight = mFontSize + mFontGap;
 
-
-   // Reuse this to avoid startup and breakdown costs
+   // Reuse this to avoid setup and breakdown costs
    static ScissorsManager scissorsManager;
 
    // Only need to set scissors if we're scrolling.  When not scrolling, we control the display by only showing
@@ -250,12 +270,12 @@ void ChatMessageDisplayer::render(S32 anchorPos, F32 helperFadeIn, bool composin
    {
       // Remember that our message list contains an extra entry that exists only for scrolling purposes.
       // We want the height of the clip window to omit this line, so we subtract 1 below.  
-      S32 displayAreaHeight = (mMessages.size() - 1) * lineHeight;     
+      S32 displayAreaHeight = (getMessageCount() + 1) * lineHeight;     // + 1 makes room for the extra message that is disappearing
       S32 displayAreaYPos = anchorPos + (mTopDown ? displayAreaHeight : lineHeight);
 
-      scissorsManager.enable(true, mGame->getSettings()->getSetting<DisplayMode>(IniKey::WindowMode), 0, 
-                             F32(displayAreaYPos - displayAreaHeight), F32(DisplayManager::getScreenInfo()->getGameCanvasWidth()), 
-                             F32(displayAreaHeight));
+      scissorsManager.enable(true, mGame->getSettings()->getSetting<DisplayMode>(IniKey::WindowMode),                // enable, mode
+                             0, F32(displayAreaYPos - displayAreaHeight),                                            // x, y
+                             F32(DisplayManager::getScreenInfo()->getGameCanvasWidth()), F32(displayAreaHeight));    // w, h
    }
 
    // Initialize the starting rendering position.  This represents the bottom of the message rendering area, and
@@ -265,8 +285,8 @@ void ChatMessageDisplayer::render(S32 anchorPos, F32 helperFadeIn, bool composin
 
    // Advance anchor from top to the bottom of the render area.  When we are rendering at the bottom, anchorPos
    // already represents the bottom, so no additional adjustment is necessary.
-   if(mTopDown)
-      y += (mFirst - mLast - 1) * lineHeight;
+   if(mTopDown)      // - 1 below because y is already correct for the first message.
+      y += (min(getMessageCount(), getNumberOfMessagesToShow(composingMessage)) - 1) * lineHeight;
 
    // Render an extra message while we're scrolling (in some cases).  Scissors will control the total vertical height.
    S32 renderExtra = 0;
@@ -279,7 +299,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, F32 helperFadeIn, bool composin
    }
 
    // Adjust our last line if we have an announcement
-   U32 last = mLast;
+   S32 last = mLast;
    if(anouncementActive)
    {
       // Render one less line if we're past the size threshold for this displayer
@@ -292,42 +312,57 @@ void ChatMessageDisplayer::render(S32 anchorPos, F32 helperFadeIn, bool composin
    FontManager::pushFontContext(ChatMessageContext);
 
    S32 displayed = 0;
+   S32 scrollingMessageCount = 0;
 
    bool bonusMessagesVisible = helperFadeIn > 0;
 
-   // Draw message lines
-   for(U32 i = mFirst; i != last - renderExtra; i--)
+   // Draw message lines -- here we loop over all active messages; we may loop over more than we'll actually show.
+   // At the end of this loop, we'll exit early once we've displayed the max number of messages we want to show.
+   for(U32 i = mFirst; i > mLast - renderExtra; i--)
    {
-      U32 index = i % (U32)mMessages.size();    // Handle wrapping in our message list
+      S32 index = i % mMessages.size();    // Handle wrapping in our message list
 
-      if(showExpiredMessages(composingMessage || bonusMessagesVisible) || 
-         mMessages[index].timer.getCurrent() > 0 || 
-         mMessages[index].fadeTimer.getCurrent() > 0)
-      {
-         // Is this line and "extra" line that's only being shown because we're composing a chat message?
-         bool thisIsBonusMessage = bonusMessagesVisible &&
-                                   ((mMessages[index].timer.getCurrent() == 0 && mDisplayMode == ShortTimeout) ||
-                                   displayed >= getNumberOfMessagesToShow(false));
+      bool messageHasExpired = mMessages[index].timer.getCurrent() == 0 &&    // Current message has expired; and
+                               mMessages[index].fadeTimer.getCurrent() == 0;  // Current message is not fading out
 
-         F32 myAlpha = alpha;
+      bool msgIsBeingScrolledOff = messageHasExpired && scrollingMessageCount < renderExtra;
 
-         // Fade if we're in the fade phase
-         if(!showExpiredMessages(composingMessage) && mMessages[index].timer.getCurrent() == 0 && mMessages[index].fadeTimer.getCurrent() > 0)
-            myAlpha *= mMessages[index].fadeTimer.getFraction();
+      // Once we find a message that has expired, we can stop looping; there will be nothing further to display
+      if(!showExpiredMessages(composingMessage || bonusMessagesVisible) &&    // Not showing expired messages; and
+           messageHasExpired &&
+           !msgIsBeingScrolledOff)                                      // Current message is not being scrolling off screen
+         break;
 
-         if(thisIsBonusMessage)
-            myAlpha *= helperFadeIn;
+      if(messageHasExpired)
+         scrollingMessageCount++;
 
-         mGL->glColor(mMessages[index].color, myAlpha);
+      // Is this line and "extra" line that's only being shown because we're composing a chat message?
+      bool thisIsBonusMessage = bonusMessagesVisible &&
+                                 ((mMessages[index].timer.getCurrent() == 0 && mDisplayMode == ShortTimeout) ||
+                                 displayed >= getNumberOfMessagesToShow(false));
 
-         RenderUtils::drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
+      F32 myAlpha = alpha;
 
-         y -= lineHeight;
+      // Fade if we're in the fade phase
+      if(!showExpiredMessages(composingMessage) && mMessages[index].timer.getCurrent() == 0 && mMessages[index].fadeTimer.getCurrent() > 0)
+         myAlpha *= mMessages[index].fadeTimer.getFraction();
 
-         displayed++;
-         if(displayed >= getNumberOfMessagesToShow(composingMessage) && !bonusMessagesVisible)
-            break;
-      }
+      if(thisIsBonusMessage)
+         myAlpha *= helperFadeIn;
+
+      mGL->glColor(mMessages[index].color, myAlpha);
+
+      RenderUtils::drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
+
+      y -= lineHeight;
+
+      displayed++;
+      if(displayed >= getNumberOfMessagesToShow(composingMessage) && !bonusMessagesVisible)
+         break;
+
+      // Handle an edge case that can come up when the first message is expiring
+      if(i == 0)
+         break;
    }
 
    FontManager::popFontContext();
@@ -335,7 +370,5 @@ void ChatMessageDisplayer::render(S32 anchorPos, F32 helperFadeIn, bool composin
    // Restore scissors settings -- only used during scrolling
    scissorsManager.disable();
 }
-
-
 
 };
