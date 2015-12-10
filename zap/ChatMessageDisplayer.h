@@ -16,6 +16,10 @@
 #include "Color.h"
 #include "Timer.h"
 
+#include "Test.h"
+#include "Intervals.h"
+
+
 using namespace std;
 
 namespace Zap
@@ -51,6 +55,9 @@ private:
       MessageDisplayModes
    };
 
+   static const S32 MESSAGE_EXPIRE_TIME = SEVEN_SECONDS;    // Time messages are visible before disappearing
+   static const S32 SCROLL_TIME = 100;  //{P{P 100
+
    U32 mFirst, mLast;
    bool mTopDown;    // Render from top down or bottom up?
    S32 mWrapWidth;
@@ -76,7 +83,9 @@ private:
    // Translate the show message style enum into behaviors
    S32 getNumberOfMessagesToShow(bool composingMessage) const;
    bool showExpiredMessages(bool composingMessage) const;
-   
+
+   U32 getCountOfMessagesToDisplay(F32 helperFadeIn, bool composingMessage) const;
+   bool isScrolling() const;
 
 public:
    // Constructor
@@ -90,6 +99,9 @@ public:
 
    void onChatMessageReceived(const Color &msgColor, const string &msg);
    void toggleDisplayMode();
+
+   // Test access
+   FRIEND_TEST(GameUserInterfaceTest, ChatMessageDisplayer);
 };
 
 

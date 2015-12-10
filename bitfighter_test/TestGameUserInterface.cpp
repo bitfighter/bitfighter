@@ -3,6 +3,7 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
+#include "ChatMessageDisplayer.h"
 #include "GameManager.h"
 #include "gameType.h"
 #include "Level.h"
@@ -12,11 +13,13 @@
 #include "UIGame.h"
 #include "UIManager.h"
 
+#include "Colors.h"
 #include "TestUtils.h"
 #include "EventKeyDefs.h"
 #include "LevelFilesForTesting.h"
 
 #include "gtest/gtest.h"
+
 
 namespace Zap
 {
@@ -98,5 +101,135 @@ TEST(GameUserInterfaceTest, Engineer)
       EXPECT_EQ(1, fillVector.size()) << "Expected a teleporter!";
    }
 }
+
+
+// Do this in a macro to make it easier to call private members of tested class
+#define CHECK_DISPLAY_COUNTS(cmd, msgsVisibleWhenNotComposing, msgsVisibleWhenComposing, isScrolling)       \
+   EXPECT_EQ(msgsVisibleWhenNotComposing, cmd.getCountOfMessagesToDisplay(0, false));                       \
+   EXPECT_EQ(msgsVisibleWhenComposing,    cmd.getCountOfMessagesToDisplay(1, false));                       \
+   cmd.toggleDisplayMode();                                                                                 \
+   EXPECT_EQ(msgsVisibleWhenComposing,    cmd.getCountOfMessagesToDisplay(0, false));                       \
+   EXPECT_EQ(msgsVisibleWhenComposing,    cmd.getCountOfMessagesToDisplay(1, false));                       \
+   cmd.toggleDisplayMode();                                                                                 \
+   EXPECT_EQ(msgsVisibleWhenComposing,    cmd.getCountOfMessagesToDisplay(0, false));                       \
+   EXPECT_EQ(msgsVisibleWhenComposing,    cmd.getCountOfMessagesToDisplay(1, false));                       \
+   cmd.toggleDisplayMode();                                                                                 \
+   EXPECT_EQ(cmd.mChatScrollTimer.getCurrent() > 0, isScrolling)                                            \
+   // EXPECT_EQ(cmd.isScrolling(), isScrolling)   \
+   // For some reason the line above causes an error...
+
+
+// Test coverage here is incomplete
+TEST(GameUserInterfaceTest, ChatMessageDisplayer)
+{
+   //ClientGame *game, S32 msgCount, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontGap
+   GamePair gamePair;
+   ClientGame *game = gamePair.getClient(0);
+
+   ChatMessageDisplayer cmd(game, 5, true, 500, 7, 3);
+
+   ASSERT_EQ(cmd.mDisplayMode, ChatMessageDisplayer::ShortTimeout) << "This should be the mode we start in";
+
+   // Verify that cycling modes works as expected... nothing wrong if this changes, but tests will need to be rewritten
+   ASSERT_EQ(cmd.mDisplayMode, ChatMessageDisplayer::ShortTimeout)   << "This should be the mode we start in";
+   ASSERT_EQ(3, ChatMessageDisplayer::MessageDisplayModes)           << "Expect 3 modes; if not, test needs to be rewritten";
+   cmd.toggleDisplayMode(); cmd.toggleDisplayMode(); cmd.toggleDisplayMode(); 
+   ASSERT_EQ(cmd.mDisplayMode, ChatMessageDisplayer::ShortTimeout)   << "Should be back to starting mode";
+
+
+   // No messages yet...
+   EXPECT_EQ(0, cmd.getCountOfMessagesToDisplay(0, false));
+   EXPECT_EQ(0, cmd.getCountOfMessagesToDisplay(1, false));
+   EXPECT_FALSE(cmd.isScrolling());
+
+   // Simple message lifecycle
+   cmd.onChatMessageReceived(Colors::red, "Message 1");
+   EXPECT_EQ(1, cmd.getCountOfMessagesToDisplay(0, false));
+   EXPECT_FALSE(cmd.isScrolling());
+   cmd.idle(ChatMessageDisplayer::MESSAGE_EXPIRE_TIME, false);    // Message expires, and is just starting to scroll
+   EXPECT_EQ(1, cmd.getCountOfMessagesToDisplay(0, false));
+   EXPECT_TRUE(cmd.isScrolling());
+   cmd.idle(ChatMessageDisplayer::SCROLL_TIME - 1, false);
+   EXPECT_EQ(1, cmd.getCountOfMessagesToDisplay(0, false));
+   EXPECT_TRUE(cmd.isScrolling());
+   cmd.idle(1, false);
+   EXPECT_EQ(0, cmd.getCountOfMessagesToDisplay(0, false));
+   EXPECT_FALSE(cmd.isScrolling());
+
+   EXPECT_EQ(1, cmd.getCountOfMessagesToDisplay(0, true)) << "Started composing, should see old messages";
+   EXPECT_EQ(1, cmd.getCountOfMessagesToDisplay(1, false));
+   EXPECT_EQ(1, cmd.getCountOfMessagesToDisplay(1, true));
+   EXPECT_EQ(0, cmd.getCountOfMessagesToDisplay(0, false));
+
+   // Reset
+   cmd.reset();
+   EXPECT_EQ(0, cmd.getCountOfMessagesToDisplay(0, true));
+   EXPECT_EQ(0, cmd.getCountOfMessagesToDisplay(1, false));
+   EXPECT_FALSE(cmd.isScrolling());
+
+   /////
+   // Full compliment of messages, time such that only one will be scrolling at a time
+   ASSERT_TRUE(ChatMessageDisplayer::MESSAGE_EXPIRE_TIME > 5 * (ChatMessageDisplayer::SCROLL_TIME + 1)) << "Assumption required for test, nothing actually wrong with this condition";
+   for(S32 i = 0; i < 5; i++)
+   {
+      cmd.onChatMessageReceived(Colors::red, "Message " + itos(i + 1));
+      cmd.idle(ChatMessageDisplayer::SCROLL_TIME + 1, false);
+   }
+
+   CHECK_DISPLAY_COUNTS(cmd, 5, 5, false);
+
+   // Let first expire
+   cmd.idle(ChatMessageDisplayer::MESSAGE_EXPIRE_TIME - 5 * ChatMessageDisplayer::SCROLL_TIME - 5, false);
+   CHECK_DISPLAY_COUNTS(cmd, 5, 5, true);
+
+   cmd.idle(ChatMessageDisplayer::SCROLL_TIME - 1, false);
+   CHECK_DISPLAY_COUNTS(cmd, 5, 5, true);
+
+   // First stops scrolling
+   cmd.idle(1, false);
+   CHECK_DISPLAY_COUNTS(cmd, 4, 5, false);
+
+   // Second starts scrolling
+   cmd.idle(1, false);
+   CHECK_DISPLAY_COUNTS(cmd, 4, 5, true);
+   
+   cmd.idle(ChatMessageDisplayer::SCROLL_TIME - 1, false);
+   CHECK_DISPLAY_COUNTS(cmd, 4, 5, true);
+
+   // Second stops scrolling
+   cmd.idle(1, false);
+   CHECK_DISPLAY_COUNTS(cmd, 3, 5, false);
+
+   // Third starts scrolling
+   cmd.idle(1, false);
+   CHECK_DISPLAY_COUNTS(cmd, 3, 5, true);
+   cmd.idle(ChatMessageDisplayer::SCROLL_TIME - 1, false);
+   CHECK_DISPLAY_COUNTS(cmd, 3, 5, true);
+   // Third stops scrolling
+   cmd.idle(1, false);
+   CHECK_DISPLAY_COUNTS(cmd, 2, 5, false);
+
+   // Long time passing... all should be expired
+   for(S32 i = 0; i < 100; i++)
+     cmd.idle(ChatMessageDisplayer::SCROLL_TIME + ChatMessageDisplayer::MESSAGE_EXPIRE_TIME, false);
+   CHECK_DISPLAY_COUNTS(cmd, 0, 5, false);
+
+   cmd.reset();
+
+   ///// More than a full compliment of messages
+   ASSERT_TRUE(ChatMessageDisplayer::MESSAGE_EXPIRE_TIME > 8 * (ChatMessageDisplayer::SCROLL_TIME + 1)) << "Assumption required for test, nothing actually wrong with this condition";
+   for(S32 i = 0; i < 8; i++)
+   {
+      cmd.onChatMessageReceived(Colors::red, "Message " + itos(i + 1));
+      cmd.idle(ChatMessageDisplayer::SCROLL_TIME + 1, false);
+   }
+
+   // Let them all expire
+   for(S32 i = 0; i < 100; i++)
+     cmd.idle(ChatMessageDisplayer::SCROLL_TIME + ChatMessageDisplayer::MESSAGE_EXPIRE_TIME, false);
+
+   ASSERT_EQ(0, cmd.getCountOfMessagesToDisplay(0, false)) << "No messages should be visible after all have expired";
+}
+
 
 };

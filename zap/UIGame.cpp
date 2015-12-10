@@ -1704,7 +1704,7 @@ void GameUserInterface::renderChatMsgs() const
    F32 alpha = 1; // getBackgroundTextDimFactor(true);
 
    mChatMessageDisplayer.render(IN_GAME_CHAT_DISPLAY_POS, 1 - mHelperManager.getFraction(), isChatting(), announcementActive, alpha);
-   mServerMessageDisplayer.render(messageMargin, 1, false, false, alpha);
+   mServerMessageDisplayer.render(messageMargin, 0, false, false, alpha);
 
    if(announcementActive)
       renderAnnouncement(IN_GAME_CHAT_DISPLAY_POS);
