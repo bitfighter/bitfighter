@@ -58,7 +58,7 @@ private:
    // These need to be here so tests can access them
    static const S32 MESSAGE_EXPIRE_TIME = SEVEN_SECONDS;    // Time messages are visible before disappearing
    static const S32 SCROLL_TIME = 100;  
-   static const S32 MAX_MESSAGES = 24;
+   static const U32 MAX_MESSAGES;
 
    U32 mFirst, mLast;
    bool mTopDown;    // Render from top down or bottom up?

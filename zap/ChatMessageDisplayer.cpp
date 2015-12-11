@@ -53,6 +53,10 @@ bool ColorTimerString::idle(U32 timeDelta)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Defined constants needed here in .cpp because of usage with an std:: library
+// e.g. std::min.  See:    http://stackoverflow.com/q/16957458
+const U32 ChatMessageDisplayer::MAX_MESSAGES = 24;
+
 
 // Constructor
 ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontWidth)
