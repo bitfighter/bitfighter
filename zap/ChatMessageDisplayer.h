@@ -55,8 +55,10 @@ private:
       MessageDisplayModes
    };
 
+   // These need to be here so tests can access them
    static const S32 MESSAGE_EXPIRE_TIME = SEVEN_SECONDS;    // Time messages are visible before disappearing
-   static const S32 SCROLL_TIME = 100;  //{P{P 100
+   static const S32 SCROLL_TIME = 100;  
+   static const S32 MAX_MESSAGES = 24;
 
    U32 mFirst, mLast;
    bool mTopDown;    // Render from top down or bottom up?
@@ -78,10 +80,10 @@ private:
    Vector<ColorTimerString> mMessages;
    string substitueVars(const string &str) const;
 
-   S32 getMessageCount() const;
+   U32 getMessageCount() const;
 
    // Translate the show message style enum into behaviors
-   S32 getNumberOfMessagesToShow(bool composingMessage) const;
+   U32 getNumberOfMessagesToShow(bool composingMessage) const;
    bool showExpiredMessages(bool composingMessage) const;
 
    U32 getCountOfMessagesToDisplay(F32 helperFadeIn, bool composingMessage) const;

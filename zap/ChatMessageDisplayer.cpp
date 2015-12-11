@@ -15,7 +15,6 @@
 namespace Zap
 {
 
-static const S32 MAX_MESSAGES = 24;
 static const S32 FADE_TIME = 100;
 
 
@@ -108,7 +107,7 @@ void ChatMessageDisplayer::idle(U32 timeDelta, bool composingMessage)
       if(mMessages[i].idle(timeDelta))    // Returns true if message has expired and will no longer be displayed
       {
          mLast++;
-         if(mTopDown && (getMessageCount()) <= getNumberOfMessagesToShow(composingMessage))
+         if(mTopDown && getMessageCount() <= getNumberOfMessagesToShow(composingMessage))
             mChatScrollTimer.reset();
       }
 }
@@ -136,11 +135,10 @@ void ChatMessageDisplayer::advanceFirst()
 }
 
 
-S32 ChatMessageDisplayer::getMessageCount() const
+U32 ChatMessageDisplayer::getMessageCount() const
 {
    return mFirst - mLast;   
 }
-
 
 
 // Replace %vars% in chat messages 
@@ -223,7 +221,7 @@ string ChatMessageDisplayer::substitueVars(const string &str) const
 
 
 // How many messages do we show, given our current display mode?
-S32 ChatMessageDisplayer::getNumberOfMessagesToShow(bool composingMessage) const
+U32 ChatMessageDisplayer::getNumberOfMessagesToShow(bool composingMessage) const
 {
    if(composingMessage)
       return MAX_MESSAGES;
@@ -257,6 +255,9 @@ U32 ChatMessageDisplayer::getCountOfMessagesToDisplay(F32 helperFadeIn, bool com
    if(mFirst == 0)
       return 0;
 
+   if(helperFadeIn > 0)
+      return min(MAX_MESSAGES, mFirst);
+
    bool scrolling = isScrolling();
 
    // Render an extra message while we're scrolling (in some cases).  Scissors will control the total vertical height.
@@ -270,7 +271,7 @@ U32 ChatMessageDisplayer::getCountOfMessagesToDisplay(F32 helperFadeIn, bool com
          messagesBeingScrolledOff = 1;
    }
 
-   S32 messagesToDisplay = 0;
+   U32 messagesToDisplay = 0;
    S32 scrollingMessageCount = 0;
    
    // Normally, we'll expect this loop to terminate with a break statement
@@ -297,8 +298,6 @@ U32 ChatMessageDisplayer::getCountOfMessagesToDisplay(F32 helperFadeIn, bool com
             if(scrollingMessageCount > messagesBeingScrolledOff)    
                break;
          }
-
-         //if()
       }
 
       // Check if we've found our limit of number of messages to display
@@ -338,7 +337,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, F32 helperFadeIn, bool composin
    {
       // Remember that our message list contains an extra entry that exists only for scrolling purposes.
       // We want the height of the clip window to omit this line, so we subtract 1 below.  
-      S32 displayAreaHeight = (getMessageCount() + 1) * lineHeight;     // + 1 makes room for the extra message that is disappearing
+      S32 displayAreaHeight = MAX_MESSAGES * lineHeight;
       S32 displayAreaYPos = anchorPos + (mTopDown ? displayAreaHeight : lineHeight);
 
       scissorsManager.enable(true, mGame->getSettings()->getSetting<DisplayMode>(IniKey::WindowMode),                // enable, mode
@@ -388,7 +387,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, F32 helperFadeIn, bool composin
 
       // If we've just started composing a chat message, older messages may need to fade onto the screen.  Apply more alpha if needed,
       // but only to the appropriate messages.  Messages that were already displayed do not fade in.
-      if (helperFadeIn > 0 &&
+      if (helperFadeIn > 0 && helperFadeIn < 1 &&
             ((mMessages[index].timer.getCurrent() == 0 && mDisplayMode == ShortTimeout) ||
             (mFirst - i) >= getNumberOfMessagesToShow(false)))
          alpha *= helperFadeIn;

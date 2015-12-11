@@ -228,7 +228,30 @@ TEST(GameUserInterfaceTest, ChatMessageDisplayer)
    for(S32 i = 0; i < 100; i++)
      cmd.idle(ChatMessageDisplayer::SCROLL_TIME + ChatMessageDisplayer::MESSAGE_EXPIRE_TIME, false);
 
-   ASSERT_EQ(0, cmd.getCountOfMessagesToDisplay(0, false)) << "No messages should be visible after all have expired";
+   EXPECT_EQ(0, cmd.getCountOfMessagesToDisplay(0, false)) << "No messages should be visible after all have expired";
+   EXPECT_EQ(8, cmd.getCountOfMessagesToDisplay(0.5, false)) 
+                     << "All messages should be visible while widget is fading out";
+
+
+   ///// Lots of messages
+   cmd.reset();
+
+   ///// More than a full compliment of messages
+   ASSERT_TRUE(ChatMessageDisplayer::MESSAGE_EXPIRE_TIME > 8 * (ChatMessageDisplayer::SCROLL_TIME + 1)) << "Assumption required for test, nothing actually wrong with this condition";
+   for(S32 i = 0; i < 800; i++)
+   {
+      cmd.onChatMessageReceived(Colors::red, "Message " + itos(i + 1));
+      cmd.idle(ChatMessageDisplayer::SCROLL_TIME + 1, false);
+   }
+
+   // Let them all expire
+   for(S32 i = 0; i < 100; i++)
+     cmd.idle(ChatMessageDisplayer::SCROLL_TIME + ChatMessageDisplayer::MESSAGE_EXPIRE_TIME, false);
+
+   EXPECT_EQ(0, cmd.getCountOfMessagesToDisplay(0, false)) << "No messages should be visible after all have expired";
+   EXPECT_EQ(ChatMessageDisplayer::MAX_MESSAGES, cmd.getCountOfMessagesToDisplay(0.5, false)) 
+                     << "Max messages should be visible while widget is fading out";
+
 }
 
 
