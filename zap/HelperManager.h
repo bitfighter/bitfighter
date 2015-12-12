@@ -63,6 +63,7 @@ public:
 
    bool isChatAllowed() const;
    bool isComposingPlayerChat() const;
+   bool isOrWasComposingPlayerChat() const;
    bool isMovementDisabled() const;
    bool isHelperActive() const;
    bool isHelperActive(HelperMenu::HelperMenuType helperType) const;

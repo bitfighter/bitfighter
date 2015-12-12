@@ -1703,7 +1703,10 @@ void GameUserInterface::renderChatMsgs() const
 
    F32 alpha = 1; // getBackgroundTextDimFactor(true);
 
-   mChatMessageDisplayer.render(IN_GAME_CHAT_DISPLAY_POS, 1 - mHelperManager.getFraction(), isChatting(), announcementActive, alpha);
+   // Only fade in chat messages when dealing with player chat
+   F32 chatComposerFadein = mHelperManager.isOrWasComposingPlayerChat() ? 1 - mHelperManager.getFraction() : 0;
+
+   mChatMessageDisplayer.render(IN_GAME_CHAT_DISPLAY_POS, chatComposerFadein, isChatting(), announcementActive, alpha);
    mServerMessageDisplayer.render(messageMargin, 0, false, false, alpha);
 
    if(announcementActive)

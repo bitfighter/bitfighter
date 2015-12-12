@@ -131,8 +131,15 @@ bool HelperManager::isChatAllowed() const
 
 // True if Global or Team chat is currently active; false otherwise
 bool HelperManager::isComposingPlayerChat() const
-{
+{  //             chat composer is visible                          but player is not entering a command
    return isHelperActive(HelperMenu::ChatHelperType) && !static_cast<ChatHelper *>(mHelperStack.last())->isCmdChat();
+}
+
+
+// True if Global or Team chat is currently active, or was recently; false otherwise
+bool HelperManager::isOrWasComposingPlayerChat() const
+{
+   return isComposingPlayerChat() || (mOffDeckHelper && mOffDeckHelper->getType() == HelperMenu::ChatHelperType);
 }
 
 
