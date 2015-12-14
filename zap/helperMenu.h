@@ -80,6 +80,7 @@ private:
    void renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &baseColor, InputMode inputMode) const;
    void renderLegend(S32 xPos, S32 yPos, const Vector<HelperMenuLegendItem> &legend) const;
 
+   S32 getItemsHeight() const;
    S32 getMenuHeight() const;
    S32 getMenuBottomPos() const;
 

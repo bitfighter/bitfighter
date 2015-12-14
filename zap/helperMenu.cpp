@@ -141,15 +141,19 @@ S32 HelperMenu::getLegendHeight() const
    return 0;
 }
 
-// Total height of the menu
-S32 HelperMenu::getMenuHeight() const
+
+S32 HelperMenu::getItemsHeight() const
 {
    S32 displayItems = getDisplayItemCount(mCurrentRenderItems, mCurrentRenderCount);
 
-   // Height of variable menu parts
-   const S32 itemsHeight  = displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + MENU_PADDING + GrayLineBuffer;
+   return displayItems * (MENU_FONT_SIZE + MENU_FONT_SPACING) + MENU_PADDING + GrayLineBuffer;
+}
 
-   return MENU_PADDING + TitleHeight + itemsHeight + getLegendHeight() + InstructionHeight + BottomPadding;     
+
+// Total height of the menu
+S32 HelperMenu::getMenuHeight() const
+{
+   return MENU_PADDING + TitleHeight + getItemsHeight() + getLegendHeight() + InstructionHeight + BottomPadding;     
 }
 
 
@@ -210,7 +214,7 @@ void HelperMenu::drawItemMenu(S32 widthOfButtons, S32 widthOfTextBlock) const
    drawMenuItems(mPrevRenderItems,    mPrevRenderCount,    yPos + 2, menuBottom, false, mHorizLabelOffset);
    drawMenuItems(mCurrentRenderItems, mCurrentRenderCount, yPos,     menuBottom, true,  0);      
 
-   yPos += getMenuHeight(); 
+   yPos += getItemsHeight(); 
 
    // Adjust for any transition that might be going on that is changing the overall menu height.  menuBottom is the rendering location
    // of the bottom fo the menu, newBottom is the target bottom location after the transition has ocurred.
