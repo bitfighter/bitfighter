@@ -65,6 +65,12 @@ static void testLevelCallback(ClientGame *game, U32 unused)
 }
 
 
+static void editorOptionsCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->activate<EditorOptionsUserInterface>();
+}
+
+
 void returnToEditorCallback(ClientGame *game, U32 unused)
 {
    EditorUserInterface *ui = game->getUIManager()->getUI<EditorUserInterface>();
@@ -203,6 +209,7 @@ void EditorMenuUserInterface::setupMenus()
    addMenuItem(new MenuItem("HOW TO EDIT",      activateHelpCallback,        "", KEY_H, keyHelp));
    addMenuItem(new MenuItem("LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
    addMenuItem(new MenuItem("MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
+   addMenuItem(new MenuItem("EDITOR OPTIONS",   editorOptionsCallback,       "", KEY_O));
 
    // Only show the upload to database option if authenticated
    if(getGame()->getClientInfo()->isAuthenticated())

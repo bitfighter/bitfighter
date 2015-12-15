@@ -1364,6 +1364,18 @@ bool GameSettings::getShowingInGameHelp()
 }
 
 
+bool GameSettings::getEditorShowConnectionsToMaster()
+{
+   return mIniSettings.mSettings.getVal<YesNo>(IniKey::ShowConnectionsToMaster);
+}
+
+
+void GameSettings::setEditorShowConnectionsToMaster(bool show)
+{
+   mIniSettings.mSettings.setVal(IniKey::ShowConnectionsToMaster, show ? Yes : No);
+}
+
+
 // Returns pointer to inserted item
 const UserSettings *GameSettings::addUserSettings(const UserSettings &userSettings)
 {

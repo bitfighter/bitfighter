@@ -1614,6 +1614,56 @@ void InGameHelpOptionsUserInterface::onEscape()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+// Constructor
+EditorOptionsUserInterface::EditorOptionsUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
+{
+   mMenuTitle = "EDITOR OPTIONS";
+}
+
+
+// Destructor
+EditorOptionsUserInterface::~EditorOptionsUserInterface()
+{
+   // Do nothing
+}
+
+
+void EditorOptionsUserInterface::onActivate()
+{
+   Parent::onActivate();
+   setupMenus();
+}
+
+
+void EditorOptionsUserInterface::setupMenus()
+{
+   clearMenuItems();
+
+   bool showingInGameHelp = mGameSettings->getEditorShowConnectionsToMaster();
+
+   addMenuItem(new YesNoMenuItem("SHOW CONNECTIONS TO MASTER:", showingInGameHelp, 
+                                          "Display a message when a player connects to the master server?", KEY_S, KEY_M));
+}
+
+
+// Save options to INI file, and return to our regularly scheduled program
+void EditorOptionsUserInterface::onEscape()
+{
+   bool show = getMenuItem(0)->getIntValue() == Yes;
+
+   getGame()->setShowingInGameHelp(show);
+   
+   mGameSettings->setEditorShowConnectionsToMaster(show);
+   saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
+
+   getUIManager()->reactivatePrevUI();      //mGameUserInterface
+}
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 // Constructor
 RobotOptionsMenuUserInterface::RobotOptionsMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
    Parent(game, uiManager)

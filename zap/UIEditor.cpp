@@ -196,6 +196,9 @@ void EditorUserInterface::onQuitted()
 
 void EditorUserInterface::onClientConnectedToMaster(StringTableEntry playerNick)
 {
+   if(!mGameSettings->getEditorShowConnectionsToMaster())
+      return;
+
    string message = string(playerNick.getString()) + " connected to the master server";
    mChatMessageDisplayer.onChatMessageReceived(Colors::green50, message);
 }

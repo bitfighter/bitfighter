@@ -309,8 +309,12 @@ public:
    InputMode getInputMode();
 
    // In-game help messages
-   void setShowingInGameHelp(bool show);
    bool getShowingInGameHelp();
+   void setShowingInGameHelp(bool show);
+
+   // Editor settings
+   bool getEditorShowConnectionsToMaster();
+   void setEditorShowConnectionsToMaster(bool show);
 
    // User settings
    const UserSettings *addUserSettings(const UserSettings &userSettings);     // Returns pointer to inserted item

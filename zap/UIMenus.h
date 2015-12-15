@@ -269,6 +269,23 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class EditorOptionsUserInterface : public MenuUserInterface
+{
+   typedef MenuUserInterface Parent;
+
+public:
+   explicit EditorOptionsUserInterface(ClientGame *game, UIManager *uiManager);    // Constructor
+   virtual ~EditorOptionsUserInterface();
+
+   void onEscape();
+   void setupMenus();
+   void onActivate();
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class RobotOptionsMenuUserInterface : public MenuUserInterface
 {
    typedef MenuUserInterface Parent;
