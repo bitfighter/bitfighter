@@ -1600,7 +1600,7 @@ void InGameHelpOptionsUserInterface::setupMenus()
 // Save options to INI file, and return to our regularly scheduled program
 void InGameHelpOptionsUserInterface::onEscape()
 {
-   bool show = getMenuItem(0)->getIntValue() == 1;    // 1 ==> Yes
+   bool show = getMenuItem(0)->getIntValue() == Yes;
 
    getGame()->setShowingInGameHelp(show);
    
