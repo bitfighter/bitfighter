@@ -1467,8 +1467,10 @@ bool ServerGame::isServer() const
 // Top-level idle loop for server, runs only on the server by definition
 void ServerGame::idle(U32 timeDelta)
 {
-   // No idle during pre-game level loading
-   if(GameManager::getHostingModePhase() == GameManager::LoadingLevels)
+   // No idle during pre-game level loading or when there is an error state
+   
+   GameManager::HostingModePhase phase = GameManager::getHostingModePhase();
+   if(phase == GameManager::LoadingLevels || phase == GameManager::ErrorHosting)
       return;
 
    Parent::idle(timeDelta);
