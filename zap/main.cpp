@@ -836,11 +836,9 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       removeFile(joindir(joindir(getInstalledDataDir(), "editor_plugins"), "item_select.lua"));
    }
 
-   // 019b, 019c, 019d, 019e - no major changes with preferences
+   // 019b, 019c - no major changes with preferences
 
-   // 019b: Nothing to update
-
-   // 020:
+   // 019d:
    if(previousVersion < VERSION_019d)
    {
       // VerboseHelpMessages was removed
@@ -854,6 +852,19 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       // value and write the updated version.
       bool oldval = GameSettings::iniFile.GetValueB("Settings", "QueryServerSortAscending", true);
       GameSettings::iniFile.setValueYN("Settings", "QueryServerSortAscending", oldval, false);
+   }
+
+   // 020:
+   if(previousVersion < VERSION_020)
+   {
+      // GridSize was moved to EditorOptions and renamed
+      if(GameSettings::iniFile.hasKey("Settings", "EditorGridSize"))
+      {
+         U32 oldVal = GameSettings::iniFile.GetValueI("Settings", "EditorGridSize");
+         settings->setSetting(IniKey::GridSize, oldVal);
+
+         GameSettings::iniFile.deleteKey("Settings", "EditorGridSize");
+      }
    }
 
 

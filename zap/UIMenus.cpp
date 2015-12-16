@@ -1645,6 +1645,8 @@ void EditorOptionsUserInterface::setupMenus()
 
    addMenuItem(new YesNoMenuItem("SHOW CONNECTIONS TO MASTER:", showingInGameHelp, 
                                           "Display a message when a player connects to the master server?", KEY_S, KEY_M));
+   addMenuItem(new CounterMenuItem("GRID SIZE:", mGameSettings->getSetting<U32>(IniKey::GridSize),
+         1, 1, 10000, "grid units", "", "Grid Size affects snapping"));
 }
 
 
@@ -1656,9 +1658,16 @@ void EditorOptionsUserInterface::onEscape()
    getGame()->setShowingInGameHelp(show);
    
    mGameSettings->setEditorShowConnectionsToMaster(show);
+
+   U32 gridSize = getMenuItem(1)->getIntValue();
+   mGameSettings->setSetting(IniKey::GridSize, gridSize);
+
    saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
 
-   getUIManager()->reactivatePrevUI();      //mGameUserInterface
+   // Update any internal settings in the Editor itself
+   getUIManager()->getUI<EditorUserInterface>()->updateSettings();
+
+   getUIManager()->reactivatePrevUI();
 }
 
 ////////////////////////////////////////

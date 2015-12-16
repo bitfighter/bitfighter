@@ -133,7 +133,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game, UIManager *uiManager)
 
    mSaveMsgTimer.setPeriod(FIVE_SECONDS);
 
-   mGridSize = mGameSettings->getSetting<U32>(IniKey::EditorGridSize);
+   mGridSize = mGameSettings->getSetting<U32>(IniKey::GridSize);
 
    mQuitLocked = false;
    mVertexEditMode = true;
@@ -201,6 +201,13 @@ void EditorUserInterface::onClientConnectedToMaster(StringTableEntry playerNick)
 
    string message = string(playerNick.getString()) + " connected to the master server";
    mChatMessageDisplayer.onChatMessageReceived(Colors::green50, message);
+}
+
+
+// Re-read any settings set in the Editor Options menu
+void EditorUserInterface::updateSettings()
+{
+   mGridSize = mGameSettings->getSetting<U32>(IniKey::GridSize);
 }
 
 

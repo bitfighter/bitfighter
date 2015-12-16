@@ -513,6 +513,8 @@ public:
 
    void onClientConnectedToMaster(StringTableEntry playerNick);
 
+   void updateSettings();
+
 
    ///// Testing
    friend class EditorTest;
