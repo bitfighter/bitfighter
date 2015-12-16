@@ -164,7 +164,6 @@ bool ErrorMessageUserInterface::usesEditorScreenMode() const
    }
    else
       return getUIManager()->getCurrentUI()->usesEditorScreenMode();
-
 }
 
 

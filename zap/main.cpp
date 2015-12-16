@@ -252,6 +252,9 @@ void loadAnotherLevelOrStartHosting()
    if(!GameManager::getServerGame())
       return;
 
+   if(GameManager::getHostingModePhase() == GameManager::Hosting || GameManager::getHostingModePhase() == GameManager::NotHosting)
+      return;
+
    if(GameManager::getHostingModePhase() == GameManager::LoadingLevels)
    {
       string levelName = GameManager::getServerGame()->loadNextLevelInfo();
@@ -262,10 +265,21 @@ void loadAnotherLevelOrStartHosting()
       for(S32 i = 0; i < clientGames->size(); i++)
          clientGames->get(i)->getUIManager()->serverLoadedLevel(levelName);
 #endif
+      return;
    }
 
-   else if(GameManager::getHostingModePhase() == GameManager::DoneLoadingLevels)
-      GameManager::hostGame();
+   if(GameManager::getHostingModePhase() == GameManager::DoneLoadingLevels)
+   {
+      if(!GameManager::hostGame())
+         GameManager::setHostingModePhase(GameManager::ErrorHosting);
+
+      return;
+   }
+
+   if(GameManager::getHostingModePhase() == GameManager::ErrorHosting)
+      return;
+   
+   TNLAssert(false, "Unhandled situation!"); 
 }
 
 
