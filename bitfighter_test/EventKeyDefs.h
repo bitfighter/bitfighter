@@ -9,14 +9,6 @@
 #include "../zap/Event.h"
 #include "SDL.h"
 
-
-#if SDL_VERSION_ATLEAST(2,0,0)
-#  define SDLKey SDL_Keycode
-#  define SDLMod SDL_Keymod
-#else
-   typedef S32 SDL_Keycode;
-#endif
-
 // Define a big block of code that we can plunk into any test and get all these key events defined.  Gross yet fascinating.
 
 #define DEFINE_KEYS_AND_EVENTS(clientSettings)                                                            \

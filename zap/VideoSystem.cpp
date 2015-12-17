@@ -20,15 +20,7 @@
 
 #include "tnlLog.h"
 
-#if !SDL_VERSION_ATLEAST(2,0,0)
-#  include "SDL_syswm.h"
-#endif
-
 #include <cmath>
-
-#if defined(TNL_OS_LINUX) && !SDL_VERSION_ATLEAST(2,0,0)
-#  include <X11/Xlib.h>
-#endif
 
 namespace Zap
 {
@@ -76,8 +68,6 @@ bool VideoSystem::init()
 
    // Get information about the current desktop video settings and initialize
    // our ScreenInfo class with with current width and height
-
-#if SDL_VERSION_ATLEAST(2,0,0)
 
    SDL_DisplayMode mode;
 
@@ -130,14 +120,6 @@ bool VideoSystem::init()
    SDL_GLContext context = SDL_GL_CreateContext(DisplayManager::getScreenInfo()->sdlWindow);
    DisplayManager::getScreenInfo()->sdlGlContext = &context;
 
-#else
-
-   const SDL_VideoInfo* info = SDL_GetVideoInfo();
-
-   DisplayManager::getScreenInfo()->init(info->current_w, info->current_h);
-
-#endif
-
 
    // Set the window icon -- note that the icon must be a 32x32 bmp, and SDL will
    // downscale it to 16x16 with no interpolation.  Therefore, it's best to start
@@ -147,21 +129,11 @@ bool VideoSystem::init()
    // Save bmp as a 32 bit XRGB bmp file (Gimp can do it!)
    string iconPath = getInstalledDataDir() + getFileSeparator() + "bficon.bmp";
    SDL_Surface *icon = SDL_LoadBMP(iconPath.c_str());
-#if SDL_VERSION_ATLEAST(2,0,0)
+
    // OSX handles icons better with its native .icns file
-#  ifndef TNL_OS_MAC_OSX
+#ifndef TNL_OS_MAC_OSX
    if(icon != NULL)
       SDL_SetWindowIcon(DisplayManager::getScreenInfo()->sdlWindow, icon);
-#  endif
-#else
-   // Set window and icon title here so window will be created with proper name later
-   SDL_WM_SetCaption(WINDOW_TITLE.c_str(), WINDOW_TITLE.c_str());
-
-   if(icon != NULL)
-   {
-      SDL_SetColorKey(icon, SDL_SRCCOLORKEY, SDL_MapRGB(icon->format, 0, 0, 0));
-      SDL_WM_SetIcon(icon,NULL);
-   }
 #endif
 
    if(icon != NULL)
@@ -173,105 +145,18 @@ bool VideoSystem::init()
 }
 
 
-#if !SDL_VERSION_ATLEAST(2,0,0)
-static SDL_SysWMinfo windowManagerInfo;
-#endif
-
 void VideoSystem::setWindowPosition(S32 left, S32 top)
 {
-#if SDL_VERSION_ATLEAST(2,0,0)
    SDL_SetWindowPosition(DisplayManager::getScreenInfo()->sdlWindow, left, top);
-#else /* SDL_VERSION_ATLEAST(2,0,0) */
-
-   // SDL 1.2 requires a lot more rigmarole to get and set window positions
-
-#ifdef TNL_OS_MAC_OSX
-   // We cannot set window position on Mac with SDL 1.2.  Abort!
-   return;
-#endif
-
-   SDL_VERSION(&windowManagerInfo.version);
-
-   // No window information..  Abort!!
-   if(!SDL_GetWMInfo(&windowManagerInfo))
-   {
-      logprintf(LogConsumer::LogError, "Failed to set window position");
-      return;
-   }
-
-#ifdef TNL_OS_LINUX
-   if (windowManagerInfo.subsystem == SDL_SYSWM_X11) {
-       windowManagerInfo.info.x11.lock_func();
-       XMoveWindow(windowManagerInfo.info.x11.display, windowManagerInfo.info.x11.wmwindow, left, top);
-       windowManagerInfo.info.x11.unlock_func();
-   }
-#endif
-
-#ifdef TNL_OS_WIN32
-   SetWindowPos(windowManagerInfo.window, HWND_TOP, left, top, 0, 0, SWP_NOSIZE);
-#endif
-
-#endif /* SDL_VERSION_ATLEAST(2,0,0) */
 }
 
 
 S32 VideoSystem::getWindowPositionCoord(bool getX)
 {
-#if SDL_VERSION_ATLEAST(2,0,0)
-
    S32 x, y;
    SDL_GetWindowPosition(DisplayManager::getScreenInfo()->sdlWindow, &x, &y);
 
    return getX ? x : y;
-
-#else /* SDL_VERSION_ATLEAST(2,0,0) */
-
-   SDL_VERSION(&windowManagerInfo.version);
-
-   if(!SDL_GetWMInfo(&windowManagerInfo))
-      logprintf(LogConsumer::LogError, "Failed to set window position");
-
-#ifdef TNL_OS_LINUX
-   if (windowManagerInfo.subsystem == SDL_SYSWM_X11)
-   {
-      XWindowAttributes xAttributes;
-      Window parent, childIgnore, rootIgnore;
-      Window *childrenIgnore;
-      U32 childrenCountIgnore;
-      S32 x, y;
-
-      windowManagerInfo.info.x11.lock_func();
-
-      // Find parent window of managed window to get proper coordinates
-      XQueryTree(windowManagerInfo.info.x11.display, windowManagerInfo.info.x11.wmwindow,
-              &rootIgnore, &parent, &childrenIgnore, &childrenCountIgnore);
-
-      // Free any children returned
-      if (childrenIgnore)
-         XFree(childrenIgnore);
-
-      // Get Window attributes
-      XGetWindowAttributes(windowManagerInfo.info.x11.display, parent, &xAttributes);
-
-      // Now find absolute values
-      XTranslateCoordinates(windowManagerInfo.info.x11.display, parent,
-            xAttributes.root, 0, 0, &x, &y, &childIgnore);
-
-      windowManagerInfo.info.x11.unlock_func();
-      return getX ? x : y;
-   }
-#endif
-
-#ifdef TNL_OS_WIN32
-   RECT rect;
-   GetWindowRect(windowManagerInfo.window, &rect);
-   return getX ? rect.left : rect.top;
-#endif
-
-   // Otherwise just return 0
-   return 0;
-
-#endif /* SDL_VERSION_ATLEAST(2,0,0) */
 }
 
 
@@ -330,7 +215,6 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
 
    getWindowParameters(settings, displayMode, sdlWindowWidth, sdlWindowHeight, orthoLeft, orthoRight, orthoTop, orthoBottom);
 
-#if SDL_VERSION_ATLEAST(2,0,0)
    // Change video modes based on selected display mode
    // Note:  going into fullscreen you have to do in order:
    //  - SDL_SetWindowSize()
@@ -369,31 +253,6 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    SDL_FlushEvent(SDL_WINDOWEVENT);
 
    SDL_GL_SetSwapInterval(settings->getSetting<YesNo>(IniKey::Vsync) ? 1 : 0);
-#else
-   // Set up sdl video flags according to display mode
-   S32 sdlVideoFlags = SDL_OPENGL;
-
-   switch (displayMode)
-   {
-      case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
-         sdlVideoFlags |= settings->getSetting<YesNo>(IniKey::UseFakeFullscreen) ? SDL_NOFRAME : SDL_FULLSCREEN;
-         break;
-
-      case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
-         sdlVideoFlags |= settings->getSetting<YesNo>(IniKey::UseFakeFullscreen)  ? SDL_NOFRAME : SDL_FULLSCREEN;
-         break;
-
-      case DISPLAY_MODE_WINDOWED:
-      default:  //  DISPLAY_MODE_WINDOWED
-         sdlVideoFlags |= SDL_RESIZABLE;
-         break;
-   }
-
-   // Finally change the video mode
-   if(SDL_SetVideoMode(sdlWindowWidth, sdlWindowHeight, 0, sdlVideoFlags) == NULL)
-      logprintf(LogConsumer::LogFatalError, "Setting display mode failed: %s", SDL_GetError());
-#endif
-
 
    // Now save the new window dimensions in ScreenInfo
    DisplayManager::getScreenInfo()->setWindowSize(sdlWindowWidth, sdlWindowHeight);

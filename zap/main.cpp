@@ -208,11 +208,7 @@ void display()
    // back-buffer, and to set all rendering operations to occur on what was the front-buffer.
    // Double buffering prevents nasty visual tearing from the application drawing on areas of the
    // screen that are being updated at the same time.
-#if SDL_VERSION_ATLEAST(2,0,0)
    SDL_GL_SwapWindow(DisplayManager::getScreenInfo()->sdlWindow);
-#else
-   SDL_GL_SwapBuffers();  // Use this if we convert to SDL
-#endif
 }
 
 #endif // ZAP_DEDICATED
@@ -1169,12 +1165,7 @@ int main(int argc, char **argv)
       RenderManager::init();                  // Initialize the OpenGL abstraction layer
       mGL = RenderManager::getGL();
 
-#if SDL_VERSION_ATLEAST(2,0,0)
       SDL_StartTextInput();
-#else
-      SDL_EnableUNICODE(1);   // Activate unicode ==> http://sdl.beuc.net/sdl.wiki/SDL_EnableUNICODE
-      SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);      // SDL_DEFAULT_REPEAT_DELAY defined as 500
-#endif
 
       Cursor::init();
 
