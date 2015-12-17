@@ -1011,7 +1011,7 @@ FloatCounterMenuItem::FloatCounterMenuItem(const string &title,
    mUnits = units;
    mMinMsg = minMsg;
    mDecimalPlaces = decimalPlaces;
-   mPrecision = std::pow(10, mDecimalPlaces);
+   mPrecision = (S32) std::pow((F32)10, mDecimalPlaces);
 
    setFloatValue(value);     // Needs to be done after mMinValue and mMaxValue are set
 }
