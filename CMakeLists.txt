@@ -17,7 +17,6 @@ endif()
 # CMake options
 #
 
-option(USE_SDL2 "Use SDL2" YES)
 option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
 option(USE_GLES2 "Force usage of OpenGL ES 2 for the bitfighter client.  Requires SDL2." NO)
 option(USE_LUAJIT_IN_TREE "Force usage of in-tree LuaJIT." NO)
@@ -62,20 +61,11 @@ endif()
 #
 
 # SDL2 is default and should be found on all platforms except possibly Linux
-if(USE_SDL2)
-	find_package(SDL2)
+find_package(SDL2)
 
-	if(SDL2_FOUND)
-		set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
-		set(SDL_LIBRARY ${SDL2_LIBRARY})
-	else()
-		message(STATUS "SDL2 not found.  Attempting to find SDL 1.2...")
-	endif()
-endif()
-
-if(NOT USE_SDL2 OR NOT SDL2_FOUND)
-	# SDL_LIBRARY and SDL_INCLUDE_DIR are set by the FindSDL module
-	find_package(SDL)
+if(SDL2_FOUND)
+	set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
+	set(SDL_LIBRARY ${SDL2_LIBRARY})
 endif()
 
 
