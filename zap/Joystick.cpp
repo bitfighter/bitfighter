@@ -58,55 +58,16 @@ Joystick::~Joystick()
 bool Joystick::initJoystick(GameSettings *settings)
 {
    // Make sure "SDL_Init(0)" was done before calling this function, otherwise joystick will fail to work on windows.
-#if defined(TNL_OS_LINUX) && !SDL_VERSION_ATLEAST(2,0,0)
-   // Hackety hack hack for some joysticks that seem calibrated horribly wrong.
-   //
-   // What happens is that SDL uses the newer event system at /dev/input/eventX for joystick enumeration
-   // instead of the older /dev/input/jsX or /dev/jsX;  The problem is that calibration cannot be done on
-   // the event (/dev/input/eventX) devices and therefore some joysticks, like the PS3, act strangely in-game
-   //
-   // If you specify "JoystickLinuxUseOldDeviceSystem" as "Yes" in the INI, then this code below will
-   // add /dev/input/js0 to the list of enumerated joysticks (as joystick 0).  This means that if you have
-   // a PS3 joystick plugged in, SDL will detect *two* joysticks:
-   //
-   // 1. joystick 0 = PS3 controller at /dev/input/js0
-   // 2. joystick 1 = PS3 controller at /dev/input/eventX (where 'X' can be any number)
-   //
-   // See here for more info:
-   //   http://superuser.com/questions/17959/linux-joystick-seems-mis-calibrated-in-an-sdl-game-freespace-2-open
-
-
-   if(settings->getIniSettings()->joystickLinuxUseOldDeviceSystem)
-   {
-      string joystickEnv = "SDL_JOYSTICK_DEVICE=/dev/input/js" + itos(0);
-      SDL_putenv((char *)joystickEnv.c_str());
-
-      logprintf("Using older Linux joystick device system to workaround calibration problems");
-   }
-#endif
-
    GameSettings::DetectedJoystickNameList.clear();
 
-#  if SDL_VERSION_ATLEAST(2,0,0)
-      // Allows multiple joysticks with each using a copy of Bitfighter
-      SDL_setenv("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1", 0);
+   // Allows multiple joysticks with each using a copy of Bitfighter
+   SDL_setenv("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1", 0);
 
-      if(!SDL_WasInit(SDL_INIT_JOYSTICK) && SDL_InitSubSystem(SDL_INIT_JOYSTICK))
-      {
-         logprintf("Unable to initialize the joystick subsystem");
-         return false;
-      }
-#  else
-      // Will need to shutdown and init, to allow SDL_NumJoysticks to count new joysticks
-      shutdownJoystick();
-
-      // Initialize the SDL subsystem
-      if(SDL_InitSubSystem(SDL_INIT_JOYSTICK))
-      {
-         logprintf("Unable to initialize the joystick subsystem");
-         return false;
-      }
-#  endif
+   if(!SDL_WasInit(SDL_INIT_JOYSTICK) && SDL_InitSubSystem(SDL_INIT_JOYSTICK))
+   {
+      logprintf("Unable to initialize the joystick subsystem");
+      return false;
+   }
 
    // How many joysticks are there
    S32 joystickCount = SDL_NumJoysticks();
@@ -118,11 +79,8 @@ bool Joystick::initJoystick(GameSettings *settings)
    logprintf("%d joystick(s) detected:", joystickCount);
    for (S32 i = 0; i < joystickCount; i++)
    {
-#if SDL_VERSION_ATLEAST(2,0,0)
       const char *joystickName = SDL_JoystickNameForIndex(i);
-#else
-      const char *joystickName = SDL_JoystickName(i);
-#endif
+
       logprintf("%d.) Autodetect string = \"%s\"", i + 1, joystickName);
       GameSettings::DetectedJoystickNameList.push_back(joystickName);
    }
@@ -154,18 +112,12 @@ bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
    sdlJoystick = SDL_JoystickOpen(GameSettings::UseJoystickNumber);
    if(sdlJoystick == NULL)
    {
-#if SDL_VERSION_ATLEAST(2,0,0)
       logprintf("Error opening joystick %d [%s]", GameSettings::UseJoystickNumber + 1, SDL_JoystickNameForIndex(GameSettings::UseJoystickNumber));
-#else
-      logprintf("Error opening joystick %d [%s]", GameSettings::UseJoystickNumber + 1, SDL_JoystickName(GameSettings::UseJoystickNumber));
-#endif
+
       return false;
    }
-#if SDL_VERSION_ATLEAST(2,0,0)
+
    logprintf("Using joystick %d - %s", GameSettings::UseJoystickNumber + 1, SDL_JoystickNameForIndex(GameSettings::UseJoystickNumber));
-#else
-   logprintf("Using joystick %d - %s", GameSettings::UseJoystickNumber + 1, SDL_JoystickName(GameSettings::UseJoystickNumber));
-#endif
 
    // Now try and autodetect the joystick and update the game settings
    string joystickType = Joystick::autodetectJoystick(settings);

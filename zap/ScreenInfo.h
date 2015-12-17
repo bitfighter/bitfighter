@@ -11,7 +11,7 @@
 #include "ConfigEnum.h"
 
 #ifndef ZAP_DEDICATED
-#  include "SDL.h"      // For SDL_VERSION_ATLEAST macro
+#  include "SDL.h"
 #endif
 
 
@@ -112,12 +112,10 @@ public:
    bool isActualized();
    void setActualized();
 
-   // SDL information
 #ifndef ZAP_DEDICATED
-#  if SDL_VERSION_ATLEAST(2,0,0)
-      SDL_Window *sdlWindow;
-      SDL_GLContext *sdlGlContext;
-#  endif
+   // SDL information
+   SDL_Window *sdlWindow;
+   SDL_GLContext *sdlGlContext;
 #endif
 
 };

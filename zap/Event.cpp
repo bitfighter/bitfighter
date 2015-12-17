@@ -14,12 +14,7 @@
 #include "ClientGame.h"
 #include "Cursor.h"
 
-#include "SDL.h" 
-
-#if SDL_VERSION_ATLEAST(2,0,0)
-#  define SDLKey SDL_Keycode
-#  define SDLMod SDL_Keymod
-#endif
+#include "SDL.h"
 
 #if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
 #  include "SDL_opengles.h"
@@ -197,7 +192,6 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
          onKeyUp(currentUI, event);
          break;
 
-#if SDL_VERSION_ATLEAST(2,0,0)
       case SDL_TEXTINPUT:
          if(mAllowTextInput)
             onTextInput(currentUI, event->text.text[0]);
@@ -210,7 +204,6 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
       case SDL_JOYDEVICEREMOVED:    // Joystick was unplugged -- which is instance_id
          onStickRemoved(event->jdevice.which);
          break;
-#endif
 
       case SDL_MOUSEMOTION:
          onMouseMoved(currentUI, event->motion.x, event->motion.y, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
@@ -230,18 +223,9 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
             case SDL_BUTTON_MIDDLE:
                onMouseButtonDown(currentUI, event->button.x, event->button.y, MOUSE_MIDDLE, iniSettings->mSettings.getVal<DisplayMode>("WindowMode"));
                break;
-#if !SDL_VERSION_ATLEAST(2,0,0)
-            case SDL_BUTTON_WHEELUP:
-               onMouseWheel(currentUI, true, false);
-               break;
-            case SDL_BUTTON_WHEELDOWN:
-               onMouseWheel(currentUI, false, true);
-               break;
-#endif
          }
          break;
 
-#if SDL_VERSION_ATLEAST(2,0,0)
       case SDL_MOUSEWHEEL:
          if(event->wheel.y > 0)
             onMouseWheel(currentUI, true, false);
@@ -249,7 +233,6 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
             onMouseWheel(currentUI, false, true);
 
          break;
-#endif
 
       case SDL_MOUSEBUTTONUP:
          switch(event->button.button)
@@ -291,7 +274,7 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
       case SDL_SYSWMEVENT:
          //Ignore
          break;
-#if SDL_VERSION_ATLEAST(2,0,0)
+
       case SDL_WINDOWEVENT:
          switch (event->window.event) {
             // This event should only be triggered in windowed mode.  SDL 2.0, however,
@@ -317,13 +300,6 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
             }
          break;
 
-#else
-      // In SDL 1.2, this event is only triggered when in windowed mode and you 
-      // adjust the window yourself
-      case SDL_VIDEORESIZE:
-         onResize(game, event->resize.w, event->resize.h);
-         break;
-#endif
       default:
          onUser(event->user.type, event->user.code, event->user.data1, event->user.data2);
          break;
@@ -336,7 +312,7 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
    // We first disallow key-to-text translation
    mAllowTextInput = false;
 
-   SDLKey key = event->key.keysym.sym;
+   SDL_Keycode key = event->key.keysym.sym;
    // Use InputCodeManager::getState() instead of checking the mod flag to prevent hyper annoying case
    // of user pressing and holding Alt, selecting another window, releasing Alt, returning to
    // Bitfighter window, and pressing enter, and having this block think we pressed alt-enter.
@@ -351,11 +327,7 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
 
       DisplayManager::getScreenInfo()->setCanvasMousePos((S32)pos->x, (S32)pos->y, game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"));
 
-#if SDL_VERSION_ATLEAST(2,0,0)
       SDL_WarpMouseInWindow(DisplayManager::getScreenInfo()->sdlWindow, (S32)DisplayManager::getScreenInfo()->getWindowMousePos()->x, (S32)DisplayManager::getScreenInfo()->getWindowMousePos()->y);
-#else
-      SDL_WarpMouse(DisplayManager::getScreenInfo()->getWindowMousePos()->x, DisplayManager::getScreenInfo()->getWindowMousePos()->y);
-#endif
    }
    // The rest
    else
@@ -364,12 +336,6 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
 
       // If an input code is not handled by a UI, then we will allow text translation to pass through
       mAllowTextInput = !inputCodeDown(game->getUIManager()->getCurrentUI(), inputCode);
-
-      // SDL 1.2 has the translated key along with the keysym, so we trigger text input from here
-#if !SDL_VERSION_ATLEAST(2,0,0)
-      if(mAllowTextInput)
-         onTextInput(game->getUIManager()->getCurrentUI(), InputCodeManager::keyToAscii(event->key.keysym.unicode, inputCode));
-#endif
    }
 }
 
@@ -537,6 +503,7 @@ void Event::onStickRemoved(S32 deviceId)
 }
 
 
+// TODO - make the change required here since we've moved to SDL 2
 // This method should never be run in fullscreen mode, impossible with SDL 1.2, but probable 
 // with SDL 2.0.  It is used to adjust window settings when resizing a windowed-window.
 // This can be re-engineered when we move to SDL 2.0-only; we can then make use of the
@@ -557,15 +524,10 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
    S32 newWidth  = (S32)floor(canvasWidth  * iniSettings->winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
    S32 newHeight = (S32)floor(canvasHeight * iniSettings->winSizeFact + 0.5f);
 
-#if SDL_VERSION_ATLEAST(2,0,0)
    SDL_SetWindowSize(DisplayManager::getScreenInfo()->sdlWindow, newWidth, newHeight);
 
    // Flush window events because SDL2 triggers another resize event with SDL_SetWindowSize
    SDL_FlushEvent(SDL_WINDOWEVENT);
-#else
-   S32 flags = SDL_OPENGL | SDL_RESIZABLE;
-   SDL_SetVideoMode(newWidth, newHeight, 0, flags);
-#endif
 
    DisplayManager::getScreenInfo()->setWindowSize(newWidth, newHeight);
   

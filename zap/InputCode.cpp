@@ -896,238 +896,28 @@ InputCode InputCodeManager::sdlKeyToInputCode(SDL_Keycode key)
 	   case SDLK_DELETE:
 		   return KEY_DELETE;
 
-#if SDL_VERSION_ATLEAST(2,0,0)
 		// TODO: SDL2 replacement for international keys, see SDL_Scancode
-#else
-	   // International keyboard syms
-	   case SDLK_WORLD_0:
-		   return KEY_WORLD_0;
-	   case SDLK_WORLD_1:
-		   return KEY_WORLD_1;
-	   case SDLK_WORLD_2:
-		   return KEY_WORLD_2;
-	   case SDLK_WORLD_3:
-		   return KEY_WORLD_3;
-	   case SDLK_WORLD_4:
-		   return KEY_WORLD_4;
-	   case SDLK_WORLD_5:
-		   return KEY_WORLD_5;
-	   case SDLK_WORLD_6:
-		   return KEY_WORLD_6;
-	   case SDLK_WORLD_7:
-		   return KEY_WORLD_7;
-	   case SDLK_WORLD_8:
-		   return KEY_WORLD_8;
-	   case SDLK_WORLD_9:
-		   return KEY_WORLD_9;
-	   case SDLK_WORLD_10:
-		   return KEY_WORLD_10;
-	   case SDLK_WORLD_11:
-		   return KEY_WORLD_11;
-	   case SDLK_WORLD_12:
-		   return KEY_WORLD_12;
-	   case SDLK_WORLD_13:
-		   return KEY_WORLD_13;
-	   case SDLK_WORLD_14:
-		   return KEY_WORLD_14;
-	   case SDLK_WORLD_15:
-		   return KEY_WORLD_15;
-	   case SDLK_WORLD_16:
-		   return KEY_WORLD_16;
-	   case SDLK_WORLD_17:
-		   return KEY_WORLD_17;
-	   case SDLK_WORLD_18:
-		   return KEY_WORLD_18;
-	   case SDLK_WORLD_19:
-		   return KEY_WORLD_19;
-	   case SDLK_WORLD_20:
-		   return KEY_WORLD_20;
-	   case SDLK_WORLD_21:
-		   return KEY_WORLD_21;
-	   case SDLK_WORLD_22:
-		   return KEY_WORLD_22;
-	   case SDLK_WORLD_23:
-		   return KEY_WORLD_23;
-	   case SDLK_WORLD_24:
-		   return KEY_WORLD_24;
-	   case SDLK_WORLD_25:
-		   return KEY_WORLD_25;
-	   case SDLK_WORLD_26:
-		   return KEY_WORLD_26;
-	   case SDLK_WORLD_27:
-		   return KEY_WORLD_27;
-	   case SDLK_WORLD_28:
-		   return KEY_WORLD_28;
-	   case SDLK_WORLD_29:
-		   return KEY_WORLD_29;
-	   case SDLK_WORLD_30:
-		   return KEY_WORLD_30;
-	   case SDLK_WORLD_31:
-		   return KEY_WORLD_31;
-	   case SDLK_WORLD_32:
-		   return KEY_WORLD_32;
-	   case SDLK_WORLD_33:
-		   return KEY_WORLD_33;
-	   case SDLK_WORLD_34:
-		   return KEY_WORLD_34;
-	   case SDLK_WORLD_35:
-		   return KEY_WORLD_35;
-	   case SDLK_WORLD_36:
-		   return KEY_WORLD_36;
-	   case SDLK_WORLD_37:
-		   return KEY_WORLD_37;
-	   case SDLK_WORLD_38:
-		   return KEY_WORLD_38;
-	   case SDLK_WORLD_39:
-		   return KEY_WORLD_39;
-	   case SDLK_WORLD_40:
-		   return KEY_WORLD_40;
-	   case SDLK_WORLD_41:
-		   return KEY_WORLD_41;
-	   case SDLK_WORLD_42:
-		   return KEY_WORLD_42;
-	   case SDLK_WORLD_43:
-		   return KEY_WORLD_43;
-	   case SDLK_WORLD_44:
-		   return KEY_WORLD_44;
-	   case SDLK_WORLD_45:
-		   return KEY_WORLD_45;
-	   case SDLK_WORLD_46:
-		   return KEY_WORLD_46;
-	   case SDLK_WORLD_47:
-		   return KEY_WORLD_47;
-	   case SDLK_WORLD_48:
-		   return KEY_WORLD_48;
-	   case SDLK_WORLD_49:
-		   return KEY_WORLD_49;
-	   case SDLK_WORLD_50:
-		   return KEY_WORLD_50;
-	   case SDLK_WORLD_51:
-		   return KEY_WORLD_51;
-	   case SDLK_WORLD_52:
-		   return KEY_WORLD_52;
-	   case SDLK_WORLD_53:
-		   return KEY_WORLD_53;
-	   case SDLK_WORLD_54:
-		   return KEY_WORLD_54;
-	   case SDLK_WORLD_55:
-		   return KEY_WORLD_55;
-	   case SDLK_WORLD_56:
-		   return KEY_WORLD_56;
-	   case SDLK_WORLD_57:
-		   return KEY_WORLD_57;
-	   case SDLK_WORLD_58:
-		   return KEY_WORLD_58;
-	   case SDLK_WORLD_59:
-		   return KEY_WORLD_59;
-	   case SDLK_WORLD_60:
-		   return KEY_WORLD_60;
-	   case SDLK_WORLD_61:
-		   return KEY_WORLD_61;
-	   case SDLK_WORLD_62:
-		   return KEY_WORLD_62;
-	   case SDLK_WORLD_63:
-		   return KEY_WORLD_63;
-	   case SDLK_WORLD_64:
-		   return KEY_WORLD_64;
-	   case SDLK_WORLD_65:
-		   return KEY_WORLD_65;
-	   case SDLK_WORLD_66:
-		   return KEY_WORLD_66;
-	   case SDLK_WORLD_67:
-		   return KEY_WORLD_67;
-	   case SDLK_WORLD_68:
-		   return KEY_WORLD_68;
-	   case SDLK_WORLD_69:
-		   return KEY_WORLD_69;
-	   case SDLK_WORLD_70:
-		   return KEY_WORLD_70;
-	   case SDLK_WORLD_71:
-		   return KEY_WORLD_71;
-	   case SDLK_WORLD_72:
-		   return KEY_WORLD_72;
-	   case SDLK_WORLD_73:
-		   return KEY_WORLD_73;
-	   case SDLK_WORLD_74:
-		   return KEY_WORLD_74;
-	   case SDLK_WORLD_75:
-		   return KEY_WORLD_75;
-	   case SDLK_WORLD_76:
-		   return KEY_WORLD_76;
-	   case SDLK_WORLD_77:
-		   return KEY_WORLD_77;
-	   case SDLK_WORLD_78:
-		   return KEY_WORLD_78;
-	   case SDLK_WORLD_79:
-		   return KEY_WORLD_79;
-	   case SDLK_WORLD_80:
-		   return KEY_WORLD_80;
-	   case SDLK_WORLD_81:
-		   return KEY_WORLD_81;
-	   case SDLK_WORLD_82:
-		   return KEY_WORLD_82;
-	   case SDLK_WORLD_83:
-		   return KEY_WORLD_83;
-	   case SDLK_WORLD_84:
-		   return KEY_WORLD_84;
-	   case SDLK_WORLD_85:
-		   return KEY_WORLD_85;
-	   case SDLK_WORLD_86:
-		   return KEY_WORLD_86;
-	   case SDLK_WORLD_87:
-		   return KEY_WORLD_87;
-	   case SDLK_WORLD_88:
-		   return KEY_WORLD_88;
-	   case SDLK_WORLD_89:
-		   return KEY_WORLD_89;
-	   case SDLK_WORLD_90:
-		   return KEY_WORLD_90;
-	   case SDLK_WORLD_91:
-		   return KEY_WORLD_91;
-	   case SDLK_WORLD_92:
-		   return KEY_WORLD_92;
-	   case SDLK_WORLD_93:
-		   return KEY_WORLD_93;
-	   case SDLK_WORLD_94:
-		   return KEY_WORLD_94;
-	   case SDLK_WORLD_95:
-		   return KEY_WORLD_95;
-#endif
-
-// Numpad keys were renamed in SDL2
-#if SDL_VERSION_ATLEAST(2,0,0)
-#  define SDLK_KP0 SDLK_KP_0
-#  define SDLK_KP1 SDLK_KP_1
-#  define SDLK_KP2 SDLK_KP_2
-#  define SDLK_KP3 SDLK_KP_3
-#  define SDLK_KP4 SDLK_KP_4
-#  define SDLK_KP5 SDLK_KP_5
-#  define SDLK_KP6 SDLK_KP_6
-#  define SDLK_KP7 SDLK_KP_7
-#  define SDLK_KP8 SDLK_KP_8
-#  define SDLK_KP9 SDLK_KP_9
-#endif
 
 	   // Numeric keypad
-	   case SDLK_KP0:
+	   case SDLK_KP_0:
 		   return KEY_KEYPAD0;
-	   case SDLK_KP1:
+	   case SDLK_KP_1:
 		   return KEY_KEYPAD1;
-	   case SDLK_KP2:
+	   case SDLK_KP_2:
 		   return KEY_KEYPAD2;
-	   case SDLK_KP3:
+	   case SDLK_KP_3:
 		   return KEY_KEYPAD3;
-	   case SDLK_KP4:
+	   case SDLK_KP_4:
 		   return KEY_KEYPAD4;
-	   case SDLK_KP5:
+	   case SDLK_KP_5:
 		   return KEY_KEYPAD5;
-	   case SDLK_KP6:
+	   case SDLK_KP_6:
 		   return KEY_KEYPAD6;
-	   case SDLK_KP7:
+	   case SDLK_KP_7:
 		   return KEY_KEYPAD7;
-	   case SDLK_KP8:
+	   case SDLK_KP_8:
 		   return KEY_KEYPAD8;
-	   case SDLK_KP9:
+	   case SDLK_KP_9:
 		   return KEY_KEYPAD9;
 	   case SDLK_KP_PERIOD:
 		   return KEY_KEYPAD_PERIOD;
@@ -1196,21 +986,12 @@ InputCode InputCodeManager::sdlKeyToInputCode(SDL_Keycode key)
 	   case SDLK_F15:
 		   return KEY_F15;
 
-
-// Some modifier keys were renamed in SDL2
-#if SDL_VERSION_ATLEAST(2,0,0)
-#define SDLK_NUMLOCK SDLK_NUMLOCKCLEAR
-#define SDLK_SCROLLOCK SDLK_SCROLLLOCK
-#define SDLK_RMETA SDLK_RGUI
-#define SDLK_LMETA SDLK_LGUI
-#define SDLK_COMPOSE SDLK_APPLICATION
-#endif
 	   // Key state modifier keys
-	   case SDLK_NUMLOCK:
+	   case SDLK_NUMLOCKCLEAR:
 		   return KEY_NUMLOCK;
 	   case SDLK_CAPSLOCK:
 		   return KEY_CAPSLOCK;
-	   case SDLK_SCROLLOCK:
+	   case SDLK_SCROLLLOCK:
 		   return KEY_SCROLLOCK;
 	   case SDLK_RSHIFT:
 	   case SDLK_LSHIFT:
@@ -1221,28 +1002,18 @@ InputCode InputCodeManager::sdlKeyToInputCode(SDL_Keycode key)
 	   case SDLK_RALT:
 	   case SDLK_LALT:
 		   return KEY_ALT;
-	   case SDLK_RMETA:
-	   case SDLK_LMETA:
+	   case SDLK_RGUI:
+	   case SDLK_LGUI:
 		   return KEY_META;
-#if !SDL_VERSION_ATLEAST(2,0,0)
-	   case SDLK_LSUPER:
-	   case SDLK_RSUPER:
-		   return KEY_SUPER;
-#endif
 	   case SDLK_MODE:
 		   return KEY_MODE;
-	   case SDLK_COMPOSE:
+	   case SDLK_APPLICATION:
 		   return KEY_COMPOSE;
 
-
-// Some misc. keys were renamed in SDL2
-#if SDL_VERSION_ATLEAST(2,0,0)
-#  define SDLK_PRINT SDLK_PRINTSCREEN
-#endif
 	   // Miscellaneous function keys
 	   case SDLK_HELP:
 		   return KEY_HELP;
-	   case SDLK_PRINT:
+	   case SDLK_PRINTSCREEN:
 		   return KEY_PRINT;
 	   case SDLK_SYSREQ:
 		   return KEY_SYSREQ;
@@ -1250,16 +1021,9 @@ InputCode InputCodeManager::sdlKeyToInputCode(SDL_Keycode key)
          return KEY_MENU;
       case SDLK_POWER:
          return KEY_POWER;
-#if !SDL_VERSION_ATLEAST(2,0,0)
-	   case SDLK_BREAK:
-		   return KEY_BREAK;
-	   case SDLK_EURO:
-		   return KEY_EURO;
-#endif
 	   case SDLK_UNDO:
 		   return KEY_UNDO;
 
-#if SDL_VERSION_ATLEAST(2,0,0)
       // Identify some other keys we want to explicitly ignore without triggering the warning below
       case SDLK_VOLUMEUP:        
       case SDLK_VOLUMEDOWN:
@@ -1269,7 +1033,6 @@ InputCode InputCodeManager::sdlKeyToInputCode(SDL_Keycode key)
       case SDLK_AUDIOSTOP:
       case SDLK_AUDIOPLAY:
          return KEY_UNKNOWN;
-#endif
 
       default:
          logprintf(LogConsumer::LogWarning, "Unknown key detected: %d", key);
@@ -1427,224 +1190,29 @@ SDL_Keycode InputCodeManager::inputCodeToSDLKey(InputCode inputCode)
 		   return SDLK_DELETE;
 
 	   // International keyboard syms
-#if SDL_VERSION_ATLEAST(2,0,0)
 		// TODO: SDL2 replacement for international keys, see SDL_Scancode
-#else
-	   case KEY_WORLD_0:
-		   return SDLK_WORLD_0;
-	   case KEY_WORLD_1:
-		   return SDLK_WORLD_1;
-	   case KEY_WORLD_2:
-		   return SDLK_WORLD_2;
-	   case KEY_WORLD_3:
-		   return SDLK_WORLD_3;
-	   case KEY_WORLD_4:
-		   return SDLK_WORLD_4;
-	   case KEY_WORLD_5:
-		   return SDLK_WORLD_5;
-	   case KEY_WORLD_6:
-		   return SDLK_WORLD_6;
-	   case KEY_WORLD_7:
-		   return SDLK_WORLD_7;
-	   case KEY_WORLD_8:
-		   return SDLK_WORLD_8;
-	   case KEY_WORLD_9:
-		   return SDLK_WORLD_9;
-	   case KEY_WORLD_10:
-		   return SDLK_WORLD_10;
-	   case KEY_WORLD_11:
-		   return SDLK_WORLD_11;
-	   case KEY_WORLD_12:
-		   return SDLK_WORLD_12;
-	   case KEY_WORLD_13:
-		   return SDLK_WORLD_13;
-	   case KEY_WORLD_14:
-		   return SDLK_WORLD_14;
-	   case KEY_WORLD_15:
-		   return SDLK_WORLD_15;
-	   case KEY_WORLD_16:
-		   return SDLK_WORLD_16;
-	   case KEY_WORLD_17:
-		   return SDLK_WORLD_17;
-	   case KEY_WORLD_18:
-		   return SDLK_WORLD_18;
-	   case KEY_WORLD_19:
-		   return SDLK_WORLD_19;
-	   case KEY_WORLD_20:
-		   return SDLK_WORLD_20;
-	   case KEY_WORLD_21:
-		   return SDLK_WORLD_21;
-	   case KEY_WORLD_22:
-		   return SDLK_WORLD_22;
-	   case KEY_WORLD_23:
-		   return SDLK_WORLD_23;
-	   case KEY_WORLD_24:
-		   return SDLK_WORLD_24;
-	   case KEY_WORLD_25:
-		   return SDLK_WORLD_25;
-	   case KEY_WORLD_26:
-		   return SDLK_WORLD_26;
-	   case KEY_WORLD_27:
-		   return SDLK_WORLD_27;
-	   case KEY_WORLD_28:
-		   return SDLK_WORLD_28;
-	   case KEY_WORLD_29:
-		   return SDLK_WORLD_29;
-	   case KEY_WORLD_30:
-		   return SDLK_WORLD_30;
-	   case KEY_WORLD_31:
-		   return SDLK_WORLD_31;
-	   case KEY_WORLD_32:
-		   return SDLK_WORLD_32;
-	   case KEY_WORLD_33:
-		   return SDLK_WORLD_33;
-	   case KEY_WORLD_34:
-		   return SDLK_WORLD_34;
-	   case KEY_WORLD_35:
-		   return SDLK_WORLD_35;
-	   case KEY_WORLD_36:
-		   return SDLK_WORLD_36;
-	   case KEY_WORLD_37:
-		   return SDLK_WORLD_37;
-	   case KEY_WORLD_38:
-		   return SDLK_WORLD_38;
-	   case KEY_WORLD_39:
-		   return SDLK_WORLD_39;
-	   case KEY_WORLD_40:
-		   return SDLK_WORLD_40;
-	   case KEY_WORLD_41:
-		   return SDLK_WORLD_41;
-	   case KEY_WORLD_42:
-		   return SDLK_WORLD_42;
-	   case KEY_WORLD_43:
-		   return SDLK_WORLD_43;
-	   case KEY_WORLD_44:
-		   return SDLK_WORLD_44;
-	   case KEY_WORLD_45:
-		   return SDLK_WORLD_45;
-	   case KEY_WORLD_46:
-		   return SDLK_WORLD_46;
-	   case KEY_WORLD_47:
-		   return SDLK_WORLD_47;
-	   case KEY_WORLD_48:
-		   return SDLK_WORLD_48;
-	   case KEY_WORLD_49:
-		   return SDLK_WORLD_49;
-	   case KEY_WORLD_50:
-		   return SDLK_WORLD_50;
-	   case KEY_WORLD_51:
-		   return SDLK_WORLD_51;
-	   case KEY_WORLD_52:
-		   return SDLK_WORLD_52;
-	   case KEY_WORLD_53:
-		   return SDLK_WORLD_53;
-	   case KEY_WORLD_54:
-		   return SDLK_WORLD_54;
-	   case KEY_WORLD_55:
-		   return SDLK_WORLD_55;
-	   case KEY_WORLD_56:
-		   return SDLK_WORLD_56;
-	   case KEY_WORLD_57:
-		   return SDLK_WORLD_57;
-	   case KEY_WORLD_58:
-		   return SDLK_WORLD_58;
-	   case KEY_WORLD_59:
-		   return SDLK_WORLD_59;
-	   case KEY_WORLD_60:
-		   return SDLK_WORLD_60;
-	   case KEY_WORLD_61:
-		   return SDLK_WORLD_61;
-	   case KEY_WORLD_62:
-		   return SDLK_WORLD_62;
-	   case KEY_WORLD_63:
-		   return SDLK_WORLD_63;
-	   case KEY_WORLD_64:
-		   return SDLK_WORLD_64;
-	   case KEY_WORLD_65:
-		   return SDLK_WORLD_65;
-	   case KEY_WORLD_66:
-		   return SDLK_WORLD_66;
-	   case KEY_WORLD_67:
-		   return SDLK_WORLD_67;
-	   case KEY_WORLD_68:
-		   return SDLK_WORLD_68;
-	   case KEY_WORLD_69:
-		   return SDLK_WORLD_69;
-	   case KEY_WORLD_70:
-		   return SDLK_WORLD_70;
-	   case KEY_WORLD_71:
-		   return SDLK_WORLD_71;
-	   case KEY_WORLD_72:
-		   return SDLK_WORLD_72;
-	   case KEY_WORLD_73:
-		   return SDLK_WORLD_73;
-	   case KEY_WORLD_74:
-		   return SDLK_WORLD_74;
-	   case KEY_WORLD_75:
-		   return SDLK_WORLD_75;
-	   case KEY_WORLD_76:
-		   return SDLK_WORLD_76;
-	   case KEY_WORLD_77:
-		   return SDLK_WORLD_77;
-	   case KEY_WORLD_78:
-		   return SDLK_WORLD_78;
-	   case KEY_WORLD_79:
-		   return SDLK_WORLD_79;
-	   case KEY_WORLD_80:
-		   return SDLK_WORLD_80;
-	   case KEY_WORLD_81:
-		   return SDLK_WORLD_81;
-	   case KEY_WORLD_82:
-		   return SDLK_WORLD_82;
-	   case KEY_WORLD_83:
-		   return SDLK_WORLD_83;
-	   case KEY_WORLD_84:
-		   return SDLK_WORLD_84;
-	   case KEY_WORLD_85:
-		   return SDLK_WORLD_85;
-	   case KEY_WORLD_86:
-		   return SDLK_WORLD_86;
-	   case KEY_WORLD_87:
-		   return SDLK_WORLD_87;
-	   case KEY_WORLD_88:
-		   return SDLK_WORLD_88;
-	   case KEY_WORLD_89:
-		   return SDLK_WORLD_89;
-	   case KEY_WORLD_90:
-		   return SDLK_WORLD_90;
-	   case KEY_WORLD_91:
-		   return SDLK_WORLD_91;
-	   case KEY_WORLD_92:
-		   return SDLK_WORLD_92;
-	   case KEY_WORLD_93:
-		   return SDLK_WORLD_93;
-	   case KEY_WORLD_94:
-		   return SDLK_WORLD_94;
-	   case KEY_WORLD_95:
-		   return SDLK_WORLD_95;
-#endif
 
 	   // Numeric keypad
 	   case KEY_KEYPAD0:
-		   return SDLK_KP0;
+		   return SDLK_KP_0;
 	   case KEY_KEYPAD1:
-		   return SDLK_KP1;
+		   return SDLK_KP_1;
 	   case KEY_KEYPAD2:
-		   return SDLK_KP2;
+		   return SDLK_KP_2;
 	   case KEY_KEYPAD3:
-		   return SDLK_KP3;
+		   return SDLK_KP_3;
 	   case KEY_KEYPAD4:
-		   return SDLK_KP4;
+		   return SDLK_KP_4;
 	   case KEY_KEYPAD5:
-		   return SDLK_KP5;
+		   return SDLK_KP_5;
 	   case KEY_KEYPAD6:
-		   return SDLK_KP6;
+		   return SDLK_KP_6;
 	   case KEY_KEYPAD7:
-		   return SDLK_KP7;
+		   return SDLK_KP_7;
 	   case KEY_KEYPAD8:
-		   return SDLK_KP8;
+		   return SDLK_KP_8;
 	   case KEY_KEYPAD9:
-		   return SDLK_KP9;
+		   return SDLK_KP_9;
 	   case KEY_KEYPAD_PERIOD:
 		   return SDLK_KP_PERIOD;
 	   case KEY_KEYPAD_DIVIDE:
@@ -1714,33 +1282,27 @@ SDL_Keycode InputCodeManager::inputCodeToSDLKey(InputCode inputCode)
 
 	   // Key state modifier keys
 	   case KEY_NUMLOCK:
-		   return SDLK_NUMLOCK;
+		   return SDLK_NUMLOCKCLEAR;
 	   case KEY_CAPSLOCK:
 		   return SDLK_CAPSLOCK;
 	   case KEY_SCROLLOCK:
-		   return SDLK_SCROLLOCK;
+		   return SDLK_SCROLLLOCK;
 	   case KEY_MODE:
 		   return SDLK_MODE;
 	   case KEY_COMPOSE:
-		   return SDLK_COMPOSE;
+		   return SDLK_APPLICATION;
 
 	   // Miscellaneous function keys
 	   case KEY_HELP:
 		   return SDLK_HELP;
 	   case KEY_PRINT:
-		   return SDLK_PRINT;
+		   return SDLK_PRINTSCREEN;
 	   case KEY_SYSREQ:
 		   return SDLK_SYSREQ;
 	   case KEY_MENU:
 		   return SDLK_MENU;
 	   case KEY_POWER:
 		   return SDLK_POWER;
-#if !SDL_VERSION_ATLEAST(2,0,0)
-	   case KEY_EURO:
-		   return SDLK_EURO;
-      case KEY_BREAK:
-         return SDLK_BREAK;
-#endif
 	   case KEY_UNDO:
 		   return SDLK_UNDO;
       default:

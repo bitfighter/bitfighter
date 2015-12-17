@@ -180,7 +180,6 @@ public:
    Settings mSettings;
 
    DisplayMode oldDisplayMode;
-   bool joystickLinuxUseOldDeviceSystem;
    bool alwaysStartInKeyboardMode;
 
    F32 sfxVolLevel;                 // SFX volume (0 = silent, 1 = full bore)
