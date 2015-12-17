@@ -105,9 +105,8 @@ void GameManager::abortHosting_noLevels()
       logprintf(LogConsumer::ServerFilter, "No levels found in folder %s.  Cannot host a game.", levelDir);
    }
 
-
 #ifndef ZAP_DEDICATED
-   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+   const Vector<ClientGame *> *clientGames = getClientGames();
 
    for(S32 i = 0; i < clientGames->size(); i++)    // <<=== Should probably only display this message on the clientGame that initiated hosting
    {
@@ -136,7 +135,9 @@ void GameManager::abortHosting_noLevels()
 
    if(clientGames->size() == 0)
 #endif
-      GameManager::shutdownBitfighter();      // Quit in an orderly fashion
+      shutdownBitfighter();      // Quit in an orderly fashion... this function will never return
+
+   deleteServerGame();
 }
 
 
@@ -282,18 +283,14 @@ void GameManager::shutdownBitfighter()
 #ifndef ZAP_DEDICATED
    if(getClientGames()->size() == 0)
 #endif
-      if(getServerGame())
-         exitToOs();
+      exitToOs();
 
    // Grab a pointer to settings wherever we can.  Note that all Games (client or server) currently refer to the same settings object.
    // This is no longer quite true -- now they point to identical objects, but ones that can be configured independently for
    // testing purposes.
 #ifndef ZAP_DEDICATED
-   if(getClientGames()->size() > 0)
-      settings = getClientGames()->get(0)->getSettings();
-
+   settings = getClientGames()->get(0)->getSettings();
    deleteClientGames();
-
 #endif
 
    if(getServerGame())

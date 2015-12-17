@@ -64,7 +64,6 @@ void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool test
    if(levelSource->getLevelCount() == 0 && !hostOnServer)     // No levels!
    {
       GameManager::abortHosting_noLevels();
-      GameManager::deleteServerGame();
       return;
    }
 
