@@ -6,7 +6,6 @@ cmake_minimum_required (VERSION 2.8.8)
 # CMake options
 #
 
-option(USE_SDL2 "Use SDL2" YES)
 option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
 option(ALURE_DISABLE_MP3 "Disable dynamic loading of libmpg123.  Disables mp3 completely." NO)
 option(NO_THREADS "Disable usage of threads in TNL.  May cause issues." NO)
@@ -47,20 +46,11 @@ endif()
 #
 
 # SDL2 is default and should be found on all platforms except possibly Linux
-if(USE_SDL2)
-	find_package(SDL2)
+find_package(SDL2)
 
-	if(SDL2_FOUND)
-		set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
-		set(SDL_LIBRARY ${SDL2_LIBRARY})
-	else()
-		message(STATUS "SDL2 not found.  Attempting to find SDL 1.2...")
-	endif()
-endif()
-
-if(NOT USE_SDL2 OR NOT SDL2_FOUND)
-	# SDL_LIBRARY and SDL_INCLUDE_DIR are set by the FindSDL module
-	find_package(SDL)
+if(SDL2_FOUND)
+	set(SDL_INCLUDE_DIR ${SDL2_INCLUDE_DIR})
+	set(SDL_LIBRARY ${SDL2_LIBRARY})
 endif()
 
 
