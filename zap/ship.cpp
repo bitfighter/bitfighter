@@ -2268,7 +2268,7 @@ void Ship::renderLayer(S32 layerIndex)
    const U32 killStreak           = clientInfo ? clientInfo->getKillStreak()           : 0;  
    const U32 gamesPlayed          = clientInfo ? clientInfo->getGamesPlayed()          : 0;  
 
-   const bool drawRepairIcon = canRepairObjectsOnTeam(clientInfo->getTeamIndex());
+   const bool drawRepairIcon = clientInfo ? canRepairObjectsOnTeam(clientInfo->getTeamIndex()) : false;
    const bool boostActive    = mLoadout.isModulePrimaryActive(ModuleBoost);
    const bool shieldActive   = mLoadout.isModulePrimaryActive(ModuleShield);
    const bool repairActive   = mLoadout.isModulePrimaryActive(ModuleRepair) && mHealth < 1;
