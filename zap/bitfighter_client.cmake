@@ -12,7 +12,7 @@ add_library(bitfighter_client OBJECT
 )
 
 add_dependencies(bitfighter_client
-	alure
+	${ALURE_LIB}
 	${LUA_LIB}
 	tnl
 	tomcrypt

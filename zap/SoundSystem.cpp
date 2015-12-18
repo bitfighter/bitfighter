@@ -266,7 +266,7 @@ SoundSystem::~SoundSystem()
 
 // Initialize the sound sub-system
 // Use ALURE to ease the use of OpenAL
-void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const string &musicDir, float musicVolLevel)
+void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const string &musicDir, F32 musicVolLevel)
 {
    // Initialize the sound device
    if(!alureInitDevice(NULL, NULL))    // <=== causes crash on exit
@@ -1211,7 +1211,7 @@ void SoundSystem::queueVoiceChatBuffer(const SFXHandle &effect, ByteBufferPtr p)
    // Do nothing
 }
 
-void SoundSystem::init(SfxSet sfxSet, const string &sfxDir, const string &musicDir, float musicVolLevel)
+void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDir, const string &musicDir, F32 musicVol)
 {
    logprintf(LogConsumer::LogError, "No OpenAL support on this platform.");
 }

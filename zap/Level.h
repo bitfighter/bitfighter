@@ -19,7 +19,7 @@
 
 #include <string>
 
-#include "gtest/gtest_prod.h"
+#include "Test.h"
 
 using namespace std;
 using namespace TNL;

@@ -4,16 +4,19 @@
 //------------------------------------------------------------------------------
 
 #include "gameStats.h"
-#include "../master/database.h"
 
 #include "tnlMethodDispatch.h"
+
+#ifndef BF_NO_STATS
+#  include "../master/database.h"
+   using namespace DbWriter;
+#endif
 
 // This is shared in both client and master.
 // this read/write is usually the hardest part about this struct, but this allows custom version handling.
 
 using namespace TNL;
 using namespace Zap;
-using namespace DbWriter;
 
 U32 calculateChecksum(BitStream &s, U32 length, U32 bitStart = 0)
 {
@@ -167,6 +170,7 @@ void processStatsResults(GameStats *gameStats)
 
 void logGameStats(VersionedGameStats *stats) 
 {
+#ifndef BF_NO_STATS
    processStatsResults(&stats->gameStats);
 
    string databasePath = DbWriter::DatabaseWriter::sqliteFile;
@@ -174,6 +178,7 @@ void logGameStats(VersionedGameStats *stats)
    DatabaseWriter databaseWriter(databasePath.c_str());
 
    databaseWriter.insertStats(stats->gameStats);
+#endif
 }
 
 }

@@ -11,7 +11,10 @@
 #include "version.h"
 #include "BanList.h"
 #include "Colors.h"
-#include "../master/database.h"
+
+#ifndef BF_NO_STATS
+#  include "../master/database.h"
+#endif
 
 #ifndef ZAP_DEDICATED
 #  include "quickChatHelper.h"
@@ -33,8 +36,9 @@
 #  include <windows.h>   // For ARRAYSIZE when using ZAP_DEDICATED
 #endif
 
-
-using namespace DbWriter;
+#ifndef BF_NO_STATS
+   using namespace DbWriter;
+#endif
 
 
 namespace Zap
@@ -1199,7 +1203,9 @@ FolderManager::FolderManager()
    //addSfxDir("sfx", true);     --> Will be added later in resolveDirs()
    //fontsDir = joindir("", "fonts");
 
+#ifndef BF_NO_STATS
    DbWriter::DatabaseWriter::sqliteFile = logDir + DbWriter::DatabaseWriter::sqliteFile;
+#endif
 
    initialize();
 }
@@ -1334,9 +1340,9 @@ void FolderManager::resolveDirs(GameSettings *settings)
 
    folderManager->addFontDirs(cmdLineDirs.fontDirs);                           // Add any user specified folders
    folderManager->addFontDir (joindir(getInstalledDataDir(), "fonts"), true);  // And add the system default as a fallback
-
+#ifndef BF_NO_STATS
    DatabaseWriter::sqliteFile = folderManager->logDir + DatabaseWriter::sqliteFile;
-
+#endif
    mResolved = true;
 }
 

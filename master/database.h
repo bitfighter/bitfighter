@@ -6,6 +6,8 @@
 #ifndef _DATABASE_H_
 #define _DATABASE_H_
 
+#ifndef BF_NO_STATS
+
 #include "../zap/gameWeapons.h"     // For WeaponType enum
 #include "../zap/gameStats.h"
 #include "../zap/SharedConstants.h"
@@ -144,4 +146,6 @@ DatabaseWriter getDatabaseWriter(const Master::MasterSettings *settings);
 }
 
 
-#endif
+#endif // BF_NO_STATS
+
+#endif // _DATABASE_H_

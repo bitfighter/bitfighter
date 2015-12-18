@@ -2,6 +2,7 @@
 // Copyright Chris Eykamp
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
+#ifndef BF_NO_STATS
 
 #include "master.h"
 #include "database.h"
@@ -841,3 +842,5 @@ string DatabaseWriter::getSqliteSchema() {
 
 
 }
+
+#endif // BF_NO_STATS
