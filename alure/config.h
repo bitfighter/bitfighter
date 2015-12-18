@@ -53,10 +53,10 @@
 /* #undef HAVE_PTHREAD_NP_H */
 
 /* Define the supported backends */
-#define HAS_VORBISFILE
+/* #undef HAS_VORBISFILE */
 /* #undef HAS_FLAC */
 /* #undef HAS_SNDFILE */
 /* #undef HAS_FLUIDSYNTH */
 /* #undef HAS_DUMB */
-#define HAS_MODPLUG
-#define HAS_MPG123
+/* #undef HAS_MODPLUG */
+/* #undef HAS_MPG123 */

@@ -9,7 +9,9 @@
 #include "tnlByteBuffer.h"
 
 #if defined(TNL_OS_MOBILE) || defined(BF_NO_AUDIO) || defined(ZAP_DEDICATED)
-#  define BF_NO_VOICECHAT
+#  ifndef BF_NO_VOICECHAT
+#     define BF_NO_VOICECHAT
+#  endif
 #endif
 
 #ifndef BF_NO_VOICECHAT

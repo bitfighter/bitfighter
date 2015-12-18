@@ -346,6 +346,7 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
       }
    }
 
+#ifndef BF_NO_MUSIC
    mGameMusicList.addFilesFromFolder(mMusicDir, extList, ARRAYSIZE(extList));
 
    if(!mGameMusicList.isOk())
@@ -407,6 +408,7 @@ void SoundSystem::init(SfxSet sfxSet, const Vector<string> &sfxDirs, const strin
          mMusicData.command = MusicCommandPlay;
       }
    }
+#endif
 
    // Set up voice chat buffers
    gVoiceFreeBuffers.resize(NumVoiceChatBuffers);
