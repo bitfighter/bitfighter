@@ -1468,9 +1468,7 @@ bool ServerGame::isServer() const
 void ServerGame::idle(U32 timeDelta)
 {
    // No idle during pre-game level loading or when there is an error state
-   
-   GameManager::HostingModePhase phase = GameManager::getHostingModePhase();
-   if(phase == GameManager::LoadingLevels || phase == GameManager::ErrorHosting)
+   if(GameManager::getHostingModePhase() == GameManager::LoadingLevels)
       return;
 
    Parent::idle(timeDelta);

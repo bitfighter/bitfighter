@@ -266,15 +266,10 @@ void loadAnotherLevelOrStartHosting()
 
    if(GameManager::getHostingModePhase() == GameManager::DoneLoadingLevels)
    {
-      if(!GameManager::hostGame())
-         GameManager::setHostingModePhase(GameManager::ErrorHosting);
-
+      GameManager::hostGame();
       return;
    }
 
-   if(GameManager::getHostingModePhase() == GameManager::ErrorHosting)
-      return;
-   
    TNLAssert(false, "Unhandled situation!"); 
 }
 

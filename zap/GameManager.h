@@ -29,8 +29,7 @@ public:
       NotHosting,
       LoadingLevels,
       DoneLoadingLevels,
-      Hosting,
-      ErrorHosting
+      Hosting
    };
 
 private:
