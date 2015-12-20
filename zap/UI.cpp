@@ -331,9 +331,14 @@ bool UserInterface::checkInputCode(BindingNameEnum binding, InputCode inputCode)
       return inputCode == InputCodeManager::getBaseKeySpecialSequence(bindingCode) &&
              InputCodeManager::checkModifier(InputCodeManager::getModifier(bindingCode));
 
-   // Else just do a simple key check.  filterInputCode deals with the numeric keypad.
-   else
-      return bindingCode == mGameSettings->getInputCodeManager()->filterInputCode(inputCode);
+   // Otherwise, just do a simple key check.  filterInputCode deals with the numeric keypad.
+   return bindingCode == mGameSettings->getInputCodeManager()->filterInputCode(inputCode);
+}
+
+
+bool UserInterface::checkInputCode(SpecialBindingNameEnum binding, const string &inputString) const
+{
+   return inputString == getSpecialBindingString(binding);
 }
 
 
@@ -356,7 +361,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
    UIManager *uiManager = getUIManager();
    string inputString = InputCodeManager::getCurrentInputString(inputCode);
 
-   if(checkInputCode(BINDING_DIAG, inputCode))              // Turn on diagnostic overlay
+   if(checkInputCode(BINDING_DIAG, inputString))               // Turn on diagnostic overlay
    { 
       if(uiManager->isCurrentUI<DiagnosticUserInterface>())
          return false;
@@ -367,7 +372,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
       
       handled = true;
    }
-   else if(checkInputCode(BINDING_LOBBYCHAT, inputCode))  // Turn on Lobby Chat overlay
+   else if(checkInputCode(BINDING_LOBBYCHAT, inputString))     // Turn on Lobby Chat overlay
    {
       // Don't activate if we're already in chat or if we're on the Name Entry
       // screen (since we don't have a nick yet)
@@ -382,8 +387,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
    
 #ifndef BF_NO_SCREENSHOTS
    // Screenshot!
-   else if(inputString == getSpecialBindingString(BINDING_SCREENSHOT_1) ||
-           inputString == getSpecialBindingString(BINDING_SCREENSHOT_2))
+   else if(checkInputCode(BINDING_SCREENSHOT_1, inputString) || checkInputCode(BINDING_SCREENSHOT_2, inputString))
    {
       ScreenShooter::saveScreenshot(getUIManager(), mGameSettings);
       handled = true;

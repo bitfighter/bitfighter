@@ -1088,11 +1088,12 @@ void QueryServersUserInterface::onTextInput(char ascii)
 bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
 {
    inputCode = InputCodeManager::convertJoystickToKeyboard(inputCode);
+   string inputString = InputCodeManager::getCurrentInputString(inputCode);
 
    mJustMovedMouse = (inputCode == MOUSE_LEFT || inputCode == MOUSE_MIDDLE || inputCode == MOUSE_RIGHT);
    mDraggingDivider = false;
 
-   if(checkInputCode(BINDING_LOBBYCHAT, inputCode))
+   if(checkInputCode(BINDING_LOBBYCHAT, inputString))
    {
       // Toggle half-height servers, full-height servers, full chat overlay
 

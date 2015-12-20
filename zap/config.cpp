@@ -526,13 +526,24 @@ void setDefaultEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManag
 // Only called while loading keys from the INI
 void setDefaultSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
-#define SPECIAL_BINDING(specialEnumVal, b, c, defaultSpecialKeyboardBinding)                                      \
-      inputCodeManager->setSpecialBinding(specialEnumVal,                                                         \
+///// Keyboard version
+#define SPECIAL_BINDING(specialEnumVal, b, c, defaultSpecialKeyboardBinding, e)                                   \
+      inputCodeManager->setSpecialBinding(specialEnumVal, InputModeKeyboard,                                      \
                                           getInputString(ini, "SpecialKeyBindings",                               \
                                                          InputCodeManager::getSpecialBindingName(specialEnumVal), \
                                                          defaultSpecialKeyboardBinding)); 
     SPECIAL_BINDING_TABLE
 #undef SPECIAL_BINDING
+
+///// Joystick version
+#define SPECIAL_BINDING(specialEnumVal, b, c, d, defaultJoystickBinding)                                          \
+      inputCodeManager->setSpecialBinding(specialEnumVal, InputModeJoystick,                                      \
+                                          getInputString(ini, "SpecialJoystickBindings",                          \
+                                                         InputCodeManager::getSpecialBindingName(specialEnumVal), \
+                                                         defaultJoystickBinding)); 
+    SPECIAL_BINDING_TABLE
+#undef SPECIAL_BINDING
+
 }
 
 
@@ -573,7 +584,7 @@ static void writeEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMan
 }
 
 
-static void writeSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section)
+static void writeSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section, InputMode mode)
 {
    string key;
 
@@ -584,10 +595,10 @@ static void writeSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMa
 
    // Don't overwrite existing bindings for now... there is no way to modify them in-game, and if the user has
    // specified an invalid binding, leaving it wrong will make it easier for them to find and fix the error
-#define SPECIAL_BINDING(specialEnumVal, b, c, d)                                            \
+#define SPECIAL_BINDING(specialEnumVal, b, c, d, e)                                         \
       key = InputCodeManager::getSpecialBindingName(specialEnumVal);                        \
       if(!ini->hasKey(section, key))                                                        \
-         ini->SetValue(section, key, inputCodeManager->getSpecialBinding(specialEnumVal));
+         ini->SetValue(section, key, inputCodeManager->getSpecialBinding(specialEnumVal, mode));
     SPECIAL_BINDING_TABLE
 #undef SPECIAL_BINDING
 }
@@ -595,10 +606,11 @@ static void writeSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMa
 
 static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
-   writeKeyBindings(ini, inputCodeManager, "KeyboardKeyBindings", InputModeKeyboard);
-   writeKeyBindings(ini, inputCodeManager, "JoystickKeyBindings", InputModeJoystick);
+   writeKeyBindings       (ini, inputCodeManager, "KeyboardKeyBindings",     InputModeKeyboard);
+   writeKeyBindings       (ini, inputCodeManager, "JoystickKeyBindings",     InputModeJoystick);
    writeEditorKeyBindings (ini, inputCodeManager, "EditorKeyboardKeyBindings");
-   writeSpecialKeyBindings(ini, inputCodeManager, "SpecialKeyBindings");
+   writeSpecialKeyBindings(ini, inputCodeManager, "SpecialKeyBindings",      InputModeKeyboard);
+   writeSpecialKeyBindings(ini, inputCodeManager, "SpecialJoystickBindings", InputModeJoystick);
 }
 
 

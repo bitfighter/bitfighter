@@ -950,11 +950,9 @@ MainMenuUserInterface::MainMenuUserInterface(ClientGame *game, UIManager *uiMana
    mNeedToUpgrade = false;           // Assume we're up-to-date until we hear from the master
    mShowedUpgradeAlert = false;      // So we don't show the upgrade message more than once
 
-   InputCode keyHelp = getInputCode(mGameSettings, BINDING_HELP);
-
    addMenuItem(new MenuItem("JOIN LAN/INTERNET GAME", joinSelectedCallback,       "", KEY_J));
    addMenuItem(new MenuItem("HOST GAME",              hostSelectedCallback,       "", KEY_H));
-   addMenuItem(new MenuItem("HOW TO PLAY",            helpSelectedCallback,       "", KEY_I, keyHelp));
+   addMenuItem(new MenuItem("HOW TO PLAY",            helpSelectedCallback,       "", KEY_I, KEY_F1));
    addMenuItem(new MenuItem("OPTIONS",                optionsSelectedCallback,    "", KEY_O));
    addMenuItem(new MenuItem("HIGH SCORES",            highScoresSelectedCallback, "", KEY_S));
    addMenuItem(new MenuItem("LEVEL EDITOR",           editorSelectedCallback,     "", KEY_L, KEY_E));
@@ -2181,7 +2179,7 @@ void GameMenuUserInterface::buildMenu()
    lastInputMode = mGameSettings->getInputMode();
 
    addMenuItem(new MenuItem("OPTIONS",      optionsSelectedCallback, "", KEY_O));
-   addMenuItem(new MenuItem("INSTRUCTIONS", helpSelectedCallback,    "", KEY_I, getInputCode(mGameSettings, BINDING_HELP)));
+   addMenuItem(new MenuItem("INSTRUCTIONS", helpSelectedCallback,    "", KEY_I, KEY_F1));
 
 
    GameConnection *gc = (getGame())->getConnectionToServer();

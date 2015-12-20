@@ -130,7 +130,7 @@ static const string EditorBindingNames[] = {
 
 // Generates an array of bindingNames for the special keys
 static const string SpecialBindingNames[] = {
-#define SPECIAL_BINDING(a, bindingName, c, d) bindingName,
+#define SPECIAL_BINDING(a, bindingName, c, d, e) bindingName,
     SPECIAL_BINDING_TABLE
 #undef SPECIAL_BINDING
 };
@@ -212,7 +212,7 @@ SpecialBindingSet::SpecialBindingSet()
    // Screenshot_2 = "Ctrl+Q";
    // ...
 
-#define SPECIAL_BINDING(a, b, memberName, defaultBinding) memberName = defaultBinding;
+#define SPECIAL_BINDING(a, b, memberName, defaultBinding, e) memberName = defaultBinding;
     SPECIAL_BINDING_TABLE
 #undef SPECIAL_BINDING
 }
@@ -232,7 +232,7 @@ string SpecialBindingSet::getBinding(SpecialBindingNameEnum bindingName) const
    // TNLAssert(false);
    // return "";
 
-#define SPECIAL_BINDING(enumName, b, memberName, d) if(bindingName == enumName) return memberName;
+#define SPECIAL_BINDING(enumName, b, memberName, d, e) if(bindingName == enumName) return memberName;
    SPECIAL_BINDING_TABLE
 #undef SPECIAL_BINDING
    // Just in case:
@@ -249,7 +249,7 @@ void SpecialBindingSet::setBinding(SpecialBindingNameEnum bindingName, const str
      // else if...
      // else TNLAssert(false);
      if(false) { }     // Dummy conditional to let us use else if below
-#define SPECIAL_BINDING(enumName, b, memberName, d) else if(bindingName == enumName) memberName = key;
+#define SPECIAL_BINDING(enumName, b, memberName, d, e) else if(bindingName == enumName) memberName = key;
     SPECIAL_BINDING_TABLE
 #undef SPECIAL_BINDING
    else 
@@ -266,11 +266,9 @@ InputCodeManager::InputCodeManager()
    mBindingsHaveKeypadEntry = false;
    mInputMode = InputModeKeyboard;
 
-   // Create two binding sets
+   // Create two binding sets, one for keyboard controls, one for joystick
    mBindingSets.resize(2); 
-
-   // Set the first to be our current one
-   mCurrentBindingSet = &mBindingSets[0];     
+   mSpecialBindingSets.resize(2);
 }
 
 
@@ -681,9 +679,14 @@ string InputCodeManager::getEditorBinding(EditorBindingNameEnum bindingName) con
 }
 
 
-string InputCodeManager::getSpecialBinding(SpecialBindingNameEnum bindingName) const
+string InputCodeManager::getSpecialBinding(SpecialBindingNameEnum bindingName, InputMode inputMode) const
 {
-   return mSpecialBindingSet.getBinding(bindingName);
+   S32 mode = (S32)inputMode;    // 0 or 1 at present
+
+   const SpecialBindingSet *bindingSet = &mSpecialBindingSets[mode];
+   
+   return bindingSet->getBinding(bindingName);
+
 }
 
 
@@ -708,7 +711,7 @@ void InputCodeManager::setBinding(BindingNameEnum bindingName, InputMode inputMo
       if(isKeypad)
          mBindingsHaveKeypadEntry = true;
       else
-         mBindingsHaveKeypadEntry = checkIfBindingsHaveKeypad();
+         mBindingsHaveKeypadEntry = checkIfBindingsHaveKeypad(inputMode);
    }
 }
 
@@ -719,16 +722,27 @@ void InputCodeManager::setEditorBinding(EditorBindingNameEnum bindingName, const
 }
 
 
-void InputCodeManager::setSpecialBinding(SpecialBindingNameEnum bindingName, const string &inputString)
+// We'll be using this one most of the time
+string InputCodeManager::getSpecialBinding(SpecialBindingNameEnum bindingName) const
 {
-	mSpecialBindingSet.setBinding(bindingName, inputString);
+   return getSpecialBinding(bindingName, mInputMode);
+}
+
+
+void InputCodeManager::setSpecialBinding(SpecialBindingNameEnum bindingName, InputMode inputMode, const string &inputString)
+{
+   S32 mode = (S32)inputMode;    // 0 or 1 at present
+
+   SpecialBindingSet *bindingSet = &mSpecialBindingSets[mode];
+
+	bindingSet->setBinding(bindingName, inputString);
 }
 
 
 void InputCodeManager::setInputMode(InputMode inputMode)
 {
    mInputMode = inputMode;
-   mBindingsHaveKeypadEntry = checkIfBindingsHaveKeypad();
+   mBindingsHaveKeypadEntry = checkIfBindingsHaveKeypad(inputMode);
 }
 
 
@@ -1489,9 +1503,10 @@ string InputCodeManager::getBaseKeyString(InputCode inputCode)
 }
 
 
-bool InputCodeManager::checkIfBindingsHaveKeypad()
+bool InputCodeManager::checkIfBindingsHaveKeypad(InputMode inputMode) const
 {
-   return mCurrentBindingSet->hasKeypad();
+   S32 mode = (S32)inputMode;    // 0 or 1 at present
+   return mBindingSets[mode].hasKeypad();    
 }
 
 

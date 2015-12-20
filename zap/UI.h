@@ -110,6 +110,8 @@ public:
 
    void setInputCode(BindingNameEnum binding, InputCode inputCode);
    bool checkInputCode(BindingNameEnum, InputCode inputCode) const;
+   bool checkInputCode(SpecialBindingNameEnum binding, const string &inputString) const;
+
    const char *getInputCodeString(BindingNameEnum binding) const;
 
    void setUiManager(UIManager *uiManager);

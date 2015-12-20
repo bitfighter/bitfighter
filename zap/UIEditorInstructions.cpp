@@ -524,6 +524,8 @@ void EditorInstructionsUserInterface::exitInstructions()
 
 bool EditorInstructionsUserInterface::onKeyDown(InputCode inputCode)
 {
+   string inputString = InputCodeManager::getCurrentInputString(inputCode);
+
    if(Parent::onKeyDown(inputCode)) { /* Do nothing */ }
 
    else if(inputCode == KEY_LEFT || inputCode == BUTTON_DPAD_LEFT || inputCode == BUTTON_DPAD_UP || inputCode == KEY_UP)
@@ -538,7 +540,7 @@ bool EditorInstructionsUserInterface::onKeyDown(InputCode inputCode)
       nextPage();
    }
    // F1 has dual use... advance page, then quit out of help when done
-   else if(checkInputCode(BINDING_HELP, inputCode))
+   else if(checkInputCode(BINDING_HELP, inputString))
    {
       if(mCurPage < getPageCount())
          nextPage();

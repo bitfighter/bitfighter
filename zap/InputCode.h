@@ -54,16 +54,13 @@ namespace Zap
    BINDING( BINDING_SCRBRD,             "ShowScoreboard",      true,  inputSCRBRD,       KEY_TAB,          BUTTON_5         ) \
    BINDING( BINDING_MISSION,            "Mission",             true,  inputMISSION,      KEY_F2,           KEY_F2           ) \
    BINDING( BINDING_TOGGLE_RATING,      "ToggleRating",        true,  inputTOGGLERATING, KEY_EQUALS,       KEY_EQUALS       ) \
-   BINDING( BINDING_HELP,               "Help",                false, keyHELP,           KEY_F1,           KEY_F1           ) \
-   BINDING( BINDING_LOBBYCHAT,          "OutOfGameChat",       false, keyLOBBYCHAT,      KEY_F5,           KEY_F5           ) \
-   BINDING( BINDING_FPS,                "FPS",                 false, keyFPS,            KEY_F6,           KEY_F6           ) \
-   BINDING( BINDING_DIAG,               "Diagnostics",         false, keyDIAG,           KEY_F7,           KEY_F7           ) \
-   BINDING( BINDING_LOAD_PRESET_1,      "LoadLoadoutPreset1",  false, keyLoadPreset1,    KEY_ALT_1,        KEY_ALT_1        ) \
-   BINDING( BINDING_LOAD_PRESET_2,      "LoadLoadoutPreset2",  false, keyLoadPreset2,    KEY_ALT_2,        KEY_ALT_2        ) \
-   BINDING( BINDING_LOAD_PRESET_3,      "LoadLoadoutPreset3",  false, keyLoadPreset3,    KEY_ALT_3,        KEY_ALT_3        ) \
-   BINDING( BINDING_SAVE_PRESET_1,      "SaveLoadoutPreset1",  false, keySavePreset1,    KEY_CTRL_1,       KEY_CTRL_1       ) \
-   BINDING( BINDING_SAVE_PRESET_2,      "SaveLoadoutPreset2",  false, keySavePreset2,    KEY_CTRL_2,       KEY_CTRL_2       ) \
-   BINDING( BINDING_SAVE_PRESET_3,      "SaveLoadoutPreset3",  false, keySavePreset3,    KEY_CTRL_3,       KEY_CTRL_3       ) \
+   BINDING( BINDING_FPS,                "FPS",                 true,  keyFPS,            KEY_F6,           KEY_F6           ) \
+   BINDING( BINDING_LOAD_PRESET_1,      "LoadLoadoutPreset1",  true,  keyLoadPreset1,    KEY_ALT_1,        KEY_ALT_1        ) \
+   BINDING( BINDING_LOAD_PRESET_2,      "LoadLoadoutPreset2",  true,  keyLoadPreset2,    KEY_ALT_2,        KEY_ALT_2        ) \
+   BINDING( BINDING_LOAD_PRESET_3,      "LoadLoadoutPreset3",  true,  keyLoadPreset3,    KEY_ALT_3,        KEY_ALT_3        ) \
+   BINDING( BINDING_SAVE_PRESET_1,      "SaveLoadoutPreset1",  true,  keySavePreset1,    KEY_CTRL_1,       KEY_CTRL_1       ) \
+   BINDING( BINDING_SAVE_PRESET_2,      "SaveLoadoutPreset2",  true,  keySavePreset2,    KEY_CTRL_2,       KEY_CTRL_2       ) \
+   BINDING( BINDING_SAVE_PRESET_3,      "SaveLoadoutPreset3",  true,  keySavePreset3,    KEY_CTRL_3,       KEY_CTRL_3       ) \
 /*---------------------------------------------------------------------------------------------------------------------------*/
 
 
@@ -111,13 +108,17 @@ namespace Zap
    EDITOR_BINDING( BINDING_TOGGLE_EDIT_MODE,  "ToggleEditMode",     keyToggleEditMode,  "Insert"        ) \
 /*-------------------------------------------------------------------------------------------------------*/
 
-/*---------------------------------------SPECIAL_BINDING_TABLE-------------------------------------*/
-/*                                                                  BindingSet          Def. kb    */
-/*                       Enum                    Name in INI        member name         binding    */
-#define SPECIAL_BINDING_TABLE                                                                       \
-   SPECIAL_BINDING( BINDING_SCREENSHOT_1,       "Screenshot_1",     keyScreenshot1,    "PrntScrn")  \
-   SPECIAL_BINDING( BINDING_SCREENSHOT_2,       "Screenshot_2",     keyScreenshot2,    "Ctrl+Q")    \
-/*-------------------------------------------------------------------------------------------------*/
+/*---------------------------------------SPECIAL_BINDING_TABLE----------------------------------------------*/
+/*                                                              BindingSet          Def. kb    Def. js      */
+/*                       Enum                Name in INI        member name         binding    binding      */
+#define SPECIAL_BINDING_TABLE                                                                               \
+   SPECIAL_BINDING( BINDING_SCREENSHOT_1,   "Screenshot_1",     keyScreenshot1,    "PrntScrn", "PrntScrn")  \
+   SPECIAL_BINDING( BINDING_SCREENSHOT_2,   "Screenshot_2",     keyScreenshot2,    "Ctrl+Q",   "Ctrl+Q"  )  \
+   SPECIAL_BINDING( BINDING_HELP,           "Help",             keyHELP,           "F1",       "F1"      )  \
+   SPECIAL_BINDING( BINDING_LOBBYCHAT,      "OutOfGameChat",    keyLOBBYCHAT,      "F5",       "F5"      )  \
+   SPECIAL_BINDING( BINDING_DIAG,           "Diagnostics",      keyDIAG,           "F7",       "F7"      )  \
+
+/*-------------------------------------------------------------------------------------------------------------*/
    
 
 enum BindingNameEnum {
@@ -137,7 +138,7 @@ enum EditorBindingNameEnum {
 
 
 enum SpecialBindingNameEnum {
-#define SPECIAL_BINDING(specialEnumName, b, c, d) specialEnumName,
+#define SPECIAL_BINDING(specialEnumName, b, c, d, e) specialEnumName,
     SPECIAL_BINDING_TABLE
 #undef SPECIAL_BINDING
     SPECIAL_BINDING_DEFINEABLE_KEY_COUNT
@@ -192,7 +193,7 @@ struct SpecialBindingSet
    string getBinding(SpecialBindingNameEnum bindingName) const;
    void setBinding(SpecialBindingNameEnum bindingName, const string &key);
 
-#define SPECIAL_BINDING(a, b, memberName, d) string memberName;
+#define SPECIAL_BINDING(a, b, memberName, d, e) string memberName;
    SPECIAL_BINDING_TABLE
 #undef SPECIAL_BINDING
 };
@@ -207,11 +208,11 @@ private:
    bool mBindingsHaveKeypadEntry;
    InputMode mInputMode;             // Joystick or Keyboard
 
-   BindingSet *mCurrentBindingSet;
    Vector<BindingSet> mBindingSets;
 
    EditorBindingSet mEditorBindingSet;
-   SpecialBindingSet mSpecialBindingSet;
+
+   Vector<SpecialBindingSet> mSpecialBindingSets;
 
 public:
    enum JoystickJoysticks {
@@ -254,7 +255,7 @@ public:
    static InputCode convertJoystickToKeyboard(InputCode inputCode);
 private:
    static InputCode convertNumPadToNum(InputCode inputCode);
-   bool checkIfBindingsHaveKeypad();
+   bool checkIfBindingsHaveKeypad(InputMode inputMode) const;
 
 public:
    static string getCurrentInputString(InputCode inputCode);
@@ -305,8 +306,9 @@ public:
    string getEditorBinding(EditorBindingNameEnum bindingName) const;
    void setEditorBinding(EditorBindingNameEnum bindingName, const string &inputString);
 
-   string getSpecialBinding(SpecialBindingNameEnum bindingName) const;
-   void setSpecialBinding(SpecialBindingNameEnum bindingName, const string &inputString);
+   string getSpecialBinding(SpecialBindingNameEnum bindingName) const; 
+   string getSpecialBinding(SpecialBindingNameEnum bindingName, InputMode inputMode) const;
+   void setSpecialBinding(SpecialBindingNameEnum bindingName, InputMode inputMode, const string &inputString);
 };
 
 

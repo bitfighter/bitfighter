@@ -334,7 +334,8 @@ void AbstractChat::deliverPrivateMessage(const char *sender, const char *message
 
       gameUI->onChatMessageReceived(Colors::privateF5MessageDisplayedInGameColor,
          "Private message from %s: Press [%s] to enter chat mode", 
-         sender, gameUI->getInputCodeString(BINDING_LOBBYCHAT));
+         sender, gameUI->getSpecialBindingString(BINDING_LOBBYCHAT));
+      
 
       gameUI->onChatMessageReceived(Colors::privateF5MessageDisplayedInGameColor, "%s %s", ARROW, message);
    }
@@ -521,9 +522,11 @@ void ChatUserInterface::renderHeader() const
 
 bool ChatUserInterface::onKeyDown(InputCode inputCode)
 {
+   string inputString = InputCodeManager::getCurrentInputString(inputCode);
+
    if(Parent::onKeyDown(inputCode))
       { /* Do nothing */ }
-   else if(inputCode == KEY_ESCAPE || checkInputCode(BINDING_LOBBYCHAT, inputCode))
+   else if(inputCode == KEY_ESCAPE || checkInputCode(BINDING_LOBBYCHAT, inputString))
       onEscape();
    else if (inputCode == KEY_ENTER)                // Submits message
       issueChat();

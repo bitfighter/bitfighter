@@ -199,14 +199,12 @@ void quitEditorCallback(ClientGame *game, U32 unused)
 
 void EditorMenuUserInterface::setupMenus()
 {
-   InputCode keyHelp = getInputCode(mGameSettings, BINDING_HELP);
-
    clearMenuItems();
    addMenuItem(new MenuItem("RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R));
    addMenuItem(getWindowModeMenuItem((U32)mGameSettings->getSetting<DisplayMode>(IniKey::WindowMode)));
    addMenuItem(new MenuItem("TEST LEVEL",       testLevelCallback,           "", KEY_T));
    addMenuItem(new MenuItem("SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
-   addMenuItem(new MenuItem("HOW TO EDIT",      activateHelpCallback,        "", KEY_H, keyHelp));
+   addMenuItem(new MenuItem("HOW TO EDIT",      activateHelpCallback,        "", KEY_H, KEY_F1));
    addMenuItem(new MenuItem("LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
    addMenuItem(new MenuItem("MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
    addMenuItem(new MenuItem("EDITOR OPTIONS",   editorOptionsCallback,       "", KEY_O));

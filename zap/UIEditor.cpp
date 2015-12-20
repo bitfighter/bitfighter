@@ -4040,7 +4040,7 @@ bool EditorUserInterface::handleKeyPress(InputCode inputCode, const string &inpu
       insertNewItem(ForceFieldProjectorTypeNumber);
    else if(inputString == "Backspace" || inputString == "Del" || inputString == "Keypad .")  // Keypad . is the keypad's del key
       deleteSelection(false);
-   else if(checkInputCode(BINDING_HELP, inputCode))                                          // Turn on help screen
+   else if(checkInputCode(BINDING_HELP, inputString))                                        // Turn on help screen
    {
       getUIManager()->activate<EditorInstructionsUserInterface>();
       playBoop();

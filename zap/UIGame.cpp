@@ -1294,6 +1294,8 @@ Point GameUserInterface::getTimeLeftIndicatorWidthAndHeight() const
 // Handles all keypress events, including mouse clicks and controller button presses
 bool GameUserInterface::onKeyDown(InputCode inputCode)
 {
+   string inputString = InputCodeManager::getCurrentInputString(inputCode);
+
    // Kind of hacky, but this will unsuspend and swallow the keystroke, which is what we want
    if(!mHelperManager.isHelperActive())
    {
@@ -1306,10 +1308,10 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       else if(getGame()->isSpawnDelayed())
       {
          // Allow scoreboard and the various chats while idle
-         if(!checkInputCode(BINDING_LOBBYCHAT, inputCode) &&
-            !checkInputCode(BINDING_GLOBCHAT,  inputCode)  &&
-            !checkInputCode(BINDING_TEAMCHAT,  inputCode)  &&
-            !checkInputCode(BINDING_CMDCHAT,   inputCode)  &&
+         if(!checkInputCode(BINDING_LOBBYCHAT, inputString) &&
+            !checkInputCode(BINDING_GLOBCHAT,  inputCode)   &&
+            !checkInputCode(BINDING_TEAMCHAT,  inputCode)   &&
+            !checkInputCode(BINDING_CMDCHAT,   inputCode)   &&
             !checkInputCode(BINDING_SCRBRD,    inputCode))
          {
             getGame()->undelaySpawn();
@@ -1319,7 +1321,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       }
    }
 
-   if(checkInputCode(BINDING_LOBBYCHAT, inputCode))
+   if(checkInputCode(BINDING_LOBBYCHAT, inputString))
       getGame()->setBusyChatting(true);
 
    if(Parent::onKeyDown(inputCode))    // Let parent try handling the key
@@ -1328,7 +1330,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    if(GameManager::gameConsole->onKeyDown(inputCode))   // Pass the key on to the console for processing
       return true;
 
-   if(checkInputCode(BINDING_HELP, inputCode))   // Turn on help screen
+   if(checkInputCode(BINDING_HELP, inputString))   // Turn on help screen
    {
       playBoop();
       getGame()->setBusyChatting(true);
@@ -1357,7 +1359,6 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    if(checkInputCode(BINDING_MISSION, inputCode))    // F2
    {
       onMissionKeyPressed();
-
       return true;
    }
 
