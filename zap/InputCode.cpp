@@ -94,7 +94,7 @@ void BindingSet::setBinding(BindingNameEnum bindingName, InputCode key)
 
 
 // Return true if any bound keys are explicitly mapped to the numeric keypad
-bool BindingSet::hasKeypad()
+bool BindingSet::hasKeypad() const
 {
    // Generates a statement that looks like:
    // return InputCodeManager::isKeypadKey(inputSELWEAP1) || 

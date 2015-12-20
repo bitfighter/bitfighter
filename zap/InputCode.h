@@ -152,7 +152,7 @@ struct BindingSet
    BindingSet();     // Constructor
    virtual ~BindingSet();
 
-   bool hasKeypad();
+   bool hasKeypad() const;
 
    InputCode getBinding(BindingNameEnum bindingName) const;
    void setBinding(BindingNameEnum bindingName, InputCode key);
