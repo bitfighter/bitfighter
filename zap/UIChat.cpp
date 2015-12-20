@@ -334,7 +334,7 @@ void AbstractChat::deliverPrivateMessage(const char *sender, const char *message
 
       gameUI->onChatMessageReceived(Colors::privateF5MessageDisplayedInGameColor,
          "Private message from %s: Press [%s] to enter chat mode", 
-         sender, gameUI->getSpecialBindingString(BINDING_LOBBYCHAT));
+         sender, gameUI->getSpecialBindingString(BINDING_LOBBYCHAT).c_str());
       
 
       gameUI->onChatMessageReceived(Colors::privateF5MessageDisplayedInGameColor, "%s %s", ARROW, message);
