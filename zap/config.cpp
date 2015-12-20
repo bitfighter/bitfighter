@@ -507,12 +507,6 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
     BINDING_TABLE
 #undef BINDING
 
-   // Keys where savedInIni is false are not user-defineable at the moment, mostly because we want consistency
-   // throughout the game, and that would require some real constraints on what keys users could choose.
-   // keyHELP = KEY_F1;
-   // keyLOBBYCHAT = KEY_F5;
-   // keyFPS = KEY_F6;
-   // keyDIAG = KEY_F7;
 }
 
 
