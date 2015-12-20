@@ -1335,7 +1335,7 @@ static void addStickOptions(Vector<string> *opts)
    opts->clear();
    opts->push_back("KEYBOARD");
    
-   for(S32 i = 0; i < GameSettings::DetectedJoystickNameList.size(); i++)
+   for(S32 i = 0; i < GameSettings::DetectedControllerList.size(); i++)
       opts->push_back(string("JOYSTICK ") + itos(i + 1));
 }
 
@@ -1354,7 +1354,7 @@ static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
    Joystick::initJoystick(settings);
 
    // If there is a different number of sticks than previously detected
-   if(sticks != GameSettings::DetectedJoystickNameList.size())
+   if(sticks != GameSettings::DetectedControllerList.size())
    {
       ToggleMenuItem *menuItem = dynamic_cast<ToggleMenuItem *>(game->getUIManager()->getUI<InputOptionsMenuUserInterface>()->
                                                                 getMenuItem(INPUT_MODE_MENU_ITEM_INDEX));
@@ -1364,18 +1364,18 @@ static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
          addStickOptions(&menuItem->mOptions);
 
       // Loop back to the first index if we hit the end of the list
-      if(inputModeIndex > (U32)GameSettings::DetectedJoystickNameList.size())
+      if(inputModeIndex > (U32)GameSettings::DetectedControllerList.size())
       {
          inputModeIndex = 0;
          menuItem->setValueIndex(0);
       }
 
       // Special case handler for common situation
-      if(sticks == 0 && GameSettings::DetectedJoystickNameList.size() == 1)      // User just plugged a stick in
+      if(sticks == 0 && GameSettings::DetectedControllerList.size() == 1)      // User just plugged a stick in
          menuItem->setValueIndex(1);
 
       // Save the current number of sticks
-      sticks = GameSettings::DetectedJoystickNameList.size();
+      sticks = GameSettings::DetectedControllerList.size();
    }
 
    if(inputModeIndex == 0)
@@ -1385,7 +1385,7 @@ static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
 
 
    if(inputModeIndex >= 1)
-      GameSettings::UseJoystickNumber = inputModeIndex - 1;
+      GameSettings::UseControllerIndex = inputModeIndex - 1;
 
    Joystick::enableJoystick(settings, true);
 }
@@ -1406,7 +1406,7 @@ void InputOptionsMenuUserInterface::setupMenus()
 
    U32 inputMode = (U32)mGameSettings->getInputMode();   // 0 = keyboard, 1 = joystick
    if(inputMode == InputModeJoystick)
-      inputMode += GameSettings::UseJoystickNumber;
+      inputMode += GameSettings::UseControllerIndex;
 
    addMenuItem(new ToggleMenuItem("PRIMARY INPUT:", 
                                   opts, 

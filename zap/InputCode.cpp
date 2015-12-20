@@ -756,7 +756,7 @@ InputMode InputCodeManager::getInputMode() const
 string InputCodeManager::getInputModeString() const
 {
    if(mInputMode == InputModeJoystick)
-      return "Joystick " + itos(GameSettings::UseJoystickNumber + 1);    // Humans use 1-based indices!
+      return "Joystick " + itos(GameSettings::UseControllerIndex + 1);    // Humans use 1-based indices!
    else
       return "Keyboard";
 }

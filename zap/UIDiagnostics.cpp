@@ -398,9 +398,9 @@ void DiagnosticUserInterface::render() const
   
       ypos += textsize + gap;
       
-      S32 index = GameSettings::UseJoystickNumber;
+      S32 index = GameSettings::UseControllerIndex;
 
-      bool joystickDetected = GameSettings::DetectedJoystickNameList.size() > 0;
+      bool joystickDetected = GameSettings::DetectedControllerList.size() > 0;
 
       if(joystickDetected && getGame()->getInputMode() == InputModeKeyboard)
       {
@@ -416,9 +416,9 @@ void DiagnosticUserInterface::render() const
 
          // Draw the raw SDL detection string
          RenderUtils::drawCenteredStringPair2Colf(ypos + textsize + gap, textsize, true, Colors::magenta, Colors::cyan, "Autodetect String:", "%s",
-               (U32(index) >= U32(GameSettings::DetectedJoystickNameList.size()) || 
-                GameSettings::DetectedJoystickNameList[index] == "") ? 
-                          "<None>" : GameSettings::DetectedJoystickNameList[index].c_str());
+               (U32(index) >= U32(GameSettings::DetectedControllerList.size()) || 
+                GameSettings::DetectedControllerList[index] == "") ? 
+                          "<None>" : GameSettings::DetectedControllerList[index].c_str());
       }
 
       ypos += 6 * (textsize + gap);
@@ -496,7 +496,7 @@ void DiagnosticUserInterface::render() const
          ypos += textsize + gap;
          hpos = horizMargin;
 
-         hpos += RenderUtils::drawStringAndGetWidthf(hpos, ypos, textsize - 2, "Raw Controller Input [%d]: ", GameSettings::UseJoystickNumber);
+         hpos += RenderUtils::drawStringAndGetWidthf(hpos, ypos, textsize - 2, "Raw Controller Input [%d]: ", GameSettings::UseControllerIndex);
 
          for(U32 i = 0; i < 32; i++)  // there are 32 bit in U32
             if(Joystick::ButtonMask & BIT(i))

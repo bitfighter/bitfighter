@@ -272,6 +272,27 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
          onJoyButtonUp(currentUI, event->jbutton.which, event->jbutton.button);
          break;
 
+      // TODO Use these methods to trigger controller loading/unloading
+      case SDL_CONTROLLERDEVICEADDED:
+//         onControllerAdded(event->cdevice);
+         break;
+
+      case SDL_CONTROLLERDEVICEREMOVED:
+//         onControllerRemoved(event->cdevice);
+         break;
+
+      case SDL_CONTROLLERBUTTONDOWN:
+//         onControllerButtonDown(event->cbutton);
+         break;
+
+      case SDL_CONTROLLERBUTTONUP:
+//         onControllerButtonUp(event->cbutton);
+         break;
+
+      case SDL_CONTROLLERAXISMOTION:
+//         onControllerAxis(event->caxis);
+         break;
+
       case SDL_SYSWMEVENT:
          //Ignore
          break;
