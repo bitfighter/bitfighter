@@ -304,13 +304,13 @@ InputCode UserInterface::getInputCode(GameSettings *settings, BindingNameEnum bi
 }
 
 
-string UserInterface::getEditorBindingString(EditorBindingNameEnum binding)
+string UserInterface::getEditorBindingString(EditorBindingNameEnum binding) const
 {
    return mGameSettings->getInputCodeManager()->getEditorBinding(binding);
 }
 
 
-string UserInterface::getSpecialBindingString(SpecialBindingNameEnum binding)
+string UserInterface::getSpecialBindingString(SpecialBindingNameEnum binding) const
 {
    return mGameSettings->getInputCodeManager()->getSpecialBinding(binding);
 }
@@ -322,7 +322,7 @@ void UserInterface::setInputCode(BindingNameEnum binding, InputCode inputCode)
 }
 
 
-bool UserInterface::checkInputCode(BindingNameEnum binding, InputCode inputCode)
+bool UserInterface::checkInputCode(BindingNameEnum binding, InputCode inputCode) const
 {
    InputCode bindingCode = getInputCode(mGameSettings, binding);
 
