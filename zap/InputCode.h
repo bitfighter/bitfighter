@@ -11,6 +11,7 @@
 #include "JoystickButtonEnum.h"
 
 #include "tnlVector.h"
+#include <string>
 
 // Until we move completely to SDL2
 typedef S32 SDL_Keycode;
