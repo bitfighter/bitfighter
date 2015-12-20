@@ -15,8 +15,6 @@
 #endif
 
 
-#include <ctype.h>
-
 #ifdef TNL_OS_WIN32
 #  include <windows.h>           // For ARRAYSIZE 
 #endif
