@@ -27,40 +27,40 @@ namespace Zap
 // Note that the BindingSet member name referenced below doesn't actually appear anywhere else... it could be any aribtrary and unique token
 
 /*-----------------------------------------------------BINDING_TABLE---------------------------------------------------------*/
-/*                                                            Saved    BindingSet        Def. kb           Def. js           */
-/*            Enum                      Name in INI           in INI   member name       binding           binding           */
-#define BINDING_TABLE                                                                                                         \
-   BINDING( BINDING_SELWEAP1,           "SelWeapon1",          true,  inputSELWEAP1,     KEY_1,            KEY_1            ) \
-   BINDING( BINDING_SELWEAP2,           "SelWeapon2",          true,  inputSELWEAP2,     KEY_2,            KEY_2            ) \
-   BINDING( BINDING_SELWEAP3,           "SelWeapon3",          true,  inputSELWEAP3,     KEY_3,            KEY_3            ) \
-   BINDING( BINDING_ADVWEAP,            "SelNextWeapon",       true,  inputADVWEAP,      KEY_E,            BUTTON_1         ) \
-   BINDING( BINDING_ADVWEAP2,           "SelNextWeapon2",      true,  inputADVWEAP2,     MOUSE_WHEEL_UP,   MOUSE_WHEEL_UP   ) \
-   BINDING( BINDING_PREVWEAP,           "SelPrevWeapon",       true,  inputPREVWEAP,     MOUSE_WHEEL_DOWN, MOUSE_WHEEL_DOWN ) \
-   BINDING( BINDING_CMDRMAP,            "ShowCmdrMap",         true,  inputCMDRMAP,      KEY_C,            BUTTON_2         ) \
-   BINDING( BINDING_TEAMCHAT,           "TeamChat",            true,  inputTEAMCHAT,     KEY_T,            KEY_T            ) \
-   BINDING( BINDING_GLOBCHAT,           "GlobalChat",          true,  inputGLOBCHAT,     KEY_G,            KEY_G            ) \
-   BINDING( BINDING_QUICKCHAT,          "QuickChat",           true,  inputQUICKCHAT,    KEY_V,            BUTTON_3         ) \
-   BINDING( BINDING_CMDCHAT,            "Command",             true,  inputCMDCHAT,      KEY_SLASH,        KEY_SLASH        ) \
-   BINDING( BINDING_LOADOUT,            "ShowLoadoutMenu",     true,  inputLOADOUT,      KEY_Z,            BUTTON_4         ) \
-   BINDING( BINDING_MOD1,               "ActivateModule1",     true,  inputMOD1,         KEY_SPACE,        BUTTON_7         ) \
-   BINDING( BINDING_MOD2,               "ActivateModule2",     true,  inputMOD2,         MOUSE_RIGHT,      BUTTON_6         ) \
-   BINDING( BINDING_FIRE,               "Fire",                true,  inputFIRE,         MOUSE_LEFT,       MOUSE_LEFT       ) \
-   BINDING( BINDING_DROPITEM,           "DropItem",            true,  inputDROPITEM,     KEY_B,            KEY_B            ) \
-   BINDING( BINDING_TOGVOICE,           "VoiceChat",           true,  inputTOGVOICE,     KEY_R,            KEY_R            ) \
-   BINDING( BINDING_UP,                 "ShipUp",              true,  inputUP,           KEY_W,            KEY_UP           ) \
-   BINDING( BINDING_DOWN,               "ShipDown",            true,  inputDOWN,         KEY_S,            KEY_DOWN         ) \
-   BINDING( BINDING_LEFT,               "ShipLeft",            true,  inputLEFT,         KEY_A,            KEY_LEFT         ) \
-   BINDING( BINDING_RIGHT,              "ShipRight",           true,  inputRIGHT,        KEY_D,            KEY_RIGHT        ) \
-   BINDING( BINDING_SCRBRD,             "ShowScoreboard",      true,  inputSCRBRD,       KEY_TAB,          BUTTON_5         ) \
-   BINDING( BINDING_MISSION,            "Mission",             true,  inputMISSION,      KEY_F2,           KEY_F2           ) \
-   BINDING( BINDING_TOGGLE_RATING,      "ToggleRating",        true,  inputTOGGLERATING, KEY_EQUALS,       KEY_EQUALS       ) \
-   BINDING( BINDING_FPS,                "FPS",                 true,  keyFPS,            KEY_F6,           KEY_F6           ) \
-   BINDING( BINDING_LOAD_PRESET_1,      "LoadLoadoutPreset1",  true,  keyLoadPreset1,    KEY_ALT_1,        KEY_ALT_1        ) \
-   BINDING( BINDING_LOAD_PRESET_2,      "LoadLoadoutPreset2",  true,  keyLoadPreset2,    KEY_ALT_2,        KEY_ALT_2        ) \
-   BINDING( BINDING_LOAD_PRESET_3,      "LoadLoadoutPreset3",  true,  keyLoadPreset3,    KEY_ALT_3,        KEY_ALT_3        ) \
-   BINDING( BINDING_SAVE_PRESET_1,      "SaveLoadoutPreset1",  true,  keySavePreset1,    KEY_CTRL_1,       KEY_CTRL_1       ) \
-   BINDING( BINDING_SAVE_PRESET_2,      "SaveLoadoutPreset2",  true,  keySavePreset2,    KEY_CTRL_2,       KEY_CTRL_2       ) \
-   BINDING( BINDING_SAVE_PRESET_3,      "SaveLoadoutPreset3",  true,  keySavePreset3,    KEY_CTRL_3,       KEY_CTRL_3       ) \
+/*                                                            BindingSet         Def. kb           Def. js           */
+/*            Enum                      Name in INI           member name        binding           binding           */
+#define BINDING_TABLE                                                                                                 \
+   BINDING( BINDING_SELWEAP1,           "SelWeapon1",         inputSELWEAP1,     KEY_1,            KEY_1            ) \
+   BINDING( BINDING_SELWEAP2,           "SelWeapon2",         inputSELWEAP2,     KEY_2,            KEY_2            ) \
+   BINDING( BINDING_SELWEAP3,           "SelWeapon3",         inputSELWEAP3,     KEY_3,            KEY_3            ) \
+   BINDING( BINDING_ADVWEAP,            "SelNextWeapon",      inputADVWEAP,      KEY_E,            BUTTON_1         ) \
+   BINDING( BINDING_ADVWEAP2,           "SelNextWeapon2",     inputADVWEAP2,     MOUSE_WHEEL_UP,   MOUSE_WHEEL_UP   ) \
+   BINDING( BINDING_PREVWEAP,           "SelPrevWeapon",      inputPREVWEAP,     MOUSE_WHEEL_DOWN, MOUSE_WHEEL_DOWN ) \
+   BINDING( BINDING_CMDRMAP,            "ShowCmdrMap",        inputCMDRMAP,      KEY_C,            BUTTON_2         ) \
+   BINDING( BINDING_TEAMCHAT,           "TeamChat",           inputTEAMCHAT,     KEY_T,            KEY_T            ) \
+   BINDING( BINDING_GLOBCHAT,           "GlobalChat",         inputGLOBCHAT,     KEY_G,            KEY_G            ) \
+   BINDING( BINDING_QUICKCHAT,          "QuickChat",          inputQUICKCHAT,    KEY_V,            BUTTON_3         ) \
+   BINDING( BINDING_CMDCHAT,            "Command",            inputCMDCHAT,      KEY_SLASH,        KEY_SLASH        ) \
+   BINDING( BINDING_LOADOUT,            "ShowLoadoutMenu",    inputLOADOUT,      KEY_Z,            BUTTON_4         ) \
+   BINDING( BINDING_MOD1,               "ActivateModule1",    inputMOD1,         KEY_SPACE,        BUTTON_7         ) \
+   BINDING( BINDING_MOD2,               "ActivateModule2",    inputMOD2,         MOUSE_RIGHT,      BUTTON_6         ) \
+   BINDING( BINDING_FIRE,               "Fire",               inputFIRE,         MOUSE_LEFT,       MOUSE_LEFT       ) \
+   BINDING( BINDING_DROPITEM,           "DropItem",           inputDROPITEM,     KEY_B,            KEY_B            ) \
+   BINDING( BINDING_TOGVOICE,           "VoiceChat",          inputTOGVOICE,     KEY_R,            KEY_R            ) \
+   BINDING( BINDING_UP,                 "ShipUp",             inputUP,           KEY_W,            KEY_UP           ) \
+   BINDING( BINDING_DOWN,               "ShipDown",           inputDOWN,         KEY_S,            KEY_DOWN         ) \
+   BINDING( BINDING_LEFT,               "ShipLeft",           inputLEFT,         KEY_A,            KEY_LEFT         ) \
+   BINDING( BINDING_RIGHT,              "ShipRight",          inputRIGHT,        KEY_D,            KEY_RIGHT        ) \
+   BINDING( BINDING_SCRBRD,             "ShowScoreboard",     inputSCRBRD,       KEY_TAB,          BUTTON_5         ) \
+   BINDING( BINDING_MISSION,            "Mission",            inputMISSION,      KEY_F2,           KEY_F2           ) \
+   BINDING( BINDING_TOGGLE_RATING,      "ToggleRating",       inputTOGGLERATING, KEY_EQUALS,       KEY_EQUALS       ) \
+   BINDING( BINDING_FPS,                "FPS",                keyFPS,            KEY_F6,           KEY_F6           ) \
+   BINDING( BINDING_LOAD_PRESET_1,      "LoadLoadoutPreset1", keyLoadPreset1,    KEY_ALT_1,        KEY_ALT_1        ) \
+   BINDING( BINDING_LOAD_PRESET_2,      "LoadLoadoutPreset2", keyLoadPreset2,    KEY_ALT_2,        KEY_ALT_2        ) \
+   BINDING( BINDING_LOAD_PRESET_3,      "LoadLoadoutPreset3", keyLoadPreset3,    KEY_ALT_3,        KEY_ALT_3        ) \
+   BINDING( BINDING_SAVE_PRESET_1,      "SaveLoadoutPreset1", keySavePreset1,    KEY_CTRL_1,       KEY_CTRL_1       ) \
+   BINDING( BINDING_SAVE_PRESET_2,      "SaveLoadoutPreset2", keySavePreset2,    KEY_CTRL_2,       KEY_CTRL_2       ) \
+   BINDING( BINDING_SAVE_PRESET_3,      "SaveLoadoutPreset3", keySavePreset3,    KEY_CTRL_3,       KEY_CTRL_3       ) \
 /*---------------------------------------------------------------------------------------------------------------------------*/
 
 
@@ -122,7 +122,7 @@ namespace Zap
    
 
 enum BindingNameEnum {
-#define BINDING(enumName, b, c, d, e, f) enumName,
+#define BINDING(enumName, b, c, d, e) enumName,
     BINDING_TABLE
 #undef BINDING
     BINDING_DEFINEABLE_KEY_COUNT
@@ -159,7 +159,7 @@ struct BindingSet
    void setBinding(BindingNameEnum bindingName, InputCode key);
 
    // Create a sequence of member variables from memberName column of the BINDING_TABLE above
-#define BINDING(a, b, c, memberName, e, f) InputCode memberName;
+#define BINDING(a, b, memberName, d, e) InputCode memberName;
     BINDING_TABLE
 #undef BINDING
 };

@@ -43,7 +43,7 @@ BindingSet::BindingSet()
    // inputSELWEAP2 = KEY_2;
    // ...
 
-#define BINDING(a, b, c, memberName, defaultKeyboardBinding, f)  memberName = defaultKeyboardBinding;
+#define BINDING(a, b, memberName, defaultKeyboardBinding, e)  memberName = defaultKeyboardBinding;
     BINDING_TABLE
 #undef BINDING
 }
@@ -66,7 +66,7 @@ InputCode BindingSet::getBinding(BindingNameEnum bindingName) const
    // return KEY_NONE;
 
     if(false) { }     // Dummy conditional to let us use else if below
-#define BINDING(enumName, b, c, memberName, e, f) else if(bindingName == enumName) return memberName;
+#define BINDING(enumName, b, memberName, d, e) else if(bindingName == enumName) return memberName;
     BINDING_TABLE
 #undef BINDING
 
@@ -85,7 +85,7 @@ void BindingSet::setBinding(BindingNameEnum bindingName, InputCode key)
    // else TNLAssert(false);
 
    if(false) { }     // Dummy conditional to let us use else if below
-#define BINDING(enumName, b, c, memberName, e, f) else if(bindingName == enumName) memberName = key;
+#define BINDING(enumName, b, memberName, d, e) else if(bindingName == enumName) memberName = key;
     BINDING_TABLE
 #undef BINDING
    else 
@@ -102,7 +102,7 @@ bool BindingSet::hasKeypad() const
    //        ...
    //        false;
    return 
-#define BINDING(a, b, c, memberName, e, f) InputCodeManager::isKeypadKey(memberName) ||
+#define BINDING(a, b, memberName, d, e) InputCodeManager::isKeypadKey(memberName) ||
     BINDING_TABLE
 #undef BINDING
     false;
@@ -114,7 +114,7 @@ bool BindingSet::hasKeypad() const
 
 // Generates an array of bindingNames for the game
 static const string BindingNames[] = {
-#define BINDING(a, bindingName, c, d, e, f) bindingName, 
+#define BINDING(a, bindingName, c, d, e) bindingName, 
     BINDING_TABLE
 #undef BINDING
 };

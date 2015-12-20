@@ -487,11 +487,10 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
    //          getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(InputCodeManager::BINDING_SELWEAP1), 
    //                       KEY_1));
 
-#define BINDING(enumVal, b, savedInIni, d, defaultKeyboardBinding, f)                           \
-      if(savedInIni)                                                                            \
-         inputCodeManager->setBinding(enumVal, InputModeKeyboard,                            	\
-            getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(enumVal), \
-                         defaultKeyboardBinding));
+#define BINDING(enumVal, b, c, defaultKeyboardBinding, e)                                    \
+      inputCodeManager->setBinding(enumVal, InputModeKeyboard,                            	\
+         getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(enumVal), \
+                        defaultKeyboardBinding));
     BINDING_TABLE
 #undef BINDING
 
@@ -499,11 +498,10 @@ static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
    ///// JOYSTICK
 
    // Basically the same, except that we use the default joystick binding column... generated code will look pretty much the same
-#define BINDING(enumVal, b, savedInIni, d, e, defaultJoystickBinding)                           \
-      if(savedInIni)                                                                            \
-         inputCodeManager->setBinding(enumVal, InputModeJoystick,                               \
-            getInputCode(ini, "JoystickKeyBindings", InputCodeManager::getBindingName(enumVal), \
-                         defaultJoystickBinding));
+#define BINDING(enumVal, b, c, d, defaultJoystickBinding)                                    \
+      inputCodeManager->setBinding(enumVal, InputModeJoystick,                               \
+         getInputCode(ini, "JoystickKeyBindings", InputCodeManager::getBindingName(enumVal), \
+                        defaultJoystickBinding));
     BINDING_TABLE
 #undef BINDING
 
@@ -554,10 +552,9 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
    //    ini->SetValue(section, InputCodeManager::getBindingName(InputCodeManager::BINDING_SELWEAP1),
    //                           InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1, mode)));
 
-#define BINDING(enumVal, b, savedInIni, d, e, f)                                                                   \
-      if(savedInIni)                                                                                               \
-         ini->SetValue(section, InputCodeManager::getBindingName(enumVal),                                         \
-                                InputCodeManager::inputCodeToString(inputCodeManager->getBinding(enumVal, mode))); 
+#define BINDING(enumVal, b, c, d, e)                                                                            \
+      ini->SetValue(section, InputCodeManager::getBindingName(enumVal),                                         \
+                              InputCodeManager::inputCodeToString(inputCodeManager->getBinding(enumVal, mode))); 
     BINDING_TABLE
 #undef BINDING
 }
