@@ -156,9 +156,12 @@ const char *helpTitles[] = {
 ////////////////////////////////////////
 // Define statics
 FolderManager *GameSettings::mFolderManager = NULL;
-Vector<string> GameSettings::DetectedJoystickNameList;   // List of joysticks we found attached to this machine
 
-S32 GameSettings::UseJoystickNumber = 0;
+// List of controllers we found attached to this machine.  This contains the
+// Controller index as the key, the name as the value
+map<S32,string> GameSettings::DetectedControllerList;
+
+S32 GameSettings::UseControllerIndex = -1;
 
 CIniFile GameSettings::iniFile("dummy");                 // Our INI file.  Real filename will be supplied later.
 CIniFile GameSettings::userPrefs("dummy");               // Our INI file.  Real filename will be supplied later.
@@ -939,7 +942,7 @@ void GameSettings::onFinishedLoading()
 #ifndef ZAP_DEDICATED
    U32 stick = getU32(USE_STICK);
    if(stick > 0)
-      UseJoystickNumber = stick - 1;
+      UseControllerIndex = stick - 1;
 #endif
 }
 

@@ -199,7 +199,7 @@ public:
    Vector<string> getLevelList(const string &levelFolder);   // Grab a list of levels from the specified level folder; ignore anything in the INI
 
 public:
-   static S32 UseJoystickNumber;
+   static S32 UseControllerIndex;
 
    Vector<string> *getMasterServerList();
    void saveMasterAddressListInIniUnlessItCameFromCmdLine();
@@ -277,7 +277,7 @@ public:
    static void showHelp(GameSettings *settings, const Vector<string> &words);
    static void showVersion(GameSettings *settings, const Vector<string> &words);
 
-   static Vector<string> DetectedJoystickNameList;   // List of joysticks we found attached to this machine
+   static map<S32,string> DetectedControllerList;   // List of joysticks we found attached to this machine
 
    // Dealing with saved passwords for servers
    static void saveServerPassword(const string &serverName, const string &password);

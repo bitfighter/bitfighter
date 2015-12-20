@@ -23,8 +23,8 @@ using namespace TNL;
 using namespace std;
 
 // Forward declarations
-struct _SDL_Joystick;
-typedef struct _SDL_Joystick SDL_Joystick;
+struct _SDL_GameController;
+typedef struct _SDL_GameController SDL_GameController;
 
 
 namespace Zap {
@@ -43,7 +43,7 @@ enum JoystickHatDirections {
 
 class Joystick {
 private:
-   static SDL_Joystick *sdlJoystick;       // The current Joystick in use
+   static SDL_GameController *sdlController;       // The current Joystick in use
 
 public:
    enum ButtonShape {

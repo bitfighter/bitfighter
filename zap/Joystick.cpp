@@ -24,7 +24,7 @@ namespace Zap {
 
 // Linker needs these declared like this, why?
 // private
-SDL_Joystick *Joystick::sdlJoystick = NULL;
+SDL_GameController *Joystick::sdlController = NULL;
 
 // public
 Vector<Joystick::JoystickInfo> Joystick::JoystickPresetList;
@@ -55,19 +55,29 @@ Joystick::~Joystick()
 }
 
 
+// Make sure "SDL_Init(0)" was done before calling this function, otherwise joystick will fail to work on windows.
 bool Joystick::initJoystick(GameSettings *settings)
 {
-   // Make sure "SDL_Init(0)" was done before calling this function, otherwise joystick will fail to work on windows.
-   GameSettings::DetectedJoystickNameList.clear();
+   GameSettings::DetectedControllerList.clear();
 
    // Allows multiple joysticks with each using a copy of Bitfighter
+   // FIXME: If this still works, then great!  If not, we may need to set it
+   // *before* SDL_Init(0) in main.cpp
    SDL_setenv("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1", 0);
 
-   if(!SDL_WasInit(SDL_INIT_JOYSTICK) && SDL_InitSubSystem(SDL_INIT_JOYSTICK))
+   if(!SDL_WasInit(SDL_INIT_GAMECONTROLLER) &&
+         SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER))
    {
-      logprintf("Unable to initialize the joystick subsystem");
+      logprintf("Unable to initialize the game controller subsystem");
       return false;
    }
+
+   // Load the controller database
+   SDL_GameControllerAddMappingsFromFile(
+         joindir(settings->getFolderManager()->iniDir, "gamecontrollerdb.txt").c_str()
+         );
+
+   // TODO Add user-specific gamecontroller database?
 
    // How many joysticks are there
    S32 joystickCount = SDL_NumJoysticks();
@@ -77,13 +87,36 @@ bool Joystick::initJoystick(GameSettings *settings)
       return false;
 
    logprintf("%d joystick(s) detected:", joystickCount);
-   for (S32 i = 0; i < joystickCount; i++)
-   {
-      const char *joystickName = SDL_JoystickNameForIndex(i);
 
-      logprintf("%d.) Autodetect string = \"%s\"", i + 1, joystickName);
-      GameSettings::DetectedJoystickNameList.push_back(joystickName);
+   for(S32 i = 0; i < joystickCount; i++)
+   {
+      // A GameController is a specific type of joystick
+      if(SDL_IsGameController(i))
+      {
+         const char *controllerName = SDL_GameControllerNameForIndex(i);
+
+         logprintf("  %d. [GameController] \"%s\"", i + 1, controllerName);
+         GameSettings::DetectedControllerList.insert(pair<S32,string>(i,controllerName));
+      }
+
+      // Not detected as a game controller
+      else
+      {
+         const char *joystickName = SDL_JoystickNameForIndex(i);
+
+         logprintf("  %d. [Joystick] (not compatible) \"%s\"", i + 1, joystickName);
+
+         // TODO: Do some sort of auto-detection and string output of the
+         // joystick hardware mappings and create a gamecontroller out of this
+         // joystick.  Maybe integrate SDL/test/controllermap.c from SDL hg
+      }
    }
+
+   // Set the controller number we will use during the game unless it was already
+   // set by a command line arg in GameSettings.cpp.  This will be the first
+   // detected controller from above.
+   if(GameSettings::UseControllerIndex == -1)
+      GameSettings::UseControllerIndex = GameSettings::DetectedControllerList.begin()->first;
 
    return true;
 }
@@ -91,33 +124,34 @@ bool Joystick::initJoystick(GameSettings *settings)
 
 bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
 {
-   if(sdlJoystick != NULL) {
-      SDL_JoystickClose(sdlJoystick);  // Need to close joystick, to avoid having 2 joysticks being active at the same time
-      sdlJoystick = NULL;
+   // Need to close the controller to avoid having 2 being active at the same time
+   if(sdlController != NULL) {
+      SDL_GameControllerClose(sdlController);
+      sdlController = NULL;
    }
 
-   // Check that there is a joystick available
-   if(SDL_NumJoysticks() == 0)
+   // Check that there is a controller available
+   if(GameSettings::DetectedControllerList.size() == 0)
       return false;
 
+   // Don't enable controller at all in keyboard mode
    if(settings->getInputMode() == InputModeKeyboard &&
         (hasBeenOpenedBefore || settings->getIniSettings()->alwaysStartInKeyboardMode)) // Don't enable joystick at all in keyboard mode
-         return true;
+       return true;
 
-   // Enable joystick events
-   SDL_JoystickEventState(SDL_ENABLE);
+   // Enable controller events
+   SDL_GameControllerEventState(SDL_ENABLE);
 
-
-   // Start using joystick
-   sdlJoystick = SDL_JoystickOpen(GameSettings::UseJoystickNumber);
-   if(sdlJoystick == NULL)
+   // Start using the controller
+   sdlController = SDL_GameControllerOpen(GameSettings::UseControllerIndex);
+   if(sdlController == NULL)
    {
-      logprintf("Error opening joystick %d [%s]", GameSettings::UseJoystickNumber + 1, SDL_JoystickNameForIndex(GameSettings::UseJoystickNumber));
+      logprintf("Error opening controller %d [%s]", GameSettings::UseControllerIndex, SDL_GameControllerNameForIndex(GameSettings::UseControllerIndex));
 
       return false;
    }
 
-   logprintf("Using joystick %d - %s", GameSettings::UseJoystickNumber + 1, SDL_JoystickNameForIndex(GameSettings::UseJoystickNumber));
+   logprintf("Using controller %d [%s]", GameSettings::UseControllerIndex, SDL_GameControllerNameForIndex(GameSettings::UseControllerIndex));
 
    // Now try and autodetect the joystick and update the game settings
    string joystickType = Joystick::autodetectJoystick(settings);
@@ -144,13 +178,13 @@ bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
 
 void Joystick::shutdownJoystick()
 {
-   if(sdlJoystick != NULL) {
-      SDL_JoystickClose(sdlJoystick);
-      sdlJoystick = NULL;
+   if(sdlController != NULL) {
+      SDL_GameControllerClose(sdlController);
+      sdlController = NULL;
    }
 
-   if(SDL_WasInit(SDL_INIT_JOYSTICK))
-      SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+   if(SDL_WasInit(SDL_INIT_GAMECONTROLLER))
+      SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
 }
 
 
@@ -182,10 +216,10 @@ S32 Joystick::checkJoystickString_partial_match(const string &controllerName)
 // Returns a valid name of one of our joystick profiles
 string Joystick::autodetectJoystick(GameSettings *settings)
 {
-   if(GameSettings::DetectedJoystickNameList.size() == 0)  // No controllers detected
+   if(GameSettings::DetectedControllerList.size() == 0)  // No controllers detected
       return NoJoystick;
 
-   string controllerName = GameSettings::DetectedJoystickNameList[GameSettings::UseJoystickNumber];
+   string controllerName = GameSettings::DetectedControllerList[GameSettings::UseControllerIndex];
 
    S32 match;
    // First check against predefined joysticks that have exact search strings

@@ -549,7 +549,11 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       ClientInfo *clientInfo = clientGame->getClientInfo();
 
       // First controller's autodetect string (for research purposes!)
-      bstream->writeString(GameSettings::DetectedJoystickNameList.size() > 0 ? GameSettings::DetectedJoystickNameList[0].c_str() : "");
+      const char *controllerName = "";
+      if(GameSettings::DetectedControllerList.size() > 0)
+         controllerName = GameSettings::DetectedControllerList.begin()->second.c_str();
+
+      bstream->writeString(controllerName);
 
       bstream->writeString(clientGame->getPlayerName().c_str());          // User's nickname
       bstream->writeString(clientGame->getPlayerPassword().c_str());      // and whatever password they supplied
