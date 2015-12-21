@@ -412,9 +412,9 @@ void DiagnosticUserInterface::render()
 
          y += 25;
 
-         for(S32 i = 0; i < Joystick::rawAxisCount; i++)
+         for(S32 i = 0; i < SDL_CONTROLLER_AXIS_MAX; i++)
          {
-            F32 a = Joystick::rawAxis[i];    // Range: -1 to 1
+            F32 a = (F32)Joystick::axesValues[i] / (F32)S16_MAX;    // Range: -1 to 1
             if(fabs(a) > .1f)
             {
                glColor(Colors::cyan);

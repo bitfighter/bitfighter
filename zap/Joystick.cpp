@@ -13,7 +13,6 @@
 #include "tnlLog.h"
 
 #include "SDL.h"
-#include "SDL_joystick.h"
 #include "SDL_stdinc.h"
 
 #include <map>
@@ -30,11 +29,10 @@ SDL_GameController *Joystick::sdlController = NULL;
 Vector<Joystick::JoystickInfo> Joystick::JoystickPresetList;
 
 U32 Joystick::ButtonMask = 0;
-F32 Joystick::rawAxis[Joystick::rawAxisCount];
+S16 Joystick::axesValues[SDL_CONTROLLER_AXIS_MAX]; // Array of the current axes values
 S16 Joystick::LowerSensitivityThreshold = 4900;   // out of 32767, ~15%, any less than this is ends up as zero
 S16 Joystick::UpperSensitivityThreshold = 30000;  // out of 32767, ~91%, any more than this is full amount
 U32 Joystick::AxesInputCodeMask = 0;
-U32 Joystick::HatInputCodeMask = 0;
 
 U32 Joystick::SelectedPresetIndex = 0;    // TODO: This should be non-static on ClientGame, I think
 
@@ -243,24 +241,6 @@ string Joystick::autodetectJoystick(GameSettings *settings)
 
    // It's beyond hope!  Return something that will *ALWAYS* be wrong.
    return "GenericJoystick";
-}
-
-
-JoystickButton Joystick::remapSdlButtonToJoystickButton(U8 rawButton)
-{
-   for(S32 i = 0; i < JoystickButtonCount; i++)
-      if(JoystickPresetList[SelectedPresetIndex].buttonMappings[i].sdlButton == rawButton)
-         return JoystickPresetList[SelectedPresetIndex].buttonMappings[i].button;
-
-   return JoystickButtonUnknown;
-}
-JoystickButton Joystick::remapSdlAxisToJoystickButton(U8 rawButton)
-{
-   for(S32 i = 0; i < JoystickButtonCount; i++)
-      if(JoystickPresetList[SelectedPresetIndex].buttonMappings[i].rawAxis == rawButton)
-         return JoystickPresetList[SelectedPresetIndex].buttonMappings[i].button;
-
-   return JoystickButtonUnknown;
 }
 
 
