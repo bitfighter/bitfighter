@@ -29,10 +29,9 @@ SDL_GameController *Joystick::sdlController = NULL;
 Vector<Joystick::JoystickInfo> Joystick::JoystickPresetList;
 
 U32 Joystick::ButtonMask = 0;
-S16 Joystick::axesValues[SDL_CONTROLLER_AXIS_MAX]; // Array of the current axes values
+S16 Joystick::rawAxesValues[SDL_CONTROLLER_AXIS_MAX]; // Array of the current axes values
 S16 Joystick::LowerSensitivityThreshold = 4900;   // out of 32767, ~15%, any less than this is ends up as zero
 S16 Joystick::UpperSensitivityThreshold = 30000;  // out of 32767, ~91%, any more than this is full amount
-U32 Joystick::AxesInputCodeMask = 0;
 
 U32 Joystick::SelectedPresetIndex = 0;    // TODO: This should be non-static on ClientGame, I think
 

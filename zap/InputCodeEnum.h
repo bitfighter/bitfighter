@@ -101,7 +101,7 @@ enum InputCode {
    // Keep these together -- InputCodeManager::isControllerButton() depends on order and togetherness
    BUTTON_1, BUTTON_2, BUTTON_3,             // Controller buttons
    BUTTON_4, BUTTON_5, BUTTON_6,
-   BUTTON_7, BUTTON_8,                       // Often triggers 1 and 2
+   BUTTON_7, BUTTON_8,                       // Triggers 1 and 2, if they exist
    BUTTON_9, BUTTON_10, BUTTON_11, BUTTON_12,// Extra buttons that only a few game controller have
    BUTTON_BACK, BUTTON_START,                // Sometimes 9 & 10
 

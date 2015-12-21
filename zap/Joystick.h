@@ -93,7 +93,9 @@ public:
    static const U8 FakeRawButton = 254;  // A button that can't possibly be real (must fit within U8)
 
    static U32 ButtonMask;    // Holds what buttons are current pressed down - can support up to 32
-   static S16 axesValues[SDL_CONTROLLER_AXIS_MAX];  // Current state of all controller axes
+
+   // Current state of all controller axes; raw values
+   static S16 rawAxesValues[SDL_CONTROLLER_AXIS_MAX];
 
    // static data
    static S16 LowerSensitivityThreshold;
@@ -101,7 +103,6 @@ public:
    static S32 UseJoystickNumber;
    static Vector<JoystickInfo> JoystickPresetList;
    static U32 SelectedPresetIndex;
-   static U32 AxesInputCodeMask;
 
    static bool initJoystick(GameSettings *settings);
    static bool enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore);

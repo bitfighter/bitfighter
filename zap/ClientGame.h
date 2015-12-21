@@ -19,6 +19,7 @@
 #include "gameConnection.h"
 #include "MasterTypes.h"
 
+#include "SDL_gamecontroller.h"
 
 #ifdef TNL_OS_WIN32
 #  include <windows.h>           // For screensaver... windows only feature, I'm afraid!
@@ -149,7 +150,8 @@ public:
    bool isLevelInDatabase() const;
 
    // A place to store input from the joysticks while we are composing our moves
-   F32 mJoystickInputs[JoystickAxesDirectionCount];
+   // Why is this there in ClientGame?
+   F32 normalizedAxesValues[SDL_CONTROLLER_AXIS_MAX];
 
    void resetCommandersMap();
    F32 getCommanderZoomFraction() const;
