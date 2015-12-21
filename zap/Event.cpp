@@ -52,14 +52,17 @@ void Event::setMousePos(UserInterface *currentUI, S32 x, S32 y, DisplayMode repo
 
 // Needs to be Aligned with JoystickAxesDirections... X-Macro?
 static JoystickStaticDataStruct JoystickInputData[JoystickAxesDirectionCount] = {
+   // Movement axes
    { JoystickMoveAxesLeft,   MoveAxesLeftMask,   STICK_1_LEFT  },
    { JoystickMoveAxesRight,  MoveAxesRightMask,  STICK_1_RIGHT },
    { JoystickMoveAxesUp,     MoveAxesUpMask,     STICK_1_UP    },
    { JoystickMoveAxesDown,   MoveAxesDownMask,   STICK_1_DOWN  },
+   // Shooting axes
    { JoystickShootAxesLeft,  ShootAxesLeftMask,  STICK_2_LEFT  },
    { JoystickShootAxesRight, ShootAxesRightMask, STICK_2_RIGHT },
    { JoystickShootAxesUp,    ShootAxesUpMask,    STICK_2_UP    },
    { JoystickShootAxesDown,  ShootAxesDownMask,  STICK_2_DOWN  },
+   // Triggers?
 };
 
 
@@ -191,14 +194,6 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
             onTextInput(currentUI, event->text.text[0]);
          break;
 
-      case SDL_JOYDEVICEADDED:      // Joystick was plugged -- which is stick index
-         onStickAdded(event->jdevice.which);
-         break;
-
-      case SDL_JOYDEVICEREMOVED:    // Joystick was unplugged -- which is instance_id
-         onStickRemoved(event->jdevice.which);
-         break;
-
       case SDL_MOUSEMOTION:
          onMouseMoved(currentUI, event->motion.x, event->motion.y, 
                settings->getSetting<DisplayMode>(IniKey::WindowMode));
@@ -252,45 +247,25 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
          }
          break;
 
-      case SDL_JOYAXISMOTION:
-         onJoyAxis(game, event->jaxis.which, event->jaxis.axis, event->jaxis.value);
+      case SDL_CONTROLLERBUTTONDOWN:
+         onControllerButtonDown(currentUI, event->cbutton.which, event->cbutton.button);
          break;
 
-      case SDL_JOYBALLMOTION:
-         onJoyBall(event->jball.which, event->jball.ball, event->jball.xrel, event->jball.yrel);
+      case SDL_CONTROLLERBUTTONUP:
+         onControllerButtonUp(currentUI, event->cbutton.which, event->cbutton.button);
          break;
 
-      case SDL_JOYHATMOTION:
-         onJoyHat(currentUI, event->jhat.which, event->jhat.hat, event->jhat.value);
-         break;
-
-      case SDL_JOYBUTTONDOWN:
-         onJoyButtonDown(currentUI, event->jbutton.which, event->jbutton.button);
-         break;
-
-      case SDL_JOYBUTTONUP:
-         onJoyButtonUp(currentUI, event->jbutton.which, event->jbutton.button);
+      case SDL_CONTROLLERAXISMOTION:
+         onControllerAxis(game, event->caxis.which, event->caxis.axis, event->caxis.value);
          break;
 
       // TODO Use these methods to trigger controller loading/unloading
       case SDL_CONTROLLERDEVICEADDED:
-//         onControllerAdded(event->cdevice);
+         onControllerAdded(event->cdevice.which);
          break;
 
       case SDL_CONTROLLERDEVICEREMOVED:
-//         onControllerRemoved(event->cdevice);
-         break;
-
-      case SDL_CONTROLLERBUTTONDOWN:
-//         onControllerButtonDown(event->cbutton);
-         break;
-
-      case SDL_CONTROLLERBUTTONUP:
-//         onControllerButtonUp(event->cbutton);
-         break;
-
-      case SDL_CONTROLLERAXISMOTION:
-//         onControllerAxis(event->caxis);
+         onControllerRemoved(event->cdevice.which);
          break;
 
       case SDL_SYSWMEVENT:
@@ -419,112 +394,82 @@ void Event::onMouseButtonUp(UserInterface *currentUI, S32 x, S32 y, InputCode in
 }
 
 
-void Event::onJoyAxis(ClientGame *game, U8 whichJoystick, U8 axis, S16 value)
+void Event::onControllerAxis(ClientGame *game, U8 deviceId, U8 axis, S16 value)
 {
 //   logprintf("SDL Axis number: %u, value: %d", axis, value);
+   if(axis == SDL_CONTROLLER_AXIS_INVALID)
+      return;
 
-   if(axis < Joystick::rawAxisCount)
+   S16 oldValue = Joystick::axesValues[axis];
+   Joystick::axesValues[axis] = value;
+
+   // Axis has changed direction
+//   bool changedDirection = (value ^ oldValue) < 0;  // Uses signed bit for trickery
+
+   switch((SDL_GameControllerAxis)axis)
    {
-      F32 axisOld = Joystick::rawAxis[axis];
-      F32 axisNew = Joystick::rawAxis[axis] = (F32)value / (F32)S16_MAX;
-      if((axisOld > 0) != (axisNew > 0))
-      {
-         JoystickButton button = Joystick::remapSdlAxisToJoystickButton(axis); //JoystickButtonUnknown
-         if(button != JoystickButtonUnknown)
-         {
-            if(axisNew > 0)
-               inputCodeDown(game->getUIManager()->getCurrentUI(), InputCodeManager::joystickButtonToInputCode(button));
-            else
-               inputCodeUp(game->getUIManager()->getCurrentUI(), InputCodeManager::joystickButtonToInputCode(button));
+      // Left/Right movement axis
+      case SDL_CONTROLLER_AXIS_LEFTX:
+         updateJoyAxesDirections(game, MoveAxisLeftRightMask,  value);
+         break;
 
-         }
-      }
+      // Up/down movement axis
+      case SDL_CONTROLLER_AXIS_LEFTY:
+         updateJoyAxesDirections(game, MoveAxisUpDownMask,  value);
+         break;
+
+      // Left/Right shooting axis
+      case SDL_CONTROLLER_AXIS_RIGHTX:
+         updateJoyAxesDirections(game, ShootAxisLeftRightMask, value);
+         break;
+
+      // Up/down shooting axis
+      case SDL_CONTROLLER_AXIS_RIGHTY:
+         updateJoyAxesDirections(game, ShootAxisUpDownMask, value);
+         break;
+
+      // Left trigger
+      case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+         // TODO
+         break;
+
+      // Right trigger
+      case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+         // TODO
+         break;
    }
-
-   // Left/Right movement axis
-   if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].moveAxesSdlIndex[0])
-      updateJoyAxesDirections(game, MoveAxisLeftRightMask,  value);
-
-   // Up/down movement axis
-   if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].moveAxesSdlIndex[1])
-      updateJoyAxesDirections(game, MoveAxisUpDownMask,  value);
-
-   // Left/Right shooting axis
-   if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].shootAxesSdlIndex[0])
-      updateJoyAxesDirections(game, ShootAxisLeftRightMask, value);
-
-   // Up/down shooting axis
-   if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].shootAxesSdlIndex[1])
-      updateJoyAxesDirections(game, ShootAxisUpDownMask, value);
 }
 
 
-void Event::onJoyButtonDown(UserInterface *currentUI, U8 which, U8 button)
+void Event::onControllerButtonDown(UserInterface *currentUI, U8 deviceId, U8 button)
 {
 //   logprintf("SDL button down number: %u", button);
-   inputCodeDown(currentUI, InputCodeManager::joystickButtonToInputCode(Joystick::remapSdlButtonToJoystickButton(button)));
+   inputCodeDown(currentUI, InputCodeManager::sdlControllerButtonToInputCode(button));
    Joystick::ButtonMask |= BIT(button);
 }
 
 
-void Event::onJoyButtonUp(UserInterface *currentUI, U8 which, U8 button)
+void Event::onControllerButtonUp(UserInterface *currentUI, U8 deviceId, U8 button)
 {
 //   logprintf("SDL button up number: %u", button);
-   inputCodeUp(currentUI, InputCodeManager::joystickButtonToInputCode(Joystick::remapSdlButtonToJoystickButton(button)));
+   inputCodeUp(currentUI, InputCodeManager::sdlControllerButtonToInputCode(button));
    Joystick::ButtonMask = Joystick::ButtonMask & ~BIT(button);
 }
 
 
-// See SDL_Joystick.h for the SDL_HAT_* mask definitions
-void Event::onJoyHat(UserInterface *currentUI, U8 which, U8 hat, U8 directionMask)
+void Event::onControllerAdded(S32 deviceId)
 {
-//   logprintf("SDL Hat number: %u, value: %u", hat, directionMask);
+//   const char *joystickName = SDL_GameControllerNameForIndex(deviceId);
 
-   InputCode inputCode;
-   U32 inputCodeDownDeltaMask = directionMask & ~Joystick::HatInputCodeMask;
-   U32 inputCodeUpDeltaMask = ~directionMask & Joystick::HatInputCodeMask;
-
-   for(S32 i = 0; i < MaxHatDirections; i++)
-   {
-      inputCode = InputCodeManager::joyHatToInputCode(BIT(i));  // BIT(i) corresponds to a defined SDL_HAT_*  value
-
-      // If the current hat direction is set in the inputCodeDownDeltaMask, set the input code down
-      if(inputCodeDownDeltaMask & BIT(i))
-         inputCodeDown(currentUI, inputCode);
-
-      // If the current hat direction is set in the inputCodeUpDeltaMask, set the input code up
-      if(inputCodeUpDeltaMask & BIT(i))
-         inputCodeUp(currentUI, inputCode);
-   }
-
-   // Finally alter the global hat InputCode mask to reflect the current input code State
-   Joystick::HatInputCodeMask = directionMask;
+//   logprintf("Found %s", joystickName);
 }
 
 
-void Event::onJoyBall(U8 which, U8 ball, S16 xrel, S16 yrel)
+void Event::onControllerRemoved(S32 deviceId)
 {
-   // TODO:  Do we need joyball?
-//   logprintf("SDL Ball number: %u, relative x: %d, relative y: %d", ball, xrel, yrel);
-}
+//   const char *joystickName = SDL_GameControllerNameForIndex(deviceId);
 
-
-Vector<S32> deviceIds;
-
-void Event::onStickAdded(S32 stickIndex)
-{
-   //S32 deviceId = SDL_SYS_GetInstanceIdOfDeviceIndex(stickIndex);
-   //const char *joystickName = SDL_JoystickNameForIndex(deviceId);
-
-   //JoystickInfo
-   //logprintf("Found %s", joystickName);
-}
-
-
-void Event::onStickRemoved(S32 deviceId)
-{
- /*  joystickNames[deviceId];
-   logprintf("removing %s", joystickName);*/
+//   logprintf("Removing %s", joystickName);
 }
 
 

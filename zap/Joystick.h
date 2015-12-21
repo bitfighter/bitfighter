@@ -17,6 +17,8 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 
+#include "SDL_gamecontroller.h"
+
 #include <string>
 
 using namespace TNL;
@@ -29,16 +31,8 @@ typedef struct _SDL_GameController SDL_GameController;
 
 namespace Zap {
 
-
+// Forward declarations
 class GameSettings;
-
-enum JoystickHatDirections {
-   HatUp,
-   HatRight,
-   HatDown,
-   HatLeft,
-   MaxHatDirections
-};
 
 
 class Joystick {
@@ -96,12 +90,10 @@ public:
    Joystick();
    virtual ~Joystick();
 
-   static const S32 rawAxisCount = 32;   // Maximum raw axis to detect
-   static const U32 MaxSdlButtons = 32;  // Maximum raw buttons to detect
    static const U8 FakeRawButton = 254;  // A button that can't possibly be real (must fit within U8)
 
    static U32 ButtonMask;    // Holds what buttons are current pressed down - can support up to 32
-   static F32 rawAxis[rawAxisCount];
+   static S16 axesValues[SDL_CONTROLLER_AXIS_MAX];  // Current state of all controller axes
 
    // static data
    static S16 LowerSensitivityThreshold;
@@ -110,7 +102,6 @@ public:
    static Vector<JoystickInfo> JoystickPresetList;
    static U32 SelectedPresetIndex;
    static U32 AxesInputCodeMask;
-   static U32 HatInputCodeMask;
 
    static bool initJoystick(GameSettings *settings);
    static bool enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore);
@@ -132,9 +123,6 @@ public:
    static JoystickInfo *getJoystickInfo(const string &joystickIndex);
 
    static bool isButtonDefined(S32 presetIndex, S32 buttonIndex);
-
-   static JoystickButton remapSdlButtonToJoystickButton(U8 button);
-   static JoystickButton remapSdlAxisToJoystickButton(U8 button);
 };
 
 } /* namespace Zap */

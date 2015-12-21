@@ -426,7 +426,7 @@ void UserInterface::renderDiagnosticKeysOverlay()
       hpos = horizMargin;
       mGL->glColor(Colors::magenta);
 
-      for(U32 i = 0; i < Joystick::MaxSdlButtons; i++)
+      for(U32 i = 0; i < CHAR_BIT * sizeof(Joystick::ButtonMask); i++)
          if(Joystick::ButtonMask & (1 << i))
          {
             RenderUtils::drawStringf( hpos, vpos, 18, "RawBut [%d]", i );

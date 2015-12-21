@@ -1328,64 +1328,47 @@ SDL_Keycode InputCodeManager::inputCodeToSDLKey(InputCode inputCode)
 }
 
 
-InputCode InputCodeManager::joystickButtonToInputCode(JoystickButton button)
+InputCode InputCodeManager::sdlControllerButtonToInputCode(U8 button)
 {
-   switch(button)
+   switch((SDL_GameControllerButton)button)
    {
-      case JoystickButton1:
+      case SDL_CONTROLLER_BUTTON_A:
          return BUTTON_1;
-      case JoystickButton2:
+      case SDL_CONTROLLER_BUTTON_B:
          return BUTTON_2;
-      case JoystickButton3:
+      case SDL_CONTROLLER_BUTTON_X:
          return BUTTON_3;
-      case JoystickButton4:
+      case SDL_CONTROLLER_BUTTON_Y:
          return BUTTON_4;
-      case JoystickButton5:
+      case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
          return BUTTON_5;
-      case JoystickButton6:
+      case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
          return BUTTON_6;
-      case JoystickButton7:
-         return BUTTON_7;
-      case JoystickButton8:
-         return BUTTON_8;
-      case JoystickButtonStart:
+      case SDL_CONTROLLER_BUTTON_START:
          return BUTTON_START;
-      case JoystickButtonBack:
+      case SDL_CONTROLLER_BUTTON_BACK:
          return BUTTON_BACK;
-      case JoystickButtonDPadUp:
+      case SDL_CONTROLLER_BUTTON_DPAD_UP:
          return BUTTON_DPAD_UP;
-      case JoystickButtonDPadDown:
+      case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
          return BUTTON_DPAD_DOWN;
-      case JoystickButtonDPadLeft:
+      case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
          return BUTTON_DPAD_LEFT;
-      case JoystickButtonDPadRight:
+      case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
          return BUTTON_DPAD_RIGHT;
-      case JoystickButton9:
+      case SDL_CONTROLLER_BUTTON_LEFTSTICK:
          return BUTTON_9;
-      case JoystickButton10:
+      case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
          return BUTTON_10;
-      case JoystickButton11:
+      case SDL_CONTROLLER_BUTTON_GUIDE:
          return BUTTON_11;
-      case JoystickButton12:
-         return BUTTON_12;
-      default:
-         return BUTTON_UNKNOWN;
-   }
-}
 
+      // These 2 are analog triggers?
+//      case JoystickButton7:
+//         return BUTTON_7;
+//      case JoystickButton8:
+//         return BUTTON_8;
 
-InputCode InputCodeManager::joyHatToInputCode(int hatDirectionMask)
-{
-   switch(hatDirectionMask)
-   {
-      case 1:
-         return BUTTON_DPAD_UP;
-      case 2:
-         return BUTTON_DPAD_RIGHT;
-      case 4:
-         return BUTTON_DPAD_DOWN;
-      case 8:
-         return BUTTON_DPAD_LEFT;
       default:
          return BUTTON_UNKNOWN;
    }

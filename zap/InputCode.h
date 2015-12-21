@@ -249,8 +249,7 @@ public:
    InputCode filterInputCode(InputCode inputCode);    // Calls filters below
 
 #ifndef ZAP_DEDICATED
-   static InputCode joyHatToInputCode(int hatDirectionMask);
-   static InputCode joystickButtonToInputCode(JoystickButton button);
+   static InputCode sdlControllerButtonToInputCode(U8 button);
 #endif
 
    static InputCode convertJoystickToKeyboard(InputCode inputCode);
