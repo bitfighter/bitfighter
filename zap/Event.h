@@ -26,7 +26,6 @@ private:
    static bool mAllowTextInput;   // Flag to allow text translation pass-through
 
    static void setMousePos(UserInterface *currentUI, S32 x, S32 y, DisplayMode mode);
-   static void updateJoyAxesDirections(ClientGame *game, U32 axisMask, S16 value);
 
    static void inputCodeUp(UserInterface *currentUI, InputCode inputCode);
    static bool inputCodeDown(UserInterface *currentUI, InputCode inputCode);

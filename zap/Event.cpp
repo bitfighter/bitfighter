@@ -56,106 +56,6 @@ void Event::setMousePos(UserInterface *currentUI, S32 x, S32 y, DisplayMode repo
 }
 
 
-// Needs to be Aligned with JoystickAxesDirections... X-Macro?
-static JoystickStaticDataStruct JoystickInputData[JoystickAxesDirectionCount] = {
-   // Movement axes
-   { JoystickMoveAxesLeft,   MoveAxesLeftMask,   STICK_1_LEFT  },
-   { JoystickMoveAxesRight,  MoveAxesRightMask,  STICK_1_RIGHT },
-   { JoystickMoveAxesUp,     MoveAxesUpMask,     STICK_1_UP    },
-   { JoystickMoveAxesDown,   MoveAxesDownMask,   STICK_1_DOWN  },
-   // Shooting axes
-   { JoystickShootAxesLeft,  ShootAxesLeftMask,  STICK_2_LEFT  },
-   { JoystickShootAxesRight, ShootAxesRightMask, STICK_2_RIGHT },
-   { JoystickShootAxesUp,    ShootAxesUpMask,    STICK_2_UP    },
-   { JoystickShootAxesDown,  ShootAxesDownMask,  STICK_2_DOWN  },
-   // Triggers?
-};
-
-
-// Argument of axisMask is one of the 4 axes:
-//    MoveAxisLeftRightMask, MoveAxisUpDownMask, ShootAxisLeftRightMask, ShootAxisUpDownMask
-void Event::updateJoyAxesDirections(ClientGame *game, U32 axisMask, S16 value)
-{
-   // Get our current joystick-axis-direction and its opposite on the same axis
-   U32 detectedAxesDirectionMask = 0;
-   U32 oppositeDetectedAxesDirectionMask = 0;
-   if (value < 0)
-   {
-      detectedAxesDirectionMask         = axisMask & NegativeAxesMask;
-      oppositeDetectedAxesDirectionMask = axisMask & PositiveAxesMask;
-   }
-   else
-   {
-      detectedAxesDirectionMask         = axisMask & PositiveAxesMask;
-      oppositeDetectedAxesDirectionMask = axisMask & NegativeAxesMask;
-   }
-
-   // Get the specific axes direction index (and opposite) from the mask we've detected
-   // from enum JoystickAxesDirections
-   U32 axesDirectionIndex = 0;
-   U32 oppositeAxesDirectionIndex = 0;
-   for (S32 i = 0; i < JoystickAxesDirectionCount; i++)
-   {
-      if(JoystickInputData[i].axesMask & detectedAxesDirectionMask)
-         axesDirectionIndex = i;
-      if(JoystickInputData[i].axesMask & oppositeDetectedAxesDirectionMask)
-         oppositeAxesDirectionIndex = i;
-   }
-
-   // Update our global joystick input data, use a sensitivity threshold to take care of calibration issues
-   // Also, normalize the input value to a floating point scale of 0 to 1
-   F32 normalValue;
-   S32 absValue = abs(value);
-   if(axisMask & (ShootAxisUpDownMask | ShootAxisLeftRightMask))  // shooting have its own deadzone system (see ClientGame.cpp, joystickUpdateMove)
-      normalValue = F32(absValue) / 32767.f;
-   else if(absValue < Joystick::LowerSensitivityThreshold)
-      normalValue = 0.0f;
-   else if(absValue > Joystick::UpperSensitivityThreshold)
-      normalValue = 1.0f;
-   else
-      normalValue = (F32)(absValue - Joystick::LowerSensitivityThreshold) / 
-                    (F32)(Joystick::UpperSensitivityThreshold - Joystick::LowerSensitivityThreshold);
-
-   game->mJoystickInputs[axesDirectionIndex] = normalValue;
-
-   // Set the opposite axis back to zero
-   game->mJoystickInputs[oppositeAxesDirectionIndex] = 0.0f;
-
-
-   // Determine what to set the InputCode state, it is binary so set the threshold has half -> 0.5
-   // Set the mask if it is above the digital threshold
-   U32 currentInputCodeMask = 0;
-
-   for (S32 i = 0; i < JoystickAxesDirectionCount; i++)
-      if (fabs(game->mJoystickInputs[i]) > 0.5)
-         currentInputCodeMask |= (1 << i);
-
-
-   // Only change InputCode state if the axis has changed.  Time to be tricky..
-   U32 inputCodeDownDeltaMask = currentInputCodeMask & ~Joystick::AxesInputCodeMask;
-   U32 inputCodeUpDeltaMask = ~currentInputCodeMask & Joystick::AxesInputCodeMask;
-
-   UserInterface *currentUI = game->getUIManager()->getCurrentUI();
-
-   for(S32 i = 0; i < JoystickAxesDirectionCount; i++)
-   {
-      // If the current axes direction is set in the inputCodeDownDeltaMask, set the input code down
-      if(JoystickInputData[i].axesMask & inputCodeDownDeltaMask)
-      {
-         inputCodeDown(currentUI, JoystickInputData[i].inputCode);
-         continue;
-      }
-
-      // If the current axes direction is set in the inputCodeUpDeltaMask, set the input code up
-      if(JoystickInputData[i].axesMask & inputCodeUpDeltaMask)
-         inputCodeUp(currentUI, JoystickInputData[i].inputCode);
-   }
-
-   // Finally alter the global axes InputCode mask to reflect the current inputCodeState
-   Joystick::AxesInputCodeMask = currentInputCodeMask;
-}
-
-
 void Event::inputCodeUp(UserInterface *currentUI, InputCode inputCode)
 {
    InputCodeManager::setState(inputCode, false);
@@ -390,49 +290,110 @@ void Event::onMouseButtonUp(UserInterface *currentUI, S32 x, S32 y, InputCode in
 }
 
 
+struct ControllerAxisInputCode {
+   U8 axis;
+   // InputCode for each of the positive or negative directions
+   InputCode negative;
+   InputCode positive;
+};
+
+
+static ControllerAxisInputCode JoystickInputData[SDL_CONTROLLER_AXIS_MAX] = {
+   // Movement axes
+   { SDL_CONTROLLER_AXIS_LEFTX,        STICK_1_LEFT,  STICK_1_RIGHT },
+   { SDL_CONTROLLER_AXIS_LEFTY,        STICK_1_UP,    STICK_1_DOWN  },
+   // Shooting axes
+   { SDL_CONTROLLER_AXIS_RIGHTX,       STICK_2_LEFT,  STICK_2_RIGHT },
+   { SDL_CONTROLLER_AXIS_RIGHTY,       STICK_2_UP,    STICK_2_DOWN  },
+   // Triggers - shouldn't be negative
+   { SDL_CONTROLLER_AXIS_TRIGGERLEFT,  BUTTON_7,      BUTTON_7      },
+   { SDL_CONTROLLER_AXIS_TRIGGERRIGHT, BUTTON_8,      BUTTON_8      },
+};
+
+
 void Event::onControllerAxis(ClientGame *game, U8 deviceId, U8 axis, S16 value)
 {
-//   logprintf("SDL Axis number: %u, value: %d", axis, value);
-   if(axis == SDL_CONTROLLER_AXIS_INVALID)
-      return;
+   // Set our persistent array for raw values (used by diagnostics)
+   Joystick::rawAxesValues[axis] = value;
 
-   S16 oldValue = Joystick::axesValues[axis];
-   Joystick::axesValues[axis] = value;
+   // Update our global joystick input data, use a sensitivity threshold to take
+   // care of calibration issues.  Also, normalize the input value to a floating
+   // point scale of -1.0 to 1.0
+   F32 currentNormalizedValue;
+   S32 magnitude = abs(value);
 
-   // Axis has changed direction
-//   bool changedDirection = (value ^ oldValue) < 0;  // Uses signed bit for trickery
+   // Lower than threshold, zero it out
+   if(magnitude < Joystick::LowerSensitivityThreshold)
+      currentNormalizedValue = 0.0f;
 
-   switch((SDL_GameControllerAxis)axis)
+   // Higher than threshold.  Set full throttle!
+   else if(magnitude > Joystick::UpperSensitivityThreshold)
    {
-      // Left/Right movement axis
-      case SDL_CONTROLLER_AXIS_LEFTX:
-         updateJoyAxesDirections(game, MoveAxisLeftRightMask,  value);
-         break;
+      if(value < 0)
+         currentNormalizedValue = -1.0;
+      else
+         currentNormalizedValue = 1.0;
+   }
 
-      // Up/down movement axis
-      case SDL_CONTROLLER_AXIS_LEFTY:
-         updateJoyAxesDirections(game, MoveAxisUpDownMask,  value);
-         break;
+   // Otherwise we're in the goldilocks zone
+   else
+   {
+      currentNormalizedValue = (F32)(magnitude - Joystick::LowerSensitivityThreshold) /
+            (F32)(Joystick::UpperSensitivityThreshold - Joystick::LowerSensitivityThreshold);
 
-      // Left/Right shooting axis
-      case SDL_CONTROLLER_AXIS_RIGHTX:
-         updateJoyAxesDirections(game, ShootAxisLeftRightMask, value);
-         break;
+      if(value < 0)
+         currentNormalizedValue = -currentNormalizedValue;
+   }
 
-      // Up/down shooting axis
-      case SDL_CONTROLLER_AXIS_RIGHTY:
-         updateJoyAxesDirections(game, ShootAxisUpDownMask, value);
-         break;
+   // Save the old and set the current normalized value into the game for move
+   // processing
+   F32 oldNormalizedValue = game->normalizedAxesValues[axis];
+   game->normalizedAxesValues[axis] = currentNormalizedValue;
 
-      // Left trigger
-      case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
-         // TODO
-         break;
+   // Determine what to set the InputCode state, it is binary so set the
+   // threshold at half -> 0.5
+   // Set the mask if it is above the digital threshold
+   static const F32 InputCodeThreshold = 0.5;
 
-      // Right trigger
-      case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
-         // TODO
-         break;
+   UserInterface *currentUI = game->getUIManager()->getCurrentUI();
+
+   // This is ugly - I attempted a large karnaugh map with tri-state data to
+   // simplify it and my head exploded.  This is the result
+
+   // Old value was zero (below the threshold)
+   if(oldNormalizedValue > -InputCodeThreshold && oldNormalizedValue < InputCodeThreshold)
+   {
+      // Current value is negative
+      if(currentNormalizedValue < -InputCodeThreshold)
+         inputCodeDown(currentUI, JoystickInputData[axis].negative);
+
+      // Current value is positive
+      else if(currentNormalizedValue > InputCodeThreshold)
+         inputCodeDown(currentUI, JoystickInputData[axis].positive);
+   }
+
+   // Old value was negative
+   else if(oldNormalizedValue < -InputCodeThreshold)
+   {
+      // Current value is zero or positive
+      if(currentNormalizedValue >= -InputCodeThreshold)
+         inputCodeUp(currentUI, JoystickInputData[axis].negative);
+
+      // Current value is positive
+      if(currentNormalizedValue > InputCodeThreshold)
+         inputCodeDown(currentUI, JoystickInputData[axis].positive);
+   }
+
+   // Old value was positive
+   else if(oldNormalizedValue > InputCodeThreshold)
+   {
+      // Current value is zero or negative
+      if(currentNormalizedValue <= InputCodeThreshold)
+         inputCodeUp(currentUI, JoystickInputData[axis].positive);
+
+      // Current value is negative
+      if(currentNormalizedValue < -InputCodeThreshold)
+         inputCodeDown(currentUI, JoystickInputData[axis].negative);
    }
 }
 

@@ -1733,42 +1733,17 @@ bool GameUserInterface::isInScoreboardMode()
 
 static void joystickUpdateMove(ClientGame *game, GameSettings *settings, Move *theMove)
 {
-   // One of each of left/right axis and up/down axis should be 0 by this point
-   // but let's guarantee it..   why?
-   theMove->x = game->mJoystickInputs[JoystickMoveAxesRight] - 
-                game->mJoystickInputs[JoystickMoveAxesLeft];
-   theMove->x = MAX(theMove->x, -1);
-   theMove->x = MIN(theMove->x, 1);
-   theMove->y =  game->mJoystickInputs[JoystickMoveAxesDown] - 
-                 game->mJoystickInputs[JoystickMoveAxesUp];
-   theMove->y = MAX(theMove->y, -1);
-   theMove->y = MIN(theMove->y, 1);
+   // Set the move coordinates to the joystick normalized values
+   theMove->x = game->normalizedAxesValues[SDL_CONTROLLER_AXIS_LEFTX];
+   theMove->y =  game->normalizedAxesValues[SDL_CONTROLLER_AXIS_LEFTY];
 
-   //logprintf(
-   //      "Joystick axis values. Move: Left: %f, Right: %f, Up: %f, Down: %f\nShoot: Left: %f, Right: %f, Up: %f, Down: %f ",
-   //      mJoystickInputs[MoveAxesLeft],  mJoystickInputs[MoveAxesRight],
-   //      mJoystickInputs[MoveAxesUp],    mJoystickInputs[MoveAxesDown],
-   //      mJoystickInputs[ShootAxesLeft], mJoystickInputs[ShootAxesRight],
-   //      mJoystickInputs[ShootAxesUp],   mJoystickInputs[ShootAxesDown]
-   //      );
-
-   //logprintf(
-   //         "Move values. Move: Left: %f, Right: %f, Up: %f, Down: %f",
-   //         theMove->left, theMove->right,
-   //         theMove->up, theMove->down
-   //         );
-
-
-   //logprintf("XY from shoot axes. x: %f, y: %f", x, y);
-
-
-   Point p(game->mJoystickInputs[JoystickShootAxesRight] - 
-           game->mJoystickInputs[JoystickShootAxesLeft], 
-                             game->mJoystickInputs[JoystickShootAxesDown]  - 
-                             game->mJoystickInputs[JoystickShootAxesUp]);
+   // Same with the shooting coordinates
+   Point p(game->normalizedAxesValues[SDL_CONTROLLER_AXIS_RIGHTX],
+         game->normalizedAxesValues[SDL_CONTROLLER_AXIS_RIGHTY]);
 
    F32 fact =  p.len();
 
+   // TODO pull out these constants and put them into the INI?
    if(fact > 0.66f)        // It requires a large movement to actually fire...
    {
       theMove->angle = atan2(p.y, p.x);
