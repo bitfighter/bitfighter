@@ -567,10 +567,8 @@ JoystickButton InputCodeManager::inputCodeToJoystickButton(InputCode inputCode)
          return JoystickButton9;
       case BUTTON_10:
          return JoystickButton10;
-      case BUTTON_11:
+      case BUTTON_GUIDE:
          return JoystickButton11;
-      case BUTTON_12:
-         return JoystickButton12;
       case BUTTON_START:
          return JoystickButtonStart;
       case BUTTON_BACK:
@@ -1361,7 +1359,7 @@ InputCode InputCodeManager::sdlControllerButtonToInputCode(U8 button)
       case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
          return BUTTON_10;
       case SDL_CONTROLLER_BUTTON_GUIDE:
-         return BUTTON_11;
+         return BUTTON_GUIDE;
 
       // These 2 are analog triggers?
 //      case JoystickButton7:
@@ -1684,8 +1682,7 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(BUTTON_8)]            = "Button 8";         
    keyNames[S32(BUTTON_9)]            = "Button 9";         
    keyNames[S32(BUTTON_10)]           = "Button 10";        
-   keyNames[S32(BUTTON_11)]           = "Button 11";        
-   keyNames[S32(BUTTON_12)]           = "Button 12";        
+   keyNames[S32(BUTTON_GUIDE)]        = "Guide";
    keyNames[S32(BUTTON_BACK)]         = "Back";             
    keyNames[S32(BUTTON_START)]        = "Start";            
    keyNames[S32(BUTTON_DPAD_UP)]      = "DPad Up";          
