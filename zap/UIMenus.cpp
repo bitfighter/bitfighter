@@ -1298,16 +1298,22 @@ static void addControllerOptions(Vector<string> *opts)
    for(it = GameSettings::DetectedControllerList.begin();
          it != GameSettings::DetectedControllerList.end(); it++)
    {
-      opts->push_back("Controller " + itos(it->first + 1) + ": " + it->second);
+      // Not too long of a string or we'll overflow the menu option
+      string name = it->second;
+      if(name.size() >= 20)
+         name = name.substr(0, 17) + "...";
+
+      opts->push_back("Controller " + itos(it->first + 1) + ": " + name);
    }
 }
 
 
 static S32 INPUT_MODE_MENU_ITEM_INDEX = 0;
 
-// Must be static; keeps track of the number of sticks the user had last time the setInputModeCallback was run.
-// That lets the function know if it needs to rebuild the menu because of new stick values available.
-static S32 sticks = -1;    
+// Must be static; keeps track of the number of sticks the user had last time
+// the setInputModeCallback was run. That lets the function know if it needs
+// to rebuild the menu because of new stick values available.
+static S32 controllers = -1;
 
 static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
 {
@@ -1317,7 +1323,7 @@ static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
    Joystick::initJoystick(settings);
 
    // If there is a different number of sticks than previously detected
-   if(sticks != GameSettings::DetectedControllerList.size())
+   if(controllers != GameSettings::DetectedControllerList.size())
    {
       ToggleMenuItem *menuItem = dynamic_cast<ToggleMenuItem *>(game->getUIManager()->getUI<InputOptionsMenuUserInterface>()->
                                                                 getMenuItem(INPUT_MODE_MENU_ITEM_INDEX));
@@ -1334,11 +1340,11 @@ static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
       }
 
       // Special case handler for common situation
-      if(sticks == 0 && GameSettings::DetectedControllerList.size() == 1)      // User just plugged a stick in
+      if(controllers == 0 && GameSettings::DetectedControllerList.size() == 1)      // User just plugged a stick in
          menuItem->setValueIndex(1);
 
       // Save the current number of sticks
-      sticks = GameSettings::DetectedControllerList.size();
+      controllers = GameSettings::DetectedControllerList.size();
    }
 
    if(inputModeIndex == 0)
