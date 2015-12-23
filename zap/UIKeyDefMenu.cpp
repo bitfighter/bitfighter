@@ -259,7 +259,7 @@ void KeyDefMenuUserInterface::render()
          const Color *color = dupe ? &Colors::red : NULL;
 
          JoystickRender::renderControllerButton(F32(xPos), F32(y + offset), 
-                               Joystick::SelectedPresetIndex, getInputCode(getGame()->getSettings(), menuItems[i].primaryControl), color);
+               getInputCode(getGame()->getSettings(), menuItems[i].primaryControl), color);
       }
    }
 

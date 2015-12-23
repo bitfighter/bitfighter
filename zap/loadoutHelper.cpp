@@ -28,7 +28,7 @@ static const OverlayMenuItem loadoutModuleMenuItems[] = {
    { KEY_4, BUTTON_4, true, ModuleSensor,   "Enhanced Sensor",       UNSEL_COLOR, "",               NULL,       NULL },
    { KEY_5, BUTTON_5, true, ModuleCloak,    "Cloak Field Modulator", UNSEL_COLOR, "",               NULL,       NULL },
    { KEY_6, BUTTON_6, true, ModuleArmor,    "Armor",                 UNSEL_COLOR, "(adds mass)",    HELP_COLOR, NULL },
-   { KEY_7, BUTTON_7, true, ModuleEngineer, "Engineer",              UNSEL_COLOR, "",               NULL,       NULL },
+   { KEY_7, BUTTON_TRIGGER_LEFT, true, ModuleEngineer, "Engineer",              UNSEL_COLOR, "",               NULL,       NULL },
 };
 
 static const S32 moduleEngineerIndex = 6;

@@ -26,17 +26,37 @@ namespace Zap {
 SDL_GameController *Joystick::sdlController = NULL;
 
 // public
-Vector<Joystick::JoystickInfo> Joystick::JoystickPresetList;
-
 U32 Joystick::ButtonMask = 0;
 S16 Joystick::rawAxesValues[SDL_CONTROLLER_AXIS_MAX]; // Array of the current axes values
 S16 Joystick::LowerSensitivityThreshold = 4900;   // out of 32767, ~15%, any less than this is ends up as zero
 S16 Joystick::UpperSensitivityThreshold = 30000;  // out of 32767, ~91%, any more than this is full amount
 
-U32 Joystick::SelectedPresetIndex = 0;    // TODO: This should be non-static on ClientGame, I think
+// private
+// Aligned with SDL_GameControllerButton.  For now this is just an XBox controller
+Joystick::ButtonInfo Joystick::controllerButtonInfos[ControllerButtonMax] =
+{
+      // These first values must be aligned with SDL_GameControllerButton enum
+      // and the ControllerButton enum
+      { "A",   Colors::white, ButtonShapeRound, ButtonSymbolNone },
+      { "B",   Colors::white, ButtonShapeRound, ButtonSymbolNone },
+      { "X",   Colors::white, ButtonShapeRound, ButtonSymbolNone },
+      { "Y",   Colors::white, ButtonShapeRound, ButtonSymbolNone },
+      { "Ba",  Colors::white, ButtonShapeRoundedRect, ButtonSymbolNone },
+      { "G",   Colors::white, ButtonShapeHorizEllipse, ButtonSymbolNone },
+      { "St",  Colors::white, ButtonShapeRoundedRect, ButtonSymbolNone },
+      { "9",   Colors::white, ButtonShapeRound, ButtonSymbolNone },
+      { "10",  Colors::white, ButtonShapeRound, ButtonSymbolNone },
+      { "L",   Colors::white, ButtonShapeRect, ButtonSymbolNone },
+      { "R",   Colors::white, ButtonShapeRect, ButtonSymbolNone },
+      { "",    Colors::white, ButtonShapeDPadUp, ButtonSymbolNone },
+      { "",    Colors::white, ButtonShapeDPadDown, ButtonSymbolNone },
+      { "",    Colors::white, ButtonShapeDPadLeft, ButtonSymbolNone },
+      { "",    Colors::white, ButtonShapeDPadRight, ButtonSymbolNone },
+      // Additional hybrid buttons (start at index SDL_CONTROLLER_BUTTON_MAX)
+      { "LT",  Colors::white, ButtonShapeRect, ButtonSymbolNone },
+      { "RT",  Colors::white, ButtonShapeRect, ButtonSymbolNone },
+};
 
-
-CIniFile joystickPresetsINI("dummy");
 
 // Constructor
 Joystick::Joystick()
@@ -74,7 +94,7 @@ bool Joystick::initJoystick(GameSettings *settings)
          joindir(settings->getFolderManager()->iniDir, "gamecontrollerdb.txt").c_str()
          );
 
-   // TODO Add user-specific gamecontroller database?
+   // TODO Add and load user-specific gamecontroller database
 
    // How many joysticks are there
    S32 joystickCount = SDL_NumJoysticks();
@@ -134,39 +154,25 @@ bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
    // Don't enable controller at all in keyboard mode
    if(settings->getInputMode() == InputModeKeyboard &&
         (hasBeenOpenedBefore || settings->getIniSettings()->alwaysStartInKeyboardMode)) // Don't enable joystick at all in keyboard mode
-       return true;
+      return true;
 
    // Enable controller events
    SDL_GameControllerEventState(SDL_ENABLE);
 
    // Start using the controller
    sdlController = SDL_GameControllerOpen(GameSettings::UseControllerIndex);
+   string controllerName = SDL_GameControllerNameForIndex(GameSettings::UseControllerIndex);
    if(sdlController == NULL)
    {
-      logprintf("Error opening controller %d [%s]", GameSettings::UseControllerIndex, SDL_GameControllerNameForIndex(GameSettings::UseControllerIndex));
+      logprintf("Error opening controller %d \"%s\"", GameSettings::UseControllerIndex, controllerName.c_str());
 
       return false;
    }
 
-   logprintf("Using controller %d [%s]", GameSettings::UseControllerIndex, SDL_GameControllerNameForIndex(GameSettings::UseControllerIndex));
+   logprintf("Using controller %d \"%s\"", GameSettings::UseControllerIndex, controllerName.c_str());
 
-   // Now try and autodetect the joystick and update the game settings
-   string joystickType = Joystick::autodetectJoystick(settings);
-
-   // Set joystick type if we found anything
-   // Otherwise, it makes more sense to remember what the user had last specified
-   if(!hasBeenOpenedBefore && joystickType != NoJoystick)
-   {
-	  settings->getIniSettings()->mSettings.setVal("JoystickType", joystickType);
-      setSelectedPresetIndex(Joystick::getJoystickIndex(joystickType));
-   }
-
-   // Set primary input to joystick if any controllers were found, even a generic one
-   if(hasBeenOpenedBefore)
-      return true;  // Do nothing when this was opened before
-   else if(joystickType == NoJoystick)
-      settings->getInputCodeManager()->setInputMode(InputModeKeyboard);
-   else
+   // Set primary input to joystick if any controllers were found
+   if(!hasBeenOpenedBefore)
       settings->getInputCodeManager()->setInputMode(InputModeJoystick);
 
    return true;
@@ -185,132 +191,16 @@ void Joystick::shutdownJoystick()
 }
 
 
-// Returns -1 if there is no match, otherwise returns the index of the match
-S32 Joystick::checkJoystickString_exact_match(const string &controllerName)
+// This handles both the
+Joystick::ButtonInfo Joystick::getButtonInfo(S16 button)
 {
-   for(S32 i = 0; i < JoystickPresetList.size(); i++)
-      if(!JoystickPresetList[i].isSearchStringSubstring)  // Use exact string
-         if(controllerName == JoystickPresetList[i].searchString)
-            return i;
+   static const ButtonInfo DefaultButtonInfo =
+   { "", Colors::white, ButtonShapeRound, ButtonSymbolNone };
 
-   return -1;     // No match
-}
+   if(button >= ControllerButtonMax)
+      return DefaultButtonInfo;
 
-
-// Returns -1 if there is no match, otherwise returns the index of the match
-S32 Joystick::checkJoystickString_partial_match(const string &controllerName)
-{
-   for(S32 i = 0; i < JoystickPresetList.size(); i++)
-      if(JoystickPresetList[i].isSearchStringSubstring)   // Use substring
-         if(lcase(controllerName).find(lcase(JoystickPresetList[i].searchString)) != string::npos)
-            return i;
-               // end cascading fury of death <== metacomment: not useful, but entertaining.  Wait... fury of death or furry death?
-
-   return -1;     // No match
-}
-
-
-// Returns a valid name of one of our joystick profiles
-string Joystick::autodetectJoystick(GameSettings *settings)
-{
-   if(GameSettings::DetectedControllerList.size() == 0)  // No controllers detected
-      return NoJoystick;
-
-   string controllerName = GameSettings::DetectedControllerList[GameSettings::UseControllerIndex];
-
-   S32 match;
-   // First check against predefined joysticks that have exact search strings
-   // We do this first so that a substring match doesn't override one of these (like with XBox controller)
-   match = checkJoystickString_exact_match(controllerName);
-   if(match >= 0)    
-      return JoystickPresetList[match].identifier;
-
-   // Then check against joysticks that use substrings to match
-   match = checkJoystickString_partial_match(controllerName);
-   if(match >= 0)    
-      return JoystickPresetList[match].identifier;
-   
-   // If we've made it here, let's try the value stored in the INI
-   string lastStickUsed = settings->getIniSettings()->mSettings.getVal<string>("JoystickType");
-
-   // Let's validate that, shall we?
-   for(S32 i = 0; i < JoystickPresetList.size(); i++)
-      if(JoystickPresetList[i].identifier == lastStickUsed)
-         return JoystickPresetList[i].identifier;
-
-   // It's beyond hope!  Return something that will *ALWAYS* be wrong.
-   return "GenericJoystick";
-}
-
-
-void Joystick::getAllJoystickPrettyNames(Vector<string> &nameList)
-{
-   for(S32 i = 0; i < JoystickPresetList.size(); i++)
-      nameList.push_back(JoystickPresetList[i].name);
-}
-
-
-JoystickButton Joystick::stringToJoystickButton(const string &buttonString)
-{
-   if(buttonString == "Button1")
-      return JoystickButton1;
-   else if(buttonString == "Button2")
-      return JoystickButton2;
-   else if(buttonString == "Button3")
-      return JoystickButton3;
-   else if(buttonString == "Button4")
-      return JoystickButton4;
-   else if(buttonString == "Button5")
-      return JoystickButton5;
-   else if(buttonString == "Button6")
-      return JoystickButton6;
-   else if(buttonString == "Button7")
-      return JoystickButton7;
-   else if(buttonString == "Button8")
-      return JoystickButton8;
-   else if(buttonString == "Button9")
-      return JoystickButton9;
-   else if(buttonString == "Button10")
-      return JoystickButton10;
-   else if(buttonString == "Button11")
-      return JoystickButton11;
-   else if(buttonString == "Button12")
-      return JoystickButton12;
-   else if(buttonString == "ButtonStart")
-      return JoystickButtonStart;
-   else if(buttonString == "ButtonBack")
-      return JoystickButtonBack;
-   else if(buttonString == "ButtonDPadUp")
-      return JoystickButtonDPadUp;
-   else if(buttonString == "ButtonDPadDown")
-      return JoystickButtonDPadDown;
-   else if(buttonString == "ButtonDPadLeft")
-      return JoystickButtonDPadLeft;
-   else if(buttonString == "ButtonDPadRight")
-      return JoystickButtonDPadRight;
-
-   return JoystickButtonUnknown;
-}
-
-
-Joystick::ButtonShape Joystick::buttonLabelToButtonShape(const string &label)
-{
-   if(label == "Round")
-      return ButtonShapeRound;
-   else if(label == "Rect")
-      return ButtonShapeRect;
-   else if(label == "SmallRect")
-      return ButtonShapeSmallRect;
-   else if(label == "RoundedRect")
-      return ButtonShapeRoundedRect;
-   else if(label == "SmallRoundedRect")
-      return ButtonShapeSmallRoundedRect;
-   else if(label == "HorizEllipse")
-      return ButtonShapeHorizEllipse;
-   else if(label == "RightTriangle")
-      return ButtonShapeRightTriangle;
-
-   return ButtonShapeRound;  // Default
+   return controllerButtonInfos[button];
 }
 
 
@@ -330,209 +220,6 @@ Joystick::ButtonSymbol Joystick::stringToButtonSymbol(const string &label)
       return ButtonSymbolSmallRightTriangle;
 
    return ButtonSymbolNone;
-}
-
-
-Color Joystick::stringToColor(const string &colorString)
-{
-   string lower = lcase(colorString);
-   if(lower == "white")
-      return Colors::white;
-   else if(lower == "green")
-      return Colors::green;
-   else if(lower == "blue")
-      return Colors::blue;
-   else if(lower == "yellow")
-      return Colors::yellow;
-   else if(lower == "cyan")
-      return Colors::cyan;
-   else if(lower == "magenta")
-      return Colors::magenta;
-   else if(lower == "black")
-      return Colors::black;
-   else if(lower == "red")
-      return Colors::red;
-   else if(lower == "paleRed")
-      return Colors::paleRed;
-   else if(lower == "paleBlue")
-      return Colors::paleBlue;
-   else if(lower == "palePurple")
-      return Colors::palePurple;
-   else if(lower == "paleGreen")
-      return Colors::paleGreen;
-
-   return Colors::white;  // default
-}
-
-
-void Joystick::setSelectedPresetIndex(U32 joystickIndex)
-{
-   SelectedPresetIndex = joystickIndex;
-}
-
-
-Joystick::JoystickInfo *Joystick::getJoystickInfo(const string &joystickType)
-{
-   for(S32 i = 0; i < JoystickPresetList.size(); i++)
-      if(joystickType == JoystickPresetList[i].identifier)
-         return &JoystickPresetList[i];
-
-   TNLAssert(false, "We should never get here!");
-   return NULL;
-}
-
-
-bool Joystick::isButtonDefined(S32 presetIndex, S32 buttonIndex) 
-{
-   TNLAssert(buttonIndex >= 0 && buttonIndex < JoystickButtonCount, "Button index out of range!");
-
-   return Joystick::JoystickPresetList[presetIndex].buttonMappings[buttonIndex].sdlButton != Joystick::FakeRawButton
-      || Joystick::JoystickPresetList[presetIndex].buttonMappings[buttonIndex].rawAxis != Joystick::FakeRawButton;
-}
-
-
-Joystick::JoystickInfo Joystick::getGenericJoystickInfo()
-{
-   JoystickInfo joystickInfo;
-
-   joystickInfo.identifier = "GenericJoystick";
-   joystickInfo.name = "Generic Joystick";
-   joystickInfo.searchString = "";
-   joystickInfo.isSearchStringSubstring = false;
-   joystickInfo.moveAxesSdlIndex[0] = 0;
-   joystickInfo.moveAxesSdlIndex[1] = 1;
-   joystickInfo.shootAxesSdlIndex[0] = 2;
-   joystickInfo.shootAxesSdlIndex[1] = 3;
-
-   // Make the button graphics all the same
-   for(S32 i = 0; i < JoystickButtonCount; i++)
-   {
-      joystickInfo.buttonMappings[i].button = (JoystickButton)i;  // 'i' should be in line with JoystickButton
-      joystickInfo.buttonMappings[i].label = "";
-      joystickInfo.buttonMappings[i].color = Colors::white;
-      joystickInfo.buttonMappings[i].buttonShape = ButtonShapeRound;
-      joystickInfo.buttonMappings[i].buttonSymbol = ButtonSymbolNone;
-   }
-
-   // Add some labels
-   for(S32 i = 0; i < 8; i++)
-   {
-      joystickInfo.buttonMappings[i].label = itos(i + 1);
-      joystickInfo.buttonMappings[i].sdlButton = i;
-   }
-
-   joystickInfo.buttonMappings[JoystickButtonBack].label = "9";
-   joystickInfo.buttonMappings[JoystickButtonBack].sdlButton = 9;
-
-   joystickInfo.buttonMappings[JoystickButtonStart].label = "10";
-   joystickInfo.buttonMappings[JoystickButtonStart].sdlButton = 10;
-   
-   return joystickInfo;
-}
-
-
-U32 Joystick::getJoystickIndex(const string &joystickType)
-{
-   for(S32 i = 0; i < JoystickPresetList.size(); i++)
-      if(joystickType == JoystickPresetList[i].identifier)
-         return (U32)i;
-
-   TNLAssert(false, "We should never get here!");
-   return JoystickPresetList.size() - 1;              // Return the generic joystick
-}
-
-
-void Joystick::loadJoystickPresets(GameSettings *settings)
-{
-   // Load up the joystick presets INI
-   joystickPresetsINI.SetPath(joindir(settings->getFolderManager()->iniDir, "joystick_presets.ini"));
-   joystickPresetsINI.ReadFile();
-
-   // Loop through each section (each section is a joystick) and parse
-   for (S32 sectionId = 0; sectionId < joystickPresetsINI.GetNumSections(); sectionId++)
-   {
-      JoystickInfo joystickInfo;
-
-      // Names names names
-      joystickInfo.identifier              = joystickPresetsINI.sectionName(sectionId).c_str();
-      joystickInfo.name                    = joystickPresetsINI.GetValue   (sectionId, "Name").c_str();
-      joystickInfo.searchString            = joystickPresetsINI.GetValue   (sectionId, "SearchString").c_str();
-      joystickInfo.isSearchStringSubstring = joystickPresetsINI.GetValueYN (sectionId, "SearchStringIsSubstring", false);
-
-      TNLAssert(
-            (lcase(joystickPresetsINI.GetValue(sectionId, "SearchStringIsSubstring")) == "yes") ==
-            joystickPresetsINI.GetValueYN(sectionId, "SearchStringIsSubstring", false),
-            "Should be equal... can delete this assert after a mid June 2013 or so...");
-
-
-      // Axis of evil
-      joystickInfo.moveAxesSdlIndex[0]  = atoi(joystickPresetsINI.GetValue(sectionId, "MoveAxisLeftRight").c_str());
-      joystickInfo.moveAxesSdlIndex[1]  = atoi(joystickPresetsINI.GetValue(sectionId, "MoveAxisUpDown").c_str());
-      joystickInfo.shootAxesSdlIndex[0] = atoi(joystickPresetsINI.GetValue(sectionId, "ShootAxisLeftRight").c_str());
-      joystickInfo.shootAxesSdlIndex[1] = atoi(joystickPresetsINI.GetValue(sectionId, "ShootAxisUpDown").c_str());
-
-      Vector<string> sectionKeys;
-      joystickPresetsINI.GetAllKeys(sectionId, sectionKeys);
-
-      // Start the search for Button-related keys
-      // Button4=Raw:3;Label:4;Color:White;Shape:Round
-      Vector<string> buttonKeyNames;
-      string buttonName;
-      for(S32 i = 0; i < sectionKeys.size(); i++)
-      {
-         buttonName = sectionKeys[i];
-         if(buttonName.substr(0, 6) == "Button")   // Found a button!
-            buttonKeyNames.push_back(buttonName);
-      }
-
-      // Now load up button values
-      for(S32 i = 0; i < buttonKeyNames.size(); i++)
-      {
-         // Parse the complex string into key/value pairs
-         map<string, string> buttonInfoMap;
-         parseComplexStringToMap(joystickPresetsINI.GetValue(sectionId, buttonKeyNames[i]), buttonInfoMap);
-
-         ButtonInfo buttonInfo;
-
-         buttonInfo.button = stringToJoystickButton(buttonKeyNames[i]); // Converts "Button3" to JoystickButton3
-
-         // Our button was not detected properly (misspelling?)
-         if(buttonInfo.button == JoystickButtonUnknown)
-         {
-            string message = "Joystick preset button not found: " + buttonKeyNames[i];
-            settings->addConfigurationError(message);
-            logprintf(LogConsumer::ConfigurationError, message.c_str());
-
-            continue;      // On to the next button
-         }
-
-         buttonInfo.label = buttonInfoMap["Label"];
-         buttonInfo.color = stringToColor(buttonInfoMap["Color"]);
-         buttonInfo.buttonShape = buttonLabelToButtonShape(buttonInfoMap["Shape"]);
-         buttonInfo.buttonSymbol = stringToButtonSymbol(buttonInfoMap["Label"]);
-         buttonInfo.sdlButton = buttonInfoMap["Raw"] == "" ? FakeRawButton : U8(atoi(buttonInfoMap["Raw"].c_str()));
-         buttonInfo.rawAxis = buttonInfoMap["Axis"] == "" ? FakeRawButton : U8(atoi(buttonInfoMap["Axis"].c_str()));
-
-         // Set the button info with index of the JoystickButton
-         joystickInfo.buttonMappings[buttonInfo.button] = buttonInfo;
-      }
-
-      JoystickPresetList.push_back(joystickInfo);
-   }
-
-   // Now add a generic joystick for a fall back
-   JoystickPresetList.push_back(getGenericJoystickInfo());
-}
-
-
-Joystick::ButtonInfo::ButtonInfo() {
-   button = JoystickButtonUnknown;
-   sdlButton = FakeRawButton;
-   rawAxis = FakeRawButton;
-   label = "";
-   color = Colors::white;
-   buttonShape = ButtonShapeRound;
-   buttonSymbol = ButtonSymbolNone;
 }
 
 

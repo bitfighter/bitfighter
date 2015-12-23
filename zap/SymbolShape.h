@@ -187,6 +187,26 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class SymbolDPadArrow : public SymbolShape
+{
+   typedef SymbolShape Parent;
+
+private:
+   Joystick::ButtonShape mButtonShape;
+
+public:
+   using Parent::render;
+
+   SymbolDPadArrow(Joystick::ButtonShape buttonShape, const Color *color); // Constructor
+   virtual ~SymbolDPadArrow();
+
+   void render(const Point &center) const;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class SymbolCircle : public SymbolShape
 {
    typedef SymbolShape Parent;

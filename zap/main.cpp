@@ -1186,7 +1186,6 @@ int main(int argc, char **argv)
 
       InputCodeManager::resetStates();    // Reset keyboard state mapping to show no keys depressed
 
-      Joystick::loadJoystickPresets(settings.get());     // Load joystick presets from INI first
       SDL_Init(0);                                       // Allows Joystick and VideoSystem to work.
       Joystick::initJoystick(settings.get());            // Initialize joystick system
       Joystick::enableJoystick(settings.get(), false);   

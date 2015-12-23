@@ -8,9 +8,9 @@
 
 #include "InputModeEnum.h"
 #include "InputCodeEnum.h"
-#include "JoystickButtonEnum.h"
 
 #include "tnlVector.h"
+
 #include <string>
 
 // Until we move completely to SDL2
@@ -43,7 +43,7 @@ namespace Zap
    BINDING( BINDING_QUICKCHAT,          "QuickChat",           true,  inputQUICKCHAT,    KEY_V,            BUTTON_3         ) \
    BINDING( BINDING_CMDCHAT,            "Command",             true,  inputCMDCHAT,      KEY_SLASH,        KEY_SLASH        ) \
    BINDING( BINDING_LOADOUT,            "ShowLoadoutMenu",     true,  inputLOADOUT,      KEY_Z,            BUTTON_4         ) \
-   BINDING( BINDING_MOD1,               "ActivateModule1",     true,  inputMOD1,         KEY_SPACE,        BUTTON_7         ) \
+   BINDING( BINDING_MOD1,               "ActivateModule1",     true,  inputMOD1,         KEY_SPACE,        BUTTON_TRIGGER_LEFT         ) \
    BINDING( BINDING_MOD2,               "ActivateModule2",     true,  inputMOD2,         MOUSE_RIGHT,      BUTTON_6         ) \
    BINDING( BINDING_FIRE,               "Fire",                true,  inputFIRE,         MOUSE_LEFT,       MOUSE_LEFT       ) \
    BINDING( BINDING_DROPITEM,           "DropItem",            true,  inputDROPITEM,     KEY_B,            KEY_B            ) \
@@ -295,7 +295,7 @@ public:
    static InputCode getBaseKey(InputCode inputCode);
    static string getBaseKeyString(InputCode inputCode);
 
-   static JoystickButton inputCodeToJoystickButton(InputCode inputCode);
+   static S16 inputCodeToControllerButton(InputCode inputCode);
 
    InputCode getBinding(BindingNameEnum bindingName) const; 
    InputCode getBinding(BindingNameEnum bindingName, InputMode inputMode) const;

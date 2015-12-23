@@ -401,6 +401,13 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const Color *color)
       case Joystick::ButtonShapeRightTriangle:
          return SymbolShapePtr(new SymbolRightTriangle(rightTriangleWidth, color));
 
+      // DPad
+      case Joystick::ButtonShapeDPadUp:
+      case Joystick::ButtonShapeDPadDown:
+      case Joystick::ButtonShapeDPadLeft:
+      case Joystick::ButtonShapeDPadRight:
+         return SymbolShapePtr(new SymbolDPadArrow(shape, color));
+
       default:
          //TNLAssert(false, "Unknown button shape!");
          return getSymbol(KEY_UNKNOWN, &Colors::red);
@@ -452,14 +459,14 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
    }
    else if(InputCodeManager::isControllerButton(inputCode))
    {
-      // This gives us the logical button that inputCode represents... something like JoystickButton3
-      JoystickButton button = InputCodeManager::inputCodeToJoystickButton(inputCode);
+      // This gives us the logical SDL button that inputCode represents...
+      SDL_GameControllerButton button = (SDL_GameControllerButton) InputCodeManager::inputCodeToControllerButton(inputCode);
+
+      if(button == SDL_CONTROLLER_BUTTON_INVALID)
+         return getSymbol(KEY_UNKNOWN, color);
 
       // Now we need to figure out which symbol to use for this button, depending on controller make/model
-      Joystick::ButtonInfo buttonInfo = Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].buttonMappings[button];
-
-      if(!Joystick::isButtonDefined(Joystick::SelectedPresetIndex, button))
-         return getSymbol(KEY_UNKNOWN, color);
+      Joystick::ButtonInfo buttonInfo = Joystick::getButtonInfo(button);
 
       // This gets us the button shape index, which will tell us what to draw... something like ButtonShapeRound
       Joystick::ButtonShape buttonShape = buttonInfo.buttonShape;
@@ -1025,11 +1032,6 @@ void SymbolHorizEllipse::render(const Point &center) const
 
    Point cen = center - Point(0, h - 1);
 
-   // First the fill
-   drawFilledEllipse(cen, w, h, 0);
-
-   // Outline in white
-   glColor(Colors::white);
    drawEllipse(cen, w, h, 0);
 }
 
@@ -1075,6 +1077,57 @@ void SymbolRightTriangle::render(const Point &center) const
 
    Point cen(center.x -mWidth / 4, center.y);  // Need to off-center the label slightly for this button
    drawButtonRightTriangle(cen);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+// Constructor
+SymbolDPadArrow::SymbolDPadArrow(Joystick::ButtonShape buttonShape, const Color *color) : Parent(18, 18, color)
+{
+   mButtonShape = buttonShape;
+}
+
+
+// Destructor
+SymbolDPadArrow::~SymbolDPadArrow()
+{
+   // Do nothing
+}
+
+
+void SymbolDPadArrow::render(const Point &center) const
+{
+   if(mHasColor)
+      glColor(mColor);
+
+   // Off set to match text rendering methods
+   Point pos = center + Point(0, -6);
+
+   // DPad
+   switch(mButtonShape)
+   {
+      case Joystick::ButtonShapeDPadUp:
+         JoystickRender::drawDPadUp(pos);
+         break;
+
+      case Joystick::ButtonShapeDPadDown:
+         JoystickRender::drawDPadDown(pos);
+         break;
+
+      case Joystick::ButtonShapeDPadLeft:
+         JoystickRender::drawDPadLeft(pos);
+         break;
+
+      case Joystick::ButtonShapeDPadRight:
+         JoystickRender::drawDPadRight(pos);
+         break;
+
+      default:  // Should never get here
+         break;
+   }
 }
 
 
@@ -1168,6 +1221,7 @@ void SymbolButtonSymbol::render(const Point &pos) const
       case Joystick::ButtonSymbolSmallRightTriangle:
          JoystickRender::drawSmallRightTriangle(renderPos + Point(0, -1));
          break;
+
       case Joystick::ButtonSymbolNone:
       default:
          TNLAssert(false, "Shouldn't be here!");

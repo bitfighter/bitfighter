@@ -29,6 +29,7 @@ private:
    static const S32 horizEllipseButtonRadiusY = 8;
    static const S32 rightTriangleWidth = 28;
    static const S32 rightTriangleHeight = 18;
+   static const S32 dpadArrowRadius = 9;
 
    static const S32 labelSize = 12;
 
@@ -38,10 +39,15 @@ public:
    virtual ~JoystickRender();
 
 
-   static bool renderControllerButton(F32 centerX, F32 centerY, U32 joystickIndex, InputCode inputCode, const Color *overrideRenderColor = NULL);
+   static bool renderControllerButton(F32 centerX, F32 centerY, InputCode inputCode, const Color *overrideRenderColor = NULL);
    static S32 getControllerButtonRenderedSize(InputCode inputCode);
 
-   static void renderDPad(Point center, F32 radius, bool upActivated, bool downActivated, bool leftActivated,
+   static void drawDPadUp(Point center);
+   static void drawDPadDown(Point center);
+   static void drawDPadLeft(Point center);
+   static void drawDPadRight(Point center);
+
+   static void renderDPad(Point center, bool upActivated, bool downActivated, bool leftActivated,
          bool rightActivated, const char *msg1, const char *msg2);
 
    static void drawPlaystationCross(const Point &center);

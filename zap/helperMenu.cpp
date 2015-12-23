@@ -291,9 +291,8 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
 
       // Need to add buttonWidth / 2 because renderControllerButton() centers on passed coords
       JoystickRender::renderControllerButton(LeftMargin + horizOffset + (F32)buttonWidth / 2, 
-                                             (F32)yPos - 1, Joystick::SelectedPresetIndex, code, 
-                                             buttonOverrideColor); 
-      glColor(itemColor);  
+                                             (F32)yPos - 1, code, buttonOverrideColor);
+      glColor(itemColor);
 
       S32 xPos = LeftMargin + buttonWidth + ButtonLabelGap + horizOffset;
       S32 textWidth = drawStringAndGetWidth(xPos, yPos, MENU_FONT_SIZE, items[i].name); 
