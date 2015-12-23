@@ -99,11 +99,12 @@ enum InputCode {
    MOUSE_WHEEL_UP, MOUSE_WHEEL_DOWN,         // Mouse wheel spinning
 
    // Keep these together -- InputCodeManager::isControllerButton() depends on order and togetherness
-   BUTTON_1, BUTTON_2, BUTTON_3,             // Controller buttons
-   BUTTON_4, BUTTON_5, BUTTON_6,
-   BUTTON_7, BUTTON_8,                       // Triggers 1 and 2, if they exist
-   BUTTON_9, BUTTON_10, BUTTON_11, BUTTON_12,// Extra buttons that only a few game controller have
-   BUTTON_BACK, BUTTON_START,                // Sometimes 9 & 10
+   BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4,   // Main controller buttons
+   BUTTON_5, BUTTON_6,                       // Usually shoulder buttons
+   BUTTON_BACK, BUTTON_START,                // Usually buttons 7 and 8
+   BUTTON_GUIDE,                             // Special buttons
+   BUTTON_9, BUTTON_10,                      // Stick buttons (when you press the stick in)
+   BUTTON_TRIGGER_LEFT, BUTTON_TRIGGER_RIGHT,// Analog triggers, if they exist
 
    BUTTON_DPAD_UP,   BUTTON_DPAD_DOWN,
    BUTTON_DPAD_LEFT, BUTTON_DPAD_RIGHT,
@@ -135,7 +136,7 @@ static const U32 FIRST_PRINTABLE_KEY = (U32)KEY_0;    // Note that KEY_SPACE is 
 static const U32 LAST_PRINTABLE_KEY = (U32)KEY_SLASH;
 
 static const U32 FIRST_CONTROLLER_BUTTON = (U32)BUTTON_1;
-static const U32 LAST_CONTROLLER_BUTTON  = (U32)BUTTON_START;               
+static const U32 LAST_CONTROLLER_BUTTON  = (U32)BUTTON_DPAD_RIGHT;
 
 static const U32 FIRST_CTRL_KEY = (U32)KEY_CTRL_M;
 static const U32 LAST_CTRL_KEY  = (U32)KEY_CTRL_3;

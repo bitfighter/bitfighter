@@ -28,8 +28,6 @@
 #define MAX_KEYNAME    128
 #define MAX_VALUENAME  128
 
-#define NoJoystick "NoJoystick"
-
 
 using namespace std;
 using namespace TNL;

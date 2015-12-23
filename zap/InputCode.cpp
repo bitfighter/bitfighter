@@ -12,6 +12,7 @@
 
 #ifndef ZAP_DEDICATED
 #  include "SDL.h"
+#  include "Joystick.h"
 #endif
 
 
@@ -543,46 +544,51 @@ InputCode InputCodeManager::convertJoystickToKeyboard(InputCode inputCode)
 }
 
 
-JoystickButton InputCodeManager::inputCodeToJoystickButton(InputCode inputCode)
+// This must return a signed value since it can return
+//    SDL_CONTROLLER_BUTTON_INVALID = -1
+S16 InputCodeManager::inputCodeToControllerButton(InputCode inputCode)
 {
    switch(inputCode)
    {
       case BUTTON_1:
-         return JoystickButton1;
+         return SDL_CONTROLLER_BUTTON_A;
       case BUTTON_2:
-         return JoystickButton2;
+         return SDL_CONTROLLER_BUTTON_B;
       case BUTTON_3:
-         return JoystickButton3;
+         return SDL_CONTROLLER_BUTTON_X;
       case BUTTON_4:
-         return JoystickButton4;
+         return SDL_CONTROLLER_BUTTON_Y;
       case BUTTON_5:
-         return JoystickButton5;
+         return SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
       case BUTTON_6:
-         return JoystickButton6;
-      case BUTTON_7:
-         return JoystickButton7;
-      case BUTTON_8:
-         return JoystickButton8;
-      case BUTTON_9:
-         return JoystickButton9;
-      case BUTTON_10:
-         return JoystickButton10;
-      case BUTTON_GUIDE:
-         return JoystickButton11;
+         return SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
       case BUTTON_START:
-         return JoystickButtonStart;
+         return SDL_CONTROLLER_BUTTON_START;
       case BUTTON_BACK:
-         return JoystickButtonBack;
+         return SDL_CONTROLLER_BUTTON_BACK;
+      case BUTTON_GUIDE:
+         return SDL_CONTROLLER_BUTTON_GUIDE;
+      case BUTTON_9:
+         return SDL_CONTROLLER_BUTTON_LEFTSTICK;
+      case BUTTON_10:
+         return SDL_CONTROLLER_BUTTON_RIGHTSTICK;
       case BUTTON_DPAD_UP:
-         return JoystickButtonDPadUp;
+         return SDL_CONTROLLER_BUTTON_DPAD_UP;
       case BUTTON_DPAD_DOWN:
-         return JoystickButtonDPadDown;
+         return SDL_CONTROLLER_BUTTON_DPAD_DOWN;
       case BUTTON_DPAD_LEFT:
-         return JoystickButtonDPadLeft;
+         return SDL_CONTROLLER_BUTTON_DPAD_LEFT;
       case BUTTON_DPAD_RIGHT:
-         return JoystickButtonDPadRight;
+         return SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
+
+      // Some buttons are 'hybrid' and come from other sources (like SDL axes)
+      case BUTTON_TRIGGER_LEFT:
+         return Joystick::ControllerButtonTriggerLeft;
+      case BUTTON_TRIGGER_RIGHT:
+         return Joystick::ControllerButtonTriggerRight;
+
       default:
-         return JoystickButtonUnknown;
+         return SDL_CONTROLLER_BUTTON_INVALID;
    }
 }
 
@@ -1346,6 +1352,8 @@ InputCode InputCodeManager::sdlControllerButtonToInputCode(U8 button)
          return BUTTON_START;
       case SDL_CONTROLLER_BUTTON_BACK:
          return BUTTON_BACK;
+      case SDL_CONTROLLER_BUTTON_GUIDE:
+         return BUTTON_GUIDE;
       case SDL_CONTROLLER_BUTTON_DPAD_UP:
          return BUTTON_DPAD_UP;
       case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
@@ -1358,14 +1366,6 @@ InputCode InputCodeManager::sdlControllerButtonToInputCode(U8 button)
          return BUTTON_9;
       case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
          return BUTTON_10;
-      case SDL_CONTROLLER_BUTTON_GUIDE:
-         return BUTTON_GUIDE;
-
-      // These 2 are analog triggers?
-//      case JoystickButton7:
-//         return BUTTON_7;
-//      case JoystickButton8:
-//         return BUTTON_8;
 
       default:
          return BUTTON_UNKNOWN;
@@ -1678,8 +1678,8 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(BUTTON_4)]            = "Button 4";         
    keyNames[S32(BUTTON_5)]            = "Button 5";         
    keyNames[S32(BUTTON_6)]            = "Button 6";         
-   keyNames[S32(BUTTON_7)]            = "Button 7";         
-   keyNames[S32(BUTTON_8)]            = "Button 8";         
+   keyNames[S32(BUTTON_TRIGGER_LEFT)] = "L Trigger";
+   keyNames[S32(BUTTON_TRIGGER_RIGHT)]= "R Trigger";
    keyNames[S32(BUTTON_9)]            = "Button 9";         
    keyNames[S32(BUTTON_10)]           = "Button 10";        
    keyNames[S32(BUTTON_GUIDE)]        = "Guide";

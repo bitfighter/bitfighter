@@ -205,7 +205,7 @@ public:
    Vector<string> getLevelList(const string &levelFolder);   // Grab a list of levels from the specified level folder; ignore anything in the INI
 
 public:
-   static S32 UseControllerIndex;
+   static S32 UseControllerIndex;  // Which SDL2 controller index are we using
 
    Vector<string> *getMasterServerList();
    void saveMasterAddressListInIniUnlessItCameFromCmdLine();

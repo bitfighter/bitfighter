@@ -1284,28 +1284,6 @@ void InputOptionsMenuUserInterface::onActivate()
 void InputOptionsMenuUserInterface::render() const
 {
    Parent::render();
-
-   // In debug builds, show the current suite of joystick buttons at the bottom of the screen
-#  ifdef TNL_DEBUG
-      Vector<SymbolShapePtr> symbols;
-
-      // Cycle through all possibe controller buttons
-      S32 buttonCount = LAST_CONTROLLER_BUTTON - FIRST_CONTROLLER_BUTTON + 1;
-      for(S32 i = 0; i < buttonCount; i++)
-      {
-         if(!Joystick::isButtonDefined(Joystick::SelectedPresetIndex, i))
-            continue;
-
-         symbols.push_back(SymbolString::getControlSymbol(InputCode(i + FIRST_CONTROLLER_BUTTON)));
-         if(i < buttonCount - 1)
-            symbols.push_back(SymbolString::getBlankSymbol(8));      // Provide a little breathing room
-      }
-
-      SymbolString(symbols).render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 440));
-
-      RenderUtils::drawCenteredString(456, 12, "[Debug builds only]");
-
-#  endif
 }
 
 //////////
@@ -1322,21 +1300,17 @@ static void defineKeysCallback(ClientGame *game, U32 unused)
 }
 
 
-static void setControllerCallback(ClientGame *game, U32 joystickIndex)
-{
-   game->getSettings()->setSetting(IniKey::JoystickType, 
-                                                           Joystick::JoystickPresetList[joystickIndex].identifier);
-   Joystick::setSelectedPresetIndex(joystickIndex);
-}
-
-
-static void addStickOptions(Vector<string> *opts)
+static void addControllerOptions(Vector<string> *opts)
 {
    opts->clear();
-   opts->push_back("KEYBOARD");
+   opts->push_back("Keyboard");
    
-   for(S32 i = 0; i < GameSettings::DetectedControllerList.size(); i++)
-      opts->push_back(string("JOYSTICK ") + itos(i + 1));
+   map<S32,string>::iterator it;
+   for(it = GameSettings::DetectedControllerList.begin();
+         it != GameSettings::DetectedControllerList.end(); it++)
+   {
+      opts->push_back("Controller " + itos(it->first + 1) + ": " + it->second);
+   }
 }
 
 
@@ -1361,7 +1335,7 @@ static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
 
       // Rebuild this menu with the new number of sticks
       if(menuItem)
-         addStickOptions(&menuItem->mOptions);
+         addControllerOptions(&menuItem->mOptions);
 
       // Loop back to the first index if we hit the end of the list
       if(inputModeIndex > (U32)GameSettings::DetectedControllerList.size())
@@ -1402,8 +1376,9 @@ void InputOptionsMenuUserInterface::setupMenus()
    Joystick::initJoystick(mGameSettings);            // Refresh joystick list
    Joystick::enableJoystick(mGameSettings, true);    // Refresh joystick list
 
-   addStickOptions(&opts);
+   addControllerOptions(&opts);
 
+   // Weird.  must re-engineer
    U32 inputMode = (U32)mGameSettings->getInputMode();   // 0 = keyboard, 1 = joystick
    if(inputMode == InputModeJoystick)
       inputMode += GameSettings::UseControllerIndex;
@@ -1418,16 +1393,7 @@ void InputOptionsMenuUserInterface::setupMenus()
 
    INPUT_MODE_MENU_ITEM_INDEX = getMenuItemCount() - 1;
 
-   opts.clear();
-   // Add the joystick names to opts
-   Joystick::getAllJoystickPrettyNames(opts);
-
-   U32 selectedOption = Joystick::SelectedPresetIndex;
-
-   addMenuItem(new ToggleMenuItem("JOYSTICK:", opts, selectedOption, true, 
-                                  setControllerCallback, "Choose which joystick to use in joystick mode", KEY_J));
-
-   addMenuItem(new MenuItem(getMenuItemCount(), "DEFINE KEYS / BUTTONS", defineKeysCallback, 
+   addMenuItem(new MenuItem(getMenuItemCount(), "DEFINE KEYS / BUTTONS", defineKeysCallback,
                             "Remap keyboard or joystick controls", KEY_D, KEY_K));
 
    opts.clear();

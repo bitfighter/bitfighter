@@ -10,7 +10,6 @@
 #ifndef JOYSTICK_H_
 #define JOYSTICK_H_
 
-#include "JoystickButtonEnum.h"
 #include "InputCodeEnum.h"
 
 #include "Color.h"
@@ -48,6 +47,10 @@ public:
       ButtonShapeSmallRoundedRect,
       ButtonShapeHorizEllipse,
       ButtonShapeRightTriangle,
+      ButtonShapeDPadUp,
+      ButtonShapeDPadDown,
+      ButtonShapeDPadLeft,
+      ButtonShapeDPadRight,
    };
 
 
@@ -62,35 +65,27 @@ public:
    };
 
 
-   struct ButtonInfo {
-      ButtonInfo();
+   // Added buttons we want to use in addition to SDL's
+   enum ControllerButton {
+      ControllerButtonTriggerLeft = SDL_CONTROLLER_BUTTON_MAX,
+      ControllerButtonTriggerRight,
+      ControllerButtonMax
+   };
 
-      JoystickButton button;
-      U8 sdlButton;
-      U8 rawAxis;
+
+   struct ButtonInfo {
       string label;
       Color color;
       Joystick::ButtonShape buttonShape;
       Joystick::ButtonSymbol buttonSymbol;
    };
 
+private:
+   static ButtonInfo controllerButtonInfos[ControllerButtonMax];
 
-   // Struct to hold joystick information once it has been detected
-   struct JoystickInfo {
-      string identifier;             // Primary joystick identifier; used in bitfighter.ini; used as section name
-      string name;                   // Pretty name to show in-game
-      string searchString;           // Name that SDL detects when joystick is connected
-      bool isSearchStringSubstring;  // If the search string is a substring pattern to look for
-      U32 moveAxesSdlIndex[2];       // primary axes; 0 -> left/right, 1 -> up/down
-      U32 shootAxesSdlIndex[2];      // secondary axes; could be anything; first -> left/right, second -> up/down
-
-      ButtonInfo buttonMappings[JoystickButtonCount];
-   };
-
+public:
    Joystick();
    virtual ~Joystick();
-
-   static const U8 FakeRawButton = 254;  // A button that can't possibly be real (must fit within U8)
 
    static U32 ButtonMask;    // Holds what buttons are current pressed down - can support up to 32
 
@@ -100,30 +95,13 @@ public:
    // static data
    static S16 LowerSensitivityThreshold;
    static S16 UpperSensitivityThreshold;
-   static S32 UseJoystickNumber;
-   static Vector<JoystickInfo> JoystickPresetList;
-   static U32 SelectedPresetIndex;
 
    static bool initJoystick(GameSettings *settings);
    static bool enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore);
    static void shutdownJoystick();
 
-   static void loadJoystickPresets(GameSettings *settings);
-   static string autodetectJoystick(GameSettings *settings);
-   static S32 checkJoystickString_exact_match(const string &controllerName);     // Searches for an exact match for controllerName
-   static S32 checkJoystickString_partial_match(const string &controllerName);   // Searches for an exact match for controllerName
-   static JoystickInfo getGenericJoystickInfo();
-   static void setSelectedPresetIndex(U32 joystickIndex);
-
-   static void getAllJoystickPrettyNames(Vector<string> &nameList);
-   static JoystickButton stringToJoystickButton(const string &buttonString);
-   static ButtonShape buttonLabelToButtonShape(const string &label);
+   static ButtonInfo getButtonInfo(S16 button);
    static ButtonSymbol stringToButtonSymbol(const string &label);
-   static Color stringToColor(const string &colorString);
-   static U32 getJoystickIndex(const string &joystickIndex);
-   static JoystickInfo *getJoystickInfo(const string &joystickIndex);
-
-   static bool isButtonDefined(S32 presetIndex, S32 buttonIndex);
 };
 
 } /* namespace Zap */

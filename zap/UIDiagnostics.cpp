@@ -411,10 +411,7 @@ void DiagnosticUserInterface::render() const
          RenderUtils::drawCenteredString2Col(ypos, textsize, true, "No joysticks detected");
       else
       {
-         // Draw which profile we're using
-         RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, true, "Current Profile:", "%s", Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].name.c_str());
-
-         // Draw the raw SDL detection string
+         // Draw the SDL detected controller string
          RenderUtils::drawCenteredStringPair2Colf(ypos + textsize + gap, textsize, true, Colors::magenta, Colors::cyan, "Autodetect String:", "%s",
                (U32(index) >= U32(GameSettings::DetectedControllerList.size()) || 
                 GameSettings::DetectedControllerList[index] == "") ? 
@@ -502,8 +499,6 @@ void DiagnosticUserInterface::render() const
             if(Joystick::ButtonMask & BIT(i))
                hpos += RenderUtils::drawStringAndGetWidthf( hpos, ypos, textsize - 2, "(%d)", i ) + 5;
 
-         // TODO render raw D-pad (SDL Hat)
-
          ypos += textsize + gap + 10;
 
          mGL->glColor(Colors::green);
@@ -511,53 +506,51 @@ void DiagnosticUserInterface::render() const
 
          //////////
          // Draw joystick and button map
-         hpos = 100;
+         hpos = 60;
          ypos = DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - 110;
 
-         JoystickRender::renderDPad(Point(hpos, ypos), 25, 
+         JoystickRender::renderDPad(Point(hpos, ypos),
                InputCodeManager::getState(BUTTON_DPAD_UP),   InputCodeManager::getState(BUTTON_DPAD_DOWN),
                InputCodeManager::getState(BUTTON_DPAD_LEFT), InputCodeManager::getState(BUTTON_DPAD_RIGHT), 
                "DPad", "(Menu Nav)");
-         hpos += 75;
+         hpos += 65;
 
-         JoystickRender::renderDPad(Point(hpos, ypos), 25, 
+         JoystickRender::renderDPad(Point(hpos, ypos),
                InputCodeManager::getState(STICK_1_UP),   InputCodeManager::getState(STICK_1_DOWN),
                InputCodeManager::getState(STICK_1_LEFT), InputCodeManager::getState(STICK_1_RIGHT), 
                "L Stick", "(Move)");
-         hpos += 75;
+         hpos += 65;
 
-         JoystickRender::renderDPad(Point(hpos, ypos), 25, 
+         JoystickRender::renderDPad(Point(hpos, ypos),
                InputCodeManager::getState(STICK_2_UP),   InputCodeManager::getState(STICK_2_DOWN),
                InputCodeManager::getState(STICK_2_LEFT), InputCodeManager::getState(STICK_2_RIGHT), 
                "R Stick", "(Fire)");
          hpos += 55;
 
-         U32 joystickIndex = Joystick::SelectedPresetIndex;
-
-         Vector<UI::SymbolShapePtr> symbols;
-
-         S32 buttonCount = LAST_CONTROLLER_BUTTON - FIRST_CONTROLLER_BUTTON + 1;
-         for(S32 i = 0; i < buttonCount; i++)
-         {
-            if(!Joystick::isButtonDefined(Joystick::SelectedPresetIndex, i))
-               continue;
-
-            symbols.push_back(UI::SymbolString::getControlSymbol(InputCode(i + FIRST_CONTROLLER_BUTTON)));
-            if(i < buttonCount - 1)
-               symbols.push_back(UI::SymbolString::getBlankSymbol(8));      // Provide a little breathing room
-         }
-
-         UI::SymbolString(symbols).render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2 + 100, ypos + 50));
-
+         // Render controller buttons
          for(U32 i = FIRST_CONTROLLER_BUTTON; i <= LAST_CONTROLLER_BUTTON; i++)
          {
             InputCode code = InputCode(i);
             const Color *color = InputCodeManager::getState(code) ? &Colors::red : NULL;
 
             // renderControllerButton() returns false if nothing is rendered
-            if(JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, joystickIndex, code, color))
-               hpos += 40;
+            if(JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, code, color))
+               hpos += 33;
          }
+
+
+         // Render buttons as parsed as symbol strings (is this needed?)
+         Vector<UI::SymbolShapePtr> symbols;
+
+         S32 buttonCount = LAST_CONTROLLER_BUTTON - FIRST_CONTROLLER_BUTTON + 1;
+         for(S32 i = 0; i < buttonCount; i++)
+         {
+            symbols.push_back(UI::SymbolString::getControlSymbol(InputCode(i + FIRST_CONTROLLER_BUTTON)));
+            if(i < buttonCount - 1)
+               symbols.push_back(UI::SymbolString::getBlankSymbol(8));      // Provide a little breathing room
+         }
+
+         UI::SymbolString(symbols).render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2 + 60, ypos + 50));
       }
    }
    else if(mCurPage == 1)
