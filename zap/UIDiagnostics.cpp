@@ -390,11 +390,15 @@ void DiagnosticUserInterface::render()
          drawCenteredString2Col(ypos, textsize, true, "No joysticks detected");
       else
       {
-         // Draw the SDL detected controller string
-         drawCenteredStringPair2Colf(ypos + textsize + gap, textsize, true, Colors::magenta, Colors::cyan, "Autodetect String:", "%s",
-               (U32(index) >= U32(GameSettings::DetectedControllerList.size()) || 
-                GameSettings::DetectedControllerList[index] == "") ? 
-                          "<None>" : GameSettings::DetectedControllerList[index].c_str());
+         glColor(Colors::magenta);
+         drawCenteredString2Col(ypos + textsize + gap, textsize, true, "Autodetect String:");
+
+         const char *controllerName = "<None>";
+         if(GameSettings::UseControllerIndex >= 0)
+            controllerName = GameSettings::DetectedControllerList[index].c_str();
+
+         glColor(Colors::cyan);
+         drawCenteredString2Col(ypos + 2 * (textsize + gap), textsize, true, controllerName);
       }
 
       ypos += 6 * (textsize + gap);
@@ -447,15 +451,28 @@ void DiagnosticUserInterface::render()
       }
 
 
+      // Render input strings
       glColor(Colors::cyan);
-      hpos += drawStringAndGetWidth(hpos, ypos, textsize, " | ");
+      hpos = horizMargin;
+      ypos += textsize + gap;
+
+      glColor(Colors::yellow);
+      hpos += drawStringAndGetWidth(hpos, ypos, textsize, "Input string: ");
 
       glColor(Colors::yellow);
       hpos += drawStringAndGetWidth(hpos, ypos, textsize, "Input string: ");
 
       glColor(Colors::magenta);
 
-      string in = InputCodeManager::getCurrentInputString(KEY_NONE);
+      InputCode inputCode;
+      for(U32 i = 0; i < MAX_INPUT_CODES; i++)
+      {
+         inputCode = InputCode(i);
+         if(InputCodeManager::getState(inputCode))
+            break;
+      }
+
+      string in = InputCodeManager::getCurrentInputString(inputCode);
 
       if(in != "")
       {
@@ -468,23 +485,13 @@ void DiagnosticUserInterface::render()
 
       if(joystickDetected)
       {
-         glColor(Colors::magenta);
-         ypos += textsize + gap;
-         hpos = horizMargin;
-
-         hpos += drawStringAndGetWidthf(hpos, ypos, textsize - 2, "Raw Controller Input [%d]: ", GameSettings::UseControllerIndex);
-
-         for(U32 i = 0; i < 32; i++)  // there are 32 bit in U32
-            if(Joystick::ButtonMask & BIT(i))
-               hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "(%d)", i ) + 5;
-
          ypos += textsize + gap + 10;
 
          glColor(Colors::green);
          drawCenteredString(ypos, textsize, "Hint: If you're having joystick problems, check your controller's 'mode' button.");
 
          //////////
-         // Draw joystick and button map
+         // Draw DPad and controller axis
          hpos = 60;
          ypos = DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - 110;
 
@@ -518,8 +525,9 @@ void DiagnosticUserInterface::render()
          }
 
 
-         // Render buttons as parsed as symbol strings (is this needed?)
+         // Render buttons parsed as symbol strings (is this needed?)
          Vector<UI::SymbolShapePtr> symbols;
+         symbols.push_back(UI::SymbolShapePtr(new UI::SymbolString("SymbolStrings:   ", NULL, HelpContext, 16, false)));
 
          S32 buttonCount = LAST_CONTROLLER_BUTTON - FIRST_CONTROLLER_BUTTON + 1;
          for(S32 i = 0; i < buttonCount; i++)

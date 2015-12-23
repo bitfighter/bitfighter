@@ -76,6 +76,7 @@ Joystick::~Joystick()
 bool Joystick::initJoystick(GameSettings *settings)
 {
    GameSettings::DetectedControllerList.clear();
+   GameSettings::UseControllerIndex = -1;
 
    // Allows multiple joysticks with each using a copy of Bitfighter
    // FIXME: If this still works, then great!  If not, we may need to set it
