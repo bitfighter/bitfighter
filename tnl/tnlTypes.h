@@ -332,15 +332,6 @@ static const U32 S32_MAX_DIGITS = 11;                             ///< S16_MIN =
 #  define TNL_SUPPORTS_NASM
 
 #  if defined (__GNUC__)
-#    if __GNUC__ == 2
-#      define TNL_GCC_2
-#    elif __GNUC__ == 3
-#      define TNL_GCC_3
-#    elif __GNUC__ == 4
-#      define TNL_GCC_4
-#    else
-#      error "TNL: Unsupported version of GCC (see tnlMethodDispatch.cpp)"
-#    endif
 #    define TNL_SUPPORTS_GCC_INLINE_X86_ASM
 #  elif defined (__MWERKS__)
 #    define TNL_SUPPORTS_MWERKS_INLINE_X86_ASM
@@ -359,7 +350,6 @@ static const U32 S32_MAX_DIGITS = 11;                             ///< S16_MIN =
 #  define TNL_CPU_STRING "ARM"
 #  define TNL_CPU_ARM
 #  define TNL_LITTLE_ENDIAN
-#  define TNL_GCC_4
 #else
 #  error "TNL: Unsupported Target CPU"
 #endif
