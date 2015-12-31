@@ -143,7 +143,8 @@ bool Joystick::initJoystick(GameSettings *settings)
 bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
 {
    // Need to close the controller to avoid having 2 being active at the same time
-   if(sdlController != NULL) {
+   if(sdlController != NULL) 
+   {
       SDL_GameControllerClose(sdlController);
       sdlController = NULL;
    }
