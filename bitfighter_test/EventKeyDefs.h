@@ -17,11 +17,11 @@ SDL_Keycode keyDown = InputCodeManager::inputCodeToSDLKey(                      
                                                                                                           \
 SDL_Event EventDownPressed;                                                                               \
 EventDownPressed.type = SDL_KEYDOWN;                                                                      \
-EventDownPressed.key.keysym.sym = (SDLKey) keyDown;                                                       \
+EventDownPressed.key.keysym.sym = (SDL_Keycode) keyDown;                                                  \
                                                                                                           \
 SDL_Event EventDownReleased;                                                                              \
 EventDownReleased.type = SDL_KEYUP;                                                                       \
-EventDownReleased.key.keysym.sym = (SDLKey) keyDown;                                                      \
+EventDownReleased.key.keysym.sym = (SDL_Keycode) keyDown;                                                 \
                                                                                                           \
 InputCode KEY_MOD1 = clientSettings->getInputCodeManager()->getBinding(BINDING_MOD1, InputModeKeyboard);  \
 InputCode LOADOUT_KEY_BOOST  = LoadoutHelper::getInputCodeForModuleOption(ModuleBoost,    true);          \
