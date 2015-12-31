@@ -90,7 +90,7 @@ TEST(LoadoutTest, TestLevelHasLoadoutZoneForTeam)
 TEST(LoadoutTest, TestTenthsCounter) 
 {
    F32 val = 4.3f;
-   FloatCounterMenuItem menuItem("Test", val, 0.1, 2.1, 40.5, 1, "what", "ever", "man");
+   FloatCounterMenuItem menuItem("Test", val, 0.1f, 2.1f, 40.5f, 1, "what", "ever", "man");
 
    EXPECT_EQ("4.3", menuItem.getValue());    // 4.3
    EXPECT_FLOAT_EQ(val, Zap::stof(menuItem.getValue()));
