@@ -308,6 +308,7 @@ public:
 
    string getSpecialBinding(SpecialBindingNameEnum bindingName) const; 
    string getSpecialBinding(SpecialBindingNameEnum bindingName, InputMode inputMode) const;
+
    void setSpecialBinding(SpecialBindingNameEnum bindingName, InputMode inputMode, const string &inputString);
 };
 
