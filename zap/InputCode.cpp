@@ -1421,10 +1421,11 @@ InputCode InputCodeManager::getModifier(InputCode inputCode)
 {
    if(isCtrlKey(inputCode))
       return KEY_CTRL;
-   else if(isAltKey(inputCode))
+   
+   if(isAltKey(inputCode))
       return KEY_ALT;
-   else
-      return KEY_NONE;
+   
+   return KEY_NONE;
 
    // TODO: Add other modifiers here as needed, then also fix up isModified()
 }
