@@ -210,15 +210,20 @@ Joystick::ButtonSymbol Joystick::stringToButtonSymbol(const string &label)
 {
    if(label == "PSCIRCLE")
       return ButtonSymbolPsCircle;
-   else if(label == "PSCROSS")
+
+   if(label == "PSCROSS")
       return ButtonSymbolPsCross;
-   else if(label == "PSSQUARE")
+
+   if(label == "PSSQUARE")
       return ButtonSymbolPsSquare;
-   else if(label == "PSTRIANGLE")
+
+   if(label == "PSTRIANGLE")
       return ButtonSymbolPsTriangle;
-   else if(label == "SMALLLEFTTRIANGLE")
+
+   if(label == "SMALLLEFTTRIANGLE")
       return ButtonSymbolSmallLeftTriangle;
-   else if(label == "SMALLRIGHTTRIANGLE")
+
+   if(label == "SMALLRIGHTTRIANGLE")
       return ButtonSymbolSmallRightTriangle;
 
    return ButtonSymbolNone;
