@@ -28,7 +28,7 @@ if(NOT WIN32)
 endif()
 
 
-add_library(alure ${ALURE_SOURCES})
+add_library(alure STATIC ${ALURE_SOURCES})
 include_directories(
 	${OPENAL_INCLUDE_DIR} 
 	${OGG_INCLUDE_DIR} 
