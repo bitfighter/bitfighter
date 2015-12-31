@@ -6,7 +6,6 @@
 #include "InputCode.h"
 
 #include "gtest/gtest.h"
-#include <string>
 
 namespace Zap
 {
@@ -44,6 +43,7 @@ TEST(InputStringTest, validStrings)
    EXPECT_FALSE(InputCodeManager::isValidInputString("Ctrl+shift+A"));     // Incorrect case
 }
 
+
 TEST(InputStringTest, normalizeStrings)
 {
    InputCodeManager::initializeKeyNames();
@@ -75,7 +75,29 @@ TEST(InputStringTest, normalizeStrings)
 
    normalized = InputCodeManager::normalizeInputString("Ctrl+Ctrl");   
    EXPECT_EQ("", normalized);                      EXPECT_FALSE(InputCodeManager::isValidInputString(normalized));
+}
 
+
+TEST(InputStringTest, baseKeysForSpecialSequences)
+{
+   // Simple cases
+   EXPECT_EQ(KEY_X, InputCodeManager::getBaseKeySpecialSequence(KEY_CTRL_X));
+   EXPECT_EQ(KEY_1, InputCodeManager::getBaseKeySpecialSequence(KEY_ALT_1));
+
+   // Edge cases
+   EXPECT_EQ(KEY_0, InputCodeManager::getBaseKeySpecialSequence(KEY_CTRL_0));
+   EXPECT_EQ(KEY_0, InputCodeManager::getBaseKeySpecialSequence(KEY_ALT_0));
+
+   EXPECT_EQ(KEY_Z, InputCodeManager::getBaseKeySpecialSequence(KEY_CTRL_Z));
+   EXPECT_EQ(KEY_9, InputCodeManager::getBaseKeySpecialSequence(KEY_ALT_9));
+
+   // Make sure we're testing the right edge cases...  If these fail, update them and the corresponding 
+   // test above.
+   ASSERT_EQ(KEY_CTRL_0, FIRST_CTRL_KEY);
+   ASSERT_EQ(KEY_ALT_0,  FIRST_ALT_KEY);
+
+   ASSERT_EQ(KEY_CTRL_Z, LAST_CTRL_KEY);
+   ASSERT_EQ(KEY_ALT_9,  LAST_ALT_KEY);
 }
 
 

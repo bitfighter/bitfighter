@@ -1446,36 +1446,14 @@ const Vector<string> *InputCodeManager::getModifierNames()
 
 InputCode InputCodeManager::getBaseKeySpecialSequence(InputCode inputCode)
 {
-   switch(inputCode)
-   {
-      case KEY_CTRL_M:
-         return KEY_M;
+   if(isCtrlKey(inputCode))
+      return (InputCode)((S32)inputCode - FIRST_CTRL_KEY + KEY_0);
 
-      case KEY_CTRL_Q:
-         return KEY_Q;
+   if(isAltKey(inputCode))
+      return (InputCode)((S32)inputCode - FIRST_ALT_KEY + KEY_0);
 
-      case KEY_CTRL_S:
-         return KEY_S;
-
-      case KEY_CTRL_1:
-      case KEY_ALT_1:
-         return KEY_1;
-
-      case KEY_CTRL_2:
-      case KEY_ALT_2:
-         return KEY_2;
-
-      case KEY_CTRL_3:
-      case KEY_ALT_3:
-         return KEY_3;
-
-      case KEY_ALT_9:
-         return KEY_9;
-
-      default:
-         TNLAssert(false, "Unknown input code!");
-         return KEY_UNKNOWN;
-   }
+   TNLAssert(false, "Unknown input code!");
+   return KEY_UNKNOWN;
 }
 
 
@@ -1703,16 +1681,52 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(LEFT_JOYSTICK)]       = "Left joystick";    
    keyNames[S32(RIGHT_JOYSTICK)]      = "Right joystick"; 
 
-   keyNames[S32(KEY_CTRL_M)]          = "Ctrl+M";                 // First ctrl key
-   keyNames[S32(KEY_CTRL_Q)]          = "Ctrl+Q";      
-   keyNames[S32(KEY_CTRL_S)]          = "Ctrl+S";                 
+   keyNames[S32(KEY_CTRL_A)]          = "Ctrl+A";                 // First ctrl key
+   keyNames[S32(KEY_CTRL_B)]          = "Ctrl+B";
+   keyNames[S32(KEY_CTRL_C)]          = "Ctrl+C";
+   keyNames[S32(KEY_CTRL_D)]          = "Ctrl+D";
+   keyNames[S32(KEY_CTRL_E)]          = "Ctrl+E";
+   keyNames[S32(KEY_CTRL_F)]          = "Ctrl+F";
+   keyNames[S32(KEY_CTRL_G)]          = "Ctrl+G";
+   keyNames[S32(KEY_CTRL_H)]          = "Ctrl+H";
+   keyNames[S32(KEY_CTRL_I)]          = "Ctrl+I";
+   keyNames[S32(KEY_CTRL_J)]          = "Ctrl+J";
+   keyNames[S32(KEY_CTRL_K)]          = "Ctrl+K";
+   keyNames[S32(KEY_CTRL_L)]          = "Ctrl+L";
+   keyNames[S32(KEY_CTRL_M)]          = "Ctrl+M";
+   keyNames[S32(KEY_CTRL_N)]          = "Ctrl+N";
+   keyNames[S32(KEY_CTRL_O)]          = "Ctrl+O";
+   keyNames[S32(KEY_CTRL_P)]          = "Ctrl+P";
+   keyNames[S32(KEY_CTRL_Q)]          = "Ctrl+Q";
+   keyNames[S32(KEY_CTRL_R)]          = "Ctrl+R";
+   keyNames[S32(KEY_CTRL_S)]          = "Ctrl+S";
+   keyNames[S32(KEY_CTRL_T)]          = "Ctrl+T";
+   keyNames[S32(KEY_CTRL_U)]          = "Ctrl+U";
+   keyNames[S32(KEY_CTRL_V)]          = "Ctrl+V";
+   keyNames[S32(KEY_CTRL_W)]          = "Ctrl+W";
+   keyNames[S32(KEY_CTRL_X)]          = "Ctrl+X";
+   keyNames[S32(KEY_CTRL_Y)]          = "Ctrl+Y";
+   keyNames[S32(KEY_CTRL_Z)]          = "Ctrl+Z";
+   keyNames[S32(KEY_CTRL_0)]          = "Ctrl+0";         
    keyNames[S32(KEY_CTRL_1)]          = "Ctrl+1";                 
    keyNames[S32(KEY_CTRL_2)]          = "Ctrl+2";                 
-   keyNames[S32(KEY_CTRL_3)]          = "Ctrl+3";                 // Last ctrl key
+   keyNames[S32(KEY_CTRL_3)]          = "Ctrl+3";
+   keyNames[S32(KEY_CTRL_4)]          = "Ctrl+4";
+   keyNames[S32(KEY_CTRL_5)]          = "Ctrl+5";
+   keyNames[S32(KEY_CTRL_6)]          = "Ctrl+6";
+   keyNames[S32(KEY_CTRL_7)]          = "Ctrl+7";
+   keyNames[S32(KEY_CTRL_8)]          = "Ctrl+8";
+   keyNames[S32(KEY_CTRL_9)]          = "Ctrl+9";                 // Last ctrl key
 
-   keyNames[S32(KEY_ALT_1)]           = "Alt+1";                  // First alt key
+   keyNames[S32(KEY_ALT_0)]           = "Alt+0";                  // First alt key
+   keyNames[S32(KEY_ALT_1)]           = "Alt+1";                  
    keyNames[S32(KEY_ALT_2)]           = "Alt+2";                  
    keyNames[S32(KEY_ALT_3)]           = "Alt+3";                  
+   keyNames[S32(KEY_ALT_4)]           = "Alt+4";                  
+   keyNames[S32(KEY_ALT_5)]           = "Alt+5";                  
+   keyNames[S32(KEY_ALT_6)]           = "Alt+6";                  
+   keyNames[S32(KEY_ALT_7)]           = "Alt+7";                  
+   keyNames[S32(KEY_ALT_8)]           = "Alt+8";                  
    keyNames[S32(KEY_ALT_9)]           = "Alt+9";                  // Last alt key
 
    keyNames[S32(KEY_BACKQUOTE)]       = "`";                
