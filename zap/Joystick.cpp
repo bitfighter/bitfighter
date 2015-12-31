@@ -5,7 +5,6 @@
 
 #include "Joystick.h"
 #include "GameSettings.h"
-#include "IniFile.h"
 #include "Colors.h"
 
 #include "stringUtils.h"
