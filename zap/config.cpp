@@ -475,7 +475,7 @@ static string getInputString(CIniFile *ini, const string &section, const string 
 }
 
 
-// Remember: If you change any of these defaults, you'll need to rebuild your INI file to see the results!
+// Remember: If you change any of the defaults, you'll need to rebuild your INI file to see the results!
 static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {                                
    ///// BINDING_TABLE
