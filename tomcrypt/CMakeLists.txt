@@ -1,4 +1,4 @@
-add_library(tomcrypt
+add_library(tomcrypt STATIC
 ${CMAKE_CURRENT_SOURCE_DIR}/src/pk/rsa/rsa_decrypt_key.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/pk/rsa/rsa_verify_hash.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/pk/rsa/rsa_sign_hash.c
