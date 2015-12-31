@@ -478,60 +478,51 @@ static string getInputString(CIniFile *ini, const string &section, const string 
 // Remember: If you change any of the defaults, you'll need to rebuild your INI file to see the results!
 static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {                                
-   ///// KEYBOARD
-
    // Generates a block of code that looks like this:
-   // if(true)
-   //    inputCodeManager->setBinding(BINDING_SELWEAP1, InputModeKeyboard, 
-   //          getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(BINDING_SELWEAP1), 
-   //                       KEY_1));
+   //
+   // inputCodeManager->setBinding(BINDING_SELWEAP1, InputModeKeyboard, 
+   //    getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(BINDING_SELWEAP1), KEY_1));
+   //
+   // inputCodeManager->setBinding(BINDING_SELWEAP1, InputModeKeyboard, 
+   //    getInputCode(ini, "JoystickKeyBindings", InputCodeManager::getBindingName(BINDING_SELWEAP1), BUTTON_1));
 
-#define BINDING(enumVal, b, c, defaultKeyboardBinding, e)                                    \
+#define BINDING(enumVal, b, c, defaultKeyboardBinding, defaultJoystickBinding)               \
       inputCodeManager->setBinding(enumVal, InputModeKeyboard,                            	\
          getInputCode(ini, "KeyboardKeyBindings", InputCodeManager::getBindingName(enumVal), \
-                        defaultKeyboardBinding));
-    BINDING_TABLE
-#undef BINDING
-
-
-   ///// JOYSTICK
-
-   // Basically the same, except that we use the default joystick binding column... generated code will look pretty much the same
-#define BINDING(enumVal, b, c, d, defaultJoystickBinding)                                    \
+                        defaultKeyboardBinding));                                            \
+                                                                                             \
       inputCodeManager->setBinding(enumVal, InputModeJoystick,                               \
          getInputCode(ini, "JoystickKeyBindings", InputCodeManager::getBindingName(enumVal), \
                         defaultJoystickBinding));
+
     BINDING_TABLE
 #undef BINDING
-
 }
 
 
 // Only called while loading keys from the INI
 void setDefaultSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
-   ///// KEYBOARD
    // Generates a block of code that looks like this:
-   // if(true)
-   //    inputCodeManager->setSpecialBinding(BINDING_SCREENSHOT_1, InputModeKeyboard, 
-   //          getInputString(ini, "SpecialKeyBindings", InputCodeManager::getSpecialBindingName(BINDING_SCREENSHOT_1), 
-   //                       "PrntScrn"));
+   //
+   // inputCodeManager->setSpecialBinding(BINDING_SCREENSHOT_1, InputModeKeyboard, 
+   //    getInputString(ini, "SpecialKeyBindings", InputCodeManager::getSpecialBindingName(BINDING_SCREENSHOT_1), "PrntScrn"));
+   //
+   // inputCodeManager->setSpecialBinding(BINDING_SCREENSHOT_1, InputModeJoystick, 
+   //    getInputString(ini, "SpecialJoystickBindings", InputCodeManager::getSpecialBindingName(BINDING_SCREENSHOT_1), "PrntScrn"));
 
-#define SPECIAL_BINDING(specialEnumVal, b, c, defaultSpecialKeyboardBinding, e)                                   \
+#define SPECIAL_BINDING(specialEnumVal, b, c, defaultSpecialKeyboardBinding, defaultJoystickBinding)              \
       inputCodeManager->setSpecialBinding(specialEnumVal, InputModeKeyboard,                                      \
                                           getInputString(ini, "SpecialKeyBindings",                               \
                                                          InputCodeManager::getSpecialBindingName(specialEnumVal), \
-                                                         defaultSpecialKeyboardBinding)); 
-    SPECIAL_BINDING_TABLE
-#undef SPECIAL_BINDING
-
-   ///// JOYSTICK
-#define SPECIAL_BINDING(specialEnumVal, b, c, d, defaultJoystickBinding)                                          \
+                                                         defaultSpecialKeyboardBinding));                         \
+                                                                                                                  \
       inputCodeManager->setSpecialBinding(specialEnumVal, InputModeJoystick,                                      \
                                           getInputString(ini, "SpecialJoystickBindings",                          \
                                                          InputCodeManager::getSpecialBindingName(specialEnumVal), \
                                                          defaultJoystickBinding)); 
-    SPECIAL_BINDING_TABLE
+
+   SPECIAL_BINDING_TABLE
 #undef SPECIAL_BINDING
 
 }
