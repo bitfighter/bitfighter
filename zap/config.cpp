@@ -547,10 +547,9 @@ void setDefaultSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
 
 static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section, InputMode mode)
 {
-   // Top line evaluates to:
-   // if(true)
-   //    ini->SetValue(section, InputCodeManager::getBindingName(InputCodeManager::BINDING_SELWEAP1),
-   //                           InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1, mode)));
+   // Evaluates to:
+   // ini->SetValue(section, InputCodeManager::getBindingName(InputCodeManager::BINDING_SELWEAP1),
+   //               InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1, mode)));
 
 #define BINDING(enumVal, b, c, d, e)                                                                            \
       ini->SetValue(section, InputCodeManager::getBindingName(enumVal),                                         \
