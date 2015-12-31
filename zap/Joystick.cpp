@@ -182,7 +182,8 @@ bool Joystick::enableJoystick(GameSettings *settings, bool hasBeenOpenedBefore)
 
 void Joystick::shutdownJoystick()
 {
-   if(sdlController != NULL) {
+   if(sdlController != NULL) 
+   {
       SDL_GameControllerClose(sdlController);
       sdlController = NULL;
    }
