@@ -829,15 +829,11 @@ void Ship::findRepairTargets()
 // Return true if this ship can repair (or be repaired by) something on the specified team
 bool Ship::canRepairObjectsOnTeam(S32 teamIndex) const
 {
-   // TeamIndex must be neutral, or on our team...
-   if(teamIndex != TEAM_NEUTRAL && teamIndex != getTeam())
-      return false;
-
-   // ...or same team in non-team game
-   if(!getGame()->getGameType()->isTeamGame() && teamIndex == getTeam())
-      return false;
-
-   return true;
+   return 
+      // Ship must have repair and...
+      hasModule(ModuleRepair) &&
+      // ...be neutral...        or  ...be on the same team in non-team game
+      (teamIndex == TEAM_NEUTRAL || (getGame()->getGameType()->isTeamGame() && teamIndex == getTeam()));
 }
 
 
@@ -2268,7 +2264,7 @@ void Ship::renderLayer(S32 layerIndex)
    const U32 killStreak           = clientInfo ? clientInfo->getKillStreak()           : 0;  
    const U32 gamesPlayed          = clientInfo ? clientInfo->getGamesPlayed()          : 0;  
 
-   const bool drawRepairIcon = clientInfo ? canRepairObjectsOnTeam(clientInfo->getTeamIndex()) : false;
+   const bool drawRepairIcon = canRepairObjectsOnTeam(clientGame->getLocalRemoteClientInfo()->getTeamIndex());
    const bool boostActive    = mLoadout.isModulePrimaryActive(ModuleBoost);
    const bool shieldActive   = mLoadout.isModulePrimaryActive(ModuleShield);
    const bool repairActive   = mLoadout.isModulePrimaryActive(ModuleRepair) && mHealth < 1;

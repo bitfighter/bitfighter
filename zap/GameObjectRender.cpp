@@ -520,15 +520,18 @@ void GameObjectRender::renderShipName(const string &shipName, bool isAuthenticat
    F32 ypos = textSize + 30;
    S32 len = RenderUtils::drawStringc(0.0f, ypos, textSize, renderName.c_str());
 
+   // Underline name if player is authenticated
+   if(isAuthenticated)
+   {
+      RenderUtils::drawHorizLine(-len * 0.5f, len * 0.5f, ypos + 3);     // 3 provides a little gap beneath the text
+      ypos += 2;
+   }
+
    // Indicate player has repair if drawRepairIcon is true -- icon goes to the left of the player name
    if(drawRepairIcon)
       renderRepairItem(Point(-len / 2.0f - 12, ypos - textSize / 2 + 1), true, NULL, 0.5);
 
 //   renderGamesPlayedMark(-len / 2, ypos, textSize, gamesPlayed);
-
-   // Underline name if player is authenticated
-   if(isAuthenticated)
-      RenderUtils::drawHorizLine(-len * 0.5f, len * 0.5f, ypos + 3);     // 3 provides a little gap beneath the text
 
    mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
