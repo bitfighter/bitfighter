@@ -40,7 +40,7 @@ protected:
 
    static void renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 height, const Color &borderColor);
    void setStartingOffset(S32 startingOffset);
-   S32 getStartingOffset();
+   S32 getStartingOffset() const;
    void setExpectedWidth(S32 width);
    virtual void setExpectedWidth_MidTransition(S32 width);
 

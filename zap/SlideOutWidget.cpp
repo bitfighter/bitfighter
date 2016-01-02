@@ -121,7 +121,7 @@ F32 SlideOutWidget::getInsideEdge() const
 }
 
 
-S32 SlideOutWidget::getStartingOffset()
+S32 SlideOutWidget::getStartingOffset() const
 {
    return mStartingOffset;
 }
