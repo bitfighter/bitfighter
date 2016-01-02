@@ -19,11 +19,11 @@ class Timer
 private:
    U32 mPeriod;
    U32 mCurrentCounter;
-   EasingType mEasingType;
+   AHEasingFunction mEasingFunction;
 
 public:
    explicit Timer(U32 period = 0);  // Constructor
-   virtual ~Timer();       // Destructor
+   virtual ~Timer();                // Destructor
 
    // Update timer in idle loop -- returns true if timer has just expired, false if there's still time left
    bool update(U32 timeDelta);
@@ -33,10 +33,9 @@ public:
 
    // Return fraction of original time left on timer
    F32 getFraction() const;
-   F32 getEasedFraction() const;    // Same thing, but passed through an easing function
 
    void invert();    // Set current timer value to 1 - (currentFraction)
-   void setEasing(EasingType easingType);
+   void setEasingFunction(AHEasingFunction easingFunction);
 
    void setPeriod(U32 period);
    U32 getPeriod() const;

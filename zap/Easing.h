@@ -29,47 +29,7 @@ using namespace TNL;
 #define AHFloat F32
 //#endif
 
-//typedef AHFloat (*AHEasingFunction)(AHFloat);
-
-enum EasingType
-{
-   LINEAR_INTERPOLATION,
-   QUADRATIC_EASE_IN,
-   QUADRATIC_EASE_OUT,
-   QUADRATIC_EASE_IN_OUT,
-   CUBIC_EASE_IN,
-   CUBIC_EASE_OUT,
-   CUBIC_EASE_IN_OUT,
-   QUARTIC_EASE_IN,
-   QUARTIC_EASE_OUT,
-   QUARTIC_EASE_IN_OUT,
-   QUINTIC_EASE_IN,
-   QUINTIC_EASE_OUT,
-   QUINTIC_EASE_IN_OUT,
-   SINE_EASE_IN,
-   SINE_EASE_OUT,
-   SINE_EASE_IN_OUT,
-   CIRCULAR_EASE_IN,
-   CIRCULAR_EASE_OUT,
-   CIRCULAR_EASE_IN_OUT,
-   EXPONENTIAL_EASE_IN,
-   EXPONENTIAL_EASE_OUT,
-   EXPONENTIAL_EASE_IN_OUT,
-   ELASTIC_EASE_IN,
-   ELASTIC_EASE_OUT,
-   ELASTIC_EASE_IN_OUT,
-   BACK_EASE_IN,
-   BACK_EASE_OUT,
-   BACK_EASE_IN_OUT,
-   BOUNCE_EASE_IN,
-   BOUNCE_EASE_OUT,
-   BOUNCE_EASE_IN_OUT,
-   EASING_TYPE_COUNT
-};
-
-
-AHFloat getEasedValue(EasingType easingType, F32 value);
-
+typedef AHFloat (*AHEasingFunction)(AHFloat);      // Let's us write: timer.setEasingFunction(Easing::ExponentialEaseIn);
 
 namespace Easing {
 

@@ -26,7 +26,7 @@ SlideOutWidget::SlideOutWidget()
    mActivating = false;
    mWidth = 350;           // Menus should set this to a real value so they appear more quickly
    setStartingOffset(0);
-   mAnimationTimer.setEasing(EXPONENTIAL_EASE_IN);
+   mAnimationTimer.setEasingFunction(Easing::ExponentialEaseIn);
 }
 
 
@@ -181,7 +181,7 @@ bool SlideOutWidget::isClosing() const
 
 F32 SlideOutWidget::getFraction() const
 {
-   return mActivating ? mAnimationTimer.getEasedFraction() : 1 - mAnimationTimer.getEasedFraction();
+   return mActivating ? mAnimationTimer.getFraction() : 1 - mAnimationTimer.getFraction();
 }
 
 

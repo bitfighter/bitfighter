@@ -14,83 +14,15 @@
 
 #include "easing.h"
 #include <math.h>
-#include <tnlAssert.h>
 
 #define M_PI FloatPi
 #define M_PI_2 FloatHalfPi
 
 #pragma warning(disable: 4244) // Suppress warning about possible loss of data when using floats like 2.5
 
-AHFloat getEasedValue(EasingType easingType, F32 value)
+AHFloat getEasedValue(AHEasingFunction easingFunction, F32 value)
 {
-   switch(easingType)
-   {
-      case LINEAR_INTERPOLATION:
-         return Easing::LinearInterpolation(value);
-      case QUADRATIC_EASE_IN:
-         return Easing::QuadraticEaseIn(value);
-      case QUADRATIC_EASE_OUT:
-         return Easing::QuadraticEaseOut(value);
-      case QUADRATIC_EASE_IN_OUT:
-         return Easing::QuadraticEaseInOut(value);
-      case CUBIC_EASE_IN:
-         return Easing::CubicEaseIn(value);
-      case CUBIC_EASE_OUT:
-         return Easing::CubicEaseOut(value);
-      case CUBIC_EASE_IN_OUT:
-         return Easing::CubicEaseInOut(value);
-      case QUARTIC_EASE_IN:
-         return Easing::QuarticEaseIn(value);
-      case QUARTIC_EASE_OUT:
-         return Easing::QuarticEaseOut(value);
-      case QUARTIC_EASE_IN_OUT:
-         return Easing::QuarticEaseInOut(value);
-      case QUINTIC_EASE_IN:
-         return Easing::QuinticEaseIn(value);
-      case QUINTIC_EASE_OUT:
-         return Easing::QuinticEaseOut(value);
-      case QUINTIC_EASE_IN_OUT:
-         return Easing::QuinticEaseInOut(value);
-      case SINE_EASE_IN:
-         return Easing::SineEaseIn(value);
-      case SINE_EASE_OUT:
-         return Easing::SineEaseOut(value);
-      case SINE_EASE_IN_OUT:
-         return Easing::SineEaseInOut(value);
-      case CIRCULAR_EASE_IN:
-         return Easing::CircularEaseIn(value);
-      case CIRCULAR_EASE_OUT:
-         return Easing::CircularEaseOut(value);
-      case CIRCULAR_EASE_IN_OUT:
-         return Easing::CircularEaseInOut(value);
-      case EXPONENTIAL_EASE_IN:
-         return Easing::ExponentialEaseIn(value);
-      case EXPONENTIAL_EASE_OUT:
-         return Easing::ExponentialEaseOut(value);
-      case EXPONENTIAL_EASE_IN_OUT:
-         return Easing::ExponentialEaseInOut(value);
-      case ELASTIC_EASE_IN:
-         return Easing::ElasticEaseIn(value);
-      case ELASTIC_EASE_OUT:
-         return Easing::ElasticEaseOut(value);
-      case ELASTIC_EASE_IN_OUT:
-         return Easing::ElasticEaseInOut(value);
-      case BACK_EASE_IN:
-         return Easing::BackEaseIn(value);
-      case BACK_EASE_OUT:
-         return Easing::BackEaseOut(value);
-      case BACK_EASE_IN_OUT:
-         return Easing::BackEaseInOut(value);
-      case BOUNCE_EASE_IN:
-         return Easing::BounceEaseIn(value);
-      case BOUNCE_EASE_OUT:
-         return Easing::BounceEaseOut(value);
-      case BOUNCE_EASE_IN_OUT:
-         return Easing::BounceEaseInOut(value);
-      default:
-         TNLAssert(false, "Unknown Easing!");
-         return Easing::LinearInterpolation(value);
-   }
+   return easingFunction(value);
 }
 
 namespace Easing {
