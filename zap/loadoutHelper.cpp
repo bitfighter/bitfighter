@@ -299,7 +299,7 @@ void LoadoutHelper::setShowingPresets(bool showingPresets)
 
    else     
    {
-      static char title[32];
+      static char title[32];     // Reusable
       dSprintf(title, sizeof(title), "Pick %d weapons:", ShipWeaponCount);
       mTitle = title;
 
