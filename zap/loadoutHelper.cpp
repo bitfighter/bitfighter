@@ -13,6 +13,7 @@
 #include "gameConnection.h"
 #include "ClientGame.h"
 #include "ship.h"
+#include "RenderUtils.h"
 
 
 namespace Zap
@@ -62,7 +63,7 @@ LoadoutHelper::LoadoutHelper()
 
    reset();
 
-   mTitle = "";
+   setTitle("");
    mLegend = NULL;
 }
 
@@ -279,7 +280,7 @@ void LoadoutHelper::setShowingPresets(bool showingPresets)
 
    if(mShowingPresets)
    {
-      mTitle = "Choose loadout preset:";
+      setTitle("Choose loadout preset:");
       mCurrentRenderItems = mPresetItems.address();
       mCurrentRenderCount = mPresetItems.size();
    }
@@ -288,7 +289,7 @@ void LoadoutHelper::setShowingPresets(bool showingPresets)
    {
       static char title[32];  // static, so mTitle pointer stays valid
       dSprintf(title, sizeof(title), "Pick %d modules:", ShipModuleCount);
-      mTitle = title;
+      setTitle(title);
 
       mPrevRenderItems = NULL; //(showingMods ? mModuleMenuItems : mWeaponMenuItems).address();
       mPrevRenderCount = 0; //(showingMods ? mModuleMenuItems : mWeaponMenuItems).size();
@@ -301,7 +302,7 @@ void LoadoutHelper::setShowingPresets(bool showingPresets)
    {
       static char title[32];     // Reusable
       dSprintf(title, sizeof(title), "Pick %d weapons:", ShipWeaponCount);
-      mTitle = title;
+      setTitle(title);
 
       mPrevRenderItems = mModuleMenuItems.address();
       mPrevRenderCount = mModuleMenuItems.size();

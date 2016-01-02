@@ -72,6 +72,9 @@ private:
    S32 mOldBottom;
    S32 mOldCount;
 
+   const char *mTitle;
+   S32 mTitleWidth;        // Width of aforementioned mTitle
+
    S32 mHorizLabelOffset;
 
    // Some render helpers
@@ -87,13 +90,16 @@ private:
 
 protected:
    static const S32 MENU_TOP          = 175;   // Location of top of title of overlay menu frame
+   static const S32 TITLE_FONT_SIZE   = 20;    // Size of title of menu
    static const S32 MENU_FONT_SIZE    = 15;    // Size of standard items
    static const S32 MENU_FONT_SPACING =  7;    // Vertical gap between lines
    static const S32 MENU_PADDING      =  9;    // Padding around outer edge of overlay
    static const S32 ITEM_HELP_PADDING =  5;    // Gap between item and its help text
    static const S32 ITEM_INDENT       = 50;    // Amount individual menu items are indented to make room for keys
    static const S32 BottomPadding     = MENU_PADDING;
-
+   static const S32 GrayLineBuffer    = 10;
+   static const S32 TitleHeight       = TITLE_FONT_SIZE + GrayLineBuffer;
+   static const S32 TitleHorizPadding = 15;
 
    // Shortcut helper function
    virtual void exitHelper();
@@ -107,7 +113,6 @@ protected:
    const OverlayMenuItem *mPrevRenderItems;
    S32 mPrevRenderCount;
 
-   const char *mTitle;
    Vector<HelperMenuLegendItem> *mLegend;
 
    ClientGame *getGame() const;
@@ -115,6 +120,8 @@ protected:
    S32 getTotalDisplayWidth  (S32 widthOfButtons, S32 widthOfTextBlock) const;
    S32 getCurrentDisplayWidth(S32 widthOfButtons, S32 widthOfTextBlock) const;
    S32 getLegendHeight() const;
+
+   void setTitle(const char *title);
 
    S32 getButtonWidth(const OverlayMenuItem *items, S32 itemCount) const;
    void setExpectedWidth_MidTransition(S32 width);

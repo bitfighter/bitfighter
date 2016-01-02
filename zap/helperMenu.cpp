@@ -34,6 +34,7 @@ HelperMenu::HelperMenu()
    mOldBottom = 0;
    mOldCount = 0;
    mCurrentRenderCount = 0;
+   mTitleWidth = 0;
 }
 
 
@@ -99,7 +100,7 @@ static S32 ButtonLabelGap = 9;      // Space between button/key rendering and me
 // Returns total width of the helper
  S32 HelperMenu::getTotalDisplayWidth(S32 widthOfButtons, S32 widthOfTextBlock) const
 {
-   return widthOfButtons + widthOfTextBlock + LeftMargin + ButtonLabelGap + MENU_PADDING;
+   return MAX(widthOfButtons + widthOfTextBlock + LeftMargin + ButtonLabelGap, mTitleWidth) + MENU_PADDING;
 }
 
 
@@ -125,10 +126,7 @@ static S32 getDisplayItemCount(const OverlayMenuItem *items, S32 itemCount)
 
 // Set a bunch of display geometry parameters -- there are more in the .h file
 static const S32 MENU_LEGEND_FONT_SIZE = 11;    // Smaller font of lengend items on QuickChat menus
-static const S32 TITLE_FONT_SIZE       = 20;    // Size of title of menu
-static const S32 GrayLineBuffer        = 10;
 
-static const S32 TitleHeight = TITLE_FONT_SIZE + GrayLineBuffer;
 static const S32 InstructionHeight = MENU_LEGEND_FONT_SIZE;
 
 
@@ -138,6 +136,13 @@ S32 HelperMenu::getLegendHeight() const
       return MENU_LEGEND_FONT_SIZE + MENU_FONT_SPACING;
 
    return 0;
+}
+
+
+void HelperMenu::setTitle(const char *title)
+{
+   mTitle = title;
+   mTitleWidth = RenderUtils::getStringWidth(TITLE_FONT_SIZE, mTitle) + 2 * TitleHorizPadding;
 }
 
 

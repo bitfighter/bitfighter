@@ -70,7 +70,7 @@ QuickChatHelper::QuickChatHelper() :
    mPrevRenderItems = NULL;
    mPrevRenderCount = 0;
 
-   mTitle = "QuickChat menu";
+   setTitle("QuickChat menu");
 
    setLegend();
 }
