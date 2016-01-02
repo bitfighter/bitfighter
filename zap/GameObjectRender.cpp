@@ -2067,7 +2067,6 @@ void GameObjectRender::renderCore(const Point &pos, const Color &coreColor, U32 
    {
       dir = (panelGeom->repair[i] - pos);
       dir.normalize();
-      Point cross(dir.y, -dir.x);
 
       mGL->glColor(coreColor);
       renderHealthBar(panelHealth[i] / panelStartingHealth, panelGeom->repair[i], dir, 30, 7);
