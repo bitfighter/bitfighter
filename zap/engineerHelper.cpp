@@ -43,7 +43,7 @@ static const char *menuTitle = "Choose One:";
 
 // Constructor
 EngineerHelper::EngineerHelper() :
-   mEngineerItemsDisplayWidth( getWidthOfItems() )
+   mEngineerItemsDisplayWidth( getWidthOfItems() )     // This is set here because they are const
 {
    mSelectedIndex = -1;
 
@@ -53,7 +53,7 @@ EngineerHelper::EngineerHelper() :
    mPrevRenderItems = NULL;
    mPrevRenderCount = 0;
 
-   mTitle = menuTitle;
+   setTitle(menuTitle);
    mLegend = NULL;
 }
 
@@ -77,6 +77,8 @@ S32 EngineerHelper::getWidthOfItems() const
 
    return max(maxItemWidth, titleWidth);
 }
+
+
 
 
 HelperMenu::HelperMenuType EngineerHelper::getType() { return EngineerHelperType; }
