@@ -181,7 +181,7 @@ bool SlideOutWidget::isClosing() const
 F32 SlideOutWidget::getFraction() const
 {
    return mActivating ?     mAnimationTimer.getFraction(Easing::ExponentialEaseIn) :   // Showing
-                        1 - mAnimationTimer.getFraction(Easing::ExponentialEaseOut);   // Hiding
+                        1 - mAnimationTimer.getFraction(Easing::CircularEaseIn);       // Hiding
 }
 
 
