@@ -633,10 +633,10 @@ void GameObjectRender::renderShipRepairRays(const Point &pos, const Ship *ship, 
          Vector<Point> targetRepairLocations = repairTargets[i]->getRepairLocations(pos);
 
          Vector<Point> vertexArray(2 * targetRepairLocations.size());
-         for(S32 i = 0; i < targetRepairLocations.size(); i++)
+         for(S32 j = 0; j < targetRepairLocations.size(); j++)
          {
             vertexArray.push_back(pos);
-            vertexArray.push_back(targetRepairLocations[i]);
+            vertexArray.push_back(targetRepairLocations[j]);
          }
 
          mGL->renderPointVector(&vertexArray, GLOPT::Lines);
