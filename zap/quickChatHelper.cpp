@@ -15,8 +15,6 @@
 
 #include "RenderUtils.h"
 
-#include <ctype.h>
-
 namespace Zap
 {
 
