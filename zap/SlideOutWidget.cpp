@@ -18,7 +18,7 @@
 namespace Zap
 {
 
-static const F32 WidgetSpeed = 2.0f;    // Pixels / ms
+static const F32 WidgetSpeed = 0.5f;    // Pixels / ms
 
 // Constructor
 SlideOutWidget::SlideOutWidget()
@@ -26,6 +26,7 @@ SlideOutWidget::SlideOutWidget()
    mActivating = false;
    mWidth = 350;           // Menus should set this to a real value so they appear more quickly
    setStartingOffset(0);
+   mAnimationTimer.setEasing(EXPONENTIAL_EASE_IN);
 }
 
 
@@ -180,7 +181,7 @@ bool SlideOutWidget::isClosing() const
 
 F32 SlideOutWidget::getFraction() const
 {
-   return mActivating ? mAnimationTimer.getFraction() : 1 - mAnimationTimer.getFraction();
+   return mActivating ? mAnimationTimer.getEasedFraction() : 1 - mAnimationTimer.getEasedFraction();
 }
 
 

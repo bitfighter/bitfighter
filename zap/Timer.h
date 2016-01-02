@@ -7,6 +7,7 @@
 #define _TIMER_H_
 
 #include "tnlTypes.h"
+#include "Easing.h"
 
 using namespace TNL;
 
@@ -18,6 +19,7 @@ class Timer
 private:
    U32 mPeriod;
    U32 mCurrentCounter;
+   EasingType mEasingType;
 
 public:
    explicit Timer(U32 period = 0);  // Constructor
@@ -31,8 +33,10 @@ public:
 
    // Return fraction of original time left on timer
    F32 getFraction() const;
+   F32 getEasedFraction() const;    // Same thing, but passed through an easing function
 
    void invert();    // Set current timer value to 1 - (currentFraction)
+   void setEasing(EasingType easingType);
 
    void setPeriod(U32 period);
    U32 getPeriod() const;

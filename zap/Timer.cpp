@@ -13,6 +13,7 @@ namespace Zap
 Timer::Timer(U32 period)
 {
    mCurrentCounter = mPeriod = period;
+   mEasingType = LINEAR_INTERPOLATION;
 }
 
 
@@ -44,12 +45,25 @@ U32 Timer::getCurrent() const
 }
 
 
+// Returns a value between 0 and 1
 F32 Timer::getFraction() const
 {
    if(!mPeriod)
       return 0;
 
    return mCurrentCounter / F32(mPeriod);
+}
+
+
+F32 Timer::getEasedFraction() const
+{
+   return getEasedValue(mEasingType, getFraction());
+}
+
+
+void Timer::setEasing(EasingType easingType)
+{
+   mEasingType = easingType;
 }
 
 
