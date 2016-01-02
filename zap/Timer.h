@@ -19,7 +19,6 @@ class Timer
 private:
    U32 mPeriod;
    U32 mCurrentCounter;
-   AHEasingFunction mEasingFunction;
 
 public:
    explicit Timer(U32 period = 0);  // Constructor
@@ -33,9 +32,9 @@ public:
 
    // Return fraction of original time left on timer
    F32 getFraction() const;
+   F32 getFraction(AHEasingFunction easingFunction) const;
 
    void invert();    // Set current timer value to 1 - (currentFraction)
-   void setEasingFunction(AHEasingFunction easingFunction);
 
    void setPeriod(U32 period);
    U32 getPeriod() const;
