@@ -750,11 +750,11 @@ void GameObjectRender::renderTeleporter(const Point &pos, U32 type, bool spiralI
       {
          Tracker &t = particles[i];
 
-         t.thetaI = TNL::Random::readF() * FloatTau;
-         t.thetaP = TNL::Random::readF() * 2 + 0.5f;
-         t.dP = TNL::Random::readF() * 5 + 2.5f;
-         t.dI = TNL::Random::readF() * t.dP;
-         t.ci = TNL::Random::readI(0, NumColors - 1);
+         t.thetaI = Random::readF() * FloatTau;
+         t.thetaP = Random::readF() * 2 + 0.5f;
+         t.dP = Random::readF() * 5 + 2.5f;
+         t.dI = Random::readF() * t.dP;
+         t.ci = Random::readI(0, NumColors - 1);
       }
    }
 
