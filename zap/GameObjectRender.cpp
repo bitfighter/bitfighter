@@ -1741,8 +1741,6 @@ void GameObjectRender::renderGrenade(const Point &pos, F32 lifeLeft)
 
 void GameObjectRender::renderSpyBug(const Point &pos, const Color &teamColor, bool visible, bool drawOutline)
 {
-   F32 mod = 0.25;
-
    if(visible)
    {
       mGL->glColor(teamColor);
@@ -1753,13 +1751,12 @@ void GameObjectRender::renderSpyBug(const Point &pos, const Color &teamColor, bo
          RenderUtils::drawCircle(pos, 15);
       }
 
-      mod = 1.0;
       RenderUtils::drawString(pos.x - 3, pos.y - 5, 10, "S");
    }
    else
    {
       mGL->glLineWidth(RenderUtils::LINE_WIDTH_1);
-      mGL->glColor(mod);
+      mGL->glColor(0.25);
       RenderUtils::drawCircle(pos, 5);
    }
 
