@@ -624,7 +624,12 @@ bool copyFileToDir(const string &sourceFilename, const string &destDir)
 {
    string destFilename = destDir + getFileSeparator() + extractFilename(sourceFilename);
 
-   return copyFile(sourceFilename, destFilename);
+   bool success = copyFile(sourceFilename, destFilename);
+
+   if(!success)
+      printf("File copy failed.  File: %s to directory: %s\n", sourceFilename.c_str(), destDir.c_str());
+
+   return success;
 }
 
 

@@ -821,23 +821,17 @@ void copyResourcesToUserData()
 
       for(S32 i = 0; i < fillFiles.size(); i++)
       {
-         string sourceFile = installedResourceDir + fileSeparator + fillFiles[i];
-//         printf("Attempting to copy file: %s\n", sourceFile.c_str());
-         if(!copyFileToDir(sourceFile, userResourceDir))
-         {
-            printf("File copy failed.  File: %s to directory: %s\n", fillFiles[i].c_str(), userResourceDir.c_str());
+         if(!copyFileToDir(fillFiles[i], userResourceDir))
             return;
-         }
       }
    }
 
-   // Copy the joystick_presets.ini, too
-   string joystickPresetsFile = installDataDir + fileSeparator + "joystick_presets.ini";
-   if(!copyFileToDir(joystickPresetsFile, userDataDir))
-   {
-      printf("File copy failed.  File: %s to directory: %s\n", joystickPresetsFile.c_str(), userDataDir.c_str());
+   // Copy the gamecontroller databases
+   string controllerDbFile = installDataDir + fileSeparator + "gamecontrollerdb.txt";
+   string userControllerDbFile = installDataDir + fileSeparator + "usergamecontrollerdb.txt";
+   if(!copyFileToDir(controllerDbFile, userDataDir) ||
+         !copyFileToDir(userControllerDbFile, userDataDir))
       return;
-   }
 }
 
 
