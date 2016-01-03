@@ -13,6 +13,10 @@
 //
 
 #include "easing.h"
+
+#include "tnlAssert.h"
+#include "tnlLog.h"
+
 #include <math.h>
 
 #define M_PI FloatPi
@@ -20,10 +24,6 @@
 
 #pragma warning(disable: 4244) // Suppress warning about possible loss of data when using floats like 2.5
 
-AHFloat getEasedValue(AHEasingFunction easingFunction, F32 value)
-{
-   return easingFunction(value);
-}
 
 namespace Easing {
 
@@ -313,6 +313,170 @@ AHFloat BounceEaseInOut(AHFloat p)
 	{
 		return 0.5 * BounceEaseOut(p * 2 - 1) + 0.5;
 	}
+}
+
+
+// A helper function mainly for testing stuff, making it possible to cycle through easings to find just the right one
+AHEasingFunction getNextEasing(AHEasingFunction currentEasing)
+{
+   if(currentEasing == LinearInterpolation)
+   {
+      logprintf("Using easing QuadraticEaseIn");
+      return QuadraticEaseIn;
+   }
+   if(currentEasing == QuadraticEaseIn)
+   {
+      logprintf("Using easing QuadraticEaseOut");
+      return QuadraticEaseOut;
+   }
+   if(currentEasing == QuadraticEaseOut)
+   {
+      logprintf("Using easing QuadraticEaseInO");
+      return QuadraticEaseInOut;
+   }
+   if(currentEasing == QuadraticEaseInOut)
+   {
+      logprintf("Using easing CubicEaseIn");
+      return CubicEaseIn;
+   }
+   if(currentEasing == CubicEaseIn)
+   {
+      logprintf("Using easing CubicEaseOut");
+      return CubicEaseOut;
+   }
+   if(currentEasing == CubicEaseOut)
+   {
+      logprintf("Using easing CubicEaseInOut");
+      return CubicEaseInOut;
+   }
+   if(currentEasing == CubicEaseInOut)
+   {
+      logprintf("Using easing QuarticEaseIn");
+      return QuarticEaseIn;
+   }
+   if(currentEasing == QuarticEaseIn)
+   {
+      logprintf("Using easing QuarticEaseOut");
+      return QuarticEaseOut;
+   }
+   if(currentEasing == QuarticEaseOut)
+   {
+      logprintf("Using easing QuarticEaseInOut");
+      return QuarticEaseInOut;
+   }
+   if(currentEasing == QuarticEaseInOut)
+   {
+      logprintf("Using easing QuinticEaseIn");
+      return QuinticEaseIn;
+   }
+   if(currentEasing == QuinticEaseIn)
+   {
+      logprintf("Using easing QuinticEaseOut");
+      return QuinticEaseOut;
+   }
+   if(currentEasing == QuinticEaseOut)
+   {
+      logprintf("Using easing QuinticEaseInOut");
+      return QuinticEaseInOut;
+   }
+   if(currentEasing == QuinticEaseInOut)
+   {
+      logprintf("Using easing SineEaseIn");
+      return SineEaseIn;
+   }
+   if(currentEasing == SineEaseIn)
+   {
+      logprintf("Using easing SineEaseOut");
+      return SineEaseOut;
+   }
+   if(currentEasing == SineEaseOut)
+   {
+      logprintf("Using easing SineEaseInOut");
+      return SineEaseInOut;
+   }
+   if(currentEasing == SineEaseInOut)
+   {
+      logprintf("Using easing CircularEaseIn");
+      return CircularEaseIn;
+   }
+   if(currentEasing == CircularEaseIn)
+   {
+      logprintf("Using easing CircularEaseOut");
+      return CircularEaseOut;
+   }
+   if(currentEasing == CircularEaseOut)
+   {
+      logprintf("Using easing CircularEaseInOu");
+      return CircularEaseInOut;
+   }
+   if(currentEasing == CircularEaseInOut)
+   {
+      logprintf("Using easing ExponentialEaseI");
+      return ExponentialEaseIn;
+   }
+   if(currentEasing == ExponentialEaseIn)
+   {
+      logprintf("Using easing ExponentialEaseO");
+      return ExponentialEaseOut;
+   }
+   if(currentEasing == ExponentialEaseOut)
+   {
+      logprintf("Using easing ExponentialEaseI");
+      return ExponentialEaseInOut;
+   }
+   if(currentEasing == ExponentialEaseInOut)
+   {
+      logprintf("Using easing ElasticEaseIn");
+      return ElasticEaseIn;
+   }
+   if(currentEasing == ElasticEaseIn)
+   {
+      logprintf("Using easing ElasticEaseOut");
+      return ElasticEaseOut;
+   }
+   if(currentEasing == ElasticEaseOut)
+   {
+      logprintf("Using easing ElasticEaseInOut");
+      return ElasticEaseInOut;
+   }
+   if(currentEasing == ElasticEaseInOut)
+   {
+      logprintf("Using easing BackEaseIn");
+      return BackEaseIn;
+   }
+   if(currentEasing == BackEaseIn)
+   {
+      logprintf("Using easing BackEaseOut");
+      return BackEaseOut;
+   }
+   if(currentEasing == BackEaseOut)
+   {
+      logprintf("Using easing BackEaseInOut");
+      return BackEaseInOut;
+   }
+   if(currentEasing == BackEaseInOut)
+   {
+      logprintf("Using easing BounceEaseIn");
+      return BounceEaseIn;
+   }
+   if(currentEasing == BounceEaseIn)
+   {
+      logprintf("Using easing BounceEaseOut");
+      return BounceEaseOut;
+   }
+   if(currentEasing == BounceEaseOut)
+   {
+      logprintf("Using easing BounceEaseInOut");
+      return BounceEaseInOut;
+   }
+   if(currentEasing == BounceEaseInOut)
+   {
+      logprintf("Using easing LinearInterpolat");
+      return LinearInterpolation;   }
+
+
+   TNLAssert(false, "Should never get here");
+   return NULL;
 }
 
 

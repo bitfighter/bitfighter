@@ -28,6 +28,8 @@ private:
    Timer mAnimationTimer;
    S32 mStartingOffset;             // For when transitioning between two already-slid out entities
    S32 mWidth;
+   AHEasingFunction mDisplayEasing;
+   AHEasingFunction mHideEasing;
 
    void adjustAnimationTimer();
    S32 getCurrentDisplayWidth() const;
@@ -35,6 +37,7 @@ private:
 
 protected:
    void setAnimationTime(U32 period);
+   void setEasings(AHEasingFunction displayEasing, AHEasingFunction hideEasing);
    bool isOpening() const;
    bool isClosing() const;          // Return true if widget is playing the closing animation
 

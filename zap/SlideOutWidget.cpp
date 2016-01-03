@@ -18,7 +18,8 @@
 namespace Zap
 {
 
-static const F32 WidgetSpeed = 0.5f;    // Pixels / ms
+   
+static const F32 WidgetSpeed = 1.3f;    // Pixels / ms
 
 // Constructor
 SlideOutWidget::SlideOutWidget()
@@ -26,6 +27,8 @@ SlideOutWidget::SlideOutWidget()
    mActivating = false;
    mWidth = 350;           // Menus should set this to a real value so they appear more quickly
    setStartingOffset(0);
+   mDisplayEasing = Easing::QuarticEaseIn;
+   mHideEasing = Easing::QuarticEaseOut;
 }
 
 
@@ -73,7 +76,7 @@ void SlideOutWidget::onDeactivated()
    setStartingOffset(0);
    setExpectedWidth(expectedWidth);
 
-   mAnimationTimer.reset(currentWidth / WidgetSpeed, expectedWidth / WidgetSpeed);
+   mAnimationTimer.reset(currentWidth / WidgetSpeed, expectedWidth / WidgetSpeed);     // setAnimationTime
    mActivating = false;
 }
 
@@ -180,8 +183,8 @@ bool SlideOutWidget::isClosing() const
 
 F32 SlideOutWidget::getFraction() const
 {
-   return mActivating ?     mAnimationTimer.getFraction(Easing::ExponentialEaseIn) :   // Showing
-                        1 - mAnimationTimer.getFraction(Easing::CircularEaseIn);       // Hiding
+   return mActivating ?     mAnimationTimer.getFraction(mDisplayEasing) :   
+                        1 - mAnimationTimer.getFraction(mHideEasing);    
 }
 
 
@@ -194,6 +197,13 @@ S32 SlideOutWidget::getAnimationTime() const
 void SlideOutWidget::setAnimationTime(U32 period)
 {
    mAnimationTimer.setPeriod(period);
+}
+
+
+void SlideOutWidget::setEasings(AHEasingFunction displayEasing, AHEasingFunction hideEasing)
+{
+  mDisplayEasing = displayEasing;
+  mHideEasing    = hideEasing;
 }
 
 

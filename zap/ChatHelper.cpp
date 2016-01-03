@@ -133,6 +133,7 @@ ChatHelper::ChatHelper()
    makeCommandCandidateList();
 
    setAnimationTime(65);    // Menu appearance time
+   setEasings(Easing::LinearInterpolation, Easing::LinearInterpolation);
 }
 
 

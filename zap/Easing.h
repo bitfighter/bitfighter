@@ -86,6 +86,9 @@ AHFloat BounceEaseIn(AHFloat p);
 AHFloat BounceEaseOut(AHFloat p);
 AHFloat BounceEaseInOut(AHFloat p);
 
+// Functions for testing UI functionality -- not intended for use in production code
+AHEasingFunction getNextEasing(AHEasingFunction currentEasing);
+
 }
 
 #endif
