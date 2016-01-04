@@ -717,7 +717,8 @@ static void loadQuickChatMessages(CIniFile *ini)
 
    for(S32 i = groups.size() - 1; i >= 0; i--)
    {
-      Vector<string> messages;
+      messages.clear();
+
       for(S32 j = 0; j < keys; j++)
       {
          string keyName = ini->getSectionName(j);
@@ -966,6 +967,13 @@ void IniSettings::loadUserSettingsFromINI(CIniFile *ini, GameSettings *settings)
 }
 
 
+static void writeComments(CIniFile *ini, const string &section, const Vector<string> &comments)
+{
+   for(S32 i = 0; i < comments.size(); i++)
+      ini->sectionComment(section, " " + comments[i]);
+}
+
+
 static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 {
    TNLAssert(ARRAYSIZE(sections) == ARRAYSIZE(headerComments), "Mismatch!");
@@ -981,31 +989,26 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    
       if(true || ini->numSectionComments(section) == 0)  // <<<==== remove true when done testing!
       {
-         const Vector<string> comments = wrapString(headerComments[i], NO_AUTO_WRAP);
-
          ini->deleteSectionComments(section);      // Delete when done testing (harmless but useless)
 
          ini->sectionComment(section, HorizontalLine);      // ----------------
-         for(S32 i = 0; i < comments.size(); i++)
-            ini->sectionComment(section, " " + comments[i]);
+         writeComments(ini, section, wrapString(headerComments[i], NO_AUTO_WRAP));
          ini->sectionComment(section, HorizontalLine);      // ----------------
 
          // Write all our section comments for items defined in the new manner
-         for(S32 i = 0; i < settings.size(); i++)
+         for(S32 j = 0; j < settings.size(); j++)
          {
             // Pass NO_AUTO_WRAP as width to disable automatic wrapping... we'll rely on \ns to do our wrapping here
-            const string prefix = settings[i]->getKey() + " - ";
-            const Vector<string> comments = wrapString(prefix + settings[i]->getComment(), NO_AUTO_WRAP, string(prefix.size(), ' '));
-            for(S32 j = 0; j < comments.size(); j++)
-               ini->sectionComment(section, " " + comments[j]);
+            const string prefix = settings[j]->getKey() + " - ";
+            writeComments(ini, section, wrapString(prefix + settings[j]->getComment(), NO_AUTO_WRAP, string(prefix.size(), ' ')));
          }
 
          ini->sectionComment(section, HorizontalLine);      // ----------------
       }
 
       // Write the settings themselves
-      for(S32 i = 0; i < settings.size(); i++)
-         ini->SetValue(section, settings[i]->getKey(), settings[i]->getIniString());
+      for(S32 j = 0; j < settings.size(); j++)
+         ini->SetValue(section, settings[j]->getKey(), settings[j]->getIniString());
    }
 
    const char *section = "Settings";
