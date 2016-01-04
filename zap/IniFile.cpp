@@ -204,6 +204,7 @@ S32 CIniFile::findKey(S32 const sectionId, const string &keyName) const
 }
 
 
+// Returns index of added section, or noID if section already exists
 S32 CIniFile::addSection(const string &keyname)
 {
    if(findSection(keyname) != noID)       // Don't create duplicate keys!
