@@ -115,6 +115,7 @@ IniSettings::~IniSettings()
 
 
 // This list is currently incomplete, will grow as we move our settings into the new structure
+// TODO: xmacro!
 static const string sections[] =
 {
    "Settings",
