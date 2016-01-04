@@ -105,12 +105,12 @@ public:
    virtual GameConnection *getConnection() = 0;
    virtual void setConnection(GameConnection *conn) = 0;
 
-   const StringTableEntry getName() const;
+   StringTableEntry getName() const;
    void setName(const StringTableEntry &name);
 
-   const U8 getPlayerFlagstoSendToMaster() const;
+   static U8 getPlayerFlagstoSendToMaster();
 
-   S32 getScore();
+   S32 getScore() const;
    void setScore(S32 score);
    void addScore(S32 score);
 
@@ -132,18 +132,18 @@ public:
 
    Timer respawnTimer;
 
-   bool isLoadoutValid(const LoadoutTracker &loadout, bool engineerAllowed);
+   static bool isLoadoutValid(const LoadoutTracker &loadout, bool engineerAllowed);
 
    void setNeedToCheckAuthenticationWithMaster(bool needToCheck);
-   bool getNeedToCheckAuthenticationWithMaster();
+   bool getNeedToCheckAuthenticationWithMaster() const;
 
-   bool isSpawnDelayed();              // Returns true if spawn has actually been delayed   
+   bool isSpawnDelayed() const;                    // Returns true if spawn has actually been delayed   
    virtual void setSpawnDelayed(bool spawnDelayed) = 0;
 
    virtual bool isPlayerInactive();                // Server only
    virtual ClientClass getClientClass() const;     // Server only
 
-   bool isBusy();
+   bool isBusy() const;
    void setIsBusy(bool isBusy);
 
    Ship *getShip();
@@ -161,17 +161,17 @@ public:
    void clearKillStreak();
    U32 getKillStreak() const;
 
-   S32 getPing();
+   S32 getPing() const;
    void setPing(S32 ping);
 
-   S32 getTeamIndex();
+   S32 getTeamIndex() const;
    void setTeamIndex(S32 teamIndex);
 
    virtual void setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges, U16 gamesPlayed);
-   bool isAuthenticated();
+   bool isAuthenticated() const;
 
-   Int<BADGE_COUNT> getBadges();
-   bool hasBadge(MeritBadges badge);
+   Int<BADGE_COUNT> getBadges() const;
+   bool hasBadge(MeritBadges badge) const;
 
    void setRole(ClientRole role, bool displayNoticeToPlayers = true);
    ClientRole getRole() const;
@@ -194,14 +194,14 @@ public:
    void sDisableShipSystems(bool disable);
 
    void setShipSystemsDisabled(bool disabled);
-   bool isShipSystemsDisabled();
+   bool isShipSystemsDisabled() const;
 
    void addKill();
    void addDeath();
 
    Nonce *getId();
 
-   U32 getReturnToGameTime();
+   U32 getReturnToGameTime() const;
    void setReturnToGameTimer(U32 time);
    bool updateReturnToGameTimer(U32 timeDelta);
    void requireReturnToGameTimer(bool required);
@@ -240,7 +240,7 @@ public:
 
    void setSpawnDelayed(bool spawnDelayed);
    bool isPlayerInactive();
-   bool hasReturnToGamePenalty();
+   bool hasReturnToGamePenalty() const;
 
    void setRating(F32 rating);
    F32 getRating();

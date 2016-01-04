@@ -61,26 +61,26 @@ void ClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges,
 }
 
 
-Int<BADGE_COUNT> ClientInfo::getBadges()
+Int<BADGE_COUNT> ClientInfo::getBadges() const
 {
    return mBadges;
 }
 
 
-bool ClientInfo::hasBadge(MeritBadges badge)
+bool ClientInfo::hasBadge(MeritBadges badge) const
 {
    return mBadges &BIT(badge);
 }
 
 
-const StringTableEntry ClientInfo::getName() const
+StringTableEntry ClientInfo::getName() const
 {
    return mName;
 }
 
 
 // An 8 bit bitmask to send to master on connection
-const U8 ClientInfo::getPlayerFlagstoSendToMaster() const
+U8 ClientInfo::getPlayerFlagstoSendToMaster()
 {
    U8 bitmask = 0;
 
@@ -98,7 +98,7 @@ void ClientInfo::setName(const StringTableEntry &name)
 }
 
 
-S32 ClientInfo::getScore()
+S32 ClientInfo::getScore() const
 {
    return mScore;
 }
@@ -141,14 +141,14 @@ void ClientInfo::setNeedToCheckAuthenticationWithMaster(bool needToCheck)
 }
 
 
-bool ClientInfo::getNeedToCheckAuthenticationWithMaster()
+bool ClientInfo::getNeedToCheckAuthenticationWithMaster() const
 {
    return mNeedToCheckAuthenticationWithMaster;
 }
 
 
 // Returns true if spawn has actually been delayed 
-bool ClientInfo::isSpawnDelayed()
+bool ClientInfo::isSpawnDelayed() const
 {
    return mSpawnDelayed;
 }
@@ -160,7 +160,7 @@ void ClientInfo::setShipSystemsDisabled(bool disabled)
 }
 
 
-bool ClientInfo::isShipSystemsDisabled()
+bool ClientInfo::isShipSystemsDisabled() const
 {
    return mShipSystemsDisabled;
 }
@@ -181,7 +181,7 @@ ClientInfo::ClientClass ClientInfo::getClientClass() const
 
 
 // Returns true if spawn has actually been delayed 
-bool ClientInfo::isBusy()
+bool ClientInfo::isBusy() const
 {
    return mIsBusy;
 }
@@ -298,7 +298,7 @@ void ClientInfo::saveActiveLoadout(const LoadoutTracker &loadout)
 }
 
 
-S32 ClientInfo::getPing()
+S32 ClientInfo::getPing() const
 {
    return mPing;
 }
@@ -310,7 +310,7 @@ void ClientInfo::setPing(S32 ping)
 }
 
 
-S32 ClientInfo::getTeamIndex()
+S32 ClientInfo::getTeamIndex() const
 {
    return mTeamIndex;
 }
@@ -336,7 +336,7 @@ S32 ClientInfo::getShowLevelUpMessage() const
 }
 
 
-bool ClientInfo::isAuthenticated()
+bool ClientInfo::isAuthenticated() const
 {
    return mIsAuthenticated;
 }
@@ -613,7 +613,7 @@ void ClientInfo::addDeath()
 
 // Methods to provide access to mReturnToGameTimer -- this is used on the server to enforce a post /idle delay
 // and used on the client to display the (approximate) time left in that delay.
-U32  ClientInfo::getReturnToGameTime()                   { return mReturnToGameTimer.getCurrent();      }
+U32  ClientInfo::getReturnToGameTime() const             { return mReturnToGameTimer.getCurrent();      }
 void ClientInfo::setReturnToGameTimer(U32 time)          {        mReturnToGameTimer.reset(time, mReturnToGameTimer.getPeriod()); }
 bool ClientInfo::updateReturnToGameTimer(U32 timeDelta)  { return mReturnToGameTimer.update(timeDelta); }
 void ClientInfo::requireReturnToGameTimer(bool required) {        mNeedReturnToGameTimer = required;    }
@@ -700,7 +700,7 @@ bool FullClientInfo::isPlayerInactive()
 }
 
 
-bool FullClientInfo::hasReturnToGamePenalty()
+bool FullClientInfo::hasReturnToGamePenalty() const
 {
    return mNeedReturnToGameTimer;
 }
