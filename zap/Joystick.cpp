@@ -89,12 +89,16 @@ bool Joystick::initJoystick(GameSettings *settings)
       return false;
    }
 
-   // Load the controller database
+   // Load the default controller database
    SDL_GameControllerAddMappingsFromFile(
          joindir(settings->getFolderManager()->getIniDir(), "gamecontrollerdb.txt").c_str()
          );
 
-   // TODO Add and load user-specific gamecontroller database
+   // Load the user-specific gamecontroller database.  These will override any
+   // in the main database since they're loaded afterwards
+   SDL_GameControllerAddMappingsFromFile(
+         joindir(settings->getFolderManager()->getIniDir(), "usergamecontrollerdb.txt").c_str()
+         );
 
    // How many joysticks are there
    S32 joystickCount = SDL_NumJoysticks();

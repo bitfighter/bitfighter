@@ -12,7 +12,7 @@
 // See http://easings.net/ for visualizations
 //
 
-#include "easing.h"
+#include "Easing.h"
 
 #include "tnlAssert.h"
 #include "tnlLog.h"
