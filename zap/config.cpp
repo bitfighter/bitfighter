@@ -872,38 +872,41 @@ static void loadServerBanList(CIniFile *ini, BanList *banList)
 void writeServerBanList(CIniFile *ini, BanList *banList)
 {
    // Refresh the server ban list
-   ini->deleteSection("ServerBanList");
-   ini->addSection("ServerBanList");
+   const char *section = "ServerBanList";
+   ini->deleteSection(section);
+   ini->addSection(section);
 
    string delim = banList->getDelimiter();
    string wildcard = banList->getWildcard();
-   if(ini->numSectionComments("ServerBanList") == 0)
+
+
+   if(ini->numSectionComments(section) == 0)
    {
-      ini->sectionComment("ServerBanList", "----------------");
-      ini->sectionComment("ServerBanList", " This section contains a list of bans that this dedicated server has enacted");
-      ini->sectionComment("ServerBanList", " ");
-      ini->sectionComment("ServerBanList", " Bans are in the following format:");
-      ini->sectionComment("ServerBanList", "   IP Address " + delim + " nickname " + delim + " Start time (ISO time format) " + delim + " Duration in minutes ");
-      ini->sectionComment("ServerBanList", " ");
-      ini->sectionComment("ServerBanList", " Examples:");
-      ini->sectionComment("ServerBanList", "   BanItem0=123.123.123.123" + delim + "watusimoto" + delim + "20110131T123000" + delim + "30");
-      ini->sectionComment("ServerBanList", "   BanItem1=" + wildcard + delim + "watusimoto" + delim + "20110131T123000" + delim + "120");
-      ini->sectionComment("ServerBanList", "   BanItem2=123.123.123.123" + delim + wildcard + delim + "20110131T123000" + delim + "30");
-      ini->sectionComment("ServerBanList", " ");
-      ini->sectionComment("ServerBanList", " Note: Wildcards (" + wildcard +") may be used for IP address and nickname" );
-      ini->sectionComment("ServerBanList", " ");
-      ini->sectionComment("ServerBanList", " Note: ISO time format is in the following format: YYYYMMDDTHH24MISS");
-      ini->sectionComment("ServerBanList", "   YYYY = four digit year, (e.g. 2011)");
-      ini->sectionComment("ServerBanList", "     MM = month (01 - 12), (e.g. 01)");
-      ini->sectionComment("ServerBanList", "     DD = day of the month, (e.g. 31)");
-      ini->sectionComment("ServerBanList", "      T = Just a one character divider between date and time, (will always be T)");
-      ini->sectionComment("ServerBanList", "   HH24 = hour of the day (0-23), (e.g. 12)");
-      ini->sectionComment("ServerBanList", "     MI = minute of the hour, (e.g. 30)");
-      ini->sectionComment("ServerBanList", "     SS = seconds of the minute, (e.g. 00) (we don't really care about these... yet)");
-      ini->sectionComment("ServerBanList", "----------------");
+      addComment("----------------");
+      addComment(" This section contains a list of bans that this dedicated server has enacted");
+      addComment(" ");
+      addComment(" Bans are in the following format:");
+      addComment("   IP Address " + delim + " nickname " + delim + " Start time (ISO time format) " + delim + " Duration in minutes ");
+      addComment(" ");
+      addComment(" Examples:");
+      addComment("   BanItem0=123.123.123.123" + delim + "watusimoto" + delim + "20110131T123000" + delim + "30");
+      addComment("   BanItem1=" + wildcard + delim + "watusimoto" + delim + "20110131T123000" + delim + "120");
+      addComment("   BanItem2=123.123.123.123" + delim + wildcard + delim + "20110131T123000" + delim + "30");
+      addComment(" ");
+      addComment(" Note: Wildcards (" + wildcard +") may be used for IP address and nickname" );
+      addComment(" ");
+      addComment(" Note: ISO time format is in the following format: YYYYMMDDTHH24MISS");
+      addComment("   YYYY = four digit year, (e.g. 2011)");
+      addComment("     MM = month (01 - 12), (e.g. 01)");
+      addComment("     DD = day of the month, (e.g. 31)");
+      addComment("      T = Just a one character divider between date and time, (will always be T)");
+      addComment("   HH24 = hour of the day (0-23), (e.g. 12)");
+      addComment("     MI = minute of the hour, (e.g. 30)");
+      addComment("     SS = seconds of the minute, (e.g. 00) (we don't really care about these... yet)");
+      addComment("----------------");
    }
 
-   ini->SetAllValues("ServerBanList", "BanItem", banList->banListToString());
+   ini->SetAllValues(section, "BanItem", banList->banListToString());
 }
 
 
@@ -1013,9 +1016,8 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
    const char *section = "Settings";
 
-   ini->sectionComment(section, " LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game");
-
-   ini->sectionComment(section, "----------------");
+   addComment(" LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game");
+   addComment("----------------");
 
 
    // And the ones still to be ported to the new system
@@ -1031,35 +1033,38 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
 static void writeLevels(CIniFile *ini)
 {
+   const char *section = "Levels";
+
    // If there is no Levels key, we'll add it here.  Otherwise, we'll do nothing so as not to clobber an existing value
    // We'll write the default level list (which may have been overridden by the cmd line) because there are no levels in the INI
-   if(ini->findSection("Levels") == ini->noID)    // Section doesn't exist... let's write one
-      ini->addSection("Levels");              
+   if(ini->findSection(section) == ini->noID)    // Section doesn't exist... let's write one
+      ini->addSection(section);              
 
-   if(ini->numSectionComments("Levels") == 0)
+   if(ini->numSectionComments(section) == 0)
    {
-      ini->sectionComment("Levels", "----------------");
-      ini->sectionComment("Levels", " All levels in this section will be loaded when you host a game in Server mode.");
-      ini->sectionComment("Levels", " You can call the level keys anything you want (within reason), and the levels will be sorted");
-      ini->sectionComment("Levels", " by key name and will appear in that order, regardless of the order the items are listed in.");
-      ini->sectionComment("Levels", " Example:");
-      ini->sectionComment("Levels", " Level1=ctf.level");
-      ini->sectionComment("Levels", " Level2=zonecontrol.level");
-      ini->sectionComment("Levels", " ... etc ...");
-      ini->sectionComment("Levels", "This list can be overidden on the command line with the -leveldir, -rootdatadir, or -levels parameters.");
-      ini->sectionComment("Levels", "----------------");
+      addComment("----------------");
+      addComment(" All levels in this section will be loaded when you host a game in Server mode.");
+      addComment(" You can call the level keys anything you want (within reason), and the levels will be sorted");
+      addComment(" by key name and will appear in that order, regardless of the order the items are listed in.");
+      addComment(" Example:");
+      addComment(" Level1=ctf.level");
+      addComment(" Level2=zonecontrol.level");
+      addComment(" ... etc ...");
+      addComment("This list can be overidden on the command line with the -leveldir, -rootdatadir, or -levels parameters.");
+      addComment("----------------");
    }
 }
 
 
-static void writePasswordSection_helper(CIniFile *ini, string section)
+static void writePasswordSection_helper(CIniFile *ini, const string &section)
 {
    ini->addSection(section);
+
    if (ini->numSectionComments(section) == 0)
    {
-      ini->sectionComment(section, "----------------");
-      ini->sectionComment(section, " This section holds passwords you've entered to gain access to various servers.");
-      ini->sectionComment(section, "----------------");
+      addComment("----------------");
+      addComment(" This section holds passwords you've entered to gain access to various servers.");
+      addComment("----------------");
    }
 }
 
@@ -1155,21 +1160,23 @@ void writeSkipList(CIniFile *ini, const Vector<string> *levelSkipList)
    // If there is no LevelSkipList key, we'll add it here.  Otherwise, we'll do nothing so as not to clobber an existing value
    // We'll write our current skip list (which may have been specified via remote server management tools)
 
-   ini->deleteSection("LevelSkipList");   // Delete all current entries to prevent user renumberings to be corrected from tripping us up
-                                          // This may the unfortunate side-effect of pushing this section to the bottom of the INI file
+   const char *section = "LevelSkipList";
 
-   ini->addSection("LevelSkipList");      // Create the key, then provide some comments for documentation purposes
+   ini->deleteSection(section);   // Delete all current entries to prevent user renumberings to be corrected from tripping us up
+                                  // This may the unfortunate side-effect of pushing this section to the bottom of the INI file
 
-   ini->sectionComment("LevelSkipList", "----------------");
-   ini->sectionComment("LevelSkipList", " Levels listed here will be skipped and will NOT be loaded, even when they are specified in");
-   ini->sectionComment("LevelSkipList", " on the command line.  You can edit this section, but it is really intended for remote");
-   ini->sectionComment("LevelSkipList", " server management.  You will experience slightly better load times if you clean this section");
-   ini->sectionComment("LevelSkipList", " out from time to time.  The names of the keys are not important, and may be changed.");
-   ini->sectionComment("LevelSkipList", " Example:");
-   ini->sectionComment("LevelSkipList", " SkipLevel1=skip_me.level");
-   ini->sectionComment("LevelSkipList", " SkipLevel2=dont_load_me_either.level");
-   ini->sectionComment("LevelSkipList", " ... etc ...");
-   ini->sectionComment("LevelSkipList", "----------------");
+   ini->addSection(section);      // Create the key, then provide some comments for documentation purposes
+
+   addComment("----------------");
+   addComment(" Levels listed here will be skipped and will NOT be loaded, even when they are specified in");
+   addComment(" on the command line.  You can edit this section, but it is really intended for remote");
+   addComment(" server management.  You will experience slightly better load times if you clean this section");
+   addComment(" out from time to time.  The names of the keys are not important, and may be changed.");
+   addComment(" Example:");
+   addComment(" SkipLevel1=skip_me.level");
+   addComment(" SkipLevel2=dont_load_me_either.level");
+   addComment(" ... etc ...");
+   addComment("----------------");
 
    Vector<string> normalizedSkipList;
 
