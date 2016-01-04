@@ -157,8 +157,7 @@ void IniSettings::clearbits(bool *bitArray, S32 itemCount)
 }
 
 
-// Produce a string of Ys and Ns based on values in bool items[], suitable for storing in the INI in a semi-readable manner.
-// And this doesn't really pack as much as serialize, but that doesn't sound as punchy.
+// Produce a string of Ys and Ns based on values in bool items[], suitable for storing in the INI in a semi-readable manner
 string IniSettings::bitArrayToIniString(const bool *bitArray, S32 itemCount)
 {
    string s = "";
@@ -170,7 +169,7 @@ string IniSettings::bitArrayToIniString(const bool *bitArray, S32 itemCount)
 }
 
 
-// Takes a string; we'll set the corresponding bool in items[] to true whenever we encounter a 'Y'.  See pack() for comment about name.
+// Takes a string; we'll set the corresponding bool in items[] to true whenever we encounter a 'Y'
 void IniSettings::iniStringToBitArray(const string &vals, bool *bitArray, S32 itemCount)
 {
    clearbits(bitArray, itemCount);
