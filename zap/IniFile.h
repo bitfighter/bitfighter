@@ -103,7 +103,7 @@ public:
    bool hasKey(const string &section, const string &key) const;
 
    // Add a section name
-   S32 addSection( const string section);
+   S32 addSection( const string &section);
 
    // Returns section names by index
    string sectionName( S32 const sectionId) const;

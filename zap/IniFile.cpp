@@ -204,9 +204,9 @@ S32 CIniFile::findKey(S32 const sectionId, const string &keyName) const
 }
 
 
-S32 CIniFile::addSection(const string keyname)  // Pass by value
+S32 CIniFile::addSection(const string &keyname)
 {
-   if(findSection(keyname) != noID)             // Don't create duplicate keys!
+   if(findSection(keyname) != noID)       // Don't create duplicate keys!
       return noID;
 
    sectionNames.push_back(keyname);
