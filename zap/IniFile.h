@@ -53,10 +53,7 @@ private:
    string section;
 
 public:
-   enum errors
-   {
-      noID = -1
-   };
+   static const S32 noID = -1;
 
    S32 lineCount;
 
