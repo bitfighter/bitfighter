@@ -30,10 +30,7 @@
 #include "stringUtils.h"      // for lcase, itos, etc.
 #include "tnlTypes.h"
 
-#include <stdio.h>
-#include <stdarg.h>
 #include <fstream>
-#include <sstream>
 
 
 #if defined(WIN32)
