@@ -221,8 +221,8 @@ string CIniFile::sectionName(S32 const sectionId) const
 {
    if(sectionId < sectionNames.size())
       return sectionNames[sectionId];
-   else
-      return "";
+   
+   return "";
 }
 
 
@@ -230,6 +230,7 @@ string CIniFile::ValueName(S32 const sectionId, S32 const valueID) const
 {
    if(sectionId < sections.size() && valueID < sections[sectionId].keys.size())
       return sections[sectionId].keys[valueID];
+
    return "";
 }
 
@@ -239,6 +240,7 @@ string CIniFile::ValueName(const string &keyname, S32 const valueID) const
    S32 sectionId = findSection(keyname);
    if(sectionId == noID)
       return "";
+
    return ValueName(sectionId, valueID);
 }
 
@@ -277,9 +279,11 @@ bool CIniFile::SetValue(const string &section, const string &key, const string &
    {
       if(!create)
          return false;
+
       sections[sectionId].keys.push_back(key);
       sections[sectionId].values.push_back(value);
-   } else
+   } 
+   else
       sections[sectionId].values[valueID] = value;
 
    return true;
