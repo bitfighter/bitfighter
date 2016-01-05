@@ -933,10 +933,11 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    for(U32 i = 0; i < ARRAYSIZE(sections); i++)
       loadSettings(ini, iniSettings, sections[i]);
 
-
    // This section can be modernized, the remainder maybe not
    loadGeneralSettings(ini, iniSettings);
 
+   // The following sections are all oddballs for one reason or another, and probably cannot be parsed
+   // using a standard settings process
    loadLoadoutPresets(ini, settings);
    loadPluginBindings(ini, iniSettings);
 
