@@ -138,7 +138,6 @@ static const string sections[] =
 #  undef SECTION_ITEM
 };
 
-// Aligned with 'sections' above
 static const string headerComments[] = 
 {
 #  define SECTION_ITEM(a, comment) comment,
