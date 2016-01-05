@@ -359,9 +359,7 @@ void loadLevelSkipList(CIniFile *ini, GameSettings *settings)
 }
 
 
-
 typedef Vector<AbstractSetting<IniKey::SettingsItem> *> SettingsList;
-
 
 static void loadSettings(CIniFile *ini, IniSettings *iniSettings, const string &section)
 {
