@@ -115,35 +115,35 @@ IniSettings::~IniSettings()
 
 
 // This list is currently incomplete, will grow as we move our settings into the new structure
-// TODO: xmacro!
+#define SECTION_TABLE                                                                                                                                                        \
+   SECTION_ITEM("Settings",        "Settings entries contain a number of different options.")                                                                                \
+   SECTION_ITEM("Effects",         "Various visual effects.")                                                                                                                \
+   SECTION_ITEM("Host",            "Items in this section control how Bitfighter works when you are hosting a game.  See also Host-Voting.")                                 \
+   SECTION_ITEM("Host-Voting",     "Control how voting works on the server.  The default values work pretty well, but if you want to tweak them, go ahead!\n"                \
+                                   "Yes and No votes, and abstentions, have different weights.  When a vote is conducted, the total value of all votes (or non-votes)\n"     \
+                                   "is added up, and if the result is greater than 0, the vote passes.  Otherwise it fails.  You can adjust the weight of the votes below.") \
+   SECTION_ITEM("EditorSettings",  "EditorSettings entries relate to items in the editor.")                                                                                  \
+   SECTION_ITEM("Updater",         "The Updater section contains entries that control how game updates are handled.")                                                        \
+   SECTION_ITEM("Diagnostics",     "Diagnostic entries can be used to enable or disable particular actions for debugging purposes.\n"                                        \
+                                   "You probably can't use any of these settings to enhance your gameplay experience!")                                                      \
+   SECTION_ITEM("Sounds",          "Sound settings.")                                                                                                                        \
+   SECTION_ITEM("Testing",         "Experimental and possibly short-lived settings use for testing.  They may be removed at any time,\n"                                     \
+                                   "even in the next version of Bitfighter.")                                                                                                \
+
+
 static const string sections[] =
 {
-   "Settings",
-   "Effects",
-   "Host",
-   "Host-Voting",
-   "EditorSettings",
-   "Updater",
-   "Diagnostics",
-   "Sounds",
-   "Testing"
+#  define SECTION_ITEM(section, b) section,
+      SECTION_TABLE
+#  undef SECTION_ITEM
 };
+
 // Aligned with 'sections' above
 static const string headerComments[] = 
 {
-   "Settings entries contain a number of different options.",
-   "Various visual effects.",
-   "Items in this section control how Bitfighter works when you are hosting a game.  See also Host-Voting.",
-   "Control how voting works on the server.  The default values work pretty well, but if you want to tweak them, go ahead!\n"
-      "Yes and No votes, and abstentions, have different weights.  When a vote is conducted, the total value of all votes (or non-votes)\n"
-      "is added up, and if the result is greater than 0, the vote passes.  Otherwise it fails.  You can adjust the weight of the votes below.",
-   "EditorSettings entries relate to items in the editor",
-   "The Updater section contains entries that control how game updates are handled.",
-   "Diagnostic entries can be used to enable or disable particular actions for debugging purposes.\n"
-      "You probably can't use any of these settings to enhance your gameplay experience!",
-   "Sound settings",
-   "Experimental and possibly short-lived settings use for testing.  They may be removed at any time,\n"
-      "even in the next version of Bitfighter."
+#  define SECTION_ITEM(a, comment) comment,
+      SECTION_TABLE
+#  undef SECTION_ITEM
 };
 
 
