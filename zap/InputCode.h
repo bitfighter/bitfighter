@@ -25,87 +25,87 @@ namespace Zap
 
 // Note that the BindingSet member name referenced below doesn't actually appear anywhere else... it could be any aribtrary and unique token
 
-/*-----------------------------------------------------BINDING_TABLE---------------------------------------------------------*/
-/*                                                            BindingSet         Def. kb           Def. js           */
-/*            Enum                      Name in INI           member name        binding           binding           */
-#define BINDING_TABLE                                                                                                 \
-   BINDING( BINDING_SELWEAP1,           "SelWeapon1",         inputSELWEAP1,     KEY_1,            KEY_1            ) \
-   BINDING( BINDING_SELWEAP2,           "SelWeapon2",         inputSELWEAP2,     KEY_2,            KEY_2            ) \
-   BINDING( BINDING_SELWEAP3,           "SelWeapon3",         inputSELWEAP3,     KEY_3,            KEY_3            ) \
-   BINDING( BINDING_ADVWEAP,            "SelNextWeapon",      inputADVWEAP,      KEY_E,            BUTTON_1         ) \
-   BINDING( BINDING_ADVWEAP2,           "SelNextWeapon2",     inputADVWEAP2,     MOUSE_WHEEL_UP,   MOUSE_WHEEL_UP   ) \
-   BINDING( BINDING_PREVWEAP,           "SelPrevWeapon",      inputPREVWEAP,     MOUSE_WHEEL_DOWN, MOUSE_WHEEL_DOWN ) \
-   BINDING( BINDING_CMDRMAP,            "ShowCmdrMap",        inputCMDRMAP,      KEY_C,            BUTTON_2         ) \
-   BINDING( BINDING_TEAMCHAT,           "TeamChat",           inputTEAMCHAT,     KEY_T,            KEY_T            ) \
-   BINDING( BINDING_GLOBCHAT,           "GlobalChat",         inputGLOBCHAT,     KEY_G,            KEY_G            ) \
-   BINDING( BINDING_QUICKCHAT,          "QuickChat",          inputQUICKCHAT,    KEY_V,            BUTTON_3         ) \
-   BINDING( BINDING_CMDCHAT,            "Command",            inputCMDCHAT,      KEY_SLASH,        KEY_SLASH        ) \
-   BINDING( BINDING_LOADOUT,            "ShowLoadoutMenu",    inputLOADOUT,      KEY_Z,            BUTTON_4         ) \
-   BINDING( BINDING_MOD1,               "ActivateModule1",    inputMOD1,         KEY_SPACE,        BUTTON_TRIGGER_LEFT         ) \
-   BINDING( BINDING_MOD2,               "ActivateModule2",    inputMOD2,         MOUSE_RIGHT,      BUTTON_6         ) \
-   BINDING( BINDING_FIRE,               "Fire",               inputFIRE,         MOUSE_LEFT,       MOUSE_LEFT       ) \
-   BINDING( BINDING_DROPITEM,           "DropItem",           inputDROPITEM,     KEY_B,            KEY_B            ) \
-   BINDING( BINDING_TOGVOICE,           "VoiceChat",          inputTOGVOICE,     KEY_R,            KEY_R            ) \
-   BINDING( BINDING_UP,                 "ShipUp",             inputUP,           KEY_W,            KEY_UP           ) \
-   BINDING( BINDING_DOWN,               "ShipDown",           inputDOWN,         KEY_S,            KEY_DOWN         ) \
-   BINDING( BINDING_LEFT,               "ShipLeft",           inputLEFT,         KEY_A,            KEY_LEFT         ) \
-   BINDING( BINDING_RIGHT,              "ShipRight",          inputRIGHT,        KEY_D,            KEY_RIGHT        ) \
-   BINDING( BINDING_SCRBRD,             "ShowScoreboard",     inputSCRBRD,       KEY_TAB,          BUTTON_5         ) \
-   BINDING( BINDING_MISSION,            "Mission",            inputMISSION,      KEY_F2,           KEY_F2           ) \
-   BINDING( BINDING_TOGGLE_RATING,      "ToggleRating",       inputTOGGLERATING, KEY_EQUALS,       KEY_EQUALS       ) \
-   BINDING( BINDING_FPS,                "FPS",                keyFPS,            KEY_F6,           KEY_F6           ) \
-   BINDING( BINDING_LOAD_PRESET_1,      "LoadLoadoutPreset1", keyLoadPreset1,    KEY_ALT_1,        KEY_ALT_1        ) \
-   BINDING( BINDING_LOAD_PRESET_2,      "LoadLoadoutPreset2", keyLoadPreset2,    KEY_ALT_2,        KEY_ALT_2        ) \
-   BINDING( BINDING_LOAD_PRESET_3,      "LoadLoadoutPreset3", keyLoadPreset3,    KEY_ALT_3,        KEY_ALT_3        ) \
-   BINDING( BINDING_SAVE_PRESET_1,      "SaveLoadoutPreset1", keySavePreset1,    KEY_CTRL_1,       KEY_CTRL_1       ) \
-   BINDING( BINDING_SAVE_PRESET_2,      "SaveLoadoutPreset2", keySavePreset2,    KEY_CTRL_2,       KEY_CTRL_2       ) \
-   BINDING( BINDING_SAVE_PRESET_3,      "SaveLoadoutPreset3", keySavePreset3,    KEY_CTRL_3,       KEY_CTRL_3       ) \
-/*---------------------------------------------------------------------------------------------------------------------------*/
+/*-----------------------------------------------------BINDING_TABLE----------------------------------------------------*/
+/*                                                            BindingSet         Def. kb           Def. js              */
+/*            Enum                      Name in INI           member name        binding           binding              */
+#define BINDING_TABLE                                                                                                    \
+   BINDING( BINDING_SELWEAP1,           "SelWeapon1",         inputSELWEAP1,     KEY_1,            KEY_1               ) \
+   BINDING( BINDING_SELWEAP2,           "SelWeapon2",         inputSELWEAP2,     KEY_2,            KEY_2               ) \
+   BINDING( BINDING_SELWEAP3,           "SelWeapon3",         inputSELWEAP3,     KEY_3,            KEY_3               ) \
+   BINDING( BINDING_ADVWEAP,            "SelNextWeapon",      inputADVWEAP,      KEY_E,            BUTTON_1            ) \
+   BINDING( BINDING_ADVWEAP2,           "SelNextWeapon2",     inputADVWEAP2,     MOUSE_WHEEL_UP,   MOUSE_WHEEL_UP      ) \
+   BINDING( BINDING_PREVWEAP,           "SelPrevWeapon",      inputPREVWEAP,     MOUSE_WHEEL_DOWN, MOUSE_WHEEL_DOWN    ) \
+   BINDING( BINDING_CMDRMAP,            "ShowCmdrMap",        inputCMDRMAP,      KEY_C,            BUTTON_2            ) \
+   BINDING( BINDING_TEAMCHAT,           "TeamChat",           inputTEAMCHAT,     KEY_T,            KEY_T               ) \
+   BINDING( BINDING_GLOBCHAT,           "GlobalChat",         inputGLOBCHAT,     KEY_G,            KEY_G               ) \
+   BINDING( BINDING_QUICKCHAT,          "QuickChat",          inputQUICKCHAT,    KEY_V,            BUTTON_3            ) \
+   BINDING( BINDING_CMDCHAT,            "Command",            inputCMDCHAT,      KEY_SLASH,        KEY_SLASH           ) \
+   BINDING( BINDING_LOADOUT,            "ShowLoadoutMenu",    inputLOADOUT,      KEY_Z,            BUTTON_4            ) \
+   BINDING( BINDING_MOD1,               "ActivateModule1",    inputMOD1,         KEY_SPACE,        BUTTON_TRIGGER_LEFT ) \
+   BINDING( BINDING_MOD2,               "ActivateModule2",    inputMOD2,         MOUSE_RIGHT,      BUTTON_6            ) \
+   BINDING( BINDING_FIRE,               "Fire",               inputFIRE,         MOUSE_LEFT,       MOUSE_LEFT          ) \
+   BINDING( BINDING_DROPITEM,           "DropItem",           inputDROPITEM,     KEY_B,            KEY_B               ) \
+   BINDING( BINDING_TOGVOICE,           "VoiceChat",          inputTOGVOICE,     KEY_R,            KEY_R               ) \
+   BINDING( BINDING_UP,                 "ShipUp",             inputUP,           KEY_W,            KEY_UP              ) \
+   BINDING( BINDING_DOWN,               "ShipDown",           inputDOWN,         KEY_S,            KEY_DOWN            ) \
+   BINDING( BINDING_LEFT,               "ShipLeft",           inputLEFT,         KEY_A,            KEY_LEFT            ) \
+   BINDING( BINDING_RIGHT,              "ShipRight",          inputRIGHT,        KEY_D,            KEY_RIGHT           ) \
+   BINDING( BINDING_SCRBRD,             "ShowScoreboard",     inputSCRBRD,       KEY_TAB,          BUTTON_5            ) \
+   BINDING( BINDING_MISSION,            "Mission",            inputMISSION,      KEY_F2,           KEY_F2              ) \
+   BINDING( BINDING_TOGGLE_RATING,      "ToggleRating",       inputTOGGLERATING, KEY_EQUALS,       KEY_EQUALS          ) \
+   BINDING( BINDING_FPS,                "FPS",                keyFPS,            KEY_F6,           KEY_F6              ) \
+   BINDING( BINDING_LOAD_PRESET_1,      "LoadLoadoutPreset1", keyLoadPreset1,    KEY_ALT_1,        KEY_ALT_1           ) \
+   BINDING( BINDING_LOAD_PRESET_2,      "LoadLoadoutPreset2", keyLoadPreset2,    KEY_ALT_2,        KEY_ALT_2           ) \
+   BINDING( BINDING_LOAD_PRESET_3,      "LoadLoadoutPreset3", keyLoadPreset3,    KEY_ALT_3,        KEY_ALT_3           ) \
+   BINDING( BINDING_SAVE_PRESET_1,      "SaveLoadoutPreset1", keySavePreset1,    KEY_CTRL_1,       KEY_CTRL_1          ) \
+   BINDING( BINDING_SAVE_PRESET_2,      "SaveLoadoutPreset2", keySavePreset2,    KEY_CTRL_2,       KEY_CTRL_2          ) \
+   BINDING( BINDING_SAVE_PRESET_3,      "SaveLoadoutPreset3", keySavePreset3,    KEY_CTRL_3,       KEY_CTRL_3          ) \
+/*----------------------------------------------------------------------------------------------------------------------*/
 
 
-/*----------------------------------------EDITOR_BINDING_TABLE-------------------------------------------*/
-/*                                                                  BindingSet           Def. kb         */
-/*                       Enum                  Name in INI          member name          binding         */
-#define EDITOR_BINDING_TABLE                                                                              \
-   EDITOR_BINDING( BINDING_FLIP_HORIZ,        "FlipItemHorizontal", keyFlipItemHoriz,   "H"             ) \
-   EDITOR_BINDING( BINDING_PASTE_SELECTION,   "PasteSelection",     keyPasteSelection,  "Ctrl+V"        ) \
-   EDITOR_BINDING( BINDING_FLIP_VERTICAL,     "FlipItemVertical",   keyFlipItemVertl,   "V"             ) \
-   EDITOR_BINDING( BINDING_RELOAD_LEVEL,      "ReloadLevel",        keyReloadLevel,     "Ctrl+Alt+Shift+L"  ) \
-   EDITOR_BINDING( BINDING_REDO_ACTION,       "RedoAction",         keyRedoAction,      "Ctrl+Shift+Z"  ) \
-   EDITOR_BINDING( BINDING_UNDO_ACTION,       "UndoAction",         keyUndoAction,      "Ctrl+Z"        ) \
-   EDITOR_BINDING( BINDING_RESET_VIEW,        "ResetView",          keyResetView,       "Z"             ) \
-   EDITOR_BINDING( BINDING_LVLGEN_SCRIPT,     "RunLevelgenScript",  keyRunLvlgenScript, "Ctrl+K"        ) \
-   EDITOR_BINDING( BINDING_ROTATE_CENTROID,   "RotateCentroid",     keyRotateCentroid,  "Alt+R"         ) \
-   EDITOR_BINDING( BINDING_ROTATE_ORIGIN,     "RotateOrigin",       keyRotateOrigin,    "Ctrl+Alt+R"    ) \
-   EDITOR_BINDING( BINDING_SPIN_CCW,          "RotateSpinCCW",      keyRotateSpinCCW,   "R"             ) \
-   EDITOR_BINDING( BINDING_SPIN_CW,           "RotateSpinCW",       keyRotateSpinCW,    "Shift+R"       ) \
-   EDITOR_BINDING( BINDING_ROTATE_CCW_ORIGIN, "RotateCCWOrigin",    keyRotateCCWOrigin, "Ctrl+R"        ) \
-   EDITOR_BINDING( BINDING_ROTATE_CW_ORIGIN,  "RotateCWOrigin",     keyRotateCWOrigin,  "Ctrl+Shift+R"  ) \
-   EDITOR_BINDING( BINDING_INSERT_GEN_ITEMS,  "InsertGenItems",     keyInsertGenItems,  "Ctrl+I"        ) \
-   EDITOR_BINDING( BINDING_SAVE_LEVEL,        "SaveLevel",          keySaveLevel,       "Ctrl+S"        ) \
-   EDITOR_BINDING( BINDING_ZOOM_IN,           "ZoomIn",             keyZoomIn,          "E"             ) \
-   EDITOR_BINDING( BINDING_ZOOM_OUT,          "ZoomOut",            keyZoomOut,         "C"             ) \
-   EDITOR_BINDING( BINDING_JOIN_SELECTION,    "JoinSelection",      keyJoinSelection,   "J"             ) \
-   EDITOR_BINDING( BINDING_SELECT_EVERYTHING, "SelectEverything",   keySelectAll,       "Ctrl+A"        ) \
-   EDITOR_BINDING( BINDING_RESIZE_SELECTION,  "ResizeSelection",    keyResizeSelection, "Ctrl+Shift+X"  ) \
-   EDITOR_BINDING( BINDING_CUT_SELECTION,     "CutSelection",       keyCutSelection,    "Ctrl+X"        ) \
-   EDITOR_BINDING( BINDING_COPY_SELECTION,    "CopySelection",      keyCopySelection,   "Ctrl+C"        ) \
-   EDITOR_BINDING( BINDING_LEVEL_PARAM_EDITOR,"GameParameterEditor",keyGameParamEditor, "F3"            ) \
-   EDITOR_BINDING( BINDING_TEAM_EDITOR,       "TeamEditor",         keyTeamEditor,      "F2"            ) \
-   EDITOR_BINDING( BINDING_PLACE_TELEPORTER,  "PlaceNewTeleporter", keyPlaceTeleporter, "T"             ) \
-   EDITOR_BINDING( BINDING_PLACE_SPEEDZONE,   "PlaceNewSpeedZone",  keyPlaceSpeedZone,  "P"             ) \
-   EDITOR_BINDING( BINDING_PLACE_SPAWN,       "PlaceNewSpawn",      keyPlaceSpawn,      "G"             ) \
-   EDITOR_BINDING( BINDING_PLACE_SPYBUG,      "PlaceNewSpybug",     keyPlaceSpybug,     "Ctrl+Shift+B"  ) \
-   EDITOR_BINDING( BINDING_PLACE_REPAIR,      "PlaceNewRepair",     keyPlaceRepair,     "B"             ) \
-   EDITOR_BINDING( BINDING_PLACE_TURRET,      "PlaceNewTurret",     keyPlaceTurret,     "Y"             ) \
-   EDITOR_BINDING( BINDING_PLACE_MINE,        "PlaceNewMine",       keyPlaceMine,       "M"             ) \
-   EDITOR_BINDING( BINDING_PLACE_FORCEFIELD,  "PlaceNewForcefield", keyPlaceForcefield, "F"             ) \
-   EDITOR_BINDING( BINDING_NO_SNAPPING,       "NoSnapping",         keyNoSnapping,      "Shift+Space"   ) \
-   EDITOR_BINDING( BINDING_NO_GRID_SNAPPING,  "NoGridSnapping",     keyNoGridSnapping,  "Space"         ) \
-   EDITOR_BINDING( BINDING_PREVIEW_MODE,      "PreviewMode",        keyPreviewMode,     "Tab"           ) \
-   EDITOR_BINDING( BINDING_DOCKMODE_ITEMS,    "DockmodeItems",      keyDockmodeItems,   "F4"            ) \
-   EDITOR_BINDING( BINDING_TOGGLE_EDIT_MODE,  "ToggleEditMode",     keyToggleEditMode,  "Insert"        ) \
-/*-------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------EDITOR_BINDING_TABLE----------------------------------------------*/
+/*                                                                  BindingSet           Def. kb            */
+/*                       Enum                  Name in INI          member name          binding            */
+#define EDITOR_BINDING_TABLE                                                                                 \
+   EDITOR_BINDING( BINDING_FLIP_HORIZ,        "FlipItemHorizontal", keyFlipItemHoriz,   "H"                ) \
+   EDITOR_BINDING( BINDING_PASTE_SELECTION,   "PasteSelection",     keyPasteSelection,  "Ctrl+V"           ) \
+   EDITOR_BINDING( BINDING_FLIP_VERTICAL,     "FlipItemVertical",   keyFlipItemVertl,   "V"                ) \
+   EDITOR_BINDING( BINDING_RELOAD_LEVEL,      "ReloadLevel",        keyReloadLevel,     "Ctrl+Alt+Shift+L" ) \
+   EDITOR_BINDING( BINDING_REDO_ACTION,       "RedoAction",         keyRedoAction,      "Ctrl+Shift+Z"     ) \
+   EDITOR_BINDING( BINDING_UNDO_ACTION,       "UndoAction",         keyUndoAction,      "Ctrl+Z"           ) \
+   EDITOR_BINDING( BINDING_RESET_VIEW,        "ResetView",          keyResetView,       "Z"                ) \
+   EDITOR_BINDING( BINDING_LVLGEN_SCRIPT,     "RunLevelgenScript",  keyRunLvlgenScript, "Ctrl+K"           ) \
+   EDITOR_BINDING( BINDING_ROTATE_CENTROID,   "RotateCentroid",     keyRotateCentroid,  "Alt+R"            ) \
+   EDITOR_BINDING( BINDING_ROTATE_ORIGIN,     "RotateOrigin",       keyRotateOrigin,    "Ctrl+Alt+R"       ) \
+   EDITOR_BINDING( BINDING_SPIN_CCW,          "RotateSpinCCW",      keyRotateSpinCCW,   "R"                ) \
+   EDITOR_BINDING( BINDING_SPIN_CW,           "RotateSpinCW",       keyRotateSpinCW,    "Shift+R"          ) \
+   EDITOR_BINDING( BINDING_ROTATE_CCW_ORIGIN, "RotateCCWOrigin",    keyRotateCCWOrigin, "Ctrl+R"           ) \
+   EDITOR_BINDING( BINDING_ROTATE_CW_ORIGIN,  "RotateCWOrigin",     keyRotateCWOrigin,  "Ctrl+Shift+R"     ) \
+   EDITOR_BINDING( BINDING_INSERT_GEN_ITEMS,  "InsertGenItems",     keyInsertGenItems,  "Ctrl+I"           ) \
+   EDITOR_BINDING( BINDING_SAVE_LEVEL,        "SaveLevel",          keySaveLevel,       "Ctrl+S"           ) \
+   EDITOR_BINDING( BINDING_ZOOM_IN,           "ZoomIn",             keyZoomIn,          "E"                ) \
+   EDITOR_BINDING( BINDING_ZOOM_OUT,          "ZoomOut",            keyZoomOut,         "C"                ) \
+   EDITOR_BINDING( BINDING_JOIN_SELECTION,    "JoinSelection",      keyJoinSelection,   "J"                ) \
+   EDITOR_BINDING( BINDING_SELECT_EVERYTHING, "SelectEverything",   keySelectAll,       "Ctrl+A"           ) \
+   EDITOR_BINDING( BINDING_RESIZE_SELECTION,  "ResizeSelection",    keyResizeSelection, "Ctrl+Shift+X"     ) \
+   EDITOR_BINDING( BINDING_CUT_SELECTION,     "CutSelection",       keyCutSelection,    "Ctrl+X"           ) \
+   EDITOR_BINDING( BINDING_COPY_SELECTION,    "CopySelection",      keyCopySelection,   "Ctrl+C"           ) \
+   EDITOR_BINDING( BINDING_LEVEL_PARAM_EDITOR,"GameParameterEditor",keyGameParamEditor, "F3"               ) \
+   EDITOR_BINDING( BINDING_TEAM_EDITOR,       "TeamEditor",         keyTeamEditor,      "F2"               ) \
+   EDITOR_BINDING( BINDING_PLACE_TELEPORTER,  "PlaceNewTeleporter", keyPlaceTeleporter, "T"                ) \
+   EDITOR_BINDING( BINDING_PLACE_SPEEDZONE,   "PlaceNewSpeedZone",  keyPlaceSpeedZone,  "P"                ) \
+   EDITOR_BINDING( BINDING_PLACE_SPAWN,       "PlaceNewSpawn",      keyPlaceSpawn,      "G"                ) \
+   EDITOR_BINDING( BINDING_PLACE_SPYBUG,      "PlaceNewSpybug",     keyPlaceSpybug,     "Ctrl+Shift+B"     ) \
+   EDITOR_BINDING( BINDING_PLACE_REPAIR,      "PlaceNewRepair",     keyPlaceRepair,     "B"                ) \
+   EDITOR_BINDING( BINDING_PLACE_TURRET,      "PlaceNewTurret",     keyPlaceTurret,     "Y"                ) \
+   EDITOR_BINDING( BINDING_PLACE_MINE,        "PlaceNewMine",       keyPlaceMine,       "M"                ) \
+   EDITOR_BINDING( BINDING_PLACE_FORCEFIELD,  "PlaceNewForcefield", keyPlaceForcefield, "F"                ) \
+   EDITOR_BINDING( BINDING_NO_SNAPPING,       "NoSnapping",         keyNoSnapping,      "Shift+Space"      ) \
+   EDITOR_BINDING( BINDING_NO_GRID_SNAPPING,  "NoGridSnapping",     keyNoGridSnapping,  "Space"            ) \
+   EDITOR_BINDING( BINDING_PREVIEW_MODE,      "PreviewMode",        keyPreviewMode,     "Tab"              ) \
+   EDITOR_BINDING( BINDING_DOCKMODE_ITEMS,    "DockmodeItems",      keyDockmodeItems,   "F4"               ) \
+   EDITOR_BINDING( BINDING_TOGGLE_EDIT_MODE,  "ToggleEditMode",     keyToggleEditMode,  "Insert"           ) \
+/*----------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------SPECIAL_BINDING_TABLE----------------------------------------------*/
 /*                                                              BindingSet          Def. kb    Def. js      */
@@ -117,7 +117,8 @@ namespace Zap
    SPECIAL_BINDING( BINDING_LOBBYCHAT,      "OutOfGameChat",    keyLOBBYCHAT,      "F5",       "F5"      )  \
    SPECIAL_BINDING( BINDING_DIAG,           "Diagnostics",      keyDIAG,           "F7",       "F7"      )  \
 
-/*-------------------------------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------------------*/
    
 
 enum BindingNameEnum {
