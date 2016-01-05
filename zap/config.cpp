@@ -622,10 +622,12 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 }
 
 
-static void insertQuickChatMessageCommonBits(CIniFile *ini, const string &key, 
-                                   MessageType messageType, 
-                                   InputCode keyCode, InputCode buttonCode, 
-                                   const string &caption)
+static void insertQuickChatMessageCommonBits(CIniFile *ini, 
+                                             const string &key, 
+                                             MessageType messageType, 
+                                             InputCode keyCode, 
+                                             InputCode buttonCode, 
+                                             const string &caption)
 {
    ini->setValue(key, "Key", InputCodeManager::inputCodeToString(keyCode));
    ini->setValue(key, "Button", InputCodeManager::inputCodeToString(buttonCode));
@@ -634,9 +636,12 @@ static void insertQuickChatMessageCommonBits(CIniFile *ini, const string &key,
 }
 
 
-static void insertQuickChatMessageSection(CIniFile *ini, S32 group, MessageType messageType, 
-                                   InputCode keyCode, InputCode buttonCode, 
-                                   const string &caption)
+static void insertQuickChatMessageSection(CIniFile *ini, 
+                                          S32 group, 
+                                          MessageType messageType, 
+                                          InputCode keyCode, 
+                                          InputCode buttonCode, 
+                                          const string &caption)
 {
    const string key = "QuickChatMessagesGroup" + itos(group);
 
@@ -644,9 +649,14 @@ static void insertQuickChatMessageSection(CIniFile *ini, S32 group, MessageType 
 }
 
 
-static void insertQuickChatMessage(CIniFile *ini, S32 group, S32 messageId, MessageType messageType, 
-                                   InputCode keyCode, InputCode buttonCode, 
-                                   const string &caption, const string &message)
+static void insertQuickChatMessage(CIniFile *ini, 
+                                   S32 group, 
+                                   S32 messageId, 
+                                   MessageType messageType, 
+                                   InputCode keyCode, 
+                                   InputCode buttonCode, 
+                                   const string &caption, 
+                                   const string &message)
 {
    const string key = "QuickChatMessagesGroup" + itos(group) + "_Message" + itos(messageId);
 
