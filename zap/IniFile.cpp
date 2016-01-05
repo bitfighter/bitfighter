@@ -293,7 +293,7 @@ bool CIniFile::setAllValues(const string &section, const string &prefix, const V
 
    for(S32 i = 0; i < values.size(); i++)
    {
-      dSprintf(key, 255, "%s%d", prefix.c_str(), i);
+      dSprintf(key, sizeof(key), "%s%d", prefix.c_str(), i);
       stat &= setValue(section, key, values[i], true);
    }
 
