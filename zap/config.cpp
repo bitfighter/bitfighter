@@ -564,7 +564,7 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
    //               InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1, mode)));
 
 #define BINDING(enumVal, b, c, d, e)                                                                            \
-      ini->SetValue(section, InputCodeManager::getBindingName(enumVal),                                         \
+      ini->setValue(section, InputCodeManager::getBindingName(enumVal),                                         \
                               InputCodeManager::inputCodeToString(inputCodeManager->getBinding(enumVal, mode))); 
     BINDING_TABLE
 #undef BINDING
@@ -586,7 +586,7 @@ static void writeEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMan
 #define EDITOR_BINDING(editorEnumVal, b, c, d)                                               \
       key = InputCodeManager::getEditorBindingName(editorEnumVal);                           \
       if(!ini->hasKey(section, key))                                                         \
-         ini->SetValue(section, key, inputCodeManager->getEditorBinding(editorEnumVal));
+         ini->setValue(section, key, inputCodeManager->getEditorBinding(editorEnumVal));
     EDITOR_BINDING_TABLE
 #undef EDITOR_BINDING
 }
@@ -606,7 +606,7 @@ static void writeSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMa
 #define SPECIAL_BINDING(specialEnumVal, b, c, d, e)                                         \
       key = InputCodeManager::getSpecialBindingName(specialEnumVal);                        \
       if(!ini->hasKey(section, key))                                                        \
-         ini->SetValue(section, key, inputCodeManager->getSpecialBinding(specialEnumVal, mode));
+         ini->setValue(section, key, inputCodeManager->getSpecialBinding(specialEnumVal, mode));
     SPECIAL_BINDING_TABLE
 #undef SPECIAL_BINDING
 }
