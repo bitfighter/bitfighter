@@ -217,13 +217,13 @@ static void loadForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
    // AlwaysPingList will default to broadcast, can modify the list in the INI
    // http://learn-networking.com/network-design/how-a-broadcast-address-works
    iniSettings->alwaysPingList.clear();
-   parseString(ini->GetValue("Connections", "AlwaysPingList", "IP:Broadcast:28000"), iniSettings->alwaysPingList, ',');
+   parseString(ini->getValue("Connections", "AlwaysPingList", "IP:Broadcast:28000"), iniSettings->alwaysPingList, ',');
 
    // These are the servers we found last time we were able to contact the master.
    // In case the master server fails, we can use this list to try to find some game servers. 
    //parseString(ini->GetValue("ForeignServers", "ForeignServerList"), prevServerListFromMaster, ',');
    iniSettings->prevServerListFromMaster.clear();
-   ini->GetAllValues("RecentForeignServers", iniSettings->prevServerListFromMaster);
+   ini->getAllValues("RecentForeignServers", iniSettings->prevServerListFromMaster);
 }
 
 
@@ -252,7 +252,7 @@ static void writeLoadoutPresets(CIniFile *ini, GameSettings *settings)
       string presetStr = settings->getLoadoutPreset(i).toString(true);
 
       if(presetStr != "")
-         ini->SetValue(section, "Preset" + itos(i + 1), presetStr);
+         ini->setValue(section, "Preset" + itos(i + 1), presetStr);
    }
 }
 
@@ -285,7 +285,7 @@ static void writePluginBindings(CIniFile *ini, IniSettings *iniSettings)
       plugins.push_back(string(binding.key + "|" + binding.script + "|" + binding.help));
    }
 
-   ini->SetAllValues(section, "Plugin", plugins);
+   ini->setAllValues(section, "Plugin", plugins);
 }
 
 
@@ -304,7 +304,7 @@ static void writeConnectionsInfo(CIniFile *ini, IniSettings *iniSettings)
    }
 
    // Creates comma delimited list
-   ini->SetValue(section, "AlwaysPingList", listToString(iniSettings->alwaysPingList, ","));
+   ini->setValue(section, "AlwaysPingList", listToString(iniSettings->alwaysPingList, ","));
 }
 
 
@@ -322,7 +322,7 @@ static void writeForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
       addComment("----------------");
    }
 
-   ini->SetAllValues(section, "Server", iniSettings->prevServerListFromMaster);
+   ini->setAllValues(section, "Server", iniSettings->prevServerListFromMaster);
 }
 
 
@@ -335,14 +335,14 @@ static void writeForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
       Vector<string> levelValNames;
 
       for(S32 i = 0; i < numLevels; i++)
-         levelValNames.push_back(ini->ValueName("Levels", i));
+         levelValNames.push_back(ini->valueName("Levels", i));
 
       levelValNames.sort(alphaSort);
 
       string level;
       for(S32 i = 0; i < numLevels; i++)
       {
-         level = ini->GetValue("Levels", levelValNames[i], "");
+         level = ini->getValue("Levels", levelValNames[i], "");
          if (level != "")
             iniSettings->levelList.push_back(StringTableEntry(level.c_str()));
       }
@@ -355,7 +355,7 @@ static void writeForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
 void loadLevelSkipList(CIniFile *ini, GameSettings *settings)
 {
    settings->getLevelSkipList()->clear();
-   ini->GetAllValues("LevelSkipList", *settings->getLevelSkipList());
+   ini->getAllValues("LevelSkipList", *settings->getLevelSkipList());
 }
 
 
@@ -370,7 +370,7 @@ static void loadSettings(CIniFile *ini, IniSettings *iniSettings, const string &
 
    // Load the INI settings into the settings list, overwriting the defaults
    for(S32 i = 0; i < settings.size(); i++)
-      settings[i]->setValFromString(ini->GetValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
+      settings[i]->setValFromString(ini->getValue(section, settings[i]->getKey(), settings[i]->getDefaultValueString()));
 }
 
 
@@ -389,7 +389,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
 
 #ifndef ZAP_DEDICATED
-   RenderUtils::DEFAULT_LINE_WIDTH = ini->GetValueF(section, "LineWidth", 2);
+   RenderUtils::DEFAULT_LINE_WIDTH = ini->getValueF(section, "LineWidth", 2);
    RenderUtils::LINE_WIDTH_1 = RenderUtils::DEFAULT_LINE_WIDTH * 0.5f;
    RenderUtils::LINE_WIDTH_3 = RenderUtils::DEFAULT_LINE_WIDTH * 1.5f;
    RenderUtils::LINE_WIDTH_4 = RenderUtils::DEFAULT_LINE_WIDTH * 2;
@@ -402,7 +402,7 @@ static void loadLoadoutPresets(CIniFile *ini, GameSettings *settings)
    Vector<string> rawPresets(GameSettings::LoadoutPresetCount);
 
    for(S32 i = 0; i < GameSettings::LoadoutPresetCount; i++)
-      rawPresets.push_back(ini->GetValue("LoadoutPresets", "Preset" + itos(i + 1), ""));
+      rawPresets.push_back(ini->getValue("LoadoutPresets", "Preset" + itos(i + 1), ""));
    
    for(S32 i = 0; i < GameSettings::LoadoutPresetCount; i++)
    {
@@ -418,7 +418,7 @@ static void loadPluginBindings(CIniFile *ini, IniSettings *iniSettings)
    Vector<string> values;
    Vector<string> words;      // Reusable container
 
-   ini->GetAllValues("EditorPlugins", values);
+   ini->getAllValues("EditorPlugins", values);
 
    // Parse the retrieved strings.  They'll be in the form "Key Script Help"
    for(S32 i = 0; i < values.size(); i++)
@@ -448,14 +448,14 @@ static void loadPluginBindings(CIniFile *ini, IniSettings *iniSettings)
 static InputCode getInputCode(CIniFile *ini, const string &section, const string &key, InputCode defaultValue)
 {
    const char *code = InputCodeManager::inputCodeToString(defaultValue);
-   return InputCodeManager::stringToInputCode(ini->GetValue(section, key, code).c_str());
+   return InputCodeManager::stringToInputCode(ini->getValue(section, key, code).c_str());
 }
 
 
 // Returns a string like "Ctrl+L"
 static string getInputString(CIniFile *ini, const string &section, const string &key, const string &defaultValue)
 {
-   string inputStringFromIni = ini->GetValue(section, key, defaultValue);
+   string inputStringFromIni = ini->getValue(section, key, defaultValue);
    string normalizedInputString = InputCodeManager::normalizeInputString(inputStringFromIni);
 
    // Check if inputString is valid -- we could get passed any ol' garbage that got put in the INI file
@@ -463,7 +463,7 @@ static string getInputString(CIniFile *ini, const string &section, const string 
    {
       // If normalized binding is different than what is in the INI file, replace the INI version with the good version
       if(normalizedInputString != inputStringFromIni)
-         ini->SetValue(section, key, normalizedInputString);
+         ini->setValue(section, key, normalizedInputString);
 
       return normalizedInputString;
    }
@@ -627,10 +627,10 @@ static void insertQuickChatMessageCommonBits(CIniFile *ini, const string &key,
                                    InputCode keyCode, InputCode buttonCode, 
                                    const string &caption)
 {
-   ini->SetValue(key, "Key", InputCodeManager::inputCodeToString(keyCode));
-   ini->SetValue(key, "Button", InputCodeManager::inputCodeToString(buttonCode));
-   ini->SetValue(key, "MessageType", Evaluator::toString(messageType));
-   ini->SetValue(key, "Caption", caption);
+   ini->setValue(key, "Key", InputCodeManager::inputCodeToString(keyCode));
+   ini->setValue(key, "Button", InputCodeManager::inputCodeToString(buttonCode));
+   ini->setValue(key, "MessageType", Evaluator::toString(messageType));
+   ini->setValue(key, "Caption", caption);
 }
 
 
@@ -651,7 +651,7 @@ static void insertQuickChatMessage(CIniFile *ini, S32 group, S32 messageId, Mess
    const string key = "QuickChatMessagesGroup" + itos(group) + "_Message" + itos(messageId);
 
    insertQuickChatMessageCommonBits(ini, key, messageType, keyCode, buttonCode, caption);
-   ini->SetValue(key, "Message", message);
+   ini->setValue(key, "Message", message);
 }
 
 
@@ -863,7 +863,7 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
 static void loadServerBanList(CIniFile *ini, BanList *banList)
 {
    Vector<string> banItemList;
-   ini->GetAllValues("ServerBanList", banItemList);
+   ini->getAllValues("ServerBanList", banItemList);
    banList->loadBanList(banItemList);
 }
 
@@ -906,7 +906,7 @@ void writeServerBanList(CIniFile *ini, BanList *banList)
       addComment("----------------");
    }
 
-   ini->SetAllValues(section, "BanItem", banList->banListToString());
+   ini->setAllValues(section, "BanItem", banList->banListToString());
 }
 
 
@@ -917,7 +917,7 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    InputCodeManager *inputCodeManager = settings->getInputCodeManager();
    IniSettings *iniSettings = settings->getIniSettings();
 
-   ini->ReadFile();                             // Read the INI file
+   ini->readFile();                             // Read the INI file
 
    // New school
    //
@@ -962,7 +962,7 @@ void IniSettings::loadUserSettingsFromINI(CIniFile *ini, GameSettings *settings)
    {
       userSettings.name = ini->getSectionName(i);
 
-      string seenList = ini->GetValue(userSettings.name, "LevelupItemsAlreadySeenList", "");
+      string seenList = ini->getValue(userSettings.name, "LevelupItemsAlreadySeenList", "");
       IniSettings::iniStringToBitArray(seenList, userSettings.levelupItemsAlreadySeen, userSettings.LevelCount);
 
       settings->addUserSettings(userSettings);
@@ -1011,7 +1011,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
       // Write the settings themselves
       for(S32 j = 0; j < settings.size(); j++)
-         ini->SetValue(section, settings[j]->getKey(), settings[j]->getIniString());
+         ini->setValue(section, settings[j]->getKey(), settings[j]->getIniString());
    }
 
    const char *section = "Settings";
@@ -1026,7 +1026,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    // Don't save new value if out of range, so it will go back to the old value. 
    // Just in case a user screw up with /linewidth command using value too big or too small.
    if(RenderUtils::DEFAULT_LINE_WIDTH >= 0.5 && RenderUtils::DEFAULT_LINE_WIDTH <= 5)
-      ini->SetValueF (section, "LineWidth", RenderUtils::DEFAULT_LINE_WIDTH);
+      ini->setValueF (section, "LineWidth", RenderUtils::DEFAULT_LINE_WIDTH);
 #endif
 }
 
@@ -1139,7 +1139,7 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    writeServerBanList(ini, settings->getBanList());
 
 
-   ini->WriteFile();    // Commit the file to disk
+   ini->writeFile();    // Commit the file to disk
 }
 
 
@@ -1149,8 +1149,8 @@ void IniSettings::saveUserSettingsToINI(const string &name, CIniFile *ini, GameS
 
    string val = IniSettings::bitArrayToIniString(userSettings->levelupItemsAlreadySeen, userSettings->LevelCount);
 
-   ini->SetValue(name, "LevelupItemsAlreadySeenList", val, true);
-   ini->WriteFile();
+   ini->setValue(name, "LevelupItemsAlreadySeenList", val, true);
+   ini->writeFile();
 }
 
 
@@ -1190,7 +1190,7 @@ void writeSkipList(CIniFile *ini, const Vector<string> *levelSkipList)
       normalizedSkipList.push_back(filename);
    }
 
-   ini->SetAllValues("LevelSkipList", "SkipLevel", normalizedSkipList);
+   ini->setAllValues("LevelSkipList", "SkipLevel", normalizedSkipList);
 }
 
 

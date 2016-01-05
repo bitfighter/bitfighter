@@ -779,7 +779,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
 
       // We added editor plugins
       GameSettings::iniFile.addSection("EditorPlugins");
-      GameSettings::iniFile.SetValue("EditorPlugins", "Plugin0", "Ctrl+;|draw_arcs.lua|Make curves!");
+      GameSettings::iniFile.setValue("EditorPlugins", "Plugin0", "Ctrl+;|draw_arcs.lua|Make curves!");
    }
 
    // 017:  nothing to update anymore
@@ -807,7 +807,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       settings->setShowingInGameHelp(false);
 
       // Add new plugin
-      GameSettings::iniFile.SetValue("EditorPlugins", "Plugin1", "Ctrl+'|draw_stars.lua|Create polygon/star");
+      GameSettings::iniFile.setValue("EditorPlugins", "Plugin1", "Ctrl+'|draw_stars.lua|Create polygon/star");
 
       // Add back linesmoothing option
       settings->setSetting(IniKey::LineSmoothing, Yes);
@@ -819,7 +819,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       // Rename BotsBalanceTeams to AddRobots in [Host] --> BotsBalanceTeams was introduced in 019, renamed in 019a
       if(GameSettings::iniFile.hasKey("Host", "BotsBalanceTeams"))
       {
-         bool oldval = GameSettings::iniFile.GetValueYN("Host", "BotsBalanceTeams", false);
+         bool oldval = GameSettings::iniFile.getValueYN("Host", "BotsBalanceTeams", false);
          GameSettings::iniFile.setValueYN("Host", "AddRobots", oldval, true);
          GameSettings::iniFile.deleteKey("Host", "BotsBalanceTeams");
       }
@@ -846,8 +846,8 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       GameSettings::iniFile.deleteKey("Settings", "VerboseHelpMessages");
 
       // Testing::OldGoalFlash --> Testing::GoalZoneFlashStyle
-      string val = GameSettings::iniFile.GetValueYN("Testing", "OldGoalFlash", Yes) ? "Original" : "Experimental";
-      GameSettings::iniFile.SetValue("Testing", "GoalZoneFlashStyle", val, true);
+      string val = GameSettings::iniFile.getValueYN("Testing", "OldGoalFlash", Yes) ? "Original" : "Experimental";
+      GameSettings::iniFile.setValue("Testing", "GoalZoneFlashStyle", val, true);
 
       // We converted QueryServerSortAscending to YesNo from a 0/1 boolean setting.  Read the old
       // value and write the updated version.
@@ -861,7 +861,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       // GridSize was moved to EditorOptions and renamed
       if(GameSettings::iniFile.hasKey("Settings", "EditorGridSize"))
       {
-         U32 oldVal = GameSettings::iniFile.GetValueI("Settings", "EditorGridSize");
+         U32 oldVal = GameSettings::iniFile.getValueI("Settings", "EditorGridSize");
          settings->setSetting(IniKey::GridSize, oldVal);
 
          GameSettings::iniFile.deleteKey("Settings", "EditorGridSize");

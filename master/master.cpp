@@ -64,16 +64,16 @@ void MasterSettings::loadSettingsFromINI()
       Vector<AbstractSetting<IniKey::SettingsItem>  *> settings = mSettings.getSettingsInSection(section);
 
       for(S32 j = 0; j < settings.size(); j++)
-         settings[j]->setValFromString(ini.GetValue(section, settings[j]->getKey(), settings[j]->getDefaultValueString()));
+         settings[j]->setValFromString(ini.getValue(section, settings[j]->getKey(), settings[j]->getDefaultValueString()));
    }
 
    // Got to do something about this!
-   string str1 = ini.GetValue("host", "master_admin", "");
+   string str1 = ini.getValue("host", "master_admin", "");
    parseString(str1.c_str(), master_admins, ',');
 
 
    // [stats] section --> most has been modernized
-   DbWriter::DatabaseWriter::sqliteFile = ini.GetValue("stats", "sqlite_file_basename", DbWriter::DatabaseWriter::sqliteFile);
+   DbWriter::DatabaseWriter::sqliteFile = ini.getValue("stats", "sqlite_file_basename", DbWriter::DatabaseWriter::sqliteFile);
 
 
    // [motd_clients] section
@@ -81,14 +81,14 @@ void MasterSettings::loadSettingsFromINI()
    // different messages for different versions
    string defaultMessage = "New version available at bitfighter.org";
    Vector<string> keys;
-   ini.GetAllKeys("motd_clients", keys);
+   ini.getAllKeys("motd_clients", keys);
 
    motdClientMap.clear();
 
    for(S32 i = 0; i < keys.size(); i++)
    {
       U32 build_version = (U32)atoi(keys[i].c_str());    // Avoid conflicts with std::stoi() which is defined for VC++ 10
-      string message = ini.GetValue("motd_clients", keys[i], defaultMessage);
+      string message = ini.getValue("motd_clients", keys[i], defaultMessage);
 
       motdClientMap.insert(pair<U32, string>(build_version, message));
    }
@@ -97,7 +97,7 @@ void MasterSettings::loadSettingsFromINI()
    // [motd] section
    // Here we just get the name of the file.  We use a file so the message can be updated
    // externally through the website
-   string motdFilename = ini.GetValue("motd", "motd_file", "motd");  // Default 'motd' in current directory
+   string motdFilename = ini.getValue("motd", "motd_file", "motd");  // Default 'motd' in current directory
 
    // Grab the current message and add it to the map as the most recently released build
    motdClientMap[getVal<U32>(IniKey::LatestReleasedBuildVersion)] = getCurrentMOTDFromFile(motdFilename);

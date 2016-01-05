@@ -798,8 +798,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
       if(paramName != NULL)
       {
          // Update the INI file
-         GameSettings::iniFile.SetValue("Host", paramName, param.getString(), true);
-         GameSettings::iniFile.WriteFile();    // Save new INI settings to disk
+         GameSettings::iniFile.setValue("Host", paramName, param.getString(), true);
+         GameSettings::iniFile.writeFile();    // Save new INI settings to disk
       }
    }
 
@@ -951,7 +951,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
    // If we know the level change password, apply for permissions if we don't already have them
    if(!mClientInfo->isLevelChanger())
    {
-      string levelChangePassword = GameSettings::iniFile.GetValue("SavedLevelChangePasswords", getServerName());
+      string levelChangePassword = GameSettings::iniFile.getValue("SavedLevelChangePasswords", getServerName());
       if(levelChangePassword != "")
       {
          c2sSubmitPassword(Md5::getSaltedHashFromString(levelChangePassword).c_str());
@@ -962,7 +962,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
    // If we know the admin password, apply for permissions if we don't already have them
    if(!mClientInfo->isAdmin())
    {
-      string adminPassword = GameSettings::iniFile.GetValue("SavedAdminPasswords", getServerName());
+      string adminPassword = GameSettings::iniFile.getValue("SavedAdminPasswords", getServerName());
       if(adminPassword != "")
       {
          c2sSubmitPassword(Md5::getSaltedHashFromString(adminPassword).c_str());
@@ -973,7 +973,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
    // If we know the owner password, apply for permissions if we don't already have them
    if(!mClientInfo->isOwner())
    {
-      string ownerPassword = GameSettings::iniFile.GetValue("SavedOwnerPasswords", getServerName());
+      string ownerPassword = GameSettings::iniFile.getValue("SavedOwnerPasswords", getServerName());
       if(ownerPassword != "")
       {
          c2sSubmitPassword(Md5::getSaltedHashFromString(ownerPassword).c_str());
@@ -1008,11 +1008,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetRole, (RangedU32<0,ClientInfo::MaxRoles>
    if(newRole != ClientInfo::RoleNone && mLastEnteredPassword != "")
    {
       if(newRole == ClientInfo::RoleOwner)
-         GameSettings::iniFile.SetValue(ownerKey, getServerName(), mLastEnteredPassword, true);
+         GameSettings::iniFile.setValue(ownerKey, getServerName(), mLastEnteredPassword, true);
       else if(newRole == ClientInfo::RoleAdmin)
-         GameSettings::iniFile.SetValue(adminKey, getServerName(), mLastEnteredPassword, true);
+         GameSettings::iniFile.setValue(adminKey, getServerName(), mLastEnteredPassword, true);
       else if(newRole == ClientInfo::RoleLevelChanger)
-         GameSettings::iniFile.SetValue(levelChangeKey, getServerName(), mLastEnteredPassword, true);
+         GameSettings::iniFile.setValue(levelChangeKey, getServerName(), mLastEnteredPassword, true);
 
       mLastEnteredPassword = "";
    }

@@ -34,13 +34,13 @@ QuickChatNode::QuickChatNode()
 QuickChatNode::QuickChatNode(S32 depth, const CIniFile *ini, const string &key, bool isGroup)
 {
    this->depth = depth;
-   inputCode  = InputCodeManager::stringToInputCode(ini->GetValue(key, "Key", "A").c_str());
-   buttonCode = InputCodeManager::stringToInputCode(ini->GetValue(key, "Button", "Button 1").c_str());
-   messageType = Evaluator::fromString<MessageType>(ini->GetValue(key, "MessageType"));
+   inputCode  = InputCodeManager::stringToInputCode(ini->getValue(key, "Key", "A").c_str());
+   buttonCode = InputCodeManager::stringToInputCode(ini->getValue(key, "Button", "Button 1").c_str());
+   messageType = Evaluator::fromString<MessageType>(ini->getValue(key, "MessageType"));
 
-   caption = ini->GetValue(key, "Caption", "Caption") + (isGroup ? " >" : "");
+   caption = ini->getValue(key, "Caption", "Caption") + (isGroup ? " >" : "");
    if(!isGroup)
-      msg = ini->GetValue(key, "Message", "Message");
+      msg = ini->getValue(key, "Message", "Message");
 }
 
 

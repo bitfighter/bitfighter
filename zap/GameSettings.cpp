@@ -499,7 +499,7 @@ void GameSettings::setLoginCredentials(const string &name, const string &passwor
 
    mIniSettings.mSettings.setVal(IniKey::LastName, name);
    
-   iniFile.WriteFile();
+   iniFile.writeFile();
 }
 
 
@@ -511,7 +511,7 @@ void GameSettings::updatePlayerName(const string &name)
    if(!mPlayerNameSpecifiedOnCmdLine)
    {
       mIniSettings.mSettings.setVal(IniKey::LastName, name);      // Save new name to the INI
-      iniFile.WriteFile();
+      iniFile.writeFile();
    }
 }
 
@@ -626,43 +626,43 @@ Vector<string> GameSettings::getConfigurationErrors()
 
 void GameSettings::saveLevelChangePassword(const string &serverName, const string &password) const
 {
-   iniFile.SetValue("SavedLevelChangePasswords", serverName, password, true);
-   iniFile.WriteFile();
+   iniFile.setValue("SavedLevelChangePasswords", serverName, password, true);
+   iniFile.writeFile();
 }
 
 
 void GameSettings::saveAdminPassword(const string &serverName, const string &password) const
 {
-   iniFile.SetValue("SavedAdminPasswords", serverName, password, true);
-   iniFile.WriteFile();
+   iniFile.setValue("SavedAdminPasswords", serverName, password, true);
+   iniFile.writeFile();
 }
 
 
 void GameSettings::saveOwnerPassword(const string &serverName, const string &password) const
 {
-   iniFile.SetValue("SavedOwnerPasswords", serverName, password, true);
-   iniFile.WriteFile();
+   iniFile.setValue("SavedOwnerPasswords", serverName, password, true);
+   iniFile.writeFile();
 }
 
 
 void GameSettings::forgetLevelChangePassword(const string &serverName) const
 {
    iniFile.deleteKey("SavedLevelChangePasswords", serverName);
-   iniFile.WriteFile();
+   iniFile.writeFile();
 }
 
 
 void GameSettings::forgetAdminPassword(const string &serverName) const
 {
    iniFile.deleteKey("SavedAdminPasswords", serverName);
-   iniFile.WriteFile();
+   iniFile.writeFile();
 }
 
 
 void GameSettings::forgetOwnerPassword(const string &serverName) const
 {
    iniFile.deleteKey("SavedOwnerPasswords", serverName);
-   iniFile.WriteFile();
+   iniFile.writeFile();
 }
 
 
@@ -1293,13 +1293,13 @@ U32 GameSettings::getSimulatedLag()
 // static method
 void GameSettings::saveServerPassword(const string &serverName, const string &password)
 {
-   iniFile.SetValue("SavedServerPasswords", serverName, password, true);
+   iniFile.setValue("SavedServerPasswords", serverName, password, true);
 }
 
 
 string GameSettings::getServerPassword(const string &serverName)
 {
-   return iniFile.GetValue("SavedServerPasswords", serverName);
+   return iniFile.getValue("SavedServerPasswords", serverName);
 }
 
 
@@ -1343,7 +1343,7 @@ void GameSettings::removeLevelFromSkipList(const string &filename)
 void GameSettings::saveSkipList() const
 {
    writeSkipList(&iniFile, &mLevelSkipList);  // Write skipped levels to INI
-   iniFile.WriteFile();                       // Save new INI settings to disk
+   iniFile.writeFile();                       // Save new INI settings to disk
 }
 
 
@@ -1405,7 +1405,7 @@ const UserSettings *GameSettings::getUserSettings(const string &name)
 
 void GameSettings::setIniSetting(const string &section, const string &key, const string &value)
 {
-   iniFile.SetValue(section, key, value, true);
+   iniFile.setValue(section, key, value, true);
 }
 
 };

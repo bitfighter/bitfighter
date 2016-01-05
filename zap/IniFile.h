@@ -80,10 +80,10 @@ public:
 
    // Reads ini file specified using path.
    // Returns true if successful, false otherwise.
-   void ReadFile();
+   void readFile();
 
    // Writes data stored in class to ini file.
-   bool WriteFile();
+   bool writeFile();
 
    // Deletes all stored ini data.
    void Erase();
@@ -114,31 +114,31 @@ public:
    S32 GetNumEntries(const string &section) const;
 
    // Returns value name by index for a given keyname or sectionId.
-   string ValueName(S32 const sectionID, S32 const keyID) const;
+   string valueName(S32 const sectionID, S32 const keyID) const;
    string GetValueName(S32 const sectionID, S32 const keyID) const;
-   string ValueName(const string &section, S32 const keyID) const;
+   string valueName(const string &section, S32 const keyID) const;
    string GetValueName(const string &section, S32 const keyID) const;
 
    // Gets value of [keyname] valuename =.
    // Overloaded to return string, int, and double.
    // Returns defValue if key/value not found.
-   string GetValue(S32 const sectionId, S32 const keyID, const string &defValue = "") const;
-   string GetValue(S32 const sectionId, const string &keyName, const string &defValue = "") const;
-   string GetValue(const string &section, const string &keyName, const string &defValue = "") const;
+   string getValue(S32 const sectionId, S32 const keyID, const string &defValue = "") const;
+   string getValue(S32 const sectionId, const string &keyName, const string &defValue = "") const;
+   string getValue(const string &section, const string &keyName, const string &defValue = "") const;
 
    // Load up valueList with all values from the section
-   void GetAllValues(const string &section, Vector<string> &valueList) const;
-   void GetAllValues(S32 const sectionId, Vector<string> &valueList) const;
+   void getAllValues(const string &section, Vector<string> &valueList) const;
+   void getAllValues(S32 const sectionId, Vector<string> &valueList) const;
 
    // Load up keyList with all keys from the section
-   void GetAllKeys(S32 const sectionId, Vector<string> &keyList) const;
-   void GetAllKeys(const string &section, Vector<string> &keyList) const;
+   void getAllKeys(S32 const sectionId, Vector<string> &keyList) const;
+   void getAllKeys(const string &section, Vector<string> &keyList) const;
 
-   S32  GetValueI(const string &section,  const string &key, S32 const defValue = 0) const;
+   S32  getValueI(const string &section,  const string &key, S32 const defValue = 0) const;
    bool GetValueB(const string &section,  const string &key, bool const defValue = false) const;
-   F32  GetValueF(const string &section, const string &key, F32 const defValue = 0.0f) const;
-   bool GetValueYN(const string &section, const string &key, bool defValue) const;
-   bool GetValueYN(S32 const sectionId,   const string &keyName, const bool &defValue) const;
+   F32  getValueF(const string &section, const string &key, F32 const defValue = 0.0f) const;
+   bool getValueYN(const string &section, const string &key, bool defValue) const;
+   bool getValueYN(S32 const sectionId,   const string &keyName, const bool &defValue) const;
 
 
    // This is a variable length formatted GetValue routine. All these voids
@@ -154,14 +154,14 @@ public:
    // Specify the optional paramter as false (0) if you do not want it to create
    // the key if it doesn't exist. Returns true if data entered, false otherwise.
    // Overloaded to accept string, int, and double.
-   bool SetValue(const string &section, const string &key, const string &value, bool const create = true);
-   bool SetAllValues(const string &section, const string &prefix, const Vector<string> &values);
-   bool SetValueI(const string &section, const string &key, int const value, bool const create = true);
+   bool setValue(const string &section, const string &key, const string &value, bool const create = true);
+   bool setAllValues(const string &section, const string &prefix, const Vector<string> &values);
+   bool setValueI(const string &section, const string &key, int const value, bool const create = true);
    bool SetValueB(const string &section, const string &key, bool const value, bool const create = true);
    bool setValueYN(const string section, const string key, bool const value, bool const create = true);
-   bool SetValueF(const string &section, const string &key, F32 const value, bool const create = true);
+   bool setValueF(const string &section, const string &key, F32 const value, bool const create = true);
    //bool SetValueV(const string &section, const string &key, char *format, ...);
-   bool SetValue(S32 const sectionId, S32 const valueID, const string &value);
+   bool setValue(S32 const sectionId, S32 const valueID, const string &value);
 
    // Deletes specified value.
    // Returns true if value existed and deleted, false otherwise.

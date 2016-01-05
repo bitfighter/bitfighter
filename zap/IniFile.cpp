@@ -32,8 +32,6 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <ctype.h>
-#include <iostream>
 #include <fstream>
 #include <sstream>
 
@@ -65,7 +63,7 @@ CIniFile::~CIniFile()
 }
 
 
-void CIniFile::ReadFile()
+void CIniFile::readFile()
 {
    // Normally you would use ifstream, but the SGI CC compiler has
    // a few bugs with ifstream. So ... fstream used.
@@ -129,7 +127,7 @@ void CIniFile::processLine(string line)      // Pass by value
             k = trim(k, " ");
             v = trim(v, " ");
 
-            SetValue(section, k, v);
+            setValue(section, k, v);
             break;
 
          case ';':      // Comments
@@ -145,7 +143,7 @@ void CIniFile::processLine(string line)      // Pass by value
 }
 
 
-bool CIniFile::WriteFile()
+bool CIniFile::writeFile()
 {
    S32 commentID, sectionId, keyID;
 
@@ -226,7 +224,7 @@ string CIniFile::sectionName(S32 const sectionId) const
 }
 
 
-string CIniFile::ValueName(S32 const sectionId, S32 const valueID) const
+string CIniFile::valueName(S32 const sectionId, S32 const valueID) const
 {
    if(sectionId < sections.size() && valueID < sections[sectionId].keys.size())
       return sections[sectionId].keys[valueID];
@@ -235,17 +233,18 @@ string CIniFile::ValueName(S32 const sectionId, S32 const valueID) const
 }
 
 
-string CIniFile::ValueName(const string &keyname, S32 const valueID) const
+string CIniFile::valueName(const string &keyname, S32 const valueID) const
 {
    S32 sectionId = findSection(keyname);
+
    if(sectionId == noID)
       return "";
 
-   return ValueName(sectionId, valueID);
+   return valueName(sectionId, valueID);
 }
 
 
-bool CIniFile::SetValue(S32 const sectionId, S32 const valueID, const string &value)
+bool CIniFile::setValue(S32 const sectionId, S32 const valueID, const string &value)
 {
    if(sectionId < sections.size() && valueID < sections[sectionId].keys.size())
       sections[sectionId].values[valueID] = value;
@@ -255,7 +254,7 @@ bool CIniFile::SetValue(S32 const sectionId, S32 const valueID, const string &va
 
 
 // If create is set to true, will create key if it does not exist
-bool CIniFile::SetValue(const string &section, const string &key, const string &value, bool const create)
+bool CIniFile::setValue(const string &section, const string &key, const string &value, bool const create)
 {
    S32 sectionId = findSection(section);
 
@@ -290,33 +289,34 @@ bool CIniFile::SetValue(const string &section, const string &key, const string &
 }
 
 
-bool CIniFile::SetAllValues(const string &section, const string &prefix, const Vector<string> &values)
+bool CIniFile::setAllValues(const string &section, const string &prefix, const Vector<string> &values)
 {
    char key[256];
    bool stat = true;
+
    for(S32 i = 0; i < values.size(); i++)
    {
       dSprintf(key, 255, "%s%d", prefix.c_str(), i);
-      stat &= SetValue(section, key, values[i], true);
+      stat &= setValue(section, key, values[i], true);
    }
 
    return stat;      // true if all worked, false if any failed
 }
 
 
-bool CIniFile::SetValueI(const string &section, const string &key, S32 const value, bool const create)
+bool CIniFile::setValueI(const string &section, const string &key, S32 const value, bool const create)
 {
    string val = itos(value);
 
-   return SetValue(section, key, val);
+   return setValue(section, key, val);
 }
 
 
-bool CIniFile::SetValueF(const string &section, const string &key, F32 const value, bool const create)
+bool CIniFile::setValueF(const string &section, const string &key, F32 const value, bool const create)
 {
    string val = ftos(value);
 
-   return SetValue(section, key, val);
+   return setValue(section, key, val);
 }
 
 
@@ -333,7 +333,7 @@ bool CIniFile::SetValueF(const string &section, const string &key, F32 const val
 //}
 
 
-string CIniFile::GetValue(S32 const sectionId, S32 const keyID, const string &defValue) const
+string CIniFile::getValue(S32 const sectionId, S32 const keyID, const string &defValue) const
 {
    if(sectionId < sections.size() && keyID < sections[sectionId].keys.size())
       return sections[sectionId].values[keyID];
@@ -342,7 +342,7 @@ string CIniFile::GetValue(S32 const sectionId, S32 const keyID, const string &de
 }
 
 
-string CIniFile::GetValue(S32 const sectionId, const string &keyName, const string &defValue) const
+string CIniFile::getValue(S32 const sectionId, const string &keyName, const string &defValue) const
 {
    S32 valueID = findKey(sectionId, keyName);
    if(valueID == noID)
@@ -352,7 +352,7 @@ string CIniFile::GetValue(S32 const sectionId, const string &keyName, const stri
 }
 
 
-string CIniFile::GetValue(const string &section, const string &keyName, const string &defValue) const
+string CIniFile::getValue(const string &section, const string &keyName, const string &defValue) const
 {
    S32 sectionId = findSection(section);
    if(sectionId == noID)
@@ -367,7 +367,7 @@ string CIniFile::GetValue(const string &section, const string &keyName, const st
 
 
 // Fill valueList with values from all keys in the specified section.  Key names will be discarded.
-void CIniFile::GetAllValues(S32 const sectionId, Vector<string> &valueList) const
+void CIniFile::getAllValues(S32 const sectionId, Vector<string> &valueList) const
 {
    for(S32 i = 0; i < sections[sectionId].keys.size(); i++)
       // Only return non-empty values
@@ -377,17 +377,17 @@ void CIniFile::GetAllValues(S32 const sectionId, Vector<string> &valueList) cons
 
 
 // Fill valueList with values from all keys in the specified section.  Key names will be discarded.
-void CIniFile::GetAllValues(const string &section, Vector<string> &valueList) const
+void CIniFile::getAllValues(const string &section, Vector<string> &valueList) const
 {
    S32 sectionId = findSection(section);
    if(sectionId == noID)
       return;
 
-   GetAllValues(sectionId, valueList);
+   getAllValues(sectionId, valueList);
 }
 
 
-void CIniFile::GetAllKeys(S32 const sectionId, Vector<string> &keyList) const
+void CIniFile::getAllKeys(S32 const sectionId, Vector<string> &keyList) const
 {
    if(GetNumEntries(sectionId) == 0)
       return;
@@ -397,19 +397,19 @@ void CIniFile::GetAllKeys(S32 const sectionId, Vector<string> &keyList) const
 }
 
 
-void CIniFile::GetAllKeys(const string &section, Vector<string> &keyList) const
+void CIniFile::getAllKeys(const string &section, Vector<string> &keyList) const
 {
    S32 sectionId = findSection(section);
    if(sectionId == noID)
       return;
 
-   GetAllKeys(sectionId, keyList);
+   getAllKeys(sectionId, keyList);
 }
 
 
-int CIniFile::GetValueI(const string &section, const string &key, S32 const defValue) const
+int CIniFile::getValueI(const string &section, const string &key, S32 const defValue) const
 {
-   string val = GetValue(section, key, itos(defValue));
+   string val = getValue(section, key, itos(defValue));
 
    return atoi(val.c_str());
 }
@@ -422,13 +422,13 @@ static bool valueIsYes(const string &val)
 
 
 // Returns true for "Yes" (case insensitive), false otherwise
-bool CIniFile::GetValueYN(const string &section, const string &key, bool defValue) const
+bool CIniFile::getValueYN(const string &section, const string &key, bool defValue) const
 {
-   return valueIsYes(GetValue(section, key, defValue ? "Yes" : "No"));
+   return valueIsYes(getValue(section, key, defValue ? "Yes" : "No"));
 }
 
 
-bool CIniFile::GetValueYN(S32 const sectionId, const string &keyName, const bool &defValue) const
+bool CIniFile::getValueYN(S32 const sectionId, const string &keyName, const bool &defValue) const
 {
    S32 valueID = findKey(sectionId, keyName);
    if(valueID == noID)
@@ -438,9 +438,9 @@ bool CIniFile::GetValueYN(S32 const sectionId, const string &keyName, const bool
 }
 
 
-F32 CIniFile::GetValueF(const string &section, const string &key, F32 const defValue) const
+F32 CIniFile::getValueF(const string &section, const string &key, F32 const defValue) const
 {
-   string val = GetValue(section, key, ftos(defValue));
+   string val = getValue(section, key, ftos(defValue));
 
    return (F32)atof(val.c_str());
 }
@@ -720,32 +720,32 @@ S32 CIniFile::GetNumEntries(const string &section) const
 
 string CIniFile::GetValueName(S32 const sectionID, S32 const keyID) const
 {
-   return ValueName(sectionID, keyID);
+   return valueName(sectionID, keyID);
 }
 
 
 
 string CIniFile::GetValueName( const string &section, S32 const keyID) const
 {
-   return ValueName( section, keyID);
+   return valueName( section, keyID);
 }
 
 
 bool CIniFile::GetValueB(const string &section, const string &key, bool const defValue) const
 {
-   return (GetValueI( section, key, int( defValue)) != 0);
+   return (getValueI( section, key, int( defValue)) != 0);
 }
 
 
 bool CIniFile::SetValueB(const string &section, const string &key, bool const value, bool const create)
 {
-   return SetValueI(section, key, int(value), create);
+   return setValueI(section, key, int(value), create);
 }
 
 
 bool CIniFile::setValueYN(const string section, const string key, bool const value, bool const create)
 {
-   return SetValue(section, key, value ? "Yes" : "No", create);
+   return setValue(section, key, value ? "Yes" : "No", create);
 }
 
 

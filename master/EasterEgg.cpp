@@ -30,7 +30,7 @@ void EasterEggBasket::loadEasterEggs()
 
    // Clear, then read
    ini.Clear();
-   ini.ReadFile();
+   ini.readFile();
 
    // TODO
    // 1. Load EasterEgg data from easteregg.ini into map

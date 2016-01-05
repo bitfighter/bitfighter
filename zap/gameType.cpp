@@ -3174,7 +3174,7 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
    writeServerBanList(&GameSettings::iniFile, settings->getBanList());
 
    // Save new INI settings to disk
-   GameSettings::iniFile.WriteFile();
+   GameSettings::iniFile.writeFile();
 
    GameConnection *conn = clientInfo->getConnection();
 
@@ -3228,7 +3228,7 @@ GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 dura
    writeServerBanList(&GameSettings::iniFile, settings->getBanList());
 
    // Save new INI settings to disk
-   GameSettings::iniFile.WriteFile();
+   GameSettings::iniFile.writeFile();
 
 
    if(!playerDisconnected)
