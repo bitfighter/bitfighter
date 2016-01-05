@@ -987,7 +987,6 @@ static void writeComments(CIniFile *ini, const string &section, const Vector<str
 static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 {
    TNLAssert(ARRAYSIZE(sections) == ARRAYSIZE(headerComments), "Mismatch!");
-   static const string HorizontalLine = "----------------";
 
    for(U32 i = 0; i < ARRAYSIZE(sections); i++)
    {
@@ -1001,9 +1000,9 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       {
          ini->deleteSectionComments(section);      // Delete when done testing (harmless but useless)
 
-         ini->sectionComment(section, HorizontalLine);      // ----------------
+         ini->sectionComment(section, "----------------");      // ----------------
          writeComments(ini, section, wrapString(headerComments[i], NO_AUTO_WRAP));
-         ini->sectionComment(section, HorizontalLine);      // ----------------
+         ini->sectionComment(section, "----------------");      // ----------------
 
          // Write all our section comments for items defined in the new manner
          for(S32 j = 0; j < settings.size(); j++)
@@ -1013,7 +1012,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
             writeComments(ini, section, wrapString(prefix + settings[j]->getComment(), NO_AUTO_WRAP, string(prefix.size(), ' ')));
          }
 
-         ini->sectionComment(section, HorizontalLine);      // ----------------
+         ini->sectionComment(section, "----------------");      // ----------------
       }
 
       // Write the settings themselves
