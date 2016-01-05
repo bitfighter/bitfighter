@@ -216,7 +216,7 @@ void GameSettings::setExecutablePath(const string &executablePath)
 }
 
 
-string GameSettings::getHostName()
+string GameSettings::getHostName() const
 {
    return mHostName;
 }
@@ -231,7 +231,7 @@ void GameSettings::setHostName(const string &serverName, bool updateINI)
 }
 
 
-string GameSettings::getHostDescr()
+string GameSettings::getHostDescr() const
 {
    return mHostDescr;
 }
@@ -246,7 +246,7 @@ void GameSettings::setHostDescr(const string &serverDescription, bool updateINI)
 }
 
 
-string GameSettings::getServerPassword()
+string GameSettings::getServerPassword() const
 {
    return mServerPassword;
 }
@@ -276,7 +276,7 @@ void GameSettings::setOwnerPassword(const string &ownerPassword, bool updateINI)
 }
 
 
-string GameSettings::getAdminPassword()
+string GameSettings::getAdminPassword() const
 {
    return mAdminPassword;
 }
@@ -359,7 +359,7 @@ FolderManager GameSettings::getCmdLineFolderManager()
 }
 
 
-BanList *GameSettings::getBanList()
+BanList *GameSettings::getBanList() const
 {
    return mBanList;
 }
@@ -437,13 +437,13 @@ string GameSettings::getDefaultName()
 }
 
 
-bool GameSettings::getForceUpdate()
+bool GameSettings::getForceUpdate() const
 {
    return isCmdLineParamSpecified(FORCE_UPDATE);
 }
 
 
-string GameSettings::getPlayerName()
+string GameSettings::getPlayerName() const
 {
    return mPlayerName;
 }
@@ -456,8 +456,8 @@ void GameSettings::setQueryServerSortColumn(S32 column, bool ascending)
 }
 
 
-S32  GameSettings::getQueryServerSortColumn()    { return mIniSettings.mSettings.getVal<S32>(IniKey::QueryServerSortColumn);      }
-bool GameSettings::getQueryServerSortAscending() { return mIniSettings.mSettings.getVal<YesNo>(IniKey::QueryServerSortAscending); }
+S32  GameSettings::getQueryServerSortColumn()    const { return mIniSettings.mSettings.getVal<S32>(IniKey::QueryServerSortColumn);      }
+bool GameSettings::getQueryServerSortAscending() const { return mIniSettings.mSettings.getVal<YesNo>(IniKey::QueryServerSortAscending); }
 
 
 void GameSettings::setWindowPosition(S32 x, S32 y)
@@ -466,8 +466,8 @@ void GameSettings::setWindowPosition(S32 x, S32 y)
    setSetting(IniKey::WindowYPos, y);
 }
 
-S32 GameSettings::getWindowPositionX() { return mIniSettings.mSettings.getVal<S32>(IniKey::WindowXPos); }
-S32 GameSettings::getWindowPositionY() { return mIniSettings.mSettings.getVal<S32>(IniKey::WindowYPos); }
+S32 GameSettings::getWindowPositionX() const { return mIniSettings.mSettings.getVal<S32>(IniKey::WindowXPos); }
+S32 GameSettings::getWindowPositionY() const { return mIniSettings.mSettings.getVal<S32>(IniKey::WindowYPos); }
 
 
 void GameSettings::setWindowSizeFactor(F32 scalingFactor)
@@ -475,10 +475,10 @@ void GameSettings::setWindowSizeFactor(F32 scalingFactor)
    setSetting(IniKey::WindowScalingFactor, scalingFactor);
 }
 
-F32 GameSettings::getWindowSizeFactor() { return mIniSettings.mSettings.getVal<F32>(IniKey::WindowScalingFactor); }
+F32 GameSettings::getWindowSizeFactor() const { return mIniSettings.mSettings.getVal<F32>(IniKey::WindowScalingFactor); }
 
 
-F32 GameSettings::getMusicVolume()
+F32 GameSettings::getMusicVolume() const
 {
    if(isCmdLineParamSpecified(NO_MUSIC))
       return 0;
@@ -517,7 +517,7 @@ void GameSettings::updatePlayerName(const string &name)
 
 
 // Forums password
-string GameSettings::getPlayerPassword()
+string GameSettings::getPlayerPassword() const
 {
    return mPlayerPassword;
 }
@@ -538,7 +538,7 @@ void GameSettings::setAutologin(bool autologin)
 }
 
 
-bool GameSettings::isDedicatedServer()
+bool GameSettings::isDedicatedServer() const
 {
    return isCmdLineParamSpecified(DEDICATED) || isCmdLineParamSpecified(HOST_ON_DEDICATED);
 }
@@ -618,48 +618,48 @@ void GameSettings::addConfigurationError(const string &errorMessage)
 }
 
 
-Vector<string> GameSettings::getConfigurationErrors()
+Vector<string> GameSettings::getConfigurationErrors() const
 {
    return mConfigurationErrors;
 }
 
 
-void GameSettings::saveLevelChangePassword(const string &serverName, const string &password) const
+void GameSettings::saveLevelChangePassword(const string &serverName, const string &password)
 {
    iniFile.setValue("SavedLevelChangePasswords", serverName, password, true);
    iniFile.writeFile();
 }
 
 
-void GameSettings::saveAdminPassword(const string &serverName, const string &password) const
+void GameSettings::saveAdminPassword(const string &serverName, const string &password)
 {
    iniFile.setValue("SavedAdminPasswords", serverName, password, true);
    iniFile.writeFile();
 }
 
 
-void GameSettings::saveOwnerPassword(const string &serverName, const string &password) const
+void GameSettings::saveOwnerPassword(const string &serverName, const string &password)
 {
    iniFile.setValue("SavedOwnerPasswords", serverName, password, true);
    iniFile.writeFile();
 }
 
 
-void GameSettings::forgetLevelChangePassword(const string &serverName) const
+void GameSettings::forgetLevelChangePassword(const string &serverName)
 {
    iniFile.deleteKey("SavedLevelChangePasswords", serverName);
    iniFile.writeFile();
 }
 
 
-void GameSettings::forgetAdminPassword(const string &serverName) const
+void GameSettings::forgetAdminPassword(const string &serverName)
 {
    iniFile.deleteKey("SavedAdminPasswords", serverName);
    iniFile.writeFile();
 }
 
 
-void GameSettings::forgetOwnerPassword(const string &serverName) const
+void GameSettings::forgetOwnerPassword(const string &serverName)
 {
    iniFile.deleteKey("SavedOwnerPasswords", serverName);
    iniFile.writeFile();
@@ -1010,7 +1010,7 @@ void GameSettings::saveMasterAddressListInIniUnlessItCameFromCmdLine()
 
 
 // Tries to figure out what display mode was specified on the cmd line, if any
-DisplayMode GameSettings::resolveCmdLineSpecifiedDisplayMode()
+DisplayMode GameSettings::resolveCmdLineSpecifiedDisplayMode() const
 {
    if(isCmdLineParamSpecified(WINDOW_MODE))
       return DISPLAY_MODE_WINDOWED;
@@ -1259,13 +1259,13 @@ void GameSettings::showVersion(GameSettings *settings, const Vector<string> &wor
 }
 
 
-const Color GameSettings::getWallFillColor() const
+Color GameSettings::getWallFillColor() const
 {
    return mIniSettings.mSettings.getVal<Color>(IniKey::WallFillColor);
 }
 
 
-const Color GameSettings::getWallOutlineColor() const
+Color GameSettings::getWallOutlineColor() const
 {
    return mIniSettings.mSettings.getVal<Color>(IniKey::WallOutlineColor);
 }
@@ -1360,13 +1360,13 @@ void GameSettings::setShowingInGameHelp(bool show)
 }
 
 
-bool GameSettings::getShowingInGameHelp()
+bool GameSettings::getShowingInGameHelp() const
 {
    return mIniSettings.mSettings.getVal<YesNo>(IniKey::ShowInGameHelp);
 }
 
 
-bool GameSettings::getEditorShowConnectionsToMaster()
+bool GameSettings::getEditorShowConnectionsToMaster() const
 {
    return mIniSettings.mSettings.getVal<YesNo>(IniKey::ShowConnectionsToMaster);
 }

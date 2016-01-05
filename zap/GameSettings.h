@@ -149,7 +149,7 @@ private:
    U32 getCmdLineParamU32(ParamId paramId);
    F32 getCmdLineParamF32(ParamId paramId);
 
-   DisplayMode resolveCmdLineSpecifiedDisplayMode();  // Tries to figure out what display mode was specified on the cmd line, if any
+   DisplayMode resolveCmdLineSpecifiedDisplayMode() const;  // Tries to figure out what display mode was specified on the cmd line, if any
       
    Vector<LoadoutTracker> mLoadoutPresets;
 
@@ -167,24 +167,24 @@ public:
 
    static const U16 DEFAULT_GAME_PORT = 28000;
 
-   void setExecutablePath(const string &executablePath);
+   static void setExecutablePath(const string &executablePath);
 
    void readCmdLineParams(const Vector<string> &argv);
    void resolveDirs();
 
-   string getHostName();
+   string getHostName() const;
    void setHostName(const string &hostName, bool updateINI);
 
-   string getHostDescr();
+   string getHostDescr() const;
    void setHostDescr(const string &hostDescr, bool updateINI);
 
-   string getServerPassword();
+   string getServerPassword() const;
    void setServerPassword(const string &ServerPassword, bool updateINI);
 
    string getOwnerPassword() const;
    void setOwnerPassword(const string &OwnerPassword, bool updateINI);
 
-   string getAdminPassword();
+   string getAdminPassword() const;
    void setAdminPassword(const string &AdminPassword, bool updateINI);
 
    string getLevelChangePassword() const;
@@ -213,7 +213,7 @@ public:
    FolderManager *getFolderManager() const;
    FolderManager getCmdLineFolderManager();    // Return a FolderManager struct populated with settings specified on cmd line
 
-   BanList *getBanList();
+   BanList *getBanList() const;
 
    Vector<string> getPlaylists() const;
 
@@ -228,21 +228,21 @@ public:
 
    bool shouldShowNameEntryScreenOnStartup();
 
-   const Color getWallFillColor() const;
-   const Color getWallOutlineColor() const;
+   Color getWallFillColor() const;
+   Color getWallOutlineColor() const;
 
    void setQueryServerSortColumn(S32 column, bool ascending);
-   S32  getQueryServerSortColumn();   
-   bool getQueryServerSortAscending();
+   S32  getQueryServerSortColumn() const;   
+   bool getQueryServerSortAscending() const;
 
-   S32  getWindowPositionX();
-   S32  getWindowPositionY();
+   S32  getWindowPositionX() const;
+   S32  getWindowPositionY() const;
    void setWindowPosition(S32 x, S32 y);
 
-   F32  getWindowSizeFactor();
+   F32  getWindowSizeFactor() const;
    void setWindowSizeFactor(F32 scalingFactor);
 
-   F32 getMusicVolume();
+   F32 getMusicVolume() const;
 
    // Accessor methods
    U32 getSimulatedStutter();
@@ -251,17 +251,17 @@ public:
 
    string getDefaultName();
 
-   bool getForceUpdate();
+   bool getForceUpdate() const;
 
-   string getPlayerName();
+   string getPlayerName() const;
 
    void updatePlayerName(const string &name);
 
    void setAutologin(bool autologin);
 
-   string getPlayerPassword();
+   string getPlayerPassword() const;
 
-   bool isDedicatedServer();
+   bool isDedicatedServer() const;
 
    string getLevelDir(SettingSource source);
    string getPlaylistFile();
@@ -274,16 +274,16 @@ public:
    void setLoadoutPreset(const LoadoutTracker *preset, S32 index);
 
    void addConfigurationError(const string &errorMessage);
-   Vector<string> getConfigurationErrors();
+   Vector<string> getConfigurationErrors() const;
 
    // Other methods
-   void saveLevelChangePassword(const string &serverName, const string &password) const;
-   void saveAdminPassword(const string &serverName, const string &password) const;
-   void saveOwnerPassword(const string &serverName, const string &password) const;
+   static void saveLevelChangePassword(const string &serverName, const string &password);
+   static void saveAdminPassword(const string &serverName, const string &password);
+   static void saveOwnerPassword(const string &serverName, const string &password);
 
-   void forgetLevelChangePassword(const string &serverName) const;
-   void forgetAdminPassword(const string &serverName) const;
-   void forgetOwnerPassword(const string &serverName) const;
+   static void forgetLevelChangePassword(const string &serverName);
+   static void forgetAdminPassword(const string &serverName);
+   static void forgetOwnerPassword(const string &serverName);
 
    void onFinishedLoading();     // Should be run after INI and cmd line params have been read
 
@@ -309,11 +309,11 @@ public:
    InputMode getInputMode();
 
    // In-game help messages
-   bool getShowingInGameHelp();
+   bool getShowingInGameHelp() const;
    void setShowingInGameHelp(bool show);
 
    // Editor settings
-   bool getEditorShowConnectionsToMaster();
+   bool getEditorShowConnectionsToMaster() const;
    void setEditorShowConnectionsToMaster(bool show);
 
    // User settings
@@ -323,7 +323,7 @@ public:
    static GameSettings *get();
 
    // Used for iniFile access in the setSetting() template below
-   void setIniSetting(const string &section, const string &key, const string &value);
+   static void setIniSetting(const string &section, const string &key, const string &value);
 
    // Helper method to simultaneously update the mSettings and iniFile objects
    template <class DataType>
