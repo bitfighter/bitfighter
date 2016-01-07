@@ -21,6 +21,7 @@
 
 #include <tnlVector.h>     // For Vector type
 
+#include <string>
 
 #define MAX_KEYNAME    128
 #define MAX_VALUENAME  128
