@@ -19,10 +19,15 @@
 
 #include <math.h>
 
+
+#ifndef M_PI
 #define M_PI FloatPi
 #define M_PI_2 FloatHalfPi
+#endif
 
+#ifdef _MSC_VER
 #pragma warning(disable: 4244) // Suppress warning about possible loss of data when using floats like 2.5
+#endif
 
 
 namespace Easing {
