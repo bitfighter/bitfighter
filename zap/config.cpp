@@ -455,7 +455,7 @@ static void writeGeneralKeybindingInstructions(CIniFile *ini, const string &sect
 static void writeKeyStringInstructions(CIniFile *ini, const string &section)
 {
    addComment("----------------");
-   addComment(" Howdy!");
+   addComment(" These key bindings use KeyStrings.  See help above for more details.");
    addComment("----------------"); 
 }
 
@@ -464,7 +464,7 @@ static void writeKeyStringInstructions(CIniFile *ini, const string &section)
 static void writeKeyCodeInstructions(CIniFile *ini, const string &section)
 {
    addComment("----------------");
-   addComment(" Howdy!");
+   addComment(" These key bindings use KeyCodes.  See help above for more details.");
    addComment("----------------");
 }
 
