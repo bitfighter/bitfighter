@@ -611,7 +611,6 @@ static void writeSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMa
 
 static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
-   
    writeKeyBindings       (ini, inputCodeManager, "KeyboardKeyBindings",     InputModeKeyboard);
    writeKeyBindings       (ini, inputCodeManager, "JoystickKeyBindings",     InputModeJoystick);
    writeEditorKeyBindings (ini, inputCodeManager, "EditorKeyboardKeyBindings");
