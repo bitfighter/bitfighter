@@ -442,6 +442,33 @@ static void loadPluginBindings(CIniFile *ini, IniSettings *iniSettings)
 }
 
 
+// These instructions are written before an any sections containing keyCodes or keyStrings
+static void writeGeneralKeybindingInstructions(CIniFile *ini, const string &section)
+{
+   addComment("----------------");
+   addComment(" Howdy!");
+   addComment("----------------");
+}
+
+
+// These instructions are written before an INI section containing keyStrings
+static void writeKeyStringInstructions(CIniFile *ini, const string &section)
+{
+   addComment("----------------");
+   addComment(" Howdy!");
+   addComment("----------------"); 
+}
+
+
+// These instructions are written before an INI section containing keyCodes
+static void writeKeyCodeInstructions(CIniFile *ini, const string &section)
+{
+   addComment("----------------");
+   addComment(" Howdy!");
+   addComment("----------------");
+}
+
+
 static InputCode getInputCode(CIniFile *ini, const string &section, const string &key, InputCode defaultValue)
 {
    const char *code = InputCodeManager::inputCodeToString(defaultValue);
@@ -556,6 +583,8 @@ void loadDefaultEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
 
 static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section, InputMode mode)
 {
+   writeKeyCodeInstructions(ini, section);
+
    // Evaluates to:
    // ini->SetValue(section, InputCodeManager::getBindingName(InputCodeManager::BINDING_SELWEAP1),
    //               InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1, mode)));
@@ -571,6 +600,8 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
 // Note that this function might not be able to be modernized!
 static void writeEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section)
 {
+   writeKeyStringInstructions(ini, section);
+
    string key;
 
    // Expands to:
@@ -591,6 +622,8 @@ static void writeEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMan
 
 static void writeSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section, InputMode mode)
 {
+   writeKeyStringInstructions(ini, section);
+
    string key;
 
    // Expands to:
@@ -611,6 +644,8 @@ static void writeSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMa
 
 static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
+   writeGeneralKeybindingInstructions(ini, "KeyboardKeyBindings");
+
    writeKeyBindings       (ini, inputCodeManager, "KeyboardKeyBindings",     InputModeKeyboard);
    writeKeyBindings       (ini, inputCodeManager, "JoystickKeyBindings",     InputModeJoystick);
    writeEditorKeyBindings (ini, inputCodeManager, "EditorKeyboardKeyBindings");
