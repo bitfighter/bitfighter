@@ -1182,8 +1182,8 @@ void GameSettings::showHelp(GameSettings *settings, const Vector<string> &words)
 {
    // Header
    printf("Usage: %s [OPTIONS]\n\nRun %s, a 2-D multiplayer space-combat game.\n\nOptions:\n\n"
-         "The following options can be specified on the command-line.",
-         mExecutablePath.c_str(), ZAP_GAME_NAME);
+          "The following options can be specified on the command-line.",
+          mExecutablePath.c_str(), ZAP_GAME_NAME);
 
    for(S32 i = 0; i < S32(ARRAYSIZE(helpTitles)); i++)
    {
@@ -1203,7 +1203,7 @@ void GameSettings::showHelp(GameSettings *settings, const Vector<string> &words)
       for(S32 j = 0; j < S32(ARRAYSIZE(directiveDefs)); j++)
          if(directiveDefs[j].docLevel == i)
          {
-            U32 len = (U32) makeParamStr(directiveDefs[j].paramName, directiveDefs[j].paramString).length();
+            U32 len = (U32)makeParamStr(directiveDefs[j].paramName, directiveDefs[j].paramString).length();
 
             if(len > maxSize)
                maxSize = len;
@@ -1347,7 +1347,6 @@ void GameSettings::saveSkipList() const
 }
 
 
-
 InputMode GameSettings::getInputMode()
 {
    return getInputCodeManager()->getInputMode();
@@ -1402,6 +1401,7 @@ const UserSettings *GameSettings::getUserSettings(const string &name)
 
    return &i->second;
 }
+
 
 void GameSettings::setIniSetting(const string &section, const string &key, const string &value)
 {
