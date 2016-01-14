@@ -495,7 +495,7 @@ static void setGameBindings(CIniFile *ini,
 
 
 // Remember: If you change any of the defaults, you'll need to rebuild your INI file to see the results!
-static void setDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
+static void loadDefaultKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {                                
 // Generate a block of code that calls above function for every entry in BINDING_TABLE
 #define BINDING(enumVal, b, c, defaultKeyboardBinding, defaultJoystickBinding) \
@@ -529,7 +529,7 @@ static void setSpecialBindings(CIniFile *ini,
 
 
 // Only called while loading keys from the INI
-void setDefaultSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
+void loadDefaultSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
 // Generate a block of code that calls above function for every entry in SPECIAL_BINDING_TABLE
 #define SPECIAL_BINDING(specialEnumVal, b, c, defaultSpecialKeyboardBinding, defaultJoystickBinding)  \
@@ -542,7 +542,7 @@ void setDefaultSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMana
 
 
 // Only called while loading keys from the INI; Note that this function might not be able to be modernized!
-void setDefaultEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
+void loadDefaultEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
 #define EDITOR_BINDING(editorEnumVal, b, c, defaultEditorKeyboardBinding)                                       \
       inputCodeManager->setEditorBinding(editorEnumVal,                                                         \
@@ -611,6 +611,7 @@ static void writeSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMa
 
 static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
+   
    writeKeyBindings       (ini, inputCodeManager, "KeyboardKeyBindings",     InputModeKeyboard);
    writeKeyBindings       (ini, inputCodeManager, "JoystickKeyBindings",     InputModeJoystick);
    writeEditorKeyBindings (ini, inputCodeManager, "EditorKeyboardKeyBindings");
@@ -941,9 +942,9 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    loadLoadoutPresets(ini, settings);
    loadPluginBindings(ini, iniSettings);
 
-   setDefaultKeyBindings(ini, inputCodeManager);
-   setDefaultEditorKeyBindings(ini, inputCodeManager);
-   setDefaultSpecialKeyBindings(ini, inputCodeManager);
+   loadDefaultKeyBindings(ini, inputCodeManager);
+   loadDefaultEditorKeyBindings(ini, inputCodeManager);
+   loadDefaultSpecialKeyBindings(ini, inputCodeManager);
 
    loadForeignServerInfo(ini, iniSettings);     // Info about other servers
    loadLevels(ini, iniSettings);                // Read levels, if there are any
