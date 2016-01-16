@@ -1762,6 +1762,8 @@ void InputCodeManager::initializeKeyNames()
 // Static method
 const char *InputCodeManager::inputCodeToString(InputCode inputCode)
 {
+   TNLAssert(U32(inputCode) < U32(KEY_COUNT), "Invalid inputCode!");
+
    if(U32(inputCode) >= U32(KEY_COUNT))
       return "";
 
