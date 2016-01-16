@@ -1556,7 +1556,7 @@ void InputCodeManager::initializeKeyNames()
 {
    // Fill name list with default value
    for(S32 i = 0; i < KEY_COUNT; i++)
-      keyNames[i] = "Unknown Key";
+      keyNames[i] = UNKNOWN_KEY_NAME;
 
    // Now keys we know with our locally defined names
    keyNames[S32(KEY_BACKSPACE)]       = "Backspace";        
@@ -1762,7 +1762,7 @@ void InputCodeManager::initializeKeyNames()
 // Static method
 const char *InputCodeManager::inputCodeToString(InputCode inputCode)
 {
-   TNLAssert(U32(inputCode) < U32(KEY_COUNT), "Invalid inputCode!");
+   TNLAssert(U32(inputCode) < U32(KEY_COUNT) || inputCode == KEY_UNKNOWN, "Invalid inputCode!");
 
    if(U32(inputCode) >= U32(KEY_COUNT))
       return "";

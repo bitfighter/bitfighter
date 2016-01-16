@@ -24,6 +24,7 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+#define UNKNOWN_KEY_NAME "Unknown Key"
 
 // Note that the BindingSet member name referenced below doesn't actually appear anywhere else... it could be any aribtrary and unique token
 

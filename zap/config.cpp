@@ -273,6 +273,8 @@ static void writePluginBindings(CIniFile *ini, IniSettings *iniSettings)
       addComment(" Ctrl+Alt+Shift+Meta+Super+key (omit unneeded modifiers, you can get correct Input Strings from the");
       addComment(" diagnostics screen).  Scripts should be stored in the plugins folder in the install directory. Please")
       addComment(" see the Bitfighter wiki for details.");
+      addComment(" ");
+      addComment(" Note: these key bindings use KeyStrings.  See info at the top of this file for an explanation.");
       addComment("----------------");
    }
 
@@ -443,11 +445,56 @@ static void loadPluginBindings(CIniFile *ini, IniSettings *iniSettings)
 
 
 // These instructions are written before an any sections containing keyCodes or keyStrings
-static void writeGeneralKeybindingInstructions(CIniFile *ini, const string &section)
+static void writeGeneralKeybindingInstructions(CIniFile *ini)
 {
-   addComment("----------------");
-   addComment(" Howdy!");
-   addComment("----------------");
+   ini->headerComment("----------------");
+   ini->headerComment(" Key bindings come in two flavors: KeyCodes and KeyStrings.  In-game bindings are done with KeyCodes, whereas editor and");
+   ini->headerComment(" special keys (i.e. those that are avaialAble everywhere, like Help or Lobby Chat) are defined with KeyStrings.  With a");
+   ini->headerComment(" few exceptions, KeyCodes do not contain modifier keys (Ctrl, Alt, Shift, etc.), which are generally less useful in-game.");
+   ini->headerComment(" This also allows these keys to function independently of whether a modifier key is pressed.  KeyStrings, on the other");
+   ini->headerComment(" hand, can specify any combination of modifiers, and can differentiate between Ctrl+L and Ctrl+Shift+L (for example).");
+   ini->headerComment(" ");
+   ini->headerComment(" List of available KeyCodes:");
+
+   string indent = "    ";
+
+   string line = indent;
+   bool first = true;
+
+   for(S32 i = 0; i < KEY_COUNT; i++)
+   {
+      string name = InputCodeManager::inputCodeToString((InputCode)i);
+
+      if(name == UNKNOWN_KEY_NAME)      // Filter out "Unknown key" values
+         continue;
+
+      if(line.length() + name.length() + 2 < 115)     // 115 = width
+      {
+         if(!first)
+            line += ", ";
+         else
+            first = false;
+
+         line += name;
+      }
+      else
+      {
+         ini->headerComment(line + ", ");
+         line = indent + name;
+      }
+   }
+
+   ini->headerComment(line);
+   ini->headerComment(" ");
+
+
+   ini->headerComment(" If you specify an invalid key binding, the default will be used.");
+   // List of keycodes
+
+   // How to construct a keystring
+
+   ini->headerComment("----------------");
+
 }
 
 
@@ -455,7 +502,7 @@ static void writeGeneralKeybindingInstructions(CIniFile *ini, const string &sect
 static void writeKeyStringInstructions(CIniFile *ini, const string &section)
 {
    addComment("----------------");
-   addComment(" These key bindings use KeyStrings.  See help above for more details.");
+   addComment(" These key bindings use KeyStrings.  See info at the top of this file for an explanation.");
    addComment("----------------"); 
 }
 
@@ -464,7 +511,7 @@ static void writeKeyStringInstructions(CIniFile *ini, const string &section)
 static void writeKeyCodeInstructions(CIniFile *ini, const string &section)
 {
    addComment("----------------");
-   addComment(" These key bindings use KeyCodes.  See help above for more details.");
+   addComment(" These key bindings use KeyCodes.  See info at the top of this file for an explanation.");
    addComment("----------------");
 }
 
@@ -644,7 +691,7 @@ static void writeSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMa
 
 static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
-   writeGeneralKeybindingInstructions(ini, "KeyboardKeyBindings");
+   writeGeneralKeybindingInstructions(ini);     // These codes get appeneded to the INI header comments
 
    writeKeyBindings       (ini, inputCodeManager, "KeyboardKeyBindings",     InputModeKeyboard);
    writeKeyBindings       (ini, inputCodeManager, "JoystickKeyBindings",     InputModeJoystick);
@@ -824,6 +871,8 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
       addComment(" \"addbots 2\" (without quotes, and without a leading \"/\"), and the MessageType to \"Command\" (also");
       addComment(" without quotes), 2 robots will be added to the game when you select the appropriate message.  You can");
       addComment(" use this functionality to assign commonly used commands to joystick buttons or short key sequences.");
+      addComment(" ");
+      addComment(" Bindings specified here use KeyCodes.  See info at the top of this file for an explanation.");
       addComment("----------------");
    }
 
