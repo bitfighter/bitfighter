@@ -51,8 +51,8 @@ enum InputCode {
 
    // And these are pseudo modifers, that may represent multiple events
    // (e.g. KEY_SHIFT means KEY_LSHIFT or KEY_RSHIFT)
-   // Keep these together
-   KEY_SHIFT,   KEY_CTRL,   KEY_ALT,   KEY_META,  KEY_SUPER,
+   // Keep these together; KEY_CTRL is first, KEY_SUPER is last.
+   KEY_CTRL,   KEY_ALT,   KEY_SHIFT,   KEY_META,  KEY_SUPER,
 
    // Some keys in SDL that were not in GLUT
    KEY_CLEAR, KEY_PAUSE, KEY_EXCLAIM, KEY_DOUBLEQUOTE, KEY_HASH, KEY_DOLLAR,

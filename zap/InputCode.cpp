@@ -261,6 +261,9 @@ void SpecialBindingSet::setBinding(SpecialBindingNameEnum bindingName, const str
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+static Vector<InputCode> modifiers;
+
+
 // Constructor
 InputCodeManager::InputCodeManager()
 {
@@ -270,6 +273,11 @@ InputCodeManager::InputCodeManager()
    // Create two binding sets, one for keyboard controls, one for joystick
    mBindingSets.resize(2); 
    mSpecialBindingSets.resize(2);
+
+   for(U32 i = FIRST_MODIFIER; i <= LAST_MODIFIER; i++)
+      modifiers.push_back(InputCode(i));
+
+   TNLAssert(modifiers.size() == 5, "Delete this assert whenever... it has already served its purpose.");
 }
 
 
@@ -312,7 +320,6 @@ bool InputCodeManager::getState(InputCode inputCode)
 }
 
 
-static const InputCode modifiers[] = { KEY_CTRL, KEY_ALT, KEY_SHIFT, KEY_META, KEY_SUPER };
 static const char InputStringJoiner = '+';
 
 static InputCode getBaseKey(InputCode inputCode)
@@ -349,7 +356,7 @@ string InputCodeManager::getCurrentInputString(InputCode inputCode)
       
    string inputString = "";
 
-   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
+   for(S32 i = 0; i < S32(modifiers.size()); i++)
       if(getState(modifiers[i]))
          inputString += string(inputCodeToString(modifiers[i])) + InputStringJoiner;
    
@@ -363,7 +370,7 @@ bool InputCodeManager::checkModifier(InputCode mod1)
 {
    S32 foundCount = 0;
 
-   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
+   for(S32 i = 0; i < S32(modifiers.size()); i++)
       if(getState(modifiers[i]))                   // Modifier is down
       {
          if(modifiers[i] == mod1)      
@@ -381,7 +388,7 @@ bool InputCodeManager::checkModifier(InputCode mod1, InputCode mod2)
 {
    S32 foundCount = 0;
 
-   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
+   for(S32 i = 0; i < S32(modifiers.size()); i++)
       if(getState(modifiers[i]))                   // Modifier is down
       {
          if(modifiers[i] == mod1 || modifiers[i] == mod2)      
@@ -399,7 +406,7 @@ bool InputCodeManager::checkModifier(InputCode mod1, InputCode mod2, InputCode m
 {
    S32 foundCount = 0;
 
-   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
+   for(S32 i = 0; i < S32(modifiers.size()); i++)
       if(getState(modifiers[i]))                   // Modifier is down
       {
          if(modifiers[i] == mod1 || modifiers[i] == mod2 || modifiers[i] == mod3)      
@@ -425,8 +432,8 @@ string InputCodeManager::normalizeInputString(const string &inputString)
    parseString(inputString, words, InputStringJoiner);
 
    // Modifiers will be first words... sort them, normalize capitalization, get them organized
-   bool hasModifier[ARRAYSIZE(modifiers)];
-   for(U32 i = 0; i < ARRAYSIZE(modifiers); i++)
+   bool hasModifier[modifiers.size()];
+   for(U32 i = 0; i < modifiers.size(); i++)
       hasModifier[i] = false;
 
    for(S32 i = 0; i < words.size() - 1; i++)
@@ -436,7 +443,7 @@ string InputCodeManager::normalizeInputString(const string &inputString)
          return INVALID;
 
       bool found = false;
-      for(U32 i = 0; i < ARRAYSIZE(modifiers); i++)
+      for(U32 i = 0; i < modifiers.size(); i++)
          if(inputCode == modifiers[i])
          {
             hasModifier[i] = true;
@@ -458,7 +465,7 @@ string InputCodeManager::normalizeInputString(const string &inputString)
       return INVALID;
 
    string normalizedInputString = "";
-   for(U32 i = 0; i < ARRAYSIZE(modifiers); i++)
+   for(U32 i = 0; i < modifiers.size(); i++)
       if(hasModifier[i])
          normalizedInputString += string(keyNames[modifiers[i]]) + InputStringJoiner;
 
@@ -483,7 +490,7 @@ bool InputCodeManager::isValidInputString(const string &inputString)
    for(S32 i = 0; i < words.size() - 1; i++)
    {
       bool found = false;
-      for(S32 j = startMod; j < S32(ARRAYSIZE(modifiers)); j++)
+      for(S32 j = startMod; j < S32(modifiers.size()); j++)
          if(words[i] == mods->get(j))
          {
             found = true;
@@ -1789,7 +1796,7 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(KEY_KEYPAD_ENTER)]    = "Keypad Enter";     
    keyNames[S32(KEY_LESS)]            = "Less";    
 
-   for(U32 i = 0; i < ARRAYSIZE(modifiers); i++)
+   for(U32 i = 0; i < modifiers.size(); i++)
       modifierNames.push_back(keyNames[S32(modifiers[i])]);            
 }
 
