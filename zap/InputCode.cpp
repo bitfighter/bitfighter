@@ -1552,6 +1552,43 @@ string InputCodeManager::getSpecialKeyBoundToBindingCodeName(const string &name)
 
 
 // static method
+Vector<string> InputCodeManager::getValidKeyCodes(S32 width)
+{
+   Vector<string> lines;
+
+   string line = "";
+   bool first = true;
+
+   for(S32 i = 0; i < KEY_COUNT; i++)
+   {
+      string name = InputCodeManager::inputCodeToString((InputCode)i);
+
+      if(name == UNKNOWN_KEY_NAME)      // Filter out "Unknown key" values
+         continue;
+
+      if(line.length() + name.length() + 2 < 115)     // 115 = width
+      {
+         if(!first)
+            line += ", ";
+         else
+            first = false;
+
+         line += name;
+      }
+      else
+      {
+         lines.push_back(line);
+         line = name;
+      }
+   }
+
+   lines.push_back(line);
+
+   return lines;
+}
+
+
+// static method
 void InputCodeManager::initializeKeyNames()
 {
    // Fill name list with default value

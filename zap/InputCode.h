@@ -298,6 +298,8 @@ public:
 
    static S16 inputCodeToControllerButton(InputCode inputCode);
 
+   static Vector<string> InputCodeManager::getValidKeyCodes(S32 width);
+
    InputCode getBinding(BindingNameEnum bindingName) const; 
    InputCode getBinding(BindingNameEnum bindingName, InputMode inputMode) const;
    void setBinding(BindingNameEnum bindingName, InputCode key);

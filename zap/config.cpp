@@ -456,35 +456,11 @@ static void writeGeneralKeybindingInstructions(CIniFile *ini)
    ini->headerComment(" ");
    ini->headerComment(" List of available KeyCodes:");
 
-   string indent = "    ";
+   Vector<string> lines = InputCodeManager::getValidKeyCodes(115);      // width of 115 looks nice
 
-   string line = indent;
-   bool first = true;
+   for(S32 i = 0; i < lines.size(); i++)
+      ini->headerComment("    " + lines[i]);
 
-   for(S32 i = 0; i < KEY_COUNT; i++)
-   {
-      string name = InputCodeManager::inputCodeToString((InputCode)i);
-
-      if(name == UNKNOWN_KEY_NAME)      // Filter out "Unknown key" values
-         continue;
-
-      if(line.length() + name.length() + 2 < 115)     // 115 = width
-      {
-         if(!first)
-            line += ", ";
-         else
-            first = false;
-
-         line += name;
-      }
-      else
-      {
-         ini->headerComment(line + ", ");
-         line = indent + name;
-      }
-   }
-
-   ini->headerComment(line);
    ini->headerComment(" ");
 
 
