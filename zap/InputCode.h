@@ -298,7 +298,10 @@ public:
 
    static S16 inputCodeToControllerButton(InputCode inputCode);
 
+   // For use in the INI file comments section
    static Vector<string> InputCodeManager::getValidKeyCodes(S32 width);
+   static string InputCodeManager::getValidModifiers();
+   static pair<string,string> InputCodeManager::getExamplesOfModifiedKeys();
 
    InputCode getBinding(BindingNameEnum bindingName) const; 
    InputCode getBinding(BindingNameEnum bindingName, InputMode inputMode) const;

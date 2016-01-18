@@ -432,7 +432,9 @@ string InputCodeManager::normalizeInputString(const string &inputString)
    parseString(inputString, words, InputStringJoiner);
 
    // Modifiers will be first words... sort them, normalize capitalization, get them organized
-   bool hasModifier[modifiers.size()];
+   Vector<bool> hasModifier;
+   hasModifier.resize(modifiers.size());
+
    for(U32 i = 0; i < modifiers.size(); i++)
       hasModifier[i] = false;
 
@@ -1591,6 +1593,42 @@ Vector<string> InputCodeManager::getValidKeyCodes(S32 width)
    lines.push_back(line);
 
    return lines;
+}
+
+
+// static method
+string InputCodeManager::getValidModifiers()
+{
+   TNLAssert(modifiers.size() > 0, "Modifiers not initialized!");
+
+   string modifierList = "";
+
+   for(S32 i = 0; i < modifiers.size(); i++)
+   {
+      if(i != 0)
+         modifierList += ", ";
+      modifierList += inputCodeToString(modifiers[i]);
+   }
+
+   TNLAssert(modifierList.length() < 100, "This certainly grew... consider returning a vector of strings!");
+   return modifierList;
+}
+
+
+// Return two examples of modified strings; the first is valid, the second invalid
+// static method
+pair<string,string> InputCodeManager::getExamplesOfModifiedKeys()
+{
+   TNLAssert(modifiers.size() > 0, "Modifiers not initialized!");
+
+   pair<string,string> examples;
+
+   string base = "X";
+
+   examples.first  = string(inputCodeToString(modifiers[0])) + InputStringJoiner + string(inputCodeToString(modifiers[1])) + InputStringJoiner + base;
+   examples.second = string(inputCodeToString(modifiers[1])) + InputStringJoiner + string(inputCodeToString(modifiers[0])) + InputStringJoiner + base;
+
+   return examples;
 }
 
 

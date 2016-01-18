@@ -462,15 +462,17 @@ static void writeGeneralKeybindingInstructions(CIniFile *ini)
       ini->headerComment("    " + lines[i]);
 
    ini->headerComment(" ");
+   ini->headerComment(" KeyStrings are composed of zero or more modifiers keys, followed by a base key.");
 
+   string modifiers = InputCodeManager::getValidModifiers();
+   pair<string,string> goodExampleBadExample = InputCodeManager::getExamplesOfModifiedKeys();
 
-   ini->headerComment(" If you specify an invalid key binding, the default will be used.");
-   // List of keycodes
-
-   // How to construct a keystring
-
+   ini->headerComment("     Valid modifiers: " + modifiers);
+   ini->headerComment("     Multiple modifiers can be used, but they MUST appear in the order listed above.  For example: ");
+   ini->headerComment("     " + goodExampleBadExample.first + " is valid, but " + goodExampleBadExample.second + " will not work.");
+   ini->headerComment("     The base key can be almost any keyboard key (but not modifiers by themselves).  There is no definitive list; They are");
+   ini->headerComment("     somewhat system dependent; you may need to experiment a bit.");
    ini->headerComment("----------------");
-
 }
 
 
