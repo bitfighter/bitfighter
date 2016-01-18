@@ -766,10 +766,9 @@ InputMode InputCodeManager::getInputMode() const
 // Returns display-friendly mode designator like "Keyboard" or "Joystick 1"
 string InputCodeManager::getInputModeString() const
 {
-   if(mInputMode == InputModeJoystick)
-      return "Joystick " + itos(GameSettings::UseControllerIndex + 1);    // Humans use 1-based indices!
-   else
-      return "Keyboard";
+   return mInputMode == InputModeJoystick ?
+         "Joystick " + itos(GameSettings::UseControllerIndex + 1) :    // Humans use 1-based indices!
+         "Keyboard";
 }
 
 
