@@ -870,7 +870,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
 
 
    // Now copy over resources to user's preference directory.  This will overwrite the previous
-   // resources with same names.  Dont do this if it is a standalone bundle
+   // resources with same names.  Don't do this if it is a standalone bundle.
    if(!isStandalone)
       copyResourcesToUserData();
 }
