@@ -1567,7 +1567,7 @@ Vector<string> InputCodeManager::getValidKeyCodes(S32 width)
 
    for(S32 i = 0; i < KEY_COUNT; i++)
    {
-      string name = InputCodeManager::inputCodeToString((InputCode)i);
+      string name = inputCodeToString(InputCode(i));
 
       if(name == UNKNOWN_KEY_NAME)      // Filter out "Unknown key" values
          continue;
