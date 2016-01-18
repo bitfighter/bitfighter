@@ -1383,7 +1383,7 @@ bool InputCodeManager::isControllerButton(InputCode inputCode)
 
 bool InputCodeManager::isKeypadKey(InputCode inputCode)
 {
-   return inputCode >= KEY_KEYPAD0 && inputCode <= KEY_KEYPAD_EQUALS;
+   return inputCode >= FIRST_KEYPAD_KEY && inputCode <= LAST_KEYPAD_KEY;
 }
 
 
@@ -1413,7 +1413,7 @@ bool InputCodeManager::isModified(InputCode inputCode)
 
 bool InputCodeManager::isModifier(InputCode inputCode)
 {
-   return inputCode >= KEY_SHIFT && inputCode <= KEY_SUPER;
+   return inputCode >= FIRST_MODIFIER && inputCode <= LAST_MODIFIER;
 }
 
 
