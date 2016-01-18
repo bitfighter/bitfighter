@@ -346,7 +346,7 @@ static InputCode getBaseKey(InputCode inputCode)
 // This may be different than the keys actually being pressed.  For example, if the A and B keys are down, the inputString will be [A].
 // In the event that two keys are both down, we'll prefer the one passed in inputCode, if possible.
 // This generally works well most of the time, but may need to be cleaned up if it generates erroneous or misleading input strings.
-// Modifiers will appear in order specified above... i.e. Ctrl+Shift+A, not Shift+Ctrl+A
+// Modifiers will appear in order specified in the list of InputCodes... i.e. Ctrl+Shift+A, not Shift+Ctrl+A
 string InputCodeManager::getCurrentInputString(InputCode inputCode)
 {
    InputCode baseKey = getBaseKey(inputCode);
