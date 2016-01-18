@@ -443,10 +443,10 @@ string InputCodeManager::normalizeInputString(const string &inputString)
          return INVALID;
 
       bool found = false;
-      for(U32 i = 0; i < modifiers.size(); i++)
-         if(inputCode == modifiers[i])
+      for(U32 j = 0; j < modifiers.size(); j++)
+         if(inputCode == modifiers[j])
          {
-            hasModifier[i] = true;
+            hasModifier[j] = true;
             found = true;
             break;
          }
