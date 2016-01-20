@@ -807,6 +807,8 @@ static void loadQuickChatMessages(CIniFile *ini)
 }
 
 
+void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSettings);     // Forward declaration to make flow easier to follow
+
 static void writeQuickChatMessages(CIniFile *ini, IniSettings *iniSettings)
 {
    const char *section = "QuickChatMessages";
@@ -865,6 +867,13 @@ static void writeQuickChatMessages(CIniFile *ini, IniSettings *iniSettings)
          (keyName.substr(0, 17) == "QuickChat_Message"))
          return;
    }
+
+   writeDefaultQuickChatMessages(ini, iniSettings);
+}
+
+
+static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSettings)
+{
 
    insertQuickChatMessageSection(ini, 1, GlobalMessageType, KEY_G, BUTTON_6, "Global");
       insertQuickChatMessage(ini, 1, 1, GlobalMessageType, KEY_A, BUTTON_1,    "No Problem",            "No Problemo.");
