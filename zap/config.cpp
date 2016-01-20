@@ -807,7 +807,7 @@ static void loadQuickChatMessages(CIniFile *ini)
 }
 
 
-void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSettings);     // Forward declaration to make flow easier to follow
+void writeDefaultQuickChatMessages(CIniFile *ini);     // Forward declaration to make flow easier to follow
 
 static void writeQuickChatMessages(CIniFile *ini, IniSettings *iniSettings)
 {
@@ -868,13 +868,12 @@ static void writeQuickChatMessages(CIniFile *ini, IniSettings *iniSettings)
          return;
    }
 
-   writeDefaultQuickChatMessages(ini, iniSettings);
+   writeDefaultQuickChatMessages(ini);
 }
 
 
-static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSettings)
+static void writeDefaultQuickChatMessages(CIniFile *ini)
 {
-
    insertQuickChatMessageSection(ini, 1, GlobalMessageType, KEY_G, BUTTON_6, "Global");
       insertQuickChatMessage(ini, 1, 1, GlobalMessageType, KEY_A, BUTTON_1,    "No Problem",            "No Problemo.");
       insertQuickChatMessage(ini, 1, 2, GlobalMessageType, KEY_T, BUTTON_2,    "Thanks",                "Thanks.");
