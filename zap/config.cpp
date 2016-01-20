@@ -807,7 +807,7 @@ static void loadQuickChatMessages(CIniFile *ini)
 }
 
 
-static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSettings)
+static void writeQuickChatMessages(CIniFile *ini, IniSettings *iniSettings)
 {
    const char *section = "QuickChatMessages";
 
@@ -861,7 +861,8 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
    for(S32 i = 0; i < keys; i++)
    {
       string keyName = ini->getSectionName(i);
-      if(keyName.substr(0, 22) == "QuickChatMessagesGroup" && keyName.find("_") == string::npos)
+      if((keyName.substr(0, 22) == "QuickChatMessagesGroup" && keyName.find("_") == string::npos) ||
+         (keyName.substr(0, 17) == "QuickChat_Message"))
          return;
    }
 
@@ -1198,7 +1199,7 @@ void saveSettingsToINI(CIniFile *ini, GameSettings *settings)
    writePasswordSection(ini);
    writeKeyBindings(ini, settings->getInputCodeManager());
    
-   writeDefaultQuickChatMessages(ini, iniSettings);  // Does nothing if there are already chat messages in the INI
+   writeQuickChatMessages(ini, iniSettings);  // Does nothing if there are already chat messages in the INI
 
    // only needed for users using custom joystick 
    // or joystick that maps differenly in LINUX
