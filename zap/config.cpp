@@ -751,7 +751,7 @@ static void loadQuickChatMessages(CIniFile *ini)
 
    QuickChatHelper::nodeTree.push_back(emptyNode);
 
-   S32 keys = ini->GetNumSections();
+   S32 keys = ini->getNumSections();
    Vector<string> groups;
 
    // Read any top-level messages (those starting with "QuickChat_Message")
@@ -856,7 +856,7 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
 
 
    // Are there any QuickChatMessageGroups?  If not, we'll write the defaults.
-   S32 keys = ini->GetNumSections();
+   S32 keys = ini->getNumSections();
 
    for(S32 i = 0; i < keys; i++)
    {
@@ -1014,7 +1014,6 @@ void loadSettingsFromINI(CIniFile *ini, GameSettings *settings)
    loadQuickChatMessages(ini);
    loadServerBanList(ini, settings->getBanList());
 
-
    saveSettingsToINI(ini, settings);            // Save to fill in any missing settings
 
    settings->onFinishedLoading();               // Merge INI settings with cmd line settings
@@ -1026,7 +1025,7 @@ void IniSettings::loadUserSettingsFromINI(CIniFile *ini, GameSettings *settings)
    UserSettings userSettings;
 
    // Get a list of sections... we should have one per user
-   S32 sections = ini->GetNumSections();
+   S32 sections = ini->getNumSections();
 
    for(S32 i = 0; i < sections; i++)
    {

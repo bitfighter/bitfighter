@@ -92,7 +92,7 @@ public:
    S32 findKey(S32 const sectionID, const string &keyName) const;
 
    // Returns number of sections currently in the ini
-   S32 GetNumSections() const;
+   S32 getNumSections() const;
 
    // Verify if the key exists
    bool hasKey(const string &section, const string &key) const;

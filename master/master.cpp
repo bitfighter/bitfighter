@@ -54,7 +54,7 @@ extern Vector<string> master_admins;
 void MasterSettings::loadSettingsFromINI()
 {
    // Read all settings defined in the new modern manner
-   S32 sectionCount = ini.GetNumSections();
+   S32 sectionCount = ini.getNumSections();
 
    for(S32 i = 0; i < sectionCount; i++)
    {

@@ -672,7 +672,7 @@ void CIniFile::Reset()
 }
 
 
-S32 CIniFile::GetNumSections() const
+S32 CIniFile::getNumSections() const
 {
    return sectionNames.size();
 }
