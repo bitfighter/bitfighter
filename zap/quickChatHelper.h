@@ -6,13 +6,7 @@
 #ifndef _UIQUICKCHAT_H_
 #define _UIQUICKCHAT_H_
 
-
 #include "helperMenu.h"
-
-#include "tnlNetBase.h"
-#include "tnlNetStringTable.h"
-
-#include <string>
 
 using namespace std;
 
