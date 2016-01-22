@@ -8,7 +8,6 @@
 #include "BanList.h"
 #include "barrier.h"
 #include "game.h"
-#include "GameRecorder.h"
 #include "IniFile.h"          // For CIniFile
 #include "Level.h"
 #include "LineEditorFilterEnum.h"
