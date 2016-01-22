@@ -2632,11 +2632,9 @@ void GameUserInterface::renderGameCommander() const
    if(ship)
    {
       // Get info about the current player
-      S32 playerTeam = -1;
-
       if(gameType)
       {
-         playerTeam = ship->getTeam();
+         S32 playerTeam = ship->getTeam();
          const Color &teamColor = ship->getColor();
 
          for(S32 i = 0; i < renderObjects.size(); i++)
