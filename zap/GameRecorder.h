@@ -6,7 +6,6 @@
 #ifndef _GAMERECORDER_H_
 #define _GAMERECORDER_H_
 
-#include <stdio.h>
 #include "tnlGhostConnection.h"
 #include "tnlNetObject.h"
 #include "gameConnection.h"
