@@ -311,7 +311,8 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
       if(!items[i].showOnMenu)
          continue;
 
-      InputCode code = (inputMode == InputModeJoystick) ? items[i].button : items[i].key;    // Get the input code for the thing we want to render
+      // Get the input code for the thing we want to render, depending on the type of controls we're using
+      InputCode code = (inputMode == InputModeJoystick) ? items[i].button : items[i].key;    
 
       // Render key in white, or, if there is a legend, in the color of the adjacent item
       const Color *buttonOverrideColor = items[i].buttonOverrideColor;

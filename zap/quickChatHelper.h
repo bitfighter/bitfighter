@@ -27,6 +27,7 @@ struct QuickChatNode
    // Constructors
    QuickChatNode();
    QuickChatNode(S32 depth, const CIniFile *ini, const string &key, bool isGroup);
+   QuickChatNode(S32 depth, MessageType messageType, InputCode inputCode, InputCode buttonCode, const string &caption, const string &msg = "");
 
    virtual ~QuickChatNode();
 };

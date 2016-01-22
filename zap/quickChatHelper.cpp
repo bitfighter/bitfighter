@@ -34,13 +34,29 @@ QuickChatNode::QuickChatNode()
 QuickChatNode::QuickChatNode(S32 depth, const CIniFile *ini, const string &key, bool isGroup)
 {
    this->depth = depth;
-   inputCode  = InputCodeManager::stringToInputCode(ini->getValue(key, "Key", "A").c_str());
-   buttonCode = InputCodeManager::stringToInputCode(ini->getValue(key, "Button", "Button 1").c_str());
-   messageType = Evaluator::fromString<MessageType>(ini->getValue(key, "MessageType"));
+   
+   this->inputCode   = InputCodeManager::stringToInputCode(ini->getValue(key, "Key", "A").c_str());
+   this->buttonCode  = InputCodeManager::stringToInputCode(ini->getValue(key, "Button", "Button 1").c_str());
+   this->messageType = Evaluator::fromString<MessageType>(ini->getValue(key, "MessageType"));
 
-   caption = ini->getValue(key, "Caption", "Caption") + (isGroup ? " >" : "");
+   this->caption = ini->getValue(key, "Caption", "Caption") + (isGroup ? " >" : "");
+
    if(!isGroup)
-      msg = ini->getValue(key, "Message", "Message");
+      this->msg = ini->getValue(key, "Message", "Message");
+}
+
+
+QuickChatNode::QuickChatNode(S32 depth, MessageType messageType, InputCode inputCode, InputCode buttonCode, 
+                             const string &caption, const string &msg)
+{
+   this->depth = depth;
+
+   this->inputCode   = inputCode;
+   this->buttonCode  = buttonCode;
+   this->messageType = messageType;
+
+   this->caption = caption;
+   this->msg = msg;   
 }
 
 
@@ -203,7 +219,6 @@ const Vector<OverlayMenuItem> *QuickChatHelper::getConstMenuItems(bool one) cons
 }
 
 
-
 void QuickChatHelper::updateChatMenuItems(S32 curNode)
 {
    mCurNode = curNode;
@@ -225,12 +240,7 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
 
    bool showKeys = (settings->getInputMode() == InputModeKeyboard);
 
-   // First get to the end...
    while(nodeTree[walk].depth >= matchLevel)
-      walk++;
-
-   // Then draw bottom up...
-   while(walk != mCurNode)
    {  
       // When we're using a controller, don't present options with no defined controller key
       if(nodeTree[walk].depth == matchLevel && (showKeys || nodeTree[walk].buttonCode != KEY_UNKNOWN) )
@@ -246,7 +256,7 @@ void QuickChatHelper::updateChatMenuItems(S32 curNode)
 
          menuItems->push_back(item);
       }
-      walk--;
+      walk++;
    }
 
    mCurrentRenderItems = menuItems->address();

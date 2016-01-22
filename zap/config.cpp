@@ -5,12 +5,13 @@
 
 #include "config.h"
 
+#include "BanList.h"
+#include "Colors.h"
 #include "GameSettings.h"
 #include "IniFile.h"
 #include "InputCode.h"
+#include "QuickChatMessages.h"
 #include "version.h"
-#include "BanList.h"
-#include "Colors.h"
 
 #ifndef BF_NO_STATS
 #  include "../master/database.h"
@@ -65,6 +66,7 @@ UserSettings::~UserSettings() { /* Do nothing */ }
 // Nov 1 2013: bitfighter.org ip address changed to 209.148.88.166
 const char *MASTER_SERVER_LIST_ADDRESS = "bitfighter.org:25955,bitfighter.net:25955,IP:209.148.88.166:25955";
 //const char *MASTER_SERVER_LIST_ADDRESS = "IP:199.192.229.168:25955, bitfighter.net:25955";
+
 
 
 // Vol gets stored as a number from 0 to 10; normalize it to 0-1
@@ -722,6 +724,39 @@ static void insertQuickChatMessage(CIniFile *ini,
 }
 
 
+static void writeDefaultQuickChatMessages(CIniFile *ini)
+{
+#  define QUICK_CHAT_SECTION(group, messageType, keyCode, buttonCode, caption)                              \
+      insertQuickChatMessageSection(ini, group, messageType, keyCode, buttonCode, caption);
+
+#  define QUICK_CHAT_MESSAGE(group, messageId, messageType, keyCode, buttonCode, cation, message)           \
+      insertQuickChatMessage(ini, group, messageId, messageType, keyCode, buttonCode, cation, message);
+
+      DEFAULT_QUICK_CHAT_MESSAGE_TABLE
+
+#  undef QUICK_CHAT_MESSAGE
+#  undef QUICK_CHAT_SECTION
+
+}
+
+
+// This is only used when no messages are specified in the INI
+static void defineDefaultQuickChatMessages()
+{
+ #  define QUICK_CHAT_SECTION(group, messageType, keyCode, buttonCode, caption)                             \
+      QuickChatHelper::nodeTree.push_back(QuickChatNode(1, messageType, keyCode, buttonCode, caption));
+
+#  define QUICK_CHAT_MESSAGE(group, messageId, messageType, keyCode, buttonCode, caption, message)          \
+      QuickChatHelper::nodeTree.push_back(QuickChatNode(2, messageType, keyCode, buttonCode, caption, message));
+
+      DEFAULT_QUICK_CHAT_MESSAGE_TABLE
+
+#  undef QUICK_CHAT_MESSAGE
+#  undef QUICK_CHAT_SECTION  
+}
+
+
+
 /*  INI file looks a little like this:
    [QuickChatMessagesGroup1]
    Key=F
@@ -778,27 +813,32 @@ static void loadQuickChatMessages(CIniFile *ini)
 
    groups.sort(alphaSort);
 
-   // Now find all the individual message definitions for each key -- match "QuickChatMessagesGroup123_Message456"
-   // quickChat render functions were designed to work with the messages sorted in reverse.  Rather than
-   // reenigneer those, let's just iterate backwards and leave the render functions alone.
+   // If no messages were found, insert default messages
+   if(messages.size() == 0 && groups.size() == 0)
+      defineDefaultQuickChatMessages();
 
-   for(S32 i = groups.size() - 1; i >= 0; i--)
+   else
    {
-      messages.clear();
+      // Find all the individual message definitions for each key -- match "QuickChatMessagesGroup123_Message456"
 
-      for(S32 j = 0; j < keys; j++)
+      for(S32 i = 0; i < groups.size(); i++)
       {
-         string keyName = ini->getSectionName(j);
-         if(keyName.substr(0, groups[i].length() + 1) == groups[i] + "_")
-            messages.push_back(keyName);
+         messages.clear();
+
+         for(S32 j = 0; j < keys; j++)
+         {
+            string keyName = ini->getSectionName(j);
+            if(keyName.substr(0, groups[i].length() + 1) == groups[i] + "_")
+               messages.push_back(keyName);
+         }
+
+         messages.sort(alphaSort);
+
+         QuickChatHelper::nodeTree.push_back(QuickChatNode(1, ini, groups[i], true));
+
+         for(S32 j = 0; j < messages.size(); j++)
+            QuickChatHelper::nodeTree.push_back(QuickChatNode(2, ini, messages[j], false));
       }
-
-      messages.sort(alphaSort);
-
-      QuickChatHelper::nodeTree.push_back(QuickChatNode(1, ini, groups[i], true));
-
-      for(S32 j = messages.size() - 1; j >= 0; j--)
-         QuickChatHelper::nodeTree.push_back(QuickChatNode(2, ini, messages[j], false));
    }
 
    // Add final node.  Last verse, same as the first.
@@ -806,8 +846,6 @@ static void loadQuickChatMessages(CIniFile *ini)
 #endif
 }
 
-
-void writeDefaultQuickChatMessages(CIniFile *ini);     // Forward declaration to make flow easier to follow
 
 static void writeQuickChatMessages(CIniFile *ini, IniSettings *iniSettings)
 {
@@ -869,72 +907,6 @@ static void writeQuickChatMessages(CIniFile *ini, IniSettings *iniSettings)
    }
 
    writeDefaultQuickChatMessages(ini);
-}
-
-
-static void writeDefaultQuickChatMessages(CIniFile *ini)
-{
-   insertQuickChatMessageSection(ini, 1, GlobalMessageType, KEY_G, BUTTON_6, "Global");
-      insertQuickChatMessage(ini, 1, 1, GlobalMessageType, KEY_A, BUTTON_1,    "No Problem",            "No Problemo.");
-      insertQuickChatMessage(ini, 1, 2, GlobalMessageType, KEY_T, BUTTON_2,    "Thanks",                "Thanks.");
-      insertQuickChatMessage(ini, 1, 3, GlobalMessageType, KEY_X, KEY_UNKNOWN, "You idiot!",            "You idiot!");
-      insertQuickChatMessage(ini, 1, 4, GlobalMessageType, KEY_E, BUTTON_3,    "Duh",                   "Duh.");
-      insertQuickChatMessage(ini, 1, 5, GlobalMessageType, KEY_C, KEY_UNKNOWN, "Crap",                  "Ah Crap!");
-      insertQuickChatMessage(ini, 1, 6, GlobalMessageType, KEY_D, BUTTON_4,    "Damnit",                "Dammit!");
-      insertQuickChatMessage(ini, 1, 7, GlobalMessageType, KEY_S, BUTTON_5,    "Shazbot",               "Shazbot!");
-      insertQuickChatMessage(ini, 1, 8, GlobalMessageType, KEY_Z, BUTTON_6,    "Doh",                   "Doh!");
-
-   insertQuickChatMessageSection(ini, 2, TeamMessageType, KEY_D, BUTTON_5, "Defense");
-      insertQuickChatMessage(ini, 2, 1, TeamMessageType, KEY_G, KEY_UNKNOWN,   "Defend Our Base",       "Defend our base.");
-      insertQuickChatMessage(ini, 2, 2, TeamMessageType, KEY_D, BUTTON_1,      "Defending Base",        "Defending our base.");
-      insertQuickChatMessage(ini, 2, 3, TeamMessageType, KEY_Q, BUTTON_2,      "Is Base Clear?",        "Is our base clear?");
-      insertQuickChatMessage(ini, 2, 4, TeamMessageType, KEY_C, BUTTON_3,      "Base Clear",            "Base is secured.");
-      insertQuickChatMessage(ini, 2, 5, TeamMessageType, KEY_T, BUTTON_4,      "Base Taken",            "Base is taken.");
-      insertQuickChatMessage(ini, 2, 6, TeamMessageType, KEY_N, BUTTON_5,      "Need More Defense",     "We need more defense.");
-      insertQuickChatMessage(ini, 2, 7, TeamMessageType, KEY_E, BUTTON_6,      "Enemy Attacking Base",  "The enemy is attacking our base.");
-      insertQuickChatMessage(ini, 2, 8, TeamMessageType, KEY_A, KEY_UNKNOWN,   "Attacked",              "We are being attacked.");
-
-   insertQuickChatMessageSection(ini, 3, TeamMessageType, KEY_F, BUTTON_4, "Flag");
-      insertQuickChatMessage(ini, 3, 1, TeamMessageType, KEY_F, BUTTON_1,      "Get enemy flag",        "Get the enemy flag.");
-      insertQuickChatMessage(ini, 3, 2, TeamMessageType, KEY_R, BUTTON_2,      "Return our flag",       "Return our flag to base.");
-      insertQuickChatMessage(ini, 3, 3, TeamMessageType, KEY_S, BUTTON_3,      "Flag secure",           "Our flag is secure.");
-      insertQuickChatMessage(ini, 3, 4, TeamMessageType, KEY_H, BUTTON_4,      "Have enemy flag",       "I have the enemy flag.");
-      insertQuickChatMessage(ini, 3, 5, TeamMessageType, KEY_E, BUTTON_5,      "Enemy has flag",        "The enemy has our flag!");
-      insertQuickChatMessage(ini, 3, 6, TeamMessageType, KEY_G, BUTTON_6,      "Flag gone",             "Our flag is not in the base!");
-
-   insertQuickChatMessageSection(ini, 4, TeamMessageType, KEY_S, KEY_UNKNOWN, "Incoming Enemies - Direction");
-      insertQuickChatMessage(ini, 4, 1, TeamMessageType, KEY_S, KEY_UNKNOWN,   "Incoming South",        "*** INCOMING SOUTH ***");
-      insertQuickChatMessage(ini, 4, 2, TeamMessageType, KEY_E, KEY_UNKNOWN,   "Incoming East",         "*** INCOMING EAST  ***");
-      insertQuickChatMessage(ini, 4, 3, TeamMessageType, KEY_W, KEY_UNKNOWN,   "Incoming West",         "*** INCOMING WEST  ***");
-      insertQuickChatMessage(ini, 4, 4, TeamMessageType, KEY_N, KEY_UNKNOWN,   "Incoming North",        "*** INCOMING NORTH ***");
-      insertQuickChatMessage(ini, 4, 5, TeamMessageType, KEY_V, KEY_UNKNOWN,   "Incoming Enemies",      "Incoming enemies!");
-
-   insertQuickChatMessageSection(ini, 5, TeamMessageType, KEY_V, BUTTON_3, "Quick");
-      insertQuickChatMessage(ini, 5, 1, TeamMessageType, KEY_J, KEY_UNKNOWN,   "Capture the objective", "Capture the objective.");
-      insertQuickChatMessage(ini, 5, 2, TeamMessageType, KEY_O, KEY_UNKNOWN,   "Go on the offensive",   "Go on the offensive.");
-      insertQuickChatMessage(ini, 5, 3, TeamMessageType, KEY_A, BUTTON_1,      "Attack!",               "Attack!");
-      insertQuickChatMessage(ini, 5, 4, TeamMessageType, KEY_W, BUTTON_2,      "Wait for signal",       "Wait for my signal to attack.");
-      insertQuickChatMessage(ini, 5, 5, TeamMessageType, KEY_V, BUTTON_3,      "Help!",                 "Help!");
-      insertQuickChatMessage(ini, 5, 6, TeamMessageType, KEY_E, BUTTON_4,      "Regroup",               "Regroup.");
-      insertQuickChatMessage(ini, 5, 7, TeamMessageType, KEY_G, BUTTON_5,      "Going offense",         "Going offense.");
-      insertQuickChatMessage(ini, 5, 8, TeamMessageType, KEY_Z, BUTTON_6,      "Move out",              "Move out.");
-
-   insertQuickChatMessageSection(ini, 6, TeamMessageType, KEY_R, BUTTON_2, "Reponses");
-      insertQuickChatMessage(ini, 6, 1, TeamMessageType, KEY_A, BUTTON_1,      "Acknowledge",           "Acknowledged.");
-      insertQuickChatMessage(ini, 6, 2, TeamMessageType, KEY_N, BUTTON_2,      "No",                    "No.");
-      insertQuickChatMessage(ini, 6, 3, TeamMessageType, KEY_Y, BUTTON_3,      "Yes",                   "Yes.");
-      insertQuickChatMessage(ini, 6, 4, TeamMessageType, KEY_S, BUTTON_4,      "Sorry",                 "Sorry.");
-      insertQuickChatMessage(ini, 6, 5, TeamMessageType, KEY_T, BUTTON_5,      "Thanks",                "Thanks.");
-      insertQuickChatMessage(ini, 6, 6, TeamMessageType, KEY_D, BUTTON_6,      "Don't know",            "I don't know.");
-
-   insertQuickChatMessageSection(ini, 7, GlobalMessageType, KEY_T, BUTTON_1, "Taunts");
-      insertQuickChatMessage(ini, 7, 1, GlobalMessageType, KEY_R, KEY_UNKNOWN, "Rawr",                  "RAWR!");
-      insertQuickChatMessage(ini, 7, 2, GlobalMessageType, KEY_C, BUTTON_1,    "Come get some!",        "Come get some!");
-      insertQuickChatMessage(ini, 7, 3, GlobalMessageType, KEY_D, BUTTON_2,    "Dance!",                "Dance!"); 
-      insertQuickChatMessage(ini, 7, 4, GlobalMessageType, KEY_X, BUTTON_3,    "Missed me!",            "Missed me!");
-      insertQuickChatMessage(ini, 7, 5, GlobalMessageType, KEY_W, BUTTON_4,    "I've had worse...",     "I've had worse...");
-      insertQuickChatMessage(ini, 7, 6, GlobalMessageType, KEY_Q, BUTTON_5,    "How'd THAT feel?",      "How'd THAT feel?");
-      insertQuickChatMessage(ini, 7, 7, GlobalMessageType, KEY_E, BUTTON_6,    "Yoohoo!",               "Yoohoo!");
 }
 
 
