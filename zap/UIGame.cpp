@@ -770,7 +770,7 @@ void GameUserInterface::renderShutdownMessage() const
    if(mShutdownMode == None)
       return;
 
-   else if(mShutdownMode == ShuttingDown)
+   if(mShutdownMode == ShuttingDown)
    {
       char timemsg[255];
       dSprintf(timemsg, sizeof(timemsg), "Server is shutting down in %d seconds.", (S32) (mShutdownTimer.getCurrent() / 1000));
