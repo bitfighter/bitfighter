@@ -644,7 +644,7 @@ void GameType::idle_server(U32 deltaT)
    {
       mScoreboardUpdateTimer.reset();
 
-      GameConnection *gc = ((ServerGame*)mGame)->getGameRecorder();
+      GameConnection *gc = ((ServerGame *)mGame)->getGameRecorder();
       if(gc)
          updateClientScoreboard(gc);
    }
@@ -3559,7 +3559,7 @@ void GameType::sendChat(const StringTableEntry &senderName, ClientInfo *senderCl
    if(senderClientInfo && !senderClientInfo->isRobot())
       EventManager::get()->fireEvent(NULL, EventManager::MsgReceivedEvent, message, senderClientInfo->getPlayerInfo(), global);
 
-   GameConnection *gc = ((ServerGame*)mGame)->getGameRecorder();
+   GameConnection *gc = ((ServerGame *)mGame)->getGameRecorder();
    if(gc)
       gc->postNetEvent(theEvent);
 }
@@ -3856,7 +3856,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sVoiceChat, (bool echo, ByteBufferPtr vo
             dest->postNetEvent(event);
       }
 
-      GameConnection *gc = ((ServerGame*)mGame)->getGameRecorder();
+      GameConnection *gc = ((ServerGame *)mGame)->getGameRecorder();
       if(gc)
          gc->postNetEvent(event);
    }
@@ -4143,7 +4143,7 @@ void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles
          if(!mGame->getClientInfo(i)->isRobot())
             mGame->getClientInfo(i)->getConnection()->s2cDisplayMessage(color, sfx, message);
 
-      GameConnection *gc = ((ServerGame*)mGame)->getGameRecorder();
+      GameConnection *gc = ((ServerGame *)mGame)->getGameRecorder();
       if(gc)
          gc->s2cDisplayMessage(color, sfx, message);
    }
@@ -4161,7 +4161,7 @@ void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles
          if(!mGame->getClientInfo(i)->isRobot())
             mGame->getClientInfo(i)->getConnection()->s2cDisplayMessageE(color, sfx, formatString, e);
 
-      GameConnection *gc = ((ServerGame*)mGame)->getGameRecorder();
+      GameConnection *gc = ((ServerGame *)mGame)->getGameRecorder();
       if(gc)
          gc->s2cDisplayMessageE(color, sfx, formatString, e);
    }
