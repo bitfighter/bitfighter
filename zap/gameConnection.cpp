@@ -1108,7 +1108,6 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetFastRechargeTime, (U32 time), (time), Ne
 
 
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetDefaultLoadout, (Vector<U8> loadout), (loadout), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
-
 {
    LoadoutTracker def(loadout);
    getClientInfo()->setDefaultLoadout(def);
@@ -2498,6 +2497,7 @@ void GameConnection::onConnectionEstablished_server()
    setGhostFrom(true);
    setGhostTo(false);
    activateGhosting();
+
    //setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);  // make this client only?
 
    GameSettings *settings = mServerGame->getSettings();
