@@ -105,8 +105,6 @@ protected:
 
    static S32 findObjectById(lua_State *L, const Vector<DatabaseObject *> *objects);
 
-   static bool envContainsProperScriptId(const char *name);     // Only used for supporting asserts
-
 
 // Sets a var in the script's environment to give access to the caller's "this" obj, with the var name "name".
 // Basically sets the "bot", "levelgen", and "plugin" vars.
