@@ -4,19 +4,16 @@
 //------------------------------------------------------------------------------
 
 #include "GameRecorder.h"
-#include "tnlBitStream.h"
-#include "tnlNetObject.h"
 #include "FileList.h"
 #include "gameType.h"
 #include "ServerGame.h"
 #include "stringUtils.h"
-#include "tnlThread.h"
-#include "Level.h"
+#include "Level.h"         // Needed, sorry, resharper!
 
-#ifndef ZAP_DEDICATED
-#  include "ClientGame.h"
-#  include "UIManager.h"
-#endif
+#include "tnlThread.h"
+#include "tnlBitStream.h"
+#include "tnlNetObject.h"
+
 
 #include "version.h"
 
