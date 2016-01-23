@@ -229,6 +229,8 @@ public:
    TNL_DECLARE_RPC(s2cWrongPassword, ());
 
    TNL_DECLARE_RPC(s2cSetServerName, (StringTableEntry name));
+   TNL_DECLARE_RPC(s2cDisplayAnnouncement, (string message));
+
 
    bool isInCommanderMap();
 

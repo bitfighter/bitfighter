@@ -3432,7 +3432,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sSendAnnouncement, (string message), (me
    if(!sourceClientInfo->isAdmin())
       return;
 
-   s2cDisplayAnnouncement(message);
+   displayAnnouncement(message);
 }
 
 
@@ -3500,27 +3500,28 @@ void GameType::sendPrivateChat(const StringTableEntry &senderName, const StringT
 }
 
 
-// Send private chat from Controller
-void GameType::sendAnnouncementFromController(const StringPtr &message)
-{
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
-   {
-      ClientInfo *clientInfo = mGame->getClientInfo(i);
-
-      if(clientInfo->isRobot())
-         continue;
-
-      RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayAnnouncement, (message.getString()));
-
-      clientInfo->getConnection()->postNetEvent(theEvent);
-   }
-}
-
-
 void GameType::announceTeamsLocked(bool locked)
 {
    for(S32 i = 0; i < mGame->getClientCount(); i++)
       mGame->getClientInfo(i)->getConnection()->s2cTeamsLocked(locked);
+}
+
+
+// Server only
+void GameType::displayAnnouncement(const string &message) const
+{
+   TNLAssert(dynamic_cast<ServerGame *>(mGame), "Server only!");
+
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+      if(mGame->getClientInfo(i)->isRobot())
+         continue;
+
+      GameConnection *conn = mGame->getClientInfo(i)->getConnection();
+
+      if(conn)
+         conn->s2cDisplayAnnouncement(message);
+   }
 }
 
 
@@ -3563,15 +3564,6 @@ void GameType::sendChat(const StringTableEntry &senderName, ClientInfo *senderCl
    GameConnection *gc = ((ServerGame *)mGame)->getGameRecorder();
    if(gc)
       gc->postNetEvent(theEvent);
-}
-
-
-TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cDisplayAnnouncement, (string message), (message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 1)
-{
-#ifndef ZAP_DEDICATED
-   ClientGame* clientGame = static_cast<ClientGame *>(mGame);
-   clientGame->gotAnnouncement(message);
-#endif
 }
 
 

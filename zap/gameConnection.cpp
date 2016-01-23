@@ -983,6 +983,16 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
 }
 
 
+TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayAnnouncement, (string message), (message),
+                  NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
+{
+#ifndef ZAP_DEDICATED
+   ClientGame* clientGame = getClientGame();
+   clientGame->gotAnnouncement(message);
+#endif
+}
+
+
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetRole, (RangedU32<0,ClientInfo::MaxRoles> role, bool notify), (role, notify),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
@@ -2504,6 +2514,10 @@ void GameConnection::onConnectionEstablished_server()
 
    // Ideally, the server name would be part of the connection handshake, but this will work as well
    s2cSetServerName(settings->getHostName());   // Note: mSettings is NULL here
+   
+   //s2cDisplayAnnouncement("Welcome to the greatest server on earth!\n\nThis is an expert server, and "
+   //      "we expect that you will play your darndedst and just do well here!");
+
 
    time(&joinTime);
    mAcheivedConnection = true;

@@ -439,14 +439,12 @@ public:
    // In-game chat message:
    void sendChat(const StringTableEntry &senderName, ClientInfo *senderClientInfo, const StringPtr &message, bool global, S32 teamIndex);
    void sendPrivateChat(const StringTableEntry &senderName, const StringTableEntry &receiverName, const StringPtr &message);
-   void sendAnnouncementFromController(const StringPtr &message);
 
    TNL_DECLARE_RPC(c2sAddTime, (U32 time));                                    // Admin is adding time to the game
    TNL_DECLARE_RPC(c2sChangeTeams, (S32 team));                                // Player wants to change teams
    void processClientRequestForChangingGameTime(S32 time, bool isUnlimited1, bool changeTimeIfAlreadyUnlimited, bool addTime);
 
    TNL_DECLARE_RPC(c2sSendAnnouncement, (string message));
-   TNL_DECLARE_RPC(s2cDisplayAnnouncement, (string message));
 
    TNL_DECLARE_RPC(c2sSendChatPM, (StringTableEntry toName, StringPtr message));                        // using /pm command
    TNL_DECLARE_RPC(c2sSendChat, (bool global, StringPtr message));             // In-game chat
@@ -502,6 +500,8 @@ public:
    bool addBotFromClient(Vector<StringTableEntry> args);
 
    void announceTeamsLocked(bool locked);
+   void displayAnnouncement(const string &message) const;
+
 
    map <pair<U16,U16>, Vector<Point> > cachedBotFlightPlans;  // cache of zone-to-zone flight plans, shared for all bots
 };
