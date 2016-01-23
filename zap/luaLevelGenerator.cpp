@@ -6,7 +6,6 @@
 #include "luaLevelGenerator.h"
 
 #include "game.h"
-#include "barrier.h"             // For PolyWall def
 #include "Level.h"
 
 #include "stringUtils.h"         // fileExists
