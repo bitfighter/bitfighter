@@ -153,6 +153,8 @@ public:
    bool runScript(bool cacheScript);   // Load the script, execute the chunk to get it in memory, then run its main() function
 
    bool runFunction(const char *function, S32 returnValues);
+   void handleError(const string &message);
+
 
    const char *getScriptId();
    static bool loadFunction(lua_State *L, const char *scriptId, const char *functionName);

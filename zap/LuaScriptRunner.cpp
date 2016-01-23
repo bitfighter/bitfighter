@@ -355,7 +355,10 @@ bool LuaScriptRunner::runFunction(const char *function, S32 returnValues)
    pushStackTracer();                                        // -- <<args>>, _stackTracer
 
    if(!loadFunction(L, getScriptId(), function))             // -- <<args>>, _stackTracer, function
-      throw LuaException("Cannot load method " + string(function) +"()!\n");
+   {
+      handleError("Cannot load method " + string(function) +"()!\n");
+      return true;
+   }
 
    // Reorder the stack a little
    if(args > 0)
@@ -379,17 +382,20 @@ bool LuaScriptRunner::runFunction(const char *function, S32 returnValues)
    string msg = lua_tostring(L, -1);
    lua_pop(L, 1);    // Remove the message from the stack, so it won't appear in our stack dump
 
-   string text = "In method " + string(function) +"():\n" + msg;
+   handleError("In method " + string(function) + "():\n" + msg);
+   return true;
+}
 
-   logprintf(LogConsumer::LogError, "%s\n%s", getErrorMessagePrefix(), text.c_str());
+
+void LuaScriptRunner::handleError(const string &message)
+{
+   logprintf(LogConsumer::LogError, "%s\n%s", getErrorMessagePrefix(), message.c_str());
    logprintf(LogConsumer::LogError, "Dump of Lua/C++ stack:");
    dumpStack(L);
    logprintf(LogConsumer::LogError, "Terminating script");
 
    killScript();
    clearStack(L);
-
-   return true;
 }
 
 
