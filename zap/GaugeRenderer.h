@@ -6,9 +6,10 @@
 #ifndef _GAUGE_RENDERER_
 #define _GAUGE_RENDERER_
 
-#include "tnlTypes.h"
 #include "RenderManager.h"
 #include "UI.h"
+
+#include "tnlTypes.h"
 
 using namespace TNL;
 
