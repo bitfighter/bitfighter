@@ -230,7 +230,7 @@ S32 LuaLevelGenerator::lua_announce(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "announce");
 
-   const char *message = getString(L, 1);
+   string message = getString(L, 1);
 
    mGame->sendAnnouncementFromController(message);
 
