@@ -5,12 +5,11 @@
 
 #include "HTFGame.h"
 
+#include "game.h"
 #include "goalZone.h"
 #include "HelpItemManager.h"
 #include "Level.h"
 #include "ship.h"
-
-#include "game.h"
 
 #ifndef ZAP_DEDICATED
 #  include "UIMenuItems.h"
