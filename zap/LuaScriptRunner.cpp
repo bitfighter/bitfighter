@@ -356,7 +356,13 @@ bool LuaScriptRunner::runFunction(const char *function, S32 returnValues)
 
    if(!loadFunction(L, getScriptId(), function))             // -- <<args>>, _stackTracer, function
    {
-      handleError("Cannot load method " + string(function) +"()!\n");
+      string message = "Cannot load method " + string(function) +"()!\n";
+
+      // Add a helpful hint
+      if(strcmp(function, "main") == 0)
+         message += "Tip: All scripts should have a main() function that gets called when they are run.\n";
+
+      handleError(message);
       return true;
    }
 
