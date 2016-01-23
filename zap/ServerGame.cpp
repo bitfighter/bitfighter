@@ -1150,11 +1150,11 @@ void ServerGame::unsuspendIfActivePlayers()
 }
 
 
-// Return true if script was run (even if it errored) false if it wasn't (file not found or whatnot)
+// Return true if script was run (even if it errored), or if no script was specified, false if it wasn't (file not found or whatnot)
 bool ServerGame::runLevelGenScript(const string &scriptName)
 {
    if(scriptName == "")    // No script specified!
-      return false;
+      return true;
 
    // Find full name of levelgen script -- returns "" if file not found
    string fullname = getSettings()->getFolderManager()->findLevelGenScript(scriptName);  
