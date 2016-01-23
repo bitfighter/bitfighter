@@ -11,7 +11,6 @@
 #include "EventManager.h"
 #include "LuaWrapper.h"
 
-#include "tnl.h"
 #include "tnlVector.h"
 
 #include <deque>

@@ -6,14 +6,12 @@
 #include "LuaScriptRunner.h"  
 
 #include "BfObject.h"
-#include "BotNavMeshZone.h"
 #include "Engineerable.h"
 #include "game.h"
 #include "GeomUtils.h"
 #include "Level.h"
 #include "LuaModule.h"
 #include "ServerGame.h"
-#include "ship.h"
 #include "WallItem.h"
 
 #include "GameTypesEnum.h"
@@ -27,10 +25,8 @@
 #include <clipper.hpp>
 
 #include "tnlLog.h"            // For logprintf
-#include "tnlRandom.h"
 #include "tnlAssert.h"
 
-#include <iostream>            // For enum code
 #include <sstream>             // For enum code
 #include <string>
 
