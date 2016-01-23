@@ -11,6 +11,8 @@
 
 #include "tnlVector.h"
 
+#include <string>
+
 // Until we move completely to SDL2
 typedef S32 SDL_Keycode;
 
@@ -299,9 +301,9 @@ public:
    static S16 inputCodeToControllerButton(InputCode inputCode);
 
    // For use in the INI file comments section
-   static Vector<string> InputCodeManager::getValidKeyCodes(S32 width);
-   static string InputCodeManager::getValidModifiers();
-   static pair<string,string> InputCodeManager::getExamplesOfModifiedKeys();
+   static Vector<string> getValidKeyCodes(S32 width);
+   static string getValidModifiers();
+   static pair<string,string> getExamplesOfModifiedKeys();
 
    InputCode getBinding(BindingNameEnum bindingName) const; 
    InputCode getBinding(BindingNameEnum bindingName, InputMode inputMode) const;
