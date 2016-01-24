@@ -214,6 +214,7 @@ public:
    string hostname;                 // Server name when in host mode
    string hostaddr;                 // User-specified address/port of server
    string hostdescr;                // One-line description of server
+   string welcomeMessage;
    string serverPassword;
    string ownerPassword;
    string adminPassword;

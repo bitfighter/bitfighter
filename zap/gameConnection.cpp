@@ -2369,6 +2369,8 @@ void GameConnection::onConnectionEstablished_server()
 
    // Ideally, the server name would be part of the connection handshake, but this will work as well
    s2cSetServerName(mServerGame->getSettings()->getHostName());   // Note: mSettings is NULL here
+   
+   displayWelcomeMessage();
 
    time(&joinTime);
    mAcheivedConnection = true;
@@ -2416,6 +2418,17 @@ void GameConnection::onConnectionEstablished_server()
 
    if(mServerGame->isSuspended())
       s2rSetSuspendGame(true);
+}
+
+
+void GameConnection::displayWelcomeMessage()
+{
+   string message = mSettings->getWelcomeMessage();
+
+   if(message == "")
+      return;
+
+   mServerGame->getGameType()->s2cDisplayAnnouncement(message);
 }
 
 

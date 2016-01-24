@@ -1918,6 +1918,9 @@ void HostMenuUserInterface::setupMenus()
    addMenuItem(new TextEntryMenuItem("DESCRIPTION:", settings->getHostDescr(),                    
                                      "<Empty>", "", MaxServerDescrLen, KEY_D));
 
+   addMenuItem(new TextEntryMenuItem("WELCOME MSG:", settings->getWelcomeMessage(),
+                                       "<Empty>", "", MaxWelcomeMessageLen, KEY_W));
+
    addMenuItem(new MenuItem(getMenuItemCount(), "PASSWORDS", passwordOptionsSelectedCallback,
          "Set server passwords/permissions", KEY_P));
 
@@ -1948,8 +1951,9 @@ void HostMenuUserInterface::saveSettings()
 {
    GameSettings *settings = getGame()->getSettings();
 
-   settings->setHostName (getMenuItem(OPT_NAME)->getValue(), true);
+   settings->setHostName (getMenuItem(OPT_NAME)->getValue(),  true);
    settings->setHostDescr(getMenuItem(OPT_DESCR)->getValue(), true);
+   settings->setWelcomeMessage(getMenuItem(OPT_WELCOME)->getValue());
 
    settings->getIniSettings()->allowGetMap = (getMenuItem(OPT_GETMAP)->getIntValue() != 0);
    settings->getIniSettings()->enableGameRecording = (getMenuItem(OPT_RECORD)->getIntValue() != 0);

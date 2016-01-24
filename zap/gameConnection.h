@@ -75,6 +75,8 @@ private:
    S32 mAuthenticationCounter;
 
    void displayMessage(U32 colorIndex, U32 sfxEnum, const char *message);    // Helper function
+   void displayWelcomeMessage();
+
 
    StringTableEntry mServerName;
    GameSettings *mSettings;

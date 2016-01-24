@@ -304,6 +304,7 @@ class HostMenuUserInterface : public MenuUserInterface
       OPT_ROBOTS,
       OPT_NAME,
       OPT_DESCR,
+      OPT_WELCOME,
       OPT_PASSWORDS,
       OPT_GETMAP,
       OPT_RECORD,

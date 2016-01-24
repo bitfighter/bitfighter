@@ -638,6 +638,7 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->hostname  = ini->GetValue(section, "ServerName", iniSettings->hostname);
    iniSettings->hostaddr  = ini->GetValue(section, "ServerAddress", iniSettings->hostaddr);
    iniSettings->hostdescr = ini->GetValue(section, "ServerDescription", iniSettings->hostdescr);
+   iniSettings->welcomeMessage = ini->GetValue(section, "WelcomeMessage", iniSettings->welcomeMessage);
 
    iniSettings->serverPassword         = ini->GetValue  (section, "ServerPassword", iniSettings->serverPassword);
    iniSettings->ownerPassword          = ini->GetValue  (section, "OwnerPassword", iniSettings->ownerPassword);
@@ -1775,6 +1776,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
       addComment(" ServerName - The name others will see when they are browsing for servers (max 20 chars)");
       addComment(" ServerAddress - Socket address and port to bind to, e.g. IP:Any:9876 or IP:54.35.110.99:8000 or IP:bitfighter.org:8888 (leave blank to let the system decide; this is almost always what you want)");
       addComment(" ServerDescription - A one line description of your server.  Please include nickname and physical location!");
+      addComment(" WelcomeMessage - A message to be displayed to players when they connect to this server.");
       addComment(" ServerPassword - You can require players to use a password to play on your server.  Leave blank to grant access to all.");
       addComment(" OwnerPassword - Super admin password.  Gives admin rights + power over admins.  Do not give this out!");
       addComment(" AdminPassword - Use this password to manage players & change levels on your server.");
@@ -1806,6 +1808,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
    ini->SetValue  (section, "ServerName", iniSettings->hostname);
    ini->SetValue  (section, "ServerAddress", iniSettings->hostaddr);
    ini->SetValue  (section, "ServerDescription", iniSettings->hostdescr);
+   ini->SetValue  (section, "WelcomeMessage", iniSettings->welcomeMessage);
    ini->SetValue  (section, "ServerPassword", iniSettings->serverPassword);
    ini->SetValue  (section, "OwnerPassword", iniSettings->ownerPassword);
    ini->SetValue  (section, "AdminPassword", iniSettings->adminPassword);
