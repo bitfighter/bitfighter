@@ -178,6 +178,9 @@ public:
    string getHostDescr() const;
    void setHostDescr(const string &hostDescr, bool updateINI);
 
+   string getWelcomeMessage() const;
+   void setWelcomeMessage(const string &welcomeMessage);
+
    string getServerPassword() const;
    void setServerPassword(const string &ServerPassword, bool updateINI);
 

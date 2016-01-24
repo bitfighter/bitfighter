@@ -41,13 +41,6 @@
 namespace Zap
 {
 
-enum MenuItems {
-   OPT_HOST,            OPT_ROBOTS,
-   OPT_PLAYLIST,        OPT_NAME,
-   OPT_DESCR,           OPT_PASSWORDS,
-   OPT_GETMAP,          OPT_RECORD,
-   OPT_HOST_ON_SERVER,  OPT_PLAYBACK
-};
 
 // Sorts alphanumerically by menuItem's prompt  ==> used for getting levels in the right order and such
 S32 QSORT_CALLBACK menuItemValueSort(boost::shared_ptr<MenuItem> *a, boost::shared_ptr<MenuItem> *b)
@@ -1972,6 +1965,17 @@ static void playbackGamesCallback(ClientGame *game, U32 unused)
 }
 
 
+// Order here is important -- it must match order of the Host menu itself
+enum MenuItems {
+   OPT_HOST,            OPT_ROBOTS,
+   OPT_PLAYLIST,        OPT_NAME,
+   OPT_DESCR,           OPT_WELCOME,
+   OPT_PASSWORDS,
+   OPT_GETMAP,          OPT_RECORD,
+   OPT_HOST_ON_SERVER,  OPT_PLAYBACK
+};
+
+
 void HostMenuUserInterface::setupMenus()
 {
    clearMenuItems();
@@ -1990,6 +1994,9 @@ void HostMenuUserInterface::setupMenus()
 
    addMenuItem(new TextEntryMenuItem(OPT_DESCR, "DESCRIPTION:", mGameSettings->getHostDescr(),
                                        "<Empty>", "", MaxServerDescrLen, KEY_D));
+
+   addMenuItem(new TextEntryMenuItem(OPT_WELCOME, "WELCOME MSG:", mGameSettings->getWelcomeMessage(),
+                                       "<Empty>", "", MaxWelcomeMessageLen, KEY_W));
 
    addMenuItem(new MenuItem(OPT_PASSWORDS, "PASSWORDS", passwordOptionsSelectedCallback,
                                        "Set server passwords/permissions", KEY_P));
@@ -2023,6 +2030,7 @@ void HostMenuUserInterface::saveSettings()
 {
    mGameSettings->setHostName (getMenuItem(OPT_NAME)->getValue(),  true);
    mGameSettings->setHostDescr(getMenuItem(OPT_DESCR)->getValue(), true);
+   mGameSettings->setWelcomeMessage(getMenuItem(OPT_WELCOME)->getValue());
 
    mGameSettings->setSetting<YesNo>(IniKey::AllowGetMap,   getMenuItem(OPT_GETMAP)->getIntValue() ? Yes : No);
    mGameSettings->setSetting<YesNo>(IniKey::GameRecording, getMenuItem(OPT_RECORD)->getIntValue() ? Yes : No);

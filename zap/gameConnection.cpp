@@ -2515,9 +2515,7 @@ void GameConnection::onConnectionEstablished_server()
    // Ideally, the server name would be part of the connection handshake, but this will work as well
    s2cSetServerName(settings->getHostName());   // Note: mSettings is NULL here
    
-   //s2cDisplayAnnouncement("Welcome to the greatest server on earth!\n\nThis is an expert server, and "
-   //      "we expect that you will play your darndedst and just do well here!");
-
+   displayWelcomeMessage();
 
    time(&joinTime);
    mAcheivedConnection = true;
@@ -2563,6 +2561,17 @@ void GameConnection::onConnectionEstablished_server()
 
    if(mServerGame->isSuspended())
       s2rSetSuspendGame(true);
+}
+
+
+void GameConnection::displayWelcomeMessage()
+{
+   string message = mSettings->getWelcomeMessage();
+
+   if(message == "")
+      return;
+
+   s2cDisplayAnnouncement(message);
 }
 
 

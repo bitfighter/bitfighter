@@ -246,6 +246,18 @@ void GameSettings::setHostDescr(const string &serverDescription, bool updateINI)
 }
 
 
+string GameSettings::getWelcomeMessage() const
+{
+   return mIniSettings.mSettings.getVal<string>(IniKey::WelcomeMessage);
+}
+
+
+void GameSettings::setWelcomeMessage(const string &welcomeMessage) 
+{ 
+   mIniSettings.mSettings.setVal(IniKey::WelcomeMessage, welcomeMessage);
+}
+
+
 string GameSettings::getServerPassword() const
 {
    return mServerPassword;
