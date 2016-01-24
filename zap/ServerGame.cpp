@@ -5,37 +5,33 @@
 
 #include "ServerGame.h"
 
+#include "BanList.h"             // For banList kick duration
+#include "BotNavMeshZone.h"      // For zone clearing code
 #include "gameConnection.h"      // Need Color definitions for RPCs
 #include "GameManager.h"
-#include "gameType.h"
 #include "gameNetInterface.h"
-#include "masterConnection.h"
-#include "SoundSystem.h"
+#include "GameRecorder.h"
+#include "gameType.h"
+#include "IniFile.h"
+#include "Level.h"
+#include "LevelSource.h"
 #include "LevelSpecifierEnum.h" 
 #include "luaGameInfo.h"
 #include "luaLevelGenerator.h"
+#include "masterConnection.h"
 #include "robot.h"
+#include "SoundSystem.h"
 #include "Teleporter.h"
-#include "BanList.h"             // For banList kick duration
-#include "BotNavMeshZone.h"      // For zone clearing code
-#include "LevelSource.h"
-#include "Level.h"
 #include "WallItem.h"
 
-
-#include "stringUtils.h"
 #include "GeomUtils.h"
-
-#include "GameRecorder.h"
-
-#include "IniFile.h"
+#include "stringUtils.h"
 
 
 using namespace TNL;
 
 namespace Zap
 {
-
 
 static bool instantiated;           // Just a little something to keep us from creating multiple ServerGames...
 
