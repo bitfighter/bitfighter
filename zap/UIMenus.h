@@ -412,7 +412,6 @@ public:
    virtual ~LevelMenuUserInterface();
 
    void onActivate();
-   void onEscape();
 };
 
 
@@ -428,7 +427,6 @@ public:
    virtual ~RobotsMenuUserInterface();
 
    void onActivate();
-   void onEscape();
 };
 
 
@@ -468,7 +466,6 @@ public:
    virtual ~TeamMenuUserInterface();
 
    void idle(U32 timeDelta);
-   void onEscape();
 
    void processSelection(U32 index);
 };

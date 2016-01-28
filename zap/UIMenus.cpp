@@ -2312,12 +2312,6 @@ void LevelMenuUserInterface::onActivate()
 }
 
 
-void LevelMenuUserInterface::onEscape()
-{
-   getUIManager()->reactivatePrevUI();    // to mGameUserInterface
-}
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -2366,12 +2360,6 @@ void RobotsMenuUserInterface::onActivate()
    addMenuItem(new MenuItem("MORE ROBOTS",       moreBotsCallback,   "Add a robot to each team",        KEY_M));
    addMenuItem(new MenuItem("FEWER ROBOTS",      fewerBotsCallback,  "Remove a robot from each team",   KEY_F));
    addMenuItem(new MenuItem("REMOVE ALL ROBOTS", removeBotsCallback, "Remove all robots from the game", KEY_R));
-}
-
-
-void RobotsMenuUserInterface::onEscape()
-{
-   getUIManager()->reactivatePrevUI();    // to mGameUserInterface
 }
 
 
@@ -2451,12 +2439,6 @@ void TeamMenuUserInterface::idle(U32 timeDelta)
 
    // Finally, set menu title
    mMenuTitle = "TEAM TO SWITCH " + name + "TO";       // No space before the TO!
-}
-
-
-void TeamMenuUserInterface::onEscape()
-{
-   getUIManager()->reactivatePrevUI();
 }
 
 
