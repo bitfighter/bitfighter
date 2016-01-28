@@ -460,13 +460,15 @@ class TeamMenuUserInterface : public MenuUserInterface
 {
    typedef MenuUserInterface Parent;
 
+private:
+   string mNameToChange;
+
 public:
    explicit TeamMenuUserInterface(ClientGame *game, UIManager *uiManager);    // Constructor
    virtual ~TeamMenuUserInterface();
 
    void idle(U32 timeDelta);
    void onEscape();
-   string nameToChange;
 
    void processSelection(U32 index);
 };

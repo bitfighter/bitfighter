@@ -2401,12 +2401,12 @@ static void processTeamSelectionCallback(ClientGame *game, U32 index)
 void TeamMenuUserInterface::processSelection(U32 index)        
 {
    // Make sure user isn't just changing to the team they're already on...
-   if(index != (U32)getGame()->getTeamIndex(nameToChange.c_str()))
+   if(index != (U32)getGame()->getTeamIndex(mNameToChange.c_str()))
    {
       // Check if was initiated by an admin (PlayerUI is the kick/change team player-pick admin menu)
       if(getUIManager()->getPrevUI() == getUIManager()->getUI<PlayerMenuUserInterface>())        
       {
-         StringTableEntry e(nameToChange.c_str());
+         StringTableEntry e(mNameToChange.c_str());
          getGame()->changePlayerTeam(e, index);    // Index will be the team index
       }
       else                                         // Came from player changing own team
@@ -2430,7 +2430,7 @@ void TeamMenuUserInterface::idle(U32 timeDelta)
       AbstractTeam *team = getGame()->getTeam(i);
       strncpy(c, team->getName().getString(), 1);     // Grab first char of name for a shortcut key
 
-      bool isCurrent = (i == getGame()->getTeamIndex(nameToChange.c_str()));
+      bool isCurrent = (i == getGame()->getTeamIndex(mNameToChange.c_str()));
       
       addMenuItem(new TeamMenuItem(i, team, processTeamSelectionCallback, InputCodeManager::stringToInputCode(c), isCurrent));
    }
@@ -2441,9 +2441,9 @@ void TeamMenuUserInterface::idle(U32 timeDelta)
    if(ship && ship->getClientInfo())
       name = ship->getClientInfo()->getName().getString();
 
-   if(name != nameToChange)    // i.e. names differ, this isn't the local player
+   if(name != mNameToChange)    // i.e. names differ, this isn't the local player
    {
-      name = nameToChange;
+      name = mNameToChange;
       name += " ";
    }
    else
