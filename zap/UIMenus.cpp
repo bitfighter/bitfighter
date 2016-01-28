@@ -269,7 +269,7 @@ void MenuUserInterface::renderArrow(S32 pos, bool pointingUp) const
 
    S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
-   S32 y = 0;
+   S32 y;
    if(pointingUp)    // Up arrow
       y = pos - (ARROW_HEIGHT + ARROW_MARGIN) - 7;
    else              // Down arrow
