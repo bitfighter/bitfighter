@@ -1725,13 +1725,19 @@ void ServerInfoMenuUserInterface::setupMenus()
    clearMenuItems();
 
    OPT_NAME    = addMenuItem(new TextEntryMenuItem("SERVER NAME:", mGameSettings->getHostName(),
-                                                   "<Bitfighter Host>", "", MaxServerNameLen,  KEY_N));
+                                                   "<Bitfighter Host>", 
+                                                   "Name of the server as shown on Join screen", 
+                                                   MaxServerNameLen,  KEY_N));
 
    OPT_DESCR   = addMenuItem(new TextEntryMenuItem("DESCRIPTION:", mGameSettings->getHostDescr(),
-                                                   "<Empty>", "", MaxServerDescrLen, KEY_D));
+                                                   "<Empty>", 
+                                                   "Description of server as shown on Join screen", 
+                                                   MaxServerDescrLen, KEY_D));
 
    OPT_WELCOME = addMenuItem(new TextEntryMenuItem("WELCOME MSG:", mGameSettings->getWelcomeMessage(),
-                                                   "<Empty>", "", MaxWelcomeMessageLen, KEY_W));
+                                                   "<None>", 
+                                                   "Welcome message displayed when new players join server (leave blank for none)", 
+                                                   MaxWelcomeMessageLen, KEY_W));
 }
 
 
