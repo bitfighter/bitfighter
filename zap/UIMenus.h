@@ -314,7 +314,7 @@ public:
    void onEscape();
    void setupMenus();
    void onActivate();
-   void saveSettings();
+   void saveSettings() const;
 };
 
 

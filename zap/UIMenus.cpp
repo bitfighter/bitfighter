@@ -1749,7 +1749,7 @@ void ServerInfoMenuUserInterface::onEscape()
 }
 
 
-void ServerInfoMenuUserInterface::saveSettings()
+void ServerInfoMenuUserInterface::saveSettings() const
 {
    TNLAssert(OPT_NAME != -1, "Need to call setupMenus first!");
 
