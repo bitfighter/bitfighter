@@ -1695,6 +1695,70 @@ void RobotOptionsMenuUserInterface::saveSettings()
 ////////////////////////////////////////
 
 // Constructor
+ServerInfoMenuUserInterface::ServerInfoMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
+   Parent(game, uiManager)
+{
+   mMenuTitle = "SERVER INFORMATION";
+}
+
+
+// Destructor
+ServerInfoMenuUserInterface::~ServerInfoMenuUserInterface()
+{
+   // Do nothing
+}
+
+
+void ServerInfoMenuUserInterface::onActivate()
+{
+   Parent::onActivate();
+   setupMenus();
+}
+
+
+static S32 OPT_NAME = -1;
+static S32 OPT_DESCR = -1;
+static S32 OPT_WELCOME = -1;
+
+void ServerInfoMenuUserInterface::setupMenus()
+{
+   clearMenuItems();
+
+   OPT_NAME    = addMenuItem(new TextEntryMenuItem("SERVER NAME:", mGameSettings->getHostName(),
+                                                   "<Bitfighter Host>", "", MaxServerNameLen,  KEY_N));
+
+   OPT_DESCR   = addMenuItem(new TextEntryMenuItem("DESCRIPTION:", mGameSettings->getHostDescr(),
+                                                   "<Empty>", "", MaxServerDescrLen, KEY_D));
+
+   OPT_WELCOME = addMenuItem(new TextEntryMenuItem("WELCOME MSG:", mGameSettings->getWelcomeMessage(),
+                                                   "<Empty>", "", MaxWelcomeMessageLen, KEY_W));
+}
+
+
+// Save options to INI file
+void ServerInfoMenuUserInterface::onEscape()
+{
+   Parent::onEscape();
+   saveSettings();
+}
+
+
+void ServerInfoMenuUserInterface::saveSettings()
+{
+   TNLAssert(OPT_NAME != -1, "Need to call setupMenus first!");
+
+   mGameSettings->setHostName      (getMenuItem(OPT_NAME)->getValue(),  true);
+   mGameSettings->setHostDescr     (getMenuItem(OPT_DESCR)->getValue(), true);
+   mGameSettings->setWelcomeMessage(getMenuItem(OPT_WELCOME)->getValue());
+
+   saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
 ServerPasswordsMenuUserInterface::ServerPasswordsMenuUserInterface(ClientGame *game, UIManager *uiManager) : 
    Parent(game, uiManager)
 {
@@ -1947,6 +2011,12 @@ static void robotOptionsSelectedCallback(ClientGame *game, U32 unused)
 }
 
 
+static void serverInfoSelectedCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->activate<ServerInfoMenuUserInterface>();
+}
+
+
 static void passwordOptionsSelectedCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->activate<ServerPasswordsMenuUserInterface>();
@@ -1968,8 +2038,7 @@ static void playbackGamesCallback(ClientGame *game, U32 unused)
 // Order here is important -- it must match order of the Host menu itself
 enum MenuItems {
    OPT_HOST,            OPT_ROBOTS,
-   OPT_PLAYLIST,        OPT_NAME,
-   OPT_DESCR,           OPT_WELCOME,
+   OPT_PLAYLIST,        OPT_SERVER_INFO,
    OPT_PASSWORDS,
    OPT_GETMAP,          OPT_RECORD,
    OPT_HOST_ON_SERVER,  OPT_PLAYBACK
@@ -1989,14 +2058,8 @@ void HostMenuUserInterface::setupMenus()
    addMenuItem(new MenuItem(OPT_PLAYLIST, "PLAYLIST", playlistItemSelectedCallback,
                             "Select a playlist", KEY_L));
 
-   addMenuItem(new TextEntryMenuItem(OPT_NAME, "SERVER NAME:", mGameSettings->getHostName(),
-                                       "<Bitfighter Host>", "", MaxServerNameLen,  KEY_N));
-
-   addMenuItem(new TextEntryMenuItem(OPT_DESCR, "DESCRIPTION:", mGameSettings->getHostDescr(),
-                                       "<Empty>", "", MaxServerDescrLen, KEY_D));
-
-   addMenuItem(new TextEntryMenuItem(OPT_WELCOME, "WELCOME MSG:", mGameSettings->getWelcomeMessage(),
-                                       "<Empty>", "", MaxWelcomeMessageLen, KEY_W));
+   addMenuItem(new MenuItem(OPT_SERVER_INFO, "SERVER NAME & INFO", serverInfoSelectedCallback,
+                                       "Set server passwords/permissions", KEY_S, KEY_I));
 
    addMenuItem(new MenuItem(OPT_PASSWORDS, "PASSWORDS", passwordOptionsSelectedCallback,
                                        "Set server passwords/permissions", KEY_P));

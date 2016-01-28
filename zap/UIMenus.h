@@ -300,6 +300,23 @@ public:
    void saveSettings();
 };
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+class ServerInfoMenuUserInterface : public MenuUserInterface
+{
+   typedef MenuUserInterface Parent;
+
+public:
+   explicit ServerInfoMenuUserInterface(ClientGame *game, UIManager *uiManager);     // Constructor
+   virtual ~ServerInfoMenuUserInterface();
+
+   void onEscape();
+   void setupMenus();
+   void onActivate();
+   void saveSettings();
+};
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -464,6 +481,7 @@ private:
 public:
    explicit TeamMenuUserInterface(ClientGame *game, UIManager *uiManager);    // Constructor
    virtual ~TeamMenuUserInterface();
+
 
    void idle(U32 timeDelta);
 
