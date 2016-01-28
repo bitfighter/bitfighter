@@ -2091,10 +2091,6 @@ void HostMenuUserInterface::onEscape()
 // Save parameters and get them into the INI file
 void HostMenuUserInterface::saveSettings()
 {
-   mGameSettings->setHostName (getMenuItem(OPT_NAME)->getValue(),  true);
-   mGameSettings->setHostDescr(getMenuItem(OPT_DESCR)->getValue(), true);
-   mGameSettings->setWelcomeMessage(getMenuItem(OPT_WELCOME)->getValue());
-
    mGameSettings->setSetting<YesNo>(IniKey::AllowGetMap,   getMenuItem(OPT_GETMAP)->getIntValue() ? Yes : No);
    mGameSettings->setSetting<YesNo>(IniKey::GameRecording, getMenuItem(OPT_RECORD)->getIntValue() ? Yes : No);
 
