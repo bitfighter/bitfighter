@@ -735,7 +735,7 @@ void UIManager::showPlayerActionMenu(PlayerAction action)
 void UIManager::showMenuToChangeTeamForPlayer(const string &playerName)
 {
    TeamMenuUserInterface *ui = getUI<TeamMenuUserInterface>();
-   ui->nameToChange = playerName;
+   ui->mNameToChange = playerName;
    activate(ui);                  
 }
 

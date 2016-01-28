@@ -420,7 +420,7 @@ void PlayerMenuUserInterface::playerSelected(U32 index) const
    if(action == PlayerActionChangeTeam)
    {
       TeamMenuUserInterface *ui = getUIManager()->getUI<TeamMenuUserInterface>();
-      ui->nameToChange = getMenuItem(index)->getPrompt();
+      ui->mNameToChange = getMenuItem(index)->getPrompt();
 
       getUIManager()->activate<TeamMenuUserInterface>();     // Show menu to let player select a new team
    }
