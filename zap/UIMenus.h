@@ -475,13 +475,11 @@ class TeamMenuUserInterface : public MenuUserInterface
 {
    typedef MenuUserInterface Parent;
 
-private:
-   string mNameToChange;
-
 public:
    explicit TeamMenuUserInterface(ClientGame *game, UIManager *uiManager);    // Constructor
    virtual ~TeamMenuUserInterface();
 
+   string mNameToChange;
 
    void idle(U32 timeDelta);
 
