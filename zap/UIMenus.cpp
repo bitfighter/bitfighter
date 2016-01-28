@@ -16,25 +16,24 @@
 #include "UINameEntry.h"
 #include "UIManager.h"
 
-#include "LevelSource.h"
-#include "ship.h"
-
-#include "GameManager.h"
 #include "ClientGame.h"
-#include "gameType.h"            // Can get rid of this with some simple passthroughs
-#include "DisplayManager.h"
-#include "Joystick.h"
 #include "Colors.h"
 #include "Cursor.h"
-#include "VideoSystem.h"
+#include "DisplayManager.h"
 #include "FontManager.h"
-#include "SystemFunctions.h"
-#include "masterConnection.h"
+#include "GameManager.h"
+#include "gameType.h"            // Can get rid of this with some simple passthroughs
+#include "Joystick.h"
+#include "LevelSource.h"
 #include "LevelSpecifierEnum.h" 
+#include "masterConnection.h"
+#include "ship.h"
+#include "SystemFunctions.h"
+#include "VideoSystem.h"
 
 #include "GameObjectRender.h"    // For renderBitfighterLogo, mGL->glColor
-#include "stringUtils.h"
 #include "RenderUtils.h"
+#include "stringUtils.h"
 
 #include "GameRecorderPlayback.h"
 
