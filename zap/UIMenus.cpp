@@ -1410,8 +1410,8 @@ void InputOptionsMenuUserInterface::setupMenus()
 // Save options to INI file, and return to our regularly scheduled program
 void InputOptionsMenuUserInterface::onEscape()
 {
-   saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
    Parent::onEscape();
+   saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
 }
 
 
@@ -1510,8 +1510,8 @@ void SoundOptionsMenuUserInterface::setupMenus()
 // Save options to INI file, and return to our regularly scheduled program
 void SoundOptionsMenuUserInterface::onEscape()
 {
-   saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
    Parent::onEscape();
+   saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
 }
 
 
@@ -1676,8 +1676,8 @@ void RobotOptionsMenuUserInterface::setupMenus()
 // Save options to INI file
 void RobotOptionsMenuUserInterface::onEscape()
 {
-   saveSettings();
    Parent::onEscape();
+   saveSettings();
 }
 
 
@@ -1811,8 +1811,8 @@ void ServerPasswordsMenuUserInterface::setupMenus()
 // Save options to INI file
 void ServerPasswordsMenuUserInterface::onEscape()
 {
-   saveSettings();
    Parent::onEscape();
+   saveSettings();
 }
 
 
@@ -2083,8 +2083,8 @@ void HostMenuUserInterface::setupMenus()
 // This only gets called when escape not already handled by preprocessKeys(), i.e. when we're not editing
 void HostMenuUserInterface::onEscape()
 {
-   saveSettings();
    Parent::onEscape();
+   saveSettings();
 }
 
 
