@@ -1238,12 +1238,13 @@ void OptionsMenuUserInterface::toggleDisplayMode()
 // Save options to INI file, and return to our regularly scheduled program
 void OptionsMenuUserInterface::onEscape()
 {
+   Parent::onEscape();
+
    bool autologin = getMenuItem(3)->getIntValue();
 
    mGameSettings->setAutologin(autologin);
 
    saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
-   getUIManager()->reactivatePrevUI();      //mGameUserInterface
 }
 
 
@@ -1410,7 +1411,7 @@ void InputOptionsMenuUserInterface::setupMenus()
 void InputOptionsMenuUserInterface::onEscape()
 {
    saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
-   getUIManager()->reactivatePrevUI();      
+   Parent::onEscape();
 }
 
 
@@ -1510,7 +1511,7 @@ void SoundOptionsMenuUserInterface::setupMenus()
 void SoundOptionsMenuUserInterface::onEscape()
 {
    saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
-   getUIManager()->reactivatePrevUI();      //mGameUserInterface
+   Parent::onEscape();
 }
 
 
@@ -1562,14 +1563,14 @@ void InGameHelpOptionsUserInterface::setupMenus()
 // Save options to INI file, and return to our regularly scheduled program
 void InGameHelpOptionsUserInterface::onEscape()
 {
+   Parent::onEscape();
+
    bool show = getMenuItem(0)->getIntValue() == Yes;
 
    getGame()->setShowingInGameHelp(show);
    
    mGameSettings->setShowingInGameHelp(show);
    saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
-
-   getUIManager()->reactivatePrevUI();      //mGameUserInterface
 }
 
 
@@ -1615,6 +1616,8 @@ void EditorOptionsUserInterface::setupMenus()
 // Save options to INI file, and return to our regularly scheduled program
 void EditorOptionsUserInterface::onEscape()
 {
+   Parent::onEscape();
+
    bool show = getMenuItem(0)->getIntValue() == Yes;
 
    getGame()->setShowingInGameHelp(show);
@@ -1628,8 +1631,6 @@ void EditorOptionsUserInterface::onEscape()
 
    // Update any internal settings in the Editor itself
    getUIManager()->getUI<EditorUserInterface>()->updateSettings();
-
-   getUIManager()->reactivatePrevUI();
 }
 
 ////////////////////////////////////////
@@ -1676,7 +1677,7 @@ void RobotOptionsMenuUserInterface::setupMenus()
 void RobotOptionsMenuUserInterface::onEscape()
 {
    saveSettings();
-   getUIManager()->reactivatePrevUI();
+   Parent::onEscape();
 }
 
 
@@ -1747,7 +1748,7 @@ void ServerPasswordsMenuUserInterface::setupMenus()
 void ServerPasswordsMenuUserInterface::onEscape()
 {
    saveSettings();
-   getUIManager()->reactivatePrevUI();
+   Parent::onEscape();
 }
 
 
@@ -2020,7 +2021,7 @@ void HostMenuUserInterface::setupMenus()
 void HostMenuUserInterface::onEscape()
 {
    saveSettings();
-   getUIManager()->reactivatePrevUI();     
+   Parent::onEscape();
 }
 
 
@@ -2212,7 +2213,7 @@ void GameMenuUserInterface::buildMenu()
 
 void GameMenuUserInterface::onEscape()
 {
-   getUIManager()->reactivatePrevUI();      //mGameUserInterface
+   Parent::onEscape();
 
    // Show alert about input mode changing, if needed
    bool inputModesChanged = (lastInputMode != getGame()->getInputMode());
