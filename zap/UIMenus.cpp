@@ -2508,4 +2508,3 @@ void TeamMenuUserInterface::idle(U32 timeDelta)
 
 
 };
-
