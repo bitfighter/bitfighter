@@ -2065,7 +2065,7 @@ void HostMenuUserInterface::setupMenus()
                             "Select a playlist", KEY_L));
 
    addMenuItem(new MenuItem(OPT_SERVER_INFO, "SERVER NAME & INFO", serverInfoSelectedCallback,
-                                       "Set server passwords/permissions", KEY_S, KEY_I));
+                                       "Set server name, description, and welcome message", KEY_S, KEY_I));
 
    addMenuItem(new MenuItem(OPT_PASSWORDS, "PASSWORDS", passwordOptionsSelectedCallback,
                                        "Set server passwords/permissions", KEY_P));
