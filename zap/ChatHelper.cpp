@@ -84,7 +84,7 @@ namespace Zap
    { "leveldir",           &ChatCommands::setLevelDirHandler,         { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<new level folder>"},  "Set leveldir param on the server (changes levels available)" },
    { "setservername",      &ChatCommands::setServerNameHandler,       { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<name>"},              "Set server name" },
    { "setserverdescr",     &ChatCommands::setServerDescrHandler,      { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<descr>"},             "Set server description" },
-   { "setserverwelcome",   &ChatCommands::setServerWelcomeMsgHandler, { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<descr>"},             "Set server welcome message (use blank to disable)" },
+   { "setserverwelcome",   &ChatCommands::setServerWelcomeMsgHandler, { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<message>"},           "Set server welcome message (use blank to disable)" },
    { "deletecurrentlevel", &ChatCommands::deleteCurrentLevelHandler,  { },            0, ADMIN_COMMANDS,  0,  1,  {""},                    "Mark current level as deleted" },
    { "undeletelevel",      &ChatCommands::undeleteLevelHandler,       { },            0, ADMIN_COMMANDS,  0,  1,  {""},                    "Undelete most recently deleted level" },
    { "gmute",              &ChatCommands::globalMuteHandler,          { NAME },       1, ADMIN_COMMANDS,  0,  1,  {"<name>"},              "Globally mute/unmute a player" },
