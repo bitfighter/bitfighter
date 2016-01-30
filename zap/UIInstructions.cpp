@@ -291,6 +291,10 @@ void InstructionsUserInterface::render() const
          renderPageCommands(InstructionAdminCommands - FIRST_COMMAND_PAGE, 
                             "Admin permissions are required to use these commands");   // Admin commands
          break;                                                                        
+      case InstructionAdmin2Commands:
+         renderPageCommands(InstructionAdmin2Commands - FIRST_COMMAND_PAGE, 
+                            "Admin permissions are required to use these commands");   // More admin commands
+         break;                                                                        
       case InstructionOwnerCommands:                                                   
          renderPageCommands(InstructionOwnerCommands - FIRST_COMMAND_PAGE,             
                             "Owner permissions are required to use these commands");   // Owner commands
