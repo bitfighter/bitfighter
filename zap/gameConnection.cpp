@@ -5,20 +5,19 @@
 
 #include "gameConnection.h"
 
-#include "ServerGame.h"
-#include "IniFile.h"             // For CIniFile def
-#include "shipItems.h"           // For EngineerBuildObjects enum
-#include "masterConnection.h"    // For MasterServerConnection def
-#include "GameSettings.h"
 #include "BanList.h"
 #include "gameNetInterface.h"
-#include "gameType.h"
-#include "LevelSource.h"
-#include "ship.h"
-#include "LevelSpecifierEnum.h" 
-
-#include "SoundSystemEnums.h"
 #include "GameRecorder.h"
+#include "GameSettings.h"
+#include "gameType.h"
+#include "IniFile.h"             // For CIniFile def
+#include "LevelSource.h"
+#include "LevelSpecifierEnum.h" 
+#include "masterConnection.h"    // For MasterServerConnection def
+#include "ServerGame.h"
+#include "ship.h"
+#include "shipItems.h"           // For EngineerBuildObjects enum
+#include "SoundSystemEnums.h"
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
