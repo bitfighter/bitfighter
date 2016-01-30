@@ -47,22 +47,22 @@ namespace Zap
    { "mnext",    &ChatCommands::mNextHandler,       {  },          0,      SOUND_COMMANDS,   2,     1,    {  },                   "Play next track in the music list" },
    { "mprev",    &ChatCommands::mPrevHandler,       {  },          0,      SOUND_COMMANDS,   2,     1,    {  },                   "Play previous track in the music list" },
 
-   { "add",         &ChatCommands::addTimeHandler,         { xINT },     1,   LEVEL_COMMANDS,   0,  1,  {"<time in minutes>"},    "Add time to the current game" },
-   { "next",        &ChatCommands::nextLevelHandler,       {  },         0,   LEVEL_COMMANDS,   0,  1,  {  },                     "Start next level" },
-   { "prev",        &ChatCommands::prevLevelHandler,       {  },         0,   LEVEL_COMMANDS,   0,  1,  {  },                     "Replay previous level" },
-   { "restart",     &ChatCommands::restartLevelHandler,    {  },         0,   LEVEL_COMMANDS,   0,  1,  {  },                     "Restart current level" },
-   { "reset",       &ChatCommands::resetGameHandler,       {  },         0,   LEVEL_COMMANDS,   0,  1,  {  },                     "Restart level keeping same teams" },
-   { "random",      &ChatCommands::randomLevelHandler,     {  },         0,   LEVEL_COMMANDS,   0,  1,  {  },                     "Start random level" },
-   { "map",         &ChatCommands::mapLevelHandler,        { LEVEL },    1,   LEVEL_COMMANDS,   0,  1,  {"<level name>"},         "Start random level" },
-   { "shownextlevel",&ChatCommands::showNextLevelHandler,  {  },         0,   LEVEL_COMMANDS,   0,  1,  {  },                     "Show name of the next level" },
-   { "showprevlevel",&ChatCommands::showPrevLevelHandler,  {  },         0,   LEVEL_COMMANDS,   0,  1,  {  },                     "Show name of the previous level" },
-   { "setplaylist", &ChatCommands::setPlaylistHandler,     { PLAYLIST }, 1,   LEVEL_COMMANDS,   0,  1,  {"<playlist name>"},      "Switch to specified playlist" },
+   { "add",           &ChatCommands::addTimeHandler,       { xINT },     1,   LEVEL_COMMANDS,   0,  1,  {"<time in minutes>"},    "Add time to the current game" },
+   { "next",          &ChatCommands::nextLevelHandler,     {  },         0,   LEVEL_COMMANDS,   0,  1,  {  },                     "Start next level" },
+   { "prev",          &ChatCommands::prevLevelHandler,     {  },         0,   LEVEL_COMMANDS,   0,  1,  {  },                     "Replay previous level" },
+   { "restart",       &ChatCommands::restartLevelHandler,  {  },         0,   LEVEL_COMMANDS,   0,  1,  {  },                     "Restart current level" },
+   { "reset",         &ChatCommands::resetGameHandler,     {  },         0,   LEVEL_COMMANDS,   0,  1,  {  },                     "Restart level keeping same teams" },
+   { "random",        &ChatCommands::randomLevelHandler,   {  },         0,   LEVEL_COMMANDS,   0,  1,  {  },                     "Start random level" },
+   { "map",           &ChatCommands::mapLevelHandler,      { LEVEL },    1,   LEVEL_COMMANDS,   0,  1,  {"<level name>"},         "Start random level" },
+   { "shownextlevel", &ChatCommands::showNextLevelHandler, {  },         0,   LEVEL_COMMANDS,   0,  1,  {  },                     "Show name of the next level" },
+   { "showprevlevel", &ChatCommands::showPrevLevelHandler, {  },         0,   LEVEL_COMMANDS,   0,  1,  {  },                     "Show name of the previous level" },
+   { "setplaylist",   &ChatCommands::setPlaylistHandler,   { PLAYLIST }, 1,   LEVEL_COMMANDS,   0,  1,  {"<playlist name>"},      "Switch to specified playlist" },
                                                                                                     
-   { "settime",     &ChatCommands::setTimeHandler,         { xINT },  1,   LEVEL_COMMANDS,   0,     1,  {"<time in minutes>"},    "Set play time for the level" },
-   { "setscore",    &ChatCommands::setWinningScoreHandler, { xINT },  1,   LEVEL_COMMANDS,   0,     1,  {"<score>"},              "Set score to win the level" },
-   { "resetscore",  &ChatCommands::resetScoreHandler,      {  },      0,   LEVEL_COMMANDS,   0,     1,  {  },                     "Reset all scores to zero" },
- 
-   { "run",         &ChatCommands::runScriptHandler,       { SCRIPT },1,   LEVEL_COMMANDS,   0,     1,  {"<script name>"},        "Run a script" },
+   { "settime",     &ChatCommands::setTimeHandler,         { xINT },     1,   LEVEL_COMMANDS,   0,     1,  {"<time in minutes>"},    "Set play time for the level" },
+   { "setscore",    &ChatCommands::setWinningScoreHandler, { xINT },     1,   LEVEL_COMMANDS,   0,     1,  {"<score>"},              "Set score to win the level" },
+   { "resetscore",  &ChatCommands::resetScoreHandler,      {  },         0,   LEVEL_COMMANDS,   0,     1,  {  },                     "Reset all scores to zero" },
+    
+   { "run",         &ChatCommands::runScriptHandler,       { SCRIPT },   1,   LEVEL_COMMANDS,   0,     1,  {"<script name>"},        "Run a script" },
 
    HEADER_TEXT(BOT_COMMANDS, 0, "These commands add bot players that continue to play in future levels"),
    { "morebots",    &ChatCommands::moreBotsHandler,        {  },                     0, BOT_COMMANDS,    0,  1,  {  },                                               "Add some bots (keep teams balanced)"},
@@ -88,12 +88,12 @@ namespace Zap
    { "lockteams",          &ChatCommands::lockTeams,                  { },            0, ADMIN_COMMANDS,  0,  1,  { "" },                  "Lock teams - teams same every game, players may not change" },
    { "unlockteams",        &ChatCommands::unlockTeams,                { },            0, ADMIN_COMMANDS,  0,  1,  { "" },                  "Unlock teams - Teams revert to normal behavior" },
 
-   { "setlevpass",         &ChatCommands::setLevPassHandler,          { STR },        1, ADMIN_COMMANDS,  0,  1,  {"[passwd]"},            "Set level change password (use blank to clear)" },
-   { "setserverpass",      &ChatCommands::setServerPassHandler,       { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<passwd>"},            "Set server password (use blank to clear)" },
-   { "leveldir",           &ChatCommands::setLevelDirHandler,         { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<new level folder>"},  "Set leveldir param on the server (changes levels available)" },
-   { "setservername",      &ChatCommands::setServerNameHandler,       { STR },        1, ADMIN_COMMANDS_2, 0, 1,  {"<name>"},              "Set server name" },
-   { "setserverdescr",     &ChatCommands::setServerDescrHandler,      { STR },        1, ADMIN_COMMANDS_2, 0, 1,  {"<descr>"},             "Set server description" },
-   { "setserverwelcome",   &ChatCommands::setServerWelcomeMsgHandler, { STR },        1, ADMIN_COMMANDS_2, 0, 1,  {"<message>"},           "Set server welcome message (use blank to disable)" },
+   { "setlevpass",         &ChatCommands::setLevPassHandler,          { STR },        1, ADMIN_COMMANDS_2, 0,  1,  {"[passwd]"},            "Set level change password (use blank to clear)" },
+   { "setserverpass",      &ChatCommands::setServerPassHandler,       { STR },        1, ADMIN_COMMANDS_2, 0,  1,  {"<passwd>"},            "Set server password (use blank to clear)" },
+   { "leveldir",           &ChatCommands::setLevelDirHandler,         { STR },        1, ADMIN_COMMANDS_2, 0,  1,  {"<new level folder>"},  "Set leveldir param on the server (changes levels available)" },
+   { "setservername",      &ChatCommands::setServerNameHandler,       { STR },        1, ADMIN_COMMANDS_2, 0,  1,  {"<name>"},              "Set server name" },
+   { "setserverdescr",     &ChatCommands::setServerDescrHandler,      { STR },        1, ADMIN_COMMANDS_2, 0,  1,  {"<descr>"},             "Set server description" },
+   { "setserverwelcome",   &ChatCommands::setServerWelcomeMsgHandler, { STR },        1, ADMIN_COMMANDS_2, 0,  1,  {"<message>"},           "Set server welcome message (use blank to disable)" },
 
    { "setownerpass", &ChatCommands::setOwnerPassHandler,       { STR },        1, OWNER_COMMANDS,  0,  1,  {"[passwd]"},            "Set owner password" },
    { "setadminpass", &ChatCommands::setAdminPassHandler,       { STR },        1, OWNER_COMMANDS,  0,  1,  {"[passwd]"},            "Set admin password" },
@@ -199,8 +199,8 @@ void ChatHelper::render() const
 
    // Define some vars for readability:
    S32 promptWidth = RenderUtils::getStringWidth(CHAT_COMPOSE_FONT_SIZE, promptStr);
-   S32 nameSize   = RenderUtils::getStringWidthf(CHAT_COMPOSE_FONT_SIZE, "%s: ", getGame()->getClientInfo()->getName().getString());
-   S32 nameWidth  = max(nameSize, promptWidth);
+   S32 nameSize    = RenderUtils::getStringWidthf(CHAT_COMPOSE_FONT_SIZE, "%s: ", getGame()->getClientInfo()->getName().getString());
+   S32 nameWidth   = max(nameSize, promptWidth);
    // Above block repeated below...
 
    S32 ypos = IN_GAME_CHAT_DISPLAY_POS + CHAT_COMPOSE_FONT_SIZE + 11;      // Top of the box when fully displayed
