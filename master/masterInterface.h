@@ -188,7 +188,6 @@ public:
 
    TNL_DECLARE_RPC(s2mChangeName, (StringTableEntry name));         // when server changes name using /setservname
    TNL_DECLARE_RPC(s2mServerDescription, (StringTableEntry descr)); // when server changes using /setservdescr
-
 };
 
 }

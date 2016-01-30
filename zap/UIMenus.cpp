@@ -1753,9 +1753,9 @@ void ServerInfoMenuUserInterface::saveSettings() const
 {
    TNLAssert(OPT_NAME != -1, "Need to call setupMenus first!");
 
-   mGameSettings->setHostName      (getMenuItem(OPT_NAME)->getValue(),  true);
-   mGameSettings->setHostDescr     (getMenuItem(OPT_DESCR)->getValue(), true);
-   mGameSettings->setWelcomeMessage(getMenuItem(OPT_WELCOME)->getValue());
+   mGameSettings->setHostName      (getMenuItem(OPT_NAME)->getValue(),    true);
+   mGameSettings->setHostDescr     (getMenuItem(OPT_DESCR)->getValue(),   true);
+   mGameSettings->setWelcomeMessage(getMenuItem(OPT_WELCOME)->getValue(), true);
 
    saveSettingsToINI(&GameSettings::iniFile, mGameSettings);
 }

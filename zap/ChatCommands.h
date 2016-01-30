@@ -98,6 +98,7 @@ void setServerPassHandler      (ClientGame *game, const Vector<string> &args);
 void setLevPassHandler         (ClientGame *game, const Vector<string> &args);
 void setServerNameHandler      (ClientGame *game, const Vector<string> &args);
 void setServerDescrHandler     (ClientGame *game, const Vector<string> &args);
+void setServerWelcomeMsgHandler(ClientGame *game, const Vector<string> &args);
 void setLevelDirHandler        (ClientGame *game, const Vector<string> &args);
 void setPlaylistHandler        (ClientGame *game, const Vector<string> &args);
 void pmHandler                 (ClientGame *game, const Vector<string> &args);

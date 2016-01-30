@@ -248,13 +248,16 @@ void GameSettings::setHostDescr(const string &serverDescription, bool updateINI)
 
 string GameSettings::getWelcomeMessage() const
 {
-   return mIniSettings.mSettings.getVal<string>(IniKey::WelcomeMessage);
+   return mWelcomeMessage;
 }
 
 
-void GameSettings::setWelcomeMessage(const string &welcomeMessage) 
+void GameSettings::setWelcomeMessage(const string &welcomeMessage, bool updateINI) 
 { 
-   mIniSettings.mSettings.setVal(IniKey::WelcomeMessage, welcomeMessage);
+   mWelcomeMessage = welcomeMessage;
+
+   if(updateINI)
+      mIniSettings.mSettings.setVal(IniKey::WelcomeMessage, welcomeMessage);
 }
 
 
@@ -937,6 +940,7 @@ void GameSettings::onFinishedLoading()
 
    mHostName               = *choose( getCmdLineParamString(HOST_NAME),             settings.getVal<string>(IniKey::ServerName) );
    mHostDescr              = *choose( getCmdLineParamString(HOST_DESCRIPTION),      settings.getVal<string>(IniKey::ServerDescription) );
+   mWelcomeMessage         = mIniSettings.mSettings.getVal<string>(IniKey::WelcomeMessage);
 
 
    cmdLineVal = getCmdLineParamString(LOGIN_NAME);
