@@ -37,6 +37,7 @@ enum HelpCategories {
    LEVEL_COMMANDS,
    BOT_COMMANDS,
    ADMIN_COMMANDS,
+   ADMIN_COMMANDS_2,
    OWNER_COMMANDS,
    DEBUG_COMMANDS,
    DEVELOPER_COMMANDS,     // Only include in debug builds
