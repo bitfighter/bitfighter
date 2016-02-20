@@ -2418,7 +2418,7 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
       mPointOfRotation = new Point();
       Vector<Point> centroidList;
 
-      // Add all object centroids to a set for de-duplication.  We'll get the centroid of the set
+      // Add all object centroids to a set for de-duplication.  We'll get the centroid of the set.
       set<Point> centroidSet;
       for(S32 i = 0; i < objList->size(); i++)
       {
