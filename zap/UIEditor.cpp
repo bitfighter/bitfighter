@@ -2902,8 +2902,10 @@ void EditorUserInterface::onMouseDragged()
    else  // larger items
       mSnapDelta = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
 
-   // Nudge all selected objects by incremental move amount
-   translateSelectedItems(mSnapDelta, lastSnapDelta);
+   // Nudge all selected objects by incremental move amount; constrain movement if shift is down
+   bool constrainMovement = InputCodeManager::getState(KEY_SHIFT);   
+
+   translateSelectedItems(mSnapDelta, lastSnapDelta, constrainMovement);
 
    // Snap all selected engr. objects if possible
    snapSelectedEngineeredItems(mSnapDelta);
@@ -2988,7 +2990,7 @@ void EditorUserInterface::onMouseDragged_copyAndDrag(const Vector<DatabaseObject
 }
 
 
-void EditorUserInterface::translateSelectedItems(const Point &offset, const Point &lastOffset)
+void EditorUserInterface::translateSelectedItems(const Point &offset, const Point &lastOffset, bool constrainMovement)
 {
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
@@ -3007,6 +3009,9 @@ void EditorUserInterface::translateSelectedItems(const Point &offset, const Poin
             {
                newVert = obj->getVert(j) + (mSelectedObjectsForDragging[k]->getVert(0) - obj->getVert(0)) + offset;
 
+               if(constrainMovement)
+                  newVert = snapToConstrainedLine(newVert);
+
                obj->setVert(newVert, j);
 
                obj->onItemDragging();        // Let the item know it's being dragged
@@ -3015,6 +3020,10 @@ void EditorUserInterface::translateSelectedItems(const Point &offset, const Poin
             {
                // Pos of vert at last tick + Offset from last tick
                newVert = obj->getVert(j) + (offset - lastOffset);
+
+               if(constrainMovement)
+                  newVert = snapToConstrainedLine(newVert);
+
                obj->setVert(newVert, j);
                obj->onGeomChanging();        // Because, well, the geom is changing
 
@@ -3026,6 +3035,18 @@ void EditorUserInterface::translateSelectedItems(const Point &offset, const Poin
          k++;
       }
    }
+}
+
+
+Point EditorUserInterface::snapToConstrainedLine(const Point &point) const
+{
+   Point pos = convertCanvasToLevelCoord(mMousePos);
+   Point horiz = Point(point.x, mMoveOrigin.y);
+   Point vert = Point(mMoveOrigin.x, point.y);
+
+   if(pos.distSquared(horiz) > pos.distSquared(vert))
+      return vert;
+   return horiz;
 }
 
 
@@ -4718,7 +4739,7 @@ void EditorUserInterface::onFinishedDragging_droppedItemOnDock()     // Delete t
 
       // Move objects back to their starting location before deleting, so when undeleting, 
       // objects return the way users will expect
-      translateSelectedItems(Point(0, 0), mSnapDelta);
+      translateSelectedItems(Point(0, 0), mSnapDelta, false);
 
       mUndoManager.startTransaction();
 

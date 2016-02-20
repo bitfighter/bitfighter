@@ -283,6 +283,8 @@ private:
 
    Point convertCanvasToLevelCoord(const Point &p) const;
    Point convertLevelToCanvasCoord(const Point &p, bool convert = true) const;
+   Point snapToConstrainedLine(const Point &point) const;
+
 
    string getInfoMsg() const;
 
@@ -302,7 +304,7 @@ private:
 
    Level mLevelGenDatabase;         // Database for inserting objects when running a levelgen script in the editor
 
-   void translateSelectedItems(const Point &offset, const Point &lastOffset);
+   void translateSelectedItems(const Point &offset, const Point &lastOffset, bool constrainMovement);
    void snapSelectedEngineeredItems(const Point &cumulativeOffset);
 
    void render() const;
