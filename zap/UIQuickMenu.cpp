@@ -198,7 +198,7 @@ void QuickMenuUI::render() const
 
    // Dim out area behind instructions
    F32 margin = 5.0f;
-   mGL->glColor(Colors::black, 0.7);
+   mGL->glColor(Colors::black, 0.7f);
    RenderUtils::drawFilledRect(instrXPos - helpWidth / 2.0f - margin, instrYPos, instrXPos + helpWidth / 2.0f + margin, instrYPos + HELP_TEXT_SIZE + margin);
 
    // And draw the text
