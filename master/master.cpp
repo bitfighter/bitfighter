@@ -37,7 +37,7 @@ void MasterSettings::readConfigFile()
 
    // Clear, then read
    ini.Clear();
-   ini.ReadFile();
+   ini.readFile();
 
    // Now set up variables -- copies data from ini to settings
    loadSettingsFromINI();
