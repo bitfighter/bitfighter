@@ -2754,10 +2754,9 @@ void Mortar::onGeomChanged()
 { 
    Parent::onGeomChanged();
 
-
-
    Point normal = mAnchorNormal;
    normal.normalize();
+
    Point perpendicular = Point(normal.y, -normal.x);
    Point offset = normal;
    offset.normalize(MORTAR_OFFSET + 35);     // 35 determined by trial and error, only coincidentally equal to MORTAR_OFFSET
