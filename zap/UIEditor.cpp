@@ -3042,11 +3042,16 @@ Point EditorUserInterface::snapToConstrainedLine(const Point &point) const
 {
    Point mousePos = convertCanvasToLevelCoord(mMousePos);     
 
-   Vector<Point> candidates(4);
+   Vector<Point> candidates(12);
    candidates.push_back(Point(point.x, mMoveOrigin.y));                                // Horizontal
    candidates.push_back(Point(mMoveOrigin.x, point.y));                                // Vertical
-   candidates.push_back(pointOnLine(point, mMoveOrigin, mMoveOrigin + Point(10,10)));  // Diagonal going up and to the right
-   candidates.push_back(pointOnLine(point, mMoveOrigin, mMoveOrigin + Point(10,-10))); // Diagonal going up and to the left
+   candidates.push_back(pointOnLine(point, mMoveOrigin, Point(10,10)));  // Diagonal going up and to the right
+   candidates.push_back(pointOnLine(point, mMoveOrigin, Point(10,-10))); // Diagonal going up and to the left
+
+   // Add some other multiples of 15 deg
+   S32 angles[] = { 15, 30, 60, 75, 105, 120, 150, 165 };
+   for(S32 i = 0; i < ARRAYSIZE(angles); i++)
+      candidates.push_back(pointOnLine(point, mMoveOrigin, Point(100 * cos(angles[i] * FloatPi / 180), 100 * sin(angles[i] * FloatPi / 180)))); 
 
    F32 dist = mousePos.distSquared(candidates[0]);
    S32 closest = 0;
