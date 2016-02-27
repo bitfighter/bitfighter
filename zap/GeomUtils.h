@@ -79,7 +79,7 @@ bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point 
 bool zonesTouch(const Vector<Point> *zone1, const Vector<Point> *zone2, F32 scaleFact, Point &overlapStart, Point &overlapEnd);
 bool pointOnSegment(const Point &c, const Point &a, const Point &b, F32 closeEnough);
 
-Point pointOnLine(Point p, const Point &l1, const Point &l2);
+Point pointOnLine(Point p, const Point &line, const Point &dir);
 
 bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, 
                             Point &outPoint, Point *ignoreVelocityEpsilon = NULL);
