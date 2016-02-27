@@ -1963,16 +1963,27 @@ bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &cl
    Point edgeDelta = s2 - s1;    // Vector defining extent of segment
    Point pointDelta = p - s1;    // Distance from p to start of segment
 
-   float fraction = pointDelta.dot(edgeDelta);  // "Perpendicularize" pointDelta towards edgeDelta
-   float lenSquared = edgeDelta.lenSquared();
+   F32 fraction = pointDelta.dot(edgeDelta);                // "Perpendicularize" pointDelta towards edgeDelta
+   F32 lenSquared = edgeDelta.lenSquared();
 
    if(fraction > 0 && fraction < lenSquared)                // Intersection!
    {
       closest = s1 + edgeDelta * (fraction / lenSquared);   // Closest point
       return true;
    }
-   else   // Didn't find a good match
-      return false;
+   
+   // Didn't find a good match
+   return false;
+}
+
+
+// From http://stackoverflow.com/questions/22087193/optimized-functions-to-compute-projection-of-a-point-on-a-line
+Point pointOnLine(Point p, const Point &l1, const Point &l2)
+{
+   p -= l1;
+   Point l(l2.x - l1.x, l2.y - l1.y);
+   F32 len = l.lenSquared();
+   return l * ( l.dot(l1) / len ) + l1;
 }
 
 

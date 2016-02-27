@@ -16,6 +16,16 @@ using namespace TNL;
 
 #define ARRAYDEF(...) __VA_ARGS__
 
+
+TEST(GeomUtilstest, pointOnLine)
+{
+   EXPECT_LT(pointOnLine(Point(0,10), Point(0,0),     Point(10,10))  .distanceTo(Point(5,5)), .001);
+   EXPECT_LT(pointOnLine(Point(0,10), Point(10,10),   Point(0,0))    .distanceTo(Point(5,5)), .001);     // Same thing, reversed points
+   EXPECT_LT(pointOnLine(Point(0,10), Point(-10,-10), Point(0,0))    .distanceTo(Point(5,5)), .001);     // Same thing, different line points
+   EXPECT_LT(pointOnLine(Point(0,10), Point(-10,-10), Point(-20,-20)).distanceTo(Point(5,5)), .001);     // Same thing, different line points
+}
+
+
 void parsePoly(const char* lines[], S32 size, Vector<Point> &result)
 {
 	map<char, Point> points;
