@@ -7,7 +7,6 @@
 #include "gtest/gtest.h"
 #include <tnl.h>
 #include <map>
-#include <stdarg.h>
 
 namespace Zap
 {

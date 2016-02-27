@@ -32,9 +32,6 @@
 #include "Point.h"
 #include "Rect.h"
 
-#include <string>
-#include <vector>
-
 #include "tnlTypes.h"
 #include <clipper.hpp>
 
