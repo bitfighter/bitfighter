@@ -1980,10 +1980,10 @@ bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &cl
 // From http://stackoverflow.com/questions/22087193/optimized-functions-to-compute-projection-of-a-point-on-a-line
 Point pointOnLine(Point p, const Point &l1, const Point &l2)
 {
-   p -= l1;
+   p -= l1;    // Normalize everything to (0,0)
    Point l(l2.x - l1.x, l2.y - l1.y);
    F32 len = l.lenSquared();
-   return l * ( l.dot(l1) / len ) + l1;
+   return l * ( p.dot(l) / len ) + l1;
 }
 
 

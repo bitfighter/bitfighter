@@ -17,12 +17,23 @@ using namespace TNL;
 #define ARRAYDEF(...) __VA_ARGS__
 
 
-TEST(GeomUtilstest, pointOnLine)
+TEST(GeomUtilsTest, pointOnLine)
 {
    EXPECT_LT(pointOnLine(Point(0,10), Point(0,0),     Point(10,10))  .distanceTo(Point(5,5)), .001);
    EXPECT_LT(pointOnLine(Point(0,10), Point(10,10),   Point(0,0))    .distanceTo(Point(5,5)), .001);     // Same thing, reversed points
    EXPECT_LT(pointOnLine(Point(0,10), Point(-10,-10), Point(0,0))    .distanceTo(Point(5,5)), .001);     // Same thing, different line points
    EXPECT_LT(pointOnLine(Point(0,10), Point(-10,-10), Point(-20,-20)).distanceTo(Point(5,5)), .001);     // Same thing, different line points
+
+   EXPECT_LT(pointOnLine(Point(-16.39656, -3.36974), Point(1.52738, 4.80359), Point(9.34006, 0.5753)).distanceTo(Point(-8.91, 10.45)), .01);     // Same thing, different line points
+
+   // Horiz. and vert. lines
+   EXPECT_LT(pointOnLine(Point(3,4), Point(-10,10), Point(20,10)).distanceTo(Point(3,10)),  .001); 
+   EXPECT_LT(pointOnLine(Point(3,4), Point(-10,3),  Point(-10,6)).distanceTo(Point(-10,4)), .001); 
+
+   // Colinear, and on endpoints
+   EXPECT_LT(pointOnLine(Point(5,5), Point(-10,-10), Point(20,20)).distanceTo(Point(5,5)), .001); 
+   EXPECT_LT(pointOnLine(Point(5,5), Point(5,5),     Point(20,20)).distanceTo(Point(5,5)), .001); 
+   EXPECT_LT(pointOnLine(Point(5,5), Point(15,15),   Point(5,5))  .distanceTo(Point(5,5)), .001); 
 }
 
 
