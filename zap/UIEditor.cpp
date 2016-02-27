@@ -3043,8 +3043,8 @@ Point EditorUserInterface::snapToConstrainedLine(const Point &point) const
    Point mousePos = convertCanvasToLevelCoord(mMousePos);     
 
    Vector<Point> candidates(12);
-   candidates.push_back(Point(point.x, mMoveOrigin.y));                                // Horizontal
-   candidates.push_back(Point(mMoveOrigin.x, point.y));                                // Vertical
+   candidates.push_back(Point(point.x, mMoveOrigin.y));                  // Horizontal
+   candidates.push_back(Point(mMoveOrigin.x, point.y));                  // Vertical
    candidates.push_back(pointOnLine(point, mMoveOrigin, Point(10,10)));  // Diagonal going up and to the right
    candidates.push_back(pointOnLine(point, mMoveOrigin, Point(10,-10))); // Diagonal going up and to the left
 
