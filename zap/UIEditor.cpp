@@ -3040,13 +3040,28 @@ void EditorUserInterface::translateSelectedItems(const Point &offset, const Poin
 
 Point EditorUserInterface::snapToConstrainedLine(const Point &point) const
 {
-   Point pos = convertCanvasToLevelCoord(mMousePos);
-   Point horiz = Point(point.x, mMoveOrigin.y);
-   Point vert = Point(mMoveOrigin.x, point.y);
+   Point mousePos = convertCanvasToLevelCoord(mMousePos);     
 
-   if(pos.distSquared(horiz) > pos.distSquared(vert))
-      return vert;
-   return horiz;
+   Vector<Point> candidates(4);
+   candidates.push_back(Point(point.x, mMoveOrigin.y));                                // Horizontal
+   candidates.push_back(Point(mMoveOrigin.x, point.y));                                // Vertical
+   candidates.push_back(pointOnLine(point, mMoveOrigin, mMoveOrigin + Point(10,10)));  // Diagonal going up and to the right
+   candidates.push_back(pointOnLine(point, mMoveOrigin, mMoveOrigin + Point(10,-10))); // Diagonal going up and to the left
+
+   F32 dist = mousePos.distSquared(candidates[0]);
+   S32 closest = 0;
+
+   for(S32 i = 1; i < candidates.size(); i++)
+   {
+      F32 d = mousePos.distSquared(candidates[i]);
+      if(d < dist)
+      {
+         closest = i;
+         dist = d;
+      }
+   }
+
+   return candidates[closest];
 }
 
 
