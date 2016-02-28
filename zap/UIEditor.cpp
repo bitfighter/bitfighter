@@ -2995,7 +2995,7 @@ void EditorUserInterface::translateSelectedItems(const Point &offset, const Poin
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    S32 k = 0;
-   for(S32 i = 0; i < objList->size(); i++)
+   for(S32 i = 0; i < objList->size(); i++)  // k changes in this loop
    {
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
