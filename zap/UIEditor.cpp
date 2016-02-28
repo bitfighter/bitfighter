@@ -3003,14 +3003,18 @@ void EditorUserInterface::translateSelectedItems(const Point &offset, const Poin
       {
          Point newVert;    // Reusable container
 
+         Point dragOffset = (mSelectedObjectsForDragging[k]->getVert(0) - obj->getVert(0)) + offset;
+
+         Point constrainedOffset;
+         
+         if(constrainMovement)
+            constrainedOffset = snapToConstrainedLine(obj->getVert(mSnapVertexIndex) + dragOffset) - (obj->getVert(mSnapVertexIndex) + dragOffset);
+
          for(S32 j = obj->getVertCount() - 1; j >= 0; j--)
          {
             if(obj->isSelected())            // ==> Dragging whole object
             {
-               newVert = obj->getVert(j) + (mSelectedObjectsForDragging[k]->getVert(0) - obj->getVert(0)) + offset;
-
-               if(constrainMovement)
-                  newVert = snapToConstrainedLine(newVert);
+               newVert = obj->getVert(j) + dragOffset + constrainedOffset;
 
                obj->setVert(newVert, j);
 
@@ -3021,7 +3025,7 @@ void EditorUserInterface::translateSelectedItems(const Point &offset, const Poin
                // Pos of vert at last tick + Offset from last tick
                newVert = obj->getVert(j) + (offset - lastOffset);
 
-               if(constrainMovement)
+               if(constrainMovement && j == mSnapVertexIndex)
                   newVert = snapToConstrainedLine(newVert);
 
                obj->setVert(newVert, j);
