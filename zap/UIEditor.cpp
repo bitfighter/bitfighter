@@ -2903,9 +2903,11 @@ void EditorUserInterface::onMouseDragged()
       mSnapDelta = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
 
    // Nudge all selected objects by incremental move amount; constrain movement if shift is down
-   bool constrainMovement = InputCodeManager::getState(KEY_SHIFT);   
+   bool constrainMovement = InputCodeManager::getState(KEY_SHIFT);
+   if(constrainMovement)
+      mSnapDelta = snapToConstrainedLine(snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos)) - mMoveOrigin;
 
-   translateSelectedItems(mSnapDelta, lastSnapDelta, constrainMovement);
+   translateSelectedItems(mSnapDelta, lastSnapDelta);
 
    // Snap all selected engr. objects if possible
    snapSelectedEngineeredItems(mSnapDelta);
@@ -2990,7 +2992,7 @@ void EditorUserInterface::onMouseDragged_copyAndDrag(const Vector<DatabaseObject
 }
 
 
-void EditorUserInterface::translateSelectedItems(const Point &offset, const Point &lastOffset, bool constrainMovement)
+void EditorUserInterface::translateSelectedItems(const Point &offset, const Point &lastOffset)
 {
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
@@ -3004,18 +3006,12 @@ void EditorUserInterface::translateSelectedItems(const Point &offset, const Poin
          Point newVert;    // Reusable container
 
          Point dragOffset = (mSelectedObjectsForDragging[k]->getVert(0) - obj->getVert(0)) + offset;
-         Point unconstrainedPos = obj->getVert(mSnapVertexIndex) + dragOffset;
-
-         Point constrainedOffset;
-         
-         if(constrainMovement)
-            constrainedOffset = snapToConstrainedLine(unconstrainedPos) - unconstrainedPos;
 
          for(S32 j = obj->getVertCount() - 1; j >= 0; j--)
          {
             if(obj->isSelected())            // ==> Dragging whole object
             {
-               newVert = obj->getVert(j) + dragOffset + constrainedOffset;
+               newVert = obj->getVert(j) + dragOffset;
 
                obj->setVert(newVert, j);
 
@@ -3025,9 +3021,6 @@ void EditorUserInterface::translateSelectedItems(const Point &offset, const Poin
             {
                // Pos of vert at last tick + Offset from last tick
                newVert = obj->getVert(j) + (offset - lastOffset);
-
-               if(constrainMovement && j == mSnapVertexIndex)
-                  newVert = snapToConstrainedLine(newVert);
 
                obj->setVert(newVert, j);
                obj->onGeomChanging();        // Because, well, the geom is changing
@@ -4764,7 +4757,7 @@ void EditorUserInterface::onFinishedDragging_droppedItemOnDock()     // Delete t
 
       // Move objects back to their starting location before deleting, so when undeleting, 
       // objects return the way users will expect
-      translateSelectedItems(Point(0, 0), mSnapDelta, false);
+      translateSelectedItems(Point(0, 0), mSnapDelta);
 
       mUndoManager.startTransaction();
 

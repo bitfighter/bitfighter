@@ -304,7 +304,7 @@ private:
 
    Level mLevelGenDatabase;         // Database for inserting objects when running a levelgen script in the editor
 
-   void translateSelectedItems(const Point &offset, const Point &lastOffset, bool constrainMovement);
+   void translateSelectedItems(const Point &offset, const Point &lastOffset);
    void snapSelectedEngineeredItems(const Point &cumulativeOffset);
 
    void render() const;
