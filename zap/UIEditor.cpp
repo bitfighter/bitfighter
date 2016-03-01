@@ -2897,16 +2897,20 @@ void EditorUserInterface::onMouseDragged()
    // The thinking here is that for large items -- walls, polygons, etc., we may grab an item far from its snap vertex, and we
    // want to factor that offset into our calculations.  For point items (and vertices), we don't really care about any slop
    // in the selection, and we just want the damn thing where we put it.
-   if(mSnapObject->getGeomType() == geomPoint || (mHitItem && mHitItem->anyVertsSelected()))
-      mSnapDelta = snapPoint(convertCanvasToLevelCoord(mMousePos)) - mMoveOrigin;
-   else  // larger items
-      mSnapDelta = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
+   Point p;
 
-   // Nudge all selected objects by incremental move amount; constrain movement if shift is down
+   if(mSnapObject->getGeomType() == geomPoint || (mHitItem && mHitItem->anyVertsSelected()))
+      p = snapPoint(convertCanvasToLevelCoord(mMousePos));
+   else  // larger items
+      p = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos);
+
    bool constrainMovement = InputCodeManager::getState(KEY_SHIFT);
    if(constrainMovement)
-      mSnapDelta = snapToConstrainedLine(snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos)) - mMoveOrigin;
+      p = snapToConstrainedLine(p);
 
+   mSnapDelta = p - mMoveOrigin;
+
+   // Nudge all selected objects by incremental move amount
    translateSelectedItems(mSnapDelta, lastSnapDelta);
 
    // Snap all selected engr. objects if possible
