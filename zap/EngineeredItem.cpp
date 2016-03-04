@@ -558,7 +558,8 @@ static DatabaseObject *findClosestWall(const GridDatabase *database, const Point
    // below this loop.
    //
    // Start at any angle other than 0.  Search at angle 0 seems to return the wrong wall sometimes.
-   F32 increment = Float2Pi * 0.0625f;
+   const S32 steps = 16;
+   const F32 increment = Float2Pi / steps;
 
    for(F32 theta = increment; theta < Float2Pi + increment; theta += increment)
    {
