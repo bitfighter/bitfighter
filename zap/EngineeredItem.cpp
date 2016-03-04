@@ -1069,7 +1069,7 @@ void EngineeredItem::findMountPoint(const Level *level, const Point &pos)
 }
 
 
-// Find mount point or turret or forcefield closest to pos; used in editor.  See findMountPoint() for in-game version.
+// Find mount point for turret or forcefield closest to pos; used in editor.  See findMountPoint() for in-game version.
 void EngineeredItem::mountToWall(const Point &pos, 
                                  const GridDatabase *gameObjectDatabase, 
                                  const GridDatabase *wallEdgeDatabase)
