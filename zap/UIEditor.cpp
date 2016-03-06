@@ -1373,35 +1373,33 @@ Point EditorUserInterface::snapPoint(const Point &p, bool snapWhileOnDock) const
       minDist = snapPoint.distSquared(p);
    }
 
-   if(mSnapContext != NO_SNAPPING)
+   if(mSnapContext == NO_SNAPPING)
+      return snapPoint;
+
+
+   // Now look for other things we might want to snap to
+   for(S32 i = 0; i < objList->size(); i++)
    {
-      // Where will we be snapping things?
-      bool snapToWallCorners = getSnapToWallCorners();
+      BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
-      // Now look for other things we might want to snap to
-      for(S32 i = 0; i < objList->size(); i++)
+      // Don't snap to selected items or items with selected verts (keeps us from snapping to ourselves, which is usually trouble)
+      if(obj->isSelected() || obj->anyVertsSelected())
+         continue;
+
+      for(S32 j = 0; j < obj->getVertCount(); j++)
       {
-         BfObject *obj = static_cast<BfObject *>(objList->get(i));
-
-         // Don't snap to selected items or items with selected verts (keeps us from snapping to ourselves, which is usually trouble)
-         if(obj->isSelected() || obj->anyVertsSelected())
-            continue;
-
-         for(S32 j = 0; j < obj->getVertCount(); j++)
+         F32 dist = obj->getVert(j).distSquared(p);
+         if(dist < minDist)
          {
-            F32 dist = obj->getVert(j).distSquared(p);
-            if(dist < minDist)
-            {
-               minDist = dist;
-               snapPoint.set(obj->getVert(j));
-            }
+            minDist = dist;
+            snapPoint.set(obj->getVert(j));
          }
       }
-
-      // Search for a corner to snap to - by using wall edges, we'll also look for intersections between segments
-      if(snapToWallCorners)
-         checkCornersForSnap(p, mLevel->getWallEdgeDatabase()->findObjects_fast(), minDist, snapPoint);
    }
+
+   // Search for a corner to snap to - by using wall edges, we'll also look for intersections between segments
+   if(getSnapToWallCorners())
+      checkCornersForSnap(p, mLevel->getWallEdgeDatabase()->findObjects_fast(), minDist, snapPoint);
 
    return snapPoint;
 }
