@@ -2009,6 +2009,7 @@ bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const 
 }
 
 
+// Return intersection of segment p1-p2 and segment p3-p4
 bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &intersection)
 {
     F32 denom = ((p4.y - p3.y) * (p2.x - p1.x)) - ((p4.x - p3.x) * (p2.y - p1.y));
@@ -2029,8 +2030,8 @@ bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const P
       intersection.set(p1.x + ua * (p2.x - p1.x), p1.y + ua * (p2.y - p1.y));
       return true;
     }
-    else
-       return false;
+    
+   return false;
 }
 
 
