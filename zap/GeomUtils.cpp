@@ -2020,10 +2020,10 @@ bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const P
     if ( denom == 0.0 )
        //if ( numerator == 0.0 && numerator2 == 0.0 )
        //   return false;  //COINCIDENT;
-    return false;  // PARALLEL;
+      return false;  // PARALLEL;
 
-    F32 ua = numerator / denom;
-    F32 ub = numerator2/ denom;
+    F32 ua = numerator  / denom;
+    F32 ub = numerator2 / denom;
 
     if (ua >= 0.0 && ua <= 1.0 && ub >= 0.0 && ub <= 1.0)
     {
