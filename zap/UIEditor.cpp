@@ -1349,6 +1349,7 @@ Point EditorUserInterface::snapPointToLevelGrid(Point const &p) const
 }
 
 
+// p should be a level coordinate
 Point EditorUserInterface::snapPoint(const Point &p, bool snapWhileOnDock) const
 {
    if(mouseOnDock() && !snapWhileOnDock)
