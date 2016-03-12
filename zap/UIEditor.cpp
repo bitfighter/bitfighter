@@ -1337,6 +1337,7 @@ void EditorUserInterface::onDisplayModeChange()
 }
 
 
+// p must be a level coordinate
 Point EditorUserInterface::snapPointToLevelGrid(Point const &p) const
 {
    if(mSnapContext != GRID_SNAPPING)
