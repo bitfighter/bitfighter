@@ -1191,7 +1191,7 @@ void EditorUserInterface::onActivate()
    loadLevel();
    setCurrentTeam(0);
 
-   mSnapContext = FULL_SNAPPING;      // Hold [space/shift+space] to temporarily disable snapping
+   mSnapContext = GRID_SNAPPING;      // Hold [space/shift+space] to temporarily disable snapping
 
    // Reset display parameters...
    mDragSelecting = false;
@@ -1339,7 +1339,7 @@ void EditorUserInterface::onDisplayModeChange()
 
 Point EditorUserInterface::snapPointToLevelGrid(Point const &p) const
 {
-   if(mSnapContext != FULL_SNAPPING)
+   if(mSnapContext != GRID_SNAPPING)
       return p;
 
    // First, find a snap point based on our grid
@@ -1367,7 +1367,7 @@ Point EditorUserInterface::snapPoint(const Point &p, bool snapWhileOnDock) const
 
    F32 minDist = 255 / mCurrentScale;    // 255 just seems to work well, not related to gridsize; only has an impact when grid is off
 
-   if(mSnapContext == FULL_SNAPPING)     // Only snap to grid when full snapping is enabled; lowest priority snaps go first
+   if(mSnapContext == GRID_SNAPPING)     // Only snap to grid when full snapping is enabled; lowest priority snaps go first
    {
       snapPoint = snapPointToLevelGrid(p);
       minDist = snapPoint.distSquared(p);
@@ -1827,7 +1827,7 @@ void EditorUserInterface::render() const
       renderTurretAndSpyBugRanges(editorDb);    // Render range of all turrets and spybugs in editorDb
    else
       GameObjectRender::renderGrid(mCurrentScale, mCurrentOffset, convertLevelToCanvasCoord(Point(0, 0)),
-      (F32)mGridSize, mSnapContext == FULL_SNAPPING, showMinorGridLines());
+      (F32)mGridSize, mSnapContext == GRID_SNAPPING, showMinorGridLines());
 
    mGL->glPushMatrix();
    mGL->glTranslate(getCurrentOffset());
@@ -4639,7 +4639,7 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
       mOut = false;
       break;
    case KEY_SPACE:
-      mSnapContext = FULL_SNAPPING;
+      mSnapContext = GRID_SNAPPING;
       break;
    case KEY_SHIFT:
       // Check if space is down... if so, modify snapping accordingly

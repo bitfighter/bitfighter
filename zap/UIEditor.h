@@ -90,7 +90,7 @@ private:
    S32 mCurrentTeam;
 
    enum SnapContext {
-      FULL_SNAPPING,
+      GRID_SNAPPING,       
       NO_GRID_SNAPPING,
       NO_SNAPPING
    };
