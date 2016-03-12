@@ -90,9 +90,9 @@ private:
    S32 mCurrentTeam;
 
    enum SnapContext {
-      GRID_SNAPPING,       // Snap to grid lines and objects
-      NO_GRID_SNAPPING,    // Still snapping to objects
-      NO_SNAPPING          // No snapping (well, almost none... engineered objects might still snap)
+      GRID_SNAPPING,          // Snap to grid lines and objects
+      NO_GRID_SNAPPING,       // Still snapping to objects
+      NO_SNAPPING             // No snapping (well, almost none... engineered objects might still snap)
    };
 
    enum RenderModes {
