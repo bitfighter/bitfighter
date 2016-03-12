@@ -4093,7 +4093,7 @@ bool EditorUserInterface::handleKeyPress(InputCode inputCode, const string &inpu
       getUIManager()->activate<EditorMenuUserInterface>();
    }
    else if(inputString == getEditorBindingString(BINDING_NO_SNAPPING))            // No snapping to grid, but still to other things
-      mSnapContext = NO_GRID_SNAPPING;
+      mSnapContext = OBJECT_SNAPPING;
    else if(inputString == getEditorBindingString(BINDING_NO_GRID_SNAPPING))       // Completely disable snapping
       mSnapContext = NO_SNAPPING;
    else if(inputString == getEditorBindingString(BINDING_PREVIEW_MODE))           // Turn on preview mode
@@ -4646,7 +4646,7 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
       // Check if space is down... if so, modify snapping accordingly
       // This is a little special-casey, but it is, after all, a special case.
       if(InputCodeManager::getState(KEY_SPACE) && mSnapContext == NO_SNAPPING)
-         mSnapContext = NO_GRID_SNAPPING;
+         mSnapContext = OBJECT_SNAPPING;
       break;
    case KEY_TAB:
       mPreviewMode = false;
