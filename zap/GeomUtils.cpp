@@ -605,10 +605,10 @@ bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point 
 // Returns index of points vector closest to point
 S32 findClosestPoint(const Point &point, const Vector<Point> &points)
 {
-   F32 dist = F32_MAX;
-   S32 closest = -1;
+   F32 dist = points[0].distSquared(point);
+   S32 closest = 0;
 
-   for(S32 i = 0; i < points.size(); i++)
+   for(S32 i = 1; i < points.size(); i++)
    {
       F32 d = points[i].distSquared(point);
 
