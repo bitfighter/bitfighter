@@ -3146,7 +3146,7 @@ void GameObjectRender::renderShadowWalls(const Vector<BfObject *> &objects)
 
 
 void GameObjectRender::renderWallSpine(const WallItem *wallItem, const Vector<Point> *outline, const Color &color,
-                       F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+                                       F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    mGL->glColor(color);
    renderWallSpine(wallItem, outline, currentScale, snappingToWallCornersEnabled, renderVertices);
@@ -3154,7 +3154,7 @@ void GameObjectRender::renderWallSpine(const WallItem *wallItem, const Vector<Po
 
 
 void GameObjectRender::renderWallSpine(const WallItem *wallItem, const Vector<Point> *outline,
-                       F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
+                                       F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    mGL->renderPointVector(outline, GLOPT::LineStrip);
 
@@ -3164,7 +3164,7 @@ void GameObjectRender::renderWallSpine(const WallItem *wallItem, const Vector<Po
 
 
 void GameObjectRender::drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color &outlineColor,
-                        S32 canvasWidth, S32 canvasHeight, F32 alphaMod, F32 highlightAlpha)
+                                          S32 canvasWidth, S32 canvasHeight, F32 alphaMod, F32 highlightAlpha)
 {
    Point center(canvasWidth / 2, canvasHeight / 2);
    Point arrowDir = nearestPoint - center;
