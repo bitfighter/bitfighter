@@ -90,9 +90,9 @@ private:
    S32 mCurrentTeam;
 
    enum SnapContext {
-      GRID_SNAPPING,          // Snap to grid lines and objects
-      OBJECT_SNAPPING,        // Still snapping to objects
-      NO_SNAPPING             // No snapping (well, almost none... engineered objects might still snap)
+      GRID_SNAPPING        = BIT(2),   // Snap to grid lines and objects
+      CONSTRAINED_MOVEMENT = BIT(1),   // Dragged items are constrained to 15 degree increments from their starting points
+      OBJECT_SNAPPING      = BIT(0),   // Still snapping to objects
    };
 
    enum RenderModes {
@@ -116,7 +116,7 @@ private:
 
    DockMode mDockMode;
 
-   SnapContext mSnapContext;
+   int mSnapContext;
 
    Timer mSaveMsgTimer;
    Timer mWarnMsgTimer;
@@ -312,7 +312,6 @@ private:
    void renderWallsAndPolywalls(const GridDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase) const;
    void renderObjectIds(GridDatabase *database) const;
 
-
    void autoSave();                    // Hope for the best, prepare for the worst
    bool doSaveLevel(const string &saveName, bool showFailMessages);
 
@@ -477,7 +476,8 @@ public:
 
    // Snapping related functions:
    Point snapPoint(const Point &p, bool snapWhileOnDock = false) const;
-   Point snapPointToLevelGrid(Point const &p) const;
+   Point snapPointConstrainedOrLevelGrid(Point const &p) const;
+   Point snapPointToLevelGrid(Point const &p, F32 factor) const;
 
    void markSelectedObjectsAsUnsnapped2(const Vector<DatabaseObject *> *objList);
 

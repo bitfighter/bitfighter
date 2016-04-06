@@ -58,6 +58,7 @@
 
 #include <cmath>
 #include <set>
+#include "MathUtils.h"
 
 
 namespace Zap
@@ -1191,8 +1192,6 @@ void EditorUserInterface::onActivate()
    loadLevel();
    setCurrentTeam(0);
 
-   mSnapContext = GRID_SNAPPING;      // Hold [space/shift+space] to temporarily disable snapping
-
    // Reset display parameters...
    mDragSelecting = false;
 
@@ -1230,6 +1229,7 @@ void EditorUserInterface::onActivateReactivate()
    mDraggingObjects = false;
    mUp = mDown = mLeft = mRight = mIn = mOut = false;
    mDockItemHit = NULL;
+   mSnapContext = GRID_SNAPPING | OBJECT_SNAPPING;    // By default, we'll snap to the grid and other objects
 
    Cursor::enableCursor();
 }
@@ -1337,15 +1337,112 @@ void EditorUserInterface::onDisplayModeChange()
 }
 
 
-// p must be a level coordinate
-Point EditorUserInterface::snapPointToLevelGrid(Point const &p) const
+// We'll have 4 possibilities to consider here: 1) GridSnapping; 2) Constrained Movement; 3) Both; 4) Neither
+// p must be a level coordinate.  
+Point EditorUserInterface::snapPointConstrainedOrLevelGrid(Point const &p) const
 {
-   if(mSnapContext != GRID_SNAPPING)
+   // Are we doing any snapping at all?  If not, there's nothing to do.  Case 4) Neither
+   if(!(mSnapContext & (GRID_SNAPPING | CONSTRAINED_MOVEMENT)))
       return p;
 
    // First, find a snap point based on our grid
-   F32 factor = (showMinorGridLines() ? 0.1f : 0.5f) * mGridSize;     // Tenths or halves -- major gridlines are gridsize pixels apart
+   F32 factor = (showMinorGridLines() ? 0.1f : 0.5f) * mGridSize;    // Tenths or halves -- major gridlines are gridsize pixels apart
 
+   // Are we only interested in grid snapping? If so, return our point!  Case 1) GridSnapping
+   if(!(mSnapContext & CONSTRAINED_MOVEMENT))                        
+      return snapPointToLevelGrid(p, factor);
+
+   // Some stuff we'll need for the following cases
+   const F32 angles[] = { degreesToRadians(0),   degreesToRadians(15),  degreesToRadians(30), 
+                          degreesToRadians(45),  degreesToRadians(60),  degreesToRadians(75), 
+                          degreesToRadians(90),  degreesToRadians(105), degreesToRadians(120), 
+                          degreesToRadians(135), degreesToRadians(150), degreesToRadians(165) }; 
+
+
+   // Case 2) Constrained Movement
+   if(!(mSnapContext & GRID_SNAPPING))    
+   {
+      Vector<Point> candidates(ARRAYSIZE(angles));
+      for(S32 i = 0; i < ARRAYSIZE(angles); i++)
+         candidates.push_back(pointOnLine(p, mMoveOrigin, Point(cos(angles[i]), sin(angles[i]))));
+
+      return candidates[findClosestPoint(p, candidates)];
+   }
+
+
+   // Here we do the more complex grid snapping PLUS constrained movement  Case 3) Both
+
+   // These are the four corners of the "snap box" we're in
+   F32 x1 = floor(p.x / factor) * factor;    F32 x2 = ceil (p.x / factor) * factor;
+   F32 y1 = ceil (p.y / factor) * factor;    F32 y2 = floor(p.y / factor) * factor;
+
+   // These are the four corners of a more outer "snap box" we're in
+   F32 x3 = floor(p.x / factor) * factor - factor;    F32 x4 = ceil (p.x / factor) * factor + factor;
+   F32 y3 = ceil (p.y / factor) * factor + factor;    F32 y4 = floor(p.y / factor) * factor - factor;
+  
+
+   Point lr = Point(x2, y1);    Point ll = Point(x1, y1);
+   Point ul = Point(x1, y2);    Point ur = Point(x2, y2);
+
+   Point lr2 = Point(x4, y3);    Point ll2 = Point(x3, y3);
+   Point ul2 = Point(x3, y4);    Point ur2 = Point(x4, y4);
+
+   // Render some points -- uncomment and call from render() to see these
+   //Vector<Point> ps = Vector<Point>();
+   //ps.clear();ps.push_back(convertLevelToCanvasCoord(ll - Point(1000,0))); ps.push_back(convertLevelToCanvasCoord(lr + Point(1000,0))); RenderUtils::drawLine(&ps, Colors::cyan);
+   //ps.clear();ps.push_back(convertLevelToCanvasCoord(lr - Point(0,1000))); ps.push_back(convertLevelToCanvasCoord(ur + Point(0,1000))); RenderUtils::drawLine(&ps, Colors::cyan);
+   //ps.clear();ps.push_back(convertLevelToCanvasCoord(ur + Point(1000,0))); ps.push_back(convertLevelToCanvasCoord(ul - Point(1000,0))); RenderUtils::drawLine(&ps, Colors::cyan);
+   //ps.clear();ps.push_back(convertLevelToCanvasCoord(ll - Point(0,1000))); ps.push_back(convertLevelToCanvasCoord(ul + Point(0,1000))); RenderUtils::drawLine(&ps, Colors::cyan);
+   //ps.clear();ps.push_back(convertLevelToCanvasCoord(ll2 - Point(1000,0))); ps.push_back(convertLevelToCanvasCoord(lr2 + Point(1000,0))); RenderUtils::drawLine(&ps, Colors::red);
+   //ps.clear();ps.push_back(convertLevelToCanvasCoord(lr2 - Point(0,1000))); ps.push_back(convertLevelToCanvasCoord(ur2 + Point(0,1000))); RenderUtils::drawLine(&ps, Colors::green);
+   //ps.clear();ps.push_back(convertLevelToCanvasCoord(ur2 + Point(1000,0))); ps.push_back(convertLevelToCanvasCoord(ul2 - Point(1000,0))); RenderUtils::drawLine(&ps, Colors::orange50);
+   //ps.clear();ps.push_back(convertLevelToCanvasCoord(ll2 - Point(0,1000))); ps.push_back(convertLevelToCanvasCoord(ul2 + Point(0,1000))); RenderUtils::drawLine(&ps, Colors::blue);
+
+
+   const S32 len = 1000000;
+   Point intersection;     // reusable container
+
+   Vector<Point> candidates(ARRAYSIZE(angles) * 8);
+
+   for(S32 i = 0; i < ARRAYSIZE(angles); i++)
+   {
+      Point offset = Point(cos(angles[i]), sin(angles[i])) * len;
+
+      Point horiz = Point(len, 0);
+      Point vert  = Point(0, len);
+
+      // Inner box
+      if(findIntersection(mMoveOrigin - offset, mMoveOrigin + offset, lr + horiz, ll - horiz, intersection))      // Bottom
+         candidates.push_back(intersection);
+      if(findIntersection(mMoveOrigin - offset, mMoveOrigin + offset, ul - horiz, ur + horiz, intersection))      // Top
+         candidates.push_back(intersection);
+      if(findIntersection(mMoveOrigin - offset, mMoveOrigin + offset, lr - vert,  ur + vert,  intersection))      // Right
+         candidates.push_back(intersection);                                       
+      if(findIntersection(mMoveOrigin - offset, mMoveOrigin + offset, ul + vert,  ll - vert,  intersection))      // Left
+         candidates.push_back(intersection); 
+
+      // Outer box
+      if(findIntersection(mMoveOrigin - offset, mMoveOrigin + offset, lr2 + horiz, ll2 - horiz, intersection))      // Bottom
+         candidates.push_back(intersection);
+      if(findIntersection(mMoveOrigin - offset, mMoveOrigin + offset, ul2 - horiz, ur2 + horiz, intersection))      // Top
+         candidates.push_back(intersection);
+      if(findIntersection(mMoveOrigin - offset, mMoveOrigin + offset, lr2 - vert,  ur2 + vert,  intersection))      // Right
+         candidates.push_back(intersection);
+      if(findIntersection(mMoveOrigin - offset, mMoveOrigin + offset, ul2 + vert,  ll2 - vert,  intersection))      // Left
+         candidates.push_back(intersection);
+   }
+
+   if(candidates.size() == 0)
+      return (mSnapContext & GRID_SNAPPING) ? snapPointToLevelGrid(p, factor) : p;
+
+   logprintf("candidates %d", candidates.size()); //{P{P
+
+   return candidates[findClosestPoint(p, candidates)];
+}
+
+
+Point EditorUserInterface::snapPointToLevelGrid(Point const &p, F32 factor) const
+{
    return Point(floor(p.x / factor + 0.5) * factor, floor(p.y / factor + 0.5) * factor);
 }
 
@@ -1364,18 +1461,19 @@ Point EditorUserInterface::snapPoint(const Point &p, bool snapWhileOnDock) const
    {
       // Turrets & forcefields: Snap to a wall edge as first (and only) choice, regardless of whether snapping is on or off
       if(isEngineeredType(mSnapObject->getObjectTypeNumber()))
-         return snapPointToLevelGrid(p);
+         return snapPointConstrainedOrLevelGrid(p);
    }
 
    F32 minDist = 255 / mCurrentScale;    // 255 just seems to work well, not related to gridsize; only has an impact when grid is off
 
-   if(mSnapContext == GRID_SNAPPING)     // Only snap to grid when full snapping is enabled; lowest priority snaps go first
+   // Only snap to grid when grid snapping or constrained movement is enabled; lowest priority snaps go first
+   if(mSnapContext & (GRID_SNAPPING | CONSTRAINED_MOVEMENT))      
    {
-      snapPoint = snapPointToLevelGrid(p);
+      snapPoint = snapPointConstrainedOrLevelGrid(p);
       minDist = snapPoint.distSquared(p);
    }
 
-   if(mSnapContext == NO_SNAPPING)
+   if(mSnapContext == 0)                  // No snapping enabled?  All done!
       return snapPoint;
 
 
@@ -1434,7 +1532,7 @@ void EditorUserInterface::markSelectedObjectsAsUnsnapped2(const Vector<DatabaseO
 bool EditorUserInterface::getSnapToWallCorners() const
 {
    // Allow snapping to wall corners when we're dragging items.  Disallow for all wall types other than PolyWall
-   return mSnapContext != NO_SNAPPING && mDraggingObjects &&
+   return mSnapContext != 0 && mDraggingObjects &&                  // When all snapping flags are off, mSnapContext will be 0
       (mSnapObject->getObjectTypeNumber() == PolyWallTypeNumber ||  // Allow PolyWall
        mSnapObject->getObjectTypeNumber() == WallItemTypeNumber ||  // Allow WallItem
        !isWallType(mSnapObject->getObjectTypeNumber()));            // Disallow other Wall-related parts (would
@@ -1829,7 +1927,11 @@ void EditorUserInterface::render() const
       renderTurretAndSpyBugRanges(editorDb);    // Render range of all turrets and spybugs in editorDb
    else
       GameObjectRender::renderGrid(mCurrentScale, mCurrentOffset, convertLevelToCanvasCoord(Point(0, 0)),
-      (F32)mGridSize, mSnapContext == GRID_SNAPPING, showMinorGridLines());
+                                   (F32)mGridSize, mSnapContext & GRID_SNAPPING, showMinorGridLines());
+
+   // == Draw rays when movement is constrained ==
+   if(mDraggingObjects && mSnapContext & CONSTRAINED_MOVEMENT)
+      GameObjectRender::renderConstrainedDraggingLines(convertLevelToCanvasCoord(mMoveOrigin));
 
    mGL->glPushMatrix();
    mGL->glTranslate(getCurrentOffset());
@@ -1882,7 +1984,7 @@ void EditorUserInterface::render() const
    }
 
    // Render our snap vertex as a hollow magenta box
-   if(mVertexEditMode &&                                                                           // Must be in vertex-edit mode
+   if(mVertexEditMode &&                                                                        // Must be in vertex-edit mode
       !mPreviewMode && mSnapObject && mSnapObject->isSelected() && mSnapVertexIndex != NONE &&  // ...but not in preview mode...
       mSnapObject->getGeomType() != geomPoint &&                                                // ...and not on point objects...
       !mSnapObject->isVertexLitUp(mSnapVertexIndex) &&                                          // ...or lit-up vertices...
@@ -2903,10 +3005,6 @@ void EditorUserInterface::onMouseDragged()
    else  // larger items
       p = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos);
 
-   bool constrainMovement = InputCodeManager::getState(KEY_SHIFT);
-   if(constrainMovement)
-      p = snapToConstrainedLine(p);
-
    mSnapDelta = p - mMoveOrigin;
 
    // Nudge all selected objects by incremental move amount
@@ -3089,7 +3187,7 @@ void EditorUserInterface::snapSelectedEngineeredItems(const Point &cumulativeOff
          S32 j = 0;
          if(engrObj->isSelected())
          {
-            engrObj->mountToWall(snapPointToLevelGrid(mSelectedObjectsForDragging[j]->getVert(0) + cumulativeOffset),
+            engrObj->mountToWall(snapPointConstrainedOrLevelGrid(mSelectedObjectsForDragging[j]->getVert(0) + cumulativeOffset),
                getLevel(), mLevel->getWallEdgeDatabase());
             j++;
          }
@@ -4092,13 +4190,15 @@ bool EditorUserInterface::handleKeyPress(InputCode inputCode, const string &inpu
       playBoop();
       getUIManager()->activate<EditorMenuUserInterface>();
    }
-   else if(inputString == getEditorBindingString(BINDING_NO_SNAPPING))            // No snapping to grid, but still to other things
-      mSnapContext = OBJECT_SNAPPING;
-   else if(inputString == getEditorBindingString(BINDING_NO_GRID_SNAPPING))       // Completely disable snapping
-      mSnapContext = NO_SNAPPING;
-   else if(inputString == getEditorBindingString(BINDING_PREVIEW_MODE))           // Turn on preview mode
+   else if(inputCode == KEY_SHIFT)        // No snapping to grid, but still to other things (Shift+Space)
+      mSnapContext |= CONSTRAINED_MOVEMENT;
+   //else if(inputString == getEditorBindingString(BINDING_NO_SNAPPING))        // No snapping to grid, but still to other things (Shift+Space)
+   //   mSnapContext |= CONSTRAINED_MOVEMENT;
+   else if(inputCode == KEY_SPACE) //getEditorBindingString(BINDING_NO_GRID_SNAPPING))   // Disable grid snapping (Space)
+      mSnapContext &= ~GRID_SNAPPING;
+   else if(inputString == getEditorBindingString(BINDING_PREVIEW_MODE))       // Turn on preview mode
       mPreviewMode = true;
-   else if(inputString == getEditorBindingString(BINDING_DOCKMODE_ITEMS))         //  Toggle dockmode Items
+   else if(inputString == getEditorBindingString(BINDING_DOCKMODE_ITEMS))     //  Toggle dockmode Items
    {
       if(mDockMode == DOCKMODE_ITEMS)
       {
@@ -4640,13 +4740,13 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
       mOut = false;
       break;
    case KEY_SPACE:
-      mSnapContext = GRID_SNAPPING;
+      mSnapContext |= GRID_SNAPPING;         // Turn grid snapping back on
       break;
    case KEY_SHIFT:
       // Check if space is down... if so, modify snapping accordingly
       // This is a little special-casey, but it is, after all, a special case.
-      if(InputCodeManager::getState(KEY_SPACE) && mSnapContext == NO_SNAPPING)
-         mSnapContext = OBJECT_SNAPPING;
+      //if(InputCodeManager::getState(KEY_SPACE))
+         mSnapContext &= ~CONSTRAINED_MOVEMENT;    // Turn object snapping back on 
       break;
    case KEY_TAB:
       mPreviewMode = false;

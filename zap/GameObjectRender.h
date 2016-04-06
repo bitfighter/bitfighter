@@ -223,6 +223,7 @@ public:
    // Editor support items
    static void renderPolyLineVertices(const BfObject *obj, bool snapping, F32 currentScale);
    static void renderGrid(F32 currentScale, const Point &offset, const Point &origin, F32 gridSize, bool fadeLines, bool showMinorGridLines);
+   static void renderConstrainedDraggingLines(const Point &origin);
 
    static void renderForceFieldProjector(const Point &pos, const Point &normal, const Color &teamColor, bool enabled, S32 healRate);
    static void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, const Color &teamColor, bool enabled, S32 healRate = 0);
@@ -279,6 +280,8 @@ private:
    static void renderHatTrickBadge(F32 x, F32 y, F32 rad);
 
    static void renderGridLines(const Point &offset, F32 gridScale, F32 grayVal, bool fadeLines);
+   static void renderInfiniteRayFromPoint(const Point &point, F32 angleInRadians, const Color &color);
+
 };
 
 

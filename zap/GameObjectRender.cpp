@@ -2890,6 +2890,18 @@ void GameObjectRender::renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
 }
 
 
+void GameObjectRender::renderInfiniteRayFromPoint(const Point &point, F32 angleInRadians, const Color &color)
+{
+   const F32 len = 1000000;
+   
+   F32 vertices[] = { point.x,                             point.y,
+                      point.x + len * cos(angleInRadians), point.y - len * sin(angleInRadians) };
+
+   mGL->glColor(color);
+   mGL->renderVertexArray(vertices, 2, GLOPT::Lines);
+}
+
+
 void GameObjectRender::renderGridLines(const Point &offset, F32 gridScale, F32 grayVal, bool fadeLines)
 {
    // Use F32 to avoid GameObjectRender::cumulative rounding errors
@@ -3141,6 +3153,33 @@ void GameObjectRender::renderShadowWalls(const Vector<BfObject *> &objects)
          for(S32 j = 0; j < barrier->getSegmentCount(); j++)
             barrier->getSegment(j)->renderFill(Point(0, 0), Colors::EDITOR_SHADOW_WALL_COLOR, false);
       }
+   }
+}
+
+
+void GameObjectRender::renderConstrainedDraggingLines(const Point &origin)
+{
+   const S32 rays = 360 / 15;      // increments of 15 degrees
+   Point offset;    // Reusable container
+   const F32 radius = 40;
+   const F32 gray = .4f;
+
+   for(S32 i = 0; i < rays; i++)
+   {
+      F32 ang = degreesToRadians(i * 15);
+      offset.set(cos(ang) * radius, -sin(ang) * radius);
+
+      GameObjectRender::renderInfiniteRayFromPoint(origin + offset, ang, Color(gray));
+
+      F32 vertices[] = { origin.x + offset.x, origin.y + offset.y,
+                         origin.x,            origin.y };
+      F32 colors[] = {
+         // R,  G,    B, aplha
+         gray, gray, gray, 1,    // Opaque
+         gray, gray, gray, 0     // Transparent
+      };
+
+      mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
    }
 }
 
