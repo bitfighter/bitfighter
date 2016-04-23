@@ -154,6 +154,10 @@ EditorBindingSet::EditorBindingSet()
 #define EDITOR_BINDING(a, b, memberName, defaultBinding) memberName = defaultBinding;
     EDITOR_BINDING_TABLE
 #undef EDITOR_BINDING
+
+#define EDITOR_BINDING(a, b, memberName, defaultBinding) memberName = defaultBinding;
+       EDITOR_BINDING_KEYCODE_TABLE
+#undef EDITOR_BINDING
 }
 
 
@@ -177,6 +181,23 @@ string EditorBindingSet::getBinding(EditorBindingNameEnum bindingName) const
    // Just in case:
    TNLAssert(false, "Invalid key binding!");
    return "";
+}
+
+
+InputCode EditorBindingSet::getBinding(EditorBindingCodeEnum bindingName) const
+{
+   // Similar to above. Produces a block of code that looks like this:
+   // if(editorBindingName == BINDING_NO_GRID_SNAPPING) return inputDisableGridSnapping;
+   // if...
+   // TNLAssert(false);
+   // return "";
+
+#define EDITOR_BINDING(enumName, b, memberName, d) if(bindingName == enumName) return memberName;
+   EDITOR_BINDING_KEYCODE_TABLE
+#undef EDITOR_BINDING
+   // Just in case:
+   TNLAssert(false, "Invalid key binding!");
+   return KEY_NONE;
 }
 
 
@@ -687,6 +708,12 @@ InputCode InputCodeManager::getBinding(BindingNameEnum bindingName, InputMode in
 
 
 string InputCodeManager::getEditorBinding(EditorBindingNameEnum bindingName) const
+{
+   return mEditorBindingSet.getBinding(bindingName);
+}
+
+
+InputCode InputCodeManager::getEditorBinding(EditorBindingCodeEnum bindingName) const
 {
    return mEditorBindingSet.getBinding(bindingName);
 }

@@ -1453,8 +1453,6 @@ Point EditorUserInterface::snapPoint(const Point &p, bool snapWhileOnDock) const
    if(mouseOnDock() && !snapWhileOnDock)
       return p;      // No snapping!
 
-   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
-
    Point snapPoint(p);     // Make a working copy
 
    if(mDraggingObjects)
@@ -1473,9 +1471,21 @@ Point EditorUserInterface::snapPoint(const Point &p, bool snapWhileOnDock) const
       minDist = snapPoint.distSquared(p);
    }
 
-   if(mSnapContext == 0)                  // No snapping enabled?  All done!
-      return snapPoint;
 
+   if(mSnapContext & OBJECT_SNAPPING)
+   {
+      snapPoint = snapToObjects(p, snapPoint, minDist);
+      //minDist = snapPoint.distSquared(p);
+   }
+
+   return snapPoint;
+}
+
+
+// we'll make a local copy of closest
+Point EditorUserInterface::snapToObjects(const Point &mousePos, Point closest, F32 minDist) const
+{
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    // Now look for other things we might want to snap to
    for(S32 i = 0; i < objList->size(); i++)
@@ -1488,20 +1498,20 @@ Point EditorUserInterface::snapPoint(const Point &p, bool snapWhileOnDock) const
 
       for(S32 j = 0; j < obj->getVertCount(); j++)
       {
-         F32 dist = obj->getVert(j).distSquared(p);
+         F32 dist = obj->getVert(j).distSquared(closest);
          if(dist < minDist)
          {
             minDist = dist;
-            snapPoint.set(obj->getVert(j));
+            closest.set(obj->getVert(j));
          }
       }
    }
 
-   // Search for a corner to snap to - by using wall edges, we'll also look for intersections between segments
+   // Search for a corner to snap to - by using wall edges, we'll also look for intersections between segments.  Sets closest.
    if(getSnapToWallCorners())
-      checkCornersForSnap(p, mLevel->getWallEdgeDatabase()->findObjects_fast(), minDist, snapPoint);
+      closest = checkCornersForSnap(mousePos, mLevel->getWallEdgeDatabase()->findObjects_fast(), minDist, closest);
 
-   return snapPoint;
+   return closest;
 }
 
 
@@ -1540,6 +1550,7 @@ bool EditorUserInterface::getSnapToWallCorners() const
 }
 
 
+// Sets snapPoint
 static bool checkPoint(const Point &clickPoint, const Point &point, F32 &minDist, Point &snapPoint)
 {
    F32 dist = point.distSquared(clickPoint);
@@ -1554,8 +1565,9 @@ static bool checkPoint(const Point &clickPoint, const Point &point, F32 &minDist
 }
 
 
-S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vector<DatabaseObject *> *edges,
-   F32 &minDist, Point &snapPoint) const
+// Pass snapPoint in a way that creates local copy we can modify
+Point EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vector<DatabaseObject *> *edges,
+                                               F32 &minDist, Point snapPoint) const
 {
    const Point *vert;
 
@@ -1564,11 +1576,12 @@ S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vect
       {
          WallEdge *edge = static_cast<WallEdge *>(edges->get(i));
          vert = (j == 0) ? edge->getStart() : edge->getEnd();
+
          if(checkPoint(clickPoint, *vert, minDist, snapPoint))
-            return i;
+            return snapPoint;
       }
 
-   return NONE;
+   return snapPoint;
 }
 
 
@@ -4190,15 +4203,13 @@ bool EditorUserInterface::handleKeyPress(InputCode inputCode, const string &inpu
       playBoop();
       getUIManager()->activate<EditorMenuUserInterface>();
    }
-   else if(inputCode == KEY_SHIFT)        // No snapping to grid, but still to other things (Shift+Space)
-      mSnapContext |= CONSTRAINED_MOVEMENT;
-   //else if(inputString == getEditorBindingString(BINDING_NO_SNAPPING))        // No snapping to grid, but still to other things (Shift+Space)
-   //   mSnapContext |= CONSTRAINED_MOVEMENT;
-   else if(inputCode == KEY_SPACE) //getEditorBindingString(BINDING_NO_GRID_SNAPPING))   // Disable grid snapping (Space)
+   else if(inputCode == getEditorBindingInputCode(TURN_ON_CONSTRAINED_MOVEMENT_CODE)) 
+      mSnapContext |= (CONSTRAINED_MOVEMENT);
+   else if(inputCode == getEditorBindingInputCode(BINDING_NO_GRID_SNAPPING))          // Disable grid snapping (Space)
       mSnapContext &= ~GRID_SNAPPING;
-   else if(inputString == getEditorBindingString(BINDING_PREVIEW_MODE))       // Turn on preview mode
-      mPreviewMode = true;
-   else if(inputString == getEditorBindingString(BINDING_DOCKMODE_ITEMS))     //  Toggle dockmode Items
+   else if(inputString == getEditorBindingString(BINDING_PREVIEW_MODE))                // Turn on preview mode
+      mPreviewMode = true;       
+   else if(inputString == getEditorBindingString(BINDING_DOCKMODE_ITEMS))              //  Toggle dockmode Items
    {
       if(mDockMode == DOCKMODE_ITEMS)
       {
@@ -4739,15 +4750,6 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
    case KEY_C:
       mOut = false;
       break;
-   case KEY_SPACE:
-      mSnapContext |= GRID_SNAPPING;         // Turn grid snapping back on
-      break;
-   case KEY_SHIFT:
-      // Check if space is down... if so, modify snapping accordingly
-      // This is a little special-casey, but it is, after all, a special case.
-      //if(InputCodeManager::getState(KEY_SPACE))
-         mSnapContext &= ~CONSTRAINED_MOVEMENT;    // Turn object snapping back on 
-      break;
    case KEY_TAB:
       mPreviewMode = false;
       break;
@@ -4761,6 +4763,11 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
       break;
 
    default:
+      // These aren't constant expressions so can't be put in the case structure above.
+      if(inputCode == getEditorBindingInputCode(BINDING_NO_GRID_SNAPPING)) 
+         mSnapContext |= GRID_SNAPPING;            // Turn grid snapping back on
+      else if(inputCode == getEditorBindingInputCode(TURN_ON_CONSTRAINED_MOVEMENT_CODE))
+         mSnapContext &= ~(CONSTRAINED_MOVEMENT);  // Turn object snapping back on 
       break;
    }     // end case
 }

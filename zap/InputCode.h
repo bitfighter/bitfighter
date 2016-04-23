@@ -103,12 +103,22 @@ namespace Zap
    EDITOR_BINDING( BINDING_PLACE_TURRET,      "PlaceNewTurret",     keyPlaceTurret,     "Y"                ) \
    EDITOR_BINDING( BINDING_PLACE_MINE,        "PlaceNewMine",       keyPlaceMine,       "M"                ) \
    EDITOR_BINDING( BINDING_PLACE_FORCEFIELD,  "PlaceNewForcefield", keyPlaceForcefield, "F"                ) \
-   EDITOR_BINDING( BINDING_NO_SNAPPING,       "NoSnapping",         keyNoSnapping,      "Shift+Space"      ) \
-   EDITOR_BINDING( BINDING_NO_GRID_SNAPPING,  "NoGridSnapping",     keyNoGridSnapping,  "Space"            ) \
+/*   EDITOR_BINDING( BINDING_NO_SNAPPING,       "NoSnapping",         keyNoSnapping,      "Shift+Space"      ) */\
+/*   EDITOR_BINDING( BINDING_NO_GRID_SNAPPING,  "NoGridSnapping",     keyNoGridSnapping,  "Space"            ) */\
    EDITOR_BINDING( BINDING_PREVIEW_MODE,      "PreviewMode",        keyPreviewMode,     "Tab"              ) \
    EDITOR_BINDING( BINDING_DOCKMODE_ITEMS,    "DockmodeItems",      keyDockmodeItems,   "F4"               ) \
    EDITOR_BINDING( BINDING_TOGGLE_EDIT_MODE,  "ToggleEditMode",     keyToggleEditMode,  "Insert"           ) \
 /*----------------------------------------------------------------------------------------------------------*/
+
+
+/*------------------------------------EDITOR_BINDING_KEYCODE_TABLE-----------------------------------------------------------*/
+/*                                                                                 BindingSet                      Def.      */
+/*                       Enum                          Name in INI                 member name                     binding   */
+#define EDITOR_BINDING_KEYCODE_TABLE                                                                                          \
+   EDITOR_BINDING( BINDING_NO_GRID_SNAPPING,          "DisableGridSnapping",       inputDisableGridSnapping,       KEY_SPACE) \
+   EDITOR_BINDING( TURN_ON_CONSTRAINED_MOVEMENT_CODE, "EnableConstrainedMovement", inputEnableConstrainedMovement, KEY_SHIFT) \
+/*---------------------------------------------------------------------------------------------------------------------------*/
+
 
 /*---------------------------------------SPECIAL_BINDING_TABLE----------------------------------------------*/
 /*                                                              BindingSet          Def. kb    Def. js      */
@@ -137,6 +147,14 @@ enum EditorBindingNameEnum {
     EDITOR_BINDING_TABLE
 #undef EDITOR_BINDING
     EDITOR_BINDING_DEFINEABLE_KEY_COUNT
+};
+
+
+enum EditorBindingCodeEnum {
+#define EDITOR_BINDING(enumName, b, c, d) enumName,
+   EDITOR_BINDING_KEYCODE_TABLE
+#undef EDITOR_BINDING
+    EDITOR_BINDING_DEFINEABLE_CODE_COUNT
 };
 
 
@@ -176,11 +194,18 @@ struct EditorBindingSet
    EditorBindingSet();     // Constructor
    virtual ~EditorBindingSet();
 
-   string getBinding(EditorBindingNameEnum bindingName) const;
+   string    getBinding(EditorBindingNameEnum bindingName) const;
+   InputCode getBinding(EditorBindingCodeEnum bindingName) const;
    void setBinding(EditorBindingNameEnum bindingName, const string &key);
 
+
+   // Generate some member variables
 #define EDITOR_BINDING(a, b, memberName, d) string memberName;
    EDITOR_BINDING_TABLE
+#undef EDITOR_BINDING
+
+#define EDITOR_BINDING(a, b, memberName, d) InputCode memberName;
+      EDITOR_BINDING_KEYCODE_TABLE
 #undef EDITOR_BINDING
 };
 
@@ -311,6 +336,7 @@ public:
    void setBinding(BindingNameEnum bindingName, InputMode inputMode, InputCode key);
 
    string getEditorBinding(EditorBindingNameEnum bindingName) const;
+   InputCode getEditorBinding(EditorBindingCodeEnum bindingName) const;
    void setEditorBinding(EditorBindingNameEnum bindingName, const string &inputString);
 
    string getSpecialBinding(SpecialBindingNameEnum bindingName) const; 

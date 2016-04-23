@@ -478,6 +478,8 @@ public:
    Point snapPoint(const Point &p, bool snapWhileOnDock = false) const;
    Point snapPointConstrainedOrLevelGrid(Point const &p) const;
    Point snapPointToLevelGrid(Point const &p, F32 factor) const;
+   Point EditorUserInterface::snapToObjects(const Point &mousePos, Point closest, F32 minDist) const;
+
 
    void markSelectedObjectsAsUnsnapped2(const Vector<DatabaseObject *> *objList);
 
@@ -487,7 +489,7 @@ public:
    void onBeforeRunScriptFromConsole();
    void onAfterRunScriptFromConsole();
 
-   S32 checkCornersForSnap(const Point &clickPoint,  const Vector<DatabaseObject *> *edges, F32 &minDist, Point &snapPoint) const;
+   Point checkCornersForSnap(const Point &clickPoint,  const Vector<DatabaseObject *> *edges, F32 &minDist, Point snapPoint) const;
 
    void deleteItem(S32 itemIndex, bool batchMode = false);
 

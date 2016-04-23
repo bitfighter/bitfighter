@@ -316,6 +316,12 @@ string UserInterface::getSpecialBindingString(SpecialBindingNameEnum binding) co
 }
 
 
+InputCode UserInterface::getEditorBindingInputCode(EditorBindingCodeEnum binding) const
+{
+   return mGameSettings->getInputCodeManager()->getEditorBinding(binding);
+}
+
+
 void UserInterface::setInputCode(BindingNameEnum binding, InputCode inputCode)
 {
    mGameSettings->getInputCodeManager()->setBinding(binding, inputCode);
