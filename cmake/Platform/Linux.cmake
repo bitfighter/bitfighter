@@ -28,15 +28,15 @@ message(STATUS "CMAKE_DATA_PATH: ${CMAKE_DATA_PATH}.  Change this by invoking cm
 # Quotes need to be a part of the definition or the compiler won't understand
 add_definitions(-DLINUX_DATA_DIR="${CMAKE_DATA_PATH}")
 
+
+if(NOT CMAKE_BIN_PATH)
+	set(CMAKE_BIN_PATH "${CMAKE_INSTALL_PREFIX}/bin")
+endif()
+
 # Allow setting of other Linux paths for various resources
 if(NOT CMAKE_DESKTOP_DATA_PATH)
-	set(CMAKE_DESKTOP_DATA_PATH "/usr/share")
+	set(CMAKE_DESKTOP_DATA_PATH "${CMAKE_INSTALL_PREFIX}/share")
 endif()
-
-if(NOT CMAKE_MAN_PATH)
-	set(CMAKE_MAN_PATH "${CMAKE_DATA_PATH}/man")
-endif()
-
 
 #
 # Library searching and dependencies
@@ -95,12 +95,12 @@ function(BF_PLATFORM_INSTALL targetName)
 	set(LINUX_PKG_RESOURCE_DIR "${CMAKE_SOURCE_DIR}/packaging/linux/")
 	
 	# Binaries
-	install(TARGETS ${targetName} RUNTIME DESTINATION bin)
+	install(TARGETS ${targetName} RUNTIME DESTINATION ${CMAKE_BIN_PATH})
 
 	if(INSTALL_NOTIFIER)
 		# Modify python script to have the shebang
 		install(CODE "execute_process(COMMAND sed -i -e \"1s@^@#!/usr/bin/env python\\\\n\\\\n@\" ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py)")
-		install(PROGRAMS ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py DESTINATION bin)
+		install(PROGRAMS ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py DESTINATION ${CMAKE_BIN_PATH} RENAME bitfighter_notifier)
 	endif()
 	
 	# Install desktop files
@@ -108,7 +108,7 @@ function(BF_PLATFORM_INSTALL targetName)
 	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.png DESTINATION ${CMAKE_DESKTOP_DATA_PATH}/pixmaps/)
 	
 	# Manpage
-	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.1 DESTINATION ${CMAKE_MAN_PATH}/man1/)
+	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.1 DESTINATION ${CMAKE_DESKTOP_DATA_PATH}/man/man1/)
 	
 	# Resources
 	install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource/ DESTINATION ${CMAKE_DATA_PATH}/bitfighter/)
