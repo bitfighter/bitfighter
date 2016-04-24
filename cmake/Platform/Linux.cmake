@@ -108,7 +108,7 @@ function(BF_PLATFORM_INSTALL targetName)
 	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.png DESTINATION ${CMAKE_DESKTOP_DATA_PATH}/pixmaps/)
 	
 	# Manpage
-	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.1 DESTINATION ${CMAKE_DESKTOP_DATA_PATH}/man/man1/)
+	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.6 DESTINATION ${CMAKE_DESKTOP_DATA_PATH}/man/man6/)
 	
 	# Resources
 	install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource/ DESTINATION ${CMAKE_DATA_PATH}/bitfighter/)
