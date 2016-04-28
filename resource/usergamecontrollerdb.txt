@@ -5,3 +5,5 @@
 
 # Sabrent 12 button (submitted by Skybax)
 79000600000000000000504944564944,USB Joystick          ,platform:Windows,x:b0,a:b2,b:b3,y:b1,back:b4,start:b5,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,dpup:h0.1,leftshoulder:b6,lefttrigger:b8,rightshoulder:b7,righttrigger:b9,leftstick:b10,rightstick:b11,leftx:a0,lefty:a1,rightx:a2,righty:a3,
+# Another XBox controller (submitted by fordcars)
+78696e70757401000000000000000000,XInput Controller #1,platform:Windows,x:b2,a:b0,b:b1,y:b3,back:b6,guide:b10,start:b7,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,dpup:h0.1,leftshoulder:b4,lefttrigger:a2,rightshoulder:b5,righttrigger:a5,leftstick:b8,rightstick:b9,leftx:a0,lefty:a1,rightx:a3,righty:a4,
