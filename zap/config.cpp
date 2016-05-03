@@ -595,16 +595,29 @@ void loadDefaultSpecialKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMan
 }
 
 
+static const string EditorKeyboardKeyBindingSectionName = "EditorKeyboardKeyBindings";
+
+
 // Only called while loading keys from the INI; Note that this function might not be able to be modernized!
 void loadDefaultEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {
-#define EDITOR_BINDING(editorEnumVal, b, c, defaultEditorKeyboardBinding)                                       \
-      inputCodeManager->setEditorBinding(editorEnumVal,                                                         \
-                                          getInputString(ini, "EditorKeyBindings",                              \
-                                                         InputCodeManager::getEditorBindingName(editorEnumVal), \
-                                                         defaultEditorKeyboardBinding)); 
+   string key;
+
+#define EDITOR_BINDING(editorEnumVal, b, c, defaultEditorKeyboardBinding)                                                     \
+      key = InputCodeManager::getEditorBindingName(editorEnumVal);                                                            \
+      inputCodeManager->setEditorBinding(editorEnumVal,                                                                       \
+                                         getInputString(ini, EditorKeyboardKeyBindingSectionName, key, defaultEditorKeyboardBinding)); 
     EDITOR_BINDING_TABLE
 #undef EDITOR_BINDING
+
+   // Now the same thing for the editor key codes
+#define EDITOR_BINDING(editorEnumVal, b, c, defaultEditorKeyboardBinding)                                                     \
+      key = InputCodeManager::getEditorBindingName(editorEnumVal);                                                            \
+      inputCodeManager->setEditorBinding(editorEnumVal,                                                                       \
+                                         getInputCode(ini, EditorKeyboardKeyBindingSectionName, key, defaultEditorKeyboardBinding)); 
+      EDITOR_BINDING_KEYCODE_TABLE
+#undef EDITOR_BINDING
+
 }
 
 
@@ -639,11 +652,21 @@ static void writeEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeMan
    // Don't overwrite existing bindings for now... there is no way to modify them in-game, and if the user has
    // specified an invalid binding, leaving it wrong will make it easier for them to find and fix the error
 #define EDITOR_BINDING(editorEnumVal, b, c, d)                                               \
-      key = InputCodeManager::getEditorBindingName(editorEnumVal);                           \
-      if(!ini->hasKey(section, key))                                                         \
-         ini->setValue(section, key, inputCodeManager->getEditorBinding(editorEnumVal));
+   key = InputCodeManager::getEditorBindingName(editorEnumVal);                              \
+   if(!ini->hasKey(section, key))                                                            \
+      ini->setValue(section, key, inputCodeManager->getEditorBinding(editorEnumVal));
     EDITOR_BINDING_TABLE
 #undef EDITOR_BINDING
+
+// Now the same thing for the editor key codes
+#define EDITOR_BINDING(editorEnumVal, b, c, d)                                               \
+   key = InputCodeManager::getEditorBindingName(editorEnumVal);                              \
+   if(!ini->hasKey(section, key))                                                            \
+      ini->setValue(section, key, InputCodeManager::inputCodeToString(inputCodeManager->getEditorBinding(editorEnumVal)));
+   EDITOR_BINDING_KEYCODE_TABLE
+#undef EDITOR_BINDING
+
+
 }
 
 
@@ -675,7 +698,7 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 
    writeKeyBindings       (ini, inputCodeManager, "KeyboardKeyBindings",     InputModeKeyboard);
    writeKeyBindings       (ini, inputCodeManager, "JoystickKeyBindings",     InputModeJoystick);
-   writeEditorKeyBindings (ini, inputCodeManager, "EditorKeyboardKeyBindings");
+   writeEditorKeyBindings (ini, inputCodeManager, EditorKeyboardKeyBindingSectionName);
    writeSpecialKeyBindings(ini, inputCodeManager, "SpecialKeyBindings",      InputModeKeyboard);
    writeSpecialKeyBindings(ini, inputCodeManager, "SpecialJoystickBindings", InputModeJoystick);
 }

@@ -129,6 +129,13 @@ static const string EditorBindingNames[] = {
 };
 
 
+// Generates an array of bindingCodes for the editor
+static const string EditorBindingCodeNames[] = {
+#define EDITOR_BINDING(a, bindingName, c, d) bindingName,
+   EDITOR_BINDING_KEYCODE_TABLE
+#undef EDITOR_BINDING
+};
+
 // Generates an array of bindingNames for the special keys
 static const string SpecialBindingNames[] = {
 #define SPECIAL_BINDING(a, bindingName, c, d, e) bindingName,
@@ -211,6 +218,22 @@ void EditorBindingSet::setBinding(EditorBindingNameEnum bindingName, const strin
      if(false) { }     // Dummy conditional to let us use else if below
 #define EDITOR_BINDING(enumName, b, memberName, d) else if(bindingName == enumName) memberName = key;
     EDITOR_BINDING_TABLE
+#undef EDITOR_BINDING
+   else 
+      TNLAssert(false, "Invalid key binding!");
+}
+
+
+void EditorBindingSet::setBinding(EditorBindingCodeEnum bindingName, InputCode code)
+{
+     // Produces a block of code that looks like this:
+     // if(false) { }
+     // else if(bindingName == BINDING_FLIP_HORIZ) keyFlipItemHoriz = key;
+     // else if...
+     // else TNLAssert(false);
+     if(false) { }     // Dummy conditional to let us use else if below
+#define EDITOR_BINDING(enumName, b, memberName, d) else if(bindingName == enumName) memberName = code;
+     EDITOR_BINDING_KEYCODE_TABLE
 #undef EDITOR_BINDING
    else 
       TNLAssert(false, "Invalid key binding!");
@@ -759,6 +782,12 @@ void InputCodeManager::setBinding(BindingNameEnum bindingName, InputMode inputMo
 void InputCodeManager::setEditorBinding(EditorBindingNameEnum bindingName, const string &inputString)
 {
 	mEditorBindingSet.setBinding(bindingName, inputString);
+}
+
+
+void InputCodeManager::setEditorBinding(EditorBindingCodeEnum bindingName, InputCode key)
+{
+	mEditorBindingSet.setBinding(bindingName, key);
 }
 
 
@@ -1528,6 +1557,16 @@ string InputCodeManager::getEditorBindingName(EditorBindingNameEnum binding)
    TNLAssert(index >= 0 && index < ARRAYSIZE(EditorBindingNames), "Invalid value for binding!");
 
    return EditorBindingNames[index];
+}
+
+
+string InputCodeManager::getEditorBindingName(EditorBindingCodeEnum binding)
+{
+   U32 index = (U32)binding;
+
+   TNLAssert(index >= 0 && index < ARRAYSIZE(EditorBindingCodeNames), "Invalid value for binding!");
+
+   return EditorBindingCodeNames[index];
 }
 
 

@@ -197,6 +197,7 @@ struct EditorBindingSet
    string    getBinding(EditorBindingNameEnum bindingName) const;
    InputCode getBinding(EditorBindingCodeEnum bindingName) const;
    void setBinding(EditorBindingNameEnum bindingName, const string &key);
+   void setBinding(EditorBindingCodeEnum bindingName, InputCode code);
 
 
    // Generate some member variables
@@ -266,6 +267,7 @@ public:
    //static S32 getBindingCount();
    static string getBindingName(BindingNameEnum binding);
    static string getEditorBindingName(EditorBindingNameEnum binding);
+   static string getEditorBindingName(EditorBindingCodeEnum binding);
    static string getSpecialBindingName(SpecialBindingNameEnum binding);
    
    InputCode getKeyBoundToBindingCodeName(const string &name) const;
@@ -338,6 +340,7 @@ public:
    string getEditorBinding(EditorBindingNameEnum bindingName) const;
    InputCode getEditorBinding(EditorBindingCodeEnum bindingName) const;
    void setEditorBinding(EditorBindingNameEnum bindingName, const string &inputString);
+   void setEditorBinding(EditorBindingCodeEnum bindingName, InputCode key);
 
    string getSpecialBinding(SpecialBindingNameEnum bindingName) const; 
    string getSpecialBinding(SpecialBindingNameEnum bindingName, InputMode inputMode) const;

@@ -866,6 +866,17 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
 
          GameSettings::iniFile.deleteKey("Settings", "EditorGridSize");
       }
+
+      // This keybinding was removed/reworked; probably not worth the effort to try to migrate
+      GameSettings::iniFile.deleteKey("EditorKeyboardKeyBindings", "NoSnapping");
+
+      // This one can be migrated... it was pretty much a simple rename
+      if(GameSettings::iniFile.hasKey("EditorKeyboardKeyBindings", "NoGridSnapping"))
+      {
+         string oldVal = GameSettings::iniFile.getValue("EditorKeyboardKeyBindings", "NoGridSnapping");   
+         GameSettings::setIniSetting("EditorKeyboardKeyBindings", "DisableGridSnapping", oldVal);
+         GameSettings::iniFile.deleteKey("EditorKeyboardKeyBindings", "NoGridSnapping");
+      }
    }
 
 
