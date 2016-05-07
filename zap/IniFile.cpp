@@ -474,7 +474,7 @@ bool CIniFile::deleteSection(const string &section)
 }
 
 
-void CIniFile::Erase()
+void CIniFile::erase()
 {
    sectionNames.clear();
    sections.clear();
@@ -662,13 +662,13 @@ void CIniFile::SetPath(const string &newPath)
 
 void CIniFile::Clear()
 {
-   Erase();
+   erase();
 }
 
 
 void CIniFile::Reset()
 {
-   Erase();
+   erase();
 }
 
 

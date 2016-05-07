@@ -81,7 +81,7 @@ public:
    bool writeFile();
 
    // Deletes all stored ini data.
-   void Erase();
+   void erase();
    void Clear();
    void Reset();
 
