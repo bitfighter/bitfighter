@@ -103,8 +103,6 @@ namespace Zap
    EDITOR_BINDING( BINDING_PLACE_TURRET,      "PlaceNewTurret",     keyPlaceTurret,     "Y"                ) \
    EDITOR_BINDING( BINDING_PLACE_MINE,        "PlaceNewMine",       keyPlaceMine,       "M"                ) \
    EDITOR_BINDING( BINDING_PLACE_FORCEFIELD,  "PlaceNewForcefield", keyPlaceForcefield, "F"                ) \
-/*   EDITOR_BINDING( BINDING_NO_SNAPPING,       "NoSnapping",         keyNoSnapping,      "Shift+Space"      ) */\
-/*   EDITOR_BINDING( BINDING_NO_GRID_SNAPPING,  "NoGridSnapping",     keyNoGridSnapping,  "Space"            ) */\
    EDITOR_BINDING( BINDING_PREVIEW_MODE,      "PreviewMode",        keyPreviewMode,     "Tab"              ) \
    EDITOR_BINDING( BINDING_DOCKMODE_ITEMS,    "DockmodeItems",      keyDockmodeItems,   "F4"               ) \
    EDITOR_BINDING( BINDING_TOGGLE_EDIT_MODE,  "ToggleEditMode",     keyToggleEditMode,  "Insert"           ) \
