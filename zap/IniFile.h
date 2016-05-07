@@ -82,8 +82,8 @@ public:
 
    // Deletes all stored ini data.
    void erase();
-   void Clear();
-   void Reset();
+   void clear();
+   void reset();
 
    // Returns index of specified key, or noID if not found
    S32 findSection(const string &sectionName) const;
@@ -105,14 +105,14 @@ public:
    string getSectionName( S32 const sectionId) const;
 
    // Returns number of values stored for specified section
-   S32 GetNumEntries(S32 const sectionId) const;
-   S32 GetNumEntries(const string &section) const;
+   S32 getNumEntries(S32 const sectionId) const;
+   S32 getNumEntries(const string &section) const;
 
    // Returns value name by index for a given keyname or sectionId
    string valueName(S32 const sectionID, S32 const keyID) const;
-   string GetValueName(S32 const sectionID, S32 const keyID) const;
+   string getValueName(S32 const sectionID, S32 const keyID) const;
    string valueName(const string &section, S32 const keyID) const;
-   string GetValueName(const string &section, S32 const keyID) const;
+   string getValueName(const string &section, S32 const keyID) const;
 
    // Gets value of [keyname] valuename =.
    // Overloaded to return string, int, and double.

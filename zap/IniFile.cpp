@@ -386,7 +386,7 @@ void CIniFile::getAllValues(const string &section, Vector<string> &valueList) co
 
 void CIniFile::getAllKeys(S32 const sectionId, Vector<string> &keyList) const
 {
-   if(GetNumEntries(sectionId) == 0)
+   if(getNumEntries(sectionId) == 0)
       return;
 
    for(S32 i = 0; i < sections[sectionId].keys.size(); i++)
@@ -660,13 +660,13 @@ void CIniFile::SetPath(const string &newPath)
 }
 
 
-void CIniFile::Clear()
+void CIniFile::clear()
 {
    erase();
 }
 
 
-void CIniFile::Reset()
+void CIniFile::reset()
 {
    erase();
 }
@@ -695,7 +695,7 @@ string CIniFile::getSectionName( S32 const sectionId) const
 }
 
 
-S32 CIniFile::GetNumEntries(S32 const sectionId) const
+S32 CIniFile::getNumEntries(S32 const sectionId) const
 {
    if(sectionId < sections.size())
       return sections[sectionId].keys.size();
@@ -704,7 +704,7 @@ S32 CIniFile::GetNumEntries(S32 const sectionId) const
 }
 
 
-S32 CIniFile::GetNumEntries(const string &section) const
+S32 CIniFile::getNumEntries(const string &section) const
 {
    S32 sectionId = findSection(section);
 
@@ -715,14 +715,14 @@ S32 CIniFile::GetNumEntries(const string &section) const
 }
 
 
-string CIniFile::GetValueName(S32 const sectionID, S32 const keyID) const
+string CIniFile::getValueName(S32 const sectionID, S32 const keyID) const
 {
    return valueName(sectionID, keyID);
 }
 
 
 
-string CIniFile::GetValueName( const string &section, S32 const keyID) const
+string CIniFile::getValueName( const string &section, S32 const keyID) const
 {
    return valueName( section, keyID);
 }

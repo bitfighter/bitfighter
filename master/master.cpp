@@ -36,7 +36,7 @@ void MasterSettings::readConfigFile()
       return;
 
    // Clear, then read
-   ini.Clear();
+   ini.clear();
    ini.readFile();
 
    // Now set up variables -- copies data from ini to settings

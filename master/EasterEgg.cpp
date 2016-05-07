@@ -29,7 +29,7 @@ void EasterEggBasket::loadEasterEggs()
       return;
 
    // Clear, then read
-   ini.Clear();
+   ini.clear();
    ini.readFile();
 
    // TODO
