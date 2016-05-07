@@ -649,7 +649,13 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
 // Note that this function might not be able to be modernized!
 static void writeEditorKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section)
 {
-   writeKeyStringInstructions(ini, section);
+   if(ini->numSectionComments(section) == 0)
+   {
+      addComment("----------------");
+      addComment(" These key bindings use KeyStrings, except for DisableGridSnappingModifier and EnableConstrainedMovementModifier,");
+      addComment(" which use KeyCodes.  See info at the top of this file for an explanation.");
+      addComment("----------------");
+   }
 
    string key;
 
