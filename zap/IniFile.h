@@ -104,11 +104,11 @@ public:
    string sectionName( S32 const sectionId) const;
    string getSectionName( S32 const sectionId) const;
 
-   // Returns number of values stored for specified section.
+   // Returns number of values stored for specified section
    S32 GetNumEntries(S32 const sectionId) const;
    S32 GetNumEntries(const string &section) const;
 
-   // Returns value name by index for a given keyname or sectionId.
+   // Returns value name by index for a given keyname or sectionId
    string valueName(S32 const sectionID, S32 const keyID) const;
    string GetValueName(S32 const sectionID, S32 const keyID) const;
    string valueName(const string &section, S32 const keyID) const;
