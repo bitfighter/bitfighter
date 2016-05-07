@@ -109,13 +109,13 @@ namespace Zap
 /*----------------------------------------------------------------------------------------------------------*/
 
 
-/*------------------------------------EDITOR_BINDING_KEYCODE_TABLE-----------------------------------------------------------*/
-/*                                                                                 BindingSet                      Def.      */
-/*                       Enum                          Name in INI                 member name                     binding   */
-#define EDITOR_BINDING_KEYCODE_TABLE                                                                                          \
-   EDITOR_BINDING( BINDING_NO_GRID_SNAPPING,          "DisableGridSnapping",       inputDisableGridSnapping,       KEY_SPACE) \
-   EDITOR_BINDING( TURN_ON_CONSTRAINED_MOVEMENT_CODE, "EnableConstrainedMovement", inputEnableConstrainedMovement, KEY_SHIFT) \
-/*---------------------------------------------------------------------------------------------------------------------------*/
+/*------------------------------------EDITOR_BINDING_KEYCODE_TABLE-------------------------------------------------------------------*/
+/*                                                                                         BindingSet                      Def.      */
+/*                       Enum                          Name in INI                         member name                     binding   */
+#define EDITOR_BINDING_KEYCODE_TABLE                                                                                                  \
+   EDITOR_BINDING( BINDING_NO_GRID_SNAPPING,          "DisableGridSnappingModifier",       inputDisableGridSnapping,       KEY_SPACE) \
+   EDITOR_BINDING( TURN_ON_CONSTRAINED_MOVEMENT_CODE, "EnableConstrainedMovementModifier", inputEnableConstrainedMovement, KEY_SHIFT) \
+/*-----------------------------------------------------------------------------------------------------------------------------------*/
 
 
 /*---------------------------------------SPECIAL_BINDING_TABLE----------------------------------------------*/

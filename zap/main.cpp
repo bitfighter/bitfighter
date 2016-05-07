@@ -874,7 +874,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       if(GameSettings::iniFile.hasKey("EditorKeyboardKeyBindings", "NoGridSnapping"))
       {
          string oldVal = GameSettings::iniFile.getValue("EditorKeyboardKeyBindings", "NoGridSnapping");   
-         GameSettings::setIniSetting("EditorKeyboardKeyBindings", "DisableGridSnapping", oldVal);
+         GameSettings::setIniSetting("EditorKeyboardKeyBindings", "DisableGridSnappingModifier", oldVal);
          GameSettings::iniFile.deleteKey("EditorKeyboardKeyBindings", "NoGridSnapping");
       }
    }
