@@ -128,7 +128,7 @@ IniSettings::~IniSettings()
    SECTION_ITEM("Updater",         "The Updater section contains entries that control how game updates are handled.")                                                        \
    SECTION_ITEM("Diagnostics",     "Diagnostic entries can be used to enable or disable particular actions for debugging purposes.\n"                                        \
                                    "You probably can't use any of these settings to enhance your gameplay experience.")                                                      \
-   SECTION_ITEM("Sounds",          "Sound settings.")                                                                                                                        \
+   SECTION_ITEM("Sounds",          "Sound settings")                                                                                                                        \
    SECTION_ITEM("Testing",         "Experimental and possibly short-lived settings use for testing.  They may be removed at any time,\n"                                     \
                                    "even in the next version of Bitfighter.")                                                                                                \
 
