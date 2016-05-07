@@ -449,6 +449,9 @@ static void loadPluginBindings(CIniFile *ini, IniSettings *iniSettings)
 // These instructions are written before an any sections containing keyCodes or keyStrings
 static void writeGeneralKeybindingInstructions(CIniFile *ini)
 {
+   if(ini->NumHeaderComments() > 0)
+      return;
+
    ini->headerComment("----------------");
    ini->headerComment(" Key bindings come in two flavors: KeyCodes and KeyStrings.  In-game bindings are done with KeyCodes, whereas editor and");
    ini->headerComment(" special keys (i.e. those that are avaialAble everywhere, like Help or Lobby Chat) are defined with KeyStrings.  With a");
@@ -481,6 +484,9 @@ static void writeGeneralKeybindingInstructions(CIniFile *ini)
 // These instructions are written before an INI section containing keyStrings
 static void writeKeyStringInstructions(CIniFile *ini, const string &section)
 {
+   if(ini->numSectionComments(section) > 0)
+      return;
+
    addComment("----------------");
    addComment(" These key bindings use KeyStrings.  See info at the top of this file for an explanation.");
    addComment("----------------"); 
@@ -490,6 +496,9 @@ static void writeKeyStringInstructions(CIniFile *ini, const string &section)
 // These instructions are written before an INI section containing keyCodes
 static void writeKeyCodeInstructions(CIniFile *ini, const string &section)
 {
+   if(ini->numSectionComments(section) > 0)
+      return;
+
    addComment("----------------");
    addComment(" These key bindings use KeyCodes.  See info at the top of this file for an explanation.");
    addComment("----------------");
@@ -1063,6 +1072,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
       SettingsList settings = iniSettings->mSettings.getSettingsInSection(section);
    
       if(true || ini->numSectionComments(section) == 0)  // <<<==== remove true when done testing!
+      if(ini->numSectionComments(section) == 0)  
       {
          ini->deleteSectionComments(section);      // Delete when done testing (harmless but useless)
 
