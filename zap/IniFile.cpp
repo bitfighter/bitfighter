@@ -728,7 +728,7 @@ string CIniFile::GetValueName( const string &section, S32 const keyID) const
 }
 
 
-bool CIniFile::GetValueB(const string &section, const string &key, bool const defValue) const
+bool CIniFile::getValueB(const string &section, const string &key, bool const defValue) const
 {
    return (getValueI( section, key, int( defValue)) != 0);
 }

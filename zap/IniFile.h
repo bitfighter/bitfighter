@@ -130,7 +130,7 @@ public:
    void getAllKeys(const string &section, Vector<string> &keyList) const;
 
    S32  getValueI(const string &section,  const string &key, S32 const defValue = 0) const;
-   bool GetValueB(const string &section,  const string &key, bool const defValue = false) const;
+   bool getValueB(const string &section,  const string &key, bool const defValue = false) const;
    F32  getValueF(const string &section, const string &key, F32 const defValue = 0.0f) const;
    bool getValueYN(const string &section, const string &key, bool defValue) const;
    bool getValueYN(S32 const sectionId,   const string &keyName, const bool &defValue) const;
