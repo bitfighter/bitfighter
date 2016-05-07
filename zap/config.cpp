@@ -1077,13 +1077,13 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
       SettingsList settings = iniSettings->mSettings.getSettingsInSection(section);
    
-      if(true || ini->numSectionComments(section) == 0)  // <<<==== remove true when done testing!
       if(ini->numSectionComments(section) == 0)  
       {
-         ini->deleteSectionComments(section);      // Delete when done testing (harmless but useless)
+         //ini->deleteSectionComments(section);      // Delete when done testing (harmless but useless)
 
          ini->sectionComment(section, "----------------");      // ----------------
          writeComments(ini, section, wrapString(headerComments[i], NO_AUTO_WRAP));
+
          ini->sectionComment(section, "----------------");      // ----------------
 
          // Write all our section comments for items defined in the new manner
@@ -1094,6 +1094,11 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
             writeComments(ini, section, wrapString(prefix + settings[j]->getComment(), NO_AUTO_WRAP, string(prefix.size(), ' ')));
          }
 
+         // Special case 
+#ifndef ZAP_DEDICATED
+         if(section == "Settings")
+            addComment(" LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game");
+#endif
          ini->sectionComment(section, "----------------");      // ----------------
       }
 
@@ -1102,11 +1107,6 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
          ini->setValue(section, settings[j]->getKey(), settings[j]->getIniString());
    }
 
-   const char *section = "Settings";
-
-   addComment(" LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game");
-   addComment("----------------");
-
 
    // And the ones still to be ported to the new system
 
@@ -1114,7 +1114,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
    // Don't save new value if out of range, so it will go back to the old value. 
    // Just in case a user screw up with /linewidth command using value too big or too small.
    if(RenderUtils::DEFAULT_LINE_WIDTH >= 0.5 && RenderUtils::DEFAULT_LINE_WIDTH <= 5)
-      ini->setValueF (section, "LineWidth", RenderUtils::DEFAULT_LINE_WIDTH);
+      ini->setValueF ("Settings", "LineWidth", RenderUtils::DEFAULT_LINE_WIDTH);
 #endif
 }
 
