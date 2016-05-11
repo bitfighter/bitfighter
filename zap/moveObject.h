@@ -60,7 +60,7 @@ private:
 
 protected:
    enum {
-      InterpMaxVelocity = 900, // velocity to use to interpolate to proper position
+      InterpMaxVelocity = 900,   // velocity to use to interpolate to proper position
       InterpAcceleration = 1800,
    };
 
