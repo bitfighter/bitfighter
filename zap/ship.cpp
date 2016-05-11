@@ -1998,7 +1998,7 @@ void Ship::killAndScore(DamageInfo *theInfo)
 }
 
 
-// Ship was killed.
+// Ship killed
 void Ship::kill()
 {
    if(isServer())    // Server only block
