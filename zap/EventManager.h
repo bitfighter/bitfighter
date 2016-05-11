@@ -9,7 +9,6 @@
 #include "LuaBase.h"    // For ScriptContext def
 
 #include "tnlTypes.h"
-#include "tnlVector.h"
 
 
 using namespace TNL;
