@@ -39,8 +39,6 @@ class Ship : public MoveObject
 
    bool mIsRobot;
 
-protected:
-   Timer mSendSpawnEffectTimer;           // Only meaningful on the server
 private:
    Vector<SafePtr<Zone> > mZones1;      // A list of zones the ship is currently in
    Vector<SafePtr<Zone> > mZones2;
@@ -87,6 +85,8 @@ private:
 protected:
    SafePtr <ClientInfo> mClientInfo;
    StringTableEntry mPlayerName;
+
+   Timer mSendSpawnEffectTimer;           // Only meaningful on the server
 
    Vector<SafePtr<MountableItem> > mMountedItems;   
 
