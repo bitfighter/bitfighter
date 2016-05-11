@@ -13,7 +13,6 @@
 #include "ship.h"
 #include "Level.h"
 
-#include "Colors.h"
 #include "GeomUtils.h"
 #include "stringUtils.h"
 #include "MathUtils.h"     // For findLowestRootIninterval()
