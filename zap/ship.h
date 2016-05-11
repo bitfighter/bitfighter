@@ -276,9 +276,9 @@ public:
 
    void emitExplosion();
    void setActualPos(const Point &p, bool warp);
-   bool isModulePrimaryActive(ShipModule module);
+   bool isModulePrimaryActive(ShipModule module) const;
 
-   ShipModule getModule(U32 modIndex);
+   ShipModule getModule(U32 modIndex) const;
 
    virtual void killAndScore(DamageInfo *theInfo);
    virtual void kill();

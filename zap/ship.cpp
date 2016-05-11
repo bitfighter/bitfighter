@@ -1967,13 +1967,13 @@ string Ship::getLoadoutString() const
 }
 
 
-bool Ship::isModulePrimaryActive(ShipModule mod)
+bool Ship::isModulePrimaryActive(ShipModule mod) const
 {
    return mLoadout.isModulePrimaryActive(mod);
 }
 
 
-ShipModule Ship::getModule(U32 modIndex)
+ShipModule Ship::getModule(U32 modIndex) const
 {
    return mLoadout.getModule(modIndex);
 }
