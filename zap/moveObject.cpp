@@ -232,7 +232,7 @@ void MoveObject::setPosVelAng(const Point &pos, const Point &vel, F32 ang)
 }
 
 
-F32 MoveObject::getMass()
+F32 MoveObject::getMass() const
 {
    return mMass;
 }

@@ -130,7 +130,7 @@ public:
    void setPosVelAng(const Point &pos, const Point &vel, F32 ang);
    virtual void setInitialPosVelAng(const Point &pos, const Point &vel, F32 ang);
 
-   F32 getMass();
+   F32 getMass() const;
    void setMass(F32 mass);
 
    virtual void playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity);
