@@ -572,7 +572,7 @@ void MoveObject::checkForZones()
    Vector<SafePtr<Zone> > &currZoneList = getCurrZoneList();
    Vector<SafePtr<Zone> > &prevZoneList = getPrevZoneList();
 
-   getZonesShipIsIn(currZoneList);     // Fill currZoneList with a list of all zones ship is currently in
+   getZonesObjectIsIn(currZoneList);     // Fill currZoneList with a list of all zones ship is currently in
 
    // Now compare currZoneList with prevZoneList to figure out if ship entered or exited any zones
    for(S32 i = 0; i < currZoneList.size(); i++)
@@ -601,7 +601,7 @@ void MoveObject::onLeftZone(Zone *zone)
 
 // Fill zoneList with a list of all zones that the ship is currently in
 // Server only
-void MoveObject::getZonesShipIsIn(Vector<SafePtr<Zone> > &zoneList)
+void MoveObject::getZonesObjectIsIn(Vector<SafePtr<Zone> > &zoneList)
 {
    // Use this boolean as a cheap way of making the current zone list be the previous out without copying
    mZones1IsCurrent = !mZones1IsCurrent;

@@ -1901,7 +1901,7 @@ void Ship::kill()
       // Fire the ShipLeftZoneEvent for every zone the ship is in
       Vector<SafePtr<Zone> > zoneList;   // Reuse our reusable container
 
-      getZonesShipIsIn(zoneList);
+      getZonesObjectIsIn(zoneList);
    
       for(S32 i = 0; i < zoneList.size(); i++)
          EventManager::get()->fireEvent(EventManager::ShipLeftZoneEvent, this, static_cast<Zone *>(zoneList[i].getPointer()));
