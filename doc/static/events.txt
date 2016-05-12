@@ -13,7 +13,7 @@ EventEnum page
 
 @section Example
 Subscribing to an event is the same for robots and levelgens: you call \link
-LuaScriptRunner::subscribe `bf:subscribe` \endlink. Here is a simple example using
+LuaScriptRunner::subscribe `bf:subscribe`\endlink. Here is a simple example using
 the MsgReceived Event which is available to both robots and levelgens:
 
 @code
@@ -29,6 +29,34 @@ function onMsgReceived(msg, player, isGlobal)
   print(player:getName(), " said: ", msg)
 end
 
+@endcode
+
+
+Another example that displays an announcement when an object or ship enters any kind of zone.
+
+@code
+function onShipEnteredZone(ship, zone)
+    levelgen:announce("ship entered zone!")
+end
+
+function onShipLeftZone(ship, zone)
+    levelgen:announce("ship left zone!")
+end 
+
+function onObjectEnteredZone(obj, zone)
+    levelgen:announce("obj entered zone!")
+end 
+
+function onObjectLeftZone(obj, zone)
+    levelgen:announce("obj left zone!")
+end 
+
+function main()
+    bf:subscribe(Event.ShipEnteredZone)
+    bf:subscribe(Event.ShipLeftZone)
+    bf:subscribe(Event.ObjectEnteredZone)
+    bf:subscribe(Event.ObjectLeftZone)
+end
 @endcode
 
 */
