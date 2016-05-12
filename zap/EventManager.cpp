@@ -429,6 +429,38 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
 }
 
 
+// ObjectEnteredZoneEvent, ObjectLeftZoneEvent
+void EventManager::fireEvent(EventType eventType, MoveObject *object, Zone *zone)
+{
+   if(suppressEvents(eventType))   
+      return;
+
+   lua_State *L = LuaScriptRunner::getL();
+
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
+
+   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   {
+      try   
+      {
+         // Passing object, zone, zoneType, zoneId
+         object->push(L);                                   // -- object
+         zone->push(L);                                     // -- object, zone   
+         lua_pushinteger(L, zone->getObjectTypeNumber());   // -- object, zone, zone->objTypeNumber
+         lua_pushinteger(L, zone->getUserAssignedId());     // -- object, zone, zone->objTypeNumber, zone->id
+
+         fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
+      }
+      catch(LuaException &e)
+      {
+         handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
+         clearStack(L);
+         return;
+      }
+   }
+}
+
+
 // onScoreChanged
 void EventManager::fireEvent(EventType eventType, S32 score, S32 teamIndex, LuaPlayerInfo *playerInfo)
 {

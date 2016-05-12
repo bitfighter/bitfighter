@@ -40,12 +40,8 @@ class Ship : public MoveObject
    bool mIsRobot;
 
 private:
-   Vector<SafePtr<Zone> > mZones1;      // A list of zones the ship is currently in
-   Vector<SafePtr<Zone> > mZones2;
-   bool mZones1IsCurrent;
-   bool mFastRecharging;
-
    F32 mLastProcessStateAngle;
+   bool mFastRecharging;
 
    void setActiveWeapon(U32 weaponIndex);
 
@@ -68,13 +64,8 @@ private:
 
    // Idle helpers
    bool checkForSpeedzones(U32 stateIndex = ActualState); // Check to see if we collided with a GoFast
-   void checkForZones();                           // See if ship entered or left any zones
-   void getZonesShipIsIn(Vector<SafePtr<Zone> > &zoneList);     // Fill zoneList with a list of all zones that the ship is currently in
    bool isLocalPlayerShip(Game *game) const;       // Returns true if ship represents local player
   
-   Vector<SafePtr<Zone> > &getCurrZoneList();    // Get list of zones ship is currently in
-   Vector<SafePtr<Zone> > &getPrevZoneList();    // Get list of zones ship was in last tick
-
    bool doesShipActivateSensor(const Ship *ship);
    F32 getShipVisibility(const Ship *localShip);
 
@@ -101,6 +92,9 @@ protected:
 
    bool processArguments(S32 argc, const char **argv, Level *level);
    string toLevelCode() const;
+
+   void onEnteredZone(Zone *zone);
+   void onLeftZone(Zone *zone);
 
 public:
    enum MaskBits {

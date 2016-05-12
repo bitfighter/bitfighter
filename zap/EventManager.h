@@ -16,11 +16,12 @@ using namespace TNL;
 namespace Zap
 {
 
-class Robot;
 class CoreItem;
-class Ship;
 class LuaPlayerInfo;
 class LuaScriptRunner;
+class MoveObject;
+class Robot;
+class Ship;
 class Zone;
 
 struct Subscription; 
@@ -51,6 +52,8 @@ class EventManager
    EVENT(NexusClosedEvent,       "NexusClosed",       "onNexusClosed",       "onNexusClosed()"                                                        ) \
    EVENT(ShipEnteredZoneEvent,   "ShipEnteredZone",   "onShipEnteredZone",   "onShipEnteredZone(Ship ship, Zone zone)"                                ) \
    EVENT(ShipLeftZoneEvent,      "ShipLeftZone",      "onShipLeftZone",      "onShipLeftZone(Ship ship, Zone zone)"                                   ) \
+   EVENT(ObjectEnteredZoneEvent, "ObjectEnteredZone", "onObjectEnteredZone", "onObjectEnteredZone(MoveObject object, Zone zone)"                      ) \
+   EVENT(ObjectLeftZoneEvent,    "ObjectLeftZone",    "onObjectLeftZone",    "onObjectLeftZone(MoveObject object, Zone zone)"                         ) \
    EVENT(ScoreChangedEvent,      "ScoreChanged",      "onScoreChanged",      "onScoreChanged(num scoreChange, num teamIndex, PlayerInfo player)"      ) \
    EVENT(GameOverEvent,          "GameOver",          "onGameOver",          "onGameOver()"                                                           ) \
    EVENT(CoreDestroyedEvent,     "CoreDestroyed",     "onCoreDestroyed",     "onCoreDestroyed(Core core)"                                             ) \
@@ -114,6 +117,7 @@ public:
    void fireEvent(LuaScriptRunner *sender, EventType eventType, const char *message, LuaPlayerInfo *playerInfo, bool global);  // MsgReceived
    void fireEvent(LuaScriptRunner *player, EventType eventType, LuaPlayerInfo *playerInfo);  // PlayerJoined, PlayerLeft, PlayerTeamChanged
    void fireEvent(EventType eventType, Ship *ship, Zone *zone); // ShipEnteredZoneEvent, ShipLeftZoneEvent
+   void fireEvent(EventType eventType, MoveObject *object, Zone *zone); // ObjectEnteredZoneEvent, ObjectLeftZoneEvent
    void fireEvent(EventType eventType, S32 score, S32 teamIndex, LuaPlayerInfo *playerInfo);
 
    // Allow the pausing of event firing for debugging purposes
