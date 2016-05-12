@@ -183,7 +183,7 @@ foreach my $file (@files) {
          # Check for some special custom tags...
 
          # Check the regexes here: http://www.regexe.com
-         # Handle Lua enum defs: "@luaenum ObjType(2)" or "@luaenum ObjType(2,1,4)"  1, 2, or 3 nums are ok
+         # Handle Lua enum defs: "   ObjType(2)" or "@luaenum ObjType(2,1,4)"  1, 2, or 3 nums are ok
          #                            $1        $2           $4           $6  
          if( $line =~ m|\@luaenum\s+(\w+)\s*\((\d+)\s*(,\s*(\d+)\s*(,\s*(\d+))?)?\s*\)| ) {
             $collectingEnum = 1;
@@ -210,7 +210,7 @@ foreach my $file (@files) {
             my $retval = $2 eq "" ? "void" : $2;                              # Retval is optional, use void if omitted            
             my $voidlessRetval = $2;
             my $class  = $3; # If no class is given the function is assumed to be global
-            my $method = $4 || die "Couldn't get method name from $line\n";  # Must have a method
+            my $method = $4 || die "Couldn't get method name from $line\n";   # Must have a method
             my $args   = $5;                                                  # Args are optional
 
             $retval =~ s|\s+$||;     # Trim any trailing spaces from $retval
@@ -317,16 +317,16 @@ foreach my $file (@files) {
          # Enum will continue until we hit a line with no trailing \
          if( $line =~ m|#\s*define| ) {
             push(@enums, "\@\{\n");
-            push(@enums, "# $enumName\n");# Add the list header
+            push(@enums, "# $enumName\n");   # Add the list header
             $collectingEnum = 2;
             next;
          }
 
-         next if $collectingEnum == 1;    # Skip lines until we hit a #define
+         next if $collectingEnum == 1;       # Skip lines until we hit a #define
 
          # If we're here, collectingEnum == 2, and we're processing an enum definition line
-         $line =~ s|/\*.*?\*/||g;         # Remove embedded comments
-         next if($line =~ m|^\W*\\$|);    # Skip any lines that have no \w chars, as long as they end in a backslash
+         $line =~ s|/\*.*?\*/||g;            # Remove embedded comments
+         next if($line =~ m|^\W*\\$|);       # Skip any lines that have no \w chars, as long as they end in a backslash
 
 
          # Skip blank lines, or those that look like they are starting with a comment
@@ -350,16 +350,16 @@ foreach my $file (@files) {
 
 
             my $enumval = $words[$enumColumn];
-            $enumval =~ s|[\s"\)\\]*||g;         # Strip out quotes and whitespace and other junk
+            $enumval =~ s|[\s"\)\\]*||g;        # Strip out quotes and whitespace and other junk
 
-            # next unless $enumval;      # Skip empty enumvals... should never happen, but does
+            # next unless $enumval;             # Skip empty enumvals... should never happen, but does
 
             push(@enums, " * * \%" . $enumName . ".\%" . $enumval . " <br>\n `" . $enumDescr."` <br>\n");    # Produces:  * * %Weapon.Triple  Triple
             # no next here, always want to do the termination check below
          }
 
 
-         if( $line !~ m|\\\r*$| ) {          # Line has no terminating \, it's the last of its kind!
+         if( $line !~ m|\\\r*$| ) {       # Line has no terminating \, it's the last of its kind!
             push(@enums, "\@\}\n");       # Close doxygen group block
             push(@enums, "*/\n\n");       # Close comment
 
