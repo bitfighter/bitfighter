@@ -478,7 +478,7 @@ public:
    Point snapPoint(const Point &p, bool snapWhileOnDock = false) const;
    Point snapPointConstrainedOrLevelGrid(Point const &p) const;
    Point snapPointToLevelGrid(Point const &p, F32 factor) const;
-   Point EditorUserInterface::snapToObjects(const Point &mousePos, Point closest, F32 minDist) const;
+   Point snapToObjects(const Point &mousePos, Point closest, F32 minDist) const;
 
 
    void markSelectedObjectsAsUnsnapped2(const Vector<DatabaseObject *> *objList);
