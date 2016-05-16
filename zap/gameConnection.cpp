@@ -599,7 +599,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
 
    // Check for forbidden blank parameters -- the following commands require a value to be passed in param
    if( (type == AdminPassword || type == OwnerPassword || type == ServerName           || type == ServerDescription || 
-        type == LevelDir      || type == PlaylistFile) || type == ServerWelcomeMessage &&
+        type == LevelDir      || type == PlaylistFile || type == ServerWelcomeMessage) &&
                           strcmp(param.getString(), "") == 0)
       return;
 
