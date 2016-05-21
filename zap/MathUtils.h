@@ -9,7 +9,7 @@
 
 #include "tnlTypes.h"
 
-#include <cmath>
+//#include <cmath>
 
 
 using namespace TNL;
