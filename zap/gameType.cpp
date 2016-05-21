@@ -1579,6 +1579,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
 
 
    const Vector<DatabaseObject *> *spyBugs = mLevel->findObjects_fast(SpyBugTypeNumber);
+   Point scopeRange(SpyBug::SPY_BUG_RANGE, SpyBug::SPY_BUG_RANGE);
    
    for(S32 i = spyBugs->size()-1; i >= 0; i--)
    {
@@ -1589,7 +1590,6 @@ void GameType::performScopeQuery(GhostConnection *connection)
          Point pos = sb->getActualPos();
          Rect queryRect(pos, pos);
 
-         Point scopeRange(SpyBug::SPY_BUG_RANGE, SpyBug::SPY_BUG_RANGE);
          queryRect.expand(scopeRange);
 
          fillVector.clear();
