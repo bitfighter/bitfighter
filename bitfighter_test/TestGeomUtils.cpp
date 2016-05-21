@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "../zap/GeomUtils.h"
+#include "../zap/MathUtils.h"
 #include "gtest/gtest.h"
 #include <tnl.h>
 #include <map>
@@ -417,6 +418,35 @@ TEST(GeomUtilsTest, triangulateManyPolygons)
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(1024, result.size());
 }
+
+
+TEST(GeomUtilsTest, pointInHexagon)
+{
+   // Some obviously bogus cases
+   EXPECT_FALSE(pointInHexagon(Point( 10,  10), Point(0, 0), 5));
+   EXPECT_FALSE(pointInHexagon(Point(-10,  10), Point(0, 0), 1));
+   EXPECT_FALSE(pointInHexagon(Point(-10, -10), Point(0, 0), 8));
+   EXPECT_FALSE(pointInHexagon(Point( 10, -10), Point(0, 0), 9));
+
+   // Obviously true cases
+   EXPECT_TRUE(pointInHexagon(Point(0, 0), Point(0, 0), 9));
+   EXPECT_TRUE(pointInHexagon(Point(0, 0), Point(1, 1), 9));
+
+   // Ouside, but within bounding box
+   EXPECT_FALSE(pointInHexagon(Point(-0.9, FloatSqrt3Half - .0001), Point(0, 0), 1));
+
+   Point PointOnOutside(FloatSqrt3Half * cos(30 * DEGREES_TO_RADIANS), FloatSqrt3Half * sin(30 * DEGREES_TO_RADIANS));
+
+   EXPECT_FALSE(pointInHexagon(Point(PointOnOutside.x + .000001, PointOnOutside.y),           Point(0, 0), 1));
+   EXPECT_FALSE(pointInHexagon(Point(PointOnOutside.x,           PointOnOutside.y + .000001), Point(0, 0), 1));
+   EXPECT_FALSE(pointInHexagon(Point(PointOnOutside.x + .000001, PointOnOutside.y + .000001), Point(0, 0), 1));
+
+   // Just inside
+   EXPECT_TRUE(pointInHexagon(Point(PointOnOutside.x - .000001, PointOnOutside.y),           Point(0, 0), 1));
+   EXPECT_TRUE(pointInHexagon(Point(PointOnOutside.x,           PointOnOutside.y - .000001), Point(0, 0), 1));
+   EXPECT_TRUE(pointInHexagon(Point(PointOnOutside.x - .000001, PointOnOutside.y - .000001), Point(0, 0), 1));
+}
+
 
 
 };
