@@ -229,8 +229,11 @@ static const F32 FloatInverse2Pi = F32(0.5 / 3.14159265358979323846);///< Consta
 
 static const F32 FloatInverse360 = F32(1.0 / 360.0);                 ///< Constant float 1 / 360
 
-static const F32 FloatSqrt2 = F32(1.41421356237309504880f);          ///< Constant float sqrt(2)
-static const F32 FloatSqrtHalf = F32(0.7071067811865475244008443f);  ///< Constant float sqrt(0.5)
+static const F32 FloatSqrt2     = F32(1.41421356237309504880f);      ///< Constant float sqrt(2)
+static const F32 FloatSqrtHalf  = F32(0.7071067811865475244008443f); ///< Constant float sqrt(0.5)
+static const F32 FloatSqrt3     = F32(1.73205080756887729353);       ///< Constant float sqrt(3)
+static const F32 FloatSqrt3Half = F32(0.86602540378443864676);       ///< Constant float sqrt(3)
+
 
 static const S8  S8_MIN  = S8(-128);                              ///< Constant Min Limit S8
 static const S8  S8_MAX  = S8(127);                               ///< Constant Max Limit S8
