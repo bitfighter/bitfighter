@@ -2211,4 +2211,22 @@ S32 lua_segmentsIntersect(lua_State *L)
    return returnNil(L);
 }
 
+
+// Adapted from http://stackoverflow.com/questions/5193331/is-a-point-inside-regular-hexagon
+// Here, radius is the center is the distance from the center to a vertex, and a side of the hexagon is presumed horizontal
+bool pointInHexagon(const Point &pos, const Point &center, F32 radius)
+{
+   const F32 d = 2 * radius;
+
+   const F32 dx = abs(pos.x - center.x) / d;    // Transform the test point locally and to quadrant 2
+   const F32 dy = abs(pos.y - center.y) / d;    // Transform the test point locally and to quadrant 2
+
+   //if(dx / 2 > radius || dy / 2 > radius * FloatSqrt3Half)     // Bounding test (since q2 is in quadrant 2 only 2 tests are needed)
+   //   return false;
+
+   F32 a = 0.25 * FloatSqrt3;
+   return (dy <= a) && (a * dx + 0.25 * dy <= 0.5 * a);
+}
+
+
 };

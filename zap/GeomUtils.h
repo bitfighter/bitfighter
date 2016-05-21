@@ -148,6 +148,9 @@ Paths upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons);
 
 Vector<Vector<Point> > downscaleClipperPoints(const Paths &inputPolygons);
 
+bool pointInHexagon(const Point &pos, const Point &center, F32 radius);
+
+
 /*****************************************************************/
 /** Static class to triangulate any contour/polygon efficiently **/
 /** You should replace Vector2d with whatever your own Vector   **/
