@@ -158,7 +158,7 @@ public:
    F32 computeMinSeperationTime(U32 stateIndex, MoveObject *contactObject, Point intendedPos);
 
    void checkForZones();                                       // See if object entered or left any zones
-   void getZonesShipIsIn(Vector<SafePtr<Zone> > &zoneList);    // Fill zoneList with a list of all zones that the object is currently in
+   void getZonesObjectIsIn(Vector<SafePtr<Zone> > &zoneList);    // Fill zoneList with a list of all zones that the object is currently in
         
    void computeImpulseDirection(DamageInfo *damageInfo);
 
