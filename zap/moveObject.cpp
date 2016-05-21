@@ -610,10 +610,10 @@ void MoveObject::getZonesObjectIsIn(Vector<SafePtr<Zone> > &zoneList)
 
    zoneList.clear();
 
-   Rect rect(getActualPos(), getActualPos());      // Center of ship
+   Rect rect(getActualPos(), getActualPos());            // Center of object
 
    fillVector.clear();
-   findObjects((TestFunc)isZoneType, fillVector, rect);  // Find all zones the ship might be in
+   findObjects((TestFunc)isZoneType, fillVector, rect);  // Find all zones the object might be in
 
    // Extents overlap...  now check for actual overlap
    for(S32 i = 0; i < fillVector.size(); i++)
