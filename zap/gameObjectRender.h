@@ -204,7 +204,7 @@ extern void renderSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 time
 
 extern void renderMine(const Point &pos, bool armed, bool visible);
 extern void renderGrenade(const Point &pos, F32 lifeLeft);
-extern void renderSpyBug(const Point &pos, const Color &teamColor, bool visible, bool drawOutline);
+extern void renderSpyBug(const Point &pos, const Color &teamColor, bool visible);
 
 extern void renderRepairItem(const Point &pos);
 extern void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha);
@@ -277,6 +277,9 @@ extern void renderSpawn(const Point &pos, F32 scale, const Color *color);
 extern void renderFlightPlan(const Point &from, const Point &to, const Vector<Point> &flightPlan);
 extern void renderHeavysetArrow(const Point &pos, const Point &dest, const Color &color, bool isSelected, bool isLitUp);
 extern void renderTeleporterEditorObject(const Point &pos, S32 radius, const Color &color);
+
+extern void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const Color &fillColor);
+extern void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const Color &fillColor, const Color &outlineColor);
 };
 
 #else

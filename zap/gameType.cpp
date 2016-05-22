@@ -8,6 +8,10 @@
 #include "projectile.h"       // For s2cClientJoinedTeam()
 #include "version.h"
 #include "BanList.h"
+#include "barrier.h"
+#include "game.h"
+#include "GameRecorder.h"     // Needed, despite resharper
+#include "GeomUtils.h"
 #include "IniFile.h"          // For CIniFile
 #include "ServerGame.h"
 #include "robot.h"
@@ -1362,8 +1366,8 @@ void GameType::performScopeQuery(GhostConnection *connection)
    bool sameQuery = false;  // helps speed up by not repeatedly finding same objects
 
    const Vector<DatabaseObject *> *spyBugs = mGame->getGameObjDatabase()->findObjects_fast(SpyBugTypeNumber);
-   const Point scopeRange(SpyBug::SPY_BUG_RANGE, SpyBug::SPY_BUG_RANGE);
-   
+   const Point scopeRange(SpyBug::SPY_BUG_RADIUS, SpyBug::SPY_BUG_RADIUS * FloatSqrt3Half);  // Bounding box of hexagon
+
    for(S32 i = spyBugs->size()-1; i >= 0; i--)
    {
       SpyBug *sb = static_cast<SpyBug *>(spyBugs->get(i));
@@ -1376,11 +1380,15 @@ void GameType::performScopeQuery(GhostConnection *connection)
          queryRect.expand(scopeRange);
 
          fillVector.clear();
-         mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect, sameQuery);
+         mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect, false);
+
          sameQuery = true;
 
          for(S32 j = 0; j < fillVector.size(); j++)
          {
+            if(!pointInHexagon(fillVector[j]->getPos(), pos, SpyBug::SPY_BUG_RADIUS))
+               continue;
+
             connection->objectInScope(static_cast<BfObject *>(fillVector[j]));
             if(isShipType(fillVector[j]->getObjectTypeNumber()))
                markAllMountedItemsAsBeingInScope(static_cast<Ship *>(fillVector[j]), conn);

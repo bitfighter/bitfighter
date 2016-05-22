@@ -776,10 +776,10 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderMine(Point(0,0), true, false);
             break;
          case 8:
-            renderSpyBug(Point(0,0), Colors::blue, true, true);
+            renderSpyBug(Point(0,0), Colors::blue, true);
             break;
          case 9:
-            renderSpyBug(Point(0,0), Colors::blue, false, true);
+            renderSpyBug(Point(0,0), Colors::blue, false);
             break;
          case 10:    // Blank
          case 11:

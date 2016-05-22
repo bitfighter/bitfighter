@@ -1296,7 +1296,7 @@ void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentS
    Color col(color);        // Make a copy we can alter
    glColor(col * 0.45f);    // Slightly different color than that used for ships
 
-   F32 range = SpyBug::SPY_BUG_RANGE * currentScale;
+   F32 range = SpyBug::SPY_BUG_RADIUS * currentScale;
 
    drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GL_TRIANGLE_FAN);
 }
@@ -2068,29 +2068,43 @@ void renderGrenade(const Point &pos, F32 lifeLeft)
       drawCircle(pos, 6);
 }
 
-
-void renderSpyBug(const Point &pos, const Color &teamColor, bool visible, bool drawOutline)
+void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const Color &fillColor, const Color &outlineColor)
 {
-   F32 mod = 0.25;
+   Vector<Point> pts(points);
+   Vector<Point> fill;
+   calcPolygonVerts(pos, points, radius, 0, pts);
 
+   Triangulate::Process(pts, fill);
+
+   renderPolygon(&fill, &pts, &fillColor, &outlineColor);
+}
+
+
+void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const Color &fillColor)
+{
+   Vector<Point> pts(points);
+   Vector<Point> fill;
+   calcPolygonVerts(pos, points, radius, 0, pts);
+
+   Triangulate::Process(pts, fill);
+
+   renderPolygonFill(&fill, &fillColor);
+}
+
+
+void renderSpyBug(const Point &pos, const Color &teamColor, bool visible)
+{
    if(visible)
    {
-      glColor(teamColor);
-      drawFilledCircle(pos, 15);
-      if(drawOutline)
-      {
-         glColor(Colors::gray50);
-         drawCircle(pos, 15);
-      }
+      renderFilledPolygon(pos, 6, 15, teamColor * 0.45f, Colors::gray50);
 
-      mod = 1.0;
       drawString(pos.x - 3, pos.y - 5, 10, "S");
    }
    else
    {
       glLineWidth(gLineWidth1);
-      glColor(mod);
-      drawCircle(pos, 5);
+      glColor(0.25);
+      drawPolygon(pos, 6, 5, 0);
    }
 
    glLineWidth(gDefaultLineWidth);
