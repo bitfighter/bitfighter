@@ -1199,8 +1199,8 @@ void SpyBug::idle(IdleCallPath path)
    // Skip the grenade timing goofiness...
    MoveItem::idle(path);
 
-   if(mExploded || path != BfObject::ServerIdleMainLoop)
-      return;
+   //if(mExploded || path != BfObject::ServerIdleMainLoop)
+   //   return;
 }
 
 
