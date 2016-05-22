@@ -1262,9 +1262,9 @@ void SpyBug::renderItem(const Point &pos) const
 
    bool visible = false;
 
-   Ship *ship = getGame()->getLocalPlayerShip();
-
-   S32 ourTeam = static_cast<ClientGame*>(getGame())->getCurrentTeamIndex();
+   // During editor preview mode, getGame() is returning NULL; I'm not sure why, and not sure if it's a problem,
+   // but we'll add a check here to handle it.
+   S32 ourTeam = getGame() ? static_cast<ClientGame*>(getGame())->getCurrentTeamIndex() : TEAM_NEUTRAL;
 
    if(ourTeam != TEAM_NEUTRAL)
    {
@@ -1275,6 +1275,7 @@ void SpyBug::renderItem(const Point &pos) const
          visible = true;
 
       // If sensor is active and you're within the detection distance
+      Ship *ship = getGame()->getLocalPlayerShip();
       if(ship && ship->hasModule(ModuleSensor) &&
             (ship->getPos() - getPos()).lenSquared() < sq(ModuleInfo::SensorCloakInnerDetectionDistance))
          visible = true;
@@ -1283,14 +1284,14 @@ void SpyBug::renderItem(const Point &pos) const
       visible = true;      // We get here in editor when in preview mode
 
 
-   GameObjectRender::renderSpyBug(pos, getColor(), visible, true);
+   GameObjectRender::renderSpyBug(pos, getColor(), visible);
 #endif
 }
 
 
 void SpyBug::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices) const
 {
-   GameObjectRender::renderSpyBug(getPos(), getColor(), true, true);
+   GameObjectRender::renderSpyBug(getPos(), getColor(), true);
 }
 
 
@@ -1301,9 +1302,8 @@ void SpyBug::renderDock(const Color &color) const
 
    Point pos = getRenderPos();
 
-   RenderUtils::drawFilledCircle(pos, radius, color);
+   GameObjectRender::renderFilledPolygon(pos, 6, radius, color, Colors::gray70);
 
-   RenderUtils::drawCircle(pos, radius, &Colors::gray70);
    RenderUtils::drawLetter('S', pos, Color(getTeam() < 0 ? .5 : .7), 1);    // Use darker gray for neutral spybugs so S will show up clearer
 #endif
 }

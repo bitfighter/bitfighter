@@ -175,7 +175,7 @@ public:
 
    static void renderMine(const Point &pos, bool armed, bool visible);
    static void renderGrenade(const Point &pos, F32 lifeLeft);
-   static void renderSpyBug(const Point &pos, const Color &teamColor, bool visible, bool drawOutline);
+   static void renderSpyBug(const Point &pos, const Color &teamColor, bool visible);
 
    static void renderRepairItem(const Point &pos);
    static void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha);
@@ -268,6 +268,9 @@ public:
 
    static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed);
 
+   static void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const Color &fillColor);
+   static void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const Color &fillColor, const Color &outlineColor);
+
 private:
    // Individual badges
    static void render25FlagsBadge(F32 x, F32 y, F32 rad);
@@ -281,7 +284,6 @@ private:
 
    static void renderGridLines(const Point &offset, F32 gridScale, F32 grayVal, bool fadeLines);
    static void renderInfiniteRayFromPoint(const Point &point, F32 angleInRadians, const Color &color);
-
 };
 
 

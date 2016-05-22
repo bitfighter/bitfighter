@@ -771,10 +771,10 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
             GameObjectRender::renderMine(Point(0,0), true, false);
             break;
          case 8:
-            GameObjectRender::renderSpyBug(Point(0,0), Colors::blue, true, true);
+            GameObjectRender::renderSpyBug(Point(0,0), Colors::blue, true);
             break;
          case 9:
-            GameObjectRender::renderSpyBug(Point(0,0), Colors::blue, false, true);
+            GameObjectRender::renderSpyBug(Point(0,0), Colors::blue, false);
             break;
          case 10:    // Blank
          case 11:

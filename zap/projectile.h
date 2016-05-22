@@ -243,7 +243,7 @@ public:
    virtual ~SpyBug();                           // Destructor
    SpyBug *clone() const;
 
-   static const S32 SPY_BUG_RANGE = 300;     // How far can a spy bug see?
+   static const S32 SPY_BUG_RADIUS = 450;       // How far can a spy bug see?  This is the "radius" of the hexagon, from center to corner
 
    bool processArguments(S32 argc, const char **argv, Level *level);
    void onAddedToGame(Game *theGame);

@@ -993,12 +993,7 @@ void GameObjectRender::renderPolyLineVertices(const BfObject *obj, bool snapping
 
 void GameObjectRender::renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentScale)
 {
-   Color col(color);        // Make a copy we can alter
-   mGL->glColor(col * 0.45f);    // Slightly different color than that used for ships
-
-   F32 range = SpyBug::SPY_BUG_RANGE * currentScale;
-
-   RenderUtils::drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GLOPT::TriangleFan);
+   GameObjectRender::renderFilledPolygon(pos, 6, SpyBug::SPY_BUG_RADIUS * currentScale, color * 0.45f);
 }
 
 
@@ -1369,7 +1364,7 @@ void GameObjectRender::renderNavMeshBorders(const Vector<NeighboringZone> &borde
    {
       F32 vertices[] = {
             borders[i].borderStart.x, borders[i].borderStart.y,
-            borders[i].borderEnd.x, borders[i].borderEnd.y,
+            borders[i].borderEnd.x,   borders[i].borderEnd.y,
       };
       mGL->renderVertexArray(vertices, 2, GLOPT::Lines);
    }
@@ -1739,17 +1734,34 @@ void GameObjectRender::renderGrenade(const Point &pos, F32 lifeLeft)
 }
 
 
-void GameObjectRender::renderSpyBug(const Point &pos, const Color &teamColor, bool visible, bool drawOutline)
+void GameObjectRender::renderFilledPolygon(const Point &pos, S32 points, S32 radius, const Color &fillColor, const Color &outlineColor)
+{
+   Vector<Point> pts(points);
+   Vector<Point> fill;
+   calcPolygonVerts(pos, points, radius, 0, pts);
+
+   Triangulate::Process(pts, fill);
+
+   renderPolygon(&fill, &pts, fillColor, outlineColor);
+}
+
+
+void GameObjectRender::renderFilledPolygon(const Point &pos, S32 points, S32 radius, const Color &fillColor)
+{
+   Vector<Point> pts(points);
+   Vector<Point> fill;
+   calcPolygonVerts(pos, points, radius, 0, pts);
+
+   Triangulate::Process(pts, fill);
+
+   renderPolygonFill(&fill, fillColor);
+}
+
+void GameObjectRender::renderSpyBug(const Point &pos, const Color &teamColor, bool visible)
 {
    if(visible)
    {
-      mGL->glColor(teamColor);
-      RenderUtils::drawFilledCircle(pos, 15);
-      if(drawOutline)
-      {
-         mGL->glColor(Colors::gray50);
-         RenderUtils::drawCircle(pos, 15);
-      }
+      renderFilledPolygon(pos, 6, 15, teamColor * 0.45f, Colors::gray50);
 
       RenderUtils::drawString(pos.x - 3, pos.y - 5, 10, "S");
    }
@@ -1757,7 +1769,7 @@ void GameObjectRender::renderSpyBug(const Point &pos, const Color &teamColor, bo
    {
       mGL->glLineWidth(RenderUtils::LINE_WIDTH_1);
       mGL->glColor(0.25);
-      RenderUtils::drawCircle(pos, 5);
+      RenderUtils::drawPolygon(pos, 6, 5, 0);
    }
 
    mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
