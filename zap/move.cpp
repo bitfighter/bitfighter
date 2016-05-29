@@ -15,6 +15,7 @@
 #  include <windows.h>     // For ARRAYSIZE
 #endif
 
+#include <cmath>           // For fabs
 
 namespace Zap
 {

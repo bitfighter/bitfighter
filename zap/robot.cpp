@@ -17,6 +17,8 @@
 #include "MathUtils.h"           // For findLowestRootIninterval()
 #include "GeomUtils.h"
 
+#include <cmath>                 // For sin/cos
+
 
 #define hypot _hypot    // Kill some warnings
 

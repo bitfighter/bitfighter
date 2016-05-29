@@ -34,6 +34,7 @@
 #  include "GameManager.h"
 #endif
 
+#include <cmath>
 
 namespace Zap
 {

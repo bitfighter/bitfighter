@@ -27,6 +27,7 @@
 #  include "UIQuickMenu.h"
 #endif
 
+#include <cmath>
 
 namespace Zap
 {

@@ -26,6 +26,8 @@
 #  include <windows.h>   // For ARRAYSIZE
 #endif
 
+#include <cmath>
+
 namespace Zap {
 
 
