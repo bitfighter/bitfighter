@@ -136,9 +136,15 @@ bool Joystick::initJoystick(GameSettings *settings)
 
    // Set the controller number we will use during the game unless it was already
    // set by a command line arg in GameSettings.cpp.  This will be the first
-   // detected controller from above.
+   // detected controller from above.  Unless there were no controllers detected, in which
+   // case we'll bail.
    if(GameSettings::UseControllerIndex == -1)
+   {
+      if(GameSettings::DetectedControllerList.size() == 0)
+         return false;
+
       GameSettings::UseControllerIndex = GameSettings::DetectedControllerList.begin()->first;
+   }
 
    return true;
 }
