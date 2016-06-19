@@ -251,7 +251,8 @@ void KeyDefMenuUserInterface::render()
       if(changingItem == i)
       {
          glColor(Colors::red);
-         drawCenteredString_fixed(xPos, y + offset + 1 + 13, 13, "Press Key or Button");
+         const S32 size = 13;
+         drawCenteredString_fixed(xPos, y + offset + 1 + size, size, "Press Key or Button");
       }
       else
       {
