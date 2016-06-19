@@ -218,8 +218,7 @@ void Joystick::shutdownJoystick()
 // This handles both the
 Joystick::ButtonInfo Joystick::getButtonInfo(S16 button)
 {
-   static const ButtonInfo DefaultButtonInfo =
-   { "", Colors::white, ButtonShapeRound, ButtonSymbolNone };
+   static const ButtonInfo DefaultButtonInfo = { "", Colors::white, ButtonShapeRound, ButtonSymbolNone };
 
    if(button >= ControllerButtonMax)
       return DefaultButtonInfo;
