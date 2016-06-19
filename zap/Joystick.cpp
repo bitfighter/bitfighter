@@ -127,6 +127,18 @@ bool Joystick::initJoystick(GameSettings *settings)
          const char *joystickName = SDL_JoystickNameForIndex(i);
 
          logprintf("  %d. [Joystick] (not compatible) \"%s\"", i + 1, joystickName);
+         logprintf("");
+         logprintf("");
+         logprintf("There are a couple of things you can do to fix this.  First, check the SDL database to see if your stick has been added.");
+         logprintf("Copy the contents of https://github.com/gabomdq/SDL_GameControllerDB/blob/master/gamecontrollerdb.txt into the copy of");
+         logprintf("gamecontrollerdb.txt that was shipped with Bitfighter(it should be in the install folder) and restart the game.  ");
+         logprintf("");
+         logprintf("If that doesn't help, you may need to create a new joystick definition for your controller. To do this, download the");
+         logprintf("SDL2 Gamepad Tool from http://www.generalarcade.com/gamepadtool, uncompress it, and run the  executable.  This tool will");
+         logprintf("help you create a definition string for your joystick.  Copy it to the clipboard, and add it to the");
+         logprintf("usergamecontrollerdb.txt file in the Bitfighter install folder, and restart the game.  If you know how to use GitHub,");
+         logprintf("you can also create a pull request to submit your definition to the https://github.com/gabomdq/SDL_GameControllerDB");
+         logprintf("project.");
 
          // TODO: Do some sort of auto-detection and string output of the
          // joystick hardware mappings and create a gamecontroller out of this
