@@ -916,7 +916,8 @@ Paths upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons)
       outputPolygons[i].resize(inputPolygons[i].size());
 
       for(S32 j = 0; j < inputPolygons[i].size(); j++)
-         outputPolygons[i][j] = IntPoint(S64(inputPolygons[i].get(j).x * CLIPPER_SCALE_FACT), S64(inputPolygons[i].get(j).y * CLIPPER_SCALE_FACT));
+         outputPolygons[i][j] = IntPoint(S64(inputPolygons[i].get(j).x * CLIPPER_SCALE_FACT), 
+                                         S64(inputPolygons[i].get(j).y * CLIPPER_SCALE_FACT));
    }
 
    return outputPolygons;
@@ -1297,7 +1298,7 @@ bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vecto
 
 
 // Use Clipper to merge inputPolygons, placing the result in outputPolygons
-// NOTE: this does NOT downscale the Clipper points.  You must do this afterwards
+// NOTE: this does NOT downscale the Clipper points.  You must do this afterwards.
 bool mergePolysToPolyTree(const Vector<Vector<Point> > &inputPolygons, PolyTree &solution)
 {
    Paths input = upscaleClipperPoints(inputPolygons);
