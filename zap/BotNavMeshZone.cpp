@@ -438,7 +438,8 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<Bot
 
    PolyTree solution;
 
-   // Check if this is some sort of degenerate empty level and act accordingly
+   // Check if this is some sort of degenerate empty level and manually inject a zone.  Using a square because it looks nice;
+   // A triangle would work too, and would be a tiny bit more efficient.
    if(barrierList.size() == 0 && turretList.size() == 0 && forceFieldProjectorList.size() == 0)
    {
       Vector<Vector<Point> > inputPolygons(1);
