@@ -438,11 +438,28 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<Bot
 
    PolyTree solution;
 
-   // Merge bot zone buffers from barriers, turrets, and forcefield projectors
-   // The Clipper library is the work horse here.  Its output is essential for the
-   // triangulation.  The output contains the upscaled Clipper points (you will need to downscale)
-   if(!mergeBotZoneBuffers(barrierList, turretList, forceFieldProjectorList, (F32)BufferRadius, solution))
-      return false;
+   // Check if this is some sort of degenerate empty level and act accordingly
+   if(barrierList.size() == 0 && turretList.size() == 0 && forceFieldProjectorList.size() == 0)
+   {
+      Vector<Vector<Point> > inputPolygons(1);
+      Vector<Point> points(4);
+      points.push_back(Point(0, 0));
+      points.push_back(Point(3, 0));
+      points.push_back(Point(3, 3));
+      points.push_back(Point(0, 3));
+      inputPolygons.push_back(points);
+
+      if(!mergePolysToPolyTree(inputPolygons, solution))
+         return false;
+   }
+   else
+   {
+      // Merge bot zone buffers from barriers, turrets, and forcefield projectors
+      // The Clipper library is the work horse here.  Its output is essential for the
+      // triangulation.  The output contains the upscaled Clipper points (you will need to downscale)
+      if(!mergeBotZoneBuffers(barrierList, turretList, forceFieldProjectorList, (F32)BufferRadius, solution))
+         return false;
+   }
 
 
 #ifdef LOG_TIMER
