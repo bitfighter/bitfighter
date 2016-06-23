@@ -293,7 +293,8 @@ static BotNavMeshZone *findZoneTouchingCircle(const GridDatabase *botZoneDatabas
 static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
                                 const Vector<DatabaseObject *> &turrets,
                                 const Vector<DatabaseObject *> &forceFieldProjectors, 
-                                F32 bufferRadius,   PolyTree &solution)
+                                F32 bufferRadius,   
+                                PolyTree &solution)
 {
 
    Vector<Vector<Point> > inputPolygons;
@@ -346,8 +347,8 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
    // StrictlySimple(true) flag.  I decided to leave it because it does seem to make
    // clipper's job a little easier and saves some processor time
    //
-   for(S32 i=0; i < inputPolygons.size(); i++)
-      for(S32 j=0; j < inputPolygons[i].size(); j++)
+   for(S32 i = 0; i < inputPolygons.size(); i++)
+      for(S32 j = 0; j < inputPolygons[i].size(); j++)
       {
          inputPolygons[i][j].x = (F32)floor(inputPolygons[i][j].x);
          inputPolygons[i][j].y = (F32)floor(inputPolygons[i][j].y);
