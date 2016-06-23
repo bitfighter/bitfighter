@@ -435,7 +435,7 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<Bot
       return false;
    }
 
-   Vector<F32> holes;
+
    PolyTree solution;
 
    // Merge bot zone buffers from barriers, turrets, and forcefield projectors
