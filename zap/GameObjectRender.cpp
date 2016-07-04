@@ -2517,9 +2517,9 @@ void GameObjectRender::renderVertex(char style, const Point &v, S32 number, S32 
    else if(style == SelectedVertex)
       mGL->glColor(Colors::EDITOR_SELECT_COLOR, alpha);
    else if(style == SnappingVertex)
-      mGL->glColor(Colors::magenta, alpha);
+      mGL->glColor(Colors::EDITOR_SNAP_VERTEX_COLOR, alpha);
    else     // SelectedItemVertex
-      mGL->glColor(Colors::red, alpha);
+      mGL->glColor(EDITOR_SELECTED_ITEM_VERTEX_COLOR, alpha);
 
    RenderUtils::drawSquare(v, (F32)size / scale, !hollow);
 
