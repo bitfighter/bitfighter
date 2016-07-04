@@ -2521,7 +2521,7 @@ void GameObjectRender::renderVertex(char style, const Point &v, S32 number, S32 
    else  if(style == SelectedItemVertex)
       mGL->glColor(Colors::EDITOR_SELECTED_ITEM_VERTEX_COLOR, alpha);
    else
-      TNLAssert(false, "Missing enum value!");
+      TNLAssert(false, "Unhandled enum value!");
 
    RenderUtils::drawSquare(v, (F32)size / scale, !hollow);
 
