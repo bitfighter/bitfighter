@@ -1226,7 +1226,6 @@ void RenderUtils::drawHollowSquare(const Point &pos, F32 radius, const Color &co
 void RenderUtils::drawFilledSquare(const Point &pos, F32 radius)
 {
    drawSquare(pos, radius, true);
-
 }
 
 
