@@ -147,9 +147,9 @@ void GeomObject::moveTo(const Point &pos, S32 snapVertex)          {  mGeometry.
 void GeomObject::offset(const Point &offset)                       {  mGeometry.getGeometry()->offset(offset);                    }
 
 // Geom in-out
-void GeomObject::packGeom(GhostConnection *connection, BitStream *stream)    {   mGeometry.getGeometry()->packGeom(connection, stream);     }
-void GeomObject::unpackGeom(GhostConnection *connection, BitStream *stream)  {   mGeometry.getGeometry()->unpackGeom(connection, stream); onGeomChanged();  }
-void GeomObject::setGeom(const Vector<Point> &points)                        {   mGeometry.getGeometry()->setGeom(points); }
+void GeomObject::packGeom(GhostConnection *connection, BitStream *stream)    {  mGeometry.getGeometry()->packGeom(connection, stream);                     }
+void GeomObject::unpackGeom(GhostConnection *connection, BitStream *stream)  {  mGeometry.getGeometry()->unpackGeom(connection, stream); onGeomChanged();  }
+void GeomObject::setGeom(const Vector<Point> &points)                        {  mGeometry.getGeometry()->setGeom(points);                                  }
 
 void GeomObject::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) 
 {  
