@@ -2525,12 +2525,12 @@ void GameObjectRender::renderVertex(char style, const Point &v, S32 number, S32 
 
    RenderUtils::drawSquare(v, (F32)size / scale, !hollow);
 
-   if(number != NO_NUMBER)     // Draw vertex numbers
-   {
-      mGL->glColor(Colors::white, alpha);
-      F32 fontsize = 6 / scale;
-      RenderUtils::drawStringf(v.x - RenderUtils::getStringWidthf(fontsize, "%d", number) / 2, v.y - 3 / scale, fontsize, "%d", number);
-   }
+   if(number == NO_NUMBER)     // Draw vertex numbers
+      return;
+
+   mGL->glColor(Colors::white, alpha);
+   F32 fontsize = 6 / scale;
+   RenderUtils::drawStringf(v.x - RenderUtils::getStringWidthf(fontsize, "%d", number) / 2, v.y - 3 / scale, fontsize, "%d", number);
 }
 
 
