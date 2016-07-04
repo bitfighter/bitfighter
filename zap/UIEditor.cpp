@@ -322,6 +322,7 @@ void EditorUserInterface::clearSnapEnvironment()
 {
    mSnapObject = NULL;
    mSnapVertexIndex = NONE;
+   mSnapToCentroid = false;
 }
 
 
@@ -1482,7 +1483,7 @@ Point EditorUserInterface::snapPoint(const Point &p, bool snapWhileOnDock) const
 }
 
 
-// we'll make a local copy of closest
+// Make a local, modifiable copy of closest
 Point EditorUserInterface::snapToObjects(const Point &mousePos, Point closest, F32 minDist) const
 {
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
@@ -1505,9 +1506,21 @@ Point EditorUserInterface::snapToObjects(const Point &mousePos, Point closest, F
             closest.set(obj->getVert(j));
          }
       }
+
+      // Snap to centroid of polygons
+      if(obj->getGeomType() == geomPolygon)
+      {
+         F32 dist = obj->getCentroid().distSquared(closest);
+         if(dist < minDist)
+         {
+            minDist = dist;
+            closest.set(obj->getCentroid());
+         }
+      }
+      
    }
 
-   // Search for a corner to snap to - by using wall edges, we'll also look for intersections between segments.  Sets closest.
+   // Search for a corner to snap to - by using wall edges, we'll also look for intersections between segments.  Sets closest and minDist.
    if(getSnapToWallCorners())
       closest = checkCornersForSnap(mousePos, mLevel->getWallEdgeDatabase()->findObjects_fast(), minDist, closest);
 
@@ -1546,7 +1559,7 @@ bool EditorUserInterface::getSnapToWallCorners() const
       (mSnapObject->getObjectTypeNumber() == PolyWallTypeNumber ||  // Allow PolyWall
        mSnapObject->getObjectTypeNumber() == WallItemTypeNumber ||  // Allow WallItem
        !isWallType(mSnapObject->getObjectTypeNumber()));            // Disallow other Wall-related parts (would
-   // these even ever appear as a snap object?)
+                                                                    // these even ever appear as a snap object?)
 }
 
 
@@ -1707,6 +1720,12 @@ void EditorUserInterface::renderDock() const
 }
 
 
+Point EditorUserInterface::getSnapVert() const
+{
+   return mSnapToCentroid ? mSnapObject->getCentroid() : mSnapObject->getVert(mSnapVertexIndex);
+}
+
+
 const S32 PANEL_TEXT_SIZE = 10;
 const S32 PANEL_SPACING = S32(PANEL_TEXT_SIZE * 1.3);
 
@@ -1726,13 +1745,7 @@ void EditorUserInterface::renderInfoPanel() const
 
    // Draw coordinates on panel -- if we're moving an item, show the coords of the snap vertex, otherwise show the coords of the
    // snapped mouse position
-   Point pos;
-
-   if(mSnapObject)
-      pos = mSnapObject->getVert(mSnapVertexIndex);
-   else
-      pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
-
+   Point pos = mSnapObject ? getSnapVert() : snapPoint(convertCanvasToLevelCoord(mMousePos));
 
    mGL->glColor(Colors::white);
    renderPanelInfoLine(1, "Cursor X,Y: %2.1f,%2.1f", pos.x, pos.y);
@@ -1997,13 +2010,14 @@ void EditorUserInterface::render() const
    }
 
    // Render our snap vertex as a hollow magenta box
-   if(mVertexEditMode &&                                                                        // Must be in vertex-edit mode
-      !mPreviewMode && mSnapObject && mSnapObject->isSelected() && mSnapVertexIndex != NONE &&  // ...but not in preview mode...
-      mSnapObject->getGeomType() != geomPoint &&                                                // ...and not on point objects...
-      !mSnapObject->isVertexLitUp(mSnapVertexIndex) &&                                          // ...or lit-up vertices...
-      !mSnapObject->vertSelected(mSnapVertexIndex))                                             // ...or selected vertices
+   if(mVertexEditMode &&                                             // Must be in vertex-edit mode
+      !mPreviewMode && mSnapObject && mSnapObject->isSelected() &&   // ...but not in preview mode...
+      mSnapObject->getGeomType() != geomPoint &&                     // ...and not on point objects...
+      (mSnapVertexIndex != NONE || mSnapToCentroid) &&               // ...and have a snap point...
+      !mSnapObject->isVertexLitUp(mSnapVertexIndex) &&               // ...or lit-up vertices...
+      !mSnapObject->vertSelected(mSnapVertexIndex))                  // ...or selected vertices
    {
-      GameObjectRender::renderVertex(SnappingVertex, mSnapObject->getVert(mSnapVertexIndex), NO_NUMBER, mCurrentScale/*, alpha*/);
+      GameObjectRender::renderVertex(SnappingVertex, getSnapVert(), NO_NUMBER, mCurrentScale/*, alpha*/);
    }
 
    if(mShowAllIds)
@@ -3031,7 +3045,7 @@ void EditorUserInterface::onMouseDragged()
 // onStartDragging
 void EditorUserInterface::onMouseDragged_startDragging()
 {
-   mMoveOrigin = mSnapObject->getVert(mSnapVertexIndex);
+   mMoveOrigin = getSnapVert();
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    mSelectedObjectsForDragging.clear();
@@ -3331,8 +3345,8 @@ void EditorUserInterface::doneChangingGeoms(const Vector<BfObject *> &bfObjects)
 }
 
 
-// Sets mSnapObject and mSnapVertexIndex based on the vertex closest to the cursor that is part of the selected set
-// What we really want is the closest vertex in the closest feature
+// Sets mSnapObject and mSnapVertexIndex based on the vertex closest to the cursor that is part of the selected set.
+// What we really want is the closest vertex in the closest feature, or the centroid, if that's closer.
 void EditorUserInterface::findSnapVertex()
 {
    F32 closestDist = F32_MAX;
@@ -3374,6 +3388,19 @@ void EditorUserInterface::findSnapVertex()
             closestDist = dist;
             mSnapObject = mHitItem;
             mSnapVertexIndex = j;
+            mSnapToCentroid = false;
+         }
+      }
+
+      // Check if we're closer to the centroid than any of the verteices; if so, we'll snap there to make
+      // centering large objects easier
+      if(mHitItem->getGeomType() == geomPolygon)
+      {
+         F32 dist = mHitItem->getCentroid().distSquared(mouseLevelCoord);
+         if(dist < closestDist)
+         {
+            closestDist = dist;
+            mSnapToCentroid = true;
          }
       }
 
@@ -3382,7 +3409,7 @@ void EditorUserInterface::findSnapVertex()
 
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
-   // Otherwise, we don't have a selected hitItem -- look for a selected vertex
+   // Otherwise, we don't have a selected hitItem -- look for a selected vertex (and find the closest if there are multiple)
    for(S32 i = 0; i < objList->size(); i++)
    {
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
@@ -3396,6 +3423,7 @@ void EditorUserInterface::findSnapVertex()
             closestDist = dist;
             mSnapObject = obj;
             mSnapVertexIndex = j;
+            mSnapToCentroid = false;
          }
       }
    }
@@ -4907,7 +4935,7 @@ void EditorUserInterface::onFinishedDragging_droppedItemOnDock()     // Delete t
 void EditorUserInterface::onFinishedDragging_movingObject()
 {
    // If our snap vertex has moved then all selected items have moved
-   bool itemsMoved = mDragCopying || (mSnapObject.isValid() && mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin);
+   bool itemsMoved = mDragCopying || (mSnapObject.isValid() && getSnapVert() != mMoveOrigin);
 
    if(itemsMoved)    // Move consumated... update any moved items, and save our autosave
    {

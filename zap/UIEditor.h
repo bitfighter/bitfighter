@@ -253,6 +253,7 @@ private:
    SafePtr<BfObject> mNewItem;
    SafePtr<BfObject> mSnapObject;
    SafePtr<BfObject> mHitItem;
+   bool mSnapToCentroid;
 
    SafePtr<BfObject> mDraggingDockItem;
    SafePtr<BfObject> mDockItemHit;
@@ -284,6 +285,8 @@ private:
    Point convertCanvasToLevelCoord(const Point &p) const;
    Point convertLevelToCanvasCoord(const Point &p, bool convert = true) const;
    Point snapToConstrainedLine(const Point &point) const;
+
+   Point getSnapVert() const;
 
 
    string getInfoMsg() const;

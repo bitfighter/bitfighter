@@ -45,7 +45,13 @@ void PolygonObject::renderEditor(F32 currentScale, bool snappingToWallCornersEna
       renderPolyHighlight();
 
    if(renderVertices)
+   {
       GameObjectRender::renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
+
+      // Draw a snap target vertex at the centroid
+      if(snappingToWallCornersEnabled && !isSelected())
+         GameObjectRender::renderSmallSolidVertex(currentScale, getCentroid(), true);
+   }
 #endif
 }
 
