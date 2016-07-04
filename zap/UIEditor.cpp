@@ -1451,7 +1451,7 @@ Point EditorUserInterface::snapPointToLevelGrid(Point const &p, F32 factor) cons
 Point EditorUserInterface::snapPoint(const Point &p, bool snapWhileOnDock) const
 {
    if(mouseOnDock() && !snapWhileOnDock)
-      return p;      // No snapping!
+      return p;            // No snapping!
 
    Point snapPoint(p);     // Make a working copy
 
