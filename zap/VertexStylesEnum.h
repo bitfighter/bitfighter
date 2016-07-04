@@ -15,7 +15,6 @@ enum VertexStyles
    HighlightedVertex,      // Highlighted vertex
    SelectedVertex,         // Vertex itself is selected
    SelectedItemVertex,     // Non-highlighted vertex of a selected item
-   UnselectedItemVertex,   // Non-highlighted vertex of a non-selected item
 };
 
 };
