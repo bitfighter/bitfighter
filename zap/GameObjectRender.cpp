@@ -2506,7 +2506,7 @@ void GameObjectRender::renderVertex(char style, const Point &v, S32 number, S32 
    bool hollow = style == HighlightedVertex || style == SelectedVertex || style == SelectedItemVertex || style == SnappingVertex;
 
    // Fill the box with a dark gray to make the number easier to read
-   if(hollow && number != -1)
+   if(hollow && number != NO_NUMBER)
    {
       mGL->glColor(Colors::gray25);
       RenderUtils::drawFilledSquare(v, size / scale);
