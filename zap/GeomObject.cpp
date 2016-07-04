@@ -118,21 +118,21 @@ bool GeomObject::addVert(const Point &point, bool ignoreMaxPointsLimit)
 
 
 // Vertex selection -- only needed in editor
-void GeomObject::selectVert(S32 vertIndex)         {   mGeometry.getGeometry()->selectVert(vertIndex);            }
-void GeomObject::aselectVert(S32 vertIndex)        {   mGeometry.getGeometry()->aselectVert(vertIndex);           }
-void GeomObject::unselectVert(S32 vertIndex)       {   mGeometry.getGeometry()->unselectVert(vertIndex);          }
-void GeomObject::unselectVerts()                   {   mGeometry.getGeometry()->unselectVerts();                  }
+void GeomObject::selectVert(S32 vertIndex)         {  mGeometry.getGeometry()->selectVert(vertIndex);           }
+void GeomObject::aselectVert(S32 vertIndex)        {  mGeometry.getGeometry()->aselectVert(vertIndex);          }
+void GeomObject::unselectVert(S32 vertIndex)       {  mGeometry.getGeometry()->unselectVert(vertIndex);         }
+void GeomObject::unselectVerts()                   {  mGeometry.getGeometry()->unselectVerts();                 }
      
-bool GeomObject::vertSelected(S32 vertIndex) const {   return mGeometry.getGeometry()->vertSelected(vertIndex);   }
+bool GeomObject::vertSelected(S32 vertIndex) const {  return mGeometry.getGeometry()->vertSelected(vertIndex);  }
 
 // Geometric calculations
-Point GeomObject::getCentroid()   const {   return mGeometry.getGeometry()->getCentroid();     }
-F32   GeomObject::getLabelAngle() const {   return mGeometry.getGeometry()->getLabelAngle();   }
+Point GeomObject::getCentroid()   const {  return mGeometry.getGeometry()->getCentroid();    }
+F32   GeomObject::getLabelAngle() const {  return mGeometry.getGeometry()->getLabelAngle();  }
       
 
 // Geometry operations
-const Vector<Point> *GeomObject::getOutline() const       {   return mGeometry.getOutline();    }
-const Vector<Point> *GeomObject::getFill() const          {   return mGeometry.getFill();       }
+const Vector<Point> *GeomObject::getOutline() const       {  return mGeometry.getOutline();  }
+const Vector<Point> *GeomObject::getFill() const          {  return mGeometry.getFill();     }
 
 void GeomObject::reverseWinding() { mGeometry.reverseWinding(); }
 
@@ -177,16 +177,16 @@ bool GeomObject::hasGeometry() const
 }
 
 
-string GeomObject::geomToLevelCode() const {  return mGeometry.geomToLevelCode();     }
+string GeomObject::geomToLevelCode() const {  return mGeometry.geomToLevelCode();             }
 Rect GeomObject::calcExtents() const       {  return mGeometry.getGeometry()->calcExtents();  }
 
 
 // Settings
-void GeomObject::disableTriangulation() {   mGeometry.getGeometry()->disableTriangulation();   }
+void GeomObject::disableTriangulation() {  mGeometry.getGeometry()->disableTriangulation();  }
 
 
-Point GeomObject::getPos()       const { return getVert(0); }
-Point GeomObject::getRenderPos() const { return getPos();   }
+Point GeomObject::getPos()       const {  return getVert(0); }
+Point GeomObject::getRenderPos() const {  return getPos();   }
 
 
 void GeomObject::setPos(const Point &pos)
