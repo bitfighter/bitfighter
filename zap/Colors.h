@@ -78,9 +78,9 @@ namespace Colors
 
    // Chat colors
    const Color globalChatColor(0.9, 0.9, 0.9);
-   const Color teamChatColor(Colors::green);
-   const Color cmdChatColor(Colors::red);
-   const Color privateF5MessageDisplayedInGameColor(Colors::blue);
+   const Color teamChatColor(green);
+   const Color cmdChatColor(red);
+   const Color privateF5MessageDisplayedInGameColor(blue);
 
 
    // Specialties
@@ -88,13 +88,13 @@ namespace Colors
    const Color silver(.90f, .91f, .98f);
    const Color bronze(.55f, .47f, .33f);
 
-   const Color wallFillColor(Colors::paleBlue);
+   const Color wallFillColor(paleBlue);
 
    // Editor colors
-   const Color EDITOR_HIGHLIGHT_COLOR(Colors::white);
-   const Color EDITOR_SELECT_COLOR(Colors::yellow);
-   const Color EDITOR_PLAIN_COLOR(Colors::gray75);
-   const Color EDITOR_SHADOW_WALL_COLOR(Colors::gray10);
+   const Color EDITOR_HIGHLIGHT_COLOR(white);
+   const Color EDITOR_SELECT_COLOR(yellow);
+   const Color EDITOR_PLAIN_COLOR(gray75);
+   const Color EDITOR_SHADOW_WALL_COLOR(gray10);
    const Color EDITOR_SNAP_VERTEX_COLOR(magenta);
    const Color EDITOR_SELECTED_ITEM_VERTEX_COLOR(red);
 
@@ -104,14 +104,14 @@ namespace Colors
    const Color NexusOpenColor(0, 0.7, 0);
    const Color NexusClosedColor(0.85, 0.3, 0);
    const Color DefaultWallFillColor(0, 0, 0.15);
-   const Color DefaultWallOutlineColor(Colors::blue);
-   const Color ErrorMessageTextColor(Colors::paleRed);
-   const Color NeutralTeamColor(Colors::gray80);         // Objects that are neutral (on team -1)
-   const Color HostileTeamColor(Colors::gray50);         // Objects that are "hostile-to-all" (on team -2)
-   const Color MasterServerBlue(0.8, 0.8, 1);            // Messages about successful master server statii
-   const Color HelpItemRenderColor(Colors::green);       // Render color for inline-help messages
-   const Color DisabledGray(Colors::gray40);             // Color for disabled commands and menu options
-   const Color AnnounceColor(Colors::cyan);              // Color for announcements
+   const Color DefaultWallOutlineColor(blue);
+   const Color ErrorMessageTextColor(paleRed);
+   const Color NeutralTeamColor(gray80);         // Objects that are neutral (on team -1)
+   const Color HostileTeamColor(gray50);         // Objects that are "hostile-to-all" (on team -2)
+   const Color MasterServerBlue(0.8, 0.8, 1);    // Messages about successful master server statii
+   const Color HelpItemRenderColor(green);       // Render color for inline-help messages
+   const Color DisabledGray(gray40);             // Color for disabled commands and menu options
+   const Color AnnounceColor(cyan);              // Color for announcements
 };
 
 }
