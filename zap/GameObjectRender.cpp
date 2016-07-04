@@ -2519,7 +2519,7 @@ void GameObjectRender::renderVertex(char style, const Point &v, S32 number, S32 
    else if(style == SnappingVertex)
       mGL->glColor(Colors::EDITOR_SNAP_VERTEX_COLOR, alpha);
    else  if(style == SelectedItemVertex)
-      mGL->glColor(EDITOR_SELECTED_ITEM_VERTEX_COLOR, alpha);
+      mGL->glColor(Colors::EDITOR_SELECTED_ITEM_VERTEX_COLOR, alpha);
    else
       TNLAssert(false, "Missing enum value!");
 
