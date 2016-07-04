@@ -13,7 +13,7 @@
 #include "TeamConstants.h"
 
 #ifndef ZAP_DEDICATED
-#  include "ClientGame.h"
+#  include "ClientGame.h"     // Needed, despite Resharper's prostestations
 #  include "RenderUtils.h"    // For drawHollowSquare
 #endif
 
