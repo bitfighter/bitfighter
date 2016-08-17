@@ -663,18 +663,18 @@ namespace Zap
 
       else if(stricmp(argv[0], "LevelDatabaseId") == 0)
       {
-         U32 id = 0;
+         U32 dbid = 0;
 
          if(argc >= 2)
-            id = atoi(argv[1]);
+            dbid = atoi(argv[1]);
 
-         if(id == 0)
+         if(dbid == 0)
          {
             errorMsg = "Invalid LevelDatabaseId specified";
             return false;
          }
 
-         mDatabaseId = id;
+         mDatabaseId = dbid;
 
          return true;
       }
