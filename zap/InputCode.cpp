@@ -311,6 +311,7 @@ static Vector<InputCode> modifiers;
 // Constructor
 InputCodeManager::InputCodeManager()
 {
+   modifiers.clear();
    mBindingsHaveKeypadEntry = false;
    mInputMode = InputModeKeyboard;
 
