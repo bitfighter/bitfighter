@@ -64,7 +64,7 @@ namespace Zap
    }
 
 
-   Level *Level::clone()
+   Level *Level::clone() const
    {
       Level *newLevel = new Level;
 
