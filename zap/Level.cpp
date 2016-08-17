@@ -12,7 +12,6 @@
 #include "LevelDatabase.h"
 #include "LevelLoadException.h"
 #include "robot.h"
-#include "Spawn.h"
 #include "WallItem.h"
 #include "PolyWall.h"
 #include "barrier.h"
