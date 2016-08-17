@@ -248,7 +248,7 @@ namespace Zap
 
 
    // Snaps all engineered items in database
-   void Level::snapAllEngineeredItems(bool onlyUnsnapped)
+   void Level::snapAllEngineeredItems(bool onlyUnsnapped) const
    {
       Vector<Zap::DatabaseObject *> fillVector;
 
@@ -474,7 +474,7 @@ namespace Zap
 
 
    // Zero teams will crash, returns true if we had to add a team.  Server only.
-   bool Level::makeSureTeamCountIsNotZero()
+   bool Level::makeSureTeamCountIsNotZero() const
    {
       if(getTeamCount() == 0)
       {
@@ -500,13 +500,13 @@ namespace Zap
    }
 
 
-   void Level::setTeamColor(S32 index, const Color &color)
+   void Level::setTeamColor(S32 index, const Color &color) const
    {
       mTeamManager->setTeamColor(index, color);
    }
 
 
-   void Level::setTeamName(S32 index, const string &name)
+   void Level::setTeamName(S32 index, const string &name) const
    {
       mTeamManager->setTeamName(index, name.c_str());
    }
@@ -518,19 +518,19 @@ namespace Zap
    }
 
 
-   void Level::removeTeam(S32 teamIndex)
+   void Level::removeTeam(S32 teamIndex) const
    {
       mTeamManager->removeTeam(teamIndex);
    }
 
 
-   void Level::addTeam(AbstractTeam *team)
+   void Level::addTeam(AbstractTeam *team) const
    {
       mTeamManager->addTeam(team);
    }
 
 
-   void Level::addTeam(AbstractTeam *team, S32 index)
+   void Level::addTeam(AbstractTeam *team, S32 index) const
    {
       //TNLAssert(mGame, "Expected to have been added to a game by now!");
       mTeamManager->addTeam(team, index);
@@ -543,7 +543,7 @@ namespace Zap
    }
 
 
-   void Level::setTeamHasFlag(S32 teamIndex, bool hasFlag)
+   void Level::setTeamHasFlag(S32 teamIndex, bool hasFlag) const
    {
       mTeamManager->setTeamHasFlag(teamIndex, hasFlag);
    }
@@ -556,13 +556,13 @@ namespace Zap
 
 
    // Perhaps unused
-   void Level::replaceTeam(AbstractTeam *team, S32 index)
+   void Level::replaceTeam(AbstractTeam *team, S32 index) const
    {
       mTeamManager->replaceTeam(team, index);
    }
 
 
-   void Level::clearTeams()
+   void Level::clearTeams() const
    {
       return mTeamManager->clearTeams();
    }
@@ -575,7 +575,7 @@ namespace Zap
    }
 
 
-   boost::shared_ptr<TeamManager> Level::getTeamManager()
+   boost::shared_ptr<TeamManager> Level::getTeamManager() const
    {
       return mTeamManager;
    }

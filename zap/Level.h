@@ -88,7 +88,7 @@ public:
    LevelInfo &getLevelInfo();
 
    void buildWallEdgeGeometry(Vector<Point> &wallEdgePoints);
-   void snapAllEngineeredItems(bool onlyUnsnapped);
+   void snapAllEngineeredItems(bool onlyUnsnapped) const;
 
    string toLevelCode() const;
 
@@ -132,34 +132,34 @@ public:
 
 
    // Team methods
-   boost::shared_ptr<TeamManager> getTeamManager();
+   boost::shared_ptr<TeamManager> getTeamManager() const;
    void setTeamManager(boost::shared_ptr<TeamManager> teamManager);
 
    S32 getTeamCount() const;
 
    StringTableEntry getTeamName(S32 index) const;
-   void setTeamName(S32 index, const string &name);
+   void setTeamName(S32 index, const string &name) const;
 
    const Color &getTeamColor(S32 index) const;
-   void setTeamColor(S32 index, const Color &color);
+   void setTeamColor(S32 index, const Color &color) const;
 
-   void removeTeam(S32 teamIndex); 
+   void removeTeam(S32 teamIndex) const; 
 
-   void addTeam(AbstractTeam *team);
-   void addTeam(AbstractTeam *team, S32 index);
+   void addTeam(AbstractTeam *team) const;
+   void addTeam(AbstractTeam *team, S32 index) const;
 
    AbstractTeam *getTeam(S32 teamIndex) const;
-   void setTeamHasFlag(S32 teamIndex, bool hasFlag);
+   void setTeamHasFlag(S32 teamIndex, bool hasFlag) const;
    bool getTeamHasFlag(S32 teamIndex) const;
 
-   void replaceTeam(AbstractTeam *team, S32 index);
-   void clearTeams();             
+   void replaceTeam(AbstractTeam *team, S32 index) const;
+   void clearTeams() const;             
    string getTeamLevelCode(S32 index) const;
 
    void clearAllObjects();
 
 
-   bool makeSureTeamCountIsNotZero();        // Because zero teams can cause crashiness
+   bool makeSureTeamCountIsNotZero() const;        // Because zero teams can cause crashiness
 
 
    S32 getBotCount() const;
