@@ -155,19 +155,53 @@ namespace Zap
    }
 
 
+   // Load level stored in filename into database; returns true if file exists, false if not.  In either case,
+   // the Level object will be left in a usable state.
+   bool Level::loadLevelFromFile(const string &filename)
+   {
+      string contents;
+      bool fileExists = readFile(filename, contents);
+
+      ifstream fileStream(filename.c_str(), ios_base::in | ios_base::binary);
+      if(fileStream.fail())
+         return false;
+
+      loadLevelFromStream(fileStream, filename);
+
+#ifdef SAM_ONLY
+      // In case the level crash the game trying to load, want to know which file is the problem. 
+      logprintf("Loading %s", filename.c_str());
+#endif
+
+      return fileExists;
+   }
+
+
    // This is the core loader for levels in-game and in-editor.  This will always return a valid level, even
    // if contents is empty or somehow invalid.
    void Level::loadLevelFromString(const string &contents, const string &filename)
    {
-      istringstream iss(contents);
+      istringstream stringStream(contents);
+      loadLevelFromStream(stringStream, filename);
+   }
+
+
+   void Level::loadLevelFromStream(istream &stream, const string &streamSource)
+   {
       string line;
 
       Md5::IncrementalHasher md5;
+      bool first = true;
 
-      while(std::getline(iss, line))
+      while(std::getline(stream, line))
       {
-         parseLevelLine(line, filename);
+         if(first)
+            trimBOM(line);
+
+         parseLevelLine(line, streamSource);
          md5.add(line);
+
+         first = false;
       }
 
       mLevelHash = md5.getHash();
@@ -230,24 +264,6 @@ namespace Zap
 
          engrObj->mountToWall(engrObj->getPos(), this, getWallEdgeDatabase());
       }
-   }
-
-
-   // Load level stored in filename into database; returns true if file exists, false if not.  In either case,
-   // the Level object will be left in a usable state.
-   bool Level::loadLevelFromFile(const string &filename)
-   {
-      string contents;
-      bool fileExists = readFile(filename, contents);
-
-      loadLevelFromString(contents, filename);
-
-#ifdef SAM_ONLY
-      // In case the level crash the game trying to load, want to know which file is the problem. 
-      logprintf("Loading %s", filename.c_str());
-#endif
-
-      return fileExists;
    }
 
 

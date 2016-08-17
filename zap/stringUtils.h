@@ -126,6 +126,8 @@ string trim_right(const string &source, const string &t = DEFAULT_TRIM_CHARS);
 string trim_left(const string &source, const string &t = DEFAULT_TRIM_CHARS);
 string trim(const string &source, const string &t = DEFAULT_TRIM_CHARS);
 
+void trimBOM(string &line);
+
 void trim_right_in_place(string &source, const string &t = DEFAULT_TRIM_CHARS);
 void trim_left_in_place(string &source, const string &t = DEFAULT_TRIM_CHARS);
 void trim_in_place(string &source, const string &t = DEFAULT_TRIM_CHARS);

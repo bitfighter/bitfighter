@@ -26,7 +26,7 @@ class LevelLoaderTest : public testing::Test
 };
 
 
-TEST(LevelLoaderTest, longLine)
+TEST(LevelLoaderTest, LongLine)
 {
    U32 TEST_POINTS = 0xFFF;      //0xFFFF takes a wicked long time to run
 
@@ -48,6 +48,14 @@ TEST(LevelLoaderTest, longLine)
    const Vector<DatabaseObject *> *walls = level.findObjects_fast(WallItemTypeNumber);
    ASSERT_EQ(1, walls->size());
    EXPECT_EQ(TEST_POINTS, walls->get(0)->getVertCount());
+}
+
+
+TEST(LevelLoaderTest, InvalidFile)
+{
+   Level level;
+   bool result = level.loadLevelFromFile("file_that_does_not_exist_1967215_62957358_dd25a399-e099-427d-9b8f-12411a58ea27.level");
+   EXPECT_FALSE(result);
 }
 
 

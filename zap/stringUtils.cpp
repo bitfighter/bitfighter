@@ -836,6 +836,14 @@ string trim(const string &source, const string &t)
 }
 
 
+// Remove the UTF-8 BOM if it exists
+// These are the first three bytes:  EF BB BF
+void trimBOM(string &line)
+{
+   trim_left_in_place(line, "\357\273\277");
+}
+
+
 // These string methods operate on the given string in-place
 void trim_left_in_place(string &source, const string &t)
 {
@@ -1004,8 +1012,7 @@ bool readFilePhysFs(const string &path, string &contents)
       file.read(&contents[0], contents.size());
 
       // Remove the UTF-8 BOM if it exists
-      // These are the first three bytes:  EF BB BF
-      trim_left_in_place(contents, "\357\273\277");
+      trimBOM(contents);
 
       return true;
    }
