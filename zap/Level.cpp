@@ -187,9 +187,16 @@ namespace Zap
 
    void Level::loadLevelFromStream(istream &stream, const string &streamSource)
    {
+      mLevelHash = Md5::getHashFromStream(stream);
+
+      // If level is unknown...
+
+      // Reset stream to beginning
+      stream.clear();
+      stream.seekg(0, ios::beg);
+
       string line;
 
-      Md5::IncrementalHasher md5;
       bool first = true;
 
       while(std::getline(stream, line))
@@ -198,12 +205,9 @@ namespace Zap
             trimBOM(line);
 
          parseLevelLine(line, streamSource);
-         md5.add(line);
 
          first = false;
       }
-
-      mLevelHash = md5.getHash();
 
       // Build wall edge geometry
       Vector<Point> wallEdgePoints;  // <== not used
