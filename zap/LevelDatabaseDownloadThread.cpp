@@ -144,34 +144,37 @@ void LevelDatabaseDownloadThread::finish()
       return;
 
    if(errorNumber == 2)
-      mGame->displayErrorMessage("!!! Downloaded level without levelgen");
-
-   if(errorNumber != 0)
-      mGame->displayErrorMessage("%s", url);
-   else
    {
-      mGame->displaySuccessMessage("Saved to %s", levelFileName.c_str());
-      if(levelGenFileName.length() != 0)
-         mGame->displaySuccessMessage("Saved to %s", levelGenFileName.c_str());
-
-      ServerGame *serverGame = mGame->getServerGame();
-
-      if(serverGame)
-      {
-         LevelInfo levelInfo;
-         levelInfo.filename = levelFileName;
-         levelInfo.folder = levelDir;
-
-         string filePath = joindir(levelDir, levelFileName);
-         if(serverGame->populateLevelInfoFromSource(filePath, levelInfo))
-         {
-            serverGame->addLevel(levelInfo);
-            serverGame->sendLevelListToLevelChangers(string("Level ") + levelInfo.mLevelName.getString() + " added to server");
-         }
-      }
+      mGame->displayErrorMessage("!!! Downloaded level without levelgen");
+      return;
    }
 
+   if(errorNumber != 0)
+   {
+      mGame->displayErrorMessage("%s", url);
+      return;
+   }
+
+
+   mGame->displaySuccessMessage("Saved to %s", levelFileName.c_str());
+
+   if(levelGenFileName.length() != 0)
+      mGame->displaySuccessMessage("Saved to %s", levelGenFileName.c_str());
+
+   ServerGame *serverGame = mGame->getServerGame();
+
+   if(serverGame)
+   {
+      string filePath = joindir(levelDir, levelFileName);
+
+      LevelInfo levelInfo;
+      levelInfo.filename = levelFileName;
+      levelInfo.folder = levelDir;
+
+      serverGame->addDownloadedLevel(filePath, levelInfo);
+   }
 }
+
 
 }
 

@@ -345,9 +345,14 @@ void ServerGame::setShuttingDown(bool shuttingDown, U16 time, GameConnection *wh
 }
 
 
-bool ServerGame::populateLevelInfoFromSource(const string &fullFilename, LevelInfo &levelInfo) const
+// Called from LevelDatabaseDownloadThread
+void ServerGame::addDownloadedLevel(const string &fullFilename, LevelInfo &levelInfo)
 {
-   return mLevelSource->populateLevelInfoFromSource(fullFilename, levelInfo);
+   if(!mLevelSource->populateLevelInfoFromSource(fullFilename, levelInfo))
+      return;
+
+   addLevel(levelInfo);
+   sendLevelListToLevelChangers(string("Level ") + levelInfo.mLevelName.getString() + " added to server");
 }
 
 
