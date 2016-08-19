@@ -39,6 +39,9 @@ string getSaltedHashFromString(const string &text);
 // Creates an MD5 hash from the specified file and returns it as string
 string getHashFromFile(const string &filename);
 
+string getHashFromStream(std::istream &stream);
+
+
 }
 
 #endif

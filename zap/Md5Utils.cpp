@@ -72,6 +72,27 @@ string getSaltedHashFromString(const string &text)
 }
 
 
+string getHashFromStream(std::istream &stream)
+{
+   string line;
+
+   IncrementalHasher md5;
+   bool first = true;
+
+   while(std::getline(stream, line))
+   {
+      if(first)
+         Zap::trimBOM(line);     // In stringUtils
+
+      md5.add(line);
+
+      first = false;
+   }
+
+   return md5.getHash();
+}
+
+
 // Creates a MD5 hash from a file specified in "filename" and returns it as string 
 // (based on Ronald L. Rivest's code from RFC1321 "The MD5 Message-Digest Algorithm") 
 string getHashFromFile(const string &filename)	
