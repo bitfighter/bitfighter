@@ -608,7 +608,7 @@ DbQuery::DbQuery(const char *db, const char *server, const char *user, const cha
    mSqliteDb = NULL;
    mIsValid = true;
 
-   TNLAssert(db && db[0] != 0, "must have a database");
+   TNLAssert(db && db[0] != 0, "Must have a database!");
 
 #ifdef BF_WRITE_TO_MYSQL
 
