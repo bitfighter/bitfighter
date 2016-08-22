@@ -184,7 +184,7 @@ namespace Zap
 
    void Level::loadLevelFromStream(istream &stream, const string &streamSource)
    {
-      // Reset stream to beginning
+      // Reset stream to beginning, get a clean start
       stream.clear();
       stream.seekg(0, ios::beg);
 
