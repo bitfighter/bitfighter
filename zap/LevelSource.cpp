@@ -16,6 +16,7 @@
 
 #include <fstream>
 #include <sstream>
+#include "Md5Utils.h"
 
 namespace Zap
 {
@@ -426,16 +427,32 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
    if(fullFilename.empty())
       return false;
 
-   FILE *f = fopen(fullFilename.c_str(), "rb");
-   if(!f)
+   //FILE *f = fopen(fullFilename.c_str(), "rb");
+   //if(!f)
+   //{
+   //   logprintf(LogConsumer::LogWarning, "Could not read level file %s [%s]... Skipping...",
+   //      levelInfo.filename.c_str(), fullFilename.c_str());
+   //   return false;
+   //}
+
+   ifstream fileStream(fullFilename.c_str(), ios_base::in | ios_base::binary);
+   if(fileStream.fail())
    {
       logprintf(LogConsumer::LogWarning, "Could not read level file %s [%s]... Skipping...",
          levelInfo.filename.c_str(), fullFilename.c_str());
       return false;
    }
 
+
+   // Compute hash
+   string hash = Md5::getHashFromStream(fileStream);
+
+   // Is hash known?
+
+   // If not, load the level
    Level level;
-   level.loadLevelFromFile(fullFilename);
+   level.loadLevelFromStream(fileStream, fullFilename);
+
 
    // some ideas for getting the area of a level:
    //   if(loadLevel())
@@ -522,14 +539,11 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
    //
 
 
+   // Reset stream to beginning
+   fileStream.clear();
+   fileStream.seekg(0, ios::beg);
 
-
-
-   char data[1024 * 4];  // Should be enough to fit all parameters at the beginning of level; we don't need to read everything
-   S32 size = (S32)fread(data, 1, sizeof(data), f);
-   fclose(f);
-
-   getLevelInfoFromCodeChunk(string(data, size), levelInfo);     // Fills levelInfo with data from file
+   getLevelInfoFromCodeChunk(fileStream, levelInfo);     // Fills levelInfo with data from file
 
 
    levelInfo.ensureLevelInfoHasValidName();

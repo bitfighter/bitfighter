@@ -184,10 +184,6 @@ namespace Zap
 
    void Level::loadLevelFromStream(istream &stream, const string &streamSource)
    {
-      mLevelHash = Md5::getHashFromStream(stream);
-
-      // If level is unknown...
-
       // Reset stream to beginning
       stream.clear();
       stream.seekg(0, ios::beg);
