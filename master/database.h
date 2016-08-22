@@ -75,7 +75,7 @@ public:
    DbQuery(const char *db, const char *server = NULL, const char *user = NULL, const char *password = NULL);     // Constructor
    ~DbQuery();                      // Destructor
 
-   U64 runQuery(const string &sql) const;
+   U64 runInsertQuery(const string &sql) const;
 };
 
 

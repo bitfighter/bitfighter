@@ -104,7 +104,7 @@ static void insertStatsLoadout(const DbQuery &query, U64 playerId, const Vector<
          string sql = "INSERT INTO stats_player_loadout(stats_player_id, loadout) "
                        "VALUES(" + itos(playerId) + ", " + itos(loadoutStats[i].loadoutHash) + ");";
 
-         query.runQuery(sql);
+         query.runInsertQuery(sql);
    }
 }
 
@@ -119,7 +119,7 @@ static void insertStatsShots(const DbQuery &query, U64 playerId, const Vector<We
                        "VALUES(" + itos(playerId) + ", '" + WeaponInfo::getWeaponName(weaponStats[i].weaponType) + "', " + 
                                   itos(weaponStats[i].shots) + ", " + itos(weaponStats[i].hits) + ");";
          
-         query.runQuery(sql);
+         query.runInsertQuery(sql);
       }
    }
 }
@@ -154,7 +154,7 @@ static U64 insertStatsPlayer(const DbQuery &query, const PlayerStats *playerStat
                                  itos(playerStats->distTraveled)        + 
                          ")";
 
-   U64 playerId = query.runQuery(sql);
+   U64 playerId = query.runInsertQuery(sql);
 
    insertStatsShots(query, playerId, playerStats->weaponStats);
    insertStatsLoadout(query, playerId, playerStats->loadoutStats);
@@ -170,7 +170,7 @@ static U64 insertStatsTeam(const DbQuery &query, const TeamStats *teamStats, U64
                 "VALUES(" + itos(gameId) + ", '" + sanitizeForSql(teamStats->name) + "', " + itos(teamStats->score) + " ,'" + 
                 ctos(teamStats->gameResult) + "' ,'" + teamStats->hexColor + "');";
 
-   U64 teamId = query.runQuery(sql);
+   U64 teamId = query.runInsertQuery(sql);
 
    for(S32 i = 0; i < teamStats->playerStats.size(); i++)
       insertStatsPlayer(query, &teamStats->playerStats[i], gameId, itos(teamId));
@@ -188,7 +188,7 @@ static U64 insertStatsGame(const DbQuery &query, const GameStats *gameStats, U64
                              sanitizeForSql(gameStats->levelName) + "', " + btos(gameStats->isTeamGame) + ", " + 
                              itos(gameStats->teamStats.size())  + ");";
 
-   U64 gameId = query.runQuery(sql);
+   U64 gameId = query.runInsertQuery(sql);
 
    for(S32 i = 0; i < gameStats->teamStats.size(); i++)
       insertStatsTeam(query, &gameStats->teamStats[i], gameId);
@@ -203,11 +203,11 @@ static U64 insertStatsServer(const DbQuery &query, const string &serverName, con
                 "VALUES('" + sanitizeForSql(serverName) + "', '" + serverIP + "');";
 
    if(query.mQuery)
-     return query.runQuery(sql);
+     return query.runInsertQuery(sql);
 
    if(query.mSqliteDb)
    {
-      query.runQuery(sql);
+      query.runInsertQuery(sql);
       return sqlite3_last_insert_rowid(query.mSqliteDb);
    }
 
@@ -311,7 +311,7 @@ void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry 
                       "VALUES( '" + sanitizeForSql(playerNick.getString()) + "', "
                               "'" + itos(achievementId) + "', " + itos(serverId) + ");";
 
-         query.runQuery(sql);
+         query.runInsertQuery(sql);
       }
    }
    catch(const Exception &ex) 
@@ -352,7 +352,7 @@ void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName
                       "'" + sanitizeForSql(creator)   + "', '" + sanitizeForSql(gameType)          + "', " +
                       "'" + btos(hasLevelGen)   + "', '" + itos(teamCount)             + "', " + 
                       "'" + itos(winningScore)  + "', '" + itos(gameDurationInSeconds) + "');";
-         query.runQuery(sql);
+         query.runInsertQuery(sql);
       }
    }
    catch(const Exception &ex) 
@@ -583,7 +583,7 @@ void DatabaseWriter::createStatsDatabase()
 
    sqlite3_open(mDb, &sqliteDb);
 
-   query.runQuery(getSqliteSchema());
+   query.runInsertQuery(getSqliteSchema());
 
    if(sqliteDb)
       sqlite3_close(sqliteDb);
@@ -649,8 +649,8 @@ DbQuery::~DbQuery()
 }
 
 
-// Run the passed query on the appropriate database -- throws exceptions!
-U64 DbQuery::runQuery(const string &sql) const
+// Run the passed query on the appropriate database, returns id of inserted record -- throws exceptions!
+U64 DbQuery::runInsertQuery(const string &sql) const
 {
    if(!mIsValid)
       return U64_MAX;
