@@ -151,13 +151,13 @@ void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &level
    string line;
 
    // Read until all these are true
-   bool foundGameType = false, foundLevelName = false, foundMinPlayers = false,
-      foundMaxPlayers = false, foundScriptName = false;
+   bool foundGameType   = false, foundLevelName  = false, foundMinPlayers = false,
+        foundMaxPlayers = false, foundScriptName = false;
 
-   static const S32 gameTypeLen = strlen("GameType");
-   static const S32 levelNameLen = strlen("LevelName");
+   static const S32 gameTypeLen      = strlen("GameType");
+   static const S32 levelNameLen     = strlen("LevelName");
    static const S32 minMaxPlayersLen = strlen("MinPlayers");
-   static const S32 scriptLen = strlen("Script");
+   static const S32 scriptLen        = strlen("Script");
 
    std::size_t pos;
 
