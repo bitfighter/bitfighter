@@ -8,13 +8,12 @@
 
 #ifndef BF_NO_STATS
 
-#include "../zap/gameWeapons.h"     // For WeaponType enum
 #include "../zap/gameStats.h"
 #include "../zap/SharedConstants.h"
 
 #include "tnlTypes.h"
 #include "tnlVector.h"
-#include "tnlNonce.h"
+
 #include <sqlite3.h>
 #include <string>
 
