@@ -158,9 +158,6 @@ namespace Zap
    // the Level object will be left in a usable state.
    bool Level::loadLevelFromFile(const string &filename)
    {
-      string contents;
-      bool fileExists = readFile(filename, contents);
-
       ifstream fileStream(filename.c_str(), ios_base::in | ios_base::binary);
       if(fileStream.fail())
          return false;
