@@ -162,7 +162,7 @@ namespace Zap
       if(fileStream.fail())
          return false;
 
-      loadLevelFromStream(fileStream, filename);
+      loadLevelFromStream(fileStream, filename, Md5::getHashFromStream(fileStream));
 
 #ifdef SAM_ONLY
       // In case the level crash the game trying to load, want to know which file is the problem. 
@@ -178,11 +178,11 @@ namespace Zap
    void Level::loadLevelFromString(const string &contents, const string &filename)
    {
       istringstream stringStream(contents);
-      loadLevelFromStream(stringStream, filename);
+      loadLevelFromStream(stringStream, filename, Md5::getHashFromStream(stringStream));
    }
 
 
-   void Level::loadLevelFromStream(istream &stream, const string &streamSource)
+   void Level::loadLevelFromStream(istream &stream, const string &streamSource, const string &hash)
    {
       // Reset stream to beginning, get a clean start
       stream.clear();
@@ -210,6 +210,8 @@ namespace Zap
       snapAllEngineeredItems(false);
 
       validateLevel();
+
+      mLevelHash = hash;
    }
 
 

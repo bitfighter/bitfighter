@@ -451,8 +451,7 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
 
    // If not, load the level
    Level level;
-   level.loadLevelFromStream(fileStream, fullFilename);
-
+   level.loadLevelFromStream(fileStream, fullFilename, hash);
 
    // some ideas for getting the area of a level:
    //   if(loadLevel())

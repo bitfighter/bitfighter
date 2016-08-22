@@ -81,7 +81,7 @@ public:
    void onAddedToGame(Game *game);
 
    void loadLevelFromString(const string &contents, const string &filename = "");
-   void loadLevelFromStream(istream &stream, const string &streamSource);
+   void loadLevelFromStream(istream &stream, const string &streamSource, const string &hash);
    bool loadLevelFromFile(const string &filename);
    void validateLevel();
 
