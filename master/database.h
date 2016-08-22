@@ -66,10 +66,10 @@ class DbQuery
 #endif
 
 public:
-   Query *query;
-   sqlite3 *sqliteDb;
+   Query *mQuery;
+   sqlite3 *mSqliteDb;
 
-   bool isValid;
+   bool mIsValid;
    static bool dumpSql;
    
    DbQuery(const char *db, const char *server = NULL, const char *user = NULL, const char *password = NULL);     // Constructor

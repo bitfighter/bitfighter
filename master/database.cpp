@@ -202,13 +202,13 @@ static U64 insertStatsServer(const DbQuery &query, const string &serverName, con
    string sql = "INSERT INTO server(server_name, ip_address) "
                 "VALUES('" + sanitizeForSql(serverName) + "', '" + serverIP + "');";
 
-   if(query.query)
+   if(query.mQuery)
      return query.runQuery(sql);
 
-   if(query.sqliteDb)
+   if(query.mSqliteDb)
    {
       query.runQuery(sql);
-      return sqlite3_last_insert_rowid(query.sqliteDb);
+      return sqlite3_last_insert_rowid(query.mSqliteDb);
    }
 
    return U64_MAX;
@@ -284,7 +284,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
 
    try
    {
-      if(query.isValid)
+      if(query.mIsValid)
       {
          U64 serverId = getServerID(query, gameStats.serverName, gameStats.serverIP);
          insertStatsGame(query, &gameStats, serverId);
@@ -303,7 +303,7 @@ void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry 
 
    try
    {
-      if(query.isValid)
+      if(query.mIsValid)
       {
          U64 serverId = getServerID(query, serverName, serverIP);
 
@@ -328,7 +328,7 @@ void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName
 
    try
    {
-      if(!query.isValid)
+      if(!query.mIsValid)
          return;
 
       // Sanity check
@@ -539,13 +539,13 @@ void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<st
       }
       else
 #endif
-      if(query.sqliteDb)
+      if(query.mSqliteDb)
       {
          char *err = 0;
          char **results;
          int rows, cols;
 
-         sqlite3_get_table(query.sqliteDb, sql.c_str(), &results, &rows, &cols, &err);
+         sqlite3_get_table(query.mSqliteDb, sql.c_str(), &results, &rows, &cols, &err);
 
          // results[0]...results[cols] contain the col headers ==> http://www.sqlite.org/c3ref/free_table.html
          for(S32 i = 0; i < rows * cols; i += cols)
@@ -604,9 +604,9 @@ bool DbQuery::dumpSql = false;
 // Constructor
 DbQuery::DbQuery(const char *db, const char *server, const char *user, const char *password)
 {
-   query = NULL;
-   sqliteDb = NULL;
-   isValid = true;
+   mQuery = NULL;
+   mSqliteDb = NULL;
+   mIsValid = true;
 
    TNLAssert(db && db[0] != 0, "must have a database");
 
@@ -630,35 +630,35 @@ DbQuery::DbQuery(const char *db, const char *server, const char *user, const cha
    }
    else
 #endif
-      if(sqlite3_open(db, &sqliteDb))    // Returns true if an error occurred
+      if(sqlite3_open(db, &mSqliteDb))    // Returns true if an error occurred
       {
-         logprintf("ERROR: Can't open stats database %s: %s", db, sqlite3_errmsg(sqliteDb));
-         sqlite3_close(sqliteDb);
-         isValid = false;
+         logprintf("ERROR: Can't open stats database %s: %s", db, sqlite3_errmsg(mSqliteDb));
+         sqlite3_close(mSqliteDb);
+         mIsValid = false;
       }
 }
 
 // Destructor
 DbQuery::~DbQuery()
 {
-   if(query)
-      delete query;
+   if(mQuery)
+      delete mQuery;
 
-   if(sqliteDb)
-      sqlite3_close(sqliteDb);
+   if(mSqliteDb)
+      sqlite3_close(mSqliteDb);
 }
 
 
 // Run the passed query on the appropriate database -- throws exceptions!
 U64 DbQuery::runQuery(const string &sql) const
 {
-   if(!isValid)
+   if(!mIsValid)
       return U64_MAX;
 
    if(dumpSql)
       logprintf("SQL: %s", sql.c_str());
 
-   if(query)
+   if(mQuery)
       // Should only get here when mysql has been compiled in
 #ifdef BF_WRITE_TO_MYSQL
          return query->execute(sql).insert_id();
@@ -666,16 +666,16 @@ U64 DbQuery::runQuery(const string &sql) const
          throw std::exception();    // Should be impossible
 #endif
 
-   if(sqliteDb)
+   if(mSqliteDb)
    {
       char *err = 0;
-      sqlite3_exec(sqliteDb, sql.c_str(), NULL, 0, &err);
+      sqlite3_exec(mSqliteDb, sql.c_str(), NULL, 0, &err);
 
       if(err)
          logprintf("Database error accessing sqlite databse: %s", err);
 
 
-      return sqlite3_last_insert_rowid(sqliteDb);  
+      return sqlite3_last_insert_rowid(mSqliteDb);  
    }
 
    return U64_MAX;
