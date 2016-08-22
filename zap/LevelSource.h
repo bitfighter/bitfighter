@@ -108,6 +108,7 @@ public:
    // The following populate levelInfo
    static bool getLevelInfoFromDatabase(const string &hash, LevelInfo &levelInfo);
    static void getLevelInfoFromCodeChunk(const string &code, LevelInfo &levelInfo);
+   static void getLevelInfoFromCodeChunk(istream &stream, LevelInfo &levelInfo);
 };
 
 

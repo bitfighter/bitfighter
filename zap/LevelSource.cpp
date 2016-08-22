@@ -148,6 +148,12 @@ bool LevelSource::getLevelInfoFromDatabase(const string &hash, LevelInfo &levelI
 void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &levelInfo)
 {
    istringstream stream(code);
+   getLevelInfoFromCodeChunk(stream, levelInfo);
+}
+
+
+void LevelSource::getLevelInfoFromCodeChunk(istream &stream, LevelInfo &levelInfo)
+{
    string line;
 
    // Read until all these are true
