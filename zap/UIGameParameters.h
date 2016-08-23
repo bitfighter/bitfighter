@@ -11,7 +11,6 @@
 
 #include "tnlTypes.h"
 
-#include <string>
 #include <map>
 
 namespace Zap
