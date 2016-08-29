@@ -96,7 +96,7 @@ private:
 
    void initialize(const char *server, const char *db, const char *user, const char *password);
    void createStatsDatabase();
-   string getSqliteSchema();
+   static string getSqliteSchema();
 
    U64 getServerID(const DbQuery &query, const string &serverName, const string &serverIP);
 
