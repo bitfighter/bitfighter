@@ -53,7 +53,7 @@ public:
    // Destructor
    virtual ~LevelInfo();
 
-   const char *getLevelTypeName();
+   const char *getLevelTypeName() const;
    void writeToStream(ostream &stream, const string &hash) const;
    void ensureLevelInfoHasValidName();
 };
