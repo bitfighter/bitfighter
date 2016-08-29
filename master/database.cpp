@@ -687,8 +687,9 @@ U64 DbQuery::runInsertQuery(const string &sql) const
 
 // Put this at the end where it's easy to find
 
-string DatabaseWriter::getSqliteSchema() {
-   string schema =
+string DatabaseWriter::getSqliteSchema() 
+{
+   return
       /* bitfighter sqlite3 database structure */
       /* turn on foreign keys */
       "PRAGMA foreign_keys = ON;"
@@ -836,8 +837,6 @@ string DatabaseWriter::getSqliteSchema() {
       "   date_awarded DATETIME NOT NULL  DEFAULT CURRENT_TIMESTAMP );"
 
       "   CREATE UNIQUE INDEX player_achievements_accomplishment_id on player_achievements(achievement_id, player_name COLLATE BINARY);";
-
-   return schema;
 }
 
 
