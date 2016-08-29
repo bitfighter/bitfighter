@@ -600,6 +600,7 @@ string GameType::getScoringEventDescr(ScoringEvent event)
 // Static method
 string GameType::validateGameType(const string &gameTypeName)
 {
+   // Hunters was renmaed to Nexus ages ago, but there may still be some old levels lingering around
    if(gameTypeName == "HuntersGameType")
        return "NexusGameType";
 
