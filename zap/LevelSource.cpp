@@ -701,7 +701,7 @@ StringLevelSource::StringLevelSource(const string &levelCode)
 }
 
 
-// Constructor -- mulitlpe levels (only used for testing, at the moment)
+// Constructor -- multiple levels (only used for testing, at the moment)
 StringLevelSource::StringLevelSource(const Vector<string> &levelCodes)
 {
    mLevelCodes = levelCodes;
