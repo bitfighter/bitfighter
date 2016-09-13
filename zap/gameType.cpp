@@ -1600,7 +1600,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
 
          for(S32 j = 0; j < fillVector.size(); j++)
          {
-            if(!pointInHexagon(fillVector[j]->getPos(), pos, SpyBug::SPY_BUG_RADIUS))
+            if(!pointInHexagon(fillVector[j]->getPos(), pos, (F32)SpyBug::SPY_BUG_RADIUS))
                continue;
 
             connection->objectInScope(static_cast<BfObject *>(fillVector[j]));
