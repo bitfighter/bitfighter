@@ -147,7 +147,7 @@ string itos(S32 i)
 
 string itos(U32 i)
 {
-   char outString[11];  // 10 chars plus a null char, 4294967295
+   char outString[U32_MAX_DIGITS + 1];  // + 1 for the null
    dSprintf(outString, sizeof(outString), "%u", i);
    return outString;
 }
@@ -155,7 +155,7 @@ string itos(U32 i)
 
 string itos(U64 i)
 {
-   char outString[21];  // 20 chars plus a null char, 18446744073709551615
+   char outString[U64_MAX_DIGITS + 1];  // + 1 for the null
    dSprintf(outString, sizeof(outString), "%u", i);
    return outString;
 }
@@ -163,7 +163,7 @@ string itos(U64 i)
 
 string itos(S64 i)
 {
-   char outString[21];  // 20 chars plus a null char, -9223372036854775808
+   char outString[ + 1];  // + 1 for the null
    dSprintf(outString, sizeof(outString), "%d", i);
    return outString;
 }
