@@ -198,9 +198,9 @@ private:
    Vector<string> mLevelCodes;
 
 public:
-   StringLevelSource(const string &levelCode);           // Constructor
-   StringLevelSource(const Vector<string> &levelCode);   // Constructor
-   virtual ~StringLevelSource();                         // Destructor
+   explicit StringLevelSource(const string &levelCode);           // Constructor
+   explicit StringLevelSource(const Vector<string> &levelCode);   // Constructor
+   virtual ~StringLevelSource();                                  // Destructor
 
    Level *getLevel(S32 index) const;
    string getLevelFileDescriptor(S32 index) const;
