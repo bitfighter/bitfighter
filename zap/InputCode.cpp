@@ -480,7 +480,7 @@ string InputCodeManager::normalizeInputString(const string &inputString)
    Vector<bool> hasModifier;
    hasModifier.resize(modifiers.size());
 
-   for(U32 i = 0; i < modifiers.size(); i++)
+   for(S32 i = 0; i < modifiers.size(); i++)
       hasModifier[i] = false;
 
    for(S32 i = 0; i < words.size() - 1; i++)
@@ -490,7 +490,7 @@ string InputCodeManager::normalizeInputString(const string &inputString)
          return INVALID;
 
       bool found = false;
-      for(U32 j = 0; j < modifiers.size(); j++)
+      for(S32 j = 0; j < modifiers.size(); j++)
          if(inputCode == modifiers[j])
          {
             hasModifier[j] = true;
@@ -512,7 +512,7 @@ string InputCodeManager::normalizeInputString(const string &inputString)
       return INVALID;
 
    string normalizedInputString = "";
-   for(U32 i = 0; i < modifiers.size(); i++)
+   for(S32 i = 0; i < modifiers.size(); i++)
       if(hasModifier[i])
          normalizedInputString += string(keyNames[modifiers[i]]) + InputStringJoiner;
 
@@ -1900,7 +1900,7 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(KEY_KEYPAD_ENTER)]    = "Keypad Enter";     
    keyNames[S32(KEY_LESS)]            = "Less";    
 
-   for(U32 i = 0; i < modifiers.size(); i++)
+   for(S32 i = 0; i < modifiers.size(); i++)
       modifierNames.push_back(keyNames[S32(modifiers[i])]);            
 }
 
