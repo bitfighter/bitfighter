@@ -2495,7 +2495,7 @@ bool pointInHexagon(const Point &pos, const Point &center, F32 radius)
    //if(dx / 2 > radius || dy / 2 > radius * FloatSqrt3Half)     // Bounding test (since q2 is in quadrant 2 only 2 tests are needed)
    //   return false;
 
-   F32 a = 0.25 * FloatSqrt3;
+   F32 a = 0.25f * FloatSqrt3;
    return (dy <= a) && (a * dx + 0.25 * dy <= 0.5 * a);
 }
 
