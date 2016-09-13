@@ -83,7 +83,7 @@ string extractExtension(const string &path )
 
 string itos(S32 i)
 {
-   char outString[12];  // 11 chars plus a null char, -2147483648
+   char outString[S32_MAX_DIGITS + 1];  // + 1 for the null
    dSprintf(outString, sizeof(outString), "%d", i);
    return outString;
 }
