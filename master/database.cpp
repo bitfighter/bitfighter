@@ -522,10 +522,10 @@ void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<st
    {
 
 #ifdef BF_WRITE_TO_MYSQL
-      if(query.query)
+      if(mQuery.query)
       {
          //S32 serverId_int = -1;
-         StoreQueryResult results = query.query->store(sql.c_str(), sql.length());
+         StoreQueryResult results = mQuery.query->store(sql.c_str(), sql.length());
 
          S32 rows = results.num_rows();
 
@@ -621,12 +621,12 @@ DbQuery::DbQuery(const char *db, const char *server, const char *user, const cha
       try
       {
          conn.connect(db, server, user, password);    // Will throw error if it fails
-         query = new Query(&conn);
+         mQuery = new Query(&conn);
       }
       catch(const Exception &ex) 
       {
          logprintf("Failure opening mysql database: %s", ex.what());
-         isValid = false;
+         mIsValid = false;
       }
    }
    else
@@ -662,7 +662,7 @@ U64 DbQuery::runInsertQuery(const string &sql) const
    if(mQuery)
       // Should only get here when mysql has been compiled in
 #ifdef BF_WRITE_TO_MYSQL
-         return query->execute(sql).insert_id();
+         return mQuery->execute(sql).insert_id();
 #else
          throw std::exception();    // Should be impossible
 #endif
