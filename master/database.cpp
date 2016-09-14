@@ -557,6 +557,7 @@ void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<st
          }
 
          sqlite3_free_table(results);
+         sqlite3_free(err);
       }
    }
    catch(const Exception &ex)
@@ -674,6 +675,7 @@ U64 DbQuery::runInsertQuery(const string &sql) const
       if(err)
          logprintf("Database error accessing sqlite databse: %s", err);
 
+         sqlite3_free(err);
 
       return sqlite3_last_insert_rowid(mSqliteDb);  
    }
