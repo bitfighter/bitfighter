@@ -673,9 +673,12 @@ U64 DbQuery::runInsertQuery(const string &sql) const
       sqlite3_exec(mSqliteDb, sql.c_str(), NULL, 0, &err);
 
       if(err)
-         logprintf("Database error accessing sqlite databse: %s", err);
-
+      {
+         logprintf("Database error accessing sqlite database: %s", err);
+         logprintf(sql.c_str());
          sqlite3_free(err);
+         return -1;
+      }
 
       return sqlite3_last_insert_rowid(mSqliteDb);  
    }
