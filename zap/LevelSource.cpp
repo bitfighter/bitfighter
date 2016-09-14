@@ -82,7 +82,7 @@ void LevelInfo::writeToStream(ostream &stream, const string &hash) const
 }
 
 
-const char *LevelInfo::getLevelTypeName()
+const char *LevelInfo::getLevelTypeName() const
 {
    return GameType::getGameTypeName(mLevelType);
 }
