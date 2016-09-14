@@ -615,8 +615,8 @@ DbQuery::DbQuery(const char *db, const char *server, const char *user, const cha
 
    if(server && server[0] != 0) // mysql have a server to connect to
    {
-      TNLAssert(server, "const char * server is NULL");
-      TNLAssert(user, "const char * user is NULL");
+      TNLAssert(server,   "const char * server is NULL");
+      TNLAssert(user,     "const char * user is NULL");
       TNLAssert(password, "const char * password is NULL");
       try
       {
