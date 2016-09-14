@@ -132,7 +132,7 @@ LevelInfo LevelSource::getLevelInfo(S32 index)
 // Remove any "s in place
 static void stripQuotes(string &str)      // not const; will be modified!
 {
-   str.erase(std::remove(str.begin(), str.end(), '"'), str.end());
+   str.erase(remove(str.begin(), str.end(), '"'), str.end());
 }
 
 
