@@ -348,10 +348,10 @@ void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName
       if(!found) 
       {
          sql = "INSERT INTO stats_level(hash, level_name, creator, game_type, has_levelgen, team_count, winning_score, game_duration) "
-               "VALUES('" + sanitizeForSql(hash)      + "', '" + sanitizeForSql(levelName)         + "', " + 
-                      "'" + sanitizeForSql(creator)   + "', '" + sanitizeForSql(gameType)          + "', " +
-                      "'" + btos(hasLevelGen)   + "', '" + itos(teamCount)             + "', " + 
-                      "'" + itos(winningScore)  + "', '" + itos(gameDurationInSeconds) + "');";
+               "VALUES('" + sanitizeForSql(hash)      + "', '" + sanitizeForSql(levelName)   + "', " + 
+                      "'" + sanitizeForSql(creator)   + "', '" + sanitizeForSql(gameType)    + "', " +
+                      "'" + btos(hasLevelGen)         + "', '" + itos(teamCount)             + "', " + 
+                      "'" + itos(winningScore)        + "', '" + itos(gameDurationInSeconds) + "');";
          query.runInsertQuery(sql);
       }
    }
