@@ -18,7 +18,6 @@
 #include "../recast/RecastAlloc.h"
 #include <clipper.hpp>
 
-#include <vector>
 #include <math.h>
 
 
