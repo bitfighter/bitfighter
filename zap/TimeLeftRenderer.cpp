@@ -76,7 +76,7 @@ void TimeLeftRenderer::updateLeadingPlayerAndScore(const Game *game)
 
 F32 renderLock(GL *gl, F32 xPos, bool render)
 {
-   static const F32 lockHeight = 3.4;   // pixels --> see rendering code
+   static const F32 lockHeight = 3.4f;   // pixels --> see rendering code
    static const F32 lockWidth = 3;
    static const F32 renderHeight = 12.0f;
    static const F32 scale = renderHeight / lockHeight;

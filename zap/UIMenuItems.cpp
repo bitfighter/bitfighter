@@ -1076,7 +1076,7 @@ void FloatCounterMenuItem::initialize()
 
 void FloatCounterMenuItem::setFloatValue(F32 val)
 {
-   F32 rounded = floor(val * mPrecision + 0.5) / mPrecision;
+   F32 rounded = floor(val * mPrecision + 0.5f) / mPrecision;
 
    mValue = clamp(rounded, mMinValue, mMaxValue);
 }
@@ -1300,8 +1300,8 @@ FloatCounterMenuItem::FloatCounterMenuItem(lua_State *L) : Parent("", NULL, "", 
       // mValue =  getInt(L, 2, methodName);  ==> set this later, after we've determined mMinValue and mMaxValue
 
       // Optional (but recommended) items
-      mStep =     getFloat(L, 3, 0.1);
-      mMinValue = getFloat(L, 4, 0.1);
+      mStep =     getFloat(L, 3, 0.1f);
+      mMinValue = getFloat(L, 4, 0.1f);
       mMaxValue = getFloat(L, 5, 1000);
       mDecimalPlaces = getInt(L, 6, 3);
       mUnits =    getString(L, 7, "");
