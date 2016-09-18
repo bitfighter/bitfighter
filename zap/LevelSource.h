@@ -13,7 +13,6 @@
 #include "tnlVector.h"
 
 #include <boost/shared_ptr.hpp>
-#include <string>
 
 
 using namespace TNL;
