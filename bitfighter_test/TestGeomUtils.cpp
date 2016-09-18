@@ -6,7 +6,6 @@
 #include "../zap/GeomUtils.h"
 #include "../zap/MathUtils.h"
 #include "gtest/gtest.h"
-#include <tnl.h>
 #include <map>
 
 namespace Zap
