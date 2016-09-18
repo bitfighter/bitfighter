@@ -5,12 +5,10 @@
 
 #include "Point.h"
 
-#include "tnlPlatform.h"
 #include "tnlBitStream.h"
 #include "stringUtils.h"
 
 #include <math.h>
-#include <cstdlib>
 
 
 namespace Zap
