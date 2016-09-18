@@ -39,12 +39,14 @@ void Point::set(const Point *pt)
    y = pt->y;
 }
 
+
 // Distance from (0,0)
 // lenSquared() is faster!
 F32 Point::len() const
 {
    return (F32) sqrt(x * x + y * y);
 }
+
 
 F32 Point::lenSquared() const
 {
@@ -99,10 +101,12 @@ F32 Point::ATAN2() const
    return atan2(y, x);
 }
 
+
 F32 Point::distanceTo(const Point &pt) const
 {
    return sqrt( (x-pt.x) * (x-pt.x) + (y-pt.y) * (y-pt.y) );
 }
+
 
 F32 Point::distSquared(const Point &pt) const
 {
@@ -113,6 +117,7 @@ F32 Point::angleTo(const Point &p) const
 {
    return atan2(p.y-y, p.x-x);      // That's radians, folks!
 }
+
 
 Point Point::rotate(F32 ang)
 {
@@ -127,11 +132,13 @@ void Point::setAngle(const F32 ang)
    setPolar(len(), ang);
 }
 
+
 void Point::setPolar(const F32 l, const F32 ang)
 {
    x = cos(ang) * l;
    y = sin(ang) * l;
 }
+
 
 F32 Point::determinant(const Point &p)
 {
@@ -144,10 +151,12 @@ void Point::scaleFloorDiv(float scaleFactor, float divFactor)
    y = (F32) floor(y * scaleFactor + 0.5) * divFactor;
 }
 
+
 F32 Point::dot(const Point &p) const
 {
    return x * p.x + y * p.y;
 }
+
 
 void Point::read(const char **argv)
 {
