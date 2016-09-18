@@ -166,7 +166,7 @@ void LevelSource::getLevelInfoFromCodeChunk(istream &stream, LevelInfo &levelInf
    static const S32 minMaxPlayersLen = strlen("MinPlayers");
    static const S32 scriptLen        = strlen("Script");
 
-   std::size_t pos;
+   U32 pos;
 
    // Iterate until we've either exhausted all the lines, or found everything we're looking for
    while(getline(stream, line) && (
