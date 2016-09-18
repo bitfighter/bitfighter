@@ -60,12 +60,12 @@ public:
    static const S32 BufferRadius;            // Radius to buffer objects when creating the holes for zones
    static const S32 LevelZoneBuffer;         // Extra padding around the game extents to allow outsize zones to be created
 
-   void renderLayer(S32 layerIndex);
+   void renderLayer(S32 layerIndex) const;
 
    GridDatabase *getGameObjDatabase();
    void addToZoneDatabase(GridDatabase *botZoneDatabase);
 
-   Point getCenter();      // Return center of zone
+   Point getCenter() const;      // Return center of zone
 
    // More precise boundary for precise collision detection
    const Vector<Point> *getCollisionPoly() const;

@@ -63,13 +63,13 @@ BotNavMeshZone::~BotNavMeshZone()
 
 
 // Return the center of this zone
-Point BotNavMeshZone::getCenter()
+Point BotNavMeshZone::getCenter() const
 {
    return getExtent().getCenter();     // Good enough for government work
 }
 
 
-void BotNavMeshZone::renderLayer(S32 layerIndex)    
+void BotNavMeshZone::renderLayer(S32 layerIndex) const
 {
 #ifndef ZAP_DEDICATED
    if(layerIndex == 0)
