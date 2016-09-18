@@ -2182,7 +2182,7 @@ void GameObjectRender::renderTextItem(const Point &pos, const Point &dir, F32 si
    F32 ypos = pos.y;
    F32 xpos = pos.x;
 
-   F32 lineHeight = size * 1.25;
+   F32 lineHeight = size * 1.25f;
    F32 xspace = -lineHeight * sin(angle);
    F32 yspace =  lineHeight * cos(angle);
 

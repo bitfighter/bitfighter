@@ -217,6 +217,12 @@ void GL::glTranslate(const Point &pos)
 }
 
 
+void GL::glTranslate(S32 x, S32 y)
+{
+   glTranslate((F32)x, (F32)y);
+}
+
+
 void GL::glTranslate(F32 x, F32 y)
 {
 #ifdef BF_USE_GLES2
