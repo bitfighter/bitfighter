@@ -74,7 +74,6 @@ public:
    void setGeom(const Vector<Point> &points);
    Vector<Point> getGeom() const;
 
-
    string geomToLevelCode() const;
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 

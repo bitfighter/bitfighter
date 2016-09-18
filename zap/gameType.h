@@ -248,7 +248,6 @@ public:
       S32 maxval;    // Max value for this param
    };
 
-
    virtual S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
    static string getScoringEventDescr(ScoringEvent event);
 
