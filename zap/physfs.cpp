@@ -22,7 +22,7 @@ namespace PhysFS {
          if(PHYSFS_eof(file)) {
             return traits_type::eof();
          }
-         size_t bytesRead = PHYSFS_read(file, buffer, 1, bufferSize);
+         PHYSFS_sint64 bytesRead = PHYSFS_read(file, buffer, 1, (PHYSFS_uint32)bufferSize);
          if(bytesRead < 1) {
             return traits_type::eof();
          }
@@ -241,12 +241,12 @@ namespace PhysFS {
 
       // PhysFS uses a linked list to store folders, so forward traversal is the most efficient
       // (see http://libphysfs.sourcearchive.com/documentation/2.0.0/physfs_8h_1eef17d8edd5525928e97d32e3e58428.html)
-      for(int i = 0; i < dirs.size(); i++)   
+      for(unsigned int i = 0; i < dirs.size(); i++)   
          removeFromSearchPath(dirs[i]);
    }
 
    void mountAll(const StringList &folderList) {
-      for(int i = 0; i < folderList.size(); i++)
+      for(unsigned int i = 0; i < folderList.size(); i++)
          mount(folderList[i], "", true);
    }
 
