@@ -82,7 +82,7 @@ public:
    bool loadLevelFromFile(const string &filename);
    void validateLevel();
 
-   LevelInfo &getLevelInfo();
+   //LevelInfo &getLevelInfo();
 
    void buildWallEdgeGeometry(Vector<Point> &wallEdgePoints);
    void snapAllEngineeredItems(bool onlyUnsnapped) const;
