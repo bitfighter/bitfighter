@@ -79,8 +79,8 @@ namespace Zap
    {
       return mLevelHash;
    }
-  
 
+  
    // Gets run when this level is associated with a game.  From this point forward, the Level object
    // will be tainted and polluted.  Don't reuse -- discard when done.
    // Runs on client and server
@@ -273,6 +273,12 @@ namespace Zap
 
       if(mTeamManager->getTeamCount() == 0)
          mTeamManager->addTeam(new Team());
+   }
+
+
+   U64 Level::getSqliteLevelId()
+   {
+      return mLevelInfo.getSqliteLevelId();
    }
 
 
