@@ -365,7 +365,7 @@ void FontManager::drawStrokeCharacter(const SFG_StrokeFont *font, S32 character)
       }
       mGL->renderVertexArray(characterVertexArray, strip->Number, GLOPT::LineStrip);
    }
-   mGL->glTranslate(schar->Right, 0);
+   mGL->glTranslate(schar->Right, 0.0f);
 }
 
 
