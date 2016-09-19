@@ -184,6 +184,7 @@ public:
    /////
    // Time related -- these are all passthroughs to mGameTimer
    void setGameTime(F32 timeInSeconds);
+   void setGameTime(S32 timeInSeconds);
    void extendGameTime(S32 timeInMs);
 
    U32 getTotalGameTime() const;                         // In seconds

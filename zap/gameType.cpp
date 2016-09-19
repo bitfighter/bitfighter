@@ -4020,8 +4020,17 @@ void GameType::setWinningScore(S32 score)
 
 
 // Mostly used while reading a level file
+void GameType::setGameTime(S32 timeInSeconds)
+{
+   setGameTime((F32)timeInSeconds);
+}
+
+
 void GameType::setGameTime(F32 timeInSeconds)
 {
+   if(timeInSeconds < 0)
+      return;
+
    U32 time = U32(timeInSeconds * 1000);
    setTimeRemaining(time, time == 0);
 }
