@@ -104,7 +104,6 @@ public:
                            Vector<Point> &wallEdgePoints,    // <== gets modified!
                            bool modifiedWalls);
 
-   string getHash() const;
    F32 getLegacyGridSize() const;
    GameType *getGameType() const;
    void setGameType(GameType *gameType);
@@ -113,6 +112,7 @@ public:
    GridDatabase &getBotZoneDatabase();
    Vector<BotNavMeshZone *> &getBotZoneList();
 
+   string getHash() const;
 
    bool getAddedToGame() const;
 
