@@ -13,10 +13,11 @@
 #include "stringUtils.h"
 
 #include "tnlAssert.h"
+#include "Md5Utils.h"
 
 #include <fstream>
 #include <sstream>
-#include "Md5Utils.h"
+
 
 namespace Zap
 {
@@ -51,6 +52,8 @@ LevelInfo::LevelInfo(const string &filename, const string &folder)
 // Constructor
 LevelInfo::LevelInfo(const string &levelName, GameTypeId levelType, S32 minPlayers, S32 maxPlayers, const string &script)
 {
+   initialize();
+
    mLevelName = levelName;
    mLevelType = levelType;
    minRecPlayers = minPlayers;
