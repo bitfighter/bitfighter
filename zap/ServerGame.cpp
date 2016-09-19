@@ -604,6 +604,7 @@ void ServerGame::cycleLevel(S32 nextLevel, bool isReset)
 #endif
 
    TNLAssert(getGameType(), "Expect to have a GameType here!");
+   
    getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(mLevel->getBotZoneDatabase(), mLevel->getBotZoneList(),
                                                                               getWorldExtents(), barrierList, turretList,
                                                                               forceFieldProjectorList, teleporterData, triangulate);

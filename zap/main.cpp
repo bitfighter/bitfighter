@@ -1134,7 +1134,7 @@ int main(int argc, char **argv)
       FontManager::initialize(settings.get(), false);
 #endif
       ServerGame *serverGame = GameManager::getServerGame();
-      
+
       // Now even the dedicated server can make use of playlist files...
       // TODO: test if playlist files work with the dedicated server
       LevelSourcePtr levelSource = LevelSourcePtr(settings->chooseLevelSource(serverGame));

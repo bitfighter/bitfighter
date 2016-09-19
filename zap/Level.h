@@ -75,7 +75,6 @@ public:
    virtual ~Level();                // Destructor
 
    Level *clone() const;      // Duplicate level
-
    static const U32 CurrentLevelFormat = 2;
 
    void onAddedToGame(Game *game);
