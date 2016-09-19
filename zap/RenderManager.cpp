@@ -229,6 +229,12 @@ void GL::glTranslate(F32 x, S32 y)
 }
 
 
+void GL::glTranslate(S32 x, F32 y)
+{
+   glTranslate((F32)x, y);
+}
+
+
 void GL::glTranslate(F32 x, F32 y)
 {
 #ifdef BF_USE_GLES2

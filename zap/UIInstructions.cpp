@@ -594,7 +594,7 @@ void InstructionsUserInterface::renderModulesPage() const
       RenderUtils::drawString(x, y, textsize, moduleDescriptions[i][1]);
 
       mGL->glPushMatrix();
-      mGL->glTranslate(60, y + 10.0f);
+      mGL->glTranslate(60, y + 10);
       mGL->glScale(0.7f);
       mGL->glRotate(-90);
 
