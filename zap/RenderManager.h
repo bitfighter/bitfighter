@@ -111,6 +111,7 @@ public:
    void glTranslate(const Point &pos);
    void glTranslate(F32 x, F32 y);
    void glTranslate(S32 x, S32 y);
+   void glTranslate(F32 x, S32 y);
    void glTranslate(F32 x, F32 y, F32 z);
    void glRotate(F32 angle);
    void glLineWidth(F32 width);
