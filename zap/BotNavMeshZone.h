@@ -30,12 +30,18 @@ public:
 class NeighboringZone : public Border
 {
 public:
-   NeighboringZone();      // Constructor
+
+   // These are from Parent:
+   // Point borderStart;
+   // Point borderEnd;
+
    U16 zoneID;
 
    Point borderCenter;     // Simply a point half way between borderStart and borderEnd
    Point center;           // Center of zone
    F32 distTo;
+
+   NeighboringZone();      // Constructor
 };
 
 
@@ -49,14 +55,16 @@ class BotNavMeshZone : public DatabaseObject
    typedef GeomObject Parent;
 
 private:   
-   U16 mZoneId;                                    // Unique ID for each zone
+   U16 mZoneId;                              // Unique ID for each zone
+
+   Vector<NeighboringZone> mNeighbors;       // List of other zones this zone touches, only populated on server
+   Vector<Border> mNeighborRenderPoints;     // Only populated on client
 
    static void populateZoneList(GridDatabase *mBotZoneDatabase, Vector<BotNavMeshZone *> *allZones);  // Populates allZones
 
 public:
    explicit BotNavMeshZone(S32 id = -1);     // Constructor
    virtual ~BotNavMeshZone();                // Destructor
-   
    static const S32 BufferRadius;            // Radius to buffer objects when creating the holes for zones
    static const S32 LevelZoneBuffer;         // Extra padding around the game extents to allow outsize zones to be created
 
@@ -75,8 +83,6 @@ public:
 
    U16 getZoneId() { return mZoneId; }
 
-   Vector<NeighboringZone> mNeighbors;       // List of other zones this zone touches, only populated on server
-   Vector<Border> mNeighborRenderPoints;     // Only populated on client
    S32 getNeighborIndex(S32 zone);           // Returns index of neighboring zone, or -1 if zone is not a neighbor
 
    static bool buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<BotNavMeshZone *> &allZones,

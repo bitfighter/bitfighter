@@ -422,8 +422,9 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<Bot
    U32 starttime = Platform::getRealMilliseconds();
 #endif
 
-   Rect bounds(worldExtents);      // Modifiable copy
    allZones.deleteAndClear();
+
+   Rect bounds(worldExtents);      // Modifiable copy
 
    bounds.expandToInt(Point(LevelZoneBuffer, LevelZoneBuffer));      // Provide a little breathing room
 
@@ -605,7 +606,6 @@ inline F32 getTriangleArea(const Point &p1, const Point &p2, const Point &p3)
    F32 area = ((p2.x - p1.x) * (p3.y - p1.y) - (p3.x - p1.x) * (p2.y - p1.y)) / 2;
    return (area > 0.0) ? area : -area;
 }
-
 
 
 // Server only
