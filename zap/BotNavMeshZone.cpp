@@ -854,7 +854,7 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
          // Add these adjacent child squares to the open list
          //   for later consideration if appropriate.
 
-         Vector<NeighboringZone> neighboringZones = zones->get(parentZone)->mNeighbors;
+         Vector<NeighboringZone> neighboringZones = zones->get(parentZone)->getNeighbors();
 
          for(S32 a = 0; a < neighboringZones.size(); a++)
          {
@@ -992,7 +992,7 @@ Point AStar::findGateway(const Vector<BotNavMeshZone *> *zones, S32 zone1, S32 z
    S32 neighborIndex = zones->get(zone1)->getNeighborIndex(zone2);
    TNLAssert(neighborIndex >= 0, "Invalid neighbor index!!");
 
-   return zones->get(zone1)->mNeighbors[neighborIndex].borderCenter;
+   return zones->get(zone1)->getNeighbors()[neighborIndex].borderCenter;
 }
 
 

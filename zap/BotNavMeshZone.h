@@ -12,7 +12,6 @@
 namespace Zap
 {
 
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -65,6 +64,7 @@ private:
 public:
    explicit BotNavMeshZone(S32 id = -1);     // Constructor
    virtual ~BotNavMeshZone();                // Destructor
+   Vector<NeighboringZone> &getNeighbors();
    static const S32 BufferRadius;            // Radius to buffer objects when creating the holes for zones
    static const S32 LevelZoneBuffer;         // Extra padding around the game extents to allow outsize zones to be created
 
