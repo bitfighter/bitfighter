@@ -29,7 +29,6 @@ public:
 class NeighboringZone : public Border
 {
 public:
-
    // These are from Parent:
    // Point borderStart;
    // Point borderEnd;
