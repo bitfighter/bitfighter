@@ -40,6 +40,7 @@ public:
    F32 distTo;
 
    NeighboringZone();      // Constructor
+   NeighboringZone(S32 zoneId, const Point &bordStart, const Point &bordEnd, const Point &selfCenter, const Point &otherCenter);
 };
 
 

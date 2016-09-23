@@ -697,24 +697,12 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections(const Vector<BotNavMeshZone 
             bordCen.set(rect.getCenter());
 
             // Zone j is a neighbor of i
-            neighbor.zoneID = j;
-            neighbor.borderStart.set(bordStart);
-            neighbor.borderEnd.set(bordEnd);
-            neighbor.borderCenter.set(bordCen);
-
-            neighbor.distTo = allZones.get(i)->getExtent().getCenter().distanceTo(bordCen);     // Whew!
-            neighbor.center.set(allZones.get(j)->getCenter());
-            allZones.get(i)->mNeighbors.push_back(neighbor);
+            NeighboringZone neighbor1(j, bordStart, bordEnd, allZones.get(i)->getExtent().getCenter(), allZones.get(j)->getCenter());
+            allZones.get(i)->mNeighbors.push_back(neighbor1);
 
             // Zone i is a neighbor of j
-            neighbor.zoneID = i;
-            neighbor.borderStart.set(bordStart);
-            neighbor.borderEnd.set(bordEnd);
-            neighbor.borderCenter.set(bordCen);
-
-            neighbor.distTo = allZones.get(j)->getExtent().getCenter().distanceTo(bordCen);     
-            neighbor.center.set(allZones.get(i)->getCenter());
-            allZones.get(j)->mNeighbors.push_back(neighbor);
+            NeighboringZone neighbor2(i, bordStart, bordEnd, allZones.get(j)->getExtent().getCenter(), allZones.get(i)->getCenter());
+            allZones.get(i)->mNeighbors.push_back(neighbor2);
          }
       }
    }
@@ -729,6 +717,18 @@ NeighboringZone::NeighboringZone()
 {
    zoneID = 0;
    distTo = 0;
+}
+
+
+NeighboringZone::NeighboringZone(S32 zoneId, const Point &bordStart, const Point &bordEnd, const Point &selfCenter, const Point &otherCenter)
+{
+   zoneID = zoneId;
+   borderStart.set(bordStart);
+   borderEnd.set(bordEnd);
+   borderCenter.set((borderStart.x + borderEnd.x) / 2, (borderStart.y + borderEnd.y) / 2);
+
+   distTo = selfCenter.distanceTo(borderCenter);
+   center.set(otherCenter);
 }
 
 
