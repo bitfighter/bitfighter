@@ -70,7 +70,7 @@ public:
 
    void renderLayer(S32 layerIndex) const;
 
-   GridDatabase *getGameObjDatabase();
+   //GridDatabase *getGameObjDatabase();
    void addToZoneDatabase(GridDatabase *botZoneDatabase);
 
    Point getCenter() const;      // Return center of zone
