@@ -1207,13 +1207,11 @@ bool PolygonGeometry::readWkb(unsigned char *wkb)
 string PolygonGeometry::toWkb() const
 {
    BitStream stream;
-   //writeWkbGeometryHeader(stream, wkbPolygon);
-   //writeInt(stream, 1);          // One ring... always one ring.
 
    S32 pts = mPolyBounds.size();
 
    stream.writeInt(pts, 32);
-   //writeInt(stream, pts);
+
    for(S32 i = 0; i < pts; i++)
       mPolyBounds[i].coordsToWkb(stream);
 
