@@ -1193,7 +1193,7 @@ string PolygonGeometry::toWkb() const
 
    S32 pts = mPolyBounds.size();
 
-   stream.writeInt(pts, 32);
+   stream.writeInt(pts, sizeof(S32)>>3);
 
    for(S32 i = 0; i < pts; i++)
       mPolyBounds[i].coordsToWkb(stream);
