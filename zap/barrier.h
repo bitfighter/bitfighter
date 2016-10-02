@@ -10,7 +10,6 @@
 
 #include "Point.h"
 
-#include "tnlTypes.h"
 #include "tnlVector.h"
 
 #include "Test.h"
