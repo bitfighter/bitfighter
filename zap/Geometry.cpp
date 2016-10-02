@@ -1170,25 +1170,8 @@ static U8 readByte(const char *wkb, S32 &pos)
 bool PolygonGeometry::readWkb(unsigned char *wkb)
 {
    S32 pos = 0;
-   //U8 byteOrder = readByte(wkb, pos);
-   //TNLAssert(byteOrder == wkbEndian, "Invalid geometry: Unexpected endian!");
-   //if(byteOrder != wkbEndian)
-   //   return false;
-
-   //S32 geomType = readInt(wkb, pos);
-   //TNLAssert(geomType == wkbPolygon, "Invalid geometry: Expected polygon!");
-   //if(geomType != wkbPolygon)
-   //   return false;
-
-   //S32 rings = readInt(wkb, pos);
-   //TNLAssert(rings == 1, "Invalid geometry: Expected 1 ring!");
-   //if(rings != 1)
-   //   return false;
       
    BitStream stream(wkb, 1024);
-
-   //Geometry::writeWkbGeometryHeader(stream, wkbPoint);
-   //coordsToWkb(stream);
 
    S32 numPoints = stream.readInt(32);
    
