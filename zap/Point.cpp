@@ -9,6 +9,8 @@
 #include "stringUtils.h"
 
 #include <math.h>
+#include "Geometry_Base.h"
+#include <sstream>
 
 
 namespace Zap
@@ -127,6 +129,7 @@ Point Point::rotate(F32 ang)
    return Point(x * sina + y * cosa, y * sina - x * cosa);
 }
 
+
 void Point::setAngle(const F32 ang)
 {
    setPolar(len(), ang);
@@ -176,6 +179,127 @@ void Point::write(BitStream *stream) const
 {
    stream->write(x);
    stream->write(y);
+}
+
+
+// TODO: Repeated code, also can we leverage existing stream writing code above?
+static void writeFloat(ostream &stream, F64 f)
+{
+   stream.write(reinterpret_cast<char *>(&f), sizeof(f));
+}
+
+
+inline void read_double(const char* data, F64 &val)
+{
+   memcpy(&val, &data[0], 8);
+}
+
+
+string Point::toWkb() const
+{
+   BitStream stream;
+   coordsToWkb(stream);
+
+   return string((char *)stream.getBuffer(), stream.getBytePosition());
+}
+
+
+void Point::coordsFromWkb(const char* wkb, S32 &pos)
+{
+   F64 xx, yy;
+   read_double(wkb + pos, xx);
+   read_double(wkb + pos + 8, yy);
+
+   pos += 16; // Advance pointer
+
+   x = (F32)xx;
+   y = (F32)yy;
+}
+
+
+// TODO: Dupe
+inline void read_int8(const char* data, U8 &val)
+{
+   memcpy(&val, data, 1);
+}
+static U8 readByte(const char *wkb, S32 &pos)
+{
+   U8 n;
+   read_int8(wkb + pos, n);
+
+   pos += 1;
+
+   return n;
+}
+static const U8 wkbXDR = 0;         // Big Endian
+static const U8 wkbNDR = 1;         // Little Endian
+
+#ifdef TNL_LITTLE_ENDIAN
+static const U8 wkbEndian = wkbNDR;
+#else
+static const U8 wkbEndian = wkbXDR;
+#endif
+inline void read_int32(const char* data, S32 &val)
+{
+   memcpy(&val, data, 4);
+}
+
+
+static S32 readInt(const char *wkb, S32 &pos)
+{
+   S32 n;
+   read_int32(wkb + pos, n);
+
+   pos += 4;
+
+   return n;
+}
+bool Point::fromWkb(unsigned char* wkb)
+{
+   S32 pos = 0;
+   //U8 byteOrder = readByte(wkb, pos);
+   //TNLAssert(byteOrder == wkbEndian, "Invalid geometry: Unexpected endian!");
+   //if(byteOrder != wkbEndian)
+   //   return false;
+
+   //S32 geomType = readInt(wkb, pos);
+   //TNLAssert(geomType == wkbPoint, "Invalid geometry: Expected point!");
+   //if(geomType != wkbPoint)
+   //   return false;
+
+
+   BitStream stream(wkb, 8);
+
+   //Geometry::writeWkbGeometryHeader(stream, wkbPoint);
+   //coordsToWkb(stream);
+   //x = stream.readFloat(32);
+   //y = stream.readFloat(32);
+
+   read(&stream);
+
+   //F64 xx, yy;
+   //read_double(wkb + pos, xx);
+   //read_double(wkb + pos + 8, yy);
+
+   //pos += 16; // Advance pointer
+
+   //x = (F32)xx;
+   //y = (F32)yy;
+
+   return true;
+}
+
+
+
+void Point::coordsToWkb(BitStream &stream) const
+{
+   //stream.write(reinterpret_cast<char *>(&f), sizeof(f));
+   //stream.writeFloat(x, 32);
+   //stream.writeFloat(y, 32);
+   //writeFloat(stream, x);
+   //writeFloat(stream, y);
+
+   write(&stream);
 }
 
 

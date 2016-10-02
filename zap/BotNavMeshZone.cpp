@@ -12,6 +12,7 @@
 #include "Teleporter.h"             // For Teleporter::TELEPORTER_RADIUS
 #include "GeomUtils.h"
 #include "MathUtils.h"
+#include "StringUtils.h"
 
 #include "tnlLog.h"
 
@@ -19,6 +20,9 @@
 #include <clipper.hpp>
 
 #include <math.h>
+#include "sqlite3.h"
+#include "ServerGame.h"
+#include "Level.h"
 
 
 // triangulate wants quit on error
@@ -62,6 +66,12 @@ BotNavMeshZone::~BotNavMeshZone()
 }
 
 
+Vector<NeighboringZone> &BotNavMeshZone::getNeighbors()
+{
+   return mNeighbors;
+}
+
+
 // Return the center of this zone
 Point BotNavMeshZone::getCenter() const
 {
@@ -99,7 +109,13 @@ void BotNavMeshZone::renderLayer(S32 layerIndex) const
 void BotNavMeshZone::addToZoneDatabase(GridDatabase *botZoneDatabase)
 {
    setExtent(calcExtents());
-   DatabaseObject::addToDatabase(botZoneDatabase);    // not a static, just looks like one from here!
+   addToDatabase(botZoneDatabase);
+}
+
+
+void BotNavMeshZone::addNeighbor(const NeighboringZone neighbor)
+{
+   mNeighbors.push_back(neighbor);
 }
 
 
@@ -404,7 +420,7 @@ static void linkTeleportersBotNavMeshZoneConnections(const GridDatabase *botZone
             neighbor.distTo = 0;
             neighbor.center.set(origin);
 
-            origZone->mNeighbors.push_back(neighbor);
+            origZone->addNeighbor(neighbor);
          }
       }  // for loop iterating over teleporter dests
    } // for loop iterating over teleporters
@@ -416,13 +432,31 @@ static void linkTeleportersBotNavMeshZoneConnections(const GridDatabase *botZone
 bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<BotNavMeshZone *> &allZones,
                                        const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList,
                                        const Vector<DatabaseObject *> &turretList, const Vector<DatabaseObject *> &forceFieldProjectorList,
-                                       const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones)
+                                       const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones, 
+                                       U64 sqliteLevelInfoId)
 {
 #ifdef LOG_TIMER
    U32 starttime = Platform::getRealMilliseconds();
 #endif
 
    allZones.deleteAndClear();
+
+   bool loaded = tryToLoadZonesFromSqlite(sqliteLevelInfoId, allZones) && allZones.size() > 0;
+#ifdef LOG_TIMER
+   U32 done0 = Platform::getRealMilliseconds();
+#endif
+   if(loaded)
+   {
+      for(S32 i = 0; i < allZones.size(); i++)
+         allZones[i]->addToZoneDatabase(&botZoneDatabase);
+
+#ifdef LOG_TIMER
+      // Timings: 567 579 3014
+      logprintf("Loaded %d zones in %d ms!", allZones.size(), done0 - starttime);
+#endif 
+      return true;
+   }
+
 
    Rect bounds(worldExtents);      // Modifiable copy
 
@@ -594,8 +628,218 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<Bot
 #ifdef LOG_TIMER
    U32 done3 = Platform::getRealMilliseconds();
 
-   logprintf("Timings: %d %d %d", done1-starttime, done2-done1, done3-done2);
+   logprintf("Timings: %d %d %d; total %d", done1 - starttime, done2 - done1, done3 - done2, done3 - starttime);
 #endif
+
+
+   saveBotZonesToSqlite(allZones, sqliteLevelInfoId);
+
+   return true;
+}
+
+
+void clearZonesFromDatabase(sqlite3 *sqliteDb, U64 sqliteLevelInfoId)
+{
+   string sql = "DELETE FROM zone_neighbors WHERE level_info_id = " + itos(sqliteLevelInfoId) + ";"
+                "DELETE FROM zones          WHERE level_info_id = " + itos(sqliteLevelInfoId) + ";";
+
+   sqlite3_stmt *pStmt;
+   S32 rc;
+
+   // Compile the INSERT statement -- note that passed size should include trailing \0, hence the + 1
+   rc = sqlite3_prepare_v2(sqliteDb, sql.c_str(), sql.size() + 1, &pStmt, 0);
+   TNLAssert(rc == SQLITE_OK, "Error preparing statement");
+
+   rc = sqlite3_step(pStmt);        // Run the virtual machine; with insert, only need to run this once
+   TNLAssert(rc == SQLITE_DONE, "Error running statement");
+
+   rc = sqlite3_finalize(pStmt);    // Cleanup
+   TNLAssert(rc == SQLITE_OK, "Error finalizing statement");
+}
+
+
+bool BotNavMeshZone::saveBotZonesToSqlite(const Vector<BotNavMeshZone *> &allZones, U64 sqliteLevelInfoId)
+{
+   if(!LevelInfo::isValidSqliteLevelId(sqliteLevelInfoId))
+      return false;
+
+   S32 rc;
+   sqlite3 *sqliteDb;
+
+   rc = sqlite3_open_v2(LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str(), &sqliteDb, SQLITE_OPEN_READWRITE, NULL);
+   TNLAssert(rc == SQLITE_OK, "Error opening database!");
+   if(rc != SQLITE_OK)
+      return false;
+
+   sqlite3_exec(sqliteDb, "BEGIN TRANSACTION;", NULL, NULL, NULL);
+
+   clearZonesFromDatabase(sqliteDb, sqliteLevelInfoId);
+
+   // Some statement templates -- we'll precompile these once for better performance, and pass them rather than the database
+   const string zones_sql     = "INSERT INTO zones (level_info_id, zone_id, zone_geom) VALUES(@LEVEL_INFO_ID, @ZONE_ID, @ZONE_GEOM);";
+   const string neighbors_sql = "INSERT INTO zone_neighbors(level_info_id, write_order, origin_zone_id, dest_zone_id, border_start_geom, border_end_geom) "
+                                "VALUES(@LEVEL_INFO_ID, @OEDER_BY, @ORIGIN_ZONE_ID, @DEST_ZONE_ID, @BORDER_START, @BORDER_END);";
+
+   sqlite3_stmt *zones_pStmt, *neighbors_pStmt;
+
+   // Compile the INSERT statement -- note that passed size should include trailing \0, hence the + 1
+   rc = sqlite3_prepare_v2(sqliteDb, zones_sql.c_str(), zones_sql.size() + 1, &zones_pStmt, 0);
+   TNLAssert(rc == SQLITE_OK, "Error preparing statement");  if(rc != SQLITE_OK) { sqlite3_close(sqliteDb); return false; }
+
+   rc = sqlite3_prepare_v2(sqliteDb, neighbors_sql.c_str(), neighbors_sql.size() + 1, &neighbors_pStmt, 0);
+   TNLAssert(rc == SQLITE_OK, "Error preparing statement");  if(rc != SQLITE_OK)  { sqlite3_close(sqliteDb); return false; }
+
+   for(S32 i = 0; i < allZones.size(); i++)
+   {
+      TNLAssert(i == allZones[i]->getZoneId(), "These should be the same!");
+
+      if(!allZones[i]->writeZoneToSqlite(zones_pStmt, neighbors_pStmt, sqliteLevelInfoId))
+      {
+         TNLAssert(false, "Error writing zones to database!");
+         const char *errorMessage = sqlite3_errmsg(sqliteDb);
+         logprintf("Error writing zones to sqlite database: %s", errorMessage);
+         sqlite3_close(sqliteDb);
+         return false;
+      }
+   }
+
+   sqlite3_exec(sqliteDb, "END TRANSACTION;", NULL, NULL, NULL);
+
+   // Cleanup
+   rc = sqlite3_finalize(zones_pStmt);    
+   TNLAssert(rc == SQLITE_OK, "Error finalizing!");
+
+   rc = sqlite3_finalize(neighbors_pStmt);  
+   TNLAssert(rc == SQLITE_OK, "Error finalizing!");
+
+   rc = sqlite3_close(sqliteDb);
+   TNLAssert(rc == SQLITE_OK, "Error closing database!");
+
+   return rc == SQLITE_OK;
+}
+
+
+//                         0         1
+// Callback for "SELECT zone_id, zone_geom FROM zones WHERE zone_id = nnnn;"
+static int loadZonesCallback(void *allZones_ptr, int argc, char **argv, char **colName)
+{
+   Vector<BotNavMeshZone *> &allZones = *static_cast<Vector<BotNavMeshZone *> *>(allZones_ptr);
+
+   BotNavMeshZone *zone = new BotNavMeshZone(stoi(argv[0]));    // Will be cleaned up when allZones is cleared
+   zone->getGeometry().getGeometry()->readWkb((U8 *)argv[1]);
+
+   zone->setExtent(zone->getGeometry().getGeometry()->calcExtents());
+
+   allZones.push_back(zone);
+
+   return 0;
+}
+
+
+//                              0            1             2              3       
+// Callback for "SELECT origin_zone_id, dest_zone_id, border_start_geom, border_end_geom FROM zone_neighbors WHERE level_info_id = nnnn;"
+static int loadNeighborCallback(void *allZones_ptr, int argc, char **argv, char **colName)
+{
+   TNLAssert(string(colName[0]) == "origin_zone_id" && string(colName[1]) == "dest_zone_id" && string(colName[2]) == "border_start_geom" && string(colName[3]) == "border_end_geom", "Wrong column names!");
+
+   Vector<BotNavMeshZone *> &allZones = *static_cast<Vector<BotNavMeshZone *> *>(allZones_ptr);
+
+   BotNavMeshZone &originZone = *allZones[stoi(argv[0])];
+   S32 destZoneId = stoi(argv[1]);
+   BotNavMeshZone &destZone = *allZones[destZoneId];
+
+   Point borderStart, borderEnd;
+   borderStart.fromWkb((U8 *)argv[2]);
+   borderEnd.fromWkb((U8 *)argv[3]);
+
+   originZone.addNeighbor(NeighboringZone(destZoneId, borderStart, borderEnd, originZone.getCenter(), destZone.getCenter()));
+
+   return 0;
+}
+
+
+static void logSqlError(char *message)
+{
+   logprintf("SQL error: %s", message);
+   sqlite3_free(message);
+}
+
+
+bool BotNavMeshZone::tryToLoadZonesFromSqlite(U64 sqliteLevelInfoId, Vector<BotNavMeshZone *> &allZones)
+{
+   if(!LevelInfo::isValidSqliteLevelId(sqliteLevelInfoId))
+      return false;
+
+   S32 rc;
+   sqlite3 *sqliteDb;
+   rc = sqlite3_open_v2(LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str(), &sqliteDb, SQLITE_OPEN_READONLY, NULL);
+   TNLAssert(rc == SQLITE_OK, "Error opening database!");
+   if(rc != SQLITE_OK)
+      return false;
+
+   // Our sql
+   const string id = itos(sqliteLevelInfoId);
+   const string zones_sql     = "SELECT zone_id, zone_geom FROM zones WHERE level_info_id = " + id + " ORDER BY zone_id;";
+   const string neighbors_sql = "SELECT origin_zone_id, dest_zone_id, border_start_geom, border_end_geom FROM zone_neighbors WHERE level_info_id = " + id + " ORDER BY write_order;";
+
+   char *errMsg = NULL;
+   rc = sqlite3_exec(sqliteDb, zones_sql.c_str(), loadZonesCallback, &allZones, &errMsg);
+   TNLAssert(rc == SQLITE_OK, "Error running statement");
+   if(rc != SQLITE_OK)
+   {
+      logSqlError(errMsg);
+
+      rc = sqlite3_close(sqliteDb);
+      TNLAssert(rc == SQLITE_OK, "Error closing database!");
+
+      return false;
+   }
+
+
+   rc = sqlite3_exec(sqliteDb, neighbors_sql.c_str(), loadNeighborCallback, &allZones, &errMsg);
+   TNLAssert(rc == SQLITE_OK, "Error running statement");
+   if(rc != SQLITE_OK)
+      logSqlError(errMsg);
+
+   rc = sqlite3_close(sqliteDb);
+   TNLAssert(rc == SQLITE_OK, "Error closing database!");
+
+   return rc == SQLITE_OK;
+}
+
+
+bool bindDataAndRun(sqlite3_stmt *pStmt, U64 recordId, S32 zoneId, const string &wkb)
+{
+   static const S32 param1 = sqlite3_bind_parameter_index(pStmt, "@LEVEL_INFO_ID");
+   static const S32 param2 = sqlite3_bind_parameter_index(pStmt, "@ZONE_ID");
+   static const S32 param3 = sqlite3_bind_parameter_index(pStmt, "@ZONE_GEOM");
+
+   TNLAssert(param1 > 0 && param2 > 0 && param3 > 0, "Could not find params!");
+
+   S32 rc;
+
+   rc = sqlite3_reset(pStmt);                                                     TNLAssert(rc == SQLITE_OK, "Bad bind!"); if(rc != SQLITE_OK) return false;
+   rc = sqlite3_clear_bindings(pStmt);                                            TNLAssert(rc == SQLITE_OK, "Bad bind!"); if(rc != SQLITE_OK) return false;
+   rc = sqlite3_bind_int64(pStmt, param1, recordId);                              TNLAssert(rc == SQLITE_OK, "Bad bind!"); if(rc != SQLITE_OK) return false;
+   rc = sqlite3_bind_int  (pStmt, param2, zoneId);                                TNLAssert(rc == SQLITE_OK, "Bad bind!"); if(rc != SQLITE_OK) return false;
+   rc = sqlite3_bind_blob(pStmt, param3, wkb.c_str(), wkb.size(), SQLITE_STATIC); TNLAssert(rc == SQLITE_OK, "Bad bind!"); if(rc != SQLITE_OK) return false;
+
+   rc = sqlite3_step(pStmt);    // Run the virtual machine; with insert, only need to run this once
+   TNLAssert(rc == SQLITE_DONE, "Error stepping!");
+   return rc == SQLITE_DONE;
+}
+
+
+bool BotNavMeshZone::writeZoneToSqlite(sqlite3_stmt *zones_pStmt, sqlite3_stmt *neighbors_pStmt, U64 sqliteLevelInfoId)
+{
+   string wkb = getGeometry().getGeometry()->toWkb();
+
+   if(!bindDataAndRun(zones_pStmt, sqliteLevelInfoId, mZoneId, wkb))
+      return false;
+
+   for(S32 i = 0; i < mNeighbors.size(); i++)
+      if(!mNeighbors[i].bindDataAndRun(neighbors_pStmt, sqliteLevelInfoId, i, mZoneId, mNeighbors[i].zoneID, mNeighbors[i].borderStart, mNeighbors[i].borderEnd))
+         return false;
 
    return true;
 }
@@ -604,7 +848,7 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<Bot
 inline F32 getTriangleArea(const Point &p1, const Point &p2, const Point &p3)
 {
    F32 area = ((p2.x - p1.x) * (p3.y - p1.y) - (p3.x - p1.x) * (p2.y - p1.y)) / 2;
-   return (area > 0.0) ? area : -area;
+   return (area >= 0.0) ? area : -area;
 }
 
 
@@ -729,6 +973,56 @@ NeighboringZone::NeighboringZone(S32 zoneId, const Point &bordStart, const Point
 
    distTo = selfCenter.distanceTo(borderCenter);
    center.set(otherCenter);
+}
+
+
+static bool bind_point(sqlite3_stmt *pStmt, S32 param, const Point &point)
+{
+   BitStream stream;
+   point.coordsToWkb(stream);
+
+   S32 rc = sqlite3_bind_blob(pStmt, param, stream.getBuffer(), stream.getBytePosition(), SQLITE_TRANSIENT);
+   TNLAssert(rc == SQLITE_OK, "Error binding!");
+   if(rc != SQLITE_OK)
+      return false;
+
+#ifdef TNL_DEBUG
+   Point x;
+   x.fromWkb(stream.getBuffer());
+   TNLAssert(x == point, "Should be equal!");
+#endif
+
+   return true;
+}
+
+
+bool NeighboringZone::bindDataAndRun(sqlite3_stmt *pStmt, U64 sqliteLevelInfoId, S32 order, S32 originZoneId, S32 destZoneId,
+                                     const Point &borderStart, const Point &borderEnd)
+{
+   // Make these static to avoid looking them up every time... pStmt is not going to change form
+   static const S32 param1 = sqlite3_bind_parameter_index(pStmt, "@LEVEL_INFO_ID");
+   static const S32 param2 = sqlite3_bind_parameter_index(pStmt, "@OEDER_BY");
+   static const S32 param3 = sqlite3_bind_parameter_index(pStmt, "@ORIGIN_ZONE_ID");
+   static const S32 param4 = sqlite3_bind_parameter_index(pStmt, "@DEST_ZONE_ID");
+   static const S32 param5 = sqlite3_bind_parameter_index(pStmt, "@BORDER_START");
+   static const S32 param6 = sqlite3_bind_parameter_index(pStmt, "@BORDER_END");
+
+   TNLAssert(param1 > 0 && param2 > 0 && param3 > 0 && param4 > 0 && param5 > 0 && param6 > 0, "Could not find params!");
+
+   sqlite3_reset(pStmt);
+   sqlite3_clear_bindings(pStmt);
+   sqlite3_bind_int64(pStmt, param1, sqliteLevelInfoId);
+   sqlite3_bind_int(pStmt, param2, order);
+   sqlite3_bind_int(pStmt, param3, originZoneId);
+   sqlite3_bind_int(pStmt, param4, destZoneId);
+   
+   if(!(bind_point(pStmt, param5, borderStart) &&
+        bind_point(pStmt, param6, borderEnd)))
+      return false;
+
+   S32 rc = sqlite3_step(pStmt);    // Run the virtual machine; with insert, only need to run this once
+   TNLAssert(rc == SQLITE_DONE, "Error stepping!");
+   return rc == SQLITE_DONE;
 }
 
 

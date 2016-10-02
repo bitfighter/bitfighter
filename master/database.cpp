@@ -651,6 +651,43 @@ DbQuery::~DbQuery()
 
 
 // Run the passed query on the appropriate database, returns id of inserted record -- throws exceptions!
+U64 DbQuery::runSelectQuery(const string &sql, int(*callback)(void*, int, char**, char**), void *data) const
+{
+   if(!mIsValid)
+      return U64_MAX;
+
+   if(dumpSql)
+      logprintf("SQL: %s", sql.c_str());
+
+   if(mQuery)
+      // Should only get here when mysql has been compiled in
+#ifdef BF_WRITE_TO_MYSQL
+      return mQuery->execute(sql).insert_id();
+#else
+      throw std::exception();    // Should be impossible
+#endif
+
+   if(mSqliteDb)
+   {
+      char *err = 0;
+      sqlite3_exec(mSqliteDb, sql.c_str(), callback, data, &err);
+
+      if(err)
+      {
+         logprintf("Database error accessing sqlite database: %s", err);
+         logprintf(sql.c_str());
+         sqlite3_free(err);
+         return -1;
+      }
+
+      return sqlite3_last_insert_rowid(mSqliteDb);
+   }
+
+   return U64_MAX;
+}
+
+
+// Run the passed query on the appropriate database, returns id of inserted record -- throws exceptions (but rarely)
 U64 DbQuery::runInsertQuery(const string &sql) const
 {
    if(!mIsValid)
@@ -670,14 +707,14 @@ U64 DbQuery::runInsertQuery(const string &sql) const
    if(mSqliteDb)
    {
       char *err = 0;
-      sqlite3_exec(mSqliteDb, sql.c_str(), NULL, 0, &err);
+      sqlite3_exec(mSqliteDb, sql.c_str(), NULL, NULL, &err);
 
       if(err)
       {
          logprintf("Database error accessing sqlite database: %s", err);
          logprintf(sql.c_str());
          sqlite3_free(err);
-         return -1;
+         return U64_MAX;
       }
 
       return sqlite3_last_insert_rowid(mSqliteDb);  
@@ -827,7 +864,7 @@ string DatabaseWriter::getSqliteSchema()
       "   game_type VARCHAR(32) NOT NULL,"
       "   has_levelgen TINYINT NOT NULL,"
       "   team_count INTEGER NOT NULL,"
-      "   winning_score INTEGER NOT NULL,"
+      "   winning_score INTEGER NOT NULL,"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
       "   game_duration INTEGER NOT NULL"
       ");"
 

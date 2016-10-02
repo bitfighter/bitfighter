@@ -39,7 +39,7 @@ namespace Zap
    Level::Level(const string &levelCode)
    {
       initialize();
-      loadLevelFromString(levelCode);
+      loadLevelFromString(levelCode, -1);
    }
 
 
@@ -156,13 +156,13 @@ namespace Zap
 
    // Load level stored in filename into database; returns true if file exists, false if not.  In either case,
    // the Level object will be left in a usable state.
-   bool Level::loadLevelFromFile(const string &filename)
+   bool Level::loadLevelFromFile(const string &filename, U64 sqliteLevelId)
    {
       ifstream fileStream(filename.c_str(), ios_base::in | ios_base::binary);
       if(fileStream.fail())
          return false;
 
-      loadLevelFromStream(fileStream, filename, Md5::getHashFromStream(fileStream));
+      loadLevelFromStream(fileStream, filename, Md5::getHashFromStream(fileStream), sqliteLevelId);
 
 #ifdef SAM_ONLY
       // In case the level crash the game trying to load, want to know which file is the problem. 
@@ -175,14 +175,14 @@ namespace Zap
 
    // This is the core loader for levels in-game and in-editor.  This will always return a valid level, even
    // if contents is empty or somehow invalid.
-   void Level::loadLevelFromString(const string &contents, const string &filename)
+   void Level::loadLevelFromString(const string &contents, U64 sqliteLevelId, const string &filename)
    {
       istringstream stringStream(contents);
-      loadLevelFromStream(stringStream, filename, Md5::getHashFromStream(stringStream));
+      loadLevelFromStream(stringStream, filename, Md5::getHashFromStream(stringStream), sqliteLevelId);
    }
 
 
-   void Level::loadLevelFromStream(istream &stream, const string &streamSource, const string &hash)
+   void Level::loadLevelFromStream(istream &stream, const string &streamSource, const string &hash, U64 sqliteLevelId)
    {
       // Reset stream to beginning, get a clean start
       stream.clear();
@@ -212,6 +212,7 @@ namespace Zap
       validateLevel();
 
       mLevelHash = hash;
+      mLevelInfo.setSqliteLevelId(sqliteLevelId);
    }
 
 

@@ -9,6 +9,9 @@
 #include "gridDB.h"            // Parent
 #include "../recast/Recast.h"  // for rcPolyMesh;
 
+
+struct sqlite3_stmt;
+
 namespace Zap
 {
 
@@ -41,8 +44,10 @@ public:
 
    NeighboringZone();      // Constructor
    NeighboringZone(S32 zoneId, const Point &bordStart, const Point &bordEnd, const Point &selfCenter, const Point &otherCenter);
-};
 
+   static bool bindDataAndRun(sqlite3_stmt *pStmt, U64 sqliteLevelInfoId, S32 order, S32 originZoneId, S32 destZoneId,
+                       const Point &borderStart, const Point &borderEnd);
+};
 
 class ServerGame;
 
@@ -60,6 +65,8 @@ private:
    Vector<Border> mNeighborRenderPoints;     // Only populated on client
 
    static void populateZoneList(GridDatabase *mBotZoneDatabase, Vector<BotNavMeshZone *> *allZones);  // Populates allZones
+   static bool saveBotZonesToSqlite(const Vector<BotNavMeshZone *> &allZones, U64 sqliteLevelInfoId);
+   static bool tryToLoadZonesFromSqlite(U64 sqliteLevelInfoId, Vector<BotNavMeshZone *> &allZones);
 
 public:
    explicit BotNavMeshZone(S32 id = -1);     // Constructor
@@ -72,11 +79,14 @@ public:
 
    //GridDatabase *getGameObjDatabase();
    void addToZoneDatabase(GridDatabase *botZoneDatabase);
+   bool writeZoneToSqlite(sqlite3_stmt *zones_pStmt, sqlite3_stmt *neighbors_pStmt, U64 sqliteLevelInfoId);
+
 
    Point getCenter() const;      // Return center of zone
 
    // More precise boundary for precise collision detection
    const Vector<Point> *getCollisionPoly() const;
+   void addNeighbor(const NeighboringZone neighbor);
 
    // Only gets run on the server, never on client
    //bool collide(BfObject *hitObject);
@@ -88,7 +98,7 @@ public:
    static bool buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<BotNavMeshZone *> &allZones,
                                  const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList,
                                  const Vector<DatabaseObject *> &turretList, const Vector<DatabaseObject *> &forceFieldProjectorList,
-                                 const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones);
+                                 const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones, U64 sqliteLevelInfoId);
 
    static S32 calcLevelSize     (const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList,
                                  const Vector<pair<Point, const Vector<Point> *> > &teleporterData);

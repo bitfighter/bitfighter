@@ -68,6 +68,8 @@
 #include "physfs.hpp"
 #include "StackTracer.h"
 #include <UIMenus.h>
+#include "../master/database.h"
+#include <sstream>
 
 using namespace TNL;
 
@@ -403,6 +405,29 @@ void setupLogging(IniSettings *iniSettings)
    gMainLog.setMsgType(LogConsumer::LuaLevelGenerator,     iniSettings->mSettings.getVal<YesNo>(IniKey::LuaLevelGenerator)); 
    gMainLog.setMsgType(LogConsumer::LuaBotMessage,         iniSettings->mSettings.getVal<YesNo>(IniKey::LuaBotMessage)); 
    gMainLog.setMsgType(LogConsumer::ServerFilter,          iniSettings->mSettings.getVal<YesNo>(IniKey::ServerFilter)); 
+}
+
+
+// Create the levelInfo database if it does not already exist
+void makeLevelDatabase()
+{
+   if(fileExists(LevelInfo::LEVEL_INFO_DATABASE_NAME))
+      return;
+
+   string schema = LevelInfo::getCreateTableSql(LevelInfo::LEVEL_DATABASE_SCHEMA_VERSION);
+
+   DbWriter::DbQuery query(LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str());
+
+   // Create empty file on file system
+   logprintf("Creating level database %s", LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str());
+   sqlite3 *sqliteDb = NULL;
+
+   sqlite3_open(LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str(), &sqliteDb);
+
+   U64 result = query.runInsertQuery(schema);      // Will be U64_MAX in case of error... TODO: Check for this and disable database stuff
+
+   if(sqliteDb)
+      sqlite3_close(sqliteDb);
 }
 
 
@@ -1126,6 +1151,10 @@ int main(int argc, char **argv)
    // Even dedicated server needs sound these days
    SoundSystem::init(settings->getSetting<SfxSet>(IniKey::SFXSet), folderManager->getSfxDirs(),
                      folderManager->getMusicDir(), settings->getMusicVolume());
+
+   // Make sure we have a database for storing our level data (does nothing if database already exists)
+   makeLevelDatabase();
+
    
    if(settings->isDedicatedServer())
    {

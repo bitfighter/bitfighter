@@ -75,8 +75,133 @@ void LevelInfo::initialize()
    minRecPlayers = 0;
    maxRecPlayers = 0;
    mHosterLevelIndex = -1;
+   mSqliteLevelId = -1;
 }
 
+
+static string STE2String(StringTableEntry ste)
+{
+   return ste.getString();
+}
+
+
+const string LevelInfo::SCHEMA_TABLE_NAME        = "schema";
+const string LevelInfo::LEVEL_INFO_TABLE_NAME    = "levelinfo";
+const string LevelInfo::LEVEL_INFO_DATABASE_NAME = "levelinfo.db";
+
+#define LEVEL_INFO_DATABASE_MAPPING_TABLE \
+   /*           Index,  Db column,     DbField Type                 LevelInfo field   Db to LevelInfo transformation   LevelInfo to Db                */  \
+   LEVEL_INFO_ITEM(0,   "hash",        "TEXT NOT NULL",             mLevelHash,       ,                                                                )  \
+   LEVEL_INFO_ITEM(1,   "level_name",  "TEXT NOT NULL",             mLevelName,       ,                                STE2String                      )  \
+   LEVEL_INFO_ITEM(2,   "game_type",   "TEXT NOT NULL",             mLevelType,       GameType::getGameTypeIdFromName, GameType::getGameTypeClassName  )  \
+   LEVEL_INFO_ITEM(3,   "min_players", "INT  NOT NULL",             minRecPlayers,    atoi,                                                            )  \
+   LEVEL_INFO_ITEM(4,   "max_players", "INT  NOT NULL",             maxRecPlayers,    atoi,                                                            )  \
+   LEVEL_INFO_ITEM(5,   "script_file", "TEXT NOT NULL",             mScriptFileName,  ,                                                                )  \
+   
+
+
+static const S32 MAX_INDEX = 0
+#  define LEVEL_INFO_ITEM(index, b, c, d, e, f)  * 0 + index
+   LEVEL_INFO_DATABASE_MAPPING_TABLE
+#  undef LEVEL_INFO_ITEM
+   + 1;     // + 1 for level_info_id
+
+   // static const S32 MAX_INDEX = 0 * 0 + 1 * 0 + 2 * 0 + 3... + 1
+
+
+string LevelInfo::getSelectSql(const string &hash)
+{
+   return string("") + "SELECT "
+#  define LEVEL_INFO_ITEM(a, col, c, d, e, f)  col + ","
+      LEVEL_INFO_DATABASE_MAPPING_TABLE
+#  undef LEVEL_INFO_ITEM
+      "level_info_id FROM " + LEVEL_INFO_TABLE_NAME + " WHERE hash = '" + hash + "';";
+
+   // Generates something that goes a little like this:
+   // SELECT hash, level_name, game_type, min_players, max_players, script_file, 1
+   // FROM levelinfo
+   // WHERE hash = '8f0e423dd3cc5f1ef2d48a4781fb98bf';
+}
+
+
+void LevelInfo::populateFromDatabaseResults(char **results)
+{
+   // Note that the first line of results is the column headers, so we need to apply offset of MAX_INDEX
+#  define LEVEL_INFO_ITEM(index, b, c, param, transformation, f)  param = transformation(results[index + MAX_INDEX]);
+   LEVEL_INFO_DATABASE_MAPPING_TABLE
+#  undef LEVEL_INFO_ITEM
+
+      // Generates something that goes a bit like this:
+      // mLevelName      = NO_OP(results[1]);
+      // mLevelType      = GameType::getGameTypeIdFromName(results[2]);
+      // minRecPlayers   = atoi(results[3]);
+      // maxRecPlayers   = atoi(results[4]);
+      // mScriptFileName = NO_OP(results[5]); 
+
+      mSqliteLevelId = atoi(results[MAX_INDEX + MAX_INDEX + 1]);
+}
+
+
+string LevelInfo::getCreateTableSql(S32 schemaVersion)
+{
+   return string("") +     // Coerce what follows into a string expression
+      "DROP TABLE IF EXISTS " + SCHEMA_TABLE_NAME + ";"
+      "CREATE TABLE " + SCHEMA_TABLE_NAME + " (version INTEGER NOT NULL);"
+      "INSERT INTO " + SCHEMA_TABLE_NAME + " VALUES(" + itos(schemaVersion) + ");"
+      "DROP TABLE IF EXISTS " + LEVEL_INFO_TABLE_NAME + ";"
+      "CREATE TABLE " + LEVEL_INFO_TABLE_NAME + " (" +
+      "level_info_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
+#  define LEVEL_INFO_ITEM(index, column, type, d, e, f)  column + " " + type + "," +
+      LEVEL_INFO_DATABASE_MAPPING_TABLE
+#  undef LEVEL_INFO_ITEM
+      "last_seen DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);"
+
+      "DROP TABLE IF EXISTS zones; "
+      "CREATE TABLE zones (level_info_id INTEGER NOT NULL, zone_id INTEGER NOT NULL, zone_geom BLOB NOT NULL); "
+
+      "DROP TABLE IF EXISTS zone_neighbors; "
+      "CREATE TABLE zone_neighbors(level_info_id     INTEGER NOT NULL, "
+                                  "write_order       INTEGER NOT NULL, "
+                                  "origin_zone_id    INTEGER NOT NULL, "
+                                  "dest_zone_id      INTEGER NOT NULL, "
+                                  "border_start_geom BLOB NOT NULL, "
+                                  "border_end_geom   BLOB NOT NULL);";
+      
+
+   // Generates something like this:
+   // DROP TABLE IF EXISTS levels;
+   // CREATE TABLE levels (
+   //    hash        TEXT     NOT NULL   PRIMARY KEY,
+   //    level_name  TEXT     NOT NULL,
+   //    game_type   TEXT     NOT NULL,
+   //    min_players INTEGER  NOT NULL,
+   //    max_players INTEGER  NOT NULL,
+   //    script_file TEXT     NOT NULL,
+   //    last_seen   DATETIME NOT NULL   DEFAULT CURRENT_TIMESTAMP
+   //  );
+   //  DROP TABLE IF EXISTS ...
+}
+
+
+string LevelInfo::toSql() const
+{
+   ostringstream str;
+   str << "INSERT INTO " << LevelInfo::LEVEL_INFO_TABLE_NAME << "(" <<
+#  define LEVEL_INFO_ITEM(index, dbField, c, d, e, f)  dbField << "," <<
+      LEVEL_INFO_DATABASE_MAPPING_TABLE
+#  undef LEVEL_INFO_ITEM
+      "last_seen) VALUES (" <<
+#  define LEVEL_INFO_ITEM(index, b, c, field, e, transform) " '" << transform((##field)) << "'," << 
+      LEVEL_INFO_DATABASE_MAPPING_TABLE
+#  undef LEVEL_INFO_ITEM
+       "datetime('NOW'));";
+
+   // Produces this:
+   // insert into levels(hash,level_name,game_type,min_players,max_players,script_file,last_seen) 
+   //          values ('8f0e423dd3cc5f1ef2d48a4781fb98bf','Level Name','NexusGameType','1','5','killemall',datetime('now'));
+
+   return str.str();
+}
 
 void LevelInfo::writeToStream(ostream &stream, const string &hash) const
 {
@@ -149,15 +274,22 @@ bool LevelSource::getLevelInfoFromDatabase(const string &hash, LevelInfo &levelI
 // Parse through the chunk of data passed in and find parameters to populate levelInfo with
 // This is only used on the server to provide quick level information without having to load the level
 // (like with playlists or menus).  Static method.
-void LevelSource::getLevelInfoFromCodeChunk(const string &code, LevelInfo &levelInfo)
+void LevelSource::getLevelInfoFromCodeChunk(const string &code, const string &hash, LevelInfo &levelInfo)
 {
    istringstream stream(code);
-   getLevelInfoFromCodeChunk(stream, levelInfo);
+   getLevelInfoFromStream(stream, hash, levelInfo);
 }
 
 
-void LevelSource::getLevelInfoFromCodeChunk(istream &stream, LevelInfo &levelInfo)
+void LevelSource::getLevelInfoFromStream(istream &stream, const string &hash, LevelInfo &levelInfo)
 {
+   levelInfo.mLevelHash = hash;
+
+   DbWriter::DbQuery query(LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str());
+
+   if(populateFromDatabase(query, levelInfo, hash))
+      return;
+
    string line;
 
    // Read until all these are true
@@ -257,6 +389,29 @@ void LevelSource::getLevelInfoFromCodeChunk(istream &stream, LevelInfo &levelInf
          }
       }
    }
+
+   levelInfo.ensureLevelInfoHasValidName();
+   
+   U64 id = query.runInsertQuery(levelInfo.toSql());     // Returns U64_MAX if there was an error, writes to log
+   levelInfo.setSqliteLevelId(id);
+}
+
+   
+void LevelInfo::setSqliteLevelId(U64 levelId)
+{
+   mSqliteLevelId = levelId;
+}
+
+
+U64 LevelInfo::getSqliteLevelId() const
+{
+   return mSqliteLevelId;
+}
+
+
+bool LevelInfo::isValidSqliteLevelId(U64 id)
+{
+   return id != U64_MAX;
 }
 
 
@@ -389,26 +544,26 @@ bool MultiLevelSource::loadLevels(FolderManager *folderManager)
 }
 
 
-// Load specified level, put results in gameObjectDatabase.  Return md5 hash of level
+// Load specified level, put results in gameObjectDatabase.
 Level *MultiLevelSource::getLevel(S32 index) const
 {
    TNLAssert(index >= 0 && index < mLevelInfos.size(), "Index out of bounds!");
 
-   const LevelInfo *levelInfo = &mLevelInfos[index];
+   const LevelInfo &levelInfo = mLevelInfos[index];
 
-   string filename = FolderManager::findLevelFile(levelInfo->folder, levelInfo->filename);
+   string filename = FolderManager::findLevelFile(levelInfo.folder, levelInfo.filename);
 
    if(filename == "")
    {
-      logprintf("Unable to find level file \"%s\".  Skipping...", levelInfo->filename.c_str());
+      logprintf("Unable to find level file \"%s\".  Skipping...", levelInfo.filename.c_str());
       return NULL;
    }
 
    Level *level = new Level();      // Deleted by Game
 
-   if(!level->loadLevelFromFile(filename))
+   if(!level->loadLevelFromFile(filename, levelInfo.getSqliteLevelId()))
    {
-      logprintf("Unable to process level file \"%s\".  Skipping...", levelInfo->filename.c_str());
+      logprintf("Unable to process level file \"%s\".  Skipping...", levelInfo.filename.c_str());
       delete level;
       return NULL;
    }
@@ -449,14 +604,11 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
    }
 
 
-   // Compute hash
-   string hash = Md5::getHashFromStream(fileStream);
-
-   // Is hash known?
-
    // If not, load the level
-   Level level;
-   level.loadLevelFromStream(fileStream, fullFilename, hash);
+   //Level level;
+   //level.loadLevelFromStream(fileStream, fullFilename, hash);
+
+
 
    // some ideas for getting the area of a level:
    //   if(loadLevel())
@@ -547,11 +699,39 @@ bool MultiLevelSource::populateLevelInfoFromSource(const string &fullFilename, L
    fileStream.clear();
    fileStream.seekg(0, ios::beg);
 
-   getLevelInfoFromCodeChunk(fileStream, levelInfo);     // Fills levelInfo with data from file
+   getLevelInfoFromStream(fileStream, Md5::getHashFromStream(fileStream), levelInfo);     // Fills levelInfo with data from file
 
-
-   levelInfo.ensureLevelInfoHasValidName();
    return true;
+}
+
+
+bool LevelSource::populateFromDatabase(DbWriter::DbQuery &query, LevelInfo &levelInfo, const string &hash)
+{
+   string sql = LevelInfo::getSelectSql(hash);
+
+   Vector<Vector<string> > values;
+
+   char *err = 0;
+   char **results;
+   S32 rows, cols;
+
+   sqlite3_get_table(query.mSqliteDb, sql.c_str(), &results, &rows, &cols, &err);
+
+   // results[0]...results[cols] contain the col headers ==> http://www.sqlite.org/c3ref/free_table.html
+   TNLAssert(rows == 0 || rows == 1, "Index violation!");
+
+   sqlite3_free(err);
+
+
+   if(rows == 1)
+   {
+      levelInfo.populateFromDatabaseResults(results);
+      sqlite3_free_table(results);
+      return true;
+   }
+
+   sqlite3_free_table(results);
+   return false;
 }
 
 
@@ -619,7 +799,7 @@ Level *PlaylistLevelSource::getLevel(S32 index) const
 
    Level *level = new Level();      // Will be deleted by caller
 
-   if(!level->loadLevelFromFile(filename))
+   if(!level->loadLevelFromFile(filename, levelInfo->getSqliteLevelId()))
    {
       logprintf("Unable to process level file \"%s\".  Skipping...", levelInfo->filename.c_str());
       delete level;
@@ -681,7 +861,7 @@ Level *TestPlaylistLevelSource::getLevel(S32 index) const
 
    Level *level = new Level();      // Will be deleted by caller
 
-   level->loadLevelFromString("");
+   level->loadLevelFromString("", levelInfo->getSqliteLevelId());
 
    return level;
 }
@@ -728,7 +908,9 @@ StringLevelSource::~StringLevelSource()
 
 bool StringLevelSource::populateLevelInfoFromSourceByIndex(S32 levelInfoIndex)
 {
-   getLevelInfoFromCodeChunk(mLevelCodes[levelInfoIndex], mLevelInfos[levelInfoIndex]);
+   string hash = Md5::getHashFromString(mLevelCodes[levelInfoIndex]);
+
+   getLevelInfoFromCodeChunk(mLevelCodes[levelInfoIndex], hash, mLevelInfos[levelInfoIndex]);
    return true;
 }
 
@@ -744,7 +926,7 @@ Level *StringLevelSource::getLevel(S32 index) const
 {
    Level *level = new Level();
 
-   level->loadLevelFromString(mLevelCodes[index], "");
+   level->loadLevelFromString(mLevelCodes[index], -1, "");
    return level;
 }
 

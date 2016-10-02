@@ -15,12 +15,24 @@
 #endif
 
 #include <math.h>
+#include "ServerGame.h"
+#include <sstream>
 
 
 using namespace TNL;
 
 namespace Zap
 {
+
+static const U8 wkbXDR = 0;         // Big Endian
+static const U8 wkbNDR = 1;         // Little Endian
+
+#ifdef TNL_LITTLE_ENDIAN
+   static const U8 wkbEndian = wkbNDR;
+#else
+   static const U8 wkbEndian = wkbXDR;
+#endif
+
 
 // Constructor
 Geometry::Geometry()
@@ -46,6 +58,42 @@ GeomType Geometry::getGeomType() const
 void Geometry::onPointsChanged()
 {
    // Do nothing
+}
+
+
+bool Geometry::readWkb(unsigned char *wkb)
+{
+   TNLAssert(false, "Not implemented");
+}
+
+
+string Geometry::toWkb() const
+{
+   TNLAssert(false, "Not implemented");
+   return "";
+}
+
+
+static void writeInt(ostream &stream, S32 i)
+{
+   char c[4];
+   memcpy(c, &i, 4);
+   stream.write(c, 4);
+}
+
+
+static void writeByte(ostream &stream, U8 i)
+{
+   char c[1];
+   c[0] = i;
+   stream.write(c, 1);
+}
+
+
+void Geometry::writeWkbGeometryHeader(ostream &stream, WkbGeomType type)
+{
+   writeByte(stream, wkbEndian);
+   writeInt(stream, type);
 }
 
 
@@ -1080,6 +1128,96 @@ F32 PolygonGeometry::getLabelAngle() const
 void PolygonGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
 {
    readPolyBounds(argc, argv, firstCoord, gridSize, false, mPolyBounds, mVertSelected);
+}
+
+
+inline void read_int8(const char* data, U8 &val)
+{
+   memcpy(&val, data, 1);
+}
+
+
+inline void read_int32(const char* data, S32 &val)
+{
+   memcpy(&val, data, 4);
+}
+
+
+static S32 readInt(const char *wkb, S32 &pos)
+{
+   S32 n;
+   read_int32(wkb + pos, n);
+
+   pos += 4;
+
+   return n;
+}
+
+
+static U8 readByte(const char *wkb, S32 &pos)
+{
+   U8 n;
+   read_int8(wkb + pos, n);
+
+   pos += 1;
+
+   return n;
+}
+
+
+// Returns true if reading was successful, false if an error was encountered
+// For WKB polygon format see http://edndoc.esri.com/arcsde/9.1/general_topics/wkb_representation.htm
+bool PolygonGeometry::readWkb(unsigned char *wkb)
+{
+   S32 pos = 0;
+   //U8 byteOrder = readByte(wkb, pos);
+   //TNLAssert(byteOrder == wkbEndian, "Invalid geometry: Unexpected endian!");
+   //if(byteOrder != wkbEndian)
+   //   return false;
+
+   //S32 geomType = readInt(wkb, pos);
+   //TNLAssert(geomType == wkbPolygon, "Invalid geometry: Expected polygon!");
+   //if(geomType != wkbPolygon)
+   //   return false;
+
+   //S32 rings = readInt(wkb, pos);
+   //TNLAssert(rings == 1, "Invalid geometry: Expected 1 ring!");
+   //if(rings != 1)
+   //   return false;
+      
+   BitStream stream(wkb, 1024);
+
+   //Geometry::writeWkbGeometryHeader(stream, wkbPoint);
+   //coordsToWkb(stream);
+
+   S32 numPoints = stream.readInt(32);
+   
+   if(numPoints > 0)
+   {
+      mPolyBounds.resize(numPoints);
+
+      for(S32 i = 0; i < numPoints; i++)
+         mPolyBounds[i].read(&stream);
+   }
+
+   return true;
+}
+
+
+string PolygonGeometry::toWkb() const
+{
+   BitStream stream;
+   //writeWkbGeometryHeader(stream, wkbPolygon);
+   //writeInt(stream, 1);          // One ring... always one ring.
+
+   S32 pts = mPolyBounds.size();
+
+   stream.writeInt(pts, 32);
+   //writeInt(stream, pts);
+   for(S32 i = 0; i < pts; i++)
+      mPolyBounds[i].coordsToWkb(stream);
+
+   return string((char *)stream.getBuffer(), stream.getBufferSize());
 }
 
 

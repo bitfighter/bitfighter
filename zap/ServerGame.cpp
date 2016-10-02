@@ -607,7 +607,8 @@ void ServerGame::cycleLevel(S32 nextLevel, bool isReset)
    
    getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(mLevel->getBotZoneDatabase(), mLevel->getBotZoneList(),
                                                                               getWorldExtents(), barrierList, turretList,
-                                                                              forceFieldProjectorList, teleporterData, triangulate);
+                                                                              forceFieldProjectorList, teleporterData, triangulate,
+                                                                              mLevel->getSqliteLevelId());
    // Clear team info for all clients
    resetAllClientTeams();
 

@@ -12,6 +12,9 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 
+#include "../master/database.h"
+
+
 #include <boost/shared_ptr.hpp>
 
 
@@ -24,9 +27,16 @@ namespace Zap
 struct LevelInfo
 {
 private:
-   void initialize();               // Called by constructors
+   void initialize();      // Called by constructors
+
+   U64 mSqliteLevelId;     // U64_MAX means this id is invalid
 
 public:
+   static const S32 LEVEL_DATABASE_SCHEMA_VERSION = 1;
+   static const string SCHEMA_TABLE_NAME;
+   static const string LEVEL_INFO_TABLE_NAME;
+   static const string LEVEL_INFO_DATABASE_NAME;
+
    string filename;                 // File level is stored in
    string folder;                   // File's folder
    string mScriptFileName;
@@ -36,6 +46,8 @@ public:
    S32 minRecPlayers;               // Min recommended number of players for this level
    S32 maxRecPlayers;               // Max recommended number of players for this level
    S32 mHosterLevelIndex;           
+   string mLevelHash;
+
 
    // Default constructor used on server side
    LevelInfo();      
@@ -52,9 +64,18 @@ public:
    // Destructor
    virtual ~LevelInfo();
 
+   static string getSelectSql(const string &hash);
+   void populateFromDatabaseResults(char **results);
+   string toSql() const;
+   static string getCreateTableSql(S32 schemaVersion);
+
    const char *getLevelTypeName() const;
    void writeToStream(ostream &stream, const string &hash) const;
    void ensureLevelInfoHasValidName();
+
+   void setSqliteLevelId(U64 levelId);
+   U64 getSqliteLevelId() const;
+   static bool isValidSqliteLevelId(U64 id);
 };
 
 
@@ -72,6 +93,8 @@ class LevelSource
 {
 protected:
    Vector<LevelInfo> mLevelInfos;   // Info about these levels
+
+   static bool populateFromDatabase(DbWriter::DbQuery &query, LevelInfo &levelInfo, const string &hash);
 
 public:
    static const string TestFileName;
@@ -106,8 +129,8 @@ public:
 
    // The following populate levelInfo
    static bool getLevelInfoFromDatabase(const string &hash, LevelInfo &levelInfo);
-   static void getLevelInfoFromCodeChunk(const string &code, LevelInfo &levelInfo);
-   static void getLevelInfoFromCodeChunk(istream &stream, LevelInfo &levelInfo);
+   static void getLevelInfoFromCodeChunk(const string &code, const string &hash, LevelInfo &levelInfo);
+   static void getLevelInfoFromStream(istream &stream, const string &hash, LevelInfo &levelInfo);
 };
 
 

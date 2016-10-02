@@ -425,7 +425,7 @@ void EditorUserInterface::loadLevel()
    // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
 
    Level *level = new Level();
-   bool isNewLevel = !level->loadLevelFromFile(fileName);   // load returns true if fileName exists, false if not
+   bool isNewLevel = !level->loadLevelFromFile(fileName, -1);   // load returns true if fileName exists, false if not
 
    setLevel(boost::shared_ptr<Level>(level));
 

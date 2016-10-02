@@ -20,6 +20,7 @@ namespace boost{ template<class T> class shared_ptr; }      // or use #include <
 using namespace std;
 using namespace TNL;
 
+struct sqlite3;
 
 namespace Zap
 {
@@ -31,6 +32,20 @@ enum GeomType {
    geomPolygon,      // Many points, closed loop
    geomNone,         // Singularity   
 };
+
+
+// From https://github.com/mapnik/mapnik/blob/master/src/wkb.cpp
+enum WkbGeomType
+{
+   wkbPoint = 1,
+   wkbLineString = 2,
+   wkbPolygon = 3,
+   wkbMultiPoint = 4,
+   wkbMultiLineString = 5,
+   wkbMultiPolygon = 6,
+   wkbGeometryCollection = 7
+};
+
 
 
 // Geometry is essentially an interface class that all geometric objects implement
@@ -76,7 +91,13 @@ public:
    virtual string geomToLevelCode() const;
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
+   virtual bool readWkb(unsigned char *wkb);
+   virtual string toWkb() const;
+
+   static void writeWkbGeometryHeader(ostream &stream, WkbGeomType type);
+
    virtual void disableTriangulation();
+   
 
    //Geometry *newCopy();     // Not needed?
 

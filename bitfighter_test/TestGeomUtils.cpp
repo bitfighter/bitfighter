@@ -7,6 +7,7 @@
 #include "../zap/MathUtils.h"
 #include "gtest/gtest.h"
 #include <map>
+#include "BotNavMeshZone.h"
 
 namespace Zap
 {
@@ -20,15 +21,15 @@ using namespace TNL;
 TEST(GeomUtilsTest, pointOnLine)
 {
    EXPECT_LT(pointOnLine(Point(0,10), Point(0,0),     Point(10,10))  .distanceTo(Point(5,5)), .001);
-   EXPECT_LT(pointOnLine(Point(0,10), Point(10,10),   Point(0,0))    .distanceTo(Point(5,5)), .001);     // Same thing, reversed points
-   EXPECT_LT(pointOnLine(Point(0,10), Point(-10,-10), Point(0,0))    .distanceTo(Point(5,5)), .001);     // Same thing, different line points
-   EXPECT_LT(pointOnLine(Point(0,10), Point(-10,-10), Point(-20,-20)).distanceTo(Point(5,5)), .001);     // Same thing, different line points
+   EXPECT_LT(pointOnLine(Point(0,10), Point(10,10),   Point(-10,-10)).distanceTo(Point(5,5)), .001);     // Same thing, reversed points
+   EXPECT_LT(pointOnLine(Point(0,10), Point(-10,-10), Point(20,20))  .distanceTo(Point(5,5)), .001);     // Same thing, different line points
+   EXPECT_LT(pointOnLine(Point(0,10), Point(-20,-20), Point(-20,-20)).distanceTo(Point(5,5)), .001);     // Same thing, different line points
 
    EXPECT_LT(pointOnLine(Point(-16.39656, -3.36974), Point(1.52738, 4.80359), Point(9.34006, 0.5753)).distanceTo(Point(-8.91, 10.45)), .01);     // Same thing, different line points
 
    // Horiz. and vert. lines
-   EXPECT_LT(pointOnLine(Point(3,4), Point(-10,10), Point(20,10)).distanceTo(Point(3,10)),  .001); 
-   EXPECT_LT(pointOnLine(Point(3,4), Point(-10,3),  Point(-10,6)).distanceTo(Point(-10,4)), .001); 
+   EXPECT_LT(pointOnLine(Point(3,4), Point(-10,10), Point(0,10)).distanceTo(Point(3,10)),  .001); 
+   EXPECT_LT(pointOnLine(Point(3,4), Point(-10,3),  Point(-10,0)).distanceTo(Point(-10,3)), .001); 
 
    // Colinear, and on endpoints
    EXPECT_LT(pointOnLine(Point(5,5), Point(-10,-10), Point(20,20)).distanceTo(Point(5,5)), .001); 
@@ -73,6 +74,37 @@ Vector<Point> _name;                                                           \
 const char* _name##lines[] = _lines;                                           \
 parsePoly(_name##lines, sizeof(_name##lines) / sizeof(_name##lines[0]), _name) \
 
+
+void TestWkbRoundTrip(const Vector<Vector<Point> > &polys)
+{
+   for(S32 i = 0; i < polys.size(); i++)
+   {
+      BotNavMeshZone zone1(0);
+      zone1.getGeometry().setGeometry(polys[i]);
+      string geom = zone1.getGeometry().getGeometry()->toWkb();
+
+      BotNavMeshZone zone2(0);
+      zone2.getGeometry().getGeometry()->readWkb((U8 *)geom.c_str());
+
+      EXPECT_EQ(zone1.getGeometry().getOutline()->size(), zone1.getGeometry().getOutline()->size());
+      for(S32 j = 0; j < zone1.getGeometry().getOutline()->size(); j++)
+         EXPECT_EQ(zone1.getGeometry().getOutline()->get(j), zone2.getGeometry().getOutline()->get(j));
+   }
+
+   // Also test individual points
+   for(S32 i = 0; i < polys.size(); i++)
+   {
+      for(S32 j = 0; j < polys[i].size(); j++)
+      {
+         string geom = polys[i][j].toWkb();
+         Point x;
+         x.fromWkb((U8 *)geom.c_str());
+         EXPECT_EQ(x, polys[i][j]);
+      }
+   }
+}
+
+
 TEST(GeomUtilsTest, splitSelfIntersecting)
 {
 	POLY(poly, ARRAYDEF({
@@ -91,6 +123,8 @@ TEST(GeomUtilsTest, splitSelfIntersecting)
 	ASSERT_EQ(2, result.size());
 	EXPECT_EQ(3, result[0].size());
 	EXPECT_EQ(3, result[1].size());
+
+   TestWkbRoundTrip(polys);
 }
 
 
@@ -120,6 +154,8 @@ TEST(GeomUtilsTest, splitRepeatedlySelfIntersecting)
 	{
 		EXPECT_EQ(4, result[i].size());
 	}
+
+   TestWkbRoundTrip(polys);
 }
 
 
@@ -158,6 +194,8 @@ TEST(GeomUtilsTest, splitRevisitedVertex)
 	EXPECT_EQ(4, result[0].size());
 	EXPECT_EQ(4, result[1].size());
 	*/
+
+   TestWkbRoundTrip(polys);
 }
 
 
@@ -175,6 +213,8 @@ TEST(GeomUtilsTest, triangulateCW)
 	Vector<Vector<Point> > result;
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(2, result.size());
+
+   TestWkbRoundTrip(polys);
 }
 
 
@@ -192,6 +232,8 @@ TEST(GeomUtilsTest, triangulateCCW)
 	Vector<Vector<Point> > result;
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(2, result.size());
+
+   TestWkbRoundTrip(polys);
 }
 
 
@@ -220,6 +262,8 @@ TEST(GeomUtilsTest, triangulateBarelyTouching)
 	Vector<Vector<Point> > result;
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(4, result.size());
+
+   TestWkbRoundTrip(polys);
 }
 
 
@@ -252,6 +296,8 @@ TEST(GeomUtilsTest, triangulateOverlapping)
 	Vector<Vector<Point> > result;
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_NE(0, result.size());
+
+   TestWkbRoundTrip(polys);
 }
 
 
@@ -271,6 +317,8 @@ TEST(GeomUtilsTest, triangulateSelfIntersecting)
 	Vector<Vector<Point> > result;
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(2, result.size());
+
+   TestWkbRoundTrip(polys);
 }
 
 
@@ -290,6 +338,8 @@ TEST(GeomUtilsTest, triangulateColinearAdjacentSegments)
 	Vector<Vector<Point> > result;
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(2, result.size());
+
+   TestWkbRoundTrip(polys);
 }
 
 
@@ -309,6 +359,8 @@ TEST(GeomUtilsTest, triangulateOverlappingSegments)
 	Vector<Vector<Point> > result;
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(4, result.size());
+
+   TestWkbRoundTrip(polys);
 }
 
 
@@ -333,6 +385,8 @@ TEST(GeomUtilsTest, triangulateRepeatedlySelfIntersecting)
 	Vector<Vector<Point> > result;
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(10, result.size());
+
+   TestWkbRoundTrip(polys);
 }
 
 
@@ -358,6 +412,8 @@ TEST(GeomUtilsTest, triangulateConsecutiveRepeatVertices)
 	Vector<Vector<Point> > result;
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(2, result.size());
+
+   TestWkbRoundTrip(polys);
 }
 
 
@@ -389,6 +445,8 @@ TEST(GeomUtilsTest, triangulateWithRevisitedVertex)
 	Vector<Vector<Point> > result;
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(4, result.size());
+
+   TestWkbRoundTrip(polys);
 }
 
 
@@ -401,6 +459,8 @@ TEST(GeomUtilsTest, triangulateLongPolygon)
 
 	Vector<Vector<Point> > result;
 	EXPECT_TRUE(triangulate(polys, result));
+
+   TestWkbRoundTrip(polys);
 }
 
 
@@ -416,6 +476,8 @@ TEST(GeomUtilsTest, triangulateManyPolygons)
 	Vector<Vector<Point> > result;
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(1024, result.size());
+
+   TestWkbRoundTrip(polys);
 }
 
 

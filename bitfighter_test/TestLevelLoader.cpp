@@ -54,7 +54,7 @@ TEST(LevelLoaderTest, LongLine)
 TEST(LevelLoaderTest, InvalidFile)
 {
    Level level;
-   bool result = level.loadLevelFromFile("file_that_does_not_exist_1967215_62957358_dd25a399-e099-427d-9b8f-12411a58ea27.level");
+   bool result = level.loadLevelFromFile("file_that_does_not_exist_1967215_62957358_dd25a399-e099-427d-9b8f-12411a58ea27.level", -1);
    EXPECT_FALSE(result);
 }
 

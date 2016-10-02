@@ -1686,7 +1686,10 @@ void GameConnection::ReceivedLevelFile(const U8 *leveldata, U32 levelsize, const
    }
 
    LevelInfo levelInfo;
-   LevelSource::getLevelInfoFromCodeChunk(string((char *)leveldata, levelsize), levelInfo);
+   string levelString = string((char *)leveldata, levelsize);
+   string hash = Md5::getHashFromString(levelString);
+
+   LevelSource::getLevelInfoFromCodeChunk(levelString, hash, levelInfo);
 
    if(isServer && levelgensize == 0 && levelInfo.mScriptFileName.length() != 0)
    {
@@ -1954,7 +1957,10 @@ bool GameConnection::TransferLevelFile(const char *filename)
       }
 
       LevelInfo levelInfo;
-      LevelSource::getLevelInfoFromCodeChunk(string((char*)data, size), levelInfo);
+      string levelString = string((char *)data, size);
+      string hash = Md5::getHashFromString(levelString);
+
+      LevelSource::getLevelInfoFromCodeChunk(levelString, hash, levelInfo);
 
       for(U32 i = 0; i < size; i += partsSize)
       {

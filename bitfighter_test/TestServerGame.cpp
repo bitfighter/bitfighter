@@ -25,7 +25,7 @@ TEST(ServerGameTest, LoadLevelWithEmptyLevelLine)
    Level level;
 
    // Empty level lines caused crashes at one point
-   level.loadLevelFromString(getGenericHeader() + "\r\n\r\n");
+   level.loadLevelFromString(getGenericHeader() + "\r\n\r\n", -1);
 }
 
 

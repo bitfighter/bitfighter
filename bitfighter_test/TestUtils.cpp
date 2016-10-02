@@ -59,7 +59,7 @@ ServerGame *newServerGame()
    LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(""));
 
    Level *level = new Level();
-   level->loadLevelFromString("");
+   level->loadLevelFromString("", -1);
 
    ServerGame *game = new ServerGame(addr, settings, levelSource, false, false);
    game->setLevel(level);

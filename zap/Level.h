@@ -77,10 +77,12 @@ public:
 
    void onAddedToGame(Game *game);
 
-   void loadLevelFromString(const string &contents, const string &filename = "");
-   void loadLevelFromStream(istream &stream, const string &streamSource, const string &hash);
-   bool loadLevelFromFile(const string &filename);
+   bool loadLevelFromFile(const string &filename, U64 sqliteLevelId);   
+   void loadLevelFromString(const string &contents, U64 sqliteLevelId, const string &filename = "");
+   void loadLevelFromStream(istream &stream, const string &streamSource, const string &hash, U64 sqliteLevelId);
+   
    void validateLevel();
+   U64 getSqliteLevelId();
 
    //LevelInfo &getLevelInfo();
 

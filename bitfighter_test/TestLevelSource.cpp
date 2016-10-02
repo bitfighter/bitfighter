@@ -34,7 +34,7 @@ TEST(TestLevelSource, tests)
    {
       SCOPED_TRACE("i = " + itos(i));
       LevelInfo levelInfo;
-      LevelSource::getLevelInfoFromCodeChunk(levels.first[i], levelInfo);
+      LevelSource::getLevelInfoFromCodeChunk(levels.first[i], "not really a hash", levelInfo);
 
       EXPECT_EQ(levelInfo.mLevelName,      levels.second[i].mLevelName);
       EXPECT_EQ(levelInfo.mLevelType,      levels.second[i].mLevelType);

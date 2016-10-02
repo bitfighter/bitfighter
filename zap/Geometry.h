@@ -222,6 +222,9 @@ public:
    F32 getLabelAngle() const;
 
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
+   bool readWkb(unsigned char *wkb);
+   string toWkb() const;
+
 
    virtual void onPointsChanged();
 

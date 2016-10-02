@@ -11,6 +11,8 @@
 // forward declarations
 namespace TNL {
    typedef float F32;
+   typedef int S32;
+   typedef unsigned char U8;
    class BitStream;
 };
 
@@ -67,6 +69,12 @@ public:
    void read(const char **argv);
    void read(BitStream *stream);
    void write(BitStream *stream) const;
+
+   string toWkb() const;
+   bool fromWkb(unsigned char* wkb);
+   void coordsToWkb(BitStream &stream) const;
+   void coordsFromWkb(const char *wkb, S32 &pos);
+
 
    string toString() const;
    string toLevelCode() const;
@@ -177,6 +185,7 @@ public:
    {
       return !operator<(pt);
    }
+
 }; // class
 
 
