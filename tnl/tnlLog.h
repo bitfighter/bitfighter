@@ -92,6 +92,7 @@ public:
 
       LogLevelError           = BIT(23),     // Logs errors and warnings in levels
       ConsoleMsg              = BIT(24),     // Message that goes only to the console
+      SqlMsg                  = BIT(25),     // Messages related to SQL
       
       All = 0xFFFFFFFF,
       AllErrorTypes = LogFatalError | LogError | LogWarning | LogLevelError | ConfigurationError
