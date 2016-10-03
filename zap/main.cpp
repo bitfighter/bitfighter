@@ -99,7 +99,6 @@ using namespace TNL;
 #include "SoundSystem.h"
 #include "InputCode.h"     // initializeKeyNames()
 #include "ClientInfo.h"
-#include "Console.h"       // For access to console
 #include "ship.h"
 #include "LevelSource.h"
 
@@ -109,8 +108,6 @@ using namespace TNL;
 #ifdef WIN32
 // For writeToConsole()
 #  include <windows.h>
-#  include <io.h>
-#  include <fcntl.h>
 #  include <shellapi.h>
 
 #  define USE_BFUP
