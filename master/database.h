@@ -120,7 +120,7 @@ public:
 
    void selectHandler(const string &sql, S32 cols, Vector<Vector<string> > &values);
 
-   void setDumpSql(bool dump);
+   static void setDumpSql(bool dump);
 
    void insertStats(const GameStats &gameStats);
    void insertAchievement(U8 achievementId, const StringTableEntry &playerNick, const string &serverName, const string &serverIP);
