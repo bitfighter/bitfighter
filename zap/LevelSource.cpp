@@ -9,7 +9,7 @@
 #include "gameType.h"
 #include "GameSettings.h"
 #include "Level.h"
-
+#include "LevelInfoDatabaseMapping.h"
 #include "stringUtils.h"
 
 #include "tnlAssert.h"
@@ -85,19 +85,7 @@ static string STE2String(StringTableEntry ste)
 }
 
 
-const string LevelInfo::SCHEMA_TABLE_NAME        = "schema";
-const string LevelInfo::LEVEL_INFO_TABLE_NAME    = "levelinfo";
 const string LevelInfo::LEVEL_INFO_DATABASE_NAME = "levelinfo.db";
-
-#define LEVEL_INFO_DATABASE_MAPPING_TABLE \
-   /*           Index,  Db column,     DbField Type                 LevelInfo field   Db to LevelInfo transformation   LevelInfo to Db                */  \
-   LEVEL_INFO_ITEM(0,   "hash",        "TEXT NOT NULL",             mLevelHash,       ,                                                                )  \
-   LEVEL_INFO_ITEM(1,   "level_name",  "TEXT NOT NULL",             mLevelName,       ,                                STE2String                      )  \
-   LEVEL_INFO_ITEM(2,   "game_type",   "TEXT NOT NULL",             mLevelType,       GameType::getGameTypeIdFromName, GameType::getGameTypeClassName  )  \
-   LEVEL_INFO_ITEM(3,   "min_players", "INT  NOT NULL",             minRecPlayers,    atoi,                                                            )  \
-   LEVEL_INFO_ITEM(4,   "max_players", "INT  NOT NULL",             maxRecPlayers,    atoi,                                                            )  \
-   LEVEL_INFO_ITEM(5,   "script_file", "TEXT NOT NULL",             mScriptFileName,  ,                                                                )  \
-   
 
 
 static const S32 MAX_INDEX = 0
@@ -115,7 +103,7 @@ string LevelInfo::getSelectSql(const string &hash)
 #  define LEVEL_INFO_ITEM(a, col, c, d, e, f)  col + ","
       LEVEL_INFO_DATABASE_MAPPING_TABLE
 #  undef LEVEL_INFO_ITEM
-      "level_info_id FROM " + LEVEL_INFO_TABLE_NAME + " WHERE hash = '" + hash + "';";
+      "level_info_id FROM " + Sqlite::LEVEL_INFO_TABLE_NAME + " WHERE hash = '" + hash + "';";
 
    // Generates something that goes a little like this:
    // SELECT hash, level_name, game_type, min_players, max_players, script_file, 1
@@ -127,66 +115,27 @@ string LevelInfo::getSelectSql(const string &hash)
 void LevelInfo::populateFromDatabaseResults(char **results)
 {
    // Note that the first line of results is the column headers, so we need to apply offset of MAX_INDEX
-#  define LEVEL_INFO_ITEM(index, b, c, param, transformation, f)  param = transformation(results[index + MAX_INDEX]);
+#  define LEVEL_INFO_ITEM(index, b, c, param, transformation, f)  param = transformation(results[index + MAX_INDEX + 1]);
    LEVEL_INFO_DATABASE_MAPPING_TABLE
 #  undef LEVEL_INFO_ITEM
 
-      // Generates something that goes a bit like this:
-      // mLevelName      = NO_OP(results[1]);
-      // mLevelType      = GameType::getGameTypeIdFromName(results[2]);
-      // minRecPlayers   = atoi(results[3]);
-      // maxRecPlayers   = atoi(results[4]);
-      // mScriptFileName = NO_OP(results[5]); 
+   // MAX_INDEX is 5; there are 6 items (including mSqliteLevelId), hence the + 1.  Also see comment above about MAX_INDEX.
+   // Generates something that goes a bit like this:
+   // mLevelHash      = (results[0 + MAX_INDEX + 1]);
+   // mLevelName      = STE2String(results[1 + MAX_INDEX + 1]);
+   // mLevelType      = GameType::getGameTypeIdFromName(results[2 + MAX_INDEX + 1]);
+   // minRecPlayers   = atoi(results[3 + MAX_INDEX + 1]);
+   // maxRecPlayers   = atoi(results[4 + MAX_INDEX + 1]);
+   // mScriptFileName = (results[5 + MAX_INDEX + 1]); 
 
-      mSqliteLevelId = atoi(results[MAX_INDEX + MAX_INDEX + 1]);
-}
-
-
-string LevelInfo::getCreateTableSql(S32 schemaVersion)
-{
-   return string("") +     // Coerce what follows into a string expression
-      "DROP TABLE IF EXISTS " + SCHEMA_TABLE_NAME + ";"
-      "CREATE TABLE " + SCHEMA_TABLE_NAME + " (version INTEGER NOT NULL);"
-      "INSERT INTO " + SCHEMA_TABLE_NAME + " VALUES(" + itos(schemaVersion) + ");"
-      "DROP TABLE IF EXISTS " + LEVEL_INFO_TABLE_NAME + ";"
-      "CREATE TABLE " + LEVEL_INFO_TABLE_NAME + " (" +
-      "level_info_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
-#  define LEVEL_INFO_ITEM(index, column, type, d, e, f)  column + " " + type + "," +
-      LEVEL_INFO_DATABASE_MAPPING_TABLE
-#  undef LEVEL_INFO_ITEM
-      "last_seen DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);"
-
-      "DROP TABLE IF EXISTS zones; "
-      "CREATE TABLE zones (level_info_id INTEGER NOT NULL, zone_id INTEGER NOT NULL, zone_geom BLOB NOT NULL); "
-
-      "DROP TABLE IF EXISTS zone_neighbors; "
-      "CREATE TABLE zone_neighbors(level_info_id     INTEGER NOT NULL, "
-                                  "write_order       INTEGER NOT NULL, "
-                                  "origin_zone_id    INTEGER NOT NULL, "
-                                  "dest_zone_id      INTEGER NOT NULL, "
-                                  "border_start_geom BLOB NOT NULL, "
-                                  "border_end_geom   BLOB NOT NULL);";
-      
-
-   // Generates something like this:
-   // DROP TABLE IF EXISTS levels;
-   // CREATE TABLE levels (
-   //    hash        TEXT     NOT NULL   PRIMARY KEY,
-   //    level_name  TEXT     NOT NULL,
-   //    game_type   TEXT     NOT NULL,
-   //    min_players INTEGER  NOT NULL,
-   //    max_players INTEGER  NOT NULL,
-   //    script_file TEXT     NOT NULL,
-   //    last_seen   DATETIME NOT NULL   DEFAULT CURRENT_TIMESTAMP
-   //  );
-   //  DROP TABLE IF EXISTS ...
+   mSqliteLevelId = atoi(results[MAX_INDEX + MAX_INDEX + 1]);
 }
 
 
 string LevelInfo::toSql() const
 {
    ostringstream str;
-   str << "INSERT INTO " << LevelInfo::LEVEL_INFO_TABLE_NAME << "(" <<
+   str << "INSERT INTO " << Sqlite::LEVEL_INFO_TABLE_NAME << "(" <<
 #  define LEVEL_INFO_ITEM(index, dbField, c, d, e, f)  dbField << "," <<
       LEVEL_INFO_DATABASE_MAPPING_TABLE
 #  undef LEVEL_INFO_ITEM
@@ -194,11 +143,11 @@ string LevelInfo::toSql() const
 #  define LEVEL_INFO_ITEM(index, b, c, field, e, transform) " '" << transform((##field)) << "'," << 
       LEVEL_INFO_DATABASE_MAPPING_TABLE
 #  undef LEVEL_INFO_ITEM
-       "datetime('NOW'));";
+       "datetime('now'));";
 
    // Produces this:
-   // insert into levels(hash,level_name,game_type,min_players,max_players,script_file,last_seen) 
-   //          values ('8f0e423dd3cc5f1ef2d48a4781fb98bf','Level Name','NexusGameType','1','5','killemall',datetime('now'));
+   // INSERT INTO levels(hash,level_name,game_type,min_players,max_players,script_file,last_seen) 
+   //          VALUES ('8f0e423dd3cc5f1ef2d48a4781fb98bf','Level Name','NexusGameType','1','5','killemall',datetime('now'));
 
    return str.str();
 }

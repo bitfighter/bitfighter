@@ -6,8 +6,9 @@
 #include "../zap/GeomUtils.h"
 #include "../zap/MathUtils.h"
 #include "gtest/gtest.h"
-#include <map>
 #include "BotNavMeshZone.h"
+#include "tnlBitStream.h"
+#include <map>
 
 namespace Zap
 {
@@ -81,14 +82,17 @@ void TestWkbRoundTrip(const Vector<Vector<Point> > &polys)
    {
       BotNavMeshZone zone1(0);
       zone1.getGeometry().setGeometry(polys[i]);
-      string geom = zone1.getGeometry().getGeometry()->toWkb();
+      BitStream stream;
+      zone1.getGeometry().getGeometry()->write(&stream);
 
       BotNavMeshZone zone2(0);
-      zone2.getGeometry().getGeometry()->readWkb((U8 *)geom.c_str());
+      string x((char *)stream.getBuffer(), stream.getBytePosition());
+      zone2.getGeometry().getGeometry()->readWkb(stream.getBuffer(), stream.getBytePosition());
 
-      EXPECT_EQ(zone1.getGeometry().getOutline()->size(), zone1.getGeometry().getOutline()->size());
+      EXPECT_EQ(zone1.getGeometry().getOutline()->size(), zone2.getGeometry().getOutline()->size());
       for(S32 j = 0; j < zone1.getGeometry().getOutline()->size(); j++)
-         EXPECT_EQ(zone1.getGeometry().getOutline()->get(j), zone2.getGeometry().getOutline()->get(j));
+         EXPECT_EQ(zone1.getGeometry().getOutline()->get(j), 
+                   zone2.getGeometry().getOutline()->get(j));
    }
 
    // Also test individual points
@@ -96,9 +100,10 @@ void TestWkbRoundTrip(const Vector<Vector<Point> > &polys)
    {
       for(S32 j = 0; j < polys[i].size(); j++)
       {
-         string geom = polys[i][j].toWkb();
+         BitStream stream;
+         polys[i][j].write(&stream);
          Point x;
-         x.fromWkb((U8 *)geom.c_str());
+         x.fromWkb(stream.getBuffer(), stream.getBytePosition());
          EXPECT_EQ(x, polys[i][j]);
       }
    }

@@ -9,6 +9,7 @@
 #include "gridDB.h"            // Parent
 #include "../recast/Recast.h"  // for rcPolyMesh;
 
+#include "Test.h"
 
 struct sqlite3_stmt;
 
@@ -65,8 +66,9 @@ private:
    Vector<Border> mNeighborRenderPoints;     // Only populated on client
 
    static void populateZoneList(GridDatabase *mBotZoneDatabase, Vector<BotNavMeshZone *> *allZones);  // Populates allZones
-   static bool saveBotZonesToSqlite(const Vector<BotNavMeshZone *> &allZones, U64 sqliteLevelInfoId);
-   static bool tryToLoadZonesFromSqlite(U64 sqliteLevelInfoId, Vector<BotNavMeshZone *> &allZones);
+   static bool saveBotZonesToSqlite(const string &databaseName, const Vector<BotNavMeshZone *> &allZones, U64 sqliteLevelInfoId);
+   static bool tryToLoadZonesFromSqlite(const string &databaseName, U64 sqliteLevelInfoId, Vector<BotNavMeshZone *> &allZones);
+   static bool clearZonesFromDatabase(sqlite3 *sqliteDb, U64 sqliteLevelInfoId);
 
 public:
    explicit BotNavMeshZone(S32 id = -1);     // Constructor
@@ -106,6 +108,9 @@ public:
    static bool buildBotNavMeshZoneConnectionsRecastStyle(const Vector<BotNavMeshZone *> &allZones, 
                                                          rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
    static void buildBotNavMeshZoneConnections(const Vector<BotNavMeshZone *> &allZones);
+
+   // Test access
+   FRIEND_TEST(DatabaseTest, GeometryRoundTrip);
 };
 
 

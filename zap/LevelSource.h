@@ -67,7 +67,6 @@ public:
    static string getSelectSql(const string &hash);
    void populateFromDatabaseResults(char **results);
    string toSql() const;
-   static string getCreateTableSql(S32 schemaVersion);
 
    const char *getLevelTypeName() const;
    void writeToStream(ostream &stream, const string &hash) const;

@@ -182,27 +182,12 @@ void Point::write(BitStream *stream) const
 }
 
 
-string Point::toWkb() const
+bool Point::fromWkb(unsigned char* wkb, S32 bytes)
 {
-   BitStream stream;
-   coordsToWkb(stream);
-
-   return string((char *)stream.getBuffer(), stream.getBytePosition());
-}
-
-
-bool Point::fromWkb(unsigned char* wkb)
-{
-   BitStream stream(wkb, 8);
+   BitStream stream(wkb, bytes);
    read(&stream);
 
    return true;
-}
-
-
-void Point::coordsToWkb(BitStream &stream) const
-{
-   write(&stream);
 }
 
 

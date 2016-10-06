@@ -138,6 +138,9 @@ public:
 
    Int<BADGE_COUNT> getAchievements(const char *name);
    U16 getGamesPlayed(const char *name);
+
+   static sqlite3 *openSqliteDatabase(const string &databaseName, S32 mode);
+   static bool createLevelDatabase(const string &databaseName, S32 schemaVersion);
 };
 
 

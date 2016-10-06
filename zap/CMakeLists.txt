@@ -54,6 +54,7 @@ set(SHARED_SOURCES
 	item.cpp
 	Level.cpp
 	LevelDatabase.cpp
+   	LevelInfoDatabaseMapping.cpp
 	LevelLoadException.cpp
 	LevelSource.cpp
 	LineItem.cpp

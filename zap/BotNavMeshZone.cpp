@@ -441,7 +441,7 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<Bot
 
    allZones.deleteAndClear();
 
-   bool loaded = tryToLoadZonesFromSqlite(sqliteLevelInfoId, allZones) && allZones.size() > 0;
+   bool loaded = tryToLoadZonesFromSqlite(LevelInfo::LEVEL_INFO_DATABASE_NAME, sqliteLevelInfoId, allZones) && allZones.size() > 0;
 #ifdef LOG_TIMER
    U32 done0 = Platform::getRealMilliseconds();
 #endif
@@ -632,13 +632,13 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<Bot
 #endif
 
 
-   saveBotZonesToSqlite(allZones, sqliteLevelInfoId);
+   saveBotZonesToSqlite(LevelInfo::LEVEL_INFO_DATABASE_NAME, allZones, sqliteLevelInfoId);
 
    return true;
 }
 
 
-void clearZonesFromDatabase(sqlite3 *sqliteDb, U64 sqliteLevelInfoId)
+bool BotNavMeshZone::clearZonesFromDatabase(sqlite3 *sqliteDb, U64 sqliteLevelInfoId)
 {
    string sql = "DELETE FROM zone_neighbors WHERE level_info_id = " + itos(sqliteLevelInfoId) + ";"
                 "DELETE FROM zones          WHERE level_info_id = " + itos(sqliteLevelInfoId) + ";";
@@ -649,24 +649,33 @@ void clearZonesFromDatabase(sqlite3 *sqliteDb, U64 sqliteLevelInfoId)
    // Compile the INSERT statement -- note that passed size should include trailing \0, hence the + 1
    rc = sqlite3_prepare_v2(sqliteDb, sql.c_str(), sql.size() + 1, &pStmt, 0);
    TNLAssert(rc == SQLITE_OK, "Error preparing statement");
+   if(rc != SQLITE_OK)
+   {
+      const char *msg = sqlite3_errmsg(sqliteDb);
+      logprintf("SQLite error: %s", msg);
+      return false;
+   }
 
    rc = sqlite3_step(pStmt);        // Run the virtual machine; with insert, only need to run this once
    TNLAssert(rc == SQLITE_DONE, "Error running statement");
 
    rc = sqlite3_finalize(pStmt);    // Cleanup
    TNLAssert(rc == SQLITE_OK, "Error finalizing statement");
+
+   return rc == SQLITE_OK;
 }
 
 
-bool BotNavMeshZone::saveBotZonesToSqlite(const Vector<BotNavMeshZone *> &allZones, U64 sqliteLevelInfoId)
+bool BotNavMeshZone::saveBotZonesToSqlite(const string &databaseName, const Vector<BotNavMeshZone *> &allZones, U64 sqliteLevelInfoId)
 {
    if(!LevelInfo::isValidSqliteLevelId(sqliteLevelInfoId))
       return false;
 
-   S32 rc;
-   sqlite3 *sqliteDb;
+   sqlite3 *sqliteDb = DbWriter::DatabaseWriter::openSqliteDatabase(databaseName, SQLITE_OPEN_READWRITE);
+   if(sqliteDb == NULL)
+      return false;
 
-   rc = sqlite3_open_v2(LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str(), &sqliteDb, SQLITE_OPEN_READWRITE, NULL);
+   S32 rc = sqlite3_open_v2(databaseName.c_str(), &sqliteDb, SQLITE_OPEN_READWRITE, NULL);
    TNLAssert(rc == SQLITE_OK, "Error opening database!");
    if(rc != SQLITE_OK)
       return false;
@@ -719,14 +728,14 @@ bool BotNavMeshZone::saveBotZonesToSqlite(const Vector<BotNavMeshZone *> &allZon
 }
 
 
-//                         0         1
-// Callback for "SELECT zone_id, zone_geom FROM zones WHERE zone_id = nnnn;"
+//                         0         1              2
+// Callback for "SELECT zone_id, zone_geom, length(zone_geom) FROM zones WHERE zone_id = nnnn;"
 static int loadZonesCallback(void *allZones_ptr, int argc, char **argv, char **colName)
 {
    Vector<BotNavMeshZone *> &allZones = *static_cast<Vector<BotNavMeshZone *> *>(allZones_ptr);
 
    BotNavMeshZone *zone = new BotNavMeshZone(stoi(argv[0]));    // Will be cleaned up when allZones is cleared
-   zone->getGeometry().getGeometry()->readWkb((U8 *)argv[1]);
+   zone->getGeometry().getGeometry()->readWkb((U8 *)argv[1], stoi(argv[2]));
 
    zone->setExtent(zone->getGeometry().getGeometry()->calcExtents());
 
@@ -736,11 +745,11 @@ static int loadZonesCallback(void *allZones_ptr, int argc, char **argv, char **c
 }
 
 
-//                              0            1             2              3       
-// Callback for "SELECT origin_zone_id, dest_zone_id, border_start_geom, border_end_geom FROM zone_neighbors WHERE level_info_id = nnnn;"
+//                              0            1             2                         3                      4                     5
+// Callback for "SELECT origin_zone_id, dest_zone_id, border_start_geom, length(border_start_geom), border_end_geom, length(border_end_geom) FROM zone_neighbors WHERE level_info_id = nnnn;"
 static int loadNeighborCallback(void *allZones_ptr, int argc, char **argv, char **colName)
 {
-   TNLAssert(string(colName[0]) == "origin_zone_id" && string(colName[1]) == "dest_zone_id" && string(colName[2]) == "border_start_geom" && string(colName[3]) == "border_end_geom", "Wrong column names!");
+   TNLAssert(string(colName[0]) == "origin_zone_id" && string(colName[1]) == "dest_zone_id" && string(colName[2]) == "border_start_geom" && string(colName[4]) == "border_end_geom", "Wrong column names!");
 
    Vector<BotNavMeshZone *> &allZones = *static_cast<Vector<BotNavMeshZone *> *>(allZones_ptr);
 
@@ -749,8 +758,8 @@ static int loadNeighborCallback(void *allZones_ptr, int argc, char **argv, char 
    BotNavMeshZone &destZone = *allZones[destZoneId];
 
    Point borderStart, borderEnd;
-   borderStart.fromWkb((U8 *)argv[2]);
-   borderEnd.fromWkb((U8 *)argv[3]);
+   borderStart.fromWkb((U8 *)argv[2], stoi(argv[3]));
+   borderEnd.fromWkb  ((U8 *)argv[4], stoi(argv[5]));
 
    originZone.addNeighbor(NeighboringZone(destZoneId, borderStart, borderEnd, originZone.getCenter(), destZone.getCenter()));
 
@@ -765,25 +774,22 @@ static void logSqlError(char *message)
 }
 
 
-bool BotNavMeshZone::tryToLoadZonesFromSqlite(U64 sqliteLevelInfoId, Vector<BotNavMeshZone *> &allZones)
+bool BotNavMeshZone::tryToLoadZonesFromSqlite(const string &databaseName, U64 sqliteLevelInfoId, Vector<BotNavMeshZone *> &allZones)
 {
    if(!LevelInfo::isValidSqliteLevelId(sqliteLevelInfoId))
       return false;
 
-   S32 rc;
-   sqlite3 *sqliteDb;
-   rc = sqlite3_open_v2(LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str(), &sqliteDb, SQLITE_OPEN_READONLY, NULL);
-   TNLAssert(rc == SQLITE_OK, "Error opening database!");
-   if(rc != SQLITE_OK)
+   sqlite3 *sqliteDb = DbWriter::DatabaseWriter::openSqliteDatabase(databaseName, SQLITE_OPEN_READONLY);
+   if(sqliteDb == NULL)
       return false;
 
    // Our sql
    const string id = itos(sqliteLevelInfoId);
-   const string zones_sql     = "SELECT zone_id, zone_geom FROM zones WHERE level_info_id = " + id + " ORDER BY zone_id;";
-   const string neighbors_sql = "SELECT origin_zone_id, dest_zone_id, border_start_geom, border_end_geom FROM zone_neighbors WHERE level_info_id = " + id + " ORDER BY write_order;";
+   const string zones_sql     = "SELECT zone_id, zone_geom, length(zone_geom) FROM zones WHERE level_info_id = " + id + " ORDER BY zone_id;";
+   const string neighbors_sql = "SELECT origin_zone_id, dest_zone_id, border_start_geom, length(border_start_geom), border_end_geom, length(border_end_geom) FROM zone_neighbors WHERE level_info_id = " + id + " ORDER BY write_order;";
 
    char *errMsg = NULL;
-   rc = sqlite3_exec(sqliteDb, zones_sql.c_str(), loadZonesCallback, &allZones, &errMsg);
+   S32 rc = sqlite3_exec(sqliteDb, zones_sql.c_str(), loadZonesCallback, &allZones, &errMsg);
    TNLAssert(rc == SQLITE_OK, "Error running statement");
    if(rc != SQLITE_OK)
    {
@@ -808,7 +814,7 @@ bool BotNavMeshZone::tryToLoadZonesFromSqlite(U64 sqliteLevelInfoId, Vector<BotN
 }
 
 
-bool bindDataAndRun(sqlite3_stmt *pStmt, U64 recordId, S32 zoneId, const string &wkb)
+bool bindDataAndRun(sqlite3_stmt *pStmt, U64 recordId, S32 zoneId, BitStream *stream)
 {
    static const S32 param1 = sqlite3_bind_parameter_index(pStmt, "@LEVEL_INFO_ID");
    static const S32 param2 = sqlite3_bind_parameter_index(pStmt, "@ZONE_ID");
@@ -816,25 +822,29 @@ bool bindDataAndRun(sqlite3_stmt *pStmt, U64 recordId, S32 zoneId, const string 
 
    TNLAssert(param1 > 0 && param2 > 0 && param3 > 0, "Could not find params!");
 
-   S32 rc;
+   S32 rc = sqlite3_reset(pStmt)                        ||
+            sqlite3_clear_bindings(pStmt)               ||
+            sqlite3_bind_int64(pStmt, param1, recordId) ||
+            sqlite3_bind_int(pStmt, param2, zoneId)     ||
+            sqlite3_bind_blob(pStmt, param3, stream->getBuffer(), stream->getBytePosition(), SQLITE_STATIC);
 
-   rc = sqlite3_reset(pStmt);                                                     TNLAssert(rc == SQLITE_OK, "Bad bind!"); if(rc != SQLITE_OK) return false;
-   rc = sqlite3_clear_bindings(pStmt);                                            TNLAssert(rc == SQLITE_OK, "Bad bind!"); if(rc != SQLITE_OK) return false;
-   rc = sqlite3_bind_int64(pStmt, param1, recordId);                              TNLAssert(rc == SQLITE_OK, "Bad bind!"); if(rc != SQLITE_OK) return false;
-   rc = sqlite3_bind_int  (pStmt, param2, zoneId);                                TNLAssert(rc == SQLITE_OK, "Bad bind!"); if(rc != SQLITE_OK) return false;
-   rc = sqlite3_bind_blob(pStmt, param3, wkb.c_str(), wkb.size(), SQLITE_STATIC); TNLAssert(rc == SQLITE_OK, "Bad bind!"); if(rc != SQLITE_OK) return false;
+   TNLAssert(rc == SQLITE_OK, "Problem binding data!"); 
+   if(rc != SQLITE_OK) 
+      return false;
 
    rc = sqlite3_step(pStmt);    // Run the virtual machine; with insert, only need to run this once
    TNLAssert(rc == SQLITE_DONE, "Error stepping!");
+
    return rc == SQLITE_DONE;
 }
 
 
 bool BotNavMeshZone::writeZoneToSqlite(sqlite3_stmt *zones_pStmt, sqlite3_stmt *neighbors_pStmt, U64 sqliteLevelInfoId)
 {
-   string wkb = getGeometry().getGeometry()->toWkb();
+   BitStream stream;
+   getGeometry().getGeometry()->write(&stream);
 
-   if(!bindDataAndRun(zones_pStmt, sqliteLevelInfoId, mZoneId, wkb))
+   if(!bindDataAndRun(zones_pStmt, sqliteLevelInfoId, mZoneId, &stream))
       return false;
 
    for(S32 i = 0; i < mNeighbors.size(); i++)
@@ -979,7 +989,7 @@ NeighboringZone::NeighboringZone(S32 zoneId, const Point &bordStart, const Point
 static bool bind_point(sqlite3_stmt *pStmt, S32 param, const Point &point)
 {
    BitStream stream;
-   point.coordsToWkb(stream);
+   point.write(&stream);
 
    S32 rc = sqlite3_bind_blob(pStmt, param, stream.getBuffer(), stream.getBytePosition(), SQLITE_TRANSIENT);
    TNLAssert(rc == SQLITE_OK, "Error binding!");
@@ -988,7 +998,7 @@ static bool bind_point(sqlite3_stmt *pStmt, S32 param, const Point &point)
 
 #ifdef TNL_DEBUG
    Point x;
-   x.fromWkb(stream.getBuffer());
+   x.fromWkb(stream.getBuffer(), stream.getBytePosition());
    TNLAssert(x == point, "Should be equal!");
 #endif
 

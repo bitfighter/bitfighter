@@ -61,39 +61,15 @@ void Geometry::onPointsChanged()
 }
 
 
-bool Geometry::readWkb(unsigned char *wkb)
+bool Geometry::readWkb(unsigned char *wkb, S32 bytes)
 {
    TNLAssert(false, "Not implemented");
 }
 
 
-string Geometry::toWkb() const
+void Geometry::write(BitStream *stream) const
 {
    TNLAssert(false, "Not implemented");
-   return "";
-}
-
-
-static void writeInt(ostream &stream, S32 i)
-{
-   char c[4];
-   memcpy(c, &i, 4);
-   stream.write(c, 4);
-}
-
-
-static void writeByte(ostream &stream, U8 i)
-{
-   char c[1];
-   c[0] = i;
-   stream.write(c, 1);
-}
-
-
-void Geometry::writeWkbGeometryHeader(ostream &stream, WkbGeomType type)
-{
-   writeByte(stream, wkbEndian);
-   writeInt(stream, type);
 }
 
 
@@ -1131,49 +1107,15 @@ void PolygonGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 
 }
 
 
-inline void read_int8(const char* data, U8 &val)
-{
-   memcpy(&val, data, 1);
-}
-
-
-inline void read_int32(const char* data, S32 &val)
-{
-   memcpy(&val, data, 4);
-}
-
-
-static S32 readInt(const char *wkb, S32 &pos)
-{
-   S32 n;
-   read_int32(wkb + pos, n);
-
-   pos += 4;
-
-   return n;
-}
-
-
-static U8 readByte(const char *wkb, S32 &pos)
-{
-   U8 n;
-   read_int8(wkb + pos, n);
-
-   pos += 1;
-
-   return n;
-}
-
-
 // Returns true if reading was successful, false if an error was encountered
 // For WKB polygon format see http://edndoc.esri.com/arcsde/9.1/general_topics/wkb_representation.htm
-bool PolygonGeometry::readWkb(unsigned char *wkb)
+bool PolygonGeometry::readWkb(unsigned char *wkb, S32 bytes)
 {
    S32 pos = 0;
       
-   BitStream stream(wkb, 1024);
+   BitStream stream(wkb, bytes);
 
-   S32 numPoints = stream.readInt(32);
+   S32 numPoints = stream.readInt(sizeof(S32) << 3);    // << 3 converts byte count to bits
    
    if(numPoints > 0)
    {
@@ -1187,18 +1129,14 @@ bool PolygonGeometry::readWkb(unsigned char *wkb)
 }
 
 
-string PolygonGeometry::toWkb() const
+void PolygonGeometry::write(BitStream *stream) const
 {
-   BitStream stream;
-
    S32 pts = mPolyBounds.size();
 
-   stream.writeInt(pts, sizeof(S32)>>3);
+   stream->writeInt(pts, sizeof(S32) << 3);    // << 3 converts bytes to bits
 
    for(S32 i = 0; i < pts; i++)
-      mPolyBounds[i].coordsToWkb(stream);
-
-   return string((char *)stream.getBuffer(), stream.getBufferSize());
+      mPolyBounds[i].write(stream);
 }
 
 

@@ -10,6 +10,7 @@
 #include "tnlTypes.h"
 #include "tnlLog.h"
 
+#include "../zap/LevelInfoDatabaseMapping.h"
 #include "../zap/stringUtils.h"            // For replaceString() and itos()
 #include "../zap/WeaponInfo.h"
 
@@ -212,6 +213,41 @@ static U64 insertStatsServer(const DbQuery &query, const string &serverName, con
    }
 
    return U64_MAX;
+}
+
+
+sqlite3 *DatabaseWriter::openSqliteDatabase(const string &databaseName, S32 mode)
+{
+   sqlite3 *sqliteDb = NULL;
+   S32 rc = sqlite3_open_v2(databaseName.c_str(), &sqliteDb, mode, NULL);
+
+   TNLAssert(rc == SQLITE_OK, "Error opening database!");
+   if(rc == SQLITE_OK)
+      return sqliteDb;
+
+   logprintf(LogConsumer::SqlMsg, "Error opening database %s: %s", databaseName.c_str(), sqlite3_errmsg(sqliteDb));
+
+   return NULL;
+}
+
+
+bool DatabaseWriter::createLevelDatabase(const string &databaseName, S32 schemaVersion)
+{
+   string schema = Sqlite::getCreateLevelInfoTableSql(schemaVersion);
+
+   DbQuery query(databaseName.c_str());
+
+   // Create empty file on file system
+   sqlite3 *sqliteDb = openSqliteDatabase(databaseName, SQLITE_OPEN_READWRITE);
+   if(sqliteDb == NULL)
+      return false;
+
+   U64 result = query.runInsertQuery(schema);
+
+   if(sqliteDb)
+      sqlite3_close(sqliteDb);
+
+   return result != U64_MAX;
 }
 
 
@@ -580,9 +616,9 @@ void DatabaseWriter::createStatsDatabase()
 
    // Import schema
    logprintf("Building stats database schema");
-   sqlite3 *sqliteDb = NULL;
-
-   sqlite3_open(mDb, &sqliteDb);
+   sqlite3 *sqliteDb = openSqliteDatabase(mDb, SQLITE_OPEN_READWRITE);
+   if(sqliteDb == NULL)
+      return;
 
    query.runInsertQuery(getSqliteSchema());
 
@@ -631,13 +667,13 @@ DbQuery::DbQuery(const char *db, const char *server, const char *user, const cha
    }
    else
 #endif
-      if(sqlite3_open(db, &mSqliteDb))    // Returns true if an error occurred
-      {
-         logprintf("ERROR: Can't open stats database %s: %s", db, sqlite3_errmsg(mSqliteDb));
-         sqlite3_close(mSqliteDb);
+   {
+      mSqliteDb = DatabaseWriter::openSqliteDatabase(db, SQLITE_OPEN_READWRITE);
+      if(mSqliteDb == NULL)
          mIsValid = false;
-      }
+   } 
 }
+
 
 // Destructor
 DbQuery::~DbQuery()
@@ -711,7 +747,7 @@ U64 DbQuery::runInsertQuery(const string &sql) const
 
       if(err)
       {
-         logprintf("Database error accessing sqlite database: %s", err);
+         logprintf(LogConsumer::SqlMsg, "Database error accessing sqlite database: %s", err);
          logprintf(sql.c_str());
          sqlite3_free(err);
          return U64_MAX;

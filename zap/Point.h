@@ -70,11 +70,7 @@ public:
    void read(BitStream *stream);
    void write(BitStream *stream) const;
 
-   string toWkb() const;
-   bool fromWkb(unsigned char* wkb);
-   void coordsToWkb(BitStream &stream) const;
-   void coordsFromWkb(const char *wkb, S32 &pos);
-
+   bool fromWkb(unsigned char* wkb, S32 bytes);
 
    string toString() const;
    string toLevelCode() const;

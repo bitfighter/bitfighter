@@ -101,6 +101,7 @@ using namespace TNL;
 #include "ClientInfo.h"
 #include "ship.h"
 #include "LevelSource.h"
+#include "LevelInfoDatabaseMapping.h"
 
 #include <sys/stat.h>
 #include <time.h>
@@ -411,20 +412,8 @@ void makeLevelDatabase()
    if(fileExists(LevelInfo::LEVEL_INFO_DATABASE_NAME))
       return;
 
-   string schema = LevelInfo::getCreateTableSql(LevelInfo::LEVEL_DATABASE_SCHEMA_VERSION);
-
-   DbWriter::DbQuery query(LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str());
-
-   // Create empty file on file system
-   logprintf("Creating level database %s", LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str());
-   sqlite3 *sqliteDb = NULL;
-
-   sqlite3_open(LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str(), &sqliteDb);
-
-   U64 result = query.runInsertQuery(schema);      // Will be U64_MAX in case of error... TODO: Check for this and disable database stuff
-
-   if(sqliteDb)
-      sqlite3_close(sqliteDb);
+   logprintf(LogConsumer::SqlMsg, "Creating level database %s", LevelInfo::LEVEL_INFO_DATABASE_NAME);
+   DbWriter::DatabaseWriter::createLevelDatabase(LevelInfo::LEVEL_INFO_DATABASE_NAME, LevelInfo::LEVEL_DATABASE_SCHEMA_VERSION);
 }
 
 
