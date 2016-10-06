@@ -175,6 +175,13 @@ void Point::read(BitStream *stream)
 }
 
 
+void Point::read(unsigned char* geom, S32 bytes)
+{
+   BitStream stream(geom, bytes);
+   read(&stream);
+}
+
+
 void Point::write(BitStream *stream) const
 {
    stream->write(x);
@@ -182,13 +189,7 @@ void Point::write(BitStream *stream) const
 }
 
 
-bool Point::fromWkb(unsigned char* wkb, S32 bytes)
-{
-   BitStream stream(wkb, bytes);
-   read(&stream);
 
-   return true;
-}
 
 
 string Point::toString() const

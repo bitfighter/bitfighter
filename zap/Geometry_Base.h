@@ -91,7 +91,7 @@ public:
    virtual string geomToLevelCode() const;
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
-   virtual bool readWkb(unsigned char *wkb, S32 bytes);
+   virtual bool read(unsigned char *geom, S32 bytes);
    virtual void write(BitStream *stream) const;
 
    static void writeWkbGeometryHeader(ostream &stream, WkbGeomType type);

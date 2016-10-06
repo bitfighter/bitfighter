@@ -735,7 +735,7 @@ static int loadZonesCallback(void *allZones_ptr, int argc, char **argv, char **c
    Vector<BotNavMeshZone *> &allZones = *static_cast<Vector<BotNavMeshZone *> *>(allZones_ptr);
 
    BotNavMeshZone *zone = new BotNavMeshZone(stoi(argv[0]));    // Will be cleaned up when allZones is cleared
-   zone->getGeometry().getGeometry()->readWkb((U8 *)argv[1], stoi(argv[2]));
+   zone->getGeometry().getGeometry()->read((U8 *)argv[1], stoi(argv[2]));
 
    zone->setExtent(zone->getGeometry().getGeometry()->calcExtents());
 
@@ -758,8 +758,8 @@ static int loadNeighborCallback(void *allZones_ptr, int argc, char **argv, char 
    BotNavMeshZone &destZone = *allZones[destZoneId];
 
    Point borderStart, borderEnd;
-   borderStart.fromWkb((U8 *)argv[2], stoi(argv[3]));
-   borderEnd.fromWkb  ((U8 *)argv[4], stoi(argv[5]));
+   borderStart.read((U8 *)argv[2], stoi(argv[3]));
+   borderEnd  .read((U8 *)argv[4], stoi(argv[5]));
 
    originZone.addNeighbor(NeighboringZone(destZoneId, borderStart, borderEnd, originZone.getCenter(), destZone.getCenter()));
 
@@ -998,7 +998,7 @@ static bool bind_point(sqlite3_stmt *pStmt, S32 param, const Point &point)
 
 #ifdef TNL_DEBUG
    Point x;
-   x.fromWkb(stream.getBuffer(), stream.getBytePosition());
+   x.read(stream.getBuffer(), stream.getBytePosition());
    TNLAssert(x == point, "Should be equal!");
 #endif
 

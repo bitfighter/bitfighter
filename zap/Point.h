@@ -68,9 +68,9 @@ public:
    F32 dot(const Point &p) const;
    void read(const char **argv);
    void read(BitStream *stream);
+   void read(unsigned char* geom, S32 bytes);
    void write(BitStream *stream) const;
 
-   bool fromWkb(unsigned char* wkb, S32 bytes);
 
    string toString() const;
    string toLevelCode() const;

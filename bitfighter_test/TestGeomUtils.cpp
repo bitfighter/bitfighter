@@ -87,7 +87,7 @@ void TestWkbRoundTrip(const Vector<Vector<Point> > &polys)
 
       BotNavMeshZone zone2(0);
       string x((char *)stream.getBuffer(), stream.getBytePosition());
-      zone2.getGeometry().getGeometry()->readWkb(stream.getBuffer(), stream.getBytePosition());
+      zone2.getGeometry().getGeometry()->read(stream.getBuffer(), stream.getBytePosition());
 
       EXPECT_EQ(zone1.getGeometry().getOutline()->size(), zone2.getGeometry().getOutline()->size());
       for(S32 j = 0; j < zone1.getGeometry().getOutline()->size(); j++)
@@ -103,7 +103,7 @@ void TestWkbRoundTrip(const Vector<Vector<Point> > &polys)
          BitStream stream;
          polys[i][j].write(&stream);
          Point x;
-         x.fromWkb(stream.getBuffer(), stream.getBytePosition());
+         x.read(stream.getBuffer(), stream.getBytePosition());
          EXPECT_EQ(x, polys[i][j]);
       }
    }
