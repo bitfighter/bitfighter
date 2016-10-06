@@ -24,15 +24,6 @@ using namespace TNL;
 namespace Zap
 {
 
-static const U8 wkbXDR = 0;         // Big Endian
-static const U8 wkbNDR = 1;         // Little Endian
-
-#ifdef TNL_LITTLE_ENDIAN
-   static const U8 wkbEndian = wkbNDR;
-#else
-   static const U8 wkbEndian = wkbXDR;
-#endif
-
 
 // Constructor
 Geometry::Geometry()
