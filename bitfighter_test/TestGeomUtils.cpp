@@ -76,7 +76,7 @@ const char* _name##lines[] = _lines;                                           \
 parsePoly(_name##lines, sizeof(_name##lines) / sizeof(_name##lines[0]), _name) \
 
 
-void TestWkbRoundTrip(const Vector<Vector<Point> > &polys)
+void TestSerializationRoundTrip(const Vector<Vector<Point> > &polys)
 {
    for(S32 i = 0; i < polys.size(); i++)
    {
@@ -129,7 +129,7 @@ TEST(GeomUtilsTest, splitSelfIntersecting)
 	EXPECT_EQ(3, result[0].size());
 	EXPECT_EQ(3, result[1].size());
 
-   TestWkbRoundTrip(polys);
+   TestSerializationRoundTrip(polys);
 }
 
 
@@ -160,7 +160,7 @@ TEST(GeomUtilsTest, splitRepeatedlySelfIntersecting)
 		EXPECT_EQ(4, result[i].size());
 	}
 
-   TestWkbRoundTrip(polys);
+   TestSerializationRoundTrip(polys);
 }
 
 
@@ -200,7 +200,7 @@ TEST(GeomUtilsTest, splitRevisitedVertex)
 	EXPECT_EQ(4, result[1].size());
 	*/
 
-   TestWkbRoundTrip(polys);
+   TestSerializationRoundTrip(polys);
 }
 
 
@@ -219,7 +219,7 @@ TEST(GeomUtilsTest, triangulateCW)
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(2, result.size());
 
-   TestWkbRoundTrip(polys);
+   TestSerializationRoundTrip(polys);
 }
 
 
@@ -238,7 +238,7 @@ TEST(GeomUtilsTest, triangulateCCW)
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(2, result.size());
 
-   TestWkbRoundTrip(polys);
+   TestSerializationRoundTrip(polys);
 }
 
 
@@ -268,7 +268,7 @@ TEST(GeomUtilsTest, triangulateBarelyTouching)
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(4, result.size());
 
-   TestWkbRoundTrip(polys);
+   TestSerializationRoundTrip(polys);
 }
 
 
@@ -302,7 +302,7 @@ TEST(GeomUtilsTest, triangulateOverlapping)
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_NE(0, result.size());
 
-   TestWkbRoundTrip(polys);
+   TestSerializationRoundTrip(polys);
 }
 
 
@@ -323,7 +323,7 @@ TEST(GeomUtilsTest, triangulateSelfIntersecting)
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(2, result.size());
 
-   TestWkbRoundTrip(polys);
+   TestSerializationRoundTrip(polys);
 }
 
 
@@ -344,7 +344,7 @@ TEST(GeomUtilsTest, triangulateColinearAdjacentSegments)
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(2, result.size());
 
-   TestWkbRoundTrip(polys);
+   TestSerializationRoundTrip(polys);
 }
 
 
@@ -365,7 +365,7 @@ TEST(GeomUtilsTest, triangulateOverlappingSegments)
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(4, result.size());
 
-   TestWkbRoundTrip(polys);
+   TestSerializationRoundTrip(polys);
 }
 
 
@@ -391,7 +391,7 @@ TEST(GeomUtilsTest, triangulateRepeatedlySelfIntersecting)
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(10, result.size());
 
-   TestWkbRoundTrip(polys);
+   TestSerializationRoundTrip(polys);
 }
 
 
@@ -418,7 +418,7 @@ TEST(GeomUtilsTest, triangulateConsecutiveRepeatVertices)
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(2, result.size());
 
-   TestWkbRoundTrip(polys);
+   TestSerializationRoundTrip(polys);
 }
 
 
@@ -451,7 +451,7 @@ TEST(GeomUtilsTest, triangulateWithRevisitedVertex)
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(4, result.size());
 
-   TestWkbRoundTrip(polys);
+   TestSerializationRoundTrip(polys);
 }
 
 
@@ -465,7 +465,7 @@ TEST(GeomUtilsTest, triangulateLongPolygon)
 	Vector<Vector<Point> > result;
 	EXPECT_TRUE(triangulate(polys, result));
 
-   TestWkbRoundTrip(polys);
+   TestSerializationRoundTrip(polys);
 }
 
 
@@ -482,7 +482,7 @@ TEST(GeomUtilsTest, triangulateManyPolygons)
 	EXPECT_TRUE(triangulate(polys, result));
 	EXPECT_EQ(1024, result.size());
 
-   TestWkbRoundTrip(polys);
+   TestSerializationRoundTrip(polys);
 }
 
 

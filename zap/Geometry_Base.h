@@ -34,20 +34,6 @@ enum GeomType {
 };
 
 
-// From https://github.com/mapnik/mapnik/blob/master/src/wkb.cpp
-enum WkbGeomType
-{
-   wkbPoint = 1,
-   wkbLineString = 2,
-   wkbPolygon = 3,
-   wkbMultiPoint = 4,
-   wkbMultiLineString = 5,
-   wkbMultiPolygon = 6,
-   wkbGeometryCollection = 7
-};
-
-
-
 // Geometry is essentially an interface class that all geometric objects implement
 class Geometry
 {
@@ -93,8 +79,6 @@ public:
 
    virtual bool read(unsigned char *geom, S32 bytes);
    virtual void write(BitStream *stream) const;
-
-   static void writeWkbGeometryHeader(ostream &stream, WkbGeomType type);
 
    virtual void disableTriangulation();
    
