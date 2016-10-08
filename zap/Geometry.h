@@ -222,7 +222,7 @@ public:
    F32 getLabelAngle() const;
 
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
-   bool read(unsigned char *geom, S32 bytes);
+   void read(unsigned char *geom, S32 bytes);
    void write(BitStream *stream) const;
 
 

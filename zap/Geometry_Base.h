@@ -77,7 +77,7 @@ public:
    virtual string geomToLevelCode() const;
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
-   virtual bool read(unsigned char *geom, S32 bytes);
+   virtual void read(unsigned char *geom, S32 bytes);
    virtual void write(BitStream *stream) const;
 
    virtual void disableTriangulation();

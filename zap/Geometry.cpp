@@ -52,7 +52,7 @@ void Geometry::onPointsChanged()
 }
 
 
-bool Geometry::read(unsigned char *geom, S32 bytes)
+void Geometry::read(unsigned char *geom, S32 bytes)
 {
    TNLAssert(false, "Not implemented");
 }
@@ -1099,7 +1099,7 @@ void PolygonGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 
 
 
 // Returns true if reading was successful, false if an error was encountered
-bool PolygonGeometry::read(unsigned char *geom, S32 bytes)
+void PolygonGeometry::read(unsigned char *geom, S32 bytes)
 {
    S32 pos = 0;
       
