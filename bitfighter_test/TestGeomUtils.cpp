@@ -18,6 +18,14 @@ using namespace TNL;
 
 #define ARRAYDEF(...) __VA_ARGS__
 
+// Test points can be generated with this python script; copy three points from C++ to code, put answer in distanceTo call
+// Note that Python uses F64 and we use F32 so there may be some resolution differences at high coordinates
+// from sympy import Point, Line, Segment, Rational
+// def lfp(p1, dir) :
+//    return Line(Point(p1.x + dir.x, p1.y + dir.y), p1)
+//
+// p1, p2, p3 = Point(-15, 3.33333), Point(1.52738, 4.80359), Point(27.3345, -9.8876)
+// print(lfp(p2, p3).projection(p1).evalf()) 	# - 12.6173865802032, 9.92012017389809
 
 TEST(GeomUtilsTest, pointOnLine)
 {
@@ -26,11 +34,14 @@ TEST(GeomUtilsTest, pointOnLine)
    EXPECT_LT(pointOnLine(Point(0,10), Point(-10,-10), Point(20,20))  .distanceTo(Point(5,5)), .001);     // Same thing, different line points
    EXPECT_LT(pointOnLine(Point(0,10), Point(-20,-20), Point(-20,-20)).distanceTo(Point(5,5)), .001);     // Same thing, different line points
 
-   EXPECT_LT(pointOnLine(Point(-16.39656, -3.36974), Point(1.52738, 4.80359), Point(9.34006, 0.5753)).distanceTo(Point(-8.91, 10.45)), .01);     // Same thing, different line points
+   // These cases generated with code above; arbitrary coords
+   EXPECT_LT(pointOnLine(Point(-15, 3.33333), Point(1.52738, 4.80359), Point(27.3345, -9.8876)).distanceTo(Point(-12.6173865802032, 9.92012017389809)), .01);     
+   EXPECT_LT(pointOnLine(Point(-16.39656, -3.36974), Point(3.14159, 8.7765), Point(9.34006, 0.5753)).distanceTo(Point(-17.0680324470228, 7.53169045982872)), .01); 
+   EXPECT_LT(pointOnLine(Point(1.3887, 197.880), Point(41.8535, 60.7973), Point(58.5479, 90.5406)).distanceTo(Point(92.4289448420256, 139.009005650654)), .01);    
 
    // Horiz. and vert. lines
-   EXPECT_LT(pointOnLine(Point(3,4), Point(-10,10), Point(0,10)).distanceTo(Point(3,10)),  .001); 
-   EXPECT_LT(pointOnLine(Point(3,4), Point(-10,3),  Point(-10,0)).distanceTo(Point(-10,3)), .001); 
+   EXPECT_LT(pointOnLine(Point(3, 4), Point(-10, 10), Point(0, 10)).distanceTo(Point(-10.0, 4.0)), .001);
+   EXPECT_LT(pointOnLine(Point(3,4), Point(-10,3),  Point(-10,0)).distanceTo(Point(3,3)), .001); 
 
    // Colinear, and on endpoints
    EXPECT_LT(pointOnLine(Point(5,5), Point(-10,-10), Point(20,20)).distanceTo(Point(5,5)), .001); 
