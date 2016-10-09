@@ -3,7 +3,7 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "LevelinfoDatabaseMapping.h"
+#include "LevelInfoDatabaseMapping.h"
 #include "stringUtils.h"
 
 namespace Sqlite

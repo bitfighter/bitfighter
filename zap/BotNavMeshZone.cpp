@@ -12,7 +12,7 @@
 #include "Teleporter.h"             // For Teleporter::TELEPORTER_RADIUS
 #include "GeomUtils.h"
 #include "MathUtils.h"
-#include "StringUtils.h"
+#include "stringUtils.h"
 
 #include "tnlLog.h"
 
@@ -734,8 +734,8 @@ static int loadZonesCallback(void *allZones_ptr, int argc, char **argv, char **c
 {
    Vector<BotNavMeshZone *> &allZones = *static_cast<Vector<BotNavMeshZone *> *>(allZones_ptr);
 
-   BotNavMeshZone *zone = new BotNavMeshZone(stoi(argv[0]));    // Will be cleaned up when allZones is cleared
-   zone->getGeometry().getGeometry()->read((U8 *)argv[1], stoi(argv[2]));
+   BotNavMeshZone *zone = new BotNavMeshZone(atoi(argv[0]));    // Will be cleaned up when allZones is cleared
+   zone->getGeometry().getGeometry()->read((U8 *)argv[1], atoi(argv[2]));
 
    zone->setExtent(zone->getGeometry().getGeometry()->calcExtents());
 
@@ -753,13 +753,13 @@ static int loadNeighborCallback(void *allZones_ptr, int argc, char **argv, char 
 
    Vector<BotNavMeshZone *> &allZones = *static_cast<Vector<BotNavMeshZone *> *>(allZones_ptr);
 
-   BotNavMeshZone &originZone = *allZones[stoi(argv[0])];
-   S32 destZoneId = stoi(argv[1]);
+   BotNavMeshZone &originZone = *allZones[atoi(argv[0])];
+   S32 destZoneId = atoi(argv[1]);
    BotNavMeshZone &destZone = *allZones[destZoneId];
 
    Point borderStart, borderEnd;
-   borderStart.read((U8 *)argv[2], stoi(argv[3]));
-   borderEnd  .read((U8 *)argv[4], stoi(argv[5]));
+   borderStart.read((U8 *)argv[2], atoi(argv[3]));
+   borderEnd  .read((U8 *)argv[4], atoi(argv[5]));
 
    originZone.addNeighbor(NeighboringZone(destZoneId, borderStart, borderEnd, originZone.getCenter(), destZone.getCenter()));
 

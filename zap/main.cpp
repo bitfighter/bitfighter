@@ -412,7 +412,7 @@ void makeLevelDatabase()
    if(fileExists(LevelInfo::LEVEL_INFO_DATABASE_NAME))
       return;
 
-   logprintf(LogConsumer::SqlMsg, "Creating level database %s", LevelInfo::LEVEL_INFO_DATABASE_NAME);
+   logprintf(LogConsumer::SqlMsg, "Creating level database %s", LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str());
    DbWriter::DatabaseWriter::createLevelDatabase(LevelInfo::LEVEL_INFO_DATABASE_NAME, LevelInfo::LEVEL_DATABASE_SCHEMA_VERSION);
 }
 
