@@ -35,9 +35,9 @@ TEST(GeomUtilsTest, pointOnLine)
    EXPECT_LT(pointOnLine(Point(0,10), Point(-20,-20), Point(-20,-20)).distanceTo(Point(5,5)), .001);     // Same thing, different line points
 
    // These cases generated with code above; arbitrary coords
-   EXPECT_LT(pointOnLine(Point(-15, 3.33333), Point(1.52738, 4.80359), Point(27.3345, -9.8876)).distanceTo(Point(-12.6173865802032, 9.92012017389809)), .01);     
-   EXPECT_LT(pointOnLine(Point(-16.39656, -3.36974), Point(3.14159, 8.7765), Point(9.34006, 0.5753)).distanceTo(Point(-17.0680324470228, 7.53169045982872)), .01); 
-   EXPECT_LT(pointOnLine(Point(1.3887, 197.880), Point(41.8535, 60.7973), Point(58.5479, 90.5406)).distanceTo(Point(92.4289448420256, 139.009005650654)), .01);    
+   EXPECT_LT(pointOnLine(Point(-15, 3.33333),        Point(1.52738, 4.80359), Point(27.3345, -9.8876)).distanceTo(Point(-12.6173865802032, 9.92012017389809)), .01);     
+   EXPECT_LT(pointOnLine(Point(-16.39656, -3.36974), Point(3.14159, 8.7765),  Point(9.34006, 0.5753)) .distanceTo(Point(-17.0680324470228, 7.53169045982872)), .01); 
+   EXPECT_LT(pointOnLine(Point(1.3887, 197.880),     Point(41.8535, 60.7973), Point(58.5479, 90.5406)).distanceTo(Point(92.4289448420256, 139.009005650654)),  .01);    
 
    // Horiz. and vert. lines
    EXPECT_LT(pointOnLine(Point(3, 4), Point(-10, 10), Point(0, 10)).distanceTo(Point(-10.0, 4.0)), .001);
