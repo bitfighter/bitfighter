@@ -1114,8 +1114,6 @@ void PolygonGeometry::read(unsigned char *geom, S32 bytes)
       for(S32 i = 0; i < numPoints; i++)
          mPolyBounds[i].read(&stream);
    }
-
-   return true;
 }
 
 
