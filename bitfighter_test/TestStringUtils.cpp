@@ -5,7 +5,6 @@
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
-#include "FontManager.h"
 
 #include "gtest/gtest.h"
 
@@ -263,6 +262,34 @@ TEST(StringUtilsTest, WrapStringsLineWidth)
       }
    }
 }
+
+   
+// TODO: Flesh out this test
+TEST(StringUtilsTest, SplitString)
+{
+   Vector<string> words;
+
+   // Common case
+   words = parseString("I love Bitfighter");
+   ASSERT_TRUE(words[0] == "I" && words[1] == "love" && words[2] == "Bitfighter");
+
+   // Non-space separator (with spaces), emtpty final item
+   words = parseString("I love|Bitfighter|", '|');
+   ASSERT_TRUE(words[0] == "I love" && words[1] == "Bitfighter" && words[2] == "" && words.size() == 3);
+
+   // Quotes
+   words = parseString("\"I love\" Bitfighter");
+   ASSERT_TRUE(words[0] == "I love" && words[1] == "Bitfighter" && words.size() == 2);
+
+   // Trailing space
+   words = parseString("\"I love\" Bitfighter ");
+   ASSERT_TRUE(words[0] == "I love" && words[1] == "Bitfighter" && words.size() == 2);
+
+   // Multiple trailing spaces
+   words = parseString("\"I love\" Bitfighter     ");
+   ASSERT_TRUE(words[0] == "I love" && words[1] == "Bitfighter" && words.size() == 2);
+}
+
 
 
 };

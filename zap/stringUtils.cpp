@@ -404,19 +404,26 @@ void parseString(const char *inputString, Vector<string> &words, char seperator)
 {
    const S32 maxlen = 126;
    char word[maxlen + 2];
-   S32 wn = 0;       // Where we are in the word we're creating
-   S32 isn = 0;      // Where we are in the inputString we're parsing
+   S32 wn = 0;             // Where we are in the word we're creating
+   S32 isn = 0;            // Where we are in the inputString we're parsing
+   bool inQuotes = false;  // Are we inside "s?
 
    words.clear();
 
    while(inputString[isn] != 0)
    {
-      if(inputString[isn] == seperator) 
+      if(inputString[isn] == seperator && !inQuotes)
       {
          word[wn] = 0;    // Add terminating NULL
-         words.push_back(trim(word));
+
+         string w = trim(word);
+         // Skip empty items where we have a space terminator and an empty item; can happen when our parse string has trailing whitespace
+         if(!(w == "" && seperator == ' '))
+            words.push_back(w);
          wn = 0;
       }
+      else if(inputString[isn] == '"')
+         inQuotes = !inQuotes;
       else
       {
          if(wn < maxlen)   // Avoid overflows
@@ -429,8 +436,17 @@ void parseString(const char *inputString, Vector<string> &words, char seperator)
    }
    
    word[wn] = 0;     // Add terminator
-   words.push_back(trim(word));
+
+   string w = trim(word);
+   if(!(w == "" && seperator == ' '))
+      words.push_back(w);
 }
+
+   //   string w = trim(word);
+   // Skip empty items where we have a space terminator and an empty item; can happen when our parse string has trailing whitespace
+//if(!(w == "" && seperator == ' '))
+//words.push_back(w);
+
 
 
 Vector<string> parseStringAndStripLeadingSlash(const char *str)
