@@ -100,7 +100,8 @@ public:
    static bool buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<BotNavMeshZone *> &allZones,
                                  const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList,
                                  const Vector<DatabaseObject *> &turretList, const Vector<DatabaseObject *> &forceFieldProjectorList,
-                                 const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones, U64 sqliteLevelInfoId);
+                                 const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones, 
+                                 U64 sqliteLevelInfoId, bool writeZonesToDb);
 
    static S32 calcLevelSize     (const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList,
                                  const Vector<pair<Point, const Vector<Point> *> > &teleporterData);

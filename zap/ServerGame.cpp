@@ -605,10 +605,16 @@ void ServerGame::cycleLevel(S32 nextLevel, bool isReset)
 
    TNLAssert(getGameType(), "Expect to have a GameType here!");
    
+   // We'll generally want to cache our zone geometry, but not if there is a levelgen script that might be generating
+   // dynamic geometry, or if it is a test server, because the user might be editing levels, making caching non-sensical.
+   bool hasLevelgens = getSettings()->getGlobalScriptCount() > 0 || getGameType()->getScriptName() != "";
+
+   bool writeZonesToDb = !hasLevelgens && !isTestServer();
+
    getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(mLevel->getBotZoneDatabase(), mLevel->getBotZoneList(),
                                                                               getWorldExtents(), barrierList, turretList,
                                                                               forceFieldProjectorList, teleporterData, triangulate,
-                                                                              mLevel->getSqliteLevelId());
+                                                                              mLevel->getSqliteLevelId(), writeZonesToDb);
    // Clear team info for all clients
    resetAllClientTeams();
 

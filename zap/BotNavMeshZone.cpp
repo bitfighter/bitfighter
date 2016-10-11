@@ -433,7 +433,7 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<Bot
                                        const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList,
                                        const Vector<DatabaseObject *> &turretList, const Vector<DatabaseObject *> &forceFieldProjectorList,
                                        const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones, 
-                                       U64 sqliteLevelInfoId)
+                                       U64 sqliteLevelInfoId, bool writeZonesToDb)
 {
 #ifdef LOG_TIMER
    U32 starttime = Platform::getRealMilliseconds();
@@ -631,8 +631,8 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<Bot
    logprintf("Timings: %d %d %d; total %d", done1 - starttime, done2 - done1, done3 - done2, done3 - starttime);
 #endif
 
-
-   saveBotZonesToSqlite(LevelInfo::LEVEL_INFO_DATABASE_NAME, allZones, sqliteLevelInfoId);
+   if(writeZonesToDb)
+      saveBotZonesToSqlite(LevelInfo::LEVEL_INFO_DATABASE_NAME, allZones, sqliteLevelInfoId);
 
    return true;
 }
