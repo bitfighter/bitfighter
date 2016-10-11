@@ -377,41 +377,19 @@ bool containsControlCharacter(const char* str)
 }
 
 
-// TODO: Merge this with the one following
-// Based on http://www.gamedev.net/community/forums/topic.asp?topic_id=320087
-// Parses a string on whitespace, except when inside "s
-//
-// FIXME: This is using string streams which are an order of magnitude (or 2) too slow
-// rewrite without using streams if possible
-Vector<string> parseString(const string &line)
+// This version is marginally slower than the versions below
+Vector<string> parseString(const string &inputString, char seperator)
 {
-   Vector<string> result;
+   return parseString(inputString.c_str(), seperator);
+}
 
-   string          item;
-   stringstream    ss(line);
 
-   while(ss >> item)
-   {
-      if(item[0] == '"')
-      {
-         S32 lastItemPosition = (S32)item.length() - 1;
-         if(item[lastItemPosition] != '"') 
-         {
-            // read the rest of the double-quoted item
-            string restOfItem;
-            getline(ss, restOfItem, '"');
-            item += restOfItem;
-         }
-         // otherwise, we had a single word that was quoted. In any case, we now
-         // have the item in quotes; remove them
-         item = trim(item, "\"");
-      }
-
-      // item is "fully cooked" now
-      result.push_back(item);
-   }
-
-   return result;
+// This version is marginally slower than the versions below
+Vector<string> parseString(const char *inputString, char seperator)
+{
+   Vector<string> words;
+   parseString(inputString, words, seperator);
+   return words;
 }
 
 
@@ -436,9 +414,7 @@ void parseString(const char *inputString, Vector<string> &words, char seperator)
       if(inputString[isn] == seperator) 
       {
          word[wn] = 0;    // Add terminating NULL
-
          words.push_back(trim(word));
-
          wn = 0;
       }
       else

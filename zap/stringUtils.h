@@ -58,10 +58,12 @@ string stripExtension(string filename);
 
 string listToString(const Vector<string> &words, const string &seperator);
 
-// TODO: Merge these methods
-Vector<string> parseString(const string &line);
+// These first two sigs are slightly slower than the void versions below
+Vector<string> parseString(const string &inputString, char seperator = ' ');
+Vector<string> parseString(const char *inputString, char seperator = ' ');
 void parseString(const char *inputString, Vector<string> &words, char seperator = ' ');
 void parseString(const string &inputString, Vector<string> &words, char seperator = ' ');
+
 Vector<string> parseStringAndStripLeadingSlash(const char *str);
 
 void parseComplexStringToMap(const string &inputString, map<string, string> &fillMap,
