@@ -1419,6 +1419,20 @@ const UserSettings *GameSettings::getUserSettings(const string &name)
 }
 
 
+Vector<string> GameSettings::getGlobalScriptList()
+{
+   static Vector<string> scriptList = parseString(getSetting<string>(IniKey::GlobalLevelScript), '|');      // Lazily initialize
+   return scriptList;
+}
+
+
+S32 GameSettings::getGlobalScriptCount()
+{
+   static S32 count = getGlobalScriptList().size();
+   return count;
+}
+
+
 void GameSettings::setIniSetting(const string &section, const string &key, const string &value)
 {
    iniFile.setValue(section, key, value, true);

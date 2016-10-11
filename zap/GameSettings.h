@@ -323,6 +323,9 @@ public:
    // User settings
    const UserSettings *addUserSettings(const UserSettings &userSettings);     // Returns pointer to inserted item
    const UserSettings *getUserSettings(const string &name);
+   Vector<string> getGlobalScriptList();
+   S32 getGlobalScriptCount();
+
 
    static GameSettings *get();
 
