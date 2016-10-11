@@ -335,7 +335,8 @@ void Robot::kill()
 // Called by Level when it is added to a game
 bool Robot::processArguments(const string &argString, Game *game)
 {
-   Vector<string> args = parseString(argString);
+   Vector<string> args;
+   parseString(argString, args);
 
    string errorMessage;
 

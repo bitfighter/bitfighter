@@ -403,7 +403,8 @@ bool ChatHelper::processInputCode(InputCode inputCode)
       if(isCmdChat())     // It's a command!  Complete!  Complete!
       {
          // First, parse line into words
-         Vector<string> words = parseString(mLineEditor.getString());
+         Vector<string> words;
+         parseString(mLineEditor.getString(), words);
 
          bool needLeadingSlash = false;
 
@@ -501,7 +502,8 @@ bool ChatHelper::processInputCode(InputCode inputCode)
       else // Username chat completion
       {
          // First, parse line into words
-         Vector<string> words = parseString(mLineEditor.getString());
+         Vector<string> words;
+         parseString(mLineEditor.getString(), words);
 
          string partial;          // The partially typed word we're trying to match against
 

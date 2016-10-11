@@ -286,7 +286,8 @@ namespace Zap
    // Each line of the file is handled separately by processLevelLoadLine in game.cpp or UIEditor.cpp
    void Level::parseLevelLine(const string &line, const string &levelFileName)
    {
-      Vector<string> args = parseString(line);
+      Vector<string> args;
+      parseString(line, args);
       U32 argc = args.size();
       S32 id = 0;
 
