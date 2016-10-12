@@ -442,12 +442,6 @@ void parseString(const char *inputString, Vector<string> &words, char seperator)
       words.push_back(w);
 }
 
-   //   string w = trim(word);
-   // Skip empty items where we have a space terminator and an empty item; can happen when our parse string has trailing whitespace
-//if(!(w == "" && seperator == ' '))
-//words.push_back(w);
-
-
 
 Vector<string> parseStringAndStripLeadingSlash(const char *str)
 {
