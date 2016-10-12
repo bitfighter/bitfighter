@@ -27,6 +27,9 @@ namespace Sqlite
 
 extern const string SCHEMA_TABLE_NAME;
 extern const string LEVEL_INFO_TABLE_NAME;
+extern const string ZONE_TABLE_NAME;
+extern const string NEIGHBOR_TABLE_NAME;
+
 
 string getCreateLevelInfoTableSql(TNL::S32 schemaVersion);
 

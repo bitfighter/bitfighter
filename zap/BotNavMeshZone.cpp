@@ -23,6 +23,7 @@
 #include "sqlite3.h"
 #include "ServerGame.h"
 #include "Level.h"
+#include "LevelInfoDatabaseMapping.h"
 
 
 // triangulate wants quit on error
@@ -640,8 +641,8 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<Bot
 
 bool BotNavMeshZone::clearZonesFromDatabase(sqlite3 *sqliteDb, U64 sqliteLevelInfoId)
 {
-   string sql = "DELETE FROM zone_neighbors WHERE level_info_id = " + itos(sqliteLevelInfoId) + ";"
-                "DELETE FROM zones          WHERE level_info_id = " + itos(sqliteLevelInfoId) + ";";
+   string sql = "DELETE FROM " + Sqlite::ZONE_TABLE_NAME +     " WHERE level_info_id = " + itos(sqliteLevelInfoId) + ";"
+                "DELETE FROM " + Sqlite::NEIGHBOR_TABLE_NAME + " WHERE level_info_id = " + itos(sqliteLevelInfoId) + ";";
 
    sqlite3_stmt *pStmt;
    S32 rc;
@@ -685,8 +686,8 @@ bool BotNavMeshZone::saveBotZonesToSqlite(const string &databaseName, const Vect
    clearZonesFromDatabase(sqliteDb, sqliteLevelInfoId);
 
    // Some statement templates -- we'll precompile these once for better performance, and pass them rather than the database
-   const string zones_sql     = "INSERT INTO zones (level_info_id, zone_id, zone_geom) VALUES(@LEVEL_INFO_ID, @ZONE_ID, @ZONE_GEOM);";
-   const string neighbors_sql = "INSERT INTO zone_neighbors(level_info_id, write_order, origin_zone_id, dest_zone_id, border_start_geom, border_end_geom) "
+   const string zones_sql     = "INSERT INTO " + Sqlite::ZONE_TABLE_NAME     + " (level_info_id, zone_id, zone_geom) VALUES(@LEVEL_INFO_ID, @ZONE_ID, @ZONE_GEOM);";
+   const string neighbors_sql = "INSERT INTO " + Sqlite::NEIGHBOR_TABLE_NAME + "(level_info_id, write_order, origin_zone_id, dest_zone_id, border_start_geom, border_end_geom) "
                                 "VALUES(@LEVEL_INFO_ID, @OEDER_BY, @ORIGIN_ZONE_ID, @DEST_ZONE_ID, @BORDER_START, @BORDER_END);";
 
    sqlite3_stmt *zones_pStmt, *neighbors_pStmt;
@@ -785,8 +786,8 @@ bool BotNavMeshZone::tryToLoadZonesFromSqlite(const string &databaseName, U64 sq
 
    // Our sql
    const string id = itos(sqliteLevelInfoId);
-   const string zones_sql     = "SELECT zone_id, zone_geom, length(zone_geom) FROM zones WHERE level_info_id = " + id + " ORDER BY zone_id;";
-   const string neighbors_sql = "SELECT origin_zone_id, dest_zone_id, border_start_geom, length(border_start_geom), border_end_geom, length(border_end_geom) FROM zone_neighbors WHERE level_info_id = " + id + " ORDER BY write_order;";
+   const string zones_sql     = "SELECT zone_id, zone_geom, length(zone_geom) FROM " + Sqlite::ZONE_TABLE_NAME + " WHERE level_info_id = " + id + " ORDER BY zone_id;";
+   const string neighbors_sql = "SELECT origin_zone_id, dest_zone_id, border_start_geom, length(border_start_geom), border_end_geom, length(border_end_geom) FROM " + Sqlite::NEIGHBOR_TABLE_NAME + " WHERE level_info_id = " + id + " ORDER BY write_order;";
 
    char *errMsg = NULL;
    S32 rc = sqlite3_exec(sqliteDb, zones_sql.c_str(), loadZonesCallback, &allZones, &errMsg);

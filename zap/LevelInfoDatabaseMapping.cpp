@@ -11,6 +11,8 @@ namespace Sqlite
 
 const string SCHEMA_TABLE_NAME = "schema";
 const string LEVEL_INFO_TABLE_NAME = "levelinfo";
+const string ZONE_TABLE_NAME = "zones";
+const string NEIGHBOR_TABLE_NAME = "zone_neighbors";
 
 
 string getCreateLevelInfoTableSql(S32 schemaVersion)
@@ -27,16 +29,17 @@ string getCreateLevelInfoTableSql(S32 schemaVersion)
 #  undef LEVEL_INFO_ITEM
       "last_seen DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);"
 
-      "DROP TABLE IF EXISTS zones; "
-      "CREATE TABLE zones (level_info_id INTEGER NOT NULL, zone_id INTEGER NOT NULL, zone_geom BLOB NOT NULL); "
+      "DROP TABLE IF EXISTS " + ZONE_TABLE_NAME + "; "
+      "CREATE TABLE " + ZONE_TABLE_NAME + " (level_info_id INTEGER NOT NULL, zone_id INTEGER NOT NULL, zone_geom BLOB NOT NULL); "
 
-      "DROP TABLE IF EXISTS zone_neighbors; "
-      "CREATE TABLE zone_neighbors(level_info_id     INTEGER NOT NULL, "
-      "write_order       INTEGER NOT NULL, "
-      "origin_zone_id    INTEGER NOT NULL, "
-      "dest_zone_id      INTEGER NOT NULL, "
-      "border_start_geom BLOB NOT NULL, "
-      "border_end_geom   BLOB NOT NULL);";
+      "DROP TABLE IF EXISTS " + NEIGHBOR_TABLE_NAME + "; "
+      "CREATE TABLE " + NEIGHBOR_TABLE_NAME + "("
+         "level_info_id     INTEGER NOT NULL, "
+         "write_order       INTEGER NOT NULL, "
+         "origin_zone_id    INTEGER NOT NULL, "
+         "dest_zone_id      INTEGER NOT NULL, "
+         "border_start_geom BLOB NOT NULL, "
+         "border_end_geom   BLOB NOT NULL);";
 
 
    // Generates something like this:
