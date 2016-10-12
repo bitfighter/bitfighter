@@ -264,7 +264,6 @@ TEST(StringUtilsTest, WrapStringsLineWidth)
 }
 
    
-// TODO: Flesh out this test
 TEST(StringUtilsTest, SplitString)
 {
    Vector<string> words;
