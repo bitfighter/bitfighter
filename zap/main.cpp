@@ -57,9 +57,6 @@
 #include "IniFile.h"
 #include "SystemFunctions.h"
 
-#include "tnl.h"
-#include "tnlRandom.h"
-#include "tnlGhostConnection.h"
 #include "tnlJournal.h"
 
 #include "zapjournal.h"
