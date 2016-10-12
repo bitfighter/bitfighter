@@ -271,7 +271,7 @@ TEST(StringUtilsTest, SplitString)
 
    // Common case
    words = parseString("I love Bitfighter");
-   ASSERT_TRUE(words[0] == "I" && words[1] == "love" && words[2] == "Bitfighter");
+   ASSERT_TRUE(words[0] == "I" && words[1] == "love" && words[2] == "Bitfighter" && words.size() == 3);
 
    // Non-space separator (with spaces), emtpty final item
    words = parseString("I love|Bitfighter|", '|');
@@ -288,6 +288,13 @@ TEST(StringUtilsTest, SplitString)
    // Multiple trailing spaces
    words = parseString("\"I love\" Bitfighter     ");
    ASSERT_TRUE(words[0] == "I love" && words[1] == "Bitfighter" && words.size() == 2);
+
+   // Make sure args are trimmed
+   words = parseString("I love     Bitfighter     ");
+   ASSERT_TRUE(words[0] == "I" && words[1] == "love" && words[2] == "Bitfighter" && words.size() == 3);
+
+   words = parseString("I|love  |   Bitfighter     ", '|');
+   ASSERT_TRUE(words[0] == "I" && words[1] == "love" && words[2] == "Bitfighter" && words.size() == 3);
 }
 
 
