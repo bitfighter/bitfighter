@@ -56,4 +56,15 @@ string getCreateLevelInfoTableSql(S32 schemaVersion)
    //  DROP TABLE IF EXISTS ...
 }
 
+
+string getClearOutOldLevelsSql()
+{
+   static const string WHERE_OLDER_THAN_ONE_YEAR = " where last_seen < date('now', '-1 year')";   // 1 year ago, in a galaxy not far away
+
+   return
+      "delete from " + NEIGHBOR_TABLE_NAME + " where level_info_id in(select level_info_id from " + LEVEL_INFO_TABLE_NAME + WHERE_OLDER_THAN_ONE_YEAR + "); "
+      "delete from " + ZONE_TABLE_NAME     + " where level_info_id in(select level_info_id from " + LEVEL_INFO_TABLE_NAME + WHERE_OLDER_THAN_ONE_YEAR + "); "
+      "delete from " + LEVEL_INFO_TABLE_NAME + WHERE_OLDER_THAN_ONE_YEAR + "; ";  
+}
+
 }

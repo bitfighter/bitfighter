@@ -32,6 +32,7 @@ extern const string NEIGHBOR_TABLE_NAME;
 
 
 string getCreateLevelInfoTableSql(TNL::S32 schemaVersion);
+string getClearOutOldLevelsSql();
 
 }
 

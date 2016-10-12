@@ -407,8 +407,16 @@ void setupLogging(IniSettings *iniSettings)
 void makeLevelDatabase()
 {
    if(fileExists(LevelInfo::LEVEL_INFO_DATABASE_NAME))
-      return;
+   {
+      logprintf(LogConsumer::SqlMsg, "Removing old levels from level database");
+      DbWriter::DbQuery query(LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str());
+      
+      U64 result = query.runInsertQuery(Sqlite::getClearOutOldLevelsSql());
+      TNLAssert(result == SQLITE_OK, "Problem deleting old zones!");
 
+      return;
+   }
+      
    logprintf(LogConsumer::SqlMsg, "Creating level database %s", LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str());
    DbWriter::DatabaseWriter::createLevelDatabase(LevelInfo::LEVEL_INFO_DATABASE_NAME, LevelInfo::LEVEL_DATABASE_SCHEMA_VERSION);
 }
