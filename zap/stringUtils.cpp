@@ -400,6 +400,7 @@ void parseString(const string &inputString, Vector<string> &words, char seperato
 
 
 // Splits inputString into a series of words using the specified separator; does not consider quotes; trims words
+// See StringUtilsTest::SplitString for examples of usage
 void parseString(const char *inputString, Vector<string> &words, char seperator)
 {
    const S32 maxlen = 126;
