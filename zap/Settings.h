@@ -13,7 +13,6 @@
 
 #include "tnlVector.h"
 
-#include <string>
 #include <map>
 
 using namespace std;
