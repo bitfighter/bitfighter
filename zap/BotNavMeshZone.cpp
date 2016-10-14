@@ -790,8 +790,14 @@ bool BotNavMeshZone::tryToLoadZonesFromSqlite(const string &databaseName, U64 sq
 
    // Our sql
    const string id = itos(sqliteLevelInfoId);
-   const string zones_sql     = "SELECT zone_id, zone_geom, length(zone_geom) FROM " + Sqlite::ZONE_TABLE_NAME + " WHERE level_info_id = " + id + " ORDER BY zone_id;";
-   const string neighbors_sql = "SELECT origin_zone_id, dest_zone_id, border_start_geom, length(border_start_geom), border_end_geom, length(border_end_geom) FROM " + Sqlite::NEIGHBOR_TABLE_NAME + " WHERE level_info_id = " + id + " ORDER BY write_order;";
+   const string zones_sql     = "SELECT zone_id, zone_geom, length(zone_geom) "
+                                "FROM " + Sqlite::ZONE_TABLE_NAME + " "
+                                "WHERE level_info_id = " + id + " ORDER BY zone_id;";
+
+   const string neighbors_sql = "SELECT origin_zone_id, dest_zone_id, border_start_geom, length(border_start_geom), "
+                                       "border_end_geom, length(border_end_geom) "
+                                "FROM " + Sqlite::NEIGHBOR_TABLE_NAME + " "
+                                "WHERE level_info_id = " + id + " ORDER BY write_order;";
 
    char *errMsg = NULL;
    S32 rc = sqlite3_exec(sqliteDb, zones_sql.c_str(), loadZonesCallback, &allZones, &errMsg);
