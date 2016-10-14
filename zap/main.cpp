@@ -404,7 +404,7 @@ void setupLogging(IniSettings *iniSettings)
 
 
 // Create the levelInfo database if it does not already exist
-void makeLevelDatabase()
+void setupLevelDatabase(GameSettingsPtr settings)
 {
    if(fileExists(LevelInfo::LEVEL_INFO_DATABASE_NAME))
    {
@@ -414,11 +414,13 @@ void makeLevelDatabase()
       U64 result = query.runInsertQuery(Sqlite::getClearOutOldLevelsSql());
       TNLAssert(result == SQLITE_OK, "Problem deleting old zones!");
 
+      settings->usingDatabaseZoneCache = (result == SQLITE_OK);
+
       return;
    }
       
    logprintf(LogConsumer::SqlMsg, "Creating level database %s", LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str());
-   DbWriter::DatabaseWriter::createLevelDatabase(LevelInfo::LEVEL_INFO_DATABASE_NAME, LevelInfo::LEVEL_DATABASE_SCHEMA_VERSION);
+   settings->usingDatabaseZoneCache = DbWriter::DatabaseWriter::createLevelDatabase(LevelInfo::LEVEL_INFO_DATABASE_NAME, LevelInfo::LEVEL_DATABASE_SCHEMA_VERSION);
 }
 
 
@@ -1144,7 +1146,7 @@ int main(int argc, char **argv)
                      folderManager->getMusicDir(), settings->getMusicVolume());
 
    // Make sure we have a database for storing our level data (does nothing if database already exists)
-   makeLevelDatabase();
+   setupLevelDatabase(settings);
 
    
    if(settings->isDedicatedServer())

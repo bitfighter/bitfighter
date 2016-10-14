@@ -122,7 +122,7 @@ namespace Zap
       // Create empty file on file system
       DbWriter::DatabaseWriter::createLevelDatabase(dbName, LevelInfo::LEVEL_DATABASE_SCHEMA_VERSION);
 
-      BotNavMeshZone::saveBotZonesToSqlite(dbName, zonesIn, levelId);
+      BotNavMeshZone::saveBotZonesToSqlite(dbName, levelId, zonesIn);
       // Time passes
       ASSERT_TRUE(BotNavMeshZone::tryToLoadZonesFromSqlite(dbName, levelId, zonesOut));
 

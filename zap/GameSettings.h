@@ -326,11 +326,12 @@ public:
    Vector<string> getGlobalScriptList();
    S32 getGlobalScriptCount();
 
-
    static GameSettings *get();
+   bool usingDatabaseZoneCache;
 
    // Used for iniFile access in the setSetting() template below
    static void setIniSetting(const string &section, const string &key, const string &value);
+
 
    // Helper method to simultaneously update the mSettings and iniFile objects
    template <class DataType>

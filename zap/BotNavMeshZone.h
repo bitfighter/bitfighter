@@ -66,8 +66,8 @@ private:
    Vector<Border> mNeighborRenderPoints;     // Only populated on client
 
    static void populateZoneList(GridDatabase *mBotZoneDatabase, Vector<BotNavMeshZone *> *allZones);  // Populates allZones
-   static bool saveBotZonesToSqlite(const string &databaseName, const Vector<BotNavMeshZone *> &allZones, U64 sqliteLevelInfoId);
-   static bool tryToLoadZonesFromSqlite(const string &databaseName, U64 sqliteLevelInfoId, Vector<BotNavMeshZone *> &allZones);
+   static bool saveBotZonesToSqlite    (const string &databaseName, U64 sqliteLevelInfoId, const Vector<BotNavMeshZone *> &allZones);
+   static bool tryToLoadZonesFromSqlite(const string &databaseName, U64 sqliteLevelInfoId,       Vector<BotNavMeshZone *> &allZones);
    static bool clearZonesFromDatabase(sqlite3 *sqliteDb, U64 sqliteLevelInfoId);
 
 public:
@@ -101,7 +101,7 @@ public:
                                  const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList,
                                  const Vector<DatabaseObject *> &turretList, const Vector<DatabaseObject *> &forceFieldProjectorList,
                                  const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones, 
-                                 U64 sqliteLevelInfoId, bool writeZonesToDb);
+                                 U64 sqliteLevelInfoId, bool writeZonesToDb, bool usingDatabaseZoneCache);
 
    static S32 calcLevelSize     (const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList,
                                  const Vector<pair<Point, const Vector<Point> *> > &teleporterData);

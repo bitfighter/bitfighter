@@ -609,12 +609,12 @@ void ServerGame::cycleLevel(S32 nextLevel, bool isReset)
    // dynamic geometry, or if it is a test server, because the user might be editing levels, making caching non-sensical.
    bool hasLevelgens = getSettings()->getGlobalScriptCount() > 0 || getGameType()->getScriptName() != "";
 
-   bool writeZonesToDb = !hasLevelgens && !isTestServer();
+   bool writeZonesToDb = !hasLevelgens && !isTestServer() && mSettings->usingDatabaseZoneCache;
 
    getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(mLevel->getBotZoneDatabase(), mLevel->getBotZoneList(),
                                                                               getWorldExtents(), barrierList, turretList,
                                                                               forceFieldProjectorList, teleporterData, triangulate,
-                                                                              mLevel->getSqliteLevelId(), writeZonesToDb);
+                                                                              mLevel->getSqliteLevelId(), writeZonesToDb, mSettings->usingDatabaseZoneCache);
    // Clear team info for all clients
    resetAllClientTeams();
 

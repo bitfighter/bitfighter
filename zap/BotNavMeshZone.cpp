@@ -434,7 +434,7 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<Bot
                                        const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList,
                                        const Vector<DatabaseObject *> &turretList, const Vector<DatabaseObject *> &forceFieldProjectorList,
                                        const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones, 
-                                       U64 sqliteLevelInfoId, bool writeZonesToDb)
+                                       U64 sqliteLevelInfoId, bool writeZonesToDb, bool usingDatabaseZoneCache)
 {
 #ifdef LOG_TIMER
    U32 starttime = Platform::getRealMilliseconds();
@@ -442,7 +442,10 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<Bot
 
    allZones.deleteAndClear();
 
-   bool loaded = tryToLoadZonesFromSqlite(LevelInfo::LEVEL_INFO_DATABASE_NAME, sqliteLevelInfoId, allZones) && allZones.size() > 0;
+   bool loaded = usingDatabaseZoneCache &&
+                 tryToLoadZonesFromSqlite(LevelInfo::LEVEL_INFO_DATABASE_NAME, sqliteLevelInfoId, allZones) &&
+                 allZones.size() > 0;
+
 #ifdef LOG_TIMER
    U32 done0 = Platform::getRealMilliseconds();
 #endif
@@ -633,7 +636,7 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<Bot
 #endif
 
    if(writeZonesToDb)
-      saveBotZonesToSqlite(LevelInfo::LEVEL_INFO_DATABASE_NAME, allZones, sqliteLevelInfoId);
+      saveBotZonesToSqlite(LevelInfo::LEVEL_INFO_DATABASE_NAME, sqliteLevelInfoId, allZones);
 
    return true;
 }
@@ -667,7 +670,7 @@ bool BotNavMeshZone::clearZonesFromDatabase(sqlite3 *sqliteDb, U64 sqliteLevelIn
 }
 
 
-bool BotNavMeshZone::saveBotZonesToSqlite(const string &databaseName, const Vector<BotNavMeshZone *> &allZones, U64 sqliteLevelInfoId)
+bool BotNavMeshZone::saveBotZonesToSqlite(const string &databaseName, U64 sqliteLevelInfoId, const Vector<BotNavMeshZone *> &allZones)
 {
    if(!LevelInfo::isValidSqliteLevelId(sqliteLevelInfoId))
       return false;
