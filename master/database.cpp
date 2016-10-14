@@ -225,8 +225,10 @@ sqlite3 *DatabaseWriter::openSqliteDatabase(const string &databaseName, S32 mode
    if(rc == SQLITE_OK)
       return sqliteDb;
 
-   logprintf(LogConsumer::DatabaseFilter, "Error opening database %s: %s", databaseName.c_str(), sqlite3_errmsg(sqliteDb));
-
+   logprintf(LogConsumer::DatabaseFilter, "Error opening database for %s for %s: %s", 
+                                          databaseName.c_str(), 
+                                          mode == SQLITE_OPEN_READWRITE ? "reading/writing" : "reading", 
+                                          sqlite3_errmsg(sqliteDb));
    return NULL;
 }
 
