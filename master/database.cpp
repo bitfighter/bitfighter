@@ -225,7 +225,7 @@ sqlite3 *DatabaseWriter::openSqliteDatabase(const string &databaseName, S32 mode
    if(rc == SQLITE_OK)
       return sqliteDb;
 
-   logprintf(LogConsumer::SqlMsg, "Error opening database %s: %s", databaseName.c_str(), sqlite3_errmsg(sqliteDb));
+   logprintf(LogConsumer::DatabaseFilter, "Error opening database %s: %s", databaseName.c_str(), sqlite3_errmsg(sqliteDb));
 
    return NULL;
 }
@@ -747,7 +747,7 @@ U64 DbQuery::runInsertQuery(const string &sql) const
 
       if(err)
       {
-         logprintf(LogConsumer::SqlMsg, "Database error accessing sqlite database: %s", err);
+         logprintf(LogConsumer::DatabaseFilter, "Database error accessing sqlite database: %s", err);
          logprintf(sql.c_str());
          sqlite3_free(err);
          return U64_MAX;

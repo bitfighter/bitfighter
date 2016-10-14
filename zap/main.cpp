@@ -408,7 +408,7 @@ void setupLevelDatabase(GameSettingsPtr settings)
 {
    if(fileExists(LevelInfo::LEVEL_INFO_DATABASE_NAME))
    {
-      logprintf(LogConsumer::SqlMsg, "Removing old levels from level database");
+      logprintf(LogConsumer::DatabaseFilter, "Removing old levels from level database");
       DbWriter::DbQuery query(LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str());
       
       U64 result = query.runInsertQuery(Sqlite::getClearOutOldLevelsSql());
@@ -419,7 +419,7 @@ void setupLevelDatabase(GameSettingsPtr settings)
       return;
    }
       
-   logprintf(LogConsumer::SqlMsg, "Creating level database %s", LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str());
+   logprintf(LogConsumer::DatabaseFilter, "Creating level database %s", LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str());
    settings->usingDatabaseZoneCache = DbWriter::DatabaseWriter::createLevelDatabase(LevelInfo::LEVEL_INFO_DATABASE_NAME, LevelInfo::LEVEL_DATABASE_SCHEMA_VERSION);
 }
 
