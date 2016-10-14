@@ -774,7 +774,7 @@ static int loadNeighborCallback(void *allZones_ptr, int argc, char **argv, char 
 
 static void logSqlError(char *message)
 {
-   logprintf("SQL error: %s", message);
+   logprintf(LogConsumer::SqlMsg, "SQL error: %s", message);
    sqlite3_free(message);
 }
 
