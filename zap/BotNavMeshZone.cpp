@@ -733,6 +733,7 @@ bool BotNavMeshZone::saveBotZonesToSqlite(const string &databaseName, const Vect
 // Callback for "SELECT zone_id, zone_geom, length(zone_geom) FROM zones WHERE zone_id = nnnn;"
 static int loadZonesCallback(void *allZones_ptr, int argc, char **argv, char **colName)
 {
+   // Reconstitute the type of allZones, which gets passed as a void * by sqlite
    Vector<BotNavMeshZone *> &allZones = *static_cast<Vector<BotNavMeshZone *> *>(allZones_ptr);
 
    BotNavMeshZone *zone = new BotNavMeshZone(atoi(argv[0]));    // Will be cleaned up when allZones is cleared
