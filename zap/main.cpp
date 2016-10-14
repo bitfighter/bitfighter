@@ -420,7 +420,8 @@ void setupLevelDatabase(GameSettingsPtr settings)
    }
       
    logprintf(LogConsumer::DatabaseFilter, "Creating level database %s", LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str());
-   settings->usingDatabaseZoneCache = DbWriter::DatabaseWriter::createLevelDatabase(LevelInfo::LEVEL_INFO_DATABASE_NAME, LevelInfo::LEVEL_DATABASE_SCHEMA_VERSION);
+   settings->usingDatabaseZoneCache = 
+               DbWriter::DatabaseWriter::createLevelDatabase(LevelInfo::LEVEL_INFO_DATABASE_NAME, LevelInfo::LEVEL_DATABASE_SCHEMA_VERSION);
 }
 
 
