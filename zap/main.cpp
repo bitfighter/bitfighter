@@ -408,7 +408,6 @@ void setupLevelDatabase(GameSettingsPtr settings)
 {
    if(fileExists(LevelInfo::LEVEL_INFO_DATABASE_NAME))
    {
-      logprintf(LogConsumer::DatabaseFilter, "Removing old levels from level database");
       DbWriter::DbQuery query(LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str());
       
       U64 result = query.runInsertQuery(Sqlite::getClearOutOldLevelsSql());
