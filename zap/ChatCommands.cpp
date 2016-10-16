@@ -1187,6 +1187,7 @@ void rateMapHandler(ClientGame *game, const Vector<string> &args)
    }
 }
 
+
 void pauseHandler(ClientGame *game, const Vector<string> &args)
 {
    if(game->isSuspended())
@@ -1194,6 +1195,7 @@ void pauseHandler(ClientGame *game, const Vector<string> &args)
    else
       game->suspendGame();
 }
+
 
 // The following are only available in debug builds
 #ifdef TNL_DEBUG
