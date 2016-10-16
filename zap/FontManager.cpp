@@ -132,7 +132,7 @@ S32 BfFont::getStashFontId()
 
 static FontId currentFontId;
 
-static BfFont *fontList[FontCount] = {NULL};
+static BfFont *fontList[FontCount] = { NULL };
 
 sth_stash *FontManager::mStash = NULL;
 bool FontManager::mUsingExternalFonts = true;
