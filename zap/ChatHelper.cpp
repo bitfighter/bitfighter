@@ -113,7 +113,7 @@ namespace Zap
 
    // The following are only available in debug builds!
 #ifdef TNL_DEBUG
-   {"pause",               &ChatCommands::pauseHandler,              {  },  0, DEVELOPER_COMMANDS, 0, 1, { }, "TODO: add 'PAUSED' display while paused"},
+   { "pause",              &ChatCommands::pauseHandler,              {  },  0, DEVELOPER_COMMANDS, 0, 1, { }, "TODO: add 'PAUSED' display while paused"},
    { "showobjectoutlines", &ChatCommands::showObjectOutlinesHandler, {  },  0, DEVELOPER_COMMANDS, 0, 1, { }, "Show HelpItem object outlines on all objects" },    
 #endif
 };
