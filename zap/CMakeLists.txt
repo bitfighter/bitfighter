@@ -196,8 +196,6 @@ set(CLIENT_SOURCES
 	UITeamDefMenu.cpp
 	VideoSystem.cpp
 	voiceCodec.cpp
-	${CMAKE_SOURCE_DIR}/fontstash/stb_truetype.c
-	${CMAKE_SOURCE_DIR}/fontstash/fontstash.c
 )
 
 file(GLOB BITFIGHTER_HEADERS *.h *.hpp)

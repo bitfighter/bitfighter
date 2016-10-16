@@ -260,11 +260,14 @@ void RenderUtils::drawCenteredString_highlightKeys(S32 y, S32 size, const string
    keyStart = str.find("[");
    while(keyStart != string::npos)
    {
-      mGL->glColor(bodyColor);
+      //mGL->glColor(bodyColor);
+      FontManager::setFontColor(bodyColor);     
+
       x += drawStringAndGetWidth(x, y, size, str.substr(pos, keyStart - pos).c_str());
 
       keyEnd = str.find("]", keyStart) + 1;     // + 1 to include the "]" itself
-      mGL->glColor(keyColor);
+      //mGL->glColor(keyColor);
+      FontManager::setFontColor(keyColor);
       x += drawStringAndGetWidth(x, y, size, str.substr(keyStart, keyEnd - keyStart).c_str());
       pos = keyEnd;
 
@@ -272,7 +275,8 @@ void RenderUtils::drawCenteredString_highlightKeys(S32 y, S32 size, const string
    }
    
    // Draw any remaining bits of our string
-   mGL->glColor(bodyColor);
+   //mGL->glColor(bodyColor);
+   FontManager::setFontColor(bodyColor);
    drawString(x, y, size, str.substr(keyEnd).c_str());
 }
 
@@ -433,12 +437,14 @@ S32 RenderUtils::drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, FontContex
 S32 RenderUtils::drawStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor, const Color &rightColor,
                                          const char *leftStr, const char *rightStr)
 {
-   mGL->glColor(leftColor);
+   //mGL->glColor(leftColor);
+   FontManager::setFontColor(leftColor);
 
    // Use crazy width calculation to compensate for fontStash bug calculating with of terminal spaces
    xpos += drawStringAndGetWidth((F32)xpos, (F32)ypos, size, leftStr) + 5; //getStringWidth(size, "X X") - getStringWidth(size, "XX");
 
-   mGL->glColor(rightColor);
+   //mGL->glColor(rightColor);
+   FontManager::setFontColor(rightColor);
    drawString(xpos, ypos, size, rightStr);
 
    return xpos;
@@ -450,12 +456,14 @@ S32 RenderUtils::drawStringPair(S32 xpos, S32 ypos, S32 size, FontContext leftCo
       const char* leftStr, const char* rightStr)
 {
    FontManager::pushFontContext(leftContext);
-   mGL->glColor(leftColor);
+   //mGL->glColor(leftColor);
+   FontManager::setFontColor(leftColor);
    xpos += drawStringAndGetWidth((F32)xpos, (F32)ypos, size, leftStr);
    FontManager::popFontContext();
 
    FontManager::pushFontContext(rightContext);
-   mGL->glColor(rightColor);
+   //mGL->glColor(rightColor);
+   FontManager::setFontColor(rightColor);
    drawString(xpos, ypos, size, rightStr);
    FontManager::popFontContext();
 
@@ -507,10 +515,12 @@ S32 RenderUtils::drawCenteredStringPair2Col(S32 y, S32 size, bool leftCol, const
    S32 width = offset + getStringWidth(size, right);
    S32 x = get2ColStartingPos(leftCol) - width / 2;         // x must be S32 in case it leaks off left side of screen
 
-   mGL->glColor(leftColor);
+   //mGL->glColor(leftColor);
+   FontManager::setFontColor(leftColor);
    drawString(x, y, size, left);
 
-   mGL->glColor(rightColor);
+   //mGL->glColor(rightColor);
+   FontManager::setFontColor(rightColor);
    drawString(x + offset, y, size, right);
 
    return x;
@@ -668,6 +678,13 @@ void RenderUtils::drawLine(const Vector<Point> *points, const Color &color)
 {
    mGL->glColor(color);
    mGL->renderPointVector(points, GLOPT::LineStrip);
+}
+
+
+void RenderUtils::drawHorizLine(S32 x1, S32 x2, S32 y, const Color &color)
+{
+   mGL->glColor(color);
+   drawHorizLine(x1, x2, y);
 }
 
 

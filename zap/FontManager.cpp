@@ -21,9 +21,15 @@
 #include "../fontstash/stb_truetype.h"
 
 #include "tnlPlatform.h"
+#include "../master/GameJoltConnector.h"
 
-extern "C" {
+extern "C"
+{
+#  include "glinc.h"
+#  define FONTSTASH_IMPLEMENTATION
 #  include "../fontstash/fontstash.h"
+#  define GLFONTSTASH_IMPLEMENTATION
+#  include "../fontstash/glfontstash.h"
 }
 
 #include <string>
@@ -42,7 +48,7 @@ BfFont::BfFont(const ::SFG_StrokeFont *strokeFont)
    mStrokeFont = strokeFont;
 
    // TTF only stuff that is ignored
-   mStashFontId = 0;
+   mStashFontId = FONS_INVALID;
 }
 
 
@@ -62,7 +68,7 @@ BfFont::BfFont(const string &fontFile, GameSettings *settings)
 {
    mIsStrokeFont = false;
    mStrokeFont = NULL;     // Stroke font only
-   mStashFontId = 0;
+   mStashFontId = FONS_INVALID;
 
    TNLAssert(FontManager::getStash(), "Invalid font stash!");
 
@@ -74,24 +80,25 @@ BfFont::BfFont(const string &fontFile, GameSettings *settings)
 
    for(U32 i = 0; i < sizeof(SystemFontDirectories) / sizeof(SystemFontDirectories[0]) && mStashFontId <= 0; i++) {
       string file = string(SystemFontDirectories[i]) + getFileSeparator() + fontFile;
-      mStashFontId = sth_add_font(FontManager::getStash(), file.c_str());
+      mStashFontId = fonsAddFont(FontManager::getStash(), file.c_str(), file.c_str());
    }
 
    // Prepare physfs for searching for sfx
    //PhysFS::clearSearchPath();
    //PhysFS::mountAll(settings->getFolderManager()->getFontDirs().getConstStlVector());
 
-   if(mStashFontId <= 0) {
+   // If fonsAddFont returned -1, then the font failed to be added
+   if(mStashFontId == FONS_INVALID) {
       //string realDir = PhysFS::getRealDir(fontFile);
       //string file = joindir(realDir, fontFile);
       string file = checkName(fontFile, settings->getFolderManager()->getFontDirs());
 
-      mStashFontId = sth_add_font(FontManager::getStash(), file.c_str());
+      mStashFontId = fonsAddFont(FontManager::getStash(), "", file.c_str());
    }
 
-   TNLAssert(mStashFontId > 0, "Invalid font id!");
+   TNLAssert(mStashFontId != FONS_INVALID, "Invalid font id!");
 
-   if(mStashFontId == 0)
+   if(mStashFontId == FONS_INVALID)
    {
       mOk = false;
       return;
@@ -134,10 +141,10 @@ static FontId currentFontId;
 
 static BfFont *fontList[FontCount] = { NULL };
 
-sth_stash *FontManager::mStash = NULL;
+FONScontext *FontManager::mStash = NULL;
 bool FontManager::mUsingExternalFonts = true;
 
-// Constructor
+// Constructorer
 FontManager::FontManager()
 {
    for(S32 i = 0; i < FontCount; i++)
@@ -159,6 +166,65 @@ void FontManager::reinitialize(GameSettings *settings)
 }
 
 
+// stashPtr is a pointer that we pass in when we register the callback
+void fontStashErrorHandlerCallback(void* stashPtr, int error, int val)
+{
+   switch(error)
+   {
+      case FONS_ATLAS_FULL:
+      { 
+         // Let's make the atlas a bit bigger so we can hold more glyphs and not get back here
+         FONScontext *stash = (FONScontext *)stashPtr;
+      
+         // We should never get here; if we do, we want to figure out how much memory we really need, so we'll just bump this up by 
+         // 10%.  If we ever get here, we need to increase the initial size (see call to glfonsCreate) so that we never hit this.
+         S32 newWidth = stash->atlas->width * 1.1;    
+         S32 newHeight = stash->atlas->height;
+
+         TNLAssert(false, "Increase initial atlas size (glfonsCreate)");
+         logprintf(LogConsumer::LogWarning, "FontStash warning: Atlas full. Increasing size to %d x %d (w x h).", newWidth, newHeight);
+         S32 ok = fonsExpandAtlas(stash, newWidth, newHeight);
+
+         if(!ok)
+         {
+            TNLAssert(false, "Resizing FontStash atlas failed... disabling TTF fonts.")
+            logprintf(LogConsumer::LogError, "Resizing FontStash atlas failed... disabling TTF fonts.");
+            FontManager::disableTtfFonts();
+         }
+
+         return;
+      }
+
+      case FONS_SCRATCH_FULL:
+         TNLAssert(false, "FontStash error: Scratch memory used to render glyphs is full, requested size reported in 'val', you may need to bump up FONS_SCRATCH_BUF_SIZE.");
+         logprintf(LogConsumer::LogError, "FontStash error: Scratch memory for rendering fonts full. Falling back to default font.");
+         break;
+
+      case FONS_STATES_OVERFLOW:
+         TNLAssert(false, "FontStash error: Calls to fonsPushState has created too large stack, if you need deep state stack bump up FONS_MAX_STATES.");
+         logprintf(LogConsumer::LogError, "FontStash error: Stack overflow. Falling back to default font.");
+         break;
+
+      case FONS_STATES_UNDERFLOW:
+         TNLAssert(false, "FontStash error: Trying to pop too many states fonsPopState().");
+         logprintf(LogConsumer::LogError, "FontStash error: Stack underflow. Falling back to default font.");
+         break;
+
+      default:
+         TNLAssert(false, "FontStash error: Unknown error!");
+         logprintf(LogConsumer::LogError, "FontStash error: Unknown problem. Falling back to default font.");
+   }
+
+   FontManager::disableTtfFonts();
+}
+
+
+void FontManager::disableTtfFonts()
+{
+   mUsingExternalFonts = false;
+}
+
+
 // This must be run after VideoSystem::actualizeScreenMode()
 // If useExternalFonts is false, settings can be NULL
 void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
@@ -177,7 +243,8 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
    if(mUsingExternalFonts)
    {
       TNLAssert(mStash == NULL, "This should be NULL, or else we'll have a memory leak!");
-      mStash = sth_create(512, 512);
+      mStash = glfonsCreate(2048, 512, FONS_ZERO_TOPLEFT);
+      fonsSetErrorCallback(mStash, fontStashErrorHandlerCallback, mStash); // <== 3rd arg gets passed to the callback as 1st param
 
       TNLAssert(settings, "Settings can't be NULL if we are using external fonts!");
 
@@ -206,13 +273,13 @@ void FontManager::cleanup()
 
    if(mUsingExternalFonts)
    {
-      sth_delete(mStash);
+      glfonsDelete(mStash);
       mStash = NULL;
    }
 }
 
 
-sth_stash *FontManager::getStash()
+FONScontext *FontManager::getStash()
 {
    return mStash;
 }
@@ -220,13 +287,9 @@ sth_stash *FontManager::getStash()
 
 void FontManager::drawTTFString(BfFont *font, const char *string, F32 size)
 {
-   F32 outPos;
-
-   sth_begin_draw(mStash);
-
-   sth_draw_text(mStash, font->getStashFontId(), size, 0.0, 0.0, string, &outPos);
-
-   sth_end_draw(mStash);
+   fonsSetFont(mStash, font->getStashFontId());
+   fonsSetSize(mStash, size);
+   fonsDrawText(mStash, 0.0, 0.0, string, NULL);
 }
 
 
@@ -300,6 +363,13 @@ void FontManager::setFontContext(FontContext fontContext)
          TNLAssert(false, "Unknown font context!");
          break;
    }
+}
+
+
+void FontManager::setFontColor(const Color &color)
+{
+   mGL->glColor(color);    // For stroke fonts
+   fonsSetColor(mStash, glfonsRGBA(color.r * 255, color.g * 255, color.b * 255, 255));    // For FontStash
 }
 
 
@@ -431,10 +501,19 @@ F32 FontManager::getStrokeFontStringLength(const SFG_StrokeFont *font, const cha
 
 F32 FontManager::getTtfFontStringLength(BfFont *font, const char *string)
 {
-   F32 minx, miny, maxx, maxy;
-   sth_dim_text(mStash, font->getStashFontId(), legacyRomanSizeFactorThanksGlut, string, &minx, &miny, &maxx, &maxy);
+   // I think it's this simple...
+   // TODO FIX - "Release 020"
+   // - old:  size = 717 at all screen modes
+   // - new:  size = 219 at windowed; 319 in fullscreen
+   F32 bounds[4];
+   F32 length = fonsTextBounds2(mStash, legacyRomanSizeFactorThanksGlut, 0, 0, string, NULL, bounds);
+   //F32 length = fonsTextBounds(mStash, 0, 0, string, NULL, NULL);
 
-   return maxx - minx;
+   //F32 len = (bounds[2] - bounds[0]);
+   //if(strcmp(string, "LEFT - previous page   |   RIGHT, SPACE - next page   |   ESC exits") == 0)
+   //   printf("zzxz Len = %f/%f", length, len);
+
+   return length;
 }
 
 
@@ -474,9 +553,9 @@ void FontManager::renderString(F32 size, const char *string)
       F32 k = DisplayManager::getScreenInfo()->getPixelRatio() * 2;
       F32 rk = 1/k;
 
-      // Flip upside down because y = -y
-      mGL->glScale(rk, -rk);
-      // `size * k` becomes `size` due to the glScale above
+      mGL->glScale(rk, rk);
+
+      // 'size * k' becomes 'size' due to the glScale above
       drawTTFString(font, string, size * k * legacyNormalizationFactor);
    }
 }

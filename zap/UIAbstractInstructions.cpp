@@ -11,6 +11,7 @@
 #include "Colors.h"
 
 #include "RenderUtils.h"
+#include "FontManager.h"
 
 namespace Zap
 {
@@ -100,17 +101,16 @@ void AbstractInstructionsUserInterface::render(const char *header, S32 page, S32
    static S32 prefixWidth = RenderUtils::getStringWidth(fontSize, prefix);
 
    // Draw header first as different color, then everything else
-   mGL->glColor(Colors::cyan);
+   FontManager::setFontColor(Colors::cyan);
    RenderUtils::drawString(3 + prefixWidth, 3, fontSize, header);
 
-   mGL->glColor(Colors::red);
+   FontManager::setFontColor(Colors::red);
    RenderUtils::drawString(3, 3, fontSize, prefix);
 
    RenderUtils::drawStringf(625, 3, fontSize, "PAGE %d/%d", page, pages);
    RenderUtils::drawCenteredString(571, 20, "LEFT - previous page   |   RIGHT, SPACE - next page   |   ESC exits");
 
-   mGL->glColor(Colors::gray70);
-   RenderUtils::drawHorizLine(0, 800, 32);
+   RenderUtils::drawHorizLine(0, 800, 32, Colors::gray70);
    RenderUtils::drawHorizLine(0, 800, 569);
 }
 
@@ -132,15 +132,14 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolString
 
    Color secColor =   Colors::yellow;
 
-   mGL->glColor(secColor);
+   FontManager::setFontColor(secColor);
    RenderUtils::drawString(cmdCol,   ypos, headerSize, "Code Example");
    RenderUtils::drawString(descrCol, ypos, headerSize, "Description");
 
    Vector<SymbolShapePtr> symbols;
 
    ypos += cmdSize + cmdGap;
-   mGL->glColor(&Colors::gray70);
-   RenderUtils::drawHorizLine(cmdCol, 750, ypos);
+   RenderUtils::drawHorizLine(cmdCol, 750, ypos, Colors::gray70);
 
    ypos += 10;     // Small gap before cmds start
    ypos += cmdSize;
@@ -148,10 +147,7 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolString
    for(S32 i = 0; cmdList[i].command != ""; i++)
    {
       if(cmdList[i].command[0] == '-')      // Horiz spacer
-      {
-         mGL->glColor(Colors::gray40);
-         RenderUtils::drawHorizLine(cmdCol, cmdCol + 335, ypos + (cmdSize + cmdGap) / 4);
-      }
+         RenderUtils::drawHorizLine(cmdCol, cmdCol + 335, ypos + (cmdSize + cmdGap) / 4, Colors::gray40);
       else
       {
          symbols.clear();
