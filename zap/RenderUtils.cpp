@@ -652,11 +652,14 @@ void RenderUtils::wrapString(const string &str, S32 wrapWidth, S32 fontSize, Fon
 //}
 
 
-S32 RenderUtils::getStringPairWidth(S32 size, FontContext leftContext,
-      FontContext rightContext, const char* leftStr, const char* rightStr)
+S32 RenderUtils::getStringPairWidth(S32 size, 
+                                    FontContext leftContext,
+                                    FontContext rightContext, 
+                                    const char* leftStr, 
+                                    const char* rightStr)
 {
-   S32 leftWidth = getStringWidth(leftContext, size, leftStr);
-   S32 spaceWidth = getStringWidth(leftContext, size, " ");
+   S32 leftWidth  = getStringWidth(leftContext,  size, leftStr);
+   S32 spaceWidth = getStringWidth(leftContext,  size, " ");
    S32 rightWidth = getStringWidth(rightContext, size, rightStr);
 
    return leftWidth + spaceWidth + rightWidth;
