@@ -323,12 +323,12 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
    }
    else if(helpItem == EnergyGaugeItem)
    {
-      const S32 indicatorLeft  = UI::GaugeRenderer::GaugeLeftMargin - indicatorHorizontalGap;
-      const S32 indicatorRight = UI::GaugeRenderer::GaugeLeftMargin + UI::GaugeRenderer::GaugeWidth + indicatorHorizontalGap;
+      const S32 indicatorLeft  = GaugeRenderer::GaugeLeftMargin - indicatorHorizontalGap;
+      const S32 indicatorRight = GaugeRenderer::GaugeLeftMargin + GaugeRenderer::GaugeWidth + indicatorHorizontalGap;
       const S32 indicatorTop   = DisplayManager::getScreenInfo()->getGameCanvasHeight() - 
-                                          (UI::EnergyGaugeRenderer::GaugeBottomMargin + 
-                                           UI::EnergyGaugeRenderer::GaugeHeight + 
-                                           UI::GaugeRenderer::SafetyLineExtend + 
+                                          (EnergyGaugeRenderer::GaugeBottomMargin + 
+                                           EnergyGaugeRenderer::GaugeHeight + 
+                                           GaugeRenderer::SafetyLineExtend + 
                                            indicatorVerticalGap);
 
       const S32 textMiddle = (textTop + textBottom) / 2;
