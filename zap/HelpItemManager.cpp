@@ -302,10 +302,9 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
       const Point widthAndHeight = game->getUIManager()->getUI<GameUserInterface>()->getTimeLeftIndicatorWidthAndHeight();
       const S32 w = (S32)widthAndHeight.x;
       const S32 h = (S32)widthAndHeight.y;
-      const S32 x = DisplayManager::getScreenInfo()->getGameCanvasWidth() - 
-                                       UI::TimeLeftRenderer::TimeLeftIndicatorMargin - w;
-      const S32 indicatorTop = DisplayManager::getScreenInfo()->getGameCanvasHeight() - 
-                                       UI::TimeLeftRenderer::TimeLeftIndicatorMargin - h - indicatorVerticalGap;
+      const S32 margin = TimeLeftRenderer::TimeLeftIndicatorMargin;
+      const S32 x            = DisplayManager::getScreenInfo()->getGameCanvasWidth()  - margin - w;
+      const S32 indicatorTop = DisplayManager::getScreenInfo()->getGameCanvasHeight() - margin - h - indicatorVerticalGap;
 
       const S32 indicatorLeft  = x + w + indicatorHorizontalGap;
       const S32 indicatorRight = x - indicatorHorizontalGap;
