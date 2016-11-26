@@ -231,8 +231,8 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
 
    const char *topName, *botName;
    string topScoreStr, botScoreStr;
-   S32 topScore, botScore;
-   S32 topScoreLen = 0, botScoreLen = 0, topOneFixFactor = 0, botOneFixFactor = 0;
+   S32 topScore, botScore, topScoreLen, topOneFixFactor;
+   S32 botOneFixFactor = 0, botScoreLen = 0;
 
    bool renderTwoNames = hasSecondLeader || !localClientIsLeader;
 
