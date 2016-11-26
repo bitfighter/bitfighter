@@ -576,10 +576,10 @@ void HelpItemManager::setAlreadySeenString(const string &vals)
 }
 
 
-static inline bool isNeut(S32 objectTeam)                  { return objectTeam == TEAM_NEUTRAL; }
-static inline bool isHost(S32 objectTeam)                  { return objectTeam == TEAM_HOSTILE; }
-static inline bool isTeam(S32 objectTeam, S32 playerTeam)  { return objectTeam == playerTeam;   }
-static inline bool isEnemy(S32 objectTeam, S32 playerTeam) { return objectTeam >= 0 && objectTeam != playerTeam; }
+static bool isNeut(S32 objectTeam)                  { return objectTeam == TEAM_NEUTRAL; }
+static bool isHost(S32 objectTeam)                  { return objectTeam == TEAM_HOSTILE; }
+static bool isTeam(S32 objectTeam, S32 playerTeam)  { return objectTeam == playerTeam;   }
+static bool isEnemy(S32 objectTeam, S32 playerTeam) { return objectTeam >= 0 && objectTeam != playerTeam; }
 
 static bool checkWhose(HighlightItem::Whose whose, S32 objectTeam, S32 playerTeam)
 {
