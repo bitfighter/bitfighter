@@ -21,8 +21,6 @@
 #include "SymbolShape.h"
 #include "Colors.h"
 #include "RenderUtils.h"
-#include "GameObjectRender.h"    // For drawHorizLine
-#include "MathUtils.h"           // For min()
 
 
 using namespace TNL;
