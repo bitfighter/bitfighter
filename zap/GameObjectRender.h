@@ -33,6 +33,19 @@ struct PanelGeom;
 
 class GameObjectRender: RenderManager
 {
+   // Object to hold data on each swirling teleporter particle + trail
+   struct Tracker
+   {
+      F32 thetaI;
+      F32 thetaP;
+      F32 dI;
+      F32 dP;
+      U32 ci;
+   };
+
+private:
+   static Color GameObjectRender::getTrackerColor(const Tracker &t, Color *liveColors, Color *deadColors, S32 i, S32 trackerCount);
+
 public:
    GameObjectRender();
    virtual ~GameObjectRender();
@@ -45,12 +58,10 @@ public:
 
    //////////
    // Primitives
-   static void renderCentroidMark(const Point &pos, F32 radius);
-
-   static void renderUpArrow(const Point &center, S32 size);
-   static void renderDownArrow(const Point &center, S32 size);
-   static void renderLeftArrow(const Point &center, S32 size);
-   static void renderRightArrow(const Point &center, S32 size);
+   static void renderUpArrow(const Point &center, S32 size, const Color &color);
+   static void renderDownArrow(const Point &center, S32 size, const Color &color);
+   static void renderLeftArrow(const Point &center, S32 size, const Color &color);
+   static void renderRightArrow(const Point &center, S32 size, const Color &color);
 
    static void renderNumberInBox(const Point pos, S32 number, F32 scale);
 
@@ -66,15 +77,15 @@ public:
    static void renderSquareItem(const Point &pos, const Color &c, F32 alpha, const Color &letterColor, char letter);
 
    static void drawDivetedTriangle(F32 height, F32 len);
-   static void drawGear(const Point &center, S32 teeth, F32 r1, F32 r2, F32 ang1, F32 ang2, F32 innerCircleRadius, F32 angleRadians = 0.0f);
+   static void drawGear(const Point &center, S32 teeth, F32 r1, F32 r2, F32 ang1, F32 ang2, F32 innerCircleRadius, const Color &color, F32 angleRadians = 0.0f);
 
 
    //////////
    // Some things for rendering on screen display
-   static F32 renderCenteredString(const Point &pos, S32 size, const char *string);
-   static F32 renderCenteredString(const Point &pos, F32 size, const char *string);
+   static F32 renderCenteredString(const Point &pos, S32 size, const Color &color, F32 alpha, const char *string);
+   static F32 renderCenteredString(const Point &pos, F32 size, const Color &color,            const char *string);
 
-   static void renderHealthBar(F32 health, const Point &center, const Point &dir, F32 length, F32 width);
+   static void renderHealthBar(F32 health, const Point &center, const Point &dir, F32 length, F32 width, const Color &color, F32 alpha = 1.0);
    static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bool shieldActive,
                                           bool sensorActive, bool repairActive, bool hasArmor);
    static void renderShipFlame(ShipFlame *flames, S32 flameCount, F32 thrust, F32 alpha, bool yThruster);
@@ -104,7 +115,7 @@ public:
    static void drawFourArrows(const Point &pos);
 
    static void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha,
-                                const Vector<Point> *dests, U32 trackerCount = 100);
+                                const Vector<Point> *dests, S32 trackerCount = 100);
    static void renderTeleporterOutline(const Point &center, F32 radius, const Color &color);
    static void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentScale = 1);
    static void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentScale);
@@ -132,7 +143,7 @@ public:
    static void renderLoadoutZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill,
                                  const Point &centroid, F32 angle, F32 scaleFact = 1);
 
-   static void renderLoadoutZoneIcon(const Point &center, S32 outerRadius, F32 angleRadians = 0.0f);
+   static void renderLoadoutZoneIcon(const Point &center, S32 outerRadius, const Color &color, F32 angleRadians = 0.0f);
 
    static void renderNavMeshZone(const Vector<Point> *outline, const Vector<Point> *fill,
                                  const Point &centroid, S32 zoneId);
@@ -155,20 +166,21 @@ public:
    static void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill);     // No label version
    static void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle,
                               bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter, GoalZoneFlashStyle flashStyle);
-   static void renderGoalZoneIcon(const Point &center, S32 radius);
+   static void renderGoalZoneIcon(const Point &center, S32 radius, const Color &color);
 
 
    static void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle,
                            bool open, F32 glowFraction);
 
    static void renderNexus(const Vector<Point> *outline, const Vector<Point> *fill, bool open, F32 glowFraction);
-   static void renderNexusIcon(const Point &center, S32 radius, F32 angleRadians = 0.0f);
+   static void renderNexusIcon(const Point &center, S32 radius, F32 angleRadians, const Color &color);
 
 
    static void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill, const Point &centroid);
    static void renderSlipZoneIcon(const Point &center, S32 radius, F32 angleRadians = 0.0f);
 
-   static void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *text, F32 scaleFact = 1);
+   static void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const Color &color, const char *text, F32 scaleFact = 1);
+   static void renderPolygonLabel(const Point &centroid, F32 angle, S32 size, const Color &color, F32 alpha, const char *text, F32 scaleFact = 1);
 
    static void renderProjectile(const Point &pos, U32 type, U32 time);
    static void renderSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRemaining);
@@ -229,9 +241,9 @@ public:
    static void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, const Color &teamColor, bool enabled, S32 healRate = 0);
    static void renderForceField(Point start, Point end, const Color &c, bool fieldUp, F32 scale = 1);
 
-   static void renderBitfighterLogo(U32 mask);
-   static void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask = 1023);
-   static void renderBitfighterLogo(const Point &pos, F32 size, U32 letterMask = 1023);
+   static void renderBitfighterLogo(U32 mask, const Color &color);
+   static void renderBitfighterLogo(S32 yPos, F32 scale, const Color &color, U32 mask = 1023);
+   static void renderBitfighterLogo(const Point &pos, F32 size, const Color &color, U32 letterMask = 1023);
    static void renderBitfighterLogo(const Point &pos, const Point &dir, F32 size);
 
    static void renderStaticBitfighterLogo();

@@ -20,6 +20,7 @@ namespace Colors
    const Color yellow(1,1,0);
    const Color cyan(0,1,1);
    const Color magenta(1,0,1);
+   const Color redderMagenta(1, 0, 0.35);    // Used by seekers
    const Color black(0,0,0);
    const Color white(1,1,1);
 

@@ -237,11 +237,19 @@ void GL::glTranslate(S32 x, F32 y)
 
 void GL::glTranslate(F32 x, F32 y)
 {
-#ifdef BF_USE_GLES2
-   // TODO
-#else
-   glTranslatef(x, y, 0);
-#endif
+   glTranslatef(x, y, 0.0f);
+}
+
+
+void GL::glTranslate(S32 x, S32 y, S32 z)
+{
+   glTranslatef((F32)x, (F32)y, (F32)z);
+}
+
+
+void GL::glTranslate(S32 x, S32 y, F32 z)
+{
+   glTranslatef((F32)x, (F32)y, z);
 }
 
 
@@ -409,8 +417,7 @@ void GL::glDepthFunc(U32 function)
 }
 
 
-void GL::renderVertexArray(const S8 verts[], S32 vertCount, S32 geomType,
-      S32 start, S32 stride)
+void GL::renderVertexArray(const S8 verts[], S32 vertCount, S32 geomType, S32 start, S32 stride)
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -425,12 +432,12 @@ void GL::renderVertexArray(const S8 verts[], S32 vertCount, S32 geomType,
 }
 
 
-void GL::renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType,
-      S32 start, S32 stride)
+void GL::renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType, const Color &color, S32 start, S32 stride)
 {
 #ifdef BF_USE_GLES2
    // TODO
 #else
+   glColor(color);
    glEnableClientState(GL_VERTEX_ARRAY);
 
    glVertexPointer(2, GL_SHORT, stride, verts);
@@ -441,8 +448,23 @@ void GL::renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType,
 }
 
 
-void GL::renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType,
-      S32 start, S32 stride)
+void GL::renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType, const Color &color, S32 start, S32 stride)
+{
+   glColor(color);
+
+   renderVertexArray(verts, vertCount, geomType, start, stride);
+}
+
+
+void GL::renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType, const Color &color, F32 alpha, S32 start, S32 stride)
+{
+   glColor(color, alpha);
+
+   renderVertexArray(verts, vertCount, geomType, start, stride);
+}
+
+
+void GL::renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType, S32 start, S32 stride)
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -457,8 +479,7 @@ void GL::renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType,
 }
 
 
-void GL::renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount,
-      S32 geomType, S32 start, S32 stride)
+void GL::renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, S32 geomType, S32 start, S32 stride)
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -478,6 +499,23 @@ void GL::renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 ve
 
 
 // geomType: GL_LINES, GL_LINE_STRIP, GL_LINE_LOOP, GL_TRIANGLES, GL_TRIANGLE_FAN, etc.
+void GL::renderPointVector(const Vector<Point> *points, U32 geomType, const Color &color, F32 alpha)
+{
+   glColor(color, alpha);
+   renderPointVector(points, geomType);
+}
+
+
+void GL::renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType, const Color &color, F32 alpha)
+{
+   glColor(color, alpha);
+   glPushMatrix();
+   glTranslate(offset);
+   renderPointVector(points, geomType);
+   glPopMatrix();
+}
+
+
 void GL::renderPointVector(const Vector<Point> *points, U32 geomType)
 {
 #ifdef BF_USE_GLES2
@@ -493,26 +531,9 @@ void GL::renderPointVector(const Vector<Point> *points, U32 geomType)
 }
 
 
-void GL::renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType)
-{
-#ifdef BF_USE_GLES2
-   // TODO
-#else
-   ::glPushMatrix();
-      glTranslate(offset);
-      renderPointVector(points, geomType);
-   ::glPopMatrix();
-#endif
-}
-
-
 void GL::renderLine(const Vector<Point> *points)
 {
-#ifdef BF_USE_GLES2
-   // TODO
-#else
    renderPointVector(points, GL_LINE_STRIP);
-#endif
 }
 
 

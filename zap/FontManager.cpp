@@ -78,10 +78,12 @@ BfFont::BfFont(const string &fontFile, GameSettings *settings)
       return;
    }
 
-   for(U32 i = 0; i < sizeof(SystemFontDirectories) / sizeof(SystemFontDirectories[0]) && mStashFontId <= 0; i++) {
-      string file = string(SystemFontDirectories[i]) + getFileSeparator() + fontFile;
-      mStashFontId = fonsAddFont(FontManager::getStash(), file.c_str(), file.c_str());
-   }
+   // This seems to fail... wrong folder?
+   //for(U32 i = 0; i < sizeof(SystemFontDirectories) / sizeof(SystemFontDirectories[0]) && mStashFontId <= 0; i++) {
+   //   string file = string(SystemFontDirectories[i]) + getFileSeparator() + fontFile;
+   //   mStashFontId = fonsAddFont(FontManager::getStash(), file.c_str(), file.c_str());
+   //   printf("Adding font %s: %d\n", file.c_str(), mStashFontId);//xyzzy
+   //}
 
    // Prepare physfs for searching for sfx
    //PhysFS::clearSearchPath();
@@ -94,17 +96,12 @@ BfFont::BfFont(const string &fontFile, GameSettings *settings)
       string file = checkName(fontFile, settings->getFolderManager()->getFontDirs());
 
       mStashFontId = fonsAddFont(FontManager::getStash(), "", file.c_str());
+      printf("Adding font2 %s: %d\n", file.c_str(), mStashFontId);//xyzzy
    }
 
    TNLAssert(mStashFontId != FONS_INVALID, "Invalid font id!");
 
-   if(mStashFontId == FONS_INVALID)
-   {
-      mOk = false;
-      return;
-   }
-
-   mOk = true;
+   mOk = mStashFontId != FONS_INVALID;
 }
 
 
@@ -178,7 +175,7 @@ void fontStashErrorHandlerCallback(void* stashPtr, int error, int val)
       
          // We should never get here; if we do, we want to figure out how much memory we really need, so we'll just bump this up by 
          // 10%.  If we ever get here, we need to increase the initial size (see call to glfonsCreate) so that we never hit this.
-         S32 newWidth = stash->atlas->width * 1.1;    
+         S32 newWidth = S32(stash->atlas->width * 1.1);    // + 10%
          S32 newHeight = stash->atlas->height;
 
          TNLAssert(false, "Increase initial atlas size (glfonsCreate)");
@@ -243,7 +240,7 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
    if(mUsingExternalFonts)
    {
       TNLAssert(mStash == NULL, "This should be NULL, or else we'll have a memory leak!");
-      mStash = glfonsCreate(2048, 512, FONS_ZERO_TOPLEFT);
+      mStash = glfonsCreate(2400, 768, FONS_ZERO_TOPLEFT);
       fonsSetErrorCallback(mStash, fontStashErrorHandlerCallback, mStash); // <== 3rd arg gets passed to the callback as 1st param
 
       TNLAssert(settings, "Settings can't be NULL if we are using external fonts!");
@@ -287,7 +284,7 @@ FONScontext *FontManager::getStash()
 
 void FontManager::drawTTFString(BfFont *font, const char *string, F32 size)
 {
-   fonsSetFont(mStash, font->getStashFontId());
+   //fonsSetFont(mStash, font->getStashFontId());
    fonsSetSize(mStash, size);
    fonsDrawText(mStash, 0.0, 0.0, string, NULL);
 }
@@ -296,6 +293,7 @@ void FontManager::drawTTFString(BfFont *font, const char *string, F32 size)
 void FontManager::setFont(FontId fontId)
 {
    currentFontId = fontId;
+   fonsSetFont(mStash, getFont(fontId)->getStashFontId());
 }
 
 
@@ -365,11 +363,16 @@ void FontManager::setFontContext(FontContext fontContext)
    }
 }
 
+//void FontManager::setFontColor(const Color *color)
+//{
+//   setFontColor(*color);
+//}
 
-void FontManager::setFontColor(const Color &color)
+
+void FontManager::setFontColor(const Color &color, F32 alpha)
 {
-   mGL->glColor(color);    // For stroke fonts
-   fonsSetColor(mStash, glfonsRGBA(color.r * 255, color.g * 255, color.b * 255, 255));    // For FontStash
+   mGL->glColor(color, alpha);    // For stroke fonts
+   fonsSetColor(mStash, glfonsRGBA(U8(color.r * 255), U8(color.g * 255), U8(color.b * 255), U8(alpha * 255)));    // For FontStash
 }
 
 
@@ -454,7 +457,7 @@ BfFont *FontManager::getFont(FontId currentFontId)
 }
 
 
-F32 FontManager::getStringLength(const char* string)
+F32 FontManager::getStringLength(const char *string)
 {
    BfFont *font = getFont(currentFontId);
 
@@ -507,11 +510,16 @@ F32 FontManager::getTtfFontStringLength(BfFont *font, const char *string)
    // - new:  size = 219 at windowed; 319 in fullscreen
    F32 bounds[4];
    F32 length = fonsTextBounds2(mStash, legacyRomanSizeFactorThanksGlut, 0, 0, string, NULL, bounds);
+
    //F32 length = fonsTextBounds(mStash, 0, 0, string, NULL, NULL);
 
-   //F32 len = (bounds[2] - bounds[0]);
-   //if(strcmp(string, "LEFT - previous page   |   RIGHT, SPACE - next page   |   ESC exits") == 0)
-   //   printf("zzxz Len = %f/%f", length, len);
+   
+   if(strcmp(string, "Delete Selection") == 0)
+   {
+      F32 len = (bounds[2] - bounds[0]);  //xyzzy
+      printf("zzxz Len = %f/%f", length, len);
+      F32 xxxx = fonsTextBounds2(mStash, legacyRomanSizeFactorThanksGlut, 0, 0, string, NULL, bounds);
+   }
 
    return length;
 }

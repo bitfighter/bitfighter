@@ -4,13 +4,10 @@
 //------------------------------------------------------------------------------
 
 #include "lineEditor.h"
-#include "Colors.h"
 #include "UI.h"
 
 #include "MathUtils.h"
 #include "RenderUtils.h"
-
-#include <math.h>
 
 namespace Zap
 {
@@ -217,23 +214,19 @@ void LineEditor::completePartial(const Vector<string> *candidates, const string 
 
 
 // Draw our cursor, assuming string is drawn at x,y  (vert spacing works differently than on the angle version
-void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize) const
+void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize, const Color &color) const
 {
    static const U32 chunkSize = 10;
    S32 offset;
-   
+
    if(mMasked)
-   {
       offset = RenderUtils::getStringWidth(fontSize, string(mCursorOffset, MASK_CHAR).c_str());
-   }
    else
    {
       // FIXME: I need to be documented!
       U32 offsetCharacters;
       if(mCursorOffset < mDisplayedCharacters)
-      {
          offsetCharacters = 0;
-      }
       else
       {
          offsetCharacters = (mCursorOffset - mDisplayedCharacters) / chunkSize + 1;
@@ -243,23 +236,17 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize) const
       offset = RenderUtils::getStringWidth(fontSize, mLine.substr(offsetCharacters, mCursorOffset - offsetCharacters).c_str());
    }
 
-   drawCursor(x, y, fontSize, offset);
-}
-
-
-// Draw our cursor, assuming string is drawn at x,y and cursor should be offset to the right
-void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize, S32 offset) const
-{
    if(Platform::getRealMilliseconds() / 500 % 2)
       return;
 
-   // Cursor width.  We just draw as a bar because all we support is insert mode
-   static const S32 width = 2;
+   // Cursor width.  We just draw as a bar because all we support is insert mode.
+   static const S32 cursorWidth = 2;
 
    // This would be used for overwrite mode, if we supported it
-//   S32 width = MAX(2, RenderUtils::getStringWidth(fontSize, mLine.substr(mCursorOffset, 1).c_str()));
+   //   S32 width = MAX(2, RenderUtils::getStringWidth(fontSize, mLine.substr(mCursorOffset, 1).c_str()));
 
-   RenderUtils::drawFilledRect(x + offset, y, x + offset + width, y + fontSize + 3, Colors::white, 0.3f);
+   // Draw our cursor, assuming string is drawn at x,y and cursor should be offset to the right
+   RenderUtils::drawFilledRect(x + offset, y - fontSize, x + offset + cursorWidth, y + 3, color, 0.3f);
 }
 
 

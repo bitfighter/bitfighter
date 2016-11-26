@@ -18,9 +18,10 @@ using namespace std;
 
 namespace Zap
 {
+   class Color;
 
 
-//
+   //
 // Class to manage all sorts of single-line editing tasks
 //
 class LineEditor
@@ -76,9 +77,8 @@ public:
    string getPrompt() const;
    const char *c_str() const;                   // Return the string in c_str format
 
-   void drawCursor(S32 x, S32 y, S32 fontSize) const;                // Draw our cursor, assuming string is drawn at x,y
-   void drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle);      // Draw our cursor, assuming string is drawn at x,y at specified angle
-   void drawCursor(S32 x, S32 y, S32 fontSize, S32 startingWidth) const;   // Draw cursor starting at a given width
+   void drawCursor(S32 x, S32 y, S32 fontSize, const Color &color) const;  // Draw our cursor, assuming string is drawn at x,y
+   void drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle);            // Draw our cursor, assuming string is drawn at x,y at specified angle
 
    // For tab expansion 
    void completePartial(const Vector<string> *candidates, const string &partial, std::size_t replacePos, const string &appender, bool wrapQuotes = true);

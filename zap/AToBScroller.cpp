@@ -100,7 +100,7 @@ S32 AToBScroller::prepareToRenderToDisplay(DisplayMode displayMode, S32 top, S32
    scissorsManager.enable(mScrollTimer.getCurrent() > 0, displayMode, 0, top + getTransitionPos(height, 0) - vertBuffer, 
                           DisplayManager::getScreenInfo()->getGameCanvasWidth(), getTransitionPos(0, height) + 2 * vertBuffer);
 
-   return top + fromHeight * mScrollTimer.getFraction();
+   return top + S32(fromHeight * mScrollTimer.getFraction());
 }
 
 

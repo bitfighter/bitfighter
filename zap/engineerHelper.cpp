@@ -107,19 +107,17 @@ void EngineerHelper::onActivated()
 
 void EngineerHelper::render() const
 {
-   S32 yPos = MENU_TOP + MENU_PADDING;
-   
    if(isMenuBeingDisplayed())    // Haven't selected an item yet, so show the menu
       drawItemMenu(mEngineerItemsDisplayWidth, mEngineerButtonsWidth);
 
    else     // Have selected a module, need to indicate where to deploy
    {
       S32 xPos = UserInterface::horizMargin;
+      S32 yPos = MENU_TOP + MENU_PADDING + MENU_FONT_SIZE;
 
-      mGL->glColor(Colors::green);
-      RenderUtils::drawStringf(xPos, yPos, MENU_FONT_SIZE, "Placing %s.", engineerItemInfo[mSelectedIndex].name);
+      RenderUtils::drawStringf_fixed(xPos, yPos, MENU_FONT_SIZE, Colors::green, "Placing %s.", engineerItemInfo[mSelectedIndex].name);
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
-      RenderUtils::drawString(xPos, yPos, MENU_FONT_SIZE, engineerInstructions[mSelectedIndex]);
+      RenderUtils::drawString_fixed(xPos, yPos, MENU_FONT_SIZE,  Colors::green, engineerInstructions[mSelectedIndex]);
    }
 }
 
@@ -236,8 +234,7 @@ void EngineerHelper::renderDeploymentMarker(const Ship *ship) const
       {
          case EngineeredTurret:
          case EngineeredForceField:
-            mGL->glColor(canDeploy ? Colors::green : Colors::red);
-            RenderUtils::drawSquare(deployPosition, 5);
+            RenderUtils::drawSquare(deployPosition, 5, canDeploy ? Colors::green : Colors::red);
             break;
 
          case EngineeredTeleporterEntrance:

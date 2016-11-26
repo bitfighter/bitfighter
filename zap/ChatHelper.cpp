@@ -165,6 +165,10 @@ bool ChatHelper::isCmdChat() const
 
 void ChatHelper::render() const
 {
+   // Protect against crashes while game is initializing... is this really needed??
+   if(!getGame()->getConnectionToServer())
+      return;
+
    FontManager::pushFontContext(InputContext);
    const char *promptStr;
 
@@ -186,9 +190,6 @@ void ChatHelper::render() const
       promptStr = "(Global): ";
    }
 
-   // Protect against crashes while game is initializing... is this really needed??
-   if(!getGame()->getConnectionToServer())
-      return;
 
    // Size of chat composition elements
 //   static const S32 CHAT_COMPOSE_FONT_GAP = CHAT_COMPOSE_FONT_SIZE / 4;
@@ -226,30 +227,25 @@ void ChatHelper::render() const
    // Render text entry box like thingy
    S32 top = ypos - 3;
 
-//   F32 vertices[] = {
-//         (F32)xPos,            top,
-//         (F32)xPos + boxWidth, top,
-//         (F32)xPos + boxWidth, top + BOX_HEIGHT,
-//         (F32)xPos,            top + BOX_HEIGHT
-//   };
-//
-//   for(S32 i = 1; i >= 0; i--)
-//   {
-//      glColor(baseColor, i ? .25f : .4f);
-//      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GLOPT::TriangleFan : GLOPT::LineLoop);
-//   }
+   //F32 vertices[] = {
+   //      (F32)xPos,            top,
+   //      (F32)xPos + boxWidth, top,
+   //      (F32)xPos + boxWidth, top + BOX_HEIGHT,
+   //      (F32)xPos,            top + BOX_HEIGHT
+   //};
+
+   //for(S32 i = 1; i >= 0; i--)
+   //   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GLOPT::TriangleFan : GLOPT::LineLoop, baseColor, i ? .25f : .4f);
 
    RenderUtils::drawFilledRect(xPos, top, xPos + boxWidth, top + BOX_HEIGHT, baseColor, .25f, baseColor, .4f);
 
-   RenderUtils::glColor(baseColor);
-
    // Display prompt
-   S32 xStartPos   = xPos + 3 + promptWidth;
+   S32 xStartPos = xPos + 3 + promptWidth;
 
-   RenderUtils::drawString(xPos + 3, ypos, CHAT_COMPOSE_FONT_SIZE, promptStr);  // draw prompt
+   RenderUtils::drawString_fixed(xPos + 3, ypos + CHAT_COMPOSE_FONT_SIZE, CHAT_COMPOSE_FONT_SIZE, baseColor, promptStr);  // draw prompt
 
    // Display typed text
-   S32 displayWidth = RenderUtils::drawStringAndGetWidth(xStartPos, ypos, CHAT_COMPOSE_FONT_SIZE, mLineEditor.getDisplayString().c_str());
+   S32 displayWidth = RenderUtils::drawStringAndGetWidth(xStartPos, ypos, CHAT_COMPOSE_FONT_SIZE, baseColor, mLineEditor.getDisplayString().c_str());
 
    // If we've just finished entering a chat cmd, show next parameter
    if(isCmdChat())
@@ -270,10 +266,7 @@ void ChatHelper::render() const
                // that this should work well.  If a number is even, num % 2 will be 0.
                S32 numberOfQuotes = count(line.begin(), line.end(), '"');
                if(chatCmds[i].cmdArgCount >= words.size() && line[line.size() - 1] == ' ' && numberOfQuotes % 2 == 0)
-               {
-                  RenderUtils::glColor(baseColor * .5);
-                  RenderUtils::drawString(xStartPos + displayWidth, ypos, CHAT_COMPOSE_FONT_SIZE, chatCmds[i].helpArgString[words.size() - 1].c_str());
-               }
+                  RenderUtils::drawString_fixed(xStartPos + displayWidth, ypos + CHAT_COMPOSE_FONT_SIZE, CHAT_COMPOSE_FONT_SIZE, baseColor * .5, chatCmds[i].helpArgString[words.size() - 1].c_str());
 
                break;
             }
@@ -281,8 +274,7 @@ void ChatHelper::render() const
       }
    }
 
-   RenderUtils::glColor(baseColor);
-   mLineEditor.drawCursor(xStartPos, ypos, CHAT_COMPOSE_FONT_SIZE);
+   mLineEditor.drawCursor(xStartPos, ypos + CHAT_COMPOSE_FONT_SIZE, CHAT_COMPOSE_FONT_SIZE, baseColor);
 
    // Restore scissors settings -- only used during scrolling
    scissorsManager.disable();

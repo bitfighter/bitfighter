@@ -413,12 +413,12 @@ void CoreGameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) c
    if(isTeamCoreBeingAttacked(teamIndex)) 
    {
       const S32 flashCycleTime = 300;  
-      const Color *color = &Colors::red80;
+      Color color = Colors::red80;
       F32 alpha = 1;
 
       if(getGame()->getCurrentTime() % flashCycleTime <= flashCycleTime / 2)
       {
-         color = &Colors::yellow;
+         color = Colors::yellow;
          alpha = 0.6f;
       }
          

@@ -27,7 +27,7 @@ protected:
    bool resetOnActivate;
    LineEditor lineEditor;
 
-   F32 getFontSize() const;
+   S32 getFontSize() const;
 
 
    virtual void onAccept(const char *text) = 0;

@@ -835,7 +835,7 @@ void Teleporter::render() const
 
    if(radiusFraction != 0)
    {
-      U32 trackerCount = 100;    // Trackers are the swirling bits in a teleporter.  100 gives the "classic" appearance.
+      S32 trackerCount = 100;    // Trackers are the swirling bits in a teleporter.  100 gives the "classic" appearance.
       if(mHealth < 1.f)
          trackerCount = U32(mHealth * 75.f) + 25;
 
@@ -954,9 +954,8 @@ void Teleporter::onGeomChanged()
 bool Teleporter::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
    attributeMenu->addMenuItem(new FloatCounterMenuItem("Delay:",
-         mTeleporterCooldown / 1000.f, 0.1, 0.1, 10000., 1, "seconds",
-         "Almost no delay", "Adjust teleporter cooldown for re-entry"));
-
+                                                        mTeleporterCooldown / 1000.0f, 0.1f, 0.1f, 10000.0f, 1, "seconds",
+                                                        "Almost no delay", "Adjust teleporter cooldown for re-entry"));
    return true;
 }
 
@@ -964,7 +963,7 @@ bool Teleporter::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 // Retrieve the values we need from the menu
 void Teleporter::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   mTeleporterCooldown = Zap::stof(attributeMenu->getMenuItem(0)->getValue()) * 1000;
+   mTeleporterCooldown = U32(Zap::stof(attributeMenu->getMenuItem(0)->getValue()) * 1000);
 }
 
 

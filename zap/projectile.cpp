@@ -1070,7 +1070,7 @@ void Mine::renderDock(const Color &color) const
 #ifndef ZAP_DEDICATED
    Point pos = getActualPos();
 
-   RenderUtils::drawCircle(pos, 9, &Colors::gray70);
+   RenderUtils::drawCircle(pos, 9, Colors::gray70);
    RenderUtils::drawLetter('M', pos, Colors::gray70, 1);
 #endif
 }

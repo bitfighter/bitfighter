@@ -42,7 +42,7 @@ public:
    virtual ~Button();
 
    void render(F32 mouseX, F32 mouseY) const;
-   void onClick(F32 mouseX, F32 mouseY);
+   void onClick(F32 mouseX, F32 mouseY) const;
 };
 
 
@@ -108,14 +108,14 @@ private:
    void renderColumnHeaders() const;
    void renderMessageBox(bool msg1, bool msg2) const;
 
-   bool mouseInHeaderRow(const Point *pos) const;
+   static bool mouseInHeaderRow(const Point *pos);
 
    void addServersToPingList(const Vector<ServerAddr> &serverList); 
    void forgetServersNoLongerOnList(const Vector<ServerAddr> &serverListFromMaster);
    void sort();
 
-   void setPingTimeColor(U32 pingTime) const;
-   void setLocalRemoteColor(bool isLocal) const;
+   static const Color &getPingTimeColor(U32 pingTime);
+   static const Color &getLocalRemoteColor(bool isLocal);
 
 public:
    explicit QueryServersUserInterface(ClientGame *game, UIManager *uiManager);       // Constructor
@@ -137,7 +137,7 @@ public:
    struct ServerRef
    {
    private:
-      U32 getNextId();
+      static U32 getNextId();
 
    public:
       enum State {

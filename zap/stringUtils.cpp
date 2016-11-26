@@ -199,9 +199,9 @@ string ftos(F32 f)
 }
 
 
-F64 stof(const string &s)
+F32 stof(const string &s)
 {
-   return atof(s.c_str());
+   return (F32)atof(s.c_str());
 }
 
 

@@ -51,18 +51,18 @@ void TextEntryUserInterface::onActivate()
 
 
 static const S32 fontSize = 20;
-static const F32 fontSizeBig = 30.0f;
+static const S32 fontSizeBig = 30;
 static const S32 TextEntryYPos = 325;
 
 
-F32 TextEntryUserInterface::getFontSize() const
+S32 TextEntryUserInterface::getFontSize() const
 {
-   F32 maxLineLength = 750.0f;      // Pixels
+   S32 maxLineLength = 750;      // Pixels
 
    // Shrink the text to fit on-screen when text gets very long
-   F32 w = (F32)RenderUtils::getStringWidthf(fontSizeBig, lineEditor.getDisplayString().c_str());
+   S32 w = RenderUtils::getStringWidthf(fontSizeBig, lineEditor.getDisplayString().c_str());
    if(w > maxLineLength)
-      return maxLineLength * fontSizeBig / w;
+      return S32(maxLineLength * (F32)fontSizeBig / (F32)w + 0.5f);
    else
       return fontSizeBig;
 }
@@ -70,28 +70,24 @@ F32 TextEntryUserInterface::getFontSize() const
 
 void TextEntryUserInterface::render() const
 {
-   mGL->glColor(Colors::white);
-
    const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    // Center vertically
-   S32 y = TextEntryYPos - 45 ;
+   S32 y = TextEntryYPos - 45;
 
-   RenderUtils::drawCenteredString(y, fontSize, title);
+   RenderUtils::drawCenteredString_fixed(y + fontSize, fontSize, Colors::white, title);
    y += 45;
 
-   mGL->glColor(Colors::green);
-   RenderUtils::drawCenteredString(canvasHeight - vertMargin - 2 * fontSize - 5, fontSize, instr1);
-   RenderUtils::drawCenteredString(canvasHeight - vertMargin - fontSize, fontSize, instr2);
-
-   mGL->glColor(Colors::white);
+   RenderUtils::drawCenteredString_fixed(canvasHeight - vertMargin - 2 * fontSize - 5, fontSize, Colors::green, instr1);
+   RenderUtils::drawCenteredString_fixed(canvasHeight - vertMargin - fontSize,         fontSize, Colors::green, instr2);
 
    FontManager::pushFontContext(InputContext);
 
-   TNLAssert(y == TextEntryYPos, "Something is off here!");
+   S32 fontSizex = getFontSize();
+   y += fontSizex;
 
-   S32 x = (S32)RenderUtils::drawCenteredString(y, getFontSize(), lineEditor.getDisplayString().c_str());
-   lineEditor.drawCursor(x, y, (S32)fontSizeBig);
+   S32 x = (S32)RenderUtils::drawCenteredString_fixed(y, fontSizex, Colors::white, lineEditor.getDisplayString().c_str());
+   lineEditor.drawCursor(x, y, fontSizeBig, Colors::white);
    FontManager::popFontContext();
 }
 
@@ -306,16 +302,16 @@ void LevelNameEntryUserInterface::render() const
 
    S32 startIndex = MAX(0, mLevelIndex - linesBefore);
    S32 endIndex = MIN(mLevels.size() - 1, mLevelIndex + linesAfter);
+   S32 size = getFontSize();
 
-   mGL->glColor(Colors::gray20);
    for(S32 i = startIndex; i <= endIndex; i++)
    {
       if(i != mLevelIndex)
-         RenderUtils::drawCenteredString(TextEntryYPos + F32(i - mLevelIndex) * ((F32)fontSize * 2.0f), getFontSize(), mLevels[i].c_str());
-//      RenderUtils::drawHorizLine(100, 700, TextEntryYPos + F32(i - mLevelIndex) * ((F32)fontSize * 2.0f));
+      {
+         S32 y = TextEntryYPos + (i - mLevelIndex) * (fontSize * 2) + size;
+         RenderUtils::drawCenteredString_fixed(y, size, Colors::gray20, mLevels[i].c_str());
+      }
    }
-
-//   RenderUtils::drawHorizLine(100, 700, TextEntryYPos + F32(mLevels.size() - mLevelIndex) * ((F32)fontSize * 2.0f));
 
    Parent::render();
 }
@@ -341,22 +337,10 @@ PasswordEntryUserInterface::~PasswordEntryUserInterface()
 
 void PasswordEntryUserInterface::render() const
 {
-   const S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
-   const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
-
    if(getGame()->getConnectionToServer())
    {
       getUIManager()->getUI<GameUserInterface>()->render();
-
-      mGL->glColor(Colors::black, 0.5);
-
-      F32 vertices[] = {
-            0,                 0,
-            (F32)canvasWidth,  0,
-            (F32)canvasWidth, (F32)canvasHeight,
-            0,                (F32)canvasHeight
-      };
-      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::TriangleFan);
+      dimUnderlyingUI(0.5f);
    }
 
    Parent::render();

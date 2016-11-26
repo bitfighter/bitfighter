@@ -341,7 +341,7 @@ U32 GameSettings::getCmdLineParamU32(ParamId paramId)
 
 F32 GameSettings::getCmdLineParamF32(ParamId paramId)
 {
-   return mCmdLineParams[paramId].size() > 0 ? (F32)Zap::stof(mCmdLineParams[paramId].get(0)) : 0;
+   return mCmdLineParams[paramId].size() > 0 ? Zap::stof(mCmdLineParams[paramId].get(0)) : 0;
 }
 
 

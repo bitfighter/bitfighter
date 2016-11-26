@@ -78,7 +78,7 @@ AbstractChat::~AbstractChat()
 }
 
 
-Color AbstractChat::getColor(string name) const
+Color AbstractChat::getColor(string name)
 {
    if(mFromColors.count(name) == 0)    
       mFromColors[name] = getNextColor();          
@@ -153,7 +153,7 @@ void AbstractChat::playerLeftLobbyChat(const StringTableEntry &playerNick)
 }
 
 
-bool AbstractChat::isPlayerInLobbyChat(const StringTableEntry &playerNick)
+bool AbstractChat::isPlayerInLobbyChat(const StringTableEntry &playerNick) const
 {
    ChatUserInterface *ui = mGame->getUIManager()->getUI<ChatUserInterface>();
 
@@ -167,13 +167,13 @@ bool AbstractChat::isPlayerInLobbyChat(const StringTableEntry &playerNick)
 
 // We're using a rolling "wrap-around" array, and this figures out which array index we need to retrieve a message.
 // First message has index == 0, second has index == 1, etc.
-ChatMessage AbstractChat::getMessage(U32 index) const
+ChatMessage AbstractChat::getMessage(U32 index)
 {
    return mMessages[index % MESSAGES_TO_RETAIN];
 }
 
 
-U32 AbstractChat::getMessageCount() const
+U32 AbstractChat::getMessageCount()
 {
    return mMessageCount;
 }
@@ -186,7 +186,7 @@ bool AbstractChat::composingMessage() const
 
 
 // Retrieve the next available chat text color
-Color AbstractChat::getNextColor() const
+Color AbstractChat::getNextColor()
 {
    static const Color colorList[] = {
       Color(0.55,0.55,0),     Color(1,0.55,0.55),
@@ -210,7 +210,7 @@ Color AbstractChat::getNextColor() const
 
 
 // Announce we're ducking out for a spell...
-void AbstractChat::leaveLobbyChat()
+void AbstractChat::leaveLobbyChat() const
 {
    MasterServerConnection *conn = mGame->getConnectionToMaster();
 
@@ -250,7 +250,6 @@ void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay) const
          else
          {
             ChatMessage msg = getMessage(i + firstMsg);
-            mGL->glColor(msg.color);
 
             // Figure out the x position based on the message prefixes
             S32 xpos = UserInterface::horizMargin / 2;
@@ -267,27 +266,27 @@ void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay) const
 
             // Calculate (and draw if in renderLoop) the message lines
             U32 lineCount = RenderUtils::drawWrapText(msg.message, xpos, ypos, allowedWidth, ypos_top,
-               AbstractChat::CHAT_FONT_SIZE + AbstractChat::CHAT_FONT_MARGIN,  // line height
-               AbstractChat::CHAT_FONT_SIZE, // font size
-               renderLoop);
+                                                      AbstractChat::CHAT_FONT_SIZE + AbstractChat::CHAT_FONT_MARGIN,  // line height
+                                                      AbstractChat::CHAT_FONT_SIZE, // font size
+                                                      msg.color, renderLoop);
 
-            ypos -= (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) * lineCount;
+            ypos -= (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) * lineCount - CHAT_TIME_FONT_SIZE;
 
             // Draw the message prefixes
             if(renderLoop)
             {
                xpos = UserInterface::horizMargin / 2;
-               xpos += RenderUtils::drawStringAndGetWidthf((F32)xpos, F32(ypos + (CHAT_FONT_SIZE - CHAT_TIME_FONT_SIZE) / 2.f + 2),  // + 2 just looks better!
-                     CHAT_TIME_FONT_SIZE, "[%s] ", msg.time.c_str());
+               xpos += RenderUtils::drawStringAndGetWidthf_fixed((F32)xpos, F32(ypos + (CHAT_FONT_SIZE - CHAT_TIME_FONT_SIZE) / 2.f + 2),  // + 2 just looks better!
+                                                                 CHAT_TIME_FONT_SIZE, msg.color, "[%s] ", msg.time.c_str());
 
                if(!msg.isSystem)
-                  xpos += RenderUtils::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, msg.from.c_str());     // No sender for system message
+                  xpos += RenderUtils::drawStringAndGetWidth_fixed(xpos, ypos, CHAT_FONT_SIZE, msg.color, msg.from.c_str());     // No sender for system message
 
                if(msg.isPrivate)
-                  xpos += RenderUtils::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, "*");
+                  xpos += RenderUtils::drawStringAndGetWidth_fixed(xpos, ypos, CHAT_FONT_SIZE, msg.color, "*");
 
                if(!msg.isSystem)
-                  xpos += RenderUtils::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, ARROW) + AFTER_ARROW_SPACE;
+                  RenderUtils::drawStringAndGetWidth_fixed(xpos, ypos, CHAT_FONT_SIZE, msg.color, ARROW);
             }
          }
       }
@@ -312,13 +311,11 @@ void AbstractChat::renderMessageComposition(S32 ypos) const
    FontManager::pushFontContext(InputContext);
    string displayString = mLineEditor.getDisplayString();
 
-   mGL->glColor(Colors::cyan);
-   RenderUtils::drawString(UserInterface::horizMargin, ypos, CHAT_FONT_SIZE, PROMPT_STR);
+   RenderUtils::drawString_fixed(UserInterface::horizMargin, ypos, CHAT_FONT_SIZE, Colors::cyan, PROMPT_STR);
+   RenderUtils::drawString_fixed(xStartPos, ypos, CHAT_FONT_SIZE, Colors::white, displayString.c_str());
 
-   mGL->glColor(Colors::white);
-   RenderUtils::drawString(xStartPos, ypos, CHAT_FONT_SIZE, displayString.c_str());
+   mLineEditor.drawCursor(xStartPos, ypos, CHAT_FONT_SIZE, Colors::white);
 
-   mLineEditor.drawCursor(xStartPos, ypos, CHAT_FONT_SIZE);
    FontManager::popFontContext();
 }
 
@@ -371,18 +368,14 @@ void AbstractChat::clearChat()
 void AbstractChat::renderChatters(S32 xpos, S32 ypos) const
 {
    if(mPlayersInLobbyChat.size() == 0)
-   {
-      mGL->glColor(Colors::white);
-      RenderUtils::drawString(xpos, ypos, CHAT_NAMELIST_SIZE, "No other players currently in lobby chat room");
-   }
+      RenderUtils::drawString_fixed(xpos, ypos, CHAT_NAMELIST_SIZE, Colors::white, "No other players currently in lobby chat room");
+
    else
       for(S32 i = 0; i < mPlayersInLobbyChat.size(); i++)
       {
          const char *name = mPlayersInLobbyChat[i].getString();
 
-         mGL->glColor(getColor(name));      // use it
-
-         xpos += RenderUtils::drawStringAndGetWidthf((F32)xpos, (F32)ypos, CHAT_NAMELIST_SIZE, "%s%s", 
+         xpos += RenderUtils::drawStringAndGetWidthf_fixed((F32)xpos, (F32)ypos, CHAT_NAMELIST_SIZE, getColor(name), "%s%s",
                                                      name, (i < mPlayersInLobbyChat.size() - 1) ? "; " : "");
       }
 }
@@ -444,16 +437,15 @@ void ChatUserInterface::render() const
    renderHeader();
 
    // And footer
-   mGL->glColor(Colors::green);
    S32 vertFooterPos = DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - VERT_FOOTER_SIZE;
-   RenderUtils::drawCenteredString(vertFooterPos, VERT_FOOTER_SIZE - 2, "Type your message | ENTER to send | ESC exits");
+   RenderUtils::drawCenteredString_fixed(vertFooterPos + VERT_FOOTER_SIZE - 2, VERT_FOOTER_SIZE - 2, Colors::green, "Type your message | ENTER to send | ESC exits");
 
-   renderChatters(horizMargin, vertFooterPos - CHAT_NAMELIST_SIZE - CHAT_FONT_MARGIN * 2);
+   renderChatters(horizMargin, vertFooterPos - CHAT_FONT_MARGIN * 2);
 
    // Render incoming chat msgs
-   mGL->glColor(Colors::white);
+   //mGL->glColor(Colors::white);
 
-   U32 y = UserInterface::vertMargin + 60;
+   U32 y = vertMargin + 60;
 
    static const S32 chatAreaHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight() - 2 * vertMargin -   // Screen area less margins
                      VERT_FOOTER_SIZE -                                                     // Instructions at the bottom
@@ -465,7 +457,7 @@ void ChatUserInterface::render() const
    static const S32 MessageDisplayCount = chatAreaHeight / (CHAT_FONT_SIZE + CHAT_FONT_MARGIN);
 
    renderMessages(y, MessageDisplayCount);
-   renderMessageComposition(vertFooterPos - 45);
+   renderMessageComposition(vertFooterPos - 45 + CHAT_FONT_SIZE);
 
    // Give user notice that there is no connection to master, and thus chatting is ineffectual
    MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
@@ -479,10 +471,10 @@ void ChatUserInterface::render() const
       static const char* line2 = "Your chat messages cannot be relayed";
 
       static const S32 CORNER_INSET = 15;
-      static const S32 yPos1 = 200;
-      static const S32 yPos2 = yPos1 + (2 * (fontsize + fontgap + margin));
+      S32 yPos1 = 200;
+      S32 yPos2 = yPos1 + (2 * (fontsize + fontgap + margin));
 
-      const S32 width = RenderUtils::getStringWidth(fontsize, line2);
+      S32 width = RenderUtils::getStringWidth(fontsize, line2);
 
       S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
       S32 xPos1 = (canvasWidth - width) / 2 - margin;
@@ -490,33 +482,33 @@ void ChatUserInterface::render() const
 
       RenderUtils::drawFilledFancyBox(xPos1, yPos1, xPos2, yPos2, CORNER_INSET, Colors::red40, 1.0, Colors::red);
 
-      mGL->glColor(Colors::white);
-      RenderUtils::drawCenteredString(yPos1 + margin, fontsize, line1);
-      RenderUtils::drawCenteredString(yPos1 + margin + fontsize + fontgap, fontsize, line2);
+      yPos1 += margin + fontsize;
+      RenderUtils::drawCenteredString_fixed(yPos1, fontsize, Colors::white, line1);
+      RenderUtils::drawCenteredString_fixed(yPos1 + fontsize + fontgap, fontsize, Colors::white, line2);
    }
+}
+
+
+static string getSubtitle(ClientGame *game)
+{
+   if(!game->getConnectionToServer())
+      return "Not currently connected to any game server";
+
+   string name = game->getConnectionToServer()->getServerName();
+   
+   return name == "" ? "Connected to unnamed game server" : "Connected to game server \"" + name + "\"";
 }
 
 
 void ChatUserInterface::renderHeader() const
 {
    // Draw title, subtitle, and footer
-   mGL->glColor(Colors::green);
-   RenderUtils::drawCenteredString(vertMargin, MENU_TITLE_SIZE, "LOBBY CHAT");
+   RenderUtils::drawCenteredString_fixed(vertMargin + MENU_TITLE_SIZE, MENU_TITLE_SIZE, Colors::green, "LOBBY CHAT");
 
-   mGL->glColor(Colors::red);
-   string subtitle = "Not currently connected to any game server";
+   string subtitle = getSubtitle(getGame());
 
-   if(getGame()->getConnectionToServer())
-   {
-      mGL->glColor(Colors::yellow);
-      string name = getGame()->getConnectionToServer()->getServerName();
-      if(name == "")
-         subtitle = "Connected to game server with no name";
-      else
-         subtitle = "Connected to game server \"" + name + "\"";
-   }
-
-   RenderUtils::drawCenteredString(vertMargin + MENU_TITLE_SIZE + TITLE_SUBTITLE_GAP, MENU_SUBTITLE_SIZE, subtitle.c_str());
+   S32 ypos = vertMargin + MENU_TITLE_SIZE + TITLE_SUBTITLE_GAP + MENU_SUBTITLE_SIZE;
+   RenderUtils::drawCenteredString_fixed(ypos, MENU_SUBTITLE_SIZE, getGame()->getConnectionToServer() ? Colors::yellow : Colors::red, subtitle.c_str());
 }
 
 
@@ -575,7 +567,7 @@ void ChatUserInterface::onLobbyChat()
 }
 
 
-void ChatUserInterface::onEscape()
+void ChatUserInterface::onEscape() const
 {
    // Don't leave if UIQueryServers is a parent unless we're in-game...
    // Is UIQueryServers supposed to be a parent of UIGame??
@@ -607,30 +599,17 @@ SuspendedUserInterface::~SuspendedUserInterface()
 
 void SuspendedUserInterface::renderHeader() const
 {
+   S32 ypos = vertMargin + MENU_TITLE_SIZE;
+
    if(getGame()->isSuspended())
-   {
-      mGL->glColor(Colors::white);
-      RenderUtils::drawCenteredString(vertMargin, MENU_TITLE_SIZE, "-- GAME SUSPENDED -- ");
-   }
+      RenderUtils::drawCenteredString_fixed(ypos, MENU_TITLE_SIZE, Colors::white, "-- GAME SUSPENDED -- ");
+   
    else
-   {
-      mGL->glColor(Colors::red);
-      RenderUtils::drawCenteredString(vertMargin, MENU_TITLE_SIZE, "!! GAME RESTARTED !! ");
-   }
+      RenderUtils::drawCenteredString_fixed(ypos, MENU_TITLE_SIZE, Colors::red, "!! GAME RESTARTED !! ");
 
-   string subtitle = "Not currently connected to any game server";
+   string subtitle = getSubtitle(getGame());
 
-   if(getGame()->getConnectionToServer())
-   {
-      string name = getGame()->getConnectionToServer()->getServerName();
-      if(name == "")
-         subtitle = "Connected to game server with no name";
-      else
-         subtitle = "Connected to game server \"" + name + "\"";
-   }
-
-   mGL->glColor(Colors::green);
-   RenderUtils::drawCenteredString(vertMargin + MENU_TITLE_SIZE + TITLE_SUBTITLE_GAP, MENU_SUBTITLE_SIZE, subtitle.c_str());
+   RenderUtils::drawCenteredString_fixed(ypos + MENU_SUBTITLE_SIZE + TITLE_SUBTITLE_GAP, MENU_SUBTITLE_SIZE, Colors::green, subtitle.c_str());
 }
 
 

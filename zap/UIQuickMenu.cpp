@@ -10,11 +10,7 @@
 #include "DisplayManager.h"   // For canvasHeight
 #include "ClientGame.h"       // For UIManager and callback
 
-#include "Spawn.h"
 #include "CoreGame.h"
-#include "TextItem.h"
-#include "PickupItem.h"
-#include "EngineeredItem.h"
 
 #include "Colors.h"
 
@@ -127,12 +123,13 @@ void QuickMenuUI::render() const
    left  += 3;
    right -= 4;
 
+   S32 textsize = getTextSize(MENU_ITEM_SIZE_SMALL);
+
    // First draw the menu title
-   mGL->glColor(Colors::red);
-   RenderUtils::drawCenteredString(cenX, yStart, getTextSize(MENU_ITEM_SIZE_SMALL), title.c_str());
+   RenderUtils::drawCenteredString_fixed(cenX, yStart + textsize, textsize, Colors::red, title.c_str());
 
    // Then the menu items
-   yStart += getGap(MENU_ITEM_SIZE_NORMAL) + getTextSize(MENU_ITEM_SIZE_SMALL) + 2;
+   yStart += getGap(MENU_ITEM_SIZE_NORMAL) + textsize + 2;
    //mTopOfFirstMenuItem = yStart;    // Save this -- it will be handy elsewhere!
 
    TNLAssert(yStart == getYStart(), "Out of sync!");
@@ -197,13 +194,15 @@ void QuickMenuUI::render() const
       instrYPos = naturalTop + keepingItOnScreenAdjFactorY - HELP_TEXT_SIZE - getGap(MENU_ITEM_SIZE_NORMAL) - vpad;   // No room below, help goes above
 
    // Dim out area behind instructions
-   F32 margin = 5.0f;
-   mGL->glColor(Colors::black, 0.7f);
-   RenderUtils::drawFilledRect(instrXPos - helpWidth / 2.0f - margin, instrYPos, instrXPos + helpWidth / 2.0f + margin, instrYPos + HELP_TEXT_SIZE + margin);
+   S32 margin = 5;
+   S32 x1 = instrXPos - helpWidth / 2 - margin;
+   S32 x2 = instrXPos + helpWidth / 2 + margin;
+
+   RenderUtils::drawFilledRect(x1, instrYPos, x2, instrYPos + HELP_TEXT_SIZE + margin, Colors::black, 0.7f);
 
    // And draw the text
-   mGL->glColor(Colors::menuHelpColor);
-   RenderUtils::drawCenteredString(instrXPos, instrYPos, HELP_TEXT_SIZE, getMenuItem(mSelectedIndex)->getHelp().c_str());
+   instrYPos += HELP_TEXT_SIZE;
+   RenderUtils::drawCenteredString_fixed(instrXPos, instrYPos, HELP_TEXT_SIZE, Colors::menuHelpColor, getMenuItem(mSelectedIndex)->getHelp().c_str());
 }
 
 

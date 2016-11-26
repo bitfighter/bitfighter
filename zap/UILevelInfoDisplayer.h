@@ -34,6 +34,9 @@ private:
    string getGameTypeName() const;
    string getShortGameTypeName() const;
 
+   void renderTopPanel() const;
+   void renderSidePanel() const;
+
 public:
    LevelInfoDisplayer(const ClientGame *game);
    virtual ~LevelInfoDisplayer();

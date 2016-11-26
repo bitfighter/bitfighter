@@ -56,7 +56,7 @@ public:
    void prevPage();
 
    void onActivate();
-   void exitInstructions();
+   void exitInstructions() const;
    void idle(U32 timeDelta);
 };
 

@@ -7,9 +7,7 @@
 #include "Joystick.h"
 #include "InputCode.h"
 #include "SymbolShape.h"
-#include "FontManager.h"
 #include "Colors.h"
-#include "SymbolShape.h"
 
 #include "RenderUtils.h"
 
@@ -31,47 +29,38 @@ JoystickRender::~JoystickRender()
 }
 
 
-inline const Color *JoystickRender::getButtonColor(bool activated)
+inline const Color &JoystickRender::getButtonColor(bool activated)
 {
    if(activated)
-      return &Colors::red;
+      return Colors::red;
 
-   return &Colors::white;
+   return Colors::white;
 }
 
 
 // Render dpad graphic
-void JoystickRender::renderDPad(Point center, bool upActivated, bool downActivated, bool leftActivated,
-                bool rightActivated, const char *msg1, const char *msg2)
+void JoystickRender::renderDPad(const Point &center, bool upActivated, bool downActivated, bool leftActivated,
+                                bool rightActivated, const char *msg1, const char *msg2)
 {
-   mGL->glColor(getButtonColor(upActivated));
-   drawDPadUp(center + Point(0,-16));
-
-   mGL->glColor(getButtonColor(downActivated));
-   drawDPadDown(center + Point(0,16));
-
-   mGL->glColor(getButtonColor(leftActivated));
-   drawDPadLeft(center + Point(-16,0));
-
-   mGL->glColor(getButtonColor(rightActivated));
-   drawDPadRight(center + Point(16,0));
+   drawDPadUp   (center + Point(0, -16), getButtonColor(upActivated));
+   drawDPadDown (center + Point(0,  16), getButtonColor(downActivated));
+   drawDPadLeft (center + Point(-16, 0), getButtonColor(leftActivated));
+   drawDPadRight(center + Point(16,  0), getButtonColor(rightActivated));
 
    // Label the graphic
-   mGL->glColor(Colors::white);
    if(strcmp(msg1, "") == 0)    // That is, != "".  Remember, kids, strcmp returns 0 when strings are identical!
    {
       S32 size = 12;
-      S32 width = RenderUtils::getStringWidth(size, msg1);
-      RenderUtils::drawString(center.x - width / 2, center.y + 27, size, msg1);
+      RenderUtils::drawStringc(center.x, center.y + size + 27, size, Colors::white, msg1);
    }
 
    if(strcmp(msg2, "") == 0)
    {
       S32 size = 10;
-      S32 width = RenderUtils::getStringWidth(size, msg2);
-      RenderUtils::drawString(center.x - width / 2, center.y + 42, size, msg2);
+      RenderUtils::drawStringc(center.x, center.y + size + 42, size, Colors::white, msg2);
    }
 }
+
 
 static S32 SymbolPadding = 6;       // Just some padding we throw around our symbols to make them look hot
 
@@ -79,7 +68,7 @@ S32 JoystickRender::getControllerButtonRenderedSize(InputCode inputCode)
 {
    // Return keyboard key size, just in case
    if(!InputCodeManager::isControllerButton(inputCode))
-      return SymbolKey(InputCodeManager::inputCodeToString(inputCode)).getWidth();
+      return SymbolKey::getRenderWidth(InputCodeManager::inputCodeToString(inputCode));
 
    // Get joystick button size
    S16 button = InputCodeManager::inputCodeToControllerButton(inputCode);
@@ -97,8 +86,6 @@ S32 JoystickRender::getControllerButtonRenderedSize(InputCode inputCode)
       case Joystick::ButtonShapeRightTriangle:     return rectButtonWidth               + SymbolPadding;
       default:                                     return rectButtonWidth               + SymbolPadding;
    }
-
-   return -1;     // Kill a useless warning -- can never get here!
 }
 
 // Thinking...
@@ -123,16 +110,12 @@ S32 JoystickRender::getControllerButtonRenderedSize(InputCode inputCode)
 bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, InputCode inputCode, const Color *overrideRenderColor)
 {
    // Set the basic color, could be overridden later
-   if(overrideRenderColor)
-      mGL->glColor(overrideRenderColor);
-   else
-      mGL->glColor(Colors::white);
-
+   const Color &color = overrideRenderColor ? *overrideRenderColor : Colors::white;
 
    // Render keyboard keys, just in case
    if(!InputCodeManager::isControllerButton(inputCode))
    {
-      SymbolKey(InputCodeManager::inputCodeToString(inputCode)).render(centerX, centerY + 17, AlignmentCenter);
+      SymbolKey(InputCodeManager::inputCodeToString(inputCode), color).render(centerX, centerY + 17, AlignmentCenter);
       return true;
    }
 
@@ -157,43 +140,42 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, InputCode 
    switch(buttonShape)
    {
       case Joystick::ButtonShapeRect:
-         RenderUtils::drawRoundedRect(center, rectButtonWidth, rectButtonHeight, 3);
+         RenderUtils::drawRoundedRect(center, rectButtonWidth, rectButtonHeight, 3, color);
          break;
       case Joystick::ButtonShapeSmallRect:
-         RenderUtils::drawRoundedRect(center, smallRectButtonWidth, smallRectButtonHeight, 3);
+         RenderUtils::drawRoundedRect(center, smallRectButtonWidth, smallRectButtonHeight, 3, color);
          break;
       case Joystick::ButtonShapeRoundedRect:
-         RenderUtils::drawRoundedRect(center, rectButtonWidth, rectButtonHeight, 5);
+         RenderUtils::drawRoundedRect(center, rectButtonWidth, rectButtonHeight, 5, color);
          break;
       case Joystick::ButtonShapeSmallRoundedRect:
-         RenderUtils::drawRoundedRect(center, smallRectButtonWidth, smallRectButtonHeight, 5);
+         RenderUtils::drawRoundedRect(center, smallRectButtonWidth, smallRectButtonHeight, 5, color);
          break;
       case Joystick::ButtonShapeHorizEllipse:
-         RenderUtils::drawEllipse(center, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, 0);
+         RenderUtils::drawEllipse(center, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, 0, color);
          break;
       case Joystick::ButtonShapeRightTriangle:
          location = location + Point(-rightTriangleWidth / 4.0f, 0);  // Need to off-center the label slightly for this button
-         drawButtonRightTriangle(center);
+         drawButtonRightTriangle(center, color);
          break;
 
       // DPad
       case Joystick::ButtonShapeDPadUp:
-         JoystickRender::drawDPadUp(center);
+         drawDPadUp(center, color);
          break;
       case Joystick::ButtonShapeDPadDown:
-         JoystickRender::drawDPadDown(center);
+         drawDPadDown(center, color);
          break;
       case Joystick::ButtonShapeDPadLeft:
-         JoystickRender::drawDPadLeft(center);
+         drawDPadLeft(center, color);
          break;
       case Joystick::ButtonShapeDPadRight:
-         JoystickRender::drawDPadRight(center);
+         drawDPadRight(center, color);
          break;
 
       case Joystick::ButtonShapeRound:
       default:
-         //shapeCircle.render(center);
-         RenderUtils::drawCircle(center, (F32)buttonHalfHeight);
+         RenderUtils::drawCircle(center, (F32)buttonHalfHeight, color);
          break;
    }
 
@@ -201,12 +183,8 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, InputCode 
    // 2. Render joystick label or symbol
 
    // Change color of label to the preset (default white)
-   if(overrideRenderColor)
-      mGL->glColor(overrideRenderColor);
-   else
-      mGL->glColor(buttonColor);
-
-
+   const Color &labelColor = overrideRenderColor ? *overrideRenderColor : *buttonColor;
+      
    switch(buttonInfo.buttonSymbol)
    {
       case Joystick::ButtonSymbolPsCircle:
@@ -219,17 +197,17 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, InputCode 
          drawPlaystationSquare(center);
          break;
       case Joystick::ButtonSymbolPsTriangle:
-         drawPlaystationTriangle(center);
+         drawPlaystationTriangle(center, labelColor);
          break;
       case Joystick::ButtonSymbolSmallLeftTriangle:
-         drawSmallLeftTriangle(center);
+         drawSmallLeftTriangle(center, labelColor);
          break;
       case Joystick::ButtonSymbolSmallRightTriangle:
-         drawSmallRightTriangle(center);
+         drawSmallRightTriangle(center, labelColor);
          break;
       case Joystick::ButtonSymbolNone:
       default:
-         RenderUtils::drawString(location.x - RenderUtils::getStringWidth(labelSize, label) / 2, location.y + 2, labelSize, label);
+         RenderUtils::drawString_fixed(location.x - RenderUtils::getStringWidth(labelSize, label) / 2, location.y + 2, labelSize, labelColor, label);
          break;
    }
 
@@ -239,7 +217,6 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, InputCode 
 
 void JoystickRender::drawPlaystationCross(const Point &center)
 {
-   mGL->glColor(Colors::paleBlue);
    Point p1(center + Point(-5, -5));
    Point p2(center + Point(5, 5));
    Point p3(center + Point(-5, 5));
@@ -251,99 +228,81 @@ void JoystickRender::drawPlaystationCross(const Point &center)
          p3.x, p3.y,
          p4.x, p4.y
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::Lines, Colors::paleBlue);
 }
 
 
 void JoystickRender::drawPlaystationCircle(const Point &center)
 {
-   mGL->glColor(Colors::paleRed);
-   RenderUtils::drawCircle(center, 6);
+   RenderUtils::drawCircle(center, 6, Colors::paleRed);
 }
 
 
 void JoystickRender::drawPlaystationSquare(const Point &center)
 {
-   mGL->glColor(Colors::palePurple);
-   Point p1(center + Point(-5, -5));
-   Point p2(center + Point(-5, 5));
-   Point p3(center + Point(5, 5));
-   Point p4(center + Point(5, -5));
-
    F32 vertices[] = {
-         p1.x, p1.y,
-         p2.x, p2.y,
-         p3.x, p3.y,
-         p4.x, p4.y
+      center.x - 5, center.y - 5,
+      center.x - 5, center.y + 5,
+      center.x + 5, center.y + 5,
+      center.x + 5, center.y - 5,
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop);
+
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop, Colors::palePurple);   // ARRAYSIZE = 8, have 4 points
 }
 
 
-void JoystickRender::drawPlaystationTriangle(const Point &center)
+void JoystickRender::drawPlaystationTriangle(const Point &center, const Color &color)
 {
-   Point p1(center + Point(0, -7));
-   Point p2(center + Point(6, 5));
-   Point p3(center + Point(-6, 5));
-
    F32 vertices[] = {
-         p1.x, p1.y,
-         p2.x, p2.y,
-         p3.x, p3.y
+      center.x,     center.y - 7,
+      center.x + 6, center.y + 5,
+      center.x - 6, center.y + 5
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop);
+
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop, color);
 }
 
 
-void JoystickRender::drawSmallLeftTriangle(const Point & center)
+void JoystickRender::drawSmallLeftTriangle(const Point &center, const Color &color)
 {
-   Point p1(center + Point(4, 0));
-   Point p2(center + Point(-3, 5));
-   Point p3(center + Point(-3, -5));
-
    F32 vertices[] = {
-         p1.x, p1.y,
-         p2.x, p2.y,
-         p3.x, p3.y
+         center.x + 4, center.y,
+         center.x - 3, center.y + 5,
+         center.x - 3, center.y - 5
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop);
+
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop, color);
 }
 
 
-void JoystickRender::drawSmallRightTriangle(const Point & center)
+void JoystickRender::drawSmallRightTriangle(const Point &center, const Color &color)
 {
-   Point p1(center + Point(-4, 0));
-   Point p2(center + Point(3, 5));
-   Point p3(center + Point(3, -5));
-
    F32 vertices[] = {
-         p1.x, p1.y,
-         p2.x, p2.y,
-         p3.x, p3.y
+         center.x - 4, center.y,
+         center.x + 3, center.y + 5,
+         center.x + 3, center.y - 5
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop);
+
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop, color);
 }
 
 
-void JoystickRender::drawButtonRightTriangle(const Point &center)
+void JoystickRender::drawButtonRightTriangle(const Point &center, const Color &color)
 {
-   Point p1(center + Point(-15, -9));
-   Point p2(center + Point(-15, 10));
-   Point p3(center + Point(12, 0));
-
    F32 vertices[] = {
-         p1.x, p1.y,
-         p2.x, p2.y,
-         p3.x, p3.y
+         center.x - 15, center.y -  9,
+         center.x - 15, center.y + 10,
+         center.x + 12, center.y
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop);
+
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop, color);
 }
 
 
-void JoystickRender::drawDPadUp(Point center)
-{
-   static Point points[7];
+static Point points[7];    // Reuse this for the items below
 
+void JoystickRender::drawDPadUp(const Point &center, const Color &color)
+{
    // Up arrow
    points[0] = (center + Point(-3, 6));
    points[1] = (center + Point(-3, 0));
@@ -353,14 +312,12 @@ void JoystickRender::drawDPadUp(Point center)
    points[5] = (center + Point( 3, 0));
    points[6] = (center + Point( 3, 6));
 
-   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GLOPT::LineLoop);
+   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GLOPT::LineLoop, color);
 }
 
 
-void JoystickRender::drawDPadDown(Point center)
+void JoystickRender::drawDPadDown(const Point &center, const Color &color)
 {
-   static Point points[7];
-
    // Down arrow
    points[0] = (center + Point(-3,-6));
    points[1] = (center + Point(-3, 0));
@@ -370,14 +327,12 @@ void JoystickRender::drawDPadDown(Point center)
    points[5] = (center + Point( 3, 0));
    points[6] = (center + Point( 3,-6));
 
-   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GLOPT::LineLoop);
+   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GLOPT::LineLoop, color);
 }
 
 
-void JoystickRender::drawDPadLeft(Point center)
+void JoystickRender::drawDPadLeft(const Point &center, const Color &color)
 {
-   static Point points[7];
-
    // Left arrow
    points[0] = (center + Point( 6,-3));
    points[1] = (center + Point( 0,-3));
@@ -387,14 +342,12 @@ void JoystickRender::drawDPadLeft(Point center)
    points[5] = (center + Point( 0, 3));
    points[6] = (center + Point( 6, 3));
 
-   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GLOPT::LineLoop);
+   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GLOPT::LineLoop, color);
 }
 
 
-void JoystickRender::drawDPadRight(Point center)
+void JoystickRender::drawDPadRight(const Point &center, const Color &color)
 {
-   static Point points[7];
-
    // Right arrow
    points[0] = (center + Point(-6,-3));
    points[1] = (center + Point( 0,-3));
@@ -404,7 +357,7 @@ void JoystickRender::drawDPadRight(Point center)
    points[5] = (center + Point( 0, 3));
    points[6] = (center + Point(-6, 3));
 
-   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GLOPT::LineLoop);
+   mGL->renderVertexArray((F32 *)points, ARRAYSIZE(points), GLOPT::LineLoop, color);
 }
 
 ////////// End rendering functions

@@ -126,9 +126,7 @@ void FxManager::DebrisChunk::render() const
    if(ttl < 250)
       alpha = ttl / 250.f;
 
-   mGL->glColor(color, alpha);
-
-   mGL->renderPointVector(&points, GLOPT::LineLoop);
+   mGL->renderPointVector(&points, GLOPT::LineLoop, color, alpha);
 
    mGL->glPopMatrix();
 }
@@ -172,13 +170,12 @@ void FxManager::TextEffect::render(const Point &centerOffset) const
    if(ttl < FadeTime)
       alpha = ttl / FadeTime;     // Fade as item nears the end of its life
 
-   mGL->glColor(color, alpha);
-
    mGL->glPushMatrix();
 
       mGL->glTranslate(pos);
       mGL->glScale(size / MAX_TEXTEFFECT_SIZE);  // We'll draw big and scale down
 
+      FontManager::setFontColor(color, alpha);
       FontManager::pushFontContext(TextEffectContext);
          RenderUtils::drawStringc(0, 0, 120, text.c_str());
       FontManager::popFontContext();

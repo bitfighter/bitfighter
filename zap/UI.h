@@ -127,7 +127,7 @@ public:
    virtual void onMouseDragged();
 
    // Old school -- deprecated
-   void renderMessageBox(const string &title, const string &instr, const string &message, S32 vertOffset = 0, S32 style = 1) const;
+   void renderMessageBox(const string &title, const string &instr, const string &message, const Color &color, S32 vertOffset = 0, S32 style = 1) const;
 
    // New school
    void renderMessageBox(const SymbolShapePtr &title, const SymbolShapePtr &instr, const SymbolShapePtr *message, S32 msgLines, S32 vertOffset = 0, S32 style = 1) const;

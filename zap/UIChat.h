@@ -54,8 +54,8 @@ private:
    static U32 mMessageCount;
    ClientGame *mGame;
 
-   Color getNextColor() const;                       // Get next available color for a new nick
-   Color getColor(string name) const;
+   static Color getNextColor();                       // Get next available color for a new nick
+   static Color getColor(string name);
 
 
 protected:
@@ -65,8 +65,8 @@ protected:
 
    U32 mChatCursorPos;                     // Where is cursor?
 
-   ChatMessage getMessage(U32 index) const;
-   U32 getMessageCount() const;
+   static ChatMessage getMessage(U32 index);
+   static U32 getMessageCount();
    bool composingMessage() const;
 
 public:
@@ -77,7 +77,7 @@ public:
    void clearChat();                      // Clear message being composed
    virtual void issueChat();              // Send chat message
 
-   void leaveLobbyChat();                 // Send msg to master telling them we're leaving chat
+   void leaveLobbyChat() const;                 // Send msg to master telling them we're leaving chat
 
    void renderMessages(U32 yPos, U32 lineCountToDisplay) const;
    void renderMessageComposition(S32 ypos) const;   // Render outgoing chat message composition line
@@ -86,8 +86,8 @@ public:
    void deliverPrivateMessage(const char *sender, const char *message);
 
    // Handle players joining and leaving lobby chat
-   bool isPlayerInLobbyChat(const StringTableEntry &playerNick);
-   void setPlayersInLobbyChat(const Vector<StringTableEntry> &playerNicks);
+   bool isPlayerInLobbyChat(const StringTableEntry &playerNick) const;
+   static void setPlayersInLobbyChat(const Vector<StringTableEntry> &playerNicks);
    void playerJoinedLobbyChat(const StringTableEntry &playerNick);
    void playerLeftLobbyChat(const StringTableEntry &playerNick);
 
@@ -131,7 +131,7 @@ public:
    void onActivate();
    void onActivateLobbyMode();
 
-   void onEscape();
+   void onEscape() const;
 
    void idle(U32 timeDelta);
 

@@ -248,24 +248,24 @@ void HelpItemManager::moveItemFromQueueToActiveList(const ClientGame *game)
 }
 
 
-static void renderHelpTextBracket(S32 x, S32 top, S32 bot, S32 stubLen)
+static void renderHelpTextBracket(S32 x, S32 top, S32 bot, S32 stubLen, const Color &color, F32 alpha)
 {
-   RenderUtils::drawVertLine (x, top,         bot);    // Vertical bar
-   RenderUtils::drawHorizLine(x, x + stubLen, top);    // Top stub
-   RenderUtils::drawHorizLine(x, x + stubLen, bot);    // Bottom stub
+   RenderUtils::drawVertLine (x, top,         bot, color, alpha);    // Vertical bar
+   RenderUtils::drawHorizLine(x, x + stubLen, top, color, alpha);    // Top stub
+   RenderUtils::drawHorizLine(x, x + stubLen, bot, color, alpha);    // Bottom stub
 }
 
 
-static void renderIndicatorBracket(S32 left, S32 right, S32 top, S32 stubLen)
+static void renderIndicatorBracket(S32 left, S32 right, S32 top, S32 stubLen, const Color &color, F32 alpha)
 {
-   RenderUtils::drawHorizLine(left,  right, top);
-   RenderUtils::drawVertLine (left,  top,   top + stubLen);
-   RenderUtils::drawVertLine (right, top,   top + stubLen);
+   RenderUtils::drawHorizLine(left,  right, top, color, alpha);
+   RenderUtils::drawVertLine (left,  top,   top + stubLen, color, alpha);
+   RenderUtils::drawVertLine (right, top,   top + stubLen, color, alpha);
 }
 
 
 // Do some special rendering required by just a couple of items
-static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 textLeft, S32 textTop, S32 textBottom)
+static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 textLeft, S32 textTop, S32 textBottom, const Color &color, F32 alpha)
 {
    textLeft -= 10;      // Provide some buffer between vertical bar and help text
 
@@ -276,8 +276,8 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
    if(helpItem == ModulesAndWeaponsItem)
    {
       const S32 w = game->getUIManager()->getUI<GameUserInterface>()->getLoadoutIndicatorWidth();
-      const S32 x = UI::LoadoutIndicator::LoadoutIndicatorLeftPos;
-      const S32 y = UI::LoadoutIndicator::LoadoutIndicatorBottomPos;
+      const S32 x = LoadoutIndicator::LoadoutIndicatorLeftPos;
+      const S32 y = LoadoutIndicator::LoadoutIndicatorBottomPos;
 
       const S32 indicatorTop = y + indicatorVerticalGap;
       const S32 riserBot = (textTop + textBottom) / 2;
@@ -289,12 +289,12 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
       const S32 indicatorLeft  = x -     indicatorHorizontalGap;                   
       const S32 indicatorRight = x + w + indicatorHorizontalGap;
 
-      renderHelpTextBracket(textLeft, textTop, textBottom, stubLen);
-      renderIndicatorBracket(indicatorLeft, indicatorRight, indicatorTop, -stubLen);
+      renderHelpTextBracket(textLeft, textTop, textBottom, stubLen, color, alpha);
+      renderIndicatorBracket(indicatorLeft, indicatorRight, indicatorTop, -stubLen, color, alpha);
 
       // Lines connecting the two
-      RenderUtils::drawHorizLine(indicatorMiddle, textLeft,     riserBot);    // Main horizontal
-      RenderUtils::drawVertLine (indicatorMiddle, indicatorTop, riserBot);    // Main riser
+      RenderUtils::drawHorizLine(indicatorMiddle, textLeft,     riserBot, color, alpha);    // Main horizontal
+      RenderUtils::drawVertLine (indicatorMiddle, indicatorTop, riserBot, color, alpha);    // Main riser
    }
 
    else if(helpItem == GameTypeAndTimer)
@@ -315,12 +315,12 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
 
       const S32 textRight = DisplayManager::getScreenInfo()->getGameCanvasWidth() - textLeft;
 
-      renderHelpTextBracket(textRight, textTop, textBottom, -stubLen);
-      renderIndicatorBracket(indicatorLeft, indicatorRight, indicatorTop, stubLen);
+      renderHelpTextBracket(textRight, textTop, textBottom, -stubLen, color, alpha);
+      renderIndicatorBracket(indicatorLeft, indicatorRight, indicatorTop, stubLen, color, alpha);
 
       // Lines connecting the two
-      RenderUtils::drawHorizLine(textRight, indicatorMiddle, textMiddle);
-      RenderUtils::drawVertLine(indicatorMiddle, textMiddle, indicatorTop);
+      RenderUtils::drawHorizLine(textRight, indicatorMiddle, textMiddle, color, alpha);
+      RenderUtils::drawVertLine(indicatorMiddle, textMiddle, indicatorTop, color, alpha);
    }
    else if(helpItem == EnergyGaugeItem)
    {
@@ -335,17 +335,17 @@ static void renderMessageDoodads(const ClientGame *game, HelpItem helpItem, S32 
       const S32 textMiddle = (textTop + textBottom) / 2;
       const S32 indicatorMiddle = (indicatorLeft + indicatorRight) / 2;
 
-      renderHelpTextBracket(textLeft, textTop, textBottom, stubLen);
-      renderIndicatorBracket(indicatorLeft, indicatorRight, indicatorTop, stubLen);
+      renderHelpTextBracket(textLeft, textTop, textBottom, stubLen, color, alpha);
+      renderIndicatorBracket(indicatorLeft, indicatorRight, indicatorTop, stubLen, color, alpha);
 
       // Lines connecting the two
-      RenderUtils::drawHorizLine(textLeft, indicatorMiddle, textMiddle);
-      RenderUtils::drawVertLine(indicatorMiddle, textMiddle, indicatorTop);
+      RenderUtils::drawHorizLine(textLeft, indicatorMiddle, textMiddle, color, alpha);
+      RenderUtils::drawVertLine(indicatorMiddle, textMiddle, indicatorTop, color, alpha);
    }
 }
 
 
-static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inputCodeManager, HelpItem helpItem, F32 yPos)
+static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inputCodeManager, HelpItem helpItem, F32 yPos, const Color &color, F32 alpha)
 {
    const char * const *messages = helpItems[helpItem].helpMessages;
 
@@ -360,7 +360,7 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
       TNLAssert(i < MAX_LINES, "Too many lines... better increase MAX_LINES!");
 
       // Do some token subsititution for dynamic elements such as keybindings
-      SymbolString symbolString(messages[i], inputCodeManager, HelpItemContext, FontSize, true);
+      SymbolString symbolString(messages[i], inputCodeManager, HelpItemContext, FontSize, color, alpha, true);
 
       symbolString.render(xPos, yPos + yOffset, AlignmentCenter);
 
@@ -374,7 +374,7 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
    S32 leftPos = (S32)xPos - maxw / 2;
    S32 topPos  = (S32)yPos + yOffset - (lines + 1) * (FontSize + FontGap);
    S32 botPos  = (S32)yPos + yOffset - FontSize + 4;    // 4.... just... because?
-   renderMessageDoodads(game, helpItem, leftPos, topPos, botPos);
+   renderMessageDoodads(game, helpItem, leftPos, topPos, botPos, color, alpha);
 
    return yOffset;
 }
@@ -399,9 +399,8 @@ void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha
    if(mTestingTimer.getCurrent() > 0)
    {
       FontManager::pushFontContext(HelpItemContext);
-      RenderUtils::glColor(Colors::red, alpha);
 
-      doRenderMessages(game, mInputCodeManager, (HelpItem)(mTestingCtr % HelpItemCount), yPos);
+      doRenderMessages(game, mInputCodeManager, (HelpItem)(mTestingCtr % HelpItemCount), yPos, Colors::red, alpha);
 
       FontManager::popFontContext();
       return;
@@ -415,8 +414,6 @@ void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha
 
    for(S32 i = 0; i < mHelpItems.size(); i++)      // Iterate over each message being displayed
    {
-      RenderUtils::glColor(Colors::HelpItemRenderColor, alpha);
-
       // Height of the message in pixels, including the gap before the next message (even if there isn't one)
       F32 height = F32(getLinesInHelpItem(i) * (FontSize + FontGap)) + InterMsgGap;
 
@@ -429,7 +426,7 @@ void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha
       scissorsManager.enable(mHelpFading[i], displayMode, 0, yPos - FontSize, 
                              (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), height);
 
-      doRenderMessages(game, mInputCodeManager, mHelpItems[i], yPos - offset);
+      doRenderMessages(game, mInputCodeManager, mHelpItems[i], yPos - offset, Colors::HelpItemRenderColor, alpha);
       yPos += height - offset;      
 
       scissorsManager.disable();

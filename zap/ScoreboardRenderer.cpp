@@ -113,17 +113,17 @@ static void renderScoreboardLegend(S32 humans, U32 scoreboardTop, U32 totalHeigh
                       levelChangerSymbol + " = Can Change Levels | " + botSymbol + " = Bot |";
 
       symbols.push_back(SymbolShapePtr());    // Placeholder, will be replaced with humans count below
-      symbols.push_back(SymbolShapePtr(new SymbolText(legend, LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor)));
-      symbols.push_back(SymbolShapePtr(new SymbolText(" Idle Player", LegendSize, ScoreboardContext, &Colors::idlePlayerNameColor)));
-      symbols.push_back(SymbolShapePtr(new SymbolText(" | ", LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor)));
-      symbols.push_back(SymbolShapePtr(new SymbolText("Player on Rampage", LegendSize, ScoreboardContext, &Colors::streakPlayerNameColor)));
+      symbols.push_back(SymbolShapePtr(new SymbolText(legend, LegendSize, ScoreboardContext, Colors::standardPlayerNameColor)));
+      symbols.push_back(SymbolShapePtr(new SymbolText(" Idle Player", LegendSize, ScoreboardContext, Colors::idlePlayerNameColor)));
+      symbols.push_back(SymbolShapePtr(new SymbolText(" | ", LegendSize, ScoreboardContext, Colors::standardPlayerNameColor)));
+      symbols.push_back(SymbolShapePtr(new SymbolText("Player on Rampage", LegendSize, ScoreboardContext, Colors::streakPlayerNameColor)));
    }
 
    // Rebuild the humans symbol, if the number of humans has changed
    if(humans != lastHumans)
    {
       const string humanStr = itos(humans) + " Human" + (humans != 1 ? "s" : "");
-      symbols[0] = SymbolShapePtr(new SymbolText(humanStr, LegendSize, ScoreboardContext, &Colors::standardPlayerNameColor));
+      symbols[0] = SymbolShapePtr(new SymbolText(humanStr, LegendSize, ScoreboardContext, Colors::standardPlayerNameColor));
       lastHumans = humans;
    }
 
@@ -132,48 +132,49 @@ static void renderScoreboardLegend(S32 humans, U32 scoreboardTop, U32 totalHeigh
 }
 
 
-static void renderPlayerSymbolAndSetColor(ClientInfo *player, S32 x, S32 y, S32 size)
+// Figure out what color to use to render player name
+static const Color &getPlayerNameColor(ClientInfo *player)
 {
-   GL *gL = RenderManager::getGL();
+   if(player->isSpawnDelayed())
+      return Colors::idlePlayerNameColor;
 
+   if(player->getKillStreak() >= UserInterface::StreakingThreshold)
+      return Colors::streakPlayerNameColor;
+                                                                     
+   return Colors::standardPlayerNameColor;
+}
+
+
+static void renderPlayerSymbol(ClientInfo *player, S32 x, S32 y, S32 size, const Color &color)
+{
    // Figure out how much room we need to leave for our player symbol (@, +, etc.)
    x -= RenderUtils::getStringWidth(size, adminSymbol) + Gap;  // Use admin symbol as it's the widest
 
    // Draw the player's experience level before we set the color
    FontManager::pushFontContext(OldSkoolContext);
 
-   static const S32 levelSize = 7;
+   static const S32 fontSize = 7;
 
-   gL->glColor(Colors::green);
-   RenderUtils::drawStringf(x - 8, y + 7 , levelSize, "%d", ClientGame::getExpLevel(player->getGamesPlayed()));
+   RenderUtils::drawStringf_fixed(x - 8, y + (fontSize - size) + 7, fontSize, Colors::green, "%d", ClientGame::getExpLevel(player->getGamesPlayed()));
    FontManager::popFontContext();
-
-   // Figure out what color to use to render player name, and set it
-   if(player->isSpawnDelayed())
-      gL->glColor(Colors::idlePlayerNameColor);
-   else if(player->getKillStreak() >= UserInterface::StreakingThreshold)
-      gL->glColor(Colors::streakPlayerNameColor);
-   else
-      gL->glColor(Colors::standardPlayerNameColor);
 
    // Mark of the bot
    if(player->isRobot())
-      RenderUtils::drawString(x, y, size, botSymbol);
+      RenderUtils::drawString_fixed(x, y, size, color, botSymbol);
 
    // Admin mark
    else if(player->isAdmin())
-      RenderUtils::drawString(x, y, size, adminSymbol);
+      RenderUtils::drawString_fixed(x, y, size, color, adminSymbol);
 
    // Level changer mark
    else if(player->isLevelChanger())
-      RenderUtils::drawString(x, y, size, levelChangerSymbol);
+      RenderUtils::drawString_fixed(x, y, size, color, levelChangerSymbol);
 }
 
 
 static void renderTeamName(ClientGame *clientGame, S32 index, bool isWinningTeam, S32 left, S32 right, S32 top)
 {
    static const S32 teamFontSize = 24;
-   GL *gL = RenderManager::getGL();
 
    // First the box
    const Color &teamColor = clientGame->getTeamColor(index);
@@ -187,8 +188,6 @@ static void renderTeamName(ClientGame *clientGame, S32 index, bool isWinningTeam
 
    // Then the team name & score
    FontManager::pushFontContext(ScoreboardHeadlineContext);
-   gL->glColor(Colors::white);
-
 
    // Figure out where we should draw the teamname and score -- we can nudge things apart a little to 
    // accomodate long names or high scores
@@ -229,7 +228,7 @@ static void renderTeamName(ClientGame *clientGame, S32 index, bool isWinningTeam
    else 
       teamName = clientGame->getTeamName(index).getString();
 
-
+   FontManager::setFontColor(Colors::white);
    RenderUtils::drawString (leftPos,  top + 2, teamFontSize, teamName.c_str());
    RenderUtils::drawStringr(rightPos, top + 2, teamFontSize, scoreStr.c_str());
 
@@ -240,9 +239,7 @@ static void renderTeamName(ClientGame *clientGame, S32 index, bool isWinningTeam
 static void renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y,
                                           const S32 *colIndexWidths, bool isTeamGame)
 {
-   GL *gL = RenderManager::getGL();
-
-   gL->glColor(Colors::gray50);
+   FontManager::setFontColor(Colors::gray50);
 
    RenderUtils::drawString_fixed(leftEdge,                                                 y, ColHeaderTextSize, "Name");
    RenderUtils::drawStringc     (rightEdge -  (KdOff   + colIndexWidths[KdIndex]   / 2),   y, ColHeaderTextSize, "Threat Level");
@@ -285,8 +282,7 @@ static void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio)
          }
 
          // Draw badge border
-         gL->glColor(Colors::gray20);
-         RenderUtils::drawRoundedRect(Point(x,y), badgeBackgroundEdgeSize, badgeBackgroundEdgeSize, 3.f);
+         RenderUtils::drawRoundedRect(Point(x, y), badgeBackgroundEdgeSize, badgeBackgroundEdgeSize, 3.0f, Colors::gray20);
 
          GameObjectRender::renderBadge((F32)x, (F32)y, badgeRadius, badge);
          x += badgeOffset;
@@ -320,21 +316,23 @@ static void renderScoreboardLine(const Vector<ClientInfo *> &playerScores, bool 
 
    static const S32 vertAdjustFact = (playerFontSize - symbolFontSize) / 2 - 1;
 
-   renderPlayerSymbolAndSetColor(playerScores[row], x, y + vertAdjustFact + 2, symbolFontSize);
+   const Color &color = getPlayerNameColor(playerScores[row]);
+   renderPlayerSymbol(playerScores[row], x, y + vertAdjustFact + 2 + symbolFontSize, symbolFontSize, color);
 
-   S32 nameWidth = RenderUtils::drawStringAndGetWidth(x, y, playerFontSize, playerScores[row]->getName().getString());
+   y += playerFontSize;
+   S32 nameWidth = RenderUtils::drawStringAndGetWidth_fixed(x, y, playerFontSize, color, playerScores[row]->getName().getString());
 
-   colWidths[KdIndex]   = RenderUtils::drawStringfr(rightEdge - KdOff,                  y, playerFontSize, "%2.2f", playerScores[row]->getRating());
-   colWidths[PingIndex] = RenderUtils::drawStringfr(rightEdge - PingOff + maxPingWidth, y, playerFontSize, "%d",    playerScores[row]->getPing());
+   colWidths[KdIndex]   = RenderUtils::drawStringfr_fixed(rightEdge - KdOff,                  y, playerFontSize, color, "%2.2f", color, playerScores[row]->getRating());
+   colWidths[PingIndex] = RenderUtils::drawStringfr_fixed(rightEdge - PingOff + maxPingWidth, y, playerFontSize, color, "%d",    color, playerScores[row]->getPing());
 
    if(!isTeamGame)
-      colWidths[ScoreIndex] = RenderUtils::drawStringfr(rightEdge - ScoreOff, y, playerFontSize, "%d", playerScores[row]->getScore());
+      colWidths[ScoreIndex] = RenderUtils::drawStringfr_fixed(rightEdge - ScoreOff, y, playerFontSize, color, "%d", playerScores[row]->getScore());
 
    // Vertical scale ratio to maximum line height
    const F32 scaleRatio = lineHeight / 30.f;
 
    // Circle back and render the badges now that all the rendering with the name color is finished
-   renderBadges(playerScores[row],   x + nameWidth + 10 + Gap, y + (lineHeight / 2), scaleRatio);
+   renderBadges(playerScores[row], x + nameWidth + 10 + Gap, y + (lineHeight / 2), scaleRatio);
 }
 
 

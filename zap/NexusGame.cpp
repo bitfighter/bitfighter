@@ -656,19 +656,20 @@ S32 NexusGameType::renderTimeLeftSpecial(S32 right, S32 bottom, bool render) con
 {
    const S32 size = 20;
    const S32 gap = 4;
-   const S32 x = right;
-   const S32 y = bottom;
 
    if(render)
    {
-      RenderUtils::glColor(mNexusIsOpen ? Colors::NexusOpenColor : Colors::NexusClosedColor);      // Display timer in appropriate color
+      const Color &color = mNexusIsOpen ? Colors::NexusOpenColor : Colors::NexusClosedColor;
 
       if(isOvertime() || (mNexusIsOpen && mNexusOpenTime == 0))
-         RenderUtils::drawStringfr(x, y - size, size, "Nexus open until end of game");
+         RenderUtils::drawStringfr_fixed(right, bottom, size, color, "Nexus open until end of game");
+
       else if(!mNexusIsOpen && mNexusClosedTime == 0)
-         RenderUtils::drawStringfr(x, y - size, size, "Nexus never opens");
+         RenderUtils::drawStringfr_fixed(right, bottom, size, color, "Nexus never opens");
+
       else if(!mNexusIsOpen && !isTimeUnlimited() && getRemainingGameTimeInMs() <= getNexusTimeLeftMs())
-         RenderUtils::drawStringfr(x, y - size, size, "Nexus closed until end of game");
+         RenderUtils::drawStringfr_fixed(right, bottom, size, color, "Nexus closed until end of game");
+
       else if(!isGameOver())
       {
          static const U32 w0      = RenderUtils::getStringWidth(size, "0");
@@ -680,12 +681,12 @@ S32 NexusGameType::renderTimeLeftSpecial(S32 right, S32 bottom, bool render) con
          // Get the width of the minutes and 10 seconds digit(s), account for two leading 0s (00:45)
          const U32 minsRemaining = timeLeft / (60 * 1000);
          const U32 tenSecsRemaining = timeLeft / 1000 % 60 / 10;
-         string timestr = itos(minsRemaining) + ":" + itos(tenSecsRemaining);
+         const string timestr = itos(minsRemaining) + ":" + itos(tenSecsRemaining);
          const U32 minsWidth = RenderUtils::getStringWidth(size, timestr.c_str()) + (minsRemaining < 10 ? w0 : 0);
 
          S32 w = minsWidth + w0 + (mNexusIsOpen ? wCloses : wOpens);
 
-         RenderUtils::drawTime(x - w, y - size, size, timeLeft, mNexusIsOpen ? "Nexus closes: " : "Nexus opens: ");
+         RenderUtils::drawTime(right - w, bottom, size, color, timeLeft, mNexusIsOpen ? "Nexus closes: " : "Nexus opens: ");
       }
    }
 
@@ -825,6 +826,15 @@ void NexusFlagItem::renderItem(const Point &pos) const
 }
 
 
+static const Color &getFlagCountColor(U32 flagCount)
+{
+   if(flagCount >= 40) return Colors::paleRed;  // like, rad!
+   if(flagCount >= 20) return Colors::yellow;   // cool!
+   if(flagCount >= 10) return Colors::green;    // ok, I guess
+                       return Colors::white;    // lame
+}
+
+
 void NexusFlagItem::renderItemAlpha(const Point &pos, F32 alpha) const
 {
 #ifndef ZAP_DEDICATED
@@ -836,14 +846,7 @@ void NexusFlagItem::renderItemAlpha(const Point &pos, F32 alpha) const
    GameObjectRender::renderFlag(pos + offset, getColor(), alpha);
 
    if(mIsMounted && mFlagCount > 0)
-   {
-      if     (mFlagCount >= 40) RenderUtils::glColor(Colors::paleRed, alpha);   // like, rad!
-      else if(mFlagCount >= 20) RenderUtils::glColor(Colors::yellow,  alpha);   // cool!
-      else if(mFlagCount >= 10) RenderUtils::glColor(Colors::green,   alpha);   // ok, I guess
-      else                      RenderUtils::glColor(Colors::white,   alpha);   // lame
-
-      RenderUtils::drawStringf(pos.x + 10, pos.y - 46, 12, "%d", mFlagCount);
-   }
+      RenderUtils::drawStringf_fixed(pos.x + 10, pos.y - 34, 12, getFlagCountColor(mFlagCount), alpha, "%d", mFlagCount);
 #endif
 }
 

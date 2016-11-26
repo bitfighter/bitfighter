@@ -14,6 +14,7 @@
 
 #include "RenderUtils.h"
 #include "stringUtils.h"
+#include "UIAbstractInstructions.h"
 
 using namespace TNL;
 
@@ -176,6 +177,7 @@ static S32 computeLayeredWidth(const Vector<SymbolShapePtr> &symbols)
    return width;
 }
 
+
 // Height is the height of the tallest element in the symbol list
 static S32 computeHeight(const Vector<SymbolShapePtr> &symbols)
 {
@@ -212,11 +214,27 @@ SymbolString::SymbolString(const SymbolShapePtr &symbol, Alignment alignment)
 
 // Convenience constructor, just pass in a string, we'll do the rest!
 SymbolString::SymbolString(const string &str, const InputCodeManager *inputCodeManager, FontContext context, 
-                           S32 textSize, bool blockMode, Alignment alignment)
+                           S32 textSize, const Color &color, bool blockMode, Alignment alignment)
 {
-   SymbolString::symbolParse(inputCodeManager, str, mSymbols, context, textSize, blockMode);
+   symbolParse(inputCodeManager, str, mSymbols, context, textSize, blockMode, color, color);
    mWidth = computeWidth(mSymbols);
    mHeight = computeHeight(mSymbols);
+   mColor = color;
+   mAlpha = 1.0f;
+   mAlignment = alignment;
+}
+
+
+// Convenience constructor, just pass in a string, we'll do the rest!
+SymbolString::SymbolString(const string &str, const InputCodeManager *inputCodeManager, FontContext context, 
+                           S32 textSize, const Color &color, F32 alpha, bool blockMode, Alignment alignment)
+{
+   symbolParse(inputCodeManager, str, mSymbols, context, textSize, blockMode, color, color);
+   mWidth = computeWidth(mSymbols);
+   mHeight = computeHeight(mSymbols);
+   mColor = color;
+   mAlpha = alpha;
+   mAlignment = alignment;
 }
 
 
@@ -244,11 +262,12 @@ void SymbolString::setSymbols(const Vector<SymbolShapePtr> &symbols)
 }
 
 
+// Only used in editor for showing message related to updating levels in pleiades
 void SymbolString::setSymbolsFromString(const string &string, const InputCodeManager *inputCodeManager, 
-                                        FontContext fontContext, S32 textSize, const Color *color)
+                                        FontContext fontContext, S32 textSize, const Color &color)
 {
    Vector<SymbolShapePtr> symbols;
-   symbolParse(inputCodeManager, string, symbols, fontContext, textSize, color);
+   symbolParse(inputCodeManager, string, symbols, fontContext, textSize, false, color, color);
    setSymbols(symbols);
 }
 
@@ -298,6 +317,7 @@ void SymbolString::render(const Point &center, Alignment alignment) const
 
 S32 SymbolString::render(S32 x, S32 y, Alignment blockAlignment, S32 blockWidth) const
 {
+   //FontManager::setFontColor(mColor);
    return render((F32)x, (F32)y, blockAlignment, blockWidth);
 }
 
@@ -359,9 +379,9 @@ static const S32 RectRadius = 3;
 static const S32 RoundedRectRadius = 5;
 
 
-static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color);
+static SymbolShapePtr getSymbol(InputCode inputCode, const Color &color);
 
-static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const Color *color)
+static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const Color &color)
 {
    switch(shape)
    {
@@ -409,12 +429,12 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const Color *color)
 
       default:
          //TNLAssert(false, "Unknown button shape!");
-         return getSymbol(KEY_UNKNOWN, &Colors::red);
+         return getSymbol(KEY_UNKNOWN, Colors::red);
    }
 }
 
 
-static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const string &label, const Color *color)
+static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const string &label, const Color &color)
 {
    static const S32 LabelSize = 13;
    Vector<SymbolShapePtr> symbols;
@@ -430,7 +450,7 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const string &label
    // Point(0,-1) below is a font-dependent rendering factor chosen by trial-and-error
    if(buttonSymbol == Joystick::ButtonSymbolNone)
       symbols.push_back(SymbolShapePtr(new SymbolText(label, LabelSize + shapePtr->getLabelSizeAdjustor(label, LabelSize), 
-                                                      KeyContext, shapePtr->getLabelOffset(label, LabelSize) + Point(0,-1))));
+                                                      KeyContext, shapePtr->getLabelOffset(label, LabelSize) + Point(0,-1), color)));
    else
       symbols.push_back(SymbolShapePtr(new SymbolButtonSymbol(buttonSymbol)));
 
@@ -441,7 +461,7 @@ static SymbolShapePtr getSymbol(Joystick::ButtonShape shape, const string &label
 static S32 KeyFontSize = 13;     // Size of characters used for rendering key bindings
 
 // Color is ignored for controller buttons
-static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
+static SymbolShapePtr getSymbol(InputCode inputCode, const Color &color)
 {
    if(InputCodeManager::isKeyboardKey(inputCode))
       return SymbolShapePtr(new SymbolKey(InputCodeManager::inputCodeToString(inputCode), color));
@@ -470,7 +490,7 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
       // This gets us the button shape index, which will tell us what to draw... something like ButtonShapeRound
       Joystick::ButtonShape buttonShape = buttonInfo.buttonShape;
 
-      SymbolShapePtr symbol = getSymbol(buttonShape, buttonInfo.label, &buttonInfo.color);
+      SymbolShapePtr symbol = getSymbol(buttonShape, buttonInfo.label, buttonInfo.color);
 
       return symbol;
    }
@@ -486,7 +506,7 @@ static SymbolShapePtr getSymbol(InputCode inputCode, const Color *color)
 }
 
 
-SymbolShapePtr SymbolString::getModifiedKeySymbol(const string &symbolName, const Color *color)
+SymbolShapePtr SymbolString::getModifiedKeySymbol(const string &symbolName, const Color &color)
 {
    const Vector<string> *mods = InputCodeManager::getModifierNames();
    Vector<string> foundMods;
@@ -515,12 +535,11 @@ SymbolShapePtr SymbolString::getModifiedKeySymbol(const string &symbolName, cons
    if(inputCode == KEY_UNKNOWN) 
        return SymbolShapePtr();
 
-   SymbolShapePtr s = SymbolString::getModifiedKeySymbol(inputCode, foundMods, color);
-   return s;
+   return getModifiedKeySymbol(inputCode, foundMods, color);
 }
 
 
-SymbolShapePtr SymbolString::getModifiedKeySymbol(InputCode inputCode, const Vector<string> &modifiers, const Color *color)
+SymbolShapePtr SymbolString::getModifiedKeySymbol(InputCode inputCode, const Vector<string> &modifiers, const Color &color)
 {
    // Returns the SymbolUnknown symbol
    if(inputCode == KEY_UNKNOWN || modifiers.size() == 0)
@@ -542,49 +561,49 @@ SymbolShapePtr SymbolString::getModifiedKeySymbol(InputCode inputCode, const Vec
 
 
 // Static method
-SymbolShapePtr SymbolString::getControlSymbol(InputCode inputCode, const Color *color)
+SymbolShapePtr SymbolString::getControlSymbol(InputCode inputCode, const Color &color)
 {
    return getSymbol(inputCode, color);
 }
 
 
 // Static method
-SymbolShapePtr SymbolString::getSymbolGear(S32 fontSize)
+SymbolShapePtr SymbolString::getSymbolGear(S32 fontSize, const Color &color)
 {
-   return SymbolShapePtr(new SymbolGear(fontSize));
+   return SymbolShapePtr(new SymbolGear(fontSize, color));
 }
 
 
 // Static method
-SymbolShapePtr SymbolString::getSymbolGoal(S32 fontSize)
+SymbolShapePtr SymbolString::getSymbolGoal(S32 fontSize, const Color &color)
 {
-   return SymbolShapePtr(new SymbolGoal(fontSize));
+   return SymbolShapePtr(new SymbolGoal(fontSize, color));
 }
 
 
 // Static method
-SymbolShapePtr SymbolString::getSymbolNexus(S32 fontSize)
+SymbolShapePtr SymbolString::getSymbolNexus(S32 fontSize, const Color &color)
 {
-   return SymbolShapePtr(new SymbolNexus(fontSize));
+   return SymbolShapePtr(new SymbolNexus(fontSize, color));
 }
 
 
 // Static method
-SymbolShapePtr SymbolString::getSymbolSpinner(S32 fontSize, const Color *color)
+SymbolShapePtr SymbolString::getSymbolSpinner(S32 fontSize, const Color &color)
 {
    return SymbolShapePtr(new SymbolSpinner(fontSize, color));
 }
 
 
 // Static method
-SymbolShapePtr SymbolString::getBullet()
+SymbolShapePtr SymbolString::getBullet(const Color &color)
 {
-   return SymbolShapePtr(new SymbolBullet());
+   return SymbolShapePtr(new SymbolBullet(color));
 }
 
 
 // Static method
-SymbolShapePtr SymbolString::getSymbolText(const string &text, S32 fontSize, FontContext context, const Color *color)
+SymbolShapePtr SymbolString::getSymbolText(const string &text, S32 fontSize, FontContext context, const Color &color)
 {
    return SymbolShapePtr(new SymbolText(text, fontSize, context, color));
 }
@@ -598,13 +617,13 @@ SymbolShapePtr SymbolString::getBlankSymbol(S32 width, S32 height)
 
 
 // Static method
-SymbolShapePtr SymbolString::getHorizLine(S32 length, S32 height, const Color *color)
+SymbolShapePtr SymbolString::getHorizLine(S32 length, S32 height, const Color &color)
 {
    return SymbolShapePtr(new SymbolHorizLine(length, height, color));
 }
 
 
-SymbolShapePtr SymbolString::getHorizLine(S32 length, S32 vertOffset, S32 height, const Color *color)
+SymbolShapePtr SymbolString::getHorizLine(S32 length, S32 vertOffset, S32 height, const Color &color)
 {
    return SymbolShapePtr(new SymbolHorizLine(length, vertOffset, height, color));
 }
@@ -629,7 +648,7 @@ static InputCode convertStringToInputCode(const InputCodeManager *inputCodeManag
 }
 
 
-static SymbolShapePtr convertStringToControlSymbol(const InputCodeManager *inputCodeManager, const string &symbol, const Color *color)
+static SymbolShapePtr convertStringToControlSymbol(const InputCodeManager *inputCodeManager, const string &symbol, const Color &color)
 {
    string controlString = "";
 
@@ -653,7 +672,7 @@ static SymbolShapePtr convertStringToControlSymbol(const InputCodeManager *input
 // Parse special symbols enclosed inside [[ ]] in strings.  The passed symbolName is the bit inside the brackets.
 // Pass in NULL for inputCodeManager only if you double-pinky-promise that the string your parsing doesn't need it.
 static void getSymbolShape(const InputCodeManager *inputCodeManager, const string &symbol, S32 fontSize,
-                           const Color *color, Vector<SymbolShapePtr> &symbols)
+                           const Color &color, Vector<SymbolShapePtr> &symbols)
 {
    // The first thing we'll do is see if we can convert symbolName into an inputCode, which we can then convert into its 
    // string representation.  If conversion doesn't work, convertStringToInputCode will return KEY_UNKNOWN.
@@ -683,52 +702,54 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
    string symbolName = words[0];
 
    if(symbol == "LOADOUT_ICON")
-      symbols.push_back(SymbolString::getSymbolGear(14));
+      symbols.push_back(SymbolString::getSymbolGear(14, Colors::green)); // This is definitely wrong, but fixing the problem will be hard
    else if(symbol == "GOAL_ICON")
-      symbols.push_back(SymbolString::getSymbolGoal(14));
+      symbols.push_back(SymbolString::getSymbolGoal(14, color));
    else if(symbol == "NEXUS_ICON")
-      symbols.push_back(SymbolString::getSymbolNexus(14));
+      symbols.push_back(SymbolString::getSymbolNexus(14, color));
    else if(symbol == "SPINNER")
       symbols.push_back(SymbolString::getSymbolSpinner(fontSize, color));
    else if(symbol == "CHANGEWEP")
    {
       TNLAssert(inputCodeManager, "Need an inputCodeManager to parse this!");
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_SELWEAP1)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_SELWEAP2)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_SELWEAP3)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_SELWEAP1), color));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_SELWEAP2), color));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_SELWEAP3), color));
    }
 
    else if(symbol == "MOVEMENT")
    {
       TNLAssert(inputCodeManager, "Need an inputCodeManager to parse this!");
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_UP)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_DOWN)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_LEFT)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_RIGHT)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_UP), color));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_DOWN), color));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_LEFT), color));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_RIGHT), color));
    }
 
    else if(symbol == "MOVEMENT_LDR")
    {
       TNLAssert(inputCodeManager, "Need an inputCodeManager to parse this!");
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_LEFT)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_DOWN)));
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_RIGHT)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_LEFT), color));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_DOWN), color));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_RIGHT), color));
    }
 
    else if(symbol == "MODULE_CTRL1")
    {
       TNLAssert(inputCodeManager, "Need an inputCodeManager to parse this!");
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_MOD1)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_MOD1), color));
    }
 
    else if(symbol == "MODULE_CTRL2")
    {
       TNLAssert(inputCodeManager, "Need an inputCodeManager to parse this!");
-      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_MOD2)));
+      symbols.push_back(SymbolString::getControlSymbol(inputCodeManager->getBinding(BINDING_MOD2), color));
    }
 
-   else if(symbol == "BULLET")                    // Square bullet point 
-      symbols.push_back(SymbolString::getBullet());
+   else if(symbol == "BULLET")                        // Square bullet point 
+      symbols.push_back(SymbolString::getBullet(AbstractInstructionsUserInterface::txtColor));    
+      // Note that the above color will be wrong if this is used in any other context.  At the moment, we have no mechanism
+      // for specifying the color of a symbol.  We need one.  But until then, this will work.
 
    else if(symbolName == "TAB_STOP")                  // Adds whitespace until width is equal to n
    {
@@ -745,7 +766,7 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
    else
    {
       // Note that we might get here with an otherwise usable symbol if we passed NULL for the inputCodeManager
-      symbols.push_back(SymbolShapePtr(new SymbolText("Unknown Symbol: " + symbolName, fontSize, HelpItemContext, &Colors::red)));
+      symbols.push_back(SymbolShapePtr(new SymbolText("Unknown Symbol: " + symbolName, fontSize, HelpItemContext, Colors::red)));
    }
 }
 
@@ -753,20 +774,24 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
 // Pass true for block if this is part of a block of text, and empty lines should be accorded their full height.
 // Pass false if this is a standalone string where and empty line should have zero height.
 void SymbolString::symbolParse(const InputCodeManager *inputCodeManager, const string &str, Vector<SymbolShapePtr> &symbols,
-                              FontContext fontContext, S32 fontSize, bool block, const Color *textColor, const Color *symbolColor)
+                              FontContext fontContext, S32 fontSize, bool block, const Color &color)
+{
+   symbolParse(inputCodeManager, str, symbols, fontContext, fontSize, block, color, color);
+}
+
+
+void SymbolString::symbolParse(const InputCodeManager *inputCodeManager, const string &str, Vector<SymbolShapePtr> &symbols,
+                              FontContext fontContext, S32 fontSize, bool block, const Color &textColor, const Color &symbolColor)
 {
    if(!block && str == "")
       return;
 
-   std::size_t offset = 0;
-
-   if(!symbolColor)
-      symbolColor = textColor;
+   size_t offset = 0;
 
    while(true)
    {
-      std::size_t startPos = str.find("[[", offset);      // If this isn't here, no further searching is necessary
-      std::size_t endPos   = str.find("]]", offset + 2);
+      size_t startPos = str.find("[[", offset);      // If this isn't here, no further searching is necessary
+      size_t endPos   = str.find("]]", offset + 2);
 
       if(startPos == string::npos || endPos == string::npos)
       {
@@ -820,12 +845,13 @@ S32 LayeredSymbolString::render(F32 x, F32 y, Alignment alignment, S32 blockWidt
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-SymbolShape::SymbolShape(S32 width, S32 height, const Color *color) : mColor(color)
+SymbolShape::SymbolShape(S32 width, S32 height, const Color &color) : 
+   mColor(color)
 {
    mWidth = width;
    mHeight = height;
-   mHasColor = color != NULL;
    mLabelSizeAdjustor = 0;
+   mAlpha = 1;
 }
 
 
@@ -891,7 +917,7 @@ S32 SymbolShape::getLabelSizeAdjustor(const string &label, S32 labelSize) const
 ////////////////////////////////////////
 
 // Constructor
-SymbolBlank::SymbolBlank(S32 width, S32 height) : Parent(width, height, NULL)
+SymbolBlank::SymbolBlank(S32 width, S32 height) : Parent(width, height, Colors::black)
 {
    // Do nothing
 }
@@ -914,14 +940,14 @@ void SymbolBlank::render(const Point &center) const
 ////////////////////////////////////////
 
 // Constructor
-SymbolHorizLine::SymbolHorizLine(S32 length, S32 height, const Color *color) : Parent(length, height, color)
+SymbolHorizLine::SymbolHorizLine(S32 length, S32 height, const Color &color) : Parent(length, height, color)
 {
    mVertOffset = 0;
 }
 
 
 // Constructor
-SymbolHorizLine::SymbolHorizLine(S32 length, S32 vertOffset, S32 height, const Color *color) : Parent(length, height, color)
+SymbolHorizLine::SymbolHorizLine(S32 length, S32 vertOffset, S32 height, const Color &color) : Parent(length, height, color)
 {
    mVertOffset = vertOffset;
 }
@@ -936,10 +962,7 @@ SymbolHorizLine::~SymbolHorizLine()
 
 void SymbolHorizLine::render(const Point &center) const
 {
-   if(mHasColor)
-      mGL->glColor(mColor);
-
-   RenderUtils::drawHorizLine(center.x - mWidth / 2, center.x + mWidth / 2, center.y - mHeight / 2 + mVertOffset);
+   RenderUtils::drawHorizLine(center.x - mWidth / 2, center.x + mWidth / 2, center.y - mHeight / 2 + mVertOffset, mColor, mAlpha);
 }
 
 
@@ -951,7 +974,7 @@ static const S32 SpacingAdjustor = 2;
 
 
 // Constructor
-SymbolRoundedRect::SymbolRoundedRect(S32 width, S32 height, S32 radius, const Color *color) : 
+SymbolRoundedRect::SymbolRoundedRect(S32 width, S32 height, S32 radius, const Color &color) : 
                                                                   Parent(width + SpacingAdjustor, height + SpacingAdjustor, color)
 {
    mRadius = radius;
@@ -967,11 +990,8 @@ SymbolRoundedRect::~SymbolRoundedRect()
 
 void SymbolRoundedRect::render(const Point &center) const
 {
-   if(mHasColor)
-      mGL->glColor(mColor);
-
    RenderUtils::drawRoundedRect(center - Point(0, (mHeight - SpacingAdjustor) / 2 - BorderDecorationVertCenteringOffset - 1),
-                   mWidth - SpacingAdjustor, mHeight - SpacingAdjustor, mRadius);
+                                mWidth - SpacingAdjustor, mHeight - SpacingAdjustor, mRadius, mColor, mAlpha);
 }
 
 
@@ -979,7 +999,7 @@ void SymbolRoundedRect::render(const Point &center) const
 ////////////////////////////////////////
 
 // Constructor
-SymbolSmallRoundedRect::SymbolSmallRoundedRect(S32 width, S32 height, S32 radius, const Color *color) : 
+SymbolSmallRoundedRect::SymbolSmallRoundedRect(S32 width, S32 height, S32 radius, const Color &color) : 
                                                                Parent(width + SpacingAdjustor, height + SpacingAdjustor, radius, color)
 {
    mLabelOffset.set(0, -1);
@@ -995,11 +1015,8 @@ SymbolSmallRoundedRect::~SymbolSmallRoundedRect()
 
 void SymbolSmallRoundedRect::render(const Point &center) const
 {
-   if(mHasColor)
-      mGL->glColor(mColor);
-
    RenderUtils::drawRoundedRect(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - SpacingAdjustor + 2),
-                   mWidth - SpacingAdjustor, mHeight - SpacingAdjustor, mRadius);
+                                mWidth - SpacingAdjustor, mHeight - SpacingAdjustor, mRadius, mColor, mAlpha);
 }
 
 
@@ -1008,7 +1025,7 @@ void SymbolSmallRoundedRect::render(const Point &center) const
 
 
 // Constructor
-SymbolHorizEllipse::SymbolHorizEllipse(S32 width, S32 height, const Color *color) : Parent(width + 2, height, color)
+SymbolHorizEllipse::SymbolHorizEllipse(S32 width, S32 height, const Color &color) : Parent(width + 2, height, color)
 {
    mLabelOffset.set(0, -1);
 }
@@ -1026,12 +1043,9 @@ void SymbolHorizEllipse::render(const Point &center) const
    S32 w = mWidth / 2;
    S32 h = mHeight / 2;
 
-   if(mHasColor)
-      mGL->glColor(mColor);
-
    Point cen = center - Point(0, h - 1);
 
-   RenderUtils::drawEllipse(cen, w, h, 0);
+   RenderUtils::drawEllipse(cen, w, h, 0, mColor, mAlpha);
 }
 
 
@@ -1040,7 +1054,7 @@ void SymbolHorizEllipse::render(const Point &center) const
 
 
 // Constructor
-SymbolRightTriangle::SymbolRightTriangle(S32 width, const Color *color) : Parent(width, 19, color)
+SymbolRightTriangle::SymbolRightTriangle(S32 width, const Color &color) : Parent(width, 19, color)
 {
    mLabelOffset.set(-5, -1);
    mLabelSizeAdjustor = -3;
@@ -1056,11 +1070,8 @@ SymbolRightTriangle::~SymbolRightTriangle()
 
 void SymbolRightTriangle::render(const Point &center) const
 {
-   if(mHasColor)
-      mGL->glColor(mColor);
-
    Point cen((center.x -mWidth / 4) - 9, center.y + 6);  // Need to off-center the label slightly for this button
-   JoystickRender::drawButtonRightTriangle(cen);
+   JoystickRender::drawButtonRightTriangle(cen, mColor);
 }
 
 
@@ -1069,7 +1080,7 @@ void SymbolRightTriangle::render(const Point &center) const
 
 
 // Constructor
-SymbolDPadArrow::SymbolDPadArrow(Joystick::ButtonShape buttonShape, const Color *color) : Parent(18, 18, color)
+SymbolDPadArrow::SymbolDPadArrow(Joystick::ButtonShape buttonShape, const Color &color) : Parent(18, 18, color)
 {
    mButtonShape = buttonShape;
 }
@@ -1084,9 +1095,6 @@ SymbolDPadArrow::~SymbolDPadArrow()
 
 void SymbolDPadArrow::render(const Point &center) const
 {
-   if(mHasColor)
-      mGL->glColor(mColor);
-
    // Off set to match text rendering methods
    Point pos = center + Point(0, -6);
 
@@ -1094,19 +1102,19 @@ void SymbolDPadArrow::render(const Point &center) const
    switch(mButtonShape)
    {
       case Joystick::ButtonShapeDPadUp:
-         JoystickRender::drawDPadUp(pos);
+         JoystickRender::drawDPadUp(pos, mColor);
          break;
 
       case Joystick::ButtonShapeDPadDown:
-         JoystickRender::drawDPadDown(pos);
+         JoystickRender::drawDPadDown(pos, mColor);
          break;
 
       case Joystick::ButtonShapeDPadLeft:
-         JoystickRender::drawDPadLeft(pos);
+         JoystickRender::drawDPadLeft(pos, mColor);
          break;
 
       case Joystick::ButtonShapeDPadRight:
-         JoystickRender::drawDPadRight(pos);
+         JoystickRender::drawDPadRight(pos, mColor);
          break;
 
       default:  // Should never get here
@@ -1120,7 +1128,8 @@ void SymbolDPadArrow::render(const Point &center) const
 
 
 // Constructor
-SymbolCircle::SymbolCircle(S32 radius, const Color *color) : Parent(radius * 2 + SpacingAdjustor, radius * 2 + SpacingAdjustor, color)
+SymbolCircle::SymbolCircle(S32 radius, const Color &color) : 
+      Parent(radius * 2 + SpacingAdjustor, radius * 2 + SpacingAdjustor, color)
 {
    // Do nothing
 }
@@ -1135,11 +1144,10 @@ SymbolCircle::~SymbolCircle()
 
 void SymbolCircle::render(const Point &pos) const
 {
-   if(mHasColor)
-      mGL->glColor(mColor);
-
    // Adjust our position's y coordinate to be the center of the circle
-   RenderUtils::drawCircle(pos - Point(0, (mHeight) / 2 - BorderDecorationVertCenteringOffset - SpacingAdjustor), F32(mWidth - SpacingAdjustor) / 2);
+   RenderUtils::drawCircle(pos - Point(0, (mHeight) / 2 - BorderDecorationVertCenteringOffset - SpacingAdjustor), 
+                           F32(mWidth - SpacingAdjustor) / 2, 
+                           mColor);
 }
 
 
@@ -1197,19 +1205,18 @@ void SymbolButtonSymbol::render(const Point &pos) const
          JoystickRender::drawPlaystationSquare(renderPos);
          break;
       case Joystick::ButtonSymbolPsTriangle:
-         JoystickRender::drawPlaystationTriangle(renderPos);
+         JoystickRender::drawPlaystationTriangle(renderPos, mColor);
          break;
       case Joystick::ButtonSymbolSmallLeftTriangle:
-         JoystickRender::drawSmallLeftTriangle(renderPos + Point(0, -1));
+         JoystickRender::drawSmallLeftTriangle(renderPos + Point(0, -1), mColor);
          break;
       case Joystick::ButtonSymbolSmallRightTriangle:
-         JoystickRender::drawSmallRightTriangle(renderPos + Point(0, -1));
+         JoystickRender::drawSmallRightTriangle(renderPos + Point(0, -1), mColor);
          break;
 
       case Joystick::ButtonSymbolNone:
       default:
          TNLAssert(false, "Shouldn't be here!");
-         break;
    }
 }
 
@@ -1219,7 +1226,7 @@ void SymbolButtonSymbol::render(const Point &pos) const
 
 
 // Constructor
-SymbolGear::SymbolGear(S32 fontSize) : Parent(0, NULL)
+SymbolGear::SymbolGear(S32 fontSize, const Color &color) : Parent(0, color)
 {
    mWidth = S32(1.333f * fontSize);    // mWidth is effectively a diameter; we'll use mWidth / 2 for our rendering radius
    mHeight = mWidth;
@@ -1237,7 +1244,7 @@ void SymbolGear::render(const Point &pos) const
 {
    // We are given the bottom y position of the line, but the icon expects the center
    Point center(pos.x, (pos.y - mHeight/2) + 2); // Slight downward adjustment to position to better align with text
-   GameObjectRender::renderLoadoutZoneIcon(center, mWidth / 2);
+   GameObjectRender::renderLoadoutZoneIcon(center, mWidth / 2, mColor);
 }
 
 
@@ -1245,7 +1252,7 @@ void SymbolGear::render(const Point &pos) const
 ////////////////////////////////////////
 
 // Constructor
-SymbolGoal::SymbolGoal(S32 fontSize) : Parent(fontSize)
+SymbolGoal::SymbolGoal(S32 fontSize, const Color &color) : Parent(fontSize, color)
 {
    // Do nothing
 }
@@ -1262,7 +1269,7 @@ void SymbolGoal::render(const Point &pos) const
 {
    // We are given the bottom y position of the line, but the icon expects the center
    Point center(pos.x, (pos.y - mHeight/2) + 2); // Slight downward adjustment to position to better align with text
-   GameObjectRender::renderGoalZoneIcon(center, mWidth/2);
+   GameObjectRender::renderGoalZoneIcon(center, mWidth/2, mColor);
 }
 
 
@@ -1270,7 +1277,7 @@ void SymbolGoal::render(const Point &pos) const
 ////////////////////////////////////////
 
 // Constructor
-SymbolNexus::SymbolNexus(S32 fontSize) : Parent(fontSize)
+SymbolNexus::SymbolNexus(S32 fontSize, const Color &color) : Parent(fontSize, color)
 {
    // Do nothing
 }
@@ -1286,8 +1293,9 @@ SymbolNexus::~SymbolNexus()
 void SymbolNexus::render(const Point &pos) const
 {
    // We are given the bottom y position of the line, but the icon expects the center
-   Point center(pos.x, (pos.y - mHeight/2) + 2); // Slight downward adjustment to position to better align with text
-   GameObjectRender::renderNexusIcon(center, mWidth/2);
+   // so we need a slight downward adjustment to position to better align with text
+   Point center(pos.x, (pos.y - mHeight/2) + 2);               
+   GameObjectRender::renderNexusIcon(center, mWidth/2, 0, mColor);
 }
 
 
@@ -1295,7 +1303,7 @@ void SymbolNexus::render(const Point &pos) const
 ////////////////////////////////////////
 
 // Constructor
-SymbolSpinner::SymbolSpinner(S32 fontSize, const Color *color) : Parent(fontSize / 2, color)
+SymbolSpinner::SymbolSpinner(S32 fontSize, const Color &color) : Parent(fontSize / 2, color)
 {
    // Do nothing
 }
@@ -1333,7 +1341,7 @@ void SymbolSpinner::render(const Point &pos) const
          break;
    }
 
-   RenderUtils::drawStringc(pos - Point(0, SpacingAdjustor / 2), mHeight / 2.0f, charstr);
+   RenderUtils::drawStringc(pos.x, pos.y - SpacingAdjustor / 2, mHeight / 2.0f, mColor, charstr);
 }
 
 
@@ -1343,7 +1351,7 @@ void SymbolSpinner::render(const Point &pos) const
 static const S32 BulletRad = 2;
 
 // Constructor
-SymbolBullet::SymbolBullet() : Parent(BulletRad * 2, BulletRad * 2)
+SymbolBullet::SymbolBullet(const Color &color) : Parent(BulletRad * 2, BulletRad * 2, color)
 {
    // Do nothing
 }
@@ -1360,7 +1368,7 @@ void SymbolBullet::render(const Point &pos) const
 {
    // We are given the bottom y position of the line, but the icon expects the center
    Point center(pos.x, (pos.y - 7));
-   RenderUtils::drawFilledSquare(center, (F32)BulletRad);
+   RenderUtils::drawFilledSquare(center, (F32)BulletRad, mColor, mAlpha);
 }
 
 
@@ -1369,7 +1377,7 @@ void SymbolBullet::render(const Point &pos) const
 
 
 // Constructor with no vertical offset
-SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, const Color *color) : 
+SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, const Color &color) : 
                               Parent(RenderUtils::getStringWidth(context, fontSize, text.c_str()), fontSize, color)
 {
    mText = text;
@@ -1379,7 +1387,7 @@ SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, co
 
 
 // Constructor with vertical offset
-SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, const Point &labelOffset, const Color *color) : 
+SymbolText::SymbolText(const string &text, S32 fontSize, FontContext context, const Point &labelOffset, const Color &color) : 
                                        Parent(RenderUtils::getStringWidth(context, fontSize, text.c_str()), fontSize, color)
 {
    mText = text;
@@ -1400,11 +1408,10 @@ SymbolText::~SymbolText()
 
 void SymbolText::render(const Point &center) const
 {
-   if(mHasColor)
-      mGL->glColor(mColor);
-
    FontManager::pushFontContext(mFontContext);
-   RenderUtils::drawStringc(center + mLabelOffset, (F32)mFontSize, mText.c_str());
+   
+      RenderUtils::drawStringc(center + mLabelOffset, mFontSize, mColor, mAlpha, mText.c_str());
+
    FontManager::popFontContext();
 }
 
@@ -1433,7 +1440,7 @@ static S32 SymbolPadding = 6;       // Just some padding we throw around our sym
 
 static S32 getKeyWidth(const string &text, S32 height)
 {
-   S32 width = -1;
+   S32 width;
    if(text == "Up Arrow" || text == "Down Arrow" || text == "Left Arrow" || text == "Right Arrow")
       width = 0;     // Make a square button; will return height below (and since it's a square...)
    else
@@ -1443,10 +1450,10 @@ static S32 getKeyWidth(const string &text, S32 height)
 }
 
 
-SymbolKey::SymbolKey(const string &text, const Color *color) : Parent(text, KeyFontSize, KeyContext, color)
+SymbolKey::SymbolKey(const string &text, const Color &color) : Parent(text, KeyFontSize, KeyContext, color)
 {
    mHeight = TotalHeight;
-   mWidth = getKeyWidth(text, mHeight);
+   mWidth = getRenderWidth(text);
 }
 
 
@@ -1454,6 +1461,12 @@ SymbolKey::SymbolKey(const string &text, const Color *color) : Parent(text, KeyF
 SymbolKey::~SymbolKey()
 {
    // Do nothing
+}
+
+
+S32 SymbolKey::getRenderWidth(const string &text)
+{
+   return getKeyWidth(text, TotalHeight);
 }
 
 
@@ -1466,24 +1479,21 @@ void SymbolKey::render(const Point &center) const
    // The -4 is a font-dependent aesthetic value determined by trial and error while looking at the help screens
    const Point textVertAdj = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset - 4);
 
-   if(mHasColor)
-      mGL->glColor(mColor);
-
    // Handle some special cases:
    if(mText == "Up Arrow")
-      GameObjectRender::renderUpArrow(center + textVertAdj + Point(0, -5.5), KeyFontSize);
+      GameObjectRender::renderUpArrow(center + textVertAdj + Point(0, -5.5), KeyFontSize, mColor);
    else if(mText == "Down Arrow")
-      GameObjectRender::renderDownArrow(center + textVertAdj + Point(0, -6), KeyFontSize);
+      GameObjectRender::renderDownArrow(center + textVertAdj + Point(0, -6), KeyFontSize, mColor);
    else if(mText == "Left Arrow")
-      GameObjectRender::renderLeftArrow(center + textVertAdj + Point(0, -6), KeyFontSize);
+      GameObjectRender::renderLeftArrow(center + textVertAdj + Point(0, -6), KeyFontSize, mColor);
    else if(mText == "Right Arrow")
-      GameObjectRender::renderRightArrow(center + textVertAdj + Point(0, -6), KeyFontSize);
+      GameObjectRender::renderRightArrow(center + textVertAdj + Point(0, -6), KeyFontSize, mColor);
    else
       Parent::render(center + textVertAdj);
 
    S32 width =  max(mWidth - 2 * Gap, mHeight);
 
-   RenderUtils::drawHollowRect(center + boxVertAdj, width, mHeight);
+   RenderUtils::drawHollowRect(center + boxVertAdj, width, mHeight, mColor);
 }
 
 
@@ -1494,7 +1504,7 @@ void SymbolKey::render(const Point &center) const
 // Symbol to be used when we don't know what symbol to use
 
 // Constructor
-SymbolUnknown::SymbolUnknown(const Color *color) : Parent("~?~", &Colors::red)
+SymbolUnknown::SymbolUnknown(const Color &color) : Parent("~?~", Colors::red)
 {
    // Do nothing
 }

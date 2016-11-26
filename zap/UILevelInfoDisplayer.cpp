@@ -79,25 +79,34 @@ static const char *ScoreToWinStr = "Score to Win:";
 
 void LevelInfoDisplayer::render() const
 {
+   renderTopPanel();
+   renderSidePanel();
+}
+
+
+static const S32 frameMargin = UserInterface::vertMargin;
+
+void LevelInfoDisplayer::renderTopPanel() const
+{
    mGL->glPushMatrix();
-   mGL->glTranslate(0, getInsideEdge(), 0);
+   mGL->glTranslate(0, getInsideEdge());
 
    GameType *gameType = mGame->getGameType();
 
    FontManager::pushFontContext(MenuHeaderContext);
 
-    // Only render these when they are not empty
-   bool showCredits = gameType->getLevelCredits() != "";    
-   bool showDescr   = strcmp(gameType->getLevelDescription(), "") != 0;
+   // Only render these when they are not empty
+   bool showCredits = gameType->getLevelCredits() != "";
+   bool showDescr = strcmp(gameType->getLevelDescription(), "") != 0;
 
    const S32 titleSize = 30;
-   const S32 titleGap  = 10;
+   const S32 titleGap = 10;
 
    Vector<SymbolShapePtr> symbols;
    string levelName = gameType->getLevelName();
    if(levelName == "")
       levelName = "Unnamed Level";
-   symbols.push_back(SymbolString::getSymbolText(levelName, titleSize, LevelInfoHeadlineContext));
+   symbols.push_back(SymbolString::getSymbolText(levelName, titleSize, LevelInfoHeadlineContext, Colors::white));
 
    // Find the unicode in Character Map or similar utility,
    // then convert it here: http://www.ltg.ed.ac.uk/~richard/utf-8.html
@@ -113,7 +122,7 @@ void LevelInfoDisplayer::render() const
    static const string divider = " / ";
    static const F32 dividerWidth = RenderUtils::getStringWidth(LevelInfoContext, RatingSize, divider.c_str());
 
-   PersonalRating myRating    = mGame->getPersonalLevelRating();
+   PersonalRating myRating = mGame->getPersonalLevelRating();
    S16            totalRating = mGame->getTotalLevelRating();
 
    bool isInDatabase = mGame->getLevelDatabaseId() > 0;
@@ -121,16 +130,16 @@ void LevelInfoDisplayer::render() const
    if(isInDatabase)
    {
       symbols.push_back(SymbolString::getBlankSymbol(10));
-      symbols.push_back(SymbolString::getSymbolText("\xEF\x80\x8B", 15, WebDingContext));  // Little database icon
+      symbols.push_back(SymbolString::getSymbolText("\xEF\x80\x8B", 15, WebDingContext, Colors::white));  // Little database icon
 
       S32 pos;
-      
+
       symbols.push_back(SymbolString::getBlankSymbol(8));  // Padding -- more symbols will be added below in symbolParse
 
       if(totalRating == UnknownRating)
       {
-         SymbolString::symbolParse(NULL, "Loading Rating ", symbols, LevelInfoContext, (S32)RatingSize,     true, &Colors::red);
-         SymbolString::symbolParse(NULL, "[[SPINNER]]",     symbols, LevelInfoContext, (S32)RatingSize + 6, true, &Colors::red);
+         SymbolString::symbolParse(NULL, "Loading Rating ", symbols, LevelInfoContext, (S32)RatingSize,     true, Colors::red);
+         SymbolString::symbolParse(NULL, "[[SPINNER]]",     symbols, LevelInfoContext, (S32)RatingSize + 6, true, Colors::red);
       }
       else
       {
@@ -143,8 +152,8 @@ void LevelInfoDisplayer::render() const
          totalSignlessRatingWidth = RenderUtils::getStringWidth(LevelInfoContext, RatingSize, totalRatingStr.c_str() + pos);
          totalSignWidth = RenderUtils::getStringWidth(LevelInfoContext, RatingSize, totalRatingStr.substr(0, pos).c_str());
 
-         SymbolString::symbolParse(NULL, myRatingStr + divider + totalRatingStr, symbols, 
-                                   LevelInfoContext, (S32)RatingSize, true, &Colors::red);
+         SymbolString::symbolParse(NULL, myRatingStr + divider + totalRatingStr, symbols,
+                                   LevelInfoContext, (S32)RatingSize, true, Colors::red);
       }
    }
 
@@ -163,80 +172,80 @@ void LevelInfoDisplayer::render() const
       const F32 textleft = xright + 5;
 
       // Draw a legend for the ratings
-      mGL->glColor(Colors::gray70);
-
-      RenderUtils::drawVertLine(x1, y1, ybot);
-      RenderUtils::drawHorizLine(x1, xright, y1);
-      RenderUtils::drawString_fixed(textleft, y1 + legendSize / 2, legendSize, "Your rating");
+      RenderUtils::drawVertLine(x1, y1, ybot, Colors::gray70);
+      RenderUtils::drawHorizLine(x1, xright, y1, Colors::gray70);
+      RenderUtils::drawString_fixed(textleft, y1 + legendSize / 2, legendSize, Colors::gray70, "Your rating");
 
       const F32 x2 = rightEdge - totalSignlessRatingWidth / 2;
       const F32 y2 = 22;
 
-      RenderUtils::drawVertLine(x2, y2, ybot);
-      RenderUtils::drawHorizLine(x2, xright, y2);
-      RenderUtils::drawString_fixed(textleft, y2 + legendSize / 2, legendSize, "Total rating");
+      RenderUtils::drawVertLine(x2, y2, ybot, Colors::gray70);
+      RenderUtils::drawHorizLine(x2, xright, y2, Colors::gray70);
+      RenderUtils::drawString_fixed(textleft, y2 + legendSize / 2, legendSize, Colors::gray70, "Total rating");
    }
 
-   const char *descr           = gameType->getLevelDescription();
-   const S32 descriptionSize   = 20;
+   const char *descr = gameType->getLevelDescription();
+   const S32 descriptionSize = 20;
    const S32 descriptionHeight = showDescr ? descriptionSize + 8 : 0;
 
-   const char *designedBy      = "Designed By:";
-   string credits              = gameType->getLevelCredits();
-   const S32 creditsSize       = 20;
-   const S32 creditsHeight     = showCredits ? creditsSize + 8 : 0;
-   
-   const S32 frameMargin       = UserInterface::vertMargin;
+   const char *designedBy = "Designed By:";
+   const string credits = gameType->getLevelCredits();
+   const S32 creditsSize = 20;
+   const S32 creditsHeight = showCredits ? creditsSize + 8 : 0;
+
+   const S32 frameMargin = UserInterface::vertMargin;
 
    const S32 totalHeight = frameMargin + titleSize + titleGap + descriptionHeight + creditsHeight + frameMargin;
    const S32 totalWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth() - 60;
    S32 yPos = frameMargin + titleSize;
 
    // Draw top info box
-   renderSlideoutWidgetFrame((DisplayManager::getScreenInfo()->getGameCanvasWidth() - totalWidth) / 2, 0, 
-                             totalWidth, totalHeight, Colors::blue);
+   renderSlideoutWidgetFrame((DisplayManager::getScreenInfo()->getGameCanvasWidth() - totalWidth) / 2, 0,
+      totalWidth, totalHeight, Colors::blue);
 
-   mGL->glColor(Colors::white);
+
    titleSymbolString.render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, yPos, AlignmentCenter);
 
    yPos += titleGap;
 
    if(showDescr)
    {
-      mGL->glColor(Colors::magenta);
-      RenderUtils::drawCenteredString(yPos, descriptionSize, descr);
       yPos += descriptionHeight;
+      RenderUtils::drawCenteredString_fixed(yPos, descriptionSize, Colors::magenta, descr);
    }
 
    if(showCredits)
    {
-      RenderUtils::drawCenteredStringPair(yPos, creditsSize, Colors::cyan, Colors::red, designedBy, credits.c_str());
       yPos += creditsHeight;
+      RenderUtils::drawCenteredStringPair(yPos, creditsSize, Colors::cyan, Colors::red, designedBy, credits.c_str());
    }
 
    mGL->glPopMatrix();
+}
 
-   /////
-   // Auxilliary side panel
+
+void LevelInfoDisplayer::renderSidePanel() const
+{
+   GameType *gameType = mGame->getGameType();
 
    mGL->glPushMatrix();
-   mGL->glTranslate(-getInsideEdge(), 0, 0);
+   mGL->glTranslate(-getInsideEdge(), 0);
 
    bool showTwoLinesOfInstructions = gameType->getInstructionString()[1];     // Show 'em if we got 'em
 
    const S32 sideBoxY = 275;     // Top edge of side box
 
    const S32 gameTypeMargin    =  8;
-   const S32 gameTypeHeight    = GameTypeTextSize + gameTypeMargin;
-
    const S32 instructionMargin =  5;
    const S32 postInstructionMargin = 8 - instructionMargin;
+   const S32 adjustment = 4;
+
    const S32 instructionHeight = InstructionSize + instructionMargin;
 
    const S32 scoreToWinMargin  =  6;
    const S32 scoreToWinHeight  = ScoreToWinSize + scoreToWinMargin;
 
-   const S32 sideBoxTotalHeight = frameMargin + gameTypeHeight + instructionHeight * (showTwoLinesOfInstructions ? 2 : 1) + 
+   const S32 sideBoxTotalHeight = frameMargin + GameTypeTextSize + gameTypeMargin + instructionHeight * (showTwoLinesOfInstructions ? 2 : 1) +
                                   postInstructionMargin + scoreToWinHeight + frameMargin;
 
    string gt  = getGameTypeName();
@@ -248,29 +257,27 @@ void LevelInfoDisplayer::render() const
    renderSlideoutWidgetFrame(DisplayManager::getScreenInfo()->getGameCanvasWidth() - sideBoxWidth, 
                              sideBoxY, sideBoxWidth, sideBoxTotalHeight, Colors::blue);
 
-   yPos = sideBoxY + frameMargin;
+   S32 yPos = sideBoxY + frameMargin + GameTypeTextSize;
 
-   RenderUtils::drawCenteredStringPair(sideBoxCen, yPos, GameTypeTextSize, LevelInfoHeadlineContext, LevelInfoHeadlineContext,
-                          Colors::white, Colors::cyan, gt.c_str(), sgt.c_str());
+   RenderUtils::drawCenteredStringPair_fixed(sideBoxCen, yPos, GameTypeTextSize, LevelInfoHeadlineContext, LevelInfoHeadlineContext,
+                                             Colors::white, Colors::cyan, gt.c_str(), sgt.c_str());
 
-   yPos += gameTypeHeight;
+   yPos += gameTypeMargin + instructionHeight - adjustment;
 
-   mGL->glColor(Colors::yellow);
-   RenderUtils::drawCenteredString(sideBoxCen, yPos, InstructionSize, gameType->getInstructionString()[0]);
+   RenderUtils::drawCenteredString_fixed(sideBoxCen, yPos, InstructionSize, Colors::yellow, gameType->getInstructionString()[0]);
    yPos += instructionHeight;
 
    // Add a second line of instructions if there is one...
    if(showTwoLinesOfInstructions)
    {
-      RenderUtils::drawCenteredString(sideBoxCen, yPos, InstructionSize, gameType->getInstructionString()[1]);
+      RenderUtils::drawCenteredString_fixed(sideBoxCen, yPos, InstructionSize, gameType->getInstructionString()[1]);
       yPos += instructionHeight;
    }
 
-   yPos += postInstructionMargin;
+   yPos += postInstructionMargin + scoreToWinMargin + adjustment;
 
-   RenderUtils::drawCenteredStringPair(sideBoxCen, yPos, ScoreToWinSize, LevelInfoHeadlineContext, LevelInfoHeadlineContext, 
-                          Colors::cyan, Colors::red, ScoreToWinStr, itos(gameType->getWinningScore()).c_str());
-   yPos += scoreToWinHeight;
+   RenderUtils::drawCenteredStringPair_fixed(sideBoxCen, yPos, ScoreToWinSize, LevelInfoHeadlineContext, LevelInfoHeadlineContext, 
+                                             Colors::cyan, Colors::red, ScoreToWinStr, itos(gameType->getWinningScore()).c_str());
 
    mGL->glPopMatrix();
 

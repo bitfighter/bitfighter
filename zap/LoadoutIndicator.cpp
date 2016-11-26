@@ -88,15 +88,19 @@ static S32 getComponentRectWidth(S32 textWidth)
 
 
 // Returns width of indicator component
-static S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
+static S32 renderComponentIndicator(S32 xPos, S32 yPos, const Color &color, const char *name)
 {
+   S32 adjustment = -1;
    // Draw the weapon or module name (n.b.: If you change the lcase, do the same in getComponentIndicatorWidth)
-   S32 textWidth = RenderUtils::drawStringAndGetWidth(xPos + IndicatorHorizPadding, yPos + IndicatorVertPadding - 1,
-                                         IndicatorFontSize, lcase(name).c_str());
+   S32 textWidth = RenderUtils::drawStringAndGetWidth_fixed(xPos + IndicatorHorizPadding, 
+                                                            yPos + IndicatorVertPadding + IndicatorFontSize + adjustment,
+                                                            IndicatorFontSize, 
+                                                            color, 
+                                                            lcase(name).c_str());
 
    S32 rectWidth = getComponentRectWidth(textWidth);
 
-   RenderUtils::drawFancyBox(xPos, yPos, xPos + rectWidth, yPos + IndicatorHeight, IndicatorVertPadding, GLOPT::LineLoop);
+   RenderUtils::drawFancyBox(xPos, yPos, xPos + rectWidth, yPos + IndicatorHeight, IndicatorVertPadding, GLOPT::LineLoop, color);
 
    return rectWidth;
 }
@@ -110,16 +114,37 @@ static S32 getComponentIndicatorWidth(const char *name)
 
 static const S32 GapBetweenTheGroups = 20;
 
+static const Color &INDICATOR_INACTIVE_COLOR = Colors::green80;
+static const Color &INDICATOR_ACTIVE_COLOR   = Colors::red80;
+static const Color &INDICATOR_PASSIVE_COLOR  = Colors::yellow;
+
+
+static const Color &getRenderColor(ShipModule module, bool isModuleActive, bool isSecondaryActive)
+{
+   // Always change to orange if module secondary is fired
+   if(gModuleInfo[module].hasSecondary() && isSecondaryActive)
+      return Colors::orange67;
+
+   if(gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUsePassive ||   // Armor
+      gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUseHybrid)      // Sensor
+   {
+      return INDICATOR_PASSIVE_COLOR;
+   }
+   
+   if(isModuleActive)
+      return INDICATOR_ACTIVE_COLOR;
+   
+   return INDICATOR_INACTIVE_COLOR;
+
+
+}
+
 // Returns width
-static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
+static S32 doRender(const LoadoutTracker &loadout, const ClientGame *game, S32 top)
 {
    // If if we have no module, then this loadout has never been set, and there is nothing to render
    if(!loadout.isValid())  
       return 0;
-
-   static const Color &INDICATOR_INACTIVE_COLOR = Colors::green80;
-   static const Color &INDICATOR_ACTIVE_COLOR   = Colors::red80;
-   static const Color &INDICATOR_PASSIVE_COLOR  = Colors::yellow;
 
    S32 xPos = LoadoutIndicator::LoadoutIndicatorLeftPos;
 
@@ -128,9 +153,9 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    // First, the weapons
    for(S32 i = 0; i < ShipWeaponCount; i++)
    {
-      RenderUtils::glColor(loadout.isWeaponActive(i) ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
+      const Color &color = loadout.isWeaponActive(i) ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR;
 
-      S32 width = renderComponentIndicator(xPos, top, WeaponInfo::getWeaponInfo(loadout.getWeapon(i)).name.getString());
+      S32 width = renderComponentIndicator(xPos, top, color, WeaponInfo::getWeaponInfo(loadout.getWeapon(i)).name.getString());
 
       xPos += width + IndicatorHorizPadding;
    }
@@ -141,22 +166,9 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    for(S32 i = 0; i < ShipModuleCount; i++)
    {
       ShipModule module = loadout.getModule(i);
+      const Color &color = getRenderColor(module, loadout.isModulePrimaryActive(module), loadout.isModuleSecondaryActive(module));
 
-      if(gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUsePassive ||   // Armor
-         gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUseHybrid)      // Sensor
-      {
-         RenderUtils::glColor(INDICATOR_PASSIVE_COLOR);
-      }
-      else if(loadout.isModulePrimaryActive(module))
-         RenderUtils::glColor(INDICATOR_ACTIVE_COLOR);
-      else 
-         RenderUtils::glColor(INDICATOR_INACTIVE_COLOR);
-
-      // Always change to orange if module secondary is fired
-      if(gModuleInfo[module].hasSecondary() && loadout.isModuleSecondaryActive(module))
-         RenderUtils::glColor(Colors::orange67);
-
-      S32 width = renderComponentIndicator(xPos, top, ModuleInfo::getModuleInfo(module)->getName());
+      S32 width = renderComponentIndicator(xPos, top, color, ModuleInfo::getModuleInfo(module)->getName());
 
       xPos += width + IndicatorHorizPadding;
    }
@@ -187,14 +199,14 @@ S32 LoadoutIndicator::getWidth() const
 
 
 // Draw weapon indicators at top of the screen, runs on client
-S32 LoadoutIndicator::render(ClientGame *game) const
+S32 LoadoutIndicator::render(const ClientGame *game) const
 {
    S32 top;
 
    DisplayMode windowMode = game->getSettings()->getSetting<DisplayMode>(IniKey::WindowMode);
 
    // Old loadout
-   top = Parent::prepareToRenderFromDisplay(windowMode, LoadoutIndicatorTopPos - 1, LoadoutIndicatorHeight + 1);
+   top = prepareToRenderFromDisplay(windowMode, LoadoutIndicatorTopPos - 1, LoadoutIndicatorHeight + 1);
    if(top != NO_RENDER)
    {
       doRender(mPrevLoadout, game, top);
@@ -202,7 +214,7 @@ S32 LoadoutIndicator::render(ClientGame *game) const
    }
 
    // Current loadout
-   top = Parent::prepareToRenderToDisplay(windowMode, LoadoutIndicatorTopPos, LoadoutIndicatorHeight);
+   top = prepareToRenderToDisplay(windowMode, LoadoutIndicatorTopPos, LoadoutIndicatorHeight);
    S32 width = doRender(mCurrLoadout, game, top);
    doneRendering();
 

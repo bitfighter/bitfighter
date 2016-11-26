@@ -8,7 +8,6 @@
 #include "UIManager.h"
 
 #include "DisplayManager.h"
-#include "Joystick.h"
 #include "JoystickRender.h"
 #include "ClientGame.h"
 #include "Cursor.h"
@@ -18,7 +17,6 @@
 
 #include "RenderUtils.h"
 
-#include <string>
 #include <math.h>
 
 
@@ -212,15 +210,11 @@ void KeyDefMenuUserInterface::render() const
    if(getGame()->getConnectionToServer())
       getUIManager()->renderAndDimGameUserInterface();
 
-   mGL->glColor(Colors::white);
-   RenderUtils::drawCenteredString(vertMargin, 30, mMenuTitle);
-   RenderUtils::drawCenteredString(vertMargin + 35, 18, mMenuSubTitle);
+   RenderUtils::drawCenteredString_fixed(vertMargin + 30, 30, Colors::white, mMenuTitle);
+   RenderUtils::drawCenteredString_fixed(vertMargin + 53, 18, Colors::white, mMenuSubTitle);
 
-   mGL->glColor(Colors::menuHelpColor);
-   RenderUtils::drawCenteredString(vertMargin + 63, 14, "You can define different keys for keyboard or joystick mode.  Switch in Options menu.");
-
-   mGL->glColor(Colors::white);
-   RenderUtils::drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - 20, 18, mMenuFooter);
+   RenderUtils::drawCenteredString_fixed(vertMargin + 77, 14, Colors::menuHelpColor, "You can define different keys for keyboard or joystick mode.  Switch in Options menu.");
+   RenderUtils::drawCenteredString_fixed(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - 2, 18, Colors::white, mMenuFooter);
 
    TNLAssert(selectedIndex < menuItems.size(), "Index out of bounds!");
    //if(mSelectedIndex >= menuItems.size())
@@ -241,41 +235,37 @@ void KeyDefMenuUserInterface::render() const
                         Colors::blue40, Colors::blue);
 
       // Draw item text
-      mGL->glColor(Colors::cyan);
-      RenderUtils::drawString(xPos, y + offset, 15, menuItems[i].text);
+      RenderUtils::drawString_fixed(xPos, y + offset + 15, 15, Colors::cyan, menuItems[i].text);
 
 		xPos += Column_Width * 14 / 20;
 
       if(mChangingItem == i)
       {
-         mGL->glColor(Colors::red);
          const S32 size = 13;
-         RenderUtils::drawCenteredString_fixed(xPos, y + offset + 1 + size, size, "Press Key or Button");
+         RenderUtils::drawCenteredString_fixed(xPos, y + offset + 1 + size, size, Colors::red, "Press Key or Button");
       }
       else
       {
          bool dupe = isDuplicate(i, menuItems); 
-         const Color *color = dupe ? &Colors::red : NULL;
+         const Color &color = dupe ? Colors::red : Colors::white;
 
          JoystickRender::renderControllerButton(F32(xPos), F32(y + offset), 
-               getInputCode(mGameSettings, menuItems[i].primaryControl), color);
+               getInputCode(mGameSettings, menuItems[i].primaryControl), &color);
       }
    }
 
-   S32 yPos = yStart + maxMenuItemsInAnyCol * height + 10;
+   S32 yPos = yStart + maxMenuItemsInAnyCol * height + 25;
 
    // Draw the help string
-   mGL->glColor(Colors::green);
-   RenderUtils::drawCenteredString(yPos, 15, menuItems[selectedIndex].helpString.c_str());
+   RenderUtils::drawCenteredString_fixed(yPos, 15, Colors::green, menuItems[selectedIndex].helpString.c_str());
 
    yPos += 20;
 
    // Draw some suggestions
-   mGL->glColor(Colors::yellow);
    if(getGame()->getInputMode() == InputModeJoystick)
-      RenderUtils::drawCenteredString(yPos, 15, "HINT: You will be using the left joystick to steer, the right to fire");
+      RenderUtils::drawCenteredString_fixed(yPos, 15, Colors::yellow, "HINT: You will be using the left joystick to steer, the right to fire");
    else
-      RenderUtils::drawCenteredString(yPos, 15, "HINT: You will be using the mouse to aim, so make good use of your mouse buttons");
+      RenderUtils::drawCenteredString_fixed(yPos, 15, Colors::yellow, "HINT: You will be using the mouse to aim, so make good use of your mouse buttons");
 
    if(errorMsgTimer.getCurrent())
    {
@@ -284,8 +274,7 @@ void KeyDefMenuUserInterface::render() const
       if(errorMsgTimer.getCurrent() < 1000)
          alpha = (F32) errorMsgTimer.getCurrent() / 1000;
 
-      mGL->glColor(Colors::red, alpha);
-      RenderUtils::drawCenteredString(yPos, 15, errorMsg.c_str());
+      RenderUtils::drawCenteredString_fixed(yPos, 15, Colors::red, alpha, errorMsg.c_str());
    }
 }
 

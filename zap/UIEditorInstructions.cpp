@@ -8,7 +8,6 @@
 #include "UIManager.h"
 #include "UIEditor.h"         // For PluginInfo def
 
-#include "BotNavMeshZone.h"   // For Border class def
 #include "ClientGame.h"       // For usage with getGame()
 #include "DisplayManager.h"
 #include "FontManager.h"
@@ -67,7 +66,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
    // Add horizontal line to first column (will draw across all)
    symbols.clear();
-   symbols.push_back(SymbolString::getHorizLine(735, -14, 8, &Colors::gray70));
+   symbols.push_back(SymbolString::getHorizLine(735, -14, 8, Colors::gray70));
    keysInstrLeft1.add(SymbolString(symbols));
    keysInstrLeft2.add(SymbolString(symbols));
 
@@ -186,7 +185,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    ControlStringsEditor helpBindRight[] = 
    {
       { "Game Params Editor", "[[GameParameterEditor]]" },
-      { "Lobby Chat",     "[[OutOfGameChat]]"       }
+      { "Lobby Chat",         "[[OutOfGameChat]]"       }
    };
 
    pack(mSpecialKeysInstrRight, mSpecialKeysBindingsRight, helpBindRight, ARRAYSIZE(helpBindRight));
@@ -206,7 +205,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
    symbols.clear();
    SymbolString::symbolParse(mGameSettings->getInputCodeManager(), "Open the console by pressing [[/]]",
-                             symbols, HelpContext, FontSize, true, &Colors::green, keyColor);
+                             symbols, HelpContext, FontSize, true, Colors::green, keyColor);
 
    mConsoleInstructions.add(SymbolString(symbols));
 
@@ -229,19 +228,19 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
       symbols.clear();
       SymbolString::symbolParse(mGameSettings->getInputCodeManager(), "Plugins are scripts that can manipuate items in the editor.",
-                                symbols, HelpContext, FontSize, true, &Colors::green, keyColor);
+                                symbols, HelpContext, FontSize, true, Colors::green, keyColor);
       pluginSymbolSet.add(SymbolString(symbols));
 
       symbols.clear();
       SymbolString::symbolParse(mGameSettings->getInputCodeManager(), "See the Bitfighter wiki for info on creating your own.",
-                                symbols, HelpContext, FontSize, true, &Colors::green, keyColor);
+                                symbols, HelpContext, FontSize, true, Colors::green, keyColor);
       pluginSymbolSet.add(SymbolString(symbols));
 
       // Using TAB_STOP:0 below will cause the text and the horiz. line to be printed in the same space, creating a underline effect
       symbols.clear();
-      symbols.push_back(SymbolString::getHorizLine(735, FontSize, FontSize + 4, &Colors::gray70));
+      symbols.push_back(SymbolString::getHorizLine(735, FontSize, FontSize + 4, Colors::gray70));
       SymbolString::symbolParse(mGameSettings->getInputCodeManager(), "[[TAB_STOP:0]]Key" + tabstr + "Description",
-                                symbols, HelpContext, FontSize, true, &Colors::yellow, keyColor);
+                                symbols, HelpContext, FontSize, true, Colors::yellow, keyColor);
       pluginSymbolSet.add(SymbolString(symbols));
 
       S32 start = i + (PLUGINS_PER_PAGE * i);
@@ -260,7 +259,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
 
          symbols.clear();
          SymbolString::symbolParse(mGameSettings->getInputCodeManager(), key + tabstr + instr,
-                                   symbols, HelpContext, FontSize, txtColor, keyColor);
+                                   symbols, HelpContext, FontSize, true, txtColor, keyColor);
          pluginSymbolSet.add(SymbolString(symbols));
       }
 
@@ -341,19 +340,18 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page) const
       mSymbolSets2Right.render(y);
    }
 
-   y = 486;
-   mGL->glColor(secColor);
-   RenderUtils::drawCenteredString(y, 20, "These special keys are also usually active:");
+   y = 506;
+   RenderUtils::drawCenteredString_fixed(y, 20, secColor, "These special keys are also usually active:");
 
-   y += 45;
+   y += 25;
 
-   mSpecialKeysInstrLeft.render (mCol1, y, UI::AlignmentLeft);
-   mSpecialKeysInstrRight.render(mCol3, y, UI::AlignmentLeft);
+   mSpecialKeysInstrLeft.render (mCol1, y, AlignmentLeft);
+   mSpecialKeysInstrRight.render(mCol3, y, AlignmentLeft);
 
    S32 centeringOffset = RenderUtils::getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
 
-   mSpecialKeysBindingsLeft.render (mCol2 + centeringOffset, y, UI::AlignmentCenter);
-   mSpecialKeysBindingsRight.render(mCol4 + centeringOffset, y, UI::AlignmentCenter);
+   mSpecialKeysBindingsLeft.render (mCol2 + centeringOffset, y, AlignmentCenter);
+   mSpecialKeysBindingsRight.render(mCol4 + centeringOffset, y, AlignmentCenter);
 }
 
 
@@ -445,11 +443,11 @@ void EditorInstructionsUserInterface::renderPageWalls() const
          delete wallSegments[i];
    }
 
-   mGL->glColor(mAnimStage <= 11 ? Colors::yellow : Colors::NeutralTeamColor);
+   const Color &color = mAnimStage <= 11 ? Colors::yellow : Colors::NeutralTeamColor;
 
    mGL->glLineWidth(RenderUtils::LINE_WIDTH_3);
 
-   mGL->renderPointVector(&points, GLOPT::Lines);
+   mGL->renderPointVector(&points, GLOPT::Lines, color);
 
    mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
@@ -470,7 +468,7 @@ void EditorInstructionsUserInterface::renderPageWalls() const
 
    FontManager::popFontContext();
 
-   mWallInstr.render(50, 300, UI::AlignmentLeft);     // The written instructions block
+   mWallInstr.render(50, 300, AlignmentLeft);     // The written instructions block
 }
 
 
@@ -515,7 +513,7 @@ void EditorInstructionsUserInterface::idle(U32 timeDelta)
 }
 
 
-void EditorInstructionsUserInterface::exitInstructions()
+void EditorInstructionsUserInterface::exitInstructions() const
 {
    playBoop();
    getUIManager()->reactivatePrevUI();      // To EditorUserInterface, probably

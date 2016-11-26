@@ -18,10 +18,10 @@ namespace Zap
 
 
 // Define static consts
-const Color *AbstractInstructionsUserInterface::txtColor = &Colors::cyan;
-const Color *AbstractInstructionsUserInterface::keyColor = &Colors::white;     
-const Color *AbstractInstructionsUserInterface::secColor = &Colors::yellow;
-const Color *AbstractInstructionsUserInterface::groupHeaderColor = &Colors::red;
+const Color &AbstractInstructionsUserInterface::txtColor         = Colors::cyan;
+const Color &AbstractInstructionsUserInterface::keyColor         = Colors::white;     
+const Color &AbstractInstructionsUserInterface::secColor         = Colors::yellow;
+const Color &AbstractInstructionsUserInterface::groupHeaderColor = Colors::red;
 
 // Import some symbols to reduce typing
 using UI::SymbolString;
@@ -51,7 +51,7 @@ AbstractInstructionsUserInterface::~AbstractInstructionsUserInterface()
 
 
 void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStringSet &bindings,      // <== will be modified
-                                             const ControlStringsEditor *helpBindings, S32 bindingCount)
+                                             const ControlStringsEditor *helpBindings, S32 bindingCount) const
 {
    Vector<SymbolShapePtr> symbols;
 
@@ -60,7 +60,7 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStr
       if(helpBindings[i].command == "-")
       {
          symbols.clear();
-         symbols.push_back(SymbolString::getHorizLine(335, FontSize, &Colors::gray40));
+         symbols.push_back(SymbolString::getHorizLine(335, FontSize, Colors::gray40));
          instrs.add(SymbolString(symbols));
 
          symbols.clear();
@@ -82,12 +82,11 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStr
          symbols.clear();
          SymbolString::symbolParse(mGameSettings->getInputCodeManager(), helpBindings[i].command,
                                    symbols, HelpContext, FontSize, true, txtColor, keyColor);
-
          instrs.add(SymbolString(symbols));
 
          symbols.clear();
          SymbolString::symbolParse(mGameSettings->getInputCodeManager(), helpBindings[i].binding,
-                                   symbols, HelpContext, FontSize, true, keyColor);
+                                   symbols, HelpContext, FontSize, true, keyColor, keyColor);
          bindings.add(SymbolString(symbols));
       }
    }
@@ -97,21 +96,19 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStr
 void AbstractInstructionsUserInterface::render(const char *header, S32 page, S32 pages) const
 {
    static const char* prefix = "INSTRUCTIONS - ";
-   static S32 fontSize = 25;
-   static S32 prefixWidth = RenderUtils::getStringWidth(fontSize, prefix);
+   static const S32 fontSize = 25;
+   static const S32 prefixWidth = RenderUtils::getStringWidth(fontSize, prefix);
+   static const S32 y = 28;
 
    // Draw header first as different color, then everything else
-   FontManager::setFontColor(Colors::cyan);
-   RenderUtils::drawString(3 + prefixWidth, 3, fontSize, header);
+   RenderUtils::drawString_fixed(3 + prefixWidth, y, fontSize, Colors::cyan, header);
+   RenderUtils::drawString_fixed(3,               y, fontSize, Colors::red,  prefix);
 
-   FontManager::setFontColor(Colors::red);
-   RenderUtils::drawString(3, 3, fontSize, prefix);
+   RenderUtils::drawStringf_fixed(625, y, fontSize, Colors::red, "PAGE %d/%d", page, pages);
+   RenderUtils::drawCenteredString_fixed(591, 20, Colors::red, "LEFT - previous page   |   RIGHT, SPACE - next page   |   ESC exits");
 
-   RenderUtils::drawStringf(625, 3, fontSize, "PAGE %d/%d", page, pages);
-   RenderUtils::drawCenteredString(571, 20, "LEFT - previous page   |   RIGHT, SPACE - next page   |   ESC exits");
-
-   RenderUtils::drawHorizLine(0, 800, 32, Colors::gray70);
-   RenderUtils::drawHorizLine(0, 800, 569);
+   RenderUtils::drawHorizLine(32,  Colors::gray70);
+   RenderUtils::drawHorizLine(569, Colors::gray70);
 }
 
 

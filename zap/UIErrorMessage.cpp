@@ -9,6 +9,7 @@
 #include "ClientGame.h"
 
 #include "RenderUtils.h"
+#include "Colors.h"
 
 namespace Zap
 {
@@ -46,7 +47,7 @@ void AbstractMessageUserInterface::setMessage(const string &message)
    InputCodeManager *inputCodeManager = mGameSettings->getInputCodeManager();
 
    for(S32 i = 0; i < wrappedLines.size(); i++)
-      mMessage[i] = SymbolShapePtr(new SymbolString(wrappedLines[i], inputCodeManager, Context, TextHeight, true));
+      mMessage[i] = SymbolShapePtr(new SymbolString(wrappedLines[i], inputCodeManager, Context, TextHeight, Colors::white, true));
 
    mMaxLines = wrappedLines.size();
 }
@@ -62,13 +63,13 @@ void AbstractMessageUserInterface::setMaxLines(S32 lines)
 
 void AbstractMessageUserInterface::setTitle(const string &title)
 {
-   mTitle = SymbolShapePtr(new SymbolString(title, mGameSettings->getInputCodeManager(), Context, TitleSize, false));
+   mTitle = SymbolShapePtr(new SymbolString(title, mGameSettings->getInputCodeManager(), Context, TitleSize, Colors::white, false));
 }
 
 
 void AbstractMessageUserInterface::setInstr(const string &instr)
 {
-   mInstr = SymbolShapePtr(new SymbolString(instr, mGameSettings->getInputCodeManager(), Context, TextHeight, false));
+   mInstr = SymbolShapePtr(new SymbolString(instr, mGameSettings->getInputCodeManager(), Context, TextHeight, Colors::white, false));
 }
 
 

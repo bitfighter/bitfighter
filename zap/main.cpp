@@ -1194,6 +1194,7 @@ int main(int argc, char **argv)
 
       settings->getIniSettings()->oldDisplayMode = DISPLAY_MODE_UNKNOWN;   // We don't know what the old one was
       VideoSystem::actualizeScreenMode(settings.get(), false, false);      // Create a display window
+      FontManager::reinitialize(settings.get());//xyzzy
 
       // Instantiate ClietGame -- this should be done after actualizeScreenMode() because the client game in turn instantiates some of the
       // user interface code which triggers a long series of cascading events culminating in something somewhere determining the width

@@ -10,17 +10,16 @@
 #include "ship.h"
 #include "GameObjectRender.h"    // For renderPolyLineVertices()
 #include "stringUtils.h"         // For itos
-#include "tnlGhostConnection.h"
 
 #ifndef ZAP_DEDICATED
-#  include "GameObjectRender.h"  // For renderPolyLineVertices()
 #  include "RenderUtils.h"
 #  include "ClientGame.h"
 #  include "UIQuickMenu.h"       // For EditorAttributeMenuUI def
+#  include "UIEditor.h"
 #endif
 
+#include "tnlGhostConnection.h"
 
-#include <math.h>
 
 namespace Zap
 {
@@ -128,7 +127,7 @@ void LineItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled,
 {
 #ifndef ZAP_DEDICATED
    if(isSelected() || isLitUp())
-      RenderUtils::drawLine(getOutline());
+      RenderUtils::drawLine(getOutline(), EditorUserInterface::getColor(isSelected(), isLitUp()));
    else
       RenderUtils::drawLine(getOutline(), getEditorRenderColor());
 

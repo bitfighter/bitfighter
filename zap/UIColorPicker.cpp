@@ -116,25 +116,22 @@ const F32 colorBrightnessPointsBlue[] = {
 };
 
 
-void UIColorPicker::drawArrow(F32 *p)
+void UIColorPicker::drawArrow(F32 *p, const Color &color)
 {
    p[2] = p[0] + 20; p[3] = p[1] - 10;
    p[4] = p[0] + 20; p[5] = p[1] + 10;
-   mGL->renderVertexArray(p, 3, GLOPT::LineLoop);
+   mGL->renderVertexArray(p, 3, GLOPT::LineLoop, color);
 }
 
 
 void UIColorPicker::render() const
 {
-   mGL->glColor(Colors::green);
-
    FontManager::pushFontContext(MenuHeaderContext);
-   RenderUtils::drawCenteredUnderlinedString(15, 30, "COLOR PICKER");
-   RenderUtils::drawStringc(400, 580, 30, "Done");
-   RenderUtils::drawString (730, 580, 15, "Cancel");
+   RenderUtils::drawCenteredUnderlinedString(15, 30, Colors::green, "COLOR PICKER");
+   RenderUtils::drawStringc     (400, 580, 30, Colors::green, "Done");
+   RenderUtils::drawString_fixed(730, 595, 15, Colors::green, "Cancel");
    FontManager::popFontContext();
 
-   mGL->glColor(Colors::white);
 
    F32 maxCol = max(r, g);
 
@@ -190,26 +187,29 @@ void UIColorPicker::render() const
    colorArray[13] = g; colorArray[14] = 0;
    mGL->renderColorVertexArray(colorBrightnessPointsBlue, colorArray, 4, GLOPT::TriangleFan);
 
-   mGL->glColor(Colors::white);
-   mGL->renderVertexArray(&colorWheelPoints[2],       6, GLOPT::LineLoop);
-   mGL->renderVertexArray(colorBrightnessPoints,      4, GLOPT::LineLoop);
-   mGL->renderVertexArray(colorBrightnessPointsRed,   4, GLOPT::LineLoop);
-   mGL->renderVertexArray(colorBrightnessPointsGreen, 4, GLOPT::LineLoop);
-   mGL->renderVertexArray(colorBrightnessPointsBlue,  4, GLOPT::LineLoop);
+   mGL->renderVertexArray(&colorWheelPoints[2],       6, GLOPT::LineLoop, Colors::white);
+   mGL->renderVertexArray(colorBrightnessPoints,      4, GLOPT::LineLoop, Colors::white);
+   mGL->renderVertexArray(colorBrightnessPointsRed,   4, GLOPT::LineLoop, Colors::white);
+   mGL->renderVertexArray(colorBrightnessPointsGreen, 4, GLOPT::LineLoop, Colors::white);
+   mGL->renderVertexArray(colorBrightnessPointsBlue,  4, GLOPT::LineLoop, Colors::white);
 
 
    F32 pointerArrow[8];
-   pointerArrow[0] = colorBrightness_x + colorBrightness_w; pointerArrow[1] = colorBrightness_y + colorBrightness_h - maxCol * colorBrightness_h;
-   drawArrow(pointerArrow);
+   pointerArrow[0] = colorBrightness_x + colorBrightness_w; 
+   pointerArrow[1] = colorBrightness_y + colorBrightness_h - maxCol * colorBrightness_h;
+   drawArrow(pointerArrow, Colors::white);
 
-   pointerArrow[0] = colorBrightness_x + colorBrightness_w + colorBrightness_w_space; pointerArrow[1] = colorBrightness_y + colorBrightness_h - r * colorBrightness_h;
-   drawArrow(pointerArrow);
+   pointerArrow[0] = colorBrightness_x + colorBrightness_w + colorBrightness_w_space; 
+   pointerArrow[1] = colorBrightness_y + colorBrightness_h - r * colorBrightness_h;
+   drawArrow(pointerArrow, Colors::white);
 
-   pointerArrow[0] = colorBrightness_x + colorBrightness_w + colorBrightness_w_space * 2; pointerArrow[1] = colorBrightness_y + colorBrightness_h - g * colorBrightness_h;
-   drawArrow(pointerArrow);
+   pointerArrow[0] = colorBrightness_x + colorBrightness_w + colorBrightness_w_space * 2; 
+   pointerArrow[1] = colorBrightness_y + colorBrightness_h - g * colorBrightness_h;
+   drawArrow(pointerArrow, Colors::white);
 
-   pointerArrow[0] = colorBrightness_x + colorBrightness_w + colorBrightness_w_space * 3; pointerArrow[1] = colorBrightness_y + colorBrightness_h - b * colorBrightness_h;
-   drawArrow(pointerArrow);
+   pointerArrow[0] = colorBrightness_x + colorBrightness_w + colorBrightness_w_space * 3; 
+   pointerArrow[1] = colorBrightness_y + colorBrightness_h - b * colorBrightness_h;
+   drawArrow(pointerArrow, Colors::white);
 
 
    if(maxCol != 0)
@@ -238,9 +238,7 @@ void UIColorPicker::render() const
       pointerArrow[4] = pointerArrow[0] + 10;                 pointerArrow[5] = pointerArrow[1] + 10;
       pointerArrow[6] = pointerArrow[0] + 10;                 pointerArrow[7] = pointerArrow[1] - 10;
 
-      mGL->glColor(maxCol > 0.6 ?  0.0f : 1.0f);
-
-      mGL->renderVertexArray(pointerArrow, 4, GLOPT::Lines);
+      mGL->renderVertexArray(pointerArrow, 4, GLOPT::Lines, maxCol > 0.6 ? Colors::black : Colors::white);
    }
 
 

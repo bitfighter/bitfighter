@@ -375,6 +375,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, F32 helperFadeIn, bool composin
 
    FontManager::pushFontContext(ChatMessageContext);
 
+   y += mFontSize;
 
    ////////////////////////////////
    // Draw message lines -- here we loop over all active messages; we may loop over more than we'll actually show.
@@ -396,9 +397,8 @@ void ChatMessageDisplayer::render(S32 anchorPos, F32 helperFadeIn, bool composin
             (mFirst - i) >= getNumberOfMessagesToShow(false)))
          alpha *= helperFadeIn;
 
-      mGL->glColor(mMessages[index].color, alpha);
-
-      RenderUtils::drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
+      FontManager::setFontColor(mMessages[index].color, alpha);
+      RenderUtils::drawString_fixed(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
 
       y -= lineHeight;
    }

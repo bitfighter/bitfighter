@@ -27,9 +27,8 @@
 #include "stringUtils.h"
 #include "RenderUtils.h"
 
-#include "tnl.h"
-
 #include <cmath>
+#include "FontManager.h"
 
 
 namespace Zap
@@ -114,14 +113,14 @@ bool DiagnosticUserInterface::onKeyDown(InputCode inputCode)
 }
 
 
-S32 findLongestString(F32 size, const Vector<string> &strings)
+S32 findLongestString(S32 size, const Vector<string> &strings)
 {
-   F32 maxLen = 0;
+   S32 maxLen = 0;
    S32 longest = 0;
 
    for(S32 i = 0; i < strings.size(); i++)
    {
-      F32 len = RenderUtils::getStringWidth(size, strings[i]);
+      S32 len = RenderUtils::getStringWidth(size, strings[i]);
       if(len > maxLen)
       {
          maxLen = len;
@@ -180,8 +179,8 @@ void DiagnosticUserInterface::initFoldersBlock(FolderManager *folderManager, S32
    names.push_back("Root Data Dir:");
    vals.push_back(folderManager->getRootDataDir() == "" ? "None specified" : folderManager->getRootDataDir());
 
-   longestName = findLongestString((F32)textsize, names);
-   longestVal  = findLongestString((F32)textsize, vals);
+   longestName = findLongestString(textsize, names);
+   longestVal  = findLongestString(textsize, vals);
 
    nameWidth   = RenderUtils::getStringWidth(textsize, names[longestName]);
    spaceWidth  = RenderUtils::getStringWidth(textsize, " ");
@@ -198,11 +197,9 @@ S32 DiagnosticUserInterface::showFoldersBlock(FolderManager *folderManager, F32 
    for(S32 i = 0; i < names.size(); i++)
    {
       S32 xpos = (DisplayManager::getScreenInfo()->getGameCanvasWidth() - totLen) / 2;
-      mGL->glColor(Colors::cyan);
-      RenderUtils::drawString(xpos, ypos, (S32)textsize, names[i].c_str());
+      RenderUtils::drawString_fixed(xpos, ypos, (S32)textsize, Colors::cyan, names[i].c_str());
       xpos += nameWidth + spaceWidth;
-      mGL->glColor(Colors::white);
-      RenderUtils::drawString(xpos, ypos, (S32)textsize, vals[i].c_str());
+      RenderUtils::drawString_fixed(xpos, ypos, (S32)textsize, Colors::white,vals[i].c_str());
 
       ypos += (S32)textsize + gap;
    }
@@ -219,49 +216,31 @@ static const string buildDate = __DATE__;
 
 S32 DiagnosticUserInterface::showVersionBlock(S32 ypos, S32 textsize, S32 gap)
 {
-   mGL->glColor(Colors::white);
-
    S32 x = RenderUtils::getCenteredStringStartingPosf(textsize, "M/C Ver: %d | C/S Ver: %d | Build: %s/%d | Date: %s | CPU: %s | OS: %s | Cmplr: %s",
            MASTER_PROTOCOL_VERSION, CS_PROTOCOL_VERSION, ZAP_GAME_RELEASE, BUILD_VERSION, TNL_CPU_STRING, TNL_OS_STRING, TNL_COMPILER_STRING, buildDate.c_str());
 
-   mGL->glColor(Colors::white);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, "M/C Ver: ");
-   mGL->glColor(Colors::yellow);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, "%d", MASTER_PROTOCOL_VERSION);
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white, "M/C Ver: ");
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%d", MASTER_PROTOCOL_VERSION);
 
-   mGL->glColor(Colors::white);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, " | C/S Ver: ");
-   mGL->glColor(Colors::yellow);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, "%d", CS_PROTOCOL_VERSION);
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white,  " | C/S Ver: ");
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%d", CS_PROTOCOL_VERSION);
 
-   mGL->glColor(Colors::white);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, " | Build: ");
-   mGL->glColor(Colors::yellow);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, "%d", BUILD_VERSION);
-   mGL->glColor(Colors::yellow);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, "/");
-   mGL->glColor(Colors::yellow);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, "%s", ZAP_GAME_RELEASE);
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white,  " | Build: ");
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%d", BUILD_VERSION);
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "/");
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%s", ZAP_GAME_RELEASE);
 
-   mGL->glColor(Colors::white);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, " | Date: ");
-   mGL->glColor(Colors::yellow);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, "%s", buildDate.c_str());
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white,  " | Date: ");
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%s", buildDate.c_str());
 
-   mGL->glColor(Colors::white);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, " | CPU: ");
-   mGL->glColor(Colors::yellow);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, "%s", TNL_CPU_STRING);
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white,  " | CPU: ");
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%s", TNL_CPU_STRING);
 
-   mGL->glColor(Colors::white);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, " | OS: ");
-   mGL->glColor(Colors::yellow);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, "%s", TNL_OS_STRING);
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white,  " | OS: ");
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%s", TNL_OS_STRING);
 
-   mGL->glColor(Colors::white);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, " | Cmplr: ");
-   mGL->glColor(Colors::yellow);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, "%s", TNL_COMPILER_STRING);
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white,  " | Cmplr: ");
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%s", TNL_COMPILER_STRING);
 
    return ypos + textsize + gap * 2;
 }
@@ -271,15 +250,11 @@ S32 DiagnosticUserInterface::showNameDescrBlock(const string &hostName, const st
 {
    S32 x = RenderUtils::getCenteredStringStartingPosf(textsize, "Server Name: %s | Descr: %s", hostName.c_str(), hostDescr.c_str());
 
-   mGL->glColor(Colors::white);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, "Server Name: ");
-   mGL->glColor(Colors::yellow);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, "%s", hostName.c_str());
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white,  "Server Name: ");
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%s", hostName.c_str());
 
-   mGL->glColor(Colors::white);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, " | Descr: ");
-   mGL->glColor(Colors::yellow);
-   x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, "%s", hostDescr.c_str());
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white,  " | Descr: ");
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%s", hostDescr.c_str());
 
    return ypos + textsize + gap;
 }
@@ -291,19 +266,15 @@ S32 DiagnosticUserInterface::showMasterBlock(ClientGame *game, S32 textsize, S32
                                               game->getSettings()->getMasterServerList()->size() > 0 ? 
                                                          game->getSettings()->getMasterServerList()->get(0).c_str() : "None");
 
-   ypos += textsize + gap;
+   ypos += 2 * textsize + gap;
 
    if(game->getConnectionToMaster() && game->getConnectionToMaster()->isEstablished())
    {
-      mGL->glColor(Colors::MasterServerBlue);
-      RenderUtils::drawCenteredString2Colf(ypos, textsize, leftcol, "Connected to [%s]",
+      RenderUtils::drawCenteredString2Colf(ypos, textsize, Colors::MasterServerBlue, leftcol, "Connected to [%s]",
                                              game->getConnectionToMaster()->getMasterName().c_str() );
    }
    else
-   {
-      mGL->glColor(Colors::red);
-      RenderUtils::drawCenteredString2Col(ypos, textsize, leftcol, "Not connected to Master Server" );
-   }
+      RenderUtils::drawCenteredString2Col(ypos, textsize, Colors::red, leftcol, "Not connected to Master Server");
 
    return ypos + textsize + gap;
 }
@@ -331,15 +302,13 @@ string DiagnosticUserInterface::resolvePlaylist(GameSettings *gameSettings) cons
 void DiagnosticUserInterface::render() const
 {
    // Draw title, subtitle, and footer
-   mGL->glColor(Colors::red);
-   RenderUtils::drawStringf(  3, 3, 25, "DIAGNOSTICS - %s", pageHeaders[mCurPage]);
-   RenderUtils::drawStringf(625, 3, 25, "PAGE %d/%d",       mCurPage + 1, NUM_PAGES);
+   RenderUtils::drawStringf_fixed(  3, 28, 25, Colors::red, "DIAGNOSTICS - %s", pageHeaders[mCurPage]);
+   RenderUtils::drawStringf_fixed(625, 28, 25, Colors::red, "PAGE %d/%d", mCurPage + 1, NUM_PAGES);
  
-   RenderUtils::drawCenteredStringf(571, 20, "%s - next page  ESC exits", getSpecialBindingString(BINDING_DIAG).c_str());
+   RenderUtils::drawCenteredStringf_fixed(591, 20, Colors::red, "%s - next page  ESC exits", getSpecialBindingString(BINDING_DIAG).c_str());
 
-   mGL->glColor(0.7f);
-   RenderUtils::drawHorizLine(0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), 31);
-   RenderUtils::drawHorizLine(0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), 569);
+   RenderUtils::drawHorizLine(0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), 31,  Colors::gray70);
+   RenderUtils::drawHorizLine(0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), 569, Colors::gray70);
 
    S32 textsize = 14;
 
@@ -347,54 +316,44 @@ void DiagnosticUserInterface::render() const
    {
       string inputMode = mGameSettings->getInputCodeManager()->getInputModeString();
 
-      mGL->glColor(Colors::red);
-      RenderUtils::drawCenteredString(vertMargin + 37, 18, "Is something wrong?");
+      RenderUtils::drawCenteredString_fixed(vertMargin + 55, 18, Colors::red, "Is something wrong?");
 
       S32 x, y;
       x = RenderUtils::getCenteredStringStartingPosf(textsize, "Can't control your ship? Check your input mode "
-                                                  "(Options>Primary Input) [currently %s]", inputMode.c_str());
-      mGL->glColor(Colors::green);
-      y = vertMargin + 63;
-      x += RenderUtils::drawStringAndGetWidth(x, y, textsize, "Can't control your ship? Check your input mode (Options>Primary Input) [currently ");
+                                                    "(Options>Primary Input) [currently %s]", inputMode.c_str());
+      y = vertMargin + 63 + textsize;
+      x += RenderUtils::drawStringAndGetWidth_fixed(x, y, textsize, Colors::green, "Can't control your ship? Check your input mode (Options>Primary Input) [currently ");
+      x += RenderUtils::drawStringAndGetWidth_fixed(x, y, textsize, Colors::red, inputMode.c_str());
 
-      mGL->glColor(Colors::red);
-      x += RenderUtils::drawStringAndGetWidth(x, y, textsize, inputMode.c_str());
-
-      mGL->glColor(Colors::green);
-      RenderUtils::drawString(x, y, textsize, "]");
+      RenderUtils::drawString_fixed(x, y, textsize, Colors::green, "]");
 
       // Box around something wrong? block
-      mGL->glColor(Colors::cyan);
-      RenderUtils::drawHollowRect(horizMargin, vertMargin + 27, DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin, vertMargin + 90);
+      RenderUtils::drawHollowRect(horizMargin, vertMargin + 27, DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin, vertMargin + 90, Colors::cyan);
 
       const S32 gap = 5;
 
-      S32 ypos = showVersionBlock(120, textsize - 2, gap);
-
-      mGL->glColor(Colors::white);
+      S32 ypos = showVersionBlock(122, textsize - 2, gap) + textsize;
 
       textsize = 16;
 
       bool needToUpgrade = getUIManager()->getUI<MainMenuUserInterface>()->getNeedToUpgrade();
 
-      RenderUtils::drawCenteredString2Colf(ypos, textsize, false, "%s", needToUpgrade ? "<<Update available>>" : "<<Current version>>");
+      RenderUtils::drawCenteredString2Colf(ypos, textsize, Colors::white, false, "%s", needToUpgrade ? "<<Update available>>" : "<<Current version>>");
       ypos += textsize + gap;
 
       ClientInfo *clientInfo = getGame()->getClientInfo();
 
       // This following line is a bit of a beast, but it will return a valid result at any stage of being in or out of a game.
       // If the server modifies a user name to make it unique, this will display the modified version.
-      RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, true, "Nickname:", "%s (%s)",
+      RenderUtils::drawCenteredStringPair2Colf(ypos - textsize, textsize, true, Colors::white, Colors::cyan, "Nickname:", "%s (%s)",
                                   clientInfo->getName().getString(), 
                                   clientInfo->isAuthenticated() ? 
                                        string("Verified - " + itos(clientInfo->getBadges())).c_str() : "Not verified");
 
-      ypos += textsize + gap;
-
       showMasterBlock(getGame(), textsize, ypos, gap, false);
 
-      ypos += textsize + gap;
-      RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, true, "Input Mode:", "%s", inputMode.c_str());
+      ypos += (textsize + gap) * 2;
+      RenderUtils::drawCenteredStringPair2Colf(ypos - textsize, textsize, true, Colors::white, Colors::cyan, "Input Mode:", "%s", inputMode.c_str());
   
       ypos += textsize + gap;
       
@@ -404,22 +363,20 @@ void DiagnosticUserInterface::render() const
 
       if(joystickDetected && getGame()->getInputMode() == InputModeKeyboard)
       {
-         RenderUtils::drawCenteredString(400, textsize, "Joystick not enabled, you may set input mode to Joystick in option menu.");
+         RenderUtils::drawCenteredString_fixed(414, textsize, Colors::cyan, "Joystick not enabled, you may set input mode to Joystick in option menu.");
          joystickDetected = false;
       }
       else if(!joystickDetected)
-         RenderUtils::drawCenteredString2Col(ypos, textsize, true, "No joysticks detected");
+         RenderUtils::drawCenteredString2Col(ypos, textsize, Colors::cyan, true, "No joysticks detected");
       else
       {
-         mGL->glColor(Colors::magenta);
-         RenderUtils::drawCenteredString2Col(ypos + textsize + gap, textsize, true, "Autodetect String:");
+         RenderUtils::drawCenteredString2Col(ypos + textsize + gap, textsize, Colors::magenta, true, "Autodetect String:");
 
          const char *controllerName = "<None>";
          if(GameSettings::UseControllerIndex >= 0)
             controllerName = GameSettings::DetectedControllerList[index].c_str();
 
-         mGL->glColor(Colors::cyan);
-         RenderUtils::drawCenteredString2Col(ypos + 2 * (textsize + gap), textsize, true, controllerName);
+         RenderUtils::drawCenteredString2Col(ypos + 2 * (textsize + gap), textsize, Colors::cyan, true, controllerName);
       }
 
       ypos += 6 * (textsize + gap);
@@ -427,10 +384,9 @@ void DiagnosticUserInterface::render() const
       if(joystickDetected)
       {
          S32 x = 500;
-         S32 y = 290;
+         S32 y = 300;
 
-         mGL->glColor(Colors::white);
-         RenderUtils::drawString(x, y, textsize - 2, "Raw Analog Axis Values:");
+         RenderUtils::drawString_fixed(x, y, textsize - 2, Colors::white, "Raw Analog Axis Values:");
 
          y += 25;
 
@@ -439,14 +395,10 @@ void DiagnosticUserInterface::render() const
             F32 a = (F32)Joystick::rawAxesValues[i] / (F32)S16_MAX;    // Range: -1 to 1
             if(fabs(a) > .1f)
             {
-               mGL->glColor(Colors::cyan);
-               S32 len = RenderUtils::drawStringAndGetWidthf(x, y, textsize - 2, "Axis %d", i);
+               S32 len = RenderUtils::drawStringAndGetWidthf_fixed(x, y, textsize - 2, Colors::cyan, "Axis %d", i);
 
-               mGL->glColor(Colors::red);
-               RenderUtils::drawHorizLine(x, x + len, y + textsize + 3);
-
-               mGL->glColor(Colors::yellow);
-               RenderUtils::drawHorizLine(x + len / 2, x + len / 2 + S32(a * F32(len / 2)), y + textsize + 3);
+               RenderUtils::drawHorizLine(x, x + len, y + 5, Colors::red);
+               RenderUtils::drawHorizLine(x + len / 2, x + len / 2 + S32(a * F32(len / 2)), y + 5, Colors::yellow);
 
                x += len + 8;
             }
@@ -454,33 +406,25 @@ void DiagnosticUserInterface::render() const
       }
 
       // Key states
-      mGL->glColor(Colors::yellow);
-      S32 hpos = horizMargin;
+      S32 hpos = horizMargin + textsize;
 
-      hpos += RenderUtils::drawStringAndGetWidth(hpos, ypos, textsize, "Keys down: ");
+      hpos += RenderUtils::drawStringAndGetWidth_fixed(hpos, ypos, textsize, Colors::yellow, "Keys down: ");
 
-      mGL->glColor(Colors::red);
       for(U32 i = 0; i < MAX_INPUT_CODES; i++)
       {
          InputCode inputCode = InputCode(i);
          if(InputCodeManager::getState(inputCode))
          {
-            UI::SymbolKey key = UI::SymbolKey(InputCodeManager::inputCodeToString(inputCode));
-            key.render(hpos, ypos + textsize, UI::AlignmentLeft);
+            SymbolKey key = SymbolKey(InputCodeManager::inputCodeToString(inputCode), Colors::red);
+            key.render(hpos, ypos, AlignmentLeft);
             hpos += key.getWidth() + 5;
          }
       }
 
 
       // Render input strings
-      mGL->glColor(Colors::cyan);
-      hpos = horizMargin;
-      ypos += textsize + gap;
-
-      mGL->glColor(Colors::yellow);
-      hpos += RenderUtils::drawStringAndGetWidth(hpos, ypos, textsize, "Input string: ");
-
-      mGL->glColor(Colors::magenta);
+      hpos += RenderUtils::drawStringAndGetWidth_fixed(hpos, ypos, textsize, Colors::cyan, " | ");
+      hpos += RenderUtils::drawStringAndGetWidth_fixed(hpos, ypos, textsize, Colors::yellow, "Input string: ");
 
       InputCode inputCode;
       for(U32 i = 0; i < MAX_INPUT_CODES; i++)
@@ -494,9 +438,9 @@ void DiagnosticUserInterface::render() const
 
       if(in != "")
       {
-         UI::SymbolShapePtr key = UI::SymbolString::getModifiedKeySymbol(in, NULL);
+         SymbolShapePtr key = SymbolString::getModifiedKeySymbol(in, Colors::magenta);
 
-         key->render(hpos, ypos + textsize, UI::AlignmentLeft);
+         key->render(hpos, ypos, UI::AlignmentLeft);
          hpos += key->getWidth() + 5;
       }
 
@@ -505,8 +449,7 @@ void DiagnosticUserInterface::render() const
       {
          ypos += textsize + gap + 10;
 
-         mGL->glColor(Colors::green);
-         RenderUtils::drawCenteredString(ypos, textsize, "Hint: If you're having joystick problems, check your controller's 'mode' button.");
+         RenderUtils::drawCenteredString_fixed(ypos, textsize, Colors::green, "Hint: If you're having joystick problems, check your controller's 'mode' button.");
 
          //////////
          // Draw DPad and controller axis
@@ -535,48 +478,47 @@ void DiagnosticUserInterface::render() const
          for(U32 i = FIRST_CONTROLLER_BUTTON; i <= LAST_CONTROLLER_BUTTON; i++)
          {
             InputCode code = InputCode(i);
-            const Color *color = InputCodeManager::getState(code) ? &Colors::red : NULL;
+            const Color &color = InputCodeManager::getState(code) ? Colors::red : Colors::white;
 
             // renderControllerButton() returns false if nothing is rendered
-            if(JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, code, color))
+            if(JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, code, &color))
                hpos += 33;
          }
 
 
          // Render buttons parsed as symbol strings (is this needed?)
-         Vector<UI::SymbolShapePtr> symbols;
-         symbols.push_back(UI::SymbolShapePtr(new UI::SymbolString("SymbolStrings:   ", NULL, HelpContext, 16, false)));
+         Vector<SymbolShapePtr> symbols;
+         symbols.push_back(SymbolShapePtr(new SymbolString("SymbolStrings:   ", NULL, HelpContext, 16, Colors::yellow, false)));
 
          S32 buttonCount = LAST_CONTROLLER_BUTTON - FIRST_CONTROLLER_BUTTON + 1;
          for(S32 i = 0; i < buttonCount; i++)
          {
-            symbols.push_back(UI::SymbolString::getControlSymbol(InputCode(i + FIRST_CONTROLLER_BUTTON)));
+            symbols.push_back(SymbolString::getControlSymbol(InputCode(i + FIRST_CONTROLLER_BUTTON), Colors::white));
             if(i < buttonCount - 1)
-               symbols.push_back(UI::SymbolString::getBlankSymbol(8));      // Provide a little breathing room
+               symbols.push_back(SymbolString::getBlankSymbol(8));      // Provide a little breathing room
          }
 
-         UI::SymbolString(symbols).render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2 + 60, ypos + 50));
+         SymbolString(symbols).render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2 + 60, ypos + 50));
       }
    }
    else if(mCurPage == 1)
    {
-      S32 ypos = vertMargin + 35;
+      S32 ypos = vertMargin + 50;
       S32 textsize = 15;
       S32 gap = 5;
 
-      RenderUtils::drawString(horizMargin, ypos, textsize, "Folders are either an absolute path or a path relative to the program execution folder");
-      ypos += textsize + gap;
-      RenderUtils::drawString(horizMargin, ypos, textsize, "or local folder, depending on OS.  If an entry is blank, Bitfighter will look for files");
-      ypos += textsize + gap;
-      RenderUtils::drawString(horizMargin, ypos, textsize, "in the program folder or local folder, depending on OS.");
-      ypos += textsize + gap;
-      ypos += textsize + gap;
-      RenderUtils::drawString(horizMargin, ypos, textsize, "See the Command line parameters section of the wiki at bitfighter.org for more information.");
-      ypos += textsize + gap;
-      ypos += textsize + gap;
+      FontManager::setFontColor(Colors::gray70);
 
-      mGL->glColor(Colors::red);
-      RenderUtils::drawCenteredString(ypos, textsize, "Currently reading data and settings from:");
+      RenderUtils::drawString_fixed(horizMargin, ypos, textsize, "Folders are either an absolute path or a path relative to the program execution folder");
+      ypos += textsize + gap;
+      RenderUtils::drawString_fixed(horizMargin, ypos, textsize, "or local folder, depending on OS.  If an entry is blank, Bitfighter will look for files");
+      ypos += textsize + gap;
+      RenderUtils::drawString_fixed(horizMargin, ypos, textsize, "in the program folder or local folder, depending on OS.");
+      ypos += textsize * 2 + gap;
+      RenderUtils::drawString_fixed(horizMargin, ypos, textsize, "See the Command line parameters section of the wiki at bitfighter.org for more information.");
+      ypos += (textsize + gap) * 2;
+
+      RenderUtils::drawCenteredString_fixed(ypos, textsize, Colors::red, "Currently reading data and settings from:");
       ypos += textsize + gap + gap;
 
       FolderManager *folderManager = mGameSettings->getFolderManager();
@@ -588,56 +530,53 @@ void DiagnosticUserInterface::render() const
       S32 textsize = 16;
       S32 smallText = 14;
 
-      S32 ypos = vertMargin + 35;
+      S32 ypos = vertMargin + 19;
 
-      mGL->glColor(Colors::white);
+      ypos += showNameDescrBlock(mGameSettings->getHostName(), mGameSettings->getHostDescr(), ypos + textsize, textsize, gap);
 
-      ypos += showNameDescrBlock(mGameSettings->getHostName(), mGameSettings->getHostDescr(), ypos, textsize, gap);
+      //ypos += textsize;
 
-      RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, true, "Host Addr:", "%s", mGameSettings->getHostAddress().c_str());
-      RenderUtils::drawCenteredStringPair2Colf(ypos, smallText, false, "Lvl Change PW:", "%s", mGameSettings->getLevelChangePassword() == "" ?
+      RenderUtils::drawCenteredStringPair2Colf(ypos, textsize,                           true,  Colors::white, Colors::cyan, 
+                                               "Host Addr:", "%s", mGameSettings->getHostAddress().c_str());
+      RenderUtils::drawCenteredStringPair2Colf(ypos, smallText - (textsize - smallText), false, Colors::white, Colors::cyan,
+                                               "Lvl Change PW:", "%s", mGameSettings->getLevelChangePassword() == "" ?
                                                                     "None - anyone can change" : mGameSettings->getLevelChangePassword().c_str());
       ypos += textsize + gap;
 
       
-      RenderUtils::drawCenteredStringPair2Colf(ypos, smallText, false, "Admin PW:", "%s", mGameSettings->getAdminPassword() == "" ?
+      RenderUtils::drawCenteredStringPair2Colf(ypos, smallText, false, Colors::white, Colors::cyan, "Admin PW:", "%s", mGameSettings->getAdminPassword() == "" ?
                                                                      "None - no one can get admin" : mGameSettings->getAdminPassword().c_str());
       ypos += textsize + gap;
 
-      RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, false, "Server PW:", "%s", mGameSettings->getServerPassword() == "" ?
+      RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, false, Colors::white, Colors::cyan, "Server PW:", "%s", mGameSettings->getServerPassword() == "" ?
                                                                              "None needed to play" : mGameSettings->getServerPassword().c_str());
 
       ypos += textsize + gap;
       ypos += textsize + gap;
 
-      S32 x = RenderUtils::getCenteredString2ColStartingPosf(textsize, false, "Max Players: %d", mGameSettings->getMaxPlayers());
-
-      mGL->glColor(Colors::white);
-      x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, "Max Players: ");
-      mGL->glColor(Colors::yellow);
-      x += RenderUtils::drawStringAndGetWidthf(x, ypos, textsize, "%d", mGameSettings->getMaxPlayers());
+      RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, false, Colors::white, Colors::cyan, "Max Players:", "%d", mGameSettings->getMaxPlayers());
 
       ypos += textsize + gap;
 
       GameConnection *conn = getGame()->getConnectionToServer();
 
-      RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, true, "Playlist File:", "%s", resolvePlaylist(mGameSettings).c_str());
+      RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, true, Colors::white, Colors::cyan, "Playlist File:", "%s", resolvePlaylist(mGameSettings).c_str());
       
       if(conn)
       {
-         RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Send Lag/Pkt. Loss:", "%dms/%2.0f%%",
+         RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, false, Colors::white, Colors::cyan, "Sim. Send Lag/Pkt. Loss:", "%dms/%2.0f%%",
                                      conn->getSimulatedSendLatency(), 
                                      conn->getSimulatedSendPacketLoss() * 100);
 
          ypos += textsize + gap;
 
-         RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Rcv. Lag/Pkt. Loss:", "%dms/%2.0f%%",
+         RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, false, Colors::white, Colors::cyan, "Sim. Rcv. Lag/Pkt. Loss:", "%dms/%2.0f%%",
                                      conn->getSimulatedReceiveLatency(), 
                                      conn->getSimulatedReceivePacketLoss() * 100);
       }
       else     // No connection? Use settings in settings.
       {
-         RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Send Lag/Pkt. Loss:", "%dms/%2.0f%%",
+         RenderUtils::drawCenteredStringPair2Colf(ypos, textsize, false, Colors::white, Colors::cyan, "Sim. Send Lag/Pkt. Loss:", "%dms/%2.0f%%",
                                      mGameSettings->getSimulatedLag(),
                                      mGameSettings->getSimulatedLoss() * 100);
          ypos += textsize + gap;
@@ -646,7 +585,6 @@ void DiagnosticUserInterface::render() const
       ypos += textsize + gap;
       
       // Dump out names of loaded levels...
-      mGL->glColor(Colors::white);
       string allLevels = "Levels: ";
 
       if(!GameManager::getServerGame())
@@ -658,6 +596,7 @@ void DiagnosticUserInterface::render() const
       U32 i, j, k;
       i = j = k = 0;
       
+      ypos += textsize - 6;
       for(j = 0; j < 4 && i < allLevels.length(); j++)
       {
          while(RenderUtils::getStringWidth(textsize - 6, allLevels.substr(k, i - k).c_str()) <
@@ -666,7 +605,7 @@ void DiagnosticUserInterface::render() const
             i++;
          }
 
-         RenderUtils::drawString(horizMargin, ypos, textsize - 6, allLevels.substr(k, i - k).c_str());
+         RenderUtils::drawString_fixed(horizMargin, ypos, textsize - 6, Colors::white, allLevels.substr(k, i - k).c_str());
          k = i;
          ypos += textsize + gap - 5;
       }
@@ -697,73 +636,52 @@ void DiagnosticUserInterface::render() const
          F32 r3 = rad * .333f;
          F32 rm23 = rm2 * .333f;
 
-         mGL->glColor(Colors::white);
-         RenderUtils::drawPolygon(Point(x,y), 6, rm2, 0);
-         mGL->glColor(Colors::red);
-         RenderUtils::drawCircle(Point(x, y), rad);
+         RenderUtils::drawPolygon(Point(x, y), 6, rm2, 0, Colors::white);
+         RenderUtils::drawCircle(Point(x, y), rad, Colors::red);
 
-         x += 3*rad;
+         x += 3 * rad;
 
-         mGL->glColor(Colors::yellow);
-         RenderUtils::drawPolygon(Point(x,y), 3, rm2, FloatTau/12);
-         mGL->glColor(Colors::red);
-         RenderUtils::drawCircle(Point(x, y), rad);
+         RenderUtils::drawPolygon(Point(x, y), 3, rm2, FloatTau / 12, Colors::yellow);
+         RenderUtils::drawCircle(Point(x, y), rad, Colors::red);
 
-         x += 3*rad;
-         mGL->glColor(Colors::green);
-         RenderUtils::drawHollowRect(x - rad, y - r3,  x + rad, y + r3);
-         RenderUtils::drawHollowRect(x - r3,  y - rad, x + r3,  y + rad);
-
+         x += 3 * rad;
+         RenderUtils::drawHollowRect(x - rad, y - r3,  x + rad, y + r3,  Colors::green);
+         RenderUtils::drawHollowRect(x - r3,  y - rad, x + r3,  y + rad, Colors::green);
 
          // Use rm2 and rm23 to make squares a little smaller to balance size of the circles
+         x += 3 * rad;
+         RenderUtils::drawFilledRect(x - rm2, y - rm2, x + rm2, y + rm2, Colors::red);
+         RenderUtils::drawFilledRect(x - rm23, y - rm2,  x + rm23, y - rm23, Colors::white);
+         RenderUtils::drawFilledRect(x - rm23, y + rm2,  x + rm23, y + rm23, Colors::white);
+         RenderUtils::drawFilledRect(x + rm2,  y - rm23, x + rm23, y + rm23, Colors::white);
+         RenderUtils::drawFilledRect(x - rm2,  y - rm23, x - rm23, y + rm23, Colors::white);
 
-         x += 3*rad;
-         mGL->glColor(Colors::red);
-         RenderUtils::drawFilledRect(x - rm2, y - rm2, x + rm2, y + rm2);
-         mGL->glColor(Colors::white);
-         RenderUtils::drawFilledRect(x - rm23,  y - rm2, x + rm23, y - rm23);
-         RenderUtils::drawFilledRect(x - rm23,  y + rm2, x + rm23, y + rm23);
-         RenderUtils::drawFilledRect(x + rm2, y - rm23,  x + rm23, y + rm23);
-         RenderUtils::drawFilledRect(x - rm2, y - rm23,  x - rm23, y + rm23);
+         x += 3 * rad;
+         RenderUtils::drawHollowRect(x - rm2, y - rm2, x + rm2, y + rm2, Colors::red);
+         RenderUtils::drawCircle(Point(x, y), rm2,     Colors::red);
+         RenderUtils::drawCircle(Point(x, y), rad / 2, Colors::orange67);
 
-         x += 3*rad;
-         mGL->glColor(Colors::red);
-         RenderUtils::drawHollowRect(x - rm2, y - rm2, x + rm2, y + rm2);
-         RenderUtils::drawCircle(Point(x, y), rm2);
-         mGL->glColor(Colors::orange67);
-         RenderUtils::drawCircle(Point(x, y), rad / 2);
-
-         x += 3*rad;
-         mGL->glColor(Colors::red);
-         RenderUtils::drawHollowRect(x - rm2, y - rm2, x + rm2, y + rm2);
-         RenderUtils::drawCircle(Point(x, y), rm2);
-         mGL->glColor(Colors::yellow);
-         RenderUtils::drawFilledCircle(Point(x, y), rad / 2);
-         mGL->glColor(Colors::orange67);
-         RenderUtils::drawCircle(Point(x, y), rad / 2);
+         x += 3 * rad;
+         RenderUtils::drawHollowRect(x - rm2, y - rm2, x + rm2, y + rm2, Colors::red);
+         RenderUtils::drawCircle(      Point(x, y), rm2, Colors::red);
+         RenderUtils::drawFilledCircle(Point(x, y), rad / 2, Colors::yellow);
+         RenderUtils::drawCircle(      Point(x, y), rad / 2, Colors::orange67);
 
 
          x += 3*rad;
-         mGL->glColor(Colors::red);
-         RenderUtils::drawCircle(Point(x, y), rad);
-         mGL->glColor(Colors::white);
-         RenderUtils::drawCircle(Point(x, y), r3 * 2);
-         mGL->glColor(Colors::red);
-         RenderUtils::drawCircle(Point(x, y), r3);
+         RenderUtils::drawCircle(Point(x, y), rad,    Colors::red);
+         RenderUtils::drawCircle(Point(x, y), r3 * 2, Colors::white);
+         RenderUtils::drawCircle(Point(x, y), r3,     Colors::red);
 
 
          x += 3*rad;
-         mGL->glColor(Colors::paleBlue);
-         RenderUtils::drawPolygon(Point(x,y + r3), 3, rad * 1.2f, FloatTau/12);
-         mGL->glColor(Colors::cyan);
-         RenderUtils::drawPolygon(Point(x,y + r3), 3, rad * .6f, FloatTau/4);
+         RenderUtils::drawPolygon(Point(x, y + r3), 3, rad * 1.2f, FloatTau / 12, Colors::paleBlue);
+         RenderUtils::drawPolygon(Point(x, y + r3), 3, rad * .6f, FloatTau / 4, Colors::cyan);
 
 
          x += 3*rad;
-         mGL->glColor(Colors::red);
-         RenderUtils::drawCircle(Point(x, y), rad);
-         mGL->glColor(Colors::white);
-         RenderUtils::drawStar(Point(x,y), 7, rad - 1, rad/2);
+         RenderUtils::drawCircle(Point(x, y), rad, Colors::red);
+         RenderUtils::drawStar(Point(x,y), 7, rad - 1, rad/2, Colors::white);
 
          x += 3*rad;
          GameObjectRender::renderBadge(x, y, rad, DEVELOPER_BADGE);
@@ -807,8 +725,7 @@ void DiagnosticUserInterface::render() const
          points.push_back(Point(x + rm2, y - rm2));
          GameObjectRender::renderWallFill(&points, Colors::wallFillColor, false);
          GameObjectRender::renderPolygonOutline(&points, Colors::blue);
-         mGL->glColor(Colors::yellow);
-         RenderUtils::drawStar(Point(x,y), 5, rad * .5f, rad * .25f);
+         RenderUtils::drawStar(Point(x, y), 5, rad * .5f, rad * .25f, Colors::yellow);
 
          ///// After all badge rendering
          mGL->glPopMatrix();

@@ -9,8 +9,6 @@
 #include "stringUtils.h"
 
 #include <math.h>
-#include "Geometry_Base.h"
-#include <sstream>
 
 
 namespace Zap
@@ -121,7 +119,7 @@ F32 Point::angleTo(const Point &p) const
 }
 
 
-Point Point::rotate(F32 ang)
+Point Point::rotate(F32 ang) const
 {
    F32 sina = sin(ang);
    F32 cosa = cos(ang);
@@ -147,6 +145,7 @@ F32 Point::determinant(const Point &p)
 {
    return (x * p.y - y * p.x);
 }
+
 
 void Point::scaleFloorDiv(float scaleFactor, float divFactor)
 {
@@ -189,9 +188,6 @@ void Point::write(BitStream *stream) const
 }
 
 
-
-
-
 string Point::toString() const
 {
    return ftos(x) + ", " + ftos(y);
@@ -204,11 +200,12 @@ string Point::toLevelCode() const
 }
 
 
-};	// namespace
+}	// namespace
 
 
 namespace Types
 {
+
 void read(TNL::BitStream &s, Zap::Point *val)
 {
    val->read(&s);
@@ -218,4 +215,6 @@ void write(TNL::BitStream &s, const Zap::Point &val)
 {
    val.write(&s);
 }
-};
+
+}  // namespace
+

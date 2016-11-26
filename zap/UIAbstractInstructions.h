@@ -29,10 +29,10 @@ public:
    static const S32 FontSize = 18;
    static const S32 LineGap = 8;
 
-   static const Color *txtColor;
-   static const Color *keyColor;
-   static const Color *secColor;
-   static const Color *groupHeaderColor;
+   static const Color &txtColor;
+   static const Color &keyColor;
+   static const Color &secColor;
+   static const Color &groupHeaderColor;
 
 protected:
    void render(const char *header, S32 page, S32 pages) const;
@@ -44,7 +44,7 @@ protected:
          mWallInstr,              mWallBindings;
 
    void pack(UI::SymbolStringSet &Instrs, UI::SymbolStringSet &Bindings, 
-            const ControlStringsEditor *helpBindings, S32 bindingCount);
+            const ControlStringsEditor *helpBindings, S32 bindingCount) const;
 
 public:
    explicit AbstractInstructionsUserInterface(ClientGame *clientGame, UIManager *uiManager); // Constructor

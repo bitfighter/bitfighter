@@ -222,8 +222,8 @@ class MountableItem : public MoveItem
 
 protected:
    enum MaskBits {
-      MountMask        = Parent::FirstFreeMask << 0,
-      FirstFreeMask    = Parent::FirstFreeMask << 1
+      MountMask        = FirstFreeMask << 0,
+      FirstFreeMask    = FirstFreeMask << 1
    };
 
    bool mIsMounted;
@@ -236,7 +236,7 @@ public:
    virtual ~MountableItem();                                                                                   // Destructor
 
    // Override some parent functions
-   void idle(BfObject::IdleCallPath path);
+   void idle(IdleCallPath path);
    void render() const;
    virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -316,8 +316,8 @@ private:
 
 protected:
    enum MaskBits {
-      ItemChangedMask  = Parent::FirstFreeMask << 0,
-      FirstFreeMask    = Parent::FirstFreeMask << 1
+      ItemChangedMask  = FirstFreeMask << 0,
+      FirstFreeMask    = FirstFreeMask << 1
    };
 
 public:
@@ -398,11 +398,11 @@ private:
 
 public:
    explicit TestItem(lua_State *L = NULL); // Combined Lua / C++ default constructor
-   virtual ~TestItem();           // Destructor
+   virtual ~TestItem();                    // Destructor
    TestItem *clone() const;
 
    // Test methods
-   void idle(BfObject::IdleCallPath path);
+   void idle(IdleCallPath path);
 
    static const S32 TEST_ITEM_RADIUS = 60;
    static const S32 TEST_ITEM_SIDES  =  7;

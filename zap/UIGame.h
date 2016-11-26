@@ -246,7 +246,7 @@ public:
    void setAnnouncement(const string &announcement);
    void displayMessage(const Color &msgColor, const char *message);
    void onChatMessageReceived(const Color &msgColor, const char *format, ...);
-   const char *getChatMessage();    // Return message being composed in in-game chat
+   const char *getChatMessage() const;    // Return message being composed in in-game chat
 
    void resetInputModeChangeAlertDisplayTimer(U32 timeInMs);
 
@@ -264,7 +264,7 @@ public:
    void renderLevelUpMessage(S32 newLevel) const;
    void renderObjectIds() const;          // Render server-side object ids on client
    void renderLevelListDisplayer() const;
-   void renderMsgBox(const string *message, S32 msgLines) const;
+   void renderMsgBox(const string *message, S32 msgLines, const Color &msgColor) const;
 
 
    bool isChatting() const;               // Returns true if player is composing a chat message

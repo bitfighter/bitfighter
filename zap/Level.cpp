@@ -169,7 +169,7 @@ namespace Zap
       logprintf("Loading %s", filename.c_str());
 #endif
 
-      return fileExists;
+      return true;
    }
 
 

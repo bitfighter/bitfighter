@@ -20,6 +20,7 @@
 #include "Level.h"
 
 #include "version.h"
+#include "Colors.h"
 
 namespace Zap
 {
@@ -597,19 +598,19 @@ void PlaybackGameUserInterface::render() const
 
    if(mVisible)
    {
-      mGL->glColor(1);
-      mGL->renderVertexArray(playbackBarVertex, 4, GLOPT::LineLoop);
+      mGL->renderVertexArray(playbackBarVertex, 4, GLOPT::LineLoop, Colors::white);
 
       F32 vertex[4];
       vertex[0] = mPlaybackConnection->mCurrentTime * playbackBar_w / mPlaybackConnection->mTotalTime + playbackBar_x;
       vertex[1] = playbackBar_y;
       vertex[2] = vertex[0];
       vertex[3] = playbackBar_y + playbackBar_h;
-      mGL->renderVertexArray(vertex, 2, GLOPT::Lines);
 
-      mGL->renderVertexArray(buttons_lines, sizeof(buttons_lines) / (sizeof(buttons_lines[0]) * 2), GLOPT::Lines);
+      mGL->renderVertexArray(vertex, 2, GLOPT::Lines, Colors::white);
+      mGL->renderVertexArray(buttons_lines, sizeof(buttons_lines) / (sizeof(buttons_lines[0]) * 2), GLOPT::Lines, Colors::white);
 
-      RenderUtils::drawString(btn_spectate_name_x, btn_y, 15, mPlaybackConnection->mClientInfoSpectatingName.getString());
+      RenderUtils::drawString_fixed(btn_spectate_name_x, btn_y + 15, 15, Colors::white, 
+                                    mPlaybackConnection->mClientInfoSpectatingName.getString());
    }
 }
 

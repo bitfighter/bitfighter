@@ -44,23 +44,23 @@ public:
    static bool renderControllerButton(F32 centerX, F32 centerY, InputCode inputCode, const Color *overrideRenderColor = NULL);
    static S32 getControllerButtonRenderedSize(InputCode inputCode);
 
-   static void drawDPadUp(Point center);
-   static void drawDPadDown(Point center);
-   static void drawDPadLeft(Point center);
-   static void drawDPadRight(Point center);
+   static void drawDPadUp(const Point &center, const Color &color);
+   static void drawDPadDown(const Point &center, const Color &color);
+   static void drawDPadLeft(const Point &center, const Color &color);
+   static void drawDPadRight(const Point &center, const Color &color);
 
-   static void renderDPad(Point center, bool upActivated, bool downActivated, bool leftActivated,
+   static void renderDPad(const Point &center, bool upActivated, bool downActivated, bool leftActivated,
          bool rightActivated, const char *msg1, const char *msg2);
 
    static void drawPlaystationCross(const Point &center);
    static void drawPlaystationCircle(const Point &center);
    static void drawPlaystationSquare(const Point &center);
-   static void drawPlaystationTriangle(const Point &center);
-   static void drawSmallLeftTriangle(const Point & center);
-   static void drawSmallRightTriangle(const Point & center);
-   static void drawButtonRightTriangle(const Point & center);
+   static void drawPlaystationTriangle(const Point &center, const Color &color);
+   static void drawSmallLeftTriangle(const Point &center, const Color &color);
+   static void drawSmallRightTriangle(const Point &center, const Color &color);
+   static void drawButtonRightTriangle(const Point &center, const Color &color);
 
-   static inline const Color *getButtonColor(bool activated);
+   static inline const Color &getButtonColor(bool activated);
 };
 
 } /* namespace Zap */

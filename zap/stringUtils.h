@@ -51,7 +51,7 @@ string itos(S64 i);
 string ftos(F32 f, int digits);
 string ftos(F32 f);
 
-F64 stof(const string &s);
+F32 stof(const string &s);
 
 string replaceString(const string &strString, const string &strOld, const string &strNew);
 string stripExtension(string filename);

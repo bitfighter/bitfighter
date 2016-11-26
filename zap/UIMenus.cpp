@@ -31,7 +31,7 @@
 #include "SystemFunctions.h"
 #include "VideoSystem.h"
 
-#include "GameObjectRender.h"    // For renderBitfighterLogo, mGL->glColor
+#include "GameObjectRender.h"    // For renderBitfighterLogo
 #include "RenderUtils.h"
 #include "stringUtils.h"
 
@@ -240,13 +240,11 @@ void MenuUserInterface::renderMenuInstructions(GameSettings *settings) const
    F32 y = F32(canvasHeight - UserInterface::vertMargin - 20);
    const S32 size = 18;
 
-   mGL->glColor(Colors::white);
-
    if(settings->getInputMode() == InputModeKeyboard)
    {
       static const SymbolString KeyboardInstructions(
             "[[Up Arrow]], [[Down Arrow]] to choose | [[Enter]] to select | [[Esc]] exits menu", 
-            settings->getInputCodeManager(), MenuHeaderContext, size, false, AlignmentCenter);
+            settings->getInputCodeManager(), MenuHeaderContext, size, Colors::white, false, AlignmentCenter);
 
       KeyboardInstructions.render(Point(canvasWidth / 2, y + size));
    }
@@ -254,14 +252,14 @@ void MenuUserInterface::renderMenuInstructions(GameSettings *settings) const
    {
       static const SymbolString JoystickInstructions(
             "[[DPad Up]],  [[Dpad Down]] to choose | [[Start]] to select | [[Back]] exits menu", 
-            settings->getInputCodeManager(), MenuHeaderContext, size, false, AlignmentCenter);
+            settings->getInputCodeManager(), MenuHeaderContext, size, Colors::white, false, AlignmentCenter);
 
       JoystickInstructions.render(Point(canvasWidth / 2, y + size));
    }
 }
 
 
-void MenuUserInterface::renderArrow(S32 pos, bool pointingUp) const
+void MenuUserInterface::renderArrow(S32 pos, bool pointingUp)
 {
    static const S32 ARROW_WIDTH = 100;
    static const S32 ARROW_HEIGHT = 20;
@@ -284,8 +282,7 @@ void MenuUserInterface::renderArrow(S32 pos, bool pointingUp) const
    for(S32 i = 1; i >= 0; i--)
    {
       // First create a black poly to blot out what's behind, then the arrow itself
-      mGL->glColor(i ? Colors::black : Colors::blue);
-      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GLOPT::TriangleFan : GLOPT::LineLoop);
+      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GLOPT::TriangleFan : GLOPT::LineLoop, i ? Colors::black : Colors::blue);
    }
 }
 
@@ -307,14 +304,10 @@ void MenuUserInterface::render() const
 
    // Title 
    if(mMenuTitle.length() != 0) // This check is to fix green dot from zero length underline on some systems including linux software renderer (linux command: LIBGL_ALWAYS_SOFTWARE=1 ./bitfighter)
-   {
-      mGL->glColor(Colors::green);
-      RenderUtils::drawCenteredUnderlinedString(vertMargin, 30, mMenuTitle.c_str());
-   }
+      RenderUtils::drawCenteredUnderlinedString(vertMargin, 30, Colors::green, mMenuTitle.c_str());
    
    // Subtitle
-   mGL->glColor(mMenuSubTitleColor);
-   RenderUtils::drawCenteredString(vertMargin + 35, 18, mMenuSubTitle.c_str());
+   RenderUtils::drawCenteredString_fixed(vertMargin + 53, 18, mMenuSubTitleColor, mMenuSubTitle.c_str());
 
    // Instructions
    if(mRenderInstructions)
@@ -354,32 +347,28 @@ void MenuUserInterface::render() const
    // Render an indicator that there are scrollable items above and/or below
    if(isScrollingMenu())
    {
-      if(offset > 0)                     // There are items above
-         renderArrow(yStart, true);      // Arrow pointing up
-
+      if(offset > 0)                          // There are items above
+         renderArrow(yStart, true);           // Arrow pointing up
+      
       if(offset < getMaxFirstItemIndex())     // There are items below
-      {
-         renderArrow(yStart + (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)) * mMaxMenuSize + 6,
-               false);   // Arrow pointing down
-      }
+         renderArrow(yStart + (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)) * mMaxMenuSize + 6, false);   // Down
    }
 
    // Render a help string at the bottom of the menu
    if(U32(mSelectedIndex) < U32(mMenuItems.size()))
    {
       const S32 helpFontSize = 15;
-      S32 ypos = canvasHeight - vertMargin - 50;
+      S32 ypos = canvasHeight - vertMargin - 35;
 
       // Render a special instruction line
       if(mRenderSpecialInstructions)
       {
-         mGL->glColor(Colors::menuHelpColor, 0.6f);
-         RenderUtils::drawCenteredString(ypos, helpFontSize, mMenuItems[mSelectedIndex]->getSpecialEditingInstructions());
+         FontManager::setFontColor(Colors::menuHelpColor, 0.6f);
+         RenderUtils::drawCenteredString_fixed(ypos, helpFontSize, mMenuItems[mSelectedIndex]->getSpecialEditingInstructions());
       }
 
       ypos -= helpFontSize + 5;
-      mGL->glColor(Colors::yellow);
-      RenderUtils::drawCenteredString(ypos, helpFontSize, mMenuItems[mSelectedIndex]->getHelp().c_str());
+      RenderUtils::drawCenteredString_fixed(ypos, helpFontSize, Colors::yellow, mMenuItems[mSelectedIndex]->getHelp().c_str());
    }
 
    // If we have a fading notice to show
@@ -399,15 +388,13 @@ void MenuUserInterface::render() const
       const S32 cornerInset = 10;
 
       // Fill
-      mGL->glColor(Colors::red40, alpha);
-      RenderUtils::drawFancyBox(left, top, DisplayManager::getScreenInfo()->getGameCanvasWidth() - left, bottom, cornerInset, GLOPT::TriangleFan);
+      RenderUtils::drawFancyBox(left, top, DisplayManager::getScreenInfo()->getGameCanvasWidth() - left, bottom, cornerInset, GLOPT::TriangleFan, Colors::red40, alpha);
 
       // Border
-      mGL->glColor(Colors::red, alpha);
-      RenderUtils::drawFancyBox(left, top, DisplayManager::getScreenInfo()->getGameCanvasWidth() - left, bottom, cornerInset, GLOPT::LineLoop);
+      RenderUtils::drawFancyBox(left, top, DisplayManager::getScreenInfo()->getGameCanvasWidth() - left, bottom, cornerInset, GLOPT::LineLoop, Colors::red, alpha);
 
-      mGL->glColor(Colors::white, alpha);
-      RenderUtils::drawCenteredString(top + padding, textsize, mFadingNoticeMessage.c_str());
+      FontManager::setFontColor(Colors::white, alpha);
+      RenderUtils::drawCenteredString_fixed(top + padding + textsize, textsize, mFadingNoticeMessage.c_str());
    }
 
    renderExtras();  // Draw something unique on a menu
@@ -991,14 +978,11 @@ static const S32 MotdFontSize = 20;
 
 void MainMenuUserInterface::render() const
 {
-   static const S32 MotdVertPos = 540;
-
    // Draw our Message-Of-The-Day, if we have one
    if(!mMotd.empty())
    {
       FontManager::pushFontContext(MotdContext);
-      mGL->glColor(Colors::white);
-      RenderUtils::drawString(mMotdPos, MotdVertPos, MotdFontSize, mMotd.c_str());
+      RenderUtils::drawString_fixed(mMotdPos, 560, MotdFontSize, Colors::white, mMotd.c_str());
       FontManager::popFontContext();
    }
 
@@ -1052,9 +1036,7 @@ bool MainMenuUserInterface::getNeedToUpgrade()
 
 void MainMenuUserInterface::renderExtras() const
 {
-   mGL->glColor(Colors::white);
-   const S32 size = 16;
-   RenderUtils::drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - size, size, "join us @ www.bitfighter.org");
+   RenderUtils::drawCenteredString_fixed(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin, 16, Colors::white, "join us @ www.bitfighter.org");
 }
 
 
@@ -1937,15 +1919,13 @@ void NameEntryUserInterface::renderExtras() const
 
    S32 instrGap = mRenderInstructions ? 30 : 0;
 
-   mGL->glColor(Colors::menuHelpColor);
-
    row++;
 
-   RenderUtils::drawCenteredString(canvasHeight - vertMargin - instrGap - (rows - row) * size - (rows - row) * gap, size, 
+   RenderUtils::drawCenteredString_fixed(canvasHeight - vertMargin - instrGap - (rows - row) * (size + gap) + size, size, Colors::menuHelpColor,
             "A password is only needed if you are using a reserved name.  You can reserve your");
    row++;
 
-   RenderUtils::drawCenteredString(canvasHeight - vertMargin - instrGap - (rows - row) * size - (rows - row) * gap, size, 
+   RenderUtils::drawCenteredString_fixed(canvasHeight - vertMargin - instrGap - (rows - row) * (size  + gap) + size, size, Colors::menuHelpColor,
             "nickname by registering for the bitfighter.org forums.  Registration is free.");
 
 
@@ -1955,7 +1935,7 @@ void NameEntryUserInterface::renderExtras() const
                        "the forums, enter your forum password below. Otherwise, "
                        "this user name may be reserved. Please choose another.";
 
-      renderMessageBox("Invalid Name or Password", "Press [[Esc]] to continue", message, 3, -190);
+      renderMessageBox("Invalid Name or Password", "Press [[Esc]] to continue", message, Colors::white, 3, -190);
    }
 }
 

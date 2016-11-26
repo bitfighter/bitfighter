@@ -5,7 +5,6 @@
 
 #include "UIMenuItems.h"
 #include "UIMenus.h"
-#include "UIQuickMenu.h"
 
 #include "DisplayManager.h"    // For DisplayManager::getScreenInfo() stuff
 #include "FontManager.h"
@@ -174,10 +173,8 @@ const Color *MenuItem::getColor(bool isSelected)
 
 void MenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   mGL->glColor(*getColor(isSelected));
-
    FontManager::pushFontContext(MenuContext);
-      RenderUtils::drawCenteredStringf(xpos, ypos, textsize, "%s%s", getPrompt().c_str(), mDisplayValAppendage);
+   RenderUtils::drawCenteredStringf_fixed(xpos, ypos + textsize, textsize, *getColor(isSelected), "%s%s", getPrompt().c_str(), mDisplayValAppendage);
    FontManager::popFontContext();
 }
 
@@ -429,8 +426,8 @@ string ToggleMenuItem::getOptionText() const
 
 void ToggleMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   RenderUtils::drawCenteredStringPair(xpos, ypos, textsize, MenuContext, InputContext, *getColor(isSelected), *getValueColor(isSelected),
-                          getPrompt().c_str(), getOptionText().c_str());
+   RenderUtils::drawCenteredStringPair_fixed(xpos, ypos + textsize, textsize, MenuContext, InputContext, *getColor(isSelected), *getValueColor(isSelected),
+                                             getPrompt().c_str(), getOptionText().c_str());
 }
 
 
@@ -821,8 +818,8 @@ string CounterMenuItem::getOptionText() const
 
 void CounterMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   RenderUtils::drawCenteredStringPair(xpos, ypos, textsize, MenuContext, InputContext, *getColor(isSelected), *getValueColor(isSelected),
-                          getPrompt().c_str(), getOptionText().c_str());
+   RenderUtils::drawCenteredStringPair_fixed(xpos, ypos + textsize, textsize, MenuContext, InputContext, *getColor(isSelected), *getValueColor(isSelected),
+                                             getPrompt().c_str(), getOptionText().c_str());
 }
 
 
@@ -1103,8 +1100,8 @@ string FloatCounterMenuItem::getOptionText()
 
 void FloatCounterMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   RenderUtils::drawCenteredStringPair(xpos, ypos, textsize, MenuContext, InputContext, *getColor(isSelected), *getValueColor(isSelected),
-                          getPrompt().c_str(), getOptionText().c_str());
+   RenderUtils::drawCenteredStringPair_fixed(xpos, ypos + textsize, textsize, MenuContext, InputContext, *getColor(isSelected), *getValueColor(isSelected),
+                                             getPrompt().c_str(), getOptionText().c_str());
 }
 
 
@@ -1120,7 +1117,7 @@ bool FloatCounterMenuItem::handleKey(InputCode inputCode)
    {
       if(InputCodeManager::checkModifier(KEY_SHIFT))
       {
-         increment(getBigIncrement());
+         increment((S32)getBigIncrement());
          snap();
       }
       else
@@ -1132,7 +1129,7 @@ bool FloatCounterMenuItem::handleKey(InputCode inputCode)
    {
       if(InputCodeManager::checkModifier(KEY_SHIFT))
       {
-         decrement(getBigIncrement());
+         decrement((S32)getBigIncrement());
          snap();
       }
       else
@@ -1171,6 +1168,7 @@ F32 FloatCounterMenuItem::getBigIncrement()
 {
    return 10.f;
 }
+
 
 void FloatCounterMenuItem::backspace()
 {
@@ -1500,8 +1498,7 @@ string PlayerMenuItem::getOptionText() const
 
 void PlayerMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   mGL->glColor(*getColor(isSelected));
-   RenderUtils::drawCenteredString(xpos, ypos, textsize, getOptionText().c_str());
+   RenderUtils::drawCenteredString_fixed(xpos, ypos + textsize, textsize, *getColor(isSelected), getOptionText().c_str());
 }
 
 
@@ -1558,8 +1555,7 @@ string TeamMenuItem::getOptionText() const
 
 void TeamMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   mGL->glColor(*getColor(isSelected));
-   RenderUtils::drawCenteredStringf(xpos, ypos, textsize, getOptionText().c_str());
+   RenderUtils::drawCenteredStringf_fixed(xpos, ypos + textsize, textsize, *getColor(isSelected), getOptionText().c_str());
 }
 
 
@@ -1629,20 +1625,19 @@ void TextEntryMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected
 {
    Color textColor;     
    if(mLineEditor.getString() == "" && mEmptyVal != "")
-      textColor.set(.4, .4, .4);
+      textColor = Colors::gray40;
    else if(isSelected)
-      textColor.set(Colors::red);
+      textColor = Colors::red;
    else
-      textColor.set(Colors::cyan);
+      textColor = Colors::cyan;
 
-   S32 xpos2 = RenderUtils::drawCenteredStringPair(xpos, ypos, textsize, MenuContext, InputContext, *getColor(isSelected), textColor,
-                                      getPrompt().c_str(), getOptionText().c_str());
+   S32 xpos2 = RenderUtils::drawCenteredStringPair_fixed(xpos, ypos + textsize, textsize, MenuContext, InputContext, *getColor(isSelected), textColor,
+                                                         getPrompt().c_str(), getOptionText().c_str());
 
-   mGL->glColor(Colors::red);      // Cursor is always red
    if(isSelected)
    {
       FontManager::pushFontContext(InputContext);
-      mLineEditor.drawCursor(xpos2, ypos, textsize);
+      mLineEditor.drawCursor(xpos2, ypos + textsize, textsize, Colors::red);
       FontManager::popFontContext();
    }
 }
@@ -1870,15 +1865,12 @@ bool SimpleTextEntryMenuItem::handleKey(InputCode inputCode)
 
 void SimpleTextEntryMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   Color textColor(Colors::cyan);
+   S32 xpos2 = RenderUtils::drawCenteredStringPair_fixed(xpos, ypos + textsize, textsize, MenuContext, InputContext, *getColor(false),
+                                                         Colors::cyan, getPrompt().c_str(), mLineEditor.getDisplayString().c_str());
 
-   S32 xpos2 = RenderUtils::drawCenteredStringPair(xpos, ypos, textsize, MenuContext, InputContext, *getColor(false), textColor,
-         getPrompt().c_str(), mLineEditor.getDisplayString().c_str());
-
-   mGL->glColor(Colors::red);      // Cursor is always red
-
+   // Cursor needs font to be set to know where to draw
    FontManager::pushFontContext(InputContext);
-   mLineEditor.drawCursor(xpos2, ypos, textsize);
+   mLineEditor.drawCursor(xpos2, ypos + textsize, textsize, Colors::red);
    FontManager::popFontContext();
 }
 

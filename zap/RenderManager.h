@@ -87,58 +87,64 @@ public:
    void init();
 
    // GL methods
-   void glColor(const Color &c, float alpha = 1.0);
-   void glColor(const Color *c, float alpha = 1.0);
-   void glColor(F32 c, float alpha = 1.0);
-   void glColor(F32 r, F32 g, F32 b);
-   void glColor(F32 r, F32 g, F32 b, F32 alpha);
+   static void glColor(const Color &c, float alpha = 1.0);
+   static void glColor(const Color *c, float alpha = 1.0);
+   static void glColor(F32 c, float alpha = 1.0);
+   static void glColor(F32 r, F32 g, F32 b);
+   static void glColor(F32 r, F32 g, F32 b, F32 alpha);
 
-   void renderPointVector(const Vector<Point> *points, U32 geomType);
-   void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType);  // Same, but with points offset some distance
-   void renderVertexArray(const S8 verts[], S32 vertCount, S32 geomType,
-         S32 start = 0, S32 stride = 0);
-   void renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType,
-         S32 start = 0, S32 stride = 0);
-   void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType,
-         S32 start = 0, S32 stride = 0);
-   void renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount,
-         S32 geomType, S32 start = 0, S32 stride = 0);
-   void renderLine(const Vector<Point> *points);
+   static void renderPointVector(const Vector<Point> *points, U32 geomType);
+   static void renderPointVector(const Vector<Point> *points, U32 geomType, const Color &color, F32 alpha = 1.0);
+   //static void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType);  // Same, but with points offset some distance
+   static void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType, const Color &color, F32 alpha = 1.0);
+   
+   static void renderVertexArray(const S8  verts[], S32 vertCount, S32 geomType, S32 start = 0, S32 stride = 0);
+   //static void renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType, S32 start = 0, S32 stride = 0);
+   static void renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType, const Color &color, S32 start = 0, S32 stride = 0);
+   static void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType, S32 start = 0, S32 stride = 0);
+   static void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType, const Color &color, S32 start = 0, S32 stride = 0);
+   static void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType, const Color &color, F32 alpha, S32 start = 0, S32 stride = 0);
 
-   void glScale(const Point &scaleFactor);
-   void glScale(F32 scaleFactor);
-   void glScale(F32 xScaleFactor, F32 yScaleFactor);
-   void glTranslate(const Point &pos);
+   static void renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, S32 geomType, S32 start = 0, S32 stride = 0);
+   static void renderLine(const Vector<Point> *points);
 
-   void glTranslate(F32 x, F32 y);
-   void glTranslate(S32 x, S32 y);
-   void glTranslate(F32 x, S32 y);
-   void glTranslate(S32 x, F32 y);
+   static void glScale(const Point &scaleFactor);
+   static void glScale(F32 scaleFactor);
+   static void glScale(F32 xScaleFactor, F32 yScaleFactor);
+   static void glTranslate(const Point &pos);
 
-   void glTranslate(F32 x, F32 y, F32 z);
-   void glRotate(F32 angle);
-   void glLineWidth(F32 width);
-   void glViewport(S32 x, S32 y, S32 width, S32 height);
-   void glScissor(S32 x, S32 y, S32 width, S32 height);
-   void glPointSize(F32 size);
-   void glLoadIdentity();
-   void glOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 near, F64 far);
-   void glClear(U32 mask);
-   void glClearColor(F32 red, F32 green, F32 blue, F32 alpha);
-   void glPixelStore(U32 name, S32 param);
-   void glReadPixels(S32 x, S32 y, U32 width, U32 height, U32 format, U32 type, void *data);
-   void glViewport(S32 x, S32 y, U32 width, U32 height);
+   static void glTranslate(F32 x, F32 y);
+   static void glTranslate(S32 x, S32 y);
+   static void glTranslate(F32 x, S32 y);
+   static void glTranslate(S32 x, F32 y);
+
+   static void glTranslate(S32 x, S32 y, S32 z);
+   static void glTranslate(F32 x, F32 y, F32 z);
+   static void glTranslate(S32 x, S32 y, F32 z);
+
+   static void glRotate(F32 angle);
+   static void glLineWidth(F32 width);
+   static void glViewport(S32 x, S32 y, S32 width, S32 height);
+   static void glScissor(S32 x, S32 y, S32 width, S32 height);
+   static void glPointSize(F32 size);
+   static void glLoadIdentity();
+   static void glOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 near, F64 far);
+   static void glClear(U32 mask);
+   static void glClearColor(F32 red, F32 green, F32 blue, F32 alpha);
+   static void glPixelStore(U32 name, S32 param);
+   static void glReadPixels(S32 x, S32 y, U32 width, U32 height, U32 format, U32 type, void *data);
+   static void glViewport(S32 x, S32 y, U32 width, U32 height);
 
    void glBlendFunc(U32 sourceFactor, U32 destFactor);
    void setDefaultBlendFunction();
-   void glDepthFunc(U32 func);
+   static void glDepthFunc(U32 func);
 
-   void glGetValue(U32 name, U8 *fill);
+   static void glGetValue(U32 name, U8 *fill);
    void glGetValue(U32 name, S32 *fill);
    void glGetValue(U32 name, F32 *fill);
 
-   void glPushMatrix();
-   void glPopMatrix();
+   static void glPushMatrix();
+   static void glPopMatrix();
    void glMatrixMode(U32 mode);
 
    void glEnable(U32 option);

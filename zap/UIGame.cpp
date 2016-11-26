@@ -523,20 +523,17 @@ void GameUserInterface::render() const
 {
    if(!getGame()->isConnectedToServer())
    {
-      mGL->glColor(Colors::white);
-      static const SymbolString connecting("Connecting to server...", NULL, ErrorMsgContext, 30, false, AlignmentCenter);
+      static const SymbolString connecting("Connecting to server...", NULL, ErrorMsgContext, 30, Colors::white, false, AlignmentCenter);
       connecting.render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 290));
 
-      mGL->glColor(Colors::green);
       if(getGame()->getConnectionToServer())
       {
          SymbolString stat(GameConnection::getConnectionStateString(getGame()->getConnectionToServer()->getConnectionState()), 
-                           NULL, ErrorMsgContext, 16, false, AlignmentCenter);
+                            NULL, ErrorMsgContext, 16, Colors::green, false, AlignmentCenter);
          stat.render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 326));
       }
 
-      mGL->glColor(Colors::white);
-      static const SymbolString pressEsc("Press [[ESC]] to abort", NULL, ErrorMsgContext, 20, false, AlignmentCenter);
+      static const SymbolString pressEsc("Press [[ESC]] to abort", NULL, ErrorMsgContext, 20, Colors::white, false, AlignmentCenter);
       pressEsc.render(Point(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 366));
 
       return;
@@ -670,12 +667,12 @@ void GameUserInterface::renderSuspendedMessage() const
    {
       static string waitMsg[] = { "", "WILL RESPAWN", "IN BLAH BLAH SECONDS", "" };
       waitMsg[2] = "IN " + ftos(ceil(F32(getGame()->getReturnToGameDelay()) * MS_TO_SECONDS)) + " SECONDS";
-      renderMsgBox(waitMsg,  ARRAYSIZE(waitMsg));
+      renderMsgBox(waitMsg,  ARRAYSIZE(waitMsg), Colors::white);
    }
    else
    {
       static string readyMsg[] = { "", "PRESS ANY", "KEY TO", "RESPAWN", "" };
-      renderMsgBox(readyMsg, ARRAYSIZE(readyMsg));
+      renderMsgBox(readyMsg, ARRAYSIZE(readyMsg), Colors::white);
    }
 }
 
@@ -690,19 +687,19 @@ void GameUserInterface::renderLevelUpMessage(S32 newLevel) const
                            "" };
 
    msg[3] = "LEVEL " + itos(newLevel);
-   renderMsgBox(msg,  ARRAYSIZE(msg));
+   renderMsgBox(msg, ARRAYSIZE(msg), Colors::white);
 }
 
 
 // This is a helper for renderSuspendedMessage and renderLevelUpMessage.  It assumes that none of the messages
 // will have [[key_bindings]] in them.  If this assumption changes, will need to replace the NULL below in the
 // SymbolString() construction.
-void GameUserInterface::renderMsgBox(const string *message, S32 msgLines) const
+void GameUserInterface::renderMsgBox(const string *message, S32 msgLines, const Color &msgColor) const
 {
    Vector<SymbolShapePtr> messages(msgLines);
 
    for(S32 i = 0; i < msgLines; i++)
-      messages.push_back(SymbolShapePtr(new SymbolString(message[i], NULL, ErrorMsgContext, 30, true)));
+      messages.push_back(SymbolShapePtr(new SymbolString(message[i], NULL, ErrorMsgContext, 30, msgColor, true)));
 
    // Use empty shared pointer instead of NULL
    renderMessageBox(boost::shared_ptr<SymbolShape>(), boost::shared_ptr<SymbolShape>(),
@@ -733,32 +730,29 @@ void GameUserInterface::renderLostConnectionMessage() const
 
       renderCenteredFancyBox(130, 54, 130, 10, Colors::red30, 0.75f, Colors::white);
 
-      mGL->glColor(Colors::white);
-      RenderUtils::drawStringc(430, 170, 30, "CONNECTION INTERRUPTED");
+      RenderUtils::drawStringc(430, 170, 30, Colors::white, "CONNECTION INTERRUPTED");
 
       const S32 x1 = 140;
       const S32 y1 = 142;
 
-      mGL->glColor(Colors::black);
-      RenderUtils::drawRect(x1 +  1, y1 + 20, x1 + 8, y1 + 30, GLOPT::TriangleFan);
-      RenderUtils::drawRect(x1 + 11, y1 + 15, x1 + 18, y1 + 30, GLOPT::TriangleFan);
-      RenderUtils::drawRect(x1 + 21, y1 + 10, x1 + 28, y1 + 30, GLOPT::TriangleFan);
-      RenderUtils::drawRect(x1 + 31, y1 + 05, x1 + 38, y1 + 30, GLOPT::TriangleFan);
-      RenderUtils::drawRect(x1 + 41, y1 + 00, x1 + 48, y1 + 30, GLOPT::TriangleFan);
-      mGL->glColor(Colors::gray40);
-      RenderUtils::drawRect(x1 +  1, y1 + 20, x1 + 8, y1 + 30, GLOPT::LineLoop);
-      RenderUtils::drawRect(x1 + 11, y1 + 15, x1 + 18, y1 + 30, GLOPT::LineLoop);
-      RenderUtils::drawRect(x1 + 21, y1 + 10, x1 + 28, y1 + 30, GLOPT::LineLoop);
-      RenderUtils::drawRect(x1 + 31, y1 + 05, x1 + 38, y1 + 30, GLOPT::LineLoop);
-      RenderUtils::drawRect(x1 + 41, y1 + 00, x1 + 48, y1 + 30, GLOPT::LineLoop);
+      RenderUtils::drawRect(x1 + 1,  y1 + 20, x1 + 8,  y1 + 30, GLOPT::TriangleFan, Colors::black);
+      RenderUtils::drawRect(x1 + 11, y1 + 15, x1 + 18, y1 + 30, GLOPT::TriangleFan, Colors::black);
+      RenderUtils::drawRect(x1 + 21, y1 + 10, x1 + 28, y1 + 30, GLOPT::TriangleFan, Colors::black);
+      RenderUtils::drawRect(x1 + 31, y1 + 05, x1 + 38, y1 + 30, GLOPT::TriangleFan, Colors::black);
+      RenderUtils::drawRect(x1 + 41, y1 + 00, x1 + 48, y1 + 30, GLOPT::TriangleFan, Colors::black);
+
+      RenderUtils::drawRect(x1 + 1,  y1 + 20, x1 + 8,  y1 + 30, GLOPT::LineLoop, Colors::gray40);
+      RenderUtils::drawRect(x1 + 11, y1 + 15, x1 + 18, y1 + 30, GLOPT::LineLoop, Colors::gray40);
+      RenderUtils::drawRect(x1 + 21, y1 + 10, x1 + 28, y1 + 30, GLOPT::LineLoop, Colors::gray40);
+      RenderUtils::drawRect(x1 + 31, y1 + 05, x1 + 38, y1 + 30, GLOPT::LineLoop, Colors::gray40);
+      RenderUtils::drawRect(x1 + 41, y1 + 00, x1 + 48, y1 + 30, GLOPT::LineLoop, Colors::gray40);
 
 
       if((Platform::getRealMilliseconds() & 0x300) != 0) // Draw flashing red "X" on empty connection bars
       {
          static const F32 vertices[] = {x1 + 5, y1 - 5, x1 + 45, y1 + 35,  x1 + 5, y1 + 35, x1 + 45, y1 - 5 };
-         mGL->glColor(Colors::red);
-         mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH * 2.f);
-         mGL->renderVertexArray(vertices, 4, GLOPT::Lines);
+         mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH * 2.0f);
+         mGL->renderVertexArray(vertices, 4, GLOPT::Lines, Colors::red);
          mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
       }
    }
@@ -778,7 +772,7 @@ void GameUserInterface::renderShutdownMessage() const
       if(mShutdownInitiator)     // Local client intitiated the shutdown
       {
          string msg = string(timemsg) + "\n\nShutdown sequence intitated by you.\n\n" + mShutdownReason.getString();
-         renderMessageBox("SERVER SHUTDOWN INITIATED", "Press [[Esc]] to cancel shutdown", msg, 7);
+         renderMessageBox("SERVER SHUTDOWN INITIATED", "Press [[Esc]] to cancel shutdown", msg, Colors::white, 7);
       }
       else                       // Remote user intiated the shutdown
       {
@@ -788,7 +782,7 @@ void GameUserInterface::renderShutdownMessage() const
          string msg = string(timemsg) + "\n\n" + 
                       whomsg + "\n\n" + 
                       mShutdownReason.getString();
-         renderMessageBox("SHUTDOWN INITIATED", "Press [[Esc]] to dismiss", msg, 7);
+         renderMessageBox("SHUTDOWN INITIATED", "Press [[Esc]] to dismiss", msg, Colors::white, 7);
       }
    }
    else if(mShutdownMode == Canceled)
@@ -797,7 +791,7 @@ void GameUserInterface::renderShutdownMessage() const
       string msg = "Server shutdown sequence canceled.\n\n"
                    "Play on!";
 
-      renderMessageBox("SHUTDOWN CANCELED", "Press [[Esc]] to dismiss", msg, 7);
+      renderMessageBox("SHUTDOWN CANCELED", "Press [[Esc]] to dismiss", msg, Colors::white, 7);
    }
 }
 
@@ -888,8 +882,6 @@ void GameUserInterface::renderProgressBar() const
    GameType *gt = getGame()->getGameType();
    if((mShowProgressBar || mProgressBarFadeTimer.getCurrent() > 0) && gt && gt->mObjectsExpected > 0)
    {
-      mGL->glColor(Colors::green, mShowProgressBar ? 1 : mProgressBarFadeTimer.getFraction());
-
       // Outline
       const F32 left = 200;
       const F32 width = DisplayManager::getScreenInfo()->getGameCanvasWidth() - 2 * left;
@@ -901,6 +893,7 @@ void GameUserInterface::renderProgressBar() const
       // fill in the status bar while it's fading, to make it look like the level fully loaded.  Since the only thing that this
       // whole mechanism is used for is to display something to the user, this should work fine.
       F32 barWidth = mShowProgressBar ? S32((F32)width * (F32)gt->getObjectsLoaded() / (F32)gt->mObjectsExpected) : width;
+      F32 alpha = mShowProgressBar ? 1 : mProgressBarFadeTimer.getFraction();
 
       for(S32 i = 1; i >= 0; i--)
       {
@@ -912,7 +905,8 @@ void GameUserInterface::renderProgressBar() const
                left + w, F32(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - height),
                left,     F32(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - height)
          };
-         mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GLOPT::LineLoop : GLOPT::TriangleFan);
+
+         mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GLOPT::LineLoop : GLOPT::TriangleFan, Colors::green, alpha);
       }
    }
 }
@@ -987,10 +981,9 @@ void GameUserInterface::renderWrongModeIndicator() const
       // Fade for last half second
       F32 alpha = mWrongModeMsgDisplay.getCurrent() < 500 ? mWrongModeMsgDisplay.getCurrent() / 500.0f : 1.0f;
 
-      mGL->glColor(Colors::red, alpha);
       FontManager::pushFontContext(HelperMenuContext);
-      RenderUtils::drawCenteredString(225, 20, "You are in joystick mode.");
-      RenderUtils::drawCenteredString(250, 20, "You can change to Keyboard input with the Options menu.");
+      RenderUtils::drawCenteredString_fixed(245, 20, Colors::red, alpha, "You are in joystick mode.");
+      RenderUtils::drawCenteredString_fixed(270, 20, Colors::red, alpha, "You can change to Keyboard input with the Options menu.");
       FontManager::popFontContext();
    }
 }
@@ -1717,13 +1710,10 @@ void GameUserInterface::renderChatMsgs() const
 
 void GameUserInterface::renderAnnouncement(S32 pos) const
 {
-   mGL->glColor(Colors::red);
+   const S32 fontsize = 16;
+
    mGL->glLineWidth(RenderUtils::LINE_WIDTH_4);
-
-   S32 x = RenderUtils::drawStringAndGetWidth(UserInterface::horizMargin, pos, 16, "*** ");
-   x += RenderUtils::drawStringAndGetWidth(UserInterface::horizMargin + x, pos, 16, mAnnouncement.c_str());
-   RenderUtils::drawString(UserInterface::horizMargin + x, pos, 16, " ***");
-
+   RenderUtils::drawStringAndGetWidth_fixed(horizMargin, pos + fontsize, fontsize, Colors::red, ("*** " + mAnnouncement + " ***").c_str());
    mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
@@ -1951,14 +1941,13 @@ void GameUserInterface::VoiceRecorder::render() const
       U32 totalLineCount = 50;
 
       // Render low/high volume lines
-      mGL->glColor(Colors::white);
       F32 vertices[] = {
             10.0f,                        130.0f,
             10.0f,                        145.0f,
             F32(10 + totalLineCount * 2), 130.0f,
             F32(10 + totalLineCount * 2), 145.0f
       };
-      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices)/2, GLOPT::Lines);
+      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::Lines, Colors::white);
 
       F32 halfway = totalLineCount * 0.5f;
       F32 full = amt * totalLineCount;
@@ -2129,9 +2118,8 @@ void GameUserInterface::renderBasicInterfaceOverlay() const
       F32 progress = getGame()->getConnectionToServer()->getFileProgressMeter();
       if(progress != 0)
       {
-         mGL->glColor(Colors::yellow);
-         RenderUtils::drawRect(25.f, 200.f, progress * (DisplayManager::getScreenInfo()->getGameCanvasWidth()-50) + 25.f, 210.f, GLOPT::TriangleFan);
-         RenderUtils::drawRect(25, 200, DisplayManager::getScreenInfo()->getGameCanvasWidth()-25, 210, GLOPT::LineLoop);
+         RenderUtils::drawRect(25, 200, progress * (DisplayManager::getScreenInfo()->getGameCanvasWidth() - 50) + 25, 210, GLOPT::TriangleFan, Colors::yellow);
+         RenderUtils::drawRect(25, 200, DisplayManager::getScreenInfo()->getGameCanvasWidth() - 25,                   210, GLOPT::LineLoop,    Colors::yellow);
       }
    }
    
@@ -2176,26 +2164,25 @@ void GameUserInterface::renderInputModeChangeAlert() const
    if(mInputModeChangeAlertDisplayTimer.getCurrent() < 1000)
       alpha = mInputModeChangeAlertDisplayTimer.getCurrent() * 0.001f;
 
-   mGL->glColor(Colors::paleRed, alpha);
-   RenderUtils::drawCenteredStringf(vertMargin + 130, 20, "Input mode changed to %s",
+   RenderUtils::drawCenteredStringf_fixed(vertMargin + 150, 20, Colors::paleRed, alpha, "Input mode changed to %s",
                        getGame()->getInputMode() == InputModeJoystick ? "Joystick" : "Keyboard");
 }
 
 
 void GameUserInterface::renderTalkingClients() const
 {
-   S32 y = 150;
+   S32 y = 170;
+   Game *game = getGame();
 
-   for(S32 i = 0; i < getGame()->getClientCount(); i++)
+   for(S32 i = 0; i < game->getClientCount(); i++)
    {
-      ClientInfo *client = ((Game *)getGame())->getClientInfo(i);
+      ClientInfo *client = game->getClientInfo(i);
 
       if(client->getVoiceSFX()->isPlaying())
       {
          const S32 TEXT_HEIGHT = 20;
 
-         mGL->glColor( getGame()->getTeamColor(client->getTeamIndex()) );
-         RenderUtils::drawString(10, y, TEXT_HEIGHT, client->getName().getString());
+         RenderUtils::drawString_fixed(10, y, TEXT_HEIGHT, game->getTeamColor(client->getTeamIndex()), client->getName().getString());
          y += TEXT_HEIGHT + 5;
       }
    }
@@ -2207,21 +2194,17 @@ void GameUserInterface::renderDebugStatus() const
    // When bots are frozen, render large pause icon in lower left
    if(EventManager::get()->isPaused())
    {
-      mGL->glColor(Colors::white);
-
       const S32 PAUSE_HEIGHT = 30;
-      const S32 PAUSE_WIDTH = 10;
+      const S32 PAUSE_WIDTH  = 10;
       const S32 PAUSE_GAP = 6;
       const S32 BOX_INSET = 5;
 
       const S32 TEXT_SIZE = 15;
       const char *TEXT = "STEP: Alt-], Ctrl-]";
 
-      S32 x, y;
-
       // Draw box
-      x = DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin - 2 * (PAUSE_WIDTH + PAUSE_GAP) - BOX_INSET - RenderUtils::getStringWidth(TEXT_SIZE, TEXT);
-      y = vertMargin + PAUSE_HEIGHT;
+      S32 x = DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin - 2 * (PAUSE_WIDTH + PAUSE_GAP) - BOX_INSET - RenderUtils::getStringWidth(TEXT_SIZE, TEXT);
+      S32 y = vertMargin + PAUSE_HEIGHT;
 
       // Draw Pause symbol
       RenderUtils::drawFilledRect(x, y, x + PAUSE_WIDTH, y - PAUSE_HEIGHT, Colors::black, Colors::white);
@@ -2231,8 +2214,8 @@ void GameUserInterface::renderDebugStatus() const
 
       x += PAUSE_WIDTH + PAUSE_GAP + BOX_INSET;
 
-      y -= TEXT_SIZE + (PAUSE_HEIGHT - TEXT_SIZE) / 2 + 1;
-      RenderUtils::drawString(x, y, TEXT_SIZE, TEXT);
+      y -= (PAUSE_HEIGHT - TEXT_SIZE) / 2 + 1;
+      RenderUtils::drawString_fixed(x, y, TEXT_SIZE, Colors::white, TEXT);
    }
 }
 
@@ -2260,13 +2243,10 @@ void GameUserInterface::renderObjectIds() const
       S32 width = RenderUtils::getStringWidthf(height, "[%d]", id);
 
       F32 x = obj->getPos().x;
-      F32 y = obj->getPos().y;
+      F32 y = obj->getPos().y + height;
 
-      mGL->glColor(Colors::black);
-      RenderUtils::drawFilledRect(x - 1, y - 1, x + width + 1, y + height + 1);
-
-      mGL->glColor(Colors::gray70);
-      RenderUtils::drawStringf(x, y, height, "[%d]", id);
+      RenderUtils::drawFilledRect(x - 1, y - height - 1, x + width + 1, y + 1, Colors::black);
+      RenderUtils::drawStringf_fixed(x, y, height, Colors::gray70, "[%d]", id);
    }
 }
 
@@ -2325,7 +2305,7 @@ void GameUserInterface::toggleChatDisplayMode()
 
 
 // Return message being composed in in-game chat
-const char *GameUserInterface::getChatMessage()
+const char *GameUserInterface::getChatMessage() const
 {
    return mHelperManager.getChatMessage();
 }
@@ -2481,8 +2461,8 @@ void GameUserInterface::renderGameNormal() const
    // Render current ship's energy
    if(ship)
    {
-      UI::EnergyGaugeRenderer::render(ship->mEnergy);   
-      UI::HealthGaugeRenderer::render(ship->mHealth);
+      EnergyGaugeRenderer::render(ship->mEnergy);   
+      HealthGaugeRenderer::render(ship->mHealth);
    }
 
    // Render any screen-linked special effects, outside the matrix transformations
@@ -2651,8 +2631,7 @@ void GameUserInterface::renderGameCommander() const
                   Point p = otherShip->getRenderPos();
                   Point visExt = getGame()->computePlayerVisArea(otherShip);
 
-                  mGL->glColor(teamColor * zoomFrac * 0.35f);
-                  RenderUtils::drawFilledRect(p.x - visExt.x, p.y - visExt.y, p.x + visExt.x, p.y + visExt.y);
+                  RenderUtils::drawFilledRect(p.x - visExt.x, p.y - visExt.y, p.x + visExt.x, p.y + visExt.y, teamColor * zoomFrac * 0.35f);
                }
             }
          }
@@ -2667,8 +2646,10 @@ void GameUserInterface::renderGameCommander() const
             if(sb->isVisibleToPlayer(playerTeam, gameType->isTeamGame()))
             {
                GameObjectRender::renderSpyBugVisibleRange(sb->getRenderPos(), teamColor);
-               mGL->glColor(teamColor * 0.8f);     // Draw a marker in the middle
-               RenderUtils::drawCircle(sb->getRenderPos(), 2);
+               
+               // Draw a marker in the middle
+               Color color = teamColor * 0.8f;
+               RenderUtils::drawCircle(sb->getRenderPos(), 2, color);
             }
          }
       }
@@ -2707,8 +2688,8 @@ void GameUserInterface::renderGameCommander() const
    // Render current ship's energy
    if(ship)
    {
-      UI::EnergyGaugeRenderer::render(ship->mEnergy);
-      UI::HealthGaugeRenderer::render(ship->mHealth);
+      EnergyGaugeRenderer::render(ship->mEnergy);
+      HealthGaugeRenderer::render(ship->mHealth);
    }
 
    // Render any screen-linked special effects, outside the matrix transformations
@@ -2805,18 +2786,17 @@ void GameUserInterface::renderGameCommander() const
 
 void GameUserInterface::renderSuspended() const
 {
-   mGL->glColor(Colors::yellow);
    S32 textHeight = 20;
    S32 textGap = 5;
-   S32 ypos = DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - 3 * (textHeight + textGap);
+   S32 ypos = DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - 3 * (textHeight + textGap) + textHeight;
 
-   RenderUtils::drawCenteredString(ypos, textHeight, "==> Game is currently suspended, waiting for other players <==");
+   RenderUtils::drawCenteredString_fixed(ypos, textHeight, Colors::yellow, "==> Game is currently suspended, waiting for other players <==");
    ypos += textHeight + textGap;
-   RenderUtils::drawCenteredString(ypos, textHeight, "When another player joins, the game will start automatically.");
+   RenderUtils::drawCenteredString_fixed(ypos, textHeight, Colors::yellow, "When another player joins, the game will start automatically.");
    ypos += textHeight + textGap;
-   RenderUtils::drawCenteredString(ypos, textHeight, "When the game restarts, the level will be reset.");
+   RenderUtils::drawCenteredString_fixed(ypos, textHeight, Colors::yellow, "When the game restarts, the level will be reset.");
    ypos += 2 * (textHeight + textGap);
-   RenderUtils::drawCenteredString(ypos, textHeight, "Press <SPACE> to resume playing now");
+   RenderUtils::drawCenteredString_fixed(ypos, textHeight, Colors::yellow, "Press <SPACE> to resume playing now");
 }
 
 
@@ -2868,10 +2848,11 @@ void LevelListDisplayer::render() const
    {
       for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
       {
-         mGL->glColor(Colors::white, (1.4f - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.f)) *
-                                        (mLevelLoadDisplay ? 1 : mLevelLoadDisplayFadeTimer.getFraction()) );
-         RenderUtils::drawStringf(100, DisplayManager::getScreenInfo()->getGameCanvasHeight() - /*vertMargin*/ 0 - (mLevelLoadDisplayNames.size() - i) * 20,
-                     15, "%s", mLevelLoadDisplayNames[i].c_str());
+         F32 alpha = (1.4f - ((F32)(mLevelLoadDisplayNames.size() - i) / 10.f)) * (mLevelLoadDisplay ? 1 : mLevelLoadDisplayFadeTimer.getFraction());
+
+         FontManager::setFontColor(Colors::white, alpha);
+         RenderUtils::drawStringf(100, DisplayManager::getScreenInfo()->getGameCanvasHeight() - (mLevelLoadDisplayNames.size() - i) * 20 ,
+                                  15, "%s", mLevelLoadDisplayNames[i].c_str());
       }
    }
 }

@@ -157,29 +157,22 @@ void TeamShuffleHelper::render() const
 
          S32 teamIndex = i * cols + j;
 
-         Color c = getGame()->getTeamColor(teamIndex);      // Creates a copy of color
-         c *= .2f;
+         const Color &color = getGame()->getTeamColor(teamIndex);
+         Color c = color * .2f;      
 
-         RenderUtils::drawFilledRoundedRect(Point(x + columnWidth / 2, y + rowHeight / 2),
-                               columnWidth, rowHeight, 
-                               c, getGame()->getTeamColor(teamIndex), 8);
+         RenderUtils::drawFilledRoundedRect(Point(x + columnWidth / 2, y + rowHeight / 2), columnWidth, rowHeight,  c, color, 8);
+         y += TEXT_SIZE + vpad;
+         RenderUtils::drawString_fixed(x + hpad, y, TEXT_SIZE, color, getGame()->getTeamName(teamIndex).getString());
+         RenderUtils::drawHorizLine(x + hpad, x + columnWidth - hpad, y + 3, color);
 
-         mGL->glColor(getGame()->getTeamColor(teamIndex));
-         RenderUtils::drawString(x + hpad, y + vpad, TEXT_SIZE, getGame()->getTeamName(teamIndex).getString());
-
-         RenderUtils::drawHorizLine(x + hpad, x + columnWidth - hpad, y + vpad + TEXT_SIZE + 3);
-
-         mGL->glColor(Colors::white);
          for(S32 k = 0; k < mTeams[teamIndex].size(); k++)
-            RenderUtils::drawString(x + hpad, y + S32(vpad + (k + 1) * TEXT_SIZE_FACTOR * TEXT_SIZE + 3),
-                  TEXT_SIZE, mTeams[teamIndex][k]->getName().getString());
+            RenderUtils::drawString_fixed(x + hpad, y + S32((k + 1) * TEXT_SIZE_FACTOR * TEXT_SIZE + 3),
+                                          TEXT_SIZE, Colors::white, mTeams[teamIndex][k]->getName().getString());
       }
-
-   mGL->glColor(Colors::green);
 
    static const UI::SymbolString Instructions(
          "[[Enter]] to accept | [[Space]] to reshuffle | [[Esc]] to cancel", 
-         getGame()->getSettings()->getInputCodeManager(), TeamShuffleContext, 20, false, AlignmentCenter);
+         getGame()->getSettings()->getInputCodeManager(), TeamShuffleContext, 20, Colors::green, false, AlignmentCenter);
 
    static Point RenderPos(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2,
                           DisplayManager::getScreenInfo()->getGameCanvasHeight() - 60);

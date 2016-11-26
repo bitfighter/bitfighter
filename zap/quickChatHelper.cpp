@@ -134,19 +134,17 @@ void QuickChatHelper::setLegend()
 // in remaining in QuickChat mode, is there?
 void QuickChatHelper::render() const
 {
-   S32 yPos = MENU_TOP + MENU_PADDING;
+   S32 yPos = MENU_TOP + MENU_PADDING + MENU_FONT_SIZE;
 
    if(!nodeTree.size())
    {
-      mGL->glColor(Colors::ErrorMessageTextColor);
-      RenderUtils::drawCenteredString(yPos, MENU_FONT_SIZE, "Quick Chat messages improperly configured.  Please see bitfighter.ini.");
+      RenderUtils::drawCenteredString_fixed(yPos, MENU_FONT_SIZE, Colors::ErrorMessageTextColor, "Quick Chat messages improperly configured.  Please see bitfighter.ini.");
       return;
    }
 
    if(mCurrentRenderCount == 0)    // Nothing to render, let's go home
    {
-      mGL->glColor(Colors::red);
-      RenderUtils::drawString(0, yPos, MENU_FONT_SIZE, "No messages here (misconfiguration?)");
+      RenderUtils::drawString_fixed(0, yPos, MENU_FONT_SIZE, Colors::red, "No messages here (misconfiguration?)");
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
       return;
    }

@@ -20,7 +20,7 @@ class UIColorPicker : public UserInterface, public Color
    U32 mMouseDown;
 
 private:
-   static void drawArrow(F32 *p);
+   static void drawArrow(F32 *p, const Color &color);
 
 public:
    explicit UIColorPicker(ClientGame *game, UIManager *uiManager);   // Constructor
@@ -30,7 +30,7 @@ public:
    void onReactivate();
    void idle(U32 timeDelta);
    void render() const;
-   void quit();
+   static void quit();
    bool onKeyDown(InputCode inputCode);
    void onKeyUp(InputCode inputCode);
    void onMouseMoved();

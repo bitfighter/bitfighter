@@ -170,7 +170,7 @@ private:
    void renderObjectsUnderConstruction() const;                      // Render partially constructed walls and other items that aren't yet in a db
    void renderDock() const;
    void renderInfoPanel() const;
-   void renderPanelInfoLine(S32 line, const char *format, ...) const;
+   void renderPanelInfoLine(S32 line, const Color &color, const char *format, ...) const;
 
    void renderItemInfoPanel() const;
 
@@ -220,13 +220,13 @@ private:
    bool anythingSelected() const;                              // Are any items/vertices selected?
 
    static void renderAttribText(S32 xpos, S32 ypos, S32 textsize, const Color &keyColor,
-         const Color &valColor, const Vector<string> &keys, const Vector<string> &vals);
-   static void setColor(bool isSelected, bool isLitUp, bool isScriptItem);
+                                const Color &valColor, const Vector<string> &keys, const Vector<string> &vals);
    static void renderDockItemLabel(const Point &pos, const char *label);
    static void renderDockItem(const BfObject *object, const Color &color, F32 currentScale, S32 snapVertexIndex);
 
 public:
    S32 getItemSelectedCount();                     // How many are objects are selected?
+   static const Color &getColor(bool isSelected, bool isLitUp);
 
 private:
    // Sets mHitItem and mEdgeHit -- findHitItemAndEdge calls one or more of the associated helper functions below
@@ -504,7 +504,7 @@ public:
    void runScript(Level *level, const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);
    void runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);  
 
-   string getPluginSignature();                 // Try to create some sort of uniqeish signature for the plugin
+   string getPluginSignature() const;                 // Try to create some sort of uniqeish signature for the plugin
    void onPluginExecuted(const Vector<string> &args);
    void runLevelGenScript();              // Run associated levelgen script
    void copyScriptItemsToEditor();        // Insert these items into the editor as first class items that can be manipulated or saved

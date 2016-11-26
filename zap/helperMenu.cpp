@@ -182,8 +182,6 @@ void HelperMenu::drawItemMenu(S32 widthOfButtons, S32 widthOfTextBlock) const
 
    static const S32 yStartPos = MENU_TOP + MENU_PADDING;   
 
-   S32 yPos = yStartPos;
-
    // If we are transitioning between items of different sizes, we will gradually change the rendered size during the transition
    // Generally, the top of the menu will stay in place, while the bottom will be adjusted.  Therefore, lower items need
    // to be offset by the transitionOffset which we will calculate below.  MenuBottom will be the actual bottom of the menu
@@ -200,17 +198,16 @@ void HelperMenu::drawItemMenu(S32 widthOfButtons, S32 widthOfTextBlock) const
    renderSlideoutWidgetFrame(0, MENU_TOP, getWidth(), menuBottom - MENU_TOP, frameColor);
 
    // Draw the title (above gray line)
-   mGL->glColor(baseColor);
-   
+   S32 yPos = yStartPos;
+
    FontManager::pushFontContext(HelperMenuHeadlineContext);
-   RenderUtils::drawCenteredString(grayLineCenter, yPos, TITLE_FONT_SIZE, mTitle);
+   RenderUtils::drawCenteredString_fixed(grayLineCenter, yPos + TITLE_FONT_SIZE, TITLE_FONT_SIZE, baseColor, mTitle);
    FontManager::popFontContext();
 
    yPos += TitleHeight;
 
    // Gray line
-   mGL->glColor(Colors::gray20);
-   RenderUtils::drawHorizLine(grayLineLeft, grayLineRight, yPos + 2);
+   RenderUtils::drawHorizLine(grayLineLeft, grayLineRight, yPos + 2, Colors::gray20);
 
    yPos += GrayLineBuffer;
 
@@ -227,7 +224,7 @@ void HelperMenu::drawItemMenu(S32 widthOfButtons, S32 widthOfTextBlock) const
    S32 legendHeight = getLegendHeight();
 
    if(mLegend)
-      renderLegend(grayLineCenter, yPos - legendHeight - 3, *mLegend);
+      renderLegend(grayLineCenter, yPos - legendHeight - 3 + MENU_LEGEND_FONT_SIZE, *mLegend);
 
    yPos += legendHeight;
 
@@ -303,8 +300,7 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
    else              // Draw the old items we're transitioning away from
       yPos = prepareToRenderFromDisplay(displayMode, top, oldHeight, height);
 
-   yPos += 2;        // Aesthetics
-
+   yPos += MENU_FONT_SIZE + 2;      // The 2 just looks good
    for(S32 i = 0; i < count; i++)
    {
       // Skip hidden options!
@@ -316,23 +312,21 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
 
       // Render key in white, or, if there is a legend, in the color of the adjacent item
       const Color *buttonOverrideColor = items[i].buttonOverrideColor;
-      
-      const Color *itemColor = items[i].itemColor;
+      const Color *itemColor           = items[i].itemColor;
 
       // Need to add buttonWidth / 2 because renderControllerButton() centers on passed coords
       JoystickRender::renderControllerButton(LeftMargin + horizOffset + (F32)buttonWidth / 2, 
                                              (F32)yPos - 1, code, buttonOverrideColor);
-      mGL->glColor(itemColor);
 
       S32 xPos = LeftMargin + buttonWidth + ButtonLabelGap + horizOffset;
-      S32 textWidth = RenderUtils::drawStringAndGetWidth(xPos, yPos, MENU_FONT_SIZE, items[i].name);
+      
+      S32 textWidth = RenderUtils::drawStringAndGetWidth_fixed(xPos, yPos, MENU_FONT_SIZE, *itemColor, items[i].name);
 
       // Render help string, if one is available
       if(strcmp(items[i].help, "") != 0)
       {
-         mGL->glColor(items[i].helpColor);
          xPos += textWidth + ButtonLabelGap;
-         RenderUtils::drawString(xPos, yPos, MENU_FONT_SIZE, items[i].help);
+         RenderUtils::drawString_fixed(xPos, yPos, MENU_FONT_SIZE, *items[i].helpColor, items[i].help);
       }
 
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
@@ -344,19 +338,17 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
 
 void HelperMenu::renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &baseColor, InputMode inputMode) const
 {
-   mGL->glColor(baseColor);
 
    // RenderedSize will be -1 if the button is not defined
    if(inputMode == InputModeKeyboard)
-      RenderUtils::drawStringfc((F32)xPos, (F32)yPos, (F32)MENU_LEGEND_FONT_SIZE,
+      RenderUtils::drawStringfc((F32)xPos, (F32)yPos, (F32)MENU_LEGEND_FONT_SIZE, baseColor, 1.0,
                   "Press [%s] to cancel", InputCodeManager::inputCodeToString(KEY_ESCAPE));
    else
    {
-
       static const SymbolString JoystickInstructions(
             "Press [[Back]] to cancel", 
             mClientGame->getSettings()->getInputCodeManager(), MenuHeaderContext, 
-            MENU_LEGEND_FONT_SIZE, false, AlignmentCenter);
+            MENU_LEGEND_FONT_SIZE, baseColor, false, AlignmentCenter);
 
       JoystickInstructions.render(Point(xPos + 4, yPos));
    }
@@ -379,10 +371,7 @@ void HelperMenu::renderLegend(S32 x, S32 y, const Vector<HelperMenuLegendItem> &
    x -= width / 2;
 
    for(S32 i = 0; i < legend.size(); i++)
-   {
-      mGL->glColor(legend[i].color);
-      x += RenderUtils::drawStringAndGetWidth(x, y, MENU_LEGEND_FONT_SIZE, legend[i].text.c_str()) + SPACE_BETWEEN_LEGEND_ITEMS;
-   }
+      x += RenderUtils::drawStringAndGetWidth_fixed(x, y, MENU_LEGEND_FONT_SIZE, legend[i].color, legend[i].text.c_str()) + SPACE_BETWEEN_LEGEND_ITEMS;
 }
 
 

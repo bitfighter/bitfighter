@@ -62,9 +62,7 @@ void HighScoresUserInterface::renderScores() const
    S32 gapBetweenGroups = 40;
    S32 scoreIndent = 10;
 
-   mGL->glColor(Colors::green);
-
-   RenderUtils::drawCenteredUnderlinedString(y, headerSize, "BITFIGHTER HIGH SCORES");
+   RenderUtils::drawCenteredUnderlinedString(y, headerSize, Colors::green, "BITFIGHTER HIGH SCORES");
    y += gapAfterTitle;
 
    S32 col = 0;   // 0 = left col, 1 = right col
@@ -76,14 +74,12 @@ void HighScoresUserInterface::renderScores() const
 
       S32 x = col == 0 ? horizMargin : DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2;
 
-      mGL->glColor(Colors::palePurple);
+      y += titleSize;
+      RenderUtils::drawString_fixed(x, y, titleSize, Colors::palePurple, mScoreGroups[i].title.c_str());
 
-      RenderUtils::drawString(x, y, titleSize, mScoreGroups[i].title.c_str());
-      y += titleSize + 5;
-
-      // Draw line
-      mGL->glColor(Colors::gray70);
-      RenderUtils::drawHorizLine(x, x + DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2 - 2 * horizMargin, y);
+      // Draw line with a little space
+      y += 5;
+      RenderUtils::drawHorizLine(x, x + DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2 - 2 * horizMargin, y, Colors::gray70);
       y += 5;
 
 
@@ -92,16 +88,12 @@ void HighScoresUserInterface::renderScores() const
       // Now draw names
       for(S32 j = 0; j < mScoreGroups[i].names.size(); j++)
       {
-         mGL->glColor(Colors::cyan);
-
          // First gap will always be largest if scores are descending...
          if(w == -1)
             w = RenderUtils::getStringWidth(textSize, mScoreGroups[i].scores[j].c_str());
 
-         RenderUtils::drawStringr(x + scoreIndent + w, y, textSize, mScoreGroups[i].scores[j].c_str());
-
-         mGL->glColor(Colors::yellow);
-         RenderUtils::drawStringAndGetWidth(x + scoreIndent + w + 15, y, textSize, mScoreGroups[i].names[j].c_str());
+         RenderUtils::drawStringr          (x + scoreIndent + w,      y, textSize, Colors::cyan,   mScoreGroups[i].scores[j].c_str());
+         RenderUtils::drawStringAndGetWidth(x + scoreIndent + w + 15, y, textSize, Colors::yellow, mScoreGroups[i].names[j] .c_str());
 
          y += textSize + gapBetweenNames;
       }
@@ -113,9 +105,8 @@ void HighScoresUserInterface::renderScores() const
          y = yStart;
    }
 
-   mGL->glColor(Colors::red80);
-
-   RenderUtils::drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - titleSize, titleSize, "The week ends Sunday/Monday at 0:00:00 UTC Time");
+   RenderUtils::drawCenteredString_fixed(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin, titleSize, 
+                                         Colors::red80, "The week ends Sunday/Monday at 0:00:00 UTC Time");
 
    FontManager::popFontContext();
 }
@@ -140,10 +131,10 @@ void HighScoresUserInterface::renderWaitingForScores() const
       RenderUtils::wrapString("Retrieving scores from Master Server", UIManager::MessageBoxWrapWidth, 18, ErrorMsgContext, lines);
 
       for(S32 i = 0; i < lines.size(); i++)
-         symbolSet.add(SymbolString::getSymbolText(lines[i], 30, ErrorMsgContext, &Colors::blue));
+         symbolSet.add(SymbolString::getSymbolText(lines[i], 30, ErrorMsgContext, Colors::blue));
 
       symbolSet.add(SymbolString(SymbolString::getBlankSymbol(0, 10)));   
-      symbolSet.add(SymbolString(SymbolString::getSymbolSpinner(18, &Colors::cyan)));   
+      symbolSet.add(SymbolString(SymbolString::getSymbolSpinner(18, Colors::cyan)));   
 
       symbolSet.render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, (DisplayManager::getScreenInfo()->getGameCanvasHeight() - symbolSet.getHeight()) / 2, AlignmentCenter);
    }

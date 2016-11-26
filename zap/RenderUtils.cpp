@@ -21,14 +21,15 @@
 
 namespace Zap {
 
-static char buffer[2048];     // Reusable buffer
-#define makeBuffer    va_list args; va_start(args, format); vsnprintf(buffer, sizeof(buffer), format, args); va_end(args);
 
 // static members
 F32 RenderUtils::LINE_WIDTH_1 = 1.0f;
 F32 RenderUtils::DEFAULT_LINE_WIDTH = 2.0f;
 F32 RenderUtils::LINE_WIDTH_3 = 3.0f;
 F32 RenderUtils::LINE_WIDTH_4 = 4.0f;
+
+char RenderUtils::buffer[2048];     // Reusable buffer
+
 
 const S32 RenderUtils::NUM_CIRCLE_SIDES = 32;
 const F32 RenderUtils::CIRCLE_SIDE_THETA = Float2Pi / NUM_CIRCLE_SIDES;
@@ -52,6 +53,7 @@ void RenderUtils::glColor(const Color &color, float alpha)
 }
 
 
+// All text rendering flows through here
 void RenderUtils::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
 {
    mGL->glPushMatrix();
@@ -71,37 +73,41 @@ void RenderUtils::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const cha
 //}
 
 
-// Center text between two points, adjust angle so it's always right-side-up
-void RenderUtils::drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offset, const char *format, ...)
-{
-   F32 ang = p1.angleTo(p2);
+//// Center text between two points, adjust angle so it's always right-side-up
+//void RenderUtils::drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offset, const char *format, ...)
+//{
+//   F32 ang = p1.angleTo(p2);
+//
+//   // Make sure text is right-side-up
+//   if(ang < -FloatHalfPi || ang > FloatHalfPi)
+//   {
+//      Point temp = p2;
+//      p2 = p1;
+//      p1 = temp;
+//      ang = p1.angleTo(p2);
+//   }
+//
+//   F32 cosang = cos(ang);
+//   F32 sinang = sin(ang);
+//
+//   makeBuffer;
+//   F32 len = getStringWidthf(size, buffer);
+//   F32 offset = (p1.distanceTo(p2) - len) / 2;
+//
+//   doDrawAngleString(p1.x + cosang * offset + sinang * (size + vert_offset), 
+//                     p1.y + sinang * offset - cosang * (size + vert_offset), 
+//                     size, 
+//                     ang, 
+//                     buffer);
+//}
 
-   // Make sure text is right-side-up
-   if(ang < -FloatHalfPi || ang > FloatHalfPi)
-   {
-      Point temp = p2;
-      p2 = p1;
-      p1 = temp;
-      ang = p1.angleTo(p2);
-   }
 
-   F32 cosang = cos(ang);
-   F32 sinang = sin(ang);
-
-   makeBuffer;
-   F32 len = getStringWidthf(size, buffer);
-   F32 offset = (p1.distanceTo(p2) - len) / 2;
-
-   doDrawAngleString(p1.x + cosang * offset + sinang * (size + vert_offset), p1.y + sinang * offset - cosang * (size + vert_offset), size, ang, buffer);
-}
-
-
-// New, fixed version
-void RenderUtils::drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...)
-{
-   makeBuffer;
-   doDrawAngleString(x, y, size, angle, buffer);
-}
+//// New, fixed version
+//void RenderUtils::drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...)
+//{
+//   makeBuffer;
+//   doDrawAngleString(x, y, size, angle, buffer);
+//}
 
 
 // New, fixed version
@@ -109,6 +115,21 @@ void RenderUtils::drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char 
 {
    doDrawAngleString(x, y, size, angle, string);
 }
+
+
+void RenderUtils::drawAngleString(F32 x, F32 y, F32 size, const Color &color, F32 angle, const char *string)
+{
+   FontManager::setFontColor(color);
+   doDrawAngleString(x, y, size, angle, string);
+}
+
+
+void RenderUtils::drawAngleString(F32 x, F32 y, F32 size, const Color &color, F32 alpha, F32 angle, const char *string)
+{
+   FontManager::setFontColor(color, alpha);
+   doDrawAngleString(x, y, size, angle, string);
+}
+
 
 
 // Broken!
@@ -138,24 +159,32 @@ void RenderUtils::drawString(F32 x, F32 y, F32 size, const char *string)
 void RenderUtils::drawStringf(S32 x, S32 y, S32 size, const char *format, ...)
 {
    makeBuffer;
-   drawString(x, y, size, buffer);
+   drawString_fixed(x, y + size, size, buffer);
 }
 
 
 void RenderUtils::drawStringf(F32 x, F32 y, F32 size, const char *format, ...)
 {
    makeBuffer;
-   drawString(x, y, size, buffer);
+   drawString_fixed(x, y + size, size, buffer);
 }
 
 
 void RenderUtils::drawStringf(F32 x, F32 y, S32 size, const char *format, ...)
 {
    makeBuffer;
-   drawString(x, y, size, buffer);
+   drawString_fixed(x, y + size, size, buffer);
+}
+
+// fixed
+S32 RenderUtils::drawStringfc(F32 x, F32 y, F32 size, const Color &color, F32 alpha, const char *format, ...)
+{
+   makeBuffer;
+   return drawStringc(x, y, (F32)size, color, alpha, buffer);
 }
 
 
+// fixed
 S32 RenderUtils::drawStringfc(F32 x, F32 y, F32 size, const char *format, ...)
 {
    makeBuffer;
@@ -163,14 +192,28 @@ S32 RenderUtils::drawStringfc(F32 x, F32 y, F32 size, const char *format, ...)
 }
 
 
-S32 RenderUtils::drawStringfr(F32 x, F32 y, F32 size, const char *format, ...)
+//S32 RenderUtils::drawStringfr(F32 x, F32 y, F32 size, const char *format, ...)
+//{
+//   makeBuffer;
+//
+//   F32 len = getStringWidth(size, buffer);
+//   doDrawAngleString(x - len, y, size, 0, buffer);
+//
+//   return S32(len);
+//}
+
+
+S32 RenderUtils::drawStringfr(S32 x, S32 y, S32 size, const Color &color, const char *format, ...)
 {
    makeBuffer;
+   return drawStringr(x, y, size, color, buffer);
+}
 
-   F32 len = getStringWidth(size, buffer);
-   doDrawAngleString(x - len, y, size, 0, buffer);
 
-   return S32(len);
+S32 RenderUtils::drawStringfr_fixed(S32 x, S32 y, S32 size, const Color &color, const char *format, ...)
+{
+   makeBuffer;
+   return drawStringr(x, y - size, size, color, buffer);    // feeds into unfixed version
 }
 
 
@@ -178,6 +221,13 @@ S32 RenderUtils::drawStringfr(S32 x, S32 y, S32 size, const char *format, ...)
 {
    makeBuffer;
    return drawStringr(x, y, size, buffer);
+}
+
+
+S32 RenderUtils::drawStringr(S32 x, S32 y, S32 size, const Color &color, const char *string)
+{
+   FontManager::setFontColor(color);
+   return drawStringr(x, y, size, string);
 }
 
 
@@ -189,17 +239,32 @@ S32 RenderUtils::drawStringr(S32 x, S32 y, S32 size, const char *string)
    return (S32)len;
 }
 
+
+// Fixed
+S32 RenderUtils::drawStringAndGetWidth(S32 x, S32 y, S32 size, const Color &color, const char *string)
+{
+   drawString_fixed(x, y + size, size, string);
+   return getStringWidth(size, string);
+}
    
+
 S32 RenderUtils::drawStringAndGetWidth(S32 x, S32 y, S32 size, const char *string)
 {
-   drawString(x, y, size, string);
+   drawString_fixed(x, y + size, size, string);
    return getStringWidth(size, string);
 }
 
 
 S32 RenderUtils::drawStringAndGetWidth(F32 x, F32 y, S32 size, const char *string)
 {
-   drawString(x, y, size, string);
+   drawString_fixed(x, y + size, size, string);
+   return getStringWidth(size, string);
+}
+
+
+S32 RenderUtils::drawStringAndGetWidth_fixed(F32 x, F32 y, S32 size, const char *string)
+{
+   drawString_fixed(x, y, size, string);
    return getStringWidth(size, string);
 }
 
@@ -207,7 +272,7 @@ S32 RenderUtils::drawStringAndGetWidth(F32 x, F32 y, S32 size, const char *strin
 S32 RenderUtils::drawStringAndGetWidthf(S32 x, S32 y, S32 size, const char *format, ...)
 {
    makeBuffer;
-   drawString(x, y, size, buffer);
+   drawString_fixed(x, y + size, size, buffer);
    return getStringWidth(size, buffer);
 }
 
@@ -215,24 +280,16 @@ S32 RenderUtils::drawStringAndGetWidthf(S32 x, S32 y, S32 size, const char *form
 S32 RenderUtils::drawStringAndGetWidthf(F32 x, F32 y, S32 size, const char *format, ...)
 {
    makeBuffer;
-   drawString(x, y, size, buffer);
+   drawString_fixed(x, y + size, size, buffer);
    return getStringWidth(size, buffer);
 }
 
 
-S32 RenderUtils::drawStringc(S32 x, S32 y, S32 size, const char *string)
+S32 RenderUtils::drawStringAndGetWidthf(F32 x, F32 y, S32 size, const Color &color, const char *format, ...)
 {
-   return drawStringc((F32)x, (F32)y, (F32)size, string);
-}
-
-
-// Uses fixed drawAngleString()
-S32 RenderUtils::drawStringc(F32 x, F32 y, F32 size, const char *string)
-{
-   F32 len = getStringWidth(size, string);
-   drawAngleString(x - len / 2, y, size, 0, string);
-
-   return (S32)len;
+   makeBuffer;
+   drawString_fixed(x, y + size, size, color, buffer);
+   return getStringWidth(size, buffer);
 }
 
 
@@ -242,50 +299,57 @@ S32 RenderUtils::drawStringc(const Point &cen, F32 size, const char *string)
 }
 
 
+S32 RenderUtils::drawCenteredString_fixed(S32 y, S32 size, const Color &color, const char *string)
+{
+   return drawCenteredString_fixed(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, y, size, color, string);
+}
+
+
+S32 RenderUtils::drawCenteredString_fixed(S32 y, S32 size, const Color &color, F32 alpha, const char *string)
+{
+   return drawCenteredString_fixed(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, y, size, color, alpha, string);
+}
+
+
 S32 RenderUtils::drawCenteredString_fixed(S32 y, S32 size, const char *string)
 {
    return drawCenteredString_fixed(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, y, size, string);
 }
 
 
-// For now, not very fault tolerant...  assumes well balanced []
-void RenderUtils::drawCenteredString_highlightKeys(S32 y, S32 size, const string &str, const Color &bodyColor, const Color &keyColor)
-{
-   S32 len = getStringWidth(size, str.c_str());
-   S32 x = DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2 - len / 2;
-
-   std::size_t keyStart, keyEnd = 0;
-   S32 pos = 0;
-
-   keyStart = str.find("[");
-   while(keyStart != string::npos)
-   {
-      //mGL->glColor(bodyColor);
-      FontManager::setFontColor(bodyColor);     
-
-      x += drawStringAndGetWidth(x, y, size, str.substr(pos, keyStart - pos).c_str());
-
-      keyEnd = str.find("]", keyStart) + 1;     // + 1 to include the "]" itself
-      //mGL->glColor(keyColor);
-      FontManager::setFontColor(keyColor);
-      x += drawStringAndGetWidth(x, y, size, str.substr(keyStart, keyEnd - keyStart).c_str());
-      pos = keyEnd;
-
-      keyStart = str.find("[", pos);
-   }
-   
-   // Draw any remaining bits of our string
-   //mGL->glColor(bodyColor);
-   FontManager::setFontColor(bodyColor);
-   drawString(x, y, size, str.substr(keyEnd).c_str());
-}
+//// For now, not very fault tolerant...  assumes well balanced []
+//void RenderUtils::drawCenteredString_highlightKeys(S32 y, S32 size, const string &str, const Color &bodyColor, const Color &keyColor)
+//{
+//   S32 len = getStringWidth(size, str.c_str());
+//   S32 x = DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2 - len / 2;
+//   y += size;
+//
+//   std::size_t keyStart, keyEnd = 0;
+//   S32 pos = 0;
+//
+//   keyStart = str.find("[");
+//   while(keyStart != string::npos)
+//   {
+//      x += drawStringAndGetWidth_fixed(x, y, size, bodyColor, str.substr(pos, keyStart - pos).c_str());
+//
+//      keyEnd = str.find("]", keyStart) + 1;     // + 1 to include the "]" itself
+//      
+//      x += drawStringAndGetWidth_fixed(x, y, size, keyColor, str.substr(keyStart, keyEnd - keyStart).c_str());
+//      pos = keyEnd;
+//
+//      keyStart = str.find("[", pos);
+//   }
+//   
+//   // Draw any remaining bits of our string
+//   drawString_fixed(x, y, size, bodyColor, str.substr(keyEnd).c_str());
+//}
 
 
-S32 RenderUtils::drawCenteredUnderlinedString(S32 y, S32 size, const char *string)
+S32 RenderUtils::drawCenteredUnderlinedString(S32 y, S32 size, const Color &color, const char *string)
 {
    S32 x = DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2;
-   S32 xpos = drawCenteredString(x, y, size, string);
-   drawHorizLine(xpos, DisplayManager::getScreenInfo()->getGameCanvasWidth() - xpos, y + size + 5);
+   S32 xpos = drawCenteredString_fixed(x, y + size, size, color, string);
+   drawHorizLine(xpos, DisplayManager::getScreenInfo()->getGameCanvasWidth() - xpos, y + size + 5, color);
 
    return xpos;
 }
@@ -299,28 +363,28 @@ S32 RenderUtils::drawCenteredString(S32 x, S32 y, S32 size, const char *string)
 }
 
 
-S32 RenderUtils::drawCenteredString_fixed(S32 x, S32 y, S32 size, const char *string)
+S32 RenderUtils::drawCenteredString_fixed(S32 x, S32 y, S32 size, const Color &color, const char *string)
 {
    S32 xpos = x - getStringWidth(size, string) / 2;
-   drawString_fixed(xpos, y, size, string);
-   return xpos;
+   drawString_fixed(xpos, y, size, color, string);
+   return xpos;   
 }
 
 
-F32 RenderUtils::drawCenteredString_fixed(F32 x, F32 y, S32 size, const char *string)
+S32 RenderUtils::drawCenteredString_fixed(S32 x, S32 y, S32 size, const Color &color, F32 alpha, const char *string)
 {
-   F32 xpos = x - getStringWidth((F32)size, string) / 2;
-   drawString_fixed(xpos, y, size, string);
-   return xpos;
+   S32 xpos = x - getStringWidth(size, string) / 2;
+   drawString_fixed(xpos, y, size, color, alpha, string);
+   return xpos;   
 }
 
 
-S32 RenderUtils::drawCenteredString_fixed(F32 x, F32 y, S32 size, FontContext fontContext, const char *string)
+S32 RenderUtils::drawCenteredString_fixed(F32 x, F32 y, S32 size, FontContext fontContext, const Color &color, const char *string)
 {
    FontManager::pushFontContext(fontContext);
 
    F32 xpos = x - getStringWidth(size, string) / 2.0f;
-   drawString_fixed(xpos, y, size, string);
+   drawString_fixed(xpos, y, size, color, string);
 
    FontManager::popFontContext();
 
@@ -328,31 +392,52 @@ S32 RenderUtils::drawCenteredString_fixed(F32 x, F32 y, S32 size, FontContext fo
 }
 
 
-F32 RenderUtils::drawCenteredString(F32 x, F32 y, S32 size, const char *string)
-{
-   return drawCenteredString(x, y, F32(size), string);
-}
+//F32 RenderUtils::drawCenteredString(F32 x, F32 y, S32 size, const char *string)
+//{
+//   return drawCenteredString_fixed(x, y + size, F32(size), string);
+//}
 
 
-F32 RenderUtils::drawCenteredString(F32 x, F32 y, F32 size, const char *string)
-{
-   F32 xpos = x - getStringWidth(size, string) / 2;
-   drawString(xpos, y, size, string);
-   return xpos;
-}
+//F32 RenderUtils::drawCenteredString(F32 x, F32 y, F32 size, const char *string)
+//{
+//   F32 xpos = x - getStringWidth(size, string) / 2;
+//   drawString(xpos, y, size, string);
+//   return xpos;
+//}
 
 
-S32 RenderUtils::drawCenteredStringf(S32 y, S32 size, const char *format, ...)
-{
-   makeBuffer; 
-   return (S32) drawCenteredString(y, size, buffer);
-}
+//S32 RenderUtils::drawCenteredStringf(S32 y, S32 size, const char *format, ...)
+//{
+//   makeBuffer; 
+//   return (S32) drawCenteredString(y, size, buffer);
+//}
 
 
-S32 RenderUtils::drawCenteredStringf(S32 x, S32 y, S32 size, const char *format, ...)
+S32 RenderUtils::drawCenteredStringf_fixed(S32 y, S32 size, const Color &color, const char *format, ...)
 {
    makeBuffer;
-   return drawCenteredString(x, y, size, buffer);
+   return (S32)drawCenteredString_fixed(y, size, color, buffer);
+}
+
+
+S32 RenderUtils::drawCenteredStringf_fixed(S32 y, S32 size, const Color &color, F32 alpha, const char *format, ...)
+{
+   makeBuffer;
+   return drawCenteredString_fixed(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, y, size, color, alpha, buffer);
+}
+
+
+//S32 RenderUtils::drawCenteredStringf(S32 x, S32 y, S32 size, const char *format, ...)
+//{
+//   makeBuffer;
+//   return drawCenteredString(x, y, size, buffer);
+//}
+
+
+S32 RenderUtils::drawCenteredStringf_fixed(S32 x, S32 y, S32 size, const Color &color, const char *format, ...)
+{
+   makeBuffer;
+   return drawCenteredString_fixed(x, y, size, color, buffer);
 }
 
 
@@ -387,18 +472,18 @@ S32 RenderUtils::getCenteredString2ColStartingPosf(S32 size, bool leftCol, const
 }
 
 
-S32 RenderUtils::drawCenteredString2Col(S32 y, S32 size, bool leftCol, const char *string)
+S32 RenderUtils::drawCenteredString2Col(S32 y, S32 size, const Color &color, bool leftCol, const char *string)
 {
    S32 x = getCenteredString2ColStartingPos(size, leftCol, string);
-   drawString(x, y, size, string);
+   drawString_fixed(x, y, size, color, string);
    return x;
 }
 
 
-S32 RenderUtils::drawCenteredString2Colf(S32 y, S32 size, bool leftCol, const char *format, ...)
+S32 RenderUtils::drawCenteredString2Colf(S32 y, S32 size, const Color &color, bool leftCol, const char *format, ...)
 {
    makeBuffer;
-   return drawCenteredString2Col(y, size, leftCol, buffer);
+   return drawCenteredString2Col(y, size, color, leftCol, buffer);
 }
 
    
@@ -411,7 +496,7 @@ S32 RenderUtils::get2ColStartingPos(bool leftCol)      // Must be S32 to avoid p
 
 // Returns starting position of value, which is useful for positioning the cursor in an editable menu entry
 S32 RenderUtils::drawCenteredStringPair(S32 ypos, S32 size, const Color &leftColor, const Color &rightColor,
-                                          const char *leftStr, const char *rightStr)
+                                        const char *leftStr, const char *rightStr)
 {
    return drawCenteredStringPair(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, ypos, size, leftColor, rightColor, leftStr, rightStr);
 }
@@ -419,15 +504,16 @@ S32 RenderUtils::drawCenteredStringPair(S32 ypos, S32 size, const Color &leftCol
 
 // Returns starting position of value, which is useful for positioning the cursor in an editable menu entry
 S32 RenderUtils::drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor, const Color &rightColor,
-                                          const char *leftStr, const char *rightStr)
+                                        const char *leftStr, const char *rightStr)
 {
    S32 xpos2 = getCenteredStringStartingPosf(size, "%s %s", leftStr, rightStr) + xpos - DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2;
 
    return drawStringPair(xpos2, ypos, size, leftColor, rightColor, leftStr, rightStr);
 }
 
-S32 RenderUtils::drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, FontContext leftContext, FontContext rightContext, const Color &leftColor, const Color &rightColor,
-                                          const char *leftStr, const char *rightStr)
+
+S32 RenderUtils::drawCenteredStringPair_fixed(S32 xpos, S32 ypos, S32 size, FontContext leftContext, FontContext rightContext, const Color &leftColor, const Color &rightColor,
+                                              const char *leftStr, const char *rightStr)
 {
    S32 width = getStringPairWidth(size, leftContext, rightContext, leftStr, rightStr);
    return drawStringPair(xpos - width / 2, ypos, size, leftContext, rightContext, leftColor, rightColor, string(leftStr).append(" ").c_str(), rightStr);
@@ -435,17 +521,12 @@ S32 RenderUtils::drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, FontContex
 
 
 S32 RenderUtils::drawStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor, const Color &rightColor,
-                                         const char *leftStr, const char *rightStr)
+                                const char *leftStr, const char *rightStr)
 {
-   //mGL->glColor(leftColor);
-   FontManager::setFontColor(leftColor);
+   // + 5 to compensate for fontStash bug calculating with of terminal spaces
+   xpos += drawStringAndGetWidth_fixed(xpos, ypos, size, leftColor, leftStr) + 5;
 
-   // Use crazy width calculation to compensate for fontStash bug calculating with of terminal spaces
-   xpos += drawStringAndGetWidth((F32)xpos, (F32)ypos, size, leftStr) + 5; //getStringWidth(size, "X X") - getStringWidth(size, "XX");
-
-   //mGL->glColor(rightColor);
-   FontManager::setFontColor(rightColor);
-   drawString(xpos, ypos, size, rightStr);
+   drawString_fixed(xpos, ypos, size, rightColor, rightStr);
 
    return xpos;
 }
@@ -456,15 +537,15 @@ S32 RenderUtils::drawStringPair(S32 xpos, S32 ypos, S32 size, FontContext leftCo
       const char* leftStr, const char* rightStr)
 {
    FontManager::pushFontContext(leftContext);
-   //mGL->glColor(leftColor);
+
    FontManager::setFontColor(leftColor);
-   xpos += drawStringAndGetWidth((F32)xpos, (F32)ypos, size, leftStr);
+   xpos += drawStringAndGetWidth_fixed((F32)xpos, (F32)ypos, size, leftStr);
    FontManager::popFontContext();
 
    FontManager::pushFontContext(rightContext);
-   //mGL->glColor(rightColor);
    FontManager::setFontColor(rightColor);
-   drawString(xpos, ypos, size, rightStr);
+
+   drawString_fixed(xpos, ypos, size, rightStr);
    FontManager::popFontContext();
 
    return xpos;
@@ -515,40 +596,23 @@ S32 RenderUtils::drawCenteredStringPair2Col(S32 y, S32 size, bool leftCol, const
    S32 width = offset + getStringWidth(size, right);
    S32 x = get2ColStartingPos(leftCol) - width / 2;         // x must be S32 in case it leaks off left side of screen
 
-   //mGL->glColor(leftColor);
-   FontManager::setFontColor(leftColor);
-   drawString(x, y, size, left);
+   y += size;
 
-   //mGL->glColor(rightColor);
-   FontManager::setFontColor(rightColor);
-   drawString(x + offset, y, size, right);
+   drawString_fixed(x,          y, size, leftColor,  left);
+   drawString_fixed(x + offset, y, size, rightColor, right);
 
    return x;
 }
 
 
-// Draw a left-justified string at column # (1-4)
-void RenderUtils::drawString4Col(S32 y, S32 size, U32 col, const char *string)
-{
-   drawString(UserInterface::horizMargin + ((DisplayManager::getScreenInfo()->getGameCanvasWidth() - 2 * UserInterface::horizMargin) / 4 * (col - 1)), y, size, string);
-}
-
-
-void RenderUtils::drawString4Colf(S32 y, S32 size, U32 col, const char *format, ...)
-{
-   makeBuffer;
-   drawString4Col(y, size, col, buffer);
-}
-
-
-void RenderUtils::drawTime(S32 x, S32 y, S32 size, S32 timeInMs, const char *prefixString)
+void RenderUtils::drawTime(S32 x, S32 y, S32 size, const Color &color, S32 timeInMs, const char *prefixString)
 {
    F32 F32time = (F32)timeInMs;
 
    U32 minsRemaining = U32(F32time / (60 * 1000));
    U32 secsRemaining = U32((F32time - F32(minsRemaining * 60 * 1000)) / 1000);
 
-   drawStringf(x, y, size, "%s%02d:%02d", prefixString, minsRemaining, secsRemaining);
+   drawStringf_fixed(x, y, size, color, "%s%02d:%02d", prefixString, minsRemaining, secsRemaining);
 }
 
 
@@ -582,6 +646,8 @@ S32 RenderUtils::getStringWidth(S32 size, const char *string)
 
 F32 RenderUtils::getStringWidth(F32 size, const char *string)
 {
+   if(strcmp(string, " Create walls with right mouse button; hold ") == 0)
+      printf("Width: %2.2f (%2.2f)",  FontManager::getStringLength(string) * size / 120, size);//xyzzy
    return FontManager::getStringLength(string) * size / 120;
 }
 
@@ -629,13 +695,13 @@ S32 RenderUtils::getStringPairWidth(S32 size,
 
 
 // Returns the number of lines our msg consumed during rendering
-U32 RenderUtils::drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width, S32 ypos_end, S32 lineHeight, S32 fontSize, bool draw)
+U32 RenderUtils::drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width, S32 ypos_end, S32 lineHeight, S32 fontSize, const Color &color, bool draw)
 {
    S32 linesDrawn = 0;
    Vector<string> lines = Zap::wrapString(msg, width, fontSize);
 
    // Align the y position, if alignBottom is enabled
-   ypos -= lines.size() * lineHeight;     // Align according to number of wrapped lines
+   ypos -= lines.size() * lineHeight - fontSize;     // Align according to number of wrapped lines
 
    // Draw lines that need to wrap
    for(S32 i = 0; i < lines.size(); i++)
@@ -643,7 +709,7 @@ U32 RenderUtils::drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width, 
       if(ypos >= ypos_end)      // If there is room to draw some lines at top when aligned bottom
       {
          if(draw)
-            drawString(xpos, ypos, fontSize, lines[i].c_str());
+            drawString_fixed(xpos, ypos, fontSize, color, lines[i].c_str());
 
          linesDrawn++;
       }
@@ -657,74 +723,67 @@ U32 RenderUtils::drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width, 
 void RenderUtils::drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
 {
    // Mark the item with a letter, unless we're showing the reference ship
-   F32 vertOffset = 8;
+   F32 vertOffset = 7;
    if (letter >= 'a' && letter <= 'z')    // Better positioning for lowercase letters
-      vertOffset = 10;
+      vertOffset = 5;
 
-   mGL->glColor(color, alpha);
-   F32 xpos = pos.x - getStringWidthf(15, "%c", letter) / 2;
-
-   drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
+   drawStringfc(pos.x, pos.y + vertOffset, 15, color, alpha, "%c", letter);
 }
 
 
-void RenderUtils::drawLine(const Vector<Point> *points)
+void RenderUtils::drawLine(const Vector<Point> *points, const Color &color, F32 alpha)
 {
-   mGL->renderPointVector(points, GLOPT::LineStrip);
+   mGL->renderPointVector(points, GLOPT::LineStrip, color, alpha);
 }
 
 
-void RenderUtils::drawLine(const Vector<Point> *points, const Color &color)
+void RenderUtils::drawHorizLine(F32 y, const Color &color, F32 alpha)
 {
-   mGL->glColor(color);
-   mGL->renderPointVector(points, GLOPT::LineStrip);
+   drawHorizLine((S32)y, color, alpha);
 }
 
 
-void RenderUtils::drawHorizLine(S32 x1, S32 x2, S32 y, const Color &color)
+void RenderUtils::drawHorizLine(U32 y, const Color &color, F32 alpha)
 {
-   mGL->glColor(color);
-   drawHorizLine(x1, x2, y);
+   drawHorizLine(0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), y, color, alpha);
 }
 
 
-void RenderUtils::drawHorizLine(S32 x1, S32 x2, S32 y)
+void RenderUtils::drawHorizLine(S32 y, const Color &color, F32 alpha)
 {
-   drawHorizLine((F32)x1, (F32)x2, (F32)y);
+   drawHorizLine(0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), y, color, alpha);
 }
 
 
-void RenderUtils::drawVertLine(S32 x, S32 y1, S32 y2)
+void RenderUtils::drawHorizLine(S32 x1, S32 x2, S32 y, const Color &color, F32 alpha)
 {
-   drawVertLine((F32)x, (F32)y1, (F32)y2);
+   drawHorizLine((F32)x1, (F32)x2, (F32)y, color, alpha);
 }
 
 
-void RenderUtils::drawHorizLine(F32 x1, F32 x2, F32 y)
+void RenderUtils::drawHorizLine(F32 x1, F32 x2, F32 y, const Color &color, F32 alpha)
 {
-   F32 vertices[] = { x1, y,   x2, y };
-   mGL->renderVertexArray(vertices, 2, GLOPT::Lines);
+   F32 vertices[] = {x1, y, x2, y};
+   mGL->renderVertexArray(vertices, 2, GLOPT::Lines, color, alpha);
 }
 
 
-void RenderUtils::drawVertLine(F32 x, F32 y1, F32 y2)
+void RenderUtils::drawVertLine(S32 x, const Color &color, F32 alpha)
+{
+   drawVertLine((F32)x, (F32)0, (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight(), color, alpha);
+}
+
+
+void RenderUtils::drawVertLine(S32 x, S32 y1, S32 y2, const Color &color, F32 alpha)
+{
+   drawVertLine((F32)x, (F32)y1, (F32)y2, color, alpha);
+}
+
+
+void RenderUtils::drawVertLine(F32 x, F32 y1, F32 y2, const Color &color, F32 alpha)
 {
    F32 vertices[] = { x, y1,   x, y2 };
-   mGL->renderVertexArray(vertices, 2, GLOPT::Lines);
-}
-
-
-void RenderUtils::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor)
-{
-   mGL->glColor(fillColor);
-   drawFilledRect(x1, y1, x2, y2);
-}
-
-
-void RenderUtils::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha)
-{
-   mGL->glColor(fillColor, fillAlpha);
-   drawFilledRect(x1, y1, x2, y2);
+   mGL->renderVertexArray(vertices, 2, GLOPT::Lines, color, alpha);
 }
 
 
@@ -742,28 +801,32 @@ void RenderUtils::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fi
 
 void RenderUtils::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor, F32 outlineAlpha)
 {
-   mGL->glColor(fillColor, fillAlpha);
-   drawRect(x1, y1, x2, y2, GLOPT::TriangleFan);
-
-   mGL->glColor(outlineColor, outlineAlpha);
-   drawRect(x1, y1, x2, y2, GLOPT::LineLoop);
+   drawRect(x1, y1, x2, y2, GLOPT::TriangleFan, fillColor,    fillAlpha);
+   drawRect(x1, y1, x2, y2, GLOPT::LineLoop,    outlineColor, outlineAlpha);
 }
 
 
-void RenderUtils::drawHollowRect(const Point &center, S32 width, S32 height)
+void RenderUtils::drawHollowRect(const Point &center, S32 width, S32 height, const Color &color, F32 alpha)
 {
    drawHollowRect(center.x - (F32)width / 2, center.y - (F32)height / 2,
-                  center.x + (F32)width / 2, center.y + (F32)height / 2);
+                  center.x + (F32)width / 2, center.y + (F32)height / 2,
+                  color, alpha);
 }
 
 
-void RenderUtils::drawHollowRect(const Point &p1, const Point &p2)
+void RenderUtils::drawHollowRect(const Point &p1, const Point &p2, const Color &color, F32 alpha)
 {
-   drawHollowRect(p1.x, p1.y, p2.x, p2.y);
+   drawHollowRect(p1.x, p1.y, p2.x, p2.y, color, alpha);
 }
 
 
-void RenderUtils::drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, U8 corners, S32 glMode)
+void RenderUtils::drawFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners, S32 glMode, const Color &color, F32 alpha)
+{
+   drawFancyBox((F32)xLeft, (F32)yTop, (F32)xRight, (F32)yBottom, (F32)cornerInset, corners, glMode, color, alpha);
+}
+
+
+void RenderUtils::drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, U8 corners, S32 glMode, const Color &color, F32 alpha)
 {
    F32 vertices[] = {
          xLeft, yTop,                   // Top
@@ -774,19 +837,19 @@ void RenderUtils::drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32
          xLeft, yBottom - cornerInset   // Edge
    };
 
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, glMode);
+   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, glMode, color, alpha);
 }
 
 
-void RenderUtils::drawHollowFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset)
+void RenderUtils::drawHollowFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, const Color &color, F32 alpha)
 {
-   drawHollowFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, LL|UR);
+   drawHollowFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, LL|UR, color, alpha);
 }
 
 
-void RenderUtils::drawHollowFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners)
+void RenderUtils::drawHollowFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners, const Color &color, F32 alpha)
 {
-   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, corners, GLOPT::LineLoop);
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, corners, GLOPT::LineLoop, color, alpha);
 }
 
 
@@ -799,17 +862,15 @@ void RenderUtils::drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBotto
 void RenderUtils::drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners, const Color &fillColor, F32 fillAlpha, const Color &borderColor)
 {
    // Fill
-   mGL->glColor(fillColor, fillAlpha);
-   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, corners, GLOPT::TriangleFan);
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, corners, GLOPT::TriangleFan, fillColor, fillAlpha);
 
    // Border
-   mGL->glColor(borderColor, 1.f);
-   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, corners, GLOPT::LineLoop);
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, corners, GLOPT::LineLoop, borderColor);
 }
 
 
 // Draw arc centered on pos, with given radius, from startAngle to endAngle.  0 is East, increasing CW
-void RenderUtils::drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
+void RenderUtils::drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle, const Color &color, F32 alpha)
 {
    static Vector<Point> points;     // Reusable container
 
@@ -822,86 +883,83 @@ void RenderUtils::drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endA
 
    mGL->glPushMatrix();
       mGL->glTranslate(pos);
-      mGL->renderPointVector(&points, GLOPT::LineStrip);
+      mGL->renderPointVector(&points, GLOPT::LineStrip, color, alpha);
    mGL->glPopMatrix();
 }
 
 
-void RenderUtils::drawDashedArc(const Point &center, F32 radius, F32 arcTheta, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle)
+void RenderUtils::drawDashedArc(const Point &center, F32 radius, F32 arcTheta, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle, const Color &color, F32 alpha)
 {
    F32 interimAngle = arcTheta / dashCount;
 
    for(S32 i = 0; i < dashCount; i++)
-      drawArc(center, radius, interimAngle * i + offsetAngle, (interimAngle * (i + 1)) - dashSpaceCentralAngle + offsetAngle);
+      drawArc(center, radius, interimAngle * i + offsetAngle, (interimAngle * (i + 1)) - dashSpaceCentralAngle + offsetAngle, color, alpha);
 }
 
 
-void RenderUtils::drawDashedCircle(const Point &center, F32 radius, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle)
+void RenderUtils::drawDashedCircle(const Point &center, F32 radius, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle, const Color &color, F32 alpha)
 {
-   drawDashedArc(center, radius, FloatTau, dashCount, dashSpaceCentralAngle, offsetAngle);
+   drawDashedArc(center, radius, FloatTau, dashCount, dashSpaceCentralAngle, offsetAngle, color, alpha);
 }
 
 
-void RenderUtils::drawAngledRay(const Point &center, F32 innerRadius, F32 outerRadius, F32 angle)
+void RenderUtils::drawAngledRay(const Point &center, F32 innerRadius, F32 outerRadius, F32 angle, const Color &color)
 {
    F32 vertices[] = {
          center.x + cos(angle) * innerRadius, center.y + sin(angle) * innerRadius,
          center.x + cos(angle) * outerRadius, center.y + sin(angle) * outerRadius,
    };
 
-   mGL->renderVertexArray(vertices, 2, GLOPT::LineStrip);
+   mGL->renderVertexArray(vertices, 2, GLOPT::LineStrip, color);
 }
 
 
-void RenderUtils::drawAngledRayCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 rayCount, F32 offsetAngle)
+void RenderUtils::drawAngledRayCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 rayCount, F32 offsetAngle, const Color &color)
 {
-   drawAngledRayArc(center, innerRadius, outerRadius, FloatTau, rayCount, offsetAngle);
+   drawAngledRayArc(center, innerRadius, outerRadius, FloatTau, rayCount, offsetAngle, color);
 }
 
 
-void RenderUtils::drawAngledRayArc(const Point &center, F32 innerRadius, F32 outerRadius, F32 centralAngle, S32 rayCount, F32 offsetAngle)
+void RenderUtils::drawAngledRayArc(const Point &center, F32 innerRadius, F32 outerRadius, F32 centralAngle, S32 rayCount, F32 offsetAngle, const Color &color)
 {
    F32 interimAngle = centralAngle / rayCount;
 
    for(S32 i = 0; i < rayCount; i++)
-      drawAngledRay(center, innerRadius, outerRadius, interimAngle * i + offsetAngle);
+      drawAngledRay(center, innerRadius, outerRadius, interimAngle * i + offsetAngle, color);
 }
 
 
-void RenderUtils::drawDashedHollowCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle)
+void RenderUtils::drawDashedHollowCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle, const Color &color)
 {
    // Draw the dashed circles
-   drawDashedCircle(center, innerRadius, dashCount, dashSpaceCentralAngle, offsetAngle);
-   drawDashedCircle(center, outerRadius, dashCount, dashSpaceCentralAngle, offsetAngle);
+   drawDashedCircle(center, innerRadius, dashCount, dashSpaceCentralAngle, offsetAngle, color);
+   drawDashedCircle(center, outerRadius, dashCount, dashSpaceCentralAngle, offsetAngle, color);
 
    // Now connect them
-   drawAngledRayCircle(center, innerRadius,  outerRadius, dashCount, offsetAngle);
-   drawAngledRayCircle(center, innerRadius,  outerRadius, dashCount, offsetAngle - dashSpaceCentralAngle);
+   drawAngledRayCircle(center, innerRadius,  outerRadius, dashCount, offsetAngle,                         color);
+   drawAngledRayCircle(center, innerRadius,  outerRadius, dashCount, offsetAngle - dashSpaceCentralAngle, color);
 }
 
 
-void RenderUtils::drawHollowArc(const Point &center, F32 innerRadius, F32 outerRadius, F32 centralAngle, F32 offsetAngle)
+void RenderUtils::drawHollowArc(const Point &center, F32 innerRadius, F32 outerRadius, F32 centralAngle, F32 offsetAngle, const Color &color)
 {
-   drawAngledRay(center, innerRadius, outerRadius, offsetAngle);
-   drawAngledRay(center, innerRadius, outerRadius, offsetAngle + centralAngle);
+   drawAngledRay(center, innerRadius, outerRadius, offsetAngle,                color);
+   drawAngledRay(center, innerRadius, outerRadius, offsetAngle + centralAngle, color);
 
-   drawArc(center, innerRadius, offsetAngle, offsetAngle + centralAngle);
-   drawArc(center, outerRadius, offsetAngle, offsetAngle + centralAngle);
+   drawArc(center, innerRadius, offsetAngle, offsetAngle + centralAngle, color);
+   drawArc(center, outerRadius, offsetAngle, offsetAngle + centralAngle, color);
 }
 
 
-void RenderUtils::drawRoundedRect(const Point &pos, S32 width, S32 height, S32 rad)
+void RenderUtils::drawRoundedRect(const Point &pos, S32 width, S32 height, S32 rad, const Color &color, F32 alpha)
 {
-   drawRoundedRect(pos, (F32)width, (F32)height, (F32)rad);
+   drawRoundedRect(pos, (F32)width, (F32)height, (F32)rad, color, alpha);
 }
 
 
 // Draw rounded rectangle centered on pos
-void RenderUtils::drawRoundedRect(const Point &pos, F32 width, F32 height, F32 rad)
+void RenderUtils::drawRoundedRect(const Point &pos, F32 width, F32 height, F32 rad, const Color &color, F32 alpha)
 {
-   Point p;
-
-   // First the main body of the rect, start in UL, proceed CW
    F32 width2  = width  / 2;
    F32 height2 = height / 2;
 
@@ -921,22 +979,23 @@ void RenderUtils::drawRoundedRect(const Point &pos, F32 width, F32 height, F32 r
 
    mGL->renderVertexArray(vertices, 8, GLOPT::Lines);
 
+   Point p;
    // Now add some quarter-rounds in the corners, start in UL, proceed CW
    p.set(pos.x - width2 + rad, pos.y - height2 + rad);
-   drawArc(p, rad, -FloatPi, -FloatHalfPi);
+   drawArc(p, rad, -FloatPi, -FloatHalfPi, color, alpha);
 
    p.set(pos.x + width2 - rad, pos.y - height2 + rad);
-   drawArc(p, rad, -FloatHalfPi, 0);
+   drawArc(p, rad, -FloatHalfPi, 0, color, alpha);
 
    p.set(pos.x + width2 - rad, pos.y + height2 - rad);
-   drawArc(p, rad, 0, FloatHalfPi);
+   drawArc(p, rad, 0, FloatHalfPi, color, alpha);
 
    p.set(pos.x - width2 + rad, pos.y + height2 - rad);
-   drawArc(p, rad, FloatHalfPi, FloatPi);
+   drawArc(p, rad, FloatHalfPi, FloatPi, color, alpha);
 }
 
 
-void RenderUtils::drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
+void RenderUtils::drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle, const Color &color, F32 alpha)
 {
    // With theta delta of 0.2, that means maximum 32 points + 2 at the end
    const S32 MAX_POINTS = 32 + 2;
@@ -960,7 +1019,7 @@ void RenderUtils::drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F3
    filledArcVertexArray[(2*count) + 1] = pos.y;
    count++;
 
-   mGL->renderVertexArray(filledArcVertexArray, count, GLOPT::TriangleFan);
+   mGL->renderVertexArray(filledArcVertexArray, count, GLOPT::TriangleFan, color, alpha);
 }
 
 
@@ -972,29 +1031,26 @@ void RenderUtils::drawFilledRoundedRect(const Point &pos, S32 width, S32 height,
 
 void RenderUtils::drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color &fillColor, const Color &outlineColor, F32 radius, F32 alpha)
 {
-   mGL->glColor(fillColor, alpha);
-
-   drawFilledArc(Point(pos.x - width / 2 + radius, pos.y - height / 2 + radius), radius,      FloatPi, FloatPi + FloatHalfPi);
-   drawFilledArc(Point(pos.x + width / 2 - radius, pos.y - height / 2 + radius), radius, -FloatHalfPi, 0);
-   drawFilledArc(Point(pos.x + width / 2 - radius, pos.y + height / 2 - radius), radius,            0, FloatHalfPi);
-   drawFilledArc(Point(pos.x - width / 2 + radius, pos.y + height / 2 - radius), radius,  FloatHalfPi, FloatPi);
+   drawFilledArc(Point(pos.x - width / 2 + radius, pos.y - height / 2 + radius), radius,      FloatPi, FloatPi + FloatHalfPi, fillColor, alpha);
+   drawFilledArc(Point(pos.x + width / 2 - radius, pos.y - height / 2 + radius), radius, -FloatHalfPi, 0,                     fillColor, alpha);
+   drawFilledArc(Point(pos.x + width / 2 - radius, pos.y + height / 2 - radius), radius,            0, FloatHalfPi,           fillColor, alpha);
+   drawFilledArc(Point(pos.x - width / 2 + radius, pos.y + height / 2 - radius), radius,  FloatHalfPi, FloatPi,               fillColor, alpha);
 
    drawRect(pos.x - width / 2, pos.y - height / 2 + radius,
-            pos.x + width / 2, pos.y + height / 2 - radius, GLOPT::TriangleFan);
+            pos.x + width / 2, pos.y + height / 2 - radius,          GLOPT::TriangleFan, fillColor, alpha);
 
    drawRect(pos.x - width / 2 + radius, pos.y - height / 2,
-            pos.x + width / 2 - radius, pos.y - height / 2 + radius, GLOPT::TriangleFan);
+            pos.x + width / 2 - radius, pos.y - height / 2 + radius, GLOPT::TriangleFan, fillColor, alpha);
 
    drawRect(pos.x - width / 2 + radius, pos.y + height / 2,
-            pos.x + width / 2 - radius, pos.y + height / 2 - radius, GLOPT::TriangleFan);
+            pos.x + width / 2 - radius, pos.y + height / 2 - radius, GLOPT::TriangleFan, fillColor, alpha);
 
-   mGL->glColor(outlineColor, alpha);
-   drawRoundedRect(pos, width, height, radius);
+   drawRoundedRect(pos, width, height, radius, outlineColor, alpha);
 }
 
 
 // Actually draw the ellipse
-void RenderUtils::drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U32 glStyle)
+void RenderUtils::drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U32 glStyle, const Color &color, F32 alpha)
 {
    F32 sinbeta = sin(angle);
    F32 cosbeta = cos(angle);
@@ -1012,31 +1068,31 @@ void RenderUtils::drawFilledEllipseUtil(const Point &pos, F32 width, F32 height,
       count++;
    }
 
-   mGL->renderVertexArray(vertexArray, ARRAYSIZE(vertexArray) / 2, glStyle);
+   mGL->renderVertexArray(vertexArray, ARRAYSIZE(vertexArray) / 2, glStyle, color, alpha);
 }
 
 
 // Draw an n-sided polygon
-void RenderUtils::drawPolygon(S32 sides, F32 radius, F32 angle)
+void RenderUtils::drawPolygon(S32 sides, F32 radius, F32 angle, const Color &color, F32 alpha)
 {
    Vector<Point> points;
    generatePointsInACurve(angle, angle + FloatTau, sides + 1, radius, points);   // +1 so we can "close the loop"
 
-   mGL->renderPointVector(&points, GLOPT::LineStrip);
+   mGL->renderPointVector(&points, GLOPT::LineStrip, color, alpha);
 }
 
 
 // Draw an n-sided polygon
-void RenderUtils::drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle)
+void RenderUtils::drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle, const Color &color, F32 alpha)
 {
    mGL->glPushMatrix();
-      mGL->glTranslate(pos);
-      drawPolygon(sides, radius, angle);
+   mGL->glTranslate(pos);
+   drawPolygon(sides, radius, angle, color, alpha);
    mGL->glPopMatrix();
 }
 
 
-void RenderUtils::drawStar(const Point &pos, S32 points, F32 radius, F32 innerRadius)
+void RenderUtils::drawStar(const Point &pos, S32 points, F32 radius, F32 innerRadius, const Color &color, F32 alpha)
 {
    F32 ang = FloatTau / F32(points * 2);
    F32 a = -ang / 2;
@@ -1056,101 +1112,94 @@ void RenderUtils::drawStar(const Point &pos, S32 points, F32 radius, F32 innerRa
       r = inout ? radius : innerRadius;
    }
 
-   mGL->renderPointVector(&pts, GLOPT::LineLoop);
+   mGL->renderPointVector(&pts, GLOPT::LineLoop, color, alpha);
 }
 
 
-void RenderUtils::drawFilledStar(const Point &pos, S32 points, F32 radius, F32 innerRadius)
+//void RenderUtils::drawFilledStar(const Point &pos, S32 points, F32 radius, F32 innerRadius)
+//{
+//   F32 ang = FloatTau / F32(points * 2);
+//   F32 a = ang / 2;
+//   F32 r = innerRadius;
+//   bool inout = false;
+//
+//   static Point p;
+//   static Point first;
+//
+//   static Vector<Point> pts;
+//   static Vector<Point> core;
+//   static Vector<Point> outline;
+//
+//   pts.clear();
+//   core.clear();
+//   outline.clear();
+//
+//   for(S32 i = 0; i < points * 2; i++)
+//   {
+//      p.set(r * cos(a) + pos.x, r * sin(a) + pos.y);
+//
+//      outline.push_back(p);
+//
+//      if(i == 0)
+//      {
+//         first = p;
+//         core.push_back(p);
+//      }
+//      else if(i % 2 == 0)
+//      {
+//         pts.push_back(p);
+//         core.push_back(p);
+//      }
+//
+//      pts.push_back(p);
+//
+//      a += ang;
+//      inout = !inout;
+//      r = inout ? radius : innerRadius;
+//   }
+//
+//   pts.push_back(first);
+//
+//   mGL->renderPointVector(&pts, GLOPT::Triangles);       // Points
+//   mGL->renderPointVector(&core, GLOPT::TriangleFan);        // Inner pentagon
+//   mGL->renderPointVector(&outline, GLOPT::LineLoop);   // Outline to make things look smoother, at least when star is small
+//}
+
+
+// Draw an ellipse at pos, with axes width and height, canted at angle
+void RenderUtils::drawEllipse(const Point &pos, F32 width, F32 height, F32 angle, const Color &color, F32 alpha)
 {
-   F32 ang = FloatTau / F32(points * 2);
-   F32 a = ang / 2;
-   F32 r = innerRadius;
-   bool inout = false;
-
-   static Point p;
-   static Point first;
-
-   static Vector<Point> pts;
-   static Vector<Point> core;
-   static Vector<Point> outline;
-
-   pts.clear();
-   core.clear();
-   outline.clear();
-
-   for(S32 i = 0; i < points * 2; i++)
-   {
-      p.set(r * cos(a) + pos.x, r * sin(a) + pos.y);
-
-      outline.push_back(p);
-
-      if(i == 0)
-      {
-         first = p;
-         core.push_back(p);
-      }
-      else if(i % 2 == 0)
-      {
-         pts.push_back(p);
-         core.push_back(p);
-      }
-
-      pts.push_back(p);
-
-      a += ang;
-      inout = !inout;
-      r = inout ? radius : innerRadius;
-   }
-
-   pts.push_back(first);
-
-   mGL->renderPointVector(&pts, GLOPT::Triangles);       // Points
-   mGL->renderPointVector(&core, GLOPT::TriangleFan);        // Inner pentagon
-   mGL->renderPointVector(&outline, GLOPT::LineLoop);   // Outline to make things look smoother, at least when star is small
+   drawFilledEllipseUtil(pos, width, height, angle, GLOPT::LineLoop, color, alpha);
 }
 
 
 // Draw an ellipse at pos, with axes width and height, canted at angle
-void RenderUtils::drawEllipse(const Point &pos, F32 width, F32 height, F32 angle)
+void RenderUtils::drawEllipse(const Point &pos, S32 width, S32 height, F32 angle, const Color &color, F32 alpha)
 {
-   drawFilledEllipseUtil(pos, width, height, angle, GLOPT::LineLoop);
-}
-
-
-// Draw an ellipse at pos, with axes width and height, canted at angle
-void RenderUtils::drawEllipse(const Point &pos, S32 width, S32 height, F32 angle)
-{
-   drawFilledEllipseUtil(pos, (F32)width, (F32)height, angle, GLOPT::LineLoop);
+   drawFilledEllipseUtil(pos, (F32)width, (F32)height, angle, GLOPT::LineLoop, color, alpha);
 }
 
 
 // Well...  draws a filled ellipse, much as you'd expect
-void RenderUtils::drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle)
+void RenderUtils::drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle, const Color &color)
 {
-   drawFilledEllipseUtil(pos, width, height, angle, GLOPT::TriangleFan);
+   drawFilledEllipseUtil(pos, width, height, angle, GLOPT::TriangleFan, color);
 }
 
 
-void RenderUtils::drawFilledEllipse(const Point &pos, S32 width, S32 height, F32 angle)
+void RenderUtils::drawFilledEllipse(const Point &pos, S32 width, S32 height, F32 angle, const Color &color)
 {
-   drawFilledEllipseUtil(pos, (F32)width, (F32)height, angle, GLOPT::TriangleFan);
-}
-
-
-void RenderUtils::drawFilledCircle(const Point &pos, F32 radius)
-{
-   drawFilledSector(pos, radius, 0, FloatTau);
+   drawFilledEllipseUtil(pos, (F32)width, (F32)height, angle, GLOPT::TriangleFan, color);
 }
 
 
 void RenderUtils::drawFilledCircle(const Point &pos, F32 radius, const Color &color)
 {
-   mGL->glColor(color);
-   drawFilledCircle(pos, radius);
+   drawFilledSector(pos, radius, 0, FloatTau, color);
 }
 
 
-void RenderUtils::drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end)
+void RenderUtils::drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end, const Color &color, F32 alpha)
 {
    // With theta delta of 0.2, that means maximum 32 points
    static const S32 MAX_POINTS = 32;
@@ -1165,50 +1214,44 @@ void RenderUtils::drawFilledSector(const Point &pos, F32 radius, F32 start, F32 
       count++;
    }
 
-   mGL->renderVertexArray(filledSectorVertexArray, count, GLOPT::TriangleFan);
+   mGL->renderVertexArray(filledSectorVertexArray, count, GLOPT::TriangleFan, color, alpha);
 }
 
 
-// Pos is the square's center
-void RenderUtils::drawSquare(const Point &pos, F32 radius, bool filled)
+// pos is the square's center
+void RenderUtils::drawSquare(const Point &pos, F32 radius, const Color &color, bool filled)
 {
-   drawRect(pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius, filled ? GLOPT::TriangleFan : GLOPT::LineLoop);
+   drawRect(pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius, filled ? GLOPT::TriangleFan : GLOPT::LineLoop, color);
 }
 
 
-void RenderUtils::drawSquare(const Point &pos, S32 radius, bool filled)
+// pos is the square's center
+void RenderUtils::drawSquare(const Point &pos, F32 radius, const Color &color, F32 alpha, bool filled)
 {
-    drawSquare(pos, F32(radius), filled);
+   drawRect(pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius, filled ? GLOPT::TriangleFan : GLOPT::LineLoop, color, alpha);
 }
 
 
-void RenderUtils::drawHollowSquare(const Point &pos, F32 radius)
+// Hollow by default
+void RenderUtils::drawSquare(const Point &pos, S32 radius, const Color &color, F32 alpha, bool filled)
 {
-   drawSquare(pos, radius, false);
+   drawSquare(pos, (F32)radius, color, alpha, filled);
 }
 
 
-void RenderUtils::drawHollowSquare(const Point &pos, F32 radius, const Color &color)
+void RenderUtils::drawHollowSquare(const Point &pos, F32 radius, const Color &color, F32 alpha)
 {
-   mGL->glColor(color);
-   drawHollowSquare(pos, radius);
+   drawSquare(pos, radius, color, alpha, false);
 }
 
 
-void RenderUtils::drawFilledSquare(const Point &pos, F32 radius)
+void RenderUtils::drawFilledSquare(const Point &pos, F32 radius, const Color &color, F32 alpha)
 {
-   drawSquare(pos, radius, true);
+   drawSquare(pos, radius, color, alpha, true);
 }
 
 
-void RenderUtils::drawFilledSquare(const Point &pos, F32 radius, const Color &color)
-{
-   mGL->glColor(color);
-   drawFilledSquare(pos, radius);
-}
-
-
-void RenderUtils::drawCircle(const Point &center, F32 radius, const Color *color, F32 alpha)
+void RenderUtils::drawCircle(const Point &center, F32 radius, const Color &color, F32 alpha)
 {
    mGL->glPushMatrix();
       mGL->glTranslate(center);
@@ -1220,7 +1263,7 @@ void RenderUtils::drawCircle(const Point &center, F32 radius, const Color *color
 // Circle drawing now precalculates a set of points around the circle, then renders them using mGL->glScale()
 // to get the radius right.  This eliminates most point calculations during rendering, making it much
 // more efficient.
-void RenderUtils::drawCircle(F32 radius, const Color *color, F32 alpha)
+void RenderUtils::drawCircle(F32 radius, const Color &color, F32 alpha)
 {
    static Vector<Point> points;
 
@@ -1228,12 +1271,9 @@ void RenderUtils::drawCircle(F32 radius, const Color *color, F32 alpha)
    if(points.size() == 0)
       generatePointsInACircle(NUM_CIRCLE_SIDES, 1.0, points);
 
-   if(color)
-      mGL->glColor(color, alpha);
-
    mGL->glPushMatrix();
       mGL->glScale(radius);
-      mGL->renderPointVector(&points, GLOPT::LineStrip);
+      mGL->renderPointVector(&points, GLOPT::LineStrip, color, alpha);
    mGL->glPopMatrix();
 }
 

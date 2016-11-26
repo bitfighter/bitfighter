@@ -102,7 +102,7 @@ public:
 
    void activatePage(IntructionPages pageIndex);
    void onActivate();
-   void exitInstructions();
+   void exitInstructions() const;
 };
 
 };

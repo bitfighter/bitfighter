@@ -57,7 +57,8 @@ public:
    static void setFont(FontId fontId);
    static void setFontContext(FontContext fontContext);
 
-   static void setFontColor(const Color &color);
+   //static void setFontColor(const Color *color);
+   static void setFontColor(const Color &color, F32 alpha = 1.0);
 
    static void pushFontContext(FontContext fontContext);
    static void popFontContext();

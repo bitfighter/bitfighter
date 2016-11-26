@@ -257,14 +257,8 @@ void SlideOutWidget::renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 
    else
       TNLAssert(false, "Expected one of the above to be true!");
 
-
-   // Fill
-   mGL->glColor(Colors::black, 0.70f);
-   mGL->renderPointVector(&points, GLOPT::TriangleFan);
-
-   // Border
-   mGL->glColor(borderColor);
-   mGL->renderPointVector(&points, GLOPT::LineStrip);
+   mGL->renderPointVector(&points, GLOPT::TriangleFan, Colors::black, 0.70f);    // Fill
+   mGL->renderPointVector(&points, GLOPT::LineStrip, borderColor);               // Border
 }
 
 

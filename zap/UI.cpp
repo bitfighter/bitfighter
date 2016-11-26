@@ -129,11 +129,8 @@ void UserInterface::playBoop()
 void UserInterface::renderMasterStatus(const MasterServerConnection *connectionToMaster) const
 {
    if(connectionToMaster && connectionToMaster->getConnectionState() != NetConnection::Connected)
-   {
-      mGL->glColor(Colors::white);
-      RenderUtils::drawStringf(10, 550, 15, "Master Server - %s",
-               GameConnection::getConnectionStateString(connectionToMaster->getConnectionState()));
-   }
+      RenderUtils::drawStringf_fixed(10, 565, 15, Colors::white, "Master Server - %s",
+                     GameConnection::getConnectionStateString(connectionToMaster->getConnectionState()));
 }
 
 
@@ -157,8 +154,14 @@ void UserInterface::renderConsole() const
 
 static const S32 TitleSize = 30;
 
+static const Color &getColorForStle(S32 style)
+{
+   
+}
+
+
 void UserInterface::renderMessageBox(const string &titleStr, const string &instrStr, 
-                                     const string &messageStr, S32 vertOffset, S32 style) const
+                                     const string &messageStr, const Color &color, S32 vertOffset, S32 style) const
 {
    static const FontContext Context = ErrorMsgContext;
    static const S32 TextSize = 18;
@@ -166,8 +169,8 @@ void UserInterface::renderMessageBox(const string &titleStr, const string &instr
 
    InputCodeManager *inputCodeManager = mGameSettings->getInputCodeManager();
 
-   SymbolShapePtr title = SymbolShapePtr(new SymbolString(titleStr, inputCodeManager, Context, TitleSize, false));
-   SymbolShapePtr instr = SymbolShapePtr(new SymbolString(instrStr, inputCodeManager, Context, TextSize, false));
+   SymbolShapePtr title = SymbolShapePtr(new SymbolString(titleStr, inputCodeManager, Context, TitleSize, color, false));
+   SymbolShapePtr instr = SymbolShapePtr(new SymbolString(instrStr, inputCodeManager, Context, TextSize, color, false));
 
    Vector<string> wrappedLines;
    RenderUtils::wrapString(messageStr, UIManager::MessageBoxWrapWidth, TextSize, Context, wrappedLines);
@@ -175,7 +178,7 @@ void UserInterface::renderMessageBox(const string &titleStr, const string &instr
    Vector<SymbolShapePtr> message(wrappedLines.size());
 
    for(S32 i = 0; i < wrappedLines.size(); i++)
-      message.push_back(SymbolShapePtr(new SymbolString(wrappedLines[i], inputCodeManager, Context, TextSize, true)));
+      message.push_back(SymbolShapePtr(new SymbolString(wrappedLines[i], inputCodeManager, Context, TextSize, color, true)));
 
    renderMessageBox(title, instr, message.address(), message.size(), vertOffset, style);
 }
@@ -199,7 +202,6 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
    const S32 instrGapBottom = 5;       // A bit of extra gap below the instr. line
 
    const F32 LinespacingFactor = 1.333f;
-
 
    S32 titleHeight = title ? title->getHeight() : 0;
    if(titleHeight > 0)
@@ -257,11 +259,9 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
 
 
 // Static method
-void UserInterface::dimUnderlyingUI(F32 amount)
+void UserInterface::dimUnderlyingUI(F32 alpha)
 {
-   mGL->glColor(Colors::black, amount);
-
-   RenderUtils::drawFilledRect(0, 0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
+   RenderUtils::drawFilledRect(0, 0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight(), Colors::black, alpha);
 }
 
 
@@ -418,26 +418,22 @@ void UserInterface::renderDiagnosticKeysOverlay()
 
    if(dumpKeys)
    {
-     S32 vpos = DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2;
+     static const S32 margin = 5;
+     static const S32 fontSize = 18;
+     S32 vpos = DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 + fontSize;
      S32 hpos = horizMargin;
-
-     mGL->glColor(Colors::white);
 
      // Key states
      for (U32 i = 0; i < MAX_INPUT_CODES; i++)
         if(InputCodeManager::getState((InputCode) i))
-           hpos += RenderUtils::drawStringAndGetWidth( hpos, vpos, 18, InputCodeManager::inputCodeToString((InputCode) i) );
+           hpos += RenderUtils::drawStringAndGetWidth_fixed(hpos, vpos, fontSize, Colors::white, InputCodeManager::inputCodeToString((InputCode)i));
 
-      vpos += 23;
+      vpos += 41;
       hpos = horizMargin;
-      mGL->glColor(Colors::magenta);
 
       for(U32 i = 0; i < CHAR_BIT * sizeof(Joystick::ButtonMask); i++)
          if(Joystick::ButtonMask & (1 << i))
-         {
-            RenderUtils::drawStringf( hpos, vpos, 18, "RawBut [%d]", i );
-            hpos += RenderUtils::getStringWidthf(18, "RawBut [%d]", i ) + 5;
-         }
+            hpos += RenderUtils::drawStringAndGetWidthf_fixed(hpos, vpos, fontSize, Colors::magenta, "RawBut [%d]", i) + margin;
    }
 }   
 

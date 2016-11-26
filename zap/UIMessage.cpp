@@ -10,11 +10,8 @@
 
 #include "UIManager.h"
 
-#include "Colors.h"
-
 #include "RenderUtils.h"
-
-#include <stdio.h>
+#include "Colors.h"
 
 namespace Zap
 {
@@ -123,11 +120,11 @@ void MessageUserInterface::idle(U32 timeDelta)
 
 void MessageUserInterface::render() const
 {
-   const F32 canvasWidth  = (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth();
-   const F32 canvasHeight = (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight();
+   const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
-   F32 hInset = F32(canvasHeight - mHeight) / 2;
-   F32 wInset = F32(canvasWidth - mWidth) / 2;
+   S32 hInset = (canvasHeight - mHeight) / 2;
+   S32 wInset = (canvasWidth - mWidth) / 2;
 
    // Fade effect
    F32 fadeFactor;
@@ -140,31 +137,23 @@ void MessageUserInterface::render() const
 
    if(mBox)
    {
-      F32 vertices[] = {
-            wInset + mVertOffset,               hInset,
-            canvasWidth - wInset + mVertOffset, hInset,
-            canvasWidth - wInset + mVertOffset, canvasHeight - hInset,
-            wInset + mVertOffset,               canvasHeight - hInset
-      };
+      S32 x1 = wInset + mVertOffset;
+      S32 y1 = hInset;
+      S32 x2 = canvasWidth - wInset + mVertOffset;
+      S32 y2 = canvasHeight - hInset;
 
-      mGL->glColor(Colors::red30, fadeFactor * 0.95f);  // Draw a box
-      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::TriangleFan);
-
-      mGL->glColor(Colors::white, fadeFactor);          // Add a border
-      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop);
+      RenderUtils::drawFilledRect(x1, y1, x2, y2, Colors::red30, fadeFactor * 0.95f, Colors::white, fadeFactor);
    }
 
    // Draw title, message, and footer
-   mGL->glColor(mMessageColor, fadeFactor);
-
    if(strcmp(mTitle, ""))  // If they are different
-      RenderUtils::drawCenteredString(vertMargin + hInset + mVertOffset, 30, mTitle);
+      RenderUtils::drawCenteredString_fixed(vertMargin + hInset + mVertOffset + 30, 30, mMessageColor, fadeFactor, mTitle);
 
    for(S32 i = 0; i < mNumLines; i++)
-      RenderUtils::drawCenteredString(vertMargin + 40 + hInset + i * 24 + mVertOffset, 18, mMessage[i]);
+      RenderUtils::drawCenteredString_fixed(vertMargin + 58 + hInset + i * 24 + mVertOffset, 18, mMessageColor, fadeFactor, mMessage[i]);
 
    if (!mFadeTime)
-      RenderUtils::drawCenteredString(canvasHeight - vertMargin - hInset - 18 + mVertOffset, 18, "Hit any key to continue");
+      RenderUtils::drawCenteredString_fixed(canvasHeight - vertMargin - hInset + mVertOffset, 18, mMessageColor, fadeFactor, "Hit any key to continue");
 }
 
 };

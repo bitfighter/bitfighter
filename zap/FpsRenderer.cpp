@@ -122,14 +122,12 @@ void FpsRenderer::render(S32 canvasWidth) const
    const S32 xpos = canvasWidth - horizMargin - S32(getInsideEdge());
    const S32 fontGap = 5;
 
-   mGL->glColor(Colors::white);
-   RenderUtils::drawStringfr(xpos, vertMargin,                      FontSize, "%1.0f fps", mFPSAvg);
-   mGL->glColor(Colors::yellow);
-   RenderUtils::drawStringfr(xpos, vertMargin + FontSize + fontGap, FontSize, "%1.0f ms",  mPingAvg);
+   RenderUtils::drawStringfr(xpos, vertMargin,                      FontSize, Colors::white,  "%1.0f fps", mFPSAvg);
+   RenderUtils::drawStringfr(xpos, vertMargin + FontSize + fontGap, FontSize, Colors::yellow, "%1.0f ms",  mPingAvg);
 
-   // vertex display is green at zero and red at 1000 or more visible vertices
-   mGL->glColor(visibleVertices / 1000.0f, 1.0f - visibleVertices / 1000.0f, 0.0f, 1);
-   RenderUtils::drawStringfr(xpos, vertMargin + 2 * (FontSize + fontGap), FontSize, "%d vts",  visibleVertices);
+   // Vertex display is green at zero and red at 1000 or more visible vertices
+   Color color((visibleVertices / 1000.0f), 1.0f - (visibleVertices / 1000.0f), 0.0f);
+   RenderUtils::drawStringfr(xpos, vertMargin + 2 * (FontSize + fontGap), FontSize, color, "%d vts",  visibleVertices);
    
    FontManager::popFontContext();
 }
