@@ -229,9 +229,6 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
    // The player is the leader if a leader is detected and it matches his name
    bool localClientIsLeader = (localClientName == game->getClientInfo(mLeadingPlayer)->getName());
 
-   const char *topName, *botName;
-   string topScoreStr, botScoreStr;
-   S32 topScore, botScore, topScoreLen, topOneFixFactor;
    S32 botOneFixFactor = 0, botScoreLen = 0;
 
    bool renderTwoNames = hasSecondLeader || !localClientIsLeader;
@@ -239,15 +236,19 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
    // Slide the first entry up if there will be a second entry
    S32 firstNameOffset = renderTwoNames ? (textsize + textgap) : 0;    
 
-   topName  = game->getClientInfo(mLeadingPlayer)->getName().getString();
-   topScore = mLeadingPlayerScore;
+   const char *topName  = game->getClientInfo(mLeadingPlayer)->getName().getString();
+   S32 topScore = mLeadingPlayerScore;
 
    // This is a total hack based on visual inspection trying to get scores ending in 1 to align with others
    // in a way that is nice.  This is totally font dependent, sadly...
-   topOneFixFactor = topScore % 10 == 1 ? oneAdjFact : 0;
+   S32 topOneFixFactor = topScore % 10 == 1 ? oneAdjFact : 0;
 
-   topScoreStr = itos(topScore);
-   topScoreLen = RenderUtils::getStringWidth(textsize, topScoreStr.c_str()) + topOneFixFactor;
+   string topScoreStr = itos(topScore);
+   S32 topScoreLen = RenderUtils::getStringWidth(textsize, topScoreStr.c_str()) + topOneFixFactor;
+
+   const char *botName;
+   string botScoreStr;
+   S32 botScore;
 
    if(renderTwoNames)
    {
