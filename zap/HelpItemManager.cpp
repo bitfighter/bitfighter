@@ -542,7 +542,7 @@ void HelpItemManager::resetInGameHelpMessages()
 
 
 // Write seen status to INI
-void HelpItemManager::saveAlreadySeenList()
+void HelpItemManager::saveAlreadySeenList() const
 {
    mGameSettings->setSetting(IniKey::HelpItemsAlreadySeenList, getAlreadySeenString());
 }
@@ -757,7 +757,7 @@ const Vector<HelpItemManager::WeightedHelpItem> *HelpItemManager::getHighPriorit
 const Vector<HelpItemManager::WeightedHelpItem> *HelpItemManager::getLowPriorityQueue()    const { return &mLowPriorityQueuedItems;  }
 
 
-HelpItemManager::Priority HelpItemManager::getItemPriority(HelpItem item) const
+HelpItemManager::Priority HelpItemManager::getItemPriority(HelpItem item)
 {
    return helpItems[item].priority;
 }

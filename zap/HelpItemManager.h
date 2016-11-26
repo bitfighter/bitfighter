@@ -239,7 +239,7 @@ public:
    bool isEnabled() const;
 
    void clearAlreadySeenList();
-   void saveAlreadySeenList();
+   void saveAlreadySeenList() const;
    void loadAlreadySeenList();
 
    void onGameStarting();        // Reset things for a new level
@@ -262,7 +262,7 @@ public:
    const Vector<WeightedHelpItem> *getHighPriorityQueue()   const;
    const Vector<WeightedHelpItem> *getLowPriorityQueue()    const;
 
-   Priority getItemPriority(HelpItem item) const;
+   static Priority getItemPriority(HelpItem item);
    static U8 getAssociatedObjectType(HelpItem helpItem);
 
 
