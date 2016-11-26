@@ -190,13 +190,13 @@ S32 TimeLeftRenderer::renderHeadlineScores(const Game *game, S32 ypos) const
 
 
 // Try to mitigate some of the weirdness that comes from TTF hinting when trying to right-align text
-static void drawStringDigitByDigit(S32 x, S32 y, S32 textsize, const string &s)
+static void drawStringDigitByDigit(S32 x, S32 y, S32 textsize, const Color &color, const string &s)
 {
    // Note for the well-intentioned cast-killer... if you try to make i an unsigned int to avoid the cast,
    // this loop will crash, as i will be decremented below 0, and, well... bring on the velocoraptor.  
    // See http://xkcd.com/292/ for clarification.
    for(S32 i = (S32)s.length() - 1; i >= 0; i--)
-      x -= RenderUtils::drawStringr(x, y, textsize, s.substr(i, 1).c_str());
+      x -= RenderUtils::drawStringr(x, y, textsize, color, s.substr(i, 1).c_str());
 }
 
 
@@ -276,23 +276,21 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
 
    if(render)
    {
-      FontManager::setFontColor(Colors::white);
-
-      drawStringDigitByDigit   ((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - topOneFixFactor, 
-                                ypos - firstNameOffset, textsize, topScoreStr);
-      RenderUtils:: drawStringr((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth,
-                                ypos - firstNameOffset, textsize, topName);
+      drawStringDigitByDigit  ((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - topOneFixFactor, 
+                               ypos - firstNameOffset, textsize, Colors::white, topScoreStr);
+      RenderUtils::drawStringr((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth,
+                               ypos - firstNameOffset, textsize, Colors::white, topName);
 
       // Render bottom score if we have one
       if(renderTwoNames)
       {
          //                                                winner color : loser color
-         FontManager::setFontColor((topScore == botScore) ? Colors::red : Colors::red60);
+         const Color &color = (topScore == botScore) ? Colors::red : Colors::red60;
 
-         drawStringDigitByDigit((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - botOneFixFactor, 
-                                ypos, textsize, botScoreStr);
-         RenderUtils::drawStringr           ((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth,
-                                ypos, textsize, botName);
+         drawStringDigitByDigit  ((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - botOneFixFactor, 
+                                    ypos, textsize, color, botScoreStr);
+         RenderUtils::drawStringr((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth,
+                                    ypos, textsize, color, botName);
       }
    }
 

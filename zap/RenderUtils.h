@@ -60,6 +60,7 @@ public:
    ///
 private:
    static void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string);
+   static S32 doDrawStringr(S32 x, S32 y, S32 size, const char *string);
 
 public:
    // Draw string at given location (normal and formatted versions)
@@ -87,7 +88,6 @@ public:
    static S32 drawStringfr(S32 x, S32 y, S32 size, const Color &color, const char *format, ...);
    static S32 drawStringfr_fixed(S32 x, S32 y, S32 size, const Color &color, const char *format, ...);
 
-   static S32 drawStringr(S32 x, S32 y, S32 size, const char *string);
    static S32 drawStringr(S32 x, S32 y, S32 size, const Color &color, const char *string);
 
    // Draw string and get it's width

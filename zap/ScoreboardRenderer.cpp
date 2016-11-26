@@ -228,9 +228,8 @@ static void renderTeamName(ClientGame *clientGame, S32 index, bool isWinningTeam
    else 
       teamName = clientGame->getTeamName(index).getString();
 
-   FontManager::setFontColor(Colors::white);
-   RenderUtils::drawString (leftPos,  top + 2, teamFontSize, teamName.c_str());
-   RenderUtils::drawStringr(rightPos, top + 2, teamFontSize, scoreStr.c_str());
+   RenderUtils::drawString_fixed(leftPos,  top + 2, teamFontSize, Colors::white, teamName.c_str());
+   RenderUtils::drawStringr     (rightPos, top + 2, teamFontSize, Colors::white, scoreStr.c_str());
 
    FontManager::popFontContext();
 }

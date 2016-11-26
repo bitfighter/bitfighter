@@ -220,18 +220,18 @@ S32 RenderUtils::drawStringfr_fixed(S32 x, S32 y, S32 size, const Color &color, 
 S32 RenderUtils::drawStringfr(S32 x, S32 y, S32 size, const char *format, ...)
 {
    makeBuffer;
-   return drawStringr(x, y, size, buffer);
+   return doDrawStringr(x, y, size, buffer);
 }
 
 
 S32 RenderUtils::drawStringr(S32 x, S32 y, S32 size, const Color &color, const char *string)
 {
    FontManager::setFontColor(color);
-   return drawStringr(x, y, size, string);
+   return doDrawStringr(x, y, size, string);
 }
 
 
-S32 RenderUtils::drawStringr(S32 x, S32 y, S32 size, const char *string)
+S32 RenderUtils::doDrawStringr(S32 x, S32 y, S32 size, const char *string)
 {
    F32 len = getStringWidth((F32)size, string);
    doDrawAngleString((F32)x - len, (F32)y + size, (F32)size, 0, string);
