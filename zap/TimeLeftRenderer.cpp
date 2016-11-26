@@ -374,14 +374,15 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool includeLoc
       wb = RenderUtils::getStringWidth(siSize + stwSizeBonus, itos(gameType->getWinningScore()).c_str());
    }
 
-   static const S32 leftLineOverhangAmount = 4;
-   static const S32 visualVerticalTextAlignmentHackyFacty = 8;     // This is that little gap btwn the gray vert and horiz lines
+   const S32 leftLineOverhangAmount = 4;
    S32 farLeftCoord = smallTextRPos - max(wt, wb) - leftLineOverhangAmount;
 
    if(render)
    {
+      const S32 visualVerticalTextAlignmentHackyFacty = 8;     // This is that little gap btwn the gray vert and horiz lines
       const S32 timeTop = timeBottom - TimeTextSize;
       const Color &gray = Colors::gray40;
+
       RenderUtils::drawHorizLine(farLeftCoord, (canvasWidth - TimeLeftIndicatorMargin), timeTop - grayLineVertPadding, gray);
       RenderUtils::drawVertLine(grayLinePos, timeBottom, timeTop + visualVerticalTextAlignmentHackyFacty, gray);
    }
