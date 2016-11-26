@@ -615,8 +615,8 @@ void GameObjectRender::renderShipCoords(const Point &coords, bool localShip, F32
    const U32 textSize = 18;
 
    mGL->glLineWidth(RenderUtils::LINE_WIDTH_1);
-   FontManager::setFontColor(Colors::white,  0.5f * alpha);
 
+   FontManager::setFontColor(Colors::white,  0.5f * alpha);
    RenderUtils::drawStringc(0, 30 + (localShip ? 0 : textSize + 3) + textSize, textSize, str.c_str() );
 
    mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
