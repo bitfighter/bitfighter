@@ -425,24 +425,24 @@ void DiagnosticUserInterface::render() const
       hpos += RenderUtils::drawStringAndGetWidth_fixed(hpos, ypos, textsize, Colors::cyan, " | ");
       hpos += RenderUtils::drawStringAndGetWidth_fixed(hpos, ypos, textsize, Colors::yellow, "Input string: ");
 
-      InputCode inputCode;
       for(U32 i = 0; i < MAX_INPUT_CODES; i++)
       {
-         inputCode = InputCode(i);
+         InputCode inputCode = InputCode(i);
+
          if(InputCodeManager::getState(inputCode))
+         {
+            string in = InputCodeManager::getCurrentInputString(inputCode);
+
+            if(in != "")
+            {
+               SymbolShapePtr key = SymbolString::getModifiedKeySymbol(in, Colors::magenta);
+
+               key->render(hpos, ypos, UI::AlignmentLeft);
+               key->getWidth() + 5;
+            }
             break;
+         }
       }
-
-      string in = InputCodeManager::getCurrentInputString(inputCode);
-
-      if(in != "")
-      {
-         SymbolShapePtr key = SymbolString::getModifiedKeySymbol(in, Colors::magenta);
-
-         key->render(hpos, ypos, UI::AlignmentLeft);
-         hpos += key->getWidth() + 5;
-      }
-
 
       if(joystickDetected)
       {
