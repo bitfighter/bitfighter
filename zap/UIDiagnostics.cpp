@@ -239,7 +239,7 @@ S32 DiagnosticUserInterface::showVersionBlock(S32 ypos, S32 textsize, S32 gap)
    x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%s", TNL_OS_STRING);
 
    x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white,  " | Cmplr: ");
-   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%s", TNL_COMPILER_STRING);
+        RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%s", TNL_COMPILER_STRING);
 
    return ypos + textsize + gap * 2;
 }
@@ -253,7 +253,7 @@ S32 DiagnosticUserInterface::showNameDescrBlock(const string &hostName, const st
    x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%s", hostName.c_str());
 
    x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white,  " | Descr: ");
-   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%s", hostDescr.c_str());
+        RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%s", hostDescr.c_str());
 
    return ypos + textsize + gap;
 }
