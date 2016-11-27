@@ -187,7 +187,7 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    if(settings->getIniSettings()->oldDisplayMode == DISPLAY_MODE_WINDOWED ||
          (changingInterfaces && displayMode == DISPLAY_MODE_WINDOWED))
    {
-      settings->setWindowPosition(VideoSystem::getWindowPositionX(), VideoSystem::getWindowPositionY());
+      settings->setWindowPosition(getWindowPositionX(), getWindowPositionY());
    }
 
    // When we're in the editor, let's take advantage of the entire screen unstretched
