@@ -10,7 +10,6 @@ namespace Zap {
 
 ScreenInfo::ScreenInfo()
 {
-   MIN_SCALING_FACTOR = 0.15f;
    resetGameCanvasSize();        // Initialize GameCanvasSize vars
    setWindowSize(GAME_WIDTH, GAME_HEIGHT);      // In case these are used in a calculation before they're set... avoids spurious divide by 0
    mPrevCanvasWidth  = GAME_WIDTH;
@@ -57,7 +56,11 @@ void ScreenInfo::init(S32 physicalScreenWidth, S32 physicalScreenHeight)
 }
 
 
+// Limits minimum window size
+static F32 MIN_SCALING_FACTOR = 0.15f;
+
 F32 ScreenInfo::getMinScalingFactor() { return MIN_SCALING_FACTOR; }
+
 
 void ScreenInfo::setWindowSize(S32 width, S32 height) 
 { 
@@ -144,8 +147,8 @@ void ScreenInfo::resetGameCanvasSize()
    setGameCanvasSize(GAME_WIDTH, GAME_HEIGHT);
 }  
 
-S32 ScreenInfo::getDefaultCanvasWidth()  const { return GAME_WIDTH;  }
-S32 ScreenInfo::getDefaultCanvasHeight() const { return GAME_HEIGHT; }
+S32 ScreenInfo::getDefaultCanvasWidth()  { return GAME_WIDTH;  }
+S32 ScreenInfo::getDefaultCanvasHeight() { return GAME_HEIGHT; }
 
 // These only change from the default when in the editor
 S32 ScreenInfo::getGameCanvasWidth()  const { return mGameCanvasWidth;  }     // canvasWidth, usually 800
@@ -169,7 +172,7 @@ S32 ScreenInfo::getVertDrawMargin() const
 bool ScreenInfo::isLandscape() const { return mIsLandscape; }     // Whether physical screen is landscape, or at least more landscape than our game window
 
 
-Point ScreenInfo::convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode)
+Point ScreenInfo::convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode) const
 {
 //   logprintf("Point: %d, %d || canvas %2.0f, %2.0f ||margin h/v: %d/%d || window w/h: %d,%d || canvas w/h %d,%d\n",
 //         x, y,
@@ -211,11 +214,11 @@ void ScreenInfo::setCanvasMousePos(S32 x, S32 y, DisplayMode mode)
 }
 
 
-bool ScreenInfo::isActualized()  { return mActualized; }
-void ScreenInfo::setActualized() { mActualized = true; }
+bool ScreenInfo::isActualized() const { return mActualized; }
+void ScreenInfo::setActualized()      { mActualized = true; }
 
 
-const Point *ScreenInfo::getMousePos() { return &mCanvasMousePos; }
-const Point *ScreenInfo::getWindowMousePos() { return &mWindowMousePos; }
+const Point *ScreenInfo::getMousePos() const { return &mCanvasMousePos; }
+const Point *ScreenInfo::getWindowMousePos() const { return &mWindowMousePos; }
 
 } // namespace Zap

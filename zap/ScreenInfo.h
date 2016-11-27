@@ -29,8 +29,6 @@ private:
    static const S32 GAME_WIDTH  = 800;
    static const S32 GAME_HEIGHT = 600;
 
-   F32 MIN_SCALING_FACTOR;       // Limits minimum window size
-
    Point mWindowMousePos, mCanvasMousePos;
 
    S32 mPhysicalScreenWidth, mPhysicalScreenHeight;
@@ -49,7 +47,7 @@ public:
    ScreenInfo();      // Constructor
    virtual ~ScreenInfo();
 
-   F32 getMinScalingFactor();
+   static F32 getMinScalingFactor();
 
    // Can't initialize until SDL has been set up
    void init(S32 physicalScreenWidth, S32 physicalScreenHeight);
@@ -82,8 +80,8 @@ public:
    void setGameCanvasSize(S32 width, S32 height);
    void resetGameCanvasSize();
 
-   S32 getDefaultCanvasWidth() const;
-   S32 getDefaultCanvasHeight() const;
+   static S32 getDefaultCanvasWidth();
+   static S32 getDefaultCanvasHeight();
 
    S32 getGameCanvasWidth() const;
    S32 getGameCanvasHeight() const;
@@ -98,7 +96,7 @@ public:
    bool isLandscape() const;     // Whether physical screen is landscape, or at least more landscape than our game window
 
    // Convert physical window screen coordinates into virtual, in-game coordinate
-   Point convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode);
+   Point convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode) const;
 
    Point convertCanvasToWindowCoord(S32 x, S32 y, DisplayMode mode) const;
    Point convertCanvasToWindowCoord(F32 x, F32 y, DisplayMode mode) const;
@@ -106,10 +104,10 @@ public:
    void setMousePos      (S32 x, S32 y, DisplayMode mode);
    void setCanvasMousePos(S32 x, S32 y, DisplayMode mode);
 
-   const Point *getMousePos();
-   const Point *getWindowMousePos();
+   const Point *getMousePos() const;
+   const Point *getWindowMousePos() const;
 
-   bool isActualized();
+   bool isActualized() const;
    void setActualized();
 
 #ifndef ZAP_DEDICATED
