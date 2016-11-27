@@ -22,7 +22,6 @@
 
 #include "Colors.h"
 #include "GameObjectRender.h"    // For drawCircle in badge rendering below
-#include "SymbolShape.h"
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
