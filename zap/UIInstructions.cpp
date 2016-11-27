@@ -624,7 +624,9 @@ void InstructionsUserInterface::renderModulesPage() const
                        false, true, false, false);
             break;
 
-         // skip 5 for 2nd line of sensor
+         case 5:
+            // skip 5 for 2nd line of sensor
+            break;
 
          case 6:     // Cloak
             {
