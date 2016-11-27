@@ -7,7 +7,6 @@
 
 #include "GameManager.h"
 #include "ClientGame.h"
-#include "IniFile.h"
 #include "Console.h"
 #include "DisplayManager.h"
 #include "UI.h"
