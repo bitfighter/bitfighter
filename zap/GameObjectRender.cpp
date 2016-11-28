@@ -2405,7 +2405,7 @@ static const Color &getVertexColor(char style)
       return Colors::EDITOR_SELECTED_ITEM_VERTEX_COLOR;
    
    TNLAssert(false, "Unhandled enum value!");
-
+   return Colors::white;
 }
 
 

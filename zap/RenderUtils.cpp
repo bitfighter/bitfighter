@@ -906,8 +906,8 @@ void RenderUtils::drawDashedCircle(const Point &center, F32 radius, S32 dashCoun
 void RenderUtils::drawAngledRay(const Point &center, F32 innerRadius, F32 outerRadius, F32 angle, const Color &color)
 {
    F32 vertices[] = {
-         center.x + cos(angle) * innerRadius, center.y + sin(angle) * innerRadius,
-         center.x + cos(angle) * outerRadius, center.y + sin(angle) * outerRadius,
+         center.x + cosf(angle) * innerRadius, center.y + sinf(angle) * innerRadius,
+         center.x + cosf(angle) * outerRadius, center.y + sinf(angle) * outerRadius,
    };
 
    mGL->renderVertexArray(vertices, 2, GLOPT::LineStrip, color);

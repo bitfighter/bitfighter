@@ -154,11 +154,6 @@ void UserInterface::renderConsole() const
 
 static const S32 TitleSize = 30;
 
-static const Color &getColorForStle(S32 style)
-{
-   
-}
-
 
 void UserInterface::renderMessageBox(const string &titleStr, const string &instrStr, 
                                      const string &messageStr, const Color &color, S32 vertOffset, S32 style) const
