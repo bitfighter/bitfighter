@@ -140,7 +140,7 @@ string LevelInfo::toSql() const
       LEVEL_INFO_DATABASE_MAPPING_TABLE
 #  undef LEVEL_INFO_ITEM
       "last_seen) VALUES (" <<
-#  define LEVEL_INFO_ITEM(index, b, c, field, e, transform) " '" << transform((##field)) << "'," << 
+#  define LEVEL_INFO_ITEM(index, b, c, field, e, transform) " '" << transform(field) << "'," <<
       LEVEL_INFO_DATABASE_MAPPING_TABLE
 #  undef LEVEL_INFO_ITEM
        "datetime('now'));";
