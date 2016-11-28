@@ -136,11 +136,11 @@ string LevelInfo::toSql() const
 {
    ostringstream str;
    str << "INSERT INTO " << Sqlite::LEVEL_INFO_TABLE_NAME << "(" <<
-#  define LEVEL_INFO_ITEM(index, dbField, c, d, e, f)  dbField << "," <<
+#  define LEVEL_INFO_ITEM(a, dbField, c, d, e, f)  dbField << "," <<
       LEVEL_INFO_DATABASE_MAPPING_TABLE
 #  undef LEVEL_INFO_ITEM
       "last_seen) VALUES (" <<
-#  define LEVEL_INFO_ITEM(index, b, c, field, e, transform) " '" << transform(field) << "'," <<
+#  define LEVEL_INFO_ITEM(a, b, c, field, e, transform) " '" << transform(field) << "'," <<
       LEVEL_INFO_DATABASE_MAPPING_TABLE
 #  undef LEVEL_INFO_ITEM
        "datetime('now'));";
