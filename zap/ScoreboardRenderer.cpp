@@ -253,8 +253,6 @@ static void renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y,
 // Static method
 static void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio)
 {
-   GL *gL = RenderManager::getGL();
-
    // Default to vector font for badges
    FontManager::pushFontContext(OldSkoolContext);
 
@@ -322,8 +320,8 @@ static void renderScoreboardLine(const Vector<ClientInfo *> &playerScores, bool 
    y += playerFontSize;
    S32 nameWidth = RenderUtils::drawStringAndGetWidth_fixed(x, y, playerFontSize, color, playerScores[row]->getName().getString());
 
-   colWidths[KdIndex]   = RenderUtils::drawStringfr_fixed(rightEdge - KdOff,                  y, playerFontSize, color, "%2.2f", color, playerScores[row]->getRating());
-   colWidths[PingIndex] = RenderUtils::drawStringfr_fixed(rightEdge - PingOff + maxPingWidth, y, playerFontSize, color, "%d",    color, playerScores[row]->getPing());
+   colWidths[KdIndex]   = RenderUtils::drawStringfr_fixed(rightEdge - KdOff,                  y, playerFontSize, color, "%2.2f", playerScores[row]->getRating());
+   colWidths[PingIndex] = RenderUtils::drawStringfr_fixed(rightEdge - PingOff + maxPingWidth, y, playerFontSize, color, "%d",    playerScores[row]->getPing());
 
    if(!isTeamGame)
       colWidths[ScoreIndex] = RenderUtils::drawStringfr_fixed(rightEdge - ScoreOff, y, playerFontSize, color, "%d", playerScores[row]->getScore());

@@ -44,7 +44,7 @@ class GameObjectRender: RenderManager
    };
 
 private:
-   static Color GameObjectRender::getTrackerColor(const Tracker &t, Color *liveColors, Color *deadColors, S32 i, S32 trackerCount);
+   static Color getTrackerColor(const Tracker &t, Color *liveColors, Color *deadColors, S32 i, S32 trackerCount);
 
 public:
    GameObjectRender();
