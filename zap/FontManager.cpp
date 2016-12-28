@@ -184,7 +184,7 @@ void fontStashErrorHandlerCallback(void* stashPtr, int error, int val)
 
          if(!ok)
          {
-            TNLAssert(false, "Resizing FontStash atlas failed... disabling TTF fonts.")
+            TNLAssert(false, "Resizing FontStash atlas failed... disabling TTF fonts.");
             logprintf(LogConsumer::LogError, "Resizing FontStash atlas failed... disabling TTF fonts.");
             FontManager::disableTtfFonts();
          }
