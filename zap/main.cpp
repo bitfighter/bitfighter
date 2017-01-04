@@ -410,6 +410,7 @@ void setupLevelDatabase(GameSettingsPtr settings)
    {
       DbWriter::DbQuery query(LevelInfo::LEVEL_INFO_DATABASE_NAME.c_str());
       
+      // Delete any levels we haven't seen in a year, just to keep things from getting totally out of control
       U64 result = query.runInsertQuery(Sqlite::getClearOutOldLevelsSql());
       TNLAssert(result == SQLITE_OK, "Problem deleting old zones!");
 
