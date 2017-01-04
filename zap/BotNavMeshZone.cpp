@@ -682,7 +682,10 @@ bool BotNavMeshZone::saveBotZonesToSqlite(const string &databaseName, U64 sqlite
    S32 rc = sqlite3_open_v2(databaseName.c_str(), &sqliteDb, SQLITE_OPEN_READWRITE, NULL);
    TNLAssert(rc == SQLITE_OK, "Error opening database!");
    if(rc != SQLITE_OK)
+   {
+      sqlite3_close(sqliteDb);
       return false;
+   }
 
    sqlite3_exec(sqliteDb, "BEGIN TRANSACTION;", NULL, NULL, NULL);
 
