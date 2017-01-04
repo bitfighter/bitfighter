@@ -624,7 +624,7 @@ void DatabaseWriter::createStatsDatabase()
    query.runInsertQuery(getSqliteSchema());
 
    if(sqliteDb)
-      sqlite3_close(sqliteDb);
+      sqlite3_close_v2(sqliteDb);
 }
 
 

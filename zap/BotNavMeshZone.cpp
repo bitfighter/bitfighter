@@ -728,7 +728,7 @@ bool BotNavMeshZone::saveBotZonesToSqlite(const string &databaseName, U64 sqlite
    rc = sqlite3_finalize(neighbors_pStmt);  
    TNLAssert(rc == SQLITE_OK, "Error finalizing!");
 
-   rc = sqlite3_close(sqliteDb);
+   rc = sqlite3_close_v2(sqliteDb);
    TNLAssert(rc == SQLITE_OK, "Error closing database!");
 
    return rc == SQLITE_OK;
@@ -809,7 +809,7 @@ bool BotNavMeshZone::tryToLoadZonesFromSqlite(const string &databaseName, U64 sq
    {
       logSqlError(errMsg);
 
-      rc = sqlite3_close(sqliteDb);
+      rc = sqlite3_close_v2(sqliteDb);
       TNLAssert(rc == SQLITE_OK, "Error closing database!");
 
       return false;
