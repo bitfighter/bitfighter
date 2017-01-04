@@ -617,7 +617,7 @@ void DatabaseWriter::createStatsDatabase()
 
    // Import schema
    logprintf("Building stats database schema");
-   sqlite3 *sqliteDb = openSqliteDatabase(mDb, SQLITE_OPEN_READWRITE);
+   sqlite3 *sqliteDb = openSqliteDatabase(mDb, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
    if(sqliteDb == NULL)
       return;
 
