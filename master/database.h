@@ -141,6 +141,7 @@ public:
 
    static sqlite3 *openSqliteDatabase(const string &databaseName, S32 mode);
    static bool createLevelDatabase(const string &databaseName, S32 schemaVersion);
+   static bool createDatabase(const string &databaseName, const string &sql);
 };
 
 

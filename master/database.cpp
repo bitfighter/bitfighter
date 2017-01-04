@@ -236,6 +236,12 @@ sqlite3 *DatabaseWriter::openSqliteDatabase(const string &databaseName, S32 mode
 
 bool DatabaseWriter::createLevelDatabase(const string &databaseName, S32 schemaVersion)
 {
+   return createDatabase(databaseName, Sqlite::getCreateLevelInfoTableSql(schemaVersion));
+}
+
+
+bool DatabaseWriter::createDatabase(const string &databaseName, const string &sql)
+{
    // Create empty file on file system
    sqlite3 *sqliteDb = openSqliteDatabase(databaseName, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
    if(sqliteDb == NULL)
@@ -243,10 +249,8 @@ bool DatabaseWriter::createLevelDatabase(const string &databaseName, S32 schemaV
 
    sqlite3_close_v2(sqliteDb);
 
-   string schema = Sqlite::getCreateLevelInfoTableSql(schemaVersion);
-
    DbQuery query(databaseName.c_str());
-   U64 result = query.runInsertQuery(schema);
+   U64 result = query.runInsertQuery(sql);
 
    return result != U64_MAX;
 }
@@ -607,24 +611,9 @@ void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<st
 
 void DatabaseWriter::createStatsDatabase() 
 {
-   DbQuery query(mDb, mServer, mUser, mPassword);
-
    // Create empty file on file system
    logprintf("Creating stats database file %s", mDb);
-   ofstream dbFile;
-   dbFile.open(mDb);
-   dbFile.close();
-
-   // Import schema
-   logprintf("Building stats database schema");
-   sqlite3 *sqliteDb = openSqliteDatabase(mDb, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
-   if(sqliteDb == NULL)
-      return;
-
-   query.runInsertQuery(getSqliteSchema());
-
-   if(sqliteDb)
-      sqlite3_close_v2(sqliteDb);
+   createDatabase(mDb, getSqliteSchema());
 }
 
 
