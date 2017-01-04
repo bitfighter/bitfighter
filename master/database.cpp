@@ -227,27 +227,26 @@ sqlite3 *DatabaseWriter::openSqliteDatabase(const string &databaseName, S32 mode
 
    logprintf(LogConsumer::DatabaseFilter, "Error opening database for %s for %s: %s", 
                                           databaseName.c_str(), 
-                                          mode == SQLITE_OPEN_READWRITE ? "reading/writing" : "reading", 
+                                          mode & SQLITE_OPEN_READWRITE ? "reading/writing" : "reading", 
                                           sqlite3_errmsg(sqliteDb));
+   sqlite3_close_v2(sqliteDb);
    return NULL;
 }
 
 
 bool DatabaseWriter::createLevelDatabase(const string &databaseName, S32 schemaVersion)
 {
-   string schema = Sqlite::getCreateLevelInfoTableSql(schemaVersion);
-
-   DbQuery query(databaseName.c_str());
-
    // Create empty file on file system
-   sqlite3 *sqliteDb = openSqliteDatabase(databaseName, SQLITE_OPEN_READWRITE);
+   sqlite3 *sqliteDb = openSqliteDatabase(databaseName, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
    if(sqliteDb == NULL)
       return false;
 
-   U64 result = query.runInsertQuery(schema);
+   sqlite3_close_v2(sqliteDb);
 
-   if(sqliteDb)
-      sqlite3_close(sqliteDb);
+   string schema = Sqlite::getCreateLevelInfoTableSql(schemaVersion);
+
+   DbQuery query(databaseName.c_str());
+   U64 result = query.runInsertQuery(schema);
 
    return result != U64_MAX;
 }
@@ -684,7 +683,7 @@ DbQuery::~DbQuery()
       delete mQuery;
 
    if(mSqliteDb)
-      sqlite3_close(mSqliteDb);
+      sqlite3_close_v2(mSqliteDb);
 }
 
 
