@@ -238,7 +238,7 @@ bool DatabaseWriter::createLevelDatabase(const string &databaseName, S32 schemaV
 }
 
 
-// Called from Master and Client
+// Called from both Master and Client
 bool DatabaseWriter::createDatabase(const string &databaseName, const string &sql)
 {
    // Create empty file on file system
