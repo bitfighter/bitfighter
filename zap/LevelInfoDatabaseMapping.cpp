@@ -9,10 +9,11 @@
 namespace Sqlite
 { 
 
-const string SCHEMA_TABLE_NAME = "schema";
+// Table names:
+const string SCHEMA_TABLE_NAME     = "schema";
 const string LEVEL_INFO_TABLE_NAME = "levelinfo";
-const string ZONE_TABLE_NAME = "zones";
-const string NEIGHBOR_TABLE_NAME = "zone_neighbors";
+const string ZONE_TABLE_NAME       = "zones";
+const string NEIGHBOR_TABLE_NAME   = "zone_neighbors";
 
 
 string getCreateLevelInfoTableSql(S32 schemaVersion)
