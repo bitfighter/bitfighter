@@ -16,7 +16,7 @@
 
 #ifdef BF_WRITE_TO_MYSQL
 #  include "mysql++.h"
-using namespace mysqlpp;
+   using namespace mysqlpp;
 #endif
 
 using namespace std;
