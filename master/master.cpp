@@ -184,9 +184,7 @@ MasterServer::MasterServer(MasterSettings *settings)
 MasterServer::~MasterServer()
 {
    delete mNetInterface;
-
    delete mDatabaseAccessThread;
-
    delete mEasterEggBasket;
 }
 
