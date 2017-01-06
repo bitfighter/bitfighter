@@ -14,8 +14,6 @@
 #include "../zap/stringUtils.h"            // For replaceString() and itos()
 #include "../zap/WeaponInfo.h"
 
-#include <fstream>
-
 #ifdef BF_WRITE_TO_MYSQL
 #  include "mysql++.h"
 using namespace mysqlpp;
