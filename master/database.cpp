@@ -671,8 +671,7 @@ DbQuery::~DbQuery()
    if(mQuery)
       delete mQuery;
 
-   if(mSqliteDb)
-      sqlite3_close_v2(mSqliteDb);
+   sqlite3_close_v2(mSqliteDb);     // Ok if mSqliteDb is NULL
 }
 
 
