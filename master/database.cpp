@@ -238,6 +238,7 @@ bool DatabaseWriter::createLevelDatabase(const string &databaseName, S32 schemaV
 }
 
 
+// Called from Master and Client
 bool DatabaseWriter::createDatabase(const string &databaseName, const string &sql)
 {
    // Create empty file on file system
@@ -752,8 +753,7 @@ U64 DbQuery::runInsertQuery(const string &sql) const
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Put this at the end where it's easy to find
-
+// Put this at the end where it's easy to find... and it's static
 string DatabaseWriter::getSqliteSchema() 
 {
    return
