@@ -20,21 +20,22 @@ string getCreateLevelInfoTableSql(S32 schemaVersion)
 {
    return string("") +     // Coerce what follows into a string expression
       "DROP TABLE IF EXISTS " + SCHEMA_TABLE_NAME + ";"
-      "CREATE TABLE " + SCHEMA_TABLE_NAME + " (version INTEGER NOT NULL);"
-      "INSERT INTO " + SCHEMA_TABLE_NAME + " VALUES(" + Zap::itos(schemaVersion) + ");"
+      "CREATE TABLE "         + SCHEMA_TABLE_NAME + " (version INTEGER NOT NULL);"
+      "INSERT INTO "          + SCHEMA_TABLE_NAME + " VALUES(" + Zap::itos(schemaVersion) + ");"
+
       "DROP TABLE IF EXISTS " + LEVEL_INFO_TABLE_NAME + ";"
-      "CREATE TABLE " + LEVEL_INFO_TABLE_NAME + " (" +
-      "level_info_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
+      "CREATE TABLE "         + LEVEL_INFO_TABLE_NAME + " (" +
+         "level_info_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
 #  define LEVEL_INFO_ITEM(index, column, type, d, e, f)  column + " " + type + "," +
-      LEVEL_INFO_DATABASE_MAPPING_TABLE
+         LEVEL_INFO_DATABASE_MAPPING_TABLE
 #  undef LEVEL_INFO_ITEM
-      "last_seen DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);"
+         "last_seen DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);"
 
       "DROP TABLE IF EXISTS " + ZONE_TABLE_NAME + "; "
-      "CREATE TABLE " + ZONE_TABLE_NAME + " (level_info_id INTEGER NOT NULL, zone_id INTEGER NOT NULL, zone_geom BLOB NOT NULL); "
+      "CREATE TABLE "         + ZONE_TABLE_NAME + " (level_info_id INTEGER NOT NULL, zone_id INTEGER NOT NULL, zone_geom BLOB NOT NULL); "
 
       "DROP TABLE IF EXISTS " + NEIGHBOR_TABLE_NAME + "; "
-      "CREATE TABLE " + NEIGHBOR_TABLE_NAME + "("
+      "CREATE TABLE "         + NEIGHBOR_TABLE_NAME + "("
          "level_info_id     INTEGER NOT NULL, "
          "write_order       INTEGER NOT NULL, "
          "origin_zone_id    INTEGER NOT NULL, "
