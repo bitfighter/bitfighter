@@ -720,12 +720,14 @@ U64 DbQuery::runInsertQuery(const string &sql) const
       logprintf("SQL: %s", sql.c_str());
 
    if(mQuery)
+   {
       // Should only get here when mysql has been compiled in
 #ifdef BF_WRITE_TO_MYSQL
-         return mQuery->execute(sql).insert_id();
+      return mQuery->execute(sql).insert_id();
 #else
-         throw std::exception();    // Should be impossible
+      throw std::exception();    // Should be impossible
 #endif
+   }
 
    if(mSqliteDb)
    {
