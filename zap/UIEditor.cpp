@@ -1629,15 +1629,15 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb) co
    {
       // Use Z Buffer to make use of not drawing overlap visible area of same team SpyBug, but does overlap different team
       fillVector.sort(sortByTeam); // Need to sort by team, or else won't properly combine the colors.
-      mGL->glClear(GLOPT::DepthBufferBit);
-      mGL->glEnable(GLOPT::DepthTest);
-      mGL->glEnable(GLOPT::DepthWritemask);
-      mGL->glDepthFunc(GLOPT::Less);
-      mGL->glPushMatrix();
+      mGL->clear(GLOPT::DepthBufferBit);
+      mGL->enable(GLOPT::DepthTest);
+      mGL->enable(GLOPT::DepthWritemask);
+      mGL->depthFunc(GLOPT::Less);
+      mGL->pushMatrix();
       mGL->glTranslate(0, 0, -0.95f);
 
       // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
-      mGL->glBlendFunc(GLOPT::OneMinusDstColor, GLOPT::One);
+      mGL->blendFunc(GLOPT::OneMinusDstColor, GLOPT::One);
 
       S32 prevTeam = -10;
 
@@ -1658,9 +1658,9 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb) co
 
       mGL->setDefaultBlendFunction();
 
-      mGL->glPopMatrix();
-      mGL->glDisable(GLOPT::DepthWritemask);
-      mGL->glDisable(GLOPT::DepthTest);
+      mGL->popMatrix();
+      mGL->disable(GLOPT::DepthWritemask);
+      mGL->disable(GLOPT::DepthTest);
    }
 
    // Next draw turret firing ranges for selected or highlighted turrets only
@@ -1917,7 +1917,7 @@ void EditorUserInterface::renderReferenceShip() const
    // Render ship at cursor to show scale
    static F32 thrusts[4] = {1, 0, 0, 0};
 
-   mGL->glPushMatrix();
+   mGL->pushMatrix();
    mGL->glTranslate(mMousePos);
    mGL->glScale(mCurrentScale);
    mGL->glRotate(90);
@@ -1926,9 +1926,9 @@ void EditorUserInterface::renderReferenceShip() const
 
    // Draw collision circle
    const F32 spaceAngle = 0.0278f * FloatTau;
-   mGL->glLineWidth(RenderUtils::LINE_WIDTH_1);
+   mGL->lineWidth(RenderUtils::LINE_WIDTH_1);
    RenderUtils::drawDashedCircle(Point(0, 0), (F32)Ship::CollisionRadius, 10, spaceAngle, 0, Colors::green, 0.35f);
-   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
    // And show how far it can see
    const S32 horizDist = Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL;
@@ -1936,7 +1936,7 @@ void EditorUserInterface::renderReferenceShip() const
 
    RenderUtils::drawFilledRect(-horizDist, -vertDist, horizDist, vertDist, Colors::paleBlue, 0.35f);
 
-   mGL->glPopMatrix();
+   mGL->popMatrix();
 }
 
 
@@ -1962,7 +1962,7 @@ void EditorUserInterface::render() const
    if(mDraggingObjects && mSnapContext & CONSTRAINED_MOVEMENT)
       GameObjectRender::renderConstrainedDraggingLines(convertLevelToCanvasCoord(mMoveOrigin));
 
-   mGL->glPushMatrix();
+   mGL->pushMatrix();
    mGL->glTranslate(getCurrentOffset());
    mGL->glScale(getCurrentScale());
 
@@ -2026,7 +2026,7 @@ void EditorUserInterface::render() const
    if(mShowAllIds)
       renderObjectIds(editorDb);
 
-   mGL->glPopMatrix();
+   mGL->popMatrix();
 
    if(!mNormalizedScreenshotMode)
    {
@@ -2165,12 +2165,12 @@ void EditorUserInterface::renderObjectsUnderConstruction() const
 {
    // Add a vert (and deleted it later) to help show what this item would look like if the user placed the vert in the current location
    mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
-   mGL->glLineWidth(RenderUtils::LINE_WIDTH_3);
+   mGL->lineWidth(RenderUtils::LINE_WIDTH_3);
 
    const Color &color = mCreatingPoly ? Colors::EDITOR_SELECT_COLOR : mLevel->getTeamColor(mCurrentTeam);
    RenderUtils::drawLine(mNewItem->getOutline(), color);
 
-   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
    for(S32 j = mNewItem->getVertCount() - 1; j >= 0; j--)      // Go in reverse order so that placed vertices are drawn atop unplaced ones
    {
@@ -5336,7 +5336,7 @@ void EditorUserInterface::createNormalizedScreenshot(ClientGame* game)
    mPreviewMode = true;
    mNormalizedScreenshotMode = true;
 
-   mGL->glClear(GLOPT::ColorBufferBit);
+   mGL->clear(GLOPT::ColorBufferBit);
    centerView(true);
 
    render();

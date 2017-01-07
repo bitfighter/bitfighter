@@ -40,20 +40,20 @@ void ScreenShooter::resizeViewportToCanvas(UIManager *uiManager)
    S32 width = DisplayManager::getScreenInfo()->getGameCanvasWidth();
    S32 height = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
-   mGL->glViewport(0, 0, width, height);
+   mGL->viewport(0, 0, width, height);
 
-   mGL->glMatrixMode(GLOPT::Projection);
-   mGL->glLoadIdentity();
+   mGL->matrixMode(GLOPT::Projection);
+   mGL->loadIdentity();
 
-   mGL->glOrtho(0, width, height, 0, 0, 1);
+   mGL->ortho(0, width, height, 0, 0, 1);
 
-   mGL->glMatrixMode(GLOPT::Modelview);
-   mGL->glLoadIdentity();
+   mGL->matrixMode(GLOPT::Modelview);
+   mGL->loadIdentity();
 
-   mGL->glScissor(0, 0, width, height);
+   mGL->scissor(0, 0, width, height);
 
    // Now render a frame to draw our new viewport to the back buffer
-   mGL->glClear(GLOPT::ColorBufferBit);   // Not sure why this is needed
+   mGL->clear(GLOPT::ColorBufferBit);   // Not sure why this is needed
    uiManager->renderCurrent();
 }
 
@@ -69,26 +69,26 @@ void ScreenShooter::restoreViewportToWindow(GameSettings *settings)
 
    VideoSystem::getWindowParameters(settings, displayMode, sdlWindowWidth, sdlWindowHeight, orthoLeft, orthoRight, orthoTop, orthoBottom);
 
-   mGL->glViewport(0, 0, sdlWindowWidth, sdlWindowHeight);
+   mGL->viewport(0, 0, sdlWindowWidth, sdlWindowHeight);
 
-   mGL->glMatrixMode(GLOPT::Projection);
-   mGL->glLoadIdentity();
+   mGL->matrixMode(GLOPT::Projection);
+   mGL->loadIdentity();
 
-   mGL->glOrtho(orthoLeft, orthoRight, orthoBottom, orthoTop, 0, 1);
+   mGL->ortho(orthoLeft, orthoRight, orthoBottom, orthoTop, 0, 1);
 
-   mGL->glMatrixMode(GLOPT::Modelview);
-   mGL->glLoadIdentity();
+   mGL->matrixMode(GLOPT::Modelview);
+   mGL->loadIdentity();
 
    // Now scissor
    if(displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
    {
-      mGL->glScissor(DisplayManager::getScreenInfo()->getHorizPhysicalMargin(), // x
+      mGL->scissor(DisplayManager::getScreenInfo()->getHorizPhysicalMargin(), // x
             DisplayManager::getScreenInfo()->getVertPhysicalMargin(),      // y
             DisplayManager::getScreenInfo()->getDrawAreaWidth(),           // width
             DisplayManager::getScreenInfo()->getDrawAreaHeight());         // height
    }
    else
-      mGL->glScissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
+      mGL->scissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
 }
 
 
@@ -149,10 +149,10 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings,
    png_bytep *rows = new png_bytep[height];
 
    // Set alignment at smallest for compatibility
-   mGL->glPixelStore(GLOPT::PackAlignment, 1);
+   mGL->pixelStore(GLOPT::PackAlignment, 1);
 
    // Read pixels from buffer - slow operation
-   mGL->glReadPixels(0, 0, width, height, GLOPT::Rgb, GLOPT::UnsignedByte, screenBuffer);
+   mGL->readPixels(0, 0, width, height, GLOPT::Rgb, GLOPT::UnsignedByte, screenBuffer);
 
    // Change opengl viewport back to what it was
    if(doResize)

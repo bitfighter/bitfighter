@@ -56,13 +56,7 @@ void RenderUtils::glColor(const Color &color, float alpha)
 // All text rendering flows through here
 void RenderUtils::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
 {
-   mGL->glPushMatrix();
-      mGL->glTranslate(x, y);
-      mGL->glRotate(angle * RADIANS_TO_DEGREES);
-
-      FontManager::renderString(size, string);
-
-   mGL->glPopMatrix();
+      FontManager::renderString(x, y, size, angle, string);
 }
 
 
@@ -881,10 +875,10 @@ void RenderUtils::drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endA
 
    generatePointsInACurve(startAngle, endAngle, numPoints, radius, points);
 
-   mGL->glPushMatrix();
+   mGL->pushMatrix();
       mGL->glTranslate(pos);
       mGL->renderPointVector(&points, GLOPT::LineStrip, color, alpha);
-   mGL->glPopMatrix();
+   mGL->popMatrix();
 }
 
 
@@ -1085,10 +1079,10 @@ void RenderUtils::drawPolygon(S32 sides, F32 radius, F32 angle, const Color &col
 // Draw an n-sided polygon
 void RenderUtils::drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle, const Color &color, F32 alpha)
 {
-   mGL->glPushMatrix();
+   mGL->pushMatrix();
    mGL->glTranslate(pos);
    drawPolygon(sides, radius, angle, color, alpha);
-   mGL->glPopMatrix();
+   mGL->popMatrix();
 }
 
 
@@ -1253,10 +1247,10 @@ void RenderUtils::drawFilledSquare(const Point &pos, F32 radius, const Color &co
 
 void RenderUtils::drawCircle(const Point &center, F32 radius, const Color &color, F32 alpha)
 {
-   mGL->glPushMatrix();
+   mGL->pushMatrix();
       mGL->glTranslate(center);
       drawCircle(radius, color, alpha);
-   mGL->glPopMatrix();
+   mGL->popMatrix();
 }
 
 
@@ -1271,10 +1265,10 @@ void RenderUtils::drawCircle(F32 radius, const Color &color, F32 alpha)
    if(points.size() == 0)
       generatePointsInACircle(NUM_CIRCLE_SIDES, 1.0, points);
 
-   mGL->glPushMatrix();
+   mGL->pushMatrix();
       mGL->glScale(radius);
       mGL->renderPointVector(&points, GLOPT::LineStrip, color, alpha);
-   mGL->glPopMatrix();
+   mGL->popMatrix();
 }
 
 

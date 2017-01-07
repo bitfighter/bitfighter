@@ -196,6 +196,8 @@ set(CLIENT_SOURCES
 	UITeamDefMenu.cpp
 	VideoSystem.cpp
 	voiceCodec.cpp
+	${CMAKE_SOURCE_DIR}/nanovg/nanovg.c
+	glad.c
 )
 
 file(GLOB BITFIGHTER_HEADERS *.h *.hpp)
@@ -203,7 +205,7 @@ file(GLOB BITFIGHTER_HEADERS *.h *.hpp)
 file(GLOB OTHER_HEADERS
 	${CLIPPER_INCLUDE_DIR}/*.hpp 
 	${CMAKE_SOURCE_DIR}/other/*.h 
-	${CMAKE_SOURCE_DIR}/fontstash/*.h 
+	${CMAKE_SOURCE_DIR}/nanovg/*.h
 	${CMAKE_SOURCE_DIR}/recast/*.h 
 	${CMAKE_SOURCE_DIR}/poly2tri/*.h
 	${CMAKE_SOURCE_DIR}/poly2tri/common/*.h

@@ -88,7 +88,7 @@ static const S32 frameMargin = UserInterface::vertMargin;
 
 void LevelInfoDisplayer::renderTopPanel() const
 {
-   mGL->glPushMatrix();
+   mGL->pushMatrix();
    mGL->glTranslate(0, getInsideEdge());
 
    GameType *gameType = mGame->getGameType();
@@ -220,7 +220,7 @@ void LevelInfoDisplayer::renderTopPanel() const
       RenderUtils::drawCenteredStringPair(yPos, creditsSize, Colors::cyan, Colors::red, designedBy, credits.c_str());
    }
 
-   mGL->glPopMatrix();
+   mGL->popMatrix();
 }
 
 
@@ -228,7 +228,7 @@ void LevelInfoDisplayer::renderSidePanel() const
 {
    GameType *gameType = mGame->getGameType();
 
-   mGL->glPushMatrix();
+   mGL->pushMatrix();
    mGL->glTranslate(-getInsideEdge(), 0);
 
    bool showTwoLinesOfInstructions = gameType->getInstructionString()[1];     // Show 'em if we got 'em
@@ -279,7 +279,7 @@ void LevelInfoDisplayer::renderSidePanel() const
    RenderUtils::drawCenteredStringPair_fixed(sideBoxCen, yPos, ScoreToWinSize, LevelInfoHeadlineContext, LevelInfoHeadlineContext, 
                                              Colors::cyan, Colors::red, ScoreToWinStr, itos(gameType->getWinningScore()).c_str());
 
-   mGL->glPopMatrix();
+   mGL->popMatrix();
 
    FontManager::popFontContext();
 }

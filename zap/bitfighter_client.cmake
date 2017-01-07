@@ -21,11 +21,12 @@ add_dependencies(bitfighter_client
 	sqlite
 )
 
+
+get_property(CLIENT_DEFS TARGET bitfighter_client PROPERTY COMPILE_DEFINITIONS)
+
 if(USE_GLES)
-	get_property(CLIENT_DEFS TARGET bitfighter_client PROPERTY COMPILE_DEFINITIONS)
-	set_target_properties(bitfighter_client
-		PROPERTIES
-		COMPILE_DEFINITIONS "${CLIENT_DEFS};BF_USE_GLES"
+	set_target_properties(bitfighter_client PROPERTIES COMPILE_DEFINITIONS 
+		"${CLIENT_DEFS};BF_USE_GLES"
 	)
 endif()
 

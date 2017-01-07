@@ -52,7 +52,7 @@ public:
 
    static F32 getStringLength(const char* string);
 
-   static void renderString(F32 size, const char *string);
+   static void renderString(F32 x, F32 y, F32 size, F32 angle, const char *string);
 
    static void setFont(FontId fontId);
    static void setFontContext(FontContext fontContext);

@@ -474,14 +474,14 @@ void UIManager::renderCurrent()
       S32 viewport[4];
       mGL->glGetValue(GLOPT::Viewport, viewport);
 
-      mGL->glViewport(viewport[0] + S32((mLastWasLower ? 1 : -1) * viewport[2] * (1 - mMenuTransitionTimer.getFraction())), 0, viewport[2], viewport[3]);
+      mGL->viewport(viewport[0] + S32((mLastWasLower ? 1 : -1) * viewport[2] * (1 - mMenuTransitionTimer.getFraction())), 0, viewport[2], viewport[3]);
       mLastUI->render();
 
-      mGL->glViewport(viewport[0] - S32((mLastWasLower ? 1 : -1) * viewport[2] * mMenuTransitionTimer.getFraction()), 0, viewport[2], viewport[3]);
+      mGL->viewport(viewport[0] - S32((mLastWasLower ? 1 : -1) * viewport[2] * mMenuTransitionTimer.getFraction()), 0, viewport[2], viewport[3]);
       mCurrentInterface->render();
 
       // Restore viewport for posterity
-      mGL->glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+      mGL->viewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
       return;
    }

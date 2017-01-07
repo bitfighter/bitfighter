@@ -19,6 +19,8 @@
 
 #include "tnlLog.h"
 
+#include "glad.h"
+
 #include <cmath>
 
 namespace Zap
@@ -117,8 +119,24 @@ bool VideoSystem::init()
 
    // Create our OpenGL context; save it in case we ever need it
    SDL_GLContext context = SDL_GL_CreateContext(DisplayManager::getScreenInfo()->sdlWindow);
+   if(!context)
+   {
+      logprintf(LogConsumer::LogFatalError, "OpenGL context creation failed: %s", SDL_GetError());
+      return false;
+   }
    DisplayManager::getScreenInfo()->sdlGlContext = &context;
 
+      // Load OpenGL at runtime
+#if defined BF_USE_GLES2
+   gladLoadGLES2Loader(SDL_GL_GetProcAddress);
+#else
+   gladLoadGLLoader(SDL_GL_GetProcAddress);
+#endif
+   logprintf("OpenGL loaded");
+   logprintf("Vendor:   %s", glGetString(GL_VENDOR));
+   logprintf("Renderer: %s", glGetString(GL_RENDERER));
+   logprintf("Version:  %s", glGetString(GL_VERSION));
+   logprintf("GLSL Version: %s", glGetString (GL_SHADING_LANGUAGE_VERSION));
 
    // Set the window icon -- note that the icon must be a 32x32 bmp, and SDL will
    // downscale it to 16x16 with no interpolation.  Therefore, it's best to start
@@ -168,6 +186,12 @@ S32 VideoSystem::getWindowPositionX()
 S32 VideoSystem::getWindowPositionY()
 {
    return getWindowPositionCoord(false);
+}
+
+
+void VideoSystem::getWindowSize(S32 &fillWidth, S32 &fillHeight)
+{
+   SDL_GetWindowSize(DisplayManager::getScreenInfo()->sdlWindow, &fillWidth, &fillHeight);
 }
 
 
@@ -256,25 +280,25 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    // Now save the new window dimensions in ScreenInfo
    DisplayManager::getScreenInfo()->setWindowSize(sdlWindowWidth, sdlWindowHeight);
 
-   mGL->glClearColor(0, 0, 0, 0);
+   mGL->clearColor(0, 0, 0, 0);
 
-   mGL->glViewport(0, 0, sdlWindowWidth, sdlWindowHeight);
+   mGL->viewport(0, 0, sdlWindowWidth, sdlWindowHeight);
 
-   mGL->glMatrixMode(GLOPT::Projection);
-   mGL->glLoadIdentity();
+   mGL->matrixMode(GLOPT::Projection);
+   mGL->loadIdentity();
 
    // The best understanding I can get for glOrtho is that these are the coordinates you want to appear at the four corners of the
    // physical screen. If you want a "black border" down one side of the screen, you need to make left negative, so that 0 would
    // appear some distance in from the left edge of the physical screen.  The same applies to the other coordinates as well.
-   mGL->glOrtho(orthoLeft, orthoRight, orthoBottom, orthoTop, 0, 1);
+   mGL->ortho(orthoLeft, orthoRight, orthoBottom, orthoTop, 0, 1);
 
-   mGL->glMatrixMode(GLOPT::Modelview);
-   mGL->glLoadIdentity();
+   mGL->matrixMode(GLOPT::Modelview);
+   mGL->loadIdentity();
 
    // Do the scissoring
    if(displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
    {
-      mGL->glScissor(DisplayManager::getScreenInfo()->getHorizPhysicalMargin(),    // x
+      mGL->scissor(DisplayManager::getScreenInfo()->getHorizPhysicalMargin(),    // x
                 DisplayManager::getScreenInfo()->getVertPhysicalMargin(),     // y
                 DisplayManager::getScreenInfo()->getDrawAreaWidth(),          // width
                 DisplayManager::getScreenInfo()->getDrawAreaHeight());        // height
@@ -287,22 +311,22 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
       // causing some lines to wrap around the screen, or by writing other
       // parts of RAM that can crash Bitfighter, graphics driver, or the entire computer.
       // This is probably a bug in the Linux Intel graphics driver.
-      mGL->glScissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
+      mGL->scissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
    }
 
-   mGL->glEnable(GLOPT::ScissorTest);    // Turn on clipping
+   mGL->enable(GLOPT::ScissorTest);    // Turn on clipping
 
    mGL->setDefaultBlendFunction();
-   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
    // Enable Line smoothing everywhere!  Make sure to disable temporarily for filled polygons and such
    if(settings->getSetting<YesNo>(IniKey::LineSmoothing))
    {
-      mGL->glEnable(GLOPT::LineSmooth);
+      mGL->enable(GLOPT::LineSmooth);
       //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
    }
 
-   mGL->glEnable(GLOPT::Blend);
+   mGL->enable(GLOPT::Blend);
 
    // Now set the window position
    if(displayMode == DISPLAY_MODE_WINDOWED)

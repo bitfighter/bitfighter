@@ -88,13 +88,13 @@ S32 renderLock(GL *gl, S32 xPos, bool render)
    {
       S32 y = DisplayManager::getScreenInfo()->getGameCanvasHeight() - TimeLeftRenderer::TimeLeftIndicatorMargin - renderHeight - 5;
     
-      gl->glPushMatrix();
+      gl->pushMatrix();
       gl->glTranslate(xPos - totalWidth, y);
       gl->glScale(scale);
 
       GameObjectRender::renderLock();
 
-      gl->glPopMatrix();
+      gl->popMatrix();
    }
 
    return totalWidth;

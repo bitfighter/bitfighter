@@ -751,9 +751,9 @@ void GameUserInterface::renderLostConnectionMessage() const
       if((Platform::getRealMilliseconds() & 0x300) != 0) // Draw flashing red "X" on empty connection bars
       {
          static const F32 vertices[] = {x1 + 5, y1 - 5, x1 + 45, y1 + 35,  x1 + 5, y1 + 35, x1 + 45, y1 - 5 };
-         mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH * 2.0f);
+         mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH * 2.0f);
          mGL->renderVertexArray(vertices, 4, GLOPT::Lines, Colors::red);
-         mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+         mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
       }
    }
 }
@@ -1712,9 +1712,9 @@ void GameUserInterface::renderAnnouncement(S32 pos) const
 {
    const S32 fontsize = 16;
 
-   mGL->glLineWidth(RenderUtils::LINE_WIDTH_4);
+   mGL->lineWidth(RenderUtils::LINE_WIDTH_4);
    RenderUtils::drawStringAndGetWidth_fixed(horizMargin, pos + fontsize, fontsize, Colors::red, ("*** " + mAnnouncement + " ***").c_str());
-   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
 
@@ -2390,7 +2390,7 @@ void GameUserInterface::renderGameNormal() const
 
    visExt = getGame()->computePlayerVisArea(ship);
 
-   mGL->glPushMatrix();
+   mGL->pushMatrix();
 
    static const Point center(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2,
                              DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
@@ -2456,7 +2456,7 @@ void GameUserInterface::renderGameNormal() const
    if(mDebugShowObjectIds)
       renderObjectIds();
 
-   mGL->glPopMatrix();
+   mGL->popMatrix();
 
    // Render current ship's energy
    if(ship)
@@ -2569,7 +2569,7 @@ void GameUserInterface::renderGameCommander() const
    visSize = ship ? getGame()->computePlayerVisArea(ship) * 2 : worldExtents;
 
 
-   mGL->glPushMatrix();
+   mGL->pushMatrix();
 
    // Put (0,0) at the center of the screen
    mGL->glTranslate(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.5f,
@@ -2682,7 +2682,7 @@ void GameUserInterface::renderGameCommander() const
 
    getUIManager()->getUI<GameUserInterface>()->renderEngineeredItemDeploymentMarker(ship);
 
-   mGL->glPopMatrix();
+   mGL->popMatrix();
 
 
    // Render current ship's energy

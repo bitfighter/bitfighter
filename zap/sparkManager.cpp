@@ -117,7 +117,7 @@ void FxManager::DebrisChunk::idle(U32 timeDelta)
 
 void FxManager::DebrisChunk::render() const
 {
-   mGL->glPushMatrix();
+   mGL->pushMatrix();
 
    mGL->glTranslate(pos);
    mGL->glRotate(angle * RADIANS_TO_DEGREES);
@@ -128,7 +128,7 @@ void FxManager::DebrisChunk::render() const
 
    mGL->renderPointVector(&points, GLOPT::LineLoop, color, alpha);
 
-   mGL->glPopMatrix();
+   mGL->popMatrix();
 }
 
 
@@ -170,7 +170,7 @@ void FxManager::TextEffect::render(const Point &centerOffset) const
    if(ttl < FadeTime)
       alpha = ttl / FadeTime;     // Fade as item nears the end of its life
 
-   mGL->glPushMatrix();
+   mGL->pushMatrix();
 
       mGL->glTranslate(pos);
       mGL->glScale(size / MAX_TEXTEFFECT_SIZE);  // We'll draw big and scale down
@@ -180,7 +180,7 @@ void FxManager::TextEffect::render(const Point &centerOffset) const
          RenderUtils::drawStringc(0, 0, 120, text.c_str());
       FontManager::popFontContext();
 
-   mGL->glPopMatrix();
+   mGL->popMatrix();
 }
 
 
@@ -356,7 +356,7 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction, const Point &c
    {
       for(S32 i = SparkTypeCount - 1; i >= 0; i --)     // Loop through our different spark types
       {
-         mGL->glPointSize(RenderUtils::DEFAULT_LINE_WIDTH);
+         mGL->pointSize(RenderUtils::DEFAULT_LINE_WIDTH);
 
          // This actually works...
          const F32 *vertexPointer = &mSparks[i][0].pos.x;
@@ -381,14 +381,14 @@ void FxManager::renderScreenEffects() const
 {
    static const Point center(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2,
                              DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
-   mGL->glPushMatrix();
+   mGL->pushMatrix();
       mGL->glTranslate(center);
       mGL->glScale(0.6667f);
 
       for(S32 i = 0; i < mScreenTextEffects.size(); i++)
          mScreenTextEffects[i].render(center);
 
-   mGL->glPopMatrix();
+   mGL->popMatrix();
 }
 
 

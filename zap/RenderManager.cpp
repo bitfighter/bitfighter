@@ -5,9 +5,15 @@
 
 #include "RenderManager.h"
 
-#define BF_ALLOW_GLHEADER 1
 #include "glinc.h"
-#undef BF_ALLOW_GLHEADER
+
+#ifdef BF_USE_GLES
+#  define NANOVG_GLES2_IMPLEMENTATION
+#else
+#  define NANOVG_GL2_IMPLEMENTATION
+#endif
+#include "../nanovg/nanovg.h"
+#include "../nanovg/nanovg_gl.h"
 
 #include "Color.h"
 #include "Point.h"
@@ -63,6 +69,8 @@ const U32 GLOPT::Viewport = GL_VIEWPORT;
 
 
 GL *RenderManager::mGL = NULL;
+NVGcontext *RenderManager::nvg = NULL;
+NVGcontext *GL::nvg = NULL;
 
 RenderManager::RenderManager()
 {
@@ -78,6 +86,16 @@ RenderManager::~RenderManager()
 void RenderManager::init()
 {
    TNLAssert(mGL == NULL, "GL Renderer should only be created once!");
+   TNLAssert(nvg == NULL, "NanoVG GL context should only be created once!");
+
+//   int nvgFlags = NVG_ANTIALIAS | NVG_STENCIL_STROKES;
+   int nvgFlags = 0;
+
+#ifdef BF_USE_GLES
+   nvg = nvgCreateGLES2(nvgFlags);
+#else
+   nvg = nvgCreateGL2(nvgFlags);
+#endif
 
    mGL = new GL();
    mGL->init();
@@ -88,6 +106,12 @@ void RenderManager::shutdown()
 {
    TNLAssert(mGL != NULL, "GL Renderer should have been created; never called RenderManager::init()?");
    delete mGL;
+
+#ifdef BF_USE_GLES
+   nvgDeleteGLES2(nvg);
+#else
+   nvgDeleteGL2(nvg);
+#endif
 }
 
 
@@ -96,6 +120,15 @@ GL *RenderManager::getGL()
    TNLAssert(mGL != NULL, "GL Renderer should not be NULL!  Run RenderManager::init() before calling this!");
    return mGL;
 }
+
+
+NVGcontext *RenderManager::getNVG()
+{
+   TNLAssert(nvg != NULL, "GL Renderer should not be NULL!  Run RenderManager::init() before calling this!");
+   return nvg;
+}
+
+
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -120,6 +153,8 @@ void GL::init() {
 #ifdef BF_USE_GLES2
    // TODO - Shaders and stuff
 #else
+   nvg = RenderManager::getNVG();
+   TNLAssert(nvg != NULL, "NanoVG GL context is NULL!");
    // No initialization for the fixed-function pipeline!
 #endif
 }
@@ -273,7 +308,7 @@ void GL::glRotate(F32 angle)
 }
 
 
-void GL::glLineWidth(F32 angle)
+void GL::lineWidth(F32 angle)
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -283,7 +318,7 @@ void GL::glLineWidth(F32 angle)
 }
 
 
-void GL::glViewport(S32 x, S32 y, S32 width, S32 height)
+void GL::viewport(S32 x, S32 y, U32 width, U32 height)
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -293,7 +328,7 @@ void GL::glViewport(S32 x, S32 y, S32 width, S32 height)
 }
 
 
-void GL::glScissor(S32 x, S32 y, S32 width, S32 height)
+void GL::scissor(S32 x, S32 y, S32 width, S32 height)
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -303,7 +338,7 @@ void GL::glScissor(S32 x, S32 y, S32 width, S32 height)
 }
 
 
-void GL::glPointSize(F32 size)
+void GL::pointSize(F32 size)
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -313,7 +348,7 @@ void GL::glPointSize(F32 size)
 }
 
 
-void GL::glLoadIdentity()
+void GL::loadIdentity()
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -323,7 +358,7 @@ void GL::glLoadIdentity()
 }
 
 
-void GL::glOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx)
+void GL::ortho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx)
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -337,7 +372,7 @@ void GL::glOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx)
 }
 
 
-void GL::glClear(U32 mask)
+void GL::clear(U32 mask)
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -347,7 +382,7 @@ void GL::glClear(U32 mask)
 }
 
 
-void GL::glClearColor(F32 red, F32 green, F32 blue, F32 alpha)
+void GL::clearColor(F32 red, F32 green, F32 blue, F32 alpha)
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -357,7 +392,7 @@ void GL::glClearColor(F32 red, F32 green, F32 blue, F32 alpha)
 }
 
 
-void GL::glPixelStore(U32 name, S32 param)
+void GL::pixelStore(U32 name, S32 param)
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -367,22 +402,12 @@ void GL::glPixelStore(U32 name, S32 param)
 }
 
 
-void GL::glReadPixels(S32 x, S32 y, U32 width, U32 height, U32 format, U32 type, void *data)
+void GL::readPixels(S32 x, S32 y, U32 width, U32 height, U32 format, U32 type, void *data)
 {
 #ifdef BF_USE_GLES2
    // TODO
 #else
    ::glReadPixels(x, y, width, height, format, type, data);
-#endif
-}
-
-
-void GL::glViewport(S32 x, S32 y, U32 width, U32 height)
-{
-#ifdef BF_USE_GLES2
-   // TODO
-#else
-   ::glViewport(x, y, width, height);
 #endif
 }
 
@@ -397,7 +422,7 @@ void GL::setDefaultBlendFunction()
 }
 
 
-void GL::glBlendFunc(U32 sourceFactor, U32 destFactor)
+void GL::blendFunc(U32 sourceFactor, U32 destFactor)
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -407,7 +432,7 @@ void GL::glBlendFunc(U32 sourceFactor, U32 destFactor)
 }
 
 
-void GL::glDepthFunc(U32 function)
+void GL::depthFunc(U32 function)
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -567,7 +592,7 @@ void GL::glGetValue(U32 name, F32 *fill)
 }
 
 
-void GL::glPushMatrix()
+void GL::pushMatrix()
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -577,7 +602,7 @@ void GL::glPushMatrix()
 }
 
 
-void GL::glPopMatrix()
+void GL::popMatrix()
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -587,7 +612,7 @@ void GL::glPopMatrix()
 }
 
 
-void GL::glMatrixMode(U32 mode)
+void GL::matrixMode(U32 mode)
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -597,7 +622,7 @@ void GL::glMatrixMode(U32 mode)
 }
 
 
-void GL::glEnable(U32 option)
+void GL::enable(U32 option)
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -607,7 +632,7 @@ void GL::glEnable(U32 option)
 }
 
 
-void GL::glDisable(U32 option)
+void GL::disable(U32 option)
 {
 #ifdef BF_USE_GLES2
    // TODO
@@ -617,7 +642,7 @@ void GL::glDisable(U32 option)
 }
 
 
-bool GL::glIsEnabled(U32 option)
+bool GL::isEnabled(U32 option)
 {
 #ifdef BF_USE_GLES2
    // TODO

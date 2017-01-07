@@ -162,7 +162,7 @@ bool CreditsUserInterface::onKeyDown(InputCode inputCode)
 // Constructor
 CreditsScroller::CreditsScroller()
 {
-   mGL->glLineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
    // Loop through each line in the credits looking for section breaks ("-")
    // thus creating groups, the first of which is generally the job, followed

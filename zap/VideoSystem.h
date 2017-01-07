@@ -32,6 +32,8 @@ public:
    static S32 getWindowPositionX();
    static S32 getWindowPositionY();
 
+   static void getWindowSize(S32 &fillWidth, S32 &fillHeight);
+
    static void actualizeScreenMode(GameSettings *settings, bool changingInterfaces, bool currentUIUsesEditorScreenMode);
    static void getWindowParameters(GameSettings *settings, DisplayMode displayMode, 
                                    S32 &sdlWindowWidth, S32 &sdlWindowHeight, F64 &orthoLeft, F64 &orthoRight, F64 &orthoTop, F64 &orthoBottom);

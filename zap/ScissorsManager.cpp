@@ -27,9 +27,9 @@ void ScissorsManager::enable(bool enable, DisplayMode displayMode, F32 x, F32 y,
    p1 = DisplayManager::getScreenInfo()->convertCanvasToWindowCoord(x,     DisplayManager::getScreenInfo()->getGameCanvasHeight() - y - height, displayMode);
    p2 = DisplayManager::getScreenInfo()->convertCanvasToWindowCoord(width, height,                                         displayMode);
 
-   mGL->glScissor(S32(p1.x), S32(p1.y), S32(p2.x), S32(p2.y));
+   mGL->scissor(S32(p1.x), S32(p1.y), S32(p2.x), S32(p2.y));
 
-   mGL->glEnable(GLOPT::ScissorTest);
+   mGL->enable(GLOPT::ScissorTest);
 }
 
 
@@ -40,9 +40,9 @@ void ScissorsManager::disable()
       return;
 
    if(mScissorsWasEnabled)
-      mGL->glScissor(mScissorBox[0], mScissorBox[1], mScissorBox[2], mScissorBox[3]);
+      mGL->scissor(mScissorBox[0], mScissorBox[1], mScissorBox[2], mScissorBox[3]);
    else
-      mGL->glDisable(GLOPT::ScissorTest);
+      mGL->disable(GLOPT::ScissorTest);
 
    mManagerEnabled = false;
 }

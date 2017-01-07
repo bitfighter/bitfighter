@@ -73,7 +73,8 @@ void ScreenInfo::setWindowSize(S32 width, S32 height)
 
 void ScreenInfo::calcPixelRatio()
 {
-   mPixelRatio = (F32)mWindowHeight / (F32)mGameCanvasHeight;
+   mPixelRatioX = (F32)mWindowWidth / (F32)mGameCanvasWidth;
+   mPixelRatioY = (F32)mWindowHeight / (F32)mGameCanvasHeight;
 }
 
 
@@ -86,9 +87,11 @@ S32 ScreenInfo::getPhysicalScreenHeight() const { return mPhysicalScreenHeight; 
 
 
 // How many physical pixels make up a virtual one?
-F32 ScreenInfo::getPixelRatio() const { return mPixelRatio; }
+F32 ScreenInfo::getPixelRatioX() const { return mPixelRatioX; }
+F32 ScreenInfo::getPixelRatioY() const { return mPixelRatioY; }
 
-F32 ScreenInfo::getScalingRatio() const { return mScalingRatioY; }
+F32 ScreenInfo::getScalingRatioX() const { return mScalingRatioX; }
+F32 ScreenInfo::getScalingRatioY() const { return mScalingRatioY; }
 
 
 // Game canvas size in physical pixels, assuming full screen unstretched mode

@@ -573,7 +573,7 @@ void InstructionsUserInterface::renderModulesPage() const
 
       RenderUtils::drawString_fixed(x, y, textsize, Colors::white, moduleDescriptions[i][1]);
 
-      mGL->glPushMatrix();
+      mGL->pushMatrix();
       mGL->glTranslate(60, y - 10);
       mGL->glScale(0.7f);
       mGL->glRotate(-90);
@@ -651,7 +651,7 @@ void InstructionsUserInterface::renderModulesPage() const
          default: 
             TNLAssert(false, "Unhandled case!");
       }
-      mGL->glPopMatrix();
+      mGL->popMatrix();
       y += 45;
    }
 }
@@ -722,7 +722,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
       for(S32 j = 0; j < desc.size(); j++)
          GameObjectRender::renderCenteredString(start + Point(0, 25 + j * FontSize * 1.2), 17, Colors::white, desc[j].c_str());
 
-      mGL->glPushMatrix();
+      mGL->pushMatrix();
       mGL->glTranslate(objStart);
       mGL->glScale(0.7f);
 
@@ -877,11 +877,11 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                PanelGeom panelGeom;
                CoreItem::fillPanelGeom(pos, time, panelGeom);
 
-               mGL->glPushMatrix();
+               mGL->pushMatrix();
                   mGL->glTranslate(pos);
                   mGL->glScale(0.55f);
                   GameObjectRender::renderCore(pos, Colors::blue, time, &panelGeom, health, 1.0f);
-               mGL->glPopMatrix();
+               mGL->popMatrix();
             }
             break;
 
@@ -897,7 +897,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
          default: 
             TNLAssert(false, "Unhandled case!");
       }
-      mGL->glPopMatrix();
+      mGL->popMatrix();
       objStart.y += 75;
       start.y += 75;
    }

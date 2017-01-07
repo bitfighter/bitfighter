@@ -876,7 +876,7 @@ void QueryServersUserInterface::render() const
          // Render icons
          if(s.dedicated || s.test || s.pingTimedOut || !s.everGotQueryResponse)
          {
-            mGL->glPushMatrix();
+            mGL->pushMatrix();
             mGL->glTranslate(columns[1].xStart + 5.0f, y + 2.0f, 0.0f);
                if(s.pingTimedOut || !s.everGotQueryResponse)
                   RenderUtils::drawString_fixed(0, SERVER_ENTRY_TEXTSIZE, SERVER_ENTRY_TEXTSIZE, Colors::green, "?");
@@ -884,11 +884,11 @@ void QueryServersUserInterface::render() const
                   renderTestIcon();
                else
                   renderDedicatedIcon();
-            mGL->glPopMatrix();
+            mGL->popMatrix();
          }
          if(s.passwordRequired || s.pingTimedOut || !s.everGotQueryResponse)
          {
-            mGL->glPushMatrix();
+            mGL->pushMatrix();
                mGL->glTranslate(F32(columns[1].xStart + 25), F32(y + 2));
 
                if(s.pingTimedOut || !s.everGotQueryResponse)
@@ -898,7 +898,7 @@ void QueryServersUserInterface::render() const
                   mGL->glScale(3.65f);
                   GameObjectRender::renderLock();
                }
-            mGL->glPopMatrix();
+            mGL->popMatrix();
          }
 
          RenderUtils::drawStringf_fixed(columns[2].xStart, y, SERVER_ENTRY_TEXTSIZE, getPingTimeColor(s.pingTime), "%d", s.pingTime);

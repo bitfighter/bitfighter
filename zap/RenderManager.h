@@ -15,6 +15,9 @@
 
 using namespace TNL;
 
+// Must not be in a namespace
+struct NVGcontext;
+
 namespace Zap
 {
 
@@ -64,6 +67,7 @@ class RenderManager
 {
 protected:
    static GL *mGL;
+   static NVGcontext *nvg;
 
 public:
    RenderManager();
@@ -73,6 +77,7 @@ public:
    static void shutdown();
 
    static GL *getGL();
+   static NVGcontext *getNVG();
 };
 
 
@@ -80,6 +85,9 @@ public:
 // of desktop OpenGL 1.1 compatible [a subset]).
 class GL
 {
+private:
+   static NVGcontext *nvg;
+
 public:
    GL();          // Constructor
    virtual ~GL(); // Destructor
@@ -123,33 +131,32 @@ public:
    static void glTranslate(S32 x, S32 y, F32 z);
 
    static void glRotate(F32 angle);
-   static void glLineWidth(F32 width);
-   static void glViewport(S32 x, S32 y, S32 width, S32 height);
-   static void glScissor(S32 x, S32 y, S32 width, S32 height);
-   static void glPointSize(F32 size);
-   static void glLoadIdentity();
-   static void glOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 near, F64 far);
-   static void glClear(U32 mask);
-   static void glClearColor(F32 red, F32 green, F32 blue, F32 alpha);
-   static void glPixelStore(U32 name, S32 param);
-   static void glReadPixels(S32 x, S32 y, U32 width, U32 height, U32 format, U32 type, void *data);
-   static void glViewport(S32 x, S32 y, U32 width, U32 height);
+   static void lineWidth(F32 width);
+   static void viewport(S32 x, S32 y, U32 width, U32 height);
+   static void scissor(S32 x, S32 y, S32 width, S32 height);
+   static void pointSize(F32 size);
+   static void loadIdentity();
+   static void ortho(F64 left, F64 right, F64 bottom, F64 top, F64 near, F64 far);
+   static void clear(U32 mask);
+   static void clearColor(F32 red, F32 green, F32 blue, F32 alpha);
+   static void pixelStore(U32 name, S32 param);
+   static void readPixels(S32 x, S32 y, U32 width, U32 height, U32 format, U32 type, void *data);
 
-   void glBlendFunc(U32 sourceFactor, U32 destFactor);
+   void blendFunc(U32 sourceFactor, U32 destFactor);
    void setDefaultBlendFunction();
-   static void glDepthFunc(U32 func);
+   static void depthFunc(U32 func);
 
    static void glGetValue(U32 name, U8 *fill);
    void glGetValue(U32 name, S32 *fill);
    void glGetValue(U32 name, F32 *fill);
 
-   static void glPushMatrix();
-   static void glPopMatrix();
-   void glMatrixMode(U32 mode);
+   static void pushMatrix();
+   static void popMatrix();
+   void matrixMode(U32 mode);
 
-   void glEnable(U32 option);
-   void glDisable(U32 option);
-   bool glIsEnabled(U32 option);
+   void enable(U32 option);
+   void disable(U32 option);
+   bool isEnabled(U32 option);
 };
 
 

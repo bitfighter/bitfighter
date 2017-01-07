@@ -258,21 +258,21 @@ void UIColorPicker::render() const
    // Ship
    static F32 thrusts[4] =  { 1, 0, 0, 0 };
 
-   mGL->glPushMatrix();
+   mGL->pushMatrix();
    mGL->glTranslate(165, y + h / 2);
    mGL->glRotate(-90);
 
    GameObjectRender::renderShip(ShipShape::Normal, *this, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
 
-   mGL->glPopMatrix();
+   mGL->popMatrix();
 
    // Turret
-   mGL->glPushMatrix();
+   mGL->pushMatrix();
    mGL->glTranslate(240, y + h / 2);
 
    GameObjectRender::renderTurret(*this, Point(0, 15), Point(0, -1), true, 1, 0, 0);
 
-   mGL->glPopMatrix();
+   mGL->popMatrix();
 }
 
 

@@ -626,7 +626,7 @@ void DiagnosticUserInterface::render() const
          F32 rad = 10;
          F32 smallSize = .6f;
             
-         mGL->glPushMatrix();
+         mGL->pushMatrix();
          mGL->glScale(i ? smallSize : 1);
          y *= (i ? 1/smallSize : 1);
 
@@ -727,7 +727,7 @@ void DiagnosticUserInterface::render() const
          RenderUtils::drawStar(Point(x, y), 5, rad * .5f, rad * .25f, Colors::yellow);
 
          ///// After all badge rendering
-         mGL->glPopMatrix();
+         mGL->popMatrix();
       }
 #endif // TNL_DEBUG
    }

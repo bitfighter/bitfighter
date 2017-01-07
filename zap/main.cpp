@@ -86,6 +86,7 @@ using namespace TNL;
 #  include "ClientGame.h"
 #  include "FontManager.h"
 #  include "RenderManager.h"
+#  include "../nanovg/nanovg.h"
 #endif
 
 #include "ServerGame.h"
@@ -169,15 +170,15 @@ GL *mGL = NULL;
 // Clear screen -- force clear of "black bars" area to avoid flickering on some video cards
 static void clearScreen()
 {
-   bool scissorMode = mGL->glIsEnabled(GLOPT::ScissorTest);
+   bool scissorMode = mGL->isEnabled(GLOPT::ScissorTest);
 
    if(scissorMode)
-      mGL->glDisable(GLOPT::ScissorTest);
+      mGL->disable(GLOPT::ScissorTest);
 
-   mGL->glClear(GLOPT::ColorBufferBit);
+   mGL->clear(GLOPT::ColorBufferBit);
 
    if(scissorMode)
-      mGL->glEnable(GLOPT::ScissorTest);
+      mGL->enable(GLOPT::ScissorTest);
 }
 
 
@@ -186,10 +187,14 @@ void display()
 {
    clearScreen();
 
-   mGL->glMatrixMode(GLOPT::Modelview);
-   mGL->glLoadIdentity();
+   mGL->matrixMode(GLOPT::Modelview);
+   mGL->loadIdentity();
 
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+
+   S32 width, height;
+   VideoSystem::getWindowSize(width, height);
+   nvgBeginFrame(RenderManager::getNVG(), width, height, DisplayManager::getScreenInfo()->getPixelRatioY());
 
    for(S32 i = 0; i < clientGames->size(); i++)
    {
@@ -200,6 +205,8 @@ void display()
       TNLAssert(i == 0, "You need a little tra-la-la here before you can do that!");
       clientGames->get(i)->getUIManager()->renderCurrent();
    }
+
+   nvgEndFrame(RenderManager::getNVG());
 
    // Swap the buffers. This this tells the driver to render the next frame from the contents of the
    // back-buffer, and to set all rendering operations to occur on what was the front-buffer.
