@@ -708,7 +708,7 @@ void ClientGame::requestLoadoutPreset(S32 index)
    LoadoutTracker loadout = getSettings()->getLoadoutPreset(index);
 
    displayShipDesignChangedMessage(loadout, "Loaded preset " + itos(index + 1) + ": ",
-                                             "Preset same as the current design");
+                                             "Modifications canceled: preset design same as the current");
 
    // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
    // that matches A, it would be better to have loadout remain unchanged if I entered a loadout zone.
@@ -727,21 +727,22 @@ void ClientGame::displayShipDesignChangedMessage(const LoadoutTracker &loadout, 
    if(!ship)
       return;
 
+   if(ship->isLoadoutSameAsCurrent(loadout))
+   {
+      displayErrorMessage(msgToShowIfLoadoutsAreTheSame);
+      return;
+   }
+
    // If we're in a loadout zone, don't show any message -- new loadout will become active immediately, 
    // and we'll get a different msg from the server.  Avoids unnecessary messages.
    if(ship->isInZone(LoadoutZoneTypeNumber, ship->getTeam()))
       return;
 
-   if(ship->isLoadoutSameAsCurrent(loadout))
-      displayErrorMessage(msgToShowIfLoadoutsAreTheSame);
-   else
-   {
-      // Show new loadout
-      displaySuccessMessage("%s %s", baseSuccesString.c_str(), loadout.toString(false).c_str());
+   // Show new loadout
+   displaySuccessMessage("%s %s", baseSuccesString.c_str(), loadout.toString(false).c_str());
 
-      displaySuccessMessage(levelHasLoadoutZoneForTeam(ship->getTeam()) ? "Enter Loadout Zone to activate changes" : 
-                                                                          "Changes will be activated when you respawn");
-   }
+   displaySuccessMessage(levelHasLoadoutZoneForTeam(ship->getTeam()) ? "Enter Loadout Zone to activate changes" : 
+                                                                        "Changes will be activated when you respawn");
 }
 
 
