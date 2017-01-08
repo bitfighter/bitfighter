@@ -1430,8 +1430,6 @@ float  fonsTextBounds2(FONScontext* stash, float size,
    if(font->data == NULL) return 0;
 
    scale = fons__tt_getPixelHeightScale(&font->font, (float)isize / 10.0f);
-   //scale = 0.0638842285;
-   //scale = .131633535;  //.131633535  //xyzzy
 
    // Align vertically.
    y += fons__getVertAlign(stash, font, state->align, isize);
