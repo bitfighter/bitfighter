@@ -258,7 +258,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       {
          if(getGame()->getSettings()->getIniSettings()->mSettings.getVal<YesNo>("VerboseHelpMessages"))
             getGame()->displayShipDesignChangedMessage(loadout, "Selected loadout: ", 
-                                                                "Modifications canceled -- new ship design same as the current");
+                                                                "Modifications canceled: new ship design same as the current");
 
          // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
          // that matches A, it would be better to have loadout remain unchanged if I entered a loadout zone.
