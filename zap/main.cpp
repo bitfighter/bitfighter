@@ -190,16 +190,27 @@ void display()
    mGL->matrixMode(GLOPT::Modelview);
    mGL->loadIdentity();
 
-   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
-
    S32 width, height;
    VideoSystem::getWindowSize(width, height);
-   nvgBeginFrame(RenderManager::getNVG(), width, height, DisplayManager::getScreenInfo()->getPixelRatioY());
+   nvgBeginFrame(RenderManager::getNVG(), width, height, 1);
+
+   // This is (somewhat) a hack to get around needing glOrtho for NanoVG things.
+   // Since this is done before any other rendering, we scale and translate the
+   // top level render matrix to simulate our 800x600 canvas on whatever part of
+   // the window we need
+   NVGcontext *nvg = RenderManager::getNVG();
+   nvgScale(nvg, DisplayManager::getScreenInfo()->getScalingRatioX(),
+         DisplayManager::getScreenInfo()->getScalingRatioY());
+   // TODO do correct translation/scissoring
+//   nvgTranslate(nvg, DisplayManager::getScreenInfo()->getHorizDrawMargin(),
+//         DisplayManager::getScreenInfo()->getVertDrawMargin());
+
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
 
    for(S32 i = 0; i < clientGames->size(); i++)
    {
       // Do any la-ti-da that we might need to get the viewport setup for the game we're about to run.  For example, if
-      // we have two games, we might want to divide the screen into two viewports, configuring each before running the 
+      // we have two games, we might want to divide the screen into two viewports, configuring each before running the
       // associated render method which follows...
       // Each viewport should have an aspect ratio of 800x600.  The aspect ratio of the entire window will likely need to be different.
       TNLAssert(i == 0, "You need a little tra-la-la here before you can do that!");

@@ -47,12 +47,6 @@ RenderUtils::~RenderUtils()
 }
 
 
-void RenderUtils::glColor(const Color &color, float alpha)
-{
-   mGL->glColor(color, alpha);
-}
-
-
 // All text rendering flows through here
 void RenderUtils::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
 {
@@ -640,8 +634,9 @@ S32 RenderUtils::getStringWidth(S32 size, const char *string)
 
 F32 RenderUtils::getStringWidth(F32 size, const char *string)
 {
-   if(strcmp(string, " Create walls with right mouse button; hold ") == 0)
-      printf("Width: %2.2f (%2.2f)",  FontManager::getStringLength(string) * size / 120, size);//xyzzy
+   if(strcmp(string, "QYZX") == 0)
+      printf("Width: %2.2f (%2.2f)\n",  FontManager::getStringLength(string) * size / 120, size);//xyzzy
+
    return FontManager::getStringLength(string) * size / 120;
 }
 

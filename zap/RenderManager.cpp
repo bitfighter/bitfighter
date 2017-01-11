@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "RenderManager.h"
+#include "DisplayManager.h"
 
 #include "glinc.h"
 
@@ -89,6 +90,7 @@ void RenderManager::init()
    TNLAssert(nvg == NULL, "NanoVG GL context should only be created once!");
 
 //   int nvgFlags = NVG_ANTIALIAS | NVG_STENCIL_STROKES;
+//   int nvgFlags = NVG_ANTIALIAS;
    int nvgFlags = 0;
 
 #ifdef BF_USE_GLES
@@ -334,6 +336,8 @@ void GL::scissor(S32 x, S32 y, S32 width, S32 height)
    // TODO
 #else
    ::glScissor(x, y, width, height);
+
+   nvgScissor(nvg, x, y, width, height);
 #endif
 }
 

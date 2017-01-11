@@ -369,10 +369,12 @@ void FontManager::setFontContext(FontContext fontContext)
 
 void FontManager::setFontColor(const Color &color, F32 alpha)
 {
-   mGL->glColor(color, alpha);    // For stroke fonts
+//   mGL->glColor(color, alpha);    // For stroke fonts
 //   fonsSetColor(mStash, glfonsRGBA(U8(color.r * 255), U8(color.g * 255), U8(color.b * 255), U8(alpha * 255)));    // For FontStash
 
-   nvgFillColor(nvg, nvgRGBA(U8(color.r * 255), U8(color.g * 255), U8(color.b * 255), U8(alpha * 255)));    // For FontStash
+   // Chagne color for both strokes and TTF (fill) fonts
+   nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgFillColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
 }
 
 
@@ -430,15 +432,21 @@ void FontManager::drawStrokeCharacter(const SFG_StrokeFont *font, S32 character)
    {
       // I didn't find any strip->Number larger than 34, so I chose a buffer of 64
       // This may change if we go crazy with i18n some day...
-      static F32 characterVertexArray[128];
-      for(j = 0; j < strip->Number; j++)
-      {
-        characterVertexArray[2*j]     = strip->Vertices[j].X;
-        characterVertexArray[(2*j)+1] = strip->Vertices[j].Y;
-      }
-      mGL->renderVertexArray(characterVertexArray, strip->Number, GLOPT::LineStrip);
+//      static F32 characterVertexArray[128];
+//      for(j = 0; j < strip->Number; j++)
+//      {
+//        characterVertexArray[2*j]     = strip->Vertices[j].X;
+//        characterVertexArray[(2*j)+1] = strip->Vertices[j].Y;
+//      }
+//      mGL->renderVertexArray(characterVertexArray, strip->Number, GLOPT::LineStrip);
+      nvgBeginPath(nvg);
+      nvgMoveTo(nvg, strip->Vertices[0].X, strip->Vertices[0].Y);
+      for(j = 1; j < strip->Number; j++)
+         nvgLineTo(nvg, strip->Vertices[j].X, strip->Vertices[j].Y);
+      nvgStroke(nvg);
    }
-   mGL->glTranslate(schar->Right, 0.0f);
+//   mGL->glTranslate(schar->Right, 0.0f);
+   nvgTranslate(nvg, schar->Right, 0.0f);
 }
 
 
@@ -456,7 +464,8 @@ BfFont *FontManager::getFont(FontId currentFontId)
    return font;
 }
 
-
+// FIXME reconcile why this factor is needed; it shouldn't be
+#define MAGIC_FONTSTASH_FACTOR 10.0
 F32 FontManager::getStringLength(const char *string)
 {
    BfFont *font = getFont(currentFontId);
@@ -464,7 +473,7 @@ F32 FontManager::getStringLength(const char *string)
    if(font->isStrokeFont())
       return getStrokeFontStringLength(font->getStrokeFont(), string);
    else
-      return getTtfFontStringLength(font, string);
+      return getTtfFontStringLength(font, string) * MAGIC_FONTSTASH_FACTOR;
 }
 
 
@@ -532,27 +541,40 @@ void FontManager::renderString(F32 x, F32 y, F32 size, F32 angle, const char *st
 
    if(font->isStrokeFont())
    {
-   mGL->pushMatrix();
-      mGL->glTranslate(x, y);
-      mGL->glRotate(angle * RADIANS_TO_DEGREES);
+//      mGL->glColor(color, alpha);
 
+//   mGL->pushMatrix();
+//      mGL->glTranslate(x, y);
+//      mGL->glRotate(angle * RADIANS_TO_DEGREES);
+
+      nvgSave(nvg);
+      nvgTranslate(nvg, x, y);
+      nvgRotate(nvg, angle);
       static F32 modelview[16];
       mGL->glGetValue(GLOPT::ModelviewMatrix, modelview);    // Fills modelview[]
 
       // Clamp to range of 0.5 - 1 then multiply by line width (2 by default)
       F32 linewidth =
-            CLAMP(size * DisplayManager::getScreenInfo()->getPixelRatioY() * modelview[0] * 0.05f, 0.5f, 1.0f) * RenderUtils::DEFAULT_LINE_WIDTH;
+            CLAMP(size * modelview[0] * 0.05f, 0.5f, 1.0f) * RenderUtils::DEFAULT_LINE_WIDTH;
 
-      mGL->lineWidth(linewidth);
+//      mGL->lineWidth(linewidth);
+//      nvgStrokeWidth(nvg, linewidth);
 
-      F32 scaleFactor = size / 120.0f;  // Where does this magic number come from?
-      mGL->glScale(scaleFactor, -scaleFactor);
+//      F32 scaleFactor = size / 120.0f;  // Where does this magic number come from?
+      F32 scaleFactor = size / 120.0f;
+//      mGL->glScale(scaleFactor, -scaleFactor);
+      nvgScale(nvg, scaleFactor, -scaleFactor);
+//      nvgStrokeColor(nvg, nvgRGBAf(1,1,1,1));
+      // Upscaled because we downscaled the whole character
+      nvgStrokeWidth(nvg, linewidth/scaleFactor);
       for(S32 i = 0; string[i]; i++)
          FontManager::drawStrokeCharacter(font->getStrokeFont(), string[i]);
 
-      mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+//      mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+      nvgStrokeWidth(nvg, RenderUtils::DEFAULT_LINE_WIDTH);
 
-   mGL->popMatrix();
+//   mGL->popMatrix();
+      nvgRestore(nvg);
    }
    else
    {
@@ -573,13 +595,13 @@ void FontManager::renderString(F32 x, F32 y, F32 size, F32 angle, const char *st
 //      // 'size * k' becomes 'size' due to the glScale above
 //      drawTTFString(font, string, size * k * legacyNormalizationFactor);
 
-      F32 kx = DisplayManager::getScreenInfo()->getPixelRatioX();
-      F32 ky = DisplayManager::getScreenInfo()->getPixelRatioY();
+      // TODO redo upscaling?  check fonts in fullscreen with new fontstash to
+      // see if they look good
       nvgSave(nvg);
-      nvgTranslate(nvg, x * kx, y * ky);
+      nvgTranslate(nvg, x, y);
       nvgRotate(nvg, angle);
 
-      drawTTFString(font, string, size * ky * legacyNormalizationFactor);
+      drawTTFString(font, string, size * legacyNormalizationFactor);
 
       nvgRestore(nvg);
    }

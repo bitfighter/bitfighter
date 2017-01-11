@@ -50,12 +50,6 @@ public:
    static const U8 UR = 1;
    static const U8 LL = 2;
 
-
-   /// Generic render methods
-   ///
-   // This method is probably wholly incompatible with GLES 2
-   static void glColor(const Color &color, float alpha = 1.0f);
-
    /// Text-related methods
    ///
 private:

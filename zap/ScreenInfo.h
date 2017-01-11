@@ -40,9 +40,8 @@ private:
 
    bool mActualized;                            // True once screen has been actualized
 
-   F32 mPixelRatioX;                             // Number of physical pixels that are used to draw a single virtual pixel
-   F32 mPixelRatioY;
-   void calcPixelRatio();
+   F32 mPixelRatio;                             // Number of physical pixels that are used to draw a single virtual pixel
+   void calcRatios();
 
 public:
    ScreenInfo();      // Constructor
@@ -66,8 +65,7 @@ public:
    S32 getDrawAreaHeight() const;
 
    // This is the number of physical pixels that are used to draw a single virtual pixel -- larger windows will have larger pixelRaios
-   F32 getPixelRatioX() const;
-   F32 getPixelRatioY() const;
+   F32 getPixelRatio() const;
    F32 getScalingRatioX() const;
    F32 getScalingRatioY() const;
 

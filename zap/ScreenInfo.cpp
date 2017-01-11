@@ -36,8 +36,8 @@ void ScreenInfo::init(S32 physicalScreenWidth, S32 physicalScreenHeight)
 
    mIsLandscape = physicalScreenRatio >= gameCanvasRatio;
 
-   mScalingRatioX = mIsLandscape ? (F32)mPhysicalScreenWidth  / (F32)mGameCanvasWidth  : (F32)mPhysicalScreenHeight / (F32)mGameCanvasHeight;
-   mScalingRatioY = mIsLandscape ? (F32)mPhysicalScreenHeight / (F32)mGameCanvasHeight : (F32)mPhysicalScreenWidth  / (F32)mGameCanvasWidth;
+   mScalingRatioX = (F32)mWindowWidth / (F32)mGameCanvasWidth;
+   mScalingRatioY = (F32)mWindowHeight / (F32)mGameCanvasHeight;
 
 //   logprintf("mIsLandscape: %d", mIsLandscape);
 //
@@ -67,14 +67,16 @@ void ScreenInfo::setWindowSize(S32 width, S32 height)
    mWindowWidth  = width; 
    mWindowHeight = height; 
 
-   calcPixelRatio();
+   calcRatios();
 }
 
 
-void ScreenInfo::calcPixelRatio()
+void ScreenInfo::calcRatios()
 {
-   mPixelRatioX = (F32)mWindowWidth / (F32)mGameCanvasWidth;
-   mPixelRatioY = (F32)mWindowHeight / (F32)mGameCanvasHeight;
+   mPixelRatio = (F32)mWindowHeight / (F32)mGameCanvasHeight;
+
+   mScalingRatioX = (F32)mWindowWidth / (F32)mGameCanvasWidth;
+   mScalingRatioY = (F32)mWindowHeight / (F32)mGameCanvasHeight;
 }
 
 
@@ -87,8 +89,7 @@ S32 ScreenInfo::getPhysicalScreenHeight() const { return mPhysicalScreenHeight; 
 
 
 // How many physical pixels make up a virtual one?
-F32 ScreenInfo::getPixelRatioX() const { return mPixelRatioX; }
-F32 ScreenInfo::getPixelRatioY() const { return mPixelRatioY; }
+F32 ScreenInfo::getPixelRatio() const { return mPixelRatio; }
 
 F32 ScreenInfo::getScalingRatioX() const { return mScalingRatioX; }
 F32 ScreenInfo::getScalingRatioY() const { return mScalingRatioY; }
@@ -142,7 +143,7 @@ void ScreenInfo::setGameCanvasSize(S32 width, S32 height)
    mGameCanvasWidth  = width;
    mGameCanvasHeight = height;
 
-   calcPixelRatio();
+   calcRatios();
 }
 
 void ScreenInfo::resetGameCanvasSize()
