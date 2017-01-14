@@ -305,11 +305,11 @@ void FontManager::setFontContext(FontContext fontContext)
          setFont(FontOrbitronMedStroke);
          return;
 
-      case MenuContext:
       case OldSkoolContext:
          setFont(FontRoman);
          return;
 
+      case MenuContext:
       case MotdContext:
       case HelpContext:
       case ErrorMsgContext:
