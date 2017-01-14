@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "FontManager.h"
 
 namespace Zap
 {
@@ -236,6 +237,7 @@ void CreditsScroller::updateFX(U32 delta)
 
 void CreditsScroller::render()
 {
+   FontManager::pushFontContext(MenuContext);
    glColor(Colors::white);
 
    // Draw the credits text, section by section, line by line
@@ -253,6 +255,8 @@ void CreditsScroller::render()
    renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
 
    renderStaticBitfighterLogo();    // And add our logo at the top of the page
+
+   FontManager::popFontContext();
 }
 
 
