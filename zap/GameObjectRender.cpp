@@ -949,7 +949,7 @@ void GameObjectRender::renderSpyBugVisibleRange(const Point &pos, const Color &c
 void GameObjectRender::renderTurretFiringRange(const Point &pos, const Color &color, F32 currentScale)
 {
    F32 range = Turret::TurretPerceptionDistance * currentScale;
-   RenderUtils::drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GLOPT::TriangleFan, color, 0.25f);
+   RenderUtils::drawFilledRect(pos.x - range, pos.y - range, range, range, color, 0.25f);
 }
 
 
@@ -1068,8 +1068,8 @@ void GameObjectRender::renderMortar(const Color &color, Point anchor, Point norm
 void GameObjectRender::renderFlag(const Color &flagColor, const Color &mastColor, F32 alpha)
 {
    // First, the flag itself
-   static F32 flagPoints[] = { -15,-15, 15,-5,  15,-5, -15,5,  -15,-10, 10,-5,  10,-5, -15,0 };
-   mGL->renderVertexArray(flagPoints, ARRAYSIZE(flagPoints) / 2, GLOPT::Lines, flagColor, alpha);
+   static const F32 flagPoints[] = { -15,-15, 15,-5,  15,-5, -15,5,  -15,-10, 10,-5,  10,-5, -15,0 };
+   RenderUtils::drawLines(flagPoints, ARRAYSIZE(flagPoints) / 2, flagColor, alpha);
 
    // Now the flag's mast
    RenderUtils::drawVertLine(-15, -15, 15, mastColor, alpha);
@@ -1085,21 +1085,25 @@ void GameObjectRender::renderFlag(const Color &flagColor, F32 alpha)
 
 void GameObjectRender::doRenderFlag(F32 x, F32 y, F32 scale, const Color &flagColor, const Color &mastColor, F32 alpha)
 {
-   mGL->pushMatrix();
-      mGL->glTranslate(x, y);
-      mGL->glScale(scale);
-      renderFlag(flagColor, mastColor, alpha);
-   mGL->popMatrix();
+   nvgSave(nvg);
+   nvgTranslate(nvg, x, y);
+   nvgScale(nvg, scale, scale);
+
+   renderFlag(flagColor, mastColor, alpha);
+
+   nvgRestore(nvg);
 }
 
 
 void GameObjectRender::doRenderFlag(F32 x, F32 y, F32 scale, const Color &flagColor, F32 alpha)
 {
-   mGL->pushMatrix();
-      mGL->glTranslate(x, y);
-      mGL->glScale(scale);
-      renderFlag(flagColor, alpha);
-   mGL->popMatrix();
+   nvgSave(nvg);
+   nvgTranslate(nvg, x, y);
+   nvgScale(nvg, scale, scale);
+
+   renderFlag(flagColor, alpha);
+
+   nvgRestore(nvg);
 }
 
 
@@ -1137,30 +1141,23 @@ void GameObjectRender::renderSmallFlag(const Point &pos, const Color &c, F32 par
 {
    F32 alpha = 0.75f * parentAlpha;
    
-   mGL->pushMatrix();
-      mGL->glTranslate(pos);
-      mGL->glScale(0.2f);
+   nvgSave(nvg);
+   nvgTranslate(nvg, pos.x, pos.y);
+   nvgScale(nvg, 0.2f, 0.2f);
 
-      static F32 vertices[] = {
-            -15, -15,
-             15,  -5,
-             15,  -5,
-            -15,   5,
-            -15, -15,
-            -15,  15
-      };
+   static F32 vertices[] = {
+         -15, -15,
+          15,  -5,
+          15,  -5,
+         -15,   5,
+   };
 
-      F32 colors[] = {
-            c.r, c.g, c.b, alpha,
-            c.r, c.g, c.b, alpha,
-            c.r, c.g, c.b, alpha,
-            c.r, c.g, c.b, alpha,
-              1,   1,   1, alpha,
-              1,   1,   1, alpha
-      };
+   RenderUtils::drawLines(vertices, ARRAYSIZE(vertices) / 2, c, alpha);
 
-      mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
-   mGL->popMatrix();
+   // Now the flag's mast
+   RenderUtils::drawVertLine(-15, -15, 15, Colors::white, alpha);
+
+   nvgRestore(nvg);
 }
 
 
@@ -1168,13 +1165,14 @@ void GameObjectRender::renderFlagSpawn(const Point &pos, F32 currentScale, const
 {
    static const Point p(-4, 0);
 
-   mGL->pushMatrix();
-      mGL->glTranslate(pos);
-      mGL->glScale(0.4f / currentScale);
-      renderFlag(color);
+   nvgSave(nvg);
+   nvgTranslate(nvg, pos.x, pos.y);
+   nvgScale(nvg, 0.4f / currentScale, 0.4f / currentScale);
 
-      RenderUtils::drawCircle(p, 26, Colors::white);
-   mGL->popMatrix();
+   renderFlag(color);
+   RenderUtils::drawCircle(p, 26, Colors::white);
+
+   nvgRestore(nvg);
 }
 
 
@@ -1411,19 +1409,20 @@ void GameObjectRender::renderNexusIcon(const Point &center, S32 radius, F32 angl
    static const Point arcPoint2 = Point(vertRadius * root3div2, vertRadius * 0.5f);
    static const Point arcPoint3 = Point(-vertRadius * root3div2, vertRadius * 0.5f);
 
-   mGL->pushMatrix();
-      mGL->glTranslate(center);
-      mGL->glScale(radius * 0.05f);  // 1/20.  Default radius is 20 in-game
-      mGL->glRotate(angleRadians * RADIANS_TO_DEGREES);
+   nvgSave(nvg);
+   nvgTranslate(nvg, center.x, center.y);
+   nvgScale(nvg, radius * 0.05f, radius * 0.05f);
+   nvgRotate(nvg, angleRadians);
 
-      // Draw our center spokes
-      mGL->renderVertexArray(spokes, ARRAYSIZE(spokes) / 2, GLOPT::Lines, color);
+   // Draw our center spokes
+   RenderUtils::drawLines(spokes, ARRAYSIZE(spokes) / 2, color);
 
-      // Draw design
-      RenderUtils::drawArc(arcPoint1, arcRadius, 0.583f * FloatTau, 1.25f  * FloatTau, color);
-      RenderUtils::drawArc(arcPoint2, arcRadius, 0.917f * FloatTau, 1.583f * FloatTau, color);
-      RenderUtils::drawArc(arcPoint3, arcRadius, 0.25f  * FloatTau, 0.917f * FloatTau, color);
-   mGL->popMatrix();
+   // Draw design
+   RenderUtils::drawArc(arcPoint1, arcRadius, 0.583f * FloatTau, 1.25f  * FloatTau, color);
+   RenderUtils::drawArc(arcPoint2, arcRadius, 0.917f * FloatTau, 1.583f * FloatTau, color);
+   RenderUtils::drawArc(arcPoint3, arcRadius, 0.25f  * FloatTau, 0.917f * FloatTau, color);
+
+   nvgRestore(nvg);
 }
 
 
@@ -1727,8 +1726,8 @@ void GameObjectRender::renderRepairItem(const Point &pos, bool forEditor, const 
       size = 18;
    }
 
-   mGL->pushMatrix();
-   mGL->glTranslate(pos);
+   nvgSave(nvg);
+   nvgTranslate(nvg, pos.x, pos.y);
 
    RenderUtils::drawHollowSquare(Point(0, 0), size, overrideColor == NULL ? Colors::white : *overrideColor, alpha);
 
@@ -1747,19 +1746,20 @@ void GameObjectRender::renderRepairItem(const Point &pos, bool forEditor, const 
          -crossWidth,  crossLen,
           crossWidth,  crossLen
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::LineLoop, overrideColor == NULL ? Colors::red : *overrideColor, alpha);
 
-   mGL->popMatrix();
+   RenderUtils::drawLineLoop(vertices, ARRAYSIZE(vertices) / 2, overrideColor == NULL ? Colors::red : *overrideColor, alpha);
+
+   nvgRestore(nvg);
 }
 
 
 void GameObjectRender::renderEnergySymbol(const Point &pos, F32 scaleFactor)
 {
-   mGL->pushMatrix();
-      mGL->glTranslate(pos);
-      mGL->glScale(scaleFactor);
-      renderEnergySymbol();
-   mGL->popMatrix();
+   nvgSave(nvg);
+   nvgTranslate(nvg, pos.x, pos.y);
+   nvgScale(nvg, scaleFactor, scaleFactor);
+   renderEnergySymbol();
+   nvgRestore(nvg);
 }
 
 
@@ -1767,8 +1767,8 @@ void GameObjectRender::renderEnergySymbol(const Point &pos, F32 scaleFactor)
 void GameObjectRender::renderEnergySymbol()
 {
    // Yellow lightning bolt
-   static S16 energySymbolPoints[] = { 20,-20,  3,-2,  12,5,  -20,20,  -2,3,  -12,-5 };
-   mGL->renderVertexArray(energySymbolPoints, ARRAYSIZE(energySymbolPoints) / 2, GLOPT::LineLoop, Colors::orange67);
+   static const F32 energySymbolPoints[] = { 20,-20,  3,-2,  12,5,  -20,20,  -2,3,  -12,-5 };
+   RenderUtils::drawLineLoop(energySymbolPoints, ARRAYSIZE(energySymbolPoints) / 2, Colors::orange67);
 }
 
 
@@ -1776,18 +1776,18 @@ void GameObjectRender::renderEnergyItem(const Point &pos, bool forEditor)
 {
    F32 scaleFactor = forEditor ? .45f : 1;    // Resize for editor
 
-   mGL->pushMatrix();
-      mGL->glTranslate(pos);
+   nvgSave(nvg);
+   nvgTranslate(nvg, pos.x, pos.y);
 
       F32 size = 18;
       RenderUtils::drawHollowSquare(Point(0,0), size, Colors::white);
-      mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+      nvgStrokeWidth(nvg, RenderUtils::DEFAULT_LINE_WIDTH);
 
       // Scale down the symbol a little so it fits in the box
-      mGL->glScale(scaleFactor * 0.7f);
+      nvgScale(nvg, scaleFactor * 0.7f, scaleFactor * 0.7f);
       renderEnergySymbol();
 
-   mGL->popMatrix();
+   nvgRestore(nvg);
 }
 
 
@@ -1855,8 +1855,8 @@ void GameObjectRender::renderTestItem(const Vector<Point> &points, F32 alpha)
 
 void GameObjectRender::renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
 {
-   mGL->pushMatrix();
-   mGL->glTranslate(pos);
+   nvgSave(nvg);
+   nvgTranslate(nvg, pos.x, pos.y);
 
    F32 vertexArray[2 * ASTEROID_POINTS];
    for(S32 i = 0; i < ASTEROID_POINTS; i++)
@@ -1864,9 +1864,9 @@ void GameObjectRender::renderAsteroid(const Point &pos, S32 design, F32 scaleFac
       vertexArray[2*i]     = AsteroidCoords[design][i][0] * scaleFact;
       vertexArray[(2*i)+1] = AsteroidCoords[design][i][1] * scaleFact;
    }
-   mGL->renderVertexArray(vertexArray, ASTEROID_POINTS, GLOPT::LineLoop, color ? *color : Color(.7), alpha);
+   RenderUtils::drawLineLoop(vertexArray, ASTEROID_POINTS, color ? *color : Color(.7), alpha);
 
-   mGL->popMatrix();
+   nvgRestore(nvg);
 }
 
 
@@ -1884,29 +1884,6 @@ void GameObjectRender::renderAsteroidSpawn(const Point &pos, S32 time)
    F32 alpha = max(0.0f, 1.0f - time * invPeriod);
 
    renderAsteroid(pos, 2, 0.1f, &Colors::green, alpha);
-
-//   static const F32 lines[] = {
-//         // Inner
-//          -8, -12,     8, -12,
-//          12,  -8,    12,   8,
-//           8,  12,    -8,  12,
-//         -12,   8,   -12,  -8,
-//
-//         // Outer
-//         -12, -16,    12, -16,
-//          16, -12,    16,  12,
-//          12,  16,   -12,  16,
-//         -16,  12,   -16, -12,
-//   };
-//
-//   mGL->glPushMatrix();
-//      mGL->glTranslate(pos);
-//
-//      // Inner
-//      mGL->renderVertexArray(lines, 8, GLOPT::LineLoop, Colors::green, 0.5f);
-//      // Outer
-//      mGL->renderVertexArray(&lines[16], 8, GLOPT::LineLoop, Colors::green, 0.5f);
-//   mGL->glPopMatrix();
 }
 
 
@@ -1915,13 +1892,14 @@ void GameObjectRender::renderAsteroidSpawnEditor(const Point &pos, F32 scale)
    scale *= 0.8f;
    static const Point p(0,0);
 
-   mGL->pushMatrix();
-      mGL->glTranslate(pos.x, pos.y);
-      mGL->glScale(scale);
-      renderAsteroid(p, 2, 0.1f);
+   nvgSave(nvg);
+   nvgTranslate(nvg, pos.x, pos.y);
+   nvgScale(nvg, scale, scale);
 
-      RenderUtils::drawCircle(13, Colors::white);
-   mGL->popMatrix();
+   renderAsteroid(p, 2, 0.1f);
+   RenderUtils::drawCircle(13, Colors::white);
+
+   nvgRestore(nvg);
 }
 
 //
@@ -2513,13 +2491,15 @@ void GameObjectRender::drawGear(const Point &center, S32 teeth, F32 radius1, F32
 
 void GameObjectRender::render25FlagsBadge(F32 x, F32 y, F32 rad)
 {
-   mGL->pushMatrix();
-      mGL->glTranslate(x, y);
-      mGL->glScale(.05f * rad);
-      RenderUtils::drawEllipse(Point(-16, 15), 6, 2, 0, Colors::gray40);
+   nvgSave(nvg);
+   nvgTranslate(nvg, x, y);
+   nvgScale(nvg, .05f * rad, .05f * rad);
 
-      renderFlag(-.10f * rad, -.10f * rad, Colors::red50);
-   mGL->popMatrix();
+   RenderUtils::drawEllipse(Point(-16, 15), 6, 2, Colors::gray40);
+
+   renderFlag(-.10f * rad, -.10f * rad, Colors::red50);
+
+   nvgRestore(nvg);
 
    F32 ts = rad - 3;
    F32 width = RenderUtils::getStringWidth(ts, "25");
@@ -2527,7 +2507,7 @@ void GameObjectRender::render25FlagsBadge(F32 x, F32 y, F32 rad)
    F32 ty = y + rad - .40f * rad;
 
    RenderUtils::drawFilledRect((tx - width / 2.0 - 1.0), (ty - (ts + 2.0) / 2.0),
-                               (tx + width / 2.0 + 0.5), (ty + (ts + 2.0) / 2.0), Colors::yellow);
+                               width + 1.5, ts + 2.0, Colors::yellow);
 
    renderCenteredString(Point(tx, ty), ts, Colors::gray20, "25");
 }
@@ -3170,11 +3150,13 @@ void GameObjectRender::renderScoreboardOrnamentTeamFlags(S32 xpos, S32 ypos, con
 
 void GameObjectRender::renderSpawn(const Point &pos, F32 scale, const Color &color)
 {   
-   mGL->pushMatrix();
-      mGL->glTranslate(pos.x, pos.y);
-      mGL->glScale(scale);    // Make item draw at constant size, regardless of zoom
-      renderSquareItem(Point(0,0), color, 1, Colors::white, 'S');
-   mGL->popMatrix();
+   nvgSave(nvg);
+   nvgTranslate(nvg, pos.x, pos.y);
+   nvgScale(nvg, scale, scale);
+
+   renderSquareItem(Point(0,0), color, 1, Colors::white, 'S');
+
+   nvgRestore(nvg);
 }
 
 
@@ -3317,7 +3299,7 @@ void GameObjectRender::renderNumberInBox(const Point pos, S32 number, F32 scale)
    F32 len = RenderUtils::getStringWidth(height, numberStr);
 
    RenderUtils::drawFilledRect(pos.x - len / 2 - padding, pos.y + halfHeight + padding,
-                               pos.x + len / 2 + padding, pos.y - halfHeight - padding * 0.5, // 0.5 compensates for weird font spacing
+                               len + 2*padding, height + 1.5*padding, // 0.5 compensates for weird font spacing
                                Colors::white, 0.75f); 
 
    RenderUtils::drawCenteredString_fixed(pos.x, pos.y + halfHeight, height, HelpContext, Colors::black, numberStr.c_str());

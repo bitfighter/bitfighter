@@ -725,6 +725,9 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
       mGL->pushMatrix();
       mGL->glTranslate(objStart);
       mGL->glScale(0.7f);
+      nvgSave(nvg);
+      nvgTranslate(nvg, objStart.x, objStart.y);
+      nvgScale(nvg, 0.7f, 0.7f);
 
       S32 x, y;
 
@@ -898,6 +901,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
             TNLAssert(false, "Unhandled case!");
       }
       mGL->popMatrix();
+      nvgRestore(nvg);
       objStart.y += 75;
       start.y += 75;
    }

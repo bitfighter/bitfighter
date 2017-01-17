@@ -833,7 +833,7 @@ void QueryServersUserInterface::render() const
          const ServerRef &s = servers[i];
 
          if(s.isLocalServer)
-            RenderUtils::drawFilledRect(0, y, canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4, Colors::red, .25);
+            RenderUtils::drawFilledRect(0, y, canvasWidth, SERVER_ENTRY_TEXTSIZE + 4, Colors::red, .25);
       }
 
 
@@ -979,7 +979,7 @@ void QueryServersUserInterface::renderColumnHeaders() const
       else
          x2 = columns[mHighlightColumn+1].xStart - 5;
 
-      RenderUtils::drawRect(x1, COLUMN_HEADER_TOP, x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1, GLOPT::LineLoop, Colors::white);
+      RenderUtils::drawRect(x1, COLUMN_HEADER_TOP, x2-x1, COLUMN_HEADER_HEIGHT + 1, Colors::white);
    }
 }
 

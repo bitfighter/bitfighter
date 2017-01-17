@@ -184,7 +184,7 @@ static void renderTeamName(ClientGame *clientGame, S32 index, bool isWinningTeam
    if(index == 1)    // Box in UR corner needs to be fancy to nest in outer box
       RenderUtils::drawFilledFancyBox(left, top, right, top + headerBoxHeight, 10, RenderUtils::UR, teamColor, 0.6f, borderColor);
    else
-      RenderUtils::drawFilledRect(left, top, right, top + headerBoxHeight, teamColor, 0.6f, borderColor, 1.0f);
+      RenderUtils::drawFilledRect(left, top, right-left, headerBoxHeight, teamColor, 0.6f, borderColor, 1.0f);
 
    // Then the team name & score
    FontManager::pushFontContext(ScoreboardHeadlineContext);

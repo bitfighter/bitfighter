@@ -1934,7 +1934,7 @@ void EditorUserInterface::renderReferenceShip() const
    const S32 horizDist = Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL;
    const S32 vertDist = Game::PLAYER_VISUAL_DISTANCE_VERTICAL;
 
-   RenderUtils::drawFilledRect(-horizDist, -vertDist, horizDist, vertDist, Colors::paleBlue, 0.35f);
+   RenderUtils::drawFilledRect(-horizDist, -vertDist, 2*horizDist, 2*vertDist, Colors::paleBlue, 0.35f);
 
    mGL->popMatrix();
 }
@@ -1965,6 +1965,9 @@ void EditorUserInterface::render() const
    mGL->pushMatrix();
    mGL->glTranslate(getCurrentOffset());
    mGL->glScale(getCurrentScale());
+   nvgSave(nvg);
+   nvgTranslate(nvg, mCurrentOffset.x, mCurrentOffset.y);
+   nvgScale(nvg, mCurrentScale, mCurrentScale);
 
    // mSnapDelta only gets recalculated during a dragging event -- if an item is no longer being dragged, we
    // don't want to use the now stale value in mSnapDelta, but rather (0,0) to reflect the rather obvoius fact
@@ -2027,6 +2030,7 @@ void EditorUserInterface::render() const
       renderObjectIds(editorDb);
 
    mGL->popMatrix();
+   nvgRestore(nvg);
 
    if(!mNormalizedScreenshotMode)
    {
@@ -2241,7 +2245,7 @@ void EditorUserInterface::renderDockPlugins() const
          S32 x = DisplayManager::getScreenInfo()->getGameCanvasWidth() - mDockWidth - horizMargin;
          F32 y = 1.5f * vertMargin + PLUGIN_LINE_SPACING * (i - mDockPluginScrollOffset);
 
-         RenderUtils::drawHollowRect(x + horizMargin / 3, y, x + mDockWidth - horizMargin / 3, y + PLUGIN_LINE_SPACING, Colors::white);
+         RenderUtils::drawHollowRect(x, y, mDockWidth - (2 * horizMargin / 3), PLUGIN_LINE_SPACING, Colors::white);
       }
 
       S32 x = (S32)(DisplayManager::getScreenInfo()->getGameCanvasWidth() - mDockWidth - horizMargin / 2);

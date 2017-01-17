@@ -1045,7 +1045,7 @@ void SymbolHorizEllipse::render(const Point &center) const
 
    Point cen = center - Point(0, h - 1);
 
-   RenderUtils::drawEllipse(cen, w, h, 0, mColor, mAlpha);
+   RenderUtils::drawEllipse(cen, w, h, mColor, mAlpha);
 }
 
 

@@ -98,16 +98,16 @@ void ConnectionStatsRenderer::render(GameConnection *conn) const
    if(mGraphVisible)
    {
       const S32 x1 = 550;
-      const S32 x2 = 700;
+      const S32 width = 150;
       const S32 y_size = 150;
 
-      RenderUtils::drawRect(x1, y, x2, y + y_size, GLOPT::LineLoop, Colors::white);
+      RenderUtils::drawRect(x1, y, width, y_size, Colors::white);
 
       const U32 ArraySizeGraph = ArraySize - 1;
 
       F32 graphs[ArraySizeGraph * 2];
       for(U32 i = 0; i < ArraySizeGraph; i++)
-         graphs[i * 2] = F32(i * (x2 - x1)) / (ArraySizeGraph - 1) + x1;
+         graphs[i * 2] = F32(i * width) / (ArraySizeGraph - 1) + x1;
 
       U32 i1 = mCurrentIndex;
       U32 i2 = i1 + 1 >= ArraySize ? 0 : i1 + 1;

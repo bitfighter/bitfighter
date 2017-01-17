@@ -246,7 +246,7 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize, const Color &color) cons
    //   S32 width = MAX(2, RenderUtils::getStringWidth(fontSize, mLine.substr(mCursorOffset, 1).c_str()));
 
    // Draw our cursor, assuming string is drawn at x,y and cursor should be offset to the right
-   RenderUtils::drawFilledRect(x + offset, y - fontSize, x + offset + cursorWidth, y + 3, color, 0.3f);
+   RenderUtils::drawFilledRect(x + offset, y - fontSize, cursorWidth, fontSize + 3, color, 0.3f);
 }
 
 

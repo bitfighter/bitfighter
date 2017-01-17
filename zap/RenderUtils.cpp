@@ -720,9 +720,107 @@ void RenderUtils::drawLetter(char letter, const Point &pos, const Color &color, 
 }
 
 
+void RenderUtils::drawLineStrip(const Vector<Point> *points, const Color &color, F32 alpha)
+{
+   nvgBeginPath(nvg);
+
+   nvgMoveTo(nvg, points->get(0).x, points->get(0).y);
+   for(S32 i = 1; i < points->size(); i++)
+      nvgLineTo(nvg, points->get(i).x, points->get(i).y);
+
+   nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgStroke(nvg);
+}
+
+
+void RenderUtils::drawLineStrip(const F32 *points, U32 pointCount, const Color &color, F32 alpha)
+{
+   nvgBeginPath(nvg);
+
+   nvgMoveTo(nvg, points[0], points[1]);
+   for(U32 i = 2; i < 2 * pointCount; i = i + 2)
+      nvgLineTo(nvg, points[i], points[i+1]);
+
+   nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgStroke(nvg);
+}
+
+
+void RenderUtils::drawLineLoop(const Vector<Point> *points, const Color &color, F32 alpha)
+{
+   nvgBeginPath(nvg);
+
+   nvgMoveTo(nvg, points->get(0).x, points->get(0).y);
+   for(S32 i = 1; i < points->size(); i++)
+      nvgLineTo(nvg, points->get(i).x, points->get(i).y);
+   nvgClosePath(nvg);  // Finish loop
+
+   nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgStroke(nvg);
+}
+
+
+void RenderUtils::drawLineLoop(const F32 *points, U32 pointCount, const Color &color, F32 alpha)
+{
+   nvgBeginPath(nvg);
+
+   nvgMoveTo(nvg, points[0], points[1]);
+   for(U32 i = 2; i < 2 * pointCount; i = i + 2)
+      nvgLineTo(nvg, points[i], points[i+1]);
+   nvgClosePath(nvg);  // Finish loop
+
+   nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgStroke(nvg);
+}
+
+
+void RenderUtils::drawFilledLineLoop(const F32 *points, U32 pointCount, const Color &color, F32 alpha)
+{
+   nvgBeginPath(nvg);
+
+   nvgMoveTo(nvg, points[0], points[1]);
+   for(U32 i = 2; i < 2 * pointCount; i = i + 2)
+      nvgLineTo(nvg, points[i], points[i+1]);
+   nvgClosePath(nvg);  // Finish loop
+
+   nvgFillColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgFill(nvg);
+}
+
+
+// Operates like GL_LINES, drawing individual 2-point line segments.  pointCount
+// should be a multiple of 4
+void RenderUtils::drawLines(const F32 *points, U32 pointsCount, const Color &color, F32 alpha)
+{
+   nvgBeginPath(nvg);
+
+   // 1 segment == 2 points == 4 F32s
+   for(U32 i = 0; i < 2 * pointsCount; i = i + 4)
+   {
+      nvgMoveTo(nvg, points[i],   points[i+1]);
+      nvgLineTo(nvg, points[i+2], points[i+3]);
+   }
+
+   nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgStroke(nvg);
+}
+
+
+void RenderUtils::drawLine(F32 x1, F32 y1, F32 x2, F32 y2, const Color &color, F32 alpha)
+{
+   nvgBeginPath(nvg);
+
+   nvgMoveTo(nvg, x1, y1);
+   nvgLineTo(nvg, x2, y2);
+
+   nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgStroke(nvg);
+}
+
+
 void RenderUtils::drawLine(const Vector<Point> *points, const Color &color, F32 alpha)
 {
-   mGL->renderPointVector(points, GLOPT::LineStrip, color, alpha);
+   drawLineStrip(points, color, alpha);
 }
 
 
@@ -752,8 +850,7 @@ void RenderUtils::drawHorizLine(S32 x1, S32 x2, S32 y, const Color &color, F32 a
 
 void RenderUtils::drawHorizLine(F32 x1, F32 x2, F32 y, const Color &color, F32 alpha)
 {
-   F32 vertices[] = {x1, y, x2, y};
-   mGL->renderVertexArray(vertices, 2, GLOPT::Lines, color, alpha);
+   drawLine(x1, y, x2, y, color, alpha);
 }
 
 
@@ -771,51 +868,49 @@ void RenderUtils::drawVertLine(S32 x, S32 y1, S32 y2, const Color &color, F32 al
 
 void RenderUtils::drawVertLine(F32 x, F32 y1, F32 y2, const Color &color, F32 alpha)
 {
-   F32 vertices[] = { x, y1,   x, y2 };
-   mGL->renderVertexArray(vertices, 2, GLOPT::Lines, color, alpha);
+   drawLine(x, y1, x, y2, color, alpha);
 }
 
 
 void RenderUtils::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor)
 {
-   drawFilledRect(x1, y1, x2, y2, fillColor, 1, outlineColor, 1);
+   drawFilledRect(x1, y1, x2-x1, y2-y1, fillColor, 1, outlineColor, 1);
 }
 
 
 void RenderUtils::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor)
 {
-   drawFilledRect(x1, y1, x2, y2, fillColor, fillAlpha, outlineColor, 1);
+   drawFilledRect(x1, y1, x2-x1, y2-y1, fillColor, fillAlpha, outlineColor, 1);
 }
 
 
-void RenderUtils::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor, F32 outlineAlpha)
+void RenderUtils::drawFilledRect(S32 x, S32 y, S32 w, S32 h, const Color &fillColor, F32 fillAlpha, const Color &outlineColor, F32 outlineAlpha)
 {
-   drawRect(x1, y1, x2, y2, GLOPT::TriangleFan, fillColor,    fillAlpha);
-   drawRect(x1, y1, x2, y2, GLOPT::LineLoop,    outlineColor, outlineAlpha);
+   drawFilledRect(x, y, w, h, fillColor, fillAlpha);
+   drawRect(x, y, w, h, outlineColor, outlineAlpha);
 }
 
 
 void RenderUtils::drawHollowRect(const Point &center, S32 width, S32 height, const Color &color, F32 alpha)
 {
    drawHollowRect(center.x - (F32)width / 2, center.y - (F32)height / 2,
-                  center.x + (F32)width / 2, center.y + (F32)height / 2,
-                  color, alpha);
+         width, height, color, alpha);
 }
 
 
 void RenderUtils::drawHollowRect(const Point &p1, const Point &p2, const Color &color, F32 alpha)
 {
-   drawHollowRect(p1.x, p1.y, p2.x, p2.y, color, alpha);
+   drawHollowRect(p1.x, p1.y, p2.x-p1.x, p2.y-p1.y, color, alpha);
 }
 
 
-void RenderUtils::drawFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners, S32 glMode, const Color &color, F32 alpha)
+void RenderUtils::drawFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners, const Color &color, F32 alpha)
 {
-   drawFancyBox((F32)xLeft, (F32)yTop, (F32)xRight, (F32)yBottom, (F32)cornerInset, corners, glMode, color, alpha);
+   drawFancyBox((F32)xLeft, (F32)yTop, (F32)xRight, (F32)yBottom, (F32)cornerInset, corners, color, alpha);
 }
 
 
-void RenderUtils::drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, U8 corners, S32 glMode, const Color &color, F32 alpha)
+void RenderUtils::drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, U8 corners, const Color &color, F32 alpha)
 {
    F32 vertices[] = {
          xLeft, yTop,                   // Top
@@ -826,7 +921,21 @@ void RenderUtils::drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32
          xLeft, yBottom - cornerInset   // Edge
    };
 
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, glMode, color, alpha);
+   drawLineLoop(vertices, ARRAYSIZE(vertices)/2, color, alpha);
+}
+
+void RenderUtils::drawFilledFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, U8 corners, const Color &color, F32 alpha)
+{
+   F32 vertices[] = {
+         xLeft, yTop,                   // Top
+         xRight - (corners & UR ? cornerInset : 0), yTop,
+         xRight, yTop + cornerInset,    // Edge
+         xRight, yBottom,               // Bottom
+         xLeft + (corners & LL ? cornerInset : 0), yBottom,
+         xLeft, yBottom - cornerInset   // Edge
+   };
+
+   drawFilledLineLoop(vertices, ARRAYSIZE(vertices)/2, color, alpha);
 }
 
 
@@ -838,7 +947,7 @@ void RenderUtils::drawHollowFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBotto
 
 void RenderUtils::drawHollowFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners, const Color &color, F32 alpha)
 {
-   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, corners, GLOPT::LineLoop, color, alpha);
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, corners, color, alpha);
 }
 
 
@@ -851,29 +960,25 @@ void RenderUtils::drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBotto
 void RenderUtils::drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners, const Color &fillColor, F32 fillAlpha, const Color &borderColor)
 {
    // Fill
-   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, corners, GLOPT::TriangleFan, fillColor, fillAlpha);
+   drawFilledFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, corners, fillColor, fillAlpha);
 
    // Border
-   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, corners, GLOPT::LineLoop, borderColor);
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, corners, borderColor);
 }
 
 
 // Draw arc centered on pos, with given radius, from startAngle to endAngle.  0 is East, increasing CW
 void RenderUtils::drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle, const Color &color, F32 alpha)
 {
-   static Vector<Point> points;     // Reusable container
+   nvgSave(nvg);
+   nvgTranslate(nvg, pos.x, pos.y);
 
-   // The +1 just makes the curves I've looked at appear nicer
-   S32 numPoints = (S32)ceil(NUM_CIRCLE_SIDES * (endAngle - startAngle) / FloatTau) + 1;
+   nvgBeginPath(nvg);
+   nvgArc(nvg, 0, 0, radius, startAngle, endAngle, NVG_CW);  // Clockwise
+   nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgStroke(nvg);
 
-   TNLAssert(numPoints >= 0, "Negative points???");
-
-   generatePointsInACurve(startAngle, endAngle, numPoints, radius, points);
-
-   mGL->pushMatrix();
-      mGL->glTranslate(pos);
-      mGL->renderPointVector(&points, GLOPT::LineStrip, color, alpha);
-   mGL->popMatrix();
+   nvgRestore(nvg);
 }
 
 
@@ -894,12 +999,12 @@ void RenderUtils::drawDashedCircle(const Point &center, F32 radius, S32 dashCoun
 
 void RenderUtils::drawAngledRay(const Point &center, F32 innerRadius, F32 outerRadius, F32 angle, const Color &color)
 {
-   F32 vertices[] = {
-         center.x + cosf(angle) * innerRadius, center.y + sinf(angle) * innerRadius,
-         center.x + cosf(angle) * outerRadius, center.y + sinf(angle) * outerRadius,
-   };
+   F32 x1 = center.x + cosf(angle) * innerRadius;
+   F32 y1 = center.y + sinf(angle) * innerRadius;
+   F32 x2 = center.x + cosf(angle) * outerRadius;
+   F32 y2 = center.y + sinf(angle) * outerRadius;
 
-   mGL->renderVertexArray(vertices, 2, GLOPT::LineStrip, color);
+   drawLine(x1, y1, x2, y2, color);
 }
 
 
@@ -949,66 +1054,19 @@ void RenderUtils::drawRoundedRect(const Point &pos, S32 width, S32 height, S32 r
 // Draw rounded rectangle centered on pos
 void RenderUtils::drawRoundedRect(const Point &pos, F32 width, F32 height, F32 rad, const Color &color, F32 alpha)
 {
-   F32 width2  = width  / 2;
-   F32 height2 = height / 2;
-
-   F32 vertices[] = {
-         pos.x - width2 + rad, pos.y - height2,
-         pos.x + width2 - rad, pos.y - height2,
-
-         pos.x + width2, pos.y - height2 + rad,
-         pos.x + width2, pos.y + height2 - rad,
-
-         pos.x + width2 - rad, pos.y + height2,
-         pos.x - width2 + rad, pos.y + height2,
-
-         pos.x - width2, pos.y + height2 - rad,
-         pos.x - width2, pos.y - height2 + rad
-   };
-
-   mGL->renderVertexArray(vertices, 8, GLOPT::Lines);
-
-   Point p;
-   // Now add some quarter-rounds in the corners, start in UL, proceed CW
-   p.set(pos.x - width2 + rad, pos.y - height2 + rad);
-   drawArc(p, rad, -FloatPi, -FloatHalfPi, color, alpha);
-
-   p.set(pos.x + width2 - rad, pos.y - height2 + rad);
-   drawArc(p, rad, -FloatHalfPi, 0, color, alpha);
-
-   p.set(pos.x + width2 - rad, pos.y + height2 - rad);
-   drawArc(p, rad, 0, FloatHalfPi, color, alpha);
-
-   p.set(pos.x - width2 + rad, pos.y + height2 - rad);
-   drawArc(p, rad, FloatHalfPi, FloatPi, color, alpha);
+   nvgBeginPath(nvg);
+   nvgRoundedRect(nvg, pos.x - width/2, pos.y - height/2, width, height, rad);
+   nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgStroke(nvg);
 }
 
 
 void RenderUtils::drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle, const Color &color, F32 alpha)
 {
-   // With theta delta of 0.2, that means maximum 32 points + 2 at the end
-   const S32 MAX_POINTS = 32 + 2;
-   static F32 filledArcVertexArray[MAX_POINTS * 2];      // 2 components per point
-
-   U32 count = 0;
-
-   for(F32 theta = startAngle; theta < endAngle; theta += CIRCLE_SIDE_THETA)
-   {
-      filledArcVertexArray[2*count]       = pos.x + cos(theta) * radius;
-      filledArcVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
-      count++;
-   }
-
-   // Make sure arc makes it all the way to endAngle...  rounding errors look terrible!
-   filledArcVertexArray[2*count]       = pos.x + cos(endAngle) * radius;
-   filledArcVertexArray[(2*count) + 1] = pos.y + sin(endAngle) * radius;
-   count++;
-
-   filledArcVertexArray[2*count]       = pos.x;
-   filledArcVertexArray[(2*count) + 1] = pos.y;
-   count++;
-
-   mGL->renderVertexArray(filledArcVertexArray, count, GLOPT::TriangleFan, color, alpha);
+   nvgBeginPath(nvg);
+   nvgArc(nvg, pos.x, pos.y, radius, startAngle, endAngle, NVG_CCW);  // Counter-clockwise
+   nvgFillColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgFill(nvg);
 }
 
 
@@ -1018,46 +1076,17 @@ void RenderUtils::drawFilledRoundedRect(const Point &pos, S32 width, S32 height,
 }
 
 
+// This includes an outline on top
 void RenderUtils::drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color &fillColor, const Color &outlineColor, F32 radius, F32 alpha)
 {
-   drawFilledArc(Point(pos.x - width / 2 + radius, pos.y - height / 2 + radius), radius,      FloatPi, FloatPi + FloatHalfPi, fillColor, alpha);
-   drawFilledArc(Point(pos.x + width / 2 - radius, pos.y - height / 2 + radius), radius, -FloatHalfPi, 0,                     fillColor, alpha);
-   drawFilledArc(Point(pos.x + width / 2 - radius, pos.y + height / 2 - radius), radius,            0, FloatHalfPi,           fillColor, alpha);
-   drawFilledArc(Point(pos.x - width / 2 + radius, pos.y + height / 2 - radius), radius,  FloatHalfPi, FloatPi,               fillColor, alpha);
+   // Draw fill
+   nvgBeginPath(nvg);
+   nvgRoundedRect(nvg, pos.x - width/2, pos.y - height/2, width, height, radius);
+   nvgFillColor(nvg, nvgRGBAf(fillColor.r, fillColor.g, fillColor.b, alpha));
+   nvgFill(nvg);
 
-   drawRect(pos.x - width / 2, pos.y - height / 2 + radius,
-            pos.x + width / 2, pos.y + height / 2 - radius,          GLOPT::TriangleFan, fillColor, alpha);
-
-   drawRect(pos.x - width / 2 + radius, pos.y - height / 2,
-            pos.x + width / 2 - radius, pos.y - height / 2 + radius, GLOPT::TriangleFan, fillColor, alpha);
-
-   drawRect(pos.x - width / 2 + radius, pos.y + height / 2,
-            pos.x + width / 2 - radius, pos.y + height / 2 - radius, GLOPT::TriangleFan, fillColor, alpha);
-
+   // Draw outline
    drawRoundedRect(pos, width, height, radius, outlineColor, alpha);
-}
-
-
-// Actually draw the ellipse
-void RenderUtils::drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U32 glStyle, const Color &color, F32 alpha)
-{
-   F32 sinbeta = sin(angle);
-   F32 cosbeta = cos(angle);
-
-   // 32 vertices to fake our ellipse
-   F32 vertexArray[64];
-   U32 count = 0;
-   for(F32 theta = 0; theta < FloatTau; theta += CIRCLE_SIDE_THETA)
-   {
-      F32 sinalpha = sin(theta);
-      F32 cosalpha = cos(theta);
-
-      vertexArray[2*count]     = pos.x + (width * cosalpha * cosbeta - height * sinalpha * sinbeta);
-      vertexArray[(2*count)+1] = pos.y + (width * cosalpha * sinbeta + height * sinalpha * cosbeta);
-      count++;
-   }
-
-   mGL->renderVertexArray(vertexArray, ARRAYSIZE(vertexArray) / 2, glStyle, color, alpha);
 }
 
 
@@ -1067,17 +1096,19 @@ void RenderUtils::drawPolygon(S32 sides, F32 radius, F32 angle, const Color &col
    Vector<Point> points;
    generatePointsInACurve(angle, angle + FloatTau, sides + 1, radius, points);   // +1 so we can "close the loop"
 
-   mGL->renderPointVector(&points, GLOPT::LineStrip, color, alpha);
+   drawLineStrip(&points, color, alpha);
 }
 
 
 // Draw an n-sided polygon
 void RenderUtils::drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle, const Color &color, F32 alpha)
 {
-   mGL->pushMatrix();
-   mGL->glTranslate(pos);
+   nvgSave(nvg);
+   nvgTranslate(nvg, pos.x, pos.y);
+
    drawPolygon(sides, radius, angle, color, alpha);
-   mGL->popMatrix();
+
+   nvgRestore(nvg);
 }
 
 
@@ -1101,7 +1132,7 @@ void RenderUtils::drawStar(const Point &pos, S32 points, F32 radius, F32 innerRa
       r = inout ? radius : innerRadius;
    }
 
-   mGL->renderPointVector(&pts, GLOPT::LineLoop, color, alpha);
+   drawLineLoop(&pts, color, alpha);
 }
 
 
@@ -1156,68 +1187,64 @@ void RenderUtils::drawStar(const Point &pos, S32 points, F32 radius, F32 innerRa
 
 
 // Draw an ellipse at pos, with axes width and height, canted at angle
-void RenderUtils::drawEllipse(const Point &pos, F32 width, F32 height, F32 angle, const Color &color, F32 alpha)
+void RenderUtils::drawEllipse(const Point &pos, F32 radiusX, F32 radiusY, const Color &color, F32 alpha)
 {
-   drawFilledEllipseUtil(pos, width, height, angle, GLOPT::LineLoop, color, alpha);
+   nvgBeginPath(nvg);
+   nvgEllipse(nvg, pos.x, pos.y, radiusX, radiusY);
+   nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgStroke(nvg);
 }
 
 
 // Draw an ellipse at pos, with axes width and height, canted at angle
-void RenderUtils::drawEllipse(const Point &pos, S32 width, S32 height, F32 angle, const Color &color, F32 alpha)
+void RenderUtils::drawEllipse(const Point &pos, S32 radiusX, S32 radiusY, const Color &color, F32 alpha)
 {
-   drawFilledEllipseUtil(pos, (F32)width, (F32)height, angle, GLOPT::LineLoop, color, alpha);
+   drawEllipse(pos, (F32)radiusX, (F32)radiusY, color, alpha);
 }
 
 
 // Well...  draws a filled ellipse, much as you'd expect
-void RenderUtils::drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle, const Color &color)
+void RenderUtils::drawFilledEllipse(const Point &pos, F32 radiusX, F32 radiusY, const Color &color, F32 alpha)
 {
-   drawFilledEllipseUtil(pos, width, height, angle, GLOPT::TriangleFan, color);
+   nvgBeginPath(nvg);
+   nvgEllipse(nvg, pos.x, pos.y, radiusX, radiusY);
+   nvgFillColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgFill(nvg);
 }
 
 
-void RenderUtils::drawFilledEllipse(const Point &pos, S32 width, S32 height, F32 angle, const Color &color)
+void RenderUtils::drawFilledEllipse(const Point &pos, S32 radiusX, S32 radiusY, const Color &color, F32 alpha)
 {
-   drawFilledEllipseUtil(pos, (F32)width, (F32)height, angle, GLOPT::TriangleFan, color);
+   drawFilledEllipse(pos, (F32)radiusX, (F32)radiusY, color, alpha);
 }
 
 
-void RenderUtils::drawFilledCircle(const Point &pos, F32 radius, const Color &color)
+void RenderUtils::drawFilledCircle(const Point &pos, F32 radius, const Color &color, F32 alpha)
 {
-   drawFilledSector(pos, radius, 0, FloatTau, color);
-}
-
-
-void RenderUtils::drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end, const Color &color, F32 alpha)
-{
-   // With theta delta of 0.2, that means maximum 32 points
-   static const S32 MAX_POINTS = 32;
-   static F32 filledSectorVertexArray[MAX_POINTS * 2];      // 2 components per point
-
-   U32 count = 0;
-
-   for(F32 theta = start; theta < end; theta += CIRCLE_SIDE_THETA)
-   {
-      filledSectorVertexArray[2 * count]     = pos.x + cos(theta) * radius;
-      filledSectorVertexArray[2 * count + 1] = pos.y + sin(theta) * radius;
-      count++;
-   }
-
-   mGL->renderVertexArray(filledSectorVertexArray, count, GLOPT::TriangleFan, color, alpha);
+   nvgBeginPath(nvg);
+   nvgCircle(nvg, pos.x, pos.y, radius);
+   nvgFillColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgFill(nvg);
 }
 
 
 // pos is the square's center
 void RenderUtils::drawSquare(const Point &pos, F32 radius, const Color &color, bool filled)
 {
-   drawRect(pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius, filled ? GLOPT::TriangleFan : GLOPT::LineLoop, color);
+   if(filled)
+      drawFilledRect(pos.x - radius, pos.y - radius, radius, radius, color);
+   else
+      drawRect(pos.x - radius, pos.y - radius, radius, radius, color);
 }
 
 
 // pos is the square's center
 void RenderUtils::drawSquare(const Point &pos, F32 radius, const Color &color, F32 alpha, bool filled)
 {
-   drawRect(pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius, filled ? GLOPT::TriangleFan : GLOPT::LineLoop, color, alpha);
+   if(filled)
+      drawFilledRect(pos.x - radius, pos.y - radius, 2*radius, 2*radius, color, alpha);
+   else
+      drawRect(pos.x - radius, pos.y - radius, 2*radius, 2*radius, color, alpha);
 }
 
 
@@ -1242,44 +1269,19 @@ void RenderUtils::drawFilledSquare(const Point &pos, F32 radius, const Color &co
 
 void RenderUtils::drawCircle(const Point &center, F32 radius, const Color &color, F32 alpha)
 {
-   mGL->pushMatrix();
-      mGL->glTranslate(center);
-      drawCircle(radius, color, alpha);
-   mGL->popMatrix();
+   nvgSave(nvg);
+   nvgTranslate(nvg, center.x, center.y);
+   drawCircle(radius, color, alpha);
+   nvgRestore(nvg);
 }
 
 
-// Circle drawing now precalculates a set of points around the circle, then renders them using mGL->glScale()
-// to get the radius right.  This eliminates most point calculations during rendering, making it much
-// more efficient.
 void RenderUtils::drawCircle(F32 radius, const Color &color, F32 alpha)
 {
-   static Vector<Point> points;
-
-   // Lazily initialize point array
-   if(points.size() == 0)
-      generatePointsInACircle(NUM_CIRCLE_SIDES, 1.0, points);
-
-   mGL->pushMatrix();
-      mGL->glScale(radius);
-      mGL->renderPointVector(&points, GLOPT::LineStrip, color, alpha);
-   mGL->popMatrix();
-}
-
-
-void RenderUtils::drawFadingHorizontalLine(S32 x1, S32 x2, S32 yPos, const Color &color)
-{
-   F32 vertices[] = {
-         (F32)x1, (F32)yPos,
-         (F32)x2, (F32)yPos
-   };
-
-   F32 colors[] = {
-         color.r, color.g, color.b, 1,
-         color.r, color.g, color.b, 0,
-   };
-
-   mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
+   nvgBeginPath(nvg);
+   nvgCircle(nvg, 0, 0, radius);
+   nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgStroke(nvg);
 }
 
 

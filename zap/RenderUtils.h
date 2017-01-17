@@ -16,6 +16,8 @@
 #include "FontContextEnum.h"
 #include "Point.h"
 
+#include "../nanovg/nanovg.h"
+
 #include "tnlTypes.h"
 #include "tnlVector.h"
 
@@ -312,52 +314,50 @@ public:
 
    /// Shape-related methods
    ///
-   static void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor);
-   static void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor);
-   static void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor, F32 outlineAlpha);
+   static void drawFilledRect(S32 x, S32 y, S32 w, S32 h, const Color &fillColor, const Color &outlineColor);
+   static void drawFilledRect(S32 x, S32 y, S32 w, S32 h, const Color &fillColor, F32 fillAlpha, const Color &outlineColor);
+   static void drawFilledRect(S32 x, S32 y, S32 w, S32 h, const Color &fillColor, F32 fillAlpha, const Color &outlineColor, F32 outlineAlpha);
 
    static void drawHollowRect(const Point &center, S32 width, S32 height, const Color &color, F32 alpha = 1.0);
    static void drawHollowRect(const Point &p1, const Point &p2, const Color &color, F32 alpha = 1.0);
 
    template<typename T, typename U, typename V, typename W>
-   static void drawRect(T x1, U y1, V x2, W y2, S32 mode, const Color &color, F32 alpha = 1.0)
+   static void drawRect(T x, U y, V w, W h, const Color &color, F32 alpha = 1.0)
    {
-      F32 vertices[] =
-      {
-            static_cast<F32>(x1), static_cast<F32>(y1),
-            static_cast<F32>(x2), static_cast<F32>(y1),
-            static_cast<F32>(x2), static_cast<F32>(y2),
-            static_cast<F32>(x1), static_cast<F32>(y2)
-      };
-
-      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, mode, color, alpha);
+      nvgBeginPath(nvg);
+      nvgRect(nvg, static_cast<F32>(x), static_cast<F32>(y),
+            static_cast<F32>(w), static_cast<F32>(h));
+      nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+      nvgStroke(nvg);
    }
 
-
-   //
    template<typename T, typename U, typename V, typename W>
-   static void drawFilledRect(T x1, U y1, V x2, W y2, const Color &color, F32 alpha = 1.0)
+   static void drawFilledRect(T x, U y, V w, W h, const Color &color, F32 alpha = 1.0)
    {
-      drawRect(static_cast<F32>(x1), static_cast<F32>(y1), static_cast<F32>(x2), static_cast<F32>(y2), GLOPT::TriangleFan, color, alpha);
+      nvgBeginPath(nvg);
+      nvgRect(nvg, static_cast<F32>(x), static_cast<F32>(y),
+            static_cast<F32>(w), static_cast<F32>(h));
+      nvgFillColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+      nvgFill(nvg);
    }
 
 
    template<typename T, typename U, typename V, typename W>
-   static void drawHollowRect(T x1, U y1, V x2, W y2, const Color &color, F32 alpha = 1.0)
+   static void drawHollowRect(T x, U y, V w, W h, const Color &color, F32 alpha = 1.0)
    {
-      drawRect(static_cast<F32>(x1), static_cast<F32>(y1), static_cast<F32>(x2), static_cast<F32>(y2), GLOPT::LineLoop, color, alpha);
+      drawRect(static_cast<F32>(x), static_cast<F32>(y), static_cast<F32>(w), static_cast<F32>(h), color, alpha);
    }
 
-
-   static void drawFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners, S32 glMode, const Color &color, F32 alpha = 1.0);
-   static void drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, U8 corners, S32 glMode, const Color &color, F32 alpha = 1.0);
+   static void drawFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners, const Color &color, F32 alpha = 1.0);
+   static void drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, U8 corners, const Color &color, F32 alpha = 1.0);
 
    template<typename T, typename U, typename V, typename W, typename X>
-   static void drawFancyBox(T xLeft, U yTop, V xRight, W yBottom, X cornerInset, S32 mode, const Color &color, F32 alpha = 1.0)
+   static void drawFancyBox(T xLeft, U yTop, V xRight, W yBottom, X cornerInset, const Color &color, F32 alpha = 1.0)
    {
-      drawFancyBox(F32(xLeft), F32(yTop), F32(xRight), F32(yBottom), F32(cornerInset), LL|UR, mode, color, alpha);
+      drawFancyBox(F32(xLeft), F32(yTop), F32(xRight), F32(yBottom), F32(cornerInset), LL|UR, color, alpha);
    }
 
+   static void drawFilledFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, U8 corners, const Color &color, F32 alpha);
 
    static void drawHollowFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, const Color &color, F32 alpha = 1.0);
    static void drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset,  
@@ -366,8 +366,7 @@ public:
    static void drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners, 
                                   const Color &fillColor, F32 fillAlpha, const Color &borderColor);
 
-   static void drawFilledCircle(const Point &pos, F32 radius, const Color &color);
-   static void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end, const Color &color, F32 alpha = 1.0);
+   static void drawFilledCircle(const Point &pos, F32 radius, const Color &color, F32 alpha = 1.0);
 
    static void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 radius, const Color &color, F32 alpha = 1.0);
    static void drawRoundedRect(const Point &pos, S32 width, S32 height, S32 radius, const Color &color, F32 alpha = 1.0);
@@ -381,13 +380,11 @@ public:
    static void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle, const Color &color, F32 alpha = 1.0);
    static void drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle, const Color &color, F32 alpha = 1.0);
 
-   static void drawEllipse(const Point &pos, F32 width, F32 height, F32 angle, const Color &color, F32 alpha = 1.0);
-   static void drawEllipse(const Point &pos, S32 width, S32 height, F32 angle, const Color &color, F32 alpha = 1.0);
+   static void drawEllipse(const Point &pos, F32 radiusX, F32 radiusY, const Color &color, F32 alpha = 1.0);
+   static void drawEllipse(const Point &pos, S32 radiusX, S32 radiusY, const Color &color, F32 alpha = 1.0);
 
-   static void drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle, const Color &color);
-   static void drawFilledEllipse(const Point &pos, S32 width, S32 height, F32 angle, const Color &color);
-
-   static void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U32 glStyle, const Color &color, F32 alpha = 1.0);
+   static void drawFilledEllipse(const Point &pos, F32 radiusX, F32 radiusY, const Color &color, F32 alpha = 1.0);
+   static void drawFilledEllipse(const Point &pos, S32 radiusX, S32 radiusY, const Color &color, F32 alpha = 1.0);
 
    static void drawPolygon(                  S32 sides, F32 radius, F32 angle, const Color &color, F32 alpha = 1.0);
    static void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle, const Color &color, F32 alpha = 1.0);
@@ -414,6 +411,14 @@ public:
    static void drawCircle(F32 radius, const Color &color, F32 alpha = 1.0);
 
    static void drawLine(const Vector<Point> *points, const Color &color, F32 alpha = 1.0);
+   static void drawLine(F32 x1, F32 x2, F32 y1, F32 y2, const Color &color, F32 alpha = 1.0);
+   static void drawLineStrip(const F32 *points, U32 pointCount, const Color &color, F32 alpha = 1.0);
+   static void drawLineStrip(const Vector<Point> *points, const Color &color, F32 alpha = 1.0);
+   static void drawLineLoop(const F32 *points, U32 pointCount, const Color &color, F32 alpha = 1.0);
+   static void drawLineLoop(const Vector<Point> *points, const Color &color, F32 alpha = 1.0);
+   static void drawLines(const F32 *points, U32 linesCount, const Color &color, F32 alpha = 1.0);
+
+   static void drawFilledLineLoop(const F32 *points, U32 pointCount, const Color &color, F32 alpha = 1.0);
 
    static void drawHorizLine(                S32 y, const Color &color, F32 alpha = 1.0);
    static void drawHorizLine(                U32 y, const Color &color, F32 alpha = 1.0);
@@ -424,8 +429,6 @@ public:
    static void drawVertLine (S32 x,                 const Color &color, F32 alpha = 1.0);
    static void drawVertLine (S32 x, S32 y1, S32 y2, const Color &color, F32 alpha = 1.0);
    static void drawVertLine (F32 x, F32 y1, F32 y2, const Color &color, F32 alpha = 1.0);
-
-   static void drawFadingHorizontalLine(S32 x1, S32 x2, S32 yPos, const Color &color);
 };
 
 

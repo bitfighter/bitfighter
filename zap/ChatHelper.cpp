@@ -237,7 +237,7 @@ void ChatHelper::render() const
    //for(S32 i = 1; i >= 0; i--)
    //   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GLOPT::TriangleFan : GLOPT::LineLoop, baseColor, i ? .25f : .4f);
 
-   RenderUtils::drawFilledRect(xPos, top, xPos + boxWidth, top + BOX_HEIGHT, baseColor, .25f, baseColor, .4f);
+   RenderUtils::drawFilledRect(xPos, top, boxWidth, BOX_HEIGHT, baseColor, .25f, baseColor, .4f);
 
    // Display prompt
    S32 xStartPos = xPos + 3 + promptWidth;

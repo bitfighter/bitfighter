@@ -152,7 +152,7 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, InputCode 
          RenderUtils::drawRoundedRect(center, smallRectButtonWidth, smallRectButtonHeight, 5, color);
          break;
       case Joystick::ButtonShapeHorizEllipse:
-         RenderUtils::drawEllipse(center, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, 0, color);
+         RenderUtils::drawEllipse(center, horizEllipseButtonRadiusX, horizEllipseButtonRadiusY, color);
          break;
       case Joystick::ButtonShapeRightTriangle:
          location = location + Point(-rightTriangleWidth / 4.0f, 0);  // Need to off-center the label slightly for this button

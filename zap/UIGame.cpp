@@ -735,17 +735,17 @@ void GameUserInterface::renderLostConnectionMessage() const
       const S32 x1 = 140;
       const S32 y1 = 142;
 
-      RenderUtils::drawRect(x1 + 1,  y1 + 20, x1 + 8,  y1 + 30, GLOPT::TriangleFan, Colors::black);
-      RenderUtils::drawRect(x1 + 11, y1 + 15, x1 + 18, y1 + 30, GLOPT::TriangleFan, Colors::black);
-      RenderUtils::drawRect(x1 + 21, y1 + 10, x1 + 28, y1 + 30, GLOPT::TriangleFan, Colors::black);
-      RenderUtils::drawRect(x1 + 31, y1 + 05, x1 + 38, y1 + 30, GLOPT::TriangleFan, Colors::black);
-      RenderUtils::drawRect(x1 + 41, y1 + 00, x1 + 48, y1 + 30, GLOPT::TriangleFan, Colors::black);
+      RenderUtils::drawFilledRect(x1 + 1,  y1 + 20, 7, 30, Colors::black);
+      RenderUtils::drawFilledRect(x1 + 11, y1 + 15, 7, 30, Colors::black);
+      RenderUtils::drawFilledRect(x1 + 21, y1 + 10, 7, 30, Colors::black);
+      RenderUtils::drawFilledRect(x1 + 31, y1 + 05, 7, 30, Colors::black);
+      RenderUtils::drawFilledRect(x1 + 41, y1 + 00, 7, 30, Colors::black);
 
-      RenderUtils::drawRect(x1 + 1,  y1 + 20, x1 + 8,  y1 + 30, GLOPT::LineLoop, Colors::gray40);
-      RenderUtils::drawRect(x1 + 11, y1 + 15, x1 + 18, y1 + 30, GLOPT::LineLoop, Colors::gray40);
-      RenderUtils::drawRect(x1 + 21, y1 + 10, x1 + 28, y1 + 30, GLOPT::LineLoop, Colors::gray40);
-      RenderUtils::drawRect(x1 + 31, y1 + 05, x1 + 38, y1 + 30, GLOPT::LineLoop, Colors::gray40);
-      RenderUtils::drawRect(x1 + 41, y1 + 00, x1 + 48, y1 + 30, GLOPT::LineLoop, Colors::gray40);
+      RenderUtils::drawRect(x1 + 1,  y1 + 20, 7, 30, Colors::gray40);
+      RenderUtils::drawRect(x1 + 11, y1 + 15, 7, 30, Colors::gray40);
+      RenderUtils::drawRect(x1 + 21, y1 + 10, 7, 30, Colors::gray40);
+      RenderUtils::drawRect(x1 + 31, y1 + 05, 7, 30, Colors::gray40);
+      RenderUtils::drawRect(x1 + 41, y1 + 00, 7, 30, Colors::gray40);
 
 
       if((Platform::getRealMilliseconds() & 0x300) != 0) // Draw flashing red "X" on empty connection bars
@@ -2118,8 +2118,8 @@ void GameUserInterface::renderBasicInterfaceOverlay() const
       F32 progress = getGame()->getConnectionToServer()->getFileProgressMeter();
       if(progress != 0)
       {
-         RenderUtils::drawRect(25, 200, progress * (DisplayManager::getScreenInfo()->getGameCanvasWidth() - 50) + 25, 210, GLOPT::TriangleFan, Colors::yellow);
-         RenderUtils::drawRect(25, 200, DisplayManager::getScreenInfo()->getGameCanvasWidth() - 25,                   210, GLOPT::LineLoop,    Colors::yellow);
+         RenderUtils::drawFilledRect(25, 200, progress * (DisplayManager::getScreenInfo()->getGameCanvasWidth() - 50), 10, Colors::yellow);
+         RenderUtils::drawRect(25, 200, DisplayManager::getScreenInfo()->getGameCanvasWidth() - 50,                    10, Colors::yellow);
       }
    }
    
@@ -2245,7 +2245,7 @@ void GameUserInterface::renderObjectIds() const
       F32 x = obj->getPos().x;
       F32 y = obj->getPos().y + height;
 
-      RenderUtils::drawFilledRect(x - 1, y - height - 1, x + width + 1, y + 1, Colors::black);
+      RenderUtils::drawFilledRect(x - 1, y - height - 1, width + 2, height + 2, Colors::black);
       RenderUtils::drawStringf_fixed(x, y, height, Colors::gray70, "[%d]", id);
    }
 }
@@ -2391,15 +2391,20 @@ void GameUserInterface::renderGameNormal() const
    visExt = getGame()->computePlayerVisArea(ship);
 
    mGL->pushMatrix();
+   nvgSave(nvg);
 
    static const Point center(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2,
                              DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
 
    mGL->glTranslate(center);       // Put (0,0) at the center of the screen
+   nvgTranslate(nvg, center.x, center.y);
 
    // These scaling factors are different when changing the visible area by equiping the sensor module
+   Point negShipPos = getShipRenderPos() * -1;
    mGL->glScale(center.x / visExt.x, center.y / visExt.y);
-   mGL->glTranslate(getShipRenderPos() * -1);
+   mGL->glTranslate(negShipPos);
+   nvgScale(nvg, center.x / visExt.x, center.y / visExt.y);
+   nvgTranslate(nvg, negShipPos.x, negShipPos.y);
 
    GameObjectRender::renderStars(mStars, mStarColors, NumStars, 1.0, getShipRenderPos(), visExt * 2);
 
@@ -2457,6 +2462,7 @@ void GameUserInterface::renderGameNormal() const
       renderObjectIds();
 
    mGL->popMatrix();
+   nvgRestore(nvg);
 
    // Render current ship's energy
    if(ship)
@@ -2570,18 +2576,23 @@ void GameUserInterface::renderGameCommander() const
 
 
    mGL->pushMatrix();
+   nvgSave(nvg);
 
    // Put (0,0) at the center of the screen
    mGL->glTranslate(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.5f,
+               DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f);
+   nvgTranslate(nvg, DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.5f,
                DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f);    
 
    F32 zoomFrac = getCommanderZoomFraction();
 
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
    mGL->glScale(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y);
+   nvgScale(nvg, canvasWidth / modVisSize.x, canvasHeight / modVisSize.y);
 
    Point offset = (mDispWorldExtents.getCenter() - getShipRenderPos()) * zoomFrac + getShipRenderPos();
    mGL->glTranslate(-offset.x, -offset.y);
+   nvgTranslate(nvg, -offset.x, -offset.y);
 
    // zoomFrac == 1.0 when fully zoomed out to cmdr's map
    GameObjectRender::renderStars(mStars, mStarColors, NumStars, 1 - zoomFrac, offset, modVisSize);
@@ -2631,7 +2642,7 @@ void GameUserInterface::renderGameCommander() const
                   Point p = otherShip->getRenderPos();
                   Point visExt = getGame()->computePlayerVisArea(otherShip);
 
-                  RenderUtils::drawFilledRect(p.x - visExt.x, p.y - visExt.y, p.x + visExt.x, p.y + visExt.y, teamColor * zoomFrac * 0.35f);
+                  RenderUtils::drawFilledRect(p.x - visExt.x, p.y - visExt.y, 2 * visExt.x, 2 * visExt.y, teamColor * zoomFrac * 0.35f);
                }
             }
          }
@@ -2683,6 +2694,7 @@ void GameUserInterface::renderGameCommander() const
    getUIManager()->getUI<GameUserInterface>()->renderEngineeredItemDeploymentMarker(ship);
 
    mGL->popMatrix();
+   nvgRestore(nvg);
 
 
    // Render current ship's energy

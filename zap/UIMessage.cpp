@@ -139,10 +139,10 @@ void MessageUserInterface::render() const
    {
       S32 x1 = wInset + mVertOffset;
       S32 y1 = hInset;
-      S32 x2 = canvasWidth - wInset + mVertOffset;
-      S32 y2 = canvasHeight - hInset;
+      S32 w = canvasWidth - 2*(wInset + mVertOffset);
+      S32 h = canvasHeight - 2*hInset;
 
-      RenderUtils::drawFilledRect(x1, y1, x2, y2, Colors::red30, fadeFactor * 0.95f, Colors::white, fadeFactor);
+      RenderUtils::drawFilledRect(x1, y1, w, h, Colors::red30, fadeFactor * 0.95f, Colors::white, fadeFactor);
    }
 
    // Draw title, message, and footer

@@ -327,7 +327,7 @@ void DiagnosticUserInterface::render() const
       RenderUtils::drawString_fixed(x, y, textsize, Colors::green, "]");
 
       // Box around something wrong? block
-      RenderUtils::drawHollowRect(horizMargin, vertMargin + 27, DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin, vertMargin + 90, Colors::cyan);
+      RenderUtils::drawHollowRect(horizMargin, vertMargin + 27, DisplayManager::getScreenInfo()->getGameCanvasWidth() - 2*horizMargin, 63, Colors::cyan);
 
       const S32 gap = 5;
 

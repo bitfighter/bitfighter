@@ -86,6 +86,7 @@ using namespace TNL;
 #  include "ClientGame.h"
 #  include "FontManager.h"
 #  include "RenderManager.h"
+#  include "RenderUtils.h"
 #  include "../nanovg/nanovg.h"
 #endif
 
@@ -190,15 +191,20 @@ void display()
    mGL->matrixMode(GLOPT::Modelview);
    mGL->loadIdentity();
 
+   NVGcontext *nvg = RenderManager::getNVG();
+
    S32 width, height;
    VideoSystem::getWindowSize(width, height);
-   nvgBeginFrame(RenderManager::getNVG(), width, height, 1);
+   nvgBeginFrame(nvg, width, height, 1);
+
+   // Defaults
+   // Set default line (stroke) width
+   nvgStrokeWidth(nvg, RenderUtils::DEFAULT_LINE_WIDTH);
 
    // This is (somewhat) a hack to get around needing glOrtho for NanoVG things.
    // Since this is done before any other rendering, we scale and translate the
    // top level render matrix to simulate our 800x600 canvas on whatever part of
    // the window we need
-   NVGcontext *nvg = RenderManager::getNVG();
    nvgScale(nvg, DisplayManager::getScreenInfo()->getScalingRatioX(),
          DisplayManager::getScreenInfo()->getScalingRatioY());
    // TODO do correct translation/scissoring
