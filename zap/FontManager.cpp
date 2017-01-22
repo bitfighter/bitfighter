@@ -21,7 +21,7 @@
 #include "tnlPlatform.h"
 #include "../master/GameJoltConnector.h"
 
-#  include "../nanovg/nanovg.h"
+#include "../nanovg/nanovg.h"
 
 #include <string>
 
@@ -62,14 +62,6 @@ BfFont::BfFont(const string &fontFile, GameSettings *settings)
    mStrokeFont = NULL;     // Stroke font only
    mStashFontId = FONS_INVALID;
 
-//   TNLAssert(FontManager::getStash(), "Invalid font stash!");
-
-//   if(FontManager::getStash() == NULL)
-//   {
-//      mOk = false;
-//      return;
-//   }
-
    // This seems to fail... wrong folder?
    //for(U32 i = 0; i < sizeof(SystemFontDirectories) / sizeof(SystemFontDirectories[0]) && mStashFontId <= 0; i++) {
    //   string file = string(SystemFontDirectories[i]) + getFileSeparator() + fontFile;
@@ -88,7 +80,6 @@ BfFont::BfFont(const string &fontFile, GameSettings *settings)
       //string file = joindir(realDir, fontFile);
       string file = checkName(fontFile, settings->getFolderManager()->getFontDirs());
 
-//      mStashFontId = fonsAddFont(FontManager::getStash(), "", file.c_str());
       mStashFontId = nvgCreateFont(RenderManager::getNVG(), "", file.c_str());
 
       printf("Adding font %s: %d\n", file.c_str(), mStashFontId);//xyzzy
@@ -133,7 +124,6 @@ static FontId currentFontId;
 
 static BfFont *fontList[FontCount] = { NULL };
 
-FONScontext *FontManager::mStash = NULL;
 bool FontManager::mUsingExternalFonts = true;
 
 // Constructorer
@@ -158,59 +148,6 @@ void FontManager::reinitialize(GameSettings *settings)
 }
 
 
-// stashPtr is a pointer that we pass in when we register the callback
-//void fontStashErrorHandlerCallback(void* stashPtr, int error, int val)
-//{
-//   switch(error)
-//   {
-//      case FONS_ATLAS_FULL:
-//      {
-//         // Let's make the atlas a bit bigger so we can hold more glyphs and not get back here
-//         FONScontext *stash = (FONScontext *)stashPtr;
-//
-//         // We should never get here; if we do, we want to figure out how much memory we really need, so we'll just bump this up by
-//         // 10%.  If we ever get here, we need to increase the initial size (see call to glfonsCreate) so that we never hit this.
-//         S32 newWidth = S32(stash->atlas->width * 1.1);    // + 10%
-//         S32 newHeight = stash->atlas->height;
-//
-//         TNLAssert(false, "Increase initial atlas size (glfonsCreate)");
-//         logprintf(LogConsumer::LogWarning, "FontStash warning: Atlas full. Increasing size to %d x %d (w x h).", newWidth, newHeight);
-//         S32 ok = fonsExpandAtlas(stash, newWidth, newHeight);
-//
-//         if(!ok)
-//         {
-//            TNLAssert(false, "Resizing FontStash atlas failed... disabling TTF fonts.");
-//            logprintf(LogConsumer::LogError, "Resizing FontStash atlas failed... disabling TTF fonts.");
-//            FontManager::disableTtfFonts();
-//         }
-//
-//         return;
-//      }
-//
-//      case FONS_SCRATCH_FULL:
-//         TNLAssert(false, "FontStash error: Scratch memory used to render glyphs is full, requested size reported in 'val', you may need to bump up FONS_SCRATCH_BUF_SIZE.");
-//         logprintf(LogConsumer::LogError, "FontStash error: Scratch memory for rendering fonts full. Falling back to default font.");
-//         break;
-//
-//      case FONS_STATES_OVERFLOW:
-//         TNLAssert(false, "FontStash error: Calls to fonsPushState has created too large stack, if you need deep state stack bump up FONS_MAX_STATES.");
-//         logprintf(LogConsumer::LogError, "FontStash error: Stack overflow. Falling back to default font.");
-//         break;
-//
-//      case FONS_STATES_UNDERFLOW:
-//         TNLAssert(false, "FontStash error: Trying to pop too many states fonsPopState().");
-//         logprintf(LogConsumer::LogError, "FontStash error: Stack underflow. Falling back to default font.");
-//         break;
-//
-//      default:
-//         TNLAssert(false, "FontStash error: Unknown error!");
-//         logprintf(LogConsumer::LogError, "FontStash error: Unknown problem. Falling back to default font.");
-//   }
-//
-//   FontManager::disableTtfFonts();
-//}
-
-
 void FontManager::disableTtfFonts()
 {
    mUsingExternalFonts = false;
@@ -223,7 +160,7 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 {
    cleanup();  // Makes sure its been cleaned up first, many tests call init without cleanup
 
-   TNLAssert(mGL != NULL && nvg != NULL, "RenderManager is NULL.  Bad things will happen!");
+   TNLAssert(nvg != NULL, "RenderManager is NULL.  Bad things will happen!");
 
    mUsingExternalFonts = useExternalFonts;
 
@@ -234,10 +171,6 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 
    if(mUsingExternalFonts)
    {
-      TNLAssert(mStash == NULL, "This should be NULL, or else we'll have a memory leak!");
-//      mStash = glfonsCreate(2400, 768, FONS_ZERO_TOPLEFT);
-//      fonsSetErrorCallback(mStash, fontStashErrorHandlerCallback, mStash); // <== 3rd arg gets passed to the callback as 1st param
-
       TNLAssert(settings, "Settings can't be NULL if we are using external fonts!");
 
       // Our TTF fonts
@@ -248,9 +181,6 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
       fontList[FontPlay]           = new BfFont("Play-Regular-hinting.ttf", settings);
       fontList[FontPlayBold]       = new BfFont("Play-Bold.ttf",       settings);
       fontList[FontModernVision]   = new BfFont("Modern-Vision.ttf",   settings);
-
-      // Set texture blending function
-      mGL->setDefaultBlendFunction();
    }
 }
 
@@ -262,26 +192,11 @@ void FontManager::cleanup()
       delete fontList[i];
       fontList[i] = NULL;
    }
-
-//   if(mUsingExternalFonts)
-//   {
-//      glfonsDelete(mStash);
-//      mStash = NULL;
-//   }
-}
-
-
-FONScontext *FontManager::getStash()
-{
-   return mStash;
 }
 
 
 void FontManager::drawTTFString(BfFont *font, const char *string, F32 size)
 {
-   //fonsSetFont(mStash, font->getStashFontId());
-//   fonsSetSize(mStash, size);
-//   fonsDrawText(mStash, 0.0, 0.0, string, NULL);
    nvgFontSize(nvg, size);
    nvgText(nvg, 0.0, 0.0, string, NULL);
 }
@@ -290,7 +205,6 @@ void FontManager::drawTTFString(BfFont *font, const char *string, F32 size)
 void FontManager::setFont(FontId fontId)
 {
    currentFontId = fontId;
-//   fonsSetFont(mStash, getFont(fontId)->getStashFontId());
    nvgFontFaceId(nvg, getFont(fontId)->getStashFontId());
 }
 
@@ -361,18 +275,10 @@ void FontManager::setFontContext(FontContext fontContext)
    }
 }
 
-//void FontManager::setFontColor(const Color *color)
-//{
-//   setFontColor(*color);
-//}
-
 
 void FontManager::setFontColor(const Color &color, F32 alpha)
 {
-//   mGL->glColor(color, alpha);    // For stroke fonts
-//   fonsSetColor(mStash, glfonsRGBA(U8(color.r * 255), U8(color.g * 255), U8(color.b * 255), U8(alpha * 255)));    // For FontStash
-
-   // Chagne color for both strokes and TTF (fill) fonts
+   // Change color for both strokes and TTF (fill) fonts
    nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
    nvgFillColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
 }
@@ -430,22 +336,12 @@ void FontManager::drawStrokeCharacter(const SFG_StrokeFont *font, S32 character)
 
    for(i = 0; i < schar->Number; i++, strip++)
    {
-      // I didn't find any strip->Number larger than 34, so I chose a buffer of 64
-      // This may change if we go crazy with i18n some day...
-//      static F32 characterVertexArray[128];
-//      for(j = 0; j < strip->Number; j++)
-//      {
-//        characterVertexArray[2*j]     = strip->Vertices[j].X;
-//        characterVertexArray[(2*j)+1] = strip->Vertices[j].Y;
-//      }
-//      mGL->renderVertexArray(characterVertexArray, strip->Number, GLOPT::LineStrip);
       nvgBeginPath(nvg);
       nvgMoveTo(nvg, strip->Vertices[0].X, strip->Vertices[0].Y);
       for(j = 1; j < strip->Number; j++)
          nvgLineTo(nvg, strip->Vertices[j].X, strip->Vertices[j].Y);
       nvgStroke(nvg);
    }
-//   mGL->glTranslate(schar->Right, 0.0f);
    nvgTranslate(nvg, schar->Right, 0.0f);
 }
 
@@ -513,22 +409,13 @@ F32 FontManager::getStrokeFontStringLength(const SFG_StrokeFont *font, const cha
 
 F32 FontManager::getTtfFontStringLength(BfFont *font, const char *string)
 {
-   // I think it's this simple...
-   // TODO FIX - "Release 020"
-   // - old:  size = 717 at all screen modes
-   // - new:  size = 219 at windowed; 319 in fullscreen
    F32 bounds[4];
-//   F32 length = fonsTextBounds2(mStash, legacyRomanSizeFactorThanksGlut, 0, 0, string, NULL, bounds);
-   //F32 length = fonsTextBounds(mStash, 0, 0, string, NULL, NULL);
-
    F32 length = nvgTextBounds(nvg, 0, 0, string, NULL, bounds);
-//   printf("%.2f, %s\n", length, string);
    
    if(strcmp(string, "Delete Selection") == 0)
    {
       F32 len = (bounds[2] - bounds[0]);  //xyzzy
       printf("zzxz Len = %f/%f", length, len);
-//      F32 xxxx = nvgTextBounds(nvg, legacyRomanSizeFactorThanksGlut, 0, 0, string, NULL, bounds);
    }
 
    return length;
@@ -541,39 +428,23 @@ void FontManager::renderString(F32 x, F32 y, F32 size, F32 angle, const char *st
 
    if(font->isStrokeFont())
    {
-//      mGL->glColor(color, alpha);
-
-//   mGL->pushMatrix();
-//      mGL->glTranslate(x, y);
-//      mGL->glRotate(angle * RADIANS_TO_DEGREES);
-
       nvgSave(nvg);
       nvgTranslate(nvg, x, y);
       nvgRotate(nvg, angle);
-      static F32 modelview[16];
-      mGL->glGetValue(GLOPT::ModelviewMatrix, modelview);    // Fills modelview[]
 
       // Clamp to range of 0.5 - 1 then multiply by line width (2 by default)
-      F32 linewidth =
-            CLAMP(size * modelview[0] * 0.05f, 0.5f, 1.0f) * RenderUtils::DEFAULT_LINE_WIDTH;
+      F32 linewidth = RenderUtils::DEFAULT_LINE_WIDTH;
 
-//      mGL->lineWidth(linewidth);
-//      nvgStrokeWidth(nvg, linewidth);
-
-//      F32 scaleFactor = size / 120.0f;  // Where does this magic number come from?
       F32 scaleFactor = size / 120.0f;
-//      mGL->glScale(scaleFactor, -scaleFactor);
       nvgScale(nvg, scaleFactor, -scaleFactor);
-//      nvgStrokeColor(nvg, nvgRGBAf(1,1,1,1));
+
       // Upscaled because we downscaled the whole character
       nvgStrokeWidth(nvg, linewidth/scaleFactor);
       for(S32 i = 0; string[i]; i++)
          FontManager::drawStrokeCharacter(font->getStrokeFont(), string[i]);
 
-//      mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
       nvgStrokeWidth(nvg, RenderUtils::DEFAULT_LINE_WIDTH);
 
-//   mGL->popMatrix();
       nvgRestore(nvg);
    }
    else

@@ -17,8 +17,6 @@
 using namespace TNL;
 using namespace std;
 
-struct FONScontext;
-
 namespace Zap
 {
 
@@ -29,7 +27,6 @@ class FontManager: RenderManager
 {
 
 private:
-   static FONScontext *mStash;
    static bool mUsingExternalFonts;
 
    static BfFont *getFont(FontId currentFontId);
@@ -45,8 +42,6 @@ public:
    static void reinitialize(GameSettings *settings);
    static void cleanup();
 
-   static FONScontext *getStash();
-
    static void drawTTFString(BfFont *font, const char *string, F32 size);
    static void drawStrokeCharacter(const SFG_StrokeFont *font, S32 character);
 
@@ -57,7 +52,6 @@ public:
    static void setFont(FontId fontId);
    static void setFontContext(FontContext fontContext);
 
-   //static void setFontColor(const Color *color);
    static void setFontColor(const Color &color, F32 alpha = 1.0);
 
    static void pushFontContext(FontContext fontContext);
