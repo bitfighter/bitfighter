@@ -173,8 +173,8 @@ void HelperMenu::drawItemMenu(S32 widthOfButtons, S32 widthOfTextBlock) const
    if(mCurrentRenderCount == 0)
       return;
 
-   mGL->pushMatrix();
-   mGL->glTranslate(getInsideEdge(), 0);
+   nvgSave(nvg);
+   nvgTranslate(nvg, getInsideEdge(), 0);
 
    static const Color baseColor(Colors::red);
 
@@ -232,7 +232,7 @@ void HelperMenu::drawItemMenu(S32 widthOfButtons, S32 widthOfTextBlock) const
 
    FontManager::popFontContext();
 
-   mGL->popMatrix();
+   nvgRestore(nvg);
 }
 
 

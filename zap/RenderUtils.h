@@ -414,11 +414,24 @@ public:
    static void drawLine(F32 x1, F32 x2, F32 y1, F32 y2, const Color &color, F32 alpha = 1.0);
    static void drawLineStrip(const F32 *points, U32 pointCount, const Color &color, F32 alpha = 1.0);
    static void drawLineStrip(const Vector<Point> *points, const Color &color, F32 alpha = 1.0);
+   static void drawLineLoop(const S16 *points, U32 pointCount, const Color &color, F32 alpha = 1.0);
    static void drawLineLoop(const F32 *points, U32 pointCount, const Color &color, F32 alpha = 1.0);
    static void drawLineLoop(const Vector<Point> *points, const Color &color, F32 alpha = 1.0);
-   static void drawLines(const F32 *points, U32 linesCount, const Color &color, F32 alpha = 1.0);
+   static void drawLines(const F32 *points, U32 pointCount, const Color &color, F32 alpha = 1.0);
+   static void drawLines(const Vector<Point> *points, const Color &color, F32 alpha = 1.0);
+
+   static void drawLineGradient(F32 x1, F32 y1, F32 x2, F32 y2,
+         const Color &color1, F32 alpha1, const Color &color2, F32 alpha2);
+
+   static void drawRectHorizGradient(F32 x1, F32 y1, F32 w, F32 h,
+         const Color &color1, F32 alpha1, const Color &color2, F32 alpha2);
 
    static void drawFilledLineLoop(const F32 *points, U32 pointCount, const Color &color, F32 alpha = 1.0);
+   static void drawFilledLineLoop(const Vector<Point> *points, const Color &color, F32 alpha = 1.0);
+
+   static void drawPoints(const F32 *points, U32 pointCount, const Color &color, F32 alpha = 1.0);
+   static void drawPoints(const F32 *points, U32 pointCount, const Color &color, F32 alpha,
+         F32 pointSize, F32 scale, F32 translateX, F32 translateY, F32 rotate);
 
    static void drawHorizLine(                S32 y, const Color &color, F32 alpha = 1.0);
    static void drawHorizLine(                U32 y, const Color &color, F32 alpha = 1.0);
@@ -429,6 +442,9 @@ public:
    static void drawVertLine (S32 x,                 const Color &color, F32 alpha = 1.0);
    static void drawVertLine (S32 x, S32 y1, S32 y2, const Color &color, F32 alpha = 1.0);
    static void drawVertLine (F32 x, F32 y1, F32 y2, const Color &color, F32 alpha = 1.0);
+
+   static void setDefaultLineWidth(F32 width);
+   static void lineWidth(F32 width);
 };
 
 

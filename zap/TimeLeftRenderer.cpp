@@ -74,7 +74,7 @@ void TimeLeftRenderer::updateLeadingPlayerAndScore(const Game *game)
 }
 
 
-S32 renderLock(GL *gl, S32 xPos, bool render)
+S32 TimeLeftRenderer::renderLock(S32 xPos, bool render) const
 {
    static const F32 lockHeight = 3.4f;   // pixels --> see rendering code
    static const F32 lockWidth = 3;
@@ -88,13 +88,13 @@ S32 renderLock(GL *gl, S32 xPos, bool render)
    {
       S32 y = DisplayManager::getScreenInfo()->getGameCanvasHeight() - TimeLeftRenderer::TimeLeftIndicatorMargin - renderHeight - 5;
     
-      gl->pushMatrix();
-      gl->glTranslate(xPos - totalWidth, y);
-      gl->glScale(scale);
+      nvgSave(nvg);
+      nvgTranslate(nvg, xPos - totalWidth, y);
+      nvgScale(nvg, scale, scale);
 
-      GameObjectRender::renderLock();
+      GameObjectRender::renderLock(Colors::white);
 
-      gl->popMatrix();
+      nvgRestore(nvg);
    }
 
    return totalWidth;
@@ -387,7 +387,7 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool includeLoc
    }
 
    if(includeLock)
-      farLeftCoord -= renderLock(mGL, farLeftCoord, render);
+      farLeftCoord -= renderLock(farLeftCoord, render);
 
    // Adjusting this topCord will control how much space above the horiz gray line there is before the flags or other junk is drawn
    const S32 topCoord = timeBottom - 2 * grayLineVertPadding - TimeTextSize - (S32)RenderUtils::DEFAULT_LINE_WIDTH - 8;

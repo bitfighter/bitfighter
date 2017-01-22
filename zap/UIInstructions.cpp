@@ -573,10 +573,10 @@ void InstructionsUserInterface::renderModulesPage() const
 
       RenderUtils::drawString_fixed(x, y, textsize, Colors::white, moduleDescriptions[i][1]);
 
-      mGL->pushMatrix();
-      mGL->glTranslate(60, y - 10);
-      mGL->glScale(0.7f);
-      mGL->glRotate(-90);
+      nvgSave(nvg);
+      nvgTranslate(nvg, 60, y - 10);
+      nvgScale(nvg, 0.7f, 0.7f);
+      nvgRotate(nvg, -FloatTau / 4);
 
       static F32 thrusts[4] =  { 1, 0, 0, 0 };
       static F32 thrustsBoost[4] =  { 1.3f, 0, 0, 0 };
@@ -585,21 +585,8 @@ void InstructionsUserInterface::renderModulesPage() const
       {
          case 0:     // Boost
             GameObjectRender::renderShip(ShipShape::Normal, Colors::blue, 1, thrustsBoost, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
-            {
-               F32 vertices[] = {
-                     -20, -17,
-                     -20, -50,
-                      20, -17,
-                      20, -50
-               };
-               F32 colors[] = {
-                     1, 1, 0, 1,  // Colors::yellow
-                     0, 0, 0, 1,  // Colors::black
-                     1, 1, 0, 1,  // Colors::yellow
-                     0, 0, 0, 1,  // Colors::black
-               };
-               mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
-            }
+            RenderUtils::drawLineGradient(-20, -17, -20, -50, Colors::yellow, 1.0, Colors::black, 1.0);
+            RenderUtils::drawLineGradient( 20, -17,  20, -50, Colors::yellow, 1.0, Colors::black, 1.0);
             break;
 
          case 1:     // Shield
@@ -651,7 +638,7 @@ void InstructionsUserInterface::renderModulesPage() const
          default: 
             TNLAssert(false, "Unhandled case!");
       }
-      mGL->popMatrix();
+      nvgRestore(nvg);
       y += 45;
    }
 }
@@ -722,9 +709,6 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
       for(S32 j = 0; j < desc.size(); j++)
          GameObjectRender::renderCenteredString(start + Point(0, 25 + j * FontSize * 1.2), 17, Colors::white, desc[j].c_str());
 
-      mGL->pushMatrix();
-      mGL->glTranslate(objStart);
-      mGL->glScale(0.7f);
       nvgSave(nvg);
       nvgTranslate(nvg, objStart.x, objStart.y);
       nvgScale(nvg, 0.7f, 0.7f);
@@ -880,11 +864,11 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                PanelGeom panelGeom;
                CoreItem::fillPanelGeom(pos, time, panelGeom);
 
-               mGL->pushMatrix();
-                  mGL->glTranslate(pos);
-                  mGL->glScale(0.55f);
+               nvgSave(nvg);
+                  nvgTranslate(nvg, pos.x, pos.y);
+                  nvgScale(nvg, 0.55f, 0.55f);
                   GameObjectRender::renderCore(pos, Colors::blue, time, &panelGeom, health, 1.0f);
-               mGL->popMatrix();
+               nvgRestore(nvg);
             }
             break;
 
@@ -900,8 +884,9 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
          default: 
             TNLAssert(false, "Unhandled case!");
       }
-      mGL->popMatrix();
+
       nvgRestore(nvg);
+
       objStart.y += 75;
       start.y += 75;
    }
@@ -947,7 +932,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
          (F32)cmdCol, (F32)ypos,
          (F32)750,    (F32)ypos
    };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::Lines, secColor);
+   RenderUtils::drawLines(vertices, ARRAYSIZE(vertices) / 2, secColor);
 
    ypos += 5;     // Small gap before cmds start
 

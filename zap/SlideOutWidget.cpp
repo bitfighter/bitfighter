@@ -6,6 +6,7 @@
 #include "SlideOutWidget.h"
 
 #include "DisplayManager.h"          // For DisplayManager::getScreenInfo() def
+#include "RenderUtils.h"
 #include "Point.h"
 #include "Colors.h"
 
@@ -257,10 +258,9 @@ void SlideOutWidget::renderSlideoutWidgetFrame(S32 ulx, S32 uly, S32 width, S32 
    else
       TNLAssert(false, "Expected one of the above to be true!");
 
-   mGL->renderPointVector(&points, GLOPT::TriangleFan, Colors::black, 0.70f);    // Fill
-   mGL->renderPointVector(&points, GLOPT::LineStrip, borderColor);               // Border
+   RenderUtils::drawFilledLineLoop(&points, Colors::black, 0.70f);
+   RenderUtils::drawLineStrip(&points, borderColor);
 }
-
 
 
 };

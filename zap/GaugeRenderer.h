@@ -23,7 +23,8 @@ public:
    static const S32 GaugeWidth = 200;
    static const S32 SafetyLineExtend = 4;      // How far the safety line extends above/below the main bar
 
-   static void render(F32 ether, F32 maxEther, const F32 colors[], S32 bottomMargin, S32 height, F32 safetyThresh = -1);
+   static void render(F32 ether, F32 maxEther, const Color &fromColor, const Color &toColor,
+         S32 bottomMargin, S32 height, F32 safetyThresh = -1);
 };
 
 

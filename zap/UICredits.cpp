@@ -162,7 +162,7 @@ bool CreditsUserInterface::onKeyDown(InputCode inputCode)
 // Constructor
 CreditsScroller::CreditsScroller()
 {
-   mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   nvgStrokeWidth(nvg, RenderUtils::DEFAULT_LINE_WIDTH);
 
    // Loop through each line in the credits looking for section breaks ("-")
    // thus creating groups, the first of which is generally the job, followed
@@ -241,13 +241,7 @@ void CreditsScroller::render() const
       for(S32 j = 0; j < mCredits[i].lines.size(); j++)
          RenderUtils::drawCenteredString_fixed(S32(mCredits[i].pos) + j * CreditSpace + 25, 25, Colors::white, mCredits[i].lines[j]);
 
-   F32 vertices[] = {
-         0, 0,
-         0, 150,
-         (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), 150,
-         (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), 0
-   };
-   mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::TriangleFan, Colors::black);
+   RenderUtils::drawFilledRect(0, 0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), 150, Colors::black);
 
    GameObjectRender::renderStaticBitfighterLogo();    // And add our logo at the top of the page
 }

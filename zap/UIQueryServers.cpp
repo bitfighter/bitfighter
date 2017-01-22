@@ -796,8 +796,7 @@ void QueryServersUserInterface::render() const
             (F32)horizMargin,               (F32)dividerPos,
             (F32)canvasWidth - horizMargin, (F32)dividerPos
       };
-      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::Lines, Colors::white);
-
+      RenderUtils::drawLineStrip(vertices, ARRAYSIZE(vertices) / 2, Colors::white);
 
       S32 ypos = dividerPos + 3;      // 3 = gap after divider
 
@@ -876,29 +875,29 @@ void QueryServersUserInterface::render() const
          // Render icons
          if(s.dedicated || s.test || s.pingTimedOut || !s.everGotQueryResponse)
          {
-            mGL->pushMatrix();
-            mGL->glTranslate(columns[1].xStart + 5.0f, y + 2.0f, 0.0f);
+            nvgSave(nvg);
+            nvgTranslate(nvg, columns[1].xStart + 5.0f, y + 2.0f);
                if(s.pingTimedOut || !s.everGotQueryResponse)
                   RenderUtils::drawString_fixed(0, SERVER_ENTRY_TEXTSIZE, SERVER_ENTRY_TEXTSIZE, Colors::green, "?");
                else if(s.test)
                   renderTestIcon();
                else
                   renderDedicatedIcon();
-            mGL->popMatrix();
+            nvgRestore(nvg);
          }
          if(s.passwordRequired || s.pingTimedOut || !s.everGotQueryResponse)
          {
-            mGL->pushMatrix();
-               mGL->glTranslate(F32(columns[1].xStart + 25), F32(y + 2));
+            nvgSave(nvg);
+            nvgTranslate(nvg, F32(columns[1].xStart + 25), F32(y + 2));
 
                if(s.pingTimedOut || !s.everGotQueryResponse)
                   RenderUtils::drawString_fixed(0, SERVER_ENTRY_TEXTSIZE, SERVER_ENTRY_TEXTSIZE, Colors::green, "?");
                else
                {
-                  mGL->glScale(3.65f);
-                  GameObjectRender::renderLock();
+                  nvgScale(nvg, 3.65f, 3.65f);
+                  GameObjectRender::renderLock(localRemoteColor);
                }
-            mGL->popMatrix();
+            nvgRestore(nvg);
          }
 
          RenderUtils::drawStringf_fixed(columns[2].xStart, y, SERVER_ENTRY_TEXTSIZE, getPingTimeColor(s.pingTime), "%d", s.pingTime);

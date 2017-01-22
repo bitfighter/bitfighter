@@ -71,7 +71,7 @@ const U32 GLOPT::Viewport = GL_VIEWPORT;
 
 GL *RenderManager::mGL = NULL;
 NVGcontext *RenderManager::nvg = NULL;
-NVGcontext *GL::nvg = NULL;
+
 
 RenderManager::RenderManager()
 {
@@ -155,8 +155,6 @@ void GL::init() {
 #ifdef BF_USE_GLES2
    // TODO - Shaders and stuff
 #else
-   nvg = RenderManager::getNVG();
-   TNLAssert(nvg != NULL, "NanoVG GL context is NULL!");
    // No initialization for the fixed-function pipeline!
 #endif
 }
@@ -336,8 +334,6 @@ void GL::scissor(S32 x, S32 y, S32 width, S32 height)
    // TODO
 #else
    ::glScissor(x, y, width, height);
-
-   nvgScissor(nvg, x, y, width, height);
 #endif
 }
 

@@ -199,7 +199,7 @@ void display()
 
    // Defaults
    // Set default line (stroke) width
-   nvgStrokeWidth(nvg, RenderUtils::DEFAULT_LINE_WIDTH);
+   nvgStrokeWidth(nvg, RenderUtils::DEFAULT_LINE_WIDTH / DisplayManager::getScreenInfo()->getScalingRatioY());
 
    // This is (somewhat) a hack to get around needing glOrtho for NanoVG things.
    // Since this is done before any other rendering, we scale and translate the

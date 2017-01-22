@@ -18,7 +18,8 @@
 
 namespace Zap {   namespace UI {
 
-void GaugeRenderer::render(F32 ether, F32 maxEther, const F32 colors[], S32 bottomMargin, S32 height, F32 safetyThresh)
+void GaugeRenderer::render(F32 ether, F32 maxEther, const Color &fromColor, const Color &toColor,
+      S32 bottomMargin, S32 height, F32 safetyThresh)
 {
    // Coordinates of upper left corner of main guage bar
    const F32 xul = F32(GaugeLeftMargin);
@@ -27,14 +28,7 @@ void GaugeRenderer::render(F32 ether, F32 maxEther, const F32 colors[], S32 bott
    F32 full = ether / maxEther * GaugeWidth;
 
    // Main bar outline
-   F32 vertices[] = {
-      xul,        yul,
-      xul,        yul + height,
-      xul + full, yul + height,
-      xul + full, yul,
-   };
-
-   mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GLOPT::TriangleFan);
+   RenderUtils::drawRectHorizGradient(xul, yul, full, height, fromColor, 1.0f, toColor, 1.0f);
 
    // Gauge outline
    RenderUtils::drawVertLine(xul, yul, yul + height, Colors::white);
@@ -51,15 +45,8 @@ void GaugeRenderer::render(F32 ether, F32 maxEther, const F32 colors[], S32 bott
 
 void EnergyGaugeRenderer::render(S32 energy)
 {
-   // Create fade
-   static const F32 colors[] = {
-      Colors::blue.r, Colors::blue.g, Colors::blue.b, 1,   // Fade from
-      Colors::blue.r, Colors::blue.g, Colors::blue.b, 1,
-      Colors::cyan.r, Colors::cyan.g, Colors::cyan.b, 1,   // Fade to
-      Colors::cyan.r, Colors::cyan.g, Colors::cyan.b, 1,
-   };
-
-   GaugeRenderer::render((F32)energy, Ship::EnergyMax, colors, GaugeBottomMargin, GaugeHeight, Ship::EnergyCooldownThreshold);
+   GaugeRenderer::render((F32)energy, Ship::EnergyMax, Colors::blue, Colors::cyan,
+         GaugeBottomMargin, GaugeHeight, Ship::EnergyCooldownThreshold);
 
 #ifdef SHOW_SERVER_SITUATION
    ServerGame *serverGame = GameManager::getServerGame();
@@ -82,15 +69,7 @@ void HealthGaugeRenderer::render(F32 health)
    static const S32 GaugeHeight = 5;
    static const S32 GaugeBottomMargin = UserInterface::vertMargin;
 
-   // Create fade
-   static const F32 colors[] = {
-      Colors::red.r,     Colors::red.g,     Colors::red.b,     1,   // Fade from
-      Colors::red.r,     Colors::red.g,     Colors::red.b,     1,
-      Colors::paleRed.r, Colors::paleRed.g, Colors::paleRed.b, 1,   // Fade to
-      Colors::paleRed.r, Colors::paleRed.g, Colors::paleRed.b, 1,
-   };
-
-   GaugeRenderer::render(health, 1, colors, GaugeBottomMargin, GaugeHeight);
+   GaugeRenderer::render(health, 1, Colors::red, Colors::paleRed, GaugeBottomMargin, GaugeHeight);
 }
 
 

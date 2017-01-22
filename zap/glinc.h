@@ -9,13 +9,7 @@
 
 #ifndef _GLINC_H_
 #define _GLINC_H_
-//#if defined(BF_USE_GLES2)
-//#  include "SDL_opengles2.h"
-//#elif defined(BF_USE_GLES)
-//#  include "SDL_opengles.h"
-//#else
-//#  include "SDL_opengl.h"
-//#endif
+
 #include "glad.h"
 
 #endif // _GLINC_H_

@@ -390,10 +390,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
 
 #ifndef ZAP_DEDICATED
-   RenderUtils::DEFAULT_LINE_WIDTH = ini->getValueF(section, "LineWidth", 2);
-   RenderUtils::LINE_WIDTH_1 = RenderUtils::DEFAULT_LINE_WIDTH * 0.5f;
-   RenderUtils::LINE_WIDTH_3 = RenderUtils::DEFAULT_LINE_WIDTH * 1.5f;
-   RenderUtils::LINE_WIDTH_4 = RenderUtils::DEFAULT_LINE_WIDTH * 2;
+   RenderUtils::setDefaultLineWidth(ini->getValueF(section, "LineWidth", 2));
 #endif
 }
 

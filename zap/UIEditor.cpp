@@ -1917,18 +1917,19 @@ void EditorUserInterface::renderReferenceShip() const
    // Render ship at cursor to show scale
    static F32 thrusts[4] = {1, 0, 0, 0};
 
-   mGL->pushMatrix();
-   mGL->glTranslate(mMousePos);
-   mGL->glScale(mCurrentScale);
-   mGL->glRotate(90);
+   nvgSave(nvg);
+   nvgTranslate(nvg, mMousePos.x, mMousePos.y);
+   nvgScale(nvg, mCurrentScale, mCurrentScale);
+   nvgRotate(nvg, FloatHalfPi);
    GameObjectRender::renderShip(ShipShape::Normal, Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
-   mGL->glRotate(-90);
+   nvgRotate(nvg, -FloatHalfPi);
+
 
    // Draw collision circle
    const F32 spaceAngle = 0.0278f * FloatTau;
-   mGL->lineWidth(RenderUtils::LINE_WIDTH_1);
+   nvgStrokeWidth(nvg, RenderUtils::LINE_WIDTH_1);
    RenderUtils::drawDashedCircle(Point(0, 0), (F32)Ship::CollisionRadius, 10, spaceAngle, 0, Colors::green, 0.35f);
-   mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   nvgStrokeWidth(nvg, RenderUtils::DEFAULT_LINE_WIDTH);
 
    // And show how far it can see
    const S32 horizDist = Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL;
@@ -1936,7 +1937,7 @@ void EditorUserInterface::renderReferenceShip() const
 
    RenderUtils::drawFilledRect(-horizDist, -vertDist, 2*horizDist, 2*vertDist, Colors::paleBlue, 0.35f);
 
-   mGL->popMatrix();
+   nvgRestore(nvg);
 }
 
 

@@ -15,6 +15,8 @@
 #include "RenderManager.h"
 #include "stringUtils.h"
 
+#include "glinc.h"
+
 #include <stdarg.h>        // For va_args
 #include <stdio.h>         // For vsnprintf
 
@@ -774,6 +776,20 @@ void RenderUtils::drawLineLoop(const F32 *points, U32 pointCount, const Color &c
 }
 
 
+void RenderUtils::drawLineLoop(const S16 *points, U32 pointCount, const Color &color, F32 alpha)
+{
+   nvgBeginPath(nvg);
+
+   nvgMoveTo(nvg, (F32)points[0], (F32)points[1]);
+   for(U32 i = 2; i < 2 * pointCount; i = i + 2)
+      nvgLineTo(nvg, (F32)points[i], (F32)points[i+1]);
+   nvgClosePath(nvg);  // Finish loop
+
+   nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgStroke(nvg);
+}
+
+
 void RenderUtils::drawFilledLineLoop(const F32 *points, U32 pointCount, const Color &color, F32 alpha)
 {
    nvgBeginPath(nvg);
@@ -788,17 +804,47 @@ void RenderUtils::drawFilledLineLoop(const F32 *points, U32 pointCount, const Co
 }
 
 
-// Operates like GL_LINES, drawing individual 2-point line segments.  pointCount
-// should be a multiple of 4
-void RenderUtils::drawLines(const F32 *points, U32 pointsCount, const Color &color, F32 alpha)
+void RenderUtils::drawFilledLineLoop(const Vector<Point> *points, const Color &color, F32 alpha)
+{
+   nvgBeginPath(nvg);
+
+   nvgMoveTo(nvg, points->get(0).x, points->get(0).y);
+   for(S32 i = 1; i < points->size(); i++)
+      nvgLineTo(nvg, points->get(i).x, points->get(i).y);
+   nvgClosePath(nvg);  // Finish loop
+
+   nvgFillColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgFill(nvg);
+}
+
+
+// Operates like GL_LINES, drawing individual 2-point line segments
+void RenderUtils::drawLines(const F32 *points, U32 pointCount, const Color &color, F32 alpha)
 {
    nvgBeginPath(nvg);
 
    // 1 segment == 2 points == 4 F32s
-   for(U32 i = 0; i < 2 * pointsCount; i = i + 4)
+   for(U32 i = 0; i < 2 * pointCount; i = i + 4)
    {
       nvgMoveTo(nvg, points[i],   points[i+1]);
       nvgLineTo(nvg, points[i+2], points[i+3]);
+   }
+
+   nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
+   nvgStroke(nvg);
+}
+
+
+// Operates like GL_LINES, drawing individual 2-point line segments
+void RenderUtils::drawLines(const Vector<Point> *points, const Color &color, F32 alpha)
+{
+   nvgBeginPath(nvg);
+
+   // 1 segment == 2 points == 4 F32s
+   for(S32 i = 0; i < points->size(); i = i + 2)
+   {
+      nvgMoveTo(nvg, points->get(i).x, points->get(i).y);
+      nvgLineTo(nvg, points->get(i+1).x, points->get(i+1).y);
    }
 
    nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
@@ -815,6 +861,77 @@ void RenderUtils::drawLine(F32 x1, F32 y1, F32 x2, F32 y2, const Color &color, F
 
    nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
    nvgStroke(nvg);
+}
+
+
+void RenderUtils::drawLineGradient(F32 x1, F32 y1, F32 x2, F32 y2,
+      const Color &color1, F32 alpha1, const Color &color2, F32 alpha2)
+{
+   NVGpaint gradient = nvgLinearGradient(nvg, x1, y1, x2, y2,
+         nvgRGBAf(color1.r, color1.g, color1.b, alpha1),
+         nvgRGBAf(color2.r, color2.g, color2.b, alpha2));
+
+   nvgBeginPath(nvg);
+
+   nvgMoveTo(nvg, x1, y1);
+   nvgLineTo(nvg, x2, y2);
+
+   nvgStrokePaint(nvg, gradient);
+   nvgStroke(nvg);
+}
+
+
+void RenderUtils::drawRectHorizGradient(F32 x, F32 y, F32 w, F32 h,
+      const Color &color1, F32 alpha1, const Color &color2, F32 alpha2)
+{
+   NVGpaint gradient = nvgLinearGradient(nvg, x, y, x+w, y,
+         nvgRGBAf(color1.r, color1.g, color1.b, alpha1),
+         nvgRGBAf(color2.r, color2.g, color2.b, alpha2));
+
+   nvgBeginPath(nvg);
+
+   nvgRect(nvg, x, y, w, h);
+
+   nvgFillPaint(nvg, gradient);
+   nvgFill(nvg);
+}
+
+
+void RenderUtils::drawPoints(const F32 *points, U32 pointCount, const Color &color, F32 alpha)
+{
+   // FIXME - we need to draw points with nanovg (which isn't part of the API);
+   // or, we need to do it with our own GLES2/GL2 implementation
+
+   // This is GL 1.x/2.x only
+   glColor4f(color.r, color.g, color.b, alpha);
+
+   glEnableClientState(GL_VERTEX_ARRAY);
+
+   glVertexPointer(2, GL_FLOAT, 0, points);
+   glDrawArrays(GL_POINTS, 0, pointCount);
+
+   glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+
+void RenderUtils::drawPoints(const F32 *points, U32 pointCount, const Color &color, F32 alpha,
+      F32 pointSize, F32 scale, F32 translateX, F32 translateY, F32 rotate)
+{
+   // FIXME - we need to draw points with nanovg (which isn't part of the API);
+   // or, we need to do it with our own GLES2/GL2 implementation
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   glPointSize(pointSize);  // Might need to do inside matrix?
+
+   glPushMatrix();
+      glScalef(scale, scale, 1);
+      glTranslatef(translateX, translateY, 0.0f);
+      glRotatef(rotate, 0.0f, 0.0f, 1.0f);
+
+      drawPoints(points, pointCount, color, alpha);
+   glPopMatrix();
+#endif
 }
 
 
@@ -1282,6 +1399,22 @@ void RenderUtils::drawCircle(F32 radius, const Color &color, F32 alpha)
    nvgCircle(nvg, 0, 0, radius);
    nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
    nvgStroke(nvg);
+}
+
+
+void RenderUtils::setDefaultLineWidth(F32 width)
+{
+   RenderUtils::DEFAULT_LINE_WIDTH = width;
+   RenderUtils::LINE_WIDTH_1 = RenderUtils::DEFAULT_LINE_WIDTH * 0.5f;
+   RenderUtils::LINE_WIDTH_3 = RenderUtils::DEFAULT_LINE_WIDTH * 1.5f;
+   RenderUtils::LINE_WIDTH_4 = RenderUtils::DEFAULT_LINE_WIDTH * 2;
+}
+
+
+void RenderUtils::lineWidth(F32 width)
+{
+   // TODO manage width with respect to current scaling matrix
+   nvgStrokeWidth(nvg, width);
 }
 
 

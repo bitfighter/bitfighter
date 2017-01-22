@@ -85,9 +85,6 @@ public:
 // of desktop OpenGL 1.1 compatible [a subset]).
 class GL
 {
-private:
-   static NVGcontext *nvg;
-
 public:
    GL();          // Constructor
    virtual ~GL(); // Destructor

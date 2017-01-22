@@ -117,18 +117,17 @@ void FxManager::DebrisChunk::idle(U32 timeDelta)
 
 void FxManager::DebrisChunk::render() const
 {
-   mGL->pushMatrix();
-
-   mGL->glTranslate(pos);
-   mGL->glRotate(angle * RADIANS_TO_DEGREES);
+   nvgSave(nvg);
+   nvgTranslate(nvg, pos.x, pos.y);
+   nvgRotate(nvg, angle);
 
    F32 alpha = 1;
    if(ttl < 250)
       alpha = ttl / 250.f;
 
-   mGL->renderPointVector(&points, GLOPT::LineLoop, color, alpha);
+   RenderUtils::drawLineLoop(&points, color, alpha);
 
-   mGL->popMatrix();
+   nvgRestore(nvg);
 }
 
 
@@ -170,17 +169,17 @@ void FxManager::TextEffect::render(const Point &centerOffset) const
    if(ttl < FadeTime)
       alpha = ttl / FadeTime;     // Fade as item nears the end of its life
 
-   mGL->pushMatrix();
 
-      mGL->glTranslate(pos);
-      mGL->glScale(size / MAX_TEXTEFFECT_SIZE);  // We'll draw big and scale down
+   nvgSave(nvg);
+      nvgTranslate(nvg, pos.x, pos.y);
+      nvgScale(nvg, size / MAX_TEXTEFFECT_SIZE, size / MAX_TEXTEFFECT_SIZE);
 
       FontManager::setFontColor(color, alpha);
       FontManager::pushFontContext(TextEffectContext);
          RenderUtils::drawStringc(0, 0, 120, text.c_str());
       FontManager::popFontContext();
 
-   mGL->popMatrix();
+   nvgRestore(nvg);
 }
 
 
@@ -381,14 +380,14 @@ void FxManager::renderScreenEffects() const
 {
    static const Point center(DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2,
                              DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2);
-   mGL->pushMatrix();
-      mGL->glTranslate(center);
-      mGL->glScale(0.6667f);
+   nvgSave(nvg);
+      nvgTranslate(nvg, center.x, center.y);
+      nvgScale(nvg, 0.6667f, 0.6667f);
 
       for(S32 i = 0; i < mScreenTextEffects.size(); i++)
          mScreenTextEffects[i].render(center);
 
-   mGL->popMatrix();
+   nvgRestore(nvg);
 }
 
 

@@ -279,11 +279,9 @@ void MenuUserInterface::renderArrow(S32 pos, bool pointingUp)
          F32(canvasWidth) / 2,               F32(y)
    };
 
-   for(S32 i = 1; i >= 0; i--)
-   {
-      // First create a black poly to blot out what's behind, then the arrow itself
-      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GLOPT::TriangleFan : GLOPT::LineLoop, i ? Colors::black : Colors::blue);
-   }
+   // First create a black poly to blot out what's behind, then the arrow itself
+   RenderUtils::drawFilledLineLoop(vertices, ARRAYSIZE(vertices) / 2, Colors::black);
+   RenderUtils::drawLineLoop(vertices, ARRAYSIZE(vertices) / 2, Colors::blue);
 }
 
 

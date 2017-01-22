@@ -132,7 +132,7 @@ void ConnectionStatsRenderer::render(GameConnection *conn) const
       }
 
       RenderUtils::drawStringf_fixed(x1 + 2, y + 10, 10, Colors::white, "%1.1f kbps", max * (1/128.f));
-      mGL->renderVertexArray(graphs, ArraySizeGraph, GLOPT::LineStrip, Colors::red);
+      RenderUtils::drawLineStrip(graphs, ArraySizeGraph, Colors::red);
 
       i1 = mCurrentIndex;
       i2 = i1+1 >= ArraySize ? 0 : i1+1;
@@ -142,7 +142,7 @@ void ConnectionStatsRenderer::render(GameConnection *conn) const
          i1 = i2;
          i2 = i2 + 1 >= ArraySize ? 0 : i2 + 1;
       }
-      mGL->renderVertexArray(graphs, ArraySizeGraph, GLOPT::LineStrip, Colors::green);
+      RenderUtils::drawLineStrip(graphs, ArraySizeGraph, Colors::green);
       y += y_size;
    }
 }

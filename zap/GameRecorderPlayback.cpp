@@ -598,7 +598,7 @@ void PlaybackGameUserInterface::render() const
 
    if(mVisible)
    {
-      mGL->renderVertexArray(playbackBarVertex, 4, GLOPT::LineLoop, Colors::white);
+      RenderUtils::drawLineLoop(playbackBarVertex, 4, Colors::white);
 
       F32 vertex[4];
       vertex[0] = mPlaybackConnection->mCurrentTime * playbackBar_w / mPlaybackConnection->mTotalTime + playbackBar_x;
@@ -606,8 +606,8 @@ void PlaybackGameUserInterface::render() const
       vertex[2] = vertex[0];
       vertex[3] = playbackBar_y + playbackBar_h;
 
-      mGL->renderVertexArray(vertex, 2, GLOPT::Lines, Colors::white);
-      mGL->renderVertexArray(buttons_lines, sizeof(buttons_lines) / (sizeof(buttons_lines[0]) * 2), GLOPT::Lines, Colors::white);
+      RenderUtils::drawLines(vertex, 2, Colors::white);
+      RenderUtils::drawLines(buttons_lines, sizeof(buttons_lines) / (sizeof(buttons_lines[0]) * 2), Colors::white);
 
       RenderUtils::drawString_fixed(btn_spectate_name_x, btn_y + 15, 15, Colors::white, 
                                     mPlaybackConnection->mClientInfoSpectatingName.getString());

@@ -443,8 +443,6 @@ void ChatUserInterface::render() const
    renderChatters(horizMargin, vertFooterPos - CHAT_FONT_MARGIN * 2);
 
    // Render incoming chat msgs
-   //mGL->glColor(Colors::white);
-
    U32 y = vertMargin + 60;
 
    static const S32 chatAreaHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight() - 2 * vertMargin -   // Screen area less margins

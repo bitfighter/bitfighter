@@ -519,10 +519,7 @@ void lineWidthHandler(ClientGame *game, const Vector<string> &words)
       if(linewidth < 0.125f)
          linewidth = 0.125f;
 
-      RenderUtils::DEFAULT_LINE_WIDTH = linewidth;
-      RenderUtils::LINE_WIDTH_1 = linewidth * 0.5f;
-      RenderUtils::LINE_WIDTH_3 = linewidth * 1.5f;
-      RenderUtils::LINE_WIDTH_4 = linewidth * 2;
+      RenderUtils::setDefaultLineWidth(linewidth);
 
       RenderManager::getGL()->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);    //make this change happen instantly
    }

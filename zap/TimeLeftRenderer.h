@@ -37,6 +37,7 @@ private:
    S32 renderHeadlineScores  (const Game *game, S32 ypos) const;
    S32 renderTeamScores      (const GameType *gameType, S32 bottom, bool render) const;
    S32 renderIndividualScores(const GameType *gameType, S32 bottom, bool render) const;
+   S32 renderLock(S32 xPos, bool render) const;
 
 public:
    static const S32 TimeLeftIndicatorMargin = 7;
