@@ -1492,7 +1492,7 @@ void RenderUtils::setDefaultLineWidth(F32 width)
 
 void RenderUtils::lineWidth(F32 width)
 {
-   // TODO manage width with respect to current scaling matrix
+   // TODO manage width with respect to current scaling matrix?
    nvgStrokeWidth(nvg, width);
 }
 

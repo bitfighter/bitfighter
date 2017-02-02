@@ -280,6 +280,16 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    // Now save the new window dimensions in ScreenInfo
    DisplayManager::getScreenInfo()->setWindowSize(sdlWindowWidth, sdlWindowHeight);
 
+   // FIXME NANOVG most of these GL calls are probably taken care of in the
+   // nvgBeginFrame() call in main.cpp.  The rest needs to be gotten rid of or
+   // used in GL + GLES2 compatible calls (see http://docs.gl/ for calls that
+   // will work with both APIs (e.g. gl2, es2)
+   //
+   // Probably the ortho stuff can be gotten rid of completely and just handled
+   // with nvgScissor/nvgTranslate in the main loop inside of nvgBeginFrame()
+   //
+   // Smoothing/blending is turned on in RenderManager::init() with NVG_ANTIALIAS
+   // flag and can be controlled on a per-frame basis with nvgGlobalCompositeBlendFunc
    mGL->clearColor(0, 0, 0, 0);
 
    mGL->viewport(0, 0, sdlWindowWidth, sdlWindowHeight);

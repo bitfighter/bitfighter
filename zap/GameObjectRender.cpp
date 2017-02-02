@@ -662,6 +662,7 @@ Color GameObjectRender::getTrackerColor(const Tracker &t, Color *liveColors, Col
 
 
 // TODO: Document me better!  Especially the nerdy math stuff
+// FIXME NANOVG Have to re-design this for nanovg and use its API
 void GameObjectRender::renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha,
                       const Vector<Point> *dests, S32 trackerCount)
 {
@@ -2870,6 +2871,7 @@ void GameObjectRender::renderStars(const Point *stars, const Color *colors, S32 
    for(F32 xPage = upperLeft.x + fx1; xPage < lowerRight.x + fx2 && !(F32(xPage + 1.f) == xPage); xPage++)
       for(F32 yPage = upperLeft.y + fy1; yPage < lowerRight.y + fy2 && !(F32(yPage + 1.f) == yPage); yPage++)
       {
+         // FIXME NANOVG This method is still using old GL calls
          RenderUtils::drawPoints(vertexPointer, numStars, Colors::gray60, alpha,
                RenderUtils::LINE_WIDTH_1, starChunkSize,
                xPage + (cameraPos.x / starDist), yPage + (cameraPos.y / starDist), 0.0f);

@@ -359,8 +359,11 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction, const Point &c
          const F32 *vertexPointer = &mSparks[i][0].pos.x;
          const F32 *colorPointer  = &mSparks[i][0].color.r;
 
+         // FIXME NANOVG This still uses old GL calls
          if((SparkType) i == SparkTypePoint)
             RenderUtils::drawPointsColorArray(vertexPointer, colorPointer, firstFreeIndex[i], sizeof(Spark));
+
+         // FIXME NANOVG This still uses old GL calls
          else if((SparkType) i == SparkTypeLine)
             RenderUtils::drawLinesColorArray(vertexPointer, colorPointer, firstFreeIndex[i], sizeof(Spark));
       }
@@ -565,6 +568,7 @@ void FxTrail::render() const
       FxTrailVertexArray[(2*i) + 1] = mNodes[i].pos.y;
    }
 
+   // FIXME NANOVG This still uses old GL calls
    RenderUtils::drawLineStripColorArray(FxTrailVertexArray, FxTrailColorArray, mNodes.size());
 }
 

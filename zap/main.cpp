@@ -198,7 +198,8 @@ void display()
    nvgBeginFrame(nvg, width, height, 1);
 
    // Defaults
-   // Set default line (stroke) width
+   // FIXME NANOVG default line width should somehow stay the same even if zoomed
+   // in (e.g. in the editor)
    nvgStrokeWidth(nvg, RenderUtils::DEFAULT_LINE_WIDTH / DisplayManager::getScreenInfo()->getScalingRatioY());
 
    // This is (somewhat) a hack to get around needing glOrtho for NanoVG things.
@@ -207,7 +208,8 @@ void display()
    // the window we need
    nvgScale(nvg, DisplayManager::getScreenInfo()->getScalingRatioX(),
          DisplayManager::getScreenInfo()->getScalingRatioY());
-   // TODO do correct translation/scissoring
+
+   // FIXME NANOVG do correct translation/scissoring for fullscreen-scaled mode
 //   nvgTranslate(nvg, DisplayManager::getScreenInfo()->getHorizDrawMargin(),
 //         DisplayManager::getScreenInfo()->getVertDrawMargin());
 

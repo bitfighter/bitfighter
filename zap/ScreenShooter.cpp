@@ -22,6 +22,10 @@ using namespace std;
 namespace Zap
 {
 
+
+// FIXME NANOVG everything about this class must be written to use GL + GLES2
+// compatible GL calls.  There's no way to take a screenshot with NanoVG
+
 ScreenShooter::ScreenShooter()
 {
    // Do nothing
