@@ -18,6 +18,7 @@
 #include "RenderUtils.h"
 
 #include <math.h>
+#include "FontManager.h"
 
 
 namespace Zap
@@ -206,6 +207,8 @@ bool KeyDefMenuUserInterface::isDuplicate(S32 key, const Vector<KeyDefMenuItem> 
 
 void KeyDefMenuUserInterface::render() const
 {
+   FontManager::pushFontContext(MenuContext);
+
    // Draw the game screen, then dim it out so you can still see it under our overlay
    if(getGame()->getConnectionToServer())
       getUIManager()->renderAndDimGameUserInterface();
@@ -276,6 +279,8 @@ void KeyDefMenuUserInterface::render() const
 
       RenderUtils::drawCenteredString_fixed(yPos, 15, Colors::red, alpha, errorMsg.c_str());
    }
+
+   FontManager::popFontContext();
 }
 
 
