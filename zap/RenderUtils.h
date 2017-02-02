@@ -425,6 +425,8 @@ public:
 
    static void drawRectHorizGradient(F32 x1, F32 y1, F32 w, F32 h,
          const Color &color1, F32 alpha1, const Color &color2, F32 alpha2);
+   static void drawRectVertGradient(F32 x, F32 y, F32 w, F32 h,
+         const Color &color1, F32 alpha1, const Color &color2, F32 alpha2);
 
    static void drawFilledLineLoop(const F32 *points, U32 pointCount, const Color &color, F32 alpha = 1.0);
    static void drawFilledLineLoop(const Vector<Point> *points, const Color &color, F32 alpha = 1.0);
@@ -432,6 +434,10 @@ public:
    static void drawPoints(const F32 *points, U32 pointCount, const Color &color, F32 alpha = 1.0);
    static void drawPoints(const F32 *points, U32 pointCount, const Color &color, F32 alpha,
          F32 pointSize, F32 scale, F32 translateX, F32 translateY, F32 rotate);
+
+   static void drawPointsColorArray(const F32 *points, const F32 *colors, U32 count, S32 stride = 0);
+   static void drawLinesColorArray(const F32 *vertices, const F32 *colors, U32 count, S32 stride = 0);
+   static void drawLineStripColorArray(const F32 *vertices, const F32 *colors, U32 count, S32 stride = 0);
 
    static void drawHorizLine(                S32 y, const Color &color, F32 alpha = 1.0);
    static void drawHorizLine(                U32 y, const Color &color, F32 alpha = 1.0);

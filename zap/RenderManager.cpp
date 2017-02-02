@@ -90,8 +90,9 @@ void RenderManager::init()
    TNLAssert(nvg == NULL, "NanoVG GL context should only be created once!");
 
 //   int nvgFlags = NVG_ANTIALIAS | NVG_STENCIL_STROKES;
-//   int nvgFlags = NVG_ANTIALIAS;
-   int nvgFlags = 0;
+   int nvgFlags = NVG_ANTIALIAS;
+//   int nvgFlags = NVG_DEBUG;
+//   int nvgFlags = 0;
 
 #ifdef BF_USE_GLES
    nvg = nvgCreateGLES2(nvgFlags);

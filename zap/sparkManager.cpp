@@ -355,16 +355,14 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction, const Point &c
    {
       for(S32 i = SparkTypeCount - 1; i >= 0; i --)     // Loop through our different spark types
       {
-         mGL->pointSize(RenderUtils::DEFAULT_LINE_WIDTH);
-
          // This actually works...
          const F32 *vertexPointer = &mSparks[i][0].pos.x;
          const F32 *colorPointer  = &mSparks[i][0].color.r;
 
          if((SparkType) i == SparkTypePoint)
-            mGL->renderColorVertexArray(vertexPointer, colorPointer, firstFreeIndex[i], GLOPT::Points, 0, sizeof(Spark));
+            RenderUtils::drawPointsColorArray(vertexPointer, colorPointer, firstFreeIndex[i], sizeof(Spark));
          else if((SparkType) i == SparkTypeLine)
-            mGL->renderColorVertexArray(vertexPointer, colorPointer, firstFreeIndex[i], GLOPT::Lines, 0, sizeof(Spark));
+            RenderUtils::drawLinesColorArray(vertexPointer, colorPointer, firstFreeIndex[i], sizeof(Spark));
       }
 
       for(S32 i = 0; i < mDebrisChunks.size(); i++)
@@ -567,7 +565,7 @@ void FxTrail::render() const
       FxTrailVertexArray[(2*i) + 1] = mNodes[i].pos.y;
    }
 
-   mGL->renderColorVertexArray(FxTrailVertexArray, FxTrailColorArray, mNodes.size(), GLOPT::LineStrip);
+   RenderUtils::drawLineStripColorArray(FxTrailVertexArray, FxTrailColorArray, mNodes.size());
 }
 
 

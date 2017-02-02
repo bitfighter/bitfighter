@@ -139,6 +139,9 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool isPolywall)
       if(isWoundClockwise(mPoints))         // All walls must be CCW to clip correctly
          mPoints.reverse();
 
+      // NanoVG does its own triangulation so this may not be needed unless there
+      // is a performance hit from NanoVG from not caching the geometry and just
+      // tesselating every frame
       Triangulate::Process(mPoints, mRenderFillGeometry);
 
       if(mRenderFillGeometry.size() == 0)    // Geometry is bogus; perhaps duplicated points, or other badness

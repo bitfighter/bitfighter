@@ -25,8 +25,6 @@ class ClientGame;
 class ScissorsManager: RenderManager
 {
 private:
-   U8 mScissorsWasEnabled;
-   S32 mScissorBox[4];
    bool mManagerEnabled;
 
 public:

@@ -157,7 +157,6 @@ public:
 
    static void renderScoreboardOrnamentTeamFlags(S32 xpos, S32 ypos, const Color &color, bool teamHasFlag);
 
-   static void renderPolygonOutline(const Vector<Point> *outline);
    static void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color &outlineColor, F32 alpha = 1, F32 lineThickness = DEFAULT_LINE_WIDTH);
    static void renderPolygonFill(const Vector<Point> *fillPoints, const Color &fillColor, F32 alpha = 1);
    static void renderPolygon(const Vector<Point> *fillPoints, const Vector<Point> *outlinePoints,
@@ -179,7 +178,6 @@ public:
    static void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill, const Point &centroid);
    static void renderSlipZoneIcon(const Point &center, S32 radius, F32 angleRadians = 0.0f);
 
-   static void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const Color &color, const char *text, F32 scaleFact = 1);
    static void renderPolygonLabel(const Point &centroid, F32 angle, S32 size, const Color &color, F32 alpha, const char *text, F32 scaleFact = 1);
 
    static void renderProjectile(const Point &pos, U32 type, U32 time);
@@ -268,9 +266,6 @@ public:
    static void renderShadowWalls(const Vector<BfObject *> &objects);
 
    static void renderWallSpine(const WallItem *wallItem, const Vector<Point> *outline, const Color &color,
-                               F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
-
-   static void renderWallSpine(const WallItem *wallItem, const Vector<Point> *outline,
                                F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
 
    static void renderSpawn(const Point &pos, F32 scale, const Color &color);

@@ -897,11 +897,28 @@ void RenderUtils::drawRectHorizGradient(F32 x, F32 y, F32 w, F32 h,
 }
 
 
+void RenderUtils::drawRectVertGradient(F32 x, F32 y, F32 w, F32 h,
+      const Color &color1, F32 alpha1, const Color &color2, F32 alpha2)
+{
+   NVGpaint gradient = nvgLinearGradient(nvg, x, y, x, y+h,
+         nvgRGBAf(color1.r, color1.g, color1.b, alpha1),
+         nvgRGBAf(color2.r, color2.g, color2.b, alpha2));
+
+   nvgBeginPath(nvg);
+
+   nvgRect(nvg, x, y, w, h);
+
+   nvgFillPaint(nvg, gradient);
+   nvgFill(nvg);
+}
+
+
 void RenderUtils::drawPoints(const F32 *points, U32 pointCount, const Color &color, F32 alpha)
 {
-   // FIXME - we need to draw points with nanovg (which isn't part of the API);
-   // or, we need to do it with our own GLES2/GL2 implementation
-
+   // FIXME NANOVG
+#ifdef BF_USE_GLES2
+   // TODO
+#else
    // This is GL 1.x/2.x only
    glColor4f(color.r, color.g, color.b, alpha);
 
@@ -911,14 +928,14 @@ void RenderUtils::drawPoints(const F32 *points, U32 pointCount, const Color &col
    glDrawArrays(GL_POINTS, 0, pointCount);
 
    glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 }
 
 
 void RenderUtils::drawPoints(const F32 *points, U32 pointCount, const Color &color, F32 alpha,
       F32 pointSize, F32 scale, F32 translateX, F32 translateY, F32 rotate)
 {
-   // FIXME - we need to draw points with nanovg (which isn't part of the API);
-   // or, we need to do it with our own GLES2/GL2 implementation
+   // FIXME NANOVG
 #ifdef BF_USE_GLES2
    // TODO
 #else
@@ -931,6 +948,68 @@ void RenderUtils::drawPoints(const F32 *points, U32 pointCount, const Color &col
 
       drawPoints(points, pointCount, color, alpha);
    glPopMatrix();
+#endif
+}
+
+
+void RenderUtils::drawPointsColorArray(const F32 *points, const F32 *colors, U32 count, S32 stride)
+{
+   // FIXME NANOVG
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   glPointSize(DEFAULT_LINE_WIDTH);
+
+   glEnableClientState(GL_VERTEX_ARRAY);
+   glEnableClientState(GL_COLOR_ARRAY);
+
+   // stride is the byte offset between consecutive vertices or colors
+   glVertexPointer(2, GL_FLOAT, stride, points);
+   glColorPointer(4, GL_FLOAT, stride, colors);
+   glDrawArrays(GL_POINTS, 0, count);
+
+   glDisableClientState(GL_COLOR_ARRAY);
+   glDisableClientState(GL_VERTEX_ARRAY);
+#endif
+}
+
+
+void RenderUtils::drawLinesColorArray(const F32 *vertices, const F32 *colors, U32 count, S32 stride)
+{
+   // FIXME NANOVG
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   glEnableClientState(GL_VERTEX_ARRAY);
+   glEnableClientState(GL_COLOR_ARRAY);
+
+   // stride is the byte offset between consecutive vertices or colors
+   glVertexPointer(2, GL_FLOAT, stride, vertices);
+   glColorPointer(4, GL_FLOAT, stride, colors);
+   glDrawArrays(GL_LINES, 0, count);
+
+   glDisableClientState(GL_COLOR_ARRAY);
+   glDisableClientState(GL_VERTEX_ARRAY);
+#endif
+}
+
+
+void RenderUtils::drawLineStripColorArray(const F32 *vertices, const F32 *colors, U32 count, S32 stride)
+{
+   // FIXME NANOVG
+#ifdef BF_USE_GLES2
+   // TODO
+#else
+   glEnableClientState(GL_VERTEX_ARRAY);
+   glEnableClientState(GL_COLOR_ARRAY);
+
+   // stride is the byte offset between consecutive vertices or colors
+   glVertexPointer(2, GL_FLOAT, stride, vertices);
+   glColorPointer(4, GL_FLOAT, stride, colors);
+   glDrawArrays(GL_LINE_STRIP, 0, count);
+
+   glDisableClientState(GL_COLOR_ARRAY);
+   glDisableClientState(GL_VERTEX_ARRAY);
 #endif
 }
 
@@ -1349,9 +1428,9 @@ void RenderUtils::drawFilledCircle(const Point &pos, F32 radius, const Color &co
 void RenderUtils::drawSquare(const Point &pos, F32 radius, const Color &color, bool filled)
 {
    if(filled)
-      drawFilledRect(pos.x - radius, pos.y - radius, radius, radius, color);
+      drawFilledRect(pos.x - radius, pos.y - radius, 2*radius, 2*radius, color);
    else
-      drawRect(pos.x - radius, pos.y - radius, radius, radius, color);
+      drawRect(pos.x - radius, pos.y - radius, 2*radius, 2*radius, color);
 }
 
 

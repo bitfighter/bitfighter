@@ -751,9 +751,9 @@ void GameUserInterface::renderLostConnectionMessage() const
       if((Platform::getRealMilliseconds() & 0x300) != 0) // Draw flashing red "X" on empty connection bars
       {
          static const F32 vertices[] = {x1 + 5, y1 - 5, x1 + 45, y1 + 35,  x1 + 5, y1 + 35, x1 + 45, y1 - 5 };
-         mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH * 2.0f);
-         mGL->renderVertexArray(vertices, 4, GLOPT::Lines, Colors::red);
-         mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+         RenderUtils::lineWidth(RenderUtils::DEFAULT_LINE_WIDTH * 2.0f);
+         RenderUtils::drawLines(vertices, 4, Colors::red);
+         RenderUtils::lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
       }
    }
 }
@@ -906,7 +906,10 @@ void GameUserInterface::renderProgressBar() const
                left,     F32(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - height)
          };
 
-         mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GLOPT::LineLoop : GLOPT::TriangleFan, Colors::green, alpha);
+         if(i)
+            RenderUtils::drawLineLoop(vertices, ARRAYSIZE(vertices) / 2, Colors::green, alpha);
+         else
+            RenderUtils::drawFilledLineLoop(vertices, ARRAYSIZE(vertices) / 2, Colors::green, alpha);
       }
    }
 }
@@ -923,54 +926,35 @@ void GameUserInterface::renderReticle() const
    Point offsetMouse = mMousePoint + Point(DisplayManager::getScreenInfo()->getGameCanvasWidth()  * 0.5f, 
                                            DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f);
 
-   F32 vertices[] = {
+#define RETICLE_COLOR Colors::green
+#define COLOR_RGB RETICLE_COLOR.r, RETICLE_COLOR.g, RETICLE_COLOR.b
+#define RETICLE_ALPHA 0.7f
+   F32 crossHairs[] = {
       // Center cross-hairs
       offsetMouse.x - 15, offsetMouse.y,
       offsetMouse.x + 15, offsetMouse.y,
       offsetMouse.x,      offsetMouse.y - 15,
       offsetMouse.x,      offsetMouse.y + 15,
-
-      // Large axes lines
-      0, offsetMouse.y,
-      offsetMouse.x - 30, offsetMouse.y,
-
-      offsetMouse.x + 30, offsetMouse.y,
-      (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), offsetMouse.y,
-
-      offsetMouse.x, 0,
-      offsetMouse.x, offsetMouse.y - 30,
-
-      offsetMouse.x, offsetMouse.y + 30,
-      offsetMouse.x, (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight(),
    };
+   RenderUtils::drawLines(crossHairs, ARRAYSIZE(crossHairs) / 2, RETICLE_COLOR, RETICLE_ALPHA);
 
-#define RETICLE_COLOR Colors::green
-#define COLOR_RGB RETICLE_COLOR.r, RETICLE_COLOR.g, RETICLE_COLOR.b      
+   // And the axes lines
+   RenderUtils::drawLineGradient(offsetMouse.x - 30, offsetMouse.y, 0, offsetMouse.y,
+         RETICLE_COLOR, RETICLE_ALPHA, RETICLE_COLOR, 0.0f);
 
-   static F32 colors[] = {
-   //    R,G,B   aplha
-      COLOR_RGB, 0.7f,
-      COLOR_RGB, 0.7f,
-      COLOR_RGB, 0.7f,
-      COLOR_RGB, 0.7f,
+   RenderUtils::drawLineGradient(offsetMouse.x + 30, offsetMouse.y,
+         (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth(), offsetMouse.y,
+         RETICLE_COLOR, RETICLE_ALPHA, RETICLE_COLOR, 0.0f);
 
-      COLOR_RGB, 0.0f,
-      COLOR_RGB, 0.7f,
+   RenderUtils::drawLineGradient(offsetMouse.x, offsetMouse.y - 30, offsetMouse.x, 0,
+      RETICLE_COLOR, RETICLE_ALPHA, RETICLE_COLOR, 0.0f);
 
-      COLOR_RGB, 0.7f,
-      COLOR_RGB, 0.0f,
-
-      COLOR_RGB, 0.0f,
-      COLOR_RGB, 0.7f,
-
-      COLOR_RGB, 0.7f,
-      COLOR_RGB, 0.0f,
-   };
+   RenderUtils::drawLineGradient(offsetMouse.x, offsetMouse.y + 30,
+         offsetMouse.x, (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight(),
+      RETICLE_COLOR, RETICLE_ALPHA, RETICLE_COLOR, 0.0f);
 
 #undef COLOR_RGB
 #undef RETICLE_COLOR
-
-   mGL->renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GLOPT::Lines);
 }
 
 
@@ -1712,9 +1696,9 @@ void GameUserInterface::renderAnnouncement(S32 pos) const
 {
    const S32 fontsize = 16;
 
-   mGL->lineWidth(RenderUtils::LINE_WIDTH_4);
+   RenderUtils::lineWidth(RenderUtils::LINE_WIDTH_4);
    RenderUtils::drawStringAndGetWidth_fixed(horizMargin, pos + fontsize, fontsize, Colors::red, ("*** " + mAnnouncement + " ***").c_str());
-   mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   RenderUtils::lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
 
@@ -1937,58 +1921,45 @@ void GameUserInterface::VoiceRecorder::render() const
 {
    if(mRecordingAudio)
    {
+      static const F32 x = 10;
+      static const F32 y = 130;
+
+      static const F32 height = 15;
+      static const F32 width = 100;
+      static F32 halfWidth = width/2;
+
       F32 amt = mMaxAudioSample / F32(0x7FFF);
-      U32 totalLineCount = 50;
+      F32 level = amt * width;
 
       // Render low/high volume lines
       F32 vertices[] = {
-            10.0f,                        130.0f,
-            10.0f,                        145.0f,
-            F32(10 + totalLineCount * 2), 130.0f,
-            F32(10 + totalLineCount * 2), 145.0f
+            x,         y,
+            x,         y + height,
+            x + width, y,
+            x + width, y + height
       };
-      mGL->renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GLOPT::Lines, Colors::white);
+      RenderUtils::drawLines(vertices, ARRAYSIZE(vertices) / 2, Colors::white);
 
-      F32 halfway = totalLineCount * 0.5f;
-      F32 full = amt * totalLineCount;
+      Color c1 = Colors::green;
+      Color c2 = Colors::yellow;
+      Color c3 = Colors::red;
+      NVGpaint gradient1 = nvgLinearGradient(nvg, x, y, x+halfWidth, y,
+            nvgRGBAf(c1.r, c1.g, c1.b, 1.0), nvgRGBAf(c2.r, c2.g, c2.b, 1.0f));
+      NVGpaint gradient2 = nvgLinearGradient(nvg, x+halfWidth, y, x+width, y,
+            nvgRGBAf(c2.r, c2.g, c2.b, 1.0f), nvgRGBAf(c3.r, c3.g, c3.b, 1.0));
 
-      // Total items possible is totalLineCount (50)
-      static F32 colorArray[400];   // 2 * 4 color components per item
-      static F32 vertexArray[200];  // 2 * 2 vertex components per item
+      nvgBeginPath(nvg);
+      nvgRect(nvg, x, y, level, height);
+      nvgFillPaint(nvg, gradient1);
+      nvgFill(nvg);
 
-      // Render recording volume
-      for(U32 i = 1; i < full; i++)  // start at 1 to not show
+      if(level > 50)
       {
-         if(i < halfway)
-         {
-            colorArray[8*(i-1)]     = i / halfway;
-            colorArray[(8*(i-1))+1] = 1;
-            colorArray[(8*(i-1))+2] = 0;
-            colorArray[(8*(i-1))+3] = 1;
-            colorArray[(8*(i-1))+4] = i / halfway;
-            colorArray[(8*(i-1))+5] = 1;
-            colorArray[(8*(i-1))+6] = 0;
-            colorArray[(8*(i-1))+7] = 1;
-         }
-         else
-         {
-            colorArray[8*(i-1)]     = 1;
-            colorArray[(8*(i-1))+1] = 1 - (i - halfway) / halfway;
-            colorArray[(8*(i-1))+2] = 0;
-            colorArray[(8*(i-1))+3] = 1;
-            colorArray[(8*(i-1))+4] = 1;
-            colorArray[(8*(i-1))+5] = 1 - (i - halfway) / halfway;
-            colorArray[(8*(i-1))+6] = 0;
-            colorArray[(8*(i-1))+7] = 1;
-         }
-
-         vertexArray[4*(i-1)]     = F32(10 + i * 2);
-         vertexArray[(4*(i-1))+1] = F32(130);
-         vertexArray[(4*(i-1))+2] = F32(10 + i * 2);
-         vertexArray[(4*(i-1))+3] = F32(145);
+         nvgBeginPath(nvg);
+         nvgRect(nvg, x+halfWidth, y, level-halfWidth, height);
+         nvgFillPaint(nvg, gradient2);
+         nvgFill(nvg);
       }
-
-      mGL->renderColorVertexArray(vertexArray, colorArray, S32(full*2), GLOPT::Lines);
    }
 }
 

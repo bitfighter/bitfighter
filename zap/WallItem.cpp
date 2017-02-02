@@ -197,7 +197,10 @@ void WallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled,
 {
 #ifndef ZAP_DEDICATED
    if(isSelected() || isLitUp())
-      GameObjectRender::renderWallSpine(this, getOutline(), currentScale, snappingToWallCornersEnabled, renderVertices);
+   {
+      Color color = isSelected() ? Colors::EDITOR_SELECT_COLOR : Colors::EDITOR_HIGHLIGHT_COLOR;
+      GameObjectRender::renderWallSpine(this, getOutline(), color, currentScale, snappingToWallCornersEnabled, renderVertices);
+   }
    else
       GameObjectRender::renderWallSpine(this, getOutline(), getEditorRenderColor(), currentScale, snappingToWallCornersEnabled, renderVertices);
 #endif

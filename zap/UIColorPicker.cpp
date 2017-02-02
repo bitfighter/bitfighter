@@ -33,6 +33,7 @@ const S32 colorWheel_x = 100;
 const S32 colorWheel_y = 100;
 const S32 colorWheel_w = 400;
 const S32 colorWheel_h = 400;
+const S32 colorWheel_rad = 400;
 
 const S32 colorBrightness_x = 550;
 const S32 colorBrightness_y = 100;
@@ -73,14 +74,14 @@ void UIColorPicker::idle(U32 timeDelta) { Parent::idle(timeDelta); }
 
 
 const F32 colorWheelPoints[] = {
-   colorWheel_w / 2 + colorWheel_x, colorWheel_h / 2     + colorWheel_y,
-                      colorWheel_x, colorWheel_h / 4     + colorWheel_y,
-                      colorWheel_x, colorWheel_h * 3 / 4 + colorWheel_y,
-   colorWheel_w / 2 + colorWheel_x, colorWheel_h         + colorWheel_y,
-   colorWheel_w     + colorWheel_x, colorWheel_h * 3 / 4 + colorWheel_y,
-   colorWheel_w     + colorWheel_x, colorWheel_h / 4     + colorWheel_y,
-   colorWheel_w / 2 + colorWheel_x,                        colorWheel_y,
-                      colorWheel_x, colorWheel_h / 4     + colorWheel_y,
+   colorWheel_w / 2 + colorWheel_x, colorWheel_h / 2     + colorWheel_y,  // center
+                      colorWheel_x, colorWheel_h / 4     + colorWheel_y,  // top-left
+                      colorWheel_x, colorWheel_h * 3 / 4 + colorWheel_y,  // bottom-left
+   colorWheel_w / 2 + colorWheel_x, colorWheel_h         + colorWheel_y,  // bottom
+   colorWheel_w     + colorWheel_x, colorWheel_h * 3 / 4 + colorWheel_y,  // bottom-right
+   colorWheel_w     + colorWheel_x, colorWheel_h / 4     + colorWheel_y,  // top-right
+   colorWheel_w / 2 + colorWheel_x,                        colorWheel_y,  // top
+                      colorWheel_x, colorWheel_h / 4     + colorWheel_y,  // top-left
 };
 
 
@@ -120,7 +121,7 @@ void UIColorPicker::drawArrow(F32 *p, const Color &color)
 {
    p[2] = p[0] + 20; p[3] = p[1] - 10;
    p[4] = p[0] + 20; p[5] = p[1] + 10;
-   mGL->renderVertexArray(p, 3, GLOPT::LineLoop, color);
+   RenderUtils::drawLineLoop(p, 3, color);
 }
 
 
@@ -149,49 +150,181 @@ void UIColorPicker::render() const
       b2 = b / maxCol;
    }
 
-   F32 colorArray[32] = {
-      maxCol, maxCol ,maxCol, 1,
-      maxCol,      0,      0, 1,
-      maxCol,      0, maxCol, 1,
-           0,      0, maxCol, 1,
-           0, maxCol, maxCol, 1,
-           0, maxCol,      0, 1,
-      maxCol, maxCol,      0, 1,
-      maxCol,      0,      0, 1,
-   };
+   // OLD COLOR WHEEL
+   // Color array aligned with colorWheelPoints
+//   F32 colorArray[32] = {
+//      maxCol, maxCol ,maxCol, 1,
+//      maxCol,      0,      0, 1,
+//      maxCol,      0, maxCol, 1,
+//           0,      0, maxCol, 1,
+//           0, maxCol, maxCol, 1,
+//           0, maxCol,      0, 1,
+//      maxCol, maxCol,      0, 1,
+//      maxCol,      0,      0, 1,
+//   };
+//
+//   mGL->renderColorVertexArray(colorWheelPoints, colorArray, 8, GLOPT::TriangleFan);
 
-   mGL->renderColorVertexArray(colorWheelPoints, colorArray, 8, GLOPT::TriangleFan);
+   NVGpaint paint;
+   F32 centerx = colorWheelPoints[0];
+   F32 centery = colorWheelPoints[1];
+   F32 rx = colorWheelPoints[2];
+   F32 ry = colorWheelPoints[3];
+   F32 mx = colorWheelPoints[4];
+   F32 my = colorWheelPoints[5];
+   F32 bx = colorWheelPoints[6];
+   F32 by = colorWheelPoints[7];
+   F32 cx = colorWheelPoints[8];
+   F32 cy = colorWheelPoints[9];
+   F32 gx = colorWheelPoints[10];
+   F32 gy = colorWheelPoints[11];
+   F32 yx = colorWheelPoints[12];
+   F32 yy = colorWheelPoints[13];
 
+   NVGcolor centerCol = nvgRGBAf(maxCol,maxCol,maxCol,1);
+   NVGcolor centerColOuter = nvgRGBAf(maxCol,maxCol,maxCol,0);
+   NVGcolor redCol = nvgRGBAf(maxCol,0,0,1);
+   NVGcolor greenCol = nvgRGBAf(0,maxCol,0,1);
+   NVGcolor blueCol = nvgRGBAf(0,0,maxCol,1);
+   NVGcolor magentaCol = nvgRGBAf(maxCol,0,maxCol,1);
+   NVGcolor cyanCol = nvgRGBAf(0,maxCol,maxCol,1);
+   NVGcolor yellowCol = nvgRGBAf(maxCol,maxCol,0,1);
 
-   colorArray[0]  = r2;  colorArray[1]  = g2;  colorArray[2]  = b2;
-   colorArray[4]  = r2;  colorArray[5]  = g2;  colorArray[6]  = b2; 
-   colorArray[8]  = 0;   colorArray[9]  = 0;   colorArray[10] = 0; 
-   colorArray[12] = 0;   colorArray[13] = 0;   colorArray[14] = 0;
-   mGL->renderColorVertexArray(colorBrightnessPoints, colorArray, 4, GLOPT::TriangleFan);
+   // START COLOR WHEEL
 
-   colorArray[0]  = 1;  colorArray[1]  = g;  colorArray[2]  = b;
-   colorArray[4]  = 1;  colorArray[5]  = g;  colorArray[6]  = b;
-   colorArray[9]  = g;  colorArray[10] = b;
-   colorArray[13] = g;  colorArray[14] = b;
-   mGL->renderColorVertexArray(colorBrightnessPointsRed, colorArray, 4, GLOPT::TriangleFan);
+   // Triangle 1
+   nvgBeginPath(nvg);
+   nvgMoveTo(nvg, centerx, centery);
+   nvgLineTo(nvg, rx, ry);
+   nvgLineTo(nvg, mx, my);
+   nvgClosePath(nvg);
+   // Red to magenta
+   paint = nvgRadialGradient(nvg, rx, ry, 0, colorWheel_rad/2,
+         redCol, magentaCol);
+   nvgFillPaint(nvg, paint);
+   nvgFill(nvg);
+   // Lightness fill
+   paint = nvgRadialGradient(nvg, centerx, centery, 0, colorWheel_rad/2,
+         centerCol, centerColOuter);
+   nvgFillPaint(nvg, paint);
+   nvgFill(nvg);
 
-   colorArray[0]  = r; colorArray[1]  = 1;
-   colorArray[4]  = r; colorArray[5]  = 1;
-   colorArray[8]  = r; colorArray[9]  = 0;
-   colorArray[12] = r; colorArray[13] = 0;
-   mGL->renderColorVertexArray(colorBrightnessPointsGreen, colorArray, 4, GLOPT::TriangleFan);
+   // Triangle 2
+   nvgBeginPath(nvg);
+   nvgMoveTo(nvg, centerx, centery);
+   nvgLineTo(nvg, rx, ry);
+   nvgLineTo(nvg, yx, yy);
+   nvgClosePath(nvg);
+   // Red to yellow
+   paint = nvgRadialGradient(nvg, rx, ry, 0, colorWheel_rad/2,
+         redCol, yellowCol);
+   nvgFillPaint(nvg, paint);
+   nvgFill(nvg);
+   // Lightness fill
+   paint = nvgRadialGradient(nvg, centerx, centery, 0, colorWheel_rad/2,
+         centerCol, centerColOuter);
+   nvgFillPaint(nvg, paint);
+   nvgFill(nvg);
 
-   colorArray[1]  = g; colorArray[2]  = 1;
-   colorArray[5]  = g; colorArray[6]  = 1;
-   colorArray[9]  = g; colorArray[10] = 0;
-   colorArray[13] = g; colorArray[14] = 0;
-   mGL->renderColorVertexArray(colorBrightnessPointsBlue, colorArray, 4, GLOPT::TriangleFan);
+   // Triangle 3
+   nvgBeginPath(nvg);
+   nvgMoveTo(nvg, centerx, centery);
+   nvgLineTo(nvg, bx, by);
+   nvgLineTo(nvg, mx, my);
+   nvgClosePath(nvg);
+   // Blue to magenta
+   paint = nvgRadialGradient(nvg, bx, by, 0, colorWheel_rad/2,
+         blueCol, magentaCol);
+   nvgFillPaint(nvg, paint);
+   nvgFill(nvg);
+   // Lightness fill
+   paint = nvgRadialGradient(nvg, centerx, centery, 0, colorWheel_rad/2,
+         centerCol, centerColOuter);
+   nvgFillPaint(nvg, paint);
+   nvgFill(nvg);
 
-   mGL->renderVertexArray(&colorWheelPoints[2],       6, GLOPT::LineLoop, Colors::white);
-   mGL->renderVertexArray(colorBrightnessPoints,      4, GLOPT::LineLoop, Colors::white);
-   mGL->renderVertexArray(colorBrightnessPointsRed,   4, GLOPT::LineLoop, Colors::white);
-   mGL->renderVertexArray(colorBrightnessPointsGreen, 4, GLOPT::LineLoop, Colors::white);
-   mGL->renderVertexArray(colorBrightnessPointsBlue,  4, GLOPT::LineLoop, Colors::white);
+   // Triangle 4
+   nvgBeginPath(nvg);
+   nvgMoveTo(nvg, centerx, centery);
+   nvgLineTo(nvg, bx, by);
+   nvgLineTo(nvg, cx, cy);
+   nvgClosePath(nvg);
+   // Blue to cyan
+   paint = nvgRadialGradient(nvg, bx, by, 0, colorWheel_rad/2,
+         blueCol, cyanCol);
+   nvgFillPaint(nvg, paint);
+   nvgFill(nvg);
+   // Lightness fill
+   paint = nvgRadialGradient(nvg, centerx, centery, 0, colorWheel_rad/2,
+         centerCol, centerColOuter);
+   nvgFillPaint(nvg, paint);
+   nvgFill(nvg);
+
+   // Triangle 5
+   nvgBeginPath(nvg);
+   nvgMoveTo(nvg, centerx, centery);
+   nvgLineTo(nvg, gx, gy);
+   nvgLineTo(nvg, cx, cy);
+   nvgClosePath(nvg);
+   // Green to cyan
+   paint = nvgRadialGradient(nvg, gx, gy, 0, colorWheel_rad/2,
+         greenCol, cyanCol);
+   nvgFillPaint(nvg, paint);
+   nvgFill(nvg);
+   // Lightness fill
+   paint = nvgRadialGradient(nvg, centerx, centery, 0, colorWheel_rad/2,
+         centerCol, centerColOuter);
+   nvgFillPaint(nvg, paint);
+   nvgFill(nvg);
+
+   // Triangle 6
+   nvgBeginPath(nvg);
+   nvgMoveTo(nvg, centerx, centery);
+   nvgLineTo(nvg, gx, gy);
+   nvgLineTo(nvg, yx, yy);
+   nvgClosePath(nvg);
+   // Green to yellow
+   paint = nvgRadialGradient(nvg, gx, gy, 0, colorWheel_rad/2,
+         greenCol, yellowCol);
+   nvgFillPaint(nvg, paint);
+   nvgFill(nvg);
+   // Lightness fill
+   paint = nvgRadialGradient(nvg, centerx, centery, 0, colorWheel_rad/2,
+         centerCol, centerColOuter);
+   nvgFillPaint(nvg, paint);
+   nvgFill(nvg);
+
+   // END COLOR WHEEL
+
+   // Draw the color bars
+   // Darkness
+   RenderUtils::drawRectVertGradient(colorBrightness_x, colorBrightness_y,
+         colorBrightness_w, colorBrightness_h,
+         Color(r2,g2,b2), 1.0f, Colors::black, 1.0f);
+
+   // Red/cyan
+   RenderUtils::drawRectVertGradient(colorBrightness_x + colorBrightness_w_space, colorBrightness_y,
+         colorBrightness_w, colorBrightness_h,
+         Color(1.0f,g,b), 1.0f, Color(0.0f,g,b), 1.0f);
+
+   // Green/magenta
+   RenderUtils::drawRectVertGradient(colorBrightness_x + 2 * colorBrightness_w_space, colorBrightness_y,
+         colorBrightness_w, colorBrightness_h,
+         Color(r,1.0f,b), 1.0f, Color(r,0.0f,b), 1.0f);
+
+   // Blue/yellow
+   RenderUtils::drawRectVertGradient(colorBrightness_x + 3 * colorBrightness_w_space, colorBrightness_y,
+         colorBrightness_w, colorBrightness_h,
+         Color(r,g,1.0f), 1.0f, Color(r,g,0.0f), 1.0f);
+
+   // Outlines
+   // Wheel
+   RenderUtils::drawLineLoop(&colorWheelPoints[2],       6, Colors::white);
+   // Bars
+   RenderUtils::drawLineLoop(colorBrightnessPoints,      4, Colors::white);
+   RenderUtils::drawLineLoop(colorBrightnessPointsRed,   4, Colors::white);
+   RenderUtils::drawLineLoop(colorBrightnessPointsGreen, 4, Colors::white);
+   RenderUtils::drawLineLoop(colorBrightnessPointsBlue,  4, Colors::white);
 
 
    F32 pointerArrow[8];
@@ -238,7 +371,7 @@ void UIColorPicker::render() const
       pointerArrow[4] = pointerArrow[0] + 10;                 pointerArrow[5] = pointerArrow[1] + 10;
       pointerArrow[6] = pointerArrow[0] + 10;                 pointerArrow[7] = pointerArrow[1] - 10;
 
-      mGL->renderVertexArray(pointerArrow, 4, GLOPT::Lines, maxCol > 0.6 ? Colors::black : Colors::white);
+      RenderUtils::drawLines(pointerArrow, 4, maxCol > 0.6 ? Colors::black : Colors::white);
    }
 
 
@@ -267,12 +400,12 @@ void UIColorPicker::render() const
    nvgRestore(nvg);
 
    // Turret
-   mGL->pushMatrix();
-   mGL->glTranslate(240, y + h / 2);
+   nvgSave(nvg);
+   nvgTranslate(nvg, 240, y + h / 2);
 
    GameObjectRender::renderTurret(*this, Point(0, 15), Point(0, -1), true, 1, 0, 0);
 
-   mGL->popMatrix();
+   nvgRestore(nvg);
 }
 
 

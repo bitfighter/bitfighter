@@ -1629,15 +1629,12 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb) co
    {
       // Use Z Buffer to make use of not drawing overlap visible area of same team SpyBug, but does overlap different team
       fillVector.sort(sortByTeam); // Need to sort by team, or else won't properly combine the colors.
-      mGL->clear(GLOPT::DepthBufferBit);
-      mGL->enable(GLOPT::DepthTest);
-      mGL->enable(GLOPT::DepthWritemask);
-      mGL->depthFunc(GLOPT::Less);
-      mGL->pushMatrix();
-      mGL->glTranslate(0, 0, -0.95f);
+
+      nvgSave(nvg);
+      nvgTranslate(nvg, 0, 0);
 
       // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
-      mGL->blendFunc(GLOPT::OneMinusDstColor, GLOPT::One);
+//      mGL->blendFunc(GLOPT::OneMinusDstColor, GLOPT::One);
 
       S32 prevTeam = -10;
 
@@ -1646,8 +1643,9 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb) co
       {
          BfObject *editorObj = dynamic_cast<BfObject *>(fillVector[i]);
 
-         if(i != 0 && editorObj->getTeam() != prevTeam)
-            mGL->glTranslate(0, 0, 0.05f);
+//         if(i != 0 && editorObj->getTeam() != prevTeam)
+//            mGL->glTranslate(0, 0, 0.05f);
+
          prevTeam = editorObj->getTeam();
 
          Point pos = editorObj->getPos();
@@ -1656,11 +1654,9 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb) co
          GameObjectRender::renderSpyBugVisibleRange(pos, editorObj->getColor(), mCurrentScale);
       }
 
-      mGL->setDefaultBlendFunction();
+//      mGL->setDefaultBlendFunction();
 
-      mGL->popMatrix();
-      mGL->disable(GLOPT::DepthWritemask);
-      mGL->disable(GLOPT::DepthTest);
+      nvgRestore(nvg);
    }
 
    // Next draw turret firing ranges for selected or highlighted turrets only
@@ -1960,7 +1956,7 @@ void EditorUserInterface::render() const
                                    (F32)mGridSize, mSnapContext & GRID_SNAPPING, showMinorGridLines());
 
    // == Draw rays when movement is constrained ==
-   if(mDraggingObjects && mSnapContext & CONSTRAINED_MOVEMENT)
+   if(mDraggingObjects && (mSnapContext & CONSTRAINED_MOVEMENT))
       GameObjectRender::renderConstrainedDraggingLines(convertLevelToCanvasCoord(mMoveOrigin));
 
    mGL->pushMatrix();
@@ -2113,10 +2109,10 @@ void EditorUserInterface::renderObjects(const GridDatabase *database, RenderMode
          continue;
 
       // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
-      const Color &color = getColor(obj->isSelected(), obj->isLitUp());
-      F32 alpha = isLevelgenOverlay ? .6f : 1;     // Make script items appear somewhat translucent
+//      const Color &color = getColor(obj->isSelected(), obj->isLitUp());
+//      F32 alpha = isLevelgenOverlay ? .6f : 1;     // Make script items appear somewhat translucent
 
-      mGL->glColor(color, alpha);
+//      mGL->glColor(color, alpha);
 
       if(mPreviewMode)
       {
@@ -2170,12 +2166,12 @@ void EditorUserInterface::renderObjectsUnderConstruction() const
 {
    // Add a vert (and deleted it later) to help show what this item would look like if the user placed the vert in the current location
    mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
-   mGL->lineWidth(RenderUtils::LINE_WIDTH_3);
+   RenderUtils::lineWidth(RenderUtils::LINE_WIDTH_3);
 
    const Color &color = mCreatingPoly ? Colors::EDITOR_SELECT_COLOR : mLevel->getTeamColor(mCurrentTeam);
    RenderUtils::drawLine(mNewItem->getOutline(), color);
 
-   mGL->lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   RenderUtils::lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
 
    for(S32 j = mNewItem->getVertCount() - 1; j >= 0; j--)      // Go in reverse order so that placed vertices are drawn atop unplaced ones
    {
@@ -2204,7 +2200,7 @@ void EditorUserInterface::renderDragSelectBox() const
 
 void EditorUserInterface::renderDockItem(const BfObject *object, const Color &color, F32 currentScale, S32 snapVertexIndex)
 {
-   mGL->glColor(Colors::EDITOR_PLAIN_COLOR);
+//   mGL->glColor(Colors::EDITOR_PLAIN_COLOR);
 
    object->renderDock(color);
    renderDockItemLabel(object->getDockLabelPos(), object->getOnDockName());
@@ -5341,7 +5337,7 @@ void EditorUserInterface::createNormalizedScreenshot(ClientGame* game)
    mPreviewMode = true;
    mNormalizedScreenshotMode = true;
 
-   mGL->clear(GLOPT::ColorBufferBit);
+//   mGL->clear(GLOPT::ColorBufferBit);
    centerView(true);
 
    render();

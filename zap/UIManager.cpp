@@ -468,23 +468,24 @@ void UIManager::renderCurrent()
    // The viewport has been setup by the caller so, regardless of how many clients we're running, we can just render away here.
    // Each viewport should have an aspect ratio of 800x600.
 
-   if(mMenuTransitionTimer.getCurrent() && mLastUI)
-   {
-      // Save viewport
-      S32 viewport[4];
-      mGL->glGetValue(GLOPT::Viewport, viewport);
-
-      mGL->viewport(viewport[0] + S32((mLastWasLower ? 1 : -1) * viewport[2] * (1 - mMenuTransitionTimer.getFraction())), 0, viewport[2], viewport[3]);
-      mLastUI->render();
-
-      mGL->viewport(viewport[0] - S32((mLastWasLower ? 1 : -1) * viewport[2] * mMenuTransitionTimer.getFraction()), 0, viewport[2], viewport[3]);
-      mCurrentInterface->render();
-
-      // Restore viewport for posterity
-      mGL->viewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-
-      return;
-   }
+   // FIXME transition crashes, also NanoVG port means no more glViewport
+//   if(mMenuTransitionTimer.getCurrent() && mLastUI)
+//   {
+//      // Save viewport
+//      S32 viewport[4];
+//      mGL->glGetValue(GLOPT::Viewport, viewport);
+//
+//      mGL->viewport(viewport[0] + S32((mLastWasLower ? 1 : -1) * viewport[2] * (1 - mMenuTransitionTimer.getFraction())), 0, viewport[2], viewport[3]);
+//      mLastUI->render();
+//
+//      mGL->viewport(viewport[0] - S32((mLastWasLower ? 1 : -1) * viewport[2] * mMenuTransitionTimer.getFraction()), 0, viewport[2], viewport[3]);
+//      mCurrentInterface->render();
+//
+//      // Restore viewport for posterity
+//      mGL->viewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+//
+//      return;
+//   }
 
    TNLAssert(mCurrentInterface, "NULL mCurrentInterface");
 
