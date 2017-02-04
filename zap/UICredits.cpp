@@ -199,6 +199,7 @@ CreditsScroller::~CreditsScroller()
    // Do nothing
 }
 
+
 void CreditsScroller::updateFX(U32 delta)
 {
    static bool creditsMusicExists = false;
