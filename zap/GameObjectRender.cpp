@@ -2880,19 +2880,19 @@ void GameObjectRender::renderStars(const Point *stars, const Color *colors, S32 
 
 
 void GameObjectRender::renderWalls(const Vector<DatabaseObject *> *walls,
-                 const Vector<DatabaseObject *> *polyWalls,
-                 const Vector<Point> &wallEdgePoints,
-                 const Vector<Point> &selectedWallEdgePointsWholeWalls,
-                 const Vector<Point> &selectedWallEdgePointsDraggedVertices,
-                 const Color &outlineColor,
-                 const Color &fillColor, 
-                 F32 currentScale, 
-                 bool dragMode, 
-                 bool drawSelected,
-                 const Point &selectedItemOffset, 
-                 bool previewMode, 
-                 bool showSnapVertices, 
-                 F32 alpha)
+                                   const Vector<DatabaseObject *> *polyWalls,
+                                   const Vector<Point> &wallEdgePoints,
+                                   const Vector<Point> &selectedWallEdgePointsWholeWalls,
+                                   const Vector<Point> &selectedWallEdgePointsDraggedVertices,
+                                   const Color &outlineColor,
+                                   const Color &fillColor, 
+                                   F32 currentScale, 
+                                   bool dragMode, 
+                                   bool drawSelected,
+                                   const Point &selectedItemOffset, 
+                                   bool previewMode, 
+                                   bool showSnapVertices, 
+                                   F32 alpha)
 {
    S32 wallCount     = walls->size();
    S32 polyWallCount = polyWalls->size();
