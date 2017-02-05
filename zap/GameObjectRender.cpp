@@ -1805,6 +1805,7 @@ void GameObjectRender::renderWallFill(const Vector<Point> *points, const Color &
 // Used in both editor and game
 void GameObjectRender::renderWallEdges(const Vector<Point> &edges, const Color &outlineColor, F32 alpha)
 {
+   RenderUtils::lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
    RenderUtils::drawLines(&edges, outlineColor, alpha);
 }
 
@@ -1814,6 +1815,7 @@ void GameObjectRender::renderWallEdges(const Vector<Point> &edges, const Point &
 {
    nvgSave(nvg);
    nvgTranslate(nvg, offset.x, offset.y);
+   RenderUtils::lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
    RenderUtils::drawLines(&edges, outlineColor, alpha);
    nvgRestore(nvg);
 }

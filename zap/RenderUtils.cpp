@@ -835,15 +835,6 @@ void RenderUtils::drawLines(const F32 *points, U32 pointCount, const Color &colo
 }
 
 
-static void setStrokeWidth(NVGcontext* ctx, F32 width)
-{
-   static F32 transformData[6];
-   nvgCurrentTransform(ctx, transformData);
-
-   nvgStrokeWidth(ctx, width / transformData[3]);
-}
-
-
 // Operates like GL_LINES, drawing individual 2-point line segments
 void RenderUtils::drawLines(const Vector<Point> *points, const Color &color, F32 alpha)
 {
@@ -858,8 +849,6 @@ void RenderUtils::drawLines(const Vector<Point> *points, const Color &color, F32
 
    nvgLineCap(nvg, NVG_SQUARE);
 
-   setStrokeWidth(nvg, DEFAULT_LINE_WIDTH);
-
    nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
    nvgStroke(nvg);
 }
@@ -873,8 +862,6 @@ void RenderUtils::drawLine(F32 x1, F32 y1, F32 x2, F32 y2, const Color &color, F
    nvgLineTo(nvg, x2, y2);
 
    nvgLineCap(nvg, NVG_SQUARE);
-
-   setStrokeWidth(nvg, DEFAULT_LINE_WIDTH);
 
    nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
    nvgStroke(nvg);
@@ -1509,8 +1496,10 @@ void RenderUtils::setDefaultLineWidth(F32 width)
 
 void RenderUtils::lineWidth(F32 width)
 {
-   // TODO manage width with respect to current scaling matrix?
-   nvgStrokeWidth(nvg, width);
+   static F32 transformData[6];
+   nvgCurrentTransform(nvg, transformData);
+
+   nvgStrokeWidth(nvg, width / transformData[3]);
 }
 
 
