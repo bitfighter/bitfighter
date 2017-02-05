@@ -835,17 +835,30 @@ void RenderUtils::drawLines(const F32 *points, U32 pointCount, const Color &colo
 }
 
 
+static void setStrokeWidth(NVGcontext* ctx, F32 width)
+{
+   static F32 transformData[6];
+   nvgCurrentTransform(ctx, transformData);
+
+   nvgStrokeWidth(ctx, width / transformData[3]);
+}
+
+
 // Operates like GL_LINES, drawing individual 2-point line segments
 void RenderUtils::drawLines(const Vector<Point> *points, const Color &color, F32 alpha)
 {
    nvgBeginPath(nvg);
 
    // 1 segment == 2 points == 4 F32s
-   for(S32 i = 0; i < points->size(); i = i + 2)
+   for(S32 i = 0; i < points->size(); i += 2)
    {
       nvgMoveTo(nvg, points->get(i).x, points->get(i).y);
       nvgLineTo(nvg, points->get(i+1).x, points->get(i+1).y);
    }
+
+   nvgLineCap(nvg, NVG_SQUARE);
+
+   setStrokeWidth(nvg, DEFAULT_LINE_WIDTH);
 
    nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
    nvgStroke(nvg);
@@ -858,6 +871,10 @@ void RenderUtils::drawLine(F32 x1, F32 y1, F32 x2, F32 y2, const Color &color, F
 
    nvgMoveTo(nvg, x1, y1);
    nvgLineTo(nvg, x2, y2);
+
+   nvgLineCap(nvg, NVG_SQUARE);
+
+   setStrokeWidth(nvg, DEFAULT_LINE_WIDTH);
 
    nvgStrokeColor(nvg, nvgRGBAf(color.r, color.g, color.b, alpha));
    nvgStroke(nvg);
