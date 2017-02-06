@@ -1908,6 +1908,7 @@ void GameObjectRender::renderAsteroidSpawnEditor(const Point &pos, F32 scale)
 
 void GameObjectRender::renderResourceItem(const Vector<Point> &points, F32 alpha)
 {
+   nvgLineJoin(nvg, NVG_ROUND);     // NVG_MITER (default), NVG_ROUND, NVG_BEVEL
    RenderUtils::drawLineLoop((F32 *)&points[0], points.size(), Colors::white, alpha);
 }
 
