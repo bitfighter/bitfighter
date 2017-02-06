@@ -61,7 +61,7 @@ public:
    virtual ~Engineerable();  // Destructor
 
    void setEngineered(bool isEngineered);
-   bool isEngineered(); // Was this engineered by a player?
+   bool isEngineered() const; // Was this engineered by a player?
 
    void setResource(MountableItem *resource);
    void releaseResource(const Point &releasePos, Level *level);

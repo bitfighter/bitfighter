@@ -55,7 +55,7 @@ void Engineerable::setEngineered(bool isEngineered)
 }
 
 
-bool Engineerable::isEngineered()
+bool Engineerable::isEngineered() const
 {
    // If the engineered item has a resource attached, then it was engineered by a player
    return mEngineered;
