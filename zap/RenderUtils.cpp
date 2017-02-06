@@ -1499,7 +1499,7 @@ void RenderUtils::lineWidth(F32 width)
    static F32 transformData[6];
    nvgCurrentTransform(nvg, transformData);
 
-   nvgStrokeWidth(nvg, width / abs(transformData[3]));
+   nvgStrokeWidth(nvg, width / fabs(transformData[3]));
 }
 
 
