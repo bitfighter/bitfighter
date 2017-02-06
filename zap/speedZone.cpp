@@ -78,7 +78,7 @@ SpeedZone::~SpeedZone()
 }
 
 
-U16 SpeedZone::getSpeed()
+U16 SpeedZone::getSpeed() const
 {
    return mSpeed;
 }
@@ -90,7 +90,7 @@ void SpeedZone::setSpeed(U16 speed)
 }
 
 
-bool SpeedZone::getSnapping()
+bool SpeedZone::getSnapping() const
 {
    return mSnapLocation;
 }

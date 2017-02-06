@@ -47,10 +47,10 @@ public:
    static const U16 maxSpeed;      // Max speed for the goFast
    static const U16 defaultSpeed;  // Default speed if none specified
 
-   U16 getSpeed();
+   U16 getSpeed() const;
    void setSpeed(U16 speed);
 
-   bool getSnapping();
+   bool getSnapping() const;
    void setSnapping(bool snapping);
 
    F32 mRotateSpeed;
