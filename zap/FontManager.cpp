@@ -437,11 +437,13 @@ void FontManager::renderString(F32 x, F32 y, F32 size, F32 angle, const char *st
 
       F32 scaleFactor = size / 120.0f;
       nvgScale(nvg, scaleFactor, -scaleFactor);
+      nvgLineCap(nvg, NVG_BUTT);
+      nvgLineJoin(nvg, NVG_MITER);
 
-      // Upscaled because we downscaled the whole character
-      nvgStrokeWidth(nvg, linewidth/scaleFactor);
+      RenderUtils::lineWidth(linewidth * .85);
+
       for(S32 i = 0; string[i]; i++)
-         FontManager::drawStrokeCharacter(font->getStrokeFont(), string[i]);
+         drawStrokeCharacter(font->getStrokeFont(), string[i]);
 
       nvgStrokeWidth(nvg, RenderUtils::DEFAULT_LINE_WIDTH);
 
