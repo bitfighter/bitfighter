@@ -1825,6 +1825,8 @@ void GameObjectRender::renderSpeedZone(const Vector<Point> &points)
 {
    S32 pointSize = points.size() / 2;
 
+   nvgLineJoin(nvg, NVG_ROUND);     // Take the harshness off the sharp corners
+
    RenderUtils::drawLineLoop(&points[0].x, pointSize, Colors::red);
    RenderUtils::drawLineLoop(&points[pointSize].x, pointSize, Colors::red);
 }
@@ -3153,6 +3155,7 @@ void GameObjectRender::renderFlightPlan(const Point &from, const Point &to, cons
 // Used by SimpleLineItem to draw the chunky arrow that represents the item in the editor
 void GameObjectRender::renderHeavysetArrow(const Point &pos, const Point &dest, const Color &color, bool isSelected, bool isLitUp)
 {
+   nvgLineCap(nvg, NVG_BUTT);
    for(S32 i = 1; i >= 0; i--)
    {
       // Draw heavy colored line with colored core
