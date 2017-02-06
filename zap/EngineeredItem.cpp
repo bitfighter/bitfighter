@@ -1463,7 +1463,7 @@ Vector<Point> ForceFieldProjector::getObjectGeometry(const Point &anchor, const 
 
 
 // static method
-Vector<Point> ForceFieldProjector::getForceFieldProjectorGeometry(const Point &anchor, const Point &normal)
+Vector<Point> ForceFieldProjector::getForceFieldProjectorGeometry(const Point &anchor, const Point &normal, F32 scale)
 {
    static const S32 PROJECTOR_HALF_WIDTH = 12;  // Half the width of base of the projector, along the wall
 
@@ -1471,9 +1471,9 @@ Vector<Point> ForceFieldProjector::getForceFieldProjectorGeometry(const Point &a
    geom.reserve(3);
 
    Point cross(normal.y, -normal.x);
-   cross.normalize((F32)PROJECTOR_HALF_WIDTH);
+   cross.normalize(PROJECTOR_HALF_WIDTH * scale);
 
-   geom.push_back(getForceFieldStartPoint(anchor, normal));
+   geom.push_back(getForceFieldStartPoint(anchor, normal, scale));
    geom.push_back(anchor - cross);
    geom.push_back(anchor + cross);
 
@@ -1574,9 +1574,11 @@ void ForceFieldProjector::render() const
 }
 
 
+// Also used for rendering in editor when not snapped
 void ForceFieldProjector::renderDock(const Color &color) const
 {
-   GameObjectRender::renderSquareItem(getPos(), color, 1, Colors::white, '>');
+   GameObjectRender::renderSquareItem(getPos(), color, 1);
+   GameObjectRender::renderForceFieldProjector(getPos() - Point(3, 0), Point(1, 0), Colors::white, true, 0, .5f);
 }
 
 

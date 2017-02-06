@@ -2082,10 +2082,10 @@ void GameObjectRender::renderBitfighterLogo(const Point &pos, const Point &dir, 
 }
 
 
-// Only used by instructions... in-game uses the other signature
-void GameObjectRender::renderForceFieldProjector(const Point &pos, const Point &normal, const Color &color, bool enabled, S32 healRate)
+// Only used by instructions and for icon in editor... in-game uses the other signature
+void GameObjectRender::renderForceFieldProjector(const Point &pos, const Point &normal, const Color &color, bool enabled, S32 healRate, F32 scale)
 {
-   Vector<Point> geom = ForceFieldProjector::getForceFieldProjectorGeometry(pos, normal);
+   Vector<Point> geom = ForceFieldProjector::getForceFieldProjectorGeometry(pos, normal, scale);
    renderForceFieldProjector(&geom, pos, color, enabled, healRate);
 }
 
@@ -2121,6 +2121,10 @@ void GameObjectRender::renderForceFieldProjector(const Vector<Point> *geom, cons
          RenderUtils::drawLineStrip(symbol, ARRAYSIZE(symbol) / 2, c);
       nvgRestore(nvg);
    }
+
+
+   //nvgLineCap(nvg, NVG_SQUARE);
+   nvgLineJoin(nvg, NVG_ROUND);     // NVG_MITER (default), NVG_ROUND, NVG_BEVEL
 
    RenderUtils::drawLineLoop(geom, c);
 }
@@ -2405,12 +2409,17 @@ void GameObjectRender::renderVertex(char style, const Point &v, S32 number, S32 
 }
 
 
-void GameObjectRender::renderSquareItem(const Point &pos, const Color &c, F32 alpha, const Color &letterColor, char letter)
+void GameObjectRender::renderSquareItem(const Point &pos, const Color &color, F32 alpha)
 {
-   RenderUtils::drawFilledSquare(pos, 8, c, alpha);  // Draw filled box in which we'll put our letter
-   RenderUtils::drawLetter(letter, pos, letterColor, alpha);
+   RenderUtils::drawFilledSquare(pos, 8, color, alpha);  // Draw filled box in which we'll put our letter or symbol
 }
 
+
+void GameObjectRender::renderSquareItem(const Point &pos, const Color &color, F32 alpha, const Color &letterColor, char letter)
+{
+   renderSquareItem(pos, color, alpha);
+   RenderUtils::drawLetter(letter, pos, letterColor, alpha);
+}
 
 void GameObjectRender::drawDivetedTriangle(F32 height, F32 len)
 {

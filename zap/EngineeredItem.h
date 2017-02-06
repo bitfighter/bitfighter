@@ -240,7 +240,7 @@ public:
 
    void createCaptiveForceField();
    
-   static Vector<Point> getForceFieldProjectorGeometry(const Point &anchor, const Point &normal);
+   static Vector<Point> getForceFieldProjectorGeometry(const Point &anchor, const Point &normal, F32 scale = 1);
    static Point getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact = 1);
 
    // Get info about the forcfield that might be projected from this projector

@@ -74,7 +74,8 @@ public:
    static void renderVertex(char style, const Point &v, S32 number,           F32 scale, F32 alpha);
    static void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F32 alpha);
 
-   static void renderSquareItem(const Point &pos, const Color &c, F32 alpha, const Color &letterColor, char letter);
+   static void renderSquareItem(const Point &pos, const Color &color, F32 alpha);
+   static void renderSquareItem(const Point &pos, const Color &color, F32 alpha, const Color &letterColor, char letter);
 
    static void drawDivetedTriangle(F32 height, F32 len);
    static void drawGear(const Point &center, S32 teeth, F32 r1, F32 r2, F32 ang1, F32 ang2, F32 innerCircleRadius, const Color &color, F32 angleRadians = 0.0f);
@@ -235,7 +236,7 @@ public:
    static void renderGrid(F32 currentScale, const Point &offset, const Point &origin, F32 gridSize, bool fadeLines, bool showMinorGridLines);
    static void renderConstrainedDraggingLines(const Point &origin);
 
-   static void renderForceFieldProjector(const Point &pos, const Point &normal, const Color &teamColor, bool enabled, S32 healRate);
+   static void renderForceFieldProjector(const Point &pos, const Point &normal, const Color &teamColor, bool enabled, S32 healRate, F32 scale = 1.0);
    static void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, const Color &teamColor, bool enabled, S32 healRate = 0);
    static void renderForceField(Point start, Point end, const Color &c, bool fieldUp, F32 scale = 1);
 
