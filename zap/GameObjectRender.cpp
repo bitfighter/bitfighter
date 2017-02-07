@@ -1068,6 +1068,8 @@ void GameObjectRender::renderMortar(const Color &color, Point anchor, Point norm
 
 void GameObjectRender::renderFlag(const Color &flagColor, const Color &mastColor, F32 alpha)
 {
+   RenderUtils::lineWidth(DEFAULT_LINE_WIDTH);
+
    // First, the flag itself
    static const F32 flagPoints[] = { -15,-15, 15,-5,  15,-5, -15,5,  -15,-10, 10,-5,  10,-5, -15,0 };
    RenderUtils::drawLines(flagPoints, ARRAYSIZE(flagPoints) / 2, flagColor, alpha);
@@ -1164,14 +1166,22 @@ void GameObjectRender::renderSmallFlag(const Point &pos, const Color &c, F32 par
 
 void GameObjectRender::renderFlagSpawn(const Point &pos, F32 currentScale, const Color &color)
 {
-   static const Point p(-4, 0);
+   static const Point p(0, 0);
+
+   const S32 centeringOffset = 5;
+   const F32 scale = 0.4f / currentScale;
 
    nvgSave(nvg);
-   nvgTranslate(nvg, pos.x, pos.y);
-   nvgScale(nvg, 0.4f / currentScale, 0.4f / currentScale);
 
+   nvgTranslate(nvg, pos.x, pos.y);
+   nvgScale(nvg, scale, scale);
+
+   nvgTranslate(nvg, centeringOffset, 0);    // Flag has to be a tiny bit off center to look right in its circle
    renderFlag(color);
-   RenderUtils::drawCircle(p, 26, Colors::white);
+
+   nvgTranslate(nvg, -centeringOffset, 0);
+   RenderUtils::lineWidth(DEFAULT_LINE_WIDTH);
+   RenderUtils::drawCircle(Point(0,0), 26, Colors::white);
 
    nvgRestore(nvg);
 }
