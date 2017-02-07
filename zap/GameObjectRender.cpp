@@ -1915,18 +1915,6 @@ void GameObjectRender::renderAsteroidSpawnEditor(const Point &pos, F32 scale)
    nvgRestore(nvg);
 }
 
-//
-//void GameObjectRender::renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha)
-//{
-//   mGL->glPushMatrix();
-//      mGL->glTranslate(pos);
-//      mGL->glScale(scaleFactor);
-//
-//      static F32 resourcePoints[] = { -8,8,  0,20,  8,8,  20,0,  8,-8,  0,-20,  -8,-8,  -20,0 };
-//      mGL->renderVertexArray(resourcePoints, ARRAYSIZE(resourcePoints) / 2, GLOPT::LineLoop, color == NULL ? Colors::white : *color, alpha);
-//   mGL->glPopMatrix();
-//}
-
 
 void GameObjectRender::renderResourceItem(const Vector<Point> &points, F32 alpha)
 {
