@@ -1166,11 +1166,8 @@ void GameObjectRender::renderSmallFlag(const Point &pos, const Color &c, F32 par
 
 void GameObjectRender::renderFlagSpawn(const Point &pos, F32 currentScale, const Color &color)
 {
-   static const Point p(0, 0);
-
    const S32 centeringOffset = 5;
    const F32 scale = 0.4f / currentScale;
-
    nvgSave(nvg);
 
    nvgTranslate(nvg, pos.x, pos.y);
