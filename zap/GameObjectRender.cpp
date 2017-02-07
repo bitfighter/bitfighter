@@ -1867,6 +1867,8 @@ void GameObjectRender::renderAsteroid(const Point &pos, S32 design, F32 scaleFac
       vertexArray[2*i]     = AsteroidCoords[design][i][0] * scaleFact;
       vertexArray[(2*i)+1] = AsteroidCoords[design][i][1] * scaleFact;
    }
+
+   RenderUtils::lineWidth(DEFAULT_LINE_WIDTH);
    RenderUtils::drawLineLoop(vertexArray, ASTEROID_POINTS, color ? *color : Color(.7), alpha);
 
    nvgRestore(nvg);
@@ -1900,6 +1902,7 @@ void GameObjectRender::renderAsteroidSpawnEditor(const Point &pos, F32 scale)
    nvgScale(nvg, scale, scale);
 
    renderAsteroid(p, 2, 0.1f);
+   RenderUtils::lineWidth(DEFAULT_LINE_WIDTH);
    RenderUtils::drawCircle(13, Colors::white);
 
    nvgRestore(nvg);
