@@ -1268,6 +1268,8 @@ void GameObjectRender::renderGoalZoneIcon(const Point &center, S32 radius, const
       nvgTranslate(nvg, center.x, center.y);
       nvgScale(nvg, radius * 0.041667f, radius * 0.041667f); // 1 / 24 since we drew it to in-game radius of 24 (a ship's radius)
 
+      nvgLineJoin(nvg, NVG_ROUND);
+
       RenderUtils::drawPolygon(4, (F32)radius, 0.0f, color);
       RenderUtils::drawLineStrip(flagPoints, ARRAYSIZE(flagPoints) / 2, color);
    nvgRestore(nvg);
