@@ -303,7 +303,7 @@ S32 RenderUtils::drawCenteredString_fixed(S32 y, S32 size, const Color &color, F
 
 S32 RenderUtils::drawCenteredString_fixed(S32 y, S32 size, const char *string)
 {
-   return drawCenteredString_fixed(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, y, size, string);
+   return (S32)drawCenteredString_fixed(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, y, size, string);
 }
 
 
@@ -369,7 +369,7 @@ S32 RenderUtils::drawCenteredString_fixed(S32 x, S32 y, S32 size, const Color &c
 }
 
 
-S32 RenderUtils::drawCenteredString_fixed(F32 x, F32 y, S32 size, FontContext fontContext, const Color &color, const char *string)
+S32 RenderUtils::drawCenteredString_fixed(F32 x, F32 y, F32 size, FontContext fontContext, const Color &color, const char *string)
 {
    FontManager::pushFontContext(fontContext);
 
@@ -379,6 +379,12 @@ S32 RenderUtils::drawCenteredString_fixed(F32 x, F32 y, S32 size, FontContext fo
    FontManager::popFontContext();
 
    return (S32)xpos;
+}
+
+
+S32 RenderUtils::drawCenteredString_fixed(F32 x, F32 y, S32 size, FontContext fontContext, const Color &color, const char *string)
+{
+   return drawCenteredString_fixed(x, y, (F32)size, fontContext, color, string);
 }
 
 
@@ -619,6 +625,12 @@ F32 RenderUtils::getStringWidth(FontContext fontContext, F32 size, const char *s
    FontManager::popFontContext();
 
    return width;
+}
+
+
+F32 RenderUtils::getStringWidth(F32 size, const string &str)
+{
+   return getStringWidth(size, str.c_str());
 }
 
 
@@ -1054,6 +1066,12 @@ void RenderUtils::drawHorizLine(F32 x1, F32 x2, F32 y, const Color &color, F32 a
 }
 
 
+void RenderUtils::drawVertLine(F32 x, const Color &color, F32 alpha)
+{
+   drawVertLine(x, (F32)0, (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight(), color, alpha);
+}
+
+
 void RenderUtils::drawVertLine(S32 x, const Color &color, F32 alpha)
 {
    drawVertLine((F32)x, (F32)0, (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight(), color, alpha);
@@ -1123,6 +1141,13 @@ void RenderUtils::drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32
 
    drawLineLoop(vertices, ARRAYSIZE(vertices)/2, color, alpha);
 }
+
+
+void RenderUtils::drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners, const Color &color, F32 alpha)
+{
+   drawFilledFancyBox((F32)xLeft, (F32)yTop, (F32)xRight, (F32)yBottom, (F32)cornerInset, corners, color, alpha);
+}
+
 
 void RenderUtils::drawFilledFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, U8 corners, const Color &color, F32 alpha)
 {

@@ -157,6 +157,7 @@ public:
 
    static S32 drawCenteredString(S32 x, S32 y, S32 size, const char *str);
    static S32 drawCenteredString_fixed(F32 x, F32 y, S32 size, FontContext fontContext, const Color &color, const char *str);
+   static S32 drawCenteredString_fixed(F32 x, F32 y, F32 size, FontContext fontContext, const Color &color, const char *str);
    static S32 drawCenteredString_fixed(S32 x, S32 y, S32 size, const Color &color, const char *str);
    static S32 drawCenteredString_fixed(S32 x, S32 y, S32 size, const Color &color, F32 alpha, const char *str);
 
@@ -293,6 +294,7 @@ public:
    static S32 getStringWidth(FontContext context, S32 size, const char *string);
    static F32 getStringWidth(FontContext context, F32 size, const char *string);
 
+   static F32 getStringWidth(F32 size, const string &str);
    static S32 getStringWidth(S32 size, const string &str);
 
    static F32 getStringWidth(F32 size, const char *str);
@@ -357,6 +359,7 @@ public:
       drawFancyBox(F32(xLeft), F32(yTop), F32(xRight), F32(yBottom), F32(cornerInset), LL|UR, color, alpha);
    }
 
+   static void drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, U8 corners, const Color &color, F32 alpha);
    static void drawFilledFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, U8 corners, const Color &color, F32 alpha);
 
    static void drawHollowFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, const Color &color, F32 alpha = 1.0);
@@ -445,6 +448,7 @@ public:
    static void drawHorizLine(S32 x1, S32 x2, S32 y, const Color &color, F32 alpha = 1.0);
    static void drawHorizLine(F32 x1, F32 x2, F32 y, const Color &color, F32 alpha = 1.0); 
    
+   static void drawVertLine (F32 x,                 const Color &color, F32 alpha = 1.0);
    static void drawVertLine (S32 x,                 const Color &color, F32 alpha = 1.0);
    static void drawVertLine (S32 x, S32 y1, S32 y2, const Color &color, F32 alpha = 1.0);
    static void drawVertLine (F32 x, F32 y1, F32 y2, const Color &color, F32 alpha = 1.0);

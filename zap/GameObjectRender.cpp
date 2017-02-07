@@ -396,7 +396,7 @@ void GameObjectRender::renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 games
 //   };
 
    nvgSave(nvg);
-   nvgTranslate(nvg, x - 10, y - 6);
+   nvgTranslate(nvg, x - 10.0f, y - 6.0f);
    
    RenderUtils::lineWidth(RenderUtils::LINE_WIDTH_1);
 
@@ -531,7 +531,7 @@ void GameObjectRender::renderShip(S32 layerIndex, const Point &renderPos, const 
 
    F32 rotAmount = 0;      
    if(warpInScale < 0.8f)
-      rotAmount = (0.8f - warpInScale) * 1.5 * FloatTau;
+      rotAmount = (0.8f - warpInScale) * 1.5f * FloatTau;
 
    // An angle of 0 means the ship is heading down the +X axis since we draw the ship 
    // pointing up the Y axis, we should rotate by the ship's angle, - 90 degrees
@@ -942,7 +942,7 @@ void GameObjectRender::renderPolyLineVertices(const BfObject *obj, bool snapping
 
 void GameObjectRender::renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentScale)
 {
-   GameObjectRender::renderFilledPolygon(pos, 6, SpyBug::SPY_BUG_RADIUS * currentScale, color * 0.45f);
+   renderFilledPolygon(pos, 6, SpyBug::SPY_BUG_RADIUS * currentScale, color * 0.45f);
 }
 
 
@@ -1166,8 +1166,9 @@ void GameObjectRender::renderSmallFlag(const Point &pos, const Color &c, F32 par
 
 void GameObjectRender::renderFlagSpawn(const Point &pos, F32 currentScale, const Color &color)
 {
-   const S32 centeringOffset = 5;
+   const F32 centeringOffset = 5.0f;
    const F32 scale = 0.4f / currentScale;
+
    nvgSave(nvg);
 
    nvgTranslate(nvg, pos.x, pos.y);
@@ -1466,8 +1467,8 @@ void GameObjectRender::renderSlipZone(const Vector<Point> *bounds, const Vector<
 {
    Color color(0, 0.5, 0);  // Go for a pale green, for now...
 
-   RenderUtils::drawFilledLineLoop(boundsFill, color * 0.5);
-   RenderUtils::drawLineLoop(bounds, color * 0.7);
+   RenderUtils::drawFilledLineLoop(boundsFill, color * 0.5f);
+   RenderUtils::drawLineLoop(bounds, color * 0.7f);
 
    renderSlipZoneIcon(centroid, 20);
 }
@@ -1661,11 +1662,18 @@ void GameObjectRender::renderFilledPolygon(const Point &pos, S32 points, S32 rad
 
 void GameObjectRender::renderFilledPolygon(const Point &pos, S32 points, S32 radius, const Color &fillColor)
 {
+   renderFilledPolygon(pos, points, (F32)radius, fillColor);
+}
+
+
+void GameObjectRender::renderFilledPolygon(const Point &pos, S32 points, F32 radius, const Color &fillColor)
+{
    Vector<Point> pts(points);
    calcPolygonVerts(pos, points, (F32)radius, 0, pts);
 
    renderPolygonFill(&pts, fillColor);
 }
+
 
 void GameObjectRender::renderSpyBug(const Point &pos, const Color &teamColor, bool visible)
 {
