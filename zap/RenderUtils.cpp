@@ -648,9 +648,6 @@ S32 RenderUtils::getStringWidth(S32 size, const char *string)
 
 F32 RenderUtils::getStringWidth(F32 size, const char *string)
 {
-   if(strcmp(string, "QYZX") == 0)
-      printf("Width: %2.2f (%2.2f)\n",  FontManager::getStringLength(string) * size / 120, size);//xyzzy
-
    return FontManager::getStringLength(string) * size / 120;
 }
 
