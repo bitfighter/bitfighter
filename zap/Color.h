@@ -7,6 +7,7 @@
 #define _COLOR_H_
 
 #include <string>
+#include "../nanovg/nanovg.h"
 
 // forward declarations
 namespace TNL {
@@ -57,8 +58,9 @@ public:
 
    string toRGBString() const;
    string toHexString() const;
-   string toHexStringForIni() const ;
-
+   string toHexStringForIni() const;
+   NVGcolor toNvg() const;
+   NVGcolor toNvg(F32 alpha) const;
 
    U32 toU32() const;
 

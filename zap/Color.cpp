@@ -8,7 +8,6 @@
 #include "MathUtils.h"     // For min/max
 #include "stringUtils.h"
 
-
 namespace Zap
 {
 
@@ -166,6 +165,19 @@ string Color::toHexStringForIni() const
 {
    return string("#") + toHexString();
 }
+
+
+NVGcolor Color::toNvg() const
+{
+   return nvgRGBf(r, g, b);
+}
+
+
+NVGcolor Color::toNvg(F32 alpha) const
+{
+   return nvgRGBAf(r, g, b, alpha);
+}
+
 
 
 U32 Color::toU32() const
