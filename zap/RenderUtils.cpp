@@ -1516,12 +1516,16 @@ void RenderUtils::setDefaultLineWidth(F32 width)
 }
 
 
+// https://stackoverflow.com/questions/2690337/get-just-the-scaling-transformation-out-of-cgaffinetransform
+// Assuming no skew...
 void RenderUtils::lineWidth(F32 width)
 {
    static F32 transformData[6];
    nvgCurrentTransform(nvg, transformData);
 
-   nvgStrokeWidth(nvg, width / fabs(transformData[3]));
+   F32 scale = sqrt(transformData[0] * transformData[0] + transformData[2] * + transformData[2]);
+
+   nvgStrokeWidth(nvg, width / scale);
 }
 
 
