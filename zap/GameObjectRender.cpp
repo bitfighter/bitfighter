@@ -1221,7 +1221,20 @@ void GameObjectRender::renderPolygonOutline(const Vector<Point> *outlinePoints, 
 
 void GameObjectRender::renderPolygonFill(const Vector<Point> *triangulatedFillPoints, const Color &fillColor, F32 alpha)
 {
-   RenderUtils::drawFilledLineLoop(triangulatedFillPoints, fillColor, alpha);
+   nvgFillColor(nvg, fillColor.toNvg(alpha));
+   nvgStrokeColor(nvg, fillColor.toNvg(alpha));
+
+   for(S32 i = 0; i < triangulatedFillPoints->size(); i += 3)
+   {
+      nvgBeginPath(nvg);
+      nvgMoveTo(nvg, triangulatedFillPoints->get(i).x, triangulatedFillPoints->get(i).y);
+      nvgLineTo(nvg, triangulatedFillPoints->get(i + 1).x, triangulatedFillPoints->get(i + 1).y);
+      nvgLineTo(nvg, triangulatedFillPoints->get(i + 2).x, triangulatedFillPoints->get(i + 2).y);
+      nvgClosePath(nvg);  // Finish loop
+
+      nvgFill(nvg);
+      nvgStroke(nvg);      // Hides thin black lines bordering our triangles
+   }
 }
 
 
