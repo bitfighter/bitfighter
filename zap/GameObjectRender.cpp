@@ -1226,7 +1226,7 @@ void GameObjectRender::renderPolygonFill(const Vector<Point> *triangulatedFillPo
 
 
 void GameObjectRender::renderPolygon(const Vector<Point> *fillPoints, const Vector<Point> *outlinePoints,
-                   const Color &fillColor, const Color &outlineColor, F32 alpha)
+                                     const Color &fillColor, const Color &outlineColor, F32 alpha)
 {
    renderPolygonFill(fillPoints, fillColor, alpha);
    renderPolygonOutline(outlinePoints, outlineColor, alpha);
@@ -2498,7 +2498,6 @@ void GameObjectRender::drawGear(const Point &center, S32 teeth, F32 radius1, F32
       nvgRotate(nvg, angleRadians);
 
       renderPolygonOutline(&pts, color);
-
       RenderUtils::drawCircle(innerCircleRadius, color);
 
    nvgRestore(nvg);
