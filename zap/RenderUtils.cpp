@@ -1523,7 +1523,7 @@ void RenderUtils::lineWidth(F32 width)
    static F32 transformData[6];
    nvgCurrentTransform(nvg, transformData);
 
-   F32 scale = sqrt(transformData[0] * transformData[0] + transformData[2] * + transformData[2]);
+   F32 scale = sqrt(transformData[0] * transformData[0] + transformData[2] * transformData[2]);
 
    nvgStrokeWidth(nvg, width / scale);
 }
