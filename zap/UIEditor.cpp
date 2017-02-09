@@ -2138,22 +2138,22 @@ void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, 
                                                                        Colors::EDITOR_WALL_FILL_COLOR;
 
    const Color &outlineColor = mNormalizedScreenshotMode ? Colors::DefaultWallOutlineColor :
-      mGameSettings->getWallOutlineColor();
+                                                           mGameSettings->getWallOutlineColor();
 
    GameObjectRender::renderWalls(mLevel->findObjects_fast(WallItemTypeNumber),
-      mLevel->findObjects_fast(PolyWallTypeNumber),
-      mWallEdgePoints,
-      mSelectedWallEdgePointsWholeWalls,
-      mSelectedWallEdgePointsDraggedVertices,
-      outlineColor,
-      fillColor,
-      mCurrentScale,
-      mDraggingObjects, // <== bool
-      drawSelected,
-      offset,
-      mPreviewMode,
-      getSnapToWallCorners(),
-      getRenderingAlpha(isLevelGenDatabase));
+                                 mLevel->findObjects_fast(PolyWallTypeNumber),
+                                 mWallEdgePoints,
+                                 mSelectedWallEdgePointsWholeWalls,
+                                 mSelectedWallEdgePointsDraggedVertices,
+                                 outlineColor,
+                                 fillColor,
+                                 mCurrentScale,
+                                 mDraggingObjects, // <== bool
+                                 drawSelected,
+                                 offset,
+                                 mPreviewMode,
+                                 getSnapToWallCorners(),
+                                 getRenderingAlpha(isLevelGenDatabase));
 
 
    // Render walls as ordinary objects; this will draw wall centerlines
