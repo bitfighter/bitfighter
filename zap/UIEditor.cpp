@@ -2134,8 +2134,8 @@ void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, 
 {
    // Guarantee walls are a standard color for editor screenshot uploads to the level database
    const Color &fillColor = mNormalizedScreenshotMode ? Colors::DefaultWallFillColor :
-      mPreviewMode ? mGameSettings->getWallFillColor() :
-      Colors::EDITOR_WALL_FILL_COLOR;
+                                                        mPreviewMode ? mGameSettings->getWallFillColor() :
+                                                                       Colors::EDITOR_WALL_FILL_COLOR;
 
    const Color &outlineColor = mNormalizedScreenshotMode ? Colors::DefaultWallOutlineColor :
       mGameSettings->getWallOutlineColor();
