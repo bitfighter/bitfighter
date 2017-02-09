@@ -2909,8 +2909,6 @@ void EditorUserInterface::findHitItemOnDock()
          }
       }
    }
-
-   return;
 }
 
 
