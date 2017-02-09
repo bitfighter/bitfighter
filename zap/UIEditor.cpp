@@ -2130,7 +2130,7 @@ void EditorUserInterface::renderObjects(const GridDatabase *database, RenderMode
 
 // Render walls (both normal walls and polywalls, outlines and fills) and centerlines
 void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, const Point &offset,
-   bool drawSelected, bool isLevelGenDatabase) const
+                                                  bool drawSelected, bool isLevelGenDatabase) const
 {
    // Guarantee walls are a standard color for editor screenshot uploads to the level database
    const Color &fillColor = mNormalizedScreenshotMode ? Colors::DefaultWallFillColor :
