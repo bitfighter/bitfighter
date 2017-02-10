@@ -118,10 +118,10 @@ bool GeomObject::addVert(const Point &point, bool ignoreMaxPointsLimit)
 
 
 // Vertex selection -- only needed in editor
-void GeomObject::selectVert(S32 vertIndex)         {  mGeometry.getGeometry()->selectVert(vertIndex);           }
-void GeomObject::aselectVert(S32 vertIndex)        {  mGeometry.getGeometry()->aselectVert(vertIndex);          }
-void GeomObject::unselectVert(S32 vertIndex)       {  mGeometry.getGeometry()->unselectVert(vertIndex);         }
-void GeomObject::unselectVerts()                   {  mGeometry.getGeometry()->unselectVerts();                 }
+void GeomObject::selectVert(S32 vertIndex)   const {  mGeometry.getGeometry()->selectVert(vertIndex);           }
+void GeomObject::aselectVert(S32 vertIndex)  const {  mGeometry.getGeometry()->aselectVert(vertIndex);          }
+void GeomObject::unselectVert(S32 vertIndex) const {  mGeometry.getGeometry()->unselectVert(vertIndex);         }
+void GeomObject::unselectVerts()             const {  mGeometry.getGeometry()->unselectVerts();                 }
      
 bool GeomObject::vertSelected(S32 vertIndex) const {  return mGeometry.getGeometry()->vertSelected(vertIndex);  }
 
@@ -131,25 +131,24 @@ F32   GeomObject::getLabelAngle() const {  return mGeometry.getGeometry()->getLa
       
 
 // Geometry operations
-const Vector<Point> *GeomObject::getOutline() const       {  return mGeometry.getOutline();  }
-const Vector<Point> *GeomObject::getFill() const          {  return mGeometry.getFill();     }
-
-void GeomObject::reverseWinding() { mGeometry.reverseWinding(); }
+const Vector<Point> *GeomObject::getOutline() const  {  return mGeometry.getOutline();  }
+const Vector<Point> *GeomObject::getFill()    const  {  return mGeometry.getFill();     }
 
 
 // Geometric manipulations
-void GeomObject::rotateAboutPoint(const Point &center, F32 angle)  {  mGeometry.getGeometry()->rotateAboutPoint(center, angle);   }
-void GeomObject::flip(F32 center, bool isHoriz)                    {  mGeometry.getGeometry()->flip(center, isHoriz);             }
-void GeomObject::scale(const Point &center, F32 scale)             {  mGeometry.getGeometry()->scale(center, scale);              }
+void GeomObject::reverseWinding()                                 const { mGeometry.reverseWinding();                                  }
+void GeomObject::rotateAboutPoint(const Point &center, F32 angle) const {  mGeometry.getGeometry()->rotateAboutPoint(center, angle);   }
+void GeomObject::flip(F32 center, bool isHoriz)                   const {  mGeometry.getGeometry()->flip(center, isHoriz);             }
+void GeomObject::scale(const Point &center, F32 scale)            const {  mGeometry.getGeometry()->scale(center, scale);              }
 
 // Move object to location, specifying (optional) vertex to be positioned at pos
-void GeomObject::moveTo(const Point &pos, S32 snapVertex)          {  mGeometry.getGeometry()->moveTo(pos, snapVertex);           }
-void GeomObject::offset(const Point &offset)                       {  mGeometry.getGeometry()->offset(offset);                    }
+void GeomObject::moveTo(const Point &pos, S32 snapVertex)               {  mGeometry.getGeometry()->moveTo(pos, snapVertex);           }
+void GeomObject::offset(const Point &offset) const                      {  mGeometry.getGeometry()->offset(offset);                    }
 
 // Geom in-out
-void GeomObject::packGeom(GhostConnection *connection, BitStream *stream)    {  mGeometry.getGeometry()->packGeom(connection, stream);                     }
-void GeomObject::unpackGeom(GhostConnection *connection, BitStream *stream)  {  mGeometry.getGeometry()->unpackGeom(connection, stream); onGeomChanged();  }
-void GeomObject::setGeom(const Vector<Point> &points)                        {  mGeometry.getGeometry()->setGeom(points);                                  }
+void GeomObject::packGeom(GhostConnection *connection, BitStream *stream) const {  mGeometry.getGeometry()->packGeom(connection, stream);                     }
+void GeomObject::unpackGeom(GhostConnection *connection, BitStream *stream)     {  mGeometry.getGeometry()->unpackGeom(connection, stream); onGeomChanged();  }
+void GeomObject::setGeom(const Vector<Point> &points)                           {  mGeometry.getGeometry()->setGeom(points);                                  }
 
 void GeomObject::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) 
 {  
@@ -164,7 +163,7 @@ GeometryContainer &GeomObject::getGeometry()
 }
 
 
-void GeomObject::setGeometry(const Vector<Point> &points)
+void GeomObject::setGeometry(const Vector<Point> &points) const
 {
    mGeometry.setGeometry(points);
 }
@@ -178,11 +177,11 @@ bool GeomObject::hasGeometry() const
 
 
 string GeomObject::geomToLevelCode() const {  return mGeometry.geomToLevelCode();             }
-Rect GeomObject::calcExtents() const       {  return mGeometry.getGeometry()->calcExtents();  }
+Rect GeomObject::calcExtents()       const {  return mGeometry.getGeometry()->calcExtents();  }
 
 
 // Settings
-void GeomObject::disableTriangulation() {  mGeometry.getGeometry()->disableTriangulation();  }
+void GeomObject::disableTriangulation() const {  mGeometry.getGeometry()->disableTriangulation();  }
 
 
 Point GeomObject::getPos()       const {  return getVert(0); }
@@ -268,13 +267,13 @@ void GeometryContainer::setGeometry(Geometry *geometry)
 }
 
 
-void GeometryContainer::reverseWinding()    
+void GeometryContainer::reverseWinding() const
 {
    mGeometry->reverseWinding();
 }
 
 
-void GeometryContainer::setGeometry(const Vector<Point> &points)
+void GeometryContainer::setGeometry(const Vector<Point> &points) const
 {
    mGeometry->setGeom(points);
 }

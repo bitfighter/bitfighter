@@ -32,9 +32,9 @@ public:
    virtual ~GeometryContainer();                            // Destructor
 
    Geometry *getGeometry() const;
-   void setGeometry(const Vector<Point> &points);
+   void setGeometry(const Vector<Point> &points) const;
 
-   void reverseWinding();
+   void reverseWinding() const;
 
    const Vector<Point> *getOutline() const;
    const Vector<Point> *getFill() const;
@@ -67,23 +67,23 @@ public:
    S32 getVertCount() const;          // Actual number of vertices in the geometry
 
    bool anyVertsSelected() const;
-   void selectVert(S32 vertIndex);
-   void aselectVert(S32 vertIndex);   // Select another vertex (remember cmdline ArcInfo?)
-   void unselectVert(S32 vertIndex);
+   void selectVert(S32 vertIndex) const;
+   void aselectVert(S32 vertIndex) const;   // Select another vertex (remember cmdline ArcInfo?)
+   void unselectVert(S32 vertIndex) const;
 
    void clearVerts();
    bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
    bool addVertFront(Point vert);
    bool deleteVert(S32 vertIndex);
    bool insertVert(Point vertex, S32 vertIndex);
-   void unselectVerts();
+   void unselectVerts() const;
    bool vertSelected(S32 vertIndex) const;
 
    // Transforming the geometry
-   void rotateAboutPoint(const Point &center, F32 angle);
-   void flip(F32 center, bool isHoriz);               // Do a horizontal or vertical flip about line at center
-   void scale(const Point &center, F32 scale);
-   void offset(const Point &offset);                  // Offset object by a certain amount
+   void rotateAboutPoint(const Point &center, F32 angle) const;
+   void flip(F32 center, bool isHoriz) const;               // Do a horizontal or vertical flip about line at center
+   void scale(const Point &center, F32 scale) const;
+   void offset(const Point &offset) const;                  // Offset object by a certain amount
 
    // Move object to location, specifying (optional) vertex to be positioned at pos
    virtual void moveTo(const Point &pos, S32 snapVertex = 0);  
@@ -96,17 +96,17 @@ public:
    virtual const Vector<Point> *getOutline() const;
            const Vector<Point> *getFill()    const;
 
-   void reverseWinding();     
+   void reverseWinding() const;     
 
    virtual Rect calcExtents() const;
    bool hasGeometry() const;
 
-   void setGeometry(const Vector<Point> &points);
+   void setGeometry(const Vector<Point> &points) const;
 
-   void disableTriangulation();
+   void disableTriangulation() const;
 
    // Sending/receiving
-   void packGeom(GhostConnection *connection, BitStream *stream);
+   void packGeom(GhostConnection *connection, BitStream *stream) const;
    void unpackGeom(GhostConnection *connection, BitStream *stream);
 
    // Saving/loading
