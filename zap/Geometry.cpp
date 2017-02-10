@@ -1099,8 +1099,6 @@ void PolygonGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 
 // Returns true if reading was successful, false if an error was encountered
 void PolygonGeometry::read(unsigned char *geom, S32 bytes)
 {
-   S32 pos = 0;
-      
    BitStream stream(geom, bytes);
 
    S32 numPoints = stream.readInt(sizeof(S32) << 3);    // << 3 converts byte count to bits
