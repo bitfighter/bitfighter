@@ -7,7 +7,6 @@
 #include "GeomUtils.h"              // For polygon triangulation
 
 #include "tnlBitStream.h"
-#include "tnlLog.h"
 #include <boost/smart_ptr/shared_ptr.hpp>
 
 #ifdef TNL_OS_WIN32
@@ -16,7 +15,6 @@
 
 #include <math.h>
 #include "ServerGame.h"
-#include <sstream>
 
 
 using namespace TNL;
