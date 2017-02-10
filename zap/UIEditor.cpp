@@ -1727,6 +1727,8 @@ void EditorUserInterface::renderDock() const
 }
 
 
+// This returns the point that we're using to snap the object to -- it could be a corner  vertex or the centroid, 
+// depending on where the object was grabbed.  You can see this point highlighted in magenta when dragging a polygon item.
 Point EditorUserInterface::getSnapVert() const
 {
    return mSnapToCentroid ? mSnapObject->getCentroid() : mSnapObject->getVert(mSnapVertexIndex);
