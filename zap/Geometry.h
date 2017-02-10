@@ -119,6 +119,7 @@ public:
    const Vector<Point> *getOutline() const;
    const Vector<Point> *getFill() const;
    Point getCentroid() const;
+
    F32 getLabelAngle() const;
 
    void packGeom(GhostConnection *connection, BitStream *stream);
@@ -182,6 +183,7 @@ public:
    const Vector<Point> *getOutline() const;
    virtual const Vector<Point> *getFill() const;
    virtual Point getCentroid() const;
+   virtual Point getLiveCentroid() const;
    virtual F32 getLabelAngle() const;
 
    void packGeom(GhostConnection *connection, BitStream *stream);
@@ -219,6 +221,7 @@ public:
 
    const Vector<Point> *getFill() const;
    Point getCentroid() const;
+   Point getLiveCentroid() const;
    F32 getLabelAngle() const;
 
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);

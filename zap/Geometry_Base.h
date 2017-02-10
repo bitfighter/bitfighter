@@ -67,6 +67,7 @@ public:
    virtual const Vector<Point> *getOutline() const;
    virtual const Vector<Point> *getFill() const;
    virtual Point getCentroid() const;
+   virtual Point getLiveCentroid() const;
    virtual F32 getLabelAngle() const;
                                                             
    virtual void packGeom(GhostConnection *connection, BitStream *stream);

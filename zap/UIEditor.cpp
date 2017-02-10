@@ -1731,7 +1731,7 @@ void EditorUserInterface::renderDock() const
 // depending on where the object was grabbed.  You can see this point highlighted in magenta when dragging a polygon item.
 Point EditorUserInterface::getSnapVert() const
 {
-   return mSnapToCentroid ? mSnapObject->getCentroid() : mSnapObject->getVert(mSnapVertexIndex);
+   return mSnapToCentroid ? mSnapObject->getLiveCentroid() : mSnapObject->getVert(mSnapVertexIndex);
 }
 
 

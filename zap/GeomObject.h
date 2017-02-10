@@ -91,6 +91,7 @@ public:
 
    // Getting parts of the geometry
    Point getCentroid() const;
+   Point getLiveCentroid() const;
    F32 getLabelAngle() const;
 
    virtual const Vector<Point> *getOutline() const;

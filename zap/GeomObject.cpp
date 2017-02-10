@@ -126,8 +126,9 @@ void GeomObject::unselectVerts()             const {  mGeometry.getGeometry()->u
 bool GeomObject::vertSelected(S32 vertIndex) const {  return mGeometry.getGeometry()->vertSelected(vertIndex);  }
 
 // Geometric calculations
-Point GeomObject::getCentroid()   const {  return mGeometry.getGeometry()->getCentroid();    }
-F32   GeomObject::getLabelAngle() const {  return mGeometry.getGeometry()->getLabelAngle();  }
+Point GeomObject::getCentroid()     const {  return mGeometry.getGeometry()->getCentroid();     }
+Point GeomObject::getLiveCentroid() const {  return mGeometry.getGeometry()->getLiveCentroid(); }
+F32   GeomObject::getLabelAngle()   const {  return mGeometry.getGeometry()->getLabelAngle();   }
       
 
 // Geometry operations

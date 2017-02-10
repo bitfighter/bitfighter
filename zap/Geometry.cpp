@@ -188,6 +188,12 @@ Point Geometry::getCentroid() const
 }
 
 
+Point Geometry::getLiveCentroid() const
+{
+   return getCentroid();
+}
+
+
 F32 Geometry::getLabelAngle() const
 {
    TNLAssert(false, "Not implemented");
@@ -899,6 +905,12 @@ Point PolylineGeometry::getCentroid() const
 }
 
 
+Point PolylineGeometry::getLiveCentroid() const
+{
+   return findCentroid(mPolyBounds, true);
+}
+
+
 F32 PolylineGeometry::getLabelAngle() const
 {
    return 0;
@@ -1080,6 +1092,12 @@ Point PolygonGeometry::getCentroid() const
 {
    TNLAssert(!mTriangluationDisabled, "Triangluation disabled!");
    return Parent::getCentroid();
+}
+
+
+Point PolygonGeometry::getLiveCentroid() const
+{
+   return Parent::getLiveCentroid();
 }
 
 
