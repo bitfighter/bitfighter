@@ -677,13 +677,13 @@ void nvgMiterLimit(NVGcontext* ctx, float limit)
 	state->miterLimit = limit;
 }
 
-void nvgLineCap(NVGcontext* ctx, int cap)
+void nvgLineCap(NVGcontext* ctx, int cap)       // Can be one of: NVG_BUTT (default), NVG_ROUND, NVG_SQUARE
 {
 	NVGstate* state = nvg__getState(ctx);
 	state->lineCap = cap;
 }
 
-void nvgLineJoin(NVGcontext* ctx, int join)
+void nvgLineJoin(NVGcontext* ctx, int join)     // Can be one of NVG_MITER (default), NVG_ROUND, NVG_BEVEL
 {
 	NVGstate* state = nvg__getState(ctx);
 	state->lineJoin = join;
