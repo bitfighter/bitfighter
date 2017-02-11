@@ -1679,6 +1679,7 @@ void GameObjectRender::renderFilledPolygon(const Point &pos, S32 points, S32 rad
 }
 
 
+// This is inefficient as it triangulates every render cycle.  Use judiciously.
 void GameObjectRender::renderFilledPolygon(const Point &pos, S32 points, F32 radius, const Color &fillColor)
 {
    Vector<Point> triangulatedFillPoints(points);
