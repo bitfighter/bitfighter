@@ -1727,8 +1727,11 @@ void EditorUserInterface::renderDock() const
 }
 
 
-// This returns the point that we're using to snap the object to -- it could be a corner  vertex or the centroid, 
+// This returns the point that we're using to snap the object to -- it could be a corner vertex or the centroid, 
 // depending on where the object was grabbed.  You can see this point highlighted in magenta when dragging a polygon item.
+// getLiveCentroid() is just like getCentroid(), except for in polygons, it recalculates the centroid on demand, rather than 
+// using the stored version.  This is because the stored centroid doesn't get recalculated until the object has finished moving,
+// and we need a current centroid if we're using that as our snap point.
 Point EditorUserInterface::getSnapVert() const
 {
    return mSnapToCentroid ? mSnapObject->getLiveCentroid() : mSnapObject->getVert(mSnapVertexIndex);
