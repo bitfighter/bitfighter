@@ -118,11 +118,8 @@ void PolyWall::renderDock(const Color &color) const
 
 void PolyWall::render() const
 {
-   GameObjectRender::renderWallFill(getFill(), GameSettings::get()->getWallFillColor(), true);
-   //renderZone(color, outline, fill);
-   //renderLoadoutZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle());
+   GameObjectRender::renderPolygonFill(getFill(), GameSettings::get()->getWallFillColor());
 }
-
 
 
 bool PolyWall::processArguments(S32 argc, const char **argv, Level *level)

@@ -722,7 +722,7 @@ void DiagnosticUserInterface::render() const
          points.push_back(Point(x - rm2, y + rm2));
          points.push_back(Point(x + rm2, y + rm2));
          points.push_back(Point(x + rm2, y - rm2));
-         GameObjectRender::renderWallFill(&points, Colors::wallFillColor, false);
+         GameObjectRender::renderPolygonFill(&points, Colors::wallFillColor);
          GameObjectRender::renderPolygonOutline(&points, Colors::blue);
          RenderUtils::drawStar(Point(x, y), 5, rad * .5f, rad * .25f, Colors::yellow);
 

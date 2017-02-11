@@ -193,8 +193,7 @@ public:
 
    static void renderEnergyItem(const Point &pos);
 
-   static void renderWallFill(const Vector<Point> *points, const Color &fillColor, bool polyWall);
-   static void renderWallFill(const Vector<Point> *points, const Color &fillColor, const Point &offset, bool polyWall);
+   static void renderPolygonFill(const Vector<Point> *points, const Color &fillColor, const Point &offset);
 
    static void renderEnergyItem(const Point &pos, bool forEditor);
    static void renderEnergySymbol();                                   // Render lightning bolt symbol

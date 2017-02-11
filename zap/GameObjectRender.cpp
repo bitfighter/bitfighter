@@ -1222,7 +1222,11 @@ void GameObjectRender::renderPolygonOutline(const Vector<Point> *outlinePoints, 
 void GameObjectRender::renderPolygonFill(const Vector<Point> *triangulatedFillPoints, const Color &fillColor, F32 alpha)
 {
    nvgFillColor(nvg, fillColor.toNvg(alpha));
+
+   // Set up the stroke we'll need to cover seams between triangles
    nvgStrokeColor(nvg, fillColor.toNvg(alpha));
+   RenderUtils::lineWidth(1);
+   nvgLineJoin(nvg, NVG_BEVEL);         // Can be one of NVG_MITER (default), NVG_ROUND, NVG_BEVEL
 
    for(S32 i = 0; i < triangulatedFillPoints->size(); i += 3)
    {
@@ -1804,31 +1808,11 @@ void GameObjectRender::renderEnergyItem(const Point &pos)
 }
 
 
-// Use faster method with no offset
-void GameObjectRender::renderWallFill(const Vector<Point> *points, const Color &fillColor, bool polyWall)
+void GameObjectRender::renderPolygonFill(const Vector<Point> *points, const Color &fillColor, const Point &offset)
 {
-   // Polywall geometry are triangles, barriers are just the outline
-//   mGL->renderPointVector(points, polyWall ? GLOPT::Triangles : GLOPT::TriangleFan, fillColor);
-
-   // FIXME NANOVG does its own triangulation, but it may not be cached.  This
-   // may be a loss in performance for rendering polywalls.  This is drawing the
-   // list of triangles as a line loop so there may be rendering issues
-   RenderUtils::drawFilledLineLoop(points, fillColor, 1.0f);
-}
-
-
-// Use slower method if each point needs to be offset
-void GameObjectRender::renderWallFill(const Vector<Point> *points, const Color &fillColor, const Point &offset, bool polyWall)
-{
-   // Polywall geometry are triangles, barriers are just the outline
-//   mGL->renderPointVector(points, offset, polyWall ? GLOPT::Triangles : GLOPT::TriangleFan, fillColor);
-
    nvgSave(nvg);
    nvgTranslate(nvg, offset.x, offset.y);
-   // FIXME NANOVG does its own triangulation, but it may not be cached.  This
-   // may be a loss in performance for rendering polywalls.  This is drawing the
-   // list of triangles as a line loop so there may be rendering issues
-   RenderUtils::drawFilledLineLoop(points, fillColor, 1.0f);
+   renderPolygonFill(points, fillColor);
    nvgRestore(nvg);
 }
 
@@ -2587,7 +2571,7 @@ void GameObjectRender::renderLevelDesignWinnerBadge(F32 x, F32 y, F32 rad)
    edges.push_back(Point(x + rm2, y + rm2));
    edges.push_back(Point(x + rm2, y - rm2));
 
-   renderWallFill(&edges, Colors::wallFillColor, false);
+   renderPolygonFill(&edges, Colors::wallFillColor);
    renderPolygonOutline(&edges, Colors::blue);
    renderCenteredString(Point(x, y + rad), rad, Colors::white, "1");
 }

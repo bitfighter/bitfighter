@@ -518,9 +518,9 @@ void WallSegment::renderFill(const Point &offset, const Color &color, bool isSel
 {
 #ifndef ZAP_DEDICATED
    if(isSelected)
-      GameObjectRender::renderWallFill(&mTriangulatedFillPoints, color, offset, true);    // true ==> all segment fills are triangulated
+      GameObjectRender::renderPolygonFill(&mTriangulatedFillPoints, color, offset);
    else
-      GameObjectRender::renderWallFill(&mTriangulatedFillPoints, color, true);
+      GameObjectRender::renderPolygonFill(&mTriangulatedFillPoints, color);
 #endif
 }
 
