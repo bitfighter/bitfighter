@@ -114,6 +114,12 @@ private:
       SimpleTextEntryScale,           // Entering a scale
    };
 
+   enum ShadowWallRenderMode
+   {
+      INCLUDE_SHADOW_WALLS,
+      NO_SHADOW_WALLS
+   };
+
    DockMode mDockMode;
 
    int mSnapContext;
@@ -313,7 +319,8 @@ private:
 
    void render() const;
    void renderObjects(const GridDatabase *database, RenderModes renderMode, bool isLevelgenOverlay) const;
-   void renderWallsAndPolywalls(const GridDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase) const;
+   void renderWallsAndPolywalls(const GridDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase, 
+                                ShadowWallRenderMode shadowWallRenderMode) const;
    void renderObjectIds(GridDatabase *database) const;
 
    void autoSave();                    // Hope for the best, prepare for the worst

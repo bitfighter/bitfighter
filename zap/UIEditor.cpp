@@ -1977,12 +1977,8 @@ void EditorUserInterface::render() const
    Point delta = mDraggingObjects ? mSnapDelta : Point(0, 0);
 
    // == Render walls and polyWalls ==
-   // Shadows only drawn under walls that are being dragged.  No dragging, no shadows.
-   if(mDraggingObjects)
-      GameObjectRender::renderShadowWalls(mSelectedObjectsForDragging);
-
-   renderWallsAndPolywalls(&mLevelGenDatabase, delta, false, true);
-   renderWallsAndPolywalls(editorDb, delta, false, false);
+   renderWallsAndPolywalls(&mLevelGenDatabase, delta, false, true, INCLUDE_SHADOW_WALLS);
+   renderWallsAndPolywalls(editorDb, delta, false, false, NO_SHADOW_WALLS);
 
    // == Normal, unselected items ==
    // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
@@ -1995,7 +1991,7 @@ void EditorUserInterface::render() const
    // We do render polywalls here because this is what draws the highlighted outline when the polywall is selected.
    renderObjects(editorDb, RENDER_SELECTED_NONWALLS, false);               // Render selected objects 
 
-   renderWallsAndPolywalls(editorDb, delta, true, false);
+   renderWallsAndPolywalls(editorDb, delta, true, false, NO_SHADOW_WALLS);
 
    // == Draw geomPolyLine features under construction ==
    if(mCreatingPoly || mCreatingPolyline)
@@ -2134,8 +2130,8 @@ void EditorUserInterface::renderObjects(const GridDatabase *database, RenderMode
 
 
 // Render walls (both normal walls and polywalls, outlines and fills) and centerlines
-void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, const Point &offset,
-                                                  bool drawSelected, bool isLevelGenDatabase) const
+void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, const Point &offset, bool drawSelected, 
+                                                  bool isLevelGenDatabase, ShadowWallRenderMode shadowWallRenderMode) const
 {
    // Guarantee walls are a standard color for editor screenshot uploads to the level database
    const Color &fillColor = mNormalizedScreenshotMode ? Colors::DefaultWallFillColor :
@@ -2144,6 +2140,11 @@ void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, 
 
    const Color &outlineColor = mNormalizedScreenshotMode ? Colors::DefaultWallOutlineColor :
                                                            mGameSettings->getWallOutlineColor();
+
+   // Shadows only drawn under walls that are being dragged.  No dragging, no shadows.
+   if(mDraggingObjects && shadowWallRenderMode == INCLUDE_SHADOW_WALLS)
+      GameObjectRender::renderShadowWalls(mSelectedObjectsForDragging);
+
 
    GameObjectRender::renderWalls(mLevel->findObjects_fast(WallItemTypeNumber),
                                  mLevel->findObjects_fast(PolyWallTypeNumber),
@@ -2154,12 +2155,11 @@ void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, 
                                  fillColor,
                                  mCurrentScale,
                                  mDraggingObjects, // <== bool
-                                 drawSelected,
+                                 drawSelected,      // drawSelected
                                  offset,
                                  mPreviewMode,
                                  getSnapToWallCorners(),
                                  getRenderingAlpha(isLevelGenDatabase));
-
 
    // Render walls as ordinary objects; this will draw wall centerlines
    if(!isLevelGenDatabase)

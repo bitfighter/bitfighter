@@ -2950,11 +2950,11 @@ void GameObjectRender::renderWalls(const Vector<DatabaseObject *> *walls,
          }
       }
 
-      // Render wall outlines for walls being dragged in their entirety
+      // Render wall outlines for walls being dragged in their entirety (draws in new position)
       renderWallEdges(selectedWallEdgePointsWholeWalls, selectedItemOffset, outlineColor);
 
       // Render wall outlines for walls/polywalls with vertices being dragged
-      renderWallEdges(selectedWallEdgePointsDraggedVertices, Point(0,0), outlineColor);
+      //renderWallEdges(selectedWallEdgePointsDraggedVertices, Point(0,0), outlineColor);
    }
    else  // Render selected/moving walls last so they appear on top; this is pass 2, 
    {
