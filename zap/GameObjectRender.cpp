@@ -1232,8 +1232,8 @@ void GameObjectRender::renderPolygonFill(const Vector<Point> *triangulatedFillPo
       nvgLineTo(nvg, triangulatedFillPoints->get(i + 2).x, triangulatedFillPoints->get(i + 2).y);
       nvgClosePath(nvg);  // Finish loop
 
-      nvgFill(nvg);
-      nvgStroke(nvg);      // Hides thin black lines bordering our triangles
+      nvgFill(nvg);        // Fill the traingle
+      nvgStroke(nvg);      // Stroke to hide thin black lines bordering the triangle
    }
 }
 
