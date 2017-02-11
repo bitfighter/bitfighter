@@ -1238,10 +1238,10 @@ void GameObjectRender::renderPolygonFill(const Vector<Point> *triangulatedFillPo
 }
 
 
-void GameObjectRender::renderPolygon(const Vector<Point> *fillPoints, const Vector<Point> *outlinePoints,
+void GameObjectRender::renderPolygon(const Vector<Point> *triangulatedFillPoints, const Vector<Point> *outlinePoints,
                                      const Color &fillColor, const Color &outlineColor, F32 alpha)
 {
-   renderPolygonFill(fillPoints, fillColor, alpha);
+   renderPolygonFill(triangulatedFillPoints, fillColor, alpha);
    renderPolygonOutline(outlinePoints, outlineColor, alpha);
 }
 
