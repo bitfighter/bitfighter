@@ -1971,7 +1971,7 @@ void EditorUserInterface::render() const
    // mSnapDelta only gets recalculated during a dragging event -- if an item is no longer being dragged, we
    // don't want to use the now stale value in mSnapDelta, but rather (0,0) to reflect the rather obvoius fact
    // that walls that are not being dragged should be rendered in place.
-   static Point delta = mDraggingObjects ? mSnapDelta : Point(0, 0);
+   Point delta = mDraggingObjects ? mSnapDelta : Point(0, 0);
 
    // == Render walls and polyWalls ==
    // Shadows only drawn under walls that are being dragged.  No dragging, no shadows.
