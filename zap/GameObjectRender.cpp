@@ -1681,10 +1681,10 @@ void GameObjectRender::renderFilledPolygon(const Point &pos, S32 points, S32 rad
 
 void GameObjectRender::renderFilledPolygon(const Point &pos, S32 points, F32 radius, const Color &fillColor)
 {
-   Vector<Point> pts(points);
-   calcPolygonVerts(pos, points, (F32)radius, 0, pts);
+   Vector<Point> triangulatedFillPoints(points);
+   calcPolygonVerts(pos, points, (F32)radius, 0, triangulatedFillPoints);
 
-   renderPolygonFill(&pts, fillColor);
+   renderPolygonFill(&triangulatedFillPoints, fillColor);
 }
 
 
