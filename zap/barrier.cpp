@@ -130,7 +130,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool isPolywall)
       extent.expand(Point(w, w));
 
 
-   setExtent(extent);
+   DatabaseObject::setExtent(extent);
 
    mIsPolywall = isPolywall;
 
@@ -164,7 +164,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool isPolywall)
    }
 
    // Outline is the same for regular walls and polywalls
-   mRenderOutlineGeometry = getCollisionPoly(); 
+   mRenderOutlineGeometry = Barrier::getCollisionPoly(); 
 
    GeomObject::setGeom(*mRenderOutlineGeometry);
 }
