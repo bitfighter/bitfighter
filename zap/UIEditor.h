@@ -253,7 +253,8 @@ private:
    SafePtr<BfObject> mNewItem;
    SafePtr<BfObject> mSnapObject;
    SafePtr<BfObject> mHitItem;
-   bool mSnapToCentroid;
+
+   bool mSnapToCentroid;               // Are we snapping to polygon centroid, or a vertex?
 
    SafePtr<BfObject> mDraggingDockItem;
    SafePtr<BfObject> mDockItemHit;
