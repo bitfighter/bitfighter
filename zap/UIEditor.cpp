@@ -3035,6 +3035,7 @@ void EditorUserInterface::onMouseDragged()
 void EditorUserInterface::onMouseDragged_startDragging()
 {
    mMoveOrigin = getSnapVert();
+
    const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
 
    mSelectedObjectsForDragging.clear();
