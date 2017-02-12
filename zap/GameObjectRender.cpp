@@ -950,7 +950,7 @@ void GameObjectRender::renderSpyBugVisibleRange(const Point &pos, const Color &c
 void GameObjectRender::renderTurretFiringRange(const Point &pos, const Color &color, F32 currentScale)
 {
    F32 range = Turret::TurretPerceptionDistance * currentScale;
-   RenderUtils::drawFilledRect(pos.x - range, pos.y - range, range, range, color, 0.25f);
+   RenderUtils::drawFilledRect(pos.x - range / 2, pos.y - range / 2, range, range, color, 0.25f);
 }
 
 
