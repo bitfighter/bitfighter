@@ -942,7 +942,7 @@ void GameObjectRender::renderPolyLineVertices(const BfObject *obj, bool snapping
 
 void GameObjectRender::renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentScale)
 {
-   renderFilledPolygon(pos, 6, SpyBug::SPY_BUG_RADIUS * currentScale, color * 0.45f);
+   renderSimplePolygon(pos, 6, SpyBug::SPY_BUG_RADIUS * currentScale, color * 0.45f);
 }
 
 
@@ -1679,17 +1679,25 @@ void GameObjectRender::renderFilledPolygon(const Point &pos, S32 points, S32 rad
 
 void GameObjectRender::renderFilledPolygon(const Point &pos, S32 points, S32 radius, const Color &fillColor)
 {
-   renderFilledPolygon(pos, points, (F32)radius, fillColor);
+   renderSimplePolygon(pos, points, (F32)radius, fillColor);
 }
 
 
-// This is inefficient as it triangulates every render cycle.  Use judiciously.
-void GameObjectRender::renderFilledPolygon(const Point &pos, S32 points, F32 radius, const Color &fillColor)
+void GameObjectRender::renderSimplePolygon(const Point &pos, S32 points, F32 radius, const Color &fillColor)
 {
-   Vector<Point> triangulatedFillPoints(points);
-   calcPolygonVerts(pos, points, (F32)radius, 0, triangulatedFillPoints);
+   nvgFillColor(nvg, fillColor.toNvg());
 
-   renderPolygonFill(&triangulatedFillPoints, fillColor);
+   Vector<Point> polyVerts(points);
+   calcPolygonVerts(pos, points, (F32)radius, 0, polyVerts);
+
+   nvgBeginPath(nvg);
+   nvgMoveTo(nvg, polyVerts[0].x, polyVerts[0].y);
+
+   for(S32 i = 1; i < polyVerts.size(); i++)
+      nvgLineTo(nvg, polyVerts[i].x, polyVerts[i].y);
+
+   nvgClosePath(nvg);   // Finish loop
+   nvgFill(nvg);        // Fill the shape
 }
 
 
@@ -1708,7 +1716,6 @@ void GameObjectRender::renderSpyBug(const Point &pos, const Color &teamColor, bo
       RenderUtils::drawPolygon(pos, 6, 5, 0, Colors::gray25);
       RenderUtils::lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
   }
-
 }
 
 
@@ -1995,7 +2002,7 @@ void GameObjectRender::renderCore(const Point &pos, const Color &coreColor, U32 
    }
 
    F32 atomSize = 40;
-   F32 angle = CoreItem::getCoreAngle(time);
+   //F32 angle = CoreItem::getCoreAngle(time);
 
    // Draw atom graphic
 //   F32 t = FloatTau + (F32(time & 1023) / 1024.f * FloatTau);

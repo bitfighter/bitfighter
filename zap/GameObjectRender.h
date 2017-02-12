@@ -276,7 +276,7 @@ public:
    static void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed);
 
    static void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const Color &fillColor);
-   static void renderFilledPolygon(const Point &pos, S32 points, F32 radius, const Color &fillColor);
+   static void renderSimplePolygon(const Point &pos, S32 points, F32 radius, const Color &fillColor);
    static void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const Color &fillColor, const Color &outlineColor);
 
 private:
