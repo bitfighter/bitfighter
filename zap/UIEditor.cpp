@@ -1623,8 +1623,9 @@ static S32 QSORT_CALLBACK sortByTeam(DatabaseObject **a, DatabaseObject **b)
 
 void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb) const
 {
-   fillVector = *editorDb->findObjects_fast(SpyBugTypeNumber);  // This will actually copy vector of pointers to fillVector
-   // so we can sort by team, this is still faster then findObjects.
+   // Make a copy of our vector of pointers to fillVector so we
+   // can sort by team.  This is faster then using findObjects.
+   fillVector = *editorDb->findObjects_fast(SpyBugTypeNumber);  
    if(fillVector.size() != 0)
    {
       // Use Z Buffer to make use of not drawing overlap visible area of same team SpyBug, but does overlap different team
