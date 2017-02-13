@@ -211,7 +211,7 @@ void HelperMenu::drawItemMenu(S32 widthOfButtons, S32 widthOfTextBlock) const
 
    yPos += GrayLineBuffer;
 
-   // Draw menu items (below gray line)
+   // Draw menu items (below gray line) -- render previous items and current items because we need both during a transition
    drawMenuItems(mPrevRenderItems,    mPrevRenderCount,    yPos + 2, menuBottom, false, mHorizLabelOffset);
    drawMenuItems(mCurrentRenderItems, mCurrentRenderCount, yPos,     menuBottom, true,  0);      
 
