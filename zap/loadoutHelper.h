@@ -76,7 +76,7 @@ public:
    virtual ~LoadoutHelper();
 
    void pregameSetup(bool engineerEnabled);     // Set things up
-   HelperMenu::HelperMenuType getType();
+   HelperMenuType getType();
 
    void render() const;                
    void onActivated();  
