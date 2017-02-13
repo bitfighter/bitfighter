@@ -874,12 +874,13 @@ void SymbolShape::render(S32 x, S32 y, Alignment alignment) const
 }
 
 
+// y is the bottom of the glyph to be rendered
 void SymbolShape::render(F32 x, F32 y, Alignment alignment) const
 {
    if(alignment == AlignmentLeft)
       x += mWidth / 2;
 
-   render(Point(x, y));
+   render(Point(x, y));    
 }
 
 
@@ -1471,6 +1472,7 @@ S32 SymbolKey::getRenderWidth(const string &text)
 
 
 // Note: passed font size and context will be ignored
+// center represents a point a the bottom-center of the glyph; so it's not exactly a center
 void SymbolKey::render(const Point &center) const
 {
    // Compensate for the fact that boxes draw from center

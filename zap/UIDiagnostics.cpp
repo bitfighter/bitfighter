@@ -479,7 +479,7 @@ void DiagnosticUserInterface::render() const
             const Color &color = InputCodeManager::getState(code) ? Colors::red : Colors::white;
 
             // renderControllerButton() returns false if nothing is rendered
-            if(JoystickRender::renderControllerButton((F32)hpos, (F32)ypos, code, &color))
+            if(JoystickRender::renderControllerButton((F32)hpos, (F32)ypos + 17, code, &color))
                hpos += 33;
          }
 
@@ -721,7 +721,7 @@ void DiagnosticUserInterface::render() const
          points.push_back(Point(x - rm2, y + rm2));
          points.push_back(Point(x + rm2, y + rm2));
          points.push_back(Point(x + rm2, y - rm2));
-         GameObjectRender::renderPolygonFill(&points, Colors::wallFillColor);
+         GameObjectRender::renderConvexPolygon(points, Colors::wallFillColor);
          GameObjectRender::renderPolygonOutline(&points, Colors::blue);
          RenderUtils::drawStar(Point(x, y), 5, rad * .5f, rad * .25f, Colors::yellow);
 

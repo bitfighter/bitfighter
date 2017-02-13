@@ -162,6 +162,8 @@ public:
    static void renderPolygonFill(const Vector<Point> *fillPoints, const Color &fillColor, F32 alpha = 1);
    static void renderPolygon(const Vector<Point> *triangulatedFillPoints, const Vector<Point> *outlinePoints,
                              const Color &fillColor, const Color &outlineColor, F32 alpha = 1);
+   static void renderConvexPolygon(const Vector<Point> &polyVerts, const Color &fillColor, F32 alpha = 1);
+
 
    static void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill);     // No label version
    static void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle,

@@ -252,7 +252,7 @@ void KeyDefMenuUserInterface::render() const
          bool dupe = isDuplicate(i, menuItems); 
          const Color &color = dupe ? Colors::red : Colors::white;
 
-         JoystickRender::renderControllerButton(F32(xPos), F32(y + offset), 
+         JoystickRender::renderControllerButton(F32(xPos), F32(y + offset + 17), 
                getInputCode(mGameSettings, menuItems[i].primaryControl), &color);
       }
    }

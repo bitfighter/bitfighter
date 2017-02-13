@@ -106,8 +106,8 @@ S32 JoystickRender::getControllerButtonRenderedSize(InputCode inputCode)
 
 
 // Renders something resembling a controller button or keyboard key
-// Note: buttons are with the given x coordinate as their _center_
-bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, InputCode inputCode, const Color *overrideRenderColor)
+// Note: buttons are with the given x coordinate as their _center_, y coordinate given is the top of the button
+bool JoystickRender::renderControllerButton(F32 centerX, F32 bottomY, InputCode inputCode, const Color *overrideRenderColor)
 {
    // Set the basic color, could be overridden later
    const Color &color = overrideRenderColor ? *overrideRenderColor : Colors::white;
@@ -115,7 +115,8 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, InputCode 
    // Render keyboard keys, just in case
    if(!InputCodeManager::isControllerButton(inputCode))
    {
-      SymbolKey(InputCodeManager::inputCodeToString(inputCode), color).render(centerX, centerY + 17, AlignmentCenter);
+      // The y coord we pass here will be the bottom of the key
+      SymbolKey(InputCodeManager::inputCodeToString(inputCode), color).render(centerX, bottomY, AlignmentCenter);
       return true;
    }
 
@@ -132,7 +133,7 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, InputCode 
    const Color *buttonColor = &buttonInfo.color;
 
    // Note: the x coordinate is already at the center
-   Point location(centerX, centerY);
+   Point location(centerX, bottomY);
    Point center = location + Point(0, buttonHalfHeight);
 
    /////

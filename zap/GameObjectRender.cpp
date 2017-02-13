@@ -1242,6 +1242,21 @@ void GameObjectRender::renderPolygonFill(const Vector<Point> *triangulatedFillPo
 }
 
 
+void GameObjectRender::renderConvexPolygon(const Vector<Point> &polyVerts, const Color &fillColor, F32 alpha)
+{
+   nvgFillColor(nvg, fillColor.toNvg(alpha));
+
+   nvgBeginPath(nvg);
+   nvgMoveTo(nvg, polyVerts[0].x, polyVerts[0].y);
+
+   for(S32 i = 1; i < polyVerts.size(); i++)
+      nvgLineTo(nvg, polyVerts[i].x, polyVerts[i].y);
+
+   nvgClosePath(nvg);   // Finish loop
+   nvgFill(nvg);        // Fill the shape
+}
+
+
 void GameObjectRender::renderPolygon(const Vector<Point> *triangulatedFillPoints, const Vector<Point> *outlinePoints,
                                      const Color &fillColor, const Color &outlineColor, F32 alpha)
 {
@@ -1685,19 +1700,10 @@ void GameObjectRender::renderFilledPolygon(const Point &pos, S32 points, S32 rad
 
 void GameObjectRender::renderSimplePolygon(const Point &pos, S32 points, F32 radius, const Color &fillColor)
 {
-   nvgFillColor(nvg, fillColor.toNvg());
-
    Vector<Point> polyVerts(points);
    calcPolygonVerts(pos, points, (F32)radius, 0, polyVerts);
 
-   nvgBeginPath(nvg);
-   nvgMoveTo(nvg, polyVerts[0].x, polyVerts[0].y);
-
-   for(S32 i = 1; i < polyVerts.size(); i++)
-      nvgLineTo(nvg, polyVerts[i].x, polyVerts[i].y);
-
-   nvgClosePath(nvg);   // Finish loop
-   nvgFill(nvg);        // Fill the shape
+   renderConvexPolygon(polyVerts, fillColor, 1.0);
 }
 
 
@@ -2578,7 +2584,7 @@ void GameObjectRender::renderLevelDesignWinnerBadge(F32 x, F32 y, F32 rad)
    edges.push_back(Point(x + rm2, y + rm2));
    edges.push_back(Point(x + rm2, y - rm2));
 
-   renderPolygonFill(&edges, Colors::wallFillColor);
+   renderConvexPolygon(edges, Colors::wallFillColor);
    renderPolygonOutline(&edges, Colors::blue);
    renderCenteredString(Point(x, y + rad), rad, Colors::white, "1");
 }

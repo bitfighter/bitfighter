@@ -293,14 +293,14 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
    S32 buttonWidth = getButtonWidth(items, count);
    DisplayMode displayMode = getGame()->getSettings()->getSetting<DisplayMode>(IniKey::WindowMode);
    
-   S32 yPos;
+   S32 menuItemBaselineYPos;
 
    if(newItems)      // Draw the new items we're transitioning to
-      yPos = prepareToRenderToDisplay(displayMode, top, oldHeight, height);
+      menuItemBaselineYPos = prepareToRenderToDisplay(displayMode, top, oldHeight, height);
    else              // Draw the old items we're transitioning away from
-      yPos = prepareToRenderFromDisplay(displayMode, top, oldHeight, height);
+      menuItemBaselineYPos = prepareToRenderFromDisplay(displayMode, top, oldHeight, height);
 
-   yPos += MENU_FONT_SIZE + 2;      // The 2 just looks good
+   menuItemBaselineYPos += MENU_FONT_SIZE + 2;      // The 2 just looks good
    for(S32 i = 0; i < count; i++)
    {
       // Skip hidden options!
@@ -314,22 +314,22 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
       const Color *buttonOverrideColor = items[i].buttonOverrideColor;
       const Color *itemColor           = items[i].itemColor;
 
-      // Need to add buttonWidth / 2 because renderControllerButton() centers on passed coords
+      // Need to add buttonWidth / 2 because renderControllerButton() centers horizontally on passed coords (the y-coord is item baseline)
       JoystickRender::renderControllerButton(LeftMargin + horizOffset + (F32)buttonWidth / 2, 
-                                             (F32)yPos - 1, code, buttonOverrideColor);
+                                             (F32)menuItemBaselineYPos + 2, code, buttonOverrideColor);
 
       S32 xPos = LeftMargin + buttonWidth + ButtonLabelGap + horizOffset;
       
-      S32 textWidth = RenderUtils::drawStringAndGetWidth_fixed(xPos, yPos, MENU_FONT_SIZE, *itemColor, items[i].name);
+      S32 textWidth = RenderUtils::drawStringAndGetWidth_fixed(xPos, menuItemBaselineYPos, MENU_FONT_SIZE, *itemColor, items[i].name);
 
       // Render help string, if one is available
       if(strcmp(items[i].help, "") != 0)
       {
          xPos += textWidth + ButtonLabelGap;
-         RenderUtils::drawString_fixed(xPos, yPos, MENU_FONT_SIZE, *items[i].helpColor, items[i].help);
+         RenderUtils::drawString_fixed(xPos, menuItemBaselineYPos, MENU_FONT_SIZE, *items[i].helpColor, items[i].help);
       }
 
-      yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
+      menuItemBaselineYPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
    }
 
    doneRendering();
