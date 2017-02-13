@@ -106,7 +106,7 @@ S32 JoystickRender::getControllerButtonRenderedSize(InputCode inputCode)
 
 
 // Renders something resembling a controller button or keyboard key
-// Note:  buttons are with the given x coordinate as their _center_
+// Note: buttons are with the given x coordinate as their _center_
 bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, InputCode inputCode, const Color *overrideRenderColor)
 {
    // Set the basic color, could be overridden later
