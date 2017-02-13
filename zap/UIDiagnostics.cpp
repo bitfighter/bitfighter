@@ -438,7 +438,6 @@ void DiagnosticUserInterface::render() const
                SymbolShapePtr key = SymbolString::getModifiedKeySymbol(in, Colors::magenta);
 
                key->render(hpos, ypos, UI::AlignmentLeft);
-               key->getWidth() + 5;
             }
             break;
          }
