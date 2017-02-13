@@ -131,7 +131,7 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, InputCode 
    const char *label = buttonInfo.label.c_str();
    const Color *buttonColor = &buttonInfo.color;
 
-   // Note:  the x coordinate is already at the center
+   // Note: the x coordinate is already at the center
    Point location(centerX, centerY);
    Point center = location + Point(0, buttonHalfHeight);
 
