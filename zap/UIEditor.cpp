@@ -513,7 +513,7 @@ void EditorUserInterface::addToEditor(BfObject *obj)
 {
    obj->addToDatabase(mLevel.get());
    obj->onAddedToEditor();
-   geomChanged(obj);                   // Easy way to get PolyWalls to build themselves after being dragged from the dock
+   //geomChanged(obj);                   // Easy way to get PolyWalls to build themselves after being dragged from the dock
 }
 
 
@@ -2143,7 +2143,7 @@ void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, 
                                                            mGameSettings->getWallOutlineColor();
 
    // Shadows only drawn under walls that are being dragged.  No dragging, no shadows.
-   if(mDraggingObjects && shadowWallRenderMode == INCLUDE_SHADOW_WALLS)
+   if(mDraggingObjects && mDrawShadowWalls && shadowWallRenderMode == INCLUDE_SHADOW_WALLS)
       GameObjectRender::renderShadowWalls(mSelectedObjectsForDragging);
 
 
@@ -2156,7 +2156,7 @@ void EditorUserInterface::renderWallsAndPolywalls(const GridDatabase *database, 
                                  fillColor,
                                  mCurrentScale,
                                  mDraggingObjects, // <== bool
-                                 drawSelected,      // drawSelected
+                                 drawSelected,
                                  offset,
                                  mPreviewMode,
                                  getSnapToWallCorners(),
@@ -3000,7 +3000,10 @@ void EditorUserInterface::onMouseDragged()
    if(mCreatingPoly || mCreatingPolyline || mDragSelecting)
       return;
 
-   if(mDraggingDockItem.isValid())      // We just started dragging an item off the dock
+   if(!mDraggingObjects)
+      mDrawShadowWalls = true;         // Gets set to false inside startDraggingDockItem() if object is being dragged from the dock
+
+   if(mDraggingDockItem.isValid())     // We just started dragging an item off the dock
       startDraggingDockItem();
 
    findSnapVertex();                               // Sets mSnapObject and mSnapVertexIndex
@@ -3237,6 +3240,8 @@ void EditorUserInterface::startDraggingDockItem()
    item->moveTo(pos);
 
    addToEditor(item);
+   mDrawShadowWalls = false;
+
 
    // Create an undo action to remove this item
    mUndoManager.saveCreateActionAndMergeWithNextUndoState();

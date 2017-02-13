@@ -123,6 +123,7 @@ private:
    DockMode mDockMode;
 
    int mSnapContext;
+   bool mDrawShadowWalls;
 
    Timer mSaveMsgTimer;
    Timer mWarnMsgTimer;
