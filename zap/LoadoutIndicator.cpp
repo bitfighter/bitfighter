@@ -90,17 +90,20 @@ static S32 getComponentRectWidth(S32 textWidth)
 // Returns width of indicator component
 static S32 renderComponentIndicator(S32 xPos, S32 yPos, const Color &color, const char *name)
 {
-   S32 adjustment = -1;
+   // Adjustment factors that just make the indicators look better.  Trust the math, but verify the aesthetics.
+   const S32 xAdjustment = 2;
+   const S32 yAdjustment = -1;
+
    // Draw the weapon or module name (n.b.: If you change the lcase, do the same in getComponentIndicatorWidth)
-   S32 textWidth = RenderUtils::drawStringAndGetWidth_fixed(xPos + IndicatorHorizPadding + 2, 
-                                                            yPos + IndicatorVertPadding + IndicatorFontSize + adjustment,
+   S32 textWidth = RenderUtils::drawStringAndGetWidth_fixed(xPos + IndicatorHorizPadding + xAdjustment,
+                                                            yPos + IndicatorVertPadding + IndicatorFontSize + yAdjustment,
                                                             IndicatorFontSize, 
                                                             color, 
                                                             lcase(name).c_str());
 
    S32 rectWidth = getComponentRectWidth(textWidth);
 
-   RenderUtils::drawFancyBox(xPos, yPos, xPos + rectWidth, yPos + IndicatorHeight, IndicatorVertPadding, GLOPT::LineLoop, color);
+   RenderUtils::drawFancyBox(xPos, yPos, xPos + rectWidth, yPos + IndicatorHeight, IndicatorVertPadding, 2, color);
 
    return rectWidth;
 }
