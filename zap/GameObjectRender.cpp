@@ -162,8 +162,8 @@ void GameObjectRender::renderShipFlame(ShipFlame *flames, S32 flameCount, F32 th
 
 
 void GameObjectRender::renderShip(ShipShape::ShipShapeType shapeType, const Color &shipColor, F32 alpha,
-                F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
-                bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
+                                  F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
+                                  bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
 {
    ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[shapeType];
 
@@ -189,9 +189,11 @@ void GameObjectRender::renderShip(ShipShape::ShipShapeType shapeType, const Colo
       RenderUtils::drawLineStrip(shipShapeInfo->innerHullPieces[i].points, shipShapeInfo->innerHullPieces[i].pointCount, shipColor, alpha);
 
    // Render health bar
-   renderHealthBar(health, Point(0,1.5), Point(0,1), 28, 4, shipColor, alpha);
+   renderHealthBar(health, Point(0, 1.5), Point(0, 1), 28, 4, shipColor, alpha);
 
    // Grey outer hull drawn last, on top
+   RenderUtils::lineWidth(DEFAULT_LINE_WIDTH);
+   nvgLineJoin(nvg, NVG_BEVEL);
    RenderUtils::drawLineLoop(shipShapeInfo->outerHullPoints, shipShapeInfo->outerHullPointCount, Colors::gray70, alpha);
 
    // Now render any module states
@@ -580,6 +582,8 @@ void GameObjectRender::renderSpawnShield(const Point &pos, U32 shieldTime, U32 r
    // This rather gross looking variable helps manage problems with the resolution of F32s when getRealMilliseconds() returns a large value
    const S32 BiggishNumber = 21988;
    F32 offset = F32(renderTime % BiggishNumber) * FloatTau / BiggishNumber;
+
+   RenderUtils::lineWidth(DEFAULT_LINE_WIDTH);
    RenderUtils::drawDashedHollowCircle(pos, Ship::CollisionRadius + 5, Ship::CollisionRadius + 10, 8, FloatTau / 24.0f, offset, color);
 }
 
@@ -1616,6 +1620,8 @@ void GameObjectRender::renderMine(const Point &pos, bool armed, bool visible)
    F32 mod;
    F32 vis;   
 
+   RenderUtils::lineWidth(DEFAULT_LINE_WIDTH);
+
    if(visible)    // Friendly mine
    {
       RenderUtils::drawCircle(pos, (F32)Mine::SensorRadius, Colors::gray50);
@@ -1637,7 +1643,7 @@ void GameObjectRender::renderMine(const Point &pos, bool armed, bool visible)
       Color red(mod, 0, 0);
       RenderUtils::drawCircle(pos, 6, red, vis);
    }
-   RenderUtils::lineWidth(RenderUtils::DEFAULT_LINE_WIDTH);
+   RenderUtils::lineWidth(DEFAULT_LINE_WIDTH);
 }
 
 #ifndef min

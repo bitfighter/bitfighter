@@ -330,7 +330,7 @@ void Barrier::renderLayer(S32 layerIndex)
    static const Color fillColor(GameSettings::get()->getWallFillColor());
 
    if(layerIndex == 0)           // First pass: draw the fill
-      GameObjectRender::renderPolygonFill(&mRenderFillGeometry, fillColor);
+      GameObjectRender::renderConvexPolygon(mRenderFillGeometry, fillColor);
 #endif
 }
 

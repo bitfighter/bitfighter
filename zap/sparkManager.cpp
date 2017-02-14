@@ -569,6 +569,7 @@ void FxTrail::render() const
    }
 
    // FIXME NANOVG This still uses old GL calls
+   RenderUtils::lineWidth(RenderUtils::LINE_WIDTH_1);
    RenderUtils::drawLineStripColorArray(FxTrailVertexArray, FxTrailColorArray, mNodes.size());
 }
 
@@ -620,6 +621,7 @@ void FxTrail::unregisterTrail()
 
 void FxTrail::renderTrails()
 {
+   RenderUtils::lineWidth(RenderUtils::LINE_WIDTH_1);
    FxTrail *w = mHead;
    while(w)
    {

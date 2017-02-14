@@ -92,7 +92,7 @@ static S32 renderComponentIndicator(S32 xPos, S32 yPos, const Color &color, cons
 {
    S32 adjustment = -1;
    // Draw the weapon or module name (n.b.: If you change the lcase, do the same in getComponentIndicatorWidth)
-   S32 textWidth = RenderUtils::drawStringAndGetWidth_fixed(xPos + IndicatorHorizPadding, 
+   S32 textWidth = RenderUtils::drawStringAndGetWidth_fixed(xPos + IndicatorHorizPadding + 2, 
                                                             yPos + IndicatorVertPadding + IndicatorFontSize + adjustment,
                                                             IndicatorFontSize, 
                                                             color, 
