@@ -18,6 +18,8 @@ namespace Zap {
 
 class ClientGame;
 class ClientInfo;
+class Timer;
+
 class GameRecorderPlayback : public GameConnection
 {
    typedef GameConnection Parent;
@@ -75,6 +77,8 @@ class PlaybackGameUserInterface : public UserInterface
    U32 mSpeed;
    U32 mSpeedRemainder;
    bool mVisible;
+   Timer mDisableMouseTimer;
+
 public:
    explicit PlaybackGameUserInterface(ClientGame *game);
    void onActivate();

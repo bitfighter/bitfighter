@@ -19,6 +19,7 @@
 #include "DisplayManager.h"
 #include "OpenglUtils.h"
 #include "Cursor.h"
+#include "Timer.h"
 
 #include "version.h"
 
@@ -415,6 +416,7 @@ void PlaybackServerDownloadUserInterface::receivedLevelList(const Vector<string>
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+#define DISABLE_MOUSE_TIME 1000
 
 PlaybackGameUserInterface::PlaybackGameUserInterface(ClientGame *game) : UserInterface(game)
 {
@@ -422,6 +424,7 @@ PlaybackGameUserInterface::PlaybackGameUserInterface(ClientGame *game) : UserInt
    mSpeed = 0;
    mSpeedRemainder = 0;
    mVisible = false;
+   mDisableMouseTimer.setPeriod(DISABLE_MOUSE_TIME);
 }
 
 
@@ -560,16 +563,24 @@ void PlaybackGameUserInterface::onTextInput(char ascii)      { mGameInterface->o
 
 void PlaybackGameUserInterface::onMouseMoved()
 {
-//   F32 x = DisplayManager::getScreenInfo()->getMousePos()->x;
+   // Reset mouse timer
+   mDisableMouseTimer.reset();
+   Cursor::enableCursor();
+
    F32 y = DisplayManager::getScreenInfo()->getMousePos()->y;
 
-   mVisible = (y >= 100); // Maybe a better way to hide the bottom bar?
+   // Show playback controls if mouse crosses this line
+   mVisible = (y >= 500);
 }
 
 
 void PlaybackGameUserInterface::idle(U32 timeDelta)
 {
    mGameInterface->idle(timeDelta);
+
+   // Disable cursor if no mouse movement after a while
+   if(mDisableMouseTimer.update(timeDelta))
+      Cursor::disableCursor();
 
    U32 idleTime = timeDelta;
    switch(mSpeed)
