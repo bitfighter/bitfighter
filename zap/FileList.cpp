@@ -123,8 +123,6 @@ void FileList::addFile(const string &dir, const string &filename)
 void FileList::addFilesFromFolder(const string &dir)
 {
    addFilesFromFolder(dir, NULL, 0);
-
-   currentItemIndex = 0;    // Reset index
 }
 
 
@@ -171,7 +169,11 @@ void FileList::addFilesFromFolder(const string &dir, const string extensions[], 
 
    mOk = true;
 
-   currentItemIndex = 0;    // Reset index
+   // Reset index
+   if(mFileMap.size() == 0)
+      currentItemIndex = -1;
+   else
+      currentItemIndex = 0;
 }
 
 
