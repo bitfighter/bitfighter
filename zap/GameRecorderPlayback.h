@@ -79,6 +79,9 @@ class GameUserInterface;
 
 class PlaybackGameUserInterface : public UserInterface
 {
+   typedef UserInterface Parent;
+
+private:
    GameUserInterface *mGameInterface;
    SafePtr<GameRecorderPlayback> mPlaybackConnection;
    U32 mSpeed;
