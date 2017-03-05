@@ -423,7 +423,7 @@ PlaybackGameUserInterface::PlaybackGameUserInterface(ClientGame *game) : UserInt
    mGameInterface = game->getUIManager()->getUI<GameUserInterface>();
    mSpeed = 0;
    mSpeedRemainder = 0;
-   mVisible = false;
+   mVisible = true;
    mDisableMouseTimer.setPeriod(DISABLE_MOUSE_TIME);
 }
 
@@ -567,10 +567,8 @@ void PlaybackGameUserInterface::onMouseMoved()
    mDisableMouseTimer.reset();
    Cursor::enableCursor();
 
-   F32 y = DisplayManager::getScreenInfo()->getMousePos()->y;
-
-   // Show playback controls if mouse crosses this line
-   mVisible = (y >= 500);
+   // Show playback controls if mouse moves
+   mVisible = true;
 }
 
 
@@ -580,7 +578,15 @@ void PlaybackGameUserInterface::idle(U32 timeDelta)
 
    // Disable cursor if no mouse movement after a while
    if(mDisableMouseTimer.update(timeDelta))
-      Cursor::disableCursor();
+   {
+      // If mouse is near the controls, still show it and the controls
+      F32 y = DisplayManager::getScreenInfo()->getMousePos()->y;
+      if(y < 500)
+      {
+         Cursor::disableCursor();
+         mVisible = false;
+      }
+   }
 
    U32 idleTime = timeDelta;
    switch(mSpeed)
