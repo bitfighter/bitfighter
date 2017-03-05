@@ -19,6 +19,7 @@ namespace Zap
 
 class ClientGame;
 class ClientInfo;
+class Timer;
 
 class GameRecorderPlayback : public GameConnection
 {
@@ -83,6 +84,7 @@ class PlaybackGameUserInterface : public UserInterface
    U32 mSpeed;
    U32 mSpeedRemainder;
    bool mVisible;
+   Timer mDisableMouseTimer;
 
 public:
    explicit PlaybackGameUserInterface(ClientGame *game, UIManager *uiManager);
