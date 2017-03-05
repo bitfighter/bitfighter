@@ -501,6 +501,8 @@ const F32 buttons_lines[] = {
 
 bool PlaybackGameUserInterface::onKeyDown(InputCode inputCode)
 {
+   string inputString = InputCodeManager::getCurrentInputString(inputCode);
+
    if(inputCode == MOUSE_LEFT)
    {
       F32 x = DisplayManager::getScreenInfo()->getMousePos()->x;
@@ -550,8 +552,19 @@ bool PlaybackGameUserInterface::onKeyDown(InputCode inputCode)
       || checkInputCode(BINDING_MOD2, inputCode) )
       mPlaybackConnection->changeSpectate(-1);
 
+   // Handle a few UIGame specific keys that may be useful in playback
+   else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK ||
+         checkInputCode(BINDING_CMDRMAP, inputCode) ||
+         checkInputCode(BINDING_SCRBRD, inputCode) ||
+         checkInputCode(BINDING_HELP, inputString) ||
+         checkInputCode(BINDING_MISSION, inputCode) ||
+         inputCode == KEY_M
+         )
+      mGameInterface->onKeyDown(inputCode);
+
+   // Otherwise pass to parent
    else
-      return mGameInterface->onKeyDown(inputCode);
+      return Parent::onKeyDown(inputCode);
 
    return true;
 }
