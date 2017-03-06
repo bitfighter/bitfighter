@@ -435,6 +435,9 @@ void PlaybackGameUserInterface::onActivate()
    mSpeed = 2;
    mSpeedRemainder = 0;
    mVisible = true;
+
+   // Clear out any lingering server or chat messages
+   mGameInterface->clearDisplayers();
 }
 
 
@@ -501,8 +504,6 @@ const F32 buttons_lines[] = {
 
 bool PlaybackGameUserInterface::onKeyDown(InputCode inputCode)
 {
-   string inputString = InputCodeManager::getCurrentInputString(inputCode);
-
    if(inputCode == MOUSE_LEFT)
    {
       F32 x = DisplayManager::getScreenInfo()->getMousePos()->x;
@@ -556,7 +557,7 @@ bool PlaybackGameUserInterface::onKeyDown(InputCode inputCode)
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK ||
          checkInputCode(BINDING_CMDRMAP, inputCode) ||
          checkInputCode(BINDING_SCRBRD, inputCode) ||
-         checkInputCode(BINDING_HELP, inputString) ||
+         checkInputCode(BINDING_HELP, inputCode) ||
          checkInputCode(BINDING_MISSION, inputCode) ||
          inputCode == KEY_M
          )
@@ -589,10 +590,10 @@ void PlaybackGameUserInterface::idle(U32 timeDelta)
 {
    mGameInterface->idle(timeDelta);
 
-   // Disable cursor if no mouse movement after a while
+   // Check to see if its time to disable cursor
    if(mDisableMouseTimer.update(timeDelta))
    {
-      // If mouse is near the controls, still show it and the controls
+      // If mouse is not hovering near the controls, disable it and the controls
       F32 y = DisplayManager::getScreenInfo()->getMousePos()->y;
       if(y < 500)
       {

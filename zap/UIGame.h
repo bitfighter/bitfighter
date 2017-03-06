@@ -377,6 +377,7 @@ public:
    void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
    void emitTeleportInEffect(const Point &pos, U32 type);
 
+   void clearDisplayers();
    
    void renderBasicInterfaceOverlay();
    void renderLevelInfo();
