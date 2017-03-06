@@ -150,12 +150,7 @@ void GameUserInterface::onActivate()
    onMouseMoved();                     // Make sure ship pointed is towards mouse
    mCmdrsMapKeyRepeatSuppressionSystemApprovesToggleCmdrsMap = true;
 
-
-   // Clear out any lingering server or chat messages
-   mServerMessageDisplayer.reset();
-   mChatMessageDisplayer.reset();
-
-   mConnectionStatsRenderer.reset();
+   clearDisplayers();
 
    // Clear out any walls we were using in a previous run
    Barrier::clearRenderItems();           // TODO: Should really go in an onDeactivate method, which we don't really have
@@ -446,6 +441,17 @@ bool GameUserInterface::isShowingDebugShipCoords() const { return mDebugShowShip
 void GameUserInterface::clearSparks()
 {
    mFxManager.clearSparks();
+}
+
+
+// Some FxManager passthrough functions
+void GameUserInterface::clearDisplayers()
+{
+   // Clear out any lingering server or chat messages
+   mServerMessageDisplayer.reset();
+   mChatMessageDisplayer.reset();
+
+   mConnectionStatsRenderer.reset();
 }
 
 

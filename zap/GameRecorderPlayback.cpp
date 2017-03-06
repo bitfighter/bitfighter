@@ -436,6 +436,9 @@ void PlaybackGameUserInterface::onActivate()
    mSpeed = 2;
    mSpeedRemainder = 0;
    mVisible = true;
+
+   // Clear out any lingering server or chat messages
+   mGameInterface->clearDisplayers();
 }
 
 
@@ -590,10 +593,10 @@ void PlaybackGameUserInterface::idle(U32 timeDelta)
 {
    mGameInterface->idle(timeDelta);
 
-   // Disable cursor if no mouse movement after a while
+   // Check to see if its time to disable cursor
    if(mDisableMouseTimer.update(timeDelta))
    {
-      // If mouse is near the controls, still show it and the controls
+      // If mouse is not hovering near the controls, disable it and the controls
       F32 y = DisplayManager::getScreenInfo()->getMousePos()->y;
       if(y < 500)
       {
