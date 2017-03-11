@@ -56,4 +56,4 @@
 /* #undef HAS_FLUIDSYNTH */
 /* #undef HAS_DUMB */
 #define HAS_MODPLUG
-/* #undef HAS_MPG123 */
+#define HAS_MPG123

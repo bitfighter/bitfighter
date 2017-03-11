@@ -4,6 +4,9 @@ if(WIN32)
 	add_definitions(-D_WIN32)
 endif()
 
+# Dynamic loading of mpg123 for people who may want to drop in a decoder
+add_definitions(-DDYNLOAD_MPG123=1)
+
 if(NOT WIN32)
 	set(EXTRA_LIBS dl)
 endif()
@@ -18,6 +21,7 @@ set(ALURE_SOURCES
 	codec_aiff.cpp
 	alure.cpp
 	codec_modplug.cpp
+	codec_mpg123.cpp
 	codec_vorbisfile.cpp
 )
 

@@ -329,8 +329,8 @@ void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &music
 
    // Set up music list for streaming later.  For now, we'll load these file types.  Not all have been tested.  More may play.  Who knows?
    const string extList[] = { ".669", ".ABC", ".AMF", ".AMS", ".DBM", ".DMF", ".DSM", ".FAR", ".IT", 
-                              ".MDL", ".Med", ".MID", ".MOD", ".MT2", ".MTM", ".OKT", ".OGG", ".PAT", 
-                              ".PSM", ".PTM", ".S3M", ".STM", ".Ult", ".UMX", ".Wav", ".XM" };
+                              ".MDL", ".Med", ".MID", ".MOD", ".MP3", ".MT2", ".MTM", ".OKT", ".OGG",
+                              ".PAT", ".PSM", ".PTM", ".S3M", ".STM", ".Ult", ".UMX", ".Wav", ".XM" };
 
    if(!getFilesFromFolder(mMusicDir, mGameMusicList, extList, ARRAYSIZE(extList)))
       logprintf(LogConsumer::LogWarning, "Could not read music files from folder \"%s\".  Game will proceed without music", musicDir.c_str());

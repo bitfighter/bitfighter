@@ -30,10 +30,10 @@
 
 #include <istream>
 
-#include <mpg123.h>
+#include "mpg123.h"
 
 
-#ifdef DYNLOAD
+#if defined (DYNLOAD) || defined (DYNLOAD_MPG123)
 static void *mp123_handle;
 #define MAKE_FUNC(x) static typeof(x)* p##x
 MAKE_FUNC(mpg123_read);
@@ -75,7 +75,7 @@ private:
     std::ios::pos_type dataEnd;
 
 public:
-#ifdef DYNLOAD
+#if defined (DYNLOAD) || defined (DYNLOAD_MPG123)
     static void Init()
     {
 #ifdef _WIN32
