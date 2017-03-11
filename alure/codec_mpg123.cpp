@@ -80,12 +80,17 @@ public:
     {
 #ifdef _WIN32
 #define MPG123_LIB "libmpg123.dll"
+#define MPG123_LIB2 "libmpg123-0.dll"
 #elif defined(__APPLE__)
 #define MPG123_LIB "libmpg123.0.dylib"
+#define MPG123_LIB2 0
 #else
 #define MPG123_LIB "libmpg123.so.0"
+#define MPG123_LIB2 0
 #endif
         mp123_handle = OpenLib(MPG123_LIB);
+        if(!mp123_handle && MPG123_LIB2)
+            mp123_handle = OpenLib(MPG123_LIB2);
         if(!mp123_handle) return;
 
         LOAD_FUNC(mp123_handle, mpg123_read);
