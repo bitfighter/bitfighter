@@ -1,0 +1,7 @@
+# Add your custom game controller mappings to this file.  Use one and only one 
+# line for a mapping.  Mappings can be added with the 'controllermap' utility.
+#
+# These will override any found in the default gamecontrollerdb.txt
+
+# Sabrent 12 button (submitted by Skybax)
+79000600000000000000504944564944,USB Joystick          ,platform:Windows,x:b0,a:b2,b:b3,y:b1,back:b4,start:b5,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,dpup:h0.1,leftshoulder:b6,lefttrigger:b8,rightshoulder:b7,righttrigger:b9,leftstick:b10,rightstick:b11,leftx:a0,lefty:a1,rightx:a2,righty:a3,
