@@ -618,6 +618,16 @@ lua_Integer getCheckedInt(lua_State *L, S32 index, const char *methodName)
 }
 
 
+// Returns defaultVal if there is an invalid or missing value on the stack
+F32 getFloat(lua_State *L, S32 index, F32 defaultVal)
+{
+   if(!lua_isnumber(L, index))
+      return defaultVal;
+   // else
+   return (F32)lua_tonumber(L, index);
+}
+
+
 // Pop a number off stack, convert to float, and return it (no bounds check)
 F32 getFloat(lua_State *L, S32 index)
 {

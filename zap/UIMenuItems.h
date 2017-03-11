@@ -26,7 +26,8 @@ enum MenuItemTypes {
    TimeCounterMenuItemType,
    TextEntryMenuItemType,   
    PlayerMenuItemType,
-   TeamMenuItemType
+   TeamMenuItemType,
+   FloatCounterMenuItemType
 };
 
 enum PlayerType {
@@ -314,27 +315,65 @@ public:
    static const LuaFunctionProfile functionArgs[];
 };
 
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class TenthsCounterMenuItem : public CounterMenuItem
+class FloatCounterMenuItem : public ValueMenuItem
 {
-   typedef CounterMenuItem Parent;
+   typedef ValueMenuItem Parent;
 
 private:
-   virtual string getOptionText() const;
+   virtual string getOptionText();     // Helper function, overridden in TimeCounterMenuItem
+   virtual void setFloatValue(F32 val);// Helper to always clamp value
+   virtual void initialize();
+
+protected:
+   F32 mValue;
+   F32 mStep;
+   F32 mMinValue;
+   F32 mMaxValue;
+   S32 mDecimalPlaces;
+   S32 mPrecision;
+   string mUnits;
+   string mMinMsg;
+
+   virtual void increment(S32 fact = 1);
+   virtual void decrement(S32 fact = 1);
+   virtual F32 getBigIncrement();    // How much our counter is incremented when shift is down (multiplier)
+   virtual void backspace();
+   virtual void enterDigit(S32 digit);
 
 public:
-   // Constructor
-   TenthsCounterMenuItem(const string &title, F32 value, S32 minVal, S32 maxVal, 
-                         const string &units, const string &minMsg, 
-                         const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   FloatCounterMenuItem(const string &title, F32 value, F32 step, F32 minVal, F32 maxVal, S32 decimalPlaces,
+                   const string &units, const string &minMsg,
+                   const string &help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
-   virtual ~TenthsCounterMenuItem();      // Destructor
+   virtual ~FloatCounterMenuItem();  // Destructor
 
-   F32 getF32Value() const;
-   virtual string getValueForWritingToLevelFile() const;
+   virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
+   virtual S32 getWidth(S32 textsize);
+
+   virtual MenuItemTypes getItemType();
+   virtual S32 getIntValue() const;
+   virtual void setIntValue(S32 val);
+   virtual string getValue() const;
+   virtual void setValue(const string &val);
+   virtual const char *getSpecialEditingInstructions();
+   virtual bool handleKey(InputCode inputCode);
+
+   virtual string getUnits() const;
+
+   virtual void snap();
+
+   virtual void activatedWithShortcutKey();
+
+   ///// Lua interface
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(FloatCounterMenuItem);
+   explicit FloatCounterMenuItem(lua_State *L);      // Constructor called from Lua
+
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 
