@@ -1293,12 +1293,7 @@ void renderPolyLineVertices(BfObject *obj, bool snapping, F32 currentScale)
 
 void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentScale)
 {
-   Color col(color);        // Make a copy we can alter
-   glColor(col * 0.45f);    // Slightly different color than that used for ships
-
-   F32 range = SpyBug::SPY_BUG_RADIUS * currentScale;
-
-   drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GL_TRIANGLE_FAN);
+   renderFilledPolygon(pos, 6, SpyBug::SPY_BUG_RADIUS * currentScale, color * 0.45f);
 }
 
 
@@ -1703,7 +1698,7 @@ void renderNavMeshBorders(const Vector<NeighboringZone> &borders)
    {
       F32 vertices[] = {
             borders[i].borderStart.x, borders[i].borderStart.y,
-            borders[i].borderEnd.x, borders[i].borderEnd.y,
+            borders[i].borderEnd.x,   borders[i].borderEnd.y,
       };
       renderVertexArray(vertices, 2, GL_LINES);
    }
@@ -2103,7 +2098,7 @@ void renderSpyBug(const Point &pos, const Color &teamColor, bool visible)
    else
    {
       glLineWidth(gLineWidth1);
-      glColor(0.25);
+      glColor(0.25f);
       drawPolygon(pos, 6, 5, 0);
    }
 
@@ -2838,7 +2833,7 @@ void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F
    // Fill the box with a dark gray to make the number easier to read
    if(hollow && number != -1)
    {
-      glColor(.25);
+      glColor(.25f);
       drawFilledSquare(v, size / scale);
    }
       
