@@ -1380,8 +1380,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
          queryRect.expand(scopeRange);
 
          fillVector.clear();
-         mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect, false);
-
+         mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect, sameQuery);
          sameQuery = true;
 
          for(S32 j = 0; j < fillVector.size(); j++)
