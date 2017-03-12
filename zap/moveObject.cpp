@@ -11,6 +11,7 @@
 #include "game.h"
 #include "gameConnection.h"
 #include "ship.h"
+#include "Zone.h"
 
 #include "Colors.h"
 #include "GeomUtils.h"
@@ -68,6 +69,7 @@ MoveObject::MoveObject(const Point &pos, F32 radius, F32 mass) : Parent(radius)
    mMass = mass;
    mInterpolating = false;
    mHitLimit = 16;
+   mZones1IsCurrent = true;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -104,6 +106,9 @@ string MoveObject::toLevelCode() const
 void MoveObject::idle(BfObject::IdleCallPath path)
 {
    mHitLimit = 16;      // Reset hit limit
+
+   if(path == ServerIdleMainLoop)
+      checkForZones();        // See if ship entered or left any zones
 }
 
 
@@ -558,6 +563,81 @@ BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Poi
    }
    return collisionObject;
 }
+
+
+// See if ship entered or left any zones
+// Server only
+void MoveObject::checkForZones()
+{
+   Vector<SafePtr<Zone> > &currZoneList = getCurrZoneList();
+   Vector<SafePtr<Zone> > &prevZoneList = getPrevZoneList();
+
+   getZonesShipIsIn(currZoneList);     // Fill currZoneList with a list of all zones ship is currently in
+
+   // Now compare currZoneList with prevZoneList to figure out if ship entered or exited any zones
+   for(S32 i = 0; i < currZoneList.size(); i++)
+      if(!prevZoneList.contains(currZoneList[i]))
+         onEnteredZone(currZoneList[i].getPointer());
+
+   for(S32 i = 0; i < prevZoneList.size(); i++)
+      // Zone can sometimes disappear if removed from the game via Lua, check if valid first
+      if(prevZoneList[i].isValid() && !currZoneList.contains(prevZoneList[i]))
+         onLeftZone(prevZoneList[i].getPointer());
+}
+
+
+void MoveObject::onEnteredZone(Zone *zone)
+{
+   EventManager::get()->fireEvent(EventManager::ObjectEnteredZoneEvent, this, zone);
+}
+
+
+void MoveObject::onLeftZone(Zone *zone)
+{
+   EventManager::get()->fireEvent(EventManager::ObjectLeftZoneEvent, this, zone);
+}
+
+
+
+// Fill zoneList with a list of all zones that the ship is currently in
+// Server only
+void MoveObject::getZonesShipIsIn(Vector<SafePtr<Zone> > &zoneList)
+{
+   // Use this boolean as a cheap way of making the current zone list be the previous out without copying
+   mZones1IsCurrent = !mZones1IsCurrent;
+
+   zoneList.clear();
+
+   Rect rect(getActualPos(), getActualPos());      // Center of ship
+
+   fillVector.clear();
+   findObjects((TestFunc)isZoneType, fillVector, rect);  // Find all zones the ship might be in
+
+   // Extents overlap...  now check for actual overlap
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      // Get points that define the zone boundaries
+      const Vector<Point> *polyPoints = fillVector[i]->getCollisionPoly();
+
+      if(polygonContainsPoint(polyPoints->address(), polyPoints->size(), getActualPos()))
+         zoneList.push_back(SafePtr<Zone>(static_cast<Zone *>(fillVector[i])));
+   }
+}
+
+
+// Get list of zones ship is currently in
+Vector<SafePtr<Zone> > &MoveObject::getCurrZoneList()
+{
+   return mZones1IsCurrent ? mZones1 : mZones2;
+}
+
+
+// Get list of zones ship was in last tick
+Vector<SafePtr<Zone> > &MoveObject::getPrevZoneList()
+{
+   return mZones1IsCurrent ? mZones2 : mZones1;
+}
+
 
 
 // Collided with BarrierType, EngineeredType, or ForceFieldType.  What's the response?

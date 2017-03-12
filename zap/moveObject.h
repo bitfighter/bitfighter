@@ -58,6 +58,14 @@ private:
    S32 mHitLimit;             // Internal counter for processing collisions
    MoveStates mMoveStates;
 
+   // For maintaining a list of zones the object is currently in
+   Vector<SafePtr<Zone> > mZones1;      
+   Vector<SafePtr<Zone> > mZones2;
+   bool mZones1IsCurrent;        // "Pointer" to one of the above
+
+   Vector<SafePtr<Zone> > &getCurrZoneList();                  // Get list of zones object is currently in
+   Vector<SafePtr<Zone> > &getPrevZoneList();                  // Get list of zones object was in last tick
+
 protected:
    enum {
       InterpMaxVelocity = 900, // velocity to use to interpolate to proper position
@@ -74,6 +82,8 @@ protected:
       FirstFreeMask    = Parent::FirstFreeMask << 2
    };
 
+   virtual void onEnteredZone(Zone *zone);
+   virtual void onLeftZone(Zone *zone);
 
 public:
    MoveObject(const Point &p = Point(0,0), float radius = 1, float mass = 1);     // Constructor
@@ -146,6 +156,9 @@ public:
    void computeCollisionResponseBarrier(U32 stateIndex, Point &collisionPoint);
    F32 computeMinSeperationTime(U32 stateIndex, MoveObject *contactObject, Point intendedPos);
 
+   void checkForZones();                                       // See if object entered or left any zones
+   void getZonesShipIsIn(Vector<SafePtr<Zone> > &zoneList);    // Fill zoneList with a list of all zones that the object is currently in
+        
    void computeImpulseDirection(DamageInfo *damageInfo);
 
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const;

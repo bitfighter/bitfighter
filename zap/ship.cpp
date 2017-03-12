@@ -124,8 +124,6 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
    else
       mHasExploded = false;    // Client needs this false for unpackUpdate
 
-   mZones1IsCurrent = true;
-
 #ifndef ZAP_DEDICATED
    mSparkElapsed = 0;
    mShapeType = ShipShape::Normal;
@@ -630,8 +628,6 @@ void Ship::idle(IdleCallPath path)
       }
    }
 
-   if(path == ServerIdleMainLoop)
-      checkForZones();        // See if ship entered or left any zones
 
    // Update the object in the game's extents database
    updateExtentInDatabase();
@@ -685,20 +681,6 @@ void Ship::idle(IdleCallPath path)
 }
 
 
-// Get list of zones ship is currently in
-Vector<SafePtr<Zone> > &Ship::getCurrZoneList()
-{
-   return mZones1IsCurrent ? mZones1 : mZones2;
-}
-
-
-// Get list of zones ship was in last tick
-Vector<SafePtr<Zone> > &Ship::getPrevZoneList()
-{
-   return mZones1IsCurrent ? mZones2 : mZones1;
-}
-
-
 bool Ship::checkForSpeedzones(U32 stateIndex)
 {
    SpeedZone *speedZone = static_cast<SpeedZone *>(isOnObject(SpeedZoneTypeNumber, stateIndex));
@@ -706,52 +688,6 @@ bool Ship::checkForSpeedzones(U32 stateIndex)
    if(speedZone && speedZone->collide(this))
       return speedZone->collided(this, stateIndex);
    return false;
-}
-
-// See if ship entered or left any zones
-// Server only
-void Ship::checkForZones()
-{
-   Vector<SafePtr<Zone> > &currZoneList = getCurrZoneList();
-   Vector<SafePtr<Zone> > &prevZoneList = getPrevZoneList();
-
-   getZonesShipIsIn(currZoneList);     // Fill currZoneList with a list of all zones ship is currently in
-
-   // Now compare currZoneList with prevZoneList to figure out if ship entered or exited any zones
-   for(S32 i = 0; i < currZoneList.size(); i++)
-      if(!prevZoneList.contains(currZoneList[i]))
-         EventManager::get()->fireEvent(EventManager::ShipEnteredZoneEvent, this, static_cast<Zone *>(currZoneList[i].getPointer()));
-
-   for(S32 i = 0; i < prevZoneList.size(); i++)
-      // Zone can sometimes disappear if removed from the game via Lua, check if valid first
-      if(prevZoneList[i].isValid() && !currZoneList.contains(prevZoneList[i]))
-         EventManager::get()->fireEvent(EventManager::ShipLeftZoneEvent, this, static_cast<Zone *>(prevZoneList[i].getPointer()));
-}
-
-
-// Fill zoneList with a list of all zones that the ship is currently in
-// Server only
-void Ship::getZonesShipIsIn(Vector<SafePtr<Zone> > &zoneList)
-{
-   // Use this boolean as a cheap way of making the current zone list be the previous out without copying
-   mZones1IsCurrent = !mZones1IsCurrent;     
-
-   zoneList.clear();
-
-   Rect rect(getActualPos(), getActualPos());      // Center of ship
-
-   fillVector.clear();                             
-   findObjects((TestFunc)isZoneType, fillVector, rect);  // Find all zones the ship might be in
-
-   // Extents overlap...  now check for actual overlap
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      // Get points that define the zone boundaries
-      const Vector<Point> *polyPoints = fillVector[i]->getCollisionPoly();
-
-      if(polygonContainsPoint(polyPoints->address(), polyPoints->size(), getActualPos()))
-         zoneList.push_back(SafePtr<Zone>(static_cast<Zone*>(fillVector[i])));
-   }
 }
 
 
@@ -1920,6 +1856,18 @@ bool Ship::isModulePrimaryActive(ShipModule mod)
 ShipModule Ship::getModule(U32 modIndex)
 {
    return mLoadout.getModule(modIndex);
+}
+
+
+void Ship::onEnteredZone(Zone *zone)
+{
+   EventManager::get()->fireEvent(EventManager::ShipEnteredZoneEvent, this, zone);
+}
+
+
+void Ship::onLeftZone(Zone *zone)
+{
+   EventManager::get()->fireEvent(EventManager::ShipLeftZoneEvent, this, zone);
 }
 
 
