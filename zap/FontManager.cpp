@@ -411,12 +411,6 @@ F32 FontManager::getTtfFontStringLength(BfFont *font, const char *string)
 {
    F32 bounds[4];
    F32 length = nvgTextBounds(nvg, 0, 0, string, NULL, bounds);
-   
-   if(strcmp(string, "Delete Selection") == 0)
-   {
-      F32 len = (bounds[2] - bounds[0]);  //xyzzy
-      printf("zzxz Len = %f/%f", length, len);
-   }
 
    return length;
 }
