@@ -38,7 +38,7 @@ protected:
    void render(const char *header, S32 page, S32 pages) const;
    void renderConsoleCommands(const UI::SymbolStringSet &instructions, const ControlStringsEditor *cmdList) const;
 
-   UI::SymbolStringSet 
+   SymbolStringSet 
          mSpecialKeysInstrLeft,   mSpecialKeysBindingsLeft, 
          mSpecialKeysInstrRight,  mSpecialKeysBindingsRight,
          mWallInstr,              mWallBindings;
