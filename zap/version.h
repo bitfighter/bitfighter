@@ -20,6 +20,8 @@
 // 019 dev = 37
 // 019 = 38
 
+// Commit number:  since migration to git, this can be found by:
+//    git rev-list --all --count
 #define VERSION_016  3737
 #define VERSION_017  4252
 #define VERSION_017a 4265
@@ -32,11 +34,12 @@
 #define VERSION_019c 9708
 #define VERSION_019d 10314
 #define VERSION_019e 10572
+#define VERSION_019f 11529
 
-#define BUILD_VERSION VERSION_019e // Version of the game according to hg, will be unique every release (must be int)
+#define BUILD_VERSION VERSION_019f // Version of the game according to hg, will be unique every release (must be int)
                                    // Get from "hg summary"
 
-#define ZAP_GAME_RELEASE "019e"    // Change this with every release -- for display purposes only, string,
+#define ZAP_GAME_RELEASE "019f"    // Change this with every release -- for display purposes only, string,
                                    // will also be used for name of installer on windows, so be careful with spaces  
                                    // Used for GameRecorder.cpp, buildGameRecorderExtension
 
