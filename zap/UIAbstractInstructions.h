@@ -43,8 +43,8 @@ protected:
          mSpecialKeysInstrRight,  mSpecialKeysBindingsRight,
          mWallInstr,              mWallBindings;
 
-   void pack(UI::SymbolStringSet &Instrs, UI::SymbolStringSet &Bindings, 
-            const ControlStringsEditor *helpBindings, S32 bindingCount) const;
+   void pack(SymbolStringSet &Instrs, SymbolStringSet &Bindings, 
+             const ControlStringsEditor *helpBindings, S32 bindingCount) const;
 
 public:
    explicit AbstractInstructionsUserInterface(ClientGame *clientGame, UIManager *uiManager); // Constructor
