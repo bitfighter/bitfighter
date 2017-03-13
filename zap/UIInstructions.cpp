@@ -62,7 +62,8 @@ static const TypeDescr typeDescriptions[] = {
 
 
 // Constructor
-InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(game),
+InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : 
+   Parent(game),
                                                                          mLoadoutInstructions(LineGap),
                                                                          mPageHeaders(LineGap),
                                                                          mGameTypeInstrs(5   )
@@ -87,19 +88,17 @@ InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(
       { "Mission",           "[[Mission]]" }
    };
 
-   pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, 
-        helpBindLeft, ARRAYSIZE(helpBindLeft), getGame()->getSettings());
+   pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, helpBindLeft, ARRAYSIZE(helpBindLeft));
 
 
    const ControlStringsEditor helpBindRight[] = 
    { 
-      { "Universal Chat",    "[[OutOfGameChat]]" },
+      { "Lobby Chat",        "[[OutOfGameChat]]" },
       { "Display FPS / Lag", "[[FPS]]"           },
       { "Diagnostics",       "[[Diagnostics]]"   }
    };
 
-   pack(mSpecialKeysInstrRight, mSpecialKeysBindingsRight, 
-        helpBindRight, ARRAYSIZE(helpBindRight), getGame()->getSettings());
+   pack(mSpecialKeysInstrRight, mSpecialKeysBindingsRight, helpBindRight, ARRAYSIZE(helpBindRight));
 }
 
 
@@ -199,7 +198,7 @@ void InstructionsUserInterface::initNormalKeys_page1()
    helpBindRightCount = ARRAYSIZE(controlsRight);
 
 
-   UI::SymbolStringSet keysInstrLeft(LineGap),  keysBindingsLeft(LineGap), 
+   SymbolStringSet keysInstrLeft(LineGap),  keysBindingsLeft(LineGap), 
                        keysInstrRight(LineGap), keysBindingsRight(LineGap);
 
    // Add some headers to our 4 columns
@@ -221,8 +220,8 @@ void InstructionsUserInterface::initNormalKeys_page1()
    keysInstrRight.add(blank);
    keysBindingsRight.add(blank);
 
-   pack(keysInstrLeft,  keysBindingsLeft, helpBindLeft, helpBindLeftCount, getGame()->getSettings());
-   pack(keysInstrRight, keysBindingsRight, helpBindRight, helpBindRightCount, getGame()->getSettings());
+   pack(keysInstrLeft,  keysBindingsLeft, helpBindLeft, helpBindLeftCount);
+   pack(keysInstrRight, keysBindingsRight, helpBindRight, helpBindRightCount);
 
 
    S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;  //(= 33)
@@ -277,7 +276,7 @@ void InstructionsUserInterface::render()
          break;
       case InstructionAdvancedCommands:
          renderPageCommands(InstructionAdvancedCommands - FIRST_COMMAND_PAGE, 
-                            "Tip: Define QuickChat items to quickly enter commands (see INI for details)");
+                            "Tip: Define QuickChat items to quickly enter commands (see INI file for details)");
          break;
       case InstructionSoundCommands:
          renderPageCommands(InstructionSoundCommands - FIRST_COMMAND_PAGE);            // Sound control commands
@@ -303,10 +302,8 @@ void InstructionsUserInterface::render()
          break;
 
       case InstructionsGameTypes:
-         // JIT this, dude
          if(mGameTypeInstrs.getItemCount() == 0)
             initGameTypesPage();
-
          renderPageGameTypes();
          break;
 
@@ -350,7 +347,7 @@ bool InstructionsUserInterface::usingArrowKeys()
 }
 
 
-void InstructionsUserInterface::renderPage1()
+void InstructionsUserInterface::renderPage1() const
 {
    S32 starty = 65;
    S32 y;
@@ -453,7 +450,7 @@ void InstructionsUserInterface::initPageHeaders()
 }
 
 
-void InstructionsUserInterface::renderPage2()
+void InstructionsUserInterface::renderPage2() const
 {
    mLoadoutInstructions.render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, 65, AlignmentCenter);    // Overall block is centered
 }
@@ -529,7 +526,7 @@ static S32 renderBadges(S32 y, S32 textSize, S32 descSize)
 }
 
 
-void InstructionsUserInterface::renderPageGameIndicators()
+void InstructionsUserInterface::renderPageGameIndicators() const
 {
    S32 y = 40;
    S32 descSize = 20;
@@ -557,7 +554,7 @@ static const char *moduleDescriptions[][2] = {
    { "Engineer: ", "Collect resources to build special objects (A)" }
 };
 
-void InstructionsUserInterface::renderModulesPage()
+void InstructionsUserInterface::renderModulesPage() const
 {
    S32 y = 40;
    S32 textsize = 20;
@@ -723,7 +720,7 @@ const char *gGameObjectInfo[] = {
 static U32 GameObjectCount = ARRAYSIZE(gGameObjectInfo) / 2;   
 
 
-void InstructionsUserInterface::renderPageObjectDesc(U32 index)
+void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
 {
    U32 objectsPerPage = 6;
    U32 startIndex = index * objectsPerPage;
@@ -932,7 +929,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
 
 extern CommandInfo chatCmds[];
 
-void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
+void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) const
 {
    TNLAssert(page < COMMAND_CATEGORIES, "Page too high!");
 
@@ -1085,7 +1082,7 @@ void InstructionsUserInterface::initGameTypesPage()
 }
 
 
-void InstructionsUserInterface::renderPageGameTypes()
+void InstructionsUserInterface::renderPageGameTypes() const
 {
    mGameTypeInstrs.render(horizMargin, 60, AlignmentLeft);
 }
@@ -1109,7 +1106,7 @@ void InstructionsUserInterface::prevPage()
 }
 
 
-void InstructionsUserInterface::exitInstructions()
+void InstructionsUserInterface::exitInstructions() const
 {
    playBoop();
    getUIManager()->reactivatePrevUI();      //mGameUserInterface

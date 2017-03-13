@@ -32,7 +32,7 @@ using UI::SymbolStringSet;
 
 
 // Constructor
-AbstractInstructionsUserInterface::AbstractInstructionsUserInterface(ClientGame *clientGame) : 
+AbstractInstructionsUserInterface::AbstractInstructionsUserInterface(ClientGame *clientGame) :
                                        Parent(clientGame),
                                        mSpecialKeysInstrLeft(LineGap), 
                                        mSpecialKeysBindingsLeft(LineGap), 
@@ -41,7 +41,8 @@ AbstractInstructionsUserInterface::AbstractInstructionsUserInterface(ClientGame 
                                        mWallInstr(LineGap),  
                                        mWallBindings(LineGap)
 {
-   // Do nothing
+   mGameSettings = clientGame->getSettings();
+   
 }
 
 
@@ -52,8 +53,32 @@ AbstractInstructionsUserInterface::~AbstractInstructionsUserInterface()
 }
 
 
+void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,      // <== will be modified
+                                             const string *helpBindings, S32 bindingCount) const
+{
+   Vector<SymbolShapePtr> symbols;
+
+   for(S32 i = 0; i < bindingCount; i++)
+   {
+      if(helpBindings[i] == "-")
+      {
+         symbols.clear();
+         symbols.push_back(SymbolString::getHorizLine(335, FontSize, &Colors::gray40));
+         instrs.add(SymbolString(symbols));
+      }
+      else     // Normal line
+      {
+         symbols.clear();
+         SymbolString::symbolParse(mGameSettings->getInputCodeManager(), helpBindings[i],
+                                   symbols, HelpContext, FontSize, true, txtColor, keyColor);
+         instrs.add(SymbolString(symbols));
+      }
+   }
+}
+
+
 void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStringSet &bindings,      // <== will be modified
-                                             const ControlStringsEditor *helpBindings, S32 bindingCount, GameSettings *settings)
+                                             const ControlStringsEditor *helpBindings, S32 bindingCount) const
 {
    Vector<SymbolShapePtr> symbols;
 
@@ -82,14 +107,14 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStr
       else     // Normal line
       {
          symbols.clear();
-         SymbolString::symbolParse(settings->getInputCodeManager(), helpBindings[i].command, 
+         SymbolString::symbolParse(mGameSettings->getInputCodeManager(), helpBindings[i].command,
                                    symbols, HelpContext, FontSize, true, txtColor, keyColor);
 
          instrs.add(SymbolString(symbols));
 
          symbols.clear();
-         SymbolString::symbolParse(settings->getInputCodeManager(), helpBindings[i].binding, 
-                                   symbols, HelpContext, FontSize, true, keyColor);
+         SymbolString::symbolParse(mGameSettings->getInputCodeManager(), helpBindings[i].binding,
+                                   symbols, HelpContext, FontSize, true, keyColor, keyColor);
          bindings.add(SymbolString(symbols));
       }
    }
@@ -118,7 +143,7 @@ void AbstractInstructionsUserInterface::render(const char *header, S32 page, S32
 }
 
 
-void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolStringSet &instructions, const ControlStringsEditor *cmdList)
+void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolStringSet &instructions, const ControlStringsEditor *cmdList) const
 {
    const S32 headerSize = 20;
    const S32 cmdSize = 16;

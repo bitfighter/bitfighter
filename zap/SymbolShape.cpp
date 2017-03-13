@@ -15,6 +15,9 @@
 #include "OpenglUtils.h"
 #include "RenderUtils.h"
 #include "stringUtils.h"
+#include "GameManager.h"
+#include "RobotManager.h"
+#include "ClientGame.h"
 
 using namespace TNL;
 
@@ -743,6 +746,17 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
       symbols.push_back(SymbolShapePtr(new SymbolBlank(width - w)));
    }
 
+   else if(symbolName == "FOLDER_NAME")
+   {
+      TNLAssert(words.size() == 2, "FOLDER_NAME:xxx has the wrong number of components!");
+
+      // Coming in 020
+      //FolderManager *folderManager = GameManager::getClientGames()->get(0)->getSettings()->getFolderManager();
+      //const string dirName = folderManager->getDir(words[1]);
+
+      //symbols.push_back(SymbolShapePtr(new SymbolText(dirName, 18, HelpContext, Colors::red)));
+   }
+
    else
    {
       // Note that we might get here with an otherwise usable symbol if we passed NULL for the inputCodeManager
@@ -759,15 +773,12 @@ void SymbolString::symbolParse(const InputCodeManager *inputCodeManager, const s
    if(!block && str == "")
       return;
 
-   std::size_t offset = 0;
-
-   if(!symbolColor)
-      symbolColor = textColor;
+   size_t offset = 0;
 
    while(true)
    {
-      std::size_t startPos = str.find("[[", offset);      // If this isn't here, no further searching is necessary
-      std::size_t endPos   = str.find("]]", offset + 2);
+      size_t startPos = str.find("[[", offset);      // If this isn't here, no further searching is necessary
+      size_t endPos   = str.find("]]", offset + 2);
 
       if(startPos == string::npos || endPos == string::npos)
       {

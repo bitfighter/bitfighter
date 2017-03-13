@@ -302,19 +302,19 @@ void GameSettings::setLevelChangePassword(const string &levelChangePassword, boo
 }
 
 
-string GameSettings::getString(ParamId paramId)
+string GameSettings::getString(ParamId paramId) const
 {
    return mCmdLineParams[paramId].size() > 0 ? mCmdLineParams[paramId].get(0) : "";
 }
 
 
-U32 GameSettings::getU32(ParamId paramId)
+U32 GameSettings::getU32(ParamId paramId) const
 {
    return mCmdLineParams[paramId].size() > 0 ? U32(atoi(mCmdLineParams[paramId].get(0).c_str())) : 0;
 }
 
 
-F32 GameSettings::getF32(ParamId paramId)
+F32 GameSettings::getF32(ParamId paramId) const
 {
    return mCmdLineParams[paramId].size() > 0 ? (F32)Zap::stof(mCmdLineParams[paramId].get(0)) : 0;
 }
@@ -502,7 +502,7 @@ bool GameSettings::isDedicatedServer()
 }
 
 
-string GameSettings::getLevelDir(SettingSource source)
+string GameSettings::getLevelDir(SettingSource source) const
 {
    if(source == CMD_LINE)
       return getString(LEVEL_DIR);

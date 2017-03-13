@@ -65,13 +65,13 @@ private:
 
    bool usingArrowKeys();
 
-   void renderPage1();
-   void renderPage2();
-   void renderModulesPage();
-   void renderPageObjectDesc(U32 index);
-   void renderPageGameIndicators();
-   void renderPageCommands(U32 index, const char *msg = "");
-   void renderPageGameTypes();
+   void renderPage1() const;
+   void renderPage2() const;
+   void renderModulesPage() const;
+   void renderPageObjectDesc(U32 index) const;
+   void renderPageGameIndicators() const;
+   void renderPageCommands(U32 index, const char *msg = "") const;
+   void renderPageGameTypes() const;
    void nextPage();
    void prevPage();
 
@@ -84,7 +84,7 @@ private:
    void initNormalKeys_page1();
    void initPage2();
    void initPageHeaders();
-   void initGameTypesPage();
+   void initGameTypesPage() ;
 
 
 public:
@@ -97,7 +97,7 @@ public:
 
    void activatePage(IntructionPages pageIndex);
    void onActivate();
-   void exitInstructions();
+   void exitInstructions() const;
 };
 
 };

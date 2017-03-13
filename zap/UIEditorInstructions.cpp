@@ -34,9 +34,12 @@ using UI::SymbolString;
 using UI::SymbolStringSet;
 
 // Constructor
-EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) : Parent(game),
-                                                                                     mAnimTimer(ONE_SECOND),
-                                                                                     mConsoleInstructions(10)
+EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) :
+   Parent(game),
+   mAnimTimer(ONE_SECOND),
+   mConsoleInstructions(10),
+   mScriptInstr(LineGap),
+   mScriptBindings(LineGap)
 {
    GameSettings *settings = getGame()->getSettings();
    mCurPage = 0;
@@ -138,25 +141,29 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    };
 
 
-   pack(keysInstrLeft1,  keysBindingsLeft1, 
-        controls1Left, ARRAYSIZE(controls1Left), settings);
 
-   pack(keysInstrRight1, keysBindingsRight1, 
-        controls1Right, ARRAYSIZE(controls1Right), settings);
+   ControlStringsEditor controls2Right[] = {
+      { "HEADER", "Object IDs" },
+      { "Edit Object ID",            "[[#]] or [[!]]" },
+      { "Toggle display of all IDs", "[[Ctrl+#]]" }
+   };
 
-   pack(keysInstrLeft2,  keysBindingsLeft2, 
-        controls2Left, ARRAYSIZE(controls2Left), settings);
+   pack(keysInstrLeft1,  keysBindingsLeft1, controls1Left, ARRAYSIZE(controls1Left));
 
+   pack(keysInstrRight1, keysBindingsRight1, controls1Right, ARRAYSIZE(controls1Right));
+
+   pack(keysInstrLeft2,  keysBindingsLeft2,  controls2Left,  ARRAYSIZE(controls2Left));
+   pack(keysInstrRight2, keysBindingsRight2, controls2Right, ARRAYSIZE(controls2Right));
 
    S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
 
    // Use default width here as the editor could be using a different canvas size
    S32 screenWidth = DisplayManager::getScreenInfo()->getDefaultCanvasWidth();
 
-   mCol1 = UserInterface::horizMargin;
-   mCol2 = UserInterface::horizMargin + S32(screenWidth * 0.25) + 45;
-   mCol3 = UserInterface::horizMargin + S32(screenWidth * 0.5);
-   mCol4 = UserInterface::horizMargin + S32(screenWidth * 0.75) + 45;
+   mCol1 = horizMargin;
+   mCol2 = horizMargin + S32(screenWidth * 0.25) + 45;
+   mCol3 = horizMargin + S32(screenWidth * 0.5);
+   mCol4 = horizMargin + S32(screenWidth * 0.75) + 45;
 
    mSymbolSets1Left.addSymbolStringSet(keysInstrLeft1,      UI::AlignmentLeft,   mCol1);
    mSymbolSets1Left.addSymbolStringSet(keysBindingsLeft1,   UI::AlignmentCenter, mCol2 + centeringOffset);
@@ -176,33 +183,56 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
       { "Team Editor",        "[[TeamEditor]]" }
    };
 
-   pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, 
-   helpBindLeft, ARRAYSIZE(helpBindLeft), settings);
+   pack(mSpecialKeysInstrLeft,  mSpecialKeysBindingsLeft, helpBindLeft, ARRAYSIZE(helpBindLeft));
    
    ControlStringsEditor helpBindRight[] = 
    {
       { "Game Params Editor", "[[GameParameterEditor]]" },
-      { "Universal Chat",     "[[OutOfGameChat]]"       }
+      { "Lobby Chat",         "[[OutOfGameChat]]"       }
    };
 
-   pack(mSpecialKeysInstrRight, mSpecialKeysBindingsRight, 
-        helpBindRight, ARRAYSIZE(helpBindRight), settings);
+   pack(mSpecialKeysInstrRight, mSpecialKeysBindingsRight, helpBindRight, ARRAYSIZE(helpBindRight));
 
 
-   ControlStringsEditor wallInstructions[] =
+   string wallInstructions[] =
    {
-      { "[[BULLET]] Create walls with right mouse button; hold [[~]] to create line", "" },
-      { "[[BULLET]] Finish wall by left-clicking mouse", "" },
-      { "[[BULLET]] Drag and drop individual vertices or an entire wall", "" },
-      { "[[BULLET]] Split wall at selected vertex with [[\\]]", "" },
-      { "[[BULLET]] Join contiguous wall segments, polywalls, or zones with [[J]]", "" },
-      { "[[BULLET]] Change wall thickness with [[+]] & [[-]] (use [[Shift]] for smaller changes)", "" }
+      "[[BULLET]] Create walls with right mouse button; hold [[~]] to create line",
+      "[[BULLET]] Finish wall by left-clicking mouse",
+      "[[BULLET]] Drag and drop individual vertices or an entire wall",
+      "[[BULLET]] Split wall at selected vertex with [[\\]]",
+      "[[BULLET]] Join contiguous wall segments, polywalls, or zones with [[J]]",
+      "[[BULLET]] Change wall thickness with [[+]] & [[-]] (use [[Shift]] for smaller changes)"
    };
 
-   pack(mWallInstr, mWallBindings, wallInstructions, ARRAYSIZE(wallInstructions), settings);
+   pack(mWallInstr, wallInstructions, ARRAYSIZE(wallInstructions));
+
+
+   string scriptInstructions[] =
+   {
+      "Scripts can be used to generate level items at runtime, to monitor and respond",
+      "to events during gameplay, or both.  These scripts are referred to as ",
+      "\"levelgen scripts.\"  Scripts are written in Lua, and can monitor or manipulate",
+      "a range of objects and events.  You can create levelgen scripts using the text",
+      "editor of your choice.  Levelgen scripts should have the extension \".lua\"",
+      "or \".levelgen\", and can be stored either in your levels folder, or in the scripts",
+      "folder.  Generally, if your script is only used for a single level, it should be",
+      "stored with the levels.  If you share a level that depends on a script, you'll have",
+      "to remember to provide the script as well.",
+      "",
+      "A full scripting reference and some basic tutorials can be found on the Bitfighter",
+      "wiki.",
+         // Coming in 020
+      //"",
+      //"The current levels folder is: [[FOLDER_NAME:level]]",
+      //"",
+      //"The current scripts folder is: [[FOLDER_NAME:scripts]]",
+   };
+
+   pack(mScriptInstr, scriptInstructions, ARRAYSIZE(scriptInstructions));
+
 
    symbols.clear();
-   SymbolString::symbolParse(settings->getInputCodeManager(), "Open the console by pressing [[/]]", 
+   SymbolString::symbolParse(mGameSettings->getInputCodeManager(), "Open the console by pressing [[/]]",
                              symbols, HelpContext, FontSize, true, &Colors::green, keyColor);
 
    mConsoleInstructions.add(SymbolString(symbols));
@@ -269,7 +299,11 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    mPageHeaders.push_back("BASIC COMMANDS");
    mPageHeaders.push_back("ADVANCED COMMANDS");
    mPageHeaders.push_back("WALLS AND LINES");
+   mPageHeaders.push_back("ADDING SCRIPTS");
    mPageHeaders.push_back("SCRIPTING CONSOLE");
+
+   TNLAssert(mPageHeaders.size() == NonPluginPageCount, "Wrong number of headers!");
+
    for(S32 i = 0; i < mPluginPageCount; i++)
       mPageHeaders.push_back("PLUGINS PAGE " + itos(i+1));
 }
@@ -289,9 +323,9 @@ void EditorInstructionsUserInterface::onActivate()
 }
 
 
-S32 EditorInstructionsUserInterface::getPageCount()
+S32 EditorInstructionsUserInterface::getPageCount() const
 {
-   return 4 + mPluginPageCount;
+   return NonPluginPageCount + mPluginPageCount;
 }
 
 
@@ -314,16 +348,20 @@ void EditorInstructionsUserInterface::render()
    else if(mCurPage == 2)
       renderPageWalls();
    else if(mCurPage == 3)
+      renderScripting();
+   else if(mCurPage == 4)
       renderConsoleCommands(mConsoleInstructions, consoleCommands);
-   else if(mCurPage >= 4)
-      mPluginInstructions[mCurPage-4].render(horizMargin, 60, UI::AlignmentLeft);
+   else if(mCurPage >= NonPluginPageCount)
+      mPluginInstructions[mCurPage - NonPluginPageCount].render(horizMargin, 60, AlignmentLeft);
+   else
+      TNLAssert(false, "Should never get here -- did you just add a page?");
 
    FontManager::popFontContext();
 }
 
 
 // This has become rather ugly and inelegant.  But you shuold see UIInstructions.cpp!!!
-void EditorInstructionsUserInterface::renderPageCommands(S32 page)
+void EditorInstructionsUserInterface::renderPageCommands(S32 page) const
 {
    S32 y = 60;             // Is 65 in UIInstructions::render()...
 
@@ -344,18 +382,18 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
 
    y += 45;
 
-   mSpecialKeysInstrLeft.render (mCol1, y, UI::AlignmentLeft);
-   mSpecialKeysInstrRight.render(mCol3, y, UI::AlignmentLeft);
+   mSpecialKeysInstrLeft.render (mCol1, y, AlignmentLeft);
+   mSpecialKeysInstrRight.render(mCol3, y, AlignmentLeft);
 
    S32 centeringOffset = getStringWidth(HelpContext, HeaderFontSize, "Control") / 2;
 
-   mSpecialKeysBindingsLeft.render (mCol2 + centeringOffset, y, UI::AlignmentCenter);
-   mSpecialKeysBindingsRight.render(mCol4 + centeringOffset, y, UI::AlignmentCenter);
+   mSpecialKeysBindingsLeft.render (mCol2 + centeringOffset, y, AlignmentCenter);
+   mSpecialKeysBindingsRight.render(mCol4 + centeringOffset, y, AlignmentCenter);
 }
 
 
 // Draw animated creation of walls
-void EditorInstructionsUserInterface::renderPageWalls()
+void EditorInstructionsUserInterface::renderPageWalls() const
 {
    //drawStringf(400, 100, 25, "%d", mAnimStage);     // Useful to have around when things go wrong!
 
@@ -472,6 +510,12 @@ void EditorInstructionsUserInterface::renderPageWalls()
    FontManager::popFontContext();
 
    mWallInstr.render(50, 300, UI::AlignmentLeft);     // The written instructions block
+}
+
+
+void EditorInstructionsUserInterface::renderScripting() const
+{
+   mScriptInstr.render(30, 100, AlignmentLeft);     // The written instructions block
 }
 
 

@@ -19,6 +19,8 @@ class EditorInstructionsUserInterface : public AbstractInstructionsUserInterface
    typedef AbstractInstructionsUserInterface Parent;
 
 private:
+   static const S32 NonPluginPageCount = 5;
+
    S32 mCol1;
    S32 mCol2;
    S32 mCol3;
@@ -29,10 +31,12 @@ private:
    S32 mAnimStage;
    WallSegmentManager mWallSegmentManager;
 
-   UI::SymbolStringSetCollection mSymbolSets1Left,     mSymbolSets1Right;     // For page 1
-   UI::SymbolStringSetCollection mSymbolSets2Left,     mSymbolSets2Right;     // For page 2
-   UI::SymbolStringSet           mConsoleInstructions;
-   Vector<UI::SymbolStringSet>   mPluginInstructions;   // One set per page
+   SymbolStringSetCollection mSymbolSets1Left,     mSymbolSets1Right;     // For page 1
+   SymbolStringSetCollection mSymbolSets2Left,     mSymbolSets2Right;     // For page 2
+   SymbolStringSet           mConsoleInstructions;
+   Vector<SymbolStringSet>   mPluginInstructions;   // One set per page
+
+   SymbolStringSet mScriptInstr, mScriptBindings;
 
    S32 mPluginPageCount;
 
@@ -45,10 +49,11 @@ public:
    virtual ~EditorInstructionsUserInterface();
 
    void render();
-   void renderPageCommands(S32 page);
-   void renderPageWalls();
+   void renderPageCommands(S32 page) const;
+   void renderPageWalls() const;
+   void renderScripting() const;
 
-   S32 getPageCount();
+   S32 getPageCount() const;
  
    bool onKeyDown(InputCode inputCode);
 

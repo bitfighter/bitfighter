@@ -34,20 +34,26 @@ public:
    static const Color *secColor;
    static const Color *groupHeaderColor;
 
+   GameSettings *mGameSettings;
+public:
+   UIManager *mUiManager;
+
 protected:
    void render(const char *header, S32 page, S32 pages);
-   void renderConsoleCommands(const UI::SymbolStringSet &instructions, const ControlStringsEditor *cmdList);
+   void renderConsoleCommands(const UI::SymbolStringSet &instructions, const ControlStringsEditor *cmdList) const;
 
    UI::SymbolStringSet 
          mSpecialKeysInstrLeft,   mSpecialKeysBindingsLeft, 
          mSpecialKeysInstrRight,  mSpecialKeysBindingsRight,
          mWallInstr,              mWallBindings;
 
-   void pack(UI::SymbolStringSet &Instrs, UI::SymbolStringSet &Bindings, 
-            const ControlStringsEditor *helpBindings, S32 bindingCount, GameSettings *settings);
+   void pack(SymbolStringSet &instrs, const string *helpBindings, S32 bindingCount) const;
+
+   void pack(SymbolStringSet &instrs, SymbolStringSet &bindings, 
+             const ControlStringsEditor *helpBindings, S32 bindingCount) const;
 
 public:
-   explicit AbstractInstructionsUserInterface(ClientGame *clientGame);  // Constructor
+   explicit AbstractInstructionsUserInterface(ClientGame *clientGame); // Constructor
    virtual ~AbstractInstructionsUserInterface();                        // Destructor
 };
 

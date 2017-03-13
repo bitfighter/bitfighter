@@ -139,9 +139,9 @@ private:
 
    // Helper functions:
    // This first lot return the first value following the cmd line parameter cast to various types
-   string getString(ParamId paramId);
-   U32 getU32(ParamId paramId);
-   F32 getF32(ParamId paramId);
+   string getString(ParamId paramId) const;
+   U32 getU32(ParamId paramId) const;
+   F32 getF32(ParamId paramId) const;
 
    DisplayMode resolveCmdLineSpecifiedDisplayMode();  // Tries to figure out what display mode was specified on the cmd line, if any
       
@@ -250,7 +250,7 @@ public:
 
    bool isDedicatedServer();
 
-   string getLevelDir(SettingSource source);
+   string getLevelDir(SettingSource source) const;
    string getPlaylistFile();
    bool isUsingPlaylist();
    string getlevelLoc();
