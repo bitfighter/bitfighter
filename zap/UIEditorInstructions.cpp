@@ -35,7 +35,9 @@ using UI::SymbolStringSet;
 EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game, UIManager *uiManager) :
    Parent(game, uiManager),
    mAnimTimer(ONE_SECOND),
-   mConsoleInstructions(10)
+   mConsoleInstructions(10),
+   mScriptInstr(LineGap),
+   mScriptBindings(LineGap)
 {
    mCurPage = 0;
    mAnimStage = 0;
@@ -142,8 +144,6 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
       { "Toggle display of all IDs", "[[Ctrl+#]]" }
    };
 
-
-
    pack(keysInstrLeft1,  keysBindingsLeft1, controls1Left, ARRAYSIZE(controls1Left));
 
    pack(keysInstrRight1, keysBindingsRight1, controls1Right, ARRAYSIZE(controls1Right));
@@ -202,6 +202,26 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    };
 
    pack(mWallInstr, mWallBindings, wallInstructions, ARRAYSIZE(wallInstructions));
+
+
+   ControlStringsEditor scriptInstructions[] =
+   {
+      { "Scripts can be used to generate level items at runtime, to monitor and respond",    "" },
+      { "to events during gameplay, or both.  These scripts are referred to as ",            "" },
+      { "\"levelgen scripts.\"  Scripts are written in Lua, and can monitor or manipulate",     "" },
+      { "a range of objects and events.  You can create levelgen scripts using the text",         "" },
+      { "editor of your choice.  Levelgen scripts should have the extension \".lua\"", "" },
+      { "or \".levelgen\", and can be stored either in your levels folder, or in the scripts",     "" },
+      { "folder.  Generally, if your script is only used for a single level, it should be",      "" },
+      { "stored with the levels.  If you share a level that depends on a script, you'll have",        "" },
+      { "to remember to provide the script as well.",            "" },
+      { "",                                                                          "" },
+      { "A full scripting reference and some basic tutorials can be found on the Bitfighter",       "" },
+      { "wiki.",                                                      "" },
+   };
+
+   pack(mScriptInstr, mScriptBindings, scriptInstructions, ARRAYSIZE(scriptInstructions));
+
 
    symbols.clear();
    SymbolString::symbolParse(mGameSettings->getInputCodeManager(), "Open the console by pressing [[/]]",
@@ -271,7 +291,11 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    mPageHeaders.push_back("BASIC COMMANDS");
    mPageHeaders.push_back("ADVANCED COMMANDS");
    mPageHeaders.push_back("WALLS AND LINES");
+   mPageHeaders.push_back("ADDING SCRIPTS");
    mPageHeaders.push_back("SCRIPTING CONSOLE");
+
+   TNLAssert(mPageHeaders.size() == NonPluginPageCount, "Wrong number of headers!");
+
    for(S32 i = 0; i < mPluginPageCount; i++)
       mPageHeaders.push_back("PLUGINS PAGE " + itos(i+1));
 }
@@ -293,7 +317,7 @@ void EditorInstructionsUserInterface::onActivate()
 
 S32 EditorInstructionsUserInterface::getPageCount() const
 {
-   return 4 + mPluginPageCount;
+   return NonPluginPageCount + mPluginPageCount;
 }
 
 
@@ -316,9 +340,13 @@ void EditorInstructionsUserInterface::render() const
    else if(mCurPage == 2)
       renderPageWalls();
    else if(mCurPage == 3)
+      renderScripting();
+   else if(mCurPage == 4)
       renderConsoleCommands(mConsoleInstructions, consoleCommands);
-   else if(mCurPage >= 4)
-      mPluginInstructions[mCurPage-4].render(horizMargin, 60, UI::AlignmentLeft);
+   else if(mCurPage >= NonPluginPageCount)
+      mPluginInstructions[mCurPage - NonPluginPageCount].render(horizMargin, 60, AlignmentLeft);
+   else
+      TNLAssert(false, "Should never get here -- did you just add a page?");
 
    FontManager::popFontContext();
 }
@@ -469,6 +497,15 @@ void EditorInstructionsUserInterface::renderPageWalls() const
    FontManager::popFontContext();
 
    mWallInstr.render(50, 300, AlignmentLeft);     // The written instructions block
+}
+
+
+void EditorInstructionsUserInterface::renderScripting() const
+{
+   mScriptInstr.render(50, 100, AlignmentLeft);     // The written instructions block
+
+   FolderManager *folderManager = mGameSettings->getFolderManager();
+   RenderUtils::drawString(0,700,20,folderManager->getLevelDir().c_str());
 }
 
 
