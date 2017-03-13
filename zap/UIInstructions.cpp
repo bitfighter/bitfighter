@@ -645,8 +645,16 @@ void InstructionsUserInterface::renderModulesPage()
             break;
 
          case 4:     // Sensor
-            renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, Platform::getRealMilliseconds(), 
-                       false, true, false, false);
+            {
+               static const F32 scale = (F32)Game::PLAYER_VISUAL_DISTANCE_VERTICAL /
+                     Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL;
+
+               glPushMatrix();
+                  glScale(scale);
+                  renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, Platform::getRealMilliseconds(),
+                        false, true, false, false);
+               glPopMatrix();
+            }
             break;
 
          // skip 5 for 2nd line of sensor
