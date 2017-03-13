@@ -154,7 +154,7 @@ void DiagnosticUserInterface::initFoldersBlock(FolderManager *folderManager, S32
    names.push_back("Log Dir:");             
    vals.push_back(folderManager->getLogDir());
                                             
-   names.push_back("Lua Dir:");             
+   names.push_back("Scripts Dir:");             
    vals.push_back(folderManager->getLuaDir());
       
    names.push_back("Robot Dir:");
