@@ -36,8 +36,7 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    Parent(game, uiManager),
    mAnimTimer(ONE_SECOND),
    mConsoleInstructions(10),
-   mScriptInstr(LineGap),
-   mScriptBindings(LineGap)
+   mScriptInstr(LineGap)
 {
    mCurPage = 0;
    mAnimStage = 0;
@@ -157,10 +156,10 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    // Use default width here as the editor could be using a different canvas size
    S32 screenWidth = DisplayManager::getScreenInfo()->getDefaultCanvasWidth();
 
-   mCol1 = UserInterface::horizMargin;
-   mCol2 = UserInterface::horizMargin + S32(screenWidth * 0.25) + 45;
-   mCol3 = UserInterface::horizMargin + S32(screenWidth * 0.5);
-   mCol4 = UserInterface::horizMargin + S32(screenWidth * 0.75) + 45;
+   mCol1 = horizMargin;
+   mCol2 = horizMargin + S32(screenWidth * 0.25) + 45;
+   mCol3 = horizMargin + S32(screenWidth * 0.5);
+   mCol4 = horizMargin + S32(screenWidth * 0.75) + 45;
 
    mSymbolSets1Left.addSymbolStringSet(keysInstrLeft1,      UI::AlignmentLeft,   mCol1);
    mSymbolSets1Left.addSymbolStringSet(keysBindingsLeft1,   UI::AlignmentCenter, mCol2 + centeringOffset);
@@ -191,36 +190,40 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *gam
    pack(mSpecialKeysInstrRight, mSpecialKeysBindingsRight, helpBindRight, ARRAYSIZE(helpBindRight));
 
 
-   ControlStringsEditor wallInstructions[] =
+   string wallInstructions[] =
    {
-      { "[[BULLET]] Create walls with right mouse button; hold [[~]] to create line", "" },
-      { "[[BULLET]] Finish wall by left-clicking mouse", "" },
-      { "[[BULLET]] Drag and drop individual vertices or an entire wall", "" },
-      { "[[BULLET]] Split wall at selected vertex with [[\\]]", "" },
-      { "[[BULLET]] Join contiguous wall segments, polywalls, or zones with [[J]]", "" },
-      { "[[BULLET]] Change wall thickness with [[+]] & [[-]] (use [[Shift]] for smaller changes)", "" }
+      "[[BULLET]] Create walls with right mouse button; hold [[~]] to create line",
+      "[[BULLET]] Finish wall by left-clicking mouse",
+      "[[BULLET]] Drag and drop individual vertices or an entire wall",
+      "[[BULLET]] Split wall at selected vertex with [[\\]]",
+      "[[BULLET]] Join contiguous wall segments, polywalls, or zones with [[J]]",
+      "[[BULLET]] Change wall thickness with [[+]] & [[-]] (use [[Shift]] for smaller changes)"
    };
 
-   pack(mWallInstr, mWallBindings, wallInstructions, ARRAYSIZE(wallInstructions));
+   pack(mWallInstr, wallInstructions, ARRAYSIZE(wallInstructions));
 
 
-   ControlStringsEditor scriptInstructions[] =
+   string scriptInstructions[] =
    {
-      { "Scripts can be used to generate level items at runtime, to monitor and respond",    "" },
-      { "to events during gameplay, or both.  These scripts are referred to as ",            "" },
-      { "\"levelgen scripts.\"  Scripts are written in Lua, and can monitor or manipulate",     "" },
-      { "a range of objects and events.  You can create levelgen scripts using the text",         "" },
-      { "editor of your choice.  Levelgen scripts should have the extension \".lua\"", "" },
-      { "or \".levelgen\", and can be stored either in your levels folder, or in the scripts",     "" },
-      { "folder.  Generally, if your script is only used for a single level, it should be",      "" },
-      { "stored with the levels.  If you share a level that depends on a script, you'll have",        "" },
-      { "to remember to provide the script as well.",            "" },
-      { "",                                                                          "" },
-      { "A full scripting reference and some basic tutorials can be found on the Bitfighter",       "" },
-      { "wiki.",                                                      "" },
+      "Scripts can be used to generate level items at runtime, to monitor and respond",
+      "to events during gameplay, or both.  These scripts are referred to as ",
+      "\"levelgen scripts.\"  Scripts are written in Lua, and can monitor or manipulate",
+      "a range of objects and events.  You can create levelgen scripts using the text",
+      "editor of your choice.  Levelgen scripts should have the extension \".lua\"",
+      "or \".levelgen\", and can be stored either in your levels folder, or in the scripts",
+      "folder.  Generally, if your script is only used for a single level, it should be",
+      "stored with the levels.  If you share a level that depends on a script, you'll have",
+      "to remember to provide the script as well.",
+      "",
+      "A full scripting reference and some basic tutorials can be found on the Bitfighter",
+      "wiki.",
+      "",
+      "The current levels folder is: [[FOLDER_NAME:level]]",
+      "",
+      "The current scripts folder is: [[FOLDER_NAME:scripts]]",
    };
 
-   pack(mScriptInstr, mScriptBindings, scriptInstructions, ARRAYSIZE(scriptInstructions));
+   pack(mScriptInstr, scriptInstructions, ARRAYSIZE(scriptInstructions));
 
 
    symbols.clear();

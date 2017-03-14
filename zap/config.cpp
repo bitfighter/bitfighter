@@ -1385,6 +1385,58 @@ const Vector<string> &FolderManager::getPluginDirs() const { CHK_RESOLVED();  re
 #undef CHK_RESOLVED
 
 
+// Get the named folder
+string FolderManager::getDir(const string &folderTypeName) const
+{
+   return getDir(getFolderType(folderTypeName));
+}
+
+
+// TODO: Place this and the next function in a good ol' x-macro!
+string FolderManager::getDir(FolderType folderType) const
+{
+   switch(folderType)
+   {
+      case Level:      return getLevelDir();
+      case Robot:      return getRobotDir();
+      case Music:      return getMusicDir();
+      case Ini:        return getIniDir();
+      case Log:        return getLogDir();
+      case Screenshot: return getScreenshotDir();
+      case Scripts:    return getLuaDir();
+      case Recording:  return getRecordDir();
+
+      default:
+         TNLAssert(false, "Not implemented!");
+   }
+}
+
+
+FolderManager::FolderType FolderManager::getFolderType(const string &folderTypeName)
+{
+   if(folderTypeName == "level")
+      return Level;
+   if(folderTypeName == "robot")
+      return Robot;
+   if(folderTypeName == "music")
+      return Music;
+   if(folderTypeName == "ini")
+      return Ini;
+   if(folderTypeName == "log")
+      return Log;
+   if(folderTypeName == "screenshot")
+      return Screenshot;
+   if(folderTypeName == "scripts")
+      return Scripts;
+   if(folderTypeName == "recording")
+      return Recording;
+
+   TNLAssert(false, "Unknown typename!");
+   return Level;
+}
+
+
+
 #define ADD_FOLDER_METHODS(methodName1, methodName2, folderDirs)         \
    void FolderManager::methodName1(const string &dir, bool appendToPath) \
    {                                                                     \

@@ -43,7 +43,9 @@ protected:
          mSpecialKeysInstrRight,  mSpecialKeysBindingsRight,
          mWallInstr,              mWallBindings;
 
-   void pack(SymbolStringSet &Instrs, SymbolStringSet &Bindings, 
+   void pack(SymbolStringSet &instrs, const string *helpBindings, S32 bindingCount) const;
+
+   void pack(SymbolStringSet &instrs, SymbolStringSet &bindings, 
              const ControlStringsEditor *helpBindings, S32 bindingCount) const;
 
 public:

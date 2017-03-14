@@ -20,8 +20,6 @@
 #include "tnlNetStringTable.h"
 #include "tnlVector.h"
 
-#include <string>
-
 #include "Test.h"
 
 using namespace std;
@@ -42,6 +40,20 @@ struct CmdLineSettings;
 
 class FolderManager 
 {
+
+enum FolderType
+{
+   Level,
+   Robot,
+   Music,
+   Ini,
+   Log,
+   Screenshot,
+   Scripts,
+   Recording
+};
+
+
 private:
    string levelDir;
    string robotDir;
@@ -79,6 +91,10 @@ public:
    string getRootDataDir() const;
    string getLogDir() const;
    string getLuaDir() const;
+
+   string getDir(const string &folderTypeName) const;
+   string getDir(FolderType folderType) const;
+   static FolderType getFolderType(const string &folderTypeName);
 
    const Vector<string> &getPluginDirs() const;
    void addPluginDir(const string &dir, bool appendToPath);

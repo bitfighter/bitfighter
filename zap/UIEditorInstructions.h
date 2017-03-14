@@ -36,7 +36,7 @@ private:
    SymbolStringSet           mConsoleInstructions;
    Vector<SymbolStringSet>   mPluginInstructions;   // One set per page
 
-   SymbolStringSet mScriptInstr, mScriptBindings;
+   SymbolStringSet mScriptInstr;
 
    S32 mPluginPageCount;
 

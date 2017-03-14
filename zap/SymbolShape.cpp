@@ -15,6 +15,8 @@
 #include "RenderUtils.h"
 #include "stringUtils.h"
 #include "UIAbstractInstructions.h"
+#include "GameManager.h"
+#include "ClientGame.h"
 
 using namespace TNL;
 
@@ -761,6 +763,16 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
          w += symbols[i]->getWidth();
 
       symbols.push_back(SymbolShapePtr(new SymbolBlank(width - w)));
+   }
+
+   else if(symbolName == "FOLDER_NAME")
+   {
+      TNLAssert(words.size() == 2, "FOLDER_NAME:xxx has the wrong number of components!");
+
+      FolderManager *folderManager = GameManager::getClientGames()->get(0)->getSettings()->getFolderManager();
+      const string dirName = folderManager->getDir(words[1]);
+
+      symbols.push_back(SymbolShapePtr(new SymbolText(dirName, 18, HelpContext, Colors::red)));
    }
 
    else

@@ -50,6 +50,30 @@ AbstractInstructionsUserInterface::~AbstractInstructionsUserInterface()
 }
 
 
+void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,      // <== will be modified
+                                             const string *helpBindings, S32 bindingCount) const
+{
+   Vector<SymbolShapePtr> symbols;
+
+   for(S32 i = 0; i < bindingCount; i++)
+   {
+      if(helpBindings[i] == "-")
+      {
+         symbols.clear();
+         symbols.push_back(SymbolString::getHorizLine(335, FontSize, Colors::gray40));
+         instrs.add(SymbolString(symbols));
+      }
+      else     // Normal line
+      {
+         symbols.clear();
+         SymbolString::symbolParse(mGameSettings->getInputCodeManager(), helpBindings[i],
+                                   symbols, HelpContext, FontSize, true, txtColor, keyColor);
+         instrs.add(SymbolString(symbols));
+      }
+   }
+}
+
+
 void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStringSet &bindings,      // <== will be modified
                                              const ControlStringsEditor *helpBindings, S32 bindingCount) const
 {
@@ -91,7 +115,6 @@ void AbstractInstructionsUserInterface::pack(SymbolStringSet &instrs,  SymbolStr
       }
    }
 }
-
 
 void AbstractInstructionsUserInterface::render(const char *header, S32 page, S32 pages) const
 {
