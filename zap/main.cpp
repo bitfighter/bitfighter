@@ -134,6 +134,13 @@ using namespace TNL;
 #  include <fcntl.h>
 #  include <shellapi.h>
 
+// Weird workaround for linking with SDL2.lib in Visual Studio 2015
+#ifdef _MSC_VER
+#  if _MSC_VER >= 1900 
+extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
+#  endif
+#endif
+
 #  define USE_BFUP
 #endif
 
