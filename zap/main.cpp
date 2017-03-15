@@ -111,9 +111,13 @@ using namespace TNL;
 #  include <windows.h>
 #  include <shellapi.h>
 
-   // Fix for SDL & VS2017
-   // Details: http://stackoverflow.com/questions/30412951/unresolved-external-symbol-imp-fprintf-and-imp-iob-func-sdl2
-   extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
+// Fix for SDL & VS2017
+// Details: http://stackoverflow.com/questions/30412951/unresolved-external-symbol-imp-fprintf-and-imp-iob-func-sdl2
+#ifdef _MSC_VER
+#  if _MSC_VER >= 1900 
+extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
+#  endif
+#endif
 
 #  define USE_BFUP
 #endif
