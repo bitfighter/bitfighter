@@ -5,6 +5,7 @@
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
+#include "physfs.hpp"         // C++ wrapper version
 
 #include "gtest/gtest.h"
 
@@ -23,6 +24,12 @@ TEST(StringUtilsTest, stringContainsAllTheSameCharacter)
 
    EXPECT_FALSE(stringContainsAllTheSameCharacter("Aa"));
    EXPECT_FALSE(stringContainsAllTheSameCharacter("AB"));
+}
+
+
+TEST(StringUtilsTst, rootFolder)
+{
+   EXPECT_TRUE(getExecutableDir() == PhysFS::getBaseDir());
 }
 
 
