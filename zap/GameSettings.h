@@ -133,7 +133,7 @@ private:
    IniSettings mIniSettings;
 
    // Store params read from the cmd line
-   Vector<string> mCmdLineParams[CmdLineParams::PARAM_COUNT];
+   Vector<string> mCmdLineParams[PARAM_COUNT];
 
    static string mExecutablePath;
 
