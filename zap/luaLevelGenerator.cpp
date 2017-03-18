@@ -6,6 +6,7 @@
 #include "luaLevelGenerator.h"
 #include "gameLoader.h"
 #include "game.h"
+#include "gameType.h"
 #include "barrier.h"             // For PolyWall def
 
 #include "stringUtils.h"         // fileExists
@@ -123,6 +124,9 @@ REGISTER_LUA_CLASS(LuaLevelGenerator);
  *
  * @brief Sets the time remaining in the current game to the specified value
  *
+ * @descr Decimals can be used to specify fractions of minutes.  A value of '0'
+ * will set the game time to unlimited
+ *
  * @param timeInMinutes Time, in minutes, that the game should continue. Can be
  * fractional.
  */
@@ -131,6 +135,9 @@ S32 LuaLevelGenerator::lua_setGameTime(lua_State *L)
    checkArgList(L, functionArgs, luaClassName, "setGameTime");
 
    mGame->setGameTime(getFloat(L, 1));
+
+   // Update clients
+   mGame->getGameType()->broadcastNewRemainingTime();
 
    return 0;
 }
