@@ -542,16 +542,29 @@ bool PlaybackGameUserInterface::onKeyDown(InputCode inputCode)
       }
    }
 
-
+   // Next player
    if(checkInputCode(BINDING_ADVWEAP, inputCode)
       || checkInputCode(BINDING_ADVWEAP2, inputCode)
       || checkInputCode(BINDING_FIRE, inputCode) )
+   {
       mPlaybackConnection->changeSpectate(1);
 
+      // Show controls and player name
+      mDisableMouseTimer.reset();
+      mVisible = true;
+   }
+
+   // Previous player
    else if(checkInputCode(BINDING_PREVWEAP, inputCode)
       || checkInputCode(BINDING_MOD1, inputCode)
       || checkInputCode(BINDING_MOD2, inputCode) )
+   {
       mPlaybackConnection->changeSpectate(-1);
+
+      // Show controls and player name
+      mDisableMouseTimer.reset();
+      mVisible = true;
+   }
 
    // Handle a few UIGame specific keys that may be useful in playback
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK ||
