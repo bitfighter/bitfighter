@@ -505,10 +505,7 @@ void EditorInstructionsUserInterface::renderPageWalls() const
 
 void EditorInstructionsUserInterface::renderScripting() const
 {
-   mScriptInstr.render(50, 100, AlignmentLeft);     // The written instructions block
-
-   FolderManager *folderManager = mGameSettings->getFolderManager();
-   RenderUtils::drawString(0,700,20,folderManager->getLevelDir().c_str());
+   mScriptInstr.render(30, 100, AlignmentLeft);     // The written instructions block
 }
 
 
