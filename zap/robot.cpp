@@ -524,6 +524,10 @@ void Robot::idle(BfObject::IdleCallPath path)
    if(mHasExploded)
       return;
 
+   // See if robot entered or left any zones, why isn't this called via Parent?
+   if(path == ServerIdleMainLoop)
+      checkForZones();
+
    if(path != BfObject::ServerIdleMainLoop)   
       Parent::idle(path);                       
    else                         
