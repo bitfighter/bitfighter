@@ -184,7 +184,7 @@ void GameParamUserInterface::updateMenuItems(const GameType *gameType)
    addMenuItem(new TextEntryMenuItem("Filename:",                         // name
                                      filename,                            // val
                                      EditorUserInterface::UnnamedFile,    // empty val
-                                     "File where this level is stored",   // help
+                                     "File where this level is stored (changing this will trigger a ""Save As"", not a rename)",   // help
                                      MAX_FILE_NAME_LEN));
 
    const Vector<string> *keys = gameType->getGameParameterMenuKeys();
