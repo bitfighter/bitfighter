@@ -112,7 +112,7 @@ public:
    void resolveDirs(GameSettings *settings);                                  
    //void resolveDirs(const string &root);
    void resolveLevelDir(GameSettings *settings);                                 
-   string resolveLevelDir(const string &levelDir);
+   string resolveLevelDir(const string &levelDir) const;
 
    string findLevelFile(const string &filename) const;
    string findPlaylistFile(const string &filename) const;

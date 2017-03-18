@@ -1544,7 +1544,7 @@ void FolderManager::resolveDirs(GameSettings *settings)
 //
 // NOTE: See above for full explanation of what these functions are doing.
 // This is a helper function for the main resolveLevelDir function below.
-string FolderManager::resolveLevelDir(const string &levelDir)    
+string FolderManager::resolveLevelDir(const string &levelDir) const
 {
    if(levelDir == "")
       return "";
