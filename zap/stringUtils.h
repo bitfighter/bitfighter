@@ -42,6 +42,10 @@ string extractExtension(const string &path);
 string extractFilenameNoExtension(const string &path);
 string getPathFromFilename(const string &filename);
 
+bool isAbsolute(const string &path);
+string toNativeSeparators(string path);
+
+
 Vector<string> findAllThingsInFolder(const string &dir, const string *extList, S32 extListSize);
 
 string itos(S32 i);

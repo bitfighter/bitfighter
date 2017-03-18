@@ -1471,6 +1471,15 @@ void FolderManager::setLevelDir(const string &lvlDir)
 }
 
 
+string makeAbsolute(const string &path)
+{
+   if(isAbsolute(path))
+      return path;
+   
+   return PhysFS::getBaseDir() + path;
+}
+
+
 // Doesn't handle leveldir -- that one is handled separately, later, because it requires input from the INI file
 void FolderManager::resolveDirs(GameSettings *settings)
 {
@@ -1482,27 +1491,29 @@ void FolderManager::resolveDirs(GameSettings *settings)
    folderManager->rootDataDir = rootDataDir;
 
    // Note that we generally rely on Bitfighter being run from its install folder for these paths to be right... at least in Windows
+   // We'll convert the paths to absolute paths so that when we show folders in Diagnostics or elsewhere, they'll be easier for
+   // people to understand where they are.
 
    // rootDataDir used to specify the following folders
-   folderManager->robotDir = resolutionHelper(cmdLineDirs.robotDir, rootDataDir, "robots");
-   folderManager->luaDir = resolutionHelper(cmdLineDirs.luaDir, rootDataDir, "scripts");
-   folderManager->iniDir = resolutionHelper(cmdLineDirs.iniDir, rootDataDir, "");
-   folderManager->logDir = resolutionHelper(cmdLineDirs.logDir, rootDataDir, "");
-   folderManager->screenshotDir = resolutionHelper(cmdLineDirs.screenshotDir, rootDataDir, "screenshots");
-   folderManager->musicDir = resolutionHelper(cmdLineDirs.musicDir, rootDataDir, "music");
-   folderManager->recordDir = resolutionHelper(cmdLineDirs.recordDir, rootDataDir, "record");
+   folderManager->robotDir = makeAbsolute(resolutionHelper(cmdLineDirs.robotDir, rootDataDir, "robots"));
+   folderManager->luaDir = makeAbsolute(resolutionHelper(cmdLineDirs.luaDir, rootDataDir, "scripts"));
+   folderManager->iniDir = makeAbsolute(resolutionHelper(cmdLineDirs.iniDir, rootDataDir, ""));
+   folderManager->logDir = makeAbsolute(resolutionHelper(cmdLineDirs.logDir, rootDataDir, ""));
+   folderManager->screenshotDir = makeAbsolute(resolutionHelper(cmdLineDirs.screenshotDir, rootDataDir, "screenshots"));
+   folderManager->musicDir = makeAbsolute(resolutionHelper(cmdLineDirs.musicDir, rootDataDir, "music"));
+   folderManager->recordDir = makeAbsolute(resolutionHelper(cmdLineDirs.recordDir, rootDataDir, "record"));
 
-   folderManager->addPluginDirs(cmdLineDirs.pluginDirs);
-   folderManager->addPluginDir (joindir(rootDataDir, "editor_plugins"), true);
+   folderManager->addPluginDirs(cmdLineDirs.pluginDirs);    // TODO: Make these absolute
+   folderManager->addPluginDir(makeAbsolute(joindir(rootDataDir, "editor_plugins")), true);
 
    // rootDataDir not used for these folders
-   folderManager->addSfxDirs(cmdLineDirs.sfxDirs);                             // Add any user specified folders
-   folderManager->addSfxDir (joindir(getInstalledDataDir(), "sfx"), true);     // And add the system default as a fallback
+   folderManager->addSfxDirs(cmdLineDirs.sfxDirs);          // TODO: Make these absolute                   // Add any user specified folders
+   folderManager->addSfxDir(makeAbsolute(joindir(getInstalledDataDir(), "sfx")), true);     // And add the system default as a fallback
 
-   folderManager->addFontDirs(cmdLineDirs.fontDirs);                           // Add any user specified folders
-   folderManager->addFontDir (joindir(getInstalledDataDir(), "fonts"), true);  // And add the system default as a fallback
+   folderManager->addFontDirs(cmdLineDirs.fontDirs);       // TODO: Make these absolute                    // Add any user specified folders
+   folderManager->addFontDir(makeAbsolute(joindir(getInstalledDataDir(), "fonts")), true);  // And add the system default as a fallback
 #ifndef BF_NO_STATS
-   DatabaseWriter::sqliteFile = folderManager->logDir + DatabaseWriter::sqliteFile;
+   DatabaseWriter::sqliteFile = makeAbsolute(folderManager->logDir) + DatabaseWriter::sqliteFile;
 #endif
    mResolved = true;
 }
@@ -1550,19 +1561,19 @@ string FolderManager::resolveLevelDir(const string &levelDir) const
       return "";
 
    if(fileExists(levelDir))     // Check for a valid absolute path in levelDir
-      return levelDir;
+      return makeAbsolute(levelDir);
 
    if(rootDataDir != "")
    {
       // Check root/levels/leveldir
       string candidate = strictjoindir(rootDataDir, "levels", levelDir);
       if(fileExists(candidate))
-         return candidate;
+         return makeAbsolute(candidate);
 
       // Check root/leveldir
       candidate = strictjoindir(rootDataDir, levelDir);
       if(fileExists(candidate))
-         return candidate;
+         return makeAbsolute(candidate);
    }
 
    return "";
@@ -1586,7 +1597,7 @@ void FolderManager::resolveLevelDir(GameSettings *settings)
    // Next, check rootdatadir/levels
    if(rootDataDir != "")
    {
-      string candidate = strictjoindir(rootDataDir, "levels");
+      string candidate = makeAbsolute(strictjoindir(rootDataDir, "levels"));
       if(fileExists(candidate))   
       {
          setLevelDir(candidate);
@@ -1605,7 +1616,7 @@ void FolderManager::resolveLevelDir(GameSettings *settings)
       // Try iniLevelDir/cmdLineLevelDir
       if(cmdLineLevelDir != "")
       {
-         candidate = strictjoindir(iniLevelDir, cmdLineLevelDir);    // Is cmdLineLevelDir a subfolder of iniLevelDir?
+         candidate = makeAbsolute(strictjoindir(iniLevelDir, cmdLineLevelDir));    // Is cmdLineLevelDir a subfolder of iniLevelDir?
          if(fileExists(candidate))
          {
             setLevelDir(candidate);
@@ -1616,14 +1627,14 @@ void FolderManager::resolveLevelDir(GameSettings *settings)
       // Ok, forget about cmdLineLevelDir.  Getting desperate here.  Try just the straight folder name specified in the INI file.
       if(fileExists(iniLevelDir))
       {
-         setLevelDir(iniLevelDir);
+         setLevelDir(makeAbsolute(iniLevelDir));
          return;
       }
    }
 
    // Maybe there is just a local folder called levels?
    if(fileExists("levels"))
-      setLevelDir("levels");
+      setLevelDir(makeAbsolute("levels"));
    else
       setLevelDir("");    // Surrender
 }

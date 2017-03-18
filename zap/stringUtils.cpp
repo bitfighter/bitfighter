@@ -794,6 +794,42 @@ string strictjoindir(const string &part1, const string &part2, const string &par
 }
 
 
+// Borrowed from Cppcheck 
+bool isAbsolute(const string &path)
+{
+   const string &nativePath = toNativeSeparators(path);
+
+#ifdef _WIN32
+   if(path.length() < 2)
+      return false;
+
+   // On Windows, 'C:\foo\bar' is an absolute path, while 'C:foo\bar' is not.  \\foobar is.  
+   if(nativePath.compare(0, 2, "\\\\") == 0 || (isalpha(nativePath[0]) != 0 && nativePath.compare(1, 2, ":\\") == 0))
+      return true;
+#else
+   if(!nativePath.empty() && nativePath[0] == '/')
+      return true;
+#endif
+
+   return false;
+}
+
+
+// Borrowed from Cppcheck 
+string toNativeSeparators(string path)
+{
+#if defined(_WIN32)
+   char separ = '/';
+   char native = '\\';
+#else
+   char separ = '\\';
+   char native = '/';
+#endif
+   replace(path.begin(), path.end(), separ, native);
+   return path;
+}
+
+
 // These string methods return a newly allocated string
 string trim_right(const string &source, const string &t)
 {
