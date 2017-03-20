@@ -1134,24 +1134,20 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
 /**
  * @luafunc table LuaScriptRunner::findAllObjects(ObjType objType, ...)
  *
- * @brief Finds all items of the specified type anywhere on the level.
+ * @brief Finds all items of the specified object type anywhere on the level.
  *
- * @descr Can specify multiple types.
+ * @descr Can specify multiple object types.
  *
  * If no object types are provided, this function will return every object on
- * the level.
+ * the level (warning, may be slow).
  *
- * @note If you provide your own table to this method, make sure you clear it
- * first.
+ * @param [objType] ObjTypes specifying what types of objects to find.
  *
- * @param [objType] Zero or more ObjTypes specifying what types of objects to find.
- *
- * @return A reference back to the passed table, or a new table if one was not
- * provided.
+ * @return A table with any found objects.
  *
  * @code
  * function countObjects(objType, ...) -- Pass one or more object types
- *   local items = bf:findAllObjects(objType, ...) -- Put all items of specified type(s) into items table
+ *   local items = bf:findAllObjects(objType, ...) -- Find all items of specified type(s)
  *   logprint(#items) -- Print the number of items found to the console
  * end
  * @endcode
@@ -1167,8 +1163,13 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
 
    types.clear();
 
-   // We expect only numbers on the stack:  -- objType1, objType2, ...
-   while(lua_gettop(L) > 0)
+   // We expect the stack to look like this: -- objType1, objType2, ...
+   // or this, if using the deprecated fill table option -- [fillTable], objType1, objType2, ...
+   // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
+   // We expect that when we find something that is not a number, the stack will only contain a fillTable.  If the stack
+   // is empty at that point, we'll add a table later.
+   // Note that even if stack is empty, lua_isnumber will return a value... which makes no sense!
+   while(lua_gettop(L) > 0 && lua_isnumber(L, -1))
    {
       U8 typenum = (U8)lua_tointeger(L, -1);
 
@@ -1194,13 +1195,27 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
    
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
 
-   // Create a table, with enough slots pre-allocated for our data
-   lua_createtable(L, fillVector.size(), 0);
+
+   // This will guarantee a table at the top of the stack to return our found objects
+   if(!lua_istable(L, -1))
+   {
+      TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
+
+      lua_createtable(L, results->size(), 0);    // Create a table, with enough slots pre-allocated for our data
+   }
+   else
+      logprintf(LogConsumer::LuaBotMessage, "Usage of a fill table with findAllObjects() "
+            "is deprecated and will be removed in the future.  Instead, don't use one");
+
+   TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || dumpStack(L), "Should only have table!");
+
+   S32 pushed = 0;      // Count of items we put into our table
 
    for(S32 i = 0; i < results->size(); i++)
    {
       static_cast<BfObject *>(results->get(i))->push(L);
-      lua_rawseti(L, 1, i + 1);    // +1 because Lua uses 1-based arrays
+      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+      lua_rawseti(L, 1, pushed);
    }
 
    TNLAssert(lua_gettop(L) == 1 || dumpStack(L), "Stack has unexpected items on it!");
@@ -1217,6 +1232,8 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
  * @descr Multiple object types can be specified. A search rectangle will be
  * constructed from the two points given, with each point positioned at opposite
  * corners.
+ *
+ * @note See LuaScriptRunner::findAllObjects for a code example
  *
  * @param point1 One corner of a search rectangle.
  * @param point2 Another corner of a search rectangle diagonally opposite to the
@@ -1238,8 +1255,9 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
 
    bool hasBotZoneType = false;
 
-   // We expect numbers on the stack, with two points at the bottom:
-   //   -- pt1, pt2, objType1, objType2, ...
+   // We expect the stack to look like this: -- point1, point2, objType1, objType2, ...
+   // or this, if using the deprecated fill table option -- [fillTable], point1, point2, objType1, objType2, ...
+   // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
    while(lua_gettop(L) > 0 && lua_isnumber(L, -1))
    {
       U8 typenum = (U8)lua_tointeger(L, -1);
@@ -1265,7 +1283,16 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
 
    mLevel->findObjects(types, fillVector, searchArea);
 
-   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
+   // This will guarantee a table at the top of the stack to return our found objects
+   if(!lua_istable(L, -1))
+   {
+      TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
+
+      lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
+   }
+   else
+      logprintf(LogConsumer::LuaBotMessage, "Usage of a fill table with findAllObjectsInArea() "
+            "is deprecated and will be removed in the future.  Instead, don't use one");
 
    // Create a table, with enough slots pre-allocated for our data
    lua_createtable(L, fillVector.size(), 0);

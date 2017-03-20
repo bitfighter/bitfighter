@@ -37,8 +37,6 @@ function main()
 end
 
 
-items = { }
-
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -- This is called by the robot's idle routine each tick.  
@@ -60,8 +58,7 @@ function onTick()
 
    end
 
-   table.clear(items)
-   local targets = bf:findAllObjects(items, targetType)
+   local targets = bf:findAllObjects(targetType)
    local target = findClosest(targets, team)    
 
    if(target == nil) then                   -- Check for nil
