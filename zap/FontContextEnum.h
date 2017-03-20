@@ -56,7 +56,7 @@ namespace Zap
 
       FontCount,
       // Used as default game font
-      FontDefault = FontRoman,
+      FontDefault = FontPlay,
       FirstExternalFont = FontDroidSansMono
    };
 
