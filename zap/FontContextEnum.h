@@ -55,6 +55,8 @@ namespace Zap
       FontModernVision,
 
       FontCount,
+      // Used as default game font
+      FontDefault = FontRoman,
       FirstExternalFont = FontDroidSansMono
    };
 
