@@ -164,6 +164,7 @@ void GameParamUserInterface::updateMenuItems(const GameType *gameType)
    string filename = mLevelFilename;
    // Grab the level filename from the menuitem if it has been built already.
    // This let's us persist a changed filename without having to leave the menu first
+   // The filename menuitem should be cleared before loading a new level!
    if(getMenuItemCount() > 0)
       filename = getMenuItem(1)->getValue();
 
@@ -242,6 +243,9 @@ void GameParamUserInterface::onEscape()
 
    // Now back to our previously scheduled program...  (which will be the editor, of course)
    getUIManager()->reactivatePrevUI();
+
+   // Finally clear the menu items, they'll be reloaded next time the menu opens
+   clearMenuItems();
 }
 
 
