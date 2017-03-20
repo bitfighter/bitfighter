@@ -1214,7 +1214,7 @@ int main(int argc, char **argv)
       gConsole.initialize();     // Initialize console *after* the screen mode has been actualized
 
       // Fonts are initialized in VideoSystem::actualizeScreenMode because of OpenGL + texture loss/creation
-      FontManager::setFont(FontRoman);     // Default font
+      FontManager::setFont(FontDefault);     // Default font
 
       // Now show any error messages from start-up
       Vector<string> configurationErrors = settings->getConfigurationErrors();

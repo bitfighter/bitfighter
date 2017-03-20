@@ -117,7 +117,7 @@ S32 BfFont::getStashFontId()
 ////////////////////////////////////////
 
 
-static FontId currentFontId;
+static FontId currentFontId = FontDefault;
 
 static BfFont *fontList[FontCount] = {NULL};
 
@@ -300,7 +300,7 @@ void FontManager::popFontContext()
       contextStack.erase(contextStack.size() - 1);
    }
    else
-      fontId = FontRoman;
+      fontId = FontDefault;
 
    setFont(fontId);
 }
@@ -352,7 +352,7 @@ BfFont *FontManager::getFont(FontId currentFontId)
    if(mUsingExternalFonts || currentFontId < FirstExternalFont)
       font = fontList[currentFontId];
    else
-     font = fontList[FontRoman]; 
+     font = fontList[FontDefault];
 
    TNLAssert(font, "Font is NULL... Did the FontManager get initialized?");
 
