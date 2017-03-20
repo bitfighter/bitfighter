@@ -1065,53 +1065,23 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
 }
 
 
-static void checkFillTable(lua_State *L, S32 size)
-{
-   // We are expecting a table to be on top of the stack when we get here.  If not, we can add one.
-   if(!lua_istable(L, -1))
-   {
-      TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
-
-      lua_createtable(L, size, 0);    // Create a table, with enough slots pre-allocated for our data
-   }
-
-   TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || dumpStack(L), "Should only have table!");
-}
-
-
 /**
  * @luafunc table LuaScriptRunner::findAllObjects(table results, ObjType objType, ...)
  *
- * @brief Finds all items of the specified type anywhere on the level.
+ * @brief Finds all items of the specified object type anywhere on the level.
  *
- * @descr Can specify multiple types. The table argument is optional, but
- * levelgens that call this function frequently will perform better if they
- * provide a reusable table in which found objects can be stored. By providing a
- * table, you will avoid incurring the overhead of construction and destruction
- * of a new one.
- *
- * If a table is not provided, the function will create a table and return it on
- * the stack.
+ * @descr Can specify multiple object types.
  *
  * If no object types are provided, this function will return every object on
- * the level.
+ * the level (warning, may be slow).
  *
- * @note If you provide your own table to this method, make sure you clear it
- * first.
+ * @param [objType] ObjTypes specifying what types of objects to find.
  *
- * @param [results] Reusable table into which results can be written.
- * @param [objType] Zero or more ObjTypes specifying what types of objects to find.
- *
- * @return A reference back to the passed table, or a new table if one was not
- * provided.
+ * @return A table with any found objects.
  *
  * @code
- * items = { } -- Reusable container for findAllObjects. Because it is defined outside
- *             -- any functions, it will have global scope.
- *
  * function countObjects(objType, ...) -- Pass one or more object types
- *   table.clear(items) -- Remove any items in table from previous use
- *   levelgen:findGlobalObjects(items, objType, ...) -- Put all items of specified type(s) into items table
+ *   items = bf:findAllObjects(objType, ...) -- Find all items of specified type(s)
  *   print(#items) -- Print the number of items found to the console
  * end
  * @endcode
@@ -1127,10 +1097,11 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
 
    types.clear();
 
-   // We expect the stack to look like this: -- [fillTable], objType1, objType2, ...
+   // We expect the stack to look like this: -- objType1, objType2, ...
+   // or this, if using the deprecated fill table option -- [fillTable], objType1, objType2, ...
    // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
-   // We expect that when we find something that is not a number, the stack will only contain our fillTable.  If the stack
-   // is empty at that point, we'll add a table, and warn the user that they are using a less efficient method.
+   // We expect that when we find something that is not a number, the stack will only contain a fillTable.  If the stack
+   // is empty at that point, we'll add a table later.
    // Note that even if stack is empty, lua_isnumber will return a value... which makes no sense!
    while(lua_gettop(L) > 0 && lua_isnumber(L, -1))
    {
@@ -1156,8 +1127,18 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
       results = &fillVector;
    }
 
-   // This will guarantee a table at the top of the stack
-   checkFillTable(L, results->size());
+   // This will guarantee a table at the top of the stack to return our found objects
+   if(!lua_istable(L, -1))
+   {
+      TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
+
+      lua_createtable(L, results->size(), 0);    // Create a table, with enough slots pre-allocated for our data
+   }
+   else
+      logprintf(LogConsumer::LuaBotMessage, "Usage of a fill table with findAllObjects() "
+            "is deprecated and will be removed in the future.  Instead, don't use one");
+
+   TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || dumpStack(L), "Should only have table!");
 
    S32 pushed = 0;      // Count of items we put into our table
 
@@ -1181,13 +1162,10 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
  *
  * @descr Multiple object types can be specified. A search rectangle will be
  * constructed from the two points given, with each point positioned at opposite
- * corners. A reusable fill table can be given to increase performance if this
- * method is called frequently.
+ * corners.
  *
- * @note See LuaScriptRunner::findAllObjects for a code example with using a
- * fill table.
+ * @note See LuaScriptRunner::findAllObjects for a code example
  *
- * @param results (Optional) A reusable fill table.
  * @param point1 One corner of a search rectangle.
  * @param point2 Another corner of a search rectangle diagonally opposite to the
  * first.
@@ -1208,7 +1186,8 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
 
    bool hasBotZoneType = false;
 
-   // We expect the stack to look like this: -- [fillTable], objType1, objType2, ...
+   // We expect the stack to look like this: -- point1, point2, objType1, objType2, ...
+   // or this, if using the deprecated fill table option -- [fillTable], point1, point2, objType1, objType2, ...
    // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
    while(lua_gettop(L) > 0 && lua_isnumber(L, -1))
    {
@@ -1235,9 +1214,16 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
 
    mLuaGridDatabase->findObjects(types, fillVector, searchArea);
 
-   // This will guarantee a table at the top of the stack
-   checkFillTable(L, fillVector.size());
+   // This will guarantee a table at the top of the stack to return our found objects
+   if(!lua_istable(L, -1))
+   {
+      TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
 
+      lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
+   }
+   else
+      logprintf(LogConsumer::LuaBotMessage, "Usage of a fill table with findAllObjectsInArea() "
+            "is deprecated and will be removed in the future.  Instead, don't use one");
 
    S32 pushed = 0;      // Count of items we put into our table
 

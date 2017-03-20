@@ -268,9 +268,7 @@ end
 -- If onTeam is true, will only return items on specified team.  If onTeam is false, will return items *not* on 
 -- specified team.  If called with fewer than three args, will ignore team altogether.
 function getObjective(objType, team, onTeam)
-
-    table.clear(items)
-    bf:findAllObjects(items, objType)       -- Returns a list of all items of type objType in the game
+    local items = bf:findAllObjects(objType)       -- Returns a list of all items of type objType in the game
 
     local itemsOnMyTeam = {}
     local currentIndex = 1
