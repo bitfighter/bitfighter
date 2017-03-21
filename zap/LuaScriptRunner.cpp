@@ -322,48 +322,44 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
 // Returns true if there was an error, false if everything ran ok
 bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
 {
-   try 
+   S32 args = lua_gettop(L);  // Number of args on stack     // -- <<args>>
+
+   pushStackTracer();                                        // -- <<args>>, _stackTracer
+
+   if(!loadFunction(L, getScriptId(), function))             // -- <<args>>, _stackTracer, function
+      throw LuaException("Cannot load method " + string(function) +"()!\n");
+
+   // Reorder the stack a little
+   if(args > 0)
    {
-      S32 args = lua_gettop(L);  // Number of args on stack     // -- <<args>>
+      lua_insert(L, 1);                                      // -- function, <<args>>, _stackTracer
+      lua_insert(L, 1);                                      // -- _stackTracer, function, <<args>>
+   }
 
-      pushStackTracer();                                        // -- <<args>>, _stackTracer
+   S32 error = lua_pcall(L, args, returnValues, -2 - args);  // -- _stackTracer, <<return values>>
 
-      if(!loadFunction(L, getScriptId(), function))             // -- <<args>>, _stackTracer, function
-         throw LuaException("Cannot load method" + string(function) +"()!\n");
-
-      // Reorder the stack a little
-      if(args > 0)
-      {
-         lua_insert(L, 1);                                      // -- function, <<args>>, _stackTracer
-         lua_insert(L, 1);                                      // -- _stackTracer, function, <<args>>
-      }
-
-      S32 error = lua_pcall(L, args, returnValues, -2 - args);  // -- _stackTracer, <<return values>>
-      if(error)
-      {
-         string msg = lua_tostring(L, -1);
-         lua_pop(L, 1);    // Remove the message from the stack, so it won't appear in our stack dump
-
-         throw LuaException("In method " + string(function) +"():\n" + msg);
-      }
-
-      lua_remove(L, 1);    // Remove _stackTracer               // -- <<return values>>
+   if(!error)
+   {
+      lua_remove(L, 1);    // Remove _stackTracer            // -- <<return values>>
 
       // Do not clear stack -- caller probably wants <<return values>>
       return false;
    }
 
-   catch(const LuaException &e)
-   {
-      logprintf(LogConsumer::LogError, "%s\n%s", getErrorMessagePrefix(), e.msg.c_str());
-      logprintf(LogConsumer::LogError, "Dump of Lua/C++ stack:");
-      dumpStack(L);
-      logprintf(LogConsumer::LogError, "Terminating script");
+   // There was an error... handle it!
 
-      killScript();
-      clearStack(L);
-      return true;
-   }
+   string msg = lua_tostring(L, -1);
+   lua_pop(L, 1);    // Remove the message from the stack, so it won't appear in our stack dump
+
+   string text = "In method " + string(function) +"():\n" + msg;
+
+   logprintf(LogConsumer::LogError, "%s\n%s", getErrorMessagePrefix(), text.c_str());
+   logprintf(LogConsumer::LogError, "Dump of Lua/C++ stack:");
+   dumpStack(L);
+   logprintf(LogConsumer::LogError, "Terminating script");
+
+   killScript();
+   clearStack(L);
 
    return true;
 }
