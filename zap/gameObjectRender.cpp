@@ -825,7 +825,10 @@ static void renderShipName(const string &shipName, bool isAuthenticated, bool is
 
 
    S32 ypos = 30 + textSize;
+
+   FontManager::pushFontContext(OldSkoolContext);
    S32 len = drawStringc(0, ypos, textSize, renderName.c_str());
+   FontManager::popFontContext();
 
 //   renderGamesPlayedMark(-len / 2, ypos, textSize, gamesPlayed);
 
@@ -954,7 +957,9 @@ void renderShipCoords(const Point &coords, bool localShip, F32 alpha)
    glLineWidth(gLineWidth1);
    glColor(Colors::white, 0.5f * alpha);
 
+   FontManager::pushFontContext(OldSkoolContext);
    drawStringc(0, 30 + (localShip ? 0 : textSize + 3) + textSize, textSize, str.c_str() );
+   FontManager::popFontContext();
 
    glLineWidth(gDefaultLineWidth);
 }
@@ -1495,8 +1500,10 @@ void renderFlagSpawn(const Point &pos, F32 currentScale, const Color *color)
 
 F32 renderCenteredString(const Point &pos, S32 size, const char *string)
 {
+   FontManager::pushFontContext(OldSkoolContext);
    F32 width = getStringWidth((F32)size, string);
    drawStringAndGetWidth((S32)floor(pos.x - width * 0.5), (S32)floor(pos.y - size * 0.5), size, string);
+   FontManager::popFontContext();
 
    return width;
 }
@@ -2093,7 +2100,9 @@ void renderSpyBug(const Point &pos, const Color &teamColor, bool visible)
    {
       renderFilledPolygon(pos, 6, 15, teamColor * 0.45f, Colors::gray50);
 
+      FontManager::pushFontContext(OldSkoolContext);
       drawString(pos.x - 3, pos.y - 5, 10, "S");
+      FontManager::popFontContext();
    }
    else
    {
@@ -2491,8 +2500,10 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
       return;
    }
 
-   glColor(color);      
+   glColor(color);
+   FontManager::pushFontContext(OldSkoolContext);
    drawAngleString(pos.x, pos.y, size, pos.angleTo(dir), text.c_str());
+   FontManager::popFontContext();
 }
 
 
@@ -2852,7 +2863,9 @@ void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F
    {
       glColor(Colors::white, alpha);
       F32 fontsize = 6 / scale;
+      FontManager::pushFontContext(OldSkoolContext);
       drawStringf(v.x - getStringWidthf(fontsize, "%d", number) / 2, v.y - 3 / scale, fontsize, "%d", number);
+      FontManager::popFontContext();
    }
 }
 
@@ -2882,7 +2895,7 @@ void drawFadingHorizontalLine(S32 x1, S32 x2, S32 yPos, const Color &color)
 }
 
 
-static void drawLetter(char letter, const Point &pos, const Color *color, F32 alpha)
+void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
 {
    // Mark the item with a letter, unless we're showing the reference ship
    S32 vertOffset = 8;
@@ -2890,9 +2903,11 @@ static void drawLetter(char letter, const Point &pos, const Color *color, F32 al
       vertOffset = 10;
 
    glColor(color, alpha);
-   F32 xpos = pos.x - getStringWidthf(15, "%c", letter) / 2;
 
+   FontManager::pushFontContext(OldSkoolContext);
+   F32 xpos = pos.x - getStringWidthf(15, "%c", letter) / 2;
    drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
+   FontManager::popFontContext();
 }
 
 
@@ -2900,7 +2915,7 @@ void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *
 {
    glColor(c, alpha);
    drawFilledSquare(pos, 8);  // Draw filled box in which we'll put our letter
-   drawLetter(letter, pos, letterColor, alpha);
+   drawLetter(letter, pos, *letterColor, alpha);
 }
 
 
@@ -3619,20 +3634,6 @@ void renderScoreboardOrnamentTeamFlags(S32 xpos, S32 ypos, const Color *color, b
       glColor(Colors::magenta);
       drawString(xpos - 23, ypos + 7, 18, "*");      // These numbers are empirical alignment factors
    }
-}
-
-
-void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
-{
-   // Mark the item with a letter, unless we're showing the reference ship
-   F32 vertOffset = 8;
-   if (letter >= 'a' && letter <= 'z')    // Better positioning for lowercase letters
-      vertOffset = 10;
-
-   glColor(color, alpha);
-   F32 xpos = pos.x - getStringWidthf(15, "%c", letter) / 2;
-
-   drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
 }
 
 
