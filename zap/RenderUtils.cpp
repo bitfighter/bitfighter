@@ -727,7 +727,9 @@ void RenderUtils::drawLetter(char letter, const Point &pos, const Color &color, 
    if (letter >= 'a' && letter <= 'z')    // Better positioning for lowercase letters
       vertOffset = 5;
 
+   FontManager::pushFontContext(OldSkoolContext);
    drawStringfc(pos.x, pos.y + vertOffset, 15, color, alpha, "%c", letter);
+   FontManager::popFontContext();
 }
 
 

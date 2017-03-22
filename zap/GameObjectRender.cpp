@@ -489,7 +489,9 @@ void GameObjectRender::renderShipName(const string &shipName, bool isAuthenticat
    FontManager::setFontColor(color, alpha);
 
    F32 ypos = textSize + 30;
+   FontManager::pushFontContext(OldSkoolContext);
    S32 len = RenderUtils::drawStringc(0.0f, ypos, textSize, renderName.c_str());
+   FontManager::popFontContext();
 
    // Underline name if player is authenticated
    if(isAuthenticated)
@@ -621,8 +623,9 @@ void GameObjectRender::renderShipCoords(const Point &coords, bool localShip, F32
    nvgStrokeWidth(nvg, RenderUtils::LINE_WIDTH_1);
 
    FontManager::setFontColor(Colors::white,  0.5f * alpha);
+   FontManager::pushFontContext(OldSkoolContext);
    RenderUtils::drawStringc(0, 30 + (localShip ? 0 : textSize + 3) + textSize, textSize, str.c_str() );
-
+   FontManager::popFontContext();
    nvgStrokeWidth(nvg, RenderUtils::DEFAULT_LINE_WIDTH);
 }
 
@@ -1197,8 +1200,10 @@ F32 GameObjectRender::renderCenteredString(const Point &pos, F32 size, const Col
 
 F32 GameObjectRender::renderCenteredString(const Point &pos, S32 size, const Color &color, F32 alpha, const char *string)
 {
+   FontManager::pushFontContext(OldSkoolContext);
    F32 width = RenderUtils::getStringWidth((F32)size, string);
    RenderUtils::drawStringAndGetWidth_fixed(floor(pos.x - width * 0.5), floor(pos.y - size * 0.5), size, color, alpha, string);
+   FontManager::popFontContext();
 
    return width;
 }
@@ -1720,7 +1725,9 @@ void GameObjectRender::renderSpyBug(const Point &pos, const Color &teamColor, bo
       const Color &color = Colors::gray50;
 
       renderFilledPolygon(pos, 6, 15, teamColor * 0.45f, color);
+      FontManager::pushFontContext(OldSkoolContext);
       RenderUtils::drawString_fixed(pos.x - 3, pos.y + 5, 10, color, "S");
+      FontManager::popFontContext();
    }
    else
    {
@@ -2071,12 +2078,14 @@ void GameObjectRender::renderTextItem(const Point &pos, const Point &dir, F32 si
    F32 yspace =  lineHeight * cos(angle);
 
    FontManager::setFontColor(color);
+   FontManager::pushFontContext(OldSkoolContext);
    for(S32 i = 0; i < lines.size(); i++)
    {
       RenderUtils::drawAngleString(xpos, ypos, size, angle, lines[i].c_str());
       xpos += xspace;
       ypos += yspace;
    }
+   FontManager::popFontContext();
 }
 
 
@@ -2421,7 +2430,9 @@ void GameObjectRender::renderVertex(char style, const Point &v, S32 number, S32 
 
    // Draw vertex numbers
    F32 fontsize = 6 / scale;
+   FontManager::pushFontContext(OldSkoolContext);
    RenderUtils::drawStringfc(v.x, v.y + 3 / scale, fontsize, Colors::white, alpha, "%d", number);
+   FontManager::popFontContext();
 }
 
 
