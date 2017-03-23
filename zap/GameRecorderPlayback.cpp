@@ -19,6 +19,7 @@
 #include "Cursor.h"
 #include "Level.h"
 #include "Timer.h"
+#include "Colors.h"
 
 #include "version.h"
 #include "Colors.h"
@@ -449,7 +450,7 @@ void PlaybackGameUserInterface::onReactivate()
 
 
 const F32 playbackBar_x = 200;
-const F32 playbackBar_y = 550;
+const F32 playbackBar_y = 570;
 const F32 playbackBar_w = 400;
 const F32 playbackBar_h = 10;
 
@@ -465,7 +466,7 @@ const F32 btn0_x = 200; // pause
 const F32 btn1_x = 250; // slow play
 const F32 btn2_x = 300; // play
 const F32 btn3_x = 350; // fast forward
-const F32 btn_y = 510;
+const F32 btn_y = 530;
 const F32 btn_w = 20;
 const F32 btn_h = 20;
 
@@ -644,6 +645,26 @@ void PlaybackGameUserInterface::render() const
 
    if(mVisible)
    {
+      // Draw fancy box around controls
+      static const S32 cornerSize = 15,
+            top = 510,
+            bottom = 600,
+            left = 180,
+            right = 620;
+
+      static const F32 controlBoxPoints[] = {
+            left, bottom,  left, top,
+            right - cornerSize, top,  right, top + cornerSize,
+            right, bottom
+      };
+
+      // Fill
+      RenderUtils::drawFilledLineLoop(controlBoxPoints, ARRAYSIZE(controlBoxPoints)/2, Colors::black, 0.70f);
+
+      // Border
+      RenderUtils::drawLineLoop(controlBoxPoints, ARRAYSIZE(controlBoxPoints)/2, Colors::blue);
+
+      // Playback bar
       RenderUtils::drawLineLoop(playbackBarVertex, 4, Colors::white);
 
       F32 vertex[4];
@@ -655,6 +676,7 @@ void PlaybackGameUserInterface::render() const
       RenderUtils::drawLines(vertex, 2, Colors::white);
       RenderUtils::drawLines(buttons_lines, sizeof(buttons_lines) / (sizeof(buttons_lines[0]) * 2), Colors::white);
 
+      nvgStrokeColor(nvg, Colors::yellow.toNvg());
       RenderUtils::drawString_fixed(btn_spectate_name_x, btn_y + 15, 15, Colors::white, 
                                     mPlaybackConnection->mClientInfoSpectatingName.getString());
    }
