@@ -58,12 +58,8 @@ function main()
 end
  
 
-items = { }     -- Global variable, reusable container for bf:findAllObjects.  Reusing this table avoids costs of
-                -- constructing and destructing it every time we call bf:findAllObjects().  Be sure to clear the
-                -- table before reusing it!
 function shieldSelf()
-    table.clear(items)
-    bot:findVisibleObjects(items, ObjType.Bullet, ObjType.Seeker, ObjType.Asteroid, ObjType.Mine)
+    local items = bot:findVisibleObjects(ObjType.Bullet, ObjType.Seeker, ObjType.Asteroid, ObjType.Mine)
 
     local distToShieldAt = botRadius * 2 + (1 - difficulty) * 100
     if (items ~= nil) then
@@ -91,8 +87,7 @@ function angleDifference(angleA, angleB)
 end
 
 function fireAtObjects()
-    table.clear(items)
-    bot:findVisibleObjects(items, ObjType.Robot, ObjType.Turret, ObjType.Ship, ObjType.Asteroid, 
+    local items = bot:findVisibleObjects(ObjType.Robot, ObjType.Turret, ObjType.Ship, ObjType.Asteroid, 
         ObjType.ForceFieldProjector, ObjType.SpyBug, ObjType.Core)
 
     -- Cycle through list of potential items until we find one that we can attack
@@ -246,8 +241,7 @@ function attackNearbyEnemies(target, agressionLevel)
         -- local dist    = point.distanceTo(botPos, targetPos)
         local myPow   = bot:getEnergy() + bot:getHealth()
 
-        table.clear(items)
-        bot:findVisibleObjects(items, ObjType.Ship, ObjType.Robot)
+        local items = bot:findVisibleObjects(ObjType.Ship, ObjType.Robot)
       
         local otherPow = target:getEnergy() + target:getHealth() * #items
       

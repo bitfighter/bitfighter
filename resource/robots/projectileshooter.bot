@@ -15,8 +15,7 @@ end
 -------------------------------------------------------------------------------
 -- This function called every tick
 function onTick() 
-	table.clear(items)
-	bot:findVisibleObjects(items, ObjType.Burst, ObjType.Seeker, ObjType.Mine, ObjType.SpyBug)   -- Find a suitable target
+	local items = bot:findVisibleObjects(ObjType.Burst, ObjType.Seeker, ObjType.Mine, ObjType.SpyBug)   -- Find a suitable target
 
 	local closestItem = findClosest(items)
 
@@ -44,5 +43,4 @@ end
 -- This function is called before all other functions, only on robot start-up
 function main()
 	-- Set global objects here
-	items = {}       -- Reusable container for finding objects
 end

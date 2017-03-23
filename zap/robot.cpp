@@ -1269,38 +1269,24 @@ S32 Robot::lua_privateMsg(lua_State *L)
 
 
 /**
- * @luafunc table Robot::findVisibleObjects(table t, ObjType types, ...)
+ * @luafunc table Robot::findVisibleObjects(ObjType types, ...)
  * 
  * @brief Finds all items of the specified type within ship's area of vision.
  * 
  * @descr This search will exclude the bot itself as well as other cloaked ships
  * in the area (unless this bot has sensor equipped)
  * 
- * Can specify multiple types. The table argument is optional, but bots that
- * call this function frequently will perform better if they provide a reusable
- * table in which found objects can be stored. By providing a table, you will
- * avoid incurring the overhead of construction and destruction of a new one.
- * 
- * If a table is not provided, the function will create a table and return it on
- * the stack.
- * 
- * @param t (Optional) Reusable table into which results can be written.
+ * Can specify multiple types.
  * 
  * @param types One or more \ref ObjTypeEnum specifying what types of objects to
  * find.
  * 
- * @return Either a reference back to the passed table, or a new table if one
- * was not provided.
+ * @return A table with any found objects.
  * 
  * @code
- *   -- Reusable container for findGlobalObjects. Because it is defined outside
- *   -- any functions, it will have global scope.
- *   items = { }
- *
  *   -- Pass one or more object types
  *   function countObjects(objType, ...)
- *     table.clear(items) -- Remove any items in table from previous use
- *     bot:findVisibleObjects(items, objType, ...)
+ *     items = bot:findVisibleObjects(objType, ...)
  *     print(#items) -- Print the number of items found
  *   end
  * @endcode
@@ -1318,11 +1304,12 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
 
    types.clear();
 
-   // We expect the stack to look like this: -- [fillTable], objType1, objType2, ...
+   // We expect the stack to look like this: -- objType1, objType2, ...
+   // or this, if using the deprecated fill table option -- [fillTable], objType1, objType2, ...
    // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
    // We expect that when we find something that is not a number, the stack will only contain our fillTable.  If the stack
-   // is empty at that point, we'll add a table, and warn the user that they are using a less efficient method.
-   while(lua_isnumber(L, -1))
+   // is empty at that point, we'll add a table.
+   while(lua_gettop(L) > 0 && lua_isnumber(L, -1))
    {
       U8 typenum = (U8)lua_tointeger(L, -1);
 
@@ -1345,10 +1332,13 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
    {
       TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
 
-      logprintf(LogConsumer::LogWarning,
-                  "Finding objects will be far more efficient if your script provides a table -- see scripting docs for details!");
-      lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
+      // Create a table, cannot pre-allocate because of filtering objects from
+      // the database
+      lua_newtable(L);
    }
+   else
+      logprintf(LogConsumer::LuaBotMessage, "Usage of a fill table with findVisibleObjects() "
+            "is deprecated and will be removed in the future.  Instead, don't use one");
 
    TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || dumpStack(L), "Should only have table!");
 
