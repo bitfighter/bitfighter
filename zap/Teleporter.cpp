@@ -30,29 +30,26 @@ namespace Zap
 
 using namespace LuaArgs;
 
-DestManager::DestManager(Teleporter *owner)
-{
-   mOwner = owner;
-}
 
 
-S32 DestManager::getDestCount() const
+
+S32 Teleporter::getDestCount() const
 {
    return mDests.size();
 }
 
 
-Point DestManager::getDest(S32 index) const
+Point Teleporter::getDest(S32 index) const
 {
    // If we have no desitnations, return the orgin for a kind of bizarre loopback effect
    if(mDests.size() == 0)
-      return mOwner->getPos();
+      return getPos();
 
    return mDests[index];
 }
 
 
-S32 DestManager::getRandomDest() const
+S32 Teleporter::getRandomDest() const
 {
    if(mDests.size() == 0)
       return 0;
@@ -61,78 +58,77 @@ S32 DestManager::getRandomDest() const
 }
 
 
-void DestManager::addDest(const Point &dest)
+void Teleporter::addDest(const Point &dest)
 {
-   TNLAssert(mOwner, "We need an owner here!");
    mDests.push_back(dest);
    if(mDests.size() == 1)      // Just added the first dest
    {
-      mOwner->setVert(dest, 1);
-      mOwner->updateExtentInDatabase();
+      setVert(dest, 1);
+      updateExtentInDatabase();
    }
    // If we're the server, update the clients 
-   if(mOwner->getGame() && mOwner->getGame()->isServer())
-      mOwner->s2cAddDestination(dest);
+   if(getGame() && getGame()->isServer())
+      s2cAddDestination(dest);
 }
 
 
-void DestManager::setDest(S32 index, const Point &dest)
+void Teleporter::setDest(S32 index, const Point &dest)
 {
    TNLAssert(index < mDests.size(), "Invalid index!");
    mDests[index] = dest;
 }
 
 
-void DestManager::delDest(S32 index)
+void Teleporter::delDest(S32 index)
 {
    if(mDests.size() == 1)
-      clear();
+      clearDests();
    else
       mDests.erase(index);
 
    // If we're the server, update the clients -- this will likely be used rarely; not worth a new RPC, I think
-   if(mOwner->getGame() && mOwner->getGame()->isServer())
+   if(getGame() && getGame()->isServer())
    {
-      mOwner->s2cClearDestinations();
+      s2cClearDestinations();
       for(S32 i = 0; i < mDests.size(); i++)
-         mOwner->s2cAddDestination(mDests[i]);
+         s2cAddDestination(mDests[i]);
    }
 }
 
 
-void DestManager::clear()
+void Teleporter::clearDests()
 {
    mDests.clear();
-   mOwner->setVert(mOwner->getPos(), 1);       // Set destination to same as origin
-   mOwner->updateExtentInDatabase();
+   setVert(getPos(), 1);       // Set destination to same as origin
+   updateExtentInDatabase();
 
    // If we're the server, update the clients 
-   if(mOwner->getGame() && mOwner->getGame()->isServer())
-      mOwner->s2cClearDestinations();
+   if(getGame() && getGame()->isServer())
+      s2cClearDestinations();
 }
 
 
-void DestManager::resize(S32 count)
+void Teleporter::resize(S32 count)
 {
    mDests.resize(count);
 }
 
 
 // Read a single dest
-void DestManager::read(S32 index, BitStream *stream)
+void Teleporter::read(S32 index, BitStream *stream)
 {
    mDests[index].read(stream);
 }
 
 
 // Read a whole list of dests
-void DestManager::read(BitStream *stream)
+void Teleporter::read(BitStream *stream)
 {
    Types::read(*stream, &mDests);
 }
 
 
-const Vector<Point> *DestManager::getDestList() const
+const Vector<Point> *Teleporter::getDestList() const
 {
    return &mDests;
 }
@@ -147,9 +143,9 @@ static Vector<DatabaseObject *> foundObjects;      // Reusable container
 
 const F32 Teleporter::DamageReductionFactor = 0.5f;
 
+
 // Combined default C++/Lua constructor
-Teleporter::Teleporter(lua_State *L) :
-      mDestManager(this)
+Teleporter::Teleporter(lua_State *L)
 {
    initialize(Point(0,0), Point(0,0), NULL);
    
@@ -167,7 +163,7 @@ Teleporter::Teleporter(lua_State *L) :
 
 // Constructor used by engineer
 Teleporter::Teleporter(const Point &pos, const Point &dest, Ship *engineeringShip) : 
-      Engineerable(), mDestManager(this)
+      Engineerable()
 {
    initialize(pos, dest, engineeringShip);
 }
@@ -207,7 +203,8 @@ void Teleporter::initialize(const Point &pos, const Point &dest, Ship *engineeri
 
 Teleporter *Teleporter::clone() const
 {
-   return new Teleporter(*this);
+   Teleporter *teleporter = new Teleporter(*this);
+   return teleporter;
 }
 
 
@@ -432,9 +429,9 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       if(U32(dest) < U32(getDestCount()))
       {
          TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-         static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDestManager.getDest(dest), 0);
+         static_cast<ClientGame *>(getGame())->emitTeleportInEffect(getDest(dest), 0);
 
-         getGame()->playSoundEffect(SFXTeleportIn, mDestManager.getDest(dest));
+         getGame()->playSoundEffect(SFXTeleportIn, getDest(dest));
       }
 
       getGame()->playSoundEffect(SFXTeleportOut, getOrigin());
@@ -452,10 +449,10 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       setVert(pos, 1);                    // Simulate a point geometry -- will be changed later when we add our first dest
 
       count = stream->readInt(16);
-      mDestManager.resize(count);         // Prepare the list for multiple additions
+      resize(count);         // Prepare the list for multiple additions
 
       for(U32 i = 0; i < count; i++)
-         mDestManager.read(i, stream);
+         read(i, stream);
       
       computeExtent();
       generateOutlinePoints();
@@ -555,7 +552,7 @@ void Teleporter::doTeleport()
    foundObjects.clear();
    findObjects((TestFunc)isShipType, foundObjects, queryRect);
 
-   S32 dest = mDestManager.getRandomDest();
+   S32 dest = getRandomDest();
 
    Point teleportCenter = getOrigin();
 
@@ -583,7 +580,7 @@ void Teleporter::doTeleport()
       {
          mLastDest = dest;    // Save the destination
 
-         Point newPos = ship->getActualPos() - teleportCenter + mDestManager.getDest(dest);
+         Point newPos = ship->getActualPos() - teleportCenter + getDest(dest);
          ship->setActualPos(newPos, true);
 
          if(ship->getClientInfo() && ship->getClientInfo()->getStatistics())
@@ -597,7 +594,7 @@ void Teleporter::doTeleport()
    }
 
    Vector<DatabaseObject *> foundTeleporters; // Must be kept local, non static, because of possible recursive.
-   queryRect.set(mDestManager.getDest(dest), TRIGGER_RADIUS * 2);
+   queryRect.set(getDest(dest), TRIGGER_RADIUS * 2);
    findObjects(TeleporterTypeNumber, foundTeleporters, queryRect);
    for(S32 i = 0; i < foundTeleporters.size(); i++)
       if(static_cast<Teleporter *>(foundTeleporters[i])->mTeleportCooldown.getCurrent() == 0)
@@ -715,36 +712,6 @@ Point Teleporter::getOrigin() const
 }
 
 
-S32 Teleporter::getDestCount() const
-{
-   return mDestManager.getDestCount();
-}
-
-
-Point Teleporter::getDest(S32 index) const
-{
-   return mDestManager.getDest(index);
-}
-
-
-void Teleporter::addDest(const Point &dest)
-{
-   mDestManager.addDest(dest);
-}
-
-
-void Teleporter::delDest(S32 index)
-{
-   mDestManager.delDest(index);
-}
-
-
-void Teleporter::clearDests()
-{
-   mDestManager.clear();
-}
-
-
 void Teleporter::onConstructed()
 {
    // Do nothing
@@ -760,15 +727,10 @@ bool Teleporter::hasAnyDests() const
 // Server only, also called from editor
 void Teleporter::setEndpoint(const Point &point)
 {
-   mDestManager.addDest(point);
+   addDest(point);
    setVert(point, 1);
 }
 
-
-const Vector<Point> *Teleporter::getDestList() const
-{
-   return mDestManager.getDestList();
-}
 
 
 void Teleporter::idle(IdleCallPath path)
@@ -843,7 +805,7 @@ void Teleporter::render()
       F32 zoomFraction = getGame()->getCommanderZoomFraction();
       U32 renderStyle = mEngineered ? 2 : 0;
       renderTeleporter(getOrigin(), renderStyle, true, getGame()->getCurrentTime(), zoomFraction, radiusFraction, 
-                       (F32)TELEPORTER_RADIUS, 1.0, mDestManager.getDestList(), trackerCount);
+                       (F32)TELEPORTER_RADIUS, 1.0, getDestList(), trackerCount);
    }
 
    if(mEngineered)
@@ -859,7 +821,7 @@ void Teleporter::render()
 
       if(sizeFraction > 0)
          for(S32 i = getDestCount() - 1; i >= 0; i--)
-            renderTeleporterOutline(mDestManager.getDest(i), (F32)TELEPORTER_RADIUS * sizeFraction, Colors::richGreen);
+            renderTeleporterOutline(getDest(i), (F32)TELEPORTER_RADIUS * sizeFraction, Colors::richGreen);
    }
 #endif
 }
@@ -943,7 +905,7 @@ void Teleporter::onGeomChanged()
    Parent::onGeomChanged();
 
    // Update the dest manager.  We need this for rendering in preview mode.
-   mDestManager.setDest(0, getVert(1));
+   setDest(0, getVert(1));
 }   
 
 
@@ -1109,7 +1071,7 @@ S32 Teleporter::lua_getDest(lua_State *L)
    if(index < 0 || index >= getDestCount())
       THROW_LUA_EXCEPTION(L, string("Index out of range (requested " + itos(index) + ")").c_str());
 
-   return returnPoint(L, mDestManager.getDest(index));
+   return returnPoint(L, getDest(index));
 }
 
 
@@ -1278,7 +1240,7 @@ S32 Teleporter::lua_getGeom(lua_State *L)
    points.push_back(getPos());
 
    for(S32 i = 0; i < getDestCount(); i++)
-      points.push_back(mDestManager.getDest(i));
+      points.push_back(getDest(i));
 
    return returnPoints(L, &points);
 }

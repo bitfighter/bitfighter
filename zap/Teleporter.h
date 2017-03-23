@@ -20,35 +20,6 @@ namespace Zap
 class Teleporter;
 class EditorAttributeMenuUI;
 
-// Manage destinations for a teleporter
-struct DestManager 
-{
-   private:
-      Vector<Point> mDests;
-      Teleporter *mOwner;
-
-   public:
-      DestManager(Teleporter *owner);    // Constructor
-
-      S32 getDestCount() const;
-      Point getDest(S32 index) const;
-      S32 getRandomDest() const;
-
-      void addDest(const Point &dest);
-      void setDest(S32 index, const Point &dest);
-      void delDest(S32 index);
-
-      void resize(S32 count);
-      void read(S32 index, BitStream *stream);     // Read a single dest
-      void read(BitStream *stream);                // Read a whole list of dests
-
-      void clear();
-      const Vector<Point> *getDestList() const;
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
 
 class Teleporter : public SimpleLine, public Engineerable
 {
@@ -86,8 +57,6 @@ private:
 
    bool mFinalExplosionTriggered;
 
-   DestManager mDestManager;
-
    SafePtr<Ship> mEngineeringShip;
 
    void initialize(const Point &pos, const Point &dest, Ship *engineeringShip);
@@ -95,12 +64,23 @@ private:
    void computeExtent();
    void generateOutlinePoints();
 
+
+   Vector<Point> mDests;
+   S32 getRandomDest() const;
+
+   void setDest(S32 index, const Point &dest);
+
+   void resize(S32 count);
+   void read(S32 index, BitStream *stream);     // Read a single dest
+   void read(BitStream *stream);                // Read a whole list of dests
+
 public:
    explicit Teleporter(lua_State *L = NULL);                                  // Combined default C++/Lua constructor
    Teleporter(const Point &pos, const Point &dest, Ship *engineeringShip);    // Constructor used by engineer
    virtual ~Teleporter();                                                     // Destructor
 
    Teleporter *clone() const;
+
 
    U32 mTime;
 
