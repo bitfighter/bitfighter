@@ -20,6 +20,7 @@
 #include "OpenglUtils.h"
 #include "Cursor.h"
 #include "Timer.h"
+#include "Colors.h"
 
 #include "version.h"
 
@@ -448,7 +449,7 @@ void PlaybackGameUserInterface::onReactivate()
 
 
 const F32 playbackBar_x = 200;
-const F32 playbackBar_y = 550;
+const F32 playbackBar_y = 570;
 const F32 playbackBar_w = 400;
 const F32 playbackBar_h = 10;
 
@@ -464,7 +465,7 @@ const F32 btn0_x = 200; // pause
 const F32 btn1_x = 250; // slow play
 const F32 btn2_x = 300; // play
 const F32 btn3_x = 350; // fast forward
-const F32 btn_y = 510;
+const F32 btn_y = 530;
 const F32 btn_w = 20;
 const F32 btn_h = 20;
 
@@ -641,7 +642,29 @@ void PlaybackGameUserInterface::render()
 
    if(mVisible)
    {
-      glColor(1);
+      // Draw fancy box around controls
+      static const S32 cornerSize = 15,
+            top = 510,
+            bottom = 600,
+            left = 180,
+            right = 620;
+
+      static const F32 controlBoxPoints[] = {
+            left, bottom,  left, top,
+            right - cornerSize, top,  right, top + cornerSize,
+            right, bottom
+      };
+
+      // Fill
+      glColor(Colors::black, 0.70f);
+      renderVertexArray(controlBoxPoints, ARRAYSIZE(controlBoxPoints)/2, GL_TRIANGLE_FAN);
+
+      // Border
+      glColor(Colors::blue);
+      renderVertexArray(controlBoxPoints, ARRAYSIZE(controlBoxPoints)/2, GL_LINE_STRIP);
+
+      // Playback bar
+      glColor(Colors::white);
       renderVertexArray(playbackBarVertex, 4, GL_LINE_LOOP);
 
       F32 vertex[4];
@@ -653,6 +676,7 @@ void PlaybackGameUserInterface::render()
 
       renderVertexArray(buttons_lines, sizeof(buttons_lines) / (sizeof(buttons_lines[0]) * 2), GL_LINES);
 
+      glColor(Colors::yellow);
       drawString(btn_spectate_name_x, btn_y, 15, mPlaybackConnection->mClientInfoSpectatingName.getString());
    }
 }
