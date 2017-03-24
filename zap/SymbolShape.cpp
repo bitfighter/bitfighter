@@ -1359,8 +1359,43 @@ void SymbolSpinner::render(const Point &pos) const
          TNLAssert(false, "Unexpected value of charindx");
          break;
    }
-
    drawStringc(pos - Point(0, SpacingAdjustor / 2), mHeight / 2.0f, charstr);
+
+
+   //switch(charindx)
+   //{
+   //   case 0:
+   //      charstr = "\xEF\x9E\xAF";
+   //      break;
+   //   case 1:
+   //      charstr = "\xEF\x9E\xB0";
+   //      break;
+   //   case 2:
+   //      charstr = "\xEF\x9E\xB1";
+   //      break;
+   //   case 3:
+   //      charstr = "\xEF\x9E\xB2";
+   //      break;
+   //   case 4:
+   //      charstr = "\xEF\x9E\xB3";
+   //      break;
+   //   case 5:
+   //      charstr = "\xEF\x9E\xB4";
+   //      break;
+   //   case 6:
+   //      charstr = "\xEF\x9E\xB5";
+   //      break;
+   //   case 7:
+   //      charstr = "\xEF\x9E\xB6";
+   //      break;
+
+   //   default: 
+   //      TNLAssert(false, "Unexpected value of charindx");
+   //      break;
+   //}
+
+   //SymbolString::getSymbolText("\xEF\x80\x8B", 15, WebDingContext)
+   
 }
 
 
