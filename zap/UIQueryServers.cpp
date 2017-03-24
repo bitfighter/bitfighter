@@ -20,8 +20,6 @@
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 
-#include "tnlRandom.h"
-
 #include <math.h>
 
 namespace Zap
@@ -155,10 +153,10 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) :
 
    // Column name, x-start pos
    columns.push_back(ColumnInfo("SERVER NAME", 3));
-   columns.push_back(ColumnInfo("STAT", 400));
-   columns.push_back(ColumnInfo("PING", 449));
-   columns.push_back(ColumnInfo("PLAYERS BOTS", 493));
-   columns.push_back(ColumnInfo("ADDRESS", 616));
+   columns.push_back(ColumnInfo("STAT", 385));
+   columns.push_back(ColumnInfo("PING", 444));
+   columns.push_back(ColumnInfo("PLAYERS BOTS", 489));
+   columns.push_back(ColumnInfo("ADDRESS", 609));
 
 #ifdef TNL_ENABLE_ASSERTS
    // Make sure columns are wide enough for their labels
@@ -714,38 +712,41 @@ S32 QueryServersUserInterface::getSelectedIndex()
 static void renderDedicatedIcon()
 {
    // Add a "D"
-   drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "D");
+   drawString(0, -2, SERVER_ENTRY_TEXTSIZE, "D");
 }
 
 
 static void renderTestIcon()
 {
    // Add a "T"
-   drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "T");
+   drawString(0, -2, SERVER_ENTRY_TEXTSIZE, "T");
 }
 
 
 static void renderLockIcon()
 {
-   F32 vertices[] = {
-         0,2,
-         0,4,
-         3,4,
-         3,2
-   };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   //F32 vertices[] = {
+   //      0,2,
+   //      0,4,
+   //      3,4,
+   //      3,2
+   //};
+   //renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
 
-   F32 vertices2[] = {
-         2.6f, 2,
-         2.6f, 1.3f,
-         2.4f, 0.9f,
-         1.9f, 0.6f,
-         1.1f, 0.6f,
-         0.6f, 0.9f,
-         0.4f, 1.3f,
-         0.4f, 2
-   };
-   renderVertexArray(vertices2, ARRAYSIZE(vertices2) / 2, GL_LINE_STRIP);
+   //F32 vertices2[] = {
+   //      2.6f, 2,
+   //      2.6f, 1.3f,
+   //      2.4f, 0.9f,
+   //      1.9f, 0.6f,
+   //      1.1f, 0.6f,
+   //      0.6f, 0.9f,
+   //      0.4f, 1.3f,
+   //      0.4f, 2
+   //};
+   //renderVertexArray(vertices2, ARRAYSIZE(vertices2) / 2, GL_LINE_STRIP);
+
+   // See UILevelInfoDisplyer for info about how to use this font
+   SymbolString::getSymbolText("\xEF\x82\xBE ", 10, WebDingContext)->render(0, 13);
 }
 
 
@@ -778,7 +779,7 @@ static Color getPlayerCountColor(S32 players, S32 maxPlayers)
    else if(players == 0)
       return Colors::yellow;    // no players
 
-   return Colors::green;     // 1 or more players
+   return Colors::green;        // 1 or more players
 }
 
 
@@ -870,10 +871,11 @@ void QueryServersUserInterface::render()
 
 
       U32 y = TOP_OF_SERVER_LIST + (selectedIndex - getFirstServerIndexOnCurrentPage()) * SERVER_ENTRY_HEIGHT;
+      S32 highlightVertAdjustment = 2;
 
       // Render box behind selected item -- do this first so that it will not obscure descenders on letters like g in the column above
       bool disabled = composingMessage() && !mJustMovedMouse;
-      drawMenuItemHighlight(0, y, canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4, disabled);
+      drawMenuItemHighlight(0, y + highlightVertAdjustment, canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4 + highlightVertAdjustment, disabled);
 
 
       for(S32 i = getFirstServerIndexOnCurrentPage(); i <= lastServer; i++)
@@ -908,12 +910,13 @@ void QueryServersUserInterface::render()
 
          // Render icons
          glColor(Colors::green);
+         S32 questionMarkVertOffset = -2;
          if(s.dedicated || s.test || s.pingTimedOut || !s.everGotQueryResponse)
          {
             glPushMatrix();
                glTranslate(columns[1].xStart + 5, y + 2, 0);
                if( s.pingTimedOut || !s.everGotQueryResponse )
-                  drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
+                  drawString(0, questionMarkVertOffset, SERVER_ENTRY_TEXTSIZE, "?");
                else if(s.test)
                   renderTestIcon();
                else
@@ -925,10 +928,10 @@ void QueryServersUserInterface::render()
             glPushMatrix();
                glTranslatef(F32(columns[1].xStart + 25), F32(y + 2), 0);
                if(s.pingTimedOut || !s.everGotQueryResponse)
-                  drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
+                  drawString(0, questionMarkVertOffset, SERVER_ENTRY_TEXTSIZE, "?");
                else
                {
-                  glScale(3.65f);
+                  //glScale(3.65f);
                   renderLockIcon();
                }
             glPopMatrix();

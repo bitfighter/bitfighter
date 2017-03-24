@@ -16,8 +16,6 @@
 
 #include "tnlNonce.h"
 
-#include <stdarg.h>
-
 
 namespace Zap
 {
