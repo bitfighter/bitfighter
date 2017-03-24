@@ -27,7 +27,7 @@ struct DestManager
       Teleporter *mOwner;
 
    public:
-      void setOwner(Teleporter *owner);
+      DestManager(Teleporter *owner);    // Constructor
 
       S32 getDestCount() const;
       Point getDest(S32 index) const;

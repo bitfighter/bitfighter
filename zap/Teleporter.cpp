@@ -32,6 +32,11 @@ namespace Zap
 
 using namespace LuaArgs;
 
+DestManager::DestManager(Teleporter *owner)
+{
+   mOwner = owner;
+}
+
 S32 DestManager::getDestCount() const
 {
    return mDests.size();
@@ -134,12 +139,6 @@ const Vector<Point> *DestManager::getDestList() const
 }
 
 
-// Only done at creation time
-void DestManager::setOwner(Teleporter *owner)
-{
-   mOwner = owner;
-}
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -150,7 +149,8 @@ static Vector<DatabaseObject *> foundObjects;      // Reusable container
 const F32 Teleporter::DamageReductionFactor = 0.5f;
 
 // Combined default C++/Lua constructor
-Teleporter::Teleporter(lua_State *L)
+Teleporter::Teleporter(lua_State *L) :
+      mDestManager(this)
 {
    initialize(Point(0,0), Point(0,0), NULL);
    
@@ -169,7 +169,8 @@ Teleporter::Teleporter(lua_State *L)
 
 
 // Constructor used by engineer
-Teleporter::Teleporter(const Point &pos, const Point &dest, Ship *engineeringShip) : Engineerable()
+Teleporter::Teleporter(const Point &pos, const Point &dest, Ship *engineeringShip) : 
+      Engineerable(), mDestManager(this)
 {
    initialize(pos, dest, engineeringShip);
 }
@@ -200,7 +201,6 @@ void Teleporter::initialize(const Point &pos, const Point &dest, Ship *engineeri
    mHealth = 1.0f;
 
    mLastDest = 0;
-   mDestManager.setOwner(this);
 
    mEngineeringShip = engineeringShip;
 
