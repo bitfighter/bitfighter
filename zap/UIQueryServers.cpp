@@ -153,10 +153,10 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game, UIManager
 
    // Column name, x-start pos
    columns.push_back(ColumnInfo("SERVER NAME", 3));
-   columns.push_back(ColumnInfo("STAT", 400));
-   columns.push_back(ColumnInfo("PING", 449));
-   columns.push_back(ColumnInfo("PLAYERS BOTS", 493));
-   columns.push_back(ColumnInfo("ADDRESS", 616));
+   columns.push_back(ColumnInfo("STAT", 385));
+   columns.push_back(ColumnInfo("PING", 444));
+   columns.push_back(ColumnInfo("PLAYERS BOTS", 489));
+   columns.push_back(ColumnInfo("ADDRESS", 609));
 
 #ifdef TNL_ENABLE_ASSERTS
    // Make sure columns are wide enough for their labels
@@ -715,14 +715,14 @@ S32 QueryServersUserInterface::getSelectedIndex() const
 static void renderDedicatedIcon()
 {
    // Add a "D"
-   RenderUtils::drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "D");
+   RenderUtils::drawString(0, -2, SERVER_ENTRY_TEXTSIZE, "D");
 }
 
 
 static void renderTestIcon()
 {
    // Add a "T"
-   RenderUtils::drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "T");
+   RenderUtils::drawString(0, -2, SERVER_ENTRY_TEXTSIZE, "T");
 }
 
 
@@ -887,17 +887,17 @@ void QueryServersUserInterface::render() const
          }
          if(s.passwordRequired || s.pingTimedOut || !s.everGotQueryResponse)
          {
-            nvgSave(nvg);
-            nvgTranslate(nvg, F32(columns[1].xStart + 25), F32(y + 2));
+            if(s.pingTimedOut || !s.everGotQueryResponse)
+            {
+               nvgSave(nvg);
+               nvgTranslate(nvg, F32(columns[1].xStart + 25), F32(y + 2));
+               RenderUtils::drawString_fixed(0, SERVER_ENTRY_TEXTSIZE, SERVER_ENTRY_TEXTSIZE, Colors::green, "?");
 
-               if(s.pingTimedOut || !s.everGotQueryResponse)
-                  RenderUtils::drawString_fixed(0, SERVER_ENTRY_TEXTSIZE, SERVER_ENTRY_TEXTSIZE, Colors::green, "?");
-               else
-               {
-                  nvgScale(nvg, 3.65f, 3.65f);
-                  GameObjectRender::renderLock(localRemoteColor);
-               }
-            nvgRestore(nvg);
+               nvgRestore(nvg);
+            }
+
+            else
+               GameObjectRender::renderLock(Point(F32(columns[1].xStart + 25), F32(y + 12)), 10, localRemoteColor);
          }
 
          RenderUtils::drawStringf_fixed(columns[2].xStart, y, SERVER_ENTRY_TEXTSIZE, getPingTimeColor(s.pingTime), "%d", s.pingTime);
