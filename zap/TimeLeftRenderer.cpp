@@ -76,25 +76,16 @@ void TimeLeftRenderer::updateLeadingPlayerAndScore(const Game *game)
 
 S32 TimeLeftRenderer::renderLock(S32 xPos, bool render) const
 {
-   static const F32 lockHeight = 3.4f;   // pixels --> see rendering code
-   static const F32 lockWidth = 3;
-   static const S32 renderHeight = 12;
-   static const F32 scale = renderHeight / lockHeight;
-   static const S32 renderWidth = S32(lockWidth * scale + 0.5f);
+   static const S32 lockSize = 14;
+   static const S32 renderWidth = GameObjectRender::getLockWidth(lockSize);
    static const S32 margin = 4;
    static const S32 totalWidth = renderWidth + margin;
 
    if(render)
    {
-      S32 y = DisplayManager::getScreenInfo()->getGameCanvasHeight() - TimeLeftRenderer::TimeLeftIndicatorMargin - renderHeight - 5;
+      S32 y = DisplayManager::getScreenInfo()->getGameCanvasHeight() - TimeLeftIndicatorMargin - lockSize - 2;
     
-      nvgSave(nvg);
-      nvgTranslate(nvg, xPos - totalWidth, y);
-      nvgScale(nvg, scale, scale);
-
-      GameObjectRender::renderLock(Colors::white);
-
-      nvgRestore(nvg);
+      GameObjectRender::renderLock(Point(xPos - totalWidth / 2, y + lockSize), lockSize, Colors::white);
    }
 
    return totalWidth;
