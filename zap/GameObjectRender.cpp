@@ -1954,6 +1954,9 @@ void GameObjectRender::renderLock(const Point &pos, S32 size, const Color &color
 }
 
 
+S32 GameObjectRender::getLockWidth(S32 size)
+{
+   return SymbolString::getSymbolText("\xEF\x82\xBE", size, WebDingContext, Colors::white)->getWidth();
 }
 
 
