@@ -1960,6 +1960,7 @@ S32 GameObjectRender::getLockWidth(S32 size)
 }
 
 
+
 void GameObjectRender::renderCore(const Point &pos, const Color &coreColor, U32 time,
                 const PanelGeom *panelGeom, const F32 panelHealth[], F32 panelStartingHealth)
 {
