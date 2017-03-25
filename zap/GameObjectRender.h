@@ -228,7 +228,7 @@ public:
 
    static void renderSoccerBall(const Point &pos, F32 size);
    static void renderSoccerBall(const Point &pos);
-   static void renderLock(const Color &color);
+   static void renderLock(const Point& pos, S32 size, const Color &color);
 
    static void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color &color);
 

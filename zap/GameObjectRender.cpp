@@ -1946,30 +1946,14 @@ void GameObjectRender::renderSoccerBall(const Point &pos, F32 size)
 }
 
 
-// Unscaled, the lock is 3.4 px tall, 3 px wide.  If these change, TimeLeftRenderer will need to change as well.
-void GameObjectRender::renderLock(const Color &color)
+// pos is lower left corner of icon
+void GameObjectRender::renderLock(const Point &pos, S32 size, const Color &color)
 {
-   static F32 vertices[] = {
-         0, 2,
-         0, 4,
-         3, 4,
-         3, 2
-   };
+   // See UILevelInfoDisplyer for info about how to use this font
+   SymbolString::getSymbolText("\xEF\x82\xBE", size, WebDingContext, color)->render(pos);
+}
 
-   RenderUtils::drawLineLoop(vertices, ARRAYSIZE(vertices) / 2, color);
 
-   static F32 vertices2[] = {
-         2.6f, 2,
-         2.6f, 1.3f,
-         2.4f, 0.9f,
-         1.9f, 0.6f,
-         1.1f, 0.6f,
-         0.6f, 0.9f,
-         0.4f, 1.3f,
-         0.4f, 2
-   };
-
-   RenderUtils::drawLineStrip(vertices2, ARRAYSIZE(vertices2) / 2, color);
 }
 
 
