@@ -74,7 +74,7 @@ void TimeLeftRenderer::updateLeadingPlayerAndScore(const Game *game)
 }
 
 
-S32 TimeLeftRenderer::renderLock(S32 xPos, bool render) const
+S32 TimeLeftRenderer::renderLock(S32 xPos, bool render)
 {
    static const S32 lockSize = 14;
    static const S32 renderWidth = GameObjectRender::getLockWidth(lockSize);
