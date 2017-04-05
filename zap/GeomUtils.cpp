@@ -881,7 +881,7 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 
 
 static const F32 CLIPPER_SCALE_FACT = 1000.0f;
-static const F32 CLIPPER_SCALE_FACT_INVERSE = 0.001f;
+static const F32 CLIPPER_SCALE_FACT_INVERSE = 1 / CLIPPER_SCALE_FACT;
 
 Paths upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons)
 {
@@ -1448,8 +1448,14 @@ static void edgeShrink(Path &path)
    for(U32 i = 0; i < path.size(); i++)
    {
       // Adjust coordinate by 1 depending on the direction
-      path[i].X - path[prev].X > 0 ? path[i].X-- : path[i].X++;
-      path[i].Y - path[prev].Y > 0 ? path[i].Y-- : path[i].Y++;
+      // Note that at least one coordinate will always be adjusted; the only way that
+      // neither if/else statement can be triggered is if we have two duplicate points
+      // in a row, and, in that case, things will get crashy anyway.
+           if(path[i].X - path[prev].X > 0) path[i].X--;
+      else if(path[i].X - path[prev].X < 0) path[i].X++;
+
+           if(path[i].Y - path[prev].Y > 0) path[i].Y--;
+      else if(path[i].Y - path[prev].Y < 0) path[i].Y++;
 
       prev = i;
    }
