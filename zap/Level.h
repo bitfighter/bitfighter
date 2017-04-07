@@ -82,7 +82,7 @@ public:
    void loadLevelFromStream(istream &stream, const string &streamSource, const string &hash, U64 sqliteLevelId);
    
    void validateLevel();
-   U64 getSqliteLevelId();
+   U64 getSqliteLevelId() const;
 
    //LevelInfo &getLevelInfo();
 

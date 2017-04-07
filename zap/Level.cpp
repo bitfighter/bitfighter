@@ -277,7 +277,7 @@ namespace Zap
    }
 
 
-   U64 Level::getSqliteLevelId()
+   U64 Level::getSqliteLevelId() const
    {
       return mLevelInfo.getSqliteLevelId();
    }
