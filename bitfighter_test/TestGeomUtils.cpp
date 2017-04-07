@@ -76,17 +76,6 @@ void parsePoly(const char* lines[], S32 size, Vector<Point> &result)
 }
 
 
-/**
- * Macro to allow testing of polygons drawn with ascii art.
- * Only the numbers matter; the lines and dots are to help the
- * feeble human mind.
- */
-#define POLY(_name, _lines) \
-Vector<Point> _name;                                                           \
-const char* _name##lines[] = _lines;                                           \
-parsePoly(_name##lines, sizeof(_name##lines) / sizeof(_name##lines[0]), _name) \
-
-
 void TestSerializationRoundTrip(const Vector<Vector<Point> > &polys)
 {
    for(S32 i = 0; i < polys.size(); i++)
@@ -119,6 +108,17 @@ void TestSerializationRoundTrip(const Vector<Vector<Point> > &polys)
       }
    }
 }
+
+
+/**
+* Macro to allow testing of polygons drawn with ascii art.
+* Only the numbers matter; the lines and dots are to help the
+* feeble human mind.
+*/
+#define POLY(_name, _lines) \
+Vector<Point> _name;                                                           \
+const char* _name##lines[] = _lines;                                           \
+parsePoly(_name##lines, sizeof(_name##lines) / sizeof(_name##lines[0]), _name) \
 
 
 TEST(GeomUtilsTest, splitSelfIntersecting)
