@@ -883,7 +883,7 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 
 
 static const F32 CLIPPER_SCALE_FACT = 1000.0f;
-static const F32 CLIPPER_SCALE_FACT_INVERSE = 0.001f;
+static const F32 CLIPPER_SCALE_FACT_INVERSE = 1 / CLIPPER_SCALE_FACT;
 
 Paths upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons)
 {
