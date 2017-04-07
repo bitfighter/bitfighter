@@ -429,7 +429,8 @@ static void linkTeleportersBotNavMeshZoneConnections(const GridDatabase *botZone
 
 
 // Server only
-// Use the Triangle library to create zones.  Aggregate triangles with Recast
+// Uses the Triangle library to create zones.  Aggregates triangles with Recast.
+// Populates botZoneDatabase and allZones.
 bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<BotNavMeshZone *> &allZones,
                                        const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList,
                                        const Vector<DatabaseObject *> &turretList, const Vector<DatabaseObject *> &forceFieldProjectorList,
