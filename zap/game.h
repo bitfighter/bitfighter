@@ -402,10 +402,10 @@ public:
    void countTeamPlayers() const;      // Makes sure that the mTeams[] structure has the proper player counts
    S32 findLargestTeamWithBots() const;
 
-   void addTeam(AbstractTeam *team);
-   void addTeam(AbstractTeam *team, S32 index);
-   void replaceTeam(AbstractTeam *team, S32 index);
-   void removeTeam(S32 teamIndex);
+   void addTeam(AbstractTeam *team) const;
+   void addTeam(AbstractTeam *team, S32 index) const;
+   void replaceTeam(AbstractTeam *team, S32 index) const;
+   void removeTeam(S32 teamIndex) const;
 
    // Find winners!
    TeamGameResults       getTeamBasedGameWinner()  const;   // Find winner of a team-based game

@@ -513,10 +513,10 @@ S32 Game::getTeamIndex(const StringTableEntry &playerName)
 
 
 // The following just delegate their work to the TeamManager.  TeamManager will handle cleanup of any added teams.
-void Game::removeTeam(S32 teamIndex)                  { mLevel->removeTeam(teamIndex);    }
-void Game::addTeam(AbstractTeam *team)                { mLevel->addTeam(team);            }     // Only used by tests?
-void Game::addTeam(AbstractTeam *team, S32 index)     { mLevel->addTeam(team, index);     }
-void Game::replaceTeam(AbstractTeam *team, S32 index) { mLevel->replaceTeam(team, index); }
+void Game::removeTeam(S32 teamIndex)                  const { mLevel->removeTeam(teamIndex);    }
+void Game::addTeam(AbstractTeam *team)                const { mLevel->addTeam(team);            }     // Only used by tests?
+void Game::addTeam(AbstractTeam *team, S32 index)     const { mLevel->addTeam(team, index);     }
+void Game::replaceTeam(AbstractTeam *team, S32 index) const { mLevel->replaceTeam(team, index); }
 
 
 // Is overridden in ClientGame, called from there
