@@ -706,7 +706,7 @@ namespace Zap
          }
 
          // validateGameType() will return a valid GameType string -- either what's passed in, or the default if something bogus was specified
-         TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(argv[0]).c_str());
+         Object *theObject = Object::create(GameType::validateGameType(argv[0]).c_str());
 
          GameType *gt = dynamic_cast<GameType *>(theObject);
          if(gt)
