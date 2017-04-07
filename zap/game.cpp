@@ -17,8 +17,6 @@
 #include "Teleporter.h"
 #include "WallItem.h"
 
-#include <boost/shared_ptr.hpp>
-
 #include "../master/DatabaseAccessThread.h"
 
 using namespace TNL;
