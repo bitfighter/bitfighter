@@ -595,8 +595,11 @@ void ServerGame::cycleLevel(S32 nextLevel, bool isReset)
 
    bool triangulate;
 
-   // Try and load Bot Zones for this level, set flag if failed
-   // We need to run buildBotMeshZones in order to set mAllZones properly, which is why I (sort of) disabled the use of hand-built zones in level files
+   // Try and load Bot Zones for this level, set flag if failed.
+   // We need to run buildBotMeshZones in order to set mAllZones properly, which is why I (sort of) disabled the use of 
+   // hand-built zones in level files.
+   // We only need to triangulate the zones if we might display them on the front end (with /showzones).  This will never
+   // occur on a dedicated server, so don't waste the cycles computing it there.
 #ifdef ZAP_DEDICATED
    triangulate = false;
 #else
