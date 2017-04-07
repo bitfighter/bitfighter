@@ -46,7 +46,7 @@ public:
 ////////////////////////////////////////
 
 /// The Barrier class represents rectangular barriers that player controlled
-/// ships cannot pass through... i.e. walls  Barrier objects, once created, never
+/// ships cannot pass through... i.e. walls.  Barrier objects, once created, never
 /// change state, simplifying the pack/unpack update methods.  Barriers are
 /// constructed as an expanded line segment.
 class Barrier : public BfObject
