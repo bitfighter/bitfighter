@@ -16,8 +16,6 @@
 
 #include "stringUtils.h"
 
-#include "tnlLog.h"
-
 #ifdef TNL_OS_WIN32 
 #  include <windows.h>     // For ARRAYSIZE def
 #endif
