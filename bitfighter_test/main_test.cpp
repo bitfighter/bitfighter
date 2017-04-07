@@ -59,10 +59,10 @@ public:
    virtual void SetUp() 
    { 
       InputCodeManager::initializeKeyNames();
+      TNLAssert(VideoSystem::init(), "Ooops");
       RenderManager::init();
       GameSettings settings;
       FontManager::initialize(settings.get(), false);
-      VideoSystem::init();
       PhysFS::init("");    // Should be argv[0]... see how this works instead
       VideoSystem::actualizeScreenMode(&settings, false, false);
       GameManager::initialize();
