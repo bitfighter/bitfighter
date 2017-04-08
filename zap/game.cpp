@@ -523,14 +523,6 @@ void Game::addTeam(AbstractTeam *team, S32 index)     const { mLevel->addTeam(te
 void Game::replaceTeam(AbstractTeam *team, S32 index) const { mLevel->replaceTeam(team, index); }
 
 
-// Is overridden in ClientGame, only get here from ServerGame
-void Game::addWallItem(WallItem *wallItem)
-{
-   // Generate a series of 2-point wall segments, which are added to the database
-   Barrier::constructBarriers(this, *wallItem->getOutline(), (F32)wallItem->getWidth());
-}
-
-
 void Game::setLevel(Level *level)
 {
    setLevel(boost::shared_ptr<Level>(level));   // Will call implementations in ClientGame or ServerGame

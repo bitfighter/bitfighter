@@ -115,6 +115,7 @@ private:
    void cleanUp();
    bool loadNextLevel(S32 nextLevel);                 // Find the next valid level, and load it with loadLevel()
    bool loadLevel();                                  // Load the level pointed to by mCurrentLevelIndex
+   void addWallItem(WallItem *wallItem);
 
    AbstractTeam *getNewTeam();
 

@@ -348,7 +348,7 @@ public:
    bool areTeamsLocked() const;
    virtual void setTeamsLocked(bool locked);
    
-   virtual void addWallItem(WallItem *wallItem);     
+   virtual void addWallItem(WallItem *wallItem) = 0;
 
    virtual void deleteLevelGen(LuaLevelGenerator *levelgen) = 0; 
 

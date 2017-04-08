@@ -815,6 +815,13 @@ bool ServerGame::loadLevel()
 }
 
 
+void ServerGame::addWallItem(WallItem *wallItem)
+{
+   // Generate a series of 2-point wall segments, which are added to the database
+   Barrier::constructBarriers(this, *wallItem->getOutline(), (F32)wallItem->getWidth());
+}
+
+
 void ServerGame::onConnectedToMaster()
 {
    Parent::onConnectedToMaster();
