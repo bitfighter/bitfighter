@@ -1291,7 +1291,7 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
  *
  * @param obj Any BfObject to be added to the editor
  */
-S32 LuaScriptRunner::lua_addItem(lua_State *L) const
+S32 LuaScriptRunner::lua_addItem(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "addItem");
 

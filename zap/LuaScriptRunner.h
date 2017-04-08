@@ -193,7 +193,7 @@ public:
    S32 lua_findAllObjectsInArea(lua_State *L);
    S32 lua_findObjectById(lua_State *L);
 
-   S32 lua_addItem(lua_State *L) const;
+   S32 lua_addItem(lua_State *L);
 
    S32 lua_getBotScripts(lua_State *L);
    S32 lua_getGameInfo(lua_State *L);
