@@ -827,6 +827,7 @@ namespace Zap
    }
 
 
+   // Get here when parsing a level or when a wall is added via a Lua script
    void Level::addWallItem(WallItem *wallItem, Game *game)
    {
       if(!game)
