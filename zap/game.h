@@ -363,7 +363,7 @@ public:
 
    F32 getLegacyGridSize() const;
 
-   U32 getCurrentTime();
+   U32 getCurrentTime() const;
    virtual bool isServer() const = 0;        // Implemented by ClientGame (returns false) and ServerGame (returns true)
 
    void checkConnectionToMaster(U32 timeDelta);

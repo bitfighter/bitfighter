@@ -102,7 +102,7 @@ F32 Game::getLegacyGridSize() const
 }
 
 
-U32 Game::getCurrentTime()
+U32 Game::getCurrentTime() const
 {
    return mCurrentTime;
 }
