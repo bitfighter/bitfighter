@@ -431,7 +431,7 @@ static void linkTeleportersBotNavMeshZoneConnections(const GridDatabase *botZone
 // Server only
 // Uses the Triangle library to create zones.  Aggregates triangles with Recast.
 // Populates botZoneDatabase and allZones.
-bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<BotNavMeshZone *> &allZones,
+bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<BotNavMeshZone *> &allZones,      // <== outputs
                                        const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList,
                                        const Vector<DatabaseObject *> &turretList, const Vector<DatabaseObject *> &forceFieldProjectorList,
                                        const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones, 
@@ -443,6 +443,7 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<Bot
 
    allZones.deleteAndClear();
 
+   // See if the zones have been cached: if so, we might be able to use them and save ourselves some work
    bool loaded = usingDatabaseZoneCache &&
                  tryToLoadZonesFromSqlite(LevelInfo::LEVEL_INFO_DATABASE_NAME, sqliteLevelInfoId, allZones) &&
                  allZones.size() > 0;
@@ -456,7 +457,6 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase &botZoneDatabase, Vector<Bot
          allZones[i]->addToZoneDatabase(&botZoneDatabase);
 
 #ifdef LOG_TIMER
-      // Timings: 567 579 3014
       logprintf("Loaded %d zones in %d ms!", allZones.size(), done0 - starttime);
 #endif 
       return true;
