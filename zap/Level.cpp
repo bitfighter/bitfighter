@@ -836,9 +836,7 @@ namespace Zap
 
       // Normally we won't yet be in a game; but if we are, then we have a little more work to do
       if(game)
-      {
-         game->addWallItem(wallItem, this);
-      }
+         game->addWallItem(wallItem);
    }
 
 
