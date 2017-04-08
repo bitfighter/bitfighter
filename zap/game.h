@@ -365,6 +365,7 @@ public:
 
    U32 getCurrentTime() const;
    virtual bool isServer() const = 0;        // Implemented by ClientGame (returns false) and ServerGame (returns true)
+   bool isClient() const;
 
    void checkConnectionToMaster(U32 timeDelta);
    MasterServerConnection *getConnectionToMaster();

@@ -108,6 +108,12 @@ U32 Game::getCurrentTime() const
 }
 
 
+bool Game::isClient() const
+{
+   return !isServer();
+}
+
+
 const Vector<SafePtr<BfObject> > &Game::getScopeAlwaysList() const
 {
    return mScopeAlwaysList;
