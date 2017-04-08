@@ -214,7 +214,7 @@ void Barrier::constructBarriers(Game *game, const Vector<Point> &verts, F32 widt
       pts.push_back(barrierEnds[i]);
       pts.push_back(barrierEnds[i+1]);
 
-      Barrier *b = new Barrier(pts, width, false);    // false = not solid
+      Barrier *b = new Barrier(pts, width, false);    // false = not a polywall
       b->addToGame(game, game->getLevel());
    }
 }
