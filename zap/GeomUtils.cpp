@@ -1540,7 +1540,15 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
             cdt->AddHole(hole.getStlVector());
          }
 
-         cdt->Triangulate();
+         try {
+            cdt->Triangulate();
+         }
+         catch(std::exception ex)
+         {
+            string msg = string("Error creating bot zones: ") + ex.what() + " ||| Please send the Bitfighter devs a copy of this level!";
+            logprintf(msg.c_str());
+            return false;
+         }
 
          // Add current output triangles to our total
          vector<p2t::Triangle*> currentOutput = cdt->GetTriangles();
