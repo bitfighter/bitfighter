@@ -53,16 +53,24 @@ ClientGame *newClientGame(const GameSettingsPtr &settings)
 // Create a new ServerGame with one dummy team -- be sure to delete this somewhere!
 ServerGame *newServerGame()
 {
+   return newServerGame("");
+}
+
+
+ServerGame *newServerGame(const string &levelCode)
+{
    Address addr;
    GameSettingsPtr settings = GameSettingsPtr(new GameSettings());
+   settings->resolveDirs();
 
-   LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(""));
-
-   Level *level = new Level();
-   level->loadLevelFromString("", -1);
+   LevelSourcePtr levelSource = LevelSourcePtr(new StringLevelSource(levelCode));
 
    ServerGame *game = new ServerGame(addr, settings, levelSource, false, false);
+
+   Level *level = new Level();
+   level->loadLevelFromString(levelCode, -1);
    game->setLevel(level);
+
    game->addTeam(new Team());    // Team will be cleaned up when game is deleted
 
    return game;

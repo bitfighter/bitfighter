@@ -754,33 +754,7 @@ bool ServerGame::loadLevel()
 
    mLevel->onAddedToGame(this);     // Gets the TeamManager up and running and populated, adds bots
 
-
-   // Add walls first, so engineered items will have something to snap to
-   Vector<DatabaseObject *> walls;
-   mLevel->findObjects(WallItemTypeNumber, walls);
-
-   for(S32 i = 0; i < walls.size(); i++)
-      addWallItem(static_cast<WallItem *>(walls[i]), NULL);        // Just does this --> Barrier::constructBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
-
-   Vector<Point> points;
-   mLevel->buildWallEdgeGeometry(points);
-
-   const Vector<DatabaseObject *> objects = *mLevel->findObjects_fast();
-   for(S32 i = 0; i < objects.size(); i++)
-   {
-      // Walls have already been handled in addWallItem call above
-      if(isWallType(objects[i]->getObjectTypeNumber()))
-         continue;
-
-      BfObject *object = static_cast<BfObject *>(objects[i]);
-
-      // Mark the item as being a ghost (client copy of a server object) so that the object will not trigger server-side tests
-      // The only time this code is run on the client is when loading into the editor.
-      if(!isServer())
-         object->markAsGhost();
-
-      object->addToGame(this, NULL);
-   }
+   addObjectsToGame(this, mLevel.get());
 
    mLevel->addBots(this);
 
@@ -815,10 +789,43 @@ bool ServerGame::loadLevel()
 }
 
 
-void ServerGame::addWallItem(WallItem *wallItem)
+void ServerGame::addWallItemToGame(WallItem *wallItem)
 {
    // Generate a series of 2-point wall segments, which are added to the database
    Barrier::constructBarriers(this, *wallItem->getOutline(), (F32)wallItem->getWidth());
+}
+
+
+// This signature makes it easier to test
+void ServerGame::addObjectsToGame(ServerGame *game, Level *level)
+{
+   // Add walls first, so engineered items will have something to snap to
+   Vector<DatabaseObject *> walls;
+   level->findObjects(WallItemTypeNumber, walls);
+
+   for(S32 i = 0; i < walls.size(); i++)
+      game->addWallItemToGame(static_cast<WallItem *>(walls[i]));   // Just does this --> Barrier::constructBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
+
+   Vector<Point> points;
+   level->buildWallEdgeGeometry(points);
+
+   const Vector<DatabaseObject *> objects = *level->findObjects_fast();
+
+   for(S32 i = 0; i < objects.size(); i++)
+   {
+      // Walls have already been handled in addWallItem call above
+      if(isWallType(objects[i]->getObjectTypeNumber()))
+         continue;
+
+      BfObject *object = static_cast<BfObject *>(objects[i]);
+
+      // Mark the item as being a ghost (client copy of a server object) so that the object will not trigger server-side tests
+      // The only time this code is run on the client is when loading into the editor.
+      if(game->isClient())
+         object->markAsGhost();
+
+      object->addToGame(game, NULL);
+   }
 }
 
 

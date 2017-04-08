@@ -319,7 +319,7 @@ public:
    S32 getBotCount() const;
    const GridDatabase &getBotZoneDatabase() const;
 
-   void addWallItem(WallItem *wallItem);     // Add wallItem item to game
+   void addWallItemToGame(WallItem *wallItem);     // Add wallItem item to game
 
    Ship *getLocalPlayerShip() const;
 

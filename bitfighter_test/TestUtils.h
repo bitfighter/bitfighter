@@ -29,6 +29,7 @@ ClientGame *newClientGame();
 ClientGame *newClientGame(const GameSettingsPtr &settings);
 
 ServerGame *newServerGame();
+ServerGame *newServerGame(const string &levelCode);
 
 // Generic pack/unpack function -- feed it any class that supports pack/unpack
 template <class T>

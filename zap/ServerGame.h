@@ -81,6 +81,7 @@ public:
    SafePtr<GameConnection> mHoster;
 
    static const U32 PreSuspendSettlingPeriod = TWO_SECONDS;    // U32 here allows us to skip a cast in tests
+   static void addObjectsToGame(ServerGame *game, Level *level);
    
 private:
 
@@ -115,7 +116,7 @@ private:
    void cleanUp();
    bool loadNextLevel(S32 nextLevel);                 // Find the next valid level, and load it with loadLevel()
    bool loadLevel();                                  // Load the level pointed to by mCurrentLevelIndex
-   void addWallItem(WallItem *wallItem);
+   void addWallItemToGame(WallItem *wallItem);
 
    AbstractTeam *getNewTeam();
 

@@ -9,6 +9,11 @@
 #include "BotNavMeshZone.h"
 #include "tnlBitStream.h"
 #include <map>
+#include "barrier.h"
+#include "Level.h"
+#include "tnlNetInterface.h"
+#include "ServerGame.h"
+#include "TestUtils.h"
 
 namespace Zap
 {
@@ -47,6 +52,63 @@ TEST(GeomUtilsTest, pointOnLine)
    EXPECT_LT(pointOnLine(Point(5,5), Point(-10,-10), Point(20,20)).distanceTo(Point(5,5)), .001); 
    EXPECT_LT(pointOnLine(Point(5,5), Point(5,5),     Point(20,20)).distanceTo(Point(5,5)), .001); 
    EXPECT_LT(pointOnLine(Point(5,5), Point(15,15),   Point(5,5))  .distanceTo(Point(5,5)), .001); 
+}
+
+
+// These tests just capture some levels that have caused problems in the past.  
+// The main thing is that they not crash; other than that, we won't test the output geometry.
+TEST(GeomUtilsTest, zoneGeneration)
+{
+   Address addr;
+   NetInterface net(addr);   // We never use this, but it will initialize TNL to get past an assert
+
+   
+   // Actual lines from a level file that caused zone generation to crash
+   string levelCode = 
+         "LevelFormat 2\n"
+         "RetrieveGameType 8 8\n"
+         "LevelName \"All Santiago ZAP Rollercoasters\"\n"
+         "LevelDescription \"All Rollercoasters Made by Santi, Enjoy!\"\n"
+         "LevelCredits \"Santiago ZAP\"\n"
+         "Team Blue 0 0 1\n"
+         "Specials Engineer\n"
+         "MinPlayers\n"
+         "MaxPlayers\n"
+         "BarrierMaker 1 3187.5 -1504.5 3187.5 -1632 3213 -1785\n"
+         "BarrierMaker 1 3136.5 -1504.5 3136.5 -1657.5 3162 -1810.5\n"
+         "Spawn 0 3060 -1453.5\n";
+
+   ServerGame *game = newServerGame(levelCode);
+
+   ServerGame::addObjectsToGame(game, game->getLevel());
+
+   Level *level = game->getLevel();
+
+   // BarrierTypeNumber walls are the only ones conidered by zone generation
+   Vector<DatabaseObject *> barrierList;
+   level->findObjects(BarrierTypeNumber, barrierList);
+
+   Vector<DatabaseObject *> turretList;
+   level->findObjects(TurretTypeNumber, turretList);
+
+   Vector<DatabaseObject *> forceFieldProjectorList;
+   level->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList);
+
+   Vector<pair<Point, const Vector<Point> *> > teleporterData;
+
+   // These will get populated by buildBotMeshZones
+   GridDatabase botZoneDatabase;
+   Vector<BotNavMeshZone *> allZones;
+
+   Rect bounds = level->getExtents();
+   bounds.expand(Point(1000, 1000));      // Not sure why this is needed, but it seems to be
+
+   ASSERT_TRUE(BotNavMeshZone::buildBotMeshZones(botZoneDatabase, allZones,   // These are outputs
+      &bounds, barrierList,
+      turretList, forceFieldProjectorList, teleporterData,
+      false, -1, false, false));
+
+   ASSERT_TRUE(allZones.size() > 0);
 }
 
 
