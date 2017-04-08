@@ -461,8 +461,8 @@ void Game::setConnectionToMaster(MasterServerConnection *connection)
 // has replicated from the server.
 GameType *Game::getGameType() const
 {
-   TNLAssert(mLevel,                               "Should have a level by now!");
-   TNLAssert(!isServer() || mLevel->getGameType(), "ServerGame should have a GameType by now!");
+   TNLAssert(mLevel,                              "Should have a level by now!");
+   TNLAssert(isClient() || mLevel->getGameType(), "ServerGame should have a GameType by now!");
 
    return mLevel->getGameType();
 }
