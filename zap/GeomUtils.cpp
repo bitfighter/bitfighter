@@ -1471,7 +1471,7 @@ static void edgeShrink(Path &path)
 //
 // For assistance with a special case crash, see this utility:
 //    http://javascript.poly2tri.googlecode.com/hg/index.html
-bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bounds,
+bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect &bounds,
       const PolyTree &polyTree, bool ignoreFills, bool ignoreHoles)
 {
    // First build our map extents outline polygon (polyline).  Clockwise into Clipper's format
