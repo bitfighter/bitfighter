@@ -611,7 +611,7 @@ namespace Zap
       // with GridSize removal and the saving of real spacial coordinates.
       //
       // If it is present, this should be the first line of the file.
-      else if(stricmp(argv[0], "LevelFormat") == 0)
+      if(stricmp(argv[0], "LevelFormat") == 0)
       {
          S32 ver;
 
@@ -620,7 +620,8 @@ namespace Zap
             errorMsg = "Invalid LevelFormat parameter -- must specify version!";
             return false;
          }
-         else if(mVersion > 0)
+         
+         if(mVersion > 0)
          {
             errorMsg = "Duplicate LevelFormat parameter -- ignoring!";
             return false;
@@ -646,7 +647,7 @@ namespace Zap
       // If a level file contains this setting, we will use it to multiply all points found in
       // the level file.  However, once it is loaded and resaved in the editor, this setting will
       // disappear and all points will reflect their true, absolute nature.
-      else if(!stricmp(argv[0], "GridSize"))
+      if(!stricmp(argv[0], "GridSize"))
       {
          // We should have properly detected the level format by the time GridSize is found
          if(mVersion == 1)
@@ -656,18 +657,17 @@ namespace Zap
                errorMsg = "Improperly formed GridSize parameter";
                return false;
             }
-            else
-            {
-               mLegacyGridSize = (F32)atof(argv[1]);
-               return true;
-            }
+            
+            mLegacyGridSize = (F32)atof(argv[1]);
+            return true;
          }
-         else
-            errorMsg = "Warning: GridSize should no longer be used in level files";
+         
+         //  pGridSizearameter will be ignored
+         errorMsg = "Warning: GridSize should no longer be used in level files";
          return true;
       }
 
-      else if(stricmp(argv[0], "LevelDatabaseId") == 0)
+      if(stricmp(argv[0], "LevelDatabaseId") == 0)
       {
          U32 dbid = 0;
 
@@ -686,7 +686,7 @@ namespace Zap
       }
 
       // Parse GameType line... All game types are of form XXXXGameType
-      else if(strlenCmd >= 8 && strcmp(argv[0] + strlenCmd - 8, "GameType") == 0)
+      if(strlenCmd >= 8 && strcmp(argv[0] + strlenCmd - 8, "GameType") == 0)
       {
          // First check to see if we have a LevelFormat line, which should have been detected
          // by now since it's the first line of the file.  If it didn't find it, we are at
@@ -729,7 +729,8 @@ namespace Zap
       // Handle various game parameters and team configurations
       if(mGameType && processLevelParam(argc, argv))
       {
-         // Do nothing here -- all the action is in the if statement
+         // Do more to do -- all the action is in the if statement
+         return true;
       }
 
       // We will not add Walls directly to the database, because they are handled differently on the client, server, and editor.
@@ -742,7 +743,7 @@ namespace Zap
       // require 4 points per segment.
       //
       // In the editor, we want WallItems directly in the database so they can be more easily manipulated by the user.
-      else if(stricmp(argv[0], "BarrierMaker") == 0)
+      if(stricmp(argv[0], "BarrierMaker") == 0)
       {
          WallItem *wallItem = new WallItem();
 
@@ -755,71 +756,72 @@ namespace Zap
 
          wallItem->setUserAssignedId(id, false);
          addWallItem(wallItem);
+
+         return true;
       }
 
-      else if(stricmp(argv[0], "Robot") == 0)
+      if(stricmp(argv[0], "Robot") == 0)
       {
          // Save these for later -- we'll use them to build a robot army when the game starts
          mRobotLines.push_back(getString(argc, argv));      // getString strips off "Robot" prefix
+         return true;
       }
 
+      /////
       // Handle regular game objects
+      string objName;
+
+      // Convert any NexusFlagItem into FlagItem, only NexusFlagItem will show up on ship
+      if(stricmp(argv[0], "HuntersFlagItem") == 0 || stricmp(argv[0], "NexusFlagItem") == 0)
+         objName = "FlagItem";
+
+      // Convert legacy Hunters* objects
+      else if(stricmp(argv[0], "HuntersNexusObject") == 0 || stricmp(argv[0], "NexusObject") == 0)
+         objName = "NexusZone";
+
+      else if(stricmp(argv[0], "BarrierMakerS") == 0)
+         objName = "PolyWall";
+
       else
+         objName = argv[0];
+
+
+      // Must have a GameType at this point, if not, we will add one to prevent problems loading a level with missing GameType
+      if(!mGameType)
+         mGameType.set(new GameType(this));    // Cleaned up... where, exactly?
+
+      TNL::Object *obj = TNL::Object::create(objName.c_str());    // Create an object of the type specified on the line
+
+      SafePtr<BfObject> object = dynamic_cast<BfObject *>(obj);   // Force our new object to be a BfObject
+
+      if(object.isNull())    // Well... that was a bad idea!
       {
-         string objName;
-
-         // Convert any NexusFlagItem into FlagItem, only NexusFlagItem will show up on ship
-         if(stricmp(argv[0], "HuntersFlagItem") == 0 || stricmp(argv[0], "NexusFlagItem") == 0)
-            objName = "FlagItem";
-
-         // Convert legacy Hunters* objects
-         else if(stricmp(argv[0], "HuntersNexusObject") == 0 || stricmp(argv[0], "NexusObject") == 0)
-            objName = "NexusZone";
-
-         else if(stricmp(argv[0], "BarrierMakerS") == 0)
-            objName = "PolyWall";
-
-         else
-            objName = argv[0];
-
-
-         // Must have a GameType at this point, if not, we will add one to prevent problems loading a level with missing GameType
-         if(!mGameType)
-            mGameType.set(new GameType(this));    // Cleaned up... where, exactly?
-
-         TNL::Object *obj = TNL::Object::create(objName.c_str());    // Create an object of the type specified on the line
-
-         SafePtr<BfObject> object = dynamic_cast<BfObject *>(obj);   // Force our new object to be a BfObject
-
-         if(object.isNull())    // Well... that was a bad idea!
-         {
-            errorMsg = "Unknown object type '" + objName + "'!";
-            delete obj;
-            return false;
-         }
-
-         // Object was valid... carry on!
-         bool validArgs = object->processArguments(argc - 1, argv + 1, this);
-
-         // processArguments() might delete this object (this happens with multi-dest teleporters), so isNull() could be true
-         // even when the object is entirely legit
-         if(object.isNull())
-            return false;
-
-         if(!validArgs)
-         {
-            errorMsg = "Invalid arguments for object '" + objName + "'!";
-            delete obj;
-            return false;
-         }
-
-         object->setUserAssignedId(id, false);
-         object->setExtent(object->calcExtents());    // This looks ugly  <== changes speedzone extents??
-         addToDatabase(object);
-
-         if(stricmp(argv[0], "Polywall") == 0)
-            object->onGeomChanged();
+         errorMsg = "Unknown object type '" + objName + "'!";
+         delete obj;
+         return false;
       }
+
+      // Object was valid... carry on!
+      bool validArgs = object->processArguments(argc - 1, argv + 1, this);
+
+      // processArguments() might delete this object (this happens with multi-dest teleporters), so isNull() could be true
+      // even when the object is entirely legit
+      if(object.isNull())
+         return false;
+
+      if(!validArgs)
+      {
+         errorMsg = "Invalid arguments for object '" + objName + "'!";
+         delete obj;
+         return false;
+      }
+
+      object->setUserAssignedId(id, false);
+      object->setExtent(object->calcExtents());    // This looks ugly  <== changes speedzone extents??
+      addToDatabase(object);
+
+      if(stricmp(argv[0], "Polywall") == 0)
+         object->onGeomChanged();
 
       return true;
    }
