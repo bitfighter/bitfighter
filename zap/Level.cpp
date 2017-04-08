@@ -790,7 +790,7 @@ namespace Zap
       if(!mGameType)
          mGameType.set(new GameType(this));    // Cleaned up... where, exactly?
 
-      TNL::Object *obj = TNL::Object::create(objName.c_str());    // Create an object of the type specified on the line
+      Object *obj = Object::create(objName.c_str());    // Create an object of the type specified on the line
 
       SafePtr<BfObject> object = dynamic_cast<BfObject *>(obj);   // Force our new object to be a BfObject
 
