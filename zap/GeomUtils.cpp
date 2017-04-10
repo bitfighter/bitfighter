@@ -1458,31 +1458,18 @@ static void edgeShrink(Path &path)
    for(U32 i = 0; i < path.size(); i++)
    {
       // Adjust coordinate by 1 depending on the direction
-      path[i].X - path[prev].X > 0 ? path[i].X-- : path[i].X++;
-      path[i].Y - path[prev].Y > 0 ? path[i].Y-- : path[i].Y++;
+      // Note that at least one coordinate will always be adjusted; the only way that
+      // neither if/else statement can be triggered is if we have two duplicate points
+      // in a row, and, in that case, things will get crashy anyway.
+           if(path[i].X - path[prev].X > 0) path[i].X--;
+      else if(path[i].X - path[prev].X < 0) path[i].X++;
+
+           if(path[i].Y - path[prev].Y > 0) path[i].Y--;
+      else if(path[i].Y - path[prev].Y < 0) path[i].Y++;
 
       prev = i;
    }
 }
-
-//static void edgeShrink(Path &path)
-//{
-//   U32 prev = path.size() - 1;
-//   for(U32 i = 0; i < path.size(); i++)
-//   {
-//      // Adjust coordinate by 1 depending on the direction
-//      // Note that at least one coordinate will always be adjusted; the only way that
-//      // neither if/else statement can be triggered is if we have two duplicate points
-//      // in a row, and, in that case, things will get crashy anyway.
-//           if(path[i].X - path[prev].X > 0) path[i].X--;
-//      else if(path[i].X - path[prev].X < 0) path[i].X++;
-//
-//           if(path[i].Y - path[prev].Y > 0) path[i].Y--;
-//      else if(path[i].Y - path[prev].Y < 0) path[i].Y++;
-//
-//      prev = i;
-//   }
-//}
 
 
 // This uses poly2tri to triangulate.  poly2tri isn't very robust so clipper needs to do
