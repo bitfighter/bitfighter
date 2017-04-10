@@ -80,7 +80,7 @@ TEST(GeomUtilsTest, zoneGeneration)
 
    ServerGame *game = newServerGame(levelCode);
 
-   ServerGame::addObjectsToGame(game, game->getLevel());
+   ServerGame::addObjectsToGame(game, game->getLevel());    // Creates the barriers we need for building zones
 
    Level *level = game->getLevel();
 
@@ -95,6 +95,7 @@ TEST(GeomUtilsTest, zoneGeneration)
    level->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList);
 
    Vector<pair<Point, const Vector<Point> *> > teleporterData;
+   // TODO: Do something here to prepare the teleporter data
 
    // These will get populated by buildBotMeshZones
    GridDatabase botZoneDatabase;
