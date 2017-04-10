@@ -585,13 +585,13 @@ void ServerGame::cycleLevel(S32 nextLevel, bool isReset)
 
    // Get our parameters together
    Vector<DatabaseObject *> barrierList;
-   getLevel()->findObjects((TestFunc)isWallType, barrierList, *getWorldExtents());
+   getLevel()->findObjects((TestFunc)isWallType, barrierList);
 
    Vector<DatabaseObject *> turretList;
-   getLevel()->findObjects(TurretTypeNumber, turretList, *getWorldExtents());
+   getLevel()->findObjects(TurretTypeNumber, turretList);
 
    Vector<DatabaseObject *> forceFieldProjectorList;
-   getLevel()->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList, *getWorldExtents());
+   getLevel()->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList);
 
    bool triangulate;
 
