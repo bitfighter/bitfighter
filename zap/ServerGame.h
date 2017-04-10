@@ -15,6 +15,7 @@
 #include "TeamHistoryManager.h"
 
 #include "Intervals.h"
+#include "Test.h"
 
 using namespace std;
 
@@ -81,7 +82,7 @@ public:
    SafePtr<GameConnection> mHoster;
 
    static const U32 PreSuspendSettlingPeriod = TWO_SECONDS;    // U32 here allows us to skip a cast in tests
-   static void addObjectsToGame(ServerGame *game, Level *level);
+   void addObjectsToGame();
    
 private:
 
@@ -191,6 +192,7 @@ public:
 
    bool runLevelGenScript(const string &scriptName);  // Run any levelgens specified by the level or in the INI
 
+   void buildBotMeshZones(bool writeZonesToDb);       // Only public for test access... not sure why friend isn't working
 
    /////
    // Bot related
@@ -287,6 +289,9 @@ public:
    GameRecorderServer *getGameRecorder();
 
    friend class ObjectTest;
+
+   ///// Testing
+   FRIEND_TEST(GeomUtilTest, zoneGeneration);
 };
 
 

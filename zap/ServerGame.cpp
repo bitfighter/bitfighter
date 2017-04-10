@@ -565,34 +565,6 @@ void ServerGame::cycleLevel(S32 nextLevel, bool isReset)
    if(!mGameRecorderServer && !mShuttingDown && getSettings()->getSetting<YesNo>(IniKey::GameRecording))
       mGameRecorderServer = new GameRecorderServer(this);
 
-
-   ////// This block could easily be moved off somewhere else   
-   fillVector.clear();
-   mLevel->findObjects(TeleporterTypeNumber, fillVector);
-
-   Vector<pair<Point, const Vector<Point> *> > teleporterData(fillVector.size());
-   pair<Point, const Vector<Point> *> teldat;
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      Teleporter *teleporter = static_cast<Teleporter *>(fillVector[i]);
-
-      teldat.first  = teleporter->getPos();
-      teldat.second = teleporter->getDestList();
-
-      teleporterData.push_back(teldat);
-   }
-
-   // Get our parameters together
-   Vector<DatabaseObject *> barrierList;
-   getLevel()->findObjects((TestFunc)isWallType, barrierList);
-
-   Vector<DatabaseObject *> turretList;
-   getLevel()->findObjects(TurretTypeNumber, turretList);
-
-   Vector<DatabaseObject *> forceFieldProjectorList;
-   getLevel()->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList);
-
    bool triangulate;
 
    // Try and load Bot Zones for this level, set flag if failed.
@@ -614,10 +586,8 @@ void ServerGame::cycleLevel(S32 nextLevel, bool isReset)
 
    bool writeZonesToDb = !hasLevelgens && !isTestServer() && mSettings->usingDatabaseZoneCache;
 
-   getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(mLevel->getBotZoneDatabase(), mLevel->getBotZoneList(),
-                                                                              getWorldExtents(), barrierList, turretList,
-                                                                              forceFieldProjectorList, teleporterData, triangulate,
-                                                                              mLevel->getSqliteLevelId(), writeZonesToDb, mSettings->usingDatabaseZoneCache);
+   buildBotMeshZones(writeZonesToDb);
+
    // Clear team info for all clients
    resetAllClientTeams();
 
@@ -682,6 +652,42 @@ void ServerGame::cycleLevel(S32 nextLevel, bool isReset)
    sendLevelStatsToMaster();     // Give the master some information about this level for its database
 
    suspendIfNoActivePlayers();   // Does nothing if we're already suspended
+}
+
+
+void ServerGame::buildBotMeshZones(bool writeZonesToDb)
+{
+   ////// This block could easily be moved off somewhere else   
+   fillVector.clear();
+   mLevel->findObjects(TeleporterTypeNumber, fillVector);
+
+   Vector<pair<Point, const Vector<Point> *> > teleporterData(fillVector.size());
+   pair<Point, const Vector<Point> *> teldat;
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      Teleporter *teleporter = static_cast<Teleporter *>(fillVector[i]);
+
+      teldat.first = teleporter->getPos();
+      teldat.second = teleporter->getDestList();
+
+      teleporterData.push_back(teldat);
+   }
+
+   // Get our parameters together
+   Vector<DatabaseObject *> barrierList;
+   getLevel()->findObjects((TestFunc)isWallType, barrierList);
+
+   Vector<DatabaseObject *> turretList;
+   getLevel()->findObjects(TurretTypeNumber, turretList);
+
+   Vector<DatabaseObject *> forceFieldProjectorList;
+   getLevel()->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList);
+
+   getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(mLevel->getBotZoneDatabase(), mLevel->getBotZoneList(),
+      getWorldExtents(), barrierList, turretList,
+      forceFieldProjectorList, teleporterData, triangulate,
+      mLevel->getSqliteLevelId(), writeZonesToDb, mSettings->usingDatabaseZoneCache);
 }
 
 
@@ -754,7 +760,7 @@ bool ServerGame::loadLevel()
 
    mLevel->onAddedToGame(this);     // Gets the TeamManager up and running and populated, adds bots
 
-   addObjectsToGame(this, mLevel.get());
+   addObjectsToGame();
 
    mLevel->addBots(this);
 
@@ -797,34 +803,34 @@ void ServerGame::addWallItemToGame(WallItem *wallItem)
 
 
 // This signature makes it easier to test
-void ServerGame::addObjectsToGame(ServerGame *game, Level *level)
+void ServerGame::addObjectsToGame()
 {
    // Add walls first, so engineered items will have something to snap to
    Vector<DatabaseObject *> walls;
-   level->findObjects(WallItemTypeNumber, walls);
+   mLevel->findObjects(WallItemTypeNumber, walls);
 
    for(S32 i = 0; i < walls.size(); i++)
-      game->addWallItemToGame(static_cast<WallItem *>(walls[i]));   // Just does this --> Barrier::constructBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
+      addWallItemToGame(static_cast<WallItem *>(walls[i]));   // Just does this --> Barrier::constructBarriers(this, *wallItem->getOutline(), false, wallItem->getWidth());
 
    Vector<Point> points;
-   level->buildWallEdgeGeometry(points);
+   mLevel->buildWallEdgeGeometry(points);
 
-   const Vector<DatabaseObject *> objects = *level->findObjects_fast();
+   const Vector<DatabaseObject *> *objects = mLevel->findObjects_fast();
 
-   for(S32 i = 0; i < objects.size(); i++)
+   for(S32 i = 0; i < objects->size(); i++)
    {
       // Walls have already been handled in addWallItem call above
-      if(isWallType(objects[i]->getObjectTypeNumber()))
+      if(isWallType(objects->get(i)->getObjectTypeNumber()))
          continue;
 
-      BfObject *object = static_cast<BfObject *>(objects[i]);
+      BfObject *object = static_cast<BfObject *>(objects->get(i));
 
       // Mark the item as being a ghost (client copy of a server object) so that the object will not trigger server-side tests
       // The only time this code is run on the client is when loading into the editor.
-      if(game->isClient())
+      if(isClient())
          object->markAsGhost();
 
-      object->addToGame(game, NULL);
+      object->addToGame(this, NULL);
    }
 }
 
