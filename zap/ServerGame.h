@@ -235,7 +235,6 @@ public:
    S32 getLevelCount() const;
    LevelInfo getLevelInfo(S32 index) const;
 
-   void clearLevelInfos();
    void sendLevelListToLevelChangers(const string &message = "") const;
 
    DataSender dataSender;
