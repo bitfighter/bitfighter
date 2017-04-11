@@ -64,6 +64,27 @@ void testZoneGeneration(const string &levelCode)
 
    ASSERT_FALSE(game->getGameType()->mBotZoneCreationFailed);
    ASSERT_TRUE(game->getBotZoneList().size() > 0);
+
+   delete game;
+}
+
+
+void adjustLine(const string &levelCode, F32 dx, F32 dy)
+{
+   // Try jiggling the coordinates around just a tad to see if we can trigger a failure
+   // Locate the 2nd BarrierMaker line:
+   S32 pos1 = levelCode.find("BarrierMaker");            // First occurance
+   S32 pos2 = levelCode.find("BarrierMaker", pos1 + 1);  // Second occurance
+   S32 pos3 = levelCode.find("\n", pos2 + 1);            // EOL
+
+   // Compose a new one:
+   string adjustedLine = "BarrierMaker 1 " + ftos(3136.5 + dx) + " " + ftos(-1504.5 + dy) + " " + ftos(3136.5 + dx) + " " + ftos(-1657.5 + dy) + + " " + ftos(3162 + dx) + " " + ftos(-1810.5 + dy) + "\n";
+   
+   // Add it in:
+   string alteredLevelCode = levelCode;
+   alteredLevelCode = alteredLevelCode.replace(pos2, pos3 - pos2, adjustedLine);
+
+   testZoneGeneration(alteredLevelCode);
 }
 
 
@@ -75,20 +96,27 @@ TEST(GeomUtilsTest, zoneGeneration)
    NetInterface net(addr);   // We never use this, but it will initialize TNL to get past an assert
  
    // Actual lines from a level file that caused zone generation to crash
-   SCOPED_TRACE("Pass 1");
-   testZoneGeneration(
-         "LevelFormat 2\n"
-         "RetrieveGameType 8 8\n"
-         "LevelName \"All Santiago ZAP Rollercoasters\"\n"
-         "LevelDescription \"All Rollercoasters Made by Santi, Enjoy!\"\n"
-         "LevelCredits \"Santiago ZAP\"\n"
-         "Team Blue 0 0 1\n"
-         "Specials Engineer\n"
-         "MinPlayers\n"
-         "MaxPlayers\n"
-         "BarrierMaker 1 3187.5 -1504.5 3187.5 -1632 3213 -1785\n"
-         "BarrierMaker 1 3136.5 -1504.5 3136.5 -1657.5 3162 -1810.5\n"
-         "Spawn 0 3060 -1453.5\n");
+   
+   string levelCode = "LevelFormat 2\n"
+      "RetrieveGameType 8 8\n"
+      "Team Blue 0 0 1\n"
+      "Specials Engineer\n"
+      "BarrierMaker 1 3187.5 -1504.5 3187.5 -1632 3213 -1785\n"
+      "BarrierMaker 1 3136.5 -1504.5 3136.5 -1657.5 3162 -1810.5\n"
+      "Spawn 0 3060 -1453.5\n";
+
+   SCOPED_TRACE("Pass 1");   
+   testZoneGeneration(levelCode);
+
+   // This block is really slow -- only uncomment if you have a specific concern.  Basically, it takes the second BarrierMaker line
+   // from the code above and jiggles it around a bit trying to find a specific combination that will cause a crash.  Good news: I 
+   // didn't find any.
+   //for(F32 dx = -1; dx < 1; dx += .01)
+   //   for(F32 dy = -1; dy < 1; dy += .01)
+   //   {
+   //      SCOPED_TRACE("dx=" + ftos(dx) + ", dy=" + ftos(dy));
+   //      adjustLine(levelCode, dx, dy);
+   //   }
 }
 
 
