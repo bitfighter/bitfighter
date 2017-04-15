@@ -127,11 +127,10 @@ public:
 
    static S32 getExpLevel(S32 gamesPlayed);
 
-
-
    UIManager *getUIManager() const;
 
    void toggleShowAllObjectOutlines();
+   void showHelpItemForced(S32 id) const;
    bool showAllObjectOutlines() const;
 
    PersonalRating toggleLevelRating();
