@@ -131,6 +131,7 @@ void pauseHandler              (ClientGame *game, const Vector<string> &args);
 // The following are only available in debug builds!
 #ifdef TNL_DEBUG
    void showObjectOutlinesHandler(ClientGame *game, const Vector<string> &args);
+   void showHelpItemHandler      (ClientGame *game, const Vector<string> &args);
 #endif
 
 

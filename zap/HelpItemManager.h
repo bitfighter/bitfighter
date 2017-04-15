@@ -231,7 +231,9 @@ public:
    static bool shouldRender(const ClientGame *game);
 
    void addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playerTeam);
-   void addInlineHelpItem(HelpItem item, bool messageCameFromQueue = false);   
+   void addInlineHelpItem(HelpItem item, bool messageCameFromQueue = false); 
+   void addInlineHelpItemForced(S32 helpItemId);
+
    void removeInlineHelpItem(HelpItem item, bool markAsSeen, U8 weight = 0xFF);
    F32 getObjectiveArrowHighlightAlpha() const;
 
