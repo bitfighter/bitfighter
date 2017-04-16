@@ -248,6 +248,7 @@ public:
    void onChatMessageReceived(const Color &msgColor, const char *format, ...);
    const char *getChatMessage() const;    // Return message being composed in in-game chat
 
+   HelpItemManager *getHelpItemManager();
    void resetInputModeChangeAlertDisplayTimer(U32 timeInMs);
 
    void showLevelLoadDisplay(bool show, bool fade);

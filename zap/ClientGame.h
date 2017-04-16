@@ -138,6 +138,7 @@ public:
    UIManager *getUIManager() const;
 
    void toggleShowAllObjectOutlines();
+   void showHelpItemForced(S32 id) const;
    bool showAllObjectOutlines() const;
 
    PersonalRating toggleLevelRating();

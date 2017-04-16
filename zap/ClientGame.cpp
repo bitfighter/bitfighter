@@ -30,6 +30,9 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "GameRecorderPlayback.h"
+#include "UIGame.h"
+
 using namespace TNL;
 
 namespace Zap
@@ -1821,6 +1824,13 @@ F32 ClientGame::getObjectiveArrowHighlightAlpha() const
 void ClientGame::toggleShowAllObjectOutlines()
 {
    mShowAllObjectOutlines = !mShowAllObjectOutlines;
+}
+
+
+// Only used in debug builds
+void ClientGame::showHelpItemForced(S32 id) const
+{
+   mUIManager->getUI<GameUserInterface>()->getHelpItemManager()->addInlineHelpItemForced(id);
 }
 
 

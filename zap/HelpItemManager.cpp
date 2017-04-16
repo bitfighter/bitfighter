@@ -633,6 +633,25 @@ void HelpItemManager::addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playe
 }
 
 
+// Only used for debug builds
+void HelpItemManager::addInlineHelpItemForced(S32 helpItemId)
+{
+   if (helpItemId >= HelpItemCount)
+      return;
+
+   mHelpItems.clear();
+   mHelpFading.clear();
+   mHelpTimer.clear();
+
+   if(helpItemId == -1)    // Clear the current item
+      return;
+
+   mHelpItems.push_back((HelpItem) helpItemId);
+   mHelpTimer.push_back(Timer(U32_MAX));    // Display for a long time
+   mHelpFading.push_back(false);
+}
+
+
 // Called whenever some item somewhere thinks it would be a good time to add a help message.
 // Items added here are immediately displayed.
 void HelpItemManager::addInlineHelpItem(HelpItem item, bool messageCameFromQueue)

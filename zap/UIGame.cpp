@@ -2288,6 +2288,12 @@ const char *GameUserInterface::getChatMessage() const
 }
 
 
+HelpItemManager *GameUserInterface::getHelpItemManager()
+{
+   return &mHelpItemManager;
+}
+
+
 // Some reusable containers --> will probably need to become non-static if we have more than one clientGame active
 static Point screenSize, visSize, visExt;
 static Vector<DatabaseObject *> rawRenderObjects;
