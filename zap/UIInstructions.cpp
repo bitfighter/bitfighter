@@ -698,9 +698,9 @@ const char *gGameObjectInfo[] = {
 
    /* 12 */   "Repair Item",         "Repairs damage to ship",
    /* 13 */   "Energy Item",         "Restores ship's energy",
-   /* 14 */   "Active Turret",       "Fires at enemy team\n(regular & self-repairing)",
+   /* 14 */   "Active Turret",       "Fires at enemy team",
    /* 15 */   "Neutral Turret",      "Repair to take team ownership",
-   /* 16 */   "Force Field Emitter", "Only allows owners to pass\n(regular & self-repairing)",
+   /* 16 */   "Force Field Emitter", "Only allows owning team to pass\nShoot emitter to deactivate enemy force field",
    /* 17 */   "Neutral Emitter",     "Repair to take team ownership",
 
    /* 18 */   "Teleporter",   "Warps ship to another location",
@@ -725,6 +725,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
    U32 objectsPerPage = 6;
    U32 startIndex = index * objectsPerPage;
    U32 endIndex = startIndex + objectsPerPage;
+   S32 auxTextFontSize = 16;     // For text drawn on same line as item
 
    if(endIndex > GameObjectCount)
       endIndex = GameObjectCount;
@@ -796,10 +797,15 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
             renderEnergyItem(Point(0,0));
             break;
          case 14:
-            x = -40;
-            renderTurret(Colors::blue, Point(x, 15), Point(0, -1), true, 1, 0, 0);
+            x = -65;
+            renderTurret(Colors::blue, Point(x, 10), Point(0, -1), true, 1, 0, 0);
+            glColor(Colors::white);
+            drawStringc(x, 32, auxTextFontSize, "(Regular)");
+
             x = -x;
-            renderTurret(Colors::blue, Point(x, 15), Point(0, -1), true, 1, 0, 1);
+            renderTurret(Colors::blue, Point(x, 10), Point(0, -1), true, 1, 0, 1);
+            glColor(Colors::white);
+            drawStringc(x, 32, auxTextFontSize, "(Self-repairing)");
             break;
          case 15:
             renderTurret(Colors::white, Point(0, 15), Point(0, -1), false, 0, 0);
@@ -807,12 +813,21 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
 
          case 16:
             y = -25;
-            renderForceFieldProjector(Point(-50, y), Point(1, 0), &Colors::red, true, 0);
-            renderForceField(Point(-35, y), Point(50, y), &Colors::red, true);
+            renderForceFieldProjector(Point(-85, y), Point(1, 0), &Colors::red, true, 0);
+            renderForceField(Point(-70, y), Point(15, y), &Colors::red, true);
+
+            //GameObjectRender::renderForceFieldProjector(Point(-85, y), Point(1, 0), Colors::red, true, 0);
+            //GameObjectRender::renderForceField(Point(-70, y), Point(15, y), Colors::red, true);
+            glColor(Colors::white); 
+            drawString_fixed(25, y - auxTextFontSize / 2 + 12, auxTextFontSize, "(Regular)");
 
             y = -y;
-            renderForceFieldProjector(Point(-50, y), Point(1, 0), &Colors::red, true, 1);
-            renderForceField(Point(-35, y), Point(50, y), &Colors::red, true);
+            //GameObjectRender::renderForceFieldProjector(Point(-85, y), Point(1, 0), Colors::red, true, 1);
+            //GameObjectRender::renderForceField(Point(-70, y), Point(15, y), Colors::red, true);
+            renderForceFieldProjector(Point(-85, y), Point(1, 0), &Colors::red, true, 1);
+            renderForceField(Point(-70, y), Point(15, y), &Colors::red, true);
+            glColor(Colors::white);
+            drawString_fixed(25, y - auxTextFontSize / 2 + 12, auxTextFontSize, "(Self-repairing)");
 
             break;
          case 17:
@@ -842,7 +857,6 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
             }
 
             break;
-
          case 21:    // Nexus
             {
                Vector<Point> o;     // outline
@@ -858,7 +872,6 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                                        Platform::getRealMilliseconds() % 5000 > 2500, 0);
             }
             break;
-
          case 22:    // GoalZone
             {
                Vector<Point> o;     // outline
@@ -874,24 +887,19 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                   false, 0, 0, 0, false);
             }
             break;
-
          case 23:    // Asteroid... using goofball factor to keep out of sync with Nexus graphic
             renderAsteroid(Point(0,-10), 
                      (S32)(Platform::getRealMilliseconds() / 2891) % Asteroid::getDesignCount(), .7f);    
             break;
-
          case 24:    // TestItem
             renderTestItem(mTestItemPoints);
             break;
-
          case 25:    // ResourceItem
             renderResourceItem(mResourceItemPoints);
             break;
-
          case 26:    // SoccerBall
             renderSoccerBall(Point(0,0));
             break;
-
          case 27:    // Core
             {
                F32 health[] = { 1,1,1,1,1,1,1,1,1,1 };
@@ -909,7 +917,6 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                glPopMatrix();
             }
             break;
-
          case 28:    // SpeedZone
             {
                Vector<Point> speedZoneRenderPoints, outlinePoints;
@@ -918,7 +925,8 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                renderSpeedZone(speedZoneRenderPoints, Platform::getRealMilliseconds());
             }
             break;
-
+         default: 
+            TNLAssert(false, "Unhandled case!");
       }
       glPopMatrix();
       objStart.y += 75;
