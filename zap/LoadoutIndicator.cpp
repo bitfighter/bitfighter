@@ -174,12 +174,12 @@ S32 LoadoutIndicator::getWidth() const
    S32 width = 0;
 
    for(U32 i = 0; i < (U32)ShipWeaponCount; i++)
-      width += getComponentIndicatorWidth(WeaponInfo::getWeaponInfo(mCurrLoadout.getWeapon(i)).name.getString()) + IndicatorHorizPadding;
+      width += getComponentIndicatorWidth(WeaponInfo::getWeaponInfo(mCurrLoadout.getWeapon(i)).name.getString()) +  2 * IndicatorHorizPadding;
 
    width += GapBetweenTheGroups;
 
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
-      width += getComponentIndicatorWidth(ModuleInfo::getModuleInfo(mCurrLoadout.getModule(i))->getName()) + IndicatorHorizPadding;
+      width += getComponentIndicatorWidth(ModuleInfo::getModuleInfo(mCurrLoadout.getModule(i))->getName()) + 2 * IndicatorHorizPadding;
 
    width -= IndicatorHorizPadding;
 
