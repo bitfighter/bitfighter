@@ -816,16 +816,13 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
             renderForceFieldProjector(Point(-85, y), Point(1, 0), &Colors::red, true, 0);
             renderForceField(Point(-70, y), Point(15, y), &Colors::red, true);
 
-            //GameObjectRender::renderForceFieldProjector(Point(-85, y), Point(1, 0), Colors::red, true, 0);
-            //GameObjectRender::renderForceField(Point(-70, y), Point(15, y), Colors::red, true);
             glColor(Colors::white); 
             drawString_fixed(25, y - auxTextFontSize / 2 + 12, auxTextFontSize, "(Regular)");
 
             y = -y;
-            //GameObjectRender::renderForceFieldProjector(Point(-85, y), Point(1, 0), Colors::red, true, 1);
-            //GameObjectRender::renderForceField(Point(-70, y), Point(15, y), Colors::red, true);
             renderForceFieldProjector(Point(-85, y), Point(1, 0), &Colors::red, true, 1);
             renderForceField(Point(-70, y), Point(15, y), &Colors::red, true);
+
             glColor(Colors::white);
             drawString_fixed(25, y - auxTextFontSize / 2 + 12, auxTextFontSize, "(Self-repairing)");
 
