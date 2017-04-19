@@ -1500,10 +1500,8 @@ void renderFlagSpawn(const Point &pos, F32 currentScale, const Color *color)
 
 F32 renderCenteredString(const Point &pos, S32 size, const char *string)
 {
-   FontManager::pushFontContext(OldSkoolContext);
    F32 width = getStringWidth((F32)size, string);
    drawStringAndGetWidth((S32)floor(pos.x - width * 0.5), (S32)floor(pos.y - size * 0.5), size, string);
-   FontManager::popFontContext();
 
    return width;
 }
