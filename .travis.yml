@@ -1,2 +1,4 @@
 language: cpp
+install:
+  - sudo apt-get update -qq
 script: cd build && cmake .. && make
