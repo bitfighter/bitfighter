@@ -1,4 +1,9 @@
 language: cpp
 install:
+  - sudo add-apt-repository ppa:kalakris/cmake
   - sudo apt-get update -qq
+  - sudo apt-get install cmake
 script: cd build && cmake .. && make
+
+
+
