@@ -14,10 +14,6 @@ before_install_osx()
    # Do something?
 }
 
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 <installation prefix>"
-    exit 1
-fi
 
 case "$(uname)" in
     Linux)
