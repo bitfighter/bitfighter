@@ -8,6 +8,6 @@ script:
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=Debug -DMASTER_MINIMAL=1 .. 
   - make bitfighter
-  os:
+os:
   - linux
   - osx
