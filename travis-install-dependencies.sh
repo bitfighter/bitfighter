@@ -2,10 +2,6 @@
 
 # This script is executed by Travis CI during the before-install phase.
 
-set -o errexit # exit on first error
-set -o nounset # report unset variables
-set -o xtrace  # show commands
-
 before_install_linux()
 {
   sudo apt-get update -qq
@@ -21,10 +17,6 @@ if [ $# -ne 1 ]; then
     echo "Usage: $0 <installation prefix>"
     exit 1
 fi
-
-export PREFIX="$1"
-mkdir -p "${PREFIX}"
-
 
 case "$(uname)" in
     Linux)
