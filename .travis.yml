@@ -1,4 +1,7 @@
 language: cpp
+os:
+  - linux
+  - osx
 dist: trusty
 sudo: required
 install:
@@ -6,7 +9,9 @@ install:
 script: 
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=Debug -DMASTER_MINIMAL=1 .. 
-  - make bitfighter
-os:
-  - linux
-  # - osx
+  - >
+    if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+      make Bitfighter
+    else
+      make bitfighter
+    fi
