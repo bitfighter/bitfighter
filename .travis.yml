@@ -9,4 +9,4 @@ script:
   - make bitfighter
 os:
   - linux
-  - osx
+  # - osx
