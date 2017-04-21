@@ -38,112 +38,112 @@ struct rcEdge
 };
 
 
-static bool buildMeshAdjacency(unsigned short* polys, const int npolys,
-                               unsigned short *adjaceny,
-							          const int nverts, const int vertsPerPoly)
-{
-	// Based on code by Eric Lengyel from:
-	// http://www.terathon.com/code/edges.php
-	
-	int maxEdgeCount = npolys*vertsPerPoly;
-	unsigned short* firstEdge = (unsigned short*)rcAlloc(sizeof(unsigned short)*(nverts + maxEdgeCount), RC_ALLOC_TEMP);
-	if (!firstEdge)      // Allocation went bad
-		return false;
-	unsigned short* nextEdge = firstEdge + nverts;
-	int edgeCount = 0;
-	
-	rcEdge* edges = (rcEdge*)rcAlloc(sizeof(rcEdge)*maxEdgeCount, RC_ALLOC_TEMP);
-	if (!edges)
-	{
-		rcFree(firstEdge);
-		return false;
-	}
-	
-	for (int i = 0; i < nverts; i++)
-		firstEdge[i] = RC_MESH_NULL_IDX;
-	
-   // First process edges where 1st node < 2nd node
-	for (int i = 0; i < npolys; ++i)
-	{
-		unsigned short* t = &polys[i*vertsPerPoly];
-
-      // Skip "missing" polygons
-      if(*t == U16_MAX)
-         continue;
-
-		for (int j = 0; j < vertsPerPoly; ++j)
-		{
-			unsigned short v0 = t[j];           // jth vert
-			unsigned short v1 = (j+1 >= vertsPerPoly || t[j+1] == RC_MESH_NULL_IDX) ? t[0] : t[j+1];  // j+1th vert
-			if (v0 < v1)      
-			{
-				rcEdge& edge = edges[edgeCount];       // edge connecting v0 and v1
-				edge.vert[0] = v0;
-				edge.vert[1] = v1;
-				edge.poly[0] = (unsigned short)i;      // left poly
-				edge.polyEdge[0] = (unsigned short)j;  // ??
-				edge.poly[1] = (unsigned short)i;      // right poly, will be recalced later ??
-				edge.polyEdge[1] = 0;                  // ??
-
-				// Insert edge
-				nextEdge[edgeCount] = firstEdge[v0];   // Next edge on the previous vert now points to the first edge for this vert
-
-				firstEdge[v0] = (unsigned short)edgeCount;  // First edge of this vert 
-
-				edgeCount++;                           // edgeCount never resets -- each edge gets a unique id
-			}
-		}
-	}
-	
-
-   // Now process edges where 2nd node is > 1st node
-	for (int i = 0; i < npolys; ++i)
-	{
-		unsigned short* t = &polys[i*vertsPerPoly];
-
-      // Skip "missing" polygons
-      if(*t == U16_MAX)
-         continue;
-
-		for (int j = 0; j < vertsPerPoly; ++j)
-		{
-			unsigned short v0 = t[j];
-			unsigned short v1 = (j+1 >= vertsPerPoly || t[j+1] == RC_MESH_NULL_IDX) ? t[0] : t[j+1];
-			if (v0 > v1)      
-			{
-				for (unsigned short e = firstEdge[v1]; e != RC_MESH_NULL_IDX; e = nextEdge[e])
-				{
-					rcEdge& edge = edges[e];
-					if (edge.vert[1] == v0 && edge.poly[0] == edge.poly[1])
-					{
-						edge.poly[1] = (unsigned short)i;
-						edge.polyEdge[1] = (unsigned short)j;
-						break;
-					}
-				}
-			}
-		}
-	}
-	
-	// Store adjacency
-	for (int i = 0; i < edgeCount; ++i)
-	{
-		const rcEdge& e = edges[i];
-		if (e.poly[0] != e.poly[1])      // Should normally be the case
-		{
-			unsigned short* p0 = &adjaceny[e.poly[0]*vertsPerPoly];      // l-poly
-			unsigned short* p1 = &adjaceny[e.poly[1]*vertsPerPoly];      // r-poly
-
-			//p0[e.polyEdge[0]] = e.poly[1];
-			//p1[e.polyEdge[1]] = e.poly[0];
-		}
-	}
-	
-	rcFree(firstEdge);
-	rcFree(edges);
-	
-	return true;
-}
+//static bool buildMeshAdjacency(unsigned short* polys, const int npolys,
+//                               unsigned short *adjaceny,
+//							          const int nverts, const int vertsPerPoly)
+//{
+//	// Based on code by Eric Lengyel from:
+//	// http://www.terathon.com/code/edges.php
+//	
+//	int maxEdgeCount = npolys*vertsPerPoly;
+//	unsigned short* firstEdge = (unsigned short*)rcAlloc(sizeof(unsigned short)*(nverts + maxEdgeCount), RC_ALLOC_TEMP);
+//	if (!firstEdge)      // Allocation went bad
+//		return false;
+//	unsigned short* nextEdge = firstEdge + nverts;
+//	int edgeCount = 0;
+//	
+//	rcEdge* edges = (rcEdge*)rcAlloc(sizeof(rcEdge)*maxEdgeCount, RC_ALLOC_TEMP);
+//	if (!edges)
+//	{
+//		rcFree(firstEdge);
+//		return false;
+//	}
+//	
+//	for (int i = 0; i < nverts; i++)
+//		firstEdge[i] = RC_MESH_NULL_IDX;
+//	
+//   // First process edges where 1st node < 2nd node
+//	for (int i = 0; i < npolys; ++i)
+//	{
+//		unsigned short* t = &polys[i*vertsPerPoly];
+//
+//      // Skip "missing" polygons
+//      if(*t == U16_MAX)
+//         continue;
+//
+//		for (int j = 0; j < vertsPerPoly; ++j)
+//		{
+//			unsigned short v0 = t[j];           // jth vert
+//			unsigned short v1 = (j+1 >= vertsPerPoly || t[j+1] == RC_MESH_NULL_IDX) ? t[0] : t[j+1];  // j+1th vert
+//			if (v0 < v1)      
+//			{
+//				rcEdge& edge = edges[edgeCount];       // edge connecting v0 and v1
+//				edge.vert[0] = v0;
+//				edge.vert[1] = v1;
+//				edge.poly[0] = (unsigned short)i;      // left poly
+//				edge.polyEdge[0] = (unsigned short)j;  // ??
+//				edge.poly[1] = (unsigned short)i;      // right poly, will be recalced later ??
+//				edge.polyEdge[1] = 0;                  // ??
+//
+//				// Insert edge
+//				nextEdge[edgeCount] = firstEdge[v0];   // Next edge on the previous vert now points to the first edge for this vert
+//
+//				firstEdge[v0] = (unsigned short)edgeCount;  // First edge of this vert 
+//
+//				edgeCount++;                           // edgeCount never resets -- each edge gets a unique id
+//			}
+//		}
+//	}
+//	
+//
+//   // Now process edges where 2nd node is > 1st node
+//	for (int i = 0; i < npolys; ++i)
+//	{
+//		unsigned short* t = &polys[i*vertsPerPoly];
+//
+//      // Skip "missing" polygons
+//      if(*t == U16_MAX)
+//         continue;
+//
+//		for (int j = 0; j < vertsPerPoly; ++j)
+//		{
+//			unsigned short v0 = t[j];
+//			unsigned short v1 = (j+1 >= vertsPerPoly || t[j+1] == RC_MESH_NULL_IDX) ? t[0] : t[j+1];
+//			if (v0 > v1)      
+//			{
+//				for (unsigned short e = firstEdge[v1]; e != RC_MESH_NULL_IDX; e = nextEdge[e])
+//				{
+//					rcEdge& edge = edges[e];
+//					if (edge.vert[1] == v0 && edge.poly[0] == edge.poly[1])
+//					{
+//						edge.poly[1] = (unsigned short)i;
+//						edge.polyEdge[1] = (unsigned short)j;
+//						break;
+//					}
+//				}
+//			}
+//		}
+//	}
+//	
+//	// Store adjacency
+//	for (int i = 0; i < edgeCount; ++i)
+//	{
+//		const rcEdge& e = edges[i];
+//		if (e.poly[0] != e.poly[1])      // Should normally be the case
+//		{
+//			//unsigned short* p0 = &adjaceny[e.poly[0]*vertsPerPoly];      // l-poly
+//			//unsigned short* p1 = &adjaceny[e.poly[1]*vertsPerPoly];      // r-poly
+//
+//			//p0[e.polyEdge[0]] = e.poly[1];
+//			//p1[e.polyEdge[1]] = e.poly[0];
+//		}
+//	}
+//	
+//	rcFree(firstEdge);
+//	rcFree(edges);
+//	
+//	return true;
+//}
 
 
 static const int VERTEX_BUCKET_COUNT = (1<<12);
@@ -244,14 +244,14 @@ static bool between(const int* a, const int* b, const int* c)
 		return	((a[1] <= c[1]) && (c[1] <= b[1])) || ((a[1] >= c[1]) && (c[1] >= b[1]));
 }
 
-// Returns true iff segments ab and cd intersect, properly or improperly.
-static bool intersect(const int* a, const int* b, const int* c, const int* d)
-{
-	return (intersectProp(a, b, c, d) ||
-           between(a, b, c) || between(a, b, d) ||
-		 	  between(c, d, a) || between(c, d, b));
-}
-
+//// Returns true iff segments ab and cd intersect, properly or improperly.
+//static bool intersect(const int* a, const int* b, const int* c, const int* d)
+//{
+//	return (intersectProp(a, b, c, d) ||
+//           between(a, b, c) || between(a, b, d) ||
+//		 	  between(c, d, a) || between(c, d, b));
+//}
+//
 
 static int countPolyVerts(const unsigned short* p, const int nvp)
 {

@@ -1576,7 +1576,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
    }
 
    // What does the spy bug see?
-   bool sameQuery = false;  // helps speed up by not repeatedly finding same objects
+   //bool sameQuery = false;  // helps speed up by not repeatedly finding same objects
 
    const Vector<DatabaseObject *> *spyBugs = mLevel->findObjects_fast(SpyBugTypeNumber);
    const Point scopeRange(SpyBug::SPY_BUG_RADIUS, SpyBug::SPY_BUG_RADIUS * FloatSqrt3Half);  // Bounding box of hexagon
@@ -1595,7 +1595,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
          fillVector.clear();
          mLevel->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect, false);
 
-         sameQuery = true;
+         //sameQuery = true;
 
          for(S32 j = 0; j < fillVector.size(); j++)
          {

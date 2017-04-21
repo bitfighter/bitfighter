@@ -196,9 +196,9 @@ void QuickMenuUI::render() const
    // Dim out area behind instructions
    S32 margin = 5;
    S32 x1 = instrXPos - helpWidth / 2 - margin;
-   S32 x2 = instrXPos + helpWidth / 2 + margin;
+   //S32 x2 = instrXPos + helpWidth / 2 + margin;
 
-   RenderUtils::drawFilledRect(x1, instrYPos, helpWidth + 2*margin, HELP_TEXT_SIZE + margin, Colors::black, 0.7f);
+   RenderUtils::drawFilledRect(x1, instrYPos, helpWidth + 2 * margin, HELP_TEXT_SIZE + margin, Colors::black, 0.7f);
 
    // And draw the text
    instrYPos += HELP_TEXT_SIZE;

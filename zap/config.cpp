@@ -1408,6 +1408,7 @@ string FolderManager::getDir(FolderType folderType) const
 
       default:
          TNLAssert(false, "Not implemented!");
+         return "";
    }
 }
 

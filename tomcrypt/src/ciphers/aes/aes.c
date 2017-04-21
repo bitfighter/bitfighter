@@ -120,7 +120,7 @@ static ulong32 setup_mix2(ulong32 temp)
  */
 int SETUP(const unsigned char *key, int keylen, int num_rounds, symmetric_key *skey)
 {
-    int i, j;
+    int i;
     ulong32 temp, *rk;
 #ifndef ENCRYPT_ONLY
     ulong32 *rrk;
@@ -146,7 +146,7 @@ int SETUP(const unsigned char *key, int keylen, int num_rounds, symmetric_key *s
     LOAD32H(rk[2], key +  8);
     LOAD32H(rk[3], key + 12);
     if (keylen == 16) {
-        j = 44;
+        //j = 44;
         for (;;) {
             temp  = rk[3];
             rk[4] = rk[0] ^ setup_mix(temp) ^ rcon[i];
@@ -159,7 +159,7 @@ int SETUP(const unsigned char *key, int keylen, int num_rounds, symmetric_key *s
             rk += 4;
         }
     } else if (keylen == 24) {
-        j = 52;   
+        //j = 52;   
         LOAD32H(rk[4], key + 16);
         LOAD32H(rk[5], key + 20);
         for (;;) {
@@ -180,7 +180,7 @@ int SETUP(const unsigned char *key, int keylen, int num_rounds, symmetric_key *s
             rk += 6;
         }
     } else if (keylen == 32) {
-        j = 60;
+        //j = 60;
         LOAD32H(rk[4], key + 16);
         LOAD32H(rk[5], key + 20);
         LOAD32H(rk[6], key + 24);

@@ -42,6 +42,8 @@ namespace PhysFS {
          case std::ios_base::end:
             PHYSFS_seek(file, PHYSFS_fileLength(file) + pos);
             break;
+         default:
+            break;
          }
          if(mode & std::ios_base::in) {
             setg(egptr(), egptr(), egptr());

@@ -1637,7 +1637,7 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb) co
       // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
 //      mGL->blendFunc(GLOPT::OneMinusDstColor, GLOPT::One);
 
-      S32 prevTeam = -10;
+      //S32 prevTeam = -10;
 
       // Draw spybug visibility ranges first, underneath everything else
       for(S32 i = 0; i < fillVector.size(); i++)
@@ -1647,7 +1647,7 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb) co
 //         if(i != 0 && editorObj->getTeam() != prevTeam)
 //            mGL->glTranslate(0, 0, 0.05f);
 
-         prevTeam = editorObj->getTeam();
+         //prevTeam = editorObj->getTeam();
 
          Point pos = editorObj->getPos();
          pos *= mCurrentScale;

@@ -305,7 +305,6 @@ void PlaylistMenuUserInterface::onActivate()
    mMenuTitle = "CHOOSE PLAYLIST";
 
    // Replace with a getLevelCount() method on Game?
-   ClientGame *game = getGame();
 
    Vector<string> playlists = getPlaylists();
 
@@ -359,10 +358,10 @@ PlaylistInGameMenuUserInterface::~PlaylistInGameMenuUserInterface()
 
 
 // Selected a playlist!  What do we do now?
-static void processPlaylistInGameSelectionCallback(ClientGame *game, U32 index)             
-{
-   game->getUIManager()->getUI<PlaylistInGameMenuUserInterface>()->processSelection(index);
-}
+//static void processPlaylistInGameSelectionCallback(ClientGame *game, U32 index)             
+//{
+//   game->getUIManager()->getUI<PlaylistInGameMenuUserInterface>()->processSelection(index);
+//}
 
 
 void PlaylistInGameMenuUserInterface::setPlaylist(const string &playlistName) const

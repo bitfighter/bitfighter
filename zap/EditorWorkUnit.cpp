@@ -156,25 +156,25 @@ EditorAction EditorWorkUnitDelete::getAction() const
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
-// Helper function -- iterates through all objects in list and saves their geometries for posterity
-static void getGeometries(const Vector<boost::shared_ptr<BfObject> > &objects, Vector<Vector<Point> > &geoms)
-{
-   geoms.reserve(objects.size());
-
-   Vector<Point> points;
-   for(S32 i = 0; i < objects.size(); i++)
-   {
-      const Vector<Point> *pointsPtr = objects[i]->getGeometry().getOutline();
-      points.clear();
-      points.reserve(pointsPtr->size());
-
-      for(S32 i = 0; i < pointsPtr->size(); i++)
-         points.push_back(pointsPtr->get(i));
-         
-      geoms.push_back(points);
-   }
-}
+//
+//// Helper function -- iterates through all objects in list and saves their geometries for posterity
+//static void getGeometries(const Vector<boost::shared_ptr<BfObject> > &objects, Vector<Vector<Point> > &geoms)
+//{
+//   geoms.reserve(objects.size());
+//
+//   Vector<Point> points;
+//   for(S32 i = 0; i < objects.size(); i++)
+//   {
+//      const Vector<Point> *pointsPtr = objects[i]->getGeometry().getOutline();
+//      points.clear();
+//      points.reserve(pointsPtr->size());
+//
+//      for(S32 i = 0; i < pointsPtr->size(); i++)
+//         points.push_back(pointsPtr->get(i));
+//         
+//      geoms.push_back(points);
+//   }
+//}
 
 
 // Constructor

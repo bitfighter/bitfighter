@@ -242,7 +242,7 @@ void TeamDefUserInterface::render() const
 
    for(S32 j = 0; j < size; j++)
    {
-      S32 i = j + 2;    // Take account of the two fixed teams (neutral & hostile)
+      //S32 i = j + 2;    // Take account of the two fixed teams (neutral & hostile)
 
       yPos += fontsize + fontgap;
 
