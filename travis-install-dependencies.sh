@@ -10,6 +10,7 @@ before_install_linux()
 
 before_install_osx()
 {
+    echo "OSX"
    # Do something?
 }
 
