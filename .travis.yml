@@ -2,7 +2,7 @@ language: cpp
 dist: trusty
 sudo: required
 install:
-  - ./travis-install-dependencies.sh
+  - bash ./travis-install-dependencies.sh
 script: 
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=Debug -DMASTER_MINIMAL=1 .. 
