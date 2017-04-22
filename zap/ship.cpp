@@ -2225,7 +2225,8 @@ void Ship::renderLayer(S32 layerIndex)
    const Point vel(mCurrentMove.x, mCurrentMove.y);
 
    ///// Info about how to render the ship; color, alpha, angle, etc.
-   const Color &color   = clientGame->getGameType()->getTeamColor(this);
+   const Color &color          = clientGame->getGameType()->getTeamColor(this);
+   const Color &healthBarColor = clientGame->getGameType()->getTeamHealthBarColor(this);
    const F32 alpha      = getShipVisibility(localShip);
    const F32 angle      = getRenderAngle();
    const F32 deltaAngle = getAngleDiff(mLastProcessStateAngle, angle);     // Change in angle since we were last here
@@ -2233,10 +2234,10 @@ void Ship::renderLayer(S32 layerIndex)
    const F32 warpInScale = (WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
 
    GameObjectRender::renderShip(layerIndex, getRenderPos(), getActualPos(), vel, angle, deltaAngle,
-              mShapeType, color, alpha, clientGame->getCurrentTime(), shipName, nameScale, warpInScale, 
-              isLocalShip, isBusy, isAuthenticated, showCoordinates, mHealth, mRadius, getTeam(), 
-              drawRepairIcon, boostActive, shieldActive, repairActive, sensorActive, hasArmor, 
-              engineeringTeleport, killStreak, gamesPlayed);
+                                mShapeType, color, healthBarColor, alpha, clientGame->getCurrentTime(), shipName, nameScale, 
+                                warpInScale, isLocalShip, isBusy, isAuthenticated, showCoordinates, mHealth, mRadius, 
+                                getTeam(), drawRepairIcon, boostActive, shieldActive, repairActive, sensorActive, 
+                                hasArmor, engineeringTeleport, killStreak, gamesPlayed);
 
    if(mSpawnShield.getCurrent() != 0)  // Add spawn shield -- has a period of being on solidly, then blinks yellow 
       GameObjectRender::renderSpawnShield(getRenderPos(), mSpawnShield.getCurrent(), clientGame->getCurrentTime());

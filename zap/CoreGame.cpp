@@ -371,7 +371,7 @@ void CoreItem::renderItem(const Point &pos) const
       GameType *gameType = static_cast<Level *>(getDatabase())->getGameType();
       S32 time = gameType->getTotalGamePlayedInMs();
       PanelGeom panelGeom = getPanelGeom();
-      GameObjectRender::renderCore(pos, getColor(), time, &panelGeom, mPanelHealth, mStartingPanelHealth);
+      GameObjectRender::renderCore(pos, getColor(), getHealthBarColor(), time, &panelGeom, mPanelHealth, mStartingPanelHealth);
    }
 #endif
 }

@@ -29,6 +29,7 @@ class TeamInfo
 protected:
    StringTableEntry mName;
    Color mColor;
+   Color mHealthBarColor;
 
 public:
    TeamInfo();                            // Constructor
@@ -47,7 +48,8 @@ public:
    virtual void setColor(const Color *color);
    virtual void setColor(F32 r, F32 g, F32 b);
 
-   const Color &getColor() const;
+   const Color &getColor()          const;
+   const Color &getHealthBarColor() const;
 };
 
 
@@ -174,7 +176,9 @@ public:
    TeamManager(Level *level);       // Constructor
    virtual ~TeamManager();          // Destructor
 
-   const Color &getTeamColor(S32 index) const;
+   const Color &getTeamColor         (S32 index) const;
+   const Color &getTeamHealthBarColor(S32 index) const;
+
    StringTableEntry getTeamName(S32 index) const;
    void setTeamName(S32 index, const string &name);
    void setTeamColor(S32 index, const Color &color);

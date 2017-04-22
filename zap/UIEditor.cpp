@@ -1923,7 +1923,7 @@ void EditorUserInterface::renderReferenceShip() const
    nvgTranslate(nvg, mMousePos.x, mMousePos.y);
    nvgScale(nvg, mCurrentScale, mCurrentScale);
    nvgRotate(nvg, FloatHalfPi);
-   GameObjectRender::renderShip(ShipShape::Normal, Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
+   GameObjectRender::renderShip(ShipShape::Normal, Colors::red, Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
    nvgRotate(nvg, -FloatHalfPi);
 
 

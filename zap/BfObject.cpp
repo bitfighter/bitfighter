@@ -594,6 +594,12 @@ const Color &BfObject::getColor() const
 }
 
 
+const Color &BfObject::getHealthBarColor() const
+{ 
+   return static_cast<Level *>(getDatabase())->getTeamHealthBarColor(getTeam());
+}
+
+
 Game *BfObject::getGame() const
 {
    return mGame;

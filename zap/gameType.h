@@ -349,7 +349,8 @@ public:
    void updateShipLoadout(BfObject *shipObject); // called from LoadoutZone when a Ship touches the zone
 
    virtual const Color &getTeamColor(const BfObject *object) const; // Get the color of a team, based on object
-           const Color &getTeamColor(S32 team)               const; // Get the color of a team, based on index
+   const Color &getTeamColor(S32 team) const;                       // Get the color of a team, based on index
+   const Color &getTeamHealthBarColor(const Ship *ship) const;      // Get the color of a ship's health bar
 
    bool isSuddenDeath() const;
 

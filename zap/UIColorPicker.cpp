@@ -395,7 +395,10 @@ void UIColorPicker::render() const
    nvgTranslate(nvg, 165, y + h / 2);
    nvgRotate(nvg, -FloatHalfPi);
 
-   GameObjectRender::renderShip(ShipShape::Normal, *this, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
+   Color healthBarColor(this);
+   healthBarColor.ensureMinimumBrightness();
+
+   GameObjectRender::renderShip(ShipShape::Normal, *this, healthBarColor, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
 
    nvgRestore(nvg);
 
@@ -403,7 +406,7 @@ void UIColorPicker::render() const
    nvgSave(nvg);
    nvgTranslate(nvg, 240, y + h / 2);
 
-   GameObjectRender::renderTurret(*this, Point(0, 15), Point(0, -1), true, 1, 0, 0);
+   GameObjectRender::renderTurret(*this, healthBarColor, Point(0, 15), Point(0, -1), true, 1, 0, 0);
 
    nvgRestore(nvg);
 }

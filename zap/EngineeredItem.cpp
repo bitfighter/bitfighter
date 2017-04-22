@@ -2120,7 +2120,7 @@ void Turret::onAddedToGame(Game *game)
 
 void Turret::render() const
 {
-   GameObjectRender::renderTurret(getColor(), getPos(), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle, mHealRate);
+   GameObjectRender::renderTurret(getColor(), getHealthBarColor(), getPos(), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle, mHealRate);
 }
 
 
@@ -2137,7 +2137,7 @@ void Turret::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, b
       // We render the turret with/without health if it is neutral or not (as it starts in the game)
       bool enabled = getTeam() != TEAM_NEUTRAL;
 
-      GameObjectRender::renderTurret(getColor(), getPos(), mAnchorNormal, enabled, mHealth, mCurrentAngle, mHealRate);
+      GameObjectRender::renderTurret(getColor(), getHealthBarColor(), getPos(), mAnchorNormal, enabled, mHealth, mCurrentAngle, mHealRate);
    }
    else
       renderDock(getColor());
@@ -2592,7 +2592,7 @@ void Mortar::onAddedToGame(Game *game)
 
 void Mortar::render() const
 {
-   GameObjectRender::renderMortar(getColor(), getPos(), mAnchorNormal, isEnabled(), mHealth, mHealRate);
+   GameObjectRender::renderMortar(getColor(), getHealthBarColor(), getPos(), mAnchorNormal, isEnabled(), mHealth, mHealRate);
 
    // Render target zone?
 //   mGL->glPushMatrix();
@@ -2619,7 +2619,7 @@ void Mortar::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, b
       // We render the Mortar with/without health if it is neutral or not (as it starts in the game)
       bool enabled = getTeam() != TEAM_NEUTRAL;
 
-      GameObjectRender::renderMortar(getColor(), getPos(), mAnchorNormal, enabled, mHealth, mHealRate);
+      GameObjectRender::renderMortar(getColor(), getHealthBarColor(), getPos(), mAnchorNormal, enabled, mHealth, mHealRate);
    }
    else
       renderDock(getColor());

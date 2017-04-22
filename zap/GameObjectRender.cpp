@@ -161,9 +161,9 @@ void GameObjectRender::renderShipFlame(ShipFlame *flames, S32 flameCount, F32 th
 }
 
 
-void GameObjectRender::renderShip(ShipShape::ShipShapeType shapeType, const Color &shipColor, F32 alpha,
-                                  F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
-                                  bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
+void GameObjectRender::renderShip(ShipShape::ShipShapeType shapeType, const Color &shipColor, const Color &healthBarColor,
+                                  F32 alpha, F32 thrusts[], F32 health, F32 radius,
+                                  U32 sensorTime, bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
 {
    ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[shapeType];
 
@@ -189,7 +189,7 @@ void GameObjectRender::renderShip(ShipShape::ShipShapeType shapeType, const Colo
       RenderUtils::drawLineStrip(shipShapeInfo->innerHullPieces[i].points, shipShapeInfo->innerHullPieces[i].pointCount, shipColor, alpha);
 
    // Render health bar
-   renderHealthBar(health, Point(0, 1.5), Point(0, 1), 28, 4, shipColor, alpha);
+   renderHealthBar(health, Point(0, 1.5), Point(0, 1), 28, 4, healthBarColor, alpha);
 
    // Grey outer hull drawn last, on top
    RenderUtils::lineWidth(DEFAULT_LINE_WIDTH);
@@ -507,11 +507,11 @@ void GameObjectRender::renderShipName(const string &shipName, bool isAuthenticat
 
 
 void GameObjectRender::renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel,
-                                  F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color &color, F32 alpha, 
-                                  U32 renderTime, const string &shipName, F32 nameScale, F32 warpInScale, bool isLocalShip, bool isBusy, 
-                                  bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
-                                  bool drawRepairIcon, bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
-                                  bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed)
+                                  F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color &color, const Color &healthBarColor,
+                                  F32 alpha, U32 renderTime, const string &shipName, F32 nameScale, F32 warpInScale, bool isLocalShip,
+                                  bool isBusy, bool isAuthenticated, bool showCoordinates, F32 health, F32 radius,
+                                  S32 team, bool drawRepairIcon, bool boostActive, bool shieldActive, bool repairActive,
+                                  bool sensorActive, bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed)
 {
    nvgSave(nvg);
    nvgTranslate(nvg, renderPos.x, renderPos.y);
@@ -563,8 +563,8 @@ void GameObjectRender::renderShip(S32 layerIndex, const Point &renderPos, const 
       static F32 thrusts[4];
       calcThrustComponents(vel, angle, deltaAngle, boostActive, thrusts);  
 
-      renderShip(shape, color, alpha, thrusts, health, radius, renderTime,
-                 shieldActive, sensorActive, repairActive, hasArmor);
+      renderShip(shape, color, healthBarColor, alpha, thrusts, health, radius,
+                 renderTime, shieldActive, sensorActive, repairActive, hasArmor);
    }
 
    nvgRestore(nvg);
@@ -959,7 +959,7 @@ void GameObjectRender::renderTurretFiringRange(const Point &pos, const Color &co
 
 
 // Renders turret!  --> note that anchor and normal can't be const &Points because of the point math
-void GameObjectRender::renderTurret(const Color &color, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate)
+void GameObjectRender::renderTurret(const Color &color, const Color &healthBarColor, const Point &anchor, const Point &normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate)
 {
    const F32 FrontRadius = 15;
    const F32 BaseWidth = 36;
@@ -1004,7 +1004,7 @@ void GameObjectRender::renderTurret(const Color &color, Point anchor, Point norm
       // Draw base after potentially overlapping curvy bits
       RenderUtils::drawLineLoop(&basePoints, enabled ? Colors::white : Colors::gray60);
 
-      renderHealthBar(health, Point(0, -Turret::TURRET_OFFSET / 2), Point(1, 0), HealthBarLength, 5, color);
+      renderHealthBar(health, Point(0, -Turret::TURRET_OFFSET / 2), Point(1, 0), HealthBarLength, 5, healthBarColor);
 
    nvgRestore(nvg);
 
@@ -1020,7 +1020,7 @@ void GameObjectRender::renderTurret(const Color &color, Point anchor, Point norm
 }
 
 
-void GameObjectRender::renderMortar(const Color &color, Point anchor, Point normal, bool enabled, F32 health, S32 healRate)
+void GameObjectRender::renderMortar(const Color &color, const Color &healthBarColor, Point anchor, Point normal, bool enabled, F32 health, S32 healRate)
 {
 //   const F32 FrontRadius = 15;
    const F32 BaseWidth = 36;
@@ -1063,7 +1063,7 @@ void GameObjectRender::renderMortar(const Color &color, Point anchor, Point norm
       // Draw base after potentially overlapping curvy bits
       RenderUtils::drawLineLoop(&basePoints, enabled ? Colors::white : Colors::gray60);
 
-      renderHealthBar(health, Point(0, -Turret::TURRET_OFFSET / 2), Point(1, 0), HealthBarLength, 5, color);
+      renderHealthBar(health, Point(0, -Turret::TURRET_OFFSET / 2), Point(1, 0), HealthBarLength, 5, healthBarColor);
 
       RenderUtils::drawLineStrip(&mortarPoints, color);
    nvgRestore(nvg);
@@ -1961,8 +1961,8 @@ S32 GameObjectRender::getLockWidth(S32 size)
 
 
 
-void GameObjectRender::renderCore(const Point &pos, const Color &coreColor, U32 time,
-                const PanelGeom *panelGeom, const F32 panelHealth[], F32 panelStartingHealth)
+void GameObjectRender::renderCore(const Point &pos, const Color &coreColor, const Color &healthBarColor,
+                                  U32 time, const PanelGeom *panelGeom, const F32 panelHealth[], F32 panelStartingHealth)
 {
    // Draw outer polygon and inner circle
    Color baseColor = Colors::gray80;
@@ -1974,7 +1974,7 @@ void GameObjectRender::renderCore(const Point &pos, const Color &coreColor, U32 
       dir = (panelGeom->repair[i] - pos);
       dir.normalize();
 
-      renderHealthBar(panelHealth[i] / panelStartingHealth, panelGeom->repair[i], dir, 30, 7, coreColor);
+      renderHealthBar(panelHealth[i] / panelStartingHealth, panelGeom->repair[i], dir, 30, 7, healthBarColor);
 
       F32 vertices[] = {
             panelGeom->getStart(i).x, panelGeom->getStart(i).y,
@@ -3061,7 +3061,7 @@ void GameObjectRender::drawObjectiveArrow(const Point &nearestPoint, F32 zoomFra
    if(er < 1)
       return;
 
-   Point rp = nearestPoint;
+   Point rp;
    Point np = nearestPoint;
 
    er = sqrt(er);

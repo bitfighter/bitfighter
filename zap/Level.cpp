@@ -494,15 +494,13 @@ namespace Zap
 
    const Color &Level::getTeamColor(S32 index) const
    {
-      // Note this logic duplicated inside mTeamManager... if that is only called from here, we can remove it there
-
-      if(index == TEAM_NEUTRAL)
-         return Colors::NeutralTeamColor;
-
-      if(index == TEAM_HOSTILE)
-         return Colors::HostileTeamColor;
-
       return mTeamManager->getTeamColor(index);
+   }
+
+
+   const Color &Level::getTeamHealthBarColor(S32 index) const
+   {
+      return mTeamManager->getTeamHealthBarColor(index);
    }
 
 

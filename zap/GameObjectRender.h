@@ -94,17 +94,17 @@ public:
                               U32 killStreak, U32 gamesPlayed, F32 nameScale, F32 alpha);
 
    // Renders the core ship, good for instructions and such
-   static void renderShip(ShipShape::ShipShapeType shapeType, const Color &shipColor, F32 alpha, F32 thrusts[],
-                          F32 health, F32 radius, U32 sensorTime,
-                          bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
+   static void renderShip(ShipShape::ShipShapeType shapeType, const Color &shipColor, const Color &healthBarColor, F32 alpha,
+                          F32 thrusts[], F32 health, F32 radius,
+                          U32 sensorTime, bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
 
    // Renders the ship and all the fixins
    static void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel,
-                          F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color &color, F32 alpha,
-                          U32 renderTime, const string &shipName, F32 nameScale, F32 warpInScale, bool isLocalShip, bool isBusy,
-                          bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team,
-                          bool drawRepairIcon, bool boostActive, bool shieldActive, bool repairActive, bool sensorActive,
-                          bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed);
+                          F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color &color, const Color &healthBarColor,
+                          F32 alpha, U32 renderTime, const string &shipName, F32 nameScale, F32 warpInScale, bool isLocalShip,
+                          bool isBusy, bool isAuthenticated, bool showCoordinates, F32 health, F32 radius,
+                          S32 team, bool drawRepairIcon, bool boostActive, bool shieldActive, bool repairActive,
+                          bool sensorActive, bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed);
 
    static void renderSpawnShield(const Point &pos, U32 shieldTime, U32 renderTime);
 
@@ -120,8 +120,8 @@ public:
    static void renderTeleporterOutline(const Point &center, F32 radius, const Color &color);
    static void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentScale = 1);
    static void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentScale);
-   static void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate = 0);
-   static void renderMortar(const Color &c, Point anchor, Point normal, bool enabled, F32 health, S32 healRate = 0);
+   static void renderTurret(const Color &c, const Color &hbc, const Point &anchor, const Point &normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate = 0);
+   static void renderMortar(const Color &c, const Color &hbc, Point anchor, Point normal, bool enabled, F32 health, S32 healRate = 0);
 
    static void renderFlag(const Color &flagColor, const Color &mastColor, F32 alpha);
    static void renderFlag(const Color &flagColor, F32 alpha);
@@ -221,8 +221,8 @@ public:
    static void renderResourceItem(const Vector<Point> &points, F32 alpha = 1);
    //static void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);
 
-   static void renderCore(const Point &pos, const Color &coreColor, U32 time,
-                   const PanelGeom *panelGeom, const F32 panelHealth[10], F32 panelStartingHealth);
+   static void renderCore(const Point &pos, const Color &coreColor, const Color &healthBarColor,
+                          U32 time, const PanelGeom *panelGeom, const F32 panelHealth[10], F32 panelStartingHealth);
 
    static void renderCoreSimple(const Point &pos, const Color &coreColor, S32 width);
 

@@ -139,7 +139,8 @@ public:
    StringTableEntry getTeamName(S32 index) const;
    void setTeamName(S32 index, const string &name) const;
 
-   const Color &getTeamColor(S32 index) const;
+   const Color &getTeamColor         (S32 index) const;
+   const Color &getTeamHealthBarColor(S32 index) const;
    void setTeamColor(S32 index, const Color &color) const;
 
    void removeTeam(S32 teamIndex) const; 

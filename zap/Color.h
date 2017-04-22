@@ -37,7 +37,6 @@ public:
    explicit Color(double grayScale);
 
    explicit Color(U32 rgbInt);
-   Color(string hex);
 
    // Do not add a virtual destructor as it adds a pointer before the r, g, b members.  This
    // will mess up the pointer tricks with feeding the Color to OpenGL
@@ -61,6 +60,7 @@ public:
    string toHexStringForIni() const;
    NVGcolor toNvg() const;
    NVGcolor toNvg(F32 alpha) const;
+   void ensureMinimumBrightness();
 
    U32 toU32() const;
 

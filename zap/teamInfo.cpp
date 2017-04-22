@@ -88,7 +88,7 @@ StringTableEntry TeamInfo::getName() const
 // Overridden in EditorTeam
 void TeamInfo::setColor(const Color &color)
 {
-   mColor.set(color);
+   setColor(color.r, color.g, color.b);
 }
 
 
@@ -98,22 +98,30 @@ const Color &TeamInfo::getColor() const
 }
 
 
-// Overridden in EditorTeam
+const Color &TeamInfo::getHealthBarColor() const
+{
+   return mHealthBarColor;
+}
+
+
+// Overridden in EditorTeam, but that calls this
 void TeamInfo::setColor(F32 r, F32 g, F32 b)
 {
    mColor.set(r,g,b);
+
+   mHealthBarColor = mColor;
+   mHealthBarColor.ensureMinimumBrightness();
 }
 
 
 void TeamInfo::setColor(const Color *color)
 {
-   mColor.set(color);
+   setColor(color->r, color->g, color->b);
 }
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
 
 // Constructor
 AbstractTeam::AbstractTeam()
@@ -599,12 +607,23 @@ const Color &TeamManager::getTeamColor(S32 index) const
 {
    if(index == TEAM_NEUTRAL)
       return Colors::NeutralTeamColor;
-   else if(index == TEAM_HOSTILE)
+   
+   if(index == TEAM_HOSTILE)
       return Colors::HostileTeamColor;
-   else if((U32)index < (U32)mTeams.size())     // Using U32 lets us handle goofball negative team numbers without explicitly checking for them
+   
+   if((U32)index < (U32)mTeams.size())     // Using U32 lets us handle goofball negative team numbers without explicitly checking for them
       return mTeams[index]->getColor();
-   else
-      return Colors::magenta;                  // Use a rare color to let user know an object has an out of range team number
+   
+   return Colors::magenta;                  // Use a rare color to let user know an object has an out of range team number
+}
+
+
+const Color &TeamManager::getTeamHealthBarColor(S32 index) const
+{
+   if(index < 0 || index >= mTeams.size())
+      return getTeamColor(index);
+   
+   return mTeams[index]->getHealthBarColor();
 }
 
 
