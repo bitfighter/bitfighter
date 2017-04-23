@@ -8,6 +8,8 @@
 #include "MathUtils.h"     // For min/max
 #include "stringUtils.h"
 
+#include <cmath>
+
 namespace Zap
 {
 
