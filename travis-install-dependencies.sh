@@ -10,20 +10,20 @@ before_install_linux()
 
 before_install_osx()
 {
-    echo "OSX"
-   # Do something?
+  # Remove boost because we're using old, in-tree version for now
+  brew uninstall boost --force
 }
 
 
-case "$(uname)" in
-    Linux)
+case "${TRAVIS_OS_NAME}" in
+    linux)
         before_install_linux "${PREFIX}"
         ;;
-    Darwin)
+    osx)
         before_install_osx "${PREFIX}"
         ;;
     *)
-        echo "Unknown operating system: $(uname). Only Linux and Darwin are supported."
+        echo "Unknown operating system: ${TRAVIS_OS_NAME}. Only Linux and OSX are supported."
         exit 1
         ;;
 esac
