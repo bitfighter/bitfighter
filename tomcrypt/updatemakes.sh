@@ -1,21 +1,12 @@
 #!/bin/bash
 
-bash genlist.sh > tmplist
+./helper.pl --update-makefiles || exit 1
 
-perl filter.pl makefile tmplist
-mv -f tmp.delme makefile
+makefiles=(makefile makefile.icc makefile.shared makefile.unix makefile.mingw makefile.msvc)
+vcproj=(libtomcrypt_VS2008.vcproj libtomcrypt_VS2005.vcproj)
 
-perl filter.pl makefile.icc tmplist
-mv -f tmp.delme makefile.icc
+if [ $# -eq 1 ] && [ "$1" == "-c" ]; then
+  git add ${makefiles[@]} ${vcproj[@]} && git commit -m 'Update makefiles'
+fi
 
-perl filter.pl makefile.shared tmplist
-mv -f tmp.delme makefile.shared
-
-perl filter.pl makefile.unix tmplist
-mv -f tmp.delme makefile.unix
-
-perl filter.pl makefile.msvc tmplist
-sed -e 's/\.o /.obj /g' < tmp.delme > makefile.msvc
-
-rm -f tmplist
-rm -f tmp.delme
+exit 0

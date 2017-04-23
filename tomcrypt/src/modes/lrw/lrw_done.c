@@ -22,12 +22,12 @@
   @param lrw   The state to terminate
   @return CRYPT_OK if successful
 */
-int lrw_done(symmetric_LRW *lrw) 
+int lrw_done(symmetric_LRW *lrw)
 {
    int err;
 
    LTC_ARGCHK(lrw != NULL);
- 
+
    if ((err = cipher_is_valid(lrw->cipher)) != CRYPT_OK) {
       return err;
    }
@@ -37,6 +37,6 @@ int lrw_done(symmetric_LRW *lrw)
 }
 
 #endif
-/* $Source: /cvs/libtom/libtomcrypt/src/modes/lrw/lrw_done.c,v $ */
-/* $Revision: 1.7 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

@@ -19,14 +19,14 @@
 /**
   @file ltc_ecc_is_valid_idx.c
   ECC Crypto, Tom St Denis
-*/  
+*/
 
 #ifdef LTC_MECC
 
 /** Returns whether an ECC idx is valid or not
   @param n   The idx number to check
   @return 1 if valid, 0 if not
-*/  
+*/
 int ltc_ecc_is_valid_idx(int n)
 {
    int x;
@@ -40,7 +40,7 @@ int ltc_ecc_is_valid_idx(int n)
 }
 
 #endif
-/* $Source: /cvs/libtom/libtomcrypt/src/pk/ecc/ltc_ecc_is_valid_idx.c,v $ */
-/* $Revision: 1.7 $ */
-/* $Date: 2007/05/12 14:32:35 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */
 

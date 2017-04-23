@@ -16,7 +16,7 @@
 */
 
 /**
-   Find a hash flexibly.  First by name then if not present by digest size 
+   Find a hash flexibly.  First by name then if not present by digest size
    @param name        The name of the hash desired
    @param digestlen   The minimum length of the digest size (octets)
    @return >= 0 if found, -1 if not present
@@ -44,6 +44,6 @@
    return z;
 }
 
-/* $Source: /cvs/libtom/libtomcrypt/src/misc/crypt/crypt_find_hash_any.c,v $ */
-/* $Revision: 1.6 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

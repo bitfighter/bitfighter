@@ -10,9 +10,9 @@
  */
 #include "tomcrypt.h"
 
-/** 
+/**
   @file pmac_done.c
-  PMAC implementation, terminate a session, by Tom St Denis 
+  PMAC implementation, terminate a session, by Tom St Denis
 */
 
 #ifdef LTC_PMAC
@@ -69,6 +69,6 @@ int pmac_done(pmac_state *state, unsigned char *out, unsigned long *outlen)
 #endif
 
 
-/* $Source: /cvs/libtom/libtomcrypt/src/mac/pmac/pmac_done.c,v $ */
-/* $Revision: 1.9 $ */
-/* $Date: 2006/12/28 01:27:23 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

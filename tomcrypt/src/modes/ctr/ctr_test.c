@@ -52,7 +52,7 @@ int ctr_test(void)
   unsigned char buf[64];
   symmetric_CTR ctr;
 
-  /* AES can be under rijndael or aes... try to find it */ 
+  /* AES can be under rijndael or aes... try to find it */
   if ((idx = find_cipher("aes")) == -1) {
      if ((idx = find_cipher("rijndael")) == -1) {
         return CRYPT_NOP;
@@ -77,9 +77,9 @@ int ctr_test(void)
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/modes/ctr/ctr_test.c,v $ */
-/* $Revision: 1.4 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */
 
 
 

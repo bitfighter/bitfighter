@@ -10,13 +10,14 @@
  */
 #include "tomcrypt.h"
 
-/** 
+/**
    @file pelican.c
-   Pelican MAC, initialize state, by Tom St Denis 
+   Pelican MAC, initialize state, by Tom St Denis
 */
 
 #ifdef LTC_PELICAN
 
+#define __LTC_AES_TAB_C__
 #define ENCRYPT_ONLY
 #define PELI_TAB
 #include "../../ciphers/aes/aes_tab.c"
@@ -24,14 +25,14 @@
 /**
    Initialize a Pelican state
    @param pelmac    The Pelican state to initialize
-   @param key       The secret key 
+   @param key       The secret key
    @param keylen    The length of the secret key (octets)
    @return CRYPT_OK if successful
 */
 int pelican_init(pelican_state *pelmac, const unsigned char *key, unsigned long keylen)
 {
     int err;
-    
+
     LTC_ARGCHK(pelmac != NULL);
     LTC_ARGCHK(key    != NULL);
 
@@ -49,7 +50,7 @@ int pelican_init(pelican_state *pelmac, const unsigned char *key, unsigned long 
     aes_ecb_encrypt(pelmac->state, pelmac->state, &pelmac->K);
     pelmac->buflen = 0;
 
-    return CRYPT_OK;    
+    return CRYPT_OK;
 }
 
 static void four_rounds(pelican_state *pelmac)
@@ -90,7 +91,7 @@ static void four_rounds(pelican_state *pelmac)
     STORE32H(s3, pelmac->state  + 12);
 }
 
-/** 
+/**
   Process a block of text through Pelican
   @param pelmac       The Pelican MAC state
   @param in           The input
@@ -113,7 +114,7 @@ int pelican_process(pelican_state *pelmac, const unsigned char *in, unsigned lon
       while (inlen & ~15) {
          int x;
          for (x = 0; x < 16; x += sizeof(LTC_FAST_TYPE)) {
-            *((LTC_FAST_TYPE*)((unsigned char *)pelmac->state + x)) ^= *((LTC_FAST_TYPE*)((unsigned char *)in + x));
+            *(LTC_FAST_TYPE_PTR_CAST((unsigned char *)pelmac->state + x)) ^= *(LTC_FAST_TYPE_PTR_CAST((unsigned char *)in + x));
          }
          four_rounds(pelmac);
          in    += 16;
@@ -156,10 +157,10 @@ int pelican_done(pelican_state *pelmac, unsigned char *out)
    aes_ecb_encrypt(pelmac->state, out, &pelmac->K);
    aes_done(&pelmac->K);
    return CRYPT_OK;
-}                        
+}
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/mac/pelican/pelican.c,v $ */
-/* $Revision: 1.20 $ */
-/* $Date: 2007/05/12 14:32:35 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

@@ -33,10 +33,10 @@ int ofb_done(symmetric_OFB *ofb)
    return CRYPT_OK;
 }
 
-   
+
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/modes/ofb/ofb_done.c,v $ */
-/* $Revision: 1.7 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

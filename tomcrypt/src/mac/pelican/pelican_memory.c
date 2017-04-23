@@ -10,9 +10,9 @@
  */
 #include "tomcrypt.h"
 
-/** 
+/**
    @file pelican_memory.c
-   Pelican MAC, MAC a block of memory, by Tom St Denis 
+   Pelican MAC, MAC a block of memory, by Tom St Denis
 */
 
 #ifdef LTC_PELICAN
@@ -23,7 +23,7 @@
   @param keylen   The length of the key (octets)
   @param in       The input to MAC
   @param inlen    The length of the input (octets)
-  @param out      [out] The output TAG 
+  @param out      [out] The output TAG
   @return CRYPT_OK on success
 */
 int pelican_memory(const unsigned char *key, unsigned long keylen,
@@ -34,7 +34,7 @@ int pelican_memory(const unsigned char *key, unsigned long keylen,
    int err;
 
    pel = XMALLOC(sizeof(*pel));
-   if (pel == NULL) { 
+   if (pel == NULL) {
       return CRYPT_MEM;
    }
 
@@ -47,13 +47,13 @@ int pelican_memory(const unsigned char *key, unsigned long keylen,
       return err;
    }
    err = pelican_done(pel, out);
-   XFREE(pel); 
+   XFREE(pel);
    return err;
 }
 
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/mac/pelican/pelican_memory.c,v $ */
-/* $Revision: 1.8 $ */
-/* $Date: 2007/05/12 14:32:35 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

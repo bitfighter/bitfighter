@@ -12,7 +12,7 @@
 
 /**
   @file hmac_init.c
-  LTC_HMAC support, initialize state, Tom St Denis/Dobes Vandermeer 
+  HMAC support, initialize state, Tom St Denis/Dobes Vandermeer
 */
 
 #ifdef LTC_HMAC
@@ -20,9 +20,9 @@
 #define LTC_HMAC_BLOCKSIZE hash_descriptor[hash].blocksize
 
 /**
-   Initialize an LTC_HMAC context.
-   @param hmac     The LTC_HMAC state 
-   @param hash     The index of the hash you want to use 
+   Initialize an HMAC context.
+   @param hmac     The HMAC state
+   @param hash     The index of the hash you want to use
    @param key      The secret key
    @param keylen   The length of the secret key (octets)
    @return CRYPT_OK if successful
@@ -68,15 +68,13 @@ int hmac_init(hmac_state *hmac, int hash, const unsigned char *key, unsigned lon
         if ((err = hash_memory(hash, key, keylen, hmac->key, &z)) != CRYPT_OK) {
            goto LBL_ERR;
         }
-        if(hashsize < LTC_HMAC_BLOCKSIZE) {
-            zeromem((hmac->key) + hashsize, (size_t)(LTC_HMAC_BLOCKSIZE - hashsize));
-        }
         keylen = hashsize;
     } else {
         XMEMCPY(hmac->key, key, (size_t)keylen);
-        if(keylen < LTC_HMAC_BLOCKSIZE) {
-            zeromem((hmac->key) + keylen, (size_t)(LTC_HMAC_BLOCKSIZE - keylen));
-        }
+    }
+
+    if(keylen < LTC_HMAC_BLOCKSIZE) {
+       zeromem((hmac->key) + keylen, (size_t)(LTC_HMAC_BLOCKSIZE - keylen));
     }
 
     /* Create the initial vector for step (3) */
@@ -100,13 +98,13 @@ done:
 #ifdef LTC_CLEAN_STACK
    zeromem(buf, LTC_HMAC_BLOCKSIZE);
 #endif
- 
+
    XFREE(buf);
-   return err;    
+   return err;
 }
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/mac/hmac/hmac_init.c,v $ */
-/* $Revision: 1.7 $ */
-/* $Date: 2007/05/12 14:37:41 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

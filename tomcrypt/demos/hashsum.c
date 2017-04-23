@@ -11,7 +11,7 @@
 
 int errno;
 
-void register_algs();
+void register_algs(void);
 
 int main(int argc, char **argv)
 {
@@ -67,6 +67,7 @@ int main(int argc, char **argv)
 void register_algs(void)
 {
   int err;
+  LTC_UNUSED_PARAM(err);
 
 #ifdef LTC_TIGER
   register_hash (&tiger_desc);
@@ -95,14 +96,44 @@ void register_algs(void)
 #ifdef LTC_SHA512
   register_hash (&sha512_desc);
 #endif
+#ifdef LTC_SHA512_224
+  register_hash (&sha512_224_desc);
+#endif
+#ifdef LTC_SHA512_256
+  register_hash (&sha512_256_desc);
+#endif
+#ifdef LTC_SHA3
+  register_hash (&sha3_224_desc);
+  register_hash (&sha3_256_desc);
+  register_hash (&sha3_384_desc);
+  register_hash (&sha3_512_desc);
+#endif
 #ifdef LTC_RIPEMD128
   register_hash (&rmd128_desc);
 #endif
 #ifdef LTC_RIPEMD160
   register_hash (&rmd160_desc);
 #endif
+#ifdef LTC_RIPEMD256
+  register_hash (&rmd256_desc);
+#endif
+#ifdef LTC_RIPEMD320
+  register_hash (&rmd320_desc);
+#endif
 #ifdef LTC_WHIRLPOOL
   register_hash (&whirlpool_desc);
+#endif
+#ifdef LTC_BLAKE2S
+  register_hash (&blake2s_128_desc);
+  register_hash (&blake2s_160_desc);
+  register_hash (&blake2s_224_desc);
+  register_hash (&blake2s_256_desc);
+#endif
+#ifdef LTC_BLAKE2B
+  register_hash (&blake2b_160_desc);
+  register_hash (&blake2b_256_desc);
+  register_hash (&blake2b_384_desc);
+  register_hash (&blake2b_512_desc);
 #endif
 #ifdef LTC_CHC_HASH
   register_hash(&chc_desc);
@@ -114,6 +145,6 @@ void register_algs(void)
 
 }
 
-/* $Source: /cvs/libtom/libtomcrypt/demos/hashsum.c,v $ */
-/* $Revision: 1.5 $ */
-/* $Date: 2007/05/12 14:32:35 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

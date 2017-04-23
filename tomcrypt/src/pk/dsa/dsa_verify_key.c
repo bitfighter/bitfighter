@@ -89,12 +89,12 @@ int dsa_verify_key(dsa_key *key, int *stat)
    /* at this point we are out of tests ;-( */
    err   = CRYPT_OK;
    *stat = 1;
-error: 
+error:
    mp_clear_multi(tmp, tmp2, NULL);
    return err;
 }
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/pk/dsa/dsa_verify_key.c,v $ */
-/* $Revision: 1.8 $ */
-/* $Date: 2007/05/12 14:32:35 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

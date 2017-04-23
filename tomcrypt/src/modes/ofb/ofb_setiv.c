@@ -44,9 +44,9 @@ int ofb_setiv(const unsigned char *IV, unsigned long len, symmetric_OFB *ofb)
    return cipher_descriptor[ofb->cipher].ecb_encrypt(IV, ofb->IV, &ofb->key);
 }
 
-#endif 
+#endif
 
 
-/* $Source: /cvs/libtom/libtomcrypt/src/modes/ofb/ofb_setiv.c,v $ */
-/* $Revision: 1.7 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */
