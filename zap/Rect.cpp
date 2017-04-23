@@ -66,6 +66,8 @@ Rect::Rect(const Rect *r)
 Rect::Rect(const Vector<Point> &p)
 {
    // p can never be NULL --> in fact, it can!
+   TNLAssert(&p != NULL, "If this trips, something is messed up because a reference should NEVER by null in C++; please document or fix!");
+
    if(&p != NULL)
       set(p);
 }
