@@ -23,7 +23,6 @@ namespace Zap
 
 class Color
 {
-
 public:
    float r, g, b;
 
