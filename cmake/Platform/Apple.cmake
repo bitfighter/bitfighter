@@ -29,27 +29,20 @@ if(NOT XCOMPILE)
 
 
 	# Make sure the compiling architecture is set
-	if(OSX_DEPLOY_TARGET VERSION_LESS "10.4")
-		message(FATAL_ERROR "Bitfighter cannot be compiled on OSX earlier than 10.4")
+	if(OSX_DEPLOY_TARGET VERSION_LESS "10.5")
+		message(FATAL_ERROR "Bitfighter cannot be compiled on OSX earlier than 10.5")
 	elseif(OSX_DEPLOY_TARGET VERSION_LESS "10.6")
-		if(NOT CMAKE_OSX_ARCHITECTURES)
-			message(FATAL_ERROR "You must set CMAKE_OSX_ARCHITECTURES to either 'ppc' or 'i386'")
-		endif()
+		set(CMAKE_OSX_ARCHITECTURES "i386")
 	else()
 		set(CMAKE_OSX_ARCHITECTURES "x86_64")
 	endif()
 
 
-	# Set the proper SDK for compiling - we deploy to 10.4 for i386, ppc
-	# but will use 10.6 to compile i386 and 10.5 to compile ppc.  Internally, they should add
-	# the flag -mmacosx-version-min=10.4 and will be compatible with that OS version
-	if(OSX_DEPLOY_TARGET VERSION_EQUAL "10.4")
-		# We will use the 10.5 SDK for ppc because it is friendlier to certain libraries (like LuaJIT)
-		if(CMAKE_OSX_ARCHITECTURES STREQUAL "ppc")
-			set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.5.sdk/")
-		else()
-			set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk/")
-		endif()
+	# Set the proper SDK for compiling - we deploy to 10.5 for i386
+	# but will use 10.6 SDK to compile it.  Internally, it should add
+	# the flag -mmacosx-version-min=10.5 and will be compatible with that OS version
+	if(OSX_DEPLOY_TARGET VERSION_EQUAL "10.5")
+		set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk/")
 
 	# Here we use whatever the default SDK is for x86_64, but will deploy to OSX 10.6
 	elseif(OSX_DEPLOY_TARGET VERSION_LESS "10.7")
@@ -80,15 +73,15 @@ if(CMAKE_COMPILER_IS_GNUCC)
 endif()
 
 		
-if(OSX_DEPLOY_TARGET VERSION_EQUAL "10.4")
-	# OSX 10.4 doesn't have execinfo.h for the StackTracer
-	add_definitions(-DBF_NO_STACKTRACE)
-endif()
+#if(OSX_DEPLOY_TARGET VERSION_EQUAL "10.4")
+#	# OSX 10.4 doesn't have execinfo.h for the StackTracer
+#	add_definitions(-DBF_NO_STACKTRACE)
+#endif()
 
 
 # OSX 10.8 and greater need this to find some dependencies
 if(OSX_DEPLOY_TARGET VERSION_GREATER "10.7")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -std=gnu++11")
 endif()
 
 
@@ -211,18 +204,15 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	set(COPY_RES_1 cp -rp ${OSX_BUILD_RESOURCE_DIR}/Bitfighter.icns ${resourcesDir})
 	# Public key for Sparkle
 	set(COPY_RES_2 cp -rp ${OSX_BUILD_RESOURCE_DIR}/dsa_pub.pem ${resourcesDir})
-	# Joystick presets
-	set(COPY_RES_3 cp -rp ${exeDir}/joystick_presets.ini ${resourcesDir})
 	# Notifier
-	set(COPY_RES_4 cp -rp ${exeDir}/../notifier/bitfighter_notifier.py ${resourcesDir})
-	set(COPY_RES_5 cp -rp ${exeDir}/../notifier/redship18.png ${resourcesDir})
+	set(COPY_RES_3 cp -rp ${exeDir}/../notifier/bitfighter_notifier.py ${resourcesDir})
+	set(COPY_RES_4 cp -rp ${exeDir}/../notifier/redship18.png ${resourcesDir})
 	
 	add_custom_command(TARGET ${targetName} POST_BUILD 
 		COMMAND ${COPY_RES_1}
 		COMMAND ${COPY_RES_2}
 		COMMAND ${COPY_RES_3}
 		COMMAND ${COPY_RES_4}
-		COMMAND ${COPY_RES_5}
 	)
 	
 	# 64-bit OSX needs to use shared LuaJIT library
@@ -250,10 +240,14 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	endif()
 	
 	set(THIN_FRAMEWORKS ${CMAKE_SOURCE_DIR}/build/osx/tools/thin_frameworks.sh ${LIPO_COMMAND} ${CMAKE_OSX_ARCHITECTURES} ${exeDir}/${targetName}.app)
+	set(DO_RPATH_THING ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/../Frameworks/" ${exeDir}/${targetName}.app/Contents/MacOS/${targetName})
 	
 	add_custom_command(TARGET ${targetName} POST_BUILD
 		COMMAND ${THIN_FRAMEWORKS}
+		COMMAND ${DO_RPATH_THING}
 	)
+add_custom_command(TARGET executable 
+    POST_BUILD COMMAND )
 endfunction()
 
 
@@ -271,9 +265,7 @@ function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	set(CPACK_GENERATOR "DragNDrop")
 	set(CPACK_SYSTEM_NAME "OSX")
 	
-	if(CMAKE_OSX_ARCHITECTURES STREQUAL "ppc")
-		set(DMG_ARCH "32bit-PowerPC")
-	elseif(CMAKE_OSX_ARCHITECTURES STREQUAL "i386")
+	if(CMAKE_OSX_ARCHITECTURES STREQUAL "i386")
 		set(DMG_ARCH "32bit-Intel")
 	else()
 		set(DMG_ARCH "64bit-Intel")

@@ -13,7 +13,7 @@
 /**
   @file rsa_free.c
   Free an RSA key, Tom St Denis
-*/  
+*/
 
 #ifdef LTC_MRSA
 
@@ -24,11 +24,11 @@
 void rsa_free(rsa_key *key)
 {
    LTC_ARGCHKVD(key != NULL);
-   mp_clear_multi(key->e, key->d, key->N, key->dQ, key->dP, key->qP, key->p, key->q, NULL);
+   mp_clear_multi(key->q, key->p, key->qP, key->dP, key->dQ, key->N, key->d, key->e, NULL);
 }
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/pk/rsa/rsa_free.c,v $ */
-/* $Revision: 1.10 $ */
-/* $Date: 2007/05/12 14:32:35 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

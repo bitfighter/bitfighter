@@ -88,9 +88,9 @@ int der_decode_ia5_string(const unsigned char *in, unsigned long inlen,
 
    return CRYPT_OK;
 }
- 
+
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/pk/asn1/der/ia5/der_decode_ia5_string.c,v $ */
-/* $Revision: 1.4 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

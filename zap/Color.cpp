@@ -8,6 +8,8 @@
 #include "MathUtils.h"     // For min/max
 #include "stringUtils.h"
 
+#include <cmath>
+
 namespace Zap
 {
 
@@ -140,7 +142,7 @@ Color Color::iniValToColor(const string &s)
    if(s[0] == '#')
       return Color(s.substr(1));
 
-   Color color;
+   Color color(0.0f);
    color.set(s);
 
    return color;

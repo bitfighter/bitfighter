@@ -53,15 +53,15 @@ int eax_encrypt_authenticate_memory(int cipher,
    eax = XMALLOC(sizeof(*eax));
 
    if ((err = eax_init(eax, cipher, key, keylen, nonce, noncelen, header, headerlen)) != CRYPT_OK) {
-      goto LBL_ERR; 
+      goto LBL_ERR;
    }
 
    if ((err = eax_encrypt(eax, pt, ct, ptlen)) != CRYPT_OK) {
-      goto LBL_ERR; 
+      goto LBL_ERR;
    }
- 
+
    if ((err = eax_done(eax, tag, taglen)) != CRYPT_OK) {
-      goto LBL_ERR; 
+      goto LBL_ERR;
    }
 
    err = CRYPT_OK;
@@ -72,11 +72,11 @@ LBL_ERR:
 
    XFREE(eax);
 
-   return err;   
+   return err;
 }
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/encauth/eax/eax_encrypt_authenticate_memory.c,v $ */
-/* $Revision: 1.6 $ */
-/* $Date: 2007/05/12 14:32:35 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

@@ -32,7 +32,7 @@ public:
    template<class T, class U, class V>
       Color(T in_r, U in_g, V in_b) { r = static_cast<F32>(in_r); g = static_cast<F32>(in_g); b = static_cast<F32>(in_b);}
 
-   explicit Color(float grayScale = 1);
+   Color(float grayScale = 1);
    explicit Color(double grayScale);
 
    explicit Color(U32 rgbInt);

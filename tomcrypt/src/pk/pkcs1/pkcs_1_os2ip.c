@@ -10,9 +10,9 @@
  */
 #include "tomcrypt.h"
 
-/** 
+/**
   @file pkcs_1_os2ip.c
-  Octet to Integer OS2IP, Tom St Denis 
+  Octet to Integer OS2IP, Tom St Denis
 */
 #ifdef LTC_PKCS_1
 
@@ -31,6 +31,6 @@ int pkcs_1_os2ip(void *n, unsigned char *in, unsigned long inlen)
 #endif /* LTC_PKCS_1 */
 
 
-/* $Source: /cvs/libtom/libtomcrypt/src/pk/pkcs1/pkcs_1_os2ip.c,v $ */
-/* $Revision: 1.7 $ */
-/* $Date: 2007/05/12 14:32:35 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

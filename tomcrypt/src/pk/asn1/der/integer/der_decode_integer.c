@@ -54,7 +54,7 @@ int der_decode_integer(const unsigned char *in, unsigned long inlen, void *num)
       if (x + z > inlen) {
          return CRYPT_INVALID_PACKET;
       }
-     
+
       /* no so read it */
       if ((err = mp_read_unsigned_bin(num, (unsigned char *)in + x, z)) != CRYPT_OK) {
          return err;
@@ -62,7 +62,7 @@ int der_decode_integer(const unsigned char *in, unsigned long inlen, void *num)
    } else {
       /* long form */
       z &= 0x7F;
-      
+
       /* will number of length bytes overflow? (or > 4) */
       if (((x + z) > inlen) || (z > 4) || (z == 0)) {
          return CRYPT_INVALID_PACKET;
@@ -97,7 +97,7 @@ int der_decode_integer(const unsigned char *in, unsigned long inlen, void *num)
          return CRYPT_MEM;
       }
       mp_clear(tmp);
-   } 
+   }
 
    return CRYPT_OK;
 
@@ -105,6 +105,6 @@ int der_decode_integer(const unsigned char *in, unsigned long inlen, void *num)
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/pk/asn1/der/integer/der_decode_integer.c,v $ */
-/* $Revision: 1.5 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

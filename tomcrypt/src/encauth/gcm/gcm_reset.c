@@ -33,12 +33,12 @@ int gcm_reset(gcm_state *gcm)
    gcm->buflen   = 0;
    gcm->totlen   = 0;
    gcm->pttotlen = 0;
-  
+
    return CRYPT_OK;
 }
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/encauth/gcm/gcm_reset.c,v $ */
-/* $Revision: 1.6 $ */
-/* $Date: 2007/05/12 14:32:35 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */
