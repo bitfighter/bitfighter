@@ -34,7 +34,6 @@
 
 #include "Colors.h"
 
-#include <cmath>
 
 namespace Zap
 {
