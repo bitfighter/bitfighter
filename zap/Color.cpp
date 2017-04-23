@@ -142,7 +142,7 @@ Color Color::iniValToColor(const string &s)
    if(s[0] == '#')
       return Color(s.substr(1));
 
-   Color color(0.0);
+   Color color;
    color.set(s);
 
    return color;
