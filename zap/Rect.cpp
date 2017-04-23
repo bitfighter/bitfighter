@@ -3,11 +3,11 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "tnlVector.h"
 #include "Rect.h"
 #include "GeomUtils.h"
 #include "MathUtils.h"
 
+#include "tnlVector.h"
 
 namespace Zap
 {
