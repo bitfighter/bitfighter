@@ -33,10 +33,10 @@ int f8_done(symmetric_F8 *f8)
    return CRYPT_OK;
 }
 
-   
+
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/modes/f8/f8_done.c,v $ */
-/* $Revision: 1.3 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

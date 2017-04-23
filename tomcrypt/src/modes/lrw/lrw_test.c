@@ -105,7 +105,7 @@ int lrw_test(void)
      }
 
      /* process block */
-     if ((err = lrw_setiv(tests[x].IV, 16, &lrw)) != CRYPT_OK) { 
+     if ((err = lrw_setiv(tests[x].IV, 16, &lrw)) != CRYPT_OK) {
         lrw_done(&lrw);
         return err;
      }
@@ -122,8 +122,8 @@ int lrw_test(void)
      if ((err = lrw_done(&lrw)) != CRYPT_OK) {
         return err;
      }
-   }
-   return CRYPT_OK;
+  }
+  return CRYPT_OK;
 #endif
 }
 
@@ -131,6 +131,6 @@ int lrw_test(void)
 
 
 
-/* $Source: /cvs/libtom/libtomcrypt/src/modes/lrw/lrw_test.c,v $ */
-/* $Revision: 1.12 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

@@ -37,7 +37,7 @@ int der_encode_printable_string(const unsigned char *in, unsigned long inlen,
 
    /* get the size */
    if ((err = der_length_printable_string(in, inlen, &len)) != CRYPT_OK) {
-      return err; 
+      return err;
    }
 
    /* too big? */
@@ -80,6 +80,6 @@ int der_encode_printable_string(const unsigned char *in, unsigned long inlen,
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/pk/asn1/der/printable_string/der_encode_printable_string.c,v $ */
-/* $Revision: 1.5 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

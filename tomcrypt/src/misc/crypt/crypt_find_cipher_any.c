@@ -16,7 +16,7 @@
 */
 
 /**
-   Find a cipher flexibly.  First by name then if not present by block and key size 
+   Find a cipher flexibly.  First by name then if not present by block and key size
    @param name        The name of the cipher desired
    @param blocklen    The minimum length of the block cipher desired (octets)
    @param keylen      The minimum length of the key size desired (octets)
@@ -45,6 +45,6 @@ int find_cipher_any(const char *name, int blocklen, int keylen)
    return -1;
 }
 
-/* $Source: /cvs/libtom/libtomcrypt/src/misc/crypt/crypt_find_cipher_any.c,v $ */
-/* $Revision: 1.6 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

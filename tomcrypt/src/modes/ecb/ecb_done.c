@@ -33,10 +33,10 @@ int ecb_done(symmetric_ECB *ecb)
    return CRYPT_OK;
 }
 
-   
+
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/modes/ecb/ecb_done.c,v $ */
-/* $Revision: 1.8 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

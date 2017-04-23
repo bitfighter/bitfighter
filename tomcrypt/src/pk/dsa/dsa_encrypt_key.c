@@ -13,7 +13,7 @@
 /**
   @file dsa_encrypt_key.c
   DSA Crypto, Tom St Denis
-*/  
+*/
 
 #ifdef LTC_MDSA
 
@@ -24,20 +24,20 @@
   @param out        [out] The destination for the ciphertext
   @param outlen     [in/out] The max size and resulting size of the ciphertext
   @param prng       An active PRNG state
-  @param wprng      The index of the PRNG you wish to use 
-  @param hash       The index of the hash you want to use 
+  @param wprng      The index of the PRNG you wish to use
+  @param hash       The index of the hash you want to use
   @param key        The DSA key you want to encrypt to
   @return CRYPT_OK if successful
 */
 int dsa_encrypt_key(const unsigned char *in,   unsigned long inlen,
-                          unsigned char *out,  unsigned long *outlen, 
-                          prng_state *prng, int wprng, int hash, 
+                          unsigned char *out,  unsigned long *outlen,
+                          prng_state *prng, int wprng, int hash,
                           dsa_key *key)
 {
     unsigned char *expt, *skey;
     void          *g_pub, *g_priv;
     unsigned long  x, y;
-    int            err;
+    int            err, qbits;
 
     LTC_ARGCHK(in      != NULL);
     LTC_ARGCHK(out     != NULL);
@@ -61,7 +61,7 @@ int dsa_encrypt_key(const unsigned char *in,   unsigned long inlen,
     if ((err = mp_init_multi(&g_pub, &g_priv, NULL)) != CRYPT_OK) {
        return err;
     }
-   
+
     expt       = XMALLOC(mp_unsigned_bin_size(key->p) + 1);
     skey       = XMALLOC(MAXBLOCKSIZE);
     if (expt == NULL  || skey == NULL) {
@@ -74,24 +74,21 @@ int dsa_encrypt_key(const unsigned char *in,   unsigned long inlen,
        mp_clear_multi(g_pub, g_priv, NULL);
        return CRYPT_MEM;
     }
-    
-    /* make a random x, g^x pair */
-    x = mp_unsigned_bin_size(key->q);
-    if (prng_descriptor[wprng].read(expt, x, prng) != x) {
-       err = CRYPT_ERROR_READPRNG;
-       goto LBL_ERR;
-    }
-    
-    /* load x */
-    if ((err = mp_read_unsigned_bin(g_priv, expt, x)) != CRYPT_OK) {
-       goto LBL_ERR;
-    }
-    
+
+    /* make a random g_priv, g_pub = g^x pair */
+    qbits = mp_count_bits(key->q);
+    do {
+      if ((err = rand_bn_bits(g_priv, qbits, prng, wprng)) != CRYPT_OK) {
+        goto LBL_ERR;
+      }
+      /* private key x should be from range: 1 <= x <= q-1 (see FIPS 186-4 B.1.2) */
+    } while (mp_cmp_d(g_priv, 0) != LTC_MP_GT || mp_cmp(g_priv, key->q) != LTC_MP_LT);
+
     /* compute y */
     if ((err = mp_exptmod(key->g, g_priv, key->p, g_pub)) != CRYPT_OK) {
        goto LBL_ERR;
     }
-    
+
     /* make random key */
     x        = mp_unsigned_bin_size(key->p) + 1;
     if ((err = dsa_shared_secret(g_priv, key->y, key, expt, &x)) != CRYPT_OK) {
@@ -102,7 +99,7 @@ int dsa_encrypt_key(const unsigned char *in,   unsigned long inlen,
     if ((err = hash_memory(hash, expt, x, skey, &y)) != CRYPT_OK) {
        goto LBL_ERR;
     }
-    
+
     /* Encrypt key */
     for (x = 0; x < inlen; x++) {
       skey[x] ^= in[x];
@@ -123,13 +120,13 @@ LBL_ERR:
 
     XFREE(skey);
     XFREE(expt);
-    
+
     mp_clear_multi(g_pub, g_priv, NULL);
     return err;
 }
 
 #endif
-/* $Source: /cvs/libtom/libtomcrypt/src/pk/dsa/dsa_encrypt_key.c,v $ */
-/* $Revision: 1.9 $ */
-/* $Date: 2007/05/12 14:32:35 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */
 

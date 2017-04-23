@@ -61,7 +61,7 @@ int store_test(void)
 
      /* now XOR it word for word */
      for (x = 0; x < y; x += sizeof(LTC_FAST_TYPE)) {
-        *((LTC_FAST_TYPE*)(&buf[3*y+z+x])) = *((LTC_FAST_TYPE*)(&buf[z+x])) ^ *((LTC_FAST_TYPE*)(&buf[z+y+x]));
+        *(LTC_FAST_TYPE_PTR_CAST(&buf[3*y+z+x])) = *(LTC_FAST_TYPE_PTR_CAST(&buf[z+x])) ^ *(LTC_FAST_TYPE_PTR_CAST(&buf[z+y+x]));
      }
 
      if (memcmp(&buf[2*y+z], &buf[3*y+z], y)) {
@@ -73,6 +73,6 @@ int store_test(void)
   return 0;
 }
 
-/* $Source: /cvs/libtom/libtomcrypt/testprof/store_test.c,v $ */
-/* $Revision: 1.6 $ */
-/* $Date: 2005/05/05 14:35:59 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

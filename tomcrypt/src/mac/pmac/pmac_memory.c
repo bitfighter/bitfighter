@@ -10,9 +10,9 @@
  */
 #include "tomcrypt.h"
 
-/** 
+/**
    @file pmac_memory.c
-   PMAC implementation, process a block of memory, by Tom St Denis 
+   PMAC implementation, process a block of memory, by Tom St Denis
 */
 
 #ifdef LTC_PMAC
@@ -28,7 +28,7 @@
    @param outlen   [in/out] The max size and resulting size of the authentication tag
    @return CRYPT_OK if successful
 */
-int pmac_memory(int cipher, 
+int pmac_memory(int cipher,
                 const unsigned char *key, unsigned long keylen,
                 const unsigned char *in, unsigned long inlen,
                       unsigned char *out, unsigned long *outlen)
@@ -46,7 +46,7 @@ int pmac_memory(int cipher,
    if (pmac == NULL) {
       return CRYPT_MEM;
    }
-   
+
    if ((err = pmac_init(pmac, cipher, key, keylen)) != CRYPT_OK) {
       goto LBL_ERR;
    }
@@ -64,11 +64,11 @@ LBL_ERR:
 #endif
 
    XFREE(pmac);
-   return err;   
+   return err;
 }
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/mac/pmac/pmac_memory.c,v $ */
-/* $Revision: 1.6 $ */
-/* $Date: 2006/12/28 01:27:23 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

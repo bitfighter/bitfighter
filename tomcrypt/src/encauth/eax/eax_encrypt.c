@@ -11,7 +11,7 @@
 
 /**
    @file eax_encrypt.c
-   EAX implementation, encrypt block by Tom St Denis 
+   EAX implementation, encrypt block by Tom St Denis
 */
 #include "tomcrypt.h"
 
@@ -25,11 +25,11 @@
    @param length     The length of the plaintext (octets)
    @return CRYPT_OK if successful
 */
-int eax_encrypt(eax_state *eax, const unsigned char *pt, unsigned char *ct, 
+int eax_encrypt(eax_state *eax, const unsigned char *pt, unsigned char *ct,
                 unsigned long length)
 {
    int err;
-   
+
    LTC_ARGCHK(eax != NULL);
    LTC_ARGCHK(pt  != NULL);
    LTC_ARGCHK(ct  != NULL);
@@ -46,6 +46,6 @@ int eax_encrypt(eax_state *eax, const unsigned char *pt, unsigned char *ct,
 #endif
 
 
-/* $Source: /cvs/libtom/libtomcrypt/src/encauth/eax/eax_encrypt.c,v $ */
-/* $Revision: 1.6 $ */
-/* $Date: 2007/05/12 14:32:35 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

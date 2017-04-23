@@ -26,10 +26,10 @@
   @return CRYPT_OK if successful
 */
 int der_encode_short_integer(unsigned long num, unsigned char *out, unsigned long *outlen)
-{  
+{
    unsigned long len, x, y, z;
    int           err;
-   
+
    LTC_ARGCHK(out    != NULL);
    LTC_ARGCHK(outlen != NULL);
 
@@ -86,12 +86,12 @@ int der_encode_short_integer(unsigned long num, unsigned char *out, unsigned lon
 
    /* we good */
    *outlen = x;
- 
+
    return CRYPT_OK;
 }
 
 #endif
 
-/* $Source: /cvs/libtom/libtomcrypt/src/pk/asn1/der/short_integer/der_encode_short_integer.c,v $ */
-/* $Revision: 1.8 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */

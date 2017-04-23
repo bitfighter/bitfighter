@@ -16,7 +16,7 @@
   Convert error codes to ASCII strings, Tom St Denis
 */
 
-static const char *err_2_str[] =
+static const char * const err_2_str[] =
 {
    "CRYPT_OK",
    "CRYPT_ERROR",
@@ -45,13 +45,19 @@ static const char *err_2_str[] =
    "File Not Found",
 
    "Invalid PK type.",
-   "Invalid PK system.",
-   "Duplicate PK key found on keyring.",
-   "Key not found in keyring.",
+
+   "An overflow of a value was detected/prevented.",
+
+   "UNUSED1.",
+   "UNUSED2.",
+
    "Invalid sized parameter.",
 
    "Invalid size for prime.",
 
+   "Invalid padding.",
+
+   "Hash applied to too many bits.",
 };
 
 /**
@@ -65,10 +71,10 @@ const char *error_to_string(int err)
       return "Invalid error code.";
    } else {
       return err_2_str[err];
-   }   
+   }
 }
 
 
-/* $Source: /cvs/libtom/libtomcrypt/src/misc/error_to_string.c,v $ */
-/* $Revision: 1.5 $ */
-/* $Date: 2006/12/28 01:27:24 $ */
+/* $Source$ */
+/* $Revision$ */
+/* $Date$ */
