@@ -78,6 +78,13 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/pk/asn1/der/boolean/der_length_boolean.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/pk/asn1/der/bit/der_decode_bit_string.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/pk/asn1/der/bit/der_encode_bit_string.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/pk/asn1/der/bit/der_length_bit_string.c
+${CMAKE_CURRENT_SOURCE_DIR}/src/pk/asn1/der/bit/der_decode_raw_bit_string.c
+${CMAKE_CURRENT_SOURCE_DIR}/src/pk/asn1/der/bit/der_encode_raw_bit_string.c
+${CMAKE_CURRENT_SOURCE_DIR}/src/pk/asn1/der/teletex_string/der_decode_teletex_string.c
+${CMAKE_CURRENT_SOURCE_DIR}/src/pk/asn1/der/teletex_string/der_length_teletex_string.c
+${CMAKE_CURRENT_SOURCE_DIR}/src/pk/asn1/der/generalizedtime/der_decode_generalizedtime.c
+${CMAKE_CURRENT_SOURCE_DIR}/src/pk/asn1/der/generalizedtime/der_encode_generalizedtime.c
+${CMAKE_CURRENT_SOURCE_DIR}/src/pk/asn1/der/generalizedtime/der_length_generalizedtime.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/pk/asn1/der/set/der_encode_set.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/pk/asn1/der/set/der_encode_setof.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/pk/asn1/der/octet/der_length_octet_string.c
