@@ -78,6 +78,6 @@ public:
    inline bool operator!=(const Color &col) const { return r != col.r || g != col.g || b != col.b; }
 };
 
-};	// namespace
+}	// namespace
 
 #endif // _COLOR_H_
