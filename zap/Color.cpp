@@ -6,6 +6,9 @@
 #include "Color.h"
 #include "stringUtils.h"
 
+#include <cmath>
+
+
 namespace Zap
 {
 
