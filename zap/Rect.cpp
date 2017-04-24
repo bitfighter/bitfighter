@@ -7,6 +7,8 @@
 #include "GeomUtils.h"
 #include "MathUtils.h"
 
+#include <math.h> 
+
 #include "tnlVector.h"
 
 namespace Zap
