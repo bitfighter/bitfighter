@@ -1,0 +1,17 @@
+language: cpp
+os:
+  - linux
+  - osx
+dist: trusty
+sudo: required
+install:
+  - bash ./travis-install-dependencies.sh
+script: 
+  - cd build
+  - cmake -DCMAKE_BUILD_TYPE=Debug -DMASTER_MINIMAL=1 .. 
+  - >
+    if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+      make Bitfighter
+    else
+      make bitfighter
+    fi
