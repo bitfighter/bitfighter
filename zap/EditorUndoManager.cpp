@@ -73,9 +73,9 @@ void EditorUndoManager::saveAction(EditorAction action, const BfObject *bfObject
    if(!mInTransaction)
       fixupActionList();
 
-   if(action == Editor::ActionCreate)
+   if(action == ActionCreate)
       actionList->push_back(new EditorWorkUnitCreate(mLevel, mEditor, bfObject)); 
-   else if(action == Editor::ActionDelete)
+   else if(action == ActionDelete)
       actionList->push_back(new EditorWorkUnitDelete(mLevel, mEditor, bfObject));
    else 
       TNLAssert(false, "Action not implemented!");
@@ -92,15 +92,15 @@ void EditorUndoManager::saveAction(EditorAction action, const BfObject *origObje
    if(!mInTransaction)
       fixupActionList();
 
-   if(action == Editor::ActionChange)
+   if(action == ActionChange)
    {
       if(mInMergeAction)
       {
          mInMergeAction = false;
-         actionList->push_back(new Editor::EditorWorkUnitCreate(mLevel, mEditor, changedObject));
+         actionList->push_back(new EditorWorkUnitCreate(mLevel, mEditor, changedObject));
       }
       else
-         actionList->push_back(new Editor::EditorWorkUnitChange(mLevel, mEditor, origObject, changedObject));
+         actionList->push_back(new EditorWorkUnitChange(mLevel, mEditor, origObject, changedObject));
 
    }
    else
