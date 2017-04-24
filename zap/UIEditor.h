@@ -321,8 +321,8 @@ public:
    void setLevelGenScriptName(string name);
 
    string getLevelFileName();
-   void cleanUp();
-   void loadLevel();
+   void cleanUp(bool isReload);
+   void loadLevel(bool isReload);
    U32 mAllUndoneUndoLevel;   // What undo level reflects everything back just the
 
    void saveUndoState(bool forceSelection = false);     // Save the current state of the editor objects for later undoing
@@ -457,6 +457,7 @@ public:
 
    S32 checkCornersForSnap(const Point &clickPoint,  const Vector<DatabaseObject *> *edges, F32 &minDist, Point &snapPoint);
 
+   void deleteAllItems();
    void deleteItem(S32 itemIndex, bool batchMode = false);
 
    // Helpers for doing batch deletes

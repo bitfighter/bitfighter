@@ -192,7 +192,7 @@ void EditorUserInterface::setDatabase(boost::shared_ptr<GridDatabase> database)
 // Really quitting... no going back!
 void EditorUserInterface::onQuitted()
 {
-   cleanUp();
+   cleanUp(false);
    getGame()->clearAddTarget();
 }
 
@@ -547,13 +547,15 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 }
 
 
-void EditorUserInterface::cleanUp()
+void EditorUserInterface::cleanUp(bool isReload)
 {
    ClientGame *game = getGame();
 
    game->resetRatings();
 
-   clearUndoHistory();     // Clear up a little memory
+   if(!isReload)
+      clearUndoHistory();  // Clear up a little memory, but don't blow away our history if this is a reload
+
    mDockItems.clear();     // Free a little more -- dock will be rebuilt when editor restarts
    
    mLoadTarget = getDatabase();
@@ -569,6 +571,8 @@ void EditorUserInterface::cleanUp()
    clearLevelGenItems();
    mGameTypeArgs.clear();
 
+   mHitItem = NULL;
+
    game->resetLevelInfo();
 
    if(game->getGameType())
@@ -577,14 +581,14 @@ void EditorUserInterface::cleanUp()
 
 
 // Loads a level
-void EditorUserInterface::loadLevel()
+void EditorUserInterface::loadLevel(bool isReload)
 {
    string filename = getLevelFileName();
    TNLAssert(filename != "", "Need file name here!");
 
    ClientGame *game = getGame();
 
-   cleanUp();
+   cleanUp(isReload);
 
    FolderManager *folderManager = game->getSettings()->getFolderManager();
    string fileName = joindir(folderManager->levelDir, filename).c_str();
@@ -619,11 +623,14 @@ void EditorUserInterface::loadLevel()
    //   game->getConnectionToMaster()->c2mRequestLevelRating(getLevelDatabaseId());
    //}
 
-   clearUndoHistory();                 // Clean out undo/redo buffers
    clearSelection(mLoadTarget);        // Nothing starts selected
    setNeedToSave(false);               // Why save when we just loaded?
+
    mAllUndoneUndoLevel = mLastUndoIndex;
-   populateDock();                     // Add game-specific items to the dock
+
+   // Add game-specific items to the dock.
+   // We'll want to do this even if isReload is true because the GameType might have changed.
+   populateDock();
 
    // Bulk-process new items, walls first
    mLoadTarget->getWallSegmentManager()->recomputeAllWallGeometry(mLoadTarget);
@@ -1291,7 +1298,7 @@ void EditorUserInterface::onActivate()
 
    onActivateReactivate();
 
-   loadLevel();
+   loadLevel(false);
    setCurrentTeam(0);
 
    mSnapContext = FULL_SNAPPING;      // Hold [space/shift+space] to temporarily disable snapping
@@ -3701,6 +3708,23 @@ BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, S32 firstItemIn
 }
 
 
+void EditorUserInterface::deleteAllItems()
+{
+   //const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   saveUndoState();
+
+   //if(objList->size() == 0)
+   //   return;
+
+   //mHitItem = NULL;
+
+   //for(S32 i = objList->size() - 1; i >= 0; i--)  // Reverse to avoid having to have i-- in middle of loop
+   //   deleteItem(i, true);
+
+   //doneDeleting();
+}
+
+
 void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
 {
    GridDatabase *database = getDatabase();
@@ -3983,8 +4007,12 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       openConsole(NULL);
 	   else if(inputString == getEditorBindingString(settings, BINDING_RELOAD_LEVEL))        // Reload level
    {
-      loadLevel();                        
-      setSaveMessage("Reloaded " + getLevelFileName(), true);
+      deleteAllItems();
+      loadLevel(true);                        
+
+      string undoBinding = getEditorBindingString(settings, BINDING_UNDO_ACTION);
+
+      setSaveMessage("Reloaded " + getLevelFileName() + "        [" + undoBinding + "] to undo)", true);
    }
 	   else if(inputString == getEditorBindingString(settings, BINDING_REDO_ACTION))         // Redo
    {
