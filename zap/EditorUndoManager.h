@@ -70,8 +70,8 @@ public:
    void startTransaction();
    void endTransaction(ChangeIdentifier ident = ChangeIdNone);
    void rollbackTransaction();
-   bool inTransaction();
-   bool noMoreCanDoRedo();
+   bool inTransaction() const;
+   bool noMoreCanDoRedo() const;
 
    void discardAction();
 
@@ -79,8 +79,8 @@ public:
    void levelSaved();
    bool needToSave() const;
 
-   bool undoAvailable();
-   bool redoAvailable();
+   bool undoAvailable() const;
+   bool redoAvailable() const;
 };
 
 

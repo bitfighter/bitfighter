@@ -4,9 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "EditorUndoManager.h"
-
 #include "BfObject.h"
-
 
 
 namespace Zap { namespace Editor 
@@ -172,7 +170,7 @@ void EditorUndoManager::clearAll()
 }
 
 
-bool EditorUndoManager::noMoreCanDoRedo()
+bool EditorUndoManager::noMoreCanDoRedo() const
 {
    return mUndoLevel == mActions.size();
 }
@@ -205,13 +203,13 @@ void EditorUndoManager::redo()
 }
 
 
-bool EditorUndoManager::undoAvailable()
+bool EditorUndoManager::undoAvailable() const
 {
    return mUndoLevel > 0;
 }
 
 
-bool EditorUndoManager::redoAvailable()
+bool EditorUndoManager::redoAvailable() const
 {
    return mUndoLevel <= mActions.size();
 }
@@ -292,7 +290,7 @@ void EditorUndoManager::rollbackTransaction()
 }
 
 
-bool EditorUndoManager::inTransaction()
+bool EditorUndoManager::inTransaction() const
 {
    return mInTransaction;
 }
