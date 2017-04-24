@@ -790,6 +790,10 @@ F32 EngineeredItem::getHealth() const
 Rect EngineeredItem::calcExtents() const
 {
    const Vector<Point> *p = getCollisionPoly();
+   
+   if (p == NULL)
+      return Rect();
+
    return Rect(*p);
 }
 
