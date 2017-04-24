@@ -7,9 +7,12 @@
 #include "GeomUtils.h"
 #include "MathUtils.h"
 
-#include <math.h> 
-
 #include "tnlVector.h"
+
+#ifndef WIN32
+#  include <math.h>
+#endif
+
 
 namespace Zap
 {
