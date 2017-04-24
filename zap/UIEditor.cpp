@@ -3708,23 +3708,6 @@ BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, S32 firstItemIn
 }
 
 
-void EditorUserInterface::deleteAllItems()
-{
-   //const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
-   saveUndoState();
-
-   //if(objList->size() == 0)
-   //   return;
-
-   //mHitItem = NULL;
-
-   //for(S32 i = objList->size() - 1; i >= 0; i--)  // Reverse to avoid having to have i-- in middle of loop
-   //   deleteItem(i, true);
-
-   //doneDeleting();
-}
-
-
 void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
 {
    GridDatabase *database = getDatabase();
@@ -4007,11 +3990,10 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       openConsole(NULL);
 	   else if(inputString == getEditorBindingString(settings, BINDING_RELOAD_LEVEL))        // Reload level
    {
-      deleteAllItems();
+      saveUndoState();
       loadLevel(true);                        
 
       string undoBinding = getEditorBindingString(settings, BINDING_UNDO_ACTION);
-
       setSaveMessage("Reloaded " + getLevelFileName() + "        [" + undoBinding + "] to undo)", true);
    }
 	   else if(inputString == getEditorBindingString(settings, BINDING_REDO_ACTION))         // Redo

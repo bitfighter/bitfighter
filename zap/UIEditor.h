@@ -457,7 +457,6 @@ public:
 
    S32 checkCornersForSnap(const Point &clickPoint,  const Vector<DatabaseObject *> *edges, F32 &minDist, Point &snapPoint);
 
-   void deleteAllItems();
    void deleteItem(S32 itemIndex, bool batchMode = false);
 
    // Helpers for doing batch deletes
