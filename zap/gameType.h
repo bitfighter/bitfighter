@@ -358,7 +358,7 @@ public:
    void makeRequestedLoadoutActiveIfShipIsInLoadoutZone(ClientInfo *clientInfo, const LoadoutTracker &loadout);
    void updateShipLoadout(BfObject *shipObject); // called from LoadoutZone when a Ship touches the zone
 
-   bool makeSureTeamCountIsNotZero();                 // Zero teams can cause crashiness
+   const Color &getTeamHealthBarColor(const BfObject *obj) const;      // Get the color of a ship's health bar
 
    virtual const Color *getTeamColor(const BfObject *object) const; // Get the color of a team, based on object
            const Color *getTeamColor(S32 team)               const; // Get the color of a team, based on index
@@ -378,6 +378,7 @@ public:
    virtual void shipTouchZone(Ship *ship, GoalZone *zone);
 
    void queryItemsOfInterest();
+   bool makeSureTeamCountIsNotZero();
    void performScopeQuery(GhostConnection *connection);
    virtual void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
 

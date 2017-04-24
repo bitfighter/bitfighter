@@ -22,6 +22,7 @@
 #include "GeomUtils.h"
 #include "MathUtils.h"           // For sq()
 #include "stringUtils.h"         // For itos()
+#include "gameType.h"
 
 using namespace TNL;
 
@@ -548,6 +549,12 @@ void BfObject::setGeom(lua_State *L, S32 stackIndex)
 const Color *BfObject::getColor() const
 { 
    return mGame->getObjTeamColor(this);
+}
+
+
+const Color &BfObject::getHealthBarColor() const
+{ 
+   return mGame->getGameType()->getTeamHealthBarColor(this);
 }
 
 

@@ -6,9 +6,7 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
-#include "gameLoader.h"          // Parent class
 
-#include "GameTypesEnum.h"
 #include "DismountModesEnum.h"
 #include "ClientInfo.h"          // For ClientClass enum
 
@@ -310,6 +308,7 @@ public:
    const Rect *getWorldExtents() const;
 
    virtual const Color *getTeamColor(S32 teamId) const;
+   const Color *getTeamHealthBarColor(S32 teamId) const;
 
    virtual void setPreviousLevelName(const string &name);
 

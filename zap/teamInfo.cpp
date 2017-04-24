@@ -30,17 +30,25 @@ AbstractTeam::~AbstractTeam()
 }
 
 
-// Overridden in EditorTeam
-void AbstractTeam::setColor(F32 r, F32 g, F32 b)
+const Color &AbstractTeam::getHealthBarColor() const
 {
-   mColor.set(r,g,b);
+   return mHealthBarColor;
 }
 
 
-// Overridden in EditorTeam
+// Overridden in EditorTeam, but that calls this
+void AbstractTeam::setColor(F32 r, F32 g, F32 b)
+{
+   mColor.set(r,g,b);
+
+   mHealthBarColor = mColor;
+   mHealthBarColor.ensureMinimumBrightness();
+}
+
+
 void AbstractTeam::setColor(const Color &color)
 {
-   mColor.set(color);
+   setColor(color.r, color.g, color.b);
 }
 
 
@@ -426,12 +434,21 @@ const Color *TeamManager::getTeamColor(S32 index) const
 {
    if(index == TEAM_NEUTRAL)
       return &Colors::NeutralTeamColor;
-   else if(index == TEAM_HOSTILE)
+   if(index == TEAM_HOSTILE)
       return &Colors::HostileTeamColor;
-   else if((U32)index < (U32)mTeams.size())     // Using U32 lets us handle goofball negative team numbers without explicitly checking for them
+   if((U32)index < (U32)mTeams.size())     // Using U32 lets us handle goofball negative team numbers without explicitly checking for them
       return mTeams[index]->getColor();
-   else
+
       return &Colors::magenta;                  // Use a rare color to let user know an object has an out of range team number
+}
+
+   
+const Color *TeamManager::getTeamHealthBarColor(S32 index) const
+{
+   if(index < 0 || index >= mTeams.size())
+      return getTeamColor(index);
+   
+   return &(mTeams[index]->getHealthBarColor());
 }
 
 

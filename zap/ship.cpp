@@ -2175,6 +2175,7 @@ void Ship::renderLayer(S32 layerIndex)
    const bool engineeringTeleport = clientInfo ? clientInfo->isEngineeringTeleporter() : false;
    const bool showCoordinates     = clientGame->isShowingDebugShipCoords();
 
+   const Color &healthBarColor = clientGame->getGameType()->getTeamHealthBarColor(this);
    // Caclulate rotAmount to add the spinny effect you see when a ship spawns or comes through a teleport
    F32 warpInScale = (WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
 
@@ -2183,13 +2184,14 @@ void Ship::renderLayer(S32 layerIndex)
    const U32 gamesPlayed  = clientInfo ? clientInfo->getGamesPlayed() : 0;
 
    const Color *color = getGame()->getGameType()->getTeamColor(this);
+   const Color &hbc = getGame()->getGameType()->getTeamHealthBarColor(this);
    F32 alpha = getShipVisibility(localShip);
 
    F32 angle = getRenderAngle();
    F32 deltaAngle = getAngleDiff(mLastProcessStateAngle, angle);     // Change in angle since we were last here
 
    renderShip(layerIndex, getRenderPos(), getActualPos(), vel, angle, deltaAngle,
-              mShapeType, color, alpha, clientGame->getCurrentTime(), shipName, warpInScale, 
+              mShapeType, color, hbc, alpha, clientGame->getCurrentTime(), shipName, warpInScale, 
               isLocalShip, isBusy, isAuthenticated, showCoordinates, mHealth, mRadius, getTeam(), 
               boostActive, shieldActive, repairActive, sensorActive, hasArmor, engineeringTeleport, killStreak, 
               gamesPlayed);

@@ -483,7 +483,7 @@ static void renderShipFlame(ShipFlame *flames, S32 flameCount, F32 thrust, F32 a
 }
 
 
-void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
+void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, const Color &hbc, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                 bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
 {
    ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[shapeType];
@@ -512,6 +512,7 @@ void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 
       renderVertexArray(shipShapeInfo->innerHullPieces[i].points, shipShapeInfo->innerHullPieces[i].pointCount, GL_LINE_STRIP);
 
    // Render health bar
+   glColor(hbc, alpha);
    renderHealthBar(health, Point(0,1.5), Point(0,1), 28, 4);
 
    // Grey outer hull drawn last, on top
@@ -841,7 +842,7 @@ static void renderShipName(const string &shipName, bool isAuthenticated, bool is
 
 
 void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
-                F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, F32 alpha, 
+                F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, const Color &hbc, F32 alpha, 
                 U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
                 bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
                 bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
@@ -897,7 +898,7 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
       static F32 thrusts[4];
       calcThrustComponents(vel, angle, deltaAngle, boostActive, thrusts);  
 
-      renderShip(shape, color, alpha, thrusts, health, radius, renderTime,
+      renderShip(shape, color, hbc, alpha, thrusts, health, radius, renderTime,
                  shieldActive, sensorActive, repairActive, hasArmor);
    }
 
@@ -1313,7 +1314,7 @@ void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentSc
 
 
 // Renders turret!  --> note that anchor and normal can't be const &Points because of the point math
-void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate)
+void renderTurret(const Color &c, const Color &hbc, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate)
 {
    static const F32 frontRadius = 15.f;
 
@@ -1379,9 +1380,11 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
    renderVertexArray(vertices2, 4, GL_LINE_LOOP);
 
    // Render health bar
-   glColor(c);
+   glColor(hbc);
 
    renderHealthBar(health, anchor + normal * 7.5, cross, 28, 5);
+
+   glColor(c);
 
    // Render something...
    Point lsegStart = anchor - cross * 14 + normal * 3;
@@ -2379,7 +2382,7 @@ void renderSoccerBall(const Point &pos, F32 size)
 }
 
 
-void renderCore(const Point &pos, const Color *coreColor, U32 time, 
+void renderCore(const Point &pos, const Color *coreColor, const Color &hbc, U32 time, 
                 PanelGeom *panelGeom, F32 panelHealth[], F32 panelStartingHealth)
 {
    // Draw outer polygon and inner circle
@@ -2393,7 +2396,7 @@ void renderCore(const Point &pos, const Color *coreColor, U32 time,
       dir.normalize();
       Point cross(dir.y, -dir.x);
 
-      glColor(coreColor);
+      glColor(hbc);
       renderHealthBar(panelHealth[i] / panelStartingHealth, panelGeom->repair[i], dir, 30, 7);
 
       if(panelHealth[i] == 0)          // Panel is dead

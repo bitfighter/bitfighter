@@ -1985,7 +1985,7 @@ void EditorUserInterface::renderReferenceShip()
       glTranslate(mMousePos);
       glScale(mCurrentScale);
       glRotatef(90, 0, 0, 1);
-      renderShip(ShipShape::Normal, &Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
+      renderShip(ShipShape::Normal, &Colors::red, Colors::red, 1, thrusts, 1, 5, 0, false, false, false, false);
       glRotatef(-90, 0, 0, 1);
 
       // Draw collision circle

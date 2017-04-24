@@ -256,7 +256,9 @@ void UIColorPicker::render()
    glTranslatef(165, F32(y + h / 2), 0);
    glRotatef(-90, 0, 0, 1);
 
-   renderShip(ShipShape::Normal, this, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
+   Color healthBarColor(this);
+   healthBarColor.ensureMinimumBrightness();
+   renderShip(ShipShape::Normal, this, healthBarColor, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
 
    glPopMatrix();
 
@@ -264,7 +266,7 @@ void UIColorPicker::render()
    glPushMatrix();
    glTranslatef(240, F32(y + h / 2), 0);
 
-   renderTurret(*(const Color *)this, Point(0, 15), Point(0, -1), true, 1, 0, 0);
+   renderTurret(*(const Color *)this, healthBarColor, Point(0, 15), Point(0, -1), true, 1, 0, 0);
 
    glPopMatrix();
 }

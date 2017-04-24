@@ -361,6 +361,7 @@ public:
 
    virtual void setPos(const Point &point);
 
+   const Color &getHealthBarColor() const;      // Get object's team's healthbar color
    const Color *getColor() const;      // Get object's team's color
 
    // These methods used to be in EditorObject, but we'll need to know about them as we add

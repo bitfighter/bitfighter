@@ -606,7 +606,7 @@ void InstructionsUserInterface::renderModulesPage() const
       switch(i)
       {
          case 0:     // Boost
-            renderShip(ShipShape::Normal, &Colors::blue, 1, thrustsBoost, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
+            renderShip(ShipShape::Normal, &Colors::blue, Colors::blue, 1, thrustsBoost, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
             {
                F32 vertices[] = {
                      -20, -17,
@@ -625,11 +625,11 @@ void InstructionsUserInterface::renderModulesPage() const
             break;
 
          case 1:     // Shield
-            renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, true, false, false, false);
+            renderShip(ShipShape::Normal, &Colors::blue, Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, true, false, false, false);
             break;
 
          case 2:     // Armor
-            renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, true);
+            renderShip(ShipShape::Normal, &Colors::blue, Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, true);
             break;
 
          case 3:     // Repair
@@ -637,7 +637,7 @@ void InstructionsUserInterface::renderModulesPage() const
                F32 health = (Platform::getRealMilliseconds() & 0x7FF) * 0.0005f;
 
                F32 alpha = 1.0;
-               renderShip(ShipShape::Normal, &Colors::blue, alpha, thrusts, health, (F32)Ship::CollisionRadius, 0, false, false, true, false);
+               renderShip(ShipShape::Normal, &Colors::blue, Colors::blue, alpha, thrusts, health, (F32)Ship::CollisionRadius, 0, false, false, true, false);
             }
             break;
 
@@ -648,7 +648,7 @@ void InstructionsUserInterface::renderModulesPage() const
 
                glPushMatrix();
                   glScale(scale);
-                  renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, Platform::getRealMilliseconds(),
+                  renderShip(ShipShape::Normal, &Colors::blue, Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, Platform::getRealMilliseconds(),
                         false, true, false, false);
                glPopMatrix();
             }
@@ -665,13 +665,13 @@ void InstructionsUserInterface::renderModulesPage() const
                   alpha = frac * 0.001f;
                else
                   alpha = 1 - (frac * 0.001f);
-               renderShip(ShipShape::Normal, &Colors::blue, alpha, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
+               renderShip(ShipShape::Normal, &Colors::blue, Colors::blue, alpha, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
             }
             break;
 
          case 7:     // Engineer
             {
-               renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
+               renderShip(ShipShape::Normal, &Colors::blue, Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
                renderResourceItem(mResourceItemPoints);
             }
             break;
@@ -798,17 +798,17 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
             break;
          case 14:
             x = -65;
-            renderTurret(Colors::blue, Point(x, 10), Point(0, -1), true, 1, 0, 0);
+            renderTurret(Colors::blue, Colors::blue, Point(x, 10), Point(0, -1), true, 1, 0, 0);
             glColor(Colors::white);
             drawStringc(x, 32, auxTextFontSize, "(Regular)");
 
             x = -x;
-            renderTurret(Colors::blue, Point(x, 10), Point(0, -1), true, 1, 0, 1);
+            renderTurret(Colors::blue, Colors::blue, Point(x, 10), Point(0, -1), true, 1, 0, 1);
             glColor(Colors::white);
             drawStringc(x, 32, auxTextFontSize, "(Self-repairing)");
             break;
          case 15:
-            renderTurret(Colors::white, Point(0, 15), Point(0, -1), false, 0, 0);
+            renderTurret(Colors::white, Colors::white, Point(0, 15), Point(0, -1), false, 0, 0);
             break;
 
          case 16:
@@ -910,7 +910,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                glPushMatrix();
                   glTranslate(pos);
                   glScale(.55f);
-                  renderCore(pos, &Colors::blue, time, &panelGeom, health, 1.0f);
+                  renderCore(pos, &Colors::blue, Colors::blue, time, &panelGeom, health, 1.0f);
                glPopMatrix();
             }
             break;

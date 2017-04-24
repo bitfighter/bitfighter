@@ -328,7 +328,10 @@ void CoreItem::renderItem(const Point &pos)
    {
       GameType *gameType = getGame()->getGameType();
       S32 time = gameType->getTotalGamePlayedInMs();
-      renderCore(pos, getColor(), time, getPanelGeom(), mPanelHealth, mStartingPanelHealth);
+      const Color *color = getColor();
+      const Color &hbc = getHealthBarColor();
+      PanelGeom *panelGeom = getPanelGeom();
+      renderCore(pos, color, hbc, time, panelGeom, mPanelHealth, mStartingPanelHealth);
    }
 #endif
 }

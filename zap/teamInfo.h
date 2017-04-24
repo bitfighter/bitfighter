@@ -27,6 +27,7 @@ class AbstractTeam : public RefPtrData
 {
 private:
    Color mColor;
+   Color mHealthBarColor;
 
 protected:
    
@@ -42,6 +43,7 @@ public:
    virtual void setColor(const Color &color);
 
    const Color *getColor() const;
+   const Color &getHealthBarColor() const;
 
    virtual void setName(const char *name) = 0;
    virtual StringTableEntry getName() const = 0;
@@ -147,6 +149,7 @@ private:
 public:
    virtual ~TeamManager();      // Destructor
 
+   const Color* getTeamHealthBarColor(S32 index) const;
    const Color *getTeamColor(S32 index) const;
    S32 getTeamCount();
 

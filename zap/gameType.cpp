@@ -1582,6 +1582,13 @@ const Color *GameType::getTeamColor(S32 teamIndex) const
 }
 
 
+// This method can be overridden by other game types that handle colors differently
+const Color &GameType::getTeamHealthBarColor(const BfObject *obj) const
+{
+   return *mGame->getTeamHealthBarColor(obj->getTeam());
+}
+
+
 // Runs on the server.
 // Adds a new client to the game when a player or bot joins, or when a level cycles.
 // Note that when a new game starts, players will be added in order from

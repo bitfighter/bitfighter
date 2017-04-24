@@ -55,6 +55,7 @@ public:
 
    string toRGBString() const;
    string toHexString() const;
+   void ensureMinimumBrightness();
 
    U32 toU32() const;
 

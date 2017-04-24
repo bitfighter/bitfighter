@@ -2026,7 +2026,7 @@ void Turret::onAddedToGame(Game *theGame)
 
 void Turret::render()
 {
-   renderTurret(*(getColor()), getPos(), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle, mHealRate);
+   renderTurret(*(getColor()), getHealthBarColor(), getPos(), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle, mHealRate);
 }
 
 
@@ -2046,7 +2046,7 @@ void Turret::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, b
       bool enabled = team != TEAM_NEUTRAL;
       F32 health = team == TEAM_NEUTRAL ? 0.0f : 1.0f;
 
-      renderTurret(*(getColor()), getPos(), mAnchorNormal, enabled, health, mCurrentAngle, mHealRate);
+      renderTurret(*(getColor()), getHealthBarColor(), getPos(), mAnchorNormal, enabled, mHealth, mCurrentAngle, mHealRate);
    }
    else
       renderDock();

@@ -109,12 +109,12 @@ extern F32 renderCenteredString(const Point &pos, S32 size, const char *string);
 extern F32 renderCenteredString(const Point &pos, F32 size, const char *string);
 
 // Renders the core ship, good for instructions and such
-extern void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
+extern void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, const Color &hbc, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                        bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
 
 // Renders the ship and all the fixins
 extern void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
-                       F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, F32 alpha, 
+                       F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, const Color &hbc, F32 alpha, 
                        U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
                        bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
                        bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
@@ -134,7 +134,7 @@ extern void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32
 extern void renderTeleporterOutline(const Point &center, F32 radius, const Color &color);
 extern void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentScale = 1);
 extern void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentScale);
-extern void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate = 0);
+extern void renderTurret(const Color &c, const Color &hbc, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate = 0);
 
 extern void renderFlag(const Point &pos, const Color *flagColor);
 extern void renderFlag(const Point &pos, F32 scale, const Color *flagColor);
@@ -239,7 +239,7 @@ void renderResourceItem(const Vector<Point> &points, F32 alpha = 1);
 //void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);
 
 struct PanelGeom;
-void renderCore(const Point &pos, const Color *coreColor, U32 time, 
+void renderCore(const Point &pos, const Color *coreColor, const Color &hbc, U32 time, 
                 PanelGeom *panelGeom, F32 panelHealth[10], F32 panelStartingHealth);
 
 void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width);

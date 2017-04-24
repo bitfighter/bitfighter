@@ -8,23 +8,17 @@
 #include "GameManager.h"
 
 #include "gameType.h"
-#include "config.h"
 #include "masterConnection.h"
-#include "move.h"
 #include "robot.h"
 #include "stringUtils.h"
 #include "SlipZone.h"  
 #include "Teleporter.h"
 #include "ServerGame.h"
 #include "gameNetInterface.h"
-
+#include "gameLoader.h"          // Parent class
 
 #include "md5wrapper.h"
 
-#include <boost/shared_ptr.hpp>
-#include <sys/stat.h>
-#include <cmath>
-#include <fstream>
 #include <sstream>
 
 #include "../master/DatabaseAccessThread.h"
@@ -1281,11 +1275,16 @@ const Color *Game::getTeamColor(S32 teamId) const
 }
 
 
+const Color *Game::getTeamHealthBarColor(S32 teamId) const
+{
+   return mActiveTeamManager->getTeamHealthBarColor(teamId);
+}
+
+
 void Game::setPreviousLevelName(const string &name)
 {
    // Do nothing (but will be overidded in ClientGame)
 }
-
 
 
 void Game::onReadTeamParam(S32 argc, const char **argv)
