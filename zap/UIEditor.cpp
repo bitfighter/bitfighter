@@ -3445,7 +3445,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          if(obj->isLitUp())
             mHitItem = NULL;
 
-         mUndoManager.saveAction(Editor::ActionDelete, obj);
+         mUndoManager.saveAction(ActionDelete, obj);
 
          if(isWallType(obj->getObjectTypeNumber()))
             deletedWall = true;
@@ -3474,7 +3474,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          // Check if item has too few vertices left to be viable
          if(obj->getVertCount() < obj->getMinVertCount())
          {
-            mUndoManager.saveAction(Editor::ActionDelete, origObj);
+            mUndoManager.saveAction(ActionDelete, origObj);
             if(isWallType(obj->getObjectTypeNumber()))
                deletedWall = true;
 
@@ -3482,7 +3482,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          }
          else if(geomChanged)
          {
-            mUndoManager.saveAction(Editor::ActionChange, origObj, obj);
+            mUndoManager.saveAction(ActionChange, origObj, obj);
             obj->onGeomChanged();
          }
 
@@ -3881,7 +3881,7 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
 
    newObject->moveTo(snapPoint(convertCanvasToLevelCoord(mMousePos)));
    addToEditor(newObject);
-   mUndoManager.saveAction(Editor::ActionCreate, newObject);
+   mUndoManager.saveAction(ActionCreate, newObject);
 
    doneAddingObjects(newObject);
 
