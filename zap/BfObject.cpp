@@ -477,7 +477,8 @@ void BfObject::assignNewSerialNumber()
 {
    static S32 mNextSerialNumber = 0;
 
-   mSerialNumber = mNextSerialNumber++;
+   mNextSerialNumber++;
+   mSerialNumber = mNextSerialNumber;
 }
 
 
