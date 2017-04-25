@@ -421,7 +421,7 @@ namespace Zap
       DatabaseObject *obj = findObjBySerialNumber(serialNumber);
       TNLAssert(obj, "Could not find object!");
 
-      Parent::removeFromDatabase(obj, true);
+      removeFromDatabase(obj, true);
       addToDatabase(withThisObject->clone());
    }
 
