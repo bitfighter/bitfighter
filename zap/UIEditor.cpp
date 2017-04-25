@@ -184,8 +184,8 @@ void EditorUserInterface::setLevel(const boost::shared_ptr<Level> &level)
 
    // Tell mDockItems to use the same team info as we use for the regular items
    mDockItems.setTeamManager(mLevel->getTeamManager());
-}
 
+}
 
 // Really quitting... no going back!
 void EditorUserInterface::onQuitted()
@@ -422,7 +422,6 @@ void EditorUserInterface::loadLevel()
 
 
    // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
-
    Level *level = new Level();
    bool isNewLevel = !level->loadLevelFromFile(fileName, -1);   // load returns true if fileName exists, false if not
 
@@ -3762,7 +3761,7 @@ static void merge_1_2_3__5_4_3(BfObject *firstItem, BfObject *mergingWith)
 
 
 BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, BfObject *mergingWith, S32 mergingWithIndex,
-   void(*mergeFunction)(BfObject *, BfObject *))
+                                            void(*mergeFunction)(BfObject *, BfObject *))
 {
    BfObject *joinedObj = firstItem;
 
