@@ -596,7 +596,7 @@ namespace Zap
    // Returns true if everything went ok, sets errorMsg and returns false if there was a problem.
    bool Level::processLevelLoadLine(U32 argc, S32 id, const char **argv, string &errorMsg)
    {
-      if(argc == 0 || !strcmp(argv[0], "#"))    // Blank line or a comment
+      if(argc == 0 || strcmp(argv[0], "#") == 0)    // Blank line or a comment
          return true;
 
       S32 strlenCmd = (S32)strlen(argv[0]);
@@ -643,7 +643,7 @@ namespace Zap
       // If a level file contains this setting, we will use it to multiply all points found in
       // the level file.  However, once it is loaded and resaved in the editor, this setting will
       // disappear and all points will reflect their true, absolute nature.
-      if(!stricmp(argv[0], "GridSize"))
+      if(stricmp(argv[0], "GridSize") == 0)
       {
          // We should have properly detected the level format by the time GridSize is found
          if(mVersion == 1)
