@@ -135,7 +135,7 @@ namespace Zap
 
    void Level::clearAllObjects()
    {
-      Parent::removeEverythingFromDatabase();
+      removeEverythingFromDatabase();
       mWallEdgeManager.clear();
    }
 
@@ -192,7 +192,7 @@ namespace Zap
 
       bool first = true;
 
-      while(std::getline(stream, line))
+      while(getline(stream, line))
       {
          if(first)
             trimBOM(line);
@@ -298,7 +298,7 @@ namespace Zap
       if(argc >= 1)
       {
          // Check if there is an id embedded with a "!"  (Turret!5 is a turret with id = 5)
-         std::size_t pos = args[0].find("!");
+         size_t pos = args[0].find("!");
          if(pos != string::npos)
          {
             id = atoi(args[0].substr(pos + 1, args[0].size() - pos - 1).c_str());

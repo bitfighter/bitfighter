@@ -79,7 +79,7 @@ string getHashFromStream(std::istream &stream)
    IncrementalHasher md5;
    bool first = true;
 
-   while(std::getline(stream, line))
+   while(getline(stream, line))
    {
       if(first)
          Zap::trimBOM(line);     // In stringUtils
