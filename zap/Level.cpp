@@ -611,8 +611,6 @@ namespace Zap
       // If it is present, this should be the first line of the file.
       if(stricmp(argv[0], "LevelFormat") == 0)
       {
-         S32 ver;
-
          if(argc < 2)
          {
             errorMsg = "Invalid LevelFormat parameter -- must specify version!";
@@ -625,7 +623,7 @@ namespace Zap
             return false;
          }
 
-         ver = atoi(argv[1]);
+         S32 ver = atoi(argv[1]);
 
          if(ver < 1)
          {
