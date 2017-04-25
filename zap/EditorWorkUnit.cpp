@@ -265,9 +265,6 @@ void EditorWorkUnitGroup::undo()
    // Undo in reverse order in case on item depends on another
    for(S32 i = mWorkUnits.size() - 1; i >= 0 ; i--)
       mWorkUnits[i]->undo();
-
-   //if(mEditor)
-   //   mEditor->doneChangingGeoms(mOrigObject->getSerialNumber());
 }
 
 
@@ -275,9 +272,6 @@ void EditorWorkUnitGroup::redo()
 {
    for(S32 i = 0; i < mWorkUnits.size(); i++)
       mWorkUnits[i]->redo();
-
-   //if(mEditor)
-   //   mEditor->doneChangingGeoms(mChangedObject->getSerialNumber());
 }
 
 
@@ -320,12 +314,10 @@ void EditorWorkUnitGroup::mergeTransactions(const Vector<EditorWorkUnit *> &newW
 }
 
 
-
 EditorAction EditorWorkUnitGroup::getAction() const
 {
    return ActionGroup;
 }
-
 
 
 } };  // Nested namespace

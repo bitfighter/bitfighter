@@ -454,12 +454,6 @@ void EditorUserInterface::loadLevel()
       validateLevel();                 // Check level for errors (like too few spawns)
    }
 
-   //// If we have a level in the database, let's ping the database to make sure it's really still there
-   //if(game->isLevelInDatabase() && game->getConnectionToMaster())
-   //{
-   //   game->getConnectionToMaster()->c2mRequestLevelRating(getLevelDatabaseId());
-   //}
-
    clearSelection(mLoadTarget);        // Nothing starts selected
    populateDock();                     // Add game-specific items to the dock
 
