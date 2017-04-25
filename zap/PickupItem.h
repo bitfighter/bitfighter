@@ -89,8 +89,8 @@ public:
    static const S32 DEFAULT_RESPAWN_TIME = 20;    // In seconds
    static const S32 REPAIR_ITEM_RADIUS = 20;
 
-   explicit RepairItem(lua_State *L = NULL);    // Combined Lua / C++ default constructor
-   virtual ~RepairItem();              // Destructor
+   explicit RepairItem(lua_State *L = NULL);      // Combined Lua / C++ default constructor
+   virtual ~RepairItem();                         // Destructor
 
    RepairItem *clone() const;
 
