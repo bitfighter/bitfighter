@@ -598,54 +598,6 @@ InputCode InputCodeManager::convertJoystickToKeyboard(InputCode inputCode)
 }
 
 
-// This must return a signed value since it can return
-//    SDL_CONTROLLER_BUTTON_INVALID = -1
-S16 InputCodeManager::inputCodeToControllerButton(InputCode inputCode)
-{
-   switch(inputCode)
-   {
-      case BUTTON_1:
-         return SDL_CONTROLLER_BUTTON_A;
-      case BUTTON_2:
-         return SDL_CONTROLLER_BUTTON_B;
-      case BUTTON_3:
-         return SDL_CONTROLLER_BUTTON_X;
-      case BUTTON_4:
-         return SDL_CONTROLLER_BUTTON_Y;
-      case BUTTON_5:
-         return SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
-      case BUTTON_6:
-         return SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
-      case BUTTON_START:
-         return SDL_CONTROLLER_BUTTON_START;
-      case BUTTON_BACK:
-         return SDL_CONTROLLER_BUTTON_BACK;
-      case BUTTON_GUIDE:
-         return SDL_CONTROLLER_BUTTON_GUIDE;
-      case BUTTON_9:
-         return SDL_CONTROLLER_BUTTON_LEFTSTICK;
-      case BUTTON_10:
-         return SDL_CONTROLLER_BUTTON_RIGHTSTICK;
-      case BUTTON_DPAD_UP:
-         return SDL_CONTROLLER_BUTTON_DPAD_UP;
-      case BUTTON_DPAD_DOWN:
-         return SDL_CONTROLLER_BUTTON_DPAD_DOWN;
-      case BUTTON_DPAD_LEFT:
-         return SDL_CONTROLLER_BUTTON_DPAD_LEFT;
-      case BUTTON_DPAD_RIGHT:
-         return SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
-
-      // Some buttons are 'hybrid' and come from other sources (like SDL axes)
-      case BUTTON_TRIGGER_LEFT:
-         return Joystick::ControllerButtonTriggerLeft;
-      case BUTTON_TRIGGER_RIGHT:
-         return Joystick::ControllerButtonTriggerRight;
-
-      default:
-         return SDL_CONTROLLER_BUTTON_INVALID;
-   }
-}
-
 InputCode InputCodeManager::filterInputCode(InputCode inputCode)
 {
    // We'll only apply numpad to standard key conversion if there are no keypad bindings
@@ -1434,6 +1386,55 @@ InputCode InputCodeManager::sdlControllerButtonToInputCode(U8 button)
 
       default:
          return BUTTON_UNKNOWN;
+   }
+}
+
+
+// This must return a signed value since it can return
+//    SDL_CONTROLLER_BUTTON_INVALID = -1
+S16 InputCodeManager::inputCodeToControllerButton(InputCode inputCode)
+{
+   switch(inputCode)
+   {
+      case BUTTON_1:
+         return SDL_CONTROLLER_BUTTON_A;
+      case BUTTON_2:
+         return SDL_CONTROLLER_BUTTON_B;
+      case BUTTON_3:
+         return SDL_CONTROLLER_BUTTON_X;
+      case BUTTON_4:
+         return SDL_CONTROLLER_BUTTON_Y;
+      case BUTTON_5:
+         return SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
+      case BUTTON_6:
+         return SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
+      case BUTTON_START:
+         return SDL_CONTROLLER_BUTTON_START;
+      case BUTTON_BACK:
+         return SDL_CONTROLLER_BUTTON_BACK;
+      case BUTTON_GUIDE:
+         return SDL_CONTROLLER_BUTTON_GUIDE;
+      case BUTTON_9:
+         return SDL_CONTROLLER_BUTTON_LEFTSTICK;
+      case BUTTON_10:
+         return SDL_CONTROLLER_BUTTON_RIGHTSTICK;
+      case BUTTON_DPAD_UP:
+         return SDL_CONTROLLER_BUTTON_DPAD_UP;
+      case BUTTON_DPAD_DOWN:
+         return SDL_CONTROLLER_BUTTON_DPAD_DOWN;
+      case BUTTON_DPAD_LEFT:
+         return SDL_CONTROLLER_BUTTON_DPAD_LEFT;
+      case BUTTON_DPAD_RIGHT:
+         return SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
+
+      // Some buttons are 'hybrid' and come from other sources (like SDL axes)
+      case BUTTON_TRIGGER_LEFT:
+         return Joystick::ControllerButtonTriggerLeft;
+      case BUTTON_TRIGGER_RIGHT:
+         return Joystick::ControllerButtonTriggerRight;
+
+      default:
+         return SDL_CONTROLLER_BUTTON_INVALID;
    }
 }
 #endif
