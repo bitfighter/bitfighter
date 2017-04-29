@@ -1510,7 +1510,7 @@ void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &en
 void ForceFieldProjector::onEnabled()
 {
    // Server only -- nothing to do on client!
-   if(isGhost())
+   if(isClient())
       return;
 
    // Database can be NULL here if adding a forcefield from the editor:  The editor will
