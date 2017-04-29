@@ -1434,8 +1434,6 @@ Point EditorUserInterface::snapPointConstrainedOrLevelGrid(Point const &p) const
    if(candidates.size() == 0)
       return (mSnapContext & GRID_SNAPPING) ? snapPointToLevelGrid(p, factor) : p;
 
-   logprintf("candidates %d", candidates.size()); //{P{P
-
    return candidates[findClosestPoint(p, candidates)];
 }
 
