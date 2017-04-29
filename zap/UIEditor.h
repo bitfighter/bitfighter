@@ -432,7 +432,7 @@ public:
    void onMouseDragged_startDragging();
    void onMouseDragged_copyAndDrag(const Vector<DatabaseObject *> *objList);
    void startDraggingDockItem();
-   BfObject *copyDockItem(BfObject *source);
+   BfObject *copyDockItem(BfObject *source) const;
 
    void doneAddingObjects(S32 serialNumber);
    void doneAddingObjects(const Vector<S32> &serialNumbers);

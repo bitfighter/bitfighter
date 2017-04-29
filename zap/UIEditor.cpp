@@ -3213,7 +3213,7 @@ void EditorUserInterface::snapSelectedEngineeredItems(const Point &cumulativeOff
 }
 
 
-BfObject *EditorUserInterface::copyDockItem(BfObject *source)
+BfObject *EditorUserInterface::copyDockItem(BfObject *source) const
 {
    // Instantiate object so we are essentially dragging a non-dock item
    BfObject *newObject = source->newCopy();
