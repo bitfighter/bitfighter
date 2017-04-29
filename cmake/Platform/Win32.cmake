@@ -228,7 +228,6 @@ function(BF_PLATFORM_INSTALL targetName)
 	
 	# Resources
 	install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource/ DESTINATION ./)
-	install(FILES ${CMAKE_SOURCE_DIR}/exe/joystick_presets.ini DESTINATION ./)
 	install(FILES ${CMAKE_SOURCE_DIR}/zap/bitfighter_win_icon_green.ico DESTINATION ./)
 	
 	# Doc
@@ -275,7 +274,7 @@ function(BF_PLATFORM_CREATE_PACKAGES targetName)
 		set(CPACK_PACKAGE_VERSION_MAJOR 1)
 	else()
 		# NSIS setup
-		set(CPACK_GENERATOR NSIS) # TODO add ZIP for portable install?
+		set(CPACK_GENERATOR NSIS)
 		set(CPACK_PACKAGE_FILE_NAME "Bitfighter-${BF_VERSION}-win32-installer")
 		set(CPACK_NSIS_COMPRESSOR "/SOLID lzma")
 		set(CPACK_NSIS_HELP_LINK "http://bitfighter.org/")
