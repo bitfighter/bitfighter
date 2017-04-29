@@ -1329,7 +1329,7 @@ static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
          menuItem->setValueIndex(1);
 
       // Save the current number of sticks
-      controllers = GameSettings::DetectedControllerList.size();
+      controllers = (S32)GameSettings::DetectedControllerList.size();
    }
 
    if(inputModeIndex == 0)
