@@ -727,6 +727,7 @@ void copyResourcesToUserData()
    dirArray.push_back("scripts");
    dirArray.push_back("editor_plugins");
    dirArray.push_back("music");
+   dirArray.push_back("fonts");
 
    string userDataDir = getUserDataDir();
    string installDataDir = getInstalledDataDir();
@@ -753,7 +754,8 @@ void copyResourcesToUserData()
 
       for(S32 i = 0; i < fillFiles.size(); i++)
       {
-         if(!copyFileToDir(fillFiles[i], userResourceDir))
+         string sourceFile = installedResourceDir + fileSeparator + fillFiles[i];
+         if(!copyFileToDir(sourceFile, userResourceDir))
             return;
       }
    }
@@ -933,6 +935,15 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       }
    }
 
+   // 019f changes with gamecontroller system
+   if(previousVersion < VERSION_019f)
+   {
+      // joystick_presets.ini from music folder, if it exists...
+      FolderManager *folderManager = settings->getFolderManager();
+      string offendingFile = joindir(folderManager->rootDataDir, "joystick_presets.ini");
+
+      removeFile(offendingFile);
+   }
 
    // Now copy over resources to user's preference directory.  This will overwrite the previous
    // resources with same names.  Don't do this if it is a standalone bundle.
