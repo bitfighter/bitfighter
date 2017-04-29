@@ -188,7 +188,7 @@ public:
    bool collide(BfObject *hitObject);
    bool intersects(ForceField *forceField);     // Return true if forcefields intersect
    void onAddedToGame(Game *theGame);
-   void idle(BfObject::IdleCallPath path);
+   void idle(IdleCallPath path);
 
    void setStartAndEndPoints(const Point &start, const Point &end);
 
