@@ -1398,7 +1398,7 @@ Point EditorUserInterface::snapPointConstrainedOrLevelGrid(Point const &p) const
    //ps.clear();ps.push_back(convertLevelToCanvasCoord(ll2 - Point(0,1000))); ps.push_back(convertLevelToCanvasCoord(ul2 + Point(0,1000))); RenderUtils::drawLine(&ps, Colors::blue);
 
 
-   const S32 len = 1000000;
+   const F32 len = 1000000.0f;
    Point intersection;     // reusable container
 
    Vector<Point> candidates(ARRAYSIZE(angles) * 8);
