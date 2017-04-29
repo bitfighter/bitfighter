@@ -796,14 +796,13 @@ void copyResourcesToUserData()
 
    printf("Copying resources\n");
 
-   // Everything but sfx
+   // Everything but sfx amd fonts (which are loaded from the install dir)
    Vector<string> dirArray;
    dirArray.push_back("levels");
    dirArray.push_back("robots");
    dirArray.push_back("scripts");
    dirArray.push_back("editor_plugins");
    dirArray.push_back("music");
-   dirArray.push_back("fonts");
 
    string userDataDir = getUserDataDir();
    string installDataDir = getInstalledDataDir();
