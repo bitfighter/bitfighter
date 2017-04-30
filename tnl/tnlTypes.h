@@ -320,10 +320,43 @@ static const U32 S64_MAX_DIGITS = 20;                             ///< S64_MIN =
 #endif
 
 
+
+//----------------------------------------------------------------------------------
+// Identify 32 vs. 64 bit environment
+// http://stackoverflow.com/questions/1505582/determining-32-vs-64-bit-in-c
+//----------------------------------------------------------------------------------
+
+// Check windows
+#if _WIN32 || _WIN64
+#  if _WIN64
+#     define ENVIRONMENT64
+#  else
+#     define ENVIRONMENT32
+#  endif
+#endif
+
+// Check GCC
+#if __GNUC__
+#  if __x86_64__ || __ppc64__
+#     define ENVIRONMENT64
+#  else
+#    define ENVIRONMENT32
+#  endif
+#endif
+
+// Double-check
+#if defined(ENVIRONMENT32)
+   static_assert(sizeof(void*) == 4, "Expected 4 bytes in 32-bit environment!");
+#elif defined(ENVIRONMENT64)
+   static_assert(sizeof(void*) == 8, "Expected 8 bytes in 64-bit environment!");
+#else
+#  error Cannot determine build environment!
+#endif
+
+
 //----------------------------------------------------------------------------------
 // Identify the target CPU and assembly language options
 //----------------------------------------------------------------------------------
-
 
 // Other values that might be needed here are: 
 #if defined(_M_IX86) || defined(i386) || defined(_M_X64) || defined(__x86_64__) || defined(__x86_64)

@@ -215,21 +215,25 @@ static const string buildDate = __DATE__;
 
 S32 DiagnosticUserInterface::showVersionBlock(S32 ypos, S32 textsize, S32 gap)
 {
-   S32 x = RenderUtils::getCenteredStringStartingPosf(textsize, "M/C Ver: %d | C/S Ver: %d | Build: %s/%d | Date: %s | CPU: %s | OS: %s | Cmplr: %s",
-           MASTER_PROTOCOL_VERSION, CS_PROTOCOL_VERSION, ZAP_GAME_RELEASE, BUILD_VERSION, TNL_CPU_STRING, TNL_OS_STRING, TNL_COMPILER_STRING, buildDate.c_str());
+#  ifdef ENVIRONMENT32
+      const S32 BIT_COUNT = 32;
+#  else
+      const S32 BIT_COUNT = 64;
+#endif 
 
-   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white, "M/C Ver: ");
+   S32 x = RenderUtils::getCenteredStringStartingPosf(textsize, "M/C: %d | C/S: %d | Build: %s/%d (%d) | %s | CPU: %s | OS: %s | Cmplr: %s",
+           MASTER_PROTOCOL_VERSION, CS_PROTOCOL_VERSION, ZAP_GAME_RELEASE, BUILD_VERSION, BIT_COUNT, TNL_CPU_STRING, TNL_OS_STRING, TNL_COMPILER_STRING, buildDate.c_str());
+
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white, "M/C: ");
    x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%d", MASTER_PROTOCOL_VERSION);
 
-   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white,  " | C/S Ver: ");
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white,  " | C/S: ");
    x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%d", CS_PROTOCOL_VERSION);
 
    x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white,  " | Build: ");
-   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%d", BUILD_VERSION);
-   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "/");
-   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%s", ZAP_GAME_RELEASE);
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%d/%s (%d)", BUILD_VERSION, ZAP_GAME_RELEASE, BIT_COUNT);
 
-   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white,  " | Date: ");
+   x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white,  " | ");
    x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::yellow, "%s", buildDate.c_str());
 
    x += RenderUtils::drawStringAndGetWidthf_fixed(x, ypos, textsize, Colors::white,  " | CPU: ");
