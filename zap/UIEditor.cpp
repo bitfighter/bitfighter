@@ -3199,7 +3199,7 @@ void EditorUserInterface::snapSelectedEngineeredItems(const Point &cumulativeOff
             continue;
 
          // Only try to mount any items that are both 1) selected and 2) marked as wanting to snap
-         S32 j = 0;
+         S32 j = 0;// TODO: Something is wrong here... j doesn't seem to be being set right.  Test this and figure out what is going on
          if(engrObj->isSelected())
          {
             engrObj->mountToWall(snapPointConstrainedOrLevelGrid(mSelectedObjectsForDragging[j]->getVert(0) + cumulativeOffset),
