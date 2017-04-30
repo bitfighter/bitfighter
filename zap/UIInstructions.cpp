@@ -607,8 +607,16 @@ void InstructionsUserInterface::renderModulesPage() const
             break;
 
          case 4:     // Sensor
-            GameObjectRender::renderShip(ShipShape::Normal, Colors::blue, Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius,
-                                         Platform::getRealMilliseconds(), false, true, false, false);
+            {
+               static const F32 scale = (F32)Game::PLAYER_VISUAL_DISTANCE_VERTICAL /
+                     Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL;
+
+               nvgSave(nvg);
+               nvgScale(nvg, scale, scale);
+               GameObjectRender::renderShip(ShipShape::Normal, Colors::blue, Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius,
+                                      Platform::getRealMilliseconds(), false, true, false, false);
+               nvgRestore(nvg);
+            }
             break;
 
          case 5:
