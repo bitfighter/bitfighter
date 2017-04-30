@@ -801,6 +801,7 @@ void ServerGame::addWallItemToGame(WallItem *wallItem)
 }
 
 
+// We only get here from loadLevel() and from tests
 // This signature makes it easier to test
 void ServerGame::addObjectsToGame()
 {
@@ -816,7 +817,13 @@ void ServerGame::addObjectsToGame()
 
    const Vector<DatabaseObject *> *objects = mLevel->findObjects_fast();
 
-   for(S32 i = 0; i < objects->size(); i++)
+   // We need to get the object count now, because some objects (like ForceFieldProjectors) add create other objects (like
+   // ForceFields) when they are added to the game, and we don't want to add those twice.  Recall that findObjects_fast is
+   // actually a pointer into the database of objects, so will get longer as we add things.  By recording the size now, we'll
+   // skip any items that are added subsequently.
+   S32 objectCount = objects->size();
+
+   for(S32 i = 0; i < objectCount; i++)
    {
       // Walls have already been handled in addWallItem call above
       if(isWallType(objects->get(i)->getObjectTypeNumber()))
