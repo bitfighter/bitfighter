@@ -72,7 +72,7 @@ public:
    Level(const string &levelCode);  // Constructor with passed levelcode, primarily used for testing
    virtual ~Level();                // Destructor
 
-   Level *clone() const;      // Duplicate level
+   Level *clone() const;            // Duplicate level
    static const U32 CurrentLevelFormat = 2;
 
    void onAddedToGame(Game *game);
