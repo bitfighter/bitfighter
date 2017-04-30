@@ -1598,6 +1598,10 @@ void GameType::performScopeQuery(GhostConnection *connection)
 
          for(S32 j = 0; j < fillVector.size(); j++)
          {
+            // Some objects don't have geometry (ForceFields).  Is this a bug?
+            if(!fillVector[j]->hasGeometry())
+               continue;
+
             if(!pointInHexagon(fillVector[j]->getPos(), pos, (F32)SpyBug::SPY_BUG_RADIUS))
                continue;
 
