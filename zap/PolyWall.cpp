@@ -124,7 +124,7 @@ void PolyWall::render() const
 
 bool PolyWall::processArguments(S32 argc, const char **argv, Level *level)
 {
-   if(argc < 7)            // Need "Polywall" keyword, and at least 3 points
+   if(argc < 6)            // Need "Polywall" keyword, and at least 3 points
       return false;
 
    S32 offset = 0;
