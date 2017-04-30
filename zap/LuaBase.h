@@ -169,9 +169,9 @@ F32 getCheckedFloat(lua_State *L, S32 index, const char *methodName);
 bool getBool(lua_State *L, S32 index);
 bool getCheckedBool(lua_State *L, S32 index, const char *methodName, bool defaultVal);
 
-lua_Integer getInt(lua_State *L, S32 index);
-lua_Integer getInt(lua_State *L, S32 index, S32 defaultVal);
-lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal);
+S32 getInt(lua_State *L, S32 index);
+S32 getInt(lua_State *L, S32 index, S32 defaultVal);
+S32 getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal);
 
 S32 getTeamIndex(lua_State *L, S32 index);
 

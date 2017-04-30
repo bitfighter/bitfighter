@@ -551,9 +551,9 @@ bool dumpStack(lua_State* L, const char *msg)
 
 
 // Pop integer off stack, check its type, do bounds checking, and return it
-lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal)
+S32 getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal)
 {
-   lua_Integer val = getInt(L, index);
+   S32 val = getInt(L, index);
 
    if(val < minVal || val > maxVal)
    {
@@ -569,18 +569,18 @@ lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, 
 
 
 // Returns defaultVal if there is an invalid or missing value on the stack
-lua_Integer getInt(lua_State *L, S32 index, S32 defaultVal)
+S32 getInt(lua_State *L, S32 index, S32 defaultVal)
 {
    if(!lua_isnumber(L, index))
       return defaultVal;
    // else
-   return lua_tointeger(L, index);
+   return (S32)lua_tointeger(L, index);
 }
 
 
-lua_Integer getInt(lua_State *L, S32 index)
+S32 getInt(lua_State *L, S32 index)
 {
-   return lua_tointeger(L, index);
+   return (S32)lua_tointeger(L, index);
 }
 
 
@@ -1018,7 +1018,7 @@ string prettyPrintParamList(const LuaFunctionArgList &functionArgList)
 ScriptContext getScriptContext(lua_State *L)
 {
    lua_getfield(L, LUA_REGISTRYINDEX, SCRIPT_CONTEXT_KEY);
-   S32 context = lua_tointeger(L, -1);
+   S32 context = getInt(L, -1);
    lua_pop(L, 1);    // Remove the value we just added from the stack
 
    // Bounds checking
