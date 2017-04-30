@@ -939,7 +939,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    {
       // joystick_presets.ini from music folder, if it exists...
       FolderManager *folderManager = settings->getFolderManager();
-      string offendingFile = joindir(folderManager->rootDataDir, "joystick_presets.ini");
+      string offendingFile = joindir(folderManager->getRootDataDir(), "joystick_presets.ini");
 
       removeFile(offendingFile);
    }
