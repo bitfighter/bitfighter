@@ -351,7 +351,7 @@ public:
    explicit EditorUserInterface(ClientGame *game, UIManager *uiManager);   // Constructor
    virtual ~EditorUserInterface();                                         // Destructor
 
-   Level *getLevel() const;           // Need external access to this in one static function
+   Level *getLevel() const;          
 
    void setLevelFileName(const string &name);
    //void setLevelGenScriptName(const string &name);
