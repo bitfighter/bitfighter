@@ -13,10 +13,8 @@ namespace Zap { namespace Editor
 
 
 // Constructor
-EditorWorkUnit::EditorWorkUnit(boost::shared_ptr<Level> level, EditorUserInterface *editor, EditorAction action)
+EditorWorkUnit::EditorWorkUnit(EditorUserInterface *editor, EditorAction action)
 {
-   mLevel = level;
-   mEditor = editor;
    mAction = action;
 }
 
@@ -32,10 +30,9 @@ EditorWorkUnit::~EditorWorkUnit()
 ////////////////////////////////////////
 
 // Constructor
-EditorWorkUnitCreate::EditorWorkUnitCreate(const boost::shared_ptr<Level> &level, 
-                                           EditorUserInterface *editor,
+EditorWorkUnitCreate::EditorWorkUnitCreate(EditorUserInterface *editor,
                                            const BfObject *bfObject) : 
-   Parent(level, editor, ActionCreate)
+   Parent(editor, ActionCreate)
 {
    mCreatedObject = bfObject->clone();
 }
@@ -44,16 +41,15 @@ EditorWorkUnitCreate::EditorWorkUnitCreate(const boost::shared_ptr<Level> &level
 // Destructor
 EditorWorkUnitCreate::~EditorWorkUnitCreate()
 {
-   delete mCreatedObject;
+   //delete mCreatedObject;
 }
 
 
-void EditorWorkUnitCreate::undo()
+void EditorWorkUnitCreate::undo(EditorUserInterface *editor)
 {
-   mLevel->deleteObject(mCreatedObject->getSerialNumber());
+   editor->getLevel()->deleteObject(mCreatedObject->getSerialNumber());
 
-   if(mEditor)
-      mEditor->doneDeletingObjects();
+   editor->doneDeletingObjects();
 }
 
 
@@ -63,12 +59,11 @@ void EditorWorkUnitCreate::merge(const EditorWorkUnit *workUnit)
 }
 
 
-void EditorWorkUnitCreate::redo()
+void EditorWorkUnitCreate::redo(EditorUserInterface *editor)
 {
-   mLevel->addToDatabase(mCreatedObject->clone());
+   editor->getLevel()->addToDatabase(mCreatedObject->clone());
 
-   if(mEditor)
-      mEditor->doneAddingObjects(mCreatedObject->getSerialNumber());
+   editor->doneAddingObjects(mCreatedObject->getSerialNumber());
 }
 
 
@@ -94,10 +89,8 @@ EditorAction EditorWorkUnitCreate::getAction() const
 ////////////////////////////////////////
 
 // Constructor
-EditorWorkUnitDelete::EditorWorkUnitDelete(const boost::shared_ptr<Level> &level, 
-                                           EditorUserInterface *editor,
-                                           const BfObject *bfObject) : 
-   Parent(level, editor, ActionDelete)
+EditorWorkUnitDelete::EditorWorkUnitDelete(EditorUserInterface *editor, const BfObject *bfObject) : 
+   Parent(editor, ActionDelete)
 {
    mDeletedObject = bfObject->clone();
 
@@ -108,25 +101,26 @@ EditorWorkUnitDelete::EditorWorkUnitDelete(const boost::shared_ptr<Level> &level
 // Destructor
 EditorWorkUnitDelete::~EditorWorkUnitDelete()
 {
-   delete mDeletedObject;
+   //delete mDeletedObject;
 }
 
 
-void EditorWorkUnitDelete::undo()
+void EditorWorkUnitDelete::undo(EditorUserInterface *editor)
 {
-   mLevel->addToDatabase(mDeletedObject->clone());
+   DatabaseObject *obj = mDeletedObject->clone();
+   TNLAssert(((BfObject *)obj)->getSerialNumber() == mDeletedObject->getSerialNumber(), "Expected clone to keep same serial number!");
 
-   if(mEditor)
-      mEditor->doneAddingObjects(mDeletedObject->getSerialNumber());
+   editor->getLevel()->addToDatabase(obj);
+
+   editor->doneAddingObjects(mDeletedObject->getSerialNumber());
 }
 
 
-void EditorWorkUnitDelete::redo()
+void EditorWorkUnitDelete::redo(EditorUserInterface *editor)
 {
-   mLevel->deleteObject(mDeletedObject->getSerialNumber());   
+   editor->getLevel()->deleteObject(mDeletedObject->getSerialNumber());   
 
-   if(mEditor)
-      mEditor->doneDeletingObjects();
+   editor->doneDeletingObjects();
 }
 
 
@@ -178,47 +172,44 @@ EditorAction EditorWorkUnitDelete::getAction() const
 
 
 // Constructor
-EditorWorkUnitChange::EditorWorkUnitChange(const boost::shared_ptr<Level> &level, 
-                                           EditorUserInterface *editor,
+EditorWorkUnitChange::EditorWorkUnitChange(EditorUserInterface *editor,
                                            const BfObject *origObject,
                                            const BfObject *changedObject) : 
-   Parent(level, editor, ActionChange)
+   Parent(editor, ActionChange)
 {
-   mOrigObject = origObject->clone();
-   mChangedObject = changedObject->clone();
+   mOrigObject.set(origObject->clone());
+   mChangedObject.set(changedObject->clone());
 }
 
 
 // Destructor
 EditorWorkUnitChange::~EditorWorkUnitChange()
 {
-   delete mOrigObject;
-   delete mChangedObject;
+   //delete mOrigObject;
+   //delete mChangedObject;
 }
 
 
-void EditorWorkUnitChange::undo()
+void EditorWorkUnitChange::undo(EditorUserInterface *editor)
 {
-   mLevel->swapObject(mChangedObject->getSerialNumber(), mOrigObject);
+   editor->getLevel()->swapObject(mChangedObject->getSerialNumber(), mOrigObject);
 
-   if(mEditor)
-      mEditor->doneChangingGeoms(mOrigObject->getSerialNumber());
+   editor->doneChangingGeoms(mOrigObject->getSerialNumber());
 }
 
 
-void EditorWorkUnitChange::redo()
+void EditorWorkUnitChange::redo(EditorUserInterface *editor)
 {
-   mLevel->swapObject(mOrigObject->getSerialNumber(), mChangedObject);
+   editor->getLevel()->swapObject(mOrigObject->getSerialNumber(), mChangedObject);
 
-   if(mEditor)
-      mEditor->doneChangingGeoms(mChangedObject->getSerialNumber());
+   editor->doneChangingGeoms(mChangedObject->getSerialNumber());
 }
 
 
 void EditorWorkUnitChange::merge(const EditorWorkUnit *workUnit)
 {
    delete mChangedObject;
-   mChangedObject = workUnit->getObject()->clone();
+   mChangedObject.set(workUnit->getObject()->clone());
 }
 
 
@@ -230,7 +221,7 @@ S32 EditorWorkUnitChange::getSerialNumber() const
 
 const BfObject *EditorWorkUnitChange::getObject() const
 {
-   return mChangedObject;
+   return mChangedObject.getPointer();
 }
 
 
@@ -244,10 +235,8 @@ EditorAction EditorWorkUnitChange::getAction() const
 ////////////////////////////////////////
 
 // Constructor
-EditorWorkUnitGroup::EditorWorkUnitGroup(const boost::shared_ptr<Level> &level, 
-                                         EditorUserInterface *editor,
-                                         const Vector<EditorWorkUnit *> &workUnits) :
-   Parent(level, editor, ActionChange)
+EditorWorkUnitGroup::EditorWorkUnitGroup(EditorUserInterface *editor, const Vector<EditorWorkUnit *> &workUnits) :
+   Parent(editor, ActionChange)
 {
    mWorkUnits = workUnits;
 }
@@ -260,18 +249,18 @@ EditorWorkUnitGroup::~EditorWorkUnitGroup()
 }
 
 
-void EditorWorkUnitGroup::undo()
+void EditorWorkUnitGroup::undo(EditorUserInterface *editor)
 {
    // Undo in reverse order in case on item depends on another
    for(S32 i = mWorkUnits.size() - 1; i >= 0 ; i--)
-      mWorkUnits[i]->undo();
+      mWorkUnits[i]->undo(editor);
 }
 
 
-void EditorWorkUnitGroup::redo()
+void EditorWorkUnitGroup::redo(EditorUserInterface *editor)
 {
    for(S32 i = 0; i < mWorkUnits.size(); i++)
-      mWorkUnits[i]->redo();
+      mWorkUnits[i]->redo(editor);
 }
 
 

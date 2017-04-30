@@ -9,6 +9,7 @@
 #include "Point.h"
 #include "tnlVector.h"
 #include <boost/shared_ptr.hpp>
+#include "tnlNetBase.h"
 
 using namespace TNL;
 
@@ -38,16 +39,12 @@ class EditorWorkUnit
 private:
    EditorAction mAction;
 
-protected:
-   boost::shared_ptr<Level> mLevel;
-   EditorUserInterface *mEditor;      // Will be NULL in testing
-
 public:
-   EditorWorkUnit(boost::shared_ptr<Level> level, EditorUserInterface *editor, EditorAction action);  // Constructor
-   virtual ~EditorWorkUnit();                                                                         // Destructor
+   EditorWorkUnit(EditorUserInterface *editor, EditorAction action);  // Constructor
+   virtual ~EditorWorkUnit();                                         // Destructor
 
-   virtual void undo() = 0;
-   virtual void redo() = 0;
+   virtual void undo(EditorUserInterface *editor) = 0;
+   virtual void redo(EditorUserInterface* editor) = 0;
 
    virtual S32 getSerialNumber() const = 0;
    virtual void merge(const EditorWorkUnit *workUnit) = 0;
@@ -65,18 +62,17 @@ class EditorWorkUnitCreate : public EditorWorkUnit
    typedef EditorWorkUnit Parent;
 
 private:
-   BfObject *mCreatedObject;
+   RefPtr<BfObject> mCreatedObject;
 
 public:
    // Constructor
-   EditorWorkUnitCreate(const boost::shared_ptr<Level> &level, 
-                        EditorUserInterface *editor,
+   EditorWorkUnitCreate(EditorUserInterface *editor,
                         const BfObject *bfObjects);
 
    virtual ~EditorWorkUnitCreate();    // Destructor
 
-   void undo();
-   void redo();
+   void undo(EditorUserInterface* editorUi);
+   void redo(EditorUserInterface* editor);
    void merge(const EditorWorkUnit *workUnit);
 
    S32 getSerialNumber() const;
@@ -94,18 +90,16 @@ class EditorWorkUnitDelete : public EditorWorkUnit
    typedef EditorWorkUnit Parent;
 
 private:
-   BfObject *mDeletedObject;
+   RefPtr<BfObject> mDeletedObject;
 
 public:
    // Constructor
-   EditorWorkUnitDelete(const boost::shared_ptr<Level> &level, 
-                        EditorUserInterface *editor,
-                        const BfObject *bfObjects);   
+   EditorWorkUnitDelete(EditorUserInterface *editor, const BfObject *bfObjects);   
 
    virtual ~EditorWorkUnitDelete();    // Destructor
 
-   void undo();
-   void redo();
+   void undo(EditorUserInterface* editorUi);
+   void redo(EditorUserInterface* editor);
    void merge(const EditorWorkUnit *workUnit);
 
    S32 getSerialNumber() const;
@@ -124,21 +118,20 @@ class EditorWorkUnitChange : public EditorWorkUnit
    typedef EditorWorkUnit Parent;
 
 private:
-   BfObject *mOrigObject;
-   BfObject *mChangedObject;
+   RefPtr<BfObject> mOrigObject;
+   RefPtr<BfObject> mChangedObject;
 
 public:
    // Constructor
-   EditorWorkUnitChange(const boost::shared_ptr<Level> &level, 
-                        EditorUserInterface *editor,
+   EditorWorkUnitChange(EditorUserInterface *editor,
                         const BfObject *origObject,
                         const BfObject *changedObject);
     
     // Destructor
    virtual ~EditorWorkUnitChange();                                    
 
-   void undo();
-   void redo();
+   void undo(EditorUserInterface* editorUi);
+   void redo(EditorUserInterface* editor);
    void merge(const EditorWorkUnit *workUnit);
 
    S32 getSerialNumber() const;
@@ -160,15 +153,13 @@ private:
 
 public:
    // Constructor
-   EditorWorkUnitGroup(const boost::shared_ptr<Level> &level, 
-                        EditorUserInterface *editor,
-                        const Vector<EditorWorkUnit *> &workUnits);
+   EditorWorkUnitGroup(EditorUserInterface *editor, const Vector<EditorWorkUnit *> &workUnits);
     
     // Destructor
    virtual ~EditorWorkUnitGroup();                                    
 
-   void undo();
-   void redo();
+   void undo(EditorUserInterface* editorUi);
+   void redo(EditorUserInterface* editor);
    void merge(const EditorWorkUnit *workUnit);
 
    void mergeTransactions(const Vector<EditorWorkUnit *> &newWorkUnits);

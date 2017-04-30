@@ -38,7 +38,6 @@ private:
 
    Vector<EditorWorkUnit *> mActions;
    Vector<EditorWorkUnit *> mTransactionActions;
-   boost::shared_ptr<Level> mLevel;
    EditorUserInterface *mEditor;
 
    BfObject *mOrigObject;
@@ -50,17 +49,17 @@ private:
    void fixupActionList();
 
 public:
-   EditorUndoManager();             // Constructor
+   EditorUndoManager(EditorUserInterface *editor);             // Constructor
    virtual ~EditorUndoManager();    // Destructor
 
-   void setLevel(boost::shared_ptr<Level> level, EditorUserInterface *editor);
+   void setLevel();
 
-   void saveAction(EditorAction action, const BfObject *bfObject);
+   void saveAction(Level *level, EditorAction action, const BfObject *bfObject);
    void saveAction(EditorAction action, const BfObject *origObject, const BfObject *changedObject);
 
    // For two-step change actions
    void saveChangeAction_before(const BfObject *origObject);
-   void saveChangeAction_after(const BfObject *changedObject);
+   void saveChangeAction_after(Level* level, const BfObject *changedObject);
 
    void saveCreateActionAndMergeWithNextUndoState();
 
@@ -69,7 +68,7 @@ public:
 
    void startTransaction();
    void endTransaction(ChangeIdentifier ident = ChangeIdNone);
-   void rollbackTransaction();
+   void rollbackTransaction(Level *level);
    bool inTransaction() const;
    bool noMoreCanDoRedo() const;
 

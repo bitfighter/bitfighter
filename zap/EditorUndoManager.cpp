@@ -12,8 +12,9 @@ namespace Zap { namespace Editor
 
 
 // Constructor
-EditorUndoManager::EditorUndoManager()
+EditorUndoManager::EditorUndoManager(EditorUserInterface *editor)
 {
+   mEditor = editor;
    clearAll();
 }
 
@@ -26,10 +27,8 @@ EditorUndoManager::~EditorUndoManager()
 }
 
 
-void EditorUndoManager::setLevel(boost::shared_ptr<Level> level, EditorUserInterface *editor)
+void EditorUndoManager::setLevel()
 {
-   mLevel = level;
-   mEditor = editor;
    mActions.deleteAndClear();    // Old actions won't work with new level!
    mUndoLevel = 0;
    mChangeIdentifier = ChangeIdNone;
@@ -50,8 +49,9 @@ void EditorUndoManager::fixupActionList()
 }
 
 
-void EditorUndoManager::saveAction(EditorAction action, const BfObject *bfObject)
+void EditorUndoManager::saveAction(Level *level, EditorAction action, const BfObject *bfObject)
 {
+   TNLAssert(bfObject->getSerialNumber() != 0, "Invalid serial number!");
    // Handle special case... if we're in a MergeAction, and the first part was creating the object, and
    // now we want to delete the object, we'll just back it out and call the whole thing a wash, as if the
    // create/delete cycle never occurred.  An example of where this happens is when you create an object
@@ -74,9 +74,9 @@ void EditorUndoManager::saveAction(EditorAction action, const BfObject *bfObject
       fixupActionList();
 
    if(action == ActionCreate)
-      actionList->push_back(new EditorWorkUnitCreate(mLevel, mEditor, bfObject)); 
+      actionList->push_back(new EditorWorkUnitCreate(mEditor, bfObject)); 
    else if(action == ActionDelete)
-      actionList->push_back(new EditorWorkUnitDelete(mLevel, mEditor, bfObject));
+      actionList->push_back(new EditorWorkUnitDelete(mEditor, bfObject));
    else 
       TNLAssert(false, "Action not implemented!");
 
@@ -97,10 +97,10 @@ void EditorUndoManager::saveAction(EditorAction action, const BfObject *origObje
       if(mInMergeAction)
       {
          mInMergeAction = false;
-         actionList->push_back(new EditorWorkUnitCreate(mLevel, mEditor, changedObject));
+         actionList->push_back(new EditorWorkUnitCreate(mEditor, changedObject));
       }
       else
-         actionList->push_back(new EditorWorkUnitChange(mLevel, mEditor, origObject, changedObject));
+         actionList->push_back(new EditorWorkUnitChange(mEditor, origObject, changedObject));
 
    }
    else
@@ -118,7 +118,7 @@ void EditorUndoManager::saveChangeAction_before(const BfObject *origObject)
 }
 
 
-void EditorUndoManager::saveChangeAction_after(const BfObject *changedObject)
+void EditorUndoManager::saveChangeAction_after(Level* level, const BfObject *changedObject)
 {
    TNLAssert(mOrigObject, "Expect this not to be NULL here!");
    TNLAssert(mOrigObject->getSerialNumber() == changedObject->getSerialNumber(), "Different object!");
@@ -126,7 +126,7 @@ void EditorUndoManager::saveChangeAction_after(const BfObject *changedObject)
    if(mInMergeAction)
    {
       mInMergeAction = false;
-      saveAction(ActionCreate, changedObject);
+      saveAction(level, ActionCreate, changedObject);
    }
    else
       saveAction(ActionChange, mOrigObject, changedObject);
@@ -185,7 +185,7 @@ void EditorUndoManager::undo()
       return;
 
    mUndoLevel--;
-   mActions[mUndoLevel]->undo();
+   mActions[mUndoLevel]->undo(mEditor);
 
    mChangeIdentifier = ChangeIdNone;
 }
@@ -198,7 +198,7 @@ void EditorUndoManager::redo()
    if(mUndoLevel >= mActions.size())
       return;
 
-   mActions[mUndoLevel]->redo();
+   mActions[mUndoLevel]->redo(mEditor);
    mUndoLevel++;
 }
 
@@ -262,7 +262,7 @@ void EditorUndoManager::endTransaction(ChangeIdentifier ident)    // ident defau
    }
    else
    {
-      EditorWorkUnitGroup *group = new EditorWorkUnitGroup(mLevel, mEditor, mTransactionActions);
+      EditorWorkUnitGroup *group = new EditorWorkUnitGroup(mEditor, mTransactionActions);
 
       fixupActionList();
       mActions.push_back(group);
@@ -276,7 +276,7 @@ void EditorUndoManager::endTransaction(ChangeIdentifier ident)    // ident defau
 }
 
 
-void EditorUndoManager::rollbackTransaction()
+void EditorUndoManager::rollbackTransaction(Level *level)
 {
    TNLAssert(mInTransaction, "Should be in a transaction!");
 

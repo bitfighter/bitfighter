@@ -329,8 +329,6 @@ private:
 
    void onActivateReactivate();
 
-   void setCurrentOffset(const Point &center);
-
    void doneAddingObjects(const Vector<BfObject *> &bfObjects);
    void doneAddingObjects(BfObject *bfObject);
 
@@ -356,9 +354,9 @@ public:
    void setLevelFileName(const string &name);
    //void setLevelGenScriptName(const string &name);
 
+   void cleanUp(bool isReload);
+   void loadLevel(bool isReload);
    string getLevelFileName() const;
-   void cleanUp();
-   void loadLevel();
 
    Vector<string> mGameTypeArgs;
 
@@ -448,6 +446,8 @@ public:
 
    void idle(U32 timeDelta);
    void deleteSelection(bool objectsOnly);       // Delete selected items (true = items only, false = items & vertices)
+   void deleteAllItems();
+
    void copySelection();                         // Copy selection to clipboard
    void pasteSelection();                        // Paste selection from clipboard
    void setCurrentTeam(S32 currentTeam);         // Set current team for selected items, also sets team for all dock items

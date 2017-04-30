@@ -103,6 +103,7 @@ PluginInfo::PluginInfo(string prettyName, string fileName, string description, s
 // Constructor
 EditorUserInterface::EditorUserInterface(ClientGame *game, UIManager *uiManager) :
    Parent(game, uiManager),
+   mUndoManager(this),
    mChatMessageDisplayer(game, 5, true, 500, 12, 3)     // msgCount, topDown, wrapWidth, fontSize, fontGap
 {
    mWasTesting = false;
@@ -169,7 +170,7 @@ void EditorUserInterface::setLevel(const boost::shared_ptr<Level> &level)
    mLevel = level;
 
    //getGame()->setLevel(level);
-   mUndoManager.setLevel(level, this);
+   //mUndoManager.setLevel(this);
 
    // Do some special preparations for walls/polywalls -- the editor needs to know about wall edges and such
    // for hit detection and mounting turrets/ffs
@@ -190,7 +191,7 @@ void EditorUserInterface::setLevel(const boost::shared_ptr<Level> &level)
 // Really quitting... no going back!
 void EditorUserInterface::onQuitted()
 {
-   cleanUp();
+   cleanUp(false);
    mLevel.reset();    // reset mLevel
 }
 
@@ -386,11 +387,13 @@ void EditorUserInterface::setLevelFileName(const string &name)
 }
 
 
-void EditorUserInterface::cleanUp()
+void EditorUserInterface::cleanUp(bool isReload)
 {
    getGame()->resetRatings();       // Move to mLevel?
+   
+   if(!isReload)
+      mUndoManager.clearAll();      // Clear up a little memory, but don't blow away our history if we're just reloading the current level
 
-   mUndoManager.clearAll();         // Clear up a little memory
    mDockItems.clearAllObjects();    // Free a little more -- dock will be rebuilt when editor restarts
 
    mLoadTarget = getLevel();
@@ -404,18 +407,19 @@ void EditorUserInterface::cleanUp()
    mAddingVertex = false;
    clearLevelGenItems();
    mGameTypeArgs.clear();
+   mHitItem = NULL;
 }
 
 
 // Loads a level
-void EditorUserInterface::loadLevel()
+void EditorUserInterface::loadLevel(bool isReload)
 {
    string filename = getLevelFileName();
    TNLAssert(filename != "", "Need file name here!");
 
    // Only clean up if we've got a level to clean up!
    if(mLevel)
-      cleanUp();
+      cleanUp(isReload);
 
    FolderManager *folderManager = mGameSettings->getFolderManager();
    string fileName = joindir(folderManager->getLevelDir(), filename).c_str();
@@ -433,8 +437,13 @@ void EditorUserInterface::loadLevel()
    const Vector<DatabaseObject *> *objects = level->findObjects_fast();
 
    for(S32 i = 0; i < objects->size(); i++)
-      static_cast<BfObject *>(objects->get(i))->onAddedToEditor();
+   { 
+      BfObject *obj = static_cast<BfObject *>(objects->get(i));
+      obj->onAddedToEditor();
 
+      if(isReload)
+         mUndoManager.saveAction(mLevel.get(), ActionCreate, obj);
+   }
 
    if(isNewLevel)
    {
@@ -454,9 +463,10 @@ void EditorUserInterface::loadLevel()
    }
 
    clearSelection(mLoadTarget);        // Nothing starts selected
-   populateDock();                     // Add game-specific items to the dock
+   populateDock();                     // Add game-specific items to the dock (do this even when reloading a level in case GameType changed)
 
-   mUndoManager.clearAll();
+   if(!isReload)
+      mUndoManager.clearAll();
 
    // Bulk-process new items, walls first
    rebuildWallGeometry(mLevel.get());
@@ -491,7 +501,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
 
       obj->removeFromGame(false);     // False ==> remove, but do not delete object
       addToEditor(obj);
-      mUndoManager.saveAction(ActionCreate, obj);
+      mUndoManager.saveAction(mLevel.get(), ActionCreate, obj);
    }
 
    mUndoManager.endTransaction();
@@ -1188,7 +1198,7 @@ void EditorUserInterface::onActivate()
 
    onActivateReactivate();
 
-   loadLevel();
+   loadLevel(false);
    setCurrentTeam(0);
 
    // Reset display parameters...
@@ -2439,7 +2449,7 @@ void EditorUserInterface::pasteSelection()
 
       copiedObjects.push_back(newObject);
 
-      mUndoManager.saveAction(ActionCreate, newObject);
+      mUndoManager.saveAction(mLevel.get(), ActionCreate, newObject);
    }
 
    mUndoManager.endTransaction();
@@ -2490,7 +2500,7 @@ void EditorUserInterface::scaleSelection(F32 scale)
          obj->scale(ctr, scale);
          geomChanged(obj);
 
-         mUndoManager.saveChangeAction_after(obj);
+         mUndoManager.saveChangeAction_after(mLevel.get(), obj);
 
          if(isWallType(obj->getObjectTypeNumber()))
             modifiedWalls = true;
@@ -2561,7 +2571,7 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
          obj->rotateAboutPoint(*center, angle);
          geomChanged(obj);
 
-         mUndoManager.saveChangeAction_after(obj);
+         mUndoManager.saveChangeAction_after(mLevel.get(), obj);
       }
    }
 
@@ -2585,7 +2595,7 @@ void EditorUserInterface::setSelectionId(S32 id)
          {
             mUndoManager.saveChangeAction_before(obj);
             obj->setUserAssignedId(id, true);
-            mUndoManager.saveChangeAction_after(obj);
+            mUndoManager.saveChangeAction_after(mLevel.get(), obj);
          }
          break;
       }
@@ -2656,7 +2666,7 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 
          setTeam(obj, currentTeam);
 
-         mUndoManager.saveChangeAction_after(obj);
+         mUndoManager.saveChangeAction_after(mLevel.get(), obj);
 
          anyChanged = true;
       }
@@ -2725,7 +2735,7 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
          obj->flip(center, isHoriz);
          geomChanged(obj);
 
-         mUndoManager.saveChangeAction_after(obj);
+         mUndoManager.saveChangeAction_after(mLevel.get(), obj);
 
          if(isWallType(obj->getObjectTypeNumber()))
             modifiedWalls = true;
@@ -3264,7 +3274,9 @@ void EditorUserInterface::startDraggingDockItem()
 
 void EditorUserInterface::doneAddingObjects(S32 serialNumber)
 {
-   doneAddingObjects(mLevel->findObjBySerialNumber(serialNumber));
+   BfObject *obj = mLevel->findObjBySerialNumber(serialNumber);
+   TNLAssert(obj, "Should have found an object!");
+   doneAddingObjects(obj);
 }
 
 
@@ -3443,7 +3455,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          if(obj->isLitUp())
             mHitItem = NULL;
 
-         mUndoManager.saveAction(ActionDelete, obj);
+         mUndoManager.saveAction(mLevel.get(), ActionDelete, obj);
 
          if(isWallType(obj->getObjectTypeNumber()))
             deletedWall = true;
@@ -3472,7 +3484,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          // Check if item has too few vertices left to be viable
          if(obj->getVertCount() < obj->getMinVertCount())
          {
-            mUndoManager.saveAction(ActionDelete, origObj);
+            mUndoManager.saveAction(mLevel.get(), ActionDelete, origObj);
             if(isWallType(obj->getObjectTypeNumber()))
                deletedWall = true;
 
@@ -3502,6 +3514,19 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 }
 
 
+// We'll already be in an undo transaction by the time we get here
+void EditorUserInterface::deleteAllItems()
+{
+   const Vector<DatabaseObject *> *objList = getLevel()->findObjects_fast();
+
+   for(S32 i = objList->size() - 1; i >= 0; i--)  // Reverse to avoid having to have i-- in middle of loop
+   {
+      BfObject *obj = static_cast<BfObject *>(objList->get(i));
+      mUndoManager.saveAction(mLevel.get(), ActionDelete, obj);
+   }  
+}
+
+
 // Increase selected wall thickness by amt
 void EditorUserInterface::changeBarrierWidth(S32 amt)
 {
@@ -3518,7 +3543,7 @@ void EditorUserInterface::changeBarrierWidth(S32 amt)
       {
          mUndoManager.saveChangeAction_before(obj);
          obj->changeWidth(amt);
-         mUndoManager.saveChangeAction_after(obj);
+         mUndoManager.saveChangeAction_after(mLevel.get(), obj);
       }
    }
 
@@ -3603,8 +3628,8 @@ void EditorUserInterface::doSplit(BfObject *object, S32 vertex)
 
    rebuildWallGeometry(mLevel.get());
 
-   mUndoManager.saveChangeAction_after(object);
-   mUndoManager.saveAction(ActionCreate, newObj);
+   mUndoManager.saveChangeAction_after(mLevel.get(), object);
+   mUndoManager.saveAction(mLevel.get(), ActionCreate, newObj);
 }
 
 
@@ -3630,7 +3655,7 @@ void EditorUserInterface::joinBarrier()
          joinedObj = doMergeLines(obj_i, i);
          if(joinedObj == NULL)
          {
-            mUndoManager.rollbackTransaction();
+            mUndoManager.rollbackTransaction(mLevel.get());
             return;
          }
 
@@ -3641,7 +3666,7 @@ void EditorUserInterface::joinBarrier()
          joinedObj = doMergePolygons(obj_i, i);
          if(joinedObj == NULL)
          {
-            mUndoManager.rollbackTransaction();
+            mUndoManager.rollbackTransaction(mLevel.get());
             return;
          }
 
@@ -3687,7 +3712,7 @@ BfObject *EditorUserInterface::doMergePolygons(BfObject *firstItem, S32 firstIte
          {
             mUndoManager.saveChangeAction_before(obj);
             obj->reverseWinding();
-            mUndoManager.saveChangeAction_after(obj);
+            mUndoManager.saveChangeAction_after(mLevel.get(), obj);
          }
 
          inputPolygons.push_back(obj->getOutline());
@@ -3711,12 +3736,12 @@ BfObject *EditorUserInterface::doMergePolygons(BfObject *firstItem, S32 firstIte
       TNLAssert(ok, "Should always return true!");
    }
 
-   mUndoManager.saveChangeAction_after(firstItem);
+   mUndoManager.saveChangeAction_after(mLevel.get(), firstItem);
 
    // Delete the constituent parts; work backwards to avoid queering the deleteList indices
    for(S32 i = deleteList.size() - 1; i >= 0; i--)
    {
-      mUndoManager.saveAction(ActionDelete, static_cast<BfObject *>(objList->get(deleteList[i])));
+      mUndoManager.saveAction(mLevel.get(), ActionDelete, static_cast<BfObject *>(objList->get(deleteList[i])));
       deleteItem(deleteList[i]);
    }
 
@@ -3767,8 +3792,8 @@ BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, BfObject *mergi
 
    mergeFunction(firstItem, mergingWith);
 
-   mUndoManager.saveChangeAction_after(firstItem);
-   mUndoManager.saveAction(ActionDelete, mergingWith);
+   mUndoManager.saveChangeAction_after(mLevel.get(), firstItem);
+   mUndoManager.saveAction(mLevel.get(), ActionDelete, mergingWith);
 
    deleteItem(mergingWithIndex);    // Deletes mergingWith, but slightly more efficiently since we already know the index
 
@@ -3879,7 +3904,7 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
 
    newObject->moveTo(snapPoint(convertCanvasToLevelCoord(mMousePos)));
    addToEditor(newObject);
-   mUndoManager.saveAction(ActionCreate, newObject);
+   mUndoManager.saveAction(mLevel.get(), ActionCreate, newObject);
 
    doneAddingObjects(newObject);
 
@@ -4093,8 +4118,13 @@ bool EditorUserInterface::handleKeyPress(InputCode inputCode, const string &inpu
       openConsole(NULL);
    else if(inputString == getEditorBindingString(BINDING_RELOAD_LEVEL))       // Reload level
    {
-      loadLevel();
-      setSaveMessage("Reloaded " + getLevelFileName(), true);
+      mUndoManager.startTransaction();
+      deleteAllItems();
+      loadLevel(true);
+      mUndoManager.endTransaction();
+
+      string undoBinding = getEditorBindingString(BINDING_UNDO_ACTION);
+      setSaveMessage("Reloaded " + getLevelFileName() + "   [" + undoBinding + "] to undo)", true);
    }
    else if(inputString == getEditorBindingString(BINDING_REDO_ACTION))        // Redo
    {
@@ -4271,7 +4301,7 @@ void EditorUserInterface::onMouseClicked_left()
       if(mNewItem->getVertCount() >= 2)
       {
          addToEditor(mNewItem);
-         mUndoManager.saveAction(ActionCreate, mNewItem);      // mNewItem gets copied
+         mUndoManager.saveAction(mLevel.get(), ActionCreate, mNewItem);      // mNewItem gets copied
       }
       else
       {
@@ -4731,7 +4761,7 @@ void EditorUserInterface::doneEditingAttributes(EditorAttributeMenuUI *editor, B
          editor->doneEditingAttrs(obj);  // Transfer attributes from editor to object
          obj->onAttrsChanged();          // And notify the object that its attributes have changed
 
-         mUndoManager.saveChangeAction_after(obj);
+         mUndoManager.saveChangeAction_after(mLevel.get(), obj);
       }
    }
 
@@ -4901,7 +4931,7 @@ void EditorUserInterface::onFinishedDragging_droppedItemOnDock()     // Delete t
             if(isWallType(obj->getObjectTypeNumber()))
                deletedWall = true;
 
-            mUndoManager.saveAction(ActionDelete, obj);
+            mUndoManager.saveAction(mLevel.get(), ActionDelete, obj);
 
             deleteItem(i, true);
             i--;
