@@ -91,7 +91,7 @@ LineItem *LineItem::clone() const
 
 F32 LineItem::getEditorRadius(F32 currentScale) const
 {
-   return (F32)EditorObject::VERTEX_SIZE;
+   return (F32)VERTEX_SIZE;
 }
 
 
@@ -235,7 +235,7 @@ bool LineItem::collide(BfObject *hitObject)
 }
 
 
-void LineItem::idle(BfObject::IdleCallPath path)
+void LineItem::idle(IdleCallPath path)
 {
    // Do nothing
 }
@@ -293,7 +293,7 @@ void LineItem::setWidth(S32 width, S32 min, S32 max)
 
 void LineItem::setWidth(S32 width) 
 {         
-   setWidth(width, LineItem::MIN_LINE_WIDTH, LineItem::MAX_LINE_WIDTH);
+   setWidth(width, MIN_LINE_WIDTH, MAX_LINE_WIDTH);
 }
 
 
