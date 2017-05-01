@@ -344,11 +344,11 @@ static const U32 S64_MAX_DIGITS = 20;                             ///< S64_MIN =
 #  endif
 #endif
 
-// Double-check
+// Double-check (re-enable when we're on C++11 or greater)
 #if defined(ENVIRONMENT32)
-   static_assert(sizeof(void*) == 4, "Expected 4 bytes in 32-bit environment!");
+   //static_assert(sizeof(void*) == 4, "Expected 4 bytes in 32-bit environment!");
 #elif defined(ENVIRONMENT64)
-   static_assert(sizeof(void*) == 8, "Expected 8 bytes in 64-bit environment!");
+   //static_assert(sizeof(void*) == 8, "Expected 8 bytes in 64-bit environment!");
 #else
 #  error Cannot determine build environment!
 #endif
