@@ -137,7 +137,7 @@ const Vector<Point> *GeomObject::getFill()    const  {  return mGeometry.getFill
 
 
 // Geometric manipulations
-void GeomObject::reverseWinding()                                 const { mGeometry.reverseWinding();                                  }
+void GeomObject::reverseWinding()                                 const {  mGeometry.reverseWinding();                                 }
 void GeomObject::rotateAboutPoint(const Point &center, F32 angle) const {  mGeometry.getGeometry()->rotateAboutPoint(center, angle);   }
 void GeomObject::flip(F32 center, bool isHoriz)                   const {  mGeometry.getGeometry()->flip(center, isHoriz);             }
 void GeomObject::scale(const Point &center, F32 scale)            const {  mGeometry.getGeometry()->scale(center, scale);              }
