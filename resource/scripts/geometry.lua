@@ -134,11 +134,11 @@ end
 @return  A geometry of the same type that was passed in.
  --]]
 function Geom.rotate(geom, angle)
-    local angleRadians = angle * math.pi / 180
 
-    if (type(geom) == 'point') then         -- Single point
+    if (type(geom) == 'point') then         -- Single point, rotation has no effect
         return geom
     else                                    -- Table of points
+        local angleRadians = angle * math.pi / 180
         local centroid = Geom.centroid(geom)
         local newPoints = {}
         for i = 1, #geom do
