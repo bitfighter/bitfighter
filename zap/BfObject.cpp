@@ -837,8 +837,8 @@ void BfObject::renderDock(const Color &color) const
 
 
 // For editing attributes -- all implementation will need to be provided by the children
-bool                   BfObject::startEditingAttrs(EditorAttributeMenuUI *attributeMenu) { return false; }
-void                   BfObject::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)  { /* Do nothing */ }
+bool BfObject::startEditingAttrs(EditorAttributeMenuUI *attributeMenu) { return false; }
+void BfObject::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)  { /* Do nothing */ }
 
 
 bool BfObject::controllingClientIsValid() const
