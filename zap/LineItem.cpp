@@ -318,7 +318,7 @@ void LineItem::setGeom(lua_State *L, S32 stackIndex)
 {
    Parent::setGeom(L, stackIndex);
 
-   if(!isGhost())
+   if(isServer())
       s2cSetGeom(*GeomObject::getOutline());
 }
 
