@@ -197,7 +197,7 @@ public:
    // Track some items used in the editor
    void setSelected(bool selected);
    bool isSelected() const;
-   U32 getSelectedTime();
+   U32 getSelectedTime() const;
 
    bool isLitUp() const;
    void setLitUp(bool litUp);
@@ -271,9 +271,9 @@ public:
    
    void assignNewUserAssignedId();
    void setUserAssignedId(S32 id, bool permitZero);
-   S32 getUserAssignedId();
+   S32 getUserAssignedId() const;
 
-   StringTableEntry getKillString();
+   StringTableEntry getKillString() const;
 
    enum MaskBits {
       GeomMask      = BIT(0),
@@ -284,8 +284,8 @@ public:
    BfObject *findObjectLOS(U8 typeNumber, U32 stateIndex, const Point &start, const Point &end, float &collisionTime, Point &normal) const;
    BfObject *findObjectLOS(TestFunc,      U32 stateIndex, const Point &start, const Point &end, float &collisionTime, Point &normal) const;
 
-   bool controllingClientIsValid();                   // Checks if controllingClient is valid
-   SafePtr<GameConnection> getControllingClient();
+   bool controllingClientIsValid() const;                   // Checks if controllingClient is valid
+   SafePtr<GameConnection> getControllingClient() const;
    void setControllingClient(GameConnection *c);      // This only gets run on the server
 
    void setOwner(ClientInfo *clientInfo);
@@ -307,8 +307,8 @@ public:
    virtual S32 getRenderSortValue();
 
    // Move related      
-   const Move &getCurrentMove();
-   const Move &getLastMove();
+   const Move &getCurrentMove() const;
+   const Move &getLastMove() const;
    void setCurrentMove(const Move &move);
    void setPrevMove(const Move &move);
 
@@ -341,9 +341,9 @@ public:
    virtual bool collided(BfObject *otherObject, U32 stateIndex);
 
    // Gets location(s) where repair rays should be rendered while object is being repaired
-   virtual Vector<Point> getRepairLocations(const Point &repairOrigin);    
-   bool objectIntersectsSegment(BfObject *object, const Point &rayStart, const Point &rayEnd, F32 &fillCollisionTime);
-   S32 radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force = 2000);
+   virtual Vector<Point> getRepairLocations(const Point &repairOrigin);
+   static bool objectIntersectsSegment(BfObject *object, const Point &rayStart, const Point &rayEnd, F32 &fillCollisionTime);
+   S32 radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force = 2000) const;
    virtual void damageObject(DamageInfo *damageInfo);
 
    void onGhostAddBeforeUpdate(GhostConnection *theConnection);
@@ -385,7 +385,7 @@ public:
 
    virtual bool shouldRender() const;     // Returns true if the item is visible, false if not
 
-   BfObject *copy();       // Makes a duplicate of the item (see method for explanation)
+   BfObject *copy() const;       // Makes a duplicate of the item (see method for explanation)
    BfObject *newCopy();    // Creates a brand new object based on the current one (see method for explanation)
    virtual BfObject *clone() const;
 

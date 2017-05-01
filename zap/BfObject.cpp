@@ -347,7 +347,7 @@ bool EditorObject::isSelected() const
 }
 
 
-U32 EditorObject::getSelectedTime()
+U32 EditorObject::getSelectedTime() const
 {
    return mSelectedTime;
 }
@@ -766,7 +766,7 @@ string BfObject::appendId(const string &objName) const
 // Return a pointer to a new copy of the object.  This is more like a duplicate or twin of the object -- it has the same
 // serial number, and is already assigned to a game.
 // You will have to delete this copy when you are done with it!
-BfObject *BfObject::copy()
+BfObject *BfObject::copy() const
 {
    BfObject *newObject = clone();     
    newObject->initializeEditor();         // Marks all vertices as unselected
@@ -841,13 +841,13 @@ bool                   BfObject::startEditingAttrs(EditorAttributeMenuUI *attrib
 void                   BfObject::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)  { /* Do nothing */ }
 
 
-bool BfObject::controllingClientIsValid()
+bool BfObject::controllingClientIsValid() const
 {
    return mControllingClient.isValid();
 }
 
 
-SafePtr<GameConnection> BfObject::getControllingClient()
+SafePtr<GameConnection> BfObject::getControllingClient() const
 {
    return mControllingClient;
 }
@@ -894,7 +894,7 @@ void BfObject::setUserAssignedId(S32 id, bool permitZero)
 }
 
 
-S32 BfObject::getUserAssignedId()
+S32 BfObject::getUserAssignedId() const
 {
    return mUserAssignedId;
 }
@@ -1012,7 +1012,7 @@ bool BfObject::objectIntersectsSegment(BfObject *object, const Point &rayStart, 
 
 
 // Returns number of ships hit
-S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force)
+S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force) const
 {
    // Check for players within range.  If so, blast them to little tiny bits!
    // Those within innerRad get full force of the damage.  Those within outerRad get damage proportional to distance.
@@ -1180,7 +1180,7 @@ void BfObject::setCreationTime(U32 creationTime)
 }
 
 
-StringTableEntry BfObject::getKillString()
+StringTableEntry BfObject::getKillString() const
 {
    return mKillString;
 }
@@ -1192,13 +1192,13 @@ S32 BfObject::getRenderSortValue()
 }
 
 
-const Move &BfObject::getCurrentMove()
+const Move &BfObject::getCurrentMove() const
 {
    return mCurrentMove;
 }
 
 
-const Move &BfObject::getLastMove()
+const Move &BfObject::getLastMove() const
 {
    return mPrevMove;
 }
