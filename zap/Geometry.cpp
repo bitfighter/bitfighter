@@ -819,7 +819,7 @@ bool PolylineGeometry::deleteVert(S32 vertIndex)
 
 bool PolylineGeometry::insertVert(Point vertex, S32 vertIndex) 
 { 
-   if(mPolyBounds.size() >= Geometry::MAX_POLY_POINTS)
+   if(mPolyBounds.size() >= MAX_POLY_POINTS)
       return false;
 
    mPolyBounds.insert(vertIndex, vertex);                                                   
