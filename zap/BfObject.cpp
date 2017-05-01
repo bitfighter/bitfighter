@@ -1152,7 +1152,7 @@ void BfObject::onAddedToGame(Game *game)
 
 void BfObject::markAsGhost()
 {
-   mNetFlags = NetObject::IsGhost;
+   mNetFlags = IsGhost;
 }
 
 
