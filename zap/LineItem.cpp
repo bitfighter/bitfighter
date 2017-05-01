@@ -151,7 +151,7 @@ S32 LineItem::getRenderSortValue()
 
 
 // Create objects from parameters stored in level file
-// LineItem <team> <width> <x> <y> ...
+// LineItem <team> <width> {Global} <x> <y> ...
 bool LineItem::processArguments(S32 argc, const char **argv, Level *level)
 {
    if(argc < 6)
@@ -170,7 +170,7 @@ bool LineItem::processArguments(S32 argc, const char **argv, Level *level)
       mGlobal = false;
 
    readGeom(argc, argv, firstCoord, level->getLegacyGridSize());
-
+   
    updateExtentInDatabase();
 
    return true;
