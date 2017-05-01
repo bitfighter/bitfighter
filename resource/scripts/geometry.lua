@@ -10,8 +10,22 @@
 @luaclass Geom
 @brief    Library of various geometric transforms.
 @descr    The %Geom class provides a collection of useful geometric operations.  Since point objects
-          are immutable, all the %Geom functions return either a new point, or a new table of new points.  
+          are immutable, all the %Geom functions return either a new point or a new table of new points.  
           All follow the same usage pattern.
+
+@code
+    local p1 = point.new(0, 10)
+    local p2 = point.new(10, 10)
+    local p3 = point.new(10, 0)
+
+    local geom = {p1, p2, p3, p1}   -- Use a table
+
+    local triangle = LineItem.new()
+    triangle:setGeom(Geom.rotate(geom, 45))
+
+    bf:addItem(triangle)
+@endcode
+
 
 In all cases below, \em geom refers to either a single point or a table of points.
 --]]
@@ -131,7 +145,22 @@ end
 @brief   Rotate \em geom about its centroid.
 @param   geom - The geometry to modify.  \em Geom can either be a point or a table of points.
 @param   angle - The angle (clockwise, in degrees) to rotate \em geom.
+
 @return  A geometry of the same type that was passed in.
+
+@code
+    local p1 = point.new(0, 10)
+    local p2 = point.new(10, 10)
+    local p3 = point.new(10, 0)
+
+    local geom = {p1, p2, p3, p1}
+
+    local triangle = LineItem.new()
+    triangle:setGeom(Geom.rotate(geom, 45))
+
+    bf:addItem(triangle)
+@endcode
+
  --]]
 function Geom.rotate(geom, angle)
     local angleRadians = angle * math.pi / 180
