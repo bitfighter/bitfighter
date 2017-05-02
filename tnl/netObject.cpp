@@ -158,10 +158,17 @@ void NetObject::collapseDirtyList()
    }
 }
 
+
+// This is called on the client side of a connection after
+// the constructor and after the first call to unpackUpdate (the
+// initial call).  Returning true signifies no error - returning
+// false causes the connection to abort.
 bool NetObject::onGhostAdd(GhostConnection *theConnection)
 {
    return true;
 }
+
+
 void NetObject::onGhostAddBeforeUpdate(GhostConnection *theConnection)
 {
 }
@@ -171,6 +178,7 @@ void NetObject::onGhostRemove()
 {
 }
 
+// This gets called on the server as soon as the object is available on the client
 void NetObject::onGhostAvailable(GhostConnection *)
 {
 }
