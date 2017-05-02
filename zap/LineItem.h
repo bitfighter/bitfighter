@@ -23,7 +23,9 @@ private:
    Vector<Point> mRenderPoints;     // Precomputed points used for rendering linework
 
    S32 mWidth;
-   bool mGlobal;    // If global, then all teams will see it
+   bool mGlobal;        // If global, then all teams will see it
+
+   bool hasGeometry() const;
 
 public:
    explicit LineItem(lua_State *L = NULL);   // Combined C++ / Lua constructor

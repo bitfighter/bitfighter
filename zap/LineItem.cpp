@@ -98,8 +98,18 @@ F32 LineItem::getEditorRadius(F32 currentScale) const
 void LineItem::render() const
 {
 #ifndef ZAP_DEDICATED
-   RenderUtils::drawLine(getOutline(), getColor());
+   // The object geometry is sent in an s2c immediately after the object has been created on the client.  Sometimes, if there
+   // are a lot of LineItems, this will take a tick or two, so we might get here with no geometry, which causes the drawing
+   // to fail.  We'll check our geometry, and skip items that aren't ready.
+   if(hasGeometry())
+      RenderUtils::drawLine(getOutline(), getColor());
 #endif
+}
+
+
+bool LineItem::hasGeometry() const
+{
+   return getOutline()->size() > 0;
 }
 
 
@@ -199,6 +209,7 @@ void LineItem::onAddedToGame(Game *game)
 }
 
 
+// This gets called once the item is available on the client; initially it has no geometry, so we'll send the points over now
 void LineItem::onGhostAvailable(GhostConnection* connection)
 {
    Parent::onGhostAvailable(connection);
@@ -243,6 +254,7 @@ void LineItem::idle(IdleCallPath path)
 
 U32 LineItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
+   // TODO: This should probably be an s2c
    //stream->writeRangedU32(mWidth, 0, MAX_LINE_WIDTH);
    writeThisTeam(stream);
    stream->write(mGlobal);
@@ -266,7 +278,7 @@ F32 LineItem::getUpdatePriority(GhostConnection *connection, U32 updateMask, S32
    // Lower priority for initial update.  This is to work around network-heavy loading of levels
    // with many LineItems, which will stall the client and prevent you from moving your ship
    if(isInitialUpdate())
-      return basePriority - 1000.f;
+      return basePriority - 1000.0f;
 
    // Normal priority otherwise so Geom changes are immediately visible to all clients
    return basePriority;
