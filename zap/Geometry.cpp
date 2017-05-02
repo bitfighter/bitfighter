@@ -780,7 +780,7 @@ void PolylineGeometry::clearVerts()
 // If ignoreMaxPointsLimit is true, other code depends on this always returning true
 bool PolylineGeometry::addVert(const Point &point, bool ignoreMaxPointsLimit) 
 { 
-   if(mPolyBounds.size() >= Geometry::MAX_POLY_POINTS && !ignoreMaxPointsLimit)
+   if(mPolyBounds.size() >= MAX_POLY_POINTS && !ignoreMaxPointsLimit)
       return false;
 
    mPolyBounds.push_back(point); 
