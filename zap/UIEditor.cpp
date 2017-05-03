@@ -2273,11 +2273,11 @@ void EditorUserInterface::renderSaveMessage() const
       if(mSaveMsgTimer.getCurrent() < (U32)ONE_SECOND)
          alpha = (F32)mSaveMsgTimer.getCurrent() / 1000;
 
-      const S32 textsize = 25;
+      const S32 msgHeight = mSaveMsg.getHeight();
       const S32 len = mSaveMsg.getWidth() + 20;
       const S32 inset = min((canvasWidth - len) / 2, 200);
       const S32 boxTop = 515;
-      const S32 boxBottom = 555;
+      const S32 boxBottom = boxTop + msgHeight + 15;
       const S32 cornerInset = 10;
 
       // Fill
@@ -2288,8 +2288,7 @@ void EditorUserInterface::renderSaveMessage() const
       RenderUtils::drawFancyBox(inset, boxTop, canvasWidth - inset, boxBottom, 
                                 cornerInset, GLOPT::LineLoop, Colors::blue, alpha);
 
-
-      mSaveMsg.render(canvasWidth / 2, 545, AlignmentCenter);
+      mSaveMsg.render(canvasWidth / 2, boxTop + msgHeight + 5, AlignmentCenter);
    }
 }
 
