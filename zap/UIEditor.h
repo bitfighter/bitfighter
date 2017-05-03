@@ -80,8 +80,7 @@ public:
 
 private:
    string mInfoMsg;
-   string mSaveMsg;
-   Color mSaveMsgColor;
+   SymbolString mSaveMsg;
 
    string mWarnMsg1;
    string mWarnMsg2;

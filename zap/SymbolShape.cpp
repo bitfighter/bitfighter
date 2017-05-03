@@ -684,6 +684,14 @@ static void getSymbolShape(const InputCodeManager *inputCodeManager, const strin
       return;
    }
 
+   // See if maybe this is an editor binding
+   string editorBinding = inputCodeManager->getEditorKeyBoundToBindingCodeName(symbol);
+   if(editorBinding != "")
+   { 
+      symbols.push_back(SymbolString::getModifiedKeySymbol(editorBinding, color));
+      return;
+   }
+
    // See if we can get something that looks like a string containing the name of an inputString, something like "Shift+O",
    // or perhaps a binding that can be converted into such.
    SymbolShapePtr modifiedKey = convertStringToControlSymbol(inputCodeManager, symbol, color);

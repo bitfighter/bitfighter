@@ -2267,26 +2267,29 @@ void EditorUserInterface::renderSaveMessage() const
 {
    if(mSaveMsgTimer.getCurrent())
    {
+      S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+
       F32 alpha = 1.0;
       if(mSaveMsgTimer.getCurrent() < (U32)ONE_SECOND)
          alpha = (F32)mSaveMsgTimer.getCurrent() / 1000;
 
       const S32 textsize = 25;
-      const S32 len = RenderUtils::getStringWidth(textsize, mSaveMsg.c_str()) + 20;
-      const S32 inset = min((DisplayManager::getScreenInfo()->getGameCanvasWidth() - len) / 2, 200);
+      const S32 len = mSaveMsg.getWidth() + 20;
+      const S32 inset = min((canvasWidth - len) / 2, 200);
       const S32 boxTop = 515;
       const S32 boxBottom = 555;
       const S32 cornerInset = 10;
 
       // Fill
-      RenderUtils::drawFancyBox(inset, boxTop, DisplayManager::getScreenInfo()->getGameCanvasWidth() - inset, boxBottom, 
+      RenderUtils::drawFancyBox(inset, boxTop, canvasWidth - inset, boxBottom, 
                                 cornerInset, GLOPT::TriangleFan, Colors::black, alpha * 0.80f);
 
       // Border
-      RenderUtils::drawFancyBox(inset, boxTop, DisplayManager::getScreenInfo()->getGameCanvasWidth() - inset, boxBottom, 
+      RenderUtils::drawFancyBox(inset, boxTop, canvasWidth - inset, boxBottom, 
                                 cornerInset, GLOPT::LineLoop, Colors::blue, alpha);
 
-      RenderUtils::drawCenteredString_fixed(545, textsize, mSaveMsgColor, alpha, mSaveMsg.c_str());
+
+      mSaveMsg.render(canvasWidth / 2, 545, AlignmentCenter);
    }
 }
 
@@ -4124,7 +4127,7 @@ bool EditorUserInterface::handleKeyPress(InputCode inputCode, const string &inpu
       mUndoManager.endTransaction();
 
       string undoBinding = getEditorBindingString(BINDING_UNDO_ACTION);
-      setSaveMessage("Reloaded " + getLevelFileName() + "   [" + undoBinding + "] to undo)", true);
+      setSaveMessage("Reloaded " + getLevelFileName() + "  ([[UndoAction]] to undo)", true);
    }
    else if(inputString == getEditorBindingString(BINDING_REDO_ACTION))        // Redo
    {
@@ -5140,9 +5143,12 @@ void EditorUserInterface::clearLingeringMessage()
 
 void EditorUserInterface::setSaveMessage(const string &msg, bool savedOK)
 {
-   mSaveMsg = msg;
+   Vector<SymbolShapePtr> symbols;
+   Color msgColor = savedOK ? Colors::green : Colors::red;
+   SymbolString::symbolParse(mGameSettings->getInputCodeManager(), msg, symbols, EditorWarningContext, 25, false, msgColor, Colors::white);
+   mSaveMsg = SymbolString(symbols);
+      
    mSaveMsgTimer.reset();
-   mSaveMsgColor = (savedOK ? Colors::green : Colors::red);
 }
 
 
