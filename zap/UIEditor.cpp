@@ -2288,7 +2288,9 @@ void EditorUserInterface::renderSaveMessage() const
       RenderUtils::drawFancyBox(inset, boxTop, canvasWidth - inset, boxBottom, 
                                 cornerInset, GLOPT::LineLoop, Colors::blue, alpha);
 
+      nvgGlobalAlpha(nvg, alpha);
       mSaveMsg.render(canvasWidth / 2, boxTop + msgHeight + 5, AlignmentCenter);
+      nvgGlobalAlpha(nvg, 1.0);
    }
 }
 
