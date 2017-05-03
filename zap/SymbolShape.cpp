@@ -633,18 +633,16 @@ SymbolShapePtr SymbolString::getHorizLine(S32 length, S32 vertOffset, S32 height
 
 static InputCode convertStringToInputCode(const InputCodeManager *inputCodeManager, const string &symbol)
 {
-   InputCode inputCode = KEY_UNKNOWN;
-
    // We might pass in a NULL inputCodeManager, in which case we won't process any inputCode related items
-   if(inputCodeManager)
-   {
-      // The following will return KEY_UNKNOWN if symbolName is not recognized as a known binding
-      inputCode = inputCodeManager->getKeyBoundToBindingCodeName(symbol);
+   if(!inputCodeManager)
+      return KEY_UNKNOWN;
 
-      // Second chance -- maybe it's a key name instead of a control binding (like "K")
-      if(inputCode == KEY_UNKNOWN)
-         inputCode = inputCodeManager->stringToInputCode(symbol.c_str());
-   }
+   // The following will return KEY_UNKNOWN if symbolName is not recognized as a known binding
+   InputCode inputCode = inputCodeManager->getKeyBoundToBindingCodeName(symbol);
+
+   // Second chance -- maybe it's a key name instead of a control binding (like "K")
+   if(inputCode == KEY_UNKNOWN)
+      inputCode = inputCodeManager->stringToInputCode(symbol.c_str());
 
    return inputCode;
 }
