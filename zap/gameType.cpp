@@ -3459,7 +3459,10 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChatPM, (StringTableEntry toName, StringPtr me
    ClientInfo *clientInfo = mGame->findClientInfo(toName.getString());
 
    if(!clientInfo)
+   {
       source->s2cDisplayErrorMessage("!!! Player not found");
+      return;
+   }
 
    // No sending to bots - they don't have a game connection
    if(clientInfo->isRobot())

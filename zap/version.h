@@ -23,6 +23,8 @@
 
 // Commit number:  since migration to git, this can be found by:
 //    git rev-list --all --count
+//
+// Then add +1 to the number it gives you for the build number here
 #define VERSION_016  3737
 #define VERSION_017  4252
 #define VERSION_017a 4265
@@ -35,7 +37,7 @@
 #define VERSION_019c 9708
 #define VERSION_019d 10314
 #define VERSION_019e 10572
-#define VERSION_019f 11702
+#define VERSION_019f 11761
 #define VERSION_020  11753
 
 #define BUILD_VERSION VERSION_020   // Version of the game according to hg, will be unique every release (must be int)
