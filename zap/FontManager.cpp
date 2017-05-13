@@ -6,12 +6,9 @@
 #include "FontManager.h"         // Class header
 
 #include "GameSettings.h"
-#include "DisplayManager.h"
 
-//#include "physfs.hpp"
 #include "RenderUtils.h"         // For various rendering helpers
 #include "stringUtils.h"         // For getFileSeparator()
-#include "MathUtils.h"           // For MIN/MAX
 
 // Our stroke fonts
 #include "FontStrokeRoman.h"
@@ -19,11 +16,8 @@
 #include "FontOrbitronMedium.h"
 
 #include "tnlPlatform.h"
-#include "../master/GameJoltConnector.h"
 
 #include "../nanovg/nanovg.h"
-
-#include <string>
 
 using namespace std;
 
