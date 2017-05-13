@@ -303,7 +303,7 @@ static const U32 S64_MAX_DIGITS = 20;                             ///< S64_MIN =
 #    define TNL_OS_STRING "iOS"
 #    define TNL_OS_IOS
 #  else
-#    define TNL_OS_STRING "OS X"
+#    define TNL_OS_STRING "MacOS X"
 #    define TNL_OS_MAC_OSX
 #  endif
 #  define FN_CDECL
