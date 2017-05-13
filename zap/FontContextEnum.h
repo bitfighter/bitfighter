@@ -25,15 +25,19 @@ namespace Zap
       TextEffectContext,       // Yard Sale!!! text and the like
       ScoreboardContext,       // In-game scoreboard font
       ScoreboardHeadlineContext, // Headline items on scoreboard
+      ShipNameContext,         // Ship's name/coords
       MotdContext,             // Scrolling MOTD on Main Menu
       InputContext,            // Input value font
       ReleaseVersionContext,   // Version number on title screen
       WebDingContext,          // Font for rendering database icon
       TeamShuffleContext,      // For /shuffle command
       ChatMessageContext,      // Font for rendering in-game chat messages
-      OldSkoolContext,         // Render things like in the good ol' days
       TimeLeftHeadlineContext, // Big text on indicator in lower right corner of game  
       TimeLeftIndicatorContext,// Smaller text on same indicator
+      EditorPointObjectLabelContext,
+      TextItemContext,         // In-game labeling text items
+      EditorVertexContext,     // Vertex numbers in editor
+      DefautlBadgeContext,     // Used for rendering badges
       EditorWarningContext     // Warning messages in editor
    };
 

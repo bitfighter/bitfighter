@@ -483,7 +483,7 @@ void EditorInstructionsUserInterface::renderPageWalls() const
    nvgStrokeWidth(nvg, RenderUtils::DEFAULT_LINE_WIDTH);
 
 
-   FontManager::pushFontContext(OldSkoolContext);
+   FontManager::pushFontContext(EditorVertexContext);
 
    for(S32 i = 0; i < points.size(); i++)
    {

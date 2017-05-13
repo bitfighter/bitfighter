@@ -217,10 +217,13 @@ void FontManager::setFontContext(FontContext fontContext)
          setFont(FontOrbitronMedStroke);
          return;
 
-      case OldSkoolContext:
+      case EditorVertexContext:
+      case TextItemContext:
          setFont(FontRoman);
          return;
 
+      case EditorPointObjectLabelContext:
+      case ShipNameContext:
       case MenuContext:
       case MotdContext:
       case HelpContext:
@@ -228,6 +231,7 @@ void FontManager::setFontContext(FontContext fontContext)
       case ReleaseVersionContext:
       case LevelInfoContext:
       case ScoreboardContext:
+      case DefautlBadgeContext:
       case MenuHeaderContext:
       case EditorWarningContext:
          setFont(FontPlay);

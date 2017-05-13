@@ -151,7 +151,7 @@ static void renderPlayerSymbol(ClientInfo *player, S32 x, S32 y, S32 size, const
    x -= RenderUtils::getStringWidth(size, adminSymbol) + Gap;  // Use admin symbol as it's the widest
 
    // Draw the player's experience level before we set the color
-   FontManager::pushFontContext(OldSkoolContext);
+   FontManager::pushFontContext(ScoreboardContext);
 
    static const S32 fontSize = 7;
 
@@ -253,7 +253,7 @@ static void renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y,
 static void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio)
 {
    // Default to vector font for badges
-   FontManager::pushFontContext(OldSkoolContext);
+   FontManager::pushFontContext(DefautlBadgeContext);
 
    F32 badgeRadius = 10.f * scaleRatio;
    S32 badgeOffset = S32(2 * badgeRadius) + 5;
