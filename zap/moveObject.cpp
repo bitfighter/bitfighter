@@ -1878,7 +1878,7 @@ TestItem *TestItem::clone() const
 }
 
 
-void TestItem::idle(BfObject::IdleCallPath path)
+void TestItem::idle(IdleCallPath path)
 {
    //if(path == ServerIdleMainLoop && (abs(getPos().x) > 1000 || abs(getPos().y > 1000)))
    //   deleteObject(100);
