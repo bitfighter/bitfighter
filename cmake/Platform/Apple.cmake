@@ -196,6 +196,7 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	
 	set(RES_COPY_CMD cp -rp ${resDir}* ${resourcesDir})
 	set(LIB_COPY_CMD rsync -av --exclude=*.h ${libDir}*.framework ${frameworksDir})
+	set(LIB_COPY_CMD_2 rsync -av ${libDir}*.dylib ${frameworksDir})
 	
 	# Icon file
 	set(COPY_RES_1 cp -rp ${OSX_BUILD_RESOURCE_DIR}/Bitfighter.icns ${resourcesDir})
@@ -223,6 +224,7 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	add_custom_command(TARGET ${targetName} POST_BUILD 
 		COMMAND ${RES_COPY_CMD}
 		COMMAND ${LIB_COPY_CMD}
+		COMMAND ${LIB_COPY_CMD_2}
 	)
 	
 	# Thin out our installed frameworks by running 'lipo' to clean out the unwanted 
