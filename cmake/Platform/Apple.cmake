@@ -81,7 +81,7 @@ endif()
 
 # OSX 10.8 and greater need this to find some dependencies
 if(OSX_DEPLOY_TARGET VERSION_GREATER "10.7")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -std=gnu++11")
 endif()
 
 

@@ -201,7 +201,7 @@ endif()
 
 # gtest is for compiling the bitfighter_test suite
 if(EXISTS "${CMAKE_SOURCE_DIR}/gtest")
-	add_subdirectory(gtest)
+	add_subdirectory(gtest EXCLUDE_FROM_ALL)
 endif()
 
 
