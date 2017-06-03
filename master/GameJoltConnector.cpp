@@ -101,7 +101,7 @@ static void onPlayerAuthenticatedOrQuit(const MasterSettings *settings, const Ma
    if(pid < 0)
    {
       logprintf(LogConsumer::LogError, "PANIC: Could not fork process! (%s)", verb.c_str());
-      exit(1);    
+      return;
    }
 
    if(pid > 0)
@@ -156,7 +156,7 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
    if(pid < 0)
    {
       logprintf(LogConsumer::LogError, "PANIC: Could not fork process! (ping)");
-      exit(1);
+      return;
    }
 
    if(pid > 0)
@@ -213,7 +213,7 @@ void onPlayerAwardedAchievement(const MasterSettings *settings, const string &aw
    if(pid < 0)
    {
       logprintf(LogConsumer::LogError, "PANIC: Could not fork process! (achievement)");
-      exit(1);    
+      return;
    }
 
    if(pid > 0)
