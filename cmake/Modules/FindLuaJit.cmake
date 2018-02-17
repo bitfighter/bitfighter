@@ -20,7 +20,7 @@ set(LUAJIT_SEARCH_PATHS
 find_path(LUAJIT_INCLUDE_DIR 
 	NAMES lua.h
 	HINTS ENV LUAJITDIR
-	PATH_SUFFIXES include include/luajit luajit luajit-2.0 luajit/src luajit-5_1-2.0
+	PATH_SUFFIXES include include/luajit luajit luajit-2.0 luajit-2.1 luajit/src luajit-5_1-2.0
 	PATHS ${LUAJIT_SEARCH_PATHS}
 )
 

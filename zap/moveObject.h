@@ -169,7 +169,7 @@ public:
    LUAW_DECLARE_CLASS(MoveObject);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    // Get/set object's velocity vector
@@ -261,7 +261,7 @@ public:
    LUAW_DECLARE_CLASS(MountableItem);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    virtual S32 lua_isOnShip(lua_State *L);                 // Is flag being carried by a ship?
@@ -377,7 +377,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Asteroid);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    S32 lua_getSizeIndex(lua_State *L);   // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
@@ -427,7 +427,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(TestItem);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -473,7 +473,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(ResourceItem);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 

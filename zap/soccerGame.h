@@ -120,7 +120,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(SoccerBallItem);
 
 	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+	static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
 };

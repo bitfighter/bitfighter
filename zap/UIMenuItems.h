@@ -140,7 +140,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(MenuItem);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -231,7 +231,7 @@ public:
    explicit ToggleMenuItem(lua_State *L);      // Constructor called from Lua
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -262,7 +262,7 @@ public:
    explicit YesNoMenuItem(lua_State *L);      // Constructor called from Lua
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
 };
@@ -320,7 +320,7 @@ public:
    explicit CounterMenuItem(lua_State *L);      // Constructor called from Lua
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -381,7 +381,7 @@ public:
    explicit FloatCounterMenuItem(lua_State *L);      // Constructor called from Lua
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -496,7 +496,7 @@ public:
    explicit TextEntryMenuItem(lua_State *L);      // Constructor called from Lua
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 

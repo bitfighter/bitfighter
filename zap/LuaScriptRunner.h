@@ -184,7 +184,7 @@ public:
 
    static const char *luaClassName;
    static const LuaFunctionProfile functionArgs[];
-   static const luaL_reg luaMethods[];              // Only used for non-static lua methods
+   static const luaL_Reg luaMethods[];              // Only used for non-static lua methods
 
    // Non-static methods
    S32 lua_pointCanSeePoint(lua_State *L);
@@ -228,14 +228,14 @@ public:
 
 
 #define GENERATE_LUA_METHODS_TABLE(class_, table_) \
-const luaL_reg class_::luaMethods[] =              \
+const luaL_Reg class_::luaMethods[] =              \
 {                                                  \
    table_(class_, LUA_METHOD_ITEM)                 \
    { NULL, NULL }                                  \
 }
 
 // Generates something like the following:
-// const luaL_reg Teleporter::luaMethods[] =
+// const luaL_Reg Teleporter::luaMethods[] =
 // {
 //       { "addDest",    luaW_doMethod<Teleporter, &Teleporter::lua_addDest >    }
 //       { "delDest",    luaW_doMethod<Teleporter, &Teleporter::lua_delDest >    }

@@ -102,7 +102,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Spawn);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -138,7 +138,7 @@ public:
    LUAW_DECLARE_ABSTRACT_CLASS(ItemSpawn);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    S32 lua_getSpawnTime(lua_State *L);
@@ -197,7 +197,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(AsteroidSpawn);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -251,7 +251,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(FlagSpawn);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 

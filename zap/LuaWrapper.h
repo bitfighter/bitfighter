@@ -945,7 +945,7 @@ void luaW_extend(lua_State* L)
 // Class to facilitate the semi-autonomous self-registration of LuaW classes.
 // To use this system, classes must implement the following:
 //    class name:  const char *luaClassName
-//    method list: const luaL_reg Item::luaMethods[] = { }
+//    method list: const luaL_Reg Item::luaMethods[] = { }
 // Then, somewhere in the class definition (.cpp file), add the line:
 //    REGISTER_LUA_CLASS(className);
 // or

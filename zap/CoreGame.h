@@ -214,7 +214,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(CoreItem);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    S32 lua_getCurrentHealth(lua_State *L);    // Current health = FullHealth - damage sustained
