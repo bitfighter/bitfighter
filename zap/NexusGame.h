@@ -220,7 +220,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(NexusZone);
 
 	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+	static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    S32 lua_isOpen(lua_State *L);

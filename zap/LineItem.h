@@ -99,7 +99,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(LineItem);
 
 	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+	static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    S32 lua_setGlobal(lua_State *L);

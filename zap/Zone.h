@@ -52,7 +52,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Zone);
 
 	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+	static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    int lua_containsPoint(lua_State *L);

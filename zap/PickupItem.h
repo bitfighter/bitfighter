@@ -62,7 +62,7 @@ public:
 	LUAW_DECLARE_CLASS(PickupItem);
 
 	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+	static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    S32 lua_isVis(lua_State *L);
@@ -109,7 +109,7 @@ public:
 	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(RepairItem);
 
 	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+	static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -146,7 +146,7 @@ public:
 	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(EnergyItem);
 
 	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+	static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 

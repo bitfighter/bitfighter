@@ -160,7 +160,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(WallItem);
 
 	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+	static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    // Get/set wall's thickness
@@ -223,7 +223,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(PolyWall);
 
 	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+	static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    // Override standard methods basically to add checks to keep us from modifying a wall already in the game

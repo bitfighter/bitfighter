@@ -90,7 +90,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Projectile);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    S32 lua_getRad(lua_State *L);      // Radius of item (returns number)
@@ -156,7 +156,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Burst);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    virtual S32 lua_getWeapon(lua_State *L);   // Return which type of weapon this is
@@ -219,7 +219,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Mine);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -281,7 +281,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(SpyBug);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -355,7 +355,7 @@ public:
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Seeker);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    virtual S32 lua_getWeapon(lua_State *L);   // Return which type of weapon this is

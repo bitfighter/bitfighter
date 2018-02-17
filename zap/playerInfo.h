@@ -22,7 +22,7 @@ public:
    LUAW_DECLARE_NON_INSTANTIABLE_CLASS(LuaPlayerInfo);
 
    static const char *luaClassName;
-   static const luaL_reg luaMethods[];
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    // Overridden by child classes, Is there a better way to do this?
