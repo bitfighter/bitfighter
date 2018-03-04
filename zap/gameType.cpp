@@ -186,29 +186,29 @@ Vector<string> GameType::getGameParameterMenuKeys()
 
 
 // Definitions for those items
-boost::shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
+shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
 {
    if(key == "Level Name")
    {
       MenuItem *item = new TextEntryMenuItem("Level Name:", mLevelName.c_str(), "", "The level's name -- pick a good one!", MAX_GAME_NAME_LEN);   
       item->setFilter(allAsciiFilter);
 
-      return boost::shared_ptr<MenuItem>(item);
+      return shared_ptr<MenuItem>(item);
    }
    else if(key == "Level Descr")
-      return boost::shared_ptr<MenuItem>(new TextEntryMenuItem("Level Descr:", 
+      return shared_ptr<MenuItem>(new TextEntryMenuItem("Level Descr:", 
                                                               mLevelDescription, 
                                                               "", 
                                                               "A brief description of the level",                     
                                                               MAX_GAME_DESCR_LEN));
    else if(key == "Level Credits")
-      return boost::shared_ptr<MenuItem>(new TextEntryMenuItem("Level By:",       
+      return shared_ptr<MenuItem>(new TextEntryMenuItem("Level By:",       
                                                               mLevelCredits.getString(), 
                                                               "", 
                                                               "Who created this level?",                                  
                                                               MAX_GAME_DESCR_LEN));
    else if(key == "Levelgen Script")
-      return boost::shared_ptr<MenuItem>(new TextEntryMenuItem("Levelgen Script:", 
+      return shared_ptr<MenuItem>(new TextEntryMenuItem("Levelgen Script:", 
                                                               getScriptLine(), 
                                                               "<None>", 
                                                               "Levelgen script & args to be run when level is loaded",  
@@ -216,12 +216,12 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
    else if(key == "Game Time")
    {
       S32 gameTime = isTimeUnlimited() ? 0 : (getTotalGameTimeInMs() + 500) / 1000;
-      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem("Game Time:", gameTime, MaxMenuScore*60, "Unlimited", "Time game will last"));
+      return shared_ptr<MenuItem>(new TimeCounterMenuItem("Game Time:", gameTime, MaxMenuScore*60, "Unlimited", "Time game will last"));
    }
    else if(key == "Win Score")
-      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 1, 1, MaxMenuScore, "points", "", "Game ends when one team gets this score"));
+      return shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 1, 1, MaxMenuScore, "points", "", "Game ends when one team gets this score"));
    else if(key == "Min Players")
-      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Min Players:",       
+      return shared_ptr<MenuItem>(new CounterMenuItem("Min Players:",       
                                                              mMinRecPlayers,     // value
                                                              1,                  // increment
                                                              0,                  // min val
@@ -230,7 +230,7 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
                                                              "N/A", 
                                                              "Min. players you would recommend for this level (to help server select the next level)"));
    else if(key == "Max Players")
-      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Max Players:",       
+      return shared_ptr<MenuItem>(new CounterMenuItem("Max Players:",       
                                                              mMaxRecPlayers,     // value
                                                              1,                  // increment
                                                              0,                  // min val
@@ -239,17 +239,17 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
                                                              "N/A",
                                                              "Max. players you would recommend for this level (to help server select the next level)"));
    else if(key == "Allow Engr")
-      return boost::shared_ptr<MenuItem>(new YesNoMenuItem("Allow Engineer Module:",       
+      return shared_ptr<MenuItem>(new YesNoMenuItem("Allow Engineer Module:",       
                                                            mEngineerEnabled,
                                                            "Allow players to use the Engineer module?"));
    else if(key == "Allow Robots")
-         return boost::shared_ptr<MenuItem>(new YesNoMenuItem("Allow Robots:",
+         return shared_ptr<MenuItem>(new YesNoMenuItem("Allow Robots:",
                                                               mBotsAllowed,
                                                               "Allow players to add robots?"));
    else
    {
       TNLAssert(false, "Invalid menu key!");
-      return boost::shared_ptr<MenuItem>();     // NULLish pointer
+      return shared_ptr<MenuItem>();     // NULLish pointer
    }
 }
 

@@ -12,9 +12,8 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 
-#include <boost/shared_ptr.hpp>
 #include <string>
-
+#include <memory>
 
 using namespace TNL;
 using namespace std;
@@ -182,7 +181,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-typedef boost::shared_ptr<LevelSource> LevelSourcePtr;
+typedef shared_ptr<LevelSource> LevelSourcePtr;
 
 
 }

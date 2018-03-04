@@ -25,9 +25,8 @@
 #include "tnlThread.h"
 #include "tnlNonce.h"
 
-#include <boost/smart_ptr/shared_ptr.hpp>
-
 #include <string>
+#include <memory>
 
 namespace Master
 {
@@ -219,7 +218,7 @@ protected:
       DeleteRef(BfObject *o = NULL, U32 d = 0);
    };
 
-   boost::shared_ptr<GridDatabase> mGameObjDatabase;                // Database for all normal objects
+   shared_ptr<GridDatabase> mGameObjDatabase;                // Database for all normal objects
 
    Vector<DeleteRef> mPendingDeleteObjects;
    Vector<SafePtr<BfObject> > mScopeAlwaysList;

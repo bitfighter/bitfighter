@@ -23,8 +23,7 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 using namespace std;
 
@@ -120,16 +119,16 @@ private:
 
    SymbolString mLingeringMessage;
 
-   Vector<boost::shared_ptr<GridDatabase> > mUndoItems;  // Undo/redo history 
+   Vector<shared_ptr<GridDatabase> > mUndoItems;  // Undo/redo history 
    Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
    Point mSnapDelta;                            // For tracking how far from the snap point our cursor is
    Vector<Point> mMoveOrigins;
 
-   boost::shared_ptr<GridDatabase> mEditorDatabase;
+   shared_ptr<GridDatabase> mEditorDatabase;
 
-   void setDatabase(boost::shared_ptr<GridDatabase> database);
+   void setDatabase(shared_ptr<GridDatabase> database);
 
-   Vector<boost::shared_ptr<BfObject> > mDockItems;    // Items sitting in the dock
+   Vector<shared_ptr<BfObject> > mDockItems;    // Items sitting in the dock
 
    Vector<Vector<string> > mMessageBoxQueue;
 
@@ -151,7 +150,7 @@ private:
    void undo(bool addToRedoStack);     // Restore mItems to latest undo state
    void redo();                        // Redo latest undo
 
-   Vector<boost::shared_ptr<BfObject> > mClipboard;    // Items on clipboard
+   Vector<shared_ptr<BfObject> > mClipboard;    // Items on clipboard
 
    bool mLastUndoStateWasBarrierWidthChange;
 
@@ -202,7 +201,7 @@ private:
    bool mQuitLocked;
    string mQuitLockedMessage;
 
-   boost::shared_ptr<EditorPlugin> mPluginRunner;
+   shared_ptr<EditorPlugin> mPluginRunner;
 
    Vector<string> mLevelErrorMsgs, mLevelWarnings;
    Vector<PluginInfo> mPluginInfos;
@@ -278,8 +277,8 @@ private:
 
    void resnapAllEngineeredItems(GridDatabase *database, bool onlyUnsnapped);
 
-   boost::scoped_ptr<SimpleTextEntryMenuUI> mSimpleTextEntryMenu;
-   boost::scoped_ptr<PluginMenuUI> mPluginMenu;      
+   unique_ptr<SimpleTextEntryMenuUI> mSimpleTextEntryMenu;
+   unique_ptr<PluginMenuUI> mPluginMenu;
    map<string, Vector<string> > mPluginMenuValues;
 
    void showCouldNotFindScriptMessage(const string &scriptName);
@@ -447,7 +446,7 @@ public:
    Point snapPointToLevelGrid(Point const &p);
 
    void markSelectedObjectsAsUnsnapped(const Vector<DatabaseObject *> *objList);
-   void markSelectedObjectsAsUnsnapped(const Vector<boost::shared_ptr<BfObject> > &objList);
+   void markSelectedObjectsAsUnsnapped(const Vector<shared_ptr<BfObject> > &objList);
 
 
    bool getSnapToWallCorners();     // Returns true if wall corners are active snap targets

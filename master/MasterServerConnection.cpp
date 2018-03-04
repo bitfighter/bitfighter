@@ -15,8 +15,7 @@
 #include "../zap/stringUtils.h"
 #include "../zap/LevelDatabase.h"
 
-
-#include "../boost/boost/shared_ptr.hpp"
+#include <memory>
 
 using namespace DbWriter;
 
@@ -978,7 +977,7 @@ struct HighScoresReader : public MasterThreadEntry
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-typedef map<U32, boost::shared_ptr<TotalLevelRating> > TotalLevelRatingsMap;
+typedef map<U32, shared_ptr<TotalLevelRating> > TotalLevelRatingsMap;
 static TotalLevelRatingsMap totalLevelRatingsCache;
 
    
@@ -1028,7 +1027,7 @@ struct TotalLevelRatingsReader : public MasterThreadEntry
 ////////////////////////////////////////
 
 typedef pair<U32, StringTableEntry> DbIdPlayerNamePair;
-typedef map<DbIdPlayerNamePair, boost::shared_ptr<PlayerLevelRating> > PlayerLevelRatingsMap;
+typedef map<DbIdPlayerNamePair, shared_ptr<PlayerLevelRating> > PlayerLevelRatingsMap;
 static PlayerLevelRatingsMap playerLevelRatingsCache;
 
 
@@ -1101,13 +1100,13 @@ TotalLevelRating *MasterServerConnection::getLevelRating(U32 databaseId)
    if(!LevelDatabase::isLevelInDatabase(databaseId))
       return NULL;
 
-   // Note that while map[xxx] will create an entry if it does not exist, in this case, it will create a boost::shared_ptr
+   // Note that while map[xxx] will create an entry if it does not exist, in this case, it will create a shared_ptr
    // wrapping a NULL object.  So rating, which points to that object, will also be NULL.  Viva la confusion!
    TotalLevelRating *rating = totalLevelRatingsCache[databaseId].get();
 
    if(!rating)    // i.e. not in cache
    {
-      boost::shared_ptr<TotalLevelRating> newRating = boost::shared_ptr<TotalLevelRating>(new TotalLevelRating());
+      shared_ptr<TotalLevelRating> newRating = shared_ptr<TotalLevelRating>(new TotalLevelRating());
       totalLevelRatingsCache[databaseId] = newRating;
       rating = newRating.get();
    }
@@ -1131,7 +1130,7 @@ TotalLevelRating *MasterServerConnection::getLevelRating(U32 databaseId)
 
 static PlayerLevelRating *createNewPlayerRating(U32 databaseId, const StringTableEntry &playerName)
 {
-   boost::shared_ptr<PlayerLevelRating> newRating = boost::shared_ptr<PlayerLevelRating>(new PlayerLevelRating());
+   shared_ptr<PlayerLevelRating> newRating = shared_ptr<PlayerLevelRating>(new PlayerLevelRating());
    playerLevelRatingsCache[DbIdPlayerNamePair(databaseId, playerName)] = newRating;
 
    PlayerLevelRating *rating = newRating.get();
@@ -1151,7 +1150,7 @@ PlayerLevelRating *MasterServerConnection::getLevelRating(U32 databaseId, const 
    if(!LevelDatabase::isLevelInDatabase(databaseId))
       return NULL;
 
-   // Note that while map[xxx] will create an entry if it does not exist, in this case, it will create a boost::shared_ptr
+   // Note that while map[xxx] will create an entry if it does not exist, in this case, it will create a shared_ptr
    // wrapping a NULL object.  So rating, which points to that object, will also be NULL.  Viva la confusion!
    PlayerLevelRating *rating = playerLevelRatingsCache[DbIdPlayerNamePair(databaseId, playerName)].get();
 

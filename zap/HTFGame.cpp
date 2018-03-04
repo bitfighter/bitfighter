@@ -77,10 +77,10 @@ Vector<string> HTFGameType::getGameParameterMenuKeys()
 
 
 // Definitions for those items
-boost::shared_ptr<MenuItem> HTFGameType::getMenuItem(const string &key)
+shared_ptr<MenuItem> HTFGameType::getMenuItem(const string &key)
 {
    if(key == "Point Earn Rate")
-      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Point Earn Rate:", getFlagScore(), 1, 1, MaxMenuScore,
+      return shared_ptr<MenuItem>(new CounterMenuItem("Point Earn Rate:", getFlagScore(), 1, 1, MaxMenuScore,
                                                              "points per minute", "", "Rate zone holding the flag accrues points"));
    else
       return Parent::getMenuItem(key);

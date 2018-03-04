@@ -305,7 +305,7 @@ public:
 };
 
 
-typedef boost::shared_ptr<GameSettings> GameSettingsPtr;
+typedef shared_ptr<GameSettings> GameSettingsPtr;
 
 
 };

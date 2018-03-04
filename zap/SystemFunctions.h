@@ -11,8 +11,8 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 
-#include <boost/shared_ptr.hpp>
 #include <string>
+#include <memory>
 
 using namespace TNL;
 using namespace std;
@@ -24,7 +24,7 @@ class GameSettings;
 class ServerGame;
 
 // This is a duplicate def also found in GameSettings.h.  Need to get rid of this one!
-typedef boost::shared_ptr<GameSettings> GameSettingsPtr;
+typedef shared_ptr<GameSettings> GameSettingsPtr;
 
 
 extern void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool testMode, bool dedicatedServer, bool hostOnServer = false);

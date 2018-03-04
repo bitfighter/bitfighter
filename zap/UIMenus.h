@@ -15,7 +15,7 @@
 
 #include "tnlNetConnection.h"    // for TerminationReason
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 
 namespace Zap
@@ -47,7 +47,7 @@ private:
    virtual void initialize();
 
 protected:
-   Vector<boost::shared_ptr<MenuItem> > mMenuItems;
+   Vector<shared_ptr<MenuItem> > mMenuItems;
 
    S32 getOffset();                                   // Calculates index of topmost visible item
    S32 getBaseYStart() const;                         // Base calculation for getYStart()
@@ -85,7 +85,7 @@ public:
 
    void clearMenuItems();
    S32 addMenuItem(MenuItem *menuItem);
-   void addWrappedMenuItem(boost::shared_ptr<MenuItem> menuItem);
+   void addWrappedMenuItem(shared_ptr<MenuItem> menuItem);
    MenuItem *getMenuItem(S32 index);
    S32 getMenuItemCount();
 

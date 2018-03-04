@@ -20,8 +20,6 @@
 #include "tnlNetStringTable.h"
 #include "tnlVector.h"
 
-#include <boost/shared_ptr.hpp>
-
 #include <string>
 #include <map>
 

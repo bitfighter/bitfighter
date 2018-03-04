@@ -19,9 +19,9 @@
 #include "Timer.h"
 
 #include <string>
-#include <boost/shared_ptr.hpp>
 
 #include <map>
+#include <memory>
 
 
 namespace Zap
@@ -275,7 +275,7 @@ public:
 
 #ifndef ZAP_DEDICATED
    virtual Vector<string> getGameParameterMenuKeys();
-   virtual boost::shared_ptr<MenuItem> getMenuItem(const string &key);
+   virtual shared_ptr<MenuItem> getMenuItem(const string &key);
    virtual bool saveMenuItem(const MenuItem *menuItem, const string &key);
 #endif
 

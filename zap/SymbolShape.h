@@ -16,8 +16,7 @@
 #include "tnlVector.h"
 #include "tnlTypes.h"
 
-#include <boost/shared_ptr.hpp>
-
+#include <memory>
 
 using namespace TNL;
 
@@ -71,7 +70,7 @@ public:
 ////////////////////////////////////////
 
 
-typedef boost::shared_ptr<SymbolShape> SymbolShapePtr;
+typedef shared_ptr<SymbolShape> SymbolShapePtr;
 
 
 ////////////////////////////////////////
@@ -399,17 +398,17 @@ class SymbolString : public SymbolShape      // So a symbol string can hold othe
 protected:
    Alignment mAlignment;
 
-   Vector<boost::shared_ptr<SymbolShape> > mSymbols;
+   Vector<shared_ptr<SymbolShape> > mSymbols;
 
 public:
-   SymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols, Alignment alignment = AlignmentNone);
-   SymbolString(const        boost::shared_ptr<SymbolShape>   &symbol,  Alignment alignment = AlignmentNone);
+   SymbolString(const Vector<shared_ptr<SymbolShape> > &symbols, Alignment alignment = AlignmentNone);
+   SymbolString(const        shared_ptr<SymbolShape>   &symbol,  Alignment alignment = AlignmentNone);
    SymbolString(const string &str, const InputCodeManager *inputCodeManager, FontContext context, 
                 S32 textSize, bool blockMode, Alignment alignment = AlignmentNone);
    SymbolString();                     // Constructor (can't use until you've setSymbols)
    virtual ~SymbolString();            // Destructor
 
-   void setSymbols(const Vector<boost::shared_ptr<SymbolShape> > &symbols);
+   void setSymbols(const Vector<shared_ptr<SymbolShape> > &symbols);
    void setSymbolsFromString(const string &string, const InputCodeManager *inputCodeManager,
                              FontContext fontContext, S32 textSize, const Color *color);
    void clear();
@@ -456,7 +455,7 @@ class LayeredSymbolString : public SymbolString
    typedef SymbolString Parent;
 
 public:
-   LayeredSymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols);  // Constructor
+   LayeredSymbolString(const Vector<shared_ptr<SymbolShape> > &symbols);  // Constructor
    virtual ~LayeredSymbolString();                                               // Destructor
 
    S32 render(F32 x, F32 y, Alignment alignment, S32 blockWidth = -1) const;

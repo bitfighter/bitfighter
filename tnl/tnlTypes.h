@@ -280,7 +280,7 @@ static const U32 S64_MAX_DIGITS = 20;                             ///< S64_MIN =
 #  define FN_CDECL __cdecl
 #endif
 
-#elif defined(linux)
+#elif defined(linux) || defined(__linux__)
 #  define TNL_OS_STRING "Linux"
 #  define TNL_OS_LINUX
 #  define FN_CDECL

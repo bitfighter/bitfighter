@@ -64,8 +64,6 @@
 #include <set>
 
 
-using namespace boost;
-
 namespace Zap
 {
 
@@ -145,7 +143,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mHitVertex = NONE;
    mEdgeHit   = NONE;
 
-   mEditorDatabase = boost::shared_ptr<GridDatabase>(new GridDatabase());
+   mEditorDatabase = shared_ptr<GridDatabase>(new GridDatabase());
 
    setNeedToSave(false);
 
@@ -182,10 +180,10 @@ F32 EditorUserInterface::getGridSize() const
 }
 
 
-void EditorUserInterface::setDatabase(boost::shared_ptr<GridDatabase> database)
+void EditorUserInterface::setDatabase(shared_ptr<GridDatabase> database)
 {
    TNLAssert(database.get(), "Database should not be NULL!");
-   mEditorDatabase = boost::dynamic_pointer_cast<GridDatabase>(database);
+   mEditorDatabase = dynamic_pointer_cast<GridDatabase>(database);
 }
 
 
@@ -200,7 +198,7 @@ void EditorUserInterface::onQuitted()
 void EditorUserInterface::addDockObject(BfObject *object, F32 xPos, F32 yPos)
 {
    object->prepareForDock(getGame(), Point(xPos, yPos), mCurrentTeam);     // Prepare object   
-   mDockItems.push_back(boost::shared_ptr<BfObject>(object));          // Add item to our list of dock objects
+   mDockItems.push_back(shared_ptr<BfObject>(object));          // Add item to our list of dock objects
 }
 
 
@@ -328,7 +326,7 @@ void EditorUserInterface::saveUndoState(bool forceSelectionOfTargetObject)
 
    newDB->copyObjects(getDatabase());
 
-   mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<GridDatabase>(newDB);  
+   mUndoItems[mLastUndoIndex % UNDO_STATES] = shared_ptr<GridDatabase>(newDB);  
 
    mLastUndoIndex++;
    mLastRedoIndex = mLastUndoIndex;
@@ -855,7 +853,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    // Create new plugin, will be deleted by boost
    EditorPlugin *plugin = new EditorPlugin(fullName, args, mLoadTarget, getGame());
 
-   mPluginRunner = boost::shared_ptr<EditorPlugin>(plugin);
+   mPluginRunner = shared_ptr<EditorPlugin>(plugin);
 
    // Loads the script and runs it to get everything loaded into memory.  Does not run main().
    // We won't cache scripts here because the performance impact should be relatively small, and it will
@@ -868,7 +866,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    }
 
    string title;
-   Vector<boost::shared_ptr<MenuItem> > menuItems;
+   Vector<shared_ptr<MenuItem> > menuItems;
 
    bool error = plugin->runGetArgsMenu(title, menuItems);     // Fills menuItems
 
@@ -1609,7 +1607,7 @@ static void markSelectedObjectAsUnsnapped_done(bool calledDuringDragInitializati
 }
 
 
-void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<boost::shared_ptr<BfObject> > &objList)
+void EditorUserInterface::markSelectedObjectsAsUnsnapped(const Vector<shared_ptr<BfObject> > &objList)
 {
    markSelectedObjectsAsUnsnapped_init(objList.size(), true);
 
@@ -2444,7 +2442,7 @@ void EditorUserInterface::copySelection()
       if(obj->isSelected())
       {
          BfObject *objcopy = obj->copy();
-         mClipboard.push_back(boost::shared_ptr<BfObject>(objcopy));
+         mClipboard.push_back(shared_ptr<BfObject>(objcopy));
       }
    }
 }
@@ -4534,7 +4532,7 @@ void EditorUserInterface::startSimpleTextEntryMenu(SimpleTextEntryType entryType
    if(callback != NULL)  // Add a callback for IDs to check for duplicates
       menuItem->setTextEditedCallback(callback);
 
-   // Create our menu, use scoped_ptr since we only need once instance of this menu
+   // Create our menu, use unique_ptr since we only need once instance of this menu
    mSimpleTextEntryMenu.reset(new SimpleTextEntryMenuUI(getGame(), menuTitle, entryType));
    mSimpleTextEntryMenu->addMenuItem(menuItem);                // addMenuItem wraps the menu item in a smart pointer
    mSimpleTextEntryMenu->setAssociatedObject(selectedObject);  // Add our object for usage in the menu item callback
@@ -5246,7 +5244,7 @@ void EditorUserInterface::findPlugins()
    {
       // Try to find the title
       string title;
-      Vector<boost::shared_ptr<MenuItem> > menuItems;  // Unused
+      Vector<shared_ptr<MenuItem> > menuItems;  // Unused
 
       EditorPlugin plugin(dirName + "/" + plugins[i], Vector<string>(), mLoadTarget, getGame());
 

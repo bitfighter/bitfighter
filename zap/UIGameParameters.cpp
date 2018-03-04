@@ -111,7 +111,7 @@ void GameParamUserInterface::clearCurrentGameTypeParams()
    {
       MenuItemMap::iterator iter = mMenuItemMap.find(keys[i]);
 
-      boost::shared_ptr<MenuItem> menuItem;
+      shared_ptr<MenuItem> menuItem;
 
       if(iter != mMenuItemMap.end())      
          mMenuItemMap.erase(iter);
@@ -183,7 +183,7 @@ void GameParamUserInterface::updateMenuItems()
    {
       MenuItemMap::iterator iter = mMenuItemMap.find(keys[i]);
 
-      boost::shared_ptr<MenuItem> menuItem;
+      shared_ptr<MenuItem> menuItem;
 
       if(iter != mMenuItemMap.end())      // What is this supposed to do?  I can't seem to make this condition occur.
          menuItem = iter->second;
@@ -192,7 +192,7 @@ void GameParamUserInterface::updateMenuItems()
          menuItem = gameType->getMenuItem(keys[i]);
          TNLAssert(menuItem, "Failed to make a new menu item!");
 
-         mMenuItemMap.insert(pair<string, boost::shared_ptr<MenuItem> >(keys[i], menuItem));
+         mMenuItemMap.insert(pair<string, shared_ptr<MenuItem> >(keys[i], menuItem));
       }
 
       addWrappedMenuItem(menuItem);

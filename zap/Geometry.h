@@ -17,8 +17,6 @@ namespace TNL
    class BitStream;
 }
 
-namespace boost{ template<class T> class shared_ptr; }      // or use #include <boost/smart_ptr/shared_ptr.hpp>
-
 using namespace std;
 using namespace TNL;
 

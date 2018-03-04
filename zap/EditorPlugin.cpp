@@ -48,7 +48,7 @@ const char *EditorPlugin::getErrorMessagePrefix() { return "***PLUGIN ERROR***";
 
 
 // Run the script's getArgsMenu() function -- return true if error, false if not
-bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<boost::shared_ptr<MenuItem> > &menuItems)
+bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<shared_ptr<MenuItem> > &menuItems)
 {
 #ifdef ZAP_DEDICATED
    return false;
@@ -167,7 +167,7 @@ bool EditorPlugin::prepareEnvironment()
 
 
 // Pulls values out of the table at specified, verifies that they are MenuItems, and adds them to the menuItems vector
-bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<boost::shared_ptr<MenuItem> > &menuItems)
+bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<shared_ptr<MenuItem> > &menuItems)
 {
 #ifdef ZAP_DEDICATED
    THROW_LUA_EXCEPTION(L, "Dedicated server should not use MenuItem");
@@ -215,7 +215,7 @@ bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const cha
          THROW_LUA_EXCEPTION(L, msg);
       }
 
-      menuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));   // Add the MenuItem to our list
+      menuItems.push_back(shared_ptr<MenuItem>(menuItem));   // Add the MenuItem to our list
       lua_pop(L, 1);                   // Remove extracted element from stack                                -- menuName table table nextIndex
    }                                                                                                   // OR -- menuName table 0 on last iteration
 

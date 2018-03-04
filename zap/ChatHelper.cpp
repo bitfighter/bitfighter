@@ -23,6 +23,8 @@
 #include "OpenglUtils.h"
 #include "stringUtils.h"
 
+#include <algorithm>
+
 namespace Zap
 {
    CommandInfo chatCmds[] = {   
