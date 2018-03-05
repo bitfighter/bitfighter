@@ -9,15 +9,13 @@
 
 #include "tnlLog.h"
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-
-#include <fstream>
-#include <iostream>
-
-using namespace boost::posix_time;
+#include <chrono>
+#include <ctime>
 
 namespace Zap
 {
+
+using namespace chrono;
 
 // Constructor
 BanList::BanList(const string &iniDir)
@@ -48,15 +46,39 @@ string addressToString(const Address &address)
 }
 
 
-// Custom toString method so we don't have to compile extra boost sources
-// This is super slow because of using streams...  not sure how to fix
-string ptimeToIsoString(const ptime &ptime)
+// Return the current time
+string timeNowToISOString()
 {
-   ostringstream formatter;
-   formatter.imbue(locale(cout.getloc(), new boost::posix_time::time_facet("%Y%m%dT%H%M%S")));
-   formatter << ptime;
+   // Get current time
+   time_t now = system_clock::to_time_t(system_clock::now());
 
-   return formatter.str();
+   // Convert to ISO string
+   char buf[sizeof "11111111T111111"];
+   strftime(buf, sizeof buf, "%Y%m%dT%H%M%S", localtime(&now));
+
+   return string(buf);
+}
+
+
+// Convert our ISO time string into a time_t object
+time_t ISOStringToTime(const string &timeString)
+{
+   int year, month, day, hh, mm, ss;
+   struct tm when = {0};
+
+   // Parse string that matches timeNowToISOString()
+   sscanf(timeString.c_str(), "%04d%02d%02dT%02d%02d%02d", &year, &month, &day, &hh, &mm, &ss);
+
+   when.tm_year = year-1900;  // Funny quirk with <ctime>
+   when.tm_mon = month-1;     // Another quirk
+   when.tm_mday = day;
+   when.tm_hour = hh;
+   when.tm_min = mm;
+   when.tm_sec = ss;
+
+   time_t converted = mktime(&when);
+
+   return converted;
 }
 
 
@@ -66,7 +88,7 @@ void BanList::addToBanList(const Address &address, S32 durationMinutes, bool non
    banItem.durationMinutes = itos(durationMinutes);
    banItem.address = addressToString(address);
    banItem.nickname = nonAuthenticatedOnly ? "*NonAuthenticated" : "*";
-   banItem.startDateTime = ptimeToIsoString(second_clock::local_time());
+   banItem.startDateTime = timeNowToISOString();
 
    serverBanList.push_back(banItem);
 }
@@ -77,7 +99,7 @@ void BanList::addPlayerNameToBanList(const char *playerName, S32 durationMinutes
    banItem.durationMinutes = itos(durationMinutes);
    banItem.address = "*";
    banItem.nickname = playerName;
-   banItem.startDateTime = ptimeToIsoString(second_clock::local_time());
+   banItem.startDateTime = timeNowToISOString();
 
    serverBanList.push_back(banItem);
 }
@@ -118,18 +140,19 @@ bool BanList::processBanListLine(const string &line)
    // nickname could be anything...
 
    // Validate date
-   ptime tempDateTime;
+   time_t tempDateTime = 0;
+
    // If exception is thrown, then date didn't parse correctly
    try
    {
-      tempDateTime = from_iso_string(startDateTime);
+      tempDateTime = ISOStringToTime(startDateTime);
    }
    catch (...)
    {
       return false;
    }
-   // If date time ends up equaling empty ptime, then it didn't parse right either
-   if (tempDateTime == ptime())
+   // If date time ends up equaling empty time_t, then it didn't parse right either
+   if (tempDateTime == 0)
       return false;
 
    // Validate duration
@@ -165,7 +188,7 @@ string BanList::banItemToString(BanItem *banItem)
 bool BanList::isBanned(const Address &address, const string &nickname, bool isAuthenticated)
 {
    string addressString = addressToString(address);
-   ptime currentTime = second_clock::local_time();
+   auto currentTime = system_clock::now();
 
    for (S32 i = 0; i < serverBanList.size(); i++)
    {
@@ -182,7 +205,14 @@ bool BanList::isBanned(const Address &address, const string &nickname, bool isAu
          continue;
 
       // Check time
-      if (from_iso_string(serverBanList[i].startDateTime) + minutes(atoi(serverBanList[i].durationMinutes.c_str())) < currentTime)
+      time_t banTime = ISOStringToTime(serverBanList[i].startDateTime);
+      auto chronoBanTime = system_clock::from_time_t(banTime);
+      auto timeDifference = duration_cast<minutes>(currentTime - chronoBanTime).count();
+
+      int banDurationMinutes = atoi(serverBanList[i].durationMinutes.c_str());
+
+      // See if ban has run out
+      if (timeDifference < banDurationMinutes)
          continue;
 
       // If we get here, that means nickname and IP address matched and we are still in the

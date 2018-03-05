@@ -850,7 +850,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    }
 
 
-   // Create new plugin, will be deleted by boost
+   // Create new plugin, will be deleted by shared_ptr
    EditorPlugin *plugin = new EditorPlugin(fullName, args, mLoadTarget, getGame());
 
    mPluginRunner = shared_ptr<EditorPlugin>(plugin);
