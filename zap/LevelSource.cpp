@@ -17,7 +17,7 @@
 
 #include <fstream>
 #include <sstream>
-
+#include <algorithm>
 
 namespace Zap
 {

@@ -746,7 +746,7 @@ bool ServerGame::loadNextLevel(S32 nextLevel)
 // Returns true if the level is successfully loaded, false if it wasn't
 bool ServerGame::loadLevel()
 {
-   mLevel = boost::shared_ptr<Level>(mLevelSource->getLevel(mCurrentLevelIndex));
+   mLevel = shared_ptr<Level>(mLevelSource->getLevel(mCurrentLevelIndex));
 
    TNLAssert(!mLevel->getAddedToGame(), "Can't reuse Levels!");
 

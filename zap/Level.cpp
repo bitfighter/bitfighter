@@ -573,13 +573,13 @@ namespace Zap
 
 
    // Used when linking the teamManager used by the dock to that used by the level we're editing
-   void Level::setTeamManager(boost::shared_ptr<TeamManager> teamManager)
+   void Level::setTeamManager(shared_ptr<TeamManager> teamManager)
    {
       mTeamManager = teamManager;
    }
 
 
-   boost::shared_ptr<TeamManager> Level::getTeamManager() const
+   shared_ptr<TeamManager> Level::getTeamManager() const
    {
       return mTeamManager;
    }

@@ -164,7 +164,7 @@ void EditorUserInterface::geomChanged(BfObject *obj)
 }
 
 
-void EditorUserInterface::setLevel(const boost::shared_ptr<Level> &level)
+void EditorUserInterface::setLevel(const shared_ptr<Level> &level)
 {
    TNLAssert(level.get(), "Level should not be NULL!");
    mLevel = level;
@@ -429,7 +429,7 @@ void EditorUserInterface::loadLevel(bool isReload)
    Level *level = new Level();
    bool isNewLevel = !level->loadLevelFromFile(fileName, -1);   // load returns true if fileName exists, false if not
 
-   setLevel(boost::shared_ptr<Level>(level));
+   setLevel(shared_ptr<Level>(level));
 
    mLoadTarget = level;
 
@@ -688,10 +688,10 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
       return;
    }
 
-   // Create new plugin, will be deleted by boost
+   // Create new plugin, will be deleted by shared_ptr
    EditorPlugin *plugin = new EditorPlugin(fullName, args, mLoadTarget, getGame());
 
-   mPluginRunner = boost::shared_ptr<EditorPlugin>(plugin);
+   mPluginRunner = shared_ptr<EditorPlugin>(plugin);
 
    // Loads the script and runs it to get everything loaded into memory.  Does not run main().
    // We won't cache scripts here because the performance impact should be relatively small, and it will
@@ -704,7 +704,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    }
 
    string title;
-   Vector<boost::shared_ptr<MenuItem> > menuItems;
+   Vector<shared_ptr<MenuItem> > menuItems;
 
    bool error = plugin->runGetArgsMenu(title, menuItems);   // Fills menuItems
 
@@ -2417,7 +2417,7 @@ void EditorUserInterface::copySelection()
       if(obj->isSelected())
       {
          BfObject *objcopy = obj->copy();
-         mClipboard.push_back(boost::shared_ptr<BfObject>(objcopy));
+         mClipboard.push_back(shared_ptr<BfObject>(objcopy));
       }
    }
 }
@@ -5421,7 +5421,7 @@ void EditorUserInterface::findPlugins()
    {
       // Try to find the title
       string title;
-      Vector<boost::shared_ptr<MenuItem> > menuItems;  // Unused
+      Vector<shared_ptr<MenuItem> > menuItems;  // Unused
 
       EditorPlugin plugin(fileList.getCurrentFullFilename(), Vector<string>(), mLoadTarget, getGame());
 

@@ -708,7 +708,7 @@ void GameUserInterface::renderMsgBox(const string *message, S32 msgLines, const 
       messages.push_back(SymbolShapePtr(new SymbolString(message[i], NULL, ErrorMsgContext, 30, msgColor, true)));
 
    // Use empty shared pointer instead of NULL
-   renderMessageBox(boost::shared_ptr<SymbolShape>(), boost::shared_ptr<SymbolShape>(),
+   renderMessageBox(shared_ptr<SymbolShape>(), shared_ptr<SymbolShape>(),
          messages.address(), messages.size(), -30, 2);
 }
 

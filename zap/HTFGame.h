@@ -33,7 +33,7 @@ public:
 #ifndef ZAP_DEDICATED
    // Editor menu
    const Vector<string> *getGameParameterMenuKeys() const;
-   boost::shared_ptr<MenuItem> getMenuItem(const string &key) const;
+   shared_ptr<MenuItem> getMenuItem(const string &key) const;
    bool saveMenuItem(const MenuItem *menuItem, const string &key);
 #endif
 

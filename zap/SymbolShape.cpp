@@ -836,7 +836,7 @@ void SymbolString::symbolParse(const InputCodeManager *inputCodeManager, const s
 ////////////////////////////////////////
 
 // Constructor
-LayeredSymbolString::LayeredSymbolString(const Vector<boost::shared_ptr<SymbolShape> > &symbols) :
+LayeredSymbolString::LayeredSymbolString(const Vector<shared_ptr<SymbolShape> > &symbols) :
                   Parent(symbols)
 {
    mWidth = computeLayeredWidth(symbols);

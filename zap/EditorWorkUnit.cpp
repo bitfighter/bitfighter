@@ -152,7 +152,7 @@ EditorAction EditorWorkUnitDelete::getAction() const
 ////////////////////////////////////////
 //
 //// Helper function -- iterates through all objects in list and saves their geometries for posterity
-//static void getGeometries(const Vector<boost::shared_ptr<BfObject> > &objects, Vector<Vector<Point> > &geoms)
+//static void getGeometries(const Vector<shared_ptr<BfObject> > &objects, Vector<Vector<Point> > &geoms)
 //{
 //   geoms.reserve(objects.size());
 //

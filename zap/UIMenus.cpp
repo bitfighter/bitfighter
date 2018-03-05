@@ -42,7 +42,7 @@ namespace Zap
 
 
 // Sorts alphanumerically by menuItem's prompt  ==> used for getting levels in the right order and such
-S32 QSORT_CALLBACK menuItemValueSort(boost::shared_ptr<MenuItem> *a, boost::shared_ptr<MenuItem> *b)
+S32 QSORT_CALLBACK menuItemValueSort(shared_ptr<MenuItem> *a, shared_ptr<MenuItem> *b)
 {
    return stricmp((*a)->getPrompt().c_str(), (*b)->getPrompt().c_str());
 }
@@ -128,14 +128,14 @@ void MenuUserInterface::sortMenuItems()
 S32 MenuUserInterface::addMenuItem(MenuItem *menuItem)
 {
    menuItem->setMenu(this);
-   mMenuItems.push_back(boost::shared_ptr<MenuItem>(menuItem));
+   mMenuItems.push_back(shared_ptr<MenuItem>(menuItem));
 
    return mMenuItems.size() - 1;
 }
 
 
 // For those times when you really need to add a pre-packaged menu item... normally, you won't need to do this
-void MenuUserInterface::addWrappedMenuItem(boost::shared_ptr<MenuItem> menuItem)
+void MenuUserInterface::addWrappedMenuItem(shared_ptr<MenuItem> menuItem)
 {
    menuItem->setMenu(this);
    mMenuItems.push_back(menuItem);

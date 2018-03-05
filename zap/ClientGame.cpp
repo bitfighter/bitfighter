@@ -28,7 +28,7 @@
 #include "Colors.h"
 #include "stringUtils.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "GameRecorderPlayback.h"
 #include "UIGame.h"
@@ -72,7 +72,7 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettingsPtr settings, UIM
 
    // Kind of silly that we need this, but ClientGame is always idling, and idling causes extents to be checked,
    // and for that we need a non-NULL level.  Should be refactored away, I think.
-   mLevel = boost::shared_ptr<Level>(new Level());
+   mLevel = shared_ptr<Level>(new Level());
 
    // TODO: Make this a ref instead of a pointer
    mClientInfo = new FullClientInfo(this, NULL, mSettings->getPlayerName(), ClientInfo::ClassHuman);  // Deleted in destructor
@@ -1096,7 +1096,7 @@ void ClientGame::onGameUIActivated()
 void ClientGame::onGameStarting()
 {
    // Start with a fresh level -- this will be populated with info from the server
-   Parent::setLevel(new Level());     // Level will be cleaned up by boost
+   Parent::setLevel(new Level());     // Level will be cleaned up by shared_ptr
 
    mUIManager->onGameStarting();
    

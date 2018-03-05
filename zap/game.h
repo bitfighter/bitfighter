@@ -24,7 +24,7 @@
 #include "tnlThread.h"
 #include "tnlNonce.h"
 
-#include <boost/smart_ptr/shared_ptr.hpp>
+#include <memory>
 
 namespace Master
 {
@@ -210,7 +210,7 @@ protected:
       DeleteRef(BfObject *o = NULL, U32 d = 0);
    };
 
-   boost::shared_ptr<Level> mLevel;
+   shared_ptr<Level> mLevel;
 
    Vector<DeleteRef> mPendingDeleteObjects;
    Vector<SafePtr<BfObject> > mScopeAlwaysList;
@@ -343,7 +343,7 @@ public:
    virtual AbstractTeam *getNewTeam() = 0;
 
    void setLevel(Level *level);
-   void setLevel(const boost::shared_ptr<Level> &level);
+   void setLevel(const shared_ptr<Level> &level);
 
    bool areTeamsLocked() const;
    virtual void setTeamsLocked(bool locked);

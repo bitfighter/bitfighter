@@ -8,16 +8,14 @@
 
 #include "../zap/HttpRequest.h"
 
-#include "boost/shared_ptr.hpp"
 #include "gtest/gtest.h"
 #include "tnlLog.h"
 
 #include <string>
+#include <memory>
 
 namespace Zap
 {
-
-using boost::shared_ptr;
 
 class HttpRequestTest : public testing::Test
 {

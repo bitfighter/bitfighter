@@ -15,7 +15,7 @@
 #include "tnlTypes.h"
 #include "tnlNetBase.h"
 
-#include "boost/smart_ptr/shared_ptr.hpp"
+#include <memory>
 
 #include "Test.h"
 
@@ -56,7 +56,7 @@ private:
    Vector<string> mRobotLines;
    Vector<string> mTeamChangeLines;
 
-   boost::shared_ptr<TeamManager> mTeamManager;
+   shared_ptr<TeamManager> mTeamManager;
 
    // Zone-related
    GridDatabase mBotZoneDatabase;
@@ -131,8 +131,8 @@ public:
 
 
    // Team methods
-   boost::shared_ptr<TeamManager> getTeamManager() const;
-   void setTeamManager(boost::shared_ptr<TeamManager> teamManager);
+   shared_ptr<TeamManager> getTeamManager() const;
+   void setTeamManager(shared_ptr<TeamManager> teamManager);
 
    S32 getTeamCount() const;
 

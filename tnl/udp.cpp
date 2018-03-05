@@ -774,6 +774,8 @@ bool Address::set(const char *addressString)
                memcpy(&ipAddr, result->ai_addr, sizeof(ipAddr));
                ipAddr.sin_port = 0;
             }
+
+            freeaddrinfo(result);
 #endif
          }
       }

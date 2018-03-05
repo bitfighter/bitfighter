@@ -7,7 +7,7 @@
 #include "GeomUtils.h"              // For polygon triangulation
 
 #include "tnlBitStream.h"
-#include <boost/smart_ptr/shared_ptr.hpp>
+#include <memory>
 
 #ifdef TNL_OS_WIN32
 #  include <windows.h>   // For ARRAYSIZE

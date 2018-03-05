@@ -10,7 +10,7 @@
 #include "EditorWorkUnit.h"
 
 #include "tnlVector.h"
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 using namespace TNL;
 

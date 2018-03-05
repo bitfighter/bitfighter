@@ -11,9 +11,7 @@
 
 #include "UIMenuItems.h"
 
-#include <boost/shared_ptr.hpp>
-
-using boost::shared_ptr;
+#include <memory>
 
 namespace Zap
 {
@@ -25,7 +23,7 @@ class EditorPlugin : public LuaScriptRunner, public LuaObject
    typedef LuaScriptRunner Parent;
 
 private:
-   static bool getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<boost::shared_ptr<MenuItem> > &menuItems);
+   static bool getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<shared_ptr<MenuItem> > &menuItems);
 
    GridDatabase *mGridDatabase;
    Game *mGame;
@@ -38,7 +36,7 @@ protected:
 
 public:
    // Constructors
-   EditorPlugin();      // Dummy 0-args constructor, here to make boost happy!
+   EditorPlugin();      // Dummy 0-args constructor, here to make shared_ptr happy!
    EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, Level *gridDatabase, ClientGame *game);
 
    virtual ~EditorPlugin();  // Destructor
@@ -50,7 +48,7 @@ public:
 
    const char *getErrorMessagePrefix();
      
-   bool runGetArgsMenu(string &menuTitle, Vector<boost::shared_ptr<MenuItem> > &menuItems);    // Get menu def from the plugin
+   bool runGetArgsMenu(string &menuTitle, Vector<shared_ptr<MenuItem> > &menuItems);    // Get menu def from the plugin
 
    // Lua methods
    S32 lua_getGridSize(lua_State *L);

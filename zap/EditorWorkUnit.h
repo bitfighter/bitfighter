@@ -8,8 +8,9 @@
 
 #include "Point.h"
 #include "tnlVector.h"
-#include <boost/shared_ptr.hpp>
 #include "tnlNetBase.h"
+
+#include <memory>
 
 using namespace TNL;
 

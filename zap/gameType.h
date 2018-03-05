@@ -19,6 +19,7 @@
 
 
 #include <map>
+#include <memory>
 
 
 namespace Zap
@@ -265,7 +266,7 @@ public:
 
 #ifndef ZAP_DEDICATED
    virtual const Vector<string> *getGameParameterMenuKeys() const;
-   virtual boost::shared_ptr<MenuItem> getMenuItem(const string &key) const;
+   virtual shared_ptr<MenuItem> getMenuItem(const string &key) const;
    virtual bool saveMenuItem(const MenuItem *menuItem, const string &key);
 #endif
 

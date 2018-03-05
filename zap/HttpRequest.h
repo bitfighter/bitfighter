@@ -6,15 +6,14 @@
 #ifndef HTTPREQUEST_H_
 #define HTTPREQUEST_H_
 
-#include <boost/shared_ptr.hpp>
 #include <tnl.h>
 #include <tnlNetBase.h>
 #include <tnlUDP.h>
 #include <map>
 #include <list>
 #include <string>
+#include <memory>
 
-using boost::shared_ptr;
 using namespace std;
 using namespace TNL;
 
@@ -66,9 +65,9 @@ public:
    string receiveResponse();
 
 private:
-   boost::shared_ptr<Address> mLocalAddress;
-   boost::shared_ptr<Address> mRemoteAddress;
-   boost::shared_ptr<Socket> mSocket;
+   shared_ptr<Address> mLocalAddress;
+   shared_ptr<Address> mRemoteAddress;
+   shared_ptr<Socket> mSocket;
 
    map<string, string> mData;
    list<HttpRequestFileInfo> mFiles;

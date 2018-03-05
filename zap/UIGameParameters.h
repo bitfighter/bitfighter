@@ -60,7 +60,7 @@ private:
    S32 getYStart() const;
    void clearCurrentGameTypeParams(const GameType *gameType);
 
-   typedef map<const string, boost::shared_ptr<MenuItem> > MenuItemMap;
+   typedef map<const string, shared_ptr<MenuItem> > MenuItemMap;
    MenuItemMap mMenuItemMap;
 
    string mLevelFilename;            // Level filename when the UI is activated

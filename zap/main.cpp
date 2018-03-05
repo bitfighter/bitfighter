@@ -120,11 +120,12 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 #endif
 
 #  define USE_BFUP
+#else
+#  include <unistd.h>
 #endif
 
 #if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
 #  include "Directory.h"
-#  include <unistd.h>
 #endif
 
 #ifdef __MINGW32__

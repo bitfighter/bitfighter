@@ -525,11 +525,11 @@ void Game::replaceTeam(AbstractTeam *team, S32 index) const { mLevel->replaceTea
 
 void Game::setLevel(Level *level)
 {
-   setLevel(boost::shared_ptr<Level>(level));   // Will call implementations in ClientGame or ServerGame
+   setLevel(shared_ptr<Level>(level));   // Will call implementations in ClientGame or ServerGame
 }
 
 
-void Game::setLevel(const boost::shared_ptr<Level> &level)
+void Game::setLevel(const shared_ptr<Level> &level)
 {
    mLevel = level;
    mLevel->onAddedToGame(this);

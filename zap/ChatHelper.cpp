@@ -23,6 +23,8 @@
 #include "RenderUtils.h"
 #include "stringUtils.h"
 
+#include <algorithm>
+
 #define HEADER_TEXT(category, group, text) \
    {"", NULL, { }, 0, category, group, 0, { }, text}
 

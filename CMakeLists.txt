@@ -44,6 +44,12 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
+# Require use c++11 compiler
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Don't use compiler extensions like -std=gnu++11
+# set(CMAKE_CXX_EXTENSIONS OFF)
+
 # Use appropriate platform alterations
 if(WIN32)
 	include(${CMAKE_SOURCE_DIR}/cmake/Platform/Win32.cmake)

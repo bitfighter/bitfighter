@@ -11,7 +11,7 @@
 
 #include "tnlNetConnection.h"    // for TerminationReason
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "Test.h"
 
 
@@ -51,7 +51,7 @@ private:
    static void renderArrow(S32 pos, bool pointingUp);
 
 protected:
-   Vector<boost::shared_ptr<MenuItem> > mMenuItems;
+   Vector<shared_ptr<MenuItem> > mMenuItems;
 
    S32 findFirstVisibleItem() const;                  // Calculates index of top-most visible item
    S32 getBaseYStart() const;                         // Base calculation for getYStart()
@@ -97,7 +97,7 @@ public:
 
    void clearMenuItems();
    S32 addMenuItem(MenuItem *menuItem);
-   void addWrappedMenuItem(boost::shared_ptr<MenuItem> menuItem);
+   void addWrappedMenuItem(shared_ptr<MenuItem> menuItem);
    MenuItem *getMenuItem(S32 index) const;
    S32 getMenuItemCount() const;
 

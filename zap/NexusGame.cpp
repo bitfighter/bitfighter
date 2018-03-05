@@ -290,16 +290,16 @@ const Vector<string> *NexusGameType::getGameParameterMenuKeys() const
 
 
 // Definitions for those items
-boost::shared_ptr<MenuItem> NexusGameType::getMenuItem(const string &key) const
+shared_ptr<MenuItem> NexusGameType::getMenuItem(const string &key) const
 {
    if(key == "Nexus Time to Open")
-      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem("Time for Nexus to Open:", (mNexusClosedTime + 500) / 1000, MaxMenuScore*60, "Never",
+      return shared_ptr<MenuItem>(new TimeCounterMenuItem("Time for Nexus to Open:", (mNexusClosedTime + 500) / 1000, MaxMenuScore*60, "Never",
                                                                  "Time it takes for the Nexus to open"));
    else if(key == "Nexus Time Remain Open")
-      return boost::shared_ptr<MenuItem>(new TimeCounterMenuItemSeconds("Time Nexus Remains Open:", (mNexusOpenTime + 500) / 1000, MaxMenuScore*60, "Always",
+      return shared_ptr<MenuItem>(new TimeCounterMenuItemSeconds("Time Nexus Remains Open:", (mNexusOpenTime + 500) / 1000, MaxMenuScore*60, "Always",
                                                                         "Time that the Nexus will remain open"));
    else if(key == "Nexus Win Score")
-      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 100, 100, 20000, "points", "", 
+      return shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 100, 100, 20000, "points", "", 
                                                              "Game ends when one player or team gets this score"));
    else return Parent::getMenuItem(key);
 }

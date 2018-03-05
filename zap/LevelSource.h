@@ -15,7 +15,7 @@
 #include "../master/database.h"
 
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 
 using namespace TNL;
@@ -235,7 +235,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-typedef boost::shared_ptr<LevelSource> LevelSourcePtr;
+typedef shared_ptr<LevelSource> LevelSourcePtr;
 
 
 }
