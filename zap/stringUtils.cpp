@@ -24,8 +24,6 @@
 #include <sstream>         // For parseString
 #include <sys/stat.h>      // For testing existence of folders
 
-#include <boost/tokenizer.hpp>
-
 #ifdef TNL_OS_WIN32
 #  include <direct.h>            // For mkdir
 #endif
@@ -34,17 +32,18 @@
 #  include "../other/dirent.h"   // Need local copy for Windows builds
 #else
 #  include <dirent.h>            // Need standard copy for *NIXes
+#  include <unistd.h>
 #endif
 
 #if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
 #  include "Directory.h"
 #endif
 
+#include <algorithm>
+
 
 namespace Zap
 {
-
-using namespace boost;
 
 
 // Constructor
@@ -452,34 +451,6 @@ Vector<string> parseStringAndStripLeadingSlash(const char *str)
       words[0].erase(0, 1);      // Remove leading /
 
    return words;
-}
-
-
-void parseComplexStringToMap(const string &inputString, map<string, string> &fillMap,
-                             const string &entryDelimiter, const string &keyValueDelimiter)
-{
-   typedef tokenizer<char_separator<char> > tokenizer;
-
-   char_separator<char> entrySeparator(entryDelimiter.c_str());
-   char_separator<char> keyValueSeparator(keyValueDelimiter.c_str());
-
-   // Tokenize the entries first
-   tokenizer entries(inputString, entrySeparator);
-
-   for (tokenizer::iterator iterator1 = entries.begin(); iterator1 != entries.end(); ++iterator1)
-   {
-      // Now tokenize the key and value
-      tokenizer keyAndValues(*iterator1, keyValueSeparator);
-
-      // Set iterator to second token.  Note that if there is no second token, the first is used again
-      tokenizer::iterator iterator2 = keyAndValues.begin();
-      iterator2++;
-
-      // Add to map
-      pair<string, string> keyValuePair(*keyAndValues.begin(),
-            iterator2.current_token() == *keyAndValues.begin() ? "" : iterator2.current_token());
-      fillMap.insert(keyValuePair);
-   }
 }
 
 
