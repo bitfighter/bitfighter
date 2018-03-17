@@ -23,8 +23,8 @@
 #include "OpenglUtils.h"
 #include "RenderUtils.h"
 #include "gameObjectRender.h"    // For drawHorizLine
-#include "MathUtils.h"           // For min()
 
+#include <algorithm>
 
 using namespace TNL;
 

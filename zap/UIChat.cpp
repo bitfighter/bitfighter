@@ -20,6 +20,7 @@
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
 
+#include <algorithm>
 
 namespace Zap
 {

@@ -19,6 +19,8 @@
 #include "RobotManager.h"
 #include "ClientGame.h"
 
+#include <algorithm>
+
 using namespace TNL;
 
 
