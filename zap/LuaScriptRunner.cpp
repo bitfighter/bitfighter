@@ -1075,7 +1075,7 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
 
 
 /**
- * @luafunc table LuaScriptRunner::findAllObjects(table results, ObjType objType, ...)
+ * @luafunc table LuaScriptRunner::findAllObjects(ObjType objType, ...)
  *
  * @brief Finds all items of the specified object type anywhere on the level.
  *
@@ -1165,7 +1165,7 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
 
 
 /**
- * @luafunc table LuaScriptRunner::findAllObjectsInArea(table results, point point1, point point2, ObjType objType, ...)
+ * @luafunc table LuaScriptRunner::findAllObjectsInArea(point point1, point point2, ObjType objType, ...)
  *
  * @brief Finds all items of the specified type(s) in a given search area.
  *
