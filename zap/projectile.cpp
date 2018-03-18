@@ -32,7 +32,10 @@ Projectile::Projectile(WeaponType type, const Point &pos, const Point &vel, BfOb
    initialize(type, pos, vel, shooter);
 }
 
-
+/**
+ * @luafunc Projectile::Projectile()
+ * @luafunc Projectile::Projectile(Weapon weap)
+ */
 // Combined Lua / C++ default constructor -- only used in Lua at the moment
 Projectile::Projectile(lua_State *L)
 {
