@@ -1,5 +1,5 @@
 project (bitfighter)
-cmake_minimum_required (VERSION 2.8.8)
+cmake_minimum_required (VERSION 3.1.0)
 
 # CMake 3.0 policy that says you need to do something like this (NEW):
 #    set_target_properties(master_lib master PROPERTIES COMPILE_DEFINITIONS_DEBUG "TNL_DEBUG")
