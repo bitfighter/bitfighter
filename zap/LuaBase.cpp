@@ -192,14 +192,6 @@ bool checkLuaArgs(lua_State *L, LuaArgType argType, S32 &stackPos)
          return ok;
       }
 
-      case INTx:
-      {
-         while(stackPos < stackDepth && lua_isnumber(L, stackPos))
-            stackPos++;
-
-         return true;
-      }
-
       case STR:               
          return lua_isstring(L, stackPos);
 
