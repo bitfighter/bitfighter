@@ -18,6 +18,8 @@
 #include "GameManager.h"
 #include "ClientGame.h"
 
+#include <algorithm>
+
 using namespace TNL;
 
 

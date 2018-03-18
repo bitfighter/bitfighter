@@ -1020,7 +1020,7 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
 #define LUA_METHODS(CLASS, METHOD) \
       METHOD(CLASS, pointCanSeePoint,      ARRAYDEF({{ PT, PT, END }}), 1 ) \
       METHOD(CLASS, findObjectById,        ARRAYDEF({{ INT, END }}), 1 )    \
-      METHOD(CLASS, findAllObjects,        ARRAYDEF({{ INTx, END }, { END }}), 2 ) \
+      METHOD(CLASS, findAllObjects,        ARRAYDEF({{ INTS, END }, { END }}), 2 ) \
       METHOD(CLASS, findAllObjectsInArea,  ARRAYDEF({{ PT, PT, INTS, END }}), 1 ) \
       METHOD(CLASS, addItem,               ARRAYDEF({{ BFOBJ, END }}), 1 )  \
       METHOD(CLASS, getGameInfo,           ARRAYDEF({{ END }}), 1 )         \

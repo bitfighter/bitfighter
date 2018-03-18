@@ -9,6 +9,8 @@
 #include "MathUtils.h"
 #include "RenderUtils.h"
 
+#include <algorithm>
+
 namespace Zap
 {
 

@@ -22,6 +22,7 @@
 #include "Colors.h"
 #include "RenderUtils.h"
 
+#include <algorithm>
 
 using namespace TNL;
 

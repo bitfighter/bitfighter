@@ -11,6 +11,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
+#include <algorithm>
 
 using namespace std;
 using namespace TNL;
