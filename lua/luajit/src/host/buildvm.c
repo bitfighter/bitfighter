@@ -1,6 +1,6 @@
 /*
 ** LuaJIT VM builder.
-** Copyright (C) 2005-2015 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2017 Mike Pall. See Copyright Notice in luajit.h
 **
 ** This is a tool to build the hand-tuned assembler code required for
 ** LuaJIT's bytecode interpreter. It supports a variety of output formats
@@ -113,7 +113,7 @@ static const char *sym_decorate(BuildCtx *ctx,
       name[0] = '@';
     else
       *p = '\0';
-#elif ((LJ_TARGET_PPC && !LJ_TARGET_OSX) || LJ_TARGET_PPCSPE) && !LJ_TARGET_CONSOLE
+#elif (LJ_TARGET_PPC  || LJ_TARGET_PPCSPE) && !LJ_TARGET_CONSOLE
     /* Keep @plt. */
 #else
     *p = '\0';
