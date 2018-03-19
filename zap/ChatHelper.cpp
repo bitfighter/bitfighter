@@ -51,7 +51,7 @@ namespace Zap
    { "prev",        &ChatCommands::prevLevelHandler,       {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Replay previous level" },
    { "restart",     &ChatCommands::restartLevelHandler,    {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Restart current level" },
    { "random",      &ChatCommands::randomLevelHandler,     {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Start random level" },
-   { "map",         &ChatCommands::mapLevelHandler,        { LEVEL }, 1, LEVEL_COMMANDS,  0,  1,  {"<level name>"},                                       "Start random level" },
+   { "map",         &ChatCommands::mapLevelHandler,        { LEVEL }, 1, LEVEL_COMMANDS,  0,  1,  {"<level name>"},                           "Jump to a specific level" },
    { "shownextlevel",&ChatCommands::showNextLevelHandler,  {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Show name of the next level" },
    { "showprevlevel",&ChatCommands::showPrevLevelHandler,  {  },      0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Show name of the previous level" },
 
