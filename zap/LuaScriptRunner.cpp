@@ -319,7 +319,19 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    setLuaArgs(args);
-   bool error = runCmd("main", 0);
+   bool error = false;
+
+   try
+   {
+      error = runCmd("main", 0);
+   }
+   catch(LuaException &e)
+   {
+      // Can't run main(), it's probably missing from the script
+      logError("%s", e.msg.c_str());  // Also clears the stack
+      error = false;
+   }
+
    return !error;
 }
 
