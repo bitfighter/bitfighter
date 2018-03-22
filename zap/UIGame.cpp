@@ -2353,24 +2353,20 @@ void GameUserInterface::renderTeamName(S32 index, S32 left, S32 right, S32 top) 
 
    string teamName;
 
-   // If name is still too long, truncate it
+   // If name is still too long, shrink the name
    S32 maxLen = maxRight - maxLeft - scoreWidth - gap;
 
+   S32 fontSize = teamFontSize;
+   S32 vertAdjustment = 0;
    if(teamWidth + scoreWidth + gap > maxLen)
    {
-      S32 len = 0;
-      S32 i;
-
-      for(i = 0; len < maxLen; i++)
-         len += getStringWidthf(teamFontSize, "%c", origTeamName[i]);
-
-      teamName = origTeamName.substr(0, i - 1);
+      F32 ratio = F32(maxLen) / teamWidth;
+      fontSize = S32(ratio * teamFontSize);
+      vertAdjustment = (teamFontSize - fontSize + 1) / 2;
    }
-   else
-      teamName = origTeamName;
 
 
-   drawString(leftPos,  top + 2, teamFontSize, teamName.c_str());
+   drawString(leftPos,  top + 2 + vertAdjustment, fontSize, origTeamName.c_str());
    drawStringr(rightPos, top + 2, teamFontSize, scoreStr.c_str());
 
    FontManager::popFontContext();
