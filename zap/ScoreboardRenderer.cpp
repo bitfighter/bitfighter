@@ -201,8 +201,9 @@ static void renderTeamName(ClientGame *clientGame, S32 index, bool isWinningTeam
    const S32 gap = 20;                 // Min gap between team name and score
 
    string scoreStr = itos(clientGame->getTeam(index)->getScore());
+   string origTeamName = clientGame->getTeamName(index).getString();
 
-   const S32 teamWidth  = RenderUtils::getStringWidth(teamFontSize, clientGame->getTeamName(index).getString());
+   const S32 teamWidth  = RenderUtils::getStringWidth(teamFontSize, origTeamName.c_str());
    const S32 scoreWidth = RenderUtils::getStringWidth(teamFontSize, scoreStr.c_str());
 
    const S32 deficit = (teamWidth + scoreWidth + gap) - (minRight - minLeft);
@@ -212,23 +213,19 @@ static void renderTeamName(ClientGame *clientGame, S32 index, bool isWinningTeam
 
    string teamName;
 
-   // If name is still too long, truncate it
+   // If name is still too long, shrink the name
    S32 maxLen = maxRight - maxLeft - scoreWidth - gap;
 
+   S32 fontSize = teamFontSize;
+   S32 vertAdjustment = 0;
    if(teamWidth + scoreWidth + gap > maxLen)
    {
-      S32 len = 0;
-      S32 i;
-
-      for(i = 0; len < maxLen; i++)
-         len += RenderUtils::getStringWidthf(teamFontSize, "%c", clientGame->getTeamName(index).getString()[i]);
-
-      teamName = string(clientGame->getTeamName(index).getString()).substr(0, i - 1);
+      F32 ratio = F32(maxLen) / teamWidth;
+      fontSize = S32(ratio * teamFontSize);
+      vertAdjustment = (teamFontSize - fontSize + 1) / 2;
    }
-   else 
-      teamName = clientGame->getTeamName(index).getString();
 
-   RenderUtils::drawString_fixed(leftPos,  top + 2, teamFontSize, Colors::white, teamName.c_str());
+   RenderUtils::drawString_fixed(leftPos,  top + 2 + vertAdjustment, fontSize, Colors::white, origTeamName.c_str());
    RenderUtils::drawStringr     (rightPos, top + 2, teamFontSize, Colors::white, scoreStr.c_str());
 
    FontManager::popFontContext();
