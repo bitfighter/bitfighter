@@ -884,6 +884,8 @@ void MoveObject::computeImpulseDirection(DamageInfo *damageInfo)
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getVel, ARRAYDEF({{     END }}), 1 ) \
    METHOD(CLASS, setVel, ARRAYDEF({{ PT, END }}), 1 ) \
+   METHOD(CLASS, getAngle, ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, setAngle, ARRAYDEF({{ NUM, END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(MoveObject, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(MoveObject, LUA_METHODS);
@@ -919,6 +921,34 @@ S32 MoveObject::lua_setVel(lua_State *L)
 {
    checkArgList(L, functionArgs, "MoveObject", "setVel");
    setActualVel(getPointOrXY(L, 1));
+
+   return 0;
+}
+
+
+/**
+ * @luafunc num MoveObject::getAngle()
+ *
+ * @brief Get the items's angle in radians.
+ *
+ * @return The object's rotation angle in radians
+ */
+S32 MoveObject::lua_getAngle(lua_State *L) { return returnFloat(L, getActualAngle()); }
+
+
+/**
+ * @luafunc MoveObject::setAngle(num angle)
+ *
+ * @brief Sets the item's rotation angle.
+ *
+ * @descr Set the rotation angle (in radians) of this MoveObject
+ *
+ * @param angle A rotation angle in radians
+ */
+S32 MoveObject::lua_setAngle(lua_State *L)
+{
+   checkArgList(L, functionArgs, "MoveObject", "setAngle");
+   setActualAngle(getFloat(L, 1));
 
    return 0;
 }

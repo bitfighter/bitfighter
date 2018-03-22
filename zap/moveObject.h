@@ -175,6 +175,10 @@ public:
    // Get/set object's velocity vector
    virtual S32 lua_getVel(lua_State *L);
    virtual S32 lua_setVel(lua_State *L);
+
+   // Get/set object's rotation angle
+   virtual S32 lua_getAngle(lua_State *L);
+   virtual S32 lua_setAngle(lua_State *L);
 };
 
 
