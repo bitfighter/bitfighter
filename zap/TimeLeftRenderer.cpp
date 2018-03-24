@@ -242,6 +242,8 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
    static const U32 w0     = getStringWidth(timeTextSize, "0");
    static const U32 wUnlim = getStringWidth(timeTextSize, "Unlim.");
 
+   static const S32 gameAlmostOverMs = 10 * 1000;  // Ten seconds
+
    U32 timeWidth;
    if(gameType->isTimeUnlimited())
       timeWidth = wUnlim;
@@ -286,8 +288,10 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
          drawString(timeLeft, timeTop, timeTextSize, "Unlim.");
       else
       {
-         if (gameType->getRemainingGameTimeInMs() < 1000 * 10)
+         // Change color when game is almost over
+         if (gameType->getRemainingGameTimeInMs() < gameAlmostOverMs)
              glColor(Colors::red);
+
          drawTime(timeLeft, timeTop, timeTextSize, gameType->getRemainingGameTimeInMs());
       }
    }
