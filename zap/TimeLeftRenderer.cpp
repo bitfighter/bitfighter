@@ -282,14 +282,14 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
                         itos(gameType->getWinningScore()).c_str()); 
 
       glColor(Colors::white);
-	  if (gameType->isTimeUnlimited())
-		  drawString(timeLeft, timeTop, timeTextSize, "Unlim.");
-	  else
-	  {
-		  if (gameType->getRemainingGameTimeInMs() < 1000 * 10)
-			  glColor(Colors::red);
-		  drawTime(timeLeft, timeTop, timeTextSize, gameType->getRemainingGameTimeInMs());
-	  }
+      if (gameType->isTimeUnlimited())
+          drawString(timeLeft, timeTop, timeTextSize, "Unlim.");
+      else
+      {
+          if (gameType->getRemainingGameTimeInMs() < 1000 * 10)
+              glColor(Colors::red);
+          drawTime(timeLeft, timeTop, timeTextSize, gameType->getRemainingGameTimeInMs());
+      }
    }
    else
    {
