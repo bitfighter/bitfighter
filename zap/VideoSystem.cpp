@@ -84,7 +84,7 @@ bool VideoSystem::init()
 
    DisplayManager::getScreenInfo()->init(mode.w, mode.h);
 
-   S32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN;
+   S32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
    // Fake fullscreen might not be needed with SDL2 - I think it does the fast switching
    // on platforms that support it
    //   if(gClientGame->getSettings()->getIniSettings()->useFakeFullscreen)  <== don't use gClientGame here, please!
