@@ -170,7 +170,10 @@ void FileLogConsumer::init(std::string logFile, const char *mode)
 
    f = fopen(logFile.c_str(), mode);
    if(!f)
-      TNLAssert(false, "Can't open log file for writing!");    // TODO: What should we really do?
+   {
+      TNLAssert(false, "Can't open log file for writing!");
+      printf("Can't open log file for writing!\n");  // Fallback to printf
+   }
 }
 
 
@@ -182,7 +185,10 @@ void FileLogConsumer::writeString(const char *string)
       fflush(f);
    }
    else
+   {
       TNLAssert(false, "Logfile not initialized!");
+      printf("Logfile not initialized!\n");
+   }
 }
 
 
