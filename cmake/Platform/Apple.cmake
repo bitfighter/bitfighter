@@ -36,23 +36,6 @@ if(NOT XCOMPILE)
 	else()
 		set(CMAKE_OSX_ARCHITECTURES "x86_64")
 	endif()
-
-
-	# Set the proper SDK for compiling - we deploy to 10.5 for i386
-	# but will use 10.6 SDK to compile it.  Internally, it should add
-	# the flag -mmacosx-version-min=10.5 and will be compatible with that OS version
-	if(OSX_DEPLOY_TARGET VERSION_EQUAL "10.5")
-		set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk/")
-
-	# Here we use whatever the default SDK is for x86_64, but will deploy to OSX 10.6
-	elseif(OSX_DEPLOY_TARGET VERSION_LESS "10.7")
-		set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX${OSX_DEPLOY_TARGET}.sdk/")
-
-	# For OSX 10.7+, we need to find the path to the SDK
-	else()
-		find_program(xcodebuild xcodebuild)
-		execute_process(COMMAND ${xcodebuild} -version -sdk macosx${OSX_DEPLOY_TARGET} Path OUTPUT_VARIABLE CMAKE_OSX_SYSROOT OUTPUT_STRIP_TRAILING_WHITESPACE)
-	endif()
 	
 	message(STATUS "CMAKE_OSX_SYSROOT: ${CMAKE_OSX_SYSROOT}")
 endif()
@@ -67,21 +50,19 @@ message(STATUS "Compiling for OSX architectures: ${CMAKE_OSX_ARCHITECTURES}")
 # 
 # Compiler specific flags
 # 
+
+# c++11
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -std=gnu++11")
+
+# OSX 10.7 and greater need this to find some dependencies
+if(OSX_DEPLOY_TARGET VERSION_GREATER "10.6")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+endif()
+
+# Enable more warnings in Debug build
 if(CMAKE_COMPILER_IS_GNUCC)
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
-endif()
-
-		
-#if(OSX_DEPLOY_TARGET VERSION_EQUAL "10.4")
-#	# OSX 10.4 doesn't have execinfo.h for the StackTracer
-#	add_definitions(-DBF_NO_STACKTRACE)
-#endif()
-
-
-# OSX 10.8 and greater need this to find some dependencies
-if(OSX_DEPLOY_TARGET VERSION_GREATER "10.7")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -std=gnu++11")
 endif()
 
 
@@ -245,8 +226,6 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 		COMMAND ${THIN_FRAMEWORKS}
 		COMMAND ${DO_RPATH_THING}
 	)
-add_custom_command(TARGET executable 
-    POST_BUILD COMMAND )
 endfunction()
 
 
