@@ -45,5 +45,7 @@
 	<string>dsa_pub.pem</string>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
+	<key>NSHighResolutionCapable</key>
+	<true/>
 </dict>
 </plist>
