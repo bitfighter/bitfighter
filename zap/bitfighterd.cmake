@@ -14,7 +14,6 @@ add_dependencies(bitfighterd
 	tomcrypt
 	clipper
 	poly2tri
-	sqlite
 )
 
 target_link_libraries(bitfighterd

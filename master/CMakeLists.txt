@@ -41,7 +41,7 @@ else()
 endif()
 
 
-set(MASTER_DEPS tnl tomcrypt sqlite)
+set(MASTER_DEPS tnl tomcrypt)
 
 set(MASTER_LIBS 
 	tnl
