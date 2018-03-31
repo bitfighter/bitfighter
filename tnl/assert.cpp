@@ -58,14 +58,11 @@ static bool displayMessageBox(const char *title, const char *message, bool retry
 
 void Assert::processAssert(const char *filename, U32 lineNumber, const char  *message)
 {
-
-	logprintf(TNL::LogConsumer::LogError, "Assert: %s in %s line %u", message, filename, lineNumber);
+   char buffer[2048];
+   dSprintf(buffer, sizeof(buffer), "Fatal: (%s: %ld)", filename, lineNumber);
 
 #ifdef WIN32
    processing = true;  // only windows appears to have message box implemented, see platform.cpp
-
-   char buffer[2048];
-   dSprintf(buffer, sizeof(buffer), "Fatal: (%s: %ld)", filename, lineNumber);
 #ifdef TNL_DEBUG  
    // In debug versions, allow a retry even for ISVs...
    bool retry = displayMessageBox(buffer, message, true);

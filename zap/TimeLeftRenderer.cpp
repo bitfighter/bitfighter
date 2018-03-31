@@ -306,6 +306,8 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool includeLoc
    static const U32 wUnlim    = RenderUtils::getStringWidth(TimeTextSize, UnlimMsg);
    static const U32 wSudDeath = RenderUtils::getStringWidth(TimeTextSize, SuddenDeathMsg);
 
+   static const S32 gameAlmostOverMs = 10 * 1000;  // Ten seconds
+
    U32 timeWidth;
    if(gameType->isTimeUnlimited())
       timeWidth = wUnlim;
@@ -349,7 +351,7 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool includeLoc
                                            Colors::red, itos(gameType->getWinningScore()).c_str());
 
       // Draw the time itself
-      const Color &color = gameType->isOvertime() ? Colors::red : Colors::white;
+      const Color &color = (gameType->isOvertime() || gameType->getRemainingGameTimeInMs() < gameAlmostOverMs) ? Colors::red : Colors::white;
 
       if(gameType->isTimeUnlimited())  
          RenderUtils::drawString_fixed(timeLeft, timeBottom, TimeTextSize, color, UnlimMsg);

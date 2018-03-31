@@ -18,7 +18,6 @@ add_dependencies(bitfighter_client
 	tomcrypt
 	clipper
 	poly2tri
-	sqlite
 )
 
 
