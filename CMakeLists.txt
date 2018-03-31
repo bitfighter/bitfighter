@@ -20,6 +20,7 @@ endif()
 option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
 option(ALURE_DISABLE_MP3 "Disable dynamic loading of libmpg123.  Disables mp3 completely." NO)
 option(NO_THREADS "Disable usage of threads in TNL.  May cause issues." NO)
+option(LUAJIT_BUILTIN "Use built-in LuaJIT.  Recommended." YES)
 
 
 #
@@ -183,7 +184,10 @@ endif()
 
 
 # LuaJIT / Lua
+if(NOT LUAJIT_BUILTIN)
 find_with_fallback(LuaJit LUAJIT lua)
+endif()
+
 if(LUAJIT_FOUND)
 	set(LUA_LIB ${LUAJIT_LIBRARIES})
 	set(LUA_INCLUDE_DIR ${LUAJIT_INCLUDE_DIR})
