@@ -23,9 +23,9 @@ add_dependencies(bitfighter_client
 
 get_property(CLIENT_DEFS TARGET bitfighter_client PROPERTY COMPILE_DEFINITIONS)
 
-if(USE_GLES)
+if(USE_GLES2)
 	set_target_properties(bitfighter_client PROPERTIES COMPILE_DEFINITIONS 
-		"${CLIENT_DEFS};BF_USE_GLES"
+		"${CLIENT_DEFS};BF_USE_GLES2"
 	)
 endif()
 
