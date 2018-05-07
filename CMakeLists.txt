@@ -17,7 +17,6 @@ endif()
 # CMake options
 #
 
-option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
 option(USE_GLES2 "Force usage of OpenGL ES 2 for the bitfighter client.  Requires SDL2." NO)
 option(USE_LUAJIT_IN_TREE "Force usage of in-tree LuaJIT." NO)
 option(LUAJIT_DISABLE_JIT "Disable JIT compiler in LuaJIT." NO)
@@ -89,21 +88,12 @@ endif()
 
 # Searches for OpenGL and enables GLES if GL isnt found in the system
 message(STATUS "Determining system GL provider")
-if(NOT USE_GLES AND NOT USE_GLES2)
+if(NOT USE_GLES2)
 	message(STATUS "Atempting to use standard OpenGL")
 	find_package(OpenGL)
 	set(USE_STANDARD_GL 1)
 	set(GL_LIBRARY ${OPENGL_LIBRARY})
 	set(GL_INCLUDE_DIR ${OPENGL_INCLUDE_DIR})
-endif()
-
-if(NOT USE_GLES2 AND (USE_GLES OR NOT USE_STANDARD_GL) )
-	message(STATUS "Atempting to use OpenGL ES")
-	add_definitions(-DBF_USE_GLES)
-	add_definitions(-DBF_NO_CONSOLE)
-	find_package(OpenGLES)
-	set(GL_LIBRARY ${OPENGLES_LIBRARY})
-	set(GL_INCLUDE_DIR ${OPENGLES_INCLUDE_DIR})
 endif()
 
 if(USE_GLES2)

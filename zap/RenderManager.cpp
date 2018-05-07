@@ -8,7 +8,7 @@
 
 #include "glinc.h"
 
-#ifdef BF_USE_GLES
+#ifdef BF_USE_GLES2
 #  define NANOVG_GLES2_IMPLEMENTATION
 #else
 #  define NANOVG_GL2_IMPLEMENTATION
@@ -94,7 +94,7 @@ void RenderManager::init()
 //   int nvgFlags = NVG_DEBUG;
 //   int nvgFlags = 0;
 
-#ifdef BF_USE_GLES
+#ifdef BF_USE_GLES2
    nvg = nvgCreateGLES2(nvgFlags);
 #else
    nvg = nvgCreateGL2(nvgFlags);
@@ -110,7 +110,7 @@ void RenderManager::shutdown()
    TNLAssert(mGL != NULL, "GL Renderer should have been created; never called RenderManager::init()?");
    delete mGL;
 
-#ifdef BF_USE_GLES
+#ifdef BF_USE_GLES2
    nvgDeleteGLES2(nvg);
 #else
    nvgDeleteGL2(nvg);
@@ -364,11 +364,7 @@ void GL::ortho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx)
 #ifdef BF_USE_GLES2
    // TODO
 #else
-#  ifdef BF_USE_GLES
-   ::glOrthof(left, right, bottom, top, nearx, farx);
-#  else
    ::glOrtho(left, right, bottom, top, nearx, farx);
-#  endif
 #endif
 }
 
