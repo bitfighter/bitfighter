@@ -69,7 +69,7 @@ static SymbolString getSymbolString(const string &text, const InputCodeManager *
 {
    Vector<SymbolShapePtr> symbols;
 
-   SymbolString::symbolParse(inputCodeManager, text, symbols, MenuContext, size, &color);
+   SymbolString::symbolParse(inputCodeManager, text, symbols, MenuContext, size, true, &color);
    return SymbolString(symbols, AlignmentCenter);
 
    //symbolStringSet.add(SymbolString(symbols, AlignmentCenter));

@@ -1323,7 +1323,7 @@ static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
    Joystick::initJoystick(settings);
 
    // If there is a different number of sticks than previously detected
-   if(controllers != GameSettings::DetectedControllerList.size())
+   if(controllers != S32(GameSettings::DetectedControllerList.size()))
    {
       ToggleMenuItem *menuItem = dynamic_cast<ToggleMenuItem *>(game->getUIManager()->getUI<InputOptionsMenuUserInterface>()->
                                                                 getMenuItem(INPUT_MODE_MENU_ITEM_INDEX));

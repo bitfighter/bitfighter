@@ -491,8 +491,8 @@ bool InputCodeManager::isValidInputString(const string &inputString)
             break;
          }
 
-         if(!found)
-            return false;
+      if(!found)
+         return false;
    }
 
    return stringToInputCode(words.last().c_str()) != KEY_UNKNOWN;

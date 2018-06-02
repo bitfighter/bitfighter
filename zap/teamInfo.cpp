@@ -439,7 +439,7 @@ const Color *TeamManager::getTeamColor(S32 index) const
    if((U32)index < (U32)mTeams.size())     // Using U32 lets us handle goofball negative team numbers without explicitly checking for them
       return mTeams[index]->getColor();
 
-      return &Colors::magenta;                  // Use a rare color to let user know an object has an out of range team number
+   return &Colors::magenta;                  // Use a rare color to let user know an object has an out of range team number
 }
 
    
