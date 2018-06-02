@@ -934,5 +934,28 @@ bool isHex(const string &str)
    return true;
 }
 
+// Sorts alphanumerically, ignoring case
+bool alphaSort(const string &a, const string &b)
+{
+   return (stricmp(a.c_str(), b.c_str()) < 0);
+}
+
+
+bool alphaNumberSort(const string &a, const string &b)
+{
+   int aNum = atoi(a.c_str());
+   int bNum = atoi(b.c_str());
+
+   if(aNum == bNum)
+      return alphaSort(a, b);
+   else
+   {
+      if(aNum == 0) return true;
+      if(bNum == 0) return false;
+
+      return (aNum < bNum);
+   }
+}
+
 };
 

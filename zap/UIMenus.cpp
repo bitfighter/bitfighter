@@ -49,12 +49,6 @@
 namespace Zap
 {
 
-// Sorts alphanumerically by menuItem's prompt  ==> used for getting levels in the right order and such
-S32 QSORT_CALLBACK menuItemValueSort(shared_ptr<MenuItem> *a, shared_ptr<MenuItem> *b)
-{
-   return stricmp((*a)->getPrompt().c_str(), (*b)->getPrompt().c_str());
-}
-
 
 extern void shutdownBitfighter();
 
@@ -128,7 +122,12 @@ void MenuUserInterface::clearMenuItems()
 
 void MenuUserInterface::sortMenuItems()
 {
-   mMenuItems.sort(menuItemValueSort);
+   // Sorts alphanumerically by menuItem's prompt  ==> used for getting levels in the right order and such
+   mMenuItems.sort([](const shared_ptr<MenuItem> &a, const shared_ptr<MenuItem> &b)
+         {
+            return alphaSort(a.get()->getPrompt(), b.get()->getPrompt());
+         }
+   );
 }
 
 

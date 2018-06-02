@@ -137,8 +137,6 @@ static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
 }
 
 
-extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
-
 void GameParamUserInterface::updateMenuItems()
 {
    GameType *gameType = getGame()->getGameType();

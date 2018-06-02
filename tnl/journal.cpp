@@ -56,9 +56,9 @@ JournalBlockTypeToken::JournalBlockTypeToken(const char *typeString)
    mList = this;
 }
 
-S32 QSORT_CALLBACK JBTTCompare(JournalBlockTypeToken **a, JournalBlockTypeToken **b)
+bool JBTTCompare(JournalBlockTypeToken* const &a, JournalBlockTypeToken* const &b)
 {
-   return strcmp((*a)->getString(), (*b)->getString());
+   return (strcmp(a->getString(), b->getString()) < 0);
 }
 
 U32 JournalBlockTypeToken::getValue()

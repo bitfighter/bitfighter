@@ -242,9 +242,6 @@ void LevelSource::remove(S32 index)
    mLevelInfos.erase(index);
 }
 
-
-extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);     // Sort alphanumerically
-
 // static method
 Vector<string> LevelSource::findAllLevelFilesInFolder(const string &levelDir)
 {

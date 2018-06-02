@@ -2722,9 +2722,9 @@ static void renderBotPaths(ClientGame *game, Vector<BfObject *> &renderObjects)
 }
 
 
-static S32 QSORT_CALLBACK renderSortCompare(BfObject **a, BfObject **b)
+static bool renderSortCompare(BfObject * const &a, BfObject* const &b)
 {
-   return (*a)->getRenderSortValue() - (*b)->getRenderSortValue();
+   return (a->getRenderSortValue() < b->getRenderSortValue());
 }
 
 

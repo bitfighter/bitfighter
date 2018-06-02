@@ -30,6 +30,7 @@
 
 //Includes
 #include <vector>
+#include <algorithm>
 
 
 #ifndef _TNL_TYPES_H_
@@ -124,7 +125,10 @@ public:
    void reverse();
 
 
-   typedef S32 (QSORT_CALLBACK *compare_func)(T *a, T *b);
+   typedef S32 (QSORT_CALLBACK *q_compare_func)(T *a, T *b);
+   void sort(q_compare_func f);
+
+   typedef bool (*compare_func)(const T& a, const T& b);
    void sort(compare_func f);
 };
 
@@ -385,9 +389,31 @@ template<class T> inline void Vector<T>::reverse()
 
 typedef int (QSORT_CALLBACK *qsort_compare_func)(const void *, const void *);
 
-template<class T> inline void Vector<T>::sort(compare_func f)
+template<class T> inline void Vector<T>::sort(q_compare_func f)
 {
    qsort(address(), size(), sizeof(T), (qsort_compare_func) f);
+}
+
+// Best to use this sorting method as it is safer than old-style qsort. Can be
+// used with a function or lambda expression that has a signature of:
+//
+//    bool sortMethod(const T &a, const T &b) {...}
+//
+// Used as:
+//
+//    someVector.sort(sortMethod);
+//
+// OR with lambda expression:
+//
+//    someVector.sort(
+//       [ ](const T &a, const T &b)
+//       {
+//          return a.someMember < b.someMember;
+//       }
+//    );
+template<class T> inline void Vector<T>::sort(compare_func f)
+{
+   std::sort(this->innerVector.begin(), this->innerVector.end(), f);
 }
 
 

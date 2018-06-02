@@ -632,13 +632,6 @@ void GameSettings::forgetOwnerPassword(const string &serverName)
 }
 
 
-// Sorts alphanumerically
-S32 QSORT_CALLBACK alphaSort(string *a, string *b)
-{
-   return stricmp((a)->c_str(), (b)->c_str());        // Is there something analagous to stricmp for strings (as opposed to c_strs)?
-}
-
-
 Vector<string> *GameSettings::getLevelSkipList()
 {
    return &mLevelSkipList;

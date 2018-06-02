@@ -28,23 +28,6 @@ namespace Zap
 {
 
 
-static S32 QSORT_CALLBACK alphaNumberSort(string *a, string *b)
-{
-   int aNum = atoi(a->c_str());
-   int bNum = atoi(b->c_str());
-
-   if(aNum == bNum)
-      return stricmp(a->c_str(), b->c_str());   // Is there something analagous to stricmp for strings (as opposed to c_strs)?
-   else
-   {
-      if(aNum == 0) return -1;
-      if(bNum == 0) return 1;
-
-      return bNum - aNum;
-   }
-}
-
-
 static void idleObjects(ClientGame *game, U32 timeDelta)
 {
    const Vector<DatabaseObject *> *gameObjects = game->getGameObjDatabase()->findObjects_fast();
