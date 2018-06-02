@@ -20,6 +20,7 @@
 #include "RenderUtils.h"
 
 #include <math.h>
+#include <algorithm>
 
 namespace Zap
 {
@@ -1291,7 +1292,7 @@ void QueryServersUserInterface::sortSelected()
       mLastSortColumn = mSortColumn;
       mSortAscending = true;
    }
-   sort();   
+   sort();
 
    selectedId = servers[currentItem].id;
 
@@ -1377,60 +1378,69 @@ bool QueryServersUserInterface::isMouseOverDivider() const
 }
 
 
-#define CAST_AB_TO_SERVERAB_AND_PUT_LOCAL_SERVERS_ON_TOP                                        \
-   QueryServersUserInterface::ServerRef *serverA = (QueryServersUserInterface::ServerRef *) a;  \
-   QueryServersUserInterface::ServerRef *serverB = (QueryServersUserInterface::ServerRef *) b;  \
-                                                                                                \
-   if(serverA->isLocalServer != serverB->isLocalServer)                                         \
-   {                                                                                            \
-      if(serverA->isLocalServer) return -1;                                                     \
-      if(serverB->isLocalServer) return  1;                                                     \
-   }                                                                 
+#define PUT_LOCAL_SERVERS_ON_TOP                                     \
+   if(serverA.isLocalServer != serverB.isLocalServer)                \
+   {                                                                 \
+      if(serverA.isLocalServer) return true;                         \
+      if(serverB.isLocalServer) return false;                        \
+   }
 
 
-// Sort server list by various columns
-static S32 QSORT_CALLBACK compareFuncName(const void *a, const void *b)
+struct compareFuncName
 {
-   CAST_AB_TO_SERVERAB_AND_PUT_LOCAL_SERVERS_ON_TOP;
+   inline bool operator() (const QueryServersUserInterface::ServerRef& serverA,
+         const QueryServersUserInterface::ServerRef& serverB)
+   {
+      PUT_LOCAL_SERVERS_ON_TOP
 
-   return stricmp(serverA->serverName.c_str(), serverB->serverName.c_str());
-}
+      return (stricmp(serverA.serverName.c_str(), serverB.serverName.c_str()) < 0);
+   }
+};
 
 
-static S32 QSORT_CALLBACK compareFuncPing(const void *a, const void *b)
+struct compareFuncPing
 {
-   CAST_AB_TO_SERVERAB_AND_PUT_LOCAL_SERVERS_ON_TOP;
+   inline bool operator() (const QueryServersUserInterface::ServerRef& serverA,
+         const QueryServersUserInterface::ServerRef& serverB)
+   {
+      PUT_LOCAL_SERVERS_ON_TOP
 
-   return S32(serverA->pingTime - serverB->pingTime);
-}
+      return (serverA.pingTime < serverB.pingTime);
+   }
+};
 
 
-static S32 QSORT_CALLBACK compareFuncPlayers(const void *a, const void *b)
+struct compareFuncPlayers
 {
-   CAST_AB_TO_SERVERAB_AND_PUT_LOCAL_SERVERS_ON_TOP;
+   inline bool operator() (const QueryServersUserInterface::ServerRef& serverA,
+         const QueryServersUserInterface::ServerRef& serverB)
+   {
+      PUT_LOCAL_SERVERS_ON_TOP
 
-   S32 pc = S32(serverA->playerCount - serverB->playerCount);
+      if(serverA.playerCount == serverB.playerCount)
+         return (serverA.maxPlayers < serverB.maxPlayers);
 
-   if(pc)
-      return pc;
-
-   return S32(serverA->maxPlayers - serverB->maxPlayers);
-}
+      return (serverA.playerCount < serverB.playerCount);
+   }
+};
 
 
-// First compare IPs, then, if equal, port numbers
-static S32 QSORT_CALLBACK compareFuncAddress(const void *a, const void *b)
+struct compareFuncAddress
 {
-   CAST_AB_TO_SERVERAB_AND_PUT_LOCAL_SERVERS_ON_TOP;
+   inline bool operator() (const QueryServersUserInterface::ServerRef& serverA,
+         const QueryServersUserInterface::ServerRef& serverB)
+   {
+      PUT_LOCAL_SERVERS_ON_TOP
 
-   U32 netNumA = serverA->serverAddress.netNum[0];
-   U32 netNumB = serverB->serverAddress.netNum[0];
+      U32 netNumA = serverA.serverAddress.netNum[0];
+      U32 netNumB = serverB.serverAddress.netNum[0];
 
-   if(netNumA == netNumB)
-      return (S32)(serverA->serverAddress.port - serverB->serverAddress.port);
-   
-   return S32(netNumA - netNumB);
-}
+      if(netNumA == netNumB)
+         return (serverA.serverAddress.port < serverB.serverAddress.port);
+
+      return (netNumA < netNumB);
+   }
+};
 
 
 void QueryServersUserInterface::sort()
@@ -1439,21 +1449,22 @@ void QueryServersUserInterface::sort()
    switch(mSortColumn)
    {
       case 0:
-         qsort(servers.address(), servers.size(), sizeof(ServerRef), compareFuncName);
+         std::sort(servers.getStlVector().begin(), servers.getStlVector().end(), compareFuncName());
          break;
       case 2:
-         qsort(servers.address(), servers.size(), sizeof(ServerRef), compareFuncPing);
+         std::sort(servers.getStlVector().begin(), servers.getStlVector().end(), compareFuncPing());
          break;
       case 3:
-         qsort(servers.address(), servers.size(), sizeof(ServerRef), compareFuncPlayers);
+         std::sort(servers.getStlVector().begin(), servers.getStlVector().end(), compareFuncPlayers());
          break;
       case 4:
-         qsort(servers.address(), servers.size(), sizeof(ServerRef), compareFuncAddress);
+         std::sort(servers.getStlVector().begin(), servers.getStlVector().end(), compareFuncAddress());
          break;
       default: 
          TNLAssert(false, "Unhandled case");
    }
 
+   // This assumes the list is already sorted and just reverses the order
    if(!mSortAscending)
    {
       S32 size = servers.size() / 2;
