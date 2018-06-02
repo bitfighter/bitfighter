@@ -32,8 +32,6 @@ struct SaveException : public exception
 };
 
 
-extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
-
 // Collection of useful string things
 
 string extractDirectory(const string &path);
@@ -161,6 +159,9 @@ bool stringContainsAllTheSameCharacter(const string &str);
 bool isPrintable(char c);
 bool isHex(char c);
 bool isHex(const string &str);
+
+bool alphaSort(const string &a, const string &b);
+bool alphaNumberSort(const string &a, const string &b);
 
 static const S32 NO_AUTO_WRAP = -1;
 

@@ -78,12 +78,6 @@ static Level *mLoadTarget;
 const string EditorUserInterface::UnnamedFile = "unnamed_file";      // When a file has no name, this is its name!
 
 
-S32 QSORT_CALLBACK pluginInfoSort(PluginInfo *a, PluginInfo *b)
-{
-   return stricmp((a)->prettyName.c_str(), (b)->prettyName.c_str());
-}
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -5482,7 +5476,11 @@ void EditorUserInterface::findPlugins()
       mPluginInfos.push_back(info);
    }
 
-   mPluginInfos.sort(pluginInfoSort);
+   mPluginInfos.sort([](const PluginInfo &a, const PluginInfo &b)
+         {
+            return alphaSort(a.prettyName, b.prettyName);
+         }
+   );
 
    // Now update all the bindings in the INI
    bindings.clear();

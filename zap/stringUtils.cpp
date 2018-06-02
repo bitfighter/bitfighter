@@ -99,13 +99,6 @@ string extractFilenameNoExtension(const string &path)
 }
 
 
-// Sorts alphanumerically
-S32 QSORT_CALLBACK alphaSort(string *a, string *b)
-{
-   return stricmp((a)->c_str(), (b)->c_str());        // Is there something analagous to stricmp for strings (as opposed to c_strs)?
-}
-
-
 Vector<string> findAllThingsInFolder(const string &dir, const string *extList, S32 extListSize)
 {
    Vector<string> fileList;
@@ -1106,6 +1099,30 @@ bool isHex(const string &str)
          return false;
 
    return true;
+}
+
+
+// Sorts alphanumerically, ignoring case
+bool alphaSort(const string &a, const string &b)
+{
+   return (stricmp(a.c_str(), b.c_str()) < 0);
+}
+
+
+bool alphaNumberSort(const string &a, const string &b)
+{
+   int aNum = atoi(a.c_str());
+   int bNum = atoi(b.c_str());
+
+   if(aNum == bNum)
+      return alphaSort(a, b);
+   else
+   {
+      if(aNum == 0) return true;
+      if(bNum == 0) return false;
+
+      return (aNum < bNum);
+   }
 }
 
 

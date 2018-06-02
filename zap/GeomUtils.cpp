@@ -869,9 +869,11 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 
          /* remove v from remaining polygon */
          for(s = v, t = v+1; t < nv; s++, t++) 
-            V[s] = V[t]; nv--;
+            V[s] = V[t];
 
-         /* resest error detection counter */
+         nv--;
+
+         /* reset error detection counter */
          count = 2*nv;
       }
    }
@@ -1461,11 +1463,15 @@ static void edgeShrink(Path &path)
       // Note that at least one coordinate will always be adjusted; the only way that
       // neither if/else statement can be triggered is if we have two duplicate points
       // in a row, and, in that case, things will get crashy anyway.
-           if(path[i].X - path[prev].X > 0) path[i].X--;
-      else if(path[i].X - path[prev].X < 0) path[i].X++;
+      if(path[i].X - path[prev].X > 0)
+         path[i].X--;
+      else if(path[i].X - path[prev].X < 0)
+         path[i].X++;
 
-           if(path[i].Y - path[prev].Y > 0) path[i].Y--;
-      else if(path[i].Y - path[prev].Y < 0) path[i].Y++;
+      if(path[i].Y - path[prev].Y > 0)
+         path[i].Y--;
+      else if(path[i].Y - path[prev].Y < 0)
+         path[i].Y++;
 
       prev = i;
    }
