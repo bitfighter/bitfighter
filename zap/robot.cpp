@@ -274,8 +274,6 @@ void Robot::onAddedToGame(Game *game)
    disableCollision();
 
    game->addBot(this);        // Add this robot to the list of all robots (can't do this in constructor or else it gets run on client side too...)
-  
-   EventManager::get()->fireEvent(this, EventManager::PlayerJoinedEvent, getPlayerInfo());
 
    // Check whether a script file has been specified. If not, use the default
    if(mScriptName == "")
@@ -296,6 +294,10 @@ void Robot::onAddedToGame(Game *game)
    disableCollision();
    game->getGameType()->serverAddClient(mClientInfo.getPointer());
    enableCollision();
+
+   // This needs to run after serverAddClient so the playerInfo is properly
+   // filled out for this bot
+   EventManager::get()->fireEvent(this, EventManager::PlayerJoinedEvent, getPlayerInfo());
 
    Parent::onAddedToGame(game);
 }
