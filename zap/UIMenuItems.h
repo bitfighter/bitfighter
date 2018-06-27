@@ -96,6 +96,7 @@ public:
    S32 getIndex();      // Only used once...  TODO: Get rid of this, and perhaps user-assigned indices altogether
 
    const string getHelp();
+   void setHelp(string help);
 
    MenuUserInterface *getMenu();
    void setMenu(MenuUserInterface *menu);
@@ -203,8 +204,10 @@ public:
 
    virtual MenuItemTypes getItemType();
    virtual const char *getSpecialEditingInstructions();
-   virtual S32 getValueIndex();
+   virtual S32 getValueIndex() const;
    virtual void setValueIndex(U32 index);
+   virtual S32 getIntValue() const;
+   virtual void setIntValue(S32 value);
    
    virtual string getValue() const;
 
@@ -513,7 +516,6 @@ public:
    SimpleTextEntryMenuItem(string title, U32 length, void (*callback)(ClientGame *, U32));
    virtual ~SimpleTextEntryMenuItem();
 
-   void setHelp(string help);
    void setHasError(bool hasError);
 
    virtual bool handleKey(InputCode inputCode);

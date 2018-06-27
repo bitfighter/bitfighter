@@ -149,6 +149,12 @@ const string MenuItem::getHelp()
 }
 
 
+void MenuItem::setHelp(string help)
+{
+   mHelp = help;
+}
+
+
 void MenuItem::setMenu(MenuUserInterface *menu) 
 { 
    mMenu = menu; 
@@ -536,7 +542,7 @@ const char *ToggleMenuItem::getSpecialEditingInstructions()
 }
 
 
-S32 ToggleMenuItem::getValueIndex()
+S32 ToggleMenuItem::getValueIndex() const
 {
    return mIndex;
 }
@@ -545,6 +551,18 @@ S32 ToggleMenuItem::getValueIndex()
 void ToggleMenuItem::setValueIndex(U32 index)
 {
    mIndex = index;
+}
+
+
+S32 ToggleMenuItem::getIntValue() const
+{
+   return getValueIndex();
+}
+
+
+void ToggleMenuItem::setIntValue(S32 value)
+{
+   setValueIndex(value);
 }
 
 
@@ -1772,12 +1790,6 @@ SimpleTextEntryMenuItem::SimpleTextEntryMenuItem(string title, U32 length, void 
 SimpleTextEntryMenuItem::~SimpleTextEntryMenuItem()
 {
    // Do nothing
-}
-
-
-void SimpleTextEntryMenuItem::setHelp(string help)
-{
-   mHelp = help;
 }
 
 

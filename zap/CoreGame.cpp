@@ -10,6 +10,7 @@
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "gameObjectRender.h"
+#  include "UIMenuItems.h"
 #endif
 
 #include "Colors.h"
@@ -17,6 +18,7 @@
 #include "stringUtils.h"
 
 #include <cmath>
+#include <unordered_map>
 
 namespace Zap {
 
@@ -24,7 +26,7 @@ using namespace LuaArgs;
 
 CoreGameType::CoreGameType() : GameType(0)  // Winning score hard-coded to 0
 {
-   // Do nothing
+   mRedistMethod = RedistNone;
 }
 
 CoreGameType::~CoreGameType()
@@ -33,10 +35,42 @@ CoreGameType::~CoreGameType()
 }
 
 
+// Build up key/value map
+// One with keyString as key
+const unordered_map<string, CoreGameType::RedistMethod> CoreGameRedistKeyMap = {
+#  define COREGAME_REDIST_ITEM(enumValue, keyString, c, d) {keyString, CoreGameType::enumValue},
+      COREGAME_REDIST_TABLE
+#  undef COREGAME_REDIST_ITEM
+};
+
+// One with enumValue as key
+const unordered_map<CoreGameType::RedistMethod, string> CoreGameRedistEnumMap = {
+#  define COREGAME_REDIST_ITEM(enumValue, keyString, c, d) {CoreGameType::enumValue, keyString},
+      COREGAME_REDIST_TABLE
+#  undef COREGAME_REDIST_ITEM
+};
+
 bool CoreGameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)
       setGameTime(F32(atof(argv[0]) * 60.0));      // Game time, stored in minutes in level file
+
+   // Added in 019g
+   mRedistMethod = RedistNone;  // Default for all legacy maps
+   if(argc > 1)
+   {
+      // This will default to a return value of '0' if key is not found.  This
+      // means it'll default to RedistNone, which I think is OK
+      string key = argv[1];
+      try
+      {
+         mRedistMethod = CoreGameRedistKeyMap.at(key);
+      }
+      catch (...)
+      {
+         return false;
+      }
+   }
 
    return true;
 }
@@ -44,7 +78,8 @@ bool CoreGameType::processArguments(S32 argc, const char **argv, Game *game)
 
 string CoreGameType::toLevelCode() const
 {
-   return string(getClassName()) + " " + getRemainingGameTimeInMinutesString();
+   return string(getClassName()) + " " + getRemainingGameTimeInMinutesString() +
+         " " + CoreGameRedistEnumMap.at(mRedistMethod);
 }
 
 
@@ -86,20 +121,71 @@ bool CoreGameType::isTeamCoreBeingAttacked(S32 teamIndex) const
 
 
 #ifndef ZAP_DEDICATED
+const string CoreGameTeamRedistKey = "Team Redistribution";
+
+const char *CoreGameRedistNames[] = {
+#  define COREGAME_REDIST_ITEM(a, b, name, d) name,
+      COREGAME_REDIST_TABLE
+#  undef COREGAME_REDIST_ITEM
+};
+
+const char *CoreGameRedistInstructions[] = {
+#  define COREGAME_REDIST_ITEM(a, b, c, inst) inst,
+      COREGAME_REDIST_TABLE
+#  undef COREGAME_REDIST_ITEM
+};
+
+void teamRedistCallback(ClientGame *game, U32 val)
+{
+   // Update the help text for team redistribution
+   CoreGameType *coreGame = static_cast<CoreGameType*>(game->getGameType());
+
+   coreGame->getMenuItem(CoreGameTeamRedistKey)->setHelp(CoreGameRedistInstructions[val]);
+}
+
+
+// Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
 Vector<string> CoreGameType::getGameParameterMenuKeys()
 {
    Vector<string> items = Parent::getGameParameterMenuKeys();
 
-   // Remove "Win Score" as that's not needed here -- win score is determined by the number of cores
+   // Replace "Win Score" as that's not needed here -- win score is determined by the number of cores
    for(S32 i = 0; i < items.size(); i++)
       if(items[i] == "Win Score")
       {
-         items.erase(i);
+         items[i] = CoreGameTeamRedistKey;
          break;
       }
  
    return items;
 }
+
+// Definitions for those items
+shared_ptr<MenuItem> CoreGameType::getMenuItem(const string &key)
+{
+   Vector<string> opts;
+
+   for(S32 i = 0; i < RedistCount; i++)
+      opts.push_back(CoreGameRedistNames[i]);
+
+   if(key == CoreGameTeamRedistKey)
+      return shared_ptr<MenuItem>(new ToggleMenuItem("Losing Team Redistribution:", opts, mRedistMethod, false,
+            teamRedistCallback, "Method of moving players of a losing team to the remaining teams", KEY_T));
+   else
+      return Parent::getMenuItem(key);
+}
+
+
+bool CoreGameType::saveMenuItem(const MenuItem *menuItem, const string &key)
+{
+   if(key == CoreGameTeamRedistKey)
+      mRedistMethod = RedistMethod(menuItem->getIntValue());
+   else
+      return Parent::saveMenuItem(menuItem, key);
+
+   return true;
+}
+
 #endif
 
 
@@ -138,16 +224,29 @@ void CoreGameType::updateScore(ClientInfo *player, S32 team, ScoringEvent event,
       player->addScore(points);
    }
 
+   // If any Core on an active team was destroyed
    if((event == OwnCoreDestroyed || event == EnemyCoreDestroyed) && U32(team) < U32(getGame()->getTeamCount()))
    {
-      ((Team *)getGame()->getTeam(team))->addScore(-1); // Count down when a core is destoryed
+      Team *thisTeam = (Team *)getGame()->getTeam(team);
+      thisTeam->addScore(-1); // Count down when a core is destoryed
+      s2cSetTeamScore(team, thisTeam->getScore());     // Broadcast result
+
+
       S32 numberOfTeamsHaveSomeCores = 0;
-      s2cSetTeamScore(team, ((Team *)(getGame()->getTeam(team)))->getScore());     // Broadcast result
+      // Count up the teams that still have Cores
       for(S32 i = 0; i < getGame()->getTeamCount(); i++)
       {
          if(((Team *)getGame()->getTeam(i))->getScore() != 0)
             numberOfTeamsHaveSomeCores++;
       }
+
+      // Handle losing team redistribution
+      // Happens when this team loses last core and there are at least 2 teams
+      // left in play
+      if(thisTeam->getScore() == 0 && numberOfTeamsHaveSomeCores >= 2)
+         handleRedistribution(team);
+
+      // One team left, they win!
       if(numberOfTeamsHaveSomeCores <= 1)
          gameOverManGameOver();
    }
@@ -220,6 +319,164 @@ void CoreGameType::score(ClientInfo *destroyer, S32 coreOwningTeam, S32 score)
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
 
       updateScore(NULL, coreOwningTeam, EnemyCoreDestroyed, score);
+   }
+}
+
+
+void CoreGameType::setRedistMethod(RedistMethod method)
+{
+   mRedistMethod = method;
+}
+
+
+CoreGameType::RedistMethod CoreGameType::getRedistMethod()
+{
+   return mRedistMethod;
+}
+
+
+static bool teamScoreCompare(Team * const &a, Team* const &b)
+{
+   return (a->getScore() < b->getScore());
+}
+
+// Redistribute all players on the given team to the remaining ones, using the
+// method chosen in the level
+void CoreGameType::handleRedistribution(S32 teamIndex)
+{
+   // Get players on this (losing) team
+   Vector<ClientInfo*> players;
+   for(S32 i = 0; i < getGame()->getClientCount(); i++)
+   {
+      ClientInfo *info = getGame()->getClientInfo(i);
+
+      if(info->getTeamIndex() == teamIndex)
+         players.push_back(info);
+   }
+
+   // Get all remaining teams
+   Vector<Team*> remainingTeams;
+   S32 teamsCount = getGame()->getTeamCount();
+
+   // Check to make sure at least one team has at least one player...
+   for(S32 i = 0; i < teamsCount; i++)
+   {
+      // Skip losing team
+      if(i == teamIndex)
+         continue;
+
+      // Add other teams to list if they still have Cores
+      Team *team = (Team *)getGame()->getTeam(i);
+      if(team->getScore() != 0)
+         remainingTeams.push_back(team);
+   }
+
+   // Sorts ascending score (fewest cores first)
+   remainingTeams.sort(teamScoreCompare);
+
+   bool playersMoved = true;
+
+   // Divvy up players according the the chosen algorithm
+   switch(mRedistMethod)
+   {
+      case RedistBalancedAll:
+      {
+         S32 receivingTeamIndex = 0;  // Team with fewest cores
+         for(S32 i = 0; i < players.size(); i++)
+         {
+            ClientInfo *clientInfo = players[i];
+
+            // Grab team from sorted list
+            Team *receivingTeam = remainingTeams[receivingTeamIndex];
+
+            // Send player to new team
+            getGame()->getGameType()->changeClientTeam(clientInfo, receivingTeam->getTeamIndex());
+
+            // Go to next team
+            receivingTeamIndex++;
+            if(receivingTeamIndex >= remainingTeams.size()) // Do wrap around
+               receivingTeamIndex = 0;
+         }
+      }
+      break;
+
+      case RedistBalancedNonWinners:
+      {
+         S32 receivingTeamIndex = 0;  // Team with fewest cores
+         for(S32 i = 0; i < players.size(); i++)
+         {
+            ClientInfo *clientInfo = players[i];
+
+            // Grab team from sorted list
+            Team *receivingTeam = remainingTeams[receivingTeamIndex];
+
+            // Send player to new team
+            getGame()->getGameType()->changeClientTeam(clientInfo, receivingTeam->getTeamIndex());
+
+            // Go to next team, wrap around and skip last (winning) team
+            receivingTeamIndex++;
+            if(receivingTeamIndex >= remainingTeams.size() - 1)
+               receivingTeamIndex = 0;
+         }
+      }
+      break;
+
+      case RedistRandom:
+      {
+         for(S32 i = 0; i < players.size(); i++)
+         {
+            // Randomly grab a team index
+            S32 randomIndex = TNL::Random::readI(0, remainingTeams.size() - 1);
+            Team *receivingTeam = remainingTeams[randomIndex];
+
+            ClientInfo *clientInfo = players[i];
+            // Send player to new team
+            getGame()->getGameType()->changeClientTeam(clientInfo, receivingTeam->getTeamIndex());
+         }
+      }
+      break;
+
+      case RedistLosers:
+      {
+         S32 losersIndex = 0;  // Losers at index 0
+         Team *receivingTeam = remainingTeams[losersIndex];
+
+         for(S32 i = 0; i < players.size(); i++)
+         {
+            ClientInfo *clientInfo = players[i];
+            // Send player to new team
+            getGame()->getGameType()->changeClientTeam(clientInfo, receivingTeam->getTeamIndex());
+         }
+      }
+      break;
+
+      case RedistWinners:
+      {
+         S32 winnersIndex = remainingTeams.size() - 1;  // Winners at last index
+         Team *receivingTeam = remainingTeams[winnersIndex];
+
+         for(S32 i = 0; i < players.size(); i++)
+         {
+            ClientInfo *clientInfo = players[i];
+            // Send player to new team
+            getGame()->getGameType()->changeClientTeam(clientInfo, receivingTeam->getTeamIndex());
+         }
+      }
+      break;
+
+      // Do nothing, players stay on same team and just harass other teams
+      case RedistNone:
+      default:
+         playersMoved = false;
+         break;
+   }
+
+   // Send server message to players that they've been moved
+   if(playersMoved)
+   for(S32 i = 0; i < players.size(); i++)
+   {
+      ClientInfo *clientInfo = players[i];
+      clientInfo->getConnection()->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Failed to defend Cores. Moved to a different team");
    }
 }
 
