@@ -49,6 +49,7 @@ public:
    virtual StringTableEntry getName() const = 0;
 
    void setTeamIndex(S32 index);
+   const S32 getTeamIndex() const;
 
    bool processArguments(S32 argc, const char **argv);          // Read team info from level line
    string toLevelCode() const;

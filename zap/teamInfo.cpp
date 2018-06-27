@@ -64,6 +64,12 @@ void AbstractTeam::setTeamIndex(S32 index)
 }
 
 
+const S32 AbstractTeam::getTeamIndex() const
+{
+   return mTeamIndex;
+}
+
+
 // Read team from level file params
 bool AbstractTeam::processArguments(S32 argc, const char **argv)
 {
