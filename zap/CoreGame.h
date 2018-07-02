@@ -19,12 +19,12 @@ class ClientInfo;
 
 //  Enum,  KeyString, Name,  Description
 #define COREGAME_REDIST_TABLE \
-   COREGAME_REDIST_ITEM(RedistNone,               "RedistNone",               "None",                  "Team is not redistributed") \
-   COREGAME_REDIST_ITEM(RedistBalancedAll,        "RedistBalancedAll",        "Balanced, All",         "Divide players amongst all teams, losers first") \
-   COREGAME_REDIST_ITEM(RedistBalancedNonWinners, "RedistBalancedNonWinners", "Balanced, Non-Winner",  "Divide players amongst all but the winning team") \
-   COREGAME_REDIST_ITEM(RedistRandom,             "RedistRandom",             "Random",                "Randomly move players to remaining teams") \
-   COREGAME_REDIST_ITEM(RedistLosers,             "RedistLosers",             "Losers",                "Move players to team with fewest Cores") \
-   COREGAME_REDIST_ITEM(RedistWinners,            "RedistWinners",            "Winners",               "Move players to team with most Cores") \
+   COREGAME_REDIST_ITEM(RedistNone,               "RedistNone",               "None",                        "Team is not redistributed") \
+   COREGAME_REDIST_ITEM(RedistBalanced,           "RedistBalanced",           "Balanced",                    "Divide players amongst all teams, losers first") \
+   COREGAME_REDIST_ITEM(RedistBalancedNonWinners, "RedistBalancedNonWinners", "Balanced, Non-Winning Teams", "Divide players amongst all but the winning team") \
+   COREGAME_REDIST_ITEM(RedistRandom,             "RedistRandom",             "Random",                      "Randomly move players to remaining teams") \
+   COREGAME_REDIST_ITEM(RedistLoser,              "RedistLoser",              "Losing Team",                 "Move players to team with fewest Cores") \
+   COREGAME_REDIST_ITEM(RedistWinner,             "RedistWinner",             "Winning Team",                "Move players to team with most Cores") \
 // End XMacro
 
 class CoreGameType : public GameType

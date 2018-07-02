@@ -340,6 +340,21 @@ static bool teamScoreCompare(Team * const &a, Team* const &b)
    return (a->getScore() < b->getScore());
 }
 
+
+static bool balanceCompare(Team * const &a, Team* const &b)
+{
+   // First sort by player count
+   // Game::countTeamPlayers() must be run before this call to getPlayerCount()
+   if(a->getPlayerCount() < b->getPlayerCount())
+      return true;
+   else if(a->getPlayerCount() > b->getPlayerCount())
+      return false;
+
+   // Else sort by Core count
+   return (a->getScore() < b->getScore());
+}
+
+
 // Redistribute all players on the given team to the remaining ones, using the
 // method chosen in the level
 void CoreGameType::handleRedistribution(S32 teamIndex)
@@ -379,44 +394,33 @@ void CoreGameType::handleRedistribution(S32 teamIndex)
    // Divvy up players according the the chosen algorithm
    switch(mRedistMethod)
    {
-      case RedistBalancedAll:
-      {
-         S32 receivingTeamIndex = 0;  // Team with fewest cores
-         for(S32 i = 0; i < players.size(); i++)
-         {
-            ClientInfo *clientInfo = players[i];
-
-            // Grab team from sorted list
-            Team *receivingTeam = remainingTeams[receivingTeamIndex];
-
-            // Send player to new team
-            getGame()->getGameType()->changeClientTeam(clientInfo, receivingTeam->getTeamIndex());
-
-            // Go to next team
-            receivingTeamIndex++;
-            if(receivingTeamIndex >= remainingTeams.size()) // Do wrap around
-               receivingTeamIndex = 0;
-         }
-      }
-      break;
-
+      case RedistBalanced:
+      // Like the 'Balanced' option but skip the winning team
       case RedistBalancedNonWinners:
       {
-         S32 receivingTeamIndex = 0;  // Team with fewest cores
+         // Remove winning team if we're using non-winners method
+         if(mRedistMethod == RedistBalancedNonWinners)
+            remainingTeams.pop_back();
+
+         // Duplicate and sort by the balancing algorithm
+         Vector<Team*> balancedSortedTeams(remainingTeams);
+
          for(S32 i = 0; i < players.size(); i++)
          {
+            // Update mTeams, must be run before anything that calls Team::getPlayerCount()
+            getGame()->countTeamPlayers();
+
+            // Sort teams according to balance algo
+            balancedSortedTeams.sort(balanceCompare);
+
             ClientInfo *clientInfo = players[i];
 
-            // Grab team from sorted list
-            Team *receivingTeam = remainingTeams[receivingTeamIndex];
+            // Grab team from sorted list, approprate team should be first after
+            // re-sort
+            Team *receivingTeam = balancedSortedTeams[0];
 
             // Send player to new team
-            getGame()->getGameType()->changeClientTeam(clientInfo, receivingTeam->getTeamIndex());
-
-            // Go to next team, wrap around and skip last (winning) team
-            receivingTeamIndex++;
-            if(receivingTeamIndex >= remainingTeams.size() - 1)
-               receivingTeamIndex = 0;
+            changeClientTeam(clientInfo, receivingTeam->getTeamIndex());
          }
       }
       break;
@@ -431,35 +435,33 @@ void CoreGameType::handleRedistribution(S32 teamIndex)
 
             ClientInfo *clientInfo = players[i];
             // Send player to new team
-            getGame()->getGameType()->changeClientTeam(clientInfo, receivingTeam->getTeamIndex());
+            changeClientTeam(clientInfo, receivingTeam->getTeamIndex());
          }
       }
       break;
 
-      case RedistLosers:
+      case RedistLoser:
       {
-         S32 losersIndex = 0;  // Losers at index 0
-         Team *receivingTeam = remainingTeams[losersIndex];
+         Team *receivingTeam = remainingTeams.first();  // Losers at index 0
 
          for(S32 i = 0; i < players.size(); i++)
          {
             ClientInfo *clientInfo = players[i];
             // Send player to new team
-            getGame()->getGameType()->changeClientTeam(clientInfo, receivingTeam->getTeamIndex());
+            changeClientTeam(clientInfo, receivingTeam->getTeamIndex());
          }
       }
       break;
 
-      case RedistWinners:
+      case RedistWinner:
       {
-         S32 winnersIndex = remainingTeams.size() - 1;  // Winners at last index
-         Team *receivingTeam = remainingTeams[winnersIndex];
+         Team *receivingTeam = remainingTeams.last();  // Winners at last index
 
          for(S32 i = 0; i < players.size(); i++)
          {
             ClientInfo *clientInfo = players[i];
             // Send player to new team
-            getGame()->getGameType()->changeClientTeam(clientInfo, receivingTeam->getTeamIndex());
+            changeClientTeam(clientInfo, receivingTeam->getTeamIndex());
          }
       }
       break;
@@ -473,10 +475,14 @@ void CoreGameType::handleRedistribution(S32 teamIndex)
 
    // Send server message to players that they've been moved
    if(playersMoved)
-   for(S32 i = 0; i < players.size(); i++)
    {
-      ClientInfo *clientInfo = players[i];
-      clientInfo->getConnection()->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Failed to defend Cores. Moved to a different team");
+      for(S32 i = 0; i < players.size(); i++)
+      {
+         ClientInfo *clientInfo = players[i];
+         if(!clientInfo->isRobot())
+            clientInfo->getConnection()->s2cDisplayMessage(GameConnection::ColorRed, SFXNone,
+                  "Failed to defend Cores. Moved to a different team");
+      }
    }
 }
 
