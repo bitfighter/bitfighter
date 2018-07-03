@@ -481,7 +481,7 @@ void CoreGameType::handleRedistribution(S32 teamIndex)
          ClientInfo *clientInfo = players[i];
          if(!clientInfo->isRobot())
             clientInfo->getConnection()->s2cDisplayMessage(GameConnection::ColorRed, SFXNone,
-                  "Failed to defend Cores. Moved to a different team");
+                  "Failed to defend Cores. Moved to a different team.");
       }
    }
 }
