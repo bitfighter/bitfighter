@@ -18,7 +18,7 @@
 #include "stringUtils.h"
 
 #include <cmath>
-#include <unordered_map>
+#include <map>
 
 namespace Zap {
 
@@ -37,14 +37,14 @@ CoreGameType::~CoreGameType()
 
 // Build up key/value map
 // One with keyString as key
-const unordered_map<string, CoreGameType::RedistMethod> CoreGameRedistKeyMap = {
+const map<string, CoreGameType::RedistMethod> CoreGameRedistKeyMap = {
 #  define COREGAME_REDIST_ITEM(enumValue, keyString, c, d) {keyString, CoreGameType::enumValue},
       COREGAME_REDIST_TABLE
 #  undef COREGAME_REDIST_ITEM
 };
 
 // One with enumValue as key
-const unordered_map<CoreGameType::RedistMethod, string> CoreGameRedistEnumMap = {
+const map<CoreGameType::RedistMethod, string> CoreGameRedistEnumMap = {
 #  define COREGAME_REDIST_ITEM(enumValue, keyString, c, d) {CoreGameType::enumValue, keyString},
       COREGAME_REDIST_TABLE
 #  undef COREGAME_REDIST_ITEM
