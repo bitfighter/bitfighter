@@ -16,14 +16,38 @@ namespace Zap {
 class CoreItem;
 class ClientInfo;
 
+
+//  Enum,  KeyString, Name,  Description
+#define COREGAME_REDIST_TABLE \
+   COREGAME_REDIST_ITEM(RedistNone,               "RedistNone",               "None",                        "Team is not redistributed") \
+   COREGAME_REDIST_ITEM(RedistBalanced,           "RedistBalanced",           "Balanced",                    "Divide players amongst all teams, losers first") \
+   COREGAME_REDIST_ITEM(RedistBalancedNonWinners, "RedistBalancedNonWinners", "Balanced, Non-Winning Teams", "Divide players amongst all but the winning team") \
+   COREGAME_REDIST_ITEM(RedistRandom,             "RedistRandom",             "Random",                      "Randomly move players to remaining teams") \
+   COREGAME_REDIST_ITEM(RedistLoser,              "RedistLoser",              "Losing Team",                 "Move players to team with fewest Cores") \
+   COREGAME_REDIST_ITEM(RedistWinner,             "RedistWinner",             "Winning Team",                "Move players to team with most Cores") \
+// End XMacro
+
 class CoreGameType : public GameType
 {
    typedef GameType Parent;
+
+public:
+   // What method should be used to redistribute players if they lost all their
+   // Cores
+   enum RedistMethod
+   {
+#  define COREGAME_REDIST_ITEM(enumValue, b, c, d) enumValue,
+      COREGAME_REDIST_TABLE
+#  undef COREGAME_REDIST_ITEM
+      RedistCount   // Always last
+   };
 
 private:
    Vector<SafePtr<CoreItem> > mCores;
 
    Vector<string> makeParameterMenuKeys() const;
+   
+   RedistMethod mRedistMethod;
 
 public:
    static const S32 DestroyedCoreScore = 1;
@@ -52,9 +76,15 @@ public:
 
    void onOvertimeStarted();
 
+   void setRedistMethod(RedistMethod method);
+   RedistMethod getRedistMethod();
+   void handleRedistribution(S32 team);
+
 
 #ifndef ZAP_DEDICATED
    const Vector<string> *getGameParameterMenuKeys() const;
+   shared_ptr<MenuItem> getMenuItem(const string &key) const;
+   bool saveMenuItem(const MenuItem *menuItem, const string &key);
    void renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) const;
 #endif
 

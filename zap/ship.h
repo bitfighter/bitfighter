@@ -341,6 +341,7 @@ public:
    S32 lua_setLoadoutNow(lua_State *L);
 
    S32 lua_setPos(lua_State *L);
+   S32 lua_setTeam(lua_State *L);
 };
 
 

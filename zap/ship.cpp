@@ -2819,6 +2819,7 @@ S32 Ship::lua_setLoadoutNow(lua_State *L)
    return 0;
 }
 
+// LuaItem methods that override one in a parent class
 S32 Ship::lua_setPos(lua_State *L)
 {
    S32 r = Parent::lua_setPos(L);
@@ -2827,6 +2828,22 @@ S32 Ship::lua_setPos(lua_State *L)
    setMaskBits(PositionMask);  // Update clients
 
    return r;
+}
+
+// This completely overrides the BfObject::lua_setTeam() method
+S32 Ship::lua_setTeam(lua_State *L)
+{
+   checkArgList(L, functionArgs, "BfObject", "setTeam");
+   S32 newTeam = getTeamIndex(L, 1);
+
+   // Remove team from stack so we can trigger the event with a clean stack
+   lua_pop(L, 1);
+
+   // Update team on server and clients, with appropriate logic
+   GameType *gameType = getGame()->getGameType();
+   gameType->changeClientTeam(mClientInfo, newTeam);
+
+   return 0;
 }
 
 };

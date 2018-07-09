@@ -75,6 +75,7 @@ public:
    static const S32 MAX_TEAM_NAME_LENGTH = 32;
 
    void setTeamIndex(S32 index);
+   const S32 getTeamIndex() const;
 
    void alterRed(F32 amt);
    void alterGreen(F32 amt);

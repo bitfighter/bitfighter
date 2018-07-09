@@ -171,6 +171,12 @@ void AbstractTeam::setTeamIndex(S32 index)
 }
 
 
+const S32 AbstractTeam::getTeamIndex() const
+{
+   return mTeamIndex;
+}
+
+
 void AbstractTeam::alterRed(F32 amt) 
 {
    Color color(getColor());
