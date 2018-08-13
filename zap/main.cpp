@@ -979,6 +979,13 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       removeFile(offendingFile);
    }
 
+   // 019g changes
+   if(previousVersion < VERSION_019g)
+   {
+      // Master server changed again
+      settings->getIniSettings()->masterAddress = MASTER_SERVER_LIST_ADDRESS;
+   }
+
    // Now copy over resources to user's preference directory.  This will overwrite the previous
    // resources with same names.  Dont do this if it is a standalone bundle
    if(!isStandalone)
