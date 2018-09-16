@@ -13,6 +13,8 @@
 #include "../zap/Md5Utils.h"
 #include "../zap/stringUtils.h"
 
+#include <unistd.h>
+
 using namespace Zap;
 using namespace DbWriter;
 using namespace std;
