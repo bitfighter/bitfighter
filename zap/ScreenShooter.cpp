@@ -66,6 +66,33 @@ void ScreenShooter::resizeViewportToCanvas(UIManager *uiManager)
 }
 
 
+void ScreenShooter::resizeViewportToDrawableArea(UIManager *uiManager)
+{
+   // Grab the canvas width/height and normalize our screen to it
+   S32 width = DisplayManager::getScreenInfo()->getDrawAreaWidth();
+   S32 height = DisplayManager::getScreenInfo()->getDrawAreaHeight();
+   S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
+
+   glViewport(0, 0, width, height);
+
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+
+   // Stick to canvas width for orthographic projection
+   glOrtho(0, canvasWidth, canvasHeight, 0, 0, 1);
+
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
+
+   glScissor(0, 0, width, height);
+
+   // Now render a frame to draw our new viewport to the back buffer
+   glClear(GL_COLOR_BUFFER_BIT);   // Not sure why this is needed
+   uiManager->renderCurrent();
+}
+
+
 // Stolen from VideoSystem::updateDisplayState()
 void ScreenShooter::restoreViewportToWindow(GameSettings *settings)
 {
@@ -76,8 +103,10 @@ void ScreenShooter::restoreViewportToWindow(GameSettings *settings)
 
 // Thanks to the good developers of naev for excellent code to base this off of.
 // Much was copied directly.
-void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings, string filename)
+void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings, bool resizeToDefault, string filename)
 {
+   DisplayMode displayMode = settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
+
    string folder = settings->getFolderManager()->screenshotDir;
 
    // Let's find a filename to use
@@ -101,24 +130,35 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings,
       fullFilename = joindir(folder, filename + ".png");
    }
 
-   // We default to resizing the opengl viewport to the standard canvas size, unless we're
-   // in the editor or our window is smaller than the canvas size
-   bool doResize = (!uiManager->isCurrentUI<EditorUserInterface>()) &&
-                     DisplayManager::getScreenInfo()->getWindowWidth() > DisplayManager::getScreenInfo()->getGameCanvasWidth();
+   // Fullscreen-unstretched will probably have black bars so let's clip those
+   // for screenshots and just resize to the drawable area.  resizeToDefault
+   // takes precedence.
+   bool resizeToDrawable = !resizeToDefault && displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
+
+   // Resizing-to-default will take a screenshot of the default game canvas (800x600)
+   // This is mostly used to have a uniform screenshot for uploading to the level
+   // database
 
    // Change opengl viewport temporarily to have consistent screenshot sizes
-   if(doResize)
+   if(resizeToDefault)
       resizeViewportToCanvas(uiManager);
+   else if(resizeToDrawable)
+      resizeViewportToDrawableArea(uiManager);
 
    // Now let's grab them pixels
    S32 width;
    S32 height;
 
    // If we're resizing, use the default canvas size
-   if(doResize)
+   if(resizeToDefault)
    {
       width = DisplayManager::getScreenInfo()->getGameCanvasWidth();
       height = DisplayManager::getScreenInfo()->getGameCanvasHeight();
+   }
+   else if(resizeToDrawable)
+   {
+      width = DisplayManager::getScreenInfo()->getDrawAreaWidth();
+      height = DisplayManager::getScreenInfo()->getDrawAreaHeight();
    }
    // Otherwise just take the window size
    else
@@ -144,7 +184,7 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings,
    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, screenBuffer);
 
    // Change opengl viewport back to what it was
-   if(doResize)
+   if(resizeToDefault || resizeToDrawable)
       restoreViewportToWindow(settings);
 
    // Convert Data

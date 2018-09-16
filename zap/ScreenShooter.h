@@ -35,6 +35,7 @@ private:
    static const S32 BytesPerPixel = 3;  // 3 bytes = 24 bits
 
    static void resizeViewportToCanvas(UIManager *uiManager);
+   static void resizeViewportToDrawableArea(UIManager *uiManager);
    static void restoreViewportToWindow(GameSettings *settings);
 
    static bool writePNG(const char *file_name, png_bytep *rows,
@@ -44,7 +45,7 @@ public:
    ScreenShooter();
    virtual ~ScreenShooter();
 
-   static void saveScreenshot(UIManager *uiManager, GameSettings *settings, string filename = "");
+   static void saveScreenshot(UIManager *uiManager, GameSettings *settings, bool resizeToDefault, string filename = "");
 };
 
 } /* namespace Zap */

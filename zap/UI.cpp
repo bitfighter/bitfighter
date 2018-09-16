@@ -377,7 +377,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
    else if(inputString == getSpecialBindingString(getGame()->getSettings(), BINDING_SCREENSHOT_1) ||
            inputString == getSpecialBindingString(getGame()->getSettings(), BINDING_SCREENSHOT_2))      
    {
-      ScreenShooter::saveScreenshot(getUIManager(), getGame()->getSettings());
+      ScreenShooter::saveScreenshot(getUIManager(), getGame()->getSettings(), false);
       handled = true;
    }
 #endif
