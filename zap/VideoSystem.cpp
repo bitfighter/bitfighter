@@ -34,10 +34,13 @@
 namespace Zap
 {
 
+// Init static vars
+VideoSystem::videoSystem_st_t VideoSystem::currentState = init_st;
+
+
 VideoSystem::VideoSystem()
 {
    // Do nothing
-
 }
 
 VideoSystem::~VideoSystem()
@@ -142,7 +145,7 @@ bool VideoSystem::init()
    if(icon != NULL)
       SDL_FreeSurface(icon);
 
-   // We will set the resolution, position, and flags in actualizeScreenMode()
+   // We will set the resolution, position, and flags in updateDisplayState()
 
    return true;
 }
@@ -150,155 +153,471 @@ bool VideoSystem::init()
 
 void VideoSystem::setWindowPosition(S32 left, S32 top)
 {
-   SDL_SetWindowPosition(DisplayManager::getScreenInfo()->sdlWindow, left, top);
+   // Grab window border and add it to the y coordinate.  Only works on X11.
+   // This is needed because SDL_GetWindowPosition can return the draw area
+   // coordinates not the window ones and so the window will be saved offset
+   // the window bar
+   S32 offset = 0;
+   SDL_GetWindowBordersSize(DisplayManager::getScreenInfo()->sdlWindow, &offset, NULL, NULL, NULL);
+
+   S32 newTop = top - offset;
+
+   SDL_SetWindowPosition(DisplayManager::getScreenInfo()->sdlWindow, left, newTop);
 }
 
 
-S32 VideoSystem::getWindowPositionCoord(bool getX)
+void VideoSystem::saveWindowPostion(GameSettings *settings)
 {
    S32 x, y;
    SDL_GetWindowPosition(DisplayManager::getScreenInfo()->sdlWindow, &x, &y);
 
-   return getX ? x : y;
+   S32 offset;
+   SDL_GetWindowBordersSize(DisplayManager::getScreenInfo()->sdlWindow, &offset, NULL, NULL, NULL);
+
+   S32 newY = y - offset;
+
+   settings->getIniSettings()->winXPos = x;
+   settings->getIniSettings()->winYPos = newY;
+
+   GameSettings::iniFile.SetValueI("Settings", "WindowXPos", settings->getIniSettings()->winXPos, true);
+   GameSettings::iniFile.SetValueI("Settings", "WindowYPos", settings->getIniSettings()->winYPos, true);
 }
 
 
-S32 VideoSystem::getWindowPositionX()
+bool VideoSystem::isFullscreen()
 {
-   return getWindowPositionCoord(true);
+   if(SDL_GetWindowFlags(DisplayManager::getScreenInfo()->sdlWindow) & SDL_WINDOW_FULLSCREEN)
+      return true;
+
+   return false;
 }
 
 
-S32 VideoSystem::getWindowPositionY()
+void VideoSystem::saveUpdateWindowScale(GameSettings *settings)
 {
-   return getWindowPositionCoord(false);
+   ScreenInfo *screen = DisplayManager::getScreenInfo();
+
+   S32 windowWidth, windowHeight;
+   SDL_GetWindowSize(screen->sdlWindow, &windowWidth, &windowHeight);
+
+   S32 canvasHeight = screen->getGameCanvasHeight();
+   S32 canvasWidth = screen->getGameCanvasWidth();
+
+   // Find the window scaling factor
+   F32 scale = 1;
+   // Wider than taller
+   if((windowWidth - canvasWidth) > (windowHeight - canvasHeight))
+      scale = max((F32) windowHeight / (F32)canvasHeight, screen->getMinScalingFactor());
+   else
+      scale = max((F32) windowWidth / (F32)canvasWidth, screen->getMinScalingFactor());
+
+   S32 newWidth  = (S32)floor(canvasWidth  * scale + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
+   S32 newHeight = (S32)floor(canvasHeight * scale + 0.5f);
+
+   // Save new scaling factor to settings and INI
+   settings->getIniSettings()->winSizeFact = scale;
+   GameSettings::iniFile.SetValueF("Settings", "WindowScalingFactor", settings->getIniSettings()->winSizeFact, true);
+
+   // Save the new window dimensions in ScreenInfo
+   screen->setWindowSize(newWidth, newHeight);
 }
 
 
 extern void setDefaultBlendFunction();
 
-// Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
-// This has the unfortunate side-effect of triggering a mouse move event.
-void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInterfaces, bool currentUIUsesEditorScreenMode)
+
+static void debugPrintState(VideoSystem::videoSystem_st_t currentState)
 {
-   DisplayMode displayMode = settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
-
-   DisplayManager::getScreenInfo()->resetGameCanvasSize();     // Set GameCanvasSize vars back to their default values
-   DisplayManager::getScreenInfo()->setActualized();
-
-
-   // If old display mode is windowed or current is windowed but we change interfaces,
-   // save the window position
-   if(settings->getIniSettings()->oldDisplayMode == DISPLAY_MODE_WINDOWED ||
-         (changingInterfaces && displayMode == DISPLAY_MODE_WINDOWED))
+   logprintf("");
+   switch(currentState)
    {
-      settings->getIniSettings()->winXPos = getWindowPositionX();
-      settings->getIniSettings()->winYPos = getWindowPositionY();
+      case VideoSystem::windowed_st:
+         logprintf("windowed_st");
+         break;
 
-      GameSettings::iniFile.SetValueI("Settings", "WindowXPos", settings->getIniSettings()->winXPos, true);
-      GameSettings::iniFile.SetValueI("Settings", "WindowYPos", settings->getIniSettings()->winYPos, true);
+      case VideoSystem::fullscreen_stretched_st:
+         logprintf("fullscreen_stretched_st");
+         break;
+
+      case VideoSystem::fullscreen_unstretched_st:
+         logprintf("fullscreen_unstretched_st");
+         break;
+
+      case VideoSystem::windowed_editor_st:
+         logprintf("windowed_editor_st");
+         break;
+
+      case VideoSystem::fullscreen_editor_st:
+         logprintf("fullscreen_editor_st");
+         break;
+
+      case VideoSystem::init_st:
+         logprintf("unknown_st");
+         break;
+
+      default:
+         // stay put
+         break;
    }
-
-   // When we're in the editor, let's take advantage of the entire screen unstretched
-   // We might want to disallow this when we're in split screen mode?
-   if(currentUIUsesEditorScreenMode &&
-         (displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED))
-   {
-      // Smaller values give bigger magnification; makes small things easier to see on full screen
-      F32 magFactor = 0.85f;
-
-      // For screens smaller than normal, we need to readjust magFactor to make sure we get the full canvas height crammed onto
-      // the screen; otherwise our dock will break.  Since this mode is only used in the editor, we don't really care about
-      // screen width; tall skinny screens will work just fine.
-      magFactor = max(magFactor, (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight() / (F32)DisplayManager::getScreenInfo()->getPhysicalScreenHeight());
-
-      DisplayManager::getScreenInfo()->setGameCanvasSize(S32(DisplayManager::getScreenInfo()->getPhysicalScreenWidth() * magFactor), S32(DisplayManager::getScreenInfo()->getPhysicalScreenHeight() * magFactor));
-
-      displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
-   }
+}
 
 
-   // Set up video/window flags amd parameters and get ready to change the window
-   S32 sdlWindowWidth, sdlWindowHeight;
-   F64 orthoLeft, orthoRight, orthoTop, orthoBottom;
+// This is a state-machine to manage all the different video states.  It is
+// driven asynchronously
+void VideoSystem::updateDisplayState(GameSettings *settings, StateReason reason)
+{
+   ScreenInfo *screen = DisplayManager::getScreenInfo();
 
-   getWindowParameters(settings, displayMode, sdlWindowWidth, sdlWindowHeight, orthoLeft, orthoRight, orthoTop, orthoBottom);
+   // INI is where we save the normal display mode, grab it and set it to the old mode
+   DisplayMode oldDisplayMode = settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
+   settings->getIniSettings()->oldDisplayMode = oldDisplayMode;
 
-   // Change video modes based on selected display mode
-   // Note:  going into fullscreen you have to do in order:
-   //  - SDL_SetWindowSize()
-   //  - SDL_SetWindowFullscreen()
+   // Set ScreenInfo back to default values
+   screen->resetGameCanvasSize();
+   screen->setActualized();
+
+   // Other vars that should be updated in each state
+   DisplayMode displayMode;
+   S32 windowWidth, windowHeight;
+
+   // START STATE MACHINE
    //
-   // However, coming out of fullscreen mode you must do the reverse
-   switch (displayMode)
+   // Perform state updates first (normally backwards from most FSMs)
+   // Here we'll determine what state to go to next
+   switch(currentState)
    {
-   case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
-      SDL_SetWindowSize(DisplayManager::getScreenInfo()->sdlWindow, sdlWindowWidth, sdlWindowHeight);
-      SDL_SetWindowFullscreen(DisplayManager::getScreenInfo()->sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+      case init_st:
+         if(oldDisplayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
+            currentState = fullscreen_unstretched_st;
 
-      break;
+         else if(oldDisplayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)
+            currentState = fullscreen_stretched_st;
 
-   case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
-      SDL_SetWindowSize(DisplayManager::getScreenInfo()->sdlWindow, sdlWindowWidth, sdlWindowHeight);
-      SDL_SetWindowFullscreen(DisplayManager::getScreenInfo()->sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+         else  // Default to windowed
+            currentState = windowed_st;
 
-      break;
+         break;
 
-   case DISPLAY_MODE_WINDOWED:
-   default:
-      // Reverse order, leave fullscreen before setting size
-      SDL_SetWindowFullscreen(DisplayManager::getScreenInfo()->sdlWindow, 0);
-      SDL_SetWindowSize(DisplayManager::getScreenInfo()->sdlWindow, sdlWindowWidth, sdlWindowHeight);
-      break;
+      case windowed_st:
+         if(reason == StateReasonToggle || reason == StateReasonModeDirectFullscreenStretched)
+         {
+            currentState = fullscreen_stretched_st;
+
+            saveWindowPostion(settings);
+         }
+
+         else if(reason == StateReasonModeDirectFullscreenUnstretched)
+         {
+            currentState = fullscreen_unstretched_st;
+
+            saveWindowPostion(settings);
+         }
+
+         else if(reason == StateReasonInterfaceChange)
+            currentState = windowed_editor_st;
+
+         // Stay here if resized
+         else if(reason == StateReasonExternalResize)
+         {
+            // Get new window dimensions and scaling
+            saveUpdateWindowScale(settings);
+         }
+
+         break;
+
+      case fullscreen_stretched_st:
+         if(reason == StateReasonToggle || reason == StateReasonModeDirectFullscreenUnstretched)
+            currentState = fullscreen_unstretched_st;
+
+         else if(reason == StateReasonModeDirectWindowed)
+            currentState = windowed_st;
+
+         else if(reason == StateReasonInterfaceChange)
+            currentState = fullscreen_editor_st;
+
+         // else resized.  stay here
+
+         break;
+
+      case fullscreen_unstretched_st:
+         if(reason == StateReasonToggle || reason == StateReasonModeDirectWindowed)
+            currentState = windowed_st;
+
+         else if(reason == StateReasonModeDirectFullscreenStretched)
+            currentState = fullscreen_stretched_st;
+
+         else if(reason == StateReasonInterfaceChange)
+            currentState = fullscreen_editor_st;
+
+         // else resized.  stay here
+
+         break;
+
+      case windowed_editor_st:
+         if(reason == StateReasonToggle)
+         {
+            currentState = fullscreen_editor_st;
+
+            saveWindowPostion(settings);
+         }
+
+         else if(reason == StateReasonInterfaceChange)
+            currentState = windowed_st;
+
+         // Stay here if resized
+         else if(reason == StateReasonExternalResize)
+         {
+            // Get new window dimensions and scaling
+            saveUpdateWindowScale(settings);
+         }
+
+         break;
+
+      case fullscreen_editor_st:
+         if(reason == StateReasonToggle)
+            currentState = windowed_editor_st;
+
+         else if(reason == StateReasonInterfaceChange)
+         {
+            if(oldDisplayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
+               currentState = fullscreen_unstretched_st;
+
+            // This basically means if we don't know, this is default
+            else
+               currentState = fullscreen_stretched_st;
+         }
+
+         // else resized.  stay here
+
+         break;
+
+      default:
+         // stay put, should never get here
+         break;
    }
 
+//   debugPrintState(currentState);
+
+   // Perform state actions
+   // Now that we're in the state we want, alter the video params accordingly
+   switch(currentState)
+   {
+      // We should have moved on by now!
+      case init_st:
+         break;
+
+      case windowed_st:
+         displayMode = DISPLAY_MODE_WINDOWED;
+
+         windowWidth = (S32) floor((F32)screen->getGameCanvasWidth() * settings->getIniSettings()->winSizeFact + 0.5f);
+         windowHeight = (S32) floor((F32)screen->getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
+
+         // Set window position unless it is (0, 0) which can hide the title bar
+         if(settings->getIniSettings()->winXPos != 0 || settings->getIniSettings()->winYPos != 0)
+            setWindowPosition(settings->getIniSettings()->winXPos, settings->getIniSettings()->winYPos);
+
+         // Leave fullscreen before setting size
+         SDL_SetWindowFullscreen(screen->sdlWindow, SDL_DISABLE);
+         SDL_SetWindowSize(screen->sdlWindow, windowWidth, windowHeight);
+
+         // Save the new window dimensions in ScreenInfo
+         screen->setWindowSize(windowWidth, windowHeight);
+
+         screen->resetOrtho();
+         screen->resetScissor();
+
+         break;
+
+      case fullscreen_stretched_st:
+         displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+
+         windowWidth = screen->getPhysicalScreenWidth();
+         windowHeight = screen->getPhysicalScreenHeight();
+
+         SDL_SetWindowSize(screen->sdlWindow, windowWidth, windowHeight);
+         SDL_SetWindowFullscreen(screen->sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+
+         // Save the new window dimensions in ScreenInfo
+         screen->setWindowSize(windowWidth, windowHeight);
+
+         screen->resetOrtho();
+         screen->resetScissor();
+
+         break;
+
+      case fullscreen_unstretched_st:
+         displayMode = DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
+
+         windowWidth = screen->getPhysicalScreenWidth();
+         windowHeight = screen->getPhysicalScreenHeight();
+
+         SDL_SetWindowSize(screen->sdlWindow, windowWidth, windowHeight);
+         SDL_SetWindowFullscreen(screen->sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+
+         // Save the new window dimensions in ScreenInfo
+         screen->setWindowSize(windowWidth, windowHeight);
+
+         // Set orthongonal projection to squeeze into window so as to keep normal
+         // canvas scaling
+         screen->setOrtho(
+               -1 * screen->getHorizDrawMargin(),
+               screen->getGameCanvasWidth() + screen->getHorizDrawMargin(),
+               screen->getGameCanvasHeight() + screen->getVertDrawMargin(),
+               -1 * screen->getVertDrawMargin()
+               );
+
+         // Set scissor to clip at orthogonal projection edges; helps with artifacts
+         screen->setScissor(
+               screen->getHorizPhysicalMargin(),
+               screen->getVertPhysicalMargin(),
+               screen->getDrawAreaWidth(),
+               screen->getDrawAreaHeight()
+               );
+
+         break;
+
+      case windowed_editor_st:
+         // Keep old display mode for editor states
+         displayMode = oldDisplayMode;
+
+         windowWidth = (S32) floor((F32)screen->getGameCanvasWidth() * settings->getIniSettings()->winSizeFact + 0.5f);
+         windowHeight = (S32) floor((F32)screen->getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
+
+         // Set window position unless it is (0, 0) which can hide the title bar
+         if(settings->getIniSettings()->winXPos != 0 || settings->getIniSettings()->winYPos != 0)
+            setWindowPosition(settings->getIniSettings()->winXPos, settings->getIniSettings()->winYPos);
+
+         SDL_SetWindowFullscreen(screen->sdlWindow, SDL_DISABLE);
+         SDL_SetWindowSize(screen->sdlWindow, windowWidth, windowHeight);
+
+         // Save the new window dimensions in ScreenInfo
+         screen->setWindowSize(windowWidth, windowHeight);
+
+         screen->resetOrtho();
+         screen->resetScissor();
+
+         break;
+
+      case fullscreen_editor_st:
+      {
+         // Keep old display mode for editor states
+         displayMode = oldDisplayMode;
+
+         windowWidth = screen->getPhysicalScreenWidth();
+         windowHeight = screen->getPhysicalScreenHeight();
+
+         setWindowPosition(0, 0);
+
+         SDL_SetWindowSize(screen->sdlWindow, windowWidth, windowHeight);
+         SDL_SetWindowFullscreen(screen->sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+
+         // Save the new window dimensions in ScreenInfo
+         screen->setWindowSize(windowWidth, windowHeight);
+
+         // Smaller values give bigger magnification; makes small things easier to see on full screen
+         F32 magFactor = 0.85f;
+
+         // For screens smaller than normal, we need to readjust magFactor to make sure we get the full canvas height crammed onto
+         // the screen; otherwise our dock will break.  Since this mode is only used in the editor, we don't really care about
+         // screen width; tall skinny screens will work just fine.
+         magFactor = max(magFactor, (F32)screen->getGameCanvasHeight() / (F32)screen->getPhysicalScreenHeight());
+
+         screen->setGameCanvasSize(
+               S32(screen->getPhysicalScreenWidth() * magFactor),
+               S32(screen->getPhysicalScreenHeight() * magFactor)
+               );
+
+         screen->resetOrtho();
+         screen->resetScissor();
+      }
+
+         break;
+
+      default:
+         break;
+   }
+
+   //
+   // END STATE MACHINE
+   //
+
+   // Save normal display mode
+   settings->getIniSettings()->mSettings.setVal("WindowMode", displayMode);
+
+   // Disable screensaver
    if(settings->getIniSettings()->disableScreenSaver)
       SDL_DisableScreenSaver();
    else
       SDL_EnableScreenSaver();
 
-   // Flush window events because SDL_SetWindowSize triggers a SDL_WINDOWEVENT_RESIZED 
-   // event (which in turn triggers another SDL_SetWindowSize)
-   SDL_FlushEvent(SDL_WINDOWEVENT);
-
+   // Set Vsync
    SDL_GL_SetSwapInterval(settings->getIniSettings()->mSettings.getVal<YesNo>("Vsync") ? 1 : 0);
 
-   // Now save the new window dimensions in ScreenInfo
-   DisplayManager::getScreenInfo()->setWindowSize(sdlWindowWidth, sdlWindowHeight);
+   // Now update the viewport with any state change
+   redrawViewport(settings);
+
+   // Re-initialize our fonts because OpenGL textures can be lost upon screen change
+   FontManager::reinitialize(settings);
+
+   // This needs to happen after font re-initialization because I think fontstash interferes
+   // with the oglconsole font somehow...
+   gConsole.onScreenModeChanged();
+
+   // Notify all active UIs that the screen has changed state.  May cause problems
+   // in split-screen mode
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+   for(S32 i = 0; i < clientGames->size(); i++)
+      if(clientGames->get(i)->getUIManager()->getCurrentUI())
+         clientGames->get(i)->getUIManager()->getCurrentUI()->onDisplayModeChange();
+}
+
+
+// Redraw's the OpenGL display; the actual SDL window size should have been set
+void VideoSystem::redrawViewport(GameSettings *settings)
+{
+   // Get the window's size in screen coordinates.
+   S32 windowWidth, windowHeight;
+   SDL_GetWindowSize(DisplayManager::getScreenInfo()->sdlWindow, &windowWidth, &windowHeight);
+
+   // Find out the drawable dimensions. If this is a high- DPI display, this may
+   // be larger than the window.
+   S32 drawWidth, drawHeight;
+   SDL_GL_GetDrawableSize(DisplayManager::getScreenInfo()->sdlWindow, &drawWidth, &drawHeight);
+
+//   logprintf("w: %d, h: %d; dw: %d, dh: %d", windowWidth, windowHeight, drawWidth, drawHeight);
+
+   // If we're in HighDPI mode, set a flag incase we want to use later
+   bool isHighDpi = (drawWidth > windowWidth) || (drawHeight > windowHeight);
+   DisplayManager::getScreenInfo()->setHighDpi(isHighDpi);
 
    glClearColor( 0, 0, 0, 0 );
 
-   glViewport(0, 0, sdlWindowWidth, sdlWindowHeight);
+   glViewport(0, 0, drawWidth, drawHeight);
 
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
 
+
    // The best understanding I can get for glOrtho is that these are the coordinates you want to appear at the four corners of the
    // physical screen. If you want a "black border" down one side of the screen, you need to make left negative, so that 0 would
    // appear some distance in from the left edge of the physical screen.  The same applies to the other coordinates as well.
-   glOrtho(orthoLeft, orthoRight, orthoBottom, orthoTop, 0, 1);
+   OrthoData ortho = DisplayManager::getScreenInfo()->getOrtho();
+   glOrtho(ortho.left, ortho.right, ortho.bottom, ortho.top, 0, 1);
+//   logprintf("ortho left: %f, right: %f, bottom: %f, top: %f", ortho.left, ortho.right, ortho.bottom, ortho.top);
+
 
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 
-   // Do the scissoring
-   if(displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
-   {
-      glScissor(DisplayManager::getScreenInfo()->getHorizPhysicalMargin(),    // x
-                DisplayManager::getScreenInfo()->getVertPhysicalMargin(),     // y
-                DisplayManager::getScreenInfo()->getDrawAreaWidth(),          // width
-                DisplayManager::getScreenInfo()->getDrawAreaHeight());        // height
-   }
-   else
-   {
-      // Enabling scissor appears to fix crashing problem switching screen mode
-      // in linux and "Mobile 945GME Express Integrated Graphics Controller",
-      // probably due to lines and points was not being clipped,
-      // causing some lines to wrap around the screen, or by writing other
-      // parts of RAM that can crash Bitfighter, graphics driver, or the entire computer.
-      // This is probably a bug in the Linux Intel graphics driver.
-      glScissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
-   }
+   // Enabling scissor appears to fix crashing problem switching screen mode
+   // in linux and "Mobile 945GME Express Integrated Graphics Controller",
+   // probably due to lines and points was not being clipped,
+   // causing some lines to wrap around the screen, or by writing other
+   // parts of RAM that can crash Bitfighter, graphics driver, or the entire computer.
+   // This is probably a bug in the Linux Intel graphics driver.
+   ScissorData scissor = DisplayManager::getScreenInfo()->getScissor();
+   glScissor(scissor.x, scissor.y, scissor.width, scissor.height);
+//   logprintf("scissor x: %f, y: %f, width: %f, height: %f", scissor.x, scissor.y, scissor.width, scissor.height);
 
    glEnable(GL_SCISSOR_TEST);    // Turn on clipping
 
@@ -313,66 +632,7 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    }
 
    glEnable(GL_BLEND);
-
-   // Now set the window position
-   if(displayMode == DISPLAY_MODE_WINDOWED)
-   {
-      if(settings->getIniSettings()->winXPos != 0 || settings->getIniSettings()->winYPos != 0)  // sometimes it happens to be (0,0) hiding the top title bar preventing ability to move the window, in this case we are not moving it unless it is not (0,0). Note that ini config file will default to (0,0).
-         setWindowPosition(settings->getIniSettings()->winXPos, settings->getIniSettings()->winYPos);
-   }
-   else
-      setWindowPosition(0, 0);
-
-   // Notify all active UIs that the screen has changed mode.  This will likely need some work to not do something
-   // horrible in split-screen mode.
-   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
-   for(S32 i = 0; i < clientGames->size(); i++)
-      if(clientGames->get(i)->getUIManager()->getCurrentUI())
-         clientGames->get(i)->getUIManager()->getCurrentUI()->onDisplayModeChange();
-
-   // Re-initialize our fonts because OpenGL textures can be lost upon screen change
-   FontManager::reinitialize(settings);
-
-   // This needs to happen after font re-initialization because I think fontstash interferes
-   // with the oglconsole font somehow...
-   gConsole.onScreenModeChanged();
 }
 
-
-void VideoSystem::getWindowParameters(GameSettings *settings, DisplayMode displayMode, 
-                                      S32 &sdlWindowWidth, S32 &sdlWindowHeight, F64 &orthoLeft, F64 &orthoRight, F64 &orthoTop, F64 &orthoBottom)
-{
-   // Set up variables according to display mode
-   switch(displayMode)
-   {
-      case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
-         sdlWindowWidth  = DisplayManager::getScreenInfo()->getPhysicalScreenWidth();
-         sdlWindowHeight = DisplayManager::getScreenInfo()->getPhysicalScreenHeight();
-         orthoLeft   = 0;
-         orthoRight  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
-         orthoBottom = DisplayManager::getScreenInfo()->getGameCanvasHeight();
-         orthoTop    = 0;
-         break;
-
-      case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
-         sdlWindowWidth  = DisplayManager::getScreenInfo()->getPhysicalScreenWidth();
-         sdlWindowHeight = DisplayManager::getScreenInfo()->getPhysicalScreenHeight();
-         orthoLeft   = -1 * DisplayManager::getScreenInfo()->getHorizDrawMargin();
-         orthoRight  = DisplayManager::getScreenInfo()->getGameCanvasWidth() + DisplayManager::getScreenInfo()->getHorizDrawMargin();
-         orthoBottom = DisplayManager::getScreenInfo()->getGameCanvasHeight() + DisplayManager::getScreenInfo()->getVertDrawMargin();
-         orthoTop    = -1 * DisplayManager::getScreenInfo()->getVertDrawMargin();
-         break;
-
-      case DISPLAY_MODE_WINDOWED:
-      default:  //  Fall through OK
-         sdlWindowWidth  = (S32) floor((F32)DisplayManager::getScreenInfo()->getGameCanvasWidth()  * settings->getIniSettings()->winSizeFact + 0.5f);
-         sdlWindowHeight = (S32) floor((F32)DisplayManager::getScreenInfo()->getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
-         orthoLeft   = 0;
-         orthoRight  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
-         orthoBottom = DisplayManager::getScreenInfo()->getGameCanvasHeight();
-         orthoTop    = 0;
-         break;
-   }
-}
 
 } /* namespace Zap */

@@ -66,37 +66,10 @@ void ScreenShooter::resizeViewportToCanvas(UIManager *uiManager)
 }
 
 
-// Stolen from VideoSystem::actualizeScreenMode()
+// Stolen from VideoSystem::updateDisplayState()
 void ScreenShooter::restoreViewportToWindow(GameSettings *settings)
 {
-   DisplayMode displayMode = settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
-
-   // Set up video/window flags amd parameters and get ready to change the window
-   S32 sdlWindowWidth, sdlWindowHeight;
-   F64 orthoLeft, orthoRight, orthoTop, orthoBottom;
-
-   VideoSystem::getWindowParameters(settings, displayMode, sdlWindowWidth, sdlWindowHeight, orthoLeft, orthoRight, orthoTop, orthoBottom);
-
-   glViewport(0, 0, sdlWindowWidth, sdlWindowHeight);
-
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-
-   glOrtho(orthoLeft, orthoRight, orthoBottom, orthoTop, 0, 1);
-
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
-
-   // Now scissor
-   if(displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
-   {
-      glScissor(DisplayManager::getScreenInfo()->getHorizPhysicalMargin(), // x
-            DisplayManager::getScreenInfo()->getVertPhysicalMargin(),      // y
-            DisplayManager::getScreenInfo()->getDrawAreaWidth(),           // width
-            DisplayManager::getScreenInfo()->getDrawAreaHeight());         // height
-   }
-   else
-      glScissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
+   VideoSystem::redrawViewport(settings);
 }
 
 

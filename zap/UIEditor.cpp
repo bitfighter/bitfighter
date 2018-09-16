@@ -1306,7 +1306,6 @@ void EditorUserInterface::onActivate()
    mDragCopying = false;
    mJustInsertedVertex = false;
 
-   VideoSystem::actualizeScreenMode(settings, true, usesEditorScreenMode());
 
    centerView();
    findPlugins();
@@ -1358,7 +1357,7 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
       mCurrentTeam = 0;
 
    if(UserInterface::getUIManager()->getPrevUI()->usesEditorScreenMode() != usesEditorScreenMode())
-      VideoSystem::actualizeScreenMode(getGame()->getSettings(), true, usesEditorScreenMode());
+      VideoSystem::updateDisplayState(getGame()->getSettings(), VideoSystem::StateReasonInterfaceChange);
 }
 
 

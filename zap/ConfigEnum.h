@@ -16,6 +16,8 @@ enum sfxSets {
 };
 
 
+// Standard display modes for the game.  Does not include abnormal interfaces
+// like the editor
 enum DisplayMode {
    DISPLAY_MODE_WINDOWED,
    DISPLAY_MODE_FULL_SCREEN_STRETCHED,

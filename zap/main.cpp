@@ -490,8 +490,7 @@ void shutdownBitfighter()
       // Save current window position if in windowed mode
       if(settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode") == DISPLAY_MODE_WINDOWED)
       {
-         settings->getIniSettings()->winXPos = VideoSystem::getWindowPositionX();
-         settings->getIniSettings()->winYPos = VideoSystem::getWindowPositionY();
+         VideoSystem::saveWindowPostion(settings);
       }
 
       SDL_QuitSubSystem(SDL_INIT_VIDEO);
@@ -1223,16 +1222,18 @@ int main(int argc, char **argv)
       Cursor::init();
 
       settings->getIniSettings()->oldDisplayMode = DISPLAY_MODE_UNKNOWN;   // We don't know what the old one was
-      VideoSystem::actualizeScreenMode(settings.get(), false, false);      // Create a display window
 
-      // Instantiate ClietGame -- this should be done after actualizeScreenMode() because the client game in turn instantiates some of the
+      // Reason doesn't matter on startup since we're in the init state
+      VideoSystem::updateDisplayState(settings.get(), VideoSystem::StateReasonInterfaceChange);
+
+      // Instantiate ClietGame -- this should be done after updateDisplayState() because the client game in turn instantiates some of the
       // user interface code which triggers a long series of cascading events culminating in something somewhere determining the width
-      // of a string.  Which will crash if the fonts haven't been loaded, which happens as part of actualizeScreenMode.  So there.
+      // of a string.  Which will crash if the fonts haven't been loaded, which happens as part of updateDisplayState.  So there.
       createClientGame(settings);         
 
       gConsole.initialize();     // Initialize console *after* the screen mode has been actualized
 
-      // Fonts are initialized in VideoSystem::actualizeScreenMode because of OpenGL + texture loss/creation
+      // Fonts are initialized in VideoSystem::updateDisplayState because of OpenGL + texture loss/creation
       FontManager::setFont(FontDefault);     // Default font
 
       // Now show any error messages from start-up

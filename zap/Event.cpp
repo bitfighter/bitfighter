@@ -13,6 +13,7 @@
 #include "Joystick.h"
 #include "ClientGame.h"
 #include "Cursor.h"
+#include "VideoSystem.h"
 
 #include "SDL.h"
 
@@ -173,23 +174,23 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
 
       case SDL_WINDOWEVENT:
          switch (event->window.event) {
-            // This event should only be triggered in windowed mode.  SDL 2.0, however,
-            // triggers this on any window change.  We have therefore flushed window events
-            // in VideoSystem::actualizeScreenMode so this is only triggered by manual
-            // resizing of a window
+            // Happens with any size change (to/from fullscreen, window scaling)
             case SDL_WINDOWEVENT_RESIZED:
-               // Ignore window resize events if we are in fullscreen mode.  This actually does
-               // occur when you ALT-TAB away and back to the window
-               if(SDL_GetWindowFlags(DisplayManager::getScreenInfo()->sdlWindow) & SDL_WINDOW_FULLSCREEN)
-                  break;
-
-               onResize(game, event->window.data1, event->window.data2);
+               onResized(game, event->window.data1, event->window.data2);
                break;
 
             case SDL_WINDOWEVENT_FOCUS_LOST:
                // Released all keys when we lose focus.  No more stickies!
                InputCodeManager::resetStates();
                break;
+
+            case SDL_WINDOWEVENT_MOVED:
+               // Only save position if not in fullscreen
+               if(!VideoSystem::isFullscreen())
+                  VideoSystem::saveWindowPostion(game->getSettings());
+
+               break;
+
 
             default:
                break;
@@ -219,7 +220,7 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
    {
       const Point *pos = DisplayManager::getScreenInfo()->getMousePos();
 
-      game->getUIManager()->getUI<OptionsMenuUserInterface>()->toggleDisplayMode();
+      VideoSystem::updateDisplayState(game->getSettings(), VideoSystem::StateReasonToggle);
 
       DisplayManager::getScreenInfo()->setCanvasMousePos((S32)pos->x, (S32)pos->y, game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"));
 
@@ -430,41 +431,14 @@ void Event::onControllerRemoved(S32 deviceId)
 }
 
 
-// TODO - make the change required here since we've moved to SDL 2
-// This method should never be run in fullscreen mode, impossible with SDL 1.2, but probable 
-// with SDL 2.0.  It is used to adjust window settings when resizing a windowed-window.
-// This can be re-engineered when we move to SDL 2.0-only; we can then make use of the
-// SDL_WINDOWEVENT_SIZE_CHANGED and merge this and VideoSystem::actualizeScreenMode
-void Event::onResize(ClientGame *game, S32 width, S32 height)
+void Event::onResized(ClientGame *game, S32 width, S32 height)
 {
-   IniSettings *iniSettings = game->getSettings()->getIniSettings();
+   // Ignore window resize events if we are in fullscreen mode.  This can occur
+   // when you ALT-TAB away and back to the window
+   if(VideoSystem::isFullscreen())
+      return;
 
-   S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
-   S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
-
-   // Constrain window to correct proportions...
-   if((width - canvasWidth) > (height - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
-      iniSettings->winSizeFact = max((F32) height / (F32)canvasHeight, DisplayManager::getScreenInfo()->getMinScalingFactor());
-   else
-      iniSettings->winSizeFact = max((F32) width / (F32)canvasWidth, DisplayManager::getScreenInfo()->getMinScalingFactor());
-
-   S32 newWidth  = (S32)floor(canvasWidth  * iniSettings->winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
-   S32 newHeight = (S32)floor(canvasHeight * iniSettings->winSizeFact + 0.5f);
-
-   SDL_SetWindowSize(DisplayManager::getScreenInfo()->sdlWindow, newWidth, newHeight);
-
-   // Flush window events because SDL2 triggers another resize event with SDL_SetWindowSize
-   SDL_FlushEvent(SDL_WINDOWEVENT);
-
-   DisplayManager::getScreenInfo()->setWindowSize(newWidth, newHeight);
-  
-   glViewport(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());
-
-   gConsole.onScreenResized();
-
-   GameSettings::iniFile.SetValueF("Settings", "WindowScalingFactor", iniSettings->winSizeFact, true);
-
-   glScissor(0, 0, DisplayManager::getScreenInfo()->getWindowWidth(), DisplayManager::getScreenInfo()->getWindowHeight());    // See comment on identical line in main.cpp
+   VideoSystem::updateDisplayState(game->getSettings(), VideoSystem::StateReasonExternalResize);
 }
 
 

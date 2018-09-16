@@ -146,7 +146,7 @@ IniSettings::IniSettings()
    useUpdater = true;
 
    // Game window location when in windowed mode
-   winXPos = 0;  // if set to (0,0), it will not set the position meaning it uses operating system default position. (see bottom of "VideoSystem::actualizeScreenMode" in VideoSystem.cpp)
+   winXPos = 0;  // if set to (0,0), it will not set the position meaning it uses operating system default position. (see bottom of "VideoSystem::updateDisplayState" in VideoSystem.cpp)
    winYPos = 0;
    winSizeFact = 1.0;
 

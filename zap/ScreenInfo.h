@@ -20,6 +20,20 @@ using namespace TNL;
 namespace Zap {
 
 
+typedef struct {
+   F64 left;
+   F64 right;
+   F64 bottom;
+   F64 top;
+} OrthoData;
+
+typedef struct {
+   S32 x;
+   S32 y;
+   S32 width;
+   S32 height;
+} ScissorData;
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -38,11 +52,15 @@ private:
    S32 mPrevCanvasWidth, mPrevCanvasHeight;     // Previous size of screen
    S32 mWindowWidth, mWindowHeight;             // Window dimensions in physical pixels
    F32 mScalingRatioX, mScalingRatioY;          // Ratio of physical pixels to virtual pixels
-   bool mIsLandscape;                           // Is our screen landscape or portrait?
-
-   bool mActualized;                            // True once screen has been actualized
-
    F32 mPixelRatio;                             // Number of physical pixels that are used to draw a single virtual pixel
+
+   OrthoData mOrtho;
+   ScissorData mScissor;
+
+   bool mIsLandscape;                           // Is our screen landscape or portrait?
+   bool mActualized;                            // True once screen has been actualized
+   bool mHighDpi;
+
    void calcPixelRatio();
 
 public:
@@ -111,6 +129,17 @@ public:
 
    bool isActualized();
    void setActualized();
+
+   bool isHighDpi();
+   void setHighDpi(bool isHighDpi);
+
+   OrthoData getOrtho();
+   void setOrtho(F64 left, F64 right, F64 bottom, F64 top);
+   void resetOrtho();
+
+   ScissorData getScissor();
+   void setScissor(S32 x, S32 y, S32 width, S32 height);
+   void resetScissor();
 
 #ifndef ZAP_DEDICATED
    // SDL information

@@ -17,6 +17,10 @@ ScreenInfo::ScreenInfo()
    mPrevCanvasHeight = GAME_HEIGHT;
    mWindowMousePos.set(-1,-1);   // -1 is used to indicate initial run
    mActualized = false;
+   mHighDpi = false;
+
+   resetOrtho();
+   resetScissor();
 }
 
 // Destructor
@@ -214,8 +218,57 @@ void ScreenInfo::setCanvasMousePos(S32 x, S32 y, DisplayMode mode)
 bool ScreenInfo::isActualized()  { return mActualized; }
 void ScreenInfo::setActualized() { mActualized = true; }
 
-
 const Point *ScreenInfo::getMousePos() { return &mCanvasMousePos; }
 const Point *ScreenInfo::getWindowMousePos() { return &mWindowMousePos; }
+
+bool ScreenInfo::isHighDpi() { return mHighDpi; }
+void ScreenInfo::setHighDpi(bool isHighDpi) { mHighDpi = isHighDpi; }
+
+
+OrthoData ScreenInfo::getOrtho()
+{
+   return mOrtho;
+}
+
+void ScreenInfo::setOrtho(F64 left, F64 right, F64 bottom, F64 top)
+{
+   mOrtho.left = left;
+   mOrtho.right = right;
+   mOrtho.bottom = bottom;
+   mOrtho.top = top;
+}
+
+void ScreenInfo::resetOrtho()
+{
+   // Set default orthogonal projection to be the full canvas
+   mOrtho.left = 0;
+   mOrtho.right = mGameCanvasWidth;
+   mOrtho.bottom = mGameCanvasHeight;
+   mOrtho.top = 0;
+}
+
+
+ScissorData ScreenInfo::getScissor()
+{
+   return mScissor;
+}
+
+void ScreenInfo::setScissor(S32 x, S32 y, S32 width, S32 height)
+{
+   mScissor.x = x;
+   mScissor.y = y;
+   mScissor.width = width;
+   mScissor.height = height;
+}
+
+void ScreenInfo::resetScissor()
+{
+   // Set default scissor to be full screen
+   mScissor.x = 0;
+   mScissor.y = 0;
+   mScissor.width = mWindowWidth;
+   mScissor.height = mWindowHeight;
+}
+
 
 } // namespace Zap

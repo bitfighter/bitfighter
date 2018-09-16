@@ -15,9 +15,34 @@ namespace Zap
 {
 
 class GameSettings;
+class IniSettings;
 
 class VideoSystem
 {
+public:
+   // States for different video states
+   enum videoSystem_st_t {
+       init_st,
+       windowed_st,
+       fullscreen_stretched_st,
+       fullscreen_unstretched_st,
+       windowed_editor_st,
+       fullscreen_editor_st,
+   };
+
+   // Reason a video state changes
+   enum StateReason {
+      StateReasonToggle,                           // Normal mode toggle
+      StateReasonInterfaceChange,                  // Moving in/out of editor
+      StateReasonExternalResize,                   // User resizes window
+      StateReasonModeDirectWindowed,               // Direct change to windowed mode
+      StateReasonModeDirectFullscreenStretched,    // Direct change to FS stretched
+      StateReasonModeDirectFullscreenUnstretched,  // Direct change to FS unstretched
+   };
+
+private:
+   static videoSystem_st_t currentState;
+
 public:
    VideoSystem();
    virtual ~VideoSystem();
@@ -25,15 +50,13 @@ public:
    static bool init();
 
    static void setWindowPosition(S32 left, S32 top);
-   static S32 getWindowPositionCoord(bool getX);
+   static void saveWindowPostion(GameSettings *settings);
+   static void saveUpdateWindowScale(GameSettings *settings);
+   static bool isFullscreen();
 
-   static S32 getWindowPositionX();
-   static S32 getWindowPositionY();
+   static void redrawViewport(GameSettings *settings);
 
-   static void actualizeScreenMode(GameSettings *settings, bool changingInterfaces, bool currentUIUsesEditorScreenMode);
-   static void getWindowParameters(GameSettings *settings, DisplayMode displayMode, 
-                                   S32 &sdlWindowWidth, S32 &sdlWindowHeight, F64 &orthoLeft, F64 &orthoRight, F64 &orthoTop, F64 &orthoBottom);
-
+   static void updateDisplayState(GameSettings *settings, StateReason reason);
 };
 
 } /* namespace Zap */

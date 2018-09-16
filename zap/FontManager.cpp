@@ -138,7 +138,7 @@ void FontManager::reinitialize(GameSettings *settings)
 }
 
 
-// This must be run after VideoSystem::actualizeScreenMode()
+// This must be run after VideoSystem::updateDisplayState()
 // If useExternalFonts is false, settings can be NULL
 void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
 {

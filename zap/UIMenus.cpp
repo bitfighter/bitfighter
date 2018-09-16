@@ -911,8 +911,7 @@ static void highScoresSelectedCallback(ClientGame *game, U32 unused)
 static void editorSelectedCallback(ClientGame *game, U32 unused)
 {
    game->setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);      // <=== Should not be here... perhaps in editor onActivate?
-   game->getUIManager()->getUI<EditorUserInterface>()->setLevelFileName("");      // Reset this so we get the level entry screen
-   game->getUIManager()->activate<EditorUserInterface>();
+   game->getUIManager()->activate<LevelNameEntryUserInterface>();
 }
 
 
@@ -1123,15 +1122,18 @@ static void inGameHelpSelectedCallback(ClientGame *game, U32 unused)
 
 
 // User has clicked on Display Mode menu item -- switch screen mode
-static void setFullscreenCallback(ClientGame *game, U32 mode)
+static void setDisplayModeCallback(ClientGame *game, U32 mode)
 {
    GameSettings *settings = game->getSettings();
 
-   // Save existing setting
-   settings->getIniSettings()->oldDisplayMode = game->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");     
+   // Change display state based on selected normal display mode
+   VideoSystem::StateReason reason = VideoSystem::StateReasonModeDirectWindowed;
+   if((DisplayMode)mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)
+      reason = VideoSystem::StateReasonModeDirectFullscreenStretched;
+   else if((DisplayMode)mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
+      reason = VideoSystem::StateReasonModeDirectFullscreenUnstretched;
 
-   settings->getIniSettings()->mSettings.setVal("WindowMode", (DisplayMode)mode);
-   VideoSystem::actualizeScreenMode(game->getSettings(), false, game->getUIManager()->getCurrentUI()->usesEditorScreenMode());
+   VideoSystem::updateDisplayState(settings, reason);
 }
 
 
@@ -1147,7 +1149,7 @@ MenuItem *getWindowModeMenuItem(U32 displayMode)
    opts.push_back("FULLSCREEN");
 
    return new ToggleMenuItem("DISPLAY MODE:", opts, displayMode, true, 
-                             setFullscreenCallback, "Set the game mode to windowed or fullscreen", KEY_G);
+                             setDisplayModeCallback, "Set the game mode to windowed or fullscreen", KEY_G);
 }
 
 
@@ -1186,50 +1188,6 @@ void OptionsMenuUserInterface::setupMenus()
    addMenuItem(new ToggleMenuItem("CONNECTION SPEED:", opts, settings->getIniSettings()->connectionSpeed + 2, true, 
                                   setConnectionSpeedCallback, "Speed of your connection, if your ping goes too high, try slower speed.",  KEY_E));
 #endif
-}
-
-
-static bool isFullScreen(DisplayMode displayMode)
-{
-   return displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
-}
-
-
-void OptionsMenuUserInterface::toggleDisplayMode()
-{
-   GameSettings *settings = getGame()->getSettings();
-
-   DisplayMode oldMode = settings->getIniSettings()->oldDisplayMode;
-
-   // Save current setting
-   DisplayMode curMode = settings->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode");
-   settings->getIniSettings()->oldDisplayMode = curMode;
-
-   DisplayMode mode;
-
-   // When we're in the editor, and we toggle views, we'll skip one of the fullscreen modes, as they essentially do the same thing in that UI
-   bool editorScreenMode = getGame()->getUIManager()->getCurrentUI()->usesEditorScreenMode();
-   if(editorScreenMode)
-   {
-      if(isFullScreen(curMode))
-         mode = DISPLAY_MODE_WINDOWED;
-
-      // If we know what the previous fullscreen mode was, use that
-      else if(isFullScreen(oldMode))
-         mode = oldMode;
-
-      // Otherwise, pick some sort of full-screen mode...
-      else
-         mode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
-   }
-   else  // Not in the editor, just advance to the next mode
-   {
-      DisplayMode nextmode = DisplayMode(curMode + 1);
-      mode = (nextmode == DISPLAY_MODE_UNKNOWN) ? (DisplayMode) 0 : nextmode; // Bounds check
-   }
-
-   settings->getIniSettings()->mSettings.setVal("WindowMode", mode);
-   VideoSystem::actualizeScreenMode(settings, false, editorScreenMode);
 }
 
 
