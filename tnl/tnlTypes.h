@@ -353,6 +353,10 @@ static const U32 S64_MAX_DIGITS = 20;                             ///< S64_MIN =
 #  define TNL_CPU_STRING "ARM"
 #  define TNL_CPU_ARM
 #  define TNL_LITTLE_ENDIAN
+#elif defined(__aarch64__)
+#  define TNL_CPU_STRING "ARM64"
+#  define TNL_CPU_ARM64
+#  define TNL_LITTLE_ENDIAN
 #else
 #  error "TNL: Unsupported Target CPU"
 #endif
