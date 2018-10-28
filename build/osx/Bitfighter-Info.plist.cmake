@@ -57,7 +57,5 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>NSHighResolutionCapable</key>
-	<true/>
 </dict>
 </plist>
