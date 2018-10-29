@@ -57,10 +57,8 @@ void prepareFirstLaunchMac()
     //Link preferences
     NSArray *documentsPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *prefencesPath = [[documentsPath objectAtIndex:0] stringByAppendingPathComponent:@"Bitfighter Settings"];
-    if ([fm respondsToSelector:@selector(createSymbolicLinkAtPath:withDestinationPath:error:)])
-        [fm createSymbolicLinkAtPath:prefencesPath withDestinationPath:fullAppSupportPath error:NULL];
-    else
-        [fm createSymbolicLinkAtPath:prefencesPath pathContent:fullAppSupportPath];
+    
+    [fm createSymbolicLinkAtPath:prefencesPath withDestinationPath:fullAppSupportPath error:NULL];
 
     [pool release];
 #endif
