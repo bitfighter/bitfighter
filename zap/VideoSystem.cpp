@@ -576,20 +576,21 @@ void VideoSystem::redrawViewport(GameSettings *settings)
    S32 windowWidth, windowHeight;
    SDL_GetWindowSize(DisplayManager::getScreenInfo()->sdlWindow, &windowWidth, &windowHeight);
 
-   // Find out the drawable dimensions. If this is a high- DPI display, this may
+   // Find out the drawable dimensions. If this is a high-DPI display, this may
    // be larger than the window.
    S32 drawWidth, drawHeight;
    SDL_GL_GetDrawableSize(DisplayManager::getScreenInfo()->sdlWindow, &drawWidth, &drawHeight);
 
 //   logprintf("w: %d, h: %d; dw: %d, dh: %d", windowWidth, windowHeight, drawWidth, drawHeight);
 
-   // If we're in HighDPI mode, set a flag incase we want to use later
+   // If we're in HighDPI mode, set a flag in case we want to use later
    bool isHighDpi = (drawWidth > windowWidth) || (drawHeight > windowHeight);
    DisplayManager::getScreenInfo()->setHighDpi(isHighDpi);
 
    glClearColor( 0, 0, 0, 0 );
 
-   glViewport(0, 0, drawWidth, drawHeight);
+   // TODO High-DPI mode may change various OpenGL parameters below (and also
+   glViewport(0, 0, windowWidth, windowHeight);
 
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
