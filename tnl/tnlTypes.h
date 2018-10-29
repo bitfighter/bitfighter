@@ -429,7 +429,7 @@ static const signed char LogTable256[256] =
 // Replaces original TNL function which caused warnings under higher optimizer settings
 inline U32 getBinLog2(U32 value)
 {
-   register U32 t, tt; // temporaries
+   U32 t, tt; // temporaries
    tt = value >> 16;
    if(tt != 0)
      return (t = tt >> 8) ? 24 + LogTable256[t] : 16 + LogTable256[tt];
