@@ -165,7 +165,7 @@ void Cursor::reverseBits()
 void Cursor::enableCursor()
 {
    // Untrap mouse
-   SDL_SetRelativeMouseMode(SDL_FALSE);
+   SDL_CaptureMouse(SDL_FALSE);
    SDL_ShowCursor(1);
 }
 
@@ -173,7 +173,7 @@ void Cursor::enableCursor()
 void Cursor::disableCursor()
 {
    SDL_ShowCursor(0);
-   SDL_SetRelativeMouseMode(SDL_TRUE);
+   SDL_CaptureMouse(SDL_TRUE);
 }
 
 
