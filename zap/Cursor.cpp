@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "Cursor.h"
+#include "DisplayManager.h"
 
 #include "tnlAssert.h"
 #include "tnlPlatform.h"
@@ -165,7 +166,8 @@ void Cursor::reverseBits()
 void Cursor::enableCursor()
 {
    // Untrap mouse
-   SDL_CaptureMouse(SDL_FALSE);
+   SDL_SetWindowGrab(DisplayManager::getScreenInfo()->sdlWindow, SDL_FALSE);
+
    SDL_ShowCursor(1);
 }
 
@@ -173,7 +175,9 @@ void Cursor::enableCursor()
 void Cursor::disableCursor()
 {
    SDL_ShowCursor(0);
-   SDL_CaptureMouse(SDL_TRUE);
+
+   // Trap mouse
+   SDL_SetWindowGrab(DisplayManager::getScreenInfo()->sdlWindow, SDL_TRUE);
 }
 
 
