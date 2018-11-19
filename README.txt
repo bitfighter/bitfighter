@@ -9,7 +9,7 @@ Bitfighter README
 1) DEPENDENCIES
 
    Bitfighter has several common, open source dependencies:
-      * SDL
+      * SDL2
       * zlib
       * libpng
       * openal
@@ -24,10 +24,10 @@ Bitfighter README
       
 2) COMPILING
 
-   The CMake build system is used for compiling on Windows and Linux.  You
-   will need to download and install CMake for these platforms.  
+   The CMake build system is used for compiling on Windows, macOS, and Linux. 
+   You will need to download and install CMake 3.1+ for these platforms.
    
-   On OSX, there is an Xcode project available.
+   Also, see https://bitfighter.org/wiki/index.php/Building_Bitfighter
 
  a) Linux
 
@@ -58,7 +58,9 @@ Bitfighter README
 
    To generate the proper project files with CMake, go into the 'build' directory
    and type:
-      * cmake -G "Visual Studio 10" ..
+      * cmake -G "Visual Studio 15 2017" ..
+	OR
+      * cmake -G "Visual Studio 15 2017" -T "v141_xp" ..
     OR
       * cmake -G "MSYS Makefiles" ..
       
@@ -88,15 +90,15 @@ Bitfighter README
    After generating the "MSYS Makefiles".  All you have to do is run 'make' to compile
 
 
- d) MacOS X (10.4 - 10.7)
+ c) macOS (10.7+)
 
-   Bitfighter is built with the Xcode IDE.  The Xcode project is found in the directory:
+   Similar to Linux, but with some additional steps.  In a shell, in the 'build'
+   directory, run:
+      * export MACOSX_DEPLOYMENT_TARGET=10.7
+      * cmake ..
+	  * make Bitfighter
 
-    build/osx/xcode
-
-   To compile, select 'Release' mode and build the Bitfighter target
-
-
+	  
 3) INSTALLATION AND PACKAGING
 
  a) Linux
@@ -117,7 +119,9 @@ Bitfighter README
 
  b) Windows
 
-   An NSIS build script is found in the following directory:
+   Run the PACKAGE project in the Visual Studio project.
+   
+   Alternatively, an NSIS build script is found in the following directory:
 
     build/windows/installer
 
@@ -128,22 +132,21 @@ Bitfighter README
 
  c) MacOS X
 
-   Run the target called "Create Bitfighter Game Release" to build a 
-   distributable DMG.
+   Run 'make package' to build a distributable DMG.
 
 
 4) CRASHES & PROBLEMS
 
    If you are building off of 'tip' then expect crashes and problems.
-   Please don't report them via Google Code; instead join the IRC channel
-   #bitfighter on freenode to ask a developer about it - we probably are
-   already aware.
+   Please don't report them in the issue tracker; instead join the IRC channel
+   #bitfighter on freenode, or the Discord server 'Bitfighter' to ask a 
+   developer about it - we probably are already aware.
 
    If you are building off of a release version, please make sure you can
    consistently reproduce the problem, then post it, with the steps to
    reproduce at:
 
-    http://code.google.com/p/bitfighter/issues/list
+    https://github.com/bitfighter/bitfighter/issues
 
    For feature requests or similar, please post in the forums at:
 
