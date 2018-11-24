@@ -87,7 +87,7 @@ set(PNG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libpng")
 set(PNG_PNG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libpng")
 
 # Directly specify some libs
-set(OPENAL_LIBRARY "${CMAKE_SOURCE_DIR}/lib/OpenAL-Soft.framework")
+set(OPENAL_LIBRARY "${CMAKE_SOURCE_DIR}/lib/libopenal.1.dylib")
 set(PNG_LIBRARY "${CMAKE_SOURCE_DIR}/lib/libpng.framework")
 
 set(SPARKLE_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/lib)
