@@ -29,14 +29,11 @@
 	<key>LSMinimumSystemVersionByArchitecture</key>
 	<dict>
 		<key>x86_64</key>
-		<string>10.6.0</string>
-		<key>i386</key>
-		<string>10.5.0</string>
+		<string>10.7.0</string>
 	</dict>
 	<key>LSArchitecturePriority</key>
 	<array>
 		<string>x86_64</string>
-		<string>i386</string>
 	</array>
 	<key>SUPublicDSAKeyFile</key>
 	<string>dsa_pub.pem</string>
