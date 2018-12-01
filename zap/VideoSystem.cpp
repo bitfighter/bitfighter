@@ -150,31 +150,19 @@ bool VideoSystem::init()
 
 void VideoSystem::setWindowPosition(S32 left, S32 top)
 {
-   // Grab window border and add it to the y coordinate.  Only works on X11.
-   // This is needed because SDL_GetWindowPosition can return the draw area
-   // coordinates not the window ones and so the window will be saved offset
-   // the window bar
-   S32 offset = 0;
-   SDL_GetWindowBordersSize(DisplayManager::getScreenInfo()->sdlWindow, &offset, NULL, NULL, NULL);
-
-   S32 newTop = top - offset;
-
-   SDL_SetWindowPosition(DisplayManager::getScreenInfo()->sdlWindow, left, newTop);
+   SDL_SetWindowPosition(DisplayManager::getScreenInfo()->sdlWindow, left, top);
 }
 
 
 void VideoSystem::saveWindowPostion(GameSettings *settings)
 {
+   // FIXME sometimes X11 in Linux will save position with window decorations in
+   // certain cases.  This creates an offset and the window will creep
    S32 x, y;
    SDL_GetWindowPosition(DisplayManager::getScreenInfo()->sdlWindow, &x, &y);
 
-   S32 offset;
-   SDL_GetWindowBordersSize(DisplayManager::getScreenInfo()->sdlWindow, &offset, NULL, NULL, NULL);
-
-   S32 newY = y - offset;
-
    settings->getIniSettings()->winXPos = x;
-   settings->getIniSettings()->winYPos = newY;
+   settings->getIniSettings()->winYPos = y;
 
    GameSettings::iniFile.SetValueI("Settings", "WindowXPos", settings->getIniSettings()->winXPos, true);
    GameSettings::iniFile.SetValueI("Settings", "WindowYPos", settings->getIniSettings()->winYPos, true);
