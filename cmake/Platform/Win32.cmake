@@ -255,48 +255,39 @@ function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	
 	set(BF_PACKAGE_RESOURCE_DIR ${CMAKE_SOURCE_DIR}/build/windows/installer)
 	
-	if(WIN64)
-		# We use WiX for x64 MSI
-		set(CPACK_GENERATOR WIX)
-		set(CPACK_PACKAGE_FILE_NAME "Bitfighter-${BF_VERSION}-x64-installer")
-		
-		# Keep this the same so MSI installers can update/repair across versions
-		set(CPACK_WIX_UPGRADE_GUID "5E1F1E55-11FE-1E55-BAAD-00B17F164732")
-		set(CPACK_WIX_UI_DIALOG ${BF_PACKAGE_RESOURCE_DIR}/wix_welcome_banner.bmp)
-		set(CPACK_WIX_UI_BANNER ${BF_PACKAGE_RESOURCE_DIR}/wix_header_banner.bmp)
-		set(CPACK_WIX_PROGRAM_MENU_FOLDER ${CPACK_PACKAGE_NAME})
-		
-		# Wix requires some version, but can't handle bitfighter versions because of the letters
-		set(CPACK_PACKAGE_VERSION_MAJOR 1)
-	else()
-		# NSIS setup
-		set(CPACK_GENERATOR NSIS)
-		set(CPACK_PACKAGE_FILE_NAME "Bitfighter-${BF_VERSION}-win32-installer")
-		set(CPACK_NSIS_COMPRESSOR "/SOLID lzma")
-		set(CPACK_NSIS_HELP_LINK "http://bitfighter.org/")
-		set(CPACK_NSIS_URL_INFO_ABOUT "http://bitfighter.org/")
-		
-		# Desktop shortcut handling for install/uninstall
-		set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut \\\"$DESKTOP\\\\Bitfighter.lnk\\\" \\\"$INSTDIR\\\\bitfighter.exe\\\"")
-		set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "Delete \\\"$DESKTOP\\\\Bitfighter.lnk\\\"")
 
-		# Any extra start menu shortcuts
-		set(CPACK_NSIS_MENU_LINKS 
-			"http://bitfighter.org/" "Bitfighter Home Page"
-			"http://bitfighter.org/forums/" "Bitfighter Forums")
-		
-		# Branding
-		# Four backslashes because NSIS can't resolve the last portion of a UNIX path.  Fun!
-		set(CPACK_PACKAGE_ICON "${BF_PACKAGE_RESOURCE_DIR}\\\\nsis_header_banner.bmp")
-		set(WELCOME_BANNER ${BF_PACKAGE_RESOURCE_DIR}\\\\nsis_welcome_banner.bmp) 
-		set(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "BrandingText \\\"${CPACK_PACKAGE_NAME} ${BF_VERSION}\\\"
-			!define MUI_WELCOMEFINISHPAGE_BITMAP \\\"${WELCOME_BANNER}\\\"")
-		
-		# Need this otherwise NSIS thinks executables are in the 'bin' sub-folder
-		set(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
-		
-		set(CPACK_NSIS_MUI_FINISHPAGE_RUN "bitfighter.exe")
+	# NSIS setup, requires NSIS 3.0+ (for 64 bit support)
+	set(CPACK_GENERATOR NSIS)
+	if(WIN64)
+		set(CPACK_PACKAGE_FILE_NAME "Bitfighter-${BF_VERSION}-win64-installer")
+	else()
+		set(CPACK_PACKAGE_FILE_NAME "Bitfighter-${BF_VERSION}-win32-installer")
 	endif()
+	set(CPACK_NSIS_COMPRESSOR "/SOLID lzma")
+	set(CPACK_NSIS_HELP_LINK "http://bitfighter.org/")
+	set(CPACK_NSIS_URL_INFO_ABOUT "http://bitfighter.org/")
+	
+	# Desktop shortcut handling for install/uninstall
+	set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut \\\"$DESKTOP\\\\Bitfighter.lnk\\\" \\\"$INSTDIR\\\\bitfighter.exe\\\"")
+	set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "Delete \\\"$DESKTOP\\\\Bitfighter.lnk\\\"")
+
+	# Any extra start menu shortcuts
+	set(CPACK_NSIS_MENU_LINKS 
+		"http://bitfighter.org/" "Bitfighter Home Page"
+		"http://bitfighter.org/forums/" "Bitfighter Forums")
+	
+	# Branding
+	# Four backslashes because NSIS can't resolve the last portion of a UNIX path.  Fun!
+	set(CPACK_PACKAGE_ICON "${BF_PACKAGE_RESOURCE_DIR}\\\\nsis_header_banner.bmp")
+	set(WELCOME_BANNER ${BF_PACKAGE_RESOURCE_DIR}\\\\nsis_welcome_banner.bmp) 
+	set(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "BrandingText \\\"${CPACK_PACKAGE_NAME} ${BF_VERSION}\\\"
+		!define MUI_WELCOMEFINISHPAGE_BITMAP \\\"${WELCOME_BANNER}\\\"")
+	
+	# Need this otherwise NSIS thinks executables are in the 'bin' sub-folder
+	set(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
+	
+	set(CPACK_NSIS_MUI_FINISHPAGE_RUN "bitfighter.exe")
+	
 	
 	include(CPack)
 endfunction()
