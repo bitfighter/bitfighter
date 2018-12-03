@@ -176,6 +176,7 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
          switch (event->window.event) {
             // Happens with any size change (to/from fullscreen, window scaling)
             case SDL_WINDOWEVENT_RESIZED:
+//               logprintf("SDL_WINDOWEVENT_RESIZED");
                onResized(game, event->window.data1, event->window.data2);
                break;
 
@@ -184,13 +185,8 @@ void Event::onEvent(ClientGame *game, SDL_Event *event)
                InputCodeManager::resetStates();
                break;
 
-            case SDL_WINDOWEVENT_MOVED:
-               // Only save position if not in fullscreen
-               if(!VideoSystem::isFullscreen())
-                  VideoSystem::saveWindowPostion(game->getSettings());
-
-               break;
-
+            // Ignore SDL_WINDOWEVENT_MOVED, it is sent in too many cases to be
+            // useful
 
             default:
                break;
