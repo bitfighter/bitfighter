@@ -16,10 +16,6 @@
 #include <sys/stat.h>      // For testing existence of folders
 
 #ifdef TNL_OS_WIN32
-#  include <direct.h>        // For mkdir
-#endif
-
-#ifdef TNL_OS_WIN32
 #  include "../other/dirent.h"        // Need local copy for Windows builds
 #else
 #  include <dirent.h>        // Need standard copy for *NIXes
@@ -474,8 +470,12 @@ string getFileSeparator()
 // Ok, not strictly a string util, but do we really want a fileutils just for this??
 bool fileExists(const string &path)
 {
+#ifdef TNL_OS_WIN32
+   return (GetFileAttributes(path.c_str()) != INVALID_FILE_ATTRIBUTES);
+#else
    struct stat st;
    return (stat(path.c_str(), &st) == 0);               // Does path exist?
+#endif
 }
 
 
@@ -485,7 +485,7 @@ bool makeSureFolderExists(const string &folder)
    if(!fileExists(folder))
    {
 #ifdef TNL_OS_WIN32
-      mkdir(folder.c_str());
+      CreateDirectory(folder.c_str(), NULL);
 #else
       mkdir(folder.c_str(), 0755);
 #endif
