@@ -17,13 +17,17 @@
  along with GUP.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <stdint.h>
 #include <windows.h>
-#include <curl/curl.h>
 #include <string>
 #include <commctrl.h>
 #include "resource.h"
 #include <shlwapi.h>
 #include "xmlTools.h"
+#define CURL_STATICLIB
+#include "../curl/include/curl/curl.h"
+
+using namespace std;
 
 HINSTANCE hInst;
 static HWND hProgressDlg;
@@ -34,22 +38,23 @@ static string msgBoxTitle = "";
 static string abortOrNot = "";
 static string proxySrv = "0.0.0.0";
 static long proxyPort  = 0;
+static string winGupUserAgent = "WinGup/";
+static string dlFileName = "";
 
 const char FLAG_OPTIONS[] = "-options";
-const char FLAG_VERSION[] = "-v";
 const char FLAG_VERBOSE[] = "-verbose";
 const char FLAG_HELP[] = "--help";
 
 const char MSGID_NOUPDATE[] = "No update is available.";
-const char MSGID_UPDATEAVAILABLE[] = "An new version of the package is available.  Do you want to download it?";
-const char MSGID_DOWNLOADSTOPPED[] = "Download was stopped by user. Update is aborted.";
+const char MSGID_UPDATEAVAILABLE[] = "An update package is available, do you want to download it?";
+const char MSGID_DOWNLOADSTOPPED[] = "Download is stopped by user. Update is aborted.";
 const char MSGID_CLOSEAPP[] = " is opened.\rUpdater will close it in order to process the installation.\rContinue?";
-const char MSGID_ABORTORNOT[] = "Do you want to abort the update download?";
+const char MSGID_ABORTORNOT[] = "Do you want to abort update download?";
 const char MSGID_HELP[] = "Usage :\r\
 \r\
 gup --help\r\
 gup -options\r\
-gup [-verbose] [-vVERSION_VALUE]\r\
+gup [-verbose] [-vVERSION_VALUE] [-pCUSTOM_PARAM]\r\
 \r\
     --help : Show this help message (and quit program).\r\
     -options : Show the proxy configuration dialog (and quit program).\r\
@@ -57,7 +62,12 @@ gup [-verbose] [-vVERSION_VALUE]\r\
          VERSION_VALUE is the current version number of program to update.\r\
          If you pass the version number as the argument,\r\
          then the version set in the gup.xml will be overrided.\r\
+	-p : Launch GUP with CUSTOM_PARAM.\r\
+	     CUSTOM_PARAM will pass to destination by using GET method\r\
+         with argument name \"param\"\r\
     -verbose : Show error/warning message if any.";
+
+std::string thirdDoUpdateDlgButtonLabel;
 
 static bool isInList(const char *token2Find, char *list2Clean) {
 	char word[1024];
@@ -159,25 +169,26 @@ static string getParamVal(char c, char *list2Clean) {
 	return "";
 };
 
-static void goToCenter(HWND hwnd)
+static void goToScreenCenter(HWND hwnd)
 {
-    RECT rc;
-	::SystemParametersInfo(SPI_GETWORKAREA, 0, &rc, 0);
+    RECT screenRc;
+	::SystemParametersInfo(SPI_GETWORKAREA, 0, &screenRc, 0);
 
     POINT center;
-    center.x = rc.left + (rc.right - rc.left)/2;
-    center.y = rc.top + (rc.bottom - rc.top)/2;
+	center.x = screenRc.left + (screenRc.right - screenRc.left) / 2;
+    center.y = screenRc.top + (screenRc.bottom - screenRc.top)/2;
 
-	RECT _rc;
-	::GetWindowRect(hwnd, &_rc);
-	int x = center.x - (_rc.right - _rc.left)/2;
-	int y = center.y - (_rc.bottom - _rc.top)/2;
+	RECT rc;
+	::GetWindowRect(hwnd, &rc);
+	int x = center.x - (rc.right - rc.left)/2;
+	int y = center.y - (rc.bottom - rc.top)/2;
 
-	::SetWindowPos(hwnd, HWND_TOP, x, y, _rc.right - _rc.left, _rc.bottom - _rc.top, SWP_SHOWWINDOW);
+	::SetWindowPos(hwnd, HWND_TOP, x, y, rc.right - rc.left, rc.bottom - rc.top, SWP_SHOWWINDOW);
 };
 
+
 // This is the getUpdateInfo call back function used by curl
-static size_t getUpdateInfo(char *data, size_t size, size_t nmemb, std::string *updateInfo)
+static size_t getUpdateInfoCallback(char *data, size_t size, size_t nmemb, std::string *updateInfo)
 {
 	// What we will return
 	size_t len = size * nmemb;
@@ -204,10 +215,7 @@ static size_t getDownloadData(unsigned char *data, size_t size, size_t nmemb, FI
 
 static size_t ratio = 0;
 
-static size_t setProgress(HWND hProgress,	double t, /* dltotal */
-											double d, /* dlnow */
-											double ultotal,
-											double ulnow)
+static size_t setProgress(HWND, double t, double d, double, double)
 {
 	while (stopDL)
 		::Sleep(1000);
@@ -217,13 +225,13 @@ static size_t setProgress(HWND hProgress,	double t, /* dltotal */
 	SendMessage(hProgressBar, PBM_SETSTEP, (WPARAM)step, 0);
 	SendMessage(hProgressBar, PBM_STEPIT, 0, 0);
 
-	char percentage[8];
-	sprintf(percentage, "%d %%", ratio);
+	char percentage[128];
+	sprintf(percentage, "Downloading %s: %Iu %%", dlFileName.c_str(), ratio);
 	::SetWindowTextA(hProgressDlg, percentage);
 	return 0;
 };
 
-LRESULT CALLBACK progressBarDlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK progressBarDlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM )
 {
 	INITCOMMONCONTROLSEX InitCtrlEx;
 
@@ -236,11 +244,11 @@ LRESULT CALLBACK progressBarDlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARA
 		case WM_INITDIALOG:
 			hProgressDlg = hWndDlg;
 			hProgressBar = CreateWindowEx(0, PROGRESS_CLASS, NULL, WS_CHILD | WS_VISIBLE,
-										  20, 20, 260, 17,
+										  20, 20, 280, 17,
 										  hWndDlg, NULL, hInst, NULL);
 			SendMessage(hProgressBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100)); 
 			SendMessage(hProgressBar, PBM_SETSTEP, 1, 0);
-			goToCenter(hWndDlg);
+			goToScreenCenter(hWndDlg);
 			return TRUE; 
 
 		case WM_COMMAND:
@@ -268,7 +276,44 @@ LRESULT CALLBACK progressBarDlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARA
 	return FALSE;
 }
 
-LRESULT CALLBACK proxyDlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
+
+LRESULT CALLBACK yesNoNeverDlgProc(HWND hWndDlg, UINT message, WPARAM wParam, LPARAM)
+{
+	switch (message)
+	{
+		case WM_INITDIALOG:
+		{
+			if (thirdDoUpdateDlgButtonLabel != "")
+				::SetDlgItemTextA(hWndDlg, IDCANCEL, thirdDoUpdateDlgButtonLabel.c_str());
+
+			goToScreenCenter(hWndDlg);
+			return TRUE;
+		}
+
+		case WM_COMMAND:
+		{
+			switch (wParam)
+			{
+				case IDYES:
+				case IDNO:
+				case IDCANCEL:
+					EndDialog(hWndDlg, wParam);
+					return TRUE;
+
+				default:
+					break;
+			}
+		}
+
+		case WM_DESTROY:
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+LRESULT CALLBACK proxyDlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM)
 {
 
 	switch(Msg)
@@ -276,7 +321,7 @@ LRESULT CALLBACK proxyDlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPar
 		case WM_INITDIALOG:
 			::SetDlgItemTextA(hWndDlg, IDC_PROXYSERVER_EDIT, proxySrv.c_str());
 			::SetDlgItemInt(hWndDlg, IDC_PORT_EDIT, proxyPort, FALSE);
-			goToCenter(hWndDlg);
+			goToScreenCenter(hWndDlg);
 			return TRUE; 
 
 		case WM_COMMAND:
@@ -307,7 +352,174 @@ static DWORD WINAPI launchProgressBar(void *)
 	return 0;
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdShow)
+bool downloadBinary(string urlFrom, string destTo, pair<string, int> proxyServerInfo, bool isSilentMode, pair<string, string> stoppedMessage)
+{
+	FILE* pFile = fopen(destTo.c_str(), "wb");
+
+	//  Download the install package from indicated location
+	char errorBuffer[CURL_ERROR_SIZE] = { 0 };
+	CURLcode res = CURLE_FAILED_INIT;
+	CURL* curl = curl_easy_init();
+	if (curl)
+	{
+		curl_easy_setopt(curl, CURLOPT_URL, urlFrom.c_str());
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, TRUE);
+
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, getDownloadData);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, pFile);
+
+		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
+		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, setProgress);
+		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, hProgressBar);
+
+		curl_easy_setopt(curl, CURLOPT_USERAGENT, winGupUserAgent.c_str());
+		curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorBuffer);
+
+		if (!proxyServerInfo.first.empty() && proxyServerInfo.second != -1)
+		{
+			curl_easy_setopt(curl, CURLOPT_PROXY, proxyServerInfo.first.c_str());
+			curl_easy_setopt(curl, CURLOPT_PROXYPORT, proxyServerInfo.second);
+		}
+		curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_ALLOW_BEAST | CURLSSLOPT_NO_REVOKE);
+
+		res = curl_easy_perform(curl);
+
+		curl_easy_cleanup(curl);
+	}
+
+	if (res != CURLE_OK)
+	{
+		if (!isSilentMode && doAbort == false)
+			::MessageBoxA(NULL, errorBuffer, "curl error", MB_OK);
+		if (doAbort)
+		{
+			::MessageBoxA(NULL, stoppedMessage.first.c_str(), stoppedMessage.second.c_str(), MB_OK);
+		}
+		doAbort = false;
+		return false;
+	}
+
+	fflush(pFile);
+	fclose(pFile);
+
+	return true;
+}
+
+bool getUpdateInfo(string &info2get, const GupParameters& gupParams, const GupExtraOptions& proxyServer, const string& customParam, const string& version)
+{
+	char errorBuffer[CURL_ERROR_SIZE] = { 0 };
+
+	// Check on the web the availibility of update
+	// Get the update package's location
+	CURL *curl;
+	CURLcode res = CURLE_FAILED_INIT;
+
+	curl = curl_easy_init();
+	if (curl)
+	{
+		std::string urlComplete = gupParams.getInfoLocation() + "?version=";
+		if (!version.empty())
+			urlComplete += version;
+		else
+			urlComplete += gupParams.getCurrentVersion();
+
+		if (!customParam.empty())
+		{
+			string customParamPost = "&param=";
+			customParamPost += customParam;
+			urlComplete += customParamPost;
+		}
+		else if (!gupParams.getParam().empty())
+		{
+			string customParamPost = "&param=";
+			customParamPost += gupParams.getParam();
+			urlComplete += customParamPost;
+		}
+
+		curl_easy_setopt(curl, CURLOPT_URL, urlComplete.c_str());
+
+
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, TRUE);
+
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, getUpdateInfoCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &info2get);
+
+		string ua = gupParams.getSoftwareName();
+
+		winGupUserAgent += VERSION_VALUE;
+		if (ua != "")
+		{
+			ua += "/";
+			ua += version;
+			ua += " (";
+			ua += winGupUserAgent;
+			ua += ")";
+
+			winGupUserAgent = ua;
+		}
+
+		curl_easy_setopt(curl, CURLOPT_USERAGENT, winGupUserAgent.c_str());
+		curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorBuffer);
+
+		if (proxyServer.hasProxySettings())
+		{
+			curl_easy_setopt(curl, CURLOPT_PROXY, proxyServer.getProxyServer().c_str());
+			curl_easy_setopt(curl, CURLOPT_PROXYPORT, proxyServer.getPort());
+		}
+
+		curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_ALLOW_BEAST | CURLSSLOPT_NO_REVOKE);
+
+		res = curl_easy_perform(curl);
+
+		curl_easy_cleanup(curl);
+	}
+
+	if (res != CURLE_OK)
+	{
+		if (!gupParams.isSilentMode())
+			::MessageBoxA(NULL, errorBuffer, "curl error", MB_OK);
+		return false;
+	}
+	return true;
+}
+
+bool runInstaller(const string& app2runPath, const string& binWindowsClassName, const string& closeMsg, const string& closeMsgTitle)
+{
+
+	if (!binWindowsClassName.empty())
+	{
+		HWND h = ::FindWindowExA(NULL, NULL, binWindowsClassName.c_str(), NULL);
+
+		if (h)
+		{
+			int installAnswer = ::MessageBoxA(NULL, closeMsg.c_str(), closeMsgTitle.c_str(), MB_YESNO);
+
+			if (installAnswer == IDNO)
+			{
+				return 0;
+			}
+		}
+
+		// kill all process of binary needs to be updated.
+		while (h)
+		{
+			::SendMessage(h, WM_CLOSE, 0, 0);
+			h = ::FindWindowExA(NULL, NULL, binWindowsClassName.c_str(), NULL);
+		}
+	}
+
+	// execute the installer
+	HINSTANCE result = ::ShellExecuteA(NULL, "open", app2runPath.c_str(), "", ".", SW_SHOW);
+
+	if (result <= (HINSTANCE)32) // There's a problem (Don't ask me why, ask Microsoft)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int)
 {
 	bool isSilentMode = false;
 	FILE *pFile = NULL;
@@ -316,6 +528,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdSh
 	bool isVerbose = false;
 	bool isHelp = false;
 	string version = "";
+	string customParam = "";
 
 	if (lpszCmdLine && lpszCmdLine[0])
 	{
@@ -323,6 +536,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdSh
 		isVerbose = isInList(FLAG_VERBOSE, lpszCmdLine);
 		isHelp = isInList(FLAG_HELP, lpszCmdLine);
 		version = getParamVal('v', lpszCmdLine);
+		customParam = getParamVal('p', lpszCmdLine);
 	}
 
 	if (isHelp)
@@ -331,12 +545,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdSh
 		return 0;
 	}
 
+	GupExtraOptions extraOptions("gupOptions.xml");
+	GupNativeLang nativeLang("nativeLang.xml");
+	GupParameters gupParams("gup.xml");
+	
 	hInst = hInstance;
 	try {
-		GupParameters gupParams("gup.xml");
-		GupExtraOptions extraOptions("gupOptions.xml");
-		GupNativeLang nativeLang("nativeLang.xml");
-
 		if (launchSettingsDlg)
 		{
 			if (extraOptions.hasProxySettings())
@@ -353,14 +567,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdSh
 		msgBoxTitle = gupParams.getMessageBoxTitle();
 		abortOrNot = nativeLang.getMessageString("MSGID_ABORTORNOT");
 
+		//
+		// Get update info
+		//
 		std::string updateInfo;
-		char errorBuffer[CURL_ERROR_SIZE];
 
 		// Get your software's current version.
 		// If you pass the version number as the argument
 		// then the version set in the gup.xml will be overrided
-		if (lpszCmdLine && lpszCmdLine[0])
-			gupParams.setCurrentVersion(lpszCmdLine);
+		if (!version.empty())
+			gupParams.setCurrentVersion(version.c_str());
 
 		// override silent mode if "-isVerbose" is passed as argument
 		if (isVerbose)
@@ -368,48 +584,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdSh
 
 		isSilentMode = gupParams.isSilentMode();
 
-		// Check on the web the availibility of update
-		// Get the update package's location
-		CURL *curl;
-		CURLcode res;
+		bool getUpdateInfoSuccessful = getUpdateInfo(updateInfo, gupParams, extraOptions, customParam, version);
 
-		curl = curl_easy_init();
-		if(curl) 
-		{
-			std::string urlComplete = gupParams.getInfoLocation() + "?version=";
-			if (version != "")
-				urlComplete += version;
-			else
-				urlComplete += gupParams.getCurrentVersion();
-
-#if defined(_M_X64) || defined(__x86_64__) || defined(__amd64__)
-				urlComplete += "&platform=win64";
-#endif
-
-			curl_easy_setopt(curl, CURLOPT_URL, urlComplete.c_str());
-            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, TRUE);
-
-			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, getUpdateInfo);
-			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &updateInfo);
-			curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorBuffer);
-
-			if (extraOptions.hasProxySettings())
-			{
-				curl_easy_setopt(curl, CURLOPT_PROXY, extraOptions.getProxyServer().c_str());
-				curl_easy_setopt(curl, CURLOPT_PROXYPORT, extraOptions.getPort());
-			}
-
-			res = curl_easy_perform(curl);
-
-			curl_easy_cleanup(curl);
-		}
-
-		if (res != 0)
-		{
-			if (!isSilentMode)
-				::MessageBoxA(NULL, errorBuffer, "curl error", MB_OK);
+		if (!getUpdateInfoSuccessful)
 			return -1;
-		}
+		
 
 		GupDownloadInfo gupDlInfo(updateInfo.c_str());
 
@@ -425,13 +604,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdSh
 			return 0;
 		}
 
+
+		//
+		// Process Update Info
+		//
+
+		// Ask user if he/she want to do update
 		string updateAvailable = nativeLang.getMessageString("MSGID_UPDATEAVAILABLE");
 		if (updateAvailable == "")
 			updateAvailable = MSGID_UPDATEAVAILABLE;
 		
 		int thirdButtonCmd = gupParams.get3rdButtonCmd();
-		int buttonStyle = thirdButtonCmd?MB_YESNOCANCEL:MB_YESNO;
-		int dlAnswer = ::MessageBoxA(NULL, updateAvailable.c_str(), gupParams.getMessageBoxTitle().c_str(), buttonStyle);
+		thirdDoUpdateDlgButtonLabel = gupParams.get3rdButtonLabel();
+
+		int dlAnswer = 0;
+		HWND hApp = ::FindWindowExA(NULL, NULL, gupParams.getClassName().c_str(), NULL);
+		bool isModal = gupParams.isMessageBoxModal();
+
+		if (!thirdButtonCmd)
+			dlAnswer = ::MessageBoxA(isModal ? hApp : NULL, updateAvailable.c_str(), gupParams.getMessageBoxTitle().c_str(), MB_YESNO);
+		else
+			dlAnswer = static_cast<int32_t>(::DialogBox(hInst, MAKEINTRESOURCE(IDD_YESNONEVERDLG), isModal ? hApp : NULL, reinterpret_cast<DLGPROC>(yesNoNeverDlgProc)));
 
 		if (dlAnswer == IDNO)
 		{
@@ -442,16 +635,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdSh
 		{
 			if (gupParams.getClassName() != "")
 			{
-				HWND h = ::FindWindowExA(NULL, NULL, gupParams.getClassName().c_str(), NULL);
-
-				if (h)
+				if (hApp)
 				{
-					::SendMessage(h, thirdButtonCmd, gupParams.get3rdButtonWparam(), gupParams.get3rdButtonLparam());
+					::SendMessage(hApp, thirdButtonCmd, gupParams.get3rdButtonWparam(), gupParams.get3rdButtonLparam());
 				}
 			}
 			return 0;
 		}
-		
+
+		//
+		// Download executable bin
+		//
 		::CreateThread(NULL, 0, launchProgressBar, NULL, 0, NULL);
 		
 		std::string dlDest = std::getenv("TEMP");
@@ -462,86 +656,30 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdSh
         if (strcmp(ext, ".exe") != 0)
             dlDest += ".exe";
 
-		pFile = fopen(dlDest.c_str(), "wb");
+		dlFileName = ::PathFindFileNameA(gupDlInfo.getDownloadLocation().c_str());
 
-		//  Download the install package from indicated location
-		curl = curl_easy_init();
-		if(curl) 
-		{
-			curl_easy_setopt(curl, CURLOPT_URL, gupDlInfo.getDownloadLocation().c_str());
-            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, TRUE);
 
-			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, getDownloadData);
-			curl_easy_setopt(curl, CURLOPT_WRITEDATA, pFile);
+		string dlStopped = nativeLang.getMessageString("MSGID_DOWNLOADSTOPPED");
+		if (dlStopped == "")
+			dlStopped = MSGID_DOWNLOADSTOPPED;
 
-			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
-			curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, setProgress);
-			curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, hProgressBar);
-			
-			curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorBuffer);
-			
-			if (extraOptions.hasProxySettings())
-			{
-				curl_easy_setopt(curl, CURLOPT_PROXY, extraOptions.getProxyServer().c_str());
-				curl_easy_setopt(curl, CURLOPT_PROXYPORT, extraOptions.getPort());
-			}
-			res = curl_easy_perform(curl);
+		bool dlSuccessful = downloadBinary(gupDlInfo.getDownloadLocation(), dlDest, pair<string, int>(extraOptions.getProxyServer(), extraOptions.getPort()), isSilentMode, pair<string, string>(dlStopped, gupParams.getMessageBoxTitle()));
 
-			curl_easy_cleanup(curl);
-		}
-
-		if (res != 0)
-		{
-			if (!isSilentMode)
-				::MessageBoxA(NULL, errorBuffer, "curl error", MB_OK);
-			if (doAbort)
-			{
-				string dlStopped = nativeLang.getMessageString("MSGID_DOWNLOADSTOPPED");
-				if (dlStopped == "")
-					dlStopped = MSGID_DOWNLOADSTOPPED;
-				::MessageBoxA(NULL, dlStopped.c_str(), gupParams.getMessageBoxTitle().c_str(), MB_OK);
-			}
+		if (!dlSuccessful)
 			return -1;
-		}
 
-		fflush(pFile);
-		fclose(pFile);
-		pFile = NULL;
 
-		if (gupParams.getClassName() != "")
-		{
-			HWND h = ::FindWindowExA(NULL, NULL, gupParams.getClassName().c_str(), NULL);
+		//
+		// Run executable bin
+		//
+		string msg = gupParams.getClassName();
+		string closeApp = nativeLang.getMessageString("MSGID_CLOSEAPP");
+		if (closeApp == "")
+			closeApp = MSGID_CLOSEAPP;
+		msg += closeApp;
 
-			if (h)
-			{
-				string msg = gupParams.getClassName();
-				string closeApp = nativeLang.getMessageString("MSGID_CLOSEAPP");
-				if (closeApp == "")
-					closeApp = MSGID_CLOSEAPP;
-				msg += closeApp;
+		runInstaller(dlDest, gupParams.getClassName(), msg, gupParams.getMessageBoxTitle().c_str());
 
-				int installAnswer = ::MessageBoxA(NULL, msg.c_str(), gupParams.getMessageBoxTitle().c_str(), MB_YESNO);
-
-				if (installAnswer == IDNO)
-				{
-					return 0;
-				}
-			}
-			// kill all process of binary needs to be updated.
-			while (h)
-			{
-				::SendMessage(h, WM_CLOSE, 0, 0);
-				h = ::FindWindowExA(NULL, NULL, gupParams.getClassName().c_str(), NULL);
-			}
-		}
-
-		// execute the installer
-		HINSTANCE result = ::ShellExecuteA(NULL, "open", dlDest.c_str(), "", ".", SW_SHOW);
-        
-        if (result <= (HINSTANCE)32) // There's a problem (Don't ask me why, ask Microsoft)
-        {
-            return -1;
-        }   
 		return 0;
 
 	} catch (exception ex) {

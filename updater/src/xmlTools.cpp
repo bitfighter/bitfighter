@@ -19,8 +19,9 @@
 
 #include "xmlTools.h"
 
-GupParameters::GupParameters(const char * xmlFileName) : _currentVersion(""), _className2Close(""), _messageBoxTitle(""),\
-                                                         _3rdButton_wm_cmd(0), _3rdButton_wParam(0), _3rdButton_lParam(0), _isSilentMode(true)
+using namespace std;
+
+GupParameters::GupParameters(const char * xmlFileName)
 {
 	_xmlDoc.LoadFile(xmlFileName);
 
@@ -38,6 +39,20 @@ GupParameters::GupParameters(const char * xmlFileName) : _currentVersion(""), _c
 			if (val)
 			{
 				_currentVersion = val;
+			}
+		}
+	}
+
+	TiXmlNode *paramNode = root->FirstChildElement("Param");
+	if (paramNode)
+	{
+		TiXmlNode *n = paramNode->FirstChild();
+		if (n)
+		{
+			const char *val = n->Value();
+			if (val)
+			{
+				_param = val;
 			}
 		}
 	}
@@ -85,6 +100,17 @@ GupParameters::GupParameters(const char * xmlFileName) : _currentVersion(""), _c
 			}
 		}
 
+		valStr = (progNameNode->ToElement())->Attribute("isModal");
+		if (valStr)
+		{
+			if (stricmp(valStr, "yes") == 0)
+				_isMessageBoxModal = true;
+			else if (stricmp(valStr, "no") == 0)
+				_isMessageBoxModal = false;
+			else
+				throw exception("isModal value is incorrect (only \"yes\" or \"no\" is allowed).");
+		}
+
         int val = 0;
 		valStr = (progNameNode->ToElement())->Attribute("extraCmd", &val);
 		if (valStr)
@@ -102,6 +128,12 @@ GupParameters::GupParameters(const char * xmlFileName) : _currentVersion(""), _c
 		if (valStr)
 		{
 			_3rdButton_lParam = val;
+		}
+
+		const char * extraCmdLabel = (progNameNode->ToElement())->Attribute("extraCmdButtonLabel");
+		if (extraCmdLabel != NULL)
+		{
+			_3rdButton_label = extraCmdLabel;
 		}
 	}
 
@@ -121,6 +153,22 @@ GupParameters::GupParameters(const char * xmlFileName) : _currentVersion(""), _c
 				else
 					throw exception("SilentMode value is incorrect (only \"yes\" or \"no\" is allowed).");
 			}
+		}
+	}
+
+	
+	//
+	// Get optional parameters
+	//
+	TiXmlNode *userAgentNode = root->FirstChildElement("SoftwareName");
+	if (userAgentNode)
+	{
+		TiXmlNode *un = userAgentNode->FirstChild();
+		if (un)
+		{
+			const char *uaVal = un->Value();
+			if (uaVal)
+				_softwareName = uaVal;
 		}
 	}
 }
@@ -154,6 +202,9 @@ GupDownloadInfo::GupDownloadInfo(const char * xmlString) : _updateVersion(""), _
 
 	if (_need2BeUpdated)
 	{
+		//
+		// Get mandatory parameters
+		//
 		TiXmlNode *versionNode = root->FirstChildElement("Version");
 		if (versionNode)
 		{
@@ -236,7 +287,7 @@ void GupExtraOptions::writeProxyInfo(const char *fn, const char *proxySrv, long 
 	newProxySettings.SaveFile();
 }
 
-string GupNativeLang::getMessageString(string msgID)
+std::string GupNativeLang::getMessageString(std::string msgID)
 {
 	if (!_nativeLangRoot)
 		return "";
