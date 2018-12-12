@@ -142,7 +142,7 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 #  endif
 #endif
 
-#  define USE_BFUP
+#  define USE_GUP
 #else
 #  include <unistd.h>
 #endif
@@ -631,7 +631,7 @@ void setupLogging(const string &logDir)
 }
 
 
-#ifdef USE_BFUP
+#ifdef USE_GUP
 #  include <direct.h>
 #  include <stdlib.h>
 
@@ -639,7 +639,7 @@ void setupLogging(const string &logDir)
 void launchWindowsUpdater(bool forceUpdate)
 {
    string updaterPath = getExecutableDir() + "\\updater";
-   string updaterFileName = updaterPath + "\\bfup.exe";
+   string updaterFileName = updaterPath + "\\gup.exe";
 
    S32 buildVersion = forceUpdate ? 0 : BUILD_VERSION;
 
@@ -699,11 +699,11 @@ void launchWindowsUpdater(bool forceUpdate)
 void checkOnlineUpdate(GameSettings *settings)
 {
    // Windows only
-#ifdef USE_BFUP
+#ifdef USE_GUP
    // Spawn external updater tool to check for new version of Bitfighter
    if(settings->getIniSettings()->useUpdater)
       launchWindowsUpdater(settings->getForceUpdate());
-#endif   // USE_BFUP
+#endif   // USE_GUP
 
    // Mac OSX only
 #ifdef TNL_OS_MAC_OSX

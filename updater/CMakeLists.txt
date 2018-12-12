@@ -2,7 +2,7 @@
 if(WIN32)
 
 
-add_executable(bfup
+add_executable(gup
 	WIN32                           # make it a GUI instead of console app
 	EXCLUDE_FROM_ALL
 	src/TinyXml/tinystr.cpp
@@ -30,18 +30,18 @@ set(CURL_LIBRARY    "${CURL_LIB_DIR}libcurl.lib")
 
 find_package(CURL REQUIRED)
 
-target_link_libraries(bfup comctl32 shlwapi ${CURL_LIBRARIES})
+target_link_libraries(gup comctl32 shlwapi ${CURL_LIBRARIES})
 
 # Set up output dir
 file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe/updater/ outputDir)
 
-set_target_properties(bfup PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${outputDir})
+set_target_properties(gup PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${outputDir})
 
 if(MSVC)
 	# Work around the "Debug", "Release", etc. directories Visual Studio tries to add
 	foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
 		string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
-		set_target_properties(bfup PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${outputDir})
+		set_target_properties(gup PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${outputDir})
 	endforeach()
 endif()
 
@@ -63,7 +63,7 @@ else()
 endif()
 
 # Copy resources
-add_custom_command(TARGET bfup POST_BUILD 
+add_custom_command(TARGET gup POST_BUILD 
 	COMMAND ${LIBCURL_COPY_CMD}
 	COMMAND ${RES_COPY_CMD}
 )
