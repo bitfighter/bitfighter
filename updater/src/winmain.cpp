@@ -25,7 +25,7 @@
 #include <shlwapi.h>
 #include "xmlTools.h"
 #define CURL_STATICLIB
-#include "../curl/include/curl/curl.h"
+#include <curl/curl.h>
 
 using namespace std;
 
