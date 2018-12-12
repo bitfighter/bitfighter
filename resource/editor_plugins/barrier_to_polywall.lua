@@ -120,7 +120,7 @@ function constructBarrierEndPoints(points, width)
 		lastEdge = curEdge;
 	end
 
-	local first = extend[0]
+	local first = extend[1]
 	table.insert(extend, first)
 
 	for i=1,#edgeVector do
