@@ -234,8 +234,8 @@ function(BF_PLATFORM_INSTALL targetName)
 	install(FILES ${CMAKE_SOURCE_DIR}/COPYING.txt DESTINATION ./)
 	
 	# Updater
-	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/bfup.exe DESTINATION updater)
-	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/bfup.xml DESTINATION updater)
+	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/gup.exe DESTINATION updater)
+	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/gup.xml DESTINATION updater)
 	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/libcurl.dll DESTINATION updater)
 	
 	# Other
