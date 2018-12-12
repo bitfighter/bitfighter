@@ -188,12 +188,14 @@ endfunction()
 
 
 function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
+	# Sources
 	# The trailing slash is necessary to do here for proper native path translation
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/resource/ resDir)
 	file(TO_NATIVE_PATH ${BF_LIB_DIR}/ libDir)
-	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/lua/luajit/src/ luaLibDir)
-	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
 	
+	# Destinations
+	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
+
 	# Set copy command
 	if(MSYS OR CYGWIN OR XCOMPILE)
 		set(RES_COPY_CMD cp -r ${resDir}* ${exeDir})
@@ -218,7 +220,7 @@ function(BF_PLATFORM_INSTALL targetName)
 	
 	# Libraries
 	file(GLOB BF_INSTALL_LIBS ${BF_LIB_DIR}/*.dll)
-	# Except libcurl which will be put into the notifier directory
+	# Except libcurl which will be put into the updater directory
 	#list(REMOVE_ITEM BF_INSTALL_LIBS "${BF_LIB_DIR}/libcurl.dll")
 	install(FILES ${BF_INSTALL_LIBS} DESTINATION ./)
 	
