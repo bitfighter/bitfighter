@@ -236,6 +236,7 @@ function(BF_PLATFORM_INSTALL targetName)
 	# Updater
 	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/gup.exe DESTINATION updater)
 	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/gup.xml DESTINATION updater)
+	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/nativeLang.xml DESTINATION updater)
 	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/libcurl.dll DESTINATION updater)
 	
 	# Other
