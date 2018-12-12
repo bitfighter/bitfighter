@@ -718,6 +718,10 @@ void normalizeWorkingDirectory()
 #if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
    // Move to the application bundle's path (RDW)
    moveToAppPath();  // Directory.h
+#elif defined(TNL_OS_WIN32)
+   // Windows needs a separate function to move to the executable directory or path names
+   // get all messed up
+   SetCurrentDirectory(getExecutableDir().c_str());
 #else
    // Move to the executable directory.  Good for Windows.  Not so good for Linux since it
    // usually has the executable placed far from the installed resources
@@ -1162,8 +1166,10 @@ int main(int argc, char **argv)
    IniSettings::loadUserSettingsFromINI(&GameSettings::userPrefs, settings.get());
 
    // Time to check if there is an online update (for any relevant platforms)
-   if(!isStandalone)
-      checkOnlineUpdate(settings.get());
+   if (!isStandalone)
+	   checkOnlineUpdate(settings.get());
+   else
+	   logprintf("Standalone run detected");
 
    // Make any adjustments needed when we run for the first time after an upgrade
    // Skip if this is the first run
