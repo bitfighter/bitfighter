@@ -642,8 +642,9 @@ void launchWindowsUpdater(bool forceUpdate)
    string updaterFileName = updaterPath + "\\gup.exe";
 
    S32 buildVersion = forceUpdate ? 0 : BUILD_VERSION;
+   string versionParam = "-v" + itos(buildVersion);
 
-   S64 result = (S64) ShellExecuteA( NULL, NULL, updaterFileName.c_str(), itos(buildVersion).c_str(), updaterPath.c_str(), SW_SHOW );
+   S64 result = (S64) ShellExecuteA( NULL, NULL, updaterFileName.c_str(), versionParam.c_str(), updaterPath.c_str(), SW_SHOW );
 
    string msg = "";
 
