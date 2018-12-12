@@ -55,7 +55,7 @@
 	In win32 system, if a program is running, the binary file is locked. 
 	Use this parameter to close the program to make sure the old binary files can be erased by new one.
 	-->
-	<ClassName2Close>Bitfighter</ClassName2Close>
+	<ClassName2Close>SDL_app</ClassName2Close>
 	
 	<!-- Optional.
 	This is the title to display on the message box title bar.
