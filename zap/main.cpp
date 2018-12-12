@@ -643,6 +643,10 @@ void launchWindowsUpdater(bool forceUpdate)
 
    S32 buildVersion = forceUpdate ? 0 : BUILD_VERSION;
    string versionParam = "-v" + itos(buildVersion);
+#if defined(_M_X64) || defined(__x86_64__) || defined(__amd64__)
+   // Add on extra parameter for win64 to get different installer
+   versionParam = versionParam + " -pwin64";
+#endif
 
    S64 result = (S64) ShellExecuteA( NULL, NULL, updaterFileName.c_str(), versionParam.c_str(), updaterPath.c_str(), SW_SHOW );
 
