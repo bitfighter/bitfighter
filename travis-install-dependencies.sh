@@ -11,7 +11,7 @@ before_install_linux()
 before_install_osx()
 {
   # Remove boost because we're using old, in-tree version for now
-  brew uninstall boost --force
+  brew uninstall --ignore-dependencies boost --force
 }
 
 
