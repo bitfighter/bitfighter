@@ -123,13 +123,13 @@ set(CLIENT_SOURCES
 	EditorAttributeMenuItemBuilder.cpp
 	EditorPlugin.cpp
 	EditorTeam.cpp
-	EnergyGaugeRenderer.cpp
 	engineerHelper.cpp
 	Event.cpp
 	FontManager.cpp
 	FpsRenderer.cpp
 	gameObjectRender.cpp
 	GameRecorderPlayback.cpp
+   GaugeRenderer.cpp
 	HelpItemManager.cpp
 	HelperManager.cpp
 	helperMenu.cpp

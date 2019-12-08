@@ -21,7 +21,7 @@
 #include "projectile.h"          // For SpyBug
 #include "robot.h"
 
-#include "EnergyGaugeRenderer.h"
+#include "GaugeRenderer.h"
 
 #include "Console.h"             // Our console object
 #include "DisplayManager.h"
@@ -2820,8 +2820,9 @@ void GameUserInterface::renderGameNormal()
    glPopMatrix();
 
    // Render current ship's energy
-   if(ship)
-      UI::EnergyGaugeRenderer::render(ship->mEnergy);   
+   if(ship) 
+      UI::GaugeRenderer::render(ship->mEnergy, ship->mHealth);
+
 
    //renderOverlayMap();     // Draw a floating overlay map
 }
@@ -3042,7 +3043,8 @@ void GameUserInterface::renderGameCommander()
 
    // Render current ship's energy
    if(ship)
-      UI::EnergyGaugeRenderer::render(ship->mEnergy);   
+      UI::GaugeRenderer::render(ship->mEnergy, ship->mHealth);
+
 }
 
 
