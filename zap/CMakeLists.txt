@@ -218,7 +218,7 @@ set(SHARED_LIBS
 
 # libraries used only on the client
 set(CLIENT_LIBS
-	${SDL_LIBRARY}
+	${SDL_LIBRARY}	
 	${PNG_LIBRARY}
 	${GL_LIBRARY}
 	${OPENAL_LIBRARY}
