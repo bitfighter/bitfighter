@@ -1935,6 +1935,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mChangeName, (StringTableEn
       mMaster->writeJsonNow();  // update server name in ".json"
    }
 }
+
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mServerDescription, (StringTableEntry descr))
 {
    mServerDescr = descr;
