@@ -252,3 +252,15 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+lua/luajit/src/buildvm.exp
+
+lua/luajit/src/buildvm.lib
+
+lua/luajit/src/luajit.exp
+
+lua/luajit/src/luajit.lib
+
+lua/luajit/src/minilua.exp
+
+lua/luajit/src/minilua.lib
