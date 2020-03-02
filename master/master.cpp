@@ -322,7 +322,7 @@ void MasterServer::idle(const U32 timeDelta)
       MasterServerConnection::writeClientServerList_JSON();
 
       mJsonWritingSuspended = true;    // No more writes until this is cleared
-      mJsonWriteTimer.reset();         // But reset the timer so it start ticking down even if we aren't writing
+      mJsonWriteTimer.reset();         // But reset the timer so it starts ticking down even if we aren't writing
    }
 
 
