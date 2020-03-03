@@ -8,6 +8,7 @@
 #include "tnlLog.h"
 #include "tnlNonce.h"
 #include "tnlRandom.h"
+#include <string>
 
 #include <stdio.h>
 
@@ -17,10 +18,12 @@ int main(int argc, const char **argv)
 {
    if(argc < 2)
    {
-      printf("Usage: tnlping <remoteAddress> [sourceAddress]\n\n"
-      "Example 1: Simple usage expecting port 28000\n   tnlping 192.168.1.2\n\n"
-      "Example 2: Advanced usage with specific port\n   tnlping 192.168.1.2:28001\n\n");
-      return 1;
+      printf("Usage: tnlping <remoteAddress> [displayName] [sourceAddress]\n\n"
+      "Example 1: Simple usage expecting port 28000\n   tnlping bitfighter.org\n\n"
+      "Example 2: Advanced usage with specific port\n   tnlping 192.168.1.2:28001\n\n"
+      "Display name only used in return message.\n"
+      "Default port = 28000; Return codes are suitable for monitoring with Nagios.\n");
+      return 3;   // Nagios status = Unknown
    }
    
    U8 randData[sizeof(U32) + sizeof(S64)];
@@ -29,7 +32,8 @@ int main(int argc, const char **argv)
    TNL::Random::addEntropy(randData, sizeof(randData));
 
    Address remoteAddress(argv[1]);
-   Address sourceAddress(argc > 2 ? argv[2] : "IP:Any:0");
+   string serviceName(argc > 2 ? argv[2] : "TNL Service");
+   Address sourceAddress(argc > 3 ? argv[3] : "IP:Any:0");
 
    Nonce clientNonce;
    clientNonce.getRandom();
@@ -58,8 +62,8 @@ int main(int argc, const char **argv)
             theNonce.read(&incoming);
             if(packetType == NetInterface::ConnectChallengeResponse && theNonce == clientNonce)
             {
-               printf("TNL Service is UP (pingtime = %d)\n", Platform::getRealMilliseconds() - time);
-               return 0;
+               printf("%s is UP (pingtime = %d)\n", serviceName.c_str(), Platform::getRealMilliseconds() - time);
+               return 0;   // Nagios status OK
             }
          }
          Platform::sleep(1);
@@ -68,7 +72,7 @@ int main(int argc, const char **argv)
       }
    }
    
-   printf("TNL Service is DOWN\n");
+   printf("%s is DOWN\n", serviceName.c_str());
    
-   return 1;
+   return 2;   // Nagios status Critical
 }
