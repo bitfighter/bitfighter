@@ -304,6 +304,7 @@ class HostMenuUserInterface : public MenuUserInterface
       OPT_NAME,
       OPT_DESCR,
       OPT_WELCOME,
+      OPT_GLOBALSCR,
       OPT_PASSWORDS,
       OPT_GETMAP,
       OPT_RECORD,

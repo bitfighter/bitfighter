@@ -236,8 +236,21 @@ string GameSettings::getWelcomeMessage() const
 }
 
 
-void GameSettings::setWelcomeMessage(const string &welcomeMessage) 
+void GameSettings::setGlobalLevelgenScript(const string &globalLevelScript, bool updateINI)
 { 
+   mGlobalLevelScript = globalLevelScript;
+
+   if (updateINI)
+      mIniSettings.globalLevelScript = globalLevelScript;
+}
+string GameSettings::getGlobalLevelgenScript() const
+{
+   return mIniSettings.globalLevelScript;
+}
+
+
+void GameSettings::setWelcomeMessage(const string &welcomeMessage)
+{
    mIniSettings.welcomeMessage = welcomeMessage;
 }
 
