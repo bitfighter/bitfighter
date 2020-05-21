@@ -119,10 +119,9 @@ void UIManager::reactivate(const UserInterface *ui)
 
 UserInterface *UIManager::getPrevUI()
 {
-   if(mPrevUIs.size() == 0)
-      return NULL;
-
-   return mPrevUIs.last();
+   // Use mLastUI because mPrevUIs.last() may have been popped if this method
+   // is called from a UI reactivate() method
+   return mLastUI;
 }
 
 
