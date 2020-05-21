@@ -123,8 +123,6 @@ private:
    static FolderManager *mFolderManager;
    InputCodeManager mInputCodeManager;
 
-   string mGlobalLevelScript;
-
    BanList *mBanList;                  // Our ban list
 
    //CmdLineSettings mCmdLineSettings;
@@ -178,7 +176,7 @@ public:
    void setWelcomeMessage(const string &welcomeMessage);
 
    string getGlobalLevelgenScript() const;
-   void setGlobalLevelgenScript(const string& GlobalLevelgenScript, bool updateINI);
+   void setGlobalLevelgenScript(const string& GlobalLevelgenScript);
 
    string getServerPassword();
    void setServerPassword(const string &ServerPassword, bool updateINI);
