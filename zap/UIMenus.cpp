@@ -1878,6 +1878,8 @@ void HostMenuUserInterface::setupMenus()
 
    addMenuItem(new TextEntryMenuItem("WELCOME MSG:", settings->getWelcomeMessage(),
                                        "<Empty>", "", MaxWelcomeMessageLen, KEY_W));
+   addMenuItem(new TextEntryMenuItem("GLOBAL SCRIPT:", settings->getGlobalLevelgenScript(),
+      "<Empty>", "", MaxWelcomeMessageLen, KEY_S));
 
    addMenuItem(new MenuItem(getMenuItemCount(), "PASSWORDS", passwordOptionsSelectedCallback,
          "Set server passwords/permissions", KEY_P));
@@ -1912,7 +1914,7 @@ void HostMenuUserInterface::saveSettings()
    settings->setHostName (getMenuItem(OPT_NAME)->getValue(),  true);
    settings->setHostDescr(getMenuItem(OPT_DESCR)->getValue(), true);
    settings->setWelcomeMessage(getMenuItem(OPT_WELCOME)->getValue());
-
+   settings->setGlobalLevelgenScript(getMenuItem(OPT_GLOBALSCR)->getValue());
    settings->getIniSettings()->allowGetMap = (getMenuItem(OPT_GETMAP)->getIntValue() != 0);
    settings->getIniSettings()->enableGameRecording = (getMenuItem(OPT_RECORD)->getIntValue() != 0);
 

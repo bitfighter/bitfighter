@@ -175,6 +175,9 @@ public:
    string getWelcomeMessage() const;
    void setWelcomeMessage(const string &welcomeMessage);
 
+   string getGlobalLevelgenScript() const;
+   void setGlobalLevelgenScript(const string& GlobalLevelgenScript);
+
    string getServerPassword();
    void setServerPassword(const string &ServerPassword, bool updateINI);
 
