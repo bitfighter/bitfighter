@@ -104,10 +104,8 @@ bool VideoSystem::init()
 #  endif
 #endif
 
-#ifdef TNL_OS_MAC_OSX
-   // This hint is to workaround this bug: https://bugzilla.libsdl.org/show_bug.cgi?id=1840
+   // No minimizing when ALT-TAB away
    SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
-#endif
 
    // SDL 2.0 lets us create the window first, only once
    DisplayManager::getScreenInfo()->sdlWindow = SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
