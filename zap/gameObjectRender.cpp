@@ -2191,12 +2191,17 @@ void renderEnergySymbol()
 
 void renderEnergyItem(const Point &pos, bool forEditor)
 {
-   F32 scaleFactor = forEditor ? .45f : 1;    // Resize for editor
+   F32 scaleFactor = 1;    // Resize for editor
+   F32 size = 18;
+   if(forEditor)
+   {
+      scaleFactor = 0.45;
+      size = 8;
+   }
 
    glPushMatrix();
       glTranslate(pos);
 
-      F32 size = 18;
       drawHollowSquare(Point(0,0), size, &Colors::white);
       glLineWidth(gDefaultLineWidth);
 

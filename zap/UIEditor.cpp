@@ -204,8 +204,8 @@ void EditorUserInterface::populateDock()
    F32 yPos = 35;
    const F32 spacer = 35;
 
-   addDockObject(new RepairItem(), xPos, yPos);
-   //addDockObject(new ItemEnergy(), xPos + 10, yPos);
+   addDockObject(new RepairItem(), xPos - 10, yPos);
+   addDockObject(new EnergyItem(), xPos + 10, yPos);
    yPos += spacer;
 
    addDockObject(new Spawn(), xPos, yPos);
@@ -4087,8 +4087,10 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       insertNewItem(ShipSpawnTypeNumber);                                                   
 	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_SPYBUG))            // Spybug
       insertNewItem(SpyBugTypeNumber);                                                      
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_REPAIR))            // Repair
-      insertNewItem(RepairItemTypeNumber);                                                  
+   else if(inputString == getEditorBindingString(settings, BINDING_PLACE_REPAIR))            // Repair
+      insertNewItem(RepairItemTypeNumber);
+   else if(inputString == getEditorBindingString(settings, BINDING_PLACE_ENERGY))            // Energy
+      insertNewItem(EnergyItemTypeNumber);
 	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_TURRET))            // Turret
       insertNewItem(TurretTypeNumber);                                                      
 	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_MINE))              // Mine

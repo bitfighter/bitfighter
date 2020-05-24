@@ -371,7 +371,7 @@ void RepairItem::renderItem(const Point &pos)
 
 
 const char *RepairItem::getOnScreenName()     { return "Repair";       }
-const char *RepairItem::getOnDockName()       { return "Repair";       }
+const char *RepairItem::getOnDockName()       { return "Rep";       }
 const char *RepairItem::getPrettyNamePlural() { return "Repair Items"; }
 const char *RepairItem::getEditorHelpString() { return "Repairs damage to ships. [B]"; }
 
@@ -499,10 +499,24 @@ void EnergyItem::renderItem(const Point &pos)
 
 
 const char *EnergyItem::getOnScreenName()     { return "Energy";       }
-const char *EnergyItem::getOnDockName()       { return "Energy";       }
+const char *EnergyItem::getOnDockName()       { return "Ener";       }
 const char *EnergyItem::getPrettyNamePlural() { return "Energy Items"; }
 const char *EnergyItem::getEditorHelpString() { return "Restores energy to ships"; }
 
+
+S32 EnergyItem::getDockRadius() { return 11; }
+
+
+void EnergyItem::renderDock()
+{
+   renderEnergyItem(getPos(), true);
+}
+
+
+F32 EnergyItem::getEditorRadius(F32 currentScale)
+{
+   return mRadius * currentScale + 5;
+}
 
 /////
 // Lua interface
