@@ -297,7 +297,11 @@ void VideoSystem::updateDisplayState(GameSettings *settings, StateReason reason)
          }
 
          else if(reason == StateReasonInterfaceChange)
+         {
             currentState = windowed_editor_st;
+
+            saveWindowPostion(settings);
+         }
 
          // Stay here if resized
          else if(reason == StateReasonExternalResize)
@@ -345,7 +349,11 @@ void VideoSystem::updateDisplayState(GameSettings *settings, StateReason reason)
          }
 
          else if(reason == StateReasonInterfaceChange)
+         {
             currentState = windowed_st;
+
+            saveWindowPostion(settings);
+         }
 
          // Stay here if resized
          else if(reason == StateReasonExternalResize)
