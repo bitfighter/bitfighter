@@ -86,6 +86,11 @@ void AbstractMessageUserInterface::reset()
    mKeyRegistrations.clear();
    mRenderUnderlyingUi = true;
 
+   // Messages are rendered on top of UIs and reset() is called before activate()
+   // so use the current UI's screen mode
+   mEditorScreenMode = getUIManager()->getCurrentUI()->usesEditorScreenMode();
+   logprintf("editor screen mode: %d", mEditorScreenMode);
+
    mInstr = SymbolShapePtr(new SymbolBlank());
    mTitle = SymbolShapePtr(new SymbolBlank());
 }
@@ -155,14 +160,9 @@ ErrorMessageUserInterface::~ErrorMessageUserInterface()
 
 bool ErrorMessageUserInterface::usesEditorScreenMode() const
 {
-   if(getUIManager()->getCurrentUI() == this)
-   {
-      TNLAssert(getUIManager()->getPrevUI() != this, "Why same UI twice?");
-      return getUIManager()->getPrevUI()->usesEditorScreenMode();
-   }
-   else
-      return getUIManager()->getCurrentUI()->usesEditorScreenMode();
-
+   // Error messages can be on any screen mode so we keep track of it when this UI
+   // is created/reset
+   return mEditorScreenMode;
 }
 
 
