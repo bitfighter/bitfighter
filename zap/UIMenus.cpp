@@ -921,8 +921,9 @@ static void editorSelectedCallback(ClientGame *game, U32 unused)
       ui->reset();
       ui->setTitle("HOUSTON, WE HAVE A PROBLEM");
       ui->setMessage("No valid level folder was found, so I cannot start the level editor.\n\n"
-                     "Check the LevelDir parameter in your INI file, or your command-line parameters to make"
-                     "sure you have correctly specified a valid folder.");
+                     "Check the LevelDir parameter in your INI file or your command-line parameters to "
+                     "make sure you have correctly specified a valid folder.");
+      ui->setInstr("Press [[Esc]] to continue");
 
       uiManager->activate(ui);
 
