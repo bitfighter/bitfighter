@@ -5389,9 +5389,10 @@ static void activateTeamDefCallback(ClientGame *game, U32 unused)
 
 void uploadToDbCallback(ClientGame *game)
 {
-   game->getUIManager()->activate<EditorUserInterface>();
-
    EditorUserInterface* editor = game->getUIManager()->getUI<EditorUserInterface>();
+   // Back to the editor
+   game->getUIManager()->reactivate(editor);
+
    editor->createNormalizedScreenshot(game);
 
    if(game->getGameType()->getLevelName() == "")    
