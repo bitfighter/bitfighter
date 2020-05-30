@@ -1251,25 +1251,6 @@ void EditorUserInterface::onAfterRunScriptFromConsole()
 void EditorUserInterface::onActivate()
 {
    mDelayedUnselectObject = NULL;
-   GameSettings *settings = getGame()->getSettings();
-
-   FolderManager *folderManager = settings->getFolderManager();
-
-   if(folderManager->levelDir == "")      // Never did resolve a leveldir... no editing for you!
-   {
-      getUIManager()->reactivatePrevUI();     // Must come before the error msg, so it will become the previous UI when that one exits
-
-      ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
-      ui->reset();
-      ui->setTitle("HOUSTON, WE HAVE A PROBLEM");
-      ui->setMessage("No valid level folder was found, so I cannot start the level editor.\n\n"
-                     "Check the LevelDir parameter in your INI file, or your command-line parameters to make sure"
-                     "you have correctly specified a valid folder.");
-
-      getUIManager()->activate(ui);
-
-      return;
-   }
 
    // Check if we have a level name:
    if(getLevelFileName() == UnnamedFile)     // We need to take a detour to get a level name

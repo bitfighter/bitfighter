@@ -910,6 +910,25 @@ static void highScoresSelectedCallback(ClientGame *game, U32 unused)
 
 static void editorSelectedCallback(ClientGame *game, U32 unused)
 {
+   GameSettings *settings = game->getSettings();
+   FolderManager *folderManager = settings->getFolderManager();
+   UIManager *uiManager = game->getUIManager();
+
+   // Never did resolve a leveldir... no editing for you!
+   if(folderManager->levelDir == "")
+   {
+      ErrorMessageUserInterface *ui = uiManager->getUI<ErrorMessageUserInterface>();
+      ui->reset();
+      ui->setTitle("HOUSTON, WE HAVE A PROBLEM");
+      ui->setMessage("No valid level folder was found, so I cannot start the level editor.\n\n"
+                     "Check the LevelDir parameter in your INI file, or your command-line parameters to make"
+                     "sure you have correctly specified a valid folder.");
+
+      uiManager->activate(ui);
+
+      return;
+   }
+
    game->setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);      // <=== Should not be here... perhaps in editor onActivate?
    game->getUIManager()->activate<LevelNameEntryUserInterface>();
 }
