@@ -130,6 +130,9 @@ private:
    MusicLocation selectMusic();
    void processAudio(U32 timeDelta);
 
+   // Debugging
+   void printUIStack();
+
 public:
    void setClientGame(ClientGame *clientGame);
    void reactivatePrevUI();

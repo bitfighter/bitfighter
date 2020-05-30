@@ -202,6 +202,25 @@ void UIManager::saveUI(UserInterface *ui)
 }
 
 
+void UIManager::printUIStack()
+{
+   logprintf("== UIManager stack ==");
+
+   // Print current UI
+   for(auto const& x : mUis)
+      if(x.second == mCurrentInterface)
+         logprintf("%s (current)", x.first->name());
+
+   // Print stack, starting from most recent UI
+   for(int i = mPrevUIs.size() - 1; i > 0; i--)
+      for(auto const& x : mUis)
+         if(x.second == mPrevUIs[i])
+            logprintf("%s", x.first->name());
+
+   logprintf("=====================");
+}
+
+
 // Game connection is terminated -- reactivate the appropriate UI
 void UIManager::onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr)
 {
