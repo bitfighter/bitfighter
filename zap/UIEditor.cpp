@@ -3155,30 +3155,27 @@ void EditorUserInterface::translateSelectedItems(const Vector<Point> &origins, c
    {
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
-      if(obj->isSelected() || obj->anyVertsSelected())
+      Point newVert;    // Reusable container
+
+      if(obj->isSelected())            // ==> Dragging whole object
       {
-         //obj->setPos(mMoveOrigins[i] + offset);
-         Point newVert;    // Reusable container
-
          for(S32 j = obj->getVertCount() - 1; j >= 0;  j--)
-            if(obj->isSelected())            // ==> Dragging whole object
-            {
-               //          Offset from vertex @ getPos()   +  New position for vertex @ getPos()  
-               //F64 x = ((F64)obj->getVert(j).x - (F64)obj->getPos().x) + ((F64)mMoveOrigins[i].x + (F64)offset.x);
-               //F64 y = ((F64)obj->getVert(j).y - (F64)obj->getPos().y) + (F64)(mMoveOrigins[i].y + (F64)offset.y);
-               //newVert = Point((F32)x, (F32)y);
+         {
+            newVert = (obj->getVert(j) - obj->getVert(0)) + (mMoveOrigins[i] + offset);
+            obj->setVert(newVert, j);
+         }
+         obj->onItemDragging();        // Let the item know it's being dragged
+      }
 
-               newVert = (obj->getVert(j) - obj->getVert(0)) + (mMoveOrigins[i] + offset);
-               obj->setVert(newVert, j);
-
-               obj->onItemDragging();        // Let the item know it's being dragged
-            }
-            else if(obj->vertSelected(j))    // ==> Dragging individual vertex
+      else if(obj->anyVertsSelected()) // ==> Dragging individual vertex
+      {
+         for(S32 j = obj->getVertCount() - 1; j >= 0;  j--)
+            if(obj->vertSelected(j))
             { 
                // Pos of vert at last tick + Offset from last tick
                newVert = obj->getVert(j) + (offset - lastOffset);
                obj->setVert(newVert, j);
-               obj->onGeomChanging();        // Because, well, the geom is changing
+               obj->onGeomChanging();  // Because, well, the geom is changing
             }
       }
    }
