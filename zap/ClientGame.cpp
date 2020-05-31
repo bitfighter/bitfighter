@@ -172,6 +172,10 @@ void ClientGame::closeConnectionToGameServer(const char *reason)
 
    getUIManager()->disableLevelLoadDisplay(false);
 
+   // Clear client-side spawn timer if it was set, which can happen if a player
+   // is zapped when attempting to leave the game
+   mClientInfo->setSpawnDelayed(false);
+
    onGameReallyAndTrulyOver();  
 }
 
