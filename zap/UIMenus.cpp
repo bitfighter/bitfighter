@@ -1613,6 +1613,80 @@ void RobotOptionsMenuUserInterface::saveSettings()
 ////////////////////////////////////////
 
 // Constructor
+ServerAdvancedMenuUserInterface::ServerAdvancedMenuUserInterface(ClientGame *game) : Parent(game)
+{
+   mMenuTitle = "ADVANCED OPTIONS";
+}
+
+
+// Destructor
+ServerAdvancedMenuUserInterface::~ServerAdvancedMenuUserInterface()
+{
+   // Do nothing
+}
+
+
+void ServerAdvancedMenuUserInterface::onActivate()
+{
+   Parent::onActivate();
+   setupMenus();
+}
+
+
+static void hostOnServerCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->getUI<QueryServersUserInterface>()->mHostOnServer = true;
+   game->getUIManager()->activate<QueryServersUserInterface>();
+}
+
+
+void ServerAdvancedMenuUserInterface::setupMenus()
+{
+   clearMenuItems();
+
+   GameSettings *settings = getGame()->getSettings();
+
+   addMenuItem(new TextEntryMenuItem("GLOBAL SCRIPT:", settings->getGlobalLevelgenScript(),
+      "<Empty>", "", MaxWelcomeMessageLen, KEY_S));
+
+   addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap, "", KEY_M));
+
+   addMenuItem(new YesNoMenuItem("RECORD GAMES:", settings->getIniSettings()->enableGameRecording, "", KEY_R));
+
+   // Note, Don't move "HOST ON SERVER" above "RECORD GAMES" unless
+   // first checking HostMenuUserInterface::saveSettings if it saves correctly
+   if(getGame()->getConnectionToMaster() && getGame()->getConnectionToMaster()->isHostOnServerAvailable())
+      addMenuItem(new MenuItem("HOST ON SERVER", hostOnServerCallback, "", KEY_H));
+}
+
+
+// Save options to INI file
+void ServerAdvancedMenuUserInterface::onEscape()
+{
+   saveSettings();
+   getUIManager()->reactivatePrevUI();
+}
+
+
+void ServerAdvancedMenuUserInterface::saveSettings()
+{
+//   // Save our minimum players, get the correct index of the appropriate menu item
+//   getGame()->getSettings()->getIniSettings()->playWithBots = getMenuItem(0)->getIntValue() == 1;
+//   getGame()->getSettings()->getIniSettings()->minBalancedPlayers = getMenuItem(1)->getIntValue();
+//
+//   saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
+   GameSettings *settings = getGame()->getSettings();
+
+   settings->setGlobalLevelgenScript(getMenuItem(OPT_GLOBALSCR)->getValue());
+   settings->getIniSettings()->allowGetMap = (getMenuItem(OPT_GETMAP)->getIntValue() != 0);
+   settings->getIniSettings()->enableGameRecording = (getMenuItem(OPT_RECORD)->getIntValue() != 0);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
 ServerPasswordsMenuUserInterface::ServerPasswordsMenuUserInterface(ClientGame *game) : Parent(game)
 {
    mMenuTitle = "SERVER PASSWORDS";
@@ -1853,11 +1927,6 @@ static void startHostingCallback(ClientGame *game, U32 unused)
    initHosting(settings, levelSource, false, false);
 }
 
-static void hostOnServerCallback(ClientGame *game, U32 unused)
-{
-   game->getUIManager()->getUI<QueryServersUserInterface>()->mHostOnServer = true;
-   game->getUIManager()->activate<QueryServersUserInterface>();
-}
 
 static void robotOptionsSelectedCallback(ClientGame *game, U32 unused)
 {
@@ -1868,6 +1937,13 @@ static void robotOptionsSelectedCallback(ClientGame *game, U32 unused)
 static void passwordOptionsSelectedCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->activate<ServerPasswordsMenuUserInterface>();
+
+}
+
+
+static void advancedOptionsSelectedCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->activate<ServerAdvancedMenuUserInterface>();
 
 }
 
@@ -1898,20 +1974,12 @@ void HostMenuUserInterface::setupMenus()
 
    addMenuItem(new TextEntryMenuItem("WELCOME MSG:", settings->getWelcomeMessage(),
                                        "<Empty>", "", MaxWelcomeMessageLen, KEY_W));
-   addMenuItem(new TextEntryMenuItem("GLOBAL SCRIPT:", settings->getGlobalLevelgenScript(),
-      "<Empty>", "", MaxWelcomeMessageLen, KEY_S));
 
    addMenuItem(new MenuItem(getMenuItemCount(), "PASSWORDS", passwordOptionsSelectedCallback,
          "Set server passwords/permissions", KEY_P));
 
-   addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap, "", KEY_M));
-
-   addMenuItem(new YesNoMenuItem("RECORD GAMES:", settings->getIniSettings()->enableGameRecording, ""));
-
-   // Note, Don't move "HOST ON SERVER" above "RECORD GAMES" unless
-   // first checking HostMenuUserInterface::saveSettings if it saves correctly
-   if(getGame()->getConnectionToMaster() && getGame()->getConnectionToMaster()->isHostOnServerAvailable())
-      addMenuItem(new MenuItem("HOST ON SERVER", hostOnServerCallback, "", KEY_H));
+   addMenuItem(new MenuItem(getMenuItemCount(), "ADVANCED", advancedOptionsSelectedCallback,
+         "Other advanced server options", KEY_A));
 
    addMenuItem(new MenuItem("PLAYBACK GAMES",    playbackGamesCallback,  ""));
 }
@@ -1934,9 +2002,6 @@ void HostMenuUserInterface::saveSettings()
    settings->setHostName (getMenuItem(OPT_NAME)->getValue(),  true);
    settings->setHostDescr(getMenuItem(OPT_DESCR)->getValue(), true);
    settings->setWelcomeMessage(getMenuItem(OPT_WELCOME)->getValue());
-   settings->setGlobalLevelgenScript(getMenuItem(OPT_GLOBALSCR)->getValue());
-   settings->getIniSettings()->allowGetMap = (getMenuItem(OPT_GETMAP)->getIntValue() != 0);
-   settings->getIniSettings()->enableGameRecording = (getMenuItem(OPT_RECORD)->getIntValue() != 0);
 
    saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
 }
