@@ -1647,16 +1647,18 @@ void ServerAdvancedMenuUserInterface::setupMenus()
    GameSettings *settings = getGame()->getSettings();
 
    addMenuItem(new TextEntryMenuItem("GLOBAL SCRIPT:", settings->getGlobalLevelgenScript(),
-      "<Empty>", "", MaxWelcomeMessageLen, KEY_S));
+      "<None>", "Levelgen script to run with every level", MaxWelcomeMessageLen, KEY_S));
 
-   addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap, "", KEY_M));
+   addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap,
+         "Can users download maps from this server", KEY_M));
 
-   addMenuItem(new YesNoMenuItem("RECORD GAMES:", settings->getIniSettings()->enableGameRecording, "", KEY_R));
+   addMenuItem(new YesNoMenuItem("RECORD GAMES:", settings->getIniSettings()->enableGameRecording,
+         "Will the server record games (requires lots of disk space)", KEY_R));
 
    // Note, Don't move "HOST ON SERVER" above "RECORD GAMES" unless
    // first checking HostMenuUserInterface::saveSettings if it saves correctly
    if(getGame()->getConnectionToMaster() && getGame()->getConnectionToMaster()->isHostOnServerAvailable())
-      addMenuItem(new MenuItem("HOST ON SERVER", hostOnServerCallback, "", KEY_H));
+      addMenuItem(new MenuItem("HOST ON SERVER", hostOnServerCallback, "Upload and run levels on a proxy server", KEY_H));
 }
 
 
@@ -1967,13 +1969,16 @@ void HostMenuUserInterface::setupMenus()
          "Add robots and adjust their settings", KEY_R));
 
    addMenuItem(new TextEntryMenuItem("SERVER NAME:", settings->getHostName(), 
-                                     "<Bitfighter Host>", "", MaxServerNameLen,  KEY_N));
+                                     "<Bitfighter Host>", "Server name shown in the game lobby",
+                                     MaxServerNameLen,  KEY_N));
 
    addMenuItem(new TextEntryMenuItem("DESCRIPTION:", settings->getHostDescr(),                    
-                                     "<Empty>", "", MaxServerDescrLen, KEY_D));
+                                     "<Empty>", "Server description shown in the game lobby",
+                                     MaxServerDescrLen, KEY_D));
 
    addMenuItem(new TextEntryMenuItem("WELCOME MSG:", settings->getWelcomeMessage(),
-                                       "<Empty>", "", MaxWelcomeMessageLen, KEY_W));
+                                       "<Empty>", "Message shown to players when they join the server",
+                                       MaxWelcomeMessageLen, KEY_W));
 
    addMenuItem(new MenuItem(getMenuItemCount(), "PASSWORDS", passwordOptionsSelectedCallback,
          "Set server passwords/permissions", KEY_P));
@@ -1981,7 +1986,7 @@ void HostMenuUserInterface::setupMenus()
    addMenuItem(new MenuItem(getMenuItemCount(), "ADVANCED", advancedOptionsSelectedCallback,
          "Other advanced server options", KEY_A));
 
-   addMenuItem(new MenuItem("PLAYBACK GAMES",    playbackGamesCallback,  ""));
+   addMenuItem(new MenuItem("PLAYBACK GAMES",    playbackGamesCallback,  "Playback previously recorded games"));
 }
 
 
