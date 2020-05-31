@@ -45,6 +45,7 @@ static const char *gameCredits[] = {
    "Qui",
    "Pierce Youatt (karamazovapy)",
    "Riordan Zentler (Quartz)",
+   "Joseph Barker (Little_Apple)",
    "-",
    "Bot development:",
    "Samuel Williams (sam686)",
