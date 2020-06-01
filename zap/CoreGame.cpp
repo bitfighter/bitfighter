@@ -517,8 +517,8 @@ const F32 CoreItem::DamageReductionRatio = 1000.0f;
 const F32 CoreItem::PANEL_ANGLE = FloatTau / (F32) CORE_PANELS;
 
 // Historical default = 1
-const U32 CoreItem::CoreDefaultRotateSpeed = 1;
-const U32 CoreItem::CoreMaxRotateSpeed = 15;
+const U32 CoreItem::CoreDefaultRotationSpeed = 1;
+const U32 CoreItem::CoreMaxRotationSpeed = 15;
 
 /**
  * @luafunc CoreItem::CoreItem()
@@ -536,7 +536,7 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
    mCurrentExplosionNumber = 0;
    mPanelGeom.isValid = false;
-   mRotateSpeed = CoreDefaultRotateSpeed;
+   mRotationSpeed = CoreDefaultRotationSpeed;
 
 
    // Read some params from our L, if we have it
@@ -664,7 +664,7 @@ void CoreGameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) c
 void CoreItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
    keys.push_back("Health");   values.push_back(itos(S32(mStartingHealth * DamageReductionRatio + 0.5)));
-   keys.push_back("Speed");   values.push_back(itos(S32(mRotateSpeed)));
+   keys.push_back("Speed");   values.push_back(itos(S32(mRotationSpeed)));
 }
 
 
@@ -873,7 +873,7 @@ void CoreItem::doExplosion(const Point &pos)
 PanelGeom *CoreItem::getPanelGeom()
 {
    if(!mPanelGeom.isValid)
-      fillPanelGeom(getPos(), getGame()->getGameType()->getTotalGamePlayedInMs() * mRotateSpeed, mPanelGeom);
+      fillPanelGeom(getPos(), getGame()->getGameType()->getTotalGamePlayedInMs() * mRotationSpeed, mPanelGeom);
 
    return &mPanelGeom;
 }
@@ -1085,19 +1085,18 @@ F32 CoreItem::getHealth() const
 }
 
 
-U32 CoreItem::getRotateSpeed() const
+U32 CoreItem::getRotationSpeed() const
 {
-   return mRotateSpeed;
+   return mRotationSpeed;
 }
 
 
-void CoreItem::setRotateSpeed(U32 speed)
+void CoreItem::setRotationSpeed(U32 speed)
 {
-   logprintf("%d", speed);
-   if(speed > CoreMaxRotateSpeed)
-      speed = CoreMaxRotateSpeed;
+   if(speed > CoreMaxRotationSpeed)
+      speed = CoreMaxRotationSpeed;
 
-   mRotateSpeed = speed;
+   mRotationSpeed = speed;
 }
 
 
@@ -1161,7 +1160,7 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    if(stream->writeFlag(updateMask & (InitialMask | TeamMask)))
    {
       writeThisTeam(stream);
-      stream->writeInt(mRotateSpeed, 4);
+      stream->writeInt(mRotationSpeed, 4);
    }
 
    stream->writeFlag(mHasExploded);
@@ -1199,7 +1198,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())
    {
       readThisTeam(stream);
-      mRotateSpeed = stream->readInt(4);
+      mRotationSpeed = stream->readInt(4);
    }
 
    if(stream->readFlag())     // Exploding!  Take cover!!
@@ -1250,7 +1249,7 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 
    // 019h added rotation speed
    if(argc >=5)
-      setRotateSpeed((U32)atoi(argv[4]));
+      setRotationSpeed((U32)atoi(argv[4]));
 
    return true;
 }
@@ -1260,7 +1259,7 @@ string CoreItem::toLevelCode() const
 {
    return string(appendId(getClassName())) + " " + itos(getTeam()) + " " +
          ftos(mStartingHealth * DamageReductionRatio) + " " + geomToLevelCode() + " " +
-         itos(mRotateSpeed);
+         itos(mRotationSpeed);
 }
 
 
@@ -1292,7 +1291,7 @@ void CoreItem::onGeomChanged()
    Parent::onGeomChanged();
 
    GameType *gameType = getGame()->getGameType();
-   fillPanelGeom(getPos(), gameType->getTotalGamePlayedInMs() * mRotateSpeed, mPanelGeom);
+   fillPanelGeom(getPos(), gameType->getTotalGamePlayedInMs() * mRotationSpeed, mPanelGeom);
 }
 #endif
 

@@ -126,8 +126,8 @@ public:
    static const F32 DamageReductionRatio;
    static const U32 CoreRadius = 100;
    static const U32 CoreDefaultStartingHealth = 40;      // In ship-damage equivalents; these will be divided amongst all panels
-   static const U32 CoreDefaultRotateSpeed;
-   static const U32 CoreMaxRotateSpeed;
+   static const U32 CoreDefaultRotationSpeed;
+   static const U32 CoreMaxRotationSpeed;
 
 private:
    static const U32 CoreMinWidth = 20;
@@ -150,7 +150,7 @@ private:
    Timer mHeartbeatTimer;        // Client-side timer
    Timer mExplosionTimer;        // Client-side timer
    Timer mAttackedWarningTimer;  // Server-side timer
-   U32 mRotateSpeed;             // 4 bits are used, values 0-15 will work
+   U32 mRotationSpeed;           // 4 bits are used, values 0-15 will work
 
 protected:
    enum MaskBits {
@@ -181,8 +181,8 @@ public:
    bool isPanelDamaged(S32 panelIndex);
    bool isPanelInRepairRange(const Point &origin, S32 panelIndex);
 
-   U32 getRotateSpeed() const;
-   void setRotateSpeed(U32 speed);
+   U32 getRotationSpeed() const;
+   void setRotationSpeed(U32 speed);
 
    Vector<Point> getRepairLocations(const Point &repairOrigin);
    PanelGeom *getPanelGeom();
