@@ -1339,6 +1339,8 @@ S32 CoreItem::lua_setTeam(lua_State *L)
    METHOD(CLASS, getCurrentHealth, ARRAYDEF({{          END }}), 1 ) \
    METHOD(CLASS, getFullHealth,    ARRAYDEF({{          END }}), 1 ) \
    METHOD(CLASS, setFullHealth,    ARRAYDEF({{ NUM_GE0, END }}), 1 ) \
+   METHOD(CLASS, getRotationSpeed, ARRAYDEF({{          END }}), 1 ) \
+   METHOD(CLASS, setRotationSpeed, ARRAYDEF({{ INT_GE0, END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(CoreItem, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(CoreItem, LUA_METHODS);
@@ -1393,6 +1395,46 @@ S32 CoreItem::lua_setFullHealth(lua_State *L)
    setStartingHealth(getFloat(L, 1));
 
    return 0;     
+}
+/**
+ * @luafunc CoreItem::getRotationSpeed()
+ *
+ * @brief Get the Core's rotation speed factor
+ *
+ * @return The rotation speed.
+ */
+S32 CoreItem::lua_getRotationSpeed(lua_State *L)
+{
+   return returnInt(L, mRotationSpeed);
+}
+
+
+/**
+ * @luafunc CoreItem::setRotationSpeed(int speed)
+ *
+ * @brief Sets the Core's rotation speed factor.
+ *
+ * @desc The rotation speed is a multiple of the default (1x). The default time
+ * it takes for one rotation is 16384 ms. Therefore, the rotation time is:
+ *
+ *    16384 ms / speed
+ *
+ * Speeds of 0 (stopped) to 15 are allowed.
+ *
+ * @param speed
+ */
+S32 CoreItem::lua_setRotationSpeed(lua_State *L)
+{
+   checkArgList(L, functionArgs, "CoreItem", "setRotationSpeed");
+
+   U32 speed = getInt(L, 1);
+   mRotationSpeed = min(speed, CoreMaxRotationSpeed);
+
+   // Update clients over network
+   // Use TeamMask because it's already hooked up to send rotation speed
+   setMaskBits(TeamMask);
+
+   return 0;
 }
 
 

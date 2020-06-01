@@ -238,6 +238,9 @@ public:
    S32 lua_getFullHealth(lua_State *L);       // Health with no damange
    S32 lua_setFullHealth(lua_State *L);     
    S32 lua_setTeam(lua_State *L);
+
+   S32 lua_getRotationSpeed(lua_State *L);
+   S32 lua_setRotationSpeed(lua_State *L);
 };
 
 
