@@ -126,12 +126,15 @@ public:
    static const F32 DamageReductionRatio;
    static const U32 CoreRadius = 100;
    static const U32 CoreDefaultStartingHealth = 40;      // In ship-damage equivalents; these will be divided amongst all panels
+   static const U32 CoreDefaultRotateSpeed;
+   static const U32 CoreMaxRotateSpeed;
 
 private:
    static const U32 CoreMinWidth = 20;
    static const U32 CoreHeartbeatStartInterval = 2000;   // In milliseconds
    static const U32 CoreHeartbeatMinInterval = 500;
    static const U32 CoreAttackedWarningDuration = 600;
+   static const U32 CoreRotationTimeDefault = 16384;     // In milliseconds, must be power of 2
    static const U32 ExplosionInterval = 600;
    static const U32 ExplosionCount = 3;
 
@@ -142,13 +145,12 @@ private:
    bool mBeingAttacked;
    F32 mStartingHealth;          // Health stored in the level file, will be divided amongst panels
    F32 mStartingPanelHealth;     // Health divided up amongst panels
-   void setHealth();             // Sets startingHealth value, panels will be scaled up or down as needed
 
    F32 mPanelHealth[CORE_PANELS];
    Timer mHeartbeatTimer;        // Client-side timer
    Timer mExplosionTimer;        // Client-side timer
    Timer mAttackedWarningTimer;  // Server-side timer
-   S32 mRotateSpeed;
+   U32 mRotateSpeed;             // 4 bits are used, values 0-15 will work
 
 protected:
    enum MaskBits {
@@ -179,9 +181,12 @@ public:
    bool isPanelDamaged(S32 panelIndex);
    bool isPanelInRepairRange(const Point &origin, S32 panelIndex);
 
+   U32 getRotateSpeed() const;
+   void setRotateSpeed(U32 speed);
+
    Vector<Point> getRepairLocations(const Point &repairOrigin);
    PanelGeom *getPanelGeom();
-   static void fillPanelGeom(const Point &pos, S32 time, PanelGeom &panelGeom);
+   static void fillPanelGeom(const Point &pos, U32 time, PanelGeom &panelGeom);
 
 
    void onAddedToGame(Game *theGame);

@@ -108,6 +108,9 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
             attributeMenuUI->addMenuItem(new CounterMenuItem("Hit points:", CoreItem::CoreDefaultStartingHealth,
                                          1, 1, S32(CoreItem::DamageReductionRatio), "", "", ""));
 
+            attributeMenuUI->addMenuItem(new CounterMenuItem("Rotation speed:", CoreItem::CoreDefaultRotateSpeed,
+                                         1, 0, CoreItem::CoreMaxRotateSpeed, "x", "Stopped", ""));
+
             // Add our standard save and exit option to the menu
             attributeMenuUI->addSaveAndQuitMenuItem();
          }
@@ -233,6 +236,7 @@ void EditorAttributeMenuItemBuilder::startEditingAttrs(EditorAttributeMenuUI *at
 
       case CoreTypeNumber:
          attributeMenu->getMenuItem(0)->setIntValue(S32(static_cast<CoreItem *>(obj)->getStartingHealth() + 0.5));
+         attributeMenu->getMenuItem(1)->setIntValue(S32(static_cast<CoreItem *>(obj)->getRotateSpeed()));
          break;
 
       case TurretTypeNumber:
@@ -277,6 +281,7 @@ void EditorAttributeMenuItemBuilder::doneEditingAttrs(EditorAttributeMenuUI *att
 
       case CoreTypeNumber:
          static_cast<CoreItem *>(obj)->setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()));
+         static_cast<CoreItem *>(obj)->setRotateSpeed(F32(attributeMenu->getMenuItem(1)->getIntValue()));
          break;
 
          
