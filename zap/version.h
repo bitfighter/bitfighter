@@ -38,11 +38,12 @@
 #define VERSION_019e 10572
 #define VERSION_019f 11761
 #define VERSION_019g 11900
+#define VERSION_019h 11901
 
-#define BUILD_VERSION VERSION_019g // Version of the game according to git, will be unique every release (must be int)
+#define BUILD_VERSION VERSION_019h // Version of the game according to git, will be unique every release (must be int)
                                    // Get from "git rev-list --all --count"
 
-#define ZAP_GAME_RELEASE "019g"    // Change this with every release -- for display purposes only, string,
+#define ZAP_GAME_RELEASE "019h dev"    // Change this with every release -- for display purposes only, string,
                                    // will also be used for name of installer on windows, so be careful with spaces  
                                    // Used for GameRecorder.cpp, buildGameRecorderExtension
 
