@@ -225,6 +225,7 @@ public:
    bool enableServerVoiceChat;      // No voice chat allowed in server if disabled
    bool allowTeamChanging;
    bool enableGameRecording;
+   bool kickIdlePlayers;
 
    S32 connectionSpeed;
 

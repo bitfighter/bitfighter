@@ -107,6 +107,7 @@ IniSettings::IniSettings()
    minBalancedPlayers = 6;
    enableServerVoiceChat = true;
    allowTeamChanging = true;
+   kickIdlePlayers = true;
    serverPassword = "";               // Passwords empty by default
    ownerPassword = "";
    adminPassword = "";
@@ -648,10 +649,12 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->playWithBots           = ini->GetValueYN(section, "AddRobots", iniSettings->playWithBots);
    iniSettings->minBalancedPlayers     = ini->GetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
    iniSettings->enableServerVoiceChat  = ini->GetValueYN (section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);
+   iniSettings->kickIdlePlayers        = ini->GetValueYN (section, "KickIdlePlayers", iniSettings->kickIdlePlayers);
 
    iniSettings->alertsVolLevel       = (F32) ini->GetValueI(section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10)) / 10.0f;
    iniSettings->allowGetMap          = ini->GetValueYN (section, "AllowGetMap", iniSettings->allowGetMap);
    iniSettings->allowDataConnections = ini->GetValueYN (section, "AllowDataConnections", iniSettings->allowDataConnections);
+
 
    S32 fps = ini->GetValueI(section, "MaxFPS", iniSettings->maxDedicatedFPS);
    if(fps >= 1) 
@@ -1785,6 +1788,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
       addComment(" AddRobots - Add robot players to this server.");
       addComment(" MinBalancedPlayers - The minimum number of players ensured in each map.  Bots will be added up to this number.");
       addComment(" EnableServerVoiceChat - If false, prevents any voice chat in a server.");
+      addComment(" KickIdlePlayers - If true, the server will kick players that are considered idle.");
       addComment(" AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
       addComment(" MaxFPS - Maximum FPS the dedicaetd server will run at.  Higher values use more CPU, lower may increase lag (default = 100).");
       addComment(" RandomLevels - When current level ends, this can enable randomly switching to any available levels.");
@@ -1817,6 +1821,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
    ini->setValueYN(section, "AddRobots", iniSettings->playWithBots);
    ini->SetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
    ini->setValueYN(section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);
+   ini->setValueYN(section, "KickIdlePlayers", iniSettings->kickIdlePlayers);
    ini->setValueYN(section, "AllowTeamChanging", iniSettings->allowTeamChanging);
    ini->SetValueI (section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10));
    ini->setValueYN(section, "AllowGetMap", iniSettings->allowGetMap);
