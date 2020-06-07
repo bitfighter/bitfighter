@@ -328,6 +328,7 @@ void PlaybackSelectUserInterface::onActivate()
 void PlaybackSelectUserInterface::processSelection(U32 index)
 {
    string file = joindir(getGame()->getSettings()->getFolderManager()->recordDir, mLevels[index]);
+
    GameRecorderPlayback *gc = new GameRecorderPlayback(getGame(), file.c_str());
    if(!gc->isValid())
    {
@@ -342,8 +343,26 @@ void PlaybackSelectUserInterface::processSelection(U32 index)
       getUIManager()->displayMessageBox("Error", "Press [[Esc]] to continue", "Recorded Gameplay is empty");
       return;
    }
+
+   // Close previous connection if it exists
+   if(getGame()->getConnectionToServer() != NULL)
+      getGame()->closeConnectionToGameServer();
+
+   // Set new connection
    getGame()->setConnectionToServer(gc);
-   getGame()->getUIManager()->activate<PlaybackGameUserInterface>();
+
+   UIManager *uiManager = getGame()->getUIManager();
+
+   // If we've come from a previous playback UI
+   if(uiManager->cameFrom<PlaybackGameUserInterface>())
+   {
+      // Reactivate
+      uiManager->reactivate(uiManager->getUI<PlaybackGameUserInterface>());
+   }
+   // Otherwise start the playback UI directly
+   else
+      uiManager->activate(uiManager->getUI<PlaybackGameUserInterface>());
+
 }
 
 // --------

@@ -2133,43 +2133,53 @@ void GameMenuUserInterface::buildMenu()
 
    GameConnection *gc = (getGame())->getConnectionToServer();
 
-   if(gc && dynamic_cast<GameRecorderPlayback *>(gc) == NULL)
+   if(gc)
    {
-      GameType *gameType = getGame()->getGameType();
-
-      // Add any game-specific menu items
-      if(gameType)
+      // Add normal menu options for when we're not playing recorded games
+      if(dynamic_cast<GameRecorderPlayback *>(gc) == NULL)
       {
-         mGameType = gameType;
-         gameType->addClientGameMenuOptions(getGame(), this);
-      }
+         GameType *gameType = getGame()->getGameType();
 
-      if(gc->getClientInfo()->isLevelChanger())
-      {
-         addMenuItem(new MenuItem("ROBOTS",               robotsGameCallback,     "", KEY_B, KEY_R));
-         addMenuItem(new MenuItem("PLAY DIFFERENT LEVEL", chooseNewLevelCallback, "", KEY_L, KEY_P));
-         addMenuItem(new MenuItem("ADD TIME (2 MINS)",    addTwoMinsCallback,     "", KEY_T, KEY_2));
-         addMenuItem(new MenuItem("RESTART LEVEL",        restartGameCallback,    ""));
-      }
-
-      if(gc->getClientInfo()->isAdmin())
-      {
          // Add any game-specific menu items
          if(gameType)
          {
             mGameType = gameType;
-            gameType->addAdminGameMenuOptions(this);
+            gameType->addClientGameMenuOptions(getGame(), this);
          }
 
-         addMenuItem(new MenuItem("KICK A PLAYER", kickPlayerCallback, "", KEY_K));
+         if(gc->getClientInfo()->isLevelChanger())
+         {
+            addMenuItem(new MenuItem("ROBOTS",               robotsGameCallback,     "", KEY_B, KEY_R));
+            addMenuItem(new MenuItem("PLAY DIFFERENT LEVEL", chooseNewLevelCallback, "", KEY_L, KEY_P));
+            addMenuItem(new MenuItem("ADD TIME (2 MINS)",    addTwoMinsCallback,     "", KEY_T, KEY_2));
+            addMenuItem(new MenuItem("RESTART LEVEL",        restartGameCallback,    ""));
+         }
+
+         if(gc->getClientInfo()->isAdmin())
+         {
+            // Add any game-specific menu items
+            if(gameType)
+            {
+               mGameType = gameType;
+               gameType->addAdminGameMenuOptions(this);
+            }
+
+            addMenuItem(new MenuItem("KICK A PLAYER", kickPlayerCallback, "", KEY_K));
+         }
+
+         // Owner already has max permissions, so don't show option to enter a password
+         if(!gc->getClientInfo()->isOwner())
+            addMenuItem(new MenuItem("ENTER PASSWORD", levelChangeOrAdminPWCallback, "", KEY_A, KEY_E));
+
+         if((gc->mSendableFlags & GameConnection::ServerFlagHasRecordedGameplayDownloads) && !gc->isLocalConnection())
+            addMenuItem(new MenuItem("DOWNLOAD RECORDED GAME", downloadRecordedGameCallback, ""));
+         }
+
+      // Else add these options if we're playing recorded games
+      else
+      {
+         addMenuItem(new MenuItem("PLAYBACK GAMES", playbackGamesCallback, "Playback previously recorded games"));
       }
-
-      // Owner already has max permissions, so don't show option to enter a password
-      if(!gc->getClientInfo()->isOwner())
-         addMenuItem(new MenuItem("ENTER PASSWORD", levelChangeOrAdminPWCallback, "", KEY_A, KEY_E));
-
-      if((gc->mSendableFlags & GameConnection::ServerFlagHasRecordedGameplayDownloads) && !gc->isLocalConnection())
-         addMenuItem(new MenuItem("DOWNLOAD RECORDED GAME", downloadRecordedGameCallback, ""));
    }
 
    if(getUIManager()->cameFrom<EditorUserInterface>())    // Came from editor
