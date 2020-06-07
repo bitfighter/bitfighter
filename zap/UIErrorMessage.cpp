@@ -89,7 +89,6 @@ void AbstractMessageUserInterface::reset()
    // Messages are rendered on top of UIs and reset() is called before activate()
    // so use the current UI's screen mode
    mEditorScreenMode = getUIManager()->getCurrentUI()->usesEditorScreenMode();
-   logprintf("editor screen mode: %d", mEditorScreenMode);
 
    mInstr = SymbolShapePtr(new SymbolBlank());
    mTitle = SymbolShapePtr(new SymbolBlank());
