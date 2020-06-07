@@ -326,7 +326,6 @@ void Projectile::idle(BfObject::IdleCallPath path)
 
                   startPos = getPos();
 
-                  setMaskBits(PositionMask);  // Bouncing off a moving objects can easily get desync
                   float1 = startPos.distanceTo(obj->getRenderPos());
                   if(float1 < obj->getRadius())
                   {
@@ -334,6 +333,9 @@ void Projectile::idle(BfObject::IdleCallPath path)
                      setVert(startPos * float1 + obj->getRenderPos() * (1 - float1), 0);  // Fix bouncy stuck inside shielded ship
                   }
                }
+
+               // Bouncing off anything can easily get desync'd
+               setMaskBits(PositionMask);
 
                if(isGhost())
                   getGame()->playSoundEffect(SFXBounceShield, collisionPoint, surfNormal * surfNormal.dot(mVelocity) * 2);
