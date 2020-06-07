@@ -85,7 +85,9 @@ public:
 
    SoccerBallItem *clone() const;
 
-   static const S32 SOCCER_BALL_RADIUS = 30;
+   // Statics
+   static const F32 Radius;
+   static const F32 Mass;
 
    void renderItem(const Point &pos);
    void resetPlayerTouch();
