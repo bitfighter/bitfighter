@@ -148,7 +148,7 @@ Team::Team()
    mPlayerCount = 0;
    mBotCount = 0;
    mScore = 0;
-   mRating = 0;
+   mRatingSum = 0;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -165,7 +165,7 @@ void Team::clearStats()
 {
    mPlayerCount = 0;
    mBotCount = 0;
-   mRating = 0;
+   mRatingSum = 0;
 }
 
 
@@ -205,15 +205,15 @@ void Team::addScore(S32 score)
 }
 
 
-F32 Team::getRating()
+F32 Team::getRatingSum()
 {
-   return mRating;
+   return mRatingSum;
 }
 
 
-void Team::addRating(F32 rating)
+void Team::addToRatingSum(F32 rating)
 {
-   mRating += rating;
+   mRatingSum += rating;
 }
 
 

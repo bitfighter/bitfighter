@@ -77,6 +77,7 @@ private:
 protected:
    StringTableEntry mName;
    S32 mScore;
+   F32 mRating;
    S32 mTotalScore;
    Nonce mId;
    S32 mTeamIndex;               // <=== Does not get set on the client's LocalClientInfo!!!
@@ -91,6 +92,9 @@ protected:
    U16 mGamesPlayed;
 
    U32 mCurrentKillStreak;
+   U32 mKills;
+   U32 mDeaths;
+
    Game *mGame;
 
    bool mNeedReturnToGameTimer;
@@ -147,14 +151,19 @@ public:
    virtual void setShowLevelUpMessage(S32 level);
    virtual S32 getShowLevelUpMessage() const;
 
-   virtual void setRating(F32 rating) = 0;
-   virtual F32 getRating() = 0;
+   void setRating(F32 rating);
+   F32 getRating();
    F32 getCalculatedRating();
    void endOfGameScoringHandler();     // Resets stats and the like
 
    void incrementKillStreak();
    void clearKillStreak();
    U32 getKillStreak() const;
+
+   U32  getKills();
+   void setKills(U32 kills);
+   U32  getDeaths();
+   void setDeaths(U32 deaths);
 
    S32 getPing();
    void setPing(S32 ping);
@@ -237,9 +246,6 @@ public:
    bool isPlayerInactive();
    bool hasReturnToGamePenalty();
 
-   void setRating(F32 rating);
-   F32 getRating();
-
    bool isRobot() const;
    void setClientClass(ClientClass clientClass);
    ClientClass getClientClass() const;
@@ -265,8 +271,6 @@ class RemoteClientInfo : public ClientInfo
    typedef ClientInfo Parent;
 
 private:
-   F32 mRating;      // Ratings are provided by the server and stored here
-
    // For voice chat
    RefPtr<SoundEffect> mVoiceSFX;
    VoiceDecoder *mDecoder;
@@ -284,8 +288,6 @@ public:
    GameConnection *getConnection();
    void setConnection(GameConnection *conn);
 
-   F32 getRating();
-   void setRating(F32 rating);
    bool isRobot() const;
 
    void setSpawnDelayed(bool spawnDelayed);

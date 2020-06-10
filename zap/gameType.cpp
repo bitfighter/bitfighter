@@ -900,17 +900,17 @@ S32 QSORT_CALLBACK playerScoreSort(ClientInfo **a, ClientInfo **b)
 
 
 // Client only
-void GameType::getSortedPlayerScores(S32 teamIndex, Vector<ClientInfo *> &playerScores) const
+void GameType::getSortedPlayersByScore(S32 teamIndex, Vector<ClientInfo *> &playerInfos) const
 {
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
       ClientInfo *info = mGame->getClientInfo(i);
 
       if(!isTeamGame() || info->getTeamIndex() == teamIndex)
-         playerScores.push_back(info);
+         playerInfos.push_back(info);
    }
 
-   playerScores.sort(playerScoreSort);
+   playerInfos.sort(playerScoreSort);
 }
 
 
@@ -1371,6 +1371,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
    for(S32 i = spyBugs->size()-1; i >= 0; i--)
    {
       SpyBug *sb = static_cast<SpyBug *>(spyBugs->get(i));
+//      shared_ptr<SpyBug> sb = shared_ptr<SpyBug>(sb);
 
       if(sb->isVisibleToPlayer(clientInfo, isTeamGame()))
       {
@@ -1640,10 +1641,10 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
                          (countAutoLevelBots ? counts[i][ClientInfo::ClassRobotAddedByAutoleveler] : 0);
 
       Team *team = (Team *)mGame->getTeam(i);
-      if(playerCount == minPlayers && team->getRating() < minRating)
+      if(playerCount == minPlayers && team->getRatingSum() < minRating)
       {
          minTeamIndex = i;
-         minRating = team->getRating();
+         minRating = team->getRatingSum();
       }
    }
 
@@ -3576,15 +3577,15 @@ GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx)
 
 
 Vector<RangedU32<0, GameType::MaxPing> > GameType::mPingTimes; ///< Static vector used for constructing update RPCs
-Vector<SignedInt<24> > GameType::mScores;
-Vector<SignedFloat<8> > GameType::mRatings;  // 8 bits for 255 gradations between -1 and 1 ~ about 1 value per .01
 
+Vector<Int<10> > GameType::mKills;
+Vector<Int<10> > GameType::mDeaths;
 
 void GameType::updateClientScoreboard(GameConnection *gc)
 {
    mPingTimes.clear();
-   mScores.clear();
-   mRatings.clear();
+   mKills.clear();
+   mDeaths.clear();
 
    // First, list the players
    for(S32 i = 0; i < mGame->getClientCount(); i++)
@@ -3596,19 +3597,23 @@ void GameType::updateClientScoreboard(GameConnection *gc)
       else
          mPingTimes.push_back(MaxPing);
 
-      // Players rating = cumulative score / total score played while this player was playing, ranks from 0 to 1
-      mRatings.push_back(info->getCalculatedRating());
+      // Don't count fratricides in kills
+      U32 kills = info->getStatistics()->getKills();
+      U32 deaths = info->getStatistics()->getDeaths();
+
+      mKills.push_back(kills);
+      mDeaths.push_back(deaths);
    }
 
    NetObject::setRPCDestConnection(gc);
-   s2cScoreboardUpdate(mPingTimes, mRatings);
+   s2cScoreboardUpdate(mPingTimes, mKills, mDeaths);
    NetObject::setRPCDestConnection(NULL);
 }
 
 
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cScoreboardUpdate,
-                 (Vector<RangedU32<0, GameType::MaxPing> > pingTimes, Vector<SignedFloat<8> > ratings),
-                 (pingTimes, ratings), NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
+                 (Vector<RangedU32<0, GameType::MaxPing> > pingTimes, Vector<Int<10> > kills, Vector<Int<10> > deaths),
+                 (pingTimes, kills, deaths), NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
 {
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
@@ -3618,7 +3623,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cScoreboardUpdate,
       ClientInfo *client = mGame->getClientInfo(i);
 
       client->setPing(pingTimes[i]);
-      client->setRating(ratings[i]);
+      client->setKills(kills[i]);
+      client->setDeaths(deaths[i]);
    }
 }
 

@@ -536,7 +536,7 @@ void Game::countTeamPlayers() const
          if(isServer())
          {
             const F32 BASE_RATING = .1f;
-            team->addRating(max(clientInfo->getCalculatedRating(), BASE_RATING));    
+            team->addToRatingSum(max(clientInfo->getCalculatedRating(), BASE_RATING));    
          }
       }
    }

@@ -89,7 +89,7 @@ private:
    S32 mBotCount;         // Number of robot players --> Needs to be computed before use, not dynamically tracked
 
    S32 mScore;
-   F32 mRating; 
+   F32 mRatingSum; 
 
    Vector<Point> mItemSpawnPoints;
    Vector<FlagSpawn *> mFlagSpawns;    // List of places for team flags to spawn
@@ -107,8 +107,8 @@ public:
    void setScore(S32 score);
    void addScore(S32 score);
 
-   F32 getRating();
-   void addRating(F32 rating);     // For summing ratings of all players on a team
+   F32 getRatingSum();
+   void addToRatingSum(F32 rating);     // For summing ratings of all players on a team
 
    void clearStats();
 

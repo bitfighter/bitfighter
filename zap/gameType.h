@@ -262,8 +262,8 @@ public:
 
    // Static vectors used for constructing update RPCs
    static Vector<RangedU32<0, MaxPing> > mPingTimes;
-   static Vector<SignedInt<24> > mScores;
-   static Vector<SignedFloat<8> > mRatings;
+   static Vector<Int<10> > mKills;
+   static Vector<Int<10> > mDeaths;
 
    explicit GameType(S32 winningScore = DefaultWinningScore);    // Constructor
    virtual ~GameType();                                 // Destructor
@@ -323,7 +323,7 @@ public:
 
    void gameOverManGameOver();
    VersionedGameStats getGameStats();
-   void getSortedPlayerScores(S32 teamIndex, Vector<ClientInfo *> &playerScores) const;
+   void getSortedPlayersByScore(S32 teamIndex, Vector<ClientInfo *> &playerInfos) const;
    void saveGameStats();                     // Transmit statistics to the master server
 
    void achievementAchieved(U8 achievement, const StringTableEntry &playerName);
@@ -429,7 +429,8 @@ public:
    TNL_DECLARE_RPC(s2cSetPlayerScore, (U16 index, S32 score));
 
    TNL_DECLARE_RPC(c2sRequestScoreboardUpdates, (bool updates));
-   TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes, Vector<SignedFloat<8> > ratings));
+   TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes,
+         Vector<Int<10> > kills, Vector<Int<10> > deaths) );
 
    void updateClientScoreboard(GameConnection *gc);
 
