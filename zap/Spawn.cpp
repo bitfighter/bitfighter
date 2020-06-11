@@ -492,7 +492,7 @@ void AsteroidSpawn::spawn()
    F32 ang = TNL::Random::readF() * Float2Pi;
 
    asteroid->setPosAng(getPos(), ang);
-
+   asteroid->setTeam(getTeam());
    asteroid->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
    s2cSetTimeUntilSpawn(mTimer.getCurrent());
 }
