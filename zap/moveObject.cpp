@@ -1638,9 +1638,6 @@ U32 Asteroid::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    if(stream->writeFlag(updateMask & ItemChangedMask))
    {
       stream->writeInt(mSizeLeft, ASTEROID_SIZELEFT_BIT_COUNT);
-
-      // FIXME:  Why do we care about asteroid design on the server?
-      stream->writeEnum(mDesign, ASTEROID_DESIGNS);
    }
 
    stream->writeFlag(hasExploded);
@@ -1658,7 +1655,6 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mSizeLeft = stream->readInt(ASTEROID_SIZELEFT_BIT_COUNT);
       setRadius(getAsteroidRadius(mSizeLeft));
       setMass(getAsteroidMass(mSizeLeft));
-      mDesign = stream->readEnum(ASTEROID_DESIGNS);
 
       if(!mInitial)
       {
