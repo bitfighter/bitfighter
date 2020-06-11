@@ -211,7 +211,7 @@ void MoveObject::setPos(const Point &pos)
 {
    setActualPos(pos);
    setRenderPos(pos);
-   Parent::setVert(pos, 0);      // Kind of hacky... need to get this point into the geom object, need to avoid stack overflow TODO: Can get rid of this?
+
    updateExtentInDatabase();
 }
 
