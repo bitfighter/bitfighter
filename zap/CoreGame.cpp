@@ -1028,7 +1028,8 @@ void CoreItem::idle(BfObject::IdleCallPath path)
 
       for(S32 i = 0; i < CORE_PANELS; i++)
       {
-         if(mPanelHealth[i] == 0)                  // Panel is dead     TODO: And if panel is close enough to be worth it
+         // Panel is dead (ensured by damageObject() )
+         if(mPanelHealth[i] == 0)
          {
             Point sparkEmissionPos = getPos();
             sparkEmissionPos += dir * 3;
