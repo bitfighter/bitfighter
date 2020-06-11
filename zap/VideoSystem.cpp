@@ -154,10 +154,19 @@ void VideoSystem::setWindowPosition(S32 left, S32 top)
 
 void VideoSystem::saveWindowPostion(GameSettings *settings)
 {
-   // FIXME sometimes X11 in Linux will save position with window decorations in
-   // certain cases.  This creates an offset and the window will creep
    S32 x, y;
    SDL_GetWindowPosition(DisplayManager::getScreenInfo()->sdlWindow, &x, &y);
+
+#ifdef TNL_OS_LINUX
+   // Sometimes X11 in Linux will save position with window decorations in
+   // certain cases.  This creates an offset and the window will creep
+   S32 top = 0, left = 0;
+   SDL_GetWindowBordersSize(DisplayManager::getScreenInfo()->sdlWindow, &top, &left, NULL, NULL);
+
+   // Subtract window decorations from the window coords
+   x = x - left;
+   y = y - top;
+#endif
 
    settings->getIniSettings()->winXPos = x;
    settings->getIniSettings()->winYPos = y;
