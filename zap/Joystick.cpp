@@ -79,8 +79,6 @@ bool Joystick::initJoystick(GameSettings *settings)
    GameSettings::UseControllerIndex = -1;
 
    // Allows multiple joysticks with each using a copy of Bitfighter
-   // FIXME: If this still works, then great!  If not, we may need to set it
-   // *before* SDL_Init(0) in main.cpp
    SDL_setenv("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1", 0);
 
    if(!SDL_WasInit(SDL_INIT_GAMECONTROLLER) &&
