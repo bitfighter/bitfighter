@@ -2309,14 +2309,14 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact)
 }
 
 
-void renderAsteroidSpawn(const Point &pos, S32 time)
+void renderAsteroidSpawn(const Point &pos, S32 time, const Color* color)
 {
    static const S32 period = 4096;  // Power of 2 please
    static const F32 invPeriod = 1 / F32(period);
 
    F32 alpha = max(0.0f, 1.0f - time * invPeriod);
 
-   renderAsteroid(pos, 2, 0.1f, &Colors::green, alpha);
+   renderAsteroid(pos, 2, 0.1f, color, alpha);
 
 //   static const F32 lines[] = {
 //         // Inner
@@ -2345,7 +2345,7 @@ void renderAsteroidSpawn(const Point &pos, S32 time)
 }
 
 
-void renderAsteroidSpawnEditor(const Point &pos, F32 scale)
+void renderAsteroidSpawnEditor(const Point &pos, const Color* color, F32 scale)
 {
    scale *= 0.8f;
    static const Point p(0,0);
@@ -2353,7 +2353,7 @@ void renderAsteroidSpawnEditor(const Point &pos, F32 scale)
    glPushMatrix();
       glTranslatef(pos.x, pos.y, 0);
       glScalef(scale, scale, 1);
-      renderAsteroid(p, 2, .1f);
+      renderAsteroid(p, 2, .1f, color, .7);
 
       drawCircle(p, 13, &Colors::white);
    glPopMatrix();

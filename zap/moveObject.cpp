@@ -741,6 +741,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
          damageInfo.damageType = DamageTypePoint;
          damageInfo.damagingObject = asteroid;
          damageInfo.impulseVector = getActualVel();
+
          if (ship->getTeam() != asteroid->getTeam())
          {
             ship->damageObject(&damageInfo);
@@ -1555,6 +1556,7 @@ void Asteroid::renderItem(const Point &pos)
 {
    if(shouldRender())
       renderAsteroid(pos, mDesign, mRadius / 89.f, getColor(), .7);
+   renderAsteroid(pos, mDesign, mRadius / 88.f, &Colors::white, .2); //since this is outside the if statement, it makes a "ghost" effect when the last asteroid is killed
 }
 
 
