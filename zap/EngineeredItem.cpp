@@ -1497,7 +1497,7 @@ void ForceFieldProjector::render()
 #ifndef ZAP_DEDICATED
    // We're not in editor (connected to game)
    if(static_cast<ClientGame*>(getGame())->isConnectedToServer())
-      renderForceFieldProjector(&mCollisionPolyPoints, getPos(), getColor(), isEnabled(), mHealRate);
+      renderForceFieldProjector(&mCollisionPolyPoints, getPos(), getColor(), isEnabled(), mHealth, mHealRate);
    else
       renderEditor(0, false);
 #endif
@@ -1520,7 +1520,7 @@ void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCorn
    {
       Point forceFieldStart = getForceFieldStartPoint(getPos(), mAnchorNormal, scaleFact);
 
-      renderForceFieldProjector(&mCollisionPolyPoints, getPos(), color, true, mHealRate);
+      renderForceFieldProjector(&mCollisionPolyPoints, getPos(), color, true, mHealth, mHealRate);
       renderForceField(forceFieldStart, forceFieldEnd, color, true, scaleFact);
    }
    else

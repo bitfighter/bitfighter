@@ -2516,7 +2516,7 @@ void renderForceFieldProjector(const Point &pos, const Point &normal, const Colo
 }
 
 
-void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, const Color *color, bool enabled, S32 healRate)
+void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, const Color *color, bool enabled, F32 health, S32 healRate)
 {
    F32 ForceFieldBrightnessProjector = 0.50;
 
@@ -2524,7 +2524,12 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, cons
 
    c = c * (1 - ForceFieldBrightnessProjector) + ForceFieldBrightnessProjector;
 
-   glColor(enabled ? c : (c * 0.6f));
+   if (enabled) {
+      glColor(c, 0.2f + (.9 * health)); //adjust alpha a little so it doesn't get much darker when its enabled than disabled
+   }
+   else {
+      glColor((c * 0.6f));
+   }
 
    // Draw a symbol in the project to show it is a regenerative projector
    if(healRate > 0)
@@ -2546,7 +2551,7 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, cons
          renderVertexArray(symbol, ARRAYSIZE(symbol) / 2, GL_LINE_STRIP);
       glPopMatrix();
    }
-
+   
    renderPointVector(geom, GL_LINE_LOOP);
 }
 
