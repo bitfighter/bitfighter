@@ -1388,6 +1388,30 @@ void ForceFieldProjector::idle(BfObject::IdleCallPath path)
 }
 
 
+U32 ForceFieldProjector::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+{
+   U32 ret = Parent::packUpdate(connection, updateMask, stream);
+
+   // Update field health
+   if(mField.isValid() && isEnabled())
+   {
+      // Recalculate FF health based on the enabled portion of the FFP health
+      // i.e. 0.25 to 1 for the FFP becomes 0 to 1 for the FF
+      F32 ffHealth = (mHealth - DisabledLevel) / (1 - DisabledLevel);
+
+      mField->setHealth(ffHealth);
+   }
+
+   return ret;
+}
+
+
+void ForceFieldProjector::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   Parent::unpackUpdate(connection, stream);
+}
+
+
 static const S32 PROJECTOR_OFFSET = 15;      // Distance from wall to projector tip; thickness, if you will
 
 F32 ForceFieldProjector::getSelectionOffsetMagnitude()
@@ -1650,11 +1674,16 @@ S32 ForceFieldProjector::lua_setTeam(lua_State *L)
 
 TNL_IMPLEMENT_NETOBJECT(ForceField);
 
+// This is only created server-side
 ForceField::ForceField(S32 team, Point start, Point end) 
 {
    setTeam(team);
+
+   // These are sent to the client
    mStart = start;
    mEnd = end;
+   mFieldUp = true;
+   mHealth = 0;
 
    mOutline = computeGeom(mStart, mEnd);
 
@@ -1662,7 +1691,6 @@ ForceField::ForceField(S32 team, Point start, Point end)
    extent.expand(Point(5,5));
    setExtent(extent);
 
-   mFieldUp = true;
    mObjectTypeNumber = ForceFieldTypeNumber;
    mNetFlags.set(Ghostable);
 }
@@ -1756,6 +1784,10 @@ U32 ForceField::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
       stream->write(mEnd.y);
       writeThisTeam(stream);
    }
+
+   if(stream->writeFlag(updateMask & HealthMask))
+      stream->writeFloat(mHealth, 5);
+
    stream->writeFlag(mFieldUp);
    return 0;
 }
@@ -1778,11 +1810,28 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
       extent.expand(Point(5,5));
       setExtent(extent);
    }
+
+   if(stream->readFlag())
+      mHealth = stream->readFloat(5);
+
    bool wasUp = mFieldUp;
    mFieldUp = stream->readFlag();
 
    if(initial || (wasUp != mFieldUp))
       getGame()->playSoundEffect(mFieldUp ? SFXForceFieldUp : SFXForceFieldDown, mStart);
+}
+
+
+// ForceField health is the portion of health of the ForceFieldProjector above
+// the disabled amount
+void ForceField::setHealth(F32 health)
+{
+   // Update FF health if it has changed
+   if(health != mHealth)
+   {
+      mHealth = health;
+      setMaskBits(HealthMask);
+   }
 }
 
 

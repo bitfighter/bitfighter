@@ -22,7 +22,6 @@ private:
    typedef Item Parent;
 
    static const F32 EngineeredItemRadius;
-   static const F32 DisabledLevel;
 
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;    // Menu for text editing; since it's static, don't bother with smart pointer
@@ -34,6 +33,7 @@ private:
 
 protected:
    static const F32 DamageReductionFactor;
+   static const F32 DisabledLevel;
 
    F32 mHealth;
    Point mAnchorNormal;
@@ -173,11 +173,14 @@ private:
    Timer mDownTimer;
    bool mFieldUp;
 
+   F32 mHealth;  // Different than ForceFieldProjector health
+
 protected:
    enum MaskBits {
       InitialMask   = Parent::FirstFreeMask << 0,
       StatusMask    = Parent::FirstFreeMask << 1,
-      FirstFreeMask = Parent::FirstFreeMask << 2
+      HealthMask    = Parent::FirstFreeMask << 2,
+      FirstFreeMask = Parent::FirstFreeMask << 3
    };
 
 public:
@@ -194,9 +197,10 @@ public:
    void onAddedToGame(Game *theGame);
    void idle(BfObject::IdleCallPath path);
 
-
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
+   void setHealth(F32 health);
 
    const Vector<Point> *getCollisionPoly() const;
 
@@ -255,6 +259,9 @@ public:
 
    void onAddedToGame(Game *theGame);
    void idle(BfObject::IdleCallPath path);
+
+   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    void render();
    void onEnabled();
