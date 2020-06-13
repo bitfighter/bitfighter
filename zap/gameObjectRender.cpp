@@ -2524,12 +2524,10 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, cons
 
    c = c * (1 - ForceFieldBrightnessProjector) + ForceFieldBrightnessProjector;
 
-   if (enabled) {
+   if (enabled)
       glColor(c, 0.2f + (.9 * health)); //adjust alpha a little so it doesn't get much darker when its enabled than disabled
-   }
-   else {
+   else
       glColor((c * 0.6f));
-   }
 
    // Draw a symbol in the project to show it is a regenerative projector
    if(healRate > 0)
