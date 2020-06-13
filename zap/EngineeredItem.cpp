@@ -1454,8 +1454,9 @@ void ForceFieldProjector::setEndSegment(WallSegment *endSegment)
 }
 
 
-// Forcefield projector has been turned on some how; either at the beginning of a level, or via repairing, or deploying. 
-// Runs on both client and server
+// Forcefield projector has been turned on some how; either at the beginning of
+// a level, or via repairing, or deploying.
+// Runs on server
 void ForceFieldProjector::onEnabled()
 {
    // Database can be NULL here if adding a forcefield from the editor:  The editor will
@@ -1464,7 +1465,11 @@ void ForceFieldProjector::onEnabled()
    if(!getDatabase())
       return;
 
-   if(!isGhost() && mField.isNull())  // server only, add mField only when we don't have any
+   // Server only
+   if(isGhost())
+      return;
+
+   if(mField.isNull())  // Add mField only when we don't have any
    {
       Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
       Point end;
@@ -1518,7 +1523,7 @@ void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCorn
    {
       Point forceFieldStart = getForceFieldStartPoint(getPos(), mAnchorNormal);
 
-      renderForceFieldProjector(&mCollisionPolyPoints, getPos(), color, true, mHealth, mHealRate);
+      renderForceFieldProjector(&mCollisionPolyPoints, getPos(), color, true, 1.0, mHealRate);
       renderForceField(forceFieldStart, forceFieldEnd, color, true);
    }
    else

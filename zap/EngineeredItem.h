@@ -162,8 +162,6 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// This object is server-only!!!
-
 class ForceField : public BfObject
 {
    typedef BfObject Parent;
