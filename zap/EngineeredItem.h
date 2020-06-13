@@ -22,6 +22,7 @@ private:
    typedef Item Parent;
 
    static const F32 EngineeredItemRadius;
+   static const F32 DisabledLevel;
 
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;    // Menu for text editing; since it's static, don't bother with smart pointer
@@ -161,6 +162,8 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// This object is server-only!!!
+
 class ForceField : public BfObject
 {
    typedef BfObject Parent;
@@ -201,7 +204,7 @@ public:
 
    const Vector<Point> *getOutline() const;
 
-   static Vector<Point> computeGeom(const Point &start, const Point &end, F32 scaleFact = 1);
+   static Vector<Point> computeGeom(const Point &start, const Point &end);
    static bool findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal, 
                                  Point &end, DatabaseObject **collObj);
 
@@ -244,7 +247,7 @@ public:
    const Vector<Point> *getCollisionPoly() const;
    
    static Vector<Point> getForceFieldProjectorGeometry(const Point &anchor, const Point &normal);
-   static Point getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact = 1);
+   static Point getForceFieldStartPoint(const Point &anchor, const Point &normal);
 
    // Get info about the forcfield that might be projected from this projector
    void getForceFieldStartAndEndPoints(Point &start, Point &end);

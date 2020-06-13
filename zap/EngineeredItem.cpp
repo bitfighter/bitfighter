@@ -188,7 +188,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
    /// Part ONE
    // We need to ensure forcefield doesn't cross another; doing so can create an impossible situation
    // Forcefield starts at the end of the projector.  Need to know where that is.
-   Point forceFieldStart = ForceFieldProjector::getForceFieldStartPoint(mDeployPosition, mDeployNormal, 0);
+   Point forceFieldStart = mDeployPosition;
 
    // Now we can find the point where the forcefield would end if this were a valid position
    Point forceFieldEnd;
@@ -422,6 +422,7 @@ string EngineerModuleDeployer::getErrorMessage()
 
 const F32 EngineeredItem::EngineeredItemRadius = 7.f;
 const F32 EngineeredItem::DamageReductionFactor = 0.25f;
+const F32 EngineeredItem::DisabledLevel = 0.25f;
 
 // Constructor
 EngineeredItem::EngineeredItem(S32 team, const Point &anchorPoint, const Point &anchorNormal) : Parent(EngineeredItemRadius), Engineerable(), mAnchorNormal(anchorNormal)
@@ -651,11 +652,9 @@ bool EngineeredItem::isSnapped() const
 }
 
 
-static const F32 disabledLevel = 0.25;
-
 bool EngineeredItem::isEnabled()
 {
-   return mHealth >= disabledLevel;
+   return mHealth >= DisabledLevel;
 }
 
 
@@ -697,7 +696,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
    setMaskBits(HealthMask);
 
    // Check if turret just died
-   if(prevHealth >= disabledLevel && mHealth < disabledLevel)        // Turret just died
+   if(prevHealth >= DisabledLevel && mHealth < DisabledLevel)        // Turret just died
    {
       // Revert team to neutral if this was a repaired turret
       if(getTeam() != mOriginalTeam)
@@ -727,7 +726,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
             player->getStatistics()->mFFsKilled++;
       }
    }
-   else if(prevHealth < disabledLevel && mHealth >= disabledLevel)   // Turret was just repaired or healed
+   else if(prevHealth < DisabledLevel && mHealth >= DisabledLevel)   // Turret was just repaired or healed
    {
       if(getTeam() == TEAM_NEUTRAL)                   // Neutral objects...
       {
@@ -916,9 +915,9 @@ U32 EngineeredItem::packUpdate(GhostConnection *connection, U32 updateMask, BitS
    if(stream->writeFlag(updateMask & HealthMask))
    {
       if(stream->writeFlag(isEnabled()))
-         stream->writeFloat((mHealth - disabledLevel) / (1 - disabledLevel), 5);
+         stream->writeFloat((mHealth - DisabledLevel) / (1 - DisabledLevel), 5);
       else
-         stream->writeFloat(mHealth / disabledLevel, 5);
+         stream->writeFloat(mHealth / DisabledLevel, 5);
 
       stream->writeFlag(mIsDestroyed);
    }
@@ -954,10 +953,9 @@ void EngineeredItem::unpackUpdate(GhostConnection *connection, BitStream *stream
    if(stream->readFlag())
    {
       if(stream->readFlag())
-         mHealth = stream->readFloat(5) * (1 - disabledLevel) + disabledLevel; // enabled
+         mHealth = stream->readFloat(5) * (1 - DisabledLevel) + DisabledLevel; // enabled
       else
-         mHealth = stream->readFloat(5) * (disabledLevel * 0.99f); // disabled, make sure (mHealth < disabledLevel)
-
+         mHealth = stream->readFloat(5) * (DisabledLevel * 0.99f); // disabled, make sure (mHealth < disabledLevel)
 
       bool wasDestroyed = mIsDestroyed;
       mIsDestroyed = stream->readFlag();
@@ -1009,7 +1007,7 @@ void EngineeredItem::healObject(S32 time)
       else
          mHealTimer.reset();
 
-      if(prevHealth < disabledLevel && mHealth >= disabledLevel)
+      if(prevHealth < DisabledLevel && mHealth >= DisabledLevel)
          onEnabled();
    }
 }
@@ -1216,7 +1214,7 @@ S32 EngineeredItem::lua_setHealth(lua_State *L)
  */
 S32 EngineeredItem::lua_getDisabledThreshold(lua_State *L)
 {
-   return returnFloat(L, disabledLevel);
+   return returnFloat(L, DisabledLevel);
 }
 
 
@@ -1426,10 +1424,10 @@ Vector<Point> ForceFieldProjector::getForceFieldProjectorGeometry(const Point &a
 
 
 // Get the point where the forcefield actually starts, as it leaves the projector; i.e. the tip of the projector.  Static method.
-Point ForceFieldProjector::getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact)
+Point ForceFieldProjector::getForceFieldStartPoint(const Point &anchor, const Point &normal)
 {
-   return Point(anchor.x + normal.x * PROJECTOR_OFFSET * scaleFact, 
-                anchor.y + normal.y * PROJECTOR_OFFSET * scaleFact);
+   return Point(anchor.x + normal.x * PROJECTOR_OFFSET,
+                anchor.y + normal.y * PROJECTOR_OFFSET);
 }
 
 
@@ -1514,15 +1512,14 @@ void ForceFieldProjector::renderDock()
 void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
 #ifndef ZAP_DEDICATED
-   F32 scaleFact = 1;
    const Color *color = getColor();
 
    if(mSnapped)
    {
-      Point forceFieldStart = getForceFieldStartPoint(getPos(), mAnchorNormal, scaleFact);
+      Point forceFieldStart = getForceFieldStartPoint(getPos(), mAnchorNormal);
 
       renderForceFieldProjector(&mCollisionPolyPoints, getPos(), color, true, mHealth, mHealRate);
-      renderForceField(forceFieldStart, forceFieldEnd, color, true, scaleFact);
+      renderForceField(forceFieldStart, forceFieldEnd, color, true);
    }
    else
       renderDock();
@@ -1547,8 +1544,6 @@ void ForceFieldProjector::findForceFieldEnd()
    // Load the corner points of a maximum-length forcefield into geom
    DatabaseObject *collObj;
 
-   F32 scale = 1;
-   
    Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
 
    // Pass in database containing WallSegments, returns object in collObj
@@ -1560,7 +1555,7 @@ void ForceFieldProjector::findForceFieldEnd()
    else
       setEndSegment(NULL);
 
-   setExtent(Rect(ForceField::computeGeom(start, forceFieldEnd, scale)));
+   setExtent(Rect(ForceField::computeGeom(start, forceFieldEnd)));
 }
 
 
@@ -1789,13 +1784,13 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
 const F32 ForceField::ForceFieldHalfWidth = 2.5;
 
 // static
-Vector<Point> ForceField::computeGeom(const Point &start, const Point &end, F32 scaleFact)
+Vector<Point> ForceField::computeGeom(const Point &start, const Point &end)
 {
    Vector<Point> geom;
    geom.reserve(4);
 
    Point normal(end.y - start.y, start.x - end.x);
-   normal.normalize(ForceFieldHalfWidth * scaleFact);
+   normal.normalize(ForceFieldHalfWidth);
 
    geom.push_back(start + normal);
    geom.push_back(end + normal);
