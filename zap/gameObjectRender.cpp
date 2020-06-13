@@ -2517,7 +2517,7 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
 void renderForceFieldProjector(const Point &pos, const Point &normal, const Color *color, bool enabled, S32 healRate)
 {
    Vector<Point> geom = ForceFieldProjector::getForceFieldProjectorGeometry(pos, normal);
-   renderForceFieldProjector(&geom, pos, color, enabled, healRate);
+   renderForceFieldProjector(&geom, pos, color, enabled, 1.0, healRate);
 }
 
 
