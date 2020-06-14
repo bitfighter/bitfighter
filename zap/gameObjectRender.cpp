@@ -72,6 +72,101 @@ void drawVertLine(F32 x, F32 y1, F32 y2)
 }
 
 
+void drawDashedLine(const Point &start, const Point &end, F32 period, F32 dutycycle, F32 fractionalOffset)
+{
+   // Quick check to see if we're just drawing a straight line
+   if(dutycycle >= 1)
+   {
+      F32 vertices[] = { start.x, start.y, end.x, end.y };
+      renderVertexArray(vertices, 2, GL_LINES);
+
+      // No more to do
+      return;
+   }
+
+   // Initialize point array, remember to clear at the end
+   static Vector<Point> vertexArray(102);  // 51 dashes should be enough yeah?
+
+   Point periodSeg = (end-start);
+   // Save length first
+   F32 lineLenSq = periodSeg.lenSquared();
+   F32 lineLen = sqrt(lineLenSq);
+
+   // Normalize to the period and scale by duty cycle
+   periodSeg.normalize(period);
+   Point dutySeg = periodSeg * dutycycle;
+
+   // Draw up to the last duty cycle worth
+   U32 numPeriods = U32(lineLen / period); // Integer truncation OK
+
+   // Start point is one period segment before so we have a nice smooth transition
+   Point currentDashStart = start - (periodSeg * (1-fractionalOffset));
+   Point currentDashEnd = currentDashStart + dutySeg;
+
+   Point firstDashStart = start;
+
+   // If the end point is before the start, then shift segment forward
+   if((currentDashEnd - end).lenSquared() > lineLenSq)
+   {
+      currentDashStart += periodSeg;
+      currentDashEnd   += periodSeg;
+      if(numPeriods != 0) // Don't wrap around
+         numPeriods--;
+
+      firstDashStart = currentDashStart;
+   }
+
+
+   // Draw first chunk
+   vertexArray.push_back(firstDashStart);
+   vertexArray.push_back(currentDashEnd);
+
+   // Update to the next dash
+   currentDashStart += periodSeg;
+   currentDashEnd   += periodSeg;
+
+
+   // Draw middles
+   for(U32 i = 0; i < numPeriods; i++)
+   {
+      vertexArray.push_back(currentDashStart);
+      vertexArray.push_back(currentDashEnd);
+
+      // Update to the next dash
+      currentDashStart += periodSeg;
+      currentDashEnd   += periodSeg;
+   }
+
+   // Check to see if we drew over the line, if so replace the end
+   if((start-vertexArray.last()).lenSquared() > lineLenSq)
+   {
+      vertexArray.pop_back();
+      vertexArray.push_back(end);
+
+      // And we're done!
+   }
+
+   // Otherwise check to see if we need another segment due to varying FF
+   // lengths
+   else if((currentDashStart - start).lenSquared() < lineLenSq)
+   {
+      // Draw last
+      Point lastDashEnd = currentDashEnd;
+
+      if((currentDashEnd-start).lenSquared() > lineLenSq)
+         lastDashEnd = end;
+
+      vertexArray.push_back(currentDashStart);
+      vertexArray.push_back(lastDashEnd);   // Finish up just to the end
+   }
+
+   // Render!
+   renderPointVector(&vertexArray, GL_LINES);
+
+   // Clean up
+   vertexArray.clear();
+}
+
 // Draw arc centered on pos, with given radius, from startAngle to endAngle.  0 is East, increasing CW
 void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 {
@@ -2559,21 +2654,38 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, cons
 }
 
 
-void renderForceField(Point start, Point end, const Color *color, bool fieldUp)
+void renderForceField(const Point &start, const Point &end, const Color *color, bool fieldUp, F32 health, U32 time)
 {
    Vector<Point> geom = ForceField::computeGeom(start, end);
 
-   F32 ForceFieldBrightness = 0.25;
+   const F32 ForceFieldBrightness = 0.25;
 
    Color c(color);
    c = c * (1 - ForceFieldBrightness) + ForceFieldBrightness;
 
-   if(fieldUp)
-      glColor(c);
-   else
-      glColor(c * 0.5);
+   if(!fieldUp)
+      c = c * 0.5;
 
+   // Set color of field
+   glColor(c);
+
+   // This is a long, thin rectangle
    renderPointVector(&geom, GL_LINE_LOOP);
+
+
+   // Add health bar on top
+
+   // Chosen to be the size of a ship
+   const F32 healthBarPeriod = 50;
+
+   // Scale animation speed based on health
+   F32 timeScale = 4 * (1-health);
+
+   U32 timePeriod = 4096;  // power of 2 in milliseconds
+   U32 animationTime = U32(timeScale * time) & (timePeriod-1);
+   F32 normAnimationTime = animationTime / F32(timePeriod);
+
+   drawDashedLine(start, end, healthBarPeriod, health, normAnimationTime);  // Health is the duty cycle
 }
 
 

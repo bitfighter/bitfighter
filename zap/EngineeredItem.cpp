@@ -1884,7 +1884,7 @@ const Vector<Point> *ForceField::getCollisionPoly() const
 
 void ForceField::render()
 {
-   renderForceField(mStart, mEnd, getColor(), mFieldUp);
+   renderForceField(mStart, mEnd, getColor(), mFieldUp, mHealth, getGame()->getGameType()->getTotalGamePlayedInMs());
 }
 
 

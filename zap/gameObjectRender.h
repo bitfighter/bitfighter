@@ -91,6 +91,8 @@ extern void drawVertLine (S32 x,  S32 y1, S32 y2);
 extern void drawHorizLine(F32 x1, F32 x2, F32 y);
 extern void drawVertLine (F32 x,  F32 y1, F32 y2);
 
+extern void drawDashedLine(const Point &start, const Point &end, F32 period, F32 dutycycle = 0.5, F32 fractionalOffset = 0);
+
 extern void drawFadingHorizontalLine(S32 x1, S32 x2, S32 yPos, const Color &color);
 
 extern void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *letterColor, char letter);
@@ -255,7 +257,7 @@ extern void renderGrid(F32 currentScale, const Point &offset, const Point &origi
 
 extern void renderForceFieldProjector(const Point &pos, const Point &normal, const Color *teamColor, bool enabled, S32 healRate);
 extern void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, const Color *teamColor, bool enabled, F32 health, S32 healRate = 0);
-extern void renderForceField(Point start, Point end, const Color *c, bool fieldUp);
+extern void renderForceField(const Point &start, const Point &end, const Color *c, bool fieldUp, F32 health = 1.0, U32 time = 0);
 
 extern void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask = 1023);
 extern void renderBitfighterLogo(const Point &pos, F32 size, U32 letterMask = 1023);
