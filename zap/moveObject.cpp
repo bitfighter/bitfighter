@@ -1259,7 +1259,7 @@ U32 MountableItem::packUpdate(GhostConnection *connection, U32 updateMask, BitSt
 
 void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   Parent::unpackUpdate(connection, stream);   // Moving this to end of unpackUpdate breaks version 018... wait till we move to 019?
+   Parent::unpackUpdate(connection, stream);
 
    if(stream->readFlag())     // MountMask
    {
