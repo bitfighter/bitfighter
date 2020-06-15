@@ -666,6 +666,8 @@ S32 LuaScriptRunner::findObjectById(lua_State *L, const Vector<DatabaseObject *>
          return returnBfObject(L, bfObject);
    }
 
+   logprintf(LogConsumer::LuaBotMessage, "No object with ID %d was found", id);
+
    return returnNil(L);
 }
 
