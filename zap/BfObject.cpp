@@ -1354,7 +1354,6 @@ void BfObject::writeThisTeam(BitStream *stream)
    METHOD(CLASS, setLoc,         ARRAYDEF({{ PT,        END }               }), 1 ) \
    METHOD(CLASS, getPos,         ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, setPos,         ARRAYDEF({{ PT,        END }               }), 1 ) \
-   METHOD(CLASS, getTeamIndx,    ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, getTeamIndex,   ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, setTeam,        ARRAYDEF({{ TEAM_INDX, END }               }), 1 ) \
    METHOD(CLASS, removeFromGame, ARRAYDEF({{            END }               }), 1 ) \
@@ -1469,26 +1468,6 @@ S32 BfObject::lua_getLoc(lua_State *L)
 { 
    logprintf(LogConsumer::LuaBotMessage, "'getLoc()' is deprecated and will be removed in the future.  Use 'getPos()', instead");
    return lua_getPos(L); 
-}
-
-// TODO Remove after 019
-/**
- * @luafunc int BfObject::getTeamIndx()
- * 
- * @brief See BfObject::getTeamIndex()
- * 
- * @deprecated This method is deprecated and will be removed
- * 
- * @descr Use BfObject::getTeamIndex() instead. This method will be removed in
- * the future
- * 
- * @return Team index of the object.
- */
-S32 BfObject::lua_getTeamIndx(lua_State *L)
-{
-   logprintf(LogConsumer::LuaBotMessage, "'getTeamIndx()' is deprecated and will be removed in the future.  Use 'getTeamIndex()', with an 'e', instead");
-
-   return lua_getTeamIndex(L);
 }
 
 
