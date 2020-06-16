@@ -1843,9 +1843,6 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
                // Adjust score of everyone, scoring team will have it changed back again after this loop
                ((Team *)mGame->getTeam(i))->addScore(-teamPoints);             // Add magnitiude of negative score to all teams
                s2cSetTeamScore(i, ((Team *)(mGame->getTeam(i)))->getScore());  // Broadcast result
-
-               // Fire Lua event, but not for scoring team
-               EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, -teamPoints, i + 1, playerInfo);
             }
          }
       }
@@ -1855,19 +1852,33 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
          Team *team = (Team *)mGame->getTeam(teamIndex);
          team->addScore(teamPoints);
          s2cSetTeamScore(teamIndex, team->getScore());     // Broadcast new team score
-
-         // Fire Lua event for scoring team
-         EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, teamPoints, teamIndex + 1, playerInfo);
       }
 
       updateLeadingTeamAndScore();
       newScore = mLeadingTeamScore;
    }
-   // Fire scoring event for non-team games
-   else
+
+
+   // Fire Lua events, these are done after all scores are updated so the
+   // correct numbers are reported. This follow much (but not all) of the logic
+   // above
+   if(isTeamGame())
    {
-      EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, playerPoints, teamIndex + 1, playerInfo);
+      if(scoringEvent == ScoreGoalOwnTeam)
+      {
+         for(S32 i = 0; i < mGame->getTeamCount(); i++)
+         {
+            // Fire Lua event, but not for scoring team
+            if(i != teamIndex)
+               EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, -teamPoints, i + 1, playerInfo);
+         }
+      }
+      // Not own-goal
+      else
+         EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, teamPoints, teamIndex + 1, playerInfo);
    }
+   else
+      EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, playerPoints, teamIndex + 1, playerInfo);
 
 
    // End game if max score has been reached
