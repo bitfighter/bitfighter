@@ -1974,24 +1974,45 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
    const char *argv1[32];
    for(S32 i = 0; i < argc2; i++)
    {
-      unsigned char firstChar = argv2[i][0];
+      const char *token = argv2[i];
+      unsigned char firstChar = token[0];
       if(isAlpha(firstChar))  // starts with a letter
       {
-         if(!strncmp(argv2[i], "W=", 2))  // W= is in 015a
+         if(!strncmp(token, "W=", 2))  // W= is in 015a
          {
             S32 w = 0;
-            while(w < WeaponCount && stricmp(WeaponInfo::getWeaponInfo(WeaponType(w)).name.getString(), &argv2[i][2]))
+            while(w < WeaponCount && stricmp(WeaponInfo::getWeaponInfo(WeaponType(w)).name.getString(), &token[2]))
                w++;
             if(w < WeaponCount)
+            {
                mWeaponFireType = WeaponType(w);
-            break;
+               logprintf(LogConsumer::LogLevelError, "'W=' weapon construct in "
+                     "level file is deprecated and will be removed in the future");
+            }
          }
+         // Proper way to declare a Turret Weapon (since 021), no 'W='
+         else
+         {
+            // Loop through weapons
+            for(int w = 0; w < WeaponCount; w++)
+            {
+               const char *weaponname = WeaponInfo::getWeaponInfo(WeaponType(w)).name.getString();
+               // If a name matches, then make it the weapon type
+               if(stricmp(weaponname, token) == 0) // Matches the weapon name
+                  mWeaponFireType = WeaponType(w);
+            }
+         }
+
+         // Constrain weapon types to a useful subset
+         if(mWeaponFireType != WeaponTurret || mWeaponFireType != WeaponBurst ||
+               mWeaponFireType != WeaponSeeker || mWeaponFireType != WeaponTriple)
+            mWeaponFireType = WeaponTurret;  // Default (no phaser for you)
       }
       else
       {
          if(argc1 < 32)
          {
-            argv1[argc1] = argv2[i];
+            argv1[argc1] = token;
             argc1++;
          }
       }
@@ -2009,7 +2030,7 @@ string Turret::toLevelCode() const
    string out = Parent::toLevelCode();
 
    if(mWeaponFireType != WeaponTurret)
-      out = out + " " + writeLevelString((string("W=") + WeaponInfo::getWeaponInfo(mWeaponFireType).name.getString()).c_str());
+      out = out + " " + writeLevelString(WeaponInfo::getWeaponInfo(mWeaponFireType).name.getString());
 
    return out;
 }
