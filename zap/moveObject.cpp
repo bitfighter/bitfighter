@@ -1723,7 +1723,7 @@ bool Asteroid::processArguments(S32 argc2, const char **argv2, Game *game)
    {
       char firstChar = argv2[i][0];    // First character of arg
 
-      if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z'))
+      if(isAlpha(firstChar))
       {
          if(!strnicmp(argv2[i], "Size=", 5))
             mSizeLeft = atoi(&argv2[i][5]);

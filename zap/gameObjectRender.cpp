@@ -3023,7 +3023,7 @@ void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
 {
    // Mark the item with a letter, unless we're showing the reference ship
    S32 vertOffset = 8;
-   if (letter >= 'a' && letter <= 'z')    // Better position lowercase letters
+   if (isAlpha(letter))    // Better position lowercase letters
       vertOffset = 10;
 
    glColor(color, alpha);

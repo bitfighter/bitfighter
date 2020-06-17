@@ -40,7 +40,7 @@ void addTimeHandler(ClientGame *game, const Vector<string> &words)
                      // atoi will return 0, but this probably isn't what the user wanted.
 
          bool err = false;
-         if(words[1][0] >= '0' && words[1][0] <= '9')
+         if(isDigit(words[1][0]))
             mins = atoi(words[1].c_str());
          else
             err = true;
@@ -75,7 +75,7 @@ static void setVolume(ClientGame *game, VolumeType volType, const Vector<string>
 
    // Parse volstr -- if first digit isn't a number, user probably screwed up.
    // atoi will return 0, but this probably isn't what the user wanted.
-   if(volstr[0] >= '0' && volstr[0] <= '9')
+   if(isDigit(volstr[0]))
       vol = max(min(atoi(volstr.c_str()), 10), 0);
    else
    {

@@ -1082,7 +1082,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageESI,
    const char *src = formatString.getString();
    while(*src)
    {
-      if(src[0] == '%' && (src[1] == 'e' || src[1] == 's' || src[1] == 'i') && (src[2] >= '0' && src[2] <= '9'))
+      if(src[0] == '%' && (src[1] == 'e' || src[1] == 's' || src[1] == 'i') && isDigit(src[2]))
       {
          S32 index = src[2] - '0';
          switch(src[1])
@@ -1148,7 +1148,7 @@ void GameConnection::displayMessageE(U32 color, U32 sfx, StringTableEntry format
    const char *src = formatString.getString();
    while(*src)
    {
-      if(src[0] == '%' && (src[1] == 'e') && (src[2] >= '0' && src[2] <= '9'))
+      if(src[0] == '%' && (src[1] == 'e') && isDigit(src[2]))
       {
          S32 index = src[2] - '0';
          switch(src[1])
@@ -2428,7 +2428,13 @@ void GameConnection::displayWelcomeMessage()
    if(message == "")
       return;
 
-   mServerGame->getGameType()->s2cDisplayAnnouncement(message);
+//   mServerGame->getGameType()->s2cDisplayAnnouncement(message);
+   logprintf("WELCOME MESSAGE: %s", message.c_str());
+
+   const StringTableEntry serverWelcomeName = "WELCOME MESSAGE";
+
+   StringTableEntry recipient = mClientInfo->getName();
+   mServerGame->getGameType()->sendPrivateChat(serverWelcomeName, recipient, message.c_str());
 }
 
 
