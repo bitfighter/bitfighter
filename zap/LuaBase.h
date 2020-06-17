@@ -16,6 +16,7 @@
 #include "shipItems.h"
 #include "WeaponInfo.h"
 
+#include <cstddef> // For size_t
 #include <string>
 #include <vector>
 #include <map>
@@ -138,7 +139,7 @@ ShipModule getShipModule(lua_State *L, S32 index);
 // The basics:
 S32 returnInt(lua_State *L, S32 num);
 S32 returnFloat(lua_State *L, F32 num);
-S32 returnString(lua_State *L, const char *str);
+S32 returnString(lua_State *L, const char *str, size_t length = 0);
 S32 returnBool(lua_State *L, bool boolean);
 S32 returnNil(lua_State *L);
 
