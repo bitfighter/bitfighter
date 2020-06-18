@@ -2045,8 +2045,8 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
          }
 
          // Constrain weapon types to a useful subset
-         if(mWeaponFireType != WeaponTurret || mWeaponFireType != WeaponBurst ||
-               mWeaponFireType != WeaponSeeker || mWeaponFireType != WeaponTriple)
+         if(mWeaponFireType != WeaponTurret && mWeaponFireType != WeaponBurst &&
+               mWeaponFireType != WeaponSeeker && mWeaponFireType != WeaponTriple)
             mWeaponFireType = WeaponTurret;  // Default (no phaser for you)
       }
       else
