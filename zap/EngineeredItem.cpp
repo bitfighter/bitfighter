@@ -2210,6 +2210,8 @@ void Turret::idle(IdleCallPath path)
    fillVector.clear();
    findObjects((TestFunc)isTurretTargetType, fillVector, queryRect);    // Get all potential targets
 
+   WeaponInfo weaponInfo = WeaponInfo::getWeaponInfo(mWeaponFireType);
+
    BfObject *bestTarget = NULL;
    F32 bestRange = F32_MAX;
    Point bestDelta;
@@ -2237,12 +2239,12 @@ void Turret::idle(IdleCallPath path)
 
       // Calculate where we have to shoot to hit this...
       Point Vs = potential->getVel();
-      F32 S = (F32)WeaponInfo::getWeaponInfo(mWeaponFireType).projVelocity;
+      F32 S = (F32)weaponInfo.projVelocity;
       Point d = potential->getPos() - aimPos;
 
 // This could possibly be combined with Robot's getFiringSolution, as it's essentially the same thing
       F32 t;      // t is set in next statement
-      if(!findLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), WeaponInfo::getWeaponInfo(mWeaponFireType).projLiveTime * 0.001f, t))
+      if(!findLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), weaponInfo.projLiveTime * 0.001f, t))
          continue;
 
       Point leadPos = potential->getPos() + Vs * t;
@@ -2265,7 +2267,7 @@ void Turret::idle(IdleCallPath path)
       // See if we're gonna clobber our own stuff...
       disableCollision();
       Point delta2 = delta;
-      delta2.normalize(WeaponInfo::getWeaponInfo(mWeaponFireType).projLiveTime * (F32)WeaponInfo::getWeaponInfo(mWeaponFireType).projVelocity / 1000.f);
+      delta2.normalize(weaponInfo.projLiveTime * (F32)weaponInfo.projVelocity / 1000.f);
       BfObject *hitObject = findObjectLOS((TestFunc) isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
       enableCollision();
 
@@ -2324,7 +2326,7 @@ void Turret::idle(IdleCallPath path)
          F32 shooterRadius = mWeaponFireType == WeaponBurst ? 45.f : 35.f;
          GameWeapon::createWeaponProjectiles(mWeaponFireType, bestDelta, aimPos, velocity, 0, shooterRadius, this);
 
-         mFireTimer.reset(WeaponInfo::getWeaponInfo(mWeaponFireType).fireDelay);
+         mFireTimer.reset(weaponInfo.fireDelay);
       }
    }
 }
