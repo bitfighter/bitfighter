@@ -1524,7 +1524,12 @@ S32 BfObject::lua_setTeam(lua_State *L)
 S32 BfObject::lua_setPos(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setPos");
-   setPos(L, 1);
+
+   if(hasGeometry())
+      setPos(L, 1);
+   else
+      logprintf(LogConsumer::LuaBotMessage, "No geometry for this object (%s). Cannot set position", getClassName());
+
    return 0;
 }
 
@@ -1569,7 +1574,10 @@ S32 BfObject::lua_setGeom(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setGeom");
 
-   setGeom(L, 1);
+   if(hasGeometry())
+      setGeom(L, 1);
+   else
+      logprintf(LogConsumer::LuaBotMessage, "No geometry for this object (%s). Cannot set it", getClassName());
 
    return 0;
 }
@@ -1742,5 +1750,7 @@ S32 CentroidObject::lua_setPos(lua_State *L)
 
    return 0;
 }
+
+
 };
 
