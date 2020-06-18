@@ -438,14 +438,11 @@ public:
    static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   S32 lua_getClassId(lua_State *L);
    S32 lua_getObjType(lua_State *L);
    S32 lua_getId(lua_State *L);
    S32 lua_setId(lua_State *L);
 
    // Get/set object's position
-   S32 lua_getLoc(lua_State *L);
-   S32 lua_setLoc(lua_State *L);
    virtual S32 lua_getPos(lua_State *L);
    virtual S32 lua_setPos(lua_State *L);
 
@@ -476,8 +473,6 @@ public:
    virtual ~CentroidObject();
 
    // Provide special location handlers
-   virtual S32 lua_getLoc(lua_State *L);
-   virtual S32 lua_setLoc(lua_State *L);
    virtual S32 lua_getPos(lua_State *L);
    virtual S32 lua_setPos(lua_State *L);
 };
