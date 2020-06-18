@@ -91,7 +91,13 @@ void Projectile::initialize(WeaponType type, const Point &pos, const Point &vel,
       mKillString = shooter->getKillString();
    }
 
+   // Set default projectile style
    mStyle = WeaponInfo::getWeaponInfo(type).projectileStyle;
+
+   // If a turret, keep a coherent style
+   if(shooter && shooter->getObjectTypeNumber() == TurretTypeNumber)
+      mStyle = ProjectileStyleTurret;  // Forces Triple to use Turret style
+
    mWeaponType = type;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
