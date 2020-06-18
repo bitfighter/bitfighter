@@ -1404,6 +1404,7 @@ void Seeker::initialize(const Point &pos, const Point &vel, F32 angle, BfObject 
 
    setPosVelAng(pos, vel, angle);
    mWeaponType = WeaponSeeker;
+   mStyle = SeekerStyleNormal;
 
    updateExtentInDatabase();
 
@@ -1422,6 +1423,9 @@ void Seeker::initialize(const Point &pos, const Point &vel, F32 angle, BfObject 
       setTeam(shooter->getTeam());
       mShooter = shooter;
       mKillString = shooter->getKillString();
+
+      if(shooter->getObjectTypeNumber() == TurretTypeNumber)
+         mStyle = SeekerStyleTurret;  // Forces Seeker to use Turret style
    }
       
    mAcquiredTarget = NULL;
@@ -1673,7 +1677,10 @@ U32 Seeker::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *s
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
 
    stream->writeFlag(mExploded);
-   stream->writeFlag((updateMask & InitialMask) && (getGame()->getCurrentTime() - getCreationTime() < 500));
+
+   if(stream->writeFlag((updateMask & InitialMask) && (getGame()->getCurrentTime() - getCreationTime() < 500)))
+      stream->writeEnum(mStyle, SeekerStyleCount);
+
    if(stream->writeFlag(updateMask & PositionMask))
       stream->writeSignedFloat(getActualAngle() * FloatInversePi, 8);  // 8 bits good enough?
    return ret;
@@ -1697,7 +1704,10 @@ void Seeker::unpackUpdate(GhostConnection *connection, BitStream *stream)
       enableCollision();
 
    if(stream->readFlag())     // InitialMask --> seeker was just created
+   {
+      mStyle = (SeekerStyle) stream->readEnum(SeekerStyleCount);
       getGame()->playSoundEffect(SFXSeekerFire, getPos(), getVel());
+   }
 
    if(stream->readFlag())     // PositionMask --> for angle changes since they are not handled in MoveItem
       setActualAngle(stream->readSignedFloat(8) * FloatPi);
@@ -1845,7 +1855,7 @@ void Seeker::renderItem(const Point &pos)
       return;
 
    S32 startLiveTime = WeaponInfo::getWeaponInfo(mWeaponType).projLiveTime;
-   renderSeeker(pos, getActualAngle(), getActualVel().len(), startLiveTime - (getGame()->getCurrentTime() - getCreationTime()));
+   renderSeeker(pos, mStyle, getActualAngle(), getActualVel().len(), startLiveTime - (getGame()->getCurrentTime() - getCreationTime()));
 #endif
 }
 

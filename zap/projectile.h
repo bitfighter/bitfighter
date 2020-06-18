@@ -330,6 +330,7 @@ public:
    virtual ~Seeker();                                                           // Destructor
 
    WeaponType mWeaponType;
+   SeekerStyle mStyle;
 
    bool collide(BfObject *otherObj);                    // Things (like bullets) can collide with grenades
    bool collided(BfObject *otherObj, U32 stateIndex);   // Things (like bullets) can collide with grenades

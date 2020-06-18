@@ -771,7 +771,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
             renderGrenade(Point(0,0), 1);
             break;
          case 4:
-            renderSeeker(Point(0,0), 0, 400, Platform::getRealMilliseconds());
+            renderSeeker(Point(0,0), 0, 0, 400, Platform::getRealMilliseconds());
             break;
          case 5:     // Blank
             break;

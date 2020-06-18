@@ -82,6 +82,14 @@ enum ProjectileStyle
 };
 
 
+enum SeekerStyle
+{
+   SeekerStyleNormal,
+   SeekerStyleTurret,
+   SeekerStyleCount
+};
+
+
 struct WeaponInfo
 {
    static const char *getWeaponName(WeaponType weaponType);

@@ -1980,9 +1980,9 @@ void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill
 }
 
 
-void renderProjectile(const Point &pos, U32 type, U32 time)
+void renderProjectile(const Point &pos, U32 style, U32 time)
 {
-   ProjectileInfo *pi = GameWeapon::projectileInfo + type;
+   ProjectileInfo *pi = GameWeapon::projectileInfo + style;
 
    S32 bultype = 1;
 
@@ -2058,14 +2058,15 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
 }
 
 
-void renderSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRemaining)
+void renderSeeker(const Point &pos, U32 style, F32 angleRadians, F32 speed, U32 timeRemaining)
 {
    glPushMatrix();
       glTranslate(pos);
       glRotatef(angleRadians * 360.f / FloatTau, 0, 0, 1.0);
 
       // The flames first!
-      F32 speedRatio = speed / WeaponInfo::getWeaponInfo(WeaponSeeker).projVelocity + (S32(timeRemaining) % 200)/ 400.0f;  
+      F32 updateTime = (timeRemaining % 256)/ 512.0f; // every ~ 1/4 second increases from 0 to 0.5
+      F32 speedRatio = speed / WeaponInfo::getWeaponInfo(WeaponSeeker).projVelocity + updateTime;
       glColor(Colors::yellow, 0.5f);
       F32 innerFlame[] = {
             -8, -1,
@@ -2082,7 +2083,11 @@ void renderSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRemaini
       renderVertexArray(outerFlame, 3, GL_LINE_STRIP);
 
       // The body of the seeker
-      glColor4f(1, 0, 0.35f, 1);  // A redder magenta
+      Color bodyColor = Color(1, 0, 0.35f);
+      if(style == SeekerStyleTurret)
+         bodyColor = Color(updateTime, 1, updateTime); // Different colors of green
+
+      glColor(bodyColor, 1);  // A redder magenta
       F32 vertices[] = {
             -8, -4,
             -8,  4,
