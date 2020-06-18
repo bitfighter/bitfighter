@@ -1987,7 +1987,7 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
             {
                mWeaponFireType = WeaponType(w);
                logprintf(LogConsumer::LogLevelError, "'W=' weapon construct in "
-                     "level file is deprecated and will be removed in the future");
+                     "level file is deprecated and will be removed in the future. Instead, remove the 'W='");
             }
          }
          // Proper way to declare a Turret Weapon (since 021), no 'W='
