@@ -50,7 +50,7 @@ Projectile::Projectile(lua_State *L)
          WeaponType newType = getWeaponType(L, 1);
 
          // Only allow projectile types that use this class
-         if(WeaponInfo::getWeaponInfo(newType).projectileStyle != NotAProjectile)
+         if(WeaponInfo::getWeaponInfo(newType).projectileStyle != ProjectileStyleNotAProjectile)
             type = newType;
       }
    }
@@ -91,7 +91,7 @@ void Projectile::initialize(WeaponType type, const Point &pos, const Point &vel,
       mKillString = shooter->getKillString();
    }
 
-   mType = WeaponInfo::getWeaponInfo(type).projectileStyle;
+   mStyle = WeaponInfo::getWeaponInfo(type).projectileStyle;
    mWeaponType = type;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -115,7 +115,7 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 
    if(stream->writeFlag(updateMask & InitialMask))
    {
-      stream->writeEnum(mType, ProjectileStyleCount);
+      stream->writeEnum(mStyle, ProjectileStyleCount);
 
       S32 index = -1;
       if(mShooter.isValid())
@@ -148,7 +148,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())         // Initial chunk of data, sent once for this object
    {
 
-      mType = (ProjectileStyle) stream->readEnum(ProjectileStyleCount);
+      mStyle = (ProjectileStyle) stream->readEnum(ProjectileStyleCount);
 
       TNLAssert(connection, "Defunct connection to server in projectile.cpp!");
 
@@ -157,7 +157,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       setExtent(Rect(getPos(), 0));
       initial = true;
-      getGame()->playSoundEffect(GameWeapon::projectileInfo[mType].projectileSound, getPos(), mVelocity);
+      getGame()->playSoundEffect(GameWeapon::projectileInfo[mStyle].projectileSound, getPos(), mVelocity);
    }
    bool preCollided = mCollided;
    mCollided = stream->readFlag();
@@ -282,7 +282,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
             bool bounce = false;
 
             // Bounce off a wall and off a ship that has its shields up
-            if(mType == ProjectileBounce && isWallType(hitObject->getObjectTypeNumber()))
+            if(mStyle == ProjectileStyleBouncer && isWallType(hitObject->getObjectTypeNumber()))
                bounce = true;
             else if(isShipType(hitObject->getObjectTypeNumber()))
             {
@@ -395,7 +395,7 @@ void Projectile::explode(BfObject *hitObject, Point pos)
    if(isGhost())
    {
       TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-      static_cast<ClientGame *>(getGame())->emitExplosion(pos, 0.3f, GameWeapon::projectileInfo[mType].sparkColors, NumSparkColors);
+      static_cast<ClientGame *>(getGame())->emitExplosion(pos, 0.3f, GameWeapon::projectileInfo[mStyle].sparkColors, NumSparkColors);
 
       SFXProfiles sound;
 
@@ -410,7 +410,7 @@ void Projectile::explode(BfObject *hitObject, Point pos)
       else if((hitShip || ship))                           // We hit a ship with shields down
          sound = SFXShipHit;
       else                                                   // We hit something else
-         sound = GameWeapon::projectileInfo[mType].impactSound;
+         sound = GameWeapon::projectileInfo[mStyle].impactSound;
 
       getGame()->playSoundEffect(sound, pos, mVelocity);   // Play the sound
    }
@@ -437,7 +437,7 @@ bool Projectile::canAddToEditor() { return false; }      // No projectiles in th
 void Projectile::renderItem(const Point &pos)
 {
    if(shouldRender())
-      renderProjectile(pos, mType, getGame()->getCurrentTime() - getCreationTime());
+      renderProjectile(pos, mStyle, getGame()->getCurrentTime() - getCreationTime());
 }
 
 

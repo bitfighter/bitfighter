@@ -49,7 +49,7 @@ protected:
 
 public:
    U32 mTimeRemaining;
-   ProjectileStyle mType;
+   ProjectileStyle mStyle;
    WeaponType mWeaponType;
    bool mCollided;
    bool hitShip;
