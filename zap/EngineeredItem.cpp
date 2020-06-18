@@ -2321,8 +2321,9 @@ void Turret::idle(IdleCallPath path)
          string killer = string("got blasted by ") + getGame()->getTeamName(getTeam()).getString() + " turret";
          mKillString = killer.c_str();
 
-         GameWeapon::createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, 
-                                             0, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);
+         F32 shooterRadius = mWeaponFireType == WeaponBurst ? 45.f : 35.f;
+         GameWeapon::createWeaponProjectiles(mWeaponFireType, bestDelta, aimPos, velocity, 0, shooterRadius, this);
+
          mFireTimer.reset(WeaponInfo::getWeaponInfo(mWeaponFireType).fireDelay);
       }
    }
