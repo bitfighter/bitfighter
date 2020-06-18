@@ -1372,11 +1372,22 @@ REGISTER_LUA_SUBCLASS(SpyBug, Burst);
 
 TNL_IMPLEMENT_NETOBJECT(Seeker);
 
-// Constructor
-const F32 Seeker_Radius = 4;
-const F32 Seeker_Mass = 1;
+// Statics
+const F32 Seeker::Radius = 4;
+const F32 Seeker::Mass = 1;
 
-Seeker::Seeker(const Point &pos, const Point &vel, F32 angle, BfObject *shooter) : MoveItem(pos, true, Seeker_Radius, Seeker_Mass)
+const U32 Seeker::SpeedIncreasePerSecond = 300;
+const U32 Seeker::TargetAcquisitionRadius = 400;
+const F32 Seeker::MaximumAngleChangePerSecond = FloatTau / 2;
+const F32 Seeker::TargetSearchAngle = FloatTau * .6f;  // Anglular spread in front of ship to search for targets
+
+const S32 Seeker::ReassessTargetTime = 100;  // Milliseconds to reassess target
+
+const S32 Seeker::InnerBlastRadius = 80;
+const S32 Seeker::OuterBlastRadius = 120;
+
+// Constructor
+Seeker::Seeker(const Point &pos, const Point &vel, F32 angle, BfObject *shooter) : MoveItem(pos, true, Seeker::Radius, Seeker::Mass)
 {
    initialize(pos, vel, angle, shooter);
 }
@@ -1445,16 +1456,6 @@ static F32 normalizeAngle(F32 angle)
    return newAngle;
 }
 
-
-U32 Seeker::SpeedIncreasePerSecond = 300;
-U32 Seeker::TargetAcquisitionRadius = 400;
-F32 Seeker::MaximumAngleChangePerSecond = FloatTau / 2;
-F32 Seeker::TargetSearchAngle = FloatTau * .6f;     // Anglular spread in front of ship to search for targets
-
-const S32 Seeker::ReassessTargetTime = 100;  // Milliseconds to reassess target
-
-const S32 Seeker::InnerBlastRadius = 80;
-const S32 Seeker::OuterBlastRadius = 120;
 
 // Runs on client and server
 void Seeker::idle(IdleCallPath path)

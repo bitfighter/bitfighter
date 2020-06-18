@@ -297,10 +297,13 @@ private:
       FirstFreeMask = MoveItem::FirstFreeMask,
    };
 
-   static U32 SpeedIncreasePerSecond;
-   static U32 TargetAcquisitionRadius;
-   static F32 MaximumAngleChangePerSecond;
-   static F32 TargetSearchAngle;
+   static const F32 Radius;
+   static const F32 Mass;
+
+   static const U32 SpeedIncreasePerSecond;
+   static const U32 TargetAcquisitionRadius;
+   static const F32 MaximumAngleChangePerSecond;
+   static const F32 TargetSearchAngle;
 
    static const S32 ReassessTargetTime;
 
