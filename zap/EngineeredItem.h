@@ -176,7 +176,7 @@ private:
 
    F32 mHealth;  // Different than ForceFieldProjector health
 
-protected:
+public:
    enum MaskBits {
       InitialMask   = Parent::FirstFreeMask << 0,
       StatusMask    = Parent::FirstFreeMask << 1,
@@ -184,7 +184,6 @@ protected:
       FirstFreeMask = Parent::FirstFreeMask << 3
    };
 
-public:
    static const S32 FieldDownTime = 250;
    static const S32 MAX_FORCEFIELD_LENGTH = 2500;
 
@@ -202,6 +201,8 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    void setHealth(F32 health);
+   void setEndPoints(const Point &start, const Point &end);
+   void updateGeomAndExtents();
 
    const Vector<Point> *getCollisionPoly() const;
 

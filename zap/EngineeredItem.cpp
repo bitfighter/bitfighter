@@ -1309,7 +1309,7 @@ S32 EngineeredItem::lua_setPos(lua_State *L)
 {
    S32 retVal = Parent::lua_setPos(L);
 
-//   findMountPoint(Game::getAddTarget(), getPos());
+   // This re-triggers all the position information on the client
    setMaskBits(InitialMask);
 
    return retVal;
@@ -1632,8 +1632,25 @@ S32 ForceFieldProjector::lua_getPos(lua_State *L)
 
 S32 ForceFieldProjector::lua_setPos(lua_State *L)
 {
-   // TODO
-   return Parent::lua_setPos(L);
+   S32 retVal = Parent::lua_setPos(L);
+
+   // Re-find start/end points of FF.
+   //
+   // Can't just do onEnabled()/onDisabled() because it would reset the FF health
+   Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
+   Point end;
+   DatabaseObject *collObj;
+
+   ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
+
+   if(mField.isValid())
+   {
+      mField->setEndPoints(start, end);
+      // This will update the client
+      mField->setMaskBits(ForceField::InitialMask);
+   }
+
+   return retVal;
 }
 
 
@@ -1696,11 +1713,7 @@ ForceField::ForceField(S32 team, Point start, Point end)
    mFieldUp = true;
    mHealth = 0;
 
-   mOutline = computeGeom(mStart, mEnd);
-
-   Rect extent(mStart, mEnd);
-   extent.expand(Point(5,5));
-   setExtent(extent);
+   updateGeomAndExtents();
 
    mObjectTypeNumber = ForceFieldTypeNumber;
    mNetFlags.set(Ghostable);
@@ -1815,11 +1828,8 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->read(&mEnd.x);
       stream->read(&mEnd.y);
       readThisTeam(stream);
-      mOutline = computeGeom(mStart, mEnd);
 
-      Rect extent(mStart, mEnd);
-      extent.expand(Point(5,5));
-      setExtent(extent);
+      updateGeomAndExtents();
    }
 
    if(stream->readFlag())
@@ -1843,6 +1853,26 @@ void ForceField::setHealth(F32 health)
       mHealth = health;
       setMaskBits(HealthMask);
    }
+}
+
+
+void ForceField::setEndPoints(const Point &start, const Point &end)
+{
+   // Update the end points of the ForceField and adjust the geom/extents
+   mStart = start;
+   mEnd = end;
+
+   updateGeomAndExtents();
+}
+
+
+void ForceField::updateGeomAndExtents()
+{
+   mOutline = computeGeom(mStart, mEnd);
+
+   Rect extent(mStart, mEnd);
+   extent.expand(Point(5,5));
+   setExtent(extent);
 }
 
 
