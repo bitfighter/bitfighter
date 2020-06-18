@@ -1305,6 +1305,17 @@ S32 EngineeredItem::lua_setGeom(lua_State *L)
 }
 
 
+S32 EngineeredItem::lua_setPos(lua_State *L)
+{
+   S32 retVal = Parent::lua_setPos(L);
+
+//   findMountPoint(Game::getAddTarget(), getPos());
+   setMaskBits(InitialMask);
+
+   return retVal;
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 

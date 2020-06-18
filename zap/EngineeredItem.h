@@ -156,6 +156,7 @@ public:
 
    // Some overrides
    S32 lua_setGeom(lua_State *L);
+   S32 lua_setPos(lua_State *L);
 };
 
 
@@ -284,11 +285,11 @@ public:
    void onGeomChanged();
    void findForceFieldEnd();                      // Find end of forcefield in editor
 
-	///// Lua interface
-	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(ForceFieldProjector);
+   ///// Lua interface
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(ForceFieldProjector);
 
-	static const char *luaClassName;
-	static const luaL_Reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    S32 lua_getPos(lua_State *L);
