@@ -70,15 +70,15 @@ enum WeaponType {
 };
 
 
-// Note that not all WeaponTypes are Projectile weapons, so don't have ProjectileTypes
-enum ProjectileType
+// Note that not all WeaponTypes are Projectile weapons, so don't have ProjectileStyles
+enum ProjectileStyle
 {
    ProjectilePhaser,
    ProjectileBounce,
    ProjectileTriple,
    ProjectileTurret,
-   ProjectileTypeCount,
-   NotAProjectile  // Need this so we can fit a non-ProjectileType (like mine) into a constructor intended for proper projectiles
+   ProjectileStyleCount,
+   NotAProjectile  // Need this so we can fit a non-ProjectileStyle (like mine) into a constructor intended for proper projectiles
 };
 
 
@@ -95,7 +95,7 @@ struct WeaponInfo
    F32 damageAmount;                // Damage shot does
    F32 damageSelfMultiplier;        // Adjust damage if you shoot yourself
    bool canDamageTeammate;
-   ProjectileType projectileType;   // If this is a projectile item, which sort is it?  If not, use NotAProjectile
+   ProjectileStyle projectileStyle;   // If this is a projectile item, which sort is it?  If not, use NotAProjectile
 
    static WeaponInfo getWeaponInfo(WeaponType weaponType);
 

@@ -50,7 +50,7 @@ Projectile::Projectile(lua_State *L)
          WeaponType newType = getWeaponType(L, 1);
 
          // Only allow projectile types that use this class
-         if(WeaponInfo::getWeaponInfo(newType).projectileType != NotAProjectile)
+         if(WeaponInfo::getWeaponInfo(newType).projectileStyle != NotAProjectile)
             type = newType;
       }
    }
@@ -91,7 +91,7 @@ void Projectile::initialize(WeaponType type, const Point &pos, const Point &vel,
       mKillString = shooter->getKillString();
    }
 
-   mType = WeaponInfo::getWeaponInfo(type).projectileType;
+   mType = WeaponInfo::getWeaponInfo(type).projectileStyle;
    mWeaponType = type;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -115,7 +115,7 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 
    if(stream->writeFlag(updateMask & InitialMask))
    {
-      stream->writeEnum(mType, ProjectileTypeCount);
+      stream->writeEnum(mType, ProjectileStyleCount);
 
       S32 index = -1;
       if(mShooter.isValid())
@@ -148,7 +148,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())         // Initial chunk of data, sent once for this object
    {
 
-      mType = (ProjectileType) stream->readEnum(ProjectileTypeCount);
+      mType = (ProjectileStyle) stream->readEnum(ProjectileStyleCount);
 
       TNLAssert(connection, "Defunct connection to server in projectile.cpp!");
 

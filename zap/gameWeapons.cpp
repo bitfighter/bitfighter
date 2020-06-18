@@ -35,7 +35,8 @@ ProjectileInfo::~ProjectileInfo()
 }
 
 
-ProjectileInfo GameWeapon::projectileInfo[ProjectileTypeCount] =
+// This is for client graphics/display
+ProjectileInfo GameWeapon::projectileInfo[ProjectileStyleCount] =
 {
    //               SparkColor1     SparkColor2     SparkColor3       SparkColor4     ProjectileColor1  ProjectileColor2  Scale  Fire sound          Impact sound
    ProjectileInfo( Colors::magenta, Colors::white,  Colors::blue,     Colors::red,    Color(1, 0, 0.5), Color(0.5, 0, 1), 1.0f, SFXPhaserProjectile, SFXPhaserImpact ), // Phaser

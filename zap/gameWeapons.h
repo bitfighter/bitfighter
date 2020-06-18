@@ -42,7 +42,7 @@ struct ProjectileInfo
 
 struct GameWeapon
 {
-   static ProjectileInfo projectileInfo[ProjectileTypeCount];
+   static ProjectileInfo projectileInfo[ProjectileStyleCount];
 
    static void createWeaponProjectiles(WeaponType weapon, const Point &dir, const Point &shooterPos,
          const Point &shooterVel, S32 time, F32 shooterRadius, BfObject *shooter);
