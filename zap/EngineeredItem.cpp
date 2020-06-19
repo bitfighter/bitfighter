@@ -2026,9 +2026,8 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
       {
          if(!strncmp(token, "W=", 2))  // W= is in 015a
          {
-            S32 w = 0;
-            while(w < WeaponCount && stricmp(WeaponInfo::getWeaponInfo(WeaponType(w)).name.getString(), &token[2]))
-               w++;
+            WeaponType w = WeaponInfo::getWeaponTypeFromString(&token[2]);
+
             if(w < WeaponCount)
             {
                mWeaponFireType = WeaponType(w);
@@ -2039,14 +2038,10 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
          // Proper way to declare a Turret Weapon (since 021), no 'W='
          else
          {
-            // Loop through weapons
-            for(int w = 0; w < WeaponCount; w++)
-            {
-               const char *weaponname = WeaponInfo::getWeaponInfo(WeaponType(w)).name.getString();
-               // If a name matches, then make it the weapon type
-               if(stricmp(weaponname, token) == 0) // Matches the weapon name
-                  mWeaponFireType = WeaponType(w);
-            }
+            WeaponType w = WeaponInfo::getWeaponTypeFromString(token);
+
+            if(w < WeaponCount)
+               mWeaponFireType = WeaponType(w);
          }
 
          // Constrain weapon types to a useful subset
