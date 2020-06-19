@@ -2355,7 +2355,16 @@ EditorAttributeMenuUI *Turret::getAttributeMenu()
       opts.push_back(WeaponInfo::getWeaponName(WeaponTriple));
       opts.push_back(WeaponInfo::getWeaponName(WeaponBurst));
       opts.push_back(WeaponInfo::getWeaponName(WeaponSeeker));
-      mAttributeMenuUI->addMenuItem(new ToggleMenuItem("Weapon: ", opts, 0, false,
+
+      U32 curOption = 0;
+      if(mWeaponFireType == WeaponTriple)
+         curOption = 1;
+      else if(mWeaponFireType == WeaponBurst)
+         curOption = 2;
+      else if(mWeaponFireType == WeaponSeeker)
+         curOption = 3;
+
+      mAttributeMenuUI->addMenuItem(new ToggleMenuItem("Weapon: ", opts, curOption, false,
                                            NULL, "Select the turret weapon type"));
 
       // Add our standard save and exit option to the menu
