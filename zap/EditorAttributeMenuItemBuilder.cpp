@@ -23,6 +23,7 @@ namespace Zap
 EditorAttributeMenuItemBuilder::EditorAttributeMenuItemBuilder()
 {
    mInitialized = false;
+   mGame = NULL;
 }
 
 // Destructor
