@@ -15,14 +15,16 @@
 
 #include "ServerGame.h"
 
-#ifndef ZAP_DEDICATED
-#  include "ClientGame.h"        // for accessing client's spark manager
-#endif
-
 #include "Colors.h"
 #include "stringUtils.h"
 #include "MathUtils.h"           // For findLowestRootIninterval()
 #include "GeomUtils.h"
+
+#ifndef ZAP_DEDICATED
+#  include "ClientGame.h"        // for accessing client's spark manager
+#  include "UIEditorMenus.h"
+#endif
+
 
 namespace Zap
 {
@@ -1947,6 +1949,9 @@ void ForceField::getForceFieldStartAndEndPoints(Point &start, Point &end)
 
 TNL_IMPLEMENT_NETOBJECT(Turret);
 
+#ifndef ZAP_DEDICATED
+   EditorAttributeMenuUI *Turret::mAttributeMenuUI = NULL;
+#endif
 
 // Combined Lua / C++ default constructor
 /**
@@ -2330,6 +2335,74 @@ void Turret::idle(IdleCallPath path)
       }
    }
 }
+
+
+#ifndef ZAP_DEDICATED
+
+EditorAttributeMenuUI *Turret::getAttributeMenu()
+{
+   // Lazily initialize
+   if(!mAttributeMenuUI)
+   {
+      ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+
+      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
+
+      // Heal rate
+      // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
+      CounterMenuItem *menuItem = new CounterMenuItem("10% Heal:", 99, 1, 0, 100, "secs", "Disabled",
+                                                      "Time for this item to heal itself 10%");
+      mAttributeMenuUI->addMenuItem(menuItem);
+
+      // Weapon Type
+      Vector<string> opts;
+      opts.push_back(WeaponInfo::getWeaponName(WeaponTurret));
+      opts.push_back(WeaponInfo::getWeaponName(WeaponTriple));
+      opts.push_back(WeaponInfo::getWeaponName(WeaponBurst));
+      opts.push_back(WeaponInfo::getWeaponName(WeaponSeeker));
+      mAttributeMenuUI->addMenuItem(new ToggleMenuItem("Weapon: ", opts, 0, false,
+                                           NULL, "Select the turret weapon type"));
+
+      // Add our standard save and exit option to the menu
+      mAttributeMenuUI->addSaveAndQuitMenuItem();
+   }
+
+   return mAttributeMenuUI;
+}
+
+
+// Get the menu looking like what we want
+void Turret::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->getMenuItem(0)->setIntValue(getHealRate());
+
+   string weaponName = WeaponInfo::getWeaponName(mWeaponFireType);
+   attributeMenu->getMenuItem(1)->setValue(weaponName);
+}
+
+
+// Retrieve the values we need from the menu
+void Turret::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   setHealRate(attributeMenu->getMenuItem(0)->getIntValue());
+
+   string weaponValue = attributeMenu->getMenuItem(1)->getValue();
+   mWeaponFireType = WeaponInfo::getWeaponTypeFromString(weaponValue.c_str());
+}
+
+
+// Render some attributes when item is selected but not being edited
+void Turret::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
+{
+   string healValue = (mHealRate == 0 ? "Disabled" : itos(mHealRate) + " sec" + (mHealRate != 1 ? "s" : ""));
+   keys.push_back("10% Heal");   values.push_back(healValue);
+
+   // Weapon type attribute
+   string weaponValue = WeaponInfo::getWeaponName(mWeaponFireType);
+   keys.push_back("Weapon");   values.push_back(weaponValue);
+}
+
+#endif
 
 
 const char *Turret::getOnScreenName()     { return "Turret";  }

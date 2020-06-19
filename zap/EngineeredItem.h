@@ -22,10 +22,6 @@ private:
    typedef Item Parent;
 
    static const F32 EngineeredItemRadius;
-
-#ifndef ZAP_DEDICATED
-   static EditorAttributeMenuUI *mAttributeMenuUI;    // Menu for text editing; since it's static, don't bother with smart pointer
-#endif   
    
    void computeExtent();
 
@@ -315,6 +311,10 @@ private:
 
    F32 getSelectionOffsetMagnitude();
 
+#ifndef ZAP_DEDICATED
+   static EditorAttributeMenuUI *mAttributeMenuUI; // Menu for attribute editing
+#endif
+
 public:
    explicit Turret(lua_State *L = NULL);                                   // Combined Lua / C++ default constructor
    Turret(S32 team, const Point &anchorPoint, const Point &anchorNormal);  // Constructor for when turret is built with engineer
@@ -360,6 +360,14 @@ public:
    const char *getPrettyNamePlural();
    const char *getOnDockName();
    const char *getOnScreenName();
+
+#ifndef ZAP_DEDICATED
+   EditorAttributeMenuUI *getAttributeMenu();
+   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
+#endif
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();

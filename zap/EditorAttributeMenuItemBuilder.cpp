@@ -120,7 +120,6 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
       }
 
 
-      case TurretTypeNumber:
       case ForceFieldProjectorTypeNumber:
       {
          static EditorAttributeMenuUI *attributeMenuUI = NULL;
@@ -240,7 +239,6 @@ void EditorAttributeMenuItemBuilder::startEditingAttrs(EditorAttributeMenuUI *at
          attributeMenu->getMenuItem(1)->setIntValue(S32(static_cast<CoreItem *>(obj)->getRotationSpeed()));
          break;
 
-      case TurretTypeNumber:
       case ForceFieldProjectorTypeNumber:
          attributeMenu->getMenuItem(0)->setIntValue(static_cast<EngineeredItem *>(obj)->getHealRate());
          break;
@@ -284,9 +282,7 @@ void EditorAttributeMenuItemBuilder::doneEditingAttrs(EditorAttributeMenuUI *att
          static_cast<CoreItem *>(obj)->setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()));
          static_cast<CoreItem *>(obj)->setRotationSpeed(F32(attributeMenu->getMenuItem(1)->getIntValue()));
          break;
-
          
-      case TurretTypeNumber:
       case ForceFieldProjectorTypeNumber:
          static_cast<EngineeredItem *>(obj)->setHealRate(attributeMenu->getMenuItem(0)->getIntValue());
          break;
