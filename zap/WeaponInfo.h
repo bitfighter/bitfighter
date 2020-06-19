@@ -117,6 +117,7 @@ struct WeaponInfo
 
 #ifndef BF_MASTER
    static WeaponType getWeaponTypeFromObject(BfObject *bfObject);
+   static WeaponType getWeaponTypeFromString(const char *name);
    static BfObject *getWeaponShooterFromObject(BfObject *bfObject);
 #endif
 };
