@@ -132,6 +132,8 @@ public:
 
 
    WeaponType mWeaponType;
+   BurstStyle mStyle;
+
    void renderItem(const Point &pos);
    bool shouldRender() const;
 

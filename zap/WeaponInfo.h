@@ -90,6 +90,14 @@ enum SeekerStyle
 };
 
 
+enum BurstStyle
+{
+   BurstStyleNormal,
+   BurstStyleTurret,
+   BurstStyleCount
+};
+
+
 struct WeaponInfo
 {
    static const char *getWeaponName(WeaponType weaponType);

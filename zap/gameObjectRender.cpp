@@ -2136,7 +2136,7 @@ void renderMine(const Point &pos, bool armed, bool visible)
 
 
 // lifeLeft is a number between 0 and 1.  Burst explodes when lifeLeft == 0.
-void renderGrenade(const Point &pos, F32 lifeLeft)
+void renderGrenade(const Point &pos, U32 style, F32 lifeLeft)
 {
    glColor(Colors::white);
    drawCircle(pos, 10);
@@ -2163,7 +2163,10 @@ void renderGrenade(const Point &pos, F32 lifeLeft)
    else if(lifeLeft > .05)
       innerVis = false;
 
-   glColor(1, min(1.25f - lifeLeft, 1), 0);
+   if(style == 1)
+      glColor(0, 1, min(1.f - lifeLeft, 0.5));
+   else
+      glColor(1, min(1.25f - lifeLeft, 1), 0);
 
    if(innerVis)
       drawFilledCircle(pos, 6);

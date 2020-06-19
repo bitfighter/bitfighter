@@ -205,7 +205,7 @@ extern void renderProjectile(const Point &pos, U32 style, U32 time);
 extern void renderSeeker(const Point &pos, U32 style, F32 angleRadians, F32 speed, U32 timeRemaining);
 
 extern void renderMine(const Point &pos, bool armed, bool visible);
-extern void renderGrenade(const Point &pos, F32 lifeLeft);
+extern void renderGrenade(const Point &pos, U32 style, F32 lifeLeft);
 extern void renderSpyBug(const Point &pos, const Color &teamColor, bool visible);
 
 extern void renderRepairItem(const Point &pos);

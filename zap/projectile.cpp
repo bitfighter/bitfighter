@@ -556,6 +556,7 @@ void Burst::initialize(const Point &pos, const Point &vel, BfObject *shooter)
 {
    mObjectTypeNumber = BurstTypeNumber;
    mWeaponType = WeaponBurst;
+   mStyle = BurstStyleNormal;
 
    mNetFlags.set(Ghostable);
 
@@ -578,6 +579,10 @@ void Burst::initialize(const Point &pos, const Point &vel, BfObject *shooter)
       setTeam(shooter->getTeam());
       mShooter = shooter;
       mKillString = shooter->getKillString();
+
+      // Change style of Burst if a Turret fired it
+      if(mShooter->getObjectTypeNumber() == TurretTypeNumber)
+         mStyle = BurstStyleTurret;
    }
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -646,7 +651,9 @@ U32 Burst::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
 
    stream->writeFlag(mExploded);
-   stream->writeFlag((updateMask & InitialMask) && (getGame()->getCurrentTime() - getCreationTime() < 500));
+   if(stream->writeFlag((updateMask & InitialMask) && (getGame()->getCurrentTime() - getCreationTime() < 500)))
+      stream->writeEnum(mStyle, BurstStyleCount);
+
    return ret;
 }
 
@@ -660,8 +667,12 @@ void Burst::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())
       doExplosion(getActualPos());
 
-   if(stream->readFlag())
+   if(stream->readFlag())  // InitialMask
+   {
+      mStyle = (BurstStyle) stream->readEnum(BurstStyleCount);
+
       getGame()->playSoundEffect(SFXBurst, getActualPos(), getActualVel());
+   }
 }
 
 
@@ -762,7 +773,7 @@ void Burst::renderItem(const Point &pos)
 
    F32 initTTL = (F32) WeaponInfo::getWeaponInfo(WeaponBurst).projLiveTime;
 
-   renderGrenade( pos, (initTTL - (F32) (getGame()->getCurrentTime() - getCreationTime())) / initTTL);
+   renderGrenade( pos, mStyle, (initTTL - (F32) (getGame()->getCurrentTime() - getCreationTime())) / initTTL);
 }
 
 
