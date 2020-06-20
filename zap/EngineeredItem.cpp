@@ -2380,8 +2380,16 @@ void Turret::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
    attributeMenu->getMenuItem(0)->setIntValue(getHealRate());
 
-   string weaponName = WeaponInfo::getWeaponName(mWeaponFireType);
-   attributeMenu->getMenuItem(1)->setValue(weaponName);
+
+   U32 curOption = 0;
+   if(mWeaponFireType == WeaponTriple)
+      curOption = 1;
+   else if(mWeaponFireType == WeaponBurst)
+      curOption = 2;
+   else if(mWeaponFireType == WeaponSeeker)
+      curOption = 3;
+
+   attributeMenu->getMenuItem(1)->setIntValue(curOption);
 }
 
 
