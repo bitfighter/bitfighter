@@ -604,6 +604,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
          case ServerName:          paramName = "server name";           break;
          case ServerDescr:         paramName = "server description";    break;
          case LevelDir:            paramName = "leveldir param";        break;
+         case GlobalLevelScript:   paramName = "global script";         break;
          default:                  paramName = "unknown"; TNLAssert(false, "Fix unknown description"); break;
       }
       logprintf(LogConsumer::ServerFilter, "User [%s] %s to [%s]", mClientInfo->getName().getString(), 
@@ -720,6 +721,21 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
 
       return;
    }
+   else if(type == GlobalLevelScript)
+   {
+      // Search for script as a way to tell if it exists
+      string scriptpath = mSettings->getFolderManager()->findLevelGenScript(param.getString());
+
+      // Returned empty string -> wasn't found
+      if(scriptpath == "")
+      {
+         s2cDisplayErrorMessage("!!! Levelgen script not found");
+         return;
+      }
+
+      // Otherwise set the script!
+      mSettings->setGlobalLevelgenScript(param.getString());
+   }
 
 
    if(type != DeleteLevel && type != UndeleteLevel && type != LevelDir)
@@ -733,6 +749,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
          case ServerPassword:      paramName = "ServerPassword";      break;
          case ServerName:          paramName = "ServerName";          break;
          case ServerDescr:         paramName = "ServerDescription";   break;
+         case GlobalLevelScript:   paramName = "GlobalLevelScript";   break;
          default:                  paramName = NULL; TNLAssert(false, "Fix unknown parameter to save"); break;
       }
 
@@ -754,6 +771,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
    static StringTableEntry serverNameChanged    = "Server name changed";
    static StringTableEntry serverDescrChanged   = "Server description changed";
    static StringTableEntry serverLevelDeleted   = "Level added to skip list; level will stay in rotation until server restarted";
+   static StringTableEntry globalLevelScriptSet = "Global levelgen script set";
 
    // Pick out just the right message
    StringTableEntry msg;
@@ -841,6 +859,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
       msg = serverDescrChanged;
    else if(type == DeleteLevel)
       msg = serverLevelDeleted;
+   else if(type == GlobalLevelScript)
+      msg = globalLevelScriptSet;
 
    s2cDisplaySuccessMessage(msg);      // Notify user their bidding has been done
 }

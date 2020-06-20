@@ -71,6 +71,7 @@ namespace Zap
    { "setlevpass",         &ChatCommands::setLevPassHandler,         { STR },        1, ADMIN_COMMANDS,  0,  1,  {"[passwd]"},            "Set level change password (use blank to clear)" },
    { "setserverpass",      &ChatCommands::setServerPassHandler,      { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<passwd>"},            "Set server password (use blank to clear)" },
    { "leveldir",           &ChatCommands::setLevelDirHandler,        { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<new level folder>"},  "Set leveldir param on the server (changes levels available)" },
+   {"setgloballevelscript",&ChatCommands::setGlobalLevelScriptHandler,{ STR },       1, ADMIN_COMMANDS,  0,  1,  {"<script>"},             "Change currently running global levelgen script" },
    { "setservername",      &ChatCommands::setServerNameHandler,      { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<name>"},              "Set server name" },
    { "setserverdescr",     &ChatCommands::setServerDescrHandler,     { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<descr>"},             "Set server description" },
    { "deletecurrentlevel", &ChatCommands::deleteCurrentLevelHandler, { },            0, ADMIN_COMMANDS,  0,  1,  {""},                    "Mark current level as deleted" },

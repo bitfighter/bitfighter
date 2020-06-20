@@ -446,6 +446,13 @@ void setLevelDirHandler(ClientGame *game, const Vector<string> &words)
 }
 
 
+void setGlobalLevelScriptHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasAdmin("!!! You don't have permission to set the global levelgen script"))
+      game->changeServerParam(GameConnection::GlobalLevelScript, words);
+}
+
+
 void deleteCurrentLevelHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasAdmin("!!! You don't have permission to delete the current level"))

@@ -97,6 +97,7 @@ void setLevPassHandler         (ClientGame *game, const Vector<string> &args);
 void setServerNameHandler      (ClientGame *game, const Vector<string> &args);
 void setServerDescrHandler     (ClientGame *game, const Vector<string> &args);
 void setLevelDirHandler        (ClientGame *game, const Vector<string> &args);
+void setGlobalLevelScriptHandler(ClientGame *game,const Vector<string> &args);
 void pmHandler                 (ClientGame *game, const Vector<string> &args);
 void muteHandler               (ClientGame *game, const Vector<string> &args);
 void voiceMuteHandler          (ClientGame *game, const Vector<string> &args);
