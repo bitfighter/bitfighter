@@ -1384,8 +1384,8 @@ REGISTER_LUA_SUBCLASS(SpyBug, Burst);
 TNL_IMPLEMENT_NETOBJECT(Seeker);
 
 // Statics
-const F32 Seeker::Radius = 4;
-const F32 Seeker::Mass = 1;
+const F32 Seeker::Radius = 2;
+const F32 Seeker::Mass = 0.2;
 
 const U32 Seeker::SpeedIncreasePerSecond = 300;
 const U32 Seeker::TargetAcquisitionRadius = 400;
