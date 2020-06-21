@@ -914,8 +914,8 @@ void BfObject::damageObject(DamageInfo *theInfo)
 }
 
 
-bool BfObject::collide(BfObject *hitObject)                  { return false; }
-bool BfObject::collided(BfObject *hitObject, U32 stateIndex) { return false; }
+bool BfObject::collide(BfObject *hitObject)                  { return false; } // Checks collisions
+bool BfObject::collided(BfObject *hitObject, U32 stateIndex) { return false; } // Handles collisions
 
 
 Vector<Point> BfObject::getRepairLocations(const Point &repairOrigin)

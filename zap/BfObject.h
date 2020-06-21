@@ -325,8 +325,8 @@ public:
    void writeCompressedVelocity(const Point &vel, U32 max, BitStream *stream);
    void readCompressedVelocity(Point &vel, U32 max, BitStream *stream);
 
-   virtual bool collide(BfObject *hitObject);
-   virtual bool collided(BfObject *otherObject, U32 stateIndex);
+   virtual bool collide(BfObject *hitObject);                     // Checks collisions
+   virtual bool collided(BfObject *otherObject, U32 stateIndex);  // Handles collisions
 
    // Gets location(s) where repair rays should be rendered while object is being repaired
    virtual Vector<Point> getRepairLocations(const Point &repairOrigin);    
