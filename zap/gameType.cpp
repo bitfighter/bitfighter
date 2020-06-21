@@ -3270,7 +3270,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringP
 
 
 // Send an announcement
-TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sSendAnnouncement, (string message), (message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhostParent, 1)
+GAMETYPE_RPC_C2S(GameType, c2sSendAnnouncement, (string message), (message))
 {
    GameConnection *source = (GameConnection *)getRPCSourceConnection();
    ClientInfo *sourceClientInfo = source->getClientInfo();
@@ -3359,9 +3359,7 @@ void GameType::sendAnnouncementFromController(const StringPtr &message)
       if(clientInfo->isRobot())
          continue;
 
-      RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayAnnouncement, (message.getString()));
-
-      clientInfo->getConnection()->postNetEvent(theEvent);
+      s2cDisplayAnnouncement(message.getString());
    }
 }
 
@@ -3408,7 +3406,7 @@ void GameType::sendChat(const StringTableEntry &senderName, ClientInfo *senderCl
 }
 
 
-TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cDisplayAnnouncement, (string message), (message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 1)
+GAMETYPE_RPC_S2C(GameType, s2cDisplayAnnouncement, (string message), (message))
 {
 #ifndef ZAP_DEDICATED
    ClientGame* clientGame = static_cast<ClientGame *>(mGame);
