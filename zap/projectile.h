@@ -318,7 +318,6 @@ private:
 
    S32 mTimeRemaining;
    bool mExploded;
-   bool mBounced;
 
    void initialize(const Point &pos, const Point &vel, F32 angle, BfObject *shooter);
    void acquireTarget();

@@ -1432,7 +1432,6 @@ void Seeker::initialize(const Point &pos, const Point &vel, F32 angle, BfObject 
 
    mTimeRemaining = WeaponInfo::getWeaponInfo(WeaponSeeker).projLiveTime;
    mExploded = false;
-   mBounced = false;
 
    if(!shooter)
    {
@@ -1801,7 +1800,7 @@ bool Seeker::collide(BfObject *otherObj)
    }
 
    // Don't collide with shooter within first 500 ms of shooting
-   if(!mBounced && mShooter.isValid() && mShooter == otherObj && getGame()->getCurrentTime() - getCreationTime() < 500)
+   if(mShooter.isValid() && mShooter == otherObj && getGame()->getCurrentTime() - getCreationTime() < 500)
       return false;
 
    return isWeaponCollideableType(otherObj->getObjectTypeNumber());     // Includes bullets... well, includes most everything
@@ -1811,28 +1810,9 @@ bool Seeker::collide(BfObject *otherObj)
 // Returns true if collision was handled, false if not
 bool Seeker::collided(BfObject *otherObj, U32 stateIndex)
 {
-   static const F32 MAX_VEL_TO_BOUNCE = 500;    // Slower than this, and seekers bounce off one another.  Faster, and they explode.
-
    // Seeker hits seeker and transfers momentum only (no explosion)
    if(otherObj->getObjectTypeNumber() == SeekerTypeNumber)
       return false;
-
-   // Seeker hits ship
-   if(isShipType(otherObj->getObjectTypeNumber()))
-   {
-      TNLAssert(dynamic_cast<Ship *>(otherObj), "Not a ship");
-      Ship *ship = static_cast<Ship *>(otherObj);
-      if(ship->isModulePrimaryActive(ModuleShield))
-      {
-         // Seekers bounce off shields
-         Point p = getPos(stateIndex) - ship->getPos(stateIndex);
-         p.normalize(getVel(stateIndex).len());
-         setVel(stateIndex, p);
-         setAngle(stateIndex, p.ATAN2());
-         mBounced = true;
-         return true;
-      }
-   }
 
    if(stateIndex == ActualState)
    {
