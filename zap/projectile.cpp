@@ -1813,19 +1813,9 @@ bool Seeker::collided(BfObject *otherObj, U32 stateIndex)
 {
    static const F32 MAX_VEL_TO_BOUNCE = 500;    // Slower than this, and seekers bounce off one another.  Faster, and they explode.
 
-   // Seeker hits seeker
-   if(otherObj->getObjectTypeNumber() == SeekerTypeNumber)  // Do they bounce or explode?
-   {
-      Seeker *other = static_cast<Seeker *>(otherObj);
-      if(!isGhost() && stateIndex == ActualState && getVel().distSquared(other->getVel()) > sq(MAX_VEL_TO_BOUNCE))
-      {
-         // They explode
-         handleCollision(other, getActualPos());
-         other->handleCollision(this, other->getActualPos());
-         return true;
-      }
+   // Seeker hits seeker and transfers momentum only (no explosion)
+   if(otherObj->getObjectTypeNumber() == SeekerTypeNumber)
       return false;
-   }
 
    // Seeker hits ship
    if(isShipType(otherObj->getObjectTypeNumber()))
