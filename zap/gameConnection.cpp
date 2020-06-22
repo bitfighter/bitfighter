@@ -2448,10 +2448,7 @@ void GameConnection::displayWelcomeMessage()
    if(message == "")
       return;
 
-//   mServerGame->getGameType()->s2cDisplayAnnouncement(message);
-   logprintf("WELCOME MESSAGE: %s", message.c_str());
-
-   const StringTableEntry serverWelcomeName = "WELCOME MESSAGE";
+   const StringTableEntry serverWelcomeName = "Server Welcome";
 
    StringTableEntry recipient = mClientInfo->getName();
    mServerGame->getGameType()->sendPrivateChat(serverWelcomeName, recipient, message.c_str());
