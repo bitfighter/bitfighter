@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+   //------------------------------------------------------------------------------
 // Copyright Chris Eykamp
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
@@ -101,9 +101,6 @@ namespace Zap {
 
       void HealthGaugeRenderer::render(F32 health, S32 gaugeBottom)
       {
-         static const S32 GaugeBottomMargin = UserInterface::vertMargin - 5;
-
-
          const F32 xul = F32(GaugeLeftMargin);
          const F32 yul = gaugeBottom;
 
