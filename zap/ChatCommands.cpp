@@ -435,7 +435,14 @@ void setServerNameHandler(ClientGame *game, const Vector<string> &words)
 void setServerDescrHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasAdmin("!!! You don't have permission to set the server description"))
-      game->changeServerParam(GameConnection::ServerDescr, words);
+      game->changeServerParam(GameConnection::ServerDescription, words);
+}
+
+
+void setServerWelcomeMsgHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasAdmin("!!! You don't have permission to set the server welcome message"))
+      game->changeServerParam(GameConnection::ServerWelcomeMessage, words);
 }
 
 

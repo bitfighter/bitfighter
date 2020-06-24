@@ -107,8 +107,9 @@ private:
    // Some items will be passthroughs to the underlying INI object; however, if a value can differ from the INI setting 
    // (such as when it can be overridden from the cmd line, or is set remotely), then we'll need to store the working value locally.
 
-   string mHostName;                   // Server name used when hosting a game (default set in config.h, set in INI or on cmd line)
-   string mHostDescr;                  // Brief description of host
+   string mHostName;             // Server name used when hosting a game (default set in config.h, set in INI or on cmd line)
+   string mHostDescr;            // Brief description of host
+   string mWelcomeMessage;       // Message displayed to players when they join server (blank to disable)
 
    string mPlayerName, mPlayerPassword;   // Resolved name/password, either from INI for cmdLine or login screen
    bool mPlayerNameSpecifiedOnCmdLine;
@@ -173,7 +174,7 @@ public:
    void setHostDescr(const string &hostDescr, bool updateINI);
 
    string getWelcomeMessage() const;
-   void setWelcomeMessage(const string &welcomeMessage);
+   void setWelcomeMessage(const string &welcomeMessage, bool updateINI);
 
    string getGlobalLevelgenScript() const;
    void setGlobalLevelgenScript(const string& GlobalLevelgenScript);

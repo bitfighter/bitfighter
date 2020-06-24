@@ -129,7 +129,8 @@ public:
       OwnerPassword,
       ServerPassword,
       ServerName,
-      ServerDescr,
+      ServerDescription,
+      ServerWelcomeMessage,
       LevelDir, 
       // PlaylistFile,     // TODO for 020 uncomment this and handle it!
       DeleteLevel,  
