@@ -548,6 +548,10 @@ S32 NexusGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEven
    // 10 * n(n+1)/2
    // This means 1 flag == 10 points; 2 flags == 30; 3 flags == 60, etc.
    S32 score = (10 * flags * (flags + 1)) / 2;
+   // Min number of flags from a single drop required to achieve a certain
+   // score can be found by using the inverse of above:
+   // n = upper( (-1 + sqrt(1 + 4*2*score/10)) / 2 )
+
 
    if(scoreGroup == TeamScore)
    {
