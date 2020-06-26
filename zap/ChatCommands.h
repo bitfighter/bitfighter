@@ -127,6 +127,7 @@ void globalMuteHandler         (ClientGame *game, const Vector<string> &args);
 void shuffleTeams              (ClientGame *game, const Vector<string> &args);
 void downloadMapHandler        (ClientGame *game, const Vector<string> &args);
 void rateMapHandler            (ClientGame *game, const Vector<string> &args);
+void commentMapHandler         (ClientGame *game, const Vector<string> &args);
 void pauseHandler              (ClientGame *game, const Vector<string> &args);
 
 

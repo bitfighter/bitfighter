@@ -129,12 +129,13 @@ set(CLIENT_SOURCES
 	FpsRenderer.cpp
 	gameObjectRender.cpp
 	GameRecorderPlayback.cpp
-   GaugeRenderer.cpp
+    GaugeRenderer.cpp
 	HelpItemManager.cpp
 	HelperManager.cpp
 	helperMenu.cpp
 	Joystick.cpp
 	JoystickRender.cpp
+    LevelDatabaseCommentThread.cpp
 	LevelDatabaseDownloadThread.cpp
 	LevelDatabaseRateThread.cpp
 	LevelDatabaseUploadThread.cpp

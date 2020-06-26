@@ -582,6 +582,31 @@ bool ClientGame::canRateLevel() const
 }
 
 
+// We get here when the player toggles a rating or uses the /rating command
+bool ClientGame::canCommentLevel() const
+{
+   if(!isLevelInDatabase())
+   {
+      displayErrorMessage("!!! Level is not in database, so no comment can be posted");
+      return false;
+   }
+
+   if(!isConnectedToMaster())
+   {
+      displayErrorMessage("!!! You can't comment on a level until we've connected to the master server");
+      return false;
+   }
+
+   if(!getClientInfo()->isAuthenticated())
+   {
+      displayErrorMessage("!!! Only registered players can post comments on levels (register in forums)");
+      return false;
+   }
+
+   return true;
+}
+
+
 class EditorUserInterface;
 
 void ClientGame::levelIsNotReallyInTheDatabase()
