@@ -1122,7 +1122,7 @@ S32 Teleporter::lua_setEngineered(lua_State *L)
  *
  * @return milliseconds between teleporter usages
  *
- * @desc This is the minimum time a ship must wait to use the teleporter after
+ * @descr This is the minimum time a ship must wait to use the teleporter after
  * another ship has just entered
  */
 S32 Teleporter::lua_getDelay(lua_State *L)

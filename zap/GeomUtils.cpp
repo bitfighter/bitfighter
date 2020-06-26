@@ -1962,7 +1962,7 @@ GENERATE_LUA_STATIC_METHODS_TABLE(Geom, LUA_STATIC_METHODS);
  *
  * @brief Perform a clipping operation on sets of polygons.
  *
- * @desc
+ * @descr
  * This function uses Bitfighter's polygon manipulation utilities to perform
  * boolean operations on sets of polygons. While these utilities are generally
  * robust, there are a few caveats and some inputs may cause failure.
@@ -2029,7 +2029,7 @@ S32 lua_clipPolygons(lua_State* L)
  * @brief
  * Perform a clipping operation on sets of polygons, keeping holes.
  *
- * @desc
+ * @descr
  * This function uses Bitfighter's polygon manipulation utilities to perform
  * boolean operations on sets of polygons, keeping holes, and returning the
  * result as a tree of polygons and holes. This is useful when performing
@@ -2086,7 +2086,7 @@ S32 lua_clipPolygonsAsTree(lua_State* L)
  * @brief
  * Offset polygons by the given offset.
  *
- * @desc
+ * @descr
  * This offsets polygons using a 'miter' join type.
  *
  * If the input offset generates polygons that overlap, the output can
@@ -2128,7 +2128,7 @@ S32 lua_offsetPolygons(lua_State *L)
  * @brief
  * Break up polygons into triangles.
  *
- * @desc
+ * @descr
  * Performs a Constrained Delauney Triangulation on the input. This function
  * is meant to be used for breaking complex polygons into pieces which can then
  * be manipulated either in the editor or through more processing.
@@ -2159,7 +2159,7 @@ S32 lua_triangulate(lua_State *L)
  * @brief
  * Merge triangles into convex polygons
  *
- * @desc
+ * @descr
  * Merges triangles into convex polygons using the Recast library. This
  * function is meant for use as a best-effort to clean up triangles
  * output by geometric operations.
@@ -2196,7 +2196,7 @@ S32 lua_polyganize(lua_State *L)
  * @luafunc static mixed Geom::segmentsIntersect(point a1, point a2, point b1, point b2)
  * @brief Finds intersection of the linesegments (a1, a2) and (b1, b2)
  *
- * @desc Determines if and "when" the line segments a and b intersect. The
+ * @descr Determines if and "when" the line segments a and b intersect. The
  * boolean return value is `true` if the segments intersect. The number return
  * value is a "time" `t` along the line a corresponding to where they intersect.
  * When the first return value is `true` if and only if the second return value

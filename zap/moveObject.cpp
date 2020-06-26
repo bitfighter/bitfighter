@@ -1830,7 +1830,7 @@ REGISTER_LUA_SUBCLASS(Asteroid, MoveObject);
  * 
  * @brief Get this asteroid's current size index.
  * 
- * @desc Index 1 represents the asteroid's initial size. After it has been
+ * @descr Index 1 represents the asteroid's initial size. After it has been
  * broken once, its size index will be 2, and so on. This method will always
  * return an integer between 1 and the value returned by the getSizeCount()
  * method (inclusive).

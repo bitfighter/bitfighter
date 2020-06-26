@@ -1267,7 +1267,7 @@ S32 EngineeredItem::lua_setHealRate(lua_State *L)
 /**
  * @luafunc bool EngineeredItem::getEngineered()
  * 
- * @breif Get whether the item can be totally destroyed
+ * @brief Get whether the item can be totally destroyed
  * 
  * @return `true` if the item can be destroyed.
  */

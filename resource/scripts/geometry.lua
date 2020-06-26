@@ -190,7 +190,7 @@ end
 --[[ 
 @luafunc Geom.transform(geom, tx, ty, sx, sy, angle)
 @brief   Transform \em geom by scaling, rotating, and translating.
-@desc    Apply a full transformation to the points in \em geom, doing a combination of the above in a single operation.  
+@descr    Apply a full transformation to the points in \em geom, doing a combination of the above in a single operation.
          Scales, rotates, then translates.  Performing these operations together is more effient than applying them
          individually.
 
@@ -231,7 +231,7 @@ end
 --[[ 
 @luafunc Geom.coordsToPoints(coordList)
 @brief   Convert a table of coordinates into a table of points.
-@desc    Parse a list of coordinates and generate points for every pair.  An even number of coordinates 
+@descr    Parse a list of coordinates and generate points for every pair.  An even number of coordinates
          should be provided.  If an odd number is supplied, 0 will be used for the missing coordinate.
 
 

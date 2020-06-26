@@ -385,7 +385,7 @@ S32 Team::lua_getPlayers(lua_State *L)
  *
  * @brief Get the team color
  *
- * @desc
+ * @descr
  * The team color is a table with 3 values: red, green, blue.  These are returned
  * as integers in the range of 0-255
  *
