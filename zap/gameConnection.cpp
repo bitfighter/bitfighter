@@ -948,6 +948,16 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
 }
 
 
+TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayAnnouncement, (string message), (message),
+                  NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
+{
+#ifndef ZAP_DEDICATED
+   ClientGame* clientGame = getClientGame();
+   clientGame->gotAnnouncement(message);
+#endif
+}
+
+
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetRole, (RangedU32<0,ClientInfo::MaxRoles> role, bool notify), (role, notify),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
@@ -2461,10 +2471,7 @@ void GameConnection::displayWelcomeMessage()
    if(message == "")
       return;
 
-   const StringTableEntry serverWelcomeName = "Server Welcome";
-
-   StringTableEntry recipient = mClientInfo->getName();
-   mServerGame->getGameType()->sendPrivateChat(serverWelcomeName, recipient, message.c_str());
+   s2cDisplayAnnouncement(message);
 }
 
 
