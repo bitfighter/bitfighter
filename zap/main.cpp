@@ -107,6 +107,7 @@ using namespace TNL;
 #  include "VideoSystem.h"
 #  include "ClientGame.h"
 #  include "FontManager.h"
+#  include "AppIntegrator.h"
 #endif
 
 #include "ServerGame.h"
@@ -361,6 +362,9 @@ void idle()
 #ifndef ZAP_DEDICATED
       if(!dedicated)
          display();          // Draw the screen if not dedicated
+
+      // Run 3rd-party app things
+      AppIntegrationController::idle(U32(deltaT));
 #endif
       deltaT = 0;
 
@@ -496,6 +500,7 @@ void shutdownBitfighter()
       SDL_QuitSubSystem(SDL_INIT_VIDEO);
 
       FontManager::cleanup();
+      AppIntegrationController::shutdown();
 #endif
    }
 
@@ -1269,6 +1274,9 @@ int main(int argc, char **argv)
             uiManager->activate(ui);
          }
       }
+
+      // Init 3rd-party app integrations
+      AppIntegrationController::init();
 
 #endif   // !ZAP_DEDICATED
 

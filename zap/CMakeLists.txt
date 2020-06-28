@@ -14,6 +14,7 @@ string(REGEX REPLACE "#define[ ]+${buildVersionString}[ ]+([0-9]+).*" "\\1" BF_B
 message(STATUS "Bitfighter build version: ${BF_BUILD_VERSION}")
 
 set(SHARED_SOURCES
+	AppIntegrator.cpp
 	BanList.cpp
 	barrier.cpp
 	BfObject.cpp
@@ -229,6 +230,7 @@ set(CLIENT_LIBS
 	${SPEEX_LIBRARIES}
 	${VORBIS_LIBRARIES}
 	${VORBISFILE_LIBRARIES}
+	${DISCORD_LIBRARY}
 )
 
 BF_PLATFORM_APPEND_LIBS()

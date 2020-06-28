@@ -21,6 +21,7 @@ option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires S
 option(ALURE_DISABLE_MP3 "Disable dynamic loading of libmpg123.  Disables mp3 completely." NO)
 option(NO_THREADS "Disable usage of threads in TNL.  May cause issues." NO)
 option(LUAJIT_BUILTIN "Use built-in LuaJIT.  Recommended." YES)
+option(DISCORD "Integrate Discord RPC calls." YES)
 
 
 #
@@ -200,6 +201,16 @@ endif()
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/lua/${LUA_LIB}")
 	add_subdirectory("${CMAKE_SOURCE_DIR}/lua/${LUA_LIB}")
+endif()
+
+# Discord
+if(DISCORD)
+	set(BUILD_EXAMPLES OFF CACHE BOOL "Build example apps")
+	
+	add_subdirectory(discord-rpc)
+	
+	set(DISCORD_LIBRARY discord-rpc)
+	add_definitions(-DBF_DISCORD)
 endif()
 
 
