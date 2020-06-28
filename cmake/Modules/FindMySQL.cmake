@@ -41,4 +41,4 @@ endif()
 
 # Handle the QUIETLY and REQUIRED arguments and set XXX_FOUND to TRUE if all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(MYSQL DEFAULT_MSG MYSQL_LIBRARIES MYSQL_INCLUDE_DIR)
+find_package_handle_standard_args(MySQL DEFAULT_MSG MYSQL_LIBRARIES MYSQL_INCLUDE_DIR)
