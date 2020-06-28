@@ -238,7 +238,8 @@ void DiscordIntegrator::updateBitfighterState()
    {
       newImportantUI = uiManager->getUI<GameUserInterface>();
 
-      state = "In battle";
+      // state/details set when changing levels
+//      state = "In battle";
       largeImage = "ship_red";
       smallImage = "ship_red";
    }

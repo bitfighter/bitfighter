@@ -31,6 +31,7 @@
 
 #include "GameRecorderPlayback.h"
 #include "UIGame.h"
+#include "AppIntegrator.h"
 
 using namespace TNL;
 
@@ -1036,6 +1037,11 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
    getUIManager()->onPlayerJoined(clientInfo->getName().getString(), isLocalClient, playAlert, showMessage);
 
    mGameType->updateLeadingPlayerAndScore();
+
+   // Notify integrated apps of new level
+   string details = mGameType->getLevelName() == "" ? "Unnamed Level" : mGameType->getLevelName();
+   string state = "In " + mConnectionToServer->getServerName();
+   AppIntegrationController::updateState(state, details);
 }
 
 
