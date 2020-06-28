@@ -14,7 +14,6 @@ string(REGEX REPLACE "#define[ ]+${buildVersionString}[ ]+([0-9]+).*" "\\1" BF_B
 message(STATUS "Bitfighter build version: ${BF_BUILD_VERSION}")
 
 set(SHARED_SOURCES
-	AppIntegrator.cpp
 	BanList.cpp
 	barrier.cpp
 	BfObject.cpp
@@ -115,6 +114,7 @@ set(EXTRA_SOURCES
 
 # Client-only classes
 set(CLIENT_SOURCES 
+	AppIntegrator.cpp
 	AToBScroller.cpp
 	ChatCommands.cpp
 	ChatHelper.cpp
