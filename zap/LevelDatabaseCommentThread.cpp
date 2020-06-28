@@ -65,8 +65,6 @@ void LevelDatabaseCommentThread::run()
    req.setData("data[Comment][level_id]",   mLevelId);
    req.setData("data[Comment][text]",       mComment);
 
-   logprintf("2 level id: %s", mLevelId);
-
    if(!req.send())
    {
       errorNumber = 1;
