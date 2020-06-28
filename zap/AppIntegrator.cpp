@@ -12,6 +12,14 @@
 #include <cstdio>
 #include <cstring>
 
+#ifdef BF_DISCORD
+#  include "GameManager.h"
+#  include "ClientGame.h"
+#  include "UIManager.h"
+#  include "UIGame.h"
+#  include "UIEditor.h"
+#endif
+
 
 namespace Zap
 {
@@ -55,7 +63,7 @@ AppIntegrationController::~AppIntegrationController()
 void AppIntegrationController::init()
 {
    // Instantiate and add any integrators here
-#if BF_DISCORD
+#ifdef BF_DISCORD
    mAppIntegrators.push_back(new DiscordIntegrator());
 #endif
 
@@ -163,8 +171,8 @@ void DiscordIntegrator::init()
 
 
    // Now set our presence to be in game!
-   mDiscordPresence.state = "Main menu (test)";
-   mDiscordPresence.details = "Figuring out how to use a mouse";
+   mDiscordPresence.state = "";
+   mDiscordPresence.details = "";
 
    mDiscordPresence.startTimestamp = mStartTime;
 //   mDiscordPresence.endTimestamp = time(0) + 5 * 60;
@@ -187,50 +195,97 @@ void DiscordIntegrator::shutdown()
 
 void DiscordIntegrator::runCallbacks()
 {
+   updateBitfighterState();
+
+   // Actually run the callbacks
    Discord_RunCallbacks();
 }
 
+
+void DiscordIntegrator::updateBitfighterState()
+{
+   const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
+
+   // No client game?
+   if(clientGames->size() == 0)
+      return;
+
+   UIManager *uiManager = clientGames->get(0)->getUIManager();
+
+   // Let's update the rich presence based on what UI we're in
+   static UserInterface *currentImportantUI = NULL;
+   static UserInterface *newImportantUI = NULL;
+
+   string state = "";
+   if(uiManager->isCurrentUI<EditorUserInterface>() || uiManager->cameFrom<EditorUserInterface>())
+   {
+      state = "Editing a map";
+      newImportantUI = uiManager->getUI<EditorUserInterface>();
+   }
+   else if(uiManager->isCurrentUI<GameUserInterface>() || uiManager->cameFrom<GameUserInterface>())
+   {
+      state = "In battle";
+      newImportantUI = uiManager->getUI<GameUserInterface>();
+   }
+   else
+   {
+      state = "In menus";
+      newImportantUI = uiManager->getUI<MainMenuUserInterface>();
+   }
+
+   // Update state only on UI change
+   if(newImportantUI != currentImportantUI)
+   {
+      currentImportantUI = newImportantUI;
+
+      updateState(state);
+   }
+}
+
+
 void DiscordIntegrator::updateState(const string &state)
 {
-
+   mDiscordPresence.state = state.c_str();
+   Discord_UpdatePresence(&mDiscordPresence);
 }
 
 void DiscordIntegrator::updateDetails(const string &details)
 {
-
+   mDiscordPresence.details = details.c_str();
+   Discord_UpdatePresence(&mDiscordPresence);
 }
 
 
 // Discord Callbacks
 void DiscordIntegrator::handleDiscordReady(const DiscordUser *connectedUser)
 {
-//   logprintf("\nDiscord: connected to user %s#%s - %s\n", connectedUser->username,
-//         connectedUser->discriminator, connectedUser->userId);
+   logprintf("Discord: connected to user %s#%s - %s", connectedUser->username,
+         connectedUser->discriminator, connectedUser->userId);
 }
 
 void DiscordIntegrator::handleDiscordDisconnected(int errcode, const char *message)
 {
-//   logprintf("\nDiscord: disconnected (%d: %s)\n", errcode, message);
+//   logprintf("Discord: disconnected (%d: %s)", errcode, message);
 }
 
 void DiscordIntegrator::handleDiscordError(int errcode, const char *message)
 {
-//   logprintf("\nDiscord: error (%d: %s)\n", errcode, message);
+//   logprintf("Discord: error (%d: %s)", errcode, message);
 }
 
 void DiscordIntegrator::handleDiscordJoin(const char *secret)
 {
-//   logprintf("\nDiscord: join (%s)\n", secret);
+//   logprintf("Discord: join (%s)", secret);
 }
 
 void DiscordIntegrator::handleDiscordSpectate(const char *secret)
 {
-//   logprintf("\nDiscord: spectate (%s)\n", secret);
+//   logprintf("Discord: spectate (%s)", secret);
 }
 
 void DiscordIntegrator::handleDiscordJoinRequest(const DiscordUser *request)
 {
-//   logprintf("\nDiscord: join request from %s#%s - %s\n", request->username,
+//   logprintf("Discord: join request from %s#%s - %s", request->username,
 //         request->discriminator, request->userId);
 }
 

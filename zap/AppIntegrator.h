@@ -87,6 +87,9 @@ public:
 
    void updateState(const string &state);
    void updateDetails(const string &details);
+
+   void updateBitfighterState();
+
 };
 #endif
 
