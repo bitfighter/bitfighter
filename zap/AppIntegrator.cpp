@@ -224,7 +224,6 @@ void DiscordIntegrator::updateBitfighterState()
    string state = mPersistentPresence.state;
    string details = mPersistentPresence.details;
    string largeImage = mPersistentPresence.largeImageKey;
-   string smallImage = mPersistentPresence.smallImageKey;
    if(uiManager->isCurrentUI<EditorUserInterface>() || uiManager->cameFrom<EditorUserInterface>())
    {
       newImportantUI = uiManager->getUI<EditorUserInterface>();
@@ -232,7 +231,6 @@ void DiscordIntegrator::updateBitfighterState()
       state = "In editor";
       details = "";
       largeImage = "ship_green";
-      smallImage = "ship_green";
    }
    else if(uiManager->isCurrentUI<GameUserInterface>() || uiManager->cameFrom<GameUserInterface>())
    {
@@ -241,7 +239,6 @@ void DiscordIntegrator::updateBitfighterState()
       // state/details set when changing levels
 //      state = "In battle";
       largeImage = "ship_red";
-      smallImage = "ship_red";
    }
    else
    {
@@ -250,7 +247,6 @@ void DiscordIntegrator::updateBitfighterState()
       state = "In menus";
       details = "";
       largeImage = "ship_blue";
-      smallImage = "ship_blue";
    }
 
    // Update state only on UI change
@@ -261,7 +257,6 @@ void DiscordIntegrator::updateBitfighterState()
       mPersistentPresence.state = state;
       mPersistentPresence.details = details;
       mPersistentPresence.largeImageKey = largeImage;
-      mPersistentPresence.smallImageKey = smallImage;
 
       // Reset time
       mPersistentPresence.startTimestamp = time(0);
