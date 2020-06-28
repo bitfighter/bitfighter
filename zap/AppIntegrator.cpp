@@ -14,6 +14,7 @@
 
 #ifdef BF_DISCORD
 #  include "GameManager.h"
+#  include "gameType.h"
 #  include "ClientGame.h"
 #  include "UIManager.h"
 #  include "UIGame.h"
@@ -142,7 +143,7 @@ DiscordIntegrator::DiscordIntegrator()
 {
    // Do nothing
    mStartTime = 0;
-   mDiscordPresence = DiscordRichPresence();
+   mPersistentPresence = PersistentRichPresence();
 }
 
 DiscordIntegrator::~DiscordIntegrator()
@@ -153,8 +154,11 @@ DiscordIntegrator::~DiscordIntegrator()
 void DiscordIntegrator::init()
 {
    mStartTime = time(0);
-   // Guarantee memory
-   memset(&mDiscordPresence, 0, sizeof(mDiscordPresence));
+
+   // Guarantee memory (sort of). internal const char* values can lose info so
+   // We'll use our PersistentRichPresence object to hold onto it and reset the
+   // values in this
+   memset(&mRichPresence, 0, sizeof(mRichPresence));
 
    // Set function handlers for various discord actions
    DiscordEventHandlers handlers;
@@ -170,22 +174,22 @@ void DiscordIntegrator::init()
    Discord_Initialize(discordClientId.c_str(), &handlers, 1, NULL);
 
 
-   // Now set our presence to be in game!
-   mDiscordPresence.state = "";
-   mDiscordPresence.details = "";
+   // Now set our persistent presence to be in game!
+   mPersistentPresence.state = "";
+   mPersistentPresence.details = "";
 
-   mDiscordPresence.startTimestamp = mStartTime;
+   mPersistentPresence.startTimestamp = mStartTime;
 //   mDiscordPresence.endTimestamp = time(0) + 5 * 60;
-   mDiscordPresence.largeImageKey = "ship_blue";
-   mDiscordPresence.largeImageText = "BITFIGHTER";
+   mPersistentPresence.largeImageKey = "ship_blue";
+   mPersistentPresence.largeImageText = "BITFIGHTER";
 //   mDiscordPresence.smallImageKey = "ship_blue";
 //   mDiscordPresence.smallImageText = "ptb-small";
 
-   // There are other memebers you can set, see DiscordRichPresence struct in
+   // There are other members you can set, see DiscordRichPresence struct in
    // discord_rpc.h
 
    // Always call this if changing anything about the rich-presence
-   Discord_UpdatePresence(&mDiscordPresence);
+   updatePresence();
 }
 
 void DiscordIntegrator::shutdown()
@@ -210,27 +214,42 @@ void DiscordIntegrator::updateBitfighterState()
    if(clientGames->size() == 0)
       return;
 
-   UIManager *uiManager = clientGames->get(0)->getUIManager();
+   ClientGame *clientGame = clientGames->get(0);
+   UIManager *uiManager = clientGame->getUIManager();
 
    // Let's update the rich presence based on what UI we're in
    static UserInterface *currentImportantUI = NULL;
    static UserInterface *newImportantUI = NULL;
 
-   string state = "";
+   string state = mPersistentPresence.state;
+   string details = mPersistentPresence.details;
+   string largeImage = mPersistentPresence.largeImageKey;
+   string smallImage = mPersistentPresence.smallImageKey;
    if(uiManager->isCurrentUI<EditorUserInterface>() || uiManager->cameFrom<EditorUserInterface>())
    {
-      state = "Editing a map";
       newImportantUI = uiManager->getUI<EditorUserInterface>();
+
+      state = "In editor";
+      details = "";
+      largeImage = "ship_green";
+      smallImage = "ship_green";
    }
    else if(uiManager->isCurrentUI<GameUserInterface>() || uiManager->cameFrom<GameUserInterface>())
    {
-      state = "In battle";
       newImportantUI = uiManager->getUI<GameUserInterface>();
+
+      state = "In battle";
+      largeImage = "ship_red";
+      smallImage = "ship_red";
    }
    else
    {
-      state = "In menus";
       newImportantUI = uiManager->getUI<MainMenuUserInterface>();
+
+      state = "In menus";
+      details = "";
+      largeImage = "ship_blue";
+      smallImage = "ship_blue";
    }
 
    // Update state only on UI change
@@ -238,21 +257,57 @@ void DiscordIntegrator::updateBitfighterState()
    {
       currentImportantUI = newImportantUI;
 
-      updateState(state);
+      mPersistentPresence.state = state;
+      mPersistentPresence.details = details;
+      mPersistentPresence.largeImageKey = largeImage;
+      mPersistentPresence.smallImageKey = smallImage;
+
+      // Reset time
+      mPersistentPresence.startTimestamp = time(0);
+
+      updatePresence();
    }
+}
+
+
+// Always call this function instead of Discord_UpdatePresence() directly
+// This will re-fill out a DiscordRichPresence object from our persistent
+// object so memory errors will not occur.
+void DiscordIntegrator::updatePresence()
+{
+   // Refresh the DiscordRichPresence with memory-safe values
+   mRichPresence.state            = mPersistentPresence.state.c_str();
+   mRichPresence.details          = mPersistentPresence.details.c_str();
+   mRichPresence.startTimestamp   = mPersistentPresence.startTimestamp;
+   mRichPresence.endTimestamp     = mPersistentPresence.endTimestamp;
+   mRichPresence.largeImageKey    = mPersistentPresence.largeImageKey.c_str();
+   mRichPresence.largeImageText   = mPersistentPresence.largeImageText.c_str();
+   mRichPresence.smallImageKey    = mPersistentPresence.smallImageKey.c_str();
+   mRichPresence.smallImageText   = mPersistentPresence.smallImageText.c_str();
+   mRichPresence.partyId          = mPersistentPresence.partyId.c_str();
+   mRichPresence.partySize        = mPersistentPresence.partySize;
+   mRichPresence.partyMax         = mPersistentPresence.partyMax;
+   mRichPresence.matchSecret      = mPersistentPresence.matchSecret.c_str();
+   mRichPresence.joinSecret       = mPersistentPresence.joinSecret.c_str();
+   mRichPresence.spectateSecret   = mPersistentPresence.spectateSecret.c_str();
+   mRichPresence.instance         = mPersistentPresence.instance;
+
+   // Update the presence
+   Discord_UpdatePresence(&mRichPresence);
 }
 
 
 void DiscordIntegrator::updateState(const string &state)
 {
-   mDiscordPresence.state = state.c_str();
-   Discord_UpdatePresence(&mDiscordPresence);
+   mPersistentPresence.state = state;
+   updatePresence();
 }
+
 
 void DiscordIntegrator::updateDetails(const string &details)
 {
-   mDiscordPresence.details = details.c_str();
-   Discord_UpdatePresence(&mDiscordPresence);
+   mPersistentPresence.details = details;
+   updatePresence();
 }
 
 

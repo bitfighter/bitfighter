@@ -62,13 +62,36 @@ public:
 
 #include "discord_rpc.h"
 
+// This struct mirrors the
+struct PersistentRichPresence
+{
+   string state;   /* max 128 bytes */
+   string details; /* max 128 bytes */
+   S64 startTimestamp;
+   S64 endTimestamp;
+   string largeImageKey;  /* max 32 bytes */
+   string largeImageText; /* max 128 bytes */
+   string smallImageKey;  /* max 32 bytes */
+   string smallImageText; /* max 128 bytes */
+   string partyId;        /* max 128 bytes */
+   S32 partySize;
+   S32 partyMax;
+   string matchSecret;    /* max 128 bytes */
+   string joinSecret;     /* max 128 bytes */
+   string spectateSecret; /* max 128 bytes */
+   S8 instance;
+};
+
+
+
 class DiscordIntegrator : public AppIntegrator
 {
 private:
    static string discordClientId;
 
    S64 mStartTime;
-   DiscordRichPresence mDiscordPresence;
+   PersistentRichPresence mPersistentPresence;
+   DiscordRichPresence   mRichPresence;
 
    static void handleDiscordReady(const DiscordUser *connectedUser);
    static void handleDiscordDisconnected(int errcode, const char *message);
@@ -84,6 +107,8 @@ public:
    void init();
    void shutdown();
    void runCallbacks();
+
+   void updatePresence();
 
    void updateState(const string &state);
    void updateDetails(const string &details);
