@@ -60,7 +60,7 @@ public:
 
 #ifdef BF_DISCORD
 
-#include "discord_rpc.h"
+#include "../discord-rpc/include/discord_rpc.h"
 
 // This struct mirrors the
 struct PersistentRichPresence
