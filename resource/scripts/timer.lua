@@ -30,7 +30,7 @@ Based on code:
 A timer object that can be used to schedule arbitrary events to be executed at some time in the future. 
 All times are given in milliseconds.
 
-@usage There are four basic timer functions:
+@details There are four basic timer functions:
 @code 
    -- Execute the event once in 'delay' ms
    Timer:scheduleOnce(event, delay)
@@ -101,7 +101,7 @@ end
 
 
 --[[
-@luafunc Timer:scheduleOnce(event, delay)
+@luafunc Timer:scheduleOnce(function event, int delay)
 @brief   Schedules an event to run one time, after \em delay ms.
 @param   event - The event to be run.
 @param   delay - The delay (in ms) when the the event should be run.
@@ -118,7 +118,7 @@ end
 
 
 --[[
-@luafunc Timer:scheduleRepeating(event, delay)
+@luafunc Timer:scheduleRepeating(function event, int delay)
 @brief   Schedules an event to be run every \em delay ms.
 @param   event - The event to be run.
 @param   delay - The time (in ms) which \em event repeats.
@@ -134,7 +134,7 @@ end
 
 
 --[[
-@luafunc Timer:scheduleRepeatWhileTrue(event, delay)
+@luafunc Timer:scheduleRepeatWhileTrue(function event, int delay)
 @brief   Schedules an event to run one every \em delay ms until event returns true.  
          The event will be repeated only if the call to 'event' returns true.
 @param   event - The event to be run.

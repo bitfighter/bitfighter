@@ -1375,7 +1375,7 @@ REGISTER_LUA_CLASS(BfObject);
 /**
  * @luafunc ObjType BfObject::getObjType()
  * 
- * @brief Gets an object's \ref ObjType.
+ * @brief Gets an object's \ref ObjTypeEnum.
  * 
  * @code
  *   obj = TestItem.new()

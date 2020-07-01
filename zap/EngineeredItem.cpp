@@ -1278,7 +1278,7 @@ S32 EngineeredItem::lua_getEngineered(lua_State *L)
 
 
 /**
- * @luafunc EngineeredItem::setEngineered(engineered)
+ * @luafunc EngineeredItem::setEngineered(bool engineered)
  * 
  * @brief Sets whether the item can be destroyed when its health reaches zero.
  * 
