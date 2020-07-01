@@ -198,6 +198,15 @@ foreach my $file (@files) {
             next;
          }
 
+         # Look for @geom, and replace with @par Geometry \n
+         if( $line =~ m|\@geom\s+(.*)$| ) {
+             print($line);
+             my $body = $1;
+             print($body);
+             push(@comments,"\\par Geometry\n$body");
+             next;
+         }
+
          # Look for:  * @luafunc  retval BfObject::getClassID(p1, p2); retval and p1/p2 are optional
          if( $line =~ m|\@luafunc\s+(.*)$| ) {     
             # In C++ code, we use "::" to separate classes from functions (class::func); in Lua, we use "." (class.func).
