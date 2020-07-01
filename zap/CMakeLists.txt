@@ -114,6 +114,7 @@ set(EXTRA_SOURCES
 
 # Client-only classes
 set(CLIENT_SOURCES 
+	AppIntegrator.cpp
 	AToBScroller.cpp
 	ChatCommands.cpp
 	ChatHelper.cpp
@@ -129,12 +130,13 @@ set(CLIENT_SOURCES
 	FpsRenderer.cpp
 	gameObjectRender.cpp
 	GameRecorderPlayback.cpp
-   GaugeRenderer.cpp
+    GaugeRenderer.cpp
 	HelpItemManager.cpp
 	HelperManager.cpp
 	helperMenu.cpp
 	Joystick.cpp
 	JoystickRender.cpp
+    LevelDatabaseCommentThread.cpp
 	LevelDatabaseDownloadThread.cpp
 	LevelDatabaseRateThread.cpp
 	LevelDatabaseUploadThread.cpp
@@ -228,6 +230,7 @@ set(CLIENT_LIBS
 	${SPEEX_LIBRARIES}
 	${VORBIS_LIBRARIES}
 	${VORBISFILE_LIBRARIES}
+	${DISCORD_LIBRARY}
 )
 
 BF_PLATFORM_APPEND_LIBS()

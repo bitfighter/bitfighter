@@ -7,6 +7,7 @@
 
 #include "ClientGame.h"
 #include "gameType.h"
+#include "LevelDatabaseCommentThread.h"
 #include "LevelDatabaseDownloadThread.h"
 #include "LevelDatabaseRateThread.h"
 #include "LevelSource.h"
@@ -435,7 +436,14 @@ void setServerNameHandler(ClientGame *game, const Vector<string> &words)
 void setServerDescrHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasAdmin("!!! You don't have permission to set the server description"))
-      game->changeServerParam(GameConnection::ServerDescr, words);
+      game->changeServerParam(GameConnection::ServerDescription, words);
+}
+
+
+void setServerWelcomeMsgHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasAdmin("!!! You don't have permission to set the server welcome message"))
+      game->changeServerParam(GameConnection::ServerWelcomeMessage, words);
 }
 
 
@@ -1104,6 +1112,32 @@ void rateMapHandler(ClientGame *game, const Vector<string> &args)
       game->getSecondaryThread()->addEntry(rateThread);
    }
 }
+
+
+void commentMapHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(!game->canCommentLevel())      // Will display any appropriate error messages
+      return;
+
+   // Start at first word and concatentate all the others to rebuild the comment
+   string comment = words[1];
+   for(S32 i = 2; i < words.size(); i++)
+      comment = comment + " " + words[i];
+
+   // Comment is too small
+   if(comment.size() < 4)
+   {
+      string msg = "!!! Please enter a comment of 4 letters or more";
+
+      game->displayErrorMessage(msg.c_str());
+   }
+   else                    // Args look ok
+   {
+      RefPtr<LevelDatabaseCommentThread> commentThread = new LevelDatabaseCommentThread(game, comment);
+      game->getSecondaryThread()->addEntry(commentThread);
+   }
+}
+
 
 void pauseHandler(ClientGame *game, const Vector<string> &args)
 {

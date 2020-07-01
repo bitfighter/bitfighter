@@ -129,7 +129,8 @@ public:
       OwnerPassword,
       ServerPassword,
       ServerName,
-      ServerDescr,
+      ServerDescription,
+      ServerWelcomeMessage,
       LevelDir, 
       // PlaylistFile,     // TODO for 020 uncomment this and handle it!
       DeleteLevel,  
@@ -231,6 +232,8 @@ public:
    TNL_DECLARE_RPC(s2cWrongPassword, ());
 
    TNL_DECLARE_RPC(s2cSetServerName, (StringTableEntry name));
+   TNL_DECLARE_RPC(s2cDisplayAnnouncement, (string message));
+
 
    bool isInCommanderMap();
 

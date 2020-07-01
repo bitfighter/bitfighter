@@ -32,6 +32,7 @@ namespace Zap
 
    { "dlmap",    &ChatCommands::downloadMapHandler, { STR },       1,      ADV_COMMANDS,     0,     1,    {"<level>"},            "Download the level from the online level database" },
    { "rate",     &ChatCommands::rateMapHandler,     { STR },       1,      ADV_COMMANDS,     0,     1,    {"<up | neutral | down>"}, "Rate this level on the level database (up or down)" },
+   { "comment",  &ChatCommands::commentMapHandler,  { STR },       1,      ADV_COMMANDS,     0,     1,    {"<comment>"},          "Post a comment on this level to the level database" },
    { "password", &ChatCommands::submitPassHandler,  { STR },       1,      ADV_COMMANDS,     0,     1,    {"<password>"},         "Request admin or level change permissions"  },
    { "servvol",  &ChatCommands::servVolHandler,     { xINT },      1,      ADV_COMMANDS,     0,     1,    {"<0-10>"},             "Set volume of server"  },
    { "getmap",   &ChatCommands::getMapHandler,      { STR },       1,      ADV_COMMANDS,     1,     1,    {"[file]"},             "Save currently playing level in [file], if allowed" },
@@ -74,6 +75,7 @@ namespace Zap
    {"setgloballevelscript",&ChatCommands::setGlobalLevelScriptHandler,{ STR },       1, ADMIN_COMMANDS,  0,  1,  {"<script>"},             "Change currently running global levelgen script" },
    { "setservername",      &ChatCommands::setServerNameHandler,      { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<name>"},              "Set server name" },
    { "setserverdescr",     &ChatCommands::setServerDescrHandler,     { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<descr>"},             "Set server description" },
+   { "setserverwelcome",   &ChatCommands::setServerWelcomeMsgHandler, { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<descr>"},             "Set server welcome message (use blank to disable)" },
    { "deletecurrentlevel", &ChatCommands::deleteCurrentLevelHandler, { },            0, ADMIN_COMMANDS,  0,  1,  {""},                    "Mark current level as deleted" },
    { "undeletelevel",      &ChatCommands::undeleteLevelHandler,      { },            0, ADMIN_COMMANDS,  0,  1,  {""},                    "Undelete most recently deleted level" },
    { "gmute",              &ChatCommands::globalMuteHandler,         { NAME },       1, ADMIN_COMMANDS,  0,  1,  {"<name>"},              "Globally mute/unmute a player" },

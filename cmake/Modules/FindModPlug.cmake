@@ -42,4 +42,4 @@ endif()
 
 # Handle the QUIETLY and REQUIRED arguments and set XXX_FOUND to TRUE if all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(MODPLUG DEFAULT_MSG MODPLUG_LIBRARIES MODPLUG_INCLUDE_DIR)
+find_package_handle_standard_args(ModPlug DEFAULT_MSG MODPLUG_LIBRARIES MODPLUG_INCLUDE_DIR)

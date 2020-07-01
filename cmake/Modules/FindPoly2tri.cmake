@@ -46,4 +46,4 @@ endif()
 
 # Handle the QUIETLY and REQUIRED arguments and set XXX_FOUND to TRUE if all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(POLY2TRI DEFAULT_MSG POLY2TRI_LIBRARIES POLY2TRI_INCLUDE_DIR)
+find_package_handle_standard_args(Poly2tri DEFAULT_MSG POLY2TRI_LIBRARIES POLY2TRI_INCLUDE_DIR)

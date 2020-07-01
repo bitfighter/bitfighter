@@ -297,7 +297,7 @@ shared_ptr<MenuItem> NexusGameType::getMenuItem(const string &key)
       return shared_ptr<MenuItem>(new TimeCounterMenuItemSeconds("Time Nexus Remains Open:", (mNexusOpenTime + 500) / 1000, MaxMenuScore*60, "Always",
                                                                         "Time that the Nexus will remain open"));
    else if(key == "Nexus Win Score")
-      return shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 100, 100, 20000, "points", "", 
+      return shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 100, 100, S32_MAX, "points", "",
                                                              "Game ends when one player or team gets this score"));
    else return Parent::getMenuItem(key);
 }
@@ -548,6 +548,10 @@ S32 NexusGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEven
    // 10 * n(n+1)/2
    // This means 1 flag == 10 points; 2 flags == 30; 3 flags == 60, etc.
    S32 score = (10 * flags * (flags + 1)) / 2;
+   // Min number of flags from a single drop required to achieve a certain
+   // score can be found by using the inverse of above:
+   // n = upper( (-1 + sqrt(1 + 4*2*score/10)) / 2 )
+
 
    if(scoreGroup == TeamScore)
    {

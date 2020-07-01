@@ -2006,7 +2006,7 @@ void HostMenuUserInterface::saveSettings()
 
    settings->setHostName (getMenuItem(OPT_NAME)->getValue(),  true);
    settings->setHostDescr(getMenuItem(OPT_DESCR)->getValue(), true);
-   settings->setWelcomeMessage(getMenuItem(OPT_WELCOME)->getValue());
+   settings->setWelcomeMessage(getMenuItem(OPT_WELCOME)->getValue(), true);
 
    saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
 }

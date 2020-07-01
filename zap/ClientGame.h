@@ -117,6 +117,7 @@ public:
    void gotPlayerLevelRating(S32 rating);
 
    bool canRateLevel() const;
+   bool canCommentLevel() const;
    void levelIsNotReallyInTheDatabase();
 
    void setLevelDatabaseId(U32 id);

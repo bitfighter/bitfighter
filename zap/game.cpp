@@ -1435,10 +1435,10 @@ void Game::sendPrivateChat(const StringTableEntry &senderName, const StringTable
 }
 
 
-void Game::sendAnnouncementFromController(const StringPtr &message)
+void Game::sendAnnouncementFromController(const string &message)
 {
    if(mGameType)
-      mGameType->sendAnnouncementFromController(message);
+      mGameType->displayAnnouncement(message);
 }
 
 

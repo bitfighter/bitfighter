@@ -218,7 +218,7 @@ void VideoSystem::saveUpdateWindowScale(GameSettings *settings)
 extern void setDefaultBlendFunction();
 
 
-static void debugPrintState(VideoSystem::videoSystem_st_t currentState)
+void VideoSystem::debugPrintState(VideoSystem::videoSystem_st_t currentState)
 {
    logprintf("");
    switch(currentState)

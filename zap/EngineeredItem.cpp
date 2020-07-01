@@ -2158,7 +2158,7 @@ void Turret::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, b
       bool enabled = team != TEAM_NEUTRAL;
       F32 health = team == TEAM_NEUTRAL ? 0.0f : 1.0f;
 
-      renderTurret(*(getColor()), getHealthBarColor(), getPos(), mAnchorNormal, enabled, mHealth, mCurrentAngle, mHealRate);
+      renderTurret(*(getColor()), getHealthBarColor(), getPos(), mAnchorNormal, enabled, health, mCurrentAngle, mHealRate);
    }
    else
       renderDock();

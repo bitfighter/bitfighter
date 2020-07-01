@@ -56,7 +56,7 @@ class BfObject;
    WEAPON_ITEM(WeaponBurst,   "Burst",       "Burst",      700, 10000, 10000,  500, 1000, 0.50f,  1.0f,    false, ProjectileStyleNotAProjectile   ) \
    WEAPON_ITEM(WeaponSeeker,  "Seeker",      "Seeker",     400, 10000, 10000,  600, 8000, 0.21f,  1.0f,    false, ProjectileStyleNotAProjectile   ) \
    WEAPON_ITEM(WeaponMine,    "Mine",        "Mine",       900, 55000, 55000,  500,   -1, 0.50f,  1.0f,    true,  ProjectileStyleNotAProjectile   ) \
-   WEAPON_ITEM(WeaponTurret,  "Turret",      "Turret",     125,     0,     0, 1200,  800, 0.13f,  1.0f,    false, ProjectileStyleTurret ) \
+   WEAPON_ITEM(WeaponTurret,  "Turret",      "Turret",     125,     0,     0, 1200,  800, 0.11f,  1.0f,    false, ProjectileStyleTurret ) \
    WEAPON_ITEM(WeaponSpyBug,  "Spy Bug",     "SpyBug",     800, 50000, 50000,  800,   -1, 0,      1.0f,    true,  ProjectileStyleNotAProjectile   ) \
 
 
