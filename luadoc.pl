@@ -239,7 +239,7 @@ foreach my $file (@files) {
             # We do this in order to provide more complete method descriptions if they are found subsequently.  I think.
             # We can detect constructors because they come in the form of $class::$method where class and method are the same.
             if($class ne $method) {
-               my $index = first { ${$classes{$class}}[$_] =~ m|(static\s+)?void $method\(| } 0..$#{$classes{$class}};
+               my $index = first { ${$classes{$class}}[$_] =~ m|(static\s+)?void $method\(\)| } 0..$#{$classes{$class}};
                if($index ne "") {
                   splice(@{$classes{$class}}, $index, 1);       # Delete element at $index
                }
