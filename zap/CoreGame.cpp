@@ -1385,7 +1385,7 @@ S32 CoreItem::lua_getFullHealth(lua_State *L)
  * 
  * @brief Sets the item's full health. Has no effect on current health.
  *
- * @desc The maximum health of each panel is the full health of the core divided
+ * @descr The maximum health of each panel is the full health of the core divided
  * by the number of panels.
  * 
  * @param health The item's new full health 
@@ -1415,7 +1415,7 @@ S32 CoreItem::lua_getRotationSpeed(lua_State *L)
  *
  * @brief Sets the Core's rotation speed factor.
  *
- * @desc The rotation speed is a multiple of the default (1x). The default time
+ * @descr The rotation speed is a multiple of the default (1x). The default time
  * it takes for one rotation is 16384 ms. Therefore, the rotation time is:
  *
  *    16384 ms / speed

@@ -2705,7 +2705,7 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
 
 
 /**
- * @luafunc Ship::setLoadout(Weapon w1, Weapon w2, Weapon w3, Module m2, Module m3)
+ * @luafunc Ship::setLoadout(Weapon w1, Weapon w2, Weapon w3, Module m1, Module m2)
  * @brief Convenience alias for setLoadout(table)
  *
  * @param w1 The new \ref WeaponEnum for slot 1.

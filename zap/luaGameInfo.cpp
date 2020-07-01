@@ -73,7 +73,7 @@ REGISTER_LUA_CLASS(LuaGameInfo);
  * 
  * @brief Get the \ref GameTypeEnum of the current game.
  * 
- * @desc For possible values, see \ref GameTypeEnum.
+ * @descr For possible values, see \ref GameTypeEnum.
  * 
  * @code
  *   print(info:getGameType() == GameType.CTFGameType) -- `true` when playing CTF

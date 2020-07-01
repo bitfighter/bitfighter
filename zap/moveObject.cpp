@@ -1377,7 +1377,7 @@ bool MountableItem::isItemThatMakesYouVisibleWhileCloaked() { return true; }
 /**
  * @luaclass MountableItem
  * 
- * @brief Class of items that can be mounted on ships (such as \link Flag Flags
+ * @brief Class of items that can be mounted on ships (such as \link FlagItem FlagsItems
  * \endlink and \link ResourceItem ResourceItems \endlink).
  */
 //               Fn name       Param profiles  Profile count                           
@@ -1830,7 +1830,7 @@ REGISTER_LUA_SUBCLASS(Asteroid, MoveObject);
  * 
  * @brief Get this asteroid's current size index.
  * 
- * @desc Index 1 represents the asteroid's initial size. After it has been
+ * @descr Index 1 represents the asteroid's initial size. After it has been
  * broken once, its size index will be 2, and so on. This method will always
  * return an integer between 1 and the value returned by the getSizeCount()
  * method (inclusive).
@@ -1851,14 +1851,14 @@ S32 Asteroid::lua_getSizeIndex(lua_State *L) { return returnInt(L, ASTEROID_INIT
 S32 Asteroid::lua_getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT + 1); }
 
 /**
- * @luafunc Asteroid::setSize(size)
+ * @luafunc Asteroid::setSize(int size)
  * 
  * @brief Set the size of the Asteroid.
  * 
  * Setting the size of an Asteroid will give you (size 1) levels you'll have to
  * destroy. Each level reduction will produce two more asteroids
  * 
- * @param int size The size the asteroid will be set to.
+ * @param size The size the asteroid will be set to.
  * 
  * @note Any size less than 1 will default to size 3. Please be responsible with
  * your size choices.
