@@ -2144,7 +2144,7 @@ void Turret::render()
 
 void Turret::renderDock()
 {
-   renderSquareItem(getPos(), getColor(), 1, &Colors::white, 'T');
+   renderTurretIcon(getPos(), 1, getColor());
 }
 
 
@@ -2161,7 +2161,7 @@ void Turret::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, b
       renderTurret(*(getColor()), getHealthBarColor(), getPos(), mAnchorNormal, enabled, health, mCurrentAngle, mHealRate);
    }
    else
-      renderDock();
+      renderTurretIcon(getPos(), 1/currentScale, getColor());
 }
 
 

@@ -1408,6 +1408,16 @@ void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentSc
 }
 
 
+void renderTurretIcon(const Point &pos, F32 scale, const Color *color)
+{
+   glPushMatrix();
+      glTranslatef(pos.x, pos.y, 0);
+      glScalef(scale, scale, 1);    // Make item draw at constant size, regardless of zoom
+      renderSquareItem(Point(0,0), color, 1, &Colors::white, 'T');
+   glPopMatrix();
+}
+
+
 // Renders turret!  --> note that anchor and normal can't be const &Points because of the point math
 void renderTurret(const Color &c, const Color &hbc, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate)
 {

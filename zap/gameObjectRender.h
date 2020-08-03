@@ -137,6 +137,7 @@ extern void renderTeleporterOutline(const Point &center, F32 radius, const Color
 extern void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentScale = 1);
 extern void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentScale);
 extern void renderTurret(const Color &c, const Color &hbc, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate = 0);
+extern void renderTurretIcon(const Point &pos, F32 scale, const Color *color);
 
 extern void renderFlag(const Point &pos, const Color *flagColor);
 extern void renderFlag(const Point &pos, F32 scale, const Color *flagColor);
