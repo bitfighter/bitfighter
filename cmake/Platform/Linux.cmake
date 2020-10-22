@@ -18,22 +18,27 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11 -Wall")
 
 
-# Define the Linux data dir if not defined in a packaging build script already
+# Define the location to where CMake installs the game resources
 if(NOT CMAKE_DATA_PATH)
 	set(CMAKE_DATA_PATH "${CMAKE_INSTALL_PREFIX}/share")
 endif()
 
-message(STATUS "CMAKE_DATA_PATH: ${CMAKE_DATA_PATH}.  Change this by invoking cmake with -DCMAKE_DATA_PATH=<SOME_DIRECTORY>")
+message(STATUS "CMAKE_DATA_PATH (resource install path): ${CMAKE_DATA_PATH}.  Change this with -DCMAKE_DATA_PATH=<SOME_DIRECTORY>")
 
-# The executable will look for game assets in LINUX_DATA_DIR, hardcoded.
-# The default here is fine, but we are overridable in case a packager needs to move these after the fact.
+# The executable will look for game assets in LINUX_DATA_DIR, hardcoded. This
+# can be useful to set as a relative path for things like AppImages
 if (NOT LINUX_DATA_DIR)
-	# Quotes need to be a part of the definition or the compiler won't understand
-	add_definitions(-DLINUX_DATA_DIR="${CMAKE_DATA_PATH}")
-else()
-	# Yes, this is tautological. No, it does not work without it.
-	add_definitions(-DLINUX_DATA_DIR="${LINUX_DATA_DIR}")
+	# Default is to set to the installation path
+	set(LINUX_DATA_DIR "${CMAKE_DATA_PATH}")
 endif()
+
+# There is a difference between a CMake definition and a compiler preprocessor
+# definition. If the CMake definition of LINUX_DATA_DIR exists, we'll use it 
+# as the compiler preprocessor definition
+add_definitions(-DLINUX_DATA_DIR="${LINUX_DATA_DIR}")
+
+message(STATUS "LINUX_DATA_DIR (resource load path): ${LINUX_DATA_DIR}.  Change this with -DLINUX_DATA_DIR=<SOME_DIRECTORY>")
+
 
 if(NOT CMAKE_BIN_PATH)
 	set(CMAKE_BIN_PATH "${CMAKE_INSTALL_PREFIX}/bin")
