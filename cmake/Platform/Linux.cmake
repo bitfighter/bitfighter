@@ -25,9 +25,15 @@ endif()
 
 message(STATUS "CMAKE_DATA_PATH: ${CMAKE_DATA_PATH}.  Change this by invoking cmake with -DCMAKE_DATA_PATH=<SOME_DIRECTORY>")
 
-# Quotes need to be a part of the definition or the compiler won't understand
-add_definitions(-DLINUX_DATA_DIR="${CMAKE_DATA_PATH}")
-
+# The executable will look for game assets in LINUX_DATA_DIR, hardcoded.
+# The default here is fine, but we are overridable in case a packager needs to move these after the fact.
+if (NOT LINUX_DATA_DIR)
+	# Quotes need to be a part of the definition or the compiler won't understand
+	add_definitions(-DLINUX_DATA_DIR="${CMAKE_DATA_PATH}")
+else()
+	# Yes, this is tautological. No, it does not work without it.
+	add_definitions(-DLINUX_DATA_DIR="${LINUX_DATA_DIR}")
+endif()
 
 if(NOT CMAKE_BIN_PATH)
 	set(CMAKE_BIN_PATH "${CMAKE_INSTALL_PREFIX}/bin")
