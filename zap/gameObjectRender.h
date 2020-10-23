@@ -304,6 +304,7 @@ extern void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const 
 #define renderForceFieldProjector
 #define renderForceField
 #define renderTurret
+#define renderTurretIcon
 #define renderSquareItem
 #define renderNavMeshZone
 #define renderNavMeshBorders
