@@ -26,10 +26,12 @@ endif()
 if(NOT POLY2TRI_FOUND)
 	list(APPEND CLIENT_EXTRA_DEPS poly2tri)
 endif()
+if(NOT LUAJIT_FOUND)
+	list(APPEND CLIENT_EXTRA_DEPS ${LUA_LIB})
+endif()
 
 
 add_dependencies(bitfighter_client
-	${LUA_LIB}
 	tnl
 	${CLIENT_EXTRA_DEPS}
 )
