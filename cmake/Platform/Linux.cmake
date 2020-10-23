@@ -110,7 +110,7 @@ function(BF_PLATFORM_INSTALL targetName)
 
 	if(INSTALL_NOTIFIER)
 		# Modify python script to have the shebang
-		install(CODE "execute_process(COMMAND sed -i -e \"1s@^@#!/usr/bin/python\\\\n\\\\n@\" ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py)")
+		install(CODE "execute_process(COMMAND sed -i -e \"1s@^@#!/usr/bin/env python3\\\\n\\\\n@\" ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py)")
 		# Modify python script to use proper path to the system-installed icon
 		install(CODE "execute_process(COMMAND sed -i -e \"s@redship48.png@bitfighter.png@\" -e \"s@^ICON_BASE =.*@ICON_BASE = \\\"${CMAKE_DESKTOP_DATA_PATH}/pixmaps/\\\"@\" ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py)")
 		install(PROGRAMS ${CMAKE_SOURCE_DIR}/notifier/bitfighter_notifier.py DESTINATION ${CMAKE_BIN_PATH} RENAME bitfighter_notifier)
