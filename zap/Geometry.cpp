@@ -221,8 +221,10 @@ Rect Geometry::calcExtents()
 
 void Geometry::rotateAboutPoint(const Point &center, F32 angle)
 {
-   F32 sinTheta = sin(angle * Float2Pi / 360.0f);
-   F32 cosTheta = cos(angle * Float2Pi / 360.0f);
+   F32 rad = angle * DoubleTau / 360.0f;
+
+   F32 sinTheta = sinf(rad);
+   F32 cosTheta = cosf(rad);
 
    for(S32 j = 0; j < getVertCount(); j++)
    {
