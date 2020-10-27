@@ -2525,9 +2525,21 @@ bool EditorUserInterface::canRotate() const
 }
 
 
+struct PointCompare
+{
+   bool operator()( const Point& lhs, const Point& rhs ) const
+   {
+      return lhs.x != rhs.x || lhs.y != rhs.y;
+   }
+};
+
+
 // Rotate selected objects around their center point by angle
 void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
 {
+   static const F32 NormalizeMultiplier = 64;
+   static const F32 NormalizeFraction = 1.0 / NormalizeMultiplier;
+
    if(!canRotate())
       return;
 
@@ -2540,14 +2552,26 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
    // If we're not going to use the origin, we're going to use the 'center of mass' of the total
    if(!useOrigin)
    {
-      // Add all object centroids to a set for de-duplication.  We'll get the centroid of the set
-      set<Point> centroidSet;
+
+      // Add all object centroids to an unordered set for de-duplication.
+      // We'll then get the centroid of the set
+      set<Point, PointCompare> centroidSet;
+
       for(S32 i = 0; i < objList->size(); i++)
       {
          BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
          if(obj->isSelected())
-            centroidSet.insert(obj->getCentroid());
+         {
+            Point thisCentroid = obj->getCentroid();
+
+            // Perform a rounding to some fraction of a grid point. This will
+            // help with de-duplication, centroid finding, and float comparison
+            // in the set
+            thisCentroid.scaleFloorDiv(NormalizeMultiplier, NormalizeFraction);
+
+            centroidSet.insert(thisCentroid);
+         }
       }
 
       // Convert to Vector for centroid finding
