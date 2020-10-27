@@ -1627,9 +1627,38 @@ bool Triangulate::mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& 
 }
 
 
+// This is just an average between all the points
+Point mean2d(const Vector<Point> &polyPoints)
+{
+//   static const F32 NormalizeMultiplier = 64;
+//   static const F32 NormalizeFraction = 0.015625; // 1/NormalizeMultiplier
+
+   S32 size = polyPoints.size();
+
+   F32 x = 0;
+   F32 y = 0;
+   Point p1;
+
+   for(S32 i = 0; i < size; i++)
+   {
+      p1 = polyPoints[i];
+//      p1.scaleFloorDiv(NormalizeMultiplier, NormalizeFraction);
+
+      x += p1.x;
+      y += p1.y;
+   }
+
+   x /= size;
+   y /= size;
+
+   return Point(x,y);
+}
+
+
 // Derived from formulae here: http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/
 //
 // This will fail if the area sum is 0; e.g. with certain self-intersecting polygons
+// Failure mode is checked and calls mean2d as a fallback
 Point findCentroid(const Vector<Point> &polyPoints)
 {
    S32 size = polyPoints.size();
@@ -1645,7 +1674,7 @@ Point findCentroid(const Vector<Point> &polyPoints)
    Point p1;
    Point p2;
 
-   // All vertices except last
+   // All segments except last
    for(S32 i = 0; i < size - 1; i++)
    {
       p1 = polyPoints[i];
@@ -1658,12 +1687,18 @@ Point findCentroid(const Vector<Point> &polyPoints)
       y += (p1.y + p2.y) * area;
    }
 
-   // Do last vertex
+   // Do last segment
    p1 = polyPoints[size - 1];
    p2 = polyPoints[0];
 
    area = (p1.x * p2.y - p2.x * p1.y);
    sArea += area;
+
+   // Zero area means it's likely a complex polygon or something with all points
+   // colinear. Return the 2D mean of all the points to avoid NaN and INF issues
+   // It's not great, but maybe good enough
+   if(abs(sArea) < 1)  // This is about zero for a floating point number
+      return mean2d(polyPoints);
 
    x += (p1.x + p2.x) * area;
    y += (p1.y + p2.y) * area;
