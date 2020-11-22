@@ -14,6 +14,7 @@
 #include "../zap/stringUtils.h"
 
 #include <unistd.h>
+#include <errno.h>
 
 using namespace Zap;
 using namespace DbWriter;
@@ -106,8 +107,8 @@ static void onPlayerAuthenticatedOrQuit(const MasterSettings *settings, const Ma
 
    if(pid < 0)
    {
-      logprintf(LogConsumer::LogError, "PANIC: Could not fork process! (%s)", verb.c_str());
-      exit(1);    
+      logprintf(LogConsumer::LogError, "PANIC: Could not fork process! (%s); errno: %d", verb.c_str(), errno);
+      return;
    }
 
    if(pid > 0)
@@ -161,8 +162,8 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
 
    if(pid < 0)
    {
-      logprintf(LogConsumer::LogError, "PANIC: Could not fork process! (ping)");
-      exit(1);
+      logprintf(LogConsumer::LogError, "PANIC: Could not fork process! (ping); errno: %d", errno);
+      return;
    }
 
    if(pid > 0)
@@ -218,8 +219,8 @@ void onPlayerAwardedAchievement(const MasterSettings *settings, const string &aw
 
    if(pid < 0)
    {
-      logprintf(LogConsumer::LogError, "PANIC: Could not fork process! (achievement)");
-      exit(1);    
+      logprintf(LogConsumer::LogError, "PANIC: Could not fork process! (achievement); errno: %d", errno);
+      return;
    }
 
    if(pid > 0)
