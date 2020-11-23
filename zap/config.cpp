@@ -2362,7 +2362,7 @@ string FolderManager::findBotFile(const string &filename) const
    Vector<string> folders;
    folders.push_back(robotDir);
 
-   const char *extensions[] = { ".bot" };
+   const char *extensions[] = { ".bot", "" };
 
    return checkName(filename, folders, extensions);
 }
