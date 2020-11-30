@@ -594,6 +594,7 @@ void Game::resetLevelInfo()
    mLegacyGridSize = 1.f;
    mLevelFormat = CurrentLevelFormat;
    mHasLevelFormat = false;
+   mLevelLoadTriggeredWarnings.clear();
 }
 
 
@@ -807,7 +808,12 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
 
       if(!object && !eObject)    // Well... that was a bad idea!
       {
-         logprintf(LogConsumer::LogLevelError, "Unknown object type \"%s\" in level \"%s\"", objName.c_str(), levelFileName.c_str());
+         if(!mLevelLoadTriggeredWarnings.contains(objName))
+         {
+            logprintf(LogConsumer::LogLevelError, "Unknown object type \"%s\" in level \"%s\"", objName.c_str(), levelFileName.c_str());
+            mLevelLoadTriggeredWarnings.push_back(objName);
+         }
+
          delete theObject;
          return;
       }
