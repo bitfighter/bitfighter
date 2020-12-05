@@ -19,12 +19,13 @@
 #include "MathUtils.h"
 
 
-TNL_IMPLEMENT_NETOBJECT(Projectile);
-
 namespace Zap 
 {
 
 using namespace LuaArgs;
+
+
+TNL_IMPLEMENT_NETOBJECT(Projectile);
 
 // Constructor -- used when weapon is fired  
 Projectile::Projectile(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter)
