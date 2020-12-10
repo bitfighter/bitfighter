@@ -134,95 +134,6 @@ static SFXProfile sfxProfilesModern[] = {
 };
 
 
-//   fileName     isRelative gainScale isLooping  fullGainDistance  zeroGainDistance
-
-static SFXProfile sfxProfilesClassic[] = {
- // Utility sounds
- {  "phaser.wav",          true,  1.0f,  false, 0,   0 },
- {  "phaser.wav",          false, 0.45f, false, 150, 600 },
-
- // Players joining/leaving noises -- aren't really relative, but true allows them to play properly...
- {  "player_joined_global_chat.wav",   true,  0.8f,  false, 150, 600 },
- {  "player_left_global_chat.wav",     true,  0.8f,  false, 150, 600 },
- {  "player_joined.wav",   true,  0.8f,  false, 150, 600 },
- {  "player_left.wav",     true,  0.8f,  false, 150, 600 },
-
- // Weapon noises
- {  "phaser.wav",          false, 0.45f, false, 150, 600 },
- {  "phaser_impact.wav",   false, 0.7f,  false, 150, 600 },
- {  "bounce.wav",          false, 0.45f, false, 150, 600 },
- {  "bounce_impact.wav",   false, 0.7f,  false, 150, 600 },
- {  "triple.wav",          false, 0.45f, false, 150, 600 },
- {  "triple_impact.wav",   false, 0.7f,  false, 150, 600 },
- {  "turret.wav",          false, 0.45f, false, 150, 600 },
- {  "turret_impact.wav",   false, 0.7f,  false, 150, 600 },
-
- {  "grenade.wav",         false, 0.9f,  false, 300, 600 },
-
- {  "mine_deploy.wav",     false, 0.4f,  false, 150, 600 },
- {  "mine_arm.wav",        false, 0.7f,  false, 400, 600 },
- {  "mine_explode.wav",    false, 0.8f,  false, 300, 800 },
-
- {  "spybug_deploy.wav",   false, 0.4f,  false, 150, 600 },
- {  "spybug_explode.wav",  false, 0.8f,  false, 300, 800 },
-
- { "asteroid_explode.wav", false, 0.8f, false,  150, 800 },
-
- // Ship noises
- {  "ship_explode.wav",    false, 1.0,   false, 300, 1000 },
- {  "ship_heal.wav",       false, 1.0,   false, 300, 1000 },
- {  "ship_turbo.wav",      false, 0.15f, true,  150, 500 },
- {  "ship_hit.wav",        false, 1.0,   false, 150, 600 },    // Ship is hit by a projectile
-
- {  "bounce_wall.wav",     false, 0.7f,  false, 150, 600 },
- {  "bounce_obj.wav",      false, 0.7f,  false, 150, 600 },
- {  "bounce_shield.wav",   false, 0.7f,  false, 150, 600 },
-
- {  "ship_shield.wav",     false, 0.15f, true,  150, 500 },
- {  "ship_sensor.wav",     false, 0.15f, true,  150, 500 },
- {  "ship_repair.wav",     false, 0.15f, true,  150, 500 },
- {  "ship_cloak.wav",      false, 0.35f, true,  150, 500 },
-
- // Flag noises
- {  "flag_capture.wav",    true,  0.45f, false, 0,   0 },
- {  "flag_drop.wav",       true,  0.45f, false, 0,   0 },
- {  "flag_return.wav",     true,  0.45f, false, 0,   0 },
- {  "flag_snatch.wav",     true,  0.45f, false, 0,   0 },
-
- // Teleport noises
- {  "teleport_in.wav",     false, 1.0,   false, 200, 500 },
- {  "teleport_out.wav",    false, 1.0,   false, 200, 500 },
- {  "teleport_explode.wav", false, 6.0,   false, 200, 500 },    // SFXTeleportExploding
-
- // GoFast noises
- {  "gofast.wav",          false, 1.0,   false, 200, 500 },    // Heard outside the ship
- {  "gofast.wav",          true, 1.0,   false, 200, 500 },     // Heard inside the ship
-
- // Forcefield noises
- {  "forcefield_up.wav",   false,  0.7f,  false, 150, 600 },
- {  "forcefield_down.wav", false,  0.7f,  false, 150, 600 },
-
- // UI noises
- {  "boop.wav",            true,  0.4f,  false, 150, 600 },
- {  "comm_up.wav",         true,  0.4f,  false, 150, 600 },
- {  "comm_down.wav",       true,  0.4f,  false, 150, 600 },
- {  "boop.wav",            true,  0.25f, false, 150, 600 },
-
- // Core-related noises
- {  "core_heartbeat.wav",        false, 1.0f,  false, 150, 1000 },
- {  "core_explode.wav",          false, 1.0f,  false, 300, 1000 },
- {  "core_panel_explode.wav",    false, 2.0f,  false, 300, 1000 },
-
-  // Seekers
- {  "seeker_fire.wav",         false,  1.0f, false, 150, 800 },
-
- // Other
- {  "achievement_earned.wav",  true,  1.0f, false,   0,   0 },
-
- {  NULL, false, 0, false, 0, 0 },
-};
-
-
 // TODO clean up this rif-raff; maybe put in config.h?
 static bool gSFXValid = false;
 F32 mMaxDistance = 500;
@@ -254,7 +165,6 @@ Timer SoundSystem::mMusicFadeTimer;
 SoundSystem::SoundSystem()
 {
    TNLAssert(NumSFXBuffers == ARRAYSIZE(sfxProfilesModern),  "SFX out of alignment!");
-   TNLAssert(NumSFXBuffers == ARRAYSIZE(sfxProfilesClassic), "SFX out of alignment!");
 }
 
 
@@ -267,7 +177,7 @@ SoundSystem::~SoundSystem()
 
 // Initialize the sound sub-system
 // Use ALURE to ease the use of OpenAL
-void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &musicDir, float musicVolLevel)
+void SoundSystem::init(const string &sfxDir, const string &musicDir, float musicVolLevel)
 {
    // Initialize the sound device
    if(!alureInitDevice(NULL, NULL))    // <=== causes crash on exit
@@ -303,11 +213,8 @@ void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &music
    if(alGetError() != AL_NO_ERROR)
       logprintf(LogConsumer::LogWarning, "Failed to set proper sound gain distance model!  Sounds will be off..\n");
 
-   // Choose the sound set
-   if(sfxSet == sfxClassicSet)
-      gSFXProfiles = sfxProfilesClassic;
-   else
-      gSFXProfiles = sfxProfilesModern;
+   // Init the sound set
+   gSFXProfiles = sfxProfilesModern;
 
    // Iterate through all sounds
    for(U32 i = 0; i < NumSFXBuffers; i++)
@@ -1192,7 +1099,7 @@ void SoundSystem::queueVoiceChatBuffer(const SFXHandle &effect, ByteBufferPtr p)
    // Do nothing
 }
 
-void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &musicDir, float musicVol)
+void SoundSystem::init(const string &sfxDir, const string &musicDir, float musicVol)
 {
    logprintf(LogConsumer::LogError, "No OpenAL support on this platform.");
 }

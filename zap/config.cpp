@@ -84,8 +84,6 @@ IniSettings::IniSettings()
    voiceChatVolLevel = 1.0;           // INcoming voice chat volume (range as above)
    alertsVolLevel    = 1.0;           // Audio alerts volume (when in dedicated server mode only, range as above)
 
-   sfxSet = sfxModernSet;             // Start off with our modern sounds
-
    diagnosticKeyDumpMode = false;     // True if want to dump keystrokes to the screen
 
    allowDataConnections = false;      // Disabled unless explicitly enabled for security reasons -- most users won't need this
@@ -599,13 +597,6 @@ static void loadEffectsSettings(CIniFile *ini, IniSettings *iniSettings)
 }
 
 
-// Convert a string value to our sfxSets enum
-static sfxSets stringToSFXSet(string sfxSet)
-{
-   return (lcase(sfxSet) == "classic") ? sfxClassicSet : sfxModernSet;
-}
-
-
 static F32 checkVol(F32 vol)
 {
    return max(min(vol, 1.f), 0.f);    // Restrict volume to be between 0 and 1
@@ -619,9 +610,6 @@ static void loadSoundSettings(CIniFile *ini, GameSettings *settings, IniSettings
    iniSettings->sfxVolLevel       = (F32) ini->GetValueI("Sounds", "EffectsVolume",   (S32) (iniSettings->sfxVolLevel        * 10)) / 10.0f;
    iniSettings->setMusicVolLevel(   (F32) ini->GetValueI("Sounds", "MusicVolume",     (S32) (iniSettings->getMusicVolLevel() * 10)) / 10.0f);
    iniSettings->voiceChatVolLevel = (F32) ini->GetValueI("Sounds", "VoiceChatVolume", (S32) (iniSettings->voiceChatVolLevel  * 10)) / 10.0f;
-
-   string sfxSet = ini->GetValue("Sounds", "SFXSet", "Modern");
-   iniSettings->sfxSet = stringToSFXSet(sfxSet);
 
    // Bounds checking
    iniSettings->sfxVolLevel       = checkVol(iniSettings->sfxVolLevel);
@@ -1636,8 +1624,6 @@ static void writeSounds(CIniFile *ini, IniSettings *iniSettings)
    ini->SetValueI("Sounds", "EffectsVolume", (S32) (iniSettings->sfxVolLevel * 10));
    ini->SetValueI("Sounds", "MusicVolume",   (S32) (iniSettings->getRawMusicVolLevel() * 10));
    ini->SetValueI("Sounds", "VoiceChatVolume",   (S32) (iniSettings->voiceChatVolLevel * 10));
-
-   ini->SetValue("Sounds", "SFXSet", iniSettings->sfxSet == sfxClassicSet ? "Classic" : "Modern");
 }
 
 

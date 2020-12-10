@@ -1199,7 +1199,7 @@ int main(int argc, char **argv)
    settings->runCmdLineDirectives();            // If we specified a directive on the cmd line, like -help, attend to that now
 
    // Even dedicated server needs sound these days
-   SoundSystem::init(settings->getIniSettings()->sfxSet, folderManager->sfxDir, 
+   SoundSystem::init(folderManager->sfxDir,
                      folderManager->musicDir, settings->getIniSettings()->getMusicVolLevel());  
    
    if(settings->isDedicatedServer())

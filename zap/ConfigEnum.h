@@ -10,11 +10,6 @@
 namespace Zap
 {
 
-enum sfxSets {
-   sfxClassicSet,
-   sfxModernSet
-};
-
 
 // Standard display modes for the game.  Does not include abnormal interfaces
 // like the editor

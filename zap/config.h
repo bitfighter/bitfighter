@@ -13,7 +13,7 @@
 // will be used to rebuild it.
 
 #include "Color.h"      // For Color def
-#include "ConfigEnum.h" // For sfxSets, DisplayMode
+#include "ConfigEnum.h" // For DisplayMode
 #include "Settings.h"
 
 #include "tnlTypes.h"
@@ -190,8 +190,6 @@ public:
    void setMusicVolLevel(F32 vol);
 
    Vector<PluginBinding> getDefaultPluginBindings() const;
-
-   sfxSets sfxSet;                  // Which set of SFX does the user want?
 
    bool diagnosticKeyDumpMode;      // True if want to dump keystrokes to the screen
 

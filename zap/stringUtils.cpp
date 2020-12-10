@@ -878,7 +878,7 @@ bool stringContainsAllTheSameCharacter(const string &str)
 }
 
 
-// Convert a string value to our sfxSets enum
+// Convert a DisplayMode enum to a string
 inline string displayModeToString(DisplayMode mode)
 {
    if(mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)
