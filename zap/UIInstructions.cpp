@@ -687,7 +687,7 @@ const char *gGameObjectInfo[] = {
    /* 02 */   "Triple",  "Fires three diverging shots",
    /* 03 */   "Burst",   "Explosive projectile",
    /* 04 */   "Seeker",  "Homing projectile",
-   /* 05 */   "", "",
+   /* 05 */   "Railgun", "High speed projectile",
 
    /* 06 */   "Friendly Mine",    "Team's mines show trigger radius",
    /* 07 */   "Enemy Mine",       "These are much harder to see",
@@ -773,7 +773,8 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
          case 4:
             renderSeeker(Point(0,0), 0, 0, 400, Platform::getRealMilliseconds());
             break;
-         case 5:     // Blank
+         case 5:     // Railgun
+            renderProjectile(Point(0,0), 4, Platform::getRealMilliseconds());
             break;
          case 6:
             renderMine(Point(0,0), true, true);

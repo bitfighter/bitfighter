@@ -58,6 +58,7 @@ class BfObject;
    WEAPON_ITEM(WeaponMine,    "Mine",        "Mine",       900, 55000, 55000,  500,   -1, 0.50f,  1.0f,    true,  ProjectileStyleNotAProjectile   ) \
    WEAPON_ITEM(WeaponTurret,  "Turret",      "Turret",     125,     0,     0, 1200,  800, 0.11f,  1.0f,    false, ProjectileStyleTurret ) \
    WEAPON_ITEM(WeaponSpyBug,  "Spy Bug",     "SpyBug",     800, 50000, 50000,  800,   -1, 0,      1.0f,    true,  ProjectileStyleNotAProjectile   ) \
+   WEAPON_ITEM(WeaponRailgun, "Railgun",     "Railgun",   2000, 40000, 40000, 3000,  660, 0.70f,  0,       false, ProjectileStyleRailgun ) \
 
 
 // Define an enum from the first values in WEAPON_ITEM_TABLE
@@ -77,6 +78,7 @@ enum ProjectileStyle
    ProjectileStyleBouncer,
    ProjectileStyleTriple,
    ProjectileStyleTurret,
+   ProjectileStyleRailgun,
    ProjectileStyleCount,
    ProjectileStyleNotAProjectile  // Need this so we can fit a non-ProjectileStyle (like mine) into a constructor intended for proper projectiles
 };

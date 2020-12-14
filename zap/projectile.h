@@ -32,6 +32,7 @@ private:
    static const S32 COMPRESSED_VELOCITY_MAX = 2047;
 
    SafePtr<BfObject> mShooter;
+   BfObject *mLastHitObject;    // Keeps track ships
 
    void initialize(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter);
 
@@ -51,10 +52,10 @@ public:
    U32 mTimeRemaining;
    ProjectileStyle mStyle;
    WeaponType mWeaponType;
-   bool mCollided;
-   bool hitShip;
-   bool mAlive;
-   bool mBounced;
+   bool mCollided;          // Currently collided with something
+   bool hitShip;            // Current collision hit a ship
+   bool mAlive;             // Projectile still alive
+   bool mBounced;           // Bounced at least once
    U32 mLiveTimeIncreases;
 
    Projectile(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter);  // Constructor -- used when weapon is fired  

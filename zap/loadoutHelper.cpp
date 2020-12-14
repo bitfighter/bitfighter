@@ -40,6 +40,7 @@ static const OverlayMenuItem loadoutWeaponMenuItems[] = {
    { KEY_4, BUTTON_4, true, WeaponBurst,  "Burster",    UNSEL_COLOR, "", NULL, NULL },
    { KEY_5, BUTTON_5, true, WeaponMine,   "Mine Layer", UNSEL_COLOR, "", NULL, NULL },
    { KEY_6, BUTTON_6, true, WeaponSeeker, "Seeker",     UNSEL_COLOR, "", NULL, NULL },
+   { KEY_7, BUTTON_TRIGGER_LEFT, true, WeaponRailgun,"Railgun",    UNSEL_COLOR, "", NULL, NULL },
 };      
 
 

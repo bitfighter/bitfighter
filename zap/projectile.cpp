@@ -76,6 +76,7 @@ void Projectile::initialize(WeaponType type, const Point &pos, const Point &vel,
    mBounced = false;
    mLiveTimeIncreases = 0;
    mShooter = shooter;
+   mLastHitObject = NULL;
 
    setOwner(NULL);
 
@@ -188,7 +189,7 @@ void Projectile::handleCollision(BfObject *hitObject, Point collisionPoint)
    mCollided = true;
 
    if(isShipType(hitObject->getObjectTypeNumber()))
-      hitShip = static_cast<Ship *>(hitObject);
+      hitShip = true;
 
    if(!isGhost())    // If we're on the server, that is
    {
@@ -213,7 +214,13 @@ void Projectile::handleCollision(BfObject *hitObject, Point collisionPoint)
    }
 
    // Client and server:
-   mTimeRemaining = 0;
+
+   // Railgun goes right through ships and keeps going
+   if((mWeaponType == WeaponRailgun) && hitShip)
+      ; // Keep time remaining
+   else
+      mTimeRemaining = 0;
+
    explode(hitObject, collisionPoint);
 }
 
@@ -226,7 +233,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
 {
    U32 deltaT = mCurrentMove.time;
 
-   if(!mCollided && mAlive)
+   if(mAlive)
    {
       U32 objAge = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
       F32 timeLeft = (F32)deltaT;
@@ -283,6 +290,14 @@ void Projectile::idle(BfObject::IdleCallPath path)
          // Our collision detection is done, and hitObject contains the first thing that the projectile hit.
          for(S32 i = 0; i < disabledList.size(); i++)
             disabledList[i]->enableCollision();
+
+         // If we already hit this object, don't do it again
+         if(hitObject == mLastHitObject)
+            hitObject = NULL;
+         // Otherwise save the one we found for next iteration
+         else
+            mLastHitObject = hitObject;
+
 
          if(hitObject)  // Hit something...  should we bounce?
          {
@@ -353,6 +368,11 @@ void Projectile::idle(BfObject::IdleCallPath path)
                startPos = getPos();
                collisionPoint = startPos + (endPos - startPos) * collisionTime;
                handleCollision(hitObject, collisionPoint);     // What we hit, where we hit it
+
+               // Advance the railgun anyways
+               if(mWeaponType == WeaponRailgun)
+                  setPos(endPos);
+
                timeLeft = 0;
             }
          }
@@ -450,7 +470,7 @@ void Projectile::renderItem(const Point &pos)
 
 bool Projectile::shouldRender() const
 {
-   return mAlive && !mCollided;
+   return mAlive;
 }
 
 
