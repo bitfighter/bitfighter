@@ -32,7 +32,7 @@ private:
    static const S32 COMPRESSED_VELOCITY_MAX = 2047;
 
    SafePtr<BfObject> mShooter;
-   BfObject *mLastHitObject;    // Keeps track ships
+   BfObject *mLastHitObject;    // Last object hit by the projectile
 
    void initialize(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter);
 

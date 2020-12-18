@@ -291,6 +291,9 @@ void Projectile::idle(BfObject::IdleCallPath path)
          for(S32 i = 0; i < disabledList.size(); i++)
             disabledList[i]->enableCollision();
 
+         // This logic lets the Railgun go through ships. It assumes that the
+         // object search will return the same order of objects during this time frame
+         //
          // If we already hit this object, don't do it again
          if(hitObject == mLastHitObject)
             hitObject = NULL;
@@ -302,11 +305,12 @@ void Projectile::idle(BfObject::IdleCallPath path)
          if(hitObject)  // Hit something...  should we bounce?
          {
             bool bounce = false;
+            bool hitAShip = isShipType(hitObject->getObjectTypeNumber());
 
             // Bounce off a wall and off a ship that has its shields up
             if(mStyle == ProjectileStyleBouncer && isWallType(hitObject->getObjectTypeNumber()))
                bounce = true;
-            else if(isShipType(hitObject->getObjectTypeNumber()))
+            else if(hitAShip)
             {
                Ship *ship = static_cast<Ship *>(hitObject);
                if(ship->isModulePrimaryActive(ModuleShield))
@@ -369,8 +373,8 @@ void Projectile::idle(BfObject::IdleCallPath path)
                collisionPoint = startPos + (endPos - startPos) * collisionTime;
                handleCollision(hitObject, collisionPoint);     // What we hit, where we hit it
 
-               // Advance the railgun anyways
-               if(mWeaponType == WeaponRailgun)
+               // Advance the railgun through ships
+               if((mWeaponType == WeaponRailgun) && hitAShip)
                   setPos(endPos);
 
                timeLeft = 0;
