@@ -29,6 +29,8 @@ enum SFXProfiles
    SFXTripleImpact,
    SFXTurretProjectile,
    SFXTurretImpact,
+   SFXRailgunProjectile,
+   SFXRailgunImpact,
 
    SFXBurst, 
 

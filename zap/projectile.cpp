@@ -439,7 +439,13 @@ void Projectile::explode(BfObject *hitObject, Point pos)
       if(ship && ship->isModulePrimaryActive(ModuleShield))
          sound = SFXBounceShield;
       else if((hitShip || ship))                           // We hit a ship with shields down
-         sound = SFXShipHit;
+      {
+         // Railgun goes through ships, give it a different sound
+         if(mStyle == ProjectileStyleRailgun)  // mWeaponType doesn't work here for some reason (only server side?)
+            sound = GameWeapon::projectileInfo[mStyle].impactSound;
+         else
+            sound = SFXShipHit;
+      }
       else                                                   // We hit something else
          sound = GameWeapon::projectileInfo[mStyle].impactSound;
 

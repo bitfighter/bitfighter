@@ -61,6 +61,8 @@ static SFXProfile sfxProfilesModern[] = {
  {  "triple_impact.wav",   false, 0.7f,  false, 150, 600 },
  {  "turret.wav",          false, 0.45f, false, 150, 600 },
  {  "turret_impact.wav",   false, 0.7f,  false, 150, 600 },
+ {  "railgun.wav",         false, 0.45f, false, 150, 1000 },
+ {  "railgun_impact.wav",  false, 1.2f,  false, 150, 1000 },
 
  {  "grenade.wav",         false, 0.9f,  false, 300, 600 },
 
