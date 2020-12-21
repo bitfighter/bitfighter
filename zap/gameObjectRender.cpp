@@ -2028,42 +2028,49 @@ void renderProjectile(const Point &pos, U32 style, U32 time)
 
       glPushMatrix();
 
-      glRotatef(F32(time % 720), 0, 0, 1);
-      glColor(pi->projColors[1]);
+         glRotatef(F32(time % 720), 0, 0, 1);
+         glColor(pi->projColors[1]);
 
-      static S16 projectilePoints3[] = { -2,2,  2,2,  2,-2,  -2,-2 };
-      renderVertexArray(projectilePoints3, ARRAYSIZE(projectilePoints3) / 2, GL_LINE_LOOP);
+         static S16 projectilePoints3[] = { -2,2,  2,2,  2,-2,  -2,-2 };
+         renderVertexArray(projectilePoints3, ARRAYSIZE(projectilePoints3) / 2, GL_LINE_LOOP);
+      glPopMatrix();
 
       glPopMatrix();
 
-   } else if (bultype == 3) {  // Rosette of circles  MAKES SCREEN GO BEZERK!!
+   } else if (bultype == 3) { // Rosette of circles
 
       const int innerR = 6;
       const int outerR = 3;
       const int dist = 10;
 
 #define dr(x) degreesToRadians(x)
+      glPushMatrix();
+         glTranslate(pos);
+         glScale(pi->scaleFactor);
 
-      glRotatef( fmod(F32(time) * .15f, 720.f), 0, 0, 1);
-      glColor(pi->projColors[1]);
+         glPushMatrix();
+            glRotatef( fmod(F32(time) * .15f, 720.f), 0, 0, 1);
+            glColor(pi->projColors[1]);
 
-      Point p(0,0);
-      drawCircle(p, innerR);
-      p.set(0,-dist);
+            Point p(0,0);
+            drawCircle(p, innerR);
+            p.set(0,-dist);
 
-      drawCircle(p, outerR);
-      p.set(0,-dist);
-      drawCircle(p, outerR);
-      p.set(cos(dr(30)), -sin(dr(30)));
-      drawCircle(p*dist, outerR);
-      p.set(cos(dr(30)), sin(dr(30)));
-      drawCircle(p * dist, outerR);
-      p.set(0, dist);
-      drawCircle(p, outerR);
-      p.set(-cos(dr(30)), sin(dr(30)));
-      drawCircle(p*dist, outerR);
-      p.set(-cos(dr(30)), -sin(dr(30)));
-      drawCircle(p*dist, outerR);
+            drawCircle(p, outerR);
+            p.set(0,-dist);
+            drawCircle(p, outerR);
+            p.set(cos(dr(30)), -sin(dr(30)));
+            drawCircle(p*dist, outerR);
+            p.set(cos(dr(30)), sin(dr(30)));
+            drawCircle(p * dist, outerR);
+            p.set(0, dist);
+            drawCircle(p, outerR);
+            p.set(-cos(dr(30)), sin(dr(30)));
+            drawCircle(p*dist, outerR);
+            p.set(-cos(dr(30)), -sin(dr(30)));
+            drawCircle(p*dist, outerR);
+         glPopMatrix();
+      glPopMatrix();
    }
 }
 
