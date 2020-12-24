@@ -44,7 +44,7 @@ ProjectileInfo GameWeapon::projectileInfo[ProjectileStyleCount] =
    ProjectileInfo( Colors::yellow,  Colors::red,    Colors::orange50, Colors::white,  Colors::yellow,   Colors::red,      1.3f, SFXBounceProjectile, SFXBounceImpact ), // Bounce
    ProjectileInfo( Colors::blue,    Colors::green,  Color(0,0.5,1),   Color(0,1,0.5), Color(0, 0.5, 1), Color(0, 1, 0.5), 0.7f, SFXTripleProjectile, SFXTripleImpact ), // Triple
    ProjectileInfo( Colors::cyan,    Colors::yellow, Color(0,1,0.5),   Color(0.5,1,0), Color(0.5, 1, 0), Color(0, 1, 0.5), 0.6f, SFXTurretProjectile, SFXTurretImpact ), // Turret
-   ProjectileInfo( Colors::blue,    Colors::magenta,Colors::red,      Colors::cyan,   Colors::blue,     Colors::cyan,     0.6f, SFXRailgunProjectile,SFXRailgunImpact ), // Railgun
+   ProjectileInfo( Colors::blue,    Colors::magenta,Colors::red,      Colors::cyan,   Colors::blue,     Colors::cyan,     3.0f, SFXRailgunProjectile,SFXRailgunImpact ), // Railgun
 };
 
 

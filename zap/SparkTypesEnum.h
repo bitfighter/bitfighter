@@ -20,7 +20,8 @@ namespace Zap { namespace UI {
       ShipProfile,
       CloakedShipProfile,
       TurboShipProfile,
-      SeekerProfile
+      SeekerProfile,
+      RailgunProfile
    };
 
 }  } // Nested namespace

@@ -2075,6 +2075,32 @@ void renderProjectile(const Point &pos, U32 style, U32 time)
 }
 
 
+void renderProjectileRailgun(const Point &pos, const Point &velocity, U32 time)
+{
+   ProjectileInfo *pi = GameWeapon::projectileInfo + ProjectileStyleRailgun;
+
+   glColor(pi->projColors[0]);
+   glPushMatrix();
+      glTranslate(pos);
+      glScale(pi->scaleFactor);
+      glPushMatrix();
+         F32 angle = velocity.ATAN2() * 360.f * FloatInverse2Pi;
+         glRotatef(angle, 0, 0, 1);
+
+         // Outer polygon
+         glColor(pi->projColors[0]);
+         static S16 outer[] = { -1,1,  2,1,  4,0,  2,-1,  -1,-1 };
+         renderVertexArray(outer, ARRAYSIZE(outer) / 2, GL_LINE_LOOP);
+
+         // Stripe
+         glColor(pi->projColors[1]);
+         static F32 inner[] = { 0,0,  2.5,0 };
+         renderVertexArray(inner, ARRAYSIZE(inner) / 2, GL_LINE_STRIP);
+      glPopMatrix();
+   glPopMatrix();
+}
+
+
 void renderSeeker(const Point &pos, U32 style, F32 angleRadians, F32 speed, U32 timeRemaining)
 {
    glPushMatrix();

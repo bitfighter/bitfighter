@@ -388,7 +388,22 @@ void Projectile::idle(BfObject::IdleCallPath path)
          }
       }
    }
-         
+
+
+#ifndef ZAP_DEDICATED
+   // Draw trail for Railgun
+   if(mStyle == ProjectileStyleRailgun)
+   {
+      mTrail.idle(deltaT);
+
+      // Start a little behind the projectile
+      Point offsetPos = mVelocity;
+      offsetPos.normalize(10.0);
+      Point updatePos = getPos() - offsetPos;
+
+      mTrail.update(updatePos, UI::RailgunProfile);
+   }
+#endif
 
    // Kill old projectiles
    if(mAlive && path == BfObject::ServerIdleMainLoop)
@@ -474,7 +489,14 @@ bool Projectile::canAddToEditor() { return false; }      // No projectiles in th
 void Projectile::renderItem(const Point &pos)
 {
    if(shouldRender())
-      renderProjectile(pos, mStyle, getGame()->getCurrentTime() - getCreationTime());
+   {
+      U32 time = getGame()->getCurrentTime() - getCreationTime();
+
+      if(mStyle == ProjectileStyleRailgun)
+         renderProjectileRailgun(pos, mVelocity, time);
+      else
+         renderProjectile(pos, mStyle, time);
+   }
 }
 
 

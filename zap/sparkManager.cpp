@@ -490,6 +490,11 @@ void FxTrail::render() const
             rFade = 0.5f;   gFade = 1;   bFade = 1;  aFade = 0.2f;
             break;
 
+         case RailgunProfile:
+            r = 0.0f;       g = 0.5f;    b = 0.7f;    a = 0.6f;
+            rFade = 0.0f;   gFade = 0.8; bFade = 0.8; aFade = 0.5f;
+            break;
+
          default:
             TNLAssert(false, "No such profile!");
             break;

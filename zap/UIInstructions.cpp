@@ -774,7 +774,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
             renderSeeker(Point(0,0), 0, 0, 400, Platform::getRealMilliseconds());
             break;
          case 5:     // Railgun
-            renderProjectile(Point(0,0), 4, Platform::getRealMilliseconds());
+            renderProjectileRailgun(Point(0,0), Point(0,0), Platform::getRealMilliseconds());
             break;
          case 6:
             renderMine(Point(0,0), true, true);
