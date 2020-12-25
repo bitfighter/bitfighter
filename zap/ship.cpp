@@ -488,12 +488,20 @@ void Ship::processWeaponFire()
          if(getClientInfo())
             getClientInfo()->getStatistics()->countShot(curWeapon);
 
+         Point dir = getAimVector();
+
          if(isServer())  
          {
-            Point dir = getAimVector();
-
             // TODO: To fix skip fire effect on jittery server, need to replace the 0 with... something...
             GameWeapon::createWeaponProjectiles(curWeapon, dir, getActualPos(), getActualVel(), 0, CollisionRadius - 2, this);
+         }
+
+         // Railgun gives a little kickback
+         if(curWeapon == WeaponRailgun)
+         {
+            static const F32 RAILGUN_KICKBACK_IMPULSE = 700.0f;
+
+            mImpulseVector -= dir * RAILGUN_KICKBACK_IMPULSE;
          }
 
          mFireTimer += S32(WeaponInfo::getWeaponInfo(curWeapon).fireDelay);
