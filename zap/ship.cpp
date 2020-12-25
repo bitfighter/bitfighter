@@ -1070,7 +1070,7 @@ void Ship::damageObject(DamageInfo *theInfo)
    bool hasArmor = hasModule(ModuleArmor);
 
    // Deal with grenades and other explody things, even if they cause no damage
-   if(theInfo->damageType == DamageTypeArea)
+   if(theInfo->damageType == DamageTypeArea || theInfo->damageType == DamageTypeVector)
    {
       static const F32 ARMOR_IMPULSE_ABSORBTION_FACTOR = 0.25f;
 

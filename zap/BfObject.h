@@ -131,6 +131,7 @@ enum DamageType
 {
    DamageTypePoint,
    DamageTypeArea,
+   DamageTypeVector,  // Like DamageTypePoint but allows impulseVector to ships
 };
 
 struct DamageInfo

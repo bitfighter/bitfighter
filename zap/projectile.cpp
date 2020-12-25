@@ -193,14 +193,26 @@ void Projectile::handleCollision(BfObject *hitObject, Point collisionPoint)
 
    if(!isGhost())    // If we're on the server, that is
    {
+      DamageType damageType = DamageTypePoint;
+      Point impulseVector = mVelocity;
+
+      if(mWeaponType == WeaponRailgun)
+      {
+         static const F32 RAILGUN_IMPULSE_MAGNITUDE = 700.0f;
+         damageType = DamageTypeVector;
+         if(hitShip)
+            impulseVector.normalize(RAILGUN_IMPULSE_MAGNITUDE);
+      }
+
       DamageInfo damageInfo;
 
       damageInfo.collisionPoint       = collisionPoint;
       damageInfo.damageAmount         = WeaponInfo::getWeaponInfo(mWeaponType).damageAmount;
-      damageInfo.damageType           = DamageTypePoint;
-      damageInfo.damagingObject       = this;
-      damageInfo.impulseVector        = mVelocity;
+      damageInfo.damageType           = damageType;
+      damageInfo.impulseVector        = impulseVector;
       damageInfo.damageSelfMultiplier = WeaponInfo::getWeaponInfo(mWeaponType).damageSelfMultiplier;
+      damageInfo.damagingObject       = this;
+
 
       hitObject->damageObject(&damageInfo);
 
