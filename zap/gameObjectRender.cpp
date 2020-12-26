@@ -2463,31 +2463,6 @@ void renderAsteroidSpawn(const Point &pos, S32 time)
    F32 alpha = max(0.0f, 0.8f - time * invPeriod);
 
    renderAsteroid(pos, 2, 0.1f, &Colors::green, alpha);
-
-//   static const F32 lines[] = {
-//         // Inner
-//          -8, -12,     8, -12,
-//          12,  -8,    12,   8,
-//           8,  12,    -8,  12,
-//         -12,   8,   -12,  -8,
-//
-//         // Outer
-//         -12, -16,    12, -16,
-//          16, -12,    16,  12,
-//          12,  16,   -12,  16,
-//         -16,  12,   -16, -12,
-//   };
-//
-//   glColor(Colors::green, 0.5f);
-//
-//   glPushMatrix();
-//      glTranslate(pos);
-//
-//      // Inner
-//      renderVertexArray(lines, 8, GL_LINE_LOOP);
-//      // Outer
-//      renderVertexArray(&lines[16], 8, GL_LINE_LOOP);
-//   glPopMatrix();
 }
 
 
@@ -2504,19 +2479,6 @@ void renderAsteroidSpawnEditor(const Point &pos, F32 scale)
       drawCircle(p, 13, &Colors::white);
    glPopMatrix();
 }
-
-//
-//void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha)
-//{
-//   glPushMatrix();
-//      glTranslate(pos);
-//      glScale(scaleFactor);
-//      glColor(color == NULL ? Colors::white : *color, alpha);
-//
-//      static F32 resourcePoints[] = { -8,8,  0,20,  8,8,  20,0,  8,-8,  0,-20,  -8,-8,  -20,0 };
-//      renderVertexArray(resourcePoints, ARRAYSIZE(resourcePoints) / 2, GL_LINE_LOOP);
-//   glPopMatrix();
-//}
 
 
 void renderResourceItem(const Vector<Point> &points, F32 alpha)
