@@ -499,7 +499,7 @@ void Ship::processWeaponFire()
          // Railgun gives a little kickback
          if(curWeapon == WeaponRailgun)
          {
-            static const F32 RAILGUN_KICKBACK_IMPULSE = 700.0f;
+            static const F32 RAILGUN_KICKBACK_IMPULSE = 400.0f;
 
             mImpulseVector -= dir * RAILGUN_KICKBACK_IMPULSE;
          }
