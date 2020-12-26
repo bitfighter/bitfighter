@@ -1847,37 +1847,19 @@ void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<P
 
 // Goal zone flashes after capture, but glows after touchdown...
 void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle,
-                    bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter, bool useOldStyle)
+                    bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter)
 {
    Color fillColor, outlineColor;
 
-   if(useOldStyle)
-   {
 //      fillColor    = getGoalZoneFillColor(c, isFlashing, glowFraction);
 //      outlineColor = getGoalZoneOutlineColor(c, isFlashing);
 
-      // TODO: reconcile why using the above commentted out code doesn't work
-      F32 alpha = isFlashing ? 0.75f : 0.5f;
-      fillColor    = Color(Color(1,1,0) * (glowFraction * glowFraction) + Color(c) * alpha * (1 - glowFraction * glowFraction));
-      outlineColor = Color(Color(1,1,0) * (glowFraction * glowFraction) + Color(c) *         (1 - glowFraction * glowFraction));
-   }
-   else // Some new flashing effect (sam's idea)
-   {
-      F32 glowRate = 0.5f - fabs(flashCounter - 0.5f);  // will need flashCounter for this.
-
-      Color newColor(c);
-      if(isFlashing)
-         newColor = newColor + glowRate * (1 - glowRate);
-      else
-         newColor = newColor * (1 - glowRate);
-
-      fillColor    = getGoalZoneFillColor(newColor, false, glowFraction);
-      outlineColor = getGoalZoneOutlineColor(newColor, false);
-   }
-
+   // TODO: reconcile why using the above commentted out code doesn't work
+   F32 alpha = isFlashing ? 0.75f : 0.5f;
+   fillColor    = Color(Color(1,1,0) * (glowFraction * glowFraction) + Color(c) * alpha * (1 - glowFraction * glowFraction));
+   outlineColor = Color(Color(1,1,0) * (glowFraction * glowFraction) + Color(c) *         (1 - glowFraction * glowFraction));
 
    renderPolygon(fill, outline, &fillColor, &outlineColor);
-   //renderPolygonLabel(centroid, labelAngle, 25, "GOAL");
    renderGoalZoneIcon(centroid, 24);
 }
 

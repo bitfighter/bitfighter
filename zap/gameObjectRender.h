@@ -186,7 +186,7 @@ extern void renderPolygon(const Vector<Point> *fillPoints, const Vector<Point> *
 
 extern void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill);     // No label version
 extern void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle,
-                           bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter, bool useOldStyle);
+                           bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter);
 extern void renderGoalZoneIcon(const Point &center, S32 radius, F32 angleRadians = 0.0f);
 
 

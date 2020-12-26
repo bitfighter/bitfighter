@@ -882,7 +882,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                Triangulate::Process(o, f);
 
                renderGoalZone(Color(0.5f, 0.5f, 0.5f), &o, &f, findCentroid(o), angleOfLongestSide(o), 
-                  false, 0, 0, 0, false);
+                  false, 0, 0, 0);
             }
             break;
          case 23:    // Asteroid... using goofball factor to keep out of sync with Nexus graphic

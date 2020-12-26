@@ -302,8 +302,6 @@ public:
 
    U32 version;
 
-   bool oldGoalFlash;
-
    Vector<string> prevServerListFromMaster;
    Vector<string> alwaysPingList;
 

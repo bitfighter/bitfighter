@@ -180,8 +180,6 @@ IniSettings::IniSettings()
    logStats = false;          // Log statistics into local sqlite database
 
    version = BUILD_VERSION;   // Default to current version to avoid triggering upgrade checks on fresh install
-
-   oldGoalFlash = true;
 }
 
 
@@ -537,7 +535,6 @@ static void loadTestSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->neverConnectDirect = ini->GetValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
    iniSettings->wallFillColor.set(ini->GetValue("Testing", "WallFillColor", iniSettings->wallFillColor.toRGBString()));
    iniSettings->wallOutlineColor.set(ini->GetValue("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString()));
-   iniSettings->oldGoalFlash = ini->GetValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
    iniSettings->clientPortNumber = (U16) ini->GetValueI("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
    iniSettings->disableScreenSaver = ini->GetValueYN("Testing", "DisableScreenSaver", iniSettings->disableScreenSaver);
 }
@@ -1890,7 +1887,6 @@ static void writeTesting(CIniFile *ini, GameSettings *settings)
    ini->SetValue  ("Testing", "WallFillColor",   settings->getWallFillColor()->toRGBString());
    ini->SetValue  ("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString());
 
-   ini->setValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
    ini->SetValueI ("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
    ini->setValueYN("Testing", "DisableScreenSaver", iniSettings->disableScreenSaver);
 }
