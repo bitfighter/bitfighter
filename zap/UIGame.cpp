@@ -2855,7 +2855,7 @@ void GameUserInterface::renderInlineHelpItemOutlines(S32 playerTeam, F32 alpha) 
             if( whose == HighlightItem::Any ||
                (whose == HighlightItem::Team && team == playerTeam) ||
                (whose == HighlightItem::TorNeut && (team == playerTeam || team == TEAM_NEUTRAL)) ||
-               (whose == HighlightItem::Enemy && ((team >= 0 && team != playerTeam) || team == TEAM_HOSTILE)) ||
+               ((whose == HighlightItem::Enemy || whose == HighlightItem::EorHostile) && ((team >= 0 && team != playerTeam) || team == TEAM_HOSTILE)) ||
                (whose == HighlightItem::Neutral && team == TEAM_NEUTRAL) ||
                (whose == HighlightItem::Hostile && team == TEAM_HOSTILE) )
 
