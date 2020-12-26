@@ -53,7 +53,7 @@ const map<CoreGameType::RedistMethod, string> CoreGameRedistEnumMap = {
 bool CoreGameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)
-      setGameTime(F32(atof(argv[0]) * 60.0));      // Game time, stored in minutes in level file
+      setGameTime(F32(atof(argv[0]) * 60.0 * 1000));      // Game time, stored in minutes in level file
 
    // Added in 019g
    mRedistMethod = RedistNone;  // Default for all legacy maps

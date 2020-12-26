@@ -1003,7 +1003,7 @@ void Game::setGameTime(F32 timeInMinutes)
    TNLAssert(gt, "Null gametype!");
 
    if(gt)
-      gt->setGameTime(timeInMinutes * 60);
+      gt->setGameTime(timeInMinutes * 60 * 1000);  // Time in ms
 }
 
 

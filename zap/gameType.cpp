@@ -111,7 +111,7 @@ GameType::~GameType()
 bool GameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)      // First arg is game length, in minutes
-      setGameTime(F32(atof(argv[0]) * 60));
+      setGameTime(F32(atof(argv[0]) * 60 * 1000));
 
    if(argc > 1)      // Second arg is winning score
       mWinningScore = atoi(argv[1]);
@@ -3840,10 +3840,9 @@ void GameType::setWinningScore(S32 score)
 
 
 // Mostly used while reading a level file
-void GameType::setGameTime(F32 timeInSeconds)
+void GameType::setGameTime(F32 timeInMs)
 {
-   U32 time = U32(timeInSeconds * 1000);
-   setTimeRemaining(time, time == 0);
+   setTimeRemaining(timeInMs, timeInMs == 0);
 }
 
 

@@ -108,7 +108,7 @@ bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)
    {
-      setGameTime(F32(atof(argv[0]) * 60.f));                 // Game time, stored in minutes in level file
+      setGameTime(F32(atof(argv[0]) * 60.f * 1000));          // Game time, stored in minutes in level file
 
       if(argc > 1)
       {
