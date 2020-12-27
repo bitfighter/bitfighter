@@ -120,6 +120,9 @@ ChatHelper::ChatHelper()
    makeCommandCandidateList();
 
    setAnimationTime(65);    // Menu appearance time
+
+   mHistory = Vector<string>();
+   mHistoryIndex = 0;
 }
 
 // Destructor
@@ -136,6 +139,11 @@ void ChatHelper::activate(ChatType chatType)
 {
    mCurrentChatType = chatType;
    getGame()->setBusyChatting(true);
+
+   // Make sure we have a history slot to represent the command we'll be entering in this session
+   if(mHistory.size() == 0 || mHistory.last() != "")
+      mHistory.push_back("");
+   mHistoryIndex = mHistory.size() - 1;
 }
 
 
@@ -367,6 +375,13 @@ bool ChatHelper::processInputCode(InputCode inputCode)
       return true;
    else if(inputCode == KEY_ENTER)
       issueChat();
+
+   else if(inputCode == KEY_UP)
+         upArrowPressed();
+
+   else if(inputCode == KEY_DOWN)
+         downArrowPressed();
+
    else if(inputCode == KEY_TAB)      // Auto complete any commands
    {
       if(isCmdChat())     // It's a command!  Complete!  Complete!
@@ -512,6 +527,30 @@ bool ChatHelper::processInputCode(InputCode inputCode)
 }
 
 
+// Recall earlier message/command
+void ChatHelper::upArrowPressed()
+{
+   if(mHistoryIndex > 0)
+   {
+      mHistory[mHistoryIndex] = mLineEditor.getString();       // Save any edits we've made to this line
+      mHistoryIndex--;
+      mLineEditor.setString(mHistory[mHistoryIndex]);
+   }
+}
+
+
+// Recall more recent message/command
+void ChatHelper::downArrowPressed()
+{
+   if(mHistoryIndex < mHistory.size() - 1)
+   {
+      mHistory[mHistoryIndex] = mLineEditor.getString();      // Save any edits we've made to this line
+      mHistoryIndex++;
+      mLineEditor.setString(mHistory[mHistoryIndex]);
+   }
+}
+
+
 const char *ChatHelper::getChatMessage() const
 {
    return mLineEditor.c_str();
@@ -560,6 +599,14 @@ void ChatHelper::issueChat()
          // Player has demonstrated ability to send messages
          getGame()->getUIManager()->removeInlineHelpItem(HowToChatItem, true);
       }
+
+      // Manage command history  --> should we only store /commands in here?  Currently saves every issued chat
+      string trimmed = trim(mLineEditor.getString());
+      if(mHistory.size() > 1 && trimmed == mHistory[mHistory.size() - 2])     // Don't double up on strings in the history
+         mHistory[mHistory.size() - 1] = "";    
+      else if(trimmed != "")                                                  // Don't store empty or whitespace strings
+         mHistory[mHistory.size() - 1] = trimmed;
+      mHistoryIndex = mHistory.size();
    }
 
    exitHelper();     // Hide chat display

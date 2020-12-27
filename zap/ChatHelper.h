@@ -35,6 +35,13 @@ private:
 
    void issueChat();             // Send chat message (either Team or Global)
 
+   Vector<string> mHistory;
+   int mHistoryIndex;
+   bool mHasHistory;
+
+   void upArrowPressed();        // User hit up
+   void downArrowPressed();      // User hit down
+
    CommandInfo *getCommandInfo(const char *command);
 
    // Related to running commands
