@@ -72,6 +72,101 @@ void drawVertLine(F32 x, F32 y1, F32 y2)
 }
 
 
+void drawDashedLine(const Point &start, const Point &end, F32 period, F32 dutycycle, F32 fractionalOffset)
+{
+   // Quick check to see if we're just drawing a straight line
+   if(dutycycle >= 1)
+   {
+      F32 vertices[] = { start.x, start.y, end.x, end.y };
+      renderVertexArray(vertices, 2, GL_LINES);
+
+      // No more to do
+      return;
+   }
+
+   // Initialize point array, remember to clear at the end
+   static Vector<Point> vertexArray(102);  // 51 dashes should be enough yeah?
+
+   Point periodSeg = (end-start);
+   // Save length first
+   F32 lineLenSq = periodSeg.lenSquared();
+   F32 lineLen = sqrt(lineLenSq);
+
+   // Normalize to the period and scale by duty cycle
+   periodSeg.normalize(period);
+   Point dutySeg = periodSeg * dutycycle;
+
+   // Draw up to the last duty cycle worth
+   U32 numPeriods = U32(lineLen / period); // Integer truncation OK
+
+   // Start point is one period segment before so we have a nice smooth transition
+   Point currentDashStart = start - (periodSeg * (1-fractionalOffset));
+   Point currentDashEnd = currentDashStart + dutySeg;
+
+   Point firstDashStart = start;
+
+   // If the end point is before the start, then shift segment forward
+   if((currentDashEnd - end).lenSquared() > lineLenSq)
+   {
+      currentDashStart += periodSeg;
+      currentDashEnd   += periodSeg;
+      if(numPeriods != 0) // Don't wrap around
+         numPeriods--;
+
+      firstDashStart = currentDashStart;
+   }
+
+
+   // Draw first chunk
+   vertexArray.push_back(firstDashStart);
+   vertexArray.push_back(currentDashEnd);
+
+   // Update to the next dash
+   currentDashStart += periodSeg;
+   currentDashEnd   += periodSeg;
+
+
+   // Draw middles
+   for(U32 i = 0; i < numPeriods; i++)
+   {
+      vertexArray.push_back(currentDashStart);
+      vertexArray.push_back(currentDashEnd);
+
+      // Update to the next dash
+      currentDashStart += periodSeg;
+      currentDashEnd   += periodSeg;
+   }
+
+   // Check to see if we drew over the line, if so replace the end
+   if((start-vertexArray.last()).lenSquared() > lineLenSq)
+   {
+      vertexArray.pop_back();
+      vertexArray.push_back(end);
+
+      // And we're done!
+   }
+
+   // Otherwise check to see if we need another segment due to varying FF
+   // lengths
+   else if((currentDashStart - start).lenSquared() < lineLenSq)
+   {
+      // Draw last
+      Point lastDashEnd = currentDashEnd;
+
+      if((currentDashEnd-start).lenSquared() > lineLenSq)
+         lastDashEnd = end;
+
+      vertexArray.push_back(currentDashStart);
+      vertexArray.push_back(lastDashEnd);   // Finish up just to the end
+   }
+
+   // Render!
+   renderPointVector(&vertexArray, GL_LINES);
+
+   // Clean up
+   vertexArray.clear();
+}
+
 // Draw arc centered on pos, with given radius, from startAngle to endAngle.  0 is East, increasing CW
 void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 {
@@ -1313,6 +1408,16 @@ void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentSc
 }
 
 
+void renderTurretIcon(const Point &pos, F32 scale, const Color *color)
+{
+   glPushMatrix();
+      glTranslatef(pos.x, pos.y, 0);
+      glScalef(scale, scale, 1);    // Make item draw at constant size, regardless of zoom
+      renderSquareItem(Point(0,0), color, 1, &Colors::white, 'T');
+   glPopMatrix();
+}
+
+
 // Renders turret!  --> note that anchor and normal can't be const &Points because of the point math
 void renderTurret(const Color &c, const Color &hbc, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate)
 {
@@ -1742,37 +1847,19 @@ void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<P
 
 // Goal zone flashes after capture, but glows after touchdown...
 void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle,
-                    bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter, bool useOldStyle)
+                    bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter)
 {
    Color fillColor, outlineColor;
 
-   if(useOldStyle)
-   {
 //      fillColor    = getGoalZoneFillColor(c, isFlashing, glowFraction);
 //      outlineColor = getGoalZoneOutlineColor(c, isFlashing);
 
-      // TODO: reconcile why using the above commentted out code doesn't work
-      F32 alpha = isFlashing ? 0.75f : 0.5f;
-      fillColor    = Color(Color(1,1,0) * (glowFraction * glowFraction) + Color(c) * alpha * (1 - glowFraction * glowFraction));
-      outlineColor = Color(Color(1,1,0) * (glowFraction * glowFraction) + Color(c) *         (1 - glowFraction * glowFraction));
-   }
-   else // Some new flashing effect (sam's idea)
-   {
-      F32 glowRate = 0.5f - fabs(flashCounter - 0.5f);  // will need flashCounter for this.
-
-      Color newColor(c);
-      if(isFlashing)
-         newColor = newColor + glowRate * (1 - glowRate);
-      else
-         newColor = newColor * (1 - glowRate);
-
-      fillColor    = getGoalZoneFillColor(newColor, false, glowFraction);
-      outlineColor = getGoalZoneOutlineColor(newColor, false);
-   }
-
+   // TODO: reconcile why using the above commentted out code doesn't work
+   F32 alpha = isFlashing ? 0.75f : 0.5f;
+   fillColor    = Color(Color(1,1,0) * (glowFraction * glowFraction) + Color(c) * alpha * (1 - glowFraction * glowFraction));
+   outlineColor = Color(Color(1,1,0) * (glowFraction * glowFraction) + Color(c) *         (1 - glowFraction * glowFraction));
 
    renderPolygon(fill, outline, &fillColor, &outlineColor);
-   //renderPolygonLabel(centroid, labelAngle, 25, "GOAL");
    renderGoalZoneIcon(centroid, 24);
 }
 
@@ -1885,9 +1972,9 @@ void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill
 }
 
 
-void renderProjectile(const Point &pos, U32 type, U32 time)
+void renderProjectile(const Point &pos, U32 style, U32 time)
 {
-   ProjectileInfo *pi = GameWeapon::projectileInfo + type;
+   ProjectileInfo *pi = GameWeapon::projectileInfo + style;
 
    S32 bultype = 1;
 
@@ -1923,54 +2010,88 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
 
       glPushMatrix();
 
-      glRotatef(F32(time % 720), 0, 0, 1);
-      glColor(pi->projColors[1]);
+         glRotatef(F32(time % 720), 0, 0, 1);
+         glColor(pi->projColors[1]);
 
-      static S16 projectilePoints3[] = { -2,2,  2,2,  2,-2,  -2,-2 };
-      renderVertexArray(projectilePoints3, ARRAYSIZE(projectilePoints3) / 2, GL_LINE_LOOP);
+         static S16 projectilePoints3[] = { -2,2,  2,2,  2,-2,  -2,-2 };
+         renderVertexArray(projectilePoints3, ARRAYSIZE(projectilePoints3) / 2, GL_LINE_LOOP);
+      glPopMatrix();
 
       glPopMatrix();
 
-   } else if (bultype == 3) {  // Rosette of circles  MAKES SCREEN GO BEZERK!!
+   } else if (bultype == 3) { // Rosette of circles
 
       const int innerR = 6;
       const int outerR = 3;
       const int dist = 10;
 
 #define dr(x) degreesToRadians(x)
+      glPushMatrix();
+         glTranslate(pos);
+         glScale(pi->scaleFactor);
 
-      glRotatef( fmod(F32(time) * .15f, 720.f), 0, 0, 1);
-      glColor(pi->projColors[1]);
+         glPushMatrix();
+            glRotatef( fmod(F32(time) * .15f, 720.f), 0, 0, 1);
+            glColor(pi->projColors[1]);
 
-      Point p(0,0);
-      drawCircle(p, innerR);
-      p.set(0,-dist);
+            Point p(0,0);
+            drawCircle(p, innerR);
+            p.set(0,-dist);
 
-      drawCircle(p, outerR);
-      p.set(0,-dist);
-      drawCircle(p, outerR);
-      p.set(cos(dr(30)), -sin(dr(30)));
-      drawCircle(p*dist, outerR);
-      p.set(cos(dr(30)), sin(dr(30)));
-      drawCircle(p * dist, outerR);
-      p.set(0, dist);
-      drawCircle(p, outerR);
-      p.set(-cos(dr(30)), sin(dr(30)));
-      drawCircle(p*dist, outerR);
-      p.set(-cos(dr(30)), -sin(dr(30)));
-      drawCircle(p*dist, outerR);
+            drawCircle(p, outerR);
+            p.set(0,-dist);
+            drawCircle(p, outerR);
+            p.set(cos(dr(30)), -sin(dr(30)));
+            drawCircle(p*dist, outerR);
+            p.set(cos(dr(30)), sin(dr(30)));
+            drawCircle(p * dist, outerR);
+            p.set(0, dist);
+            drawCircle(p, outerR);
+            p.set(-cos(dr(30)), sin(dr(30)));
+            drawCircle(p*dist, outerR);
+            p.set(-cos(dr(30)), -sin(dr(30)));
+            drawCircle(p*dist, outerR);
+         glPopMatrix();
+      glPopMatrix();
    }
 }
 
 
-void renderSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRemaining)
+void renderProjectileRailgun(const Point &pos, const Point &velocity, U32 time)
+{
+   ProjectileInfo *pi = GameWeapon::projectileInfo + ProjectileStyleRailgun;
+
+   glColor(pi->projColors[0]);
+   glPushMatrix();
+      glTranslate(pos);
+      glScale(pi->scaleFactor);
+      glPushMatrix();
+         F32 angle = velocity.ATAN2() * 360.f * FloatInverse2Pi;
+         glRotatef(angle, 0, 0, 1);
+
+         // Outer polygon
+         glColor(pi->projColors[0]);
+         static S16 outer[] = { -1,1,  2,1,  4,0,  2,-1,  -1,-1 };
+         renderVertexArray(outer, ARRAYSIZE(outer) / 2, GL_LINE_LOOP);
+
+         // Stripe
+         glColor(pi->projColors[1]);
+         static F32 inner[] = { 0,0,  2.5,0 };
+         renderVertexArray(inner, ARRAYSIZE(inner) / 2, GL_LINE_STRIP);
+      glPopMatrix();
+   glPopMatrix();
+}
+
+
+void renderSeeker(const Point &pos, U32 style, F32 angleRadians, F32 speed, U32 timeRemaining)
 {
    glPushMatrix();
       glTranslate(pos);
       glRotatef(angleRadians * 360.f / FloatTau, 0, 0, 1.0);
 
       // The flames first!
-      F32 speedRatio = speed / WeaponInfo::getWeaponInfo(WeaponSeeker).projVelocity + (S32(timeRemaining) % 200)/ 400.0f;  
+      F32 updateTime = (timeRemaining % 256)/ 512.0f; // every ~ 1/4 second increases from 0 to 0.5
+      F32 speedRatio = speed / WeaponInfo::getWeaponInfo(WeaponSeeker).projVelocity + updateTime;
       glColor(Colors::yellow, 0.5f);
       F32 innerFlame[] = {
             -8, -1,
@@ -1987,7 +2108,11 @@ void renderSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRemaini
       renderVertexArray(outerFlame, 3, GL_LINE_STRIP);
 
       // The body of the seeker
-      glColor4f(1, 0, 0.35f, 1);  // A redder magenta
+      Color bodyColor = Color(1, 0, 0.35f);
+      if(style == SeekerStyleTurret)
+         bodyColor = Color(updateTime, 1, updateTime); // Different colors of green
+
+      glColor(bodyColor, 1);  // A redder magenta
       F32 vertices[] = {
             -8, -4,
             -8,  4,
@@ -2036,7 +2161,7 @@ void renderMine(const Point &pos, bool armed, bool visible)
 
 
 // lifeLeft is a number between 0 and 1.  Burst explodes when lifeLeft == 0.
-void renderGrenade(const Point &pos, F32 lifeLeft)
+void renderGrenade(const Point &pos, U32 style, F32 lifeLeft)
 {
    glColor(Colors::white);
    drawCircle(pos, 10);
@@ -2063,7 +2188,10 @@ void renderGrenade(const Point &pos, F32 lifeLeft)
    else if(lifeLeft > .05)
       innerVis = false;
 
-   glColor(1, min(1.25f - lifeLeft, 1), 0);
+   if(style == 1)
+      glColor(0, 1, min(1.f - lifeLeft, 0.5));
+   else
+      glColor(1, min(1.25f - lifeLeft, 1), 0);
 
    if(innerVis)
       drawFilledCircle(pos, 6);
@@ -2191,12 +2319,17 @@ void renderEnergySymbol()
 
 void renderEnergyItem(const Point &pos, bool forEditor)
 {
-   F32 scaleFactor = forEditor ? .45f : 1;    // Resize for editor
+   F32 scaleFactor = 1;    // Resize for editor
+   F32 size = 18;
+   if(forEditor)
+   {
+      scaleFactor = 0.45;
+      size = 8;
+   }
 
    glPushMatrix();
       glTranslate(pos);
 
-      F32 size = 18;
       drawHollowSquare(Point(0,0), size, &Colors::white);
       glLineWidth(gDefaultLineWidth);
 
@@ -2309,34 +2442,9 @@ void renderAsteroidSpawn(const Point &pos, S32 time)
    static const S32 period = 4096;  // Power of 2 please
    static const F32 invPeriod = 1 / F32(period);
 
-   F32 alpha = max(0.0f, 1.0f - time * invPeriod);
+   F32 alpha = max(0.0f, 0.8f - time * invPeriod);
 
    renderAsteroid(pos, 2, 0.1f, &Colors::green, alpha);
-
-//   static const F32 lines[] = {
-//         // Inner
-//          -8, -12,     8, -12,
-//          12,  -8,    12,   8,
-//           8,  12,    -8,  12,
-//         -12,   8,   -12,  -8,
-//
-//         // Outer
-//         -12, -16,    12, -16,
-//          16, -12,    16,  12,
-//          12,  16,   -12,  16,
-//         -16,  12,   -16, -12,
-//   };
-//
-//   glColor(Colors::green, 0.5f);
-//
-//   glPushMatrix();
-//      glTranslate(pos);
-//
-//      // Inner
-//      renderVertexArray(lines, 8, GL_LINE_LOOP);
-//      // Outer
-//      renderVertexArray(&lines[16], 8, GL_LINE_LOOP);
-//   glPopMatrix();
 }
 
 
@@ -2353,19 +2461,6 @@ void renderAsteroidSpawnEditor(const Point &pos, F32 scale)
       drawCircle(p, 13, &Colors::white);
    glPopMatrix();
 }
-
-//
-//void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha)
-//{
-//   glPushMatrix();
-//      glTranslate(pos);
-//      glScale(scaleFactor);
-//      glColor(color == NULL ? Colors::white : *color, alpha);
-//
-//      static F32 resourcePoints[] = { -8,8,  0,20,  8,8,  20,0,  8,-8,  0,-20,  -8,-8,  -20,0 };
-//      renderVertexArray(resourcePoints, ARRAYSIZE(resourcePoints) / 2, GL_LINE_LOOP);
-//   glPopMatrix();
-//}
 
 
 void renderResourceItem(const Vector<Point> &points, F32 alpha)
@@ -2476,7 +2571,7 @@ void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width)
 
 void renderSoccerBall(const Point &pos)
 {
-   renderSoccerBall(pos, (F32)SoccerBallItem::SOCCER_BALL_RADIUS);
+   renderSoccerBall(pos, (F32)SoccerBallItem::Radius);
 }
 
 
@@ -2512,11 +2607,11 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
 void renderForceFieldProjector(const Point &pos, const Point &normal, const Color *color, bool enabled, S32 healRate)
 {
    Vector<Point> geom = ForceFieldProjector::getForceFieldProjectorGeometry(pos, normal);
-   renderForceFieldProjector(&geom, pos, color, enabled, healRate);
+   renderForceFieldProjector(&geom, pos, color, enabled, 1.0, healRate);
 }
 
 
-void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, const Color *color, bool enabled, S32 healRate)
+void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, const Color *color, bool enabled, F32 health, S32 healRate)
 {
    F32 ForceFieldBrightnessProjector = 0.50;
 
@@ -2524,7 +2619,10 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, cons
 
    c = c * (1 - ForceFieldBrightnessProjector) + ForceFieldBrightnessProjector;
 
-   glColor(enabled ? c : (c * 0.6f));
+   if (enabled)
+      glColor(c, 0.2f + (.9 * health)); //adjust alpha a little so it doesn't get much darker when its enabled than disabled
+   else
+      glColor((c * 0.6f));
 
    // Draw a symbol in the project to show it is a regenerative projector
    if(healRate > 0)
@@ -2546,23 +2644,43 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, cons
          renderVertexArray(symbol, ARRAYSIZE(symbol) / 2, GL_LINE_STRIP);
       glPopMatrix();
    }
-
+   
    renderPointVector(geom, GL_LINE_LOOP);
 }
 
 
-void renderForceField(Point start, Point end, const Color *color, bool fieldUp, F32 scaleFact)
+void renderForceField(const Point &start, const Point &end, const Color *color, bool fieldUp, F32 health, U32 time)
 {
-   Vector<Point> geom = ForceField::computeGeom(start, end, scaleFact);
+   Vector<Point> geom = ForceField::computeGeom(start, end);
 
-   F32 ForceFieldBrightness = 0.25;
+   const F32 ForceFieldBrightness = 0.25;
 
    Color c(color);
    c = c * (1 - ForceFieldBrightness) + ForceFieldBrightness;
 
-   glColor(fieldUp ? c : c * 0.5);
+   if(!fieldUp)
+      c = c * 0.5;
 
+   // Set color of field
+   glColor(c);
+
+   // This is a long, thin rectangle
    renderPointVector(&geom, GL_LINE_LOOP);
+
+
+   // Add health bar on top
+
+   // Chosen to be the size of a ship
+   const F32 healthBarPeriod = 50;
+
+   // Scale animation speed based on health
+   F32 timeScale = 4 * (1-health);
+
+   U32 timePeriod = 4096;  // power of 2 in milliseconds
+   U32 animationTime = U32(timeScale * time) & (timePeriod-1);
+   F32 normAnimationTime = animationTime / F32(timePeriod);
+
+   drawDashedLine(start, end, healthBarPeriod, health, normAnimationTime);  // Health is the duty cycle
 }
 
 
@@ -2900,7 +3018,7 @@ void drawLetter(char letter, const Point &pos, const Color &color, F32 alpha)
 {
    // Mark the item with a letter, unless we're showing the reference ship
    S32 vertOffset = 8;
-   if (letter >= 'a' && letter <= 'z')    // Better position lowercase letters
+   if (isAlpha(letter))    // Better position lowercase letters
       vertOffset = 10;
 
    glColor(color, alpha);

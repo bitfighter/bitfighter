@@ -15,14 +15,16 @@
 
 #include "ServerGame.h"
 
-#ifndef ZAP_DEDICATED
-#  include "ClientGame.h"        // for accessing client's spark manager
-#endif
-
 #include "Colors.h"
 #include "stringUtils.h"
 #include "MathUtils.h"           // For findLowestRootIninterval()
 #include "GeomUtils.h"
+
+#ifndef ZAP_DEDICATED
+#  include "ClientGame.h"        // for accessing client's spark manager
+#  include "UIEditorMenus.h"
+#endif
+
 
 namespace Zap
 {
@@ -188,7 +190,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(const GridDatabase *gameO
    /// Part ONE
    // We need to ensure forcefield doesn't cross another; doing so can create an impossible situation
    // Forcefield starts at the end of the projector.  Need to know where that is.
-   Point forceFieldStart = ForceFieldProjector::getForceFieldStartPoint(mDeployPosition, mDeployNormal, 0);
+   Point forceFieldStart = mDeployPosition;
 
    // Now we can find the point where the forcefield would end if this were a valid position
    Point forceFieldEnd;
@@ -422,6 +424,7 @@ string EngineerModuleDeployer::getErrorMessage()
 
 const F32 EngineeredItem::EngineeredItemRadius = 7.f;
 const F32 EngineeredItem::DamageReductionFactor = 0.25f;
+const F32 EngineeredItem::DisabledLevel = 0.25f;
 
 // Constructor
 EngineeredItem::EngineeredItem(S32 team, const Point &anchorPoint, const Point &anchorNormal) : Parent(EngineeredItemRadius), Engineerable(), mAnchorNormal(anchorNormal)
@@ -651,11 +654,9 @@ bool EngineeredItem::isSnapped() const
 }
 
 
-static const F32 disabledLevel = 0.25;
-
 bool EngineeredItem::isEnabled()
 {
-   return mHealth >= disabledLevel;
+   return mHealth >= DisabledLevel;
 }
 
 
@@ -697,7 +698,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
    setMaskBits(HealthMask);
 
    // Check if turret just died
-   if(prevHealth >= disabledLevel && mHealth < disabledLevel)        // Turret just died
+   if(prevHealth >= DisabledLevel && mHealth < DisabledLevel)        // Turret just died
    {
       // Revert team to neutral if this was a repaired turret
       if(getTeam() != mOriginalTeam)
@@ -727,7 +728,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
             player->getStatistics()->mFFsKilled++;
       }
    }
-   else if(prevHealth < disabledLevel && mHealth >= disabledLevel)   // Turret was just repaired or healed
+   else if(prevHealth < DisabledLevel && mHealth >= DisabledLevel)   // Turret was just repaired or healed
    {
       if(getTeam() == TEAM_NEUTRAL)                   // Neutral objects...
       {
@@ -916,9 +917,9 @@ U32 EngineeredItem::packUpdate(GhostConnection *connection, U32 updateMask, BitS
    if(stream->writeFlag(updateMask & HealthMask))
    {
       if(stream->writeFlag(isEnabled()))
-         stream->writeFloat((mHealth - disabledLevel) / (1 - disabledLevel), 5);
+         stream->writeFloat((mHealth - DisabledLevel) / (1 - DisabledLevel), 5);
       else
-         stream->writeFloat(mHealth / disabledLevel, 5);
+         stream->writeFloat(mHealth / DisabledLevel, 5);
 
       stream->writeFlag(mIsDestroyed);
    }
@@ -954,10 +955,9 @@ void EngineeredItem::unpackUpdate(GhostConnection *connection, BitStream *stream
    if(stream->readFlag())
    {
       if(stream->readFlag())
-         mHealth = stream->readFloat(5) * (1 - disabledLevel) + disabledLevel; // enabled
+         mHealth = stream->readFloat(5) * (1 - DisabledLevel) + DisabledLevel; // enabled
       else
-         mHealth = stream->readFloat(5) * (disabledLevel * 0.99f); // disabled, make sure (mHealth < disabledLevel)
-
+         mHealth = stream->readFloat(5) * (DisabledLevel * 0.99f); // disabled, make sure (mHealth < disabledLevel)
 
       bool wasDestroyed = mIsDestroyed;
       mIsDestroyed = stream->readFlag();
@@ -1009,7 +1009,7 @@ void EngineeredItem::healObject(S32 time)
       else
          mHealTimer.reset();
 
-      if(prevHealth < disabledLevel && mHealth >= disabledLevel)
+      if(prevHealth < DisabledLevel && mHealth >= DisabledLevel)
          onEnabled();
    }
 }
@@ -1064,8 +1064,9 @@ Point EngineeredItem::mountToWall(const Point &pos, const WallSegmentManager *wa
    {
       setPos(anchor);
       setAnchorNormal(nrml);
-      // TODO -- After 019 release -- change this to a static_cast with a protecting assert
-      setMountSegment(dynamic_cast<WallSegment *>(mountSeg));
+
+      TNLAssert(dynamic_cast<WallSegment *>(mountSeg), "Not a WallSegment");
+      setMountSegment(static_cast<WallSegment *>(mountSeg));
 
       mSnapped = true;
       onGeomChanged();
@@ -1215,7 +1216,7 @@ S32 EngineeredItem::lua_setHealth(lua_State *L)
  */
 S32 EngineeredItem::lua_getDisabledThreshold(lua_State *L)
 {
-   return returnFloat(L, disabledLevel);
+   return returnFloat(L, DisabledLevel);
 }
 
 
@@ -1266,7 +1267,7 @@ S32 EngineeredItem::lua_setHealRate(lua_State *L)
 /**
  * @luafunc bool EngineeredItem::getEngineered()
  * 
- * @breif Get whether the item can be totally destroyed
+ * @brief Get whether the item can be totally destroyed
  * 
  * @return `true` if the item can be destroyed.
  */
@@ -1277,7 +1278,7 @@ S32 EngineeredItem::lua_getEngineered(lua_State *L)
 
 
 /**
- * @luafunc EngineeredItem::setEngineered(engineered)
+ * @luafunc EngineeredItem::setEngineered(bool engineered)
  * 
  * @brief Sets whether the item can be destroyed when its health reaches zero.
  * 
@@ -1301,6 +1302,17 @@ S32 EngineeredItem::lua_setGeom(lua_State *L)
    S32 retVal = Parent::lua_setGeom(L);
 
    findMountPoint(Game::getAddTarget(), getPos());
+
+   return retVal;
+}
+
+
+S32 EngineeredItem::lua_setPos(lua_State *L)
+{
+   S32 retVal = Parent::lua_setPos(L);
+
+   // This re-triggers all the position information on the client
+   setMaskBits(InitialMask);
 
    return retVal;
 }
@@ -1389,6 +1401,30 @@ void ForceFieldProjector::idle(BfObject::IdleCallPath path)
 }
 
 
+U32 ForceFieldProjector::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+{
+   U32 ret = Parent::packUpdate(connection, updateMask, stream);
+
+   // Update field health
+   if(mField.isValid() && isEnabled())
+   {
+      // Recalculate FF health based on the enabled portion of the FFP health
+      // i.e. 0.25 to 1 for the FFP becomes 0 to 1 for the FF
+      F32 ffHealth = (mHealth - DisabledLevel) / (1 - DisabledLevel);
+
+      mField->setHealth(ffHealth);
+   }
+
+   return ret;
+}
+
+
+void ForceFieldProjector::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   Parent::unpackUpdate(connection, stream);
+}
+
+
 static const S32 PROJECTOR_OFFSET = 15;      // Distance from wall to projector tip; thickness, if you will
 
 F32 ForceFieldProjector::getSelectionOffsetMagnitude()
@@ -1425,10 +1461,10 @@ Vector<Point> ForceFieldProjector::getForceFieldProjectorGeometry(const Point &a
 
 
 // Get the point where the forcefield actually starts, as it leaves the projector; i.e. the tip of the projector.  Static method.
-Point ForceFieldProjector::getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact)
+Point ForceFieldProjector::getForceFieldStartPoint(const Point &anchor, const Point &normal)
 {
-   return Point(anchor.x + normal.x * PROJECTOR_OFFSET * scaleFact, 
-                anchor.y + normal.y * PROJECTOR_OFFSET * scaleFact);
+   return Point(anchor.x + normal.x * PROJECTOR_OFFSET,
+                anchor.y + normal.y * PROJECTOR_OFFSET);
 }
 
 
@@ -1455,8 +1491,9 @@ void ForceFieldProjector::setEndSegment(WallSegment *endSegment)
 }
 
 
-// Forcefield projector has been turned on some how; either at the beginning of a level, or via repairing, or deploying. 
-// Runs on both client and server
+// Forcefield projector has been turned on some how; either at the beginning of
+// a level, or via repairing, or deploying.
+// Runs on server
 void ForceFieldProjector::onEnabled()
 {
    // Database can be NULL here if adding a forcefield from the editor:  The editor will
@@ -1465,7 +1502,11 @@ void ForceFieldProjector::onEnabled()
    if(!getDatabase())
       return;
 
-   if(!isGhost() && mField.isNull())  // server only, add mField only when we don't have any
+   // Server only
+   if(isGhost())
+      return;
+
+   if(mField.isNull())  // Add mField only when we don't have any
    {
       Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
       Point end;
@@ -1497,7 +1538,7 @@ void ForceFieldProjector::render()
 #ifndef ZAP_DEDICATED
    // We're not in editor (connected to game)
    if(static_cast<ClientGame*>(getGame())->isConnectedToServer())
-      renderForceFieldProjector(&mCollisionPolyPoints, getPos(), getColor(), isEnabled(), mHealRate);
+      renderForceFieldProjector(&mCollisionPolyPoints, getPos(), getColor(), isEnabled(), mHealth, mHealRate);
    else
       renderEditor(0, false);
 #endif
@@ -1513,15 +1554,14 @@ void ForceFieldProjector::renderDock()
 void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
 #ifndef ZAP_DEDICATED
-   F32 scaleFact = 1;
    const Color *color = getColor();
 
    if(mSnapped)
    {
-      Point forceFieldStart = getForceFieldStartPoint(getPos(), mAnchorNormal, scaleFact);
+      Point forceFieldStart = getForceFieldStartPoint(getPos(), mAnchorNormal);
 
-      renderForceFieldProjector(&mCollisionPolyPoints, getPos(), color, true, mHealRate);
-      renderForceField(forceFieldStart, forceFieldEnd, color, true, scaleFact);
+      renderForceFieldProjector(&mCollisionPolyPoints, getPos(), color, true, 1.0, mHealRate);
+      renderForceField(forceFieldStart, forceFieldEnd, color, true);
    }
    else
       renderDock();
@@ -1546,8 +1586,6 @@ void ForceFieldProjector::findForceFieldEnd()
    // Load the corner points of a maximum-length forcefield into geom
    DatabaseObject *collObj;
 
-   F32 scale = 1;
-   
    Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
 
    // Pass in database containing WallSegments, returns object in collObj
@@ -1559,7 +1597,7 @@ void ForceFieldProjector::findForceFieldEnd()
    else
       setEndSegment(NULL);
 
-   setExtent(Rect(ForceField::computeGeom(start, forceFieldEnd, scale)));
+   setExtent(Rect(ForceField::computeGeom(start, forceFieldEnd)));
 }
 
 
@@ -1596,8 +1634,25 @@ S32 ForceFieldProjector::lua_getPos(lua_State *L)
 
 S32 ForceFieldProjector::lua_setPos(lua_State *L)
 {
-   // TODO
-   return Parent::lua_setPos(L);
+   S32 retVal = Parent::lua_setPos(L);
+
+   // Re-find start/end points of FF.
+   //
+   // Can't just do onEnabled()/onDisabled() because it would reset the FF health
+   Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
+   Point end;
+   DatabaseObject *collObj;
+
+   ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
+
+   if(mField.isValid())
+   {
+      mField->setEndPoints(start, end);
+      // This will update the client
+      mField->setMaskBits(ForceField::InitialMask);
+   }
+
+   return retVal;
 }
 
 
@@ -1649,19 +1704,19 @@ S32 ForceFieldProjector::lua_setTeam(lua_State *L)
 
 TNL_IMPLEMENT_NETOBJECT(ForceField);
 
+// This is only created server-side
 ForceField::ForceField(S32 team, Point start, Point end) 
 {
    setTeam(team);
+
+   // These are sent to the client
    mStart = start;
    mEnd = end;
-
-   mOutline = computeGeom(mStart, mEnd);
-
-   Rect extent(mStart, mEnd);
-   extent.expand(Point(5,5));
-   setExtent(extent);
-
    mFieldUp = true;
+   mHealth = 0;
+
+   updateGeomAndExtents();
+
    mObjectTypeNumber = ForceFieldTypeNumber;
    mNetFlags.set(Ghostable);
 }
@@ -1755,6 +1810,10 @@ U32 ForceField::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
       stream->write(mEnd.y);
       writeThisTeam(stream);
    }
+
+   if(stream->writeFlag(updateMask & HealthMask))
+      stream->writeFloat(mHealth, 5);
+
    stream->writeFlag(mFieldUp);
    return 0;
 }
@@ -1771,12 +1830,13 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->read(&mEnd.x);
       stream->read(&mEnd.y);
       readThisTeam(stream);
-      mOutline = computeGeom(mStart, mEnd);
 
-      Rect extent(mStart, mEnd);
-      extent.expand(Point(5,5));
-      setExtent(extent);
+      updateGeomAndExtents();
    }
+
+   if(stream->readFlag())
+      mHealth = stream->readFloat(5);
+
    bool wasUp = mFieldUp;
    mFieldUp = stream->readFlag();
 
@@ -1785,16 +1845,49 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
+// ForceField health is the portion of health of the ForceFieldProjector above
+// the disabled amount
+void ForceField::setHealth(F32 health)
+{
+   // Update FF health if it has changed
+   if(health != mHealth)
+   {
+      mHealth = health;
+      setMaskBits(HealthMask);
+   }
+}
+
+
+void ForceField::setEndPoints(const Point &start, const Point &end)
+{
+   // Update the end points of the ForceField and adjust the geom/extents
+   mStart = start;
+   mEnd = end;
+
+   updateGeomAndExtents();
+}
+
+
+void ForceField::updateGeomAndExtents()
+{
+   mOutline = computeGeom(mStart, mEnd);
+
+   Rect extent(mStart, mEnd);
+   extent.expand(Point(5,5));
+   setExtent(extent);
+}
+
+
 const F32 ForceField::ForceFieldHalfWidth = 2.5;
 
 // static
-Vector<Point> ForceField::computeGeom(const Point &start, const Point &end, F32 scaleFact)
+Vector<Point> ForceField::computeGeom(const Point &start, const Point &end)
 {
    Vector<Point> geom;
    geom.reserve(4);
 
    Point normal(end.y - start.y, start.x - end.x);
-   normal.normalize(ForceFieldHalfWidth * scaleFact);
+   normal.normalize(ForceFieldHalfWidth);
 
    geom.push_back(start + normal);
    geom.push_back(end + normal);
@@ -1834,7 +1927,7 @@ const Vector<Point> *ForceField::getCollisionPoly() const
 
 void ForceField::render()
 {
-   renderForceField(mStart, mEnd, getColor(), mFieldUp);
+   renderForceField(mStart, mEnd, getColor(), mFieldUp, mHealth, getGame()->getGameType()->getTotalGamePlayedInMs());
 }
 
 
@@ -1856,6 +1949,9 @@ void ForceField::getForceFieldStartAndEndPoints(Point &start, Point &end)
 
 TNL_IMPLEMENT_NETOBJECT(Turret);
 
+#ifndef ZAP_DEDICATED
+   EditorAttributeMenuUI *Turret::mAttributeMenuUI = NULL;
+#endif
 
 // Combined Lua / C++ default constructor
 /**
@@ -1924,24 +2020,40 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
    const char *argv1[32];
    for(S32 i = 0; i < argc2; i++)
    {
-      char firstChar = argv2[i][0];
-      if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z'))  // starts with a letter
+      const char *token = argv2[i];
+      unsigned char firstChar = token[0];
+      if(isAlpha(firstChar))  // starts with a letter
       {
-         if(!strncmp(argv2[i], "W=", 2))  // W= is in 015a
+         if(!strncmp(token, "W=", 2))  // W= is in 015a
          {
-            S32 w = 0;
-            while(w < WeaponCount && stricmp(WeaponInfo::getWeaponInfo(WeaponType(w)).name.getString(), &argv2[i][2]))
-               w++;
+            WeaponType w = WeaponInfo::getWeaponTypeFromString(&token[2]);
+
+            if(w < WeaponCount)
+            {
+               mWeaponFireType = WeaponType(w);
+               logprintf(LogConsumer::LogLevelError, "'W=' weapon construct in "
+                     "level file is deprecated and will be removed in the future. Instead, remove the 'W='");
+            }
+         }
+         // Proper way to declare a Turret Weapon (since 021), no 'W='
+         else
+         {
+            WeaponType w = WeaponInfo::getWeaponTypeFromString(token);
+
             if(w < WeaponCount)
                mWeaponFireType = WeaponType(w);
-            break;
          }
+
+         // Constrain weapon types to a useful subset
+         if(mWeaponFireType != WeaponTurret && mWeaponFireType != WeaponBurst &&
+               mWeaponFireType != WeaponSeeker && mWeaponFireType != WeaponTriple)
+            mWeaponFireType = WeaponTurret;  // Default (no phaser for you)
       }
       else
       {
          if(argc1 < 32)
          {
-            argv1[argc1] = argv2[i];
+            argv1[argc1] = token;
             argc1++;
          }
       }
@@ -1959,7 +2071,7 @@ string Turret::toLevelCode() const
    string out = Parent::toLevelCode();
 
    if(mWeaponFireType != WeaponTurret)
-      out = out + " " + writeLevelString((string("W=") + WeaponInfo::getWeaponInfo(mWeaponFireType).name.getString()).c_str());
+      out = out + " " + writeLevelString(WeaponInfo::getWeaponInfo(mWeaponFireType).name.getString());
 
    return out;
 }
@@ -2032,7 +2144,7 @@ void Turret::render()
 
 void Turret::renderDock()
 {
-   renderSquareItem(getPos(), getColor(), 1, &Colors::white, 'T');
+   renderTurretIcon(getPos(), 1, getColor());
 }
 
 
@@ -2046,10 +2158,10 @@ void Turret::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, b
       bool enabled = team != TEAM_NEUTRAL;
       F32 health = team == TEAM_NEUTRAL ? 0.0f : 1.0f;
 
-      renderTurret(*(getColor()), getHealthBarColor(), getPos(), mAnchorNormal, enabled, mHealth, mCurrentAngle, mHealRate);
+      renderTurret(*(getColor()), getHealthBarColor(), getPos(), mAnchorNormal, enabled, health, mCurrentAngle, mHealRate);
    }
    else
-      renderDock();
+      renderTurretIcon(getPos(), 1/currentScale, getColor());
 }
 
 
@@ -2098,6 +2210,8 @@ void Turret::idle(IdleCallPath path)
    fillVector.clear();
    findObjects((TestFunc)isTurretTargetType, fillVector, queryRect);    // Get all potential targets
 
+   WeaponInfo weaponInfo = WeaponInfo::getWeaponInfo(mWeaponFireType);
+
    BfObject *bestTarget = NULL;
    F32 bestRange = F32_MAX;
    Point bestDelta;
@@ -2125,12 +2239,12 @@ void Turret::idle(IdleCallPath path)
 
       // Calculate where we have to shoot to hit this...
       Point Vs = potential->getVel();
-      F32 S = (F32)WeaponInfo::getWeaponInfo(mWeaponFireType).projVelocity;
+      F32 S = (F32)weaponInfo.projVelocity;
       Point d = potential->getPos() - aimPos;
 
 // This could possibly be combined with Robot's getFiringSolution, as it's essentially the same thing
       F32 t;      // t is set in next statement
-      if(!findLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), WeaponInfo::getWeaponInfo(mWeaponFireType).projLiveTime * 0.001f, t))
+      if(!findLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), weaponInfo.projLiveTime * 0.001f, t))
          continue;
 
       Point leadPos = potential->getPos() + Vs * t;
@@ -2153,7 +2267,7 @@ void Turret::idle(IdleCallPath path)
       // See if we're gonna clobber our own stuff...
       disableCollision();
       Point delta2 = delta;
-      delta2.normalize(WeaponInfo::getWeaponInfo(mWeaponFireType).projLiveTime * (F32)WeaponInfo::getWeaponInfo(mWeaponFireType).projVelocity / 1000.f);
+      delta2.normalize(weaponInfo.projLiveTime * (F32)weaponInfo.projVelocity / 1000.f);
       BfObject *hitObject = findObjectLOS((TestFunc) isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
       enableCollision();
 
@@ -2209,12 +2323,98 @@ void Turret::idle(IdleCallPath path)
          string killer = string("got blasted by ") + getGame()->getTeamName(getTeam()).getString() + " turret";
          mKillString = killer.c_str();
 
-         GameWeapon::createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, 
-                                             0, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);
-         mFireTimer.reset(WeaponInfo::getWeaponInfo(mWeaponFireType).fireDelay);
+         F32 shooterRadius = mWeaponFireType == WeaponBurst ? 45.f : 35.f;
+         GameWeapon::createWeaponProjectiles(mWeaponFireType, bestDelta, aimPos, velocity, 0, shooterRadius, this);
+
+         mFireTimer.reset(weaponInfo.fireDelay);
       }
    }
 }
+
+
+#ifndef ZAP_DEDICATED
+
+EditorAttributeMenuUI *Turret::getAttributeMenu()
+{
+   // Lazily initialize
+   if(!mAttributeMenuUI)
+   {
+      ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+
+      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
+
+      // Heal rate
+      // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
+      CounterMenuItem *menuItem = new CounterMenuItem("10% Heal:", 99, 1, 0, 100, "secs", "Disabled",
+                                                      "Time for this item to heal itself 10%");
+      mAttributeMenuUI->addMenuItem(menuItem);
+
+      // Weapon Type
+      Vector<string> opts;
+      opts.push_back(WeaponInfo::getWeaponName(WeaponTurret));
+      opts.push_back(WeaponInfo::getWeaponName(WeaponTriple));
+      opts.push_back(WeaponInfo::getWeaponName(WeaponBurst));
+      opts.push_back(WeaponInfo::getWeaponName(WeaponSeeker));
+
+      U32 curOption = 0;
+      if(mWeaponFireType == WeaponTriple)
+         curOption = 1;
+      else if(mWeaponFireType == WeaponBurst)
+         curOption = 2;
+      else if(mWeaponFireType == WeaponSeeker)
+         curOption = 3;
+
+      mAttributeMenuUI->addMenuItem(new ToggleMenuItem("Weapon: ", opts, curOption, false,
+                                           NULL, "Select the turret weapon type"));
+
+      // Add our standard save and exit option to the menu
+      mAttributeMenuUI->addSaveAndQuitMenuItem();
+   }
+
+   return mAttributeMenuUI;
+}
+
+
+// Get the menu looking like what we want
+void Turret::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->getMenuItem(0)->setIntValue(getHealRate());
+
+
+   U32 curOption = 0;
+   if(mWeaponFireType == WeaponTriple)
+      curOption = 1;
+   else if(mWeaponFireType == WeaponBurst)
+      curOption = 2;
+   else if(mWeaponFireType == WeaponSeeker)
+      curOption = 3;
+
+   attributeMenu->getMenuItem(1)->setIntValue(curOption);
+}
+
+
+// Retrieve the values we need from the menu
+void Turret::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   setHealRate(attributeMenu->getMenuItem(0)->getIntValue());
+
+   string weaponValue = attributeMenu->getMenuItem(1)->getValue();
+   mWeaponFireType = WeaponInfo::getWeaponTypeFromString(weaponValue.c_str());
+}
+
+
+// Render some attributes when item is selected but not being edited
+void Turret::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
+{
+   string healValue = (mHealRate == 0 ? "Disabled" : itos(mHealRate) + " sec" + (mHealRate != 1 ? "s" : ""));
+   keys.push_back("10% Heal");   values.push_back(healValue);
+
+   // Weapon type attribute
+   string weaponValue = WeaponInfo::getWeaponName(mWeaponFireType);
+   keys.push_back("Weapon");   values.push_back(weaponValue);
+}
+
+#endif
 
 
 const char *Turret::getOnScreenName()     { return "Turret";  }

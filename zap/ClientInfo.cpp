@@ -23,12 +23,18 @@ ClientInfo::ClientInfo()
    mPlayerInfo = NULL;
    mGame = NULL;
 
+   // All of these *can* be available to both client and server, but if
+   // generated on only one of the client or server they will need to be sent
+   // to the other
    mScore = 0;
+   mRating = 0;
    mGamesPlayed = 0;
    mTotalScore = 0;
    mTeamIndex = (NO_TEAM + 0);
    mPing = 0;
    mCurrentKillStreak = 0;
+   mKills = 0;
+   mDeaths = 0;
    mRole = RoleNone;
    mIsAuthenticated = false;
    mBadges = NO_BADGES;
@@ -111,6 +117,18 @@ void ClientInfo::setScore(S32 score)
 void ClientInfo::addScore(S32 score)
 {
    mScore += score;
+}
+
+
+void ClientInfo::setRating(F32 rating)
+{
+   mRating = rating;
+}
+
+
+F32 ClientInfo::getRating()
+{
+   return mRating;
 }
 
 
@@ -380,6 +398,13 @@ U32 ClientInfo::getKillStreak() const
 }
 
 
+U32  ClientInfo::getKills()          { return mKills; }
+void ClientInfo::setKills(U32 kills) { mKills = kills; }
+
+U32  ClientInfo::getDeaths()           { return mDeaths; }
+void ClientInfo::setDeaths(U32 deaths) { mDeaths = deaths; }
+
+
 LuaPlayerInfo *ClientInfo::getPlayerInfo()
 {
    // Lazily initialize
@@ -628,18 +653,6 @@ void FullClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> bad
 }
 
 
-F32 FullClientInfo::getRating()
-{
-   // Initial case: no one has scored
-   if(mTotalScore == 0)      
-      return .5;
-
-   // Standard case: 
-   else   
-      return F32(mScore) / F32(mTotalScore);
-}
-
-
 bool FullClientInfo::isRobot() const
 {
    return mClientClass == ClassRobotAddedByAddbots     || 
@@ -711,12 +724,6 @@ void FullClientInfo::setConnection(GameConnection *conn)
 }
 
 
-void FullClientInfo::setRating(F32 rating)
-{
-   TNLAssert(false, "Ratings can't be set for this class!");
-}
-
-
 SoundEffect *FullClientInfo::getVoiceSFX()
 {
    TNLAssert(false, "Can't access VoiceSFX from this class!");
@@ -783,7 +790,6 @@ RemoteClientInfo::RemoteClientInfo(Game *game, const StringTableEntry &name, boo
    mIsRobot = isRobot;
    mRole = role;
    mTeamIndex = NO_TEAM;
-   mRating = 0;
    mBadges = badges;
    mGamesPlayed = gamesPlayed;
    mSpawnDelayed = isSpawnDelayed;
@@ -819,18 +825,6 @@ void RemoteClientInfo::setConnection(GameConnection *conn)
 void RemoteClientInfo::setSpawnDelayed(bool spawnDelayed)
 {
    mSpawnDelayed = spawnDelayed;
-}
-
-
-F32 RemoteClientInfo::getRating()
-{
-   return mRating;
-}
-
-
-void RemoteClientInfo::setRating(F32 rating)
-{
-   mRating = rating;
 }
 
 

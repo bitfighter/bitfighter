@@ -104,10 +104,8 @@ bool VideoSystem::init()
 #  endif
 #endif
 
-#ifdef TNL_OS_MAC_OSX
-   // This hint is to workaround this bug: https://bugzilla.libsdl.org/show_bug.cgi?id=1840
+   // No minimizing when ALT-TAB away
    SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
-#endif
 
    // SDL 2.0 lets us create the window first, only once
    DisplayManager::getScreenInfo()->sdlWindow = SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -156,10 +154,19 @@ void VideoSystem::setWindowPosition(S32 left, S32 top)
 
 void VideoSystem::saveWindowPostion(GameSettings *settings)
 {
-   // FIXME sometimes X11 in Linux will save position with window decorations in
-   // certain cases.  This creates an offset and the window will creep
    S32 x, y;
    SDL_GetWindowPosition(DisplayManager::getScreenInfo()->sdlWindow, &x, &y);
+
+#ifdef TNL_OS_LINUX
+   // Sometimes X11 in Linux will save position with window decorations in
+   // certain cases.  This creates an offset and the window will creep
+   S32 top = 0, left = 0;
+   SDL_GetWindowBordersSize(DisplayManager::getScreenInfo()->sdlWindow, &top, &left, NULL, NULL);
+
+   // Subtract window decorations from the window coords
+   x = x - left;
+   y = y - top;
+#endif
 
    settings->getIniSettings()->winXPos = x;
    settings->getIniSettings()->winYPos = y;
@@ -211,7 +218,7 @@ void VideoSystem::saveUpdateWindowScale(GameSettings *settings)
 extern void setDefaultBlendFunction();
 
 
-static void debugPrintState(VideoSystem::videoSystem_st_t currentState)
+void VideoSystem::debugPrintState(VideoSystem::videoSystem_st_t currentState)
 {
    logprintf("");
    switch(currentState)
@@ -299,7 +306,11 @@ void VideoSystem::updateDisplayState(GameSettings *settings, StateReason reason)
          }
 
          else if(reason == StateReasonInterfaceChange)
+         {
             currentState = windowed_editor_st;
+
+            saveWindowPostion(settings);
+         }
 
          // Stay here if resized
          else if(reason == StateReasonExternalResize)
@@ -347,7 +358,11 @@ void VideoSystem::updateDisplayState(GameSettings *settings, StateReason reason)
          }
 
          else if(reason == StateReasonInterfaceChange)
+         {
             currentState = windowed_st;
+
+            saveWindowPostion(settings);
+         }
 
          // Stay here if resized
          else if(reason == StateReasonExternalResize)

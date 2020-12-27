@@ -278,6 +278,31 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class ServerAdvancedMenuUserInterface : public MenuUserInterface
+{
+   typedef MenuUserInterface Parent;
+
+   enum {
+      OPT_GLOBALSCR,
+      OPT_GETMAP,
+      OPT_RECORD,
+      OPT_HOSTONSERVER
+   };
+
+public:
+   explicit ServerAdvancedMenuUserInterface(ClientGame *game);        // Constructor
+   virtual ~ServerAdvancedMenuUserInterface();
+
+   void onEscape();
+   void setupMenus();
+   void onActivate();
+   void saveSettings();
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class ServerPasswordsMenuUserInterface : public MenuUserInterface
 {
    typedef MenuUserInterface Parent;
@@ -305,8 +330,7 @@ class HostMenuUserInterface : public MenuUserInterface
       OPT_DESCR,
       OPT_WELCOME,
       OPT_PASSWORDS,
-      OPT_GETMAP,
-      OPT_RECORD,
+      OPT_ADVANCED,
       OPT_PLAYBACK,
       OPT_COUNT
    };

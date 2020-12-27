@@ -1522,20 +1522,23 @@ void ServerGame::idle(U32 timeDelta)
    // Load a new level if the time is out on the current one
    if(mLevelSwitchTimer.update(timeDelta))
    {
-      // Kick any players who were idle the entire previous game.  But DO NOT kick the hosting player!
-      for(S32 i = 0; i < getClientCount(); i++)
+      if(getSettings()->getIniSettings()->kickIdlePlayers)
       {
-         ClientInfo *clientInfo = getClientInfo(i);
-
-         if(!clientInfo->isRobot())
+         // Kick any players who were idle the entire previous game.  But DO NOT kick the hosting player!
+         for(S32 i = 0; i < getClientCount(); i++)
          {
-            GameConnection *connection = clientInfo->getConnection();
+            ClientInfo *clientInfo = getClientInfo(i);
 
-            if(!connection->getObjectMovedThisGame() &&        // Player hasn't moved in this level
-                  !connection->isLocalConnection()   &&        // Don't kick the host, please!
-                  connection->getBusyTime() > THIRTY_SECONDS)  // Player hasn't been busy for less than 30 seconds
+            if(!clientInfo->isRobot())
             {
-               connection->disconnect(NetConnection::ReasonIdle, "");
+               GameConnection *connection = clientInfo->getConnection();
+
+               if(!connection->getObjectMovedThisGame() &&        // Player hasn't moved in this level
+                     !connection->isLocalConnection()   &&        // Don't kick the host, please!
+                     connection->getBusyTime() > THIRTY_SECONDS)  // Player hasn't been busy for less than 30 seconds
+               {
+                  connection->disconnect(NetConnection::ReasonIdle, "");
+               }
             }
          }
       }

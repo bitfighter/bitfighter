@@ -232,13 +232,26 @@ void GameSettings::setHostDescr(const string &hostDescr, bool updateINI)
 
 string GameSettings::getWelcomeMessage() const
 {
-   return mIniSettings.welcomeMessage;
+   return mWelcomeMessage;
 }
 
 
-void GameSettings::setWelcomeMessage(const string &welcomeMessage) 
+void GameSettings::setGlobalLevelgenScript(const string &globalLevelScript)
 { 
-   mIniSettings.welcomeMessage = welcomeMessage;
+      mIniSettings.globalLevelScript = globalLevelScript;
+}
+string GameSettings::getGlobalLevelgenScript() const
+{
+   return mIniSettings.globalLevelScript;
+}
+
+
+void GameSettings::setWelcomeMessage(const string &welcomeMessage, bool updateINI)
+ {
+   mWelcomeMessage = welcomeMessage;
+
+   if(updateINI)
+      mIniSettings.welcomeMessage = welcomeMessage;
 }
 
 
@@ -893,6 +906,7 @@ void GameSettings::onFinishedLoading()
 
    mHostName               = *choose( getString(HOST_NAME),             mIniSettings.hostname );
    mHostDescr              = *choose( getString(HOST_DESCRIPTION),      mIniSettings.hostdescr );
+   mWelcomeMessage         = mIniSettings.welcomeMessage;
 
 
    cmdLineVal = getString(LOGIN_NAME);

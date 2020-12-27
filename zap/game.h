@@ -250,6 +250,9 @@ protected:
 
    virtual AbstractTeam *getNewTeam() = 0;
 
+   // Keeps track of warnings already called by verifying against signature
+   Vector<string> mLevelLoadTriggeredWarnings;
+
 public:
    static const S32 MAX_TEAMS = 9;           // Max teams allowed -- careful changing this; used for RPC ranges
 
@@ -468,7 +471,7 @@ public:
 
    void sendChat(const StringTableEntry &senderName, ClientInfo *senderClientInfo, const StringPtr &message, bool global, S32 teamIndex);
    void sendPrivateChat(const StringTableEntry &senderName, const StringTableEntry &receiverName, const StringPtr &message);
-   void sendAnnouncementFromController(const StringPtr &message);
+   void sendAnnouncementFromController(const string &message);
 
    S32 getRemainingGameTime() const;        // In seconds
 

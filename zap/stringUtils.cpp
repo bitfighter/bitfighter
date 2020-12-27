@@ -713,7 +713,7 @@ string makeFilenameFromString(const char *levelname, bool allowLastDot)
    {
       // Prevent invalid characters in file names
       char c = levelname[i];
-      if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'))
+      if(isAlNum(c))
          filename[i]=c;
       else
       {
@@ -878,7 +878,7 @@ bool stringContainsAllTheSameCharacter(const string &str)
 }
 
 
-// Convert a string value to our sfxSets enum
+// Convert a DisplayMode enum to a string
 inline string displayModeToString(DisplayMode mode)
 {
    if(mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)
@@ -914,13 +914,29 @@ string toString(ColorEntryMode colorMode) { return colorEntryModeToString(colorM
 
 bool isPrintable(char c)
 {
-   return c >= 32 && c <= 126;
+   return isprint(static_cast<unsigned char>(c));
 }
 
 
 bool isHex(char c)
 {
-   return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+   return isxdigit(static_cast<unsigned char>(c));
+}
+
+
+bool isAlpha(char c)
+{
+   return isalpha(static_cast<unsigned char>(c));
+}
+
+bool isDigit(char c)
+{
+   return isdigit(static_cast<unsigned char>(c));
+}
+
+bool isAlNum(char c)
+{
+   return isalnum(static_cast<unsigned char>(c));
 }
 
 

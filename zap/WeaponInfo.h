@@ -48,16 +48,17 @@ class BfObject;
  *   - `damage`
  */
    //                                       Enum in Lua:   Fire  Min    Enrgy  Proj Proj. Dam-  Self-dam. Can dam.   Projectile
-   //             Enum          Name        Weapon.Phaser  Delay Enrgy  Drain  Vel. Life  age    Factor   Teammate      Type
+   //             Enum          Name        Weapon.Phaser  Delay Enrgy  Drain  Vel. Life  age    Factor   Teammate     Style
 #define WEAPON_ITEM_TABLE \
-   WEAPON_ITEM(WeaponPhaser,  "Phaser",      "Phaser",     100,   500,   500,  600, 1000, 0.19f,  0,       false, ProjectilePhaser ) \
-   WEAPON_ITEM(WeaponBounce,  "Bouncer",     "Bouncer",    100,  1600,  1600,  540, 1500, 0.15f,  0.4f,    false, ProjectileBounce ) \
-   WEAPON_ITEM(WeaponTriple,  "Triple",      "Triple",     200,  3500,  3500,  550,  850, 0.17f,  0,       false, ProjectileTriple ) \
-   WEAPON_ITEM(WeaponBurst,   "Burst",       "Burst",      700, 10000, 10000,  500, 1000, 0.50f,  1.0f,    false, NotAProjectile   ) \
-   WEAPON_ITEM(WeaponSeeker,  "Seeker",      "Seeker",     400, 10000, 10000,  600, 8000, 0.21f,  1.0f,    false, NotAProjectile   ) \
-   WEAPON_ITEM(WeaponMine,    "Mine",        "Mine",       900, 55000, 55000,  500,   -1, 0.50f,  1.0f,    true,  NotAProjectile   ) \
-   WEAPON_ITEM(WeaponTurret,  "Turret",      "Turret",     150,     0,     0,  800,  800, 0.11f,  1.0f,    true,  ProjectileTurret ) \
-   WEAPON_ITEM(WeaponSpyBug,  "Spy Bug",     "SpyBug",     800, 50000, 50000,  800,   -1, 0,      1.0f,    true,  NotAProjectile   ) \
+   WEAPON_ITEM(WeaponPhaser,  "Phaser",      "Phaser",     100,   500,   500,  600, 1000, 0.19f,  0,       false, ProjectileStylePhaser ) \
+   WEAPON_ITEM(WeaponBounce,  "Bouncer",     "Bouncer",    100,  1600,  1600,  540, 1500, 0.15f,  0.4f,    false, ProjectileStyleBouncer ) \
+   WEAPON_ITEM(WeaponTriple,  "Triple",      "Triple",     200,  3500,  3500,  550,  850, 0.17f,  0,       false, ProjectileStyleTriple ) \
+   WEAPON_ITEM(WeaponBurst,   "Burst",       "Burst",      700, 10000, 10000,  500, 1000, 0.50f,  1.0f,    false, ProjectileStyleNotAProjectile   ) \
+   WEAPON_ITEM(WeaponSeeker,  "Seeker",      "Seeker",     400, 10000, 10000,  600, 8000, 0.21f,  1.0f,    false, ProjectileStyleNotAProjectile   ) \
+   WEAPON_ITEM(WeaponMine,    "Mine",        "Mine",       900, 55000, 55000,  500,   -1, 0.50f,  1.0f,    true,  ProjectileStyleNotAProjectile   ) \
+   WEAPON_ITEM(WeaponTurret,  "Turret",      "Turret",     125,     0,     0, 1200,  800, 0.11f,  1.0f,    false, ProjectileStyleTurret ) \
+   WEAPON_ITEM(WeaponSpyBug,  "Spy Bug",     "SpyBug",     800, 50000, 50000,  800,   -1, 0,      1.0f,    true,  ProjectileStyleNotAProjectile   ) \
+   WEAPON_ITEM(WeaponRailgun, "Railgun",     "Railgun",   2000, 40000, 40000, 3000,  660, 0.70f,  0,       false, ProjectileStyleRailgun ) \
 
 
 // Define an enum from the first values in WEAPON_ITEM_TABLE
@@ -70,15 +71,32 @@ enum WeaponType {
 };
 
 
-// Note that not all WeaponTypes are Projectile weapons, so don't have ProjectileTypes
-enum ProjectileType
+// Note that not all WeaponTypes are Projectile weapons, so don't have ProjectileStyles
+enum ProjectileStyle
 {
-   ProjectilePhaser,
-   ProjectileBounce,
-   ProjectileTriple,
-   ProjectileTurret,
-   ProjectileTypeCount,
-   NotAProjectile  // Need this so we can fit a non-ProjectileType (like mine) into a constructor intended for proper projectiles
+   ProjectileStylePhaser,
+   ProjectileStyleBouncer,
+   ProjectileStyleTriple,
+   ProjectileStyleTurret,
+   ProjectileStyleRailgun,
+   ProjectileStyleCount,
+   ProjectileStyleNotAProjectile  // Need this so we can fit a non-ProjectileStyle (like mine) into a constructor intended for proper projectiles
+};
+
+
+enum SeekerStyle
+{
+   SeekerStyleNormal,
+   SeekerStyleTurret,
+   SeekerStyleCount
+};
+
+
+enum BurstStyle
+{
+   BurstStyleNormal,
+   BurstStyleTurret,
+   BurstStyleCount
 };
 
 
@@ -95,12 +113,13 @@ struct WeaponInfo
    F32 damageAmount;                // Damage shot does
    F32 damageSelfMultiplier;        // Adjust damage if you shoot yourself
    bool canDamageTeammate;
-   ProjectileType projectileType;   // If this is a projectile item, which sort is it?  If not, use NotAProjectile
+   ProjectileStyle projectileStyle; // If this is a projectile item, which sort is it?  If not, use ProjectileStyleNotAProjectile
 
    static WeaponInfo getWeaponInfo(WeaponType weaponType);
 
 #ifndef BF_MASTER
    static WeaponType getWeaponTypeFromObject(BfObject *bfObject);
+   static WeaponType getWeaponTypeFromString(const char *name);
    static BfObject *getWeaponShooterFromObject(BfObject *bfObject);
 #endif
 };

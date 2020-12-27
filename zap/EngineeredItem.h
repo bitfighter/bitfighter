@@ -22,10 +22,6 @@ private:
    typedef Item Parent;
 
    static const F32 EngineeredItemRadius;
-
-#ifndef ZAP_DEDICATED
-   static EditorAttributeMenuUI *mAttributeMenuUI;    // Menu for text editing; since it's static, don't bother with smart pointer
-#endif   
    
    void computeExtent();
 
@@ -33,6 +29,7 @@ private:
 
 protected:
    static const F32 DamageReductionFactor;
+   static const F32 DisabledLevel;
 
    F32 mHealth;
    Point mAnchorNormal;
@@ -155,6 +152,7 @@ public:
 
    // Some overrides
    S32 lua_setGeom(lua_State *L);
+   S32 lua_setPos(lua_State *L);
 };
 
 
@@ -172,14 +170,16 @@ private:
    Timer mDownTimer;
    bool mFieldUp;
 
-protected:
+   F32 mHealth;  // Different than ForceFieldProjector health
+
+public:
    enum MaskBits {
       InitialMask   = Parent::FirstFreeMask << 0,
       StatusMask    = Parent::FirstFreeMask << 1,
-      FirstFreeMask = Parent::FirstFreeMask << 2
+      HealthMask    = Parent::FirstFreeMask << 2,
+      FirstFreeMask = Parent::FirstFreeMask << 3
    };
 
-public:
    static const S32 FieldDownTime = 250;
    static const S32 MAX_FORCEFIELD_LENGTH = 2500;
 
@@ -193,15 +193,18 @@ public:
    void onAddedToGame(Game *theGame);
    void idle(BfObject::IdleCallPath path);
 
-
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
+   void setHealth(F32 health);
+   void setEndPoints(const Point &start, const Point &end);
+   void updateGeomAndExtents();
 
    const Vector<Point> *getCollisionPoly() const;
 
    const Vector<Point> *getOutline() const;
 
-   static Vector<Point> computeGeom(const Point &start, const Point &end, F32 scaleFact = 1);
+   static Vector<Point> computeGeom(const Point &start, const Point &end);
    static bool findForceFieldEnd(const GridDatabase *db, const Point &start, const Point &normal, 
                                  Point &end, DatabaseObject **collObj);
 
@@ -244,7 +247,7 @@ public:
    const Vector<Point> *getCollisionPoly() const;
    
    static Vector<Point> getForceFieldProjectorGeometry(const Point &anchor, const Point &normal);
-   static Point getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact = 1);
+   static Point getForceFieldStartPoint(const Point &anchor, const Point &normal);
 
    // Get info about the forcfield that might be projected from this projector
    void getForceFieldStartAndEndPoints(Point &start, Point &end);
@@ -254,6 +257,9 @@ public:
 
    void onAddedToGame(Game *theGame);
    void idle(BfObject::IdleCallPath path);
+
+   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    void render();
    void onEnabled();
@@ -276,11 +282,11 @@ public:
    void onGeomChanged();
    void findForceFieldEnd();                      // Find end of forcefield in editor
 
-	///// Lua interface
-	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(ForceFieldProjector);
+   ///// Lua interface
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(ForceFieldProjector);
 
-	static const char *luaClassName;
-	static const luaL_Reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    S32 lua_getPos(lua_State *L);
@@ -304,6 +310,10 @@ private:
    void initialize();
 
    F32 getSelectionOffsetMagnitude();
+
+#ifndef ZAP_DEDICATED
+   static EditorAttributeMenuUI *mAttributeMenuUI; // Menu for attribute editing
+#endif
 
 public:
    explicit Turret(lua_State *L = NULL);                                   // Combined Lua / C++ default constructor
@@ -350,6 +360,14 @@ public:
    const char *getPrettyNamePlural();
    const char *getOnDockName();
    const char *getOnScreenName();
+
+#ifndef ZAP_DEDICATED
+   EditorAttributeMenuUI *getAttributeMenu();
+   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
+#endif
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();

@@ -8,12 +8,24 @@ add_executable(bitfighterd
 	main.cpp
 )
 
+# If certain system libs were not found, add the in-tree variants as dependencies
+set(DEDICATED_EXTRA_DEPS "")
+if(NOT TOMCRYPT_FOUND)
+	list(APPEND DEDICATED_EXTRA_DEPS tomcrypt)
+endif()
+if(NOT CLIPPER_FOUND)
+	list(APPEND DEDICATED_EXTRA_DEPS clipper)
+endif()
+if(NOT POLY2TRI_FOUND)
+	list(APPEND DEDICATED_EXTRA_DEPS poly2tri)
+endif()
+if(NOT LUAJIT_FOUND)
+	list(APPEND DEDICATED_EXTRA_DEPS ${LUA_LIB})
+endif()
+
 add_dependencies(bitfighterd
 	tnl
-	${LUA_LIB}
-	tomcrypt
-	clipper
-	poly2tri
+	${DEDICATED_EXTRA_DEPS}
 )
 
 target_link_libraries(bitfighterd

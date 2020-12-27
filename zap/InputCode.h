@@ -102,6 +102,7 @@ namespace Zap
    EDITOR_BINDING( BINDING_PLACE_SPAWN,       "PlaceNewSpawn",      keyPlaceSpawn,      "G"             ) \
    EDITOR_BINDING( BINDING_PLACE_SPYBUG,      "PlaceNewSpybug",     keyPlaceSpybug,     "Ctrl+Shift+B"  ) \
    EDITOR_BINDING( BINDING_PLACE_REPAIR,      "PlaceNewRepair",     keyPlaceRepair,     "B"             ) \
+   EDITOR_BINDING( BINDING_PLACE_ENERGY,      "PlaceNewEnergy",     keyPlaceEnergy,     "N"             ) \
    EDITOR_BINDING( BINDING_PLACE_TURRET,      "PlaceNewTurret",     keyPlaceTurret,     "Y"             ) \
    EDITOR_BINDING( BINDING_PLACE_MINE,        "PlaceNewMine",       keyPlaceMine,       "M"             ) \
    EDITOR_BINDING( BINDING_PLACE_FORCEFIELD,  "PlaceNewForcefield", keyPlaceForcefield, "F"             ) \

@@ -31,7 +31,7 @@ In all cases below, \em geom refers to either a single point or a table of point
 --]]
 
 --[[ 
-@luafunc point Geom.centroid(geom)
+@luafunc point Geom.centroid(Geom geom)
 @brief   Find the centroid (center) of `geom`
 @param   geom The geometry to find the centroid of
 @return  The centroid, the average of all the points in geometry. This point has the property of minimizing the sum square distance to all points in `geom`
@@ -54,7 +54,7 @@ local function flipPoint(p, horizontal)
 end
 
 --[[ 
-@luafunc geom Geom.flip(geom, horizontal)
+@luafunc geom Geom.flip(Geom geom, bool horizontal)
 @brief   Flip \em geom along the x- or y-axis.
 @param   geom - The geometry to modify.  Geom can either be a point or a table of points.
 @param   horizontal - Pass true to flip along the x-axis, false to flip along the y-axis.
@@ -81,7 +81,7 @@ local function translatePoint(p, tx, ty)
 end
 
 --[[ 
-@luafunc Geom.translate(geom, tx, ty)
+@luafunc Geom.translate(Geom geom, int tx, int ty)
 @brief   Translate (offset) \em geom by \em tx, \em ty.
 @param   geom - The geometry to modify.  Geom can either be a point or a table of points.
 @param   tx - The amount to add to the x-coord of each point in \em geom.
@@ -106,11 +106,10 @@ local function scalePoint(p, sx, sy, center)
 end
 
 --[[ 
-@luafunc Geom.scale(geom, sx, sy)
+@luafunc Geom.scale(Geom geom, int sx, int sy)
 @brief   Scale \em geom by \em sx, \em sy, in reference to the x- and y-axes.
-@param   geom - The geometry to modify.  \em Geom can either be a point or a table of points.
 @descr   If \em sy is omitted, \em geom will be scaled evenly horizontally and vertically without distortion.
-
+@param   geom - The geometry to modify.  \em Geom can either be a point or a table of points.
 @param   sx - The amount to scale each point in \em geom horizontally.
 @param   sy - (Optional) The amount to scale each point in \em geom vertically.  Defaults to \em sx.
 @return  A geometry of the same type that was passed in.
@@ -141,7 +140,7 @@ local function rotatePoint(p, angleRadians, center)
 end
 
 --[[ 
-@luafunc Geom.rotate(geom, angle)
+@luafunc Geom.rotate(Geom geom, int angle)
 @brief   Rotate \em geom about its centroid.
 @param   geom - The geometry to modify.  \em Geom can either be a point or a table of points.
 @param   angle - The angle (clockwise, in degrees) to rotate \em geom.
@@ -188,9 +187,9 @@ local function transformPoint(p, tx, ty, sx, sy, angleRadians)
 end
 
 --[[ 
-@luafunc Geom.transform(geom, tx, ty, sx, sy, angle)
+@luafunc Geom.transform(Geom geom, int tx, int ty, int sx, int sy, int angle)
 @brief   Transform \em geom by scaling, rotating, and translating.
-@desc    Apply a full transformation to the points in \em geom, doing a combination of the above in a single operation.  
+@descr    Apply a full transformation to the points in \em geom, doing a combination of the above in a single operation.
          Scales, rotates, then translates.  Performing these operations together is more effient than applying them
          individually.
 
@@ -229,9 +228,9 @@ end
 
 
 --[[ 
-@luafunc Geom.coordsToPoints(coordList)
+@luafunc Geom.coordsToPoints(table coordList)
 @brief   Convert a table of coordinates into a table of points.
-@desc    Parse a list of coordinates and generate points for every pair.  An even number of coordinates 
+@descr    Parse a list of coordinates and generate points for every pair.  An even number of coordinates
          should be provided.  If an odd number is supplied, 0 will be used for the missing coordinate.
 
 

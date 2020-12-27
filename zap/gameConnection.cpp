@@ -581,8 +581,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
                                  // this has happened.
 
    // Check for forbidden blank parameters -- the following commands require a value to be passed in param
-   if( (type == AdminPassword || type == OwnerPassword || type == ServerName || type == ServerDescr || type == LevelDir) &&
-                          !strcmp(param.getString(), ""))
+   if( (type == AdminPassword || type == OwnerPassword || type == ServerName || type == ServerDescription ||
+         type == LevelDir || type == ServerWelcomeMessage) &&
+                           strcmp(param.getString(), "") == 0)
       return;
 
    // Add a message to the server log
@@ -597,14 +598,16 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
       const char *paramName;
       switch(type)
       {
-         case LevelChangePassword: paramName = "level change password"; break;
-         case AdminPassword:       paramName = "admin password";        break;
-         case OwnerPassword:       paramName = "owner password";        break;
-         case ServerPassword:      paramName = "server password";       break;
-         case ServerName:          paramName = "server name";           break;
-         case ServerDescr:         paramName = "server description";    break;
-         case LevelDir:            paramName = "leveldir param";        break;
-         default:                  paramName = "unknown"; TNLAssert(false, "Fix unknown description"); break;
+         case LevelChangePassword:  paramName = "level change password";  break;
+         case AdminPassword:        paramName = "admin password";         break;
+         case OwnerPassword:        paramName = "owner password";         break;
+         case ServerPassword:       paramName = "server password";        break;
+         case ServerName:           paramName = "server name";            break;
+         case ServerDescription:    paramName = "server description";     break;
+         case ServerWelcomeMessage: paramName = "server welcome message"; break;
+         case LevelDir:             paramName = "leveldir param";         break;
+         case GlobalLevelScript:    paramName = "global script";          break;
+         default:                   paramName = "unknown"; TNLAssert(false, "Fix unknown description"); break;
       }
       logprintf(LogConsumer::ServerFilter, "User [%s] %s to [%s]", mClientInfo->getName().getString(), 
                                                                    strcmp(param.getString(), "") ? "changed" : "cleared", paramName);
@@ -629,7 +632,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
       if(mServerGame->getConnectionToMaster())
          mServerGame->getConnectionToMaster()->s2mChangeName(StringTableEntry(param.getString()));   
    }
-   else if(type == ServerDescr)
+   else if(type == ServerDescription)
    {
       mSettings->setHostDescr(param.getString(), false);
 
@@ -638,6 +641,12 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
    }
 
    // TODO: Add option here for type == Playlist
+
+   else if(type == ServerWelcomeMessage)
+   {
+      mSettings->setWelcomeMessage(param.getString(), false);
+      return;
+   }
 
    else if(type == LevelDir)
    {
@@ -720,6 +729,21 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
 
       return;
    }
+   else if(type == GlobalLevelScript)
+   {
+      // Search for script as a way to tell if it exists
+      string scriptpath = mSettings->getFolderManager()->findLevelGenScript(param.getString());
+
+      // Returned empty string -> wasn't found
+      if(scriptpath == "")
+      {
+         s2cDisplayErrorMessage("!!! Levelgen script not found");
+         return;
+      }
+
+      // Otherwise set the script!
+      mSettings->setGlobalLevelgenScript(param.getString());
+   }
 
 
    if(type != DeleteLevel && type != UndeleteLevel && type != LevelDir)
@@ -727,13 +751,15 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
       const char *paramName;
       switch(type)
       {
-         case LevelChangePassword: paramName = "LevelChangePassword"; break;
-         case AdminPassword:       paramName = "AdminPassword";       break;
-         case OwnerPassword:       paramName = "OwnerPassword";       break;
-         case ServerPassword:      paramName = "ServerPassword";      break;
-         case ServerName:          paramName = "ServerName";          break;
-         case ServerDescr:         paramName = "ServerDescription";   break;
-         default:                  paramName = NULL; TNLAssert(false, "Fix unknown parameter to save"); break;
+         case LevelChangePassword:  paramName = "LevelChangePassword"; break;
+         case AdminPassword:        paramName = "AdminPassword";       break;
+         case OwnerPassword:        paramName = "OwnerPassword";       break;
+         case ServerPassword:       paramName = "ServerPassword";      break;
+         case ServerName:           paramName = "ServerName";          break;
+         case ServerDescription:    paramName = "ServerDescription";   break;
+         case ServerWelcomeMessage: paramName = "WelcomeMessage";      break;
+         case GlobalLevelScript:    paramName = "GlobalLevelScript";   break;
+         default:                   paramName = NULL; TNLAssert(false, "Fix unknown parameter to save"); break;
       }
 
       if(paramName != NULL)
@@ -745,15 +771,17 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
    }
 
    // Some messages we might show the user... should these just be inserted directly below?   Yes.  TODO: <== do that!
-   static StringTableEntry levelPassChanged     = "Level change password changed";
-   static StringTableEntry levelPassCleared     = "Level change password cleared -- anyone can change levels";
-   static StringTableEntry adminPassChanged     = "Admin password changed";
-   static StringTableEntry ownerPassChanged     = "Owner password changed";
-   static StringTableEntry serverPassChanged    = "Server password changed -- only players with the password can connect";
-   static StringTableEntry serverPassCleared    = "Server password cleared -- anyone can connect";
-   static StringTableEntry serverNameChanged    = "Server name changed";
-   static StringTableEntry serverDescrChanged   = "Server description changed";
-   static StringTableEntry serverLevelDeleted   = "Level added to skip list; level will stay in rotation until server restarted";
+   static StringTableEntry levelPassChanged      = "Level change password changed";
+   static StringTableEntry levelPassCleared      = "Level change password cleared -- anyone can change levels";
+   static StringTableEntry adminPassChanged      = "Admin password changed";
+   static StringTableEntry ownerPassChanged      = "Owner password changed";
+   static StringTableEntry serverPassChanged     = "Server password changed -- only players with the password can connect";
+   static StringTableEntry serverPassCleared     = "Server password cleared -- anyone can connect";
+   static StringTableEntry serverNameChanged     = "Server name changed";
+   static StringTableEntry serverDescrChanged    = "Server description changed";
+   static StringTableEntry serverLevelDeleted    = "Level added to skip list; level will stay in rotation until server restarted";
+   static StringTableEntry welcomeMessageChanged = "Server welcome message changed";
+   static StringTableEntry globalLevelScriptSet  = "Global levelgen script set";
 
    // Pick out just the right message
    StringTableEntry msg;
@@ -837,10 +865,14 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam,
          if(mServerGame->getClientInfo(i)->getConnection())
             mServerGame->getClientInfo(i)->getConnection()->s2cSetServerName(mSettings->getHostName());
    }
-   else if(type == ServerDescr)
+   else if(type == ServerDescription)
       msg = serverDescrChanged;
+   else if(type == ServerWelcomeMessage)
+      msg = welcomeMessageChanged;
    else if(type == DeleteLevel)
       msg = serverLevelDeleted;
+   else if(type == GlobalLevelScript)
+      msg = globalLevelScriptSet;
 
    s2cDisplaySuccessMessage(msg);      // Notify user their bidding has been done
 }
@@ -913,6 +945,16 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayAnnouncement, (string message), (message),
+                  NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
+{
+#ifndef ZAP_DEDICATED
+   ClientGame* clientGame = getClientGame();
+   clientGame->gotAnnouncement(message);
+#endif
 }
 
 
@@ -1082,7 +1124,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageESI,
    const char *src = formatString.getString();
    while(*src)
    {
-      if(src[0] == '%' && (src[1] == 'e' || src[1] == 's' || src[1] == 'i') && (src[2] >= '0' && src[2] <= '9'))
+      if(src[0] == '%' && (src[1] == 'e' || src[1] == 's' || src[1] == 'i') && isDigit(src[2]))
       {
          S32 index = src[2] - '0';
          switch(src[1])
@@ -1148,7 +1190,7 @@ void GameConnection::displayMessageE(U32 color, U32 sfx, StringTableEntry format
    const char *src = formatString.getString();
    while(*src)
    {
-      if(src[0] == '%' && (src[1] == 'e') && (src[2] >= '0' && src[2] <= '9'))
+      if(src[0] == '%' && (src[1] == 'e') && isDigit(src[2]))
       {
          S32 index = src[2] - '0';
          switch(src[1])
@@ -1489,7 +1531,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendableFlags, (U8 flags), (flags), NetClas
       c2sSetParam(mSettings->getOwnerPassword(), OwnerPassword);
       c2sSetParam(mSettings->getServerPassword(), ServerPassword);
       c2sSetParam(mSettings->getHostName(), ServerName);
-      c2sSetParam(mSettings->getHostDescr(), ServerDescr);
+      c2sSetParam(mSettings->getHostDescr(), ServerDescription);  
+      c2sSetParam(mSettings->getWelcomeMessage(), ServerWelcomeMessage);
 
       c2sSetVoteMapParam(
          (U8)mSettings->getIniSettings()->voteLength,
@@ -2428,7 +2471,7 @@ void GameConnection::displayWelcomeMessage()
    if(message == "")
       return;
 
-   mServerGame->getGameType()->s2cDisplayAnnouncement(message);
+   s2cDisplayAnnouncement(message);
 }
 
 

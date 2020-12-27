@@ -687,7 +687,7 @@ const char *gGameObjectInfo[] = {
    /* 02 */   "Triple",  "Fires three diverging shots",
    /* 03 */   "Burst",   "Explosive projectile",
    /* 04 */   "Seeker",  "Homing projectile",
-   /* 05 */   "", "",
+   /* 05 */   "Railgun", "High speed projectile",
 
    /* 06 */   "Friendly Mine",    "Team's mines show trigger radius",
    /* 07 */   "Enemy Mine",       "These are much harder to see",
@@ -768,12 +768,13 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
             renderProjectile(Point(0,0), 2, Platform::getRealMilliseconds());
             break;
          case 3:
-            renderGrenade(Point(0,0), 1);
+            renderGrenade(Point(0,0), 0, 1);
             break;
          case 4:
-            renderSeeker(Point(0,0), 0, 400, Platform::getRealMilliseconds());
+            renderSeeker(Point(0,0), 0, 0, 400, Platform::getRealMilliseconds());
             break;
-         case 5:     // Blank
+         case 5:     // Railgun
+            renderProjectileRailgun(Point(0,0), Point(0,0), Platform::getRealMilliseconds());
             break;
          case 6:
             renderMine(Point(0,0), true, true);
@@ -881,7 +882,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                Triangulate::Process(o, f);
 
                renderGoalZone(Color(0.5f, 0.5f, 0.5f), &o, &f, findCentroid(o), angleOfLongestSide(o), 
-                  false, 0, 0, 0, false);
+                  false, 0, 0, 0);
             }
             break;
          case 23:    // Asteroid... using goofball factor to keep out of sync with Nexus graphic

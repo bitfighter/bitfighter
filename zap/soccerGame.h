@@ -59,6 +59,7 @@ public:
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+class EditorAttributeMenuUI;
 
 class SoccerBallItem : public MoveItem
 {
@@ -72,6 +73,11 @@ private:
    StringTableEntry mLastPlayerTouchName;
    SafePtr<Ship> mLastPlayerTouch;
    bool mLuaBall;
+   bool mSpawnLock;
+
+#ifndef ZAP_DEDICATED
+   static EditorAttributeMenuUI *mAttributeMenuUI; // Menu for attribute editing
+#endif
 
 public:
    explicit SoccerBallItem(lua_State *L = NULL);      // Combined Lua / C++ default constructor
@@ -79,7 +85,9 @@ public:
 
    SoccerBallItem *clone() const;
 
-   static const S32 SOCCER_BALL_RADIUS = 30;
+   // Statics
+   static const F32 Radius;
+   static const F32 Mass;
 
    void renderItem(const Point &pos);
    void resetPlayerTouch();
@@ -106,6 +114,14 @@ public:
 
    void renderDock();
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
+
+#ifndef ZAP_DEDICATED
+   // Editor attributes functions
+   EditorAttributeMenuUI *getAttributeMenu();
+   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
+#endif
 
    const Color *getColor() const;
 

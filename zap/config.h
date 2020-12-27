@@ -13,7 +13,7 @@
 // will be used to rebuild it.
 
 #include "Color.h"      // For Color def
-#include "ConfigEnum.h" // For sfxSets, DisplayMode
+#include "ConfigEnum.h" // For DisplayMode
 #include "Settings.h"
 
 #include "tnlTypes.h"
@@ -191,8 +191,6 @@ public:
 
    Vector<PluginBinding> getDefaultPluginBindings() const;
 
-   sfxSets sfxSet;                  // Which set of SFX does the user want?
-
    bool diagnosticKeyDumpMode;      // True if want to dump keystrokes to the screen
 
    bool allowGetMap;                // allow '/GetMap' command
@@ -225,6 +223,7 @@ public:
    bool enableServerVoiceChat;      // No voice chat allowed in server if disabled
    bool allowTeamChanging;
    bool enableGameRecording;
+   bool kickIdlePlayers;
 
    S32 connectionSpeed;
 
@@ -302,8 +301,6 @@ public:
    Vector<string> reservedPWs;
 
    U32 version;
-
-   bool oldGoalFlash;
 
    Vector<string> prevServerListFromMaster;
    Vector<string> alwaysPingList;

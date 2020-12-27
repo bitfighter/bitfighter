@@ -32,6 +32,7 @@ private:
    static const S32 COMPRESSED_VELOCITY_MAX = 2047;
 
    SafePtr<BfObject> mShooter;
+   BfObject *mLastHitObject;    // Last object hit by the projectile
 
    void initialize(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter);
 
@@ -49,13 +50,17 @@ protected:
 
 public:
    U32 mTimeRemaining;
-   ProjectileType mType;
+   ProjectileStyle mStyle;
    WeaponType mWeaponType;
-   bool mCollided;
-   bool hitShip;
-   bool mAlive;
-   bool mBounced;
+   bool mCollided;          // Currently collided with something
+   bool hitShip;            // Current collision hit a ship
+   bool mAlive;             // Projectile still alive
+   bool mBounced;           // Bounced at least once
    U32 mLiveTimeIncreases;
+
+#ifndef ZAP_DEDICATED
+   UI::FxTrail mTrail;
+#endif
 
    Projectile(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter);  // Constructor -- used when weapon is fired  
    explicit Projectile(lua_State *L = NULL);                                            // Combined Lua / C++ default constructor -- only used in Lua at the moment
@@ -132,6 +137,8 @@ public:
 
 
    WeaponType mWeaponType;
+   BurstStyle mStyle;
+
    void renderItem(const Point &pos);
    bool shouldRender() const;
 
@@ -297,10 +304,13 @@ private:
       FirstFreeMask = MoveItem::FirstFreeMask,
    };
 
-   static U32 SpeedIncreasePerSecond;
-   static U32 TargetAcquisitionRadius;
-   static F32 MaximumAngleChangePerSecond;
-   static F32 TargetSearchAngle;
+   static const F32 Radius;
+   static const F32 Mass;
+
+   static const U32 SpeedIncreasePerSecond;
+   static const U32 TargetAcquisitionRadius;
+   static const F32 MaximumAngleChangePerSecond;
+   static const F32 TargetSearchAngle;
 
    static const S32 ReassessTargetTime;
 
@@ -313,7 +323,6 @@ private:
 
    S32 mTimeRemaining;
    bool mExploded;
-   bool mBounced;
 
    void initialize(const Point &pos, const Point &vel, F32 angle, BfObject *shooter);
    void acquireTarget();
@@ -330,6 +339,7 @@ public:
    virtual ~Seeker();                                                           // Destructor
 
    WeaponType mWeaponType;
+   SeekerStyle mStyle;
 
    bool collide(BfObject *otherObj);                    // Things (like bullets) can collide with grenades
    bool collided(BfObject *otherObj, U32 stateIndex);   // Things (like bullets) can collide with grenades

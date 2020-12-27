@@ -142,6 +142,10 @@ public:
    const char *getOnDockName();
    const char *getOnScreenName();
 
+   virtual S32 getDockRadius();
+   F32 getEditorRadius(F32 currentScale);
+   void renderDock();
+
    ///// Lua interface
 	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(EnergyItem);
 

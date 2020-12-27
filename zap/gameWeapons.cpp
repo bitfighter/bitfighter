@@ -35,13 +35,16 @@ ProjectileInfo::~ProjectileInfo()
 }
 
 
-ProjectileInfo GameWeapon::projectileInfo[ProjectileTypeCount] =
+// This is for client graphics/display
+// It must align with ProjectileStyle enum
+ProjectileInfo GameWeapon::projectileInfo[ProjectileStyleCount] =
 {
    //               SparkColor1     SparkColor2     SparkColor3       SparkColor4     ProjectileColor1  ProjectileColor2  Scale  Fire sound          Impact sound
    ProjectileInfo( Colors::magenta, Colors::white,  Colors::blue,     Colors::red,    Color(1, 0, 0.5), Color(0.5, 0, 1), 1.0f, SFXPhaserProjectile, SFXPhaserImpact ), // Phaser
    ProjectileInfo( Colors::yellow,  Colors::red,    Colors::orange50, Colors::white,  Colors::yellow,   Colors::red,      1.3f, SFXBounceProjectile, SFXBounceImpact ), // Bounce
    ProjectileInfo( Colors::blue,    Colors::green,  Color(0,0.5,1),   Color(0,1,0.5), Color(0, 0.5, 1), Color(0, 1, 0.5), 0.7f, SFXTripleProjectile, SFXTripleImpact ), // Triple
    ProjectileInfo( Colors::cyan,    Colors::yellow, Color(0,1,0.5),   Color(0.5,1,0), Color(0.5, 1, 0), Color(0, 1, 0.5), 0.6f, SFXTurretProjectile, SFXTurretImpact ), // Turret
+   ProjectileInfo( Colors::blue,    Colors::magenta,Colors::red,      Colors::cyan,   Colors::blue,     Colors::cyan,     3.0f, SFXRailgunProjectile,SFXRailgunImpact ), // Railgun
 };
 
 
@@ -71,6 +74,7 @@ void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, co
       case WeaponPhaser:
       case WeaponBounce:
       case WeaponTurret:
+      case WeaponRailgun:
          (new Projectile(weapon, firePos, projVel, shooter))->addToGame(game, game->getGameObjDatabase());
          break;
       case WeaponBurst:                                         // 0.9 to fix firing through barriers

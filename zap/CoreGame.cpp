@@ -53,7 +53,7 @@ const map<CoreGameType::RedistMethod, string> CoreGameRedistEnumMap = {
 bool CoreGameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)
-      setGameTime(F32(atof(argv[0]) * 60.0));      // Game time, stored in minutes in level file
+      setGameTime(F32(atof(argv[0]) * 60.0 * 1000));      // Game time, stored in minutes in level file
 
    // Added in 019g
    mRedistMethod = RedistNone;  // Default for all legacy maps
@@ -516,6 +516,10 @@ const F32 CoreItem::DamageReductionRatio = 1000.0f;
 
 const F32 CoreItem::PANEL_ANGLE = FloatTau / (F32) CORE_PANELS;
 
+// Historical default = 1
+const U32 CoreItem::CoreDefaultRotationSpeed = 1;
+const U32 CoreItem::CoreMaxRotationSpeed = 15;
+
 /**
  * @luafunc CoreItem::CoreItem()
  * @luafunc CoreItem::CoreItem(geom, team)
@@ -532,7 +536,7 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
    mCurrentExplosionNumber = 0;
    mPanelGeom.isValid = false;
-   mRotateSpeed = 1;
+   mRotationSpeed = CoreDefaultRotationSpeed;
 
 
    // Read some params from our L, if we have it
@@ -580,7 +584,11 @@ CoreItem *CoreItem::clone() const
 
 F32 CoreItem::getCoreAngle(U32 time)
 {
-   return F32(time & 16383) / 16384.f * FloatTau;
+   // This takes the time (in ms) since the start of the level and normalizes
+   // it to one rotation every 16384 ms
+   F32 fraction = F32(time & (CoreRotationTimeDefault-1)) / CoreRotationTimeDefault;
+
+   return fraction * FloatTau;  // Portion of a circle
 }
 
 
@@ -656,6 +664,7 @@ void CoreGameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) c
 void CoreItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
 {
    keys.push_back("Health");   values.push_back(itos(S32(mStartingHealth * DamageReductionRatio + 0.5)));
+   keys.push_back("Speed");   values.push_back(itos(S32(mRotationSpeed)));
 }
 
 
@@ -864,14 +873,14 @@ void CoreItem::doExplosion(const Point &pos)
 PanelGeom *CoreItem::getPanelGeom()
 {
    if(!mPanelGeom.isValid)
-      fillPanelGeom(getPos(), getGame()->getGameType()->getTotalGamePlayedInMs() * mRotateSpeed, mPanelGeom);
+      fillPanelGeom(getPos(), getGame()->getGameType()->getTotalGamePlayedInMs() * mRotationSpeed, mPanelGeom);
 
    return &mPanelGeom;
 }
 
 
 // static method
-void CoreItem::fillPanelGeom(const Point &pos, S32 time, PanelGeom &panelGeom)
+void CoreItem::fillPanelGeom(const Point &pos, U32 time, PanelGeom &panelGeom)
 {
    F32 size = CoreRadius;
 
@@ -1019,7 +1028,8 @@ void CoreItem::idle(BfObject::IdleCallPath path)
 
       for(S32 i = 0; i < CORE_PANELS; i++)
       {
-         if(mPanelHealth[i] == 0)                  // Panel is dead     TODO: And if panel is close enough to be worth it
+         // Panel is dead (ensured by damageObject() )
+         if(mPanelHealth[i] == 0)
          {
             Point sparkEmissionPos = getPos();
             sparkEmissionPos += dir * 3;
@@ -1073,6 +1083,21 @@ F32 CoreItem::getHealth() const
 {
    // health is from 0 to 1.0
    return getTotalCurrentHealth() / mStartingHealth;
+}
+
+
+U32 CoreItem::getRotationSpeed() const
+{
+   return mRotationSpeed;
+}
+
+
+void CoreItem::setRotationSpeed(U32 speed)
+{
+   if(speed > CoreMaxRotationSpeed)
+      speed = CoreMaxRotationSpeed;
+
+   mRotationSpeed = speed;
 }
 
 
@@ -1136,7 +1161,7 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    if(stream->writeFlag(updateMask & (InitialMask | TeamMask)))
    {
       writeThisTeam(stream);
-      stream->writeSignedInt(mRotateSpeed, 4);
+      stream->writeInt(mRotationSpeed, 4);
    }
 
    stream->writeFlag(mHasExploded);
@@ -1174,7 +1199,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())
    {
       readThisTeam(stream);
-      mRotateSpeed = stream->readSignedInt(4);
+      mRotationSpeed = stream->readInt(4);
    }
 
    if(stream->readFlag())     // Exploding!  Take cover!!
@@ -1214,7 +1239,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 {
-   if(argc < 4)         // CoreItem <team> <health> <x> <y>
+   if(argc < 4)         // CoreItem <team> <health> <x> <y> ...
       return false;
 
    setTeam(atoi(argv[0]));
@@ -1223,13 +1248,19 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
    if(!Parent::processArguments(argc-2, argv+2, game))
       return false;
 
+   // 019h added rotation speed
+   if(argc >=5)
+      setRotationSpeed((U32)atoi(argv[4]));
+
    return true;
 }
 
 
 string CoreItem::toLevelCode() const
 {
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + ftos(mStartingHealth * DamageReductionRatio) + " " + geomToLevelCode();
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " +
+         ftos(mStartingHealth * DamageReductionRatio) + " " + geomToLevelCode() + " " +
+         itos(mRotationSpeed);
 }
 
 
@@ -1261,7 +1292,7 @@ void CoreItem::onGeomChanged()
    Parent::onGeomChanged();
 
    GameType *gameType = getGame()->getGameType();
-   fillPanelGeom(getPos(), gameType->getTotalGamePlayedInMs() * mRotateSpeed, mPanelGeom);
+   fillPanelGeom(getPos(), gameType->getTotalGamePlayedInMs() * mRotationSpeed, mPanelGeom);
 }
 #endif
 
@@ -1309,6 +1340,8 @@ S32 CoreItem::lua_setTeam(lua_State *L)
    METHOD(CLASS, getCurrentHealth, ARRAYDEF({{          END }}), 1 ) \
    METHOD(CLASS, getFullHealth,    ARRAYDEF({{          END }}), 1 ) \
    METHOD(CLASS, setFullHealth,    ARRAYDEF({{ NUM_GE0, END }}), 1 ) \
+   METHOD(CLASS, getRotationSpeed, ARRAYDEF({{          END }}), 1 ) \
+   METHOD(CLASS, setRotationSpeed, ARRAYDEF({{ INT_GE0, END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(CoreItem, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(CoreItem, LUA_METHODS);
@@ -1352,7 +1385,7 @@ S32 CoreItem::lua_getFullHealth(lua_State *L)
  * 
  * @brief Sets the item's full health. Has no effect on current health.
  *
- * @desc The maximum health of each panel is the full health of the core divided
+ * @descr The maximum health of each panel is the full health of the core divided
  * by the number of panels.
  * 
  * @param health The item's new full health 
@@ -1363,6 +1396,46 @@ S32 CoreItem::lua_setFullHealth(lua_State *L)
    setStartingHealth(getFloat(L, 1));
 
    return 0;     
+}
+/**
+ * @luafunc CoreItem::getRotationSpeed()
+ *
+ * @brief Get the Core's rotation speed factor
+ *
+ * @return The rotation speed.
+ */
+S32 CoreItem::lua_getRotationSpeed(lua_State *L)
+{
+   return returnInt(L, mRotationSpeed);
+}
+
+
+/**
+ * @luafunc CoreItem::setRotationSpeed(int speed)
+ *
+ * @brief Sets the Core's rotation speed factor.
+ *
+ * @descr The rotation speed is a multiple of the default (1x). The default time
+ * it takes for one rotation is 16384 ms. Therefore, the rotation time is:
+ *
+ *    16384 ms / speed
+ *
+ * Speeds of 0 (stopped) to 15 are allowed.
+ *
+ * @param speed
+ */
+S32 CoreItem::lua_setRotationSpeed(lua_State *L)
+{
+   checkArgList(L, functionArgs, "CoreItem", "setRotationSpeed");
+
+   U32 speed = getInt(L, 1);
+   mRotationSpeed = min(speed, CoreMaxRotationSpeed);
+
+   // Update clients over network
+   // Use TeamMask because it's already hooked up to send rotation speed
+   setMaskBits(TeamMask);
+
+   return 0;
 }
 
 

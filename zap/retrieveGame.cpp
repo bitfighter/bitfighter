@@ -164,17 +164,50 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
 
       s->getClientInfo()->getStatistics()->mFlagScore++;
 
-      // See if all the flags are owned by one team...
+      // See if enough flags are owned by one team - one per zone
+
+      // Count zones owned by this team
+      const Vector<DatabaseObject *> *goalZones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
+
+      U32 teamZoneCount = 0;
+      for(S32 i = 0; i < goalZones->size(); i++)
+      {
+         GoalZone *thisZone = static_cast<GoalZone *>(goalZones->get(i));
+
+         // If zone is same team as the ship, count it
+         if(thisZone->getTeam() == s->getTeam())
+            teamZoneCount++;
+      }
+
+      U32 teamZoneFlagCount = 0;
+      U32 teamPossibleFlagCount = 0;
       for(S32 i = 0; i < flags->size(); i++)
       {
          FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
 
-         bool ourFlag = (flag->getTeam() == s->getTeam()) || (flag->getTeam() == TEAM_NEUTRAL);
-         if(ourFlag && (!flag->getZone() || flag->getZone()->getTeam() != s->getTeam()))
-            return;     // ...if not, we're done
+         // Team or neutral flags qualify
+         bool canBeOurFlag = (flag->getTeam() == s->getTeam()) || (flag->getTeam() == TEAM_NEUTRAL);
+
+         // If it can be owned by our team
+         if(canBeOurFlag)
+         {
+            // Keep track of possibles for later
+            teamPossibleFlagCount++;
+
+            // If it's in a zone and the zone is our team's, count it
+            if(flag->getZone() && (flag->getZone()->getTeam() == s->getTeam()))
+               teamZoneFlagCount++;
+         }
       }
 
-      // One team has all the flags
+      // If we don't have enough flags and not all flags have been captured,
+      // we haven't score a touchdown yet; exit
+      if(teamZoneFlagCount < teamZoneCount && teamZoneFlagCount < teamPossibleFlagCount)
+         return;
+
+      // This team has sufficient flags, score a touchdown
+
+      // Single flag games not included
       if(flags->size() != 1)
       {
          static StringTableEntry capAllString("Team %e0 retrieved all the flags!");
@@ -195,9 +228,16 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
       {
          FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
 
+         // Neutral and team flags are returned
          if(flag->getTeam() == s->getTeam() || flag->getTeam() == TEAM_NEUTRAL) 
          {
+            // Someone may still be carrying a flag around when another team scores
+            if(flag->isMounted())
+               flag->dismount(DISMOUNT_SILENT);
+
+            // Return flags home
             flag->setZone(NULL);
+
             if(!flag->isAtHome())
                flag->sendHome();
          }

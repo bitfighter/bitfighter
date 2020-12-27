@@ -243,13 +243,13 @@ S32 PickupItem::lua_isVis(lua_State *L) { return returnBool(L, isVisible()); }
 
 
 /**
- * @luafunc PickupItem::setVis(visible)
+ * @luafunc PickupItem::setVis(bool visible)
  *
  * @brief Show or hide the item. Note that hiding an item will reset the
  * timer that makes it visible again, just as if it had been picked up by a
  * player.
  *
- * @param visibile Pass `true` to make the item visible, `false` to hide it.
+ * @param visible Pass `true` to make the item visible, `false` to hide it.
 */
 S32 PickupItem::lua_setVis(lua_State *L)
 {
@@ -371,7 +371,7 @@ void RepairItem::renderItem(const Point &pos)
 
 
 const char *RepairItem::getOnScreenName()     { return "Repair";       }
-const char *RepairItem::getOnDockName()       { return "Repair";       }
+const char *RepairItem::getOnDockName()       { return "Rep";       }
 const char *RepairItem::getPrettyNamePlural() { return "Repair Items"; }
 const char *RepairItem::getEditorHelpString() { return "Repairs damage to ships. [B]"; }
 
@@ -499,10 +499,24 @@ void EnergyItem::renderItem(const Point &pos)
 
 
 const char *EnergyItem::getOnScreenName()     { return "Energy";       }
-const char *EnergyItem::getOnDockName()       { return "Energy";       }
+const char *EnergyItem::getOnDockName()       { return "Ener";       }
 const char *EnergyItem::getPrettyNamePlural() { return "Energy Items"; }
 const char *EnergyItem::getEditorHelpString() { return "Restores energy to ships"; }
 
+
+S32 EnergyItem::getDockRadius() { return 11; }
+
+
+void EnergyItem::renderDock()
+{
+   renderEnergyItem(getPos(), true);
+}
+
+
+F32 EnergyItem::getEditorRadius(F32 currentScale)
+{
+   return mRadius * currentScale + 5;
+}
 
 /////
 // Lua interface

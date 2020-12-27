@@ -211,7 +211,7 @@ void MoveObject::setPos(const Point &pos)
 {
    setActualPos(pos);
    setRenderPos(pos);
-   Parent::setVert(pos, 0);      // Kind of hacky... need to get this point into the geom object, need to avoid stack overflow TODO: Can get rid of this?
+
    updateExtentInDatabase();
 }
 
@@ -1259,7 +1259,7 @@ U32 MountableItem::packUpdate(GhostConnection *connection, U32 updateMask, BitSt
 
 void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   Parent::unpackUpdate(connection, stream);   // Moving this to end of unpackUpdate breaks version 018... wait till we move to 019?
+   Parent::unpackUpdate(connection, stream);
 
    if(stream->readFlag())     // MountMask
    {
@@ -1377,7 +1377,7 @@ bool MountableItem::isItemThatMakesYouVisibleWhileCloaked() { return true; }
 /**
  * @luaclass MountableItem
  * 
- * @brief Class of items that can be mounted on ships (such as \link Flag Flags
+ * @brief Class of items that can be mounted on ships (such as \link FlagItem FlagsItems
  * \endlink and \link ResourceItem ResourceItems \endlink).
  */
 //               Fn name       Param profiles  Profile count                           
@@ -1638,9 +1638,6 @@ U32 Asteroid::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    if(stream->writeFlag(updateMask & ItemChangedMask))
    {
       stream->writeInt(mSizeLeft, ASTEROID_SIZELEFT_BIT_COUNT);
-
-      // FIXME:  Why do we care about asteroid design on the server?
-      stream->writeEnum(mDesign, ASTEROID_DESIGNS);
    }
 
    stream->writeFlag(hasExploded);
@@ -1658,7 +1655,6 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mSizeLeft = stream->readInt(ASTEROID_SIZELEFT_BIT_COUNT);
       setRadius(getAsteroidRadius(mSizeLeft));
       setMass(getAsteroidMass(mSizeLeft));
-      mDesign = stream->readEnum(ASTEROID_DESIGNS);
 
       if(!mInitial)
       {
@@ -1727,7 +1723,7 @@ bool Asteroid::processArguments(S32 argc2, const char **argv2, Game *game)
    {
       char firstChar = argv2[i][0];    // First character of arg
 
-      if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z'))
+      if(isAlpha(firstChar))
       {
          if(!strnicmp(argv2[i], "Size=", 5))
             mSizeLeft = atoi(&argv2[i][5]);
@@ -1834,7 +1830,7 @@ REGISTER_LUA_SUBCLASS(Asteroid, MoveObject);
  * 
  * @brief Get this asteroid's current size index.
  * 
- * @desc Index 1 represents the asteroid's initial size. After it has been
+ * @descr Index 1 represents the asteroid's initial size. After it has been
  * broken once, its size index will be 2, and so on. This method will always
  * return an integer between 1 and the value returned by the getSizeCount()
  * method (inclusive).
@@ -1855,14 +1851,14 @@ S32 Asteroid::lua_getSizeIndex(lua_State *L) { return returnInt(L, ASTEROID_INIT
 S32 Asteroid::lua_getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT + 1); }
 
 /**
- * @luafunc Asteroid::setSize(size)
+ * @luafunc Asteroid::setSize(int size)
  * 
  * @brief Set the size of the Asteroid.
  * 
  * Setting the size of an Asteroid will give you (size 1) levels you'll have to
  * destroy. Each level reduction will produce two more asteroids
  * 
- * @param int size The size the asteroid will be set to.
+ * @param size The size the asteroid will be set to.
  * 
  * @note Any size less than 1 will default to size 3. Please be responsible with
  * your size choices.

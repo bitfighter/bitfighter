@@ -91,6 +91,8 @@ extern void drawVertLine (S32 x,  S32 y1, S32 y2);
 extern void drawHorizLine(F32 x1, F32 x2, F32 y);
 extern void drawVertLine (F32 x,  F32 y1, F32 y2);
 
+extern void drawDashedLine(const Point &start, const Point &end, F32 period, F32 dutycycle = 0.5, F32 fractionalOffset = 0);
+
 extern void drawFadingHorizontalLine(S32 x1, S32 x2, S32 yPos, const Color &color);
 
 extern void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *letterColor, char letter);
@@ -135,6 +137,7 @@ extern void renderTeleporterOutline(const Point &center, F32 radius, const Color
 extern void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentScale = 1);
 extern void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentScale);
 extern void renderTurret(const Color &c, const Color &hbc, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, S32 healRate = 0);
+extern void renderTurretIcon(const Point &pos, F32 scale, const Color *color);
 
 extern void renderFlag(const Point &pos, const Color *flagColor);
 extern void renderFlag(const Point &pos, F32 scale, const Color *flagColor);
@@ -183,7 +186,7 @@ extern void renderPolygon(const Vector<Point> *fillPoints, const Vector<Point> *
 
 extern void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill);     // No label version
 extern void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle,
-                           bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter, bool useOldStyle);
+                           bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter);
 extern void renderGoalZoneIcon(const Point &center, S32 radius, F32 angleRadians = 0.0f);
 
 
@@ -199,11 +202,12 @@ extern void renderSlipZoneIcon(const Point &center, S32 radius, F32 angleRadians
 
 extern void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *text, F32 scaleFact = 1);
 
-extern void renderProjectile(const Point &pos, U32 type, U32 time);
-extern void renderSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRemaining);
+extern void renderProjectile(const Point &pos, U32 style, U32 time);
+extern void renderProjectileRailgun(const Point &pos, const Point &velocity, U32 time);
+extern void renderSeeker(const Point &pos, U32 style, F32 angleRadians, F32 speed, U32 timeRemaining);
 
 extern void renderMine(const Point &pos, bool armed, bool visible);
-extern void renderGrenade(const Point &pos, F32 lifeLeft);
+extern void renderGrenade(const Point &pos, U32 style, F32 lifeLeft);
 extern void renderSpyBug(const Point &pos, const Color &teamColor, bool visible);
 
 extern void renderRepairItem(const Point &pos);
@@ -254,8 +258,8 @@ extern void renderPolyLineVertices(BfObject *obj, bool snapping, F32 currentScal
 extern void renderGrid(F32 currentScale, const Point &offset, const Point &origin, F32 gridSize, bool fadeLines, bool showMinorGridLines);
 
 extern void renderForceFieldProjector(const Point &pos, const Point &normal, const Color *teamColor, bool enabled, S32 healRate);
-extern void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, const Color *teamColor, bool enabled, S32 healRate = 0);
-extern void renderForceField(Point start, Point end, const Color *c, bool fieldUp, F32 scale = 1);
+extern void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, const Color *teamColor, bool enabled, F32 health, S32 healRate = 0);
+extern void renderForceField(const Point &start, const Point &end, const Color *c, bool fieldUp, F32 health = 1.0, U32 time = 0);
 
 extern void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask = 1023);
 extern void renderBitfighterLogo(const Point &pos, F32 size, U32 letterMask = 1023);
@@ -292,6 +296,7 @@ extern void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const 
 #define renderSpeedZone
 #define renderSlipZone
 #define renderProjectile
+#define renderProjectileRailgun
 #define renderGrenade
 #define renderMine
 #define renderSpyBug
@@ -301,6 +306,7 @@ extern void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const 
 #define renderForceFieldProjector
 #define renderForceField
 #define renderTurret
+#define renderTurretIcon
 #define renderSquareItem
 #define renderNavMeshZone
 #define renderNavMeshBorders

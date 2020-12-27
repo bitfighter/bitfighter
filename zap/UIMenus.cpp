@@ -910,6 +910,26 @@ static void highScoresSelectedCallback(ClientGame *game, U32 unused)
 
 static void editorSelectedCallback(ClientGame *game, U32 unused)
 {
+   GameSettings *settings = game->getSettings();
+   FolderManager *folderManager = settings->getFolderManager();
+   UIManager *uiManager = game->getUIManager();
+
+   // Never did resolve a leveldir... no editing for you!
+   if(folderManager->levelDir == "")
+   {
+      ErrorMessageUserInterface *ui = uiManager->getUI<ErrorMessageUserInterface>();
+      ui->reset();
+      ui->setTitle("HOUSTON, WE HAVE A PROBLEM");
+      ui->setMessage("No valid level folder was found, so I cannot start the level editor.\n\n"
+                     "Check the LevelDir parameter in your INI file or your command-line parameters to "
+                     "make sure you have correctly specified a valid folder.");
+      ui->setInstr("Press [[Esc]] to continue");
+
+      uiManager->activate(ui);
+
+      return;
+   }
+
    game->setLevelDatabaseId(LevelDatabase::NOT_IN_DATABASE);      // <=== Should not be here... perhaps in editor onActivate?
    game->getUIManager()->activate<LevelNameEntryUserInterface>();
 }
@@ -1593,6 +1613,82 @@ void RobotOptionsMenuUserInterface::saveSettings()
 ////////////////////////////////////////
 
 // Constructor
+ServerAdvancedMenuUserInterface::ServerAdvancedMenuUserInterface(ClientGame *game) : Parent(game)
+{
+   mMenuTitle = "ADVANCED OPTIONS";
+}
+
+
+// Destructor
+ServerAdvancedMenuUserInterface::~ServerAdvancedMenuUserInterface()
+{
+   // Do nothing
+}
+
+
+void ServerAdvancedMenuUserInterface::onActivate()
+{
+   Parent::onActivate();
+   setupMenus();
+}
+
+
+static void hostOnServerCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->getUI<QueryServersUserInterface>()->mHostOnServer = true;
+   game->getUIManager()->activate<QueryServersUserInterface>();
+}
+
+
+void ServerAdvancedMenuUserInterface::setupMenus()
+{
+   clearMenuItems();
+
+   GameSettings *settings = getGame()->getSettings();
+
+   addMenuItem(new TextEntryMenuItem("GLOBAL SCRIPT:", settings->getGlobalLevelgenScript(),
+      "<None>", "Levelgen script to run with every level", MaxWelcomeMessageLen, KEY_S));
+
+   addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap,
+         "Can users download maps from this server", KEY_M));
+
+   addMenuItem(new YesNoMenuItem("RECORD GAMES:", settings->getIniSettings()->enableGameRecording,
+         "Will the server record games (requires lots of disk space)", KEY_R));
+
+   // Note, Don't move "HOST ON SERVER" above "RECORD GAMES" unless
+   // first checking HostMenuUserInterface::saveSettings if it saves correctly
+   if(getGame()->getConnectionToMaster() && getGame()->getConnectionToMaster()->isHostOnServerAvailable())
+      addMenuItem(new MenuItem("HOST ON SERVER", hostOnServerCallback, "Upload and run levels on a proxy server", KEY_H));
+}
+
+
+// Save options to INI file
+void ServerAdvancedMenuUserInterface::onEscape()
+{
+   saveSettings();
+   getUIManager()->reactivatePrevUI();
+}
+
+
+void ServerAdvancedMenuUserInterface::saveSettings()
+{
+//   // Save our minimum players, get the correct index of the appropriate menu item
+//   getGame()->getSettings()->getIniSettings()->playWithBots = getMenuItem(0)->getIntValue() == 1;
+//   getGame()->getSettings()->getIniSettings()->minBalancedPlayers = getMenuItem(1)->getIntValue();
+//
+//   saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
+   GameSettings *settings = getGame()->getSettings();
+
+   settings->setGlobalLevelgenScript(getMenuItem(OPT_GLOBALSCR)->getValue());
+   settings->getIniSettings()->allowGetMap = (getMenuItem(OPT_GETMAP)->getIntValue() != 0);
+   settings->getIniSettings()->enableGameRecording = (getMenuItem(OPT_RECORD)->getIntValue() != 0);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
 ServerPasswordsMenuUserInterface::ServerPasswordsMenuUserInterface(ClientGame *game) : Parent(game)
 {
    mMenuTitle = "SERVER PASSWORDS";
@@ -1833,11 +1929,6 @@ static void startHostingCallback(ClientGame *game, U32 unused)
    initHosting(settings, levelSource, false, false);
 }
 
-static void hostOnServerCallback(ClientGame *game, U32 unused)
-{
-   game->getUIManager()->getUI<QueryServersUserInterface>()->mHostOnServer = true;
-   game->getUIManager()->activate<QueryServersUserInterface>();
-}
 
 static void robotOptionsSelectedCallback(ClientGame *game, U32 unused)
 {
@@ -1848,6 +1939,13 @@ static void robotOptionsSelectedCallback(ClientGame *game, U32 unused)
 static void passwordOptionsSelectedCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->activate<ServerPasswordsMenuUserInterface>();
+
+}
+
+
+static void advancedOptionsSelectedCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->activate<ServerAdvancedMenuUserInterface>();
 
 }
 
@@ -1871,27 +1969,24 @@ void HostMenuUserInterface::setupMenus()
          "Add robots and adjust their settings", KEY_R));
 
    addMenuItem(new TextEntryMenuItem("SERVER NAME:", settings->getHostName(), 
-                                     "<Bitfighter Host>", "", MaxServerNameLen,  KEY_N));
+                                     "<Bitfighter Host>", "Server name shown in the game lobby",
+                                     MaxServerNameLen,  KEY_N));
 
    addMenuItem(new TextEntryMenuItem("DESCRIPTION:", settings->getHostDescr(),                    
-                                     "<Empty>", "", MaxServerDescrLen, KEY_D));
+                                     "<Empty>", "Server description shown in the game lobby",
+                                     MaxServerDescrLen, KEY_D));
 
    addMenuItem(new TextEntryMenuItem("WELCOME MSG:", settings->getWelcomeMessage(),
-                                       "<Empty>", "", MaxWelcomeMessageLen, KEY_W));
+                                       "<Empty>", "Message shown to players when they join the server",
+                                       MaxWelcomeMessageLen, KEY_W));
 
    addMenuItem(new MenuItem(getMenuItemCount(), "PASSWORDS", passwordOptionsSelectedCallback,
          "Set server passwords/permissions", KEY_P));
 
-   addMenuItem(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", settings->getIniSettings()->allowGetMap, "", KEY_M));
+   addMenuItem(new MenuItem(getMenuItemCount(), "ADVANCED", advancedOptionsSelectedCallback,
+         "Other advanced server options", KEY_A));
 
-   addMenuItem(new YesNoMenuItem("RECORD GAMES:", settings->getIniSettings()->enableGameRecording, ""));
-
-   // Note, Don't move "HOST ON SERVER" above "RECORD GAMES" unless
-   // first checking HostMenuUserInterface::saveSettings if it saves correctly
-   if(getGame()->getConnectionToMaster() && getGame()->getConnectionToMaster()->isHostOnServerAvailable())
-      addMenuItem(new MenuItem("HOST ON SERVER", hostOnServerCallback, "", KEY_H));
-
-   addMenuItem(new MenuItem("PLAYBACK GAMES",    playbackGamesCallback,  ""));
+   addMenuItem(new MenuItem("PLAYBACK GAMES",    playbackGamesCallback,  "Playback previously recorded games"));
 }
 
 
@@ -1911,10 +2006,7 @@ void HostMenuUserInterface::saveSettings()
 
    settings->setHostName (getMenuItem(OPT_NAME)->getValue(),  true);
    settings->setHostDescr(getMenuItem(OPT_DESCR)->getValue(), true);
-   settings->setWelcomeMessage(getMenuItem(OPT_WELCOME)->getValue());
-
-   settings->getIniSettings()->allowGetMap = (getMenuItem(OPT_GETMAP)->getIntValue() != 0);
-   settings->getIniSettings()->enableGameRecording = (getMenuItem(OPT_RECORD)->getIntValue() != 0);
+   settings->setWelcomeMessage(getMenuItem(OPT_WELCOME)->getValue(), true);
 
    saveSettingsToINI(&GameSettings::iniFile, getGame()->getSettings());
 }
@@ -2041,43 +2133,53 @@ void GameMenuUserInterface::buildMenu()
 
    GameConnection *gc = (getGame())->getConnectionToServer();
 
-   if(gc && dynamic_cast<GameRecorderPlayback *>(gc) == NULL)
+   if(gc)
    {
-      GameType *gameType = getGame()->getGameType();
-
-      // Add any game-specific menu items
-      if(gameType)
+      // Add normal menu options for when we're not playing recorded games
+      if(dynamic_cast<GameRecorderPlayback *>(gc) == NULL)
       {
-         mGameType = gameType;
-         gameType->addClientGameMenuOptions(getGame(), this);
-      }
+         GameType *gameType = getGame()->getGameType();
 
-      if(gc->getClientInfo()->isLevelChanger())
-      {
-         addMenuItem(new MenuItem("ROBOTS",               robotsGameCallback,     "", KEY_B, KEY_R));
-         addMenuItem(new MenuItem("PLAY DIFFERENT LEVEL", chooseNewLevelCallback, "", KEY_L, KEY_P));
-         addMenuItem(new MenuItem("ADD TIME (2 MINS)",    addTwoMinsCallback,     "", KEY_T, KEY_2));
-         addMenuItem(new MenuItem("RESTART LEVEL",        restartGameCallback,    ""));
-      }
-
-      if(gc->getClientInfo()->isAdmin())
-      {
          // Add any game-specific menu items
          if(gameType)
          {
             mGameType = gameType;
-            gameType->addAdminGameMenuOptions(this);
+            gameType->addClientGameMenuOptions(getGame(), this);
          }
 
-         addMenuItem(new MenuItem("KICK A PLAYER", kickPlayerCallback, "", KEY_K));
+         if(gc->getClientInfo()->isLevelChanger())
+         {
+            addMenuItem(new MenuItem("ROBOTS",               robotsGameCallback,     "", KEY_B, KEY_R));
+            addMenuItem(new MenuItem("PLAY DIFFERENT LEVEL", chooseNewLevelCallback, "", KEY_L, KEY_P));
+            addMenuItem(new MenuItem("ADD TIME (2 MINS)",    addTwoMinsCallback,     "", KEY_T, KEY_2));
+            addMenuItem(new MenuItem("RESTART LEVEL",        restartGameCallback,    ""));
+         }
+
+         if(gc->getClientInfo()->isAdmin())
+         {
+            // Add any game-specific menu items
+            if(gameType)
+            {
+               mGameType = gameType;
+               gameType->addAdminGameMenuOptions(this);
+            }
+
+            addMenuItem(new MenuItem("KICK A PLAYER", kickPlayerCallback, "", KEY_K));
+         }
+
+         // Owner already has max permissions, so don't show option to enter a password
+         if(!gc->getClientInfo()->isOwner())
+            addMenuItem(new MenuItem("ENTER PASSWORD", levelChangeOrAdminPWCallback, "", KEY_A, KEY_E));
+
+         if((gc->mSendableFlags & GameConnection::ServerFlagHasRecordedGameplayDownloads) && !gc->isLocalConnection())
+            addMenuItem(new MenuItem("DOWNLOAD RECORDED GAME", downloadRecordedGameCallback, ""));
+         }
+
+      // Else add these options if we're playing recorded games
+      else
+      {
+         addMenuItem(new MenuItem("PLAYBACK GAMES", playbackGamesCallback, "Playback previously recorded games"));
       }
-
-      // Owner already has max permissions, so don't show option to enter a password
-      if(!gc->getClientInfo()->isOwner())
-         addMenuItem(new MenuItem("ENTER PASSWORD", levelChangeOrAdminPWCallback, "", KEY_A, KEY_E));
-
-      if((gc->mSendableFlags & GameConnection::ServerFlagHasRecordedGameplayDownloads) && !gc->isLocalConnection())
-         addMenuItem(new MenuItem("DOWNLOAD RECORDED GAME", downloadRecordedGameCallback, ""));
    }
 
    if(getUIManager()->cameFrom<EditorUserInterface>())    // Came from editor

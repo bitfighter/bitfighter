@@ -13,12 +13,23 @@
 #include "gameObjectRender.h"
 #include "ClientInfo.h"
 
+#ifndef ZAP_DEDICATED
+#  include "ClientGame.h"
+#  include "UIEditorMenus.h"
+#endif
+
+
 namespace Zap
 {
 
 using namespace LuaArgs;
 
 TNL_IMPLEMENT_NETOBJECT(FlagItem);
+
+#ifndef ZAP_DEDICATED
+   EditorAttributeMenuUI *FlagItem::mAttributeMenuUI = NULL;
+#endif
+
 /**
  * @luafunc FlagItem::FlagItem()
  * @luafunc FlagItem::FlagItem(point)
@@ -61,6 +72,8 @@ void FlagItem::initialize()
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = FlagTypeNumber;
    setZone(NULL);
+
+   mSpawnLock = false;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -133,7 +146,7 @@ U32 FlagItem::getFlagCount()               { return 1; }
 
 bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
 {
-   if(argc < 3)         // FlagItem <team> <x> <y> {time}
+   if(argc < 3)         // FlagItem <team> <x> <y>
       return false;
 
    setTeam(atoi(argv[0]));
@@ -141,12 +154,18 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
    if(!Parent::processArguments(argc-1, argv+1, game))
       return false;
 
-   S32 time = (argc >= 4) ? atoi(argv[4]) : 0;     // Flag spawn time is possible 4th argument.  Only important in Nexus games for now.
+   if(argc >= 4)
+   {
+      if(strcmp(argv[3], "SpawnLock") == 0)
+         mSpawnLock = true;
+      else
+         mSpawnLock = false;
+   }
 
    mInitialPos = getActualPos();                   // Save the starting location of this flag
 
    // Create a spawn at the flag's location
-   FlagSpawn *spawn = new FlagSpawn(mInitialPos, time, getTeam());
+   FlagSpawn *spawn = new FlagSpawn(mInitialPos, 0, getTeam());
    spawn->addToGame(game, game->getGameObjDatabase());
 
    return true;
@@ -155,8 +174,55 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string FlagItem::toLevelCode() const
 {
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode();
+   string line = appendId(getClassName()) + " " + itos(getTeam()) + " " + geomToLevelCode();
+
+   if(mSpawnLock)
+      line += " SpawnLock";
+
+   return line;
 }
+
+
+#ifndef ZAP_DEDICATED
+EditorAttributeMenuUI *FlagItem::getAttributeMenu()
+{
+   // Lazily initialize
+   if(!mAttributeMenuUI)
+   {
+      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
+
+      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
+
+      mAttributeMenuUI->addMenuItem(new YesNoMenuItem("SpawnLock:", true, "Lock to initial spawn point"));
+
+      // Add our standard save and exit option to the menu
+      mAttributeMenuUI->addSaveAndQuitMenuItem();
+   }
+
+   return mAttributeMenuUI;
+}
+
+
+// Get the menu looking like what we want
+void FlagItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->getMenuItem(0)->setIntValue(mSpawnLock ? 1 : 0);
+}
+
+
+// Retrieve the values we need from the menu
+void FlagItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   mSpawnLock = attributeMenu->getMenuItem(0)->getIntValue();  // Returns 0 or 1
+}
+
+
+// Render some attributes when item is selected but not being edited
+void FlagItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
+{
+   keys.push_back("SpawnLock");    values.push_back(mSpawnLock ? "Yes" : "No");
+}
+#endif
 
 
 U32 FlagItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
@@ -222,13 +288,13 @@ void FlagItem::mountToShip(Ship *ship)
 
 void FlagItem::sendHome()
 {
-   // Now that we have flag spawn points, we'll simply redefine "initial pos" as a random selection of the flag spawn points
-   // Everything else should remain as it was
+   // Now that we have flag spawn points, we'll simply redefine "initial pos"
+   // as a random selection of the flag spawn points, unless the flag has been
+   // spawn-locked to it initial position
 
    // First, make a list of valid spawn points -- start with a list of all spawn points, then remove any occupied ones
    Vector<AbstractSpawn *> spawnPoints = getGame()->getSpawnPoints(FlagSpawnTypeNumber, getTeam());
    removeOccupiedSpawnPoints(spawnPoints);
-
 
    if(spawnPoints.size() == 0)      // Protect from crash if this happens, which it shouldn't, but has
    {
@@ -236,7 +302,7 @@ void FlagItem::sendHome()
       logprintf(LogConsumer::LogError, "LEVEL ERROR!! Level %s has no flag spawn points for team %d\n**Please submit this level to the devs!**", 
          ((ServerGame *)getGame())->getCurrentLevelFileName().c_str(), getTeam());
    }
-   else
+   else if(!mSpawnLock)
    {
       S32 spawnIndex = TNL::Random::readI() % spawnPoints.size();
       mInitialPos = spawnPoints[spawnIndex]->getPos();

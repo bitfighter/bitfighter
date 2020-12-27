@@ -11,13 +11,29 @@ add_library(bitfighter_client OBJECT
 	${OTHER_HEADERS}
 )
 
+
+# If certain system libs were not found, add the in-tree variants as dependencies
+set(CLIENT_EXTRA_DEPS "")
+if(NOT ALURE_FOUND)
+	list(APPEND CLIENT_EXTRA_DEPS alure)
+endif()
+if(NOT TOMCRYPT_FOUND)
+	list(APPEND CLIENT_EXTRA_DEPS tomcrypt)
+endif()
+if(NOT CLIPPER_FOUND)
+	list(APPEND CLIENT_EXTRA_DEPS clipper)
+endif()
+if(NOT POLY2TRI_FOUND)
+	list(APPEND CLIENT_EXTRA_DEPS poly2tri)
+endif()
+if(NOT LUAJIT_FOUND)
+	list(APPEND CLIENT_EXTRA_DEPS ${LUA_LIB})
+endif()
+
+
 add_dependencies(bitfighter_client
-	alure
-	${LUA_LIB}
 	tnl
-	tomcrypt
-	clipper
-	poly2tri
+	${CLIENT_EXTRA_DEPS}
 )
 
 if(USE_GLES)

@@ -536,7 +536,7 @@ void Game::countTeamPlayers() const
          if(isServer())
          {
             const F32 BASE_RATING = .1f;
-            team->addRating(max(clientInfo->getCalculatedRating(), BASE_RATING));    
+            team->addToRatingSum(max(clientInfo->getCalculatedRating(), BASE_RATING));    
          }
       }
    }
@@ -594,6 +594,7 @@ void Game::resetLevelInfo()
    mLegacyGridSize = 1.f;
    mLevelFormat = CurrentLevelFormat;
    mHasLevelFormat = false;
+   mLevelLoadTriggeredWarnings.clear();
 }
 
 
@@ -807,7 +808,12 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
 
       if(!object && !eObject)    // Well... that was a bad idea!
       {
-         logprintf(LogConsumer::LogLevelError, "Unknown object type \"%s\" in level \"%s\"", objName.c_str(), levelFileName.c_str());
+         if(!mLevelLoadTriggeredWarnings.contains(objName))
+         {
+            logprintf(LogConsumer::LogLevelError, "Unknown object type \"%s\" in level \"%s\"", objName.c_str(), levelFileName.c_str());
+            mLevelLoadTriggeredWarnings.push_back(objName);
+         }
+
          delete theObject;
          return;
       }
@@ -997,7 +1003,7 @@ void Game::setGameTime(F32 timeInMinutes)
    TNLAssert(gt, "Null gametype!");
 
    if(gt)
-      gt->setGameTime(timeInMinutes * 60);
+      gt->setGameTime(timeInMinutes * 60 * 1000);  // Time in ms
 }
 
 
@@ -1435,10 +1441,10 @@ void Game::sendPrivateChat(const StringTableEntry &senderName, const StringTable
 }
 
 
-void Game::sendAnnouncementFromController(const StringPtr &message)
+void Game::sendAnnouncementFromController(const string &message)
 {
    if(mGameType)
-      mGameType->sendAnnouncementFromController(message);
+      mGameType->displayAnnouncement(message);
 }
 
 

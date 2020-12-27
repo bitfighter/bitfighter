@@ -57,6 +57,7 @@ public:
    static void redrawViewport(GameSettings *settings);
 
    static void updateDisplayState(GameSettings *settings, StateReason reason);
+   static void debugPrintState(VideoSystem::videoSystem_st_t currentState);
 };
 
 } /* namespace Zap */

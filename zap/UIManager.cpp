@@ -119,10 +119,9 @@ void UIManager::reactivate(const UserInterface *ui)
 
 UserInterface *UIManager::getPrevUI()
 {
-   if(mPrevUIs.size() == 0)
-      return NULL;
-
-   return mPrevUIs.last();
+   // Use mLastUI because mPrevUIs.last() may have been popped if this method
+   // is called from a UI reactivate() method
+   return mLastUI;
 }
 
 
@@ -200,6 +199,25 @@ void UIManager::saveUI(UserInterface *ui)
 
    if(ui)
       mPrevUIs.push_back(ui);
+}
+
+
+void UIManager::printUIStack()
+{
+   logprintf("== UIManager stack ==");
+
+   // Print current UI
+   for(auto const& x : mUis)
+      if(x.second == mCurrentInterface)
+         logprintf("%s (current)", x.first->name());
+
+   // Print stack, starting from most recent UI
+   for(int i = mPrevUIs.size() - 1; i > 0; i--)
+      for(auto const& x : mUis)
+         if(x.second == mPrevUIs[i])
+            logprintf("%s", x.first->name());
+
+   logprintf("=====================");
 }
 
 

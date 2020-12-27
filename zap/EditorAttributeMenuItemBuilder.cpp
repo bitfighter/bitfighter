@@ -23,6 +23,7 @@ namespace Zap
 EditorAttributeMenuItemBuilder::EditorAttributeMenuItemBuilder()
 {
    mInitialized = false;
+   mGame = NULL;
 }
 
 // Destructor
@@ -108,6 +109,9 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
             attributeMenuUI->addMenuItem(new CounterMenuItem("Hit points:", CoreItem::CoreDefaultStartingHealth,
                                          1, 1, S32(CoreItem::DamageReductionRatio), "", "", ""));
 
+            attributeMenuUI->addMenuItem(new CounterMenuItem("Rotation speed:", CoreItem::CoreDefaultRotationSpeed,
+                                         1, 0, CoreItem::CoreMaxRotationSpeed, "x", "Stopped", ""));
+
             // Add our standard save and exit option to the menu
             attributeMenuUI->addSaveAndQuitMenuItem();
          }
@@ -116,7 +120,6 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
       }
 
 
-      case TurretTypeNumber:
       case ForceFieldProjectorTypeNumber:
       {
          static EditorAttributeMenuUI *attributeMenuUI = NULL;
@@ -233,9 +236,9 @@ void EditorAttributeMenuItemBuilder::startEditingAttrs(EditorAttributeMenuUI *at
 
       case CoreTypeNumber:
          attributeMenu->getMenuItem(0)->setIntValue(S32(static_cast<CoreItem *>(obj)->getStartingHealth() + 0.5));
+         attributeMenu->getMenuItem(1)->setIntValue(S32(static_cast<CoreItem *>(obj)->getRotationSpeed()));
          break;
 
-      case TurretTypeNumber:
       case ForceFieldProjectorTypeNumber:
          attributeMenu->getMenuItem(0)->setIntValue(static_cast<EngineeredItem *>(obj)->getHealRate());
          break;
@@ -277,10 +280,9 @@ void EditorAttributeMenuItemBuilder::doneEditingAttrs(EditorAttributeMenuUI *att
 
       case CoreTypeNumber:
          static_cast<CoreItem *>(obj)->setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()));
+         static_cast<CoreItem *>(obj)->setRotationSpeed(F32(attributeMenu->getMenuItem(1)->getIntValue()));
          break;
-
          
-      case TurretTypeNumber:
       case ForceFieldProjectorTypeNumber:
          static_cast<EngineeredItem *>(obj)->setHealRate(attributeMenu->getMenuItem(0)->getIntValue());
          break;

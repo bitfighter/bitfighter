@@ -7,7 +7,6 @@
 #define SOUNDSYSTEM_H_
 
 #include "SoundSystemEnums.h"
-#include "ConfigEnum.h"     // For sfxSets
 #include "Timer.h"
 
 #ifdef ZAP_DEDICATED
@@ -123,7 +122,7 @@ public:
    virtual ~SoundSystem();
 
    // General functions
-   static void init(sfxSets sfxSet, const string &sfxDir, const string &musicDir, float musicVol);
+   static void init(const string &sfxDir, const string &musicDir, float musicVol);
    static void shutdown();
    static void setListenerParams(const Point &position, const Point &velocity);
    static void processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol, MusicLocation);  // Client version

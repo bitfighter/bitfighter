@@ -1,0 +1,59 @@
+name: bitfighter
+base: core18
+version: '21'
+summary: Fast team-based space multiplayer arcade game.
+description: |
+  The fast-paced team-based outer-space multi-player arcade game.
+  Blast your friends, zap your enemies. Steal their flags and nuke their cores.
+  Customize your ship to be sneaky, or overwhelm with superior firepower.
+  It's fast, fun, and frenetic.
+
+grade: stable
+confinement: strict
+
+parts:
+  bitfighter:
+    source: .
+    plugin: cmake
+    configflags:
+      - "-DLINUX_DATA_DIR='/snap/bitfighter/current/share'"
+    build-packages:
+      - build-essential
+      - libphysfs-dev
+      - libsdl2-dev
+      - libopenal-dev
+      - libvorbis-dev
+      - libmodplug-dev
+      - libspeex-dev
+      - libpng-dev
+    stage-packages:
+      - libglu1-mesa
+      - libphysfs1
+      - libsdl2-2.0-0
+      - libopenal1
+      - libvorbis0a
+      - libvorbisfile3
+      - libmodplug1
+      - libspeex1
+      - libpng16-16
+      - libgl1
+      - libglx0
+      - libmpg123-0
+    override-pull: |
+      snapcraftctl pull
+      sed -i 's_Icon=bitfighter_Icon=share/pixmaps/bitfighter.png_g' packaging/linux/bitfighter.desktop
+apps:
+  bitfighter:
+    command: bin/bitfighter
+    environment:
+      LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/mesa:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/mesa-gl:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/xorg:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio/
+      LIBGL_DRIVERS_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri 
+    desktop: share/applications/bitfighter.desktop
+    plugs:
+      - x11 # To create a window.
+      - opengl # To draw accelerated graphics.
+      - network # To play online.
+      - network-bind # To host a game on LAN.
+      - audio-record # To capture voice.
+      - audio-playback # To play sound effects.
+      - joystick # To allow gamepad usage.

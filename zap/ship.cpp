@@ -488,12 +488,20 @@ void Ship::processWeaponFire()
          if(getClientInfo())
             getClientInfo()->getStatistics()->countShot(curWeapon);
 
+         Point dir = getAimVector();
+
          if(isServer())  
          {
-            Point dir = getAimVector();
-
             // TODO: To fix skip fire effect on jittery server, need to replace the 0 with... something...
             GameWeapon::createWeaponProjectiles(curWeapon, dir, getActualPos(), getActualVel(), 0, CollisionRadius - 2, this);
+         }
+
+         // Railgun gives a little kickback
+         if(curWeapon == WeaponRailgun)
+         {
+            static const F32 RAILGUN_KICKBACK_IMPULSE = 400.0f;
+
+            mImpulseVector -= dir * RAILGUN_KICKBACK_IMPULSE;
          }
 
          mFireTimer += S32(WeaponInfo::getWeaponInfo(curWeapon).fireDelay);
@@ -1070,7 +1078,7 @@ void Ship::damageObject(DamageInfo *theInfo)
    bool hasArmor = hasModule(ModuleArmor);
 
    // Deal with grenades and other explody things, even if they cause no damage
-   if(theInfo->damageType == DamageTypeArea)
+   if(theInfo->damageType == DamageTypeArea || theInfo->damageType == DamageTypeVector)
    {
       static const F32 ARMOR_IMPULSE_ABSORBTION_FACTOR = 0.25f;
 
@@ -2175,7 +2183,6 @@ void Ship::renderLayer(S32 layerIndex)
    const bool engineeringTeleport = clientInfo ? clientInfo->isEngineeringTeleporter() : false;
    const bool showCoordinates     = clientGame->isShowingDebugShipCoords();
 
-   const Color &healthBarColor = clientGame->getGameType()->getTeamHealthBarColor(this);
    // Caclulate rotAmount to add the spinny effect you see when a ship spawns or comes through a teleport
    F32 warpInScale = (WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
 
@@ -2184,14 +2191,14 @@ void Ship::renderLayer(S32 layerIndex)
    const U32 gamesPlayed  = clientInfo ? clientInfo->getGamesPlayed() : 0;
 
    const Color *color = getGame()->getGameType()->getTeamColor(this);
-   const Color &hbc = getGame()->getGameType()->getTeamHealthBarColor(this);
+   const Color &healthBarColor = getGame()->getGameType()->getTeamHealthBarColor(this);
    F32 alpha = getShipVisibility(localShip);
 
    F32 angle = getRenderAngle();
    F32 deltaAngle = getAngleDiff(mLastProcessStateAngle, angle);     // Change in angle since we were last here
 
    renderShip(layerIndex, getRenderPos(), getActualPos(), vel, angle, deltaAngle,
-              mShapeType, color, hbc, alpha, clientGame->getCurrentTime(), shipName, warpInScale, 
+              mShapeType, color, healthBarColor, alpha, clientGame->getCurrentTime(), shipName, warpInScale,
               isLocalShip, isBusy, isAuthenticated, showCoordinates, mHealth, mRadius, getTeam(), 
               boostActive, shieldActive, repairActive, sensorActive, hasArmor, engineeringTeleport, killStreak, 
               gamesPlayed);
@@ -2706,7 +2713,7 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
 
 
 /**
- * @luafunc Ship::setLoadout(Weapon w1, Weapon w2, Weapon w3, Module m2, Module m3)
+ * @luafunc Ship::setLoadout(Weapon w1, Weapon w2, Weapon w3, Module m1, Module m2)
  * @brief Convenience alias for setLoadout(table)
  *
  * @param w1 The new \ref WeaponEnum for slot 1.

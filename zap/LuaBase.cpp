@@ -749,9 +749,14 @@ S32 returnBool(lua_State *L, bool boolean)
 
 
 // Returns a string to a calling Lua function
-S32 returnString(lua_State *L, const char *str)
+// Allows null-characters
+S32 returnString(lua_State *L, const char *str, size_t length)
 {
-   lua_pushstring(L, str);
+   if(length == 0)
+      lua_pushstring(L, str);
+   else
+      lua_pushlstring(L, str, length);
+
    return 1;
 }
 

@@ -11,9 +11,14 @@
 #include "Spawn.h"      // For AbstractSpawn def
 
 #include "Colors.h"
+#include "stringUtils.h"
 
 #include "gameObjectRender.h"
 
+#ifndef ZAP_DEDICATED
+#  include "ClientGame.h"
+#  include "UIEditorMenus.h"
+#endif
 
 namespace Zap
 {
@@ -291,14 +296,20 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
 
 TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 
-static const F32 SOCCER_BALL_ITEM_MASS = 4;
+// Statics
+const F32 SoccerBallItem::Radius = 30;
+const F32 SoccerBallItem::Mass = 4;
+
+#ifndef ZAP_DEDICATED
+   EditorAttributeMenuUI *SoccerBallItem::mAttributeMenuUI = NULL;
+#endif
 
 /**
  * @luafunc SoccerBallItem::SoccerBallItem()
  * @luafunc SoccerBallItem::SoccerBallItem(point)
  */
 // Combined Lua / C++ default constructor
-SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, (F32)SoccerBallItem::SOCCER_BALL_RADIUS, SOCCER_BALL_ITEM_MASS)
+SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, SoccerBallItem::Radius, SoccerBallItem::Mass)
 {
    mObjectTypeNumber = SoccerBallItemTypeNumber;
    mNetFlags.set(Ghostable);
@@ -310,6 +321,7 @@ SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, (F32)Soc
 
    mDragFactor = 0.0;      // No drag
    mLuaBall = false;
+   mSpawnLock = false;
 
    if(L)
    {
@@ -341,27 +353,19 @@ SoccerBallItem *SoccerBallItem::clone() const
 }
 
 
-bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
+bool SoccerBallItem::processArguments(S32 argc, const char **argv, Game *game)
 {
-   S32 argc = 0;
-   const char *argv[16];
-
-   for(S32 i = 0; i < argc2; i++)      // The idea here is to allow optional R3.5 for rotate at speed of 3.5
-   {
-      char firstChar = argv2[i][0];    // First character of arg
-
-      if((firstChar < 'a' || firstChar > 'z') && (firstChar < 'A' || firstChar > 'Z'))    // firstChar is not a letter
-      {
-         if(argc < 16)
-         {  
-            argv[argc] = argv2[i];
-            argc++;
-         }
-      }
-   }
-
    if(!Parent::processArguments(argc, argv, game))
       return false;
+
+   // Boolean to tie the ball to its FlagSpawn, should be 1 or 0
+   if(argc >= 3)
+   {
+      if(strcmp(argv[2], "SpawnLock") == 0)
+         mSpawnLock = true;
+      else
+         mSpawnLock = false;
+   }
 
    mInitialPos = getActualPos();
 
@@ -373,12 +377,57 @@ bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
 }
 
 
-// Yes, this method is superfluous, but makes it clear that it wasn't forgotten... always include toLevelCode() alongside processArguments()!
 string SoccerBallItem::toLevelCode() const
 {
-   return Parent::toLevelCode();
+   string line = Parent::toLevelCode();
+   if(mSpawnLock)
+      line += " SpawnLock";
+
+   return line;
 }
 
+
+
+#ifndef ZAP_DEDICATED
+EditorAttributeMenuUI *SoccerBallItem::getAttributeMenu()
+{
+   // Lazily initialize
+   if(!mAttributeMenuUI)
+   {
+      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
+
+      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
+
+      mAttributeMenuUI->addMenuItem(new YesNoMenuItem("SpawnLock:", true, "Lock to initial spawn point"));
+
+      // Add our standard save and exit option to the menu
+      mAttributeMenuUI->addSaveAndQuitMenuItem();
+   }
+
+   return mAttributeMenuUI;
+}
+
+
+// Get the menu looking like what we want
+void SoccerBallItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->getMenuItem(0)->setIntValue(mSpawnLock ? 1 : 0);
+}
+
+
+// Retrieve the values we need from the menu
+void SoccerBallItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   mSpawnLock = attributeMenu->getMenuItem(0)->getIntValue();  // Returns 0 or 1
+}
+
+
+// Render some attributes when item is selected but not being edited
+void SoccerBallItem::fillAttributesVectors(Vector<string> &keys, Vector<string> &values)
+{
+   keys.push_back("SpawnLock");    values.push_back(mSpawnLock ? "Yes" : "No");
+}
+#endif
 
 void SoccerBallItem::onAddedToGame(Game *game)
 {
@@ -522,12 +571,15 @@ void SoccerBallItem::sendHome()
    TNLAssert(!isGhost(), "Should only run on server!");
 
    // In soccer game, we use flagSpawn points to designate where the soccer ball should spawn.
-   // We'll simply redefine "initial pos" as a random selection of the flag spawn points
+   // If this ball is not locked to it's initial spawn point we'll simply redefine "initial pos"
+   // as a random selection of the flag spawn points
+   if(!mSpawnLock)
+   {
+      Vector<AbstractSpawn *> spawnPoints = getGame()->getGameType()->getSpawnPoints(FlagSpawnTypeNumber);
 
-   Vector<AbstractSpawn *> spawnPoints = getGame()->getGameType()->getSpawnPoints(FlagSpawnTypeNumber);
-
-   S32 spawnIndex = TNL::Random::readI() % spawnPoints.size();
-   mInitialPos = spawnPoints[spawnIndex]->getPos();
+      S32 spawnIndex = TNL::Random::readI() % spawnPoints.size();
+      mInitialPos = spawnPoints[spawnIndex]->getPos();
+   }
 
    setPosVelAng(mInitialPos, Point(0,0), 0);
 

@@ -46,4 +46,4 @@ endif()
 
 # Handle the QUIETLY and REQUIRED arguments and set XXX_FOUND to TRUE if all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(CLIPPER DEFAULT_MSG CLIPPER_LIBRARIES CLIPPER_INCLUDE_DIR)
+find_package_handle_standard_args(Clipper DEFAULT_MSG CLIPPER_LIBRARIES CLIPPER_INCLUDE_DIR)

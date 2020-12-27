@@ -156,7 +156,7 @@ public:
 
    /////
    // Time related -- these are all passthroughs to mGameTimer
-   void setGameTime(F32 timeInSeconds);
+   void setGameTime(F32 timeInMs);
    void extendGameTime(S32 timeInMs);
 
    U32 getTotalGameTime() const;            // In seconds
@@ -262,8 +262,8 @@ public:
 
    // Static vectors used for constructing update RPCs
    static Vector<RangedU32<0, MaxPing> > mPingTimes;
-   static Vector<SignedInt<24> > mScores;
-   static Vector<SignedFloat<8> > mRatings;
+   static Vector<Int<10> > mKills;
+   static Vector<Int<10> > mDeaths;
 
    explicit GameType(S32 winningScore = DefaultWinningScore);    // Constructor
    virtual ~GameType();                                 // Destructor
@@ -323,7 +323,7 @@ public:
 
    void gameOverManGameOver();
    VersionedGameStats getGameStats();
-   void getSortedPlayerScores(S32 teamIndex, Vector<ClientInfo *> &playerScores) const;
+   void getSortedPlayersByScore(S32 teamIndex, Vector<ClientInfo *> &playerInfos) const;
    void saveGameStats();                     // Transmit statistics to the master server
 
    void achievementAchieved(U8 achievement, const StringTableEntry &playerName);
@@ -429,7 +429,8 @@ public:
    TNL_DECLARE_RPC(s2cSetPlayerScore, (U16 index, S32 score));
 
    TNL_DECLARE_RPC(c2sRequestScoreboardUpdates, (bool updates));
-   TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes, Vector<SignedFloat<8> > ratings));
+   TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes,
+         Vector<Int<10> > kills, Vector<Int<10> > deaths) );
 
    void updateClientScoreboard(GameConnection *gc);
 
@@ -452,14 +453,12 @@ public:
    // In-game chat message:
    void sendChat(const StringTableEntry &senderName, ClientInfo *senderClientInfo, const StringPtr &message, bool global, S32 teamIndex);
    void sendPrivateChat(const StringTableEntry &senderName, const StringTableEntry &receiverName, const StringPtr &message);
-   void sendAnnouncementFromController(const StringPtr &message);
 
    TNL_DECLARE_RPC(c2sAddTime, (U32 time));                                    // Admin is adding time to the game
    TNL_DECLARE_RPC(c2sChangeTeams, (S32 team));                                // Player wants to change teams
    void processClientRequestForChangingGameTime(S32 time, bool isUnlimited1, bool changeTimeIfAlreadyUnlimited, bool addTime);
 
-   TNL_DECLARE_RPC(c2sSendAnnouncement,(string message));
-   TNL_DECLARE_RPC(s2cDisplayAnnouncement,(string message));
+   TNL_DECLARE_RPC(c2sSendAnnouncement, (string message));
 
    TNL_DECLARE_RPC(c2sSendChatPM, (StringTableEntry toName, StringPtr message));                        // using /pm command
    TNL_DECLARE_RPC(c2sSendChat, (bool global, StringPtr message));             // In-game chat
@@ -510,6 +509,8 @@ public:
    void processServerCommand(ClientInfo *clientInfo, const char *cmd, Vector<StringPtr> args);
    bool canClientAddBots(GameConnection *source, bool checkDefaultBot = true);
    bool addBotFromClient(Vector<StringTableEntry> args);
+
+   void displayAnnouncement(const string &message) const;
 
    map <pair<U16,U16>, Vector<Point> > cachedBotFlightPlans;  // cache of zone-to-zone flight plans, shared for all bots
 };

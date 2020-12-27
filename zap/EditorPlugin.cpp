@@ -381,7 +381,7 @@ S32 EditorPlugin::lua_getAllObjects(lua_State *L)
  * @brief
  * Display a big message on-screen.
  *
- * @desc
+ * @descr
  * Display a message to the user like the message displayed when saving a
  * file. Please be courteous and give the user some feedback about whether or
  * not your plugin has run successfully.
@@ -420,7 +420,7 @@ S32 EditorPlugin::lua_showMessage(lua_State *L)
  * @brief
  * Center editor window on specified point.
  *
- * @desc
+ * @descr
  * Will move the editor window to be centered on the specified point.  Will not change the zoom level.
  *
  * @param pos Where the window should be centered.
@@ -447,7 +447,7 @@ S32 EditorPlugin::lua_setDisplayCenter(lua_State *L)
  * @brief
  * Zoom the display to the specified zoom level.
  *
- * @desc
+ * @descr
  * Zooms the display to the specified level.  Will not change the center point.  
  * Editor will override specified zoom if it exceeds internal limits, specified by
  * internal constants MIN_SCALE and MAX_SCALE, which are currently 0.02 and 10 respectively.
@@ -480,7 +480,7 @@ S32 EditorPlugin::lua_setDisplayZoom(lua_State *L)
  * @brief
  * Set the display to the specified bounding box.
  *
- * @desc
+ * @descr
  * Sets the display window to the specified bounding box.  If the bounding box is a 
  * different aspect ratio than the screen, will center the bounding box on the screen.
  * It doesn't matter which points are in which corners, 
@@ -546,7 +546,7 @@ S32 EditorPlugin::lua_getDisplayCenter(lua_State *L)
  * @brief
  * Gets the current zoom level of the display.
  *
- * @desc
+ * @descr
  * Zoom level is a number between MIN_SCALE and MAX_SCALE, which are currently 0.02 and 10 respectively.
  * Zoom levels are not linear; that is, the difference between 1 and 2 is different than between 2 and 3.
  * However, the difference between 1 and 2 is the same as between 2 and 4.

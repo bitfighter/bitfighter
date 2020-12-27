@@ -31,6 +31,7 @@
 
 #include "GameRecorderPlayback.h"
 #include "UIGame.h"
+#include "AppIntegrator.h"
 
 using namespace TNL;
 
@@ -171,6 +172,10 @@ void ClientGame::closeConnectionToGameServer(const char *reason)
       getConnectionToServer()->disconnect(NetConnection::ReasonSelfDisconnect, reason);
 
    getUIManager()->disableLevelLoadDisplay(false);
+
+   // Clear client-side spawn timer if it was set, which can happen if a player
+   // is zapped when attempting to leave the game
+   mClientInfo->setSpawnDelayed(false);
 
    onGameReallyAndTrulyOver();  
 }
@@ -571,6 +576,31 @@ bool ClientGame::canRateLevel() const
    if(!getClientInfo()->isAuthenticated())
    {
       displayErrorMessage("!!! Only registered players can rate levels (register in forums)");
+      return false;
+   }
+
+   return true;
+}
+
+
+// We get here when the player toggles a rating or uses the /rating command
+bool ClientGame::canCommentLevel() const
+{
+   if(!isLevelInDatabase())
+   {
+      displayErrorMessage("!!! Level is not in database, so no comment can be posted");
+      return false;
+   }
+
+   if(!isConnectedToMaster())
+   {
+      displayErrorMessage("!!! You can't comment on a level until we've connected to the master server");
+      return false;
+   }
+
+   if(!getClientInfo()->isAuthenticated())
+   {
+      displayErrorMessage("!!! Only registered players can post comments on levels (register in forums)");
       return false;
    }
 
@@ -1007,6 +1037,11 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
    getUIManager()->onPlayerJoined(clientInfo->getName().getString(), isLocalClient, playAlert, showMessage);
 
    mGameType->updateLeadingPlayerAndScore();
+
+   // Notify integrated apps of new level
+   string details = mGameType->getLevelName() == "" ? "Unnamed Level" : mGameType->getLevelName();
+   string state = "In " + mConnectionToServer->getServerName();
+   AppIntegrationController::updateState(state, details);
 }
 
 

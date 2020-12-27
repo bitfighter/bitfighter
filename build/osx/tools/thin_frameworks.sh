@@ -27,9 +27,16 @@ do
   echo "--> $fw_name"
   
   pushd "$fw_dir/Versions/A" 1>/dev/null
-  cp "$fw_name" "$fw_name".orig
-  "$lipo" "$fw_name".orig -extract ${arch} -output "$fw_name"
-  rm "$fw_name".orig
+
+  # Test if universal binary and need extraction
+  isfat="$(file "$fw_name" | grep -i universal)"
+  if [ -n "$isfat" ] 
+  then
+    cp "$fw_name" "$fw_name".orig
+    "$lipo" "$fw_name".orig -extract ${arch} -output "$fw_name"
+    rm "$fw_name".orig
+  fi
+  
   popd 1>/dev/null
 done
 

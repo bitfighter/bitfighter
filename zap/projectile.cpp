@@ -19,12 +19,13 @@
 #include "MathUtils.h"
 
 
-TNL_IMPLEMENT_NETOBJECT(Projectile);
-
 namespace Zap 
 {
 
 using namespace LuaArgs;
+
+
+TNL_IMPLEMENT_NETOBJECT(Projectile);
 
 // Constructor -- used when weapon is fired  
 Projectile::Projectile(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter)
@@ -50,7 +51,7 @@ Projectile::Projectile(lua_State *L)
          WeaponType newType = getWeaponType(L, 1);
 
          // Only allow projectile types that use this class
-         if(WeaponInfo::getWeaponInfo(newType).projectileType != NotAProjectile)
+         if(WeaponInfo::getWeaponInfo(newType).projectileStyle != ProjectileStyleNotAProjectile)
             type = newType;
       }
    }
@@ -75,6 +76,7 @@ void Projectile::initialize(WeaponType type, const Point &pos, const Point &vel,
    mBounced = false;
    mLiveTimeIncreases = 0;
    mShooter = shooter;
+   mLastHitObject = NULL;
 
    setOwner(NULL);
 
@@ -91,7 +93,13 @@ void Projectile::initialize(WeaponType type, const Point &pos, const Point &vel,
       mKillString = shooter->getKillString();
    }
 
-   mType = WeaponInfo::getWeaponInfo(type).projectileType;
+   // Set default projectile style
+   mStyle = WeaponInfo::getWeaponInfo(type).projectileStyle;
+
+   // If a turret, keep a coherent style
+   if(shooter && shooter->getObjectTypeNumber() == TurretTypeNumber)
+      mStyle = ProjectileStyleTurret;  // Forces Triple to use Turret style
+
    mWeaponType = type;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -115,7 +123,7 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 
    if(stream->writeFlag(updateMask & InitialMask))
    {
-      stream->writeEnum(mType, ProjectileTypeCount);
+      stream->writeEnum(mStyle, ProjectileStyleCount);
 
       S32 index = -1;
       if(mShooter.isValid())
@@ -148,7 +156,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())         // Initial chunk of data, sent once for this object
    {
 
-      mType = (ProjectileType) stream->readEnum(ProjectileTypeCount);
+      mStyle = (ProjectileStyle) stream->readEnum(ProjectileStyleCount);
 
       TNLAssert(connection, "Defunct connection to server in projectile.cpp!");
 
@@ -157,7 +165,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       setExtent(Rect(getPos(), 0));
       initial = true;
-      getGame()->playSoundEffect(GameWeapon::projectileInfo[mType].projectileSound, getPos(), mVelocity);
+      getGame()->playSoundEffect(GameWeapon::projectileInfo[mStyle].projectileSound, getPos(), mVelocity);
    }
    bool preCollided = mCollided;
    mCollided = stream->readFlag();
@@ -181,18 +189,30 @@ void Projectile::handleCollision(BfObject *hitObject, Point collisionPoint)
    mCollided = true;
 
    if(isShipType(hitObject->getObjectTypeNumber()))
-      hitShip = static_cast<Ship *>(hitObject);
+      hitShip = true;
 
    if(!isGhost())    // If we're on the server, that is
    {
+      DamageType damageType = DamageTypePoint;
+      Point impulseVector = mVelocity;
+
+      if(mWeaponType == WeaponRailgun)
+      {
+         static const F32 RAILGUN_IMPULSE_MAGNITUDE = 700.0f;
+         damageType = DamageTypeVector;
+         if(hitShip)
+            impulseVector.normalize(RAILGUN_IMPULSE_MAGNITUDE);
+      }
+
       DamageInfo damageInfo;
 
       damageInfo.collisionPoint       = collisionPoint;
       damageInfo.damageAmount         = WeaponInfo::getWeaponInfo(mWeaponType).damageAmount;
-      damageInfo.damageType           = DamageTypePoint;
-      damageInfo.damagingObject       = this;
-      damageInfo.impulseVector        = mVelocity;
+      damageInfo.damageType           = damageType;
+      damageInfo.impulseVector        = impulseVector;
       damageInfo.damageSelfMultiplier = WeaponInfo::getWeaponInfo(mWeaponType).damageSelfMultiplier;
+      damageInfo.damagingObject       = this;
+
 
       hitObject->damageObject(&damageInfo);
 
@@ -206,7 +226,13 @@ void Projectile::handleCollision(BfObject *hitObject, Point collisionPoint)
    }
 
    // Client and server:
-   mTimeRemaining = 0;
+
+   // Railgun goes right through ships and keeps going
+   if((mWeaponType == WeaponRailgun) && hitShip)
+      ; // Keep time remaining
+   else
+      mTimeRemaining = 0;
+
    explode(hitObject, collisionPoint);
 }
 
@@ -219,7 +245,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
 {
    U32 deltaT = mCurrentMove.time;
 
-   if(!mCollided && mAlive)
+   if(mAlive)
    {
       U32 objAge = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
       F32 timeLeft = (F32)deltaT;
@@ -277,14 +303,26 @@ void Projectile::idle(BfObject::IdleCallPath path)
          for(S32 i = 0; i < disabledList.size(); i++)
             disabledList[i]->enableCollision();
 
+         // This logic lets the Railgun go through ships. It assumes that the
+         // object search will return the same order of objects during this time frame
+         //
+         // If we already hit this object, don't do it again
+         if(hitObject == mLastHitObject)
+            hitObject = NULL;
+         // Otherwise save the one we found for next iteration
+         else
+            mLastHitObject = hitObject;
+
+
          if(hitObject)  // Hit something...  should we bounce?
          {
             bool bounce = false;
+            bool hitAShip = isShipType(hitObject->getObjectTypeNumber());
 
             // Bounce off a wall and off a ship that has its shields up
-            if(mType == ProjectileBounce && isWallType(hitObject->getObjectTypeNumber()))
+            if(mStyle == ProjectileStyleBouncer && isWallType(hitObject->getObjectTypeNumber()))
                bounce = true;
-            else if(isShipType(hitObject->getObjectTypeNumber()))
+            else if(hitAShip)
             {
                Ship *ship = static_cast<Ship *>(hitObject);
                if(ship->isModulePrimaryActive(ModuleShield))
@@ -326,7 +364,6 @@ void Projectile::idle(BfObject::IdleCallPath path)
 
                   startPos = getPos();
 
-                  setMaskBits(PositionMask);  // Bouncing off a moving objects can easily get desync
                   float1 = startPos.distanceTo(obj->getRenderPos());
                   if(float1 < obj->getRadius())
                   {
@@ -334,6 +371,9 @@ void Projectile::idle(BfObject::IdleCallPath path)
                      setVert(startPos * float1 + obj->getRenderPos() * (1 - float1), 0);  // Fix bouncy stuck inside shielded ship
                   }
                }
+
+               // Bouncing off anything can easily get desync'd
+               setMaskBits(PositionMask);
 
                if(isGhost())
                   getGame()->playSoundEffect(SFXBounceShield, collisionPoint, surfNormal * surfNormal.dot(mVelocity) * 2);
@@ -344,6 +384,11 @@ void Projectile::idle(BfObject::IdleCallPath path)
                startPos = getPos();
                collisionPoint = startPos + (endPos - startPos) * collisionTime;
                handleCollision(hitObject, collisionPoint);     // What we hit, where we hit it
+
+               // Advance the railgun through ships
+               if((mWeaponType == WeaponRailgun) && hitAShip)
+                  setPos(endPos);
+
                timeLeft = 0;
             }
          }
@@ -355,7 +400,22 @@ void Projectile::idle(BfObject::IdleCallPath path)
          }
       }
    }
-         
+
+
+#ifndef ZAP_DEDICATED
+   // Draw trail for Railgun
+   if(mStyle == ProjectileStyleRailgun)
+   {
+      mTrail.idle(deltaT);
+
+      // Start a little behind the projectile
+      Point offsetPos = mVelocity;
+      offsetPos.normalize(10.0);
+      Point updatePos = getPos() - offsetPos;
+
+      mTrail.update(updatePos, UI::RailgunProfile);
+   }
+#endif
 
    // Kill old projectiles
    if(mAlive && path == BfObject::ServerIdleMainLoop)
@@ -393,7 +453,7 @@ void Projectile::explode(BfObject *hitObject, Point pos)
    if(isGhost())
    {
       TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-      static_cast<ClientGame *>(getGame())->emitExplosion(pos, 0.3f, GameWeapon::projectileInfo[mType].sparkColors, NumSparkColors);
+      static_cast<ClientGame *>(getGame())->emitExplosion(pos, 0.3f, GameWeapon::projectileInfo[mStyle].sparkColors, NumSparkColors);
 
       SFXProfiles sound;
 
@@ -406,9 +466,15 @@ void Projectile::explode(BfObject *hitObject, Point pos)
       if(ship && ship->isModulePrimaryActive(ModuleShield))
          sound = SFXBounceShield;
       else if((hitShip || ship))                           // We hit a ship with shields down
-         sound = SFXShipHit;
+      {
+         // Railgun goes through ships, give it a different sound
+         if(mStyle == ProjectileStyleRailgun)  // mWeaponType doesn't work here for some reason (only server side?)
+            sound = GameWeapon::projectileInfo[mStyle].impactSound;
+         else
+            sound = SFXShipHit;
+      }
       else                                                   // We hit something else
-         sound = GameWeapon::projectileInfo[mType].impactSound;
+         sound = GameWeapon::projectileInfo[mStyle].impactSound;
 
       getGame()->playSoundEffect(sound, pos, mVelocity);   // Play the sound
    }
@@ -435,13 +501,20 @@ bool Projectile::canAddToEditor() { return false; }      // No projectiles in th
 void Projectile::renderItem(const Point &pos)
 {
    if(shouldRender())
-      renderProjectile(pos, mType, getGame()->getCurrentTime() - getCreationTime());
+   {
+      U32 time = getGame()->getCurrentTime() - getCreationTime();
+
+      if(mStyle == ProjectileStyleRailgun)
+         renderProjectileRailgun(pos, mVelocity, time);
+      else
+         renderProjectile(pos, mStyle, time);
+   }
 }
 
 
 bool Projectile::shouldRender() const
 {
-   return mAlive && !mCollided;
+   return mAlive;
 }
 
 
@@ -548,6 +621,7 @@ void Burst::initialize(const Point &pos, const Point &vel, BfObject *shooter)
 {
    mObjectTypeNumber = BurstTypeNumber;
    mWeaponType = WeaponBurst;
+   mStyle = BurstStyleNormal;
 
    mNetFlags.set(Ghostable);
 
@@ -570,6 +644,10 @@ void Burst::initialize(const Point &pos, const Point &vel, BfObject *shooter)
       setTeam(shooter->getTeam());
       mShooter = shooter;
       mKillString = shooter->getKillString();
+
+      // Change style of Burst if a Turret fired it
+      if(mShooter->getObjectTypeNumber() == TurretTypeNumber)
+         mStyle = BurstStyleTurret;
    }
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -638,7 +716,9 @@ U32 Burst::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
 
    stream->writeFlag(mExploded);
-   stream->writeFlag((updateMask & InitialMask) && (getGame()->getCurrentTime() - getCreationTime() < 500));
+   if(stream->writeFlag((updateMask & InitialMask) && (getGame()->getCurrentTime() - getCreationTime() < 500)))
+      stream->writeEnum(mStyle, BurstStyleCount);
+
    return ret;
 }
 
@@ -652,8 +732,12 @@ void Burst::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())
       doExplosion(getActualPos());
 
-   if(stream->readFlag())
+   if(stream->readFlag())  // InitialMask
+   {
+      mStyle = (BurstStyle) stream->readEnum(BurstStyleCount);
+
       getGame()->playSoundEffect(SFXBurst, getActualPos(), getActualVel());
+   }
 }
 
 
@@ -754,7 +838,7 @@ void Burst::renderItem(const Point &pos)
 
    F32 initTTL = (F32) WeaponInfo::getWeaponInfo(WeaponBurst).projLiveTime;
 
-   renderGrenade( pos, (initTTL - (F32) (getGame()->getCurrentTime() - getCreationTime())) / initTTL);
+   renderGrenade( pos, mStyle, (initTTL - (F32) (getGame()->getCurrentTime() - getCreationTime())) / initTTL);
 }
 
 
@@ -1364,11 +1448,22 @@ REGISTER_LUA_SUBCLASS(SpyBug, Burst);
 
 TNL_IMPLEMENT_NETOBJECT(Seeker);
 
-// Constructor
-const F32 Seeker_Radius = 4;
-const F32 Seeker_Mass = 1;
+// Statics
+const F32 Seeker::Radius = 2;
+const F32 Seeker::Mass = 0.2;
 
-Seeker::Seeker(const Point &pos, const Point &vel, F32 angle, BfObject *shooter) : MoveItem(pos, true, Seeker_Radius, Seeker_Mass)
+const U32 Seeker::SpeedIncreasePerSecond = 300;
+const U32 Seeker::TargetAcquisitionRadius = 400;
+const F32 Seeker::MaximumAngleChangePerSecond = FloatTau / 2;
+const F32 Seeker::TargetSearchAngle = FloatTau * .6f;  // Anglular spread in front of ship to search for targets
+
+const S32 Seeker::ReassessTargetTime = 100;  // Milliseconds to reassess target
+
+const S32 Seeker::InnerBlastRadius = 80;
+const S32 Seeker::OuterBlastRadius = 120;
+
+// Constructor
+Seeker::Seeker(const Point &pos, const Point &vel, F32 angle, BfObject *shooter) : MoveItem(pos, true, Seeker::Radius, Seeker::Mass)
 {
    initialize(pos, vel, angle, shooter);
 }
@@ -1396,12 +1491,12 @@ void Seeker::initialize(const Point &pos, const Point &vel, F32 angle, BfObject 
 
    setPosVelAng(pos, vel, angle);
    mWeaponType = WeaponSeeker;
+   mStyle = SeekerStyleNormal;
 
    updateExtentInDatabase();
 
    mTimeRemaining = WeaponInfo::getWeaponInfo(WeaponSeeker).projLiveTime;
    mExploded = false;
-   mBounced = false;
 
    if(!shooter)
    {
@@ -1414,6 +1509,9 @@ void Seeker::initialize(const Point &pos, const Point &vel, F32 angle, BfObject 
       setTeam(shooter->getTeam());
       mShooter = shooter;
       mKillString = shooter->getKillString();
+
+      if(shooter->getObjectTypeNumber() == TurretTypeNumber)
+         mStyle = SeekerStyleTurret;  // Forces Seeker to use Turret style
    }
       
    mAcquiredTarget = NULL;
@@ -1433,16 +1531,6 @@ static F32 normalizeAngle(F32 angle)
    return newAngle;
 }
 
-
-U32 Seeker::SpeedIncreasePerSecond = 300;
-U32 Seeker::TargetAcquisitionRadius = 400;
-F32 Seeker::MaximumAngleChangePerSecond = FloatTau / 2;
-F32 Seeker::TargetSearchAngle = FloatTau * .6f;     // Anglular spread in front of ship to search for targets
-
-const S32 Seeker::ReassessTargetTime = 100;  // Milliseconds to reassess target
-
-const S32 Seeker::InnerBlastRadius = 80;
-const S32 Seeker::OuterBlastRadius = 120;
 
 // Runs on client and server
 void Seeker::idle(IdleCallPath path)
@@ -1665,7 +1753,10 @@ U32 Seeker::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *s
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
 
    stream->writeFlag(mExploded);
-   stream->writeFlag((updateMask & InitialMask) && (getGame()->getCurrentTime() - getCreationTime() < 500));
+
+   if(stream->writeFlag((updateMask & InitialMask) && (getGame()->getCurrentTime() - getCreationTime() < 500)))
+      stream->writeEnum(mStyle, SeekerStyleCount);
+
    if(stream->writeFlag(updateMask & PositionMask))
       stream->writeSignedFloat(getActualAngle() * FloatInversePi, 8);  // 8 bits good enough?
    return ret;
@@ -1689,7 +1780,10 @@ void Seeker::unpackUpdate(GhostConnection *connection, BitStream *stream)
       enableCollision();
 
    if(stream->readFlag())     // InitialMask --> seeker was just created
+   {
+      mStyle = (SeekerStyle) stream->readEnum(SeekerStyleCount);
       getGame()->playSoundEffect(SFXSeekerFire, getPos(), getVel());
+   }
 
    if(stream->readFlag())     // PositionMask --> for angle changes since they are not handled in MoveItem
       setActualAngle(stream->readSignedFloat(8) * FloatPi);
@@ -1771,7 +1865,7 @@ bool Seeker::collide(BfObject *otherObj)
    }
 
    // Don't collide with shooter within first 500 ms of shooting
-   if(!mBounced && mShooter.isValid() && mShooter == otherObj && getGame()->getCurrentTime() - getCreationTime() < 500)
+   if(mShooter.isValid() && mShooter == otherObj && getGame()->getCurrentTime() - getCreationTime() < 500)
       return false;
 
    return isWeaponCollideableType(otherObj->getObjectTypeNumber());     // Includes bullets... well, includes most everything
@@ -1781,38 +1875,9 @@ bool Seeker::collide(BfObject *otherObj)
 // Returns true if collision was handled, false if not
 bool Seeker::collided(BfObject *otherObj, U32 stateIndex)
 {
-   static const F32 MAX_VEL_TO_BOUNCE = 500;    // Slower than this, and seekers bounce off one another.  Faster, and they explode.
-
-   // Seeker hits seeker
-   if(otherObj->getObjectTypeNumber() == SeekerTypeNumber)  // Do they bounce or explode?
-   {
-      Seeker *other = static_cast<Seeker *>(otherObj);
-      if(!isGhost() && stateIndex == ActualState && getVel().distSquared(other->getVel()) > sq(MAX_VEL_TO_BOUNCE))
-      {
-         // They explode
-         handleCollision(other, getActualPos());
-         other->handleCollision(this, other->getActualPos());
-         return true;
-      }
+   // Seeker hits seeker and transfers momentum only (no explosion)
+   if(otherObj->getObjectTypeNumber() == SeekerTypeNumber)
       return false;
-   }
-
-   // Seeker hits ship
-   if(isShipType(otherObj->getObjectTypeNumber()))
-   {
-      TNLAssert(dynamic_cast<Ship *>(otherObj), "Not a ship");
-      Ship *ship = static_cast<Ship *>(otherObj);
-      if(ship->isModulePrimaryActive(ModuleShield))
-      {
-         // Seekers bounce off shields
-         Point p = getPos(stateIndex) - ship->getPos(stateIndex);
-         p.normalize(getVel(stateIndex).len());
-         setVel(stateIndex, p);
-         setAngle(stateIndex, p.ATAN2());
-         mBounced = true;
-         return true;
-      }
-   }
 
    if(stateIndex == ActualState)
    {
@@ -1837,7 +1902,7 @@ void Seeker::renderItem(const Point &pos)
       return;
 
    S32 startLiveTime = WeaponInfo::getWeaponInfo(mWeaponType).projLiveTime;
-   renderSeeker(pos, getActualAngle(), getActualVel().len(), startLiveTime - (getGame()->getCurrentTime() - getCreationTime()));
+   renderSeeker(pos, mStyle, getActualAngle(), getActualVel().len(), startLiveTime - (getGame()->getCurrentTime() - getCreationTime()));
 #endif
 }
 

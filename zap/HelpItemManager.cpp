@@ -382,7 +382,8 @@ static S32 doRenderMessages(const ClientGame *game, const InputCodeManager *inpu
 // static method
 bool HelpItemManager::shouldRender(const ClientGame *game)
 {
-   return !game->isSpawnDelayed();
+   return !game->isSpawnDelayed() &&
+         !game->getUIManager()->getUI<GameUserInterface>()->shouldRenderLevelInfo();
 }
 
 

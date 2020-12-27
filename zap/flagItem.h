@@ -25,10 +25,15 @@ class FlagItem : public MountableItem
 private:
    Point mInitialPos;                  // Where flag was "born"
    bool mIsAtHome;
+   bool mSpawnLock;
 
    SafePtr<GoalZone> mZone;            // GoalZone currently holding the flag, NULL if not in a zone
 
    void removeOccupiedSpawnPoints(Vector<AbstractSpawn *> &spawnPoints);
+
+#ifndef ZAP_DEDICATED
+   static EditorAttributeMenuUI *mAttributeMenuUI; // Menu for attribute editing
+#endif
 
 
 protected:
@@ -98,6 +103,13 @@ public:
    bool canBeHostile();
    bool canBeNeutral();
 
+#ifndef ZAP_DEDICATED
+   // Editor attributes functions
+   EditorAttributeMenuUI *getAttributeMenu();
+   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);
+   void fillAttributesVectors(Vector<string> &keys, Vector<string> &values);
+#endif
 
    ///// Lua Interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(FlagItem);

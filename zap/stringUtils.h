@@ -71,6 +71,10 @@ string ucase(string strToConvert);
 
 bool isInteger(const char *str);
 
+bool isAlpha(char c);
+bool isDigit(char c);
+bool isAlNum(char c);
+
 string sanitizeForJson(const char *value);
 string sanitizeForSql(const string &value);
 

@@ -84,8 +84,6 @@ IniSettings::IniSettings()
    voiceChatVolLevel = 1.0;           // INcoming voice chat volume (range as above)
    alertsVolLevel    = 1.0;           // Audio alerts volume (when in dedicated server mode only, range as above)
 
-   sfxSet = sfxModernSet;             // Start off with our modern sounds
-
    diagnosticKeyDumpMode = false;     // True if want to dump keystrokes to the screen
 
    allowDataConnections = false;      // Disabled unless explicitly enabled for security reasons -- most users won't need this
@@ -107,6 +105,7 @@ IniSettings::IniSettings()
    minBalancedPlayers = 6;
    enableServerVoiceChat = true;
    allowTeamChanging = true;
+   kickIdlePlayers = true;
    serverPassword = "";               // Passwords empty by default
    ownerPassword = "";
    adminPassword = "";
@@ -181,8 +180,6 @@ IniSettings::IniSettings()
    logStats = false;          // Log statistics into local sqlite database
 
    version = BUILD_VERSION;   // Default to current version to avoid triggering upgrade checks on fresh install
-
-   oldGoalFlash = true;
 }
 
 
@@ -538,7 +535,6 @@ static void loadTestSettings(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->neverConnectDirect = ini->GetValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
    iniSettings->wallFillColor.set(ini->GetValue("Testing", "WallFillColor", iniSettings->wallFillColor.toRGBString()));
    iniSettings->wallOutlineColor.set(ini->GetValue("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString()));
-   iniSettings->oldGoalFlash = ini->GetValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
    iniSettings->clientPortNumber = (U16) ini->GetValueI("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
    iniSettings->disableScreenSaver = ini->GetValueYN("Testing", "DisableScreenSaver", iniSettings->disableScreenSaver);
 }
@@ -598,13 +594,6 @@ static void loadEffectsSettings(CIniFile *ini, IniSettings *iniSettings)
 }
 
 
-// Convert a string value to our sfxSets enum
-static sfxSets stringToSFXSet(string sfxSet)
-{
-   return (lcase(sfxSet) == "classic") ? sfxClassicSet : sfxModernSet;
-}
-
-
 static F32 checkVol(F32 vol)
 {
    return max(min(vol, 1.f), 0.f);    // Restrict volume to be between 0 and 1
@@ -618,9 +607,6 @@ static void loadSoundSettings(CIniFile *ini, GameSettings *settings, IniSettings
    iniSettings->sfxVolLevel       = (F32) ini->GetValueI("Sounds", "EffectsVolume",   (S32) (iniSettings->sfxVolLevel        * 10)) / 10.0f;
    iniSettings->setMusicVolLevel(   (F32) ini->GetValueI("Sounds", "MusicVolume",     (S32) (iniSettings->getMusicVolLevel() * 10)) / 10.0f);
    iniSettings->voiceChatVolLevel = (F32) ini->GetValueI("Sounds", "VoiceChatVolume", (S32) (iniSettings->voiceChatVolLevel  * 10)) / 10.0f;
-
-   string sfxSet = ini->GetValue("Sounds", "SFXSet", "Modern");
-   iniSettings->sfxSet = stringToSFXSet(sfxSet);
 
    // Bounds checking
    iniSettings->sfxVolLevel       = checkVol(iniSettings->sfxVolLevel);
@@ -648,10 +634,12 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->playWithBots           = ini->GetValueYN(section, "AddRobots", iniSettings->playWithBots);
    iniSettings->minBalancedPlayers     = ini->GetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
    iniSettings->enableServerVoiceChat  = ini->GetValueYN (section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);
+   iniSettings->kickIdlePlayers        = ini->GetValueYN (section, "KickIdlePlayers", iniSettings->kickIdlePlayers);
 
    iniSettings->alertsVolLevel       = (F32) ini->GetValueI(section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10)) / 10.0f;
    iniSettings->allowGetMap          = ini->GetValueYN (section, "AllowGetMap", iniSettings->allowGetMap);
    iniSettings->allowDataConnections = ini->GetValueYN (section, "AllowDataConnections", iniSettings->allowDataConnections);
+
 
    S32 fps = ini->GetValueI(section, "MaxFPS", iniSettings->maxDedicatedFPS);
    if(fps >= 1) 
@@ -1633,8 +1621,6 @@ static void writeSounds(CIniFile *ini, IniSettings *iniSettings)
    ini->SetValueI("Sounds", "EffectsVolume", (S32) (iniSettings->sfxVolLevel * 10));
    ini->SetValueI("Sounds", "MusicVolume",   (S32) (iniSettings->getRawMusicVolLevel() * 10));
    ini->SetValueI("Sounds", "VoiceChatVolume",   (S32) (iniSettings->voiceChatVolLevel * 10));
-
-   ini->SetValue("Sounds", "SFXSet", iniSettings->sfxSet == sfxClassicSet ? "Classic" : "Modern");
 }
 
 
@@ -1785,6 +1771,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
       addComment(" AddRobots - Add robot players to this server.");
       addComment(" MinBalancedPlayers - The minimum number of players ensured in each map.  Bots will be added up to this number.");
       addComment(" EnableServerVoiceChat - If false, prevents any voice chat in a server.");
+      addComment(" KickIdlePlayers - If true, the server will kick players that are considered idle.");
       addComment(" AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
       addComment(" MaxFPS - Maximum FPS the dedicaetd server will run at.  Higher values use more CPU, lower may increase lag (default = 100).");
       addComment(" RandomLevels - When current level ends, this can enable randomly switching to any available levels.");
@@ -1817,6 +1804,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
    ini->setValueYN(section, "AddRobots", iniSettings->playWithBots);
    ini->SetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
    ini->setValueYN(section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);
+   ini->setValueYN(section, "KickIdlePlayers", iniSettings->kickIdlePlayers);
    ini->setValueYN(section, "AllowTeamChanging", iniSettings->allowTeamChanging);
    ini->SetValueI (section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10));
    ini->setValueYN(section, "AllowGetMap", iniSettings->allowGetMap);
@@ -1899,7 +1887,6 @@ static void writeTesting(CIniFile *ini, GameSettings *settings)
    ini->SetValue  ("Testing", "WallFillColor",   settings->getWallFillColor()->toRGBString());
    ini->SetValue  ("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString());
 
-   ini->setValueYN("Testing", "OldGoalFlash", iniSettings->oldGoalFlash);
    ini->SetValueI ("Testing", "ClientPortNumber", iniSettings->clientPortNumber);
    ini->setValueYN("Testing", "DisableScreenSaver", iniSettings->disableScreenSaver);
 }
@@ -2357,7 +2344,7 @@ string FolderManager::findBotFile(const string &filename) const
    Vector<string> folders;
    folders.push_back(robotDir);
 
-   const char *extensions[] = { ".bot" };
+   const char *extensions[] = { ".bot", "" };
 
    return checkName(filename, folders, extensions);
 }

@@ -107,6 +107,7 @@ using namespace TNL;
 #  include "VideoSystem.h"
 #  include "ClientGame.h"
 #  include "FontManager.h"
+#  include "AppIntegrator.h"
 #endif
 
 #include "ServerGame.h"
@@ -361,6 +362,9 @@ void idle()
 #ifndef ZAP_DEDICATED
       if(!dedicated)
          display();          // Draw the screen if not dedicated
+
+      // Run 3rd-party app things
+      AppIntegrationController::idle(U32(deltaT));
 #endif
       deltaT = 0;
 
@@ -496,6 +500,7 @@ void shutdownBitfighter()
       SDL_QuitSubSystem(SDL_INIT_VIDEO);
 
       FontManager::cleanup();
+      AppIntegrationController::shutdown();
 #endif
    }
 
@@ -994,6 +999,8 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       settings->getIniSettings()->masterAddress = MASTER_SERVER_LIST_ADDRESS;
    }
 
+   // 021 changes (none)
+
    // Now copy over resources to user's preference directory.  This will overwrite the previous
    // resources with same names.  Dont do this if it is a standalone bundle
    if(!isStandalone)
@@ -1192,7 +1199,7 @@ int main(int argc, char **argv)
    settings->runCmdLineDirectives();            // If we specified a directive on the cmd line, like -help, attend to that now
 
    // Even dedicated server needs sound these days
-   SoundSystem::init(settings->getIniSettings()->sfxSet, folderManager->sfxDir, 
+   SoundSystem::init(folderManager->sfxDir,
                      folderManager->musicDir, settings->getIniSettings()->getMusicVolLevel());  
    
    if(settings->isDedicatedServer())
@@ -1269,6 +1276,9 @@ int main(int argc, char **argv)
             uiManager->activate(ui);
          }
       }
+
+      // Init 3rd-party app integrations
+      AppIntegrationController::init();
 
 #endif   // !ZAP_DEDICATED
 

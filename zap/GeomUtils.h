@@ -89,6 +89,7 @@ bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, c
 bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end, float &collisionTime, Point &normal);
 bool circleIntersectsSegment(Point center, F32 radius, Point start, Point end, float &collisionTime);
 
+Point mean2d(const Vector<Point> &polyPoints);
 Point findCentroid(const Vector<Point> &polyPoints);
 F32 area(const Vector<Point> &polyPoints);
 F32 angleOfLongestSide(const Vector<Point> &polyPoints);

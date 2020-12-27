@@ -131,6 +131,7 @@ enum DamageType
 {
    DamageTypePoint,
    DamageTypeArea,
+   DamageTypeVector,  // Like DamageTypePoint but allows impulseVector to ships
 };
 
 struct DamageInfo
@@ -325,8 +326,8 @@ public:
    void writeCompressedVelocity(const Point &vel, U32 max, BitStream *stream);
    void readCompressedVelocity(Point &vel, U32 max, BitStream *stream);
 
-   virtual bool collide(BfObject *hitObject);
-   virtual bool collided(BfObject *otherObject, U32 stateIndex);
+   virtual bool collide(BfObject *hitObject);                     // Checks collisions
+   virtual bool collided(BfObject *otherObject, U32 stateIndex);  // Handles collisions
 
    // Gets location(s) where repair rays should be rendered while object is being repaired
    virtual Vector<Point> getRepairLocations(const Point &repairOrigin);    
@@ -438,18 +439,14 @@ public:
    static const luaL_Reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   S32 lua_getClassId(lua_State *L);
    S32 lua_getObjType(lua_State *L);
    S32 lua_getId(lua_State *L);
    S32 lua_setId(lua_State *L);
 
    // Get/set object's position
-   S32 lua_getLoc(lua_State *L);
-   S32 lua_setLoc(lua_State *L);
    virtual S32 lua_getPos(lua_State *L);
    virtual S32 lua_setPos(lua_State *L);
 
-   virtual S32 lua_getTeamIndx(lua_State *L);
    virtual S32 lua_getTeamIndex(lua_State *L);
    virtual S32 lua_setTeam(lua_State *L);
 
@@ -477,8 +474,6 @@ public:
    virtual ~CentroidObject();
 
    // Provide special location handlers
-   virtual S32 lua_getLoc(lua_State *L);
-   virtual S32 lua_setLoc(lua_State *L);
    virtual S32 lua_getPos(lua_State *L);
    virtual S32 lua_setPos(lua_State *L);
 };

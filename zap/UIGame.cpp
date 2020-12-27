@@ -2272,12 +2272,12 @@ void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGa
       renderTeamName(index, xl, xr, yt);
 
    // Now for player scores.  First build a list.  Then sort it.  Then display it.
-   Vector<ClientInfo *> playerScores;
+   Vector<ClientInfo *> playerInfos;
 
 #ifdef USE_DUMMY_PLAYER_SCORES      // For testing purposes only!
    getDummyPlayerScores(getGame(), playerScores);
 #else
-   getGame()->getGameType()->getSortedPlayerScores(index, playerScores);     // Fills playerScores for team index
+   getGame()->getGameType()->getSortedPlayersByScore(index, playerInfos);  // Fills playerInfos for team index
 #endif
 
    S32 curRowY = yt + teamHeaderHeight + 1;                          // Advance y coord to below team display, if there is one
@@ -2286,7 +2286,7 @@ void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGa
    const S32 colHeaderYPos = isTeamGame ? curRowY + 3 : curRowY + 8; // Calc this before we change curRowY
 
    // Leave a gap for the colHeader... not sure yet of the exact xpos... will figure that out and render in this slot later
-   if(playerScores.size() > 0)
+   if(playerInfos.size() > 0)
    {
       const S32 colHeaderHeight = isTeamGame ? ColHeaderTextSize - 3: ColHeaderTextSize + 2;
       curRowY += colHeaderHeight;
@@ -2295,9 +2295,9 @@ void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGa
    S32 colIndexWidths[ColIndexCount];     
    S32 maxColIndexWidths[ColIndexCount] = {0};     // Inits every element of array to 0
 
-   for(S32 i = 0; i < playerScores.size(); i++)
+   for(S32 i = 0; i < playerInfos.size(); i++)
    {
-      renderScoreboardLine(playerScores, isTeamGame, i, x, curRowY, lineHeight, xr, colIndexWidths);
+      renderScoreboardLine(playerInfos, isTeamGame, i, x, curRowY, lineHeight, xr, colIndexWidths);
       curRowY += lineHeight;
 
       for(S32 j = 0; j < ColIndexCount; j++)
@@ -2305,7 +2305,7 @@ void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGa
    }
 
    // Go back and render the column headers, now that we know the widths.  These will be different for team and solo games.
-   if(playerScores.size() > 0)
+   if(playerInfos.size() > 0)
       renderScoreboardColumnHeaders(x, xr, colHeaderYPos, maxColIndexWidths, isTeamGame);
 
 #ifdef USE_DUMMY_PLAYER_SCORES
@@ -2378,7 +2378,7 @@ void GameUserInterface::renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdg
    glColor(Colors::gray50);
 
    drawString_fixed(leftEdge,                                                 y, ColHeaderTextSize, "Name");
-   drawStringc     (rightEdge -  (KdOff   + colIndexWidths[KdIndex]    / 2),  y, ColHeaderTextSize, "Threat Level");
+   drawStringc     (rightEdge -  (KdOff   + colIndexWidths[KdIndex]    / 2),  y, ColHeaderTextSize, "Kill/Death");
    drawStringc     (rightEdge -  (PingOff - colIndexWidths[PingIndex]  / 2),  y, ColHeaderTextSize, "Ping");
 
    // Solo games need one more header
@@ -2388,29 +2388,33 @@ void GameUserInterface::renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdg
 
 
 // Renders a line on the scoreboard, and returns the widths of the rendered items in colWidths
-void GameUserInterface::renderScoreboardLine(const Vector<ClientInfo *> &playerScores, bool isTeamGame, S32 row,
+void GameUserInterface::renderScoreboardLine(const Vector<ClientInfo *> &playerInfos, bool isTeamGame, S32 row,
                                              S32 x, S32 y, U32 lineHeight, S32 rightEdge, S32 *colWidths) const
 {
    const S32 playerFontSize = S32(lineHeight * 0.75f);
    const S32 symbolFontSize = S32(lineHeight * 0.75f * 0.75f);
+   const S32 dataFontSize   = S32(lineHeight * 0.75f * 0.75f);
 
-   static const S32 vertAdjustFact = (playerFontSize - symbolFontSize) / 2 - 1;
+   static const S32 symbolVertAdjustFact = (playerFontSize - symbolFontSize) / 2 - 1;
+   static const S32 dataVertAdjustFact   = (playerFontSize - dataFontSize) / 2;
 
-   renderPlayerSymbolAndSetColor(playerScores[row], x, y + vertAdjustFact + 2, symbolFontSize);
+   renderPlayerSymbolAndSetColor(playerInfos[row], x, y + symbolVertAdjustFact + 2, symbolFontSize);
 
-   S32 nameWidth = drawStringAndGetWidth(x, y, playerFontSize, playerScores[row]->getName().getString());
+   S32 nameWidth = drawStringAndGetWidth(x, y, playerFontSize, playerInfos[row]->getName().getString());
 
-   colWidths[KdIndex]   = drawStringfr          (rightEdge - KdOff,   y, playerFontSize, "%2.2f", playerScores[row]->getRating());
-   colWidths[PingIndex] = drawStringAndGetWidthf(rightEdge - PingOff, y, playerFontSize, "%d",    playerScores[row]->getPing());
+   colWidths[KdIndex]   = drawStringfr          (rightEdge - KdOff,   y + dataVertAdjustFact, dataFontSize,
+         "%d/%d", playerInfos[row]->getKills(), playerInfos[row]->getDeaths());
+   colWidths[PingIndex] = drawStringAndGetWidthf(rightEdge - PingOff, y + dataVertAdjustFact, dataFontSize,
+         "%d", playerInfos[row]->getPing());
 
    if(!isTeamGame)
-      colWidths[ScoreIndex] = drawStringfr(rightEdge - ScoreOff, y, playerFontSize, "%d", playerScores[row]->getScore());
+      colWidths[ScoreIndex] = drawStringfr(rightEdge - ScoreOff, y, playerFontSize, "%d", playerInfos[row]->getScore());
 
    // Vertical scale ratio to maximum line height
    const F32 scaleRatio = (F32)lineHeight / 30.f;
 
    // Circle back and render the badges now that all the rendering with the name color is finished
-   renderBadges(playerScores[row], x + nameWidth + 10 + Gap, y + (lineHeight / 2), scaleRatio);
+   renderBadges(playerInfos[row], x + nameWidth + 10 + Gap, y + (lineHeight / 2), scaleRatio);
 }
 
 
@@ -2851,7 +2855,7 @@ void GameUserInterface::renderInlineHelpItemOutlines(S32 playerTeam, F32 alpha) 
             if( whose == HighlightItem::Any ||
                (whose == HighlightItem::Team && team == playerTeam) ||
                (whose == HighlightItem::TorNeut && (team == playerTeam || team == TEAM_NEUTRAL)) ||
-               (whose == HighlightItem::Enemy && ((team >= 0 && team != playerTeam) || team == TEAM_HOSTILE)) ||
+               ((whose == HighlightItem::Enemy || whose == HighlightItem::EorHostile) && ((team >= 0 && team != playerTeam) || team == TEAM_HOSTILE)) ||
                (whose == HighlightItem::Neutral && team == TEAM_NEUTRAL) ||
                (whose == HighlightItem::Hostile && team == TEAM_HOSTILE) )
 
@@ -3387,7 +3391,8 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
    if(anouncementActive)
    {
       // Render one less line if we're past the size threshold for this displayer
-      if(mFirst >= (U32)mMessages.size() - 1)
+      // but only if we're not in expiry  mode
+      if(!mExpire && mFirst >= (U32)mMessages.size() - 1)
          last++;
 
       y -= lineHeight;

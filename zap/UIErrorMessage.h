@@ -28,6 +28,9 @@ private:
 
    bool mRenderUnderlyingUi;
 
+protected:
+   bool mEditorScreenMode;
+
 public:
    explicit AbstractMessageUserInterface(ClientGame *game);      // Constructor
    virtual ~AbstractMessageUserInterface();                      // Destructor

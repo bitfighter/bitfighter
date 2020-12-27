@@ -10,7 +10,7 @@ namespace Zap {
 
 
 // TODO: Make this an X-MACRO!  
-// Must keep this aligned with sfxProfilesModern[] and sfxProfilesClassic[]
+// Must keep this aligned with sfxProfilesModern[]
 enum SFXProfiles
 {
    // Utility sounds
@@ -29,6 +29,8 @@ enum SFXProfiles
    SFXTripleImpact,
    SFXTurretProjectile,
    SFXTurretImpact,
+   SFXRailgunProjectile,
+   SFXRailgunImpact,
 
    SFXBurst, 
 

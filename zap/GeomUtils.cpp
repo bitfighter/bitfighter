@@ -1627,9 +1627,38 @@ bool Triangulate::mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& 
 }
 
 
+// This is just an average between all the points
+Point mean2d(const Vector<Point> &polyPoints)
+{
+//   static const F32 NormalizeMultiplier = 64;
+//   static const F32 NormalizeFraction = 0.015625; // 1/NormalizeMultiplier
+
+   S32 size = polyPoints.size();
+
+   F32 x = 0;
+   F32 y = 0;
+   Point p1;
+
+   for(S32 i = 0; i < size; i++)
+   {
+      p1 = polyPoints[i];
+//      p1.scaleFloorDiv(NormalizeMultiplier, NormalizeFraction);
+
+      x += p1.x;
+      y += p1.y;
+   }
+
+   x /= size;
+   y /= size;
+
+   return Point(x,y);
+}
+
+
 // Derived from formulae here: http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/
 //
 // This will fail if the area sum is 0; e.g. with certain self-intersecting polygons
+// Failure mode is checked and calls mean2d as a fallback
 Point findCentroid(const Vector<Point> &polyPoints)
 {
    S32 size = polyPoints.size();
@@ -1645,7 +1674,7 @@ Point findCentroid(const Vector<Point> &polyPoints)
    Point p1;
    Point p2;
 
-   // All vertices except last
+   // All segments except last
    for(S32 i = 0; i < size - 1; i++)
    {
       p1 = polyPoints[i];
@@ -1658,12 +1687,18 @@ Point findCentroid(const Vector<Point> &polyPoints)
       y += (p1.y + p2.y) * area;
    }
 
-   // Do last vertex
+   // Do last segment
    p1 = polyPoints[size - 1];
    p2 = polyPoints[0];
 
    area = (p1.x * p2.y - p2.x * p1.y);
    sArea += area;
+
+   // Zero area means it's likely a complex polygon or something with all points
+   // colinear. Return the 2D mean of all the points to avoid NaN and INF issues
+   // It's not great, but maybe good enough
+   if(abs(sArea) < 1)  // This is about zero for a floating point number
+      return mean2d(polyPoints);
 
    x += (p1.x + p2.x) * area;
    y += (p1.y + p2.y) * area;
@@ -1962,7 +1997,7 @@ GENERATE_LUA_STATIC_METHODS_TABLE(Geom, LUA_STATIC_METHODS);
  *
  * @brief Perform a clipping operation on sets of polygons.
  *
- * @desc
+ * @descr
  * This function uses Bitfighter's polygon manipulation utilities to perform
  * boolean operations on sets of polygons. While these utilities are generally
  * robust, there are a few caveats and some inputs may cause failure.
@@ -2029,7 +2064,7 @@ S32 lua_clipPolygons(lua_State* L)
  * @brief
  * Perform a clipping operation on sets of polygons, keeping holes.
  *
- * @desc
+ * @descr
  * This function uses Bitfighter's polygon manipulation utilities to perform
  * boolean operations on sets of polygons, keeping holes, and returning the
  * result as a tree of polygons and holes. This is useful when performing
@@ -2086,7 +2121,7 @@ S32 lua_clipPolygonsAsTree(lua_State* L)
  * @brief
  * Offset polygons by the given offset.
  *
- * @desc
+ * @descr
  * This offsets polygons using a 'miter' join type.
  *
  * If the input offset generates polygons that overlap, the output can
@@ -2128,7 +2163,7 @@ S32 lua_offsetPolygons(lua_State *L)
  * @brief
  * Break up polygons into triangles.
  *
- * @desc
+ * @descr
  * Performs a Constrained Delauney Triangulation on the input. This function
  * is meant to be used for breaking complex polygons into pieces which can then
  * be manipulated either in the editor or through more processing.
@@ -2159,7 +2194,7 @@ S32 lua_triangulate(lua_State *L)
  * @brief
  * Merge triangles into convex polygons
  *
- * @desc
+ * @descr
  * Merges triangles into convex polygons using the Recast library. This
  * function is meant for use as a best-effort to clean up triangles
  * output by geometric operations.
@@ -2196,7 +2231,7 @@ S32 lua_polyganize(lua_State *L)
  * @luafunc static mixed Geom::segmentsIntersect(point a1, point a2, point b1, point b2)
  * @brief Finds intersection of the linesegments (a1, a2) and (b1, b2)
  *
- * @desc Determines if and "when" the line segments a and b intersect. The
+ * @descr Determines if and "when" the line segments a and b intersect. The
  * boolean return value is `true` if the segments intersect. The number return
  * value is a "time" `t` along the line a corresponding to where they intersect.
  * When the first return value is `true` if and only if the second return value

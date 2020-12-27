@@ -176,7 +176,7 @@ REGISTER_LUA_SUBCLASS(Zone, BfObject);
  * @brief
  * Check whether `p` lies inside of this Zone.
  *
- * @desc
+ * @descr
  * Determines if `p` is contained by this zone, according to the  winding
  * number algorithm. Points which lie on boundary of the polygon are
  * considered inside of it. If a polygon is self-intersecting, this method

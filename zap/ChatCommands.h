@@ -96,7 +96,9 @@ void setServerPassHandler      (ClientGame *game, const Vector<string> &args);
 void setLevPassHandler         (ClientGame *game, const Vector<string> &args);
 void setServerNameHandler      (ClientGame *game, const Vector<string> &args);
 void setServerDescrHandler     (ClientGame *game, const Vector<string> &args);
+void setServerWelcomeMsgHandler(ClientGame *game, const Vector<string> &args);
 void setLevelDirHandler        (ClientGame *game, const Vector<string> &args);
+void setGlobalLevelScriptHandler(ClientGame *game,const Vector<string> &args);
 void pmHandler                 (ClientGame *game, const Vector<string> &args);
 void muteHandler               (ClientGame *game, const Vector<string> &args);
 void voiceMuteHandler          (ClientGame *game, const Vector<string> &args);
@@ -125,6 +127,7 @@ void globalMuteHandler         (ClientGame *game, const Vector<string> &args);
 void shuffleTeams              (ClientGame *game, const Vector<string> &args);
 void downloadMapHandler        (ClientGame *game, const Vector<string> &args);
 void rateMapHandler            (ClientGame *game, const Vector<string> &args);
+void commentMapHandler         (ClientGame *game, const Vector<string> &args);
 void pauseHandler              (ClientGame *game, const Vector<string> &args);
 
 

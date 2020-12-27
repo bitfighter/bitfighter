@@ -35,7 +35,6 @@ LuaPlayerInfo::~LuaPlayerInfo()
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getName,             ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getShip,             ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, getTeamIndx,         ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getTeamIndex,        ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getRating,               ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getScore,                ARRAYDEF({{ END }}), 1 ) \
@@ -70,18 +69,6 @@ S32 LuaPlayerInfo::lua_getName(lua_State *L)
  * @return The player's ship, or nil if the player is "dead".
  */
 S32 LuaPlayerInfo::lua_getShip(lua_State *L)
-{
-   TNLAssert(false, "Unimplemented method!");
-   return 0;
-}
-
-
-/**
- * @luafunc int LuaPlayerInfo::getTeamIndx()
- *
- * @deprecated See getTeamIndex()
- */
-S32 LuaPlayerInfo::lua_getTeamIndx(lua_State *L)
 {
    TNLAssert(false, "Unimplemented method!");
    return 0;
@@ -177,14 +164,6 @@ S32 PlayerInfo::lua_getScriptName(lua_State *L)
 }
 
 
-S32 PlayerInfo::lua_getTeamIndx(lua_State *L)
-{
-   logprintf(LogConsumer::LuaBotMessage, "'getTeamIndx()' is deprecated and will be removed in the future.  Use 'getTeamIndex()', with an 'e', instead");
-
-   return lua_getTeamIndex(L);
-}
-
-
 S32 PlayerInfo::lua_getTeamIndex(lua_State *L)
 {
    return returnTeamIndex(L, mClientInfo->getTeamIndex());
@@ -246,14 +225,6 @@ S32 RobotPlayerInfo::lua_getShip(lua_State *L)
 S32 RobotPlayerInfo::lua_getScriptName(lua_State *L)
 {
    return returnString(L, mRobot->getScriptName());
-}
-
-
-S32 RobotPlayerInfo::lua_getTeamIndx(lua_State *L)
-{
-   logprintf(LogConsumer::LuaBotMessage, "'getTeamIndx()' is deprecated and will be removed in the future.  Use 'getTeamIndex()', with an 'e', instead");
-
-   return lua_getTeamIndex(L);
 }
 
 

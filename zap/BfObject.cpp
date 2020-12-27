@@ -914,8 +914,8 @@ void BfObject::damageObject(DamageInfo *theInfo)
 }
 
 
-bool BfObject::collide(BfObject *hitObject)                  { return false; }
-bool BfObject::collided(BfObject *hitObject, U32 stateIndex) { return false; }
+bool BfObject::collide(BfObject *hitObject)                  { return false; } // Checks collisions
+bool BfObject::collided(BfObject *hitObject, U32 stateIndex) { return false; } // Handles collisions
 
 
 Vector<Point> BfObject::getRepairLocations(const Point &repairOrigin)
@@ -1346,15 +1346,11 @@ void BfObject::writeThisTeam(BitStream *stream)
 // Lua interface
 //               Fn name         Param profiles     Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, getClassId,     ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, getObjType,     ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, getId,          ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, setId,          ARRAYDEF({{ INT,       END }               }), 1 ) \
-   METHOD(CLASS, getLoc,         ARRAYDEF({{            END }               }), 1 ) \
-   METHOD(CLASS, setLoc,         ARRAYDEF({{ PT,        END }               }), 1 ) \
    METHOD(CLASS, getPos,         ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, setPos,         ARRAYDEF({{ PT,        END }               }), 1 ) \
-   METHOD(CLASS, getTeamIndx,    ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, getTeamIndex,   ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, setTeam,        ARRAYDEF({{ TEAM_INDX, END }               }), 1 ) \
    METHOD(CLASS, removeFromGame, ARRAYDEF({{            END }               }), 1 ) \
@@ -1394,17 +1390,6 @@ REGISTER_LUA_CLASS(BfObject);
 S32 BfObject::lua_getObjType(lua_State *L)  
 { 
    return returnInt(L, mObjectTypeNumber); 
-}
-
-/**
- * @luafunc ObjType BfObject::getClassId()
- * 
- * @deprecated Use getObjType()
- */
-S32 BfObject::lua_getClassId(lua_State *L)  
-{ 
-   logprintf(LogConsumer::LuaBotMessage, "'getClassId()' is deprecated and will be removed in the future.  Use 'getObjType()', instead");
-   return lua_getObjType(L); 
 }
 
 
@@ -1461,38 +1446,6 @@ S32 BfObject::lua_getPos(lua_State *L)
 
 
 /**
- * @luafunc Point BfObject::getLoc()
- *
- * @deprecated Use getPos() instead.
- */
-S32 BfObject::lua_getLoc(lua_State *L)
-{ 
-   logprintf(LogConsumer::LuaBotMessage, "'getLoc()' is deprecated and will be removed in the future.  Use 'getPos()', instead");
-   return lua_getPos(L); 
-}
-
-// TODO Remove after 019
-/**
- * @luafunc int BfObject::getTeamIndx()
- * 
- * @brief See BfObject::getTeamIndex()
- * 
- * @deprecated This method is deprecated and will be removed
- * 
- * @descr Use BfObject::getTeamIndex() instead. This method will be removed in
- * the future
- * 
- * @return Team index of the object.
- */
-S32 BfObject::lua_getTeamIndx(lua_State *L)
-{
-   logprintf(LogConsumer::LuaBotMessage, "'getTeamIndx()' is deprecated and will be removed in the future.  Use 'getTeamIndex()', with an 'e', instead");
-
-   return lua_getTeamIndex(L);
-}
-
-
-/**
  * @luafunc int BfObject::getTeamIndex()
  * 
  * @brief Gets the index of the object's team.
@@ -1545,20 +1498,13 @@ S32 BfObject::lua_setTeam(lua_State *L)
 S32 BfObject::lua_setPos(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setPos");
-   setPos(L, 1);
+
+   if(hasGeometry())
+      setPos(L, 1);
+   else
+      logprintf(LogConsumer::LuaBotMessage, "No geometry for this object (%s). Cannot set position", getClassName());
+
    return 0;
-}
-
-
-/**
- * @luafunc BfObject::setLoc(Point pos)
- *
- * @deprecated Use setPos() instead.
- */
-S32 BfObject::lua_setLoc(lua_State *L)
-{
-   logprintf(LogConsumer::LuaBotMessage, "'setLoc()' is deprecated and will be removed in the future.  Use 'setPos()', instead");
-   return lua_setPos(L);
 }
 
 
@@ -1590,7 +1536,10 @@ S32 BfObject::lua_setGeom(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setGeom");
 
-   setGeom(L, 1);
+   if(hasGeometry())
+      setGeom(L, 1);
+   else
+      logprintf(LogConsumer::LuaBotMessage, "No geometry for this object (%s). Cannot set it", getClassName());
 
    return 0;
 }
@@ -1732,24 +1681,10 @@ CentroidObject::~CentroidObject()
 }
 
 
-// 2D objects need special handling when getting/setting location
-S32 CentroidObject::lua_getLoc(lua_State *L)
-{
-   logprintf(LogConsumer::LuaBotMessage, "'getLoc()' is deprecated and will be removed in the future.  Use 'getPos()', instead");
-   return lua_getPos(L);
-}
-
-
-S32 CentroidObject::lua_setLoc(lua_State *L)
-{
-   logprintf(LogConsumer::LuaBotMessage, "'setLoc()' is deprecated and will be removed in the future.  Use 'setPos()', instead");
-   return lua_setPos(L);
-}
-
-
 S32 CentroidObject::lua_getPos(lua_State *L)
 {
-   return returnPoint(L, getCentroid());      // Do we want this to return a series of points?
+   luaPushPoint(L, 0, 0);
+   return 1;      // Do we want this to return a series of points?
 }
 
 
@@ -1763,5 +1698,7 @@ S32 CentroidObject::lua_setPos(lua_State *L)
 
    return 0;
 }
+
+
 };
 

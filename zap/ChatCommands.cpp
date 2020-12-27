@@ -7,6 +7,7 @@
 
 #include "ClientGame.h"
 #include "gameType.h"
+#include "LevelDatabaseCommentThread.h"
 #include "LevelDatabaseDownloadThread.h"
 #include "LevelDatabaseRateThread.h"
 #include "LevelSource.h"
@@ -40,7 +41,7 @@ void addTimeHandler(ClientGame *game, const Vector<string> &words)
                      // atoi will return 0, but this probably isn't what the user wanted.
 
          bool err = false;
-         if(words[1][0] >= '0' && words[1][0] <= '9')
+         if(isDigit(words[1][0]))
             mins = atoi(words[1].c_str());
          else
             err = true;
@@ -75,7 +76,7 @@ static void setVolume(ClientGame *game, VolumeType volType, const Vector<string>
 
    // Parse volstr -- if first digit isn't a number, user probably screwed up.
    // atoi will return 0, but this probably isn't what the user wanted.
-   if(volstr[0] >= '0' && volstr[0] <= '9')
+   if(isDigit(volstr[0]))
       vol = max(min(atoi(volstr.c_str()), 10), 0);
    else
    {
@@ -435,7 +436,14 @@ void setServerNameHandler(ClientGame *game, const Vector<string> &words)
 void setServerDescrHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasAdmin("!!! You don't have permission to set the server description"))
-      game->changeServerParam(GameConnection::ServerDescr, words);
+      game->changeServerParam(GameConnection::ServerDescription, words);
+}
+
+
+void setServerWelcomeMsgHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasAdmin("!!! You don't have permission to set the server welcome message"))
+      game->changeServerParam(GameConnection::ServerWelcomeMessage, words);
 }
 
 
@@ -443,6 +451,13 @@ void setLevelDirHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasAdmin("!!! You don't have permission to set the leveldir param"))
       game->changeServerParam(GameConnection::LevelDir, words);
+}
+
+
+void setGlobalLevelScriptHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(game->hasAdmin("!!! You don't have permission to set the global levelgen script"))
+      game->changeServerParam(GameConnection::GlobalLevelScript, words);
 }
 
 
@@ -1097,6 +1112,32 @@ void rateMapHandler(ClientGame *game, const Vector<string> &args)
       game->getSecondaryThread()->addEntry(rateThread);
    }
 }
+
+
+void commentMapHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(!game->canCommentLevel())      // Will display any appropriate error messages
+      return;
+
+   // Start at first word and concatentate all the others to rebuild the comment
+   string comment = words[1];
+   for(S32 i = 2; i < words.size(); i++)
+      comment = comment + " " + words[i];
+
+   // Comment is too small
+   if(comment.size() < 4)
+   {
+      string msg = "!!! Please enter a comment of 4 letters or more";
+
+      game->displayErrorMessage(msg.c_str());
+   }
+   else                    // Args look ok
+   {
+      RefPtr<LevelDatabaseCommentThread> commentThread = new LevelDatabaseCommentThread(game, comment);
+      game->getSecondaryThread()->addEntry(commentThread);
+   }
+}
+
 
 void pauseHandler(ClientGame *game, const Vector<string> &args)
 {

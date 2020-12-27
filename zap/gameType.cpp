@@ -111,7 +111,7 @@ GameType::~GameType()
 bool GameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)      // First arg is game length, in minutes
-      setGameTime(F32(atof(argv[0]) * 60));
+      setGameTime(F32(atof(argv[0]) * 60 * 1000));
 
    if(argc > 1)      // Second arg is winning score
       mWinningScore = atoi(argv[1]);
@@ -900,17 +900,17 @@ S32 QSORT_CALLBACK playerScoreSort(ClientInfo **a, ClientInfo **b)
 
 
 // Client only
-void GameType::getSortedPlayerScores(S32 teamIndex, Vector<ClientInfo *> &playerScores) const
+void GameType::getSortedPlayersByScore(S32 teamIndex, Vector<ClientInfo *> &playerInfos) const
 {
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
       ClientInfo *info = mGame->getClientInfo(i);
 
       if(!isTeamGame() || info->getTeamIndex() == teamIndex)
-         playerScores.push_back(info);
+         playerInfos.push_back(info);
    }
 
-   playerScores.sort(playerScoreSort);
+   playerInfos.sort(playerScoreSort);
 }
 
 
@@ -1371,6 +1371,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
    for(S32 i = spyBugs->size()-1; i >= 0; i--)
    {
       SpyBug *sb = static_cast<SpyBug *>(spyBugs->get(i));
+//      shared_ptr<SpyBug> sb = shared_ptr<SpyBug>(sb);
 
       if(sb->isVisibleToPlayer(clientInfo, isTeamGame()))
       {
@@ -1640,10 +1641,10 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
                          (countAutoLevelBots ? counts[i][ClientInfo::ClassRobotAddedByAutoleveler] : 0);
 
       Team *team = (Team *)mGame->getTeam(i);
-      if(playerCount == minPlayers && team->getRating() < minRating)
+      if(playerCount == minPlayers && team->getRatingSum() < minRating)
       {
          minTeamIndex = i;
-         minRating = team->getRating();
+         minRating = team->getRatingSum();
       }
    }
 
@@ -1842,9 +1843,6 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
                // Adjust score of everyone, scoring team will have it changed back again after this loop
                ((Team *)mGame->getTeam(i))->addScore(-teamPoints);             // Add magnitiude of negative score to all teams
                s2cSetTeamScore(i, ((Team *)(mGame->getTeam(i)))->getScore());  // Broadcast result
-
-               // Fire Lua event, but not for scoring team
-               EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, -teamPoints, i + 1, playerInfo);
             }
          }
       }
@@ -1854,19 +1852,33 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
          Team *team = (Team *)mGame->getTeam(teamIndex);
          team->addScore(teamPoints);
          s2cSetTeamScore(teamIndex, team->getScore());     // Broadcast new team score
-
-         // Fire Lua event for scoring team
-         EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, teamPoints, teamIndex + 1, playerInfo);
       }
 
       updateLeadingTeamAndScore();
       newScore = mLeadingTeamScore;
    }
-   // Fire scoring event for non-team games
-   else
+
+
+   // Fire Lua events, these are done after all scores are updated so the
+   // correct numbers are reported. This follow much (but not all) of the logic
+   // above
+   if(isTeamGame())
    {
-      EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, playerPoints, teamIndex + 1, playerInfo);
+      if(scoringEvent == ScoreGoalOwnTeam)
+      {
+         for(S32 i = 0; i < mGame->getTeamCount(); i++)
+         {
+            // Fire Lua event, but not for scoring team
+            if(i != teamIndex)
+               EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, -teamPoints, i + 1, playerInfo);
+         }
+      }
+      // Not own-goal
+      else
+         EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, teamPoints, teamIndex + 1, playerInfo);
    }
+   else
+      EventManager::get()->fireEvent(EventManager::ScoreChangedEvent, playerPoints, teamIndex + 1, playerInfo);
 
 
    // End game if max score has been reached
@@ -3258,7 +3270,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringP
 
 
 // Send an announcement
-TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sSendAnnouncement, (string message), (message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhostParent, 1)
+GAMETYPE_RPC_C2S(GameType, c2sSendAnnouncement, (string message), (message))
 {
    GameConnection *source = (GameConnection *)getRPCSourceConnection();
    ClientInfo *sourceClientInfo = source->getClientInfo();
@@ -3266,7 +3278,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sSendAnnouncement, (string message), (me
    if(!sourceClientInfo->isAdmin())
       return;
 
-   s2cDisplayAnnouncement(message);
+   displayAnnouncement(message);
 }
 
 
@@ -3337,19 +3349,20 @@ void GameType::sendPrivateChat(const StringTableEntry &senderName, const StringT
 }
 
 
-// Send private chat from Controller
-void GameType::sendAnnouncementFromController(const StringPtr &message)
+// Server only
+void GameType::displayAnnouncement(const string &message) const
 {
+   TNLAssert(dynamic_cast<ServerGame *>(mGame), "Server only!");
+
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
-      ClientInfo *clientInfo = mGame->getClientInfo(i);
-
-      if(clientInfo->isRobot())
+      if(mGame->getClientInfo(i)->isRobot())
          continue;
 
-      RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayAnnouncement, (message.getString()));
+      GameConnection *conn = mGame->getClientInfo(i)->getConnection();
 
-      clientInfo->getConnection()->postNetEvent(theEvent);
+      if(conn)
+         conn->s2cDisplayAnnouncement(message);
    }
 }
 
@@ -3393,15 +3406,6 @@ void GameType::sendChat(const StringTableEntry &senderName, ClientInfo *senderCl
    GameConnection *gc = ((ServerGame*)mGame)->getGameRecorder();
    if(gc)
       gc->postNetEvent(theEvent);
-}
-
-
-TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cDisplayAnnouncement, (string message), (message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 1)
-{
-#ifndef ZAP_DEDICATED
-   ClientGame* clientGame = static_cast<ClientGame *>(mGame);
-   clientGame->gotAnnouncement(message);
-#endif
 }
 
 
@@ -3576,15 +3580,15 @@ GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx)
 
 
 Vector<RangedU32<0, GameType::MaxPing> > GameType::mPingTimes; ///< Static vector used for constructing update RPCs
-Vector<SignedInt<24> > GameType::mScores;
-Vector<SignedFloat<8> > GameType::mRatings;  // 8 bits for 255 gradations between -1 and 1 ~ about 1 value per .01
 
+Vector<Int<10> > GameType::mKills;
+Vector<Int<10> > GameType::mDeaths;
 
 void GameType::updateClientScoreboard(GameConnection *gc)
 {
    mPingTimes.clear();
-   mScores.clear();
-   mRatings.clear();
+   mKills.clear();
+   mDeaths.clear();
 
    // First, list the players
    for(S32 i = 0; i < mGame->getClientCount(); i++)
@@ -3596,19 +3600,23 @@ void GameType::updateClientScoreboard(GameConnection *gc)
       else
          mPingTimes.push_back(MaxPing);
 
-      // Players rating = cumulative score / total score played while this player was playing, ranks from 0 to 1
-      mRatings.push_back(info->getCalculatedRating());
+      // Don't count fratricides in kills
+      U32 kills = info->getStatistics()->getKills();
+      U32 deaths = info->getStatistics()->getDeaths();
+
+      mKills.push_back(kills);
+      mDeaths.push_back(deaths);
    }
 
    NetObject::setRPCDestConnection(gc);
-   s2cScoreboardUpdate(mPingTimes, mRatings);
+   s2cScoreboardUpdate(mPingTimes, mKills, mDeaths);
    NetObject::setRPCDestConnection(NULL);
 }
 
 
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cScoreboardUpdate,
-                 (Vector<RangedU32<0, GameType::MaxPing> > pingTimes, Vector<SignedFloat<8> > ratings),
-                 (pingTimes, ratings), NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
+                 (Vector<RangedU32<0, GameType::MaxPing> > pingTimes, Vector<Int<10> > kills, Vector<Int<10> > deaths),
+                 (pingTimes, kills, deaths), NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
 {
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
@@ -3618,7 +3626,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cScoreboardUpdate,
       ClientInfo *client = mGame->getClientInfo(i);
 
       client->setPing(pingTimes[i]);
-      client->setRating(ratings[i]);
+      client->setKills(kills[i]);
+      client->setDeaths(deaths[i]);
    }
 }
 
@@ -3831,10 +3840,9 @@ void GameType::setWinningScore(S32 score)
 
 
 // Mostly used while reading a level file
-void GameType::setGameTime(F32 timeInSeconds)
+void GameType::setGameTime(F32 timeInMs)
 {
-   U32 time = U32(timeInSeconds * 1000);
-   setTimeRemaining(time, time == 0);
+   setTimeRemaining(timeInMs, timeInMs == 0);
 }
 
 

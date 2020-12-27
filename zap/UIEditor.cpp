@@ -204,8 +204,8 @@ void EditorUserInterface::populateDock()
    F32 yPos = 35;
    const F32 spacer = 35;
 
-   addDockObject(new RepairItem(), xPos, yPos);
-   //addDockObject(new ItemEnergy(), xPos + 10, yPos);
+   addDockObject(new RepairItem(), xPos - 10, yPos);
+   addDockObject(new EnergyItem(), xPos + 10, yPos);
    yPos += spacer;
 
    addDockObject(new Spawn(), xPos, yPos);
@@ -1251,25 +1251,6 @@ void EditorUserInterface::onAfterRunScriptFromConsole()
 void EditorUserInterface::onActivate()
 {
    mDelayedUnselectObject = NULL;
-   GameSettings *settings = getGame()->getSettings();
-
-   FolderManager *folderManager = settings->getFolderManager();
-
-   if(folderManager->levelDir == "")      // Never did resolve a leveldir... no editing for you!
-   {
-      getUIManager()->reactivatePrevUI();     // Must come before the error msg, so it will become the previous UI when that one exits
-
-      ErrorMessageUserInterface *ui = getUIManager()->getUI<ErrorMessageUserInterface>();
-      ui->reset();
-      ui->setTitle("HOUSTON, WE HAVE A PROBLEM");
-      ui->setMessage("No valid level folder was found, so I cannot start the level editor.\n\n"
-                     "Check the LevelDir parameter in your INI file, or your command-line parameters to make sure"
-                     "you have correctly specified a valid folder.");
-
-      getUIManager()->activate(ui);
-
-      return;
-   }
 
    // Check if we have a level name:
    if(getLevelFileName() == UnnamedFile)     // We need to take a detour to get a level name
@@ -2544,9 +2525,21 @@ bool EditorUserInterface::canRotate() const
 }
 
 
+struct PointCompare
+{
+   bool operator()( const Point& lhs, const Point& rhs ) const
+   {
+      return lhs.x != rhs.x || lhs.y != rhs.y;
+   }
+};
+
+
 // Rotate selected objects around their center point by angle
 void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
 {
+   static const F32 NormalizeMultiplier = 64;
+   static const F32 NormalizeFraction = 1.0 / NormalizeMultiplier;
+
    if(!canRotate())
       return;
 
@@ -2559,14 +2552,26 @@ void EditorUserInterface::rotateSelection(F32 angle, bool useOrigin)
    // If we're not going to use the origin, we're going to use the 'center of mass' of the total
    if(!useOrigin)
    {
-      // Add all object centroids to a set for de-duplication.  We'll get the centroid of the set
-      set<Point> centroidSet;
+
+      // Add all object centroids to an unordered set for de-duplication.
+      // We'll then get the centroid of the set
+      set<Point, PointCompare> centroidSet;
+
       for(S32 i = 0; i < objList->size(); i++)
       {
          BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
          if(obj->isSelected())
-            centroidSet.insert(obj->getCentroid());
+         {
+            Point thisCentroid = obj->getCentroid();
+
+            // Perform a rounding to some fraction of a grid point. This will
+            // help with de-duplication, centroid finding, and float comparison
+            // in the set
+            thisCentroid.scaleFloorDiv(NormalizeMultiplier, NormalizeFraction);
+
+            centroidSet.insert(thisCentroid);
+         }
       }
 
       // Convert to Vector for centroid finding
@@ -3174,30 +3179,27 @@ void EditorUserInterface::translateSelectedItems(const Vector<Point> &origins, c
    {
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
-      if(obj->isSelected() || obj->anyVertsSelected())
+      Point newVert;    // Reusable container
+
+      if(obj->isSelected())            // ==> Dragging whole object
       {
-         //obj->setPos(mMoveOrigins[i] + offset);
-         Point newVert;    // Reusable container
-
          for(S32 j = obj->getVertCount() - 1; j >= 0;  j--)
-            if(obj->isSelected())            // ==> Dragging whole object
-            {
-               //          Offset from vertex @ getPos()   +  New position for vertex @ getPos()  
-               //F64 x = ((F64)obj->getVert(j).x - (F64)obj->getPos().x) + ((F64)mMoveOrigins[i].x + (F64)offset.x);
-               //F64 y = ((F64)obj->getVert(j).y - (F64)obj->getPos().y) + (F64)(mMoveOrigins[i].y + (F64)offset.y);
-               //newVert = Point((F32)x, (F32)y);
+         {
+            newVert = (obj->getVert(j) - obj->getVert(0)) + (mMoveOrigins[i] + offset);
+            obj->setVert(newVert, j);
+         }
+         obj->onItemDragging();        // Let the item know it's being dragged
+      }
 
-               newVert = (obj->getVert(j) - obj->getVert(0)) + (mMoveOrigins[i] + offset);
-               obj->setVert(newVert, j);
-
-               obj->onItemDragging();        // Let the item know it's being dragged
-            }
-            else if(obj->vertSelected(j))    // ==> Dragging individual vertex
+      else if(obj->anyVertsSelected()) // ==> Dragging individual vertex
+      {
+         for(S32 j = obj->getVertCount() - 1; j >= 0;  j--)
+            if(obj->vertSelected(j))
             { 
                // Pos of vert at last tick + Offset from last tick
                newVert = obj->getVert(j) + (offset - lastOffset);
                obj->setVert(newVert, j);
-               obj->onGeomChanging();        // Because, well, the geom is changing
+               obj->onGeomChanging();  // Because, well, the geom is changing
             }
       }
    }
@@ -4087,8 +4089,10 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       insertNewItem(ShipSpawnTypeNumber);                                                   
 	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_SPYBUG))            // Spybug
       insertNewItem(SpyBugTypeNumber);                                                      
-	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_REPAIR))            // Repair
-      insertNewItem(RepairItemTypeNumber);                                                  
+   else if(inputString == getEditorBindingString(settings, BINDING_PLACE_REPAIR))            // Repair
+      insertNewItem(RepairItemTypeNumber);
+   else if(inputString == getEditorBindingString(settings, BINDING_PLACE_ENERGY))            // Energy
+      insertNewItem(EnergyItemTypeNumber);
 	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_TURRET))            // Turret
       insertNewItem(TurretTypeNumber);                                                      
 	else if(inputString == getEditorBindingString(settings, BINDING_PLACE_MINE))              // Mine
@@ -5387,9 +5391,10 @@ static void activateTeamDefCallback(ClientGame *game, U32 unused)
 
 void uploadToDbCallback(ClientGame *game)
 {
-   game->getUIManager()->activate<EditorUserInterface>();
-
    EditorUserInterface* editor = game->getUIManager()->getUI<EditorUserInterface>();
+   // Back to the editor
+   game->getUIManager()->reactivate(editor);
+
    editor->createNormalizedScreenshot(game);
 
    if(game->getGameType()->getLevelName() == "")    
