@@ -987,6 +987,11 @@ S32 Robot::lua_setThrust(lua_State *L)
  * @luafunc Robot::setThrustToPt(point p)
  *
  * @brief Makes the Robot thrust to `p`, stopping when it reaches that point.
+ * 
+ * @descr Note that you need to keep calling this function every tick; the 
+ * ship will advance a bit towards its destination each game cycle, then 
+ * stop when it arrives at its destination, even if you continue to call the 
+ * function.  It is not a "set and forget" type of function.
  *
  * @param p The point move towards.
  */
