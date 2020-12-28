@@ -102,7 +102,7 @@ namespace Zap {
       void HealthGaugeRenderer::render(F32 health, S32 gaugeBottom)
       {
          const F32 xul = F32(GaugeLeftMargin);
-         const F32 yul = gaugeBottom;
+         const F32 yul = F32(gaugeBottom);
 
          F32 full = health * GaugeWidth;
 
