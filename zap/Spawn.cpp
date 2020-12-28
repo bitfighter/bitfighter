@@ -611,7 +611,7 @@ FlagSpawn::FlagSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
          setTeam(L, 2);
 
       if(profile == 3)      
-         setRespawnTime(getInt(L, 3));
+         setRespawnTime(S32(getInt(L, 3)));
    }
 }
 
