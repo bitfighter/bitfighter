@@ -1471,7 +1471,9 @@ S32 BfObject::lua_getTeamIndex(lua_State *L)
  * 
  * @param teamIndex Index of the team the object should be assigned to.
  * 
- * @descr Use the special team constants to make an item neutral or hostile.
+ * @descr Instead of a team index, you can use the special team enums 
+ * Team.Neutral and Team.Hostile.
+ * 
  * Will have no effect on items that are inherently teamless (such as a
  * NexusZone).
  * 
