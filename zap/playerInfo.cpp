@@ -193,7 +193,7 @@ S32 PlayerInfo::lua_getScore(lua_State *L)
 
 S32 PlayerInfo::lua_isRobot(lua_State *L)
 {
-   return returnBool(L, false);
+   return returnBool(L, mClientInfo->getShip()->isRobot());
 }
 
 
