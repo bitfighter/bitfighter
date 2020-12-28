@@ -97,7 +97,7 @@ private:
    void processVoting(U32 timeDelta);     // Manage any ongoing votes
    void processSimulatedStutter(U32 timeDelta);
 
-   string getLevelFileNameFromIndex(S32 indx);
+   //string getLevelFileNameFromIndex(S32 indx);
 
 
    void resetAllClientTeams();                        // Resets all player team assignments
@@ -227,7 +227,7 @@ public:
    S32 getCurrentLevelIndex();
    S32 getLevelCount();
    LevelInfo getLevelInfo(S32 index);
-   void clearLevelInfos();
+   //void clearLevelInfos();
    void sendLevelListToLevelChangers(const string &message = "");
 
    DataSender dataSender;

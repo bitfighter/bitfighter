@@ -303,7 +303,7 @@ bool ServerGame::isTestServer() const
 
 AbstractTeam *ServerGame::getNewTeam()
 {
-   return new Team;
+   return new Team;              // TODO: Where is this cleaned up?
 }
 
 

@@ -1805,7 +1805,7 @@ void ClientGame::addWallItem(BfObject *wallItem, GridDatabase *database)
 
 AbstractTeam *ClientGame::getNewTeam()
 {
-   return new EditorTeam;
+   return new EditorTeam;        // TODO: Where is this cleaned up?
 }
 
 

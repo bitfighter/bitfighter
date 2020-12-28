@@ -467,7 +467,7 @@ void BfObject::setTeam(S32 team)
       return;
 
    mTeam = team;
-   setMaskBits(TeamMask);
+   setMaskBits(TeamMask);     // Triggers broadcast of zone info
 }
 
 
@@ -1624,6 +1624,9 @@ S32 BfObject::lua_setSelected(lua_State *L)
  * method returns a LuaPlayerInfo object if there is an owner. Otherwise, returns
  * nil.
  * 
+ * This method is intended to be used with bullets and other projectiles, not with 
+ * game objects like zones.
+ * 
  * @return A LuaPlayerInfo representing the object's owner, or nil.
  */
 S32 BfObject::lua_getOwner(lua_State *L)
@@ -1646,6 +1649,9 @@ S32 BfObject::lua_getOwner(lua_State *L)
  * to the game via addItem(object).  The owner cannot be set beforehand. Also,
  * 'playerName' must exactly match a the name of a player already in the game
  * (case-sensitive).
+ * 
+ * This method is intended to be used with bullets and other projectiles, not with 
+ * game objects like zones.
  */
 S32 BfObject::lua_setOwner(lua_State *L)
 {

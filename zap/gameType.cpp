@@ -1955,9 +1955,9 @@ void GameType::updateScore(ClientInfo *clientInfo, ScoringEvent event, S32 data)
 
 
 // Signature for team-only scoring event
-void GameType::updateScore(S32 team, ScoringEvent event, S32 data)
+void GameType::updateScore(S32 teamIndex, ScoringEvent event, S32 data)
 {
-   updateScore(NULL, team, event, data);
+   updateScore(NULL, teamIndex, event, data);
 }
 
 
@@ -1984,10 +1984,11 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
             return -1;           // was zero in 015a
          case KillTeammate:
             return -1;
-         case KillEnemyTurret:
-            return 0;
+         case KillEnemyTurret:   // Fall through OK
          case KillOwnTurret:
             return 0;
+         case ScoreSetByScript:
+            return data;
          default:
             return naScore;
       }

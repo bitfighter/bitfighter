@@ -968,6 +968,9 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
  * @descr Script runners include levelgens, robots, and editor plugins. The
  * methods here can be called from all three. However, some may be disabled for
  * a particular script runner.
+ * 
+ * In a levelgen script, there is an object magically available called 'levelgen' 
+ * that gives you access to these methods.
  */
 
 /**
@@ -1091,7 +1094,8 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
 /**
  * @luafunc table LuaScriptRunner::findAllObjects(ObjType objType, ...)
  *
- * @brief Finds all items of the specified object type anywhere on the level.
+ * @brief Returns a table containing a list of objects of the specified type 
+ * anywhere on the level.
  *
  * @descr Can specify multiple object types.
  *
@@ -1104,9 +1108,19 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
  *
  * @code
  * function countObjects(objType, ...) -- Pass one or more object types
- *   items = bf:findAllObjects(objType, ...) -- Find all items of specified type(s)
- *   print(#items) -- Print the number of items found to the console
+ *   objects = bf:findAllObjects(objType, ...) -- Find all objects of specified type(s)
+ *   print(#objects) -- Print the number of items found to the console
  * end
+ * 
+ * function listZoneIds()
+ *    zones = levelgen:findAllObjects(ObjType.GoalZone)
+ *    for i = 1, #zones do
+ *       id = zones[i]:getId()
+ *       print(id)
+ *    end
+ * end
+ * 
+ * 
  * @endcode
  */
 S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
