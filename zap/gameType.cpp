@@ -1987,8 +1987,6 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
          case KillEnemyTurret:   // Fall through OK
          case KillOwnTurret:
             return 0;
-         case ScoreSetByScript:
-            return data;
          default:
             return naScore;
       }
