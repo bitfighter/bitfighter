@@ -30,13 +30,43 @@ using namespace LuaArgs;
 TNL_IMPLEMENT_NETOBJECT(Robot);
 
 /**
- * @luafunc Robot::Robot(point position, int teamIndex, string scriptName, string scriptArg)
+ * @luafunc Robot::Robot(position, teamIndex, scriptName, scriptArg)
  *
- * @param [position] Starting position of the Robot. Defaults to (0, 0)
- * @param [teamIndex] Starting Team of the Robot. If unspecified, defaults
+ * All parameters are optional.
+ * @param [position: point] Starting position of the Robot. Defaults to point.new(0,0).  Note
+ * that this position is pretty much ignored at this point; bot is created, then it is spawned
+ * using normal game processes, which means at a spawnPoint or at (0,0) if there are none.
+ * Once spawned, a levelgen script can relocate a ship as shown in one of the samples below.
+ * 
+ * @param [teamIndex: int] Starting Team of the Robot. If unspecified, defaults
  * to balancing teams.
- * @param [scriptName] The bot script to use. Defaults to the server's default bot.
- * @param [scriptArg] Zero or more string arguments to pass to the script.
+ * @param [scriptName: string] The bot script to use. Defaults to the server's default bot.
+ * @param [scriptArg: string] Zero or more string arguments to pass to the script.
+ * 
+ * @descr Passed arguments are available in the arg table.  
+ *
+ * @code
+ *   -- Display all the passed arguments
+ *   for i = 1, #arg do
+ *     bot:globalMsg(arg[i])  -- These are strings; use Lua methods to convert to other types as needed
+ *   end
+ * @endcode
+
+ * Alterntively, if a coordinate pair has been passed to the bot (as two strings, "xxxx", "yyyy"):
+ *    x = tonumber(arg[1])
+ *    y = tonumber(arg[2])
+ *    dest = point.new(x, y)
+ * @endcode
+ * 
+ * @code
+ *   -- ~~~ IN A LEVELGEN SCRIPT THAT HAS SUBSCRIBED TO ShipSpawned EVENTS ~~~
+ *   -- Monitor all spawning ships, and if they're a bot, relocate them to 200,200.
+ *   function onShipSpawned(ship)
+ *       playerInfo = ship:getPlayerInfo()
+ *       if playerInfo:isRobot() then
+ *          ship.setPos(200, 200)
+ *    end
+ * @endcode
  */
 Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),   
                              LuaScriptRunner() 

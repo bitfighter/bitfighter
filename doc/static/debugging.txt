@@ -2,7 +2,7 @@
 
 @page debugging Debugging Tips
 
-Any of your scripts can print a stack trace with the \e _stackTracer() command (see sample usage below).  This will show how you got to a particular execution point, and will print the values of various variables and other potentially useful information.  This can be very helpful if there are several conditions under which a function can be called, or why something went wrong.  
+Any of your scripts can print a stack trace with the \e _stackTracer() command (see sample usage below).  This will show how you got to a particular execution point, and will print the values of various variables and other potentially useful information.  This can be very helpful if there are several conditions under which a function can be called, or why something went wrong.
 
 The \e print(msg) command will print a message the in-game console (which you can turn on with ctrl+/), and \e logprint(msg) will print a message to the console, the terminal, and the Bitfighter logfile.
 
@@ -17,5 +17,22 @@ logprint(_stackTracer())
 if target == nil then error("Have a nil target!") end
 assert(target, "Target should never be nil here!")
 \endcode
+
+Other tricks:
+
+There are a couple of other ways to get info out of a script.  None of these are appropriate for long term usage, but they do work well for quick and dirty debugging.
+
+Bots can print short messages to the global chat like so:
+
+\code
+bot:globalMsg("Status " .. status)
+\endcode
+
+Levelgens can do this as well, or print short messages by setting the status message:
+\code
+levelgen:globalMsg("success!")
+levelgen:announce("I'm at: " .. p.x .. "," .. p.y)
+\endcode
+
 
 */
