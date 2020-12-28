@@ -75,7 +75,7 @@ public:
 
    virtual void disableTriangulation();
 
-   Geometry *newCopy();
+   //Geometry *newCopy();
 
    virtual Rect calcExtents();
 
