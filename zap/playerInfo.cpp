@@ -206,7 +206,7 @@ S32 PlayerInfo::lua_getShip(lua_State *L)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// C++ Constructor
+// C++ Constructor  --> I don't think this is actually used --CE 12/28/2020
 RobotPlayerInfo::RobotPlayerInfo(Robot *robot)
 {
    mRobot = robot;
