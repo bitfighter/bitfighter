@@ -2422,8 +2422,8 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
    F32 vertexArray[2 * ASTEROID_POINTS];
    for(S32 i = 0; i < ASTEROID_POINTS; i++)
    {
-      vertexArray[2*i]     = AsteroidCoords[design][i][0] * scaleFact;
-      vertexArray[(2*i)+1] = AsteroidCoords[design][i][1] * scaleFact;
+      vertexArray[2*i]     = AsteroidCoords[design][i][0] * scaleFact * ASTEROID_SCALING_FACTOR;
+      vertexArray[(2*i)+1] = AsteroidCoords[design][i][1] * scaleFact * ASTEROID_SCALING_FACTOR;
    }
    renderVertexArray(vertexArray, ASTEROID_POINTS, GL_LINE_LOOP);
 
@@ -2444,7 +2444,7 @@ void renderAsteroidSpawn(const Point &pos, S32 time)
 
    F32 alpha = max(0.0f, 0.8f - time * invPeriod);
 
-   renderAsteroid(pos, 2, 0.1f, &Colors::green, alpha);
+   renderAsteroid(pos, 2, 9.f, &Colors::green, alpha);
 }
 
 
@@ -2456,7 +2456,7 @@ void renderAsteroidSpawnEditor(const Point &pos, F32 scale)
    glPushMatrix();
       glTranslatef(pos.x, pos.y, 0);
       glScalef(scale, scale, 1);
-      renderAsteroid(p, 2, .1f);
+      renderAsteroid(p, 2, 9.f);
 
       drawCircle(p, 13, &Colors::white);
    glPopMatrix();

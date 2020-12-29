@@ -298,6 +298,7 @@ public:
 
 static const S32 ASTEROID_DESIGNS = 4;
 static const S32 ASTEROID_POINTS = 12;
+static const F32 ASTEROID_SCALING_FACTOR = 1/89.0f;  // Where on earth does this come from?
 
 static const S8 AsteroidCoords[ASTEROID_DESIGNS][ASTEROID_POINTS][2] =   // <== Wow!  A 3D array!
 {

@@ -1457,9 +1457,9 @@ void VelocityItem::setInitialPosVelAng(const Point &pos, const Point &vel, F32 a
 
 TNL_IMPLEMENT_NETOBJECT(Asteroid);
 
-static const F32 ASTEROID_MASS_LAST_SIZE              = 1;
-static const F32 ASTEROID_RADIUS_MULTIPLYER_LAST_SIZE = 89 * 0.2f;
-static const F32 ASTEROID_SPEED                       = 250;
+static const F32 ASTEROID_MASS_SIZE1   = 0.5;   // Smallest asteroid mass
+static const F32 ASTEROID_RADIUS_SIZE1 = 8.9f;  // Smallest asteroid radius
+static const F32 ASTEROID_SPEED        = 250;
 
 
 
@@ -1533,13 +1533,13 @@ void Asteroid::setCurrentSize(S32 size)
 
 F32 Asteroid::getAsteroidRadius(S32 size_left)
 {
-   return ASTEROID_RADIUS_MULTIPLYER_LAST_SIZE / 2 * F32(1 << size_left);  // doubles for each size left
+   return ASTEROID_RADIUS_SIZE1 * F32(1 << size_left);  // doubles for each size left
 }
 
 
 F32 Asteroid::getAsteroidMass(S32 size_left)
 {
-   return ASTEROID_MASS_LAST_SIZE / 2 * F32(1 << size_left);  // doubles for each size left
+   return ASTEROID_MASS_SIZE1 * F32(1 << size_left);  // doubles for each size left
 }
 
 
@@ -1552,13 +1552,13 @@ bool Asteroid::shouldRender() const
 void Asteroid::renderItem(const Point &pos)
 {
    if(shouldRender())
-      renderAsteroid(pos, mDesign, mRadius / 89.f);
+      renderAsteroid(pos, mDesign, mRadius);
 }
 
 
 void Asteroid::renderDock()
 {
-   renderAsteroid(getActualPos(), 2, .1f);
+   renderAsteroid(getActualPos(), 2, 9.f);
 }
 
 
