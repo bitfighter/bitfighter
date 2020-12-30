@@ -2417,14 +2417,10 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
    glPushMatrix();
    glTranslate(pos);
 
+   glScale(scaleFact * ASTEROID_SCALING_FACTOR);
    glColor(color ? *color : Color(.7), alpha);
 
-   F32 vertexArray[2 * ASTEROID_POINTS];
-   for(S32 i = 0; i < ASTEROID_POINTS; i++)
-   {
-      vertexArray[2*i]     = AsteroidCoords[design][i][0] * scaleFact * ASTEROID_SCALING_FACTOR;
-      vertexArray[(2*i)+1] = AsteroidCoords[design][i][1] * scaleFact * ASTEROID_SCALING_FACTOR;
-   }
+   const F32 *vertexArray = AsteroidCoords[design];
    renderVertexArray(vertexArray, ASTEROID_POINTS, GL_LINE_LOOP);
 
    glPopMatrix();
