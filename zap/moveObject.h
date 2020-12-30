@@ -306,6 +306,7 @@ private:
    S32 mSizeLeft;
    bool hasExploded;
    S32 mDesign;
+   S32 mTeam;
 
 protected:
    enum MaskBits {
