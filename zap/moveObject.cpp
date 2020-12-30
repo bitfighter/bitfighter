@@ -12,6 +12,7 @@
 #include "gameConnection.h"
 #include "ship.h"
 #include "Zone.h"
+#include "Asteroid.h"
 
 #include "Colors.h"
 #include "GeomUtils.h"

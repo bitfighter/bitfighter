@@ -19,6 +19,7 @@
 #include "game.h"
 #include "VertexStylesEnum.h"
 #include "FontManager.h"
+#include "Asteroid.h"
 
 #include "Colors.h"
 
