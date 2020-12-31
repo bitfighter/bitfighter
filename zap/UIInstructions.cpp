@@ -887,7 +887,8 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
             break;
          case 23:    // Asteroid... using goofball factor to keep out of sync with Nexus graphic
             renderAsteroid(Point(0,-10), 
-                     (S32)(Platform::getRealMilliseconds() / 2891) % Asteroid::getDesignCount(), .7f);    
+                     (S32)(Platform::getRealMilliseconds() / 2891) % Asteroid::getDesignCount(),
+                     Asteroid::getAsteroidRadius(3));
             break;
          case 24:    // TestItem
             renderTestItem(mTestItemPoints);
