@@ -1556,7 +1556,7 @@ bool Asteroid::shouldRender() const
 void Asteroid::renderItem(const Point &pos)
 {
    if(shouldRender())
-      renderAsteroid(pos, mDesign, mRadius, getColor(), .7);
+      renderAsteroidForTeam(pos, mDesign, mRadius, getColor(), .7);
 }
 
 

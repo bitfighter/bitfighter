@@ -2417,9 +2417,12 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
 {
    glPushMatrix();
    glTranslate(pos);
-
    glScale(scaleFact * ASTEROID_SCALING_FACTOR);
-   glColor(color ? *color : Color(.7), alpha);
+
+   if(color == NULL)
+      glColor(Color(.7), alpha);  // Default gray
+   else
+      glColor(*color, alpha);     // Team color
 
    const F32 *vertexArray = AsteroidCoords[design];
    renderVertexArray(vertexArray, ASTEROID_POINTS, GL_LINE_LOOP);
@@ -2428,9 +2431,15 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
 }
 
 
-void renderAsteroid(const Point &pos, S32 design, F32 scaleFact)
+void renderAsteroidForTeam(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
 {
-   renderAsteroid(pos, design, scaleFact, NULL);
+   // Render internal colored part, scaled a little smaller
+   glLineWidth(gLineWidth4);
+   renderAsteroid(pos, design, 0.95 * scaleFact, color, alpha);
+   glLineWidth(gDefaultLineWidth);
+
+   // Render standard outline
+   renderAsteroid(pos, design, scaleFact, NULL, alpha);
 }
 
 
@@ -2453,7 +2462,7 @@ void renderAsteroidSpawnEditor(const Point &pos, const Color* color, F32 scale)
    glPushMatrix();
       glTranslatef(pos.x, pos.y, 0);
       glScalef(scale, scale, 1);
-      renderAsteroid(p, 2, 9.f, color, .7);
+      renderAsteroid(p, 2, 9.f, color, 0.8);
 
       drawCircle(p, 13, &Colors::white);
    glPopMatrix();
