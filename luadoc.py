@@ -63,7 +63,6 @@ def parse_files(files: List[str]):
 
         with open(file, "r") as filex:
 
-            writeFile = False
             enumIgnoreColumn = None
             enumName = "XXXXX"
             enumColumn = "XXXXX"
@@ -106,7 +105,6 @@ def parse_files(files: List[str]):
                         classes[xclass] = []
 
                     classes[xclass].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {xclass} {{ \n public:\n")
-                    writeFile = True
                     continue
 
                 #####
@@ -119,7 +117,6 @@ def parse_files(files: List[str]):
                     if xclass not in classes:
                         classes[xclass] = []
                     classes[xclass].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {xclass} : public {parent} {{ \n public:\n")
-                    writeFile = True
                     shortClassDescr = ""
                     longClassDescr = ""
                     continue
@@ -178,7 +175,6 @@ def parse_files(files: List[str]):
 
                         # This becomes our "constructor"
                         classes[xclass].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {xclass} {{ \npublic:\n")
-                        writeFile = True
 
                         # This is an ordinary "class method"
                         for method in staticMethods:
@@ -275,7 +271,6 @@ def parse_files(files: List[str]):
 
                         # And the dummy documentation -- the encounteredDoxygenCmd tells us to keep reading until we end the comment block
                         comments.append(f"\\fn {xclass}::{FUNCS_HEADER_MARKER}\n")
-                        writeFile = True
                         encounteredDoxygenCmd = True
 
                         continue
@@ -338,7 +333,6 @@ def parse_files(files: List[str]):
                         else:
                             globalfunctions.append(f"{retval} {method}({args}) {{ /* From '{line}' */ }}\n")
 
-                        writeFile = True
                         encounteredDoxygenCmd = True
 
                         continue
@@ -363,7 +357,6 @@ def parse_files(files: List[str]):
                         classes[xclass].append(f"class {match.groups()[0]} {{\n")
                         classes[xclass].append("public:\n")
 
-                        writeFile = True
                         encounteredDoxygenCmd = True
 
                         continue
@@ -472,7 +465,7 @@ def parse_files(files: List[str]):
 
 
         # If we added any lines to keepers, write it out... otherwise skip it!
-        if writeFile:
+        if globalfunctions or comments or classes:
             base, ext = os.path.splitext(os.path.basename(file))
             ext = ext.replace(".", "")
 
