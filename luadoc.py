@@ -55,6 +55,11 @@ def main():
     run_doxygen()
     post_process()
 
+class EnumMode:
+    NOT_COLLECTING = 0
+    LUA_ENUM_COMMENT = 1
+    CPP_DEFINE = 2
+
 
 def parse_files(files: List[str]):
     # Loop through all the files we found above...
@@ -73,7 +78,7 @@ def parse_files(files: List[str]):
             # collectingLongDescr = 0
             processing_long_comment = False
             processing_main_page = False
-            collectingEnumMode = 0
+            collectingEnumMode = EnumMode.NOT_COLLECTING
             descrColumn = 0
             encounteredDoxygenCmd = False
 
@@ -234,7 +239,7 @@ def parse_files(files: List[str]):
                     #                                $1        $2           $4           $6
                     match = re.search(r"\@luaenum\s+(\w+)\s*\((\d+)\s*(,\s*(\d+)\s*(,\s*(\d+))?)?\s*\)", line)
                     if match:
-                        collectingEnumMode = 1
+                        collectingEnumMode = EnumMode.LUA_ENUM_COMMENT
                         enumName = match.groups()[0]
                         enumColumn = match.groups()[1]
                         descrColumn = -1 if match.groups()[3] == "" else match.groups()[3]          # Optional
@@ -244,6 +249,17 @@ def parse_files(files: List[str]):
                         enums.append(f"/**\n  * \\@defgroup {enumName}Enum {enumName}\n")
 
                         continue
+                        # Parsing:
+                        # /**
+                        #   * @luaenum ClipType(1,1)
+                        #   * Supported operations for clipPolygon. For a description of the operations...
+                        #   */
+                        # #define CLIP_TYPE_TABLE \
+                        #     CLIP_TYPE_ITEM( Intersection, ClipperLib::ctIntersection ) \
+                        #     CLIP_TYPE_ITEM( Union,        ClipperLib::ctUnion) \
+                        #     CLIP_TYPE_ITEM( Difference,   ClipperLib::ctDifference ) \
+                        #     CLIP_TYPE_ITEM( Xor,          ClipperLib::ctXor ) \
+
 
                     # Look for @geom, and replace with @par Geometry \n
                     match = re.search(r"\@geom\s+(.*)$", line)
@@ -371,7 +387,7 @@ def parse_files(files: List[str]):
                     # Otherwise keep the line unaltered and put it in the appropriate array
                     if processing_main_page:
                         mainpage.append(line)
-                    elif collectingEnumMode:
+                    elif collectingEnumMode != EnumMode.NOT_COLLECTING:
                         enums.append(line)
                     elif encounteredDoxygenCmd:
                         comments.append(line)       # @code ends up here
@@ -399,20 +415,20 @@ def parse_files(files: List[str]):
                 #  * * %Weapon.%Bouncer
                 #  @}
 
-                if collectingEnumMode:
+                if collectingEnumMode != EnumMode.NOT_COLLECTING:
                     # If we get here we presume the @luaenum comment has been closed, and the next #define we see will begin the enum itself
                     # Enum will continue until we hit a line with no trailing \
                     match = re.search(r"#\s*define", line)
                     if match:
                         enums.append(r"\@\{\n")
                         enums.append(f"# {enumName}\n")   # Add the list header
-                        collectingEnumMode = 2
+                        collectingEnumMode = EnumMode.CPP_DEFINE
                         continue
 
-                    if collectingEnumMode == 1:
+                    if collectingEnumMode == EnumMode.LUA_ENUM_COMMENT:
                         continue     # Skip lines until we hit a #define
 
-                    # If we're here, collectingEnumMode == 2, and we're processing an enum definition line
+                    # If we're here, collectingEnumMode == EnumMode.CPP_DEFINE, and we're processing an enum definition line
                     line = re.sub(r"/\*.*?\*/", "", line)         # Remove embedded comments
                     if re.search(r"^\W*\\$", line):                # Skip any lines that have no \w chars, as long as they end in a backslash
                         continue
@@ -457,7 +473,7 @@ def parse_files(files: List[str]):
                         enums.append("@}\n");       # Close doxygen group block
                         enums.append("*/\n\n");     # Close comment
 
-                        collectingEnumMode = 0          # This enum is complete!
+                        collectingEnumMode = EnumMode.NOT_COLLECTING          # This enum is complete!
 
 
                     continue
