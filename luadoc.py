@@ -671,7 +671,7 @@ def move_class_names_to_inherited_tag(root: Any, ns: Dict[str, str], class_urls:
 def parse_member_name(memname: str) -> Optional[Tuple[str, str, str]]:
     """
     Given a string like "int BFObject::doMath", return ["int", "BfObject", "doMath"].
-    Not all parts are mandatory.
+    Some parts may be missing; if passed string does not contain "::", bail and return None.
     """
     if "::" not in memname:    # Not sure this check is necessary
         return None
