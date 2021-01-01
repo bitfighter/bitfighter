@@ -214,13 +214,13 @@ def parse_files(files: List[str]):
                     if re.search(comment_pattern, line):
                         comments.append("*/\n")
                         processing_long_comment = False
-                        processing_main_page    = False
+                        processing_main_page = False
                         encounteredDoxygenCmd = False
                         continue
 
                     if re.search(r"\@mainpage\s", line) or re.search(r"\@page\s", line):
                         mainpage.append(line)
-                        processing_main_page    = True
+                        processing_main_page = True
                         encounteredDoxygenCmd = True
                         continue
 
@@ -241,8 +241,8 @@ def parse_files(files: List[str]):
                         collectingEnum = 1
                         enumName = match.groups()[0]
                         enumColumn = match.groups()[1]
-                        descrColumn      = -1 if match.groups()[3] == "" else match.groups()[3]       # Optional
-                        enumIgnoreColumn = None if match.groups()[5] == "" else match.groups()[5]       # Optional
+                        descrColumn = -1 if match.groups()[3] == "" else match.groups()[3]          # Optional
+                        enumIgnoreColumn = None if match.groups()[5] == "" else match.groups()[5]   # Optional
                         encounteredDoxygenCmd = True
 
                         enums.append(f"/**\n  * \\@defgroup {enumName}Enum {enumName}\n")
