@@ -7,7 +7,7 @@ import os
 from glob import glob
 import re
 import subprocess
-from typing import List, Any
+from typing import List, Any, Dict, Optional, Tuple
 from lxml import etree
 from datetime import datetime
 
@@ -35,6 +35,8 @@ enums = []
 
 FUNCS_HEADER_MARKER = "DummyConstructor"
 
+NBSP = "&#160;"
+
 
 def main():
     # Collect some file names to process
@@ -47,7 +49,7 @@ def main():
     files.extend(glob(os.path.join(outpath, "../static/*.txt")))               # our static pages for general information and task-specific examples
 
 
-    files = [r"C:\dev\bitfighter/zap/ship.cpp"]
+    # files = [r"C:\dev\bitfighter/zap/ship.cpp"]
 
     parse_files(files)
     run_doxygen()
@@ -509,7 +511,7 @@ def parse_files(files: List[str]):
 
 def run_doxygen():
     os.chdir("doc")
-    subprocess.run(f"{doxygen_cmd} luadocs.doxygen")
+    subprocess.run(f"{doxygen_cmd} luadocs.doxygen luadocs_html_extra_stylesheet.css")
     os.chdir("..")
 
 
@@ -521,30 +523,20 @@ def post_process():
     os.chdir("doc")
 
     files = glob("./html/class_*.html")
-    # files = ['./html/class_ship.html']     # TODO delete me
 
     for file in files:
         print(".", end="", flush=True)
-        output = ""
+        cleaned_html = ""
 
         with open(file, "r") as infile:
 
             # Do some quick text cleanup as we read the file, but before we feed it to etree
             for line in infile:
-                # Replace nbsp with its equivalent; nbsp is making etree very unhappy...
-                line = line.replace("&nbsp;", "&#160;")
-                line = line.replace("&ndash;", "–")
-
-                # Remove the offending &nbsp that makes some )s appear in the wrong place
-                line = re.sub(r'(<td class="paramtype">.+)&#160;(</td>)', r"\1\2", line)        # &#160; is a nobsp char
-
-                line = re.sub(r"/* @license.*?\*/", "", line)       # These comments cause problems for some reason
-
-                output += line
+                cleaned_html += cleanup_html(line)
 
 
         # Do some fancier parsing with something that understands the document structure
-        root = etree.fromstring(output)     # type: ignore
+        root = etree.fromstring(cleaned_html)
 
         ns = {"x": "http://www.w3.org/1999/xhtml"}      # Namespace dict
 
@@ -605,14 +597,151 @@ def post_process():
                 parent.insert(1, new_element)
 
 
+        class_urls = get_class_urls(root, ns)
+
+        move_class_names_to_inherited_tag(root, ns, class_urls)
+        clean_up_method_sigs(root, ns)
+
+
+        # Delete any items we've marked for deletion
         for element in elements_to_delete:
             # print("deleting", etree.tostring(element, pretty_print=True).decode("utf-8"))
-            element.getparent().remove(element)
+            delete_node(element)
 
 
-        # file = "./html\\class_ship2.html"       # TODO delete me
         with open(file, "w") as outfile:
             outfile.write(etree.tostring(root, method="html").decode("utf-8"))
+
+
+def delete_node(element):
+    element.getparent().remove(element)
+
+
+def move_class_names_to_inherited_tag(root: Any, ns: Dict[str, str], class_urls: Dict[str, str]) -> None:
+    """ Move class names to inherited tag; this does not capture all of our classes, only the inherited ones. """
+    tables = root.xpath("//x:table[contains(.,'inherited')]", namespaces=ns)     # Matches entire table below
+    # <table class="mlabels">
+    #   <tr>
+    #     <td class="mlabels-left">
+    #         <table class="memname">
+    #           <tr>
+    #             <td class="memname">BfObject::setGeom </td>                         <=== Move BfObject from here...
+    #             <td>(</td>
+    #             <td class="paramtype"><a class="el" href="class_geom.html">Geom</a></td>
+    #             <td class="paramname"><em>geometry</em></td>
+    #             <td>)</td>
+    #             <td></td>
+    #           </tr>
+    #         </table>
+    #     </td>
+    #     <td class="mlabels-right">
+    #         <span class="mlabels"><span class="mlabel">inherited</span></span>      <=== ...to here
+    #     </td>
+    #   </tr>
+    # </table>
+
+    for table in tables:
+        memnames = table.xpath(".//x:td[@class='memname']/text()", namespaces=ns)
+        if not memnames:
+            continue
+        assert len(memnames) == 1
+
+        parts = parse_member_name(memnames[0])
+
+        if not parts:
+            continue
+
+        ret_type, xclass, fn = parts
+
+
+        inherited_elements = table.xpath(".//x:span[@class='mlabel' and text()='inherited']", namespaces=ns)
+        if inherited_elements:
+            assert len(inherited_elements) == 1
+            # inherited_elements[0].text = f"inherited from {xclass}"
+
+            html = f'inherited from {xclass}'
+            if xclass in class_urls:        # Use the URL if we have one
+                html = f'<a href="{class_urls[xclass]}">{html}</a>'
+            inherited_from = etree.fromstring(html)
+
+            inherited_elements[0].clear()
+            inherited_elements[0].insert(1, inherited_from)
+
+
+def parse_member_name(memname: str) -> Optional[Tuple[str, str, str]]:
+    """
+    Given a string like "int BFObject::doMath", return ["int", "BfObject", "doMath"].
+    Not all parts are mandatory.
+    """
+    if "::" not in memname:    # Not sure this check is necessary
+        return None
+
+    xclass, fn = memname.split("::")
+
+    if " " in xclass:
+        ret_type, xclass = xclass.split(" ")
+    else:
+        ret_type = ""
+
+    return ret_type, xclass, fn
+
+
+def clean_up_method_sigs(root: Any, ns: Dict[str, str]) -> None:
+    # Spiff up method signatures (looking for inner tables found above, but this time even ones without adjacent inherited tags)
+    tables = root.xpath("//x:table[@class='memname']", namespaces=ns)
+    # <table class="memname">
+    #   <tr>
+    #     <td class="memname">BfObject::setGeom </td>                       <=== "BfObject::setGeom" to "setGeom"
+    #     <td>(</td>
+    #     <td class="paramtype"><a class="el" href="class_geom.html">Geom</a></td>
+    #     <td class="paramname"><em>geometry</em></td>
+    #     <td>)</td>
+    #     <td></td>                                                         <=== Add "-> <return type>" to this cell
+    #   </tr>
+    # </table>
+
+    for table in tables:
+        memnames = table.xpath(".//x:td[@class='memname']/text()", namespaces=ns)
+
+        parts = parse_member_name(memnames[0])
+
+        if not parts:
+            continue
+
+        ret_type, xclass, function_name = parts
+
+        # table.xpath(".//x:td[@class='memname']", namespaces=ns)[0].text = function_name    # Remove class and return
+        cells = table.xpath(".//x:td", namespaces=ns)
+        cells[0].clear()
+        cells[0].text = function_name
+        # cells[-1].text = f"-> {ret_type if ret_type else 'nil'}"      # Add return type to end of row
+
+        param_types = table.xpath(".//x:td[@class='paramtype']", namespaces=ns)
+        param_names = table.xpath(".//x:td[@class='paramname']", namespaces=ns)
+
+        # These lists will be imbalanced if there are no args... for some reason doxygen inserts an empty
+        # <td class="paramname"></td> tag when there are no args, but does not also include it's corresponding
+        # <td class="paramtype"></td>.
+        if len(param_types) == len(param_names):
+            argstrs = []
+            for i in range(len(param_types)):
+                # Use itertext() to burrow into any inner tags and grab all the text
+                param_name = "".join(param_names[i].itertext()).replace(",", "")
+                param_type = "".join(param_types[i].itertext()).replace(",", "")
+                argstrs.append(f'<span class="paramname">{param_name}</span>: <span class="paramtype">{param_type}</span>')
+
+                delete_node(param_types[i])     # Won't be needing this!
+
+            # The argline styles are defined in luadocs_html_extra_stylesheet.css
+            new_row = etree.fromstring(f"""
+                <tr class="nofloat argline">
+                    <td colspan="{len(cells)}">
+                        <span class="argtypes">Arg types:</span>
+                        {", ".join(argstrs)}{NBSP * 2}|{NBSP * 2}returns <span class="returntype">{ret_type if ret_type else 'nil'}</span>
+                    </td>
+                </tr>
+            """)
+            table.append(new_row)
 
 
 # https://stackoverflow.com/questions/65506059/how-can-i-get-the-text-from-this-html-snippet-using-lxml
@@ -623,6 +752,42 @@ def replace_text(root: Any, search_str: str, replace_str: str):
             elem.text = elem.text.replace(search_str, replace_str)
         elif elem.tail and search_str in elem.tail:
             elem.tail = elem.tail.replace(search_str, replace_str)
+
+
+def get_class_urls(root: Any, ns: Dict[str, str]) -> Dict[str, str]:
+    """
+    Build a list of URLs for each parent class. These are convenitely available in the
+    map associated with the class hiearchy at the top of each page.
+    """
+    areas = root.xpath("//x:map/x:area", namespaces=ns)
+    # <map id="Ship_map" name="Ship_map">
+    #   <area href="class_move_object.html" title="Parent class of most things that move (except bullets)." alt="MoveObject" shape="rect" coords="0,112,81,136">
+    #   <area href="class_item.html" title="Parent class for most common game items." alt="Item" shape="rect" coords="0,56,81,80">
+    #   <area href="class_bf_object.html" alt="BfObject" shape="rect" coords="0,0,81,24">
+    #   <area href="class_robot.html" alt="Robot" shape="rect" coords="0,224,81,248">
+    # </map>
+    class_urls = {}
+    for area in areas:
+        class_urls[area.get("alt")] = area.get("href")
+
+    return class_urls
+
+
+def cleanup_html(line: str) -> str:
+    """
+    These things seem to anger lxml for some reason... let's make it happy.
+    These commands are run on the raw file, before lxml starts parsing.
+    """
+    # Replace these with their equivalents
+    line = line.replace("&nbsp;", NBSP)
+    line = line.replace("&ndash;", "–")
+
+    # Remove the offending &nbsp that makes some )s appear in the wrong place
+    line = re.sub(r'(<td class="paramtype">.+)&#160;(</td>)', r"\1\2", line)        # &#160; is a nobsp char
+
+    line = re.sub(r"/* @license.*?\*/", "", line)       # These comments cause problems for some reason
+
+    return line
 
 
 

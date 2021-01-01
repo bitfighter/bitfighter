@@ -1,4 +1,46 @@
+
+
 /* Cause function params to all be contained on a single line rather than broken over multiple lines */
-.memname tr { 
-   float:left; 
-}  
+.memname tr {
+   float:left;
+}
+
+tr.nofloat {
+   float: none;
+}
+
+/* Styling for the inherited links over a the right */
+span.mlabels a {
+   background-color: #728DC1;
+   border-top:1px solid #5373B4;
+   border-left:1px solid #5373B4;
+   border-right:1px solid #C4CFE5;
+   border-bottom:1px solid #C4CFE5;
+   text-shadow: none;
+   color: white;
+   margin-right: 4px;
+   padding: 3px 4px 5px;      /* Top, left/right, bottom */
+   border-radius: 3px;
+   font-size: 7pt;
+   white-space: nowrap;
+   vertical-align: middle;
+   text-decoration: underline;
+}
+span.mlabels a:visited {
+   color: white;
+}
+
+/* Parameter lists in function documentation */
+.argline span.argtypes {
+   /* font-style: italic; */
+   font-size: smaller;
+}
+.argline span.paramname {
+   font-weight: bold;
+}
+.argline span.paramtype {
+
+}
+.argline span.returntype {
+
+}
