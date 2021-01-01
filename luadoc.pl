@@ -249,6 +249,7 @@ foreach my $file (@files) {
 
             # Add our new sig to the list
             if($class) {
+               $line =~ s/^\s+//;
                push(@{$classes{$class}}, "$staticness $retval $method($args) { /* From '$line' */ }\n");
             } else {
                push(@globalfunctions, "$retval $method($args) { /* From '$line' */ }\n");
