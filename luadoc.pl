@@ -87,7 +87,7 @@ foreach my $file (@files) {
       if( $line =~ m|REGISTER_LUA_SUBCLASS *\( *(.+?) *, *(.+?) *\)| ) {
          my $class = $1;
          my $parent = $2;
-         unshift(@{$classes{$class}}, "$shortClassDescr\n$longClassDescr\nclass $class : public $parent { \n public:\n");    
+         unshift(@{$classes{$class}}, "$shortClassDescr\n$longClassDescr\nclass $class : public $parent { \n public:\n");
          $writeFile = 1;
          $shortClassDescr = "";
          $longClassDescr = "";
@@ -184,7 +184,7 @@ foreach my $file (@files) {
 
          # Check the regexes here: http://www.regexe.com
          # Handle Lua enum defs: "@luaenum ObjType(2)" or "@luaenum ObjType(2,1,4)"  1, 2, or 3 nums are ok
-         #                            $1        $2           $4           $6  
+         #                            $1        $2           $4           $6
          if( $line =~ m|\@luaenum\s+(\w+)\s*\((\d+)\s*(,\s*(\d+)\s*(,\s*(\d+))?)?\s*\)| ) {
             $collectingEnum = 1;
             $enumName = $1;
@@ -208,7 +208,7 @@ foreach my $file (@files) {
          }
 
          # Look for:  * @luafunc  retval BfObject::getClassID(p1, p2); retval and p1/p2 are optional
-         if( $line =~ m|\@luafunc\s+(.*)$| ) {     
+         if( $line =~ m|\@luafunc\s+(.*)$| ) {
             # In C++ code, we use "::" to separate classes from functions (class::func); in Lua, we use "." (class.func).
             my $sep = ($file =~ m|\.lua$|) ? "[.:]" : "::";
 
@@ -216,7 +216,7 @@ foreach my $file (@files) {
             $line =~ m|.*?\@luafunc\s+(static\s+)?(\w+\s+)?(?:(\w+)$sep)?(.+?)\((.*)\)|;    # Grab retval, class, method, and args from $line
 
             my $staticness = $1;
-            my $retval = $2 eq "" ? "void" : $2;                              # Retval is optional, use void if omitted            
+            my $retval = $2 eq "" ? "void" : $2;                              # Retval is optional, use void if omitted
             my $voidlessRetval = $2;
             my $class  = $3; # If no class is given the function is assumed to be global
             my $method = $4 || die "Couldn't get method name from $line\n";  # Must have a method
@@ -309,7 +309,7 @@ foreach my $file (@files) {
       #  #define WEAPON_ITEM_TABLE \
       #    WEAPON_ITEM(WeaponPhaser,     "Phaser",      "Phaser",     100,   500,   500,  600, 1000, 0.21f,  0,       false, ProjectilePhaser ) \
       #    WEAPON_ITEM(WeaponBounce,     "Bouncer",     "Bouncer",    100,  1800,  1800,  540, 1500, 0.15f,  0.5f,    false, ProjectileBounce ) \
-      #  
+      #
       #
       # Make this:
       # /** @defgroup WeaponEnum Weapon
@@ -319,7 +319,7 @@ foreach my $file (@files) {
       #  * __Weapon__
       #  * * %Weapon.%Phaser
       #  * * %Weapon.%Bouncer
-      #  @} 
+      #  @}
 
       if($collectingEnum) {
          # If we get here we presume the @luaenum comment has been closed, and the next #define we see will begin the enum itself
@@ -345,7 +345,7 @@ foreach my $file (@files) {
             my @words = $string =~ m/("[^"]+"|[^,]+)(?:,\s*)?/g;
 
             # Skip items marked as not to be shared with Lua... see #define TYPE_NUMBER_TABLE for example
-            next if($enumIgnoreColumn != -1 && $words[$enumIgnoreColumn] eq "false");     
+            next if($enumIgnoreColumn != -1 && $words[$enumIgnoreColumn] eq "false");
 
             $enumDescr = $descrColumn != -1 ? $words[$descrColumn] : "";
 
@@ -409,8 +409,8 @@ foreach my $file (@files) {
 
       print $OUT "\n\n// What follows is a dump of the \@comments varaible\n\n";
       print $OUT @comments;
-      
-      close $OUT;           
+
+      close $OUT;
    }
    close $IN;
 }
@@ -421,14 +421,14 @@ my $outfile = $outpath . "main_page_content.h";
 open my $OUT, '>', $outfile || die "Can't open $outfile for writing: $!";
 
 print $OUT "// This file was generated automatically from the C++ source to feed doxygen.  It will be overwritten.\n\n\n";
-  
+
 print $OUT "/**\n";
 print $OUT @mainpage;
 print $OUT "*/\n";
 
 print $OUT @enums;
 
-close $OUT;   
+close $OUT;
 
 # Finally, launch doxygen
 chdir("doc");
