@@ -264,3 +264,9 @@ lua/luajit/src/luajit.lib
 lua/luajit/src/minilua.exp
 
 lua/luajit/src/minilua.lib
+
+doc/html/
+
+doc/temp-doxygen-pl/
+
+doc/temp-doxygen/
