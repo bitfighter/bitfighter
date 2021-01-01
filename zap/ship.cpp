@@ -36,13 +36,6 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(Ship);
 
-/**
- * @luafunc Ship::Ship(XXXXX)
- *
- * Ships cannot be created from a script.  Sorry!  You might be able to do
- * what you want by spawning a Robot.
- */
-
 #ifdef _MSC_VER
 #  pragma warning(disable:4355)
 #endif
@@ -2374,6 +2367,16 @@ GENERATE_LUA_FUNARGS_TABLE(Ship, LUA_METHODS);
 const char *Ship::luaClassName = "Ship";
 REGISTER_LUA_SUBCLASS(Ship, MoveObject);
 
+
+/**
+ * @luafuncsheader Ship
+ *
+ * \warning There is no Lua constructor for Ships; they cannot be created from a script.  Sorry!  
+ * You might be able to do what you want by spawning a Robot.
+ */
+
+  
+
 // Note: All of these methods will return nil if the ship in question has been deleted.
 
 /**
@@ -2395,7 +2398,6 @@ S32 Ship::lua_isAlive(lua_State *L)    { return returnBool(L, !isDestroyed()); }
  */
 S32 Ship::lua_hasFlag(lua_State *L)    { return returnBool (L, getFlagCount() > 0); }
 
-
 /**
  * @luafunc int Ship::getFlagCount()
  *
@@ -2414,7 +2416,6 @@ S32 Ship::lua_getFlagCount(lua_State *L) { return returnInt(L, getFlagCount()); 
  * @return The LuaPlayerInfo for this Ship.
  */
 S32 Ship::lua_getPlayerInfo(lua_State *L) { return returnPlayerInfo(L, this); }
-
 
 /**
  * @luafunc num Ship::getAngle()

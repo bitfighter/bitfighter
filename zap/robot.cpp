@@ -1285,6 +1285,9 @@ S32 Robot::lua_teamMsg(lua_State *L)
  * 
  * @brief Send a private message to a player.
  * 
+ * @descr Currently, no events are fired for private messages, so they cannot
+ * be received by bots.
+ * 
  * @param message Message to send.
  * 
  * @param playerName Name of player to which to send a message.

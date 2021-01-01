@@ -27,8 +27,6 @@ using namespace LuaArgs;
 
 Vector<Point> Barrier::mRenderLineSegments;
 
-
-
 // Constructor
 WallRec::WallRec(F32 width, bool solid, const Vector<F32> &verts)
 {
