@@ -233,11 +233,11 @@ void renderTestItem(const Point &pos, S32 size, F32 alpha = 1);
 //void renderTestItem(const Point &pos, S32 size, F32 alpha = 1);
 void renderTestItem(const Vector<Point> &points, F32 alpha = 1);
 
-void renderAsteroid(const Point &pos, S32 design, F32 scaleFact);
-void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha = 1);
+void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color = NULL, F32 alpha = 1);
+void renderAsteroidForTeam(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha);
 
-void renderAsteroidSpawn(const Point &pos, S32 time);
-void renderAsteroidSpawnEditor(const Point &pos, F32 scale = 1.0);
+void renderAsteroidSpawn(const Point &pos, S32 time, const Color* color);
+void renderAsteroidSpawnEditor(const Point &pos, const Color* color, F32 scale = 1.0);
 
 void renderResourceItem(const Vector<Point> &points, F32 alpha = 1);
 //void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);

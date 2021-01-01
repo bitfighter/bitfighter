@@ -19,6 +19,7 @@
 #include "game.h"
 #include "VertexStylesEnum.h"
 #include "FontManager.h"
+#include "Asteroid.h"
 
 #include "Colors.h"
 
@@ -2416,39 +2417,44 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
 {
    glPushMatrix();
    glTranslate(pos);
+   glScale(scaleFact * ASTEROID_SCALING_FACTOR);
 
-   glColor(color ? *color : Color(.7), alpha);
+   if(color == NULL)
+      glColor(Color(.7), alpha);  // Default gray
+   else
+      glColor(*color, alpha);     // Team color
 
-   F32 vertexArray[2 * ASTEROID_POINTS];
-   for(S32 i = 0; i < ASTEROID_POINTS; i++)
-   {
-      vertexArray[2*i]     = AsteroidCoords[design][i][0] * scaleFact;
-      vertexArray[(2*i)+1] = AsteroidCoords[design][i][1] * scaleFact;
-   }
+   const F32 *vertexArray = AsteroidCoords[design];
    renderVertexArray(vertexArray, ASTEROID_POINTS, GL_LINE_LOOP);
 
    glPopMatrix();
 }
 
 
-void renderAsteroid(const Point &pos, S32 design, F32 scaleFact)
+void renderAsteroidForTeam(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
 {
-   renderAsteroid(pos, design, scaleFact, NULL);
+   // Render internal colored part, scaled a little smaller
+   glLineWidth(gLineWidth4);
+   renderAsteroid(pos, design, 0.95 * scaleFact, color, alpha);
+   glLineWidth(gDefaultLineWidth);
+
+   // Render standard outline
+   renderAsteroid(pos, design, scaleFact, NULL, alpha);
 }
 
 
-void renderAsteroidSpawn(const Point &pos, S32 time)
+void renderAsteroidSpawn(const Point &pos, S32 time, const Color* color)
 {
    static const S32 period = 4096;  // Power of 2 please
    static const F32 invPeriod = 1 / F32(period);
 
    F32 alpha = max(0.0f, 0.8f - time * invPeriod);
 
-   renderAsteroid(pos, 2, 0.1f, &Colors::green, alpha);
+   renderAsteroid(pos, 2, 9.0f, color, alpha);
 }
 
 
-void renderAsteroidSpawnEditor(const Point &pos, F32 scale)
+void renderAsteroidSpawnEditor(const Point &pos, const Color* color, F32 scale)
 {
    scale *= 0.8f;
    static const Point p(0,0);
@@ -2456,7 +2462,7 @@ void renderAsteroidSpawnEditor(const Point &pos, F32 scale)
    glPushMatrix();
       glTranslatef(pos.x, pos.y, 0);
       glScalef(scale, scale, 1);
-      renderAsteroid(p, 2, .1f);
+      renderAsteroid(p, 2, 9.f, color, 0.8);
 
       drawCircle(p, 13, &Colors::white);
    glPopMatrix();

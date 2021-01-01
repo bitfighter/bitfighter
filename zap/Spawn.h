@@ -183,6 +183,9 @@ public:
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false);
    void renderDock();
 
+   bool processArguments(S32 argc, const char** argv, Game* game);
+   string toLevelCode() const;
+
    TNL_DECLARE_CLASS(AsteroidSpawn);
    TNL_DECLARE_RPC(s2cSetTimeUntilSpawn, (S32 millis));
 

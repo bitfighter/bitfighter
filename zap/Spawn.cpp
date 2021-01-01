@@ -492,7 +492,7 @@ void AsteroidSpawn::spawn()
    F32 ang = TNL::Random::readF() * Float2Pi;
 
    asteroid->setPosAng(getPos(), ang);
-
+   asteroid->setTeam(getTeam());
    asteroid->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
    s2cSetTimeUntilSpawn(mTimer.getCurrent());
 }
@@ -504,6 +504,8 @@ U32 AsteroidSpawn::packUpdate(GhostConnection *connection, U32 updateMask, BitSt
 
    if(stream->writeFlag(updateMask & InitialMask))
       ((GameConnection *) connection)->writeCompressedPoint(getPos(), stream);
+   if (updateMask & InitialMask)
+      writeThisTeam(stream);
 
    return 0; // retMask;
 }
@@ -517,7 +519,9 @@ void AsteroidSpawn::unpackUpdate(GhostConnection *connection, BitStream *stream)
       ((GameConnection *) connection)->readCompressedPoint(pos, stream);
 
       setPos(pos);      // Also sets object extent
+      readThisTeam(stream);
    }
+   
 }
 
 
@@ -528,7 +532,7 @@ void AsteroidSpawn::renderLayer(S32 layerIndex)
    if(layerIndex != -1)
       return;
 
-   renderAsteroidSpawn(getPos(), mTimer.getCurrent());
+   renderAsteroidSpawn(getPos(), mTimer.getCurrent(), getColor());
 #endif
 }
 
@@ -536,7 +540,7 @@ void AsteroidSpawn::renderLayer(S32 layerIndex)
 void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
 #ifndef ZAP_DEDICATED
-   renderAsteroidSpawnEditor(getPos(), 1/currentScale);
+   renderAsteroidSpawnEditor(getPos(), getColor(), 1/currentScale);
 #endif
 }
 
@@ -544,8 +548,42 @@ void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEna
 void AsteroidSpawn::renderDock()
 {
 #ifndef ZAP_DEDICATED
-   renderAsteroidSpawnEditor(getPos());
+   renderAsteroidSpawnEditor(getPos(), getColor());
 #endif
+}
+
+bool AsteroidSpawn::processArguments(S32 argc, const char** argv, Game* game)
+{
+   if (argc < 2)
+      return false;
+
+   Point pos;
+   pos.read(argv);
+   pos *= game->getLegacyGridSize();
+   for (S32 i = 0; i < argc; i++) 
+   {
+      char firstChar = argv[i][0];    // First character of arg
+
+      if ((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z')) //if argument doesn't just start with a number
+      {
+         if (!strnicmp(argv[i], "Team=", 5))
+            setTeam(atoi(&argv[i][5])); //set team to character 5 on this argument, indexed at 0 (Team=4)
+      }
+   }
+
+   setPos(pos);
+
+   S32 time = (argc > 2) ? atoi(argv[2]) : getDefaultRespawnTime();
+
+   setRespawnTime(time);
+
+   updateExtentInDatabase();
+
+   return true;
+}
+string AsteroidSpawn::toLevelCode() const
+{
+   return Parent::toLevelCode() + " Team=" + itos(getTeam());
 }
 
 
@@ -637,6 +675,7 @@ bool FlagSpawn::processArguments(S32 argc, const char **argv, Game *game)
       return false;
 
    setTeam(atoi(argv[0]));
+
    
    return Parent::processArguments(argc - 1, argv + 1, game);     // then read the rest of the args
 }

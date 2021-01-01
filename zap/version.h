@@ -13,7 +13,7 @@
 #define MASTER_PROTOCOL_VERSION 8  // Change this when releasing an incompatible cm/sm protocol (must be int)
                                    // MASTER_PROTOCOL_VERSION = 4, client 015a and older (CS_PROTOCOL_VERSION <= 32) can not connect to our new master.
 
-#define CS_PROTOCOL_VERSION 40     // Change this when releasing an incompatible cs protocol (must be int)
+#define CS_PROTOCOL_VERSION 41     // Change this when releasing an incompatible cs protocol (must be int)
 // 016 = 33 
 // 017[ab] = 35
 // 018[a] = 36
@@ -21,6 +21,7 @@
 // 019 = 38
 // 020 = 39 (abandoned)
 // 021 = 40
+// 022 = 41
 
 // Commit number:  since migration to git, this can be found by:
 //    git rev-list --all --count

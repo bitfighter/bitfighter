@@ -12,6 +12,7 @@
 #include "gameConnection.h"
 #include "ship.h"
 #include "Zone.h"
+#include "Asteroid.h"
 
 #include "Colors.h"
 #include "GeomUtils.h"
@@ -742,10 +743,13 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
          damageInfo.damagingObject = asteroid;
          damageInfo.impulseVector = getActualVel();
 
-         ship->damageObject(&damageInfo);
+         if (ship->getTeam() != asteroid->getTeam())
+         {
+            ship->damageObject(&damageInfo);
+         } 
 
-         // Damage asteroid unless a shield is up
-         if(!ship->isModulePrimaryActive(ModuleShield) && ship->mSpawnShield.getCurrent() == 0)
+         // Damage asteroid unless a shield is up or asteroid and ship are same team - remove to make asteroids break on collision
+         if(!ship->isModulePrimaryActive(ModuleShield) && ship->mSpawnShield.getCurrent() == 0 && ship->getTeam() != asteroid->getTeam())
          {
             damageInfo.damagingObject = ship;
             asteroid->damageObject(&damageInfo);
@@ -1457,9 +1461,9 @@ void VelocityItem::setInitialPosVelAng(const Point &pos, const Point &vel, F32 a
 
 TNL_IMPLEMENT_NETOBJECT(Asteroid);
 
-static const F32 ASTEROID_MASS_LAST_SIZE              = 1;
-static const F32 ASTEROID_RADIUS_MULTIPLYER_LAST_SIZE = 89 * 0.2f;
-static const F32 ASTEROID_SPEED                       = 250;
+static const F32 ASTEROID_MASS_SIZE1   = 0.5;   // Smallest asteroid mass
+static const F32 ASTEROID_RADIUS_SIZE1 = 8.9f;  // Smallest asteroid radius
+static const F32 ASTEROID_SPEED        = 250;
 
 
 
@@ -1533,13 +1537,13 @@ void Asteroid::setCurrentSize(S32 size)
 
 F32 Asteroid::getAsteroidRadius(S32 size_left)
 {
-   return ASTEROID_RADIUS_MULTIPLYER_LAST_SIZE / 2 * F32(1 << size_left);  // doubles for each size left
+   return ASTEROID_RADIUS_SIZE1 * F32(1 << size_left);  // doubles for each size left
 }
 
 
 F32 Asteroid::getAsteroidMass(S32 size_left)
 {
-   return ASTEROID_MASS_LAST_SIZE / 2 * F32(1 << size_left);  // doubles for each size left
+   return ASTEROID_MASS_SIZE1 * F32(1 << size_left);  // doubles for each size left
 }
 
 
@@ -1552,13 +1556,13 @@ bool Asteroid::shouldRender() const
 void Asteroid::renderItem(const Point &pos)
 {
    if(shouldRender())
-      renderAsteroid(pos, mDesign, mRadius / 89.f);
+      renderAsteroidForTeam(pos, mDesign, mRadius, getColor(), .7);
 }
 
 
 void Asteroid::renderDock()
 {
-   renderAsteroid(getActualPos(), 2, .1f);
+   renderAsteroid(getActualPos(), 2, 9.f, getColor(), 1);
 }
 
 
@@ -1566,7 +1570,9 @@ const char *Asteroid::getOnScreenName()     { return "Asteroid";  }
 const char *Asteroid::getPrettyNamePlural() { return "Asteroids"; }
 const char *Asteroid::getOnDockName()       { return "Ast.";      }
 const char *Asteroid::getEditorHelpString() { return "Shootable asteroid object.  Just like the arcade game."; }
-
+//const bool *Asteroid::hasTeam();
+//const bool* Asteroid::canBeHostile();
+//const bool* Asteroid::canBeNeutral();
 
 F32 Asteroid::getEditorRadius(F32 currentScale)
 {
@@ -1619,6 +1625,7 @@ void Asteroid::damageObject(DamageInfo *damageInfo)
    newItem->mSizeLeft = mSizeLeft;
    newItem->setRadius(getAsteroidRadius(mSizeLeft));
    newItem->setMass(getAsteroidMass(mSizeLeft));
+   newItem->setTeam(getTeam());
 
    F32 ang2;
    do
@@ -1639,7 +1646,8 @@ U32 Asteroid::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    {
       stream->writeInt(mSizeLeft, ASTEROID_SIZELEFT_BIT_COUNT);
    }
-
+   if(updateMask & InitialMask)
+      writeThisTeam(stream);
    stream->writeFlag(hasExploded);
 
    return retMask;
@@ -1665,6 +1673,8 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
             getGame()->playSoundEffect(SFXAsteroidLargeExplode, getRenderPos());
       }
    }
+   if (mInitial)
+      readThisTeam(stream);
 
    bool explode = (stream->readFlag());     // Exploding!  Take cover!!
 
@@ -1727,6 +1737,8 @@ bool Asteroid::processArguments(S32 argc2, const char **argv2, Game *game)
       {
          if(!strnicmp(argv2[i], "Size=", 5))
             mSizeLeft = atoi(&argv2[i][5]);
+         if(!strnicmp(argv2[i], "Team=", 5))
+            setTeam(atoi(&argv2[i][5])); //set team to character 5 on this argument, indexed at 0 (Team=4)
       }
       else
       {
@@ -1737,6 +1749,7 @@ bool Asteroid::processArguments(S32 argc2, const char **argv2, Game *game)
          }
       }
    }
+
    setRadius(getAsteroidRadius(mSizeLeft));
    setMass(getAsteroidMass(mSizeLeft));
 
@@ -1746,10 +1759,7 @@ bool Asteroid::processArguments(S32 argc2, const char **argv2, Game *game)
 
 string Asteroid::toLevelCode() const
 {
-   if(mSizeLeft != ASTEROID_INITIAL_SIZELEFT)
-      return Parent::toLevelCode() + " Size=" + itos(mSizeLeft);
-   else
-      return Parent::toLevelCode();
+   return Parent::toLevelCode() + " Size=" + itos(mSizeLeft) + " Team=" + itos(getTeam());
 }
 
 
@@ -1867,7 +1877,6 @@ S32 Asteroid::lua_setSize(lua_State *L)
 {
    checkArgList(L, functionArgs, "Asteroid", "setSize");
    S32 size = getInt(L, 1);
-
    if(size <= 0)
       mSizeLeft = ASTEROID_INITIAL_SIZELEFT;
    else
