@@ -3,13 +3,17 @@
 
 # Works with doxygen verison 1.9.0
 
+# TODO: UIMenuItems_cpp.h
+
 import os
 from glob import glob
 import re
+import sys
 import subprocess
 from typing import List, Any, Dict, Optional, Tuple
 from lxml import etree
 from datetime import datetime
+import shlex
 
 # Need to be in the doc directory
 doc_dir = "doc"
@@ -31,6 +35,7 @@ doxygen_cmd = r"C:\Program Files\doxygen\bin\doxygen.exe"
 
 # These are items we collect and build up over all pages, and they will get written to a special .h file at the end
 mainpage = []
+otherpage = []
 enums = []
 
 FUNCS_HEADER_MARKER = "DummyConstructor"
@@ -63,23 +68,25 @@ class EnumMode:
 
 def parse_files(files: List[str]):
     # Loop through all the files we found above...
-    for file in files:
-        print(f"Processing {os.path.basename(file)}...")
+    for file_cnt, file in enumerate(files):
+        # print(f"Processing {os.path.basename(file)}...", end="", flush=True)
+        update_progress(file_cnt / len(files), os.path.basename(file))
 
         with open(file, "r") as filex:
 
-            enumIgnoreColumn = None
-            enumName = "XXXXX"
-            enumColumn = "XXXXX"
+            enumIgnoreColumn: Optional[int] = None
+            enumName = ""
+            enumColumn: int = -1
 
             # Various modes we could be in
-            collectingMethods = 0
-            collectingStaticMethods = 0
+            collectingMethods = False
+            collectingStaticMethods = False
             # collectingLongDescr = 0
             processing_long_comment = False
             processing_main_page = False
+            processing_other_page = False
             collectingEnumMode = EnumMode.NOT_COLLECTING
-            descrColumn = 0
+            descrColumn: Optional[int] = None
             encounteredDoxygenCmd = False
 
             luafile = file.endswith(".lua")   # Are we processing a .lua file?
@@ -216,12 +223,19 @@ def parse_files(files: List[str]):
                         comments.append("*/\n")
                         processing_long_comment = False
                         processing_main_page = False
+                        processing_other_page = False
                         encounteredDoxygenCmd = False
                         continue
 
-                    if re.search(r"\@mainpage\s", line) or re.search(r"\@page\s", line):
+                    if re.search(r"@mainpage\s", line):
                         mainpage.append(line)
                         processing_main_page = True
+                        encounteredDoxygenCmd = True
+                        continue
+
+                    if re.search(r"@page\s", line):
+                        mainpage.append(line)
+                        processing_other_page = True
                         encounteredDoxygenCmd = True
                         continue
 
@@ -237,16 +251,16 @@ def parse_files(files: List[str]):
                     # Check the regexes here: http://www.regexe.com
                     # Handle Lua enum defs: "@luaenum ObjType(2)" or "@luaenum ObjType(2,1,4)"  1, 2, or 3 nums are ok
                     #                                $1        $2           $4           $6
-                    match = re.search(r"\@luaenum\s+(\w+)\s*\((\d+)\s*(,\s*(\d+)\s*(,\s*(\d+))?)?\s*\)", line)
+                    match = re.search(r"@luaenum\s+(\w+)\s*\((\d+)\s*(,\s*(\d+)\s*(,\s*(\d+))?)?\s*\)", line)
                     if match:
                         collectingEnumMode = EnumMode.LUA_ENUM_COMMENT
                         enumName = match.groups()[0]
-                        enumColumn = match.groups()[1]
-                        descrColumn = -1 if match.groups()[3] == "" else match.groups()[3]          # Optional
-                        enumIgnoreColumn = None if match.groups()[5] == "" else match.groups()[5]   # Optional
+                        enumColumn = int(match.groups()[1])
+                        descrColumn      = None if match.groups()[3] is None else int(match.groups()[3])   # Optional
+                        enumIgnoreColumn = None if match.groups()[5] is None else int(match.groups()[5])   # Optional
                         encounteredDoxygenCmd = True
 
-                        enums.append(f"/**\n  * \\@defgroup {enumName}Enum {enumName}\n")
+                        enums.append(f"/**\n  * @defgroup {enumName}Enum {enumName}\n")
 
                         continue
                         # Parsing:
@@ -262,11 +276,11 @@ def parse_files(files: List[str]):
 
 
                     # Look for @geom, and replace with @par Geometry \n
-                    match = re.search(r"\@geom\s+(.*)$", line)
+                    match = re.search(r"@geom\s+(.*)$", line)
                     if match:
-                        print(f"line = {line}")
+                        # print(f"line = {line}")
                         body = match.groups()[0]
-                        print(f"body = {body}")
+                        # print(f"body = {body}")
                         comments.append(f"\\par Geometry\n{body}\n")
                         continue
 
@@ -354,7 +368,7 @@ def parse_files(files: List[str]):
                         continue
 
 
-                    match = re.search(r"\@luaclass\s+(\w+)\s*$", line)        # Description of a class defined in a header file
+                    match = re.search(r"@luaclass\s+(\w+)\s*$", line)        # Description of a class defined in a header file
                     if match:
                         comments.append(f" \\class {match.groups()[0]}\n")
 
@@ -363,7 +377,7 @@ def parse_files(files: List[str]):
                         continue
 
 
-                    match = re.search(r"\@luavclass\s+(\w+)\s*$", line)       # Description of a virtual class, not defined in any C++ cod
+                    match = re.search(r"@luavclass\s+(\w+)\s*$", line)       # Description of a virtual class, not defined in any C++ cod
                     if match:
                         xclass = match.groups()[0]
                         comments.append(" \\class $class\n")
@@ -377,16 +391,17 @@ def parse_files(files: List[str]):
 
                         continue
 
-                    match = re.search(r"\@descr\s+(.*)$", line)
+                    match = re.search(r"@descr\s+(.*)$", line)
                     if match:
                         comments.append(f"\n {match.groups()[0]}\n")
                         encounteredDoxygenCmd = True
                         continue
 
-
                     # Otherwise keep the line unaltered and put it in the appropriate array
                     if processing_main_page:
                         mainpage.append(line)
+                    elif processing_other_page:
+                        otherpage.append(line)
                     elif collectingEnumMode != EnumMode.NOT_COLLECTING:
                         enums.append(line)
                     elif encounteredDoxygenCmd:
@@ -394,16 +409,16 @@ def parse_files(files: List[str]):
 
                     continue
 
-
                 # Starting with an enum def that looks like this:
                 # /**
-                #  * @luaenum Weapon(2[,n])  <=== 2 refers to 0-based index of column containing Lua enum name, n refers to column specifying whether to include this item
+                #  * @luaenum Weapon(2[,n])  <=== collectingEnumMode = EnumMode.LUA_ENUM_COMMENT
+                #                                 2 refers to 0-based index of column containing Lua enum name,
+                #                                 n refers to column specifying whether to include this item
                 #  * The Weapon enum can be used to represent a weapon in some functions.
                 #  */
-                #  #define WEAPON_ITEM_TABLE \
+                #  #define WEAPON_ITEM_TABLE \          <=== collectingEnumMode = EnumMode.CPP_DEFINE
                 #    WEAPON_ITEM(WeaponPhaser,     "Phaser",      "Phaser",     100,   500,   500,  600, 1000, 0.21f,  0,       false, ProjectilePhaser ) \
                 #    WEAPON_ITEM(WeaponBounce,     "Bouncer",     "Bouncer",    100,  1800,  1800,  540, 1500, 0.15f,  0.5f,    false, ProjectileBounce ) \
-                #
                 #
                 # Make this:
                 # /** @defgroup WeaponEnum Weapon
@@ -416,11 +431,12 @@ def parse_files(files: List[str]):
                 #  @}
 
                 if collectingEnumMode != EnumMode.NOT_COLLECTING:
+
                     # If we get here we presume the @luaenum comment has been closed, and the next #define we see will begin the enum itself
                     # Enum will continue until we hit a line with no trailing \
                     match = re.search(r"#\s*define", line)
                     if match:
-                        enums.append(r"\@\{\n")
+                        enums.append("@{\n")
                         enums.append(f"# {enumName}\n")   # Add the list header
                         collectingEnumMode = EnumMode.CPP_DEFINE
                         continue
@@ -428,53 +444,63 @@ def parse_files(files: List[str]):
                     if collectingEnumMode == EnumMode.LUA_ENUM_COMMENT:
                         continue     # Skip lines until we hit a #define
 
-                    # If we're here, collectingEnumMode == EnumMode.CPP_DEFINE, and we're processing an enum definition line
-                    line = re.sub(r"/\*.*?\*/", "", line)         # Remove embedded comments
-                    if re.search(r"^\W*\\$", line):                # Skip any lines that have no \w chars, as long as they end in a backslash
-                        continue
+                    ends_in_backslash = re.search(r"\\[\r\n]*$", line)      # Examine line before it gets munged below
 
+                    # There are a lot of reasons we might not do work on a line; if we detect any, set skip to True.  But
+                    # even for those lines, we need to test whether we're exiting the CPP comment block.
+                    skip = False
+
+                    # If we're here, collectingEnumMode == EnumMode.CPP_DEFINE, and we're processing an enum definition line
+                    line = re.sub(r"/\*.*?\*/", "", line)   # Remove embedded comments
+                    if re.search(r"^\W*\\$", line):         # Skip any lines that have no \w chars, as long as they end in a backslash
+                        skip = True
 
                     # Skip blank lines, or those that look like they are starting with a comment
-                    match = re.search(r"^\s*$", line)
+                    if re.search(r"^\s*$", line) or re.search(r"^\s*//", line) or re.search(r"\s*/\*", line):
+                        skip = True
+
+                    # Extract the good bits (but with arbitrary whitespace between items):
+                    #   WeaponPhaser, "Phaser", "Phaser", 100, 500, 500, 600, 1000, 0.21f, 0, false, ProjectilePhaser
+                    match = re.search(r"[^(]+\((.+)\)", line)
                     if not match:
-                        match = re.search(r"^\s*//", line)
-                    if not match: match = re.search(r"\s*/\*", line)
+                        skip = True
 
-                    if match:
-                        # line =~ m/[^(]+\((.+)\)/
-                        # string = match.groups()[0]
-                        words = re.search(r'("[^"]+"|[^,]+)(?:,\s*)?', line)
-                        # ????
+                    if not skip:
+                        line = match.groups()[0]
+                        line = line.replace(",", ", ")      # ==> Make sure this will split properly: MODULE_ITEM(ModuleEngineer,"Engineer",
 
-                        # Skip items marked as not to be shared with Lua... see #define TYPE_NUMBER_TABLE for example
-                        if enumIgnoreColumn is not None and words[enumIgnoreColumn] == "false":
-                            continue
+                        # words = re.search(r'("[^"]+"|[^,]+)(?:,\s*)?', line)
+                        words = shlex.split(line)         # Splits without breaking up quoted strings
 
-                        enumDescr =  words[descrColumn] if descrColumn != -1 else ""
+                        # Skip items marked as not to be shared with Lua...
+                        # See #define TYPE_NUMBER_TABLE for example. BotNavMeshZoneTypeNumber is not shared.
+                        if enumIgnoreColumn is None or words[enumIgnoreColumn].strip(",") == "true":
 
-                        # Clean up descr -- remove leading and traling non-word characters... i.e. junk
-                        enumDescr = re.sub(r'^\W*"', "", enumDescr)         # Remove leading junk
-                        enumDescr = re.sub(r'"\W*$', "", enumDescr)         # Remove trailing junk
+                            enumDescr = words[descrColumn] if descrColumn is not None else ""
 
-
-                        # Suppress any words that might trigger linking
-                        enumDescr = re.sub(r'\s(\w+)', words[1], enumDescr)     # ???
+                            # # Clean up descr -- remove leading and traling non-word characters... i.e. junk  (probably no longer needed, but harmless)
+                            # enumDescr = re.sub(r'^\W*"', "", enumDescr)         # Remove leading junk
+                            # enumDescr = re.sub(r'"\W*$', "", enumDescr)         # Remove trailing junk
 
 
-                        enumval = words[enumColumn]
-                        enumval = re.sub(r'[\s"\)\\]*', "", enumval)         # Strip out quotes and whitespace and other junk
+                            # Suppress any words that might trigger linking by prepending a "%" to the words
+                            descr_words = enumDescr.split()
+                            enumDescr = " %".join(descr_words).strip(",")     # Also normalizes interior spaces, if that's an issue
+                            # enumDescr = "%" + " %".join(descr_words)        # Also normalizes interior spaces, if that's an issue
 
-                        # continue unless $enumval;      # Skip empty enumvals... should never happen, but does
-                        enums.append(f" * * %{enumName}.%{enumval} <br>\n `{enumDescr}` <br>\n");    # Produces:  * * %Weapon.Triple  Triple
 
-                        # no next here, always want to do the termination check below
+                            enumval = words[enumColumn].replace(",", "")
+                            # enumval = re.sub(r'[\s"\)\\]*', "", enumval)         # Strip out quotes and whitespace and other junk
 
-                    if  re.search(r"\\\r*$", line):  # Line has no terminating \, it's the last of its kind!
+                            # continue unless $enumval;      # Skip empty enumvals... should never happen, but does
+                            enums.append(f" * * %{enumName}.%{enumval} <br>\n `{enumDescr}` <br>\n");    # Produces:  * * %Weapon.Triple  Triple
+
+                            # no next here, always want to do the termination check below
+
+                    if not ends_in_backslash:  # Line has no terminating \, it's the last of its kind!
                         enums.append("@}\n");       # Close doxygen group block
                         enums.append("*/\n\n");     # Close comment
-
                         collectingEnumMode = EnumMode.NOT_COLLECTING          # This enum is complete!
-
 
                     continue
 
@@ -503,16 +529,19 @@ def parse_files(files: List[str]):
 
                 filex.write("\n\n// What follows is a dump of the comments list\n\n")
                 filex.write("".join(comments))
+            # print(" done.")
         else:
-            print("\tNothing to do")
+            # print(" nothing to do.")
+            pass
 
-    # Finally, write our main page data
+    # Finally, write our main page data... some of this was collected from multiple files.
     with open(os.path.join(outpath, "main_page_content.h"), "w") as filex:
         filex.write("// This file was generated automatically from the C++ source to feed doxygen.  It will be overwritten.\n\n")
         filex.write(f"// Generated {datetime.now()}\n\n")
 
         filex.write("/**\n")
         filex.write("".join(mainpage) + "\n")
+        filex.write("".join(otherpage) + "\n")
         filex.write("*/\n")
 
         filex.write("".join(enums))
@@ -618,6 +647,7 @@ def post_process():
             delete_node(element)
 
 
+        # file = "./html\\class_ship2.html"       # TODO
         with open(file, "w") as outfile:
             outfile.write(etree.tostring(root, method="html").decode("utf-8"))
 
@@ -681,9 +711,13 @@ def parse_member_name(memname: str) -> Optional[Tuple[str, str, str]]:
     """
     Given a string like "int BFObject::doMath", return ["int", "BfObject", "doMath"].
     Some parts may be missing; if passed string does not contain "::", bail and return None.
+    Drop any leading statics; none of our callers care.
     """
     if "::" not in memname:    # Not sure this check is necessary
         return None
+
+    memname = memname.replace("static", "").strip()
+
 
     xclass, fn = memname.split("::")
 
@@ -692,7 +726,7 @@ def parse_member_name(memname: str) -> Optional[Tuple[str, str, str]]:
     else:
         ret_type = ""
 
-    return ret_type, xclass, fn
+    return ret_type.strip(), xclass.strip(), fn.strip()
 
 
 def clean_up_method_sigs(root: Any, ns: Dict[str, str]) -> None:
@@ -712,12 +746,15 @@ def clean_up_method_sigs(root: Any, ns: Dict[str, str]) -> None:
     for table in tables:
         memnames = table.xpath(".//x:td[@class='memname']/text()", namespaces=ns)
 
-        parts = parse_member_name(memnames[0])
+        if memnames:
+            parts = parse_member_name(memnames[0])
+            if not parts:
+                continue
+            ret_type, xclass, function_name = parts
+        else:
 
-        if not parts:
-            continue
+            ret_type, function_name = "", table.xpath(".//x:td/text()", namespaces=ns)[0]
 
-        ret_type, xclass, function_name = parts
 
         # table.xpath(".//x:td[@class='memname']", namespaces=ns)[0].text = function_name    # Remove class and return
         cells = table.xpath(".//x:td", namespaces=ns)
@@ -797,6 +834,32 @@ def cleanup_html(line: str) -> str:
     line = re.sub(r"/* @license.*?\*/", "", line)       # These comments cause problems for some reason
 
     return line
+
+
+def update_progress(progress: float, msg: str = ""):
+    """ Progress is float between 0 and 1; 1 signifies completion, negative signifies abort. """
+    barLength = 48 # Modify this to change the length of the progress bar
+    status = ""
+
+    if isinstance(progress, int):
+        progress = float(progress)
+    if not isinstance(progress, float):
+        progress = 0
+        status = "error: progress var must be float\r\n"
+    if progress < 0:
+        progress = 0
+        status = "Halt.\r\n"
+    if progress >= 1:
+        progress = 1
+        status = "Done.\r\n"
+
+    blocklen = int(round(barLength * progress))
+    text = f"\rProgress: [{'■' * blocklen}{' ' * (barLength - blocklen)}] {progress * 100:.1f}% {status}\033[K"
+
+    if msg:
+        text += f" ({msg})"
+
+    print(text, end="", flush=True)
 
 
 
