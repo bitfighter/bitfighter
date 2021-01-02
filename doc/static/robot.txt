@@ -1,7 +1,7 @@
 /**
 
 @page robot Robot Overview
-@section intro Introduction
+@section robot_intro Introduction
 A robot's \e main() function gets run as soon as the bot is added to the
 game.  In the main function, the bot should subscribe to any events it
 wants to listen for (though it can always subscribe later).  By default,
