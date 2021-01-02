@@ -1470,6 +1470,7 @@ S32 BfObject::lua_getTeamIndex(lua_State *L)
  * @brief Assigns the object to a team.
  * 
  * @param teamIndex Index of the team the object should be assigned to.
+ * (first team index is 1)
  * 
  * @descr Instead of a team index, you can use the special team enums 
  * Team.Neutral and Team.Hostile.
@@ -1477,7 +1478,6 @@ S32 BfObject::lua_getTeamIndex(lua_State *L)
  * Will have no effect on items that are inherently teamless (such as a
  * NexusZone).
  * 
- * @note Remember that in Lua, indices start with 1!
  */
 S32 BfObject::lua_setTeam(lua_State *L) 
 { 
