@@ -56,7 +56,7 @@ function main()
     myOrbitalDirection = 1
     myObjective = math.random(0, 10)
 end
-
+ 
 
 function shouldShield()
     local items = bot:findVisibleObjects(ObjType.Bullet, ObjType.Seeker, ObjType.Burst, ObjType.Asteroid, ObjType.Mine)
@@ -169,10 +169,55 @@ function fireAtObject(obj, weapon)
     --logprint("Firing solution not found.");
     return(false)
 end
- 
+
+
+adjectives = {
+    "Short",
+    "Spunky",
+    "Quick",
+    "Tasty",
+    "Powerful",
+    "Placated",
+    "Puzzling",
+    "Warm",
+    "Kind",
+    "Clueless",
+    "Wacky",
+    "Ruthless",
+    "Incredible",
+    "Big",
+    "Shriveled",
+    "Digital",
+}
+
+nouns = {
+    "Sauce",
+    "Thunder",
+    "Requiem",
+    "Thing",
+    "Toothpick",
+    "Dish",
+    "Stone",
+    "Compass",
+    "Penguin",
+    "Roof",
+    "Head",
+    "Foliage",
+    "Sky",
+    "Horizon",
+    "Duck",
+}
  
 function getName()
-     return("S_Bot")
+    -- Randomly grab an adjective and noun from the lists
+    local adjIdx = math.random(#adjectives)
+    local adj = adjectives[adjIdx]
+    
+    local nounIdx = math.random(#nouns)
+    local noun = nouns[nounIdx]
+    
+    -- Combine and return
+    return(adj .. noun)
 end
 
 
