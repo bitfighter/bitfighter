@@ -1018,11 +1018,12 @@ void Ship::rechargeEnergy()
    {
       // Base recharge rate
       mEnergy += EnergyRechargeRate * timeInMilliSeconds;
-
+      
       //// Apply energy recharge modifier for the zone the player is in
-      //BfObject *object = isInZone(LoadoutZoneTypeNumber);
-      //S32 currentLoadoutZoneTeam = object ? object->getTeam() : NO_TEAM;
-
+      BfObject *object = isInZone(LoadoutZoneTypeNumber);
+      S32 currentLoadoutZoneTeam = object ? object->getTeam() : NO_TEAM;
+      if (currentLoadoutZoneTeam == TEAM_NEUTRAL || currentLoadoutZoneTeam == getTeam())
+         mFastRechargeTimer.update(1000);
       //if(currentLoadoutZoneTeam == TEAM_HOSTILE)
       //   mEnergy += EnergyRechargeRateInHostileLoadoutZoneModifier * timeInMilliSeconds;
 
