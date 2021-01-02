@@ -60,9 +60,9 @@ class Rect;
  */
 #define CLIP_TYPE_TABLE \
    CLIP_TYPE_ITEM( Intersection, ClipperLib::ctIntersection ) \
-   CLIP_TYPE_ITEM( Union,        ClipperLib::ctUnion) \
-   CLIP_TYPE_ITEM( Difference,   ClipperLib::ctDifference ) \
-   CLIP_TYPE_ITEM( Xor,          ClipperLib::ctXor ) \
+   CLIP_TYPE_ITEM( Union,        ClipperLib::ctUnion        ) \
+   CLIP_TYPE_ITEM( Difference,   ClipperLib::ctDifference   ) \
+   CLIP_TYPE_ITEM( Xor,          ClipperLib::ctXor          ) \
 
 
 // Test between a polygon and a swept sphere with radius inRadius moving from inBegin to inBegin + inDelta
