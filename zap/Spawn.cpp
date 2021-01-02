@@ -448,6 +448,8 @@ void AsteroidSpawn::initialize()
    mNetFlags.set(Ghostable);   // So we can render on the client
    mObjectTypeNumber = AsteroidSpawnTypeNumber;
 
+   mAsteroidSize = Asteroid::ASTEROID_INITIAL_SIZELEFT;
+
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
@@ -481,6 +483,18 @@ void AsteroidSpawn::setRespawnTime(S32 spawnTime)
 }
 
 
+S32  AsteroidSpawn::getAsteroidSize()
+{
+   return mAsteroidSize;
+}
+
+
+void AsteroidSpawn::setAsteroidSize(S32 size)
+{
+   mAsteroidSize = size;
+}
+
+
 void AsteroidSpawn::spawn()
 {
    Parent::spawn();
@@ -493,7 +507,10 @@ void AsteroidSpawn::spawn()
 
    asteroid->setPosAng(getPos(), ang);
    asteroid->setTeam(getTeam());
+   asteroid->setCurrentSize(mAsteroidSize);
+
    asteroid->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
+
    s2cSetTimeUntilSpawn(mTimer.getCurrent());
 }
 
@@ -566,6 +583,9 @@ bool AsteroidSpawn::processArguments(S32 argc, const char** argv, Game* game)
 
       if ((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z')) //if argument doesn't just start with a number
       {
+         if(!strnicmp(argv[i], "Size=", 5))
+            mAsteroidSize = atoi(&argv[i][5]);
+
          if (!strnicmp(argv[i], "Team=", 5))
             setTeam(atoi(&argv[i][5])); //set team to character 5 on this argument, indexed at 0 (Team=4)
       }
@@ -583,7 +603,7 @@ bool AsteroidSpawn::processArguments(S32 argc, const char** argv, Game* game)
 }
 string AsteroidSpawn::toLevelCode() const
 {
-   return Parent::toLevelCode() + " Team=" + itos(getTeam());
+   return Parent::toLevelCode() + " Size=" + itos(mAsteroidSize) + " Team=" + itos(getTeam());
 }
 
 

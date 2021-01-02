@@ -153,6 +153,8 @@ class AsteroidSpawn : public ItemSpawn
 private:
    void initialize();
 
+   S32 mAsteroidSize;
+
 public:
    static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
 
@@ -175,6 +177,9 @@ public:
 
    virtual void setRespawnTime(S32 spawnTime);
    void spawn();
+
+   S32  getAsteroidSize();
+   void setAsteroidSize(S32 asteroidSize);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
