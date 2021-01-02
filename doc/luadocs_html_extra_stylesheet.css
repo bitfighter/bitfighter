@@ -1,13 +1,26 @@
 
 
-/* Cause function params to all be contained on a single line rather than broken over multiple lines */
-.memname tr {
+table.memname  {
+   border-spacing: 0;   /* Remove annoying psuedo-spaces in method signature */
+}
+
+/*
+   Cause function params to all be contained on a single line rather than broken over multiple lines
+   But ignore those marked with the nofloat class
+*/
+table.memname tr:not(.nofloat) {
    float:left;
 }
 
-tr.nofloat {
-   float: none;
+table.memname td {
+   padding: 0;
 }
+
+
+td.mdescRight a:not(.el) {
+   font-size: x-small;        /* Applies to the [details] links in class definitions */
+}
+
 
 /* Styling for the inherited links over a the right */
 span.mlabels a {

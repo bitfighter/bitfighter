@@ -4,6 +4,7 @@
 # Works with doxygen verison 1.9.0
 
 # TODO: UIMenuItems_cpp.h
+# TODO: doubled classes in the global section, $class section
 
 import os
 from glob import glob
@@ -750,40 +751,57 @@ def clean_up_method_sigs(root: Any, ns: Dict[str, str]) -> None:
             parts = parse_member_name(memnames[0])
             if not parts:
                 continue
-            ret_type, xclass, function_name = parts
+            ret_type, xclass, function_name = parts     # ret_type xclass::function_name()
+            is_constructor = xclass == function_name
+            if is_constructor:
+                ret_type = xclass        # Constructors return an instance of the class, even if it's not written that way in C++
+                function_name += ".new"  # This is how you call constructors in Lua
         else:
-
             ret_type, function_name = "", table.xpath(".//x:td/text()", namespaces=ns)[0]
+            is_constructor = False
 
-
-        # table.xpath(".//x:td[@class='memname']", namespaces=ns)[0].text = function_name    # Remove class and return
         cells = table.xpath(".//x:td", namespaces=ns)
         cells[0].clear()
-        cells[0].text = function_name
+        cells[0].text = function_name       # Replaces "num MoveObject::getAngle" with "getAngle"
         # cells[-1].text = f"-> {ret_type if ret_type else 'nil'}"      # Add return type to end of row
 
         param_types = table.xpath(".//x:td[@class='paramtype']", namespaces=ns)
         param_names = table.xpath(".//x:td[@class='paramname']", namespaces=ns)
 
         # These lists will be imbalanced if there are no args... for some reason doxygen inserts an empty
-        # <td class="paramname"></td> tag when there are no args, but does not also include it's corresponding
+        # <td class="paramname"></td> tag when there are no args, but does not also include a corresponding
         # <td class="paramtype"></td>.
+        argstrs = []
         if len(param_types) == len(param_names):
-            argstrs = []
             for i in range(len(param_types)):
-                # Use itertext() to burrow into any inner tags and grab all the text
+                # Use itertext() to burrow into any inner tags and grab all interior text
                 param_name = "".join(param_names[i].itertext()).replace(",", "")
                 param_type = "".join(param_types[i].itertext()).replace(",", "")
+
+                # Handle special case: when a constructor (or other fn) has the typeless "geom" as an argument, add the type Geom here.
+                # It would be better to fix the code, but there's a lot of places where this is happening.  If that's the case,
+                # we don't want to delete the param_types node from the DOM, as that is where our "geom" token is, and we want that.
+                if param_name == "" and param_type == "geom":
+                    param_name = "geom"
+                    param_type = "Geom"
+                else:
+                    delete_node(param_types[i])     # Won't be needing this: param_types will be displayed in the line below
+
                 argstrs.append(f'<span class="paramname">{param_name}</span>: <span class="paramtype">{param_type}</span>')
 
-                delete_node(param_types[i])     # Won't be needing this!
 
-            # The argline styles are defined in luadocs_html_extra_stylesheet.css
+        # The argline styles are defined in luadocs_html_extra_stylesheet.css
+        if argstrs or ret_type:
+            if argstrs:     # Args and optional return type
+                argline = f'{", ".join(argstrs)}{NBSP * 2}|{NBSP * 2}returns <span class="returntype">{ret_type if ret_type else "nil"}</span>'
+            else:           # No args, only return type
+                argline = f'returns <span class="returntype">{ret_type}</span>'
+
             new_row = etree.fromstring(f"""
                 <tr class="nofloat argline">
                     <td colspan="{len(cells)}">
                         <span class="argtypes">Arg types:</span>
-                        {", ".join(argstrs)}{NBSP * 2}|{NBSP * 2}returns <span class="returntype">{ret_type if ret_type else 'nil'}</span>
+                        {argline}
                     </td>
                 </tr>
             """)
