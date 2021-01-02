@@ -20,7 +20,7 @@ doc_dir = "doc"
 outpath = os.path.join(os.path.dirname(__file__), doc_dir)
 
 if not os.path.exists(outpath):
-    raise Exception("Could not change to doc folder: $!")
+    raise Exception("Could not change to doc folder!")
 
 # Relative path where intermediate outputs will be written
 outpath = os.path.join(outpath, "temp-doxygen")
@@ -260,7 +260,7 @@ def parse_files(files: List[str]):
                         enumIgnoreColumn = None if match.groups()[5] is None else int(match.groups()[5])   # Optional
                         encounteredDoxygenCmd = True
 
-                        enums.append(f"/**\n  * @defgroup {enumName}Enum {enumName}\n")
+                        enums.append(f"/**\n * @defgroup {enumName}Enum {enumName}\n")
 
                         continue
                         # Parsing:
@@ -540,7 +540,7 @@ def parse_files(files: List[str]):
         filex.write(f"// Generated {datetime.now()}\n\n")
 
         filex.write("/**\n")
-        filex.write("".join(mainpage) + "\n")
+        filex.write("".join(mainpage) + "\n")       # This section needs to come first, apparently
         filex.write("".join(otherpage) + "\n")
         filex.write("*/\n")
 
