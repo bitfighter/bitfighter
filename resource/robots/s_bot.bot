@@ -56,31 +56,56 @@ function main()
     myOrbitalDirection = 1
     myObjective = math.random(0, 10)
 end
- 
 
-function shieldSelf()
-    local items = bot:findVisibleObjects(ObjType.Bullet, ObjType.Seeker, ObjType.Asteroid, ObjType.Mine)
 
-    local distToShieldAt = botRadius * 2 + (1 - difficulty) * 100
+function shouldShield()
+    local items = bot:findVisibleObjects(ObjType.Bullet, ObjType.Seeker, ObjType.Burst, ObjType.Asteroid, ObjType.Mine)
+
+    local shieldDist = botRadius * 2 + (1 - difficulty) * 100
+    local astShieldDist = botRadius  -- for asteroids/mines
+    
     if (items ~= nil) then
+        local botTeam = bot:getTeamIndex()
+        local isTeamGame = game:isTeamGame()
+        
         for i,bullet in ipairs(items) do
-            local bulletPos = bullet:getPos()
-            local bulletVel = bullet:getVel()
-            local angleDiff = math.abs(angleDifference(point.angleTo(o, bulletVel), point.angleTo(bulletPos, botPos)))
-            --logprint(angleDiff)
+            local objType = bullet:getObjType()
+            local objTeam = bullet:getTeamIndex()
+            local isDangerous = false
+            local distToShieldAt = shieldDist -- default
+            
+            if (objType == ObjType.Asteroid) then
+                distToShieldAt = astShieldDist
+                if objTeam ~= botTeam then
+                    isDangerous = true
+                end
 
-            local bulletFromTeam = false
-            if (game:isTeamGame() == true) and (bullet:getTeamIndex() == bot:getTeamIndex()) then -- If bullet is from team
-                bulletFromTeam = true                               -- bullet from team is true
+            elseif (objType == ObjType.Mine) then
+                isDangerous = true -- all mines are deadly
+                distToShieldAt = astShieldDist
+
+            else  -- All other weapons      
+                if isTeamGame and (objTeam ~= botTeam) then -- Weapon from a different team
+                    isDangerous = true
+                end
             end
 
-            if (bulletFromTeam == false) and (point.distanceTo(bulletPos, botPos) < distToShieldAt + bullet:getRad() + point.distanceTo(o, bulletVel) * 50 and angleDiff < math.pi / 4) then
-                bot:fireModule(Module.Shield)
-                return(true)
+            if isDangerous then
+                local bulletPos = bullet:getPos()
+                local bulletVel = bullet:getVel()
+                local angleDiff = math.abs(angleDifference(point.angleTo(o, bulletVel), point.angleTo(bulletPos, botPos)))
+
+                if (point.distanceTo(bulletPos, botPos) < distToShieldAt + bullet:getRad() + point.distanceTo(o, bulletVel) * 50 and angleDiff < math.pi / 4) then
+                    -- We need to shield!
+                    return true
+                end
             end
         end
     end
+    
+    return false
 end
+
 
 function angleDifference(angleA, angleB)
     return (math.mod(math.mod(angleA - angleB, math.pi * 2) + math.pi * 3, math.pi * 2) - math.pi)
@@ -152,9 +177,14 @@ end
 
 
 function shield()
-    averageArray[averageIndex] = shieldSelf()
+    -- Should we shield?
+    local needToShield = shouldShield()
+    
+    -- Save shielding determination and update current index
+    averageArray[averageIndex] = needToShield
     averageIndex = math.mod(averageIndex,averageMax) + 1
 
+    -- Calculate the percentage of time that was shielded
     local shieldPercent = 0
 
     for i = 1, averageMax do
@@ -165,11 +195,17 @@ function shield()
 
     shieldPercent = shieldPercent / averageMax
 
+    -- Dodge (reverse orbital direction) if shield was active above some threshold
     if(shieldPercent > directionThreshold) then
         myOrbitalDirection = -myOrbitalDirection
         for i = 1, averageMax do
             averageArray[i] = false
         end
+    end
+    
+    -- If we detected we need to shield, do it!
+    if needToShield == true then
+        bot:fireModule(Module.Shield)
     end
 end
  
