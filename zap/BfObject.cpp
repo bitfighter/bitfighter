@@ -1412,7 +1412,7 @@ S32 BfObject::lua_getId(lua_State *L)
 
 
 /**
- * @luafunc BfObject::setId()
+ * @luafunc BfObject::setId(int id)
  * 
  * @brief Sets an object's user assigned id.
  * 
