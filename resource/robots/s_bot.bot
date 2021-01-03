@@ -31,6 +31,9 @@ botPos = nil        -- Bot's location, will be updated when onTick() is run
 -- This function gets run once during setup.  It is the only time we can declare variables
 -- and have them be defined as globals.
 function main()
+    -- Internal script time in ms, used for timers and incrementing every tick
+    scriptTime = 0 
+    
     botRadius = bot:getRad()
     pathTimerMax = 250
     pathTimer = pathTimerMax
@@ -52,6 +55,8 @@ function main()
     for i = 1, averageMax do
         averageArray[i] = false
     end
+    
+    shieldDelay = 200  -- ms
 
     myOrbitalDirection = 1
     myObjective = math.random(0, 10)
@@ -221,10 +226,69 @@ function getName()
 end
 
 
+-- States for shielding
+shield_st_off = 0
+shield_st_delay_on = 1
+shield_st_on = 2
+shield_st_delay_off = 3
+--
+shield_st_current = shield_st_off
+shieldTimer = 0
+
 function shield()
     -- Should we shield?
     local needToShield = shouldShield()
     
+    -- State machine for handling human-like shielding by debouncing/delaying 
+    -- shielding
+    
+    -- State actions *before* updates and update actions
+    if shield_st_current == shield_st_off then
+        -- action
+        shieldTimer = scriptTime
+    
+        -- update
+        if needToShield then
+            shield_st_current = shield_st_delay_on
+        end
+        
+    elseif shield_st_current == shield_st_delay_on then
+        -- no action
+        
+        -- update
+        local timerExpired = (scriptTime - shieldTimer >= shieldDelay)
+        
+        if needToShield and (scriptTime - shieldTimer >= shieldDelay) then
+            shield_st_current = shield_st_on
+        end
+        
+    elseif shield_st_current == shield_st_on then
+        -- action
+        shieldTimer = scriptTime
+        bot:fireModule(Module.Shield)
+        
+        -- update
+        if not needToShield then
+            shield_st_current = shield_st_delay_off
+        end
+        
+    elseif shield_st_current == shield_st_delay_off then
+        -- action
+        bot:fireModule(Module.Shield)
+        
+        -- update
+        local timerExpired = (scriptTime - shieldTimer >= shieldDelay)
+        
+        if not needToShield and timerExpired then
+            shield_st_current = shield_st_off
+        end
+    end
+    
+    dodgeIfNeeded(needToShield)
+end
+
+
+function dodgeIfNeeded(needToShield)
     -- Save shielding determination and update current index
     averageArray[averageIndex] = needToShield
     averageIndex = math.mod(averageIndex,averageMax) + 1
@@ -247,12 +311,8 @@ function shield()
             averageArray[i] = false
         end
     end
-    
-    -- If we detected we need to shield, do it!
-    if needToShield == true then
-        bot:fireModule(Module.Shield)
-    end
 end
+
  
 function orbitPoint(pt, dir, inputDist, inputStrictness)
     local distAway = botRadius * 7
@@ -562,6 +622,7 @@ end
 function onTick(deltaTime)
     botPos = bot:getPos()
     pathTimer = pathTimer - deltaTime
+    scriptTime = scriptTime + deltaTime
     assert(bot:getPos() ~= nil)
 
     local closestEnemy = bot:findClosestEnemy()
