@@ -547,6 +547,9 @@ def parse_files(files: List[str]):
 
         filex.write("".join(enums))
 
+    update_progress(1)
+
+
 
 def run_doxygen():
     os.chdir("doc")
@@ -562,25 +565,26 @@ def post_process():
     os.chdir("doc")
 
     files = glob("./html/class_*.html")
+    # files = ["./html/class_asteroid.html"]     # TODO
 
-    for file in files:
-        print(".", end="", flush=True)
+    for file_ct, file in enumerate(files):
+        update_progress(file_ct / len(files), os.path.basename(file))
+        dirty_html = ""
         cleaned_html = ""
 
         with open(file, "r") as infile:
 
             # Do some quick text cleanup as we read the file, but before we feed it to etree
             for line in infile:
+                dirty_html += line
                 cleaned_html += cleanup_html(line)
 
 
         # Do some fancier parsing with something that understands the document structure
-        root = etree.fromstring(cleaned_html)
-
-        ns = {"x": "http://www.w3.org/1999/xhtml"}      # Namespace dict
+        root = etree.HTML(cleaned_html)
 
         # Remove first two annoying "More..." links...
-        elements = root.xpath("//x:a[text()='More...']", namespaces=ns)
+        elements = root.xpath("//a[text()='More...']")
         for element in elements[:2]:
             element.getparent().remove(element)
 
@@ -593,7 +597,7 @@ def post_process():
 
         # Find rows in our Member Functions table that refer to the DummyConstructor
         # Looking for rows in tables of class memberdelcs that contain a td that contains a link for DummyConstructor
-        elements = root.xpath(f"//x:table[@class='memberdecls']//x:tr[descendant::x:td/x:a[contains(text(),'{FUNCS_HEADER_MARKER}')]]", namespaces=ns)
+        elements = root.xpath(f"//table[@class='memberdecls']//tr[descendant::td/a[contains(text(),'{FUNCS_HEADER_MARKER}')]]")
         if elements:
             elements_to_delete.append(elements[0])
             # <tr xmlns="http://www.w3.org/1999/xhtml" class="memitem:a515b33956a05bb5a042488cf4f361019">
@@ -603,29 +607,61 @@ def post_process():
 
         # Looking for rows in tables of class memberdecls that have a immediately preceding row that contains a td with a link for DummyConstructor
         # This should find rows immediately following the rows in rows_to_modify
-        elements = root.xpath(f"//x:table[@class='memberdecls']//x:tr[preceding::x:tr[1][descendant::x:td/x:a[contains(text(),'{FUNCS_HEADER_MARKER}')]]]", namespaces=ns)
+        elements = root.xpath(f"//table[@class='memberdecls']//tr[preceding::tr[1][descendant::td/a[contains(text(),'{FUNCS_HEADER_MARKER}')]]]")
         if elements:
             elements_to_delete.append(elements[0])
 
-        elements = root.xpath(f"//x:h2[@class='memtitle' and contains(text(), '{FUNCS_HEADER_MARKER}')]", namespaces=ns)
+        # Clear the type declaration for function return types in the upper portion of the class definitions
+        elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemLeft']")
+        for element in elements:
+            element.clear()
+
+        # Clear out annoying space just before ().  That is, setGeom (Geometry geom)  ==> setGeom(Geometry geom)
+        elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']/a[@class='el']")
+        for element in elements:
+            if element.tail:
+                if re.match(r" \(.*", element.tail):         # If it's an open paren followed by something...
+                    element.tail = element.tail.strip()      # ...strip leading space
+
+        # Remove types from declarations in upper section.  Several patterns to consider.
+        # Pattern 1: Method(geom lineGeom, int speed)
+        elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']/a[@class='el']")
+        for element in elements:
+            if element.tail:
+                match = re.match(r"\((.*)\)", element.tail)
+                if match:
+                    arglist = match.groups()[0].split()
+                    if arglist and len(arglist) % 2 == 0:    # Even number, meaning every param has a type
+                        argstr = " ".join(arglist[1::2])     # Concatenate every second item; commas will already be included in the text we're parsing
+                        element.tail = "(" + argstr + ")"         # ['geom', 'geometry,', 'int', 'thickness'] ==> (geometry, thickness)
+        # Pattern 2: Method(<linked type> param)
+        # Linked types are in <a class="el"> elements, but we need to hang onto the first one, which is the member name itself
+        elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']/a[@class='el' and position()>1]")
+        for element in elements:
+            text = element.tail.strip()
+            element.getprevious().tail += text
+            delete_node(element)
+
+
+        elements = root.xpath(f"//h2[@class='memtitle' and contains(text(), '{FUNCS_HEADER_MARKER}')]")
         if elements:
             elements_to_delete.append(elements[0])
             # <h2 class="memtitle">
             #   <span class="permalink"><a href="#a515b33956a05bb5a042488cf4f361019">&#9670;&#160;</a></span> DummyConstructor()
             # </h2>
 
-        elements = root.xpath(f"//x:div[preceding::x:h2[@class='memtitle' and contains(text(), '{FUNCS_HEADER_MARKER}')]]", namespaces=ns)
+        elements = root.xpath(f"//div[preceding::h2[@class='memtitle' and contains(text(), '{FUNCS_HEADER_MARKER}')]]")
         if elements:
-            elements_to_delete.append(elements[0])
+                elements_to_delete.append(elements[0])
             # The div following the one above
 
 
         # Retrieve our description, which is down in the description of DummyConstructor
-        elements = root.xpath(f"//x:div[preceding::x:td[contains(text(),'Ship::DummyConstructor')]]/child::*", namespaces=ns)
+        elements = root.xpath(f"//div[preceding::td[contains(text(),'Ship::DummyConstructor')]]/child::*")
         if elements:
             new_content = etree.tostring(elements[0]).decode("utf-8")
 
-            parent = root.xpath(f"//x:table[@class='memberdecls']", namespaces=ns)[0]
+            parent = root.xpath(f"//table[@class='memberdecls']")[0]
             new_elements = [
                 etree.fromstring(f'<tr><td colspan="2" class="memItemRight">{new_content}</td></tr>'),
                 etree.fromstring(f'<tr><td class="memSeparator" colspan="2">&#160;</td></tr>'),
@@ -636,10 +672,10 @@ def post_process():
                 parent.insert(1, new_element)
 
 
-        class_urls = get_class_urls(root, ns)
+        class_urls = get_class_urls(root)
 
-        move_class_names_to_inherited_tag(root, ns, class_urls)
-        clean_up_method_sigs(root, ns)
+        move_class_names_to_inherited_tag(root, class_urls)
+        clean_up_method_sigs(root)
 
 
         # Delete any items we've marked for deletion
@@ -650,16 +686,18 @@ def post_process():
 
         # file = "./html\\class_ship2.html"       # TODO
         with open(file, "w") as outfile:
-            outfile.write(etree.tostring(root, method="html").decode("utf-8"))
+            outfile.write(etree.tostring(root).decode("utf-8"))
+
+    update_progress(1)
 
 
 def delete_node(element):
     element.getparent().remove(element)
 
 
-def move_class_names_to_inherited_tag(root: Any, ns: Dict[str, str], class_urls: Dict[str, str]) -> None:
+def move_class_names_to_inherited_tag(root: Any, class_urls: Dict[str, str]) -> None:
     """ Move class names to inherited tag; this does not capture all of our classes, only the inherited ones. """
-    tables = root.xpath("//x:table[contains(.,'inherited')]", namespaces=ns)     # Matches entire table below
+    tables = root.xpath("//table[contains(.,'inherited')]")     # Matches entire table below
     # <table class="mlabels">
     #   <tr>
     #     <td class="mlabels-left">
@@ -681,7 +719,7 @@ def move_class_names_to_inherited_tag(root: Any, ns: Dict[str, str], class_urls:
     # </table>
 
     for table in tables:
-        memnames = table.xpath(".//x:td[@class='memname']/text()", namespaces=ns)
+        memnames = table.xpath(".//td[@class='memname']/text()")
         if not memnames:
             continue
         assert len(memnames) == 1
@@ -694,7 +732,7 @@ def move_class_names_to_inherited_tag(root: Any, ns: Dict[str, str], class_urls:
         ret_type, xclass, fn = parts
 
 
-        inherited_elements = table.xpath(".//x:span[@class='mlabel' and text()='inherited']", namespaces=ns)
+        inherited_elements = table.xpath(".//span[@class='mlabel' and text()='inherited']")
         if inherited_elements:
             assert len(inherited_elements) == 1
             # inherited_elements[0].text = f"inherited from {xclass}"
@@ -712,7 +750,7 @@ def parse_member_name(memname: str) -> Optional[Tuple[str, str, str]]:
     """
     Given a string like "int BFObject::doMath", return ["int", "BfObject", "doMath"].
     Some parts may be missing; if passed string does not contain "::", bail and return None.
-    Drop any leading statics; none of our callers care.
+    Drop a leading static token if there is one; none of our callers care.
     """
     if "::" not in memname:    # Not sure this check is necessary
         return None
@@ -730,9 +768,9 @@ def parse_member_name(memname: str) -> Optional[Tuple[str, str, str]]:
     return ret_type.strip(), xclass.strip(), fn.strip()
 
 
-def clean_up_method_sigs(root: Any, ns: Dict[str, str]) -> None:
+def clean_up_method_sigs(root: Any) -> None:
     # Spiff up method signatures (looking for inner tables found above, but this time even ones without adjacent inherited tags)
-    tables = root.xpath("//x:table[@class='memname']", namespaces=ns)
+    tables = root.xpath("//table[@class='memname']")
     # <table class="memname">
     #   <tr>
     #     <td class="memname">BfObject::setGeom </td>                       <=== "BfObject::setGeom" to "setGeom"
@@ -745,7 +783,7 @@ def clean_up_method_sigs(root: Any, ns: Dict[str, str]) -> None:
     # </table>
 
     for table in tables:
-        memnames = table.xpath(".//x:td[@class='memname']/text()", namespaces=ns)
+        memnames = table.xpath(".//td[@class='memname']/text()")
 
         if memnames:
             parts = parse_member_name(memnames[0])
@@ -757,16 +795,16 @@ def clean_up_method_sigs(root: Any, ns: Dict[str, str]) -> None:
                 ret_type = xclass        # Constructors return an instance of the class, even if it's not written that way in C++
                 function_name += ".new"  # This is how you call constructors in Lua
         else:
-            ret_type, function_name = "", table.xpath(".//x:td/text()", namespaces=ns)[0]
+            ret_type, function_name = "", table.xpath(".//td/text()")[0]
             is_constructor = False
 
-        cells = table.xpath(".//x:td", namespaces=ns)
+        cells = table.xpath(".//td")
         cells[0].clear()
         cells[0].text = function_name       # Replaces "num MoveObject::getAngle" with "getAngle"
         # cells[-1].text = f"-> {ret_type if ret_type else 'nil'}"      # Add return type to end of row
 
-        param_types = table.xpath(".//x:td[@class='paramtype']", namespaces=ns)
-        param_names = table.xpath(".//x:td[@class='paramname']", namespaces=ns)
+        param_types = table.xpath(".//td[@class='paramtype']")
+        param_names = table.xpath(".//td[@class='paramname']")
 
         # These lists will be imbalanced if there are no args... for some reason doxygen inserts an empty
         # <td class="paramname"></td> tag when there are no args, but does not also include a corresponding
@@ -818,12 +856,12 @@ def replace_text(root: Any, search_str: str, replace_str: str):
             elem.tail = elem.tail.replace(search_str, replace_str)
 
 
-def get_class_urls(root: Any, ns: Dict[str, str]) -> Dict[str, str]:
+def get_class_urls(root: Any) -> Dict[str, str]:
     """
     Build a list of URLs for each parent class. These are convenitely available in the
     map associated with the class hiearchy at the top of each page.
     """
-    areas = root.xpath("//x:map/x:area", namespaces=ns)
+    areas = root.xpath("//map/area")
     # <map id="Ship_map" name="Ship_map">
     #   <area href="class_move_object.html" title="Parent class of most things that move (except bullets)." alt="MoveObject" shape="rect" coords="0,112,81,136">
     #   <area href="class_item.html" title="Parent class for most common game items." alt="Item" shape="rect" coords="0,56,81,80">
@@ -849,7 +887,7 @@ def cleanup_html(line: str) -> str:
     # Remove the offending &nbsp that makes some )s appear in the wrong place
     line = re.sub(r'(<td class="paramtype">.+)&#160;(</td>)', r"\1\2", line)        # &#160; is a nobsp char
 
-    line = re.sub(r"/* @license.*?\*/", "", line)       # These comments cause problems for some reason
+    line = re.sub(r"/\* @license.*?\*/", "", line)       # These comments cause problems for some reason
 
     return line
 
@@ -866,10 +904,10 @@ def update_progress(progress: float, msg: str = ""):
         status = "error: progress var must be float\r\n"
     if progress < 0:
         progress = 0
-        status = "Halt.\r\n"
+        status = "Halt.\033[K\n"
     if progress >= 1:
         progress = 1
-        status = "Done.\r\n"
+        status = "Done.\033[K\n"
 
     blocklen = int(round(barLength * progress))
     text = f"\rProgress: [{'■' * blocklen}{' ' * (barLength - blocklen)}] {progress * 100:.1f}% {status}\033[K"
