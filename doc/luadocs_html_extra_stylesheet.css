@@ -21,6 +21,9 @@ td.mdescRight a:not(.el) {
    font-size: x-small;        /* Applies to the [details] links in class definitions */
 }
 
+span.argtypes {
+   padding-left: 8px;         /* Indent the "Arg types" line a bit */
+}
 
 /* Styling for the inherited links over a the right */
 span.mlabels a {
@@ -49,7 +52,7 @@ span.mlabels a:visited {
    font-size: smaller;
 }
 .argline span.paramname {
-   font-weight: bold;
+   color: black;
 }
 .argline span.paramtype {
 

@@ -36,8 +36,8 @@ class ClientInfo;
 // We don't need to make all these values available to scripts; set the 2nd value to false for
 // those values that we don't want to share.
 //
-//                                         Make available      Available to scripts as:   Descr in             
-//                   Enum:                  to scripts?            ObjType. ...         documentation: 
+//                                         Make available      Available to scripts as:   Descr in        (note that these descriptions should match the      
+//                   Enum:                  to scripts?            ObjType. ...         documentation:     class name so that the documentation autolinks)
 #define TYPE_NUMBER_TABLE                                                                                        \
    TYPE_NUMBER( BarrierTypeNumber,             true,              "Barrier",             "Barrier"             ) \
    TYPE_NUMBER( PlayerShipTypeNumber,          true,              "Ship",                "Ship"                ) \
@@ -50,7 +50,7 @@ class ClientInfo;
    TYPE_NUMBER( BulletTypeNumber,              true,              "Bullet",              "Bullet"              ) \
    TYPE_NUMBER( BurstTypeNumber,               true,              "Burst",               "Burst"               ) \
    TYPE_NUMBER( MineTypeNumber,                true,              "Mine",                "Mine"                ) \
-   TYPE_NUMBER( NexusTypeNumber,               true,              "Nexus",               "Nexus"               ) \
+   TYPE_NUMBER( NexusTypeNumber,               true,              "Nexus",               "NexusZone"           ) \
    TYPE_NUMBER( BotNavMeshZoneTypeNumber,      false,             "BotNavMeshZone",      "BotNavMeshZone"      ) \
    TYPE_NUMBER( RobotShipTypeNumber,           true,              "Robot",               "Robot"               ) \
    TYPE_NUMBER( TeleporterTypeNumber,          true,              "Teleporter",          "Teleporter"          ) \
@@ -141,7 +141,7 @@ struct DamageInfo
    F32 damageAmount;
    F32 damageSelfMultiplier;
    DamageType damageType;       // see enum above!
-   BfObject *damagingObject;  // see class below!
+   BfObject *damagingObject;    // see class below!
 
    DamageInfo();  // Constructor
 };

@@ -4,7 +4,6 @@
 # Works with doxygen verison 1.9.0
 
 # TODO: UIMenuItems_cpp.h
-# TODO: doubled classes in the global section, $class section
 
 import os
 from glob import glob
@@ -564,10 +563,21 @@ def post_process():
     print("Fixing doxygen output...")
 
     os.chdir("doc")
+    class_urls = {}     # Map of class to url that describes it
 
     files = glob("./html/class_*.html")
-    files = ["./html/class_core_item.html"]     # TODO
 
+
+    # Rip through them first to build a map of all the class --> urls so we can create links
+    for file_ct, file in enumerate(files):
+        update_progress(file_ct / len(files), os.path.basename(file))
+        with open(file, "r") as infile:
+            root = etree.HTML(infile.read())
+            class_urls.update(get_class_urls(root))
+    update_progress(1)
+
+
+    # files = ["./html/class_core_item.html"]     # TODO
     for file_ct, file in enumerate(files):
         update_progress(file_ct / len(files), os.path.basename(file))
         dirty_html = ""
@@ -650,19 +660,16 @@ def post_process():
                 parent.insert(1, new_element)
 
 
-        class_urls = get_class_urls(root)
-
         clean_up_member_details(root, class_urls)
 
 
         # Delete any items we've marked for deletion
         for element in elements_to_delete:
-            # print("deleting", etree.tostring(element, pretty_print=True).decode("utf-8"))
             delete_node(element)
 
 
         # file = "./html\\class_ship2.html"       # TODO
-        file = file.replace("html", "html-final", 1)    # TODO
+        # file = file.replace("html", "html-final", 1)    # TODO
         # if not os.path.exists(os.path.dirname(file)):
         #     os.mkdir(os.path.dirname(file))
 
@@ -838,6 +845,14 @@ def clean_up_member_details(root: Any, class_urls: Dict[str, str]) -> None:
         # <td class="paramtype"></td>.
         argstrs = []
         param_list = []
+
+        def linkify(param_type):
+            if param_type in class_urls:
+                return f'<a href="{class_urls[param_type]}" class="el">{param_type}</a>'
+            else:
+                return param_type
+
+
         if len(param_types) == len(param_names):        # Balanced, so has args
             for i in range(len(param_types)):
                 # Use itertext() to burrow into any inner tags and grab all interior text
@@ -856,16 +871,14 @@ def clean_up_member_details(root: Any, class_urls: Dict[str, str]) -> None:
                 param_list.append(param_name)
                 param_type = handle_mixed(param_type)
 
-                argstrs.append(f'<span class="paramname">{param_name}</span>: <span class="paramtype">{param_type}</span>')
+                argstrs.append(f'<span class="paramname">{param_name}</span>: <span class="paramtype">{linkify(param_type)}</span>')
 
         # Now back up the tab and the big member name
         method = memtitle.xpath("./span[@class='permalink']")[0]
-        # if is_constructor:
-        #     method.tail =  f"{fn_name}.new({', '.join(param_list)})"        # Insert .new()
-        # else:
         method.tail = f"{fn_name}({', '.join(param_list)})"
 
-        ret_type = f'returns <span class="returntype">{ret_type if ret_type else "nothing"}</span>'
+
+        ret_type = f'returns <span class="returntype">{linkify(ret_type) if ret_type else "nothing"}</span>'
 
         ret_type = handle_mixed(ret_type)       # Decode mixed_xxx_yyy types used for multiple return types
 

@@ -32,8 +32,8 @@ TNL_IMPLEMENT_NETOBJECT(FlagItem);
 
 /**
  * @luafunc FlagItem::FlagItem()
- * @luafunc FlagItem::FlagItem(point)
- * @luafunc FlagItem::FlagItem(point, teamIndex)
+ * @luafunc FlagItem::FlagItem(Point point)
+ * @luafunc FlagItem::FlagItem(Point point, int teamIndex)
  */
 // Combined Lua / C++ default constructor
 FlagItem::FlagItem(lua_State *L) : Parent(Point(0,0), true, (F32)Ship::CollisionRadius) // radius was 20
