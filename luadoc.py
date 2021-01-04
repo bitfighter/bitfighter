@@ -58,6 +58,7 @@ def main():
     # files = [r"C:\dev\bitfighter/zap/ship.cpp"]
 
     parse_files(files)
+    pre_process(files)
     run_doxygen()
     post_process()
 
@@ -67,7 +68,7 @@ class EnumMode:
     CPP_DEFINE = 2
 
 
-def parse_files(files: List[str]):
+def pre_process(files: List[str]):
     # Loop through all the files we found above...
     for file_cnt, file in enumerate(files):
         # print(f"Processing {os.path.basename(file)}...", end="", flush=True)
@@ -378,7 +379,7 @@ def parse_files(files: List[str]):
                         continue
 
 
-                    match = re.search(r"@luavclass\s+(\w+)\s*$", line)       # Description of a virtual class, not defined in any C++ cod
+                    match = re.search(r"@luavclass\s+(\w+)\s*$", line)       # Description of a virtual class, not defined in any C++ code
                     if match:
                         xclass = match.groups()[0]
                         comments.append(f" \\class {xclass}\n")
