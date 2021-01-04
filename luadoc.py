@@ -674,8 +674,7 @@ def post_process():
 
         class_urls = get_class_urls(root)
 
-        move_class_names_to_inherited_tag(root, class_urls)
-        clean_up_method_sigs(root)
+        clean_up_member_details(root, class_urls)
 
 
         # Delete any items we've marked for deletion
@@ -693,57 +692,6 @@ def post_process():
 
 def delete_node(element):
     element.getparent().remove(element)
-
-
-def move_class_names_to_inherited_tag(root: Any, class_urls: Dict[str, str]) -> None:
-    """ Move class names to inherited tag; this does not capture all of our classes, only the inherited ones. """
-    tables = root.xpath("//table[contains(.,'inherited')]")     # Matches entire table below
-    # <table class="mlabels">
-    #   <tr>
-    #     <td class="mlabels-left">
-    #         <table class="memname">
-    #           <tr>
-    #             <td class="memname">BfObject::setGeom </td>                         <=== Move BfObject from here...
-    #             <td>(</td>
-    #             <td class="paramtype"><a class="el" href="class_geom.html">Geom</a></td>
-    #             <td class="paramname"><em>geometry</em></td>
-    #             <td>)</td>
-    #             <td></td>
-    #           </tr>
-    #         </table>
-    #     </td>
-    #     <td class="mlabels-right">
-    #         <span class="mlabels"><span class="mlabel">inherited</span></span>      <=== ...to here
-    #     </td>
-    #   </tr>
-    # </table>
-
-    for table in tables:
-        memnames = table.xpath(".//td[@class='memname']/text()")
-        if not memnames:
-            continue
-        assert len(memnames) == 1
-
-        parts = parse_member_name(memnames[0])
-
-        if not parts:
-            continue
-
-        ret_type, xclass, fn = parts
-
-
-        inherited_elements = table.xpath(".//span[@class='mlabel' and text()='inherited']")
-        if inherited_elements:
-            assert len(inherited_elements) == 1
-            # inherited_elements[0].text = f"inherited from {xclass}"
-
-            html = f'inherited from {xclass}'
-            if xclass in class_urls:        # Use the URL if we have one
-                html = f'<a href="{class_urls[xclass]}">{html}</a>'
-            inherited_from = etree.fromstring(html)
-
-            inherited_elements[0].clear()
-            inherited_elements[0].insert(1, inherited_from)
 
 
 def parse_member_name(memname: str) -> Optional[Tuple[str, str, str]]:
@@ -768,27 +716,91 @@ def parse_member_name(memname: str) -> Optional[Tuple[str, str, str]]:
     return ret_type.strip(), xclass.strip(), fn.strip()
 
 
-def clean_up_method_sigs(root: Any) -> None:
-    # Spiff up method signatures (looking for inner tables found above, but this time even ones without adjacent inherited tags)
-    tables = root.xpath("//table[@class='memname']")
-    # <table class="memname">
+def clean_up_member_details(root: Any, class_urls: Dict[str, str]) -> None:
+    """
+        Move class names to inherited tag on right side of header;
+        this does not capture all of our classes, only the inherited ones.
+    """
+    inherited_tables = root.xpath("//table[contains(.,'inherited')]")     # Matches entire table below
+    # <table class="mlabels">
     #   <tr>
-    #     <td class="memname">BfObject::setGeom </td>                       <=== "BfObject::setGeom" to "setGeom"
-    #     <td>(</td>
-    #     <td class="paramtype"><a class="el" href="class_geom.html">Geom</a></td>
-    #     <td class="paramname"><em>geometry</em></td>
-    #     <td>)</td>
-    #     <td></td>                                                         <=== Add "-> <return type>" to this cell
+    #     <td class="mlabels-left">
+    #         <table class="memname">
+    #           <tr>
+    #             <td class="memname">BfObject::setGeom </td>                         <=== Move BfObject from here...
+    #             <td>(</td>
+    #             <td class="paramtype"><a class="el" href="class_geom.html">Geom</a></td>
+    #             <td class="paramname"><em>geometry</em></td>
+    #             <td>)</td>
+    #             <td></td>
+    #           </tr>
+    #         </table>
+    #     </td>
+    #     <td class="mlabels-right">
+    #         <span class="mlabels"><span class="mlabel">inherited</span></span>      <=== ...to here
+    #     </td>
     #   </tr>
     # </table>
 
-    for table in tables:
+    for table in inherited_tables:
         memnames = table.xpath(".//td[@class='memname']/text()")
+        if not memnames:
+            continue
+        assert len(memnames) == 1
+
+        parts = parse_member_name(memnames[0])
+
+        if not parts:
+            continue
+
+        ret_type, xclass, fn = parts
+
+        inherited_elements = table.xpath(".//span[@class='mlabel' and text()='inherited']")
+        if inherited_elements:
+            assert len(inherited_elements) == 1
+            # inherited_elements[0].text = f"inherited from {xclass}"
+
+            html = f'inherited from {xclass}'
+            if xclass in class_urls:        # Use the URL if we have one
+                html = f'<a href="{class_urls[xclass]}">{html}</a>'
+            inherited_from = etree.fromstring(html)
+
+            inherited_elements[0].clear()
+            inherited_elements[0].insert(1, inherited_from)
+
+
+    #####
+    # Spiff up method signatures (looking for inner tables found above, but this time even ones without adjacent inherited tags)
+    memitems = root.xpath("//div[@class='memitem']")
+
+    for memitem in memitems:
+        table = memitem.xpath(".//table[@class='memname']")[0]
+        memtitle = memitem.getprevious()        # Member Title: Big text title on tab in member descriptions
+        # <h2 class="memtitle"><span
+        #     class="permalink"><a
+        #     href="#a603c2eb87a4ed26c5b3fb06e953d611c">◆&nbsp;</a></span>Asteroid() <span
+        #     class="overload">[1/2]</span>
+        # </h2>
+
+        memnames = table.xpath(".//td[@class='memname']/text()")
+        # <table class="memname">
+        #   <tr>
+        #     <td class="memname">BfObject::setGeom </td>                       <=== "BfObject::setGeom" to "setGeom"
+        #     <td>(</td>
+        #     <td class="paramtype"><a class="el" href="class_geom.html">Geom</a></td>
+        #     <td class="paramname"><em>geometry</em></td>
+        #     <td>)</td>
+        #     <td></td>                                                         <=== Add "-> <return type>" to this cell
+        #   </tr>
+        # </table>
 
         if memnames:
+
             parts = parse_member_name(memnames[0])
             if not parts:
                 continue
+            if memnames[0] == "BfObject::removeFromGame " or "isSelected" in memnames[0]:
+                print(99)
             ret_type, xclass, function_name = parts     # ret_type xclass::function_name()
             is_constructor = xclass == function_name
             if is_constructor:
@@ -797,6 +809,8 @@ def clean_up_method_sigs(root: Any) -> None:
         else:
             ret_type, function_name = "", table.xpath(".//td/text()")[0]
             is_constructor = False
+
+
 
         cells = table.xpath(".//td")
         cells[0].clear()
@@ -810,7 +824,8 @@ def clean_up_method_sigs(root: Any) -> None:
         # <td class="paramname"></td> tag when there are no args, but does not also include a corresponding
         # <td class="paramtype"></td>.
         argstrs = []
-        if len(param_types) == len(param_names):
+        param_list = []
+        if len(param_types) == len(param_names):        # Balanced, so has args
             for i in range(len(param_types)):
                 # Use itertext() to burrow into any inner tags and grab all interior text
                 param_name = "".join(param_names[i].itertext()).replace(",", "")
@@ -825,25 +840,42 @@ def clean_up_method_sigs(root: Any) -> None:
                 else:
                     delete_node(param_types[i])     # Won't be needing this: param_types will be displayed in the line below
 
+                param_list.append(param_name.strip())
+
                 argstrs.append(f'<span class="paramname">{param_name}</span>: <span class="paramtype">{param_type}</span>')
 
+        # Now back up the tab and the big member name
+        # Add .new() and arglist to constructor title items
+        if is_constructor:
+            constructor = memtitle.xpath("./span[@class='permalink']")[0]
+            parts = constructor.tail.split("(", 1)
+            constructor.tail = parts[0] + ".new(" + ", ".join(param_list) + parts[1]
+        else:
+            method = memtitle.xpath("./span[@class='permalink']")[0]
+            parts = method.tail.split("(", 1)
+            method.tail = parts[0] + "(" + ", ".join(param_list) + parts[1]        # Split swallowed "(", parts[1] has ")" already
+
+
+        ret_type = f'returns <span class="returntype">{ret_type if ret_type else "nothing"}</span>'
 
         # The argline styles are defined in luadocs_html_extra_stylesheet.css
-        if argstrs or ret_type:
-            if argstrs:     # Args and optional return type
-                argline = f'{", ".join(argstrs)}{NBSP * 2}|{NBSP * 2}returns <span class="returntype">{ret_type if ret_type else "nil"}</span>'
-            else:           # No args, only return type
-                argline = f'returns <span class="returntype">{ret_type}</span>'
+        if argstrs:     # Args and return type
+            arg_type = "Arg types: "
+            argline = f"{', '.join(argstrs)}{NBSP * 2}|{NBSP * 2}{ret_type}"
+        else:           # No args, only return type
+            arg_type = ""
+            argline = ret_type
 
-            new_row = etree.fromstring(f"""
-                <tr class="nofloat argline">
-                    <td colspan="{len(cells)}">
-                        <span class="argtypes">Arg types:</span>
-                        {argline}
-                    </td>
-                </tr>
-            """)
-            table.append(new_row)
+        new_row = etree.fromstring(f"""
+            <tr class="nofloat argline">
+                <td colspan="{len(cells)}">
+                    <span class="argtypes">{arg_type}</span>
+                    {argline}
+                </td>
+            </tr>
+        """)
+        table.clear()           # Remove existing rows, which are now a repeat of the data shown in the tab
+        table.append(new_row)   # And insert the type information in a new row
 
 
 # https://stackoverflow.com/questions/65506059/how-can-i-get-the-text-from-this-html-snippet-using-lxml
