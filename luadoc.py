@@ -667,9 +667,39 @@ def post_process():
     update_progress(1)
 
 
-def delete_node(element):
+def delete_node(element: Any) -> None:
     element.getparent().remove(element)
 
+
+def remove_space_after_method_name(root: Any) -> None:
+    # Clear out annoying space just before ().  That is, setGeom (Geometry geom)  ==> setGeom(Geometry geom)
+    elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']/a[@class='el']")
+    for element in elements:
+        if element.tail:
+            if re.match(r" \(.*", element.tail):         # If it's an open paren followed by something...
+                element.tail = element.tail.strip()      # ...strip leading space
+
+
+def remove_spaces_in_method_declarations_section(root: Any) -> None:
+
+    # Remove types from declarations in upper section.  Several patterns to consider.
+    # Pattern 1: Method(geom lineGeom, int speed)
+    elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']/a[@class='el']")
+    for element in elements:
+        if element.tail:
+            match = re.match(r"\((.*)\)", element.tail)
+            if match:
+                arglist = match.groups()[0].split()
+                if arglist and len(arglist) % 2 == 0:    # Even number, meaning every param has a type
+                    argstr = " ".join(arglist[1::2])     # Concatenate every second item; commas will already be included in the text we're parsing
+                    element.tail = "(" + argstr + ")"         # ['geom', 'geometry,', 'int', 'thickness'] ==> (geometry, thickness)
+    # Pattern 2: Method(<linked type> param)
+    # Linked types are in <a class="el"> elements, but we need to hang onto the first one, which is the member name itself
+    elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']/a[@class='el' and position()>1]")
+    for element in elements:
+        text = element.tail.strip()
+        element.getprevious().tail += text
+        delete_node(element)
 
 
 def parse_member_name(memname: str) -> Optional[Tuple[str, str, str]]:
@@ -735,7 +765,6 @@ def clean_up_member_details(root: Any, class_urls: Dict[str, str]) -> None:
         inherited_elements = table.xpath(".//span[@class='mlabel' and text()='inherited']")
         if inherited_elements:
             assert len(inherited_elements) == 1
-            # inherited_elements[0].text = f"inherited from {xclass}"
 
             html = f'inherited from {xclass}'
             if xclass in class_urls:        # Use the URL if we have one
@@ -759,7 +788,7 @@ def clean_up_member_details(root: Any, class_urls: Dict[str, str]) -> None:
         #     class="overload">[1/2]</span>
         # </h2>
 
-        memnames = table.xpath(".//td[@class='memname']/text()")
+        memnames = table.xpath(".//td[@class='memname']")
         # <table class="memname">
         #   <tr>
         #     <td class="memname">BfObject::setGeom </td>                       <=== "BfObject::setGeom" to "setGeom"
@@ -772,26 +801,28 @@ def clean_up_member_details(root: Any, class_urls: Dict[str, str]) -> None:
         # </table>
 
         if memnames:
+            fn_decl = "".join(memnames[0].itertext()).strip()       # itertext gives us any text inside of tags
 
-            parts = parse_member_name(memnames[0])
+            parts = parse_member_name(fn_decl)
             if not parts:
                 continue
-            if memnames[0] == "BfObject::removeFromGame " or "isSelected" in memnames[0]:
-                print(99)
-            ret_type, xclass, function_name = parts     # ret_type xclass::function_name()
-            is_constructor = xclass == function_name
+
+            ret_type, xclass, fn_name = parts     # ret_type xclass::fn_name()
+            # print(fn_name)
+
+            is_constructor = xclass == fn_name
             if is_constructor:
                 ret_type = xclass        # Constructors return an instance of the class, even if it's not written that way in C++
-                function_name += ".new"  # This is how you call constructors in Lua
+                fn_name += ".new"  # This is how you call constructors in Lua
         else:
-            ret_type, function_name = "", table.xpath(".//td/text()")[0]
+            assert False
+            ret_type, fn_name = "", table.xpath(".//td/text()")[0]
             is_constructor = False
-
 
 
         cells = table.xpath(".//td")
         cells[0].clear()
-        cells[0].text = function_name       # Replaces "num MoveObject::getAngle" with "getAngle"
+        cells[0].text = fn_name       # Replaces "num MoveObject::getAngle" with "getAngle"
         # cells[-1].text = f"-> {ret_type if ret_type else 'nil'}"      # Add return type to end of row
 
         param_types = table.xpath(".//td[@class='paramtype']")
@@ -823,20 +854,15 @@ def clean_up_member_details(root: Any, class_urls: Dict[str, str]) -> None:
                 argstrs.append(f'<span class="paramname">{param_name}</span>: <span class="paramtype">{param_type}</span>')
 
         # Now back up the tab and the big member name
-        # Add .new() and arglist to constructor title items
+        method = memtitle.xpath("./span[@class='permalink']")[0]
         if is_constructor:
-            constructor = memtitle.xpath("./span[@class='permalink']")[0]
-            parts = constructor.tail.split("(", 1)
-            constructor.tail = parts[0] + ".new(" + ", ".join(param_list) + parts[1]
+            method.tail =  f"{fn_name}.new({', '.join(param_list)})"        # Insert .new()
         else:
-            method = memtitle.xpath("./span[@class='permalink']")[0]
-            parts = method.tail.split("(", 1)
-            method.tail = parts[0] + "(" + ", ".join(param_list) + parts[1]        # Split swallowed "(", parts[1] has ")" already
-
+            method.tail = f"{fn_name}({', '.join(param_list)})"
 
         ret_type = f'returns <span class="returntype">{ret_type if ret_type else "nothing"}</span>'
 
-        ret_type = handle_mixed(ret_type)
+        ret_type = handle_mixed(ret_type)       # Decode mixed_xxx_yyy types used for multiple return types
 
         # The argline styles are defined in luadocs_html_extra_stylesheet.css
         if argstrs:     # Args and return type
