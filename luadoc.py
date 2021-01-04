@@ -616,31 +616,8 @@ def post_process():
         for element in elements:
             element.clear()
 
-        # Clear out annoying space just before ().  That is, setGeom (Geometry geom)  ==> setGeom(Geometry geom)
-        elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']/a[@class='el']")
-        for element in elements:
-            if element.tail:
-                if re.match(r" \(.*", element.tail):         # If it's an open paren followed by something...
-                    element.tail = element.tail.strip()      # ...strip leading space
-
-        # Remove types from declarations in upper section.  Several patterns to consider.
-        # Pattern 1: Method(geom lineGeom, int speed)
-        elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']/a[@class='el']")
-        for element in elements:
-            if element.tail:
-                match = re.match(r"\((.*)\)", element.tail)
-                if match:
-                    arglist = match.groups()[0].split()
-                    if arglist and len(arglist) % 2 == 0:    # Even number, meaning every param has a type
-                        argstr = " ".join(arglist[1::2])     # Concatenate every second item; commas will already be included in the text we're parsing
-                        element.tail = "(" + argstr + ")"         # ['geom', 'geometry,', 'int', 'thickness'] ==> (geometry, thickness)
-        # Pattern 2: Method(<linked type> param)
-        # Linked types are in <a class="el"> elements, but we need to hang onto the first one, which is the member name itself
-        elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']/a[@class='el' and position()>1]")
-        for element in elements:
-            text = element.tail.strip()
-            element.getprevious().tail += text
-            delete_node(element)
+        remove_space_after_method_name(root)
+        remove_spaces_in_method_declarations_section(root)
 
 
         elements = root.xpath(f"//h2[@class='memtitle' and contains(text(), '{FUNCS_HEADER_MARKER}')]")
@@ -694,6 +671,7 @@ def delete_node(element):
     element.getparent().remove(element)
 
 
+
 def parse_member_name(memname: str) -> Optional[Tuple[str, str, str]]:
     """
     Given a string like "int BFObject::doMath", return ["int", "BfObject", "doMath"].
@@ -704,7 +682,6 @@ def parse_member_name(memname: str) -> Optional[Tuple[str, str, str]]:
         return None
 
     memname = memname.replace("static", "").strip()
-
 
     xclass, fn = memname.split("::")
 
@@ -828,8 +805,8 @@ def clean_up_member_details(root: Any, class_urls: Dict[str, str]) -> None:
         if len(param_types) == len(param_names):        # Balanced, so has args
             for i in range(len(param_types)):
                 # Use itertext() to burrow into any inner tags and grab all interior text
-                param_name = "".join(param_names[i].itertext()).replace(",", "")
-                param_type = "".join(param_types[i].itertext()).replace(",", "")
+                param_name = "".join(param_names[i].itertext()).replace(",", "").strip()
+                param_type = "".join(param_types[i].itertext()).replace(",", "").strip()
 
                 # Handle special case: when a constructor (or other fn) has the typeless "geom" as an argument, add the type Geom here.
                 # It would be better to fix the code, but there's a lot of places where this is happening.  If that's the case,
@@ -891,6 +868,7 @@ def handle_mixed(argtype: str) -> str:
         argtype = argtype.replace("mixed_", " ", 1)
         argtype = argtype.replace("_", ", ")
     return argtype
+
 
 # https://stackoverflow.com/questions/65506059/how-can-i-get-the-text-from-this-html-snippet-using-lxml
 def replace_text(root: Any, search_str: str, replace_str: str):
