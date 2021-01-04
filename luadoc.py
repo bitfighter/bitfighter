@@ -885,7 +885,7 @@ def handle_mixed(argtype: str) -> str:
     """
     Because Lua functions can return multiple types, and C++ fuctions cannot, we'll use a fake datatype called mixed
     to specify multiple types.  In the docs, we specify it as "mixed_xxx_yyy", which should survive the processing steps,
-    and here we'll retranslate to "xxx, yyy".
+    and here we'll translate to "xxx, yyy".
     """
     if "mixed_" in argtype:
         argtype = argtype.replace("mixed_", " ", 1)
