@@ -841,6 +841,7 @@ def clean_up_member_details(root: Any, class_urls: Dict[str, str]) -> None:
                     delete_node(param_types[i])     # Won't be needing this: param_types will be displayed in the line below
 
                 param_list.append(param_name.strip())
+                param_type = handle_mixed(param_type)
 
                 argstrs.append(f'<span class="paramname">{param_name}</span>: <span class="paramtype">{param_type}</span>')
 
@@ -857,6 +858,8 @@ def clean_up_member_details(root: Any, class_urls: Dict[str, str]) -> None:
 
 
         ret_type = f'returns <span class="returntype">{ret_type if ret_type else "nothing"}</span>'
+
+        ret_type = handle_mixed(ret_type)
 
         # The argline styles are defined in luadocs_html_extra_stylesheet.css
         if argstrs:     # Args and return type
@@ -877,6 +880,17 @@ def clean_up_member_details(root: Any, class_urls: Dict[str, str]) -> None:
         table.clear()           # Remove existing rows, which are now a repeat of the data shown in the tab
         table.append(new_row)   # And insert the type information in a new row
 
+
+def handle_mixed(argtype: str) -> str:
+    """
+    Because Lua functions can return multiple types, and C++ fuctions cannot, we'll use a fake datatype called mixed
+    to specify multiple types.  In the docs, we specify it as "mixed_xxx_yyy", which should survive the processing steps,
+    and here we'll retranslate to "xxx, yyy".
+    """
+    if "mixed_" in argtype:
+        argtype = argtype.replace("mixed_", " ", 1)
+        argtype = argtype.replace("_", ", ")
+    return argtype
 
 # https://stackoverflow.com/questions/65506059/how-can-i-get-the-text-from-this-html-snippet-using-lxml
 def replace_text(root: Any, search_str: str, replace_str: str):
