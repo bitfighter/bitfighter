@@ -2435,7 +2435,7 @@ S32 Ship::lua_getAngle(lua_State *L)        { return returnFloat(L, getCurrentMo
  * @descr This will return an item of the \ref WeaponEnum enum, e.g.
  * `Weapon.Phaser`.
  *
- * @return int The \ref WeaponEnum that is currently active on this ship.
+ * @return The \ref WeaponEnum that is currently active on this ship.
  */
 S32 Ship::lua_getActiveWeapon(lua_State *L)
 {
