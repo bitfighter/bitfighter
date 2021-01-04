@@ -190,21 +190,21 @@ def parse_files(files: List[str]):
                         classes[xclass].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {xclass} {{ \npublic:\n")
 
                         # This is an ordinary "class method"
-                        for method in staticMethods:
+                        # for method in staticMethods:
                             # index = first { ${$classes{$class}}[$_] =~ m|\s$method\(| } 0..$#{$classes{$class}}  # ? Not sure what's happening here
-                            index = False       # TODO: Fix line above
+                            # index = False       # TODO: Fix line above
 
-                            found = False
-                            for xxx in classes[xclass]:
-                                if re.search(f"\\s{method}\\(", xxx):       # ? Maybe this is it??
-                                    found = True
-                                    break
+                            # found = False
+                            # for method in classes[xclass]:
+                            #     if re.search(f"\\s{method}\\(", method):       # ? Maybe this is it??
+                            #         found = True
+                            #         break
 
                             # Ignore methods that already have explicit documentation
-                            if not found:
-                                classes[xclass].append(f"static void {method}() {{ }}\n")
+                            # if not found:
+                            #     classes[xclass].append(f"static void {method}() {{ }}\n")
 
-                        staticMethods = []
+                        # staticMethods = []
                         collectingStaticMethods = False
                         continue
 
