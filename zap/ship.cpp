@@ -2420,7 +2420,7 @@ S32 Ship::lua_getPlayerInfo(lua_State *L) { return returnPlayerInfo(L, this); }
 /**
  * @luafunc num Ship::getAngle()
  *
- * @brief Get the angle of Ship.
+ * @brief Get the angle of the Ship.
  *
  * @return The Ship's angle in radians.
  */

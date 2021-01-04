@@ -57,10 +57,10 @@ def main():
 
     # files = [r"C:\dev\bitfighter/zap/ship.cpp"]
 
-    parse_files(files)
-    pre_process(files)
-    run_doxygen()
-    post_process()
+    # TODO
+    pre_process(files)      # --> Writes files to temp-doxygen
+    run_doxygen()           # --> Writes files to html
+    post_process()          # --> Overwrites files in html
 
 class EnumMode:
     NOT_COLLECTING = 0
@@ -566,7 +566,7 @@ def post_process():
     os.chdir("doc")
 
     files = glob("./html/class_*.html")
-    # files = ["./html/class_asteroid.html"]     # TODO
+    files = ["./html/class_core_item.html"]     # TODO
 
     for file_ct, file in enumerate(files):
         update_progress(file_ct / len(files), os.path.basename(file))
@@ -662,6 +662,10 @@ def post_process():
 
 
         # file = "./html\\class_ship2.html"       # TODO
+        file = file.replace("html", "html-final", 1)    # TODO
+        # if not os.path.exists(os.path.dirname(file)):
+        #     os.mkdir(os.path.dirname(file))
+
         with open(file, "w") as outfile:
             outfile.write(etree.tostring(root).decode("utf-8"))
 
@@ -849,17 +853,17 @@ def clean_up_member_details(root: Any, class_urls: Dict[str, str]) -> None:
                 else:
                     delete_node(param_types[i])     # Won't be needing this: param_types will be displayed in the line below
 
-                param_list.append(param_name.strip())
+                param_list.append(param_name)
                 param_type = handle_mixed(param_type)
 
                 argstrs.append(f'<span class="paramname">{param_name}</span>: <span class="paramtype">{param_type}</span>')
 
         # Now back up the tab and the big member name
         method = memtitle.xpath("./span[@class='permalink']")[0]
-        if is_constructor:
-            method.tail =  f"{fn_name}.new({', '.join(param_list)})"        # Insert .new()
-        else:
-            method.tail = f"{fn_name}({', '.join(param_list)})"
+        # if is_constructor:
+        #     method.tail =  f"{fn_name}.new({', '.join(param_list)})"        # Insert .new()
+        # else:
+        method.tail = f"{fn_name}({', '.join(param_list)})"
 
         ret_type = f'returns <span class="returntype">{ret_type if ret_type else "nothing"}</span>'
 

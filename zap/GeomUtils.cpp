@@ -2014,7 +2014,7 @@ GENERATE_LUA_STATIC_METHODS_TABLE(Geom, LUA_STATIC_METHODS);
  * @note
  * This function is highly experimental, and potentially very resource
  * intensive. If the output must be triangulated (because you made a hole), then
- * there is a possibility that **the program will crash abruptly**. Please use
+ * there is a possibility that the program will **crash abruptly**. Please use
  * this function with great care, and make sure to constrain the inputs tightly
  * so that users can not induce crashes.
  *
@@ -2228,14 +2228,15 @@ S32 lua_polyganize(lua_State *L)
 
 
 /**
- * @luafunc static mixed Geom::segmentsIntersect(point a1, point a2, point b1, point b2)
+ * @luafunc static mixed_bool_num Geom::segmentsIntersect(point a1, point a2, point b1, point b2)
  * @brief Finds intersection of the linesegments (a1, a2) and (b1, b2)
  *
  * @descr Determines if and "when" the line segments a and b intersect. The
  * boolean return value is `true` if the segments intersect. The number return
  * value is a "time" `t` along the line a corresponding to where they intersect.
- * When the first return value is `true` if and only if the second return value
- * is in the range [0, 1].
+ * If the segments intersect, the first return value will `true` and the second 
+ * return value will be in the range [0, 1].  If they do not intersect, the first
+ * return value will be false, and the second value should be discarded.
  *
  * To find the actual point of intersection, just use
  * @code

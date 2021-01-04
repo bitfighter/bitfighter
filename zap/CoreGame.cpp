@@ -522,8 +522,8 @@ const U32 CoreItem::CoreMaxRotationSpeed = 15;
 
 /**
  * @luafunc CoreItem::CoreItem()
- * @luafunc CoreItem::CoreItem(geom, team)
- * @luafunc CoreItem::CoreItem(geom, team, health)
+ * @luafunc CoreItem::CoreItem(Geom geom, int team)
+ * @luafunc CoreItem::CoreItem(Geom geom, int team, num health)
  */
 // Combined Lua / C++ default constructor
 CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))    
