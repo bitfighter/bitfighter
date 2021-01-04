@@ -314,6 +314,10 @@ protected:
       FirstFreeMask    = Parent::FirstFreeMask << 1
    };
 
+   static const F32 ASTEROID_MASS_SIZE1;
+   static const F32 ASTEROID_RADIUS_SIZE1;
+   static const F32 ASTEROID_SPEED;
+
 public:
    explicit Asteroid(lua_State *L = NULL); // Combined Lua / C++ default constructor
    virtual ~Asteroid();           // Destructor

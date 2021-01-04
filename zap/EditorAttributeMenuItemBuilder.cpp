@@ -70,13 +70,12 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
          return attributeMenuUI;
       }
 
-      case ShipSpawnTypeNumber:
+      case ShipSpawnTypeNumber:  // Nothing for Ship Spawn
+         return NULL;
+
       case AsteroidSpawnTypeNumber:
       case FlagSpawnTypeNumber:
       {
-         if(static_cast<AbstractSpawn *>(obj)->getDefaultRespawnTime() == -1)  // No editing RespawnTimer for Ship Spawn
-            return NULL;
-
          static EditorAttributeMenuUI *attributeMenuUI = NULL;
 
          if(!attributeMenuUI)
@@ -89,11 +88,19 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
                                                             "Time it takes for each item to be spawned");
             attributeMenuUI->addMenuItem(menuItem);
 
+            // Additionally add the asterod size
+            if(obj->getObjectTypeNumber() == AsteroidSpawnTypeNumber)
+            {
+               attributeMenuUI->addMenuItem(
+                     new CounterMenuItem("Asteroid Size:", Asteroid::ASTEROID_INITIAL_SIZELEFT, 1, 1, Asteroid::ASTEROID_SIZELEFT_MAX, "", "", "")
+               );
+            }
+
             // Add our standard save and exit option to the menu
             attributeMenuUI->addSaveAndQuitMenuItem();
          }
 
-          return attributeMenuUI;
+         return attributeMenuUI;
       }
 
       case CoreTypeNumber:
@@ -232,6 +239,10 @@ void EditorAttributeMenuItemBuilder::startEditingAttrs(EditorAttributeMenuUI *at
       case AsteroidSpawnTypeNumber:
       case FlagSpawnTypeNumber:
          attributeMenu->getMenuItem(0)->setIntValue(static_cast<AbstractSpawn *>(obj)->getSpawnTime());
+
+         if(obj->getObjectTypeNumber() == AsteroidSpawnTypeNumber)
+            attributeMenu->getMenuItem(1)->setIntValue(static_cast<AsteroidSpawn *>(obj)->getAsteroidSize());
+
          break;
 
       case CoreTypeNumber:
@@ -276,6 +287,10 @@ void EditorAttributeMenuItemBuilder::doneEditingAttrs(EditorAttributeMenuUI *att
       case AsteroidSpawnTypeNumber:
       case FlagSpawnTypeNumber:
          static_cast<AbstractSpawn *>(obj)->setSpawnTime(attributeMenu->getMenuItem(0)->getIntValue());
+
+         if(obj->getObjectTypeNumber() == AsteroidSpawnTypeNumber)
+            static_cast<AsteroidSpawn *>(obj)->setAsteroidSize(attributeMenu->getMenuItem(1)->getIntValue());
+
          break;
 
       case CoreTypeNumber:

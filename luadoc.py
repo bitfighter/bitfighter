@@ -553,7 +553,7 @@ def parse_files(files: List[str]):
 
 def run_doxygen():
     os.chdir("doc")
-    subprocess.run(f"{doxygen_cmd} luadocs.doxygen")
+    subprocess.run(f"{doxygen_cmd} luadocs.doxygen luadocs_html_extra_stylesheet.css")
     os.chdir("..")
 
 

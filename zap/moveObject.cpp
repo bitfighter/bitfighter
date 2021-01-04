@@ -1461,11 +1461,9 @@ void VelocityItem::setInitialPosVelAng(const Point &pos, const Point &vel, F32 a
 
 TNL_IMPLEMENT_NETOBJECT(Asteroid);
 
-static const F32 ASTEROID_MASS_SIZE1   = 0.5;   // Smallest asteroid mass
-static const F32 ASTEROID_RADIUS_SIZE1 = 8.9f;  // Smallest asteroid radius
-static const F32 ASTEROID_SPEED        = 250;
-
-
+const F32 Asteroid::ASTEROID_MASS_SIZE1   = 0.5;   // Smallest asteroid mass
+const F32 Asteroid::ASTEROID_RADIUS_SIZE1 = 8.9f;  // Smallest asteroid radius
+const F32 Asteroid::ASTEROID_SPEED        = 250;
 
 const U8 Asteroid::ASTEROID_SIZELEFT_BIT_COUNT = 3;
 const S32 Asteroid::ASTEROID_SIZELEFT_MAX      = 5;
