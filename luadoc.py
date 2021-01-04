@@ -381,7 +381,7 @@ def parse_files(files: List[str]):
                     match = re.search(r"@luavclass\s+(\w+)\s*$", line)       # Description of a virtual class, not defined in any C++ cod
                     if match:
                         xclass = match.groups()[0]
-                        comments.append(" \\class $class\n")
+                        comments.append(f" \\class {xclass}\n")
 
                         if xclass not in classes:
                             classes[xclass] = []
