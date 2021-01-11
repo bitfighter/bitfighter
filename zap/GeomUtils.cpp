@@ -1366,8 +1366,37 @@ void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Poi
 }
 
 
+// Same as expandCenterlineToOutline, but for lines with more than 2 points
+// This method expands a line to a given thickness with ends still squared off
+void offsetLineOpenButt(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset)
+{
+   // Glue code for Clipper methods
+   Vector<const Vector<Point> *> tempInputVector;
+   tempInputVector.push_back(inputPoly);
+
+   Vector<Vector<Point> > tempOutputVector;
+
+   // Upscale to integer points
+   Paths polygons = upscaleClipperPoints(tempInputVector);
+
+   // Call Clipper to do the dirty work
+   ClipperOffset clipperOffset(0, 0);
+   Paths outPolys(polygons.size());
+
+   clipperOffset.AddPaths(polygons, jtMiter, etOpenButt);
+   clipperOffset.Execute(outPolys, offset * CLIPPER_SCALE_FACT);
+
+   // Downscale
+   tempOutputVector = downscaleClipperPoints(outPolys);
+
+   // Return output
+   if(tempOutputVector.size() > 0)
+      outputPoly = tempOutputVector[0];
+}
+
+
 // This method is a generic offsetting method that uses the miter offset
-void offsetPolygons(Vector<Vector<Point> > &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset)
+void offsetPolygonsMitered(Vector<Vector<Point> > &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset)
 {
    // Upscale
    Paths polygons = upscaleClipperPoints(inputPolys);
@@ -1941,6 +1970,137 @@ void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, 
 }
 
 
+bool isClockwiseTriangle(const Point & p1, const Point & p2, const Point & p3)
+{
+   // Test winding, is either pos, neg, or zero
+   int windTest = (p2.y - p1.y) * (p3.x - p2.x) - (p2.x - p1.x) * (p3.y - p2.y);
+
+   return (windTest > 0);  // 0 is colinear, but we don't care
+}
+
+
+// This expects CCW points
+void addMiterPoints(Point p1, Point p2, Point p3, F32 offset, Vector<Point> &polyToAppend)
+{
+   static const F32 MiterLimit = 2.0f;
+
+   // Compute angle between the two vectors
+   Point vec1 = p2-p1;
+   Point vec2 = p2-p3;
+   vec1.normalize();
+   vec2.normalize();
+
+   // Compute normalized normal (len == 1, perpendicular)
+   Point crossVec = Point(vec1.y, -vec1.x); // -90 deg
+
+   // Extend length
+   Point offsetCrossVec = crossVec * offset;
+
+
+   // Find subtended angle of two vectors
+   F32 cosTheta = vec1.dot(vec2);
+
+   // Bounds checking with weird floating values
+   if (cosTheta > 1.0)
+      cosTheta = 1.0;
+   else if(cosTheta < -1.0)
+      cosTheta = -1.0;
+
+   F32 subtendedAngle = acosf(cosTheta);
+   F32 halfAngle = subtendedAngle * 0.5;
+
+
+   // Do mitering
+   // Find length of miter offset
+   F32 miterLen = offset / tanf(halfAngle);
+
+   // Create perpendicular vector and extend to length
+   Point miterVec = vec1 * miterLen;
+
+   // Test miter length to see if we should square it off
+   F32 miterLimitLen = MiterLimit * offset;
+
+   // Too big, time to square it and add two points
+   if(miterVec.lenSquared() > (miterLimitLen * miterLimitLen))
+   {
+      // Determine squared-off vector length, by backtracking off of miter length
+      F32 cosAngle = cosf(halfAngle);
+      F32 hypot = miterLen / cosAngle;
+      F32 removeLen = (hypot - offset) / cosAngle;
+      F32 finalLen = miterLen - removeLen;
+
+      // Compute normalized normal of segment 2, but rotated other direction
+      Point crossVec2 = Point(-vec2.y, vec2.x); // +90 deg
+      Point offsetCrossVec2 = crossVec2 * offset;
+
+      // Compute the two new squared-miter points a
+      Point sq1 = p2 + offsetCrossVec + (vec1 * finalLen);
+      Point sq2 = p2 + offsetCrossVec2 + (vec2 * finalLen);
+
+      // CCW point first
+      polyToAppend.push_back(sq2);
+      polyToAppend.push_back(sq1);
+   }
+
+   // Else only one point to add, the miter point
+   else
+      polyToAppend.push_back(p2 + offsetCrossVec + miterVec);
+
+   return;
+}
+
+// Builds a polygon from a Barrier segment. Will construct miters if given
+// points before (pre) or after (post).
+// The output polygon may be 4 to 6 points, simple convex, and wound CCW
+void constructBarrierPolygon(const Point &start, const Point &end, const Point &pre, const Point &post,
+      F32 width, Vector<Point> &outPoly)
+{
+   F32 offset = width * 0.5f;
+
+   // Determine if pre/post points are dummies (end of barrier)
+   bool isDummyPre  = isnanf(pre.x);
+   bool isDummyPost = isnanf(post.x);
+
+   // Build normalized normals. Two definitions of 'normal'!
+   Point dirVec = end - start;
+   Point crossVec(-dirVec.y, dirVec.x);
+   crossVec.normalize(offset);  // offset amount
+
+
+   // Now calculate the points. Each of the 4 corners of an expanded segment
+   // could become mitered to one or two points depending on what the pre/post
+   // segment is.   B               C
+   //                 o-----------o
+   //               A               D
+   //
+   // This only took 5 times to design on paper!
+
+   // Corner A
+   if(isDummyPre || isClockwiseTriangle(pre, start, end))  // Fail fast
+      outPoly.push_back(start - crossVec);
+   else
+      addMiterPoints(pre, start, end, offset, outPoly);
+
+   // Corner B
+   if(isDummyPre || !isClockwiseTriangle(pre, start, end))
+      outPoly.push_back(start + crossVec);
+   else
+      addMiterPoints(end, start, pre, offset, outPoly);  // Swap winding
+
+   // Corner C
+   if(isDummyPost || !isClockwiseTriangle(start, end, post))
+      outPoly.push_back(end + crossVec);
+   else
+      addMiterPoints(post, end, start, offset, outPoly);  // Swap winding
+
+   // Corner D
+   if(isDummyPost || isClockwiseTriangle(start, end, post))
+      outPoly.push_back(end - crossVec);
+   else
+      addMiterPoints(start, end, post, offset, outPoly);
+}
+
+
 void pushPolyNode(lua_State *L, const PolyNode *node)
 {
    if(!node)
@@ -2147,7 +2307,7 @@ S32 lua_offsetPolygons(lua_State *L)
    // try to execute the operation
    Vector<Vector<Point> > result;
 
-   offsetPolygons(input, result, amount);
+   offsetPolygonsMitered(input, result, amount);
 
    // No output??
    if(result.size() == 0)
