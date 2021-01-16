@@ -405,68 +405,46 @@ void EditorInstructionsUserInterface::renderPageWalls() const
    points.push_back(Point(220, 190 + vertOffset));
 
    if(mAnimStage > 0 && mAnimStage < 10)
-   {
-      points.push_back(points.last());
       points.push_back(Point(350, 80 + vertOffset));
-   }
+
    else if(mAnimStage == 10)
-   {
-      points.push_back(points.last());
       points.push_back(Point(350, 150 + vertOffset));
-   }
+
    else if(mAnimStage >= 11)
-   {
-      points.push_back(points.last());
       points.push_back(Point(350, 200 + vertOffset));
-   }
 
    if(mAnimStage > 1)
-   {
-      points.push_back(points.last());
       points.push_back(Point(470, 140 + vertOffset));
-   }
 
    if(mAnimStage > 2)
-   {
-      points.push_back(points.last());
       points.push_back(Point(550, 120 + vertOffset));
-   }
 
    if(mAnimStage == 4)
-   {
-      points.push_back(points.last());
       points.push_back(Point(650, 100 + vertOffset));
-   }
 
    else if(mAnimStage == 5)
-   {
-      points.push_back(points.last());
       points.push_back(Point(690, 130 + vertOffset));
-   }
 
    else if(mAnimStage >= 6)
-   {
-      points.push_back(points.last());
       points.push_back(Point(650, 170 + vertOffset));
-   }
 
+   // Inefficient to do this every tick, but the page won't be rendered often
    if(mAnimStage > 6)
    {
       const F32 width = 25;
-     
-      // Extend end points --> populates extendedEndPoints
-      Vector<Point> extendedEndPoints;
-      constructBarrierEndPoints(&points, width, extendedEndPoints);
 
-       Vector<DatabaseObject *> wallSegments;      
+      Vector<DatabaseObject *> wallSegments;
 
-      // Create a series of WallSegments, each representing a sequential pair of vertices on our wall
-      for(S32 i = 0; i < extendedEndPoints.size(); i += 2)
+      // Build out segment data for this line
+      Vector<Vector<Point> > segmentData;
+      barrierLineToSegmentData(points, segmentData);
+
+      for(S32 i = 0; i < segmentData.size(); i++)
       {
          // Create a new segment, and add it to the list.  The WallSegment constructor will add it to the specified database.
-         WallSegment *newSegment = new WallSegment(mWallSegmentManager.getWallSegmentDatabase(), 
-                                                   extendedEndPoints[i], extendedEndPoints[i+1], width);    
-         wallSegments.push_back(newSegment);            
+         WallSegment *newSegment = new WallSegment(mWallSegmentManager.getWallSegmentDatabase(),
+                                                   segmentData[i], width);
+         wallSegments.push_back(newSegment);
       }
 
       Vector<Point> edges;
@@ -488,7 +466,7 @@ void EditorInstructionsUserInterface::renderPageWalls() const
 
    glLineWidth(gLineWidth3);
 
-   renderPointVector(&points, GL_LINES);
+   renderPointVector(&points, GL_LINE_STRIP);
 
    glLineWidth(gDefaultLineWidth);
 

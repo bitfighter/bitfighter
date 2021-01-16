@@ -2101,6 +2101,73 @@ void constructBarrierPolygon(const Point &start, const Point &end, const Point &
 }
 
 
+// Convert a barrier line into segmented chunks with data about possible mitering
+void barrierLineToSegmentData(Vector<Point> inputLine, Vector<Vector<Point> > &outData)  // Copied input data
+{
+   // Create barriers from line segments, with some pre- and post-
+   // information to help with mitering
+   //
+   // We'll always use 4 points in this order:
+   // - pre:   previous point in line, or Point(NAN,NAN) if none
+   // - start: start of segment
+   // - end:   end of segment
+   // - post:  next point in line, or Point(NAN,NAN) if none
+   Vector<Point> pts(4);
+//   Point dummyPoint = Point(F32_MAX,F32_MAX);
+   Point dummyPoint = Point(NAN,NAN);
+
+   S32 pointCount = inputLine.size(); // Real point size
+
+   // If this line is a loop, add extra points on the end to help with
+   // logic below
+   bool isLineLoop = (inputLine[0] == inputLine[pointCount-1]);
+   if(isLineLoop)
+   {
+      inputLine.push_back(inputLine[1]);
+      // Add the next point if it exists
+      if(pointCount > 2)
+         inputLine.push_back(inputLine[2]);
+      else
+         inputLine.push_back(dummyPoint);
+   }
+   // Otherwise just add dummy points to the end
+   else
+   {
+      inputLine.push_back(dummyPoint);
+      inputLine.push_back(dummyPoint);
+   }
+
+
+   // Extract segment with pre/post points
+   for(S32 i = 0; i < pointCount - 1; i++)  // One less than full loop to guarantee nextPoint(s)
+   {
+      pts.clear();
+
+      Point previousPoint = dummyPoint;
+      Point thisPoint = inputLine[i];
+      Point nextPoint = inputLine[i+1];
+      Point nextNextPoint = inputLine[i+2];  // Guaranteed with extra insertions above
+
+      // Add 2nd-to-last point as pre-point if line forms a closed loop
+      if(isLineLoop && i == 0)
+         previousPoint = inputLine[pointCount-2];
+      // else keep dummy point as previousPoint
+
+      // All other cases there is a guaranteed previousPoint
+      if(i >= 1)
+         previousPoint = inputLine[i-1];
+
+      // Build up loaded segment
+      pts.push_back(previousPoint);
+      pts.push_back(thisPoint);
+      pts.push_back(nextPoint);
+      pts.push_back(nextNextPoint);
+
+      outData.push_back(pts);
+   }
+}
+
+
 void pushPolyNode(lua_State *L, const PolyNode *node)
 {
    if(!node)

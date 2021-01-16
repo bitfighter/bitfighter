@@ -94,68 +94,14 @@ void WallRec::constructWalls(Game *game) const
       Barrier *b = new Barrier(vec, width, true);
       b->addToGame(game, game->getGameObjDatabase());
    }
-   else        // This is a standard series of segments
+   else        // This is a line forming a standard series of segments
    {
-      // Create barriers from line segments, with some pre- and post-
-      // information to help with mitering
-      //
-      // We'll always use 4 points in this order:
-      // - pre:   previous point in line, or Point(NAN,NAN) if none
-      // - start: start of segment
-      // - end:   end of segment
-      // - post:  next point in line, or Point(NAN,NAN) if none
-      Vector<Point> pts;
-//      Point dummyPoint = Point(F32_MAX,F32_MAX);
-      Point dummyPoint = Point(NAN,NAN);
+      Vector<Vector<Point> > segmentData;
+      barrierLineToSegmentData(vec, segmentData);
 
-      S32 pointCount = vec.size(); // Real point size
-
-      // If this line is a loop, add extra points on the end to help with
-      // logic below
-      bool isLineLoop = (vec[0] == vec[pointCount-1]);
-      if(isLineLoop)
+      for(S32 i = 0; i < segmentData.size(); i++)
       {
-         vec.push_back(vec[1]);
-         // Add the next point if it exists
-         if(pointCount > 2)
-            vec.push_back(vec[2]);
-         else
-            vec.push_back(dummyPoint);
-      }
-      // Otherwise just add dummy points to the end
-      else
-      {
-         vec.push_back(dummyPoint);
-         vec.push_back(dummyPoint);
-      }
-
-
-      // Extract segment with pre/post points
-      for(S32 i = 0; i < pointCount - 1; i++)  // One less than full loop to guarantee nextPoint(s)
-      {
-         pts.clear();
-
-         Point previousPoint = dummyPoint;
-         Point thisPoint = vec[i];
-         Point nextPoint = vec[i+1];
-         Point nextNextPoint = vec[i+2];  // Guaranteed with extra insertions above
-
-         // Add 2nd-to-last point as pre-point if line forms a closed loop
-         if(isLineLoop && i == 0)
-            previousPoint = vec[pointCount-2];
-         // else keep dummy point as previousPoint
-
-         // All other cases there is a guaranteed previousPoint
-         if(i >= 1)
-            previousPoint = vec[i-1];
-
-         // Build up loaded segment
-         pts.push_back(previousPoint);
-         pts.push_back(thisPoint);
-         pts.push_back(nextPoint);
-         pts.push_back(nextNextPoint);
-
-         Barrier *b = new Barrier(pts, width, false);    // false = not solid
+         Barrier *b = new Barrier(segmentData[i], width, false);    // false = not solid
          b->addToGame(game, game->getGameObjDatabase());
       }
    }
@@ -489,8 +435,8 @@ void WallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled,
 void WallItem::processEndPoints()
 {
 #ifndef ZAP_DEDICATED
-   // TODO change to new miter method
-   constructBarrierEndPoints(getOutline(), (F32)getWidth(), extendedEndPoints);     // Fills extendedEndPoints
+   // Preprocessing of BarrierMaker points before rendering in editor was done here
+   // No longer needed
 #endif
 }
 
@@ -935,15 +881,15 @@ bool WallEdge::getCollisionCircle(U32 stateIndex, Point &point, float &radius) c
 ////////////////////////////////////////
 
 // Regular constructor
-WallSegment::WallSegment(GridDatabase *gridDatabase, const Point &start, const Point &end, F32 width, S32 owner) 
+WallSegment::WallSegment(GridDatabase *gridDatabase, const Vector<Point> &segmentData, F32 width, S32 owner)
 { 
-   // Calculate segment corners by expanding the extended end points into a rectangle
-//   expandCenterlineToOutline(start, end, width, mCorners);  // ==> Fills mCorners
-   // TODO do whole line not just segment
-   Vector<Point> input;
-   input.push_back(start);
-   input.push_back(end);
-   offsetLineOpenButt(&input, mCorners, width * 0.5);  // Use half-width
+   Point pre   = segmentData[0];
+   Point start = segmentData[1];
+   Point end   = segmentData[2];
+   Point post  = segmentData[3];
+
+   // Fill out outline
+   constructBarrierPolygon(start, end, pre, post, width, mCorners);
 
    init(gridDatabase, owner);
 }

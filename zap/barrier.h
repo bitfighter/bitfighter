@@ -118,7 +118,6 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toLevelCode() const;
 
-   Vector<Point> extendedEndPoints;
    virtual Rect calcExtents();
 
    virtual void onGeomChanged();
@@ -249,7 +248,7 @@ private:
    Vector<Point> mTriangulatedFillPoints;
 
 public:
-   WallSegment(GridDatabase *gridDatabase, const Point &start, const Point &end, F32 width, S32 owner = -1);    // Normal wall segment
+   WallSegment(GridDatabase *gridDatabase, const Vector<Point> &segmentData, F32 width, S32 owner = -1);    // Normal wall segment
    WallSegment(GridDatabase *gridDatabase, const Vector<Point> &points, S32 owner = -1);                        // PolyWall 
    virtual ~WallSegment();
 

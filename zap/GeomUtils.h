@@ -204,6 +204,8 @@ void constructBarrierEndPoints(const Vector<Point> *vec, F32 width, Vector<Point
 void constructBarrierPolygon(const Point &start, const Point &end, const Point &pre, const Point &post,
       F32 width, Vector<Point> &outPoly);
 
+void barrierLineToSegmentData(Vector<Point> vec, Vector<Vector<Point> > &outData);
+
 // Takes a list of vertices and converts them into a list of lines representing the edges of an object
 void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges);
 
