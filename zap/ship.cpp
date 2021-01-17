@@ -2368,6 +2368,7 @@ const char *Ship::luaClassName = "Ship";
 REGISTER_LUA_SUBCLASS(Ship, MoveObject);
 
 
+// The following block injects a special item into the docs where documentation about the constructor would go
 /**
  * @luafuncsheader Ship
  *
