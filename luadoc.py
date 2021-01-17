@@ -494,7 +494,8 @@ def pre_process(files: List[str]):
                             # enumval = re.sub(r'[\s"\)\\]*', "", enumval)         # Strip out quotes and whitespace and other junk
 
                             # continue unless $enumval;      # Skip empty enumvals... should never happen, but does
-                            enums.append(f" * * %{enumName}.%{enumval} <br>\n `{enumDescr}` <br>\n");    # Produces:  * * %Weapon.Triple  Triple
+                            # `s cause text to be wrapped in <code> tags
+                            enums.append(f" * * `%{enumName}.%{enumval}`<br>\n{enumDescr}<br>\n");    # Produces:  * * %Weapon.Triple  Triple
 
                             # no next here, always want to do the termination check below
 
