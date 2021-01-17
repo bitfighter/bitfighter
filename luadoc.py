@@ -892,7 +892,12 @@ def clean_up_member_details(root: Any, class_urls: Dict[str, str]) -> None:
         method.tail = f"{fn_name}({', '.join(param_list)})"
 
 
-        ret_type = f'returns <span class="returntype">{linkify(ret_type) if ret_type else "nothing"}</span>'
+        if not ret_type or ret_type == "void":
+            ret_type = "nothing"
+        else:
+            ret_type = f'<span class="returntype">{linkify(ret_type)}</span>'
+
+        ret_type = f"returns {ret_type}"
 
         ret_type = handle_mixed(ret_type)       # Decode mixed_xxx_yyy types used for multiple return types
 
