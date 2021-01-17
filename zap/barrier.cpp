@@ -27,13 +27,6 @@ using namespace LuaArgs;
 
 Vector<Point> Barrier::mRenderLineSegments;
 
-static void printPoints(Vector<Point> pts, const char *header)
-{
-   logprintf("%s", header);
-   for(int i = 0; i < pts.size(); i++)
-      logprintf("%f,%f", pts[i].x, pts[i].y);
-}
-
 
 // Constructor
 WallRec::WallRec(F32 width, bool solid, const Vector<F32> &verts)
@@ -888,7 +881,7 @@ WallSegment::WallSegment(GridDatabase *gridDatabase, const Vector<Point> &segmen
    Point end   = segmentData[2];
    Point post  = segmentData[3];
 
-   // Fill out outline
+   // Fill out outline, returns CCW points
    constructBarrierPolygon(start, end, pre, post, width, mCorners);
 
    init(gridDatabase, owner);

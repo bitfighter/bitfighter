@@ -2038,8 +2038,8 @@ void addMiterPoints(Point p1, Point p2, Point p3, F32 offset, Vector<Point> &pol
       Point sq2 = p2 + offsetCrossVec2 + (vec2 * finalLen);
 
       // CCW point first
-      polyToAppend.push_back(sq2);
       polyToAppend.push_back(sq1);
+      polyToAppend.push_back(sq2);
    }
 
    // Else only one point to add, the miter point
@@ -2069,35 +2069,35 @@ void constructBarrierPolygon(const Point &start, const Point &end, const Point &
 
    // Now calculate the points. Each of the 4 corners of an expanded segment
    // could become mitered to one or two points depending on what the pre/post
-   // segment is.   B               C
+   // segment is.   A               D
    //                 o-----------o
-   //               A               D
+   //               B               C
    //
    // This only took 5 times to design on paper!
 
    // Corner A
-   if(isDummyPre || isClockwiseTriangle(pre, start, end))  // Fail fast
-      outPoly.push_back(start - crossVec);
-   else
-      addMiterPoints(pre, start, end, offset, outPoly);
-
-   // Corner B
    if(isDummyPre || !isClockwiseTriangle(pre, start, end))
       outPoly.push_back(start + crossVec);
    else
       addMiterPoints(end, start, pre, offset, outPoly);  // Swap winding
 
-   // Corner C
-   if(isDummyPost || !isClockwiseTriangle(start, end, post))
-      outPoly.push_back(end + crossVec);
+   // Corner B
+   if(isDummyPre || isClockwiseTriangle(pre, start, end))  // Fail fast
+      outPoly.push_back(start - crossVec);
    else
-      addMiterPoints(post, end, start, offset, outPoly);  // Swap winding
+      addMiterPoints(pre, start, end, offset, outPoly);
 
-   // Corner D
+   // Corner C
    if(isDummyPost || isClockwiseTriangle(start, end, post))
       outPoly.push_back(end - crossVec);
    else
       addMiterPoints(start, end, post, offset, outPoly);
+
+   // Corner D
+   if(isDummyPost || !isClockwiseTriangle(start, end, post))
+      outPoly.push_back(end + crossVec);
+   else
+      addMiterPoints(post, end, start, offset, outPoly);  // Swap winding
 }
 
 
