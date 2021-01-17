@@ -431,7 +431,7 @@ def pre_process(files: List[str]):
                 #  * * %Weapon.%Bouncer
                 #  @}
 
-                if collectingEnumMode != EnumMode.NOT_COLLECTING:
+                if collectingEnumMode in [EnumMode.LUA_ENUM_COMMENT, EnumMode.CPP_DEFINE]:
 
                     # If we get here we presume the @luaenum comment has been closed, and the next #define we see will begin the enum itself
                     # Enum will continue until we hit a line with no trailing \
@@ -484,11 +484,24 @@ def pre_process(files: List[str]):
                             # enumDescr = re.sub(r'"\W*$', "", enumDescr)         # Remove trailing junk
 
 
-                            # Suppress any words that might trigger linking by prepending a "%" to the words
+                            # Suppress any words that might trigger linking by prepending a "%" to them
                             descr_words = enumDescr.split()
-                            enumDescr = " %".join(descr_words).strip(",")     # Also normalizes interior spaces, if that's an issue
-                            # enumDescr = "%" + " %".join(descr_words)        # Also normalizes interior spaces, if that's an issue
+                            enumDescr = " %".join(descr_words).strip(",").replace("%`", "`")     # Also normalizes interior spaces, if that's an issue
 
+                            # This bit really only applies to the Event enum
+                            # Selectively remove %s to convert this:
+                            #   %onShipKilled(Ship %ship, %BfObject %damagingObject, %BfObject %shooter)
+                            # to this:
+                            #   %onShipKilled(Ship %ship, BfObject %damagingObject, BfObject %shooter)
+                            # This will make our classes linkable (just omitting the % above does not work for unknown reasons)
+                            match = re.match(r"^(.*)\((.+?)\)(.*)$", enumDescr)   # ["%onShipKilled", "Ship %ship, %BfObject %damagingObject, %BfObject %shooter", ""]
+                            if match:
+                                arglist = ""
+                                args = match.groups()[1].split(",")    # Ship %ship, %BfObject %damagingObject, %BfObject %shooter
+                                for arg in args:
+                                    a = arg.split()     # ["Ship", "%ship"]   //  ["%BfObject", "%damagingObject"]  //   ["%BfObject", "%shooter"]
+                                    arglist = a[0].replace("%", "") + " " + a[1]
+                                enumDescr = f"{match.groups()[0]}({arglist}){match.groups()[2]}"
 
                             enumval = words[enumColumn].replace(",", "")
                             # enumval = re.sub(r'[\s"\)\\]*', "", enumval)         # Strip out quotes and whitespace and other junk
