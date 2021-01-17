@@ -31,7 +31,7 @@ class EventManager
 {
 /**
  * @luaenum Event(1,3)
- * The Event enum represents different events that the game fires that scripts might want to handle.  Below
+ * The Event enum represents different events that the game fires that scripts might want to respond to.  Below
  * are the signatures of methods you can implement to respond to these events.  Note that you will also have
  * to subscribe to the event to be notified of it.
  *
