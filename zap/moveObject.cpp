@@ -1381,8 +1381,8 @@ bool MountableItem::isItemThatMakesYouVisibleWhileCloaked() { return true; }
 /**
  * @luaclass MountableItem
  * 
- * @brief Class of items that can be mounted on ships (such as \link FlagItem FlagsItems
- * \endlink and \link ResourceItem ResourceItems \endlink).
+ * @brief Class of items that can be mounted on ships (such as \link FlagItem FlagsItems\endlink 
+ * and \link ResourceItem ResourceItems\endlink).
  */
 //               Fn name       Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \

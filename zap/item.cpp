@@ -238,8 +238,8 @@ S32 Item::lua_getRad(lua_State *L) { return returnFloat(L, getRadius()); }
  * @brief Returns capture zone holding the item.
  * 
  * @descr Many games do not feature capture zones. For those games, this
- * function will always return nil. Currently only \link FlagItem FlagItems
- * \endlink can be captured.
+ * function will always return nil. Currently only \link FlagItem FlagItems\endlink 
+ * can be captured.
  * 
  * @return Zone where the item has been captured. Returns nil if the item is not
  * in a capture zone.

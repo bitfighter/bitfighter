@@ -1210,7 +1210,7 @@ S32 EngineeredItem::lua_setHealth(lua_State *L)
  * @brief Gets the health threshold below which the item becomes disabled. 
  * 
  * @descr The value will always be between 0 and 1. This value is constant and
- * will be the same for all \link EngineeredItem EngineeredItems \endlink.
+ * will be the same for all \link EngineeredItem EngineeredItems\endlink.
  * 
  * @return Health threshold below which the item will be disabled.
  */

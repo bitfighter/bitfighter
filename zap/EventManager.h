@@ -35,7 +35,7 @@ class EventManager
  * are the signatures of methods you can implement to respond to these events.  Note that you will also have
  * to subscribe to the event to be notified of it.
  *
- * See the \e subscribe methods for \link Robot::subscribe bots\endlink and \link LuaLevelGenerator::subscribe levelGens \endlink, and the 
+ * See the \e subscribe methods for \link Robot::subscribe bots\endlink and \link LuaLevelGenerator::subscribe levelGens\endlink, and the 
  * \e Events section of the scripting overview page.
  */
 

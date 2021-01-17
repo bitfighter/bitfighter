@@ -618,7 +618,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(AsteroidSpawn, s2cSetTimeUntilSpawn, (S32 millis), (
 /**
  * @luaclass AsteroidSpawn
  * 
- * @brief Spawns \link Asteroid Asteroids \endlink at regular intervals.
+ * @brief Spawns \link Asteroid Asteroids\endlink at regular intervals.
  * 
  * @geom The geometry of AsteroidSpawns is a single point.
  */
@@ -769,14 +769,14 @@ void FlagSpawn::renderDock()
 /**
  * @luaclass FlagSpawn
  * 
- * @brief Spawns \link FlagItem Flags \endlink at regular intervals during Nexus
+ * @brief Spawns \link FlagItem Flags\endlink at regular intervals during Nexus
  * games, serves as starting point for flags and soccer balls in other games.
  * 
  * @descr During Nexus games, FlagSpawn acts like any other ItemSpawn, emitting
  * flags at regular intervals. During games that use flags (such as
  * ZoneControl), FlagSpawns mark locations where flags can be returned to when
  * flags are "sent home". In Soccer games, marks the location that the \link
- * SoccerBallItem SoccerBall \endlink is returned to after a goal is scored.
+ * SoccerBallItem SoccerBall\endlink is returned to after a goal is scored.
  * 
  * Note that in flag games, any place a flag starts will become a FlagSpawn, and
  * in Soccer, the location the SoccerBall starts will become a FlagSpawn.
