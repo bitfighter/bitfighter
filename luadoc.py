@@ -691,6 +691,7 @@ def post_process():
             outfile.write(etree.tostring(root).decode("utf-8"))
 
     update_progress(1)
+    os.chdir("..")
 
 
 def delete_node(element: Any) -> None:
