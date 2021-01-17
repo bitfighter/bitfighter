@@ -27,6 +27,7 @@ using namespace LuaArgs;
 
 Vector<Point> Barrier::mRenderLineSegments;
 
+
 // Constructor
 WallRec::WallRec(F32 width, bool solid, const Vector<F32> &verts)
 {
@@ -86,21 +87,14 @@ void WallRec::constructWalls(Game *game) const
       Barrier *b = new Barrier(vec, width, true);
       b->addToGame(game, game->getGameObjDatabase());
    }
-   else        // This is a standard series of segments
+   else        // This is a line forming a standard series of segments
    {
-      // First, fill a vector with barrier segments
-      Vector<Point> barrierEnds;
-      constructBarrierEndPoints(&vec, width, barrierEnds);
+      Vector<Vector<Point> > segmentData;
+      barrierLineToSegmentData(vec, segmentData);
 
-      Vector<Point> pts;
-      // Then add individual segments to the game
-      for(S32 i = 0; i < barrierEnds.size(); i += 2)
+      for(S32 i = 0; i < segmentData.size(); i++)
       {
-         pts.clear();
-         pts.push_back(barrierEnds[i]);
-         pts.push_back(barrierEnds[i+1]);
-
-         Barrier *b = new Barrier(pts, width, false);    // false = not solid
+         Barrier *b = new Barrier(segmentData[i], width, false);    // false = not solid
          b->addToGame(game, game->getGameObjDatabase());
       }
    }
@@ -110,11 +104,15 @@ void WallRec::constructWalls(Game *game) const
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Constructor --> gets called from constructBarriers above
+// Constructor --> gets called from constructWalls above
 Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 {
    mObjectTypeNumber = BarrierTypeNumber;
    mPoints = points;
+   // Must be positive to avoid problem with botzone buffers
+   F32 w = abs(width);
+   mWidth = w;
+   mSolid = solid;
 
    if(points.size() < 2)      // Invalid barrier!
    {
@@ -123,27 +121,16 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
       return;
    }
 
-   Rect extent(points);
-
-   F32 w = abs(width);
-
-   mWidth = w;                      // Must be positive to avoid problem with bufferBarrierForBotZone
-   w = w * 0.5f + 1;                // Divide by 2 to avoid double size extents, add 1 to avoid rounding errors
-
-   if(points.size() == 2)           // It's a regular segment, need to make a little larger to accomodate width
-      extent.expand(Point(w, w));
-
-
-   setExtent(extent);
-
-   mSolid = solid;
-
    if(mSolid)  // Polywall
    {
       if(isWoundClockwise(mPoints))         // All walls must be CCW to clip correctly
          mPoints.reverse();
 
-      Triangulate::Process(mPoints, mRenderFillGeometry);
+      // Set collision polygon
+      mOutline = mPoints;
+
+      // Create rendering fill triangles
+      Triangulate::Process(mOutline, mRenderFillGeometry);
 
       if(mRenderFillGeometry.size() == 0)    // Geometry is bogus; perhaps duplicated points, or other badness
       {
@@ -155,19 +142,36 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
    }
    else     // Normal wall
    {
-      if(mPoints.size() == 2 && mPoints[0] == mPoints[1])      // Test for zero-length barriers
-         mPoints[1] += Point(0, 0.5);                          // Add vertical vector of half a point so we can see outline in-game
+      // Here we should always receive 4 points that describe a single segment
+      // and pre/post segments
+      // - pre:   previous point in original line, or Point(NAN,NAN) if none
+      // - start: start of segment
+      // - end:   end of segment
+      // - post:  next point in original line, or Point(NAN,NAN) if none
+      Point pre   = mPoints[0];
+      Point start = mPoints[1];
+      Point end   = mPoints[2];
+      Point post  = mPoints[3];
+      if(start == end)     // Test for zero-length barriers
+         end += Point(0, 0.5);  // Add vertical vector of half a point to see outline in-game
 
-      if(mPoints.size() == 2 && mWidth != 0)                   // It's a regular segment, so apply width
-         expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, mRenderFillGeometry);     // Fills mRenderFillGeometry with 4 points
+      // Generate wall outline based on width
+      if(mWidth != 0)
+         // Smart method that will handle mitering based on pre/post segments
+         constructBarrierPolygon(start, end, pre, post, mWidth, mOutline);
+
+      // Set rendering fill geometry for line-loop rendering, should already be CCW
+      mRenderFillGeometry = mOutline;
 
       setNewGeometry(geomPolyLine);
    }
 
-   // Outline is the same for regular walls and polywalls
-   mRenderOutlineGeometry = getCollisionPoly(); 
+   // Set geometry object
+   GeomObject::setGeom(mPoints);
 
-   GeomObject::setGeom(*mRenderOutlineGeometry);
+   // Set GridDatabase extents as the collision polygon
+   Rect extent(mOutline);
+   setExtent(extent);
 }
 
 // Destructor
@@ -180,10 +184,7 @@ Barrier::~Barrier()
 // Processes mPoints and fills polyPoints 
 const Vector<Point> *Barrier::getCollisionPoly() const
 {
-   if(mSolid)
-      return &mPoints;
-   else
-      return &mRenderFillGeometry;
+   return &mOutline;
 }
 
 
@@ -196,44 +197,8 @@ bool Barrier::collide(BfObject *otherObject)
 // Server only -- fills points
 void Barrier::getBufferForBotZone(F32 bufferRadius, Vector<Point> &points) const
 {
-   // Use a clipper library to buffer polywalls; should be counter-clockwise by here
-   if(mSolid)
-      offsetPolygon(&mPoints, points, bufferRadius);
-
-   // If a barrier, do our own buffer
-   // Puffs out segment to the specified width with a further buffer for bot zones, has an inset tangent corner cut
-   else
-   {
-      const Point &start = mPoints[0];
-      const Point &end   = mPoints[1];
-      Point difference   = end - start;
-
-      Point crossVector(difference.y, -difference.x);          // Create a point whose vector from 0,0 is perpenticular to the original vector
-      crossVector.normalize((mWidth * 0.5f) + bufferRadius);   // Reduce point so the vector has length of barrier width + ship radius
-
-      Point parallelVector(difference.x, difference.y);        // Create a vector parallel to original segment
-      parallelVector.normalize(bufferRadius);                  // Reduce point so vector has length of ship radius
-
-      // For octagonal zones
-      //   create extra vectors that are offset full offset to create 'cut' corners
-      //   (FloatSqrtHalf * BotNavMeshZone::BufferRadius)  creates a tangent to the radius of the buffer
-      //   we then subtract a little from the tangent cut to shorten the buffer on the corners and allow zones to be created when barriers are close
-      Point crossPartial = crossVector;
-      crossPartial.normalize((FloatSqrtHalf * bufferRadius) + (mWidth * 0.5f) - (0.3f * bufferRadius));
-
-      Point parallelPartial = parallelVector;
-      parallelPartial.normalize((FloatSqrtHalf * bufferRadius) - (0.3f * bufferRadius));
-
-      // Now add/subtract perpendicular and parallel vectors to buffer the segments
-      points.push_back((start - parallelVector)  + crossPartial);
-      points.push_back((start - parallelPartial) + crossVector);
-      points.push_back((end   + parallelPartial) + crossVector);
-      points.push_back((end   + parallelVector)  + crossPartial);
-      points.push_back((end   + parallelVector)  - crossPartial);
-      points.push_back((end   + parallelPartial) - crossVector);
-      points.push_back((start - parallelPartial) - crossVector);
-      points.push_back((start - parallelVector)  - crossPartial);
-   }
+   // Use a clipper library to buffer walls; should be CCW outline here
+   offsetPolygon(&mOutline, points, bufferRadius);
 }
 
 
@@ -463,7 +428,8 @@ void WallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled,
 void WallItem::processEndPoints()
 {
 #ifndef ZAP_DEDICATED
-   constructBarrierEndPoints(getOutline(), (F32)getWidth(), extendedEndPoints);     // Fills extendedEndPoints
+   // Preprocessing of BarrierMaker points before rendering in editor was done here
+   // No longer needed
 #endif
 }
 
@@ -908,10 +874,16 @@ bool WallEdge::getCollisionCircle(U32 stateIndex, Point &point, float &radius) c
 ////////////////////////////////////////
 
 // Regular constructor
-WallSegment::WallSegment(GridDatabase *gridDatabase, const Point &start, const Point &end, F32 width, S32 owner) 
+WallSegment::WallSegment(GridDatabase *gridDatabase, const Vector<Point> &segmentData, F32 width, S32 owner)
 { 
-   // Calculate segment corners by expanding the extended end points into a rectangle
-   expandCenterlineToOutline(start, end, width, mCorners);  // ==> Fills mCorners 
+   Point pre   = segmentData[0];
+   Point start = segmentData[1];
+   Point end   = segmentData[2];
+   Point post  = segmentData[3];
+
+   // Fill out outline, returns CCW points
+   constructBarrierPolygon(start, end, pre, post, width, mCorners);
+
    init(gridDatabase, owner);
 }
 

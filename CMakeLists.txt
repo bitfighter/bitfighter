@@ -1,6 +1,8 @@
 project (bitfighter)
 cmake_minimum_required (VERSION 3.1.0)
 
+cmake_policy(SET CMP0043 OLD)
+
 #
 # CMake options
 #

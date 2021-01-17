@@ -212,13 +212,17 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
       TNLAssert(dynamic_cast<WallItem *>(wall), "Expected an WallItem!");
       WallItem *wallItem = static_cast<WallItem *>(wall);
 
-      // Create a WallSegment for each sequential pair of vertices
-      for(S32 i = 0; i < wallItem->extendedEndPoints.size(); i += 2)
+      // Build out segment data for this line
+      Vector<Vector<Point> > segmentData;
+      barrierLineToSegmentData(*(wallItem->getOutline()), segmentData);
+
+      for(S32 i = 0; i < segmentData.size(); i++)
       {
          // Create the segment; the WallSegment constructor will add it to the specified database
-         WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, wallItem->extendedEndPoints[i], wallItem->extendedEndPoints[i+1], 
+         WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, segmentData[i],
                                                    (F32)wallItem->getWidth(), wallItem->getSerialNumber());
 
+         // Build up extents of the whole WallItem
          if(i == 0)
             allSegExtent.set(newSegment->getExtent());
          else

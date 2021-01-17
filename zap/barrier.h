@@ -30,13 +30,13 @@ public:
    Barrier(const Vector<Point> &points = Vector<Point>(), F32 width = DEFAULT_BARRIER_WIDTH, bool solid = false);
    virtual ~Barrier();
 
-   Vector<Point> mPoints;  // The points of the barrier --> if only two, first will be start, second end of an old-school segment
+   Vector<Point> mPoints;  // The points of the barrier, might represent outline of a Polywall or the spine of an old-style BarrierMaker
+   Vector<Point> mOutline; // The collision/rendering outline of the Barrier
 
    bool mSolid;            // True if this represents a polywall
 
    // By precomputing and storing, we should ease the rendering cost
    Vector<Point> mRenderFillGeometry;        // Actual geometry used for rendering fill
-   const Vector<Point> *mRenderOutlineGeometry;     // Actual geometry used for rendering outline
 
    F32 mWidth;
 
@@ -118,7 +118,6 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toLevelCode() const;
 
-   Vector<Point> extendedEndPoints;
    virtual Rect calcExtents();
 
    virtual void onGeomChanged();
@@ -249,7 +248,7 @@ private:
    Vector<Point> mTriangulatedFillPoints;
 
 public:
-   WallSegment(GridDatabase *gridDatabase, const Point &start, const Point &end, F32 width, S32 owner = -1);    // Normal wall segment
+   WallSegment(GridDatabase *gridDatabase, const Vector<Point> &segmentData, F32 width, S32 owner = -1);    // Normal wall segment
    WallSegment(GridDatabase *gridDatabase, const Vector<Point> &points, S32 owner = -1);                        // PolyWall 
    virtual ~WallSegment();
 

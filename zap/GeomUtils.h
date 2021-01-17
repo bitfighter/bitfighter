@@ -176,7 +176,8 @@ public:
    static bool Process(const Vector<Point> &contour, Vector<Point> &result);
 
    // Triangulate a bounded area with complex polygon holes
-   static bool processComplex(Vector<Point> &outputTriangles, const Rect& bounds, const PolyTree &polygonList, bool ignoreFills = true, bool ignoreHoles = false);
+   static bool processComplex(Vector<Point> &outputTriangles, const Rect& bounds, const PolyTree &polygonList,
+                              bool ignoreFills = true, bool ignoreHoles = false);
 
    // Merge triangles into convex polygons
    static bool mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& mesh, S32 maxVertices = 6);
@@ -200,12 +201,19 @@ private:
 // Wall related methods
 
 void constructBarrierEndPoints(const Vector<Point> *vec, F32 width, Vector<Point> &barrierEnds);
+void constructBarrierPolygon(const Point &start, const Point &end, const Point &pre, const Point &post,
+      F32 width, Vector<Point> &outPoly);
+
+void barrierLineToSegmentData(Vector<Point> vec, Vector<Vector<Point> > &outData);
 
 // Takes a list of vertices and converts them into a list of lines representing the edges of an object
 void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges);
 
 // Simply takes a segment and "puffs it out" to a rectangle of a specified width, filling cornerPoints.  Does not modify endpoints.
 void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &cornerPoints);
+
+// Same as expandCenterlineToOutline, but for lines with more than 2 points
+void offsetLineOpenButt(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset);
 
 S32 lua_clipPolygons(lua_State *L);
 S32 lua_clipPolygonsAsTree(lua_State *L);
