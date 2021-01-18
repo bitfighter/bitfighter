@@ -393,8 +393,8 @@ S32 EditorPlugin::lua_getAllObjects(lua_State *L)
  *
  * @param msg The text to display.
  * @param good Controls the color of the displayed text as follows:
- *  - 'true': green
- *  - 'false': red
+ *  - `true`: green
+ *  - `false`: red
  */
 S32 EditorPlugin::lua_showMessage(lua_State *L)
 {

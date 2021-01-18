@@ -226,6 +226,8 @@ REGISTER_LUA_SUBCLASS(Item, BfObject);
 /**
  * @luafunc num Item::getRad()
  * 
+ * @brief Returns the radius of an item.
+ * 
  * @return The radius of the item. For a Teleporter, this is the radius of the
  * entrance. For a ForceFieldProjector, this is the radius of the base.
  */

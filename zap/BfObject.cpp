@@ -1379,8 +1379,7 @@ REGISTER_LUA_CLASS(BfObject);
  * 
  * @code
  *   obj = TestItem.new()
- *   -- prints 'true'
- *   print(obj:getObjType() == ObjType.TestItem)
+ *   print(obj:getObjType() == ObjType.TestItem)   -- prints 'true'
  * @endcode
  *
  * See \ref ObjTypeEnum for a list of possible return values.
@@ -1451,8 +1450,7 @@ S32 BfObject::lua_getPos(lua_State *L)
  * @brief Gets the index of the object's team.
  * 
  * @descr Many BfObjects (such as \link TestItem TestItems\endlink) are never
- * part of any particular team. For these objects, this method will return the
- * Neutral Team index
+ * part of any particular team. For these objects, this method will return `Team.Neutral`.
  * 
  * @note Remember that in Lua, indices start with 1!
  * 
@@ -1473,11 +1471,11 @@ S32 BfObject::lua_getTeamIndex(lua_State *L)
  * (first team index is 1; there is no team 0)
  * 
  * @descr Instead of a team index, you can use the special team enums 
- * Team.Neutral and Team.Hostile.
+ * `Team.Neutral` and `Team.Hostile`.
  * 
- * Limitations: Will have no effect on items that are inherently teamless 
- * (such as aNexusZone).  Neither Ships nor Robots can be assigned to
- * Team.Neutral or Team.Hostile.
+ * Limitations: <ul><li>Will have no effect on items that are inherently teamless 
+ * (such as a NexusZone).</li><li>Neither \link Ship Ships\endlink nor \link Robot Robots\endlink can be assigned to
+ * `Team.Neutral` or `Team.Hostile`.</li></ul>
  * 
  */
 S32 BfObject::lua_setTeam(lua_State *L) 
@@ -1591,7 +1589,7 @@ S32 BfObject::lua_clone(lua_State *L)
  * 
  * @descr This is useful for editor plugins only.
  * 
- * @return Returns 'true' if the object is selected, 'false' if not.
+ * @return Returns `true` if the object is selected, `false` if not.
  */
 S32 BfObject::lua_isSelected(lua_State *L)
 {
@@ -1606,7 +1604,7 @@ S32 BfObject::lua_isSelected(lua_State *L)
  * 
  * @descr This is useful for editor plugins only.
  * 
- * @param selected 'true' to select the object, 'false' to deselect it.
+ * @param selected `true` to select the object, `false` to deselect it.
  */
 S32 BfObject::lua_setSelected(lua_State *L)
 {
@@ -1621,16 +1619,16 @@ S32 BfObject::lua_setSelected(lua_State *L)
 /**
  * @luafunc PlayerInfo BfObject::getOwner()
  * 
- * @brief Gets an object's owner as a PlayerInfo.
+ * @brief Gets an object's owner as a \ref PlayerInfo.
  * 
  * @descr Some objects (like projectiles) have an owning player associated. This
- * method returns a PlayerInfo object if there is an owner. Otherwise, returns
+ * method returns a \ref PlayerInfo object if there is an owner. Otherwise, returns
  * nil.
  * 
  * This method is intended to be used with bullets and other projectiles, not with 
  * game objects like zones.
  * 
- * @return A PlayerInfo representing the object's owner, or nil.
+ * @return A \ref PlayerInfo representing the object's owner, or nil.
  */
 S32 BfObject::lua_getOwner(lua_State *L)
 {
