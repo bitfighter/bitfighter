@@ -1349,8 +1349,25 @@ void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineS
 }
 
 
-// This method offsets and squares any acute corners, perfect for bot zones
+// This method offsets and squares any acute corners
 void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset)
+{
+   Paths polygons = upscaleClipperPoints(inputPolys);
+
+   // Call Clipper to do the dirty work
+   ClipperOffset clipperOffset(0, 0);
+   Paths outPolys(polygons.size());
+
+   clipperOffset.AddPaths(polygons, jtSquare, etClosedPolygon);
+   clipperOffset.Execute(outPolys, offset * CLIPPER_SCALE_FACT);
+
+   // Downscale
+   outputPolys = downscaleClipperPoints(outPolys);
+}
+
+
+// This method offsets and squares any acute corners, perfect for bot zones
+void offsetPolygons(Vector<Vector<Point> > &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset)
 {
    Paths polygons = upscaleClipperPoints(inputPolys);
 
