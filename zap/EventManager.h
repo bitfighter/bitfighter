@@ -35,29 +35,29 @@ class EventManager
  * are the signatures of methods you can implement to respond to these events.  Note that you will also have
  * to subscribe to the event to be notified of it.
  *
- * See the \e subscribe methods for \link Robot::subscribe bots\endlink and \link LuaLevelGenerator::subscribe levelGens\endlink, and the 
+ * See the \e subscribe methods for \link Robot bots\endlink and \link LevelGenerator levelGens\endlink, and the 
  * \e Events section of the scripting overview page.
  */
 
 // See http://stackoverflow.com/questions/6635851/real-world-use-of-x-macros
 //          Enum                 Name                 Lua event handler      Lua event handler signature (documentation only)
 #define EVENT_TABLE \
-   EVENT(TickEvent,              "Tick",              "onTick",              "Use event handler: `onTick()`"                                                               ) \
-   EVENT(ShipSpawnedEvent,       "ShipSpawned",       "onShipSpawned",       "Use event handler: `onShipSpawned(Ship ship)`"                                               ) \
-   EVENT(ShipKilledEvent,        "ShipKilled",        "onShipKilled",        "Use event handler: `onShipKilled(Ship ship, BfObject damagingObject, BfObject shooter)`"     ) \
-   EVENT(PlayerJoinedEvent,      "PlayerJoined",      "onPlayerJoined",      "Use event handler: `onPlayerJoined(PlayerInfo player)`"                                      ) \
-   EVENT(PlayerLeftEvent,        "PlayerLeft",        "onPlayerLeft",        "Use event handler: `onPlayerLeft(PlayerInfo player)`"                                        ) \
-   EVENT(PlayerTeamChangedEvent, "PlayerTeamChanged", "onPlayerTeamChanged", "Use event handler: `onPlayerTeamChanged(PlayerInfo player)`"                                 ) \
-   EVENT(MsgReceivedEvent,       "MsgReceived",       "onMsgReceived",       "Use event handler: `onMsgReceived(string message, PlayerInfo sender, bool messageIsGlobal)`" ) \
-   EVENT(NexusOpenedEvent,       "NexusOpened",       "onNexusOpened",       "Use event handler: `onNexusOpened()`"                                                        ) \
-   EVENT(NexusClosedEvent,       "NexusClosed",       "onNexusClosed",       "Use event handler: `onNexusClosed()`"                                                        ) \
-   EVENT(ShipEnteredZoneEvent,   "ShipEnteredZone",   "onShipEnteredZone",   "Use event handler: `onShipEnteredZone(Ship ship, Zone zone)`"                                ) \
-   EVENT(ShipLeftZoneEvent,      "ShipLeftZone",      "onShipLeftZone",      "Use event handler: `onShipLeftZone(Ship ship, Zone zone)`"                                   ) \
-   EVENT(ObjectEnteredZoneEvent, "ObjectEnteredZone", "onObjectEnteredZone", "Use event handler: `onObjectEnteredZone(MoveObject object, Zone zone)`"                      ) \
-   EVENT(ObjectLeftZoneEvent,    "ObjectLeftZone",    "onObjectLeftZone",    "Use event handler: `onObjectLeftZone(MoveObject object, Zone zone)`"                         ) \
-   EVENT(ScoreChangedEvent,      "ScoreChanged",      "onScoreChanged",      "Use event handler: `onScoreChanged(num scoreChange, num teamIndex, PlayerInfo player)`"      ) \
-   EVENT(GameOverEvent,          "GameOver",          "onGameOver",          "Use event handler: `onGameOver()`"                                                           ) \
-   EVENT(CoreDestroyedEvent,     "CoreDestroyed",     "onCoreDestroyed",     "Use event handler: `onCoreDestroyed(CoreItem core)`"                                             ) \
+   EVENT(TickEvent,              "Tick",              "onTick",              "Use with event handler: `onTick()`"                                                               ) \
+   EVENT(ShipSpawnedEvent,       "ShipSpawned",       "onShipSpawned",       "Use with event handler: `onShipSpawned(Ship ship)`"                                               ) \
+   EVENT(ShipKilledEvent,        "ShipKilled",        "onShipKilled",        "Use with event handler: `onShipKilled(Ship ship, BfObject damagingObject, BfObject shooter)`"     ) \
+   EVENT(PlayerJoinedEvent,      "PlayerJoined",      "onPlayerJoined",      "Use with event handler: `onPlayerJoined(PlayerInfo player)`"                                      ) \
+   EVENT(PlayerLeftEvent,        "PlayerLeft",        "onPlayerLeft",        "Use with event handler: `onPlayerLeft(PlayerInfo player)`"                                        ) \
+   EVENT(PlayerTeamChangedEvent, "PlayerTeamChanged", "onPlayerTeamChanged", "Use with event handler: `onPlayerTeamChanged(PlayerInfo player)`"                                 ) \
+   EVENT(MsgReceivedEvent,       "MsgReceived",       "onMsgReceived",       "Use with event handler: `onMsgReceived(string message, PlayerInfo sender, bool messageIsGlobal)`" ) \
+   EVENT(NexusOpenedEvent,       "NexusOpened",       "onNexusOpened",       "Use with event handler: `onNexusOpened()`"                                                        ) \
+   EVENT(NexusClosedEvent,       "NexusClosed",       "onNexusClosed",       "Use with event handler: `onNexusClosed()`"                                                        ) \
+   EVENT(ShipEnteredZoneEvent,   "ShipEnteredZone",   "onShipEnteredZone",   "Use with event handler: `onShipEnteredZone(Ship ship, Zone zone)`"                                ) \
+   EVENT(ShipLeftZoneEvent,      "ShipLeftZone",      "onShipLeftZone",      "Use with event handler: `onShipLeftZone(Ship ship, Zone zone)`"                                   ) \
+   EVENT(ObjectEnteredZoneEvent, "ObjectEnteredZone", "onObjectEnteredZone", "Use with event handler: `onObjectEnteredZone(MoveObject object, Zone zone)`"                      ) \
+   EVENT(ObjectLeftZoneEvent,    "ObjectLeftZone",    "onObjectLeftZone",    "Use with event handler: `onObjectLeftZone(MoveObject object, Zone zone)`"                         ) \
+   EVENT(ScoreChangedEvent,      "ScoreChanged",      "onScoreChanged",      "Use with event handler: `onScoreChanged(num scoreChange, num teamIndex, PlayerInfo player)`"      ) \
+   EVENT(GameOverEvent,          "GameOver",          "onGameOver",          "Use with event handler: `onGameOver()`"                                                           ) \
+   EVENT(CoreDestroyedEvent,     "CoreDestroyed",     "onCoreDestroyed",     "Use with event handler: `onCoreDestroyed(CoreItem core)`"                                             ) \
 
 public:
 

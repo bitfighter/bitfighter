@@ -2410,11 +2410,11 @@ S32 Ship::lua_getFlagCount(lua_State *L) { return returnInt(L, getFlagCount()); 
 
 
 /**
- * @luafunc LuaPlayerInfo Ship::getPlayerInfo()
+ * @luafunc PlayerInfo Ship::getPlayerInfo()
  *
- * @brief Get the LuaPlayerInfo for this Ship.
+ * @brief Get the PlayerInfo for this Ship.
  *
- * @return The LuaPlayerInfo for this Ship.
+ * @return The PlayerInfo for this Ship.
  */
 S32 Ship::lua_getPlayerInfo(lua_State *L) { return returnPlayerInfo(L, this); }
 

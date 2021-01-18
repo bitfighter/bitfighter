@@ -341,7 +341,7 @@ S32 Team::lua_getPlayerCount(lua_State *L)
  *   end
  * @endcode
  *
- * @return A table of \link LuaPlayerInfo LuaPlayerInfos\endlink currently on this
+ * @return A table of \link PlayerInfo PlayerInfos\endlink currently on this
  * team. 
  */
 S32 Team::lua_getPlayers(lua_State *L)

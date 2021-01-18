@@ -1619,18 +1619,18 @@ S32 BfObject::lua_setSelected(lua_State *L)
 
 
 /**
- * @luafunc LuaPlayerInfo BfObject::getOwner()
+ * @luafunc PlayerInfo BfObject::getOwner()
  * 
- * @brief Gets an object's owner as a LuaPlayerInfo.
+ * @brief Gets an object's owner as a PlayerInfo.
  * 
  * @descr Some objects (like projectiles) have an owning player associated. This
- * method returns a LuaPlayerInfo object if there is an owner. Otherwise, returns
+ * method returns a PlayerInfo object if there is an owner. Otherwise, returns
  * nil.
  * 
  * This method is intended to be used with bullets and other projectiles, not with 
  * game objects like zones.
  * 
- * @return A LuaPlayerInfo representing the object's owner, or nil.
+ * @return A PlayerInfo representing the object's owner, or nil.
  */
 S32 BfObject::lua_getOwner(lua_State *L)
 {

@@ -1040,7 +1040,7 @@ REGISTER_LUA_CLASS(LuaScriptRunner);
 
 
 /**
- * @luafunc bool LuaScriptRunner::pointCanSeePoint(point point1, point point2)
+ * @luafunc bool ScriptRunner::pointCanSeePoint(point point1, point point2)
  * 
  * @brief Returns `true` if the two specified points can see one another.
  * 
@@ -1064,7 +1064,7 @@ S32 LuaScriptRunner::lua_pointCanSeePoint(lua_State *L)
 
 
 /**
- * @luafunc BfObject LuaScriptRunner::findObjectById(num id)
+ * @luafunc BfObject ScriptRunner::findObjectById(num id)
  * 
  * @brief Returns an object with the given id, or nil if none exists.
  * 
@@ -1092,7 +1092,7 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
 
 
 /**
- * @luafunc table LuaScriptRunner::findAllObjects(ObjType objType, ...)
+ * @luafunc table ScriptRunner::findAllObjects(ObjType objType, ...)
  *
  * @brief Returns a table containing a list of objects of the specified type 
  * anywhere on the level.
@@ -1193,7 +1193,7 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
 
 
 /**
- * @luafunc table LuaScriptRunner::findAllObjectsInArea(point point1, point point2, ObjType objType, ...)
+ * @luafunc table ScriptRunner::findAllObjectsInArea(point point1, point point2, ObjType objType, ...)
  *
  * @brief Finds all items of the specified type(s) in a given search area.
  *
@@ -1201,7 +1201,7 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
  * constructed from the two points given, with each point positioned at opposite
  * corners.
  *
- * @note See LuaScriptRunner::findAllObjects for a code example
+ * @note See findAllObjects() for a code example
  *
  * @param point1 One corner of a search rectangle.
  * @param point2 Another corner of a search rectangle diagonally opposite to the
@@ -1278,7 +1278,7 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
 
 
 /**
- * @luafunc LuaScriptRunner::addItem(BfObject obj)
+ * @luafunc ScriptRunner::addItem(BfObject obj)
  *
  * @brief Add a BfObject to the game or editor. Any object constructed in a
  * levelgen will not appear in the game world or editor until this method is
@@ -1318,15 +1318,15 @@ S32 LuaScriptRunner::lua_addItem(lua_State *L)
 
 
 /**
- * @luafunc LuaGameInfo LuaScriptRunner::getGameInfo()
+ * @luafunc GameInfo ScriptRunner::getGameInfo()
  *
- * @brief Returns the LuaGameInfo object.
+ * @brief Returns the GameInfo object.
  *
- * @descr LuaGameInfo can be used to grab information about the currently running
+ * @descr GameInfo can be used to grab information about the currently running
  * game, including the GameType. This only works in-game, not with editor
  * plugins.
  *
- * @return The LuaGameInfo object.
+ * @return The GameInfo object.
  */
 S32 LuaScriptRunner::lua_getGameInfo(lua_State *L)
 {
@@ -1344,7 +1344,7 @@ S32 LuaScriptRunner::lua_getGameInfo(lua_State *L)
 
 
 /**
- * @luafunc num LuaScriptRunner::getPlayerCount()
+ * @luafunc num ScriptRunner::getPlayerCount()
  *
  * @return Current number of connected players.
  */
@@ -1357,7 +1357,7 @@ S32 LuaScriptRunner::lua_getPlayerCount(lua_State *L)
 
 
 /**
- * @luafunc LuaScriptRunner::subscribe(Event event)
+ * @luafunc ScriptRunner::subscribe(Event event)
  *
  * @brief Manually subscribe to notifications when the specified \ref EventEnum
  * occurs.
@@ -1389,7 +1389,7 @@ S32 LuaScriptRunner::lua_subscribe(lua_State *L)
 
 
 /**
- * @luafunc LuaScriptRunner::unsubscribe(Event event)
+ * @luafunc ScriptRunner::unsubscribe(Event event)
  *
  * @brief Manually unsubscribe to the specified \ref EventEnum.
  */

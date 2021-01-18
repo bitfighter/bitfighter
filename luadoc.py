@@ -61,13 +61,18 @@ def main():
     run_doxygen()           # --> Writes files to html
     post_process()          # --> Overwrites files in html
 
+    post_process_classes()          # --> Overwrites files in html
+    # post_process_enums()
+    pass
+
+
 class EnumMode:
     NOT_COLLECTING = 0
     LUA_ENUM_COMMENT = 1
     CPP_DEFINE = 2
 
 
-def pre_process(files: List[str]):
+def preprocess(files: List[str]):
     # Loop through all the files we found above...
     for file_cnt, file in enumerate(files):
         # print(f"Processing {os.path.basename(file)}...", end="", flush=True)
@@ -111,25 +116,27 @@ def pre_process(files: List[str]):
                 #####
                 # LUA BASE CLASSES in C++ code
                 #####
+
+                # REGISTER_LUA_CLASS(LuaPlayerInfo);
                 match = re.search(r"REGISTER_LUA_CLASS *\( *(.+?) *\)", line)
                 if match:
-                    xclass = match.groups()[0]
-                    if xclass not in classes:
-                        classes[xclass] = []
+                    classname = cleanup_classname(match.groups()[0])        # ==> PlayerInfo
+                    if classname not in classes:
+                        classes[classname] = []
 
-                    classes[xclass].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {xclass} {{ \n public:\n")
+                    classes[classname].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {classname} {{ \n public:\n")
                     continue
 
                 #####
                 # LUA SUBCLASSES in C++ code
                 #####
-                match = re.search(r"REGISTER_LUA_SUBCLASS *\( *(.+?) *, *(.+?) *\)", line)
+                match = re.search(r"REGISTER_LUA_SUBCLASS *\( *(.+?) *, *(.+?) *\)", line)      # REGISTER_LUA_SUBCLASS(WallItem, BfObject);
                 if match:
-                    xclass = match.groups()[0]
-                    parent = match.groups()[1]
-                    if xclass not in classes:
-                        classes[xclass] = []
-                    classes[xclass].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {xclass} : public {parent} {{ \n public:\n")
+                    classname = cleanup_classname(match.groups()[0])   # ==> WallItem
+                    parent = cleanup_classname(match.groups()[1])      # ==> BfObject
+                    if classname not in classes:
+                        classes[classname] = []
+                    classes[classname].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {classname} : public {parent} {{ \n public:\n")
                     shortClassDescr = ""
                     longClassDescr = ""
                     continue
@@ -153,14 +160,15 @@ def pre_process(files: List[str]):
                         methods.append(match.groups()[0])
                         continue
 
+                    # GENERATE_LUA_METHODS_TABLE(LuaPlayerInfo, LUA_METHODS);
                     match = re.search(r"GENERATE_LUA_METHODS_TABLE *\( *(.+?) *,", line)      # Signals we have all methods for this class, gives us class name; now generate cod
                     if match:
-                        xclass = match.groups()[0]
+                        classname = cleanup_classname(match.groups()[0])    # ==> PlayerInfo
 
                         for method in methods:
-                            if xclass not in classes:
-                                classes[xclass] = []
-                            classes[xclass].append(make_method_line(method))
+                            if classname not in classes:
+                                classes[classname] = []
+                            classes[classname].append(make_method_line(method))
 
                         methods = []
                         collectingMethods = False
@@ -179,15 +187,17 @@ def pre_process(files: List[str]):
                         staticMethods.append(method + "\n")
                         continue
 
+                    # GENERATE_LUA_STATIC_METHODS_TABLE(Geom, LUA_STATIC_METHODS);
                     match = re.search(r"GENERATE_LUA_STATIC_METHODS_TABLE *\( *(.+?) *,", line)  # Signals we have all methods for this class, gives us class name; now generate cod
-                    if match:
-                        xclass = match.groups()[0]
 
-                        if xclass not in classes:
-                            classes[xclass] = []
+                    if match:
+                        classname = cleanup_classname(match.groups()[0])        # ==> Geom
+
+                        if classname not in classes:
+                            classes[classname] = []
 
                         # This becomes our "constructor"
-                        classes[xclass].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {xclass} {{ \npublic:\n")
+                        classes[classname].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {classname} {{ \npublic:\n")
 
                         # This is an ordinary "class method"
                         # for method in staticMethods:
@@ -290,18 +300,18 @@ def pre_process(files: List[str]):
                     # Look for  "* @luafuncsheader <class>" followed by a block of text.  class is the class we're documenting, obviously.
                     # This is a magic item that lets us, through extreme hackery, inject a comment at the top of the functions list (as is done with Ship)
                     # Currently only support one per file.  That should be enough.
-                    match = re.search(r"^\s*\*\s*@luafuncsheader\s+(\w+)", line)
+                    match = re.search(r"^\s*\*\s*@luafuncsheader\s+(\w+)", line)        # @luafuncsheader Ship
                     if match:
                         # Now we need to do something that will make it through Doxygen and emerge in a recognizable form for the postprocessor to work on
                         # We'll use a dummy function and some dummy documentation.  We'll fix it in post!
-                        xclass = match.groups()[0]
-                        if xclass not in classes:
-                            classes[xclass] = []
+                        classname = cleanup_classname(match.groups()[0])        # ==> Ship
+                        if classname not in classes:
+                            classes[classname] = []
 
-                        classes[xclass].append(f"void {FUNCS_HEADER_MARKER}() {{ }}\n")
+                        classes[classname].append(f"void {FUNCS_HEADER_MARKER}() {{ }}\n")
 
                         # And the dummy documentation -- the encounteredDoxygenCmd tells us to keep reading until we end the comment block
-                        comments.append(f"\\fn {xclass}::{FUNCS_HEADER_MARKER}\n")
+                        comments.append(f"\\fn {classname}::{FUNCS_HEADER_MARKER}\n")
                         encounteredDoxygenCmd = True
 
                         continue
@@ -313,7 +323,7 @@ def pre_process(files: List[str]):
 
                     #   staticness -> "static"
                     #   voidlessRetval -> "table"
-                    #   xclass -> "Geom"
+                    #   classname -> "Geom"
                     #   method -> "triangulate"
                     #   args -> "mixed polygons"
                     match = re.search(r"^\s*\*\s*@luafunc\s+(.*)$", line)
@@ -321,13 +331,14 @@ def pre_process(files: List[str]):
                         # In C++ code, we use "::" to separate classes from functions (class::func); in Lua, we use "." or ":" (class.func).
                         sep = "[.:]" if luafile else "::"
 
+                        # @luafunc bool Ship::isAlive()
                         #                                      $1          $2       $3                  $4    $5
                         match = re.search(r".*?@luafunc\s+(static\s+)?(\w+\s+)?(?:(\w+)" + sep + r")?(.+?)\((.*)\)", line)     # Grab retval, class, method, and args from $line
 
                         staticness = match.groups()[0].strip() if match.groups()[0] else ""
                         retval = match.groups()[1] if match.groups()[1] else "void"         # Retval is optional, use void if omitted
                         voidlessRetval = match.groups()[1] or ""
-                        xclass  = match.groups()[2] or "global"   # If no class is given the function is assumed to be global
+                        classname  = cleanup_classname(match.groups()[2]) or "global"       # If no class is given the function is assumed to be global
                         method = match.groups()[3]
                         args   = match.groups()[4]     # Args are optional
 
@@ -338,29 +349,29 @@ def pre_process(files: List[str]):
                         # retval =~ s|\s+$||      # Trim any trailing spaces from $retval
 
                         # Use voidlessRetval to avoid having "void" show up where we'd rather omit the return type altogether
-                        comments.append(f" \\fn {voidlessRetval} {xclass}::{method}({args})\n")
+                        comments.append(f" \\fn {voidlessRetval} {classname}::{method}({args})\n")
 
                         # Here we generate some boilerplate standard code and such
-                        is_constructor = xclass == method
+                        is_constructor = classname == method
                         if is_constructor:  # Constructors come in the form of class::method where class and method are the same
-                            comments.append(f"\\brief Constructor.\n\nExample:\n@code\n{xclass.lower()} = {xclass}.new({args})\n...\nlevelgen:addItem({xclass.lower()})\n@endcode\n\n")
+                            comments.append(f"\\brief Constructor.\n\nExample:\n@code\n{classname.lower()} = {classname}.new({args})\n...\nlevelgen:addItem({classname.lower()})\n@endcode\n\n")
 
                         # Find an earlier definition and delete it (if it still exists); but not if it's a constructor.
                         # This might have come from an earlier GENERATE_LUA_METHODS_TABLE block.
                         # We do this in order to provide more complete method descriptions if they are found subsequently.  I think.
                         else:
                             try:
-                                if xclass in classes:
-                                    classes[xclass].remove(make_method_line(method))
+                                if classname in classes:
+                                    classes[classname].remove(make_method_line(method))
                             except ValueError:
                                 pass    # Item is not in the list; this is fine, nothing to do.
 
                         # Add our new sig to the list
-                        if xclass:
-                            if xclass not in classes:
-                                classes[xclass] = []
+                        if classname:
+                            if classname not in classes:
+                                classes[classname] = []
 
-                            classes[xclass].append(f"{staticness} {retval} {method}({args}) {{ /* From '{line.strip()}' */ }}\n")
+                            classes[classname].append(f"{staticness} {retval} {method}({args}) {{ /* From '{line.strip()}' */ }}\n")
                         else:
                             globalfunctions.append(f"{retval} {method}({args}) {{ /* From '{line}' */ }}\n")
 
@@ -371,7 +382,7 @@ def pre_process(files: List[str]):
 
                     match = re.search(r"@luaclass\s+(\w+)\s*$", line)        # Description of a class defined in a header file
                     if match:
-                        comments.append(f" \\class {match.groups()[0]}\n")
+                        comments.append(f" \\class {cleanup_classname(match.groups()[0])}\n")
 
                         encounteredDoxygenCmd = True
 
@@ -380,13 +391,13 @@ def pre_process(files: List[str]):
 
                     match = re.search(r"@luavclass\s+(\w+)\s*$", line)       # Description of a virtual class, not defined in any C++ code
                     if match:
-                        xclass = match.groups()[0]
-                        comments.append(f" \\class {xclass}\n")
+                        classname = cleanup_classname(match.groups()[0])
+                        comments.append(f" \\class {classname}\n")
 
-                        if xclass not in classes:
-                            classes[xclass] = []
-                        classes[xclass].append(f"class {match.groups()[0]} {{\n")
-                        classes[xclass].append("public:\n")
+                        if classname not in classes:
+                            classes[classname] = []
+                        classes[classname].append(f"class {cleanup_classname(match.groups()[0])} {{\n")
+                        classes[classname].append("public:\n")
 
                         encounteredDoxygenCmd = True
 
@@ -394,7 +405,7 @@ def pre_process(files: List[str]):
 
                     match = re.search(r"@descr\s+(.*)$", line)
                     if match:
-                        comments.append(f"\n {match.groups()[0]}\n")
+                        comments.append(f"\n {cleanup_classname(match.groups()[0])}\n")
                         encounteredDoxygenCmd = True
                         continue
 
@@ -564,6 +575,12 @@ def pre_process(files: List[str]):
     update_progress(1)
 
 
+def cleanup_classname(classname: str) -> str:
+    """ Do some renaming to avoid awkward names (LuaPlayerInfo ==> PlayerInfo, LuaGameInfo ==> GameInfo, etc.) """
+    if classname.startswith("Lua"):
+        return classname.replace("Lua", "", 1)
+    return classname
+
 
 def run_doxygen():
     os.chdir("doc")
@@ -571,7 +588,49 @@ def run_doxygen():
     os.chdir("..")
 
 
-def post_process():
+def post_process_enums():
+    os.chdir("doc")
+    files = glob("./html/*_enum.html")
+    for file_ct, file in enumerate(files):
+        update_progress(file_ct / len(files), os.path.basename(file))
+
+        with open(file, "r") as infile:
+            root = etree.HTML(infile.read())
+
+        format_enums(root)
+
+        if XXX:
+            file = file.replace("html", "html-final", 1)    # TODO
+
+        with open(file, "w") as outfile:
+            outfile.write(etree.tostring(root).decode("utf-8"))
+
+
+    update_progress(1)
+    os.chdir("..")
+
+
+def format_enums(root: Any) -> None:
+    # Need to swap where the code styline is applied.  Add some spans with classes while we're here.
+    elements = root.xpath(f"//div[@class='contents']/ul/li/code")
+    for element in elements:
+        element.getparent().insert(1, etree.fromstring(f'<span class="enum-descr">{element.text}</span>'))
+        delete_node(element)
+
+    elements = root.xpath(f"//div[@class='contents']/ul/li")
+    for element in elements:
+        element.insert(0, etree.fromstring(f'<span class="enum-name"><code>{element.text}</code></span>'))
+        element.text = ""
+
+
+
+    # Remove some annoying BRs
+    elements = root.xpath(f"//li/br")
+    for element in elements:
+        delete_node(element)
+
+
+def post_process_classes():
     """ Post-process the generated doxygen stuff """
 
     print("Fixing doxygen output...")
@@ -581,7 +640,7 @@ def post_process():
 
     files = glob("./html/class_*.html")
 
-
+    # First pass
     # Rip through them first to build a map of all the class --> urls so we can create links
     for file_ct, file in enumerate(files):
         update_progress(file_ct / len(files), os.path.basename(file))
@@ -591,7 +650,8 @@ def post_process():
     update_progress(1)
 
 
-    # files = ["./html/class_core_item.html"]     # TODO
+    # Second pass
+    # files = ["./html/main_page_content.h"]     # TODO
     for file_ct, file in enumerate(files):
         update_progress(file_ct / len(files), os.path.basename(file))
         dirty_html = ""
@@ -807,119 +867,121 @@ def clean_up_member_details(root: Any, class_urls: Dict[str, str]) -> None:
     memitems = root.xpath("//div[@class='memitem']")
 
     for memitem in memitems:
-        table = memitem.xpath(".//table[@class='memname']")[0]
-        memtitle = memitem.getprevious()        # Member Title: Big text title on tab in member descriptions
-        # <h2 class="memtitle"><span
-        #     class="permalink"><a
-        #     href="#a603c2eb87a4ed26c5b3fb06e953d611c">◆&nbsp;</a></span>Asteroid() <span
-        #     class="overload">[1/2]</span>
-        # </h2>
+        tables = memitem.xpath(".//table[@class='memname']")
+        if tables:
+            table = tables[0]       # There will be only 1
+            memtitle = memitem.getprevious()        # Member Title: Big text title on tab in member descriptions
+            # <h2 class="memtitle"><span
+            #     class="permalink"><a
+            #     href="#a603c2eb87a4ed26c5b3fb06e953d611c">◆&nbsp;</a></span>Asteroid() <span
+            #     class="overload">[1/2]</span>
+            # </h2>
 
-        memnames = table.xpath(".//td[@class='memname']")
-        # <table class="memname">
-        #   <tr>
-        #     <td class="memname">BfObject::setGeom </td>                       <=== "BfObject::setGeom" to "setGeom"
-        #     <td>(</td>
-        #     <td class="paramtype"><a class="el" href="class_geom.html">Geom</a></td>
-        #     <td class="paramname"><em>geometry</em></td>
-        #     <td>)</td>
-        #     <td></td>                                                         <=== Add "-> <return type>" to this cell
-        #   </tr>
-        # </table>
+            memnames = table.xpath(".//td[@class='memname']")
+            # <table class="memname">
+            #   <tr>
+            #     <td class="memname">BfObject::setGeom </td>                       <=== "BfObject::setGeom" to "setGeom"
+            #     <td>(</td>
+            #     <td class="paramtype"><a class="el" href="class_geom.html">Geom</a></td>
+            #     <td class="paramname"><em>geometry</em></td>
+            #     <td>)</td>
+            #     <td></td>                                                         <=== Add "-> <return type>" to this cell
+            #   </tr>
+            # </table>
 
-        if memnames:
-            fn_decl = "".join(memnames[0].itertext()).strip()       # itertext gives us any text inside of tags
+            if memnames:
+                fn_decl = "".join(memnames[0].itertext()).strip()       # itertext gives us any text inside of tags
 
-            parts = parse_member_name(fn_decl)
-            if not parts:
-                continue
+                parts = parse_member_name(fn_decl)
+                if not parts:
+                    continue
 
-            ret_type, xclass, fn_name = parts     # ret_type xclass::fn_name()
-            # print(fn_name)
+                ret_type, xclass, fn_name = parts     # ret_type xclass::fn_name()
+                # print(fn_name)
 
-            is_constructor = xclass == fn_name
-            if is_constructor:
-                ret_type = xclass        # Constructors return an instance of the class, even if it's not written that way in C++
-                fn_name += ".new"  # This is how you call constructors in Lua
-        else:
-            assert False
-            ret_type, fn_name = "", table.xpath(".//td/text()")[0]
-            is_constructor = False
-
-
-        cells = table.xpath(".//td")
-        cells[0].clear()
-        cells[0].text = fn_name       # Replaces "num MoveObject::getAngle" with "getAngle"
-        # cells[-1].text = f"-> {ret_type if ret_type else 'nil'}"      # Add return type to end of row
-
-        param_types = table.xpath(".//td[@class='paramtype']")
-        param_names = table.xpath(".//td[@class='paramname']")
-
-        # These lists will be imbalanced if there are no args... for some reason doxygen inserts an empty
-        # <td class="paramname"></td> tag when there are no args, but does not also include a corresponding
-        # <td class="paramtype"></td>.
-        argstrs = []
-        param_list = []
-
-        def linkify(param_type):
-            if param_type in class_urls:
-                return f'<a href="{class_urls[param_type]}" class="el">{param_type}</a>'
+                is_constructor = xclass == fn_name
+                if is_constructor:
+                    ret_type = xclass        # Constructors return an instance of the class, even if it's not written that way in C++
+                    fn_name += ".new"  # This is how you call constructors in Lua
             else:
-                return param_type
+                assert False
+                ret_type, fn_name = "", table.xpath(".//td/text()")[0]
+                is_constructor = False
 
 
-        if len(param_types) == len(param_names):        # Balanced, so has args
-            for i in range(len(param_types)):
-                # Use itertext() to burrow into any inner tags and grab all interior text
-                param_name = "".join(param_names[i].itertext()).replace(",", "").strip()
-                param_type = "".join(param_types[i].itertext()).replace(",", "").strip()
+            cells = table.xpath(".//td")
+            cells[0].clear()
+            cells[0].text = fn_name       # Replaces "num MoveObject::getAngle" with "getAngle"
+            # cells[-1].text = f"-> {ret_type if ret_type else 'nil'}"      # Add return type to end of row
 
-                # Handle special case: when a constructor (or other fn) has the typeless "geom" as an argument, add the type Geom here.
-                # It would be better to fix the code, but there's a lot of places where this is happening.  If that's the case,
-                # we don't want to delete the param_types node from the DOM, as that is where our "geom" token is, and we want that.
-                if param_name == "" and param_type == "geom":
-                    param_name = "geom"
-                    param_type = "Geom"
+            param_types = table.xpath(".//td[@class='paramtype']")
+            param_names = table.xpath(".//td[@class='paramname']")
+
+            # These lists will be imbalanced if there are no args... for some reason doxygen inserts an empty
+            # <td class="paramname"></td> tag when there are no args, but does not also include a corresponding
+            # <td class="paramtype"></td>.
+            argstrs = []
+            param_list = []
+
+            def linkify(param_type):
+                if param_type in class_urls:
+                    return f'<a href="{class_urls[param_type]}" class="el">{param_type}</a>'
                 else:
-                    delete_node(param_types[i])     # Won't be needing this: param_types will be displayed in the line below
-
-                param_list.append(param_name)
-                param_type = handle_mixed(param_type)
-
-                argstrs.append(f'<span class="paramname">{param_name}</span>: <span class="paramtype">{linkify(param_type)}</span>')
-
-        # Now back up the tab and the big member name
-        method = memtitle.xpath("./span[@class='permalink']")[0]
-        method.tail = f"{fn_name}({', '.join(param_list)})"
+                    return param_type
 
 
-        if not ret_type or ret_type == "void":
-            ret_type = "nothing"
-        else:
-            ret_type = f'<span class="returntype">{linkify(ret_type)}</span>'
+            if len(param_types) == len(param_names):        # Balanced, so has args
+                for i in range(len(param_types)):
+                    # Use itertext() to burrow into any inner tags and grab all interior text
+                    param_name = "".join(param_names[i].itertext()).replace(",", "").strip()
+                    param_type = "".join(param_types[i].itertext()).replace(",", "").strip()
 
-        ret_type = f"returns {ret_type}"
+                    # Handle special case: when a constructor (or other fn) has the typeless "geom" as an argument, add the type Geom here.
+                    # It would be better to fix the code, but there's a lot of places where this is happening.  If that's the case,
+                    # we don't want to delete the param_types node from the DOM, as that is where our "geom" token is, and we want that.
+                    if param_name == "" and param_type == "geom":
+                        param_name = "geom"
+                        param_type = "Geom"
+                    else:
+                        delete_node(param_types[i])     # Won't be needing this: param_types will be displayed in the line below
 
-        ret_type = handle_mixed(ret_type)       # Decode mixed_xxx_yyy types used for multiple return types
+                    param_list.append(param_name)
+                    param_type = handle_mixed(param_type)
 
-        # The argline styles are defined in luadocs_html_extra_stylesheet.css
-        if argstrs:     # Args and return type
-            arg_type = "Arg types: "
-            argline = f"{', '.join(argstrs)}{NBSP * 2}|{NBSP * 2}{ret_type}"
-        else:           # No args, only return type
-            arg_type = ""
-            argline = ret_type
+                    argstrs.append(f'<span class="paramname">{param_name}</span>: <span class="paramtype">{linkify(param_type)}</span>')
 
-        new_row = etree.fromstring(f"""
-            <tr class="nofloat argline">
-                <td colspan="{len(cells)}">
-                    <span class="argtypes">{arg_type}</span>
-                    {argline}
-                </td>
-            </tr>
-        """)
-        table.clear()           # Remove existing rows, which are now a repeat of the data shown in the tab
-        table.append(new_row)   # And insert the type information in a new row
+            # Now back up the tab and the big member name
+            method = memtitle.xpath("./span[@class='permalink']")[0]
+            method.tail = f"{fn_name}({', '.join(param_list)})"
+
+
+            if not ret_type or ret_type == "void":
+                ret_type = "nothing"
+            else:
+                ret_type = f'<span class="returntype">{linkify(ret_type)}</span>'
+
+            ret_type = f"returns {ret_type}"
+
+            ret_type = handle_mixed(ret_type)       # Decode mixed_xxx_yyy types used for multiple return types
+
+            # The argline styles are defined in luadocs_html_extra_stylesheet.css
+            if argstrs:     # Args and return type
+                arg_type = "Arg types: "
+                argline = f"{', '.join(argstrs)}{NBSP * 2}|{NBSP * 2}{ret_type}"
+            else:           # No args, only return type
+                arg_type = ""
+                argline = ret_type
+
+            new_row = etree.fromstring(f"""
+                <tr class="nofloat argline">
+                    <td colspan="{len(cells)}">
+                        <span class="argtypes">{arg_type}</span>
+                        {argline}
+                    </td>
+                </tr>
+            """)
+            table.clear()           # Remove existing rows, which are now a repeat of the data shown in the tab
+            table.append(new_row)   # And insert the type information in a new row
 
 
 def handle_mixed(argtype: str) -> str:

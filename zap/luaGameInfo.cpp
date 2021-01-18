@@ -55,21 +55,21 @@ GENERATE_LUA_METHODS_TABLE(LuaGameInfo, LUA_METHODS);
 
 
 /**
- * @luaclass LuaGameInfo
+ * @luaclass GameInfo
  * 
  * @brief Get information about the current game.
  * 
  * @descr You can get information about the current game with the GameInfo
  * object. You only need get this object once, then you can use it as often as
  * you like. It will always reflect the latest data. You can get this object
- * with `bf:getGameInfo()` (see LuaScriptRunner::getGameInfo()).
+ * with `bf:getGameInfo()` (see ScriptRunner::getGameInfo()).
  */
 const char *LuaGameInfo::luaClassName = "GameInfo";  // Class name as it appears to Lua scripts
 REGISTER_LUA_CLASS(LuaGameInfo);
 
 
 /**
- * @luafunc GameType LuaGameInfo::getGameType()
+ * @luafunc GameType GameInfo::getGameType()
  * 
  * @brief Get the \ref GameTypeEnum of the current game.
  * 
@@ -89,7 +89,7 @@ S32 LuaGameInfo::lua_getGameType(lua_State *L)
 
 
 /**
- * @luafunc string LuaGameInfo::getGameTypeName()
+ * @luafunc string GameInfo::getGameTypeName()
  *
  * @brief Get a string representing the name of the game type.
  *
@@ -99,7 +99,7 @@ S32 LuaGameInfo::lua_getGameTypeName(lua_State *L) { return returnString(L, mSer
 
 
 /**
- * @luafunc int LuaGameInfo::getFlagCount()
+ * @luafunc int GameInfo::getFlagCount()
  *
  * @brief Get the number of flags in play.
  *
@@ -109,7 +109,7 @@ S32 LuaGameInfo::lua_getFlagCount(lua_State *L) { return returnInt (L, mServerGa
 
 
 /**
- * @luafunc int LuaGameInfo::getWinningScore()
+ * @luafunc int GameInfo::getWinningScore()
  *
  * @brief Get the winning score.
  *
@@ -119,7 +119,7 @@ S32 LuaGameInfo::lua_getWinningScore(lua_State *L) { return returnInt (L, mServe
 
 
 /**
- * @luafunc int LuaGameInfo::getGameTimeTotal()
+ * @luafunc int GameInfo::getGameTimeTotal()
  *
  * @brief Get the initial time limit of the game in seconds.
  *
@@ -129,7 +129,7 @@ S32 LuaGameInfo::lua_getGameTimeTotal(lua_State *L) { return returnInt (L, mServ
 
 
 /**
- * @luafunc int LuaGameInfo::getGameTimeRemaining()
+ * @luafunc int GameInfo::getGameTimeRemaining()
  *
  * @brief Get the number of seconds until the game ends.
  *
@@ -139,7 +139,7 @@ S32 LuaGameInfo::lua_getGameTimeRemaining(lua_State *L) { return returnInt (L, m
 
 
 /**
- * @luafunc int LuaGameInfo::getLeadingScore()
+ * @luafunc int GameInfo::getLeadingScore()
  *
  * @brief Get the highest score among all teams.
  *
@@ -149,7 +149,7 @@ S32 LuaGameInfo::lua_getLeadingScore(lua_State *L) { return returnInt (L, mServe
 
 
 /**
- * @luafunc int LuaGameInfo::getLeadingTeam()
+ * @luafunc int GameInfo::getLeadingTeam()
  *
  * @brief Get the index of the team with the highest score.
  *
@@ -159,7 +159,7 @@ S32 LuaGameInfo::lua_getLeadingTeam(lua_State *L) { return returnInt (L, mServer
 
 
 /**
- * @luafunc int LuaGameInfo::getTeamCount()
+ * @luafunc int GameInfo::getTeamCount()
  * 
  * @brief Get the number of teams in the game.
  * 
@@ -169,7 +169,7 @@ S32 LuaGameInfo::lua_getTeamCount(lua_State *L) { return returnInt (L, mServerGa
 
 
 /**
- * @luafunc string LuaGameInfo::getLevelName()
+ * @luafunc string GameInfo::getLevelName()
  *
  * @brief Get a string representing the level's name.
  *
@@ -179,7 +179,7 @@ S32 LuaGameInfo::lua_getLevelName(lua_State *L) { return returnString(L, mServer
 
 
 /**
- * @luafunc bool LuaGameInfo::isTeamGame()
+ * @luafunc bool GameInfo::isTeamGame()
  *
  * @return `true` if there is more than one team.
  */
@@ -187,7 +187,7 @@ S32 LuaGameInfo::lua_isTeamGame(lua_State *L) { return returnBool (L, mServerGam
 
 
 /**
- * @luafunc bool LuaGameInfo::isNexusOpen()
+ * @luafunc bool GameInfo::isNexusOpen()
  *
  * @brief Get whether the nexus is open
  *
@@ -204,7 +204,7 @@ S32 LuaGameInfo::lua_isNexusOpen(lua_State *L)
 
 
 /**
- * @luafunc int LuaGameInfo::getNexusTimeLeft()
+ * @luafunc int GameInfo::getNexusTimeLeft()
  *
  * @brief The number of seconds until the nexus opens or closes.
  *
@@ -222,7 +222,7 @@ S32 LuaGameInfo::lua_getNexusTimeLeft(lua_State *L)
 
 
 /**
- * @luafunc int LuaGameInfo::getEventScore(ScoringEvent event)
+ * @luafunc int GameInfo::getEventScore(ScoringEvent event)
  *
  * @brief Get the value of a \ref ScoringEventEnum.
  *
@@ -240,11 +240,11 @@ S32 LuaGameInfo::lua_getEventScore(lua_State *L)
 
 
 /**
- * @luafunc table LuaGameInfo::getPlayers()
+ * @luafunc table GameInfo::getPlayers()
  *
  * @brief Get a list of the players in the game.
  *
- * @return A table containing the LuaPlayerInfo for each player (and robot) in
+ * @return A table containing the PlayerInfo for each player (and robot) in
  * the game
  */
 S32 LuaGameInfo::lua_getPlayers(lua_State *L) 
@@ -279,7 +279,7 @@ S32 LuaGameInfo::lua_getPlayers(lua_State *L)
 
 
 /**
- * @luafunc Team LuaGameInfo::getTeam(int teamIndex)
+ * @luafunc Team GameInfo::getTeam(int teamIndex)
  *
  * @brief Get a Team by index.
  *

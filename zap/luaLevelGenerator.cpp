@@ -97,7 +97,7 @@ void LuaLevelGenerator::killScript()
 /////
 // Lua interface
 /**
- * @luaclass LuaLevelGenerator
+ * @luaclass LevelGenerator
  *
  * @brief Supervisor class of a levelgen with various utilities.
  */
@@ -120,7 +120,7 @@ REGISTER_LUA_CLASS(LuaLevelGenerator);
 
 
 /**
- * @luafunc void LuaLevelGenerator::setGameTime(num timeInMinutes)
+ * @luafunc void LevelGenerator::setGameTime(num timeInMinutes)
  *
  * @brief Sets the time remaining in the current game to the specified value
  *
@@ -147,7 +147,7 @@ static const StringTableEntry levelControllerName = "LevelController";
 
 
 /**
- * @luafunc void LuaLevelGenerator::globalMsg(string message)
+ * @luafunc void LevelGenerator::globalMsg(string message)
  *
  * @brief Broadcast a message to all players.
  *
@@ -172,7 +172,7 @@ S32 LuaLevelGenerator::lua_globalMsg(lua_State *L)
 
 
 /**
- * @luafunc void LuaLevelGenerator::teamMsg(string message, num teamIndex)
+ * @luafunc void LevelGenerator::teamMsg(string message, num teamIndex)
  *
  * @brief Broadcast a message to players of a team.
  *
@@ -199,7 +199,7 @@ S32 LuaLevelGenerator::lua_teamMsg(lua_State *L)
 
 
 /**
- * @luafunc LuaLevelGenerator::privateMsg(string message, string playerName)
+ * @luafunc LevelGenerator::privateMsg(string message, string playerName)
  * @brief Broadcast a private message to a player.
  *
  * @param message Message to broadcast.
@@ -222,7 +222,7 @@ S32 LuaLevelGenerator::lua_privateMsg(lua_State *L)
 
 
 /**
- * @luafunc LuaLevelGenerator::announce(string message)
+ * @luafunc LevelGenerator::announce(string message)
  *
  * @brief Broadcast an announcement.
  *
