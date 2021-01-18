@@ -2026,6 +2026,9 @@ void addMiterPoints(Point p1, Point p2, Point p3, F32 offset, Vector<Point> &pol
    F32 subtendedAngle = acosf(cosTheta);
    F32 halfAngle = subtendedAngle * 0.5;
 
+   // Guard against divide by zero
+   if(halfAngle < 0.00001)  // Arbitrary
+      halfAngle = 0.00001;
 
    // Do mitering
    // Find length of miter offset
