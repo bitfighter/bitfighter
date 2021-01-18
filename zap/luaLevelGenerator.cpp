@@ -124,7 +124,7 @@ REGISTER_LUA_CLASS(LuaLevelGenerator);
  *
  * @brief Sets the time remaining in the current game to the specified value
  *
- * @descr Decimals can be used to specify fractions of minutes.  A value of '0'
+ * @descr Decimals can be used to specify fractions of minutes.  A value of 0
  * will set the game time to unlimited
  *
  * @param timeInMinutes Time, in minutes, that the game should continue. Can be
