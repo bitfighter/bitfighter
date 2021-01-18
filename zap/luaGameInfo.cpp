@@ -227,7 +227,7 @@ S32 LuaGameInfo::lua_getNexusTimeLeft(lua_State *L)
  * @brief Get the value of a \ref ScoringEventEnum.
  *
  * @return The number of points earned when the \ref ScoringEventEnum `event`
- * occurs, or zero of an unknown event is specified.
+ * occurs, or zero if an unknown event is specified.
  */
 S32 LuaGameInfo::lua_getEventScore(lua_State *L)
 {
