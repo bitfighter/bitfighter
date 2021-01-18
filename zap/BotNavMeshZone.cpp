@@ -295,20 +295,18 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
                                 const Vector<DatabaseObject *> &forceFieldProjectors, 
                                 F32 bufferRadius,   PolyTree &solution)
 {
-
+   // Keep track of all polygons to merge
    Vector<Vector<Point> > inputPolygons;
 
-   // Add barriers (PolyWalls are Barriers on the server)
-   for(S32 i = 0; i < barriers.size(); i++)
-   {
-      if(barriers[i]->getObjectTypeNumber() != BarrierTypeNumber)
-         continue;
+   // First merge all barrier polygons
+   Vector<Vector<Point> > barrierInputPolygons;
+   bool unionSucceeded = Barrier::unionBarriers(barriers,  barrierInputPolygons);
+   if(!unionSucceeded)
+      return false;
 
-      Barrier *barrier = static_cast<Barrier *>(barriers[i]);
+   // Now offset and fill inputPolygons directly
+   offsetPolygons(barrierInputPolygons, inputPolygons, bufferRadius);
 
-      inputPolygons.push_back(Vector<Point>());
-      barrier->getBufferForBotZone(bufferRadius, inputPolygons.last());
-   }
 
    // Add turrets
    for (S32 i = 0; i < turrets.size(); i++)
@@ -333,25 +331,6 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
       inputPolygons.push_back(Vector<Point>());
       forceFieldProjector->getBufferForBotZone(bufferRadius, inputPolygons.last());
    }
-
-
-   // Here we round the botzone points before clipper takes ahold.  This is because
-   // the older editor would save identical points with floating point rounding errors.
-   // These errors can sometimes create issues with clipping and triangulation, usually
-   // by creating not strictly-simple polygons or self-intersecting lines - these then
-   // crash poly2tri in triangulation.  For a good reference to these issues see:
-   //    http://www.angusj.com/delphi/clipper/documentation/Docs/Overview/Rounding.htm
-   //
-   // This doesn't seem to be needed anymore since updating to clipper 6 with the
-   // StrictlySimple(true) flag.  I decided to leave it because it does seem to make
-   // clipper's job a little easier and saves some processor time
-   //
-   for(S32 i=0; i < inputPolygons.size(); i++)
-      for(S32 j=0; j < inputPolygons[i].size(); j++)
-      {
-         inputPolygons[i][j].x = (F32)floor(inputPolygons[i][j].x);
-         inputPolygons[i][j].y = (F32)floor(inputPolygons[i][j].y);
-      }
 
    return mergePolysToPolyTree(inputPolygons, solution);
 }
@@ -413,11 +392,38 @@ static void linkTeleportersBotNavMeshZoneConnections(const GridDatabase *botZone
 
 // Server only
 // Use the Triangle library to create zones.  Aggregate triangles with Recast
-bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, Vector<BotNavMeshZone *> *allZones,
-                                       const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList,
-                                       const Vector<DatabaseObject *> &turretList, const Vector<DatabaseObject *> &forceFieldProjectorList,
-                                       const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones)
+bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDatabase *gameObjDatabase, Vector<BotNavMeshZone *> *allZones,
+                                       const Rect *worldExtents, bool triangulateZones)
 {
+   // Start by finding all objects that'll matter for meshing the level
+   fillVector.clear();
+   gameObjDatabase->findObjects(TeleporterTypeNumber, fillVector);
+
+   Vector<pair<Point, const Vector<Point> *> > teleporterData(fillVector.size());
+   pair<Point, const Vector<Point> *> teldat;
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      Teleporter *teleporter = static_cast<Teleporter *>(fillVector[i]);
+
+      teldat.first  = teleporter->getPos();
+      teldat.second = teleporter->getDestList();
+
+      teleporterData.push_back(teldat);
+   }
+
+   // Get our parameters together
+   Vector<DatabaseObject *> barrierList;
+   gameObjDatabase->findObjects((TestFunc)isWallType, barrierList, *worldExtents);
+
+   Vector<DatabaseObject *> turretList;
+   gameObjDatabase->findObjects(TurretTypeNumber, turretList, *worldExtents);
+
+   Vector<DatabaseObject *> forceFieldProjectorList;
+   gameObjDatabase->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList, *worldExtents);
+
+
+
 #ifdef LOG_TIMER
    U32 starttime = Platform::getRealMilliseconds();
 #endif

@@ -647,33 +647,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
       mGameRecorderServer = new GameRecorderServer(this);
 
 
-   ////// This block could easily be moved off somewhere else   
-   fillVector.clear();
-   getGameObjDatabase()->findObjects(TeleporterTypeNumber, fillVector);
-
-   Vector<pair<Point, const Vector<Point> *> > teleporterData(fillVector.size());
-   pair<Point, const Vector<Point> *> teldat;
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      Teleporter *teleporter = static_cast<Teleporter *>(fillVector[i]);
-
-      teldat.first  = teleporter->getPos();
-      teldat.second = teleporter->getDestList();
-
-      teleporterData.push_back(teldat);
-   }
-
-   // Get our parameters together
-   Vector<DatabaseObject *> barrierList;
-   getGameObjDatabase()->findObjects((TestFunc)isWallType, barrierList, *getWorldExtents());
-
-   Vector<DatabaseObject *> turretList;
-   getGameObjDatabase()->findObjects(TurretTypeNumber, turretList, *getWorldExtents());
-
-   Vector<DatabaseObject *> forceFieldProjectorList;
-   getGameObjDatabase()->findObjects(ForceFieldProjectorTypeNumber, forceFieldProjectorList, *getWorldExtents());
-
+   // Bot zone time
    bool triangulate;
 
    // Try and load Bot Zones for this level, set flag if failed
@@ -684,9 +658,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
    triangulate = !isDedicated();
 #endif
 
-   mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(mBotZoneDatabase, &mAllZones,
-                                                                          getWorldExtents(), barrierList, turretList,
-                                                                          forceFieldProjectorList, teleporterData, triangulate);
+   mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(mBotZoneDatabase, getGameObjDatabase(), &mAllZones,
+                                                                          getWorldExtents(), triangulate);
    // Clear team info for all clients
    resetAllClientTeams();
 

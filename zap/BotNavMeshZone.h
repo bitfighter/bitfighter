@@ -79,10 +79,8 @@ public:
    Vector<Border> mNeighborRenderPoints;     // Only populated on client
    S32 getNeighborIndex(S32 zone);           // Returns index of neighboring zone, or -1 if zone is not a neighbor
 
-   static bool buildBotMeshZones(GridDatabase *botZoneDatabase, Vector<BotNavMeshZone *> *allZones,
-                                 const Rect *worldExtents, const Vector<DatabaseObject *> &barrierList,
-                                 const Vector<DatabaseObject *> &turretList, const Vector<DatabaseObject *> &forceFieldProjectorList,
-                                 const Vector<pair<Point, const Vector<Point> *> > &teleporterData, bool triangulateZones);
+   static bool buildBotMeshZones(GridDatabase *botZoneDatabase, GridDatabase *gameObjDatabase, Vector<BotNavMeshZone *> *allZones,
+                                 const Rect *worldExtents, bool triangulateZones);
 
    static bool buildBotNavMeshZoneConnectionsRecastStyle(const Vector<BotNavMeshZone *> *allZones, 
                                                          rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
