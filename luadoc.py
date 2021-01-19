@@ -317,6 +317,25 @@ def preprocess(files: List[str]):
                         continue
 
                     #####
+                    # @LUACONST delcaration in C++ or Lua code
+                    #####
+                    # Look for: "@luaconst point.zero
+                    match = re.search(r"^\s*\*?\s*@luaconst\s+(.*)$", line)
+                    if match:
+                        sep = "[.:]" if luafile else "::"
+                        match = re.search(r".*?@luaconst\s+(?:(\w+)" + sep + r")?(.+?)", line)     # Grab class, and constant namefrom line
+
+                        classname  = cleanup_classname(match.groups()[0]) or "global"       # If no class is given the function is assumed to be global
+                        constname = match.groups()[1]
+
+                        # Use voidlessRetval to avoid having "void" show up where we'd rather omit the return type altogether
+                        comments.append(f" \\fn {classname}::{constname}\n")
+
+                        encounteredDoxygenCmd = True
+
+                        continue
+
+                    #####
                     # @LUAFUNC delcaration in C++ code
                     #####
                     # Look for: "* @luafunc static table Geom::triangulate(mixed polygons)"  [retval (table) and args are optional]
@@ -326,14 +345,14 @@ def preprocess(files: List[str]):
                     #   classname -> "Geom"
                     #   method -> "triangulate"
                     #   args -> "mixed polygons"
-                    match = re.search(r"^\s*\*\s*@luafunc\s+(.*)$", line)
+                    match = re.search(r"^\s*\*?\s*@luafunc\s+(.*)$", line)
                     if match:
                         # In C++ code, we use "::" to separate classes from functions (class::func); in Lua, we use "." or ":" (class.func).
                         sep = "[.:]" if luafile else "::"
 
                         # @luafunc bool Ship::isAlive()
-                        #                                      $1          $2       $3                  $4    $5
-                        match = re.search(r".*?@luafunc\s+(static\s+)?(\w+\s+)?(?:(\w+)" + sep + r")?(.+?)\((.*)\)", line)     # Grab retval, class, method, and args from $line
+                        #                                      $1          $2       $3                 $4    $5
+                        match = re.search(r".*?@luafunc\s+(static\s+)?(\w+\s+)?(?:(\w+)" + sep + r")?(.+?)\((.*)\)", line)     # Grab retval, class, method, and args from line
 
                         staticness = match.groups()[0].strip() if match.groups()[0] else ""
                         retval = match.groups()[1] if match.groups()[1] else "void"         # Retval is optional, use void if omitted
