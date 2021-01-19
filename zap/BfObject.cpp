@@ -1454,7 +1454,7 @@ S32 BfObject::lua_getPos(lua_State *L)
  * 
  * @note Remember that in Lua, indices start with 1!
  * 
- * @return Team index of the object.
+ * @return %Team index of the object.
  */
 S32 BfObject::lua_getTeamIndex(lua_State *L)
 {
