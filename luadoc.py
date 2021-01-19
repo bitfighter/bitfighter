@@ -638,19 +638,22 @@ def post_process_classes():
     os.chdir("doc")
     class_urls = {}     # Map of class to url that describes it
 
-    files = glob("./html/class_*.html")
-
     # First pass
+    files = []
+    files.extend(glob("./html/class_*.html"))
+    files.extend(glob("./html/group__*.html"))
+
     # Rip through them first to build a map of all the class --> urls so we can create links
     for file_ct, file in enumerate(files):
         update_progress(file_ct / len(files), os.path.basename(file))
         with open(file, "r") as infile:
             root = etree.HTML(infile.read())
-            class_urls.update(get_class_urls(root))
+            class_urls.update(get_class_urls(root, file))
     update_progress(1)
 
 
     # Second pass
+    files = glob("./html/class_*.html")
     # files = ["./html/main_page_content.h"]     # TODO
     for file_ct, file in enumerate(files):
         update_progress(file_ct / len(files), os.path.basename(file))
@@ -1006,21 +1009,19 @@ def replace_text(root: Any, search_str: str, replace_str: str):
             elem.tail = elem.tail.replace(search_str, replace_str)
 
 
-def get_class_urls(root: Any) -> Dict[str, str]:
+def get_class_urls(root: Any, filename: str) -> Dict[str, str]:        # Dict[class, url]
     """
-    Build a list of URLs for each parent class. These are convenitely available in the
-    map associated with the class hiearchy at the top of each page.
+    Build a list of URLs for each class.  Returns a dict where dict[class] = url.
     """
-    areas = root.xpath("//map/area")
-    # <map id="Ship_map" name="Ship_map">
-    #   <area href="class_move_object.html" title="Parent class of most things that move (except bullets)." alt="MoveObject" shape="rect" coords="0,112,81,136">
-    #   <area href="class_item.html" title="Parent class for most common game items." alt="Item" shape="rect" coords="0,56,81,80">
-    #   <area href="class_bf_object.html" alt="BfObject" shape="rect" coords="0,0,81,24">
-    #   <area href="class_robot.html" alt="Robot" shape="rect" coords="0,224,81,248">
-    # </map>
     class_urls = {}
-    for area in areas:
-        class_urls[area.get("alt")] = area.get("href")
+
+    # Look for a title in the current doc and add that
+    title = root.xpath("//div[@class='title']")[0].text
+    match = re.match("(.*) Class Reference", title)
+    if match:
+        class_urls[match.groups()[0]] = os.path.basename(filename)
+    elif " " not in title:      # One word... maybe it's a cass!
+        class_urls[title] = os.path.basename(filename)
 
     return class_urls
 
