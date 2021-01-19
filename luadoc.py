@@ -726,6 +726,7 @@ def post_process_classes():
         remove_space_after_method_name(root)
         remove_spaces_in_method_declarations_section(root)
 
+        remove_destructor_text(root)
 
         elements = root.xpath(f"//h2[@class='memtitle' and contains(text(), '{FUNCS_HEADER_MARKER}')]")
         if elements:
@@ -788,6 +789,13 @@ def remove_space_after_method_name(root: Any) -> None:
             if re.match(r" \(.*", element.tail):         # If it's an open paren followed by something...
                 element.tail = element.tail.strip()      # ...strip leading space
 
+
+def remove_destructor_text(root: Any) -> None:
+    """ Lua doesn't really do destructors, so let's get rid of references to them. """
+    elements = root.xpath("//h2[@class='groupheader']")
+    for element in elements:
+        if element.text == "Constructor & Destructor Documentation":
+            element.text = "Constructor Documentation"
 
 def remove_spaces_in_method_declarations_section(root: Any) -> None:
 
