@@ -961,7 +961,7 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
 
 //// Lua interface
 /**
- * @luaclass LuaScriptRunner
+ * @luaclass ScriptRunner
  * 
  * @brief Main class for holding global methods accessible by all script runners
  * 
@@ -1040,7 +1040,7 @@ REGISTER_LUA_CLASS(LuaScriptRunner);
 
 
 /**
- * @luafunc bool ScriptRunner::pointCanSeePoint(point point1, point point2)
+ * @luafunc bool ScriptRunner::pointCanSeePoint(Point point1, Point point2)
  * 
  * @brief Returns `true` if the two specified points can see one another.
  * 
@@ -1102,14 +1102,14 @@ S32 LuaScriptRunner::lua_findObjectById(lua_State *L)
  * If no object types are provided, this function will return every object on
  * the level (warning, may be slow).
  *
- * @param [objType] ObjTypes specifying what types of objects to find.
+ * @param objType \link ObjType ObjTypes\endlink specifying what types of objects to find.
  *
  * @return A table with any found objects.
  *
  * @code
- * function countObjects(objType, ...) -- Pass one or more object types
+ * function countObjects(objType, ...)         -- Pass one or more object types
  *   objects = bf:findAllObjects(objType, ...) -- Find all objects of specified type(s)
- *   print(#objects) -- Print the number of items found to the console
+ *   print(#objects)                           -- Print the number of items found to the console
  * end
  * 
  * function listZoneIds()
