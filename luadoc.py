@@ -42,6 +42,24 @@ FUNCS_HEADER_MARKER = "DummyConstructor"
 
 NBSP = "&#160;"
 
+DEBUG_MODE = False       # Set to False for production mode
+
+
+# These flags are ignored if DEBUG_MODE is False
+# These flags are used to let you run a subset of the process while debugging.
+# TODO: Document this better
+DEBUG_PREPROCESS = False
+DEBUG_DOXYGEN = True
+DEBUG_POST_PROCESS = True     # Only do post processing stage
+
+
+if not DEBUG_MODE:
+    DEBUG_PREPROCESS = True
+    DEBUG_DOXYGEN = True
+    DEBUG_POST_PROCESS = True
+else:
+    print("Running in debug mode; if this is a production run, be sure to set DEBUG_MODE to False!")
+
 
 def main():
     # Collect some file names to process
@@ -56,12 +74,14 @@ def main():
 
     # files = [r"C:\dev\bitfighter/zap/ship.cpp"]
 
-    # TODO
-    pre_process(files)      # --> Writes files to temp-doxygen
-    run_doxygen()           # --> Writes files to html
-    post_process()          # --> Overwrites files in html
+    if DEBUG_PREPROCESS:
+        preprocess(files)      # --> Writes files to temp-doxygen
 
-    post_process_classes()          # --> Overwrites files in html
+    if DEBUG_DOXYGEN:
+        run_doxygen()          # --> Writes files to html
+
+    if DEBUG_POST_PROCESS:
+        post_process_classes()          # --> Overwrites files in html
     # post_process_enums()
     pass
 
@@ -620,8 +640,8 @@ def post_process_enums():
 
         format_enums(root)
 
-        if XXX:
-            file = file.replace("html", "html-final", 1)    # TODO
+        if DEBUG_MODE and DEBUG_POST_PROCESS:
+            file = file.replace("html", "html-final", 1)
 
         with open(file, "w") as outfile:
             outfile.write(etree.tostring(root).decode("utf-8"))
@@ -767,8 +787,8 @@ def post_process_classes():
             delete_node(element)
 
 
-        # file = "./html\\class_ship2.html"       # TODO
-        # file = file.replace("html", "html-final", 1)    # TODO
+        if DEBUG_MODE and DEBUG_POST_PROCESS:
+            file = file.replace("html", "html-final", 1)
         # if not os.path.exists(os.path.dirname(file)):
         #     os.mkdir(os.path.dirname(file))
 
