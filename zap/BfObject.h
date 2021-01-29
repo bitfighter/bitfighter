@@ -39,15 +39,15 @@ class ClientInfo;
 //                                         Make available      Available to scripts as:   Descr in        (note that these descriptions should match the      
 //                   Enum:                  to scripts?            ObjType. ...         documentation:     class name so that the documentation autolinks)
 #define TYPE_NUMBER_TABLE                                                                                        \
-   TYPE_NUMBER( BarrierTypeNumber,             true,              "Barrier",             "Barrier"             ) \
+   TYPE_NUMBER( BarrierTypeNumber,             true,              "Barrier",             "WallItem"            ) \
    TYPE_NUMBER( PlayerShipTypeNumber,          true,              "Ship",                "Ship"                ) \
    TYPE_NUMBER( LineTypeNumber,                true,              "Line",                "LineItem"            ) \
    TYPE_NUMBER( ResourceItemTypeNumber,        true,              "ResourceItem",        "ResourceItem"        ) \
    TYPE_NUMBER( TextItemTypeNumber,            true,              "TextItem",            "TextItem"            ) \
    TYPE_NUMBER( LoadoutZoneTypeNumber,         true,              "LoadoutZone",         "LoadoutZone"         ) \
    TYPE_NUMBER( TestItemTypeNumber,            true,              "TestItem",            "TestItem"            ) \
-   TYPE_NUMBER( FlagTypeNumber,                true,              "Flag",                "Flag"                ) \
-   TYPE_NUMBER( BulletTypeNumber,              true,              "Bullet",              "Bullet"              ) \
+   TYPE_NUMBER( FlagTypeNumber,                true,              "Flag",                "FlagItem"            ) \
+   TYPE_NUMBER( BulletTypeNumber,              true,              "Bullet",              "\link Projectile Bullet\endlink" ) \
    TYPE_NUMBER( BurstTypeNumber,               true,              "Burst",               "Burst"               ) \
    TYPE_NUMBER( MineTypeNumber,                true,              "Mine",                "Mine"                ) \
    TYPE_NUMBER( NexusTypeNumber,               true,              "Nexus",               "NexusZone"           ) \
@@ -64,7 +64,7 @@ class ClientInfo;
    TYPE_NUMBER( ForceFieldProjectorTypeNumber, true,              "ForceFieldProjector", "ForceFieldProjector" ) \
    TYPE_NUMBER( SpeedZoneTypeNumber,           true,              "SpeedZone",           "SpeedZone"           ) \
    TYPE_NUMBER( PolyWallTypeNumber,            true,              "PolyWall",            "PolyWall"            ) \
-   TYPE_NUMBER( ShipSpawnTypeNumber,           true,              "ShipSpawn",           "ShipSpawn"           ) \
+   TYPE_NUMBER( ShipSpawnTypeNumber,           true,              "ShipSpawn",           "\link Spawn ShipSpawn\endlink") \
    TYPE_NUMBER( FlagSpawnTypeNumber,           true,              "FlagSpawn",           "FlagSpawn"           ) \
    TYPE_NUMBER( AsteroidSpawnTypeNumber,       true,              "AsteroidSpawn",       "AsteroidSpawn"       ) \
    TYPE_NUMBER( WallItemTypeNumber,            true,              "WallItem",            "WallItem"            ) \
@@ -72,7 +72,7 @@ class ClientInfo;
    TYPE_NUMBER( WallSegmentTypeNumber,         false,             "WallSegment",         "WallSegment"         ) \
    TYPE_NUMBER( SlipZoneTypeNumber,            true,              "SlipZone",            "SlipZone"            ) \
    TYPE_NUMBER( SpyBugTypeNumber,              true,              "SpyBug",              "SpyBug"              ) \
-   TYPE_NUMBER( CoreTypeNumber,                true,              "Core",                "Core"                ) \
+   TYPE_NUMBER( CoreTypeNumber,                true,              "Core",                "CoreItem"            ) \
    TYPE_NUMBER( ZoneTypeNumber,                true,              "Zone",                "Zone"                ) \
    TYPE_NUMBER( SeekerTypeNumber,              true,              "Seeker",              "Seeker"              ) \
    TYPE_NUMBER( DeletedTypeNumber,             false,             "Deleted",             "Deleted Item"        ) \
