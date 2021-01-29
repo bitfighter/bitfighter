@@ -26,7 +26,7 @@ class GridDatabase;
 //                Enum                    Enum in Lua            Nice name for docs
 #define ENGINEER_BUILD_OBJECTS_TABLE \
    ENGR_OBJ(EngineeredTurret,             "Turret",              "Turret"               ) \
-   ENGR_OBJ(EngineeredForceField,         "ForceFieldProjector", "Force Field Projector") \
+   ENGR_OBJ(EngineeredForceField,         "ForceFieldProjector", "\link ForceFieldProjector Force Field Projector\endlink") \
    ENGR_OBJ(EngineeredTeleporterEntrance, "Teleporter",          "Teleporter"           ) \
    ENGR_OBJ(EngineeredTeleporterExit,     "TelerporterExit",     "Teleporter exit point") \
 

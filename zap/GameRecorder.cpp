@@ -144,14 +144,17 @@ static string newRecordingFileName(const string &dir, const string &levelName, c
          max_id = id;
    }
 
-   string file = itos(max_id + 1);
+   string nextnum = itos(max_id + 1);
 
-   string file2 = makeFilenameFromString(levelName.c_str());
-   if(file2.size() == 0)
-      file2 = makeFilenameFromString(hostName.c_str());
-   if(file2.size() != 0)
-      file = file + "_" + file2;
-   return file;
+   static S32 pad = 4;
+   string filenum = string(pad - nextnum.length(), '0') + nextnum;
+
+   string levelname = makeFilenameFromString(levelName.c_str());
+   if(levelname.size() == 0)
+      levelname = makeFilenameFromString(hostName.c_str());
+   if(levelname.size() != 0)
+      filenum = filenum + "_" + levelname;
+   return filenum;
 }
 
 // Constructor

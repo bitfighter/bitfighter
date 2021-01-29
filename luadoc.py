@@ -516,7 +516,9 @@ def preprocess(files: List[str]):
 
                             # Suppress any words that might trigger linking by prepending a "%" to them
                             descr_words = enumDescr.split()
+
                             enumDescr = " %".join(descr_words).strip(",").replace("%`", "`")     # Also normalizes interior spaces, if that's an issue
+                            enumDescr = enumDescr.replace(R"\link %", R"\link ")                 # Undo quoting of \links.  e.g. \link %ForceFieldProjector
 
                             # This bit really only applies to the Event enum
                             # Selectively remove %s to convert this:

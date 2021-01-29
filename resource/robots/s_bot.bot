@@ -226,65 +226,79 @@ function getName()
 end
 
 
--- States for shielding
-shield_st_off = 0
-shield_st_delay_on = 1
-shield_st_on = 2
-shield_st_delay_off = 3
---
-shield_st_current = shield_st_off
-shieldTimer = 0
+module_one_st = {
+    -- states
+    off = 0;
+    delay_on = 1;
+    on = 2;
+    delay_off = 3;
+    -- other
+    current = 0;  -- off
+    timer = 0;
+}
+
 
 function shield()
     -- Should we shield?
     local needToShield = shouldShield()
     
-    -- State machine for handling human-like shielding by debouncing/delaying 
-    -- shielding
+    -- State machine for handling human-like shielding
+    reaction_fsm(module_one_st, needToShield, 
+                 function() bot:fireModule(Module.Shield) end, 
+                 shieldDelay)
+    
+    dodgeIfNeeded(needToShield)
+end
+
+
+-- Finite state machine to handle reaction speed to some actions. This will do
+-- human-like behavior by delaying/debouncing the action both on and off
+--
+-- This requires the global scriptTime and a state object
+function reaction_fsm(state, condition_bool, action_func, delay)
+--     logprint(tostring(state.current) .. " " .. tostring(state.timer) .. " " .. tostring(condition_bool) )
     
     -- State actions *before* updates and update actions
-    if shield_st_current == shield_st_off then
+    if state.current == state.off then
         -- action
-        shieldTimer = scriptTime
+        state.timer = scriptTime
     
         -- update
-        if needToShield then
-            shield_st_current = shield_st_delay_on
+        if condition_bool then
+            state.current = state.delay_on
         end
         
-    elseif shield_st_current == shield_st_delay_on then
+    elseif state.current == state.delay_on then
         -- no action
         
         -- update
-        local timerExpired = (scriptTime - shieldTimer >= shieldDelay)
+        local timerExpired = (scriptTime - state.timer >= delay)
         
-        if needToShield and (scriptTime - shieldTimer >= shieldDelay) then
-            shield_st_current = shield_st_on
+        if condition_bool and timerExpired then
+            state.current = state.on
         end
         
-    elseif shield_st_current == shield_st_on then
+    elseif state.current == state.on then
         -- action
-        shieldTimer = scriptTime
-        bot:fireModule(Module.Shield)
+        state.timer = scriptTime
+        action_func()
         
         -- update
-        if not needToShield then
-            shield_st_current = shield_st_delay_off
+        if not condition_bool then
+            state.current = state.delay_off
         end
         
-    elseif shield_st_current == shield_st_delay_off then
+    elseif state.current == state.delay_off then
         -- action
-        bot:fireModule(Module.Shield)
+        action_func()
         
         -- update
-        local timerExpired = (scriptTime - shieldTimer >= shieldDelay)
+        local timerExpired = (scriptTime - state.timer >= delay)
         
-        if not needToShield and timerExpired then
-            shield_st_current = shield_st_off
+        if not condition_bool and timerExpired then
+            state.current = state.off
         end
     end
-    
-    dodgeIfNeeded(needToShield)
 end
 
 
