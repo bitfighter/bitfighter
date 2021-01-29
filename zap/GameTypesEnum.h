@@ -9,9 +9,9 @@
 namespace Zap
 {     
 /**
- * @luaenum GameType(1,2)
+ * @luaenum GameType(1,3)
  * The GameType enum represets the different types of game.
- */
+ */                                           //      LuaEnum not used?     
 //                 Enum              ClassName             LuaEnum     GameType Name     TeamGame  Game Instructions                
 #define GAME_TYPE_TABLE \
    GAME_TYPE_ITEM( BitmatchGame,    "GameType",            "Bitmatch", "Bitmatch",         false, "Simple combat game -- zap as many players as you can.  Also has a team variant where you can work together to rack up points." )                                                \
