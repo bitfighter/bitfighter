@@ -53,16 +53,16 @@ class Point;
 class Rect;
 
 /**
- * @luaenum ClipType(1,1)
+ * @luaenum ClipType(1, 2)
  * Supported operations for clipPolygon. For a description of the operations,
  * and the roles of `subject` and `clip` in each, visit
  * http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/ClipType.htm
  */
 #define CLIP_TYPE_TABLE \
-   CLIP_TYPE_ITEM( Intersection, ClipperLib::ctIntersection ) \
-   CLIP_TYPE_ITEM( Union,        ClipperLib::ctUnion        ) \
-   CLIP_TYPE_ITEM( Difference,   ClipperLib::ctDifference   ) \
-   CLIP_TYPE_ITEM( Xor,          ClipperLib::ctXor          ) \
+   CLIP_TYPE_ITEM( Intersection, ClipperLib::ctIntersection, "AND operator: Create regions where both subject and clip polygons are filled.") \
+   CLIP_TYPE_ITEM( Union,        ClipperLib::ctUnion,        "OR operator: Create regions where either subject or clip polygons (or both) are filled.") \
+   CLIP_TYPE_ITEM( Difference,   ClipperLib::ctDifference,   "NOT operator: Create regions where subject polygons are filled except where clip polygons are filled.") \
+   CLIP_TYPE_ITEM( Xor,          ClipperLib::ctXor,          "XOR operator: Create regions where either subject or clip polygons are filled but not where both are filled") \
 
 
 // Test between a polygon and a swept sphere with radius inRadius moving from inBegin to inBegin + inDelta
