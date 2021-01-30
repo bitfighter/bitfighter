@@ -854,7 +854,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
    // Polygon boolean operations
    add_enum_to_lua(L, "ClipType",
-   #  define CLIP_TYPE_ITEM(luaEnumName, value) #luaEnumName, true, value,
+   #  define CLIP_TYPE_ITEM(luaEnumName, value, c) #luaEnumName, true, value,
          CLIP_TYPE_TABLE
    #  undef CLIP_TYPE_ITEM
       (char*)NULL);
