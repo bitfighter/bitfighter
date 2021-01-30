@@ -57,7 +57,7 @@ class EventManager
    EVENT(ObjectLeftZoneEvent,    "ObjectLeftZone",    "onObjectLeftZone",    "Use with event handler: `onObjectLeftZone(MoveObject object, Zone zone)`"                         ) \
    EVENT(ScoreChangedEvent,      "ScoreChanged",      "onScoreChanged",      "Use with event handler: `onScoreChanged(num scoreChange, num teamIndex, PlayerInfo player)`"      ) \
    EVENT(GameOverEvent,          "GameOver",          "onGameOver",          "Use with event handler: `onGameOver()`"                                                           ) \
-   EVENT(CoreDestroyedEvent,     "CoreDestroyed",     "onCoreDestroyed",     "Use with event handler: `onCoreDestroyed(CoreItem core)`"                                             ) \
+   EVENT(CoreDestroyedEvent,     "CoreDestroyed",     "onCoreDestroyed",     "Use with event handler: `onCoreDestroyed(CoreItem core)`"                                         ) \
 
 public:
 
