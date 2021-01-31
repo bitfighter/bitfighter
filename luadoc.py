@@ -854,7 +854,7 @@ def remove_types_from_method_declarations_section(root: Any) -> None:
     elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']/a[@class='el' and position()>1]")
     for element in elements:
         text = element.tail.strip()
-        element.getprevious().tail += text
+        element.getprevious().tail += text.replace(",", ", ")
         delete_node(element)
 
 
