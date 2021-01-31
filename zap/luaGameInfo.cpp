@@ -76,7 +76,7 @@ REGISTER_LUA_CLASS(LuaGameInfo);
  * @descr For possible values, see \ref GameTypeEnum.
  * 
  * @code
- *   print(info:getGameType() == GameType.CTFGameType) -- `true` when playing CTF
+ *   print(info:getGameType() == GameType.CTFGameType) -- true when playing CTF
  * @endcode
  * 
  * @return A member of \ref GameTypeEnum.
