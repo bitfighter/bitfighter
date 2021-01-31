@@ -62,20 +62,8 @@ else:
 
 
 def main():
-    # Collect some file names to process
-    files = []
-
-    files.extend(glob(os.path.join(outpath, "../../zap/*.cpp")))               # Core .cpp files
-    files.extend(glob(os.path.join(outpath, "../../zap/*.h")))                 # Core .h files
-    files.extend(glob(os.path.join(outpath, "../../lua/lua-vec/src/*.c")))     # Lua-vec .c files  -- none here anymore... can probably delete this line
-    files.extend(glob(os.path.join(outpath, "../../resource/scripts/*.lua")))  # Some Lua scripts
-    files.extend(glob(os.path.join(outpath, "../static/*.txt")))               # our static pages for general information and task-specific examples
-
-
-    # files = [r"C:\dev\bitfighter/zap/ship.cpp"]
-
     if DEBUG_PREPROCESS:
-        preprocess(files)      # --> Writes files to temp-doxygen
+        preprocess()           # --> Writes files to temp-doxygen
 
     if DEBUG_DOXYGEN:
         run_doxygen()          # --> Writes files to html
@@ -92,7 +80,19 @@ class EnumMode:
     CPP_DEFINE = 2
 
 
-def preprocess(files: List[str]):
+def preprocess():
+        # Collect some file names to process
+    files = []
+
+    files.extend(glob(os.path.join(outpath, "../../zap/*.cpp")))               # Core .cpp files
+    files.extend(glob(os.path.join(outpath, "../../zap/*.h")))                 # Core .h files
+    files.extend(glob(os.path.join(outpath, "../../lua/lua-vec/src/*.c")))     # Lua-vec .c files  -- none here anymore... can probably delete this line
+    files.extend(glob(os.path.join(outpath, "../../resource/scripts/*.lua")))  # Some Lua scripts
+    files.extend(glob(os.path.join(outpath, "../static/*.txt")))               # our static pages for general information and task-specific examples
+
+
+    # files = [r"C:\dev\bitfighter/zap/ship.cpp"]
+
     # Loop through all the files we found above...
     for file_cnt, file in enumerate(files):
         # print(f"Processing {os.path.basename(file)}...", end="", flush=True)
