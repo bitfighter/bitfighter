@@ -1048,7 +1048,7 @@ REGISTER_LUA_CLASS(LuaScriptRunner);
  * @param point2 Second point.
  * 
  * @return `true` if objects have a line of sight from one to the other,
- * `false`otherwise.
+ * `false` otherwise.
  */
 S32 LuaScriptRunner::lua_pointCanSeePoint(lua_State *L)
 {
