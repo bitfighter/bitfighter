@@ -265,7 +265,7 @@ def preprocess(files: List[str]):
                         continue
 
                     if re.search(r"@page\s", line):
-                        mainpage.append(line)
+                        otherpage.append(line)
                         processing_other_page = True
                         encounteredDoxygenCmd = True
                         continue
