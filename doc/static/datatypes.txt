@@ -2,13 +2,13 @@
 
 @page datatypes Datatypes in Bitfighter
 
-@section point Point
+@section xpoint Point
 
-Point is a low-overhead custom structure that represents an xy
-coordinate pair.  See the \link point point class documentation \endlink for
+Points represent an xy coordinate pair or a vector with an x and y component.  They are constructed as
+tables in Lua, but can be used like classes.  See the \ref point class for
 further details.
 
-Note that points are immutable, so cannot be changed once created.
+Note that unlike other Bitfighter classes, points are not capitalized for historical reasons.
 
 @section geometry Geometry
 
