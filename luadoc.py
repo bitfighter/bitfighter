@@ -42,17 +42,17 @@ FUNCS_HEADER_MARKER = "DummyConstructor"
 
 NBSP = "&#160;"
 
-DEBUG_MODE = False       # Set to False for production mode
-
 
 # These flags are ignored if DEBUG_MODE is False
 # These flags are used to let you run a subset of the process while debugging.
 # TODO: Document this better
+DEBUG_MODE = False              # Set to False for production mode
 DEBUG_PREPROCESS = False
 DEBUG_DOXYGEN = True
-DEBUG_POST_PROCESS = True     # Only do post processing stage
+DEBUG_POST_PROCESS = True       # Only do post processing stage; need to copy files from html to html-final
 
 
+# Adjust these above only; do not change the settings below
 if not DEBUG_MODE:
     DEBUG_PREPROCESS = True
     DEBUG_DOXYGEN = True
