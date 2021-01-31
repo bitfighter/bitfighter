@@ -839,6 +839,7 @@ def remove_destructor_text(root: Any) -> None:
 def remove_types_from_method_declarations_section(root: Any) -> None:
     # Remove types from declarations in upper section.  Several patterns to consider.
     # Pattern 1: Method(geom lineGeom, int speed)
+    #   convert to: Method(lineGeom, speed)
     elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']/a[@class='el']")
     for element in elements:
         if element.tail:
@@ -847,7 +848,7 @@ def remove_types_from_method_declarations_section(root: Any) -> None:
                 arglist = match.groups()[0].split()
                 if arglist and len(arglist) % 2 == 0:    # Even number, meaning every param has a type
                     argstr = " ".join(arglist[1::2])     # Concatenate every second item; commas will already be included in the text we're parsing
-                    element.tail = "(" + argstr + ")"         # ['geom', 'geometry,', 'int', 'thickness'] ==> (geometry, thickness)
+                    element.tail = "(" + argstr + ")"    # ['geom', 'geometry,', 'int', 'thickness'] ==> (geometry, thickness)
     # Pattern 2: Method(<linked type> param)
     # Linked types are in <a class="el"> elements, but we need to hang onto the first one, which is the member name itself
     elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']/a[@class='el' and position()>1]")
