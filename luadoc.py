@@ -539,6 +539,9 @@ def preprocess(files: List[str]):
 
                             enumDescr = " %".join(descr_words).strip(",").replace("%`", "`")     # Also normalizes interior spaces, if that's an issue
                             enumDescr = enumDescr.replace(R"\link %", R"\link ")                 # Undo quoting of \links.  e.g. \link %ForceFieldProjector
+                            enumDescr = enumDescr.replace("%(", "(")                             # Undo quoting of ()s...  they get b0rked
+                            enumDescr = enumDescr.replace("%->", "->")                           # Undo quoting of arrows...
+                            # TODO --> Replace %([^a-zA-Z]) with \1 ?
 
                             # This bit really only applies to the Event enum
                             # Selectively remove %s to convert this:
