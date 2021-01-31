@@ -674,6 +674,14 @@ def format_enums(root: Any) -> None:
         delete_node(element)
 
 
+def get_class_files() -> List[str]:
+    files = glob("./html/class_*.html")
+    files.extend(glob("./html/classpoint*.html"))
+    files.extend(glob("./html/classglobal*.html"))
+
+    return files
+
+
 def post_process_classes():
     """ Post-process the generated doxygen stuff """
 
@@ -683,8 +691,7 @@ def post_process_classes():
     class_urls = {}     # Map of class to url that describes it
 
     # First pass
-    files = []
-    files.extend(glob("./html/class_*.html"))
+    files = get_class_files()
     files.extend(glob("./html/group__*.html"))
 
     # Rip through them first to build a map of all the class --> urls so we can create links
@@ -697,7 +704,8 @@ def post_process_classes():
 
 
     # Second pass
-    files = glob("./html/class_*.html")
+    files = get_class_files()
+
     # files = ["./html/main_page_content.h"]     # TODO
     for file_ct, file in enumerate(files):
         update_progress(file_ct / len(files), os.path.basename(file))
