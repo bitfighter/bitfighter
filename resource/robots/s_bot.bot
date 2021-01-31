@@ -56,7 +56,7 @@ function main()
         averageArray[i] = false
     end
     
-    shieldDelay = 200  -- ms
+    reactionSpeed = 200  -- ms
 
     myOrbitalDirection = 1
     myObjective = math.random(0, 10)
@@ -116,32 +116,59 @@ function angleDifference(angleA, angleB)
     return (math.mod(math.mod(angleA - angleB, math.pi * 2) + math.pi * 3, math.pi * 2) - math.pi)
 end
 
+
 function fireAtObjects()
     local items = bot:findVisibleObjects(ObjType.Robot, ObjType.Turret, ObjType.Ship, ObjType.Asteroid, 
         ObjType.ForceFieldProjector, ObjType.SpyBug, ObjType.Core)
 
+    local haveTarget = false
+    
     -- Cycle through list of potential items until we find one that we can attack
-    for index, enemy in ipairs(items) do
-        if(fireAtObject(enemy, Weapon.Phaser)) then
+    local enemy = nil
+    for i, obj in ipairs(items) do
+        haveTarget = shouldFireAtObject(obj)
+        
+        if haveTarget then
+            enemy = obj
             break
         end
     end
+    
+    local shouldFire = false
+    
+    if haveTarget then
+        -- Last enemy was the found one from the loop above
+        local angle = bot:getFiringSolution(enemy)
+        if (angle ~= nil) and bot:hasWeapon(Weapon.Phaser) then
+            shouldFire = true
+            -- Set angle here
+            bot:setAngle(angle + math.rad((math.random()-0.5)*20*(1-difficulty)))
+        end
+    end
+    
+    -- State machine for handling human-like firing
+    reaction_fsm(weapon_st, shouldFire, 
+                 function() 
+                    bot:fireWeapon(Weapon.Phaser)
+                 end, 
+                 reactionSpeed)
+    
 end
  
  
 -- Fires at the specified object with the specified weapon if the obj is a good target.
 -- Does not fire if object is on the same team or if there is something in the way.
 -- Returns whether it fired or not.
-function fireAtObject(obj, weapon)
-    local classId = obj:getObjType()
+function shouldFireAtObject(obj)
+    local objType = obj:getObjType()
 
-    if(classId == ObjType.Turret or classId == ObjType.ForceFieldProjector) then
+    if(objType == ObjType.Turret or objType == ObjType.ForceFieldProjector) then
         -- Ignore all same-team engineered objects...  even in single-team games
         if obj:getTeamIndex() == bot:getTeamIndex() then
-            return false                                 -- Cancel fireAtObject function
+            return false  
         end
 
-        if obj:getHealth() < .1  then                                             -- If item is essentially dead
+        if obj:getHealth() < .1  then                                       -- If item is essentially dead
             return false                                                          
         end
     end
@@ -149,30 +176,22 @@ function fireAtObject(obj, weapon)
     
     -- No shooting various team related objects
     if (obj:getTeamIndex() == bot:getTeamIndex() and game:isTeamGame()) or  -- Same team
-        obj:getTeamIndex() == Team.Neutral then                            -- Neutral team
-        if (classId == ObjType.Ship    or   classId == ObjType.Robot   or    -- Turrets and FFs handled above
-            classId == ObjType.Core    or   classId == ObjType.SpyBug) then
+        obj:getTeamIndex() == Team.Neutral then                             -- Neutral team
+        if (objType == ObjType.Ship    or   objType == ObjType.Robot   or   -- Turrets and FFs handled above
+            objType == ObjType.Core    or   objType == ObjType.SpyBug) then
             return false
         end
     end
     
     -- No shooting non-flag carriers in single player rabbit
     if gameType == GameType.Rabbit and not game:isTeamGame() and 
-        (classId == ObjType.Ship or classId == ObjType.Robot) and 
+        (objType == ObjType.Ship or objType == ObjType.Robot) and 
         not bot:hasFlag() and not obj:hasFlag() then
         return false
     end
 
     -- We made it here!  We have a valid target..
-    local angle = getFiringSolution(obj)
-    if angle ~= nil and bot:hasWeapon(weapon) then
-        bot:setAngle(angle + math.rad((math.random()-0.5)*20*(1-difficulty)))
-        bot:fireWeapon(weapon)
-        --logprint("bot:fireWeapon() called!");
-        return(true)
-    end
-    --logprint("Firing solution not found.");
-    return(false)
+    return true
 end
 
 
@@ -238,6 +257,18 @@ module_one_st = {
 }
 
 
+weapon_st = {
+    -- states
+    off = 0;
+    delay_on = 1;
+    on = 2;
+    delay_off = 3;
+    -- other
+    current = 0;  -- off
+    timer = 0;
+}
+
+
 function shield()
     -- Should we shield?
     local needToShield = shouldShield()
@@ -245,7 +276,7 @@ function shield()
     -- State machine for handling human-like shielding
     reaction_fsm(module_one_st, needToShield, 
                  function() bot:fireModule(Module.Shield) end, 
-                 shieldDelay)
+                 reactionSpeed)
     
     dodgeIfNeeded(needToShield)
 end
