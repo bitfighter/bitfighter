@@ -763,7 +763,7 @@ def post_process_classes():
             element.clear()
 
         remove_space_after_method_name(root)
-        remove_spaces_in_method_declarations_section(root)
+        remove_types_from_method_declarations_section(root)
 
         remove_destructor_text(root)
 
@@ -836,8 +836,7 @@ def remove_destructor_text(root: Any) -> None:
         if element.text == "Constructor & Destructor Documentation":
             element.text = "Constructor Documentation"
 
-def remove_spaces_in_method_declarations_section(root: Any) -> None:
-
+def remove_types_from_method_declarations_section(root: Any) -> None:
     # Remove types from declarations in upper section.  Several patterns to consider.
     # Pattern 1: Method(geom lineGeom, int speed)
     elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']/a[@class='el']")
