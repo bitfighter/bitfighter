@@ -26,7 +26,7 @@ Bots can print short messages to the global chat like so:
 
 \code
 bot:globalMsg("Status " .. status)
-bot:privateMsg(message, "ChumpChange")     -- If you know your player name!
+bot:privateMsg(message, "ChumpChange")          -- If you know your player name!
 \endcode
 
 Levelgens can do this as well, or print short messages by setting the announcement message:
