@@ -1040,7 +1040,7 @@ REGISTER_LUA_CLASS(LuaScriptRunner);
 
 
 /**
- * @luafunc bool ScriptRunner::pointCanSeePoint(Point point1, Point point2)
+ * @luafunc bool ScriptRunner::pointCanSeePoint(point point1, point point2)
  * 
  * @brief Returns `true` if the two specified points can see one another.
  * 
