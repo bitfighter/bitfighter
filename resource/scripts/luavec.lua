@@ -9,7 +9,7 @@
        Points can be added and subtracted from one another, as well as multiplied together.
        Most point methods are static.
 @code
-    function getAngleDiff(bullet, botPos)    -- %BfObject, %point
+    function getAngleDiff(bullet, botPos)     -- %BfObject, %point
         local o = %point.zero                 -- Origin
         local bulletPos = bullet:getPos()
         local bulletVel = bullet:getVel()
