@@ -392,7 +392,13 @@ def preprocess(files: List[str]):
 
                         # Here we generate some boilerplate standard code and such
                         is_constructor = classname == method
-                        if is_constructor:  # Constructors come in the form of class::method where class and method are the same
+                        if is_constructor:      # Constructors come in the form of class::method where class and method are the same
+
+                            # SPECIAL CASE HANDLER!
+                            # Because the point class is lower case, the default example we generate below won't work.  Insert a different one
+                            if classname == "point":
+                                comments.append(f"\\brief Constructor.\n\nExample:\n@code\npt = point.new(100, 300)\ntestitem = TestItem.new(pt)\nlevelgen:addItem(testitem)\n@endcode\n\n")
+                            else:
                             comments.append(f"\\brief Constructor.\n\nExample:\n@code\n{classname.lower()} = {classname}.new({args})\n...\nlevelgen:addItem({classname.lower()})\n@endcode\n\n")
 
                         # Find an earlier definition and delete it (if it still exists); but not if it's a constructor.
