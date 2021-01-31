@@ -399,7 +399,7 @@ def preprocess(files: List[str]):
                             if classname == "point":
                                 comments.append(f"\\brief Constructor.\n\nExample:\n@code\npt = point.new(100, 300)\ntestitem = TestItem.new(pt)\nlevelgen:addItem(testitem)\n@endcode\n\n")
                             else:
-                            comments.append(f"\\brief Constructor.\n\nExample:\n@code\n{classname.lower()} = {classname}.new({args})\n...\nlevelgen:addItem({classname.lower()})\n@endcode\n\n")
+                                comments.append(f"\\brief Constructor.\n\nExample:\n@code\n{classname.lower()} = {classname}.new({args})\n...\nlevelgen:addItem({classname.lower()})\n@endcode\n\n")
 
                         # Find an earlier definition and delete it (if it still exists); but not if it's a constructor.
                         # This might have come from an earlier GENERATE_LUA_METHODS_TABLE block.
