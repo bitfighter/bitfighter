@@ -830,7 +830,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
    // Scoring Events
    add_enum_to_lua(L, "ScoringEvent",
-   #  define SCORING_EVENT_ITEM(value, luaEnumName)  luaEnumName, true, value,
+   #  define SCORING_EVENT_ITEM(value, luaEnumName, c)  luaEnumName, true, value,
          SCORING_EVENT_TABLE
    #  undef SCORING_EVENT_ITEM
       (char*)NULL);
