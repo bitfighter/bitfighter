@@ -781,7 +781,7 @@ def post_process_classes():
 
 
         # Retrieve our description, which is down in the description of DummyConstructor
-        elements = root.xpath(f"//div[preceding::td[contains(text(),'Ship::DummyConstructor')]]/child::*")
+        elements = root.xpath(f"//div[preceding::td[contains(text(),'::{FUNCS_HEADER_MARKER}')]]/child::*")
         if elements:
             new_content = etree.tostring(elements[0]).decode("utf-8")
 
