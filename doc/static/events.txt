@@ -13,18 +13,20 @@ EventEnum page
 
 @section Example
 Subscribing to an event is the same for robots and levelgens: you call \link
-LuaScriptRunner::subscribe `bf:subscribe`\endlink. Here is a simple example using
+ScriptRunner::subscribe `bf:subscribe`\endlink. Here is a simple example using
 the MsgReceived Event which is available to both robots and levelgens:
 
 @code
 
 function main()
-  bf:subscribe(Event.MsgReceived)
+  bf:subscribe(Event.MsgReceived)   -- The subscribe method is also available on
+                                    -- the LevelGenerator and Robot objects
 end
 
 -- Whenever an event occurs which a script is subscribed to, Bitfighter will
 -- run the function named after that Event.
--- For the `MsgReceived` Event, the name must be `onMsgReceived`
+-- For the MsgReceived Event, the name must be onMsgReceived.
+
 function onMsgReceived(msg, player, isGlobal)
   print(player:getName(), " said: ", msg)
 end
@@ -39,17 +41,21 @@ function onShipEnteredZone(ship, zone)
     levelgen:announce("ship entered zone!")
 end
 
+
 function onShipLeftZone(ship, zone)
     levelgen:announce("ship left zone!")
-end 
+end
+
 
 function onObjectEnteredZone(obj, zone)
     levelgen:announce("obj entered zone!")
-end 
+end
+
 
 function onObjectLeftZone(obj, zone)
     levelgen:announce("obj left zone!")
-end 
+end
+
 
 function main()
     bf:subscribe(Event.ShipEnteredZone)

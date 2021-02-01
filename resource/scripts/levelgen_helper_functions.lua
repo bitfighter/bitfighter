@@ -18,17 +18,22 @@
 --
 -- And two more
 --
+
+-- Documented in luaLevelGenerator.cpp
 function subscribe(event)
-   bf:subscribe(event)
-end   
+    bf:subscribe(event)
+end
 
+-- Documented in luaLevelGenerator.cpp
 function unsubscribe(event)
-   bf:unsubscribe(event)
-end  
+    bf:unsubscribe(event)
+end
 
+
+-- Documented in luaLevelGenerator.cpp
 function globalMsg(message)
    levelgen:globalMsg(message)
-end   
+end
 
 
 --

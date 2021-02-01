@@ -28,6 +28,20 @@ end
 -- Will return nil if items has 0 elements
 -- If teamIndex is specified, will only include items on team
 --
+
+--[[  TODO: These are docs I wrote but aren't included in the manual; need to figure out where to add these -CE 1/31/2021
+            It's not exactly a robot method, but rather a globalish function available to all bots.
+  /**
+   * item findClosest(table items, int teamIndex)
+   *
+   * @brief Find closest item in a specfied list of items.
+   *
+   * @param items Items to search.  This should be a table with one or more Lua items (note that these are actual items, not item types).
+   * @param teamIndex Limit search to items from this team.  If omitted, will return the closest item on any team.
+   *
+   * @descr The teamIndex parameter is optional; if it is omitted, items on any team will be evaluated.
+   */
+]]--
 function findClosest(items, teamIndex)
 
    local closest = nil
@@ -36,11 +50,11 @@ function findClosest(items, teamIndex)
 
    for indx, item in ipairs(items) do              -- Iterate over our list
 
---logprint(tostring(teamIndex)..","..item:getTeamIndex())
+      --logprint(tostring(teamIndex)..","..item:getTeamIndex())
       if teamIndex == nil or item:getTeamIndex() == teamIndex then
 
          -- Use distSquared because it is less computationally expensive
-         -- and works great for comparing distances 
+         -- and works great for comparing distances
          local d = point.distSquared(pos, item:getPos())  -- Dist btwn robot and TestItem
 
          if d < minDist then                         -- Is it the closest yet?
@@ -57,17 +71,21 @@ end
 
 --
 -- The following functions are provided so users don't need to run them with the bot: prefix
--- 
+--
 -- Why?  why is the bot: prefix so horrible??
 --
+
+-- Documented in luaLevelGenerator.cpp
 function subscribe(...)
    return bf:subscribe(...)
-end   
+end
 
+-- Documented in luaLevelGenerator.cpp
 function unsubscribe(...)
    return bf:unsubscribe(...)
-end  
+end
 
+-- Documented in luaLevelGenerator.cpp
 function globalMsg(...)
    return bot:globalMsg(...)
 end

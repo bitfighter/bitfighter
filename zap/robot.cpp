@@ -29,6 +29,38 @@ using namespace LuaArgs;
 
 TNL_IMPLEMENT_NETOBJECT(Robot);
 
+// The following two functions are implemented in Lua, but we'll document them here for simplicity.
+
+/**
+ * @luafunc void Robot::subscribe(Event event)
+ *
+ * @brief Let the bot listen for and respond to the specified event.
+ *
+ * @descr When the specified event is fired, the robot can respond by implementing a specially
+ * named listener function. See @ref events "Subscribing to Events" for more information.
+ * See also the Event page for a list of events you can subscribe to and their
+ * corresponding listener funtcitons.
+ *
+ * As a conveneinece, robots are automatically subscribed to the Tick event, and if they 
+ * implement a function called onTick(), it will be called every game cycle.  You can unubscribe
+ * from this event if you want.
+ *
+ * @param event Event to subscribe to.
+ */
+
+
+ /**
+  * @luafunc void Robot::unsubscribe(Event event)
+  *
+  * @brief Stop listening for the specified event.
+  *
+  * @descr After unsubscribing from the event, the corresponding listener function will no longer be
+  * called when the event is fired.
+  *
+  * @param event Event to unsubscribe from.
+  */
+
+
 /**
  * @luafunc Robot::Robot(position, teamIndex, scriptName, scriptArg)
  *

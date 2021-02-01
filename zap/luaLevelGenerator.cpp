@@ -145,6 +145,33 @@ S32 LuaLevelGenerator::lua_setGameTime(lua_State *L)
 
 static const StringTableEntry levelControllerName = "LevelController";
 
+// The following two functions are implemented in Lua, but we'll document them here for simplicity.
+
+/**
+ * @luafunc void LuaLevelGenerator::subscribe(Event event)
+ *
+ * @brief Let the level listen for and respond to the specified event.
+ * 
+ * @descr When the specified event is fired, the level can respond by implementing a specially
+ * named listener function. See @ref events "Subscribing to Events" for more information.
+ * See also the Event page for a list of events you can subscribe to and their
+ * corresponding listener funtcitons.  
+ *
+ * @param event Event to subscribe to.
+ */
+
+
+ /**
+  * @luafunc void LuaLevelGenerator::unsubscribe(Event event)
+  *
+  * @brief Stop listening for the specified event.
+  *
+  * @descr After unsubscribing from the event, the corresponding listener function will no longer be 
+  * called when the event is fired.
+  *
+  * @param event Event to unsubscribe from.
+  */
+
 
 /**
  * @luafunc void LevelGenerator::globalMsg(string message)
