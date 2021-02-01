@@ -62,18 +62,18 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
 
 
 /**
- * @luafunc Robot::Robot(position, teamIndex, scriptName, scriptArg)
+ * @luafunc Robot::Robot(point position, int teamIndex, string scriptName, string scriptArg)
  *
  * All parameters are optional.
- * @param [position: point] Starting position of the Robot. Defaults to point.new(0,0).  Note
+ * @param position Starting position of the Robot. Defaults to point.new(0,0).  Note
  * that this position is pretty much ignored at this point; bot is created, then it is spawned
  * using normal game processes, which means at a spawnPoint or at (0,0) if there are none.
  * Once spawned, a levelgen script can relocate a ship as shown in one of the samples below.
  * 
- * @param [teamIndex: int] Starting Team of the Robot. If unspecified, defaults
+ * @param teamIndex Starting Team of the Robot. If unspecified, defaults
  * to balancing teams.
- * @param [scriptName: string] The bot script to use. Defaults to the server's default bot.
- * @param [scriptArg: string] Zero or more string arguments to pass to the script.
+ * @param scriptName The bot script to use. Defaults to the server's default bot.
+ * @param scriptArg  Zero or more string arguments to pass to the script.  If there are multiple arguments, just list them sequentially.
  * 
  * @descr Passed arguments are available in the arg table.  
  *
