@@ -48,6 +48,10 @@ function main()
 
     gameType = game:getGameType()
     
+    -- Hack to get a starting position, should happen after at least one tick
+    startPos = nil
+    Timer:scheduleOnce(function() startPos = bot:getPos() end, 100)
+    
     averageIndex = 1
     averageMax = 20
 
@@ -651,8 +655,11 @@ function doObjective(closestEnemy)
         if(closestEnemy ~= nil) then
             prevtarget = closestEnemy:getPos()
         end
+        
         if(prevtarget ~= nil) then 
             gotoAndOrbitPosition(prevtarget) 
+        else  -- No target and nothing to do, go starting position
+            gotoAndOrbitPosition(startPos)
         end
     end
 end

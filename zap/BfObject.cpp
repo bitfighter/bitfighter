@@ -1690,7 +1690,7 @@ CentroidObject::~CentroidObject()
 
 S32 CentroidObject::lua_getPos(lua_State *L)
 {
-   luaPushPoint(L, 0, 0);
+   luaPushPoint(L, getCentroid());
    return 1;      // Do we want this to return a series of points?
 }
 
