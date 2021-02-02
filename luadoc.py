@@ -8,7 +8,6 @@
 import os
 from glob import glob
 import re
-import sys
 import subprocess
 from typing import List, Any, Dict, Optional, Tuple
 from lxml import etree
@@ -38,7 +37,7 @@ mainpage = []
 otherpage = []
 enums = []
 
-FUNCS_HEADER_MARKER = "DummyConstructor"
+FUNCS_HEADER_MARKER = "int DummyArg"
 
 NBSP = "&#160;"
 
@@ -47,9 +46,10 @@ NBSP = "&#160;"
 # These flags are used to let you run a subset of the process while debugging.
 # TODO: Document this better
 DEBUG_MODE = False              # Set to False for production mode
+
 DEBUG_PREPROCESS = False
-DEBUG_DOXYGEN = True
-DEBUG_POST_PROCESS = True       # Only do post processing stage; need to copy files from html to html-final
+DEBUG_DOXYGEN = False
+DEBUG_POST_PROCESS = True      # Only do post processing stage; need to copy files from html to html-final
 
 
 # Adjust these above only; do not change the settings below
@@ -70,7 +70,7 @@ def main():
 
     if DEBUG_POST_PROCESS:
         post_process_classes()          # --> Overwrites files in html
-    # post_process_enums()
+        # post_process_enums()
     pass
 
 
@@ -91,7 +91,10 @@ def preprocess():
     files.extend(glob(os.path.join(outpath, "../static/*.txt")))               # our static pages for general information and task-specific examples
 
 
-    # files = [r"C:\dev\bitfighter/zap/ship.cpp"]
+    # files = [
+    #     R"C:\dev\bitfighter\zap\luaLevelGenerator.cpp",
+    #     R"C:\dev\bitfighter\resource\scripts\levelgen_helper_functions.lua"
+    # ]
 
     # Loop through all the files we found above...
     for file_cnt, file in enumerate(files):
@@ -144,7 +147,7 @@ def preprocess():
                     if classname not in classes:
                         classes[classname] = []
 
-                    classes[classname].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {classname} {{ \n public:\n")
+                    classes[classname].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {classname} {{ \n")
                     continue
 
                 #####
@@ -156,7 +159,7 @@ def preprocess():
                     parent = cleanup_classname(match.groups()[1])      # ==> BfObject
                     if classname not in classes:
                         classes[classname] = []
-                    classes[classname].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {classname} : public {parent} {{ \n public:\n")
+                    classes[classname].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {classname} : public {parent} {{ \n ")
                     shortClassDescr = ""
                     longClassDescr = ""
                     continue
@@ -217,7 +220,7 @@ def preprocess():
                             classes[classname] = []
 
                         # This becomes our "constructor"
-                        classes[classname].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {classname} {{ \npublic:\n")
+                        classes[classname].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {classname} {{ \n")
 
                         # This is an ordinary "class method"
                         # for method in staticMethods:
@@ -328,10 +331,11 @@ def preprocess():
                         if classname not in classes:
                             classes[classname] = []
 
-                        classes[classname].append(f"void {FUNCS_HEADER_MARKER}() {{ }}\n")
+                        classes[classname].append(f"private:\nvoid {classname} ({FUNCS_HEADER_MARKER}) {{ }}\n")    # Make it look like a private constructor to discourage
+                                                                                                                        # Doxygen from inserting it into child classes
 
                         # And the dummy documentation -- the encounteredDoxygenCmd tells us to keep reading until we end the comment block
-                        comments.append(f"\\fn {classname}::{FUNCS_HEADER_MARKER}\n")
+                        comments.append(f"\\fn {classname}::{classname}({FUNCS_HEADER_MARKER})\n")
                         encounteredDoxygenCmd = True
 
                         continue
@@ -349,7 +353,7 @@ def preprocess():
                         constname = match.groups()[1]
 
                         # Use voidlessRetval to avoid having "void" show up where we'd rather omit the return type altogether
-                        comments.append(f" \\fn {classname}::{constname}\n")
+                        comments.append(f" // @ingroup {constname}\n")
 
                         encounteredDoxygenCmd = True
 
@@ -416,7 +420,7 @@ def preprocess():
                             if classname not in classes:
                                 classes[classname] = []
 
-                            classes[classname].append(f"{staticness} {retval} {method}({args}) {{ /* From '{line.strip()}' */ }}\n")
+                            classes[classname].append(f"public:\n{staticness} {retval} {method}({args}) {{ /* From '{line.strip()}' */ }}\n")
                         else:
                             globalfunctions.append(f"{retval} {method}({args}) {{ /* From '{line}' */ }}\n")
 
@@ -442,7 +446,7 @@ def preprocess():
                         if classname not in classes:
                             classes[classname] = []
                         classes[classname].append(f"class {cleanup_classname(match.groups()[0])} {{\n")
-                        classes[classname].append("public:\n")
+                        # classes[classname].append("public:\n")
 
                         encounteredDoxygenCmd = True
 
@@ -700,6 +704,7 @@ def post_process_classes():
     files = get_class_files()
     files.extend(glob("./html/group__*.html"))
 
+
     # Rip through them first to build a map of all the class --> urls so we can create links
     for file_ct, file in enumerate(files):
         update_progress(file_ct / len(files), os.path.basename(file))
@@ -712,7 +717,6 @@ def post_process_classes():
     # Second pass
     files = get_class_files()
 
-    # files = ["./html/main_page_content.h"]     # TODO
     for file_ct, file in enumerate(files):
         update_progress(file_ct / len(files), os.path.basename(file))
         dirty_html = ""
@@ -729,79 +733,22 @@ def post_process_classes():
         # Do some fancier parsing with something that understands the document structure
         root = etree.HTML(cleaned_html)
 
-        # Remove first two annoying "More..." links...
-        elements = root.xpath("//a[text()='More...']")
-        for element in elements[:2]:
-            element.getparent().remove(element)
-
-        # Remove Public (it's confusing!)
-        replace_text(root, "Public Member Function", "Member Function")
+        remove_first_two_more_links(root)   # They're annoying
+        replace_text(root, "Public Member Function", "Member Function")     # Remove the word "Public" (it's confusing!)
         replace_text(root, "More...", "[details]")
 
-
-        elements_to_delete = []
-
-        # Find rows in our Member Functions table that refer to the DummyConstructor
-        # Looking for rows in tables of class memberdelcs that contain a td that contains a link for DummyConstructor
-        elements = root.xpath(f"//table[@class='memberdecls']//tr[descendant::td/a[contains(text(),'{FUNCS_HEADER_MARKER}')]]")
-        if elements:
-            elements_to_delete.append(elements[0])
-            # <tr xmlns="http://www.w3.org/1999/xhtml" class="memitem:a515b33956a05bb5a042488cf4f361019">
-            #   <td class="memItemLeft" align="right" valign="top">void&#160;</td>
-            #   <td class="memItemRight" valign="bottom"><a class="el" href="class_ship.html#a515b33956a05bb5a042488cf4f361019">DummyConstructor</a> ()</td>
-            # </tr>
-
-        # Looking for rows in tables of class memberdecls that have a immediately preceding row that contains a td with a link for DummyConstructor
-        # This should find rows immediately following the rows in rows_to_modify
-        elements = root.xpath(f"//table[@class='memberdecls']//tr[preceding::tr[1][descendant::td/a[contains(text(),'{FUNCS_HEADER_MARKER}')]]]")
-        if elements:
-            elements_to_delete.append(elements[0])
+        handle_dummy_constructor_element(root)          # Has to go before remove_destructor_text, which alters one of our markers
 
         # Clear the type declaration for function return types in the upper portion of the class definitions
         elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemLeft']")
         for element in elements:
             element.clear()
 
+
         remove_space_after_method_name(root)
         remove_types_from_method_declarations_section(root)
-
         remove_destructor_text(root)
-
-        elements = root.xpath(f"//h2[@class='memtitle' and contains(text(), '{FUNCS_HEADER_MARKER}')]")
-        if elements:
-            elements_to_delete.append(elements[0])
-            # <h2 class="memtitle">
-            #   <span class="permalink"><a href="#a515b33956a05bb5a042488cf4f361019">&#9670;&#160;</a></span> DummyConstructor()
-            # </h2>
-
-        elements = root.xpath(f"//div[preceding::h2[@class='memtitle' and contains(text(), '{FUNCS_HEADER_MARKER}')]]")
-        if elements:
-                elements_to_delete.append(elements[0])
-            # The div following the one above
-
-
-        # Retrieve our description, which is down in the description of DummyConstructor
-        elements = root.xpath(f"//div[preceding::td[contains(text(),'::{FUNCS_HEADER_MARKER}')]]/child::*")
-        if elements:
-            new_content = etree.tostring(elements[0]).decode("utf-8")
-
-            parent = root.xpath(f"//table[@class='memberdecls']")[0]
-            new_elements = [
-                etree.fromstring(f'<tr><td colspan="2" class="memItemRight">{new_content}</td></tr>'),
-                etree.fromstring(f'<tr><td class="memSeparator" colspan="2">&#160;</td></tr>'),
-            ]
-
-            new_elements.reverse()
-            for new_element in new_elements:
-                parent.insert(1, new_element)
-
-
         clean_up_member_details(root, class_urls)
-
-
-        # Delete any items we've marked for deletion
-        for element in elements_to_delete:
-            delete_node(element)
 
 
         if DEBUG_MODE and DEBUG_POST_PROCESS:
@@ -818,6 +765,104 @@ def post_process_classes():
 
 def delete_node(element: Any) -> None:
     element.getparent().remove(element)
+
+
+def handle_dummy_constructor_element(root: Any) -> None:
+    """ This is a lot of work to go through to get a warning placed at the top of selected class method lists! """
+
+    elements_to_delete = []
+
+    # Find rows in our Member Functions table that refer to the DummyConstructor
+    # Looking for rows in tables of class memberdelcs that contain a td that contains a link for DummyConstructor
+    elements = root.xpath(f"//table[@class='memberdecls'][descendant::td[contains(text(),'{FUNCS_HEADER_MARKER}')]]")
+    if elements:
+        elements_to_delete.append(elements[0])
+        # Deletes:
+        # <table class="memberdecls">
+        #     <tr class="heading">
+        #         <td colspan="2"><h2 class="groupheader"><a name="pri-methods" id="pri-methods"></a>Private Member Functions</h2></td>
+        #     </tr>
+        #     <tr class="memitem:a2b298db4d6febba2e202fd0f3822f607">
+        #         <td class="memItemLeft" align="right" valign="top">void&#160;</td>
+        #         <td class="memItemRight" valign="bottom"><a class="el" href="class_ship.html#a2b298db4d6febba2e202fd0f3822f607">Ship</a> (int DummyArg)</td>
+        #     </tr>
+        #     <tr class="separator:a2b298db4d6febba2e202fd0f3822f607">
+        #         <td class="memSeparator" colspan="2">&#160;</td>
+        #     </tr>
+        # </table>
+
+    elements = root.xpath(f"//h2[@class='memtitle' and contains(text(), '{FUNCS_HEADER_MARKER}')]")
+    if elements:
+        elements_to_delete.append(elements[0])
+        # <h2 class="memtitle">
+        #   <span class="permalink"><a href="#a515b33956a05bb5a042488cf4f361019">&#9670;&#160;</a></span> DummyConstructor()
+        # </h2>
+
+
+
+    xpath = f"div[@class='memitem'][descendant::em[contains(text(),'{FUNCS_HEADER_MARKER.split()[1]}')]]"   # Split to get rid of datatype
+    elements = root.xpath(f"//{xpath}")
+    if elements:
+        elements_to_delete.append(elements[0].getprevious())
+        elements_to_delete.append(elements[0])
+        # Deletes:
+        # <h2 class="memtitle"><span class="permalink"><a href="#a2b298db4d6febba2e202fd0f3822f607">&#9670;&#160;</a></span>Ship()</h2>
+        # <div class="memitem">
+        #     <div class="memproto">
+        #         <table class="mlabels">
+        #             <tr>
+        #                 <td class="mlabels-left">
+        #                     <table class="memname">
+        #                         <tr>
+        #                             <td class="memname">Ship::Ship </td>
+        #                             <td>(</td>
+        #                             <td class="paramtype">int</td>
+        #                             <td class="paramname"><em>DummyArg</em></td>
+        #                             <td>)</td>
+        #                             <td></td>
+        #                         </tr>
+        #                     </table>
+        #                 </td>
+        #                 <td class="mlabels-right"> <span class="mlabels"><span class="mlabel">private</span></span> </td>
+        #             </tr>
+        #         </table>
+        #     </div>
+        #     <div class="memdoc">
+        #         <dl class="section warning">
+        #             <dt>Warning</dt>
+        #             <dd>There is no Lua constructor for Ships; they cannot be created from a script. Sorry! <br />
+        #                 You might
+        #                 be able to do what you want by spawning a <a class="el" href="class_robot.html">Robot</a>. </dd>
+        #         </dl>
+        #     </div>
+        # </div>
+
+        # Retrieve our description, which can be found in the last element of our delete list
+        elements = elements_to_delete[-1].xpath(f"./div[@class='memdoc']")
+        if elements:
+            new_content = etree.tostring(elements[0]).decode("utf-8")
+
+            parent = root.xpath(f"//table[@class='memberdecls']")[0].getprevious()
+            new_elements = [
+                etree.fromstring(f'<div class="memfunc-banner">{new_content}</div>'),
+            ]
+
+            new_elements.reverse()
+            for new_element in new_elements:
+                parent.insert(1, new_element)
+
+
+    # Delete any items we've marked for deletion
+    for element in elements_to_delete:
+        delete_node(element)
+
+    # Delete "Constructor Documentation" header, if it's empty
+    elements = root.xpath(f"//h2[@class='groupheader' and contains(text(), 'Member Function Documentation')]/preceding-sibling::*[1]/preceding-sibling::*[1][@class='groupheader' and contains(text(), 'Destructor Documentation')]")
+
+    if elements:
+        delete_node(elements[0])
+        # Deletes:
+        # <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 
 
 def remove_space_after_method_name(root: Any) -> None:
@@ -1063,6 +1108,12 @@ def handle_mixed(argtype: str) -> str:
         argtype = argtype.replace("mixed_", " ", 1)
         argtype = argtype.replace("_", ", ")
     return argtype
+
+
+def remove_first_two_more_links(root: Any):
+    elements = root.xpath("//a[text()='More...']")
+    for element in elements[:2]:
+        element.getparent().remove(element)
 
 
 # https://stackoverflow.com/questions/65506059/how-can-i-get-the-text-from-this-html-snippet-using-lxml

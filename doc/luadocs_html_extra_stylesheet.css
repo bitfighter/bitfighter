@@ -16,6 +16,11 @@ table.memname td {
    padding: 0;
 }
 
+/* Div to hold banner message used in ships warning about no constructor */
+div.memfunc-banner {
+   padding-top: 20px;
+}
+
 
 td.mdescRight a:not(.el) {
    font-size: x-small;        /* Applies to the [details] links in class definitions */
