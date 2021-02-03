@@ -74,10 +74,15 @@ def main():
     pass
 
 
-class EnumMode:
-    NOT_COLLECTING = 0
-    LUA_ENUM_COMMENT = 1
-    CPP_DEFINE = 2
+class CollectingMode:
+    LONG_COMMENT = 0
+    MAIN_PAGE = 1
+    OTHER_PAGE = 2
+    METHODS = 3
+    STATIC_METHODS = 4
+    LUA_ENUM_COMMENT = 5
+    CPP_ENUM_DEFINE = 6
+    NONE = 7
 
 
 def preprocess():
@@ -107,14 +112,8 @@ def preprocess():
             enumName = ""
             enumColumn: int = -1
 
-            # Various modes we could be in
-            collectingMethods = False
-            collectingStaticMethods = False
-            # collectingLongDescr = 0
-            processing_long_comment = False
-            processing_main_page = False
-            processing_other_page = False
-            collectingEnumMode = EnumMode.NOT_COLLECTING
+            collecting_mode = CollectingMode.NONE
+
             descrColumn: Optional[int] = None
             encounteredDoxygenCmd = False
 
@@ -174,10 +173,10 @@ def preprocess():
 
                 match = re.search(r"define +LUA_METHODS *\(CLASS, *METHOD\)", line)
                 if match:
-                    collectingMethods = True        # Activate collecting methods mode
+                    collecting_mode = CollectingMode.METHODS
                     continue
 
-                if collectingMethods:
+                if collecting_mode == CollectingMode.METHODS:
                     match = re.search(r"METHOD *\( *CLASS, *(.+?) *,", line)                 # Signals class declaration... methods will follo
                     if match:
                         methods.append(match.groups()[0])
@@ -194,16 +193,16 @@ def preprocess():
                             classes[classname].append(make_method_line(method))
 
                         methods = []
-                        collectingMethods = False
+                        collecting_mode = CollectingMode.NONE
                         continue
 
                 match = re.search(r"define +LUA_STATIC_METHODS *\( *METHOD *\)", line)
                 if match:
-                    collectingStaticMethods = True
+                    collecting_mode = CollectingMode.STATIC_METHODS
                     continue
 
 
-                if collectingStaticMethods:
+                if collecting_mode == CollectingMode.STATIC_METHODS:
                     match = re.search(r"METHOD *\( *(.+?) *,", line)                 # Signals class declaration... methods will follow
                     if match:
                         method = match.groups()[0]
@@ -222,23 +221,7 @@ def preprocess():
                         # This becomes our "constructor"
                         classes[classname].insert(0, f"{shortClassDescr}\n{longClassDescr}\nclass {classname} {{ \n")
 
-                        # This is an ordinary "class method"
-                        # for method in staticMethods:
-                            # index = first { ${$classes{$class}}[$_] =~ m|\s$method\(| } 0..$#{$classes{$class}}  # ? Not sure what's happening here
-                            # index = False       # TODO: Fix line above
-
-                            # found = False
-                            # for method in classes[xclass]:
-                            #     if re.search(f"\\s{method}\\(", method):       # ? Maybe this is it??
-                            #         found = True
-                            #         break
-
-                            # Ignore methods that already have explicit documentation
-                            # if not found:
-                            #     classes[xclass].append(f"static void {method}() {{ }}\n")
-
-                        # staticMethods = []
-                        collectingStaticMethods = False
+                        collecting_mode = CollectingMode.NONE
                         continue
 
                 #####
@@ -246,30 +229,28 @@ def preprocess():
                 # These tokens signal we're entering the beginning of a long comment block we need to pay attention to
                 comment_pattern = r"--\[\[" if luafile else r"/\*\*"
                 if re.search(comment_pattern, line):
-                    processing_long_comment = True
+                    collecting_mode = CollectingMode.LONG_COMMENT
                     comments.append("/*!\n")
                     continue
 
-                if processing_long_comment:
+                if collecting_mode == CollectingMode.LONG_COMMENT:
                     # Look for closing */ or --]] to terminate our long comment
                     comment_pattern = r"--\]\]" if luafile else r"\*/"
                     if re.search(comment_pattern, line):
                         comments.append("*/\n")
-                        processing_long_comment = False
-                        processing_main_page = False
-                        processing_other_page = False
+                        collecting_mode = CollectingMode.NONE
                         encounteredDoxygenCmd = False
                         continue
 
                     if re.search(r"@mainpage\s", line):
                         mainpage.append(line)
-                        processing_main_page = True
+                        collecting_mode = CollectingMode.MAIN_PAGE
                         encounteredDoxygenCmd = True
                         continue
 
                     if re.search(r"@page\s", line):
                         otherpage.append(line)
-                        processing_other_page = True
+                        collecting_mode = CollectingMode.OTHER_PAGE
                         encounteredDoxygenCmd = True
                         continue
 
@@ -287,7 +268,7 @@ def preprocess():
                     #                                $1        $2           $4           $6
                     match = re.search(r"@luaenum\s+(\w+)\s*\((\d+)\s*(,\s*(\d+)\s*(,\s*(\d+))?)?\s*\)", line)
                     if match:
-                        collectingEnumMode = EnumMode.LUA_ENUM_COMMENT
+                        collecting_mode = CollectingMode.LUA_ENUM_COMMENT
                         enumName = match.groups()[0]
                         enumColumn = int(match.groups()[1])
                         descrColumn      = None if match.groups()[3] is None else int(match.groups()[3])   # Optional
@@ -459,11 +440,11 @@ def preprocess():
                         continue
 
                     # Otherwise keep the line unaltered and put it in the appropriate array
-                    if processing_main_page:
+                    if collecting_mode == CollectingMode.MAIN_PAGE:
                         mainpage.append(line)
-                    elif processing_other_page:
+                    elif collecting_mode == CollectingMode.OTHER_PAGE:
                         otherpage.append(line)
-                    elif collectingEnumMode != EnumMode.NOT_COLLECTING:
+                    elif collecting_mode in (CollectingMode.LUA_ENUM_COMMENT, CollectingMode.CPP_ENUM_DEFINE):
                         enums.append(line)
                     elif encounteredDoxygenCmd:
                         comments.append(line)       # @code ends up here
@@ -472,12 +453,12 @@ def preprocess():
 
                 # Starting with an enum def that looks like this:
                 # /**
-                #  * @luaenum Weapon(2[,n])  <=== collectingEnumMode = EnumMode.LUA_ENUM_COMMENT
+                #  * @luaenum Weapon(2[,n])  <=== collecting_mode = CollectingMode.LUA_ENUM_COMMENT
                 #                                 2 refers to 0-based index of column containing Lua enum name,
                 #                                 n refers to column specifying whether to include this item
                 #  * The Weapon enum can be used to represent a weapon in some functions.
                 #  */
-                #  #define WEAPON_ITEM_TABLE \          <=== collectingEnumMode = EnumMode.CPP_DEFINE
+                #  #define WEAPON_ITEM_TABLE \          <=== collecting_mode = CollectingMode.CPP_ENUM_DEFINE
                 #    WEAPON_ITEM(WeaponPhaser,     "Phaser",      "Phaser",     100,   500,   500,  600, 1000, 0.21f,  0,       false, ProjectilePhaser ) \
                 #    WEAPON_ITEM(WeaponBounce,     "Bouncer",     "Bouncer",    100,  1800,  1800,  540, 1500, 0.15f,  0.5f,    false, ProjectileBounce ) \
                 #
@@ -491,7 +472,7 @@ def preprocess():
                 #  * * %Weapon.%Bouncer
                 #  @}
 
-                if collectingEnumMode in [EnumMode.LUA_ENUM_COMMENT, EnumMode.CPP_DEFINE]:
+                if collecting_mode in (CollectingMode.LUA_ENUM_COMMENT, CollectingMode.CPP_ENUM_DEFINE):
 
                     # If we get here we presume the @luaenum comment has been closed, and the next #define we see will begin the enum itself
                     # Enum will continue until we hit a line with no trailing \
@@ -499,10 +480,10 @@ def preprocess():
                     if match:
                         enums.append("@{\n")
                         enums.append(f"# {enumName}\n")   # Add the list header
-                        collectingEnumMode = EnumMode.CPP_DEFINE
+                        collecting_mode = CollectingMode.CPP_ENUM_DEFINE
                         continue
 
-                    if collectingEnumMode == EnumMode.LUA_ENUM_COMMENT:
+                    if collecting_mode == CollectingMode.LUA_ENUM_COMMENT:
                         continue     # Skip lines until we hit a #define
 
                     ends_in_backslash = re.search(r"\\[\r\n]*$", line)      # Examine line before it gets munged below
@@ -511,7 +492,7 @@ def preprocess():
                     # even for those lines, we need to test whether we're exiting the CPP comment block.
                     skip = False
 
-                    # If we're here, collectingEnumMode == EnumMode.CPP_DEFINE, and we're processing an enum definition line
+                    # If we're here, collecting_mode == CollectingMode.CPP_ENUM_DEFINE, and we're processing an enum definition line
                     line = re.sub(r"/\*.*?\*/", "", line)   # Remove embedded comments
                     if re.search(r"^\W*\\$", line):         # Skip any lines that have no \w chars, as long as they end in a backslash
                         skip = True
@@ -580,7 +561,7 @@ def preprocess():
                     if not ends_in_backslash:  # Line has no terminating \, it's the last of its kind!
                         enums.append("@}\n");       # Close doxygen group block
                         enums.append("*/\n\n");     # Close comment
-                        collectingEnumMode = EnumMode.NOT_COLLECTING          # This enum is complete!
+                        collecting_mode = CollectingMode.NONE          # This enum is complete!
 
                     continue
 
