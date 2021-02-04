@@ -48,6 +48,7 @@ namespace Zap {
 using ClipperLib::PolyTree;
 using ClipperLib::ClipType;
 using ClipperLib::Paths;
+using ClipperLib::JoinType;
 
 class Point;
 class Rect;
@@ -112,9 +113,9 @@ void calcPolygonVerts(const Point &pos, S32 sides, F32 radius, F32 angle, Vector
 S32 findClosestPoint(const Point &point, const Vector<Point> &points);
 
 // Offset a complex polygon by a given amount
-void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset);
-void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset);
-void offsetPolygons(Vector<Vector<Point> > &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset);
+void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset, JoinType joinType = JoinType::jtSquare);
+void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset, JoinType joinType = JoinType::jtSquare);
+void offsetPolygons(Vector<Vector<Point> > &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset, JoinType joinType = JoinType::jtSquare);
 
 // Convert a list of floats into a list of points, removing all collinear points
 Vector<Point> floatsToPoints(const Vector<F32> floats);

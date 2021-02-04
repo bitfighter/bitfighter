@@ -16,6 +16,7 @@
 #include "Colors.h"
 
 #include "stringUtils.h"
+#include "GeomUtils.h"
 
 #include <cmath>
 #include <map>
@@ -691,6 +692,17 @@ bool CoreItem::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 const Vector<Point> *CoreItem::getCollisionPoly() const
 {
    return NULL;
+}
+
+
+void CoreItem::getBufferForBotZone(F32 bufferRadius, Vector<Point> &outputPoly) const
+{
+   // Simple core - 10 sides means rotation vertices won't affect the buffer much
+   Vector<Point> simpleCore;
+   calcPolygonVerts(getPos(), CORE_PANELS, CoreRadius, 0, simpleCore);
+
+   // Expand polygon, use mitering to reduce complexity
+   offsetPolygon(&simpleCore, outputPoly, bufferRadius, ClipperLib::jtMiter);
 }
 
 

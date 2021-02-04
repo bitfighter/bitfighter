@@ -90,6 +90,8 @@ public:
    void onGeomChanging();
    void onGeomChanged();
 
+   void getBufferForBotZone(F32 bufferRadius, Vector<Point> &outputPoly) const;
+
 #ifndef ZAP_DEDICATED
    // These four methods are all that's needed to add an editable attribute to a class...
    EditorAttributeMenuUI *getAttributeMenu();

@@ -9,6 +9,7 @@
 #include "gameType.h"
 #include "gameNetInterface.h"
 #include "gameObjectRender.h"
+#include "GeomUtils.h"
 #include "ship.h"
 #include "SoundSystem.h"
 #include "stringUtils.h"
@@ -216,6 +217,14 @@ void SpeedZone::onGeomChanged()
 {  
    generatePoints(getVert(0), getVert(1), mPolyBounds, mOutline);
    Parent::onGeomChanged();
+}
+
+
+// Server only
+void SpeedZone::getBufferForBotZone(F32 bufferRadius, Vector<Point> &outputPoly) const
+{
+   // Expand polygons
+   offsetPolygon(&mOutline, outputPoly, bufferRadius, ClipperLib::jtMiter);
 }
 
 

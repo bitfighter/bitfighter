@@ -1002,8 +1002,13 @@ void polyMeshToPolygons(const rcPolyMesh &mesh, Vector<Vector<Point> > &result)
          if(vertIndex == RC_MESH_NULL_IDX)
             break;
 
-         // otherwise, add a new point
          const U16 *vert = &mesh.verts[vertIndex * 2];
+
+//         // No more verts in this polygon
+//         if(vert[0] == RC_MESH_NULL_IDX)
+//            break;
+
+         // otherwise, add a new point
          poly.push_back(Point((S16) (vert[0] - mesh.offsetX), (S16) (vert[1] - mesh.offsetY)));
       }
 
@@ -1046,7 +1051,7 @@ bool clipPolygonsAsTree(ClipType operation, const Vector<Vector<Point> > &subjec
  * Perform a Clipper operation on two sets of polygons, giving the result as a
  * Vector<Vector<Point> >
  */
-bool clipPolys(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, Vector<Vector<Point> > &result, bool merge)
+bool clipPolygons(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, Vector<Vector<Point> > &result, bool merge)
 {
    PolyTree solution;
    bool success = clipPolygonsAsTree(operation, subject, clip, solution);
@@ -1349,8 +1354,9 @@ void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineS
 }
 
 
-// This method offsets and squares any acute corners
-void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset)
+// This method offsets polygons and can square or miter any corners
+void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Point> > &outputPolys,
+      const F32 offset, JoinType joinType)
 {
    Paths polygons = upscaleClipperPoints(inputPolys);
 
@@ -1358,7 +1364,7 @@ void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Poi
    ClipperOffset clipperOffset(0, 0);
    Paths outPolys(polygons.size());
 
-   clipperOffset.AddPaths(polygons, jtSquare, etClosedPolygon);
+   clipperOffset.AddPaths(polygons, joinType, etClosedPolygon);
    clipperOffset.Execute(outPolys, offset * CLIPPER_SCALE_FACT);
 
    // Downscale
@@ -1367,7 +1373,8 @@ void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Poi
 
 
 // This method offsets and squares any acute corners, perfect for bot zones
-void offsetPolygons(Vector<Vector<Point> > &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset)
+void offsetPolygons(Vector<Vector<Point> > &inputPolys, Vector<Vector<Point> > &outputPolys,
+      const F32 offset, JoinType joinType)
 {
    Paths polygons = upscaleClipperPoints(inputPolys);
 
@@ -1375,7 +1382,7 @@ void offsetPolygons(Vector<Vector<Point> > &inputPolys, Vector<Vector<Point> > &
    ClipperOffset clipperOffset(0, 0);
    Paths outPolys(polygons.size());
 
-   clipperOffset.AddPaths(polygons, jtSquare, etClosedPolygon);
+   clipperOffset.AddPaths(polygons, joinType, etClosedPolygon);
    clipperOffset.Execute(outPolys, offset * CLIPPER_SCALE_FACT);
 
    // Downscale
@@ -1432,14 +1439,15 @@ void offsetPolygonsMitered(Vector<Vector<Point> > &inputPolys, Vector<Vector<Poi
 
 // Offset a complex polygon by a given amount
 // Uses clipper to create a buffer around a polygon with the given offset
-void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset)
+void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset,
+      JoinType joinType)
 {
    Vector<const Vector<Point> *> tempInputVector;
    tempInputVector.push_back(inputPoly);
 
    Vector<Vector<Point> > tempOutputVector;
 
-   offsetPolygons(tempInputVector, tempOutputVector, offset);
+   offsetPolygons(tempInputVector, tempOutputVector, offset, joinType);
 
    TNLAssert(tempOutputVector.size() > 0, "tempVector empty in offsetPolygon?");
    if(tempOutputVector.size() > 0)
@@ -2297,7 +2305,7 @@ S32 lua_clipPolygons(lua_State* L)
 
    // try to execute the operation
    Vector<Vector<Point> > output;
-   if(!clipPolys(operation, subject, clip, output, merge))
+   if(!clipPolygons(operation, subject, clip, output, merge))
       return returnNil(L);
 
    // return the polygons if we're successful
