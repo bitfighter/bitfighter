@@ -10,8 +10,9 @@
        Most point methods are static.
 @code
     function getAngleDiff(bullet, botPos)     -- BfObject, point
-        local o = point.zero                  -- Origin
+        local o = point.zero                  -- Origin; using builtin constant rather than creating new object
         local bulletPos = bullet:getPos()
+        print(bulletPos.x, bulletPos.y)       -- Access coordinates with dot notation
         local bulletVel = bullet:getVel()
         return math.abs(angleDifference(point.angleTo(o, bulletVel), point.angleTo(bulletPos, botPos)))
     end
@@ -127,14 +128,17 @@ end
 -- Some possibly useful constants
 --[[
 @luaconst point.zero
-@brief Constant representing the point (0, 0).  Using this constant is marginally more
-       efficient than defining it yourself.
+@brief Constant representing the point (0, 0).
+
+Using this constant is marginally more efficient than defining it yourself.
 --]]
 point.zero = point.new(0,0)
+
 --[[
 @luaconst point.one
-@brief Constant representing the point (1, 1).  Using this constant is marginally more
-       efficient than defining it yourself.
+@brief Constant representing the point (1, 1).
+
+Using this constant is marginally more efficient than defining it yourself.
 --]]
 point.one = point.new(1,1)
 

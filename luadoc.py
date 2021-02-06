@@ -75,14 +75,17 @@ def main():
 
 
 class CollectingMode:
-    LONG_COMMENT = 0
-    MAIN_PAGE = 1
-    OTHER_PAGE = 2
-    METHODS = 3
-    STATIC_METHODS = 4
-    LUA_ENUM_COMMENT = 5
-    CPP_ENUM_DEFINE = 6
-    NONE = 7
+    LONG_COMMENT = "LONG_COMMENT"
+    MAIN_PAGE = "MAIN_PAGE"
+    OTHER_PAGE = "OTHER_PAGE"
+    METHODS = "METHODS"
+    STATIC_METHODS = "STATIC_METHODS"
+    LUA_ENUM = "LUA_ENUM"
+    EXPECTING_LUA_ENUM_COMMENT = "EXPECTING_LUA_ENUM_COMMENT"
+    LUA_ENUM_COMMENT = "LUA_ENUM_COMMENT"
+    CPP_ENUM_DEFINE = "CPP_ENUM_DEFINE"
+    LUA_CONST = "LUA_CONST"
+    NONE = "NONE"
 
 
 def preprocess():
@@ -113,6 +116,7 @@ def preprocess():
             enumColumn: int = -1
 
             collecting_mode = CollectingMode.NONE
+            collecting_class = ""
 
             descrColumn: Optional[int] = None
             encounteredDoxygenCmd = False
@@ -127,6 +131,8 @@ def preprocess():
 
             shortClassDescr = ""
             longClassDescr  = ""
+
+            const_declaration = ""
 
             # Visit each line of the source cpp file
             for line_num, line in enumerate(filex):
@@ -233,15 +239,34 @@ def preprocess():
                     comments.append("/*!\n")
                     continue
 
-                if collecting_mode == CollectingMode.LONG_COMMENT:
-                    # Look for closing */ or --]] to terminate our long comment
-                    comment_pattern = r"--\]\]" if luafile else r"\*/"
-                    if re.search(comment_pattern, line):
-                        comments.append("*/\n")
+
+                if collecting_mode not in (CollectingMode.NONE, CollectingMode.EXPECTING_LUA_ENUM_COMMENT):
+                    end_comment_found = re.search(r"--\]\]" if luafile else r"\*/", line)
+
+                    if end_comment_found:
+                        if collecting_mode == CollectingMode.LUA_CONST:
+                            classes[collecting_class].append("*/\n")
+                            classes[collecting_class].append(const_declaration + "\n")
+                            collecting_mode = CollectingMode.NONE
+                            continue
+
+
+                        if collecting_mode == CollectingMode.LONG_COMMENT:
+                            if end_comment_found:
+                                comments.append("*/\n")
+                                collecting_mode = CollectingMode.NONE
+                                encounteredDoxygenCmd = False
+                                continue
+
+                        if collecting_mode == CollectingMode.LUA_ENUM:
+                            collecting_mode = CollectingMode.EXPECTING_LUA_ENUM_COMMENT
+                            continue
+
                         collecting_mode = CollectingMode.NONE
-                        encounteredDoxygenCmd = False
                         continue
 
+
+                if collecting_mode == CollectingMode.LONG_COMMENT:
                     if re.search(r"@mainpage\s", line):
                         mainpage.append(line)
                         collecting_mode = CollectingMode.MAIN_PAGE
@@ -258,6 +283,7 @@ def preprocess():
                         encounteredDoxygenCmd = True
                         continue
 
+                if collecting_mode not in (CollectingMode.NONE, CollectingMode.EXPECTING_LUA_ENUM_COMMENT, CollectingMode.CPP_ENUM_DEFINE):
                     # Check for some special custom tags...
 
                     #####
@@ -268,7 +294,7 @@ def preprocess():
                     #                                $1        $2           $4           $6
                     match = re.search(r"@luaenum\s+(\w+)\s*\((\d+)\s*(,\s*(\d+)\s*(,\s*(\d+))?)?\s*\)", line)
                     if match:
-                        collecting_mode = CollectingMode.LUA_ENUM_COMMENT
+                        collecting_mode = CollectingMode.LUA_ENUM
                         enumName = match.groups()[0]
                         enumColumn = int(match.groups()[1])
                         descrColumn      = None if match.groups()[3] is None else int(match.groups()[3])   # Optional
@@ -324,18 +350,36 @@ def preprocess():
                     #####
                     # @LUACONST delcaration in C++ or Lua code
                     #####
-                    # Look for: "@luaconst point.zero
+                    # Transform:
+                    #
+                    # --[[
+                    # @luaconst point.one
+                    # @brief Constant representing the point (1, 1).
+                    #
+                    # Using this constant is marginally more efficient than defining it yourself.
+                    # --]]
+                    # point.one = point.new(1,1)
+                    #
+                    # into:
+                    #
+                    # /**
+                    # __FULLNAME: point.zero
+                    # @brief Constant representing the point (0, 0).
+                    #
+                    # Using this constant is marginally more efficient than defining it yourself.
+                    # */
+                    # point zero;
+
                     match = re.search(r"^\s*\*?\s*@luaconst\s+(.*)$", line)
                     if match:
-                        sep = "[.:]" if luafile else "::"
-                        match = re.search(r".*?@luaconst\s+(?:(\w+)" + sep + r")?(.+?)", line)     # Grab class, and constant namefrom line
+                        fullname = match.groups()[0].strip()   # Arg to @luaconst
+                        collecting_class, name = re.split("[.:]", fullname.replace("::", ":"))   # Split out classname regardless of whether separator is :, ::, or .
 
-                        classname  = cleanup_classname(match.groups()[0]) or "global"       # If no class is given the function is assumed to be global
-                        constname = match.groups()[1]
+                        classes[collecting_class].append(f"/**\n__FULLNAME: {fullname}\n")
 
-                        # Use voidlessRetval to avoid having "void" show up where we'd rather omit the return type altogether
-                        comments.append(f" // @ingroup {constname}\n")
+                        const_declaration = f"{collecting_class} {name};"
 
+                        collecting_mode = CollectingMode.LUA_CONST
                         encounteredDoxygenCmd = True
 
                         continue
@@ -444,7 +488,9 @@ def preprocess():
                         mainpage.append(line)
                     elif collecting_mode == CollectingMode.OTHER_PAGE:
                         otherpage.append(line)
-                    elif collecting_mode in (CollectingMode.LUA_ENUM_COMMENT, CollectingMode.CPP_ENUM_DEFINE):
+                    elif collecting_mode == CollectingMode.LUA_CONST:
+                        classes[collecting_class].append(line)
+                    elif collecting_mode in (CollectingMode.LUA_ENUM, CollectingMode.CPP_ENUM_DEFINE):
                         enums.append(line)
                     elif encounteredDoxygenCmd:
                         comments.append(line)       # @code ends up here
@@ -453,11 +499,12 @@ def preprocess():
 
                 # Starting with an enum def that looks like this:
                 # /**
-                #  * @luaenum Weapon(2[,n])  <=== collecting_mode = CollectingMode.LUA_ENUM_COMMENT
+                #  * @luaenum Weapon(2[,n])  <=== collecting_mode = CollectingMode.LUA_ENUM
                 #                                 2 refers to 0-based index of column containing Lua enum name,
                 #                                 n refers to column specifying whether to include this item
                 #  * The Weapon enum can be used to represent a weapon in some functions.
-                #  */
+                #  */                       <=== collecting_mode = CollectingMode.EXPECTING_LUA_ENUM_COMMENT
+                #
                 #  #define WEAPON_ITEM_TABLE \          <=== collecting_mode = CollectingMode.CPP_ENUM_DEFINE
                 #    WEAPON_ITEM(WeaponPhaser,     "Phaser",      "Phaser",     100,   500,   500,  600, 1000, 0.21f,  0,       false, ProjectilePhaser ) \
                 #    WEAPON_ITEM(WeaponBounce,     "Bouncer",     "Bouncer",    100,  1800,  1800,  540, 1500, 0.15f,  0.5f,    false, ProjectileBounce ) \
@@ -472,7 +519,7 @@ def preprocess():
                 #  * * %Weapon.%Bouncer
                 #  @}
 
-                if collecting_mode in (CollectingMode.LUA_ENUM_COMMENT, CollectingMode.CPP_ENUM_DEFINE):
+                if collecting_mode in (CollectingMode.EXPECTING_LUA_ENUM_COMMENT, CollectingMode.CPP_ENUM_DEFINE):
 
                     # If we get here we presume the @luaenum comment has been closed, and the next #define we see will begin the enum itself
                     # Enum will continue until we hit a line with no trailing \
@@ -483,7 +530,7 @@ def preprocess():
                         collecting_mode = CollectingMode.CPP_ENUM_DEFINE
                         continue
 
-                    if collecting_mode == CollectingMode.LUA_ENUM_COMMENT:
+                    if collecting_mode == CollectingMode.EXPECTING_LUA_ENUM_COMMENT:
                         continue     # Skip lines until we hit a #define
 
                     ends_in_backslash = re.search(r"\\[\r\n]*$", line)      # Examine line before it gets munged below
@@ -561,11 +608,12 @@ def preprocess():
                     if not ends_in_backslash:  # Line has no terminating \, it's the last of its kind!
                         enums.append("@}\n");       # Close doxygen group block
                         enums.append("*/\n\n");     # Close comment
-                        collecting_mode = CollectingMode.NONE          # This enum is complete!
+                        if CollectingMode.CPP_ENUM_DEFINE:
+                            collecting_mode = CollectingMode.NONE          # This enum is complete!
 
                     continue
 
-
+        # Done reading this file, time to write!
 
         # If we added any lines to keepers, write it out... otherwise skip it!
         if globalfunctions or comments or classes:

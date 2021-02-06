@@ -1359,13 +1359,15 @@ S32 LuaScriptRunner::lua_getPlayerCount(lua_State *L)
 /**
  * @luafunc ScriptRunner::subscribe(Event event)
  *
- * @brief Manually subscribe to notifications when the specified \ref EventEnum
+ * @brief Manually subscribe to notifications when the specified event.
  * occurs.
  *
- * @param event The \ref EventEnum to subscribe to.
+ * @param event The \link EventEnum Event\endlink to subscribe to.
  *
- * @see The \ref EventEnum page for a list of events and their callback
+ * @see The \link EventEnum Event\endlink page for a list of events and their callback
  * signatures.
+ *
+ * Note that this method is equivalent to the subscribe method on \link Robot bots\endlink and \link LevelGenerator levelgens\endlink.
  */
 S32 LuaScriptRunner::lua_subscribe(lua_State *L)
 {
@@ -1380,7 +1382,7 @@ S32 LuaScriptRunner::lua_subscribe(lua_State *L)
    // Subscribing is only allowed for bots and levelgens
    else
    {
-      logprintf(LogConsumer::LuaBotMessage, "Calling 'subscribe()' only allowed in-game.  Not subscribing..");
+      logprintf(LogConsumer::LuaBotMessage, "Calling 'subscribe()' only allowed in-game.  Not subscribing.");
       return 0;
    }
 
@@ -1391,7 +1393,9 @@ S32 LuaScriptRunner::lua_subscribe(lua_State *L)
 /**
  * @luafunc ScriptRunner::unsubscribe(Event event)
  *
- * @brief Manually unsubscribe to the specified \ref EventEnum.
+ * @brief Manually unsubscribe to the specified \link EventEnum Event\endlink.
+ *
+ * Note that this method is equivalent to the unsubscribe method on \link Robot bots\endlink and \link LevelGenerator levelgens\endlink.
  */
 S32 LuaScriptRunner::lua_unsubscribe(lua_State *L)
 {

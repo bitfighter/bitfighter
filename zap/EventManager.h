@@ -35,8 +35,8 @@ class EventManager
  * are the signatures of methods you can implement to respond to these events.  Note that you will also have
  * to subscribe to the event to be notified of it.
  *
- * See the \e subscribe methods for \link Robot bots\endlink and \link LevelGenerator levelGens\endlink, and the 
- * \e Events section of the scripting overview page.
+ * See the \e subscribe methods for \link Robot bots\endlink and \link LevelGenerator levelgens\endlink, and the 
+ * \e Events section of the scripting overview page.  
  */
 
 // See http://stackoverflow.com/questions/6635851/real-world-use-of-x-macros
