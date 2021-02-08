@@ -600,12 +600,107 @@ bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, r
 
 	if (mesh.nverts > 0xffff)
 	{
-		logprintf(LogConsumer::LogError, "rcMergePolyMeshes: The resulting mesh has too many vertices %d (max %d). Data can be corrupted.", mesh.nverts, 0xffff);
+		logprintf(LogConsumer::LogError, "rcBuildPolyMesh: The resulting mesh has too many vertices %d (max %d). Data can be corrupted.", mesh.nverts, 0xffff);
 	}
 	if (mesh.npolys > 0xffff)
 	{
-		logprintf(LogConsumer::LogError, "rcMergePolyMeshes: The resulting mesh has too many polygons %d (max %d). Data can be corrupted.", mesh.npolys, 0xffff);
+		logprintf(LogConsumer::LogError, "rcBuildPolyMesh: The resulting mesh has too many polygons %d (max %d). Data can be corrupted.", mesh.npolys, 0xffff);
 	}
 	
 	return true;
+}
+
+bool rcMergePolyMeshes(rcPolyMesh** meshes, const int nmeshes, rcPolyMesh& mesh)
+{
+   if (!nmeshes || !meshes)
+      return true;
+
+   mesh.nvp = meshes[0]->nvp;
+
+   int maxVerts = 0;
+   int maxPolys = 0;
+   int maxVertsPerMesh = 0;
+   for (int i = 0; i < nmeshes; ++i)
+   {
+      maxVertsPerMesh = rcMax(maxVertsPerMesh, meshes[i]->nverts);
+      maxVerts += meshes[i]->nverts;
+      maxPolys += meshes[i]->npolys;
+   }
+
+   mesh.nverts = 0;
+   mesh.verts = (unsigned short*)rcAlloc(sizeof(unsigned short)*maxVerts*2, RC_ALLOC_PERM);
+   if (!mesh.verts)
+   {
+      logprintf(LogConsumer::LogError, "rcMergePolyMeshes: Out of memory 'mesh.verts' (%d).", maxVerts*2);
+      return false;
+   }
+
+   mesh.npolys = 0;
+   mesh.polys = (unsigned short*)rcAlloc(sizeof(unsigned short)*maxPolys*mesh.nvp, RC_ALLOC_PERM);
+   if (!mesh.polys)
+   {
+      logprintf(LogConsumer::LogError, "rcMergePolyMeshes: Out of memory 'mesh.polys' (%d).", maxPolys*mesh.nvp);
+      return false;
+   }
+   memset(mesh.polys, 0xff, sizeof(unsigned short)*maxPolys*mesh.nvp);
+
+   rcScopedDelete<int> nextVert = (int*)rcAlloc(sizeof(int)*maxVerts, RC_ALLOC_TEMP);
+   if (!nextVert)
+   {
+      logprintf(LogConsumer::LogError, "rcMergePolyMeshes: Out of memory 'nextVert' (%d).", maxVerts);
+      return false;
+   }
+   memset(nextVert, 0, sizeof(int)*maxVerts);
+
+   rcScopedDelete<int> firstVert = (int*)rcAlloc(sizeof(int)*VERTEX_BUCKET_COUNT, RC_ALLOC_TEMP);
+   if (!firstVert)
+   {
+      logprintf(LogConsumer::LogError, "rcMergePolyMeshes: Out of memory 'firstVert' (%d).", VERTEX_BUCKET_COUNT);
+      return false;
+   }
+   for (int i = 0; i < VERTEX_BUCKET_COUNT; ++i)
+      firstVert[i] = -1;
+
+   rcScopedDelete<unsigned short> vremap = (unsigned short*)rcAlloc(sizeof(unsigned short)*maxVertsPerMesh, RC_ALLOC_PERM);
+   if (!vremap)
+   {
+      logprintf(LogConsumer::LogError, "rcMergePolyMeshes: Out of memory 'vremap' (%d).", maxVertsPerMesh);
+      return false;
+   }
+   memset(nextVert, 0, sizeof(int)*maxVerts);
+
+   for (int i = 0; i < nmeshes; ++i)
+   {
+      const rcPolyMesh* pmesh = meshes[i];
+
+      for (int j = 0; j < pmesh->nverts; ++j)
+      {
+         unsigned short* v = &pmesh->verts[j*2];
+         vremap[j] = addVertex(v[0], v[1],
+                          mesh.verts, firstVert, nextVert, mesh.nverts);
+      }
+
+      for (int j = 0; j < pmesh->npolys; ++j)
+      {
+         unsigned short* tgt = &mesh.polys[mesh.npolys*mesh.nvp];
+         unsigned short* src = &pmesh->polys[j*mesh.nvp];
+         mesh.npolys++;
+         for (int k = 0; k < mesh.nvp; ++k)
+         {
+            if (src[k] == RC_MESH_NULL_IDX) break;
+            tgt[k] = vremap[src[k]];
+         }
+      }
+   }
+
+   if (mesh.nverts > 0xffff)
+   {
+      logprintf(LogConsumer::LogError, "rcMergePolyMeshes: The resulting mesh has too many vertices %d (max %d). Data can be corrupted.", mesh.nverts, 0xffff);
+   }
+   if (mesh.npolys > 0xffff)
+   {
+      logprintf(LogConsumer::LogError, "rcMergePolyMeshes: The resulting mesh has too many polygons %d (max %d). Data can be corrupted.", mesh.npolys, 0xffff);
+   }
+
+   return true;
 }

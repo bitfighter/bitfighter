@@ -185,5 +185,6 @@ void rcCalcGridSize(const float* bmin, const float* bmax, float cs, int* w, int*
 // Returns false if operation ran out of memory.
 bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int triCount, rcPolyMesh& mesh);
 
+bool rcMergePolyMeshes(rcPolyMesh** meshes, const int nmeshes, rcPolyMesh& mesh);
 
 #endif // RECAST_H
