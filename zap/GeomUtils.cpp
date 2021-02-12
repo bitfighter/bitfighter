@@ -1051,7 +1051,8 @@ bool clipPolygonsAsTree(ClipType operation, const Vector<Vector<Point> > &subjec
  * Perform a Clipper operation on two sets of polygons, giving the result as a
  * Vector<Vector<Point> >
  */
-bool clipPolygons(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, Vector<Vector<Point> > &result, bool merge)
+bool clipPolygons(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip,
+      Vector<Vector<Point> > &result, bool merge, bool forceTriangulate)
 {
    PolyTree solution;
    bool success = clipPolygonsAsTree(operation, subject, clip, solution);
@@ -1061,7 +1062,7 @@ bool clipPolygons(ClipType operation, const Vector<Vector<Point> > &subject, con
       // clipper failed
       return false;
    }
-   else if(containsHoles(solution))
+   else if(containsHoles(solution) || forceTriangulate)
    {
       // if the solution has holes, then we resort to triangulating them away
       Vector<Point> resultTriangles;
@@ -1498,6 +1499,9 @@ bool isWoundClockwise(const Vector<Point>& inputPoly)
 //
 // This normally wouldn't work in every case, but our upscaled-by-1000 polygons
 // have little chance to create new duplicate points with this method
+//
+// An example of where this is needed is when two simple polygons share a
+// point: poly2tri would then fail
 static void edgeShrink(Path &path)
 {
    U32 prev = path.size() - 1;
@@ -1584,6 +1588,7 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
             PolyNode *childNode = currentNode->Childs[j];
 
             // Slightly modify the polygon to guarantee no duplicate points
+            // with other polygons being triangulated together in poly2tri
             edgeShrink(childNode->Contour);
 
             Vector<p2t::Point*> hole;
@@ -1671,8 +1676,8 @@ bool Triangulate::mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& 
 
    for(S32 i = 0; i < pointCount; i++)
    {
-      intPoints[2*i]   = (S32)floor(triangleData[i].x + 0.5) + mesh.offsetX;
-      intPoints[2*i+1] = (S32)floor(triangleData[i].y + 0.5) + mesh.offsetY;
+      intPoints[2*i]   = (S32)round(triangleData[i].x) + mesh.offsetX;
+      intPoints[2*i+1] = (S32)round(triangleData[i].y) + mesh.offsetY;
 
       triangleList[i] = i;  // Our triangle list is ordered so every 3 is a triangle in correct winding order
    }
