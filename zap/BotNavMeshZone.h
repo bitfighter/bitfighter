@@ -87,10 +87,6 @@ public:
 
    static bool buildConnectionsRecastStyle(const Vector<BotNavMeshZone *> *allZones,
                                                          rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
-   static void buildConnections(const Vector<BotNavMeshZone *> *allZones);
-
-   static void buildConnectionsSpecial(const Vector<BotNavMeshZone *> *allZones,
-         const Vector<Vector<Point> > &coreZones, const Vector<Vector<Point> > &speedZoneZones);
 };
 
 

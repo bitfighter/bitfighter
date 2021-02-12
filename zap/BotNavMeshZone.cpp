@@ -225,7 +225,7 @@ bool BotNavMeshZone::buildConnectionsRecastStyle(const Vector<BotNavMeshZone *> 
       unsigned short* t = &mesh.polys[i*mesh.nvp];
 
       // Skip "missing" polygons
-      if(*t == U16_MAX)
+      if(*t == RC_MESH_NULL_IDX)
          continue;
 
       for(int j = 0; j < mesh.nvp; ++j)
@@ -328,7 +328,7 @@ void BotNavMeshZone::populateZoneList(GridDatabase *botZoneDatabase, Vector<BotN
 
 
 // Only runs on server
-static void linkTeleportersBotNavMeshZoneConnections(const GridDatabase *botZoneDatabase,
+static void linkConnectionsTeleporters(const GridDatabase *botZoneDatabase,
                                                      const Vector<pair<Point, const Vector<Point> *> > &teleporterData)
 {
    NeighboringZone neighbor;
@@ -365,6 +365,30 @@ static void linkTeleportersBotNavMeshZoneConnections(const GridDatabase *botZone
          }
       }  // for loop iterating over teleporter dests
    } // for loop iterating over teleporters
+}
+
+
+// Mesh a particular Clipper-sanitized set of polygons.
+//
+// The 'invertFill' flag instructs triangulation of the Clipper holes instead
+// of the Clipper fill polygons
+static bool meshArea(const PolyTree &polytree, const Rect &levelBounds,
+      const Rect &triangulationBounds, bool invertFill, rcPolyMesh &outMesh)
+{
+   // Triangulate Clipper solution
+   Vector<Point> resultTriangles;
+   // This will downscale the Clipper output and use poly2tri to triangulate
+   bool successTriangulate = Triangulate::processComplex(resultTriangles, triangulationBounds,
+         polytree, !invertFill, invertFill);
+
+   // Guarantee positive coordinates needed for recast
+   outMesh.offsetX = -1 * (int)round(levelBounds.min.x);
+   outMesh.offsetY = -1 * (int)round(levelBounds.min.y);
+
+   // Merge triangles into convex polygons using Recast
+   bool successMerge = Triangulate::mergeTriangles(resultTriangles, outMesh);
+
+   return successTriangulate && successMerge;
 }
 
 
@@ -523,20 +547,24 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
       speedZone->getBufferForBotZone(BufferRadius, speedZonePolygons.last());
    }
 
-   // Make copy and extend to include special areas
-   Vector<Vector<Point> > allPolygons = blockingPolygons;
+   bool hasCores = corePolygons.size() > 0;
+   bool hasSpeedZones = speedZonePolygons.size() > 0;
 
-   if(corePolygons.size() > 0)
+   // Make copy and extend to include special areas, this will be used to
+   // find all non-navigable areas in the level
+   Vector<Vector<Point> > nonStandardPolygons = blockingPolygons;
+
+   if(hasCores)
       for(S32 i = 0; i < corePolygons.size(); i++)
-         allPolygons.push_back(corePolygons[i]);
+         nonStandardPolygons.push_back(corePolygons[i]);
 
-   if(speedZonePolygons.size() > 0)
+   if(hasSpeedZones)
       for(S32 i = 0; i < speedZonePolygons.size(); i++)
-         allPolygons.push_back(speedZonePolygons[i]);
+         nonStandardPolygons.push_back(speedZonePolygons[i]);
 
 
    // This is some sort of degenerate empty level; manually inject a zone.
-   if(allPolygons.size() == 0)
+   if(nonStandardPolygons.size() == 0)
    {
       // Just add a simple, small square
       Vector<Point> points(4);
@@ -545,231 +573,171 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
       points.push_back(Point(3, 3));
       points.push_back(Point(0, 3));
 
-      allPolygons.push_back(points);
+      nonStandardPolygons.push_back(points);
    }
 
-   // Finally run clipper to merge all the areas, this contains blocked areas
-   // and special areas excluded from normal navigable zones
-   PolyTree solution;
 
-   if(!mergePolysToPolyTree(allPolygons, solution))
+   // Run clipper to merge all the areas, this contains blocked areas and
+   // special areas excluded from normal navigable zones
+   //
+   // These operations upscale the geometry points
+   PolyTree levelPolyTree;
+   bool clipSuccess = mergePolysToPolyTree(nonStandardPolygons, levelPolyTree);
+
+   // Cores
+   PolyTree corePolyTree;
+   if(hasCores)
+      clipSuccess = clipSuccess &&
+      clipPolygonsAsTree(ClipperLib::ctDifference, corePolygons, blockingPolygons, corePolyTree);
+
+   // SpeedZones
+   PolyTree szPolyTree;
+
+   if(hasSpeedZones)
+      clipSuccess = clipSuccess &&
+      clipPolygonsAsTree(ClipperLib::ctDifference, speedZonePolygons, blockingPolygons, szPolyTree);
+
+   // Any failures
+   if(!clipSuccess)
+   {
+      logprintf(LogConsumer::LogLevelError, "Clipper failed to generate input polygons for bot zones!");
       return false;
+   }
 
 
 #ifdef LOG_TIMER
-   U32 done1 = Platform::getRealMilliseconds();
+   U32 done1 = Platform::getRealMilliseconds();  // Clipper done
 #endif
 
+   // Mesh the main level area (minus special areas)
+   rcPolyMesh levelMesh;
+   bool meshSuccess = meshArea(levelPolyTree, bounds, bounds, false, levelMesh);
 
    // Now create the zone polygons for the special areas
-   Vector<Vector<Point> > coreRemainder;
-   clipPolygons(ClipperLib::ctDifference, corePolygons, blockingPolygons, coreRemainder, true);
+   rcPolyMesh coreMesh;
+   if(hasCores)
+      meshSuccess = meshSuccess && meshArea(corePolyTree, bounds, Rect(0,0,0,0), true, coreMesh);
 
-   Vector<Vector<Point> > speedZoneRemainder;
-   clipPolygons(ClipperLib::ctDifference, speedZonePolygons, blockingPolygons, speedZoneRemainder, true);
+   rcPolyMesh szMesh;
+   if(hasSpeedZones)
+      meshSuccess = meshSuccess && meshArea(szPolyTree, bounds, Rect(0,0,0,0), true, szMesh);
 
-   // TODO add to mesh below
-   // TODO use poligonize() method from GeomUtils instead of doing recast logic below
-
-   // Tessellate!
-   // This will downscale the Clipper output and use poly2tri to triangulate
-   Vector<Point> outputTriangles;  // Every 3 points is a triangle
-   if(!Triangulate::processComplex(outputTriangles, bounds, solution))
+   // Any failures
+   if(!meshSuccess)
+   {
+      logprintf(LogConsumer::LogLevelError, "Bot zone mesh failed to generate!");
       return false;
+   }
+
+   // Merge meshes
+   rcPolyMesh mesh;
+   // Reapply bounds
+   mesh.offsetX = -1 * (int)round(bounds.min.x);
+   mesh.offsetY = -1 * (int)round(bounds.min.y);
+
+   // Build up references to send to the merge method
+   S32 meshCount = 3;
+   rcPolyMesh* meshes[meshCount] = {};
+   meshes[0] = &levelMesh;
+   meshes[1] = &coreMesh;
+   meshes[2] = &szMesh;
+
+   // Do the merge
+   bool mergeSuccess = rcMergePolyMeshes(meshes, meshCount, mesh);
+
+   if(!mergeSuccess)
+   {
+      logprintf(LogConsumer::LogLevelError, "Bot zone mesh failed to merge!");
+      return false;
+   }
+
+
+   // Save polygon count for the various meshes to be used later for custom
+   // zone connections. These aren't the true number of polygons, rather all
+   // the junk Recast returns to us
+   S32 levelRecastPolyCount = levelMesh.npolys;
+   S32  coreRecastPolyCount = coreMesh.npolys;
+   S32    szRecastPolyCount = szMesh.npolys;
+
 
 #ifdef LOG_TIMER
-   U32 done2 = Platform::getRealMilliseconds();
+   U32 done2 = Platform::getRealMilliseconds();  // poly2tri and Recast done
 #endif
 
-   bool recastPassed = false;
-   rcPolyMesh mesh;
+   // If Recast succeeded, our triangles were successfully aggregatedinto zones,
+   // but will need further polishing.
 
-   if(bounds.getWidth() < U16_MAX && bounds.getHeight() < U16_MAX)
+   BotNavMeshZone *botzone = NULL;
+   bool addedZones = false;
+
+   const S32 bytesPerVertex = sizeof(U16);      // Recast coords are U16s
+
+   // Instead of using polyMeshToPolygons() we choose to keep the Recast mesh to
+   // build the zone connections in buildConnectionsRecastStyle()
+   //
+   // This polyToZoneMap is required for that
+   Vector<S32> polyToZoneMap;
+   polyToZoneMap.resize(mesh.npolys);
+
+   // Visualize rcPolyMesh
+   for(S32 i = 0; i < mesh.npolys; i++)
    {
-      // Guarantee positive coordinates needed for recast
-      mesh.offsetX = -1 * (int)floor(bounds.min.x + 0.5f);
-      mesh.offsetY = -1 * (int)floor(bounds.min.y + 0.5f);
+      S32 j = 0;
+      botzone = NULL;
 
-      // This works because bounds is always passed by reference.  Is this really needed?
-      bounds.offset(Point(mesh.offsetX, mesh.offsetY));
-
-      // Merge!  into convex polygons
-      recastPassed = Triangulate::mergeTriangles(outputTriangles, mesh);
-   }
-
-   // If recastPassed, our triangles were successfully aggregatedinto zones,
-   // but will need further polishing.  If failed (should never happen), our
-   // zones are just the unaggregated raw triangles before attempting mergeTriangles.
-
-   if(recastPassed)
-   {
-      BotNavMeshZone *botzone = NULL;
-      bool addedZones = false;
-
-      const S32 bytesPerVertex = sizeof(U16);      // Recast coords are U16s
-
-      // Instead of using polyMeshToPolygons() we choose to keep the Recast mesh to
-      // build the zone connections in buildBotNavMeshZoneConnectionsRecastStyle()
-      //
-      // This polyToZoneMap is required for that
-      Vector<S32> polyToZoneMap;
-      polyToZoneMap.resize(mesh.npolys);
-
-      // Visualize rcPolyMesh
-      for(S32 i = 0; i < mesh.npolys; i++)
+      while(j < mesh.nvp)
       {
-         S32 j = 0;
-         botzone = NULL;
+         if(mesh.polys[(i * mesh.nvp + j)] == RC_MESH_NULL_IDX)
+            break;
 
-         while(j < mesh.nvp)
-         {
-            if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)
-               break;
+         const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
 
-            const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
+         if(vert[0] == RC_MESH_NULL_IDX)
+            break;
 
-            if(vert[0] == U16_MAX)
-               break;
-
-            if(botZoneDatabase->getObjectCount() >= MAX_ZONES)      // Don't add too many zones...
-               break;
-
-            if(j == 0)     // Add new zone because... why?
-            {
-               botzone = new BotNavMeshZone(botZoneDatabase->getObjectCount());
-
-               // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
-               // and there is really no point if they will never be viewed.  Once disabled, triangluation cannot be re-enabled
-               // for this object.
-               if(!triangulateZones)
-                  botzone->disableTriangulation();
-
-               polyToZoneMap[i] = botzone->getZoneId();
-            }
-
-            botzone->addVert(Point(vert[0] - mesh.offsetX, vert[1] - mesh.offsetY));
-            j++;
-         }
-
-         if(botzone != NULL)
-         {
-            botzone->addToZoneDatabase(botZoneDatabase);
-            addedZones = true;
-         }
-      }
-
-
-#ifdef LOG_TIMER
-      logprintf("Recast built %d zones!", botZoneDatabase->getObjectCount());
-#endif              
-
-      if(addedZones)
-         populateZoneList(botZoneDatabase, allZones);     // Repopulate allZones with the zones we modified above
-
-
-      buildConnectionsRecastStyle(allZones, mesh, polyToZoneMap);
-
-      // Add it special zones
-      buildConnectionsSpecial(allZones, coreRemainder, speedZoneRemainder);
-
-      linkTeleportersBotNavMeshZoneConnections(botZoneDatabase, teleporterData);
-   }
-
-   // If recast failed, build zones from the underlying triangle geometry.  This bit could be made more efficient by using the adjacnecy
-   // data from Triangle, but it should only run rarely, if ever.
-   else  // recastPassed == false
-   {
-      TNLAssert(false, "Recast failed -- please report this level to the devs, and pick continue to build zones from triangle output");
-      logprintf(LogConsumer::LogLevelError, "There were problems with bot nav zone creation -- please report this level to the devs!");
-
-      for(S32 i = 0; i < outputTriangles.size(); i+=3)
-      {
          if(botZoneDatabase->getObjectCount() >= MAX_ZONES)      // Don't add too many zones...
             break;
 
-         BotNavMeshZone *botzone = new BotNavMeshZone(i/3);
-         // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
-         // and there is really no point if they will never be viewed.  Once disabled, triangluation cannot be re-enabled
-         // for this object.
-         if(!triangulateZones)
-            botzone->disableTriangulation();
+         if(j == 0)     // New poly, add new zone
+         {
+            botzone = new BotNavMeshZone(botZoneDatabase->getObjectCount());
 
-         botzone->addVert(outputTriangles[i]);
-         botzone->addVert(outputTriangles[i+1]);
-         botzone->addVert(outputTriangles[i+2]);
+            // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
+            // and there is really no point if they will never be viewed.  Once disabled, triangluation cannot be re-enabled
+            // for this object.
+            if(!triangulateZones)
+               botzone->disableTriangulation();
 
-         botzone->addToZoneDatabase(botZoneDatabase);
+            polyToZoneMap[i] = botzone->getZoneId();
+         }
+
+         botzone->addVert(Point(vert[0] - mesh.offsetX, vert[1] - mesh.offsetY));
+         j++;
       }
 
-      buildConnections(allZones);
-      linkTeleportersBotNavMeshZoneConnections(botZoneDatabase, teleporterData);
+      if(botzone != NULL)
+      {
+         botzone->addToZoneDatabase(botZoneDatabase);
+         addedZones = true;
+      }
    }
 
-#ifdef LOG_TIMER
-   U32 done3 = Platform::getRealMilliseconds();
 
+   if(addedZones)
+      populateZoneList(botZoneDatabase, allZones);     // Repopulate allZones with the zones we modified above
+
+   // Build connections for standard zones
+   buildConnectionsRecastStyle(allZones, mesh, polyToZoneMap);
+
+   linkConnectionsTeleporters(botZoneDatabase, teleporterData);
+
+#ifdef LOG_TIMER
+   U32 done3 = Platform::getRealMilliseconds();  // Done
+   logprintf("Built %d zones!", botZoneDatabase->getObjectCount());
    logprintf("Timings: %d %d %d", done1-starttime, done2-done1, done3-done2);
 #endif
 
    return true;
-}
-
-
-// Only runs on server
-// TODO can be combined with buildBotNavMeshZoneConnectionsRecastStyle() ?
-void BotNavMeshZone::buildConnections(const Vector<BotNavMeshZone *> *allZones)
-{
-   if(allZones->size() == 0)      // Nothing to do!
-      return;
-
-   // We'll reuse these objects throughout the following block, saving the cost of creating and destructing them
-   Point bordStart, bordEnd, bordCen;
-   Rect rect;
-   NeighboringZone neighbor;
-
-   // Figure out which zones are adjacent to which, and find the "gateway" between them
-   for(S32 i = 0; i < zones.size() - 1; i++)
-   {
-      for(S32 j = i + 1; j < zones.size(); j++)
-      {
-         // Do zones i and j touch?  First a quick and dirty bounds check:
-         if(!zones[i]->getExtent().intersectsOrBorders(zones[j]->getExtent()))
-            continue;
-
-         if(zonesTouch(allZones->get(i)->getOutline(), allZones->get(j)->getOutline(), 1.0, bordStart, bordEnd))
-         {
-            rect.set(bordStart, bordEnd);
-            bordCen.set(rect.getCenter());
-
-            // Zone j is a neighbor of i
-            neighbor.zoneID = j;
-            neighbor.borderStart.set(bordStart);
-            neighbor.borderEnd.set(bordEnd);
-            neighbor.borderCenter.set(bordCen);
-
-            neighbor.distTo = allZones->get(i)->getExtent().getCenter().distanceTo(bordCen);     // Whew!
-            neighbor.center.set(allZones->get(j)->getCenter());
-            allZones->get(i)->mNeighbors.push_back(neighbor);
-
-            // Zone i is a neighbor of j
-            neighbor.zoneID = i;
-            neighbor.borderStart.set(bordStart);
-            neighbor.borderEnd.set(bordEnd);
-            neighbor.borderCenter.set(bordCen);
-
-            neighbor.distTo = allZones->get(j)->getExtent().getCenter().distanceTo(bordCen);     
-            neighbor.center.set(allZones->get(i)->getCenter());
-            allZones->get(j)->mNeighbors.push_back(neighbor);
-         }
-      }
-   }
-}
-
-
-void BotNavMeshZone::buildConnectionsSpecial(const Vector<BotNavMeshZone *> *allZones,
-      const Vector<Vector<Point> > &coreZones, const Vector<Vector<Point> > &speedZoneZones)
-{
-   // TODO
 }
 
 
