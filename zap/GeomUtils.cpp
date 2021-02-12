@@ -1494,38 +1494,6 @@ bool isWoundClockwise(const Vector<Point>& inputPoly)
 }
 
 
-// Shrink large polygons by reducing each coordinate by 1 in the
-// general direction of the last point as we wind around
-//
-// This normally wouldn't work in every case, but our upscaled-by-1000 polygons
-// have little chance to create new duplicate points with this method
-//
-// An example of where this is needed is when two simple polygons share a
-// point: poly2tri would then fail
-static void edgeShrink(Path &path)
-{
-   U32 prev = path.size() - 1;
-   for(U32 i = 0; i < path.size(); i++)
-   {
-      // Adjust coordinate by 1 depending on the direction
-      // Note that at least one coordinate will always be adjusted; the only way that
-      // neither if/else statement can be triggered is if we have two duplicate points
-      // in a row, and, in that case, things will get crashy anyway.
-      if(path[i].X - path[prev].X > 0)
-         path[i].X--;
-      else if(path[i].X - path[prev].X < 0)
-         path[i].X++;
-
-      if(path[i].Y - path[prev].Y > 0)
-         path[i].Y--;
-      else if(path[i].Y - path[prev].Y < 0)
-         path[i].Y++;
-
-      prev = i;
-   }
-}
-
-
 // This uses poly2tri to triangulate.  poly2tri isn't very robust so clipper needs to do
 // the cleaning of points before getting here.
 //
@@ -1586,10 +1554,6 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
          for(U32 j = 0; j < currentNode->Childs.size(); j++)
          {
             PolyNode *childNode = currentNode->Childs[j];
-
-            // Slightly modify the polygon to guarantee no duplicate points
-            // with other polygons being triangulated together in poly2tri
-            edgeShrink(childNode->Contour);
 
             Vector<p2t::Point*> hole;
             for(U32 k = 0; k < childNode->Contour.size(); k++)
