@@ -60,6 +60,7 @@ public:
    
    static const S32 BufferRadius;            // Radius to buffer objects when creating the holes for zones
    static const S32 LevelZoneBuffer;         // Extra padding around the game extents to allow outsize zones to be created
+   static const F32 CoreTraversalCost;       // Cost for a bot to go into a Core zone
 
    void renderLayer(S32 layerIndex);
 
@@ -86,7 +87,8 @@ public:
                                  const Rect *worldExtents, bool triangulateZones);
 
    static bool buildConnectionsRecastStyle(const Vector<BotNavMeshZone *> *allZones,
-                                                         rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
+         rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap, S32 coreRecastPolyStartIdx,
+         S32 szRecastPolyStartIdx);
 };
 
 

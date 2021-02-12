@@ -46,7 +46,7 @@ const S32 BotNavMeshZone::BufferRadius = Ship::CollisionRadius;  // Radius to bu
 // Extra padding around the game extents to allow outsize zones to be created.
 // Make sure we always have 50 for good measure
 const S32 BotNavMeshZone::LevelZoneBuffer = MAX(BufferRadius * 2, 50);
-
+const F32 BotNavMeshZone::CoreTraversalCost = 1000;
 
 // Constructor
 BotNavMeshZone::BotNavMeshZone(S32 id)
@@ -154,15 +154,11 @@ struct rcEdge
 // Adapted from RecastMesh::buildMeshAdjacency() to fill connection data into
 // BotNavMeshZone instead of Recast's adjaceny data
 bool BotNavMeshZone::buildConnectionsRecastStyle(const Vector<BotNavMeshZone *> *allZones,
-      rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap)
+      rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap, S32 coreRecastPolyStartIdx,
+      S32 szRecastPolyStartIdx)
 {
    if(allZones->size() == 0)      // Nothing to do!
       return true;
-
-   // We'll reuse these objects throughout the following block, saving the cost of creating and destructing them
-   Point bordStart, bordEnd, bordCen;
-   Rect rect;
-   NeighboringZone neighbor;
 
    /////////////////////////////
    // Based on recast's interpretation of code by Eric Lengyel:
@@ -251,12 +247,21 @@ bool BotNavMeshZone::buildConnectionsRecastStyle(const Vector<BotNavMeshZone *> 
       }
    }
 
+
+   // We'll reuse these objects throughout the following block
+   Point bordStart, bordEnd, bordCen;
+   Rect rect;
+   NeighboringZone neighbor;
+
    // Now create our neighbor data
    for(int i = 0; i < edgeCount; i++)
    {
       const rcEdge& e = edges[i];
 
-      if(e.poly[0] != e.poly[1])      // Should normally be the case
+      U16 polyId0 = e.poly[0];
+      U16 polyId1 = e.poly[1];
+
+      if(polyId0 != polyId1)      // Should normally be the case
       {
          U16 *v;
 
@@ -268,11 +273,37 @@ bool BotNavMeshZone::buildConnectionsRecastStyle(const Vector<BotNavMeshZone *> 
 
          neighbor.borderCenter.set((neighbor.borderStart + neighbor.borderEnd) * 0.5);
 
-         neighbor.zoneID = polyToZoneMap[e.poly[1]];  
-         allZones->get(polyToZoneMap[e.poly[0]])->mNeighbors.push_back(neighbor);  // (copies neighbor implicitly)
+         // Test if polygons are under a Core or SpeedZone using prior knowledge of mesh placement
+         bool poly0isCore = (polyId0 > coreRecastPolyStartIdx && polyId0 < szRecastPolyStartIdx);
+         bool poly1isCore = (polyId1 > coreRecastPolyStartIdx && polyId1 < szRecastPolyStartIdx);
 
-         neighbor.zoneID = polyToZoneMap[e.poly[0]];   
-         allZones->get(polyToZoneMap[e.poly[1]])->mNeighbors.push_back(neighbor);
+         bool poly0isSz = (polyId0 > szRecastPolyStartIdx);
+         bool poly1isSz = (polyId1 > szRecastPolyStartIdx);
+
+         // Logic for poly0 to get poly1 as a neighbor
+         if(!poly0isSz)  // Connections only go one direction for SpeedZone
+         {
+            neighbor.zoneID = polyToZoneMap[polyId1];
+
+            // Going into a Core zone is high cost so bots try another way
+            if(poly1isCore && !poly0isCore)
+               neighbor.distTo = CoreTraversalCost;
+
+            // Save poly1 as neighbor to poly0 (copies neighbor implicitly)
+            allZones->get(polyToZoneMap[polyId0])->mNeighbors.push_back(neighbor);
+         }
+
+         // Now do the same for poly1 to get poly0 as a neighbor
+         if(!poly1isSz)  // Connections only go one direction for SpeedZone
+         {
+            neighbor.zoneID = polyToZoneMap[polyId0];
+
+            // Going into a Core zone is high cost so bots try another way
+            if(poly0isCore && !poly1isCore)
+               neighbor.distTo = CoreTraversalCost;
+
+            allZones->get(polyToZoneMap[polyId1])->mNeighbors.push_back(neighbor);
+         }
       }
    }
    
@@ -464,7 +495,6 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
 #endif
 
    Rect bounds(worldExtents);      // Modifiable copy
-   allZones->deleteAndClear();
 
    bounds.expandToInt(Point(LevelZoneBuffer, LevelZoneBuffer));      // Provide a little breathing room
 
@@ -638,6 +668,7 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
    // Build up references to send to the merge method
    S32 meshCount = 3;
    rcPolyMesh* meshes[meshCount] = {};
+   // Order matters here!
    meshes[0] = &levelMesh;
    meshes[1] = &coreMesh;
    meshes[2] = &szMesh;
@@ -652,12 +683,10 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
    }
 
 
-   // Save polygon count for the various meshes to be used later for custom
-   // zone connections. These aren't the true number of polygons, rather all
-   // the junk Recast returns to us
-   S32 levelRecastPolyCount = levelMesh.npolys;
-   S32  coreRecastPolyCount = coreMesh.npolys;
-   S32    szRecastPolyCount = szMesh.npolys;
+   // Save what index the special zones start at in the Recast merged mesh.
+   // This will be used later to modify zone connections
+   S32  coreRecastPolyStartIdx = levelMesh.npolys;
+   S32    szRecastPolyStartIdx = levelMesh.npolys + coreMesh.npolys;
 
 
 #ifdef LOG_TIMER
@@ -723,12 +752,19 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
    }
 
 
+   // allZones is a Vector cache of all zones held in memory by the server to
+   // be used by Robots without having to call the grid database
+   allZones->deleteAndClear();
+
+   // Repopulate allZones with the zones we modified above
    if(addedZones)
-      populateZoneList(botZoneDatabase, allZones);     // Repopulate allZones with the zones we modified above
+      populateZoneList(botZoneDatabase, allZones);
 
    // Build connections for standard zones
-   buildConnectionsRecastStyle(allZones, mesh, polyToZoneMap);
+   buildConnectionsRecastStyle(allZones, mesh, polyToZoneMap,
+         coreRecastPolyStartIdx, szRecastPolyStartIdx);
 
+   // Teleporters require special connections
    linkConnectionsTeleporters(botZoneDatabase, teleporterData);
 
 #ifdef LOG_TIMER
