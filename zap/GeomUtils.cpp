@@ -1568,7 +1568,7 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
          try {
             cdt->Triangulate();
          }
-         catch(std::exception ex)
+         catch(std::exception &ex)
          {
             string msg = string("Error creating bot zones: ") + ex.what() + " ||| Please send the Bitfighter devs a copy of this level!";
             logprintf(msg.c_str());
