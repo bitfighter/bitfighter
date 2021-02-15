@@ -764,6 +764,9 @@ def postprocess_classes():
 
         remove_first_two_more_links(root)   # They're annoying
         replace_text(root, "Public Member Function", "Member Function")     # Remove the word "Public" (it's confusing!)
+        replace_text(root, "Member Data Documentation", "Constants")        # Fits better with the context
+        replace_text(root, "Public Attributes", "Constants")                # Fits better with the context
+
         replace_text(root, "More...", "[details]")
 
         handle_dummy_constructor_element(root)          # Has to go before remove_destructor_text, which alters one of our markers
@@ -778,6 +781,7 @@ def postprocess_classes():
         remove_types_from_method_declarations_section(root)
         remove_destructor_text(root)
         cleanup_member_details(root, class_urls)
+        cleanup_constant_defs(root)
 
 
         if DEBUG_MODE and DEBUG_POST_PROCESS:
@@ -1125,6 +1129,52 @@ def cleanup_member_details(root: Any, class_urls: Dict[str, str]) -> None:
             """)
             table.clear()           # Remove existing rows, which are now a repeat of the data shown in the tab
             table.append(new_row)   # And insert the type information in a new row
+
+
+def cleanup_constant_defs(root: Any):
+    fullnames = root.xpath("//p[text()='__FULLNAME: ']")        # Marker for the correct name for the item in question
+
+    # <h2 class="memtitle">
+    #   <span class="permalink">
+    #     <a href="#a6ae0a4bf7042d0f70123a44dbabd49fd">◆&nbsp;</a>
+    #   </span>one()                         <=== replace one() with point.one (which is extracted below); var memtitle will point at this
+    # </h2>
+    # <div class="memitem">
+    #   <div class="memproto">
+    #     <table>
+    #       <tbody>
+    #         <tr class="nofloat argline">
+    #           <td colspan="1">
+    #             <span class="argtypes"></span> returns <span class="returntype"><a href="classpoint.html" class="el">point</a></span>
+    #           </td>
+    #         </tr>
+    #       </tbody>
+    #     </table>
+    #   </div>
+    #   <div class="memdoc">
+
+    #     <p>Constant representing the point (1, 1). </p>
+    #     <p>__FULLNAME: <a class="el" href="classpoint.html#a6ae0a4bf7042d0f70123a44dbabd49fd"
+    #         title="Constant representing the point (1, 1).">point.one</a></p>
+    #     <p>Using this constant is marginally more efficient than defining it yourself. </p>
+
+    #   </div>
+    # </div>
+    #   <p>Constant representing the point (1, 1). </p>
+    #   <p>__FULLNAME: <a class="el" href="classpoint.html#a6ae0a4bf7042d0f70123a44dbabd49fd"           <=== fullnames finds these elements
+    #           title="Constant representing the point (1, 1).">point.one</a></p>                       <=== point.one is the name we want
+    #   <p>Using this constant is marginally more efficient than defining it yourself. </p>
+
+    #   </div>
+    # </div>
+
+    for item in fullnames:
+        fullname = item.xpath("./a")[0].text
+
+        memtitle = root.xpath(f"//div[@class='memitem'][descendant::p[text()='__FULLNAME: ']/a[text()='{fullname}']]/preceding-sibling::*[1]/span")[0]
+        memtitle.tail = fullname
+
+        delete_node(item)
 
 
 def handle_mixed(argtype: str) -> str:
