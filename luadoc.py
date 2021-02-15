@@ -69,8 +69,9 @@ def main():
         run_doxygen()          # --> Writes files to html
 
     if DEBUG_POST_PROCESS:
-        post_process_classes()          # --> Overwrites files in html
-        # post_process_enums()
+        postprocess_classes()
+          # --> Overwrites files in html
+        # postprocess_enums()
     pass
 
 
@@ -109,33 +110,32 @@ def preprocess():
         # print(f"Processing {os.path.basename(file)}...", end="", flush=True)
         update_progress(file_cnt / len(files), os.path.basename(file))
 
+        enumIgnoreColumn: Optional[int] = None
+        enumName = ""
+        enumColumn: int = -1
+
+        collecting_mode = CollectingMode.NONE
+        collecting_class = ""
+
+        descrColumn: Optional[int] = None
+        encounteredDoxygenCmd = False
+
+        luafile = file.endswith(".lua")   # Are we processing a .lua file?
+
+        methods = []
+        staticMethods = []
+        globalfunctions = []
+        comments = []
+        classes = {}         # Will be a dict of arrays
+
+        shortClassDescr = ""
+        longClassDescr  = ""
+
+        const_declaration = ""
+
         with open(file, "r") as filex:
-
-            enumIgnoreColumn: Optional[int] = None
-            enumName = ""
-            enumColumn: int = -1
-
-            collecting_mode = CollectingMode.NONE
-            collecting_class = ""
-
-            descrColumn: Optional[int] = None
-            encounteredDoxygenCmd = False
-
-            luafile = file.endswith(".lua")   # Are we processing a .lua file?
-
-            methods = []
-            staticMethods = []
-            globalfunctions = []
-            comments = []
-            classes = {}         # Will be a dict of arrays
-
-            shortClassDescr = ""
-            longClassDescr  = ""
-
-            const_declaration = ""
-
             # Visit each line of the source cpp file
-            for line_num, line in enumerate(filex):
+            for line in filex:
 
                 # If we are processing a .lua file, replace @luaclass with @luavclass for simplicity
                 if luafile:
@@ -671,7 +671,7 @@ def run_doxygen():
     os.chdir("..")
 
 
-def post_process_enums():
+def postprocess_enums():
     os.chdir("doc")
     files = glob("./html/*_enum.html")
     for file_ct, file in enumerate(files):
@@ -721,7 +721,7 @@ def get_class_files() -> List[str]:
     return files
 
 
-def post_process_classes():
+def postprocess_classes():
     """ Post-process the generated doxygen stuff """
 
     print("Fixing doxygen output...")
@@ -777,7 +777,7 @@ def post_process_classes():
         remove_space_after_method_name(root)
         remove_types_from_method_declarations_section(root)
         remove_destructor_text(root)
-        clean_up_member_details(root, class_urls)
+        cleanup_member_details(root, class_urls)
 
 
         if DEBUG_MODE and DEBUG_POST_PROCESS:
@@ -953,7 +953,7 @@ def parse_member_name(memname: str) -> Optional[Tuple[str, str, str]]:
     return ret_type.strip(), xclass.strip(), fn.strip()
 
 
-def clean_up_member_details(root: Any, class_urls: Dict[str, str]) -> None:
+def cleanup_member_details(root: Any, class_urls: Dict[str, str]) -> None:
     """
         Move class names to inherited tag on right side of header;
         this does not capture all of our classes, only the inherited ones.
