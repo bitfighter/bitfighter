@@ -272,7 +272,14 @@ REGISTER_LUA_CLASS(Team);
  *
  * @brief Get information about a team in the current game.
  *
- * @descr The Team object contains data about each team in a game.
+ * @descr The Team object contains data about each team in a game.  You can get a team object from several places, including the GameInfo class.
+ *
+ * @code
+ * gameInfo = bf:getGameInfo()      -- for a bot; use levelgen:getGameInfo() in a levelgen script
+ * team = gameInfo:getLeadingTeam()
+ * @endcode
+ *
+ * 
  */
 
 
@@ -281,7 +288,8 @@ REGISTER_LUA_CLASS(Team);
  *
  * @brief Get the numerical index of this Team.
  *
- * @return The numerical index of this Team.
+ * @return The numerical index of this Team.  Note that the first team has an index of 1, and neutral and hostile "teams" 
+ * will have the index of `Team.Neutral` and `Team.Hostile`, respectively.
  */
 S32 Team::lua_getIndex(lua_State *L)
 {
