@@ -188,6 +188,8 @@ public:
    PanelGeom *getPanelGeom();
    static void fillPanelGeom(const Point &pos, U32 time, PanelGeom &panelGeom);
 
+   void getBufferForBotZone(F32 bufferRadius, Vector<Point> &outputPoly) const;
+
 
    void onAddedToGame(Game *theGame);
 #ifndef ZAP_DEDICATED

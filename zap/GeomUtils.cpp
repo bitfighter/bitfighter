@@ -1002,8 +1002,13 @@ void polyMeshToPolygons(const rcPolyMesh &mesh, Vector<Vector<Point> > &result)
          if(vertIndex == RC_MESH_NULL_IDX)
             break;
 
-         // otherwise, add a new point
          const U16 *vert = &mesh.verts[vertIndex * 2];
+
+//         // No more verts in this polygon
+//         if(vert[0] == RC_MESH_NULL_IDX)
+//            break;
+
+         // otherwise, add a new point
          poly.push_back(Point((S16) (vert[0] - mesh.offsetX), (S16) (vert[1] - mesh.offsetY)));
       }
 
@@ -1046,7 +1051,8 @@ bool clipPolygonsAsTree(ClipType operation, const Vector<Vector<Point> > &subjec
  * Perform a Clipper operation on two sets of polygons, giving the result as a
  * Vector<Vector<Point> >
  */
-bool clipPolys(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip, Vector<Vector<Point> > &result, bool merge)
+bool clipPolygons(ClipType operation, const Vector<Vector<Point> > &subject, const Vector<Vector<Point> > &clip,
+      Vector<Vector<Point> > &result, bool merge, bool forceTriangulate)
 {
    PolyTree solution;
    bool success = clipPolygonsAsTree(operation, subject, clip, solution);
@@ -1056,7 +1062,7 @@ bool clipPolys(ClipType operation, const Vector<Vector<Point> > &subject, const 
       // clipper failed
       return false;
    }
-   else if(containsHoles(solution))
+   else if(containsHoles(solution) || forceTriangulate)
    {
       // if the solution has holes, then we resort to triangulating them away
       Vector<Point> resultTriangles;
@@ -1349,8 +1355,9 @@ void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineS
 }
 
 
-// This method offsets and squares any acute corners
-void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset)
+// This method offsets polygons and can square or miter any corners
+void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Point> > &outputPolys,
+      const F32 offset, JoinType joinType)
 {
    Paths polygons = upscaleClipperPoints(inputPolys);
 
@@ -1358,7 +1365,7 @@ void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Poi
    ClipperOffset clipperOffset(0, 0);
    Paths outPolys(polygons.size());
 
-   clipperOffset.AddPaths(polygons, jtSquare, etClosedPolygon);
+   clipperOffset.AddPaths(polygons, joinType, etClosedPolygon);
    clipperOffset.Execute(outPolys, offset * CLIPPER_SCALE_FACT);
 
    // Downscale
@@ -1367,7 +1374,8 @@ void offsetPolygons(Vector<const Vector<Point> *> &inputPolys, Vector<Vector<Poi
 
 
 // This method offsets and squares any acute corners, perfect for bot zones
-void offsetPolygons(Vector<Vector<Point> > &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset)
+void offsetPolygons(Vector<Vector<Point> > &inputPolys, Vector<Vector<Point> > &outputPolys,
+      const F32 offset, JoinType joinType)
 {
    Paths polygons = upscaleClipperPoints(inputPolys);
 
@@ -1375,7 +1383,7 @@ void offsetPolygons(Vector<Vector<Point> > &inputPolys, Vector<Vector<Point> > &
    ClipperOffset clipperOffset(0, 0);
    Paths outPolys(polygons.size());
 
-   clipperOffset.AddPaths(polygons, jtSquare, etClosedPolygon);
+   clipperOffset.AddPaths(polygons, joinType, etClosedPolygon);
    clipperOffset.Execute(outPolys, offset * CLIPPER_SCALE_FACT);
 
    // Downscale
@@ -1432,14 +1440,15 @@ void offsetPolygonsMitered(Vector<Vector<Point> > &inputPolys, Vector<Vector<Poi
 
 // Offset a complex polygon by a given amount
 // Uses clipper to create a buffer around a polygon with the given offset
-void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset)
+void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, const F32 offset,
+      JoinType joinType)
 {
    Vector<const Vector<Point> *> tempInputVector;
    tempInputVector.push_back(inputPoly);
 
    Vector<Vector<Point> > tempOutputVector;
 
-   offsetPolygons(tempInputVector, tempOutputVector, offset);
+   offsetPolygons(tempInputVector, tempOutputVector, offset, joinType);
 
    TNLAssert(tempOutputVector.size() > 0, "tempVector empty in offsetPolygon?");
    if(tempOutputVector.size() > 0)
@@ -1482,35 +1491,6 @@ bool isWoundClockwise(const Vector<Point>& inputPoly)
       return false;
    else
       return true;
-}
-
-
-// Shrink large polygons by reducing each coordinate by 1 in the
-// general direction of the last point as we wind around
-//
-// This normally wouldn't work in every case, but our upscaled-by-1000 polygons
-// have little chance to create new duplicate points with this method
-static void edgeShrink(Path &path)
-{
-   U32 prev = path.size() - 1;
-   for(U32 i = 0; i < path.size(); i++)
-   {
-      // Adjust coordinate by 1 depending on the direction
-      // Note that at least one coordinate will always be adjusted; the only way that
-      // neither if/else statement can be triggered is if we have two duplicate points
-      // in a row, and, in that case, things will get crashy anyway.
-      if(path[i].X - path[prev].X > 0)
-         path[i].X--;
-      else if(path[i].X - path[prev].X < 0)
-         path[i].X++;
-
-      if(path[i].Y - path[prev].Y > 0)
-         path[i].Y--;
-      else if(path[i].Y - path[prev].Y < 0)
-         path[i].Y++;
-
-      prev = i;
-   }
 }
 
 
@@ -1575,9 +1555,6 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
          {
             PolyNode *childNode = currentNode->Childs[j];
 
-            // Slightly modify the polygon to guarantee no duplicate points
-            edgeShrink(childNode->Contour);
-
             Vector<p2t::Point*> hole;
             for(U32 k = 0; k < childNode->Contour.size(); k++)
                hole.push_back(new p2t::Point(F64(childNode->Contour[k].X), F64(childNode->Contour[k].Y)));
@@ -1591,7 +1568,7 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
          try {
             cdt->Triangulate();
          }
-         catch(std::exception ex)
+         catch(std::exception &ex)
          {
             string msg = string("Error creating bot zones: ") + ex.what() + " ||| Please send the Bitfighter devs a copy of this level!";
             logprintf(msg.c_str());
@@ -1663,8 +1640,8 @@ bool Triangulate::mergeTriangles(const Vector<Point> &triangleData, rcPolyMesh& 
 
    for(S32 i = 0; i < pointCount; i++)
    {
-      intPoints[2*i]   = (S32)floor(triangleData[i].x + 0.5) + mesh.offsetX;
-      intPoints[2*i+1] = (S32)floor(triangleData[i].y + 0.5) + mesh.offsetY;
+      intPoints[2*i]   = (S32)round(triangleData[i].x) + mesh.offsetX;
+      intPoints[2*i+1] = (S32)round(triangleData[i].y) + mesh.offsetY;
 
       triangleList[i] = i;  // Our triangle list is ordered so every 3 is a triangle in correct winding order
    }
@@ -2297,7 +2274,7 @@ S32 lua_clipPolygons(lua_State* L)
 
    // try to execute the operation
    Vector<Vector<Point> > output;
-   if(!clipPolys(operation, subject, clip, output, merge))
+   if(!clipPolygons(operation, subject, clip, output, merge))
       return returnNil(L);
 
    // return the polygons if we're successful

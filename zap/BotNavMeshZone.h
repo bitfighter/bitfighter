@@ -49,7 +49,8 @@ class BotNavMeshZone : public DatabaseObject
    typedef GeomObject Parent;
 
 private:   
-   U16 mZoneId;                                    // Unique ID for each zone
+   U16 mZoneId;                              // Unique ID for each zone
+   bool mWalkable;                           // Flag for if this zone can currently be traversed
 
    static void populateZoneList(GridDatabase *mBotZoneDatabase, Vector<BotNavMeshZone *> *allZones);  // Populates allZones
 
@@ -59,6 +60,7 @@ public:
    
    static const S32 BufferRadius;            // Radius to buffer objects when creating the holes for zones
    static const S32 LevelZoneBuffer;         // Extra padding around the game extents to allow outsize zones to be created
+   static const F32 CoreTraversalCost;       // Cost for a bot to go into a Core zone
 
    void renderLayer(S32 layerIndex);
 
@@ -73,7 +75,9 @@ public:
    // Only gets run on the server, never on client
    //bool collide(BfObject *hitObject);
 
-   U16 getZoneId() { return mZoneId; }
+   U16 getZoneId();
+   bool getWalkable();
+   void setWalkable(bool canWalk);
 
    Vector<NeighboringZone> mNeighbors;       // List of other zones this zone touches, only populated on server
    Vector<Border> mNeighborRenderPoints;     // Only populated on client
@@ -82,9 +86,9 @@ public:
    static bool buildBotMeshZones(GridDatabase *botZoneDatabase, GridDatabase *gameObjDatabase, Vector<BotNavMeshZone *> *allZones,
                                  const Rect *worldExtents, bool triangulateZones);
 
-   static bool buildBotNavMeshZoneConnectionsRecastStyle(const Vector<BotNavMeshZone *> *allZones, 
-                                                         rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
-   static void buildBotNavMeshZoneConnections(const Vector<BotNavMeshZone *> *allZones);
+   static bool buildConnectionsRecastStyle(const Vector<BotNavMeshZone *> *allZones,
+         rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap, S32 coreRecastPolyStartIdx,
+         S32 szRecastPolyStartIdx);
 };
 
 

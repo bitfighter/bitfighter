@@ -7,9 +7,11 @@
 
 #include "ship.h"                   // For Ship::CollisionRadius
 #include "Teleporter.h"             // For Teleporter::TELEPORTER_RADIUS
+#include "CoreGame.h"
 #include "gameObjectRender.h"
 #include "barrier.h"                // For Barrier methods in generating zones
 #include "EngineeredItem.h"         // For Turret and ForceFieldProjector methods in generating zones
+#include "speedZone.h"
 #include "GeomUtils.h"
 #include "MathUtils.h"
 
@@ -44,7 +46,7 @@ const S32 BotNavMeshZone::BufferRadius = Ship::CollisionRadius;  // Radius to bu
 // Extra padding around the game extents to allow outsize zones to be created.
 // Make sure we always have 50 for good measure
 const S32 BotNavMeshZone::LevelZoneBuffer = MAX(BufferRadius * 2, 50);
-
+const F32 BotNavMeshZone::CoreTraversalCost = 1000;
 
 // Constructor
 BotNavMeshZone::BotNavMeshZone(S32 id)
@@ -53,6 +55,7 @@ BotNavMeshZone::BotNavMeshZone(S32 id)
    setNewGeometry(geomPolygon);
 
    mZoneId = id;
+   mWalkable = true;
 }
 
 
@@ -121,6 +124,23 @@ S32 BotNavMeshZone::getNeighborIndex(S32 zoneID)
    return -1;
 }
 
+U16 BotNavMeshZone::getZoneId()
+{
+   return mZoneId;
+}
+
+
+bool BotNavMeshZone::getWalkable()
+{
+   return mWalkable;
+}
+
+
+void BotNavMeshZone::setWalkable(bool canWalk)
+{
+   mWalkable = canWalk;
+}
+
 
 struct rcEdge
 {
@@ -130,16 +150,15 @@ struct rcEdge
 
 
 // Build connections between zones using the adjacency data created in recast
-bool BotNavMeshZone::buildBotNavMeshZoneConnectionsRecastStyle(const Vector<BotNavMeshZone *> *allZones, 
-                                                               rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap)
+//
+// Adapted from RecastMesh::buildMeshAdjacency() to fill connection data into
+// BotNavMeshZone instead of Recast's adjaceny data
+bool BotNavMeshZone::buildConnectionsRecastStyle(const Vector<BotNavMeshZone *> *allZones,
+      rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap, S32 coreRecastPolyStartIdx,
+      S32 szRecastPolyStartIdx)
 {
    if(allZones->size() == 0)      // Nothing to do!
       return true;
-
-   // We'll reuse these objects throughout the following block, saving the cost of creating and destructing them
-   Point bordStart, bordEnd, bordCen;
-   Rect rect;
-   NeighboringZone neighbor;
 
    /////////////////////////////
    // Based on recast's interpretation of code by Eric Lengyel:
@@ -202,7 +221,7 @@ bool BotNavMeshZone::buildBotNavMeshZoneConnectionsRecastStyle(const Vector<BotN
       unsigned short* t = &mesh.polys[i*mesh.nvp];
 
       // Skip "missing" polygons
-      if(*t == U16_MAX)
+      if(*t == RC_MESH_NULL_IDX)
          continue;
 
       for(int j = 0; j < mesh.nvp; ++j)
@@ -228,12 +247,21 @@ bool BotNavMeshZone::buildBotNavMeshZoneConnectionsRecastStyle(const Vector<BotN
       }
    }
 
+
+   // We'll reuse these objects throughout the following block
+   Point bordStart, bordEnd, bordCen;
+   Rect rect;
+   NeighboringZone neighbor;
+
    // Now create our neighbor data
    for(int i = 0; i < edgeCount; i++)
    {
       const rcEdge& e = edges[i];
 
-      if(e.poly[0] != e.poly[1])      // Should normally be the case
+      U16 polyId0 = e.poly[0];
+      U16 polyId1 = e.poly[1];
+
+      if(polyId0 != polyId1)      // Should normally be the case
       {
          U16 *v;
 
@@ -245,11 +273,37 @@ bool BotNavMeshZone::buildBotNavMeshZoneConnectionsRecastStyle(const Vector<BotN
 
          neighbor.borderCenter.set((neighbor.borderStart + neighbor.borderEnd) * 0.5);
 
-         neighbor.zoneID = polyToZoneMap[e.poly[1]];  
-         allZones->get(polyToZoneMap[e.poly[0]])->mNeighbors.push_back(neighbor);  // (copies neighbor implicitly)
+         // Test if polygons are under a Core or SpeedZone using prior knowledge of mesh placement
+         bool poly0isCore = (polyId0 > coreRecastPolyStartIdx && polyId0 < szRecastPolyStartIdx);
+         bool poly1isCore = (polyId1 > coreRecastPolyStartIdx && polyId1 < szRecastPolyStartIdx);
 
-         neighbor.zoneID = polyToZoneMap[e.poly[0]];   
-         allZones->get(polyToZoneMap[e.poly[1]])->mNeighbors.push_back(neighbor);
+         bool poly0isSz = (polyId0 > szRecastPolyStartIdx);
+         bool poly1isSz = (polyId1 > szRecastPolyStartIdx);
+
+         // Logic for poly0 to get poly1 as a neighbor
+         if(!poly0isSz)  // Connections only go one direction for SpeedZone
+         {
+            neighbor.zoneID = polyToZoneMap[polyId1];
+
+            // Going into a Core zone is high cost so bots try another way
+            if(poly1isCore && !poly0isCore)
+               neighbor.distTo = CoreTraversalCost;
+
+            // Save poly1 as neighbor to poly0 (copies neighbor implicitly)
+            allZones->get(polyToZoneMap[polyId0])->mNeighbors.push_back(neighbor);
+         }
+
+         // Now do the same for poly1 to get poly0 as a neighbor
+         if(!poly1isSz)  // Connections only go one direction for SpeedZone
+         {
+            neighbor.zoneID = polyToZoneMap[polyId0];
+
+            // Going into a Core zone is high cost so bots try another way
+            if(poly0isCore && !poly1isCore)
+               neighbor.distTo = CoreTraversalCost;
+
+            allZones->get(polyToZoneMap[polyId1])->mNeighbors.push_back(neighbor);
+         }
       }
    }
    
@@ -290,51 +344,6 @@ static BotNavMeshZone *findZoneTouchingCircle(const GridDatabase *botZoneDatabas
 #  define LOG_TIMER
 #endif
 
-static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
-                                const Vector<DatabaseObject *> &turrets,
-                                const Vector<DatabaseObject *> &forceFieldProjectors, 
-                                F32 bufferRadius,   PolyTree &solution)
-{
-   // Keep track of all polygons to merge
-   Vector<Vector<Point> > inputPolygons;
-
-   // First merge all barrier polygons
-   Vector<Vector<Point> > barrierInputPolygons;
-   bool unionSucceeded = Barrier::unionBarriers(barriers,  barrierInputPolygons);
-   if(!unionSucceeded)
-      return false;
-
-   // Now offset and fill inputPolygons directly
-   offsetPolygons(barrierInputPolygons, inputPolygons, bufferRadius);
-
-
-   // Add turrets
-   for (S32 i = 0; i < turrets.size(); i++)
-   {
-      if(turrets[i]->getObjectTypeNumber() != TurretTypeNumber)
-         continue;
-
-      Turret *turret = static_cast<Turret *>(turrets[i]);
-
-      inputPolygons.push_back(Vector<Point>());
-      turret->getBufferForBotZone(bufferRadius, inputPolygons.last());
-   }
-
-   // Add forcefield projectors
-   for (S32 i = 0; i < forceFieldProjectors.size(); i++)
-   {
-      if(forceFieldProjectors[i]->getObjectTypeNumber() != ForceFieldProjectorTypeNumber)
-         continue;
-
-      ForceFieldProjector *forceFieldProjector = static_cast<ForceFieldProjector *>(forceFieldProjectors[i]);
-
-      inputPolygons.push_back(Vector<Point>());
-      forceFieldProjector->getBufferForBotZone(bufferRadius, inputPolygons.last());
-   }
-
-   return mergePolysToPolyTree(inputPolygons, solution);
-}
-
 
 // Populate allZones -- we'll use this for efficiency, saving us the trouble of repeating this operation in multiple places.  
 // We can retrieve them using BotNavMeshZone::getBotZones().
@@ -350,7 +359,7 @@ void BotNavMeshZone::populateZoneList(GridDatabase *botZoneDatabase, Vector<BotN
 
 
 // Only runs on server
-static void linkTeleportersBotNavMeshZoneConnections(const GridDatabase *botZoneDatabase,
+static void linkConnectionsTeleporters(const GridDatabase *botZoneDatabase,
                                                      const Vector<pair<Point, const Vector<Point> *> > &teleporterData)
 {
    NeighboringZone neighbor;
@@ -390,12 +399,38 @@ static void linkTeleportersBotNavMeshZoneConnections(const GridDatabase *botZone
 }
 
 
+// Mesh a particular Clipper-sanitized set of polygons.
+//
+// The 'invertFill' flag instructs triangulation of the Clipper holes instead
+// of the Clipper fill polygons
+static bool meshArea(const PolyTree &polytree, const Rect &levelBounds,
+      const Rect &triangulationBounds, bool invertFill, rcPolyMesh &outMesh)
+{
+   // Triangulate Clipper solution
+   Vector<Point> resultTriangles;
+   // This will downscale the Clipper output and use poly2tri to triangulate
+   bool successTriangulate = Triangulate::processComplex(resultTriangles, triangulationBounds,
+         polytree, !invertFill, invertFill);
+
+   // Guarantee positive coordinates needed for recast
+   outMesh.offsetX = -1 * (int)round(levelBounds.min.x);
+   outMesh.offsetY = -1 * (int)round(levelBounds.min.y);
+
+   // Merge triangles into convex polygons using Recast
+   bool successMerge = Triangulate::mergeTriangles(resultTriangles, outMesh);
+
+   return successTriangulate && successMerge;
+}
+
+
 // Server only
 // Use the Triangle library to create zones.  Aggregate triangles with Recast
 bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDatabase *gameObjDatabase, Vector<BotNavMeshZone *> *allZones,
                                        const Rect *worldExtents, bool triangulateZones)
 {
    // Start by finding all objects that'll matter for meshing the level
+
+   // Teleporters form extra connections
    fillVector.clear();
    gameObjDatabase->findObjects(TeleporterTypeNumber, fillVector);
 
@@ -411,6 +446,37 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
 
       teleporterData.push_back(teldat);
    }
+
+   // So do speedzones // TODO use speed to connect an end point
+   Vector<DatabaseObject *> speedZoneList;
+   gameObjDatabase->findObjects(SpeedZoneTypeNumber, speedZoneList);
+
+//   Vector<pair<Point, Point> > speedZoneData(fillVector.size());
+//   pair<Point, Point> speedZoneDat;
+//
+//   for(S32 i = 0; i < fillVector.size(); i++)
+//   {
+//      SpeedZone *speedZone = static_cast<SpeedZone *>(fillVector[i]);
+//
+//      speedZoneDat.first  = speedZone->getPos();
+//
+//      // TODO
+//      // Calculate destination
+//      // Only add it if it's line-of-sight
+////      speedZoneDat.second = speedZone->getDestList();
+//
+//      speedZoneData.push_back(speedZoneDat);
+//   }
+
+   // TODO link speedzone stuff below
+   // make speedzones have one-way links from zones around it
+
+   // Cores can be destroyed and open up new paths - need special handling
+   Vector<DatabaseObject *> coreList;
+   gameObjDatabase->findObjects(CoreTypeNumber, coreList);
+
+
+   // Expand core bot buffer by ~5 more than needed (to 55) because of rotation
 
    // Get our parameters together
    Vector<DatabaseObject *> barrierList;
@@ -429,7 +495,6 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
 #endif
 
    Rect bounds(worldExtents);      // Modifiable copy
-   allZones->deleteAndClear();
 
    bounds.expandToInt(Point(LevelZoneBuffer, LevelZoneBuffer));      // Provide a little breathing room
 
@@ -440,220 +505,275 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
       return false;
    }
 
-   Vector<F32> holes;
-   PolyTree solution;
 
-   // Check if this is some sort of degenerate empty level and manually inject a zone.  Using a square because it looks nice;
-   // A triangle would work too, and would be a tiny bit more efficient.
-   if(barrierList.size() == 0 && turretList.size() == 0 && forceFieldProjectorList.size() == 0)
+   // Merge bot zone buffers from barriers, turrets, and forcefield projectors
+   // The Clipper library is the work horse here.  Its output is essential for the
+   // triangulation.  The output contains the upscaled Clipper points (you will need to downscale)
+
+   // Keep track of all the non-navigable polygons to merge
+   Vector<Vector<Point> > blockingPolygons;
+
+   // First merge all barrier polygons
+   Vector<Vector<Point> > barrierInputPolygons;
+   bool unionSucceeded = Barrier::unionBarriers(barrierList,  barrierInputPolygons);
+   if(!unionSucceeded)
+      return false;
+
+   // Now offset and fill inputPolygons directly
+   offsetPolygons(barrierInputPolygons, blockingPolygons, BufferRadius);
+
+
+   // Add turrets
+   for (S32 i = 0; i < turretList.size(); i++)
    {
-      Vector<Vector<Point> > inputPolygons(1);
+      if(turretList[i]->getObjectTypeNumber() != TurretTypeNumber)
+         continue;
+
+      Turret *turret = static_cast<Turret *>(turretList[i]);
+
+      blockingPolygons.push_back(Vector<Point>());
+      turret->getBufferForBotZone(BufferRadius, blockingPolygons.last());
+   }
+
+   // Add forcefield projectors
+   for (S32 i = 0; i < forceFieldProjectorList.size(); i++)
+   {
+      if(forceFieldProjectorList[i]->getObjectTypeNumber() != ForceFieldProjectorTypeNumber)
+         continue;
+
+      ForceFieldProjector *forceFieldProjector = static_cast<ForceFieldProjector *>(forceFieldProjectorList[i]);
+
+      blockingPolygons.push_back(Vector<Point>());
+
+      forceFieldProjector->getBufferForBotZone(BufferRadius, blockingPolygons.last());
+   }
+
+
+   // The next items are special items that need to be meshed, but must be
+   // excluded from initial mesh for various reasons
+
+   // Add Cores - they are destructible
+   Vector<Vector<Point> > corePolygons;
+
+   // Increase buffer radius a little to handle the spinning corners
+   F32 coreBufferRadius = BufferRadius + 5;
+
+   for (S32 i = 0; i < coreList.size(); i++)
+   {
+      CoreItem *core = static_cast<CoreItem *>(coreList[i]);
+
+      corePolygons.push_back(Vector<Point>());
+      core->getBufferForBotZone(coreBufferRadius, corePolygons.last());
+   }
+
+   // Add SpeedZones - they are one-way like areas
+   Vector<Vector<Point> > speedZonePolygons;
+
+   for (S32 i = 0; i < speedZoneList.size(); i++)
+   {
+      SpeedZone *speedZone = static_cast<SpeedZone *>(speedZoneList[i]);
+
+      speedZonePolygons.push_back(Vector<Point>());
+      speedZone->getBufferForBotZone(BufferRadius, speedZonePolygons.last());
+   }
+
+   bool hasCores = corePolygons.size() > 0;
+   bool hasSpeedZones = speedZonePolygons.size() > 0;
+
+   // Make copy and extend to include special areas, this will be used to
+   // find all non-navigable areas in the level
+   Vector<Vector<Point> > nonStandardPolygons = blockingPolygons;
+
+   if(hasCores)
+      for(S32 i = 0; i < corePolygons.size(); i++)
+         nonStandardPolygons.push_back(corePolygons[i]);
+
+   if(hasSpeedZones)
+      for(S32 i = 0; i < speedZonePolygons.size(); i++)
+         nonStandardPolygons.push_back(speedZonePolygons[i]);
+
+
+   // This is some sort of degenerate empty level; manually inject a zone.
+   if(nonStandardPolygons.size() == 0)
+   {
+      // Just add a simple, small square
       Vector<Point> points(4);
       points.push_back(Point(0, 0));
       points.push_back(Point(3, 0));
       points.push_back(Point(3, 3));
       points.push_back(Point(0, 3));
-      inputPolygons.push_back(points);
 
-      if(!mergePolysToPolyTree(inputPolygons, solution))
-         return false;
+      nonStandardPolygons.push_back(points);
    }
-   else
+
+
+   // Run clipper to merge all the areas, this contains blocked areas and
+   // special areas excluded from normal navigable zones
+   //
+   // These operations upscale the geometry points
+   PolyTree levelPolyTree;
+   bool clipSuccess = mergePolysToPolyTree(nonStandardPolygons, levelPolyTree);
+
+   // Cores
+   PolyTree corePolyTree;
+   if(hasCores)
+      clipSuccess = clipSuccess &&
+      clipPolygonsAsTree(ClipperLib::ctDifference, corePolygons, blockingPolygons, corePolyTree);
+
+   // SpeedZones
+   PolyTree szPolyTree;
+
+   if(hasSpeedZones)
+      clipSuccess = clipSuccess &&
+      clipPolygonsAsTree(ClipperLib::ctDifference, speedZonePolygons, blockingPolygons, szPolyTree);
+
+   // Any failures
+   if(!clipSuccess)
    {
-      // Merge bot zone buffers from barriers, turrets, and forcefield projectors
-      // The Clipper library is the work horse here.  Its output is essential for the
-      // triangulation.  The output contains the upscaled Clipper points (you will need to downscale)
-      if(!mergeBotZoneBuffers(barrierList, turretList, forceFieldProjectorList, (F32)BufferRadius, solution))
-         return false;
-   }
-
-
-#ifdef LOG_TIMER
-   U32 done1 = Platform::getRealMilliseconds();
-#endif
-
-   // Tessellate!
-   // This will downscale the Clipper output and use poly2tri to triangulate
-   Vector<Point> outputTriangles;  // Every 3 points is a triangle
-   if(!Triangulate::processComplex(outputTriangles, bounds, solution))
+      logprintf(LogConsumer::LogLevelError, "Clipper failed to generate input polygons for bot zones!");
       return false;
+   }
+
 
 #ifdef LOG_TIMER
-   U32 done2 = Platform::getRealMilliseconds();
+   U32 done1 = Platform::getRealMilliseconds();  // Clipper done
 #endif
 
-   bool recastPassed = false;
-   rcPolyMesh mesh;
+   // Mesh the main level area (minus special areas)
+   rcPolyMesh levelMesh;
+   bool meshSuccess = meshArea(levelPolyTree, bounds, bounds, false, levelMesh);
 
-   if(bounds.getWidth() < U16_MAX && bounds.getHeight() < U16_MAX)
+   // Now create the zone polygons for the special areas
+   rcPolyMesh coreMesh;
+   if(hasCores)
+      meshSuccess = meshSuccess && meshArea(corePolyTree, bounds, Rect(0,0,0,0), true, coreMesh);
+
+   rcPolyMesh szMesh;
+   if(hasSpeedZones)
+      meshSuccess = meshSuccess && meshArea(szPolyTree, bounds, Rect(0,0,0,0), true, szMesh);
+
+   // Any failures
+   if(!meshSuccess)
    {
-      mesh.offsetX = -1 * (int)floor(bounds.min.x + 0.5f);
-      mesh.offsetY = -1 * (int)floor(bounds.min.y + 0.5f);
-
-      // This works because bounds is always passed by reference.  Is this really needed?
-      bounds.offset(Point(mesh.offsetX, mesh.offsetY));
-
-      // Merge!  into convex polygons
-      recastPassed = Triangulate::mergeTriangles(outputTriangles, mesh);
+      logprintf(LogConsumer::LogLevelError, "Bot zone mesh failed to generate!");
+      return false;
    }
 
-   populateZoneList(botZoneDatabase, allZones);     // Populate allZones from botZoneDatabase
+   // Merge meshes
+   rcPolyMesh mesh;
+   // Reapply bounds
+   mesh.offsetX = -1 * (int)round(bounds.min.x);
+   mesh.offsetY = -1 * (int)round(bounds.min.y);
 
-   // So here we are.  If recastPassed, our triangles were successfully aggregated into zones, but will need further polishing below.  If it failed 
-   // (which will happen rarely, if ever), the aggregation failed and our zones are just the unaggregated raw triangles that we created before 
-   // attempting mergeTriangles.  
+   // Build up references to send to the merge method
+   S32 meshCount = 3;
+   rcPolyMesh* meshes[meshCount] = {};
+   // Order matters here!
+   meshes[0] = &levelMesh;
+   meshes[1] = &coreMesh;
+   meshes[2] = &szMesh;
 
-   if(recastPassed)
+   // Do the merge
+   bool mergeSuccess = rcMergePolyMeshes(meshes, meshCount, mesh);
+
+   if(!mergeSuccess)
    {
-      BotNavMeshZone *botzone = NULL;
-      bool addedZones = false;
-   
-      const S32 bytesPerVertex = sizeof(U16);      // Recast coords are U16s
-      Vector<S32> polyToZoneMap;
-      polyToZoneMap.resize(mesh.npolys);
+      logprintf(LogConsumer::LogLevelError, "Bot zone mesh failed to merge!");
+      return false;
+   }
 
-      // Visualize rcPolyMesh
-      for(S32 i = 0; i < mesh.npolys; i++)
-      {
-         S32 j = 0;
-         botzone = NULL;
 
-         while(j < mesh.nvp)
-         {
-            if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)
-               break;
+   // Save what index the special zones start at in the Recast merged mesh.
+   // This will be used later to modify zone connections
+   S32  coreRecastPolyStartIdx = levelMesh.npolys;
+   S32    szRecastPolyStartIdx = levelMesh.npolys + coreMesh.npolys;
 
-            const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
-
-            if(vert[0] == U16_MAX)
-               break;
-
-            if(botZoneDatabase->getObjectCount() >= MAX_ZONES)      // Don't add too many zones...
-               break;
-
-            if(j == 0)     // Add new zone because... why?
-            {
-               botzone = new BotNavMeshZone(botZoneDatabase->getObjectCount());
-
-               // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
-               // and there is really no point if they will never be viewed.  Once disabled, triangluation cannot be re-enabled
-               // for this object.
-               if(!triangulateZones)
-                  botzone->disableTriangulation();
-
-               polyToZoneMap[i] = botzone->getZoneId();
-            }
-
-            botzone->addVert(Point(vert[0] - mesh.offsetX, vert[1] - mesh.offsetY));
-            j++;
-         }
-   
-         if(botzone != NULL)
-         {
-            botzone->addToZoneDatabase(botZoneDatabase);
-            addedZones = true;
-         }
-      }
 
 #ifdef LOG_TIMER
-      logprintf("Recast built %d zones!", botZoneDatabase->getObjectCount());
-#endif              
+   U32 done2 = Platform::getRealMilliseconds();  // poly2tri and Recast done
+#endif
 
-      if(addedZones)
-         populateZoneList(botZoneDatabase, allZones);     // Repopulate allZones with the zones we modified above
+   // If Recast succeeded, our triangles were successfully aggregatedinto zones,
+   // but will need further polishing.
 
-      buildBotNavMeshZoneConnectionsRecastStyle(allZones, mesh, polyToZoneMap);
-      linkTeleportersBotNavMeshZoneConnections(botZoneDatabase, teleporterData);
-   }
+   BotNavMeshZone *botzone = NULL;
+   bool addedZones = false;
 
-   // If recast failed, build zones from the underlying triangle geometry.  This bit could be made more efficient by using the adjacnecy
-   // data from Triangle, but it should only run rarely, if ever.
-   else  // recastPassed == false
+   const S32 bytesPerVertex = sizeof(U16);      // Recast coords are U16s
+
+   // Instead of using polyMeshToPolygons() we choose to keep the Recast mesh to
+   // build the zone connections in buildConnectionsRecastStyle()
+   //
+   // This polyToZoneMap is required for that
+   Vector<S32> polyToZoneMap;
+   polyToZoneMap.resize(mesh.npolys);
+
+   // Visualize rcPolyMesh
+   for(S32 i = 0; i < mesh.npolys; i++)
    {
-      TNLAssert(false, "Recast failed -- please report this level to the devs, and pick continue to build zones from triangle output");
-      logprintf(LogConsumer::LogLevelError, "There were problems with bot nav zone creation -- please report this level to the devs!");
+      S32 j = 0;
+      botzone = NULL;
 
-      for(S32 i = 0; i < outputTriangles.size(); i+=3)
+      while(j < mesh.nvp)
       {
+         if(mesh.polys[(i * mesh.nvp + j)] == RC_MESH_NULL_IDX)
+            break;
+
+         const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
+
+         if(vert[0] == RC_MESH_NULL_IDX)
+            break;
+
          if(botZoneDatabase->getObjectCount() >= MAX_ZONES)      // Don't add too many zones...
             break;
 
-         BotNavMeshZone *botzone = new BotNavMeshZone(i/3);
-         // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
-         // and there is really no point if they will never be viewed.  Once disabled, triangluation cannot be re-enabled
-         // for this object.
-         if(!triangulateZones)
-            botzone->disableTriangulation();
+         if(j == 0)     // New poly, add new zone
+         {
+            botzone = new BotNavMeshZone(botZoneDatabase->getObjectCount());
 
-         botzone->addVert(outputTriangles[i]);
-         botzone->addVert(outputTriangles[i+1]);
-         botzone->addVert(outputTriangles[i+2]);
+            // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
+            // and there is really no point if they will never be viewed.  Once disabled, triangluation cannot be re-enabled
+            // for this object.
+            if(!triangulateZones)
+               botzone->disableTriangulation();
 
-         botzone->addToZoneDatabase(botZoneDatabase);
+            polyToZoneMap[i] = botzone->getZoneId();
+         }
+
+         botzone->addVert(Point(vert[0] - mesh.offsetX, vert[1] - mesh.offsetY));
+         j++;
       }
 
-      buildBotNavMeshZoneConnections(allZones);
-      linkTeleportersBotNavMeshZoneConnections(botZoneDatabase, teleporterData);
+      if(botzone != NULL)
+      {
+         botzone->addToZoneDatabase(botZoneDatabase);
+         addedZones = true;
+      }
    }
 
-#ifdef LOG_TIMER
-   U32 done3 = Platform::getRealMilliseconds();
 
+   // allZones is a Vector cache of all zones held in memory by the server to
+   // be used by Robots without having to call the grid database
+   allZones->deleteAndClear();
+
+   // Repopulate allZones with the zones we modified above
+   if(addedZones)
+      populateZoneList(botZoneDatabase, allZones);
+
+   // Build connections for standard zones
+   buildConnectionsRecastStyle(allZones, mesh, polyToZoneMap,
+         coreRecastPolyStartIdx, szRecastPolyStartIdx);
+
+   // Teleporters require special connections
+   linkConnectionsTeleporters(botZoneDatabase, teleporterData);
+
+#ifdef LOG_TIMER
+   U32 done3 = Platform::getRealMilliseconds();  // Done
+   logprintf("Built %d zones!", botZoneDatabase->getObjectCount());
    logprintf("Timings: %d %d %d", done1-starttime, done2-done1, done3-done2);
 #endif
 
    return true;
-}
-
-
-// Only runs on server
-// TODO can be combined with buildBotNavMeshZoneConnectionsRecastStyle() ?
-void BotNavMeshZone::buildBotNavMeshZoneConnections(const Vector<BotNavMeshZone *> *allZones)
-{
-   if(allZones->size() == 0)      // Nothing to do!
-      return;
-
-   // We'll reuse these objects throughout the following block, saving the cost of creating and destructing them
-   Point bordStart, bordEnd, bordCen;
-   Rect rect;
-   NeighboringZone neighbor;
-
-   // Figure out which zones are adjacent to which, and find the "gateway" between them
-   for(S32 i = 0; i < zones.size() - 1; i++)
-   {
-      for(S32 j = i + 1; j < zones.size(); j++)
-      {
-         // Do zones i and j touch?  First a quick and dirty bounds check:
-         if(!zones[i]->getExtent().intersectsOrBorders(zones[j]->getExtent()))
-            continue;
-
-         if(zonesTouch(allZones->get(i)->getOutline(), allZones->get(j)->getOutline(), 1.0, bordStart, bordEnd))
-         {
-            rect.set(bordStart, bordEnd);
-            bordCen.set(rect.getCenter());
-
-            // Zone j is a neighbor of i
-            neighbor.zoneID = j;
-            neighbor.borderStart.set(bordStart);
-            neighbor.borderEnd.set(bordEnd);
-            neighbor.borderCenter.set(bordCen);
-
-            neighbor.distTo = allZones->get(i)->getExtent().getCenter().distanceTo(bordCen);     // Whew!
-            neighbor.center.set(allZones->get(j)->getCenter());
-            allZones->get(i)->mNeighbors.push_back(neighbor);
-
-            // Zone i is a neighbor of j
-            neighbor.zoneID = i;
-            neighbor.borderStart.set(bordStart);
-            neighbor.borderEnd.set(bordEnd);
-            neighbor.borderCenter.set(bordCen);
-
-            neighbor.distTo = allZones->get(j)->getExtent().getCenter().distanceTo(bordCen);     
-            neighbor.center.set(allZones->get(i)->getCenter());
-            allZones->get(j)->mNeighbors.push_back(neighbor);
-         }
-      }
-   }
 }
 
 
