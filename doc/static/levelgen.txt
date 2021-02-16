@@ -18,4 +18,50 @@ called throughout the game as events are fired.
 Unlike robots, levelgens are not automatically subscribed to the \e Tick
 event.
 
+
+"Hello World" Levelgen recipe
+---------------
+1. Start the Bitfighter level editor.
+2. Open the second diagnostics screen to find the Bitfighter LevelDir by pressing [F7] twice.
+3. Open your favorite text editor and create the following skeleton script:
+@code
+function main()     -- Gets run when level is loaded, before game starts
+    print("Hello World!")
+end
+@endcode
+4. Save it in the scripts folder as "hello_world.levelgen" (the .lua extension will also work).
+5. Create a barebones level in the editor.
+6. Edit the level settings in the Game Params Editor [F3].
+7. Set the Levelgen Script option to "hello_world" (no need to enter the extension).
+8. Press [Esc] to return to the editor, and [Esc] again to get to the Main Menu.  Select the Test Level option.
+9. Open the console ([Ctrl-/]) and you should see the text "Hello World!".
+
+You can build on this script by expanding the main() function, or by subscribing to events and adding event listeners to respond to them.
+See @ref events "Subscribing to Events" for more information.
+
+A Slightly More Interesting Example
+-----------------
+
+You can do some pretty neat things with even a basic levelgen script, such as add objects to levels.
+
+Modify your hello_world script to look like this:
+@code
+function main()
+    -- print("Hello World!")
+    radius = 200
+    items = 10
+
+    for i = 0, items - 1 do
+        resourceitem = ResourceItem.new(        -- Create the item
+            point.new(radius * math.cos(i * 2 * math.pi / items), radius * math.sin(i * 2 * math.pi / items))
+        )
+        levelgen:addItem(resourceitem)          -- Add it to the level
+    end
+end
+@endcode
+
+Now when you start your level, you should see a ring of resource items!
+
+If you don't see them, the script might be crashing.  Errors are logged to the console, so be sure to check there when something isn't working.
+To run your script again, quit the game and restart it.
 */
