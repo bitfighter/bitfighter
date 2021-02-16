@@ -990,7 +990,7 @@ const char *Teleporter::luaClassName = "Teleporter";
 REGISTER_LUA_SUBCLASS(Teleporter, BfObject);
 
 /** 
- * @luafunc Teleporter::addDest(Point dest)
+ * @luafunc Teleporter::addDest(point dest)
  *
  * @brief Adds a destination to the teleporter.
  *
@@ -1156,7 +1156,7 @@ S32 Teleporter::lua_setDelay(lua_State *L)
 // Overrides
 
 /**
- * @luafunc Teleporter::setGeom(geom geometry)
+ * @luafunc Teleporter::setGeom(geom lineGeom)
  * @brief Sets teleporter geometry; differs from standard conventions.
  * @descr In this case, geometry represents both Teleporter's location and those
  * of all destinations.  The first point specified will be used to set the
@@ -1221,7 +1221,7 @@ void Teleporter::doSetGeom(const Vector<Point> &points)
 
 
 /**
- * @luafunc Geom Teleporter::getGeom()
+ * @luafunc geom Teleporter::getGeom()
  * 
  * @brief Gets teleporter geometry; differs from standard conventions.
  * 
@@ -1231,7 +1231,7 @@ void Teleporter::doSetGeom(const Vector<Point> &points)
  * In the editor, all teleporters are simple lines, and will return geometries
  * with two points -- an origin and a destination.
  * 
- * @return Geom geometry: New geometry for Teleporter.
+ * @return geo geometry: New geometry for Teleporter.
  */
 S32 Teleporter::lua_getGeom(lua_State *L)
 {

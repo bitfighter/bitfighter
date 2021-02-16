@@ -1487,7 +1487,7 @@ S32 BfObject::lua_setTeam(lua_State *L)
 
 
 /**
- * @luafunc BfObject::setPos(Point pos)
+ * @luafunc BfObject::setPos(point pos)
  * 
  * @brief Set the object's position.
  * 

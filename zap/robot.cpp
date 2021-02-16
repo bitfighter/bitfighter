@@ -62,10 +62,10 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
 
 
 /**
- * @luafunc Robot::Robot(point position, int teamIndex, string scriptName, string scriptArg)
+ * @luafunc Robot::Robot(point pos, int teamIndex, string scriptName, string scriptArg)
  *
  * All parameters are optional.
- * @param position Starting position of the Robot. Defaults to point.new(0,0).  Note
+ * @param pos Starting position of the Robot. Defaults to point.zero (i.e. (0,0)).  Note
  * that this position is pretty much ignored at this point; bot is created, then it is spawned
  * using normal game processes, which means at a spawnPoint or at (0,0) if there are none.
  * Once spawned, a levelgen script can relocate a ship as shown in one of the samples below.
@@ -766,7 +766,7 @@ S32 Robot::lua_getAnglePt(lua_State *L)
  * 
  * @brief Does this robot have line-of-sight to the given point.
  * 
- * @descr Line-of-sight a straight path from the robot to the object without any
+ * @descr Line-of-sight is a straight path from the robot to the object without any
  * stationary, collideable objects in the way
  * 
  * @param pt point to test

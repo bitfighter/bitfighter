@@ -1421,7 +1421,7 @@ bool SpyBug::isVisibleToPlayer(ClientInfo *clientInfo, bool isTeamGame)
 // Lua interface
 /**
  * @luafunc SpyBug::SpyBug()
- * @luafunc SpyBug::SpyBug(geom, team)
+ * @luafunc SpyBug::SpyBug(point pos, int team)
  * @luaclass SpyBug
  * 
  * @brief Monitors a section of the map and will show enemy ships there.

@@ -417,7 +417,7 @@ S32 EditorPlugin::lua_showMessage(lua_State *L)
 
 
 /**
- * @luafunc EditorPlugin::setDisplayCenter(Point pos)
+ * @luafunc EditorPlugin::setDisplayCenter(point pos)
  * 
  * @brief
  * Center editor window on specified point.

@@ -155,8 +155,8 @@ Spawn::Spawn(const Point &pos) : AbstractSpawn(pos)
 
 /**
  * @luafunc Spawn::Spawn()
- * @luafunc Spawn::Spawn(geom)
- * @luafunc Spawn::Spawn(geom, team)
+ * @luafunc Spawn::Spawn(point pos)
+ * @luafunc Spawn::Spawn(point pos, int team)
  */
 // Lua constructor
 Spawn::Spawn(lua_State *L) : AbstractSpawn(Point(0,0))
@@ -409,8 +409,8 @@ AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : Parent(pos, time)
 
 /**
  * @luafunc AsteroidSpawn::AsteroidSpawn()
- * @luafunc AsteroidSpawn::AsteroidSpawn(geom)
- * @luafunc AsteroidSpawn::AsteroidSpawn(geom, time)
+ * @luafunc AsteroidSpawn::AsteroidSpawn(point pos)
+ * @luafunc AsteroidSpawn::AsteroidSpawn(point pos, num time)
  */
 AsteroidSpawn::AsteroidSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
 {

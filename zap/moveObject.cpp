@@ -1471,7 +1471,7 @@ const S32 Asteroid::ASTEROID_INITIAL_SIZELEFT  = 3;
 
 /**
  *   @luafunc Asteroid::Asteroid()
- *   @luafunc Asteroid::Asteroid(geom)
+ *   @luafunc Asteroid::Asteroid(point pos)
  */
 // Combined Lua / C++ default constructor
 Asteroid::Asteroid(lua_State *L) : Parent(Point(0,0), ASTEROID_SPEED, getAsteroidRadius(ASTEROID_INITIAL_SIZELEFT), getAsteroidMass(ASTEROID_INITIAL_SIZELEFT))
@@ -1990,7 +1990,7 @@ const Vector<Point> *TestItem::getCollisionPoly() const
 
 /**
  * @luafunc TestItem::TestItem()
- * @luafunc TestItem::TestItem(geom)
+ * @luafunc TestItem::TestItem(point pos)
  * @luaclass TestItem
  * 
  * @brief Large bouncy ball type item.
@@ -2146,7 +2146,7 @@ bool ResourceItem::isItemThatMakesYouVisibleWhileCloaked()
 
 /**
  * @luafunc ResourceItem::ResourceItem()
- * @luafunc ResourceItem::ResourceItem(geom)
+ * @luafunc ResourceItem::ResourceItem(point pos)
  * @luaclass ResourceItem
  * 
  * @brief Small bouncy ball type item. In levels where Engineer module is

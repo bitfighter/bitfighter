@@ -530,7 +530,7 @@ void WallItem::addToGame(Game *game, GridDatabase *database)
 // Lua interface
 /**
  * @luafunc WallItem::WallItem()
- * @luafunc WallItem::WallItem(geom geometry, int thickness)
+ * @luafunc WallItem::WallItem(geom lineGeom, int thickness)
  * @luaclass WallItem
  * 
  * @brief Traditional wall item.
