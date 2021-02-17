@@ -417,11 +417,12 @@ GENERATE_LUA_FUNARGS_TABLE(LineItem, LUA_METHODS);
  * @brief Sets the LineItem's global parameter.
  *
  * @descr LineItems are normally viewable by all players in a game. If you wish
- * to only let the LineItem be viewable to the owning team, set to `false`. Make
- * sure you call setTeam() on the LineItem first. Global is on by default.
+ * to only let the LineItem be viewable to the owning team, set to `false`. You
+ * must call setTeam() on the LineItem before using this method. Global is `true` 
+ * by default.
  *
  * @param global `false` if this LineItem should be viewable only by the owning
- * team, otherwise viewable by all teams.
+ * team; 'true' makes it viewable by all teams.
  */
 S32 LineItem::lua_setGlobal(lua_State *L)
 {
