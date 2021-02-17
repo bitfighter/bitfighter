@@ -976,14 +976,19 @@ def remove_types_from_method_declarations_section(root: Any) -> None:
         delete_node(element)
 
 
-def parse_member_name(memname: str) -> Optional[Tuple[str, str, str]]:
+def parse_member_name(memname: str) -> Optional[Tuple[str, str, str, str]]:
     """
     Given a string like "int BFObject::doMath", return ["int", "BfObject", "doMath"].
     Some parts may be missing; if passed string does not contain "::", bail and return None.
-    Drop a leading static token if there is one; none of our callers care.
     """
     if "::" not in memname:    # Not sure this check is necessary
         return None
+
+    memname = memname.strip()
+    if memname.startswith("static"):
+        static = "static"
+    else:
+        static = ""
 
     memname = memname.replace("static", "").strip()
 
@@ -994,7 +999,7 @@ def parse_member_name(memname: str) -> Optional[Tuple[str, str, str]]:
     else:
         ret_type = ""
 
-    return ret_type.strip(), xclass.strip(), fn.strip()
+    return static, ret_type.strip(), xclass.strip(), fn.strip()
 
 
 def cleanup_member_details(root: Any, class_urls: Dict[str, str]) -> None:
@@ -1034,8 +1039,9 @@ def cleanup_member_details(root: Any, class_urls: Dict[str, str]) -> None:
         if not parts:
             continue
 
-        ret_type, xclass, fn = parts
+        static, ret_type, xclass, fn = parts
 
+        # Modify "inherited from" tags off to the right
         inherited_elements = table.xpath(".//span[@class='mlabel' and text()='inherited']")
         if inherited_elements:
             assert len(inherited_elements) == 1
@@ -1047,7 +1053,6 @@ def cleanup_member_details(root: Any, class_urls: Dict[str, str]) -> None:
 
             inherited_elements[0].clear()
             inherited_elements[0].insert(1, inherited_from)
-
 
     #####
     # Spiff up method signatures (looking for inner tables found above, but this time even ones without adjacent inherited tags)
@@ -1083,18 +1088,30 @@ def cleanup_member_details(root: Any, class_urls: Dict[str, str]) -> None:
                 if not parts:
                     continue
 
-                ret_type, xclass, fn_name = parts     # ret_type xclass::fn_name()
-                # print(fn_name)
+                # Note that by the time we get here, static will always be "" in this call because fn_decl is missing the static
+                # keyword (it appears to get stripped off by Doxygen).  So we'll determine if the function is static by using the
+                # small static banner over on the right, in an mlabel span.
+                static, ret_type, xclass, fn_name = parts     # ret_type xclass::fn_name()
+
+                mlabels = memitem.xpath(".//span[@class='mlabel']")
+
+                if mlabels and mlabels[0].text.strip() == "static":
+                    static = "static"
+
+
 
                 is_constructor = xclass == fn_name
                 if is_constructor:
                     ret_type = xclass        # Constructors return an instance of the class, even if it's not written that way in C++
-                    fn_name += ".new"  # This is how you call constructors in Lua
+                    fn_name += ".new"        # This is how you call constructors in Lua
             else:
                 assert False
                 ret_type, fn_name = "", table.xpath(".//td/text()")[0]
                 is_constructor = False
 
+            # If this is a static class, alter the title to show the class to make usage clearer
+            if static:
+                fn_name = f"{xclass}.{fn_name}"
 
             cells = table.xpath(".//td")
             cells[0].clear()
