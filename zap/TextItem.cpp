@@ -411,7 +411,7 @@ void TextItem::textEditedCallback(string text, BfObject *obj)
 
 /**
  * @luafunc TextItem::TextItem()
- * @luafunc TextItem::TextItem(lineGeom, string text)
+ * @luafunc TextItem::TextItem(Geom lineGeom, string text)
  * @luaclass TextItem
  * 
  * @brief Display text message in level.

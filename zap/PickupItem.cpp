@@ -300,8 +300,8 @@ TNL_IMPLEMENT_NETOBJECT(RepairItem);
 
 /**
  * @luafunc RepairItem::RepairItem()
- * @luafunc RepairItem::RepairItem(point)
- * @luafunc RepairItem::RepairItem(point, time)
+ * @luafunc RepairItem::RepairItem(point pos)
+ * @luafunc RepairItem::RepairItem(point pos, int time)
  */
 RepairItem::RepairItem(lua_State *L) : Parent((F32)REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME)   // Combined Lua / C++ default constructor
 { 
@@ -420,8 +420,8 @@ REGISTER_LUA_SUBCLASS(RepairItem, PickupItem);
 TNL_IMPLEMENT_NETOBJECT(EnergyItem);
 /**
  * @luafunc EnergyItem::EnergyItem()
- * @luafunc EnergyItem::EnergyItem(point)
- * @luafunc EnergyItem::EnergyItem(point, time)
+ * @luafunc EnergyItem::EnergyItem(point pos)
+ * @luafunc EnergyItem::EnergyItem(point pos, int time)
  */
 EnergyItem::EnergyItem(lua_State *L) : Parent(20, DEFAULT_RESPAWN_TIME)    // Combined Lua / C++ default constructor
 {

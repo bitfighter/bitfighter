@@ -44,8 +44,8 @@ const S32 LineItem::MAX_LINE_WIDTH = 255;
 // Combined C++ / Lua constructor
 /**
  * @luafunc LineItem::LineItem()
- * @luafunc LineItem::LineItem(geom lineGeom)
- * @luafunc LineItem::LineItem(geom lineGeom, int teamIndex)
+ * @luafunc LineItem::LineItem(Geom lineGeom)
+ * @luafunc LineItem::LineItem(Geom lineGeom, int teamIndex)
  */
 LineItem::LineItem(lua_State *L)
 { 

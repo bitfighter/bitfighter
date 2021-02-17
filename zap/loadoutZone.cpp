@@ -18,7 +18,7 @@ TNL_IMPLEMENT_NETOBJECT(LoadoutZone);
 
 /**
 *  @luafunc LoadoutZone::LoadoutZone()
-*  @luafunc LoadoutZone::LoadoutZone(geom poly, int team)
+*  @luafunc LoadoutZone::LoadoutZone(Geom poly, int team)
 *  @brief %LoadoutZone constructor.
 *  @descr Default team is `Team.Neutral`.
 */

@@ -895,7 +895,7 @@ Mine::Mine(const Point &pos, BfObject *planter) : Burst(pos, Point(0,0), planter
 
 /**
  * @luafunc Mine::Mine()
- * @luafunc Mine::Mine(point)
+ * @luafunc Mine::Mine(point pos)
  */
 // Combined Lua / C++ default constructor -- used in Lua and editor
 Mine::Mine(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL, BurstRadius)

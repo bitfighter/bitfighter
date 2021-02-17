@@ -575,8 +575,8 @@ bool SpeedZone::canBeNeutral() { return false; }
 
 /**
  * @luafunc SpeedZone::SpeedZone()
- * @luafunc SpeedZone::SpeedZone(geom lineGeom)
- * @luafunc SpeedZone::SpeedZone(geom lineGeom, int speed)
+ * @luafunc SpeedZone::SpeedZone(Geom lineGeom)
+ * @luafunc SpeedZone::SpeedZone(Geom lineGeom, int speed)
  * 
  * @luaclass SpeedZone
  * 

@@ -1325,8 +1325,8 @@ TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 
 /**
  * @luafunc ForceFieldProjector::ForceFieldProjector()
- * @luafunc ForceFieldProjector::ForceFieldProjector(point)
- * @luafunc ForceFieldProjector::ForceFieldProjector(point, teamIndex)
+ * @luafunc ForceFieldProjector::ForceFieldProjector(point pos)
+ * @luafunc ForceFieldProjector::ForceFieldProjector(point pos, int teamIndex)
  */
 // Combined Lua / C++ default constructor
 ForceFieldProjector::ForceFieldProjector(lua_State *L) : Parent(TEAM_NEUTRAL, Point(0,0), Point(1,0))

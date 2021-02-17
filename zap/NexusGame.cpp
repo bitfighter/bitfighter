@@ -931,7 +931,7 @@ void NexusFlagItem::sendHome()
 
 /**
  * @luafunc NexusZone::NexusZone()
- * @luafunc NexusZone::NexusZone(geom)
+ * @luafunc NexusZone::NexusZone(Geom polyGeom)
  */
 // Combined Lua / C++ constructor)
 NexusZone::NexusZone(lua_State *L)

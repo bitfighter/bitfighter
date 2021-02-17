@@ -1524,7 +1524,7 @@ S32 BfObject::lua_removeFromGame(lua_State *L)
 
 
 /**
- * @luafunc BfObject::setGeom(geom geometry)
+ * @luafunc BfObject::setGeom(Geom geometry)
  * 
  * @brief Sets an object's geometry. 
  * 

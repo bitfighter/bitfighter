@@ -530,7 +530,7 @@ void WallItem::addToGame(Game *game, GridDatabase *database)
 // Lua interface
 /**
  * @luafunc WallItem::WallItem()
- * @luafunc WallItem::WallItem(geom lineGeom, int thickness)
+ * @luafunc WallItem::WallItem(Geom polyLineGeom, int thickness)
  * @luaclass WallItem
  * 
  * @brief Traditional wall item.
@@ -634,7 +634,7 @@ TNL_IMPLEMENT_NETOBJECT(PolyWall);
 
 /**
  * @luafunc PolyWall::PolyWall()
- * @luafunc PolyWall::PolyWall(polyGeom)
+ * @luafunc PolyWall::PolyWall(Geom polyGeom)
  */
 // Combined Lua/C++ constructor
 PolyWall::PolyWall(lua_State *L)

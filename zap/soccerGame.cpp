@@ -306,7 +306,7 @@ const F32 SoccerBallItem::Mass = 4;
 
 /**
  * @luafunc SoccerBallItem::SoccerBallItem()
- * @luafunc SoccerBallItem::SoccerBallItem(point)
+ * @luafunc SoccerBallItem::SoccerBallItem(point pos)
  */
 // Combined Lua / C++ default constructor
 SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, SoccerBallItem::Radius, SoccerBallItem::Mass)

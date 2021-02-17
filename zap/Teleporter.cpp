@@ -957,7 +957,7 @@ bool Teleporter::canBeNeutral() { return false; }
 
 /**
  * @luafunc Teleporter::Teleporter()
- * @luafunc Teleporter::Teleporter(geom)
+ * @luafunc Teleporter::Teleporter(Geom simpleLine)
  * @descr         Note that teleporter geom is a strange beast and should be documented here!
  * @luaclass Teleporter
  *
@@ -1156,7 +1156,7 @@ S32 Teleporter::lua_setDelay(lua_State *L)
 // Overrides
 
 /**
- * @luafunc Teleporter::setGeom(geom lineGeom)
+ * @luafunc Teleporter::setGeom(Geom simpleLine)
  * @brief Sets teleporter geometry; differs from standard conventions.
  * @descr In this case, geometry represents both Teleporter's location and those
  * of all destinations.  The first point specified will be used to set the
@@ -1221,7 +1221,7 @@ void Teleporter::doSetGeom(const Vector<Point> &points)
 
 
 /**
- * @luafunc geom Teleporter::getGeom()
+ * @luafunc Geom Teleporter::getGeom()
  * 
  * @brief Gets teleporter geometry; differs from standard conventions.
  * 

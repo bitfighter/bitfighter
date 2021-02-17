@@ -1401,6 +1401,7 @@ REGISTER_LUA_SUBCLASS(MountableItem, MoveObject);
 /**
  * @luafunc Ship MountableItem::getShip()
  * 
+ * @brief Get the ship carrying this item, if any.
  * @return The ship this item is mounted to, or nil if item is unmounted.
  */
 S32 MountableItem::lua_getShip(lua_State *L) 
