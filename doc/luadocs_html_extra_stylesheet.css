@@ -59,9 +59,20 @@ span.mlabels a:visited {
 .argline span.paramname {
    color: black;
 }
+
+/* Parameter types in detailed member documentation */
 .argline span.paramtype {
-
+   color: hsl(0, 32%, 30%);
+   border: 1px solid hsl(0, 32%, 30%);
+   padding-left: 2px;
+   padding-right: 2px;
+   margin-right: 1px;      /* Provide a tiny bit of breathing room for trailing commas */
 }
-.argline span.returntype {
 
+/* Return type in detailed member documentation */
+.argline span.returntype {
+   color: hsl(0, 32%, 30%);
+   border: 1px solid hsl(0, 32%, 30%);
+   padding-left: 2px;
+   padding-right: 2px;
 }

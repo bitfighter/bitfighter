@@ -414,6 +414,20 @@ def preprocess():
                             raise Exception(f"Couldn't get method name from {line}\n")   # Must have a method; should never happen
 
 
+                        if args:        # point pos, int teamIndex
+                            parts = args.split(",")
+                            arg_parts = []
+                            for part in parts:
+                                part = part.strip()
+                                if " " in part:         # e.g. BarrierItem has a PolyGeom that this doesn't like
+                                    arg_parts.append(part.split(" ")[1])
+                                else:
+                                    arg_parts.append(part)
+                                    # print(part)
+                            classless_arg_list = ", ".join(arg_parts)
+                        else:
+                            classless_arg_list = ""
+
                         # retval =~ s|\s+$||      # Trim any trailing spaces from $retval
 
                         # Use voidlessRetval to avoid having "void" show up where we'd rather omit the return type altogether
@@ -424,11 +438,13 @@ def preprocess():
                         if is_constructor:      # Constructors come in the form of class::method where class and method are the same
 
                             # SPECIAL CASE HANDLER!
-                            # Because the point class is lower case, the default example we generate below won't work.  Insert a different one
+                            # Because the point class is lowercase, the default example we generate below won't work.  Insert a different one.
                             if classname == "point":
-                                comments.append(f"\\brief Constructor.\n\nExample:\n@code\npt = point.new(100, 300)\ntestitem = TestItem.new(pt)\nlevelgen:addItem(testitem)\n@endcode\n\n")
+                                comments.append(f"\\brief Constructor.\n\nExample:\n@code\npt = point.new(100, 300)\n" +
+                                                f"testitem = TestItem.new(pt)\nlevelgen:addItem(testitem)\n@endcode\n\n")
                             else:
-                                comments.append(f"\\brief Constructor.\n\nExample:\n@code\n{classname.lower()} = {classname}.new({args})\n...\nlevelgen:addItem({classname.lower()})\n@endcode\n\n")
+                                comments.append(f"\\brief Constructor.\n\nExample:\n@code\n{classname.lower()} = {classname}.new({classless_arg_list})\n...\n" +
+                                                f"levelgen:addItem({classname.lower()})\n@endcode\n\n")
 
                         # Find an earlier definition and delete it (if it still exists); but not if it's a constructor.
                         # This might have come from an earlier GENERATE_LUA_METHODS_TABLE block.
@@ -918,15 +934,39 @@ def remove_types_from_method_declarations_section(root: Any) -> None:
     # Remove types from declarations in upper section.  Several patterns to consider.
     # Pattern 1: Method(geom lineGeom, int speed)
     #   convert to: Method(lineGeom, speed)
-    elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']/a[@class='el']")
+
+    # <table class="memberdecls">
+    #   ...
+    #   <tr class="memitem:a1dce54ec5f53f8848202ccf0b117f1a2">
+    #     <td class="memItemLeft" align="right" valign="top">void&nbsp;</td>
+    #     <td class="memItemRight" valign="bottom">
+    #       <a class="el" href="class_flag_item.html#a1dce54ec5f53f8848202ccf0b117f1a2">FlagItem</a>
+    #    >>> replace the following line with (pos, teamIndex) <<<
+    #       (<a class="el" href="classpoint.html">point</a> pos, int teamIndex)
+    #     </td>
+    #   </tr>
+
+
+    elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']")
+
     for element in elements:
-        if element.tail:
-            match = re.match(r"\((.*)\)", element.tail)
-            if match:
-                arglist = match.groups()[0].split()
-                if arglist and len(arglist) % 2 == 0:    # Even number, meaning every param has a type
-                    argstr = " ".join(arglist[1::2])     # Concatenate every second item; commas will already be included in the text we're parsing
-                    element.tail = "(" + argstr + ")"    # ['geom', 'geometry,', 'int', 'thickness'] ==> (geometry, thickness)
+        signature = etree.tostring(element, method="text", encoding="unicode")  # Strips tags --> FlagItem(point pos, int teamIndex)
+        match = re.match(r".*\((.*)\)", signature)   # matches --> point pos, int teamIndex
+        if match:
+            arglist = match.groups()[0].split()
+            if arglist and len(arglist) % 2 == 0:    # Even number, meaning every param has a type
+                children = element.getchildren()
+                for child in children[1:]:           # Delete all but the first child, which will be the linked class name
+                    delete_node(child)
+
+                argstr = " ".join(arglist[1::2])        # Concatenate every second item; commas will already be included in the text we're parsing
+                children[0].tail = "(" + argstr + ")"   # ['point', 'pos,', 'int', 'teamIndex'] ==> (pos, teamIndex)
+            else:
+                if arglist:
+                    print(f"Warn: Missing types? | {signature} | {arglist}")
+        else:
+            print(f"Warn: Couldn't find signature pattern | {signature}")
+
     # Pattern 2: Method(<linked type> param)
     # Linked types are in <a class="el"> elements, but we need to hang onto the first one, which is the member name itself
     elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']/a[@class='el' and position()>1]")
