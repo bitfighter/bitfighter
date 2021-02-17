@@ -1429,7 +1429,7 @@ S32 BfObject::lua_setId(lua_State *L)
 
 
 /**
- * @luafunc Point BfObject::getPos()
+ * @luafunc point BfObject::getPos()
  * 
  * @brief Gets an object's position.
  * 

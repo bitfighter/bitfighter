@@ -153,7 +153,7 @@ bool Zone::collide(BfObject *hitObject)
 
 /**
  * @luafunc Zone::Zone()
- * @luafunc Zone::Zone(geom)
+ * @luafunc Zone::Zone(Geom poly)
  * @luaclass Zone
  * 
  * @brief Invisible objects, used mainly for generating events.

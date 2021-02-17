@@ -1415,7 +1415,8 @@ S32 MountableItem::lua_getShip(lua_State *L)
 /**
  * @luafunc bool MountableItem::isOnShip()
  *
- * @return `true` if item is mounted on a ship, `false` otherwise.
+ * @brief Is item mounted on a ship?
+ * @return `true` if item is mounted on a ship, `false` if it is not.
  */
 S32 MountableItem::lua_isOnShip(lua_State *L)
 {

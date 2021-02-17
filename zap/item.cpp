@@ -266,7 +266,8 @@ S32 Item::lua_getShip (lua_State *L) { return returnNil(L); }
 /**
  * @luafunc bool Item::isInCaptureZone()
  *
- * @return `true` if item is held in a capture zone, `false` otherwise.
+ * @brief Is item in a capture zone?
+ * @return `true` if item is held in a capture zone, `false` if it is not.
  */
 S32 Item::lua_isInCaptureZone(lua_State *L) { return returnBool(L, false); }
 
