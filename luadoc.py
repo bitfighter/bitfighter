@@ -100,10 +100,12 @@ def preprocess():
     files.extend(glob(os.path.join(outpath, "../static/*.txt")))               # our static pages for general information and task-specific examples
 
 
-    # files = [
-    #     R"C:\dev\bitfighter\zap\luaLevelGenerator.cpp",
-    #     R"C:\dev\bitfighter\resource\scripts\levelgen_helper_functions.lua"
-    # ]
+    # if DEBUG_MODE:
+    #     files = [
+    #         R"C:\dev\bitfighter\zap\flagItem.h",
+    #         R"C:\dev\bitfighter\zap\flagItem.cpp",
+    #         # R"C:\dev\bitfighter\resource\scripts\luavec.lua"
+    #     ]
 
     # Loop through all the files we found above...
     for file_cnt, file in enumerate(files):
@@ -222,7 +224,7 @@ def preprocess():
                         continue
 
                     # GENERATE_LUA_STATIC_METHODS_TABLE(Geom, LUA_STATIC_METHODS);
-                    match = re.search(r"GENERATE_LUA_STATIC_METHODS_TABLE *\( *(.+?) *,", line)  # Signals we have all methods for this class, gives us class name; now generate cod
+                    match = re.search(r"GENERATE_LUA_STATIC_METHODS_TABLE *\( *(.+?) *,", line)  # Signals we have all methods for this class, gives us class name; now generate code
 
                     if match:
                         classname = cleanup_classname(match.groups()[0])        # ==> Geom
@@ -768,6 +770,14 @@ def postprocess_classes():
     # Second pass
     files = get_class_files()
 
+    # if DEBUG_MODE:
+    #     files = glob("./html/*point*.html")
+    #     # files = [
+    #     #     "./html/flagItem.h",
+    #     #     "./html/flagItem.cpp",
+    #     # ]
+
+
     for file_ct, file in enumerate(files):
         update_progress(file_ct / len(files), os.path.basename(file))
         dirty_html = ""
@@ -971,7 +981,8 @@ def remove_types_from_method_declarations_section(root: Any) -> None:
                 if arglist:
                     print(f"Warn: Missing types? | {signature} | {arglist}")
         else:
-            print(f"Warn: Couldn't find signature pattern | {signature}")
+            # print(f"Warn: Couldn't find signature pattern | {signature}")
+            pass
 
     # Pattern 2: Method(<linked type> param)
     # Linked types are in <a class="el"> elements, but we need to hang onto the first one, which is the member name itself
