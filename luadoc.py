@@ -185,6 +185,12 @@ def preprocess():
                 if collecting_mode == CollectingMode.METHODS:
                     match = re.search(r"METHOD *\( *CLASS, *(.+?) *,", line)                 # Signals class declaration... methods will follo
                     if match:
+
+                        # Special case; suppress this item until the code is written
+                        # Block ID 8675309
+                        if match.groups()[0].strip() == "clone":
+                            continue
+
                         methods.append(match.groups()[0])
                         continue
 

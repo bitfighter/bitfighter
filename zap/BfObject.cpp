@@ -1563,18 +1563,19 @@ S32 BfObject::lua_getGeom(lua_State *L)
 }
 
 
-/**
- * @ xxx luafunc BfObject BfObject::clone()
- * 
- * @brief Make an exact duplicate of an object.
- * 
- * @descr Returned object will not be added to the current game, and will have a
- * different id than the source object.
- * 
- * @return Returns the new clone of the object.
- *
- * @note This function is not yet implemented.
- */
+// Temporarily disable these docs -- note there is a special handler in the luadoc.py that 
+// suppresses this; search for and remove the python block marked with "Block ID 8675309"
+// @ xxx luafunc BfObject BfObject::clone()
+// 
+// @brief Make an exact duplicate of an object.
+// 
+// @descr Returned object will not be added to the current game, and will have a
+// different id than the source object.
+// 
+// @return Returns the new clone of the object.
+//
+// @note This function is not yet implemented.
+//
 S32 BfObject::lua_clone(lua_State *L)
 {
    TNLAssert(false, "Not yet implemented!!!");
