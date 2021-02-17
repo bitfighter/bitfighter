@@ -966,7 +966,16 @@ def remove_types_from_method_declarations_section(root: Any) -> None:
     elements = root.xpath(f"//table[@class='memberdecls']//td[@class='memItemRight']")
 
     for element in elements:
-        signature = etree.tostring(element, method="text", encoding="unicode")  # Strips tags --> FlagItem(point pos, int teamIndex)
+        # This beast of a statement strips out all the HTML tags, but also ensures there are sufficient spaces between tokens.
+        # The following (commented out, nicer) method fails occasionally.
+        # signature = etree.tostring(element, method="text", encoding="unicode")
+        # Strips HTML tags to get FlagItem(point pos, int teamIndex)
+        signature = etree.tostring(
+            etree.fromstring(etree.tostring(element, encoding="unicode").replace("<", " <")),
+            method="text",
+            encoding="unicode",
+        ).replace(" , ", ", ").replace(" ( ", "(").strip()   # Repair some of the damage
+
         match = re.match(r".*\((.*)\)", signature)   # matches --> point pos, int teamIndex
         if match:
             arglist = match.groups()[0].split()
