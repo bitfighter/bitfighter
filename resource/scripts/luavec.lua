@@ -13,7 +13,8 @@
         local o = point.zero                  -- Origin; using builtin constant rather than creating new object
         local bulletPos = bullet:getPos()
         print(bulletPos.x, bulletPos.y)       -- Access coordinates with dot notation
-        local bulletVel = bullet:getVel()
+        local bulletVel = bullet:getVel()     -- Access member functions with colon notation
+        -- angleTo is a static method, so call with "point.angleTo"
         return math.abs(angleDifference(point.angleTo(o, bulletVel), point.angleTo(bulletPos, botPos)))
     end
 @endcode
