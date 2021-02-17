@@ -1524,7 +1524,7 @@ S32 BfObject::lua_removeFromGame(lua_State *L)
 
 
 /**
- * @luafunc BfObject::setGeom(Geom geometry)
+ * @luafunc BfObject::setGeom(geom geometry)
  * 
  * @brief Sets an object's geometry. 
  * 
@@ -1564,7 +1564,7 @@ S32 BfObject::lua_getGeom(lua_State *L)
 
 
 /**
- * @luafunc BfObject BfObject::clone()
+ * @ xxx luafunc BfObject BfObject::clone()
  * 
  * @brief Make an exact duplicate of an object.
  * 
