@@ -93,6 +93,7 @@ public:
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
    virtual string toLevelCode() const;
 
+   static const F32 MoveObjectCollisionElasticity;
 
    void onAddedToGame(Game *game);
    void idle(BfObject::IdleCallPath path);    // Called from child object idle methods
