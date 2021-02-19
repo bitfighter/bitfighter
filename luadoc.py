@@ -3,6 +3,9 @@
 
 # Works with doxygen verison 1.9.0
 
+# HINT: Scanning the Bitfighter source code for the string "METHOD(CLASS," will locate all implemented Lua methods.
+
+
 # TODO: UIMenuItems_cpp.h
 
 import os
