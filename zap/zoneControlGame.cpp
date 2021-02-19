@@ -241,11 +241,11 @@ void ZoneControlGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeig
 {
 #ifndef ZAP_DEDICATED
 
-   Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
-
    Ship *ship = getGame()->getLocalPlayerShip();
-   if(!ship)
+   if(!ship) {
+      Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
       return;
+   }
 
    bool localClientHasFlag = (ship->getFlagCount() != 0);
 
@@ -317,6 +317,9 @@ void ZoneControlGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeig
                renderObjectiveArrow(zone, &c, canvasWidth, canvasHeight);
             }
          }
+
+      Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
+
    }
 #endif
 }

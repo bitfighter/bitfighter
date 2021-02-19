@@ -162,15 +162,15 @@ void CTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clie
 void CTFGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const
 {
 #ifndef ZAP_DEDICATED
-   // Render basic overlay
-   Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
 
    // Add some objective arrows...
    // ...but rendering objective arrows makes no sense if there is no ship at the moment
    Ship *ship = getGame()->getLocalPlayerShip();
 
-   if(!ship)
+   if(!ship) {
+      Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
       return;
+   }
 
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
@@ -187,6 +187,9 @@ void CTFGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) cons
       else
          renderObjectiveArrow(flag, canvasWidth, canvasHeight);
    }
+
+   // Render basic overlay
+   Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
 #endif
 }
 

@@ -197,12 +197,12 @@ void SoccerGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) c
 {
 #ifndef ZAP_DEDICATED
 
-   Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
-
    Ship *ship = getGame()->getLocalPlayerShip();
 
-   if(!ship)
+   if(!ship) {
+      Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
       return;
+   }
 
    S32 team = ship->getTeam();
 
@@ -218,6 +218,8 @@ void SoccerGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) c
 
    if(mBall.isValid())
       renderObjectiveArrow(mBall, canvasWidth, canvasHeight);
+
+   Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
 #endif
 }
 

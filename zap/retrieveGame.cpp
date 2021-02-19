@@ -287,12 +287,12 @@ void RetrieveGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight)
 {
 #ifndef ZAP_DEDICATED
 
-   Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
-
    Ship *ship = getGame()->getLocalPlayerShip();
 
-   if(!ship)
+   if(!ship) {
+      Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
       return;
+   }
 
    bool uFlag = false;   // What does this mean?
    S32 team = ship->getTeam();
@@ -353,6 +353,8 @@ void RetrieveGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight)
             renderObjectiveArrow(mount, canvasWidth, canvasHeight);
       }
    }
+
+   Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
 #endif
 }
 

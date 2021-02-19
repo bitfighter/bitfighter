@@ -88,12 +88,14 @@ string CoreGameType::toLevelCode() const
 void CoreGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const
 {
 #ifndef ZAP_DEDICATED
-   Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
 
    Ship *ship = getGame()->getLocalPlayerShip();
 
-   if(!ship)
+   if(!ship) 
+   {
+      Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
       return;
+   }
 
    for(S32 i = mCores.size() - 1; i >= 0; i--)
    {
@@ -102,6 +104,8 @@ void CoreGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) con
          if(coreItem->getTeam() != ship->getTeam())
             renderObjectiveArrow(coreItem, canvasWidth, canvasHeight);
    }
+
+   Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
 #endif
 }
 
