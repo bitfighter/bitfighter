@@ -74,8 +74,8 @@ S32 lua_logprint(lua_State *L)
  *
  * @brief Print to the in-game console.
  *
- * @descr This hijacks Lua's normal 'print' command that goes to stdout and
- * instead redirects it to the in-game console.
+ * @descr This hijacks Lua's normal `print` command that goes to stdout and
+ * instead redirects it to the in-game console.  Messages also go to the logfile.
  *
  * @param val The value you wish to print.
  */

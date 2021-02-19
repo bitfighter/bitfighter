@@ -613,26 +613,29 @@ void createClientGame(GameSettingsPtr settings)
 #endif
 }
 
+//print->ConsoleMsg
+//logprint->LuaBotMessage
 
 void setupLogging(const string &logDir)
 {
-   // Specify which events each logfile will listen for
-   S32 events        = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage | LogConsumer::LogConnection;
-   S32 consoleEvents = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage | LogConsumer::ConsoleMsg;
+   // Specify which events each logging destination will record
+   S32 stdoutEvents    = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage | LogConsumer::LogConnection;
+   S32 consoleEvents   = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage | LogConsumer::ConsoleMsg;
+   S32 serverLogEvents = LogConsumer::AllErrorTypes | LogConsumer::ServerFilter      | LogConsumer::StatisticsFilter;
+   // logfileEvents  ==> set from INI settings     See setupLogging(IniSettings *iniSettings)
 
    gMainLog.init(joindir(logDir, "bitfighter.log"), "w");
-   //gMainLog.setMsgTypes(events);  ==> set from INI settings     
    gMainLog.logprintf("------ Bitfighter Log File ------");
 
 #ifndef BF_NO_CONSOLE
    gOglConsoleLog.setMsgTypes(consoleEvents);   // writes to in-game console
-   gStdoutLog.setMsgTypes(events);              // writes to stdout
+   gStdoutLog.setMsgTypes(stdoutEvents);        // writes to stdout
 #else
    gStdoutLog.setMsgTypes(events | consoleEvents);              // writes to stdout
 #endif
 
    gServerLog.init(joindir(logDir, "bitfighter_server.log"), "a");
-   gServerLog.setMsgTypes(LogConsumer::AllErrorTypes | LogConsumer::ServerFilter | LogConsumer::StatisticsFilter); 
+   gServerLog.setMsgTypes(serverLogEvents);
 }
 
 
