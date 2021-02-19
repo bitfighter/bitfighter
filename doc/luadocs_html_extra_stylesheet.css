@@ -76,3 +76,18 @@ span.mlabels a:visited {
    padding-left: 2px;
    padding-right: 2px;
 }
+
+/* Inline code */
+code {
+   font-family: Consolas, monospace;
+   color: #c31805;
+   font-size: 95%;
+}
+
+/* Code samples */
+div.fragment {
+   padding: 8px;
+   margin: 8px 8px 8px 12px;
+   background-color: #eef1f4;
+   border: 1px solid #c4cfe5;
+}
