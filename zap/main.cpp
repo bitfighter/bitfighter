@@ -895,6 +895,16 @@ void removeFile(const string &offendingFile)
 }
 
 
+void renameIniKey(const string& section, const string& oldName, const string& newName) {
+   if(GameSettings::iniFile.hasKey(section, oldName))
+   {
+      bool oldval = GameSettings::iniFile.GetValueYN(section, oldName, true);
+      GameSettings::iniFile.setValueYN(section, newName, oldval, true);
+      GameSettings::iniFile.deleteKey(section, oldName);
+   }
+}
+
+
 // Function to handle one-time update tasks
 // Use this when upgrading, and changing something like the name of an INI parameter.  The old version is stored in
 // IniSettings.version, and the new version is in BUILD_VERSION.
@@ -907,7 +917,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    if(previousVersion >= BUILD_VERSION)
       return;
 
-   logprintf("Bitfighter was recently updated.  Migrating user preferences...");
+   logprintf("Bitfighter has been updated since it was last run.  Migrating user preferences...");
 
    // Wipe out all comments; they will be automatically replaced with any updates
    GameSettings::iniFile.deleteHeaderComments();
@@ -966,12 +976,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    if(previousVersion < VERSION_019a)
    {
       // Rename BotsBalanceTeams to AddRobots in [Host] --> BotsBalanceTeams was introduced in 019, renamed in 019a
-      if(GameSettings::iniFile.hasKey("Host", "BotsBalanceTeams"))
-      {
-         bool oldval = GameSettings::iniFile.GetValueYN("Host", "BotsBalanceTeams", false);
-         GameSettings::iniFile.setValueYN("Host", "AddRobots", oldval, true);
-         GameSettings::iniFile.deleteKey("Host", "BotsBalanceTeams");
-      }
+      renameIniKey("Host", "BotsBalanceTeams", "AddRobots");
 
       // Remove option that is no longer used, added in 019 
       GameSettings::iniFile.deleteKey("Host", "BotsAlwaysBalanceTeams");
@@ -1008,12 +1013,9 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    if(previousVersion < VERSION_022)
    {
       // Rename INI setting that I'm quite confident no one has ever changed
-      if(GameSettings::iniFile.hasKey("Diagnostics", "LuaBotMessage"))
-      {
-         bool oldval = GameSettings::iniFile.GetValueYN("Diagnostics", "LuaBotMessage", true);
-         GameSettings::iniFile.setValueYN("Diagnostics", "LuaScriptMessage", oldval, true);
-         GameSettings::iniFile.deleteKey("Diagnostics", "LuaBotMessage");
-      }
+      renameIniKey("Diagnostics", "LuaBotMessage", "LuaScriptMessage");
+
+      // Delete key that we've never really used
       GameSettings::iniFile.deleteKey("Diagnostics", "LuaLevelGenerator");
    }
 
