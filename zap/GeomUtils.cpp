@@ -45,6 +45,11 @@
 using namespace TNL;
 using namespace ClipperLib;
 
+
+#ifdef TNL_OS_WIN32 
+#  define isnanf _isnanf
+#endif
+
 namespace Zap
 {
 

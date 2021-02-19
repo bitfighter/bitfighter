@@ -666,8 +666,8 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
    mesh.offsetY = -1 * (int)round(bounds.min.y);
 
    // Build up references to send to the merge method
-   S32 meshCount = 3;
-   rcPolyMesh* meshes[meshCount] = {};
+   const S32 meshCount = 3;
+   rcPolyMesh *meshes[meshCount] = {};
    // Order matters here!
    meshes[0] = &levelMesh;
    meshes[1] = &coreMesh;
