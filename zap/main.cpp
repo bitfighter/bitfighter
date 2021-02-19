@@ -542,8 +542,8 @@ void setupLogging(IniSettings *iniSettings)
    gMainLog.setMsgType(LogConsumer::LogConnection,         iniSettings->logConnection); 
    gMainLog.setMsgType(LogConsumer::LogLevelLoaded,        iniSettings->logLevelLoaded); 
    gMainLog.setMsgType(LogConsumer::LogLuaObjectLifecycle, iniSettings->logLuaObjectLifecycle); 
-   gMainLog.setMsgType(LogConsumer::LuaLevelGenerator,     iniSettings->luaLevelGenerator); 
-   gMainLog.setMsgType(LogConsumer::LuaBotMessage,         iniSettings->luaBotMessage); 
+   //gMainLog.setMsgType(LogConsumer::LuaLevelGenerator,     iniSettings->luaLevelGenerator); 
+   gMainLog.setMsgType(LogConsumer::LuaScriptMessage,      iniSettings->luaScriptMessage);      // Used for both bots and levelgens and plugins too!
    gMainLog.setMsgType(LogConsumer::ServerFilter,          iniSettings->serverFilter); 
 }
 
@@ -614,13 +614,13 @@ void createClientGame(GameSettingsPtr settings)
 }
 
 //print->ConsoleMsg
-//logprint->LuaBotMessage
+//logprint->LuaScriptMessage
 
 void setupLogging(const string &logDir)
 {
    // Specify which events each logging destination will record
-   S32 stdoutEvents    = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage | LogConsumer::LogConnection;
-   S32 consoleEvents   = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage | LogConsumer::ConsoleMsg;
+   S32 stdoutEvents    = LogConsumer::AllErrorTypes | LogConsumer::LuaScriptMessage | LogConsumer::LogConnection;
+   S32 consoleEvents   = LogConsumer::AllErrorTypes | LogConsumer::LuaScriptMessage | LogConsumer::ConsoleMsg;
    S32 serverLogEvents = LogConsumer::AllErrorTypes | LogConsumer::ServerFilter      | LogConsumer::StatisticsFilter;
    // logfileEvents  ==> set from INI settings     See setupLogging(IniSettings *iniSettings)
 
@@ -1003,6 +1003,19 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    }
 
    // 021 changes (none)
+
+   // 022 changes -- merged LuaBotMessage and LuaLevelGenerator into a single setting: LuaScriptMessage
+   if(previousVersion < VERSION_022)
+   {
+      // Rename INI setting that I'm quite confident no one has ever changed
+      if(GameSettings::iniFile.hasKey("Diagnostics", "LuaBotMessage"))
+      {
+         bool oldval = GameSettings::iniFile.GetValueYN("Diagnostics", "LuaBotMessage", true);
+         GameSettings::iniFile.setValueYN("Diagnostics", "LuaScriptMessage", oldval, true);
+         GameSettings::iniFile.deleteKey("Diagnostics", "LuaBotMessage");
+      }
+      GameSettings::iniFile.deleteKey("Diagnostics", "LuaLevelGenerator");
+   }
 
    // Now copy over resources to user's preference directory.  This will overwrite the previous
    // resources with same names.  Dont do this if it is a standalone bundle

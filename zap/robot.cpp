@@ -1409,7 +1409,7 @@ S32 Robot::lua_findVisibleObjects(lua_State *L)
       lua_newtable(L);
    }
    else
-      logprintf(LogConsumer::LuaBotMessage, "Usage of a fill table with findVisibleObjects() "
+      logprintf(LogConsumer::LuaScriptMessage, "Usage of a fill table with findVisibleObjects() "
             "is deprecated and will be removed in the future.  Instead, don't use one");
 
    TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || dumpStack(L), "Should only have table!");

@@ -2,22 +2,22 @@
 
 @page debugging Debugging Tips
 
-Any of your scripts can print a stack trace with the \e _stackTracer() command (see sample usage below).  This will show how you got to a particular execution point, and will print the values of various variables and other potentially useful information.  This can be very helpful if there are several conditions under which a function can be called, or why something went wrong.
+Any of your scripts can print a stack trace with the `_stackTracer()` command (see sample usage below).  This will show how you got to a particular execution point, and will print the values of various variables and other potentially useful information.  This can be very helpful if there are several conditions under which a function can be called, or why something went wrong.
 
-The \e print(msg) command will print a message the in-game console (which you can turn on with [ctrl+/]) as well as the logfile (`bitfighter.log`), and \e logprint(msg) will print a message to the console, the logfile, and the terminal.  Both commands can accept multiple arguments (see sample below).
+The `print(msg)` command will print a message the in-game console (which you can turn on with [Ctrl+/]) as well as the logfile (`bitfighter.log`), and `logprint(msg)` will print a message to the console, the logfile, and the terminal.  Both commands can accept multiple arguments (see sample below).
 
-For most cases, `print` and `logprint` are interchangable.  Note that it is possible to disable script logging to the logfile in your configuration.  If you don't see the messages you expect, check the [Diagnostics] section of the `bitfighter.ini` file, and make sure the `LuaBotMessage` setting is `Yes`.
+For most cases, `print` and `logprint` are interchangable.  Note that it is possible to disable script logging to the logfile in your configuration.  If you don't see the messages you expect, check the [Diagnostics] section of the `bitfighter.ini` file, and make sure the `LuaScriptMessage` setting is `Yes`.
 
 `print` and `logprint` both go to the in-game console; `logprint` goes to the terminal window but `print` does not; by default both get logged to `bitfighter.log`, but this can be controlled in the INI file.
 
-Lua's \e [error](http://www.lua.org/manual/5.2/manual.html#pdf-error) command will stop the script, print a message, and cause a stack trace to be printed.  Use \e [assert](https://web.archive.org/web/20191231230706/http://luatut.com/assert.html) to confirm that a condition is true.
+Lua's <code>[error](http://www.lua.org/manual/5.2/manual.html#pdf-error)</code> command will stop the script, print a message, and cause a stack trace to be printed.  Use <code>[assert](https://web.archive.org/web/20191231230706/http://luatut.com/assert.html)</code> to confirm that a condition is true.
 
 Finally, if you detect an unexpected error condition, you can log a message, trigger a stack trace, and terminate the script with Lua's `error` function.
 
 \code
 logprint("target:", target, "hits:", hitcount)  -- Accepts multiple arguments
-logprint("Stack trace:")
-logprint(_stackTracer())
+print("Stack trace:")
+print(_stackTracer())
 
 if target == nil then
     error("Have a nil target!")                 -- Terminates script and prints stack trace

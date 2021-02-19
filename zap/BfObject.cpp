@@ -1503,7 +1503,7 @@ S32 BfObject::lua_setPos(lua_State *L)
    if(hasGeometry())
       setPos(L, 1);
    else
-      logprintf(LogConsumer::LuaBotMessage, "No geometry for this object (%s). Cannot set position", getClassName());
+      logprintf(LogConsumer::LuaScriptMessage, "No geometry for this object (%s). Cannot set position", getClassName());
 
    return 0;
 }
@@ -1540,7 +1540,7 @@ S32 BfObject::lua_setGeom(lua_State *L)
    if(hasGeometry())
       setGeom(L, 1);
    else
-      logprintf(LogConsumer::LuaBotMessage, "No geometry for this object (%s). Cannot set it", getClassName());
+      logprintf(LogConsumer::LuaScriptMessage, "No geometry for this object (%s). Cannot set it", getClassName());
 
    return 0;
 }
@@ -1664,7 +1664,7 @@ S32 BfObject::lua_setOwner(lua_State *L)
    // This is NULL if the owner was set *before* adding this object to the game
    if(mGame == NULL)
    {
-      logprintf(LogConsumer::LuaBotMessage, "You cannot call setOwner() on an object before it is added to the game.");
+      logprintf(LogConsumer::LuaScriptMessage, "You cannot call setOwner() on an object before it is added to the game.");
       return 0;
    }
 

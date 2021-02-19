@@ -171,8 +171,7 @@ IniSettings::IniSettings()
    logConnection = true;       
    logLevelLoaded = true;      
    logLuaObjectLifecycle = false;
-   luaLevelGenerator = true;   
-   luaBotMessage = true;       
+   luaScriptMessage = true;       
    serverFilter = false; 
 
    logLevelError = true;
@@ -524,8 +523,7 @@ static void loadDiagnostics(CIniFile *ini, IniSettings *iniSettings)
 
    iniSettings->logLevelLoaded        = ini->GetValueYN(section, "LogLevelLoaded",        iniSettings->logLevelLoaded);
    iniSettings->logLuaObjectLifecycle = ini->GetValueYN(section, "LogLuaObjectLifecycle", iniSettings->logLuaObjectLifecycle);
-   iniSettings->luaLevelGenerator     = ini->GetValueYN(section, "LuaLevelGenerator",     iniSettings->luaLevelGenerator);
-   iniSettings->luaBotMessage         = ini->GetValueYN(section, "LuaBotMessage",         iniSettings->luaBotMessage);
+   iniSettings->luaScriptMessage      = ini->GetValueYN(section, "LuaScriptMessage",      iniSettings->luaScriptMessage);
    iniSettings->serverFilter          = ini->GetValueYN(section, "ServerFilter",          iniSettings->serverFilter);
 }
 
@@ -1560,7 +1558,7 @@ static void writeDiagnostics(CIniFile *ini, IniSettings *iniSettings)
       ini->sectionComment(section, " LogLevelError - Log errors and warnings about levels loaded (Yes/No)");
       ini->sectionComment(section, " LogLuaObjectLifecycle - Creation and destruciton of lua objects (Yes/No)");
       ini->sectionComment(section, " LuaLevelGenerator - Messages from the LuaLevelGenerator (Yes/No)");
-      ini->sectionComment(section, " LuaBotMessage - Message from a bot (Yes/No)");
+      ini->sectionComment(section, " LuaScriptMessage - Message from scripts (Yes/No)");
       ini->sectionComment(section, " ServerFilter - For logging messages specific to hosting games (Yes/No)");
       ini->sectionComment(section, "                (Note: these messages will go to bitfighter_server.log regardless of this setting) ");
       ini->sectionComment(section, "----------------");
@@ -1584,8 +1582,7 @@ static void writeDiagnostics(CIniFile *ini, IniSettings *iniSettings)
    ini->setValueYN(section, "LogLevelLoaded",        iniSettings->logLevelLoaded);
    ini->setValueYN(section, "LogLevelError",         iniSettings->logLevelError);
    ini->setValueYN(section, "LogLuaObjectLifecycle", iniSettings->logLuaObjectLifecycle);
-   ini->setValueYN(section, "LuaLevelGenerator",     iniSettings->luaLevelGenerator);
-   ini->setValueYN(section, "LuaBotMessage",         iniSettings->luaBotMessage);
+   ini->setValueYN(section, "LuaScriptMessage",      iniSettings->luaScriptMessage);
    ini->setValueYN(section, "ServerFilter",          iniSettings->serverFilter);
 }
 

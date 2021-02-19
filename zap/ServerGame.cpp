@@ -1089,7 +1089,7 @@ void ServerGame::runLevelGenScript(const string &scriptName)
 
    if(fullname == "")
    {
-      logprintf(LogConsumer::MsgType(LogConsumer::LogWarning | LogConsumer::LuaLevelGenerator), 
+      logprintf(LogConsumer::MsgType(LogConsumer::LogWarning | LogConsumer::LuaScriptMessage),
                 "Warning: Could not find levelgen script \"%s\"", scriptName.c_str());
       return;
    }

@@ -282,8 +282,7 @@ public:
    bool logLevelLoaded;    
    bool logLevelError;
    bool logLuaObjectLifecycle;
-   bool luaLevelGenerator;    
-   bool luaBotMessage;        
+   bool luaScriptMessage;
    bool serverFilter;  
    bool logStats;
 

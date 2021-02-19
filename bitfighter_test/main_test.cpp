@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 {
    // Uncomment to see lots of events... we should do this from time to time and eliminate as many messages as possible
    //const S32 consoleEvents = LogConsumer::AllErrorTypes |
-   //                          LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage |
+   //                          LogConsumer::LuaScriptMessage |
    //                          LogConsumer::ConsoleMsg;
    //StdoutLogConsumer StdoutLog;
    //StdoutLog.setMsgTypes(consoleEvents);

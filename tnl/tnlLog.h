@@ -80,8 +80,8 @@ public:
       LogLevelLoaded          = BIT(14),     // When a level is loaded
 
       LogLuaObjectLifecycle   = BIT(15),     // Creation and destruciton of lua objects
-      LuaLevelGenerator       = BIT(16),     // Messages from the LuaLevelGenerator     
-      LuaBotMessage           = BIT(17),     // Message from a bot, to go to lua msg console
+      //LuaLevelGenerator       = BIT(16),     // Messages from the LuaLevelGenerator     
+      LuaScriptMessage         = BIT(17),     // Message from a script, to go to lua msg console
 
       ServerFilter            = BIT(18),     // For logging messages specific to hosting games
       StatisticsFilter        = BIT(19),     // For logging player/game statistics

@@ -666,7 +666,7 @@ S32 LuaScriptRunner::findObjectById(lua_State *L, const Vector<DatabaseObject *>
          return returnBfObject(L, bfObject);
    }
 
-   logprintf(LogConsumer::LuaBotMessage, "No object with ID %d was found", id);
+   logprintf(LogConsumer::LuaScriptMessage, "No object with ID %d was found", id);
 
    return returnNil(L);
 }
@@ -1172,7 +1172,7 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
       lua_createtable(L, results->size(), 0);    // Create a table, with enough slots pre-allocated for our data
    }
    else
-      logprintf(LogConsumer::LuaBotMessage, "Usage of a fill table with findAllObjects() "
+      logprintf(LogConsumer::LuaScriptMessage, "Usage of a fill table with findAllObjects() "
             "is deprecated and will be removed in the future.  Instead, don't use one");
 
    TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || dumpStack(L), "Should only have table!");
@@ -1259,7 +1259,7 @@ S32 LuaScriptRunner::lua_findAllObjectsInArea(lua_State *L)
       lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
    }
    else
-      logprintf(LogConsumer::LuaBotMessage, "Usage of a fill table with findAllObjectsInArea() "
+      logprintf(LogConsumer::LuaScriptMessage, "Usage of a fill table with findAllObjectsInArea() "
             "is deprecated and will be removed in the future.  Instead, don't use one");
 
    S32 pushed = 0;      // Count of items we put into our table
@@ -1335,7 +1335,7 @@ S32 LuaScriptRunner::lua_getGameInfo(lua_State *L)
 
    if(!mLuaGame->isServer())
    {
-      logprintf(LogConsumer::LuaBotMessage, "'getGameInfo' can only be called while playing a game");
+      logprintf(LogConsumer::LuaScriptMessage, "'getGameInfo' can only be called while playing a game");
       returnNil(L);
    }
 
@@ -1382,7 +1382,7 @@ S32 LuaScriptRunner::lua_subscribe(lua_State *L)
    // Subscribing is only allowed for bots and levelgens
    else
    {
-      logprintf(LogConsumer::LuaBotMessage, "Calling 'subscribe()' only allowed in-game.  Not subscribing.");
+      logprintf(LogConsumer::LuaScriptMessage, "Calling 'subscribe()' only allowed in-game.  Not subscribing.");
       return 0;
    }
 
