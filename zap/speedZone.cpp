@@ -263,6 +263,7 @@ const Vector<Point> *SpeedZone::getEditorHitPoly() const
    return Parent::getOutline();
 }
 
+
 // More precise boundary for more precise collision detection
 const Vector<Point> *SpeedZone::getCollisionPoly() const
 {
@@ -415,7 +416,7 @@ bool SpeedZone::collide(BfObject *hitObject)
 bool SpeedZone::collided(BfObject *hitObject, U32 stateIndex)
 {
    TNLAssert(dynamic_cast<MoveObject *>(hitObject), "Not a MoveObject");
-   MoveObject *s = static_cast<MoveObject *>(hitObject);
+   MoveObject *ship = static_cast<MoveObject *>(hitObject);
 
    static Point start, end, impulse, newVel;      // Reusable containers
    start = getVert(0);
@@ -436,14 +437,14 @@ bool SpeedZone::collided(BfObject *hitObject, U32 stateIndex)
 
    impulse = end - start;                 // Gives us direction
    impulse.normalize(mSpeed);             // Gives us the magnitude of speed
-   Point shipNormal = s->getVel(stateIndex);
+   Point shipNormal = ship->getVel(stateIndex);
    shipNormal.normalize(mSpeed);
    F32 angleSpeed = mSpeed * 0.5f;
 
    // Using mUnpackInit, as client does not know that mRotateSpeed is not zero.
    if(mSnapLocation && mRotateSpeed == 0 && mUnpackInit < 3)
       angleSpeed *= 0.01f;
-   if(shipNormal.distanceTo(impulse) < angleSpeed && s->getVel(stateIndex).len() > mSpeed)
+   if(shipNormal.distanceTo(impulse) < angleSpeed && ship->getVel(stateIndex).len() > mSpeed)
       return true;
 
    // This following line will cause ships entering the speedzone to have their location set to the same point
@@ -452,51 +453,51 @@ bool SpeedZone::collided(BfObject *hitObject, U32 stateIndex)
    {
       static Point diffpos, thisAngle, newPos, oldPos, oldVel, collisionPoint, p;    // Reusable points
 
-      diffpos = s->getPos(stateIndex) - start;
+      diffpos = ship->getPos(stateIndex) - start;
       thisAngle = end - start;
       thisAngle.normalize();
       newPos = thisAngle * diffpos.dot(thisAngle) + start + impulse * 0.001f;
 
-      oldPos = s->getPos(stateIndex);
-      oldVel = s->getVel(stateIndex);
+      oldPos = ship->getPos(stateIndex);
+      oldVel = ship->getVel(stateIndex);
 
       ignoreThisCollision = true;  // Seem to need it to ignore collide to SpeedZone during a findFirstCollision
-      s->setVel(stateIndex, newPos - oldPos);
+      ship->setVel(stateIndex, newPos - oldPos);
 
       F32 collisionTime = 1;
-      s->findFirstCollision(stateIndex, collisionTime, collisionPoint);
+      ship->findFirstCollision(stateIndex, collisionTime, collisionPoint);
 
-      p = s->getPos(stateIndex) + s->getVel(stateIndex) * collisionTime;    // x = x + vt
-      s->setPos(stateIndex, p);
+      p = ship->getPos(stateIndex) + ship->getVel(stateIndex) * collisionTime;    // x = x + vt
+      ship->setPos(stateIndex, p);
 
       ignoreThisCollision = false;
 
       if(collisionTime != 1)     // Don't allow using speed zone when could not line up due to going into wall?
       {
-         s->setPos(stateIndex, oldPos);
-         s->setVel(stateIndex, oldVel);
+         ship->setPos(stateIndex, oldPos);
+         ship->setVel(stateIndex, oldVel);
          return true;
       }
       newVel = impulse * 1.5;    // Why multiply by 1.5?
    }
    else
    {
-      if(shipNormal.distanceTo(impulse) < mSpeed && s->getVel(stateIndex).len() > mSpeed * 0.8)
+      if(shipNormal.distanceTo(impulse) < mSpeed && ship->getVel(stateIndex).len() > mSpeed * 0.8)
          return true;
 
-      newVel = s->getVel(stateIndex) + impulse * 1.5;    // Why multiply by 1.5?
+      newVel = ship->getVel(stateIndex) + impulse * 1.5;    // Why multiply by 1.5?
    }
 
-   s->setVel(stateIndex, newVel);
+   ship->setVel(stateIndex, newVel);
 
 
-   if(!s->isGhost() && stateIndex == ActualState)        // Only server needs to send information
+   if(!ship->isGhost() && stateIndex == ActualState)        // Only server needs to send information
    {
       setMaskBits(HitMask);
 
       // Trigger a sound on the player's machine: They're going to be so far away they'll never hear the sound emitted by the gofast itself...
-      if(s->getControllingClient() && s->getControllingClient().isValid())
-         s->getControllingClient()->s2cDisplayMessage(0, SFXGoFastInside, "");
+      if(ship->getControllingClient() && ship->getControllingClient().isValid())
+         ship->getControllingClient()->s2cDisplayMessage(0, SFXGoFastInside, "");
    }
    return true;
 }
