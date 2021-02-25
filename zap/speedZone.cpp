@@ -64,7 +64,7 @@ SpeedZone::SpeedZone(lua_State *L)
       else if(profile == 2)
       {
          setGeom(L, 1);
-         setSpeed(getInt(L, 2));
+         setSpeed(U16(getInt(L, 2)));
       }
    }
 
@@ -675,7 +675,7 @@ S32 SpeedZone::lua_getDir(lua_State *L)
 S32 SpeedZone::lua_setSpeed(lua_State *L)
 {
    checkArgList(L, functionArgs, "SpeedZone", "setSpeed");
-   U32 speed = getInt(L, 1);
+   U32 speed = U32(getInt(L, 1));
    mSpeed = min(speed, (U32)U16_MAX);    // Speed is a U16 -- respond to larger values in a sane manner
 
    return 0;

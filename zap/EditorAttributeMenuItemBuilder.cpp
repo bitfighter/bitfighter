@@ -208,7 +208,7 @@ EditorAttributeMenuUI *EditorAttributeMenuItemBuilder::getAttributeMenu(BfObject
 
             // Values don't matter, they will be overwritten when startEditingAttrs() is called
             FloatCounterMenuItem *menuItem = new FloatCounterMenuItem("Delay:",
-                  1.5f, 0.1, 0.1, 10000., 1, "seconds", "Almost no delay",
+                  1.5f, 0.1f, 0.1f, 10000.0f, 1, "seconds", "Almost no delay",
                   "Adjust teleporter cooldown for re-entry");
 
             attributeMenuUI->addMenuItem(menuItem);
@@ -295,7 +295,7 @@ void EditorAttributeMenuItemBuilder::doneEditingAttrs(EditorAttributeMenuUI *att
 
       case CoreTypeNumber:
          static_cast<CoreItem *>(obj)->setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()));
-         static_cast<CoreItem *>(obj)->setRotationSpeed(F32(attributeMenu->getMenuItem(1)->getIntValue()));
+         static_cast<CoreItem *>(obj)->setRotationSpeed(U32(attributeMenu->getMenuItem(1)->getIntValue()));
          break;
          
       case ForceFieldProjectorTypeNumber:
