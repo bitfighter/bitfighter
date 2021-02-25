@@ -336,6 +336,36 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
 }
 
 
+// Modifies msg, which might look like:
+//    "levels\\script.lua:19: attempt to index global 'abc' (a nil value)\r\nStack Traceback\n...
+// and inserts a helpful debugging message
+void improveErrorMessages(string &msg)
+{
+   // See if this looks like an undefined variable error; if so, make the message friendlier
+   string startStr = "attempt to index global '";
+   size_t start = msg.find(startStr);
+
+   if(start == string::npos)      // Not found
+      return;
+
+   start += startStr.length();    // Make start be the index of the end of startStr
+
+   size_t end = msg.find("' (a nil value)", start);
+   if(end == string::npos)        // Not found
+      return;
+
+   string var = msg.substr(start, end - start);    // var is the problematic variable (abc in the sample above)
+
+   size_t insertPos = msg.find("Stack Traceback", end);
+   if(end == string::npos)        // Not found
+      return;
+
+   msg.insert(insertPos, ">>> This error could mean that '" + var + 
+                         "' has a value of nil or that it has not been defined.\r\n");
+}
+
+
+
 // Returns true if there was an error, false if everything ran ok
 bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
 {
@@ -367,6 +397,8 @@ bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
 
    string msg = lua_tostring(L, -1);
    lua_pop(L, 1);    // Remove the message from the stack, so it won't appear in our stack dump
+
+   improveErrorMessages(msg);    // Modifies msg
 
    string text = "In method " + string(function) +"():\n" + msg;
 
