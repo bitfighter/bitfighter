@@ -53,6 +53,7 @@ public:
    static const U16 minSpeed;      // How slow can you go?
    static const U16 maxSpeed;      // Max speed for the goFast
    static const U16 defaultSpeed;  // Default speed if none specified
+   static const F32 SpeedMultiplier; // Initial speed multiplier
 
    U16 getSpeed();
    void setSpeed(U16 speed);

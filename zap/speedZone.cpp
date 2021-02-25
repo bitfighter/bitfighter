@@ -35,6 +35,7 @@ TNL_IMPLEMENT_NETOBJECT(SpeedZone);
 const U16 SpeedZone::minSpeed = 500;
 const U16 SpeedZone::maxSpeed = 5000;
 const U16 SpeedZone::defaultSpeed = 2000;
+const F32 SpeedZone::SpeedMultiplier = 1.5;  // Nobody knows why this is used
 
 #ifndef ZAP_DEDICATED
    EditorAttributeMenuUI *SpeedZone::mAttributeMenuUI = NULL;
@@ -478,14 +479,14 @@ bool SpeedZone::collided(BfObject *hitObject, U32 stateIndex)
          ship->setVel(stateIndex, oldVel);
          return true;
       }
-      newVel = impulse * 1.5;    // Why multiply by 1.5?
+      newVel = impulse * SpeedMultiplier;    // Why have a multiplier?
    }
    else
    {
       if(shipNormal.distanceTo(impulse) < mSpeed && ship->getVel(stateIndex).len() > mSpeed * 0.8)
          return true;
 
-      newVel = ship->getVel(stateIndex) + impulse * 1.5;    // Why multiply by 1.5?
+      newVel = s->getVel(stateIndex) + impulse * SpeedMultiplier; // Why have a multiplier?
    }
 
    ship->setVel(stateIndex, newVel);

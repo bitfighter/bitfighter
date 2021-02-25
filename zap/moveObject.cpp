@@ -124,7 +124,7 @@ void MoveObject::onAddedToGame(Game *game)
 }
 
 
-static const float MoveObjectCollisionElasticity = 1.7f;
+const F32 MoveObject::CollisionElasticity = 1.7f;
 
 Rect MoveObject::calcExtents()
 {
@@ -648,7 +648,7 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
    Point normal = getPos(stateIndex) - collisionPoint;
    normal.normalize();
 
-   Point newVel = getVel(stateIndex) - normal * MoveObjectCollisionElasticity * normal.dot(getVel(stateIndex));
+   Point newVel = getVel(stateIndex) - normal * CollisionElasticity * normal.dot(getVel(stateIndex));
    setVel(stateIndex, newVel);
 
 #ifndef ZAP_DEDICATED
