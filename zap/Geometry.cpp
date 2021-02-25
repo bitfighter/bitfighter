@@ -906,7 +906,7 @@ void PolylineGeometry::setGeom(const Vector<Point> &points)
 
    for(S32 i = 0; i < size; i++)
    {
-      // filter out points with NaN values
+      // Filter out points with NaN values
       if(points[i] == points[i])
          mPolyBounds.push_back(points[i]);
    }
