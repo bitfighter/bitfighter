@@ -316,7 +316,6 @@ F32 Ship::processMove(U32 stateIndex)
    if(getVel(stateIndex).lenSquared() > sq(MAX_CONTROLLABLE_SPEED))
       requestVel.set(0,0);
 
-
    // Limit requestVel to maxVel (but can be lower)
    if(requestVel.lenSquared() > sq(maxVel))
       requestVel.normalize(maxVel);
@@ -591,10 +590,12 @@ void Ship::idle(IdleCallPath path)
          // differently in the lowest mantissa bits.  So normalize after each update the position and velocity, so that
          // the control state update will not differ from client to server.
          static const F32 ShipVarNormalizeMultiplier = 128;
-         static const F32 ShipVarNormalizeFraction = 0.0078125; // 1/ShipVarNormalizeMultiplier
+         static const F32 ShipVarNormalizeFraction = 1.0 / ShipVarNormalizeMultiplier;
 
          static Point p;
          
+
+         // What do these two blocks do?  Is it a sort of snapping to a resolution that makes TNL happy?
          p = getActualPos();
          p.scaleFloorDiv(ShipVarNormalizeMultiplier, ShipVarNormalizeFraction);
          Parent::setActualPos(p);
@@ -675,7 +676,7 @@ void Ship::idle(IdleCallPath path)
    if(path == ClientIdlingLocalShip || path == ClientIdlingNotLocalShip)
    {
       // On the client, update the interpolation of this object unless we are replaying control moves
-      mInterpolating = (getActualVel().lenSquared() < MoveObject::InterpMaxVelocity*MoveObject::InterpMaxVelocity);
+      mInterpolating = (getActualVel().lenSquared() < MoveObject::InterpMaxVelocity * MoveObject::InterpMaxVelocity);
       updateInterpolation();
 
       mWarpInTimer.update(mCurrentMove.time);
@@ -1261,9 +1262,10 @@ void Ship::setState(ControlObjectData *state)
    mFastRecharging = state->mFastRecharging;
 
    // Probably needed, it is because ship don't update modules from Move until after moving the ship.
-   mLoadout.setModulePrimary(ModuleBoost, state->mBoostActive);
-   
+   mLoadout.setModulePrimary(ModuleBoost, state->mBoostActive);  
 }
+
+
 void Ship::getState(ControlObjectData *state) const
 {
    state->mPos = getActualPos();
@@ -1278,6 +1280,7 @@ void Ship::getState(ControlObjectData *state) const
    state->mFastRecharging = mFastRecharging;
    state->mBoostActive = mLoadout.isModulePrimaryActive(ModuleBoost);
 }
+
 
 void Ship::writeControlState(BitStream *stream)
 {
