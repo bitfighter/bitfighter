@@ -50,7 +50,10 @@ LuaLevelGenerator::~LuaLevelGenerator()
 }
 
 
-const char *LuaLevelGenerator::getErrorMessagePrefix() { return "***LEVELGEN ERROR***"; }
+const char *LuaLevelGenerator::getErrorMessagePrefix() 
+{ 
+   return "***LEVELGEN ERROR***"; 
+}
 
 
 string LuaLevelGenerator::getScriptName()
