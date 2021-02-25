@@ -486,7 +486,7 @@ bool SpeedZone::collided(BfObject *hitObject, U32 stateIndex)
       if(shipNormal.distanceTo(impulse) < mSpeed && ship->getVel(stateIndex).len() > mSpeed * 0.8)
          return true;
 
-      newVel = s->getVel(stateIndex) + impulse * SpeedMultiplier; // Why have a multiplier?
+      newVel = ship->getVel(stateIndex) + impulse * SpeedMultiplier; // Why have a multiplier?
    }
 
    ship->setVel(stateIndex, newVel);
