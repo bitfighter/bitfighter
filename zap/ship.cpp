@@ -595,7 +595,10 @@ void Ship::idle(IdleCallPath path)
          static Point p;
          
 
-         // What do these two blocks do?  Is it a sort of snapping to a resolution that makes TNL happy?
+         // This rounds the position and velocity to specific bit resolutions
+         // log2(ShipVarNormalizeMultiplier). This gives better predictability
+         // with floating point operations on pos/vel, and maybe allows better TNL
+         // float compression
          p = getActualPos();
          p.scaleFloorDiv(ShipVarNormalizeMultiplier, ShipVarNormalizeFraction);
          Parent::setActualPos(p);
