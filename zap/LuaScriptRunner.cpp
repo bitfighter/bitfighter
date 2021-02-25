@@ -657,7 +657,7 @@ int LuaScriptRunner::luaPanicked(lua_State *L)
 // Called by various children classes
 S32 LuaScriptRunner::findObjectById(lua_State *L, const Vector<DatabaseObject *> *objects)
 {
-   S32 id = getInt(L, 1);
+   S32 id = S32(getInt(L, 1));
 
    for(S32 i = 0; i < objects->size(); i++)
    {
