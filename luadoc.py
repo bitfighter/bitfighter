@@ -32,7 +32,7 @@ if not os.path.exists(outpath):
     os.makedirs(outpath)
 
 
-doxygen_cmd = r"C:\Program Files\doxygen\bin\doxygen.exe"
+doxygen_cmd = R"C:\Program Files\doxygen\bin\doxygen.exe"
 
 
 # These are items we collect and build up over all pages, and they will get written to a special .h file at the end
