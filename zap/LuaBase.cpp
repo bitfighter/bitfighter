@@ -440,6 +440,7 @@ Vector<Point> getPointsOrXYs(lua_State *L, S32 index)
    return points;
 }
 
+
 /**
  * Reads a list of polygons from the specified lua index
  */
