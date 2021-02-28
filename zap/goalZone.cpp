@@ -44,10 +44,7 @@ GoalZone::GoalZone(lua_State *L)
       S32 profile = checkArgList(L, constructorArgList, "GoalZone", "constructor");
 
       if(profile == 1)        // Geom, Team
-      {
-         setGeom(L, 1);
-         setTeam(L, 2);
-      }
+         setGeomTeamParams(L);
    }
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;

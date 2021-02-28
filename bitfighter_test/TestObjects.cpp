@@ -23,6 +23,9 @@
 #include "stringUtils.h"
 #include "RenderUtils.h"
 
+#include "luaLevelGenerator.h"
+
+
 #include "TestUtils.h"
 
 #include <string>
@@ -185,9 +188,8 @@ TEST_F(ObjectTest, GhostingSanity)
 }
 
 
-
 /**
- * Test some LUA commands to all objects
+ * Test some Lua commands to all objects
  */
 TEST_F(ObjectTest, LuaSanity)
 {
@@ -222,7 +224,7 @@ TEST_F(ObjectTest, LuaSanity)
          bfobj->setExtent(Rect(0,0,1,1));
          bfobj->GeomObject::setGeom(geom);
 
-         // LUA testing
+         // Lua testing
          lua_pushinteger(L, 1);
          bfobj->lua_setTeam(L);
          lua_pop(L, 1);
@@ -238,10 +240,56 @@ TEST_F(ObjectTest, LuaSanity)
       else
          delete bfobj;
    }
-
-
    lua_close(L);
 }
+
+
+void createVerifyDeleteItem(ServerGame *serverGame, LuaLevelGenerator &levelgen, const string &luaTypeName, TypeNumber typeNumber, S32 objId, S32 teamIndex, bool asTable) {
+   string open, close;
+
+   if(asTable) { open = "{";     close = "}"; }
+   else        { open = "";      close = "";  }
+
+   EXPECT_TRUE(levelgen.runString("obj = " + luaTypeName + ".new(" + open + "point.new(0,0), point.new(100,100), point.new(0, 100)" + close + ", " + to_string(teamIndex + 1) + ")"));
+   EXPECT_TRUE(levelgen.runString("obj:setId(" + to_string(objId) + ")"));
+   EXPECT_TRUE(levelgen.runString("levelgen:addItem(obj)"));
+
+   // Verify the object is as we expect
+   BfObject *obj = serverGame->getGameObjDatabase()->findObjectById(objId);
+   EXPECT_EQ(3, obj->getVertCount());
+   EXPECT_EQ(teamIndex, obj->getTeam());
+
+   serverGame->deleteObjects(typeNumber);     // Marks items as ready to delete
+   serverGame->processDeleteList(1);          // Actually delete the objects
+}
+
+TEST_F(ObjectTest, CreateObjectsFromLua)
+{
+   ServerGame *serverGame = newServerGame();
+   GameSettingsPtr settings = serverGame->getSettingsPtr();
+
+   // Set-up our environment
+   LuaScriptRunner::startLua(settings->getFolderManager()->luaDir);
+
+   // Set up a levelgen object, with no script
+   LuaLevelGenerator levelgen(serverGame);
+
+   // Ensure environment set-up
+   levelgen.prepareEnvironment();
+
+   // Compare adding objects using a list of points with a table of points.  Documentation states both are permitted.
+   createVerifyDeleteItem(serverGame, levelgen, "LoadoutZone", LoadoutZoneTypeNumber, 1, 0, true);
+   createVerifyDeleteItem(serverGame, levelgen, "LoadoutZone", LoadoutZoneTypeNumber, 1, 0, false);
+
+   createVerifyDeleteItem(serverGame, levelgen, "GoalZone", GoalZoneTypeNumber, 1, 0, true);
+   createVerifyDeleteItem(serverGame, levelgen, "GoalZone", GoalZoneTypeNumber, 1, 0, false);
+
+   createVerifyDeleteItem(serverGame, levelgen, "LineItem", LineTypeNumber, 1, 0, true);
+   createVerifyDeleteItem(serverGame, levelgen, "LineItem", LineTypeNumber, 1, 0, false);
+
+   delete serverGame;
+}
+
 
    
 }; // namespace Zap

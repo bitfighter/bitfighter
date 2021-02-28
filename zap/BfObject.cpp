@@ -1708,5 +1708,15 @@ S32 CentroidObject::lua_setPos(lua_State *L)
 }
 
 
+// Set the geometry and team from the Lua stack for a zone that takes two params: geom and a teamIndex
+void CentroidObject::setGeomTeamParams(lua_State* L)
+{
+   S32 stackPos = lua_gettop(L);    // For some reason, we need to grab this before running setGeom.  Probably a sign of a problem.
+   setGeom(L, 1);
+   setTeam(L, stackPos);            // We could have a single table of points, or an arbitrary number; but team will always be the last arg
+}
+
+
+
 };
 

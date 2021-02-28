@@ -1147,7 +1147,7 @@ void Game::processDeleteList(U32 timeDelta)
 }
 
 
-// Delete all objects of specified type  --> currently only used to remove all walls from the game
+// Delete all objects of specified type  --> currently only used to remove all walls from the game and in tests
 void Game::deleteObjects(U8 typeNumber)
 {
    fillVector.clear();

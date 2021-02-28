@@ -476,6 +476,10 @@ public:
    // Provide special location handlers
    virtual S32 lua_getPos(lua_State *L);
    virtual S32 lua_setPos(lua_State *L);
+
+protected:
+   void setGeomTeamParams(lua_State* L);     // Constructor helper for lineItems and some zones
+
 };
 
 

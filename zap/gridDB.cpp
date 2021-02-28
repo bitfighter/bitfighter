@@ -326,15 +326,15 @@ void GridDatabase::findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> 
 void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector) const
 {
    // If the user is looking for a type we maintain a list for, it will be faster to use that list than to cycle through the general item list.
-   TNLAssert(typeNumber != GoalZoneTypeNumber && typeNumber != FlagTypeNumber && typeNumber != SpyBugTypeNumber, 
+   TNLAssert(typeNumber != FlagTypeNumber && typeNumber != SpyBugTypeNumber, 
              "Can use findObjects_fast()?  If not, uncomment the appropriate block below; it will perform better!");
 
-   //if(typeNumber == GoalZoneTypeNumber)
-   //{
-   //   for(S32 i = 0; i < mGoalZones.size(); i++)
-   //      fillVector.push_back(mGoalZones[i]);
-   //   return;
-   //}
+   if(typeNumber == GoalZoneTypeNumber)
+   {
+      for(S32 i = 0; i < mGoalZones.size(); i++)
+         fillVector.push_back(mGoalZones[i]);
+      return;
+   }
 
    //if(typeNumber == FlagTypeNumber)
    //{
@@ -430,6 +430,21 @@ void GridDatabase::findObjects(const Vector<U8> &types, Vector<DatabaseObject *>
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if(testTypes(types, mAllObjects[i]->getObjectTypeNumber()))
          fillVector.push_back(mAllObjects[i]);
+}
+
+
+// Find first object in database with specified id; currently only used in tests
+BfObject *GridDatabase::findObjectById(S32 id) const
+{
+   for(S32 i = 0; i < mAllObjects.size(); i++)
+   {
+      BfObject *bfobj = dynamic_cast<BfObject*>(mAllObjects[i]);
+
+      if(bfobj && bfobj->getUserAssignedId() == id)
+         return bfobj;
+   }
+
+   return NULL;
 }
 
 

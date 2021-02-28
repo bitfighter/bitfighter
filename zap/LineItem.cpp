@@ -60,7 +60,7 @@ LineItem::LineItem(lua_State *L)
    
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { SIMPLE_LINE, END }, { SIMPLE_LINE, TEAM_INDX, END }}, 3 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { LINE, END }, { LINE, TEAM_INDX, END }}, 3 };
 
       S32 profile = checkArgList(L, constructorArgList, "LineItem", "constructor");
 
@@ -68,10 +68,7 @@ LineItem::LineItem(lua_State *L)
          setGeom(L, 1);
 
       else if(profile == 2)
-      {
-         setGeom(L, 1);
-         setTeam(L, 2);
-      }
+         setGeomTeamParams(L);
    }
 }
 

@@ -36,10 +36,7 @@ LoadoutZone::LoadoutZone(lua_State *L)
       S32 profile = checkArgList(L, constructorArgList, "LoadoutZone", "constructor");
 
       if(profile == 1)         // Geom, team
-      {
-         setGeom(L, 1);
-         setTeam(L, 2);
-      }
+         setGeomTeamParams(L);
    }
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
