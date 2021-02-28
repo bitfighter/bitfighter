@@ -259,6 +259,8 @@ void createVerifyDeleteItem(ServerGame *serverGame, LuaLevelGenerator &levelgen,
    EXPECT_EQ(3, obj->getVertCount());
    EXPECT_EQ(teamIndex, obj->getTeam());
 
+   // TODO: Verify actual coordiates of points
+
    serverGame->deleteObjects(typeNumber);     // Marks items as ready to delete
    serverGame->processDeleteList(1);          // Actually delete the objects
 }
