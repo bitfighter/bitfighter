@@ -13,7 +13,13 @@
 #include "../zap/md5wrapper.h"
 #include "../zap/stringUtils.h"
 
-#include <unistd.h>
+
+#ifdef TNL_OS_WIN32 
+#  include <io.h>
+#else
+#  include <unistd.h>
+#endif
+
 #include <errno.h>
 
 using namespace Zap;
