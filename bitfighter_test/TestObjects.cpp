@@ -247,8 +247,8 @@ TEST_F(ObjectTest, LuaSanity)
 void createVerifyDeleteItem(ServerGame *serverGame, LuaLevelGenerator &levelgen, const string &luaTypeName, TypeNumber typeNumber, S32 objId, S32 teamIndex, bool asTable) {
    string open, close;
 
-   if(asTable) { open = "{";     close = "}"; }
-   else        { open = "";      close = "";  }
+   if(asTable) { open = "{";     close = "}"; }    // Put points in a table
+   else        { open = "";      close = "";  }    // Don't put points in a table
 
    EXPECT_TRUE(levelgen.runString("obj = " + luaTypeName + ".new(" + open + "point.new(0,0), point.new(100,100), point.new(0, 100)" + close + ", " + to_string(teamIndex + 1) + ")"));
    EXPECT_TRUE(levelgen.runString("obj:setId(" + to_string(objId) + ")"));
