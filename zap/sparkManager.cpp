@@ -491,8 +491,8 @@ void FxTrail::render() const
             break;
 
          case RailgunProfile:
-            r = 0.0f;       g = 0.5f;    b = 0.7f;    a = 0.6f;
-            rFade = 0.0f;   gFade = 0.8; bFade = 0.8; aFade = 0.5f;
+            r = 0.0f;       g = 0.5f;     b = 0.7f;     a = 0.6f;
+            rFade = 0.0f;   gFade = 0.8f; bFade = 0.8f; aFade = 0.5f;
             break;
 
          default:
