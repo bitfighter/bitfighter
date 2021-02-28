@@ -244,22 +244,44 @@ TEST_F(ObjectTest, LuaSanity)
 }
 
 
-void createVerifyDeleteItem(ServerGame *serverGame, LuaLevelGenerator &levelgen, const string &luaTypeName, TypeNumber typeNumber, S32 objId, S32 teamIndex, bool asTable) {
-   string open, close;
+// Given a series of points, return "point.new(x1, y1), point.new(x2, y2), ..." or "{ point.new(x1, y1), point.new(x2, y2), ... }"
+string pointsToLuaList(const Vector<Point> &points, bool asTable)
+{
+   string pointList = "";
 
-   if(asTable) { open = "{";     close = "}"; }    // Put points in a table
-   else        { open = "";      close = "";  }    // Don't put points in a table
+   if(asTable)
+      pointList += "{ ";
 
-   EXPECT_TRUE(levelgen.runString("obj = " + luaTypeName + ".new(" + open + "point.new(0,0), point.new(100,100), point.new(0, 100)" + close + ", " + to_string(teamIndex + 1) + ")"));
+   for(S32 i = 0; i < points.size(); i++)
+   {
+      pointList += "point.new(" + points[i].toString() + ")";
+      if(i < points.size() - 1)
+         pointList += ", ";
+   }
+
+   if(asTable)
+      pointList += " }";
+
+   return pointList;
+}
+
+
+void createVerifyDeleteItem(ServerGame *serverGame, LuaLevelGenerator &levelgen, const string &luaTypeName, TypeNumber typeNumber, S32 objId, S32 teamIndex, const Vector<Point> &geom, bool asTable) {
+   EXPECT_TRUE(levelgen.runString("obj = " + luaTypeName + ".new(" + pointsToLuaList(geom, asTable) + ", " + to_string(teamIndex + 1) + ")"));
    EXPECT_TRUE(levelgen.runString("obj:setId(" + to_string(objId) + ")"));
    EXPECT_TRUE(levelgen.runString("levelgen:addItem(obj)"));
 
    // Verify the object is as we expect
    BfObject *obj = serverGame->getGameObjDatabase()->findObjectById(objId);
-   EXPECT_EQ(3, obj->getVertCount());
+   EXPECT_EQ(geom.size(), obj->getVertCount());
    EXPECT_EQ(teamIndex, obj->getTeam());
 
-   // TODO: Verify actual coordiates of points
+   // Verify actual coordiates of points (getting pretty pedantic here!)
+   for(S32 i = 0; i < obj->getVertCount(); i++)
+   {
+      EXPECT_EQ(geom[i].x, obj->getVert(i).x);
+      EXPECT_EQ(geom[i].y, obj->getVert(i).y);
+   }
 
    serverGame->deleteObjects(typeNumber);     // Marks items as ready to delete
    serverGame->processDeleteList(1);          // Actually delete the objects
@@ -279,15 +301,17 @@ TEST_F(ObjectTest, CreateObjectsFromLua)
    // Ensure environment set-up
    levelgen.prepareEnvironment();
 
+   vector<Point> geom {Point(10, 10), Point(100, 100), Point(-20, -50)};
+
    // Compare adding objects using a list of points with a table of points.  Documentation states both are permitted.
-   createVerifyDeleteItem(serverGame, levelgen, "LoadoutZone", LoadoutZoneTypeNumber, 1, 0, true);
-   createVerifyDeleteItem(serverGame, levelgen, "LoadoutZone", LoadoutZoneTypeNumber, 1, 0, false);
+   createVerifyDeleteItem(serverGame, levelgen, "LoadoutZone", LoadoutZoneTypeNumber, 1, 0, geom, true);
+   createVerifyDeleteItem(serverGame, levelgen, "LoadoutZone", LoadoutZoneTypeNumber, 1, 0, geom, false);
 
-   createVerifyDeleteItem(serverGame, levelgen, "GoalZone", GoalZoneTypeNumber, 1, 0, true);
-   createVerifyDeleteItem(serverGame, levelgen, "GoalZone", GoalZoneTypeNumber, 1, 0, false);
+   createVerifyDeleteItem(serverGame, levelgen, "GoalZone", GoalZoneTypeNumber, 1, 0, geom, true);
+   createVerifyDeleteItem(serverGame, levelgen, "GoalZone", GoalZoneTypeNumber, 1, 0, geom, false);
 
-   createVerifyDeleteItem(serverGame, levelgen, "LineItem", LineTypeNumber, 1, 0, true);
-   createVerifyDeleteItem(serverGame, levelgen, "LineItem", LineTypeNumber, 1, 0, false);
+   createVerifyDeleteItem(serverGame, levelgen, "LineItem", LineTypeNumber, 1, 0, geom, true);
+   createVerifyDeleteItem(serverGame, levelgen, "LineItem", LineTypeNumber, 1, 0, geom, false);
 
    delete serverGame;
 }
