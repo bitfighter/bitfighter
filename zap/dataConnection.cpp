@@ -183,7 +183,7 @@ SenderStatus DataSender::initialize(DataSendable *connection, FolderManager *fol
    // Allocate a buffer
    //char *buffer = new char[MAX_CHUNK_LEN + 1];      // 255 for data, + 1 for terminator
    char buffer[MAX_CHUNK_LEN + 1];      // 255 for data, + 1 for terminator
-   U32 size;
+   size_t size;
 
    // We'll read the file in 255 char chunks; this is the largest string we can send, and we want to be as large as possible to get
    // maximum benefit of the string compression that occurs during the transmission process.
