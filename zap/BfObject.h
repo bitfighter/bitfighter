@@ -37,20 +37,20 @@ class ClientInfo;
 // those values that we don't want to share.
 //
 //                                         Make available      Available to scripts as:   Descr in        (note that these descriptions should match the      
-//                   Enum:                  to scripts?            ObjType. ...         documentation:     class name so that the documentation autolinks)
+//                   Enum:                  to scripts?           ObjType.XXXX enum     documentation:     class name so that the documentation autolinks)
 #define TYPE_NUMBER_TABLE                                                                                        \
    TYPE_NUMBER( BarrierTypeNumber,             true,              "Barrier",             "WallItem"            ) \
    TYPE_NUMBER( PlayerShipTypeNumber,          true,              "Ship",                "Ship"                ) \
-   TYPE_NUMBER( LineTypeNumber,                true,              "Line",                "LineItem"            ) \
+   TYPE_NUMBER( LineTypeNumber,                true,              "LineItem",            "LineItem"            ) \
    TYPE_NUMBER( ResourceItemTypeNumber,        true,              "ResourceItem",        "ResourceItem"        ) \
    TYPE_NUMBER( TextItemTypeNumber,            true,              "TextItem",            "TextItem"            ) \
    TYPE_NUMBER( LoadoutZoneTypeNumber,         true,              "LoadoutZone",         "LoadoutZone"         ) \
    TYPE_NUMBER( TestItemTypeNumber,            true,              "TestItem",            "TestItem"            ) \
-   TYPE_NUMBER( FlagTypeNumber,                true,              "Flag",                "FlagItem"            ) \
+   TYPE_NUMBER( FlagTypeNumber,                true,              "FlagItem",            "FlagItem"            ) \
    TYPE_NUMBER( BulletTypeNumber,              true,              "Bullet",              "\link Projectile Bullet\endlink" ) \
    TYPE_NUMBER( BurstTypeNumber,               true,              "Burst",               "Burst"               ) \
    TYPE_NUMBER( MineTypeNumber,                true,              "Mine",                "Mine"                ) \
-   TYPE_NUMBER( NexusTypeNumber,               true,              "Nexus",               "NexusZone"           ) \
+   TYPE_NUMBER( NexusTypeNumber,               true,              "NexusZone",           "NexusZone"           ) \
    TYPE_NUMBER( BotNavMeshZoneTypeNumber,      false,             "BotNavMeshZone",      "BotNavMeshZone"      ) \
    TYPE_NUMBER( RobotShipTypeNumber,           true,              "Robot",               "Robot"               ) \
    TYPE_NUMBER( TeleporterTypeNumber,          true,              "Teleporter",          "Teleporter"          ) \
@@ -72,7 +72,7 @@ class ClientInfo;
    TYPE_NUMBER( WallSegmentTypeNumber,         false,             "WallSegment",         "WallSegment"         ) \
    TYPE_NUMBER( SlipZoneTypeNumber,            true,              "SlipZone",            "SlipZone"            ) \
    TYPE_NUMBER( SpyBugTypeNumber,              true,              "SpyBug",              "SpyBug"              ) \
-   TYPE_NUMBER( CoreTypeNumber,                true,              "Core",                "CoreItem"            ) \
+   TYPE_NUMBER( CoreTypeNumber,                true,              "CoreItem",            "CoreItem"            ) \
    TYPE_NUMBER( ZoneTypeNumber,                true,              "Zone",                "Zone"                ) \
    TYPE_NUMBER( SeekerTypeNumber,              true,              "Seeker",              "Seeker"              ) \
    TYPE_NUMBER( DeletedTypeNumber,             false,             "Deleted",             "Deleted Item"        ) \

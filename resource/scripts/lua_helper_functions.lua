@@ -36,6 +36,14 @@ function table.clear(tab)
 end
 
 
+-- We changed these enum values in 022 to better align with object names; make sure old values (Line, Flag, etc.) still work
+-- Use rawset to modify read-only table: http://lua-users.org/wiki/ReadOnlyTables
+rawset(ObjType, "Line",    ObjType.LineItem)
+rawset(ObjType, "Flag",    ObjType.FlagItem)
+rawset(ObjType, "Core",    ObjType.CoreItem)
+rawset(ObjType, "Nexus",   ObjType.NexusZone)
+
+
 --
 -- strict.lua
 -- Checks uses of undeclared global variables
@@ -50,10 +58,10 @@ end
 --   mt = {}
 --   setmetatable(getfenv(), mt)
 -- end
--- 
+--
 -- __STRICT = true
 -- mt.__declared = {}
--- 
+--
 -- mt.__newindex = function (t, n, v)
 --   if __STRICT and not mt.__declared[n] then
 --     local w = debug.getinfo(2, "S").what     -- See PiL ch 23
@@ -68,26 +76,26 @@ end
 --   end
 --   rawset(t, n, v)
 -- end
--- 
+--
 -- mt.__index = function (t, n)
 --   if not mt.__declared[n] and debug.getinfo(2, "S") and debug.getinfo(2, "S").what ~= "C" then
 --     error("Variable '"..n.."' cannot be used if it is not first declared.", 2)
 --   end
 --   return rawget(t, n)
 -- end
--- 
+--
 -- function global(...)
 --    for _, v in ipairs{...} do mt.__declared[v] = true end
 -- end
--- 
--- 
+--
+--
 -- function _declared(fname)
 --    local mt = getmetatable(getfenv())
--- 
+--
 --    if mt.__declared[fname] then
 --       return true
 --    end
--- 
+--
 --    return false
 -- end
 

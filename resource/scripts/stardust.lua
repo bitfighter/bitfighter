@@ -5,16 +5,16 @@ sd = { }
 local VALID_TYPES = {
   "Asteroid",
   "AsteroidSpawn",
-  "Core",
+  "CoreItem",
   "EnergyItem",
-  "Flag",
+  "FlagItem",
   "FlagSpawn",
   "ForceFieldProjector",
   "GoalZone",
-  "Line",
+  "LineItem",
   "LoadoutZone",
   "Mine",
-  "Nexus",
+  "NexusZone",
   "PolyWall",
   "RepairItem",
   "ResourceItem",
@@ -38,7 +38,7 @@ end
 local IMPLICITLY_CLOSED_CLASS_IDS = {
 	[ObjType.GoalZone] = true,
 	[ObjType.LoadoutZone] = true,
-	[ObjType.Nexus] = true,
+	[ObjType.NexusZone] = true,
 	[ObjType.PolyWall] = true,
 	[ObjType.SlipZone] = true,
 	[ObjType.Zone] = true
@@ -47,7 +47,7 @@ local IMPLICITLY_CLOSED_CLASS_IDS = {
 local ZONE_CLASS_IDS = {
 	[ObjType.GoalZone] = true,
 	[ObjType.LoadoutZone] = true,
-	[ObjType.Nexus] = true,
+	[ObjType.NexusZone] = true,
 	[ObjType.SlipZone] = true,
 	[ObjType.Zone] = true
 }
@@ -55,16 +55,16 @@ local ZONE_CLASS_IDS = {
 local OBJTYPE_TO_CLASS = {
 	-- [ObjType.Barrier]             = Barrier,
 	[ObjType.Ship]                = Ship,
-	[ObjType.Line]                = LineItem,
+	[ObjType.LineItem]            = LineItem,
 	[ObjType.ResourceItem]        = ResourceItem,
 	[ObjType.TextItem]            = TextItem,
 	[ObjType.LoadoutZone]         = LoadoutZone,
 	[ObjType.TestItem]            = TestItem,
-	[ObjType.Flag]                = FlagItem,
+	[ObjType.FlagItem]            = FlagItem,
 	-- [ObjType.Bullet]              = Bullet,
 	[ObjType.Burst]               = Burst,
 	[ObjType.Mine]                = Mine,
-	[ObjType.Nexus]               = NexusZone,
+	[ObjType.NexusZone]           = NexusZone,
 	[ObjType.Robot]               = Robot,
 	[ObjType.Teleporter]          = Teleporter,
 	[ObjType.GoalZone]            = GoalZone,
@@ -83,9 +83,9 @@ local OBJTYPE_TO_CLASS = {
 	[ObjType.WallItem]            = WallItem,
 	[ObjType.SlipZone]            = SlipZone,
 	[ObjType.SpyBug]              = SpyBug,
-	[ObjType.Core]                = CoreItem,
+	[ObjType.CoreItem]            = CoreItem,
 	[ObjType.Zone]                = Zone,
-	[ObjType.Seeker]              = Seeker 
+	[ObjType.Seeker]              = Seeker
 }
 
 -- Return a shallow copy of t
@@ -175,7 +175,7 @@ local function is(...)
 end
 
 -- adds every element of t2 on to t1:
--- 
+--
 -- append({1, 2}, {3, 4})
 -- > {1, 2, 3, 4}
 local function append(t1, t2)
@@ -442,7 +442,7 @@ end
 
 -- Find the segment of `poly` at distance `d` along the polyline
 --
--- Traverses `poly` until it gets to the segment which contains the 
+-- Traverses `poly` until it gets to the segment which contains the
 -- point at distance `d` along the line, then returns the one-based
 -- index of the segment. `d` is a number between 0.0 and 1.0 inclusive
 --
@@ -996,7 +996,7 @@ sd = {
 	spread                      = spread,
 	subdividePolyline           = subdividePolyline,
 	uniqueValues                = uniqueValues,
-	
+
 	CLASS_TO_OBJTYPE            = CLASS_TO_OBJTYPE,
 	EDGE                        = EDGE,
 	IMPLICITLY_CLOSED_CLASS_IDS = IMPLICITLY_CLOSED_CLASS_IDS,

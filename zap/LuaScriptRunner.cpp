@@ -768,7 +768,7 @@ S32 LuaScriptRunner::doUnsubscribe(lua_State *L)
 bool add_enum_to_lua(lua_State* L, const char* tname, ...)
 {
    // NOTE: Here's the Lua code we're building and executing to define the
-   //       enum.
+   //       enum.  http://lua-users.org/wiki/ReadOnlyTables
    //
    // <tname> = setmetatable( {}, { 
    //      __index = { 
