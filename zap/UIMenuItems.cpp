@@ -1408,6 +1408,7 @@ TimeCounterMenuItemSeconds::TimeCounterMenuItemSeconds(const string &title, S32 
    // Do nothing
 }
 
+
 // Destructor
 TimeCounterMenuItemSeconds::~TimeCounterMenuItemSeconds()
 {

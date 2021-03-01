@@ -22,7 +22,7 @@ namespace Zap
 // Default constructor
 SavedMenuItem::SavedMenuItem()
 {
-   /* Unused */
+   // Do nothing
 }
 
 
@@ -31,6 +31,7 @@ SavedMenuItem::SavedMenuItem(MenuItem *menuItem)
    mParamName = menuItem->getPrompt();
    setValues(menuItem);
 }
+
 
 // Destructor
 SavedMenuItem::~SavedMenuItem()
