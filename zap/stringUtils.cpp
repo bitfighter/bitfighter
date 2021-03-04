@@ -216,7 +216,7 @@ bool isInteger(const char *str)
 // Sanitize strings before inclusion into JSON
 string sanitizeForJson(const char *value)
 {
-   unsigned maxsize = strlen(value) * 2 + 3; // allescaped+quotes+NULL
+   size_t maxsize = strlen(value) * 2 + 3; // allescaped+quotes+NULL
    std::string result;
    result.reserve(maxsize);  // memory management
 
@@ -746,7 +746,7 @@ string replaceString(const char *in, const char *find, const char *replace)
 {
    string out;
    int n = 0;
-   int findlen = strlen(find);
+   size_t findlen = strlen(find);
    while(in[n])
    {
       if(!strncmp(&in[n], find, findlen))
