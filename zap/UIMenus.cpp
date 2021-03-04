@@ -654,7 +654,7 @@ S32 MenuUserInterface::getTotalMenuItemHeight()
 }
 
 
-// Process the keys that work on all menus
+// Process the keys that work on all menus -- return true if key was handled, false otherwise
 bool MenuUserInterface::processKeys(InputCode inputCode)
 {
    inputCode = InputCodeManager::convertJoystickToKeyboard(inputCode);

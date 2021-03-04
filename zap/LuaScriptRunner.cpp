@@ -209,9 +209,9 @@ bool LuaScriptRunner::loadCompileRunEnvironmentScript(const string &scriptName) 
 }
 
 
-// Loads script from file into a Lua chunk, then runs it.  This has the effect of loading all our functions into the local environment,
-// defining any globals, and executing any "loose" code not defined in a function.  If we're going to get any compile errors, they'll
-// show up here.
+// Loads script with name mScriptName into a Lua chunk, then runs it.  This has the effect of loading all our functions into the local
+// environment, defining any globals, and executing any "loose" code not defined in a function.  If we're going to get any compile errors,
+// they'll show up here.
 bool LuaScriptRunner::loadScript(bool cacheScript)
 {
    if(mScriptName == "")

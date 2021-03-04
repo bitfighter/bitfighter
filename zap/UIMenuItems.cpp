@@ -809,6 +809,7 @@ S32 CounterMenuItem::getWidth(S32 textsize)
 }
 
 
+// Return true if key was handled, false otherwise
 bool CounterMenuItem::handleKey(InputCode inputCode)
 {
    if(inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT || inputCode == MOUSE_WHEEL_UP)  
@@ -1355,6 +1356,7 @@ void TimeCounterMenuItem::enterDigit(S32 digit)
 }
 
 
+// Return true if key was handled, false otherwise
 bool TimeCounterMenuItem::handleKey(InputCode inputCode)
 {
    if(inputCode == KEY_SEMICOLON || inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)
