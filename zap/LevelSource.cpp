@@ -490,7 +490,7 @@ bool StringLevelSource::populateLevelInfoFromSource(const string &fullFilename, 
    char chunk[1024 * 4];
 
    strncpy(chunk, mLevelCode.c_str(), sizeof(chunk));
-   getLevelInfoFromCodeChunk(chunk, strlen(chunk), levelInfo);
+   getLevelInfoFromCodeChunk(chunk, S32(strlen(chunk)), levelInfo);
 
    return true;
 }

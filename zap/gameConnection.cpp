@@ -1833,7 +1833,7 @@ bool GameConnection::TransferLevelFile(const char *filename)
       const U32 DATAARRAYSIZE = 8192;
       U8 *data = new U8[DATAARRAYSIZE];
       U32 totalTransferSize = 0;
-      size = fread(data, 1, DATAARRAYSIZE, f);
+      size = U32(fread(data, 1, DATAARRAYSIZE, f));
 
       mPendingTransferData.resize(0);
 
