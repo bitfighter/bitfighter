@@ -298,7 +298,7 @@ bool LuaScriptRunner::runString(const string &code)
 {
    luaL_loadstring(L, code.c_str());
    setEnvironment();
-   return !lua_pcall(L, 0, 0, 0);
+   return !lua_pcall(L, 0, 0, 0);      // lua_pcall returns 0 in case of success
 }
 
 

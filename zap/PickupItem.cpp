@@ -277,7 +277,7 @@ S32 PickupItem::lua_setRegenTime(lua_State *L)
 { 
    checkArgList(L, functionArgs, "PickupItem", "setRegenTime");
 
-   mRepopDelay = getInt(L, 1);
+   mRepopDelay = S32(getInt(L, 1));
 
    return 0;
 }
@@ -321,7 +321,7 @@ RepairItem::RepairItem(lua_State *L) : Parent((F32)REPAIR_ITEM_RADIUS, DEFAULT_R
       else if(profile == 2)
       {
          setPos(L, 1);
-         mRepopDelay = getInt(L, 2);
+         mRepopDelay = S32(getInt(L, 2));
       }
    }
 }
@@ -437,7 +437,7 @@ EnergyItem::EnergyItem(lua_State *L) : Parent(20, DEFAULT_RESPAWN_TIME)    // Co
       else if(profile == 2)
       {
          setPos(L, 1);
-         mRepopDelay = getInt(L, 2);
+         mRepopDelay = S32(getInt(L, 2));
       }
    }
    

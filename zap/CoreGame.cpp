@@ -1444,7 +1444,7 @@ S32 CoreItem::lua_setRotationSpeed(lua_State *L)
 {
    checkArgList(L, functionArgs, "CoreItem", "setRotationSpeed");
 
-   U32 speed = getInt(L, 1);
+   U32 speed = U32(getInt(L, 1));
    mRotationSpeed = min(speed, CoreMaxRotationSpeed);
 
    // Update clients over network

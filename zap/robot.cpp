@@ -1210,7 +1210,7 @@ S32 Robot::lua_setLoadoutWeapon(lua_State *L)
    checkArgList(L, functionArgs, "Ship", "setLoadoutWeapon");
 
    // Slots start at index 1, but c++ wants 0
-   S32 slot = getInt(L, 1) - 1;
+   S32 slot = S32(getInt(L, 1)) - 1;
    WeaponType weapon = getWeaponType(L, 2);
 
    // Make a copy of our current loadout and adjust it
@@ -1239,7 +1239,7 @@ S32 Robot::lua_setLoadoutModule(lua_State *L)
    checkArgList(L, functionArgs, "Ship", "setLoadoutModule");
 
    // Slots start at index 1, but c++ wants 0
-   S32 slot = getInt(L, 1) - 1;
+   S32 slot = S32(getInt(L, 1)) - 1;
    ShipModule module = getShipModule(L, 2);
 
    // Make a copy of our current loadout and adjust it

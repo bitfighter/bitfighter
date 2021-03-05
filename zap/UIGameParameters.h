@@ -63,7 +63,6 @@ private:
 
    S32 getYStart() const;
 
-
    typedef map<const string, shared_ptr<MenuItem> > MenuItemMap;
    MenuItemMap mMenuItemMap;
 

@@ -83,7 +83,7 @@ REGISTER_LUA_CLASS(LuaGameInfo);
  */
 S32 LuaGameInfo::lua_getGameType(lua_State *L)
 {
-   TNLAssert(mServerGame->getGameType(), "Need Gametype check in getGameType");
+   TNLAssert(mServerGame->getGameType(), "Need to set gameType!");     // Trips with malformed tests
    return returnInt(L, mServerGame->getGameType()->getGameTypeId());
 }
 
