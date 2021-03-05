@@ -20,7 +20,7 @@ the MsgReceived Event which is available to both robots and levelgens:
 
 function main()
   bf:subscribe(Event.MsgReceived)   -- The subscribe method is also available on
-                                    -- the LevelGenerator and Robot objects
+                                    -- the levelgen and bot objects
 end
 
 -- Whenever an event occurs which a script is subscribed to, Bitfighter will

@@ -36,7 +36,7 @@ class EventManager
  * to subscribe to the event to be notified of it.
  *
  * See the \e subscribe methods for \link Robot bots\endlink and \link LevelGenerator levelgens\endlink, and the 
- * \e Events section of the scripting overview page.  
+ * @ref events "Subscribing to Events" page.  
  */
 
 // See http://stackoverflow.com/questions/6635851/real-world-use-of-x-macros
