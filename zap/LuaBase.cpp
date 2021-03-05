@@ -581,7 +581,7 @@ lua_Integer getInt(lua_State *L, S32 index)
 // Assumes that the value has already been checked, so this does no sanity checks whatsoever.
 S32 getTeamIndex(lua_State *L, S32 index)
 {
-   S32 teamIndex = getInt(L, index);
+   S32 teamIndex = getInt2<S32>(L, index);
    if(teamIndex <= TEAM_NEUTRAL)
       return teamIndex;
    else

@@ -169,6 +169,12 @@ bool getBool(lua_State *L, S32 index);
 bool getCheckedBool(lua_State *L, S32 index, const char *methodName, bool defaultVal);
 
 lua_Integer getInt(lua_State *L, S32 index);
+template<typename T>
+lua_Integer getInt2(lua_State* L, S32 index)
+{
+   return T(lua_tointeger(L, index));
+}
+
 lua_Integer getInt(lua_State *L, S32 index, S32 defaultVal);
 lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal);
 
