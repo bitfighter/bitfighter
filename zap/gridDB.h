@@ -163,7 +163,7 @@ public:
    void findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector) const;
    void findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector, const Rect &extents) const;
 
-   BfObject *GridDatabase::findObjectById(S32 id) const;
+   BfObject *findObjectById(S32 id) const;
 
    void copyObjects(const GridDatabase *source);
 
