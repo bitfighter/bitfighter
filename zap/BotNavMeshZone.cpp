@@ -408,62 +408,81 @@ bool isSpeedZoneProblemObject(U8 x)
 }
 
 
-//static BfObject *findWallCollision(const Point &vel, F32 &collisionTime, Point &collisionPoint)
-//{
-//   // Check for collisions against other objects
-//   Point delta = getVel(stateIndex) * collisionTime;
-//
-//   Rect queryRect(getPos(stateIndex), getPos(stateIndex) + delta);
-//   queryRect.expand(Point(Ship::CollisionRadius, Ship::CollisionRadius));
-//
-//   fillVector.clear();
-//
-//   findObjects(collideTypes(), fillVector, queryRect);   // Free CPU for finding only the ones we care about
-//
-//   fillVector.sort(sortBarriersFirst);  // Sort to do Barriers::Collide first, to prevent picking up flag (FlagItem::Collide) through Barriers, especially when client does /maxfps 10
-//
-//   F32 collisionFraction;
-//
-//   BfObject *collisionObject = NULL;
-//
-//   for(S32 i = 0; i < fillVector.size(); i++)
-//   {
-//      BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
-//
-//      if(!foundObject->isCollisionEnabled())
-//         continue;
-//
-//      const Vector<Point> *poly = foundObject->getCollisionPoly();
-//
-//      if(poly)
-//      {
-//         Point cp;
-//
-//         if(PolygonSweptCircleIntersect(&poly->first(), poly->size(), getPos(stateIndex),
-//                                        delta, mRadius, cp, collisionFraction))
-//         {
-//            if(cp != getPos(stateIndex) || !isCollideableType(foundObject->getObjectTypeNumber()))   // Avoid getting stuck inside polygon wall
-//            {
-//               bool collide1 = collide(foundObject);
-//               bool collide2 = foundObject->collide(this);
-//
-//               if(!(collide1 && collide2))
-//                  continue;
-//
-//               collisionPoint = cp;
-//               delta *= collisionFraction;
-//               collisionTime *= collisionFraction;
-//               collisionObject = foundObject;
-//
-//               if(!collisionTime)
-//                  break;
-//            }
-//         }
-//      }
-//   }
-//
-//   return collisionObject;
-//}
+static S32 QSORT_CALLBACK sortBarriersFirst(DatabaseObject **a, DatabaseObject **b)
+{
+   return ((*b)->getObjectTypeNumber() == BarrierTypeNumber ? 1 : 0) - ((*a)->getObjectTypeNumber() == BarrierTypeNumber ? 1 : 0);
+}
+
+// This is patterned after MoveObject::findFirstCollision(), but modified with
+// different assumptions because we are not a moving ship
+static BfObject* findFirstCollision(const GridDatabase *gameObjDatabase, F32 &collisionTime, Point &collisionPoint,
+      const Point &source, const Point &delta)
+{
+   // Check for collisions against other objects
+   Rect queryRect(source, source + delta);
+   queryRect.expand(Point(Ship::CollisionRadius, Ship::CollisionRadius));
+
+   fillVector.clear();
+
+   gameObjDatabase->findObjects(isSpeedZoneProblemObject, fillVector, queryRect);
+
+   fillVector.sort(sortBarriersFirst);
+
+   BfObject *collisionObject = NULL;
+   F32 closestCollisionFraction = F32_MAX;
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
+
+      if(!foundObject->isCollisionEnabled())
+         continue;
+
+      const Vector<Point> *poly = foundObject->getCollisionPoly();
+
+      if(!poly) // Teleporter
+      {
+         Point teleporterPos = foundObject->getVert(0);
+         F32 thisDist = (teleporterPos - source).len();
+         F32 origDist = delta.len();
+
+         collisionTime   = thisDist / origDist;
+         collisionPoint  = teleporterPos;
+         collisionObject = foundObject;
+
+         continue;
+      }
+
+      Point outPoint;
+      F32 outFraction;
+
+      bool doesIntersect = PolygonSweptCircleIntersect(&poly->first(), poly->size(), source,
+            delta, Ship::CollisionRadius, outPoint, outFraction);
+
+      if(!doesIntersect)
+         continue;
+
+      if(outPoint == source)
+         continue;
+
+      // Found a collision that's closer
+      if(outFraction < closestCollisionFraction)
+      {
+         // New closest
+         closestCollisionFraction = outFraction;
+
+         // Update returned variables
+         collisionTime   = outFraction;
+         collisionPoint  = outPoint;
+         collisionObject = foundObject;
+      }
+
+      // Implicit continue
+   }
+
+   return collisionObject;
+}
+
 
 
 static void linkConnectionsSpeedZones(const GridDatabase *gameObjDatabase,
@@ -478,11 +497,11 @@ static void linkConnectionsSpeedZones(const GridDatabase *gameObjDatabase,
    // Go through each known SpeedZone
    for(S32 i = 0; i < speedZoneList.size(); i++)
    {
-      logprintf("newzone");
       SpeedZone *speedZone = static_cast<SpeedZone *>(speedZoneList[i]);
       const Vector<Point> &szBufferedPoly = speedZonePolygons[i];  // Aligned with speedZoneList
 
-      Point dir = speedZone->getVert(1) - speedZone->getVert(0);  // end - start
+      Point vert0 = speedZone->getVert(0);
+      Point dir = speedZone->getVert(1) - vert0;  // end - start
 
       // Determine the likely end point based on the initial speed of the SpeedZone
       // It has a 1.5 multiplier (see SpeedZone::collided()) for some reason
@@ -491,41 +510,38 @@ static void linkConnectionsSpeedZones(const GridDatabase *gameObjDatabase,
       // Physics: v_i^2 / 2a
       F32 distanceEstimate = sq(currentSpeed) / (2 * Ship::Acceleration);
       Point szTip = speedZone->getOutline()->get(2);  // Tip point 2, from SpeedZone::generatePoints()
+      Point szMiddle = (vert0 + szTip) * 0.5;
 
       if(distanceEstimate < Ship::CollisionRadius)  // Clamp to lower bound
          distanceEstimate = Ship::CollisionRadius;
 
-
       Point currentVec = dir;
       currentVec.normalize(distanceEstimate);   // Vector from the SZ
 
-      source = szTip;
-      dest = szTip + currentVec;  // Will likely be overridden
+      // These position variables will be updated to reflect the currect trajectory
+      // as the simulated ship bounces around
+      source = szMiddle;           // Start from middle of zone as an average of any point of entry
+      dest = source + currentVec;  // Will likely be overridden
 
-
-      DatabaseObject* hitObject = NULL;
+      // This represents the remaining distance we have to travel based on the physics
       F32 currentVecDist = distanceEstimate;
-      // Used for bouncing off Barriers
-      F32 collisionTime;
-      Point collisionNormal;
 
       // Here we'll attempt to see if the speed zone runs us into another object,
       // even after bouncing off of walls multiple times
       bool objSearch = true;
-
       while(objSearch)
       {
-         // TODO Use findFirstCollision
-         hitObject = gameObjDatabase->findObjectLOS((TestFunc) isSpeedZoneProblemObject,
-               ActualState, source, dest, collisionTime, collisionNormal);
+         // Used for bouncing off Barriers
+         F32 collisionTime;
+         Point collisionPoint;
 
-         logprintf("source: %f,%f; dest: %f,%f; norm: %f,%f",
-               source.x, source.y, dest.x, dest.y, collisionNormal.x, collisionNormal.y);
+         // Search for a collision as though we were a ship
+         DatabaseObject* hitObject = findFirstCollision(gameObjDatabase,
+               collisionTime, collisionPoint, source, currentVec);
 
          if(hitObject)  // Some object in the way
          {
             U8 hitObjectType = hitObject->getObjectTypeNumber();
-//            logprintf("hit objtype: %d", hitObjectType);
 
             if(hitObjectType == SpeedZoneTypeNumber)
             {
@@ -546,7 +562,7 @@ static void linkConnectionsSpeedZones(const GridDatabase *gameObjDatabase,
             }
             else if(hitObjectType == BarrierTypeNumber)  // Includes both BarrierMaker/Polywall
             {
-//               logprintf("ct: %f; normal: %f,%f", collisionTime, collisionNormal.x, collisionNormal.y);
+               // Get better estimate of where we hit the wall because of ship's radius
                F32 distBeforeWall = collisionTime * currentVecDist;
 
                // If we're close enough set the end point near the wall
@@ -563,31 +579,35 @@ static void linkConnectionsSpeedZones(const GridDatabase *gameObjDatabase,
                // Much shorter, include a bounce
                else
                {
+                  // Distance vector traveled
+                  Point thisVec = currentVec;
+                  thisVec.normalize(distBeforeWall);
+
+                  // Advance ship to collision location
+                  Point shipPos = source + thisVec;
+                  // Recalc normal
+                  Point normal = shipPos - collisionPoint;
+                  normal.normalize();
+
                   // calc new v from d, apply elasticity, calc new d
                   F32 collisionSpeed = sqrt(2 * -Ship::Acceleration * distBeforeWall + sq(currentSpeed));
                   Point collisionVel = currentVec;
                   collisionVel.normalize(collisionSpeed);
                   // Taken from MoveObject::computeCollisionResponseBarrier()
                   Point reflectVel = collisionVel -
-                        collisionNormal * MoveObject::CollisionElasticity * collisionNormal.dot(collisionVel);
+                        normal * MoveObject::CollisionElasticity * normal.dot(collisionVel);
                   F32 reflectSpeed = reflectVel.len();
                   F32 remainingDist = sq(reflectSpeed) / (2 * Ship::Acceleration);
 
-//                  logprintf("hitspeed: %f, reflectspeed: %f, dist: %f, remain: %f",
-//                        collisionSpeed, reflectSpeed, distBeforeWall, remainingDist);
-
                   Point newVec = reflectVel;
                   newVec.normalize(remainingDist);
-
-                  // Distance vector traveled
-                  Point thisVec = currentVec;
-                  thisVec.normalize(distBeforeWall - 0.01);  // Subtract a little to be off-Barrier
 
                   // Update new reflected source and destination
                   source = source + thisVec;
                   dest = source + newVec;
 
-                  // Update new endVec
+
+                  // Update new current vector estimates
                   currentVec = newVec;
                   currentVecDist = remainingDist;
                   currentSpeed = reflectSpeed;
@@ -609,8 +629,6 @@ static void linkConnectionsSpeedZones(const GridDatabase *gameObjDatabase,
          else
              objSearch = false;
       }
-
-      logprintf("final dest: %f,%f", dest.x, dest.y);
 
       // Now go through all known bot zones under speedzones
       // allZones should be a list of BotNavMeshZone ordered by their zoneId
