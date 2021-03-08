@@ -124,6 +124,7 @@ void MoveObject::onAddedToGame(Game *game)
 }
 
 
+// 2.0 means perfect reflection, less means velocity loss along normal component
 const F32 MoveObject::CollisionElasticity = 1.7f;
 
 Rect MoveObject::calcExtents()
