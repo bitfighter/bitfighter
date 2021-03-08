@@ -740,6 +740,12 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
 #endif
 
    Rect bounds(worldExtents);      // Modifiable copy
+   // allZones is a Vector cache of all zones held in memory by the server to
+   // be used by Robots without having to call the grid database
+   //
+   // Clearing this here *also* clears the botZoneDatabase and is required before
+   // repopulating it below
+   allZones->deleteAndClear();
 
    bounds.expandToInt(Point(LevelZoneBuffer, LevelZoneBuffer));      // Provide a little breathing room
 
@@ -997,11 +1003,6 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
          addedZones = true;
       }
    }
-
-
-   // allZones is a Vector cache of all zones held in memory by the server to
-   // be used by Robots without having to call the grid database
-   allZones->deleteAndClear();
 
    // Repopulate allZones with the zones we modified above
    if(addedZones)
