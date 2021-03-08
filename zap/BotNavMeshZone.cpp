@@ -974,6 +974,8 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
 
          if(j == 0)     // New poly, add new zone
          {
+            // Create new zone, give it an ID that is +1 to the highest already in the database
+            // This assumes zones are already added sequentially in this manner
             botzone = new BotNavMeshZone(botZoneDatabase->getObjectCount());
 
             // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
@@ -1014,10 +1016,14 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
    // Teleporters require special connections
    linkConnectionsTeleporters(botZoneDatabase, teleporterData);
 
-   // And SpeedZones
-   S32 szBotZoneStartId = polyToZoneMap[szRecastPolyStartIdx];
-   linkConnectionsSpeedZones(gameObjDatabase, botZoneDatabase, allZones,
-         speedZoneList, speedZonePolygons, szBotZoneStartId);
+   // And SpeedZones, if they exist
+   if(szRecastPolyStartIdx < polyToZoneMap.size())
+   {
+      S32 szBotZoneStartId = polyToZoneMap[szRecastPolyStartIdx];
+
+      linkConnectionsSpeedZones(gameObjDatabase, botZoneDatabase, allZones,
+            speedZoneList, speedZonePolygons, szBotZoneStartId);
+   }
 
 #ifdef LOG_TIMER
    U32 done3 = Platform::getRealMilliseconds();  // Done
