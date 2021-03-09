@@ -706,11 +706,11 @@ S32 LuaScriptRunner::findObjectById(lua_State *L, const Vector<DatabaseObject *>
 
 S32 LuaScriptRunner::doSubscribe(lua_State *L, ScriptContext context)   
 { 
-   lua_Integer eventType = getInt(L, -1);
+   EventManager::EventType eventType = getInt2<EventManager::EventType>(L, -1);
 
    if(!mSubscriptions[eventType])
    {
-      EventManager::get()->subscribe(this, (EventManager::EventType)eventType, context);
+      EventManager::get()->subscribe(this, eventType, context);
       mSubscriptions[eventType] = true;
    }
 
