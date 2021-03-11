@@ -177,12 +177,18 @@ function shouldFireAtObject(obj)
         end
     end
     
-    
     -- No shooting various team related objects
-    if (obj:getTeamIndex() == bot:getTeamIndex() and game:isTeamGame()) or  -- Same team
-        obj:getTeamIndex() == Team.Neutral then                             -- Neutral team
-        if (objType == ObjType.Ship    or   objType == ObjType.Robot   or   -- Turrets and FFs handled above
+    if (obj:getTeamIndex() == bot:getTeamIndex() and game:isTeamGame()) then -- Same team
+        if (objType == ObjType.Ship    or   objType == ObjType.Robot   or    -- Turrets and FFs handled above
             objType == ObjType.Core    or   objType == ObjType.SpyBug) then
+            return false
+        end
+    end
+    
+    -- No shooting some neutral objects
+    if obj:getTeamIndex() == Team.Neutral then                               -- Neutral team
+        if (objType == ObjType.Ship    or   objType == ObjType.Robot   or  
+            objType == ObjType.SpyBug) then
             return false
         end
     end
