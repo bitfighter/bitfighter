@@ -192,7 +192,8 @@ S32 MenuItem::getWidth(S32 textsize)
 
 bool MenuItem::handleKey(InputCode inputCode)
 {
-   if(inputCode == KEY_ENTER || inputCode == KEY_SPACE || inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT)
+   if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER ||
+         inputCode == KEY_SPACE || inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT)
    {
       UserInterface::playBoop();
       if(mCallback)
@@ -445,7 +446,7 @@ bool ToggleMenuItem::handleKey(InputCode inputCode)
       return true;
    }
 
-   else if(inputCode == KEY_ENTER || inputCode == KEY_SPACE)
+   else if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER || inputCode == KEY_SPACE)
    {
       mIndex = (mIndex == (U32)mOptions.size() - 1) ? nextValAfterWrap : mIndex + 1;
 
@@ -1801,7 +1802,7 @@ void SimpleTextEntryMenuItem::setHasError(bool hasError)
 
 bool SimpleTextEntryMenuItem::handleKey(InputCode inputCode)
 {
-   if(inputCode == KEY_ENTER)
+   if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)
    {
       // Call the menu item main callback unless we have an error
       if(mCallback && !mHasError)

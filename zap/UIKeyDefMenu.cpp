@@ -343,7 +343,8 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
    }
 
    // We're not doing InputCode entry, so let's try menu navigation
-   if(inputCode == KEY_SPACE || inputCode == KEY_ENTER || inputCode == BUTTON_START || inputCode == MOUSE_LEFT)      // Set key for selected item
+   if(inputCode == KEY_SPACE || inputCode == KEY_ENTER  || inputCode == KEY_KEYPAD_ENTER ||
+         inputCode == BUTTON_START || inputCode == MOUSE_LEFT)      // Set key for selected item
    {
       playBoop();
       changingItem = selectedIndex;
