@@ -252,8 +252,11 @@ public:
    TNL_DECLARE_RPC(s2cTouchdownScored, (RangedU32<0, NumSFXBuffers> sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e, Point scorePos));
 
    TNL_DECLARE_RPC(s2cDisplayMessage, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString));
+
+   // These could be consolidated
    TNL_DECLARE_RPC(s2cDisplaySuccessMessage, (StringTableEntry formatString));    
    TNL_DECLARE_RPC(s2cDisplayErrorMessage,   (StringTableEntry formatString));    
+   TNL_DECLARE_RPC(s2cDisplayConsoleMessage, (StringTableEntry formatString));
 
    TNL_DECLARE_RPC(s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message));
 

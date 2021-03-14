@@ -1258,6 +1258,17 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayErrorMessage,
 }
 
 
+TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayConsoleMessage,
+                  (StringTableEntry formatString),
+                  (formatString),
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
+{
+#ifndef ZAP_DEDICATED
+   logprintf(LogConsumer::ConsoleMsg, "%s", formatString.getString());
+#endif
+}
+
+
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message),
                   (title, instr, message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {

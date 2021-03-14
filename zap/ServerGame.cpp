@@ -660,6 +660,12 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(mBotZoneDatabase, getGameObjDatabase(), &mAllZones,
                                                                           getWorldExtents(), triangulate);
+   if(mGameType->mBotZoneCreationFailed)
+   {
+      for(int i = 0; i < getClientCount(); i++)
+         getClientInfo(i)->getConnection()->s2cDisplayConsoleMessage("Zone creation failed for level; bots disabled.");
+   }
+
    // Clear team info for all clients
    resetAllClientTeams();
 
