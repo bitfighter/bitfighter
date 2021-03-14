@@ -903,7 +903,6 @@ S32 returnGameInfo(lua_State *L, ServerGame *serverGame)
       return 0;
    }
 
-
    serverGame->getGameInfo()->push(L);
    return 1;
 }

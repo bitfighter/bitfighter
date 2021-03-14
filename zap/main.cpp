@@ -621,7 +621,7 @@ void setupLogging(const string &logDir)
    // Specify which events each logging destination will record
    S32 stdoutEvents    = LogConsumer::AllErrorTypes | LogConsumer::LuaScriptMessage | LogConsumer::LogConnection;
    S32 consoleEvents   = LogConsumer::AllErrorTypes | LogConsumer::LuaScriptMessage | LogConsumer::ConsoleMsg;
-   S32 serverLogEvents = LogConsumer::AllErrorTypes | LogConsumer::ServerFilter      | LogConsumer::StatisticsFilter;
+   S32 serverLogEvents = LogConsumer::AllErrorTypes | LogConsumer::ServerFilter     | LogConsumer::StatisticsFilter;
    // logfileEvents  ==> set from INI settings     See setupLogging(IniSettings *iniSettings)
 
    gMainLog.init(joindir(logDir, "bitfighter.log"), "w");

@@ -779,6 +779,7 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
    // Keep track of all the non-navigable polygons to merge
    Vector<Vector<Point> > blockingPolygons;
 
+
    // First merge all barrier polygons
    Vector<Vector<Point> > barrierInputPolygons;
    bool unionSucceeded = Barrier::unionBarriers(barrierList,  barrierInputPolygons);

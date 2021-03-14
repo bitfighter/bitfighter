@@ -106,11 +106,11 @@ void LuaLevelGenerator::killScript()
  */
 //               Fn name    Param profiles         Profile count
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, setGameTime,       ARRAYDEF({{ NUM, END }}), 1 )                        \
-   METHOD(CLASS, globalMsg,         ARRAYDEF({{ STR, END }}), 1 )                        \
-   METHOD(CLASS, teamMsg,           ARRAYDEF({{ STR, TEAM_INDX, END }}), 1 )             \
-   METHOD(CLASS, privateMsg,        ARRAYDEF({{ STR, STR, END }}), 1 )                   \
-   METHOD(CLASS, announce,          ARRAYDEF({{ STR, END }}), 1 )                        \
+   METHOD(CLASS, setGameTime,       ARRAYDEF({{ NUM, END }}), 1 )            \
+   METHOD(CLASS, globalMsg,         ARRAYDEF({{ STR, END }}), 1 )            \
+   METHOD(CLASS, teamMsg,           ARRAYDEF({{ STR, TEAM_INDX, END }}), 1 ) \
+   METHOD(CLASS, privateMsg,        ARRAYDEF({{ STR, STR, END }}), 1 )       \
+   METHOD(CLASS, announce,          ARRAYDEF({{ STR, END }}), 1 )            \
 
 GENERATE_LUA_METHODS_TABLE(LuaLevelGenerator, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(LuaLevelGenerator, LUA_METHODS);

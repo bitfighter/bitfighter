@@ -15,8 +15,8 @@ namespace Zap
 class HelpItemManagerTest : public testing::Test
 {
 public:
-   ClientGame* game;
-   GameType* gameType;
+   ClientGame *game;
+   GameType *gameType;
    HelpItem helpItem;
    UI::HelpItemManager himgr;
 

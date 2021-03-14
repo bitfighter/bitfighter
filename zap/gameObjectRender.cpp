@@ -2639,8 +2639,8 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, cons
       F32 angle = pos.angleTo(geom->get(0));
 
       static const F32 symbol[] = {
-            -2, 5,
-            4, 0,
+            -2,  5,
+             4,  0,
             -2, -5,
       };
 
