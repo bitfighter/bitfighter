@@ -1676,7 +1676,7 @@ void ServerGame::processVoting(U32 timeDelta)
                case VoteSetTime:
                   if(mGameType)
                   {
-                     mGameType->setGameTime(mVoteNumber);
+                     mGameType->setGameTime(F32(mVoteNumber));
                      mGameType->broadcastNewRemainingTime();
                   }
                   break;

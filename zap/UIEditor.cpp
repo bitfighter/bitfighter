@@ -170,7 +170,7 @@ GridDatabase *EditorUserInterface::getDatabase() const
 
 F32 EditorUserInterface::getGridSize() const
 {
-   return mGridSize;
+   return F32(mGridSize);
 }
 
 
@@ -2003,7 +2003,7 @@ void EditorUserInterface::render()
       renderTurretAndSpyBugRanges(editorDb);    // Render range of all turrets and spybugs in editorDb
    else
       renderGrid(mCurrentScale, mCurrentOffset, convertLevelToCanvasCoord(Point(0,0)), 
-                 mGridSize, mSnapContext == FULL_SNAPPING, showMinorGridLines());
+                 F32(mGridSize), mSnapContext == FULL_SNAPPING, showMinorGridLines());
 
    glPushMatrix();
       glTranslate(getCurrentOffset());
@@ -3229,7 +3229,7 @@ BfObject *EditorUserInterface::copyDockItem(BfObject *source)
 {
    // Instantiate object so we are essentially dragging a non-dock item
    BfObject *newObject = source->newCopy();
-   newObject->newObjectFromDock(mGridSize);     // Do things particular to creating an object that came from dock
+   newObject->newObjectFromDock(F32(mGridSize));     // Do things particular to creating an object that came from dock
 
    return newObject;
 }

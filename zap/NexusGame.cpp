@@ -1238,7 +1238,7 @@ S32 NexusZone::lua_setOpenTime(lua_State *L)
    if(gameType->getGameTypeId() != NexusGame)       // Do nothing if this is not a Nexus game
       return 0;
   
-   static_cast<NexusGameType *>(gameType)->setNewOpenTime(getInt(L, 1));
+   static_cast<NexusGameType *>(gameType)->setNewOpenTime(S32(getInt(L, 1)));
 
    return 0;
 }
@@ -1272,7 +1272,7 @@ S32 NexusZone::lua_setClosedTime(lua_State *L)
    if(gameType->getGameTypeId() != NexusGame)       // Do nothing if this is not a Nexus game
       return 0;
   
-   static_cast<NexusGameType *>(gameType)->setNewClosedTime(getInt(L, 1));
+   static_cast<NexusGameType *>(gameType)->setNewClosedTime(S32(getInt(L, 1)));
 
    return 0;
 }

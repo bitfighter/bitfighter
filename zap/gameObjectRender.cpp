@@ -2626,7 +2626,7 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, cons
    c = c * (1 - ForceFieldBrightnessProjector) + ForceFieldBrightnessProjector;
 
    if (enabled)
-      glColor(c, 0.2f + (.9 * health)); //adjust alpha a little so it doesn't get much darker when its enabled than disabled
+      glColor(c, 0.2f + (0.9f * health)); //adjust alpha a little so it doesn't get much darker when its enabled than disabled
    else
       glColor((c * 0.6f));
 

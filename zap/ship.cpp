@@ -2681,7 +2681,7 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
       lua_pushnil(L);                             // table, nil
       while(lua_next(L, 1) != 0)                  // table, key, value
       {
-         loadoutValues.push_back(getInt(L, -1));
+         loadoutValues.push_back(getInt2<S32>(L, -1));
          lua_pop(L, 1);                           // table, key
       }
    }
@@ -2689,7 +2689,7 @@ LoadoutTracker Ship::checkAndBuildLoadout(lua_State *L, S32 profile)
    else
    {
       for(S32 i = 0; i < expectedSize; i++)
-         loadoutValues.push_back(getInt(L, i + 1));
+         loadoutValues.push_back(getInt2<S32>(L, i + 1));
    }
 
    // Make sure we have the appropriate number of loadout values

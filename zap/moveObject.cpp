@@ -1557,7 +1557,7 @@ bool Asteroid::shouldRender() const
 void Asteroid::renderItem(const Point &pos)
 {
    if(shouldRender())
-      renderAsteroidForTeam(pos, mDesign, mRadius, getColor(), .7);
+      renderAsteroidForTeam(pos, mDesign, mRadius, getColor(), .7f);
 }
 
 
@@ -1877,7 +1877,7 @@ S32 Asteroid::lua_getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INIT
 S32 Asteroid::lua_setSize(lua_State *L)
 {
    checkArgList(L, functionArgs, "Asteroid", "setSize");
-   S32 size = getInt(L, 1);
+   S32 size = getInt2<S32>(L, 1);
    if(size <= 0)
       mSizeLeft = ASTEROID_INITIAL_SIZELEFT;
    else

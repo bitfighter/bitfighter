@@ -505,10 +505,10 @@ static void linkConnectionsSpeedZones(const GridDatabase *gameObjDatabase,
 
       // Determine the likely end point based on the initial speed of the SpeedZone
       // It has a 1.5 multiplier (see SpeedZone::collided()) for some reason
-      U16 currentSpeed = speedZone->getSpeed() * SpeedZone::SpeedMultiplier;
+      U16 currentSpeed = U16(speedZone->getSpeed() * SpeedZone::SpeedMultiplier);
 
       // Physics: v_i^2 / 2a
-      F32 distanceEstimate = sq(currentSpeed) / (2 * Ship::Acceleration);
+      F32 distanceEstimate = F32(sq(currentSpeed) / (2 * Ship::Acceleration));
       Point szTip = speedZone->getOutline()->get(2);  // Tip point 2, from SpeedZone::generatePoints()
       Point szMiddle = (vert0 + szTip) * 0.5;
 
@@ -589,7 +589,7 @@ static void linkConnectionsSpeedZones(const GridDatabase *gameObjDatabase,
                   Point normal = shipPos - collisionPoint;
                   normal.normalize();
 
-                  // calc new v from d, apply elasticity, calc new d
+                  // Calc new v from d, apply elasticity, calc new d
                   F32 collisionSpeed = sqrt(2 * -Ship::Acceleration * distBeforeWall + sq(currentSpeed));
                   Point collisionVel = currentVec;
                   collisionVel.normalize(collisionSpeed);
@@ -610,7 +610,7 @@ static void linkConnectionsSpeedZones(const GridDatabase *gameObjDatabase,
                   // Update new current vector estimates
                   currentVec = newVec;
                   currentVecDist = remainingDist;
-                  currentSpeed = reflectSpeed;
+                  currentSpeed = U16(reflectSpeed);
 
                   objSearch = true;
                }
