@@ -97,7 +97,7 @@ void GameParamUserInterface::onActivate()
    if(mLevelFilename == EditorUserInterface::UnnamedFile)
       mLevelFilename = "";
 
-   updateMenuItems();   
+   updateMenuItems();
    origGameParams = getGame()->toLevelCode();   // Save a copy of the params coming in for comparison when we leave to see what changed
    Cursor::disableCursor();
 }
