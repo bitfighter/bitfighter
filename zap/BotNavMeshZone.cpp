@@ -620,8 +620,8 @@ static void linkConnectionsSpeedZones(const GridDatabase *gameObjDatabase,
                // Minimum point the SpeedZone will send you is directly in front of it;
                // this is our fallback end point
                Point dirMin = dir;
-               dirMin.normalize(Ship::CollisionRadius);
-               dest = source + dirMin;
+               dirMin.normalize(1.5*Ship::CollisionRadius);
+               dest = szTip + dirMin;
             }
          }
 
@@ -645,19 +645,34 @@ static void linkConnectionsSpeedZones(const GridDatabase *gameObjDatabase,
             BotNavMeshZone *destZone =
                   findZoneTouchingCircle(botZoneDatabase, dest, 1);  // Small radius needed only
 
-            if(destZone != NULL && origZone != destZone)      // Ignore teleporters that begin and end in the same zone
+            // What to do if calculated destination is not found
+            if(destZone == NULL || origZone == destZone)
             {
-               // SpeedZone is one way path
-               neighbor.zoneID = destZone->getZoneId();
-               neighbor.borderStart.set(origin);
-               neighbor.borderEnd.set(dest);
-               neighbor.borderCenter.set(origin);
+               Point dirMin = dir;
+               dirMin.normalize(1.5*Ship::CollisionRadius);
+               dest = szTip + dirMin;
 
-               neighbor.distTo = 0;  // Not sure what this should be
-               neighbor.center.set(origin);
-
-               origZone->mNeighbors.push_back(neighbor);
+               // Redo search
+               destZone = findZoneTouchingCircle(botZoneDatabase, dest, 1);
             }
+
+            // Still no zone??
+            if(destZone == NULL)
+            {
+               TNLAssert(destZone != NULL, "Missing SpeedZone destination connection");
+               continue;
+            }
+
+            // SpeedZone is one way path
+            neighbor.zoneID = destZone->getZoneId();
+            neighbor.borderStart.set(origin);
+            neighbor.borderEnd.set(dest);
+            neighbor.borderCenter.set(origin);
+
+            neighbor.distTo = 0;  // Not sure what this should be
+            neighbor.center.set(origin);
+
+            origZone->mNeighbors.push_back(neighbor);
          }
       }
    }
