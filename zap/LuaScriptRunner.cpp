@@ -336,28 +336,41 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
 }
 
 
-// Modifies msg, which might look like:
-//    "levels\\script.lua:19: attempt to index global 'abc' (a nil value)\r\nStack Traceback\n...
+// Forward declare
+void improveErrorMessages_global(string& msg, const string& startStr);
+
+// Modifies the following messages:
+//    attempt to call global 'setThrustToPt' (a nil value)
+//    attempt to index global 'abc' (a nil value)\r\nStack Traceback\n...
+//    attempt to perform arithmetic on global 'iii' (a nil value)
 // and inserts a helpful debugging message
 void improveErrorMessages(string &msg)
 {
-   // See if this looks like an undefined variable error; if so, make the message friendlier
-   string startStr = "attempt to index global '";
-   size_t start = msg.find(startStr);
+   improveErrorMessages_global(msg, "attempt to call global");
+   improveErrorMessages_global(msg, "attempt to index global");
+   improveErrorMessages_global(msg, "attempt to perform arithmetic on global");
+}
 
-   if(start == string::npos)      // Not found
+
+// See if this looks like an undefined variable error; if so, make the message friendlier
+// Does nothing if msg doesn't start with startStr
+void improveErrorMessages_global(string &msg, const string &startStr)
+{
+   size_t start = msg.find(startStr + " '");
+
+   if(start == string::npos)        // Not found
       return;
 
-   start += startStr.length();    // Make start be the index of the end of startStr
+   start += startStr.length() + 2;  // Make start be the index of the end of startStr (+2 for the " '")
 
    size_t end = msg.find("' (a nil value)", start);
-   if(end == string::npos)        // Not found
+   if(end == string::npos)          // Not found
       return;
 
    string var = msg.substr(start, end - start);    // var is the problematic variable (abc in the sample above)
 
    size_t insertPos = msg.find("Stack Traceback", end);
-   if(end == string::npos)        // Not found
+   if(end == string::npos)          // Not found
       return;
 
    msg.insert(insertPos, ">>> This error could mean that '" + var + 
