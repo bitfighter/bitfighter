@@ -620,8 +620,8 @@ static void linkConnectionsSpeedZones(const GridDatabase *gameObjDatabase,
                // Minimum point the SpeedZone will send you is directly in front of it;
                // this is our fallback end point
                Point dirMin = dir;
-               dirMin.normalize(Ship::CollisionRadius);
-               dest = source + dirMin;
+               dirMin.normalize(1.5*Ship::CollisionRadius);
+               dest = szTip + dirMin;
             }
          }
 
@@ -645,19 +645,34 @@ static void linkConnectionsSpeedZones(const GridDatabase *gameObjDatabase,
             BotNavMeshZone *destZone =
                   findZoneTouchingCircle(botZoneDatabase, dest, 1);  // Small radius needed only
 
-            if(destZone != NULL && origZone != destZone)      // Ignore teleporters that begin and end in the same zone
+            // What to do if calculated destination is not found
+            if(destZone == NULL || origZone == destZone)
             {
-               // SpeedZone is one way path
-               neighbor.zoneID = destZone->getZoneId();
-               neighbor.borderStart.set(origin);
-               neighbor.borderEnd.set(dest);
-               neighbor.borderCenter.set(origin);
+               Point dirMin = dir;
+               dirMin.normalize(1.5*Ship::CollisionRadius);
+               dest = szTip + dirMin;
 
-               neighbor.distTo = 0;  // Not sure what this should be
-               neighbor.center.set(origin);
-
-               origZone->mNeighbors.push_back(neighbor);
+               // Redo search
+               destZone = findZoneTouchingCircle(botZoneDatabase, dest, 1);
             }
+
+            // Still no zone??
+            if(destZone == NULL)
+            {
+               TNLAssert(destZone != NULL, "Missing SpeedZone destination connection");
+               continue;
+            }
+
+            // SpeedZone is one way path
+            neighbor.zoneID = destZone->getZoneId();
+            neighbor.borderStart.set(origin);
+            neighbor.borderEnd.set(dest);
+            neighbor.borderCenter.set(origin);
+
+            neighbor.distTo = 0;  // Not sure what this should be
+            neighbor.center.set(origin);
+
+            origZone->mNeighbors.push_back(neighbor);
          }
       }
    }
@@ -740,6 +755,12 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
 #endif
 
    Rect bounds(worldExtents);      // Modifiable copy
+   // allZones is a Vector cache of all zones held in memory by the server to
+   // be used by Robots without having to call the grid database
+   //
+   // Clearing this here *also* clears the botZoneDatabase and is required before
+   // repopulating it below
+   allZones->deleteAndClear();
 
    bounds.expandToInt(Point(LevelZoneBuffer, LevelZoneBuffer));      // Provide a little breathing room
 
@@ -974,6 +995,8 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
 
          if(j == 0)     // New poly, add new zone
          {
+            // Create new zone, give it an ID that is +1 to the highest already in the database
+            // This assumes zones are already added sequentially in this manner
             botzone = new BotNavMeshZone(botZoneDatabase->getObjectCount());
 
             // Triangulation only needed for display on local client... it is expensive to compute for so many zones,
@@ -996,11 +1019,6 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
       }
    }
 
-
-   // allZones is a Vector cache of all zones held in memory by the server to
-   // be used by Robots without having to call the grid database
-   allZones->deleteAndClear();
-
    // Repopulate allZones with the zones we modified above
    if(addedZones)
       populateZoneList(botZoneDatabase, allZones);
@@ -1014,10 +1032,14 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
    // Teleporters require special connections
    linkConnectionsTeleporters(botZoneDatabase, teleporterData);
 
-   // And SpeedZones
-   S32 szBotZoneStartId = polyToZoneMap[szRecastPolyStartIdx];
-   linkConnectionsSpeedZones(gameObjDatabase, botZoneDatabase, allZones,
-         speedZoneList, speedZonePolygons, szBotZoneStartId);
+   // And SpeedZones, if they exist
+   if(szRecastPolyStartIdx < polyToZoneMap.size())
+   {
+      S32 szBotZoneStartId = polyToZoneMap[szRecastPolyStartIdx];
+
+      linkConnectionsSpeedZones(gameObjDatabase, botZoneDatabase, allZones,
+            speedZoneList, speedZonePolygons, szBotZoneStartId);
+   }
 
 #ifdef LOG_TIMER
    U32 done3 = Platform::getRealMilliseconds();  // Done
