@@ -736,8 +736,6 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
    gameObjDatabase->findObjects(CoreTypeNumber, coreList);
 
 
-   // Expand core bot buffer by ~5 more than needed (to 55) because of rotation
-
    // Get our parameters together
    Vector<DatabaseObject *> barrierList;
    gameObjDatabase->findObjects((TestFunc)isWallType, barrierList, *worldExtents);
@@ -780,14 +778,19 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
    Vector<Vector<Point> > blockingPolygons;
 
    // First merge all barrier polygons
-   Vector<Vector<Point> > barrierInputPolygons;
-   bool unionSucceeded = Barrier::unionBarriers(barrierList,  barrierInputPolygons);
-   if(!unionSucceeded)
-      return false;
+   if(barrierList.size() > 0)
+   {
+      Vector<Vector<Point> > barrierInputPolygons;
+      bool unionSucceeded = Barrier::unionBarriers(barrierList,  barrierInputPolygons);
+      if(!unionSucceeded)
+      {
+         logprintf(LogConsumer::LogLevelError, "Barriers failed to merge for bot zones!", U16_MAX);
+         return false;
+      }
 
-   // Now offset and fill inputPolygons directly
-   offsetPolygons(barrierInputPolygons, blockingPolygons, BufferRadius);
-
+      // Now offset and fill inputPolygons directly
+      offsetPolygons(barrierInputPolygons, blockingPolygons, BufferRadius);
+   }
 
    // Add turrets
    for (S32 i = 0; i < turretList.size(); i++)
@@ -859,7 +862,7 @@ bool BotNavMeshZone::buildBotMeshZones(GridDatabase *botZoneDatabase, GridDataba
          nonStandardPolygons.push_back(speedZonePolygons[i]);
 
 
-   // This is some sort of degenerate empty level; manually inject a zone.
+   // This is some sort of degenerate empty level; manually inject a tiny zone hole.
    if(nonStandardPolygons.size() == 0)
    {
       // Just add a simple, small square
