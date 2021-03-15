@@ -198,20 +198,6 @@ public:
    template<typename T>
    T getVal(S32 index) { return getVal<T>(index); }
 
-   template<> S32 getVal(S32 index) { return S32(lua_tointeger(L, index)); }
-   template<> U32 getVal(S32 index) { return U32(lua_tointeger(L, index)); }
-   template<> S16 getVal(S32 index) { return S16(lua_tointeger(L, index)); }
-   template<> U16 getVal(S32 index) { return U16(lua_tointeger(L, index)); }
-   template<> S8  getVal(S32 index) { return S8(lua_tointeger(L, index)); }
-   template<> U8  getVal(S32 index) { return U8(lua_tointeger(L, index)); }
-   template<> F32 getVal(S32 index) { return F32(lua_tonumber(L, index)); }
-   template<> bool getVal(S32 index) { return lua_toboolean(L, index); }
-   template<> string getVal(S32 index) {
-      size_t len;
-      const char* cstr = lua_tolstring(L, -1, &len);
-      return string(cstr, len);
-   }
-
 
    //// Lua interface
    LUAW_DECLARE_ABSTRACT_CLASS(LuaScriptRunner);
@@ -237,6 +223,21 @@ public:
 
    S32 lua_sendData(lua_State *L);
 };
+
+
+template<> inline S32 LuaScriptRunner::getVal(S32 index) { return S32(lua_tointeger(L, index)); }
+template<> inline U32 LuaScriptRunner::getVal(S32 index) { return U32(lua_tointeger(L, index)); }
+template<> inline S16 LuaScriptRunner::getVal(S32 index) { return S16(lua_tointeger(L, index)); }
+template<> inline U16 LuaScriptRunner::getVal(S32 index) { return U16(lua_tointeger(L, index)); }
+template<> inline S8  LuaScriptRunner::getVal(S32 index) { return S8(lua_tointeger(L, index)); }
+template<> inline U8  LuaScriptRunner::getVal(S32 index) { return U8(lua_tointeger(L, index)); }
+template<> inline F32 LuaScriptRunner::getVal(S32 index) { return F32(lua_tonumber(L, index)); }
+template<> inline bool LuaScriptRunner::getVal(S32 index) { return lua_toboolean(L, index); }
+template<> inline string LuaScriptRunner::getVal(S32 index) {
+   size_t len;
+   const char* cstr = lua_tolstring(L, -1, &len);
+   return string(cstr, len);
+}
 
 
 ////////////////////////////////////////
