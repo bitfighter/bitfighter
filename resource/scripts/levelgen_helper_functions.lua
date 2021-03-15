@@ -16,23 +16,36 @@
 -------------------------------------------------------------------------------
 
 --
--- And two more
+-- Some aliases and accessibility aids
 --
 
 -- Documented in luaLevelGenerator.cpp
-function subscribe(event)
-    bf:subscribe(event)
+function subscribe(...)
+    bf:subscribe(...)
 end
 
 -- Documented in luaLevelGenerator.cpp
-function unsubscribe(event)
-    bf:unsubscribe(event)
+function levelgen:subscribe(...)
+    bf:subscribe(...)
+end
+
+-- Documented in luaLevelGenerator.cpp
+function unsubscribe(...)
+    bf:unsubscribe(...)
+end
+
+function levelgen:unsubscribe(...)
+    bf:unsubscribe(...)
+end
+
+function levelgen:sendData(...)
+    bf:sendData(...)
 end
 
 
 -- Documented in luaLevelGenerator.cpp
-function globalMsg(message)
-   levelgen:globalMsg(message)
+function globalMsg(...)
+   levelgen:globalMsg(...)
 end
 
 

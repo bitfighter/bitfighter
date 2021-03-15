@@ -49,6 +49,7 @@ class EventManager
    EVENT(PlayerLeftEvent,        "PlayerLeft",        "onPlayerLeft",        "Use with event handler: `onPlayerLeft(PlayerInfo player)`"                                        ) \
    EVENT(PlayerTeamChangedEvent, "PlayerTeamChanged", "onPlayerTeamChanged", "Use with event handler: `onPlayerTeamChanged(PlayerInfo player)`"                                 ) \
    EVENT(MsgReceivedEvent,       "MsgReceived",       "onMsgReceived",       "Use with event handler: `onMsgReceived(string message, PlayerInfo sender, bool messageIsGlobal)`" ) \
+   EVENT(DataReceivedEvent,      "DataReceived",      "onDataReceived",      "Use with event handler: `onDataReceived(Any data)`"                                               ) \
    EVENT(NexusOpenedEvent,       "NexusOpened",       "onNexusOpened",       "Use with event handler: `onNexusOpened()`"                                                        ) \
    EVENT(NexusClosedEvent,       "NexusClosed",       "onNexusClosed",       "Use with event handler: `onNexusClosed()`"                                                        ) \
    EVENT(ShipEnteredZoneEvent,   "ShipEnteredZone",   "onShipEnteredZone",   "Use with event handler: `onShipEnteredZone(Ship ship, Zone zone)`"                                ) \
@@ -80,8 +81,8 @@ private:
    void removeFromPendingSubscribeList  (LuaScriptRunner *subscriber, EventType eventType);
    void removeFromPendingUnsubscribeList(LuaScriptRunner *subscriber, EventType eventType);
 
-   void handleEventFiringError(lua_State *L, const Subscription &subscriber, EventType eventType, const char *errorMsg);
-   bool fire(lua_State *L, LuaScriptRunner *scriptRunner, const char *function, ScriptContext context);
+   //void handleEventFiringError(lua_State *L, const Subscription &subscriber, EventType eventType, const char *errorMsg);
+   bool fire(lua_State *L, LuaScriptRunner *scriptRunner, const char *function, S32 argCount, ScriptContext context);
       
    bool mIsPaused;
    S32 mStepCount;           // If running for a certain number of steps, this will be > 0, while mIsPaused will be true
@@ -116,6 +117,7 @@ public:
    void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned
    void fireEvent(EventType eventType, Ship *ship, BfObject *damagingObject, BfObject *shooter);  // ShipKilled
    void fireEvent(LuaScriptRunner *sender, EventType eventType, const char *message, LuaPlayerInfo *playerInfo, bool global);  // MsgReceived
+   void fireEvent(LuaScriptRunner* sender, EventType eventType);  // DataReceivedEvent
    void fireEvent(LuaScriptRunner *player, EventType eventType, LuaPlayerInfo *playerInfo);  // PlayerJoined, PlayerLeft, PlayerTeamChanged
    void fireEvent(EventType eventType, Ship *ship, Zone *zone); // ShipEnteredZoneEvent, ShipLeftZoneEvent
    void fireEvent(EventType eventType, S32 score, S32 team, LuaPlayerInfo *playerInfo);

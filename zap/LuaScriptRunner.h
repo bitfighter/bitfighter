@@ -104,21 +104,21 @@ protected:
    static S32 findObjectById(lua_State *L, const Vector<DatabaseObject *> *objects);
 
 
-// Sets a var in the script's environment to give access to the caller's "this" obj, with the var name "name".
-// Basically sets the "bot", "levelgen", and "plugin" vars.
-template <class T>
+   // Sets a var in the script's environment to give access to the caller's "this" obj, with the var name "name".
+   // Basically sets the "bot", "levelgen", and "plugin" vars.
+   template <class T>
 void setSelf(lua_State *L, T *self, const char *name)
 {
-   lua_getfield(L, LUA_REGISTRYINDEX, self->getScriptId()); // Put script's env table onto the stack  -- env_table
-                                                         
-   lua_pushstring(L, name);                                 //                                        -- env_table, "plugin"
-   luaW_push(L, self);                                      //                                        -- env_table, "plugin", *this
-   lua_rawset(L, -3);                                       // env_table["plugin"] = *this            -- env_table
-                                                                                                    
-   lua_pop(L, -1);                                          // Cleanup                                -- <<empty stack>>
+      lua_getfield(L, LUA_REGISTRYINDEX, self->getScriptId()); // Put script's env table onto the stack  -- env_table
 
-   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
-}
+      lua_pushstring(L, name);                                 //                                        -- env_table, "plugin"
+      luaW_push(L, self);                                      //                                        -- env_table, "plugin", *this
+      lua_rawset(L, -3);                                       // env_table["plugin"] = *this            -- env_table
+
+      lua_pop(L, -1);                                          // Cleanup                                -- <<empty stack>>
+
+      TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack not cleared!");
+   }
 
 
 protected:
@@ -160,7 +160,7 @@ public:
 
    // Consolidate code from bots and levelgens -- this tickTimer works for both!
    template <class T>
-   void tickTimer(U32 deltaT)          
+   void tickTimer(U32 deltaT)
    {
       TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
       clearStack(L);
@@ -168,9 +168,48 @@ public:
       luaW_push<T>(L, static_cast<T *>(this));           // -- this
       lua_pushnumber(L, deltaT);                         // -- this, deltaT
 
+      // TODO: If this fires, we can replace the 2 with lua_gettop(L) in the runCmd call below
+      // If it never fires, we can delete this assert.  I'm 99.9% sure it's fine.  -CE 3/13/2021
+      TNLAssert(lua_gettop(L) == 2, "Unexpected number of items on stack");      
+
       // Note that we don't care if this generates an error... if it does the error handler will
       // print a nice message, then call killScript().
-      runCmd("_tickTimer", 0);
+      runCmd("_tickTimer", 2, 0);
+   }
+
+
+   template<typename T>
+   T getLuaGlobalVar(const char* varName)
+   {
+      S32 stackDepth = lua_gettop(L);
+
+      lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());   // Push REGISTRY[scriptId] onto stack            -- registry table
+      lua_getfield(L, -1, varName);                        // Get value of variable from environment table  -- registry table, value of var 
+      T var = getVal<T>(-1);
+      lua_pop(L, 1);
+      lua_pop(L, 1);
+
+      TNLAssert(stackDepth == lua_gettop(L), "Stack not properly restored to the state it was in when we got here!");
+
+      return var;
+   }
+
+
+   template<typename T>
+   T getVal(S32 index) { return getVal<T>(index); }
+
+   template<> S32 getVal(S32 index) { return S32(lua_tointeger(L, index)); }
+   template<> U32 getVal(S32 index) { return U32(lua_tointeger(L, index)); }
+   template<> S16 getVal(S32 index) { return S16(lua_tointeger(L, index)); }
+   template<> U16 getVal(S32 index) { return U16(lua_tointeger(L, index)); }
+   template<> S8  getVal(S32 index) { return S8(lua_tointeger(L, index)); }
+   template<> U8  getVal(S32 index) { return U8(lua_tointeger(L, index)); }
+   template<> F32 getVal(S32 index) { return F32(lua_tonumber(L, index)); }
+   template<> bool getVal(S32 index) { return lua_toboolean(L, index); }
+   template<> string getVal(S32 index) {
+      size_t len;
+      const char* cstr = lua_tolstring(L, -1, &len);
+      return string(cstr, len);
    }
 
 
@@ -195,6 +234,8 @@ public:
 
    S32 lua_subscribe(lua_State *L);
    S32 lua_unsubscribe(lua_State *L);
+
+   S32 lua_sendData(lua_State *L);
 };
 
 

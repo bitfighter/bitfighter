@@ -61,13 +61,16 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<shared_ptr<MenuItem>
    // First check if function exists... if it does not, there will be no menu items, so we can return false.  
    // This is not an error condition.
    if(!loadFunction(L, getScriptId(), "getArgsMenu"))
-      return false;  
+   {
+      clearStack(L);
+      return false;
+   }
 
    // Function exists, and is on the stack.  Clear it away because it will be reloaded by runCmd().
    clearStack(L);
 
    static const S32 numResults = 4;
-   bool error = runCmd("getArgsMenu", numResults);
+   bool error = runCmd("getArgsMenu", 0, numResults);
 
    if(error)        
    {

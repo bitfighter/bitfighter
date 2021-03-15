@@ -80,8 +80,18 @@ function subscribe(...)
    return bf:subscribe(...)
 end
 
+function bot:subscribe(...)
+   return bf:subscribe(...)
+end
+
+
 -- Documented in luaLevelGenerator.cpp
 function unsubscribe(...)
+   return bf:unsubscribe(...)
+end
+
+-- Documented in luaLevelGenerator.cpp
+function bot:unsubscribe(...)
    return bf:unsubscribe(...)
 end
 
@@ -102,6 +112,9 @@ function getFiringSolution(...)
     return bot:getFiringSolution(...)
 end
 
+function bot:sendData(...)
+    bf:sendData(...)
+end
 
 --
 -- Add backwards compatibility for some API changes

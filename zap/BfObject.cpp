@@ -23,6 +23,7 @@
 #include "MathUtils.h"           // For sq()
 #include "stringUtils.h"         // For itos()
 #include "gameType.h"
+#include "EventManager.h"        // For EventType enum
 
 using namespace TNL;
 
@@ -833,10 +834,19 @@ void BfObject::deleteObject(U32 deleteTimeInterval)  // interval defaults to 0
    mOriginalTypeNumber = mObjectTypeNumber;
    mObjectTypeNumber = DeletedTypeNumber;
 
-   if(!mGame)                    // Not in a game
+   if(!mGame)                    // Not in a game -- delete cleans up subscriptions
       delete this;
    else
+   {
+      // Clean out our subscriptions so we don't keep running event handlers if the script is bailing for some reason
+      LuaScriptRunner *scriptRunner = dynamic_cast<LuaScriptRunner *>(this);
+
+      if(scriptRunner)
+         for(S32 i = 0; i < EventManager::EventTypes; i++)
+            EventManager::get()->unsubscribeImmediate(scriptRunner, EventManager::EventType(i));
+
       mGame->addToDeleteList(this, deleteTimeInterval);
+   }
 }
 
 

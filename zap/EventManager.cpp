@@ -255,7 +255,18 @@ void EventManager::fireEvent(EventType eventType)
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
-      fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
+   {
+      bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 0, subscriptions[eventType][i].context);
+         
+      // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // compensate for that by decrementing it here.
+      if(error)
+      {
+         clearStack(L);
+         i--;
+      }
+   }
 }
 
 
@@ -275,7 +286,16 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
       lua_pushinteger(L, deltaT);   // -- deltaT
-      fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
+      bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 1, subscriptions[eventType][i].context);
+         
+      // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // compensate for that by decrementing it here.
+      if(error)
+      {
+         clearStack(L);
+         i--;
+      }
    }
 }
 
@@ -293,7 +313,16 @@ void EventManager::fireEvent(EventType eventType, CoreItem *core)
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
       core->push(L);                // -- core
-      fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
+      bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 1, subscriptions[eventType][i].context);
+         
+      // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // compensate for that by decrementing it here.
+      if(error)
+      {
+         clearStack(L);
+         i--;
+      }
    }
 }
 
@@ -311,7 +340,16 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
       ship->push(L);                // -- ship
-      fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
+      bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 1, subscriptions[eventType][i].context);
+         
+      // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // compensate for that by decrementing it here.
+      if(error)
+      {
+         clearStack(L);
+         i--;
+      }
    }
 }
 
@@ -340,11 +378,21 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, BfObject *damaging
       else
          lua_pushnil(L);
 
-      fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
+      bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 3, subscriptions[eventType][i].context);
+         
+      // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // compensate for that by decrementing it here.
+      if(error)
+      {
+         clearStack(L);
+         i--;
+      }
    }
 }
 
 
+// onMsgReceived
 // Note that player can be NULL, in which case we'll pass nil to the listeners
 // callerId will be NULL when player sends message
 void EventManager::fireEvent(LuaScriptRunner *sender, EventType eventType, const char *message, LuaPlayerInfo *playerInfo, bool global)
@@ -366,12 +414,73 @@ void EventManager::fireEvent(LuaScriptRunner *sender, EventType eventType, const
       if(playerInfo)
          playerInfo->push(L);       // -- message, playerInfo
       else
-         lua_pushnil(L);            
+         lua_pushnil(L);
 
       lua_pushboolean(L, global);   // -- message, player, isGlobal
 
-      fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
+      bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 3, subscriptions[eventType][i].context);
+         
+      // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // compensate for that by decrementing it here.
+      if(error)
+      {
+         clearStack(L);
+         i--;
+      }
    }
+
+   TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
+}
+
+
+// onDataReceived
+void EventManager::fireEvent(LuaScriptRunner *sender, EventType eventType)
+{
+   lua_State *L = LuaScriptRunner::getL();
+
+   if(suppressEvents(eventType))
+   {
+      clearStack(L);
+      return;
+   }
+
+   S32 argCount = lua_gettop(L);
+
+   // Because we're going to call this function repeatedly, and because each call removes these items from the stack,
+   // we need to make a copy of them first so we can add them back for subsequent calls.
+
+
+   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   {
+      if(sender == subscriptions[eventType][i].subscriber)    // Don't alert sender about own message!
+         continue;
+
+      Subscription subscription = subscriptions[eventType][i];
+
+      // Duplicate the first argCount items on the stack
+      for(S32 j = 1; j <= argCount; j++)
+         lua_pushvalue(L, j);
+
+      bool error = fire(L, subscription.subscriber, eventDefs[eventType].function, argCount, subscription.context);
+
+      // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // compensate for that by decrementing it here.
+      if(error)
+      {
+         // If we're in a game, we need to unsubscribe; outside of a game, objects are deleted immediately which handles the issue.
+         // But we can't do both.
+         // subscription.subscriber is getting deleted in the bowels of fire()
+         //unsubscribeImmediate(subscription.subscriber, eventType);  /// <===== WHy does this break tests????
+         lua_settop(L, argCount);
+         i--;
+      }
+
+      TNLAssert(lua_gettop(L) == argCount, "Expect args to still be on the stack!");
+   }
+
+   clearStack(L);    // Get rid of final copy of args
 }
 
 
@@ -391,7 +500,16 @@ void EventManager::fireEvent(LuaScriptRunner *player, EventType eventType, LuaPl
          continue;
 
       playerInfo->push(L);          // -- playerInfo
-      fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
+      bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 1, subscriptions[eventType][i].context);
+
+      // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // compensate for that by decrementing it here.
+      if(error)
+      {
+         clearStack(L);
+         i--;
+      }
    }
 }
 
@@ -408,21 +526,21 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
-      try   
-      {
-         // Passing ship, zone, zoneType, zoneId
-         ship->push(L);                                     // -- ship
-         zone->push(L);                                     // -- ship, zone   
-         lua_pushinteger(L, zone->getObjectTypeNumber());   // -- ship, zone, zone->objTypeNumber
-         lua_pushinteger(L, zone->getUserAssignedId());     // -- ship, zone, zone->objTypeNumber, zone->id
+      // Passing ship, zone, zoneType, zoneId
+      ship->push(L);                                     // -- ship
+      zone->push(L);                                     // -- ship, zone   
+      lua_pushinteger(L, zone->getObjectTypeNumber());   // -- ship, zone, zone->objTypeNumber
+      lua_pushinteger(L, zone->getUserAssignedId());     // -- ship, zone, zone->objTypeNumber, zone->id
 
-         fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
-      }
-      catch(LuaException &e)
+      bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 4, subscriptions[eventType][i].context);
+
+      // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // compensate for that by decrementing it here.
+      if(error)
       {
-         handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
          clearStack(L);
-         return;
+         i--;
       }
    }
 }
@@ -440,21 +558,21 @@ void EventManager::fireEvent(EventType eventType, MoveObject *object, Zone *zone
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
-      try   
-      {
-         // Passing object, zone, zoneType, zoneId
-         object->push(L);                                   // -- object
-         zone->push(L);                                     // -- object, zone   
-         lua_pushinteger(L, zone->getObjectTypeNumber());   // -- object, zone, zone->objTypeNumber
-         lua_pushinteger(L, zone->getUserAssignedId());     // -- object, zone, zone->objTypeNumber, zone->id
+      // Passing object, zone, zoneType, zoneId
+      object->push(L);                                   // -- object
+      zone->push(L);                                     // -- object, zone   
+      lua_pushinteger(L, zone->getObjectTypeNumber());   // -- object, zone, zone->objTypeNumber
+      lua_pushinteger(L, zone->getUserAssignedId());     // -- object, zone, zone->objTypeNumber, zone->id
 
-         fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
-      }
-      catch(LuaException &e)
+      bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 4, subscriptions[eventType][i].context);
+
+      // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // compensate for that by decrementing it here.
+      if(error)
       {
-         handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
          clearStack(L);
-         return;
+         i--;
       }
    }
 }
@@ -464,7 +582,7 @@ void EventManager::fireEvent(EventType eventType, MoveObject *object, Zone *zone
 void EventManager::fireEvent(EventType eventType, S32 score, S32 team, LuaPlayerInfo *playerInfo)
 {
    if(suppressEvents(eventType))
-         return;
+      return;
 
    lua_State *L = LuaScriptRunner::getL();
 
@@ -480,35 +598,44 @@ void EventManager::fireEvent(EventType eventType, S32 score, S32 team, LuaPlayer
       else
          lua_pushnil(L);
 
-      fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
+      bool error = fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, 3, subscriptions[eventType][i].context);
+
+      // If an error occurred, the subscriber is gone; subscriptions[eventType].size() is now smaller, and the
+      // next one we need to handle is at index i.  i will increment at the end of this block, so we need to 
+      // compensate for that by decrementing it here.
+      if(error)
+      {
+         clearStack(L);
+         i--;
+      }
    }
 }
 
 
 // Actually fire the event, called by one of the fireEvent() methods above
 // Returns true if there was an error, false if everything ran ok
-bool EventManager::fire(lua_State *L, LuaScriptRunner *scriptRunner, const char *function, ScriptContext context)
+bool EventManager::fire(lua_State *L, LuaScriptRunner *scriptRunner, const char *function, S32 argCount, ScriptContext context)
 {
    setScriptContext(L, context);
-   return scriptRunner->runCmd(function, 0);
+   return scriptRunner->runCmd(function, argCount, 0);
 }
 
 
-void EventManager::handleEventFiringError(lua_State *L, const Subscription &subscriber, EventType eventType, const char *errorMsg)
-{
-   if(subscriber.context == RobotContext)
-   {
-      subscriber.subscriber->logError("Error handling event %s: %s. Shutting bot down.", eventDefs[eventType].name, errorMsg);
-      delete subscriber.subscriber;
-   }
-   else
-   {
-      // It was a levelgen
-      logprintf(LogConsumer::LogError, "Error firing event %s: %s", eventDefs[eventType].name, errorMsg);
-   }
-
-   clearStack(L);
-}
+//void EventManager::handleEventFiringError(lua_State *L, const Subscription &subscriber, EventType eventType, const char *errorMsg)
+//{
+//   if(subscriber.context == RobotContext)
+//   {
+//      subscriber.subscriber->logError("Error handling event [%s]: %s. Shutting bot down.", eventDefs[eventType].name, errorMsg);
+//      //unsubscribeImmediate(subscriber.subscriber, eventType);
+//   }
+//   else
+//   {
+//      // It was a levelgen
+//      logprintf(LogConsumer::LogError, "Error firing event %s: %s", eventDefs[eventType].name, errorMsg);
+//   }
+//      
+//   // Don't clear the stack here, as some callers may still need stack items
+//}
 
 
 // If true, events will not fire!

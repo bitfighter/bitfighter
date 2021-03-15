@@ -142,6 +142,8 @@ void LuaScriptRunner::setEnvironment()
 // Remember that not every failure to load a function is a problem; some functions are expected but optional.
 bool LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const char *functionName)
 {
+   S32 stackDepth = lua_gettop(L);
+
    lua_getfield(L, LUA_REGISTRYINDEX, scriptId);   // Push REGISTRY[scriptId] onto the stack                -- table
    lua_getfield(L, -1, functionName);              // And get the requested function from the environment   -- table, function
    lua_remove(L, -2);                              // Remove table                                          -- function
@@ -151,7 +153,9 @@ bool LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const cha
       return true;      // If so, return true, leaving the function on top of the stack
 
    // else
-   clearStack(L);
+   lua_pop(L, 1);       // Get rid of the function
+   TNLAssert(stackDepth == lua_gettop(L), "Stack not properly restored to the state it was in when we got here!");
+
    return false;
 }
 
@@ -159,6 +163,7 @@ bool LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const cha
 // Only used for loading helper functions
 bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, ScriptContext context)
 {
+   S32 stackDepth = lua_gettop(L);
    setScriptContext(L, context);
 
    lua_getfield(L, LUA_REGISTRYINDEX, key);     // Get function out of the registry      -- functionName()
@@ -169,10 +174,11 @@ bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, Sc
    {
       logError("Failed to load startup functions %s: %s", key, lua_tostring(L, -1));
 
-      clearStack(L);
+      TNLAssert(stackDepth == lua_gettop(L), "Stack not properly restored to the state it was in when we got here!");
       return false;
    }
 
+   TNLAssert(stackDepth == lua_gettop(L), "Stack not properly restored to the state it was in when we got here!");
    return true;
 }
 
@@ -183,8 +189,11 @@ void LuaScriptRunner::pushStackTracer()
 {
    // _stackTracer is a function included in lua_helper_functions that manages the stack trace; it should ALWAYS be present.
    if(!loadFunction(L, getScriptId(), "_stackTracer"))
+   {
+      clearStack(L);
       throw LuaException("Method _stackTracer() could not be found!\n"
                          "Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
+   }
 }
 
 
@@ -294,6 +303,7 @@ bool LuaScriptRunner::loadScript(bool cacheScript)
 }
 
 
+// Returns true if string ran successfully
 bool LuaScriptRunner::runString(const string &code)
 {
    luaL_loadstring(L, code.c_str());
@@ -311,6 +321,7 @@ bool LuaScriptRunner::runMain()
 
 
 // Takes the passed args, puts them into a Lua table called arg, pushes it on the stack, and runs the "main" function.
+// Returns false if there was an error
 bool LuaScriptRunner::runMain(const Vector<string> &args)
 {
    if(mScriptName == "")
@@ -319,19 +330,8 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
    TNLAssert(lua_gettop(L) == 0 || dumpStack(L), "Stack dirty!");
 
    setLuaArgs(args);
-   bool error = false;
 
-   try
-   {
-      error = runCmd("main", 0);
-   }
-   catch(LuaException &e)
-   {
-      // Can't run main(), it's probably missing from the script
-      logError("%s", e.msg.c_str());  // Also clears the stack
-      error = false;
-   }
-
+   S32 error = runCmd("main", lua_gettop(L), 0);
    return !error;
 }
 
@@ -378,50 +378,87 @@ void improveErrorMessages_global(string &msg, const string &startStr)
 }
 
 
-
 // Returns true if there was an error, false if everything ran ok
-bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
+bool LuaScriptRunner::runCmd(const char* function, S32 argCount, S32 returnValueCount)
 {
-   S32 args = lua_gettop(L);  // Number of args on stack     // -- <<args>>
+   S32 stackDepth = lua_gettop(L);
 
-   pushStackTracer();                                        // -- <<args>>, _stackTracer
+   // argCount args are already on the stack... we'll refer to these as collectively as <<args>>
+   pushStackTracer();                                       // -- <<whatever>>, <<args>>, _stackTracer
 
-   if(!loadFunction(L, getScriptId(), function))             // -- <<args>>, _stackTracer, function
-      throw LuaException("Cannot load method " + string(function) +"()!\n");
+   S32 error;
+   string errorMessage;
 
-   // Reorder the stack a little
-   if(args > 0)
+   if(loadFunction(L, getScriptId(), function))             // -- <<whatever>>, <<args>>, _stackTracer, function
    {
-      lua_insert(L, 1);                                      // -- function, <<args>>, _stackTracer
-      lua_insert(L, 1);                                      // -- _stackTracer, function, <<args>>
-   }
+      // Reorder the stack a little
+      if(argCount > 0)
+      {
+         // top should be 1 in all cases except for sendData() where we duplicate stack args, 
+         // in which it should be argCount + 1
+         // top = # items on stack - 2 [_stackTracer and function we want to run] - argCount + 1 [top of stack is 1 not 0]
+         S32 top = lua_gettop(L) - 2 - argCount + 1;
+         TNLAssert(top == 1 * abs(strcmp(function, "onDataReceived")) + (argCount + 1) * (1 - abs(strcmp(function, "onDataReceived"))), \
+            "Unexpected number of items on stack!");
+         lua_insert(L, top);                                // -- <<whatever>>, function, <<args>>, _stackTracer
+         lua_insert(L, top);                                // -- <<whatever>>, _stackTracer, function, <<args>>
+      }
 
-   S32 error = lua_pcall(L, args, returnValues, -2 - args);  // -- _stackTracer, <<return values>>
+      // Note that lua_pcall will remove args and the function we called from the stack
+
+      // lua_pcall returns 0 in case of success or one of the following error codes (defined in lua.h, vals shown in ()s below):
+      //    LUA_ERRRUN: a runtime error. (2)
+      //    LUA_ERRMEM : memory allocation error.For such errors, Lua does not call the error handler function. (4)
+      //    LUA_ERRERR : error while running the error handler function.  (5)
+      error = lua_pcall(L, argCount, returnValueCount, -2 - argCount);  // -- <<whatever>>, _stackTracer, <<return values>>
+      //dumpStack(L, "after pcall");
+
+   }
+   else
+      error = -1;
 
    if(!error)
    {
-      lua_remove(L, 1);    // Remove _stackTracer            // -- <<return values>>
+      lua_remove(L, -1 - returnValueCount);    // Remove _stackTracer           // -- <<whatever>>, <<return values>>
+      // Currently, the only time <<whatever>> is anything is when we're dealing with onDataReceived, 
+      // in which case it will have argCount items.
 
-      // Do not clear stack -- caller probably wants <<return values>>
+      // Inital starting depth will be same as argCount, except with onDataReceived, in which case it will
+      // be double argCount (because we had to duplicate the args to keep a copy for subsequent calls).
+      // Therefore, generally we'll end up with only our return vals on the stack, (stackDepth - argCount == 0)
+      // but with onDataReceived, we also have a copy our args (stackDepth - argCount == argCount).
+      TNLAssert(lua_gettop(L) == (stackDepth - argCount + returnValueCount), "Unexpected number of items on Lua stack!");
+
+      // Do not clear stack -- caller probably wants <<whatever>> and <<return values>>
       return false;
    }
 
-   // There was an error... handle it!
+   // There was an error... handle it!l
 
-   string msg = lua_tostring(L, -1);
-   lua_pop(L, 1);    // Remove the message from the stack, so it won't appear in our stack dump
+   if(error == -1)         // Handler was removed after subscription
+   {
+      // The only way this can get triggered is if the handler function has been deleted by the time 
+      // we get here (we check for its existence when a script subscribes).  In practice, this has 
+      // probably never happened.  
+      string text = "Cannot find Lua function " + string(function) + "()!\n";
+      logprintf(LogConsumer::LogError, "%s\n%s", getErrorMessagePrefix(), text.c_str());
+   }
+   else                    // A "normal" error occurred (i.e. error in the code)
+   {
+      string msg = lua_tostring(L, -1);
+      lua_pop(L, 1);       // Remove the message from the stack, so it won't appear in our stack dump
 
-   improveErrorMessages(msg);    // Modifies msg
+      improveErrorMessages(msg);    // Modifies msg
+      string text = "In method " + string(function) + "():\n" + msg;
 
-   string text = "In method " + string(function) +"():\n" + msg;
+      logprintf(LogConsumer::LogError, "%s\n%s", getErrorMessagePrefix(), text.c_str());
+      logprintf(LogConsumer::LogError, "Dump of Lua/C++ stack:");
+   }
 
-   logprintf(LogConsumer::LogError, "%s\n%s", getErrorMessagePrefix(), text.c_str());
-   logprintf(LogConsumer::LogError, "Dump of Lua/C++ stack:");
-   dumpStack(L);
    logprintf(LogConsumer::LogError, "Terminating script");
 
    killScript();
-   clearStack(L);
+   lua_settop(L, stackDepth - argCount);   // Remove <<args>> and other cruft     -- <<whatever>>
 
    return true;
 }
@@ -614,8 +651,6 @@ void LuaScriptRunner::logErrorHandler(const char *msg, const char *prefix)
 { 
    // Log the error to the logging system and also to the game console
    logprintf(LogConsumer::LogError, "%s %s", prefix, msg);
-
-   clearStack(L);
 }
 
 /*
@@ -639,6 +674,22 @@ void LuaScriptRunner::registerClasses()
 {
    LuaW_Registrar::registerClasses(L);    // Register all objects that use our automatic registration scheme
 }
+
+
+//template<typename T>
+//void LuaScriptRunner::getLuaGlobalVar(const char* varName)
+//{
+//   S32 stackDepth = lua_gettop(L);
+//
+//   lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());   // Push REGISTRY[scriptId] onto stack            -- registry table
+//   lua_getfield(L, -1, varName);                        // Get value of variable from environment table  -- registry table, value of var 
+//   int var = lua_tointeger(L, -1);
+//   lua_pop(L, 1);
+//   lua_pop(L, 1);
+//
+//   TNLAssert(stackDepth == lua_gettop(L), "Stack not properly restored to the state it was in when we got here!");
+//}
+
 
 
 // Hand off any script arguments to Lua, by packing them in the arg table, which is where Lua traditionally stores cmd line args.
@@ -1022,7 +1073,7 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
  * These non-static methods work with in-game objects and can be dependent on script type and
  * what 'Game' it's called from (i.e. ServerGame or ClientGame)
  */
-//               Fn name    Param profiles         Profile count
+//                     Fn name                      Param profiles, Profile count
 #define LUA_METHODS(CLASS, METHOD) \
       METHOD(CLASS, pointCanSeePoint,      ARRAYDEF({{ PT, PT, END }}), 1 ) \
       METHOD(CLASS, findObjectById,        ARRAYDEF({{ INT, END }}), 1 )    \
@@ -1033,6 +1084,7 @@ void LuaScriptRunner::setGlobalObjectArrays(lua_State *L)
       METHOD(CLASS, getPlayerCount,        ARRAYDEF({{ END }}), 1 )         \
       METHOD(CLASS, subscribe,             ARRAYDEF({{ EVENT, END }}), 1 )  \
       METHOD(CLASS, unsubscribe,           ARRAYDEF({{ EVENT, END }}), 1 )  \
+      METHOD(CLASS, sendData,              ARRAYDEF({{ ANY, END }}), 1 )    \
 
 
 GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);
@@ -1177,7 +1229,7 @@ S32 LuaScriptRunner::lua_findAllObjects(lua_State *L)
    fillVector.clear();
    static Vector<U8> types;
 
-   types.clear();
+   types.clear();    // Needed because types is a reusable static vector, and we need to clear out any residuals
 
    // We expect the stack to look like this: -- objType1, objType2, ...
    // or this, if using the deprecated fill table option -- [fillTable], objType1, objType2, ...
@@ -1446,6 +1498,146 @@ S32 LuaScriptRunner::lua_unsubscribe(lua_State *L)
 {
    checkArgList(L, functionArgs, luaClassName, "unsubscribe");
    return doUnsubscribe(L);
+}
+
+
+/**
+ * @luafunc void ScriptRunner::sendData(Any data)
+ *
+ * @brief Allows scripts to send data to one another.
+ *
+ * @descr This is a very powerful and flexible function.  Make sure that your event handling 
+ * functions have the right parameters for the data you want to send.  If the number of items 
+ * you want to send varies, a good solution is to wrap them in a table and pass that.
+ * This functionality gives you plenty of rope... use it wisely.
+ * 
+ * It is possible to share simple values or tables between scripts.  When tables are shared, 
+ * only a pointer is passed; the table itself is not copied.  This allows you to create <i>shared table</i>.
+ *
+ * What this means is that all scripts that receive the table via the \link DataReceived Event\endlink event
+ * can modify the shared table, and every other script can see those changes instantly.  This allows levelgens and bots
+ * to communicate directly without firing further events just by updating a shared table.
+ * 
+ * For example, let's assume we have a levelgen script and a bot:
+ * 
+ * @code
+ * -- bot
+ * function onDataReceived(p1) { tbl = p1 } end  -- tbl will be a global (the default in lua), pointing at p1
+ * bf:subscribe(Event.DataReceived)              -- Listen for sendData messages
+ * @endcode
+ * 
+ * @code
+ * -- levelgen
+ * tbl = {x=10, y=15}   -- Define a table with x and y attributes
+ * bf:sendData(tbl)     -- Send the table to all scripts who are subscribed to DataReceived events
+ * @endcode
+ * 
+ * ... later ...
+ * 
+ * @code
+ * -- levelgen
+ * tbl.x = 20           -- Update the x attribute of tbl
+ * @endcode
+ * 
+ * @code
+ * -- bot
+ * print(tbl.x)         -- prints 20
+ * tbl.x = 30           -- Updates tbl in the levelgen
+ * @endcode
+ * 
+ * @code
+ * -- levelgen
+ * print(tbl.x)         -- prints 30
+ * @endcode
+ * 
+ * This example can be scaled up to any number of bots, all of which can form a "hive mind".  Any valid manipulation of
+ * the shared table, including adding functions, elements, sub-tables, etc. is allowed.
+ * 
+ * Here is a complete example that uses a shared table to let the levelgen set a destination in a shared table that 
+ * bots will fly towards.  Note that the `sendData()` function is only called when a new bot is added.
+ * 
+ * First the levelgen code:
+ * 
+ * @code 
+ * -- Levelgen to direct bots to fly towards a changing destination using shared tables
+ *   
+ * sharedDest = {x=0, y=0}
+ * 
+ * function main()
+ *     bf:subscribe(Event.PlayerJoined)                -- Listen for players (or bots) joining
+ *     Timer:scheduleRepeating(changeDest, 3 * 1000)   -- Run changeDest every 2 seconds
+ *     dest = 0
+ * end
+ * 
+ * -- Event handlers
+ * function onPlayerJoined(playerInfo)
+ *     -- Notify new bots of sharedDest; all robots will get this, but it doesn't hurt if they get it twice
+ *     if playerInfo:isRobot() then
+ *         bf:sendData(sharedDest)
+ *         dest = dest + 2
+ *         if dest > 4 then dest = dest - 4 end
+ *     end
+ * end
+ * 
+ * -- Called by timer
+ * function changeDest()
+ *     -- Advance destination
+ *     dest = dest + 1
+ *     if dest > 4 then dest = 1 end
+ * 
+ *     -- Update coordinates
+ *     if     dest == 1 then sharedDest.x = 800; sharedDest.y = 0
+ *     elseif dest == 2 then sharedDest.x = 800; sharedDest.y = 800
+ *     elseif dest == 3 then sharedDest.x = 0;   sharedDest.y = 800
+ *     elseif dest == 4 then sharedDest.x = 0;   sharedDest.y = 0
+ *     end
+ * end
+ * @endcode
+ * 
+ * And the bot:
+ * 
+ * @code
+ * -- Bot always moves towards a destination provided by the levelgen via shared table
+ * 
+ * -- Set up shared table so we have somewhere to go until we get the onDataReceived event
+ * sharedDest = {x=0, y=0}
+ * 
+ * function main()
+ *     bf:subscribe(Event.DataReceived)  -- Listen for sendData messages
+ * end
+ * 
+ * function onDataReceived(tbl)
+ *     sharedDest = tbl                  -- Hook up shared table
+ * end
+ * 
+ * function onTick()
+ *     bot:setThrustToPt(sharedDest)     -- Always move towards sharedDest
+ *     bot:setAngle(sharedDest)          -- Aim in the direction of travel (looks nice)
+ * end
+ * @endcode
+ * 
+ * Even though this capability allows almost unlimited low-overhead communication, you may still prefer 
+ * to use the sendData function because that will trigger an event handler on the receiver, whereas 
+ * unless the script is monitoring values in a shared table, it will have no idea when something
+ * changs.  The details of how you design your scripts will determine which approach, or combination 
+ * of approaches, is best.
+ * 
+ * Note that the sendData function will send data to bots and the levelgen if they are 
+ * subscribed to the \link DataReceived Event\endlink event, 
+ * but it will not be sent back to the sender, even if they are subscribed.
+ *
+ * @param data Data to be sent (can be zero or more numeric, string, table, or other Lua values)
+ */
+S32 LuaScriptRunner::lua_sendData(lua_State* L)
+{
+   // No need to check the args because... anything goes!!
+
+   // Fire our event handler
+   EventManager::get()->fireEvent(this, EventManager::DataReceivedEvent);
+
+   TNLAssert(lua_gettop(L) == 0, "Stack is dirty!");
+
+   return 0;
 }
 
 

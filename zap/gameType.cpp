@@ -3336,9 +3336,9 @@ void GameType::sendPrivateChat(const StringTableEntry &senderName, const StringT
    if(clientInfo == NULL)           // Player not found
       return;
 
-   if(clientInfo->isRobot())        // Bots don't have a connection, and don't get PMs
+   if(clientInfo->isRobot())        // Bots don't have a connection, so will be handled directly
    {
-      // clientInfo->sendBotPM();   // Placeholder for future
+       //clientInfo->sendPrivateChatToBot();    // TODO
       return;
    }
 
