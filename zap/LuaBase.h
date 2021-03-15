@@ -170,7 +170,7 @@ bool getCheckedBool(lua_State *L, S32 index, const char *methodName, bool defaul
 
 lua_Integer getInt(lua_State *L, S32 index);
 template<typename T>
-lua_Integer getInt2(lua_State* L, S32 index)
+T getInt2(lua_State* L, S32 index)
 {
    return T(lua_tointeger(L, index));
 }
