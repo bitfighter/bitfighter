@@ -25,10 +25,16 @@ class Barrier : public BfObject
 {
    typedef BfObject Parent;
 
+private:
+   // To construct a Barrier, please use the factory function createBarrier()
+   Barrier(const Vector<Point> &points = Vector<Point>(), F32 width = DEFAULT_BARRIER_WIDTH, bool solid = false, const Vector<Point> &fillGeom = Vector<Point>());
+
 public:
-   // Constructor
-   Barrier(const Vector<Point> &points = Vector<Point>(), F32 width = DEFAULT_BARRIER_WIDTH, bool solid = false);
    virtual ~Barrier();
+
+   // Factory method
+   static Barrier *createBarrier(Vector<Point> &points, F32 width, bool solid);
+
 
    Vector<Point> mPoints;  // The points of the barrier, might represent outline of a Polywall or the spine of an old-style BarrierMaker
    Vector<Point> mOutline; // The collision/rendering outline of the Barrier
