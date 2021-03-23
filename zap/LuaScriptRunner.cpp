@@ -407,8 +407,8 @@ bool LuaScriptRunner::runCmd(const char* function, S32 argCount, S32 returnValue
          // can just push them onto the stack multiple times for firing an event for multiple listeners.
          //
          // It's a bit messy because we're trying to pack those two conditions into a single Assert that will disappear in production
-         // builds.
-         TNLAssert(top == 1 * abs(strcmp(function, "onDataReceived")) + (argCount + 1) * (1 - abs(strcmp(function, "onDataReceived"))), \
+         // builds. Take advantage of guaranteed left-to-right evaluation order of the || to get this to work.
+         TNLAssert( ((strcmp(function, "onDataReceived") == 0) && top == (argCount + 1)) || (top == 1),
             "Unexpected number of items on stack!");
          lua_insert(L, top);                                // -- <<whatever>>, function, <<args>>, _stackTracer
          lua_insert(L, top);                                // -- <<whatever>>, _stackTracer, function, <<args>>
