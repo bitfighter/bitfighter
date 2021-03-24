@@ -399,16 +399,15 @@ bool LuaScriptRunner::runCmd(const char* function, S32 argCount, S32 returnValue
          // top = # items on stack - 2 [_stackTracer and function we want to run] - argCount + 1 [top of stack is 1 not 0]
          S32 top = lua_gettop(L) - 2 - argCount + 1;
 
-         // This assert is  intended to check that if we're running onDataReceived, there should be argCount + 1 items on the stack, 
-         // but for any other function, there should be 1.  This is because onDataReceived, unlike other functions, needs to keep some 
-         // items on the stack in order to be able to replicate them for subsequent calls of the function (if, for example, we're 
-         // sending data to multiple bots).  Because the arguments can be unbounded in type and number, we never copy them into
-         // C++ land; we just duplicate them from the stack as needed.  For other functions, we have the arguments in C++, so we 
-         // can just push them onto the stack multiple times for firing an event for multiple listeners.
-         //
-         // It's a bit messy because we're trying to pack those two conditions into a single Assert that will disappear in production
-         // builds. Take advantage of guaranteed left-to-right evaluation order of the || to get this to work.
-         TNLAssert( ((strcmp(function, "onDataReceived") == 0) && top == (argCount + 1)) || (top == 1),
+         // This assert is intended to check that if we're running onDataReceived, there should be argCount + 1
+         // items on the stack "beneath" where top is pointing, but for any other function, there should be 1.
+         // This is because onDataReceived, unlike other functions, needs to keep some items on the stack
+         // in order to be able to replicate them for subsequent calls of the function (if, for example,
+         // we're sending data to multiple bots).  Because the arguments can be unbounded in type and number,
+         // we never copy them into C++ land; instead we duplicate them from the stack as needed.  For other
+         // functions, we have the arguments in C++, so we can just push them onto the stack multiple times
+         // for firing an event for multiple listeners.
+         TNLAssert(!strcmp(function, "onDataReceived") && top == (argCount + 1) || strcmp(function, "onDataReceived") && top == 1, \
             "Unexpected number of items on stack!");
          lua_insert(L, top);                                // -- <<whatever>>, function, <<args>>, _stackTracer
          lua_insert(L, top);                                // -- <<whatever>>, _stackTracer, function, <<args>>
