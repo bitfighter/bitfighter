@@ -407,7 +407,7 @@ bool LuaScriptRunner::runCmd(const char* function, S32 argCount, S32 returnValue
          // we never copy them into C++ land; instead we duplicate them from the stack as needed.  For other
          // functions, we have the arguments in C++, so we can just push them onto the stack multiple times
          // for firing an event for multiple listeners.
-         TNLAssert(!strcmp(function, "onDataReceived") && top == (argCount + 1) || strcmp(function, "onDataReceived") && top == 1, \
+         TNLAssert((!strcmp(function, "onDataReceived") && top == (argCount + 1)) || (strcmp(function, "onDataReceived") && top == 1), \
             "Unexpected number of items on stack!");
          lua_insert(L, top);                                // -- <<whatever>>, function, <<args>>, _stackTracer
          lua_insert(L, top);                                // -- <<whatever>>, _stackTracer, function, <<args>>
