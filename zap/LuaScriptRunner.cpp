@@ -404,7 +404,7 @@ bool LuaScriptRunner::runCmd(const char* function, S32 argCount, S32 returnValue
          // This is because onDataReceived, unlike other functions, needs to keep some items on the stack
          // in order to be able to replicate them for subsequent calls of the function (if, for example,
          // we're sending data to multiple bots).  Because the arguments can be unbounded in type and number,
-         // we never copy them into C++ land; instead we duplicate them from the stack as needed.  For other
+         // we never copy them into C++ land; we just duplicate them from the stack as needed.  For other
          // functions, we have the arguments in C++, so we can just push them onto the stack multiple times
          // for firing an event for multiple listeners.
          TNLAssert((!strcmp(function, "onDataReceived") && top == (argCount + 1)) || (strcmp(function, "onDataReceived") && top == 1), \
