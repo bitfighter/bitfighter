@@ -1714,7 +1714,7 @@ Point ClientGame::worldToScreenPoint(const Point *point, S32 canvasWidth, S32 ca
 }
 
 
-bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id)
+bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id, S32 lineNum)
 {
    if(!stricmp(argv[0], "BarrierMaker"))
    {
@@ -1746,19 +1746,22 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
          S32 skipArgs = 0;
          if(!stricmp(argv[0], "BarrierMakerS"))
          {
-            logprintf(LogConsumer::LogLevelError, "BarrierMakerS has been deprecated.  Please use PolyWall instead.");
+            logprintf(LogConsumer::LogLevelError, "BarrierMakerS has been deprecated; please use PolyWall instead. (line %d)", lineNum);
 
             skipArgs = 1;
          }
 
          polywall->initializeEditor();     // Only runs unselectVerts
 
-         polywall->processArguments(argc - skipArgs, argv + skipArgs, this);
+         bool ok = polywall->processArguments(argc - skipArgs, argv + skipArgs, this);
          
-         if(polywall->getVertCount() >= 2)
+         if(ok && polywall->getVertCount() >= 2)
             addPolyWall(polywall, database);
          else
+         {
+            logprintf(LogConsumer::LogLevelError, "Invalid PolyWall geometry detected (line %d)", lineNum);
             delete polywall;
+         }
       }
    }
    else if(!stricmp(argv[0], "Robot"))

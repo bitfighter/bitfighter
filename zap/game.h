@@ -184,9 +184,9 @@ private:
    TeamManager *mActiveTeamManager;
 
    // Functions for handling individual level parameters read in processLevelParam; some may be game-specific
-   virtual void onReadTeamParam(S32 argc, const char **argv);
+   void onReadTeamParam(S32 argc, const char **argv, S32 lineNum);
    void onReadTeamChangeParam(S32 argc, const char **argv);
-   void onReadSpecialsParam(S32 argc, const char **argv);
+   void onReadSpecialsParam(S32 argc, const char **argv, S32 lineNum);
    void onReadScriptParam(S32 argc, const char **argv);
    void onReadLevelNameParam(S32 argc, const char **argv);
    void onReadLevelDescriptionParam(S32 argc, const char **argv);
@@ -348,13 +348,13 @@ public:
 
    void loadLevelFromString(const string &contents, GridDatabase *database, const string& filename = "");
    bool loadLevelFromFile(const string &filename, GridDatabase *database);
-   void parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName);
+   void parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName, S32 lineNum);
 
-   void processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName);  
-   bool processLevelParam(S32 argc, const char **argv);
+   void processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName, S32 lineNum);
+   bool processLevelParam(S32 argc, const char **argv, S32 lineNum);
    string toLevelCode() const;
 
-   virtual bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id) = 0;
+   virtual bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id, S32 lineNum) = 0;
 
    virtual void addPolyWall(BfObject *polyWall, GridDatabase *database);     
    virtual void addWallItem(BfObject *wallItem, GridDatabase *database);     

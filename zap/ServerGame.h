@@ -172,7 +172,7 @@ public:
    void deleteLevelGen(LuaLevelGenerator *levelgen);     // Add misbehaved levelgen to the kill list
    Vector<Vector<S32> > getCategorizedPlayerCountsByTeam() const;
 
-   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id);
+   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id, S32 lineNum);
 
    void addPolyWall(BfObject *polyWall, GridDatabase *database);
    void addWallItem(BfObject *wallItem, GridDatabase *database);

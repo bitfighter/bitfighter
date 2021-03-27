@@ -717,6 +717,9 @@ namespace Zap
 
       readGeom(argc, argv, 1 + offset, game->getLegacyGridSize());
 
+      if(getFill()->size() == 0)
+         return false;
+
       return true;
    }
 

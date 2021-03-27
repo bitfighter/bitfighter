@@ -430,7 +430,7 @@ StringTableEntry ServerGame::getCurrentLevelTypeName()
 }
 
 
-bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id)
+bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id, S32 lineNum)
 {
    if(!stricmp(argv[0], "BarrierMaker"))
    {
@@ -445,7 +445,6 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
       PolyWall polywall;
       if(polywall.processArguments(argc, argv, this))    // Returns true if wall was successfully processed
          addPolyWall(&polywall, NULL);
-
    }
 
    else 

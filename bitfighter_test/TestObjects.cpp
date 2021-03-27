@@ -46,7 +46,7 @@ class ObjectTest : public testing::Test
          for(S32 j = 1; j <= argc; j++)
          {
             game->cleanUp();
-            game->processLevelLoadLine(j, 0, argv, game->getGameObjDatabase(), "some_non_existing_filename.level");
+            game->processLevelLoadLine(j, 0, argv, game->getGameObjDatabase(), "some_non_existing_filename.level", 1);
          }
       }
 };

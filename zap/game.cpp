@@ -600,12 +600,12 @@ void Game::resetLevelInfo()
 
 // Each line of the file is handled separately by processLevelLoadLine in game.cpp or UIEditor.cpp
 
-void Game::parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName)
+void Game::parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName, S32 lineNum)
 {
    Vector<string> args = parseString(string(line));
    U32 argc = args.size();
    S32 id = 0;
-   const char** argv = new const char* [argc];
+   const char **argv = new const char *[argc];
 
    if(argc >= 1)
    {
@@ -618,13 +618,11 @@ void Game::parseLevelLine(const char *line, GridDatabase *database, const string
    }
 
    for(U32 i = 0; i < argc; i++)
-   {
       argv[i] = args[i].c_str();
-   }
 
    try
    {
-      processLevelLoadLine(argc, id, (const char **) argv, database, levelFileName);
+      processLevelLoadLine(argc, id, (const char **) argv, database, levelFileName, lineNum);
    }
    catch(LevelLoadException &e)
    {
@@ -635,12 +633,16 @@ void Game::parseLevelLine(const char *line, GridDatabase *database, const string
 }
 
 
-void Game::loadLevelFromString(const string &contents, GridDatabase* database, const string &filename)
+void Game::loadLevelFromString(const string &contents, GridDatabase *database, const string &filename)
 {
    istringstream iss(contents);
    string line;
+   S32 lineNum = 1;
    while(std::getline(iss, line))
-      parseLevelLine(line.c_str(), database, filename);
+   {
+      parseLevelLine(line.c_str(), database, filename, lineNum);
+      lineNum++;
+   }
 }
 
 
@@ -664,7 +666,7 @@ bool Game::loadLevelFromFile(const string &filename, GridDatabase *database)
 // Process a single line of a level file, loaded in gameLoader.cpp
 // argc is the number of parameters on the line, argv is the params themselves
 // Used by ServerGame and the editor
-void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName)
+void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName, S32 lineNum)
 {
    if(argc == 0 || !strcmp(argv[0], "#"))
    {
@@ -684,7 +686,7 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
    else if(!stricmp(argv[0], "LevelFormat"))
    {
       if(argc < 2)
-         logprintf(LogConsumer::LogLevelError, "Invalid LevelFormat provided");
+         logprintf(LogConsumer::LogLevelError, "Invalid LevelFormat provided (line %d)", lineNum);
       else
          mLevelFormat = (U32)atoi(argv[1]);
 
@@ -706,12 +708,12 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
       if(mLevelFormat == 1)
       {
          if(argc < 2)
-            logprintf(LogConsumer::LogLevelError, "Improperly formed GridSize parameter");
+            logprintf(LogConsumer::LogLevelError, "Improperly formed GridSize parameter (line %d)", lineNum);
          else
             mLegacyGridSize = (F32)atof(argv[1]);
       }
       else
-         logprintf(LogConsumer::LogLevelError, "GridSize can no longer be used in level files");
+         logprintf(LogConsumer::LogLevelError, "GridSize can no longer be used in level files (line %d)", lineNum);
 
       return;
    }
@@ -721,7 +723,7 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
       U32 id = atoi(argv[1]);
       if(id == 0)
       {
-         logprintf(LogConsumer::LogLevelError, "Invalid LevelDatabaseId specified");
+         logprintf(LogConsumer::LogLevelError, "Invalid LevelDatabaseId specified (line %d)", lineNum);
       }
       else
       {
@@ -746,7 +748,7 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
 
       if(mGameType.isValid())
       {
-         logprintf(LogConsumer::LogLevelError, "Duplicate GameType is not allowed");
+         logprintf(LogConsumer::LogLevelError, "Duplicate GameType is not allowed (line %d)", lineNum);
          return;
       }
 
@@ -758,7 +760,7 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
       {
          bool validArgs = gt->processArguments(argc - 1, argv + 1, NULL);
          if(!validArgs)
-            logprintf(LogConsumer::LogLevelError, "GameType have incorrect parameters");
+            logprintf(LogConsumer::LogLevelError, "GameType has incorrect parameters (line %d)", lineNum);
 
          gt->addToGame(this, database);
       }
@@ -768,11 +770,11 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
       return;
    }
 
-   if(getGameType() && processLevelParam(argc, argv)) 
+   if(getGameType() && processLevelParam(argc, argv, lineNum)) 
    {
       // Do nothing here -- all the action is in the if statement
    }
-   else if(getGameType() && processPseudoItem(argc, argv, levelFileName, database, id))
+   else if(getGameType() && processPseudoItem(argc, argv, levelFileName, database, id, lineNum))
    {
       // Do nothing here -- all the action is in the if statement
    }
@@ -810,7 +812,7 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
       {
          if(!mLevelLoadTriggeredWarnings.contains(objName))
          {
-            logprintf(LogConsumer::LogLevelError, "Unknown object type \"%s\" in level \"%s\"", objName.c_str(), levelFileName.c_str());
+            logprintf(LogConsumer::LogLevelError, "Unknown object type \"%s\" in level \"%s\" (line %d)", objName.c_str(), levelFileName.c_str(), lineNum);
             mLevelLoadTriggeredWarnings.push_back(objName);
          }
 
@@ -838,7 +840,7 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
       else
       {
          if(!validArgs)
-            logprintf(LogConsumer::LogLevelError, "Invalid arguments in object \"%s\" in level \"%s\"", objName.c_str(), levelFileName.c_str());
+            logprintf(LogConsumer::LogLevelError, "Invalid arguments in object \"%s\" in level \"%s\" (line %d)", objName.c_str(), levelFileName.c_str(), lineNum);
 
          delete object.getPointer();
       }
@@ -848,17 +850,17 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
 
 // Returns true if we've handled the line (even if it handling it means that the line was bogus); returns false if
 // caller needs to create an object based on the line
-bool Game::processLevelParam(S32 argc, const char **argv)
+bool Game::processLevelParam(S32 argc, const char **argv, S32 lineNum)
 {
    if(!stricmp(argv[0], "Team"))
-      onReadTeamParam(argc, argv);
+      onReadTeamParam(argc, argv, lineNum);
 
    // TODO: Create better way to change team details from level scripts: https://code.google.com/p/bitfighter/issues/detail?id=106
    else if(!stricmp(argv[0], "TeamChange"))   // For level script. Could be removed when there is a better way to change team names and colors.
       onReadTeamChangeParam(argc, argv);
 
    else if(!stricmp(argv[0], "Specials"))
-      onReadSpecialsParam(argc, argv);
+      onReadSpecialsParam(argc, argv, lineNum);
 
    else if(!strcmp(argv[0], "Script"))
       onReadScriptParam(argc, argv);
@@ -871,6 +873,7 @@ bool Game::processLevelParam(S32 argc, const char **argv)
 
    else if(!stricmp(argv[0], "LevelCredits"))
       onReadLevelCreditsParam(argc, argv);
+
    else if(!stricmp(argv[0], "MinPlayers"))     // Recommend a min number of players for this map
    {
       if(argc > 1)
@@ -931,18 +934,18 @@ void Game::onReadTeamChangeParam(S32 argc, const char **argv)
       if(teamNumber >= 0 && teamNumber < getTeamCount())
       {
          AbstractTeam *team = getNewTeam();
-         team->processArguments(argc-1, argv+1);          // skip one arg
+         team->processArguments(argc - 1, argv + 1);          // skip one arg
          replaceTeam(team, teamNumber);
       }
    }
 }
 
 
-void Game::onReadSpecialsParam(S32 argc, const char **argv)
+void Game::onReadSpecialsParam(S32 argc, const char **argv, S32 lineNum)
 {         
    for(S32 i = 1; i < argc; i++)
       if(!getGameType()->processSpecialsParam(argv[i]))
-         logprintf(LogConsumer::LogLevelError, "Invalid specials parameter: %s", argv[i]);
+         logprintf(LogConsumer::LogLevelError, "Invalid specials parameter: %s (line %d)", argv[i], lineNum);
 }
 
 
@@ -1293,7 +1296,7 @@ void Game::setPreviousLevelName(const string &name)
 }
 
 
-void Game::onReadTeamParam(S32 argc, const char **argv)
+void Game::onReadTeamParam(S32 argc, const char **argv, S32 lineNum)
 {
    if(getTeamCount() < MAX_TEAMS)     // Too many teams?
    {
@@ -1301,6 +1304,8 @@ void Game::onReadTeamParam(S32 argc, const char **argv)
       if(team->processArguments(argc, argv))
          addTeam(team);
    }
+   else
+      logprintf(LogConsumer::LogLevelError, "Cannot have more than %d teams: ignoring team (line %d)", MAX_TEAMS, lineNum);
 }
 
 
