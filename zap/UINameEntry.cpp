@@ -118,6 +118,7 @@ bool TextEntryUserInterface::onKeyDown(InputCode inputCode)
    switch (inputCode)
    {
       case KEY_ENTER:
+      case KEY_KEYPAD_ENTER:
          onAccept(lineEditor.c_str());
          return true;
       case KEY_BACKSPACE:
