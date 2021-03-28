@@ -161,13 +161,14 @@ bool RabbitGameType::saveMenuItem(const MenuItem *menuItem, const string &key)
 
 void RabbitGameType::setFlagScore(S32 pointsPerMinute)     
 {
-   mFlagScoreTimer = U32((1.0f / F32(pointsPerMinute)) * 60 * 1000);   // Convert to ms per point
+   mFlagScoreTimer = U32(F32(ONE_MINUTE) / pointsPerMinute);   // Convert to ms per point
 }
 
 
 S32 RabbitGameType::getFlagScore() const
 {
-   return S32(1.0f / (F32(mFlagScoreTimer) / (60 * 1000)));            // Convert to points per minute
+
+   return S32(F32(ONE_MINUTE) / mFlagScoreTimer);            // Convert to points per minute
 }
 
 
