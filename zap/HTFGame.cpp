@@ -68,7 +68,7 @@ Vector<string> HTFGameType::getGameParameterMenuKeys()
    for(S32 i = 0; i < items.size(); i++)
       if(items[i] == "Win Score")
       {
-         items.insert(i + 2, "Point Earn Rate");
+         items.insert(i + 1, "Point Earn Rate");
          break;
       }
 
