@@ -575,7 +575,7 @@ bool BfObject::shouldRender() const { return true; }
 bool BfObject::canAddToEditor() { return true; }
 
 
-void BfObject::addToGame(Game *game, GridDatabase *database)
+bool BfObject::addToGame(Game *game, GridDatabase *database)
 {   
    TNLAssert(mGame == NULL, "Error: Object already in a game in BfObject::addToGame.");
    TNLAssert(game != NULL,  "Error: thefGame is NULL in BfObject::addToGame.");
@@ -592,6 +592,8 @@ void BfObject::addToGame(Game *game, GridDatabase *database)
       ServerGame *serverGame = static_cast<ServerGame *>(game);
       serverGame->onObjectAdded(this);
    }
+
+   return true;
 }
 
 

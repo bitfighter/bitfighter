@@ -439,9 +439,9 @@ void Game::clearTeams()                               { mActiveTeamManager->clea
 void Game::clearTeamHasFlagList()                     { mActiveTeamManager->clearTeamHasFlagList();   }
 
 
-void Game::addPolyWall(BfObject *polyWall, GridDatabase *database)
+bool Game::addPolyWall(BfObject *polyWall, GridDatabase *database)
 {
-   polyWall->addToGame(this, database);
+   return polyWall->addToGame(this, database);
 }
 
 
@@ -452,7 +452,7 @@ void Game::addWallItem(BfObject *wallItem, GridDatabase *database)
 
 
 // Pass through to to GameType
-void Game::addWall(const WallRec &barrier) { mGameType->addWall(barrier, this); }
+bool Game::addWall(const WallRec &barrier) { return mGameType->addWall(barrier, this); }
 
 
 void Game::setTeamHasFlag(S32 teamIndex, bool hasFlag)

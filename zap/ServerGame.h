@@ -174,7 +174,7 @@ public:
 
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id, S32 lineNum);
 
-   void addPolyWall(BfObject *polyWall, GridDatabase *database);
+   bool addPolyWall(BfObject *polyWall, GridDatabase *database);
    void addWallItem(BfObject *wallItem, GridDatabase *database);
 
    void receivedLevelFromHoster(S32 levelIndex, const string &filename);

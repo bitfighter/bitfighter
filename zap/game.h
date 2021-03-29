@@ -356,10 +356,10 @@ public:
 
    virtual bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id, S32 lineNum) = 0;
 
-   virtual void addPolyWall(BfObject *polyWall, GridDatabase *database);     
+   virtual bool addPolyWall(BfObject *polyWall, GridDatabase *database);     
    virtual void addWallItem(BfObject *wallItem, GridDatabase *database);     
 
-   void addWall(const WallRec &barrier);
+   bool addWall(const WallRec &barrier);
 
    virtual void deleteLevelGen(LuaLevelGenerator *levelgen) = 0; 
 

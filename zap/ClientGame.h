@@ -309,7 +309,7 @@ public:
    // For loading levels in editor
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id, S32 lineNum);
 
-   void addPolyWall(BfObject *polyWall, GridDatabase *database);     // Add polyWall item to game
+   bool addPolyWall(BfObject *polyWall, GridDatabase *database);     // Add polyWall item to game
    void addWallItem(BfObject *wallItem, GridDatabase *database);     // Add wallItem item to game
 
    Ship *getLocalPlayerShip() const;

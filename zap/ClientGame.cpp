@@ -1756,8 +1756,9 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
          bool ok = polywall->processArguments(argc - skipArgs, argv + skipArgs, this);
          
          if(ok && polywall->getVertCount() >= 2)
-            addPolyWall(polywall, database);
-         else
+            ok = addPolyWall(polywall, database);
+
+         if(!ok) 
          {
             logprintf(LogConsumer::LogLevelError, "Invalid PolyWall geometry detected (line %d)", lineNum);
             delete polywall;
@@ -1789,10 +1790,13 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
 
 // Add polywall item to game
-void ClientGame::addPolyWall(BfObject *polyWall, GridDatabase *database)
+bool ClientGame::addPolyWall(BfObject *polyWall, GridDatabase *database)
 {
-   Parent::addPolyWall(polyWall, database);
-   polyWall->onGeomChanged(); 
+   if(!Parent::addPolyWall(polyWall, database))
+      return false;
+
+   polyWall->onGeomChanged();
+   return true;
 }
 
 

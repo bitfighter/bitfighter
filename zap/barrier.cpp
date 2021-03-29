@@ -72,12 +72,12 @@ namespace Zap
    // Runs on server or on client, and when loading a level into the editor
    // Generates a list of barriers, which are then added to the game one-by-one
    // Barriers will either be a simple 2-point segment, or a longer list of vertices defining a polygon
-   void WallRec::constructWalls(Game *game) const
+   bool WallRec::constructWalls(Game *game) const
    {
       Vector<Point> vec = floatsToPoints(verts);
 
       if(vec.size() < 2)
-         return;
+         return false;
 
       if(solid)   // This is a polywall
       {
@@ -85,8 +85,11 @@ namespace Zap
             vec.erase(vec.size() - 1);      // If so, remove last vertex
 
          Barrier *b = Barrier::createBarrier(vec, width, true);
-         if(b)
-            b->addToGame(game, game->getGameObjDatabase());
+         if(!b)
+            return false;
+         
+         b->addToGame(game, game->getGameObjDatabase());
+         return true;
       }
       else        // This is a line forming a standard series of segments
       {
@@ -99,6 +102,8 @@ namespace Zap
             if(b)
                b->addToGame(game, game->getGameObjDatabase());
          }
+
+         return true;
       }
    }
 
@@ -174,7 +179,7 @@ namespace Zap
    {
       if(points.size() < 2)      // Invalid barrier!
       {
-         logprintf(LogConsumer::LogWarning, "Invalid barrier detected (has only one point).  Disregarding...");
+         //logprintf(LogConsumer::LogWarning, "Invalid barrier detected (has only one point).  Disregarding...");
          return NULL;
       }
 
@@ -190,7 +195,7 @@ namespace Zap
 
          if(fillGeometry.size() == 0)    // Geometry is bogus; perhaps duplicated points, or other badness
          {
-            logprintf(LogConsumer::LogWarning, "Invalid barrier detected (polywall with invalid geometry).  Disregarding...");
+            //logprintf(LogConsumer::LogWarning, "Invalid barrier detected (polywall with invalid geometry).  Disregarding...");
             return NULL;
          }
 
@@ -534,15 +539,18 @@ namespace Zap
 
 
    // Here to provide a valid signature in WallItem
-   void WallItem::addToGame(Game *game, GridDatabase *database)
+   bool WallItem::addToGame(Game *game, GridDatabase *database)
    {
-      Parent::addToGame(game, database);
+      if(!Parent::addToGame(game, database))    // Can't currently happen, but here to avoid future bugs.  Hopefully compiler optimizes away.
+         return false;
 
       // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
       // is convenient to transmit to the clients
-      game->addWall(WallRec(this));
+      if(!game->addWall(WallRec(this)))
+         return false;
 
       onAddedToGame(game);
+      return true;
    }
 
 
@@ -764,15 +772,17 @@ namespace Zap
    }
 
 
-   void PolyWall::addToGame(Game *game, GridDatabase *database)
+   bool PolyWall::addToGame(Game *game, GridDatabase *database)
    {
       Parent::addToGame(game, database);
 
       // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
       // is convenient to transmit to the clients
-      game->addWall(WallRec(this));
+      if(!game->addWall(WallRec(this)))
+         return false;
 
       onAddedToGame(game);
+      return true;
    }
 
 

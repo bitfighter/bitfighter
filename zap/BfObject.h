@@ -247,7 +247,7 @@ public:
    BfObject();                // Constructor
    virtual ~BfObject();       // Destructor
 
-   virtual void addToGame(Game *game, GridDatabase *database);       // BotNavMeshZone has its own addToGame
+   virtual bool addToGame(Game *game, GridDatabase *database);       // BotNavMeshZone has its own addToGame
    virtual void onAddedToGame(Game *game);
 
    void markAsGhost();

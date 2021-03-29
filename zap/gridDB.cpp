@@ -812,7 +812,7 @@ DatabaseObject *GridDatabase::getObjectByIndex(S32 index) const
 void DatabaseObject::addToDatabase(GridDatabase *database)
 {
    TNLAssert(mExtentSet, "Extent has not been set on this object!");    // Sanity check; adding to db will fail without extents
-;
+
    if(isDatabasable())
       database->addToDatabase(this);
 }

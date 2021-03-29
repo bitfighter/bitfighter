@@ -100,7 +100,7 @@ public:
    explicit WallRec(const WallItem *wallItem);                          // Constructor
    explicit WallRec(const PolyWall *polyWall);                          // Constructor
 
-   void constructWalls(Game *theGame) const;
+   bool constructWalls(Game *theGame) const;
 };
  
 
@@ -154,7 +154,7 @@ public:
 
    void scale(const Point &center, F32 scale);
 
-   void addToGame(Game *game, GridDatabase *database);
+   bool addToGame(Game *game, GridDatabase *database);
 
    S32 getWidth() const;
    void setWidth(S32 width);
@@ -208,7 +208,7 @@ public:
    virtual void onAddedToGame(Game *game);
 
 
-   void addToGame(Game *game, GridDatabase *database);
+   bool addToGame(Game *game, GridDatabase *database);
 
 
    /////

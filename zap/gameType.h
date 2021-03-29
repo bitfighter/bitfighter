@@ -177,7 +177,7 @@ public:
    S32 getSecondLeadingPlayerScore() const;
    S32 getSecondLeadingPlayer() const;
 
-   void addWall(const WallRec &barrier, Game *game);
+   bool addWall(const WallRec &barrier, Game *game);
 
    virtual bool isFlagGame() const; // Does game use flags?
    virtual S32 getFlagCount();      // Return the number of game-significant flags

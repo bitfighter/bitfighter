@@ -1119,10 +1119,10 @@ bool GameType::isTeamGame() const
 
 
 // Only runs on server or when loadig a level into the editor
-void GameType::addWall(const WallRec &wall, Game *game)
+bool GameType::addWall(const WallRec &wall, Game *game)
 {
-   mWalls.push_back(wall);       // Add wall to our list of walls
-   wall.constructWalls(game);    // Build it!
+   mWalls.push_back(wall);              // Add wall to our list of walls
+   return wall.constructWalls(game);    // Build it!
 }
 
 
