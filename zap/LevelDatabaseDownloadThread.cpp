@@ -118,8 +118,8 @@ void LevelDatabaseDownloadThread::run()
    if(levelgenCode.length() > 0)
    {
       // the leveldb prepends a lua comment with the target filename, and here we parse it
-      int startIndex = 3; // the length of "-- "
-      int breakIndex = levelgenCode.find_first_of("\r\n");
+      S32 startIndex = 3; // the length of "-- "
+      size_t breakIndex = levelgenCode.find_first_of("\r\n");
       string levelgenFileName = levelgenCode.substr(startIndex, breakIndex - startIndex);
       // trim the filename line before writing
       levelgenCode = levelgenCode.substr(breakIndex + 2, levelgenCode.length());
