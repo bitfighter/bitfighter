@@ -193,12 +193,12 @@ namespace Zap
 
          return new Barrier(points, width, solid, fillGeometry);
       }
-      else      
-         if(points.size() < 2)      // Invalid barrier!
-            return NULL;
 
-         // Normal wall
-         return new Barrier(points, width, solid);
+      // else... Normal wall
+      if(points.size() < 2)      // Invalid barrier!
+         return NULL;
+
+      return new Barrier(points, width, solid);
    }
 
 
