@@ -177,7 +177,6 @@ namespace Zap
    // happen here.
    Barrier *Barrier::createBarrier(Vector<Point> &points, F32 width, bool solid)
    {
-
       if(solid)  // Polywall
       {
          if(isWoundClockwise(points))        // All walls must be CCW to clip correctly
