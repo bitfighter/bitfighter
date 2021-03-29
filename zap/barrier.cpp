@@ -397,9 +397,6 @@ namespace Zap
 
    void WallItem::onGeomChanged()
    {
-      // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges
-      processEndPoints();
-
       GridDatabase *db = getDatabase();
 
       if(db)
@@ -442,15 +439,6 @@ namespace Zap
          color = getEditorRenderColor();
 
       renderWallOutline(this, getOutline(), color, currentScale, snappingToWallCornersEnabled, renderVertices);
-#endif
-   }
-
-
-   void WallItem::processEndPoints()
-   {
-#ifndef ZAP_DEDICATED
-      // Preprocessing of BarrierMaker points before rendering in editor was done here
-      // No longer needed
 #endif
    }
 

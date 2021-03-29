@@ -310,7 +310,6 @@ public:
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id, S32 lineNum);
 
    bool addPolyWall(BfObject *polyWall, GridDatabase *database);     // Add polyWall item to game
-   void addWallItem(BfObject *wallItem, GridDatabase *database);     // Add wallItem item to game
 
    Ship *getLocalPlayerShip() const;
 

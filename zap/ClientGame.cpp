@@ -1800,16 +1800,6 @@ bool ClientGame::addPolyWall(BfObject *polyWall, GridDatabase *database)
 }
 
 
-// Add polywall item to game
-void ClientGame::addWallItem(BfObject *wallItem, GridDatabase *database)
-{
-   Parent::addWallItem(wallItem, database);
-
-   // Do we want to run onGeomChanged here instead?  If so, we can combine with addPolyWall.
-   static_cast<WallItem *>(wallItem)->processEndPoints();      
-}
-
-
 AbstractTeam *ClientGame::getNewTeam()
 {
    return new EditorTeam;        // TODO: Where is this cleaned up?

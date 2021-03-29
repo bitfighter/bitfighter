@@ -761,9 +761,6 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
 
       if(obj->getVertCount() < 2)      // Invalid item; delete  --> aren't 1 point walls already excluded, making this check redundant?
          database->removeFromDatabase(obj, true);
-
-      if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
-         dynamic_cast<WallItem *>(obj)->processEndPoints();
    }
 
    // Also find any teleporters and make sure their destinations are in order.  Teleporters with no dests will be deleted.

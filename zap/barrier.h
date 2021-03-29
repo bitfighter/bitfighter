@@ -130,8 +130,6 @@ public:
    virtual void onItemDragging();
    virtual void onAddedToGame(Game *game);
 
-   void processEndPoints();  
-
    void changeWidth(S32 amt);
 
    void render();
