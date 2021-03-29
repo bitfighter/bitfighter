@@ -177,31 +177,28 @@ namespace Zap
    // happen here.
    Barrier *Barrier::createBarrier(Vector<Point> &points, F32 width, bool solid)
    {
-      if(points.size() < 2)      // Invalid barrier!
-      {
-         //logprintf(LogConsumer::LogWarning, "Invalid barrier detected (has only one point).  Disregarding...");
-         return NULL;
-      }
 
       if(solid)  // Polywall
       {
-         if(isWoundClockwise(points))         // All walls must be CCW to clip correctly
+         if(isWoundClockwise(points))        // All walls must be CCW to clip correctly
             points.reverse();
 
          Vector<Point> fillGeometry;
 
-         // Create rendering fill triangles --> Populates fillGeometry
-         Triangulate::Process(points, fillGeometry);
+         // Create rendering fill triangles --> checks min point count and populates fillGeometry
+         if(!Triangulate::Process(points, fillGeometry))
+            return NULL; 
 
-         if(fillGeometry.size() == 0)    // Geometry is bogus; perhaps duplicated points, or other badness
-         {
-            //logprintf(LogConsumer::LogWarning, "Invalid barrier detected (polywall with invalid geometry).  Disregarding...");
+         if(fillGeometry.size() == 0)        // Geometry is bogus; perhaps duplicated points, or other badness
             return NULL;
-         }
 
          return new Barrier(points, width, solid, fillGeometry);
       }
-      else     // Normal wall
+      else      
+         if(points.size() < 2)      // Invalid barrier!
+            return NULL;
+
+         // Normal wall
          return new Barrier(points, width, solid);
    }
 
