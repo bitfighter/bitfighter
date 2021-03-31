@@ -249,7 +249,20 @@ void CoreGameType::updateScore(ClientInfo *player, S32 team, ScoringEvent event,
       // Happens when this team loses last core and there are at least 2 teams
       // left in play
       if(thisTeam->getScore() == 0 && numberOfTeamsHaveSomeCores >= 2)
-         handleRedistribution(team);
+      {
+         // Get players on this (losing) team
+         Vector<ClientInfo*> players;
+         for(S32 i = 0; i < getGame()->getClientCount(); i++)
+         {
+            ClientInfo *info = getGame()->getClientInfo(i);
+
+            if(info->getTeamIndex() == team)
+               players.push_back(info);
+         }
+
+         // Redistribute them
+         handleRedistribution(players);
+      }
 
       // One team left, they win!
       if(numberOfTeamsHaveSomeCores <= 1)
@@ -362,18 +375,8 @@ static bool balanceCompare(Team * const &a, Team* const &b)
 
 // Redistribute all players on the given team to the remaining ones, using the
 // method chosen in the level
-void CoreGameType::handleRedistribution(S32 teamIndex)
+void CoreGameType::handleRedistribution(const Vector<ClientInfo*> &players)
 {
-   // Get players on this (losing) team
-   Vector<ClientInfo*> players;
-   for(S32 i = 0; i < getGame()->getClientCount(); i++)
-   {
-      ClientInfo *info = getGame()->getClientInfo(i);
-
-      if(info->getTeamIndex() == teamIndex)
-         players.push_back(info);
-   }
-
    // Get all remaining teams
    Vector<Team*> remainingTeams;
    S32 teamsCount = getGame()->getTeamCount();
@@ -381,11 +384,7 @@ void CoreGameType::handleRedistribution(S32 teamIndex)
    // Check to make sure at least one team has at least one player...
    for(S32 i = 0; i < teamsCount; i++)
    {
-      // Skip losing team
-      if(i == teamIndex)
-         continue;
-
-      // Add other teams to list if they still have Cores
+      // Add teams to list if they still have Cores
       Team *team = (Team *)getGame()->getTeam(i);
       if(team->getScore() != 0)
          remainingTeams.push_back(team);
@@ -488,6 +487,33 @@ void CoreGameType::handleRedistribution(S32 teamIndex)
             clientInfo->getConnection()->s2cDisplayMessage(GameConnection::ColorRed, SFXNone,
                   "Failed to defend Cores. Moved to a different team.");
       }
+   }
+}
+
+
+void CoreGameType::handleNewClient(ClientInfo *clientInfo)
+{
+   S32 teamsCount = getGame()->getTeamCount();
+
+   // Find if any teams have already lost
+   bool hasLostTeam = false;
+   for(S32 i = 0; i < teamsCount; i++)
+   {
+      // Add teams to list if they still have Cores
+      Team *team = (Team *)getGame()->getTeam(i);
+      if(team->getScore() == 0)
+         hasLostTeam = true;
+   }
+
+   // If we have at least one team that has already lost, redistribute
+   // this player
+   if(hasLostTeam)
+   {
+      // Redistribute the newly joined player
+      Vector<ClientInfo*> players;
+      players.push_back(clientInfo);
+
+      handleRedistribution(players);
    }
 }
 
