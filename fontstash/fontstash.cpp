@@ -17,6 +17,13 @@
 // 3. This notice may not be removed or altered from any source distribution.
 //
 
+// Modified by fordcars for Bitfighter
+// - Converted to CPP
+// - Adapted for our renderer
+
+// To make sure we get extern "C" from the header
+#include "fontstash.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,14 +34,12 @@
 #  define TNL_OS_MOBILE
 #endif
 
-#if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
-#  include "SDL_opengles.h"
-#else
-#  include "SDL_opengl.h"
-#endif
+#include "tnlTypes.h"
 
 /* @rlyeh: removed STB_TRUETYPE_IMPLENTATION. We link it externally */
-#include "stb_truetype.h"
+extern "C" {
+	#include "stb_truetype.h" // Since this is still C
+}
 
 #define HASH_LUT_SIZE 256
 #define MAX_ROWS 128
@@ -44,6 +49,11 @@
 #define TTFONT_FILE 1
 #define TTFONT_MEM  2
 #define BMFONT      3
+
+// TODO: Fix this
+#include "GLFixedRenderer.h"
+static Zap::GLFixedRenderer renderer;
+#include "SDL_opengl.h" // Obviously should not be here
 
 static int idx = 1;
 
@@ -97,7 +107,7 @@ struct sth_font
 
 struct sth_texture
 {
-	GLuint id;
+	U32 id;
 	// TODO: replace rows with pointer
 	struct sth_row rows[MAX_ROWS];
 	int nrows;
@@ -110,7 +120,7 @@ struct sth_stash
 {
 	int tw,th;
 	float itw,ith;
-	GLubyte *empty_data;
+	U8 *empty_data;
 	struct sth_texture* tt_textures;
 	struct sth_texture* bm_textures;
 	struct sth_font* fonts;
@@ -157,7 +167,7 @@ static unsigned int decutf8(unsigned int* state, unsigned int* codep, unsigned i
 struct sth_stash* sth_create(int cachew, int cacheh)
 {
 	struct sth_stash* stash = NULL;
-	GLubyte* empty_data = NULL;
+	U8* empty_data = NULL;
 	struct sth_texture* texture = NULL;
 
 	// Allocate memory for the font stash.
@@ -166,7 +176,7 @@ struct sth_stash* sth_create(int cachew, int cacheh)
 	memset(stash,0,sizeof(struct sth_stash));
 
 	// Create data for clearing the textures
-	empty_data = malloc(cachew * cacheh);
+	empty_data = static_cast<U8*>(malloc(cachew * cacheh));
 	if (empty_data == NULL) goto error;
 	memset(empty_data, 0, cachew * cacheh);
 
@@ -308,7 +318,7 @@ error:
 
 void sth_add_glyph(struct sth_stash* stash,
                   int idx,
-                  GLuint id,
+                  unsigned int id,
                   const char* s,
                   short size, short base,
                   int x, int y, int w, int h,
@@ -556,14 +566,18 @@ static void flush_draw(struct sth_stash* stash)
 		{			
 			glBindTexture(GL_TEXTURE_2D, texture->id);
 			glEnable(GL_TEXTURE_2D);
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			glVertexPointer(2, GL_FLOAT, VERT_STRIDE, texture->verts);
-			glTexCoordPointer(2, GL_FLOAT, VERT_STRIDE, texture->verts+2);
-			glDrawArrays(GL_TRIANGLES, 0, texture->nverts);
+			//glEnableClientState(GL_VERTEX_ARRAY);
+			//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			//glVertexPointer(2, GL_FLOAT, VERT_STRIDE, texture->verts);
+			//glTexCoordPointer(2, GL_FLOAT, VERT_STRIDE, texture->verts+2);
+
+			//glDrawArrays(GL_TRIANGLES, 0, texture->nverts);
+			renderer.renderColoredTextureVertexArray(texture->verts, texture->verts+2,
+					static_cast<U32>(texture->nverts), GL_TRIANGLES, 0, VERT_STRIDE);
+
 			glDisable(GL_TEXTURE_2D);
-			glDisableClientState(GL_VERTEX_ARRAY);
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+			//glDisableClientState(GL_VERTEX_ARRAY);
+			//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 			texture->nverts = 0;
 		}
 		texture = texture->next;
