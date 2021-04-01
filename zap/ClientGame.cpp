@@ -1547,9 +1547,11 @@ void ClientGame::changeServerParam(GameConnection::ParamType type, const Vector<
 
 
 // Returns true if it finds a case-sensitive match, or only 1 case-insensitive matches, false otherwise
-bool ClientGame::checkName(const string &name)
+// Also corrects case of given name and returns it to the calling function
+bool ClientGame::checkName(string &name)
 {
    S32 potentials = 0;
+   string correctedName = name;
 
    for(S32 i = 0; i < getClientCount(); i++)
    {
@@ -1559,10 +1561,22 @@ bool ClientGame::checkName(const string &name)
          return true;
 
       else if(!stricmp(n.getString(), name.c_str()))     // Case insensitive match
+      {
          potentials++;
+         correctedName = n.getString();
+      }
    }
 
-   return(potentials == 1);      // Return true if we only found exactly one potential match, false otherwise
+   // Return true if we only found exactly one potential match
+   if(potentials == 1)
+   {
+      // Update name with proper case before leaving
+      name = correctedName;
+
+      return true;
+   }
+
+   return false;
 }
 
 
