@@ -131,6 +131,7 @@ set(CLIENT_SOURCES
 	gameObjectRender.cpp
 	GameRecorderPlayback.cpp
     GaugeRenderer.cpp
+    GLFixedRenderer.cpp
 	HelpItemManager.cpp
 	HelperManager.cpp
 	helperMenu.cpp
@@ -181,7 +182,7 @@ set(CLIENT_SOURCES
 	VideoSystem.cpp
 	voiceCodec.cpp
 	${CMAKE_SOURCE_DIR}/fontstash/stb_truetype.c
-	${CMAKE_SOURCE_DIR}/fontstash/fontstash.c
+	${CMAKE_SOURCE_DIR}/fontstash/fontstash.cpp
 )
 
 file(GLOB BITFIGHTER_HEADERS *.h)
