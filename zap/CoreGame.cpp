@@ -363,9 +363,9 @@ static bool balanceCompare(Team * const &a, Team* const &b)
 {
    // First sort by player count
    // Game::countTeamPlayers() must be run before this call to getPlayerCount()
-   if(a->getPlayerCount() < b->getPlayerCount())
+   if(a->getPlayerBotCount() < b->getPlayerBotCount())
       return true;
-   else if(a->getPlayerCount() > b->getPlayerCount())
+   else if(a->getPlayerBotCount() > b->getPlayerBotCount())
       return false;
 
    // Else sort by Core count
@@ -373,10 +373,20 @@ static bool balanceCompare(Team * const &a, Team* const &b)
 }
 
 
+static bool humanBotCompare(ClientInfo* const &a, ClientInfo* const &b)
+{
+   // True if a is human
+   return !(a->isRobot());
+}
+
+
 // Redistribute all players on the given team to the remaining ones, using the
 // method chosen in the level
-void CoreGameType::handleRedistribution(const Vector<ClientInfo*> &players)
+void CoreGameType::handleRedistribution(Vector<ClientInfo*> &players)
 {
+   // Make sure humans are sorted first and have bots fill the gaps
+   players.sort(humanBotCompare);
+
    // Get all remaining teams
    Vector<Team*> remainingTeams;
    S32 teamsCount = getGame()->getTeamCount();
@@ -506,7 +516,7 @@ void CoreGameType::handleNewClient(ClientInfo *clientInfo)
    }
 
    // If we have at least one team that has already lost, redistribute
-   // this player
+   // this player properly
    if(hasLostTeam)
    {
       // Redistribute the newly joined player

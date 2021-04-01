@@ -71,7 +71,7 @@ public:
 
    void setRedistMethod(RedistMethod method);
    RedistMethod getRedistMethod();
-   void handleRedistribution(const Vector<ClientInfo*> &players);
+   void handleRedistribution(Vector<ClientInfo*> &players);
 
    void handleNewClient(ClientInfo *clientInfo);
 

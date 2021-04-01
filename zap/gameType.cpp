@@ -1681,7 +1681,7 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
 
 void GameType::handleNewClient(ClientInfo *clientInfo)
 {
-   // Do nothing
+   // Do nothing, child classes may override
 }
 
 
