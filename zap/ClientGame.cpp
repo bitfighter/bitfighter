@@ -579,6 +579,12 @@ bool ClientGame::canRateLevel() const
       return false;
    }
 
+   if(strcmp(getClientInfo()->getName().getString(), mGameType->getLevelCredits()->getString()) == 0)
+   {
+      displayErrorMessage("!!! You cannot rate your own level");
+      return false;
+   }
+
    return true;
 }
 
