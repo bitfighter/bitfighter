@@ -45,11 +45,9 @@ extern void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType);
 extern void renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, S32 geomType);
 extern void renderLine(const Vector<Point> *points);
 
-extern void setFont(FontId fontId);
-
 extern void glScale(F32 scaleFactor);
 extern void glTranslate(const Point &pos);
-extern void setDefaultBlendFunction();
+extern void setDefaultBlendFunction(); 
 
 template<class T, class U, class V>
       static void glColor(T in_r, U in_g, V in_b) { glColor4f(static_cast<F32>(in_r), static_cast<F32>(in_g), static_cast<F32>(in_b), 1.0f); }
