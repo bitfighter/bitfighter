@@ -5,6 +5,7 @@
 
 #include "FontManager.h"         // Class header
 
+#include "Renderer.h"
 #include "GameSettings.h"
 #include "DisplayManager.h"
 
@@ -166,9 +167,6 @@ void FontManager::initialize(GameSettings *settings, bool useExternalFonts)
       fontList[FontPlay]           = new BfFont("Play-Regular-hinting.ttf", settings);
       fontList[FontPlayBold]       = new BfFont("Play-Bold.ttf",       settings);
       fontList[FontModernVision]   = new BfFont("Modern-Vision.ttf",   settings);
-
-      // set texture blending function
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    }
 }
 
@@ -311,6 +309,7 @@ void FontManager::drawStrokeCharacter(const SFG_StrokeFont *font, S32 character)
    /*
     * Draw a stroke character
     */
+   Renderer& r = Renderer::get();
    const SFG_StrokeChar *schar;
    const SFG_StrokeStrip *strip;
    S32 i, j;
@@ -339,9 +338,9 @@ void FontManager::drawStrokeCharacter(const SFG_StrokeFont *font, S32 character)
         characterVertexArray[2*j]     = strip->Vertices[j].X;
         characterVertexArray[(2*j)+1] = strip->Vertices[j].Y;
       }
-      renderVertexArray(characterVertexArray, strip->Number, GL_LINE_STRIP);
+      r.renderVertexArray(characterVertexArray, strip->Number, RenderType::LineStrip);
    }
-   glTranslatef( schar->Right, 0.0, 0.0 );
+   r.translate(schar->Right, 0.0, 0.0 );
 }
 
 
@@ -419,24 +418,25 @@ extern F32 gDefaultLineWidth;
 void FontManager::renderString(F32 size, const char *string)
 {
    BfFont *font = getFont(currentFontId);
+   Renderer& r = Renderer::get();
 
    if(font->isStrokeFont())
    {
       static F32 modelview[16];
-      glGetFloatv(GL_MODELVIEW_MATRIX, modelview);    // Fills modelview[]
+      r.getMatrix(MatrixType::ModelView, modelview);    // Fills modelview[]
 
       // Clamp to range of 0.5 - 1 then multiply by line width (2 by default)
       F32 linewidth =
             CLAMP(size * DisplayManager::getScreenInfo()->getPixelRatio() * modelview[0] * 0.05f, 0.5f, 1.0f) * gDefaultLineWidth;
 
-      glLineWidth(linewidth);
+      r.setLineWidth(linewidth);
 
       F32 scaleFactor = size / 120.0f;  // Where does this magic number come from?
-      glScalef(scaleFactor, -scaleFactor, 1);
+      r.scale(scaleFactor, -scaleFactor, 1);
       for(S32 i = 0; string[i]; i++)
          FontManager::drawStrokeCharacter(font->getStrokeFont(), string[i]);
 
-      glLineWidth(gDefaultLineWidth);
+      r.setLineWidth(gDefaultLineWidth);
    }
    else
    {
@@ -452,7 +452,7 @@ void FontManager::renderString(F32 size, const char *string)
       F32 k = DisplayManager::getScreenInfo()->getPixelRatio() * 2.0f;
 
       // Flip upside down because y = -y
-      glScalef(1 / k, -1 / k, 1);
+      r.scale(1 / k, -1 / k, 1);
       // `size * k` becomes `size` due to the glScale above
       drawTTFString(font, string, size * k * legacyNormalizationFactor);
    }
