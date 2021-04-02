@@ -1029,7 +1029,7 @@ void QueryServersUserInterface::renderColumnHeaders()
          x2 = columns[mHighlightColumn+1].xStart - 5;
 
       glColor(Colors::white);
-      drawRect(x1, COLUMN_HEADER_TOP, x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1, GL_LINE_LOOP);
+      drawRect(x1, COLUMN_HEADER_TOP, x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1, RenderType::LineLoop);
    }
 }
 

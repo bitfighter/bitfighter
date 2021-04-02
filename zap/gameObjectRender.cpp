@@ -345,13 +345,13 @@ void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color 
    drawFilledArc(Point(pos.x - width / 2 + radius, pos.y + height / 2 - radius), radius,  FloatHalfPi, FloatPi);
 
    drawRect(pos.x - width / 2, pos.y - height / 2 + radius, 
-            pos.x + width / 2, pos.y + height / 2 - radius, GL_TRIANGLE_FAN);
+            pos.x + width / 2, pos.y + height / 2 - radius, RenderType::TriangleFan);
 
    drawRect(pos.x - width / 2 + radius, pos.y - height / 2, 
-            pos.x + width / 2 - radius, pos.y - height / 2 + radius, GL_TRIANGLE_FAN);
+            pos.x + width / 2 - radius, pos.y - height / 2 + radius, RenderType::TriangleFan);
 
    drawRect(pos.x - width / 2 + radius, pos.y + height / 2, 
-            pos.x + width / 2 - radius, pos.y + height / 2 - radius, GL_TRIANGLE_FAN);
+            pos.x + width / 2 - radius, pos.y + height / 2 - radius, RenderType::TriangleFan);
 
    glColor(outlineColor, alpha);
    drawRoundedRect(pos, width, height, radius);
@@ -1405,7 +1405,7 @@ void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentSc
 
    F32 range = Turret::TurretPerceptionDistance * currentScale;
 
-   drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GL_TRIANGLE_FAN);
+   drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, RenderType::TriangleFan);
 }
 
 
@@ -2897,7 +2897,7 @@ void renderBitfighterLogo(const Point &pos, F32 size, U32 letterMask)
 // Pos is the square's center
 void drawSquare(const Point &pos, F32 radius, bool filled)
 {
-   drawRect(pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius, filled ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
+   drawRect(pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius, filled ? RenderType::TriangleFan : RenderType::TriangleFan);
 }
 
 

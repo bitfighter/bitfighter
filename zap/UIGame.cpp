@@ -2470,8 +2470,8 @@ void GameUserInterface::renderBasicInterfaceOverlay()
       if(progress != 0)
       {
          glColor(Colors::yellow);
-         drawRect(25.f, 200.f, progress * (DisplayManager::getScreenInfo()->getGameCanvasWidth()-50) + 25.f, 210.f, GL_TRIANGLE_FAN);
-         drawRect(25, 200, DisplayManager::getScreenInfo()->getGameCanvasWidth()-25, 210, GL_LINE_LOOP);
+         drawRect(25.f, 200.f, progress * (DisplayManager::getScreenInfo()->getGameCanvasWidth()-50) + 25.f, 210.f, RenderType::TriangleFan);
+         drawRect(25, 200, DisplayManager::getScreenInfo()->getGameCanvasWidth()-25, 210, RenderType::LineLoop);
       }
    }
    

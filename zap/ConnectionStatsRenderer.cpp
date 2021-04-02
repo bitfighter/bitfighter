@@ -110,7 +110,7 @@ void ConnectionStatsRenderer::render(GameConnection *conn) const
       const S32 y_size = 150;
 
       glColor(Colors::white);
-      drawRect(x1, y, x2, y + y_size, GL_LINE_LOOP);
+      drawRect(x1, y, x2, y + y_size, RenderType::LineLoop);
 
       const U32 ArraySizeGraph = ArraySize - 1;
 

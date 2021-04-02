@@ -563,30 +563,30 @@ S32 getStringWidthf(S32 size, const char *format, ...)
 #undef makeBuffer
 
 
-void drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode)
+void drawRect(S32 x1, S32 y1, S32 x2, S32 y2, RenderType type)
 {
    F32 vertices[] = { (F32)x1, (F32)y1,   (F32)x2, (F32)y1,   (F32)x2, (F32)y2,   (F32)x1, (F32)y2 };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, mode);
+   Renderer::get().renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, type);
 }
 
 
 // Some functions (renderSpyBugVisibleRange) use this F32 version, this function has better accuracy
-void drawRect(F32 x1, F32 y1, F32 x2, F32 y2, S32 mode)
+void drawRect(F32 x1, F32 y1, F32 x2, F32 y2, RenderType type)
 {
    F32 vertices[] = { x1, y1,   x2, y1,   x2, y2,   x1, y2 };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, mode);
+   Renderer::get().renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, type);
 }
 
 
 void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2)
 {
-   drawRect(x1, y1, x2, y2, GL_TRIANGLE_FAN);
+   drawRect(x1, y1, x2, y2, RenderType::TriangleFan);
 }
 
 
 void drawFilledRect(F32 x1, F32 y1, F32 x2, F32 y2)
 {
-   drawRect(x1, y1, x2, y2, GL_TRIANGLE_FAN);
+   drawRect(x1, y1, x2, y2, RenderType::TriangleFan);
 }
 
 
@@ -613,10 +613,10 @@ void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, cons
 void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor)
 {
    glColor(fillColor, fillAlpha);
-   drawRect(x1, y1, x2, y2, GL_TRIANGLE_FAN);
+   drawRect(x1, y1, x2, y2, RenderType::TriangleFan);
 
    glColor(outlineColor, 1);
-   drawRect(x1, y1, x2, y2, GL_LINE_LOOP);
+   drawRect(x1, y1, x2, y2, RenderType::LineLoop);
 }
 
 
