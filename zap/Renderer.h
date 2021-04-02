@@ -3,10 +3,15 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
+// Singleton class for Rendering APIS. I wish this wasn't a Singleton, but the lack of OOP
+// in some areas of Bitfighter has forced my hand!
+
 #ifndef _RENDERER_H_
 #define _RENDERER_H_
 
 #include "tnlTypes.h"
+#include "tnlAssert.h"
+#include <memory>
 
 namespace TNL {
    template<class T> class Vector;
@@ -20,28 +25,82 @@ namespace Zap
 class Color;
 class Point;
 
+enum class MatrixType
+{
+   ModelView,
+   Projection
+};
+
+enum class RenderType
+{
+   Points,
+   Lines,
+   LineStrip,
+   LineLoop,
+   Triangles,
+   TriangleStrip,
+   TriangleFan
+};
 
 class Renderer
 {
+private:
+   static std::unique_ptr<Renderer> mInstance;
+
+   // Make these inaccessible:
+   Renderer(const Renderer&) = default;
+   Renderer& operator=(const Renderer&) = default;
+
+protected:
+   Renderer() = default; // Constructor is accessible only to derived classes.
+   static void setInstance(std::unique_ptr<Renderer>&& instance);
+
 public:
    virtual ~Renderer() = default;
 
-   virtual void setColor(const Color& c, float alpha = 1.0) = 0;
-   virtual void scale(F32 scaleFactor) = 0;
-   virtual void translate(const Point& pos) = 0;
+   static Renderer& get();
 
-   virtual void renderPointVector(const Vector<Point>* points, U32 geomType) = 0;
-   virtual void renderPointVector(const Vector<Point>* points, const Point& offset, U32 geomType) = 0;
+   virtual void clear() = 0;
+   virtual void setClearColor(F32 r, F32 g, F32 b, F32 alpha = 1.0f) = 0;
 
-   virtual void renderVertexArray(const S8 verts[], S32 vertCount, S32 geomType) = 0;
-   virtual void renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType) = 0;
-   virtual void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType) = 0;
+   virtual void setColor(F32 c, F32 alpha = 1.0f) = 0;
+   virtual void setColor(F32 r, F32 g, F32 b, F32 alpha = 1.0f) = 0;
+   virtual void setColor(const Color& c, F32 alpha = 1.0f) = 0;
 
-   virtual void renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, S32 geomType) = 0;
+   virtual void setLineWidth(F32 width) = 0;
+   virtual void setPointSize(F32 size) = 0;
+   virtual void setViewport(S32 x, S32 y, S32 width, S32 height) = 0;
+
+   virtual void scale(F32 factor) = 0;
+   virtual void scale(F32 x, F32 y, F32 z = 1.0f) = 0;
+   virtual void scale(const Point& factor) = 0;
+
+   virtual void translate(F32 x, F32 y, F32 z = 0.0f) = 0;
+   virtual void translate(const Point& offset) = 0;
+
+   virtual void rotate(F32 angle) = 0;
+   virtual void rotate(F32 angle, F32 x, F32 y, F32 z) = 0;
+
+   virtual void getMatrix(MatrixType type, F32* matrix) = 0;
+   virtual void pushMatrix() = 0;
+   virtual void popMatrix() = 0;
+   virtual void loadMatrix(const F32* m) = 0;
+   virtual void loadMatrix(const F64* m) = 0;
+   virtual void loadIdentity() = 0;
+   virtual void projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx) = 0;
+
+   virtual void renderPointVector(const Vector<Point>* points, RenderType type) = 0;
+   virtual void renderPointVector(const Vector<Point>* points, const Point& offset, RenderType type) = 0;
+
+   virtual void renderVertexArray(const S8 verts[], S32 vertCount, RenderType type) = 0;
+   virtual void renderVertexArray(const S16 verts[], S32 vertCount, RenderType type) = 0;
+   virtual void renderVertexArray(const F32 verts[], S32 vertCount, RenderType type) = 0;
+
+   virtual void renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, RenderType type) = 0;
    virtual void renderTexturedVertexArray(const F32 vertices[], const F32 UVs[], U32 vertCount,
-      U32 geomType, U32 start = 0, U32 stride = 0) = 0;
+      RenderType type, U32 start = 0, U32 stride = 0) = 0;
    virtual void renderColoredTextureVertexArray(const F32 vertices[], const F32 UVs[], U32 vertCount,
-      U32 geomType, U32 start = 0, U32 stride = 0) = 0;
+      RenderType type, U32 start = 0, U32 stride = 0) = 0;
 
    virtual void renderLine(const Vector<Point>* points) = 0;
 };

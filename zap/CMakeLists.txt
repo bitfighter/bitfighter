@@ -147,6 +147,7 @@ set(CLIENT_SOURCES
 	oglconsole.cpp
 	OpenglUtils.cpp
 	quickChatHelper.cpp
+    Renderer.cpp
 	RenderUtils.cpp
 	ScissorsManager.cpp
 	ScreenShooter.cpp

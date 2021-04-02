@@ -35,6 +35,9 @@
 #endif
 
 #include "tnlTypes.h"
+#include "Renderer.h"
+// TODO: Remove this:
+#include "SDL_opengl.h" // Obviously should not be here
 
 /* @rlyeh: removed STB_TRUETYPE_IMPLENTATION. We link it externally */
 extern "C" {
@@ -49,11 +52,6 @@ extern "C" {
 #define TTFONT_FILE 1
 #define TTFONT_MEM  2
 #define BMFONT      3
-
-// TODO: Fix this
-#include "GLFixedRenderer.h"
-static Zap::GLFixedRenderer renderer;
-#include "SDL_opengl.h" // Obviously should not be here
 
 static int idx = 1;
 
@@ -560,6 +558,8 @@ static void flush_draw(struct sth_stash* stash)
 {
 	struct sth_texture* texture = stash->tt_textures;
 	short tt = 1;
+    Zap::Renderer& r = Zap::Renderer::get();
+    
 	while (texture)
 	{
 		if (texture->nverts > 0)
@@ -572,8 +572,8 @@ static void flush_draw(struct sth_stash* stash)
 			//glTexCoordPointer(2, GL_FLOAT, VERT_STRIDE, texture->verts+2);
 
 			//glDrawArrays(GL_TRIANGLES, 0, texture->nverts);
-			renderer.renderColoredTextureVertexArray(texture->verts, texture->verts+2,
-					static_cast<U32>(texture->nverts), GL_TRIANGLES, 0, VERT_STRIDE);
+			r.renderColoredTextureVertexArray(texture->verts, texture->verts+2,
+					static_cast<U32>(texture->nverts), Zap::RenderType::Triangles, 0, VERT_STRIDE);
 
 			glDisable(GL_TEXTURE_2D);
 			//glDisableClientState(GL_VERTEX_ARRAY);
