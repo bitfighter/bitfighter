@@ -9,6 +9,7 @@
 #include "ClientGame.h"
 #include "IniFile.h"
 #include "Console.h"
+#include "GLFixedRenderer.h"
 #include "DisplayManager.h"
 #include "UI.h"
 #include "version.h"
@@ -66,7 +67,7 @@ bool VideoSystem::init()
       return false;
    }
 
-
+   
    // Now, we want to setup our requested
    // window attributes for our OpenGL window.
    // Note on SDL_GL_RED/GREEN/BLUE/ALPHA_SIZE: On windows, it is better to not set them at all, or risk going extremely slow software rendering including if your desktop graphics set to 16 bit color.
@@ -121,6 +122,8 @@ bool VideoSystem::init()
    SDL_GLContext context = SDL_GL_CreateContext(DisplayManager::getScreenInfo()->sdlWindow);
    DisplayManager::getScreenInfo()->sdlGlContext = &context;
 
+   // Initialize renderer
+   GLFixedRenderer::create();
 
    // Set the window icon -- note that the icon must be a 32x32 bmp, and SDL will
    // downscale it to 16x16 with no interpolation.  Therefore, it's best to start

@@ -87,6 +87,7 @@ include (replaces require)
 using namespace TNL;
 
 #ifndef ZAP_DEDICATED
+#  include "GLFixedRenderer.h"
 #  include "UIGame.h"
 #  include "UINameEntry.h"
 #  include "UIEditor.h"
