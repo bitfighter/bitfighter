@@ -44,7 +44,7 @@ namespace Zap
       void rotate(F32 angle) override;
       void rotate(F32 angle, F32 x, F32 y, F32 z) override;
 
-      void t_enable(U32 option); // TEMP
+      void setMatrixMode(MatrixType type) override;
       void getMatrix(MatrixType type, F32* matrix) override;
       void pushMatrix() override;
       void popMatrix() override;

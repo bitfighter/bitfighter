@@ -81,6 +81,7 @@ public:
    virtual void rotate(F32 angle) = 0;
    virtual void rotate(F32 angle, F32 x, F32 y, F32 z) = 0;
 
+   virtual void setMatrixMode(MatrixType type) = 0;
    virtual void getMatrix(MatrixType type, F32* matrix) = 0;
    virtual void pushMatrix() = 0;
    virtual void popMatrix() = 0;

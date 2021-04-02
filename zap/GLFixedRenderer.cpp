@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "GLFixedRenderer.h"
+#include "DisplayManager.h"
 #include "Color.h"
 #include "Point.h"
 #include "tnlVector.h"
@@ -16,6 +17,17 @@ namespace Zap
 GLFixedRenderer::GLFixedRenderer()
 {
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   glEnable(GL_SCISSOR_TEST);    // Turn on clipping
+   glEnable(GL_BLEND);
+
+   // Enabling scissor appears to fix crashing problem switching screen mode
+   // in linux and "Mobile 945GME Express Integrated Graphics Controller",
+   // probably due to lines and points was not being clipped,
+   // causing some lines to wrap around the screen, or by writing other
+   // parts of RAM that can crash Bitfighter, graphics driver, or the entire computer.
+   // This is probably a bug in the Linux Intel graphics driver.
+   ScissorData scissor = DisplayManager::getScreenInfo()->getScissor();
+   glScissor(scissor.x, scissor.y, scissor.width, scissor.height);
 }
 
 GLFixedRenderer::~GLFixedRenderer()
@@ -134,10 +146,21 @@ void GLFixedRenderer::rotate(F32 angle, F32 x, F32 y, F32 z)
    glRotatef(angle, x, y, z);
 }
 
-// TEMP
-void GLFixedRenderer::t_enable(U32 option)
+void GLFixedRenderer::setMatrixMode(MatrixType type)
 {
-   glEnable(option);
+   switch (type)
+   {
+   case MatrixType::ModelView:
+      glMatrixMode(GL_MODELVIEW);
+      break;
+
+   case MatrixType::Projection:
+      glMatrixMode(GL_PROJECTION);
+      break;
+
+   default:
+      break;
+   }
 }
 
 void GLFixedRenderer::getMatrix(MatrixType type, F32* matrix)
