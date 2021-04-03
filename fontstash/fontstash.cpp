@@ -572,7 +572,7 @@ static void flush_draw(struct sth_stash* stash)
 			//glTexCoordPointer(2, GL_FLOAT, VERT_STRIDE, texture->verts+2);
 
 			//glDrawArrays(GL_TRIANGLES, 0, texture->nverts);
-			r.renderColoredTextureVertexArray(texture->verts, texture->verts+2,
+			r.renderColoredTexture(texture->verts, texture->verts+2,
 					static_cast<U32>(texture->nverts), Zap::RenderType::Triangles, 0, VERT_STRIDE);
 
 			glDisable(GL_TEXTURE_2D);

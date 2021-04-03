@@ -207,10 +207,6 @@ void VideoSystem::saveUpdateWindowScale(GameSettings *settings)
    screen->setWindowSize(newWidth, newHeight);
 }
 
-
-extern void setDefaultBlendFunction();
-
-
 void VideoSystem::debugPrintState(VideoSystem::videoSystem_st_t currentState)
 {
    logprintf("");
@@ -601,7 +597,15 @@ void VideoSystem::redrawViewport(GameSettings *settings)
    renderer.setMatrixMode(MatrixType::ModelView);
    renderer.loadIdentity();
 
-   setDefaultBlendFunction();
+   // Enabling scissor appears to fix crashing problem switching screen mode
+   // in linux and "Mobile 945GME Express Integrated Graphics Controller",
+   // probably due to lines and points was not being clipped,
+   // causing some lines to wrap around the screen, or by writing other
+   // parts of RAM that can crash Bitfighter, graphics driver, or the entire computer.
+   // This is probably a bug in the Linux Intel graphics driver.
+   ScissorData scissor = DisplayManager::getScreenInfo()->getScissor();
+   glScissor(scissor.x, scissor.y, scissor.width, scissor.height);
+
    renderer.setLineWidth(gDefaultLineWidth);
 
    // Enable Line smoothing everywhere!  Make sure to disable temporarily for filled polygons and such

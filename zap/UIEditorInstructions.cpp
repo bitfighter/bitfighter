@@ -13,6 +13,7 @@
 #include "BotNavMeshZone.h"   // For Border class def
 #include "gameObjectRender.h"
 #include "DisplayManager.h"
+#include "Renderer.h"
 #include "VertexStylesEnum.h"
 #include "FontManager.h"
 
@@ -21,7 +22,6 @@
 
 #include "GeomUtils.h"        // For polygon triangulation
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 #include "stringUtils.h"
 
 #include <cmath>
@@ -377,7 +377,7 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page) const
    }
 
    y = 486;
-   glColor(secColor);
+   Renderer::get().setColor(*secColor);
    drawCenteredString(y, 20, "These special keys are also usually active:");
 
    y += 45;
@@ -395,6 +395,7 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page) const
 // Draw animated creation of walls
 void EditorInstructionsUserInterface::renderPageWalls() const
 {
+   Renderer& r = Renderer::get();
    //drawStringf(400, 100, 25, "%d", mAnimStage);     // Useful to have around when things go wrong!
 
    S32 vertOffset = 20;
@@ -462,11 +463,11 @@ void EditorInstructionsUserInterface::renderPageWalls() const
          delete wallSegments[i];
    }
 
-   glColor(mAnimStage <= 11 ? Colors::yellow : Colors::NeutralTeamColor);
+   r.setColor(mAnimStage <= 11 ? Colors::yellow : Colors::NeutralTeamColor);
 
    glLineWidth(gLineWidth3);
 
-   renderPointVector(&points, GL_LINE_STRIP);
+   r.renderPointVector(&points, RenderType::LineStrip);
 
    glLineWidth(gDefaultLineWidth);
 

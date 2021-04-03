@@ -5,15 +5,18 @@
 
 #include "GaugeRenderer.h"
 #include "DisplayManager.h"
+#include "Renderer.h"
 #include "UI.h"
 #include "ship.h"
 
 #include "Colors.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 #include "gameObjectRender.h"    // For drawHorizLine
 
+#ifdef TNL_OS_WIN32
+#  include <windows.h>   // For ARRAYSIZE
+#endif
 
 #ifdef SHOW_SERVER_SITUATION
 #  include "GameManager.h"
@@ -31,7 +34,7 @@ namespace Zap {
          HealthGaugeRenderer::render(health, GaugeRenderer::getGaugeBottom());
 
          // Bar ends
-         glColor(Colors::white);
+         Renderer::get().setColor(Colors::white);
          S32 extension = 4;
          S32 top = getGaugeBottom() - EnergyGaugeRenderer::GaugeHeight - HealthGaugeRenderer::GaugeHeight - margin - extension;
          S32 bottom = getGaugeBottom() + 2 * extension;     // Why 2 * ???
@@ -50,12 +53,13 @@ namespace Zap {
             color2.r, color2.g, color2.b, 1,   // Fade to
             color2.r, color2.g, color2.b, 1,
          };
-         renderColorVertexArray(vertices, colors, vertex_count / 2, GL_TRIANGLE_FAN);
+         Renderer::get().renderColored(vertices, colors, vertex_count / 2, RenderType::TriangleFan);
       }
 
 
       void EnergyGaugeRenderer::render(S32 energy, S32 gaugeBottom)
       {
+         Renderer& r = Renderer::get();
          static const S32 SafetyLineExtend = 4;      // How far the safety line extends above/below the main bar
          //static const S32 GaugeBottomMargin = UserInterface::vertMargin + 10;
 
@@ -80,7 +84,7 @@ namespace Zap {
          // Show safety line
          S32 cutoffx = Ship::EnergyCooldownThreshold * GaugeWidth / Ship::EnergyMax;
 
-         glColor(Colors::yellow);
+         r.setColor(Colors::yellow);
          drawVertLine(xul + cutoffx, yul - SafetyLineExtend - 1, yul + GaugeHeight + SafetyLineExtend);
 
 #ifdef SHOW_SERVER_SITUATION

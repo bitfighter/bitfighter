@@ -6,6 +6,7 @@
 #include "UILevelInfoDisplayer.h"   // Header
 
 #include "DisplayManager.h"
+#include "Renderer.h"
 #include "ClientGame.h"
 #include "UI.h"                     // Only here for the margins
 #include "GameTypesEnum.h"
@@ -17,8 +18,7 @@
 #include "Colors.h"
 #include "Intervals.h"
 
-#include "stringUtils.h"
-#include "OpenglUtils.h"               
+#include "stringUtils.h"             
 #include "RenderUtils.h"
 #include "gameObjectRender.h"
 
@@ -80,8 +80,10 @@ static const char *ScoreToWinStr = "Score to Win:";
 
 void LevelInfoDisplayer::render() const
 {
-   glPushMatrix();
-   glTranslate(0, getInsideEdge(), 0);
+   Renderer& r = Renderer::get();
+
+   r.pushMatrix();
+   r.translate(0, getInsideEdge(), 0);
 
    GameType *gameType = mGame->getGameType();
 
@@ -164,7 +166,7 @@ void LevelInfoDisplayer::render() const
       const F32 textleft = xright + 5;
 
       // Draw a legend for the ratings
-      glColor(Colors::gray70);
+      r.setColor(Colors::gray70);
 
       drawVertLine(x1, y1, ybot);
       drawHorizLine(x1, xright, y1);
@@ -196,14 +198,14 @@ void LevelInfoDisplayer::render() const
    // Draw top info box
    renderSlideoutWidgetFrame((DisplayManager::getScreenInfo()->getGameCanvasWidth() - totalWidth) / 2, 0, totalWidth, totalHeight, Colors::blue);
 
-   glColor(Colors::white);
+   r.setColor(Colors::white);
    titleSymbolString.render(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2, yPos, AlignmentCenter);
 
    yPos += titleGap;
 
    if(showDescr)
    {
-      glColor(Colors::magenta);
+      r.setColor(Colors::magenta);
       drawCenteredString(yPos, descriptionSize, descr);
       yPos += descriptionHeight;
    }
@@ -214,13 +216,13 @@ void LevelInfoDisplayer::render() const
       yPos += creditsHeight;
    }
 
-   glPopMatrix();
+   r.popMatrix();
 
    /////
    // Auxilliary side panel
 
-   glPushMatrix();
-   glTranslate(-getInsideEdge(), 0, 0);
+   r.pushMatrix();
+   r.translate(-getInsideEdge(), 0, 0);
 
    bool showTwoLinesOfInstructions = gameType->getInstructionString()[1];     // Show 'em if we got 'em
 
@@ -255,7 +257,7 @@ void LevelInfoDisplayer::render() const
 
    yPos += gameTypeHeight;
 
-   glColor(Colors::yellow);
+   r.setColor(Colors::yellow);
    drawCenteredString(sideBoxCen, yPos, InstructionSize, gameType->getInstructionString()[0]);
    yPos += instructionHeight;
 
@@ -272,7 +274,7 @@ void LevelInfoDisplayer::render() const
                           Colors::cyan, Colors::red, ScoreToWinStr, itos(gameType->getWinningScore()).c_str());
    yPos += scoreToWinHeight;
 
-   glPopMatrix();
+   r.popMatrix();
 
    FontManager::popFontContext();
 }

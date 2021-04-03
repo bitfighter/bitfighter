@@ -12,12 +12,12 @@
 #include "gameObjectRender.h"
 #include "masterConnection.h"   
 #include "DisplayManager.h"          // For canvas dimensions
+#include "Renderer.h"
 
 #include "FontManager.h"
 #include "Colors.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 namespace Zap
 {
@@ -51,6 +51,7 @@ void HighScoresUserInterface::render()
 
 void HighScoresUserInterface::renderScores()
 {
+   Renderer& r = Renderer::get();
    FontManager::pushFontContext(HelpContext);
 
    S32 y = vertMargin;
@@ -62,7 +63,7 @@ void HighScoresUserInterface::renderScores()
    S32 gapBetweenGroups = 40;
    S32 scoreIndent = 10;
 
-   glColor(Colors::green);
+   r.setColor(Colors::green);
 
    drawCenteredUnderlinedString(y, headerSize, "BITFIGHTER HIGH SCORES");
    y += gapAfterTitle;
@@ -76,13 +77,13 @@ void HighScoresUserInterface::renderScores()
 
       S32 x = col == 0 ? horizMargin : DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2;
 
-      glColor(Colors::palePurple);
+      r.setColor(Colors::palePurple);
 
       drawString(x, y, titleSize, mScoreGroups[i].title.c_str());
       y += titleSize + 5;
 
       // Draw line
-      glColor(Colors::gray70);
+      r.setColor(Colors::gray70);
       drawHorizLine(x, x + DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2 - 2 * horizMargin, y);
       y += 5;
 
@@ -92,7 +93,7 @@ void HighScoresUserInterface::renderScores()
       // Now draw names
       for(S32 j = 0; j < mScoreGroups[i].names.size(); j++)
       {
-         glColor(Colors::cyan);
+         r.setColor(Colors::cyan);
 
          // First gap will always be largest if scores are descending...
          if(w == -1)
@@ -100,7 +101,7 @@ void HighScoresUserInterface::renderScores()
 
          drawStringr(x + scoreIndent + w, y, textSize, mScoreGroups[i].scores[j].c_str());
 
-         glColor(Colors::yellow);
+         r.setColor(Colors::yellow);
          drawStringAndGetWidth(x + scoreIndent + w + 15, y, textSize, mScoreGroups[i].names[j].c_str());
 
          y += textSize + gapBetweenNames;
@@ -113,7 +114,7 @@ void HighScoresUserInterface::renderScores()
          y = yStart;
    }
 
-   glColor(Colors::red80);
+   r.setColor(Colors::red80);
 
    drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - titleSize, titleSize, "The week ends Sunday/Monday at 0:00:00 UTC Time");
 

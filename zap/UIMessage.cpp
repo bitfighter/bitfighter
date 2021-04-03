@@ -12,8 +12,8 @@
 
 #include "Colors.h"
 
+#include "Renderer.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 #include <stdio.h>
 
@@ -121,6 +121,7 @@ void MessageUserInterface::idle(U32 timeDelta)
 
 void MessageUserInterface::render()
 {
+   Renderer& r = Renderer::get();
    const F32 canvasWidth  = (F32)DisplayManager::getScreenInfo()->getGameCanvasWidth();
    const F32 canvasHeight = (F32)DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
@@ -145,15 +146,15 @@ void MessageUserInterface::render()
             wInset + mVertOffset,               canvasHeight - hInset
       };
 
-      glColor(Colors::red30, fadeFactor * 0.95f);  // Draw a box
-      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
+      r.setColor(Colors::red30, fadeFactor * 0.95f);  // Draw a box
+      r.renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::TriangleFan);
 
-      glColor(Colors::white, fadeFactor);          // Add a border
-      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+      r.setColor(Colors::white, fadeFactor);          // Add a border
+      r.renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::LineLoop);
    }
 
    // Draw title, message, and footer
-   glColor(mMessageColor, fadeFactor);
+   r.setColor(mMessageColor, fadeFactor);
 
    if(strcmp(mTitle, ""))  // If they are different
       drawCenteredString(vertMargin + hInset + mVertOffset, 30, mTitle);

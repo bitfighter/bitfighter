@@ -7,12 +7,12 @@
 
 #include "ClientGame.h"
 #include "DisplayManager.h"
+#include "Renderer.h"
 #include "FontManager.h"
 #include "Colors.h"
 #include "SymbolShape.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 
 #include <cmath>
@@ -149,6 +149,8 @@ extern void drawFilledRoundedRect(const Point &pos, S32 width, S32 height, const
 
 void TeamShuffleHelper::render()
 {
+   Renderer& r = Renderer::get();
+
    FontManager::pushFontContext(TeamShuffleContext);
 
    for(S32 i = 0; i < rows; i++)
@@ -169,18 +171,18 @@ void TeamShuffleHelper::render()
                                columnWidth, rowHeight, 
                                c, *getGame()->getTeamColor(teamIndex), 8);
 
-         glColor(getGame()->getTeamColor(teamIndex));
+         r.setColor(*getGame()->getTeamColor(teamIndex));
          drawString(x + hpad, y + vpad, TEXT_SIZE, getGame()->getTeamName(teamIndex).getString());
 
          drawHorizLine(x + hpad, x + columnWidth - hpad, y + vpad + TEXT_SIZE + 3);
 
-         glColor(Colors::white);
+         r.setColor(Colors::white);
          for(S32 k = 0; k < mTeams[teamIndex].size(); k++)
             drawString(x + hpad, y + S32(vpad + (k + 1) * TEXT_SIZE_FACTOR * TEXT_SIZE + 3),
                   TEXT_SIZE, mTeams[teamIndex][k]->getName().getString());
       }
 
-   glColor(Colors::green);
+   r.setColor(Colors::green);
 
    static const UI::SymbolString Instructions(
          "[[Enter]] to accept | [[Space]] to reshuffle | [[Esc]] to cancel", 

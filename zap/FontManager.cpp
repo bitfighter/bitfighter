@@ -9,7 +9,6 @@
 #include "GameSettings.h"
 #include "DisplayManager.h"
 
-#include "OpenglUtils.h"         // For various rendering helpers
 #include "stringUtils.h"         // For getFileSeparator()
 #include "MathUtils.h"           // For MIN/MAX
 

@@ -16,11 +16,11 @@
 #include "LoadoutIndicator.h"    // For indicator static dimensions
 #include "EnergyGaugeRenderer.h"
 #include "DisplayManager.h"          // For canvas width
+#include "Renderer.h"
 #include "ScissorsManager.h"
 
 #include "SymbolShape.h"
 #include "Colors.h"
-#include "OpenglUtils.h"
 #include "RenderUtils.h"
 #include "gameObjectRender.h"    // For drawHorizLine
 
@@ -394,12 +394,14 @@ void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha
    if(!shouldRender(game))
       return;
 
+   Renderer& r = Renderer::get();
+
 #ifdef TNL_DEBUG
    // This bit is for displaying our help messages one-by-one so we can see how they look on-screen, cycle with CTRL+H
    if(mTestingTimer.getCurrent() > 0)
    {
       FontManager::pushFontContext(HelpItemContext);
-      glColor(Colors::red, alpha);
+      r.setColor(Colors::red, alpha);
 
       doRenderMessages(game, mInputCodeManager, (HelpItem)(mTestingCtr % HelpItemCount), yPos);
 
@@ -415,7 +417,7 @@ void HelpItemManager::renderMessages(const ClientGame *game, F32 yPos, F32 alpha
 
    for(S32 i = 0; i < mHelpItems.size(); i++)      // Iterate over each message being displayed
    {
-      glColor(Colors::HelpItemRenderColor, alpha);
+      r.setColor(Colors::HelpItemRenderColor, alpha);
 
       // Height of the message in pixels, including the gap before the next message (even if there isn't one)
       F32 height = F32(getLinesInHelpItem(i) * (FontSize + FontGap)) + InterMsgGap;

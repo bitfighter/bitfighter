@@ -13,6 +13,7 @@
 #include "speedZone.h"        // For SpeedZone::height
 #include "Colors.h"
 #include "DisplayManager.h"
+#include "Renderer.h"
 #include "Joystick.h"
 #include "JoystickRender.h"
 #include "CoreGame.h"         // For coreItem rendering
@@ -21,7 +22,6 @@
 #include "FontManager.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 #include "GeomUtils.h"
 #include "stringUtils.h"
 
@@ -357,7 +357,7 @@ void InstructionsUserInterface::renderPage1() const
    y += mSymbolSets.render(y);
 
    y += 35;
-   glColor(secColor);
+   Renderer::get().setColor(*secColor);
    drawCenteredString_fixed(y, 20, "These special keys are also usually active:");
 
    y += 36;
@@ -463,18 +463,19 @@ static const char *indicatorPageHeadings[] = {
 
 static void renderBadgeLine(S32 y, S32 textSize, MeritBadges badge, S32 radius, const char *name, const char *descr)
 {
+   Renderer& r = Renderer::get();
    S32 x = 50;
 
    renderBadge((F32)x, (F32)y + radius, (F32)radius, badge);
    x += radius + 10;
 
-   glColor(Colors::yellow);
+   r.setColor(Colors::yellow);
    x += drawStringAndGetWidth(x, y, textSize, name);
 
    //glColor(Colors::cyan);
    //x += drawStringAndGetWidth(x, y, textSize, " - ");
 
-   glColor(Colors::white);
+   r.setColor(Colors::white);
    drawString(280, y, textSize, descr);
 }
 
@@ -488,8 +489,10 @@ struct BadgeDescr {
 
 static S32 renderBadges(S32 y, S32 textSize, S32 descSize)
 {
+   Renderer& r = Renderer::get();
+
    // Heading
-   glColor(Colors::cyan);
+   r.setColor(Colors::cyan);
    drawCenteredString(y, descSize, indicatorPageHeadings[0]);
    y += 26;
 
@@ -499,7 +502,7 @@ static S32 renderBadges(S32 y, S32 textSize, S32 descSize)
    };
 
    // Description
-   glColor(Colors::green);
+   r.setColor(Colors::green);
    drawCenteredString(y, textSize, badgeHeadingDescription[0]);
    y += 40;
 
@@ -556,16 +559,17 @@ static const char *moduleDescriptions[][2] = {
 
 void InstructionsUserInterface::renderModulesPage() const
 {
+   Renderer& r = Renderer::get();
    S32 y = 40;
    S32 textsize = 20;
    S32 textGap = 6;
 
-   glColor(Colors::white);
+   r.setColor(Colors::white);
 
    for(U32 i = 0; i < ARRAYSIZE(moduleInstructions); i++)
    {
       if(i == 2)
-         glColor(Colors::green);
+         r.setColor(Colors::green);
 
       drawCenteredString(y, textsize, moduleInstructions[i]);
       y += textsize + textGap;
@@ -573,7 +577,7 @@ void InstructionsUserInterface::renderModulesPage() const
 
    y += textsize;
 
-   glColor(Colors::cyan);
+   r.setColor(Colors::cyan);
    drawCenteredString(y, textsize, "THE MODULES");
 
    y += 35;
@@ -582,7 +586,7 @@ void InstructionsUserInterface::renderModulesPage() const
    for(U32 i = 0; i < ARRAYSIZE(moduleDescriptions); i++)
    {
       S32 x = 105;
-      glColor(Colors::yellow);
+      r.setColor(Colors::yellow);
       x += drawStringAndGetWidth(x, y, textsize, moduleDescriptions[i][0]);
 
       // If first element is blank, it is a continution of the previous description
@@ -592,13 +596,13 @@ void InstructionsUserInterface::renderModulesPage() const
          y -= 20;
       }
 
-      glColor(Colors::white);
+      r.setColor(Colors::white);
       drawString(x, y, textsize, moduleDescriptions[i][1]);
 
-      glPushMatrix();
-      glTranslatef(60, F32(y + 10), 0);
-      glScale(0.7f);
-      glRotatef(-90, 0, 0, 1);
+      r.pushMatrix();
+      r.translate(60, F32(y + 10), 0);
+      r.scale(0.7f);
+      r.rotate(-90, 0, 0, 1);
 
       static F32 thrusts[4] =  { 1, 0, 0, 0 };
       static F32 thrustsBoost[4] =  { 1.3f, 0, 0, 0 };
@@ -620,7 +624,7 @@ void InstructionsUserInterface::renderModulesPage() const
                      1, 1, 0, 1,  // Colors::yellow
                      0, 0, 0, 1,  // Colors::black
                };
-               renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
+               r.renderColored(vertices, colors, ARRAYSIZE(vertices) / 2, RenderType::Lines);
             }
             break;
 
@@ -646,11 +650,11 @@ void InstructionsUserInterface::renderModulesPage() const
                static const F32 scale = (F32)Game::PLAYER_VISUAL_DISTANCE_VERTICAL /
                      Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL;
 
-               glPushMatrix();
-                  glScale(scale);
+               r.pushMatrix();
+                  r.scale(scale);
                   renderShip(ShipShape::Normal, &Colors::blue, Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, Platform::getRealMilliseconds(),
                         false, true, false, false);
-               glPopMatrix();
+               r.popMatrix();
             }
             break;
 
@@ -676,7 +680,7 @@ void InstructionsUserInterface::renderModulesPage() const
             }
             break;
       }
-      glPopMatrix();
+      r.popMatrix();
       y += 45;
    }
 }
@@ -722,6 +726,7 @@ static U32 GameObjectCount = ARRAYSIZE(gGameObjectInfo) / 2;
 
 void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
 {
+   Renderer& r = Renderer::get();
    U32 objectsPerPage = 6;
    U32 startIndex = index * objectsPerPage;
    U32 endIndex = startIndex + objectsPerPage;
@@ -743,16 +748,16 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
       objStart += Point(200, 90);
       Point start = objStart + Point(0, 55);
 
-      glColor(Colors::yellow);
+      r.setColor(Colors::yellow);
       renderCenteredString(start, FontSize, text);
 
-      glColor(Colors::white);
+      r.setColor(Colors::white);
       for(S32 j = 0; j < desc.size(); j++)
          renderCenteredString(start + Point(0, 25 + j * FontSize * 1.2), 17, desc[j].c_str());
 
-      glPushMatrix();
-      glTranslate(objStart);
-      glScale(0.7f);
+      r.pushMatrix();
+      r.translate(objStart);
+      r.scale(0.7f);
 
       S32 x, y;
 
@@ -800,12 +805,12 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
          case 14:
             x = -65;
             renderTurret(Colors::blue, Colors::blue, Point(x, 10), Point(0, -1), true, 1, 0, 0);
-            glColor(Colors::white);
+            r.setColor(Colors::white);
             drawStringc(x, 32, auxTextFontSize, "(Regular)");
 
             x = -x;
             renderTurret(Colors::blue, Colors::blue, Point(x, 10), Point(0, -1), true, 1, 0, 1);
-            glColor(Colors::white);
+            r.setColor(Colors::white);
             drawStringc(x, 32, auxTextFontSize, "(Self-repairing)");
             break;
          case 15:
@@ -817,14 +822,14 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
             renderForceFieldProjector(Point(-85, y), Point(1, 0), &Colors::red, true, 0);
             renderForceField(Point(-70, y), Point(15, y), &Colors::red, true);
 
-            glColor(Colors::white); 
+            r.setColor(Colors::white); 
             drawString_fixed(25, y - auxTextFontSize / 2 + 12, auxTextFontSize, "(Regular)");
 
             y = -y;
             renderForceFieldProjector(Point(-85, y), Point(1, 0), &Colors::red, true, 1);
             renderForceField(Point(-70, y), Point(15, y), &Colors::red, true);
 
-            glColor(Colors::white);
+            r.setColor(Colors::white);
             drawString_fixed(25, y - auxTextFontSize / 2 + 12, auxTextFontSize, "(Self-repairing)");
 
             break;
@@ -909,11 +914,11 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
                PanelGeom panelGeom;
                CoreItem::fillPanelGeom(pos, time, panelGeom);
 
-               glPushMatrix();
-                  glTranslate(pos);
-                  glScale(.55f);
+               r.pushMatrix();
+                  r.translate(pos);
+                  r.scale(.55f);
                   renderCore(pos, &Colors::blue, Colors::blue, time, &panelGeom, health, 1.0f);
-               glPopMatrix();
+               r.popMatrix();
             }
             break;
          case 28:    // SpeedZone
@@ -927,7 +932,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
          default: 
             TNLAssert(false, "Unhandled case!");
       }
-      glPopMatrix();
+      r.popMatrix();
       objStart.y += 75;
       start.y += 75;
    }
@@ -940,6 +945,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
 {
    TNLAssert(page < COMMAND_CATEGORIES, "Page too high!");
 
+   Renderer& r = Renderer::get();
    S32 ypos = 65;
 
    S32 cmdCol = horizMargin;                                                         // Action column
@@ -949,7 +955,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
 
    if(strcmp(msg, ""))
    {
-      glColor(Colors::palePurple);
+      r.setColor(Colors::palePurple);
       drawString(cmdCol, ypos, FontSize, msg);
       ypos += 28;
    }
@@ -965,7 +971,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
    const S32 cmdSize = 16;
    const S32 cmdGap = 8;
 
-   glColor(secColor);
+   r.setColor(secColor);
    drawString(cmdCol,   ypos, headerSize, "Command");
    drawString(descrCol, ypos, headerSize, "Description");
 
@@ -975,7 +981,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
          (F32)cmdCol, (F32)ypos,
          (F32)750,    (F32)ypos
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+   r.renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::Lines);
 
    ypos += 5;     // Small gap before cmds start
 
@@ -996,7 +1002,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
       // Check if we've just changed sections... if so, draw a horizontal line ----------
       if(chatCmds[i].helpGroup > section)      
       {
-         glColor(Colors::gray40);
+         r.setColor(Colors::gray40);
 
          drawHorizLine(cmdCol, cmdCol + 335, ypos + (cmdSize + cmdGap) / 3);
 
@@ -1005,7 +1011,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
          ypos += cmdSize + cmdGap;
       }
 
-      glColor(cmdColor);
+      r.setColor(cmdColor);
       
       // Assemble command & args from data in the chatCmds struct
       string cmdString = "/" + chatCmds[i].cmdName;
@@ -1015,18 +1021,18 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
          args += " " + chatCmds[i].helpArgString[j];
 
       S32 w = drawStringAndGetWidth(cmdCol, ypos, cmdSize, cmdString.c_str());
-      glColor(argColor);
+      r.setColor(argColor);
       drawString(cmdCol + w, ypos, cmdSize, args.c_str());
 
       if(chatCmds[i].lines == 1)    // Everything on one line, the normal case
       {
-         glColor(descrColor);
+         r.setColor(descrColor);
          drawString(descrCol, ypos, cmdSize, chatCmds[i].helpTextString.c_str());
       }
       else                          // Draw the command on one line, explanation on the next, with a bit of indent
       {
          ypos += cmdSize + cmdGap;
-         glColor(descrColor);
+         r.setColor(descrColor);
          drawString(cmdCol + 50, ypos, cmdSize, chatCmds[i].helpTextString.c_str());
       }
 

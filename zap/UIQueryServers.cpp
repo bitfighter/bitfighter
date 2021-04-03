@@ -13,12 +13,12 @@
 #include "ClientGame.h"
 #include "Colors.h"
 #include "DisplayManager.h"
+#include "Renderer.h"
 #include "gameObjectRender.h"
 #include "Cursor.h"
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 #include <math.h>
 #include <algorithm>
@@ -753,22 +753,26 @@ static void renderLockIcon()
 
 static void setLocalRemoteColor(bool isLocal)
 {
+   Renderer& r = Renderer::get();
+
    if(isLocal)
-      glColor(Colors::cyan);
+      r.setColor(Colors::cyan);
    else
-      glColor(Colors::white);
+      r.setColor(Colors::white);
 }
 
 
 // Set color based on ping time
 static void setPingTimeColor(U32 pingTime)
 {
+   Renderer& r = Renderer::get();
+
    if(pingTime < 100)
-      glColor(Colors::green);
+      r.setColor(Colors::green);
    else if(pingTime < 250)
-      glColor(Colors::yellow);
+      r.setColor(Colors::yellow);
    else
-      glColor(Colors::red);
+      r.setColor(Colors::red);
 }
 
 
@@ -786,6 +790,7 @@ static Color getPlayerCountColor(S32 players, S32 maxPlayers)
 
 void QueryServersUserInterface::render()
 {
+   Renderer& r = Renderer::get();
    const S32 canvasWidth =  DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
    bool drawmsg1 = false;
@@ -804,12 +809,12 @@ void QueryServersUserInterface::render()
 
    if(connectedToMaster)
    {
-      glColor(Colors::MasterServerBlue);
+      r.setColor(Colors::MasterServerBlue);
       drawCenteredStringf(vertMargin - 8, 12, "Connected to %s", masterConn->getMasterName().c_str() );
    }
    else
    {
-      glColor(Colors::red);
+      r.setColor(Colors::red);
       if(mGivenUpOnMaster && getGame()->getSettings()->getIniSettings()->prevServerListFromMaster.size() != 0)
          drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Using server list from last successful connect.");
       else
@@ -822,12 +827,12 @@ void QueryServersUserInterface::render()
        S32 dividerPos = getDividerPos();
 
       // Horizontal divider between game list and chat window
-      glColor(Colors::white);
+      r.setColor(Colors::white);
       F32 vertices[] = {
             (F32)horizMargin,               (F32)dividerPos,
             (F32)canvasWidth - horizMargin, (F32)dividerPos
       };
-      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+      r.renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::Lines);
 
 
       S32 ypos = dividerPos + 3;      // 3 = gap after divider
@@ -839,7 +844,7 @@ void QueryServersUserInterface::render()
    }
 
    // Instructions at bottom of server selection section
-   glColor(Colors::white);
+   r.setColor(Colors::white);
    drawCenteredString(getDividerPos() - SEL_SERVER_INSTR_SIZE - SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE + 1, SEL_SERVER_INSTR_SIZE, 
                       "UP, DOWN to select, ENTER to join | Click on column to sort | ESC exits");
 
@@ -865,7 +870,7 @@ void QueryServersUserInterface::render()
 
          if(s.isLocalServer)
          {
-            glColor(Colors::red, .25);
+            r.setColor(Colors::red, .25);
             drawFilledRect(0, y, canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4);
          }
       }
@@ -887,7 +892,7 @@ void QueryServersUserInterface::render()
          if(i == selectedIndex)
          {
             // Render server description at bottom
-            glColor(s.msgColor);
+            r.setColor(s.msgColor);
             U32 serverDescrLoc = TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + 2;
             drawString(horizMargin, serverDescrLoc, SERVER_DESCR_TEXTSIZE, s.serverDescr.c_str());    
          }
@@ -910,24 +915,24 @@ void QueryServersUserInterface::render()
          drawString(columns[0].xStart, y, SERVER_ENTRY_TEXTSIZE, sname.c_str());
 
          // Render icons
-         glColor(Colors::green);
+         r.setColor(Colors::green);
          S32 questionMarkVertOffset = -2;
          if(s.dedicated || s.test || s.pingTimedOut || !s.everGotQueryResponse)
          {
-            glPushMatrix();
-               glTranslate(columns[1].xStart + 5, y + 2, 0);
+            r.pushMatrix();
+               r.translate(columns[1].xStart + 5, y + 2, 0);
                if( s.pingTimedOut || !s.everGotQueryResponse )
                   drawString(0, questionMarkVertOffset, SERVER_ENTRY_TEXTSIZE, "?");
                else if(s.test)
                   renderTestIcon();
                else
                   renderDedicatedIcon();
-            glPopMatrix();
+            r.popMatrix();
          }
          if(s.passwordRequired || s.pingTimedOut || !s.everGotQueryResponse)
          {
-            glPushMatrix();
-               glTranslatef(F32(columns[1].xStart + 25), F32(y + 2), 0);
+            r.pushMatrix();
+               r.translate(F32(columns[1].xStart + 25), F32(y + 2), 0);
                if(s.pingTimedOut || !s.everGotQueryResponse)
                   drawString(0, questionMarkVertOffset, SERVER_ENTRY_TEXTSIZE, "?");
                else
@@ -935,18 +940,18 @@ void QueryServersUserInterface::render()
                   //glScale(3.65f);
                   renderLockIcon();
                }
-            glPopMatrix();
+            r.popMatrix();
          }
 
          setPingTimeColor(s.pingTime);
          drawStringf(columns[2].xStart, y, SERVER_ENTRY_TEXTSIZE, "%d", s.pingTime);
 
          Color color = getPlayerCountColor(s.playerCount, s.maxPlayers);
-         glColor(color);
+         r.setColor(color);
 
          drawStringf(columns[3].xStart,      y, SERVER_ENTRY_TEXTSIZE, "%d",  s.playerCount);
          drawStringf(columns[3].xStart + 78, y, SERVER_ENTRY_TEXTSIZE, "%d",  s.botCount);
-         glColor(color * 0.5); // Dim the max players
+         r.setColor(color * 0.5); // Dim the max players
          drawStringf(columns[3].xStart + 30, y, SERVER_ENTRY_TEXTSIZE, "/%d", s.maxPlayers);
 
          setLocalRemoteColor(s.isLocalServer);
@@ -968,23 +973,24 @@ void QueryServersUserInterface::render()
 
 void QueryServersUserInterface::renderTopBanner()
 {
+   Renderer& r = Renderer::get();
    const S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
    // Top banner
-   glColor(Colors::black);
+   r.setColor(Colors::black);
    F32 vertices[] = {
          0,                0,
          (F32)canvasWidth, 0,
          (F32)canvasWidth, (F32)BANNER_HEIGHT,
          0,                (F32)BANNER_HEIGHT
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
+   r.renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::TriangleFan);
 
-   glColor(Colors::green);
+   r.setColor(Colors::green);
    drawCenteredString(vertMargin + 12, 24, "BITFIGHTER GAME LOBBY");
 
    const S32 FONT_SIZE = 12;
-   glColor(Colors::white);
+   r.setColor(Colors::white);
    drawStringf(horizMargin, vertMargin, FONT_SIZE, "SERVERS: %d", servers.size());
    drawStringfr(canvasWidth - horizMargin, vertMargin, FONT_SIZE, "PAGE %d/%d", mPage + 1, getLastPage() + 1);
 }
@@ -992,10 +998,11 @@ void QueryServersUserInterface::renderTopBanner()
 
 void QueryServersUserInterface::renderColumnHeaders()
 {
+   Renderer& r = Renderer::get();
    S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
    // Draw vertical dividing lines
-   glColor(0.7f);
+   r.setColor(0.7f);
 
    for(S32 i = 1; i < columns.size(); i++)
       drawVertLine(columns[i].xStart - 4, COLUMN_HEADER_TOP, TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + 2);
@@ -1028,7 +1035,7 @@ void QueryServersUserInterface::renderColumnHeaders()
       else
          x2 = columns[mHighlightColumn+1].xStart - 5;
 
-      glColor(Colors::white);
+      r.setColor(Colors::white);
       drawRect(x1, COLUMN_HEADER_TOP, x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1, RenderType::LineLoop);
    }
 }
@@ -1038,6 +1045,7 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
 {
    // Warning... the following section is pretty darned ugly!  We're just drawing a message box...
 
+   Renderer& r = Renderer::get();
    S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
    S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
@@ -1082,7 +1090,7 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
    drawFilledFancyBox(xpos1, ypos1, xpos2, ypos2, CORNER_INSET, Colors::red40, 1.0, Colors::red);
 
    // Draw text
-   glColor(Colors::white);
+   r.setColor(Colors::white);
 
    drawCenteredString(ypos - lines * (fontsize + fontgap), fontsize, msg1);
    drawCenteredString(ypos - (fontsize + fontgap), fontsize, msg2);

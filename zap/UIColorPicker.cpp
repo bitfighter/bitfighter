@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 #include "UIColorPicker.h"
 
+#include "Renderer.h"
 #include "gameObjectRender.h"
 #include "UIManager.h"
 #include "FontManager.h"
@@ -11,7 +12,6 @@
 #include "Colors.h"
 #include "ship.h"
 
-#include "OpenglUtils.h"
 #include "RenderUtils.h"
 #include "GeomUtils.h"    // For triangulation
 
@@ -34,7 +34,7 @@ static void drawArrow(F32 *p)
 {
    p[2] = p[0] + 20; p[3] = p[1] - 10;
    p[4] = p[0] + 20; p[5] = p[1] + 10;
-   renderVertexArray(p, 3, GL_LINE_LOOP);
+   Renderer::get().renderVertexArray(p, 3, RenderType::LineLoop);
 }
 
 const S32 colorWheel_x = 100;
@@ -117,7 +117,9 @@ const F32 colorBrightnessPointsBlue[] = {
 
 void UIColorPicker::render()
 {
-   glColor(Colors::green);
+   Renderer& renderer = Renderer::get();
+
+   renderer.setColor(Colors::green);
 
    FontManager::pushFontContext(MenuHeaderContext);
    drawCenteredUnderlinedString(15, 30, "COLOR PICKER");
@@ -125,7 +127,7 @@ void UIColorPicker::render()
    drawString (730, 580, 15, "Cancel");
    FontManager::popFontContext();
 
-   glColor(Colors::white);
+   renderer.setColor(Colors::white);
 
    F32 maxCol = max(r, g);
 
@@ -155,39 +157,39 @@ void UIColorPicker::render()
       maxCol,      0,      0, 1,
    };
 
-   renderColorVertexArray(colorWheelPoints, colorArray, 8, GL_TRIANGLE_FAN);
+   renderer.renderColored(colorWheelPoints, colorArray, 8, RenderType::TriangleFan);
 
 
    colorArray[0]  = r2;  colorArray[1]  = g2;  colorArray[2]  = b2;
    colorArray[4]  = r2;  colorArray[5]  = g2;  colorArray[6]  = b2; 
    colorArray[8]  = 0;   colorArray[9]  = 0;   colorArray[10] = 0; 
    colorArray[12] = 0;   colorArray[13] = 0;   colorArray[14] = 0;
-   renderColorVertexArray(colorBrightnessPoints, colorArray, 4, GL_TRIANGLE_FAN);
+   renderer.renderColored(colorBrightnessPoints, colorArray, 4, RenderType::TriangleFan);
 
    colorArray[0]  = 1;  colorArray[1]  = g;  colorArray[2]  = b;
    colorArray[4]  = 1;  colorArray[5]  = g;  colorArray[6]  = b;
    colorArray[9]  = g;  colorArray[10] = b;
    colorArray[13] = g;  colorArray[14] = b;
-   renderColorVertexArray(colorBrightnessPointsRed, colorArray, 4, GL_TRIANGLE_FAN);
+   renderer.renderColored(colorBrightnessPointsRed, colorArray, 4, RenderType::TriangleFan);
 
    colorArray[0]  = r; colorArray[1]  = 1;
    colorArray[4]  = r; colorArray[5]  = 1;
    colorArray[8]  = r; colorArray[9]  = 0;
    colorArray[12] = r; colorArray[13] = 0;
-   renderColorVertexArray(colorBrightnessPointsGreen, colorArray, 4, GL_TRIANGLE_FAN);
+   renderer.renderColored(colorBrightnessPointsGreen, colorArray, 4, RenderType::TriangleFan);
 
    colorArray[1]  = g; colorArray[2]  = 1;
    colorArray[5]  = g; colorArray[6]  = 1;
    colorArray[9]  = g; colorArray[10] = 0;
    colorArray[13] = g; colorArray[14] = 0;
-   renderColorVertexArray(colorBrightnessPointsBlue, colorArray, 4, GL_TRIANGLE_FAN);
+   renderer.renderColored(colorBrightnessPointsBlue, colorArray, 4, RenderType::TriangleFan);
 
-   glColor(Colors::white);
-   renderVertexArray(&colorWheelPoints[2],       6, GL_LINE_LOOP);
-   renderVertexArray(colorBrightnessPoints,      4, GL_LINE_LOOP);
-   renderVertexArray(colorBrightnessPointsRed,   4, GL_LINE_LOOP);
-   renderVertexArray(colorBrightnessPointsGreen, 4, GL_LINE_LOOP);
-   renderVertexArray(colorBrightnessPointsBlue,  4, GL_LINE_LOOP);
+   renderer.setColor(Colors::white);
+   renderer.renderVertexArray(&colorWheelPoints[2],       6, RenderType::LineLoop);
+   renderer.renderVertexArray(colorBrightnessPoints,      4, RenderType::LineLoop);
+   renderer.renderVertexArray(colorBrightnessPointsRed,   4, RenderType::LineLoop);
+   renderer.renderVertexArray(colorBrightnessPointsGreen, 4, RenderType::LineLoop);
+   renderer.renderVertexArray(colorBrightnessPointsBlue,  4, RenderType::LineLoop);
 
 
    F32 pointerArrow[8];
@@ -230,9 +232,9 @@ void UIColorPicker::render()
       pointerArrow[4] = pointerArrow[0] + 10;                 pointerArrow[5] = pointerArrow[1] + 10;
       pointerArrow[6] = pointerArrow[0] + 10;                 pointerArrow[7] = pointerArrow[1] - 10;
 
-      glColor(maxCol > .6f ?  0.f : 1.f);
+      renderer.setColor(maxCol > .6f ?  0.f : 1.f);
 
-      renderVertexArray(pointerArrow, 4, GL_LINES);
+      renderer.renderVertexArray(pointerArrow, 4, RenderType::Lines);
    }
 
 

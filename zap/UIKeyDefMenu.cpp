@@ -8,6 +8,7 @@
 #include "UIManager.h"
 
 #include "DisplayManager.h"
+#include "Renderer.h"
 #include "Joystick.h"
 #include "JoystickRender.h"
 #include "ClientGame.h"
@@ -17,7 +18,6 @@
 #include "Intervals.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 #include <string>
 #include <math.h>
@@ -212,20 +212,21 @@ bool KeyDefMenuUserInterface::isDuplicate(S32 key, const Vector<KeyDefMenuItem> 
 
 void KeyDefMenuUserInterface::render()
 {
+   Renderer& r = Renderer::get();
    FontManager::pushFontContext(MenuContext);
 
    // Draw the game screen, then dim it out so you can still see it under our overlay
    if(getGame()->getConnectionToServer())
       getUIManager()->renderAndDimGameUserInterface();
 
-   glColor(Colors::white);
+   r.setColor(Colors::white);
    drawCenteredString(vertMargin, 30, mMenuTitle);
    drawCenteredString(vertMargin + 35, 18, mMenuSubTitle);
 
-   glColor(Colors::menuHelpColor);
+   r.setColor(Colors::menuHelpColor);
    drawCenteredString(vertMargin + 63, 14, "You can define different keys for keyboard or joystick mode.  Switch in Options menu.");
 
-   glColor(Colors::white);
+   r.setColor(Colors::white);
    drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - 20, 18, mMenuFooter);
 
    if(selectedIndex >= menuItems.size())
@@ -246,14 +247,14 @@ void KeyDefMenuUserInterface::render()
                         Colors::blue40, Colors::blue);
 
       // Draw item text
-      glColor(Colors::cyan);
+      r.setColor(Colors::cyan);
       drawString(xPos, y + offset, 15, menuItems[i].text);
 
 		xPos += Column_Width * 14 / 20;
 
       if(changingItem == i)
       {
-         glColor(Colors::red);
+         r.setColor(Colors::red);
          const S32 size = 13;
          drawCenteredString_fixed(xPos, y + offset + 1 + size, size, "Press Key or Button");
       }
@@ -270,13 +271,13 @@ void KeyDefMenuUserInterface::render()
    S32 yPos = yStart + maxMenuItemsInAnyCol * height + 10;
 
    // Draw the help string
-   glColor(Colors::green);
+   r.setColor(Colors::green);
    drawCenteredString(yPos, 15, menuItems[selectedIndex].helpString.c_str());
 
    yPos += 20;
 
    // Draw some suggestions
-   glColor(Colors::yellow);
+   r.setColor(Colors::yellow);
    if(getGame()->getInputMode() == InputModeJoystick)
       drawCenteredString(yPos, 15, "HINT: You will be using the left joystick to steer, the right to fire");
    else
@@ -289,7 +290,7 @@ void KeyDefMenuUserInterface::render()
       if(errorMsgTimer.getCurrent() < 1000)
          alpha = (F32) errorMsgTimer.getCurrent() / 1000;
 
-      glColor(Colors::red, alpha);
+      r.setColor(Colors::red, alpha);
       drawCenteredString(yPos, 15, errorMsg.c_str());
    }
 

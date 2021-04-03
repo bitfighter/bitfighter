@@ -57,28 +57,30 @@ protected:
 
 public:
    virtual ~Renderer() = default;
-
    static Renderer& get();
 
+   void setColor(F32 c, F32 alpha = 1.0f);
+   void setColor(const Color& c, F32 alpha = 1.0f);
+
+   void translate(const Point& offset);
+   void rotate(F32 angle);
+   void scale(F32 factor);
+   void scale(const Point& factor);
+
+   void renderPointVector(const Vector<Point>* points, RenderType type);
+   void renderPointVector(const Vector<Point>* points, const Point& offset, RenderType type);
+
+   // Implemented by concrete renderers:
    virtual void clear() = 0;
    virtual void setClearColor(F32 r, F32 g, F32 b, F32 alpha = 1.0f) = 0;
-
-   virtual void setColor(F32 c, F32 alpha = 1.0f) = 0;
    virtual void setColor(F32 r, F32 g, F32 b, F32 alpha = 1.0f) = 0;
-   virtual void setColor(const Color& c, F32 alpha = 1.0f) = 0;
-
+   
    virtual void setLineWidth(F32 width) = 0;
    virtual void setPointSize(F32 size) = 0;
    virtual void setViewport(S32 x, S32 y, S32 width, S32 height) = 0;
 
-   virtual void scale(F32 factor) = 0;
    virtual void scale(F32 x, F32 y, F32 z = 1.0f) = 0;
-   virtual void scale(const Point& factor) = 0;
-
    virtual void translate(F32 x, F32 y, F32 z = 0.0f) = 0;
-   virtual void translate(const Point& offset) = 0;
-
-   virtual void rotate(F32 angle) = 0;
    virtual void rotate(F32 angle, F32 x, F32 y, F32 z) = 0;
 
    virtual void setMatrixMode(MatrixType type) = 0;
@@ -90,20 +92,21 @@ public:
    virtual void loadIdentity() = 0;
    virtual void projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx) = 0;
 
-   virtual void renderPointVector(const Vector<Point>* points, RenderType type) = 0;
-   virtual void renderPointVector(const Vector<Point>* points, const Point& offset, RenderType type) = 0;
+   // Render 2D points:
+   virtual void renderVertexArray(const S8 verts[], S32 vertCount, RenderType type,
+      U32 start = 0, U32 stride = 0) = 0;
+   virtual void renderVertexArray(const S16 verts[], S32 vertCount, RenderType type,
+      U32 start = 0, U32 stride = 0) = 0;
+   virtual void renderVertexArray(const F32 verts[], S32 vertCount, RenderType type,
+      U32 start = 0, U32 stride = 0) = 0;
 
-   virtual void renderVertexArray(const S8 verts[], S32 vertCount, RenderType type) = 0;
-   virtual void renderVertexArray(const S16 verts[], S32 vertCount, RenderType type) = 0;
-   virtual void renderVertexArray(const F32 verts[], S32 vertCount, RenderType type) = 0;
-
-   virtual void renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, RenderType type) = 0;
-   virtual void renderTexturedVertexArray(const F32 vertices[], const F32 UVs[], U32 vertCount,
+   virtual void renderColored(const F32 verts[], const F32 colors[], S32 vertCount, RenderType type) = 0;
+   virtual void renderTextured(const F32 verts[], const F32 UVs[], U32 vertCount,
       RenderType type, U32 start = 0, U32 stride = 0) = 0;
-   virtual void renderColoredTextureVertexArray(const F32 vertices[], const F32 UVs[], U32 vertCount,
-      RenderType type, U32 start = 0, U32 stride = 0) = 0;
 
-   virtual void renderLine(const Vector<Point>* points) = 0;
+   // Render a texture colored by the current color:
+   virtual void renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount,
+      RenderType type, U32 start = 0, U32 stride = 0) = 0;
 };
 
 

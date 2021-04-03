@@ -6,6 +6,7 @@
 #include "FpsRenderer.h"
 
 #include "DisplayManager.h"
+#include "Renderer.h"
 #include "ClientGame.h"
 #include "FontManager.h"
 #include "barrier.h"
@@ -13,7 +14,6 @@
 #include "Colors.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 namespace Zap { 
 
@@ -91,6 +91,8 @@ void FpsRenderer::idle(U32 timeDelta)
 
 void FpsRenderer::render(S32 canvasWidth) const
 {
+   Renderer& r = Renderer::get();
+
    if(!mFPSVisible && !isClosing())
       return;
 
@@ -122,13 +124,13 @@ void FpsRenderer::render(S32 canvasWidth) const
    const S32 xpos = canvasWidth - horizMargin - S32(getInsideEdge());
    const S32 fontGap = 5;
 
-   glColor(Colors::white);
+   r.setColor(Colors::white);
    drawStringfr(xpos, vertMargin,                      FontSize, "%1.0f fps", mFPSAvg);
-   glColor(Colors::yellow);
+   r.setColor(Colors::yellow);
    drawStringfr(xpos, vertMargin + FontSize + fontGap, FontSize, "%1.0f ms",  mPingAvg);
 
    // vertex display is green at zero and red at 1000 or more visible vertices
-   glColor4f(visibleVertices / 1000.0f, 1.0f - visibleVertices / 1000.0f, 0.0f, 1);
+   r.setColor(visibleVertices / 1000.0f, 1.0f - visibleVertices / 1000.0f, 0.0f, 1);
    drawStringfr(xpos, vertMargin + 2 * (FontSize + fontGap), FontSize, "%d vts",  visibleVertices);
    
    FontManager::popFontContext();

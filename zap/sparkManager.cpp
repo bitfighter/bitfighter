@@ -10,8 +10,8 @@
 #include "Colors.h"
 #include "config.h"
 
+#include "Renderer.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 #include "MathUtils.h"
 #include "FontManager.h"
 
@@ -117,20 +117,22 @@ void FxManager::DebrisChunk::idle(U32 timeDelta)
 
 void FxManager::DebrisChunk::render() const
 {
-   glPushMatrix();
+   Renderer& r = Renderer::get();
 
-   glTranslate(pos);
-   glRotatef(rd(angle), 0, 0, 1);
+   r.pushMatrix();
+
+   r.translate(pos);
+   r.rotate(rd(angle), 0, 0, 1);
 
    F32 alpha = 1;
    if(ttl < 250)
       alpha = ttl / 250.f;
 
-   glColor(color, alpha);
+   r.setColor(color, alpha);
 
-   renderPointVector(&points, GL_LINE_LOOP);
+   r.renderPointVector(&points, RenderType::LineLoop);
 
-   glPopMatrix();
+   r.popMatrix();
 }
 
 
@@ -150,18 +152,20 @@ void FxManager::TextEffect::idle(U32 timeDelta)
 
 void FxManager::TextEffect::render() const
 {
+   Renderer& r = Renderer::get();
+
    F32 alpha = 1;
    if(ttl < 300)
       alpha = F32(ttl) / 300.f;     // Fade as item nears the end of its life
-   glColor(color, alpha);
+   r.setColor(color, alpha);
    //glLineWidth(size);
-   glPushMatrix();
-      glTranslate(pos);
-      glScale(size / MAX_TEXTEFFECT_SIZE);  // We'll draw big and scale down
+   r.pushMatrix();
+      r.translate(pos);
+      r.scale(size / MAX_TEXTEFFECT_SIZE);  // We'll draw big and scale down
       FontManager::pushFontContext(TextEffectContext);
          drawStringc(0.0f, 0.0f, 120.0f, text.c_str());
       FontManager::popFontContext();
-   glPopMatrix();
+   r.popMatrix();
    //glLineWidth(gDefaultLineWidth);
 }
 
@@ -510,7 +514,7 @@ void FxTrail::render() const
       FxTrailVertexArray[(2*i) + 1] = mNodes[i].pos.y;
    }
 
-   renderColorVertexArray(FxTrailVertexArray, FxTrailColorArray, mNodes.size(), GL_LINE_STRIP);
+   Renderer::get().renderColored(FxTrailVertexArray, FxTrailColorArray, mNodes.size(), RenderType::LineStrip);
 }
 
 

@@ -56,10 +56,10 @@ void drawHollowRect(T x1, U y1, V x2, W y2, const Color &outlineColor)
    drawHollowRect(x1, y1, x2, y2);
 }
 
-void drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, S32 mode);
+void drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, RenderType mode);
 
 template<typename T, typename U, typename V, typename W, typename X>
-void drawFancyBox(T xLeft, U yTop, V xRight, W yBottom, X cornerInset, S32 mode)
+void drawFancyBox(T xLeft, U yTop, V xRight, W yBottom, X cornerInset, RenderType mode)
 {
    drawFancyBox(F32(xLeft), F32(yTop), F32(xRight), F32(yBottom), F32(cornerInset), mode);
 }

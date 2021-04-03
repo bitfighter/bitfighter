@@ -12,7 +12,7 @@
 #include "gameObjectRender.h"
 #include "Colors.h"
 
-#include "OpenglUtils.h"
+#include "Renderer.h"
 #include "RenderUtils.h"
 #include "stringUtils.h"
 #include "GameManager.h"
@@ -951,7 +951,7 @@ SymbolHorizLine::~SymbolHorizLine()
 void SymbolHorizLine::render(const Point &center) const
 {
    if(mHasColor)
-      glColor(mColor);
+      Renderer::get().setColor(mColor);
 
    drawHorizLine(center.x - mWidth / 2, center.x + mWidth / 2, center.y - mHeight / 2 + mVertOffset);
 }
@@ -982,7 +982,7 @@ SymbolRoundedRect::~SymbolRoundedRect()
 void SymbolRoundedRect::render(const Point &center) const
 {
    if(mHasColor)
-      glColor(mColor);
+      Renderer::get().setColor(mColor);
 
    drawRoundedRect(center - Point(0, (mHeight - SpacingAdjustor) / 2 - BorderDecorationVertCenteringOffset - 1), 
                    mWidth - SpacingAdjustor, mHeight - SpacingAdjustor, mRadius);
@@ -1010,7 +1010,7 @@ SymbolSmallRoundedRect::~SymbolSmallRoundedRect()
 void SymbolSmallRoundedRect::render(const Point &center) const
 {
    if(mHasColor)
-      glColor(mColor);
+      Renderer::get().setColor(mColor);
 
    drawRoundedRect(center - Point(0, mHeight / 2 - BorderDecorationVertCenteringOffset - SpacingAdjustor + 2), 
                    mWidth - SpacingAdjustor, mHeight - SpacingAdjustor, mRadius);
@@ -1041,7 +1041,7 @@ void SymbolHorizEllipse::render(const Point &center) const
    S32 h = mHeight / 2;
 
    if(mHasColor)
-      glColor(mColor);
+      Renderer::get().setColor(mColor);
 
    Point cen = center - Point(0, h - 1);
 
@@ -1079,14 +1079,14 @@ static void drawButtonRightTriangle(const Point &center)
          p2.x, p2.y,
          p3.x, p3.y
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   Renderer::get().renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::LineLoop);
 }
 
 
 void SymbolRightTriangle::render(const Point &center) const
 {
    if(mHasColor)
-      glColor(mColor);
+      Renderer::get().setColor(mColor);
 
    Point cen(center.x -mWidth / 4, center.y);  // Need to off-center the label slightly for this button
    drawButtonRightTriangle(cen);
@@ -1114,7 +1114,7 @@ SymbolDPadArrow::~SymbolDPadArrow()
 void SymbolDPadArrow::render(const Point &center) const
 {
    if(mHasColor)
-      glColor(mColor);
+      Renderer::get().setColor(mColor);
 
    // Off set to match text rendering methods
    Point pos = center + Point(0, -6);
@@ -1165,7 +1165,7 @@ SymbolCircle::~SymbolCircle()
 void SymbolCircle::render(const Point &pos) const
 {
    if(mHasColor)
-      glColor(mColor);
+      Renderer::get().setColor(mColor);
 
    // Adjust our position's y coordinate to be the center of the circle
    drawCircle(pos - Point(0, (mHeight) / 2 - BorderDecorationVertCenteringOffset - SpacingAdjustor), F32(mWidth - SpacingAdjustor) / 2);
@@ -1465,7 +1465,7 @@ SymbolText::~SymbolText()
 void SymbolText::render(const Point &center) const
 {
    if(mHasColor)
-      glColor(mColor);
+      Renderer::get().setColor(mColor);
 
    FontManager::pushFontContext(mFontContext);
    drawStringc(center + mLabelOffset, (F32)mFontSize, mText.c_str());
@@ -1531,7 +1531,7 @@ void SymbolKey::render(const Point &center) const
    const Point textVertAdj = mLabelOffset + Point(0, BorderDecorationVertCenteringOffset - 4);
 
    if(mHasColor)
-      glColor(mColor);
+      Renderer::get().setColor(mColor);
 
    // Handle some special cases:
    if(mText == "Up Arrow")

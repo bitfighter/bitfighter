@@ -19,15 +19,6 @@ GLFixedRenderer::GLFixedRenderer()
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    glEnable(GL_SCISSOR_TEST);    // Turn on clipping
    glEnable(GL_BLEND);
-
-   // Enabling scissor appears to fix crashing problem switching screen mode
-   // in linux and "Mobile 945GME Express Integrated Graphics Controller",
-   // probably due to lines and points was not being clipped,
-   // causing some lines to wrap around the screen, or by writing other
-   // parts of RAM that can crash Bitfighter, graphics driver, or the entire computer.
-   // This is probably a bug in the Linux Intel graphics driver.
-   ScissorData scissor = DisplayManager::getScreenInfo()->getScissor();
-   glScissor(scissor.x, scissor.y, scissor.width, scissor.height);
 }
 
 GLFixedRenderer::~GLFixedRenderer()
@@ -81,19 +72,9 @@ void GLFixedRenderer::setClearColor(F32 r, F32 g, F32 b, F32 alpha)
    glClearColor(r, g, b, alpha);
 }
 
-void GLFixedRenderer::setColor(F32 c, F32 alpha)
-{
-   glColor4f(c, c, c, alpha);
-}
-
 void GLFixedRenderer::setColor(F32 r, F32 g, F32 b, F32 alpha)
 {
    glColor4f(r, g, b, alpha);
-}
-
-void GLFixedRenderer::setColor(const Color& c, F32 alpha)
-{
-   glColor4f(c.r, c.g, c.b, alpha);
 }
 
 void GLFixedRenderer::setLineWidth(F32 width)
@@ -111,34 +92,14 @@ void GLFixedRenderer::setViewport(S32 x, S32 y, S32 width, S32 height)
    glViewport(x, y, width, height);
 }
 
-void GLFixedRenderer::scale(F32 factor)
-{
-   glScalef(factor, factor, factor);
-}
-
 void GLFixedRenderer::scale(F32 x, F32 y, F32 z)
 {
    glScalef(x, y, z);
 }
 
-void GLFixedRenderer::scale(const Point& factor)
-{
-   glScalef(factor.x, factor.y, 1.0f);
-}
-
 void GLFixedRenderer::translate(F32 x, F32 y, F32 z)
 {
    glTranslatef(x, y, z);
-}
-
-void GLFixedRenderer::translate(const Point& offset)
-{
-   glTranslatef(offset.x, offset.y, 0.0f);
-}
-
-void GLFixedRenderer::rotate(F32 angle)
-{
-   glRotatef(angle, 0.0f, 0.0f, 1.0f);
 }
 
 void GLFixedRenderer::rotate(F32 angle, F32 x, F32 y, F32 z)
@@ -210,63 +171,42 @@ void GLFixedRenderer::projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64
    glOrtho(left, right, bottom, top, nearx, farx);
 }
 
-void GLFixedRenderer::renderPointVector(const Vector<Point>* points, RenderType type)
+void GLFixedRenderer::renderVertexArray(const S8 verts[], S32 vertCount, RenderType type, U32 start, U32 stride)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
 
-   glVertexPointer(2, GL_FLOAT, sizeof(Point), points->address());
-   glDrawArrays(getGLRenderType(type), 0, points->size());
+   glVertexPointer(2, GL_BYTE, stride, verts);
+   glDrawArrays(getGLRenderType(type), start, vertCount);
 
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void GLFixedRenderer::renderPointVector(const Vector<Point>* points, const Point& offset, RenderType type)
-{
-   glPushMatrix();
-   glTranslatef(offset.x, offset.y, 0);
-   glEnableClientState(GL_VERTEX_ARRAY);
-   glVertexPointer(2, GL_FLOAT, 0, points->address());
-   glDrawArrays(getGLRenderType(type), 0, points->size());
-   glDisableClientState(GL_VERTEX_ARRAY);
-   glPopMatrix();
-}
-
-void GLFixedRenderer::renderVertexArray(const S8 verts[], S32 vertCount, RenderType type)
+void GLFixedRenderer::renderVertexArray(const S16 verts[], S32 vertCount, RenderType type, U32 start, U32 stride)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
 
-   glVertexPointer(2, GL_BYTE, 0, verts);
-   glDrawArrays(getGLRenderType(type), 0, vertCount);
+   glVertexPointer(2, GL_SHORT, stride, verts);
+   glDrawArrays(getGLRenderType(type), start, vertCount);
 
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void GLFixedRenderer::renderVertexArray(const S16 verts[], S32 vertCount, RenderType type)
+void GLFixedRenderer::renderVertexArray(const F32 verts[], S32 vertCount, RenderType type, U32 start, U32 stride)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
 
-   glVertexPointer(2, GL_SHORT, 0, verts);
-   glDrawArrays(getGLRenderType(type), 0, vertCount);
+   glVertexPointer(2, GL_FLOAT, stride, verts);
+   glDrawArrays(getGLRenderType(type), start, vertCount);
 
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void GLFixedRenderer::renderVertexArray(const F32 verts[], S32 vertCount, RenderType type)
-{
-   glEnableClientState(GL_VERTEX_ARRAY);
-
-   glVertexPointer(2, GL_FLOAT, 0, verts);
-   glDrawArrays(getGLRenderType(type), 0, vertCount);
-
-   glDisableClientState(GL_VERTEX_ARRAY);
-}
-
-void GLFixedRenderer::renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, RenderType type)
+void GLFixedRenderer::renderColored(const F32 verts[], const F32 colors[], S32 vertCount, RenderType type)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
    glEnableClientState(GL_COLOR_ARRAY);
 
-   glVertexPointer(2, GL_FLOAT, 0, vertices);
+   glVertexPointer(2, GL_FLOAT, 0, verts);
    glColorPointer(4, GL_FLOAT, 0, colors);
    glDrawArrays(getGLRenderType(type), 0, vertCount);
 
@@ -274,29 +214,36 @@ void GLFixedRenderer::renderColorVertexArray(const F32 vertices[], const F32 col
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void GLFixedRenderer::renderTexturedVertexArray(const F32 vertices[], const F32 UVs[], U32 vertCount, RenderType type, U32 start, U32 stride)
+void GLFixedRenderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCount, RenderType type, U32 start, U32 stride)
 {
-   // Todo
-}
-
-void GLFixedRenderer::renderColoredTextureVertexArray(const F32 vertices[], const F32 UVs[], U32 vertCount, RenderType type, U32 start, U32 stride)
-{
-   // Todo properly
+   // !Todo properly!
    glEnable(GL_TEXTURE_2D);
    glEnableClientState(GL_VERTEX_ARRAY);
    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-   glVertexPointer(2, GL_FLOAT, stride, vertices);
+
+   glVertexPointer(2, GL_FLOAT, stride, verts);
    glTexCoordPointer(2, GL_FLOAT, stride, UVs);
    glDrawArrays(GL_TRIANGLES, 0, vertCount);
+
    glDisable(GL_TEXTURE_2D);
    glDisableClientState(GL_VERTEX_ARRAY);
    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-void GLFixedRenderer::renderLine(const Vector<Point>* points)
+void GLFixedRenderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount, RenderType type, U32 start, U32 stride)
 {
-   renderPointVector(points, RenderType::LineStrip);
-}
+   // !Todo properly!
+   glEnable(GL_TEXTURE_2D);
+   glEnableClientState(GL_VERTEX_ARRAY);
+   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
+   glVertexPointer(2, GL_FLOAT, stride, verts);
+   glTexCoordPointer(2, GL_FLOAT, stride, UVs);
+   glDrawArrays(GL_TRIANGLES, 0, vertCount);
+
+   glDisable(GL_TEXTURE_2D);
+   glDisableClientState(GL_VERTEX_ARRAY);
+   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+}
 
 }

@@ -16,11 +16,11 @@
 
 #include "ScissorsManager.h"
 #include "DisplayManager.h"
+#include "Renderer.h"
 
 #include "Colors.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 #include "stringUtils.h"
 
 #include <algorithm>
@@ -158,6 +158,8 @@ bool ChatHelper::isCmdChat()
 
 void ChatHelper::render()
 {
+   Renderer& renderer = Renderer::get();
+
    FontManager::pushFontContext(InputContext);
    const char *promptStr;
 
@@ -228,11 +230,11 @@ void ChatHelper::render()
 
    for(S32 i = 1; i >= 0; i--)
    {
-      glColor(baseColor, i ? .25f : .4f);
-      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
+      renderer.setColor(baseColor, i ? .25f : .4f);
+      renderer.renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? RenderType::TriangleFan : RenderType::LineLoop);
    }
 
-   glColor(baseColor);
+   renderer.setColor(baseColor);
 
    // Display prompt
    S32 xStartPos   = xPos + 3 + promptWidth;
@@ -262,7 +264,7 @@ void ChatHelper::render()
                S32 numberOfQuotes = (S32) count(line.begin(), line.end(), '"');
                if(chatCmds[i].cmdArgCount >= words.size() && line[line.size() - 1] == ' ' && numberOfQuotes % 2 == 0)
                {
-                  glColor(baseColor * .5);
+                  renderer.setColor(baseColor * .5);
                   drawString(xStartPos + displayWidth, ypos, CHAT_COMPOSE_FONT_SIZE, chatCmds[i].helpArgString[words.size() - 1].c_str());
                }
 
@@ -272,7 +274,7 @@ void ChatHelper::render()
       }
    }
 
-   glColor(baseColor);
+   renderer.setColor(baseColor);
    mLineEditor.drawCursor(xStartPos, ypos, CHAT_COMPOSE_FONT_SIZE);
 
    // Restore scissors settings -- only used during scrolling

@@ -10,8 +10,8 @@
 
 #include "Colors.h"
 
+#include "Renderer.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 #include "stringUtils.h"
 
 
@@ -97,7 +97,7 @@ static S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
 
    S32 rectWidth = getComponentRectWidth(textWidth);
 
-   drawFancyBox(xPos, yPos, xPos + rectWidth, yPos + IndicatorHeight, IndicatorVertPadding, GL_LINE_LOOP);
+   drawFancyBox(xPos, yPos, xPos + rectWidth, yPos + IndicatorHeight, IndicatorVertPadding, RenderType::LineLoop);
 
    return rectWidth;
 }
@@ -114,6 +114,8 @@ static const S32 GapBetweenTheGroups = 20;
 // Returns width
 static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
 {
+   Renderer& r = Renderer::get();
+
    // If if we have no module, then this loadout has never been set, and there is nothing to render
    if(!loadout.isValid())  
       return 0;
@@ -129,7 +131,7 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    // First, the weapons
    for(S32 i = 0; i < ShipWeaponCount; i++)
    {
-      glColor(loadout.isWeaponActive(i) ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
+      r.setColor(loadout.isWeaponActive(i) ? *INDICATOR_ACTIVE_COLOR : *INDICATOR_INACTIVE_COLOR);
 
       S32 width = renderComponentIndicator(xPos, top, WeaponInfo::getWeaponInfo(loadout.getWeapon(i)).name.getString());
 
@@ -146,16 +148,16 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
       if(gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUsePassive ||   // Armor
          gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUseHybrid)      // Sensor
       {
-         glColor(INDICATOR_PASSIVE_COLOR);
+         r.setColor(*INDICATOR_PASSIVE_COLOR);
       }
       else if(loadout.isModulePrimaryActive(module))
-         glColor(INDICATOR_ACTIVE_COLOR);
+         r.setColor(*INDICATOR_ACTIVE_COLOR);
       else 
-         glColor(INDICATOR_INACTIVE_COLOR);
+         r.setColor(*INDICATOR_INACTIVE_COLOR);
 
       // Always change to orange if module secondary is fired
       if(gModuleInfo[module].hasSecondary() && loadout.isModuleSecondaryActive(module))
-         glColor(Colors::orange67);
+         r.setColor(Colors::orange67);
 
       S32 width = renderComponentIndicator(xPos, top, ModuleInfo::getModuleInfo(module)->getName());
 

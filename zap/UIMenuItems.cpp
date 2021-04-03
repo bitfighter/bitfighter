@@ -8,6 +8,7 @@
 #include "UIEditorMenus.h"
 
 #include "DisplayManager.h"    // For DisplayManager::getScreenInfo() stuff
+#include "Renderer.h"
 #include "FontManager.h"
 
 #include "LuaWrapper.h"
@@ -17,7 +18,6 @@
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 #include <cmath>
 
@@ -176,7 +176,7 @@ const Color *MenuItem::getColor(bool isSelected)
 
 void MenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   glColor(*getColor(isSelected));
+   Renderer::get().setColor(*getColor(isSelected));
 
    FontManager::pushFontContext(MenuContext);
       drawCenteredStringf(xpos, ypos, textsize, "%s%s", getPrompt().c_str(), mDisplayValAppendage);
@@ -1477,7 +1477,7 @@ string PlayerMenuItem::getOptionText() const
 
 void PlayerMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   glColor(*getColor(isSelected));
+   Renderer::get().setColor(*getColor(isSelected));
    drawCenteredString(xpos, ypos, textsize, getOptionText().c_str());
 }
 
@@ -1534,7 +1534,7 @@ string TeamMenuItem::getOptionText() const
 
 void TeamMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   glColor(*getColor(isSelected));
+   Renderer::get().setColor(*getColor(isSelected));
    drawCenteredStringf(xpos, ypos, textsize, getOptionText().c_str());
 }
 
@@ -1604,7 +1604,7 @@ void TextEntryMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected
    S32 xpos2 = drawCenteredStringPair(xpos, ypos, textsize, MenuContext, InputContext, *getColor(isSelected), textColor,
                                       getPrompt().c_str(), getOptionText().c_str());
 
-   glColor(Colors::red);      // Cursor is always red
+   Renderer::get().setColor(Colors::red);      // Cursor is always red
    if(isSelected)
    {
       FontManager::pushFontContext(InputContext);
@@ -1831,7 +1831,7 @@ void SimpleTextEntryMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSe
    S32 xpos2 = drawCenteredStringPair(xpos, ypos, textsize, MenuContext, InputContext, *getColor(false), textColor,
          getPrompt().c_str(), mLineEditor.getDisplayString().c_str());
 
-   glColor(Colors::red);      // Cursor is always red
+   Renderer::get().setColor(Colors::red);      // Cursor is always red
 
    FontManager::pushFontContext(InputContext);
    mLineEditor.drawCursor(xpos2, ypos, textsize);

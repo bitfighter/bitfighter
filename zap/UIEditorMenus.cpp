@@ -8,13 +8,13 @@
 #include "UIEditor.h"
 #include "UIManager.h"
 #include "DisplayManager.h"    // For canvasHeight
+#include "Renderer.h"
 #include "ClientGame.h"    // For UIManager and callback
 
 #include "Colors.h"
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 namespace Zap
 {
@@ -66,6 +66,8 @@ S32 QuickMenuUI::getGap(MenuItemSize size) const
 
 void QuickMenuUI::render()
 {
+   Renderer& r = Renderer::get();
+
    // Draw the underlying editor screen
    getUIManager()->getPrevUI()->render();
 
@@ -129,7 +131,7 @@ void QuickMenuUI::render()
    right -= 4;
 
    // First draw the menu title
-   glColor(Colors::red);
+   r.setColor(Colors::red);
    drawCenteredString(cenX, yStart, getTextSize(MENU_ITEM_SIZE_SMALL), title.c_str());
 
    // Then the menu items
@@ -174,7 +176,7 @@ void QuickMenuUI::render()
 
    /////
    // Render instructions just below the menu
-   glColor(Colors::menuHelpColor);
+   r.setColor(Colors::menuHelpColor);
 
    // Move instruction to top of the menu if there is not room to display it below.  I realize this code is a bit of a mess... not
    // sure how to write it more clearly, though I'm sure it could be done.

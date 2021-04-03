@@ -145,7 +145,6 @@ set(CLIENT_SOURCES
 	LoadoutIndicator.cpp
 	loadoutHelper.cpp
 	oglconsole.cpp
-	OpenglUtils.cpp
 	quickChatHelper.cpp
     Renderer.cpp
 	RenderUtils.cpp
