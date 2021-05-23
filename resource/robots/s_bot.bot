@@ -398,7 +398,7 @@ function orbitPoint(pt, dir, inputDist, inputStrictness)
         end
 
         local changeInAngle = (math.abs(deltaDistance)/(deltaDistance + sign)) * math.pi/2
-        local angleToPoint = point.angleTo(pt, bot:getPos())
+        local angleToPoint = point.angleTo(pt, botPos)
         dirToGo = angleToPoint + (math.pi/2 + changeInAngle)*direction
         --bot:setThrust(speed, dirToGo)
     end
@@ -586,7 +586,7 @@ function doObjective(closestEnemy)
                 local retrievingFlag = false
                 if myFlag ~= nil then
                     if not myFlag:isInInitLoc() and not myFlag:isOnShip() and                     -- If my flag is not in its initial location and my flag is not on a ship
-                            point.distSquared(myFlag:getPos(), bot:getPos()) <= 2000 * 2000 then  -- .. and we're within some sane range of the flag
+                            point.distSquared(myFlag:getPos(), botPos) <= 2000 * 2000 then  -- .. and we're within some sane range of the flag
                         gotoPosition(myFlag:getPos())                                             -- Go to and return my flag
                         retrievingFlag = true
                     end
@@ -681,7 +681,7 @@ function onTick(deltaTime)
     botPos = bot:getPos()
     pathTimer = pathTimer - deltaTime
     scriptTime = scriptTime + deltaTime
-    assert(bot:getPos() ~= nil)
+    assert(botPos ~= nil)
 
     local closestEnemy = bot:findClosestEnemy()
     
