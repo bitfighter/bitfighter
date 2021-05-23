@@ -126,23 +126,27 @@ function fireAtObjects()
         ObjType.ForceFieldProjector, ObjType.SpyBug, ObjType.Core)
 
     local haveTarget = false
-    
-    -- Cycle through list of potential items until we find one that we can attack
-    local enemy = nil
+        -- Cycle through list of potential items until we find the closest one that 
+    -- we can attack
+    local target = nil
+    local closestDistSq = 99999999
     for i, obj in ipairs(items) do
-        haveTarget = shouldFireAtObject(obj)
+        local goodTarget = shouldFireAtObject(obj)
+        local thisDist = point.distSquared(obj:getPos(), botPos)
         
-        if haveTarget then
-            enemy = obj
-            break
+        -- Update to closer target
+        if goodTarget and thisDist < closestDistSq then
+            closestDistSq = thisDist
+            target = obj
+            haveTarget = true
         end
     end
     
     local shouldFire = false
     
     if haveTarget then
-        -- Last enemy was the found one from the loop above
-        local angle = bot:getFiringSolution(enemy)
+        -- Last target was the found one from the loop above
+        local angle = bot:getFiringSolution(target)
         if (angle ~= nil) and bot:hasWeapon(Weapon.Phaser) then
             shouldFire = true
             -- Set angle here
