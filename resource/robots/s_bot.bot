@@ -132,13 +132,19 @@ function fireAtObjects()
     local closestDistSq = 99999999
     for i, obj in ipairs(items) do
         local goodTarget = shouldFireAtObject(obj)
-        local thisDist = point.distSquared(obj:getPos(), botPos)
+        local thisDistSq = point.distSquared(obj:getPos(), botPos)
         
         -- Update to closer target
-        if goodTarget and thisDist < closestDistSq then
-            closestDistSq = thisDist
-            target = obj
-            haveTarget = true
+        if goodTarget then
+            -- Favor ships a little more by pretending their distance is reduced by half
+            if obj:getObjType() == ObjType.Ship or obj:getObjType() == ObjType.Robot then
+                thisDistSq = thisDistSq / 4  -- dist/2 == distSq/4
+            end
+            if thisDistSq < closestDistSq then
+                closestDistSq = thisDistSq
+                target = obj
+                haveTarget = true
+            end
         end
     end
     
