@@ -383,8 +383,8 @@ static const char *loadoutInstructions1[] = {
 static const char *loadoutInstructions2[] = {
    "PRESETS",
    "You can save your Loadout in a Preset for easy recall later.",
-   "To save your loadout, press [[SaveLoadoutPreset1]], [[SaveLoadoutPreset2]], or [[SaveLoadoutPreset3]].",
-   "To recall the preset, press [[LoadLoadoutPreset1]], [[LoadLoadoutPreset2]], or [[LoadLoadoutPreset3]].",
+   "To save your loadout, use [[SaveLoadoutPreset1]] through [[SaveLoadoutPreset6]].",
+   "To recall the preset, use [[LoadLoadoutPreset1]] through [[LoadLoadoutPreset6]].",
    "",
    "Loadout Presets will be saved when you quit the game, and",
    "will be available the next time you play."

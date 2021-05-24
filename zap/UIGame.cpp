@@ -1464,6 +1464,12 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       loadLoadoutPreset(getGame(), 1);
    else if(checkInputCode(BINDING_LOAD_PRESET_3, inputCode))
       loadLoadoutPreset(getGame(), 2);
+   else if(checkInputCode(BINDING_LOAD_PRESET_4, inputCode))
+      loadLoadoutPreset(getGame(), 3);
+   else if(checkInputCode(BINDING_LOAD_PRESET_5, inputCode))
+      loadLoadoutPreset(getGame(), 4);
+   else if(checkInputCode(BINDING_LOAD_PRESET_6, inputCode))
+      loadLoadoutPreset(getGame(), 5);
 
    else if(checkInputCode(BINDING_SAVE_PRESET_1, inputCode))  // Saving loadout presets
       saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 0);
@@ -1471,6 +1477,12 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 1);
    else if(checkInputCode(BINDING_SAVE_PRESET_3, inputCode))
       saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 2);
+   else if(checkInputCode(BINDING_SAVE_PRESET_4, inputCode))
+      saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 3);
+   else if(checkInputCode(BINDING_SAVE_PRESET_5, inputCode))
+      saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 4);
+   else if(checkInputCode(BINDING_SAVE_PRESET_6, inputCode))
+      saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 5);
 
    else if(checkInputCode(BINDING_MOD1, inputCode))
       activateModule(0);

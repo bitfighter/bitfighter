@@ -159,7 +159,7 @@ public:
    static CIniFile iniFile;
    static CIniFile userPrefs;
 
-   static const S32 LoadoutPresetCount = 3;     // How many presets do we save?
+   static const S32 LoadoutPresetCount = 6;     // How many presets do we save?
 
    static const U16 DEFAULT_GAME_PORT = 28000;
 

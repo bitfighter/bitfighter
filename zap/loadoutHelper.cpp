@@ -44,7 +44,8 @@ static const OverlayMenuItem loadoutWeaponMenuItems[] = {
 };      
 
 
-static string preset1, preset2, preset3;     // Static so that the c_str() pointers we use will stick around
+static string preset1, preset2, preset3,  // Static so that the c_str() pointers we use will stick around
+              preset4, preset5, preset6;
 
 
 ////////////////////////////////////////
@@ -86,6 +87,9 @@ void LoadoutHelper::rebuildPresetItems()
    preset1 = "Preset 1 - " + getGame()->getSettings()->getLoadoutPreset(0).toString(false);
    preset2 = "Preset 2 - " + getGame()->getSettings()->getLoadoutPreset(1).toString(false);
    preset3 = "Preset 3 - " + getGame()->getSettings()->getLoadoutPreset(2).toString(false);
+   preset4 = "Preset 4 - " + getGame()->getSettings()->getLoadoutPreset(3).toString(false);
+   preset5 = "Preset 5 - " + getGame()->getSettings()->getLoadoutPreset(4).toString(false);
+   preset6 = "Preset 6 - " + getGame()->getSettings()->getLoadoutPreset(5).toString(false);
 
 #define GET_COLOR(p) getGame()->getSettings()->getLoadoutPreset(p).isValid() ? UNSEL_COLOR : &Colors::DisabledGray
 
@@ -94,6 +98,9 @@ void LoadoutHelper::rebuildPresetItems()
       { KEY_1, BUTTON_1, true, 0, preset1.c_str(), GET_COLOR(0), "", NULL, NULL },
       { KEY_2, BUTTON_2, true, 1, preset2.c_str(), GET_COLOR(1), "", NULL, NULL },
       { KEY_3, BUTTON_3, true, 2, preset3.c_str(), GET_COLOR(2), "", NULL, NULL },
+      { KEY_4, BUTTON_4, true, 3, preset4.c_str(), GET_COLOR(3), "", NULL, NULL },
+      { KEY_5, BUTTON_5, true, 4, preset5.c_str(), GET_COLOR(4), "", NULL, NULL },
+      { KEY_6, BUTTON_6, true, 5, preset6.c_str(), GET_COLOR(5), "", NULL, NULL },
    };
    TNLAssert(ARRAYSIZE(presetItems) == GameSettings::LoadoutPresetCount, "presetItems[] has the wrong number of elements!");
 
