@@ -2433,13 +2433,53 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
 
 void renderAsteroidForTeam(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
 {
-   // Render internal colored part, scaled a little smaller
-   glLineWidth(gLineWidth4);
-   renderAsteroid(pos, design, 0.95 * scaleFact, color, alpha);
-   glLineWidth(gDefaultLineWidth);
 
-   // Render standard outline
-   renderAsteroid(pos, design, scaleFact, NULL, alpha);
+   glPushMatrix();
+   glTranslate(pos);
+
+   // Draw filled asteroid at smaller size
+   F32 thisScale = scaleFact * ASTEROID_SCALING_FACTOR;
+   glScale(thisScale);
+
+   const F32 *vertexArray = AsteroidCoords[design];
+   const F32 *fillArray = AsteroidFillCoords[design];
+   const F32 *stencilArray = AsteroidStencilCoords[design];
+   const F32 *stencilFillArray = AsteroidStencilFillCoords[design];
+
+   glEnable(GL_STENCIL_TEST);
+   glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+   glClear(GL_STENCIL_BUFFER_BIT);
+
+   /// 1st pass - draw inset asteroid into stencil buffer for subtraction later
+   // Enable stencil buffer, disable color buffer
+   glStencilFunc(GL_ALWAYS, 1, 0xFF);
+   glStencilMask(0xFF);
+   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+   renderVertexArray(stencilFillArray, ASTEROID_FILL_POINTS, GL_TRIANGLES);
+
+   /// 2nd pass
+   // Enable color buffer, disable stencil buffer
+   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+   glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+   glStencilMask(0x00);
+
+   // Draw filled asteroid with the stencil cut out
+   glColor(color, alpha);
+   renderVertexArray(fillArray, ASTEROID_FILL_POINTS, GL_TRIANGLES);
+
+   glStencilMask(0xFF);                // Needed final calls before proper drawing
+   glStencilFunc(GL_ALWAYS, 0, 0xFF);
+   glDisable(GL_STENCIL_TEST);
+
+   // Draw inner outline to highlight edges
+   renderVertexArray(stencilArray, ASTEROID_POINTS, GL_LINE_LOOP);
+
+   // Original outline
+   glColor(Color(.7), alpha);  // Default gray
+   renderVertexArray(vertexArray, ASTEROID_POINTS, GL_LINE_LOOP);
+
+   glPopMatrix();
 }
 
 
