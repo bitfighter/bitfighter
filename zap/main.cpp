@@ -232,6 +232,7 @@ static void clearScreen()
       glDisable(GL_SCISSOR_TEST);
 
    glClear(GL_COLOR_BUFFER_BIT);
+   glClear(GL_STENCIL_BUFFER_BIT);
 
    if(scissorMode)
       glEnable(GL_SCISSOR_TEST);

@@ -2446,10 +2446,6 @@ void renderAsteroidForTeam(const Point &pos, S32 design, F32 scaleFact, const Co
    const F32 *stencilArray = AsteroidStencilCoords[design];
    const F32 *stencilFillArray = AsteroidStencilFillCoords[design];
 
-   glEnable(GL_STENCIL_TEST);
-   glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-   glClear(GL_STENCIL_BUFFER_BIT);
-
    /// 1st pass - draw inset asteroid into stencil buffer for subtraction later
    // Enable stencil buffer, disable color buffer
    glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -2470,8 +2466,8 @@ void renderAsteroidForTeam(const Point &pos, S32 design, F32 scaleFact, const Co
 
    glStencilMask(0xFF);                // Needed final calls before proper drawing
    glStencilFunc(GL_ALWAYS, 0, 0xFF);
-   glDisable(GL_STENCIL_TEST);
 
+   /// Outlines for highlighting
    // Draw inner outline to highlight edges
    renderVertexArray(stencilArray, ASTEROID_POINTS, GL_LINE_LOOP);
 

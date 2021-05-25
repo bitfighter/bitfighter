@@ -622,6 +622,9 @@ void VideoSystem::redrawViewport(GameSettings *settings)
 
    glEnable(GL_SCISSOR_TEST);    // Turn on clipping
 
+   glEnable(GL_STENCIL_TEST);    // Turn on stenciling
+   glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  // Default operation
+
    setDefaultBlendFunction();
    glLineWidth(gDefaultLineWidth);
 
