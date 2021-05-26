@@ -2469,6 +2469,7 @@ void renderAsteroidForTeam(const Point &pos, S32 design, F32 scaleFact, const Co
 
    /// Outlines for highlighting
    // Draw inner outline to highlight edges
+   glColor(color, 1.0);
    renderVertexArray(stencilArray, ASTEROID_POINTS, GL_LINE_LOOP);
 
    // Original outline
