@@ -228,28 +228,31 @@ adjectives = {
     "Clueless",
     "Wacky",
     "Ruthless",
-    "Incredible",
+    "Impossible",
     "Big",
     "Shriveled",
     "Digital",
+    "Dark",
+    "Graceful",
 }
 
 nouns = {
-    "Sauce",
     "Thunder",
     "Requiem",
-    "Thing",
     "Toothpick",
     "Dish",
     "Stone",
     "Compass",
     "Penguin",
     "Roof",
-    "Head",
     "Foliage",
     "Sky",
     "Horizon",
     "Duck",
+    "Matter",
+    "Slope",
+    "Jaunt",
+    "Machine",
 }
  
 function getName()
