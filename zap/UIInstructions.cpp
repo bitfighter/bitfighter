@@ -886,9 +886,17 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index) const
             }
             break;
          case 23:    // Asteroid... using goofball factor to keep out of sync with Nexus graphic
-            renderAsteroid(Point(0,-10), 
-                     (S32)(Platform::getRealMilliseconds() / 2891) % Asteroid::getDesignCount(),
-                     Asteroid::getAsteroidRadius(3));
+            {
+               const Color* colors[3] = {
+                     NULL,   // Default asteroid
+                     &Colors::blue,
+                     NULL
+               };
+               S32 colorIdx = (S32)(Platform::getRealMilliseconds() / 2891) % 3;
+               S32 design = (S32)(Platform::getRealMilliseconds() / 2891) % Asteroid::getDesignCount();
+
+               renderAsteroid(Point(0,-10), design, Asteroid::getAsteroidRadius(3), colors[colorIdx]);
+            }
             break;
          case 24:    // TestItem
             renderTestItem(mTestItemPoints);

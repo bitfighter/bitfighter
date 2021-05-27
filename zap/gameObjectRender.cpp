@@ -2413,17 +2413,14 @@ void renderTestItem(const Vector<Point> &points, F32 alpha)
 }
 
 
-void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
+void renderDefaultAsteroid(const Point &pos, S32 design, F32 scaleFact, F32 alpha)
 {
    glPushMatrix();
+
    glTranslate(pos);
    glScale(scaleFact * ASTEROID_SCALING_FACTOR);
 
-   if(color == NULL)
-      glColor(Color(.7), alpha);  // Default gray
-   else
-      glColor(*color, alpha);     // Team color
-
+   glColor(Color(.7), alpha);  // Default gray
    const F32 *vertexArray = AsteroidCoords[design];
    renderVertexArray(vertexArray, ASTEROID_POINTS, GL_LINE_LOOP);
 
@@ -2431,13 +2428,20 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
 }
 
 
+void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
+{
+   if(color != NULL)
+      renderAsteroidForTeam(pos, design, scaleFact, color, alpha);
+   else
+      renderDefaultAsteroid(pos, design, scaleFact, alpha);
+}
+
+
 void renderAsteroidForTeam(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
 {
-
    glPushMatrix();
-   glTranslate(pos);
 
-   // Draw filled asteroid at smaller size
+   glTranslate(pos);
    F32 thisScale = scaleFact * ASTEROID_SCALING_FACTOR;
    glScale(thisScale);
 

@@ -234,6 +234,7 @@ void renderTestItem(const Point &pos, S32 size, F32 alpha = 1);
 void renderTestItem(const Vector<Point> &points, F32 alpha = 1);
 
 void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color = NULL, F32 alpha = 1);
+void renderDefaultAsteroid(const Point &pos, S32 design, F32 scaleFact, F32 alpha = 1);
 void renderAsteroidForTeam(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha);
 
 void renderAsteroidSpawn(const Point &pos, S32 time, const Color* color);
