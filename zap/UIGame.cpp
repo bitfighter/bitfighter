@@ -3480,10 +3480,14 @@ void LevelListDisplayer::render() const
    {
       for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
       {
+         FontManager::pushFontContext(MenuContext);
+
          glColor(Colors::white, (1.4f - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.f)) * 
                                         (mLevelLoadDisplay ? 1 : mLevelLoadDisplayFadeTimer.getFraction()) );
          drawStringf(100, DisplayManager::getScreenInfo()->getGameCanvasHeight() - /*vertMargin*/ 0 - (mLevelLoadDisplayNames.size() - i) * 20, 
                      15, "%s", mLevelLoadDisplayNames[i].c_str());
+
+         FontManager::popFontContext();
       }
    }
 }

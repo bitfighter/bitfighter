@@ -431,6 +431,8 @@ void ChatUserInterface::render()
       dimUnderlyingUI();
    }
 
+   FontManager::pushFontContext(MenuContext);
+
    // Render header
    renderHeader();
 
@@ -485,11 +487,15 @@ void ChatUserInterface::render()
       drawCenteredString(yPos1 + margin, fontsize, line1);
       drawCenteredString(yPos1 + margin + fontsize + fontgap, fontsize, line2);
    }
+
+   FontManager::popFontContext();
 }
 
 
 void ChatUserInterface::renderHeader()
 {
+   FontManager::pushFontContext(MenuHeaderContext);
+
    // Draw title, subtitle, and footer
    glColor(Colors::green);
    drawCenteredString(vertMargin, MENU_TITLE_SIZE, "GAME LOBBY / GLOBAL CHAT");
@@ -508,6 +514,8 @@ void ChatUserInterface::renderHeader()
    }
 
    drawCenteredString(vertMargin + MENU_TITLE_SIZE + TITLE_SUBTITLE_GAP, MENU_SUBTITLE_SIZE, subtitle.c_str());
+
+   FontManager::popFontContext();
 }
 
 

@@ -19,6 +19,7 @@
 #include "stringUtils.h"
 #include "RenderUtils.h"
 #include "OpenglUtils.h"
+#include "FontManager.h"
 
 #include <math.h>
 #include <algorithm>
@@ -791,6 +792,8 @@ void QueryServersUserInterface::render()
    bool drawmsg1 = false;
    bool drawmsg2 = false;
 
+   FontManager::pushFontContext(MenuContext);
+
    renderTopBanner();
 
    // Render buttons
@@ -963,6 +966,8 @@ void QueryServersUserInterface::render()
 
    if(drawmsg1 || drawmsg2)
       renderMessageBox(drawmsg1, drawmsg2);
+
+   FontManager::popFontContext();
 }
 
 
@@ -980,6 +985,8 @@ void QueryServersUserInterface::renderTopBanner()
    };
    renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
 
+   FontManager::pushFontContext(MenuHeaderContext);
+
    glColor(Colors::green);
    drawCenteredString(vertMargin + 12, 24, "BITFIGHTER GAME LOBBY");
 
@@ -987,6 +994,8 @@ void QueryServersUserInterface::renderTopBanner()
    glColor(Colors::white);
    drawStringf(horizMargin, vertMargin, FONT_SIZE, "SERVERS: %d", servers.size());
    drawStringfr(canvasWidth - horizMargin, vertMargin, FONT_SIZE, "PAGE %d/%d", mPage + 1, getLastPage() + 1);
+
+   FontManager::popFontContext();
 }
 
 
