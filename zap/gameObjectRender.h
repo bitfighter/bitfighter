@@ -290,7 +290,7 @@ extern void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const 
 #else
 
 // for ZAP_DEDICATED, we will just define blank functions, and don't compile gameObjectRender.cpp
-
+// WHAT A HACK
 #define renderSoccerBall
 #define renderNexus
 #define renderTextItem
@@ -314,6 +314,8 @@ extern void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const 
 #define renderRepairItem
 #define renderEnergyItem
 #define renderAsteroid
+#define renderDefaultAsteroid
+#define renderAsteroidForTeam
 #define renderCore
 #define renderTestItem
 #define renderResourceItem
