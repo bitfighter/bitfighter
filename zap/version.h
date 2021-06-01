@@ -43,7 +43,7 @@
 #define VERSION_019g 11900
 #define VERSION_020  11753  // Abandoned
 #define VERSION_021  12030
-#define VERSION_022  12058
+#define VERSION_022  12340
 
 #define BUILD_VERSION VERSION_022  // Version of the game according to git, will be unique every release (must be int)
                                    // Get from "git rev-list --all --count"
