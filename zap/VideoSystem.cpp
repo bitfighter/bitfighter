@@ -76,7 +76,7 @@ bool VideoSystem::init()
    //SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );  // depth used in editor to display spybug visible area non-overlap
    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-
+   SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
 
    // Get information about the current desktop video settings and initialize
    // our ScreenInfo class with with current width and height
