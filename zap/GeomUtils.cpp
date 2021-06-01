@@ -2060,8 +2060,8 @@ void constructBarrierPolygon(const Point &start, const Point &end, const Point &
    F32 offset = width * 0.5f;
 
    // Determine if pre/post points are dummies (end of barrier)
-   bool isDummyPre  = isnanf(pre.x);
-   bool isDummyPost = isnanf(post.x);
+   bool isDummyPre  = isnan(pre.x);
+   bool isDummyPost = isnan(post.x);
 
    // Build normalized normals. Two definitions of 'normal'!
    Point dirVec = end - start;
