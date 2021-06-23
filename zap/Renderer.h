@@ -42,6 +42,23 @@ enum class RenderType
    TriangleFan
 };
 
+enum class TextureFormat
+{
+    RGB,
+    RGBA
+};
+
+enum class DataType
+{
+    UnsignedByte,
+    Byte,
+    UnsignedShort,
+    Short,
+    UnsignedInt,
+    Int,
+    Float
+};
+
 class Renderer
 {
 private:
@@ -78,6 +95,8 @@ public:
    virtual void setLineWidth(F32 width) = 0;
    virtual void setPointSize(F32 size) = 0;
    virtual void setViewport(S32 x, S32 y, S32 width, S32 height) = 0;
+   virtual Point getViewportPos() = 0;
+   virtual Point getViewportSize() = 0;
 
    virtual void scale(F32 x, F32 y, F32 z = 1.0f) = 0;
    virtual void translate(F32 x, F32 y, F32 z = 0.0f) = 0;
@@ -91,6 +110,13 @@ public:
    virtual void loadMatrix(const F64* m) = 0;
    virtual void loadIdentity() = 0;
    virtual void projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx) = 0;
+
+   // Textures
+   virtual U32 generateTexture() = 0;
+   virtual bool isTexture(U32 textureHandle) = 0;
+   virtual void deleteTexture(U32 textureHandle) = 0;
+   virtual void setTextureData(TextureFormat format, DataType dataType, U32 width, U32 height, const void* data) = 0;
+
 
    // Render 2D points:
    virtual void renderVertexArray(const S8 verts[], S32 vertCount, RenderType type,

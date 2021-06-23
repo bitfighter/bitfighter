@@ -15,8 +15,9 @@ namespace Zap
    {
    private:
       GLFixedRenderer();
-
       U32 getGLRenderType(RenderType type) const;
+      U32 getGLTextureFormat(TextureFormat format) const;
+      U32 getGLDataType(DataType type) const;
 
    public:
       ~GLFixedRenderer() override;
@@ -30,6 +31,8 @@ namespace Zap
       void setLineWidth(F32 width) override;
       void setPointSize(F32 size) override;
       void setViewport(S32 x, S32 y, S32 width, S32 height) override;
+      Point getViewportPos() override;
+      Point getViewportSize() override;
 
       void scale(F32 x, F32 y, F32 z = 1.0f) override;
       void translate(F32 x, F32 y, F32 z = 0.0f) override;
@@ -43,6 +46,11 @@ namespace Zap
       void loadMatrix(const F64* m) override;
       void loadIdentity() override;
       void projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx) override;
+
+      U32 generateTexture() override;
+      bool isTexture(U32 textureHandle) override;
+      void deleteTexture(U32 textureHandle) override;
+      void setTextureData(TextureFormat format, DataType dataType, U32 width, U32 height, const void* data) override;
 
       void renderVertexArray(const S8 verts[], S32 vertCount, RenderType type,
          U32 start = 0, U32 stride = 0) override;

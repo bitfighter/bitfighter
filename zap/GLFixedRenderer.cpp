@@ -56,6 +56,51 @@ U32 GLFixedRenderer::getGLRenderType(RenderType type) const
    }
 }
 
+U32 GLFixedRenderer::getGLTextureFormat(TextureFormat format) const
+{
+   switch(format)
+   {
+   case TextureFormat::RGB:
+      return GL_RGB;
+
+   case TextureFormat::RGBA:
+      return GL_RGBA;
+
+   default:
+      return 0;
+   }
+}
+
+U32 GLFixedRenderer::getGLDataType(DataType type) const
+{
+   switch(type)
+   {
+   case DataType::UnsignedByte:
+      return GL_UNSIGNED_BYTE;
+
+   case DataType::Byte:
+      return GL_BYTE;
+
+   case DataType::UnsignedShort:
+      return GL_UNSIGNED_SHORT;
+
+   case DataType::Short:
+      return GL_SHORT;
+
+   case DataType::UnsignedInt:
+      return GL_UNSIGNED_INT;
+
+   case DataType::Int:
+      return GL_INT;
+
+   case DataType::Float:
+      return GL_FLOAT;
+
+   default:
+      return 0;
+   }
+}
+
 // Static
 void GLFixedRenderer::create()
 {
@@ -90,6 +135,22 @@ void GLFixedRenderer::setPointSize(F32 size)
 void GLFixedRenderer::setViewport(S32 x, S32 y, S32 width, S32 height)
 {
    glViewport(x, y, width, height);
+}
+
+Point GLFixedRenderer::getViewportPos()
+{
+   GLint viewport[4];
+   glGetIntegerv(GL_VIEWPORT, viewport);
+
+   return Point(viewport[0], viewport[1]);
+}
+
+Point GLFixedRenderer::getViewportSize()
+{
+   GLint viewport[4];
+   glGetIntegerv(GL_VIEWPORT, viewport);
+
+   return Point(viewport[2], viewport[3]);
 }
 
 void GLFixedRenderer::scale(F32 x, F32 y, F32 z)
@@ -169,6 +230,31 @@ void GLFixedRenderer::loadIdentity()
 void GLFixedRenderer::projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx)
 {
    glOrtho(left, right, bottom, top, nearx, farx);
+}
+
+U32 GLFixedRenderer::generateTexture()
+{
+   GLuint textureHandle;
+   glGenTextures(1, &textureHandle);
+   return textureHandle;
+}
+
+bool GLFixedRenderer::isTexture(U32 textureHandle)
+{
+   return glIsTexture(textureHandle);
+}
+
+void GLFixedRenderer::deleteTexture(U32 textureHandle)
+{
+   glDeleteTextures(1, &textureHandle);
+}
+
+void GLFixedRenderer::setTextureData(TextureFormat format, DataType dataType, U32 width, U32 height, const void* data)
+{
+   glTexImage2D(
+      GL_TEXTURE_2D, 0, GL_RGB,
+      width, height, 0,
+      getGLTextureFormat(format), getGLDataType(dataType), data);
 }
 
 void GLFixedRenderer::renderVertexArray(const S8 verts[], S32 vertCount, RenderType type, U32 start, U32 stride)
