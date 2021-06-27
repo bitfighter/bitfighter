@@ -48,22 +48,27 @@ namespace Zap
       void projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx) override;
 
       U32 generateTexture() override;
+      void bindTexture(U32 textureHandle) override;
       bool isTexture(U32 textureHandle) override;
       void deleteTexture(U32 textureHandle) override;
       void setTextureData(TextureFormat format, DataType dataType, U32 width, U32 height, const void* data) override;
 
-      void renderVertexArray(const S8 verts[], S32 vertCount, RenderType type,
-         U32 start = 0, U32 stride = 0) override;
-      void renderVertexArray(const S16 verts[], S32 vertCount, RenderType type,
-         U32 start = 0, U32 stride = 0) override;
-      void renderVertexArray(const F32 verts[], S32 vertCount, RenderType type,
-         U32 start = 0, U32 stride = 0) override;
+      void renderVertexArray(const S8 verts[], U32 vertCount, RenderType type,
+         U32 start = 0, U32 stride = 0, U32 vertDimension = 2) override;
+      void renderVertexArray(const S16 verts[], U32 vertCount, RenderType type,
+         U32 start = 0, U32 stride = 0, U32 vertDimension = 2) override;
+      void renderVertexArray(const F32 verts[], U32 vertCount, RenderType type,
+         U32 start = 0, U32 stride = 0, U32 vertDimension = 2) override;
 
-      void renderColored(const F32 verts[], const F32 colors[], S32 vertCount, RenderType type) override;
+      void renderColored(const F32 verts[], const F32 colors[], U32 vertCount,
+         RenderType type, U32 start = 0, U32 stride = 0, U32 vertDimension = 2) override;
+
       void renderTextured(const F32 verts[], const F32 UVs[], U32 vertCount,
-         RenderType type, U32 start = 0, U32 stride = 0) override;
+         RenderType type, U32 start = 0, U32 stride = 0, U32 vertDimension = 2) override;
+
+      // Render a texture colored by the current color:
       void renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount,
-         RenderType type, U32 start = 0, U32 stride = 0) override;
+         RenderType type, U32 start = 0, U32 stride = 0, U32 vertDimension = 2) override;
    };
 
 

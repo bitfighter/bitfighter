@@ -51,6 +51,9 @@ U32 GLFixedRenderer::getGLRenderType(RenderType type) const
    case RenderType::TriangleFan:
       return GL_TRIANGLE_FAN;
 
+   case RenderType::Quads:
+      return GL_QUADS;
+
    default:
          return 0;
    }
@@ -239,6 +242,11 @@ U32 GLFixedRenderer::generateTexture()
    return textureHandle;
 }
 
+void GLFixedRenderer::bindTexture(U32 textureHandle)
+{
+   glBindTexture(GL_TEXTURE_2D, textureHandle);
+}
+
 bool GLFixedRenderer::isTexture(U32 textureHandle)
 {
    return glIsTexture(textureHandle);
@@ -257,75 +265,78 @@ void GLFixedRenderer::setTextureData(TextureFormat format, DataType dataType, U3
       getGLTextureFormat(format), getGLDataType(dataType), data);
 }
 
-void GLFixedRenderer::renderVertexArray(const S8 verts[], S32 vertCount, RenderType type, U32 start, U32 stride)
+void GLFixedRenderer::renderVertexArray(const S8 verts[], U32 vertCount, RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
 
-   glVertexPointer(2, GL_BYTE, stride, verts);
+   glVertexPointer(vertDimension, GL_BYTE, stride, verts);
    glDrawArrays(getGLRenderType(type), start, vertCount);
 
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void GLFixedRenderer::renderVertexArray(const S16 verts[], S32 vertCount, RenderType type, U32 start, U32 stride)
+void GLFixedRenderer::renderVertexArray(const S16 verts[], U32 vertCount, RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
 
-   glVertexPointer(2, GL_SHORT, stride, verts);
+   glVertexPointer(vertDimension, GL_SHORT, stride, verts);
    glDrawArrays(getGLRenderType(type), start, vertCount);
 
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void GLFixedRenderer::renderVertexArray(const F32 verts[], S32 vertCount, RenderType type, U32 start, U32 stride)
+void GLFixedRenderer::renderVertexArray(const F32 verts[], U32 vertCount, RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
 
-   glVertexPointer(2, GL_FLOAT, stride, verts);
+   glVertexPointer(vertDimension, GL_FLOAT, stride, verts);
    glDrawArrays(getGLRenderType(type), start, vertCount);
 
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void GLFixedRenderer::renderColored(const F32 verts[], const F32 colors[], S32 vertCount, RenderType type)
+void GLFixedRenderer::renderColored(const F32 verts[], const F32 colors[], U32 vertCount,
+                                    RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
    glEnableClientState(GL_COLOR_ARRAY);
 
-   glVertexPointer(2, GL_FLOAT, 0, verts);
+   glVertexPointer(vertDimension, GL_FLOAT, stride, verts);
    glColorPointer(4, GL_FLOAT, 0, colors);
-   glDrawArrays(getGLRenderType(type), 0, vertCount);
+   glDrawArrays(getGLRenderType(type), start, vertCount);
 
    glDisableClientState(GL_COLOR_ARRAY);
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void GLFixedRenderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCount, RenderType type, U32 start, U32 stride)
+void GLFixedRenderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCount,
+                                     RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
    // !Todo properly!
    glEnable(GL_TEXTURE_2D);
    glEnableClientState(GL_VERTEX_ARRAY);
    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-   glVertexPointer(2, GL_FLOAT, stride, verts);
+   glVertexPointer(vertDimension, GL_FLOAT, stride, verts);
    glTexCoordPointer(2, GL_FLOAT, stride, UVs);
-   glDrawArrays(GL_TRIANGLES, 0, vertCount);
+   glDrawArrays(getGLRenderType(type), start, vertCount);
 
    glDisable(GL_TEXTURE_2D);
    glDisableClientState(GL_VERTEX_ARRAY);
    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-void GLFixedRenderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount, RenderType type, U32 start, U32 stride)
+void GLFixedRenderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount,
+                                           RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
    // !Todo properly!
    glEnable(GL_TEXTURE_2D);
    glEnableClientState(GL_VERTEX_ARRAY);
    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-   glVertexPointer(2, GL_FLOAT, stride, verts);
+   glVertexPointer(vertDimension, GL_FLOAT, stride, verts);
    glTexCoordPointer(2, GL_FLOAT, stride, UVs);
-   glDrawArrays(GL_TRIANGLES, 0, vertCount);
+   glDrawArrays(getGLRenderType(type), start, vertCount);
 
    glDisable(GL_TEXTURE_2D);
    glDisableClientState(GL_VERTEX_ARRAY);

@@ -39,7 +39,8 @@ enum class RenderType
    LineLoop,
    Triangles,
    TriangleStrip,
-   TriangleFan
+   TriangleFan,
+   Quads
 };
 
 enum class TextureFormat
@@ -113,26 +114,30 @@ public:
 
    // Textures
    virtual U32 generateTexture() = 0;
+   virtual void bindTexture(U32 textureHandle) = 0;
    virtual bool isTexture(U32 textureHandle) = 0;
    virtual void deleteTexture(U32 textureHandle) = 0;
    virtual void setTextureData(TextureFormat format, DataType dataType, U32 width, U32 height, const void* data) = 0;
 
 
-   // Render 2D points:
-   virtual void renderVertexArray(const S8 verts[], S32 vertCount, RenderType type,
-      U32 start = 0, U32 stride = 0) = 0;
-   virtual void renderVertexArray(const S16 verts[], S32 vertCount, RenderType type,
-      U32 start = 0, U32 stride = 0) = 0;
-   virtual void renderVertexArray(const F32 verts[], S32 vertCount, RenderType type,
-      U32 start = 0, U32 stride = 0) = 0;
+   // Render points:
+   virtual void renderVertexArray(const S8 verts[], U32 vertCount, RenderType type,
+      U32 start = 0, U32 stride = 0, U32 vertDimension = 2) = 0;
+   virtual void renderVertexArray(const S16 verts[], U32 vertCount, RenderType type,
+      U32 start = 0, U32 stride = 0, U32 vertDimension = 2) = 0;
+   virtual void renderVertexArray(const F32 verts[], U32 vertCount, RenderType type,
+      U32 start = 0, U32 stride = 0, U32 vertDimension = 2) = 0;
 
-   virtual void renderColored(const F32 verts[], const F32 colors[], S32 vertCount, RenderType type) = 0;
+   // Render RGBA colored vertices
+   virtual void renderColored(const F32 verts[], const F32 colors[], U32 vertCount,
+      RenderType type, U32 start = 0, U32 stride = 0, U32 vertDimension = 2) = 0;
+
    virtual void renderTextured(const F32 verts[], const F32 UVs[], U32 vertCount,
-      RenderType type, U32 start = 0, U32 stride = 0) = 0;
+      RenderType type, U32 start = 0, U32 stride = 0, U32 vertDimension = 2) = 0;
 
    // Render a texture colored by the current color:
    virtual void renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount,
-      RenderType type, U32 start = 0, U32 stride = 0) = 0;
+      RenderType type, U32 start = 0, U32 stride = 0, U32 vertDimension = 2) = 0;
 };
 
 
