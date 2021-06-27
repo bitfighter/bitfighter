@@ -9,7 +9,7 @@
 #include "ClientGame.h"
 #include "IniFile.h"
 #include "Console.h"
-#include "GLFixedRenderer.h"
+#include "GLLegacyRenderer.h"
 #include "DisplayManager.h"
 #include "UI.h"
 #include "version.h"
@@ -113,7 +113,7 @@ bool VideoSystem::init()
    DisplayManager::getScreenInfo()->sdlGlContext = &context;
 
    // Initialize renderer
-   GLFixedRenderer::create();
+   GLLegacyRenderer::create();
 
    // Set the window icon -- note that the icon must be a 32x32 bmp, and SDL will
    // downscale it to 16x16 with no interpolation.  Therefore, it's best to start
@@ -612,7 +612,7 @@ void VideoSystem::redrawViewport(GameSettings *settings)
    if(settings->getIniSettings()->mSettings.getVal<YesNo>("LineSmoothing"))
    {
       // Only on OpenGL
-      GLFixedRenderer* glRenderer = dynamic_cast<GLFixedRenderer*>(&renderer);
+      GLLegacyRenderer* glRenderer = dynamic_cast<GLLegacyRenderer*>(&renderer);
       if(glRenderer != nullptr)
          glEnable(GL_LINE_SMOOTH);
 

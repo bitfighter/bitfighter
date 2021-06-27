@@ -3,24 +3,24 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#ifndef _GLFIXEDRENDERER_H_
-#define _GLFIXEDRENDERER_H_
+#ifndef _GLLEGACYRENDERER_H_
+#define _GLLEGACYRENDERER_H_
 
 #include "Renderer.h"
 
 namespace Zap
 {
 
-   class GLFixedRenderer: public Renderer
+   class GLLegacyRenderer: public Renderer
    {
    private:
-      GLFixedRenderer();
+      GLLegacyRenderer();
       U32 getGLRenderType(RenderType type) const;
       U32 getGLTextureFormat(TextureFormat format) const;
       U32 getGLDataType(DataType type) const;
 
    public:
-      ~GLFixedRenderer() override;
+      ~GLLegacyRenderer() override;
 
       static void create();
 
@@ -74,4 +74,4 @@ namespace Zap
 
 }
 
-#endif /* _GLFIXEDRENDERER_H_ */
+#endif /* _GLLEGACYRENDERER_H_ */

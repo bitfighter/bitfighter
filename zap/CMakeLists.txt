@@ -131,7 +131,7 @@ set(CLIENT_SOURCES
 	gameObjectRender.cpp
 	GameRecorderPlayback.cpp
     GaugeRenderer.cpp
-    GLFixedRenderer.cpp
+    GLLegacyRenderer.cpp
 	HelpItemManager.cpp
 	HelperManager.cpp
 	helperMenu.cpp

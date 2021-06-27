@@ -3,7 +3,7 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#include "GLFixedRenderer.h"
+#include "GLLegacyRenderer.h"
 #include "DisplayManager.h"
 #include "Color.h"
 #include "Point.h"
@@ -14,19 +14,19 @@ namespace Zap
 {
 
 // Private
-GLFixedRenderer::GLFixedRenderer()
+   GLLegacyRenderer::GLLegacyRenderer()
 {
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    glEnable(GL_SCISSOR_TEST);    // Turn on clipping
    glEnable(GL_BLEND);
 }
 
-GLFixedRenderer::~GLFixedRenderer()
+   GLLegacyRenderer::~GLLegacyRenderer()
 {
    
 }
 
-U32 GLFixedRenderer::getGLRenderType(RenderType type) const
+U32 GLLegacyRenderer::getGLRenderType(RenderType type) const
 {
    switch(type)
    {
@@ -59,7 +59,7 @@ U32 GLFixedRenderer::getGLRenderType(RenderType type) const
    }
 }
 
-U32 GLFixedRenderer::getGLTextureFormat(TextureFormat format) const
+U32 GLLegacyRenderer::getGLTextureFormat(TextureFormat format) const
 {
    switch(format)
    {
@@ -74,7 +74,7 @@ U32 GLFixedRenderer::getGLTextureFormat(TextureFormat format) const
    }
 }
 
-U32 GLFixedRenderer::getGLDataType(DataType type) const
+U32 GLLegacyRenderer::getGLDataType(DataType type) const
 {
    switch(type)
    {
@@ -105,42 +105,42 @@ U32 GLFixedRenderer::getGLDataType(DataType type) const
 }
 
 // Static
-void GLFixedRenderer::create()
+void GLLegacyRenderer::create()
 {
-   setInstance(std::unique_ptr<Renderer>(new GLFixedRenderer));
+   setInstance(std::unique_ptr<Renderer>(new GLLegacyRenderer));
 }
 
-void GLFixedRenderer::clear()
+void GLLegacyRenderer::clear()
 {
    glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void GLFixedRenderer::setClearColor(F32 r, F32 g, F32 b, F32 alpha)
+void GLLegacyRenderer::setClearColor(F32 r, F32 g, F32 b, F32 alpha)
 {
    glClearColor(r, g, b, alpha);
 }
 
-void GLFixedRenderer::setColor(F32 r, F32 g, F32 b, F32 alpha)
+void GLLegacyRenderer::setColor(F32 r, F32 g, F32 b, F32 alpha)
 {
    glColor4f(r, g, b, alpha);
 }
 
-void GLFixedRenderer::setLineWidth(F32 width)
+void GLLegacyRenderer::setLineWidth(F32 width)
 {
    glLineWidth(width);
 }
 
-void GLFixedRenderer::setPointSize(F32 size)
+void GLLegacyRenderer::setPointSize(F32 size)
 {
    glPointSize(size);
 }
 
-void GLFixedRenderer::setViewport(S32 x, S32 y, S32 width, S32 height)
+void GLLegacyRenderer::setViewport(S32 x, S32 y, S32 width, S32 height)
 {
    glViewport(x, y, width, height);
 }
 
-Point GLFixedRenderer::getViewportPos()
+Point GLLegacyRenderer::getViewportPos()
 {
    GLint viewport[4];
    glGetIntegerv(GL_VIEWPORT, viewport);
@@ -148,7 +148,7 @@ Point GLFixedRenderer::getViewportPos()
    return Point(viewport[0], viewport[1]);
 }
 
-Point GLFixedRenderer::getViewportSize()
+Point GLLegacyRenderer::getViewportSize()
 {
    GLint viewport[4];
    glGetIntegerv(GL_VIEWPORT, viewport);
@@ -156,22 +156,22 @@ Point GLFixedRenderer::getViewportSize()
    return Point(viewport[2], viewport[3]);
 }
 
-void GLFixedRenderer::scale(F32 x, F32 y, F32 z)
+void GLLegacyRenderer::scale(F32 x, F32 y, F32 z)
 {
    glScalef(x, y, z);
 }
 
-void GLFixedRenderer::translate(F32 x, F32 y, F32 z)
+void GLLegacyRenderer::translate(F32 x, F32 y, F32 z)
 {
    glTranslatef(x, y, z);
 }
 
-void GLFixedRenderer::rotate(F32 angle, F32 x, F32 y, F32 z)
+void GLLegacyRenderer::rotate(F32 angle, F32 x, F32 y, F32 z)
 {
    glRotatef(angle, x, y, z);
 }
 
-void GLFixedRenderer::setMatrixMode(MatrixType type)
+void GLLegacyRenderer::setMatrixMode(MatrixType type)
 {
    switch (type)
    {
@@ -188,7 +188,7 @@ void GLFixedRenderer::setMatrixMode(MatrixType type)
    }
 }
 
-void GLFixedRenderer::getMatrix(MatrixType type, F32* matrix)
+void GLLegacyRenderer::getMatrix(MatrixType type, F32* matrix)
 {
    switch (type)
    {
@@ -205,59 +205,59 @@ void GLFixedRenderer::getMatrix(MatrixType type, F32* matrix)
    }
 }
 
-void GLFixedRenderer::pushMatrix()
+void GLLegacyRenderer::pushMatrix()
 {
    glPushMatrix();
 }
 
-void GLFixedRenderer::popMatrix()
+void GLLegacyRenderer::popMatrix()
 {
    glPopMatrix();
 }
 
-void GLFixedRenderer::loadMatrix(const F32* m)
+void GLLegacyRenderer::loadMatrix(const F32* m)
 {
    glLoadMatrixf(m);
 }
 
-void GLFixedRenderer::loadMatrix(const F64* m)
+void GLLegacyRenderer::loadMatrix(const F64* m)
 {
    glLoadMatrixd(m);
 }
 
-void GLFixedRenderer::loadIdentity()
+void GLLegacyRenderer::loadIdentity()
 {
    glLoadIdentity();
 }
 
-void GLFixedRenderer::projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx)
+void GLLegacyRenderer::projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx)
 {
    glOrtho(left, right, bottom, top, nearx, farx);
 }
 
-U32 GLFixedRenderer::generateTexture()
+U32 GLLegacyRenderer::generateTexture()
 {
    GLuint textureHandle;
    glGenTextures(1, &textureHandle);
    return textureHandle;
 }
 
-void GLFixedRenderer::bindTexture(U32 textureHandle)
+void GLLegacyRenderer::bindTexture(U32 textureHandle)
 {
    glBindTexture(GL_TEXTURE_2D, textureHandle);
 }
 
-bool GLFixedRenderer::isTexture(U32 textureHandle)
+bool GLLegacyRenderer::isTexture(U32 textureHandle)
 {
    return glIsTexture(textureHandle);
 }
 
-void GLFixedRenderer::deleteTexture(U32 textureHandle)
+void GLLegacyRenderer::deleteTexture(U32 textureHandle)
 {
    glDeleteTextures(1, &textureHandle);
 }
 
-void GLFixedRenderer::setTextureData(TextureFormat format, DataType dataType, U32 width, U32 height, const void* data)
+void GLLegacyRenderer::setTextureData(TextureFormat format, DataType dataType, U32 width, U32 height, const void* data)
 {
    glTexImage2D(
       GL_TEXTURE_2D, 0, GL_RGB,
@@ -265,7 +265,7 @@ void GLFixedRenderer::setTextureData(TextureFormat format, DataType dataType, U3
       getGLTextureFormat(format), getGLDataType(dataType), data);
 }
 
-void GLFixedRenderer::renderVertexArray(const S8 verts[], U32 vertCount, RenderType type, U32 start, U32 stride, U32 vertDimension)
+void GLLegacyRenderer::renderVertexArray(const S8 verts[], U32 vertCount, RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -275,7 +275,7 @@ void GLFixedRenderer::renderVertexArray(const S8 verts[], U32 vertCount, RenderT
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void GLFixedRenderer::renderVertexArray(const S16 verts[], U32 vertCount, RenderType type, U32 start, U32 stride, U32 vertDimension)
+void GLLegacyRenderer::renderVertexArray(const S16 verts[], U32 vertCount, RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -285,7 +285,7 @@ void GLFixedRenderer::renderVertexArray(const S16 verts[], U32 vertCount, Render
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void GLFixedRenderer::renderVertexArray(const F32 verts[], U32 vertCount, RenderType type, U32 start, U32 stride, U32 vertDimension)
+void GLLegacyRenderer::renderVertexArray(const F32 verts[], U32 vertCount, RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -295,7 +295,7 @@ void GLFixedRenderer::renderVertexArray(const F32 verts[], U32 vertCount, Render
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void GLFixedRenderer::renderColored(const F32 verts[], const F32 colors[], U32 vertCount,
+void GLLegacyRenderer::renderColored(const F32 verts[], const F32 colors[], U32 vertCount,
                                     RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
@@ -309,7 +309,7 @@ void GLFixedRenderer::renderColored(const F32 verts[], const F32 colors[], U32 v
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void GLFixedRenderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCount,
+void GLLegacyRenderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCount,
                                      RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
    // !Todo properly!
@@ -326,7 +326,7 @@ void GLFixedRenderer::renderTextured(const F32 verts[], const F32 UVs[], U32 ver
    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-void GLFixedRenderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount,
+void GLLegacyRenderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount,
                                            RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
    // !Todo properly!
