@@ -2473,7 +2473,7 @@ void renderAsteroidForTeam(const Point &pos, S32 design, F32 scaleFact, const Co
 
    /// Outlines for highlighting
    // Draw inner outline to highlight edges
-   glColor(color, 1.0);
+   glColor(color, alpha);
    renderVertexArray(stencilArray, ASTEROID_POINTS, GL_LINE_LOOP);
 
    // Original outline
@@ -2486,7 +2486,7 @@ void renderAsteroidForTeam(const Point &pos, S32 design, F32 scaleFact, const Co
 
 void renderAsteroidSpawn(const Point &pos, S32 time, const Color* color)
 {
-   static const S32 period = 4096;  // Power of 2 please
+   static const S32 period = 2048;  // Power of 2 please
    static const F32 invPeriod = 1 / F32(period);
 
    F32 alpha = max(0.0f, 0.8f - time * invPeriod);
