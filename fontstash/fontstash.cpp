@@ -36,8 +36,6 @@
 
 #include "tnlTypes.h"
 #include "Renderer.h"
-// TODO: Remove this:
-#include "SDL_opengl.h" // Obviously should not be here
 
 /* @rlyeh: removed STB_TRUETYPE_IMPLENTATION. We link it externally */
 extern "C" {
@@ -167,6 +165,7 @@ struct sth_stash* sth_create(int cachew, int cacheh)
 	struct sth_stash* stash = NULL;
 	U8* empty_data = NULL;
 	struct sth_texture* texture = NULL;
+	Zap::Renderer& r = Zap::Renderer::get();
 
 	// Allocate memory for the font stash.
 	stash = (struct sth_stash*)malloc(sizeof(struct sth_stash));
@@ -190,12 +189,10 @@ struct sth_stash* sth_create(int cachew, int cacheh)
 	stash->ith = 1.0f/cacheh;
 	stash->empty_data = empty_data;
 	stash->tt_textures = texture;
-	glGenTextures(1, &texture->id);
+	texture->id = r.generateTexture();
 	if (!texture->id) goto error;
-	glBindTexture(GL_TEXTURE_2D, texture->id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, cachew, cacheh, 0, GL_ALPHA, GL_UNSIGNED_BYTE, empty_data);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	r.bindTexture(texture->id);
+	r.setTextureData(Zap::TextureFormat::Alpha, Zap::DataType::UnsignedByte, cachew, cacheh, empty_data);
 
 	return stash;
 	
@@ -454,12 +451,12 @@ static struct sth_glyph* get_glyph(struct sth_stash* stash, struct sth_font* fnt
 						texture = texture->next;
 						if (texture == NULL) goto error;
 						memset(texture,0,sizeof(struct sth_texture));
-						glGenTextures(1, &texture->id);
+
+						Zap::Renderer& r = Zap::Renderer::get();
+						texture->id = r.generateTexture();
 						if (!texture->id) goto error;
-						glBindTexture(GL_TEXTURE_2D, texture->id);
-						glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, stash->tw,stash->th, 0, GL_ALPHA, GL_UNSIGNED_BYTE, stash->empty_data);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+						r.bindTexture(texture->id);
+						r.setTextureData(Zap::TextureFormat::Alpha, Zap::DataType::UnsignedByte, stash->tw, stash->th, stash->empty_data);
 					}
 					continue;
 				}
@@ -506,9 +503,11 @@ static struct sth_glyph* get_glyph(struct sth_stash* stash, struct sth_font* fnt
 	{
 		stbtt_MakeGlyphBitmap(&fnt->font, bmp, gw,gh,gw, scale,scale, g);
 		// Update texture
-		glBindTexture(GL_TEXTURE_2D, texture->id);
+		Zap::Renderer& r = Zap::Renderer::get();
+		r.bindTexture(texture->id);
 		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-		glTexSubImage2D(GL_TEXTURE_2D, 0, glyph->x0,glyph->y0, gw,gh, GL_ALPHA,GL_UNSIGNED_BYTE,bmp);
+		r.setSubTextureData(Zap::TextureFormat::Alpha, Zap::DataType::UnsignedByte,
+			glyph->x0, glyph->y0, gw, gh, bmp);
 		free(bmp);
 	}
 	
@@ -564,20 +563,9 @@ static void flush_draw(struct sth_stash* stash)
 	{
 		if (texture->nverts > 0)
 		{			
-			glBindTexture(GL_TEXTURE_2D, texture->id);
-			glEnable(GL_TEXTURE_2D);
-			//glEnableClientState(GL_VERTEX_ARRAY);
-			//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			//glVertexPointer(2, GL_FLOAT, VERT_STRIDE, texture->verts);
-			//glTexCoordPointer(2, GL_FLOAT, VERT_STRIDE, texture->verts+2);
-
-			//glDrawArrays(GL_TRIANGLES, 0, texture->nverts);
+			r.bindTexture(texture->id);
 			r.renderColoredTexture(texture->verts, texture->verts+2,
 					static_cast<U32>(texture->nverts), Zap::RenderType::Triangles, 0, VERT_STRIDE);
-
-			glDisable(GL_TEXTURE_2D);
-			//glDisableClientState(GL_VERTEX_ARRAY);
-			//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 			texture->nverts = 0;
 		}
 		texture = texture->next;
@@ -733,6 +721,7 @@ void sth_delete(struct sth_stash* stash)
 	struct sth_texture* curtex = NULL;
 	struct sth_font* fnt = NULL;
 	struct sth_font* curfnt = NULL;
+	Zap::Renderer& r = Zap::Renderer::get();
 
 	if (!stash) return;
 
@@ -740,8 +729,8 @@ void sth_delete(struct sth_stash* stash)
 	while(tex != NULL) {
 		curtex = tex;
 		tex = tex->next;
-		if (curtex->id)
-			glDeleteTextures(1, &curtex->id);
+		if(curtex->id)
+			r.deleteTexture(curtex->id);
 		free(curtex);
 	}
 
@@ -750,7 +739,7 @@ void sth_delete(struct sth_stash* stash)
 		curtex = tex;
 		tex = tex->next;
 		if (curtex->id)
-			glDeleteTextures(1, &curtex->id);
+			r.deleteTexture(curtex->id);
 		free(curtex);
 	}
 

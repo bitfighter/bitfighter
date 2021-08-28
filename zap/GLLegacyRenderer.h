@@ -52,6 +52,8 @@ namespace Zap
       bool isTexture(U32 textureHandle) override;
       void deleteTexture(U32 textureHandle) override;
       void setTextureData(TextureFormat format, DataType dataType, U32 width, U32 height, const void* data) override;
+      void setSubTextureData(TextureFormat format, DataType dataType, S32 xOffset, S32 yOffset,
+         U32 width, U32 height, const void* data) override;
 
       void renderVertexArray(const S8 verts[], U32 vertCount, RenderType type,
          U32 start = 0, U32 stride = 0, U32 vertDimension = 2) override;

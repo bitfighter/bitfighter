@@ -46,7 +46,8 @@ enum class RenderType
 enum class TextureFormat
 {
     RGB,
-    RGBA
+    RGBA,
+    Alpha
 };
 
 enum class DataType
@@ -118,6 +119,8 @@ public:
    virtual bool isTexture(U32 textureHandle) = 0;
    virtual void deleteTexture(U32 textureHandle) = 0;
    virtual void setTextureData(TextureFormat format, DataType dataType, U32 width, U32 height, const void* data) = 0;
+   virtual void setSubTextureData(TextureFormat format, DataType dataType, S32 xOffset, S32 yOffset,
+                                  U32 width, U32 height, const void* data) = 0;
 
 
    // Render points:

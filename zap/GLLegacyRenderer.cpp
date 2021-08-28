@@ -69,6 +69,9 @@ U32 GLLegacyRenderer::getGLTextureFormat(TextureFormat format) const
    case TextureFormat::RGBA:
       return GL_RGBA;
 
+   case TextureFormat::Alpha:
+      return GL_ALPHA;
+
    default:
       return 0;
    }
@@ -259,10 +262,27 @@ void GLLegacyRenderer::deleteTexture(U32 textureHandle)
 
 void GLLegacyRenderer::setTextureData(TextureFormat format, DataType dataType, U32 width, U32 height, const void* data)
 {
+   U32 textureFormat = getGLTextureFormat(format);
+
    glTexImage2D(
-      GL_TEXTURE_2D, 0, GL_RGB,
+      GL_TEXTURE_2D, 0, textureFormat,
       width, height, 0,
-      getGLTextureFormat(format), getGLDataType(dataType), data);
+      textureFormat, getGLDataType(dataType), data);
+
+   // Set filtering
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
+void GLLegacyRenderer::setSubTextureData(TextureFormat format, DataType dataType, S32 xOffset, S32 yOffset,
+   U32 width, U32 height, const void* data)
+{
+   glTexSubImage2D(
+      GL_TEXTURE_2D, 0,
+      xOffset, yOffset,
+      width, height,
+      getGLTextureFormat(format),
+      getGLDataType(dataType), data);
 }
 
 void GLLegacyRenderer::renderVertexArray(const S8 verts[], U32 vertCount, RenderType type, U32 start, U32 stride, U32 vertDimension)
