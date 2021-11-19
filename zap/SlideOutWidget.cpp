@@ -79,16 +79,16 @@ void SlideOutWidget::onDeactivated()
 S32 SlideOutWidget::getCurrentDisplayWidth() const
 {
    if(mActivating && mActivationDirection)
-      return mAnimationTimer.getElapsed() * WidgetSpeed + mStartingOffset;
+      return S32(mAnimationTimer.getElapsed() * WidgetSpeed + mStartingOffset);
    // else
-   return mAnimationTimer.getCurrent() * WidgetSpeed + mStartingOffset;
+   return S32(mAnimationTimer.getCurrent() * WidgetSpeed + mStartingOffset);
 }
 
 
 // Width of widget when fully displayed
 S32 SlideOutWidget::getTotalDisplayWidth() const
 {
-   return mAnimationTimer.getPeriod() * WidgetSpeed + mStartingOffset;
+   return S32(mAnimationTimer.getPeriod() * WidgetSpeed + mStartingOffset);
 }
 
 
