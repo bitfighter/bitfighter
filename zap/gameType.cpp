@@ -1661,7 +1661,7 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
 
       robot->setChangeTeamMask();            // Needed to avoid gray robot ships when using /addbot
    }
-   
+
    clientInfo->setTeamIndex(minTeamIndex);   // Add new player to their assigned team
 
    // This message gets sent to all clients, even the client being added, though they presumably know most of this stuff already
@@ -1675,6 +1675,13 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
       s2cClientJoinedTeam(clientInfo->getName(), clientInfo->getTeamIndex(), isTeamGame() && !isGameOver());
 
    spawnShip(clientInfo);
+   handleNewClient(clientInfo);
+}
+
+
+void GameType::handleNewClient(ClientInfo *clientInfo)
+{
+   // Do nothing, child classes may override
 }
 
 

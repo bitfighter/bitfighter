@@ -76,7 +76,7 @@ bool VideoSystem::init()
    //SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );  // depth used in editor to display spybug visible area non-overlap
    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-
+   SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
 
    // Get information about the current desktop video settings and initialize
    // our ScreenInfo class with with current width and height
@@ -621,6 +621,9 @@ void VideoSystem::redrawViewport(GameSettings *settings)
 //   logprintf("scissor x: %f, y: %f, width: %f, height: %f", scissor.x, scissor.y, scissor.width, scissor.height);
 
    glEnable(GL_SCISSOR_TEST);    // Turn on clipping
+
+   glEnable(GL_STENCIL_TEST);    // Turn on stenciling
+   glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  // Default operation
 
    setDefaultBlendFunction();
    glLineWidth(gDefaultLineWidth);

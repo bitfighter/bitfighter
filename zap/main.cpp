@@ -232,6 +232,7 @@ static void clearScreen()
       glDisable(GL_SCISSOR_TEST);
 
    glClear(GL_COLOR_BUFFER_BIT);
+   glClear(GL_STENCIL_BUFFER_BIT);
 
    if(scissorMode)
       glEnable(GL_SCISSOR_TEST);
@@ -631,7 +632,7 @@ void setupLogging(const string &logDir)
    gOglConsoleLog.setMsgTypes(consoleEvents);   // writes to in-game console
    gStdoutLog.setMsgTypes(stdoutEvents);        // writes to stdout
 #else
-   gStdoutLog.setMsgTypes(events | consoleEvents);              // writes to stdout
+   gStdoutLog.setMsgTypes(consoleEvents);              // writes to stdout
 #endif
 
    gServerLog.init(joindir(logDir, "bitfighter_server.log"), "a");

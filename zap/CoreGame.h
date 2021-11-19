@@ -71,7 +71,9 @@ public:
 
    void setRedistMethod(RedistMethod method);
    RedistMethod getRedistMethod();
-   void handleRedistribution(S32 team);
+   void handleRedistribution(Vector<ClientInfo*> &players);
+
+   void handleNewClient(ClientInfo *clientInfo);
 
 #ifndef ZAP_DEDICATED
    Vector<string> getGameParameterMenuKeys();

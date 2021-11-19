@@ -217,7 +217,6 @@ endfunction()
 function(BF_PLATFORM_INSTALL targetName)
 	# Binaries
 	install(TARGETS ${targetName} RUNTIME DESTINATION ./)
-	install(PROGRAMS ${CMAKE_SOURCE_DIR}/notifier/pyinstaller/dist/bitfighter_notifier.exe DESTINATION ./)
 	
 	# Libraries
 	file(GLOB BF_INSTALL_LIBS ${BF_LIB_DIR}/*.dll)
@@ -255,7 +254,7 @@ function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
 	set(CPACK_CREATE_DESKTOP_LINKS ${targetName})
 	# This sets up start menu and desktop shortcuts
-	set(CPACK_PACKAGE_EXECUTABLES "bitfighter;Bitfighter" "bitfighter_notifier;Bitfighter Notifier")
+	set(CPACK_PACKAGE_EXECUTABLES "bitfighter;Bitfighter")
 	
 	set(BF_PACKAGE_RESOURCE_DIR ${CMAKE_SOURCE_DIR}/build/windows/installer)
 	

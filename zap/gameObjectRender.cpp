@@ -2413,17 +2413,14 @@ void renderTestItem(const Vector<Point> &points, F32 alpha)
 }
 
 
-void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
+void renderDefaultAsteroid(const Point &pos, S32 design, F32 scaleFact, F32 alpha)
 {
    glPushMatrix();
+
    glTranslate(pos);
    glScale(scaleFact * ASTEROID_SCALING_FACTOR);
 
-   if(color == NULL)
-      glColor(Color(.7), alpha);  // Default gray
-   else
-      glColor(*color, alpha);     // Team color
-
+   glColor(Color(.7), alpha);  // Default gray
    const F32 *vertexArray = AsteroidCoords[design];
    renderVertexArray(vertexArray, ASTEROID_POINTS, GL_LINE_LOOP);
 
@@ -2431,21 +2428,65 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
 }
 
 
+void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
+{
+   if(color != NULL)
+      renderAsteroidForTeam(pos, design, scaleFact, color, alpha);
+   else
+      renderDefaultAsteroid(pos, design, scaleFact, alpha);
+}
+
+
 void renderAsteroidForTeam(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
 {
-   // Render internal colored part, scaled a little smaller
-   glLineWidth(gLineWidth4);
-   renderAsteroid(pos, design, 0.95 * scaleFact, color, alpha);
-   glLineWidth(gDefaultLineWidth);
+   glPushMatrix();
 
-   // Render standard outline
-   renderAsteroid(pos, design, scaleFact, NULL, alpha);
+   glTranslate(pos);
+   F32 thisScale = scaleFact * ASTEROID_SCALING_FACTOR;
+   glScale(thisScale);
+
+   const F32 *vertexArray = AsteroidCoords[design];
+   const F32 *fillArray = AsteroidFillCoords[design];
+   const F32 *stencilArray = AsteroidStencilCoords[design];
+   const F32 *stencilFillArray = AsteroidStencilFillCoords[design];
+
+   /// 1st pass - draw inset asteroid into stencil buffer for subtraction later
+   // Enable stencil buffer, disable color buffer
+   glStencilFunc(GL_ALWAYS, 1, 0xFF);
+   glStencilMask(0xFF);
+   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+   renderVertexArray(stencilFillArray, ASTEROID_FILL_POINTS, GL_TRIANGLES);
+
+   /// 2nd pass
+   // Enable color buffer, disable stencil buffer
+   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+   glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+   glStencilMask(0x00);
+
+   // Draw filled asteroid with the stencil cut out
+   glColor(color, alpha);
+   renderVertexArray(fillArray, ASTEROID_FILL_POINTS, GL_TRIANGLES);
+
+   glStencilMask(0xFF);                // Needed final calls before proper drawing
+   glStencilFunc(GL_ALWAYS, 0, 0xFF);
+
+   /// Outlines for highlighting
+   // Draw inner outline to highlight edges
+   glColor(color, alpha);
+   renderVertexArray(stencilArray, ASTEROID_POINTS, GL_LINE_LOOP);
+
+   // Original outline
+   glColor(Color(.7), alpha);  // Default gray
+   renderVertexArray(vertexArray, ASTEROID_POINTS, GL_LINE_LOOP);
+
+   glPopMatrix();
 }
 
 
 void renderAsteroidSpawn(const Point &pos, S32 time, const Color* color)
 {
-   static const S32 period = 4096;  // Power of 2 please
+   static const S32 period = 2048;  // Power of 2 please
    static const F32 invPeriod = 1 / F32(period);
 
    F32 alpha = max(0.0f, 0.8f - time * invPeriod);

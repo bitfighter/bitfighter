@@ -1453,6 +1453,19 @@ InputCode InputCodeManager::getBaseKey(InputCode inputCode)
       case KEY_ALT_3:
          return KEY_3;
 
+      case KEY_CTRL_4:
+      case KEY_ALT_4:
+         return KEY_4;
+
+      case KEY_CTRL_5:
+      case KEY_ALT_5:
+         return KEY_5;
+
+      case KEY_CTRL_6:
+      case KEY_ALT_6:
+         return KEY_6;
+
+      case KEY_CTRL_9:
       case KEY_ALT_9:
          return KEY_9;
 
@@ -1691,11 +1704,18 @@ void InputCodeManager::initializeKeyNames()
    keyNames[S32(KEY_CTRL_S)]          = "Ctrl+S";                 
    keyNames[S32(KEY_CTRL_1)]          = "Ctrl+1";                 
    keyNames[S32(KEY_CTRL_2)]          = "Ctrl+2";                 
-   keyNames[S32(KEY_CTRL_3)]          = "Ctrl+3";                 // Last ctrl key
+   keyNames[S32(KEY_CTRL_3)]          = "Ctrl+3";
+   keyNames[S32(KEY_CTRL_4)]          = "Ctrl+4";
+   keyNames[S32(KEY_CTRL_5)]          = "Ctrl+5";
+   keyNames[S32(KEY_CTRL_6)]          = "Ctrl+6";
+   keyNames[S32(KEY_CTRL_9)]          = "Ctrl+9";                 // Last ctrl key
 
    keyNames[S32(KEY_ALT_1)]           = "Alt+1";                  // First alt key
    keyNames[S32(KEY_ALT_2)]           = "Alt+2";                  
    keyNames[S32(KEY_ALT_3)]           = "Alt+3";                  
+   keyNames[S32(KEY_ALT_4)]           = "Alt+4";
+   keyNames[S32(KEY_ALT_5)]           = "Alt+5";
+   keyNames[S32(KEY_ALT_6)]           = "Alt+6";
    keyNames[S32(KEY_ALT_9)]           = "Alt+9";                  // Last alt key
 
    keyNames[S32(KEY_BACKQUOTE)]       = "`";                

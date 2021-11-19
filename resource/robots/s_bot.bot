@@ -126,23 +126,33 @@ function fireAtObjects()
         ObjType.ForceFieldProjector, ObjType.SpyBug, ObjType.Core)
 
     local haveTarget = false
-    
-    -- Cycle through list of potential items until we find one that we can attack
-    local enemy = nil
+        -- Cycle through list of potential items until we find the closest one that 
+    -- we can attack
+    local target = nil
+    local closestDistSq = 99999999
     for i, obj in ipairs(items) do
-        haveTarget = shouldFireAtObject(obj)
+        local goodTarget = shouldFireAtObject(obj)
+        local thisDistSq = point.distSquared(obj:getPos(), botPos)
         
-        if haveTarget then
-            enemy = obj
-            break
+        -- Update to closer target
+        if goodTarget then
+            -- Favor ships a little more by pretending their distance is reduced by half
+            if obj:getObjType() == ObjType.Ship or obj:getObjType() == ObjType.Robot then
+                thisDistSq = thisDistSq / 4  -- dist/2 == distSq/4
+            end
+            if thisDistSq < closestDistSq then
+                closestDistSq = thisDistSq
+                target = obj
+                haveTarget = true
+            end
         end
     end
     
     local shouldFire = false
     
     if haveTarget then
-        -- Last enemy was the found one from the loop above
-        local angle = bot:getFiringSolution(enemy)
+        -- Last target was the found one from the loop above
+        local angle = bot:getFiringSolution(target)
         if (angle ~= nil) and bot:hasWeapon(Weapon.Phaser) then
             shouldFire = true
             -- Set angle here
@@ -218,28 +228,31 @@ adjectives = {
     "Clueless",
     "Wacky",
     "Ruthless",
-    "Incredible",
+    "Impossible",
     "Big",
     "Shriveled",
     "Digital",
+    "Dark",
+    "Graceful",
 }
 
 nouns = {
-    "Sauce",
     "Thunder",
     "Requiem",
-    "Thing",
     "Toothpick",
     "Dish",
     "Stone",
     "Compass",
     "Penguin",
     "Roof",
-    "Head",
     "Foliage",
     "Sky",
     "Horizon",
     "Duck",
+    "Matter",
+    "Slope",
+    "Jaunt",
+    "Machine",
 }
  
 function getName()
@@ -398,7 +411,7 @@ function orbitPoint(pt, dir, inputDist, inputStrictness)
         end
 
         local changeInAngle = (math.abs(deltaDistance)/(deltaDistance + sign)) * math.pi/2
-        local angleToPoint = point.angleTo(pt, bot:getPos())
+        local angleToPoint = point.angleTo(pt, botPos)
         dirToGo = angleToPoint + (math.pi/2 + changeInAngle)*direction
         --bot:setThrust(speed, dirToGo)
     end
@@ -586,7 +599,7 @@ function doObjective(closestEnemy)
                 local retrievingFlag = false
                 if myFlag ~= nil then
                     if not myFlag:isInInitLoc() and not myFlag:isOnShip() and                     -- If my flag is not in its initial location and my flag is not on a ship
-                            point.distSquared(myFlag:getPos(), bot:getPos()) <= 2000 * 2000 then  -- .. and we're within some sane range of the flag
+                            point.distSquared(myFlag:getPos(), botPos) <= 2000 * 2000 then  -- .. and we're within some sane range of the flag
                         gotoPosition(myFlag:getPos())                                             -- Go to and return my flag
                         retrievingFlag = true
                     end
@@ -681,7 +694,7 @@ function onTick(deltaTime)
     botPos = bot:getPos()
     pathTimer = pathTimer - deltaTime
     scriptTime = scriptTime + deltaTime
-    assert(bot:getPos() ~= nil)
+    assert(botPos ~= nil)
 
     local closestEnemy = bot:findClosestEnemy()
     

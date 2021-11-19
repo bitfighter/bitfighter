@@ -124,8 +124,12 @@ void UserInterface::renderMasterStatus()
 
    if(conn && conn->getConnectionState() != NetConnection::Connected)
    {
+      FontManager::pushFontContext(MenuContext);
+
       glColor(Colors::white);
       drawStringf(10, 550, 15, "Master Server - %s", GameConnection::getConnectionStateString(conn->getConnectionState()));
+
+      FontManager::popFontContext();
    }
 }
 
