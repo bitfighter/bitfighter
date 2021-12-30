@@ -2483,7 +2483,7 @@ void renderTestItem(const Vector<Point> &points, F32 alpha)
 }
 
 
-void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
+void renderDefaultAsteroid(const Point &pos, S32 design, F32 scaleFact, F32 alpha)
 {
    Renderer& r = Renderer::get();
 
@@ -2491,10 +2491,7 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
    r.translate(pos);
    r.scale(scaleFact * ASTEROID_SCALING_FACTOR);
 
-   if(color == NULL)
-      r.setColor(Color(.7), alpha);  // Default gray
-   else
-      r.setColor(*color, alpha);     // Team color
+   r.setColor(Color(.7), alpha);  // Default gray
 
    const F32 *vertexArray = AsteroidCoords[design];
    r.renderVertexArray(vertexArray, ASTEROID_POINTS, RenderType::LineLoop);
@@ -2503,23 +2500,29 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
 }
 
 
+void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
+{
+   if(color != NULL)
+      renderAsteroidForTeam(pos, design, scaleFact, color, alpha);
+   else
+      renderDefaultAsteroid(pos, design, scaleFact, alpha);
+}
+
+
 void renderAsteroidForTeam(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
 {
-   Renderer& r = Renderer::get();
-
    // Render internal colored part, scaled a little smaller
-   r.setLineWidth(gLineWidth4);
+   glLineWidth(gLineWidth4);
    renderAsteroid(pos, design, 0.95 * scaleFact, color, alpha);
-   r.setLineWidth(gDefaultLineWidth);
+   glLineWidth(gDefaultLineWidth);
 
-   // Render standard outline
-   renderAsteroid(pos, design, scaleFact, NULL, alpha);
+   glPopMatrix();
 }
 
 
 void renderAsteroidSpawn(const Point &pos, S32 time, const Color* color)
 {
-   static const S32 period = 4096;  // Power of 2 please
+   static const S32 period = 2048;  // Power of 2 please
    static const F32 invPeriod = 1 / F32(period);
 
    F32 alpha = max(0.0f, 0.8f - time * invPeriod);

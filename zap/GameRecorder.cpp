@@ -147,7 +147,12 @@ static string newRecordingFileName(const string &dir, const string &levelName, c
    string nextnum = itos(max_id + 1);
 
    static S32 pad = 4;
-   string filenum = string(pad - nextnum.length(), '0') + nextnum;
+   // Don't allow negative padding
+   S32 padLen = pad - nextnum.length();
+   if(padLen < 0)
+      padLen = 0;
+
+   string filenum = string(padLen, '0') + nextnum;
 
    string levelname = makeFilenameFromString(levelName.c_str());
    if(levelname.size() == 0)

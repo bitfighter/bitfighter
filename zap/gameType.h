@@ -331,8 +331,9 @@ public:
    virtual void onGameOver();
 
    void serverAddClient(ClientInfo *clientInfo);         
-
    void serverRemoveClient(ClientInfo *clientInfo);   // Remove a client from the game
+
+   void changeClientTeam(ClientInfo *client, S32 team);     // Change player to team indicated, -1 = cycle teams
 
    virtual bool objectCanDamageObject(BfObject *damager, BfObject *victim);
    virtual void controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject);
@@ -340,7 +341,7 @@ public:
    virtual bool spawnShip(ClientInfo *clientInfo);
    virtual void spawnRobot(Robot *robot);
 
-   virtual void changeClientTeam(ClientInfo *client, S32 team);     // Change player to team indicated, -1 = cycle teams
+   virtual void handleNewClient(ClientInfo *clientInfo);
 
 #ifndef ZAP_DEDICATED
    virtual void renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) const;

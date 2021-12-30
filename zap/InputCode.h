@@ -62,9 +62,15 @@ namespace Zap
    BINDING( BINDING_LOAD_PRESET_1,      "LoadLoadoutPreset1",  false, keyLoadPreset1,    KEY_ALT_1,        KEY_ALT_1        ) \
    BINDING( BINDING_LOAD_PRESET_2,      "LoadLoadoutPreset2",  false, keyLoadPreset2,    KEY_ALT_2,        KEY_ALT_2        ) \
    BINDING( BINDING_LOAD_PRESET_3,      "LoadLoadoutPreset3",  false, keyLoadPreset3,    KEY_ALT_3,        KEY_ALT_3        ) \
+   BINDING( BINDING_LOAD_PRESET_4,      "LoadLoadoutPreset4",  false, keyLoadPreset4,    KEY_ALT_4,        KEY_ALT_4        ) \
+   BINDING( BINDING_LOAD_PRESET_5,      "LoadLoadoutPreset5",  false, keyLoadPreset5,    KEY_ALT_5,        KEY_ALT_5        ) \
+   BINDING( BINDING_LOAD_PRESET_6,      "LoadLoadoutPreset6",  false, keyLoadPreset6,    KEY_ALT_6,        KEY_ALT_6        ) \
    BINDING( BINDING_SAVE_PRESET_1,      "SaveLoadoutPreset1",  false, keySavePreset1,    KEY_CTRL_1,       KEY_CTRL_1       ) \
    BINDING( BINDING_SAVE_PRESET_2,      "SaveLoadoutPreset2",  false, keySavePreset2,    KEY_CTRL_2,       KEY_CTRL_2       ) \
    BINDING( BINDING_SAVE_PRESET_3,      "SaveLoadoutPreset3",  false, keySavePreset3,    KEY_CTRL_3,       KEY_CTRL_3       ) \
+   BINDING( BINDING_SAVE_PRESET_4,      "SaveLoadoutPreset4",  false, keySavePreset4,    KEY_CTRL_4,       KEY_CTRL_4       ) \
+   BINDING( BINDING_SAVE_PRESET_5,      "SaveLoadoutPreset5",  false, keySavePreset5,    KEY_CTRL_5,       KEY_CTRL_5       ) \
+   BINDING( BINDING_SAVE_PRESET_6,      "SaveLoadoutPreset6",  false, keySavePreset6,    KEY_CTRL_6,       KEY_CTRL_6       ) \
 /*---------------------------------------------------------------------------------------------------------------------------*/
 
 

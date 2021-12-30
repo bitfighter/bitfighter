@@ -234,6 +234,17 @@ void Color::ensureMinimumBrightness()
       HSPtoRGB(H, S, minBrightness, &r, &g, &b);
 }
 
+
+void Color::desaturate(F32 factor)
+{
+   // Or..  grayscalify!
+   // Scale of 0 to 1, where 1 is full grayscale
+   F32 luma = 0.3*r + 0.59*g + 0.11*b;  // Popular coefficients, unsure if 'best'
+   r = r + factor * (luma - r);
+   g = g + factor * (luma - g);
+   b = b + factor * (luma - b);
+}
+
 //RangedU32<0, 0xFFFFFF> toRangedU32() { return RangedU32<0, 0xFFFFFF>(toU32()); }
 
 };	// namespace

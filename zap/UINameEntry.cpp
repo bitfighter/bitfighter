@@ -312,6 +312,8 @@ void LevelNameEntryUserInterface::render()
    S32 endIndex = MIN(mLevels.size() - 1, mLevelIndex + linesAfter);
 
    Renderer::get().setColor(Colors::gray20);
+   FontManager::pushFontContext(MenuContext);
+
    for(S32 i = startIndex; i <= endIndex; i++)
    {
       if(i != mLevelIndex)
@@ -322,6 +324,8 @@ void LevelNameEntryUserInterface::render()
 //   drawHorizLine(100, 700, TextEntryYPos + F32(mLevels.size() - mLevelIndex) * ((F32)fontSize * 2.0f));
 
    Parent::render();
+
+   FontManager::popFontContext();
 }
 
 

@@ -1557,7 +1557,13 @@ bool Asteroid::shouldRender() const
 void Asteroid::renderItem(const Point &pos)
 {
    if(shouldRender())
-      renderAsteroidForTeam(pos, mDesign, mRadius, getColor(), .7f);
+   {
+      S32 team = getTeam();
+      if(team == TEAM_NEUTRAL || team == TEAM_HOSTILE )
+         renderDefaultAsteroid(pos, mDesign, mRadius, .7f);
+      else
+         renderAsteroidForTeam(pos, mDesign, mRadius, getColor(), .7f);
+   }
 }
 
 

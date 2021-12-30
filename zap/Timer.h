@@ -44,6 +44,13 @@ public:
    void extend(S32 time);
 
    // Start timer over, setting timer to the time specified
+   template<typename T, typename U>
+   void reset(T newCounter, U newPeriod = 0) 
+   { 
+      reset(static_cast<U32>(newCounter), static_cast<U32>(newPeriod)); 
+   }
+
+
    void reset(U32 newCounter, U32 newPeriod = 0);
 
    // Remove all time from timer

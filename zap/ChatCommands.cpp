@@ -601,18 +601,20 @@ void pmHandler(ClientGame *game, const Vector<string> &words)
       game->displayErrorMessage("!!! Usage: /pm <player name> <message>");
    else
    {
-      if(!game->checkName(words[1]))
-         game->displayErrorMessage("!!! Unknown name: %s", words[1].c_str());
+      string name = words[1];
+
+      if(!game->checkName(name))
+         game->displayErrorMessage("!!! Unknown name: %s", name.c_str());
       else
       {
-         S32 argCount = 2 + countCharInString(words[1], ' ');  // Set pointer after 2 args + number of spaces in player name
+         S32 argCount = 2 + countCharInString(name, ' ');  // Set pointer after 2 args + number of spaces in player name
          const char *message = game->getUIManager()->getUI<GameUserInterface>()->getChatMessage();   // Get the original line
          message = findPointerOfArg(message, argCount);        // Get the rest of the message
 
          GameType *gt = game->getGameType();
 
          if(gt)
-            gt->c2sSendChatPM(words[1], message);
+            gt->c2sSendChatPM(name, message);
       }
    }
 }
@@ -624,21 +626,23 @@ void muteHandler(ClientGame *game, const Vector<string> &words)
       game->displayErrorMessage("!!! Usage: /mute <player name>");
    else
    {
-      if(!game->checkName(words[1]))
-         game->displayErrorMessage("!!! Unknown name: %s", words[1].c_str());
+      string name = words[1];
+
+      if(!game->checkName(name))
+         game->displayErrorMessage("!!! Unknown name: %s", name.c_str());
 
       // Un-mute if already on the list
-      else if(game->isOnMuteList(words[1]))
+      else if(game->isOnMuteList(name))
       {
-         game->removeFromMuteList(words[1]);
-         game->displaySuccessMessage("Player %s has been unmuted", words[1].c_str());
+         game->removeFromMuteList(name);
+         game->displaySuccessMessage("Player %s has been unmuted", name.c_str());
       }
 
       // Mute!
       else
       {
-         game->addToMuteList(words[1]);
-         game->displaySuccessMessage("Player %s has been muted", words[1].c_str());
+         game->addToMuteList(name);
+         game->displaySuccessMessage("Player %s has been muted", name.c_str());
       }
    }
 }
@@ -650,21 +654,23 @@ void voiceMuteHandler(ClientGame *game, const Vector<string> &words)
       game->displayErrorMessage("!!! Usage: /vmute <player name>");
    else
    {
-      if(!game->checkName(words[1]))
-         game->displayErrorMessage("!!! Unknown name: %s", words[1].c_str());
+      string name = words[1];
+
+      if(!game->checkName(name))
+         game->displayErrorMessage("!!! Unknown name: %s", name.c_str());
 
       // Un-mute if already on the list
-      else if(game->isOnVoiceMuteList(words[1]))
+      else if(game->isOnVoiceMuteList(name))
       {
-         game->removeFromVoiceMuteList(words[1]);
-         game->displaySuccessMessage("Voice for %s has been unmuted", words[1].c_str());
+         game->removeFromVoiceMuteList(name);
+         game->displaySuccessMessage("Voice for %s has been unmuted", name.c_str());
       }
 
       // Mute!
       else
       {
-         game->addToVoiceMuteList(words[1]);
-         game->displaySuccessMessage("Voice for %s has been muted", words[1].c_str());
+         game->addToVoiceMuteList(name);
+         game->displaySuccessMessage("Voice for %s has been muted", name.c_str());
       }
    }
 }

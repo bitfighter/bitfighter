@@ -1,6 +1,6 @@
 /*
- * Poly2Tri Copyright (c) 2009-2010, Poly2Tri Contributors
- * http://code.google.com/p/poly2tri/
+ * Poly2Tri Copyright (c) 2009-2018, Poly2Tri Contributors
+ * https://github.com/jhasse/poly2tri
  *
  * All rights reserved.
  *
@@ -74,7 +74,7 @@ Node* search();
 void set_search(Node* node);
 
 /// Locate insertion point along advancing front
-Node* LocateNode(const double& x);
+Node* LocateNode(double x);
 
 Node* LocatePoint(const Point* point);
 
@@ -82,7 +82,7 @@ private:
 
 Node* head_, *tail_, *search_node_;
 
-Node* FindSearchNode(const double& x);
+Node* FindSearchNode(double x);
 };
 
 inline Node* AdvancingFront::head()

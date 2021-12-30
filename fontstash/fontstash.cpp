@@ -505,7 +505,7 @@ static struct sth_glyph* get_glyph(struct sth_stash* stash, struct sth_font* fnt
 		// Update texture
 		Zap::Renderer& r = Zap::Renderer::get();
 		r.bindTexture(texture->id);
-		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+		//glPixelStorei(GL_UNPACK_ALIGNMENT,1);
 		r.setSubTextureData(Zap::TextureFormat::Alpha, Zap::DataType::UnsignedByte,
 			glyph->x0, glyph->y0, gw, gh, bmp);
 		free(bmp);

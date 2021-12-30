@@ -1,6 +1,6 @@
 /*
- * Poly2Tri Copyright (c) 2009-2010, Poly2Tri Contributors
- * http://code.google.com/p/poly2tri/
+ * Poly2Tri Copyright (c) 2009-2018, Poly2Tri Contributors
+ * https://github.com/jhasse/poly2tri
  *
  * All rights reserved.
  *
@@ -33,10 +33,10 @@
 #ifndef SHAPES_H
 #define SHAPES_H
 
-#include <vector>
-#include <cstddef>
-#include <assert.h>
 #include <cmath>
+#include <cstddef>
+#include <stdexcept>
+#include <vector>
 
 namespace p2t {
 
@@ -57,7 +57,7 @@ struct Point {
   std::vector<Edge*> edge_list;
 
   /// Construct using coordinates.
-  Point(double x, double y) : x(x), y(y) {}
+  Point(double x, double y);
 
   /// Set this point to all zeros.
   void set_zero()
@@ -111,13 +111,15 @@ struct Point {
   /// Convert this point into a unit point. Returns the Length.
   double Normalize()
   {
-    double len = Length();
+    const double len = Length();
     x /= len;
     y /= len;
     return len;
   }
 
 };
+
+std::ostream& operator<<(std::ostream&, const Point&);
 
 // Represents a simple polygon's edge
 struct Edge {
@@ -136,7 +138,7 @@ struct Edge {
         p = &p2;
       } else if (p1.x == p2.x) {
         // Repeat points
-        assert(false);
+        throw std::runtime_error("Edge::Edge: p1 == p2");
       }
     }
 
@@ -158,54 +160,57 @@ bool constrained_edge[3];
 /// Flags to determine if an edge is a Delauney edge
 bool delaunay_edge[3];
 
-Point* GetPoint(const int& index);
-Point* PointCW(Point& point);
-Point* PointCCW(Point& point);
-Point* OppositePoint(Triangle& t, Point& p);
+Point* GetPoint(int index);
+Point* PointCW(const Point& point);
+Point* PointCCW(const Point& point);
+Point* OppositePoint(Triangle& t, const Point& p);
 
-Triangle* GetNeighbor(const int& index);
+Triangle* GetNeighbor(int index);
 void MarkNeighbor(Point* p1, Point* p2, Triangle* t);
 void MarkNeighbor(Triangle& t);
 
-void MarkConstrainedEdge(const int index);
+void MarkConstrainedEdge(int index);
 void MarkConstrainedEdge(Edge& edge);
 void MarkConstrainedEdge(Point* p, Point* q);
 
 int Index(const Point* p);
 int EdgeIndex(const Point* p1, const Point* p2);
 
-Triangle* NeighborCW(Point& point);
-Triangle* NeighborCCW(Point& point);
-bool GetConstrainedEdgeCCW(Point& p);
-bool GetConstrainedEdgeCW(Point& p);
-void SetConstrainedEdgeCCW(Point& p, bool ce);
-void SetConstrainedEdgeCW(Point& p, bool ce);
-bool GetDelunayEdgeCCW(Point& p);
-bool GetDelunayEdgeCW(Point& p);
-void SetDelunayEdgeCCW(Point& p, bool e);
-void SetDelunayEdgeCW(Point& p, bool e);
+Triangle* NeighborAcross(const Point& point);
+Triangle* NeighborCW(const Point& point);
+Triangle* NeighborCCW(const Point& point);
+bool GetConstrainedEdgeCCW(const Point& p);
+bool GetConstrainedEdgeCW(const Point& p);
+void SetConstrainedEdgeCCW(const Point& p, bool ce);
+void SetConstrainedEdgeCW(const Point& p, bool ce);
+bool GetDelunayEdgeCCW(const Point& p);
+bool GetDelunayEdgeCW(const Point& p);
+void SetDelunayEdgeCCW(const Point& p, bool e);
+void SetDelunayEdgeCW(const Point& p, bool e);
 
-bool Contains(Point* p);
+bool Contains(const Point* p);
 bool Contains(const Edge& e);
-bool Contains(Point* p, Point* q);
+bool Contains(const Point* p, const Point* q);
 void Legalize(Point& point);
 void Legalize(Point& opoint, Point& npoint);
 /**
  * Clears all references to all other triangles and points
  */
 void Clear();
-void ClearNeighbor(Triangle *triangle );
+void ClearNeighbor(const Triangle *triangle);
 void ClearNeighbors();
 void ClearDelunayEdges();
 
 inline bool IsInterior();
 inline void IsInterior(bool b);
 
-Triangle& NeighborAcross(Point& opoint);
-
 void DebugPrint();
 
+bool CircumcicleContains(const Point&) const;
+
 private:
+
+bool IsCounterClockwise() const;
 
 /// Triangle points
 Point* points_[3];
@@ -254,7 +259,7 @@ inline bool operator ==(const Point& a, const Point& b)
 
 inline bool operator !=(const Point& a, const Point& b)
 {
-  return !(a.x == b.x) && !(a.y == b.y);
+  return !(a.x == b.x) || !(a.y == b.y);
 }
 
 /// Peform the dot product on two vectors.
@@ -278,22 +283,22 @@ inline Point Cross(const Point& a, double s)
 
 /// Perform the cross product on a scalar and a point. In 2D this produces
 /// a point.
-inline Point Cross(const double s, const Point& a)
+inline Point Cross(double s, const Point& a)
 {
   return Point(-s * a.y, s * a.x);
 }
 
-inline Point* Triangle::GetPoint(const int& index)
+inline Point* Triangle::GetPoint(int index)
 {
   return points_[index];
 }
 
-inline Triangle* Triangle::GetNeighbor(const int& index)
+inline Triangle* Triangle::GetNeighbor(int index)
 {
   return neighbors_[index];
 }
 
-inline bool Triangle::Contains(Point* p)
+inline bool Triangle::Contains(const Point* p)
 {
   return p == points_[0] || p == points_[1] || p == points_[2];
 }
@@ -303,7 +308,7 @@ inline bool Triangle::Contains(const Edge& e)
   return Contains(e.p) && Contains(e.q);
 }
 
-inline bool Triangle::Contains(Point* p, Point* q)
+inline bool Triangle::Contains(const Point* p, const Point* q)
 {
   return Contains(p) && Contains(q);
 }
@@ -318,8 +323,9 @@ inline void Triangle::IsInterior(bool b)
   interior_ = b;
 }
 
+/// Is this set a valid delaunay triangulation?
+bool IsDelaunay(const std::vector<p2t::Triangle*>&);
+
 }
 
 #endif
-
-

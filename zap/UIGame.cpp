@@ -1468,6 +1468,12 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       loadLoadoutPreset(getGame(), 1);
    else if(checkInputCode(BINDING_LOAD_PRESET_3, inputCode))
       loadLoadoutPreset(getGame(), 2);
+   else if(checkInputCode(BINDING_LOAD_PRESET_4, inputCode))
+      loadLoadoutPreset(getGame(), 3);
+   else if(checkInputCode(BINDING_LOAD_PRESET_5, inputCode))
+      loadLoadoutPreset(getGame(), 4);
+   else if(checkInputCode(BINDING_LOAD_PRESET_6, inputCode))
+      loadLoadoutPreset(getGame(), 5);
 
    else if(checkInputCode(BINDING_SAVE_PRESET_1, inputCode))  // Saving loadout presets
       saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 0);
@@ -1475,6 +1481,12 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 1);
    else if(checkInputCode(BINDING_SAVE_PRESET_3, inputCode))
       saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 2);
+   else if(checkInputCode(BINDING_SAVE_PRESET_4, inputCode))
+      saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 3);
+   else if(checkInputCode(BINDING_SAVE_PRESET_5, inputCode))
+      saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 4);
+   else if(checkInputCode(BINDING_SAVE_PRESET_6, inputCode))
+      saveLoadoutPreset(getGame(), mLoadoutIndicator.getLoadout(), 5);
 
    else if(checkInputCode(BINDING_MOD1, inputCode))
       activateModule(0);
@@ -3479,10 +3491,13 @@ void LevelListDisplayer::render() const
    {
       for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
       {
+         FontManager::pushFontContext(MenuContext);
          Renderer::get().setColor(Colors::white, (1.4f - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.f)) *
                                         (mLevelLoadDisplay ? 1 : mLevelLoadDisplayFadeTimer.getFraction()) );
          drawStringf(100, DisplayManager::getScreenInfo()->getGameCanvasHeight() - /*vertMargin*/ 0 - (mLevelLoadDisplayNames.size() - i) * 20, 
                      15, "%s", mLevelLoadDisplayNames[i].c_str());
+
+         FontManager::popFontContext();
       }
    }
 }

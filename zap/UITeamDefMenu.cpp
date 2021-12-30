@@ -192,6 +192,7 @@ void TeamDefUserInterface::render()
 
    FontManager::popFontContext();
 
+   FontManager::pushFontContext(MenuContext);
 
    EditorUserInterface *ui = getUIManager()->getUI<EditorUserInterface>();
 
@@ -283,6 +284,8 @@ void TeamDefUserInterface::render()
       r.setColor(Colors::red, alpha);
       drawCenteredString(canvasHeight - vertMargin - 141, fontsize, errorMsg.c_str());
    }
+
+   FontManager::popFontContext();
 }
 
 
