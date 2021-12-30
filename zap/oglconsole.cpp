@@ -21,7 +21,6 @@
 #include "SDL.h"
 #include "Renderer.h"
 #include "Point.h"
-#include "SDL_opengl.h"
 
 
 // There are two fonts available: The original ConsoleFont and the alternate PackedFont,
@@ -77,7 +76,7 @@ int OGLCONSOLE_CreateFont()
 {
 #ifndef ZAP_DEDICATED
     Zap::Renderer& r = Zap::Renderer::get();
-    { int err = glGetError(); if(err) printf("GL ERROR: %i\n",err); }
+
 #  ifdef DEBUG
     puts("Creating OGLCONSOLE font");
 #  endif
@@ -88,16 +87,9 @@ int OGLCONSOLE_CreateFont()
 
     /* Get a font index from OpenGL */
     OGLCONSOLE_glFontHandle = r.generateTexture();    /* Create 1 texture, store in glFontHandle */
-    { int err = glGetError(); if(err )printf("glGenTextures() error: %i\n",err); }
     
     /* Select our font */
     r.bindTexture(OGLCONSOLE_glFontHandle);
-    { int err = glGetError(); if(err) printf("glBindTexture() error: %i\n",err); }
-
-    /* Set some parameters i guess */
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
 
 #  ifdef OGLCONSOLE_CREATE_PACKED_FONT
 	{
@@ -228,8 +220,6 @@ int OGLCONSOLE_CreateFont()
       OGLCONSOLE_FontData.width, OGLCONSOLE_FontData.height, OGLCONSOLE_FontData.pixel_data);
 #     endif
 #  endif
-
-    { int err = glGetError(); if(err) printf("glTexImage2D() error: %i\n",err); }
     
 #  ifdef DEBUG
     puts("Created  OGLCONSOLE font");
@@ -590,8 +580,6 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
     r.pushMatrix();
     r.loadMatrix(C->mvMatrix);
 
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-
 /*    glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);*/
 
@@ -599,10 +587,7 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
      * infrastructure for "real" consoles in the game (like you could walk up to
      * a computer terminal and manipulate a console on a computer using
      * oglconsole) already exists; you'd want depth testing in that case */
-    glDisable(GL_DEPTH_TEST);
-
-	/* ADDED */
-	glDisable( GL_POLYGON_SMOOTH );
+    // glDisable(GL_DEPTH_TEST);
 
     /* Render hiding / showing console in a special manner. Zero means hidden. 1
      * means visible. All other values are traveling toward zero or one. TODO:
@@ -625,16 +610,13 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
         }
 
         d = C->textHeight * C->characterHeight * (1.0 - v * (1.0 / SLIDE_STEPS));
-        glTranslated(0, d, 0);
+        r.translate(0, d, 0);
 //d = 0.04 * v;
 //glTranslated(0, 1-d, 0);
     }
 
     /* First we draw our console's background TODO: Add something fancy? */
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    r.enableBlending();
     r.setColor(.1,0,0, 0.75);
 
     // Draw from -1 to 2 to ensure complete screen coverage... totally hacky, but works!
@@ -648,12 +630,11 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
 
 #ifndef OGLCONSOLE_USE_ALPHA_TEXT
     // Change blend mode for drawing text
-    glBlendFunc(GL_ONE, GL_ONE);
+    r.disableBlending();
 #endif
 
     /* Select the console font */
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, OGLCONSOLE_glFontHandle);
+    r.bindTexture(OGLCONSOLE_glFontHandle);
 
     /* Recolor text */
     r.setColor(0,1,0);
@@ -721,7 +702,7 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
     r.setMatrixMode(Zap::MatrixType::ModelView);
     r.popMatrix();
 
-    glPopAttrib();
+    r.enableBlending(); // Reenable blending in case we disabled it
 #endif
 }
 
