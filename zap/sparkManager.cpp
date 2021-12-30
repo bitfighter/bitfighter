@@ -16,7 +16,6 @@
 #include "FontManager.h"
 
 #include "tnlRandom.h"
-#include "SDL_opengl.h" // Basic OpenGL support
 
 using namespace TNL;
 
@@ -296,6 +295,8 @@ void FxManager::idle(U32 timeDelta)
 
 void FxManager::render(S32 renderPass, F32 commanderZoomFraction) const
 {
+   Renderer& r = Renderer::get();
+
    // The teleporter effects should render under the ships and such
    if(renderPass == 0)
    {
@@ -318,21 +319,16 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction) const
    {
       for(S32 i = SparkTypeCount - 1; i >= 0; i --)     // Loop through our different spark types
       {
-         glPointSize(gDefaultLineWidth);
+         RenderType renderType = (SparkType)i == SparkTypePoint ? RenderType::Points : RenderType::Lines;
 
-         glEnableClientState(GL_COLOR_ARRAY);
-         glEnableClientState(GL_VERTEX_ARRAY);
-
-         glVertexPointer(2, GL_FLOAT, sizeof(Spark), &mSparks[i][0].pos);     // Where to find the vertices -- see OpenGL docs
-         glColorPointer (4, GL_FLOAT, sizeof(Spark), &mSparks[i][0].color);   // Where to find the colors -- see OpenGL docs
-
-         if((SparkType) i == SparkTypePoint)
-            glDrawArrays(GL_POINTS, 0, firstFreeIndex[i]);
-         else if((SparkType) i == SparkTypeLine)
-            glDrawArrays(GL_LINES, 0, firstFreeIndex[i]);
-
-         glDisableClientState(GL_COLOR_ARRAY);
-         glDisableClientState(GL_VERTEX_ARRAY);
+         r.setPointSize(gDefaultLineWidth);
+         r.renderColored(
+            (F32*)&mSparks[i][0].pos,
+            (F32*)&mSparks[i][0].color,
+            firstFreeIndex[i],      // Count
+            renderType,             // RenderType
+            0,                      // Start
+            sizeof(Spark));         // Stride
       }
 
       for(S32 i = 0; i < mDebrisChunks.size(); i++)

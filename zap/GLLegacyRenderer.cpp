@@ -438,7 +438,7 @@ void GLLegacyRenderer::renderColored(const F32 verts[], const F32 colors[], U32 
    glEnableClientState(GL_COLOR_ARRAY);
 
    glVertexPointer(vertDimension, GL_FLOAT, stride, verts);
-   glColorPointer(4, GL_FLOAT, 0, colors);
+   glColorPointer(4, GL_FLOAT, stride, colors);
    glDrawArrays(getGLRenderType(type), start, vertCount);
 
    glDisableClientState(GL_COLOR_ARRAY);

@@ -163,10 +163,10 @@ public:
 
    // Render RGBA colored vertices
    virtual void renderColored(const F32 verts[], const F32 colors[], U32 vertCount,
-      RenderType type, U32 start = 0, U32 stride = 0, U32 vertDimension = 2) = 0;
+      RenderType type, U32 start = 0, U32 stride = 0, U32 vertDimension = 2) = 0;     // Same stride is used for both verts and colors
 
    virtual void renderTextured(const F32 verts[], const F32 UVs[], U32 vertCount,
-      RenderType type, U32 start = 0, U32 stride = 0, U32 vertDimension = 2) = 0;
+      RenderType type, U32 start = 0, U32 stride = 0, U32 vertDimension = 2) = 0;     // Same stride is used for both verts and UVs
 
    // Render a texture colored by the current color:
    virtual void renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount,
