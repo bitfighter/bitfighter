@@ -162,6 +162,27 @@ Point GLLegacyRenderer::getViewportSize()
    return Point(viewport[2], viewport[3]);
 }
 
+void GLLegacyRenderer::setScissor(S32 x, S32 y, S32 width, S32 height)
+{
+   glScissor(x, y, width, height);
+}
+
+Point GLLegacyRenderer::getScissorPos()
+{
+   GLint scissor[4];
+   glGetIntegerv(GL_SCISSOR_BOX, scissor);
+
+   return Point(scissor[0], scissor[1]);
+}
+
+Point GLLegacyRenderer::getScissorSize()
+{
+   GLint scissor[4];
+   glGetIntegerv(GL_SCISSOR_BOX, scissor);
+
+   return Point(scissor[2], scissor[3]);
+}
+
 void GLLegacyRenderer::scale(F32 x, F32 y, F32 z)
 {
    glScalef(x, y, z);
@@ -286,6 +307,17 @@ void GLLegacyRenderer::setSubTextureData(TextureFormat format, DataType dataType
       width, height,
       getGLTextureFormat(format),
       getGLDataType(dataType), data);
+}
+
+// Fairly slow operation
+void GLLegacyRenderer::readFramebufferPixels(TextureFormat format, DataType dataType, S32 x, S32 y, S32 width, S32 height, void* data)
+{
+   glReadBuffer(GL_BACK);
+   glReadPixels(
+      x, y, width, height,
+      getGLTextureFormat(format),
+      getGLDataType(dataType),
+      data);
 }
 
 void GLLegacyRenderer::renderVertexArray(const S8 verts[], U32 vertCount, RenderType type, U32 start, U32 stride, U32 vertDimension)

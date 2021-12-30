@@ -34,6 +34,10 @@ namespace Zap
       Point getViewportPos() override;
       Point getViewportSize() override;
 
+      void setScissor(S32 x, S32 y, S32 width, S32 height) override;
+      Point getScissorPos() override;
+      Point getScissorSize() override;
+
       void scale(F32 x, F32 y, F32 z = 1.0f) override;
       void translate(F32 x, F32 y, F32 z = 0.0f) override;
       void rotate(F32 angle, F32 x, F32 y, F32 z) override;
@@ -54,6 +58,8 @@ namespace Zap
       void setTextureData(TextureFormat format, DataType dataType, U32 width, U32 height, const void* data) override;
       void setSubTextureData(TextureFormat format, DataType dataType, S32 xOffset, S32 yOffset,
          U32 width, U32 height, const void* data) override;
+
+      void readFramebufferPixels(TextureFormat format, DataType dataType, S32 x, S32 y, S32 width, S32 height, void* data) override;
 
       void renderVertexArray(const S8 verts[], U32 vertCount, RenderType type,
          U32 start = 0, U32 stride = 0, U32 vertDimension = 2) override;

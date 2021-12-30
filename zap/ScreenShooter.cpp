@@ -15,13 +15,7 @@
 #include "VideoSystem.h"   // For setting screen geom vars
 #include "stringUtils.h"
 
-#if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
-#  include "SDL_opengles.h"
-   // Needed for GLES compatibility
-#  define glOrtho glOrthof
-#else
-#  include "SDL_opengl.h"
-#endif
+#include "Renderer.h"
 
 #include "zlib.h"
 
@@ -47,21 +41,22 @@ void ScreenShooter::resizeViewportToCanvas(UIManager *uiManager)
    // Grab the canvas width/height and normalize our screen to it
    S32 width = DisplayManager::getScreenInfo()->getGameCanvasWidth();
    S32 height = DisplayManager::getScreenInfo()->getGameCanvasHeight();
+   Renderer& r = Renderer::get();
 
-   glViewport(0, 0, width, height);
+   r.setViewport(0, 0, width, height);
 
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
+   r.setMatrixMode(MatrixType::Projection);
+   r.loadIdentity();
 
-   glOrtho(0, width, height, 0, 0, 1);
+   r.projectOrtho(0, width, height, 0, 0, 1);
 
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
+   r.setMatrixMode(MatrixType::ModelView);
+   r.loadIdentity();
 
-   glScissor(0, 0, width, height);
+   r.setScissor(0, 0, width, height);
 
    // Now render a frame to draw our new viewport to the back buffer
-   glClear(GL_COLOR_BUFFER_BIT);   // Not sure why this is needed
+   r.clear();   // Not sure why this is needed
    uiManager->renderCurrent();
 }
 
@@ -73,22 +68,23 @@ void ScreenShooter::resizeViewportToDrawableArea(UIManager *uiManager)
    S32 height = DisplayManager::getScreenInfo()->getDrawAreaHeight();
    S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
    S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
+   Renderer& r = Renderer::get();
 
-   glViewport(0, 0, width, height);
+   r.setViewport(0, 0, width, height);
 
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
+   r.setMatrixMode(MatrixType::Projection);
+   r.loadIdentity();
 
    // Stick to canvas width for orthographic projection
-   glOrtho(0, canvasWidth, canvasHeight, 0, 0, 1);
+   r.projectOrtho(0, canvasWidth, canvasHeight, 0, 0, 1);
 
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
+   r.setMatrixMode(MatrixType::ModelView);
+   r.loadIdentity();
 
-   glScissor(0, 0, width, height);
+   r.setScissor(0, 0, width, height);
 
    // Now render a frame to draw our new viewport to the back buffer
-   glClear(GL_COLOR_BUFFER_BIT);   // Not sure why this is needed
+   r.clear();   // Not sure why this is needed
    uiManager->renderCurrent();
 }
 
@@ -168,20 +164,11 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings,
    }
 
    // Allocate buffer
-   GLubyte *screenBuffer = new GLubyte[BytesPerPixel * width * height];  // Glubyte * 3 = 24 bits
+   U8 *screenBuffer = new U8[BytesPerPixel * width * height];  // U8 * 3 = 24 bits
    png_bytep *rows = new png_bytep[height];
 
-   // Set alignment at smallest for compatibility
-   glPixelStorei(GL_PACK_ALIGNMENT, 1);
-
-   // Grab the front buffer with the new viewport
-#ifndef BF_USE_GLES
-   // GLES doesn't need this?
-   glReadBuffer(GL_BACK);
-#endif
-
    // Read pixels from buffer - slow operation
-   glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, screenBuffer);
+   Renderer::get().readFramebufferPixels(TextureFormat::RGB, DataType::UnsignedByte, 0, 0, width, height, screenBuffer);
 
    // Change opengl viewport back to what it was
    if(resizeToDefault || resizeToDrawable)

@@ -89,7 +89,7 @@ public:
    void renderPointVector(const Vector<Point>* points, RenderType type);
    void renderPointVector(const Vector<Point>* points, const Point& offset, RenderType type);
 
-   // Implemented by concrete renderers:
+   // Implemented by concrete renderers //
    virtual void clear() = 0;
    virtual void setClearColor(F32 r, F32 g, F32 b, F32 alpha = 1.0f) = 0;
    virtual void setColor(F32 r, F32 g, F32 b, F32 alpha = 1.0f) = 0;
@@ -100,6 +100,11 @@ public:
    virtual Point getViewportPos() = 0;
    virtual Point getViewportSize() = 0;
 
+   virtual void setScissor(S32 x, S32 y, S32 width, S32 height) = 0;
+   virtual Point getScissorPos() = 0;
+   virtual Point getScissorSize() = 0;
+
+   // Matrix transforms
    virtual void scale(F32 x, F32 y, F32 z = 1.0f) = 0;
    virtual void translate(F32 x, F32 y, F32 z = 0.0f) = 0;
    virtual void rotate(F32 angle, F32 x, F32 y, F32 z) = 0;
@@ -122,6 +127,9 @@ public:
    virtual void setSubTextureData(TextureFormat format, DataType dataType, S32 xOffset, S32 yOffset,
                                   U32 width, U32 height, const void* data) = 0;
 
+
+   // Framebuffers
+   virtual void readFramebufferPixels(TextureFormat format, DataType dataType, S32 x, S32 y, S32 width, S32 height, void* data) = 0;
 
    // Render points:
    virtual void renderVertexArray(const S8 verts[], U32 vertCount, RenderType type,
