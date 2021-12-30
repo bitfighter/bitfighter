@@ -13,6 +13,12 @@
 #include "tnlAssert.h"
 #include <memory>
 
+#ifdef TNL_OS_WIN32
+   // For ARRAYSIZE, I do not understand why everyone relies on this macro, but
+   // eveybody seems to assume it is defined when including the Renderer. Why??
+#  include <windows.h>
+#endif
+
 namespace TNL {
    template<class T> class Vector;
 };

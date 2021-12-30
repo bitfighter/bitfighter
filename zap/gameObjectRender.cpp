@@ -30,6 +30,7 @@
 #include "GeomUtils.h"
 
 #include "tnlRandom.h"
+#include "SDL_opengl.h" // Basic OpenGL support
 
 #ifdef SHOW_SERVER_SITUATION
 #  include "GameManager.h"

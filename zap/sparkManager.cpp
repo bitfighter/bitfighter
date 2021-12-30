@@ -16,6 +16,7 @@
 #include "FontManager.h"
 
 #include "tnlRandom.h"
+#include "SDL_opengl.h" // Basic OpenGL support
 
 using namespace TNL;
 

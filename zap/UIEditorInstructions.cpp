@@ -23,6 +23,7 @@
 #include "GeomUtils.h"        // For polygon triangulation
 #include "RenderUtils.h"
 #include "stringUtils.h"
+#include "SDL_opengl.h" // Basic OpenGL support
 
 #include <cmath>
 

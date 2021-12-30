@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "FontManager.h"
+#include "SDL_opengl.h" // Basic OpenGL support
 
 namespace Zap
 {

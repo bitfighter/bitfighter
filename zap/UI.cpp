@@ -29,6 +29,7 @@
 
 #include "MathUtils.h"           // For RADIANS_TO_DEGREES def
 #include "RenderUtils.h"
+#include "SDL_opengl.h" // Basic OpenGL support
 
 #include <string>
 

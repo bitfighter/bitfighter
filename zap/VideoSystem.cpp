@@ -19,6 +19,7 @@
 #include "stringUtils.h"
 
 #include "tnlLog.h"
+#include "SDL_opengl.h" // Basic OpenGL support
 
 #include <cmath>
 

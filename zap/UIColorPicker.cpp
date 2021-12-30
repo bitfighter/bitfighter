@@ -14,6 +14,7 @@
 
 #include "RenderUtils.h"
 #include "GeomUtils.h"    // For triangulation
+#include "SDL_opengl.h" // Basic OpenGL support
 
 namespace Zap
 {
