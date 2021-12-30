@@ -14,16 +14,19 @@ namespace Zap
 {
 
 // Private
-   GLLegacyRenderer::GLLegacyRenderer()
+GLLegacyRenderer::GLLegacyRenderer()
 {
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    glEnable(GL_SCISSOR_TEST);    // Turn on clipping
    glEnable(GL_BLEND);
+
+   //glPixelStorei(GL_PACK_ALIGNMENT, 1);
+   //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 }
 
-   GLLegacyRenderer::~GLLegacyRenderer()
+GLLegacyRenderer::~GLLegacyRenderer()
 {
-   
+
 }
 
 U32 GLLegacyRenderer::getGLRenderType(RenderType type) const
