@@ -225,6 +225,24 @@ Point GLLegacyRenderer::getViewportSize()
    return Point(viewport[2], viewport[3]);
 }
 
+void GLLegacyRenderer::enableScissor()
+{
+   glEnable(GL_SCISSOR_TEST);
+}
+
+void GLLegacyRenderer::disableScissor()
+{
+   glDisable(GL_SCISSOR_TEST);
+}
+
+bool GLLegacyRenderer::isScissorEnabled()
+{
+   GLboolean scissorEnabled;
+   glGetBooleanv(GL_SCISSOR_TEST, &scissorEnabled);
+
+   return scissorEnabled;
+}
+
 void GLLegacyRenderer::setScissor(S32 x, S32 y, S32 width, S32 height)
 {
    glScissor(x, y, width, height);

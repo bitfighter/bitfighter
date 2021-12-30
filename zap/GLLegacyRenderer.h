@@ -46,6 +46,9 @@ namespace Zap
       Point getViewportPos() override;
       Point getViewportSize() override;
 
+      void enableScissor() override;
+      void disableScissor() override;
+      bool isScissorEnabled() override;
       void setScissor(S32 x, S32 y, S32 width, S32 height) override;
       Point getScissorPos() override;
       Point getScissorSize() override;

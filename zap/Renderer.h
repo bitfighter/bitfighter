@@ -119,6 +119,9 @@ public:
    virtual Point getViewportPos() = 0;
    virtual Point getViewportSize() = 0;
 
+   virtual void enableScissor() = 0;
+   virtual void disableScissor() = 0;
+   virtual bool isScissorEnabled() = 0;
    virtual void setScissor(S32 x, S32 y, S32 width, S32 height) = 0;
    virtual Point getScissorPos() = 0;
    virtual Point getScissorSize() = 0;
