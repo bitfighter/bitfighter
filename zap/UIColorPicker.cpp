@@ -14,7 +14,6 @@
 
 #include "RenderUtils.h"
 #include "GeomUtils.h"    // For triangulation
-#include "SDL_opengl.h" // Basic OpenGL support
 
 namespace Zap
 {
@@ -255,23 +254,23 @@ void UIColorPicker::render()
    // Ship
    static F32 thrusts[4] =  { 1, 0, 0, 0 };
 
-   glPushMatrix();
-   glTranslatef(165, F32(y + h / 2), 0);
-   glRotatef(-90, 0, 0, 1);
+   renderer.pushMatrix();
+   renderer.translate(165, F32(y + h / 2), 0);
+   renderer.rotate(-90, 0, 0, 1);
 
    Color healthBarColor(this);
    healthBarColor.ensureMinimumBrightness();
    renderShip(ShipShape::Normal, this, healthBarColor, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
 
-   glPopMatrix();
+   renderer.popMatrix();
 
    // Turret
-   glPushMatrix();
-   glTranslatef(240, F32(y + h / 2), 0);
+   renderer.pushMatrix();
+   renderer.translate(240, F32(y + h / 2), 0);
 
    renderTurret(*(const Color *)this, healthBarColor, Point(0, 15), Point(0, -1), true, 1, 0, 0);
 
-   glPopMatrix();
+   renderer.popMatrix();
 }
 
 

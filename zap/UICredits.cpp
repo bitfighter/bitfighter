@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "FontManager.h"
-#include "SDL_opengl.h" // Basic OpenGL support
 
 namespace Zap
 {
@@ -155,7 +154,7 @@ bool CreditsUserInterface::onKeyDown(InputCode inputCode)
 // Constructor
 CreditsScroller::CreditsScroller()
 {
-   glLineWidth(gDefaultLineWidth);
+   Renderer::get().setLineWidth(gDefaultLineWidth);
 
    // Loop through each line in the credits looking for section breaks ("-")
    // thus creating groups, the first of which is generally the job, followed
