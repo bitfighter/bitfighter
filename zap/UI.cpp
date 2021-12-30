@@ -29,7 +29,6 @@
 
 #include "MathUtils.h"           // For RADIANS_TO_DEGREES def
 #include "RenderUtils.h"
-#include "SDL_opengl.h" // Basic OpenGL support
 
 #include <string>
 
@@ -140,15 +139,16 @@ void UserInterface::renderConsole() const
 #ifndef BF_NO_CONSOLE
    // Temporarily disable scissors mode so we can use the full width of the screen
    // to show our console text, black bars be damned!
-   bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
+   Renderer& r = Renderer::get();
+   bool scissorMode = r.isScissorEnabled();
 
-   if(scissorMode) 
-      glDisable(GL_SCISSOR_TEST);
+   if(scissorMode)
+      r.disableScissor();
 
    gConsole.render();
 
-   if(scissorMode) 
-      glEnable(GL_SCISSOR_TEST);
+   if(scissorMode)
+      r.enableScissor();
 #endif
 }
 
