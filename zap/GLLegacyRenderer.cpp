@@ -20,8 +20,8 @@ GLLegacyRenderer::GLLegacyRenderer()
    glEnable(GL_SCISSOR_TEST);    // Turn on clipping
    glEnable(GL_BLEND);
 
-   //glPixelStorei(GL_PACK_ALIGNMENT, 1);
-   //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+   glPixelStorei(GL_PACK_ALIGNMENT, 1);
+   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 }
 
 GLLegacyRenderer::~GLLegacyRenderer()
