@@ -59,12 +59,10 @@
 #include "GeomUtils.h"
 #include "RenderUtils.h"
 #include "ScreenShooter.h"
+#include "SDL_opengl.h"
 
 #include <cmath>
 #include <set>
-
-// TEMP:
-#include "SDL_opengl.h"
 
 namespace Zap
 {
@@ -5180,7 +5178,7 @@ void EditorUserInterface::createNormalizedScreenshot(ClientGame* game)
    mPreviewMode = true;
    mNormalizedScreenshotMode = true;
 
-   glClear(GL_COLOR_BUFFER_BIT);
+   Renderer::get().clear();
    centerView(true);
 
    render();
