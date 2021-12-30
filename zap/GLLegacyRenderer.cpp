@@ -17,8 +17,11 @@ namespace Zap
 GLLegacyRenderer::GLLegacyRenderer()
 {
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-   glEnable(GL_SCISSOR_TEST);    // Turn on clipping
+   glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
    glEnable(GL_BLEND);
+   glEnable(GL_STENCIL_TEST);
+   glEnable(GL_SCISSOR_TEST);
 
    glPixelStorei(GL_PACK_ALIGNMENT, 1);
    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -139,6 +142,15 @@ void GLLegacyRenderer::setLineWidth(F32 width)
 void GLLegacyRenderer::setPointSize(F32 size)
 {
    glPointSize(size);
+}
+
+void GLLegacyRenderer::enableAntialiasing() {
+   glEnable(GL_LINE_SMOOTH);
+   // glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+}
+
+void GLLegacyRenderer::disableAntialiasing() {
+   glDisable(GL_LINE_SMOOTH);
 }
 
 void GLLegacyRenderer::setViewport(S32 x, S32 y, S32 width, S32 height)

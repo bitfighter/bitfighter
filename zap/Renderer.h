@@ -11,6 +11,7 @@
 
 #include "tnlTypes.h"
 #include "tnlAssert.h"
+
 #include <memory>
 
 #ifdef TNL_OS_WIN32
@@ -102,6 +103,9 @@ public:
    
    virtual void setLineWidth(F32 width) = 0;
    virtual void setPointSize(F32 size) = 0;
+   virtual void enableAntialiasing() = 0;
+   virtual void disableAntialiasing() = 0;
+
    virtual void setViewport(S32 x, S32 y, S32 width, S32 height) = 0;
    virtual Point getViewportPos() = 0;
    virtual Point getViewportSize() = 0;

@@ -19,7 +19,6 @@
 #include "stringUtils.h"
 
 #include "tnlLog.h"
-#include "SDL_opengl.h" // Basic OpenGL support
 
 #include <cmath>
 
@@ -575,28 +574,28 @@ void VideoSystem::redrawViewport(GameSettings *settings)
    SDL_GL_GetDrawableSize(DisplayManager::getScreenInfo()->sdlWindow, &drawWidth, &drawHeight);
 
    // Get renderer
-   Renderer& renderer = Renderer::get();
+   Renderer& r = Renderer::get();
 
    // If we're in HighDPI mode, set a flag in case we want to use later
    bool isHighDpi = (drawWidth > windowWidth) || (drawHeight > windowHeight);
    DisplayManager::getScreenInfo()->setHighDpi(isHighDpi);
 
-   renderer.setClearColor( 0, 0, 0, 0 );
+   r.setClearColor( 0, 0, 0, 0 );
 
    // TODO High-DPI mode may change various OpenGL parameters below (and also
-   renderer.setViewport(0, 0, windowWidth, windowHeight);
+   r.setViewport(0, 0, windowWidth, windowHeight);
 
-   renderer.setMatrixMode(MatrixType::Projection);
-   renderer.loadIdentity();
+   r.setMatrixMode(MatrixType::Projection);
+   r.loadIdentity();
 
    // The best understanding I can get for glOrtho is that these are the coordinates you want to appear at the four corners of the
    // physical screen. If you want a "black border" down one side of the screen, you need to make left negative, so that 0 would
    // appear some distance in from the left edge of the physical screen.  The same applies to the other coordinates as well.
    OrthoData ortho = DisplayManager::getScreenInfo()->getOrtho();
-   renderer.projectOrtho(ortho.left, ortho.right, ortho.bottom, ortho.top, 0, 1);
+   r.projectOrtho(ortho.left, ortho.right, ortho.bottom, ortho.top, 0, 1);
 
-   renderer.setMatrixMode(MatrixType::ModelView);
-   renderer.loadIdentity();
+   r.setMatrixMode(MatrixType::ModelView);
+   r.loadIdentity();
 
    // Enabling scissor appears to fix crashing problem switching screen mode
    // in linux and "Mobile 945GME Express Integrated Graphics Controller",
@@ -605,25 +604,13 @@ void VideoSystem::redrawViewport(GameSettings *settings)
    // parts of RAM that can crash Bitfighter, graphics driver, or the entire computer.
    // This is probably a bug in the Linux Intel graphics driver.
    ScissorData scissor = DisplayManager::getScreenInfo()->getScissor();
-   glScissor(scissor.x, scissor.y, scissor.width, scissor.height);
-   glEnable(GL_SCISSOR_TEST);    // Turn on clipping
+   r.setScissor(scissor.x, scissor.y, scissor.width, scissor.height);
 
-   glEnable(GL_STENCIL_TEST);    // Turn on stenciling
-   glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  // Default operation
-   //setDefaultBlendFunction();
-
-   renderer.setLineWidth(gDefaultLineWidth);
+   r.setLineWidth(gDefaultLineWidth);
 
    // Enable Line smoothing everywhere!  Make sure to disable temporarily for filled polygons and such
    if(settings->getIniSettings()->mSettings.getVal<YesNo>("LineSmoothing"))
-   {
-      // Only on OpenGL
-      GLLegacyRenderer* glRenderer = dynamic_cast<GLLegacyRenderer*>(&renderer);
-      if(glRenderer != nullptr)
-         glEnable(GL_LINE_SMOOTH);
-
-      //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-   }
+      r.enableAntialiasing();
 }
 
 

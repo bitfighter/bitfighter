@@ -30,6 +30,9 @@ namespace Zap
     
       void setLineWidth(F32 width) override;
       void setPointSize(F32 size) override;
+      void enableAntialiasing() override;
+      void disableAntialiasing() override;
+
       void setViewport(S32 x, S32 y, S32 width, S32 height) override;
       Point getViewportPos() override;
       Point getViewportSize() override;
