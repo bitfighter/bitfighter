@@ -30,7 +30,6 @@
 #include "GeomUtils.h"
 
 #include "tnlRandom.h"
-#include "SDL_opengl.h"
 
 #ifdef SHOW_SERVER_SITUATION
 #  include "GameManager.h"
@@ -2703,8 +2702,8 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
       r.pushMatrix();
       r.translate(pos);
          r.scale(scaleFactor);
-         glRotatef(pos.angleTo(dir) * RADIANS_TO_DEGREES, 0, 0, 1);
-         glTranslatef(-119, -45, 0);      // Determined experimentally
+         r.rotate(pos.angleTo(dir) * RADIANS_TO_DEGREES, 0, 0, 1);
+         r.translate(-119, -45, 0);      // Determined experimentally
 
          renderBitfighterLogo(0, 1);
       r.popMatrix();
@@ -2757,7 +2756,7 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, cons
 
       r.pushMatrix();
          r.translate(centerPoint);
-         glRotatef(angle * RADIANS_TO_DEGREES, 0, 0, 1);
+         r.rotate(angle * RADIANS_TO_DEGREES, 0, 0, 1);
          r.renderVertexArray(symbol, ARRAYSIZE(symbol) / 2, RenderType::LineStrip);
       r.popMatrix();
    }
@@ -3238,7 +3237,7 @@ void drawDivetedTriangle(F32 height, F32 len)
    
    r.pushMatrix();
       r.translate(200, 200, 0);
-      r.rotate(GLfloat(Platform::getRealMilliseconds() / 10 % 360), 0, 0, 1);
+      r.rotate(F32(Platform::getRealMilliseconds() / 10 % 360), 0, 0, 1);
       r.scale(6);
 
       renderPolygonOutline(&pts, &Colors::red);
@@ -3688,7 +3687,7 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
 
    r.setPointSize(gLineWidth1);
    r.setColor(Colors::gray60, alpha);
-   glEnable(GL_BLEND);
+   r.enableBlending();
 
    // The (F32(xPage + 1.f) == xPage) part becomes true, which could cause endless loop problem freezing game when way too far off the center.
    for(F32 xPage = upperLeft.x + fx1; xPage < lowerRight.x + fx2 && !(F32(xPage + 1.f) == xPage); xPage++)
@@ -3700,8 +3699,6 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
             r.renderVertexArray(starVerts, numStars, RenderType::Points);
          r.popMatrix();
       }
-
-   glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 
@@ -3885,8 +3882,8 @@ void renderSpawn(const Point &pos, F32 scale, const Color *color)
    Renderer& r = Renderer::get();
 
    r.pushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-      glScalef(scale, scale, 1);    // Make item draw at constant size, regardless of zoom
+      r.translate(pos.x, pos.y, 0);
+      r.scale(scale, scale, 1);    // Make item draw at constant size, regardless of zoom
       renderSquareItem(Point(0,0), color, 1, &Colors::white, 'S');
    r.popMatrix();
 }
