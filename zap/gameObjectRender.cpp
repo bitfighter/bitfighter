@@ -30,7 +30,7 @@
 #include "GeomUtils.h"
 
 #include "tnlRandom.h"
-#include "SDL_opengl.h" // Basic OpenGL support
+#include "SDL_opengl.h"
 
 #ifdef SHOW_SERVER_SITUATION
 #  include "GameManager.h"
@@ -995,12 +995,12 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
       // scrambling thing here as well...
       r.setColor(Colors::black);
 
-      glDisable(GL_BLEND);
+      r.disableBlending();
 
       F32 vertices[] = { 20,-15,  0,25,  20,-15 };
       r.renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::TriangleFan);
 
-      glEnable(GL_BLEND);
+      r.enableBlending();
    }
 
    else     // LayerIndex == 1
@@ -1198,7 +1198,6 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
       renderer.setColor(Colors::white, .25f * alpha );
 
 //      glEnable(GL_POLYGON_SMOOTH);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 //      glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
 
       // Draw a different line for each destination
@@ -1822,8 +1821,8 @@ void renderGoalZoneIcon(const Point &center, S32 radius, F32 angleRadians)
    drawPolygon(center, 4, (F32)radius, 0.0f);
 
    r.pushMatrix();
-      glTranslatef(center.x, center.y, 0);
-      glRotatef(angleRadians * RADIANS_TO_DEGREES, 0, 0, 1);
+      r.translate(center.x, center.y, 0);
+      r.rotate(angleRadians * RADIANS_TO_DEGREES, 0, 0, 1);
       r.scale(radius * 0.041667f);  // 1 / 24 since we drew it to in-game radius of 24 (a ship's radius)
       r.renderVertexArray(flagPoints, ARRAYSIZE(flagPoints) / 2, RenderType::LineStrip);
    r.popMatrix();
@@ -2457,13 +2456,7 @@ void renderSpeedZone(const Vector<Point> &points, U32 time)
    for(S32 j = 0; j < 2; j++)
    {
       S32 start = j * points.size() / 2;    // GoFast comes in two equal shapes
-
-      glEnableClientState(GL_VERTEX_ARRAY);
-
-      glVertexPointer(2, GL_FLOAT, sizeof(Point), points.address());    
-      glDrawArrays(GL_LINE_LOOP, start, points.size() / 2);
-
-      glDisableClientState(GL_VERTEX_ARRAY);
+      r.renderVertexArray((F32*)points.address(), points.size() / 2, RenderType::LineLoop, start, sizeof(Point));
    }
 }
 
@@ -2512,12 +2505,43 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
 
 void renderAsteroidForTeam(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
 {
-   // Render internal colored part, scaled a little smaller
-   glLineWidth(gLineWidth4);
-   renderAsteroid(pos, design, 0.95 * scaleFact, color, alpha);
-   glLineWidth(gDefaultLineWidth);
+   Renderer& r = Renderer::get();
+   r.pushMatrix();
 
-   glPopMatrix();
+   r.translate(pos);
+   F32 thisScale = scaleFact * ASTEROID_SCALING_FACTOR;
+   r.scale(thisScale);
+
+   const F32* vertexArray = AsteroidCoords[design];
+   const F32* fillArray = AsteroidFillCoords[design];
+   const F32* stencilArray = AsteroidStencilCoords[design];
+   const F32* stencilFillArray = AsteroidStencilFillCoords[design];
+
+   r.enableStencil();
+
+   /// 1st pass - draw inset asteroid into stencil buffer for subtraction later
+   r.enableStencilDrawOnly();
+   r.renderVertexArray(stencilFillArray, ASTEROID_FILL_POINTS, RenderType::Triangles);
+   r.disableStencilDraw();
+
+   /// 2nd pass
+   // Draw filled asteroid with the stencil cut out
+   r.useNotStencilTest();
+   r.setColor(*color, alpha);
+   r.renderVertexArray(fillArray, ASTEROID_FILL_POINTS, RenderType::Triangles);
+
+   r.disableStencil();
+
+   /// Outlines for highlighting
+   // Draw inner outline to highlight edges
+   r.setColor(*color, alpha);
+   r.renderVertexArray(stencilArray, ASTEROID_POINTS, RenderType::LineLoop);
+
+   // Original outline
+   r.setColor(Color(.7), alpha);  // Default gray
+   r.renderVertexArray(vertexArray, ASTEROID_POINTS, RenderType::LineLoop);
+
+   r.popMatrix();
 }
 
 

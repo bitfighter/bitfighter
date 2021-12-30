@@ -32,6 +32,15 @@ namespace Zap
       void setPointSize(F32 size) override;
       void enableAntialiasing() override;
       void disableAntialiasing() override;
+      void enableBlending() override;
+      void disableBlending() override;
+
+      void enableStencil() override;
+      void disableStencil() override;
+      void useAndStencilTest() override;
+      void useNotStencilTest() override;
+      void enableStencilDrawOnly() override;
+      void disableStencilDraw() override;
 
       void setViewport(S32 x, S32 y, S32 width, S32 height) override;
       Point getViewportPos() override;

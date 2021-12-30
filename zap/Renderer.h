@@ -105,6 +105,15 @@ public:
    virtual void setPointSize(F32 size) = 0;
    virtual void enableAntialiasing() = 0;
    virtual void disableAntialiasing() = 0;
+   virtual void enableBlending() = 0;
+   virtual void disableBlending() = 0;
+
+   virtual void enableStencil() = 0;
+   virtual void disableStencil() = 0;
+   virtual void useAndStencilTest() = 0;
+   virtual void useNotStencilTest() = 0;
+   virtual void enableStencilDrawOnly() = 0;
+   virtual void disableStencilDraw() = 0;
 
    virtual void setViewport(S32 x, S32 y, S32 width, S32 height) = 0;
    virtual Point getViewportPos() = 0;

@@ -18,9 +18,9 @@ GLLegacyRenderer::GLLegacyRenderer()
 {
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+   glClearStencil(0);
 
    glEnable(GL_BLEND);
-   glEnable(GL_STENCIL_TEST);
    glEnable(GL_SCISSOR_TEST);
 
    glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -121,7 +121,7 @@ void GLLegacyRenderer::create()
 
 void GLLegacyRenderer::clear()
 {
-   glClear(GL_COLOR_BUFFER_BIT);
+   glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 void GLLegacyRenderer::setClearColor(F32 r, F32 g, F32 b, F32 alpha)
@@ -144,13 +144,64 @@ void GLLegacyRenderer::setPointSize(F32 size)
    glPointSize(size);
 }
 
-void GLLegacyRenderer::enableAntialiasing() {
+void GLLegacyRenderer::enableAntialiasing()
+{
    glEnable(GL_LINE_SMOOTH);
    // glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 }
 
-void GLLegacyRenderer::disableAntialiasing() {
+void GLLegacyRenderer::disableAntialiasing()
+{
    glDisable(GL_LINE_SMOOTH);
+}
+
+void GLLegacyRenderer::enableBlending()
+{
+   glEnable(GL_BLEND);
+}
+
+void GLLegacyRenderer::disableBlending()
+{
+   glDisable(GL_BLEND);
+}
+
+// Stencils
+void GLLegacyRenderer::enableStencil()
+{
+   glEnable(GL_STENCIL_TEST);
+}
+
+void GLLegacyRenderer::disableStencil()
+{
+   glStencilMask(0xFF); // Necessary for clearing stencil buffer when calling glClear()
+   glDisable(GL_STENCIL_TEST);
+}
+
+void GLLegacyRenderer::useAndStencilTest()
+{
+   // Render if stencil value == 1
+   glStencilFunc(GL_EQUAL, 1, 0xFF);
+}
+
+void GLLegacyRenderer::useNotStencilTest()
+{
+   // Render if stencil value != 1
+   glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+}
+
+// Resets stencil test function
+void GLLegacyRenderer::enableStencilDrawOnly()
+{
+   // Always draw to stencil buffer; we don't care what what's in there already
+   glStencilFunc(GL_ALWAYS, 1, 0xFF);
+   glStencilMask(0xFF);                                 // Draw 1s everywhere in stencil buffer
+   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); // Don't draw to color buffer!
+}
+
+void GLLegacyRenderer::disableStencilDraw()
+{
+   glStencilMask(0x00);                             // Don't draw anything in the stencil buffer
+   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // Feel free to draw in the color buffer tho!
 }
 
 void GLLegacyRenderer::setViewport(S32 x, S32 y, S32 width, S32 height)
