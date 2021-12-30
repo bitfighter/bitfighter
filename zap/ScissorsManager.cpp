@@ -5,6 +5,7 @@
 
 #include "ScissorsManager.h"     // Class header
 #include "DisplayManager.h"
+#include "Renderer.h"
 
 
 namespace Zap
@@ -15,34 +16,42 @@ void ScissorsManager::enable(bool enable, DisplayMode displayMode, F32 x, F32 y,
 {
    mManagerEnabled = enable;
 
+   Renderer& r = Renderer::get();
    if(!enable)
       return;
 
-   glGetBooleanv(GL_SCISSOR_TEST, &mScissorsWasEnabled);
+   mScissorsWasEnabled = r.isScissorEnabled();
+   if (mScissorsWasEnabled)
+   {
+      Point scissorPos = r.getScissorPos();
+      Point scissorSize = r.getScissorSize();
 
-   if(mScissorsWasEnabled)
-      glGetIntegerv(GL_SCISSOR_BOX, &mScissorBox[0]);
+      mScissorBox[0] = scissorPos.x;
+      mScissorBox[1] = scissorPos.y;
+      mScissorBox[2] = scissorSize.x;
+      mScissorBox[3] = scissorSize.y;
+   }
 
    static Point p1, p2;
    p1 = DisplayManager::getScreenInfo()->convertCanvasToWindowCoord(x,     DisplayManager::getScreenInfo()->getGameCanvasHeight() - y - height, displayMode);
    p2 = DisplayManager::getScreenInfo()->convertCanvasToWindowCoord(width, height,                                         displayMode);
 
-   glScissor(GLint(p1.x), GLint(p1.y), GLsizei(p2.x), GLsizei(p2.y));
-
-   glEnable(GL_SCISSOR_TEST);
+   r.setScissor(p1.x, p1.y, p2.x, p2.y);
+   r.enableScissor();
 }
 
 
 // Restore previous scissors settings
 void ScissorsManager::disable()
 {
+   Renderer& r = Renderer::get();
    if(!mManagerEnabled)
       return;
 
    if(mScissorsWasEnabled)
-      glScissor(mScissorBox[0], mScissorBox[1], mScissorBox[2], mScissorBox[3]);
+      r.setScissor(mScissorBox[0], mScissorBox[1], mScissorBox[2], mScissorBox[3]);
    else
-      glDisable(GL_SCISSOR_TEST);
+      r.disableScissor();
 
    mManagerEnabled = false;
 }
