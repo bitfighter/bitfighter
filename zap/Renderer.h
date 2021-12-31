@@ -16,7 +16,7 @@
 
 #ifdef TNL_OS_WIN32
    // For ARRAYSIZE, I do not understand why everyone relies on this macro, but
-   // eveybody seems to assume it is defined when including the Renderer. Why??
+   // eveybody seems to assume it is defined when including the Renderer.
 #  include <windows.h>
 #endif
 
@@ -78,8 +78,9 @@ private:
    Renderer& operator=(const Renderer&) = default;
 
 protected:
+   static void setInstance(std::unique_ptr<Renderer> &&instance);
    Renderer() = default; // Constructor is accessible only to derived classes.
-   static void setInstance(std::unique_ptr<Renderer>&& instance);
+   void initRenderer();  // Call this in child constructor!
 
 public:
    virtual ~Renderer() = default;
@@ -98,6 +99,8 @@ public:
 
    // Implemented by concrete renderers //
    virtual void clear() = 0;
+   virtual void clearStencil() = 0;
+   virtual void clearDepth() = 0;
    virtual void setClearColor(F32 r, F32 g, F32 b, F32 alpha = 1.0f) = 0;
    virtual void setColor(F32 r, F32 g, F32 b, F32 alpha = 1.0f) = 0;
    
@@ -107,6 +110,10 @@ public:
    virtual void disableAntialiasing() = 0;
    virtual void enableBlending() = 0;
    virtual void disableBlending() = 0;
+   virtual void useSpyBugBlending() = 0;
+   virtual void useDefaultBlending() = 0;
+   virtual void enableDepthTest() = 0;
+   virtual void disableDepthTest() = 0;
 
    virtual void enableStencil() = 0;
    virtual void disableStencil() = 0;

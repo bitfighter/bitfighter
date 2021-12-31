@@ -15,16 +15,18 @@ namespace Zap
 
 // Private
 GLLegacyRenderer::GLLegacyRenderer()
+   : mUsingAndStencilTest(0)
 {
-   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-   glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-   glClearStencil(0);
+   glDepthFunc(GL_LESS);
+   glDepthMask(true);   // Always enable writing to depth buffer, needed for glClearing depth buffer
 
-   glEnable(GL_BLEND);
-   glEnable(GL_SCISSOR_TEST);
+   glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+   glStencilMask(0xFF); // Always enable writing to stencil buffer, needed for glClearing stencil buffer
 
    glPixelStorei(GL_PACK_ALIGNMENT, 1);
    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+   initRenderer();
 }
 
 GLLegacyRenderer::~GLLegacyRenderer()
@@ -121,7 +123,17 @@ void GLLegacyRenderer::create()
 
 void GLLegacyRenderer::clear()
 {
-   glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+   glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void GLLegacyRenderer::clearStencil()
+{
+   glClear(GL_STENCIL_BUFFER_BIT);
+}
+
+void GLLegacyRenderer::clearDepth()
+{
+   glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void GLLegacyRenderer::setClearColor(F32 r, F32 g, F32 b, F32 alpha)
@@ -165,7 +177,28 @@ void GLLegacyRenderer::disableBlending()
    glDisable(GL_BLEND);
 }
 
-// Stencils
+void GLLegacyRenderer::useSpyBugBlending()
+{
+   // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
+   glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);
+}
+
+void GLLegacyRenderer::useDefaultBlending()
+{
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+void GLLegacyRenderer::enableDepthTest()
+{
+   glEnable(GL_DEPTH_TEST);
+}
+
+void GLLegacyRenderer::disableDepthTest()
+{
+   glDisable(GL_DEPTH_TEST);
+}
+
+/// Stencils
 void GLLegacyRenderer::enableStencil()
 {
    glEnable(GL_STENCIL_TEST);
@@ -173,7 +206,8 @@ void GLLegacyRenderer::enableStencil()
 
 void GLLegacyRenderer::disableStencil()
 {
-   glStencilMask(0xFF); // Necessary for clearing stencil buffer when calling glClear()
+   // Enable writing to stencil in case we disabled it, needed for clearing buffer
+   glStencilMask(0xFF);
    glDisable(GL_STENCIL_TEST);
 }
 
@@ -181,15 +215,16 @@ void GLLegacyRenderer::useAndStencilTest()
 {
    // Render if stencil value == 1
    glStencilFunc(GL_EQUAL, 1, 0xFF);
+   mUsingAndStencilTest = true;
 }
 
 void GLLegacyRenderer::useNotStencilTest()
 {
    // Render if stencil value != 1
    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+   mUsingAndStencilTest = false;
 }
 
-// Resets stencil test function
 void GLLegacyRenderer::enableStencilDrawOnly()
 {
    // Always draw to stencil buffer; we don't care what what's in there already
@@ -198,10 +233,17 @@ void GLLegacyRenderer::enableStencilDrawOnly()
    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); // Don't draw to color buffer!
 }
 
+// Temporarily disable drawing to stencil
 void GLLegacyRenderer::disableStencilDraw()
 {
    glStencilMask(0x00);                             // Don't draw anything in the stencil buffer
    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // Feel free to draw in the color buffer tho!
+
+   // Restore stencil test, it was probably modified by enableStencilDrawOnly()
+   if(mUsingAndStencilTest)
+      useAndStencilTest();
+   else
+      useNotStencilTest();
 }
 
 void GLLegacyRenderer::setViewport(S32 x, S32 y, S32 width, S32 height)

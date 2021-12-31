@@ -14,6 +14,8 @@ namespace Zap
    class GLLegacyRenderer: public Renderer
    {
    private:
+      bool mUsingAndStencilTest;
+
       GLLegacyRenderer();
       U32 getGLRenderType(RenderType type) const;
       U32 getGLTextureFormat(TextureFormat format) const;
@@ -25,6 +27,8 @@ namespace Zap
       static void create();
 
       void clear() override;
+      void clearStencil() override;
+      void clearDepth() override;
       void setClearColor(F32 r, F32 g, F32 b, F32 alpha = 1.0f) override;
       void setColor(F32 r, F32 g, F32 b, F32 alpha = 1.0f) override;
     
@@ -34,6 +38,10 @@ namespace Zap
       void disableAntialiasing() override;
       void enableBlending() override;
       void disableBlending() override;
+      void useSpyBugBlending() override;
+      void useDefaultBlending() override;
+      void enableDepthTest() override;
+      void disableDepthTest() override;
 
       void enableStencil() override;
       void disableStencil() override;

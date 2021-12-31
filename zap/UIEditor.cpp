@@ -59,7 +59,6 @@
 #include "GeomUtils.h"
 #include "RenderUtils.h"
 #include "ScreenShooter.h"
-#include "SDL_opengl.h"
 
 #include <cmath>
 #include <set>
@@ -1664,31 +1663,29 @@ static S32 QSORT_CALLBACK sortByTeam(DatabaseObject **a, DatabaseObject **b)
 
 void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
 {
+   Renderer &r = Renderer::get();
    fillVector = *editorDb->findObjects_fast(SpyBugTypeNumber);  // This will actually copy vector of pointers to fillVector
                                                                 // so we can sort by team, this is still faster then findObjects.
    if(fillVector.size() != 0)
    {
       // Use Z Buffer to make use of not drawing overlap visible area of same team SpyBug, but does overlap different team
       fillVector.sort(sortByTeam); // Need to sort by team, or else won't properly combine the colors.
-      glClear(GL_DEPTH_BUFFER_BIT);
-      glEnable(GL_DEPTH_TEST);
-      glEnable(GL_DEPTH_WRITEMASK);
-      glDepthFunc(GL_LESS);
-      glPushMatrix();
-      glTranslatef(0, 0, -0.95f);
+      r.clearDepth();
+      r.enableDepthTest();
+      r.pushMatrix();
+      r.translate(0, 0, -0.95f);
 
-      // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
-      glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);  
+      r.useSpyBugBlending();
 
       S32 prevTeam = -10;
 
       // Draw spybug visibility ranges first, underneath everything else
       for(S32 i = 0; i < fillVector.size(); i++)
       {
-         BfObject *editorObj = dynamic_cast<BfObject *>(fillVector[i]);
+         BfObject *editorObj = dynamic_cast<BfObject*>(fillVector[i]);
 
          if(i != 0 && editorObj->getTeam() != prevTeam)
-            glTranslatef(0, 0, 0.05f);
+            r.translate(0, 0, 0.05f);
          prevTeam = editorObj->getTeam();
 
          Point pos = editorObj->getPos();
@@ -1697,11 +1694,9 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
          renderSpyBugVisibleRange(pos, *editorObj->getColor(), mCurrentScale);
       }
 
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  //setDefaultBlendFunction();
-
-      glPopMatrix();
-      glDisable(GL_DEPTH_WRITEMASK);
-      glDisable(GL_DEPTH_TEST);
+      r.useDefaultBlending();
+      r.popMatrix();
+      r.disableDepthTest();
    }
 
    // Next draw turret firing ranges for selected or highlighted turrets only

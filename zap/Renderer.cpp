@@ -27,6 +27,14 @@ Renderer& Renderer::get()
    return *mInstance;
 }
 
+// Initial settings; call this in child constructor!
+void Renderer::initRenderer()
+{
+   enableBlending();
+   enableScissor();
+   useDefaultBlending();
+}
+
 void Renderer::setColor(F32 c, F32 alpha)
 {
    setColor(c, c, c, alpha);
