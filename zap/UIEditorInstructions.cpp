@@ -23,7 +23,6 @@
 #include "GeomUtils.h"        // For polygon triangulation
 #include "RenderUtils.h"
 #include "stringUtils.h"
-#include "SDL_opengl.h" // Basic OpenGL support
 
 #include <cmath>
 
@@ -465,13 +464,10 @@ void EditorInstructionsUserInterface::renderPageWalls() const
    }
 
    r.setColor(mAnimStage <= 11 ? Colors::yellow : Colors::NeutralTeamColor);
-
-   glLineWidth(gLineWidth3);
+   r.setLineWidth(gLineWidth3);
 
    r.renderPointVector(&points, RenderType::LineStrip);
-
-   glLineWidth(gDefaultLineWidth);
-
+   r.setLineWidth(gDefaultLineWidth);
 
    FontManager::pushFontContext(OldSkoolContext);
 
