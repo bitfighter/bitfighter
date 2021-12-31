@@ -156,7 +156,6 @@ public:
    virtual void setSubTextureData(TextureFormat format, DataType dataType, S32 xOffset, S32 yOffset,
                                   U32 width, U32 height, const void* data) = 0;
 
-
    // Framebuffers
    virtual void readFramebufferPixels(TextureFormat format, DataType dataType, S32 x, S32 y, S32 width, S32 height, void* data) = 0;
 
