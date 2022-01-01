@@ -16,7 +16,10 @@
 #     include "SDL_opengl.h"
 #  endif
 #else
+#ifndef POO
+#define POO
 #  include "simple-opengl-loader.h"
+#endif
 #endif
 
 
@@ -26,6 +29,10 @@ namespace Zap
 GLRenderer::GLRenderer()
  : mUsingAndStencilTest(0)
 {
+#ifndef BF_USE_LEGACY_GL
+   sogl_loadOpenGL();
+#endif
+
    glDepthFunc(GL_LESS);
    glDepthMask(true);   // Always enable writing to depth buffer, needed for glClearing depth buffer
 
@@ -142,11 +149,6 @@ void GLRenderer::clearDepth()
 void GLRenderer::setClearColor(F32 r, F32 g, F32 b, F32 alpha)
 {
    glClearColor(r, g, b, alpha);
-}
-
-void GLRenderer::setColor(F32 r, F32 g, F32 b, F32 alpha)
-{
-   glColor4f(r, g, b, alpha);
 }
 
 void GLRenderer::setLineWidth(F32 width)
@@ -309,85 +311,6 @@ Point GLRenderer::getScissorSize()
    return Point(scissor[2], scissor[3]);
 }
 
-void GLRenderer::scale(F32 x, F32 y, F32 z)
-{
-   glScalef(x, y, z);
-}
-
-void GLRenderer::translate(F32 x, F32 y, F32 z)
-{
-   glTranslatef(x, y, z);
-}
-
-void GLRenderer::rotate(F32 angle, F32 x, F32 y, F32 z)
-{
-   glRotatef(angle, x, y, z);
-}
-
-void GLRenderer::setMatrixMode(MatrixType type)
-{
-   switch (type)
-   {
-   case MatrixType::ModelView:
-      glMatrixMode(GL_MODELVIEW);
-      break;
-
-   case MatrixType::Projection:
-      glMatrixMode(GL_PROJECTION);
-      break;
-
-   default:
-      break;
-   }
-}
-
-void GLRenderer::getMatrix(MatrixType type, F32* matrix)
-{
-   switch (type)
-   {
-   case MatrixType::ModelView:
-      glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
-      break;
-
-   case MatrixType::Projection:
-      glGetFloatv(GL_PROJECTION_MATRIX, matrix);
-      break;
-
-   default:
-      break;
-   }
-}
-
-void GLRenderer::pushMatrix()
-{
-   glPushMatrix();
-}
-
-void GLRenderer::popMatrix()
-{
-   glPopMatrix();
-}
-
-void GLRenderer::loadMatrix(const F32* m)
-{
-   glLoadMatrixf(m);
-}
-
-void GLRenderer::loadMatrix(const F64* m)
-{
-   glLoadMatrixd(m);
-}
-
-void GLRenderer::loadIdentity()
-{
-   glLoadIdentity();
-}
-
-void GLRenderer::projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx)
-{
-   glOrtho(left, right, bottom, top, nearx, farx);
-}
-
 U32 GLRenderer::generateTexture()
 {
    GLuint textureHandle;
@@ -444,84 +367,6 @@ void GLRenderer::readFramebufferPixels(TextureFormat format, DataType dataType, 
       getGLTextureFormat(format),
       getGLDataType(dataType),
       data);
-}
-
-void GLRenderer::renderVertexArray(const S8 verts[], U32 vertCount, RenderType type, U32 start, U32 stride, U32 vertDimension)
-{
-   glEnableClientState(GL_VERTEX_ARRAY);
-
-   glVertexPointer(vertDimension, GL_BYTE, stride, verts);
-   glDrawArrays(getGLRenderType(type), start, vertCount);
-
-   glDisableClientState(GL_VERTEX_ARRAY);
-}
-
-void GLRenderer::renderVertexArray(const S16 verts[], U32 vertCount, RenderType type, U32 start, U32 stride, U32 vertDimension)
-{
-   glEnableClientState(GL_VERTEX_ARRAY);
-
-   glVertexPointer(vertDimension, GL_SHORT, stride, verts);
-   glDrawArrays(getGLRenderType(type), start, vertCount);
-
-   glDisableClientState(GL_VERTEX_ARRAY);
-}
-
-void GLRenderer::renderVertexArray(const F32 verts[], U32 vertCount, RenderType type, U32 start, U32 stride, U32 vertDimension)
-{
-   glEnableClientState(GL_VERTEX_ARRAY);
-
-   glVertexPointer(vertDimension, GL_FLOAT, stride, verts);
-   glDrawArrays(getGLRenderType(type), start, vertCount);
-
-   glDisableClientState(GL_VERTEX_ARRAY);
-}
-
-void GLRenderer::renderColored(const F32 verts[], const F32 colors[], U32 vertCount,
-                                    RenderType type, U32 start, U32 stride, U32 vertDimension)
-{
-   glEnableClientState(GL_VERTEX_ARRAY);
-   glEnableClientState(GL_COLOR_ARRAY);
-
-   glVertexPointer(vertDimension, GL_FLOAT, stride, verts);
-   glColorPointer(4, GL_FLOAT, stride, colors);
-   glDrawArrays(getGLRenderType(type), start, vertCount);
-
-   glDisableClientState(GL_COLOR_ARRAY);
-   glDisableClientState(GL_VERTEX_ARRAY);
-}
-
-void GLRenderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCount,
-                                     RenderType type, U32 start, U32 stride, U32 vertDimension)
-{
-   // !Todo properly!
-   glEnable(GL_TEXTURE_2D);
-   glEnableClientState(GL_VERTEX_ARRAY);
-   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-   glVertexPointer(vertDimension, GL_FLOAT, stride, verts);
-   glTexCoordPointer(2, GL_FLOAT, stride, UVs);
-   glDrawArrays(getGLRenderType(type), start, vertCount);
-
-   glDisable(GL_TEXTURE_2D);
-   glDisableClientState(GL_VERTEX_ARRAY);
-   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-}
-
-void GLRenderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount,
-                                           RenderType type, U32 start, U32 stride, U32 vertDimension)
-{
-   // !Todo properly!
-   glEnable(GL_TEXTURE_2D);
-   glEnableClientState(GL_VERTEX_ARRAY);
-   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-   glVertexPointer(vertDimension, GL_FLOAT, stride, verts);
-   glTexCoordPointer(2, GL_FLOAT, stride, UVs);
-   glDrawArrays(getGLRenderType(type), start, vertCount);
-
-   glDisable(GL_TEXTURE_2D);
-   glDisableClientState(GL_VERTEX_ARRAY);
-   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 }
