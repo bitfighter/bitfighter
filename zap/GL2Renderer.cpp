@@ -6,7 +6,7 @@
 #ifndef BF_USE_LEGACY_GL
 
 #include "GL2Renderer.h"
-#include "simple-opengl-loader.h"
+#include "glad/glad.h"
 #include <memory>
 
 namespace Zap

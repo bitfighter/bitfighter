@@ -16,10 +16,7 @@
 #     include "SDL_opengl.h"
 #  endif
 #else
-#ifndef POO
-#define POO
-#  include "simple-opengl-loader.h"
-#endif
+#  include "glad/glad.h"
 #endif
 
 
@@ -30,7 +27,7 @@ GLRenderer::GLRenderer()
  : mUsingAndStencilTest(0)
 {
 #ifndef BF_USE_LEGACY_GL
-   sogl_loadOpenGL();
+   TNLAssert(gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress), "Unable to load GL functions!");
 #endif
 
    glDepthFunc(GL_LESS);

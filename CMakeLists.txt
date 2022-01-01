@@ -7,7 +7,7 @@ cmake_policy(SET CMP0043 OLD)
 # CMake options
 #
 
-option(USE_LEGACY_GL "Use legacy OpenGL (OpenGL 1.0) instead of modern OpenGL." NO)
+option(USE_LEGACY_GL "Use legacy OpenGL (OpenGL 1.0) instead of modern OpenGL." YES)
 option(USE_GLES "Force usage of OpenGL ES for the bitfighter client.  Requires SDL2." NO)
 option(ALURE_DISABLE_MP3 "Disable dynamic loading of libmpg123.  Disables mp3 completely." NO)
 option(NO_THREADS "Disable usage of threads in TNL.  May cause issues." NO)
@@ -87,19 +87,6 @@ if(USE_LEGACY_GL)
 	add_definitions(-DBF_USE_LEGACY_GL)
 endif()
 
-# Add OpenGL loader if we aren't using legacy OpenGL
-if(NOT USE_LEGACY_GL)
-	set(GL_LOADER_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/simple-opengl-loader")
-	add_definitions(-DSOGL_MAJOR_VERSION=2)
-	add_definitions(-DSOGL_MINOR_VERSION=1)
-	
-	if(WIN32)
-		add_definitions(-DSOGL_IMPLEMENTATION_WIN32)
-	else()
-		add_definitions(-DSOGL_IMPLEMENTATION_X11)
-	endif()
-endif()
-
 # Other needed libraries that don't have in-tree fallback options
 if(NOT NO_THREADS)
 	find_package(Threads REQUIRED)
@@ -112,6 +99,14 @@ find_package(Vorbis)
 find_package(ModPlug)
 find_package(OpenAL)
 
+# Add OpenGL loader if we aren't using legacy OpenGL
+if(NOT USE_LEGACY_GL)
+	add_subdirectory(glad)
+	set(GL_LOADER_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/glad/include")
+	set(GL_LOADER_LIBRARY glad)
+	add_definitions(-DGL_MAJOR_VERSION=2)
+	add_definitions(-DGL_MINOR_VERSION=1)
+endif()
 
 # Now look for libraries that have an in-tree fallback option
 # Many of these may have special overrides to properly adapt to the in-tree versions

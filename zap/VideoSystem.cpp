@@ -73,8 +73,8 @@ bool VideoSystem::init()
 
 #ifndef BF_USE_LEGACY_GL
    // Tell SDL which OpenGL version we will use
-   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, SOGL_MAJOR_VERSION);
-   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, SOGL_MINOR_VERSION);
+   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GL_MAJOR_VERSION);
+   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GL_MINOR_VERSION);
 #endif
 
    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );  // depth used in editor to display spybug visible area non-overlap
@@ -124,8 +124,8 @@ bool VideoSystem::init()
    SDL_GLContext context = SDL_GL_CreateContext(DisplayManager::getScreenInfo()->sdlWindow);
    DisplayManager::getScreenInfo()->sdlGlContext = &context;
 
-#ifdef BF_USE_LEGACY_GL
    // Initialize renderer
+#ifdef BF_USE_LEGACY_GL
    GLLegacyRenderer::create();
 #else
    GL2Renderer::create();
