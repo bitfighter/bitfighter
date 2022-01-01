@@ -3,6 +3,8 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
+#ifndef BF_USE_LEGACY_GL
+
 #include "Shader.h"
 #include "GameSettings.h"
 
@@ -168,3 +170,5 @@ S32 Shader::findUniform(const std::string& uniformName) const
 
 	return found->second;
 }
+
+#endif // BF_USE_LEGACY_GL
