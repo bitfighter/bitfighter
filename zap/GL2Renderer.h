@@ -3,24 +3,24 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#ifndef _GLLEGACYRENDERER_H_
-#define _GLLEGACYRENDERER_H_
+#ifndef _GL2RENDERER_H
+#define _GL2RENDERER_H
 
 #include "GLRenderer.h"
 
 namespace Zap
 {
 
-class GLLegacyRenderer: public GLRenderer
+class GL2Renderer : public GLRenderer
 {
 private:
-   GLLegacyRenderer();
+   GL2Renderer();
 
 public:
-   ~GLLegacyRenderer() override;
+   ~GL2Renderer() override;
    static void create();
 };
 
 }
 
-#endif /* _GLLEGACYRENDERER_H_ */
+#endif /* _GL2RENDERER_H */

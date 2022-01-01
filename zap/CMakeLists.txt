@@ -131,6 +131,8 @@ set(CLIENT_SOURCES
 	gameObjectRender.cpp
 	GameRecorderPlayback.cpp
     GaugeRenderer.cpp
+	GL2Renderer.cpp
+	GLRenderer.cpp
     GLLegacyRenderer.cpp
 	HelpItemManager.cpp
 	HelperManager.cpp
@@ -290,6 +292,7 @@ set(INCLUDE_DIRS
 if(COMPILE_CLIENT)
 	list(APPEND INCLUDE_DIRS
 		${GL_INCLUDE_DIR}
+		${GL_LOADER_INCLUDE_DIR}
 		${PNG_INCLUDE_DIR}
 		${SDL_INCLUDE_DIR}
 		${SPEEX_INCLUDE_DIR}

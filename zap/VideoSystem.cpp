@@ -9,7 +9,6 @@
 #include "ClientGame.h"
 #include "IniFile.h"
 #include "Console.h"
-#include "GLLegacyRenderer.h"
 #include "DisplayManager.h"
 #include "UI.h"
 #include "version.h"
@@ -19,6 +18,12 @@
 #include "stringUtils.h"
 
 #include "tnlLog.h"
+
+#ifdef BF_USE_LEGACY_GL
+#  include "GLLegacyRenderer.h"
+#else
+#  include "GL2Renderer.h"
+#endif
 
 #include <cmath>
 
@@ -65,6 +70,13 @@ bool VideoSystem::init()
    //SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
    //SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
    //SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
+
+#ifndef BF_USE_LEGACY_GL
+   // Tell SDL which OpenGL version we will use
+   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, SOGL_MAJOR_VERSION);
+   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, SOGL_MINOR_VERSION);
+#endif
+
    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );  // depth used in editor to display spybug visible area non-overlap
    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
@@ -112,8 +124,12 @@ bool VideoSystem::init()
    SDL_GLContext context = SDL_GL_CreateContext(DisplayManager::getScreenInfo()->sdlWindow);
    DisplayManager::getScreenInfo()->sdlGlContext = &context;
 
+#ifdef BF_USE_LEGACY_GL
    // Initialize renderer
    GLLegacyRenderer::create();
+#else
+   GL2Renderer::create();
+#endif
 
    // Set the window icon -- note that the icon must be a 32x32 bmp, and SDL will
    // downscale it to 16x16 with no interpolation.  Therefore, it's best to start

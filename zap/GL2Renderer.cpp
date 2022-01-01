@@ -3,34 +3,29 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#ifdef BF_USE_LEGACY_GL
+#ifndef BF_USE_LEGACY_GL
 
-#include "GLLegacyRenderer.h"
+#include "GL2Renderer.h"
+#include "simple-opengl-loader.h"
 #include <memory>
-
-#ifdef BF_USE_GLES
-#  include "SDL_opengles.h"
-#else
-#  include "SDL_opengl.h"
-#endif
 
 namespace Zap
 {
 
-GLLegacyRenderer::GLLegacyRenderer()
+GL2Renderer::GL2Renderer()
 {
-   // Do nothing
+   sogl_loadOpenGL();
 }
 
-GLLegacyRenderer::~GLLegacyRenderer()
+GL2Renderer::~GL2Renderer()
 {
    // Do nothing
 }
 
 // Static
-void GLLegacyRenderer::create()
+void GL2Renderer::create()
 {
-   setInstance(std::unique_ptr<Renderer>(new GLLegacyRenderer));
+   setInstance(std::unique_ptr<Renderer>(new GL2Renderer));
 }
 
 }

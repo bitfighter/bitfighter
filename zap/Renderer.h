@@ -79,7 +79,7 @@ private:
 
 protected:
    static void setInstance(std::unique_ptr<Renderer> &&instance);
-   Renderer() = default; // Constructor is accessible only to derived classes.
+   Renderer() = default; // Constructor is only accessible to child classes.
    void initRenderer();  // Call this in child constructor!
 
 public:
