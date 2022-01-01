@@ -59,6 +59,7 @@ enum ParamId {
    LOG_DIR,
    SCRIPTS_DIR,
    ROBOT_DIR,
+   SHADER_DIR,
    SCREENSHOT_DIR,
    SFX_DIR,
    MUSIC_DIR,

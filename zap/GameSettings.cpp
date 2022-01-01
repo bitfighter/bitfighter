@@ -91,11 +91,12 @@ ParamInfo paramDefs[] = {
 { "playlist",              ALL_REMAINING,  USE_FILE,              2, "<path>", "Specify the location of a playlist of levels, which is a text file that specifies what levels the user want to be played. you must specify its relative location (relative to the Bitfighter binaries) with the -playlist option"},
 
 // Specifying folders
-{ "rootdatadir",           ONE_REQUIRED,   ROOT_DATA_DIR,         3, "<path>",                "Equivalent to setting the -inidir, -logdir, -robotdir, -screenshotdir, and -leveldir parameters. The application will automatially append \"/robots\", \"/screenshots\", and \"/levels\" to path as appropriate.", "You must specify the root data folder with the -rootdatadir option" },
+{ "rootdatadir",           ONE_REQUIRED,   ROOT_DATA_DIR,         3, "<path>",                "Equivalent to setting the -inidir, -logdir, -robotdir, -shaderdir, -screenshotdir, and -leveldir parameters. The application will automatially append \"/robots\", \"/shaders\", \"/screenshots\", and \"/levels\" to path as appropriate.", "You must specify the root data folder with the -rootdatadir option" },
 { "leveldir",              ONE_REQUIRED,   LEVEL_DIR,             2, "<folder or subfolder>", "Load all levels in specified system folder, or a subfolder under the levels folder. Levels will be loaded in alphabetical order by level-file name. Admins can create custom level lists by copying selected levels into folders or subfolders, and rename the files to get them to load in the proper order.", "You must specify a levels subfolder with the -leveldir option" },
 { "logdir",                ONE_REQUIRED,   LOG_DIR,               3, "<path>",                "Folder where logfiles will be written",      "You must specify your log folder with the -logdir option" },
 { "scriptsdir",            ONE_REQUIRED,   SCRIPTS_DIR,           3, "<path>",                "Folder where Lua helper scripts are stored", "You must specify the folder where your Lua scripts are stored with the -scriptsdir option" },
 { "robotdir",              ONE_REQUIRED,   ROBOT_DIR,             3, "<path>",                "Folder where robot scripts are stored",      "You must specify the robots folder with the -robotdir option" },
+{ "shaderdir",             ONE_REQUIRED,   SHADER_DIR,            3, "<path>",                "Folder where shader sources are stored",     "You must specify the shaders folder with the -shaderdir option" },
 { "screenshotdir",         ONE_REQUIRED,   SCREENSHOT_DIR,        3, "<path>",                "Folder where screenshots are stored",        "You must specify your screenshots folder with the -screenshotdir option" },
 { "sfxdir",                ONE_REQUIRED,   SFX_DIR,               3, "<path>",                "Folder where sounds are stored",             "You must specify your sounds folder with the -sfxdir option" },
 { "musicdir",              ONE_REQUIRED,   MUSIC_DIR,             3, "<path>",                "Folder where game music stored",             "You must specify your music folder with the -musicdir option" },
@@ -351,8 +352,9 @@ FolderManager *GameSettings::getFolderManager()
 
 FolderManager GameSettings::getCmdLineFolderManager()
 {
-    return FolderManager( getString(LEVEL_DIR), 
-                          getString(ROBOT_DIR), 
+    return FolderManager( getString(LEVEL_DIR),
+                          getString(ROBOT_DIR),
+                          getString(SHADER_DIR),
                           getString(SFX_DIR),
                           getString(MUSIC_DIR),
                           getString(INI_DIR),

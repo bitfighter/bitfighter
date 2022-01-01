@@ -158,6 +158,9 @@ static void initFoldersBlock(FolderManager *folderManager, S32 textsize)
       
    names.push_back("Robot Dir:");
    vals.push_back(folderManager->robotDir.c_str());
+
+   names.push_back("Shader Dir:");
+   vals.push_back(folderManager->shaderDir.c_str());
       
    names.push_back("Screenshot Dir:");
    vals.push_back(folderManager->screenshotDir.c_str());
