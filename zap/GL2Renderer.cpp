@@ -13,6 +13,7 @@ namespace Zap
 {
 
 GL2Renderer::GL2Renderer()
+   : mStaticShader("static", "static.v.glsl", "static.f.glsl")
 {
    // Do nothing
 }

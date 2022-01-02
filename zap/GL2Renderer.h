@@ -7,6 +7,7 @@
 #define _GL2RENDERER_H
 
 #include "GLRenderer.h"
+#include "Shader.h"
 
 namespace Zap
 {
@@ -15,6 +16,9 @@ class GL2Renderer : public GLRenderer
 {
 private:
    GL2Renderer();
+
+   // Shaders
+   Shader mStaticShader;
 
 public:
    ~GL2Renderer() override;

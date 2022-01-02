@@ -11,7 +11,9 @@
 #include "glad/glad.h"
 #include "tnlAssert.h"
 #include "tnlLog.h"
+#include "stringUtils.h"
 #include <limits>
+#include <array>
 
 std::string getGLShaderDebugLog(U32 object, PFNGLGETSHADERIVPROC glGet_iv, PFNGLGETSHADERINFOLOGPROC glGet_InfoLog)
 {
@@ -26,7 +28,7 @@ std::string getGLShaderDebugLog(U32 object, PFNGLGETSHADERIVPROC glGet_iv, PFNGL
 		glGet_InfoLog(object, logLength, NULL, &log[0]);
 
 	log.pop_back(); // Remove null terminator (\0) that OpenGL added
-	return "\n-----------GL LOG-----------\n" + log; // For looks
+	return "\n----------- GL DEBUG LOG -----------\n" + log; // For looks
 }
 
 Shader::Shader(const std::string& name, const std::string& vertexShaderFile, const std::string& fragmentShaderFile)
@@ -52,10 +54,10 @@ Shader::~Shader()
 // Static
 std::string Shader::getShaderSource(const std::string &fileName)
 {
-	std::string filename = GameSettings::getFolderManager()->findShaderFile(fileName);
-	TNLAssert(filename != "", "Expected a shader filename here!");
+	std::string filePath = GameSettings::getFolderManager()->findShaderFile(fileName);
+	TNLAssert(filePath != "", "Expected a shader path here!");
 
-	return filename;
+	return readFile(filePath);
 }
 
 // Static
