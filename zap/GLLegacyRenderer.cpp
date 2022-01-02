@@ -112,9 +112,9 @@ void GLLegacyRenderer::loadIdentity()
    glLoadIdentity();
 }
 
-void GLLegacyRenderer::projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx)
+void GLLegacyRenderer::projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearZ, F64 farZ)
 {
-   glOrtho(left, right, bottom, top, nearx, farx);
+   glOrtho(left, right, bottom, top, nearZ, farZ);
 }
 
 void GLLegacyRenderer::renderVertexArray(const S8 verts[], U32 vertCount, RenderType type, U32 start, U32 stride, U32 vertDimension)

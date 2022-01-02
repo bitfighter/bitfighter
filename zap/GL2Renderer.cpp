@@ -204,12 +204,12 @@ void GL2Renderer::loadIdentity()
 	stack.push(newMatrix);
 }
 
-void GL2Renderer::projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx)
+void GL2Renderer::projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearZ, F64 farZ)
 {
 	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 
 	// Multiply the top matrix with an ortho matrix
-	glm::mat4 ortho = glm::ortho(left, right, bottom, top, nearx, farx);
+	glm::mat4 ortho = glm::ortho(left, right, bottom, top, nearZ, farZ);
 	glm::mat4 topMatrix = stack.top();
 
 	stack.pop();

@@ -146,6 +146,7 @@ set(CLIENT_SOURCES
 	lineEditor.cpp
 	LoadoutIndicator.cpp
 	loadoutHelper.cpp
+	Matrix.cpp
 	oglconsole.cpp
 	quickChatHelper.cpp
     Renderer.cpp

@@ -145,7 +145,7 @@ public:
    virtual void loadMatrix(const F32* m) = 0;
    virtual void loadMatrix(const F64* m) = 0;
    virtual void loadIdentity() = 0;
-   virtual void projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx) = 0;
+   virtual void projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearZ, F64 farZ) = 0;
 
    // Textures
    virtual U32 generateTexture(bool useLinearFiltering = true) = 0;
