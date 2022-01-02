@@ -26,17 +26,17 @@ void ScissorsManager::enable(bool enable, DisplayMode displayMode, F32 x, F32 y,
       Point scissorPos = r.getScissorPos();
       Point scissorSize = r.getScissorSize();
 
-      mScissorBox[0] = scissorPos.x;
-      mScissorBox[1] = scissorPos.y;
-      mScissorBox[2] = scissorSize.x;
-      mScissorBox[3] = scissorSize.y;
+      mScissorBox[0] = (S32)scissorPos.x;
+      mScissorBox[1] = (S32)scissorPos.y;
+      mScissorBox[2] = (S32)scissorSize.x;
+      mScissorBox[3] = (S32)scissorSize.y;
    }
 
    static Point p1, p2;
    p1 = DisplayManager::getScreenInfo()->convertCanvasToWindowCoord(x,     DisplayManager::getScreenInfo()->getGameCanvasHeight() - y - height, displayMode);
    p2 = DisplayManager::getScreenInfo()->convertCanvasToWindowCoord(width, height,                                         displayMode);
 
-   r.setScissor(p1.x, p1.y, p2.x, p2.y);
+   r.setScissor((S32)p1.x, (S32)p1.y, (S32)p2.x, (S32)p2.y);
    r.enableScissor();
 }
 

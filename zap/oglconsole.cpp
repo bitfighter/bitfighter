@@ -316,10 +316,10 @@ void OGLCONSOLE_Resize(_OGLCONSOLE_Console *console)
 
     /* Textual dimensions */
     Zap::Point viewportSize = r.getViewportSize(); 
-    console->textWidth = viewportSize.x / CHAR_PIXEL_W;
-    console->textHeight = viewportSize.y / CHAR_PIXEL_H;
-    screenWidth = viewportSize.x / CHAR_PIXEL_W;    // width in chars
-    screenHeight = viewportSize.y / CHAR_PIXEL_H;   // height in chars
+    console->textWidth = (S32)viewportSize.x / CHAR_PIXEL_W;
+    console->textHeight = (S32)viewportSize.y / CHAR_PIXEL_H;
+    screenWidth = (S32)viewportSize.x / CHAR_PIXEL_W;    // width in chars
+    screenHeight = (S32)viewportSize.y / CHAR_PIXEL_H;   // height in chars
     console->characterWidth = 1.0 / (int)screenWidth;
     console->characterHeight = 1.0 / (int)screenHeight;
 

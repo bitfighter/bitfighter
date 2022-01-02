@@ -2564,7 +2564,7 @@ void renderAsteroidSpawnEditor(const Point &pos, const Color* color, F32 scale)
    r.pushMatrix();
       r.translate(pos.x, pos.y, 0);
       r.scale(scale, scale, 1);
-      renderAsteroid(p, 2, 9.f, color, 0.8);
+      renderAsteroid(p, 2, 9.f, color, 0.8f);
 
       drawCircle(p, 13, &Colors::white);
    r.popMatrix();
