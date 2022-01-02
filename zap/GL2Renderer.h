@@ -47,7 +47,7 @@ public:
    void setColor(F32 r, F32 g, F32 b, F32 alpha = 1.0f) override;
    void scale(F32 x, F32 y, F32 z = 1.0f) override;
    void translate(F32 x, F32 y, F32 z = 0.0f) override;
-   void rotate(F32 angle, F32 x, F32 y, F32 z) override;
+   void rotate(F32 degAngle, F32 x, F32 y, F32 z) override;
 
    void setMatrixMode(MatrixType type) override;
    void getMatrix(MatrixType type, F32 *matrix) override;

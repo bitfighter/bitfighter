@@ -7,6 +7,8 @@
 
 #include "GL2Renderer.h"
 #include "glad/glad.h"
+#include "glm/gtc/matrix_transform.hpp" // For matrix transformations
+#include "glm/gtc/type_ptr.hpp" // glm to array conversions
 #include <memory>
 
 #define MAX_NUMBER_OF_VERTICES 300000
@@ -67,27 +69,50 @@ void GL2Renderer::create()
 
 void GL2Renderer::setColor(F32 r, F32 g, F32 b, F32 alpha)
 {
+	mColor = Color(r, g, b);
+	mAlpha = alpha;
 }
 
 void GL2Renderer::scale(F32 x, F32 y, F32 z)
 {
+	// Choose correct stack
+	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+
+	glm::mat4 newMatrix = glm::scale(stack.top(), glm::vec3(x, y, z));
+	stack.pop();
+	stack.push(newMatrix);
 }
 
 void GL2Renderer::translate(F32 x, F32 y, F32 z)
 {
+	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+
+	glm::mat4 newMatrix = glm::translate(stack.top(), glm::vec3(x, y, z));
+	stack.pop();
+	stack.push(newMatrix);
 }
 
-void GL2Renderer::rotate(F32 angle, F32 x, F32 y, F32 z)
+void GL2Renderer::rotate(F32 degAngle, F32 x, F32 y, F32 z)
 {
-}
+	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 
+	glm::mat4 newMatrix = glm::rotate(stack.top(), glm::radians(degAngle), glm::vec3(x, y, z));
+	stack.pop();
+	stack.push(newMatrix);
+}
 
 void GL2Renderer::setMatrixMode(MatrixType type)
 {
+	mMatrixMode = type;
 }
 
 void GL2Renderer::getMatrix(MatrixType type, F32 *matrix)
 {
+	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+	const F32 *sourceMatrix = static_cast<const F32 *>(glm::value_ptr(stack.top()));
+
+	for(int i = 0; i < 16; ++i)
+		matrix[i] = sourceMatrix[i];
 }
 
 void GL2Renderer::pushMatrix()

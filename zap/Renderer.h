@@ -90,7 +90,7 @@ public:
    void setColor(const Color& c, F32 alpha = 1.0f);
 
    void translate(const Point& offset);
-   void rotate(F32 angle);
+   void rotate(F32 degAngle);
    void scale(F32 factor);
    void scale(const Point& factor);
 
@@ -136,7 +136,7 @@ public:
    // Matrix transforms
    virtual void scale(F32 x, F32 y, F32 z = 1.0f) = 0;
    virtual void translate(F32 x, F32 y, F32 z = 0.0f) = 0;
-   virtual void rotate(F32 angle, F32 x, F32 y, F32 z) = 0;
+   virtual void rotate(F32 degAngle, F32 x, F32 y, F32 z) = 0;
 
    virtual void setMatrixMode(MatrixType type) = 0;
    virtual void getMatrix(MatrixType type, F32* matrix) = 0;

@@ -48,9 +48,9 @@ void GLLegacyRenderer::translate(F32 x, F32 y, F32 z)
    glTranslatef(x, y, z);
 }
 
-void GLLegacyRenderer::rotate(F32 angle, F32 x, F32 y, F32 z)
+void GLLegacyRenderer::rotate(F32 degAngle, F32 x, F32 y, F32 z)
 {
-   glRotatef(angle, x, y, z);
+   glRotatef(degAngle, x, y, z);
 }
 
 void GLLegacyRenderer::setMatrixMode(MatrixType type)

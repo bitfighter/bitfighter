@@ -50,9 +50,9 @@ void Renderer::translate(const Point& offset)
    translate(offset.x, offset.y, 0);
 }
 
-void Renderer::rotate(F32 angle)
+void Renderer::rotate(F32 degAngle)
 {
-   rotate(angle, 0.0f, 0.0f, 1.0f);
+   rotate(degAngle, 0.0f, 0.0f, 1.0f);
 }
 
 void Renderer::scale(F32 factor)
