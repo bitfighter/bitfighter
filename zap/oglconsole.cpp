@@ -86,7 +86,7 @@ int OGLCONSOLE_CreateFont()
        r.deleteTexture(OGLCONSOLE_glFontHandle);
 
     /* Get a font index from OpenGL */
-    OGLCONSOLE_glFontHandle = r.generateTexture();    /* Create 1 texture, store in glFontHandle */
+    OGLCONSOLE_glFontHandle = r.generateTexture(false);    /* Create 1 texture, store in glFontHandle */
     
     /* Select our font */
     r.bindTexture(OGLCONSOLE_glFontHandle);

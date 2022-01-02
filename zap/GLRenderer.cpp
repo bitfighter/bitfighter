@@ -303,10 +303,30 @@ Point GLRenderer::getScissorSize()
    return Point(scissor[2], scissor[3]);
 }
 
-U32 GLRenderer::generateTexture()
+// Uses "nearest pixel" filtering when useLinearFiltering is false
+U32 GLRenderer::generateTexture(bool useLinearFiltering)
 {
    GLuint textureHandle;
    glGenTextures(1, &textureHandle);
+
+   // Set filtering
+   GLint currentBinding;
+   glGetIntegerv(GL_TEXTURE_BINDING_2D, &currentBinding);
+   glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+   if(useLinearFiltering)
+   {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+   }
+   else
+   {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+   }
+
+   glBindTexture(GL_TEXTURE_2D, currentBinding); // Restore previous binding
+
    return textureHandle;
 }
 
@@ -333,10 +353,6 @@ void GLRenderer::setTextureData(TextureFormat format, DataType dataType, U32 wid
       GL_TEXTURE_2D, 0, textureFormat,
       width, height, 0,
       textureFormat, getGLDataType(dataType), data);
-
-   // Set filtering
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 void GLRenderer::setSubTextureData(TextureFormat format, DataType dataType, S32 xOffset, S32 yOffset,

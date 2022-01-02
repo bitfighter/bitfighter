@@ -59,7 +59,7 @@ public:
    Point getScissorPos() override;
    Point getScissorSize() override;
 
-   U32 generateTexture() override;
+   U32 generateTexture(bool useLinearFiltering = true) override;
    void bindTexture(U32 textureHandle) override;
    bool isTexture(U32 textureHandle) override;
    void deleteTexture(U32 textureHandle) override;

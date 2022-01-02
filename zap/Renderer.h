@@ -147,7 +147,7 @@ public:
    virtual void projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx) = 0;
 
    // Textures
-   virtual U32 generateTexture() = 0;
+   virtual U32 generateTexture(bool useLinearFiltering = true) = 0;
    virtual void bindTexture(U32 textureHandle) = 0;
    virtual bool isTexture(U32 textureHandle) = 0;
    virtual void deleteTexture(U32 textureHandle) = 0;
