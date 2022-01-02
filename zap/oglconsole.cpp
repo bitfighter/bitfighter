@@ -204,14 +204,18 @@ int OGLCONSOLE_CreateFont()
 	}
 #  else
 	/* Upload our font */
-#     ifdef OGLCONSOLE_USE_ALPHA_TEXT
-	glTexImage2D(
-			GL_TEXTURE_2D, 0, GL_ALPHA,
-			OGLCONSOLE_FontData.width, OGLCONSOLE_FontData.height, 0,
-			GL_ALPHA, GL_UNSIGNED_BYTE, OGLCONSOLE_FontData.pixel_data);
+#  ifdef OGLCONSOLE_USE_ALPHA_TEXT
+	      /*glTexImage2D(
+			   GL_TEXTURE_2D, 0, GL_ALPHA,
+			   OGLCONSOLE_FontData.width, OGLCONSOLE_FontData.height, 0,
+			   GL_ALPHA, GL_UNSIGNED_BYTE, OGLCONSOLE_FontData.pixel_data);*/
+
+         // fordcars here: I didn't test this:
+         r.setTextureData(Zap::TextureFormat::Alpha, Zap::DataType::UnsignedByte,
+            OGLCONSOLE_FontData.width, OGLCONSOLE_FontData.height, OGLCONSOLE_FontData.pixel_data);
 #     else
-   r.setTextureData(Zap::TextureFormat::RGB, Zap::DataType::UnsignedByte,
-      OGLCONSOLE_FontData.width, OGLCONSOLE_FontData.height, OGLCONSOLE_FontData.pixel_data);
+         r.setTextureData(Zap::TextureFormat::RGB, Zap::DataType::UnsignedByte,
+            OGLCONSOLE_FontData.width, OGLCONSOLE_FontData.height, OGLCONSOLE_FontData.pixel_data);
 #     endif
 #  endif
     
