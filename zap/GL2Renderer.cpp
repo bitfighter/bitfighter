@@ -73,8 +73,8 @@ template<typename T>
 void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U32 vertCount, RenderType type,
 	U32 start, U32 stride, U32 vertDimension)
 {
-	GLint shaderID = mStaticShader.getId();
-	glUseProgram(mStaticShader.getId());
+	GLuint shaderId = mStaticShader.getId();
+	glUseProgram(shaderId);
 
 	glm::mat4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
 	glUniformMatrix4fv(mStaticShader.findUniform("MVP"), 1, GL_FALSE, &MVP[0][0]);
@@ -82,7 +82,7 @@ void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U
 	glUniform1i(mStaticShader.findUniform("time"), static_cast<int>(SDL_GetTicks())); // Give time, it's always useful!
 
 	// Get the vertex position attribute location in the shader
-	GLint attribLocation = glGetAttribLocation(shaderID, "vertexPosition_modelspace");
+	GLint attribLocation = glGetAttribLocation(shaderId, "vertexPosition_modelspace");
 
 	// Give position data to the shader, and deal with stride
 	glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
@@ -109,7 +109,6 @@ void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U
 	// Draw!
 	glDrawArrays(getGLRenderType(type), 0, vertCount);
 	glDisableVertexAttribArray(attribLocation);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0); // Reset to default framebuffer
 }
 
 void GL2Renderer::setColor(F32 r, F32 g, F32 b, F32 alpha)

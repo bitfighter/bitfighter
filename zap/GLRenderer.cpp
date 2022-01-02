@@ -70,9 +70,6 @@ U32 GLRenderer::getGLRenderType(RenderType type) const
    case RenderType::TriangleFan:
       return GL_TRIANGLE_FAN;
 
-   case RenderType::Quads:
-      return GL_QUADS;
-
    default:
          return 0;
    }

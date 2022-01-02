@@ -622,10 +622,10 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
     F32 verts[4 * 2] = {
         -1, 0,
         2, 0,
+        -1, 2,
         2, 2,
-        -1, 2
     };
-    r.renderVertexArray(verts, 4, Zap::RenderType::Quads);
+    r.renderVertexArray(verts, 4, Zap::RenderType::TriangleStrip);
 
 #ifndef OGLCONSOLE_USE_ALPHA_TEXT
     // Change blend mode for drawing text
@@ -776,19 +776,19 @@ void OGLCONSOLE_DrawCharacter(int c, double x, double y, double w, double h,
     F32 verts[] = {
         x, y, z,
         x + w, y, z,
+        x, y + h, z,
         x + w, y + h, z,
-        x, y + h, z
     };
 
     F32 UVs[] = {
         cx, cy,
         cX, cy,
+        cx, cY,
         cX, cY,
-        cx, cY
     };
 
     // Render vertices
-    Zap::Renderer::get().renderColoredTexture(verts, UVs, 4, Zap::RenderType::Quads, 0, 0, 3);
+    Zap::Renderer::get().renderColoredTexture(verts, UVs, 4, Zap::RenderType::TriangleStrip, 0, 0, 3);
 #endif
 }
 

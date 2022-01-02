@@ -46,8 +46,7 @@ enum class RenderType
    LineLoop,
    Triangles,
    TriangleStrip,
-   TriangleFan,
-   Quads
+   TriangleFan
 };
 
 enum class TextureFormat
