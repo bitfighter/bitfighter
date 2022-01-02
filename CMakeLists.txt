@@ -105,8 +105,8 @@ if(NOT USE_LEGACY_GL)
 	add_subdirectory(glad)
 	set(GL_LOADER_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/glad/include")
 	set(GL_LOADER_LIBRARY glad)
-	add_definitions(-DGL_MAJOR_VERSION=2)
-	add_definitions(-DGL_MINOR_VERSION=1)
+	add_definitions(-DBF_GL_MAJOR_VERSION=2)
+	add_definitions(-DBF_GL_MINOR_VERSION=1)
 	
 	# glm
 	add_subdirectory(glm)
