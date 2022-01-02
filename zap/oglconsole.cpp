@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <vector>
+#include <cstddef> // For std::size_t
 #include "SDL.h"
 #include "Renderer.h"
 #include "Point.h"
@@ -50,8 +51,8 @@
 
 #  define CHAR_PIXEL_W 6
 #  define CHAR_PIXEL_H 13
-#  define CHAR_WIDTH 0.0234375 /* ogl tex coords */
-#  define CHAR_HEIGHT 0.203125 /* ogl tex coords */
+#  define CHAR_WIDTH 0.0234375f /* ogl tex coords */
+#  define CHAR_HEIGHT 0.203125f /* ogl tex coords */
 
 #endif
 
@@ -63,13 +64,6 @@
  * frames to divide up the time it takes to transition between "hidden" and
  * "visible" console visibility modes */
 #define SLIDE_STEPS 10
-
-#ifdef ZAP_DEDICATED
-   typedef int GLuint;
-   typedef double GLDouble;
-   typedef double GLdouble;
-   typedef int GLint;
-#endif
 
 U32 OGLCONSOLE_glFontHandle = 0;
 int OGLCONSOLE_CreateFont()
@@ -318,10 +312,10 @@ void OGLCONSOLE_Resize(_OGLCONSOLE_Console *console)
     Zap::Point viewportSize = r.getViewportSize(); 
     console->textWidth = (S32)viewportSize.x / CHAR_PIXEL_W;
     console->textHeight = (S32)viewportSize.y / CHAR_PIXEL_H;
-    screenWidth = (S32)viewportSize.x / CHAR_PIXEL_W;    // width in chars
-    screenHeight = (S32)viewportSize.y / CHAR_PIXEL_H;   // height in chars
-    console->characterWidth = 1.0 / (int)screenWidth;
-    console->characterHeight = 1.0 / (int)screenHeight;
+    screenWidth = (F32)viewportSize.x / CHAR_PIXEL_W;    // width in chars
+    screenHeight = (F32)viewportSize.y / CHAR_PIXEL_H;   // height in chars
+    console->characterWidth = 1.0f / (int)screenWidth;
+    console->characterHeight = 1.0f / (int)screenHeight;
 
     /* Different values have different meanings for xMatrixUse:
         0) Do not change the matrix before rendering
@@ -557,9 +551,9 @@ void OGLCONSOLE_Draw() { OGLCONSOLE_Render(userConsole); }
 void OGLCONSOLE_setCursor(int drawCursor) { userConsole->drawCursor = drawCursor; }
 
 /* Internal functions for drawing text. You don't want these, do you? */
-void OGLCONSOLE_DrawString(char *s, double x, double y, double w, double h, double z);
-void OGLCONSOLE_DrawWrapString(char *s, double x, double y, double w, double h, double z, int wrap);
-void OGLCONSOLE_DrawCharacter(int c, double x, double y, double w, double h, double z);
+void OGLCONSOLE_DrawString(char *s, F32 x, F32 y, F32 w, F32 h, F32 z);
+void OGLCONSOLE_DrawWrapString(char *s, F32 x, F32 y, F32 w, F32 h, F32 z, int wrap);
+void OGLCONSOLE_DrawCharacter(int c, F32 x, F32 y, F32 w, F32 h, F32 z);
 
 /* This function draws a single specific console; if you only use one console in
  * your program, use Draw() instead */
@@ -593,7 +587,7 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
      * Make this time dependent */
     if(C->visibility != 1)
     {
-        double d; /* bra size */
+        F32 d; /* bra size */
         int v = C->visibility;
 
         /* Count down in both directions */
@@ -608,7 +602,7 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
             C->visibility--;
         }
 
-        d = C->textHeight * C->characterHeight * (1.0 - v * (1.0 / SLIDE_STEPS));
+        d = C->textHeight * C->characterHeight * (1.0f - v * (1.0f / SLIDE_STEPS));
         r.translate(0, (F32)d, 0);
 //d = 0.04 * v;
 //glTranslated(0, 1-d, 0);
@@ -706,8 +700,7 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
 }
 
 /* Issue rendering commands for a single a string */
-void OGLCONSOLE_DrawString(char *s, double x, double y, double w, double h,
-                           double z)
+void OGLCONSOLE_DrawString(char *s, F32 x, F32 y, F32 w, F32 h, F32 z)
 {
     while (*s)
     {
@@ -718,11 +711,11 @@ void OGLCONSOLE_DrawString(char *s, double x, double y, double w, double h,
 }
 
 /* Issue rendering commands for a single a string */
-void OGLCONSOLE_DrawWrapString(char *s, double x, double y, double w, double h,
-                               double z, int wrap)
+void OGLCONSOLE_DrawWrapString(char *s, F32 x, F32 y, F32 w, F32 h,
+                               F32 z, int wrap)
 {
     int pos = 0;
-    double X = x;
+    F32 X = x;
 
     while (*s)
     {
@@ -740,11 +733,10 @@ void OGLCONSOLE_DrawWrapString(char *s, double x, double y, double w, double h,
 }
 
 /* Issue rendering commands for a single character */
-void OGLCONSOLE_DrawCharacter(int c, double x, double y, double w, double h,
-                              double z)
+void OGLCONSOLE_DrawCharacter(int c, F32 x, F32 y, F32 w, F32 h, F32 z)
 {
 //  static int message = 0;
-    double cx, cy, cX, cY;
+    F32 cx, cy, cX, cY;
     
 //    if(c < FIRST_CHARACTER || c > LAST_CHARACTER)
 //        c = (c - FIRST_CHARACTER) % (LAST_CHARACTER - FIRST_CHARACTER);
@@ -759,9 +751,9 @@ void OGLCONSOLE_DrawCharacter(int c, double x, double y, double w, double h,
     cY = cy - CHAR_HEIGHT;
 #else
     cx = (c % 42) * CHAR_WIDTH;
-    cy = 1.0 - (c / 42) * CHAR_HEIGHT;
+    cy = 1.0f - (c / 42) * CHAR_HEIGHT;
     cX = cx + CHAR_WIDTH;
-    cY = 1.0 - (c / 42 + 1) * CHAR_HEIGHT;
+    cY = 1.0f - (c / 42 + 1) * CHAR_HEIGHT;
 #endif
 
 
@@ -871,8 +863,7 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console C, const char *s, ...)
          if(*outputCursor == '\t')
          {
              const int TAB_WIDTH = 8;
- 
-             int n = consoleCursor - (C->lines + lineQueueIndex * textWidth);
+             std::size_t n = consoleCursor - (C->lines + lineQueueIndex * textWidth);
              //printf("column: %i\n", n);
  
              /* Are we indenting our way off the edge of the screen? */
@@ -965,7 +956,7 @@ void OGLCONSOLE_YankHistory(_OGLCONSOLE_Console *console)
         /* Set up this shite */
         console->inputCursorPos  = 
             console->inputLineLength =
-            strlen(console->inputLine);
+            (int)strlen(console->inputLine);
 
         /* Drop out of history browsing mode */
         console->historyScrollIndex = -1;
@@ -1012,7 +1003,7 @@ int getCurrentLineLength(_OGLCONSOLE_Console *userConsole)
    if(userConsole->historyScrollIndex == -1)
       return userConsole->inputLineLength;
    else
-      return strlen(userConsole->history[userConsole->historyScrollIndex]);
+      return (int)strlen(userConsole->history[userConsole->historyScrollIndex]);
 }
 
 
