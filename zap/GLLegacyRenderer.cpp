@@ -19,7 +19,7 @@ namespace Zap
 
 GLLegacyRenderer::GLLegacyRenderer()
 {
-   // Do nothing
+   initRenderer();
 }
 
 GLLegacyRenderer::~GLLegacyRenderer()

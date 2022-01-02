@@ -27,8 +27,9 @@ std::string getGLShaderDebugLog(U32 object, PFNGLGETSHADERIVPROC glGet_iv, PFNGL
 	if(logLength)
 		glGet_InfoLog(object, logLength, NULL, &log[0]);
 
-	log.pop_back(); // Remove null terminator (\0) that OpenGL added
-	return "\n----------- GL DEBUG LOG -----------\n" + log; // For looks
+	// Remove null terminator added by OpenGL; std::string doesn't need this!
+	log.pop_back();
+	return "\n----------- GL DEBUG LOG -----------\n" + log;
 }
 
 Shader::Shader(const std::string& name, const std::string& vertexShaderFile, const std::string& fragmentShaderFile)

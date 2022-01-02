@@ -38,8 +38,6 @@ GLRenderer::GLRenderer()
 
    glPixelStorei(GL_PACK_ALIGNMENT, 1);
    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-   initRenderer();
 }
 
 GLRenderer::~GLRenderer()

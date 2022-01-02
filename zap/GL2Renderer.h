@@ -8,6 +8,9 @@
 
 #include "GLRenderer.h"
 #include "Shader.h"
+#include "Color.h"
+#include "glm/glm.hpp"
+#include <stack>
 
 namespace Zap
 {
@@ -16,9 +19,26 @@ class GL2Renderer : public GLRenderer
 {
 private:
    GL2Renderer();
+   void initBuffers();
 
    // Shaders
    Shader mStaticShader;
+   Shader mDynamicShader;
+   Shader mTexturedShader;
+   Shader mColoredTextureShader;
+
+   // Reusable buffers for vertex data
+   U32 mPositionBuffer;
+   U32 mColorBuffer;
+   U32 mUVBuffer;
+
+   bool mTextureEnabled;
+   Color mColor;
+   float mAlpha;
+
+   std::stack<glm::mat4> mModelViewMatrixStack;
+   std::stack<glm::mat4> mProjectionMatrixStack;
+   MatrixType mMatrixMode;
 
 public:
    ~GL2Renderer() override;
