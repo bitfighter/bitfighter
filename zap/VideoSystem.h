@@ -15,7 +15,7 @@ namespace Zap
 {
 
 class GameSettings;
-class IniSettings;
+struct IniSettings;
 
 class VideoSystem
 {

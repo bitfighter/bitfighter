@@ -71,7 +71,7 @@ void GL2Renderer::create()
 // Uses static shader
 template<typename T>
 void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U32 vertCount, RenderType type,
-	U32 start, U32 stride)
+	U32 start, U32 stride, U32 vertDimension)
 {
 	GLint shaderID = mStaticShader.getId();
 	glUseProgram(mStaticShader.getId());
@@ -87,18 +87,19 @@ void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U
 	// Give position data to the shader, and deal with stride
 	glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
 	U32 extraBytesPerVert = 0;
-	if(stride > sizeof(F32) * 2) // Should never be less than
-		extraBytesPerVert = stride - sizeof(F32) * 2;
+	if(stride > sizeof(F32) * vertDimension) // Should never be less than
+		extraBytesPerVert = stride - sizeof(F32) * vertDimension;
 
 	glBufferSubData(GL_ARRAY_BUFFER, 0,
-		(sizeof(T) * vertCount * 2) + (extraBytesPerVert * vertCount),
-		verts + (start * 2));
+		(sizeof(T) * vertCount * vertDimension) + (extraBytesPerVert * vertCount),
+		verts + (start * vertDimension)
+	);
 
 	// Set the attribute to point to the buffer data
 	glEnableVertexAttribArray(attribLocation);
 	glVertexAttribPointer(
 		attribLocation,	       // Attribute index
-		2,				             // Number of values per vertex
+		vertDimension,				 // Number of values per vertex
 		getGLDataType(dataType), // Data type
 		GL_FALSE,			       // Normalized?
 		stride,				       // Stride
@@ -220,17 +221,19 @@ void GL2Renderer::projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nea
 void GL2Renderer::renderVertexArray(const S8 verts[], U32 vertCount, RenderType type,
    U32 start, U32 stride, U32 vertDimension)
 {
-	renderGenericVertexArray(DataType::Byte, verts, vertCount, type, start, stride);
+	renderGenericVertexArray(DataType::Byte, verts, vertCount, type, start, stride, vertDimension);
 }
 
 void GL2Renderer::renderVertexArray(const S16 verts[], U32 vertCount, RenderType type,
    U32 start, U32 stride, U32 vertDimension)
 {
+	//renderGenericVertexArray(DataType::Short, verts, vertCount, type, start, stride, vertDimension);
 }
 
 void GL2Renderer::renderVertexArray(const F32 verts[], U32 vertCount, RenderType type,
    U32 start, U32 stride, U32 vertDimension)
 {
+	renderGenericVertexArray(DataType::Float, verts, vertCount, type, start, stride, vertDimension);
 }
 
 

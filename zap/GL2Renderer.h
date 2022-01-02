@@ -42,7 +42,7 @@ private:
 
    template<typename T>
    void renderGenericVertexArray(DataType dataType, const T verts[], U32 vertCount, RenderType type,
-      U32 start = 0, U32 stride = 0);
+      U32 start, U32 stride, U32 vertDimension);
 
 public:
    ~GL2Renderer() override;
