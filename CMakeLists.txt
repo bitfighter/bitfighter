@@ -99,13 +99,18 @@ find_package(Vorbis)
 find_package(ModPlug)
 find_package(OpenAL)
 
-# Add OpenGL loader if we aren't using legacy OpenGL
+# Add OpenGL loader and glm if we aren't using legacy OpenGL
 if(NOT USE_LEGACY_GL)
+	# Loader
 	add_subdirectory(glad)
 	set(GL_LOADER_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/glad/include")
 	set(GL_LOADER_LIBRARY glad)
 	add_definitions(-DGL_MAJOR_VERSION=2)
 	add_definitions(-DGL_MINOR_VERSION=1)
+	
+	# glm
+	add_subdirectory(glm)
+	set(GLM_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/glm")
 endif()
 
 # Now look for libraries that have an in-tree fallback option
