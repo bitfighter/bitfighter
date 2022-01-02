@@ -81,7 +81,7 @@ void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U
 	glUniform4f(mStaticShader.findUniform("color"), mColor.r, mColor.g, mColor.b, mAlpha);
 	glUniform1i(mStaticShader.findUniform("time"), static_cast<int>(SDL_GetTicks())); // Give time, it's always useful!
 
-	// Get the vertex position attribute location in the shader
+	// Get the position attribute location in the shader
 	GLint attribLocation = glGetAttribLocation(shaderId, "vertexPosition_modelspace");
 
 	// Give position data to the shader, and deal with stride
@@ -226,7 +226,7 @@ void GL2Renderer::renderVertexArray(const S8 verts[], U32 vertCount, RenderType 
 void GL2Renderer::renderVertexArray(const S16 verts[], U32 vertCount, RenderType type,
    U32 start, U32 stride, U32 vertDimension)
 {
-	//renderGenericVertexArray(DataType::Short, verts, vertCount, type, start, stride, vertDimension);
+	renderGenericVertexArray(DataType::Short, verts, vertCount, type, start, stride, vertDimension);
 }
 
 void GL2Renderer::renderVertexArray(const F32 verts[], U32 vertCount, RenderType type,
@@ -235,12 +235,65 @@ void GL2Renderer::renderVertexArray(const F32 verts[], U32 vertCount, RenderType
 	renderGenericVertexArray(DataType::Float, verts, vertCount, type, start, stride, vertDimension);
 }
 
-
 void GL2Renderer::renderColored(const F32 verts[], const F32 colors[], U32 vertCount,
    RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
-}
+	GLint shaderID = mDynamicShader.getId();
+	glUseProgram(mDynamicShader.getId());
 
+	glm::mat4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
+	glUniformMatrix4fv(mDynamicShader.findUniform("MVP"), 1, GL_FALSE, &MVP[0][0]);
+	glUniform1i(mDynamicShader.findUniform("time"), static_cast<int>(SDL_GetTicks()));
+
+	// Attribute locations
+	GLint vertexPositionAttrib = glGetAttribLocation(shaderID, "vertexPosition_modelspace");
+	GLint colorAttrib = glGetAttribLocation(shaderID, "vertexColor");
+
+	// Positions
+	U32 extraBytesPerVert = 0;
+	if(stride > sizeof(F32) * vertDimension) // Should never be less than
+		extraBytesPerVert = stride - sizeof(F32) * vertDimension;
+
+	glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0,
+		(sizeof(F32) * vertCount * vertDimension) + (extraBytesPerVert * vertCount),
+		verts + (start * vertDimension));
+
+	glEnableVertexAttribArray(vertexPositionAttrib);
+	glVertexAttribPointer(
+		vertexPositionAttrib, // Attribute index
+		vertDimension,			 // Number of values per vertex
+		GL_FLOAT,			    // Data type
+		GL_FALSE,			    // Normalized?
+		stride,				    // Stride
+		(void *)0			    // Array buffer offset
+	);
+
+	// Colors
+	U32 extraBytesPerColorVert = 0;
+	if(stride > sizeof(F32) * 4) // Should never be less than
+		extraBytesPerColorVert = stride - sizeof(F32) * 4;
+
+	glBindBuffer(GL_ARRAY_BUFFER, mColorBuffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0,
+		(sizeof(F32) * vertCount * 4) + (extraBytesPerColorVert * vertCount),
+		colors + (start * 4));
+
+	glEnableVertexAttribArray(colorAttrib);
+	glVertexAttribPointer(
+		colorAttrib,          // Attribute index
+		4,				          // Number of values per vertex
+		GL_FLOAT,				 // Data type
+		GL_FALSE,				 // Normalized?
+		stride,					 // Stride
+		(void *)0			    // Array buffer offset
+	);
+
+	// Draw!
+	glDrawArrays(getGLRenderType(type), 0, vertCount);
+	glDisableVertexAttribArray(vertexPositionAttrib);
+	glDisableVertexAttribArray(colorAttrib);
+}
 
 void GL2Renderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCount,
    RenderType type, U32 start, U32 stride, U32 vertDimension)
