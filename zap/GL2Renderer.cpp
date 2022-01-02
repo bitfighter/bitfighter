@@ -6,10 +6,9 @@
 #ifndef BF_USE_LEGACY_GL
 
 #include "GL2Renderer.h"
+#include "MathUtils.h"
 #include "glad/glad.h"
 #include "SDL.h"
-#include "glm/gtc/matrix_transform.hpp" // For matrix transformations
-#include "glm/gtc/type_ptr.hpp" // glm to array conversions
 #include <memory>
 
 #define MAX_NUMBER_OF_VERTICES 300000
@@ -29,8 +28,8 @@ GL2Renderer::GL2Renderer()
    , mAlpha(1.0f)
 {
 	// Give each stack one identity matrix
-	mModelViewMatrixStack.push(glm::mat4(1.0f));
-	mProjectionMatrixStack.push(glm::mat4(1.0f));
+	mModelViewMatrixStack.push(Matrix<4>());
+	mProjectionMatrixStack.push(Matrix<4>());
 	mMatrixMode = MatrixType::ModelView;
 
 	initBuffers();
@@ -76,8 +75,8 @@ void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U
 	GLuint shaderId = mStaticShader.getId();
 	glUseProgram(shaderId);
 
-	glm::mat4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
-	glUniformMatrix4fv(mStaticShader.findUniform("MVP"), 1, GL_FALSE, &MVP[0][0]);
+	Matrix<4> MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
+	glUniformMatrix4fv(mStaticShader.findUniform("MVP"), 1, GL_FALSE, MVP.getData());
 	glUniform4f(mStaticShader.findUniform("color"), mColor.r, mColor.g, mColor.b, mAlpha);
 	glUniform1i(mStaticShader.findUniform("time"), static_cast<int>(SDL_GetTicks())); // Give time, it's always useful!
 
@@ -120,27 +119,25 @@ void GL2Renderer::setColor(F32 r, F32 g, F32 b, F32 alpha)
 void GL2Renderer::scale(F32 x, F32 y, F32 z)
 {
 	// Choose correct stack
-	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
-
-	glm::mat4 newMatrix = glm::scale(stack.top(), glm::vec3(x, y, z));
+	std::stack<Matrix<4>> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+	Matrix<4> newMatrix = stack.top().scale(x, y, z);
 	stack.pop();
 	stack.push(newMatrix);
 }
 
 void GL2Renderer::translate(F32 x, F32 y, F32 z)
 {
-	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
-
-	glm::mat4 newMatrix = glm::translate(stack.top(), glm::vec3(x, y, z));
+	std::stack<Matrix<4>> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+	Matrix<4> newMatrix = stack.top().translate(x, y, z);
 	stack.pop();
 	stack.push(newMatrix);
 }
 
 void GL2Renderer::rotate(F32 degAngle, F32 x, F32 y, F32 z)
 {
-	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+	std::stack<Matrix<4>> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 
-	glm::mat4 newMatrix = glm::rotate(stack.top(), glm::radians(degAngle), glm::vec3(x, y, z));
+	Matrix<4> newMatrix = stack.top().rotate(degreesToRadians(degAngle), x, y, z);
 	stack.pop();
 	stack.push(newMatrix);
 }
@@ -152,8 +149,8 @@ void GL2Renderer::setMatrixMode(MatrixType type)
 
 void GL2Renderer::getMatrix(MatrixType type, F32 *matrix)
 {
-	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
-	const F32 *sourceMatrix = static_cast<const F32 *>(glm::value_ptr(stack.top()));
+	std::stack<Matrix<4>> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+	const F32 *sourceMatrix = stack.top().getData();
 
 	for(int i = 0; i < 16; ++i)
 		matrix[i] = sourceMatrix[i];
@@ -161,56 +158,48 @@ void GL2Renderer::getMatrix(MatrixType type, F32 *matrix)
 
 void GL2Renderer::pushMatrix()
 {
-	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
-
 	// Duplicate the top matrix on top of the stack
-	glm::mat4 currentMatrix = stack.top();
-	stack.push(currentMatrix);
+	std::stack<Matrix<4>> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+	stack.push(stack.top());
 }
 
 void GL2Renderer::popMatrix()
 {
-	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+	std::stack<Matrix<4>> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 	stack.pop();
 }
 
 // m is column-major
 void GL2Renderer::loadMatrix(const F32 *m)
 {
-	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
-
 	// Replace top matrix
+	std::stack<Matrix<4>> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 	stack.pop();
-	stack.push(glm::make_mat4(m));
+	stack.push(Matrix<4>(m));
 }
 
 // Results in loss of precision!
 void GL2Renderer::loadMatrix(const F64 *m)
 {
-	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
-
-	// Replace top matrix
+	std::stack<Matrix<4>> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 	stack.pop();
-	stack.push(static_cast<glm::fmat4>(glm::make_mat4(m))); // Conversion exists between matrix types
+	stack.push(Matrix<4>(m));
 }
 
 void GL2Renderer::loadIdentity()
 {
-	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
-
 	// Replace the top matrix with an identity matrix
-	glm::mat4 newMatrix = glm::mat4(1.0f);
+	std::stack<Matrix<4>> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 	stack.pop();
-	stack.push(newMatrix);
+	stack.push(Matrix<4>());
 }
 
-void GL2Renderer::projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearZ, F64 farZ)
+void GL2Renderer::projectOrtho(F32 left, F32 right, F32 bottom, F32 top, F32 nearZ, F32 farZ)
 {
-	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
-
 	// Multiply the top matrix with an ortho matrix
-	glm::mat4 ortho = glm::ortho(left, right, bottom, top, nearZ, farZ);
-	glm::mat4 topMatrix = stack.top();
+	std::stack<Matrix<4>> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+	Matrix<4> topMatrix = stack.top();
+	Matrix<4> ortho = Matrix<4>::orthoProjection(left, right, bottom, top, nearZ, farZ);
 
 	stack.pop();
 	stack.push(ortho * topMatrix);
@@ -241,8 +230,8 @@ void GL2Renderer::renderColored(const F32 verts[], const F32 colors[], U32 vertC
 	GLint shaderID = mDynamicShader.getId();
 	glUseProgram(mDynamicShader.getId());
 
-	glm::mat4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
-	glUniformMatrix4fv(mDynamicShader.findUniform("MVP"), 1, GL_FALSE, &MVP[0][0]);
+	Matrix<4> MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
+	glUniformMatrix4fv(mDynamicShader.findUniform("MVP"), 1, GL_FALSE, MVP.getData());
 	glUniform1i(mDynamicShader.findUniform("time"), static_cast<int>(SDL_GetTicks()));
 
 	// Attribute locations
@@ -301,8 +290,8 @@ void GL2Renderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCou
 	GLint shaderID = mTexturedShader.getId();
 	glUseProgram(mTexturedShader.getId());
 
-	glm::mat4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
-	glUniformMatrix4fv(mTexturedShader.findUniform("MVP"), 1, GL_FALSE, &MVP[0][0]);
+	Matrix<4> MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
+	glUniformMatrix4fv(mTexturedShader.findUniform("MVP"), 1, GL_FALSE, MVP.getData());
 
 	// Uniforms
 	GLint activeTexture = 0;
@@ -364,8 +353,8 @@ void GL2Renderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 v
 	glUseProgram(mColoredTextureShader.getId());
 
 	// Uniforms
-	glm::mat4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
-	glUniformMatrix4fv(mColoredTextureShader.findUniform("MVP"), 1, GL_FALSE, &MVP[0][0]);
+	Matrix<4> MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
+	glUniformMatrix4fv(mColoredTextureShader.findUniform("MVP"), 1, GL_FALSE, MVP.getData());
 	glUniform4f(mColoredTextureShader.findUniform("color"), mColor.r, mColor.g, mColor.b, mAlpha);
 	glUniform1i(mDynamicShader.findUniform("time"), static_cast<int>(SDL_GetTicks()));
 

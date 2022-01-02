@@ -23,7 +23,10 @@ private:
 
 public:
    Matrix();
+   Matrix(const F32* matrix);
+   Matrix(const F64 *matrix);
    ~Matrix();
+   F32 *getData();
 
    static Matrix<4> orthoProjection(F32 left, F32 right, F32 bottom, F32 top, F32 nearZ, F32 farZ);
    Matrix<size> operator*(const Matrix<size> &rhs);

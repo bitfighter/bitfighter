@@ -8,8 +8,8 @@
 
 #include "GLRenderer.h"
 #include "Shader.h"
+#include "Matrix.h"
 #include "Color.h"
-#include "glm/glm.hpp"
 #include <stack>
 
 namespace Zap
@@ -33,8 +33,8 @@ private:
    Color mColor;
    float mAlpha;
 
-   std::stack<glm::mat4> mModelViewMatrixStack;
-   std::stack<glm::mat4> mProjectionMatrixStack;
+   std::stack<Matrix<4>> mModelViewMatrixStack;
+   std::stack<Matrix<4>> mProjectionMatrixStack;
    MatrixType mMatrixMode;
 
    GL2Renderer();
@@ -60,7 +60,7 @@ public:
    void loadMatrix(const F32 *m) override;
    void loadMatrix(const F64 *m) override;
    void loadIdentity() override;
-   void projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearZ, F64 farZ) override;
+   void projectOrtho(F32 left, F32 right, F32 bottom, F32 top, F32 nearZ, F32 farZ) override;
 
    void renderVertexArray(const S8 verts[], U32 vertCount, RenderType type,
       U32 start = 0, U32 stride = 0, U32 vertDimension = 2) override;

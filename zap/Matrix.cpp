@@ -20,6 +20,25 @@ Matrix<size>::Matrix()
    makeIdentity();
 }
 
+// Given matrix must be column-major
+template<U32 size>
+Matrix<size>::Matrix(const F32 *matrix)
+{
+   for(U32 c = 0; c < size; ++c)
+      for(U32 r = 0; r < size; ++r)
+         mData[c][r] = matrix[c * size + r];
+}
+
+// Loss of precision!
+template<U32 size>
+Matrix<size>::Matrix(const F64 *matrix)
+{
+   for(U32 c = 0; c < size; ++c)
+      for(U32 r = 0; r < size; ++r)
+         mData[c][r] = static_cast<F32>(matrix[c * size + r]);
+}
+
+
 template<U32 size>
 Matrix<size>::~Matrix()
 {
@@ -53,6 +72,12 @@ void Matrix<size>::makeIdentity()
             mData[c][r] = 0;
       }
    }
+}
+
+template<U32 size>
+F32 *Matrix<size>::getData()
+{
+   return &mData[0][0];
 }
 
 // Static
@@ -101,12 +126,9 @@ Matrix<size> Matrix<size>::scale(F32 x, F32 y, F32 z)
    if(size < 3)
       return newMat; // Do nothing
 
-   if(size >= 3)
-   {
-      newMat.mData[0][0] *= x;
-      newMat.mData[1][1] *= y;
-      newMat.mData[2][2] *= z;
-   }
+   newMat.mData[0][0] *= x;
+   newMat.mData[1][1] *= y;
+   newMat.mData[2][2] *= z;
 
    return newMat;
 }
@@ -114,17 +136,18 @@ Matrix<size> Matrix<size>::scale(F32 x, F32 y, F32 z)
 template<U32 size>
 Matrix<size> Matrix<size>::translate(F32 x, F32 y, F32 z)
 {
-   Matrix<size> newMat(*this);
    if(size < 3)
-      return newMat; // Do nothing
+      return *this; // Do nothing
 
-   // Fill right-most column
+   Matrix<size> translateMat;
    U32 c = size - 1;
-   newMat.mData[c][0] += x;
-   newMat.mData[c][2] += y;
-   newMat.mData[c][2] += z;
+   translateMat.mData[3][0] = x;
+   translateMat.mData[3][1] = y;
+   translateMat.mData[3][2] = z;
 
-   return newMat;
+   // Apply translation BEFORE all current transformations.
+   // This is the behavior of glTranslate.
+   return (*this) * translateMat;
 }
 
 // Source: https://math.stackexchange.com/a/4155115
@@ -158,8 +181,8 @@ Matrix<size> Matrix<size>::rotate(F32 radAngle, F32 x, F32 y, F32 z)
    rotMat.mData[2][1] = U * ay * az - S * ax;
    rotMat.mData[2][2] = U * az * az + C;
 
-   // Rotate!
-   return rotMat * (*this);
+   // Apply rotation BEFORE all current transformations.
+   return (*this) * rotMat;
 }
 
 // Explicit template instantiation for the values we will use:

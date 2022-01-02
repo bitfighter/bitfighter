@@ -608,7 +608,7 @@ void VideoSystem::redrawViewport(GameSettings *settings)
    // physical screen. If you want a "black border" down one side of the screen, you need to make left negative, so that 0 would
    // appear some distance in from the left edge of the physical screen.  The same applies to the other coordinates as well.
    OrthoData ortho = DisplayManager::getScreenInfo()->getOrtho();
-   r.projectOrtho(ortho.left, ortho.right, ortho.bottom, ortho.top, 0, 1);
+   r.projectOrtho((F32)ortho.left, (F32)ortho.right, (F32)ortho.bottom, (F32)ortho.top, 0, 1);
 
    r.setMatrixMode(MatrixType::ModelView);
    r.loadIdentity();
