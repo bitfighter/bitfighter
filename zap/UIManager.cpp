@@ -475,17 +475,25 @@ void UIManager::renderCurrent()
    if(mMenuTransitionTimer.getCurrent() && mLastUI)
    {
       // Save viewport
-      Point viewportPos = r.getViewportPos(); //x:0, y:1
-      Point viewportSize = r.getViewportSize();//x:2, y:3
+      Point viewportPos = r.getViewportPos();
+      Point viewportSize = r.getViewportSize();
 
-      r.setViewport(viewportPos.x + S32((mLastWasLower ? 1 : -1) * viewportSize.x * (1 - mMenuTransitionTimer.getFraction())), 0, viewportSize.x, viewportSize.y);
+      r.setViewport(
+         (S32)(viewportPos.x + (mLastWasLower ? 1 : -1) * viewportSize.x * (1 - mMenuTransitionTimer.getFraction())),
+         0,
+         (S32)viewportSize.x,
+         (S32)viewportSize.y);
       mLastUI->render();
 
-      r.setViewport(viewportPos.x - S32((mLastWasLower ? 1 : -1) * viewportSize.x * mMenuTransitionTimer.getFraction()), 0, viewportSize.x, viewportSize.y);
+      r.setViewport(
+         (S32)(viewportPos.x - (mLastWasLower ? 1 : -1) * viewportSize.x * mMenuTransitionTimer.getFraction()),
+         0,
+         (S32)viewportSize.x,
+         (S32)viewportSize.y);
       mCurrentInterface->render();
 
       // Restore viewport for posterity
-      r.setViewport(viewportPos.x, viewportPos.y, viewportSize.x, viewportSize.y);
+      r.setViewport((S32)viewportPos.x, (S32)viewportPos.y, (S32)viewportSize.x, (S32)viewportSize.y);
 
       return;
    }
