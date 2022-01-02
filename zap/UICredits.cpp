@@ -345,7 +345,7 @@ void SplashUserInterface::render()
    }
    else if(mPhase == SplashPhaseRising)           // Rising phase
    {
-      r.setColor(0, sqrt(1 - mSplashTimer.getFraction()), 1 - pow(1 - mSplashTimer.getFraction(), 2));
+      r.setColor(0, (F32)sqrt(1 - mSplashTimer.getFraction()), 1 - (F32)pow(1 - mSplashTimer.getFraction(), 2));
       renderBitfighterLogo((S32)(73.0f + ((F32) DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2.0f - 73.0f) * mSplashTimer.getFraction()), 1);
    }
 }

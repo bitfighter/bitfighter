@@ -829,7 +829,7 @@ void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
 
    r.pushMatrix();
 
-   r.translate(x - 10, y - 6, 0);
+   r.translate(x - 10.0f, y - 6.0f, 0.0f);
    
    r.setLineWidth(gLineWidth1);
 
@@ -2243,9 +2243,9 @@ void renderGrenade(const Point &pos, U32 style, F32 lifeLeft)
       innerVis = false;
 
    if(style == 1)
-      r.setColor(0, 1, min(1.f - lifeLeft, 0.5));
+      r.setColor(0, 1, min(1.f - lifeLeft, 0.5f));
    else
-      r.setColor(1, min(1.25f - lifeLeft, 1), 0);
+      r.setColor(1, min(1.25f - lifeLeft, 1.0f), 0);
 
    if(innerVis)
       drawFilledCircle(pos, 6);
@@ -2387,7 +2387,7 @@ void renderEnergyItem(const Point &pos, bool forEditor)
 
    if(forEditor)
    {
-      scaleFactor = 0.45;
+      scaleFactor = 0.45f;
       size = 8;
    }
 

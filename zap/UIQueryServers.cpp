@@ -923,7 +923,7 @@ void QueryServersUserInterface::render()
          if(s.dedicated || s.test || s.pingTimedOut || !s.everGotQueryResponse)
          {
             r.pushMatrix();
-               r.translate(columns[1].xStart + 5, y + 2, 0);
+               r.translate((F32)columns[1].xStart + 5, (F32)y + 2, 0);
                if( s.pingTimedOut || !s.everGotQueryResponse )
                   drawString(0, questionMarkVertOffset, SERVER_ENTRY_TEXTSIZE, "?");
                else if(s.test)

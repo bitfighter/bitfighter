@@ -310,7 +310,6 @@ void OGLCONSOLE_Resize(_OGLCONSOLE_Console *console)
 #ifndef ZAP_DEDICATED
     Zap::Renderer& r = Zap::Renderer::get();
 
-    int viewport[4];
     F32 screenWidth, screenHeight;
     int oldTextWidth = console->textWidth;
     char * oldLines = console->lines;     // Preserve console text
@@ -342,7 +341,7 @@ void OGLCONSOLE_Resize(_OGLCONSOLE_Console *console)
     r.setMatrixMode(Zap::MatrixType::ModelView);
     r.pushMatrix();
     r.loadIdentity();
-    r.scale(console->textWidth, console->textHeight, 1);
+    r.scale((F32)console->textWidth, (F32)console->textHeight, 1);
     r.getMatrix(Zap::MatrixType::ModelView, console->mvMatrix);
     r.popMatrix();
 
@@ -610,14 +609,14 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
         }
 
         d = C->textHeight * C->characterHeight * (1.0 - v * (1.0 / SLIDE_STEPS));
-        r.translate(0, d, 0);
+        r.translate(0, (F32)d, 0);
 //d = 0.04 * v;
 //glTranslated(0, 1-d, 0);
     }
 
     /* First we draw our console's background TODO: Add something fancy? */
     r.enableBlending();
-    r.setColor(.1,0,0, 0.75);
+    r.setColor(.1f, 0.0f, 0.0f, 0.75f);
 
     // Draw from -1 to 2 to ensure complete screen coverage... totally hacky, but works!
     F32 verts[4 * 2] = {
