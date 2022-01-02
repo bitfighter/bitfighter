@@ -117,26 +117,59 @@ void GL2Renderer::getMatrix(MatrixType type, F32 *matrix)
 
 void GL2Renderer::pushMatrix()
 {
+	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+
+	// Duplicate the top matrix on top of the stack
+	glm::mat4 currentMatrix = stack.top();
+	stack.push(currentMatrix);
 }
 
 void GL2Renderer::popMatrix()
 {
+	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+	stack.pop();
 }
 
+// m is column-major
 void GL2Renderer::loadMatrix(const F32 *m)
 {
+	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+
+	// Replace top matrix
+	stack.pop();
+	stack.push(glm::make_mat4(m));
 }
 
+// Results in loss of precision!
 void GL2Renderer::loadMatrix(const F64 *m)
 {
+	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+
+	// Replace top matrix
+	stack.pop();
+	stack.push(static_cast<glm::fmat4>(glm::make_mat4(m))); // Conversion exists between matrix types
 }
 
 void GL2Renderer::loadIdentity()
 {
+	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+
+	// Replace the top matrix with an identity matrix
+	glm::mat4 newMatrix = glm::mat4(1.0f);
+	stack.pop();
+	stack.push(newMatrix);
 }
 
 void GL2Renderer::projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nearx, F64 farx)
 {
+	std::stack<glm::mat4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+
+	// Multiply the top matrix with an ortho matrix
+	glm::mat4 ortho = glm::ortho(left, right, bottom, top, nearx, farx);
+	glm::mat4 topMatrix = stack.top();
+
+	stack.pop();
+	stack.push(ortho * topMatrix);
 }
 
 
