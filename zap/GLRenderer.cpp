@@ -174,6 +174,12 @@ void GLRenderer::disableBlending()
    glDisable(GL_BLEND);
 }
 
+// Any black pixel will become fully transparent
+void GLRenderer::useTransparentBlackBlending()
+{
+   glBlendFunc(GL_ONE, GL_ONE);
+}
+
 void GLRenderer::useSpyBugBlending()
 {
    // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE

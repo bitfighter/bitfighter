@@ -36,6 +36,7 @@ public:
    void disableAntialiasing() override;
    void enableBlending() override;
    void disableBlending() override;
+   void useTransparentBlackBlending() override;
    void useSpyBugBlending() override;
    void useDefaultBlending() override;
    void enableDepthTest() override;

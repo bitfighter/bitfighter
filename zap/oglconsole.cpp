@@ -629,7 +629,7 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
 
 #ifndef OGLCONSOLE_USE_ALPHA_TEXT
     // Change blend mode for drawing text
-    r.disableBlending();
+    r.useTransparentBlackBlending();
 #endif
 
     /* Select the console font */
@@ -701,7 +701,7 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
     r.setMatrixMode(Zap::MatrixType::ModelView);
     r.popMatrix();
 
-    r.enableBlending(); // Reenable blending in case we disabled it
+    r.useDefaultBlending(); // Reset blending
 #endif
 }
 

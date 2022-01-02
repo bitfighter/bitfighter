@@ -109,6 +109,7 @@ public:
    virtual void disableAntialiasing() = 0;
    virtual void enableBlending() = 0;
    virtual void disableBlending() = 0;
+   virtual void useTransparentBlackBlending() = 0;
    virtual void useSpyBugBlending() = 0;
    virtual void useDefaultBlending() = 0;
    virtual void enableDepthTest() = 0;
