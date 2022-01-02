@@ -7,6 +7,7 @@
 
 #include "GL2Renderer.h"
 #include "glad/glad.h"
+#include "SDL.h"
 #include "glm/gtc/matrix_transform.hpp" // For matrix transformations
 #include "glm/gtc/type_ptr.hpp" // glm to array conversions
 #include <memory>
@@ -65,6 +66,49 @@ void GL2Renderer::initBuffers()
 void GL2Renderer::create()
 {
    setInstance(std::unique_ptr<Renderer>(new GL2Renderer));
+}
+
+// Uses static shader
+template<typename T>
+void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U32 vertCount, RenderType type,
+	U32 start, U32 stride)
+{
+	GLint shaderID = mStaticShader.getId();
+	glUseProgram(mStaticShader.getId());
+
+	glm::mat4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
+	glUniformMatrix4fv(mStaticShader.findUniform("MVP"), 1, GL_FALSE, &MVP[0][0]);
+	glUniform4f(mStaticShader.findUniform("color"), mColor.r, mColor.g, mColor.b, mAlpha);
+	glUniform1i(mStaticShader.findUniform("time"), static_cast<int>(SDL_GetTicks())); // Give time, it's always useful!
+
+	// Get the vertex position attribute location in the shader
+	GLint attribLocation = glGetAttribLocation(shaderID, "vertexPosition_modelspace");
+
+	// Give position data to the shader, and deal with stride
+	glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
+	U32 extraBytesPerVert = 0;
+	if(stride > sizeof(F32) * 2) // Should never be less than
+		extraBytesPerVert = stride - sizeof(F32) * 2;
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0,
+		(sizeof(T) * vertCount * 2) + (extraBytesPerVert * vertCount),
+		verts + (start * 2));
+
+	// Set the attribute to point to the buffer data
+	glEnableVertexAttribArray(attribLocation);
+	glVertexAttribPointer(
+		attribLocation,	       // Attribute index
+		2,				             // Number of values per vertex
+		getGLDataType(dataType), // Data type
+		GL_FALSE,			       // Normalized?
+		stride,				       // Stride
+		(void *)0			       // Array buffer offset
+	);
+
+	// Draw!
+	glDrawArrays(getGLRenderType(type), 0, vertCount);
+	glDisableVertexAttribArray(attribLocation);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0); // Reset to default framebuffer
 }
 
 void GL2Renderer::setColor(F32 r, F32 g, F32 b, F32 alpha)
@@ -176,6 +220,7 @@ void GL2Renderer::projectOrtho(F64 left, F64 right, F64 bottom, F64 top, F64 nea
 void GL2Renderer::renderVertexArray(const S8 verts[], U32 vertCount, RenderType type,
    U32 start, U32 stride, U32 vertDimension)
 {
+	renderGenericVertexArray(DataType::Byte, verts, vertCount, type, start, stride);
 }
 
 void GL2Renderer::renderVertexArray(const S16 verts[], U32 vertCount, RenderType type,

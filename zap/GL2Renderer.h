@@ -18,9 +18,6 @@ namespace Zap
 class GL2Renderer : public GLRenderer
 {
 private:
-   GL2Renderer();
-   void initBuffers();
-
    // Shaders
    Shader mStaticShader;
    Shader mDynamicShader;
@@ -39,6 +36,13 @@ private:
    std::stack<glm::mat4> mModelViewMatrixStack;
    std::stack<glm::mat4> mProjectionMatrixStack;
    MatrixType mMatrixMode;
+
+   GL2Renderer();
+   void initBuffers();
+
+   template<typename T>
+   void renderGenericVertexArray(DataType dataType, const T verts[], U32 vertCount, RenderType type,
+      U32 start = 0, U32 stride = 0);
 
 public:
    ~GL2Renderer() override;
