@@ -282,7 +282,7 @@ void GL2Renderer::renderColored(const F32 verts[], const F32 colors[], U32 vertC
 	glEnableVertexAttribArray(colorAttrib);
 	glVertexAttribPointer(
 		colorAttrib,          // Attribute index
-		4,				          // Number of values per vertex
+		4,				          // Number of values per color
 		GL_FLOAT,				 // Data type
 		GL_FALSE,				 // Normalized?
 		stride,					 // Stride
@@ -298,15 +298,126 @@ void GL2Renderer::renderColored(const F32 verts[], const F32 colors[], U32 vertC
 void GL2Renderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCount,
    RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
-}
+	GLint shaderID = mTexturedShader.getId();
+	glUseProgram(mTexturedShader.getId());
 
+	glm::mat4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
+	glUniformMatrix4fv(mTexturedShader.findUniform("MVP"), 1, GL_FALSE, &MVP[0][0]);
+
+	// Uniforms
+	GLint activeTexture = 0;
+	glGetIntegerv(GL_ACTIVE_TEXTURE, &activeTexture); // Get active texture unit
+	glUniform1i(mTexturedShader.findUniform("textureSampler"), activeTexture);
+	glUniform1i(mDynamicShader.findUniform("time"), static_cast<int>(SDL_GetTicks()));
+
+	// Attribute locations
+	GLint vertexPositionAttrib = glGetAttribLocation(shaderID, "vertexPosition_modelspace");
+	GLint UVAttrib = glGetAttribLocation(shaderID, "vertexUV");
+
+	// Positions
+	U32 extraBytesPerVert = 0;
+	if(stride > sizeof(F32) * vertDimension) // Should never be less than
+		extraBytesPerVert = stride - sizeof(F32) * vertDimension;
+
+	glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0,
+		(sizeof(F32) * vertCount * vertDimension) + (extraBytesPerVert * vertCount),
+		verts + (start * vertDimension));
+
+	glEnableVertexAttribArray(vertexPositionAttrib);
+	glVertexAttribPointer(
+		vertexPositionAttrib, // Attribute index
+		vertDimension,			 // Number of values per vertex
+		GL_FLOAT,			    // Data type
+		GL_FALSE,			    // Normalized?
+		stride,				    // Stride
+		(void *)0			    // Array buffer offset
+	);
+
+	// UV-coords
+	glBindBuffer(GL_ARRAY_BUFFER, mUVBuffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0,
+		(sizeof(F32) * vertCount * 2) + (extraBytesPerVert * vertCount),
+		UVs + (start * 2));
+
+	glEnableVertexAttribArray(UVAttrib);
+	glVertexAttribPointer(
+		UVAttrib,			    // Attribute index
+		2,				          // Number of values per coord
+		GL_FLOAT,			    // Data type
+		GL_FALSE,			    // Normalized?
+		stride,				    // Stride
+		(void *)0			    // Array buffer offset
+	);
+
+	// Draw!
+	glDrawArrays(getGLRenderType(type), 0, vertCount);
+	glDisableVertexAttribArray(vertexPositionAttrib);
+	glDisableVertexAttribArray(UVAttrib);
+}
 
 // Render a texture colored by the current color:
 void GL2Renderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount,
    RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
-}
+	GLint shaderID = mColoredTextureShader.getId();
+	glUseProgram(mColoredTextureShader.getId());
 
+	// Uniforms
+	glm::mat4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
+	glUniformMatrix4fv(mColoredTextureShader.findUniform("MVP"), 1, GL_FALSE, &MVP[0][0]);
+	glUniform4f(mColoredTextureShader.findUniform("color"), mColor.r, mColor.g, mColor.b, mAlpha);
+	glUniform1i(mDynamicShader.findUniform("time"), static_cast<int>(SDL_GetTicks()));
+
+	GLint activeTexture = 0;
+	glGetIntegerv(GL_ACTIVE_TEXTURE, &activeTexture); // Get active texture unit
+	glUniform1i(mColoredTextureShader.findUniform("textureSampler"), activeTexture);
+
+	// Attribute locations
+	GLint vertexPositionAttrib = glGetAttribLocation(shaderID, "vertexPosition_modelspace");
+	GLint UVAttrib = glGetAttribLocation(shaderID, "vertexUV");
+
+	// Positions
+	U32 extraBytesPerVert = 0;
+	if(stride > sizeof(F32) * vertDimension) // Should never be less than
+		extraBytesPerVert = stride - sizeof(F32) * vertDimension;
+
+	glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0,
+		(sizeof(F32) * vertCount * vertDimension) + (extraBytesPerVert * vertCount),
+		verts + (start * vertDimension));
+
+	glEnableVertexAttribArray(vertexPositionAttrib);
+	glVertexAttribPointer(
+		vertexPositionAttrib, // Attribute index
+		vertDimension,			 // Number of values per vertex
+		GL_FLOAT,			    // Data type
+		GL_FALSE,			    // Normalized?
+		stride,				    // Stride
+		(void *)0			    // Array buffer offset
+	);
+
+	// UV-coords
+	glBindBuffer(GL_ARRAY_BUFFER, mUVBuffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0,
+		(sizeof(F32) * vertCount * 2) + (extraBytesPerVert * vertCount),
+		UVs + (start * 2));
+
+	glEnableVertexAttribArray(UVAttrib);
+	glVertexAttribPointer(
+		UVAttrib,			    // Attribute index
+		2,				          // Number of values per coord
+		GL_FLOAT,			    // Data type
+		GL_FALSE,			    // Normalized?
+		stride,				    // Stride
+		(void *)0			    // Array buffer offset
+	);
+
+	// Draw!
+	glDrawArrays(getGLRenderType(type), 0, vertCount);
+	glDisableVertexAttribArray(vertexPositionAttrib);
+	glDisableVertexAttribArray(UVAttrib);
+}
 
 }
 
