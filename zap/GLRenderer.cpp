@@ -27,7 +27,8 @@ GLRenderer::GLRenderer()
  : mUsingAndStencilTest(0)
 {
 #ifndef BF_USE_LEGACY_GL
-   TNLAssert(gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress), "Unable to load GL functions!");
+   bool success = gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
+   TNLAssert(success, "Unable to load GL functions!");
 #endif
 
    glDepthFunc(GL_LESS);
