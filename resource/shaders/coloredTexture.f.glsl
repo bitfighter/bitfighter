@@ -17,9 +17,7 @@ uniform int isAlphaTexture;
 
 void main()
 {
-	// A note on conditionals in shaders:
-	// https://stackoverflow.com/a/37837060
-	
+	// A note on conditionals in shaders: https://stackoverflow.com/a/37837060
 	gl_FragColor = (isAlphaTexture == 1) ?
 			vec4(color.r, color.g, color.b, texture2D(textureSampler, UV).a * color.a)
 		:
