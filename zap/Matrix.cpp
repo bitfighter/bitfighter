@@ -13,14 +13,14 @@
 namespace Zap
 {
 
-// Create square identity matrix of specified size
+// Create square identity matrix
 template<U32 size>
 Matrix<size>::Matrix()
 {
    makeIdentity();
 }
 
-// Given matrix must be column-major
+// 'matrix' must be square and column-major
 template<U32 size>
 Matrix<size>::Matrix(const F32 *matrix)
 {
