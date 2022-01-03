@@ -48,8 +48,8 @@ public:
       RenderType type, U32 start = 0, U32 stride = 0, U32 vertDimension = 2) override;
 
    // Render a texture colored by the current color:
-   void renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount,
-      RenderType type, U32 start = 0, U32 stride = 0, U32 vertDimension = 2) override;
+   void renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount, RenderType type,
+      U32 start = 0, U32 stride = 0, U32 vertDimension = 2, bool isAlphaTexture = false) override;
 };
 
 }

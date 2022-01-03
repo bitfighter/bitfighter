@@ -563,8 +563,8 @@ static void flush_draw(struct sth_stash* stash)
 		if (texture->nverts > 0)
 		{			
 			r.bindTexture(texture->id);
-			r.renderColoredTexture(texture->verts, texture->verts+2,
-					static_cast<U32>(texture->nverts), Zap::RenderType::Triangles, 0, VERT_STRIDE);
+			r.renderColoredTexture(texture->verts, texture->verts+2, static_cast<U32>(texture->nverts),
+				Zap::RenderType::Triangles, 0, VERT_STRIDE, 2, true);
 			texture->nverts = 0;
 		}
 		texture = texture->next;

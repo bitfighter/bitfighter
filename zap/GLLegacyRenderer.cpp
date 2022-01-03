@@ -179,7 +179,7 @@ void GLLegacyRenderer::renderTextured(const F32 verts[], const F32 UVs[], U32 ve
 }
 
 void GLLegacyRenderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount,
-   RenderType type, U32 start, U32 stride, U32 vertDimension)
+   RenderType type, U32 start, U32 stride, U32 vertDimension, bool _isAlphaTexture)
 {
    // !Todo properly!
    glEnable(GL_TEXTURE_2D);

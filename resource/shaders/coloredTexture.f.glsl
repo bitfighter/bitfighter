@@ -13,12 +13,15 @@ varying vec2 UV;
 // Values that stay constant for the whole mesh
 uniform sampler2D textureSampler;
 uniform vec4 color;
+uniform int isAlphaTexture;
 
 void main()
 {
-	// Remove any color the texture had, if any. Only keep alpha channel.
-	vec4 textureValue = vec4(0.0, 0.0, 0.0, texture2D(textureSampler, UV).a);
-
-	// * color.a to support semi-transparent text
-	gl_FragColor = (textureValue + vec4(color.rgb, 0)) * vec4(1.0, 1.0, 1.0, color.a);
+	// A note on conditionals in shaders:
+	// https://stackoverflow.com/a/37837060
+	
+	gl_FragColor = (isAlphaTexture == 1) ?
+			vec4(color.r, color.g, color.b, texture2D(textureSampler, UV).a * color.a)
+		:
+			texture2D(textureSampler, UV) * color;
 }

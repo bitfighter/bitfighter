@@ -297,7 +297,7 @@ void GL2Renderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCou
 	GLint activeTexture = 0;
 	glGetIntegerv(GL_ACTIVE_TEXTURE, &activeTexture); // Get active texture unit
 	glUniform1i(mTexturedShader.findUniform("textureSampler"), activeTexture);
-	glUniform1i(mDynamicShader.findUniform("time"), static_cast<int>(SDL_GetTicks()));
+	glUniform1i(mTexturedShader.findUniform("time"), static_cast<int>(SDL_GetTicks()));
 
 	// Attribute locations
 	GLint vertexPositionAttrib = glGetAttribLocation(shaderID, "vertexPosition_modelspace");
@@ -347,7 +347,7 @@ void GL2Renderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCou
 
 // Render a texture colored by the current color:
 void GL2Renderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount,
-   RenderType type, U32 start, U32 stride, U32 vertDimension)
+   RenderType type, U32 start, U32 stride, U32 vertDimension, bool isAlphaTexture)
 {
 	GLint shaderID = mColoredTextureShader.getId();
 	glUseProgram(mColoredTextureShader.getId());
@@ -356,7 +356,8 @@ void GL2Renderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 v
 	Matrix<4> MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
 	glUniformMatrix4fv(mColoredTextureShader.findUniform("MVP"), 1, GL_FALSE, MVP.getData());
 	glUniform4f(mColoredTextureShader.findUniform("color"), mColor.r, mColor.g, mColor.b, mAlpha);
-	glUniform1i(mDynamicShader.findUniform("time"), static_cast<int>(SDL_GetTicks()));
+	glUniform1i(mColoredTextureShader.findUniform("isAlphaTexture"), isAlphaTexture ? 1 : 0);
+	glUniform1i(mColoredTextureShader.findUniform("time"), static_cast<int>(SDL_GetTicks()));
 
 	GLint activeTexture = 0;
 	glGetIntegerv(GL_ACTIVE_TEXTURE, &activeTexture); // Get active texture unit

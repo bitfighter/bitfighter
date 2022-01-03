@@ -174,9 +174,10 @@ public:
    virtual void renderTextured(const F32 verts[], const F32 UVs[], U32 vertCount,
       RenderType type, U32 start = 0, U32 stride = 0, U32 vertDimension = 2) = 0;     // Same stride is used for both verts and UVs
 
-   // Render a texture colored by the current color:
-   virtual void renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount,
-      RenderType type, U32 start = 0, U32 stride = 0, U32 vertDimension = 2) = 0;
+   // Render with a texture colored by the current color.
+   // Use isAlphaTexture for coloring based purely on the texture's alpha values (texture color is ignored).
+   virtual void renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount, RenderType type,
+      U32 start = 0, U32 stride = 0, U32 vertDimension = 2, bool isAlphaTexture = false) = 0;
 };
 
 
