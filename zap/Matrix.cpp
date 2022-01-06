@@ -83,6 +83,7 @@ F32 *Matrix<size>::getData()
 // Static
 // Create an orthographic projection matrix.
 // Source: https://en.wikipedia.org/wiki/Orthographic_projection
+template<>
 Matrix<4> Matrix<4>::orthoProjection(F32 left, F32 right, F32 bottom, F32 top, F32 nearZ, F32 farZ)
 {
    // Essentially, we create a transformation matrix which will map the cube
