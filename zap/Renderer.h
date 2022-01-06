@@ -3,8 +3,7 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-// Singleton class for Rendering APIS. I wish this wasn't a Singleton, but the lack of OOP
-// in some areas of Bitfighter has forced my hand!
+// Singleton class for Rendering API.
 
 #ifndef _RENDERER_H_
 #define _RENDERER_H_
