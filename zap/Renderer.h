@@ -11,13 +11,14 @@
 #include "tnlTypes.h"
 #include "tnlAssert.h"
 
-#include <memory>
-
+// For ARRAYSIZE, many files expect this to be here for some reason.
 #ifdef TNL_OS_WIN32
-   // For ARRAYSIZE, I do not understand why everyone relies on this macro, but
-   // eveybody seems to assume it is defined when including the Renderer.
-#  include <windows.h>
+#  include <windows.h>     // For Windows
+#else
+#  include "tnlPlatform.h" // For everybody else
 #endif
+
+#include <memory>
 
 namespace TNL {
    template<class T> class Vector;
