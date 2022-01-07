@@ -41,15 +41,22 @@ Shader::Shader(const std::string& name, const std::string& vertexShaderFile, con
 	U32 vertexShader = compileShader(vertexShaderFile, vertexShaderCode, GL_VERTEX_SHADER);
 	U32 fragmentShader = compileShader(fragmentShaderFile, fragmentShaderCode, GL_FRAGMENT_SHADER);
 
-	if(vertexShader != 0 && fragmentShader !=0)
+	if(vertexShader != 0 && fragmentShader != 0)
+	{
+		mShaders.push_back(vertexShader);
+		mShaders.push_back(fragmentShader);
 		mId = linkShader(mName, static_cast<GLuint>(vertexShader), static_cast<GLuint>(fragmentShader));
+	}
 
 	registerUniforms();
 }
 
 Shader::~Shader()
 {
-	glDeleteShader(static_cast<GLuint>(mId));
+	for(U32 shader : mShaders)
+		glDeleteShader(static_cast<GLuint>(shader));
+
+	glDeleteProgram(static_cast<GLuint>(mId));
 }
 
 // Static
@@ -85,7 +92,7 @@ U32 Shader::compileShader(const std::string& shaderPath, const std::string& shad
 	if(!shaderOk)
 	{
 		std::string shaderLog = getGLShaderDebugLog(shader, glGetShaderiv, glGetShaderInfoLog);
-		glDeleteProgram(shader);
+		glDeleteShader(shader);
 
 		logprintf(shaderLog.c_str());
 		TNLAssert(false, ("Failed to compile shader at '" + shaderPath + "'.").c_str());

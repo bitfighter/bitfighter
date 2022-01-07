@@ -154,6 +154,12 @@ bool VideoSystem::init()
    return true;
 }
 
+// Performs a clean shutdown of the video system
+void VideoSystem::shutdown()
+{
+   Renderer::shutdown();
+   SDL_QuitSubSystem(SDL_INIT_VIDEO);
+}
 
 void VideoSystem::setWindowPosition(S32 left, S32 top)
 {

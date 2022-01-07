@@ -22,6 +22,7 @@
 
 #include "tnlTypes.h"
 
+#include <vector>
 #include <map>
 #include <string>
 
@@ -36,6 +37,7 @@ private:
 
 	std::string mName;
 	U32 mId;
+	std::vector<U32> mShaders;
 	UniformMap mUniformMap;
 
 	static std::string getShaderSource(const std::string &fileName);

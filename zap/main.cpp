@@ -495,8 +495,7 @@ void shutdownBitfighter()
          VideoSystem::saveWindowPostion(settings);
       }
 
-      SDL_QuitSubSystem(SDL_INIT_VIDEO);
-
+      VideoSystem::shutdown();
       FontManager::cleanup();
       AppIntegrationController::shutdown();
 #endif

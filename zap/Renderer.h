@@ -84,6 +84,7 @@ protected:
 public:
    virtual ~Renderer() = default;
    static Renderer& get();
+   static void shutdown();
 
    void setColor(F32 c, F32 alpha = 1.0f);
    void setColor(const Color& c, F32 alpha = 1.0f);

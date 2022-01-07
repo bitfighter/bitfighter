@@ -27,6 +27,12 @@ Renderer& Renderer::get()
    return *mInstance;
 }
 
+// Static
+void Renderer::shutdown()
+{
+   mInstance.reset(); // Destroy our instance
+}
+
 // Initial settings; call this in child constructor!
 void Renderer::initRenderer()
 {
