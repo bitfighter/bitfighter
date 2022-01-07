@@ -76,12 +76,12 @@ void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U
 	glUseProgram(shaderId);
 
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
-	glUniformMatrix4fv(mStaticShader.getUniform(UniformName::MVP), 1, GL_FALSE, MVP.getData());
-	glUniform4f(mStaticShader.getUniform(UniformName::Color), mColor.r, mColor.g, mColor.b, mAlpha);
-	glUniform1i(mStaticShader.getUniform(UniformName::Time), static_cast<int>(SDL_GetTicks())); // Give time, it's always useful!
+	glUniformMatrix4fv(mStaticShader.getUniformLocation(UniformName::MVP), 1, GL_FALSE, MVP.getData());
+	glUniform4f(mStaticShader.getUniformLocation(UniformName::Color), mColor.r, mColor.g, mColor.b, mAlpha);
+	glUniform1i(mStaticShader.getUniformLocation(UniformName::Time), static_cast<int>(SDL_GetTicks())); // Give time, it's always useful!
 
 	// Get the position attribute location in the shader
-	GLint attribLocation = glGetAttribLocation(shaderId, "vertexPosition_modelspace");
+	GLint attribLocation = mStaticShader.getAttributeLocation(AttributeName::VertexPosition);
 
 	// Give position data to the shader, and deal with stride
 	glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
@@ -231,12 +231,12 @@ void GL2Renderer::renderColored(const F32 verts[], const F32 colors[], U32 vertC
 	glUseProgram(mDynamicShader.getId());
 
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
-	glUniformMatrix4fv(mDynamicShader.getUniform(UniformName::MVP), 1, GL_FALSE, MVP.getData());
-	glUniform1i(mDynamicShader.getUniform(UniformName::Time), static_cast<GLuint>(SDL_GetTicks()));
+	glUniformMatrix4fv(mDynamicShader.getUniformLocation(UniformName::MVP), 1, GL_FALSE, MVP.getData());
+	glUniform1i(mDynamicShader.getUniformLocation(UniformName::Time), static_cast<GLuint>(SDL_GetTicks()));
 
 	// Attribute locations
-	GLint vertexPositionAttrib = glGetAttribLocation(shaderID, "vertexPosition_modelspace");
-	GLint colorAttrib = glGetAttribLocation(shaderID, "vertexColor");
+	GLint vertexPositionAttrib = mDynamicShader.getAttributeLocation(AttributeName::VertexPosition);
+	GLint colorAttrib = mDynamicShader.getAttributeLocation(AttributeName::VertexColor);
 
 	// Positions
 	U32 extraBytesPerVert = 0;
@@ -291,13 +291,13 @@ void GL2Renderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCou
 	glUseProgram(mTexturedShader.getId());
 
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
-	glUniformMatrix4fv(mTexturedShader.getUniform(UniformName::MVP), 1, GL_FALSE, MVP.getData());
-	glUniform1i(mTexturedShader.getUniform(UniformName::TextureSampler), 0); // Default texture unit
-	glUniform1i(mTexturedShader.getUniform(UniformName::Time), static_cast<GLuint>(SDL_GetTicks()));
+	glUniformMatrix4fv(mTexturedShader.getUniformLocation(UniformName::MVP), 1, GL_FALSE, MVP.getData());
+	glUniform1i(mTexturedShader.getUniformLocation(UniformName::TextureSampler), 0); // Default texture unit
+	glUniform1i(mTexturedShader.getUniformLocation(UniformName::Time), static_cast<GLuint>(SDL_GetTicks()));
 
 	// Attribute locations
-	GLint vertexPositionAttrib = glGetAttribLocation(shaderID, "vertexPosition_modelspace");
-	GLint UVAttrib = glGetAttribLocation(shaderID, "vertexUV");
+	GLint vertexPositionAttrib = mTexturedShader.getAttributeLocation(AttributeName::VertexPosition);
+	GLint UVAttrib = mTexturedShader.getAttributeLocation(AttributeName::VertexUV);
 
 	// Positions
 	U32 extraBytesPerVert = 0;
@@ -350,15 +350,15 @@ void GL2Renderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 v
 
 	// Uniforms
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
-	glUniformMatrix4fv(mColoredTextureShader.getUniform(UniformName::MVP), 1, GL_FALSE, MVP.getData());
-	glUniform4f(mColoredTextureShader.getUniform(UniformName::Color), mColor.r, mColor.g, mColor.b, mAlpha);
-	glUniform1i(mColoredTextureShader.getUniform(UniformName::IsAlphaTexture), isAlphaTexture ? 1 : 0);
-	glUniform1i(mColoredTextureShader.getUniform(UniformName::TextureSampler), 0); // Default texture unit
-	glUniform1i(mColoredTextureShader.getUniform(UniformName::Time), static_cast<GLuint>(SDL_GetTicks()));
+	glUniformMatrix4fv(mColoredTextureShader.getUniformLocation(UniformName::MVP), 1, GL_FALSE, MVP.getData());
+	glUniform4f(mColoredTextureShader.getUniformLocation(UniformName::Color), mColor.r, mColor.g, mColor.b, mAlpha);
+	glUniform1i(mColoredTextureShader.getUniformLocation(UniformName::IsAlphaTexture), isAlphaTexture ? 1 : 0);
+	glUniform1i(mColoredTextureShader.getUniformLocation(UniformName::TextureSampler), 0); // Default texture unit
+	glUniform1i(mColoredTextureShader.getUniformLocation(UniformName::Time), static_cast<GLuint>(SDL_GetTicks()));
 
 	// Attribute locations
-	GLint vertexPositionAttrib = glGetAttribLocation(shaderID, "vertexPosition_modelspace");
-	GLint UVAttrib = glGetAttribLocation(shaderID, "vertexUV");
+	GLint vertexPositionAttrib = mColoredTextureShader.getAttributeLocation(AttributeName::VertexPosition);
+	GLint UVAttrib = mColoredTextureShader.getAttributeLocation(AttributeName::VertexUV);
 
 	// Positions
 	U32 extraBytesPerVert = 0;

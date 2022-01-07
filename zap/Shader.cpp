@@ -51,6 +51,7 @@ Shader::Shader(const std::string& name, const std::string& vertexShaderFile, con
 	}
 
 	registerUniforms();
+	registerAttributes();
 }
 
 Shader::~Shader()
@@ -138,6 +139,14 @@ void Shader::registerUniforms()
 	mUniformLocations[static_cast<unsigned>(UniformName::Time)] = glGetUniformLocation(mId, "time");
 }
 
+void Shader::registerAttributes()
+{
+	// glGetAttribLocation returns -1 if attribute was not found
+	mAttributeLocations[static_cast<unsigned>(AttributeName::VertexPosition)] = glGetAttribLocation(mId, "vertexPosition_modelspace");
+	mAttributeLocations[static_cast<unsigned>(AttributeName::VertexColor)] = glGetAttribLocation(mId, "vertexColor");
+	mAttributeLocations[static_cast<unsigned>(AttributeName::VertexUV)] = glGetAttribLocation(mId, "vertexUV");
+}
+
 std::string Shader::getName() const
 {
 	return mName;
@@ -148,9 +157,14 @@ U32 Shader::getId() const
 	return mId;
 }
 
-S32 Shader::getUniform(UniformName uniformName) const
+S32 Shader::getUniformLocation(UniformName uniformName) const
 {
 	return mUniformLocations[static_cast<unsigned>(uniformName)];
+}
+
+S32 Shader::getAttributeLocation(AttributeName attributeName) const
+{
+	return mAttributeLocations[static_cast<unsigned>(attributeName)];
 }
 
 #endif // BF_USE_LEGACY_GL

@@ -37,18 +37,30 @@ enum class UniformName
 	UniformName_LAST // Keep this at the end
 };
 
+enum class AttributeName
+{
+	VertexPosition = 0,
+	VertexColor,
+	VertexUV,
+	AttributeName_LAST // Keep this at the end
+};
+
 class Shader
 {
 private:
 	std::string mName;
 	U32 mId;
 	std::vector<U32> mShaders;
+
 	S32 mUniformLocations[static_cast<unsigned>(UniformName::UniformName_LAST)];
+	S32 mAttributeLocations[static_cast<unsigned>(AttributeName::AttributeName_LAST)];
 
 	static std::string getShaderSource(const std::string &fileName);
 	static U32 compileShader(const std::string& shaderPath, const std::string& shaderCode, U32 type);
 	static U32 linkShader(const std::string& shaderProgramName, U32 vertexShader, U32 fragmentShader);
+
 	void registerUniforms();
+	void registerAttributes();
 
 public:
 	Shader(const std::string &name, const std::string &vertexShaderFile, const std::string &fragmentShaderFile);
@@ -56,7 +68,8 @@ public:
 
 	std::string getName() const;
 	U32 getId() const;
-	S32 getUniform(UniformName uniformName) const;
+	S32 getUniformLocation(UniformName uniformName) const;
+	S32 getAttributeLocation(AttributeName attributeName) const;
 };
 
 #endif /* SHADER_HPP */
