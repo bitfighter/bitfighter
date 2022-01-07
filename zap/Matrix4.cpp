@@ -10,6 +10,8 @@
 #include "Matrix4.h"
 #include <math.h>
 
+static const unsigned SIZE = 4;
+
 namespace Zap
 {
 
@@ -22,36 +24,22 @@ Matrix4::Matrix4()
 // 'matrix' must be square and column-major
 Matrix4::Matrix4(const F32 *matrix)
 {
-   for(U32 c = 0; c < 4; ++c)
-      for(U32 r = 0; r < 4; ++r)
-         mData[c][r] = matrix[c * 4 + r];
+   for(U32 c = 0; c < SIZE; ++c)
+      for(U32 r = 0; r < SIZE; ++r)
+         mData[c][r] = matrix[c * SIZE + r];
 }
 
 // Loss of precision!
 Matrix4::Matrix4(const F64 *matrix)
 {
-   for(U32 c = 0; c < 4; ++c)
-      for(U32 r = 0; r < 4; ++r)
-         mData[c][r] = static_cast<F32>(matrix[c * 4 + r]);
+   for(U32 c = 0; c < SIZE; ++c)
+      for(U32 r = 0; r < SIZE; ++r)
+         mData[c][r] = static_cast<F32>(matrix[c * SIZE + r]);
 }
-
 
 Matrix4::~Matrix4()
 {
    // Do nothing
-}
-
-// Static
-// Peform the dot product of 2 vectors: rowMatrix[][row] and colMatrix[col][]
-F32 Matrix4::dotProduct(U32 row, const Matrix4 &rowMatrix, U32 col, const Matrix4 &colMatrix)
-{
-   F32 result = 0;
-   for(U32 i = 0; i < 4; ++i)
-   {
-      result += rowMatrix.mData[i][row] * colMatrix.mData[col][i];
-   }
-
-   return result;
 }
 
 F32 *Matrix4::getData()
@@ -64,9 +52,9 @@ F32 *Matrix4::getData()
 Matrix4 Matrix4::getIdentity()
 {
    Matrix4 m;
-   for(U32 c = 0; c < 4; ++c)
+   for(U32 c = 0; c < SIZE; ++c)
    {
-      for(U32 r = 0; r < 4; ++r)
+      for(U32 r = 0; r < SIZE; ++r)
       {
          if(c == r)
             m.mData[c][r] = 1;
@@ -101,52 +89,36 @@ Matrix4 Matrix4::getOrthoProjection(F32 left, F32 right, F32 bottom, F32 top, F3
    return newMat;
 }
 
-// Matrix multiplication, both matrices must have the same size.
+// Fast matrix multiplication
 Matrix4 Matrix4::operator*(const Matrix4 &rhs)
 {
-   Matrix4 newMat = Matrix4::getIdentity();
-   for(U32 c = 0; c < 4; ++c)
-   {
-      for(U32 r = 0; r < 4; ++r)
-      {
-         newMat.mData[c][r] = dotProduct(r, *this, c, rhs);
-      }
-   }
+   Matrix4 out;
+   out.mData[0][0] = mData[0][0] * rhs.mData[0][0] + mData[1][0] * rhs.mData[0][1] + mData[2][0] * rhs.mData[0][2] + mData[3][0] * rhs.mData[0][3];
+   out.mData[1][0] = mData[0][0] * rhs.mData[1][0] + mData[1][0] * rhs.mData[1][1] + mData[2][0] * rhs.mData[1][2] + mData[3][0] * rhs.mData[1][3];
+   out.mData[2][0] = mData[0][0] * rhs.mData[2][0] + mData[1][0] * rhs.mData[2][1] + mData[2][0] * rhs.mData[2][2] + mData[3][0] * rhs.mData[2][3];
+   out.mData[3][0] = mData[0][0] * rhs.mData[3][0] + mData[1][0] * rhs.mData[3][1] + mData[2][0] * rhs.mData[3][2] + mData[3][0] * rhs.mData[3][3];
 
-   return newMat;
+   out.mData[0][1] = mData[0][1] * rhs.mData[0][0] + mData[1][1] * rhs.mData[0][1] + mData[2][1] * rhs.mData[0][2] + mData[3][1] * rhs.mData[0][3];
+   out.mData[1][1] = mData[0][1] * rhs.mData[1][0] + mData[1][1] * rhs.mData[1][1] + mData[2][1] * rhs.mData[1][2] + mData[3][1] * rhs.mData[1][3];
+   out.mData[2][1] = mData[0][1] * rhs.mData[2][0] + mData[1][1] * rhs.mData[2][1] + mData[2][1] * rhs.mData[2][2] + mData[3][1] * rhs.mData[2][3];
+   out.mData[3][1] = mData[0][1] * rhs.mData[3][0] + mData[1][1] * rhs.mData[3][1] + mData[2][1] * rhs.mData[3][2] + mData[3][1] * rhs.mData[3][3];
+
+   out.mData[0][2] = mData[0][2] * rhs.mData[0][0] + mData[1][2] * rhs.mData[0][1] + mData[2][2] * rhs.mData[0][2] + mData[3][2] * rhs.mData[0][3];
+   out.mData[1][2] = mData[0][2] * rhs.mData[1][0] + mData[1][2] * rhs.mData[1][1] + mData[2][2] * rhs.mData[1][2] + mData[3][2] * rhs.mData[1][3];
+   out.mData[2][2] = mData[0][2] * rhs.mData[2][0] + mData[1][2] * rhs.mData[2][1] + mData[2][2] * rhs.mData[2][2] + mData[3][2] * rhs.mData[2][3];
+   out.mData[3][2] = mData[0][2] * rhs.mData[3][0] + mData[1][2] * rhs.mData[3][1] + mData[2][2] * rhs.mData[3][2] + mData[3][2] * rhs.mData[3][3];
+
+   out.mData[0][3] = mData[0][3] * rhs.mData[0][0] + mData[1][3] * rhs.mData[0][1] + mData[2][3] * rhs.mData[0][2] + mData[3][3] * rhs.mData[0][3];
+   out.mData[1][3] = mData[0][3] * rhs.mData[1][0] + mData[1][3] * rhs.mData[1][1] + mData[2][3] * rhs.mData[1][2] + mData[3][3] * rhs.mData[1][3];
+   out.mData[2][3] = mData[0][3] * rhs.mData[2][0] + mData[1][3] * rhs.mData[2][1] + mData[2][3] * rhs.mData[2][2] + mData[3][3] * rhs.mData[2][3];
+   out.mData[3][3] = mData[0][3] * rhs.mData[3][0] + mData[1][3] * rhs.mData[3][1] + mData[2][3] * rhs.mData[3][2] + mData[3][3] * rhs.mData[3][3];
+
+   return out;
 }
-
-// Explicit specialization for faster multiplication.
-//Matrix4 Matrix4::operator*(const Matrix4 &rhs)
-//{
-//   F32 m[4][4]; // [c][r]
-//   m[0][0] = mData[0][0] * rhs.mData[0][0] + mData[1][0] * rhs.mData[0][1] + mData[2][0] * rhs.mData[0][2] + mData[3][0] * rhs.mData[0][3];
-//   m[1][0] = mData[0][0] * rhs.mData[1][0] + mData[1][0] * rhs.mData[1][1] + mData[2][0] * rhs.mData[1][2] + mData[3][0] * rhs.mData[1][3];
-//   m[2][0] = mData[0][0] * rhs.mData[2][0] + mData[1][0] * rhs.mData[2][1] + mData[2][0] * rhs.mData[2][2] + mData[3][0] * rhs.mData[2][3];
-//   m[2][0] = mData[0][0] * rhs.mData[3][0] + mData[1][0] * rhs.mData[3][1] + mData[2][0] * rhs.mData[3][2] + mData[3][0] * rhs.mData[3][3];
-//
-//   m[0][1] = mData[0][1] * rhs.mData[0][0] + mData[1][1] * rhs.mData[0][1] + mData[2][1] * rhs.mData[0][2] + mData[3][1] * rhs.mData[0][3];
-//   m[1][1] = mData[0][1] * rhs.mData[1][0] + mData[1][1] * rhs.mData[1][1] + mData[2][1] * rhs.mData[1][2] + mData[3][1] * rhs.mData[1][3];
-//   m[2][1] = mData[0][1] * rhs.mData[2][0] + mData[1][1] * rhs.mData[2][1] + mData[2][1] * rhs.mData[2][2] + mData[3][1] * rhs.mData[2][3];
-//   m[2][1] = mData[0][1] * rhs.mData[3][0] + mData[1][1] * rhs.mData[3][1] + mData[2][1] * rhs.mData[3][2] + mData[3][1] * rhs.mData[3][3];
-//
-//   m[0][2] = mData[0][2] * rhs.mData[0][0] + mData[1][2] * rhs.mData[0][1] + mData[2][2] * rhs.mData[0][2] + mData[3][2] * rhs.mData[0][3];
-//   m[1][2] = mData[0][2] * rhs.mData[1][0] + mData[1][2] * rhs.mData[1][1] + mData[2][2] * rhs.mData[1][2] + mData[3][2] * rhs.mData[1][3];
-//   m[2][2] = mData[0][2] * rhs.mData[2][0] + mData[1][2] * rhs.mData[2][1] + mData[2][2] * rhs.mData[2][2] + mData[3][2] * rhs.mData[2][3];
-//   m[2][2] = mData[0][2] * rhs.mData[3][0] + mData[1][2] * rhs.mData[3][1] + mData[2][2] * rhs.mData[3][2] + mData[3][2] * rhs.mData[3][3];
-//
-//   m[0][3] = mData[0][3] * rhs.mData[0][0] + mData[1][3] * rhs.mData[0][1] + mData[2][3] * rhs.mData[0][2] + mData[3][3] * rhs.mData[0][3];
-//   m[1][3] = mData[0][3] * rhs.mData[1][0] + mData[1][3] * rhs.mData[1][1] + mData[2][3] * rhs.mData[1][2] + mData[3][3] * rhs.mData[1][3];
-//   m[2][3] = mData[0][3] * rhs.mData[2][0] + mData[1][3] * rhs.mData[2][1] + mData[2][3] * rhs.mData[2][2] + mData[3][3] * rhs.mData[2][3];
-//   m[2][3] = mData[0][3] * rhs.mData[3][0] + mData[1][3] * rhs.mData[3][1] + mData[2][3] * rhs.mData[3][2] + mData[3][3] * rhs.mData[3][3];
-//
-//
-//}
 
 Matrix4 Matrix4::scale(F32 x, F32 y, F32 z)
 {
    Matrix4 newMat(*this);
-
    newMat.mData[0][0] *= x;
    newMat.mData[1][1] *= y;
    newMat.mData[2][2] *= z;
@@ -157,7 +129,6 @@ Matrix4 Matrix4::scale(F32 x, F32 y, F32 z)
 Matrix4 Matrix4::translate(F32 x, F32 y, F32 z)
 {
    Matrix4 translateMat = Matrix4::getIdentity();
-   U32 c = 4 - 1;
    translateMat.mData[3][0] = x;
    translateMat.mData[3][1] = y;
    translateMat.mData[3][2] = z;
