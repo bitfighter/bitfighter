@@ -8,7 +8,7 @@
 
 #include "GLRenderer.h"
 #include "Shader.h"
-#include "Matrix.h"
+#include "Matrix4.h"
 #include "Color.h"
 #include <stack>
 
@@ -33,8 +33,8 @@ private:
    Color mColor;
    float mAlpha;
 
-   std::stack<Matrix<4>> mModelViewMatrixStack;
-   std::stack<Matrix<4>> mProjectionMatrixStack;
+   std::stack<Matrix4> mModelViewMatrixStack;
+   std::stack<Matrix4> mProjectionMatrixStack;
    MatrixType mMatrixMode;
 
    GL2Renderer();
