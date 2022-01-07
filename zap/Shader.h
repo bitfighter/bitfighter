@@ -23,7 +23,7 @@
 #include "tnlTypes.h"
 
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <string>
 
 using namespace TNL;
@@ -32,7 +32,7 @@ class Shader
 {
 private:
 	// <uniform, uniformLocation>
-	using UniformMap = std::map<std::string, S32>;
+	using UniformMap = std::unordered_map<std::string, S32>;
 	using UniformPair = std::pair<std::string, S32>;
 
 	std::string mName;
