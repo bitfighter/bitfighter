@@ -23,29 +23,32 @@
 #include "tnlTypes.h"
 
 #include <vector>
-#include <unordered_map>
 #include <string>
 
 using namespace TNL;
 
+enum class UniformName
+{
+	MVP = 0,
+	Color,
+	TextureSampler,
+	IsAlphaTexture,
+	Time,
+	UniformName_LAST // Keep this at the end
+};
+
 class Shader
 {
 private:
-	// <uniform, uniformLocation>
-	using UniformMap = std::unordered_map<std::string, S32>;
-	using UniformPair = std::pair<std::string, S32>;
-
 	std::string mName;
 	U32 mId;
 	std::vector<U32> mShaders;
-	UniformMap mUniformMap;
+	S32 mUniformLocations[static_cast<unsigned>(UniformName::UniformName_LAST)];
 
 	static std::string getShaderSource(const std::string &fileName);
 	static U32 compileShader(const std::string& shaderPath, const std::string& shaderCode, U32 type);
 	static U32 linkShader(const std::string& shaderProgramName, U32 vertexShader, U32 fragmentShader);
-
 	void registerUniforms();
-	S32 registerUniform(const std::string& uniformName);
 
 public:
 	Shader(const std::string &name, const std::string &vertexShaderFile, const std::string &fragmentShaderFile);
@@ -53,7 +56,7 @@ public:
 
 	std::string getName() const;
 	U32 getId() const;
-	S32 findUniform(const std::string& uniformName) const;
+	S32 getUniform(UniformName uniformName) const;
 };
 
 #endif /* SHADER_HPP */

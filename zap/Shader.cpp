@@ -33,7 +33,9 @@ std::string getGLShaderDebugLog(U32 object, PFNGLGETSHADERIVPROC glGet_iv, PFNGL
 }
 
 Shader::Shader(const std::string& name, const std::string& vertexShaderFile, const std::string& fragmentShaderFile)
-	: mName(name), mId(0)
+	: mName(name)
+	, mId(0)
+	, mUniformLocations()
 {
 	std::string vertexShaderCode = getShaderSource(vertexShaderFile);
 	std::string fragmentShaderCode = getShaderSource(fragmentShaderFile);
@@ -128,37 +130,12 @@ U32 Shader::linkShader(const std::string& shaderProgramName, U32 vertexShader, U
 
 void Shader::registerUniforms()
 {
-	GLint numberOfUniforms;
-	const GLsizei bufferSize = 256;
-	GLchar uniformNameBuffer[bufferSize];
-	glGetProgramiv(static_cast<GLuint>(mId), GL_ACTIVE_UNIFORMS, &numberOfUniforms);
-
-	GLsizei numberOfCharsReceived;
-	GLint size;
-	GLuint type;
-	for(int i=0; i<numberOfUniforms; i++)
-	{
-		glGetActiveUniform(static_cast<GLuint>(mId), i, bufferSize, &numberOfCharsReceived, &size, &type, uniformNameBuffer);
-		registerUniform(uniformNameBuffer); // uniformNameBuffer is null-terminated
-	}
-}
-
-S32 Shader::registerUniform(const std::string& uniformName)
-{
-	// Get the location ("index") of the uniform in the shader
-	GLint uniformLocation = glGetUniformLocation(static_cast<GLuint>(mId), uniformName.c_str());
-	TNLAssert(uniformLocation != -1, (
-		"Uniform '" + uniformName + "' does not exist or is invalid in shader '" + mName + 
-		"'. We should never have this issue; check the code!").c_str()
-	);
-
-	// Add the uniform to our map
-	UniformPair uniformPair(uniformName, static_cast<S32>(uniformLocation));
-	std::pair<UniformMap::iterator, bool> newlyAddedPair = mUniformMap.insert(uniformPair);
-	TNLAssert(newlyAddedPair.second,
-		("Uniform '" + uniformName + "' in shader '" + mName + "' already exists and cannot be added again!").c_str());
-
-	return static_cast<S32>(uniformLocation);
+	// glGetUniformLocation returns -1 if uniform was not found
+	mUniformLocations[static_cast<unsigned>(UniformName::MVP)] = glGetUniformLocation(mId, "MVP");
+	mUniformLocations[static_cast<unsigned>(UniformName::Color)] = glGetUniformLocation(mId, "color");
+	mUniformLocations[static_cast<unsigned>(UniformName::TextureSampler)] = glGetUniformLocation(mId, "textureSampler");
+	mUniformLocations[static_cast<unsigned>(UniformName::IsAlphaTexture)] = glGetUniformLocation(mId, "isAlphaTexture");
+	mUniformLocations[static_cast<unsigned>(UniformName::Time)] = glGetUniformLocation(mId, "time");
 }
 
 std::string Shader::getName() const
@@ -171,14 +148,9 @@ U32 Shader::getId() const
 	return mId;
 }
 
-// Returns -1 if not found
-S32 Shader::findUniform(const std::string& uniformName) const
+S32 Shader::getUniform(UniformName uniformName) const
 {
-	UniformMap::const_iterator found = mUniformMap.find(uniformName);
-	if(found == mUniformMap.end())
-		return -1;
-
-	return found->second;
+	return mUniformLocations[static_cast<unsigned>(uniformName)];
 }
 
 #endif // BF_USE_LEGACY_GL
