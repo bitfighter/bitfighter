@@ -61,7 +61,7 @@ Shader::Shader(const std::string& name, const std::string& vertexShaderFile, con
 	registerAttributes();
 
    // Set initial uniform values
-   setMVP(Matrix4::getIdentity());
+   setMVP(Matrix4());
    setColor(Color(), 1.0f);
    setTime(0);
    setIsAlphaTexture(false);

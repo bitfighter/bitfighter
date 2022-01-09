@@ -17,10 +17,19 @@ static const unsigned SIZE = 4;
 namespace Zap
 {
 
-// Private, create uninitialized square matrix
+// Create an identity matrix
 Matrix4::Matrix4()
 {
-   // Do nothing!
+   for(U32 c = 0; c < SIZE; ++c)
+   {
+      for(U32 r = 0; r < SIZE; ++r)
+      {
+         if(c == r)
+            mData[c][r] = 1;
+         else
+            mData[c][r] = 0;
+      }
+   }
 }
 
 // 'matrix' must be square and column-major
@@ -52,48 +61,6 @@ F32 *Matrix4::getData()
 const F32 *Matrix4::getData() const
 {
    return &mData[0][0];
-}
-
-// Static
-// Get square identity matrix
-Matrix4 Matrix4::getIdentity()
-{
-   Matrix4 m;
-   for(U32 c = 0; c < SIZE; ++c)
-   {
-      for(U32 r = 0; r < SIZE; ++r)
-      {
-         if(c == r)
-            m.mData[c][r] = 1;
-         else
-            m.mData[c][r] = 0;
-      }
-   }
-
-   return m;
-}
-
-// Static
-// Create an orthographic projection matrix.
-// Source: https://en.wikipedia.org/wiki/Orthographic_projection
-Matrix4 Matrix4::getOrthoProjection(F32 left, F32 right, F32 bottom, F32 top, F32 nearZ, F32 farZ)
-{
-   // Essentially, we create a transformation matrix which will map the cube
-   // defined by the arguments into a 2x2x2 cube centered at the origin.
-   // When OpenGL will convert to screen coordinates, it will simply omit the z coordinate.
-   Matrix4 newMat = Matrix4::getIdentity();
-   
-   // Translation
-   newMat.mData[3][0] = -(right + left) / (right - left);
-   newMat.mData[3][1] = -(top + bottom) / (top - bottom);
-   newMat.mData[3][2] = -(farZ + nearZ) / (farZ - nearZ);
-
-   // Scaling
-   newMat.mData[0][0] = 2.0f / (right - left);
-   newMat.mData[1][1] = 2.0f / (top - bottom);
-   newMat.mData[2][2] = -2.0f / (farZ - nearZ);
-
-   return newMat;
 }
 
 // Fast matrix multiplication
@@ -135,7 +102,7 @@ Matrix4 Matrix4::scale(F32 x, F32 y, F32 z)
 
 Matrix4 Matrix4::translate(F32 x, F32 y, F32 z)
 {
-   Matrix4 translateMat = Matrix4::getIdentity();
+   Matrix4 translateMat;
    translateMat.mData[3][0] = x;
    translateMat.mData[3][1] = y;
    translateMat.mData[3][2] = z;
@@ -148,7 +115,7 @@ Matrix4 Matrix4::translate(F32 x, F32 y, F32 z)
 // Source: https://math.stackexchange.com/a/4155115
 Matrix4 Matrix4::rotate(F32 radAngle, F32 x, F32 y, F32 z)
 {
-   Matrix4 rotMat = Matrix4::getIdentity();
+   Matrix4 rotMat;
 
    // Normalize vector
    F32 length = static_cast<F32>(sqrt(x*x + y*y + z*z));
@@ -175,6 +142,29 @@ Matrix4 Matrix4::rotate(F32 radAngle, F32 x, F32 y, F32 z)
 
    // Apply rotation BEFORE all current transformations.
    return (*this) * rotMat;
+}
+
+// Static
+// Create an orthographic projection matrix.
+// Source: https://en.wikipedia.org/wiki/Orthographic_projection
+Matrix4 Matrix4::getOrthoProjection(F32 left, F32 right, F32 bottom, F32 top, F32 nearZ, F32 farZ)
+{
+   // Essentially, we create a transformation matrix which will map the cube
+   // defined by the arguments into a 2x2x2 cube centered at the origin.
+   // When OpenGL will convert to screen coordinates, it will simply omit the z coordinate.
+   Matrix4 newMat;
+
+   // Translation
+   newMat.mData[3][0] = -(right + left) / (right - left);
+   newMat.mData[3][1] = -(top + bottom) / (top - bottom);
+   newMat.mData[3][2] = -(farZ + nearZ) / (farZ - nearZ);
+
+   // Scaling
+   newMat.mData[0][0] = 2.0f / (right - left);
+   newMat.mData[1][1] = 2.0f / (top - bottom);
+   newMat.mData[2][2] = -2.0f / (farZ - nearZ);
+
+   return newMat;
 }
 
 }

@@ -10,8 +10,10 @@
 #include "Shader.h"
 #include "GL2RingBuffer.h"
 #include "Matrix4.h"
+#include "Stack.h"
 #include "Color.h"
-#include <stack>
+
+#define STACK_CAPACITY 100
 
 namespace Zap
 {
@@ -19,6 +21,8 @@ namespace Zap
 class GL2Renderer : public GLRenderer
 {
 private:
+   using MatrixStack = Stack<Matrix4, STACK_CAPACITY>;
+
    // Shaders
    Shader mStaticShader;
    Shader mDynamicShader;
@@ -35,8 +39,8 @@ private:
    F32 mAlpha;
    U32 mCurrentShaderId;
 
-   std::stack<Matrix4> mModelViewMatrixStack;
-   std::stack<Matrix4> mProjectionMatrixStack;
+   MatrixStack mModelViewMatrixStack;
+   MatrixStack mProjectionMatrixStack;
    MatrixType mMatrixMode;
 
    GL2Renderer();

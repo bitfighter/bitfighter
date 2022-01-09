@@ -13,8 +13,6 @@
 #include <memory>
 #include <cstddef> // For size_t
 
-#define MAX_NUMBER_OF_VERTICES 300000
-
 namespace Zap
 {
 
@@ -26,12 +24,11 @@ GL2Renderer::GL2Renderer()
    , mTextureEnabled(false)
    , mAlpha(1.0f)
    , mCurrentShaderId(0)
+   , mMatrixMode(MatrixType::ModelView)
 {
-	// Give each stack one identity matrix
-	mModelViewMatrixStack.push(Matrix4::getIdentity());
-	mProjectionMatrixStack.push(Matrix4::getIdentity());
-	mMatrixMode = MatrixType::ModelView;
-
+   // Give each stack an identity matrix
+   mModelViewMatrixStack.push(Matrix4());
+   mProjectionMatrixStack.push(Matrix4());
 	initRenderer();
 }
 
@@ -98,7 +95,7 @@ void GL2Renderer::setColor(F32 r, F32 g, F32 b, F32 alpha)
 void GL2Renderer::scale(F32 x, F32 y, F32 z)
 {
 	// Choose correct stack
-	std::stack<Matrix4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+   MatrixStack &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 	Matrix4 newMatrix = stack.top().scale(x, y, z);
 	stack.pop();
 	stack.push(newMatrix);
@@ -106,7 +103,7 @@ void GL2Renderer::scale(F32 x, F32 y, F32 z)
 
 void GL2Renderer::translate(F32 x, F32 y, F32 z)
 {
-	std::stack<Matrix4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+   MatrixStack &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 	Matrix4 newMatrix = stack.top().translate(x, y, z);
 	stack.pop();
 	stack.push(newMatrix);
@@ -114,7 +111,7 @@ void GL2Renderer::translate(F32 x, F32 y, F32 z)
 
 void GL2Renderer::rotate(F32 degAngle, F32 x, F32 y, F32 z)
 {
-	std::stack<Matrix4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+   MatrixStack &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 
 	Matrix4 newMatrix = stack.top().rotate(degreesToRadians(degAngle), x, y, z);
 	stack.pop();
@@ -128,7 +125,7 @@ void GL2Renderer::setMatrixMode(MatrixType type)
 
 void GL2Renderer::getMatrix(MatrixType type, F32 *matrix)
 {
-	std::stack<Matrix4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+   MatrixStack &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 	const F32 *sourceMatrix = stack.top().getData();
 
 	for(int i = 0; i < 16; ++i)
@@ -138,13 +135,13 @@ void GL2Renderer::getMatrix(MatrixType type, F32 *matrix)
 void GL2Renderer::pushMatrix()
 {
 	// Duplicate the top matrix on top of the stack
-	std::stack<Matrix4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+   MatrixStack &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 	stack.push(stack.top());
 }
 
 void GL2Renderer::popMatrix()
 {
-	std::stack<Matrix4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+   MatrixStack &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 	stack.pop();
 }
 
@@ -152,7 +149,7 @@ void GL2Renderer::popMatrix()
 void GL2Renderer::loadMatrix(const F32 *m)
 {
 	// Replace top matrix
-	std::stack<Matrix4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+   MatrixStack &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 	stack.pop();
 	stack.push(Matrix4(m));
 }
@@ -160,7 +157,7 @@ void GL2Renderer::loadMatrix(const F32 *m)
 // Results in loss of precision!
 void GL2Renderer::loadMatrix(const F64 *m)
 {
-	std::stack<Matrix4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+   MatrixStack &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 	stack.pop();
 	stack.push(Matrix4(m));
 }
@@ -168,15 +165,15 @@ void GL2Renderer::loadMatrix(const F64 *m)
 void GL2Renderer::loadIdentity()
 {
 	// Replace the top matrix with an identity matrix
-	std::stack<Matrix4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+   MatrixStack &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 	stack.pop();
-	stack.push(Matrix4::getIdentity());
+	stack.push(Matrix4());
 }
 
 void GL2Renderer::projectOrtho(F32 left, F32 right, F32 bottom, F32 top, F32 nearZ, F32 farZ)
 {
 	// Multiply the top matrix with an ortho matrix
-	std::stack<Matrix4> &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
+   MatrixStack &stack = (mMatrixMode == MatrixType::ModelView) ? mModelViewMatrixStack : mProjectionMatrixStack;
 	Matrix4 topMatrix = stack.top();
 	Matrix4 ortho = Matrix4::getOrthoProjection(left, right, bottom, top, nearZ, farZ);
 
