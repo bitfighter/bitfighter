@@ -39,6 +39,8 @@ private:
 
    static S32 getStrokeFontStringLength(const SFG_StrokeFont *font, const char* string);
    static S32 getTtfFontStringLength(BfFont *font, const char* string);
+   static void getStrokeCharacterPoints(const SFG_StrokeChar *schar, F32 xOffset, F32 *outPoints, U32 *pointCount);
+   static void renderStrokedString(F32 size, const char *string);
 
 public:
    FontManager();    // Constructor
@@ -50,10 +52,7 @@ public:
    static sth_stash *getStash();
 
    static void drawTTFString(BfFont *font, const char *string, F32 size);
-   static void drawStrokeCharacter(const SFG_StrokeFont *font, S32 character);
-
    static S32 getStringLength(const char* string);
-
    static void renderString(F32 size, const char *string);
 
    static void setFont(FontId fontId);
