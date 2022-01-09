@@ -42,7 +42,7 @@ Shader::Shader(const std::string& name, const std::string& vertexShaderFile, con
    , mLastAlpha(0)
    , mLastTime(0)
    , mLastIsAlphaTexture(false)
-   , mLastTextureSampler(false)
+   , mLastTextureSampler(0)
 {
 	std::string vertexShaderCode = getShaderSource(vertexShaderFile);
 	std::string fragmentShaderCode = getShaderSource(fragmentShaderFile);
@@ -61,6 +61,7 @@ Shader::Shader(const std::string& name, const std::string& vertexShaderFile, con
 	registerAttributes();
 
    // Set initial uniform values
+   glUseProgram(mId);
    setMVP(Matrix4());
    setColor(Color(), 1.0f);
    setTime(0);
@@ -196,25 +197,38 @@ void Shader::setMVP(const Matrix4 &MVP)
 void Shader::setColor(const Color &color, F32 alpha)
 {
    if(color != mLastColor || alpha != mLastAlpha)
+   {
       glUniform4f(getUniformLocation(UniformName::Color), color.r, color.g, color.b, alpha);
+      mLastColor = color;
+      mLastAlpha = alpha;
+   }
 }
 
 void Shader::setTime(U32 time)
 {
    if(time != mLastTime)
+   {
       glUniform1i(getUniformLocation(UniformName::Time), time);
+      mLastTime = time;
+   }
 }
 
 void Shader::setIsAlphaTexture(bool isAlphaTexture)
 {
    if(isAlphaTexture != mLastIsAlphaTexture)
+   {
       glUniform1i(getUniformLocation(UniformName::IsAlphaTexture), isAlphaTexture ? 1 : 0);
+      mLastIsAlphaTexture = isAlphaTexture;
+   }
 }
 
 void Shader::setTextureSampler(U32 textureSampler)
 {
    if(textureSampler != mLastTextureSampler)
+   {
       glUniform1i(getUniformLocation(UniformName::TextureSampler), textureSampler);
+      mLastTextureSampler = textureSampler;
+   }
 }
 
 }
