@@ -15,6 +15,9 @@
 #include <limits>
 #include <array>
 
+namespace Zap
+{
+
 std::string getGLShaderDebugLog(U32 object, PFNGLGETSHADERIVPROC glGet_iv, PFNGLGETSHADERINFOLOGPROC glGet_InfoLog)
 {
 	GLint logLength;
@@ -172,6 +175,8 @@ std::string Shader::getName() const
 U32 Shader::getId() const
 {
 	return mId;
+}
+
 }
 
 #endif // BF_USE_LEGACY_GL

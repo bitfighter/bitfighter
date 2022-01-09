@@ -27,6 +27,9 @@
 
 using namespace TNL;
 
+namespace Zap
+{
+
 enum class UniformName
 {
 	MVP = 0,
@@ -71,5 +74,7 @@ public:
 	std::string getName() const;
 	U32 getId() const;
 };
+
+}
 
 #endif /* SHADER_HPP */
