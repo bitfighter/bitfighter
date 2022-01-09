@@ -23,7 +23,9 @@ public:
    Matrix4(const F32* matrix);
    Matrix4(const F64 *matrix);
    ~Matrix4();
+
    F32 *getData();
+   const F32 *getData() const;
 
    static Matrix4 getIdentity();
    static Matrix4 getOrthoProjection(F32 left, F32 right, F32 bottom, F32 top, F32 nearZ, F32 farZ);

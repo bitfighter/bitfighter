@@ -47,6 +47,11 @@ F32 *Matrix4::getData()
    return &mData[0][0];
 }
 
+const F32 *Matrix4::getData() const
+{
+   return &mData[0][0];
+}
+
 // Static
 // Get square identity matrix
 Matrix4 Matrix4::getIdentity()
