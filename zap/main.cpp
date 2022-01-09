@@ -495,8 +495,8 @@ void shutdownBitfighter()
          VideoSystem::saveWindowPostion(settings);
       }
 
-      VideoSystem::shutdown();
       FontManager::cleanup();
+      VideoSystem::shutdown();
       AppIntegrationController::shutdown();
 #endif
    }
