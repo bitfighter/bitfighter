@@ -26,6 +26,7 @@ GL2Renderer::GL2Renderer()
    , mUVBuffer(0)
    , mTextureEnabled(false)
    , mAlpha(1.0f)
+   , mCurrentShaderId(0)
 {
 	// Give each stack one identity matrix
 	mModelViewMatrixStack.push(Matrix4::getIdentity());
@@ -61,6 +62,12 @@ void GL2Renderer::initBuffers()
 	glBufferData(GL_ARRAY_BUFFER, MAX_NUMBER_OF_VERTICES * 4 * 2, nullptr, GL_DYNAMIC_DRAW); // 2D
 }
 
+void GL2Renderer::useShader(const Shader &shader)
+{
+   if(mCurrentShaderId != shader.getId())
+      glUseProgram(shader.getId());
+}
+
 // Static
 void GL2Renderer::create()
 {
@@ -72,8 +79,7 @@ template<typename T>
 void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U32 vertCount, RenderType type,
 	U32 start, U32 stride, U32 vertDimension)
 {
-	GLuint shaderId = mStaticShader.getId();
-	glUseProgram(shaderId);
+   useShader(mStaticShader);
 
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
 	glUniformMatrix4fv(mStaticShader.getUniformLocation(UniformName::MVP), 1, GL_FALSE, MVP.getData());
@@ -224,8 +230,7 @@ void GL2Renderer::renderVertexArray(const F32 verts[], U32 vertCount, RenderType
 void GL2Renderer::renderColored(const F32 verts[], const F32 colors[], U32 vertCount,
    RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
-	GLint shaderID = mDynamicShader.getId();
-	glUseProgram(mDynamicShader.getId());
+   useShader(mDynamicShader);
 
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
 	glUniformMatrix4fv(mDynamicShader.getUniformLocation(UniformName::MVP), 1, GL_FALSE, MVP.getData());
@@ -280,8 +285,7 @@ void GL2Renderer::renderColored(const F32 verts[], const F32 colors[], U32 vertC
 void GL2Renderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCount,
    RenderType type, U32 start, U32 stride, U32 vertDimension)
 {
-	GLint shaderID = mTexturedShader.getId();
-	glUseProgram(mTexturedShader.getId());
+   useShader(mTexturedShader);
 
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
 	glUniformMatrix4fv(mTexturedShader.getUniformLocation(UniformName::MVP), 1, GL_FALSE, MVP.getData());
@@ -334,8 +338,7 @@ void GL2Renderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCou
 void GL2Renderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 vertCount,
    RenderType type, U32 start, U32 stride, U32 vertDimension, bool isAlphaTexture)
 {
-	GLint shaderID = mColoredTextureShader.getId();
-	glUseProgram(mColoredTextureShader.getId());
+   useShader(mColoredTextureShader);
 
 	// Uniforms
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();

@@ -32,6 +32,7 @@ private:
    bool mTextureEnabled;
    Color mColor;
    float mAlpha;
+   U32 mCurrentShaderId;
 
    std::stack<Matrix4> mModelViewMatrixStack;
    std::stack<Matrix4> mProjectionMatrixStack;
@@ -39,6 +40,7 @@ private:
 
    GL2Renderer();
    void initBuffers();
+   void useShader(const Shader &shader);
 
    template<typename T>
    void renderGenericVertexArray(DataType dataType, const T verts[], U32 vertCount, RenderType type,
