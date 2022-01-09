@@ -48,7 +48,7 @@ void ScreenShooter::resizeViewportToCanvas(UIManager *uiManager)
    r.setMatrixMode(MatrixType::Projection);
    r.loadIdentity();
 
-   r.projectOrtho(0, width, height, 0, 0, 1);
+   r.projectOrtho(0, (F32)width, (F32)height, 0, 0, 1);
 
    r.setMatrixMode(MatrixType::ModelView);
    r.loadIdentity();
@@ -76,7 +76,7 @@ void ScreenShooter::resizeViewportToDrawableArea(UIManager *uiManager)
    r.loadIdentity();
 
    // Stick to canvas width for orthographic projection
-   r.projectOrtho(0, canvasWidth, canvasHeight, 0, 0, 1);
+   r.projectOrtho(0, (F32)canvasWidth, (F32)canvasHeight, 0, 0, 1);
 
    r.setMatrixMode(MatrixType::ModelView);
    r.loadIdentity();
