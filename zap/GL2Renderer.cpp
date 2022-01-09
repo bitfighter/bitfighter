@@ -82,9 +82,9 @@ void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U
    useShader(mStaticShader);
 
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
-	glUniformMatrix4fv(mStaticShader.getUniformLocation(UniformName::MVP), 1, GL_FALSE, MVP.getData());
-	glUniform4f(mStaticShader.getUniformLocation(UniformName::Color), mColor.r, mColor.g, mColor.b, mAlpha);
-	glUniform1i(mStaticShader.getUniformLocation(UniformName::Time), static_cast<int>(SDL_GetTicks())); // Give time, it's always useful!
+   mStaticShader.setMVP(MVP);
+   mStaticShader.setColor(mColor, mAlpha);
+   mStaticShader.setTime(static_cast<GLuint>(SDL_GetTicks())); // Give time, it's always useful!
 
 	// Get the position attribute location in the shader
 	GLint attribLocation = mStaticShader.getAttributeLocation(AttributeName::VertexPosition);
@@ -233,8 +233,8 @@ void GL2Renderer::renderColored(const F32 verts[], const F32 colors[], U32 vertC
    useShader(mDynamicShader);
 
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
-	glUniformMatrix4fv(mDynamicShader.getUniformLocation(UniformName::MVP), 1, GL_FALSE, MVP.getData());
-	glUniform1i(mDynamicShader.getUniformLocation(UniformName::Time), static_cast<GLuint>(SDL_GetTicks()));
+   mDynamicShader.setMVP(MVP);
+   mDynamicShader.setTime(static_cast<GLuint>(SDL_GetTicks()));
 
 	// Attribute locations
 	GLint vertexPositionAttrib = mDynamicShader.getAttributeLocation(AttributeName::VertexPosition);
@@ -288,9 +288,9 @@ void GL2Renderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCou
    useShader(mTexturedShader);
 
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
-	glUniformMatrix4fv(mTexturedShader.getUniformLocation(UniformName::MVP), 1, GL_FALSE, MVP.getData());
-	glUniform1i(mTexturedShader.getUniformLocation(UniformName::TextureSampler), 0); // Default texture unit
-	glUniform1i(mTexturedShader.getUniformLocation(UniformName::Time), static_cast<GLuint>(SDL_GetTicks()));
+   mTexturedShader.setMVP(MVP);
+   mTexturedShader.setTextureSampler(0); // Default texture unit
+   mTexturedShader.setTime(static_cast<GLuint>(SDL_GetTicks()));
 
 	// Attribute locations
 	GLint vertexPositionAttrib = mTexturedShader.getAttributeLocation(AttributeName::VertexPosition);
@@ -342,11 +342,11 @@ void GL2Renderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 v
 
 	// Uniforms
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
-	glUniformMatrix4fv(mColoredTextureShader.getUniformLocation(UniformName::MVP), 1, GL_FALSE, MVP.getData());
-	glUniform4f(mColoredTextureShader.getUniformLocation(UniformName::Color), mColor.r, mColor.g, mColor.b, mAlpha);
-	glUniform1i(mColoredTextureShader.getUniformLocation(UniformName::IsAlphaTexture), isAlphaTexture ? 1 : 0);
-	glUniform1i(mColoredTextureShader.getUniformLocation(UniformName::TextureSampler), 0); // Default texture unit
-	glUniform1i(mColoredTextureShader.getUniformLocation(UniformName::Time), static_cast<GLuint>(SDL_GetTicks()));
+   mColoredTextureShader.setMVP(MVP);
+   mColoredTextureShader.setColor(mColor, mAlpha);
+   mColoredTextureShader.setIsAlphaTexture(isAlphaTexture);
+   mColoredTextureShader.setTextureSampler(0); // Default texture unit
+   mColoredTextureShader.setTime(static_cast<GLuint>(SDL_GetTicks()));
 
 	// Attribute locations
 	GLint vertexPositionAttrib = mColoredTextureShader.getAttributeLocation(AttributeName::VertexPosition);

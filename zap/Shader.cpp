@@ -39,6 +39,10 @@ Shader::Shader(const std::string& name, const std::string& vertexShaderFile, con
 	: mName(name)
 	, mId(0)
 	, mUniformLocations()
+   , mLastAlpha(0)
+   , mLastTime(0)
+   , mLastIsAlphaTexture(false)
+   , mLastTextureSampler(false)
 {
 	std::string vertexShaderCode = getShaderSource(vertexShaderFile);
 	std::string fragmentShaderCode = getShaderSource(fragmentShaderFile);
@@ -55,6 +59,13 @@ Shader::Shader(const std::string& name, const std::string& vertexShaderFile, con
 
 	registerUniforms();
 	registerAttributes();
+
+   // Set initial uniform values
+   setMVP(Matrix4::getIdentity());
+   setColor(Color(), 1.0f);
+   setTime(0);
+   setIsAlphaTexture(false);
+   setTextureSampler(0);
 }
 
 Shader::~Shader()
@@ -157,6 +168,16 @@ void Shader::registerAttributes()
    }
 }
 
+std::string Shader::getName() const
+{
+	return mName;
+}
+
+U32 Shader::getId() const
+{
+	return mId;
+}
+
 S32 Shader::getUniformLocation(UniformName uniformName) const
 {
    return mUniformLocations[static_cast<unsigned>(uniformName)];
@@ -167,14 +188,33 @@ S32 Shader::getAttributeLocation(AttributeName attributeName) const
    return mAttributeLocations[static_cast<unsigned>(attributeName)];
 }
 
-std::string Shader::getName() const
+void Shader::setMVP(const Matrix4 &MVP)
 {
-	return mName;
+   glUniformMatrix4fv(getUniformLocation(UniformName::MVP), 1, GL_FALSE, MVP.getData());
 }
 
-U32 Shader::getId() const
+void Shader::setColor(const Color &color, F32 alpha)
 {
-	return mId;
+   if(color != mLastColor || alpha != mLastAlpha)
+      glUniform4f(getUniformLocation(UniformName::Color), color.r, color.g, color.b, alpha);
+}
+
+void Shader::setTime(U32 time)
+{
+   if(time != mLastTime)
+      glUniform1i(getUniformLocation(UniformName::Time), time);
+}
+
+void Shader::setIsAlphaTexture(bool isAlphaTexture)
+{
+   if(isAlphaTexture != mLastIsAlphaTexture)
+      glUniform1i(getUniformLocation(UniformName::IsAlphaTexture), isAlphaTexture ? 1 : 0);
+}
+
+void Shader::setTextureSampler(U32 textureSampler)
+{
+   if(textureSampler != mLastTextureSampler)
+      glUniform1i(getUniformLocation(UniformName::TextureSampler), textureSampler);
 }
 
 }
