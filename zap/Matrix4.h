@@ -17,6 +17,7 @@ class Matrix4
 {
 private:
    F32 mData[4][4];
+   Matrix4(bool);
 
 public:
    Matrix4();

@@ -17,7 +17,14 @@ static const unsigned SIZE = 4;
 namespace Zap
 {
 
-// Create an identity matrix
+// Private, does not initialize data
+// There MUST be a better way of doing this??
+Matrix4::Matrix4(bool)
+{
+   // Do nothing!
+}
+
+// Construct a 4x4 identity matrix
 Matrix4::Matrix4()
 {
    for(U32 c = 0; c < SIZE; ++c)
@@ -66,7 +73,7 @@ const F32 *Matrix4::getData() const
 // Fast matrix multiplication
 Matrix4 Matrix4::operator*(const Matrix4 &rhs)
 {
-   Matrix4 out;
+   Matrix4 out(false); // Don't initialize, for speed
    out.mData[0][0] = mData[0][0] * rhs.mData[0][0] + mData[1][0] * rhs.mData[0][1] + mData[2][0] * rhs.mData[0][2] + mData[3][0] * rhs.mData[0][3];
    out.mData[1][0] = mData[0][0] * rhs.mData[1][0] + mData[1][0] * rhs.mData[1][1] + mData[2][0] * rhs.mData[1][2] + mData[3][0] * rhs.mData[1][3];
    out.mData[2][0] = mData[0][0] * rhs.mData[2][0] + mData[1][0] * rhs.mData[2][1] + mData[2][0] * rhs.mData[2][2] + mData[3][0] * rhs.mData[2][3];
