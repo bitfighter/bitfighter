@@ -9,7 +9,9 @@
 #include "MathUtils.h"
 #include "glad/glad.h"
 #include "SDL.h"
+
 #include <memory>
+#include <cstddef> // For size_t
 
 #define MAX_NUMBER_OF_VERTICES 300000
 
@@ -21,9 +23,6 @@ GL2Renderer::GL2Renderer()
    , mDynamicShader("dynamic", "dynamic.v.glsl", "dynamic.f.glsl")
    , mTexturedShader("textured", "textured.v.glsl", "textured.f.glsl")
    , mColoredTextureShader("coloredTexture", "coloredTexture.v.glsl", "coloredTexture.f.glsl")
-   , mPositionBuffer(0)
-   , mColorBuffer(0)
-   , mUVBuffer(0)
    , mTextureEnabled(false)
    , mAlpha(1.0f)
    , mCurrentShaderId(0)
@@ -33,33 +32,12 @@ GL2Renderer::GL2Renderer()
 	mProjectionMatrixStack.push(Matrix4::getIdentity());
 	mMatrixMode = MatrixType::ModelView;
 
-	initBuffers();
 	initRenderer();
 }
 
 GL2Renderer::~GL2Renderer()
 {
-	U32 buffers[] = { mPositionBuffer, mColorBuffer, mUVBuffer };
-	glDeleteBuffers(ARRAYSIZE(buffers), buffers);
-}
-
-void GL2Renderer::initBuffers()
-{
-	// Generate big, reusable buffers for our vertex data
-	// Position buffer
-	glGenBuffers(1, &mPositionBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
-	glBufferData(GL_ARRAY_BUFFER, MAX_NUMBER_OF_VERTICES * 4 * 2, nullptr, GL_DYNAMIC_DRAW); // 2D
-
-	// Color buffer
-	glGenBuffers(1, &mColorBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, mColorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, MAX_NUMBER_OF_VERTICES * 4 * 4, nullptr, GL_DYNAMIC_DRAW); // 4D
-
-	// UV buffer
-	glGenBuffers(1, &mUVBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, mUVBuffer);
-	glBufferData(GL_ARRAY_BUFFER, MAX_NUMBER_OF_VERTICES * 4 * 2, nullptr, GL_DYNAMIC_DRAW); // 2D
+	// Do nothing
 }
 
 void GL2Renderer::useShader(const Shader &shader)
@@ -90,15 +68,13 @@ void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U
 	GLint attribLocation = mStaticShader.getAttributeLocation(AttributeName::VertexPosition);
 
 	// Give position data to the shader, and deal with stride
-	glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
-	U32 extraBytesPerVert = 0;
-	if(stride > sizeof(F32) * vertDimension) // Should never be less than
-		extraBytesPerVert = stride - sizeof(F32) * vertDimension;
+   // Positions
+   U32 bytesPerCoord = sizeof(T) * vertDimension;
+   if(stride > bytesPerCoord) // Should never be less than
+      bytesPerCoord = stride;
 
-	glBufferSubData(GL_ARRAY_BUFFER, 0,
-		(sizeof(T) * vertCount * vertDimension) + (extraBytesPerVert * vertCount),
-		verts + (start * vertDimension)
-	);
+   mPositionBuffer.bind();
+   std::size_t positionOffset = mPositionBuffer.insertData((U8 *)verts + (start * bytesPerCoord), bytesPerCoord * vertCount);
 
 	glVertexAttribPointer(
 		attribLocation,	       // Attribute index
@@ -106,7 +82,7 @@ void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U
 		getGLDataType(dataType), // Data type
 		GL_FALSE,			       // Normalized?
 		stride,				       // Stride
-		(void *)0			       // Array buffer offset
+		(void *)positionOffset	 // Array buffer offset
 	);
 
 	// Draw!
@@ -241,33 +217,29 @@ void GL2Renderer::renderColored(const F32 verts[], const F32 colors[], U32 vertC
 	GLint colorAttrib = mDynamicShader.getAttributeLocation(AttributeName::VertexColor);
 
 	// Positions
-	U32 extraBytesPerVert = 0;
-	if(stride > sizeof(F32) * vertDimension) // Should never be less than
-		extraBytesPerVert = stride - sizeof(F32) * vertDimension;
+	U32 bytesPerCoord = sizeof(F32) * vertDimension;
+   if(stride > bytesPerCoord) // Should never be less than
+      bytesPerCoord = stride;
 
-	glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0,
-		(sizeof(F32) * vertCount * vertDimension) + (extraBytesPerVert * vertCount),
-		verts + (start * vertDimension));
+   mPositionBuffer.bind();
+   std::size_t positionOffset = mPositionBuffer.insertData((U8 *)verts + (start * bytesPerCoord), bytesPerCoord * vertCount);
 
 	glVertexAttribPointer(
-		vertexPositionAttrib, // Attribute index
-		vertDimension,			 // Number of values per vertex
-		GL_FLOAT,			    // Data type
-		GL_FALSE,			    // Normalized?
-		stride,				    // Stride
-		(void *)0			    // Array buffer offset
+		vertexPositionAttrib,  // Attribute index
+		vertDimension,			  // Number of values per vertex
+		GL_FLOAT,			     // Data type
+		GL_FALSE,			     // Normalized?
+		stride,				     // Stride
+		(void *)positionOffset // Array buffer offset
 	);
 
 	// Colors
-	U32 extraBytesPerColorVert = 0;
-	if(stride > sizeof(F32) * 4) // Should never be less than
-		extraBytesPerColorVert = stride - sizeof(F32) * 4;
+	bytesPerCoord = sizeof(F32) * 4;
+   if(stride > bytesPerCoord) // Should never be less than
+      bytesPerCoord = stride;
 
-	glBindBuffer(GL_ARRAY_BUFFER, mColorBuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0,
-		(sizeof(F32) * vertCount * 4) + (extraBytesPerColorVert * vertCount),
-		colors + (start * 4));
+   mColorBuffer.bind();
+   std::size_t colorOffset = mColorBuffer.insertData((U8 *)colors + (start * bytesPerCoord), bytesPerCoord * vertCount);
 
 	glVertexAttribPointer(
 		colorAttrib,          // Attribute index
@@ -275,7 +247,7 @@ void GL2Renderer::renderColored(const F32 verts[], const F32 colors[], U32 vertC
 		GL_FLOAT,				 // Data type
 		GL_FALSE,				 // Normalized?
 		stride,					 // Stride
-		(void *)0			    // Array buffer offset
+		(void *)colorOffset	 // Array buffer offset
 	);
 
 	// Draw!
@@ -296,30 +268,30 @@ void GL2Renderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCou
 	GLint vertexPositionAttrib = mTexturedShader.getAttributeLocation(AttributeName::VertexPosition);
 	GLint UVAttrib = mTexturedShader.getAttributeLocation(AttributeName::VertexUV);
 
-	// Positions
-	U32 extraBytesPerVert = 0;
-	if(stride > sizeof(F32) * vertDimension) // Should never be less than
-		extraBytesPerVert = stride - sizeof(F32) * vertDimension;
+   // Positions
+   U32 bytesPerCoord = sizeof(F32) * vertDimension;
+   if(stride > bytesPerCoord)
+      bytesPerCoord = stride;
 
-	glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0,
-		(sizeof(F32) * vertCount * vertDimension) + (extraBytesPerVert * vertCount),
-		verts + (start * vertDimension));
+   mPositionBuffer.bind();
+   std::size_t positionOffset = mPositionBuffer.insertData((U8 *)verts + (start * bytesPerCoord), bytesPerCoord * vertCount);
 
 	glVertexAttribPointer(
-		vertexPositionAttrib, // Attribute index
-		vertDimension,			 // Number of values per vertex
-		GL_FLOAT,			    // Data type
-		GL_FALSE,			    // Normalized?
-		stride,				    // Stride
-		(void *)0			    // Array buffer offset
+		vertexPositionAttrib,  // Attribute index
+		vertDimension,			  // Number of values per vertex
+		GL_FLOAT,			     // Data type
+		GL_FALSE,			     // Normalized?
+		stride,				     // Stride
+		(void *)positionOffset // Array buffer offset
 	);
 
 	// UV-coords
-	glBindBuffer(GL_ARRAY_BUFFER, mUVBuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0,
-		(sizeof(F32) * vertCount * 2) + (extraBytesPerVert * vertCount),
-		UVs + (start * 2));
+   bytesPerCoord = sizeof(F32) * 2;
+   if(stride > bytesPerCoord)
+      bytesPerCoord = stride;
+
+   mUVBuffer.bind();
+   std::size_t UVOffset = mUVBuffer.insertData((U8 *)UVs + (start * bytesPerCoord), bytesPerCoord * vertCount);
 
 	glVertexAttribPointer(
 		UVAttrib,			    // Attribute index
@@ -327,7 +299,7 @@ void GL2Renderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCou
 		GL_FLOAT,			    // Data type
 		GL_FALSE,			    // Normalized?
 		stride,				    // Stride
-		(void *)0			    // Array buffer offset
+		(void *)UVOffset	    // Array buffer offset
 	);
 
 	// Draw!
@@ -353,29 +325,29 @@ void GL2Renderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 v
 	GLint UVAttrib = mColoredTextureShader.getAttributeLocation(AttributeName::VertexUV);
 
 	// Positions
-	U32 extraBytesPerVert = 0;
-	if(stride > sizeof(F32) * vertDimension) // Should never be less than
-		extraBytesPerVert = stride - sizeof(F32) * vertDimension;
+   U32 bytesPerCoord = sizeof(F32) * vertDimension;
+   if(stride > bytesPerCoord)
+      bytesPerCoord = stride;
 
-	glBindBuffer(GL_ARRAY_BUFFER, mPositionBuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0,
-		(sizeof(F32) * vertCount * vertDimension) + (extraBytesPerVert * vertCount),
-		verts + (start * vertDimension));
+   mPositionBuffer.bind();
+   std::size_t positionOffset = mPositionBuffer.insertData((U8*)verts + (start * bytesPerCoord), bytesPerCoord * vertCount);
 
 	glVertexAttribPointer(
-		vertexPositionAttrib, // Attribute index
-		vertDimension,			 // Number of values per vertex
-		GL_FLOAT,			    // Data type
-		GL_FALSE,			    // Normalized?
-		stride,				    // Stride
-		(void *)0			    // Array buffer offset
+		vertexPositionAttrib,  // Attribute index
+		vertDimension,			  // Number of values per vertex
+		GL_FLOAT,			     // Data type
+		GL_FALSE,			     // Normalized?
+		stride,				     // Stride
+		(void *)positionOffset // Array buffer offset
 	);
 
-	// UV-coords
-	glBindBuffer(GL_ARRAY_BUFFER, mUVBuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0,
-		(sizeof(F32) * vertCount * 2) + (extraBytesPerVert * vertCount),
-		UVs + (start * 2));
+   // UV-coords
+   bytesPerCoord = sizeof(F32) * 2;
+   if(stride > bytesPerCoord)
+      bytesPerCoord = stride;
+
+   mUVBuffer.bind();
+   std::size_t UVOffset = mUVBuffer.insertData((U8 *)UVs + (start * bytesPerCoord), bytesPerCoord * vertCount);
 
 	glVertexAttribPointer(
 		UVAttrib,			    // Attribute index
@@ -383,7 +355,7 @@ void GL2Renderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 v
 		GL_FLOAT,			    // Data type
 		GL_FALSE,			    // Normalized?
 		stride,				    // Stride
-		(void *)0			    // Array buffer offset
+		(void *)UVOffset		 // Array buffer offset
 	);
 
 	// Draw!

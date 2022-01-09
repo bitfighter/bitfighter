@@ -8,6 +8,7 @@
 
 #include "GLRenderer.h"
 #include "Shader.h"
+#include "GL2RingBuffer.h"
 #include "Matrix4.h"
 #include "Color.h"
 #include <stack>
@@ -25,9 +26,9 @@ private:
    Shader mColoredTextureShader;
 
    // Reusable buffers for vertex data
-   U32 mPositionBuffer;
-   U32 mColorBuffer;
-   U32 mUVBuffer;
+   GL2RingBuffer mPositionBuffer;
+   GL2RingBuffer mColorBuffer;
+   GL2RingBuffer mUVBuffer;
 
    bool mTextureEnabled;
    Color mColor;
@@ -39,7 +40,6 @@ private:
    MatrixType mMatrixMode;
 
    GL2Renderer();
-   void initBuffers();
    void useShader(const Shader &shader);
 
    template<typename T>
