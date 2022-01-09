@@ -145,6 +145,13 @@ void Shader::registerAttributes()
 	mAttributeLocations[static_cast<unsigned>(AttributeName::VertexPosition)] = glGetAttribLocation(mId, "vertexPosition_modelspace");
 	mAttributeLocations[static_cast<unsigned>(AttributeName::VertexColor)] = glGetAttribLocation(mId, "vertexColor");
 	mAttributeLocations[static_cast<unsigned>(AttributeName::VertexUV)] = glGetAttribLocation(mId, "vertexUV");
+
+   // Enable all used attributes
+   for(unsigned i = 0; i < static_cast<unsigned>(AttributeName::AttributeName_LAST); ++i)
+   {
+      if(mAttributeLocations[i] != -1)
+         glEnableVertexAttribArray(mAttributeLocations[i]);
+   }
 }
 
 std::string Shader::getName() const

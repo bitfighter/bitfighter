@@ -94,8 +94,6 @@ void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U
 		verts + (start * vertDimension)
 	);
 
-	// Set the attribute to point to the buffer data
-	glEnableVertexAttribArray(attribLocation);
 	glVertexAttribPointer(
 		attribLocation,	       // Attribute index
 		vertDimension,				 // Number of values per vertex
@@ -107,7 +105,6 @@ void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U
 
 	// Draw!
 	glDrawArrays(getGLRenderType(type), 0, vertCount);
-	glDisableVertexAttribArray(attribLocation);
 }
 
 void GL2Renderer::setColor(F32 r, F32 g, F32 b, F32 alpha)
@@ -248,7 +245,6 @@ void GL2Renderer::renderColored(const F32 verts[], const F32 colors[], U32 vertC
 		(sizeof(F32) * vertCount * vertDimension) + (extraBytesPerVert * vertCount),
 		verts + (start * vertDimension));
 
-	glEnableVertexAttribArray(vertexPositionAttrib);
 	glVertexAttribPointer(
 		vertexPositionAttrib, // Attribute index
 		vertDimension,			 // Number of values per vertex
@@ -268,7 +264,6 @@ void GL2Renderer::renderColored(const F32 verts[], const F32 colors[], U32 vertC
 		(sizeof(F32) * vertCount * 4) + (extraBytesPerColorVert * vertCount),
 		colors + (start * 4));
 
-	glEnableVertexAttribArray(colorAttrib);
 	glVertexAttribPointer(
 		colorAttrib,          // Attribute index
 		4,				          // Number of values per color
@@ -280,8 +275,6 @@ void GL2Renderer::renderColored(const F32 verts[], const F32 colors[], U32 vertC
 
 	// Draw!
 	glDrawArrays(getGLRenderType(type), 0, vertCount);
-	glDisableVertexAttribArray(vertexPositionAttrib);
-	glDisableVertexAttribArray(colorAttrib);
 }
 
 void GL2Renderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCount,
@@ -309,7 +302,6 @@ void GL2Renderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCou
 		(sizeof(F32) * vertCount * vertDimension) + (extraBytesPerVert * vertCount),
 		verts + (start * vertDimension));
 
-	glEnableVertexAttribArray(vertexPositionAttrib);
 	glVertexAttribPointer(
 		vertexPositionAttrib, // Attribute index
 		vertDimension,			 // Number of values per vertex
@@ -325,7 +317,6 @@ void GL2Renderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCou
 		(sizeof(F32) * vertCount * 2) + (extraBytesPerVert * vertCount),
 		UVs + (start * 2));
 
-	glEnableVertexAttribArray(UVAttrib);
 	glVertexAttribPointer(
 		UVAttrib,			    // Attribute index
 		2,				          // Number of values per coord
@@ -337,8 +328,6 @@ void GL2Renderer::renderTextured(const F32 verts[], const F32 UVs[], U32 vertCou
 
 	// Draw!
 	glDrawArrays(getGLRenderType(type), 0, vertCount);
-	glDisableVertexAttribArray(vertexPositionAttrib);
-	glDisableVertexAttribArray(UVAttrib);
 }
 
 // Render a texture colored by the current color:
@@ -370,7 +359,6 @@ void GL2Renderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 v
 		(sizeof(F32) * vertCount * vertDimension) + (extraBytesPerVert * vertCount),
 		verts + (start * vertDimension));
 
-	glEnableVertexAttribArray(vertexPositionAttrib);
 	glVertexAttribPointer(
 		vertexPositionAttrib, // Attribute index
 		vertDimension,			 // Number of values per vertex
@@ -386,7 +374,6 @@ void GL2Renderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 v
 		(sizeof(F32) * vertCount * 2) + (extraBytesPerVert * vertCount),
 		UVs + (start * 2));
 
-	glEnableVertexAttribArray(UVAttrib);
 	glVertexAttribPointer(
 		UVAttrib,			    // Attribute index
 		2,				          // Number of values per coord
@@ -398,8 +385,6 @@ void GL2Renderer::renderColoredTexture(const F32 verts[], const F32 UVs[], U32 v
 
 	// Draw!
 	glDrawArrays(getGLRenderType(type), 0, vertCount);
-	glDisableVertexAttribArray(vertexPositionAttrib);
-	glDisableVertexAttribArray(UVAttrib);
 }
 
 }
