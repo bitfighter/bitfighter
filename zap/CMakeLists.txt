@@ -132,6 +132,7 @@ set(CLIENT_SOURCES
 	GameRecorderPlayback.cpp
     GaugeRenderer.cpp
 	GL2Renderer.cpp
+	GL2RingBuffer.cpp
 	GLRenderer.cpp
     GLLegacyRenderer.cpp
 	HelpItemManager.cpp

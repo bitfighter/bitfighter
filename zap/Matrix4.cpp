@@ -176,6 +176,7 @@ Matrix4 Matrix4::rotate(F32 radAngle, F32 x, F32 y, F32 z)
    // Apply rotation BEFORE all current transformations.
    return (*this) * rotMat;
 }
+
 }
 
 #endif // BF_USE_LEGACY_GL
