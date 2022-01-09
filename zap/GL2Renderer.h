@@ -31,7 +31,7 @@ private:
 
    bool mTextureEnabled;
    Color mColor;
-   float mAlpha;
+   F32 mAlpha;
    U32 mCurrentShaderId;
 
    std::stack<Matrix4> mModelViewMatrixStack;

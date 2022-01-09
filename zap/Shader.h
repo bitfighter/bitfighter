@@ -61,6 +61,8 @@ private:
 
 	void registerUniforms();
 	void registerAttributes();
+   S32 getUniformLocation(UniformName uniformName) const;
+   S32 getAttributeLocation(AttributeName attributeName) const;
 
 public:
 	Shader(const std::string &name, const std::string &vertexShaderFile, const std::string &fragmentShaderFile);
@@ -68,8 +70,6 @@ public:
 
 	std::string getName() const;
 	U32 getId() const;
-	S32 getUniformLocation(UniformName uniformName) const;
-	S32 getAttributeLocation(AttributeName attributeName) const;
 };
 
 #endif /* SHADER_HPP */

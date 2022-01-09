@@ -154,6 +154,16 @@ void Shader::registerAttributes()
    }
 }
 
+S32 Shader::getUniformLocation(UniformName uniformName) const
+{
+   return mUniformLocations[static_cast<unsigned>(uniformName)];
+}
+
+S32 Shader::getAttributeLocation(AttributeName attributeName) const
+{
+   return mAttributeLocations[static_cast<unsigned>(attributeName)];
+}
+
 std::string Shader::getName() const
 {
 	return mName;
@@ -162,16 +172,6 @@ std::string Shader::getName() const
 U32 Shader::getId() const
 {
 	return mId;
-}
-
-S32 Shader::getUniformLocation(UniformName uniformName) const
-{
-	return mUniformLocations[static_cast<unsigned>(uniformName)];
-}
-
-S32 Shader::getAttributeLocation(AttributeName attributeName) const
-{
-	return mAttributeLocations[static_cast<unsigned>(attributeName)];
 }
 
 #endif // BF_USE_LEGACY_GL
