@@ -99,12 +99,12 @@ Matrix4 Matrix4::operator*(const Matrix4 &rhs)
 
 Matrix4 Matrix4::scale(F32 x, F32 y, F32 z)
 {
-   Matrix4 newMat(*this);
-   newMat.mData[0][0] *= x;
-   newMat.mData[1][1] *= y;
-   newMat.mData[2][2] *= z;
+   Matrix4 newMat;
+   newMat.mData[0][0] = x;
+   newMat.mData[1][1] = y;
+   newMat.mData[2][2] = z;
 
-   return newMat;
+   return (*this) * newMat;
 }
 
 Matrix4 Matrix4::translate(F32 x, F32 y, F32 z)
