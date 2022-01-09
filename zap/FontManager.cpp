@@ -327,18 +327,37 @@ void FontManager::drawStrokeCharacter(const SFG_StrokeFont *font, S32 character)
 
    strip = schar->Strips;
 
+   // I didn't find any strip->Number larger than 34, so I chose a buffer of 128
+   // This may change if we go crazy with i18n some day...
+   // Using 32 as the maximum amount of strips per character.
+   static F32 characterVertexArray[32 * 128];
+   S32 arrayOffset = 0;
    for(i = 0; i < schar->Number; i++, strip++)
    {
-      // I didn't find any strip->Number larger than 34, so I chose a buffer of 64
-      // This may change if we go crazy with i18n some day...
-      static F32 characterVertexArray[128];
-      for(j = 0; j < strip->Number; j++)
+      // Get first point
+      F32 lastX = strip->Vertices[0].X;
+      F32 lastY = strip->Vertices[0].Y;
+
+      // Construct individual lines from the strip. This allows us to render the character using a
+      // single GL call with GL_LINES.
+      for(j = 1; j < strip->Number; j++)
       {
-        characterVertexArray[2*j]     = strip->Vertices[j].X;
-        characterVertexArray[(2*j)+1] = strip->Vertices[j].Y;
+         S32 arrayIndex = arrayOffset + (j - 1) * 4;
+
+         characterVertexArray[arrayIndex]     = lastX;
+         characterVertexArray[arrayIndex + 1] = lastY;
+         characterVertexArray[arrayIndex + 2] = strip->Vertices[j].X;
+         characterVertexArray[arrayIndex + 3] = strip->Vertices[j].Y;
+
+         lastX = strip->Vertices[j].X;
+         lastY = strip->Vertices[j].Y;
       }
-      r.renderVertexArray(characterVertexArray, strip->Number, RenderType::LineStrip);
+
+      arrayOffset += (strip->Number - 1) * 4;
    }
+
+   S32 pointCount = arrayOffset / 2; // 2 floats per vertex
+   r.renderVertexArray(characterVertexArray, pointCount, RenderType::Lines);
    r.translate(schar->Right, 0.0, 0.0 );
 }
 
