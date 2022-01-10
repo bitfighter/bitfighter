@@ -45,19 +45,7 @@ Shader::Shader(const std::string& name, const std::string& vertexShaderFile, con
    , mLastIsAlphaTexture(false)
    , mLastTextureSampler(0)
 {
-   std::string vertexShaderCode = getShaderSource(vertexShaderFile);
-   std::string fragmentShaderCode = getShaderSource(fragmentShaderFile);
-
-   U32 vertexShader = compileShader(vertexShaderFile, vertexShaderCode, GL_VERTEX_SHADER);
-   U32 fragmentShader = compileShader(fragmentShaderFile, fragmentShaderCode, GL_FRAGMENT_SHADER);
-
-   if(vertexShader != 0 && fragmentShader != 0)
-   {
-      mShaders.push_back(vertexShader);
-      mShaders.push_back(fragmentShader);
-      mId = linkShader(mName, static_cast<GLuint>(vertexShader), static_cast<GLuint>(fragmentShader));
-   }
-
+   buildProgram(vertexShaderFile, fragmentShaderFile);
    registerUniforms();
    registerAttributes();
 
@@ -73,9 +61,6 @@ Shader::Shader(const std::string& name, const std::string& vertexShaderFile, con
 
 Shader::~Shader()
 {
-   for(U32 shader : mShaders)
-      glDeleteShader(static_cast<GLuint>(shader));
-
    glDeleteProgram(static_cast<GLuint>(mId));
 }
 
@@ -144,6 +129,22 @@ U32 Shader::linkShader(const std::string& shaderProgramName, U32 vertexShader, U
    }
 
    return program;
+}
+
+void Shader::buildProgram(const std::string &vertexShaderFile, const std::string &fragmentShaderFile)
+{
+   std::string vertexShaderCode = getShaderSource(vertexShaderFile);
+   std::string fragmentShaderCode = getShaderSource(fragmentShaderFile);
+
+   U32 vertexShader = compileShader(vertexShaderFile, vertexShaderCode, GL_VERTEX_SHADER);
+   U32 fragmentShader = compileShader(fragmentShaderFile, fragmentShaderCode, GL_FRAGMENT_SHADER);
+
+   if(vertexShader != 0 && fragmentShader != 0)
+      mId = linkShader(mName, static_cast<GLuint>(vertexShader), static_cast<GLuint>(fragmentShader));
+
+   // Delete shader objects; they are no longer needed
+   glDeleteShader(static_cast<GLuint>(vertexShader));
+   glDeleteShader(static_cast<GLuint>(fragmentShader));
 }
 
 void Shader::registerUniforms()

@@ -3,8 +3,8 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-#ifndef _GL2RENDERER_H
-#define _GL2RENDERER_H
+#ifndef _GL2RENDERER_H_
+#define _GL2RENDERER_H_
 
 #include "GLRenderer.h"
 #include "Shader.h"
@@ -91,4 +91,4 @@ public:
 
 }
 
-#endif /* _GL2RENDERER_H */
+#endif // _GL2RENDERER_H_

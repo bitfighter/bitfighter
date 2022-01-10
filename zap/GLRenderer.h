@@ -73,4 +73,4 @@ public:
 
 }
 
-#endif /* _GLRENDERER_H_ */
+#endif // _GLRENDERER_H_
