@@ -211,7 +211,7 @@ void Shader::setPointSize(F32 size)
 {
    if(size != mLastPointSize)
    {
-      glUniform1i(getUniformLocation(UniformName::PointSize), size);
+      glUniform1f(getUniformLocation(UniformName::PointSize), size);
       mLastPointSize = size;
    }
 }
