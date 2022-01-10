@@ -38,6 +38,11 @@ void GLLegacyRenderer::setColor(F32 r, F32 g, F32 b, F32 alpha)
    glColor4f(r, g, b, alpha);
 }
 
+void GLLegacyRenderer::setPointSize(F32 size)
+{
+   glPointSize(size);
+}
+
 void GLLegacyRenderer::scale(F32 x, F32 y, F32 z)
 {
    glScalef(x, y, z);

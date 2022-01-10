@@ -40,6 +40,7 @@ Shader::Shader(const std::string& name, const std::string& vertexShaderFile, con
 	, mId(0)
 	, mUniformLocations()
    , mLastAlpha(0)
+   , mLastPointSize(0)
    , mLastTime(0)
    , mLastIsAlphaTexture(false)
    , mLastTextureSampler(0)
@@ -64,6 +65,7 @@ Shader::Shader(const std::string& name, const std::string& vertexShaderFile, con
    glUseProgram(mId);
    setMVP(Matrix4());
    setColor(Color(), 1.0f);
+   setPointSize(1.0f);
    setTime(0);
    setIsAlphaTexture(false);
    setTextureSampler(0);
@@ -149,6 +151,7 @@ void Shader::registerUniforms()
 	// glGetUniformLocation returns -1 if uniform was not found
 	mUniformLocations[static_cast<unsigned>(UniformName::MVP)] = glGetUniformLocation(mId, "MVP");
 	mUniformLocations[static_cast<unsigned>(UniformName::Color)] = glGetUniformLocation(mId, "color");
+   mUniformLocations[static_cast<unsigned>(UniformName::PointSize)] = glGetUniformLocation(mId, "pointSize");
 	mUniformLocations[static_cast<unsigned>(UniformName::TextureSampler)] = glGetUniformLocation(mId, "textureSampler");
 	mUniformLocations[static_cast<unsigned>(UniformName::IsAlphaTexture)] = glGetUniformLocation(mId, "isAlphaTexture");
 	mUniformLocations[static_cast<unsigned>(UniformName::Time)] = glGetUniformLocation(mId, "time");
@@ -201,6 +204,15 @@ void Shader::setColor(const Color &color, F32 alpha)
       glUniform4f(getUniformLocation(UniformName::Color), color.r, color.g, color.b, alpha);
       mLastColor = color;
       mLastAlpha = alpha;
+   }
+}
+
+void Shader::setPointSize(F32 size)
+{
+   if(size != mLastPointSize)
+   {
+      glUniform1i(getUniformLocation(UniformName::PointSize), size);
+      mLastPointSize = size;
    }
 }
 

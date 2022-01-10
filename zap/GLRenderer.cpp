@@ -27,7 +27,12 @@ GLRenderer::GLRenderer()
  : mUsingAndStencilTest(0)
 {
 #ifndef BF_USE_LEGACY_GL
-   bool success = gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
+#  ifdef BF_USE_GLES
+      bool success = gladLoadGLES2Loader((GLADloadproc)SDL_GL_GetProcAddress);
+#  else
+      bool success = gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
+#  endif
+   
    TNLAssert(success, "Unable to load GL functions!");
 #endif
 
@@ -149,20 +154,19 @@ void GLRenderer::setLineWidth(F32 width)
    glLineWidth(width);
 }
 
-void GLRenderer::setPointSize(F32 size)
-{
-   glPointSize(size);
-}
-
 void GLRenderer::enableAntialiasing()
 {
+#ifndef BF_USE_GLES
    glEnable(GL_LINE_SMOOTH);
+#endif
    // glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 }
 
 void GLRenderer::disableAntialiasing()
 {
+#ifndef BF_USE_GLES
    glDisable(GL_LINE_SMOOTH);
+#endif
 }
 
 void GLRenderer::enableBlending()
@@ -376,7 +380,6 @@ void GLRenderer::setSubTextureData(TextureFormat format, DataType dataType, S32 
 // Fairly slow operation
 void GLRenderer::readFramebufferPixels(TextureFormat format, DataType dataType, S32 x, S32 y, S32 width, S32 height, void* data)
 {
-   glReadBuffer(GL_BACK);
    glReadPixels(
       x, y, width, height,
       getGLTextureFormat(format),

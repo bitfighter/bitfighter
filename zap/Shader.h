@@ -36,6 +36,7 @@ enum class UniformName
 {
 	MVP = 0,
 	Color,
+   PointSize,
 	TextureSampler,
 	IsAlphaTexture,
 	Time,
@@ -62,6 +63,7 @@ private:
 
    Color mLastColor;
    F32 mLastAlpha;
+   F32 mLastPointSize;
    U32 mLastTime;
    bool mLastIsAlphaTexture;
    U32 mLastTextureSampler;
@@ -87,6 +89,7 @@ public:
    // Shader must be active when called!
    void setMVP(const Matrix4 &MVP);
    void setColor(const Color &color, F32 alpha);
+   void setPointSize(F32 size);
    void setTime(U32 time);
    void setIsAlphaTexture(bool isAlphaTexture);
    void setTextureSampler(U32 textureSampler);

@@ -23,6 +23,7 @@ GL2Renderer::GL2Renderer()
    , mColoredTextureShader("coloredTexture", "coloredTexture.v.glsl", "coloredTexture.f.glsl")
    , mTextureEnabled(false)
    , mAlpha(1.0f)
+   , mPointSize(1.0f)
    , mCurrentShaderId(0)
    , mMatrixMode(MatrixType::ModelView)
 {
@@ -59,6 +60,7 @@ void GL2Renderer::renderGenericVertexArray(DataType dataType, const T verts[], U
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
    mStaticShader.setMVP(MVP);
    mStaticShader.setColor(mColor, mAlpha);
+   mStaticShader.setPointSize(mPointSize);
    mStaticShader.setTime(static_cast<GLuint>(SDL_GetTicks())); // Give time, it's always useful!
 
 	// Get the position attribute location in the shader
@@ -90,6 +92,16 @@ void GL2Renderer::setColor(F32 r, F32 g, F32 b, F32 alpha)
 {
 	mColor = Color(r, g, b);
 	mAlpha = alpha;
+}
+
+void GL2Renderer::setPointSize(F32 size)
+{
+   mPointSize = size;
+
+#ifndef BF_USE_GLES
+   // GL2 does not support vertex shader gl_PointSize, while GLES2 does not suport glPointSize().
+   glPointSize(size);
+#endif
 }
 
 void GL2Renderer::scale(F32 x, F32 y, F32 z)
@@ -207,6 +219,7 @@ void GL2Renderer::renderColored(const F32 verts[], const F32 colors[], U32 vertC
 
 	Matrix4 MVP = mProjectionMatrixStack.top() * mModelViewMatrixStack.top();
    mDynamicShader.setMVP(MVP);
+   mDynamicShader.setPointSize(mPointSize);
    mDynamicShader.setTime(static_cast<GLuint>(SDL_GetTicks()));
 
 	// Attribute locations

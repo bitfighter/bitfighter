@@ -77,6 +77,7 @@ if(USE_GLES OR NOT USE_STANDARD_GL)
 	message(STATUS "Atempting to use OpenGL ES")
 	add_definitions(-DBF_USE_GLES)
 	add_definitions(-DBF_NO_CONSOLE)
+	
 	set(USE_GLES 1)
 	find_package(OpenGLES)
 	set(GL_LIBRARY ${OPENGLES_LIBRARY})

@@ -37,6 +37,7 @@ private:
    bool mTextureEnabled;
    Color mColor;
    F32 mAlpha;
+   F32 mPointSize;
    U32 mCurrentShaderId;
 
    MatrixStack mModelViewMatrixStack;
@@ -55,6 +56,8 @@ public:
    static void create();
 
    void setColor(F32 r, F32 g, F32 b, F32 alpha = 1.0f) override;
+   void setPointSize(F32 size) override;
+
    void scale(F32 x, F32 y, F32 z = 1.0f) override;
    void translate(F32 x, F32 y, F32 z = 0.0f) override;
    void rotate(F32 degAngle, F32 x, F32 y, F32 z) override;

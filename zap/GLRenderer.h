@@ -31,7 +31,6 @@ public:
    void setClearColor(F32 r, F32 g, F32 b, F32 alpha = 1.0f) override;
     
    void setLineWidth(F32 width) override;
-   void setPointSize(F32 size) override;
    void enableAntialiasing() override;
    void disableAntialiasing() override;
    void enableBlending() override;
