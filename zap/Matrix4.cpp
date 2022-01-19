@@ -3,9 +3,9 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
-// Tip: C multi-dimensional arrays are column-major. However, OpenGL and D3D use row-major.
-// This class stores its data as row-major for interoperability, which means we must access
-// elements as such: mData[col][row]
+// Tip: C multi-dimensional arrays are row-major. However, OpenGL and D3D use column-major.
+// This class stores its data as column-major for interoperability, which means we must access
+// elements as such: mData[col][row].
 
 #ifndef BF_USE_LEGACY_GL
 
