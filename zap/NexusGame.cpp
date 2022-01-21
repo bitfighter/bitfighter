@@ -13,7 +13,7 @@
 #  include "gameObjectRender.h"
 #  include "ClientGame.h"
 #  include "UIMenuItems.h"
-#  include "OpenglUtils.h"
+#  include "Renderer.h"
 #  include "RenderUtils.h"
 #endif
 
@@ -618,6 +618,8 @@ bool NexusGameType::canBeIndividualGame() const { return true;  }
 // If render is false, will return height, but not actually draw
 S32 NexusGameType::renderTimeLeftSpecial(S32 right, S32 bottom, bool render) const
 {
+   Renderer& r = Renderer::get();
+
    const S32 size = 20;
    const S32 gap = 4;
    const S32 x = right;
@@ -625,7 +627,7 @@ S32 NexusGameType::renderTimeLeftSpecial(S32 right, S32 bottom, bool render) con
 
    if(render)
    {
-      glColor(mNexusIsOpen ? Colors::NexusOpenColor : Colors::NexusClosedColor);      // Display timer in appropriate color
+      r.setColor(mNexusIsOpen ? Colors::NexusOpenColor : Colors::NexusClosedColor);      // Display timer in appropriate color
 
       if(mNexusIsOpen && mNexusOpenTime == 0)
          drawStringfr(x, y - size, size, "Nexus never closes");
@@ -792,6 +794,7 @@ void NexusFlagItem::renderItem(const Point &pos)
 void NexusFlagItem::renderItemAlpha(const Point &pos, F32 alpha)
 {
 #ifndef ZAP_DEDICATED
+   Renderer& r = Renderer::get();
    Point offset;
 
    if(mIsMounted)
@@ -801,10 +804,10 @@ void NexusFlagItem::renderItemAlpha(const Point &pos, F32 alpha)
 
    if(mIsMounted && mFlagCount > 0)
    {
-      if     (mFlagCount >= 40) glColor(Colors::paleRed, alpha);   // like, rad!
-      else if(mFlagCount >= 20) glColor(Colors::yellow,  alpha);   // cool!
-      else if(mFlagCount >= 10) glColor(Colors::green,   alpha);   // ok, I guess
-      else                      glColor(Colors::white,   alpha);   // lame
+      if     (mFlagCount >= 40) r.setColor(Colors::paleRed, alpha);   // like, rad!
+      else if(mFlagCount >= 20) r.setColor(Colors::yellow,  alpha);   // cool!
+      else if(mFlagCount >= 10) r.setColor(Colors::green,   alpha);   // ok, I guess
+      else                      r.setColor(Colors::white,   alpha);   // lame
 
       drawStringf(pos.x + 10, pos.y - 46, 12, "%d", mFlagCount);
    }

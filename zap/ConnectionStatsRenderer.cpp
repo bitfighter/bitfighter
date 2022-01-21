@@ -6,13 +6,13 @@
 #include "ConnectionStatsRenderer.h"
 
 #include "DisplayManager.h"
+#include "Renderer.h"
 #include "ClientGame.h"
 #include "FontManager.h"
 
 #include "Colors.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 namespace Zap { 
 
@@ -66,6 +66,8 @@ void ConnectionStatsRenderer::idle(U32 timeDelta, GameConnection *conn)
 
 void ConnectionStatsRenderer::render(GameConnection *conn) const
 {
+   Renderer& r = Renderer::get();
+
    S32 y = 0;
    if(mVisible && conn)
    {
@@ -76,16 +78,16 @@ void ConnectionStatsRenderer::render(GameConnection *conn) const
       const S32 size = 10;
 
       if(mGraphVisible)
-         glColor(Colors::red);
+         r.setColor(Colors::red);
       else
-         glColor(Colors::white);
+         r.setColor(Colors::white);
       drawStringr (x2,           y, size, "Send");
 
       if(mGraphVisible)
-         glColor(Colors::green);
+         r.setColor(Colors::green);
       drawStringr (x3,           y, size, "Recv");
 
-      glColor(Colors::white);
+      r.setColor(Colors::white);
       drawString  (x1, y_space  +y, size, "Count");
       drawStringfr(x2, y_space  +y, size, "%i", conn->mPacketSendCount);
       drawStringfr(x3, y_space  +y, size, "%i", conn->mPacketRecvCount);
@@ -109,8 +111,8 @@ void ConnectionStatsRenderer::render(GameConnection *conn) const
       const S32 x2 = 700;
       const S32 y_size = 150;
 
-      glColor(Colors::white);
-      drawRect(x1, y, x2, y + y_size, GL_LINE_LOOP);
+      r.setColor(Colors::white);
+      drawRect(x1, y, x2, y + y_size, RenderType::LineLoop);
 
       const U32 ArraySizeGraph = ArraySize - 1;
 
@@ -141,8 +143,8 @@ void ConnectionStatsRenderer::render(GameConnection *conn) const
       }
 
       drawStringf(x1 + 2, y, 10, "%1.1f kbps", max * (1/128.f));
-      glColor(Colors::red);
-      renderVertexArray(graphs, ArraySizeGraph, GL_LINE_STRIP);
+      r.setColor(Colors::red);
+      r.renderVertexArray(graphs, ArraySizeGraph, RenderType::LineStrip);
 
       i1 = mCurrentIndex;
       i2 = i1+1 >= ArraySize ? 0 : i1+1;
@@ -152,8 +154,8 @@ void ConnectionStatsRenderer::render(GameConnection *conn) const
          i1 = i2;
          i2 = i2 + 1 >= ArraySize ? 0 : i2 + 1;
       }
-      glColor(Colors::green);
-      renderVertexArray(graphs, ArraySizeGraph, GL_LINE_STRIP);
+      r.setColor(Colors::green);
+      r.renderVertexArray(graphs, ArraySizeGraph, RenderType::LineStrip);
       y += y_size;
    }
 }

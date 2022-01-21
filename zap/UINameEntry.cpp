@@ -12,12 +12,12 @@
 
 #include "ClientGame.h"
 #include "DisplayManager.h"
+#include "Renderer.h"
 
 #include "Colors.h"
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 #include <string>
 #include <math.h>
@@ -72,7 +72,8 @@ F32 TextEntryUserInterface::getFontSize()
 
 void TextEntryUserInterface::render()
 {
-   glColor(Colors::white);
+   Renderer& r = Renderer::get();
+   r.setColor(Colors::white);
 
    const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
@@ -82,11 +83,11 @@ void TextEntryUserInterface::render()
    drawCenteredString(y, fontSize, title);
    y += 45;
 
-   glColor(Colors::green);
+   r.setColor(Colors::green);
    drawCenteredString(canvasHeight - vertMargin - 2 * fontSize - 5, fontSize, instr1);
    drawCenteredString(canvasHeight - vertMargin - fontSize, fontSize, instr2);
 
-   glColor(Colors::white);
+   r.setColor(Colors::white);
 
    FontManager::pushFontContext(InputContext);
 
@@ -310,9 +311,9 @@ void LevelNameEntryUserInterface::render()
    S32 startIndex = MAX(0, mLevelIndex - linesBefore);
    S32 endIndex = MIN(mLevels.size() - 1, mLevelIndex + linesAfter);
 
+   Renderer::get().setColor(Colors::gray20);
    FontManager::pushFontContext(MenuContext);
 
-   glColor(Colors::gray20);
    for(S32 i = startIndex; i <= endIndex; i++)
    {
       if(i != mLevelIndex)
@@ -347,6 +348,7 @@ PasswordEntryUserInterface::~PasswordEntryUserInterface()
 
 void PasswordEntryUserInterface::render()
 {
+   Renderer& r = Renderer::get();
    const S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
    const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
@@ -354,7 +356,7 @@ void PasswordEntryUserInterface::render()
    {
       getUIManager()->getUI<GameUserInterface>()->render();
 
-      glColor(Colors::black, 0.5);
+      r.setColor(Colors::black, 0.5);
 
       F32 vertices[] = {
             0,                 0,
@@ -362,7 +364,7 @@ void PasswordEntryUserInterface::render()
             (F32)canvasWidth, (F32)canvasHeight,
             0,                (F32)canvasHeight
       };
-      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
+      r.renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::TriangleFan);
    }
 
    Parent::render();

@@ -15,7 +15,7 @@ namespace Zap
 {
 
 class GameSettings;
-class IniSettings;
+struct IniSettings;
 
 class VideoSystem
 {
@@ -48,6 +48,7 @@ public:
    virtual ~VideoSystem();
 
    static bool init();
+   static void shutdown();
 
    static void setWindowPosition(S32 left, S32 top);
    static void saveWindowPostion(GameSettings *settings);

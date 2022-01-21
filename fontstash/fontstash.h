@@ -17,8 +17,17 @@
 // 3. This notice may not be removed or altered from any source distribution.
 //
 
+// Modified by fordcars for Bitfighter
+// - Converted to CPP
+// - Adapted for our renderer
+
 #ifndef FONTSTASH_H
 #define FONTSTASH_H
+
+// Since we are compiling fontstash as C++, keep the
+// header C compatible just in-case we include it from C!
+extern "C"
+{
 
 struct sth_stash* sth_create(int cachew, int cacheh);
 
@@ -26,7 +35,7 @@ int sth_add_font(struct sth_stash* stash, const char* path);
 int sth_add_font_from_memory(struct sth_stash* stash, unsigned char* buffer);
 
 int  sth_add_bitmap_font(struct sth_stash* stash, int ascent, int descent, int line_gap);
-void sth_add_glyph(struct sth_stash* stash, int idx, GLuint id, const char* s,  /* @rlyeh: function does not return int */
+void sth_add_glyph(struct sth_stash* stash, int idx, unsigned int id, const char* s,  /* @rlyeh: function does not return int */
                   short size, short base, int x, int y, int w, int h,
                   float xoffset, float yoffset, float xadvance);
 
@@ -45,5 +54,8 @@ void sth_vmetrics(struct sth_stash* stash,
 				  float* ascender, float* descender, float * lineh);
 
 void sth_delete(struct sth_stash* stash);
+
+} /* extern "C" */
+
 
 #endif // FONTSTASH_H

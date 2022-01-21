@@ -10,13 +10,13 @@
 
 #include "EditorTeam.h"
 #include "DisplayManager.h"
+#include "Renderer.h"
 #include "ClientGame.h"
 #include "Cursor.h"
 
 #include "Colors.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 #include "stringUtils.h"
 
 #include "UIColorPicker.h"
@@ -156,17 +156,18 @@ void TeamDefUserInterface::idle(U32 timeDelta)
 // TODO: Clean this up a bit...  this menu was two-cols before, and some of that garbage is still here...
 void TeamDefUserInterface::render()
 {
+   Renderer& r = Renderer::get();
    const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
    const S32 canvasHeight = DisplayManager::getScreenInfo()->getGameCanvasHeight();
 
    FontManager::pushFontContext(MenuHeaderContext);
-   glColor(Colors::green);
+   r.setColor(Colors::green);
    drawCenteredUnderlinedString(vertMargin, 30, mMenuTitle);
    
    //mMenuSubTitle.render(canvasWidth / 2, vertMargin + 65, UI::AlignmentCenter); 
    drawCenteredString(canvasHeight - vertMargin - 20, 18, "Arrow Keys to choose | ESC to exit");
 
-   glColor(Colors::white);
+   r.setColor(Colors::white);
 
    S32 x = canvasWidth / 2;
 
@@ -202,9 +203,9 @@ void TeamDefUserInterface::render()
 
 
    // Draw the fixed teams
-   glColor(Colors::NeutralTeamColor);
+   r.setColor(Colors::NeutralTeamColor);
    drawCenteredStringf(yStart, fontsize, "Neutral Team (can't change)");
-   glColor(Colors::HostileTeamColor);
+   r.setColor(Colors::HostileTeamColor);
    drawCenteredStringf(yStart + fontsize + fontgap, fontsize, "Hostile Team (can't change)");
 
    for(S32 j = 0; j < size; j++)
@@ -247,7 +248,7 @@ void TeamDefUserInterface::render()
          string nameColorStr = namestr + spacer1 + colorstr + " " + getEntryMessage();
 
          // Draw item text
-         glColor(color);
+         r.setColor(*color);
          drawCenteredString(y, fontsize, nameColorStr.c_str());
 
          // Draw cursor if we're editing
@@ -280,7 +281,7 @@ void TeamDefUserInterface::render()
       if(errorMsgTimer.getCurrent() < (U32)ONE_SECOND)
          alpha = (F32) errorMsgTimer.getCurrent() / ONE_SECOND;
 
-      glColor(Colors::red, alpha);
+      r.setColor(Colors::red, alpha);
       drawCenteredString(canvasHeight - vertMargin - 141, fontsize, errorMsg.c_str());
    }
 

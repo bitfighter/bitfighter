@@ -17,11 +17,11 @@
 #include "Console.h"             // For console rendering
 #include "Colors.h"
 #include "DisplayManager.h"
+#include "Renderer.h"
 #include "Joystick.h"
 #include "masterConnection.h"    // For MasterServerConnection def
 #include "VideoSystem.h"
 #include "SoundSystem.h"
-#include "OpenglUtils.h"
 #include "LoadoutIndicator.h"    // For LoadoutIndicatorHeight
 #include "ScreenShooter.h"
 
@@ -125,8 +125,8 @@ void UserInterface::renderMasterStatus()
    if(conn && conn->getConnectionState() != NetConnection::Connected)
    {
       FontManager::pushFontContext(MenuContext);
+      Renderer::get().setColor(Colors::white);
 
-      glColor(Colors::white);
       drawStringf(10, 550, 15, "Master Server - %s", GameConnection::getConnectionStateString(conn->getConnectionState()));
 
       FontManager::popFontContext();
@@ -139,15 +139,16 @@ void UserInterface::renderConsole() const
 #ifndef BF_NO_CONSOLE
    // Temporarily disable scissors mode so we can use the full width of the screen
    // to show our console text, black bars be damned!
-   bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
+   Renderer& r = Renderer::get();
+   bool scissorMode = r.isScissorEnabled();
 
-   if(scissorMode) 
-      glDisable(GL_SCISSOR_TEST);
+   if(scissorMode)
+      r.disableScissor();
 
    gConsole.render();
 
-   if(scissorMode) 
-      glEnable(GL_SCISSOR_TEST);
+   if(scissorMode)
+      r.enableScissor();
 #endif
 }
 
@@ -254,7 +255,7 @@ void UserInterface::renderMessageBox(const SymbolShapePtr &title, const SymbolSh
 // Static method
 void UserInterface::dimUnderlyingUI(F32 amount)
 {
-   glColor(Colors::black, amount); 
+   Renderer::get().setColor(Colors::black, amount); 
 
    drawFilledRect (0, 0, DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
 }
@@ -398,12 +399,14 @@ void UserInterface::onTextInput(char ascii)      { /* Do nothing */ }
 // This should make it easier to see what happens when users press joystick buttons.
 void UserInterface::renderDiagnosticKeysOverlay()
 {
+   Renderer& r = Renderer::get();
+
    if(GameManager::getClientGames()->get(0)->getSettings()->getIniSettings()->diagnosticKeyDumpMode)
    {
      S32 vpos = DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2;
      S32 hpos = horizMargin;
 
-     glColor(Colors::white);
+     r.setColor(Colors::white);
 
      // Key states
      for (U32 i = 0; i < MAX_INPUT_CODES; i++)
@@ -412,7 +415,7 @@ void UserInterface::renderDiagnosticKeysOverlay()
 
       vpos += 23;
       hpos = horizMargin;
-      glColor(Colors::magenta);
+      r.setColor(Colors::magenta);
 
       for(U32 i = 0; i < CHAR_BIT * sizeof(Joystick::ButtonMask); i++)
          if(Joystick::ButtonMask & (1 << i))

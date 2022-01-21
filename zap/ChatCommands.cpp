@@ -19,8 +19,8 @@
 #include "Colors.h"
 
 #include "stringUtils.h"
+#include "Renderer.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 
 namespace ChatCommands
@@ -521,7 +521,7 @@ void lineWidthHandler(ClientGame *game, const Vector<string> &words)
       gLineWidth3 = linewidth * 1.5f;
       gLineWidth4 = linewidth * 2;
 
-      glLineWidth(gDefaultLineWidth);    //make this change happen instantly
+      Renderer::get().setLineWidth(gDefaultLineWidth);    //make this change happen instantly
    }
 }
 

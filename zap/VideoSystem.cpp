@@ -19,14 +19,10 @@
 
 #include "tnlLog.h"
 
-//#include "SDL.h"
-
-#if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
-#  include "SDL_opengles.h"
-//   // Needed for GLES compatibility
-#  define glOrtho glOrthof
-//#else
-//#  include "SDL_opengl.h"
+#ifdef BF_USE_LEGACY_GL
+#  include "GLLegacyRenderer.h"
+#else
+#  include "GL2Renderer.h"
 #endif
 
 #include <cmath>
@@ -66,7 +62,7 @@ bool VideoSystem::init()
       return false;
    }
 
-
+   
    // Now, we want to setup our requested
    // window attributes for our OpenGL window.
    // Note on SDL_GL_RED/GREEN/BLUE/ALPHA_SIZE: On windows, it is better to not set them at all, or risk going extremely slow software rendering including if your desktop graphics set to 16 bit color.
@@ -74,6 +70,13 @@ bool VideoSystem::init()
    //SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
    //SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
    //SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
+
+#ifndef BF_USE_LEGACY_GL
+   // Tell SDL which OpenGL version we will use
+   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, BF_GL_MAJOR_VERSION);
+   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, BF_GL_MINOR_VERSION);
+#endif
+
    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );  // depth used in editor to display spybug visible area non-overlap
    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
@@ -121,6 +124,12 @@ bool VideoSystem::init()
    SDL_GLContext context = SDL_GL_CreateContext(DisplayManager::getScreenInfo()->sdlWindow);
    DisplayManager::getScreenInfo()->sdlGlContext = &context;
 
+   // Initialize renderer
+#ifdef BF_USE_LEGACY_GL
+   GLLegacyRenderer::create();
+#else
+   GL2Renderer::create();
+#endif
 
    // Set the window icon -- note that the icon must be a 32x32 bmp, and SDL will
    // downscale it to 16x16 with no interpolation.  Therefore, it's best to start
@@ -145,6 +154,12 @@ bool VideoSystem::init()
    return true;
 }
 
+// Performs a clean shutdown of the video system
+void VideoSystem::shutdown()
+{
+   Renderer::shutdown();
+   SDL_QuitSubSystem(SDL_INIT_VIDEO);
+}
 
 void VideoSystem::setWindowPosition(S32 left, S32 top)
 {
@@ -213,10 +228,6 @@ void VideoSystem::saveUpdateWindowScale(GameSettings *settings)
    // Save the new window dimensions in ScreenInfo
    screen->setWindowSize(newWidth, newHeight);
 }
-
-
-extern void setDefaultBlendFunction();
-
 
 void VideoSystem::debugPrintState(VideoSystem::videoSystem_st_t currentState)
 {
@@ -584,31 +595,29 @@ void VideoSystem::redrawViewport(GameSettings *settings)
    S32 drawWidth, drawHeight;
    SDL_GL_GetDrawableSize(DisplayManager::getScreenInfo()->sdlWindow, &drawWidth, &drawHeight);
 
-//   logprintf("w: %d, h: %d; dw: %d, dh: %d", windowWidth, windowHeight, drawWidth, drawHeight);
+   // Get renderer
+   Renderer& r = Renderer::get();
 
    // If we're in HighDPI mode, set a flag in case we want to use later
    bool isHighDpi = (drawWidth > windowWidth) || (drawHeight > windowHeight);
    DisplayManager::getScreenInfo()->setHighDpi(isHighDpi);
 
-   glClearColor( 0, 0, 0, 0 );
+   r.setClearColor( 0, 0, 0, 0 );
 
    // TODO High-DPI mode may change various OpenGL parameters below (and also
-   glViewport(0, 0, windowWidth, windowHeight);
+   r.setViewport(0, 0, windowWidth, windowHeight);
 
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-
+   r.setMatrixMode(MatrixType::Projection);
+   r.loadIdentity();
 
    // The best understanding I can get for glOrtho is that these are the coordinates you want to appear at the four corners of the
    // physical screen. If you want a "black border" down one side of the screen, you need to make left negative, so that 0 would
    // appear some distance in from the left edge of the physical screen.  The same applies to the other coordinates as well.
    OrthoData ortho = DisplayManager::getScreenInfo()->getOrtho();
-   glOrtho(ortho.left, ortho.right, ortho.bottom, ortho.top, 0, 1);
-//   logprintf("ortho left: %f, right: %f, bottom: %f, top: %f", ortho.left, ortho.right, ortho.bottom, ortho.top);
+   r.projectOrtho((F32)ortho.left, (F32)ortho.right, (F32)ortho.bottom, (F32)ortho.top, 0, 1);
 
-
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
+   r.setMatrixMode(MatrixType::ModelView);
+   r.loadIdentity();
 
    // Enabling scissor appears to fix crashing problem switching screen mode
    // in linux and "Mobile 945GME Express Integrated Graphics Controller",
@@ -617,25 +626,13 @@ void VideoSystem::redrawViewport(GameSettings *settings)
    // parts of RAM that can crash Bitfighter, graphics driver, or the entire computer.
    // This is probably a bug in the Linux Intel graphics driver.
    ScissorData scissor = DisplayManager::getScreenInfo()->getScissor();
-   glScissor(scissor.x, scissor.y, scissor.width, scissor.height);
-//   logprintf("scissor x: %f, y: %f, width: %f, height: %f", scissor.x, scissor.y, scissor.width, scissor.height);
+   r.setScissor(scissor.x, scissor.y, scissor.width, scissor.height);
 
-   glEnable(GL_SCISSOR_TEST);    // Turn on clipping
-
-   glEnable(GL_STENCIL_TEST);    // Turn on stenciling
-   glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  // Default operation
-
-   setDefaultBlendFunction();
-   glLineWidth(gDefaultLineWidth);
+   r.setLineWidth(gDefaultLineWidth);
 
    // Enable Line smoothing everywhere!  Make sure to disable temporarily for filled polygons and such
    if(settings->getIniSettings()->mSettings.getVal<YesNo>("LineSmoothing"))
-   {
-      glEnable(GL_LINE_SMOOTH);
-      //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-   }
-
-   glEnable(GL_BLEND);
+      r.enableAntialiasing();
 }
 
 

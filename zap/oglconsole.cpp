@@ -17,17 +17,11 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <vector>
+#include <cstddef> // For std::size_t
 #include "SDL.h"
-
-// Begin Bitfighter specific block
-#ifndef ZAP_DEDICATED
-#  if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
-#     include "SDL_opengles.h"
-#  else
-#     include "SDL_opengl.h"
-#  endif
-#endif
-// End Bitfighter specific block
+#include "Renderer.h"
+#include "Point.h"
 
 
 // There are two fonts available: The original ConsoleFont and the alternate PackedFont,
@@ -57,8 +51,8 @@
 
 #  define CHAR_PIXEL_W 6
 #  define CHAR_PIXEL_H 13
-#  define CHAR_WIDTH 0.0234375 /* ogl tex coords */
-#  define CHAR_HEIGHT 0.203125 /* ogl tex coords */
+#  define CHAR_WIDTH 0.0234375f /* ogl tex coords */
+#  define CHAR_HEIGHT 0.203125f /* ogl tex coords */
 
 #endif
 
@@ -71,38 +65,25 @@
  * "visible" console visibility modes */
 #define SLIDE_STEPS 10
 
-#ifdef ZAP_DEDICATED
-   typedef int GLuint;
-   typedef double GLDouble;
-   typedef double GLdouble;
-   typedef int GLint;
-#endif
-
-GLuint OGLCONSOLE_glFontHandle = 0;
+U32 OGLCONSOLE_glFontHandle = 0;
 int OGLCONSOLE_CreateFont()
 {
 #ifndef ZAP_DEDICATED
-    { int err = glGetError(); if(err) printf("GL ERROR: %i\n",err); }
+    Zap::Renderer& r = Zap::Renderer::get();
+
 #  ifdef DEBUG
     puts("Creating OGLCONSOLE font");
 #  endif
    
     /* Destroy old texture if it exists */
-    if(glIsTexture(OGLCONSOLE_glFontHandle))
-       glDeleteTextures(1, &OGLCONSOLE_glFontHandle);
+    if(r.isTexture(OGLCONSOLE_glFontHandle))
+       r.deleteTexture(OGLCONSOLE_glFontHandle);
 
     /* Get a font index from OpenGL */
-    glGenTextures(1, &OGLCONSOLE_glFontHandle);    /* Create 1 texture, store in glFontHandle */
-    { int err = glGetError(); if(err )printf("glGenTextures() error: %i\n",err); }
+    OGLCONSOLE_glFontHandle = r.generateTexture(false);    /* Create 1 texture, store in glFontHandle */
     
     /* Select our font */
-    glBindTexture(GL_TEXTURE_2D, OGLCONSOLE_glFontHandle);
-    { int err = glGetError(); if(err) printf("glBindTexture() error: %i\n",err); }
-
-    /* Set some parameters i guess */
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
+    r.bindTexture(OGLCONSOLE_glFontHandle);
 
 #  ifdef OGLCONSOLE_CREATE_PACKED_FONT
 	{
@@ -223,20 +204,20 @@ int OGLCONSOLE_CreateFont()
 	}
 #  else
 	/* Upload our font */
-#     ifdef OGLCONSOLE_USE_ALPHA_TEXT
-	glTexImage2D(
-			GL_TEXTURE_2D, 0, GL_ALPHA,
-			OGLCONSOLE_FontData.width, OGLCONSOLE_FontData.height, 0,
-			GL_ALPHA, GL_UNSIGNED_BYTE, OGLCONSOLE_FontData.pixel_data);
+#  ifdef OGLCONSOLE_USE_ALPHA_TEXT
+	      /*glTexImage2D(
+			   GL_TEXTURE_2D, 0, GL_ALPHA,
+			   OGLCONSOLE_FontData.width, OGLCONSOLE_FontData.height, 0,
+			   GL_ALPHA, GL_UNSIGNED_BYTE, OGLCONSOLE_FontData.pixel_data);*/
+
+         // fordcars here: I didn't test this:
+         r.setTextureData(Zap::TextureFormat::Alpha, Zap::DataType::UnsignedByte,
+            OGLCONSOLE_FontData.width, OGLCONSOLE_FontData.height, OGLCONSOLE_FontData.pixel_data);
 #     else
-	glTexImage2D(
-			GL_TEXTURE_2D, 0, GL_RGB,
-			OGLCONSOLE_FontData.width, OGLCONSOLE_FontData.height, 0,
-			GL_RGB, GL_UNSIGNED_BYTE, OGLCONSOLE_FontData.pixel_data);
+         r.setTextureData(Zap::TextureFormat::RGB, Zap::DataType::UnsignedByte,
+            OGLCONSOLE_FontData.width, OGLCONSOLE_FontData.height, OGLCONSOLE_FontData.pixel_data);
 #     endif
 #  endif
-
-    { int err = glGetError(); if(err) printf("glTexImage2D() error: %i\n",err); }
     
 #  ifdef DEBUG
     puts("Created  OGLCONSOLE font");
@@ -265,10 +246,10 @@ int OGLCONSOLE_CreateFont()
 /* OGLCONSOLE console structure */
 struct _OGLCONSOLE_Console
 {
-    GLdouble mvMatrix[16];
+    F32 mvMatrix[16];
     int mvMatrixUse;
 
-    GLdouble pMatrix[16];
+    F32 pMatrix[16];
 
     /* Screen+scrollback lines (console output) */
     char *lines;
@@ -292,7 +273,7 @@ struct _OGLCONSOLE_Console
     int outputNewline;
 
     /* Width and height of a single character for the GL */
-    GLdouble characterWidth, characterHeight;
+    F32 characterWidth, characterHeight;
     
     /* Basic options */
     int visibility;
@@ -325,19 +306,20 @@ void OGLCONSOLE_DefaultEnterKeyCallback(OGLCONSOLE_Console console, char *cmd)
 void OGLCONSOLE_Resize(_OGLCONSOLE_Console *console)
 {
 #ifndef ZAP_DEDICATED
-    GLint viewport[4];
-    GLdouble screenWidth, screenHeight;
+    Zap::Renderer& r = Zap::Renderer::get();
+
+    F32 screenWidth, screenHeight;
     int oldTextWidth = console->textWidth;
     char * oldLines = console->lines;     // Preserve console text
 
     /* Textual dimensions */
-    glGetIntegerv(GL_VIEWPORT, viewport);    
-    console->textWidth = viewport[2] / CHAR_PIXEL_W;
-    console->textHeight = viewport[3] / CHAR_PIXEL_H;
-    screenWidth = (GLdouble)viewport[2] / (GLdouble)CHAR_PIXEL_W;    // width in chars
-    screenHeight = (GLdouble)viewport[3] / (GLdouble)CHAR_PIXEL_H;   // height in chars
-    console->characterWidth = 1.0 / (int)screenWidth;
-    console->characterHeight = 1.0 / (int)screenHeight;
+    Zap::Point viewportSize = r.getViewportSize(); 
+    console->textWidth = (S32)viewportSize.x / CHAR_PIXEL_W;
+    console->textHeight = (S32)viewportSize.y / CHAR_PIXEL_H;
+    screenWidth = (F32)viewportSize.x / CHAR_PIXEL_W;    // width in chars
+    screenHeight = (F32)viewportSize.y / CHAR_PIXEL_H;   // height in chars
+    console->characterWidth = 1.0f / (int)screenWidth;
+    console->characterHeight = 1.0f / (int)screenHeight;
 
     /* Different values have different meanings for xMatrixUse:
         0) Do not change the matrix before rendering
@@ -345,21 +327,21 @@ void OGLCONSOLE_Resize(_OGLCONSOLE_Console *console)
         2) Multiply the console's matrix before rendering */
 
     /* Initialize its projection matrix */
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    glOrtho(0, screenWidth, 0, screenHeight, -1, 1);
-    glGetDoublev(GL_PROJECTION_MATRIX, console->pMatrix);
-    glPopMatrix();
+    r.setMatrixMode(Zap::MatrixType::Projection);
+    r.pushMatrix();
+    r.loadIdentity();
+    r.projectOrtho(0, screenWidth, 0, screenHeight, -1, 1);
+    r.getMatrix(Zap::MatrixType::Projection, console->pMatrix);
+    r.popMatrix();
 
     /* Initialize its modelview matrix */
     console->mvMatrixUse = 1;
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    glScaled(console->textWidth, console->textHeight, 1);
-    glGetDoublev(GL_MODELVIEW_MATRIX, console->mvMatrix);
-    glPopMatrix();
+    r.setMatrixMode(Zap::MatrixType::ModelView);
+    r.pushMatrix();
+    r.loadIdentity();
+    r.scale((F32)console->textWidth, (F32)console->textHeight, 1);
+    r.getMatrix(Zap::MatrixType::ModelView, console->mvMatrix);
+    r.popMatrix();
 
 
    /* Screen and scrollback lines */
@@ -573,31 +555,27 @@ void OGLCONSOLE_Draw() { OGLCONSOLE_Render(userConsole); }
 void OGLCONSOLE_setCursor(int drawCursor) { userConsole->drawCursor = drawCursor; }
 
 /* Internal functions for drawing text. You don't want these, do you? */
-void OGLCONSOLE_DrawString(char *s, double x, double y, double w, double h,
-        double z);
-void OGLCONSOLE_DrawWrapString(char *s, double x, double y, double w, double h,
-        double z, int wrap);
-void OGLCONSOLE_DrawCharacter(int c, double x, double y, double w, double h,
-        double z);
+void OGLCONSOLE_DrawString(char *s, F32 x, F32 y, F32 w, F32 h, F32 z);
+void OGLCONSOLE_DrawWrapString(char *s, F32 x, F32 y, F32 w, F32 h, F32 z, int wrap);
+void OGLCONSOLE_DrawCharacter(int c, F32 x, F32 y, F32 w, F32 h, F32 z);
 
 /* This function draws a single specific console; if you only use one console in
  * your program, use Draw() instead */
 void OGLCONSOLE_Render(OGLCONSOLE_Console C)
 {
 #ifndef ZAP_DEDICATED
+    Zap::Renderer& r = Zap::Renderer::get();
 
     /* Don't render hidden console */
     if(C->visibility == 0) return;
 
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadMatrixd(C->pMatrix);
+    r.setMatrixMode(Zap::MatrixType::Projection);
+    r.pushMatrix();
+    r.loadMatrix(C->pMatrix);
 
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadMatrixd(C->mvMatrix);
-
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    r.setMatrixMode(Zap::MatrixType::ModelView);
+    r.pushMatrix();
+    r.loadMatrix(C->mvMatrix);
 
 /*    glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);*/
@@ -606,17 +584,14 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
      * infrastructure for "real" consoles in the game (like you could walk up to
      * a computer terminal and manipulate a console on a computer using
      * oglconsole) already exists; you'd want depth testing in that case */
-    glDisable(GL_DEPTH_TEST);
-
-	/* ADDED */
-	glDisable( GL_POLYGON_SMOOTH );
+    // glDisable(GL_DEPTH_TEST);
 
     /* Render hiding / showing console in a special manner. Zero means hidden. 1
      * means visible. All other values are traveling toward zero or one. TODO:
      * Make this time dependent */
     if(C->visibility != 1)
     {
-        double d; /* bra size */
+        F32 d; /* bra size */
         int v = C->visibility;
 
         /* Count down in both directions */
@@ -631,40 +606,37 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
             C->visibility--;
         }
 
-        d = C->textHeight * C->characterHeight * (1.0 - v * (1.0 / SLIDE_STEPS));
-        glTranslated(0, d, 0);
+        d = C->textHeight * C->characterHeight * (1.0f - v * (1.0f / SLIDE_STEPS));
+        r.translate(0, (F32)d, 0);
 //d = 0.04 * v;
 //glTranslated(0, 1-d, 0);
     }
 
     /* First we draw our console's background TODO: Add something fancy? */
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
+    r.enableBlending();
+    r.setColor(.1f, 0.0f, 0.0f, 0.75f);
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glColor4d(.1,0,0, 0.75);
-
-    glBegin(GL_QUADS);
-    glVertex3d(-1,0,0);      // Draw from -1 to 2 to ensure complete screen coverage... totally hacky, but works!
-    glVertex3d(2,0,0);
-    glVertex3d(2,2,0);
-    glVertex3d(-1,2,0);
-    glEnd();
+    // Draw from -1 to 2 to ensure complete screen coverage... totally hacky, but works!
+    F32 verts[4 * 2] = {
+        -1, 0,
+        2, 0,
+        -1, 2,
+        2, 2,
+    };
+    r.renderVertexArray(verts, 4, Zap::RenderType::TriangleStrip);
 
 #ifndef OGLCONSOLE_USE_ALPHA_TEXT
     // Change blend mode for drawing text
-    glBlendFunc(GL_ONE, GL_ONE);
+    r.useTransparentBlackBlending();
 #endif
 
     /* Select the console font */
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, OGLCONSOLE_glFontHandle);
+    r.bindTexture(OGLCONSOLE_glFontHandle);
 
     /* Recolor text */
-    glColor3d(0,1,0);
+    r.setColor(0,1,0);
 
     /* Render console contents */
-    glBegin(GL_QUADS);
     {
         /* Graphical line, and line in lines[] */
         int gLine, tLine = C->lineScrollIndex;
@@ -673,7 +645,8 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
         for (gLine = 0; gLine < C->textHeight; gLine++)
         {
             /* Draw this line of text adjusting for user scrolling up/down */
-            OGLCONSOLE_DrawString(C->lines + (tLine * C->textWidth),
+            OGLCONSOLE_DrawString(
+                    C->lines + (tLine * C->textWidth),
                     0,
                     (C->textHeight - gLine) * C->characterHeight,
                     C->characterWidth,
@@ -688,7 +661,7 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
          * the command history or the line being edited atm */
         if(C->historyScrollIndex >= 0)
         {
-            glColor3d(1,0,0);    // red
+            r.setColor(1,0,0);    // red
             OGLCONSOLE_DrawString(
                     C->history[C->historyScrollIndex],
                     0, 0,
@@ -699,8 +672,9 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
         else
         {
             /* Draw input line cyan */
-            glColor3d(0,1,1);
-            OGLCONSOLE_DrawString(C->inputLine,
+            r.setColor(0,1,1);
+            OGLCONSOLE_DrawString(
+                    C->inputLine,
                     0, 0,
                     C->characterWidth,
                     C->characterHeight,
@@ -710,28 +684,27 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console C)
         /* Draw cursor */
         //glColor3d(1,1,.5);    // <== use whatever color we drew the line with
         if(C->drawCursor)     
-           OGLCONSOLE_DrawCharacter('_'-FIRST_CHARACTER,
+           OGLCONSOLE_DrawCharacter(
+                    '_'-FIRST_CHARACTER,
                     C->inputCursorPos * C->characterWidth, 0,
                     C->characterWidth,
                     C->characterHeight,
                     0);
     }
-    glEnd();
 
     /* Relinquish our rendering settings */
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
+    r.setMatrixMode(Zap::MatrixType::Projection);
+    r.popMatrix();
 
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
+    r.setMatrixMode(Zap::MatrixType::ModelView);
+    r.popMatrix();
 
-    glPopAttrib();
+    r.useDefaultBlending(); // Reset blending
 #endif
 }
 
 /* Issue rendering commands for a single a string */
-void OGLCONSOLE_DrawString(char *s, double x, double y, double w, double h,
-        double z)
+void OGLCONSOLE_DrawString(char *s, F32 x, F32 y, F32 w, F32 h, F32 z)
 {
     while (*s)
     {
@@ -742,11 +715,11 @@ void OGLCONSOLE_DrawString(char *s, double x, double y, double w, double h,
 }
 
 /* Issue rendering commands for a single a string */
-void OGLCONSOLE_DrawWrapString(char *s, double x, double y, double w, double h,
-        double z, int wrap)
+void OGLCONSOLE_DrawWrapString(char *s, F32 x, F32 y, F32 w, F32 h,
+                               F32 z, int wrap)
 {
     int pos = 0;
-    double X = x;
+    F32 X = x;
 
     while (*s)
     {
@@ -764,11 +737,10 @@ void OGLCONSOLE_DrawWrapString(char *s, double x, double y, double w, double h,
 }
 
 /* Issue rendering commands for a single character */
-void OGLCONSOLE_DrawCharacter(int c, double x, double y, double w, double h,
-        double z)
+void OGLCONSOLE_DrawCharacter(int c, F32 x, F32 y, F32 w, F32 h, F32 z)
 {
 //  static int message = 0;
-    double cx, cy, cX, cY;
+    F32 cx, cy, cX, cY;
     
 //    if(c < FIRST_CHARACTER || c > LAST_CHARACTER)
 //        c = (c - FIRST_CHARACTER) % (LAST_CHARACTER - FIRST_CHARACTER);
@@ -783,9 +755,9 @@ void OGLCONSOLE_DrawCharacter(int c, double x, double y, double w, double h,
     cY = cy - CHAR_HEIGHT;
 #else
     cx = (c % 42) * CHAR_WIDTH;
-    cy = 1.0 - (c / 42) * CHAR_HEIGHT;
+    cy = 1.0f - (c / 42) * CHAR_HEIGHT;
     cX = cx + CHAR_WIDTH;
-    cY = 1.0 - (c / 42 + 1) * CHAR_HEIGHT;
+    cY = 1.0f - (c / 42 + 1) * CHAR_HEIGHT;
 #endif
 
 
@@ -797,11 +769,22 @@ void OGLCONSOLE_DrawCharacter(int c, double x, double y, double w, double h,
     }*/
 
 #ifndef ZAP_DEDICATED
-    /* This should occur outside of this function for optimiation TODO: MOVE IT */
-    glTexCoord2d(cx, cy); glVertex3d(x,   y,   z);
-    glTexCoord2d(cX, cy); glVertex3d(x+w, y,   z);
-    glTexCoord2d(cX, cY); glVertex3d(x+w, y+h, z);
-    glTexCoord2d(cx, cY); glVertex3d(x,   y+h, z);
+    F32 verts[] = {
+        x, y, z,
+        x + w, y, z,
+        x, y + h, z,
+        x + w, y + h, z,
+    };
+
+    F32 UVs[] = {
+        cx, cy,
+        cX, cy,
+        cx, cY,
+        cX, cY,
+    };
+
+    // Render vertices
+    Zap::Renderer::get().renderColoredTexture(verts, UVs, 4, Zap::RenderType::TriangleStrip, 0, 0, 3);
 #endif
 }
 
@@ -884,8 +867,7 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console C, const char *s, ...)
          if(*outputCursor == '\t')
          {
              const int TAB_WIDTH = 8;
- 
-             int n = consoleCursor - (C->lines + lineQueueIndex * textWidth);
+             std::size_t n = consoleCursor - (C->lines + lineQueueIndex * textWidth);
              //printf("column: %i\n", n);
  
              /* Are we indenting our way off the edge of the screen? */
@@ -978,7 +960,7 @@ void OGLCONSOLE_YankHistory(_OGLCONSOLE_Console *console)
         /* Set up this shite */
         console->inputCursorPos  = 
             console->inputLineLength =
-            strlen(console->inputLine);
+            (int)strlen(console->inputLine);
 
         /* Drop out of history browsing mode */
         console->historyScrollIndex = -1;
@@ -1025,7 +1007,7 @@ int getCurrentLineLength(_OGLCONSOLE_Console *userConsole)
    if(userConsole->historyScrollIndex == -1)
       return userConsole->inputLineLength;
    else
-      return strlen(userConsole->history[userConsole->historyScrollIndex]);
+      return (int)strlen(userConsole->history[userConsole->historyScrollIndex]);
 }
 
 

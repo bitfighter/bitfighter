@@ -26,6 +26,7 @@
 #include "gameType.h"            // Can get rid of this with some simple passthroughs
 #include "IniFile.h"
 #include "DisplayManager.h"
+#include "Renderer.h"
 #include "Joystick.h"
 #include "JoystickRender.h"
 #include "Colors.h"
@@ -38,7 +39,6 @@
 #include "gameObjectRender.h"    // For renderBitfighterLogo, glColor
 #include "stringUtils.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 #include <algorithm>
 #include <string>
@@ -244,7 +244,7 @@ static void renderMenuInstructions(GameSettings *settings)
    F32 y = F32(canvasHeight - UserInterface::vertMargin - 20);
    const S32 size = 18;
 
-   glColor(Colors::white);
+   Renderer::get().setColor(Colors::white);
 
    if(settings->getInputMode() == InputModeKeyboard)
    {
@@ -270,6 +270,7 @@ static void renderArrow(S32 pos, bool pointingUp)
    static const S32 ARROW_WIDTH = 100;
    static const S32 ARROW_HEIGHT = 20;
    static const S32 ARROW_MARGIN = 5;
+   Renderer& r = Renderer::get();
 
    S32 canvasWidth = DisplayManager::getScreenInfo()->getGameCanvasWidth();
 
@@ -288,8 +289,8 @@ static void renderArrow(S32 pos, bool pointingUp)
    for(S32 i = 1; i >= 0; i--)
    {
       // First create a black poly to blot out what's behind, then the arrow itself
-      glColor(i ? Colors::black : Colors::blue);
-      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
+      r.setColor(i ? Colors::black : Colors::blue);
+      r.renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? RenderType::TriangleFan : RenderType::LineLoop);
    }
 }
 
@@ -309,6 +310,7 @@ static void renderArrowBelow(S32 pos)
 // Basic menu rendering
 void MenuUserInterface::render()
 {
+   Renderer& r = Renderer::get();
    FontManager::pushFontContext(MenuContext);
 
    S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
@@ -324,12 +326,12 @@ void MenuUserInterface::render()
    // Title 
    if(mMenuTitle.length() != 0) // This check is to fix green dot from zero length underline on some systems including linux software renderer (linux command: LIBGL_ALWAYS_SOFTWARE=1 ./bitfighter)
    {
-      glColor(Colors::green);
+      r.setColor(Colors::green);
       drawCenteredUnderlinedString(vertMargin, 30, mMenuTitle.c_str());
    }
    
    // Subtitle
-   glColor(mMenuSubTitleColor);
+   r.setColor(mMenuSubTitleColor);
    drawCenteredString(vertMargin + 35, 18, mMenuSubTitle.c_str());
 
    // Instructions
@@ -387,12 +389,12 @@ void MenuUserInterface::render()
       // Render a special instruction line
       if(mRenderSpecialInstructions)
       {
-         glColor(Colors::menuHelpColor, 0.6f);
+         r.setColor(Colors::menuHelpColor, 0.6f);
          drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getSpecialEditingInstructions());
       }
 
       ypos -= helpFontSize + 5;
-      glColor(Colors::yellow);
+      r.setColor(Colors::yellow);
       drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getHelp().c_str());
    }
 
@@ -413,14 +415,14 @@ void MenuUserInterface::render()
       const S32 cornerInset = 10;
 
       // Fill
-      glColor(Colors::red40, alpha);
-      drawFancyBox(left, top, DisplayManager::getScreenInfo()->getGameCanvasWidth() - left, bottom, cornerInset, GL_TRIANGLE_FAN);
+      r.setColor(Colors::red40, alpha);
+      drawFancyBox(left, top, DisplayManager::getScreenInfo()->getGameCanvasWidth() - left, bottom, cornerInset, RenderType::TriangleFan);
 
       // Border
-      glColor(Colors::red, alpha);
-      drawFancyBox(left, top, DisplayManager::getScreenInfo()->getGameCanvasWidth() - left, bottom, cornerInset, GL_LINE_LOOP);
+      r.setColor(Colors::red, alpha);
+      drawFancyBox(left, top, DisplayManager::getScreenInfo()->getGameCanvasWidth() - left, bottom, cornerInset, RenderType::LineLoop);
 
-      glColor(Colors::white, alpha);
+      r.setColor(Colors::white, alpha);
       drawCenteredString(top + padding, textsize, mFadingNoticeMessage.c_str());
    }
 
@@ -1026,7 +1028,7 @@ void MainMenuUserInterface::render()
       delta = U32(delta * pixelsPerSec * 0.001) % totalWidth;
 
       FontManager::pushFontContext(MotdContext);
-      glColor(Colors::white);
+      Renderer::get().setColor(Colors::white);
       drawString(canvasWidth - delta, MOTD_VERT_POS, 20, mMOTD);
       FontManager::popFontContext();
    }
@@ -1068,7 +1070,7 @@ bool MainMenuUserInterface::getNeedToUpgrade()
 
 void MainMenuUserInterface::renderExtras() const
 {
-   glColor(Colors::white);
+   Renderer::get().setColor(Colors::white);
    const S32 size = 16;
    drawCenteredString(DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - size, size, "join us @ www.bitfighter.org");
 }
@@ -1862,7 +1864,7 @@ void NameEntryUserInterface::renderExtras() const
 
    S32 instrGap = mRenderInstructions ? 30 : 0;
 
-   glColor(Colors::menuHelpColor);
+   Renderer::get().setColor(Colors::menuHelpColor);
 
    row++;
 

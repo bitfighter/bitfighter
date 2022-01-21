@@ -8,10 +8,10 @@
 #include "ClientGame.h"
 #include "GameSettings.h"
 #include "DisplayManager.h"
+#include "Renderer.h"
 #include "Colors.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 namespace Zap
 {
@@ -128,16 +128,16 @@ void AbstractInstructionsUserInterface::render(const char *header, S32 page, S32
    static S32 prefixWidth = getStringWidth(fontSize, prefix);
 
    // Draw header first as different color, then everything else
-   glColor(Colors::cyan);
+   Renderer::get().setColor(Colors::cyan);
    drawString(3 + prefixWidth, 3, fontSize, header);
 
-   glColor(Colors::red);
+   Renderer::get().setColor(Colors::red);
    drawString(3, 3, fontSize, prefix);
 
    drawStringf(625, 3, fontSize, "PAGE %d/%d", page, pages);
    drawCenteredString(571, 20, "LEFT - previous page   |   RIGHT, SPACE - next page   |   ESC exits");
 
-   glColor(Colors::gray70);
+   Renderer::get().setColor(Colors::gray70);
    drawHorizLine(0, 800, 32);
    drawHorizLine(0, 800, 569);
 }
@@ -159,14 +159,14 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolString
 
    Color secColor =   Colors::yellow;
 
-   glColor(secColor);
+   Renderer::get().setColor(secColor);
    drawString(cmdCol,   ypos, headerSize, "Code Example");
    drawString(descrCol, ypos, headerSize, "Description");
 
    Vector<SymbolShapePtr> symbols;
 
    ypos += cmdSize + cmdGap;
-   glColor(&Colors::gray70);
+   Renderer::get().setColor(Colors::gray70);
    drawHorizLine(cmdCol, 750, ypos);
 
    ypos += 10;     // Small gap before cmds start
@@ -176,7 +176,7 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const SymbolString
    {
       if(cmdList[i].command[0] == '-')      // Horiz spacer
       {
-         glColor(Colors::gray40);
+         Renderer::get().setColor(Colors::gray40);
          drawHorizLine(cmdCol, cmdCol + 335, ypos + (cmdSize + cmdGap) / 4);
       }
       else

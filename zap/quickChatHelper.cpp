@@ -12,8 +12,8 @@
 
 #include "JoystickRender.h"
 
+#include "Renderer.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 #include <ctype.h>
 
@@ -73,11 +73,12 @@ HelperMenu::HelperMenuType QuickChatHelper::getType() { return QuickChatHelperTy
 // in remaining in QuickChat mode, is there?
 void QuickChatHelper::render()
 {
+   Renderer& r = Renderer::get();
    S32 yPos = MENU_TOP + MENU_PADDING;
 
    if(!nodeTree.size())
    {
-      glColor(Colors::ErrorMessageTextColor);
+      r.setColor(Colors::ErrorMessageTextColor);
       drawCenteredString(yPos, MENU_FONT_SIZE, "Quick Chat messages improperly configured.  Please see bitfighter.ini.");
       return;
    }
@@ -89,7 +90,7 @@ void QuickChatHelper::render()
    {
       TNLAssert(menuItems->size() > 0, "Should have some items here!");
 
-      glColor(Colors::red); 
+      r.setColor(Colors::red); 
       drawString(0, yPos, MENU_FONT_SIZE, "No messages here (misconfiguration?)");
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
    }

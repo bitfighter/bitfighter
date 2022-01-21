@@ -17,8 +17,8 @@
 
 #include "Colors.h"
 
+#include "Renderer.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 
 namespace Zap
@@ -118,8 +118,10 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
                               S32 widthOfButtons, S32 widthOfTextBlock,
                               const char **legendText, const Color **legendColors, S32 legendCount)
 {
-   glPushMatrix();
-   glTranslate(getInsideEdge(), 0, 0);
+   Renderer& r = Renderer::get();
+
+   r.pushMatrix();
+   r.translate(getInsideEdge(), 0, 0);
 
    static const Color baseColor(Colors::red);
 
@@ -171,7 +173,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    renderSlideoutWidgetFrame(0, MENU_TOP, getWidth(), menuBottom - MENU_TOP, frameColor);
 
    // Draw the title (above gray line)
-   glColor(baseColor);
+   r.setColor(baseColor);
    
    FontManager::pushFontContext(HelperMenuHeadlineContext);
    drawCenteredString(grayLineCenter, yPos, TITLE_FONT_SIZE, title);
@@ -180,7 +182,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
    yPos += titleHeight;
 
    // Gray line
-   glColor(Colors::gray20);
+   r.setColor(Colors::gray20);
    drawHorizLine(grayLineLeft, grayLineRight, yPos + 2);
 
    yPos += grayLineBuffer;
@@ -205,7 +207,7 @@ void HelperMenu::drawItemMenu(const char *title, const OverlayMenuItem *items, S
 
    FontManager::popFontContext();
 
-   glPopMatrix();
+   r.popMatrix();
 }
 
 
@@ -240,6 +242,8 @@ void HelperMenu::setExpectedWidth_MidTransition(S32 width)
 // Render a set of menu items.  Break this code out to make transitions easier (when we'll be rendering two sets of items).
 void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top, S32 bottom, bool newItems, S32 horizOffset)
 {
+   Renderer& renderer = Renderer::get();
+
    if(!items)
       return;
 
@@ -292,7 +296,7 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
       // Need to add buttonWidth / 2 because renderControllerButton() centers on passed coords
       JoystickRender::renderControllerButton(LeftMargin + horizOffset + (F32)buttonWidth / 2, 
                                              (F32)yPos - 1, code, buttonOverrideColor);
-      glColor(itemColor);
+      renderer.setColor(*itemColor);
 
       S32 xPos = LeftMargin + buttonWidth + ButtonLabelGap + horizOffset;
       S32 textWidth = drawStringAndGetWidth(xPos, yPos, MENU_FONT_SIZE, items[i].name); 
@@ -300,7 +304,7 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
       // Render help string, if one is available
       if(strcmp(items[i].help, "") != 0)
       {
-         glColor(items[i].helpColor);    
+         renderer.setColor(*items[i].helpColor);    
          xPos += textWidth + ButtonLabelGap;
          drawString(xPos, yPos, MENU_FONT_SIZE, items[i].help);
       }
@@ -314,7 +318,7 @@ void HelperMenu::drawMenuItems(const OverlayMenuItem *items, S32 count, S32 top,
 
 void HelperMenu::renderPressEscapeToCancel(S32 xPos, S32 yPos, const Color &baseColor, InputMode inputMode)
 {
-   glColor(baseColor);
+   Renderer::get().setColor(baseColor);
 
    // RenderedSize will be -1 if the button is not defined
    if(inputMode == InputModeKeyboard)
@@ -348,7 +352,7 @@ void HelperMenu::renderLegend(S32 x, S32 y, const char **legendText, const Color
 
    for(S32 i = 0; i < legendCount; i++)
    {
-      glColor(legendColors[i]);
+      Renderer::get().setColor(*legendColors[i]);
       x += drawStringAndGetWidth(x, y, MENU_LEGEND_FONT_SIZE, legendText[i]) + SPACE_BETWEEN_LEGEND_ITEMS;
    }
 }

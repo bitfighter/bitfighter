@@ -37,16 +37,13 @@
 #ifndef FREEGLUT_STROKE_H_
 #define FREEGLUT_STROKE_H_
 
-#if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
-#  include "SDL_opengles.h"
-#else
-#  include "SDL_opengl.h"
-#endif
+#include "tnlTypes.h"
+using namespace TNL;
 
 typedef struct tagSFG_StrokeVertex SFG_StrokeVertex;
 struct tagSFG_StrokeVertex
 {
-    GLfloat         X, Y;
+    F32             X, Y;
 };
 
 typedef struct tagSFG_StrokeStrip SFG_StrokeStrip;
@@ -59,7 +56,7 @@ struct tagSFG_StrokeStrip
 typedef struct tagSFG_StrokeChar SFG_StrokeChar;
 struct tagSFG_StrokeChar
 {
-    GLfloat         Right;
+    F32             Right;
     int             Number;
     const SFG_StrokeStrip* Strips;
 };
@@ -69,7 +66,7 @@ struct tagSFG_StrokeFont
 {
     char*           Name;                       /* The source font name      */
     int             Quantity;                   /* Number of chars in font   */
-    GLfloat         Height;                     /* Height of the characters  */
+    F32             Height;                     /* Height of the characters  */
     const SFG_StrokeChar** Characters;          /* The characters mapping    */
 };
 

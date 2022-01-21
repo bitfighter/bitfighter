@@ -45,12 +45,14 @@ struct FolderManager
    FolderManager();
    virtual ~FolderManager();
 
-   FolderManager(const string &levelDir,    const string &robotDir,  const string &sfxDir,        const string &musicDir, 
-                 const string &iniDir,      const string &logDir,    const string &screenshotDir, const string &luaDir,
-                 const string &rootDataDir, const string &pluginDir, const string &fontsDir,      const string &recordDir);
+   FolderManager(const string &levelDir, const string &robotDir,    const string &shaderDir, const string &sfxDir,
+                 const string &musicDir, const string &iniDir,      const string &logDir,    const string &screenshotDir,
+                 const string &luaDir,   const string &rootDataDir, const string &pluginDir, const string &fontsDir,
+                 const string &recordDir);
 
    string levelDir;
    string robotDir;
+   string shaderDir;
    string sfxDir;
    string musicDir;
    string iniDir;
@@ -75,9 +77,11 @@ struct FolderManager
    Vector<string> getHelperScriptFolderList() const;
 
    string findLevelGenScript(const string &fileName) const;
+   string findScriptFile(const string &filename) const;
    string findPlugin(const string &filename) const;
    string findBotFile(const string &filename) const;
-   string findScriptFile(const string &filename) const;
+
+   string findShaderFile(const string &filename) const;
 };
 
 

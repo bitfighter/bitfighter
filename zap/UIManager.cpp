@@ -28,15 +28,10 @@
 #include "ClientGame.h"
 
 #include "stringUtils.h"
+#include "Renderer.h"
 #include "RenderUtils.h"
 
 #include "SoundSystem.h"
-
-#if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
-#  include "SDL_opengles.h"
-#else
-#  include "SDL_opengl.h"
-#endif
 
 
 namespace Zap
@@ -475,21 +470,30 @@ void UIManager::renderCurrent()
 {
    // The viewport has been setup by the caller so, regardless of how many clients we're running, we can just render away here.
    // Each viewport should have an aspect ratio of 800x600.
+   Renderer &r = Renderer::get();
 
    if(mMenuTransitionTimer.getCurrent() && mLastUI)
    {
       // Save viewport
-      GLint viewport[4];
-      glGetIntegerv(GL_VIEWPORT, viewport);    
+      Point viewportPos = r.getViewportPos();
+      Point viewportSize = r.getViewportSize();
 
-      glViewport(viewport[0] + GLint((mLastWasLower ? 1 : -1) * viewport[2] * (1 - mMenuTransitionTimer.getFraction())), 0, viewport[2], viewport[3]);
+      r.setViewport(
+         (S32)(viewportPos.x + (mLastWasLower ? 1 : -1) * viewportSize.x * (1 - mMenuTransitionTimer.getFraction())),
+         0,
+         (S32)viewportSize.x,
+         (S32)viewportSize.y);
       mLastUI->render();
 
-      glViewport(viewport[0] - GLint((mLastWasLower ? 1 : -1) * viewport[2] * mMenuTransitionTimer.getFraction()), 0, viewport[2], viewport[3]);
+      r.setViewport(
+         (S32)(viewportPos.x - (mLastWasLower ? 1 : -1) * viewportSize.x * mMenuTransitionTimer.getFraction()),
+         0,
+         (S32)viewportSize.x,
+         (S32)viewportSize.y);
       mCurrentInterface->render();
 
       // Restore viewport for posterity
-      glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+      r.setViewport((S32)viewportPos.x, (S32)viewportPos.y, (S32)viewportSize.x, (S32)viewportSize.y);
 
       return;
    }

@@ -131,6 +131,10 @@ set(CLIENT_SOURCES
 	gameObjectRender.cpp
 	GameRecorderPlayback.cpp
     GaugeRenderer.cpp
+	GL2Renderer.cpp
+	GL2RingBuffer.cpp
+	GLRenderer.cpp
+    GLLegacyRenderer.cpp
 	HelpItemManager.cpp
 	HelperManager.cpp
 	helperMenu.cpp
@@ -143,12 +147,14 @@ set(CLIENT_SOURCES
 	lineEditor.cpp
 	LoadoutIndicator.cpp
 	loadoutHelper.cpp
+	Matrix4.cpp
 	oglconsole.cpp
-	OpenglUtils.cpp
 	quickChatHelper.cpp
+    Renderer.cpp
 	RenderUtils.cpp
 	ScissorsManager.cpp
 	ScreenShooter.cpp
+	Shader.cpp
 	ShipShape.cpp
 	SlideOutWidget.cpp
 	sparkManager.cpp
@@ -181,7 +187,7 @@ set(CLIENT_SOURCES
 	VideoSystem.cpp
 	voiceCodec.cpp
 	${CMAKE_SOURCE_DIR}/fontstash/stb_truetype.c
-	${CMAKE_SOURCE_DIR}/fontstash/fontstash.c
+	${CMAKE_SOURCE_DIR}/fontstash/fontstash.cpp
 )
 
 file(GLOB BITFIGHTER_HEADERS *.h)
@@ -223,6 +229,7 @@ set(CLIENT_LIBS
 	${SDL_LIBRARY}	
 	${PNG_LIBRARY}
 	${GL_LIBRARY}
+	${GL_LOADER_LIBRARY}
 	${OPENAL_LIBRARY}
 	${ALURE_LIBRARIES}
 	${MODPLUG_LIBRARIES}
@@ -289,6 +296,7 @@ set(INCLUDE_DIRS
 if(COMPILE_CLIENT)
 	list(APPEND INCLUDE_DIRS
 		${GL_INCLUDE_DIR}
+		${GL_LOADER_INCLUDE_DIR}
 		${PNG_INCLUDE_DIR}
 		${SDL_INCLUDE_DIR}
 		${SPEEX_INCLUDE_DIR}

@@ -13,12 +13,12 @@
 
 #include "masterConnection.h"
 #include "DisplayManager.h"
+#include "Renderer.h"
 #include "ClientGame.h"
 #include "Colors.h"
 #include "SoundSystem.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 #include <algorithm>
 
@@ -245,7 +245,7 @@ void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)  // ypos is 
          else
          {
             ChatMessage msg = getMessage(i + firstMsg);
-            glColor(msg.color);
+            Renderer::get().setColor(msg.color);
 
             // Figure out the x position based on the message prefixes
             S32 xpos = UserInterface::horizMargin / 2;
@@ -300,6 +300,7 @@ void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)  // ypos is 
 // Render outgoing chat message composition line
 void AbstractChat::renderMessageComposition(S32 ypos)
 {
+   Renderer& r = Renderer::get();
    const char *PROMPT_STR = "> ";     // For composition only
    const S32 promptWidth = getStringWidth(CHAT_FONT_SIZE, PROMPT_STR);
    const S32 xStartPos = UserInterface::horizMargin + promptWidth;
@@ -307,10 +308,10 @@ void AbstractChat::renderMessageComposition(S32 ypos)
    FontManager::pushFontContext(InputContext);
    string displayString = mLineEditor.getDisplayString();
 
-   glColor(Colors::cyan);
+   r.setColor(Colors::cyan);
    drawString(UserInterface::horizMargin, ypos, CHAT_FONT_SIZE, PROMPT_STR);
 
-   glColor(Colors::white);
+   r.setColor(Colors::white);
    drawString(xStartPos, ypos, CHAT_FONT_SIZE, displayString.c_str());
 
    mLineEditor.drawCursor(xStartPos, ypos, CHAT_FONT_SIZE);
@@ -364,9 +365,11 @@ void AbstractChat::clearChat()
 
 void AbstractChat::renderChatters(S32 xpos, S32 ypos)
 {
+   Renderer& r = Renderer::get();
+
    if(mPlayersInGlobalChat.size() == 0)
    {
-      glColor(Colors::white);
+      r.setColor(Colors::white);
       drawString(xpos, ypos, CHAT_NAMELIST_SIZE, "No other players currently in lobby/chat room");
    }
    else
@@ -374,7 +377,7 @@ void AbstractChat::renderChatters(S32 xpos, S32 ypos)
       {
          const char *name = mPlayersInGlobalChat[i].getString();
 
-         glColor(getColor(name));      // use it
+         r.setColor(getColor(name));      // use it
 
          xpos += drawStringAndGetWidthf((F32)xpos, (F32)ypos, CHAT_NAMELIST_SIZE, "%s%s", name, (i < mPlayersInGlobalChat.size() - 1) ? "; " : "");
       }
@@ -415,6 +418,8 @@ static const S32 MENU_SUBTITLE_SIZE = 18;
 
 void ChatUserInterface::render()
 {
+   Renderer& r = Renderer::get();
+
    // If there is an underlying menu or other UI screen, render and dim it.
    //
    // We will skip rendering if the editor is a parent UI because of a couple
@@ -437,14 +442,14 @@ void ChatUserInterface::render()
    renderHeader();
 
    // And footer
-   glColor(Colors::green);
+   r.setColor(Colors::green);
    S32 vertFooterPos = DisplayManager::getScreenInfo()->getGameCanvasHeight() - vertMargin - VERT_FOOTER_SIZE;
    drawCenteredString(vertFooterPos, VERT_FOOTER_SIZE - 2, "Type your message | ENTER to send | ESC exits");
 
    renderChatters(horizMargin, vertFooterPos - CHAT_NAMELIST_SIZE - CHAT_FONT_MARGIN * 2);
 
    // Render incoming chat msgs
-   glColor(Colors::white);
+   r.setColor(Colors::white);
 
    U32 y = UserInterface::vertMargin + 60;
 
@@ -483,7 +488,7 @@ void ChatUserInterface::render()
 
       drawFilledFancyBox(xPos1, yPos1, xPos2, yPos2, CORNER_INSET, Colors::red40, 1.0, Colors::red);
 
-      glColor(Colors::white);
+      r.setColor(Colors::white);
       drawCenteredString(yPos1 + margin, fontsize, line1);
       drawCenteredString(yPos1 + margin + fontsize + fontgap, fontsize, line2);
    }
@@ -494,18 +499,19 @@ void ChatUserInterface::render()
 
 void ChatUserInterface::renderHeader()
 {
+   Renderer& r = Renderer::get();
    FontManager::pushFontContext(MenuHeaderContext);
 
    // Draw title, subtitle, and footer
-   glColor(Colors::green);
+   r.setColor(Colors::green);
    drawCenteredString(vertMargin, MENU_TITLE_SIZE, "GAME LOBBY / GLOBAL CHAT");
 
-   glColor(Colors::red);
+   r.setColor(Colors::red);
    string subtitle = "Not currently connected to any game server";
 
    if(getGame()->getConnectionToServer())
    {
-      glColor(Colors::yellow);
+      r.setColor(Colors::yellow);
       string name = getGame()->getConnectionToServer()->getServerName();
       if(name == "")
          subtitle = "Connected to game server with no name";
@@ -600,14 +606,16 @@ SuspendedUserInterface::~SuspendedUserInterface()
 
 void SuspendedUserInterface::renderHeader()
 {
+   Renderer& r = Renderer::get();
+
    if(getGame()->isSuspended())
    {
-      glColor(Colors::white);
+      r.setColor(Colors::white);
       drawCenteredString(vertMargin, MENU_TITLE_SIZE, "-- GAME SUSPENDED -- ");
    }
    else
    {
-      glColor(Colors::red);
+      r.setColor(Colors::red);
       drawCenteredString(vertMargin, MENU_TITLE_SIZE, "!! GAME RESTARTED !! ");
    }
 
@@ -622,7 +630,7 @@ void SuspendedUserInterface::renderHeader()
          subtitle = "Connected to game server \"" + name + "\"";
    }
 
-   glColor(Colors::green);
+   r.setColor(Colors::green);
    drawCenteredString(vertMargin + MENU_TITLE_SIZE + TITLE_SUBTITLE_GAP, MENU_SUBTITLE_SIZE, subtitle.c_str());
 }
 

@@ -2021,11 +2021,13 @@ FolderManager::FolderManager()
 
 
 // Constructor
-FolderManager::FolderManager(const string &levelDir,    const string &robotDir,  const string &sfxDir,        const string &musicDir, 
-                             const string &iniDir,      const string &logDir,    const string &screenshotDir, const string &luaDir,
-                             const string &rootDataDir, const string &pluginDir, const string &fontsDir,      const string &recordDir) :
+FolderManager::FolderManager(const string &levelDir, const string &robotDir,    const string &shaderDir, const string &sfxDir,
+                             const string &musicDir, const string &iniDir,      const string &logDir,    const string &screenshotDir,
+                             const string &luaDir,   const string &rootDataDir, const string &pluginDir, const string &fontsDir,
+                             const string &recordDir) :
                levelDir      (levelDir),
                robotDir      (robotDir),
+               shaderDir     (shaderDir),
                sfxDir        (sfxDir),
                musicDir      (musicDir),
                iniDir        (iniDir),
@@ -2076,6 +2078,7 @@ void FolderManager::resolveDirs(GameSettings *settings)
 
    // rootDataDir used to specify the following folders
    folderManager->robotDir      = resolutionHelper(cmdLineDirs.robotDir,      rootDataDir, "robots");
+   folderManager->shaderDir     = resolutionHelper(cmdLineDirs.shaderDir,     rootDataDir, "shaders");
    folderManager->pluginDir     = resolutionHelper(cmdLineDirs.pluginDir,     rootDataDir, "editor_plugins");
    folderManager->luaDir        = resolutionHelper(cmdLineDirs.luaDir,        rootDataDir, "scripts");
    folderManager->iniDir        = resolutionHelper(cmdLineDirs.iniDir,        rootDataDir, "");
@@ -2098,6 +2101,7 @@ void FolderManager::resolveDirs(const string &root)
 
    // root used to specify the following folders
    robotDir      = joindir(root, "robots");
+   shaderDir     = joindir(root, "shaders");
    pluginDir     = joindir(root, "editor_plugins");
    luaDir        = joindir(root, "scripts");
    iniDir        = joindir(root, "");
@@ -2346,6 +2350,15 @@ string FolderManager::findBotFile(const string &filename) const
    return checkName(filename, folders, extensions);
 }
 
+// Full extension required
+string FolderManager::findShaderFile(const string &filename) const
+{
+   Vector<string> folders;
+   folders.push_back(shaderDir);
+
+   const char *extensions[] = { "" };
+   return checkName(filename, folders, extensions);
+}
 
 ////////////////////////////////////////
 ////////////////////////////////////////

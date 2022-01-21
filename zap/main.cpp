@@ -87,6 +87,7 @@ include (replaces require)
 using namespace TNL;
 
 #ifndef ZAP_DEDICATED
+#  include "GLLegacyRenderer.h"
 #  include "UIGame.h"
 #  include "UINameEntry.h"
 #  include "UIEditor.h"
@@ -98,12 +99,7 @@ using namespace TNL;
 #  include "Event.h"
 #  include "SDL.h"
 
-#  if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
-#    include "SDL_opengles.h"
-#  else
-#    include "SDL_opengl.h"
-#  endif
-
+#  include "Renderer.h"
 #  include "VideoSystem.h"
 #  include "ClientGame.h"
 #  include "FontManager.h"
@@ -226,26 +222,27 @@ void hostGame(ServerGame *serverGame)
 // Clear screen -- force clear of "black bars" area to avoid flickering on some video cards
 static void clearScreen()
 {
-   bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
+   Renderer &r = Renderer::get();
+   bool scissorMode = r.isScissorEnabled();
 
    if(scissorMode)
-      glDisable(GL_SCISSOR_TEST);
+      r.disableScissor();
 
-   glClear(GL_COLOR_BUFFER_BIT);
-   glClear(GL_STENCIL_BUFFER_BIT);
+   r.clear();
 
    if(scissorMode)
-      glEnable(GL_SCISSOR_TEST);
+      r.enableScissor();
 }
 
 
 // Draw the screen
 void display()
 {
+   Renderer &r = Renderer::get();
    clearScreen();
 
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
+   r.setMatrixMode(MatrixType::ModelView);
+   r.loadIdentity();
 
    const Vector<ClientGame *> *clientGames = GameManager::getClientGames();
 
@@ -498,9 +495,8 @@ void shutdownBitfighter()
          VideoSystem::saveWindowPostion(settings);
       }
 
-      SDL_QuitSubSystem(SDL_INIT_VIDEO);
-
       FontManager::cleanup();
+      VideoSystem::shutdown();
       AppIntegrationController::shutdown();
 #endif
    }

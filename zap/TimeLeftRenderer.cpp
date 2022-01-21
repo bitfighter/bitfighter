@@ -14,7 +14,6 @@
 
 #include "stringUtils.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 
 namespace Zap { 
@@ -100,7 +99,7 @@ S32 TimeLeftRenderer::renderHeadlineScores(const Game *game, S32 ypos) const
    S32 teamCount = game->getTeamCount();
    S32 maxWidth = S32_MIN;
 
-   glColor(Colors::white);
+   Renderer::get().setColor(Colors::white);
 
    for(S32 i = teamCount - 1; i >= 0; i--)
    {
@@ -135,6 +134,7 @@ static void drawStringDigitByDigit(S32 x, S32 y, S32 textsize, const string &s)
 // or leader on top and player second (if player is losing)
 S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 bottom, bool render) const
 {
+   Renderer& renderer = Renderer::get();
    Game *game = gameType->getGame();
    ClientGame *clientGame = static_cast<ClientGame *>(game);
 
@@ -208,7 +208,7 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
 
    if(render)
    {
-      glColor(winnerColor);
+      renderer.setColor(*winnerColor);
 
       drawStringDigitByDigit((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - topOneFixFactor, ypos - firstNameOffset, textsize, topScoreStr);
       drawStringr           ((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth,        ypos - firstNameOffset, textsize, topName);
@@ -217,9 +217,9 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
       if(renderTwoNames)
       {
          if(topScore == botScore)      // If players are tied, render both with winner's color
-            glColor(winnerColor);
+            renderer.setColor(*winnerColor);
          else
-            glColor(loserColor);
+            renderer.setColor(*loserColor);
 
          drawStringDigitByDigit((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - botOneFixFactor, ypos, textsize, botScoreStr);
          drawStringr           ((mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin) - maxWidth,        ypos, textsize, botName);
@@ -234,6 +234,7 @@ S32 TimeLeftRenderer::renderIndividualScores(const GameType *gameType, S32 botto
 // If render is true, will draw display, if false, will only calculate dimensions
 Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) const
 {
+   Renderer& renderer = Renderer::get();
    const S32 siSize = 12;                 // Size of stacked indicators
    const S32 grayLineHorizPadding = 4;
    const S32 grayLineVertPadding = -1;
@@ -274,23 +275,23 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
 
    if(render)
    {
-      glColor(Colors::cyan);
+      renderer.setColor(Colors::cyan);
       // Align with top of time, + 6 is a font-dependent fudge factor
       wt = drawStringfr(smallTextRPos, timeTop + 6, siSize, gameType->getShortName());
 
-      glColor(Colors::red);
+      renderer.setColor(Colors::red);
       // Align with bottom of time
       wb = drawStringfr(smallTextRPos, timeTop + timeTextSize - siSize - stwSizeBonus, siSize + stwSizeBonus, 
                         itos(gameType->getWinningScore()).c_str()); 
 
-      glColor(Colors::white);
+      renderer.setColor(Colors::white);
       if(gameType->isTimeUnlimited())
          drawString(timeLeft, timeTop, timeTextSize, "Unlim.");
       else
       {
          // Change color when game is almost over
          if (gameType->getRemainingGameTimeInMs() < gameAlmostOverMs)
-             glColor(Colors::red);
+            renderer.setColor(Colors::red);
 
          drawTime(timeLeft, timeTop, timeTextSize, gameType->getRemainingGameTimeInMs());
       }
@@ -307,7 +308,7 @@ Point TimeLeftRenderer::renderTimeLeft(const GameType *gameType, bool render) co
 
    if(render)
    {
-      glColor(Colors::gray40);
+      renderer.setColor(Colors::gray40);
       drawHorizLine(farLeftCoord, (mScreenInfo->getGameCanvasWidth() - TimeLeftIndicatorMargin), timeTop - grayLineVertPadding);
       drawVertLine(grayLinePos, timeTop + visualVerticalTextAlignmentHackyFacty, timeTop + timeTextSize);
    }

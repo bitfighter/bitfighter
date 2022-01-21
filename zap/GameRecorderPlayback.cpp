@@ -17,7 +17,7 @@
 #include "UIManager.h"
 #include "UIGame.h"
 #include "DisplayManager.h"
-#include "OpenglUtils.h"
+#include "Renderer.h"
 #include "Cursor.h"
 #include "Timer.h"
 #include "Colors.h"
@@ -640,6 +640,7 @@ void PlaybackGameUserInterface::idle(U32 timeDelta)
 
 void PlaybackGameUserInterface::render()
 {
+   Renderer& r = Renderer::get();
    mGameInterface->render();
 
    if(mVisible)
@@ -658,27 +659,27 @@ void PlaybackGameUserInterface::render()
       };
 
       // Fill
-      glColor(Colors::black, 0.70f);
-      renderVertexArray(controlBoxPoints, ARRAYSIZE(controlBoxPoints)/2, GL_TRIANGLE_FAN);
+      r.setColor(Colors::black, 0.70f);
+      r.renderVertexArray(controlBoxPoints, ARRAYSIZE(controlBoxPoints)/2, RenderType::TriangleFan);
 
       // Border
-      glColor(Colors::blue);
-      renderVertexArray(controlBoxPoints, ARRAYSIZE(controlBoxPoints)/2, GL_LINE_STRIP);
+      r.setColor(Colors::blue);
+      r.renderVertexArray(controlBoxPoints, ARRAYSIZE(controlBoxPoints)/2, RenderType::LineStrip);
 
       // Playback bar
-      glColor(Colors::white);
-      renderVertexArray(playbackBarVertex, 4, GL_LINE_LOOP);
+      r.setColor(Colors::white);
+      r.renderVertexArray(playbackBarVertex, 4, RenderType::LineLoop);
 
       F32 vertex[4];
       vertex[0] = mPlaybackConnection->mCurrentTime * playbackBar_w / mPlaybackConnection->mTotalTime + playbackBar_x;
       vertex[1] = playbackBar_y;
       vertex[2] = vertex[0];
       vertex[3] = playbackBar_y + playbackBar_h;
-      renderVertexArray(vertex, 2, GL_LINES);
+      r.renderVertexArray(vertex, 2, RenderType::Lines);
 
-      renderVertexArray(buttons_lines, sizeof(buttons_lines) / (sizeof(buttons_lines[0]) * 2), GL_LINES);
+      r.renderVertexArray(buttons_lines, sizeof(buttons_lines) / (sizeof(buttons_lines[0]) * 2), RenderType::Lines);
 
-      glColor(Colors::yellow);
+      r.setColor(Colors::yellow);
       drawString(btn_spectate_name_x, btn_y, 15, mPlaybackConnection->mClientInfoSpectatingName.getString());
    }
 }

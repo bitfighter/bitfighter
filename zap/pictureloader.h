@@ -4,13 +4,6 @@
 //------------------------------------------------------------------------------
 
 #include "../tnl/tnlTypes.h"
-
-#if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
-#include "SDL_opengles.h"
-#else
-#include "SDL_opengl.h"
-#endif
-
 using namespace TNL;
 
 struct PictureLoader
@@ -23,7 +16,7 @@ struct PictureLoader
 };
 
 PictureLoader *LoadPicture(const char* path);
-GLuint loadGLTex(PictureLoader picture);
+U32 loadGLTex(PictureLoader picture);
 
 
 extern bool LoadWAVFile(const char *filename, char &format, char **data, int &size, int &freq);

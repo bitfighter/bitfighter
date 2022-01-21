@@ -13,7 +13,6 @@
 #include "SymbolShape.h"
 
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 namespace Zap
 {
@@ -46,20 +45,22 @@ inline const Color *JoystickRender::getButtonColor(bool activated)
 void JoystickRender::renderDPad(Point center, bool upActivated, bool downActivated, bool leftActivated,
                 bool rightActivated, const char *msg1, const char *msg2)
 {
-   glColor(getButtonColor(upActivated));
+   Renderer& r = Renderer::get();
+
+   r.setColor(*getButtonColor(upActivated));
    drawDPadUp(center + Point(0,-16));
 
-   glColor(getButtonColor(downActivated));
+   r.setColor(*getButtonColor(downActivated));
    drawDPadDown(center + Point(0,16));
 
-   glColor(getButtonColor(leftActivated));
+   r.setColor(*getButtonColor(leftActivated));
    drawDPadLeft(center + Point(-16,0));
 
-   glColor(getButtonColor(rightActivated));
+   r.setColor(*getButtonColor(rightActivated));
    drawDPadRight(center + Point(16,0));
 
    // Label the graphic
-   glColor(Colors::white);
+   r.setColor(Colors::white);
    if(strcmp(msg1, "") == 0)    // That is, != "".  Remember, kids, strcmp returns 0 when strings are identical!
    {
       S32 size = 12;
@@ -124,11 +125,13 @@ S32 JoystickRender::getControllerButtonRenderedSize(InputCode inputCode)
 // Note:  buttons are with the given x coordinate as their _center_
 bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, InputCode inputCode, const Color *overrideRenderColor)
 {
+   Renderer& r = Renderer::get();
+
    // Set the basic color, could be overridden later
    if(overrideRenderColor)
-      glColor(overrideRenderColor);
+      r.setColor(*overrideRenderColor);
    else
-      glColor(Colors::white);
+      r.setColor(Colors::white);
 
 
    // Render keyboard keys, just in case
@@ -204,9 +207,9 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, InputCode 
 
    // Change color of label to the preset (default white)
    if(overrideRenderColor)
-      glColor(overrideRenderColor);
+      r.setColor(*overrideRenderColor);
    else
-      glColor(buttonColor);
+      r.setColor(*buttonColor);
 
 
    switch(buttonInfo.buttonSymbol)
@@ -241,7 +244,9 @@ bool JoystickRender::renderControllerButton(F32 centerX, F32 centerY, InputCode 
 
 void JoystickRender::drawPlaystationCross(const Point &center)
 {
-   glColor(Colors::paleBlue);
+   Renderer& r = Renderer::get();
+
+   r.setColor(Colors::paleBlue);
    Point p1(center + Point(-5, -5));
    Point p2(center + Point(5, 5));
    Point p3(center + Point(-5, 5));
@@ -253,20 +258,22 @@ void JoystickRender::drawPlaystationCross(const Point &center)
          p3.x, p3.y,
          p4.x, p4.y
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+   r.renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::Lines);
 }
 
 
 void JoystickRender::drawPlaystationCircle(const Point &center)
 {
-   glColor(Colors::paleRed);
+   Renderer::get().setColor(Colors::paleRed);
    drawCircle(center, 6);
 }
 
 
 void JoystickRender::drawPlaystationSquare(const Point &center)
 {
-   glColor(Colors::palePurple);
+   Renderer& r = Renderer::get();
+
+   r.setColor(Colors::palePurple);
    Point p1(center + Point(-5, -5));
    Point p2(center + Point(-5, 5));
    Point p3(center + Point(5, 5));
@@ -278,7 +285,7 @@ void JoystickRender::drawPlaystationSquare(const Point &center)
          p3.x, p3.y,
          p4.x, p4.y
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   r.renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::LineLoop);
 }
 
 
@@ -293,7 +300,7 @@ void JoystickRender::drawPlaystationTriangle(const Point &center)
          p2.x, p2.y,
          p3.x, p3.y
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   Renderer::get().renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::LineLoop);
 }
 
 
@@ -308,7 +315,7 @@ void JoystickRender::drawSmallLeftTriangle(const Point & center)
          p2.x, p2.y,
          p3.x, p3.y
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   Renderer::get().renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::LineLoop);
 }
 
 
@@ -323,7 +330,7 @@ void JoystickRender::drawSmallRightTriangle(const Point & center)
          p2.x, p2.y,
          p3.x, p3.y
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   Renderer::get().renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::LineLoop);
 }
 
 
@@ -338,7 +345,7 @@ void JoystickRender::drawButtonRightTriangle(const Point &center)
          p2.x, p2.y,
          p3.x, p3.y
    };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
+   Renderer::get().renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::LineLoop);
 }
 
 
@@ -355,7 +362,7 @@ void JoystickRender::drawDPadUp(Point center)
    points[5] = (center + Point( 3, 0));
    points[6] = (center + Point( 3, 6));
 
-   renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
+   Renderer::get().renderVertexArray((F32 *)points, ARRAYSIZE(points), RenderType::LineLoop);
 }
 
 
@@ -372,7 +379,7 @@ void JoystickRender::drawDPadDown(Point center)
    points[5] = (center + Point( 3, 0));
    points[6] = (center + Point( 3,-6));
 
-   renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
+   Renderer::get().renderVertexArray((F32 *)points, ARRAYSIZE(points), RenderType::LineLoop);
 }
 
 
@@ -389,7 +396,7 @@ void JoystickRender::drawDPadLeft(Point center)
    points[5] = (center + Point( 0, 3));
    points[6] = (center + Point( 6, 3));
 
-   renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
+   Renderer::get().renderVertexArray((F32 *)points, ARRAYSIZE(points), RenderType::LineLoop);
 }
 
 
@@ -406,9 +413,7 @@ void JoystickRender::drawDPadRight(Point center)
    points[5] = (center + Point( 0, 3));
    points[6] = (center + Point(-6, 3));
 
-   renderVertexArray((F32 *)points, ARRAYSIZE(points), GL_LINE_LOOP);
+   Renderer::get().renderVertexArray((F32 *)points, ARRAYSIZE(points), RenderType::LineLoop);
 }
-
-////////// End rendering functions
 
 } /* namespace Zap */

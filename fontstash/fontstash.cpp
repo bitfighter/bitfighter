@@ -17,6 +17,13 @@
 // 3. This notice may not be removed or altered from any source distribution.
 //
 
+// Modified by fordcars for Bitfighter
+// - Converted to CPP
+// - Adapted for our renderer
+
+// To make sure we get extern "C" from the header
+#include "fontstash.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,14 +34,13 @@
 #  define TNL_OS_MOBILE
 #endif
 
-#if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
-#  include "SDL_opengles.h"
-#else
-#  include "SDL_opengl.h"
-#endif
+#include "tnlTypes.h"
+#include "Renderer.h"
 
 /* @rlyeh: removed STB_TRUETYPE_IMPLENTATION. We link it externally */
-#include "stb_truetype.h"
+extern "C" {
+	#include "stb_truetype.h" // Since this is still C
+}
 
 #define HASH_LUT_SIZE 256
 #define MAX_ROWS 128
@@ -97,7 +103,7 @@ struct sth_font
 
 struct sth_texture
 {
-	GLuint id;
+	U32 id;
 	// TODO: replace rows with pointer
 	struct sth_row rows[MAX_ROWS];
 	int nrows;
@@ -110,7 +116,7 @@ struct sth_stash
 {
 	int tw,th;
 	float itw,ith;
-	GLubyte *empty_data;
+	U8 *empty_data;
 	struct sth_texture* tt_textures;
 	struct sth_texture* bm_textures;
 	struct sth_font* fonts;
@@ -157,8 +163,9 @@ static unsigned int decutf8(unsigned int* state, unsigned int* codep, unsigned i
 struct sth_stash* sth_create(int cachew, int cacheh)
 {
 	struct sth_stash* stash = NULL;
-	GLubyte* empty_data = NULL;
+	U8* empty_data = NULL;
 	struct sth_texture* texture = NULL;
+	Zap::Renderer& r = Zap::Renderer::get();
 
 	// Allocate memory for the font stash.
 	stash = (struct sth_stash*)malloc(sizeof(struct sth_stash));
@@ -166,7 +173,7 @@ struct sth_stash* sth_create(int cachew, int cacheh)
 	memset(stash,0,sizeof(struct sth_stash));
 
 	// Create data for clearing the textures
-	empty_data = malloc(cachew * cacheh);
+	empty_data = static_cast<U8*>(malloc(cachew * cacheh));
 	if (empty_data == NULL) goto error;
 	memset(empty_data, 0, cachew * cacheh);
 
@@ -182,12 +189,10 @@ struct sth_stash* sth_create(int cachew, int cacheh)
 	stash->ith = 1.0f/cacheh;
 	stash->empty_data = empty_data;
 	stash->tt_textures = texture;
-	glGenTextures(1, &texture->id);
+	texture->id = r.generateTexture();
 	if (!texture->id) goto error;
-	glBindTexture(GL_TEXTURE_2D, texture->id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, cachew, cacheh, 0, GL_ALPHA, GL_UNSIGNED_BYTE, empty_data);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	r.bindTexture(texture->id);
+	r.setTextureData(Zap::TextureFormat::Alpha, Zap::DataType::UnsignedByte, cachew, cacheh, empty_data);
 
 	return stash;
 	
@@ -308,7 +313,7 @@ error:
 
 void sth_add_glyph(struct sth_stash* stash,
                   int idx,
-                  GLuint id,
+                  unsigned int id,
                   const char* s,
                   short size, short base,
                   int x, int y, int w, int h,
@@ -446,12 +451,12 @@ static struct sth_glyph* get_glyph(struct sth_stash* stash, struct sth_font* fnt
 						texture = texture->next;
 						if (texture == NULL) goto error;
 						memset(texture,0,sizeof(struct sth_texture));
-						glGenTextures(1, &texture->id);
+
+						Zap::Renderer& r = Zap::Renderer::get();
+						texture->id = r.generateTexture();
 						if (!texture->id) goto error;
-						glBindTexture(GL_TEXTURE_2D, texture->id);
-						glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, stash->tw,stash->th, 0, GL_ALPHA, GL_UNSIGNED_BYTE, stash->empty_data);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+						r.bindTexture(texture->id);
+						r.setTextureData(Zap::TextureFormat::Alpha, Zap::DataType::UnsignedByte, stash->tw, stash->th, stash->empty_data);
 					}
 					continue;
 				}
@@ -498,9 +503,10 @@ static struct sth_glyph* get_glyph(struct sth_stash* stash, struct sth_font* fnt
 	{
 		stbtt_MakeGlyphBitmap(&fnt->font, bmp, gw,gh,gw, scale,scale, g);
 		// Update texture
-		glBindTexture(GL_TEXTURE_2D, texture->id);
-		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-		glTexSubImage2D(GL_TEXTURE_2D, 0, glyph->x0,glyph->y0, gw,gh, GL_ALPHA,GL_UNSIGNED_BYTE,bmp);
+		Zap::Renderer& r = Zap::Renderer::get();
+		r.bindTexture(texture->id);
+		r.setSubTextureData(Zap::TextureFormat::Alpha, Zap::DataType::UnsignedByte,
+			glyph->x0, glyph->y0, gw, gh, bmp);
 		free(bmp);
 	}
 	
@@ -550,20 +556,15 @@ static void flush_draw(struct sth_stash* stash)
 {
 	struct sth_texture* texture = stash->tt_textures;
 	short tt = 1;
+    Zap::Renderer& r = Zap::Renderer::get();
+    
 	while (texture)
 	{
 		if (texture->nverts > 0)
 		{			
-			glBindTexture(GL_TEXTURE_2D, texture->id);
-			glEnable(GL_TEXTURE_2D);
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			glVertexPointer(2, GL_FLOAT, VERT_STRIDE, texture->verts);
-			glTexCoordPointer(2, GL_FLOAT, VERT_STRIDE, texture->verts+2);
-			glDrawArrays(GL_TRIANGLES, 0, texture->nverts);
-			glDisable(GL_TEXTURE_2D);
-			glDisableClientState(GL_VERTEX_ARRAY);
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+			r.bindTexture(texture->id);
+			r.renderColoredTexture(texture->verts, texture->verts+2, static_cast<U32>(texture->nverts),
+				Zap::RenderType::Triangles, 0, VERT_STRIDE, 2, true);
 			texture->nverts = 0;
 		}
 		texture = texture->next;
@@ -719,6 +720,7 @@ void sth_delete(struct sth_stash* stash)
 	struct sth_texture* curtex = NULL;
 	struct sth_font* fnt = NULL;
 	struct sth_font* curfnt = NULL;
+	Zap::Renderer& r = Zap::Renderer::get();
 
 	if (!stash) return;
 
@@ -726,8 +728,8 @@ void sth_delete(struct sth_stash* stash)
 	while(tex != NULL) {
 		curtex = tex;
 		tex = tex->next;
-		if (curtex->id)
-			glDeleteTextures(1, &curtex->id);
+		if(curtex->id)
+			r.deleteTexture(curtex->id);
 		free(curtex);
 	}
 
@@ -736,7 +738,7 @@ void sth_delete(struct sth_stash* stash)
 		curtex = tex;
 		tex = tex->next;
 		if (curtex->id)
-			glDeleteTextures(1, &curtex->id);
+			r.deleteTexture(curtex->id);
 		free(curtex);
 	}
 

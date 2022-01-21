@@ -18,11 +18,7 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 
-#if defined(TNL_OS_MOBILE) || defined(BF_USE_GLES)
-#  include "SDL_opengles.h"
-#else
-#  include "SDL_opengl.h"
-#endif
+#include "Renderer.h"
 
 using namespace TNL;
 
@@ -41,29 +37,29 @@ void drawHollowRect(const Point &center, S32 width, S32 height);
 void drawHollowRect(const Point &p1, const Point &p2);
 
 
-void drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode);
-void drawRect(F32 x1, F32 y1, F32 x2, F32 y2, S32 mode);
+void drawRect(S32 x1, S32 y1, S32 x2, S32 y2, RenderType type);
+void drawRect(F32 x1, F32 y1, F32 x2, F32 y2, RenderType type);
 
 
 // Allow any numeric arguments for drawHollowRect... getting sick of casting!
 template<typename T, typename U, typename V, typename W>
 void drawHollowRect(T x1, U y1, V x2, W y2)
 {
-   drawRect(static_cast<F32>(x1), static_cast<F32>(y1), static_cast<F32>(x2), static_cast<F32>(y2), GL_LINE_LOOP);
+   drawRect(static_cast<F32>(x1), static_cast<F32>(y1), static_cast<F32>(x2), static_cast<F32>(y2), RenderType::LineLoop);
 }
 
 
 template<typename T, typename U, typename V, typename W>
 void drawHollowRect(T x1, U y1, V x2, W y2, const Color &outlineColor)
 {
-   glColor4f(outlineColor.r, outlineColor.g, outlineColor.b, 1.0);
+   Renderer::get().setColor(outlineColor.r, outlineColor.g, outlineColor.b, 1.0);
    drawHollowRect(x1, y1, x2, y2);
 }
 
-void drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, S32 mode);
+void drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, RenderType mode);
 
 template<typename T, typename U, typename V, typename W, typename X>
-void drawFancyBox(T xLeft, U yTop, V xRight, W yBottom, X cornerInset, S32 mode)
+void drawFancyBox(T xLeft, U yTop, V xRight, W yBottom, X cornerInset, RenderType mode)
 {
    drawFancyBox(F32(xLeft), F32(yTop), F32(xRight), F32(yBottom), F32(cornerInset), mode);
 }

@@ -9,7 +9,6 @@
 #include "DisplayManager.h"
 
 #include "MathUtils.h"     // For MIN/MAX def
-#include "OpenglUtils.h"
 #include "FontManager.h"
 #include "Colors.h"
 
@@ -31,13 +30,14 @@ F32 gLineWidth4 = 4.0f;
 
 void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
 {
-   glPushMatrix();
-      glTranslatef(x, y, 0);
-      glRotatef(angle * RADIANS_TO_DEGREES, 0, 0, 1);
+   Renderer& r = Renderer::get();
+
+   r.pushMatrix();
+      r.translate(x, y, 0);
+      r.rotate(angle * RADIANS_TO_DEGREES, 0, 0, 1);
 
       FontManager::renderString(size, string);
-
-   glPopMatrix();
+   r.popMatrix();
 }
 
 
@@ -228,6 +228,7 @@ S32 drawCenteredString_fixed(S32 y, S32 size, const char *string)
 // For now, not very fault tolerant...  assumes well balanced []
 void drawCenteredString_highlightKeys(S32 y, S32 size, const string &str, const Color &bodyColor, const Color &keyColor)
 {
+   Renderer& r = Renderer::get();
    S32 len = getStringWidth(size, str.c_str());
    S32 x = DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2 - len / 2;
 
@@ -237,11 +238,11 @@ void drawCenteredString_highlightKeys(S32 y, S32 size, const string &str, const 
    keyStart = str.find("[");
    while(keyStart != string::npos)
    {
-      glColor(bodyColor);
+      r.setColor(bodyColor);
       x += drawStringAndGetWidth(x, y, size, str.substr(pos, keyStart - pos).c_str());
 
       keyEnd = str.find("]", keyStart) + 1;     // + 1 to include the "]" itself
-      glColor(keyColor);
+      r.setColor(keyColor);
       x += drawStringAndGetWidth(x, y, size, str.substr(keyStart, keyEnd - keyStart).c_str());
       pos = keyEnd;
 
@@ -249,7 +250,7 @@ void drawCenteredString_highlightKeys(S32 y, S32 size, const string &str, const 
    }
    
    // Draw any remaining bits of our string
-   glColor(bodyColor);
+   r.setColor(bodyColor);
    drawString(x, y, size, str.substr(keyEnd).c_str());
 }
 
@@ -406,12 +407,13 @@ S32 drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, FontContext leftContext
 S32 drawStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor, const Color &rightColor, 
                                          const char *leftStr, const char *rightStr)
 {
-   glColor(leftColor);
+   Renderer& r = Renderer::get();
+   r.setColor(leftColor);
 
    // Use crazy width calculation to compensate for fontStash bug calculating with of terminal spaces
    xpos += drawStringAndGetWidth((F32)xpos, (F32)ypos, size, leftStr) + 5; //getStringWidth(size, "X X") - getStringWidth(size, "XX");
 
-   glColor(rightColor);
+   r.setColor(rightColor);
    drawString(xpos, ypos, size, rightStr);
 
    return xpos;
@@ -422,13 +424,15 @@ S32 drawStringPair(S32 xpos, S32 ypos, S32 size, FontContext leftContext,
       FontContext rightContext, const Color& leftColor, const Color& rightColor,
       const char* leftStr, const char* rightStr)
 {
+   Renderer& r = Renderer::get();
    FontManager::pushFontContext(leftContext);
-   glColor(leftColor);
+
+   r.setColor(leftColor);
    xpos += drawStringAndGetWidth((F32)xpos, (F32)ypos, size, leftStr);
    FontManager::popFontContext();
 
    FontManager::pushFontContext(rightContext);
-   glColor(rightColor);
+   r.setColor(rightColor);
    drawString(xpos, ypos, size, rightStr);
    FontManager::popFontContext();
 
@@ -476,14 +480,15 @@ S32 drawCenteredStringPair2Colf(S32 y, S32 size, bool leftCol, const Color &left
 S32 drawCenteredStringPair2Col(S32 y, S32 size, bool leftCol, const Color &leftColor, const Color &rightColor,
       const char *left, const char *right)
 {
+   Renderer& r = Renderer::get();
    S32 offset = getStringWidth(size, left) + getStringWidth(size, " ");
    S32 width = offset + getStringWidth(size, right);
    S32 x = get2ColStartingPos(leftCol) - width / 2;         // x must be S32 in case it leaks off left side of screen
 
-   glColor(leftColor);
+   r.setColor(leftColor);
    drawString(x, y, size, left);
 
-   glColor(rightColor);
+   r.setColor(rightColor);
    drawString(x + offset, y, size, right);
 
    return x;
@@ -563,43 +568,43 @@ S32 getStringWidthf(S32 size, const char *format, ...)
 #undef makeBuffer
 
 
-void drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode)
+void drawRect(S32 x1, S32 y1, S32 x2, S32 y2, RenderType type)
 {
    F32 vertices[] = { (F32)x1, (F32)y1,   (F32)x2, (F32)y1,   (F32)x2, (F32)y2,   (F32)x1, (F32)y2 };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, mode);
+   Renderer::get().renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, type);
 }
 
 
 // Some functions (renderSpyBugVisibleRange) use this F32 version, this function has better accuracy
-void drawRect(F32 x1, F32 y1, F32 x2, F32 y2, S32 mode)
+void drawRect(F32 x1, F32 y1, F32 x2, F32 y2, RenderType type)
 {
    F32 vertices[] = { x1, y1,   x2, y1,   x2, y2,   x1, y2 };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, mode);
+   Renderer::get().renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, type);
 }
 
 
 void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2)
 {
-   drawRect(x1, y1, x2, y2, GL_TRIANGLE_FAN);
+   drawRect(x1, y1, x2, y2, RenderType::TriangleFan);
 }
 
 
 void drawFilledRect(F32 x1, F32 y1, F32 x2, F32 y2)
 {
-   drawRect(x1, y1, x2, y2, GL_TRIANGLE_FAN);
+   drawRect(x1, y1, x2, y2, RenderType::TriangleFan);
 }
 
 
 void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor)
 {
-   glColor(fillColor);
+   Renderer::get().setColor(fillColor);
    drawFilledRect(x1, y1, x2, y2);
 }
 
 
 void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha)
 {
-   glColor(fillColor, fillAlpha);
+   Renderer::get().setColor(fillColor, fillAlpha);
    drawFilledRect(x1, y1, x2, y2);
 }
 
@@ -612,11 +617,13 @@ void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, cons
 
 void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor)
 {
-   glColor(fillColor, fillAlpha);
-   drawRect(x1, y1, x2, y2, GL_TRIANGLE_FAN);
+   Renderer& r = Renderer::get();
 
-   glColor(outlineColor, 1);
-   drawRect(x1, y1, x2, y2, GL_LINE_LOOP);
+   r.setColor(fillColor, fillAlpha);
+   drawRect(x1, y1, x2, y2, RenderType::TriangleFan);
+
+   r.setColor(outlineColor, 1);
+   drawRect(x1, y1, x2, y2, RenderType::LineLoop);
 }
 
 
@@ -633,7 +640,7 @@ void drawHollowRect(const Point &p1, const Point &p2)
 }
 
 
-void drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, S32 mode)
+void drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset, RenderType mode)
 {
    F32 vertices[] = {
          xLeft, yTop,                   // Top
@@ -644,25 +651,27 @@ void drawFancyBox(F32 xLeft, F32 yTop, F32 xRight, F32 yBottom, F32 cornerInset,
          xLeft, yBottom - cornerInset   // Edge
    };
 
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, mode);
+   Renderer::get().renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, mode);
 }
 
 
 void drawHollowFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset)
 {
-   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, GL_LINE_LOOP);
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, RenderType::LineLoop);
 }
 
 
 void drawFilledFancyBox(S32 xLeft, S32 yTop, S32 xRight, S32 yBottom, S32 cornerInset, const Color &fillColor, F32 fillAlpha, const Color &borderColor)
 {
+   Renderer& r = Renderer::get();
+
    // Fill
-   glColor(fillColor, fillAlpha);
-   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, GL_TRIANGLE_FAN);
+   r.setColor(fillColor, fillAlpha);
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, RenderType::TriangleFan);
 
    // Border
-   glColor(borderColor, 1.f);
-   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, GL_LINE_LOOP);
+   r.setColor(borderColor, 1.f);
+   drawFancyBox(xLeft, yTop, xRight, yBottom, cornerInset, RenderType::LineLoop);
 }
 
 
@@ -679,7 +688,7 @@ void renderUpArrow(const Point &center, S32 size)
                       center.x, top,     center.x + capHeight, top + capHeight
                     };
 
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+   Renderer::get().renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::Lines);
 }
 
 
@@ -695,7 +704,7 @@ void renderDownArrow(const Point &center, S32 size)
                       center.x, bot,     center.x + capHeight, bot - capHeight
                     };
 
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+   Renderer::get().renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::Lines);
 }
 
 
@@ -711,7 +720,7 @@ void renderLeftArrow(const Point &center, S32 size)
                       left, center.y,     left + capHeight, center.y + capHeight
                     };
 
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+   Renderer::get().renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::Lines);
 }
 
 
@@ -727,7 +736,7 @@ void renderRightArrow(const Point &center, S32 size)
                       right, center.y,     right - capHeight, center.y + capHeight
                     };
 
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
+   Renderer::get().renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::Lines);
 }
 
 

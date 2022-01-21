@@ -14,8 +14,8 @@
 #include "config.h"
 #include "gameObjectRender.h"    // For drawSquare
 
+#include "Renderer.h"
 #include "RenderUtils.h"
-#include "OpenglUtils.h"
 
 namespace Zap
 {
@@ -108,7 +108,7 @@ void EngineerHelper::render()
    {
       S32 xPos = UserInterface::horizMargin;
 
-      glColor(Colors::green);
+      Renderer::get().setColor(Colors::green);
       drawStringf(xPos, yPos, MENU_FONT_SIZE, "Placing %s.", engineerItemInfo[mSelectedIndex].name);
       yPos += MENU_FONT_SIZE + MENU_FONT_SPACING;
       drawString(xPos, yPos, MENU_FONT_SIZE, engineerInstructions[mSelectedIndex]);
@@ -227,7 +227,7 @@ void EngineerHelper::renderDeploymentMarker(const Ship *ship)
       {
          case EngineeredTurret:
          case EngineeredForceField:
-            glColor(canDeploy ? Colors::green : Colors::red);
+            Renderer::get().setColor(canDeploy ? Colors::green : Colors::red);
             drawSquare(deployPosition, 5);
             break;
 
