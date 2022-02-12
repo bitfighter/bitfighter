@@ -13,7 +13,7 @@
 #define MASTER_PROTOCOL_VERSION 8  // Change this when releasing an incompatible cm/sm protocol (must be int)
                                    // MASTER_PROTOCOL_VERSION = 4, client 015a and older (CS_PROTOCOL_VERSION <= 32) can not connect to our new master.
 
-#define CS_PROTOCOL_VERSION 41     // Change this when releasing an incompatible cs protocol (must be int)
+#define CS_PROTOCOL_VERSION 42     // Change this when releasing an incompatible cs protocol (must be int)
 // 016 = 33 
 // 017[ab] = 35
 // 018[a] = 36
@@ -22,6 +22,7 @@
 // 020 = 39 (abandoned)
 // 021 = 40
 // 022 = 41
+// 023 = 42
 
 // Commit number:  since migration to git, this can be found by:
 //    git rev-list --all --count
@@ -44,11 +45,12 @@
 #define VERSION_020  11753  // Abandoned
 #define VERSION_021  12030
 #define VERSION_022  12342
+#define VERSION_023  12571
 
-#define BUILD_VERSION VERSION_022  // Version of the game according to git, will be unique every release (must be int)
+#define BUILD_VERSION VERSION_023  // Version of the game according to git, will be unique every release (must be int)
                                    // Get from "git rev-list --all --count"
 
-#define ZAP_GAME_RELEASE "022"     // Change this with every release -- for display purposes only, string,
+#define ZAP_GAME_RELEASE "023"     // Change this with every release -- for display purposes only, string,
                                    // will also be used for name of installer on windows, so be careful with spaces  
                                    // Used for GameRecorder.cpp, buildGameRecorderExtension
 
