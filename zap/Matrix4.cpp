@@ -162,14 +162,18 @@ Matrix4 Matrix4::getOrthoProjection(F32 left, F32 right, F32 bottom, F32 top, F3
    Matrix4 newMat;
 
    // Translation
-   newMat.mData[3][0] = -(right + left) / (right - left);
-   newMat.mData[3][1] = -(top + bottom) / (top - bottom);
-   newMat.mData[3][2] = -(farZ + nearZ) / (farZ - nearZ);
+   F32 invHoriz = 1.0f / (right - left);
+   F32 invVert = 1.0f / (top - bottom);
+   F32 invDepth = 1.0f / (farZ - nearZ);
+
+   newMat.mData[3][0] = -(right + left) * invHoriz;
+   newMat.mData[3][1] = -(top + bottom) * invVert;
+   newMat.mData[3][2] = -(farZ + nearZ) * invDepth;
 
    // Scaling
-   newMat.mData[0][0] = 2.0f / (right - left);
-   newMat.mData[1][1] = 2.0f / (top - bottom);
-   newMat.mData[2][2] = -2.0f / (farZ - nearZ);
+   newMat.mData[0][0] = 2.0f  * invHoriz;
+   newMat.mData[1][1] = 2.0f  * invVert;
+   newMat.mData[2][2] = -2.0f  * invDepth;
 
    return newMat;
 }
