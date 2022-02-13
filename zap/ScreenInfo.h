@@ -40,7 +40,7 @@ typedef struct {
 class ScreenInfo
 {
 private:
-   static const S32 GAME_WIDTH  = 800;
+   static const S32 GAME_WIDTH  = 1066;
    static const S32 GAME_HEIGHT = 600;
 
    F32 MIN_SCALING_FACTOR;       // Limits minimum window size
@@ -48,7 +48,7 @@ private:
    Point mWindowMousePos, mCanvasMousePos;
 
    S32 mPhysicalScreenWidth, mPhysicalScreenHeight;
-   S32 mGameCanvasWidth, mGameCanvasHeight;     // Size of screen; in game, will always be 800x600, but may be different in editor fullscreen
+   S32 mGameCanvasWidth, mGameCanvasHeight;     // Size of screen; in game, will always be 1066x600, but may be different in editor fullscreen
    S32 mPrevCanvasWidth, mPrevCanvasHeight;     // Previous size of screen
    S32 mWindowWidth, mWindowHeight;             // Window dimensions in physical pixels
    F32 mScalingRatioX, mScalingRatioY;          // Ratio of physical pixels to virtual pixels
@@ -68,6 +68,7 @@ public:
    virtual ~ScreenInfo();
 
    F32 getMinScalingFactor();
+   void print();
 
    // Can't initialize until SDL has been set up
    void init(S32 physicalScreenWidth, S32 physicalScreenHeight);
@@ -86,7 +87,6 @@ public:
 
    // This is the number of physical pixels that are used to draw a single virtual pixel -- larger windows will have larger pixelRaios
    F32 getPixelRatio() const;
-   F32 getScalingRatio() const;
 
    // Dimensions of black bars in physical pixels in full-screen unstretched mode.  Does not reflect current window mode
    S32 getHorizPhysicalMargin() const;
@@ -112,8 +112,6 @@ public:
    // Dimensions of black bars in game-sized pixels
    S32 getHorizDrawMargin() const;
    S32 getVertDrawMargin() const;
-
-   bool isLandscape() const;     // Whether physical screen is landscape, or at least more landscape than our game window
 
    // Convert physical window screen coordinates into virtual, in-game coordinate
    Point convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode);

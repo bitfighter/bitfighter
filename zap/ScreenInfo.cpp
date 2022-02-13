@@ -39,25 +39,29 @@ void ScreenInfo::init(S32 physicalScreenWidth, S32 physicalScreenHeight)
    F32 physicalScreenRatio = (F32)mPhysicalScreenWidth / (F32)mPhysicalScreenHeight;
    F32 gameCanvasRatio = (F32)mGameCanvasWidth / (F32)mGameCanvasHeight;
 
-   mIsLandscape = physicalScreenRatio >= gameCanvasRatio;
+   mIsLandscape = physicalScreenRatio >= gameCanvasRatio + .01;  // Some ratios are inexact
 
    mScalingRatioX = mIsLandscape ? (F32)mPhysicalScreenWidth  / (F32)mGameCanvasWidth  : (F32)mPhysicalScreenHeight / (F32)mGameCanvasHeight;
    mScalingRatioY = mIsLandscape ? (F32)mPhysicalScreenHeight / (F32)mGameCanvasHeight : (F32)mPhysicalScreenWidth  / (F32)mGameCanvasWidth;
+//   mScalingRatioX = (F32)mWindowWidth / (F32)mGameCanvasWidth;
+//   mScalingRatioY = (F32)mWindowHeight / (F32)mGameCanvasHeight;
+}
 
-//   logprintf("mIsLandscape: %d", mIsLandscape);
-//
-//   logprintf("physicalScreenWidth: %d", physicalScreenWidth);
-//   logprintf("physicalScreenHeight: %d", physicalScreenHeight);
-//   logprintf("physicalScreenRatio: %f", physicalScreenRatio);
-//   logprintf("gameCanvasRatio: %f", gameCanvasRatio);
-//
-//   logprintf("mPhysicalScreenWidth: %d", mPhysicalScreenWidth);
-//   logprintf("mPhysicalScreenHeight: %d", mPhysicalScreenHeight);
-//   logprintf("mGameCanvasWidth: %d", mGameCanvasWidth);
-//   logprintf("mGameCanvasHeight: %d", mGameCanvasHeight);
-//
-//   logprintf("mScalingRatioX: %f", mScalingRatioX);
-//   logprintf("mScalingRatioY: %f", mScalingRatioY);
+void ScreenInfo::print()
+{
+   printf("\n=== ScreenInfo properties ===\n");
+   printf("mIsLandscape: %d\n", mIsLandscape);
+
+   printf("physicalScreenRatio: %f\n", (F32)mPhysicalScreenWidth / (F32)mPhysicalScreenHeight);
+   printf("gameCanvasRatio: %f\n", (F32)mGameCanvasWidth / (F32)mGameCanvasHeight);
+
+   printf("mPhysicalScreenWidth: %d\n", mPhysicalScreenWidth);
+   printf("mPhysicalScreenHeight: %d\n", mPhysicalScreenHeight);
+   printf("mGameCanvasWidth: %d\n", mGameCanvasWidth);
+   printf("mGameCanvasHeight: %d\n", mGameCanvasHeight);
+
+   printf("mScalingRatioX: %f\n", mScalingRatioX);
+   printf("mScalingRatioY: %f\n", mScalingRatioY);
 }
 
 
@@ -88,8 +92,6 @@ S32 ScreenInfo::getPhysicalScreenHeight() const { return mPhysicalScreenHeight; 
 
 // How many physical pixels make up a virtual one?
 F32 ScreenInfo::getPixelRatio() const { return mPixelRatio; }
-
-F32 ScreenInfo::getScalingRatio() const { return mScalingRatioY; }
 
 
 // Game canvas size in physical pixels, assuming full screen unstretched mode
@@ -152,7 +154,7 @@ S32 ScreenInfo::getDefaultCanvasWidth()  const { return GAME_WIDTH;  }
 S32 ScreenInfo::getDefaultCanvasHeight() const { return GAME_HEIGHT; }
 
 // These only change from the default when in the editor
-S32 ScreenInfo::getGameCanvasWidth()  const { return mGameCanvasWidth;  }     // canvasWidth, usually 800
+S32 ScreenInfo::getGameCanvasWidth()  const { return mGameCanvasWidth;  }     // canvasWidth, usually 1066
 S32 ScreenInfo::getGameCanvasHeight() const { return mGameCanvasHeight; }     // canvasHeight, usually 600
                                       
 S32 ScreenInfo::getPrevCanvasWidth()  const { return mPrevCanvasWidth;  }       
@@ -169,8 +171,6 @@ S32 ScreenInfo::getVertDrawMargin() const
 {
    return mIsLandscape ? 0 : S32(getVertPhysicalMargin() / mScalingRatioX);
 }
-
-bool ScreenInfo::isLandscape() const { return mIsLandscape; }     // Whether physical screen is landscape, or at least more landscape than our game window
 
 
 Point ScreenInfo::convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode)

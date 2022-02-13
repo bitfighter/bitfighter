@@ -131,7 +131,7 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings,
    // takes precedence.
    bool resizeToDrawable = !resizeToDefault && displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
 
-   // Resizing-to-default will take a screenshot of the default game canvas (800x600)
+   // Resizing-to-default will take a screenshot of the default game canvas (1066x600)
    // This is mostly used to have a uniform screenshot for uploading to the level
    // database
 

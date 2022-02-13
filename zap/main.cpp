@@ -251,7 +251,7 @@ void display()
       // Do any la-ti-da that we might need to get the viewport setup for the game we're about to run.  For example, if
       // we have two games, we might want to divide the screen into two viewports, configuring each before running the 
       // associated render method which follows...
-      // Each viewport should have an aspect ratio of 800x600.  The aspect ratio of the entire window will likely need to be different.
+      // Each viewport should have an aspect ratio of 1066x600.  The aspect ratio of the entire window will likely need to be different.
       TNLAssert(i == 0, "You need a little tra-la-la here before you can do that!");
       clientGames->get(i)->getUIManager()->renderCurrent();
    }

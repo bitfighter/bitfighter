@@ -469,7 +469,7 @@ void UIManager::displayMessage(const Color &msgColor, const char *format, ...)
 void UIManager::renderCurrent()
 {
    // The viewport has been setup by the caller so, regardless of how many clients we're running, we can just render away here.
-   // Each viewport should have an aspect ratio of 800x600.
+   // Each viewport should have an aspect ratio of 1066x600.
    Renderer &r = Renderer::get();
 
    if(mMenuTransitionTimer.getCurrent() && mLastUI)

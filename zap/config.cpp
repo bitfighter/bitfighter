@@ -1646,7 +1646,7 @@ static void writeSettings(CIniFile *ini, IniSettings *iniSettings)
 
 
       ini->sectionComment(section, " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
-      ini->sectionComment(section, " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
+      ini->sectionComment(section, " WindowScalingFactor - Used to set size of window.  1.0 = 1066x600. Best to let the program manage this setting.");
       ini->sectionComment(section, " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
       ini->sectionComment(section, " AlwaysStartInKeyboardMode - Change to 'Yes' to always start the game in keyboard mode (don't auto-select the joystick)");
       ini->sectionComment(section, " MasterServerAddressList - Comma separated list of Address of master server, in form: IP:67.18.11.66:25955,IP:myMaster.org:25955 (tries all listed, only connects to one at a time)");

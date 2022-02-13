@@ -585,7 +585,7 @@ void InstructionsUserInterface::renderModulesPage() const
 
    for(U32 i = 0; i < ARRAYSIZE(moduleDescriptions); i++)
    {
-      S32 x = 105;
+      S32 x = 235;
       r.setColor(Colors::yellow);
       x += drawStringAndGetWidth(x, y, textsize, moduleDescriptions[i][0]);
 
@@ -600,7 +600,7 @@ void InstructionsUserInterface::renderModulesPage() const
       drawString(x, y, textsize, moduleDescriptions[i][1]);
 
       r.pushMatrix();
-      r.translate(60, F32(y + 10), 0);
+      r.translate(190, F32(y + 10), 0);
       r.scale(0.7f);
       r.rotate(-90, 0, 0, 1);
 

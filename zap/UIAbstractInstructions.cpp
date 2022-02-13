@@ -134,12 +134,12 @@ void AbstractInstructionsUserInterface::render(const char *header, S32 page, S32
    Renderer::get().setColor(Colors::red);
    drawString(3, 3, fontSize, prefix);
 
-   drawStringf(625, 3, fontSize, "PAGE %d/%d", page, pages);
+   drawStringf(DisplayManager::getScreenInfo()->getDefaultCanvasWidth() - 175, 3, fontSize, "PAGE %d/%d", page, pages);
    drawCenteredString(571, 20, "LEFT - previous page   |   RIGHT, SPACE - next page   |   ESC exits");
 
    Renderer::get().setColor(Colors::gray70);
-   drawHorizLine(0, 800, 32);
-   drawHorizLine(0, 800, 569);
+   drawHorizLine(0, DisplayManager::getScreenInfo()->getDefaultCanvasWidth(), 32);
+   drawHorizLine(0, DisplayManager::getScreenInfo()->getDefaultCanvasWidth(), 569);
 }
 
 
