@@ -39,29 +39,32 @@ void ScreenInfo::init(S32 physicalScreenWidth, S32 physicalScreenHeight)
    F32 physicalScreenRatio = (F32)mPhysicalScreenWidth / (F32)mPhysicalScreenHeight;
    F32 gameCanvasRatio = (F32)mGameCanvasWidth / (F32)mGameCanvasHeight;
 
-   mIsLandscape = physicalScreenRatio >= gameCanvasRatio + .01;  // Some ratios are inexact
+   F32 ratioDiff = physicalScreenRatio - gameCanvasRatio;
 
-   mScalingRatioX = mIsLandscape ? (F32)mPhysicalScreenWidth  / (F32)mGameCanvasWidth  : (F32)mPhysicalScreenHeight / (F32)mGameCanvasHeight;
-   mScalingRatioY = mIsLandscape ? (F32)mPhysicalScreenHeight / (F32)mGameCanvasHeight : (F32)mPhysicalScreenWidth  / (F32)mGameCanvasWidth;
-//   mScalingRatioX = (F32)mWindowWidth / (F32)mGameCanvasWidth;
-//   mScalingRatioY = (F32)mWindowHeight / (F32)mGameCanvasHeight;
+   if(std::fabs(ratioDiff) < .01)
+      mFullscreenMode = FullscreenModeFit;
+   else if(ratioDiff > 0)
+      mFullscreenMode = FullscreenModeLandscape;
+   else // ratioDiff > 0
+      mFullscreenMode = FullscreenModePortrait;
+
+   calcPixelRatio();
 }
 
-void ScreenInfo::print()
+void ScreenInfo::debugPrint()
 {
    printf("\n=== ScreenInfo properties ===\n");
-   printf("mIsLandscape: %d\n", mIsLandscape);
+   printf("mFullscreenMode: %d\n", mFullscreenMode);
 
-   printf("physicalScreenRatio: %f\n", (F32)mPhysicalScreenWidth / (F32)mPhysicalScreenHeight);
+   printf("mPixelRatio: %f\n", mPixelRatio);
    printf("gameCanvasRatio: %f\n", (F32)mGameCanvasWidth / (F32)mGameCanvasHeight);
 
    printf("mPhysicalScreenWidth: %d\n", mPhysicalScreenWidth);
    printf("mPhysicalScreenHeight: %d\n", mPhysicalScreenHeight);
    printf("mGameCanvasWidth: %d\n", mGameCanvasWidth);
    printf("mGameCanvasHeight: %d\n", mGameCanvasHeight);
-
-   printf("mScalingRatioX: %f\n", mScalingRatioX);
-   printf("mScalingRatioY: %f\n", mScalingRatioY);
+   printf("mWindowWidth: %d\n", mWindowWidth);
+   printf("mWindowHeight: %d\n", mWindowHeight);
 }
 
 
@@ -78,7 +81,15 @@ void ScreenInfo::setWindowSize(S32 width, S32 height)
 
 void ScreenInfo::calcPixelRatio()
 {
-   mPixelRatio = (F32)mWindowHeight / (F32)mGameCanvasHeight;
+   // Pixels should always be square so choose the proper dimension
+   if(mFullscreenMode == FullscreenModeLandscape)
+      mPixelRatio = (F32)mWindowHeight / (F32)mGameCanvasHeight;
+
+   else if(mFullscreenMode == FullscreenModePortrait)
+      mPixelRatio = (F32)mWindowWidth / (F32)mGameCanvasWidth;
+
+   else  // mFullscreenMode == FullscreenModeFit
+      mPixelRatio = (F32)mWindowHeight / (F32)mGameCanvasHeight;  // Doesn't matter
 }
 
 
@@ -97,26 +108,32 @@ F32 ScreenInfo::getPixelRatio() const { return mPixelRatio; }
 // Game canvas size in physical pixels, assuming full screen unstretched mode
 S32 ScreenInfo::getDrawAreaWidth() const
 {
-   return mIsLandscape ? S32((F32)mGameCanvasWidth * mScalingRatioY) : mPhysicalScreenWidth;
+   if(mFullscreenMode == FullscreenModeFit)
+      return mPhysicalScreenWidth;
+
+   return S32((F32)mGameCanvasWidth * mPixelRatio);
 }
 
 
 S32 ScreenInfo::getDrawAreaHeight() const
 {
-   return mIsLandscape ? mPhysicalScreenHeight : S32((F32)mGameCanvasHeight * mScalingRatioX);
+   if(mFullscreenMode == FullscreenModeFit)
+      return mPhysicalScreenHeight;
+
+   return S32((F32)mGameCanvasHeight * mPixelRatio);
 }
 
 
 // Dimensions of black bars in physical pixels in full-screen unstretched mode.  Does not reflect current window mode
 S32 ScreenInfo::getHorizPhysicalMargin() const
 {
-   return mIsLandscape ? (mPhysicalScreenWidth - getDrawAreaWidth()) / 2 : 0;
+   return 0.5 * (mPhysicalScreenWidth - getDrawAreaWidth());
 }
 
 
 S32 ScreenInfo::getVertPhysicalMargin() const
 {
-   return mIsLandscape ? 0 : (mPhysicalScreenHeight - getDrawAreaHeight()) / 2;
+   return 0.5 * (mPhysicalScreenHeight - getDrawAreaHeight());
 }
 
 
@@ -164,12 +181,18 @@ S32 ScreenInfo::getPrevCanvasHeight() const { return mPrevCanvasHeight; }
 // Dimensions of black bars in game-sized pixels
 S32 ScreenInfo::getHorizDrawMargin() const
 {
-   return mIsLandscape ? S32(getHorizPhysicalMargin() / mScalingRatioY) : 0;
+   if(mFullscreenMode == FullscreenModeFit)
+      return 0;
+
+   return S32(getHorizPhysicalMargin() / mPixelRatio);
 }
 
 S32 ScreenInfo::getVertDrawMargin() const
 {
-   return mIsLandscape ? 0 : S32(getVertPhysicalMargin() / mScalingRatioX);
+   if(mFullscreenMode == FullscreenModeFit)
+      return 0;
+
+   return S32(getVertPhysicalMargin() / mPixelRatio);
 }
 
 

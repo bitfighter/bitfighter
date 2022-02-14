@@ -40,6 +40,14 @@ typedef struct {
 class ScreenInfo
 {
 private:
+
+   enum FullscreenMode
+   {
+      FullscreenModeFit,
+      FullscreenModePortrait,  // Black bars on top
+      FullscreenModeLandscape, // Black bars on sides
+   };
+
    static const S32 GAME_WIDTH  = 1066;
    static const S32 GAME_HEIGHT = 600;
 
@@ -51,13 +59,12 @@ private:
    S32 mGameCanvasWidth, mGameCanvasHeight;     // Size of screen; in game, will always be 1066x600, but may be different in editor fullscreen
    S32 mPrevCanvasWidth, mPrevCanvasHeight;     // Previous size of screen
    S32 mWindowWidth, mWindowHeight;             // Window dimensions in physical pixels
-   F32 mScalingRatioX, mScalingRatioY;          // Ratio of physical pixels to virtual pixels
    F32 mPixelRatio;                             // Number of physical pixels that are used to draw a single virtual pixel
 
    OrthoData mOrtho;
    ScissorData mScissor;
 
-   bool mIsLandscape;                           // Is our screen landscape or portrait?
+   FullscreenMode mFullscreenMode;              // Is our screen landscape/portrait/fit just right?
    bool mActualized;                            // True once screen has been actualized
    bool mHighDpi;
 
@@ -68,7 +75,7 @@ public:
    virtual ~ScreenInfo();
 
    F32 getMinScalingFactor();
-   void print();
+   void debugPrint();
 
    // Can't initialize until SDL has been set up
    void init(S32 physicalScreenWidth, S32 physicalScreenHeight);
