@@ -121,9 +121,7 @@ public:
    S32 getVertDrawMargin() const;
 
    // Convert physical window screen coordinates into virtual, in-game coordinate
-   Point convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode);
-
-   Point convertCanvasToWindowCoord(S32 x, S32 y, DisplayMode mode) const;
+   Point convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode) const;
    Point convertCanvasToWindowCoord(F32 x, F32 y, DisplayMode mode) const;
 
    void setMousePos      (S32 x, S32 y, DisplayMode mode);

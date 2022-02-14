@@ -196,7 +196,7 @@ S32 ScreenInfo::getVertDrawMargin() const
 }
 
 
-Point ScreenInfo::convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode)
+Point ScreenInfo::convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode) const
 {
 //   logprintf("Point: %d, %d || canvas %2.0f, %2.0f ||margin h/v: %d/%d || window w/h: %d,%d || canvas w/h %d,%d\n",
 //         x, y,
@@ -208,12 +208,6 @@ Point ScreenInfo::convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode)
 
    return Point((x - getHorizPhysicalMargin(mode)) * getGameCanvasWidth()  / F32(getWindowWidth()  - 2 * getHorizPhysicalMargin(mode)),
                 (y - getVertPhysicalMargin(mode))  * getGameCanvasHeight() / F32(getWindowHeight() - 2 * getVertPhysicalMargin(mode)));
-}
-
-
-Point ScreenInfo::convertCanvasToWindowCoord(S32 x, S32 y, DisplayMode mode) const
-{
-   return convertCanvasToWindowCoord((F32)x, (F32)y, mode);
 }
 
 
