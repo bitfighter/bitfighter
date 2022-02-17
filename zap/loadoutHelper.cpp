@@ -178,9 +178,11 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
    if(Parent::processInputCode(inputCode))    // Check for cancel keys
       return true;
 
-   Vector<OverlayMenuItem> &menuItems = mShowingPresets ? mPresetItems : 
-                                                   (mCurrentIndex < ShipModuleCount) ? mModuleMenuItems : 
-                                                                                       mWeaponMenuItems;
+   Vector<OverlayMenuItem> &menuItems =
+         mShowingPresets ? mPresetItems :
+               (mCurrentIndex < ShipModuleCount) ? mModuleMenuItems :
+                     mWeaponMenuItems;
+
    S32 index;
 
    for(index = 0; index < menuItems.size(); index++)
