@@ -2703,7 +2703,7 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
       r.translate(pos);
          r.scale(scaleFactor);
          r.rotate(pos.angleTo(dir) * RADIANS_TO_DEGREES, 0, 0, 1);
-         r.translate(-119, -45, 0);      // Determined experimentally
+         r.translate(-253, -45, 0);      // Determined experimentally
 
          renderBitfighterLogo(0, 1);
       r.popMatrix();
