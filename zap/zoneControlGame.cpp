@@ -317,10 +317,9 @@ void ZoneControlGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeig
                renderObjectiveArrow(zone, &c, canvasWidth, canvasHeight);
             }
          }
-
-      Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
-
    }
+
+   Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
 #endif
 }
 
