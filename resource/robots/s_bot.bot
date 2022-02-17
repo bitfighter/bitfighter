@@ -94,7 +94,9 @@ function shouldShield()
                 distToShieldAt = astShieldDist
 
             else  -- All other weapons      
-                if isTeamGame and (objTeam ~= botTeam) then -- Weapon from a different team
+                if not isTeamGame then -- No teams: all weapons are dangerous
+                    isDangerous = true
+                elseif isTeamGame and (objTeam ~= botTeam) then -- Weapon from a different team
                     isDangerous = true
                 end
             end
