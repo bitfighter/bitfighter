@@ -9,6 +9,7 @@
 #include "UIManager.h"
 #include "UIInstructions.h"
 #include "Colors.h"
+#include "DisplayManager.h"
 #include "LoadoutTracker.h"
 #include "gameConnection.h"
 #include "ClientGame.h"
@@ -155,18 +156,29 @@ void LoadoutHelper::render()
       drawItemMenu("Choose loadout preset:", &mPresetItems[0], mPresetItems.size(), 
                    prevItems.address(), prevItems.size(), mPresetButtonsWidth, mPresetItemsDisplayWidth);
    }
-   else if(showingModules)
+   else
    {
-      char title[100];
-      dSprintf(title, sizeof(title), "Pick %d modules:", ShipModuleCount);
-      drawItemMenu(title, mModuleMenuItems.address(), mModuleMenuItems.size(), NULL, 0, mLoadoutButtonsWidth, mLoadoutItemsDisplayWidth);
-   }
-   else     // Showing weapons
-   {
-      char title[100];
-      dSprintf(title, sizeof(title), "Pick %d weapons:", ShipWeaponCount);
-      drawItemMenu(title, mWeaponMenuItems.address(), mWeaponMenuItems.size(), 
-                   &mModuleMenuItems[0], mModuleMenuItems.size(), mLoadoutButtonsWidth, mLoadoutItemsDisplayWidth);
+      if(showingModules)
+      {
+         char title[100];
+         dSprintf(title, sizeof(title), "Pick %d modules:", ShipModuleCount);
+         drawItemMenu(title, mModuleMenuItems.address(), mModuleMenuItems.size(), NULL, 0,
+               mLoadoutButtonsWidth, mLoadoutItemsDisplayWidth);
+      }
+      else     // Showing weapons
+      {
+         char title[100];
+         dSprintf(title, sizeof(title), "Pick %d weapons:", ShipWeaponCount);
+         drawItemMenu(title, mWeaponMenuItems.address(), mWeaponMenuItems.size(),
+               &mModuleMenuItems[0], mModuleMenuItems.size(), mLoadoutButtonsWidth, mLoadoutItemsDisplayWidth);
+      }
+
+      // Show hint for the preset menu
+      static const UI::SymbolString presetHint("Press [[ShowLoadoutMenu]] for presets",
+               getGame()->getSettings()->getInputCodeManager(),
+               HelperMenuContext, 12, false, AlignmentCenter);
+      static const Point renderPos(80, DisplayManager::getScreenInfo()->getGameCanvasHeight() - 170);
+      presetHint.render(renderPos);
    }
 }
 

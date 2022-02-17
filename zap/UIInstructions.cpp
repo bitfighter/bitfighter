@@ -385,6 +385,7 @@ static const char *loadoutInstructions2[] = {
    "You can save your Loadout in a Preset for easy recall later.",
    "To save your loadout, use [[SaveLoadoutPreset1]] through [[SaveLoadoutPreset6]].",
    "To recall the preset, use [[LoadLoadoutPreset1]] through [[LoadLoadoutPreset6]].",
+   "To view and select presets, press [[ShowLoadoutMenu]] then [[ShowLoadoutMenu]] again."
    "",
    "Loadout Presets will be saved when you quit the game, and",
    "will be available the next time you play."
