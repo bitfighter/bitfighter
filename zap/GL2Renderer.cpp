@@ -41,7 +41,10 @@ GL2Renderer::~GL2Renderer()
 void GL2Renderer::useShader(const Shader &shader)
 {
    if(mCurrentShaderId != shader.getId())
+   {
       glUseProgram(shader.getId());
+      mCurrentShaderId = shader.getId();
+   }
 }
 
 // Static
