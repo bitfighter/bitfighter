@@ -1023,7 +1023,7 @@ void Ship::rechargeEnergy()
       BfObject *object = isInZone(LoadoutZoneTypeNumber);
       S32 currentLoadoutZoneTeam = object ? object->getTeam() : NO_TEAM;
       if (currentLoadoutZoneTeam == TEAM_NEUTRAL || currentLoadoutZoneTeam == getTeam())
-         mFastRechargeTimer.update(mFastRechargeTimer.getCurrent()/45); //45 is arbitrary "slightly faster" but not enough to make much impact
+         mFastRechargeTimer.update(45); //45 is arbitrary "slightly faster" but not enough to instantly win dogfights
       //if(currentLoadoutZoneTeam == TEAM_HOSTILE)
       //   mEnergy += EnergyRechargeRateInHostileLoadoutZoneModifier * timeInMilliSeconds;
 
