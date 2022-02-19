@@ -660,7 +660,16 @@ void Ship::idle(IdleCallPath path)
 #endif
        )
    {
-      mFastRechargeTimer.update(mCurrentMove.time);
+      // Handle Recharge timer
+
+      // Half the time if in a friendly/neutral loadout zone
+      BfObject *object = isInZone(LoadoutZoneTypeNumber);
+      S32 currentLoadoutZoneTeam = object ? object->getTeam() : NO_TEAM;
+      U32 updateTime = mCurrentMove.time;
+      if(currentLoadoutZoneTeam == TEAM_NEUTRAL || currentLoadoutZoneTeam == getTeam())
+         updateTime *= 2;
+
+      mFastRechargeTimer.update(updateTime);
       mFastRecharging = mFastRechargeTimer.getCurrent() == 0;
 
       processWeaponFire();
@@ -1024,10 +1033,9 @@ void Ship::rechargeEnergy()
       mEnergy += EnergyRechargeRate * timeInMilliSeconds;
       
       //// Apply energy recharge modifier for the zone the player is in
-      BfObject *object = isInZone(LoadoutZoneTypeNumber);
-      S32 currentLoadoutZoneTeam = object ? object->getTeam() : NO_TEAM;
-      if (currentLoadoutZoneTeam == TEAM_NEUTRAL || currentLoadoutZoneTeam == getTeam())
-         mFastRechargeTimer.update(45); //45 is arbitrary "slightly faster" but not enough to instantly win dogfights
+      //BfObject *object = isInZone(LoadoutZoneTypeNumber);
+      //S32 currentLoadoutZoneTeam = object ? object->getTeam() : NO_TEAM;
+
       //if(currentLoadoutZoneTeam == TEAM_HOSTILE)
       //   mEnergy += EnergyRechargeRateInHostileLoadoutZoneModifier * timeInMilliSeconds;
 
