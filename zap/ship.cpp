@@ -1022,11 +1022,12 @@ void Ship::rechargeEnergy()
    {
       // Base recharge rate
       mEnergy += EnergyRechargeRate * timeInMilliSeconds;
-
+      
       //// Apply energy recharge modifier for the zone the player is in
-      //BfObject *object = isInZone(LoadoutZoneTypeNumber);
-      //S32 currentLoadoutZoneTeam = object ? object->getTeam() : NO_TEAM;
-
+      BfObject *object = isInZone(LoadoutZoneTypeNumber);
+      S32 currentLoadoutZoneTeam = object ? object->getTeam() : NO_TEAM;
+      if (currentLoadoutZoneTeam == TEAM_NEUTRAL || currentLoadoutZoneTeam == getTeam())
+         mFastRechargeTimer.update(45); //45 is arbitrary "slightly faster" but not enough to instantly win dogfights
       //if(currentLoadoutZoneTeam == TEAM_HOSTILE)
       //   mEnergy += EnergyRechargeRateInHostileLoadoutZoneModifier * timeInMilliSeconds;
 
