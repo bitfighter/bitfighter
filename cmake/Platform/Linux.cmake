@@ -120,6 +120,7 @@ function(BF_PLATFORM_INSTALL targetName)
 	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.desktop DESTINATION ${CMAKE_DESKTOP_DATA_PATH}/applications/)
 	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.png DESTINATION ${CMAKE_DESKTOP_DATA_PATH}/icons/hicolor/48x48/apps/)
 	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter128.png DESTINATION ${CMAKE_DESKTOP_DATA_PATH}/icons/hicolor/128x128/apps/)
+	install(FILES ${LINUX_PKG_RESOURCE_DIR}/org.bitfighter.Bitfighter.metainfo.xml DESTINATION ${CMAKE_DESKTOP_DATA_PATH}/metainfo/)
 	
 	# Manpage
 	install(FILES ${LINUX_PKG_RESOURCE_DIR}/bitfighter.6 DESTINATION ${CMAKE_DESKTOP_DATA_PATH}/man/man6/)
