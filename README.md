@@ -4,7 +4,7 @@
 
 The fast-paced team-based outer-space multi-player arcade game. Blast your friends, zap your enemies. Steal their flags and nuke their cores. Customize your ship to be sneaky, or overwhelm with superior firepower. It's fast, fun, and frenetic.
 
-## [Download](http://bitfighter.org/downloads/) | [Join Discord](https://discord.gg/3sdzjkz) | [Visit the Wiki](http://bitfighter.org/wiki/index.php?title=Main_Page) | ![](https://api.travis-ci.org/bitfighter/bitfighter.svg?branch=master)
+## [Download](http://bitfighter.org/downloads/) | [Discord](https://discord.gg/3sdzjkz) | [Wiki](http://bitfighter.org/wiki/index.php?title=Main_Page) | [Forum](http://bitfighter.org/forums/viewforum.php?f=4)
 
 ## DEPENDENCIES
 
