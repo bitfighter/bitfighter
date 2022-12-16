@@ -302,7 +302,7 @@ void QueryServersUserInterface::contactEveryone()
 static S32 findServerByAddress(const Vector<ServerAddr> &serverList, const Address &address)
 {
    for(S32 i = 0; i < serverList.size(); i++)
-      if(Address(serverList[i].first) == address)
+      if(Address(serverList[i].ipAddress) == address)
          return i;
 
    return -1;
@@ -371,7 +371,7 @@ static void saveServerListToIni(GameSettings *settings, const Vector<ServerAddr>
       prevServerList.clear();    // Only clear the saved list if we have something to add... 
 
       for(S32 i = 0; i < serverListFromMaster.size(); i++)
-         prevServerList.push_back(Address(serverListFromMaster[i].first).toString());
+         prevServerList.push_back(Address(serverListFromMaster[i].ipAddress).toString());
    }
 }
 
@@ -396,11 +396,11 @@ void QueryServersUserInterface::addServersToPingList(const Vector<ServerAddr> &s
    for(S32 i = 0; i < serverList.size(); i++)
    {
       // Is this server already in our list?
-      S32 index = findServerByAddressOrId(servers, Address(serverList[i].first), serverList[i].second);
+      S32 index = findServerByAddressOrId(servers, Address(serverList[i].ipAddress), serverList[i].id);
 
       if(index == -1)  // Not found -- it's a new server; create a new entry in the servers list
       {
-         ServerRef server(serverList[i].second, serverList[i].first, ServerRef::Start, false);
+         ServerRef server(serverList[i].id, serverList[i].ipAddress, ServerRef::Start, false);
          server.setNameDescr("Internet Server",  "Internet Server -- attempting to connect", Colors::white);
 
          server.sendNonce.getRandom();

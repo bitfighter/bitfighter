@@ -75,6 +75,7 @@ public:
    /// is complete.
    TNL_DECLARE_RPC(m2cQueryServersResponse,      (U32 queryId, Vector<IPAddress> ipList));
    TNL_DECLARE_RPC(m2cQueryServersResponse_019a, (U32 queryId, Vector<IPAddress> ipList, Vector<S32> serverIdList));
+   TNL_DECLARE_RPC(m2cQueryServersResponse_023,  (U32 queryId, Vector<IPAddress> ipList, Vector<S32> serverIdList, Vector<StringTableEntry> serverNames));
 
    /// c2mRequestArrangedConnection is an RPC sent from the client to the master to request an arranged
    /// connection with the specified server address.  The internalAddress should be the client's own self-reported

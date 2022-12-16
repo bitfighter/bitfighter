@@ -333,6 +333,7 @@ void MasterServerConnection::c2mQueryServersOption(U32 queryId, bool hostonly)
 {
    Vector<IPAddress> addresses(IP_MESSAGE_ADDRESS_COUNT);
    Vector<S32> serverIdList(IP_MESSAGE_ADDRESS_COUNT);
+   Vector<StringTableEntry> serverNames(IP_MESSAGE_ADDRESS_COUNT);
    
 
    const Vector<MasterServerConnection *> *serverList = mMaster->getServerList();
@@ -354,36 +355,42 @@ void MasterServerConnection::c2mQueryServersOption(U32 queryId, bool hostonly)
       // Add us to the results list
       addresses.push_back(serverList->get(i)->getNetAddress().toIPAddress());
       serverIdList.push_back(serverList->get(i)->getClientId());
+	  serverNames.push_back(serverList->get(i)->mPlayerOrServerName);
 
       // If we get a packet's worth, send it to the client and empty our buffer...
       if(addresses.size() == IP_MESSAGE_ADDRESS_COUNT)
       {
-         sendM2cQueryServersResponse(queryId, addresses, serverIdList);
+         sendM2cQueryServersResponse(queryId, addresses, serverIdList, serverNames);
          
          addresses.clear();
          serverIdList.clear();
+		 serverNames.clear();
       }
    }
 
    // Send the final packet
-   sendM2cQueryServersResponse(queryId, addresses, serverIdList);
+   sendM2cQueryServersResponse(queryId, addresses, serverIdList, serverNames);
 
    // If we sent any with the previous message, send another list with no servers
    if(addresses.size())
    {
       addresses.clear();
       serverIdList.clear();
+	  serverNames.clear();
 
-      sendM2cQueryServersResponse(queryId, addresses, serverIdList);
+      sendM2cQueryServersResponse(queryId, addresses, serverIdList, serverNames);
    }
 }
 
 
 // Wrapper around m2cQueryServersResponse to handle the different versions we need to use
 void MasterServerConnection::sendM2cQueryServersResponse(U32 queryId, const Vector<IPAddress> &addresses, 
-                                                                      const Vector<S32> &serverIdList)
+                                                                      const Vector<S32> &serverIdList,
+																	  const Vector<StringTableEntry> &serverNames)
 {
-   if(mCMProtocolVersion >= 8)
+   if(mCMProtocolVersion >= 9)
+	   m2cQueryServersResponse_023(queryId, addresses, serverIdList, serverNames);
+   else if(mCMProtocolVersion >= 8)
       m2cQueryServersResponse_019a(queryId, addresses, serverIdList);
    else
       m2cQueryServersResponse(queryId, addresses);

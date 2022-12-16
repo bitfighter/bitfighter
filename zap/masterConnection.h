@@ -68,6 +68,7 @@ public:
 
    TNL_DECLARE_RPC_OVERRIDE(m2cQueryServersResponse, (U32 queryId, Vector<IPAddress> ipList));
    TNL_DECLARE_RPC_OVERRIDE(m2cQueryServersResponse_019a, (U32 queryId, Vector<IPAddress> ipList, Vector<S32> clientIdList));
+   TNL_DECLARE_RPC_OVERRIDE(m2cQueryServersResponse_023, (U32 queryId, Vector<IPAddress> ipList, Vector<S32> clientIdList, Vector<StringTableEntry> serverNames));
 #endif
 
    TNL_DECLARE_RPC_OVERRIDE(m2sClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
