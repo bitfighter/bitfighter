@@ -53,9 +53,9 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2cQueryServersResponse_019a,
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, M_RPC_019a) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cQueryServersResponse_023,
-	(U32 queryId, Vector<IPAddress> ipList, Vector<S32> serverIdList, Vector<StringTableEntry> serverNames),
-	(queryId, ipList, serverIdList, serverNames),
-	NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, M_RPC_023) {}
+   (U32 queryId, Vector<IPAddress> ipList, Vector<S32> serverIdList, Vector<StringTableEntry> serverNames),
+   (queryId, ipList, serverIdList, serverNames),
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, M_RPC_023) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, c2mRequestArrangedConnection, 
    (U32 requestId, IPAddress remoteAddress, IPAddress internalAddress, ByteBufferPtr connectionParameters),
