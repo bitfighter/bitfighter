@@ -264,19 +264,10 @@ lua/luajit/src/minilua.lib
 doc/html/
 doc/temp-doxygen-pl/
 doc/temp-doxygen/
-
 doc/temp-doxygen-py/
-
 doc/html2/
-
 doc/html-py/
-
 doc/html-final/
 
-.vs/bitfighter/v15/Browse.VC.db
-
-.vs/bitfighter/v15/Browse.VC.opendb
-
-.vs/slnx.sqlite
-
-.vs/VSWorkspaceState.json
+# VisualStudio files
+.vs/*
