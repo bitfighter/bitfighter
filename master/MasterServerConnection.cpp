@@ -1509,7 +1509,8 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
    bstream->read(&mCMProtocolVersion);    // Version of protocol we'll use with the client
    if(mCMProtocolVersion < 4 || mCMProtocolVersion > MASTER_PROTOCOL_VERSION) // check for unsupported version
    {
-      mLoggingStatus = "Bad version";
+      mLoggingStatus = "Client specified protocol version " + std::to_string(mCMProtocolVersion) + 
+                       " (max defined here is " + std::to_string(MASTER_PROTOCOL_VERSION) + ")";
       return false;
    }
 
