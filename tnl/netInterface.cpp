@@ -927,9 +927,6 @@ void NetInterface::handleConnectAccept(const Address &address, BitStream *stream
 
 void NetInterface::sendConnectReject(ConnectionParameters *conn, const Address &theAddress, NetConnection::TerminationReason reason)
 {
-   //if(!reason)
-   //   return; // if the stream is NULL, we reject silently
-
    PacketStream out;
    out.write(U8(ConnectReject));
    conn->mNonce.write(&out);
