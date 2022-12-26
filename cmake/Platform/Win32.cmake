@@ -248,16 +248,16 @@ function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	set(CPACK_PACKAGE_NAME "Bitfighter")
 	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A 2-D multi-player space combat game")
 	set(CPACK_PACKAGE_VENDOR "Bitfighter Industries")
-	set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.txt")
+	set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.md")
 	set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE.txt")
 	set(CPACK_PACKAGE_VERSION_MAJOR ${BF_VERSION})
 	set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
 	set(CPACK_CREATE_DESKTOP_LINKS ${targetName})
 	# This sets up start menu and desktop shortcuts
 	set(CPACK_PACKAGE_EXECUTABLES "bitfighter;Bitfighter")
-	
+
 	set(BF_PACKAGE_RESOURCE_DIR ${CMAKE_SOURCE_DIR}/build/windows/installer)
-	
+
 
 	# NSIS setup, requires NSIS 3.0+ (for 64 bit support)
 	set(CPACK_GENERATOR NSIS)
