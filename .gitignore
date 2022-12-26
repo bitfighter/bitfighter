@@ -247,10 +247,10 @@ pip-log.txt
 .coverage
 .tox
 
-#Translations
+# Translations
 *.mo
 
-#Mr Developer
+# Mr Developer
 .mr.developer.cfg
 
 lua/luajit/src/buildvm.exp
@@ -271,3 +271,8 @@ doc/html-final/
 
 # VisualStudio files
 .vs/*
+
+# CMake files
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
