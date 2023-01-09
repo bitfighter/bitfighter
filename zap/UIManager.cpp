@@ -383,7 +383,7 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
 
       default:  // Not handled
          title = "Connection Failed";
-         message = "Unable to connect to the master server, with error code:\n\n";
+         message = "Unable to connect to the master server; received error code:\n\n";
 
          if(reasonStr[0])
             message += itos(reason) + " " + reasonStr;
