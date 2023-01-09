@@ -1694,7 +1694,7 @@ void MasterServerConnection::onConnectionEstablished()
    {
       // If client needs to upgrade, tell them
       m2cSendUpdgradeStatus(mMaster->getSetting<U32>("LatestReleasedCSProtocol")   > mCSProtocolVersion ||
-                            mMaster->getSetting<U32>("LatestReleasedBuildVersion") > mClientBuild);
+                            mMaster->getSetting<U32>(LATEST_RELEASED_BUILD_VERSION) > mClientBuild);
 
       // Send message of the day
       sendMotd();

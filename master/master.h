@@ -20,6 +20,10 @@
 using namespace TNL;
 using namespace Zap;
 
+
+#define LATEST_RELEASED_BUILD_VERSION "LatestReleasedBuildVersion"
+
+
 namespace Zap {
    struct VersionedGameStats;       // gameStats.h
    struct GameStats;

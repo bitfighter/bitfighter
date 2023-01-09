@@ -33,7 +33,7 @@ MasterSettings::MasterSettings(const string &iniFile)
    mSettings.add(new Setting<string>("JsonOutfile",                      "server.json",        "json_file",                            "host"));
    mSettings.add(new Setting<U32>   ("Port",                                 25955,            "port",                                 "host"));
    mSettings.add(new Setting<U32>   ("LatestReleasedCSProtocol",               0,              "latest_released_cs_protocol",          "host"));
-   mSettings.add(new Setting<U32>   ("LatestReleasedBuildVersion",             0,              "latest_released_client_build_version", "host"));
+   mSettings.add(new Setting<U32>   (LATEST_RELEASED_BUILD_VERSION,            0,              "latest_released_client_build_version", "host"));
                                                                                                
    // Variables for managing access to MySQL                                                   
    mSettings.add(new Setting<string>("MySqlAddress",                           "",             "phpbb_database_address",               "phpbb"));
@@ -70,7 +70,7 @@ void MasterSettings::readConfigFile()
    loadSettingsFromINI();
 
    // Not sure if this should go here...
-   if(getVal<U32>("LatestReleasedCSProtocol") == 0 && getVal<U32>("LatestReleasedBuildVersion") == 0)
+   if(getVal<U32>("LatestReleasedCSProtocol") == 0 && getVal<U32>(LATEST_RELEASED_BUILD_VERSION) == 0)
       logprintf(LogConsumer::LogError, "Unable to find a valid protocol line or build_version in config file... disabling update checks!");
 }
 
@@ -127,7 +127,7 @@ void MasterSettings::loadSettingsFromINI()
    string motdFilename = ini.GetValue("motd", "motd_file", "motd");  // Default 'motd' in current directory
 
    // Grab the current message and add it to the map as the most recently released build
-   motdClientMap[getVal<U32>("LatestReleasedBuildVersion")] = getCurrentMOTDFromFile(motdFilename);
+   motdClientMap[getVal<U32>(LATEST_RELEASED_BUILD_VERSION)] = getCurrentMOTDFromFile(motdFilename);
 }
 
 
@@ -162,16 +162,19 @@ string MasterSettings::getCurrentMOTDFromFile(const string &filename) const
 // If clientBuildVersion is U32_MAX, then return the motd for the latest build
 string MasterSettings::getMotd(U32 clientBuildVersion) const
 {
-   string motdString = "Welcome to Bitfighter!";
-
    // Use latest if build version is U32_MAX
    if(clientBuildVersion == U32_MAX)
-      clientBuildVersion = getVal<U32>("LatestReleasedBuildVersion");
+      clientBuildVersion = getVal<U32>(LATEST_RELEASED_BUILD_VERSION);
 
+   string motdString;
    map <U32, string>::const_iterator iter = motdClientMap.find(clientBuildVersion);
-   if(iter != motdClientMap.end())
+   if(iter != motdClientMap.end())     // Found the version in the motdClientMap; return version-specific MOTD
       motdString = (*iter).second;
-
+   else if(clientBuildVersion > getVal<U32>(LATEST_RELEASED_BUILD_VERSION))
+      motdString = "Welcome to the future!  This client is running a new version of Bitfighter.  If it's an official release, tell the devs to update the latest_released_client_build_version setting in master.ini!";
+   else      // This is not a current release, has no version-specific messages in the motdClientMap, and isn't newer than the latest build release
+      motdString = "Time to upgrade!  Download the current version at bitfighter.org";
+  
    return motdString;
 }
 
