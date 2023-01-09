@@ -978,7 +978,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       // Remove option that is no longer used, added in 019 
       GameSettings::iniFile.deleteKey("Host", "BotsAlwaysBalanceTeams");
 
-      // Remove item_select.lua plugin, it was superseded by filter.lua
+      // Remove item_select.lua plugin, it was superceded by filter.lua
       FolderManager *folderManager = settings->getFolderManager();
       string offendingFile = joindir(folderManager->pluginDir, "item_select.lua");
 

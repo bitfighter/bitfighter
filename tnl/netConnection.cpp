@@ -918,7 +918,7 @@ bool NetConnection::readConnectRequest(BitStream *stream, NetConnection::Termina
    U32 classGroup, classCRC;
    stream->read(&classGroup);
    stream->read(&classCRC);
-
+   // classGroup --> 0 is game client, 2 is master server
    if((NetClassGroup)classGroup == getNetClassGroup() && classCRC == NetClassRep::getClassGroupCRC(getNetClassGroup()))
       return true;
 
