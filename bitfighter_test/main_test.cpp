@@ -17,6 +17,11 @@
 
 #include <gtest/gtest.h>
 
+#ifndef ARRAYSIZE
+#  define ARRAYSIZE(a) sizeof(a)/sizeof(a[0])
+#endif
+
+
 namespace Zap
 {
 void exitToOs(S32 errcode) { TNLAssert(false, "Should never be called!"); }
