@@ -1507,11 +1507,18 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
    char readstr[256]; // to hold the string being read
 
    bstream->read(&mCMProtocolVersion);    // Version of protocol we'll use with the client
-   if(mCMProtocolVersion < 4 || mCMProtocolVersion > MASTER_PROTOCOL_VERSION) // check for unsupported version
+
+   // Check for unsupported protocol versions
+   if (mCMProtocolVersion < 4)
    {
-      mLoggingStatus = "Client specified protocol version " + std::to_string(mCMProtocolVersion) + 
-                       " (max defined here is " + std::to_string(MASTER_PROTOCOL_VERSION) + ")";
+      mLoggingStatus = "Client trying to connect with protocol version " + std::to_string(mCMProtocolVersion) + 
+                       " which is far too ancient for us.";
       return false;
+   }
+   else if(mCMProtocolVersion > MASTER_PROTOCOL_VERSION) 
+   {
+      mLoggingStatus = "Client wants to use protocol version " + std::to_string(mCMProtocolVersion) + 
+                       " but the latest known here is " + std::to_string(MASTER_PROTOCOL_VERSION);
    }
 
    bstream->read(&mCSProtocolVersion);    // Protocol this client uses for C-S communication
