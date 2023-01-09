@@ -365,7 +365,7 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
          title = "Connection Failed";
          message = 
                "My attempt to connect to the Master Server failed because the server did not respond.  Either the server is down, "
-               "or, more likely, you are not connected to the Internet or your firewall is blocking the connection.\n\n"
+               "or, more likely, you are not connected to the internet or your firewall is blocking the connection.\n\n"
 
                "I will continue trying, but you will not see this message again until you successfully "
                "connect or restart Bitfighter.";
