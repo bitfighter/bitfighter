@@ -106,7 +106,7 @@ void MasterSettings::loadSettingsFromINI()
    // [motd_clients] section
    // This section holds each old client build number as a key.  This allows us to set
    // different messages for different versions
-   string defaultMessage = "New version available at bitfighter.org";
+   string upgradeMessage = "New version available at bitfighter.org";
    Vector<string> keys;
    ini.GetAllKeys("motd_clients", keys);
 
@@ -115,7 +115,7 @@ void MasterSettings::loadSettingsFromINI()
    for(S32 i = 0; i < keys.size(); i++)
    {
       U32 build_version = (U32)atoi(keys[i].c_str());    // Avoid conflicts with std::stoi() which is defined for VC++ 10
-      string message = ini.GetValue("motd_clients", keys[i], defaultMessage);
+      string message = ini.GetValue("motd_clients", keys[i], upgradeMessage);
 
       motdClientMap.insert(pair<U32, string>(build_version, message));
    }
