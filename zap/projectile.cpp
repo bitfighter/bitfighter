@@ -1454,7 +1454,7 @@ const F32 Seeker::Mass = 0.2;
 
 const U32 Seeker::SpeedIncreasePerSecond = 300;
 const U32 Seeker::TargetAcquisitionRadius = 400;
-const F32 Seeker::MaximumAngleChangePerSecond = FloatTau / 2;
+const F32 Seeker::MaximumAngleChangePerSecond = FloatTau / 2.f;
 const F32 Seeker::TargetSearchAngle = FloatTau * .6f;  // Anglular spread in front of ship to search for targets
 
 const S32 Seeker::ReassessTargetTime = 100;  // Milliseconds to reassess target

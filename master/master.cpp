@@ -344,7 +344,7 @@ void MasterServer::idle(const U32 timeDelta)
       {
          if(request->initiator.isValid())
          {
-            ByteBufferPtr ptr = new ByteBuffer((U8 *)MasterRequestTimedOut, strlen(MasterRequestTimedOut) + 1);
+            ByteBufferPtr ptr = new ByteBuffer((U8 *)MasterRequestTimedOut, U32(strlen(MasterRequestTimedOut) + 1));
 
             request->initiator->m2cArrangedConnectionRejected(request->initiatorQueryId, ptr);   // 0 = ReasonTimedOut
             request->initiator->removeConnectRequest(request);

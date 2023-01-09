@@ -148,7 +148,7 @@ static string newRecordingFileName(const string &dir, const string &levelName, c
 
    static S32 pad = 4;
    // Don't allow negative padding
-   S32 padLen = pad - nextnum.length();
+   S32 padLen = pad - S32(nextnum.length());
    if(padLen < 0)
       padLen = 0;
 
