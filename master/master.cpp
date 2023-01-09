@@ -147,8 +147,10 @@ string MasterSettings::getCurrentMOTDFromFile(const string &filename) const
    fclose(f);
 
    if(!ok)
+   {
+      logprintf(LogConsumer::LogError, "Could not read message from file \"%s\" -- using default MOTD.", filename.c_str());
       return defaultMessage;
-
+   }
 
    string returnMessage(message);
    trim_right_in_place(returnMessage, "\n");  // Remove any trailing new lines
