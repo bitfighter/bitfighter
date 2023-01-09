@@ -8,6 +8,7 @@
 #include "DatabaseAccessThread.h"
 #include "GameJoltConnector.h"
 
+#include "../zap/version.h"
 #include "../zap/stringUtils.h"  // For itos, replaceString
 #include "../zap/IniFile.h"      // For INI reading/writing
 
@@ -220,9 +221,9 @@ NetInterface *MasterServer::createNetInterface() const
    NetInterface *netInterface = new NetInterface(Address(IPProtocol, Address::Any, port));
 
    // Log a welcome message in the main log and to the console
-   logprintf("[%s] Master Server \"%s\" started - listening on port %d", getTimeStamp().c_str(),
+   logprintf("[%s] Master Server \"%s\" started - listening on port %d (protocol v. %d)", getTimeStamp().c_str(),
                                                                          getSetting<string>("ServerName").c_str(),
-                                                                         port);
+                                                                         port, MASTER_PROTOCOL_VERSION);
    return netInterface;
 }
 
