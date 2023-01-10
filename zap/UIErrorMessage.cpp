@@ -48,6 +48,13 @@ void AbstractMessageUserInterface::setMessage(const string &message)
       mMessage[i] = SymbolShapePtr(new SymbolString(wrappedLines[i], inputCodeManager, Context, TextHeight, true));
 
    mMaxLines = wrappedLines.size();
+   mMessageText = message;
+}
+
+
+bool AbstractMessageUserInterface::hasSameMessage(const AbstractMessageUserInterface *ui)
+{
+   return mMessageText == ui->mMessageText;
 }
 
 

@@ -24,6 +24,8 @@ class AbstractMessageUserInterface : public UserInterface
 
 private:
    S32 mMaxLines;
+   string mMessageText;     // Private copy for doing equality comparisons
+
    map<InputCode, void(*)(ClientGame *)> mKeyRegistrations;
 
    bool mRenderUnderlyingUi;
@@ -40,8 +42,10 @@ public:
 
    SymbolShapePtr mTitle;
    SymbolShapePtr mInstr;
+
    void onActivate();
    void setMessage(const string &message);
+   bool hasSameMessage(const AbstractMessageUserInterface *ui);      // Return true if the ui content is the same
 
    void setMaxLines(S32 lines);     // Display no more than this number of lines
    void setTitle(const string &title);
@@ -54,7 +58,6 @@ public:
 
    virtual void reset();
    virtual bool onKeyDown(InputCode inputCode);
-
 };
 
 

@@ -165,6 +165,21 @@ void UIManager::renderPrevUI(const UserInterface *ui)
       }
 }
 
+void UIManager::activateIfDifferent(ErrorMessageUserInterface *ui)
+{
+   if(!mCurrentInterface)
+      return activate(ui);
+
+   ErrorMessageUserInterface *uicurrent_ui = dynamic_cast<ErrorMessageUserInterface *>(mCurrentInterface);
+   if(!uicurrent_ui)
+      return activate(ui);
+
+   if(uicurrent_ui->hasSameMessage(ui))
+      return;
+
+   return activate(ui);
+}
+
 
 void UIManager::activate(UserInterface *ui, bool save)  // save defaults to true
 {
@@ -792,7 +807,7 @@ void UIManager::displayMessageBox(const string &title, const string &instr, cons
    ui->setInstr(instr);
    ui->setMessage(message);
 
-   activate(ui);
+   activateIfDifferent(ui);
 }
 
 
