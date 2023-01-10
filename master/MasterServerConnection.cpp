@@ -1521,7 +1521,7 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
    else if(mCMProtocolVersion > MASTER_PROTOCOL_VERSION) 
    {
       reasonStr = "Requested master protocol version " + std::to_string(mCMProtocolVersion) +
-                  ", but the master only supports up to " + std::to_string(MASTER_PROTOCOL_VERSION);
+                  ", but the server only supports up to " + std::to_string(MASTER_PROTOCOL_VERSION);
 
       mLoggingStatus = "Client wants to use protocol version " + std::to_string(mCMProtocolVersion) + 
                        " but we only support up to " + std::to_string(MASTER_PROTOCOL_VERSION);
