@@ -37,7 +37,7 @@ public:
    explicit AbstractMessageUserInterface(ClientGame *game);      // Constructor
    virtual ~AbstractMessageUserInterface();                      // Destructor
 
-   static const S32 MAX_LINES = 9;
+   static const S32 MAX_LINES = 10;
    SymbolShapePtr mMessage[MAX_LINES];
 
    SymbolShapePtr mTitle;
