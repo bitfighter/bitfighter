@@ -2069,9 +2069,9 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 // to help diagnose the problem, or prompt further data from client (such as a password).
 // Note that we'll always go through this, even if the client is running on in the same process as the server.
 // Note also that mSettings will be NULL here.
-bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason)
+bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason, string &reasonStr)
 {
-   if(!Parent::readConnectRequest(stream, reason))
+   if(!Parent::readConnectRequest(stream, reason, reasonStr))
       return false;
 
    char buf[256];
@@ -2096,6 +2096,7 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    if(serverPassword != "" && stricmp(buf, Game::md5.getSaltedHashFromString(serverPassword).c_str()))
    {
       reason = ReasonNeedServerPassword;
+      reasonStr = "This server requires a password";
       return false;
    }
 
@@ -2140,6 +2141,7 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
       if(mServerGame->getSettings()->getBanList()->isBanned(getNetAddress().toString(), string(name), needToCheckAuthentication))
       {
          reason = ReasonBanned;
+         reasonStr = "Player has been banned from this server";
          return false;
       }
 
@@ -2147,6 +2149,7 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
       if(mServerGame->getSettings()->getBanList()->isAddressKicked(getNetAddress()))
       {
          reason = ReasonKickedByAdmin;
+         reasonStr = "Player was kicked off this server by an admin";
          return false;
       }
 
@@ -2154,12 +2157,15 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
       if(mServerGame->isFull())
       {
          reason = ReasonServerFull;
+         reasonStr = "Too many players on this server -- please try again later";
          return false;
       }
    }
 
    if(mServerGame->mInfoFlags & HostModeFlag)
    {
+      reason = ReasonError;
+      reasonStr = "Client is too old";
       if(mConnectionVersion == 0) // old client can't host from server
          return false;
    }

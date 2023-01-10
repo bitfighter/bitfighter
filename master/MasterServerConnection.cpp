@@ -1494,9 +1494,9 @@ Vector<Address> gListAddressHide;  // --> move to settings struct
 
 
 // Must match MasterServerConnection::writeConnectRequest()!!
-bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnection::TerminationReason &reason)
+bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnection::TerminationReason &reason, string &reasonStr)
 {
-   if(!Parent::readConnectRequest(bstream, reason))
+   if(!Parent::readConnectRequest(bstream, reason, reasonStr))
    {
       mLoggingStatus = "Parent::readConnectRequest failed";
       return false;
@@ -1511,14 +1511,21 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
    // Check for unsupported protocol versions
    if (mCMProtocolVersion < 4)
    {
+      reasonStr = "Requested master protocol version " + std::to_string(mCMProtocolVersion) +
+                  ", but the master doesn't support anything earlier than 4";
+
       mLoggingStatus = "Client trying to connect with protocol version " + std::to_string(mCMProtocolVersion) + 
                        " which is far too ancient for us.";
       return false;
    }
    else if(mCMProtocolVersion > MASTER_PROTOCOL_VERSION) 
    {
+      reasonStr = "Requested master protocol version " + std::to_string(mCMProtocolVersion) +
+                  ", but the master only supports up to " + std::to_string(MASTER_PROTOCOL_VERSION);
+
       mLoggingStatus = "Client wants to use protocol version " + std::to_string(mCMProtocolVersion) + 
-                       " but the latest known here is " + std::to_string(MASTER_PROTOCOL_VERSION);
+                       " but we only support up to " + std::to_string(MASTER_PROTOCOL_VERSION);
+      return false;
    }
 
    bstream->read(&mCSProtocolVersion);    // Protocol this client uses for C-S communication
@@ -1599,6 +1606,8 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
                                                      clientList->get(i)->mPlayerOrServerName.getString());
                disconnect(ReasonDuplicateId, "");
                reason = ReasonDuplicateId;
+               reasonStr = "Got duplicate player id; these are randomly generated, and this is a statistally rare event, " 
+                           "so please restart and try again";
 
                mLoggingStatus = "Duplicate ID";
                return false;
@@ -1617,11 +1626,13 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
             case WrongPassword:
                reason = ReasonBadLogin;
                mLoggingStatus = "Wrong password";
+               reasonStr = "Incorrect password";
                return false;
 
             case InvalidUsername:
                reason = ReasonInvalidUsername;
                mLoggingStatus = "Invalid username";
+               reasonStr = "Invalid username";
                return false;
 
             case UnknownStatus:

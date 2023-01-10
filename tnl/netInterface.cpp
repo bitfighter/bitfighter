@@ -35,6 +35,7 @@
 #include "tnlCertificate.h"
 #include <tomcrypt.h>
 
+
 namespace TNL {
 
 //-----------------------------------------------------------------------------
@@ -774,7 +775,7 @@ void NetInterface::handleConnectRequest(const Address &address, BitStream *strea
 
    if(result != ClientPuzzleManager::Success)      // Wrong answer!
    {
-      sendConnectReject(&theParams, address, NetConnection::ReasonPuzzle);
+      sendConnectReject(&theParams, address, NetConnection::ReasonPuzzle, "");
       return;
    }
 
@@ -829,9 +830,10 @@ void NetInterface::handleConnectRequest(const Address &address, BitStream *strea
       conn->setSymmetricCipher(new SymmetricCipher(theParams.mSymmetricKey, theParams.mInitVector));
 
    NetConnection::TerminationReason reason;
-   if(!conn->readConnectRequest(stream, reason))
+   std::string reasonStr;
+   if(!conn->readConnectRequest(stream, reason, reasonStr))
    {
-      sendConnectReject(&theParams, address, reason);
+      sendConnectReject(&theParams, address, reason, reasonStr.c_str());
       return;
    }
    addConnection(conn);
@@ -925,14 +927,14 @@ void NetInterface::handleConnectAccept(const Address &address, BitStream *stream
 // NetInterface connection rejection and handling
 //-----------------------------------------------------------------------------
 
-void NetInterface::sendConnectReject(ConnectionParameters *conn, const Address &theAddress, NetConnection::TerminationReason reason)
+void NetInterface::sendConnectReject(ConnectionParameters *conn, const Address &theAddress, NetConnection::TerminationReason reason, const char *reasonString)
 {
    PacketStream out;
    out.write(U8(ConnectReject));
    conn->mNonce.write(&out);
    conn->mServerNonce.write(&out);
    out.writeEnum(reason, NetConnection::TerminationReasons);
-   out.writeString("");
+   out.writeString(reasonString);       // Max length = 255 unless specified otherwise
    out.sendto(mSocket, theAddress);
 }
 
@@ -1280,9 +1282,10 @@ void NetInterface::handleArrangedConnectRequest(const Address &theAddress, BitSt
       conn->setSymmetricCipher(new SymmetricCipher(theParams.mSymmetricKey, theParams.mInitVector));
 
    NetConnection::TerminationReason reason;
-   if(!conn->readConnectRequest(stream, reason))
+   string reasonStr;
+   if(!conn->readConnectRequest(stream, reason, reasonStr))
    {
-      sendConnectReject(&theParams, theAddress, reason);
+      sendConnectReject(&theParams, theAddress, reason, reasonStr.c_str());
       removePendingConnection(conn);
       return;
    }

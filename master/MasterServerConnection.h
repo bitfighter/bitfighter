@@ -295,7 +295,7 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name));
 
    static string cleanName(string name);
-   bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
+   bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason, string &reasonStr);
    void writeConnectAccept(BitStream *stream);
    void onConnectionEstablished();
 

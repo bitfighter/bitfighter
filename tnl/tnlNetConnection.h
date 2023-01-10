@@ -276,7 +276,7 @@ protected:
    ///
    /// Reads data sent by the writeConnectRequest method and returns true if the connection is accepted
    /// or false if it's not.  The errorString pointer should be filled if the connection is rejected.
-   virtual bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
+   virtual bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason, std::string &reasonStr);
 
    /// Writes any data needed to start the connection on the accept packet
    virtual void writeConnectAccept(BitStream *stream);
