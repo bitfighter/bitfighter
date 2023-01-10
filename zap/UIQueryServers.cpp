@@ -65,8 +65,9 @@ static void prevButtonClickedCallback(ClientGame *game)
 
 
 // Constructor
-QueryServersUserInterface::ServerRef::ServerRef(S32 serverId, const Address &address, State initialState, bool isLocalServer) :
-   serverAddress(address)
+QueryServersUserInterface::ServerRef::ServerRef(S32 serverId, const Address &address, const string &serverName, State initialState, bool isLocalServer) :
+   serverAddress(address),
+   serverName(serverName)
 {
    this->serverId = serverId;
    this->state = initialState;
@@ -94,11 +95,18 @@ QueryServersUserInterface::ServerRef::~ServerRef()
 }
 
 
-void QueryServersUserInterface::ServerRef::setNameDescr(const string &name, const string &descr, const Color &color)
+void QueryServersUserInterface::ServerRef::setNameDescr(const string &name, const string &serverDescr, const Color &msgColor)
 {
    this->serverName = name.substr(0, MaxServerNameLen);
-   this->serverDescr = descr.substr(0, MaxServerDescrLen);
-   this->msgColor = color;
+   this->serverDescr = serverDescr.substr(0, MaxServerDescrLen);
+   this->msgColor = msgColor;
+}
+
+
+void QueryServersUserInterface::ServerRef::setDescr(const string &serverDescr, const Color &msgColor)
+{
+	this->serverDescr = serverDescr.substr(0, MaxServerDescrLen);
+	this->msgColor = msgColor;
 }
 
 
@@ -302,7 +310,7 @@ void QueryServersUserInterface::contactEveryone()
 static S32 findServerByAddress(const Vector<ServerAddr> &serverList, const Address &address)
 {
    for(S32 i = 0; i < serverList.size(); i++)
-      if(Address(serverList[i].first) == address)
+      if(Address(serverList[i].ipAddress) == address)
          return i;
 
    return -1;
@@ -371,7 +379,7 @@ static void saveServerListToIni(GameSettings *settings, const Vector<ServerAddr>
       prevServerList.clear();    // Only clear the saved list if we have something to add... 
 
       for(S32 i = 0; i < serverListFromMaster.size(); i++)
-         prevServerList.push_back(Address(serverListFromMaster[i].first).toString());
+         prevServerList.push_back(Address(serverListFromMaster[i].ipAddress).toString());
    }
 }
 
@@ -396,12 +404,12 @@ void QueryServersUserInterface::addServersToPingList(const Vector<ServerAddr> &s
    for(S32 i = 0; i < serverList.size(); i++)
    {
       // Is this server already in our list?
-      S32 index = findServerByAddressOrId(servers, Address(serverList[i].first), serverList[i].second);
+      S32 index = findServerByAddressOrId(servers, Address(serverList[i].ipAddress), serverList[i].id);
 
       if(index == -1)  // Not found -- it's a new server; create a new entry in the servers list
       {
-         ServerRef server(serverList[i].second, serverList[i].first, ServerRef::Start, false);
-         server.setNameDescr("Internet Server",  "Internet Server -- attempting to connect", Colors::white);
+         ServerRef server(serverList[i].id, serverList[i].ipAddress, serverList[i].serverName.getString(), ServerRef::Start, false);
+         server.setDescr("Internet Server -- attempting to connect", Colors::white);
 
          server.sendNonce.getRandom();
          servers.push_back(server);
@@ -436,8 +444,8 @@ void QueryServersUserInterface::gotPingResponse(const Address &address, const No
       if(index != -1 && isLocal && !servers[index].isLocalServer)
          servers.erase_fast(index);
 
-      // Create a new server entry
-      ServerRef s(serverId, address, ServerRef::ReceivedPing, true);
+      // Create a new server entry, even though we don't have a name yet
+      ServerRef s(serverId, address, "", ServerRef::ReceivedPing, true);
 
       if(isLocal)
          s.setNameDescr("LAN Server", "LAN Server -- attempting to connect", Colors::white);
@@ -563,7 +571,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
             s.sendCount++;
             if(s.sendCount > PingQueryRetryCount)     // Ping has timed out, sadly
             {
-               s.setNameDescr("Ping Timed Out", "No information: Server not responding to pings", Colors::red);
+               s.setDescr("No information: Server not responding to pings", Colors::red);
                s.setPlayerBotMax(0, 0, 0);
                s.pingTime = 999;
 
@@ -607,7 +615,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                   continue;
                }
                // Otherwise, we can deal with timeouts on remote servers
-               s.setNameDescr("Query Timed Out", "No information: Server not responding to status query", Colors::red);
+               s.setDescr("No information: Server not responding to status query", Colors::red);
                s.setPlayerBotMax(0, 0, 0);
 
                s.state = ServerRef::Start;//ReceivedQuery;

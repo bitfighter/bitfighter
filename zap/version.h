@@ -10,7 +10,8 @@
 
 // Updated from 7 for 019
 // Updated to 8 for 019a -- added master-generated IDs written after connect
-#define MASTER_PROTOCOL_VERSION 8  // Change this when releasing an incompatible cm/sm protocol (must be int)
+// Updated to 9 for 023  -- added server names being sent during server query (issue #457)
+#define MASTER_PROTOCOL_VERSION 9  // Change this when releasing an incompatible cm/sm protocol (must be int)
                                    // MASTER_PROTOCOL_VERSION = 4, client 015a and older (CS_PROTOCOL_VERSION <= 32) can not connect to our new master.
 
 #define CS_PROTOCOL_VERSION 42     // Change this when releasing an incompatible cs protocol (must be int)
