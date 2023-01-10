@@ -369,7 +369,7 @@ S32 ItemSpawn::lua_setSpawnTime(lua_State *L)
 {
    checkArgList(L, functionArgs, "ItemSpawn", "setSpawnTime");
 
-   setRespawnTime(getInt(L, 1));
+   setRespawnTime(S32(getInt(L, 1)));
 
    return 0;
 }
@@ -425,7 +425,7 @@ AsteroidSpawn::AsteroidSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_
          setPos(L, 1);
 
       if(profile == 2)
-         setRespawnTime(getInt(L, 2));
+         setRespawnTime(S32(getInt(L, 2)));
    }
 }
 

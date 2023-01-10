@@ -1435,7 +1435,7 @@ S32 BfObject::lua_getId(lua_State *L)
 S32 BfObject::lua_setId(lua_State *L)  
 { 
    checkArgList(L, functionArgs, "BfObject", "setId");
-   mUserAssignedId = getInt(L, 1);
+   mUserAssignedId = S32(getInt(L, 1));
    return 0;            
 }
 
