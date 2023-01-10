@@ -395,12 +395,10 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
 
       default:  // Not handled
          title = "Connection Failed";
-         message = "Unable to connect to the master server; received error code:\n\n";
+         message = "Unable to connect to the master server\nReceived error code [" + itos(reason) + "]";
 
          if(reasonStr[0])
-            message += itos(reason) + " " + reasonStr;
-         else
-            message += "MasterServer Error #" + itos(reason);
+            message += "\n\n" + string(reasonStr);
 
          message += "\n\nCheck your Internet Connection and firewall settings.\n\n"
                     "Please report this error code to the Bitfighter developers.";
