@@ -335,7 +335,7 @@ public:
    U8 mConnectionVersion;  // the CONNECT_VERSION of the other side of this connection
 
    void writeConnectRequest(BitStream *stream);
-   bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
+   bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason, string &reasonStr);
    void writeConnectAccept(BitStream *stream);
    bool readConnectAccept(BitStream *stream, NetConnection::TerminationReason &reason);
 

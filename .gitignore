@@ -247,10 +247,10 @@ pip-log.txt
 .coverage
 .tox
 
-#Translations
+# Translations
 *.mo
 
-#Mr Developer
+# Mr Developer
 .mr.developer.cfg
 
 lua/luajit/src/buildvm.exp
@@ -264,19 +264,15 @@ lua/luajit/src/minilua.lib
 doc/html/
 doc/temp-doxygen-pl/
 doc/temp-doxygen/
-
 doc/temp-doxygen-py/
-
 doc/html2/
-
 doc/html-py/
-
 doc/html-final/
 
-.vs/bitfighter/v15/Browse.VC.db
+# VisualStudio files
+.vs/*
 
-.vs/bitfighter/v15/Browse.VC.opendb
-
-.vs/slnx.sqlite
-
-.vs/VSWorkspaceState.json
+# CMake files
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake

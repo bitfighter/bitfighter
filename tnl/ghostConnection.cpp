@@ -900,9 +900,9 @@ void GhostConnection::writeConnectRequest(BitStream *stream)
 // If this host has MORE NetEvent classes declared, the mGhostClassCount
 // is set to the requested count, and is verified to lie on a boundary between versions.
 // This gets run when someone is connecting to us
-bool GhostConnection::readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason)
+bool GhostConnection::readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason, string &reasonStr)
 {
-   if(!Parent::readConnectRequest(stream, reason))
+   if(!Parent::readConnectRequest(stream, reason, reasonStr))
       return false;
 
    U32 remoteClassCount = stream->readInt(16);

@@ -45,6 +45,8 @@
 #include "tnlNetConnection.h"
 #endif
 
+using namespace std;
+
 namespace TNL {
 
 class AsymmetricKey;
@@ -291,7 +293,7 @@ protected:
 
    /// Sends a connect rejection to a valid connect request in response to possible error
    /// conditions (server full, wrong password, etc).
-   void sendConnectReject(ConnectionParameters *theParams, const Address &theAddress, NetConnection::TerminationReason reason);
+   void sendConnectReject(ConnectionParameters *theParams, const Address &theAddress, NetConnection::TerminationReason reason, const char *reasonString);
 
    /// Handles a connect rejection packet by notifying the connection object
    /// that the connection was rejected.

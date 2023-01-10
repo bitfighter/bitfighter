@@ -12,7 +12,7 @@ endif()
 
 #
 # Linker flags
-# 
+#
 if(MSVC)
 	# Using the following NODEFAULTLIB to fix LNK4098 warning and some linker errors
 	set(CMAKE_EXE_LINKER_FLAGS_DEBUG          "${CMAKE_EXE_LINKER_FLAGS_DEBUG}          /NODEFAULTLIB:libc.lib,libcmt.lib,msvcrt.lib,libcd.lib,msvcrtd.lib")
@@ -24,7 +24,7 @@ if(MSVC)
 	set(LinkerFlags
 		CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
 	)
-	
+
 	foreach(LinkerFlag ${LinkerFlags})
 		# Handle both /INCREMENTAL:YES and /INCREMENTAL
 		# .. First set everything to '/INCREMENTAL', then turn it off
@@ -36,7 +36,7 @@ endif()
 if(MINGW)
 	# MinGW won't statically compile in Microsofts c/c++ library routines
 	set(BF_LINK_FLAGS "-Wl,--as-needed -static-libgcc -static-libstdc++")
-	
+
 	# Only link in what is absolutely necessary
 	set(CMAKE_EXE_LINKER_FLAGS ${BF_LINK_FLAGS})
 endif()
@@ -44,15 +44,15 @@ endif()
 if(XCOMPILE)
 	# Disable LuaJIT for cross-compile (for now)
 	set(USE_LUAJIT NO)
-	
+
 	# StackWalker has too much black magic for mingw
 	add_definitions(-DBF_NO_STACKTRACE)
 endif()
 
 
-# 
+#
 # Compiler specific flags
-# 
+#
 if(MSVC)
 	# Using /MT avoids dynamically linking against the stupid MSVC runtime libraries
 	set(CompilerFlags
@@ -68,11 +68,11 @@ if(MSVC)
 	foreach(CompilerFlag ${CompilerFlags})
 		string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
 	endforeach()
-	
+
 	# Enable 'Edit and Continue' debugging support
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /ZI")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
-	
+
 	# Add parallel build to Visual Studio
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 
@@ -112,7 +112,7 @@ set(PNG_PNG_INCLUDE_DIR "${BF_LIB_INCLUDE_DIR}/libpng")
 set(OPENAL_LIBRARY "${BF_LIB_DIR}/OpenAL32.lib")
 set(ZLIB_LIBRARY   "${BF_LIB_DIR}/zlib.lib")
 set(PNG_LIBRARY    "${BF_LIB_DIR}/libpng14.lib")
-	
+
 find_package(VorbisFile)
 
 
@@ -165,7 +165,7 @@ function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 				PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_SOURCE_DIR}/exe
 			)
 		endforeach()
-		
+
 		# Separate output name "bitfighter_debug.exe" for debug build, to avoid conflicts with debug/release build
 		set_target_properties(${targetName} PROPERTIES DEBUG_POSTFIX "_debug")
 
@@ -176,7 +176,7 @@ function(BF_PLATFORM_SET_TARGET_PROPERTIES targetName)
 		set_target_properties(${targetName} PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
 		set_target_properties(${targetName} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
 		set_target_properties(${targetName} PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
-		
+
 		# Set more compiler flags for console on appropriate targets
 		list(APPEND ALL_DEBUG_DEFS "_CONSOLE")
 	endif()
@@ -193,7 +193,7 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 	# The trailing slash is necessary to do here for proper native path translation
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/resource/ resDir)
 	file(TO_NATIVE_PATH ${BF_LIB_DIR}/ libDir)
-	
+
 	# Destinations
 	file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/exe exeDir)
 
@@ -205,9 +205,9 @@ function(BF_PLATFORM_POST_BUILD_INSTALL_RESOURCES targetName)
 		set(RES_COPY_CMD xcopy /e /d /y ${resDir}* ${exeDir})
 		set(LIB_COPY_CMD xcopy /d /y ${libDir}*.dll ${exeDir})
 	endif()
-	
+
 	# Copy resources
-	add_custom_command(TARGET ${targetName} POST_BUILD 
+	add_custom_command(TARGET ${targetName} POST_BUILD
 		COMMAND ${RES_COPY_CMD}
 		COMMAND ${LIB_COPY_CMD}
 	)
@@ -217,28 +217,28 @@ endfunction()
 function(BF_PLATFORM_INSTALL targetName)
 	# Binaries
 	install(TARGETS ${targetName} RUNTIME DESTINATION ./)
-	
+
 	# Libraries
 	file(GLOB BF_INSTALL_LIBS ${BF_LIB_DIR}/*.dll)
 	# Except libcurl which will be put into the updater directory
 	#list(REMOVE_ITEM BF_INSTALL_LIBS "${BF_LIB_DIR}/libcurl.dll")
 	install(FILES ${BF_INSTALL_LIBS} DESTINATION ./)
-	
+
 	# Resources
 	install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource/ DESTINATION ./)
 	install(FILES ${CMAKE_SOURCE_DIR}/zap/bitfighter_win_icon_green.ico DESTINATION ./)
-	
+
 	# Doc
 	install(FILES ${CMAKE_SOURCE_DIR}/doc/readme.txt DESTINATION ./)
 	install(FILES ${CMAKE_SOURCE_DIR}/LICENSE.txt DESTINATION ./)
 	install(FILES ${CMAKE_SOURCE_DIR}/COPYING.txt DESTINATION ./)
-	
+
 	# Updater
 	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/gup.exe DESTINATION updater)
 	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/gup.xml DESTINATION updater)
 	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/nativeLang.xml DESTINATION updater)
 	install(FILES ${CMAKE_SOURCE_DIR}/exe/updater/libcurl.dll DESTINATION updater)
-	
+
 	# Other
 	install(FILES ${CMAKE_SOURCE_DIR}/build/windows/installer/twoplayers.bat DESTINATION ./)
 endfunction()
@@ -255,9 +255,9 @@ function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	set(CPACK_CREATE_DESKTOP_LINKS ${targetName})
 	# This sets up start menu and desktop shortcuts
 	set(CPACK_PACKAGE_EXECUTABLES "bitfighter;Bitfighter")
-	
+
 	set(BF_PACKAGE_RESOURCE_DIR ${CMAKE_SOURCE_DIR}/build/windows/installer)
-	
+
 
 	# NSIS setup, requires NSIS 3.0+ (for 64 bit support)
 	set(CPACK_GENERATOR NSIS)
@@ -269,28 +269,28 @@ function(BF_PLATFORM_CREATE_PACKAGES targetName)
 	set(CPACK_NSIS_COMPRESSOR "/SOLID lzma")
 	set(CPACK_NSIS_HELP_LINK "http://bitfighter.org/")
 	set(CPACK_NSIS_URL_INFO_ABOUT "http://bitfighter.org/")
-	
+
 	# Desktop shortcut handling for install/uninstall
 	set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut \\\"$DESKTOP\\\\Bitfighter.lnk\\\" \\\"$INSTDIR\\\\bitfighter.exe\\\"")
 	set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "Delete \\\"$DESKTOP\\\\Bitfighter.lnk\\\"")
 
 	# Any extra start menu shortcuts
-	set(CPACK_NSIS_MENU_LINKS 
+	set(CPACK_NSIS_MENU_LINKS
 		"http://bitfighter.org/" "Bitfighter Home Page"
 		"http://bitfighter.org/forums/" "Bitfighter Forums")
-	
+
 	# Branding
 	# Four backslashes because NSIS can't resolve the last portion of a UNIX path.  Fun!
 	set(CPACK_PACKAGE_ICON "${BF_PACKAGE_RESOURCE_DIR}\\\\nsis_header_banner.bmp")
-	set(WELCOME_BANNER ${BF_PACKAGE_RESOURCE_DIR}\\\\nsis_welcome_banner.bmp) 
+	set(WELCOME_BANNER ${BF_PACKAGE_RESOURCE_DIR}\\\\nsis_welcome_banner.bmp)
 	set(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "BrandingText \\\"${CPACK_PACKAGE_NAME} ${BF_VERSION}\\\"
 		!define MUI_WELCOMEFINISHPAGE_BITMAP \\\"${WELCOME_BANNER}\\\"")
-	
+
 	# Need this otherwise NSIS thinks executables are in the 'bin' sub-folder
 	set(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
-	
+
 	set(CPACK_NSIS_MUI_FINISHPAGE_RUN "bitfighter.exe")
-	
-	
+
+
 	include(CPack)
 endfunction()

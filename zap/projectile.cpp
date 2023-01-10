@@ -1368,7 +1368,7 @@ void SpyBug::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, b
 void SpyBug::renderDock()
 {
 #ifndef ZAP_DEDICATED
-   const F32 radius = 9;
+   const S32 radius = 9;
 
    Point pos = getRenderPos();
 
@@ -1450,12 +1450,12 @@ TNL_IMPLEMENT_NETOBJECT(Seeker);
 
 // Statics
 const F32 Seeker::Radius = 2;
-const F32 Seeker::Mass = 0.2;
+const F32 Seeker::Mass = 0.2f;
 
 const U32 Seeker::SpeedIncreasePerSecond = 300;
 const U32 Seeker::TargetAcquisitionRadius = 400;
-const F32 Seeker::MaximumAngleChangePerSecond = FloatTau / 2;
-const F32 Seeker::TargetSearchAngle = FloatTau * .6f;  // Anglular spread in front of ship to search for targets
+const F32 Seeker::MaximumAngleChangePerSecond = FloatTau / 2.0f;
+const F32 Seeker::TargetSearchAngle = FloatTau * 0.6f;  // Anglular spread in front of ship to search for targets
 
 const S32 Seeker::ReassessTargetTime = 100;  // Milliseconds to reassess target
 

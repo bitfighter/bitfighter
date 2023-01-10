@@ -8,6 +8,7 @@
 #include "DatabaseAccessThread.h"
 #include "GameJoltConnector.h"
 
+#include "../zap/version.h"
 #include "../zap/stringUtils.h"  // For itos, replaceString
 #include "../zap/IniFile.h"      // For INI reading/writing
 
@@ -33,7 +34,7 @@ MasterSettings::MasterSettings(const string &iniFile)
    mSettings.add(new Setting<string>("JsonOutfile",                      "server.json",        "json_file",                            "host"));
    mSettings.add(new Setting<U32>   ("Port",                                 25955,            "port",                                 "host"));
    mSettings.add(new Setting<U32>   ("LatestReleasedCSProtocol",               0,              "latest_released_cs_protocol",          "host"));
-   mSettings.add(new Setting<U32>   ("LatestReleasedBuildVersion",             0,              "latest_released_client_build_version", "host"));
+   mSettings.add(new Setting<U32>   (LATEST_RELEASED_BUILD_VERSION,            0,              "latest_released_client_build_version", "host"));
                                                                                                
    // Variables for managing access to MySQL                                                   
    mSettings.add(new Setting<string>("MySqlAddress",                           "",             "phpbb_database_address",               "phpbb"));
@@ -70,7 +71,7 @@ void MasterSettings::readConfigFile()
    loadSettingsFromINI();
 
    // Not sure if this should go here...
-   if(getVal<U32>("LatestReleasedCSProtocol") == 0 && getVal<U32>("LatestReleasedBuildVersion") == 0)
+   if(getVal<U32>("LatestReleasedCSProtocol") == 0 && getVal<U32>(LATEST_RELEASED_BUILD_VERSION) == 0)
       logprintf(LogConsumer::LogError, "Unable to find a valid protocol line or build_version in config file... disabling update checks!");
 }
 
@@ -106,7 +107,7 @@ void MasterSettings::loadSettingsFromINI()
    // [motd_clients] section
    // This section holds each old client build number as a key.  This allows us to set
    // different messages for different versions
-   string defaultMessage = "New version available at bitfighter.org";
+   string upgradeMessage = "New version available at bitfighter.org";
    Vector<string> keys;
    ini.GetAllKeys("motd_clients", keys);
 
@@ -115,7 +116,7 @@ void MasterSettings::loadSettingsFromINI()
    for(S32 i = 0; i < keys.size(); i++)
    {
       U32 build_version = (U32)atoi(keys[i].c_str());    // Avoid conflicts with std::stoi() which is defined for VC++ 10
-      string message = ini.GetValue("motd_clients", keys[i], defaultMessage);
+      string message = ini.GetValue("motd_clients", keys[i], upgradeMessage);
 
       motdClientMap.insert(pair<U32, string>(build_version, message));
    }
@@ -127,7 +128,7 @@ void MasterSettings::loadSettingsFromINI()
    string motdFilename = ini.GetValue("motd", "motd_file", "motd");  // Default 'motd' in current directory
 
    // Grab the current message and add it to the map as the most recently released build
-   motdClientMap[getVal<U32>("LatestReleasedBuildVersion")] = getCurrentMOTDFromFile(motdFilename);
+   motdClientMap[getVal<U32>(LATEST_RELEASED_BUILD_VERSION)] = getCurrentMOTDFromFile(motdFilename);
 }
 
 
@@ -147,8 +148,10 @@ string MasterSettings::getCurrentMOTDFromFile(const string &filename) const
    fclose(f);
 
    if(!ok)
+   {
+      logprintf(LogConsumer::LogError, "Could not read message from file \"%s\" -- using default MOTD.", filename.c_str());
       return defaultMessage;
-
+   }
 
    string returnMessage(message);
    trim_right_in_place(returnMessage, "\n");  // Remove any trailing new lines
@@ -160,16 +163,19 @@ string MasterSettings::getCurrentMOTDFromFile(const string &filename) const
 // If clientBuildVersion is U32_MAX, then return the motd for the latest build
 string MasterSettings::getMotd(U32 clientBuildVersion) const
 {
-   string motdString = "Welcome to Bitfighter!";
-
    // Use latest if build version is U32_MAX
    if(clientBuildVersion == U32_MAX)
-      clientBuildVersion = getVal<U32>("LatestReleasedBuildVersion");
+      clientBuildVersion = getVal<U32>(LATEST_RELEASED_BUILD_VERSION);
 
+   string motdString;
    map <U32, string>::const_iterator iter = motdClientMap.find(clientBuildVersion);
-   if(iter != motdClientMap.end())
+   if(iter != motdClientMap.end())     // Found the version in the motdClientMap; return version-specific MOTD
       motdString = (*iter).second;
-
+   else if(clientBuildVersion > getVal<U32>(LATEST_RELEASED_BUILD_VERSION))
+      motdString = "Welcome to the future!  This client is running a new version of Bitfighter.  If it's an official release, tell the devs to update the latest_released_client_build_version setting in master.ini!";
+   else      // This is not a current release, has no version-specific messages in the motdClientMap, and isn't newer than the latest build release
+      motdString = "Time to upgrade!  Download the current version at bitfighter.org";
+  
    return motdString;
 }
 
@@ -215,9 +221,9 @@ NetInterface *MasterServer::createNetInterface() const
    NetInterface *netInterface = new NetInterface(Address(IPProtocol, Address::Any, port));
 
    // Log a welcome message in the main log and to the console
-   logprintf("[%s] Master Server \"%s\" started - listening on port %d", getTimeStamp().c_str(),
+   logprintf("[%s] Master Server \"%s\" started - listening on port %d (protocol v. %d)", getTimeStamp().c_str(),
                                                                          getSetting<string>("ServerName").c_str(),
-                                                                         port);
+                                                                         port, MASTER_PROTOCOL_VERSION);
    return netInterface;
 }
 
@@ -344,7 +350,7 @@ void MasterServer::idle(const U32 timeDelta)
       {
          if(request->initiator.isValid())
          {
-            ByteBufferPtr ptr = new ByteBuffer((U8 *)MasterRequestTimedOut, strlen(MasterRequestTimedOut) + 1);
+            ByteBufferPtr ptr = new ByteBuffer((U8 *)MasterRequestTimedOut, U32(strlen(MasterRequestTimedOut) + 1));
 
             request->initiator->m2cArrangedConnectionRejected(request->initiatorQueryId, ptr);   // 0 = ReasonTimedOut
             request->initiator->removeConnectRequest(request);

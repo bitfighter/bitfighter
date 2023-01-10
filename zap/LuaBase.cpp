@@ -1000,7 +1000,7 @@ string prettyPrintParamList(const LuaFunctionArgList &functionArgList)
 ScriptContext getScriptContext(lua_State *L)
 {
    lua_getfield(L, LUA_REGISTRYINDEX, SCRIPT_CONTEXT_KEY);
-   S32 context = lua_tointeger(L, -1);
+   S32 context = S32(lua_tointeger(L, -1));
    lua_pop(L, 1);    // Remove the value we just added from the stack
 
    // Bounds checking

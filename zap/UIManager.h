@@ -43,6 +43,7 @@ class Game;
 class ClientGame;
 class UserInterface;
 class GameSettings;
+class ErrorMessageUserInterface;
 
 class UIManager
 {
@@ -109,6 +110,8 @@ public:
       return false;
    }
 
+
+   void activateIfDifferent(ErrorMessageUserInterface *ui);
 
    template <typename T>
    void activate(bool save = true)

@@ -19,7 +19,7 @@
 
 using namespace DbWriter;
 
-namespace Master 
+namespace Master
 {
 
 
@@ -56,7 +56,7 @@ static S32 getNextId()
 /// so we don't explode if we destruct right away.
 MasterServerConnection::MasterServerConnection()
 {
-   mStrikeCount = 0; 
+   mStrikeCount = 0;
    mLastActivityTime = 0;
    setIsConnectionToClient();
    setIsAdaptive();
@@ -104,20 +104,20 @@ MasterServerConnection::~MasterServerConnection()
    if(mLoggingStatus != "")
    {
       // CONNECT_FAILED | timestamp | address | logging status
-      logprintf(LogConsumer::LogConnection, "CONNECT_FAILED\t%s\t%s\t%s", getTimeStamp().c_str(), 
-                                                                           getNetAddress().toString(), 
+      logprintf(LogConsumer::LogConnection, "CONNECT_FAILED\t%s\t%s\t%s", getTimeStamp().c_str(),
+                                                                           getNetAddress().toString(),
                                                                            mLoggingStatus.c_str());
    }
    else if(mConnectionType == MasterConnectionTypeServer)
    {
       // SERVER_DISCONNECT | timestamp | server name
-      logprintf(LogConsumer::LogConnection, "SERVER_DISCONNECT\t%s\t%s", getTimeStamp().c_str(), 
+      logprintf(LogConsumer::LogConnection, "SERVER_DISCONNECT\t%s\t%s", getTimeStamp().c_str(),
                                                                            mPlayerOrServerName.getString());
    }
    else if(mConnectionType == MasterConnectionTypeClient)
    {
       // CLIENT_DISCONNECT | timestamp | player name
-      logprintf(LogConsumer::LogConnection, "CLIENT_DISCONNECT\t%s\t%s", getTimeStamp().c_str(), 
+      logprintf(LogConsumer::LogConnection, "CLIENT_DISCONNECT\t%s\t%s", getTimeStamp().c_str(),
                                                                            mPlayerOrServerName.getString());
       GameJolt::onPlayerQuit(mMaster->getSettings(), this);
    }
@@ -142,11 +142,11 @@ MasterServerConnection::PHPBB3AuthenticationStatus MasterServerConnection::verif
    //          2 = alphanumeric (only allows alphanumeric characters in the username)
    //
    // We'll use level 1 for now, so users can put special characters in their username
-   authenticator.initialize(mMaster->getSetting<string>("MySqlAddress"), 
-                              mMaster->getSetting<string>("DbUsername"), 
-                              mMaster->getSetting<string>("DbPassword"), 
-                              mMaster->getSetting<string>("Phpbb3Database"), 
-                              mMaster->getSetting<string>("Phpbb3TablePrefix"), 
+   authenticator.initialize(mMaster->getSetting<string>("MySqlAddress"),
+                              mMaster->getSetting<string>("DbUsername"),
+                              mMaster->getSetting<string>("DbPassword"),
+                              mMaster->getSetting<string>("Phpbb3Database"),
+                              mMaster->getSetting<string>("Phpbb3TablePrefix"),
                               1);
 
    S32 errorcode;
@@ -239,7 +239,7 @@ MasterServerConnection::PHPBB3AuthenticationStatus MasterServerConnection::check
 Vector<string> master_admins;  // --> move to settings struct
 
 
-void MasterServerConnection::processAutentication(StringTableEntry newName, PHPBB3AuthenticationStatus stat, 
+void MasterServerConnection::processAutentication(StringTableEntry newName, PHPBB3AuthenticationStatus stat,
                                                   TNL::Int<32> badges, U16 gamesPlayed)
 {
    mBadges = NO_BADGES;
@@ -333,19 +333,19 @@ void MasterServerConnection::c2mQueryServersOption(U32 queryId, bool hostonly)
 {
    Vector<IPAddress> addresses(IP_MESSAGE_ADDRESS_COUNT);
    Vector<S32> serverIdList(IP_MESSAGE_ADDRESS_COUNT);
+
    Vector<StringTableEntry> serverNames(IP_MESSAGE_ADDRESS_COUNT);
-   
 
    const Vector<MasterServerConnection *> *serverList = mMaster->getServerList();
 
    for(S32 i = 0; i < serverList->size(); i++)
    {
       // Hide hidden servers
-      if(serverList->get(i)->mIsIgnoredFromList)  
+      if(serverList->get(i)->mIsIgnoredFromList)
          continue;
 
       // Skip servers with incompatible versions
-      if(serverList->get(i)->mCSProtocolVersion != mCSProtocolVersion)  
+      if(serverList->get(i)->mCSProtocolVersion != mCSProtocolVersion)
          continue;
 
       // Skip servers with host mode
@@ -361,7 +361,6 @@ void MasterServerConnection::c2mQueryServersOption(U32 queryId, bool hostonly)
       if(addresses.size() == IP_MESSAGE_ADDRESS_COUNT)
       {
          sendM2cQueryServersResponse(queryId, addresses, serverIdList, serverNames);
-         
          addresses.clear();
          serverIdList.clear();
 		 serverNames.clear();
@@ -384,6 +383,7 @@ void MasterServerConnection::c2mQueryServersOption(U32 queryId, bool hostonly)
 
 
 // Wrapper around m2cQueryServersResponse to handle the different versions we need to use
+
 void MasterServerConnection::sendM2cQueryServersResponse(U32 queryId, const Vector<IPAddress> &addresses, 
                                                                       const Vector<S32> &serverIdList,
 																	  const Vector<StringTableEntry> &serverNames)
@@ -423,7 +423,7 @@ bool MasterServerConnection::checkActivityTime(U32 timeDeltaMinimum)
       mStrikeCount++;
       if(mStrikeCount == 3)
       {
-         logprintf(LogConsumer::LogConnection, "User %s Disconnect due to flood control set at %i milliseconds", 
+         logprintf(LogConsumer::LogConnection, "User %s Disconnect due to flood control set at %i milliseconds",
                                                 mPlayerOrServerName.getString(), timeDeltaMinimum);
          disconnect(ReasonFloodControl, "");
          return false;
@@ -612,7 +612,7 @@ void MasterServerConnection::writeClientServerList_JSON()
 
 
 // This is called when a client wishes to arrange a connection with a server
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestArrangedConnection, 
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestArrangedConnection,
                            (U32 requestId, IPAddress remoteAddress, IPAddress internalAddress, ByteBufferPtr connectionParameters) )
 {
    // First, make sure that we're connected with the server that they're requesting a connection with
@@ -632,8 +632,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestArrangedConnection,
    req->hostQueryId = mLastQueryId++;
    req->requestTime = Platform::getRealMilliseconds();
 
- 
-   logprintf(LogConsumer::LogConnectionManager, "Client: %s requested connection to %s", 
+
+   logprintf(LogConsumer::LogConnectionManager, "Client: %s requested connection to %s",
                                                       getNetAddress().toString(), conn->getNetAddress().toString());
 
    // Add the request to the relevant lists (the global list, this connection's list,
@@ -643,7 +643,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestArrangedConnection,
    gConnectList.push_back(req);
 
    // Do some DOS checking...
-   checkActivityTime(TWO_SECONDS);      
+   checkActivityTime(TWO_SECONDS);
 
    // Get our address...
    Address theAddress = getNetAddress();
@@ -699,7 +699,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcceptArrangedConnection, 
    char buffer[256];
    strcpy(buffer, getNetAddress().toString());
 
-   logprintf(LogConsumer::LogConnectionManager, "[%s] Server: %s accepted connection request from %s", getTimeStamp().c_str(), buffer, 
+   logprintf(LogConsumer::LogConnectionManager, "[%s] Server: %s accepted connection request from %s", getTimeStamp().c_str(), buffer,
                                                       req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");
 
    // If we still know about the requestor, tell him his connection was accepted...
@@ -742,7 +742,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mUpdateServerStatus, (Strin
       return;
 
    // Only update if anything has changed
-   if(mLevelName   != levelName   || mLevelType  != levelType  || mNumBots   != botCount   || 
+   if(mLevelName   != levelName   || mLevelType  != levelType  || mNumBots   != botCount   ||
       mPlayerCount != playerCount || mMaxPlayers != maxPlayers || mInfoFlags != infoFlags )
    {
       mLevelName = levelName;
@@ -835,7 +835,7 @@ void MasterServerConnection::writeStatisticsToDb(VersionedGameStats &stats)
    mMaster->getDatabaseAccessThread()->addEntry(gameReport);
 }
 
-   
+
 struct AchievementWriter : public MasterThreadEntry
 {
    U8 achievementId;
@@ -894,8 +894,8 @@ struct LevelInfoWriter : public MasterThreadEntry
 };
 
 
-void MasterServerConnection::writeLevelInfoToDb(const string &hash, const string &levelName, const string &creator, 
-                                                const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, 
+void MasterServerConnection::writeLevelInfoToDb(const string &hash, const string &levelName, const string &creator,
+                                                const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, S32 winningScore,
                                                 S32 gameDurationInSeconds)
 {
    if(!checkActivityTime(SIX_SECONDS))
@@ -923,7 +923,7 @@ struct HighScoresReader : public MasterThreadEntry
    S32 scoresPerGroup;
 
    // Constructor
-   HighScoresReader(const MasterSettings *settings, S32 scoresPerGroup) : MasterThreadEntry(settings)        
+   HighScoresReader(const MasterSettings *settings, S32 scoresPerGroup) : MasterThreadEntry(settings)
    {
       this->scoresPerGroup = scoresPerGroup;
    }
@@ -939,28 +939,28 @@ struct HighScoresReader : public MasterThreadEntry
       MasterServerConnection::highScores.scores.clear();
 
       MasterServerConnection::highScores.groupNames.push_back("Official Wins Last Week");
-      databaseWriter.getTopPlayers("v_last_week_top_player_official_wins", "win_count",  
-                                    scoresPerGroup, MasterServerConnection::highScores.names, 
+      databaseWriter.getTopPlayers("v_last_week_top_player_official_wins", "win_count",
+                                    scoresPerGroup, MasterServerConnection::highScores.names,
                                     MasterServerConnection::highScores.scores);
 
       MasterServerConnection::highScores.groupNames.push_back("Official Wins This Week, So Far");
-      databaseWriter.getTopPlayers("v_current_week_top_player_official_wins", "win_count",  
-                                    scoresPerGroup, MasterServerConnection::highScores.names, 
+      databaseWriter.getTopPlayers("v_current_week_top_player_official_wins", "win_count",
+                                    scoresPerGroup, MasterServerConnection::highScores.names,
                                     MasterServerConnection::highScores.scores);
 
       MasterServerConnection::highScores.groupNames.push_back("Games Played Last Week");
-      databaseWriter.getTopPlayers("v_last_week_top_player_games", "game_count", 
-                                    scoresPerGroup, MasterServerConnection::highScores.names, 
+      databaseWriter.getTopPlayers("v_last_week_top_player_games", "game_count",
+                                    scoresPerGroup, MasterServerConnection::highScores.names,
                                     MasterServerConnection::highScores.scores);
 
       MasterServerConnection::highScores.groupNames.push_back("Games Played This Week, So Far");
-      databaseWriter.getTopPlayers("v_current_week_top_player_games", "game_count", 
+      databaseWriter.getTopPlayers("v_current_week_top_player_games", "game_count",
                                     scoresPerGroup, MasterServerConnection::highScores.names,
                                     MasterServerConnection::highScores.scores);
 
       MasterServerConnection::highScores.groupNames.push_back("Latest BBB Winners");
-      databaseWriter.getTopPlayers("v_latest_bbb_winners", "rank", 
-                                    scoresPerGroup, MasterServerConnection::highScores.names, 
+      databaseWriter.getTopPlayers("v_latest_bbb_winners", "rank",
+                                    scoresPerGroup, MasterServerConnection::highScores.names,
                                     MasterServerConnection::highScores.scores);
 
       MasterServerConnection::highScores.scoresPerGroup = scoresPerGroup;
@@ -973,8 +973,8 @@ struct HighScoresReader : public MasterThreadEntry
 
       for(S32 i = 0; i < MasterServerConnection::highScores.waitingClients.size(); i++)
          if(MasterServerConnection::highScores.waitingClients[i])
-            MasterServerConnection::highScores.waitingClients[i]->m2cSendHighScores(MasterServerConnection::highScores.groupNames, 
-                                                                                    MasterServerConnection::highScores.names, 
+            MasterServerConnection::highScores.waitingClients[i]->m2cSendHighScores(MasterServerConnection::highScores.groupNames,
+                                                                                    MasterServerConnection::highScores.names,
                                                                                     MasterServerConnection::highScores.scores);
       MasterServerConnection::highScores.waitingClients.clear();
    }
@@ -987,7 +987,7 @@ struct HighScoresReader : public MasterThreadEntry
 typedef map<U32, shared_ptr<TotalLevelRating> > TotalLevelRatingsMap;
 static TotalLevelRatingsMap totalLevelRatingsCache;
 
-   
+
 struct TotalLevelRatingsReader : public MasterThreadEntry
 {
    U32 dbId;
@@ -998,18 +998,18 @@ struct TotalLevelRatingsReader : public MasterThreadEntry
       dbId = databaseId;
    }
 
-   // If, while we are running, we get some updated data from the client, receivedUpdateByClientWhileBusy 
-   // will be set to true.  If that happens, we need to re-run the database query to get 
+   // If, while we are running, we get some updated data from the client, receivedUpdateByClientWhileBusy
+   // will be set to true.  If that happens, we need to re-run the database query to get
    // the latest data.
    void run()
    {
       TotalLevelRating *totalRating = totalLevelRatingsCache[dbId].get();
-      
-      do 
+
+      do
       {
          totalRating->receivedUpdateByClientWhileBusy = false;
          rating = getDatabaseWriter(mSettings).getLevelRating(dbId);    // rating could be a magic number!
-      } 
+      }
       while(totalRating->receivedUpdateByClientWhileBusy);
    }
 
@@ -1045,8 +1045,8 @@ struct PlayerLevelRatingsReader : public MasterThreadEntry
    S32 rating;
 
    // Constructor
-   PlayerLevelRatingsReader(const MasterSettings *settings, U32 databaseId, const StringTableEntry &playerName) : 
-         MasterThreadEntry(settings), 
+   PlayerLevelRatingsReader(const MasterSettings *settings, U32 databaseId, const StringTableEntry &playerName) :
+         MasterThreadEntry(settings),
          playerName(playerName)
    {
       dbId = databaseId;
@@ -1096,7 +1096,7 @@ HighScores *MasterServerConnection::getHighScores(S32 scoresPerGroup)
          RefPtr<HighScoresReader> highScoreReader = new HighScoresReader(mMaster->getSettings(), scoresPerGroup);
          mMaster->getDatabaseAccessThread()->addEntry(highScoreReader);
       }
-      
+
    return &highScores;
 }
 
@@ -1126,7 +1126,7 @@ TotalLevelRating *MasterServerConnection::getLevelRating(U32 databaseId)
          rating->resetClock();
 
          // Queue the request!
-         RefPtr<TotalLevelRatingsReader> totalLevelRatingsReader = 
+         RefPtr<TotalLevelRatingsReader> totalLevelRatingsReader =
                            new TotalLevelRatingsReader(mMaster->getSettings(), databaseId);
          mMaster->getDatabaseAccessThread()->addEntry(totalLevelRatingsReader);
       }
@@ -1163,7 +1163,7 @@ PlayerLevelRating *MasterServerConnection::getLevelRating(U32 databaseId, const 
 
    if(!rating)
       rating = createNewPlayerRating(databaseId, playerName);
-   
+
    if(!rating->isValid || rating->isExpired() || rating->getRating() == UnknownRating)
       if(!rating->isBusy)
       {
@@ -1252,8 +1252,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcheivementAchieved, (U8 a
 }
 
 
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendLevelInfo, 
-                           (string hash, string levelName, string creator, 
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendLevelInfo,
+                           (string hash, string levelName, string creator,
                               StringTableEntry gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds))
 {
    writeLevelInfoToDb(hash, levelName, creator, gameType, hasLevelGen, teamCount, winningScore, gameDurationInSeconds);
@@ -1393,7 +1393,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mSetLevelRating, (U32 datab
    S32 denormalizedPlayerRating = rating - 1;
 
    // Update the cache -- there could be some weirdness if at the same time, the player were requesting a rating and the database
-   // thread was busy... but that seems unlikely, as the player would have to be logged in multiple times.  In any event, this 
+   // thread was busy... but that seems unlikely, as the player would have to be logged in multiple times.  In any event, this
    // situation is handled by setting the receivedUpdateByClientWhileBusy flag
    PlayerLevelRating *playerRating = playerLevelRatingsCache[DbIdPlayerNamePair(databaseId, mPlayerOrServerName)].get();
 
@@ -1501,9 +1501,9 @@ Vector<Address> gListAddressHide;  // --> move to settings struct
 
 
 // Must match MasterServerConnection::writeConnectRequest()!!
-bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnection::TerminationReason &reason)
+bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnection::TerminationReason &reason, string &reasonStr)
 {
-   if(!Parent::readConnectRequest(bstream, reason))
+   if(!Parent::readConnectRequest(bstream, reason, reasonStr))
    {
       mLoggingStatus = "Parent::readConnectRequest failed";
       return false;
@@ -1514,9 +1514,24 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
    char readstr[256]; // to hold the string being read
 
    bstream->read(&mCMProtocolVersion);    // Version of protocol we'll use with the client
-   if(mCMProtocolVersion < 4 || mCMProtocolVersion > MASTER_PROTOCOL_VERSION) // check for unsupported version
+
+   // Check for unsupported protocol versions
+   if (mCMProtocolVersion < 4)
    {
-      mLoggingStatus = "Bad version";
+      reasonStr = "Requested master protocol version " + std::to_string(mCMProtocolVersion) +
+                  ", but the master doesn't support anything earlier than 4";
+
+      mLoggingStatus = "Client trying to connect with protocol version " + std::to_string(mCMProtocolVersion) + 
+                       " which is far too ancient for us.";
+      return false;
+   }
+   else if(mCMProtocolVersion > MASTER_PROTOCOL_VERSION) 
+   {
+      reasonStr = "Requested master protocol version " + std::to_string(mCMProtocolVersion) +
+                  ", but the server only supports up to " + std::to_string(MASTER_PROTOCOL_VERSION);
+
+      mLoggingStatus = "Client wants to use protocol version " + std::to_string(mCMProtocolVersion) + 
+                       " but we only support up to " + std::to_string(MASTER_PROTOCOL_VERSION);
       return false;
    }
 
@@ -1563,7 +1578,7 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
          mMaster->writeJsonNow();
 
          // SERVER_CONNECT | timestamp | server name | server description
-         logprintf(LogConsumer::LogConnection, "SERVER_CONNECT\t%s\t%s\t%s", getTimeStamp().c_str(), 
+         logprintf(LogConsumer::LogConnection, "SERVER_CONNECT\t%s\t%s\t%s", getTimeStamp().c_str(),
                                                mPlayerOrServerName.getString(), mServerDescr.getString());
       }
       break;
@@ -1598,6 +1613,8 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
                                                      clientList->get(i)->mPlayerOrServerName.getString());
                disconnect(ReasonDuplicateId, "");
                reason = ReasonDuplicateId;
+               reasonStr = "Got duplicate player id; these are randomly generated, and this is a statistally rare event, " 
+                           "so please restart and try again";
 
                mLoggingStatus = "Duplicate ID";
                return false;
@@ -1613,35 +1630,37 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
 
          switch(checkAuthentication(readstr, mCSProtocolVersion <= 35)) // readstr is password
          {
-            case WrongPassword:   
-               reason = ReasonBadLogin;        
+            case WrongPassword:
+               reason = ReasonBadLogin;
                mLoggingStatus = "Wrong password";
+               reasonStr = "Incorrect password";
                return false;
 
-            case InvalidUsername: 
-               reason = ReasonInvalidUsername; 
+            case InvalidUsername:
+               reason = ReasonInvalidUsername;
                mLoggingStatus = "Invalid username";
+               reasonStr = "Invalid username";
                return false;
 
-            case UnknownStatus: 
+            case UnknownStatus:
                mMaster->addClient(this);
 
                // CLIENT_CONNECT | timestamp | player name
-               logprintf(LogConsumer::LogConnection, "CLIENT_CONNECT\t%s\t%s", 
+               logprintf(LogConsumer::LogConnection, "CLIENT_CONNECT\t%s\t%s",
                                                      getTimeStamp().c_str(), mPlayerOrServerName.getString());
 
                // Delay writing JSON to reduce chances of incorrectly showing new player as unauthenticated
-               mMaster->writeJsonDelayed();  
+               mMaster->writeJsonDelayed();
                break;
 
-            case Authenticated: 
+            case Authenticated:
                mMaster->addClient(this);
 
                // CLIENT_CONNECT | timestamp | player name
-               logprintf(LogConsumer::LogConnection, "CLIENT_CONNECT\t%s\t%s", 
+               logprintf(LogConsumer::LogConnection, "CLIENT_CONNECT\t%s\t%s",
                                                      getTimeStamp().c_str(), mPlayerOrServerName.getString());
 
-               mMaster->writeJsonNow();      // Write immediately  
+               mMaster->writeJsonNow();      // Write immediately
                break;
 
             case CantConnect:
@@ -1692,8 +1711,8 @@ void MasterServerConnection::onConnectionEstablished()
    if(mConnectionType == MasterConnectionTypeClient)
    {
       // If client needs to upgrade, tell them
-      m2cSendUpdgradeStatus(mMaster->getSetting<U32>("LatestReleasedCSProtocol")   > mCSProtocolVersion || 
-                            mMaster->getSetting<U32>("LatestReleasedBuildVersion") > mClientBuild);
+      m2cSendUpdgradeStatus(mMaster->getSetting<U32>("LatestReleasedCSProtocol")   > mCSProtocolVersion ||
+                            mMaster->getSetting<U32>(LATEST_RELEASED_BUILD_VERSION) > mClientBuild);
 
       // Send message of the day
       sendMotd();
@@ -1725,7 +1744,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mJoinGlobalChat, ())
       return;
 
    isInGlobalChat = true;
-      
+
    for(S32 i = 0; i < clientList->size(); i++)
       if(clientList->get(i) != this && clientList->get(i)->isInGlobalChat)
          clientList->get(i)->m2cPlayerJoinedGlobalChat(mPlayerOrServerName);

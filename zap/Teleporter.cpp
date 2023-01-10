@@ -921,7 +921,7 @@ U32 Teleporter::getDelay()
 void Teleporter::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
    attributeMenu->addMenuItem(new FloatCounterMenuItem("Delay:",
-         mTeleporterCooldown / 1000.f, 0.1, 0.1, 10000., 1, "seconds",
+         mTeleporterCooldown / 1000.0f, 0.1, 0.1, 10000.0f, 1, "seconds",
          "Almost no delay", "Adjust teleporter cooldown for re-entry"));
 }
 
@@ -929,7 +929,7 @@ void Teleporter::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 // Retrieve the values we need from the menu
 void Teleporter::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   mTeleporterCooldown = Zap::stof(attributeMenu->getMenuItem(0)->getValue()) * 1000;
+   mTeleporterCooldown = U32(Zap::stof(attributeMenu->getMenuItem(0)->getValue()) * 1000);
 }
 
 
@@ -1029,7 +1029,7 @@ S32 Teleporter::lua_delDest(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "delDest");
 
-   S32 index = getInt(L, 1, "Teleporter:delDest()", 1, getDestCount());
+   S32 index = S32(getInt(L, 1, "Teleporter:delDest()", 1, getDestCount()));
 
    index--;    // Adjust for Lua's 1-based index
 
@@ -1066,7 +1066,7 @@ S32 Teleporter::lua_clearDests(lua_State *L)
 S32 Teleporter::lua_getDest(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "getDest");
-   S32 index = getInt(L, 1) - 1;    // - 1 corrects for Lua indices starting at 1
+   S32 index = S32(getInt(L, 1) - 1);    // - 1 corrects for Lua indices starting at 1
 
    if(index < 0 || index >= getDestCount())
       THROW_LUA_EXCEPTION(L, string("Index out of range (requested " + itos(index) + ")").c_str());
@@ -1146,7 +1146,7 @@ S32 Teleporter::lua_setDelay(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "setDelay");
 
-   mTeleporterCooldown = MAX(100, getInt(L, 1));
+   mTeleporterCooldown = U32(MAX(100, getInt(L, 1)));
    setMaskBits(InitMask);
 
    return 0;

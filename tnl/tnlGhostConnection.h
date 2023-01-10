@@ -234,7 +234,7 @@ public:
    TNL_DECLARE_RPC(rpcEndGhosting, ());
 
    virtual void writeConnectRequest(BitStream *stream);
-   virtual bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
+   virtual bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason, string &reasonStr);
    virtual void writeConnectAccept(BitStream *stream);
    virtual bool readConnectAccept(BitStream *stream, NetConnection::TerminationReason &reason);
 

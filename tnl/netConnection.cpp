@@ -907,22 +907,25 @@ void NetConnection::onConnectTerminated(TerminationReason, const char *)
    // Do nothing
 }
 
+
 void NetConnection::writeConnectRequest(BitStream *stream)
 {
    stream->write(U32(getNetClassGroup()));
    stream->write(U32(NetClassRep::getClassGroupCRC(getNetClassGroup())));
 }
 
-bool NetConnection::readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason)
+
+bool NetConnection::readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason, std::string &reasonStr)
 {
    U32 classGroup, classCRC;
    stream->read(&classGroup);
    stream->read(&classCRC);
-
+   // classGroup --> 0 is game client, 2 is master server
    if((NetClassGroup)classGroup == getNetClassGroup() && classCRC == NetClassRep::getClassGroupCRC(getNetClassGroup()))
       return true;
 
    reason = ReasonInvalidCRC;
+   reasonStr = "Invalid CRC (probably a version mismatch); please download the latest client and try again";
    return false;
 }
 
@@ -941,6 +944,7 @@ bool NetConnection::connectLocal(NetInterface *connectionInterface, NetInterface
    Object *co = Object::create(getClassName());
    NetConnection *client = this;
    NetConnection *server = dynamic_cast<NetConnection *>(co);
+   std::string reasonStr;
    NetConnection::TerminationReason reason;
    PacketStream stream;
 
@@ -962,7 +966,8 @@ bool NetConnection::connectLocal(NetInterface *connectionInterface, NetInterface
    stream.setBytePosition(0);
    client->writeConnectRequest(&stream);
    stream.setBytePosition(0);
-   if(!server->readConnectRequest(&stream, reason))
+
+   if(!server->readConnectRequest(&stream, reason, reasonStr))
       goto errorOut;
 
    stream.setBytePosition(0);

@@ -165,14 +165,26 @@ void UIManager::renderPrevUI(const UserInterface *ui)
       }
 }
 
+void UIManager::activateIfDifferent(ErrorMessageUserInterface *ui)
+{
+   if(!mCurrentInterface)
+      return activate(ui);
+
+   ErrorMessageUserInterface *uicurrent_ui = dynamic_cast<ErrorMessageUserInterface *>(mCurrentInterface);
+   if(!uicurrent_ui)
+      return activate(ui);
+
+   if(uicurrent_ui->hasSameMessage(ui))
+      return;
+
+   return activate(ui);
+}
+
 
 void UIManager::activate(UserInterface *ui, bool save)  // save defaults to true
 {
-   if(mCurrentInterface)
-   {
-      if(save)
-         saveUI(mCurrentInterface);
-   }
+   if(mCurrentInterface && save)
+      saveUI(mCurrentInterface);
 
    mLastUI = mCurrentInterface;
    mLastWasLower = false;
@@ -365,7 +377,7 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
          title = "Connection Failed";
          message = 
                "My attempt to connect to the Master Server failed because the server did not respond.  Either the server is down, "
-               "or, more likely, you are not connected to the Internet or your firewall is blocking the connection.\n\n"
+               "or, more likely, you are not connected to the internet or your firewall is blocking the connection.\n\n"
 
                "I will continue trying, but you will not see this message again until you successfully "
                "connect or restart Bitfighter.";
@@ -383,15 +395,12 @@ void UIManager::onConnectionToMasterTerminated(NetConnection::TerminationReason 
 
       default:  // Not handled
          title = "Connection Failed";
-         message = "Unable to connect to the master server, with error code:\n\n";
+         message = "Unable to connect to the master server\nReceived error code [" + itos(reason) + "]";
 
          if(reasonStr[0])
-            message += itos(reason) + " " + reasonStr;
-         else
-            message += "MasterServer Error #" + itos(reason);
+            message += " with message:\n\n\"" + string(reasonStr) + "\"";
 
-         message += "\n\nCheck your Internet Connection and firewall settings.\n\n"
-                    "Please report this error code to the Bitfighter developers.";
+         message += "\n\nCheck your internet connection and firewall settings, and report this error to the Bitfighter devs if it persists.";
          break;
    }
 
@@ -795,7 +804,7 @@ void UIManager::displayMessageBox(const string &title, const string &instr, cons
    ui->setInstr(instr);
    ui->setMessage(message);
 
-   activate(ui);
+   activateIfDifferent(ui);
 }
 
 

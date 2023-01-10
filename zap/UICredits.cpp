@@ -323,7 +323,7 @@ void SplashUserInterface::render()
    {
       r.setColor(0, mSplashTimer.getFraction(), 1);
 
-      F32 fr = pow(mSplashTimer.getFraction(), 2);
+      F32 fr = F32(pow(mSplashTimer.getFraction(), 2));
 
       S32 ctr = DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2;
 

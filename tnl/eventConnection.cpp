@@ -115,9 +115,9 @@ void EventConnection::writeConnectRequest(BitStream *stream)
 // If this host has MORE NetEvent classes declared, the mEventClassCount
 // is set to the requested count, and is verified to lie on a boundary between versions.
 // This gets run when someone is connecting to us
-bool EventConnection::readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason)
+bool EventConnection::readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason, string &reasonStr)
 {
-   if(!Parent::readConnectRequest(stream, reason))
+   if(!Parent::readConnectRequest(stream, reason, reasonStr))
       return false;
 
    U32 remoteClassCount;
@@ -138,6 +138,7 @@ bool EventConnection::readConnectRequest(BitStream *stream, NetConnection::Termi
       if(!NetClassRep::isVersionBorderCount(getNetClassGroup(), NetClassTypeEvent, mEventClassCount))
       {
          reason = ReasonIncompatibleRPCCounts;
+         reasonStr = "Versions incompatible: there is a mismatch in the number of callable functions";
          return false;     // If not, abort connection
       }
    }

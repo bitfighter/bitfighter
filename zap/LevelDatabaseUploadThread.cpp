@@ -62,13 +62,12 @@ LevelDatabaseUploadThread::~LevelDatabaseUploadThread()
 
 void LevelDatabaseUploadThread::run()
 {
-
    HttpRequest req(uploadrequest);
    req.setMethod(HttpRequest::PostMethod);
    req.setData("data[User][username]",      username);
    req.setData("data[User][user_password]", user_password);
    req.setData("data[Level][content]",      content);
-   req.addFile("data[Level][screenshot]",   screenshot, (U8*) screenshot2.c_str(), screenshot2.length());
+   req.addFile("data[Level][screenshot]",   screenshot, (U8*) screenshot2.c_str(), U32(screenshot2.length()));
 
    string levelgenFilename;
    levelgenFilename = mGame->getScriptName();
