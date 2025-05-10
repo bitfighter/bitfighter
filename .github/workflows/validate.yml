@@ -1,0 +1,21 @@
+name: Validate Code
+on:
+  pull_request:
+    branches:
+      - master
+jobs:
+  Build-Linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get install -y cmake libphysfs-dev libsdl2-dev libopenal-dev libvorbis-dev libmodplug-dev libspeex-dev
+      - name: Build project
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          make
+      - name: Copy resources
+        run: cp -R resource/* exe/
