@@ -10,10 +10,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Install dependencies
-        run: sudo apt-get install -y cmake libphysfs-dev libsdl2-dev libopenal-dev libvorbis-dev libmodplug-dev libspeex-dev
+        run: sudo apt-get install -y cmake libphysfs-dev libsdl2-dev libopenal-dev libvorbis-dev libmodplug-dev libspeex-dev libpng-dev
       - name: Build project
         run: |
-          mkdir build
           cd build
           cmake ..
           make
