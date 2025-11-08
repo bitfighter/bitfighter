@@ -51,6 +51,8 @@ Bitfighter can be built with at least the following build systems:
   * MingW/MSYS
 
 To generate the proper project files with CMake, open a command prompt and `cd` into this repository's `build` directory. Then type ONE of the following:
+* `cmake -G "Visual Studio 18 2026" -A x64 ..`
+* `cmake -G "Visual Studio 17 2022" -A x64 ..`
 * `cmake -G "Visual Studio 15 2017" ..`
 * `cmake -G "Visual Studio 15 2017" -T "v141_xp" ..`
 * `cmake -G "MSYS Makefiles" ..`
