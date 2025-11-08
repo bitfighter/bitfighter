@@ -71,7 +71,7 @@ const U32 Game::CurrentLevelFormat = 2;
 // Constructor
 Game::Game(const Address &theBindAddress, GameSettingsPtr settings) : mGameObjDatabase(new GridDatabase())  // New database will be deleted by boost
 {
-   mLegacyGridSize = 1.f;              // Default to 1 unless we detect LevelFormat is missing or there's a GridSize parameter
+   mLegacyGridSize = 1.0f;             // Default to 1 unless we detect LevelFormat is missing or there's a GridSize parameter
    mLevelFormat = CurrentLevelFormat;  // Default to current format version
    mHasLevelFormat = false;
 

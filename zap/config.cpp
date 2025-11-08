@@ -53,7 +53,7 @@ UserSettings::~UserSettings() { /* Do nothing */ }
 // 01 Nov 2013: bitfighter.org ip address changed to 209.148.88.166
 // 12 Aug 2018: bitfighter.org ip address changed to 172.245.93.119
 // 07 Dec 2019: bitfighter.org ip address changed to 107.175.92.56
-const char *MASTER_SERVER_LIST_ADDRESS = "bitfighter.org:25955,IP:107.175.92.56:25955,bitfighter.net:25955";
+const char *MASTER_SERVER_LIST_ADDRESS = "bitfighter.org:25955,IP:107.175.92.56:25955,bitfighter.net:25955";   // Still ok Nov 2025, but not for much longer -CE
 
 
 // Constructor: Set default values here

@@ -21,6 +21,8 @@ using namespace TNL;
 #  define MAX(x,y) (((x) > (y)) ? (x) : (y))
 #endif
 
+#define SIGN(x)	((x) < 0 ? -1 : (x) == 0 ? 0 : 1)
+
 #define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
 
 #define sq(a) ((a) * (a))

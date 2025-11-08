@@ -921,7 +921,7 @@ U32 Teleporter::getDelay()
 void Teleporter::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
    attributeMenu->addMenuItem(new FloatCounterMenuItem("Delay:",
-         mTeleporterCooldown / 1000.0f, 0.1, 0.1, 10000.0f, 1, "seconds",
+         mTeleporterCooldown / 1000.0f, 0.1f, 0.1f, 10000.0f, 1, "seconds",
          "Almost no delay", "Adjust teleporter cooldown for re-entry"));
 }
 
