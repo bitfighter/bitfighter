@@ -1,7 +1,8 @@
+cmake_minimum_required (VERSION 3.10)		# Updated Nov 2025
 project (bitfighter)
-cmake_minimum_required (VERSION 3.1.0)
 
-cmake_policy(SET CMP0043 OLD)
+cmake_policy(VERSION 3.27)
+cmake_policy(SET CMP0177 NEW)
 
 #
 # CMake options
@@ -77,7 +78,7 @@ if(USE_GLES OR NOT USE_STANDARD_GL)
 	message(STATUS "Atempting to use OpenGL ES")
 	add_definitions(-DBF_USE_GLES)
 	add_definitions(-DBF_NO_CONSOLE)
-	
+
 	set(USE_GLES 1)
 	find_package(OpenGLES)
 	set(GL_LIBRARY ${OPENGLES_LIBRARY})
@@ -209,9 +210,9 @@ endif()
 # Discord
 if(DISCORD)
 	set(BUILD_EXAMPLES OFF CACHE BOOL "Build example apps")
-	
+
 	add_subdirectory(discord-rpc)
-	
+
 	set(DISCORD_LIBRARY discord-rpc)
 	add_definitions(-DBF_DISCORD)
 endif()
