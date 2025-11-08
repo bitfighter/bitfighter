@@ -86,7 +86,7 @@ void MasterServerConnection::startServerQuery(bool hostOnServer)
 
 #ifndef ZAP_DEDICATED
 
-
+// 3 versions of this function exist; they would be used if the client is connecting to an older version of the master server
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32 queryId, Vector<IPAddress> ipList))
 {
    if(mGame->isServer())
@@ -105,7 +105,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32
    {
       // Store these intermediate results
       for(S32 i = 0; i < ipList.size(); i++)
-         mServerList.push_back(ServerAddr(ipList[i], 0));
+         mServerList.push_back(ServerAddr(ipList[i]));
    }
    else  // Empty list received, transmission complete, send whole list on to the UI
    {
@@ -148,6 +148,41 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse_019a,
 
       mServerList.clear();
    }
+}
+
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse_023,
+	(U32 queryId, Vector<IPAddress> ipList, Vector<S32> serverIdList, Vector<StringTableEntry> serverNames))
+{
+	if(mGame->isServer())
+		return;
+
+	// Only process results from current query, ignoring anything older...
+	if(queryId != mCurrentQueryId || mGame->isServer())
+		return;
+
+	TNLAssert(ipList.size() == serverIdList.size(), "Expect the same number of elements!");
+	TNLAssert(ipList.size() == serverNames.size(),  "Expect the same number of elements!");
+	if(ipList.size() != serverIdList.size() || ipList.size() != serverNames.size())
+		return;
+
+	// The master server sends out an empty list to signify and "end of transmission".  We'll build up a
+	// list of servers here until we get that final EOT list, and then send the entire list to the UI.
+	// We need to do this because the UI will look for servers that it knows about that are not on the master 
+	// list, and will remove them from the display.  If we send the list in parts, the UI will remove any known servers that
+	// don't happen to be on that part.
+	// Note that for every entry in ipList, there will be a corresponding entry in serverIdList.
+	if(ipList.size() > 0)
+	{
+		// Store these intermediate results
+		for(S32 i = 0; i < ipList.size(); i++)
+			mServerList.push_back(ServerAddr(ipList[i], serverIdList[i], serverNames[i]));
+	}
+	else  // Empty list received, transmission complete, send whole list on to the UI
+	{
+		static_cast<ClientGame *>(mGame)->gotServerListFromMaster(mServerList);
+
+		mServerList.clear();
+	}
 }
 #endif
 

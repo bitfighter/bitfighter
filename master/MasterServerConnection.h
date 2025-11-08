@@ -116,7 +116,9 @@ private:
    MasterConnectionType mConnectionType;
    static MasterServer *mMaster;
 
-   void sendM2cQueryServersResponse(U32 queryId, const Vector<IPAddress> &addresses, const Vector<S32> &serverIdList);
+   void sendM2cQueryServersResponse(U32 queryId, const Vector<IPAddress> &addresses,
+	                                             const Vector<S32> &serverIdList,
+	                                             const Vector<StringTableEntry> &serverNames);
 
 
 public:

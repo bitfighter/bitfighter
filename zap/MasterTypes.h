@@ -14,7 +14,19 @@
 namespace Zap
 {
 
-typedef std::pair<IPAddress, S32> ServerAddr;
+// Returned by master server during server query
+class ServerAddr
+{
+public:
+	IPAddress ipAddress {};
+	S32 id = 0;
+	StringTableEntry serverName {};
+
+	ServerAddr(const IPAddress &ipAddress)         : ipAddress(ipAddress) {}
+	ServerAddr(const IPAddress &ipAddress, S32 id) : ipAddress(ipAddress), id(id) {}
+	ServerAddr(const IPAddress &ipAddress, S32 id,
+		       const StringTableEntry& serverName) : ipAddress(ipAddress), id(id), serverName(serverName) {}
+};
 
 }
 

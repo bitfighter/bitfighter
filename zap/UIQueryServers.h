@@ -143,7 +143,7 @@ public:
          ReceivedQuery,
       };
 
-      ServerRef(S32 serverId, const Address &address, State state, bool isLocalServer); 
+      ServerRef(S32 serverId, const Address &address, const string& serverName, State state, bool isLocalServer); 
       virtual ~ServerRef();
 
       State state;
@@ -166,6 +166,7 @@ public:
       U32 playerCount, maxPlayers, botCount;     // U32 because that's what we use on the master
 
       void setNameDescr(const string &serverName, const string &serverDescr, const Color &msgColor);
+	  void setDescr(const string &serverDescr, const Color &msgColor);
       void setPlayerBotMax(U32 playerCount, U32 botCount, U32 maxPlayers);
    };
 

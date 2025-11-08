@@ -19,7 +19,7 @@ Bitfighter has several common, open source dependencies:
 
 These dependencies are provided for you on Windows and macOS.
 
-On Linux, you must install them using your distribution's preferred method. On Ubuntu, for instance, you need to run `sudo apt-get install cmake libphysfs-dev libsdl2-dev libopenal-dev libvorbis-dev libmodplug-dev libspeex-dev`.
+On Linux, you must install them using your distribution's preferred method. On Ubuntu, for instance, you need to run `sudo apt-get install cmake libphysfs-dev libsdl2-dev libpng-dev libopenal-dev libvorbis-dev libmodplug-dev libspeex-dev`.
 
 ## COMPILING
 
