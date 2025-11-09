@@ -406,7 +406,7 @@ ALURE_API ALboolean ALURE_APIENTRY alurePlaySourceStream(ALuint source,
 	numBufs = 0;
 	if(ent.stream->GetFormat(&ent.stream_format, &ent.stream_freq, &ent.stream_align))
 	{
-		for(size_t i = 0;i < ent.buffers.size();i++)
+		for(S32 i = 0;i < ent.buffers.size();i++)
 		{
 			ALuint got = ent.stream->GetData(&ent.stream->dataChunk[0],
 			                                 ent.stream->dataChunk.size());

@@ -816,7 +816,7 @@ void PolylineGeometry::unselectVert(S32 vertIndex)
 
 void PolylineGeometry::unselectVerts()
 {
-   for(size_t i = 0; i < mVertSelected.size(); i++)
+   for(S32 i = 0; i < mVertSelected.size(); i++)
       mVertSelected[i] = false;
 
    mAnyVertsSelected = false;
@@ -834,7 +834,7 @@ void PolylineGeometry::checkIfAnyVertsSelected()
 {
    mAnyVertsSelected = false;
 
-   for(size_t i = 0; i < mVertSelected.size(); i++)
+   for(S32 i = 0; i < mVertSelected.size(); i++)
       if(mVertSelected[i])
       {
          mAnyVertsSelected = true;

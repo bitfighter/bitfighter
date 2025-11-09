@@ -1076,7 +1076,7 @@ void exceptionHandler(int sig) {
    logprintf(LogConsumer::LogError, "Error: signal %d:", sig);
    functions = backtrace_symbols(stack, size);
 
-   for(size_t i=0; i < size; i++)
+   for(S32 i=0; i < size; i++)
       logprintf(LogConsumer::LogError, "%d: %s", i, functions[i]);
 
    free(functions);

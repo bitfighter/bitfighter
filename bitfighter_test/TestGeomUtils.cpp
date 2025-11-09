@@ -21,7 +21,7 @@ using namespace TNL;
 void parsePoly(const char* lines[], S32 size, Vector<Point> &result)
 {
 	map<char, Point> points;
-	for(size_t i = 0; i < size; i++)
+	for(S32 i = 0; i < size; i++)
 	{
 		for(S32 j = 0; lines[i][j] != '\0'; j++)
 		{
@@ -97,7 +97,7 @@ TEST(GeomUtilsTest, splitRepeatedlySelfIntersecting)
 	splitSelfIntersectingPolys(polys, result);
 
 	ASSERT_EQ(5, result.size());
-	for(size_t i = 0; i < result.size(); i++)
+	for(S32 i = 0; i < result.size(); i++)
 	{
 		EXPECT_EQ(4, result[i].size());
 	}

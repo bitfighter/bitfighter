@@ -55,7 +55,7 @@ TEST_F(LoadoutTrackerTest, ToVector)
 
    Vector<U8> outItems = rubric.toU8Vector();
    ASSERT_EQ(outItems.size(), ShipModuleCount + ShipWeaponCount);
-   for(size_t i = 0; i < outItems.size(); i++)
+   for(S32 i = 0; i < outItems.size(); i++)
       ASSERT_EQ(outItems[i], items[i]);
 }
 
