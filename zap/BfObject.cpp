@@ -4,10 +4,10 @@
 //------------------------------------------------------------------------------
 
 #include "BfObject.h"
-#include "gameObjectRender.h"    // For drawHollowSquare
-#include "gameConnection.h"
-#include "game.h"
 #include "ClientInfo.h"
+#include "game.h"
+#include "gameConnection.h"
+#include "gameObjectRender.h"    // For drawHollowSquare
 #include "moveObject.h"
 #include "TeamConstants.h"
 
