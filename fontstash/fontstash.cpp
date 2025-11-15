@@ -42,14 +42,14 @@ extern "C" {
 	#include "stb_truetype.h" // Since this is still C
 }
 
-#define HASH_LUT_SIZE 256
-#define MAX_ROWS 128
-#define VERT_COUNT (6*128)
-#define VERT_STRIDE (sizeof(float)*4)
+constexpr auto HASH_LUT_SIZE = 256;
+constexpr auto MAX_ROWS = 128;
+constexpr auto VERT_COUNT = (6*128);
+constexpr auto VERT_STRIDE = (sizeof(float)*4);
 
-#define TTFONT_FILE 1
-#define TTFONT_MEM  2
-#define BMFONT      3
+constexpr auto TTFONT_FILE = 1;
+constexpr auto TTFONT_MEM = 2;
+constexpr auto BMFONT = 3;
 
 static int idx = 1;
 
