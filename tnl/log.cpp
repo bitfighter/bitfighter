@@ -119,8 +119,10 @@ void LogConsumer::logprintf(const char *format, ...)
    prepareAndLogString(message);
 }
 
-
 #ifndef TNL_DISABLE_LOGGING
+
+// Forward declaration so we can call it here (implementation is below in this file)
+std::string getTimeStamp();
 
 // All logging should pass through this method -- disabling it via the ifdef should cause logging to not happen, but it's untested
 void LogConsumer::prepareAndLogString(std::string message)
@@ -130,6 +132,12 @@ void LogConsumer::prepareAndLogString(std::string message)
       message.erase(message.length() - 1, 1);
    else
       message.append("\n");
+
+   // Prepend datetime stamp to the beginning of the message
+   std::string ts = getTimeStamp();
+   // Insert timestamp and a space at the start
+   message.insert(0, ts + " ");
+
 #ifdef TNL_OS_ANDROID
    __android_log_print(ANDROID_LOG_DEBUG, "Bitfighter", "%s", message.c_str());
 #else
@@ -163,10 +171,80 @@ FileLogConsumer::~FileLogConsumer()
       fclose(f);
 }
 
+// cross-platform mkdir helpers
+#ifdef _WIN32
+#   include <direct.h>
+#else
+#   include <sys/stat.h>
+#   include <sys/types.h>
+#   include <errno.h>
+#endif
+
+#include <string>
+
+// Create parent directories for a given file path. Returns true on success (or if no parent).
+// Change the function signature so tests can link to it:
+bool makeParentDirs(const std::string &filepath)
+{
+    auto pos = filepath.find_last_of("/\\");
+    if (pos == std::string::npos)
+        return true; // no directory part
+
+    std::string dir = filepath.substr(0, pos);
+    std::string accum;
+
+#ifdef _WIN32
+    // preserve drive letter (e.g. "C:")
+    if (dir.size() >= 2 && dir[1] == ':')
+        accum = dir.substr(0, 2);
+#endif
+
+    for (size_t i = 0; i < dir.size(); ++i)
+    {
+        char c = dir[i];
+        if (i == 0 && (c == '/' || c == '\\'))
+        {
+            accum += c;
+            continue;
+        }
+
+        accum += c;
+
+        // create when we hit a separator or at the end
+        if (c == '/' || c == '\\' || i + 1 == dir.size())
+        {
+#ifdef _WIN32
+            if (_mkdir(accum.c_str()) != 0)
+            {
+                if (errno != EEXIST)
+                    return false;
+            }
+#else
+            if (mkdir(accum.c_str(), 0755) != 0)
+            {
+                if (errno != EEXIST)
+                    return false;
+            }
+#endif
+        }
+    }
+    return true;
+}
+
+
+// Modified FileLogConsumer::init to ensure parent directories exist before fopen
 void FileLogConsumer::init(std::string logFile, const char *mode)
 {
    if(f)
       fclose(f);
+
+   // Ensure parent directories exist
+   if(!makeParentDirs(logFile))
+   {
+      TNLAssert(false, "Can't create parent directories for log file!");
+      printf("Can't create parent directories for log file: %s\n", logFile.c_str());
+      // still attempt to open; fopen will fail and be handled below
+   }
 
    f = fopen(logFile.c_str(), mode);
    if(!f)
