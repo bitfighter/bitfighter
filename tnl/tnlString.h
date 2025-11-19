@@ -46,6 +46,7 @@ class StringPtr
    void alloc(const char *string)
    {
       mString = (StringData *) malloc(sizeof(StringData) + strlen(string));
+	  TNLAssert(mString != nullptr);
       strcpy(mString->mStringData, string);
       mString->mRefCount = 1;
    }
