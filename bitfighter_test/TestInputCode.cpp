@@ -32,7 +32,8 @@ TEST(InputStringTest, validStrings)
 
    // Invalid keys
    EXPECT_FALSE(InputCodeManager::isValidInputString("123"));              // Garbage
-   EXPECT_FALSE(InputCodeManager::isValidInputString("#"));                // Not a key
+   EXPECT_TRUE(InputCodeManager::isValidInputString("#"));                 // Not a key -- actually, it is... KEY_HASH
+   EXPECT_FALSE(InputCodeManager::isValidInputString("|"));                // Not a key -- for real this time
    EXPECT_FALSE(InputCodeManager::isValidInputString("Flux+P"));           // Invalid modifier
    EXPECT_FALSE(InputCodeManager::isValidInputString("Shift+Shift+G"));    // Double modifier
    EXPECT_FALSE(InputCodeManager::isValidInputString("Shift+Alt+Q"));      // Out-of-order modifiers
