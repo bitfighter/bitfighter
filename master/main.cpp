@@ -150,7 +150,7 @@ int main(int argc, const char **argv)
    S32 events = LogConsumer::AllErrorTypes | LogConsumer::LogConnection | LogConsumer::LogConnectionManager | LogConsumer::LogChat;
 
    FileLogConsumer fileLogConsumer;                         // Primary logfile
-   fileLogConsumer.init("bitfighter_master.log", "a");      // Will be created in folder where master is run from
+   fileLogConsumer.init("logs/bitfighter_master.log", "a");      // Will be created in folder where master is run from
    fileLogConsumer.setMsgTypes(events);
    fileLogConsumer.logprintf("------ Bitfighter Master Server Log File ------");
 
