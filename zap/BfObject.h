@@ -229,8 +229,8 @@ private:
    SafePtr<ClientInfo> mOwner;
    U32 mDisableCollisionCount;                     // No collisions when > 0, use of counter allows "nested" collision disabling
 
-   U32 mCreationTime;
-   S32 mTeam;
+   U32 mCreationTime = 0;
+   S32 mTeam = 0;
 
    S32 mSerialNumber;         // Autoincremented serial number  
    S32 mUserAssignedId;       // Id assigned to some objects in the editor

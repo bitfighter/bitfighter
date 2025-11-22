@@ -309,7 +309,7 @@ private:
 
    void initialize();
 
-   F32 getSelectionOffsetMagnitude();
+   F32 getSelectionOffsetMagnitude() override;
 
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI; // Menu for attribute editing
@@ -345,7 +345,7 @@ public:
 
    F32 getEditorRadius(F32 currentScale);
 
-   void render();
+   void render() override;
    void idle(IdleCallPath path);
    void onAddedToGame(Game *theGame);
 

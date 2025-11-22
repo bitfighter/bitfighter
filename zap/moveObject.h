@@ -55,7 +55,7 @@ class MoveObject : public Item
    typedef Item Parent;
 
 private:
-   S32 mHitLimit;             // Internal counter for processing collisions
+   S32 mHitLimit = 0;           // Internal counter for processing collisions
    MoveStates mMoveStates;
 
    // For maintaining a list of zones the object is currently in
@@ -72,9 +72,9 @@ protected:
       InterpAcceleration = 1800,
    };
 
-   bool mInterpolating;
-   F32 mMass;
-   bool mWaitingForMoveToUpdate;  // client only
+   bool mInterpolating = 0;
+   F32 mMass = 0;
+   bool mWaitingForMoveToUpdate = 0;  // client only
 
    enum MaskBits {
       PositionMask     = Parent::FirstFreeMask << 0,     // Position has changed and needs to be updated
@@ -89,7 +89,7 @@ protected:
 public:
    MoveObject(const Point &p = Point(0,0), float radius = 1, float mass = 1);     // Constructor
    virtual ~MoveObject();                                                                // Destructor
-      
+
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
    virtual string toLevelCode() const;
 

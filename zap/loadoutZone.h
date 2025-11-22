@@ -16,14 +16,14 @@ class LoadoutZone : public GameZone
    typedef GameZone Parent;
 
 public:
-   explicit LoadoutZone(lua_State *L = NULL);   // Combined Lua / C++ constructor
-   virtual ~LoadoutZone();             // Destructor
+   explicit LoadoutZone(lua_State *L = nullptr);   // Combined Lua / C++ constructor
+   ~LoadoutZone() override;             // Destructor
 
-   LoadoutZone *clone() const;
+   LoadoutZone *clone() const override;
 
-   void render();
-   bool processArguments(S32 argc, const char **argv, Game *game);
-   void onAddedToGame(Game *theGame);
+   void render() override;
+   bool processArguments(S32 argc, const char **argv, Game *game) override;
+   void onAddedToGame(Game *theGame) override;
 
    const Vector<Point> *getCollisionPoly() const;     // More precise boundary for precise collision detection
    bool collide(BfObject *hitObject);
