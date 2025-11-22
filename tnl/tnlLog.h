@@ -68,11 +68,11 @@ public:
       LogChat                 = BIT(5),      // Log global chat messages relayed through master
 
       // TNL network events
-      LogConnectionProtocol	= BIT(6),      // Details about packets sent/recv'd
+      LogConnectionProtocol	  = BIT(6),      // Details about packets sent/recv'd
       LogNetConnection        = BIT(7),      // Packet send/rcv info
       LogEventConnection      = BIT(8),      // Event connection info
       LogGhostConnection      = BIT(9),      // Info about ghosting
-      LogNetInterface		   = BIT(10),     // Higher level network events such as connection attempts and the like
+      LogNetInterface		  = BIT(10),     // Higher level network events such as connection attempts and the like
       LogPlatform             = BIT(11),     // Log message in lieu of showing message to user on non-Windows platforms; only used for Asserts
       LogNetBase              = BIT(12),     // Info about network object classes
       LogUDP                  = BIT(13),     // Logs UDP socket bindings and params
