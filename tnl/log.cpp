@@ -135,8 +135,7 @@ void LogConsumer::prepareAndLogString(std::string message)
 
    // Prepend datetime stamp to the beginning of the message
    std::string ts = getTimeStamp();
-   // Insert timestamp and a space at the start
-   message.insert(0, ts + " ");
+   message.insert(0, "[" + ts + "] ");
 
 #ifdef TNL_OS_ANDROID
    __android_log_print(ANDROID_LOG_DEBUG, "Bitfighter", "%s", message.c_str());
