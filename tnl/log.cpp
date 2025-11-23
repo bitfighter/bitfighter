@@ -311,7 +311,7 @@ void logprintf(LogConsumer::MsgType msgType, const char *format, ...)
    va_list args; 
    va_start(args, format); 
 
-   vsnprintf(msg, sizeof(msg), format, args); 
+   vsnprintf(msg, sizeof(msg), format, args);   // Consolidate an arbitrary number of args into a single string (msg)
 
    va_end(args);
 

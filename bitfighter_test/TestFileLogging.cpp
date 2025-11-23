@@ -50,6 +50,29 @@ static bool stringContains(const std::string &str, const std::string &substr)
 }
 
 
+// Helper function to check if a line contains a timestamp pattern (YYYY-MM-DD)
+static bool lineContainsTimestamp(const std::string &line)
+{
+   // Look for timestamp pattern like "2025-11-22" at the beginning
+   return (line.length() >= 10 && 
+           isdigit(line[0]) && isdigit(line[1]) && isdigit(line[2]) && isdigit(line[3]) &&
+           line[4] == '-' &&
+           isdigit(line[5]) && isdigit(line[6]) &&
+           line[7] == '-' &&
+           isdigit(line[8]) && isdigit(line[9]));
+}
+
+
+ // Helper to extract first line from file contents
+static std::string getFirstLine(const std::string &contents)
+{
+   size_t endPos = contents.find('\n');
+   if (endPos == std::string::npos)
+      return contents;
+   return contents.substr(0, endPos);
+}
+
+
 class FileLoggingTest : public testing::Test
 {
 protected:
@@ -85,6 +108,12 @@ protected:
 
       if (fileExists("deep"))
          rmdir("deep");
+
+      if (fileExists("test_logs/bitfighter_master.log"))
+         std::remove("test_logs/bitfighter_master.log");
+
+      if (fileExists("test_logs/timestamp_test.log"))
+         std::remove("test_logs/timestamp_test.log");
    }
 };
 
@@ -215,7 +244,92 @@ TEST_F(FileLoggingTest, MasterMainLogPattern)
 
    if (fileExists(filename))
        std::remove(filename.c_str());
+}
 
+
+// NEW TEST: Verify timestamps are present with MsgType parameter (logprintf with LogError)
+TEST_F(FileLoggingTest, TimestampWithMsgType)
+{
+   std::string filename = "test_logs/timestamp_test.log";
+   FileLogConsumer consumer;
+   consumer.init(filename, "w");
+   consumer.setMsgTypes(LogConsumer::LogError);
+
+   // Log using the overload that takes MsgType
+   logprintf(LogConsumer::LogError, "Unable to open MOTD file -- using default MOTD.");
+
+   // Read and verify
+   std::string contents = readFileContents(filename);
+   std::string firstLine = getFirstLine(contents);
+
+   EXPECT_TRUE(stringContains(contents, "Unable to open MOTD file")) << "Error message not found in log";
+   
+   EXPECT_TRUE(lineContainsTimestamp(firstLine)) << "Timestamp missing from LogError message. First line: " << firstLine;
+
+   if (fileExists(filename))
+       std::remove(filename.c_str());
+}
+
+
+// NEW TEST: Verify timestamps are present without MsgType parameter (logprintf without MsgType)
+TEST_F(FileLoggingTest, TimestampWithoutMsgType)
+{
+   std::string filename = "test_logs/timestamp_test.log";
+   FileLogConsumer consumer;
+   consumer.init(filename, "w");
+   consumer.setMsgTypes(LogConsumer::All);
+
+   // Log using the overload that takes no MsgType (goes to All)
+   logprintf("Master Server started - listening on port 25955");
+
+   // Read and verify
+   std::string contents = readFileContents(filename);
+   std::string firstLine = getFirstLine(contents);
+
+   EXPECT_TRUE(stringContains(contents, "Master Server started")) << "Server message not found in log";
+   
+   EXPECT_TRUE(lineContainsTimestamp(firstLine)) << "Timestamp missing from general logprintf message. First line: " << firstLine;
+
+   if (fileExists(filename))
+       std::remove(filename.c_str());
+}
+
+
+ // NEW TEST: Compare both logging paths to ensure consistent timestamp behavior
+TEST_F(FileLoggingTest, BothLoggingPathsHaveTimestamps)
+{
+   std::string filename = "test_logs/timestamp_test.log";
+   FileLogConsumer consumer;
+   consumer.init(filename, "w");
+   consumer.setMsgTypes(LogConsumer::All);
+
+   // Log first message with MsgType
+   logprintf(LogConsumer::LogError, "Error message with LogError type");
+
+   // Log second message without MsgType
+   logprintf("General message without MsgType");
+
+   // Read and verify both have timestamps
+   std::string contents = readFileContents(filename);
+   size_t pos = 0;
+   int lineCount = 0;
+   std::string line;
+
+   // Extract and check each line for timestamp
+   std::istringstream stream(contents);
+   while (std::getline(stream, line) && lineCount < 2)
+   {
+      if (!line.empty())
+      {
+         EXPECT_TRUE(lineContainsTimestamp(line)) << "Line " << (lineCount + 1) << " missing timestamp: " << line;
+         lineCount++;
+      }
+   }
+
+   EXPECT_EQ(lineCount, 2) << "Expected at least 2 logged lines with content";
+
+   if (fileExists(filename))
+       std::remove(filename.c_str());
 }
 
 }  // namespace TNL

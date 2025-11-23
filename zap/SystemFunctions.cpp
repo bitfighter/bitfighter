@@ -54,7 +54,7 @@ void initHosting(GameSettingsPtr settings, LevelSourcePtr levelSource, bool test
    if(!testMode)
    {
       logprintf(LogConsumer::ServerFilter, "----------\n"
-                                           "Bitfighter server started [%s]", getTimeStamp().c_str());
+                                           "Bitfighter server started");
       logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", settings->getHostName().c_str(), 
                                                                             settings->getHostDescr().c_str());
 

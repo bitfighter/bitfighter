@@ -104,21 +104,17 @@ MasterServerConnection::~MasterServerConnection()
    if(mLoggingStatus != "")
    {
       // CONNECT_FAILED | timestamp | address | logging status
-      logprintf(LogConsumer::LogConnection, "CONNECT_FAILED\t%s\t%s\t%s", getTimeStamp().c_str(),
-                                                                           getNetAddress().toString(),
-                                                                           mLoggingStatus.c_str());
+      logprintf(LogConsumer::LogConnection, "CONNECT_FAILED\t%s\t%s", getNetAddress().toString(), mLoggingStatus.c_str());
    }
    else if(mConnectionType == MasterConnectionTypeServer)
    {
       // SERVER_DISCONNECT | timestamp | server name
-      logprintf(LogConsumer::LogConnection, "SERVER_DISCONNECT\t%s\t%s", getTimeStamp().c_str(),
-                                                                           mPlayerOrServerName.getString());
+      logprintf(LogConsumer::LogConnection, "SERVER_DISCONNECT\t%s", mPlayerOrServerName.getString());
    }
    else if(mConnectionType == MasterConnectionTypeClient)
    {
       // CLIENT_DISCONNECT | timestamp | player name
-      logprintf(LogConsumer::LogConnection, "CLIENT_DISCONNECT\t%s\t%s", getTimeStamp().c_str(),
-                                                                           mPlayerOrServerName.getString());
+      logprintf(LogConsumer::LogConnection, "CLIENT_DISCONNECT\t%s", mPlayerOrServerName.getString());
       GameJolt::onPlayerQuit(mMaster->getSettings(), this);
    }
 
@@ -699,7 +695,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcceptArrangedConnection, 
    char buffer[256];
    strcpy(buffer, getNetAddress().toString());
 
-   logprintf(LogConsumer::LogConnectionManager, "[%s] Server: %s accepted connection request from %s", getTimeStamp().c_str(), buffer,
+   logprintf(LogConsumer::LogConnectionManager, "Server: %s accepted connection request from %s", buffer,
                                                       req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");
 
    // If we still know about the requestor, tell him his connection was accepted...
@@ -720,9 +716,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mRejectArrangedConnection, 
    if(!req)
       return;
 
-   logprintf(LogConsumer::LogConnectionManager, "[%s] Server: %s reject connection request from %s",
-                                                      getTimeStamp().c_str(), getNetAddress().toString(),
-                                                      req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");
+   logprintf(LogConsumer::LogConnectionManager, "Server: %s reject connection request from %s",
+             getNetAddress().toString(), req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");
 
    if(req->initiator.isValid())
       req->initiator->m2cArrangedConnectionRejected(req->initiatorQueryId, rejectData);
@@ -1578,8 +1573,7 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
          mMaster->writeJsonNow();
 
          // SERVER_CONNECT | timestamp | server name | server description
-         logprintf(LogConsumer::LogConnection, "SERVER_CONNECT\t%s\t%s\t%s", getTimeStamp().c_str(),
-                                               mPlayerOrServerName.getString(), mServerDescr.getString());
+         logprintf(LogConsumer::LogConnection, "SERVER_CONNECT\t%s\t%s", mPlayerOrServerName.getString(), mServerDescr.getString());
       }
       break;
 
@@ -1646,8 +1640,7 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
                mMaster->addClient(this);
 
                // CLIENT_CONNECT | timestamp | player name
-               logprintf(LogConsumer::LogConnection, "CLIENT_CONNECT\t%s\t%s",
-                                                     getTimeStamp().c_str(), mPlayerOrServerName.getString());
+               logprintf(LogConsumer::LogConnection, "CLIENT_CONNECT\t%s", mPlayerOrServerName.getString());
 
                // Delay writing JSON to reduce chances of incorrectly showing new player as unauthenticated
                mMaster->writeJsonDelayed();
@@ -1657,8 +1650,7 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
                mMaster->addClient(this);
 
                // CLIENT_CONNECT | timestamp | player name
-               logprintf(LogConsumer::LogConnection, "CLIENT_CONNECT\t%s\t%s",
-                                                     getTimeStamp().c_str(), mPlayerOrServerName.getString());
+               logprintf(LogConsumer::LogConnection, "CLIENT_CONNECT\t%s", mPlayerOrServerName.getString());
 
                mMaster->writeJsonNow();      // Write immediately
                break;
@@ -1683,9 +1675,9 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
    if(mConnectionType == MasterConnectionTypeServer || mConnectionType == MasterConnectionTypeClient)
    {
       // CLIENT/SERVER_INFO | timestamp | protocol version | build number | address | controller
-      logprintf(LogConsumer::LogConnection, "%s\t%s\t%d\t%d\t%s\t%s",
+      logprintf(LogConsumer::LogConnection, "%s\t%d\t%d\t%s\t%s",
             mConnectionType == MasterConnectionTypeServer ? "SERVER_INFO" : "CLIENT_INFO",
-            getTimeStamp().c_str(), mCMProtocolVersion, mClientBuild, getNetAddress().toString(),
+            mCMProtocolVersion, mClientBuild, getNetAddress().toString(),
             strcmp(mAutoDetectStr.getString(), "") ? mAutoDetectStr.getString():"<None>");
    }
 

@@ -609,7 +609,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
       if(loadLevel())
       {
          loaded = true;
-         logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
+         logprintf(LogConsumer::ServerFilter, "Done.");
       }
       else
       {

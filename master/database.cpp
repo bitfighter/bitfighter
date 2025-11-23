@@ -288,7 +288,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
    }
    catch(const Exception &ex) 
    {
-      logprintf("[%s] Failure writing stats to database: %s", getTimeStamp().c_str(), ex.what());
+      logprintf("Failure writing stats to database: %s", ex.what());
    }
 }
 
@@ -312,7 +312,7 @@ void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry 
    }
    catch(const Exception &ex) 
    {
-      logprintf("[%s] Failure writing achievement to database: %s", getTimeStamp().c_str(), ex.what());
+      logprintf("Failure writing achievement to database: %s", ex.what());
    }
 }
 
@@ -353,7 +353,7 @@ void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName
    }
    catch(const Exception &ex) 
    {
-      logprintf("[%s] Failure writing level info to database: %s", getTimeStamp().c_str(), ex.what());
+      logprintf("Failure writing level info to database: %s", ex.what());
    }
 }
 
@@ -558,8 +558,7 @@ void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<st
    }
    catch(const Exception &ex)
    {
-      logprintf(LogConsumer::LogError, "[%s]SQL Execution Error \"%s\"\n\trunning sql: %s", 
-                getTimeStamp().c_str(), ex.what(), sql.c_str());
+      logprintf(LogConsumer::LogError, "SQL Execution Error \"%s\"\n\trunning sql: %s", ex.what(), sql.c_str());
    }
 }
 

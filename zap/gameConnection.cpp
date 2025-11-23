@@ -133,9 +133,8 @@ GameConnection::~GameConnection()
 
         double elapsed = difftime (quitTime, joinTime);
 
-        logprintf(LogConsumer::ServerFilter, "%s [%s] quit [%s] (%.2lf secs)", mClientInfo->getName().getString(), 
-                                                  isLocalConnection() ? "Local Connection" : getNetAddressString(), 
-                                                  getTimeStamp().c_str(), elapsed);
+        logprintf(LogConsumer::ServerFilter, "%s [%s] quit (%.2lf secs)", mClientInfo->getName().getString(), 
+                                             isLocalConnection() ? "Local Connection" : getNetAddressString(), elapsed);
       }
    }
 
@@ -2441,8 +2440,8 @@ void GameConnection::onConnectionEstablished_server()
    const char *name =  mClientInfo->getName().getString();
 
    logprintf(LogConsumer::LogConnection, "%s - client \"%s\" connected.", getNetAddressString(), name);
-   logprintf(LogConsumer::ServerFilter,  "%s [%s] joined [%s]", name, 
-                                          isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str());
+   logprintf(LogConsumer::ServerFilter,  "%s [%s] joined", name, 
+                                          isLocalConnection() ? "Local Connection" : getNetAddressString());
 
    mSendableFlags = 0;
    if(mServerGame->getSettings()->getIniSettings()->allowMapUpload)

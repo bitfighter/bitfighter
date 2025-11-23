@@ -221,9 +221,8 @@ NetInterface *MasterServer::createNetInterface() const
    NetInterface *netInterface = new NetInterface(Address(IPProtocol, Address::Any, port));
 
    // Log a welcome message in the main log and to the console
-   logprintf("[%s] Master Server \"%s\" started - listening on port %d (protocol v. %d)", getTimeStamp().c_str(),
-                                                                         getSetting<string>("ServerName").c_str(),
-                                                                         port, MASTER_PROTOCOL_VERSION);
+   logprintf("Master Server \"%s\" started - listening on port %d (protocol v. %d)", 
+      getSetting<string>("ServerName").c_str(), port, MASTER_PROTOCOL_VERSION);
    return netInterface;
 }
 
