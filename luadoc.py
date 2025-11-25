@@ -105,9 +105,9 @@ def preprocess():
 
     # if DEBUG_MODE:
     #     files = [
-    #         R"C:\dev\bitfighter\zap\flagItem.h",
-    #         R"C:\dev\bitfighter\zap\flagItem.cpp",
-    #         # R"C:\dev\bitfighter\resource\scripts\luavec.lua"
+    #         R"C:\dev\bitfighter\bitfighter\zap\flagItem.h",
+    #         R"C:\dev\bitfighter\bitfighter\zap\flagItem.cpp",
+    #         # R"C:\dev\bitfighter\bitfighter\resource\scripts\luavec.lua"
     #     ]
 
     # Loop through all the files we found above...
