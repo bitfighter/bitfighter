@@ -166,7 +166,7 @@ Timer SoundSystem::mMusicFadeTimer;
 // Constructor
 SoundSystem::SoundSystem()
 {
-   TNLAssert(NumSFXBuffers == ARRAYSIZE(sfxProfilesModern),  "SFX out of alignment!");
+   TNLAssert(NumSFXBuffers == ARRAYSIZE(sfxProfilesModern), "SFX out of alignment!");
 }
 
 
