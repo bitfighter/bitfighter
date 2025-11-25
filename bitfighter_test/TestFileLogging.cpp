@@ -54,7 +54,7 @@ static bool stringContains(const std::string &str, const std::string &substr)
 static bool lineContainsTimestamp(const std::string &line)
 {
    // Look for timestamp pattern like "2025-11-22" at the beginning
-   return (line.length() >= 10 && 
+   return (line.length() >= 10 &&
            isdigit(line[0]) && isdigit(line[1]) && isdigit(line[2]) && isdigit(line[3]) &&
            line[4] == '-' &&
            isdigit(line[5]) && isdigit(line[6]) &&
@@ -263,7 +263,7 @@ TEST_F(FileLoggingTest, TimestampWithMsgType)
    std::string firstLine = getFirstLine(contents);
 
    EXPECT_TRUE(stringContains(contents, "Unable to open MOTD file")) << "Error message not found in log";
-   
+
    EXPECT_TRUE(lineContainsTimestamp(firstLine)) << "Timestamp missing from LogError message. First line: " << firstLine;
 
    if (fileExists(filename))
@@ -280,14 +280,14 @@ TEST_F(FileLoggingTest, TimestampWithoutMsgType)
    consumer.setMsgTypes(LogConsumer::All);
 
    // Log using the overload that takes no MsgType (goes to All)
-   logprintf("Master Server started - listening on port 25955");
+   logprintf("Master Server started - listening on port 99999");
 
    // Read and verify
    std::string contents = readFileContents(filename);
    std::string firstLine = getFirstLine(contents);
 
    EXPECT_TRUE(stringContains(contents, "Master Server started")) << "Server message not found in log";
-   
+
    EXPECT_TRUE(lineContainsTimestamp(firstLine)) << "Timestamp missing from general logprintf message. First line: " << firstLine;
 
    if (fileExists(filename))
