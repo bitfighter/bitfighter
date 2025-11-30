@@ -790,7 +790,6 @@ void MasterServerConnection::processIsAuthenticated(GameStats *gameStats)
 }
 
 
-
 struct AddGameReport : public MasterThreadEntry
 {
    GameStats mStats;
@@ -804,6 +803,7 @@ struct AddGameReport : public MasterThreadEntry
       databaseWriter.insertStats(mStats);
    }
 };
+
 
 void MasterServerConnection::writeStatisticsToDb(VersionedGameStats &stats)
 {
