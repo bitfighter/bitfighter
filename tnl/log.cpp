@@ -9,8 +9,8 @@
 //   the Free Software Foundation; either version 2 of the License, or
 //   (at your option) any later version.
 //
-//   For use in products that are not compatible with the terms of the GNU 
-//   General Public License, alternative licensing options are available 
+//   For use in products that are not compatible with the terms of the GNU
+//   General Public License, alternative licensing options are available
 //   from GarageGames.com.
 //
 //   This program is distributed in the hope that it will be useful,
@@ -49,7 +49,7 @@ namespace TNL
 LogConsumer *LogConsumer::mLinkedList = NULL;
 
 // Constructor -- add log to consumer list
-LogConsumer::LogConsumer()    
+LogConsumer::LogConsumer()
 {
    //mFilterType = GeneralFilter;
    mMsgTypes = 0xFFFFFFFF;       // All types on by default
@@ -100,17 +100,17 @@ void LogConsumer::logString(LogConsumer::MsgType msgType, std::string message)
 }
 
 
-// Create reusable buffer for our logging functions.  Make it big because when we use datadumper 
+// Create reusable buffer for our logging functions.  Make it big because when we use datadumper
 // in a script, some messages can get very long
 static char msg[1024 * 8];
 
 
 void LogConsumer::logprintf(const char *format, ...)
 {
-   va_list args; 
-   va_start(args, format); 
+   va_list args;
+   va_start(args, format);
 
-   vsnprintf(msg, sizeof(msg), format, args); 
+   vsnprintf(msg, sizeof(msg), format, args);
 
    va_end(args);
 
@@ -121,21 +121,35 @@ void LogConsumer::logprintf(const char *format, ...)
 
 #ifndef TNL_DISABLE_LOGGING
 
-// Forward declaration so we can call it here (implementation is below in this file)
-std::string getTimeStamp();
+// Return a nicely formatted date/time stamp
+std::string getTimeStamp()
+{
+   static const U32 TIMESIZE = 40;
+   time_t rawtime;
+   struct tm* timeinfo;
+   char buffer[TIMESIZE];
+
+   time(&rawtime);
+   timeinfo = localtime(&rawtime);
+
+   strftime(buffer, TIMESIZE, "%Y-%m-%d %a %H:%M:%S", timeinfo);
+
+   return(std::string(buffer));
+}
+
 
 // All logging should pass through this method -- disabling it via the ifdef should cause logging to not happen, but it's untested
 void LogConsumer::prepareAndLogString(std::string message)
 {
+   // Prepend datetime stamp to the beginning of the message FIRST
+   message.insert(0, "[" + getTimeStamp() + "] ");
+
    // Unless string ends with a '\', add a newline char
    if(message.length() > 0 && message[message.length() - 1] == '\\')
-      message.erase(message.length() - 1, 1);         // Chop off trailing '\'
+      message.erase(message.length() - 1, 1);               // Chop off trailing '\'
+
    else
       message.append("\n");
-
-   // Prepend datetime stamp to the beginning of the message
-   std::string ts = getTimeStamp();
-   message.insert(0, "[" + ts + "] ");
 
 #ifdef TNL_OS_ANDROID
    __android_log_print(ANDROID_LOG_DEBUG, "Bitfighter", "%s", message.c_str());
@@ -164,7 +178,7 @@ FileLogConsumer::FileLogConsumer()    // Constructor
 
 
 // Destructor -- close the file
-FileLogConsumer::~FileLogConsumer()    
+FileLogConsumer::~FileLogConsumer()
 {
    if(f)
       fclose(f);
@@ -307,8 +321,8 @@ LogType *LogType::find(const char *name)
 // Logs to logfiles that have subscribed to specified message type
 void logprintf(LogConsumer::MsgType msgType, const char *format, ...)
 {
-   va_list args; 
-   va_start(args, format); 
+   va_list args;
+   va_start(args, format);
 
    vsnprintf(msg, sizeof(msg), format, args);   // Consolidate an arbitrary number of args into a single string (msg)
 
@@ -323,33 +337,16 @@ void logprintf(LogConsumer::MsgType msgType, const char *format, ...)
 // Logs to general log
 void logprintf(const char *format, ...)
 {
-   va_list args; 
-   va_start(args, format); 
+   va_list args;
+   va_start(args, format);
 
-   vsnprintf(msg, sizeof(msg), format, args); 
+   vsnprintf(msg, sizeof(msg), format, args);
 
    va_end(args);
 
    std::string message(msg);
 
    LogConsumer::logString(LogConsumer::All, message);
-}
-
-
-// Return a nicely formatted date/time stamp
-std::string getTimeStamp()
-{
-  static const U32 TIMESIZE = 40;
-  time_t rawtime;
-  struct tm * timeinfo;
-  char buffer[TIMESIZE];
-
-  time ( &rawtime );
-  timeinfo = localtime ( &rawtime );
-
-  strftime(buffer, TIMESIZE, "%Y-%m-%d %a %H:%M:%S", timeinfo);
-
-  return(std::string(buffer));   
 }
 
 
@@ -366,7 +363,7 @@ std::string getShortTimeStamp()
 
   strftime(buffer, TIMESIZE, "%H:%M", timeinfo);
 
-  return(std::string(buffer));     
+  return(std::string(buffer));
 }
 
 

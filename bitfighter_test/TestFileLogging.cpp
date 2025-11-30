@@ -53,13 +53,14 @@ static bool stringContains(const std::string &str, const std::string &substr)
 // Helper function to check if a line contains a timestamp pattern (YYYY-MM-DD)
 static bool lineContainsTimestamp(const std::string &line)
 {
-   // Look for timestamp pattern like "2025-11-22" at the beginning
-   return (line.length() >= 10 &&
-           isdigit(line[0]) && isdigit(line[1]) && isdigit(line[2]) && isdigit(line[3]) &&
-           line[4] == '-' &&
-           isdigit(line[5]) && isdigit(line[6]) &&
-           line[7] == '-' &&
-           isdigit(line[8]) && isdigit(line[9]));
+   // Look for timestamp pattern like "[2025-11-22" at the beginning
+   int pos = 1;      // Where we expect the start of the date
+   return (line.length() >= pos + 10 &&
+           isdigit(line[pos + 0]) && isdigit(line[pos + 1]) && isdigit(line[pos + 2]) && isdigit(line[pos + 3]) &&
+           line[pos + 4] == '-' &&
+           isdigit(line[pos + 5]) && isdigit(line[pos + 6]) &&
+           line[pos + 7] == '-' &&
+           isdigit(line[pos + 8]) && isdigit(line[pos + 9]));
 }
 
 
@@ -220,7 +221,6 @@ TEST_F(FileLoggingTest, AppendModeToSubfolder)
 
    if (fileExists(filename))
        std::remove(filename.c_str());
-
 }
 
 
