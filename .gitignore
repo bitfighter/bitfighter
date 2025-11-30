@@ -1,6 +1,9 @@
 ### LuaJIT
 lua/luajit/src/luajit.exe
 lua/luajit/src/lua51.lib
+
+build/**
+
 #################
 ## C/C++
 #################
@@ -276,3 +279,4 @@ doc/html-final/
 CMakeCache.txt
 CMakeFiles
 cmake_install.cmake
+resource/music/menu_old.ogg
