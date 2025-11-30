@@ -44,7 +44,6 @@ class MasterSettings
 private:
    void loadSettingsFromINI();
    string getCurrentMOTDFromFile(const string &filename) const;
-
    map<U32, string> motdClientMap;
 
 public:
@@ -88,6 +87,9 @@ private:
    Vector<MasterServerConnection *> mClientList;
 
    NetInterface *createNetInterface() const;
+
+   void testStatsDatabaseConnectivity() const;
+   void testPhpbbDatabaseConnectivity() const;
 
 public:
    MasterServer(MasterSettings *settings);      // Constructor

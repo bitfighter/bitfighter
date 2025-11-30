@@ -22,6 +22,7 @@ namespace Zap
 namespace Master 
 {
 
+// TODO: Replace strings below with constants or #defines (like LATEST_RELEASED_BUILD_VERSION)
 
 // Constructor
 MasterSettings::MasterSettings(const string &iniFile)     
@@ -169,6 +170,7 @@ string MasterSettings::getMotd(U32 clientBuildVersion) const
 
    string motdString;
    map <U32, string>::const_iterator iter = motdClientMap.find(clientBuildVersion);
+
    if(iter != motdClientMap.end())     // Found the version in the motdClientMap; return version-specific MOTD
       motdString = (*iter).second;
    else if(clientBuildVersion > getVal<U32>(LATEST_RELEASED_BUILD_VERSION))
@@ -202,6 +204,10 @@ MasterServer::MasterServer(MasterSettings *settings)
    
    mDatabaseAccessThread = new DatabaseAccessThread();    // Deleted in destructor
 
+   // Test database connectivity
+   testStatsDatabaseConnectivity();
+   testPhpbbDatabaseConnectivity();
+
    MasterServerConnection::setMasterServer(this);
 }
 
@@ -210,7 +216,6 @@ MasterServer::MasterServer(MasterSettings *settings)
 MasterServer::~MasterServer()
 {
    delete mNetInterface;
-
    delete mDatabaseAccessThread;
 }
 
@@ -394,6 +399,58 @@ void MasterServer::idle(const U32 timeDelta)
 DatabaseAccessThread *MasterServer::getDatabaseAccessThread()
 {
    return mDatabaseAccessThread;
+}
+
+
+// Test database connectivity and log results -- do this on startup
+void MasterServer::testStatsDatabaseConnectivity() const
+{
+   try
+   {
+      DbWriter::DbQuery query(mSettings->getVal<string>("Phpbb3Database").c_str(),
+                              mSettings->getVal<string>("Phpbb3DatabaseAddress").c_str(),
+                              mSettings->getVal<string>("DbUsername").c_str(),
+                              mSettings->getVal<string>("DbPassword").c_str());
+
+      if(query.isValid)
+      {
+         logprintf("Stats database connectivity test PASSED");
+      }
+      else
+      {
+         logprintf(LogConsumer::ConfigurationError, "Stats database connectivity test FAILED - Unable to open database");
+      }
+   }
+   catch(const std::exception &ex)
+   {
+      logprintf(LogConsumer::ConfigurationError, "Stats database connectivity test FAILED - Exception: %s", ex.what());
+   }
+}
+
+
+// Test database connectivity and log results -- do this on startup
+void MasterServer::testPhpbbDatabaseConnectivity() const
+{
+   try
+   {
+      DbWriter::DbQuery query(mSettings->getVal<string>("Phpbb3Database").c_str(),
+                              mSettings->getVal<string>("MySqlAddress").c_str(),
+                              mSettings->getVal<string>("DbUsername").c_str(),
+                              mSettings->getVal<string>("DbPassword").c_str());
+
+      if(query.isValid)
+      {
+         logprintf("PHPBB username database connectivity test PASSED");
+      }
+      else
+      {
+         logprintf(LogConsumer::ConfigurationError, "PHPBB username connectivity test FAILED - Unable to open database");
+      }
+   }
+   catch(const std::exception &ex)
+   {
+      logprintf(LogConsumer::ConfigurationError, "PHPBB username connectivity test FAILED - Exception: %s", ex.what());
+   }
 }
 
 }  // namespace
