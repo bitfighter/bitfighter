@@ -49,7 +49,7 @@ TEST(SettingsTest, SetValFromString)
    settings.getSetting("YesNoYes")->setValFromString("yes");
    ASSERT_EQ(Yes, settings.getVal<YesNo>("YesNoYes"));
 
-   // Unknwon values - should go to No
+   // Unknown values - should go to No
    settings.getSetting("YesNoYes")->setValFromString("abcdefg");
    ASSERT_EQ(No, settings.getVal<YesNo>("YesNoYes"));
    // Empty string

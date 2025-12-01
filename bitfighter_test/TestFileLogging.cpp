@@ -232,14 +232,14 @@ TEST_F(FileLoggingTest, MasterMainLogPattern)
    FileLogConsumer fileLogConsumer;
    fileLogConsumer.init(filename, "a");
    fileLogConsumer.setMsgTypes(LogConsumer::AllErrorTypes | LogConsumer::LogConnection);
-   fileLogConsumer.logprintf("------ Bitfighter Master Server Log File ------");
+   fileLogConsumer.logprintf("------ Bitfighter XXX Log File ------");
    fileLogConsumer.logprintf("Server starting up...");
 
    // Verify the log file was created and contains expected messages
    EXPECT_TRUE(fileExists(filename)) << "Master log file not created";
 
    std::string contents = readFileContents(filename);
-   EXPECT_TRUE(stringContains(contents, "Bitfighter Master Server Log File")) << "Header message not found in master log";
+   EXPECT_TRUE(stringContains(contents, "Bitfighter XXX Log File")) << "Header message not found in master log";
    EXPECT_TRUE(stringContains(contents, "Server starting up")) << "Startup message not found in master log";
 
    if (fileExists(filename))
