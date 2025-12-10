@@ -38,6 +38,7 @@ namespace Master
 {
 
 // Create a test database and write some records to it.  Return exit code.
+// Only called if -testdb is passed on command line.
 S32 testDb(const char *dbName)
 {
    DatabaseWriter databaseWriter(dbName);
@@ -123,16 +124,40 @@ S32 testDb(const char *dbName)
 
 void seedRandomNumberGenerator()
 {
-   U32 time = Platform::getRealMilliseconds();
-
    U8 buf[16];
+   S32 bufIndex = 0;
 
-   buf[0] = U8(time);
-   buf[1] = U8(time >> 8);
-   buf[2] = U8(time >> 16);
-   buf[3] = U8(time >> 24);
+   // 1. Use current time (milliseconds) - 4 bytes -- essentially random
+   U32 timeMs = Platform::getRealMilliseconds();
+   buf[bufIndex++] = U8(timeMs);
+   buf[bufIndex++] = U8(timeMs >> 8);
+   buf[bufIndex++] = U8(timeMs >> 16);
+   buf[bufIndex++] = U8(timeMs >> 24);
 
-   // Need at least 16 bytes to make anything happen.  We'll provide 4 sort of good ones, and 12 bytes of uninitialized crap.
+   // 2. Use current time (seconds) - 4 bytes - adds variation from system clock -- not random but pretty arbitrary
+   time_t timeSec = time(NULL);
+   buf[bufIndex++] = U8(timeSec);
+   buf[bufIndex++] = U8(timeSec >> 8);
+   buf[bufIndex++] = U8(timeSec >> 16);
+   buf[bufIndex++] = U8(timeSec >> 24);
+
+   // 3. Use memory addresses (ASLR provides randomness) - 4 bytes
+   uintptr_t stackAddr = (uintptr_t)&buf;
+   buf[bufIndex++] = U8(stackAddr);
+   buf[bufIndex++] = U8(stackAddr >> 8);
+   buf[bufIndex++] = U8(stackAddr >> 16);
+   buf[bufIndex++] = U8(stackAddr >> 24);
+
+   // 4. Use Nonce for cryptographic randomness - 4 bytes
+   Nonce randomNonce;
+   randomNonce.getRandom();
+   // Extract some bytes from the nonce
+   U8* nonceBytes = (U8*)&randomNonce;
+   buf[bufIndex++] = nonceBytes[0];
+   buf[bufIndex++] = nonceBytes[1];
+   buf[bufIndex++] = nonceBytes[2];
+   buf[bufIndex++] = nonceBytes[3];
+
    Random::addEntropy(buf, 16);
 }
 
