@@ -19,44 +19,47 @@ namespace Zap
 }
 
 
-namespace Master 
+namespace Master
 {
 
 // TODO: Replace strings below with constants or #defines (like LATEST_RELEASED_BUILD_VERSION)
 
 // Constructor
-MasterSettings::MasterSettings(const string &iniFile)     
+MasterSettings::MasterSettings(const string &iniFile)
 {
    ini.SetPath(iniFile);
 
    // Note that on the master, our settings are read-only, so there is no need to specify a comment
-   //                      Data type  Setting name                       Default value         INI Key                                INI Section                                  
-   mSettings.add(new Setting<string>("ServerName",                 "Bitfighter Master Server", "name",                                 "host"));
-   mSettings.add(new Setting<string>("JsonOutfile",                      "server.json",        "json_file",                            "host"));
-   mSettings.add(new Setting<U32>   ("Port",                                 25955,            "port",                                 "host"));
-   mSettings.add(new Setting<U32>   ("LatestReleasedCSProtocol",               0,              "latest_released_cs_protocol",          "host"));
-   mSettings.add(new Setting<U32>   (LATEST_RELEASED_BUILD_VERSION,            0,              "latest_released_client_build_version", "host"));
-                                                                                               
-   // Variables for managing access to MySQL                                                   
-   mSettings.add(new Setting<string>("MySqlAddress",                           "",             "phpbb_database_address",               "phpbb"));
-   mSettings.add(new Setting<string>("DbUsername",                             "",             "phpbb3_database_username",             "phpbb"));
-   mSettings.add(new Setting<string>("DbPassword",                             "",             "phpbb3_database_password",             "phpbb"));
-                                                                                               
-   // Variables for verifying usernames/passwords in PHPBB3                                    
-   mSettings.add(new Setting<string>("Phpbb3Database",                         "",             "phpbb3_database_name",                 "phpbb"));
-   mSettings.add(new Setting<string>("Phpbb3TablePrefix",                      "",             "phpbb3_table_prefix",                  "phpbb"));
-                                                                                               
-   // Stats database credentials                                                               
-   mSettings.add(new Setting<YesNo> ("WriteStatsToMySql",                      No,             "write_stats_to_mysql",                 "stats"));
-   mSettings.add(new Setting<string>("StatsDatabaseAddress",                   "",             "stats_database_addr",                  "stats"));
-   mSettings.add(new Setting<string>("StatsDatabaseName",                      "",             "stats_database_name",                  "stats"));
-   mSettings.add(new Setting<string>("StatsDatabaseUsername",                  "",             "stats_database_username",              "stats"));
-   mSettings.add(new Setting<string>("StatsDatabasePassword",                  "",             "stats_database_password",              "stats"));
+   //                      Data type  Setting name                   Default value         INI Key                                INI Section
+   mSettings.add(new Setting<string>("ServerName",             "Bitfighter Master Server", "name",                                 "host"));
+   mSettings.add(new Setting<string>("JsonOutfile",                  "server.json",        "json_file",                            "host"));
+   mSettings.add(new Setting<U32>   ("Port",                             25955,            "port",                                 "host"));
+   mSettings.add(new Setting<U32>   ("LatestReleasedCSProtocol",           0,              "latest_released_cs_protocol",          "host"));
+   mSettings.add(new Setting<U32>   (LATEST_RELEASED_BUILD_VERSION,        0,              "latest_released_client_build_version", "host"));
+
+   // Variables for managing access to MySQL
+   mSettings.add(new Setting<string>("MySqlAddress",                       "",             "phpbb_database_address",               "phpbb"));
+   mSettings.add(new Setting<string>("DbUsername",                         "",             "phpbb3_database_username",             "phpbb"));
+   mSettings.add(new Setting<string>("DbPassword",                         "",             "phpbb3_database_password",             "phpbb"));
+
+   // Variables for verifying usernames/passwords in PHPBB3
+   mSettings.add(new Setting<string>("Phpbb3Database",                     "",             "phpbb3_database_name",                 "phpbb"));
+   mSettings.add(new Setting<string>("Phpbb3TablePrefix",                  "",             "phpbb3_table_prefix",                  "phpbb"));
+   mSettings.add(new Setting<string>("Phpbb3DatabaseAddress",              "",             "phpbb3_database_addr",                 "phpbb"));
+
+   // Stats database credentials
+   mSettings.add(new Setting<YesNo> ("WriteStatsToMySql",                  No,             "write_stats_to_mysql",                 "stats"));
+   mSettings.add(new Setting<string>("StatsDatabaseAddress",               "",             "stats_database_addr",                  "stats"));
+   mSettings.add(new Setting<string>("StatsDatabaseName",                  "",             "stats_database_name",                  "stats"));
+   mSettings.add(new Setting<string>("StatsDatabaseUsername",              "",             "stats_database_username",              "stats"));
+   mSettings.add(new Setting<string>("StatsDatabasePassword",              "",             "stats_database_password",              "stats"));
 
    // GameJolt settings
-   mSettings.add(new Setting<YesNo> ("UseGameJolt",                            Yes,            "UseGameJolt",                          "GameJolt"));
-   mSettings.add(new Setting<string>("GameJoltSecret",                         "",             "GameJoltSecret",                       "GameJolt"));
-}                  
+   mSettings.add(new Setting<YesNo> ("UseGameJolt",                        Yes,            "UseGameJolt",                          "GameJolt"));
+   mSettings.add(new Setting<string>("GameJoltSecret",                     "",             "GameJoltSecret",                       "GameJolt"));
+
+   mSettings.add(new Setting<string>(CURL_PATH,                      "/usr/bin/curl",      "path_to_curl",                         "system"));
+}
 
 
 void MasterSettings::readConfigFile()
@@ -177,7 +180,7 @@ string MasterSettings::getMotd(U32 clientBuildVersion) const
       motdString = "Welcome to the future!  This client is running a new version of Bitfighter.  If it's an official release, tell the devs to update the latest_released_client_build_version setting in master.ini!";
    else      // This is not a current release, has no version-specific messages in the motdClientMap, and isn't newer than the latest build release
       motdString = "Time to upgrade!  Download the current version at bitfighter.org";
-  
+
    return motdString;
 }
 
@@ -201,12 +204,15 @@ MasterServer::MasterServer(MasterSettings *settings)
    mPingGameJoltTimer.reset(THIRTY_SECONDS);    // Game Jolt recommended frequency... sessions time out after 2 mins
 
    mJsonWritingSuspended = false;
-   
+
    mDatabaseAccessThread = new DatabaseAccessThread();    // Deleted in destructor
 
    // Test database connectivity
    testStatsDatabaseConnectivity();
    testPhpbbDatabaseConnectivity();
+   testCurl();
+
+   logprintf(LogConsumer::LogStartup, "Startup tests complete");
 
    MasterServerConnection::setMasterServer(this);
 }
@@ -226,7 +232,7 @@ NetInterface *MasterServer::createNetInterface() const
    NetInterface *netInterface = new NetInterface(Address(IPProtocol, Address::Any, port));
 
    // Log a welcome message in the main log and to the console
-   logprintf("Master Server \"%s\" started - listening on port %d (protocol v. %d)", 
+   logprintf("Master Server \"%s\" started - listening on port %d (protocol v. %d)",
       getSetting<string>("ServerName").c_str(), port, MASTER_PROTOCOL_VERSION);
    return netInterface;
 }
@@ -252,7 +258,7 @@ void MasterServer::writeJsonDelayed()
 }
 
 
-// Indicates we want to write JSON as soon as possible... but never more 
+// Indicates we want to write JSON as soon as possible... but never more
 // frequently than allowed by mJsonWriteTimer, which we don't reset here
 void MasterServer::writeJsonNow()
 {
@@ -346,9 +352,9 @@ void MasterServer::idle(const U32 timeDelta)
    // Process connections -- cycle through them and check if any have timed out
    U32 currentTime = Platform::getRealMilliseconds();
 
-   for(S32 i = MasterServerConnection::gConnectList.size() - 1; i >= 0; i--)    
+   for(S32 i = MasterServerConnection::gConnectList.size() - 1; i >= 0; i--)
    {
-      GameConnectRequest *request = MasterServerConnection::gConnectList[i];    
+      GameConnectRequest *request = MasterServerConnection::gConnectList[i];
 
       if(currentTime - request->requestTime > (U32)FIVE_SECONDS)
       {
@@ -371,10 +377,10 @@ void MasterServer::idle(const U32 timeDelta)
    // Process any delayed disconnects; we use this to avoid repeating and flooding join / leave messages
    for(S32 i = MasterServerConnection::gLeaveChatTimerList.size() - 1; i >= 0; i--)
    {
-      MasterServerConnection *c = MasterServerConnection::gLeaveChatTimerList[i];      
+      MasterServerConnection *c = MasterServerConnection::gLeaveChatTimerList[i];
 
       if(!c || c->mLeaveGlobalChatTimer == 0)
-         MasterServerConnection::gLeaveChatTimerList.erase(i);                         
+         MasterServerConnection::gLeaveChatTimerList.erase(i);
       else
       {
          if(currentTime - c->mLeaveGlobalChatTimer > (U32)ONE_SECOND)
@@ -414,7 +420,7 @@ void MasterServer::testStatsDatabaseConnectivity() const
 
       if(query.isValid)
       {
-         logprintf("Stats database connectivity test PASSED");
+         logprintf(LogConsumer::LogStartup, "Stats database connectivity confirmed");
       }
       else
       {
@@ -440,7 +446,7 @@ void MasterServer::testPhpbbDatabaseConnectivity() const
 
       if(query.isValid)
       {
-         logprintf("PHPBB username database connectivity test PASSED");
+         logprintf(LogConsumer::LogStartup, "PHPBB username database connectivity confirmed");
       }
       else
       {
@@ -452,6 +458,24 @@ void MasterServer::testPhpbbDatabaseConnectivity() const
       logprintf(LogConsumer::ConfigurationError, "PHPBB username connectivity test FAILED - Exception: %s", ex.what());
    }
 }
+
+
+void MasterServer::testCurl() const
+{
+#ifdef GAME_JOLT
+   string curl_path = getSetting<string>(CURL_PATH);
+
+   if (fileExists(curl_path))
+   {
+      logprintf(LogConsumer::LogStartup, "cURL detected");
+      return;
+   }
+   logprintf(LogConsumer::ConfigurationError, "cURL not found at '%s' - GameJolt functionality will not work", curl_path.c_str());
+   mSettings->mSettings.setVal(CURL_PATH, string(""));
+
+   #endif
+}
+
 
 }  // namespace
 

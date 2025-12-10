@@ -22,6 +22,7 @@ using namespace Zap;
 
 
 #define LATEST_RELEASED_BUILD_VERSION "LatestReleasedBuildVersion"
+#define CURL_PATH "CurlPath"
 
 
 namespace Zap {
@@ -90,6 +91,7 @@ private:
 
    void testStatsDatabaseConnectivity() const;
    void testPhpbbDatabaseConnectivity() const;
+   void testCurl() const;
 
 public:
    MasterServer(MasterSettings *settings);      // Constructor

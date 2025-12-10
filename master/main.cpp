@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include <string>
-#include <stdarg.h>     
+#include <stdarg.h>
 #include <time.h>
 #include <map>
 
@@ -147,7 +147,7 @@ int main(int argc, const char **argv)
       exit(testDb("test_db"));
 
    // Configure logging
-   S32 events = LogConsumer::AllErrorTypes | LogConsumer::LogConnection | LogConsumer::LogConnectionManager | LogConsumer::LogChat;
+   S32 events = LogConsumer::AllErrorTypes | LogConsumer::LogConnection | LogConsumer::LogConnectionManager | LogConsumer::LogChat | LogConsumer::LogStartup;
 
    FileLogConsumer fileLogConsumer;                         // Primary logfile
    fileLogConsumer.init("logs/bitfighter_master.log", "a");      // Will be created in folder where master is run from
@@ -158,7 +158,7 @@ int main(int argc, const char **argv)
    stdoutLogConsumer.setMsgTypes(events);
 
    FileLogConsumer statisticsLogConsumer;       // Statistics file
-   statisticsLogConsumer.init("bitfighter_player_stats.log", "a");
+   statisticsLogConsumer.init("logs/bitfighter_player_stats.log", "a");
    statisticsLogConsumer.setMsgTypes(LogConsumer::StatisticsFilter);
 
    // Set INI location

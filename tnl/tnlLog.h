@@ -9,8 +9,8 @@
 //   the Free Software Foundation; either version 2 of the License, or
 //   (at your option) any later version.
 //
-//   For use in products that are not compatible with the terms of the GNU 
-//   General Public License, alternative licensing options are available 
+//   For use in products that are not compatible with the terms of the GNU
+//   General Public License, alternative licensing options are available
 //   from GarageGames.com.
 //
 //   This program is distributed in the hope that it will be useful,
@@ -34,7 +34,7 @@
 
 namespace TNL
 {
-///   
+///
 /// LogConsumer is the base class for the message logging system in TNL.
 ///
 /// TNL by default doesn't log messages anywhere, but users of the library
@@ -43,7 +43,7 @@ namespace TNL
 /// logprintf's, as well as any TNLLogMessages that are enabled via
 /// the setMsgType() and setMsgTypes() functions.
 ///
-   
+
 class LogConsumer
 {
 private:
@@ -53,49 +53,50 @@ private:
    static LogConsumer *mLinkedList;    ///< Head of the global linked list of log consumers.
 
 public:
-   enum MsgType {   
-      LogNone                    = 0,
+   enum MsgType
+   {
+      LogNone = 0,
 
       // Error logging
-      LogFatalError           = BIT(0),      // Log fatal errors; should be left on
-      LogError                = BIT(1),      // Log serious errors; should be left on
-      LogWarning              = BIT(2),      // Log less serious errors
- 
-      LogConnection           = BIT(3),      // High level logging connections with remote machines
+      LogFatalError = BIT(0), // Log fatal errors; should be left on
+      LogError = BIT(1),      // Log serious errors; should be left on
+      LogWarning = BIT(2),    // Log less serious errors
+
+      LogConnection = BIT(3), // High level logging connections with remote machines
 
       // Master server events
-      LogConnectionManager    = BIT(4),      // Log server attempts to manage connections between clients and servers
-      LogChat                 = BIT(5),      // Log global chat messages relayed through master
+      LogConnectionManager = BIT(4), // Log server attempts to manage connections between clients and servers
+      LogChat = BIT(5),              // Log global chat messages relayed through master
 
       // TNL network events
-      LogConnectionProtocol	  = BIT(6),      // Details about packets sent/recv'd
-      LogNetConnection        = BIT(7),      // Packet send/rcv info
-      LogEventConnection      = BIT(8),      // Event connection info
-      LogGhostConnection      = BIT(9),      // Info about ghosting
-      LogNetInterface		  = BIT(10),     // Higher level network events such as connection attempts and the like
-      LogPlatform             = BIT(11),     // Log message in lieu of showing message to user on non-Windows platforms; only used for Asserts
-      LogNetBase              = BIT(12),     // Info about network object classes
-      LogUDP                  = BIT(13),     // Logs UDP socket bindings and params
+      LogConnectionProtocol = BIT(6), // Details about packets sent/recv'd
+      LogNetConnection = BIT(7),      // Packet send/rcv info
+      LogEventConnection = BIT(8),    // Event connection info
+      LogGhostConnection = BIT(9),    // Info about ghosting
+      LogNetInterface = BIT(10),      // Higher level network events such as connection attempts and the like
+      LogPlatform = BIT(11),          // Log message in lieu of showing message to user on non-Windows platforms; only used for Asserts
+      LogNetBase = BIT(12),           // Info about network object classes
+      LogUDP = BIT(13),               // Logs UDP socket bindings and params
 
-      LogLevelLoaded          = BIT(14),     // When a level is loaded
+      LogLevelLoaded = BIT(14), // When a level is loaded
 
-      LogLuaObjectLifecycle   = BIT(15),     // Creation and destruciton of lua objects
-      //LuaLevelGenerator       = BIT(16),     // Messages from the LuaLevelGenerator     
-      LuaScriptMessage         = BIT(17),     // Message from a script, to go to lua msg console
+      LogLuaObjectLifecycle = BIT(15), // Creation and destruciton of lua objects
+      // LuaLevelGenerator       = BIT(16),     // Messages from the LuaLevelGenerator
+      LuaScriptMessage = BIT(17), // Message from a script, to go to lua msg console
 
-      ServerFilter            = BIT(18),     // For logging messages specific to hosting games
-      StatisticsFilter        = BIT(19),     // For logging player/game statistics
+      ServerFilter = BIT(18),     // For logging messages specific to hosting games
+      StatisticsFilter = BIT(19), // For logging player/game statistics
 
-      DatabaseFilter          = BIT(20),     // For logging issues with writing to database
-      ConfigurationError      = BIT(21),     // For logging configuation issues
+      DatabaseFilter = BIT(20),     // For logging issues with writing to database
+      ConfigurationError = BIT(21), // For logging configuation issues
 
-      LogLevelError           = BIT(22),     // Logs errors and warnings in levels
-      ConsoleMsg              = BIT(23),     // Message that goes only to the console
-      
+      LogLevelError = BIT(22), // Logs errors and warnings in levels
+      ConsoleMsg = BIT(23),    // Message that goes only to the console
+      LogStartup = BIT(24),    // Startup checks and validations
+
       All = 0xFFFFFFFF,
       AllErrorTypes = LogFatalError | LogError | LogWarning | LogLevelError | ConfigurationError
    };
-
 
    /// Constructor adds this LogConsumer to the global linked list.
    LogConsumer();
@@ -142,7 +143,7 @@ public:
 
 private:
    void writeString(const char *string);
-}; 
+};
 
 
 ////////////////////////////////////////

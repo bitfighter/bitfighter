@@ -14,7 +14,7 @@
 #include "../zap/stringUtils.h"
 
 
-#ifdef TNL_OS_WIN32 
+#ifdef TNL_OS_WIN32
 #  include <io.h>
 #else
 #  include <unistd.h>
@@ -30,7 +30,7 @@ using namespace std;
 // Uncomment to test compiling on Windows
 //#define GAME_JOLT
 //#define fork() false;
-//#define execl() 
+//#define execl()
 //#ifndef TNL_OS_WIN32
 //#  error -- need to comment this block out to build!
 //#endif
@@ -40,21 +40,30 @@ namespace GameJolt
 {
 
 // Bitfighter's GameJolt id ==> does it make sense to put this in the INI?
-static const string gameIdString = "game_id=20546";      
+static const string gameIdString = "game_id=20546";
 
 static md5wrapper md5;
 
 
 // When using curl, this will never return
-static void updateGameJolt(const MasterSettings *settings, const string &baseUrl, 
+static void updateGameJolt(const MasterSettings *settings, const string &baseUrl,
                            const string &secret,           const string &quotedNameList,
                            const string &otherParams = "")
 {
 #ifdef GAME_JOLT
+   string curl_path = settings->getVal<string>(CURL_PATH);
+
+   if(curl_path == "")
+   {
+      logprintf(LogConsumer::LogError, "Curl not found, GameJolt integration disabled.  (check 'path_to_curl' in master.ini)");
+      return;
+   }
+
 
    DatabaseWriter databaseWriter = DbWriter::getDatabaseWriter(settings);
 
    string databaseName = settings->getVal<string>("Phpbb3Database");
+
    Vector<string> credentialStrings = databaseWriter.getGameJoltCredentialStrings(databaseName, quotedNameList, 1);
 
    //HttpRequest request;
@@ -75,16 +84,15 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
       //request.setUrl(url);
 
       //if(!request.send())
-      //   logprintf(LogConsumer::LogError, "Error sending GameJolt request! (msg=%s, url=%s)", 
+      //   logprintf(LogConsumer::LogError, "Error sending GameJolt request! (msg=%s, url=%s)",
       //                                     request.getError().c_str(), url.c_str());
    }
 
    if(urlList.length() > 0)
    {
       // This is a fallback because the request.send() was returning a "Socket not writable" error
-      execl("/usr/bin/curl", "curl", urlList.c_str(), NULL);
-
-      logprintf(LogConsumer::LogError, "Error running exec()");
+      //execl("/usr/bin/curl", "curl", urlList.c_str(), NULL);
+      execl(curl_path.c_str(), "curl", urlList.c_str(), NULL);
       exit(1);
    }
 
@@ -96,7 +104,7 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
 
 static void onPlayerAuthenticatedOrQuit(const MasterSettings *settings, const MasterServerConnection *client, const string &verb)
 {
-#ifdef GAME_JOLT  
+#ifdef GAME_JOLT
 
    if(!settings->getVal<YesNo>("UseGameJolt"))
       return;
@@ -151,7 +159,7 @@ void onPlayerQuit(const MasterSettings *settings, const MasterServerConnection *
 // This gets updated whenever we gain or lose a server, at most every 5 seconds (currently)
 void ping(const MasterSettings *settings, const Vector<MasterServerConnection *> *clientList)
 {
-#ifdef GAME_JOLT    
+#ifdef GAME_JOLT
 
    if(!settings->getVal<YesNo>("UseGameJolt"))
       return;
@@ -178,7 +186,7 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
 
    // From here on down is child process... we'll never return!
 
-   
+
    // Assemble list of all connected and authenticated players
 
    string nameList = "";  // Comma seperated list of quoted, sanitized names ready to pass to a SQL IN() function
@@ -186,7 +194,7 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
 
    for(S32 i = 0; i < clientList->size(); i++)
    {
-      if(clientList->get(i) && clientList->get(i)->mAuthenticated) 
+      if(clientList->get(i) && clientList->get(i)->mAuthenticated)
       {
          string name = sanitizeForSql(clientList->get(i)->mPlayerOrServerName.getString());
          if(nameCount > 0)
@@ -208,7 +216,7 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
 
 void onPlayerAwardedAchievement(const MasterSettings *settings, const string &awardedTo, S32 achievementId)
 {
-#ifdef GAME_JOLT  
+#ifdef GAME_JOLT
 
    if(!settings->getVal<YesNo>("UseGameJolt"))
       return;
@@ -253,4 +261,4 @@ void onPlayerAwardedAchievement(const MasterSettings *settings, const string &aw
 }
 
 
-} 
+}
