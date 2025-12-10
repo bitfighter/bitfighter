@@ -18,6 +18,7 @@
 // Modified by Chris Eykamp to incorporate journaling for Zap
 // Also replaced sprintf with dSprintf for more secure operations
 // Also added a check to ensure duplicate keys aren't created
+// Also added environment variable expansion
 ////////////////////////
 
 // Terminology used throughout:
@@ -62,6 +63,111 @@ CIniFile::CIniFile(const string &iniPath)
 CIniFile::~CIniFile()
 {
    //WriteFile();  --> Crashes with VC++ 2008
+}
+
+
+// Expand environment variables in a string
+// Supports:
+//   ${VAR_NAME}  -> expands from environment
+//   $VAR_NAME    -> expands from environment
+//   $$           -> literal '$' (escape in INI content)
+// Environment variable VALUES are taken as-is (no further $ processing).
+static string expandEnvironmentVariables(const string &value)
+{
+   string out;
+   out.reserve(value.size());
+
+   const char *s = value.c_str();
+   size_t i = 0;
+   const size_t n = value.size();
+
+   while(i < n)
+   {
+      char c = s[i];
+
+      if(c != '$')
+      {
+         // Normal character
+         out.push_back(c);
+         ++i;
+         continue;
+      }
+
+      // We have a '$'
+      if(i + 1 >= n)
+      {
+         // Trailing lone '$' – ignore
+         //out.push_back('$');  <-- if we want to include trailing solo $s, uncomment this line
+         ++i;
+         continue;
+      }
+
+      char c1 = s[i + 1];
+
+      // $$$... cases are naturally handled by these rules:
+      //  - $$ -> '$'
+      //  - then next $VAR or ${VAR} processed as below
+
+      // 1) Escape: "$$" -> literal '$'
+      if(c1 == '$')
+      {
+         out.push_back('$');
+         i += 2;
+         continue;
+      }
+
+      // 2) Brace form: "${VAR}"
+      if(c1 == '{')
+      {
+         size_t j = i + 2; // start of var name
+         while(j < n && s[j] != '}')
+            ++j;
+
+         if(j >= n)
+         {
+            // No closing '}', treat "$" as literal and continue
+            out.push_back('$');
+            ++i;
+            continue;
+         }
+
+         // Extract variable name between { and }
+         string varName(value.substr(i + 2, j - (i + 2)));
+
+         const char *envValue = getenv(varName.c_str());
+         if(envValue)
+            out.append(envValue);  // environment value is taken as-is
+         // else append nothing (empty)
+
+         i = j + 1;  // advance past '}'
+         continue;
+      }
+
+      // 3) Simple form: "$VAR" (alnum or '_')
+      if(isalnum(static_cast<unsigned char>(c1)) || c1 == '_')
+      {
+         size_t j = i + 1;
+         while(j < n && (isalnum(static_cast<unsigned char>(s[j])) || s[j] == '_'))
+            ++j;
+
+         string varName(value.substr(i + 1, j - (i + 1)));
+
+         const char *envValue = getenv(varName.c_str());
+         if(envValue)
+            out.append(envValue);
+         // else append nothing
+
+         i = j;  // advance past variable name
+         continue;
+      }
+
+      // 4) "$" followed by something that is not '$', '{', or [A-Za-z0-9_]
+      //    Treat the '$' as literal and continue.
+      out.push_back('$');
+      ++i;
+   }
+
+   return out;
 }
 
 
@@ -331,9 +437,9 @@ bool CIniFile::SetValueF(const string &section, const string &key, F32 const val
 string CIniFile::GetValue(S32 const sectionId, S32 const keyID, const string &defValue) const
 {
    if(sectionId < sections.size() && keyID < sections[sectionId].keys.size())
-      return sections[sectionId].values[keyID];
+      return expandEnvironmentVariables(sections[sectionId].values[keyID]);
 
-   return defValue;
+   return expandEnvironmentVariables(defValue);
 }
 
 
@@ -341,9 +447,9 @@ string CIniFile::GetValue(S32 const sectionId, const string &keyName, const stri
 {
    S32 valueID = findKey(sectionId, keyName);
    if(valueID == noID)
-      return defValue;
+      return expandEnvironmentVariables(defValue);
 
-   return sections[sectionId].values[valueID];
+   return expandEnvironmentVariables(sections[sectionId].values[valueID]);
 }
 
 
@@ -351,13 +457,13 @@ string CIniFile::GetValue(const string &section, const string &keyName, const st
 {
    S32 sectionId = findSection(section);
    if(sectionId == noID)
-      return defValue;
+      return expandEnvironmentVariables(defValue);
 
    S32 valueID = findKey(sectionId, keyName);
    if(valueID == noID)
-      return defValue;
+      return expandEnvironmentVariables(defValue);
 
-   return sections[sectionId].values[valueID];
+   return expandEnvironmentVariables(sections[sectionId].values[valueID]);
 }
 
 
@@ -367,7 +473,7 @@ void CIniFile::GetAllValues(S32 const sectionId, Vector<string> &valueList) cons
    for(S32 i = 0; i < sections[sectionId].keys.size(); i++)
       // Only return non-empty values
       if(sections[sectionId].values[i] != "")
-         valueList.push_back(sections[sectionId].values[i]);
+         valueList.push_back(expandEnvironmentVariables(sections[sectionId].values[i]));
 }
 
 
@@ -404,7 +510,7 @@ void CIniFile::GetAllKeys(const string &section, Vector<string> &keyList) const
 
 int CIniFile::GetValueI(const string &section, const string &key, S32 const defValue) const
 {
-   string val = GetValue(section, key, itos(defValue));
+   string val = expandEnvironmentVariables(GetValue(section, key, itos(defValue)));
 
    return atoi(val.c_str());
 }
@@ -419,7 +525,7 @@ static bool valueIsYes(const string &val)
 // Returns true for "Yes" (case insensitive), false otherwise
 bool CIniFile::GetValueYN(const string &section, const string &key, bool defValue) const
 {
-   return valueIsYes(GetValue(section, key, defValue ? "Yes" : "No"));
+   return valueIsYes(expandEnvironmentVariables(GetValue(section, key, defValue ? "Yes" : "No")));
 }
 
 
@@ -429,13 +535,13 @@ bool CIniFile::GetValueYN(S32 const sectionId, const string &keyName, const bool
    if(valueID == noID)
       return defValue;
 
-   return valueIsYes(sections[sectionId].values[valueID]);
+   return valueIsYes(expandEnvironmentVariables(sections[sectionId].values[valueID]));
 }
 
 
 F32 CIniFile::GetValueF(const string &section, const string &key, F32 const defValue) const
 {
-   string val = GetValue(section, key, ftos(defValue));
+   string val = expandEnvironmentVariables(GetValue(section, key, ftos(defValue)));
 
    return (F32)atof(val.c_str());
 }
@@ -722,13 +828,13 @@ string CIniFile::GetValueName(S32 const sectionID, S32 const keyID) const
 
 string CIniFile::GetValueName( const string &section, S32 const keyID) const
 {
-   return ValueName( section, keyID);
+   return ValueName(section, keyID);
 }
 
 
 bool CIniFile::GetValueB(const string &section, const string &key, bool const defValue) const
 {
-   return (GetValueI( section, key, int( defValue)) != 0);
+   return (GetValueI(section, key, int( defValue)) != 0);
 }
 
 

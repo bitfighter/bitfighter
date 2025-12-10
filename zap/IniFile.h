@@ -122,6 +122,11 @@ public:
    // Gets value of [keyname] valuename =.
    // Overloaded to return string, int, and double.
    // Returns defValue if key/value not found.
+   //
+   // Environment variable expansion is supported:
+   //   ${VAR_NAME} or $VAR_NAME - expands to the value of the environment variable
+   //   $$ - escapes to a literal $ (e.g., abc=$$ expands to abc=$)
+   //   If the variable is not defined, it expands to an empty string
    string GetValue(S32 const sectionId, S32 const keyID, const string &defValue = "") const;
    string GetValue(S32 const sectionId, const string &keyName, const string &defValue = "") const;
    string GetValue(const string &section, const string &keyName, const string &defValue = "") const;
