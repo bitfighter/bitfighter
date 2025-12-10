@@ -745,7 +745,7 @@ string ctos(char c)
 string replaceString(const char *in, const char *find, const char *replace)
 {
    string out;
-   int n = 0;
+   size_t n = 0;
    size_t findlen = strlen(find);
    while(in[n])
    {
