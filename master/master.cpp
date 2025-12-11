@@ -37,22 +37,19 @@ MasterSettings::MasterSettings(const string &iniFile)
    mSettings.add(new Setting<U32>   ("LatestReleasedCSProtocol",           0,              "latest_released_cs_protocol",          "host"));
    mSettings.add(new Setting<U32>   (LATEST_RELEASED_BUILD_VERSION,        0,              "latest_released_client_build_version", "host"));
 
-   // Variables for managing access to MySQL
-   mSettings.add(new Setting<string>("MySqlAddress",                       "",             "phpbb_database_address",               "phpbb"));
-   mSettings.add(new Setting<string>("DbUsername",                         "",             "phpbb3_database_username",             "phpbb"));
-   mSettings.add(new Setting<string>("DbPassword",                         "",             "phpbb3_database_password",             "phpbb"));
-
    // Variables for verifying usernames/passwords in PHPBB3
-   mSettings.add(new Setting<string>("Phpbb3Database",                     "",             "phpbb3_database_name",                 "phpbb"));
-   mSettings.add(new Setting<string>("Phpbb3TablePrefix",                  "",             "phpbb3_table_prefix",                  "phpbb"));
-   mSettings.add(new Setting<string>("Phpbb3DatabaseAddress",              "",             "phpbb3_database_addr",                 "phpbb"));
+   mSettings.add(new Setting<string>(PHPBB3_DATABASE_NAME,                 "",             "phpbb3_database_name",                 "phpbb"));
+   mSettings.add(new Setting<string>(PHPBB3_DATABASE_ADDRESS,              "",             "phpbb3_database_address",              "phpbb"));
+   mSettings.add(new Setting<string>(PHPBB3_DATABASE_USERNAME,             "",             "phpbb3_database_username",             "phpbb"));
+   mSettings.add(new Setting<string>(PHPBB3_DATABASE_PASSWORD,             "",             "phpbb3_database_password",             "phpbb"));
+   mSettings.add(new Setting<string>(PHPBB3_TABLE_PREFIX,                  "",             "phpbb3_table_prefix",                  "phpbb"));
 
    // Stats database credentials
    mSettings.add(new Setting<YesNo> ("WriteStatsToMySql",                  No,             "write_stats_to_mysql",                 "stats"));
-   mSettings.add(new Setting<string>("StatsDatabaseAddress",               "",             "stats_database_addr",                  "stats"));
-   mSettings.add(new Setting<string>("StatsDatabaseName",                  "",             "stats_database_name",                  "stats"));
-   mSettings.add(new Setting<string>("StatsDatabaseUsername",              "",             "stats_database_username",              "stats"));
-   mSettings.add(new Setting<string>("StatsDatabasePassword",              "",             "stats_database_password",              "stats"));
+   mSettings.add(new Setting<string>(STATS_DATABASE_NAME,                  "",             "stats_database_name",                  "stats"));
+   mSettings.add(new Setting<string>(STATS_DATABASE_ADDRESS,               "",             "stats_database_addr",                  "stats"));
+   mSettings.add(new Setting<string>(STATS_DATABASE_USERNAME,              "",             "stats_database_username",              "stats"));
+   mSettings.add(new Setting<string>(STATS_DATABASE_PASSWORD,              "",             "stats_database_password",              "stats"));
 
    // GameJolt settings
    mSettings.add(new Setting<YesNo> ("UseGameJolt",                        Yes,            "UseGameJolt",                          "GameJolt"));
@@ -208,6 +205,7 @@ MasterServer::MasterServer(MasterSettings *settings)
    mDatabaseAccessThread = new DatabaseAccessThread();    // Deleted in destructor
 
    // Test database connectivity
+   logprintf(LogConsumer::LogStartup, "Using INI file \"%s\"", mSettings->ini.getPath().c_str());
    testStatsDatabaseConnectivity();
    testPhpbbDatabaseConnectivity();
    testCurl();
@@ -413,11 +411,10 @@ void MasterServer::testStatsDatabaseConnectivity() const
 {
    try
    {
-      DbWriter::DbQuery query(mSettings->getVal<string>("Phpbb3Database").c_str(),
-                              mSettings->getVal<string>("Phpbb3DatabaseAddress").c_str(),
-                              mSettings->getVal<string>("DbUsername").c_str(),
-                              mSettings->getVal<string>("DbPassword").c_str());
-
+      DbWriter::DbQuery query(mSettings->getVal<string>(STATS_DATABASE_NAME).c_str(),
+                              mSettings->getVal<string>(STATS_DATABASE_ADDRESS).c_str(),
+                              mSettings->getVal<string>(STATS_DATABASE_USERNAME).c_str(),
+                              mSettings->getVal<string>(STATS_DATABASE_PASSWORD).c_str());
       if(query.isValid)
       {
          logprintf(LogConsumer::LogStartup, "Stats database connectivity confirmed");
@@ -439,10 +436,10 @@ void MasterServer::testPhpbbDatabaseConnectivity() const
 {
    try
    {
-      DbWriter::DbQuery query(mSettings->getVal<string>("Phpbb3Database").c_str(),
-                              mSettings->getVal<string>("MySqlAddress").c_str(),
-                              mSettings->getVal<string>("DbUsername").c_str(),
-                              mSettings->getVal<string>("DbPassword").c_str());
+      DbWriter::DbQuery query(mSettings->getVal<string>(PHPBB3_DATABASE_NAME).c_str(),
+                              mSettings->getVal<string>(PHPBB3_DATABASE_ADDRESS).c_str(),
+                              mSettings->getVal<string>(PHPBB3_DATABASE_USERNAME).c_str(),
+                              mSettings->getVal<string>(PHPBB3_DATABASE_PASSWORD).c_str());
 
       if(query.isValid)
       {

@@ -22,6 +22,18 @@ using namespace Zap;
 
 
 #define LATEST_RELEASED_BUILD_VERSION "LatestReleasedBuildVersion"
+
+#define STATS_DATABASE_ADDRESS "StatsDatabaseAddress"
+#define STATS_DATABASE_NAME "StatsDatabaseName"
+#define STATS_DATABASE_USERNAME "StatsDatabaseUsername"
+#define STATS_DATABASE_PASSWORD "StatsDatabasePassword"
+
+#define PHPBB3_DATABASE_NAME "Phpbb3Database"
+#define PHPBB3_DATABASE_ADDRESS "Phpbb3DatabaseAddress"
+#define PHPBB3_DATABASE_USERNAME "Phpbb3DbUsername"
+#define PHPBB3_DATABASE_PASSWORD "Phpbb3DbPassword"
+#define PHPBB3_TABLE_PREFIX "Phpbb3TablePrefix"
+
 #define CURL_PATH "CurlPath"
 
 

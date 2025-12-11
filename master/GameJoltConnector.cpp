@@ -59,10 +59,9 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
       return;
    }
 
-
    DatabaseWriter databaseWriter = DbWriter::getDatabaseWriter(settings);
 
-   string databaseName = settings->getVal<string>("Phpbb3Database");
+   string databaseName = settings->getVal<string>(PHPBB3_DATABASE_NAME);
 
    Vector<string> credentialStrings = databaseWriter.getGameJoltCredentialStrings(databaseName, quotedNameList, 1);
 

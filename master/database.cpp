@@ -26,15 +26,15 @@ using namespace Master;
 namespace DbWriter
 {
 
-   
+
 // TODO: Should we be reusing these?
 DatabaseWriter getDatabaseWriter(const MasterSettings *settings)
 {
    if(settings->getVal<YesNo>("WriteStatsToMySql"))
-      return DatabaseWriter(settings->getVal<string>("StatsDatabaseAddress").c_str(), 
-                            settings->getVal<string>("StatsDatabaseName").c_str(),
-                            settings->getVal<string>("StatsDatabaseUsername").c_str(), 
-                            settings->getVal<string>("StatsDatabasePassword").c_str());
+      return DatabaseWriter(settings->getVal<string>(STATS_DATABASE_ADDRESS).c_str(),
+                            settings->getVal<string>(STATS_DATABASE_NAME).c_str(),
+                            settings->getVal<string>(STATS_DATABASE_USERNAME).c_str(),
+                            settings->getVal<string>(STATS_DATABASE_PASSWORD).c_str());
    else
       return DatabaseWriter("stats.db");
 }
