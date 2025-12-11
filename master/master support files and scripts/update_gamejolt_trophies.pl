@@ -2,7 +2,7 @@
 #
 # Script to cycle through all achievements and, for those players who have provided Game Jolt credentials,
 # will notify Game Jolt that the achievement has been achieved.
-# 
+#
 # Note that this requires the Game Jolt id to be entered into the achievement table in the database.
 #
 
@@ -35,6 +35,7 @@ while (<INI>) {
 }
 close (INI);
 
+# TODO: These need to come from env variables
 # If GameJolt integration is disabled, we can quit now
 my $useGameJolt = $ini{"GameJolt"}{"UseGameJolt"};
 if(lc($useGameJolt) eq "no") { exit 0; }
@@ -67,15 +68,15 @@ my $query = $dbh->prepare($sql);
 $query->execute || die "SQL Error: $DBI::errstr\n";
 
 # Loop through the achievements
-while(my @row = $query->fetchrow_array) 
+while(my @row = $query->fetchrow_array)
 {
    my($trophy_id, $username, $user_token) = @row;
    my $url = "http://gamejolt.com/api/game/v1/trophies/add-achieved?game_id=$game_id\&username=$username\&user_token=$user_token\&trophy_id=$trophy_id";
    my $signature = md5_hex($url, $secret);
-   
+
    # Add the signature we calculated
    $url .= "\&signature=$signature";
 
    `curl -s \"$url\"`;
-} 
+}
 
