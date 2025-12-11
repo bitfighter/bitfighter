@@ -104,11 +104,10 @@ static void updateGameJolt(const MasterSettings *settings, const string &baseUrl
 static void onPlayerAuthenticatedOrQuit(const MasterSettings *settings, const MasterServerConnection *client, const string &verb)
 {
 #ifdef GAME_JOLT
-
-   if(!settings->getVal<YesNo>("UseGameJolt"))
+   if(!settings->getVal<YesNo>(USE_GAME_JOLT))
       return;
 
-   string secret = settings->getVal<string>("GameJoltSecret");
+   string secret = settings->getVal<string>(GAME_JOLT_SECRET);
 
    if(secret == "")
    {
@@ -160,10 +159,10 @@ void ping(const MasterSettings *settings, const Vector<MasterServerConnection *>
 {
 #ifdef GAME_JOLT
 
-   if(!settings->getVal<YesNo>("UseGameJolt"))
+   if(!settings->getVal<YesNo>(USE_GAME_JOLT))
       return;
 
-   string secret = settings->getVal<string>("GameJoltSecret");
+   string secret = settings->getVal<string>(GAME_JOLT_SECRET);
 
    if(secret == "")
    {
@@ -217,10 +216,10 @@ void onPlayerAwardedAchievement(const MasterSettings *settings, const string &aw
 {
 #ifdef GAME_JOLT
 
-   if(!settings->getVal<YesNo>("UseGameJolt"))
+   if(!settings->getVal<YesNo>(USE_GAME_JOLT))
       return;
 
-   string secret = settings->getVal<string>("GameJoltSecret");
+   string secret = settings->getVal<string>(GAME_JOLT_SECRET);
 
    if(secret == "")
    {

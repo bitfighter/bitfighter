@@ -23,6 +23,13 @@ using namespace Zap;
 
 #define LATEST_RELEASED_BUILD_VERSION "LatestReleasedBuildVersion"
 
+#define SERVER_NAME "ServerName"
+#define PORT "Port"
+
+#define JSON_OUTFILE "JsonOutfile"
+#define LATEST_RELEASED_CS_PROTOCOL "LatestReleasedCSProtocol"
+#define WRITE_STATS_TO_MY_SQL "WriteStatsToMySql"
+
 #define STATS_DATABASE_ADDRESS "StatsDatabaseAddress"
 #define STATS_DATABASE_NAME "StatsDatabaseName"
 #define STATS_DATABASE_USERNAME "StatsDatabaseUsername"
@@ -33,6 +40,9 @@ using namespace Zap;
 #define PHPBB3_DATABASE_USERNAME "Phpbb3DbUsername"
 #define PHPBB3_DATABASE_PASSWORD "Phpbb3DbPassword"
 #define PHPBB3_TABLE_PREFIX "Phpbb3TablePrefix"
+
+#define USE_GAME_JOLT "UseGameJolt"
+#define GAME_JOLT_SECRET "GameJoltSecret"
 
 #define CURL_PATH "CurlPath"
 

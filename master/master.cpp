@@ -31,10 +31,10 @@ MasterSettings::MasterSettings(const string &iniFile)
 
    // Note that on the master, our settings are read-only, so there is no need to specify a comment
    //                      Data type  Setting name                   Default value         INI Key                                INI Section
-   mSettings.add(new Setting<string>("ServerName",             "Bitfighter Master Server", "name",                                 "host"));
-   mSettings.add(new Setting<string>("JsonOutfile",                  "server.json",        "json_file",                            "host"));
-   mSettings.add(new Setting<U32>   ("Port",                             25955,            "port",                                 "host"));
-   mSettings.add(new Setting<U32>   ("LatestReleasedCSProtocol",           0,              "latest_released_cs_protocol",          "host"));
+   mSettings.add(new Setting<string>(SERVER_NAME,              "Bitfighter Master Server", "name",                                 "host"));
+   mSettings.add(new Setting<string>(JSON_OUTFILE,                   "server.json",        "json_file",                            "host"));
+   mSettings.add(new Setting<U32>   (PORT,                               25955,            "port",                                 "host"));
+   mSettings.add(new Setting<U32>   (LATEST_RELEASED_CS_PROTOCOL,          0,              "latest_released_cs_protocol",          "host"));
    mSettings.add(new Setting<U32>   (LATEST_RELEASED_BUILD_VERSION,        0,              "latest_released_client_build_version", "host"));
 
    // Variables for verifying usernames/passwords in PHPBB3
@@ -45,17 +45,17 @@ MasterSettings::MasterSettings(const string &iniFile)
    mSettings.add(new Setting<string>(PHPBB3_TABLE_PREFIX,                  "",             "phpbb3_table_prefix",                  "phpbb"));
 
    // Stats database credentials
-   mSettings.add(new Setting<YesNo> ("WriteStatsToMySql",                  No,             "write_stats_to_mysql",                 "stats"));
+   mSettings.add(new Setting<YesNo> (WRITE_STATS_TO_MY_SQL,                No,             "write_stats_to_mysql",                 "stats"));
    mSettings.add(new Setting<string>(STATS_DATABASE_NAME,                  "",             "stats_database_name",                  "stats"));
    mSettings.add(new Setting<string>(STATS_DATABASE_ADDRESS,               "",             "stats_database_addr",                  "stats"));
    mSettings.add(new Setting<string>(STATS_DATABASE_USERNAME,              "",             "stats_database_username",              "stats"));
    mSettings.add(new Setting<string>(STATS_DATABASE_PASSWORD,              "",             "stats_database_password",              "stats"));
 
    // GameJolt settings
-   mSettings.add(new Setting<YesNo> ("UseGameJolt",                        Yes,            "UseGameJolt",                          "GameJolt"));
-   mSettings.add(new Setting<string>("GameJoltSecret",                     "",             "GameJoltSecret",                       "GameJolt"));
+   mSettings.add(new Setting<YesNo> (USE_GAME_JOLT,                        Yes,            "UseGameJolt",                          "GameJolt"));
+   mSettings.add(new Setting<string>(GAME_JOLT_SECRET,                     "",             "GameJoltSecret",                       "GameJolt"));
 
-   mSettings.add(new Setting<string>(CURL_PATH,                      "/usr/bin/curl",      "path_to_curl",                         "system"));
+   mSettings.add(new Setting<string>(CURL_PATH,                       "/usr/bin/curl",     "path_to_curl",                         "system"));
 }
 
 
@@ -72,7 +72,7 @@ void MasterSettings::readConfigFile()
    loadSettingsFromINI();
 
    // Not sure if this should go here...
-   if(getVal<U32>("LatestReleasedCSProtocol") == 0 && getVal<U32>(LATEST_RELEASED_BUILD_VERSION) == 0)
+   if(getVal<U32>(LATEST_RELEASED_CS_PROTOCOL) == 0 && getVal<U32>(LATEST_RELEASED_BUILD_VERSION) == 0)
       logprintf(LogConsumer::LogError, "Unable to find a valid protocol line or build_version in config file... disabling update checks!");
 }
 
@@ -226,12 +226,12 @@ MasterServer::~MasterServer()
 
 NetInterface *MasterServer::createNetInterface() const
 {
-   U32 port = mSettings->getVal<U32>("Port");
+   U32 port = mSettings->getVal<U32>(PORT);
    NetInterface *netInterface = new NetInterface(Address(IPProtocol, Address::Any, port));
 
    // Log a welcome message in the main log and to the console
    logprintf("Master Server \"%s\" started - listening on port %d (protocol v. %d)",
-      getSetting<string>("ServerName").c_str(), port, MASTER_PROTOCOL_VERSION);
+      getSetting<string>(SERVER_NAME).c_str(), port, MASTER_PROTOCOL_VERSION);
    return netInterface;
 }
 

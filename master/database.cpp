@@ -30,7 +30,7 @@ namespace DbWriter
 // TODO: Should we be reusing these?
 DatabaseWriter getDatabaseWriter(const MasterSettings *settings)
 {
-   if(settings->getVal<YesNo>("WriteStatsToMySql"))
+   if(settings->getVal<YesNo>(WRITE_STATS_TO_MY_SQL))
       return DatabaseWriter(settings->getVal<string>(STATS_DATABASE_ADDRESS).c_str(),
                             settings->getVal<string>(STATS_DATABASE_NAME).c_str(),
                             settings->getVal<string>(STATS_DATABASE_USERNAME).c_str(),
@@ -112,9 +112,9 @@ static void insertStatsShots(const DbQuery &query, U64 playerId, const Vector<We
       if(weaponStats[i].shots > 0)
       {
          string sql = "INSERT INTO stats_player_shots(stats_player_id, weapon, shots, shots_struck) "
-                       "VALUES(" + itos(playerId) + ", '" + WeaponInfo::getWeaponName(weaponStats[i].weaponType) + "', " + 
+                       "VALUES(" + itos(playerId) + ", '" + WeaponInfo::getWeaponName(weaponStats[i].weaponType) + "', " +
                                   itos(weaponStats[i].shots) + ", " + itos(weaponStats[i].hits) + ");";
-         
+
          query.runQuery(sql);
       }
    }
@@ -135,19 +135,19 @@ static U64 insertStatsPlayer(const DbQuery &query, const PlayerStats *playerStat
                                                "turret_kills,                   ff_kills, "
                                                "asteroid_kills,                 turrets_engineered, "
                                                "ffs_engineered,                 teleports_engineered, "
-                                               "distance_traveled )"                      
+                                               "distance_traveled )"
                          "VALUES(" + itos(gameId) + ", " + teamId + ", '"     + sanitizeForSql(playerStats->name)           + "', " +
                                  btos(playerStats->isAuthenticated)     + ", " + btos(playerStats->isRobot)           + ", " +
-                                 "'" + playerStats->gameResult + "'"    + ", " + itos(playerStats->points)            + ", " + 
+                                 "'" + playerStats->gameResult + "'"    + ", " + itos(playerStats->points)            + ", " +
                                  itos(playerStats->kills)               + ", " + itos(playerStats->deaths)            + ", " +
                                  itos(playerStats->suicides)            + ", " + itos(playerStats->switchedTeamCount) + ", " +
-                                 itos(playerStats->crashedIntoAsteroid) + ", " + itos(playerStats->flagDrop)          + ", " + 
-                                 itos(playerStats->flagPickup)          + ", " + itos(playerStats->flagReturn)        + ", " + 
-                                 itos(playerStats->flagScore)           + ", " + itos(playerStats->teleport)          + ", " + 
-                                 itos(playerStats->turretKills)         + ", " + itos(playerStats->ffKills)           + ", " + 
-                                 itos(playerStats->astKills)            + ", " + itos(playerStats->turretsEngr)       + ", " + 
-                                 itos(playerStats->ffEngr)              + ", " + itos(playerStats->telEngr)           + ", " + 
-                                 itos(playerStats->distTraveled)        + 
+                                 itos(playerStats->crashedIntoAsteroid) + ", " + itos(playerStats->flagDrop)          + ", " +
+                                 itos(playerStats->flagPickup)          + ", " + itos(playerStats->flagReturn)        + ", " +
+                                 itos(playerStats->flagScore)           + ", " + itos(playerStats->teleport)          + ", " +
+                                 itos(playerStats->turretKills)         + ", " + itos(playerStats->ffKills)           + ", " +
+                                 itos(playerStats->astKills)            + ", " + itos(playerStats->turretsEngr)       + ", " +
+                                 itos(playerStats->ffEngr)              + ", " + itos(playerStats->telEngr)           + ", " +
+                                 itos(playerStats->distTraveled)        +
                          ")";
 
    U64 playerId = query.runQuery(sql);
@@ -163,7 +163,7 @@ static U64 insertStatsPlayer(const DbQuery &query, const PlayerStats *playerStat
 static U64 insertStatsTeam(const DbQuery &query, const TeamStats *teamStats, U64 &gameId)
 {
    string sql = "INSERT INTO stats_team(stats_game_id, team_name, team_score, result, color_hex) "
-                "VALUES(" + itos(gameId) + ", '" + sanitizeForSql(teamStats->name) + "', " + itos(teamStats->score) + " ,'" + 
+                "VALUES(" + itos(gameId) + ", '" + sanitizeForSql(teamStats->name) + "', " + itos(teamStats->score) + " ,'" +
                 ctos(teamStats->gameResult) + "' ,'" + teamStats->hexColor + "');";
 
    U64 teamId = query.runQuery(sql);
