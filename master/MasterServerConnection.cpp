@@ -382,7 +382,7 @@ void MasterServerConnection::c2mQueryServersOption(U32 queryId, bool hostonly)
 
 // Wrapper around m2cQueryServersResponse to handle the different versions we need to use
 
-void MasterServerConnection::sendM2cQueryServersResponse(U32 queryId, const Vector<IPAddress> &addresses, 
+void MasterServerConnection::sendM2cQueryServersResponse(U32 queryId, const Vector<IPAddress> &addresses,
                                                                       const Vector<S32> &serverIdList,
 																	  const Vector<StringTableEntry> &serverNames)
 {
@@ -1518,16 +1518,16 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
       reasonStr = "Requested master protocol version " + std::to_string(mCMProtocolVersion) +
                   ", but the master doesn't support anything earlier than 4";
 
-      mLoggingStatus = "Client trying to connect with protocol version " + std::to_string(mCMProtocolVersion) + 
+      mLoggingStatus = "Client trying to connect with protocol version " + std::to_string(mCMProtocolVersion) +
                        " which is far too ancient for us.";
       return false;
    }
-   else if(mCMProtocolVersion > MASTER_PROTOCOL_VERSION) 
+   else if(mCMProtocolVersion > MASTER_PROTOCOL_VERSION)
    {
       reasonStr = "Requested master protocol version " + std::to_string(mCMProtocolVersion) +
                   ", but the server only supports up to " + std::to_string(MASTER_PROTOCOL_VERSION);
 
-      mLoggingStatus = "Client wants to use protocol version " + std::to_string(mCMProtocolVersion) + 
+      mLoggingStatus = "Client wants to use protocol version " + std::to_string(mCMProtocolVersion) +
                        " but we only support up to " + std::to_string(MASTER_PROTOCOL_VERSION);
       return false;
    }
@@ -1609,7 +1609,7 @@ bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnectio
                                                      clientList->get(i)->mPlayerOrServerName.getString());
                disconnect(ReasonDuplicateId, "");
                reason = ReasonDuplicateId;
-               reasonStr = "Got duplicate player id; these are randomly generated, and this is a statistally rare event, " 
+               reasonStr = "Got duplicate player id; these are randomly generated, and this is a statistally rare event, "
                            "so please restart and try again";
 
                mLoggingStatus = "Duplicate ID";

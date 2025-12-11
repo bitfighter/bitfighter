@@ -179,9 +179,9 @@ static U64 insertStatsGame(const DbQuery &query, const GameStats *gameStats, U64
 {
    string sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, "
                                        "duration_seconds, level_name, is_team_game, team_count) "
-                "VALUES( " + itos(serverId) + ", '" + gameStats->gameType + "', " + btos(gameStats->isOfficial) + ", " + 
-                             itos(gameStats->playerCount) + ", " + itos(gameStats->duration) + ", '" + 
-                             sanitizeForSql(gameStats->levelName) + "', " + btos(gameStats->isTeamGame) + ", " + 
+                "VALUES( " + itos(serverId) + ", '" + gameStats->gameType + "', " + btos(gameStats->isOfficial) + ", " +
+                             itos(gameStats->playerCount) + ", " + itos(gameStats->duration) + ", '" +
+                             sanitizeForSql(gameStats->levelName) + "', " + btos(gameStats->isTeamGame) + ", " +
                              itos(gameStats->teamStats.size())  + ");";
 
    U64 gameId = query.runQuery(sql);
@@ -234,7 +234,7 @@ void DatabaseWriter::addToServerCache(U64 id, const string &serverName, const st
    // Limit cache growth
    static const S32 SERVER_CACHE_SIZE = 20;
 
-   if(cachedServers.size() >= SERVER_CACHE_SIZE) 
+   if(cachedServers.size() >= SERVER_CACHE_SIZE)
       cachedServers.erase(0);
 
    cachedServers.push_back(ServerInfo(id, serverName, serverIP));
@@ -255,7 +255,7 @@ U64 DatabaseWriter::getServerID(const DbQuery &query, const string &serverName, 
          serverId = insertStatsServer(query, serverName, serverIP);
 
       // Save server info to cache for future use
-      addToServerCache(serverId, serverName, serverIP);     
+      addToServerCache(serverId, serverName, serverIP);
    }
 
    return serverId;
@@ -274,7 +274,7 @@ U64 DatabaseWriter::getServerIDFromCache(const string &serverName, const string 
 }
 
 
-void DatabaseWriter::insertStats(const GameStats &gameStats) 
+void DatabaseWriter::insertStats(const GameStats &gameStats)
 {
    DbQuery query(mDb, mServer, mUser, mPassword);
 
@@ -286,14 +286,14 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
          insertStatsGame(query, &gameStats, serverId);
       }
    }
-   catch(const Exception &ex) 
+   catch(const Exception &ex)
    {
       logprintf("Failure writing stats to database: %s", ex.what());
    }
 }
 
 
-void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry &playerNick, const string &serverName, const string &serverIP) 
+void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry &playerNick, const string &serverName, const string &serverIP)
 {
    DbQuery query(mDb, mServer, mUser, mPassword);
 
@@ -310,14 +310,14 @@ void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry 
          query.runQuery(sql);
       }
    }
-   catch(const Exception &ex) 
+   catch(const Exception &ex)
    {
       logprintf("Failure writing achievement to database: %s", ex.what());
    }
 }
 
 
-void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName, const string &creator, 
+void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName, const string &creator,
                                      const string &gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds)
 {
    DbQuery query(mDb, mServer, mUser, mPassword);
@@ -341,17 +341,17 @@ void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName
 
       bool found = (results.size() == 1 && results[0].size() == 1);
 
-      if(!found) 
+      if(!found)
       {
          sql = "INSERT INTO stats_level(hash, level_name, creator, game_type, has_levelgen, team_count, winning_score, game_duration) "
-               "VALUES('" + sanitizeForSql(hash)      + "', '" + sanitizeForSql(levelName)         + "', " + 
+               "VALUES('" + sanitizeForSql(hash)      + "', '" + sanitizeForSql(levelName)         + "', " +
                       "'" + sanitizeForSql(creator)   + "', '" + sanitizeForSql(gameType)          + "', " +
-                      "'" + btos(hasLevelGen)   + "', '" + itos(teamCount)             + "', " + 
+                      "'" + btos(hasLevelGen)   + "', '" + itos(teamCount)             + "', " +
                       "'" + itos(winningScore)  + "', '" + itos(gameDurationInSeconds) + "');";
          query.runQuery(sql);
       }
    }
-   catch(const Exception &ex) 
+   catch(const Exception &ex)
    {
       logprintf("Failure writing level info to database: %s", ex.what());
    }
@@ -383,7 +383,7 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
 }
 
 
-string DatabaseWriter::getGameJoltTrophyId(S32 achievementId) 
+string DatabaseWriter::getGameJoltTrophyId(S32 achievementId)
 {
    string sql = "SELECT gamejolt_id FROM achievements WHERE id = " + itos(achievementId);
 
@@ -403,7 +403,7 @@ Vector<string> DatabaseWriter::getGameJoltCredentialStrings(const string &phpbbD
 {
    // Find server in database
    string sql = "SELECT pf_gj_user_name, pf_gj_user_token "
-                "FROM "      + phpbbDatabase + ".phpbb_profile_fields_data AS pd " 
+                "FROM "      + phpbbDatabase + ".phpbb_profile_fields_data AS pd "
                 "LEFT JOIN " + phpbbDatabase + ".phpbb_users AS u ON u.user_id = pd.user_id "
                 "WHERE u.username IN (" + nameList + ") AND "
                 "pf_gj_user_name IS NOT NULL and pf_gj_user_token IS NOT NULL";
@@ -425,7 +425,7 @@ Vector<string> DatabaseWriter::getGameJoltCredentialStrings(const string &phpbbD
 }
 
 
-// Returns rating of the specified level 
+// Returns rating of the specified level
 S16 DatabaseWriter::getLevelRating(U32 databaseId)
 {
    string sql = "SELECT levels.rating from pleiades.levels WHERE id=" + itos(databaseId) + "; ";
@@ -446,14 +446,14 @@ S16 DatabaseWriter::getLevelRating(U32 databaseId)
       return MinumumLegitimateRating;
 
    return rating;
-} 
+}
 
 
 // Returns player's rating of the specified level -- should be -1, 0, or +1
 S32 DatabaseWriter::getLevelRating(U32 databaseId, const StringTableEntry &name)
 {
    // Here, we'll use a UNION to create a dummy record of 0.  That way, if there is a database error,
-   // and no records are returned, we'll be able to differentiate that from the situation where the 
+   // and no records are returned, we'll be able to differentiate that from the situation where the
    // user is not in the database and no records are returned.  With the UNION, we'll get back at least
    // one record with 0, the default rating for a player who hasn't rated a level, even if that player
    // has not rated it.  Add a sort column to ensure that we get results in the order we expect.
@@ -563,7 +563,7 @@ void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<st
 }
 
 
-void DatabaseWriter::createStatsDatabase() 
+void DatabaseWriter::createStatsDatabase()
 {
    DbQuery query(mDb, mServer, mUser, mPassword);
 
@@ -618,7 +618,7 @@ DbQuery::DbQuery(const char *db, const char *server, const char *user, const cha
          conn.connect(db, server, user, password);    // Will throw error if it fails
          query = new Query(&conn);
       }
-      catch(const Exception &ex) 
+      catch(const Exception &ex)
       {
          logprintf("Failure opening mysql database: %s", ex.what());
          isValid = false;
@@ -672,7 +672,7 @@ U64 DbQuery::runQuery(const string &sql) const
 
       sqlite3_free(err);
 
-      return sqlite3_last_insert_rowid(sqliteDb);  
+      return sqlite3_last_insert_rowid(sqliteDb);
    }
 
    return U64_MAX;
@@ -794,7 +794,7 @@ string DatabaseWriter::getSqliteSchema() {
       "   shots INTEGER NOT NULL,"
       "   shots_struck INTEGER NOT NULL,"
       "   FOREIGN KEY(stats_player_id) REFERENCES stats_player(stats_player_id));"
-         
+
       "   CREATE UNIQUE INDEX stats_player_shots_player_id_weapon on stats_player_shots(stats_player_id, weapon COLLATE BINARY);"
 
       /* stats_player_shots */
