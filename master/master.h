@@ -3,6 +3,11 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
+
+#ifndef _MASTER_H_
+#define _MASTER_H_
+
+
 #include "masterInterface.h"
 
 #include "MasterServerConnection.h"
@@ -149,3 +154,4 @@ public:
 
 }
 
+#endif
