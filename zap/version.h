@@ -15,7 +15,7 @@
                                    // MASTER_PROTOCOL_VERSION = 4, client 015a and older (CS_PROTOCOL_VERSION <= 32) can not connect to our new master.
 
 #define CS_PROTOCOL_VERSION 42     // Change this when releasing an incompatible cs protocol (must be int)
-// 016 = 33 
+// 016 = 33
 // 017[ab] = 35
 // 018[a] = 36
 // 019 dev = 37
@@ -52,7 +52,7 @@
                                    // Get from "git rev-list --all --count"
 
 #define ZAP_GAME_RELEASE "023"     // Change this with every release -- for display purposes only, string,
-                                   // will also be used for name of installer on windows, so be careful with spaces  
+                                   // will also be used for name of installer on windows, so be careful with spaces
                                    // Used for GameRecorder.cpp, buildGameRecorderExtension
 
 // ZAP_GAME_RELEASE_LONGSTRING is used for version display at main menu

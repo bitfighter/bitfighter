@@ -210,7 +210,7 @@ MasterServer::MasterServer(MasterSettings *settings)
    testPhpbbDatabaseConnectivity();
    testCurl();
 
-   logprintf(LogConsumer::LogStartup, "Startup tests complete");
+   logprintf(LogConsumer::LogStartup, "------ Startup tests complete ------");
 
    MasterServerConnection::setMasterServer(this);
 }
@@ -464,7 +464,7 @@ void MasterServer::testCurl() const
 
    if (fileExists(curl_path))
    {
-      logprintf(LogConsumer::LogStartup, "cURL detected");
+      logprintf(LogConsumer::LogStartup, "cURL found");
       return;
    }
    logprintf(LogConsumer::ConfigurationError, "cURL not found at '%s' - GameJolt functionality will not work", curl_path.c_str());
