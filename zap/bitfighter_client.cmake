@@ -44,4 +44,7 @@ if(USE_GLES)
 	)
 endif()
 
-set_target_properties(bitfighter_client PROPERTIES COMPILE_DEFINITIONS_DEBUG "TNL_DEBUG")
+target_compile_definitions(bitfighter_client
+    PUBLIC
+        $<$<CONFIG:Debug>:TNL_DEBUG>
+)
