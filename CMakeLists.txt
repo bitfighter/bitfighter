@@ -28,6 +28,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Don't use compiler extensions like -std=gnu++11
 # set(CMAKE_CXX_EXTENSIONS OFF)
 
+if(MSVC)
+    add_compile_definitions(_HAS_STD_BYTE=0)
+endif()
+
 # Use appropriate platform alterations
 if(WIN32)
 	include(${CMAKE_SOURCE_DIR}/cmake/Platform/Win32.cmake)
