@@ -9,6 +9,8 @@
 
 #include "DisplayManager.h"
 #include "FontManager.h"
+#include "Renderer.h"
+#include "TestRenderer.h"
 #include "tnlLog.h"
 
 #include "stringUtils.h"
@@ -68,9 +70,12 @@ int main(int argc, char **argv)
 
 
    DisplayManager::initialize();
+   TestRenderer::install();
    int returnvalue = RUN_ALL_TESTS();
+   Renderer::shutdown();
    FontManager::cleanup();
    DisplayManager::cleanup();
+
    return returnvalue;
 }
 

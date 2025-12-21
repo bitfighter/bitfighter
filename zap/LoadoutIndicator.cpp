@@ -89,7 +89,7 @@ static S32 getComponentRectWidth(S32 textWidth)
 
 
 // Returns width of indicator component
-static S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
+S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
 {
    // Draw the weapon or module name (n.b.: If you change the lcase, do the same in getComponentIndicatorWidth)
    S32 textWidth = drawStringAndGetWidth(xPos + IndicatorHorizPadding, yPos + IndicatorVertPadding - 1, 
@@ -103,13 +103,36 @@ static S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
 }
 
 
-static S32 getComponentIndicatorWidth(const char *name)
+S32 getComponentIndicatorWidth(const char *name)
 {
    return getComponentRectWidth(getStringWidth(IndicatorFontSize, lcase(name).c_str()));
 }
 
 
 static const S32 GapBetweenTheGroups = 20;
+
+static const Color *INDICATOR_INACTIVE_COLOR = &Colors::green80;
+static const Color *INDICATOR_ACTIVE_COLOR = &Colors::red80;
+static const Color *INDICATOR_PASSIVE_COLOR = &Colors::yellow;
+
+
+void setModuleColor(Renderer &r, const ShipModule &module, bool isPrimaryActive, bool isSecondaryActive)
+{
+   if (gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUsePassive ||   // Armor
+      gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUseHybrid)      // Sensor
+   {
+      r.setColor(*INDICATOR_PASSIVE_COLOR);
+   }
+   else if (isPrimaryActive)
+      r.setColor(*INDICATOR_ACTIVE_COLOR);
+   else
+      r.setColor(*INDICATOR_INACTIVE_COLOR);
+
+   // Always change to orange if module secondary is fired
+   if (gModuleInfo[module].hasSecondary() && isSecondaryActive)
+      r.setColor(Colors::orange67);
+}
+
 
 // Returns width
 static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
@@ -120,16 +143,12 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    if(!loadout.isValid())  
       return 0;
 
-   static const Color *INDICATOR_INACTIVE_COLOR = &Colors::green80;      
-   static const Color *INDICATOR_ACTIVE_COLOR   = &Colors::red80;        
-   static const Color *INDICATOR_PASSIVE_COLOR  = &Colors::yellow;
-
    S32 xPos = LoadoutIndicator::LoadoutIndicatorLeftPos;
 
    FontManager::pushFontContext(LoadoutIndicatorContext);
    
    // First, the weapons
-   for(S32 i = 0; i < ShipWeaponCount; i++)
+   for(auto i = 0; i < ShipWeaponCount; i++)
    {
       r.setColor(loadout.isWeaponActive(i) ? *INDICATOR_ACTIVE_COLOR : *INDICATOR_INACTIVE_COLOR);
 
@@ -141,23 +160,11 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
    xPos += GapBetweenTheGroups;    // Small horizontal gap to separate the weapon indicators from the module indicators
 
    // Next, loadout modules
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(auto i = 0; i < ShipModuleCount; i++)
    {
       ShipModule module = loadout.getModule(i);
 
-      if(gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUsePassive ||   // Armor
-         gModuleInfo[module].getPrimaryUseType() == ModulePrimaryUseHybrid)      // Sensor
-      {
-         r.setColor(*INDICATOR_PASSIVE_COLOR);
-      }
-      else if(loadout.isModulePrimaryActive(module))
-         r.setColor(*INDICATOR_ACTIVE_COLOR);
-      else 
-         r.setColor(*INDICATOR_INACTIVE_COLOR);
-
-      // Always change to orange if module secondary is fired
-      if(gModuleInfo[module].hasSecondary() && loadout.isModuleSecondaryActive(module))
-         r.setColor(Colors::orange67);
+      setModuleColor(r, module, loadout.isModulePrimaryActive(module), loadout.isModuleSecondaryActive(module));
 
       S32 width = renderComponentIndicator(xPos, top, ModuleInfo::getModuleInfo(module)->getName());
 
@@ -175,13 +182,13 @@ S32 LoadoutIndicator::getWidth() const
 {
    S32 width = 0;
 
-   for(U32 i = 0; i < (U32)ShipWeaponCount; i++)
-      width += getComponentIndicatorWidth(WeaponInfo::getWeaponInfo(mCurrLoadout.getWeapon(i)).name.getString()) +  2 * IndicatorHorizPadding;
+   for(auto i = 0; i < ShipWeaponCount; i++)
+      width += getComponentIndicatorWidth(WeaponInfo::getWeaponInfo(mCurrLoadout.getWeapon(i)).name.getString()) + IndicatorHorizPadding;
 
    width += GapBetweenTheGroups;
 
-   for(U32 i = 0; i < (U32)ShipModuleCount; i++)
-      width += getComponentIndicatorWidth(ModuleInfo::getModuleInfo(mCurrLoadout.getModule(i))->getName()) + 2 * IndicatorHorizPadding;
+   for(auto i = 0; i < ShipModuleCount; i++)
+      width += getComponentIndicatorWidth(ModuleInfo::getModuleInfo(mCurrLoadout.getModule(i))->getName()) + IndicatorHorizPadding;
 
    width -= IndicatorHorizPadding;
 

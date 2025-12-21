@@ -24,6 +24,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestObjects.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestPolylineGeometry.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestRenderUtils.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestRenderer.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestRobot.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestRobotManager.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestServerGame.cpp

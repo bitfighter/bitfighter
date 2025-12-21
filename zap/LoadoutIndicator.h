@@ -3,6 +3,8 @@
 // See LICENSE.txt for full copyright information
 //------------------------------------------------------------------------------
 
+#pragma once
+
 #ifndef _LOADOUT_INDICATOR_H_
 #define _LOADOUT_INDICATOR_H_
 
@@ -47,6 +49,12 @@ public:
    S32 render(ClientGame *game) const;
    S32 getWidth() const;
 };
+
+
+S32 renderComponentIndicator(S32 x, S32 y, const char *name);  // Renders an indicator at (x, y) for the given name.
+S32 getComponentIndicatorWidth(const char *name);			   // Returns the rendered width.
+
+
 
 } } // Nested namespace
 

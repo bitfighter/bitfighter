@@ -120,7 +120,11 @@ TEST(IntegrationTest, LevelReadingAndItemPropagation)
       clientGame->getGameObjDatabase()->findObjects(BarrierTypeNumber, fillVector);
       ASSERT_EQ(1, fillVector.size());
       Barrier *barrier = static_cast<Barrier *>(fillVector[0]);
-      EXPECT_EQ("-255, -255 | -255, 255", barrier->mPoints[0].toString() + " | " + barrier->mPoints[1].toString());
+      // barrier will have 4 points; first and last are dummies because those are pointers to the previous and next 
+      // wall segments, and this wall only has one segment.
+      EXPECT_EQ("-255, -255 | -255, 255", barrier->mPoints[1].toString() + " | " + barrier->mPoints[2].toString()); 
+      EXPECT_EQ("nan, nan | nan, nan", barrier->mPoints[0].toString() + " | " + barrier->mPoints[3].toString()); 
+      // hint: use barrier->mPoints.get(0) at debug time
       EXPECT_EQ(40, barrier->mWidth);
 
       // Teleporter (placed @ 5,5 ==> 10,10)

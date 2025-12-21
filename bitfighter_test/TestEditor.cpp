@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 
 #include "UIEditor.h"
+#include "DisplayManager.h"
 
 #include "TestUtils.h"
 #include "gtest/gtest.h"
@@ -17,6 +18,9 @@ TEST(EditorTest, panZoom)
 {
    GamePair pair;
    EditorUserInterface editorUi(pair.getClient(0));
+
+   // We computed expected results based on a canvas size of 800x600, even though that may no longer be the default.
+   DisplayManager::getScreenInfo()->setGameCanvasSize(800, 600);
 
    // The basics
    F32 scale = 1.1f;
