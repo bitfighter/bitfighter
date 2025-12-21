@@ -69,4 +69,25 @@ TEST(StringUtilsTest, chopComment)
 }
 
 
+TEST(StringUtilsTest, sanitizeForSqlLeavesSafeStrings)
+{
+   EXPECT_EQ("plain", sanitizeForSql("plain"));
+   EXPECT_EQ("", sanitizeForSql(""));
+}
+
+
+TEST(StringUtilsTest, sanitizeForSqlEscapesQuotes)
+{
+   EXPECT_EQ("O''Brien", sanitizeForSql("O'Brien"));
+   EXPECT_EQ("''quoted''", sanitizeForSql("'quoted'"));
+}
+
+
+TEST(StringUtilsTest, sanitizeForSqlEscapesBackslashesAndMixed)
+{
+   EXPECT_EQ(R"(path\\to)", sanitizeForSql(R"(path\to)"));
+   EXPECT_EQ(R"(C:\\temp\\O''Brien)", sanitizeForSql(R"(C:\temp\O'Brien)"));
+}
+
+
 };
