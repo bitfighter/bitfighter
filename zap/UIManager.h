@@ -51,7 +51,8 @@ public:
    static const S32 MessageBoxWrapWidth;
 
 private:
-   typedef map<const type_info *, UserInterface *> UiMapType;
+   //typedef map<const type_info *, UserInterface *> UiMapType;
+   typedef map<const type_info *, unique_ptr<UserInterface>> UiMapType;
    typedef UiMapType::iterator UiIterator;
 
    UiMapType mUis;
@@ -79,15 +80,19 @@ public:
    {
       const std::type_info *typeinfo = getTypeInfo<T>();
 
-      T *ui = static_cast<T *>(mUis[typeinfo]);
+      T *ui = nullptr;
+      auto it = mUis.find(typeinfo);
 
-      // Lazily initialize if UI has not yet been instantiated; store for later use
-      if(!ui)  
-      {
-         ui = new T(mGame);
-         mUis[typeinfo] = ui;
+      if(it == mUis.end() || mUis[typeinfo] == nullptr) {      // I do not know how nullptrs get in here, but they do.
+         // We need to create the pointer first, then move it, otherwise we get type issues during compilation
+         auto ptr = make_unique<T>(mGame);
+         ui = ptr.get();
+         mUis[typeinfo] = move(ptr);    // move() ransfers ownership of ptr to the mUis vector
       }
-
+      else {
+         ui = static_cast<T *>(it->second.get());
+      }
+      assert(ui != nullptr);
       return ui;
    }
 
@@ -95,7 +100,7 @@ public:
    template <typename T>
    bool isCurrentUI()
    {
-      return mCurrentInterface == mUis[getTypeInfo<T>()];
+      return mCurrentInterface == mUis[getTypeInfo<T>()].get();
    }
 
 
@@ -104,7 +109,7 @@ public:
    bool cameFrom()
    {
       for(S32 i = 0; i < mPrevUIs.size(); i++)
-         if(mPrevUIs[i] == mUis[getTypeInfo<T>()])
+         if(mPrevUIs[i] == mUis[getTypeInfo<T>()].get())
             return true;
 
       return false;

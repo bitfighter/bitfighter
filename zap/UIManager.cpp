@@ -58,12 +58,7 @@ UIManager::UIManager()
 // Destructor
 UIManager::~UIManager()
 {
-   // Clear out mUis
-
-   for(UiIterator it = mUis.begin(); it != mUis.end(); it++) 
-      delete it->second;
-
-   mUis.clear();
+   mUis.clear();     // unique_ptr will clean up
 }
 
 
@@ -140,6 +135,10 @@ bool UIManager::hasPrevUI()
 
 void UIManager::clearPrevUIs()
 {
+   //for(UiIterator it = mUis.begin(); it != mUis.end(); it++) 
+   //   delete it->second;
+
+   mUis.clear();
    mPrevUIs.clear();
 }
 
@@ -215,13 +214,13 @@ void UIManager::printUIStack()
 
    // Print current UI
    for(auto const& x : mUis)
-      if(x.second == mCurrentInterface)
+      if(x.second.get() == mCurrentInterface)
          logprintf("%s (current)", x.first->name());
 
    // Print stack, starting from most recent UI
    for(int i = mPrevUIs.size() - 1; i > 0; i--)
       for(auto const& x : mUis)
-         if(x.second == mPrevUIs[i])
+         if(x.second.get() == mPrevUIs[i])
             logprintf("%s", x.first->name());
 
    logprintf("=====================");
