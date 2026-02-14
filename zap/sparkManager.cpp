@@ -34,7 +34,7 @@ FxManager::FxManager()
    for(U32 i = 0; i < SparkTypeCount; i++)
    {
       firstFreeIndex[i] = 0;
-      lastOverwrittenIndex[i] = 500;
+      lastOverwrittenIndex[i] = MAX_SPARKS / 4;   // Use a value proportional to MAX_SPARKS
    }
    teleporterEffects = NULL;
 }
