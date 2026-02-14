@@ -1861,7 +1861,7 @@ void ClientGame::changeOwnTeam(S32 teamIndex) const
 }
 
 
-InputMode ClientGame::getInputMode()
+InputMode ClientGame::getInputMode() const
 {
    return mSettings->getInputMode();
 }
@@ -1918,4 +1918,3 @@ bool ClientGame::showAllObjectOutlines() const
 
 
 };
-

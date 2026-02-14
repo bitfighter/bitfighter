@@ -245,6 +245,7 @@ public:
    void loadAlreadySeenList();
 
    void onGameStarting();        // Reset things for a new level
+   void addStartingHelpItemsToQueue(const ClientGame *game);
    
    void loadAlreadySeenLevelupMessageList();
    void saveAlreadySeenLevelupMessageList();

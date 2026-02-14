@@ -164,38 +164,6 @@ void GameUserInterface::onActivate()
 }
 
 
-void GameUserInterface::addStartingHelpItemsToQueue()
-{
-   // Queue up some initial help messages for the new users
-   mHelpItemManager.reset();
-   mHelpItemManager.addInlineHelpItem(WelcomeItem);            // Hello, my name is Clippy!     
-
-   if(getGame()->getInputMode() == InputModeKeyboard)          // Show help related to basic movement and shooting
-      mHelpItemManager.addInlineHelpItem(ControlsKBItem);
-   else
-      mHelpItemManager.addInlineHelpItem(ControlsJSItem);
-
-   mHelpItemManager.addInlineHelpItem(ModulesAndWeaponsItem);  // Point out loadout indicators
-
-   mHelpItemManager.addInlineHelpItem(ControlsModulesItem);    // Show how to activate modules
-   mHelpItemManager.addInlineHelpItem(ChangeWeaponsItem);      // Explain how to toggle weapons
-   mHelpItemManager.addInlineHelpItem(CmdrsMapItem);           // Suggest viewing cmdrs map
-   mHelpItemManager.addInlineHelpItem(ChangeConfigItem);       // Changing loadouts
-   mHelpItemManager.addInlineHelpItem(GameModesItem);          // Use F2 to see current mission
-   mHelpItemManager.addInlineHelpItem(GameTypeAndTimer);       // Point out clock and score in LR
-   mHelpItemManager.addInlineHelpItem(EnergyGaugeItem);        // Show user the energy gauge
-   mHelpItemManager.addInlineHelpItem(ViewScoreboardItem);     // Show ow to get the score
-   mHelpItemManager.addInlineHelpItem(TryCloakItem);           // Recommend cloaking
-   mHelpItemManager.addInlineHelpItem(TryTurboItem);           // Recommend turbo
-
-   // And finally...
-   mHelpItemManager.addInlineHelpItem(F1HelpItem);             // How to get Help
-   
-   if(getGame()->getBotCount() == 0)
-      mHelpItemManager.addInlineHelpItem(AddBotsItem);         // Add some bots?
-}
-
-
 void GameUserInterface::onReactivate()
 {
    mDisableShipKeyboardInput = false;
@@ -223,8 +191,7 @@ void GameUserInterface::onGameStarting()
    Barrier::clearRenderItems();
    mHasShipPos = false;
 
-   addStartingHelpItemsToQueue();      // Do this here so if the helpItem manager gets turned on, items will start displaying next game
-
+   mHelpItemManager.addStartingHelpItemsToQueue(getGame());      // Do this here so if the helpItem manager gets turned on, items will start displaying next game
    mHelpItemManager.onGameStarting();
 }
 

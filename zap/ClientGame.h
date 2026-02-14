@@ -314,7 +314,7 @@ public:
    Ship *getLocalPlayerShip() const;
 
    // Settings related
-   InputMode getInputMode();
+   InputMode getInputMode() const;
 
    void setShowingInGameHelp(bool showing);
    void resetInGameHelpMessages();

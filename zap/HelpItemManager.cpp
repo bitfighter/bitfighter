@@ -640,6 +640,38 @@ void HelpItemManager::addInlineHelpItem(U8 objectType, S32 objectTeam, S32 playe
 }
 
 
+void HelpItemManager::addStartingHelpItemsToQueue(const ClientGame *game)
+{
+   // Queue up some initial help messages for the new users
+   reset();
+   addInlineHelpItem(WelcomeItem);            // Hello, my name is Clippy!     
+
+   if(game->getInputMode() == InputModeKeyboard)          // Show help related to basic movement and shooting
+      addInlineHelpItem(ControlsKBItem);
+   else
+      addInlineHelpItem(ControlsJSItem);
+
+   addInlineHelpItem(ModulesAndWeaponsItem);  // Point out loadout indicators
+
+   addInlineHelpItem(ControlsModulesItem);    // Show how to activate modules
+   addInlineHelpItem(ChangeWeaponsItem);      // Explain how to toggle weapons
+   addInlineHelpItem(CmdrsMapItem);           // Suggest viewing cmdrs map
+   addInlineHelpItem(ChangeConfigItem);       // Changing loadouts
+   addInlineHelpItem(GameModesItem);          // Use F2 to see current mission
+   addInlineHelpItem(GameTypeAndTimer);       // Point out clock and score in LR
+   addInlineHelpItem(EnergyGaugeItem);        // Show user the energy gauge
+   addInlineHelpItem(ViewScoreboardItem);     // Show ow to get the score
+   addInlineHelpItem(TryCloakItem);           // Recommend cloaking
+   addInlineHelpItem(TryTurboItem);           // Recommend turbo
+
+   // And finally...
+   addInlineHelpItem(F1HelpItem);             // How to get Help
+   
+   if(game->getBotCount() == 0)
+      addInlineHelpItem(AddBotsItem);         // Add some bots?
+}
+
+
 // Only used for debug builds
 void HelpItemManager::addInlineHelpItemForced(S32 helpItemId)
 {
