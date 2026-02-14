@@ -64,7 +64,7 @@ protected:
 
 public:
    UIManager();            // Constructor
-   virtual ~UIManager();   // Destructor
+   ~UIManager();           // Destructor
 
 
    template <typename T>

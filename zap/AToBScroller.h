@@ -41,7 +41,7 @@ protected:
 
 public:
    AToBScroller();            // Constructor
-   virtual ~AToBScroller();   // Destructor
+   virtual ~AToBScroller();   // Destructor - virtual because HelpItemManager inherits from this
 
    virtual void onActivated();
    virtual void idle(U32 deltaT);

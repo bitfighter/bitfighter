@@ -74,7 +74,7 @@ private:
 public:
    // Constructor
    ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool msgsExpire, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontGap);
-   virtual ~ChatMessageDisplayer();
+   ~ChatMessageDisplayer();
 
    void reset();
 
@@ -251,7 +251,7 @@ private:
       ByteBufferPtr mUnusedAudio;
 
       explicit VoiceRecorder(ClientGame *game);
-      virtual ~VoiceRecorder();
+      ~VoiceRecorder();
 
       void idle(U32 timeDelta);
       void process();

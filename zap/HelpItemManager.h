@@ -222,7 +222,7 @@ public:
    static const S32 HelpItemDisplayPeriod   =  7 * 1000; // Time for a help item to be visible
 
    HelpItemManager(GameSettings *settings);           // Constructor
-   virtual ~HelpItemManager();
+   ~HelpItemManager();
 
    void reset();
 
