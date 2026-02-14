@@ -69,7 +69,7 @@ void FxManager::emitSpark(const Point &pos, const Point &vel, const Color &color
       // Overwrite every nth spark to avoid noticable artifacts by grabbing too many sparks from one place.
       // But make sure we grab a multiple of 2 to avoid wierdness with SparkTypeLine sparks, wich require proper byte alignment.
       // This doesn't matter for point sparks, but neither does it hurt.
-      sparkIndex = (lastOverwrittenIndex[sparkType] + 100) % (MAX_SPARKS / 2 - 1) * 2;
+      sparkIndex = ((lastOverwrittenIndex[sparkType] + 100) % (MAX_SPARKS / 2 - 1)) * 2;
       lastOverwrittenIndex[sparkType] = sparkIndex;
       TNLAssert(sparkIndex < MAX_SPARKS - slotsNeeded, "Spark error!");
    }
