@@ -82,7 +82,7 @@ void calcPolygonVerts(const Point &center, S32 sides, F32 radius, F32 angle, Vec
 }
 
 
-inline S32 isLeft(const Point &p1, const Point &p2, const Point &p )
+static inline S32 isLeft(const Point &p1, const Point &p2, const Point &p )
 {
     return S32( (p2.x - p1.x) * (p.y - p1.y) - (p.x -  p1.x) * (p2.y - p1.y) );
 }
@@ -118,12 +118,12 @@ bool polygonContainsPoint(const Point *vertices, S32 vertexCount, const Point &p
 
 // Fast winding number test for finding if a point is in a polygon.  Adapted from:
 // http://geomalgorithms.com/a03-_inclusion.html#wn_PnPoly%28%29
-inline S32 isLeftP2t( p2t::Point *p1, p2t::Point *p2, const p2t::Point *p3 )
+static inline S32 isLeftP2t( p2t::Point *p1, p2t::Point *p2, const p2t::Point *p3 )
 {
     return S32( (p2->x - p1->x) * (p3->y - p1->y) - (p3->x -  p1->x) * (p2->y - p1->y) );
 }
 
-bool PolygonContains2p2t(p2t::Point **vertices, int vertexCount, const p2t::Point *point)
+static bool PolygonContains2p2t(p2t::Point **vertices, int vertexCount, const p2t::Point *point)
 {
    S32 counter = 0;    // Winding number counter
 
@@ -184,7 +184,7 @@ void removeCollinearPoints(Vector<Point> &points, bool isPolygon)
 
 // From http://www.blackpawn.com/texts/pointinpoly/default.html
 // Messy looking! Quick!
-bool pointInTriangle(const Point &p, const Point &a, const Point &b, const Point &c)
+static bool pointInTriangle(const Point &p, const Point &a, const Point &b, const Point &c)
 {
    // Compute vectors
    Point v0(c - a);
@@ -442,7 +442,7 @@ bool circleIntersectsSegment(Point center, float radius, Point start, Point end,
 
 
 // Do segments sit on same virtual line?
-bool segmentsColinear(const Point &p1, const Point &p2, const Point &p3, const Point &p4)
+static bool segmentsColinear(const Point &p1, const Point &p2, const Point &p3, const Point &p4)
 {
    const float smallNumber = (float) 0.0000001;
 
@@ -552,7 +552,7 @@ bool pointOnSegment(const Point &c, const Point &a, const Point &b, F32 closeEno
 // See if segment p1-p2 overlaps p3-p4
 // Coincident endpoints alone do not count!
 // Pass back the overpping extent in two points
-bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &overlapStart, Point &overlapEnd, F32 scaleFact)
+static bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &overlapStart, Point &overlapEnd, F32 scaleFact)
 {
    const Point* pInt = NULL;
    bool found = false;
@@ -662,7 +662,7 @@ bool zonesTouch(const Vector<Point> *zone1, const Vector<Point> *zone2, F32 scal
 
 // Checks intersection between a polygon an moving circle at inBegin + t * inDelta with radius^2 = inA * t^2 + inB * t + inC, t in [0, 1]
 // Returns true when it does and returns the intersection position in outPoint and the intersection fraction (value for t) in outFraction
-bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, F32 inA, F32 inB, F32 inC, Point &outPoint, F32 &outFraction)
+static bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, F32 inA, F32 inB, F32 inC, Point &outPoint, F32 &outFraction)
 {
    // Loop through edges
    F32 upper_bound = 1.0f;
@@ -1151,7 +1151,7 @@ bool triangulate(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &re
  * Gets a subset of a polygon from index `start` to `stop` inclusive.
  * Wraps around the polygon as needed.
  */
-Vector<Point> getSubPoly(const Vector<Point> input, U32 start, U32 stop)
+static Vector<Point> getSubPoly(const Vector<Point> input, U32 start, U32 stop)
 {
    Vector<Point> result;
    start %= input.size();
@@ -1179,7 +1179,7 @@ Vector<Point> getSubPoly(const Vector<Point> input, U32 start, U32 stop)
 
 /**
  */
-void splitSelfIntersectingPoly(const Vector<Point> input, Vector<Vector<Point> > &result)
+static void splitSelfIntersectingPoly(const Vector<Point> input, Vector<Vector<Point> > &result)
 {
    U32 size = input.size();
 
@@ -1426,7 +1426,7 @@ void offsetLineOpenButt(const Vector<Point> *inputPoly, Vector<Point> &outputPol
 
 
 // This method is a generic offsetting method that uses the miter offset
-void offsetPolygonsMitered(Vector<Vector<Point> > &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset)
+static void offsetPolygonsMitered(Vector<Vector<Point> > &inputPolys, Vector<Vector<Point> > &outputPolys, const F32 offset)
 {
    // Upscale
    Paths polygons = upscaleClipperPoints(inputPolys);
@@ -1969,7 +1969,7 @@ void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, 
 }
 
 
-bool isClockwiseTriangle(const Point & p1, const Point & p2, const Point & p3)
+static bool isClockwiseTriangle(const Point & p1, const Point & p2, const Point & p3)
 {
    // Test winding, is either pos, neg, or zero
    int windTest = (p2.y - p1.y) * (p3.x - p2.x) - (p2.x - p1.x) * (p3.y - p2.y);
@@ -1979,7 +1979,7 @@ bool isClockwiseTriangle(const Point & p1, const Point & p2, const Point & p3)
 
 
 // This expects CCW points
-void addMiterPoints(Point p1, Point p2, Point p3, F32 offset, Vector<Point> &polyToAppend)
+static void addMiterPoints(Point p1, Point p2, Point p3, F32 offset, Vector<Point> &polyToAppend)
 {
    static const F32 MiterLimit = 2.0f;
 
@@ -2170,7 +2170,7 @@ void barrierLineToSegmentData(Vector<Point> inputLine, Vector<Vector<Point> > &o
 }
 
 
-void pushPolyNode(lua_State *L, const PolyNode *node)
+static void pushPolyNode(lua_State *L, const PolyNode *node)
 {
    if(!node)
    {
