@@ -219,14 +219,29 @@ void FxManager::idle(U32 timeDelta)
 {
    F32 dTsecs = timeDelta * .001f;
 
-   for(U32 j = 0; j < SparkTypeCount; j++)
+   // We have two spark arrays -- one for points, one for lines.  Loop through both.
+   for (U32 j = 0; j < SparkTypeCount; j++)      
+   {
+      U32 slotsPerSpark = (j == SparkTypeLine) ? 2 : 1;
+
       for(U32 i = 0; i < firstFreeIndex[j]; )
       {
          Spark *theSpark = mSparks[j] + i;
-         if(theSpark->ttl < (S32)timeDelta)
-         {                          // Spark is dead -- remove it
-            firstFreeIndex[j]--;
+         if(theSpark->ttl < (S32)timeDelta)     // Spark is dead -- remove it
+         {                          
+            // For line sparks, we need to remove both halves to maintain even alignment
+            // Decrement by slotsPerSpark (2 for lines, 1 for points)
+            firstFreeIndex[j] -= slotsPerSpark;
+
+			// If this spark is not the last one, move the last spark into this one's place.  
+            // This keeps all our sparks packed at the beginning of the array.
             *theSpark = mSparks[j][firstFreeIndex[j]];
+
+            // For line sparks, also copy the second half
+            if(slotsPerSpark == 2 && i + 1 < firstFreeIndex[j])
+            {
+               mSparks[j][i + 1] = mSparks[j][firstFreeIndex[j] + 1];
+            }
          }
          else
          {
@@ -247,9 +262,10 @@ void FxManager::idle(U32 timeDelta)
                   theSpark->alpha = F32(theSpark->ttl) / 250.f;
             }
 
-            i++;
+            i += slotsPerSpark;  // Skip both halves for line sparks
          }
       }
+   }
 
 
    // Kill off any old debris chunks, advance the others
@@ -403,12 +419,23 @@ void FxManager::clearSparks()
 {
    // Remove all sparks
    for(U32 j = 0; j < SparkTypeCount; j++)
+   {
+      U32 slotsPerSpark = (j == SparkTypeLine) ? 2 : 1;
+
       for(U32 i = 0; i < firstFreeIndex[j]; )
       {
          Spark *theSpark = mSparks[j] + i;
-         firstFreeIndex[j]--;
+         // For line sparks, remove both halves to maintain even alignment
+         firstFreeIndex[j] -= slotsPerSpark;
          *theSpark = mSparks[j][firstFreeIndex[j]];
+
+         // For line sparks, also copy the second half
+         if(slotsPerSpark == 2 && i + 1 < firstFreeIndex[j])
+         {
+            mSparks[j][i + 1] = mSparks[j][firstFreeIndex[j] + 1];
+         }
       }
+   }
 }
 
 
