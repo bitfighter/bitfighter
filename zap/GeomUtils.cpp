@@ -1607,14 +1607,14 @@ bool Triangulate::processComplex(Vector<Point> &outputTriangles, const Rect& bou
    // Free the polylines
    for(S32 i = 0; i < polylinesRegistry.size(); i++)
    {
-      Vector<p2t::Point*> polyline = polylinesRegistry[i];
+      Vector<p2t::Point*> &polyline = polylinesRegistry[i];
       polyline.deleteAndClear();
    }
 
    // Free the holes
    for(S32 i = 0; i < holesRegistry.size(); i++)
    {
-      Vector<p2t::Point*> hole = holesRegistry[i];
+      Vector<p2t::Point*> &hole = holesRegistry[i];
       hole.deleteAndClear();
    }
 
