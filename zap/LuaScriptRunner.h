@@ -75,18 +75,18 @@ protected:
       ScriptTypeInvalid,
    };
 
-   Game *mLuaGame;                  // Pointer to our current Game object, which could be ServerGame or
-                                    // ClientGame depending on where the script is called from
-   GridDatabase *mLuaGridDatabase;  // Pointer to our current grid database with objects to manipulate
+   Game *mLuaGame = nullptr;                  // Pointer to our current Game object, which could be ServerGame or
+                                              // ClientGame depending on where the script is called from
+   GridDatabase *mLuaGridDatabase = nullptr;  // Pointer to our current grid database with objects to manipulate
 
    static lua_State *L;          // Main Lua state variable
    string mScriptName;           // Fully qualified script name, with path and everything
    Vector<string> mScriptArgs;   // List of arguments passed to the script
 
    string mScriptId;             // Unique id for this script
-   ScriptType mScriptType;
+   ScriptType mScriptType = ScriptTypeInvalid;
 
-   bool mSubscriptions[EventManager::EventTypes];  // Keep track of which events we're subscribed to for rapid unsubscription upon death or destruction
+   bool mSubscriptions[EventManager::EventTypes] = {};  // Keep track of which events we're subscribed to for rapid unsubscription upon death or destruction
 
    // Sub-classes that override this should still call this with Parent::prepareEnvironment()
    virtual bool prepareEnvironment();

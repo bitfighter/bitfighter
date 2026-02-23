@@ -227,21 +227,21 @@ public:
 private:
    SafePtr<GameConnection> mControllingClient;     // Only has meaning on the server, will be null on the client
    SafePtr<ClientInfo> mOwner;
-   U32 mDisableCollisionCount;                     // No collisions when > 0, use of counter allows "nested" collision disabling
+   U32 mDisableCollisionCount = 0;                 // No collisions when > 0, use of counter allows "nested" collision disabling
 
    U32 mCreationTime = 0;
    S32 mTeam = 0;
 
-   S32 mSerialNumber;         // Autoincremented serial number  
-   S32 mUserAssignedId;       // Id assigned to some objects in the editor
-   U8 mOriginalTypeNumber;    // Used during final delete to help database remove the item
+   S32 mSerialNumber = 0;         // Autoincremented serial number  
+   S32 mUserAssignedId = 0;       // Id assigned to some objects in the editor
+   U8 mOriginalTypeNumber = 0;    // Used during final delete to help database remove the item
 
 
 protected:
    Move mPrevMove;      // The move for the previous update
    Move mCurrentMove;   // The move for the current update
    StringTableEntry mKillString;     // Alternate descr of what shot projectile (e.g. "Red turret"), used when shooter is not a ship or robot
-   Game *mGame;
+   Game *mGame = nullptr;
 
 public:
    BfObject();                // Constructor
