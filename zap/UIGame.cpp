@@ -2355,7 +2355,6 @@ void GameUserInterface::renderTeamName(S32 index, S32 left, S32 right, S32 top) 
       vertAdjustment = (teamFontSize - fontSize + 1) / 2;
    }
 
-
    drawString(leftPos,  top + 2 + vertAdjustment, fontSize, origTeamName.c_str());
    drawStringr(rightPos, top + 2, teamFontSize, scoreStr.c_str());
 

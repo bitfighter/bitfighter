@@ -83,11 +83,14 @@ public:
       T *ui = nullptr;
       auto it = mUis.find(typeinfo);
 
-      if(it == mUis.end() || mUis[typeinfo] == nullptr) {      // I do not know how nullptrs get in here, but they do.
+      // Whenver we do a [] lookup on the map, if the key isn't found, a nullptr entry is added, so sometimes we'll 
+      // see a nullptr if we previously looked for something that wasn't there.
+      if(it == mUis.end() || mUis[typeinfo] == nullptr) {      
          // We need to create the pointer first, then move it, otherwise we get type issues during compilation
          auto ptr = make_unique<T>(mGame);
          ui = ptr.get();
-         mUis[typeinfo] = move(ptr);    // move() ransfers ownership of ptr to the mUis vector
+
+         mUis[typeinfo] = move(ptr);    // move() transfers ownership of ptr to the mUis vector
       }
       else {
          ui = static_cast<T *>(it->second.get());

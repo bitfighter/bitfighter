@@ -21,8 +21,7 @@ namespace
    }
 } // namespace
 
-TestRenderer::TestRenderer()
-   : mMatrixMode(MatrixType::ModelView),
+TestRenderer::TestRenderer() : mMatrixMode(MatrixType::ModelView),
    mViewportPos(0.0f, 0.0f),
    mViewportSize(0.0f, 0.0f),
    mScissorEnabled(false),
