@@ -1022,7 +1022,7 @@ struct TotalLevelRatingsReader : public MasterThreadEntry
          if(totalRating->waitingClients[i])
             totalRating->waitingClients[i]->m2cSendTotalLevelRating(dbId, rating);
 
-         totalRating->waitingClients.clear();
+      totalRating->waitingClients.clear();
    }
 };
 
