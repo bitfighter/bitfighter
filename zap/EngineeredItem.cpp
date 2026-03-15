@@ -1643,6 +1643,9 @@ S32 ForceFieldProjector::lua_setPos(lua_State *L)
    Point end;
    DatabaseObject *collObj;
 
+   if(!getDatabase())    // Not yet added to a game/database; nothing to update
+      return retVal;
+
    ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
 
    if(mField.isValid())
