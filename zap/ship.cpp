@@ -2835,8 +2835,11 @@ S32 Ship::lua_setTeam(lua_State *L)
    checkArgList(L, functionArgs, "BfObject", "setTeam");
    S32 newTeam = getTeamIndex(L, 1);
 
-   // Remove team from stack so we can trigger the event with a clean stack
-   lua_pop(L, 1);
+   if(!getGame())    // Not yet in a game; just set team directly
+   {
+      setTeam(newTeam);
+      return 0;
+   }
 
    // Update team on server and clients, with appropriate logic
    GameType *gameType = getGame()->getGameType();
