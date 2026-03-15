@@ -2818,6 +2818,12 @@ S32 Ship::lua_setPos(lua_State *L)
    S32 r = Parent::lua_setPos(L);
    Teleporter::checkAllTeleporters(this);
 
+   // If the object isn't in a game yet (mGame == NULL), two problems arise:
+   // 1. No clients to update — there's no network context, so the call is meaningless.
+   // 2. Dirty list leak — the object gets added to mDirtyList but processDeleteList / game idle
+   //    will never drain it. If the object is then deleted before ever being added to a game, the
+   //    dirty list holds a dangling pointer, which corrupts the next idle cycle.
+   if(getGame())
    setMaskBits(PositionMask);  // Update clients
 
    return r;
