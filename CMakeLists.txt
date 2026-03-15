@@ -22,8 +22,8 @@ option(DISCORD "Integrate Discord RPC calls." YES)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
-# Require use c++11 compiler
-set(CMAKE_CXX_STANDARD 11)
+# Require use c++14 compiler
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Don't use compiler extensions like -std=gnu++11
 # set(CMAKE_CXX_EXTENSIONS OFF)
