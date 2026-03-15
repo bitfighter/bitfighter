@@ -56,15 +56,15 @@ class ObjectTest : public testing::Test
  * Ensures that processArguments with long, non-sensical argv does not segfault
  * for all registered NetClasses and a few special level directives.
  */
-TEST_F(ObjectTest, ProcessArgumentsSanity) 
+TEST_F(ObjectTest, ProcessArgumentsSanity)
 {
    ServerGame *game = newServerGame();
    const S32 argc = 40;
    const char *argv[argc] = {
       "This first string will be replaced by 'argv[0] =' below",
-      "3", "4", "3", "6", "6", "4", "2", "6", "6", "3", 
-      "4", "3", "4", "3", "6", "6", "4", "2", "6", "6", 
-      "4", "3", "4", "3", "6", "6", "4", "2", "6", "6", 
+      "3", "4", "3", "6", "6", "4", "2", "6", "6", "3",
+      "4", "3", "4", "3", "6", "6", "4", "2", "6", "6",
+      "4", "3", "4", "3", "6", "6", "4", "2", "6", "6",
       "4", "3", "4", "3", "6", "blah", "4", "2", "6" };
 
    // Substitute the class name for argv[0]
@@ -154,7 +154,7 @@ TEST_F(ObjectTest, GhostingSanity)
          ghostingRecords[i].server = true;
       }
       else
-         delete bfobj;
+         delete obj;    // Delete original object so delete happens even if cast fails
    }
 
    // Idle to allow object replication
@@ -238,7 +238,7 @@ TEST_F(ObjectTest, LuaSanity)
          bfobj->addToGame(serverGame, serverGame->getGameObjDatabase());
       }
       else
-         delete bfobj;
+         delete obj; // Delete original object so delete happens even if cast fails
    }
    lua_close(L);
 }
@@ -317,5 +317,5 @@ TEST_F(ObjectTest, CreateObjectsFromLua)
 }
 
 
-   
+
 }; // namespace Zap
