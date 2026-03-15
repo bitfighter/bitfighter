@@ -13,6 +13,7 @@ namespace Zap
 {
 
 class MoveItem;
+class RobotManager;
 class ServerGame;
 
 /**
@@ -26,6 +27,7 @@ class ServerGame;
 class Robot : public Ship, public LuaScriptRunner
 {
    typedef Ship Parent;
+   friend class RobotManager;
 
 private:
    static const S32 RobotRespawnDelay = 1500;
@@ -37,6 +39,8 @@ private:
    LuaPlayerInfo *mPlayerInfo;      // Player info object describing the robot
 
    bool mHasSpawned;
+
+   RobotManager *mRobotManager = nullptr;  // Back-pointer so ~Robot() can always call removeBot()
 
    Point getNextWaypoint();                          // Helper function for getWaypoint()
    U16 findClosestZone(const Point &point);          // Finds zone closest to point, used when robots get off the map
@@ -58,6 +62,7 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    bool processArguments(S32 argc, const char **argv, Game *game, string &errorMessage);
    void onAddedToGame(Game *);
+   void removeFromGame(bool deleteObject);
 
    S32 getCurrentZone();
    void setCurrentZone(S32 zone);

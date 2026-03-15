@@ -146,6 +146,20 @@ Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),
 }
 
 
+void Robot::removeFromGame(bool deleteObject)
+{
+   // Remove from RobotManager before Parent::removeFromGame nulls mGame.
+   // Use mRobotManager directly since mGame may already be NULL in some paths.
+   if(mRobotManager)
+   {
+      mRobotManager->removeBot(this);
+      mRobotManager = nullptr;  // Prevent double-remove in ~Robot()
+   }
+
+   Parent::removeFromGame(deleteObject);
+}
+
+
 // Destructor, runs on client and server
 Robot::~Robot()
 {
@@ -168,9 +182,13 @@ Robot::~Robot()
       if(getGame()->getGameType())
          getGame()->getGameType()->serverRemoveClient(mClientInfo);
 
-      getGame()->removeBot(this);
       logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot %s terminated (%d bots left)", mScriptName.c_str(), getGame()->getRobotCount());
    }
+
+   // Always remove from mRobots regardless of mGame state (mGame can be NULL for
+   // robots added via addBot() without a full addToGame() call, e.g. in tests)
+   if(mRobotManager)
+      mRobotManager->removeBot(this);
 
    delete mPlayerInfo;
    if(mClientInfo.isValid())

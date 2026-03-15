@@ -176,6 +176,7 @@ Robot *RobotManager::findBot(const char *id)
 
 void RobotManager::addBot(Robot *robot)
 {
+   robot->mRobotManager = this;
    mRobots.push_back(robot);
 }
 
