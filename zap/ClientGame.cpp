@@ -123,7 +123,7 @@ void ClientGame::joinLocalGame(GameNetInterface *remoteInterface)
    TNLAssert(dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject()), 
                "This should never be NULL here -- if it is, it means our connection to ourselves has failed for some reason");
 
-   GameConnection *gc = static_cast<GameConnection *>(gameConnection->getRemoteConnectionObject()); 
+   GameConnection *gc = static_cast<GameConnection *>(gameConnection->getRemoteConnectionObject());
    gc->onLocalConnection();
 }
 

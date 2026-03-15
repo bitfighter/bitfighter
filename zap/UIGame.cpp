@@ -57,8 +57,8 @@ static const S32 SRV_MSG_WRAP_WIDTH = 750;
 
 
 // Constructor
-GameUserInterface::GameUserInterface(ClientGame *game) : 
-                  Parent(game), 
+GameUserInterface::GameUserInterface(ClientGame *game) :
+                  Parent(game),
                   mVoiceRecorder(game),  //   lines expr  topdown   wrap width          font size          line gap
                   mServerMessageDisplayer(game,  6, true,  true,  SRV_MSG_WRAP_WIDTH, SRV_MSG_FONT_SIZE, SRV_MSG_FONT_GAP),
                   mChatMessageDisplayer1 (game,  5, true,  false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
@@ -86,7 +86,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
    mShrinkDelayTimer.setPeriod(500);
 
    mGotControlUpdate = false;
-   
+
    mFiring = false;
 
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
@@ -95,8 +95,8 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
       mModSecondaryActivated[i] = false;
       mModuleDoubleTapTimer[i].setPeriod(DoubleClickTimeout);
    }
-   
-   mAnnouncementTimer.setPeriod(FIFTEEN_SECONDS);  
+
+   mAnnouncementTimer.setPeriod(FIFTEEN_SECONDS);
    mAnnouncement = "";
 
    mShowProgressBar = false;
@@ -284,7 +284,7 @@ static F32 rectify(F32 actual, F32 disp, bool isMax, bool waiting, bool loading,
    // We have a timer that gives us a little breathing room before we start contracting.  If waiting is true, no contraction.
    if(waiting)
       return disp;
-   
+
    // If the extents are close to the display, snap to the extents, to avoid overshooting
    if(fabs(disp - actual) <= ShrinkRate * timeDelta)
       return actual;
@@ -336,14 +336,14 @@ void GameUserInterface::idle(U32 timeDelta)
 
    mFpsRenderer.idle(timeDelta);
    mConnectionStatsRenderer.idle(timeDelta, getGame()->getConnectionToServer());
-   
+
    mHelperManager.idle(timeDelta);
    mVoiceRecorder.idle(timeDelta);
    mLevelListDisplayer.idle(timeDelta);
 
    mLoadoutIndicator.idle(timeDelta);
 
-   // Processes sparks and teleporter effects -- 
+   // Processes sparks and teleporter effects --
    //    do this even while suspended to make objects look normal while in /idling
    //    But not while playing back game recordings, idled in idleFxManager with custom timeDelta
    if(dynamic_cast<GameRecorderPlayback *>(getGame()->getConnectionToServer()) == NULL)
@@ -362,7 +362,7 @@ void GameUserInterface::idle(U32 timeDelta)
    }
 
    // Keep ship pointed towards mouse cmdrs map zoom transition
-   if(mCommanderZoomDelta.getCurrent() > 0)               
+   if(mCommanderZoomDelta.getCurrent() > 0)
       onMouseMoved();
 
    if(renderWithCommanderMap())
@@ -519,9 +519,9 @@ void GameUserInterface::render()
       renderLevelUpMessage(level);
    else if(getGame()->isSpawnDelayed())
       renderSuspendedMessage();
-   
+
    // Fade inlineHelpItem in and out as chat widget appears or F2 levelInfo appears.
-   // Don't completely hide help item when chatting -- it's jarring.  
+   // Don't completely hide help item when chatting -- it's jarring.
    F32 helpItemAlpha = getBackgroundTextDimFactor(false);
    mHelpItemManager.renderMessages(getGame(), DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2.0f + 40, helpItemAlpha);
 
@@ -548,7 +548,7 @@ void GameUserInterface::render()
    renderLevelInfo();
 
    renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
-   
+
    renderShutdownMessage();
 
    renderConsole();  // Rendered last, so it's always on top
@@ -641,7 +641,7 @@ void GameUserInterface::renderSuspendedMessage() const
 
 void GameUserInterface::renderLevelUpMessage(S32 newLevel) const
 {
-   static string msg[] = { "", 
+   static string msg[] = { "",
                            "CONGRATULATIONS!",
                            "YOU HAVE BEEN PROMOTED TO",
                            "LEVEL XXX",                     // <== This line will be updated below
@@ -710,8 +710,8 @@ void GameUserInterface::renderShutdownMessage() const
          char whomsg[255];
          dSprintf(whomsg, sizeof(whomsg), "Shutdown sequence initiated by %s.", mShutdownName.getString());
 
-         string msg = string(timemsg) + "\n\n" + 
-                      whomsg + "\n\n" + 
+         string msg = string(timemsg) + "\n\n" +
+                      whomsg + "\n\n" +
                       mShutdownReason.getString();
          renderMessageBox("SHUTDOWN INITIATED", "Press [[Esc]] to dismiss", msg, 7);
       }
@@ -877,7 +877,7 @@ void GameUserInterface::renderReticle() const
    };
 
 #define RETICLE_COLOR Colors::green
-#define COLOR_RGB RETICLE_COLOR.r, RETICLE_COLOR.g, RETICLE_COLOR.b      
+#define COLOR_RGB RETICLE_COLOR.r, RETICLE_COLOR.g, RETICLE_COLOR.b
 
    static F32 colors[] = {
    //    R,G,B   aplha
@@ -946,7 +946,7 @@ void GameUserInterface::onMouseMoved()
       Point o = ship->getRenderPos();  // To avoid taking address of temporary
       Point p = worldToScreenPoint(&o, DisplayManager::getScreenInfo()->getGameCanvasWidth(), DisplayManager::getScreenInfo()->getGameCanvasHeight());
 
-      mCurrentMove.angle = atan2(mMousePoint.y + DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - p.y, 
+      mCurrentMove.angle = atan2(mMousePoint.y + DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2 - p.y,
                                  mMousePoint.x + DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2 - p.x);
    }
 
@@ -964,8 +964,8 @@ Point GameUserInterface::worldToScreenPoint(const Point *point,  S32 canvasWidth
       return Point(0,0);
 
    Point position = ship->getRenderPos();    // Ship's location (which will be coords of screen's center)
-   
-   if(renderWithCommanderMap())              
+
+   if(renderWithCommanderMap())
    {
       F32 zoomFrac = getCommanderZoomFraction();
       const Rect *worldExtentRect = getGame()->getWorldExtents();
@@ -1119,7 +1119,7 @@ void GameUserInterface::activateModule(S32 index)
    mModuleDoubleTapTimer[index].reset();
 
    // Player figured out how to activate their modules... skip related help
-   mHelpItemManager.removeInlineHelpItem(ControlsModulesItem, true);           
+   mHelpItemManager.removeInlineHelpItem(ControlsModulesItem, true);
 
    if(getGame()->getLocalPlayerShip()->getModule(index) == ModuleCloak)
       mHelpItemManager.removeInlineHelpItem(TryCloakItem, true);     // Already tried it!
@@ -1299,7 +1299,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    if(!mHelperManager.isHelperActive())
    {
       Ship *ship = getGame()->getLocalPlayerShip();
-         
+
       if(ship)
       {
          if((checkInputCode(BINDING_MOD1, inputCode) && ship->getModule(0) == ModuleEngineer) ||
@@ -1530,9 +1530,9 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
 
       // Suppress key repeat by disabling cmdrs map until keyUp event is received
       mCmdrsMapKeyRepeatSuppressionSystemApprovesToggleCmdrsMap = false;
-      
+
       // Now that we've demonstrated use of cmdrs map, no need to tell player about it
-      mHelpItemManager.removeInlineHelpItem(CmdrsMapItem, true);  
+      mHelpItemManager.removeInlineHelpItem(CmdrsMapItem, true);
    }
 
    else if(checkInputCode(BINDING_SCRBRD, inputCode))
@@ -1554,7 +1554,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    }
 
    // The following keys are only allowed when there are no helpers or when the top helper permits
-   else if(mHelperManager.isChatAllowed())    
+   else if(mHelperManager.isChatAllowed())
    {
       if(checkEnterChatInputCode(inputCode))
          return true;
@@ -1616,8 +1616,8 @@ void GameUserInterface::checkForKeyboardMovementKeysInJoystickMode(InputCode inp
 // when entering a chat message.  When false, it will.
 F32 GameUserInterface::getBackgroundTextDimFactor(bool chatRelated) const
 {
-   F32 helperManagerFactor = chatRelated ? 
-         mHelperManager.getDimFactor() : 
+   F32 helperManagerFactor = chatRelated ?
+         mHelperManager.getDimFactor() :
          MAX(mHelperManager.getFraction(), UI::DIM_LEVEL);
 
    // Hide help message when scoreboard is visible
@@ -1628,7 +1628,7 @@ F32 GameUserInterface::getBackgroundTextDimFactor(bool chatRelated) const
 }
 
 
-// Display proper chat queue based on mMessageDisplayMode.  These displayers are configured in the constructor. 
+// Display proper chat queue based on mMessageDisplayMode.  These displayers are configured in the constructor.
 void GameUserInterface::renderChatMsgs() const
 {
    bool chatDisabled = !mHelperManager.isChatAllowed();
@@ -2091,7 +2091,7 @@ static const char *adminSymbol = "@";
 
 static void renderScoreboardLegend(S32 humans, U32 scoreboardTop, U32 totalHeight)
 {
-   const S32 LegendSize = 12;     
+   const S32 LegendSize = 12;
    const S32 LegendGap  =  3;    // Space between scoreboard and legend
    const S32 legendPos  = scoreboardTop + totalHeight + LegendGap + LegendSize;
 
@@ -2101,7 +2101,7 @@ static void renderScoreboardLegend(S32 humans, U32 scoreboardTop, U32 totalHeigh
    static S32 lastHumans = S32_MIN;
    if(symbols.size() == 0)
    {
-      string legend = " | " + string(adminSymbol) + " = Admin | " + 
+      string legend = " | " + string(adminSymbol) + " = Admin | " +
                       levelChangerSymbol + " = Can Change Levels | " + botSymbol + " = Bot |";
 
       symbols.push_back(SymbolShapePtr());    // Placeholder, will be replaced with humans count below
@@ -2242,7 +2242,7 @@ void GameUserInterface::renderScoreboard()
 }
 
 
-void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGame, 
+void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGame,
                                              S32 scoreboardTop, S32 sectionHeight, S32 teamHeaderHeight, S32 lineHeight) const
 {
    static const S32 canvasWidth  = DisplayManager::getScreenInfo()->getGameCanvasWidth();
@@ -2257,7 +2257,7 @@ void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGa
    const S32 yt = scoreboardTop + (index >> 1) * sectionHeight;   // Top edge of team render area
 
    // Team header
-   if(isTeamGame)     
+   if(isTeamGame)
       renderTeamName(index, xl, xr, yt);
 
    // Now for player scores.  First build a list.  Then sort it.  Then display it.
@@ -2281,7 +2281,7 @@ void GameUserInterface::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGa
       curRowY += colHeaderHeight;
    }
 
-   S32 colIndexWidths[ColIndexCount];     
+   S32 colIndexWidths[ColIndexCount];
    S32 maxColIndexWidths[ColIndexCount] = {0};     // Inits every element of array to 0
 
    for(S32 i = 0; i < playerInfos.size(); i++)
@@ -2463,7 +2463,7 @@ void GameUserInterface::renderBasicInterfaceOverlay()
          drawRect(25, 200, DisplayManager::getScreenInfo()->getGameCanvasWidth()-25, 210, RenderType::LineLoop);
       }
    }
-   
+
    if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
       renderInputModeChangeAlert();
 
@@ -2471,7 +2471,7 @@ void GameUserInterface::renderBasicInterfaceOverlay()
 
    if(showScore && getGame()->getTeamCount() > 0)      // How could teamCount be 0?
       renderScoreboard();
-   
+
    // Render timer and associated doodads in the lower-right corner
    mTimeLeftRenderer.render(gameType, showScore, true);
 
@@ -2480,13 +2480,13 @@ void GameUserInterface::renderBasicInterfaceOverlay()
 }
 
 
-bool GameUserInterface::shouldRenderLevelInfo() const 
+bool GameUserInterface::shouldRenderLevelInfo() const
 {
    return mLevelInfoDisplayer.isActive() || mMissionOverlayActive;
 }
 
 
-void GameUserInterface::renderLevelInfo() 
+void GameUserInterface::renderLevelInfo()
 {
    // Level Info requires gametype.  It can be NULL when switching levels
    if(getGame()->getGameType() == NULL)
@@ -2509,7 +2509,7 @@ void GameUserInterface::renderInputModeChangeAlert() const
       alpha = mInputModeChangeAlertDisplayTimer.getCurrent() * 0.001f;
 
    Renderer::get().setColor(Colors::paleRed, alpha);
-   drawCenteredStringf(vertMargin + 130, 20, "Input mode changed to %s", 
+   drawCenteredStringf(vertMargin + 130, 20, "Input mode changed to %s",
                        getGame()->getInputMode() == InputModeJoystick ? "Joystick" : "Keyboard");
 }
 
@@ -2605,7 +2605,7 @@ void GameUserInterface::renderObjectIds() const
 
 void GameUserInterface::saveAlreadySeenLevelupMessageList()
 {
-   getGame()->getSettings()->getIniSettings()->mSettings.setVal("LevelupItemsAlreadySeenList", 
+   getGame()->getSettings()->getIniSettings()->mSettings.setVal("LevelupItemsAlreadySeenList",
                                                                 getAlreadySeenLevelupMessageString());
 }
 
@@ -2736,7 +2736,7 @@ void GameUserInterface::renderGameNormal()
 
    visExt = getGame()->computePlayerVisArea(ship);
 
-   // TODO: This should not be needed here -- mPos is set elsewhere, but appears to be lagged by a frame, which 
+   // TODO: This should not be needed here -- mPos is set elsewhere, but appears to be lagged by a frame, which
    //       creates a weird slightly off-center effect when moving.  This is harmless for the moment, but should be removed.
    mShipPos.set(ship->getRenderPos());
    mHasShipPos = true;
@@ -2745,8 +2745,8 @@ void GameUserInterface::renderGameNormal()
    r.pushMatrix();
 
    // Put (0,0) at the center of the screen
-   r.translate(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2.f, 
-                DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2.f, 0);       
+   r.translate(DisplayManager::getScreenInfo()->getGameCanvasWidth() / 2.f,
+                DisplayManager::getScreenInfo()->getGameCanvasHeight() / 2.f, 0);
 
    // These scaling factors are different when changing the visible area by equiping the sensor module
    F32 scaleFactX = (DisplayManager::getScreenInfo()->getGameCanvasWidth()  / 2) / visExt.x;
@@ -2763,15 +2763,15 @@ void GameUserInterface::renderGameNormal()
 
    // Fill rawRenderObjects with anything within extentRect (our visibility extent)
    rawRenderObjects.clear();
-   getGame()->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, rawRenderObjects, extentRect);    
+   getGame()->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, rawRenderObjects, extentRect);
 
    // Cast objects in rawRenderObjects and put them in renderObjects
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
       renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
 
-   // Normally a big no-no, we'll access the server's bot zones directly if we are running locally 
-   // so we can visualize them without bogging the game down with the normal process of transmitting 
+   // Normally a big no-no, we'll access the server's bot zones directly if we are running locally
+   // so we can visualize them without bogging the game down with the normal process of transmitting
    // zones from server to client.  The result is that we can only see zones on our local server.
    if(mDebugShowMeshZones)
       populateRenderZones(getGame(), &extentRect);
@@ -2813,7 +2813,7 @@ void GameUserInterface::renderGameNormal()
    r.popMatrix();
 
    // Render current ship's energy
-   if(ship) 
+   if(ship)
       UI::GaugeRenderer::render(ship->mEnergy, ship->mHealth);
 
 
@@ -2830,11 +2830,11 @@ void GameUserInterface::renderInlineHelpItemOutlines(S32 playerTeam, F32 alpha) 
    static Vector<const Vector<Point> *> polygons;
    polygons.clear();
 
-   const Vector<HighlightItem> *itemsToHighlight = mHelpItemManager.getItemsToHighlight();      
+   const Vector<HighlightItem> *itemsToHighlight = mHelpItemManager.getItemsToHighlight();
 
    for(S32 i = 0; i < itemsToHighlight->size(); i++)
       for(S32 j = 0; j < renderObjects.size(); j++)
-         if(itemsToHighlight->get(i).type == renderObjects[j]->getObjectTypeNumber() && 
+         if(itemsToHighlight->get(i).type == renderObjects[j]->getObjectTypeNumber() &&
                                              renderObjects[j]->shouldRender())
          {
             HighlightItem::Whose whose = itemsToHighlight->get(i).whose;
@@ -2898,7 +2898,7 @@ void GameUserInterface::renderGameCommander()
    Renderer& r = Renderer::get();
 
    GameType *gameType = getGame()->getGameType();
-   
+
    static Point worldExtents;    // Reuse this point to avoid construction/destruction cost
    worldExtents = mDispWorldExtents.getExtents();
 
@@ -2922,7 +2922,7 @@ void GameUserInterface::renderGameCommander()
    r.pushMatrix();
 
    // Put (0,0) at the center of the screen
-   r.translate(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.5f, DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f, 0);    
+   r.translate(DisplayManager::getScreenInfo()->getGameCanvasWidth() * 0.5f, DisplayManager::getScreenInfo()->getGameCanvasHeight() * 0.5f, 0);
 
    F32 zoomFrac = getCommanderZoomFraction();
 
@@ -3164,7 +3164,7 @@ void ColorString::set(const string &s, const Color &c, U32 id)    // id defaults
 ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool expire, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontWidth)
 {
    mDisplayChatMessageTimer.setPeriod(5000);    // How long messages stay visible (ms)
-   mChatScrollTimer.setPeriod(100);             // Transition time when new msg arrives (ms) 
+   mChatScrollTimer.setPeriod(100);             // Transition time when new msg arrives (ms)
 
    mMessages.resize(msgCount + 1);              // Have an extra message for scrolling effect.  Will only display msgCount messages.
 
@@ -3176,7 +3176,7 @@ ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool 
    mWrapWidth = wrapWidth;
    mFontSize  = fontSize;
    mFontGap   = fontWidth;
-   
+
    mNextGroupId = 0;
 }
 
@@ -3209,7 +3209,7 @@ void ChatMessageDisplayer::idle(U32 timeDelta)
          if(mTopDown)
             mChatScrollTimer.reset();
 
-         advanceLast();         
+         advanceLast();
       }
    }
 }
@@ -3244,7 +3244,7 @@ void ChatMessageDisplayer::advanceLast()
 }
 
 
-// Replace %vars% in chat messages 
+// Replace %vars% in chat messages
 // Currently only evaluates names of keybindings (as used in the INI file), and %playerName%
 // Vars are case insensitive
 static string getSubstVarVal(ClientGame *game, const string &var)
@@ -3253,7 +3253,7 @@ static string getSubstVarVal(ClientGame *game, const string &var)
    InputCode inputCode = game->getSettings()->getInputCodeManager()->getKeyBoundToBindingCodeName(var);
    if(inputCode != KEY_UNKNOWN)
       return string("[") + InputCodeManager::inputCodeToString(inputCode) + "]";
-   
+
    // %playerName%
    if(caseInsensitiveStringCompare(var, "playerName"))
       return game->getClientInfo()->getName().getString();
@@ -3274,7 +3274,7 @@ void ChatMessageDisplayer::onChatMessageReceived(const Color &msgColor, const st
    for(S32 i = 0; i < lines.size(); i++)
    {
       advanceFirst();
-      mMessages[mFirst % mMessages.size()].set(lines[i], msgColor, mNextGroupId); 
+      mMessages[mFirst % mMessages.size()].set(lines[i], msgColor, mNextGroupId);
    }
 
    mNextGroupId++;
@@ -3330,7 +3330,7 @@ string ChatMessageDisplayer::substitueVars(const string &str)
 void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anouncementActive, F32 alpha) const
 {
    // Are we in the act of transitioning between one message and another?
-   bool isScrolling = (mChatScrollTimer.getCurrent() > 0);  
+   bool isScrolling = (mChatScrollTimer.getCurrent() > 0);
 
    // Check if there any messages to display... if not, bail
    if(mFirst == mLast && !(mTopDown && isScrolling))
@@ -3343,16 +3343,16 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
    static ScissorsManager scissorsManager;
 
    // Only need to set scissors if we're scrolling.  When not scrolling, we control the display by only showing
-   // the specified number of lines; there are normally no partial lines that need vertical clipping as 
+   // the specified number of lines; there are normally no partial lines that need vertical clipping as
    // there are when we're scrolling.  Note also that we only clip vertically, and can ignore the horizontal.
-   if(isScrolling)    
+   if(isScrolling)
    {
       // Remember that our message list contains an extra entry that exists only for scrolling purposes.
-      // We want the height of the clip window to omit this line, so we subtract 1 below.  
-      S32 displayAreaHeight = (mMessages.size() - 1) * lineHeight;     
+      // We want the height of the clip window to omit this line, so we subtract 1 below.
+      S32 displayAreaHeight = (mMessages.size() - 1) * lineHeight;
       S32 displayAreaYPos = anchorPos + (mTopDown ? displayAreaHeight : lineHeight);
 
-      scissorsManager.enable(true, mGame->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
+      scissorsManager.enable(true, mGame->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"),
                              0.0f, F32(displayAreaYPos - displayAreaHeight), F32(DisplayManager::getScreenInfo()->getGameCanvasWidth()), F32(displayAreaHeight));
    }
 
@@ -3461,7 +3461,7 @@ void LevelListDisplayer::render() const
          FontManager::pushFontContext(MenuContext);
          Renderer::get().setColor(Colors::white, (1.4f - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.f)) *
                                         (mLevelLoadDisplay ? 1 : mLevelLoadDisplayFadeTimer.getFraction()) );
-         drawStringf(100, DisplayManager::getScreenInfo()->getGameCanvasHeight() - /*vertMargin*/ 0 - (mLevelLoadDisplayNames.size() - i) * 20, 
+         drawStringf(100, DisplayManager::getScreenInfo()->getGameCanvasHeight() - /*vertMargin*/ 0 - (mLevelLoadDisplayNames.size() - i) * 20,
                      15, "%s", mLevelLoadDisplayNames[i].c_str());
 
          FontManager::popFontContext();
