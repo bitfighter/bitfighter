@@ -64,7 +64,7 @@ void *DataChunker::alloc(S32 size)
 
 DataChunker::DataBlock::DataBlock(S32 size)
 {
-   data = new U8[size];
+   data = new U8[size]();  // value-initialize to zero; prevents valgrind false positives from LuaJIT string hashing
 }
 
 DataChunker::DataBlock::~DataBlock()
