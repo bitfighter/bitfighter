@@ -62,6 +62,10 @@ void FxManager::emitSpark(const Point &pos, const Point &vel, const Color &color
 
    U8 slotsNeeded = (sparkType == SparkTypePoint ? 1 : 2);             // We need a U2 data type here!
 
+   // BOUNDS CHECK: Validate sparkType is valid
+   TNLAssert(sparkType < SparkTypeCount, "Invalid sparkType!");
+   TNLAssert(firstFreeIndex[sparkType] <= MAX_SPARKS, "firstFreeIndex out of bounds in emitSpark!");
+
    // Make sure we have room for an additional spark.  Regular sparks need one slot, line sparks need two.
    if(firstFreeIndex[sparkType] >= MAX_SPARKS - slotsNeeded)           // Spark list is full... need to overwrite an older spark
    {
@@ -220,20 +224,24 @@ void FxManager::idle(U32 timeDelta)
    F32 dTsecs = timeDelta * .001f;
 
    // We have two spark arrays -- one for points, one for lines.  Loop through both.
-   for (U32 j = 0; j < SparkTypeCount; j++)      
+   for (U32 j = 0; j < SparkTypeCount; j++)
    {
       U32 slotsPerSpark = (j == SparkTypeLine) ? 2 : 1;
+
+      TNLAssert(firstFreeIndex[j] <= MAX_SPARKS, "firstFreeIndex out of bounds!");
 
       for(U32 i = 0; i < firstFreeIndex[j]; )
       {
          Spark *theSpark = mSparks[j] + i;
          if(theSpark->ttl < (S32)timeDelta)     // Spark is dead -- remove it
-         {                          
+         {
             // For line sparks, we need to remove both halves to maintain even alignment
             // Decrement by slotsPerSpark (2 for lines, 1 for points)
             firstFreeIndex[j] -= slotsPerSpark;
 
-			// If this spark is not the last one, move the last spark into this one's place.  
+            TNLAssert(firstFreeIndex[j] < MAX_SPARKS, "firstFreeIndex became invalid after decrement!");
+
+            // If this spark is not the last one, move the last spark into this one's place.
             // This keeps all our sparks packed at the beginning of the array.
             *theSpark = mSparks[j][firstFreeIndex[j]];
 
@@ -325,7 +333,7 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction) const
             alpha = (1 - radius) / 0.5f;
 
          Vector<Point> dummy;
-         
+
          renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, commanderZoomFraction,
                           radius, Teleporter::TeleportInRadius, alpha, &dummy);
       }
@@ -336,6 +344,12 @@ void FxManager::render(S32 renderPass, F32 commanderZoomFraction) const
       for(S32 i = SparkTypeCount - 1; i >= 0; i --)     // Loop through our different spark types
       {
          RenderType renderType = (SparkType)i == SparkTypePoint ? RenderType::Points : RenderType::Lines;
+
+         // BOUNDS CHECK: Validate firstFreeIndex before rendering
+         TNLAssert(firstFreeIndex[i] <= MAX_SPARKS, "firstFreeIndex out of bounds in render!");
+         // For line sparks, firstFreeIndex should be even
+         if(renderType == RenderType::Lines)
+            TNLAssert(firstFreeIndex[i] % 2 == 0, "firstFreeIndex for line sparks must be even!");
 
          r.setPointSize(gDefaultLineWidth);
          r.renderColored(
@@ -377,7 +391,7 @@ void FxManager::emitExplosion(const Point &pos, F32 size, const Color *colorArra
    {
       F32 th = TNL::Random::readF() * 2 * 3.14f;
       F32 f = (TNL::Random::readF() * 2 - 1) * 400 * size;
-      
+
       S32 colorIndex = TNL::Random::readI() % numColors;
       S32 ttl        = S32(F32(TNL::Random::readI(0, 1000) + 2000) * size);
 
