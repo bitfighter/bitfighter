@@ -72,8 +72,8 @@ int main(int argc, char **argv)
    DisplayManager::initialize();
    TestRenderer::install();
    int returnvalue = RUN_ALL_TESTS();
+   FontManager::cleanup();   // Must precede Renderer::shutdown(); sth_delete calls Renderer::get()
    Renderer::shutdown();
-   FontManager::cleanup();
    DisplayManager::cleanup();
 
    return returnvalue;
