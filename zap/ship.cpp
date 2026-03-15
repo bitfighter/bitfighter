@@ -309,9 +309,9 @@ F32 Ship::processMove(U32 stateIndex)
    requestVel.set(mCurrentMove.x, mCurrentMove.y);
    requestVel *= maxVel;
 
-   static const S32 MAX_CONTROLLABLE_SPEED = 1000;    
+   static const S32 MAX_CONTROLLABLE_SPEED = 1000;
 
-   // If you are going too fast (i.e. > MAX_CONTROLLABLE_SPEED), you cannot move, and will automatically 
+   // If you are going too fast (i.e. > MAX_CONTROLLABLE_SPEED), you cannot move, and will automatically
    // "hit the brakes" by requesting a speed of 0
    if(getVel(stateIndex).lenSquared() > sq(MAX_CONTROLLABLE_SPEED))
       requestVel.set(0,0);
@@ -489,7 +489,7 @@ void Ship::processWeaponFire()
 
          Point dir = getAimVector();
 
-         if(isServer())  
+         if(isServer())
          {
             // TODO: To fix skip fire effect on jittery server, need to replace the 0 with... something...
             GameWeapon::createWeaponProjectiles(curWeapon, dir, getActualPos(), getActualVel(), 0, CollisionRadius - 2, this);
@@ -515,14 +515,14 @@ void Ship::processWeaponFire()
    }
 }
 
-// Compute the delta between our current render position and the server position after 
+// Compute the delta between our current render position and the server position after
 // client-side prediction has been run
 void Ship::controlMoveReplayComplete()
 {
    Point delta = getActualPos() - getRenderPos();
    F32 deltaLenSq = delta.lenSquared();
 
-   // If the delta is either very small, or greater than the max interpolation threshold, 
+   // If the delta is either very small, or greater than the max interpolation threshold,
    // just warp to the new position
    if(deltaLenSq <= sq(0.5) || deltaLenSq > sq(MaxControlObjectInterpDistance))
    {
@@ -593,7 +593,7 @@ void Ship::idle(IdleCallPath path)
          static const F32 ShipVarNormalizeFraction = 1.0 / ShipVarNormalizeMultiplier;
 
          static Point p;
-         
+
 
          // This rounds the position and velocity to specific bit resolutions
          // log2(ShipVarNormalizeMultiplier). This gives better predictability
@@ -610,7 +610,7 @@ void Ship::idle(IdleCallPath path)
 
       if(path == ServerIdleMainLoop || path == ServerProcessingUpdatesFromClient)
       {
-         // Update the render state on the server to match the actual updated state, and mark the object as having changed 
+         // Update the render state on the server to match the actual updated state, and mark the object as having changed
          // Position state.  An optimization here would check the before and after positions so as to not update unmoving ships.
          if(getRenderAngle() != getActualAngle() || getRenderPos() != getActualPos() || getRenderVel() != getActualVel())
             setMaskBits(PositionMask);
@@ -679,11 +679,11 @@ void Ship::idle(IdleCallPath path)
    // Find any repair targets for rendering repair rays -- on other paths, this will be done in processModules
    else if(path == ClientIdlingLocalShip || path == ClientIdlingNotLocalShip)
       if(mLoadout.isModulePrimaryActive(ModuleRepair))
-         findRepairTargets();       
+         findRepairTargets();
 
    if(path == ServerProcessingUpdatesFromClient)
       repairTargets();
-      
+
 
    if(path == ClientIdlingLocalShip || path == ClientIdlingNotLocalShip)
    {
@@ -723,7 +723,7 @@ void Ship::findRepairTargets()
 
    Point pos = getRenderPos();
    Rect r(pos, (RepairRadius + CollisionRadius));
-   
+
    foundObjects.clear();
    findObjects((TestFunc)isWithHealthType, foundObjects, r);   // All isWithHealthType objects are items
 
@@ -808,7 +808,7 @@ void Ship::processModules()
 
    // Go through our loaded modules and see if they are currently turned on
    // Are these checked on the server side?
-   for(S32 i = 0; i < ShipModuleCount; i++)   
+   for(S32 i = 0; i < ShipModuleCount; i++)
    {
       // If you have passive module, it's always active, no restrictions, but is off for energy consumption purposes
       if(ModuleInfo::getModuleInfo(mLoadout.getModule(i))->getPrimaryUseType() == ModulePrimaryUsePassive)
@@ -894,7 +894,7 @@ void Ship::processModules()
 
 
          // Sensor module needs to place a spybug
-         if(i == ModuleSensor &&  
+         if(i == ModuleSensor &&
                mSpyBugPlacementTimer.getCurrent() == 0 &&        // Prevent placement too fast
                mEnergy > moduleInfo->getPrimaryPerUseCost())     // Have enough energy
          {
@@ -946,7 +946,7 @@ void Ship::processModules()
    //   BfObject *object = isInZone(LoadoutZoneTypeNumber);
    //   S32 currentZoneTeam = object ? object->getTeam() : NO_TEAM;
    //   if (currentZoneTeam == TEAM_NEUTRAL || currentZoneTeam == getTeam())
-   //      mEnergy -= EnergyRechargeRateInFriendlyLoadoutZoneModifier * timeInMilliSeconds;            
+   //      mEnergy -= EnergyRechargeRateInFriendlyLoadoutZoneModifier * timeInMilliSeconds;
    //}
 
    // Reduce total energy consumption when more than one module is used
@@ -1000,7 +1000,7 @@ void Ship::deploySpybug()
       return;
    }
 
-   mEnergy -= deploymentEnergy;                             
+   mEnergy -= deploymentEnergy;
    mSpyBugPlacementTimer.reset();
 
    Point direction = getAimVector();
@@ -1025,13 +1025,13 @@ void Ship::rechargeEnergy()
    U32 timeInMilliSeconds = mCurrentMove.time;
 
    // Energy will not recharge if spawn shield is up
-   if(mSpawnShield.getCurrent() != 0)     
+   if(mSpawnShield.getCurrent() != 0)
       mFastRechargeTimer.reset();    // Fast recharge timer doesn't really get going until after spawn shield is down
    else
    {
       // Base recharge rate
       mEnergy += EnergyRechargeRate * timeInMilliSeconds;
-      
+
       //// Apply energy recharge modifier for the zone the player is in
       //BfObject *object = isInZone(LoadoutZoneTypeNumber);
       //S32 currentLoadoutZoneTeam = object ? object->getTeam() : NO_TEAM;
@@ -1086,7 +1086,7 @@ void Ship::damageObject(DamageInfo *theInfo)
 {
    TNLAssert(mHasExploded || mHealth > 0, "One must be true!  If this never fires, remove mHealth == 0 from if below.");  // Added 22-Sep-2013 by Watusimoto
    if(mHealth == 0 || mHasExploded)  // Stop multi-kill problem;  might stop robots from becoming invincible
-      return; 
+      return;
 
    bool hasArmor = hasModule(ModuleArmor);
 
@@ -1172,7 +1172,7 @@ void Ship::damageObject(DamageInfo *theInfo)
 
       if(projectile)
          getClientInfo()->getStatistics()->countHitBy(projectile->mWeaponType);
- 
+
       else if(mHealth == 0 && theInfo->damagingObject->getObjectTypeNumber() == AsteroidTypeNumber)
          getClientInfo()->getStatistics()->mCrashedIntoAsteroid++;
    }
@@ -1222,7 +1222,7 @@ void Ship::updateModuleSounds()
       SFXCloakActive,
       SFXNone,       // Armor... tough, but he don't say much
    };
-   
+
    for(U32 i = 0; i < ModuleCount; i++)
    {
       if(mLoadout.isModulePrimaryActive(ShipModule(i)) && moduleSFXs[i] != SFXNone)
@@ -1274,7 +1274,7 @@ void Ship::setState(ControlObjectData *state)
    mFastRecharging = state->mFastRecharging;
 
    // Probably needed, it is because ship don't update modules from Move until after moving the ship.
-   mLoadout.setModulePrimary(ModuleBoost, state->mBoostActive);  
+   mLoadout.setModulePrimary(ModuleBoost, state->mBoostActive);
 }
 
 
@@ -1384,7 +1384,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
          stream->writeFlag((updateMask & RespawnMask) != 0 && mSendSpawnEffectTimer.getCurrent() > 0);  // If true, ship will appear to spawn on client
          U32 sendNumber = (mSpawnShield.getCurrent() + (SpawnShieldTime / 16 / 2)) * 16 / SpawnShieldTime; // rounding
          if(stream->writeFlag(sendNumber != 0))
-            stream->writeInt(sendNumber - 1, 4); 
+            stream->writeInt(sendNumber - 1, 4);
       }
 
       if(stream->writeFlag(updateMask & HealthMask))     // Health
@@ -1474,7 +1474,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       wasInitialUpdate = true;
 
-      // During the initial update, we need to assign a ClientInfo object to this ship.  We'll 
+      // During the initial update, we need to assign a ClientInfo object to this ship.  We'll
       // identifyt the proper ClientInfo by the player's name.
       //
       // Read the name and use it to find the clientInfo that should be waiting for us... hopefully
@@ -1716,7 +1716,7 @@ bool Ship::isDestroyed()
 }
 
 
-bool Ship::isVisible(bool viewerHasSensor) 
+bool Ship::isVisible(bool viewerHasSensor)
 {
    if(viewerHasSensor || !mLoadout.isModulePrimaryActive(ModuleCloak))
       return true;
@@ -1781,7 +1781,7 @@ MountableItem *Ship::dismountFirst(U8 objectType)
 void Ship::dismountAll()
 {
    // Count down here because as items are dismounted, they will be removed from the mMountedItems vector
-   for(S32 i = mMountedItems.size() - 1; i >= 0; i--)       
+   for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
       if(mMountedItems[i].isValid())               // Can be NULL when quitting the server
          mMountedItems[i]->dismount(DISMOUNT_MOUNT_WAS_KILLED);
 }
@@ -1840,7 +1840,7 @@ bool Ship::setLoadout(const LoadoutTracker &loadout, bool silent)
       }
    }
 
-   if(!silent) 
+   if(!silent)
    {
       // Notifiy user
       GameConnection *cc = getControllingClient();
@@ -1863,7 +1863,7 @@ void Ship::setActiveWeapon(U32 weaponIndex)
 
 #ifndef ZAP_DEDICATED
    // Notify the UI that the weapon has changed (mGame might be NULL when testing)
-   if(mGame && !mGame->isServer() && static_cast<ClientGame *>(mGame)->getConnectionToServer() && static_cast<ClientGame *>(mGame)->getConnectionToServer()->getControlObject() == this)    
+   if(mGame && !mGame->isServer() && static_cast<ClientGame *>(mGame)->getConnectionToServer() && static_cast<ClientGame *>(mGame)->getConnectionToServer()->getControlObject() == this)
       static_cast<ClientGame *>(mGame)->setActiveWeapon(weaponIndex);
 #endif
 }
@@ -1938,7 +1938,7 @@ void Ship::kill()
       Vector<SafePtr<Zone> > zoneList;   // Reuse our reusable container
 
       getZonesObjectIsIn(zoneList);
-   
+
       for(S32 i = 0; i < zoneList.size(); i++)
          EventManager::get()->fireEvent(EventManager::ShipLeftZoneEvent, this, static_cast<Zone *>(zoneList[i].getPointer()));
    }
@@ -1976,7 +1976,7 @@ void Ship::destroyPartiallyDeployedTeleporter()
 
 void Ship::setChangeTeamMask()
 {
-   setMaskBits(TeamMask);  
+   setMaskBits(TeamMask);
 }
 
 
@@ -2156,7 +2156,7 @@ void Ship::updateTrails()
 {
 #ifndef ZAP_DEDICATED
    for(U32 i = 0; i < TrailCount; i++)
-      mTrail[i].idle(mCurrentMove.time); 
+      mTrail[i].idle(mCurrentMove.time);
 #endif
 }
 
@@ -2191,9 +2191,9 @@ void Ship::renderLayer(S32 layerIndex)
 
    const Point vel(mCurrentMove.x, mCurrentMove.y);
 
-   // If the local player is cloaked, and is close enough to this ship, it will activate a sensor module, 
+   // If the local player is cloaked, and is close enough to this ship, it will activate a sensor module,
    // and we'll need to draw it.  Here, we determine if that has happened.
-   
+
    const bool isBusy              = clientInfo ? clientInfo->isBusy() : false;
    const bool engineeringTeleport = clientInfo ? clientInfo->isEngineeringTeleporter() : false;
    const bool showCoordinates     = clientGame->isShowingDebugShipCoords();
@@ -2214,11 +2214,11 @@ void Ship::renderLayer(S32 layerIndex)
 
    renderShip(layerIndex, getRenderPos(), getActualPos(), vel, angle, deltaAngle,
               mShapeType, color, healthBarColor, alpha, clientGame->getCurrentTime(), shipName, warpInScale,
-              isLocalShip, isBusy, isAuthenticated, showCoordinates, mHealth, mRadius, getTeam(), 
-              boostActive, shieldActive, repairActive, sensorActive, hasArmor, engineeringTeleport, killStreak, 
+              isLocalShip, isBusy, isAuthenticated, showCoordinates, mHealth, mRadius, getTeam(),
+              boostActive, shieldActive, repairActive, sensorActive, hasArmor, engineeringTeleport, killStreak,
               gamesPlayed);
 
-   if(mSpawnShield.getCurrent() != 0)  // Add spawn shield -- has a period of being on solidly, then blinks yellow 
+   if(mSpawnShield.getCurrent() != 0)  // Add spawn shield -- has a period of being on solidly, then blinks yellow
       renderSpawnShield(getRenderPos(), mSpawnShield.getCurrent(), clientGame->getCurrentTime());
 
    if(mLoadout.isModulePrimaryActive(ModuleRepair) && alpha != 0)     // Don't bother when completely transparent
@@ -2257,11 +2257,11 @@ bool Ship::doesShipActivateSensor(const Ship *ship)
 }
 
 
-// Set to true to allow players to see their cloaked teammates, 
+// Set to true to allow players to see their cloaked teammates,
 // false if cloaked teammates should be invisible
-static const bool SHOW_CLOAKED_TEAMMATES = true;    
+static const bool SHOW_CLOAKED_TEAMMATES = true;
 
-// Determine ship's visibility, 0 = invisible, 1 = normal visibility.  
+// Determine ship's visibility, 0 = invisible, 1 = normal visibility.
 // Value will be used as alpha when rendering ship.
 F32 Ship::getShipVisibility(const Ship *localShip)
 {
@@ -2321,7 +2321,7 @@ MountableItem *Ship::getMountedItem(S32 index) const
    if(index < 0 || index >= mMountedItems.size())
       return NULL;
 
-   return mMountedItems[index];    
+   return mMountedItems[index];
 }
 
 
@@ -2352,7 +2352,7 @@ bool Ship::isRobot()
 
 //// Lua methods
 
-//               Fn name           Param profiles  Profile count                           
+//               Fn name           Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, isAlive,         ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getPlayerInfo,   ARRAYDEF({{ END }}), 1 ) \
@@ -2387,11 +2387,11 @@ REGISTER_LUA_SUBCLASS(Ship, MoveObject);
 /**
  * @luafuncsheader Ship
  *
- * \warning There is no Lua constructor for Ships; they cannot be created from a script.  Sorry!  
+ * \warning There is no Lua constructor for Ships; they cannot be created from a script.  Sorry!
  * You might be able to do what you want by spawning a Robot.
  */
 
-  
+
 
 // Note: All of these methods will return nil if the ship in question has been deleted.
 
@@ -2483,12 +2483,12 @@ S32 Ship::lua_isModActive(lua_State *L) {
 
 /**
  * @luafunc num Ship::getEnergy()
- * 
+ *
  * @brief Gets the enegy of this ship.
- * 
+ *
  * @descr Energy is specified as a number between 0 and 1 where 0 means no
  * energy and 1 means full energy.
- * 
+ *
  * @return Returns a value between 0 and 1 indicating the energy of the item.
  */
 S32 Ship::lua_getEnergy(lua_State *L)
@@ -2500,13 +2500,13 @@ S32 Ship::lua_getEnergy(lua_State *L)
 
 /**
  * @luafunc Ship::setEnergy(num energy)
- * 
+ *
  * @brief Set the current energy of this ship.
- * 
+ *
  * @descr Energy is specified as a number between 0 and 1 where 0 means no
  * energy and 1 means full energy.  Values outside this range will be clamped to
  * the valid range.
- * 
+ *
  * @param energy A value between 0 and 1.
  */
 S32 Ship::lua_setEnergy(lua_State *L)
@@ -2532,12 +2532,12 @@ S32 Ship::lua_setEnergy(lua_State *L)
 
 /**
  * @luafunc num Ship::getHealth()
- * 
+ *
  * @brief Returns the health of this ship.
- * 
+ *
  * @descr Health is specified as a number between 0 and 1 where 0 is completely
  * dead and 1 is full health.
- * 
+ *
  * @return Returns a value between 0 and 1 indicating the health of the item.
  */
 S32 Ship::lua_getHealth(lua_State *L)
@@ -2549,15 +2549,15 @@ S32 Ship::lua_getHealth(lua_State *L)
 
 /**
  * @luafunc Ship::setHealth(num health)
- * 
+ *
  * @brief Set the current health of this ship.
- * 
+ *
  * @descr Health is specified as a number between 0 and 1 where 0 is completely
  * dead and 1 is full health. Values outside this range will be clamped to the
  * valid range.
- * 
+ *
  * @param health A value between 0 and 1.
- * 
+ *
  * @note A setting of 0 will kill the ship instantly.
  */
 S32 Ship::lua_setHealth(lua_State *L)
@@ -2586,9 +2586,9 @@ S32 Ship::lua_setHealth(lua_State *L)
 
 /**
  * @luafunc table Ship::getMountedItems()
- * 
+ *
  * @brief Get all Items carried by this Ship.
- * 
+ *
  * @return A table of all Items mounted on ship (e.g. ResourceItems and Flags)
  */
 S32 Ship::lua_getMountedItems(lua_State *L)
@@ -2642,14 +2642,14 @@ S32 Ship::lua_getMountedItems(lua_State *L)
 
 /**
  * @luafunc table Ship::getLoadout()
- * 
+ *
  * @brief Get the current loadout
- * 
+ *
  * @descr This method will return a table with the loadout in the following
  * order:
- * 
+ *
  * `Module 1, Module 2, Weapon 1, Weapon 2, Weapon 3`
- * 
+ *
  * @return A table with the current loadout, as described above.
  */
 S32 Ship::lua_getLoadout(lua_State *L)
@@ -2824,7 +2824,7 @@ S32 Ship::lua_setPos(lua_State *L)
    //    will never drain it. If the object is then deleted before ever being added to a game, the
    //    dirty list holds a dangling pointer, which corrupts the next idle cycle.
    if(getGame())
-   setMaskBits(PositionMask);  // Update clients
+      setMaskBits(PositionMask);  // Update clients
 
    return r;
 }
