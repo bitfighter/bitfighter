@@ -384,6 +384,7 @@ public:
 
       PacketNotify *nextPacket; ///< Pointer to the next packet sent on this connection
       PacketNotify();
+      virtual ~PacketNotify() {}  ///< Virtual destructor for proper cleanup of derived types
    };
 
 //----------------------------------------------------------------
