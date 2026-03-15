@@ -82,7 +82,7 @@ if(BITFIGHTER_COVERAGE)
 endif()
 
 
-set_target_properties(bitfighter_test PROPERTIES COMPILE_DEFINITIONS_DEBUG "TNL_DEBUG")
+target_compile_definitions(bitfighter_test PRIVATE $<$<CONFIG:Debug>:TNL_DEBUG>)
 
 BF_PLATFORM_SET_TARGET_PROPERTIES(bitfighter_test)
 
