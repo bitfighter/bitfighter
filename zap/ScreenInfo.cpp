@@ -12,8 +12,9 @@ namespace Zap {
 ScreenInfo::ScreenInfo()
 {
    MIN_SCALING_FACTOR = 0.15f;
-   resetGameCanvasSize();        // Initialize GameCanvasSize vars
-   setWindowSize(GAME_WIDTH, GAME_HEIGHT);      // In case these are used in a calculation before they're set... avoids spurious divide by 0
+   mFullscreenMode = FullscreenModeFit;      // Must be initialized before resetGameCanvasSize/setWindowSize calls calcPixelRatio()
+   resetGameCanvasSize();                    // Initialize GameCanvasSize vars
+   setWindowSize(GAME_WIDTH, GAME_HEIGHT);   // In case these are used in a calculation before they're set... avoids spurious divide by 0
    mPrevCanvasWidth  = GAME_WIDTH;
    mPrevCanvasHeight = GAME_HEIGHT;
    mWindowMousePos.set(-1,-1);   // -1 is used to indicate initial run
@@ -71,10 +72,10 @@ void ScreenInfo::debugPrint()
 
 F32 ScreenInfo::getMinScalingFactor() { return MIN_SCALING_FACTOR; }
 
-void ScreenInfo::setWindowSize(S32 width, S32 height) 
-{ 
-   mWindowWidth  = width; 
-   mWindowHeight = height; 
+void ScreenInfo::setWindowSize(S32 width, S32 height)
+{
+   mWindowWidth  = width;
+   mWindowHeight = height;
 
    calcPixelRatio();
 }
@@ -166,7 +167,7 @@ void ScreenInfo::setGameCanvasSize(S32 width, S32 height)
 void ScreenInfo::resetGameCanvasSize()
 {
    setGameCanvasSize(GAME_WIDTH, GAME_HEIGHT);
-}  
+}
 
 S32 ScreenInfo::getDefaultCanvasWidth()  const { return GAME_WIDTH;  }
 S32 ScreenInfo::getDefaultCanvasHeight() const { return GAME_HEIGHT; }
@@ -174,9 +175,9 @@ S32 ScreenInfo::getDefaultCanvasHeight() const { return GAME_HEIGHT; }
 // These only change from the default when in the editor
 S32 ScreenInfo::getGameCanvasWidth()  const { return mGameCanvasWidth;  }     // canvasWidth, usually 1066
 S32 ScreenInfo::getGameCanvasHeight() const { return mGameCanvasHeight; }     // canvasHeight, usually 600
-                                      
-S32 ScreenInfo::getPrevCanvasWidth()  const { return mPrevCanvasWidth;  }       
-S32 ScreenInfo::getPrevCanvasHeight() const { return mPrevCanvasHeight; }     
+
+S32 ScreenInfo::getPrevCanvasWidth()  const { return mPrevCanvasWidth;  }
+S32 ScreenInfo::getPrevCanvasHeight() const { return mPrevCanvasHeight; }
 
 
 // Dimensions of black bars in game-sized pixels
