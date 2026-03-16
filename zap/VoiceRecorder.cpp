@@ -6,7 +6,7 @@
 #include "VoiceRecorder.h"
 
 #include "ClientGame.h"
-#include "GameConnection.h"
+#include "gameConnection.h"
 #include "GameSettings.h"
 #include "GameType.h"
 #include "RenderUtils.h"
