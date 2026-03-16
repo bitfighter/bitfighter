@@ -207,7 +207,7 @@ TEST_F(ObjectTest, LuaSanity)
    geom.push_back(Point(1,0));
    geom.push_back(Point(0,1));
 
-   lua_State *L = lua_open();
+   lua_State *L = LuaScriptRunner::getL();  // Already initialized by GamePair (includes luavec.lua)
 
    // Create one of each type of registered NetClass
    for(U32 i = 0; i < classCount; i++)
@@ -240,7 +240,6 @@ TEST_F(ObjectTest, LuaSanity)
       else
          delete obj; // Delete original object so delete happens even if cast fails
    }
-   lua_close(L);
 }
 
 
@@ -314,6 +313,7 @@ TEST_F(ObjectTest, CreateObjectsFromLua)
    createVerifyDeleteItem(serverGame, levelgen, "LineItem", LineTypeNumber, 1, 0, geom, false);
 
    delete serverGame;
+   LuaScriptRunner::shutdown();  // Clean up static L so subsequent tests can call startLua()
 }
 
 
