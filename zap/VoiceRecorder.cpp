@@ -7,7 +7,7 @@
 
 #include "ClientGame.h"
 #include "gameConnection.h"
-#include "gameSettings.h"
+#include "GameSettings.h"
 #include "gameType.h"
 #include "RenderUtils.h"
 #include "Renderer.h"
