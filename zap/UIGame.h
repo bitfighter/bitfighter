@@ -23,6 +23,7 @@
 
 #include "Color.h"
 #include "Rect.h"
+#include "ChatMessageDisplayer.h"
 
 #include "tnlString.h"
 
@@ -31,63 +32,6 @@ namespace Zap
 {
 
 class GameUserInterface;
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-struct ColorString
-{
-   Color color;
-   string str;
-   U32 groupId;
-
-   void set(const string &s, const Color &c, U32 groupId = 0);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class ChatMessageDisplayer
-{
-private:
-   U32 mFirst, mLast;
-   bool mExpire;
-   bool mTopDown;    // Render from top down or bottom up?
-   S32 mWrapWidth;
-   S32 mFontSize, mFontGap;
-   bool mFull;       // Our message displayer is full up
-
-   U32 mNextGroupId;
-
-   void advanceFirst();
-   void advanceLast();
-
-   Timer mChatScrollTimer;
-   Timer mDisplayChatMessageTimer;
-
-   ClientGame *mGame;
-
-   // These are the messages and their colors
-   Vector<ColorString> mMessages;
-
-public:
-   // Constructor
-   ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool msgsExpire, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontGap);
-   ~ChatMessageDisplayer();
-
-   void reset();
-
-   void idle(U32 timeDelta);
-   void render(S32 ypos, bool helperVisible, bool anouncementActive, F32 alpha) const;   // Render incoming chat msgs
-
-   void onChatMessageReceived(const Color &msgColor, const string &msg);
-   string substitueVars(const string &str);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
 
 // For displaying levels as they're loaded in host mode
 class LevelListDisplayer
