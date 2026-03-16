@@ -13,7 +13,7 @@
 #include "ClientInfo.h"
 #include "DisplayManager.h"
 #include "FontManager.h"
-#include "GameType.h"
+#include "gameType.h"
 #include "Renderer.h"
 #include "RenderUtils.h"
 #include "SymbolShape.h"
