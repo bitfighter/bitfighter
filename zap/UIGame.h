@@ -23,7 +23,9 @@
 
 #include "Color.h"
 #include "Rect.h"
-#include "ChatMessageDisplayer.h"
+#include "ChatDisplay.h"
+#include "LevelListDisplayer.h"
+#include "VoiceRecorder.h"
 
 #include "tnlString.h"
 
@@ -34,32 +36,7 @@ namespace Zap
 class GameUserInterface;
 
 // For displaying levels as they're loaded in host mode
-class LevelListDisplayer
-{
-private:
-   Vector<string> mLevelLoadDisplayNames;    
-   S32 mLevelLoadDisplayTotal;
-   bool mLevelLoadDisplay;
-   Timer mLevelLoadDisplayFadeTimer;
-
-   void addProgressListItem(string item);
-
-public:
-   LevelListDisplayer();
-   void idle(U32 timeDelta);
-   void render() const;
-   void addLevelName(const string &levelName);     
-
-   void showLevelLoadDisplay(bool show, bool fade);
-   void clearLevelLoadDisplay();
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 class Move;
-class VoiceEncoder;
 
 using namespace Zap::UI;
 
@@ -171,42 +148,12 @@ private:
 
    F32 getBackgroundTextDimFactor(bool chatRelated) const;
 
-   struct VoiceRecorder
-   {
-      private:
-         ClientGame *mGame;
+   VoiceRecorder mVoiceRecorder;
 
-      public:
-         enum {
-            FirstVoiceAudioSampleTime = 250,
-            VoiceAudioSampleTime      = 100,
-            MaxDetectionThreshold     = 2048,
-         };
-
-      Timer mVoiceAudioTimer;
-      RefPtr<SoundEffect> mVoiceSfx;
-      RefPtr<VoiceEncoder> mVoiceEncoder;
-      bool mRecordingAudio;
-      U8 mWantToStopRecordingAudio;
-      S32 mMaxAudioSample;
-      S32 mMaxForGain;
-      ByteBufferPtr mUnusedAudio;
-
-      explicit VoiceRecorder(ClientGame *game);
-      ~VoiceRecorder();
-
-      void idle(U32 timeDelta);
-      void process();
-      void start();
-      void stop();
-      void stopNow();
-      void render() const;
-   } mVoiceRecorder;
-
-   ChatMessageDisplayer mServerMessageDisplayer;   // Messages from the server
-   ChatMessageDisplayer mChatMessageDisplayer1;    // Short form, message expire
-   ChatMessageDisplayer mChatMessageDisplayer2;    // Short form, messages do not expire
-   ChatMessageDisplayer mChatMessageDisplayer3;    // Long form, messages do not expire
+   ChatDisplay mServerMessageDisplayer;   // Messages from the server
+   ChatDisplay mChatMessageDisplayer1;    // Short form, message expire
+   ChatDisplay mChatMessageDisplayer2;    // Short form, messages do not expire
+   ChatDisplay mChatMessageDisplayer3;    // Long form, messages do not expire
 
    UI::FpsRenderer mFpsRenderer;
    UI::LevelInfoDisplayer mLevelInfoDisplayer;

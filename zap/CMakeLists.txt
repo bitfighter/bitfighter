@@ -118,7 +118,7 @@ set(CLIENT_SOURCES
 	AToBScroller.cpp
 	ChatCommands.cpp
 	ChatHelper.cpp
-	ChatMessageDisplayer.cpp
+	ChatDisplay.cpp
 	ConnectionStatsRenderer.cpp
 	ClientGame.cpp
 	Cursor.cpp
@@ -148,6 +148,7 @@ set(CLIENT_SOURCES
 	lineEditor.cpp
 	LoadoutIndicator.cpp
 	loadoutHelper.cpp
+	LevelListDisplayer.cpp
 	Matrix4.cpp
 	oglconsole.cpp
 	quickChatHelper.cpp
@@ -187,6 +188,7 @@ set(CLIENT_SOURCES
 	UITeamDefMenu.cpp
 	VideoSystem.cpp
 	voiceCodec.cpp
+	VoiceRecorder.cpp
 	${CMAKE_SOURCE_DIR}/fontstash/stb_truetype.c
 	${CMAKE_SOURCE_DIR}/fontstash/fontstash.cpp
 )
