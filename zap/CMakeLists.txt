@@ -156,6 +156,7 @@ set(CLIENT_SOURCES
 	RenderUtils.cpp
 	ScissorsManager.cpp
 	ScreenShooter.cpp
+	ScoreboardRenderer.cpp
 	Shader.cpp
 	ShipShape.cpp
 	SlideOutWidget.cpp

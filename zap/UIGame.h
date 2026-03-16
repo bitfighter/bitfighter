@@ -26,6 +26,7 @@
 #include "ChatDisplay.h"
 #include "LevelListDisplayer.h"
 #include "VoiceRecorder.h"
+#include "ScoreboardRenderer.h"
 
 #include "tnlString.h"
 
@@ -111,16 +112,6 @@ private:
    bool mHasShipPos;                // True if mShipPos has been explicitly set
 
 
-   // Some rendering routines
-   void renderScoreboard();
-   void renderTeamScoreboard(S32 index, S32 teams, bool isTeamGame, 
-                             S32 scoreboardTop, S32 sectionHeight, S32 teamHeaderHeight, S32 lineHeight) const;
-   void renderScoreboardLine(const Vector<ClientInfo *> &playerInfos, bool isTeamGame, S32 row,
-                             S32 x, S32 y, U32 lineHeight, S32 rightEdge, S32 *colWidths) const;
-   void renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y, const S32 *colIndexWidths, bool isTeamGame) const;
-   void renderTeamName(S32 index, S32 left, S32 right, S32 top) const;
-
-
    // Some key press/release handler helpers
    void onMissionKeyPressed();
    void onMissionKeyReleased();
@@ -160,6 +151,7 @@ private:
    UI::ConnectionStatsRenderer mConnectionStatsRenderer;
 
    HelpItemManager mHelpItemManager;
+   ScoreboardRenderer mScoreboardRenderer;
 
    Timer mAnnouncementTimer;
    string mAnnouncement;
@@ -272,7 +264,6 @@ public:
    void renderBasicInterfaceOverlay();
    void renderLevelInfo();
    bool shouldRenderLevelInfo() const;
-   static void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio);
 
    void idle(U32 timeDelta);
 
