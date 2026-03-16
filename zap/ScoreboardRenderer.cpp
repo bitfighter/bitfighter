@@ -139,7 +139,9 @@ enum ColIndex {
 
 ScoreboardRenderer::ScoreboardRenderer(GameUserInterface *ui) : mUI(ui)
 {
+   // Do nothing
 }
+
 
 void ScoreboardRenderer::render()
 {
@@ -201,6 +203,7 @@ void ScoreboardRenderer::render()
    FontManager::popFontContext();
 }
 
+
 void ScoreboardRenderer::renderTeamScoreboard(S32 index, S32 teams, bool isTeamGame,
                                               S32 scoreboardTop, S32 sectionHeight, S32 teamHeaderHeight, S32 lineHeight) const
 {
@@ -256,6 +259,7 @@ void ScoreboardRenderer::renderTeamScoreboard(S32 index, S32 teams, bool isTeamG
 #endif
 }
 
+
 void ScoreboardRenderer::renderTeamName(S32 index, S32 left, S32 right, S32 top) const
 {
    Renderer& r = Renderer::get();
@@ -304,6 +308,7 @@ void ScoreboardRenderer::renderTeamName(S32 index, S32 left, S32 right, S32 top)
    FontManager::popFontContext();
 }
 
+
 void ScoreboardRenderer::renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEdge, S32 y, const S32 *colIndexWidths, bool isTeamGame) const
 {
    Renderer::get().setColor(Colors::gray50);
@@ -315,6 +320,7 @@ void ScoreboardRenderer::renderScoreboardColumnHeaders(S32 leftEdge, S32 rightEd
    if(!isTeamGame)
       drawStringc(rightEdge - (ScoreOff + colIndexWidths[ScoreIndex] / 2), y, ColHeaderTextSize, "Score");
 }
+
 
 void ScoreboardRenderer::renderScoreboardLine(const Vector<ClientInfo *> &playerInfos, bool isTeamGame, S32 row,
                                               S32 x, S32 y, U32 lineHeight, S32 rightEdge, S32 *colWidths) const
@@ -342,6 +348,7 @@ void ScoreboardRenderer::renderScoreboardLine(const Vector<ClientInfo *> &player
 
    renderBadges(playerInfos[row], x + nameWidth + 10 + Gap, y + (lineHeight / 2), scaleRatio);
 }
+
 
 void ScoreboardRenderer::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio) const
 {
