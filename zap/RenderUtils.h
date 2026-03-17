@@ -78,11 +78,11 @@ void renderRightArrow(const Point &center, S32 size);
 // Draw string at given location (normal and formatted versions)
 // Note it is important that x be S32 because for longer strings, they are occasionally drawn starting off-screen
 // to the left, and better to have them partially appear than not appear at all, which will happen if they are U32
-void drawString(S32 x, S32 y, F32 size, const char *string);
 void drawString(F32 x, F32 y, F32 size, const char *string);
 void drawString(F32 x, F32 y, S32 size, const char *string);
 void drawString(S32 x, S32 y, S32 size, const char *string);
-void drawString(const Point &left, S32 size, const char *string);
+//void drawString(S32 x, S32 y, F32 size, const char *string);
+//void drawString(const Point &left, S32 size, const char *string);
 
 void drawStringf(S32 x, S32 y, S32 size, const char *format, ...);
 void drawStringf(F32 x, F32 y, F32 size, const char *format, ...);
@@ -93,8 +93,6 @@ S32 drawStringfc(F32 x, F32 y, F32 size, const char *format, ...);
 S32 drawStringc (F32 x, F32 y, F32 size, const char *string);
 S32 drawStringc (S32 x, S32 y, S32 size, const char *string);
 S32 drawStringc(const Point &cen, F32 size, const char *string);
-
-
 
 // Draw strings right-aligned at point
 S32 drawStringfr(F32 x, F32 y, F32 size, const char *format, ...);
@@ -112,7 +110,6 @@ S32 drawStringAndGetWidthf(F32 x, F32 y, S32 size, const char *format, ...);
 // we've created a new drawAngleString function without the bug, called xx_fixed.  Actual work now moved to doDrawAngleString,
 // which is marked private.  I think all usage of broken function has been removed, and _fixed can be renamed to something better.
 void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string);
-void drawAngleString_fixed(F32 x, F32 y, F32 size, F32 angle, const char *string);
 void drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...);
 
 // Center text between two points

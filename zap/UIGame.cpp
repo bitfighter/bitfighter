@@ -381,11 +381,6 @@ void GameUserInterface::resetInputModeChangeAlertDisplayTimer(U32 timeInMs)
 }
 
 
-#ifdef TNL_OS_WIN32
-   extern void checkMousePos(S32 maxdx, S32 maxdy);
-#endif
-
-
 void GameUserInterface::toggleShowingShipCoords() { mDebugOverlayRenderer.toggleShowingShipCoords(); }
 void GameUserInterface::toggleShowingObjectIds()  { mDebugOverlayRenderer.toggleShowingObjectIds();  }
 void GameUserInterface::toggleShowingMeshZones()  { mDebugOverlayRenderer.toggleShowingMeshZones();  }
