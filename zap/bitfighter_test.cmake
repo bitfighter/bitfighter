@@ -1,6 +1,6 @@
 #
 # Test runner executable
-# 
+#
 option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and create 'coverage' target" NO)
 
 set(TEST_SOURCES
@@ -9,6 +9,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameType.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameUserInterface.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGeomUtils.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestColor.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestHelpItemManager.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestHttpRequest.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestINISettings.cpp
@@ -77,7 +78,7 @@ if(BITFIGHTER_COVERAGE)
       COMMAND lcov --extract ${CMAKE_SOURCE_DIR}/build/coverage.info --output-file ${CMAKE_SOURCE_DIR}/build/coverage.info ${CMAKE_SOURCE_DIR}/zap/*
       COMMAND genhtml ${CMAKE_SOURCE_DIR}/build/coverage.info --output-directory ${CMAKE_SOURCE_DIR}/build/cov
       DEPENDS bitfighter_test alure ${LUA_LIB} tnl tomcrypt
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build 
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build
    )
 endif()
 
