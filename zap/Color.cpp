@@ -23,12 +23,19 @@ Color::Color(const Color &c)
 Color::Color(const Color *c)
 {
    // Protect against NULLs
-   if(!c)
-      return;
+   if(c)
+   {
+      r = c->r;
+      g = c->g;
+      b = c->b;
+   }
+   else
+   {
+      r = 0;
+      g = 0;
+      b = 0;
+   }
 
-   r = c->r;
-   g = c->g;
-   b = c->b;
 }
 
 Color::Color(float grayScale)
@@ -70,11 +77,11 @@ Color::Color(const string &hex)
 }
 
 
-void Color::read(const char **argv) 
-{ 
-   r = (F32) atof(argv[0]); 
-   g = (F32) atof(argv[1]); 
-   b = (F32) atof(argv[2]); 
+void Color::read(const char **argv)
+{
+   r = (F32) atof(argv[0]);
+   g = (F32) atof(argv[1]);
+   b = (F32) atof(argv[2]);
 
 }
 
@@ -106,29 +113,29 @@ void Color::set(const string &s)
 }
 
 
-string Color::toRGBString() const 
-{ 
-   return ftos(r, 3) + " " + ftos(g, 3) + " " + ftos(b, 3); 
+string Color::toRGBString() const
+{
+   return ftos(r, 3) + " " + ftos(g, 3) + " " + ftos(b, 3);
 }
 
 
-string Color::toHexString() const 
-{ 
-   char c[7]; 
+string Color::toHexString() const
+{
+   char c[7];
    dSprintf(c, sizeof(c), "%.6X", U32(r * 0xFF) << 24 >> 8 | U32(g * 0xFF) << 24 >> 16 | (U32(b * 0xFF) & 0xFF));
-   return c; 
+   return c;
 }
 
 
 U32 Color::toU32() const
-{ 
-   return U32(r * 0xFF) | U32(g * 0xFF)<<8 | U32(b * 0xFF)<<16; 
+{
+   return U32(r * 0xFF) | U32(g * 0xFF)<<8 | U32(b * 0xFF)<<16;
 }
 
 
-static const F32 Pr = .299;
-static const F32 Pg = .587;
-static const F32 Pb = .114;
+static const F32 Pr = .299f;
+static const F32 Pg = .587f;
+static const F32 Pb = .114f;
 
 //  public domain function by Darel Rex Finley, 2006
 //
@@ -147,24 +154,24 @@ void RGBtoHSP(F32  R, F32  G, F32  B,
    *P=sqrt(R*R*Pr+G*G*Pg+B*B*Pb);
 
    //  Calculate the Hue and Saturation.  (This part works
-   //  the same way as in the HSV/B and HSL systems???.)
+   //  the same way as in the HSV/B and HSL systems….)
    if      (R==G && R==B) {
-      *H=0.; *S=0.; return; }
+      *H=0.f; *S=0.f; return; }
    if      (R>=G && R>=B) {   //  R is largest
       if    (B>=G) {
-         *H=6./6.-1./6.*(B-G)/(R-G); *S=1.-G/R; }
+         *H=6.f/6.f-1.f/6.f*(B-G)/(R-G); *S=1.f-G/R; }
       else         {
-         *H=0./6.+1./6.*(G-B)/(R-B); *S=1.-B/R; }}
+         *H=0.f/6.f+1.f/6.f*(G-B)/(R-B); *S=1.f-B/R; }}
    else if (G>=R && G>=B) {   //  G is largest
       if    (R>=B) {
-         *H=2./6.-1./6.*(R-B)/(G-B); *S=1.-B/G; }
+         *H=2.f/6.f-1.f/6.f*(R-B)/(G-B); *S=1.f-B/G; }
       else         {
-         *H=2./6.+1./6.*(B-R)/(G-R); *S=1.-R/G; }}
+         *H=2.f/6.f+1.f/6.f*(B-R)/(G-R); *S=1.f-R/G; }}
    else                   {   //  B is largest
       if    (G>=R) {
-         *H=4./6.-1./6.*(G-R)/(B-R); *S=1.-R/B; }
+         *H=4.f/6.f-1.f/6.f*(G-R)/(B-R); *S=1.f-R/B; }
       else         {
-         *H=4./6.+1./6.*(R-G)/(B-G); *S=1.-G/B; }}
+         *H=4.f/6.f+1.f/6.f*(R-G)/(B-G); *S=1.f-G/B; }}
 }
 
 
@@ -180,46 +187,46 @@ void RGBtoHSP(F32  R, F32  G, F32  B,
 void HSPtoRGB(F32  H, F32  S, F32  P,
               F32 *R, F32 *G, F32 *B) {
 
-   F32  part, minOverMax=1.-S ;
+   F32  part, minOverMax=1.f-S ;
 
-   if (minOverMax>0.) {
-      if      ( H<1./6.) {   //  R>G>B
-         H= 6.*( H-0./6.); part=1.+H*(1./minOverMax-1.);
+   if (minOverMax>0.f) {
+      if      ( H<1.f/6.f) {   //  R>G>B
+         H= 6.f*( H-0.f/6.f); part=1.f+H*(1.f/minOverMax-1.f);
          *B=P/sqrt(Pr/minOverMax/minOverMax+Pg*part*part+Pb);
          *R=(*B)/minOverMax; *G=(*B)+H*((*R)-(*B)); }
-      else if ( H<2./6.) {   //  G>R>B
-         H= 6.*(-H+2./6.); part=1.+H*(1./minOverMax-1.);
+      else if ( H<2.f/6.f) {   //  G>R>B
+         H= 6.f*(-H+2.f/6.f); part=1.f+H*(1.f/minOverMax-1.f);
          *B=P/sqrt(Pg/minOverMax/minOverMax+Pr*part*part+Pb);
          *G=(*B)/minOverMax; *R=(*B)+H*((*G)-(*B)); }
-      else if ( H<3./6.) {   //  G>B>R
-         H= 6.*( H-2./6.); part=1.+H*(1./minOverMax-1.);
+      else if ( H<3.f/6.f) {   //  G>B>R
+         H= 6.f*( H-2.f/6.f); part=1.f+H*(1.f/minOverMax-1.f);
          *R=P/sqrt(Pg/minOverMax/minOverMax+Pb*part*part+Pr);
          *G=(*R)/minOverMax; *B=(*R)+H*((*G)-(*R)); }
-      else if ( H<4./6.) {   //  B>G>R
-         H= 6.*(-H+4./6.); part=1.+H*(1./minOverMax-1.);
+      else if ( H<4.f/6.f) {   //  B>G>R
+         H= 6.f*(-H+4.f/6.f); part=1.f+H*(1.f/minOverMax-1.f);
          *R=P/sqrt(Pb/minOverMax/minOverMax+Pg*part*part+Pr);
          *B=(*R)/minOverMax; *G=(*R)+H*((*B)-(*R)); }
-      else if ( H<5./6.) {   //  B>R>G
-         H= 6.*( H-4./6.); part=1.+H*(1./minOverMax-1.);
+      else if ( H<5.f/6.f) {   //  B>R>G
+         H= 6.f*( H-4.f/6.f); part=1.f+H*(1.f/minOverMax-1.f);
          *G=P/sqrt(Pb/minOverMax/minOverMax+Pr*part*part+Pg);
          *B=(*G)/minOverMax; *R=(*G)+H*((*B)-(*G)); }
       else               {   //  R>B>G
-         H= 6.*(-H+6./6.); part=1.+H*(1./minOverMax-1.);
+         H= 6.f*(-H+6.f/6.f); part=1.f+H*(1.f/minOverMax-1.f);
          *G=P/sqrt(Pr/minOverMax/minOverMax+Pb*part*part+Pg);
          *R=(*G)/minOverMax; *B=(*G)+H*((*R)-(*G)); }}
    else {
-      if      ( H<1./6.) {   //  R>G>B
-         H= 6.*( H-0./6.); *R=sqrt(P*P/(Pr+Pg*H*H)); *G=(*R)*H; *B=0.; }
-      else if ( H<2./6.) {   //  G>R>B
-         H= 6.*(-H+2./6.); *G=sqrt(P*P/(Pg+Pr*H*H)); *R=(*G)*H; *B=0.; }
-      else if ( H<3./6.) {   //  G>B>R
-         H= 6.*( H-2./6.); *G=sqrt(P*P/(Pg+Pb*H*H)); *B=(*G)*H; *R=0.; }
-      else if ( H<4./6.) {   //  B>G>R
-         H= 6.*(-H+4./6.); *B=sqrt(P*P/(Pb+Pg*H*H)); *G=(*B)*H; *R=0.; }
-      else if ( H<5./6.) {   //  B>R>G
-         H= 6.*( H-4./6.); *B=sqrt(P*P/(Pb+Pr*H*H)); *R=(*B)*H; *G=0.; }
+      if      ( H<1.f/6.f) {   //  R>G>B
+         H= 6.f*( H-0.f/6.f); *R=sqrt(P*P/(Pr+Pg*H*H)); *G=(*R)*H; *B=0.f; }
+      else if ( H<2.f/6.f) {   //  G>R>B
+         H= 6.f*(-H+2.f/6.f); *G=sqrt(P*P/(Pg+Pr*H*H)); *R=(*G)*H; *B=0.f; }
+      else if ( H<3.f/6.f) {   //  G>B>R
+         H= 6.f*( H-2.f/6.f); *G=sqrt(P*P/(Pg+Pb*H*H)); *B=(*G)*H; *R=0.f; }
+      else if ( H<4.f/6.f) {   //  B>G>R
+         H= 6.f*(-H+4.f/6.f); *B=sqrt(P*P/(Pb+Pg*H*H)); *G=(*B)*H; *R=0.f; }
+      else if ( H<5.f/6.f) {   //  B>R>G
+         H= 6.f*( H-4.f/6.f); *B=sqrt(P*P/(Pb+Pr*H*H)); *R=(*B)*H; *G=0.f; }
       else               {   //  R>B>G
-         H= 6.*(-H+6./6.); *R=sqrt(P*P/(Pr+Pb*H*H)); *B=(*R)*H; *G=0.; }}
+         H= 6.f*(-H+6.f/6.f); *R=sqrt(P*P/(Pr+Pb*H*H)); *B=(*R)*H; *G=0.f; }}
 }
 
 
@@ -228,7 +235,7 @@ void Color::ensureMinimumBrightness()
    F32 H, S, P;
    RGBtoHSP(r, g, b, &H, &S, &P);
 
-   F32 minBrightness = .20;
+   F32 minBrightness = .20f;
 
    if(P < minBrightness)
       HSPtoRGB(H, S, minBrightness, &r, &g, &b);
@@ -239,7 +246,7 @@ void Color::desaturate(F32 factor)
 {
    // Or..  grayscalify!
    // Scale of 0 to 1, where 1 is full grayscale
-   F32 luma = 0.3*r + 0.59*g + 0.11*b;  // Popular coefficients, unsure if 'best'
+   F32 luma = 0.3f*r + 0.59f*g + 0.11f*b;  // Popular coefficients, unsure if 'best'
    r = r + factor * (luma - r);
    g = g + factor * (luma - g);
    b = b + factor * (luma - b);
