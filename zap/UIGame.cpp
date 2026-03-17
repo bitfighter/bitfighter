@@ -17,9 +17,7 @@
 #include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "shipItems.h"           // For EngineerBuildObjects
 #include "gameObjectRender.h"
-#include "BotNavMeshZone.h"
 #include "projectile.h"          // For SpyBug
-#include "robot.h"
 
 #include "GaugeRenderer.h"
 
@@ -77,12 +75,6 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
    mHelperManager.initialize(game);
 
    mMessageDisplayMode = ShortTimeout;
-
-   // Some debugging settings
-   mDebugShowShipCoords   = false;
-   mDebugShowObjectIds    = false;
-   mShowDebugBots         = false;
-   mDebugShowMeshZones    = false;
 
    mShrinkDelayTimer.setPeriod(500);
 
@@ -394,13 +386,13 @@ void GameUserInterface::resetInputModeChangeAlertDisplayTimer(U32 timeInMs)
 #endif
 
 
-void GameUserInterface::toggleShowingShipCoords() { mDebugShowShipCoords = !mDebugShowShipCoords; }
-void GameUserInterface::toggleShowingObjectIds()  { mDebugShowObjectIds  = !mDebugShowObjectIds;  }
-void GameUserInterface::toggleShowingMeshZones()  { mDebugShowMeshZones  = !mDebugShowMeshZones;  }
-void GameUserInterface::toggleShowDebugBots()     { mShowDebugBots       = !mShowDebugBots;       }
+void GameUserInterface::toggleShowingShipCoords() { mDebugOverlayRenderer.toggleShowingShipCoords(); }
+void GameUserInterface::toggleShowingObjectIds()  { mDebugOverlayRenderer.toggleShowingObjectIds();  }
+void GameUserInterface::toggleShowingMeshZones()  { mDebugOverlayRenderer.toggleShowingMeshZones();  }
+void GameUserInterface::toggleShowDebugBots()     { mDebugOverlayRenderer.toggleShowDebugBots();     }
 
 
-bool GameUserInterface::isShowingDebugShipCoords() const { return mDebugShowShipCoords; }
+bool GameUserInterface::isShowingDebugShipCoords() const { return mDebugOverlayRenderer.isShowingDebugShipCoords(); }
 
 
 // Some FxManager passthrough functions
@@ -1878,7 +1870,7 @@ void GameUserInterface::renderBasicInterfaceOverlay()
    mTimeLeftRenderer.render(gameType, showScore, true);
 
    renderTalkingClients();
-   renderDebugStatus();
+   mDebugOverlayRenderer.renderDebugStatus();
 }
 
 
@@ -1932,75 +1924,6 @@ void GameUserInterface::renderTalkingClients() const
          drawString(10, y, TEXT_HEIGHT, client->getName().getString());
          y += TEXT_HEIGHT + 5;
       }
-   }
-}
-
-
-void GameUserInterface::renderDebugStatus() const
-{
-   // When bots are frozen, render large pause icon in lower left
-   if(EventManager::get()->isPaused())
-   {
-      Renderer::get().setColor(Colors::white);
-
-      const S32 PAUSE_HEIGHT = 30;
-      const S32 PAUSE_WIDTH = 10;
-      const S32 PAUSE_GAP = 6;
-      const S32 BOX_INSET = 5;
-
-      const S32 TEXT_SIZE = 15;
-      const char *TEXT = "STEP: Alt-], Ctrl-]";
-
-      S32 x, y;
-
-      // Draw box
-      x = DisplayManager::getScreenInfo()->getGameCanvasWidth() - horizMargin - 2 * (PAUSE_WIDTH + PAUSE_GAP) - BOX_INSET - getStringWidth(TEXT_SIZE, TEXT);
-      y = vertMargin + PAUSE_HEIGHT;
-
-      // Draw Pause symbol
-      drawFilledRect(x, y, x + PAUSE_WIDTH, y - PAUSE_HEIGHT, Colors::black, Colors::white);
-
-      x += PAUSE_WIDTH + PAUSE_GAP;
-      drawFilledRect(x, y, x + PAUSE_WIDTH, y - PAUSE_HEIGHT, Colors::black, Colors::white);
-
-      x += PAUSE_WIDTH + PAUSE_GAP + BOX_INSET;
-
-      y -= TEXT_SIZE + (PAUSE_HEIGHT - TEXT_SIZE) / 2 + 1;
-      drawString(x, y, TEXT_SIZE, TEXT);
-   }
-}
-
-
-// Show server-side object ids... using illegal reachover to obtain them!
-void GameUserInterface::renderObjectIds() const
-{
-   TNLAssert(getGame()->isTestServer(), "Will crash on non server!");
-   if(getGame()->isTestServer())
-      return;
-
-   const Vector<DatabaseObject *> *objects = Game::getServerGameObjectDatabase()->findObjects_fast();
-
-   for(S32 i = 0; i < objects->size(); i++)
-   {
-      BfObject *obj = static_cast<BfObject *>(objects->get(i));
-      static const S32 height = 13;
-
-      // ForceFields don't have a geometry.  When I gave them one, they just rendered the ID at the
-      // exact same location as their owning projector - so we'll just skip them
-      if(obj->getObjectTypeNumber() == ForceFieldTypeNumber)
-         continue;
-
-      S32 id = obj->getUserAssignedId();
-      S32 width = getStringWidthf(height, "[%d]", id);
-
-      F32 x = obj->getPos().x;
-      F32 y = obj->getPos().y;
-
-      Renderer::get().setColor(Colors::black);
-      drawFilledRect(x - 1, y - 1, x + width + 1, y + height + 1);
-
-      Renderer::get().setColor(Colors::gray70);
-      drawStringf(x, y, height, "[%d]", id);
    }
 }
 
@@ -2082,39 +2005,6 @@ HelpItemManager *GameUserInterface::getHelpItemManager()
 static Point screenSize, visSize, visExt;
 static Vector<DatabaseObject *> rawRenderObjects;
 static Vector<BfObject *> renderObjects;
-static Vector<BotNavMeshZone *> renderZones;
-
-
-static void fillRenderZones()
-{
-   renderZones.clear();
-   for(S32 i = 0; i < rawRenderObjects.size(); i++)
-      renderZones.push_back(static_cast<BotNavMeshZone *>(rawRenderObjects[i]));
-}
-
-
-// Fills renderZones for drawing botNavMeshZones
-static void populateRenderZones(ClientGame *game, const Rect *extentRect = NULL)
-{
-   rawRenderObjects.clear();
-
-   if(extentRect)
-      game->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects, *extentRect);
-   else
-      game->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects);
-
-   fillRenderZones();
-}
-
-
-static void renderBotPaths(ClientGame *game, Vector<BfObject *> &renderObjects)
-{
-   ServerGame *serverGame = game->getServerGame();
-
-   if(serverGame)
-      for(S32 i = 0; i < serverGame->getBotCount(); i++)
-         renderObjects.push_back(serverGame->getBot(i));
-}
 
 
 static bool renderSortCompare(BfObject * const &a, BfObject* const &b)
@@ -2175,11 +2065,11 @@ void GameUserInterface::renderGameNormal()
    // Normally a big no-no, we'll access the server's bot zones directly if we are running locally
    // so we can visualize them without bogging the game down with the normal process of transmitting
    // zones from server to client.  The result is that we can only see zones on our local server.
-   if(mDebugShowMeshZones)
-      populateRenderZones(getGame(), &extentRect);
+   if(mDebugOverlayRenderer.renderingMeshZones())
+      mDebugOverlayRenderer.populateRenderZones(getGame(), &extentRect);
 
-   if(mShowDebugBots)
-      renderBotPaths(getGame(), renderObjects);
+   if(mDebugOverlayRenderer.renderingBotPaths())
+      mDebugOverlayRenderer.appendBotPaths(getGame(), renderObjects);
 
    renderObjects.sort(renderSortCompare);
 
@@ -2188,9 +2078,8 @@ void GameUserInterface::renderGameNormal()
    {
       Barrier::renderEdges(i, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
 
-      if(mDebugShowMeshZones)
-         for(S32 j = 0; j < renderZones.size(); j++)
-            renderZones[j]->renderLayer(i);
+      if(mDebugOverlayRenderer.renderingMeshZones())
+         mDebugOverlayRenderer.renderMeshZones(i);
 
       for(S32 j = 0; j < renderObjects.size(); j++)
          renderObjects[j]->renderLayer(i);
@@ -2209,8 +2098,8 @@ void GameUserInterface::renderGameNormal()
 
    // Again, we'll be accessing the server's data directly so we can see server-side item ids directly on the client.  Again,
    // the result is that we can only see zones on our local server.
-   if(mDebugShowObjectIds)
-      renderObjectIds();
+   if(mDebugOverlayRenderer.renderingObjectIds())
+      mDebugOverlayRenderer.renderObjectIds(getGame());
 
    r.popMatrix();
 
@@ -2354,12 +2243,12 @@ void GameUserInterface::renderGameCommander()
       renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
 
    // Add extra bots if we're showing them
-   if(mShowDebugBots)
-      renderBotPaths(getGame(), renderObjects);
+   if(mDebugOverlayRenderer.renderingBotPaths())
+      mDebugOverlayRenderer.appendBotPaths(getGame(), renderObjects);
 
    // If we're drawing bot zones, get them now (put them in the renderZones vector)
-   if(mDebugShowMeshZones)
-      populateRenderZones(getGame());
+   if(mDebugOverlayRenderer.renderingMeshZones())
+      mDebugOverlayRenderer.populateRenderZones(getGame());
 
    if(ship)
    {
@@ -2411,9 +2300,8 @@ void GameUserInterface::renderGameCommander()
    // Now render the objects themselves
    renderObjects.sort(renderSortCompare);
 
-   if(mDebugShowMeshZones)
-      for(S32 i = 0; i < renderZones.size(); i++)
-         renderZones[i]->renderLayer(0);
+   if(mDebugOverlayRenderer.renderingMeshZones())
+      mDebugOverlayRenderer.renderMeshZones(0);
 
    // First pass
    for(S32 i = 0; i < renderObjects.size(); i++)
@@ -2422,9 +2310,8 @@ void GameUserInterface::renderGameCommander()
    // Second pass
    Barrier::renderEdges(1, *getGame()->getSettings()->getWallOutlineColor());    // Render wall edges
 
-   if(mDebugShowMeshZones)
-      for(S32 i = 0; i < renderZones.size(); i++)
-         renderZones[i]->renderLayer(1);
+   if(mDebugOverlayRenderer.renderingMeshZones())
+      mDebugOverlayRenderer.renderMeshZones(1);
 
    for(S32 i = 0; i < renderObjects.size(); i++)
    {

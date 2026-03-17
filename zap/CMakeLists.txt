@@ -122,6 +122,7 @@ set(CLIENT_SOURCES
 	ConnectionStatsRenderer.cpp
 	ClientGame.cpp
 	Cursor.cpp
+	DebugOverlayRenderer.cpp
 	EditorAttributeMenuItemBuilder.cpp
 	EditorPlugin.cpp
 	EditorTeam.cpp

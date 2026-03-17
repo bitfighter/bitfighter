@@ -27,6 +27,7 @@
 #include "LevelListDisplayer.h"
 #include "VoiceRecorder.h"
 #include "ScoreboardRenderer.h"
+#include "DebugOverlayRenderer.h"
 
 #include "tnlString.h"
 
@@ -102,11 +103,6 @@ private:
    bool mInScoreboardMode;
    ShutdownMode mShutdownMode;
 
-   bool mDebugShowShipCoords;       // Show coords on ship?
-   bool mDebugShowObjectIds;        // Show object ids?
-   bool mDebugShowMeshZones;        // Show bot nav mesh zones?
-   bool mShowDebugBots;
-
    Timer mProgressBarFadeTimer;     // For fading out progress bar after level is loaded
    bool mShowProgressBar;
    bool mHasShipPos;                // True if mShipPos has been explicitly set
@@ -131,7 +127,6 @@ private:
    // Retnder helpers
    void renderInputModeChangeAlert() const;
    void renderTalkingClients() const;        // Render things related to voice chat
-   void renderDebugStatus() const;           // Render things related to debugging
    void renderChatMsgs() const;
    void renderAnnouncement(S32 pos) const;
    void renderInlineHelpItemOutlines(S32 playerTeam, F32 alpha) const;
@@ -152,6 +147,7 @@ private:
 
    HelpItemManager mHelpItemManager;
    ScoreboardRenderer mScoreboardRenderer;
+   DebugOverlayRenderer mDebugOverlayRenderer;
 
    Timer mAnnouncementTimer;
    string mAnnouncement;
@@ -222,7 +218,6 @@ public:
    void renderLostConnectionMessage() const; 
    void renderSuspendedMessage() const;
    void renderLevelUpMessage(S32 newLevel) const;
-   void renderObjectIds() const;          // Render server-side object ids on client
    void renderLevelListDisplayer() const;
    void renderMsgBox(const string *message, S32 msgLines) const;
 
