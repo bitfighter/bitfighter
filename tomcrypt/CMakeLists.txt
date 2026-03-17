@@ -314,7 +314,16 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/encauth/ocb/ocb_ntz.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/encauth/ocb/ocb_encrypt.c
 )
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/headers)
+target_include_directories(tomcrypt
+	SYSTEM PUBLIC
+	${CMAKE_CURRENT_SOURCE_DIR}/src/headers
+)
+
+# Keep warning policy strict for project code, but suppress third-party warnings in libtomcrypt.
+target_compile_options(tomcrypt PRIVATE
+	$<$<C_COMPILER_ID:MSVC>:/W0 /WX- /wd28251 /analyze->
+	$<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>>:-w>
+)
 
 # ranlib on OSX is really 'libtool'.  To mimic the correct behavior of ranlib fortun
 # static libraries we need to use 'ranlib -c'
