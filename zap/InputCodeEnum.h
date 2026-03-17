@@ -13,13 +13,14 @@ using namespace TNL;
 namespace Zap
 {
 
-// These are used in Bitfighter, which wants these in the Zap namespace, 
+// These are used in Bitfighter, which wants these in the Zap namespace,
 // but also in oglconsole, which is a C program and thus does not
-// understand namespace.  This is a sort of hack until we get that issue 
+// understand namespace.  This is a sort of hack until we get that issue
 // figured out.
 
 // These are many (all?) the keys that SDL can detect.
-enum InputCode {
+// Force values to be U32 to avoid casting and sign warnings elsewhere.
+enum InputCode : U32 {
    // Beginning of keyboard keys
    // KEY_0 is set to one in order to prevent warnings about comparing unsigned
    // InputCode variables to 0 (autological comparison: unsigned int will
@@ -91,7 +92,7 @@ enum InputCode {
    KEY_KEYPAD5, KEY_KEYPAD6, KEY_KEYPAD7, KEY_KEYPAD8, KEY_KEYPAD9,
    KEY_KEYPAD_PERIOD, KEY_KEYPAD_DIVIDE, KEY_KEYPAD_MULTIPLY,
    KEY_KEYPAD_MINUS, KEY_KEYPAD_PLUS, KEY_KEYPAD_ENTER, KEY_KEYPAD_EQUALS,
-   
+
    // End of keyboard keys
 
    // Keep these together -- InputCodeManager::isMouseAction() depends on order and togetherness
@@ -127,7 +128,7 @@ enum InputCode {
    KEY_ALT_1, KEY_ALT_2, KEY_ALT_3,
    KEY_ALT_4, KEY_ALT_5, KEY_ALT_6,
    KEY_ALT_9,
-   
+
    KEY_COUNT,
    KEY_UNKNOWN, KEY_NONE,
    BUTTON_UNKNOWN
