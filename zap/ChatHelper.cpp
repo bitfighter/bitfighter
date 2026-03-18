@@ -115,6 +115,7 @@ static const S32 CHAT_COMPOSE_FONT_SIZE = 12;
 
 static void makeCommandCandidateList();      // Forward delcaration
 
+
 ChatHelper::ChatHelper()
 {
    mLineEditor = LineEditor(200, "", 50);
@@ -126,6 +127,7 @@ ChatHelper::ChatHelper()
 
    mHistory = Vector<string>();
    mHistoryIndex = 0;
+   mHasHistory = FALSE;
 }
 
 // Destructor
