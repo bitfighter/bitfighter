@@ -14,7 +14,7 @@
 
 #include "RenderUtils.h"
 
-namespace Zap { 
+namespace Zap {
 
 namespace UI {
 

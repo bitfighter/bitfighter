@@ -1286,17 +1286,16 @@ void BfObject::writeCompressedVelocity(const Point &vel, U32 max, BitStream *str
 
 void BfObject::readCompressedVelocity(Point &vel, U32 max, BitStream *stream)
 {
-   if(stream->readFlag())
+   if(stream->readFlag())        // First flag just specifies 0 velocity
    {
       vel.x = vel.y = 0;
-      return;
    }
-   else if(stream->readFlag())
+   else if(stream->readFlag())   // Second flag means x/y written as floats
    {
       stream->read(&vel.x);
       stream->read(&vel.y);
    }
-   else
+   else                          // Otherwise we sent polar coordinates
    {
       F32 theta = stream->readSignedFloat(10) * Float2Pi;
       F32 magnitude = (F32)stream->readRangedU32(0, max);
