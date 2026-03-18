@@ -426,141 +426,154 @@ void ChatHelper::downArrowPressed()
 // Handle auto-completion
 bool ChatHelper::tabPressed()
 {
-   if (this->isCmdChat()) // It's a command!  Complete!  Complete!
+   if(this->isCmdChat()) // It's a command!  Complete!  Complete!
+      return this->completeChatCmd();
+   else
+      return this->completeUsername();
+}
+
+
+bool ChatHelper::completeChatCmd()
+{
+   // First, parse line into words
+   Vector<string> words = parseString(mLineEditor.getString());
+
+   bool needLeadingSlash = false;
+
+   // Handle leading slash when command is entered from ordinary chat prompt
+   if(words.size() > 0 && words[0][0] == '/')
    {
-      // First, parse line into words
-      Vector<string> words = parseString(mLineEditor.getString());
-
-      bool needLeadingSlash = false;
-
-      // Handle leading slash when command is entered from ordinary chat prompt
-      if (words.size() > 0 && words[0][0] == '/')
-      {
-         // Special case: User has entered process by starting with global chat, and has typed "/" then <tab>
-         if (mLineEditor.getString() == "/")
-            words.clear(); // Clear -- it's as if we're at a fresh "/" prompt where the user has typed nothing
-         else
-            words[0].erase(0, 1); // Strip char -- remove leading "/" so it's as if were at a regular "/" prompt
-
-         needLeadingSlash = true; // We'll need to add the stripped "/" back in later
-      }
-
-      S32 arg;           // Which word we're looking at
-      string partial;    // The partially typed word we're trying to match against
-      const char *first; // First arg we entered (will match partial if we're still entering the first one)
-
-      // Check for trailing space --> http://www.suodenjoki.dk/us/archive/2010/basic-string-back.htm
-      if (words.size() > 0 && *mLineEditor.getString().rbegin() != ' ')
-      {
-         arg = words.size() - 1; // No trailing space --> current arg is the last word we've been typing
-         partial = words[arg];   // We'll be matching against what we've typed so far
-         first = words[0].c_str();
-      }
-      else if (words.size() > 0) // We've entered a word, pressed space indicating word is complete,
-      {                          // but have not started typing the next word.  We'll let user cycle through every
-         arg = words.size();     // possible value for next argument.
-         partial = "";
-         first = words[0].c_str();
-      }
-      else // If the editor is empty, or if final character is a space, then we need to set these params differently
-      {
-         arg = words.size(); // Trailing space --> current arg is the next word we've not yet started typing
-         partial = "";
-         first = ""; // We'll be matching against an empty list since we've typed nothing so far
-      }
-
-      // Figure out which command we've got.  Can return NULL if command isn't found or
-      // we have a partial command
-      CommandInfo *commandInfo = getCommandInfo(first);
-
-      // Special case for multiple words as the last arg of a command
-      bool multiWordLastArg = false;
-      if (commandInfo != NULL && arg > commandInfo->cmdArgCount)
-      {
-         bool lastArgIsEmpty = (partial == "");
-
-         // If our last arg is empty, end at the previous one
-         S32 end = lastArgIsEmpty ? arg - 1 : arg;
-
-         string newPartial = words[commandInfo->cmdArgCount];
-         for (S32 i = commandInfo->cmdArgCount + 1; i <= end; i++)
-            newPartial = newPartial + " " + words[i];
-
-         // Set the arg to what it should be with the multiple words
-         arg = lastArgIsEmpty ? commandInfo->cmdArgCount + 1 : commandInfo->cmdArgCount;
-
-         // Set our new search string
-         partial = newPartial;
-
-         multiWordLastArg = true;
-      }
-
-      // Grab our candidates for tab-completion
-      Vector<string> *candidates = getCandidateList(getGame(), commandInfo, arg); // Could return NULL
-
-      // If the command string has quotes in it, use the last space up to the first quote
-      const string *entry = mLineEditor.getStringPtr();
-
-      std::size_t lastChar = string::npos;
-      if (entry->find_first_of("\"") != string::npos)
-         lastChar = entry->find_first_of("\"");
-
-      string appender = " ";
-
-      std::size_t pos = entry->find_last_of(' ', lastChar);
-
-      // Completion position is different if we've used multiple words in our last argument
-      if (multiWordLastArg)
-         pos = (entry->size() - 1) - partial.size();
-
-      if (pos == string::npos) // String does not contain a space, requires special handling
-      {
-         pos = 0;
-         if (words.size() <= 1 && needLeadingSlash) // ugh!  More special cases!
-            appender = "/";
-         else
-            appender = "";
-      }
-
-      mLineEditor.completePartial(candidates, partial, pos, appender);
-   }
-   else // Username chat completion
-   {
-      // First, parse line into words
-      Vector<string> words = parseString(mLineEditor.getString());
-
-      string partial; // The partially typed word we're trying to match against
-
-      // Check for trailing space --> http://www.suodenjoki.dk/us/archive/2010/basic-string-back.htm
-      if (words.size() > 0 && *mLineEditor.getString().rbegin() != ' ')
-         partial = words[words.size() - 1]; // We'll be matching against what we've typed so far
-
+      // Special case: User has entered process by starting with global chat, and has typed "/" then <tab>
+      if(mLineEditor.getString() == "/")
+         words.clear(); // Clear -- it's as if we're at a fresh "/" prompt where the user has typed nothing
       else
-      {
-         partial = "";
-         return false; // Remove this line if you want to enable username completion for strings that end with a space
-                       // or for empty chat lines
-                       // for example: "hello " (cycling through all usernames)
-      }
+         words[0].erase(0, 1); // Strip char -- remove leading "/" so it's as if were at a regular "/" prompt
 
-      const string *entry = mLineEditor.getStringPtr();
-      static Vector<string> names;
-
-      makePlayerNameList(getGame(), names);
-
-      // If the command string has quotes in it, use the last space up to the first quote
-      std::size_t lastChar = string::npos;
-      if (entry->find_first_of("\"") != string::npos)
-         lastChar = entry->find_first_of("\"");
-
-      string appender = "";
-
-      std::size_t pos = entry->find_last_of(' ', lastChar) + 1;
-      if (pos == string::npos)
-         pos = 0;
-
-      mLineEditor.completePartial(&names, partial, pos, appender);
+      needLeadingSlash = true; // We'll need to add the stripped "/" back in later
    }
+
+   S32 arg;           // Which word we're looking at
+   string partial;    // The partially typed word we're trying to match against
+   const char *first; // First arg we entered (will match partial if we're still entering the first one)
+
+   // Check for trailing space --> http://www.suodenjoki.dk/us/archive/2010/basic-string-back.htm
+   if(words.size() > 0 && *mLineEditor.getString().rbegin() != ' ')
+   {
+      arg = words.size() - 1; // No trailing space --> current arg is the last word we've been typing
+      partial = words[arg];   // We'll be matching against what we've typed so far
+      first = words[0].c_str();
+   }
+   else if(words.size() > 0) // We've entered a word, pressed space indicating word is complete,
+   {                          // but have not started typing the next word.  We'll let user cycle through every
+      arg = words.size();     // possible value for next argument.
+      partial = "";
+      first = words[0].c_str();
+   }
+   else // If the editor is empty, or if final character is a space, then we need to set these params differently
+   {
+      arg = words.size(); // Trailing space --> current arg is the next word we've not yet started typing
+      partial = "";
+      first = ""; // We'll be matching against an empty list since we've typed nothing so far
+   }
+
+   // Figure out which command we've got.  Can return NULL if command isn't found or
+   // we have a partial command
+   CommandInfo *commandInfo = getCommandInfo(first);
+
+   // Special case for multiple words as the last arg of a command
+   bool multiWordLastArg = false;
+   if(commandInfo != NULL && arg > commandInfo->cmdArgCount)
+   {
+      bool lastArgIsEmpty = (partial == "");
+
+      // If our last arg is empty, end at the previous one
+      S32 end = lastArgIsEmpty ? arg - 1 : arg;
+
+      string newPartial = words[commandInfo->cmdArgCount];
+      for (S32 i = commandInfo->cmdArgCount + 1; i <= end; i++)
+         newPartial = newPartial + " " + words[i];
+
+      // Set the arg to what it should be with the multiple words
+      arg = lastArgIsEmpty ? commandInfo->cmdArgCount + 1 : commandInfo->cmdArgCount;
+
+      // Set our new search string
+      partial = newPartial;
+
+      multiWordLastArg = true;
+      return true;
+   }
+
+
+   // Grab our candidates for tab-completion
+   Vector<string> *candidates = getCandidateList(getGame(), commandInfo, arg); // Could return NULL
+
+   // If the command string has quotes in it, use the last space up to the first quote
+   const string *entry = mLineEditor.getStringPtr();
+
+   std::size_t lastChar = string::npos;
+   if(entry->find_first_of("\"") != string::npos)
+      lastChar = entry->find_first_of("\"");
+
+   string appender = " ";
+
+   std::size_t pos = entry->find_last_of(' ', lastChar);
+
+   // Completion position is different if we've used multiple words in our last argument
+   if(multiWordLastArg)
+      pos = (entry->size() - 1) - partial.size();
+
+   if(pos == string::npos) // String does not contain a space, requires special handling
+   {
+      pos = 0;
+      if(words.size() <= 1 && needLeadingSlash) // ugh!  More special cases!
+         appender = "/";
+      else
+         appender = "";
+   }
+
+   mLineEditor.completePartial(candidates, partial, pos, appender);
+   return true;
+}
+
+
+bool ChatHelper::completeUsername()
+{
+    // First, parse line into words
+    Vector<string> words = parseString(mLineEditor.getString());
+
+   string partial; // The partially typed word we're trying to match against
+
+   // Check for trailing space --> http://www.suodenjoki.dk/us/archive/2010/basic-string-back.htm
+   if(words.size() > 0 && *mLineEditor.getString().rbegin() != ' ')
+      partial = words[words.size() - 1]; // We'll be matching against what we've typed so far
+
+   else
+   {
+      partial = "";
+      return false; // Remove this line if you want to enable username completion for strings that end with a space
+                    // or for empty chat lines
+                    // for example: "hello " (cycling through all usernames)
+   }
+
+   const string *entry = mLineEditor.getStringPtr();
+   static Vector<string> names;
+
+   makePlayerNameList(getGame(), names);
+
+   // If the command string has quotes in it, use the last space up to the first quote
+   std::size_t lastChar = string::npos;
+   if(entry->find_first_of("\"") != string::npos)
+      lastChar = entry->find_first_of("\"");
+
+   string appender = "";
+
+   std::size_t pos = entry->find_last_of(' ', lastChar) + 1;
+   if(pos == string::npos)
+      pos = 0;
+
+   mLineEditor.completePartial(&names, partial, pos, appender);
+
+   return true;
 }
 
 

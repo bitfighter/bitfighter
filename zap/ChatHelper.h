@@ -42,6 +42,8 @@ private:
    void upArrowPressed();        // User hit up
    void downArrowPressed();      // User hit down
    bool tabPressed();            // User hit tab (handles auto-completion)
+   bool completeChatCmd();
+   bool completeUsername();
 
    CommandInfo *getCommandInfo(const char *command);
 
