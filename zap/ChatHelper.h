@@ -20,7 +20,7 @@ class ChatHelper : public HelperMenu
    typedef HelperMenu Parent;
 
 public:
-    enum ChatType {               // Types of in-game chat messages:
+    enum ChatType {              // Types of in-game chat messages:
       GlobalChat,                // Goes to everyone in game
       TeamChat,                  // Goes to teammates only
       CmdChat,                   // Entering a command
@@ -41,6 +41,7 @@ private:
 
    void upArrowPressed();        // User hit up
    void downArrowPressed();      // User hit down
+   bool tabPressed();            // User hit tab (handles auto-completion)
 
    CommandInfo *getCommandInfo(const char *command);
 
@@ -60,11 +61,11 @@ public:
 
    bool isCmdChat();          // Returns true if we're composing a command in the chat bar, false otherwise
 
-   void render();                
-   void onActivated();  
+   void render();
+   void onActivated();
    void activateHelp(UIManager *uiManager);
 
-   bool processInputCode(InputCode inputCode);   
+   bool processInputCode(InputCode inputCode);
    void onTextInput(char ascii);
 
    const char *getChatMessage() const;
@@ -75,7 +76,7 @@ public:
    static void runCommand(ClientGame *game, const char *input);
 };
 
-};
+};    // namespace
 
 #endif
 
