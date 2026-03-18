@@ -27,7 +27,7 @@
 
 namespace Zap
 {
-   CommandInfo chatCmds[] = {   
+   CommandInfo chatCmds[] = {
    //  cmdName          cmdCallback                 cmdArgInfo cmdArgCount   helpCategory helpGroup lines,  helpArgString            helpTextString
 
    { "dlmap",    &ChatCommands::downloadMapHandler, { STR },       1,      ADV_COMMANDS,     0,     1,    {"<level>"},            "Download the level from the online level database" },
@@ -40,7 +40,7 @@ namespace Zap
    { "pm",       &ChatCommands::pmHandler,          { NAME, STR }, 2,      ADV_COMMANDS,     1,     1,    {"<name>","<message>"}, "Send private message to player" },
    { "mute",     &ChatCommands::muteHandler,        { NAME },      1,      ADV_COMMANDS,     1,     1,    {"<name>"},             "Toggle hiding chat messages from <name>" },
    { "vmute",    &ChatCommands::voiceMuteHandler,   { NAME },      1,      ADV_COMMANDS,     1,     1,    {"<name>"},             "Toggle muting voice chat from <name>" },
-                 
+
    { "mvol",     &ChatCommands::mVolHandler,      { xINT },      1,      SOUND_COMMANDS,   2,     1,    {"<0-10>"},             "Set music volume"      },
    { "svol",     &ChatCommands::sVolHandler,      { xINT },      1,      SOUND_COMMANDS,   2,     1,    {"<0-10>"},             "Set SFX volume"        },
    { "vvol",     &ChatCommands::vVolHandler,      { xINT },      1,      SOUND_COMMANDS,   2,     1,    {"<0-10>"},             "Set voice chat volume" },
@@ -104,7 +104,7 @@ namespace Zap
 
    // The following are only available in debug builds!
 #ifdef TNL_DEBUG
-   { "showobjectoutlines", &ChatCommands::showObjectOutlinesHandler, {  },     0, DEVELOPER_COMMANDS, 1, 1, { },                 "Show HelpItem object outlines on all objects" },    
+   { "showobjectoutlines", &ChatCommands::showObjectOutlinesHandler, {  },     0, DEVELOPER_COMMANDS, 1, 1, { },                 "Show HelpItem object outlines on all objects" },
    { "showhelpitem",       &ChatCommands::showHelpItemHandler,       { xINT }, 0, DEVELOPER_COMMANDS, 1, 1, {"<help item id>" }, "Show specified help item" },
 #endif
 };
@@ -215,9 +215,9 @@ void ChatHelper::render()
    static ScissorsManager scissorsManager;
 
    // Only need to set scissors if we're scrolling.  When not scrolling, we control the display by only showing
-   // the specified number of lines; there are normally no partial lines that need vertical clipping as 
+   // the specified number of lines; there are normally no partial lines that need vertical clipping as
    // there are when we're scrolling.  Note also that we only clip vertically, and can ignore the horizontal.
-   scissorsManager.enable(isAnimating, getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"), 
+   scissorsManager.enable(isAnimating, getGame()->getSettings()->getIniSettings()->mSettings.getVal<DisplayMode>("WindowMode"),
                           0.0f, F32(realYPos - 3), F32(DisplayManager::getScreenInfo()->getGameCanvasWidth()), F32(BOX_HEIGHT));
 
    // Render text entry box like thingy
@@ -261,7 +261,7 @@ void ChatHelper::render()
             if(!stricmp(cmd, chatCmds[i].cmdName.c_str()))
             {
                // My thinking here is that if the number of quotes is odd, the last argument is not complete, even if
-               // it ends in a space.  There may be an edge case that voids this argument, but our use is simple enough 
+               // it ends in a space.  There may be an edge case that voids this argument, but our use is simple enough
                // that this should work well.  If a number is even, num % 2 will be 0.
                S32 numberOfQuotes = (S32) count(line.begin(), line.end(), '"');
                if(chatCmds[i].cmdArgCount >= words.size() && line[line.size() - 1] == ' ' && numberOfQuotes % 2 == 0)
@@ -349,7 +349,7 @@ static Vector<string> *getCandidateList(Game *game, CommandInfo *commandInfo, S3
          static Vector<string> nameCandidateList;     // Reusable container
 
          if(argType == NAME)           // ==> Player name completion
-         {  
+         {
             makePlayerNameList(game, nameCandidateList);    // Creates a list of all player names
             return &nameCandidateList;
          }
@@ -368,7 +368,7 @@ static Vector<string> *getCandidateList(Game *game, CommandInfo *commandInfo, S3
          // else no arg completion for you!
       }
    }
-   
+
    return NULL;                        // ==> No completion options
 }
 
@@ -409,23 +409,23 @@ bool ChatHelper::processInputCode(InputCode inputCode)
 
             needLeadingSlash = true;   // We'll need to add the stripped "/" back in later
          }
-               
+
          S32 arg;                 // Which word we're looking at
          string partial;          // The partially typed word we're trying to match against
          const char *first;       // First arg we entered (will match partial if we're still entering the first one)
-         
+
          // Check for trailing space --> http://www.suodenjoki.dk/us/archive/2010/basic-string-back.htm
-         if(words.size() > 0 && *mLineEditor.getString().rbegin() != ' ')   
+         if(words.size() > 0 && *mLineEditor.getString().rbegin() != ' ')
          {
             arg = words.size() - 1;          // No trailing space --> current arg is the last word we've been typing
             partial = words[arg];            // We'll be matching against what we've typed so far
-            first = words[0].c_str();      
+            first = words[0].c_str();
          }
-         else if(words.size() > 0)           // We've entered a word, pressed space indicating word is complete, 
+         else if(words.size() > 0)           // We've entered a word, pressed space indicating word is complete,
          {                                   // but have not started typing the next word.  We'll let user cycle through every
             arg = words.size();              // possible value for next argument.
             partial = "";
-            first = words[0].c_str(); 
+            first = words[0].c_str();
          }
          else     // If the editor is empty, or if final character is a space, then we need to set these params differently
          {
@@ -576,7 +576,7 @@ static void makeCommandCandidateList()
 void ChatHelper::onTextInput(char ascii)
 {
    // Pass the key on to the console for processing
-   if(gConsole.onKeyDown(ascii))
+   if(gConsole.isOk() && gConsole.onKeyDown(ascii))
       return;
 
    // Make sure we have a chat box open
@@ -602,7 +602,7 @@ void ChatHelper::issueChat()
       else               // It's a chat message
       {
          getGame()->sendChat(mCurrentChatType == GlobalChat, mLineEditor.c_str());   // Broadcast message
-         
+
          // Player has demonstrated ability to send messages
          getGame()->getUIManager()->removeInlineHelpItem(HowToChatItem, true);
       }
@@ -610,7 +610,7 @@ void ChatHelper::issueChat()
       // Manage command history  --> should we only store /commands in here?  Currently saves every issued chat
       string trimmed = trim(mLineEditor.getString());
       if(mHistory.size() > 1 && trimmed == mHistory[mHistory.size() - 2])     // Don't double up on strings in the history
-         mHistory[mHistory.size() - 1] = "";    
+         mHistory[mHistory.size() - 1] = "";
       else if(trimmed != "")                                                  // Don't store empty or whitespace strings
          mHistory[mHistory.size() - 1] = trimmed;
       mHistoryIndex = mHistory.size();
@@ -636,7 +636,7 @@ CommandInfo *ChatHelper::getCommandInfo(const char *command)
 // Static method
 void ChatHelper::runCommand(ClientGame *game, const char *input)
 {
-   Vector<string> words = parseStringAndStripLeadingSlash(input); 
+   Vector<string> words = parseStringAndStripLeadingSlash(input);
 
    if(words.size() == 0)            // Just in case, must have 1 or more words to check the first word as command
       return;
@@ -653,7 +653,7 @@ void ChatHelper::runCommand(ClientGame *game, const char *input)
       if(lcase(words[0]) == chatCmds[i].cmdName)
       {
          (*(chatCmds[i].cmdCallback))(game, words);
-         return; 
+         return;
       }
 
    serverCommandHandler(game, words);     // Command unknown to client, will pass it on to server
