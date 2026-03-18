@@ -127,7 +127,7 @@ ChatHelper::ChatHelper()
 
    mHistory = Vector<string>();
    mHistoryIndex = 0;
-   mHasHistory = FALSE;
+   mHasHistory = false;
 }
 
 // Destructor
