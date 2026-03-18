@@ -662,7 +662,7 @@ bool EngineeredItem::isEnabled()
 
 void EngineeredItem::damageObject(DamageInfo *di)
 {
-   // Don't do self damage.  This is more complicated than it should probably be..
+   // Don't do self damage.  This is more complicated than it should probably be...
    BfObject *damagingObject = di->damagingObject;
 
    U8 damagingObjectType = UnknownTypeNumber;
@@ -676,7 +676,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
       // We have a shooter that is another engineered object (turret)
       if(shooter != NULL && isEngineeredType(shooter->getObjectTypeNumber()))
       {
-         EngineeredItem* engShooter = static_cast<EngineeredItem*>(shooter);
+         EngineeredItem* engShooter = static_cast<EngineeredItem *>(shooter);
 
          // Don't do self damage or damage to a team-turret
          if(engShooter == this || engShooter->getTeam() == this->getTeam())
@@ -734,7 +734,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
       {
          if(damagingObject)
          {
-            setTeam(damagingObject->getTeam());   // ...join the team of their repairer
+            setTeam(damagingObject->getTeam());       // ...join the team of their repairer
             setMaskBits(TeamMask);                    // Broadcast new team status
          }
       }
@@ -891,7 +891,8 @@ bool EngineeredItem::checkDeploymentPosition(const Vector<Point> &thisBounds, co
 
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      if( polygonsIntersect(thisBounds, *static_cast<BfObject *>(foundObjects[i])->getCollisionPoly()) )     // Do they intersect?
+      const Vector<Point> *foundObjectBounds = static_cast<BfObject *>(foundObjects[i])->getCollisionPoly();
+      if(polygonsIntersect(thisBounds, *foundObjectBounds))     // Do they intersect?
          return false;     // Bad location
    }
    return true;            // Good location
@@ -2245,7 +2246,7 @@ void Turret::idle(IdleCallPath path)
       F32 S = (F32)weaponInfo.projVelocity;
       Point d = potential->getPos() - aimPos;
 
-// This could possibly be combined with Robot's getFiringSolution, as it's essentially the same thing
+      // This could possibly be combined with Robot's getFiringSolution, as it's essentially the same thing
       F32 t;      // t is set in next statement
       if(!findLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), weaponInfo.projLiveTime * 0.001f, t))
          continue;
