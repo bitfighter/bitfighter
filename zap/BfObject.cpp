@@ -31,215 +31,7 @@ namespace Zap
 {
 using namespace LuaArgs;
 
-// Derived Object Type conditional methods
-bool isEngineeredType(U8 x)
-{
-   return
-         x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber;
-}
-
-bool isShipType(U8 x)
-{
-   return
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber;
-}
-
-bool isProjectileType(U8 x)
-{
-   return
-         x == MineTypeNumber  || x == SpyBugTypeNumber      || x == BulletTypeNumber ||
-         x == BurstTypeNumber || x == SeekerTypeNumber;
-}
-
-bool isGrenadeType(U8 x)
-{
-   return
-         x == MineTypeNumber || x == SpyBugTypeNumber || x == BurstTypeNumber;
-}
-
-// Ship::findRepairTargets uses this and expects everything to be a sub-class of Item (except for teleporter)
-// This is used to determine if bursts should explode on impact or not.
-bool isWithHealthType(U8 x)      
-{
-   return
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber           ||
-         x == TurretTypeNumber     || x == ForceFieldProjectorTypeNumber ||
-         x == CoreTypeNumber       || x == TeleporterTypeNumber;
-}
-
-bool isForceFieldDeactivatingType(U8 x)
-{
-   return
-         x == MineTypeNumber         || x == SpyBugTypeNumber         ||
-         x == FlagTypeNumber         || x == SoccerBallItemTypeNumber ||
-         x == ResourceItemTypeNumber || x == TestItemTypeNumber       ||
-         x == EnergyItemTypeNumber   || x == RepairItemTypeNumber     ||
-         x == PlayerShipTypeNumber   || x == RobotShipTypeNumber      || 
-         x == AsteroidTypeNumber;
-}
-
-bool isRadiusDamageAffectableType(U8 x)
-{
-   return
-         x == PlayerShipTypeNumber   || x == RobotShipTypeNumber           || x == BurstTypeNumber      ||
-         x == BulletTypeNumber       || x == MineTypeNumber                || x == SpyBugTypeNumber     ||
-         x == ResourceItemTypeNumber || x == TestItemTypeNumber            || x == AsteroidTypeNumber   ||
-         x == TurretTypeNumber       || x == ForceFieldProjectorTypeNumber || x == CoreTypeNumber       ||
-         x == FlagTypeNumber         || x == SoccerBallItemTypeNumber      || x == TeleporterTypeNumber ||
-         x == SeekerTypeNumber;
-}
-
-
-bool isMotionTriggerType(U8 x)
-{
-   return
-         x == PlayerShipTypeNumber   || x == RobotShipTypeNumber || x == SoccerBallItemTypeNumber ||
-         x == ResourceItemTypeNumber || x == TestItemTypeNumber  || 
-         x == AsteroidTypeNumber     || x == MineTypeNumber;
-}
-
-
-bool isTurretTargetType(U8 x)
-{
-   return
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber       || x == ResourceItemTypeNumber ||
-         x == TestItemTypeNumber   || x == SoccerBallItemTypeNumber;
-}
-
-
-bool isCollideableType(U8 x)
-{
-   return
-         x == BarrierTypeNumber || x == PolyWallTypeNumber   ||
-         x == TurretTypeNumber  || x == ForceFieldTypeNumber ||
-         x == CoreTypeNumber    || x == ForceFieldProjectorTypeNumber;
-}
-
-
-bool isForceFieldCollideableType(U8 x)
-{
-   return
-         x == BarrierTypeNumber || x == PolyWallTypeNumber ||
-         x == TurretTypeNumber  || x == ForceFieldProjectorTypeNumber;
-}
-
-
-bool isWallType(U8 x)
-{
-   return
-         x == BarrierTypeNumber  || x == PolyWallTypeNumber ||
-         x == WallItemTypeNumber || x == WallEdgeTypeNumber || x == WallSegmentTypeNumber;
-}
-
-
-bool isWallOrForcefieldType(U8 x)
-{
-   return
-      isWallType(x) || x == ForceFieldTypeNumber;
-}
-
-
-bool isWallItemType(U8 x)
-{
-   return x == WallItemTypeNumber;
-}
-
-
-bool isLineItemType(U8 x)
-{
-   return
-         x == BarrierTypeNumber || x == WallItemTypeNumber || x == LineTypeNumber;
-}
-
-
-bool isWeaponCollideableType(U8 x)
-{
-   return
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber      || x == BurstTypeNumber               ||
-         x == SpyBugTypeNumber     || x == MineTypeNumber           || x == BulletTypeNumber              ||
-         x == FlagTypeNumber       || x == SoccerBallItemTypeNumber || x == ForceFieldProjectorTypeNumber ||
-         x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == ResourceItemTypeNumber        ||
-         x == TurretTypeNumber     || x == CoreTypeNumber           || x == BarrierTypeNumber             ||
-         x == PolyWallTypeNumber   || x == ForceFieldTypeNumber     || x == TeleporterTypeNumber          ||
-         x == SeekerTypeNumber;
-}
-
-bool isAsteroidCollideableType(U8 x)
-{
-   return
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber           ||
-         x == TestItemTypeNumber   || x == ResourceItemTypeNumber        ||
-         x == TurretTypeNumber     || x == ForceFieldProjectorTypeNumber ||
-         x == BarrierTypeNumber    || x == PolyWallTypeNumber            ||
-         x == ForceFieldTypeNumber || x == CoreTypeNumber;
-}
-
-bool isFlagCollideableType(U8 x)
-{
-   return
-         x == BarrierTypeNumber   || x == ForceFieldProjectorTypeNumber || x == ForceFieldTypeNumber || x == PolyWallTypeNumber;
-}
-
-bool isFlagOrShipCollideableType(U8 x)
-{
-   return
-         x == BarrierTypeNumber    || x == PolyWallTypeNumber    || x == ForceFieldTypeNumber ||
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber;
-}
-
-bool isVisibleOnCmdrsMapType(U8 x)
-{
-   return
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber      || x == CoreTypeNumber                ||
-         x == BarrierTypeNumber    || x == PolyWallTypeNumber       || x == TextItemTypeNumber            ||
-         x == TurretTypeNumber     || x == ForceFieldTypeNumber     || x == ForceFieldProjectorTypeNumber ||
-         x == FlagTypeNumber       || x == SoccerBallItemTypeNumber || x == LineTypeNumber                ||
-         x == GoalZoneTypeNumber   || x == NexusTypeNumber          || x == LoadoutZoneTypeNumber         || 
-         x == SpeedZoneTypeNumber  || x == TeleporterTypeNumber     || x == SlipZoneTypeNumber            ||
-         x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == ResourceItemTypeNumber        ||
-         x == EnergyItemTypeNumber || x == RepairItemTypeNumber; 
-}
-
-bool isVisibleOnCmdrsMapWithSensorType(U8 x)     // Weapons visible on commander's map for sensor
-{
-   return
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber      || x == ResourceItemTypeNumber        ||
-         x == BarrierTypeNumber    || x == PolyWallTypeNumber       || x == LoadoutZoneTypeNumber         || 
-         x == TurretTypeNumber     || x == ForceFieldTypeNumber     || x == ForceFieldProjectorTypeNumber ||
-         x == FlagTypeNumber       || x == SoccerBallItemTypeNumber || x == SlipZoneTypeNumber            ||
-         x == GoalZoneTypeNumber   || x == NexusTypeNumber          || x == CoreTypeNumber                ||
-         x == SpeedZoneTypeNumber  || x == TeleporterTypeNumber     || x == BurstTypeNumber               ||
-         x == LineTypeNumber       || x == TextItemTypeNumber       || x == RepairItemTypeNumber          ||
-         x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == EnergyItemTypeNumber          ||
-         x == BulletTypeNumber     || x == MineTypeNumber           || x == SeekerTypeNumber;
-}
-
-
-bool isZoneType(U8 x)      // Zones a ship could be in
-{
-   return 
-         x == LoadoutZoneTypeNumber || x == GoalZoneTypeNumber   || x == NexusTypeNumber  ||
-         x == ZoneTypeNumber        || x == SlipZoneTypeNumber;
-}
-
-
-bool isSeekerTarget(U8 x)
-{
-   return isShipType(x);
-}
-
-
-bool isMountableItemType(U8 x)
-{
-   return
-         x == ResourceItemTypeNumber || x == FlagTypeNumber;
-}
-
-
-bool isAnyObjectType(U8 x)
-{
-   return true;
-}
+// Derived object type checks are implemented in BfObjectTypeChecks.cpp.
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -261,8 +53,8 @@ DamageInfo::DamageInfo()
 // Constructor
 EditorObject::EditorObject()
 {
-   mLitUp = false; 
-   mSelected = false; 
+   mLitUp = false;
+   mSelected = false;
    mVertexLitUp = 0;
 }
 
@@ -349,18 +141,18 @@ void EditorObject::setSelected(bool selected)
 }
 
 
-bool EditorObject::isLitUp() 
-{ 
-   return mLitUp; 
+bool EditorObject::isLitUp()
+{
+   return mLitUp;
 }
 
 
-void EditorObject::setLitUp(bool litUp) 
-{ 
-   mLitUp = litUp; 
+void EditorObject::setLitUp(bool litUp)
+{
+   mLitUp = litUp;
 
-   if(!litUp) 
-      setVertexLitUp(NONE); 
+   if(!litUp)
+      setVertexLitUp(NONE);
 }
 
 
@@ -376,7 +168,7 @@ void EditorObject::setVertexLitUp(S32 vertexIndex)
 }
 
 
-// Size of object in editor 
+// Size of object in editor
 F32 EditorObject::getEditorRadius(F32 currentScale)
 {
    return 10 * currentScale;   // 10 pixels is base size
@@ -389,7 +181,7 @@ F32 EditorObject::getEditorRadius(F32 currentScale)
 // BfObject - the declarations are in GameObject.h
 
 
-static S32 getNextDefaultId() 
+static S32 getNextDefaultId()
 {
    static S32 nextId = 0;
    nextId--;
@@ -419,13 +211,13 @@ BfObject::BfObject()
 // Destructor
 BfObject::~BfObject()
 {
-   // Restore type number so database can fully remove item.  In some cases, we change an item's type number to DeletedTypeNumber to 
+   // Restore type number so database can fully remove item.  In some cases, we change an item's type number to DeletedTypeNumber to
    // prevent it from showing up in a database search.  This has the unfortunate side effect of also preventing it from being properly
    // removed from the database.  So, before we run removeFromDatabase, we'll check to see if the type number has been altered, and, if
    // so, we'll restore the original.  This is not a great solution to the problem, but works for now.
    if(mObjectTypeNumber == DeletedTypeNumber)
       mObjectTypeNumber = mOriginalTypeNumber;
-   
+
    removeFromDatabase(false);
    mGame = NULL;
    LUAW_DESTRUCTOR_CLEANUP;
@@ -497,7 +289,7 @@ void BfObject::setGeom(lua_State *L, S32 stackIndex)
 {
    Vector<Point> points = getPointsOrXYs(L, stackIndex);
 
-   // TODO: Q. Shouldn't we verify that the number of points here is appropriate for this object?   
+   // TODO: Q. Shouldn't we verify that the number of points here is appropriate for this object?
    //       A. Yes!!
 
    S32 pointSize = points.size();
@@ -548,13 +340,13 @@ void BfObject::setGeom(lua_State *L, S32 stackIndex)
 
 
 const Color *BfObject::getColor() const
-{ 
+{
    return mGame->getObjTeamColor(this);
 }
 
 
 const Color &BfObject::getHealthBarColor() const
-{ 
+{
    return mGame->getGameType()->getTeamHealthBarColor(this);
 }
 
@@ -569,14 +361,14 @@ Game *BfObject::getGame() const
 bool BfObject::hasTeam()            { return true; }
 bool BfObject::canBeNeutral()       { return true; }
 bool BfObject::canBeHostile()       { return true; }
-bool BfObject::shouldRender() const { return true; }     
+bool BfObject::shouldRender() const { return true; }
 
 
 bool BfObject::canAddToEditor() { return true; }
 
 
 bool BfObject::addToGame(Game *game, GridDatabase *database)
-{   
+{
    TNLAssert(mGame == NULL, "Error: Object already in a game in BfObject::addToGame.");
    TNLAssert(game != NULL,  "Error: thefGame is NULL in BfObject::addToGame.");
 
@@ -613,10 +405,10 @@ bool BfObject::processArguments(S32 argc, const char**argv, Game *game)
 }
 
 
-void BfObject::onPointsChanged()                        
-{   
+void BfObject::onPointsChanged()
+{
    GeomObject::onPointsChanged();
-   updateExtentInDatabase(); 
+   updateExtentInDatabase();
    setMaskBits(GeomMask);
 }
 
@@ -670,7 +462,7 @@ void BfObject::renderAndLabelHighlightedVertices(F32 currentScale)
    for(S32 i = 0; i < getVertCount(); i++)
       if(vertSelected(i) || isVertexLitUp(i) || ((isSelected() || isLitUp())  && getVertCount() == 1))
       {
-         const Color *color = (vertSelected(i) || (isSelected() && getGeomType() == geomPoint)) ? 
+         const Color *color = (vertSelected(i) || (isSelected() && getGeomType() == geomPoint)) ?
                                 &Colors::EDITOR_SELECT_COLOR : &Colors::EDITOR_HIGHLIGHT_COLOR;
 
          Point center = getVert(i) + getEditorSelectionOffset(currentScale);
@@ -724,7 +516,7 @@ string BfObject::appendId(const string &objName) const
 // You will have to delete this copy when you are done with it!
 BfObject *BfObject::copy()
 {
-   BfObject *newObject = clone();     
+   BfObject *newObject = clone();
    newObject->initializeEditor();         // Marks all vertices as unselected
 
    return newObject;
@@ -759,13 +551,13 @@ void BfObject::setSnapped(bool snapped)
 
 
 // Called when item dragged from dock to editor -- overridden by several objects
-void BfObject::newObjectFromDock(F32 gridSize) 
-{  
+void BfObject::newObjectFromDock(F32 gridSize)
+{
    assignNewSerialNumber();
 
    updateExtentInDatabase();
    mGame = NULL;
-}   
+}
 
 
 Point BfObject::getEditorSelectionOffset(F32 scale)
@@ -1047,7 +839,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
       if(isShipType(foundObject->getObjectTypeNumber()))
          shipsHit++;
 
-      foundObject->damageObject(&localInfo); 
+      foundObject->damageObject(&localInfo);
    }
 
    return shipsHit;
@@ -1355,7 +1147,7 @@ void BfObject::writeThisTeam(BitStream *stream)
 
 /////
 // Lua interface
-//               Fn name         Param profiles     Profile count                           
+//               Fn name         Param profiles     Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getObjType,     ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, getId,          ARRAYDEF({{            END }               }), 1 ) \
@@ -1385,86 +1177,86 @@ REGISTER_LUA_CLASS(BfObject);
 
 /**
  * @luafunc ObjType BfObject::getObjType()
- * 
+ *
  * @brief Gets an object's \ref ObjTypeEnum.
- * 
+ *
  * @code
  *   obj = TestItem.new()
  *   print(obj:getObjType() == ObjType.TestItem)   -- prints 'true'
  * @endcode
  *
  * See \ref ObjTypeEnum for a list of possible return values.
- * 
+ *
  * @return The object's ObjType.
  */
-S32 BfObject::lua_getObjType(lua_State *L)  
-{ 
-   return returnInt(L, mObjectTypeNumber); 
+S32 BfObject::lua_getObjType(lua_State *L)
+{
+   return returnInt(L, mObjectTypeNumber);
 }
 
 
 /**
  * @luafunc int BfObject::getId()
- * 
+ *
  * @brief Gets an object's user assigned id.
- * 
+ *
  * @descr Users can assign an id to elements in the editor with the ! or # keys.
  * Use this function to obtain this id. If the user has not assigned an object
  * an id, getId() will return a negative id that will remain consistent throught
  * the game.
- * 
+ *
  * @return The object's id.
  */
-S32 BfObject::lua_getId(lua_State *L)  
-{ 
-   return returnInt(L, mUserAssignedId); 
+S32 BfObject::lua_getId(lua_State *L)
+{
+   return returnInt(L, mUserAssignedId);
 }
 
 
 /**
  * @luafunc BfObject::setId(int id)
- * 
+ *
  * @brief Sets an object's user assigned id.
- * 
+ *
  * @descr Users can assign an id to elements in the editor with the ! or # keys.
  * Use this function to set this id from Lua. When called from an editor plugin,
  * the value passed will be displayed in the editor when the player presses ! or
  * #.
  * */
-S32 BfObject::lua_setId(lua_State *L)  
-{ 
+S32 BfObject::lua_setId(lua_State *L)
+{
    checkArgList(L, functionArgs, "BfObject", "setId");
    mUserAssignedId = S32(getInt(L, 1));
-   return 0;            
+   return 0;
 }
 
 
 /**
  * @luafunc point BfObject::getPos()
- * 
+ *
  * @brief Gets an object's position.
- * 
+ *
  * @descr For objects that are not points (such as a LoadoutZone), will return
  * the object's centroid.
- * 
+ *
  * @return A Point representing the object's position.
  */
 S32 BfObject::lua_getPos(lua_State *L)
-{ 
-   return returnPoint(L, getPos()); 
+{
+   return returnPoint(L, getPos());
 }
 
 
 /**
  * @luafunc int BfObject::getTeamIndex()
- * 
+ *
  * @brief Gets the index of the object's team.
- * 
+ *
  * @descr Many BfObjects (such as \link TestItem TestItems\endlink) are never
  * part of any particular team. For these objects, this method will return `Team.Neutral`.
- * 
+ *
  * @note Remember that in Lua, indices start with 1!
- * 
+ *
  * @return %Team index of the object.
  */
 S32 BfObject::lua_getTeamIndex(lua_State *L)
@@ -1475,37 +1267,37 @@ S32 BfObject::lua_getTeamIndex(lua_State *L)
 
 /**
  * @luafunc BfObject::setTeam(int teamIndex)
- * 
+ *
  * @brief Assigns the object to a team.
- * 
+ *
  * @param teamIndex Index of the team the object should be assigned to.
  * (first team index is 1; there is no team 0)
- * 
- * @descr Instead of a team index, you can use the special team enums 
+ *
+ * @descr Instead of a team index, you can use the special team enums
  * `Team.Neutral` and `Team.Hostile`.
- * 
- * Limitations: <ul><li>Will have no effect on items that are inherently teamless 
+ *
+ * Limitations: <ul><li>Will have no effect on items that are inherently teamless
  * (such as a NexusZone).</li><li>Neither \link Ship Ships\endlink nor \link Robot Robots\endlink can be assigned to
  * `Team.Neutral` or `Team.Hostile`.</li></ul>
- * 
+ *
  */
-S32 BfObject::lua_setTeam(lua_State *L) 
-{ 
+S32 BfObject::lua_setTeam(lua_State *L)
+{
    checkArgList(L, functionArgs, "BfObject", "setTeam");
    setTeam(L, 1);
-   return 0;            
-}  
+   return 0;
+}
 
 
 /**
  * @luafunc BfObject::setPos(point pos)
- * 
+ *
  * @brief Set the object's position.
- * 
+ *
  * @descr To set the full geometry of a more complex object, see the setGeom()
  * method.
- * 
- * @param pos The new position of the object. 
+ *
+ * @param pos The new position of the object.
  */
 S32 BfObject::lua_setPos(lua_State *L)
 {
@@ -1522,9 +1314,9 @@ S32 BfObject::lua_setPos(lua_State *L)
 
 /**
  * @luafunc BfObject::removeFromGame()
- * 
+ *
  * @brief Removes the object from the current game or editor session.
- * 
+ *
  * @descr May not be implemented for all objects.
  */
 S32 BfObject::lua_removeFromGame(lua_State *L)
@@ -1536,11 +1328,11 @@ S32 BfObject::lua_removeFromGame(lua_State *L)
 
 /**
  * @luafunc BfObject::setGeom(Geom geometry)
- * 
- * @brief Sets an object's geometry. 
- * 
+ *
+ * @brief Sets an object's geometry.
+ *
  * @param geometry The object's new geometry.
- * 
+ *
  * @descr Note that not all objects support changing geometry if the object has
  * already been added to a game.
  */
@@ -1558,9 +1350,9 @@ S32 BfObject::lua_setGeom(lua_State *L)
 
 /**
  * @luafunc Geom BfObject::getGeom()
- * 
- * @brief Returns an object's geometry. 
- * 
+ *
+ * @brief Returns an object's geometry.
+ *
  * @return A geometry as described on the Geom page
  */
 S32 BfObject::lua_getGeom(lua_State *L)
@@ -1574,15 +1366,15 @@ S32 BfObject::lua_getGeom(lua_State *L)
 }
 
 
-// Temporarily disable these docs -- note there is a special handler in the luadoc.py that 
+// Temporarily disable these docs -- note there is a special handler in the luadoc.py that
 // suppresses this; search for and remove the python block marked with "Block ID 8675309"
 // @ xxx luafunc BfObject BfObject::clone()
-// 
+//
 // @brief Make an exact duplicate of an object.
-// 
+//
 // @descr Returned object will not be added to the current game, and will have a
 // different id than the source object.
-// 
+//
 // @return Returns the new clone of the object.
 //
 // @note This function is not yet implemented.
@@ -1596,11 +1388,11 @@ S32 BfObject::lua_clone(lua_State *L)
 
 /**
  * @luafunc bool BfObject::isSelected()
- * 
+ *
  * @brief Determine if an object is selected in the editor.
- * 
+ *
  * @descr This is useful for editor plugins only.
- * 
+ *
  * @return Returns `true` if the object is selected, `false` if not.
  */
 S32 BfObject::lua_isSelected(lua_State *L)
@@ -1611,11 +1403,11 @@ S32 BfObject::lua_isSelected(lua_State *L)
 
 /**
  * @luafunc BfObject::setSelected(bool selected)
- * 
+ *
  * @brief Set whether an object is selected in the editor.
- * 
+ *
  * @descr This is useful for editor plugins only.
- * 
+ *
  * @param selected `true` to select the object, `false` to deselect it.
  */
 S32 BfObject::lua_setSelected(lua_State *L)
@@ -1630,16 +1422,16 @@ S32 BfObject::lua_setSelected(lua_State *L)
 
 /**
  * @luafunc PlayerInfo BfObject::getOwner()
- * 
+ *
  * @brief Gets an object's owner as a \ref PlayerInfo.
- * 
+ *
  * @descr Some objects (like projectiles) have an owning player associated. This
  * method returns a \ref PlayerInfo object if there is an owner. Otherwise, returns
  * nil.
- * 
- * This method is intended to be used with bullets and other projectiles, not with 
+ *
+ * This method is intended to be used with bullets and other projectiles, not with
  * game objects like zones.
- * 
+ *
  * @return A \ref PlayerInfo representing the object's owner, or nil.
  */
 S32 BfObject::lua_getOwner(lua_State *L)
@@ -1653,17 +1445,17 @@ S32 BfObject::lua_getOwner(lua_State *L)
 
 /**
  * @luafunc BfObject::setOwner(string playerName)
- * 
+ *
  * @brief Sets the owner of the object.
- * 
+ *
  * @param playerName Name of player as a string.
- * 
+ *
  * @note This method only works if the item in question has already been added
  * to the game via addItem(object).  The owner cannot be set beforehand. Also,
  * 'playerName' must exactly match a the name of a player already in the game
  * (case-sensitive).
- * 
- * This method is intended to be used with bullets and other projectiles, not with 
+ *
+ * This method is intended to be used with bullets and other projectiles, not with
  * game objects like zones.
  */
 S32 BfObject::lua_setOwner(lua_State *L)

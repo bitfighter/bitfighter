@@ -17,6 +17,7 @@ set(SHARED_SOURCES
 	BanList.cpp
 	barrier.cpp
 	BfObject.cpp
+	BfObjectTypeChecks.cpp
 	BotNavMeshZone.cpp
 	ChatCheck.cpp
 	ClientInfo.cpp
