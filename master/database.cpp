@@ -12,6 +12,8 @@
 #include "../zap/WeaponInfo.h"
 
 #include <fstream>
+#include <cstring>
+#include <cstddef>
 
 #ifdef BF_WRITE_TO_MYSQL
 #  include "mysql++.h"
@@ -47,7 +49,7 @@ DatabaseWriter::DatabaseWriter()
 }
 
 
-// MySQL Constructor
+ // MySQL Constructor
 DatabaseWriter::DatabaseWriter(const char *server, const char *db, const char *user, const char *password)
 {
    initialize(server, db, user, password);
@@ -61,10 +63,24 @@ DatabaseWriter::DatabaseWriter(const char *db, const char *user, const char *pas
 }
 
 
-// Sqlite Constructor
+template <std::size_t N>
+static void safecopy(const char *src, char (&dest)[N])
+{
+   if(!src)
+   {
+      dest[0] = '\0';
+      return;
+   }
+
+   std::strncpy(dest, src, N - 1);
+   dest[N - 1] = '\0'; // ensure null termination
+}
+
+
+ // Sqlite Constructor
 DatabaseWriter::DatabaseWriter(const char *db)
 {
-   strncpy(mDb, db, sizeof(mDb) - 1);
+   safecopy(db, mDb);
 
    if(!fileExists(mDb))
       createStatsDatabase();
@@ -73,10 +89,11 @@ DatabaseWriter::DatabaseWriter(const char *db)
 
 void DatabaseWriter::initialize(const char *server, const char *db, const char *user, const char *password)
 {
-   strncpy(mServer,   server,   sizeof(mServer)   - 1);   // was const char *, but problems when data in pointer dies.
-   strncpy(mDb,       db,       sizeof(mDb)       - 1);
-   strncpy(mUser,     user,     sizeof(mUser)     - 1);
-   strncpy(mPassword, password, sizeof(mPassword) - 1);
+   safecopy(server, mServer);
+   safecopy(db, mDb);
+   safecopy(user, mUser);
+   safecopy(password, mPassword);
+
 }
 
 
