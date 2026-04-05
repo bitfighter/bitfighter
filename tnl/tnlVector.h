@@ -120,6 +120,22 @@ public:
    const T& last() const;
 
    std::vector<T>& getStlVector();
+
+   // begin() and end() enable range-based loops for C++11:
+   // for (Vector<string> &row : rows)
+   //    doSomething(row);
+   //
+   // Equivalent to a traditional loop:
+   // for (S32 i = 0; i < rows.size(); i++)
+   //    doSomething(rows[i]);
+
+   // Note: for Vector<bool>, innerVector is std::vector<S32>, so these iterators
+   // yield S32 values -- same existing quirk as operator[] which casts (T&).
+   auto begin()       -> decltype(this->innerVector.begin())  { return this->innerVector.begin(); }
+   auto end()         -> decltype(this->innerVector.end())    { return this->innerVector.end(); }
+   auto begin() const -> decltype(this->innerVector.cbegin()) { return this->innerVector.cbegin(); }
+   auto end()   const -> decltype(this->innerVector.cend())   { return this->innerVector.cend(); }
+
    T*   address();
    const T*   address() const;
    void reverse();
@@ -179,7 +195,7 @@ template<class T> const inline T* Vector<T>::address() const
    return (T*)&(*this->innerVector.begin());
 }
 
-// was U32     
+// was U32
 template<class T> inline void Vector<T>::resize(U32 size)
 {
    this->innerVector.resize(size);
