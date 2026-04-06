@@ -70,7 +70,7 @@ string concatenate(const Vector<string> &words, S32 startingWith = 0);
 string lcase(string strToConvert);
 string ucase(string strToConvert);
 
-bool isInteger(const char *str);
+bool isPositiveInteger(const char *str);
 
 bool isAlpha(char c);
 bool isDigit(char c);

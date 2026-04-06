@@ -754,7 +754,7 @@ static bool fixupArgs(ClientGame *game, Vector<StringTableEntry> &args)
    // Normal arg order is bot name, team, bot args
 
    // First thing is to try to translate the 2nd arg into a team number
-   if(args.size() >= 2 && !isInteger(args[1].getString()))
+   if(args.size() >= 2 && !isPositiveInteger(args[1].getString()))
    {
       S32 teamIndex = game->getTeamIndexFromTeamName(args[1].getString());
       if(teamIndex == NO_TEAM)
@@ -766,9 +766,9 @@ static bool fixupArgs(ClientGame *game, Vector<StringTableEntry> &args)
       args[1] = itos(teamIndex);
    }
 
-   bool firstArgIsInt  = args.size() >= 1 && isInteger(args[0].getString());
+   bool firstArgIsNumeric = args.size() >= 1 && isPositiveInteger(args[0].getString());
    
-   if(firstArgIsInt)          // If first arg is numeric, hope user entered a team index first, and do not switch the args.
+   if(firstArgIsNumeric)          // If first arg is numeric, hope user entered a team index first, and do not switch the args.
       return true;
 
    if(args.size() >= 2)       // If the first arg is a string and there is a second arg, switch them.
