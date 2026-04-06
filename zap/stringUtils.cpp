@@ -108,10 +108,10 @@ string itos(S64 i)
 
 string stripZeros(string str)
 {
-   while(str[str.length() - 1]  == '0')
+   while(str.length() > 0 && str[str.length() - 1]  == '0')
       str.erase(str.length() - 1);
 
-   if(str[str.length() - 1] == '.')
+   if(str.length() > 0 && str[str.length() - 1] == '.')
       str.erase(str.length() - 1);
 
    return str;

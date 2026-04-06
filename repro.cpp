@@ -19,13 +19,21 @@ int main() {
     cout << "itos(-123456789012345LL) = " << ss64 << endl;
     // Note: My previous read showed itos(S64) was very broken, let's see what it does.
 
-    // cout << "Testing stripZeros(\"0\")..." << endl;
-    // try {
-    //     string sz = stripZeros("0");
-    //     cout << "stripZeros(\"0\") = " << sz << endl;
-    // } catch (...) {
-    //     cout << "stripZeros(\"0\") CRASHED" << endl;
-    // }
+    cout << "Testing ftos(0.0f, 2)..." << endl;
+    try {
+        string sz = ftos(0.0f, 2);
+        cout << "ftos(0.0f, 2) = " << sz << endl;
+    } catch (...) {
+        cout << "ftos(0.0f, 2) CRASHED" << endl;
+    }
+
+    cout << "Testing ftos(0.01f, 2)..." << endl;
+    try {
+        string sz = ftos(0.01f, 2);
+        cout << "ftos(0.01f, 2) = " << sz << endl;
+    } catch (...) {
+        cout << "ftos(0.01f, 2) CRASHED" << endl;
+    }
 
     cout << "Testing extractDirectory(\"myfile.txt\")..." << endl;
     string dir = extractDirectory("myfile.txt");
