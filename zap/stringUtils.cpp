@@ -219,8 +219,8 @@ string ucase(string strToConvert)
 }
 
 
-// Return true if str looks like an int
-bool isInteger(const char *str)
+// Return true if str looks like a non-negative int
+bool isPositiveInteger(const char *str)
 {
    if (str == NULL || str[0] == 0)
       return false;

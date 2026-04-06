@@ -219,9 +219,9 @@ string GameRecorderServer::buildGameRecorderExtension()
 {
    string baseRevision = ZAP_GAME_RELEASE;
 
-   // Not a integer, e.g. 019a, then strip off the revision letter
+   // Not a positive integer, e.g. 019a, then strip off the revision letter
    // Hopefully this pattern never changes
-   if(!isInteger(baseRevision.c_str()))
+   if(!isPositiveInteger(baseRevision.c_str()))
       baseRevision.erase(baseRevision.end() - 1, baseRevision.end());
 
    // This will create a file extension like 'bf019'
