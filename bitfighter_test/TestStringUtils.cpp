@@ -69,6 +69,14 @@ TEST(StringUtilsTest, chopComment)
 }
 
 
+TEST(StringUtilsTest, extractExtension)
+{
+   EXPECT_EQ("txt", extractExtension("file.txt"));
+   EXPECT_EQ("txt", extractExtension("path/to/file.txt"));
+   EXPECT_EQ("", extractExtension("file_no_extension"));
+}
+
+
 TEST(StringUtilsTest, itos)
 {
    EXPECT_EQ("0", itos((S32)0));
@@ -101,14 +109,6 @@ TEST(StringUtilsTest, extractDirectory)
    EXPECT_EQ("path/to", extractDirectory("path/to/file.txt"));
    EXPECT_EQ("path\\to", extractDirectory("path\\to\\file.txt"));
    EXPECT_EQ("", extractDirectory("file.txt"));
-}
-
-
-TEST(StringUtilsTest, extractExtension)
-{
-   EXPECT_EQ("txt", extractExtension("file.txt"));
-   EXPECT_EQ("txt", extractExtension("path/to/file.txt"));
-   EXPECT_EQ("", extractExtension("file_no_extension"));
 }
 
 
