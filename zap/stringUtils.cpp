@@ -205,8 +205,8 @@ string ucase(string strToConvert)
 }
 
 
-// Return true if str looks like an int
-bool isInteger(const char *str)
+// Return true if str looks like a non-negative int
+bool isPositiveInteger(const char *str)
 {
    S32 i = 0;
    while(str[i])

@@ -24,6 +24,20 @@ TEST(StringUtilsTest, stringContainsAllTheSameCharacter)
 }
 
 
+TEST(StringUtilsTest, isPositiveInteger)
+{
+   EXPECT_TRUE(isPositiveInteger("0"));
+   EXPECT_TRUE(isPositiveInteger("123"));
+   EXPECT_TRUE(isPositiveInteger("000123"));
+
+   EXPECT_FALSE(isPositiveInteger("-1"));
+   EXPECT_FALSE(isPositiveInteger("1.2"));
+   EXPECT_FALSE(isPositiveInteger("abc"));
+   EXPECT_FALSE(isPositiveInteger("12a"));
+   EXPECT_FALSE(isPositiveInteger(""));
+}
+
+
 TEST(StringUtilsTest, isHex)
 {
    EXPECT_TRUE(isHex("0"));
