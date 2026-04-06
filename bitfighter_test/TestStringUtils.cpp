@@ -104,6 +104,25 @@ TEST(StringUtilsTest, extractDirectory)
 }
 
 
+TEST(StringUtilsTest, extractExtension)
+{
+   EXPECT_EQ("txt", extractExtension("file.txt"));
+   EXPECT_EQ("txt", extractExtension("path/to/file.txt"));
+   EXPECT_EQ("gz", extractExtension("file.tar.gz"));
+   EXPECT_EQ("", extractExtension("file_with_no_extension"));
+}
+
+
+TEST(StringUtilsTest, isInteger)
+{
+   EXPECT_TRUE(isInteger("123"));
+   EXPECT_TRUE(isInteger("0"));
+   EXPECT_FALSE(isInteger("12a3"));
+   EXPECT_FALSE(isInteger(""));
+   EXPECT_FALSE(isInteger(NULL));
+}
+
+
 TEST(StringUtilsTest, sanitizeForSqlLeavesSafeStrings)
 {
    EXPECT_EQ("plain", sanitizeForSql("plain"));

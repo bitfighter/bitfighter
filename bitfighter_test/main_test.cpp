@@ -47,7 +47,7 @@ bool checkResources()
       if(!fileExists(dirs[i]))
          return false;
 
-      return true;
+   return true;
 }
 
 
