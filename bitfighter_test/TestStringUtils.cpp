@@ -69,6 +69,41 @@ TEST(StringUtilsTest, chopComment)
 }
 
 
+TEST(StringUtilsTest, itos)
+{
+   EXPECT_EQ("0", itos((S32)0));
+   EXPECT_EQ("123", itos((S32)123));
+   EXPECT_EQ("-123", itos((S32)-123));
+
+   EXPECT_EQ("0", itos((U32)0));
+   EXPECT_EQ("123", itos((U32)123));
+   EXPECT_EQ("4294967295", itos((U32)0xFFFFFFFF));
+
+   EXPECT_EQ("123456789012345", itos((U64)123456789012345ULL));
+   EXPECT_EQ("18446744073709551615", itos((U64)0xFFFFFFFFFFFFFFFFULL));
+
+   EXPECT_EQ("-123456789012345", itos((S64)-123456789012345LL));
+   EXPECT_EQ("9223372036854775807", itos((S64)0x7FFFFFFFFFFFFFFFLL));
+}
+
+
+TEST(StringUtilsTest, stripZeros)
+{
+   EXPECT_EQ("1.1", stripZeros("1.100"));
+   EXPECT_EQ("1", stripZeros("1.000"));
+   EXPECT_EQ("0", stripZeros("0"));
+   EXPECT_EQ("", stripZeros(".000"));
+}
+
+
+TEST(StringUtilsTest, extractDirectory)
+{
+   EXPECT_EQ("path/to", extractDirectory("path/to/file.txt"));
+   EXPECT_EQ("path\\to", extractDirectory("path\\to\\file.txt"));
+   EXPECT_EQ("", extractDirectory("file.txt"));
+}
+
+
 TEST(StringUtilsTest, sanitizeForSqlLeavesSafeStrings)
 {
    EXPECT_EQ("plain", sanitizeForSql("plain"));

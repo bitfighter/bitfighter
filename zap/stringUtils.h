@@ -46,6 +46,7 @@ string itos(S32 i);
 string itos(U32 i);
 string itos(U64 i);
 string itos(S64 i);
+string stripZeros(string str);
 string ftos(F32 f, int digits);
 string ftos(F32 f);
 

@@ -60,7 +60,11 @@ const char *SaveException::what() const throw ()
 string extractDirectory(const string &path )
 {
    // Works on Windows and Linux/Mac!  (just don't have a path with a backslash on Linux/Mac)
-  return path.substr( 0, path.find_last_of( "\\/" )); // Paths should never end with the slash
+  string::size_type pos = path.find_last_of("\\/");
+  if (pos == string::npos)
+     return "";
+
+  return path.substr( 0, pos ); // Paths should never end with the slash
 }
 
 string extractFilename(const string &path )
@@ -93,25 +97,28 @@ string itos(U32 i)
 string itos(U64 i)
 {
    char outString[U64_MAX_DIGITS + 1];  // + 1 for the null
-   dSprintf(outString, sizeof(outString), "%u", i);
+   dSprintf(outString, sizeof(outString), "%llu", i);
    return outString;
 }
 
 
 string itos(S64 i)
 {
-   char outString[ + 1];  // + 1 for the null
-   dSprintf(outString, sizeof(outString), "%d", i);
+   char outString[S64_MAX_DIGITS + 1];  // + 1 for the null
+   dSprintf(outString, sizeof(outString), "%lld", i);
    return outString;
 }
 
 
 string stripZeros(string str)
 {
-   while(str[str.length() - 1]  == '0')
+   if (str.find('.') == string::npos)
+      return str;
+
+   while(str.length() > 0 && str[str.length() - 1]  == '0')
       str.erase(str.length() - 1);
 
-   if(str[str.length() - 1] == '.')
+   if(str.length() > 0 && str[str.length() - 1] == '.')
       str.erase(str.length() - 1);
 
    return str;
