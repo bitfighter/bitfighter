@@ -120,6 +120,7 @@ TEST(StringUtilsTest, isInteger)
    EXPECT_FALSE(isInteger("12a3"));
    EXPECT_FALSE(isInteger(""));
    EXPECT_FALSE(isInteger(NULL));
+   EXPECT_FALSE(isInteger("-123"));
 }
 
 
