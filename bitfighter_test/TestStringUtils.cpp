@@ -117,6 +117,7 @@ TEST(StringUtilsTest, extractExtension)
 
 TEST(StringUtilsTest, stripExtension)
 {
+   EXPECT_EQ("", stripExtension(""));
    EXPECT_EQ("file", stripExtension("file.txt"));
    EXPECT_EQ("file.tar", stripExtension("file.tar.gz"));
    EXPECT_EQ("file_with_no_extension", stripExtension("file_with_no_extension"));
