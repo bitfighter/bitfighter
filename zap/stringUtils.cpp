@@ -74,7 +74,13 @@ string extractFilename(const string &path )
 
 string extractExtension(const string &path )
 {
-  return path.substr( path.find_last_of( '.' ) + 1 );
+  string::size_type dotPos = path.find_last_of('.');
+  if(dotPos == string::npos) return "";
+
+  string::size_type slashPos = path.find_last_of("\\/");
+  if(slashPos != string::npos && dotPos < slashPos) return "";
+
+  return path.substr(dotPos + 1);
 }
 
 
@@ -169,7 +175,13 @@ string replaceString(const string &strString, const string &from, const string &
 // Remove any extension from filename
 string stripExtension(string filename)
 {
-   return filename.substr(0, filename.find_last_of('.'));
+   string::size_type dotPos = filename.find_last_of('.');
+   string::size_type slashPos = filename.find_last_of("\\/");
+
+   if(dotPos == string::npos || (slashPos != string::npos && dotPos < slashPos))
+      return filename;
+
+   return filename.substr(0, dotPos);
 }
 
 
@@ -208,15 +220,20 @@ string ucase(string strToConvert)
 // Return true if str looks like a non-negative int
 bool isPositiveInteger(const char *str)
 {
-   S32 i = 0;
-   while(str[i])
-   {
-      if(str[i] < '0' || str[i] > '9')
-         return false;
-      i++;
-   }
+   if(!str || !*str) return false;
+
+   while(*str)
+      if(!isDigit(*(str++))) return false;
 
    return true;
+}
+
+
+// Return true if str looks like a non-negative int
+// (this is an alias for isPositiveInteger)
+bool isInteger(const char *str)
+{
+   return isPositiveInteger(str);
 }
 
 
