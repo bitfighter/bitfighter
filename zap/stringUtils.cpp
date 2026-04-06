@@ -545,7 +545,7 @@ bool getFilesFromFolder(const string &dir, Vector<string> &files, const string e
          {
             if(name.length() > extensions[i].length() + 1)  // +1 -> include the dot '.'
             {
-               string ext = lcase(extractExtension(extensions[i]));
+               string ext = lcase(extensions[i]);
                if(ext == extension)
                   files.push_back(name);
             }

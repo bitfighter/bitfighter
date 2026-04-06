@@ -173,4 +173,40 @@ TEST(StringUtilsTest, sanitizeForSqlEscapesBackslashesAndMixed)
 }
 
 
+TEST(StringUtilsTest, getFilesFromFolder)
+{
+   // Create a temporary directory for testing
+   string testDir = "test_folder_getFilesFromFolder";
+   makeSureFolderExists(testDir);
+
+   // Create some files
+   writeFile(joindir(testDir, "test1.level"), "content");
+   writeFile(joindir(testDir, "test2.TXT"), "content");
+   writeFile(joindir(testDir, "test3.other"), "content");
+
+   Vector<string> files;
+   string extensions[] = {"level", "txt"};
+
+   // Test filtering by extensions
+   EXPECT_TRUE(getFilesFromFolder(testDir, files, extensions, 2));
+   EXPECT_EQ(2, files.size());
+
+   bool foundLevel = false;
+   bool foundTxt = false;
+   for(S32 i = 0; i < files.size(); i++)
+   {
+      if(files[i] == "test1.level") foundLevel = true;
+      if(files[i] == "test2.TXT") foundTxt = true;
+   }
+   EXPECT_TRUE(foundLevel);
+   EXPECT_TRUE(foundTxt);
+
+   // Clean up (best effort)
+   remove(joindir(testDir, "test1.level").c_str());
+   remove(joindir(testDir, "test2.TXT").c_str());
+   remove(joindir(testDir, "test3.other").c_str());
+   remove(testDir.c_str());
+}
+
+
 };
