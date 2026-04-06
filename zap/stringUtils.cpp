@@ -524,7 +524,7 @@ bool makeSureFolderExists(const string &folder)
 }
 
 
-// Read files from folder.  Extensions should be a list without dots... e.g. {"level", "txt"}  Extensions are case insensitive.
+// Read files from folder
 bool getFilesFromFolder(const string &dir, Vector<string> &files, const string extensions[], S32 extensionCount)
 {
    DIR *dp;

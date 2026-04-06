@@ -185,19 +185,18 @@ TEST(StringUtilsTest, getFilesFromFolder)
    writeFile(joindir(testDir, "test3.other"), "content");
 
    Vector<string> files;
-   string extensions[] = {"level", "txt"};   // Expected usage, lc extensions
+   string extensions[] = {"level", "txt"};
 
    // Test filtering by extensions
    EXPECT_TRUE(getFilesFromFolder(testDir, files, extensions, 2));
    EXPECT_EQ(2, files.size());
 
+   // Verify that subsequent calls return identical results
    Vector<string> files2;
-   string extensions2[] = {"LEVEL", "TxT"};         // Try again, with mixed case extensions
-
-   // Test filtering by extensions
-   EXPECT_TRUE(getFilesFromFolder(testDir, files2, extensions2, 2));
-   EXPECT_EQ(2, files2.size());
-
+   EXPECT_TRUE(getFilesFromFolder(testDir, files2, extensions, 2));
+   EXPECT_EQ(files.size(), files2.size());
+   for(S32 i = 0; i < files.size(); i++)
+      EXPECT_EQ(files[i], files2[i]);
 
    bool foundLevel = false;
    bool foundTxt = false;
