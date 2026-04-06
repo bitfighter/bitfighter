@@ -35,6 +35,7 @@ TEST(StringUtilsTest, isPositiveInteger)
    EXPECT_FALSE(isPositiveInteger("abc"));
    EXPECT_FALSE(isPositiveInteger("12a"));
    EXPECT_FALSE(isPositiveInteger(""));
+   EXPECT_FALSE(isPositiveInteger(NULL));
 }
 
 
@@ -124,6 +125,18 @@ TEST(StringUtilsTest, extractExtension)
    EXPECT_EQ("txt", extractExtension("path/to/file.txt"));
    EXPECT_EQ("gz", extractExtension("file.tar.gz"));
    EXPECT_EQ("", extractExtension("file_with_no_extension"));
+   EXPECT_EQ("txt", extractExtension("path.to/file.txt"));
+}
+
+
+TEST(StringUtilsTest, stripExtension)
+{
+   EXPECT_EQ("file", stripExtension("file.txt"));
+   EXPECT_EQ("path/to/file", stripExtension("path/to/file.txt"));
+   EXPECT_EQ("file.tar", stripExtension("file.tar.gz"));
+   EXPECT_EQ("file_with_no_extension", stripExtension("file_with_no_extension"));
+   EXPECT_EQ("path.to/file", stripExtension("path.to/file.txt"));
+   EXPECT_EQ("path.to/file", stripExtension("path.to/file"));
 }
 
 
