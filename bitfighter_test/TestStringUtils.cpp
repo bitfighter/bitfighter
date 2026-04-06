@@ -131,13 +131,13 @@ TEST(StringUtilsTest, extractExtension)
 
 TEST(StringUtilsTest, isInteger)
 {
-   EXPECT_TRUE(isInteger("123"));
-   EXPECT_TRUE(isInteger("0"));
-   EXPECT_FALSE(isInteger("12a3"));
-   EXPECT_FALSE(isInteger(""));
-   EXPECT_FALSE(isInteger(NULL));
-   EXPECT_FALSE(isInteger("-123"));
-   EXPECT_FALSE(isInteger(" "));
+   EXPECT_TRUE(isPositiveInteger("123"));
+   EXPECT_TRUE(isPositiveInteger("0"));
+   EXPECT_FALSE(isPositiveInteger("12a3"));
+   EXPECT_FALSE(isPositiveInteger(""));
+   EXPECT_FALSE(isPositiveInteger(NULL));
+   EXPECT_FALSE(isPositiveInteger("-123"));
+   EXPECT_FALSE(isPositiveInteger(" "));
 }
 
 

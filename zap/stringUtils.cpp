@@ -236,11 +236,6 @@ bool isPositiveInteger(const char *str)
 }
 
 
-// Return true if str is a non-negative integer
-bool isInteger(const char *str)
-{
-   return isPositiveInteger(str);
-}
 
 
 // Sanitize strings before inclusion into JSON

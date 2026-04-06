@@ -71,7 +71,6 @@ string lcase(string strToConvert);
 string ucase(string strToConvert);
 
 bool isPositiveInteger(const char *str);
-bool isInteger(const char *str);
 
 bool isAlpha(char c);
 bool isDigit(char c);
