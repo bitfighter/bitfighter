@@ -60,7 +60,11 @@ const char *SaveException::what() const throw ()
 string extractDirectory(const string &path )
 {
    // Works on Windows and Linux/Mac!  (just don't have a path with a backslash on Linux/Mac)
-  return path.substr( 0, path.find_last_of( "\\/" )); // Paths should never end with the slash
+  string::size_type pos = path.find_last_of("\\/");
+  if (pos == string::npos)
+     return "";
+
+  return path.substr( 0, pos ); // Paths should never end with the slash
 }
 
 string extractFilename(const string &path )
@@ -108,6 +112,9 @@ string itos(S64 i)
 
 string stripZeros(string str)
 {
+   if (str.find('.') == string::npos)
+      return str;
+
    while(str.length() > 0 && str[str.length() - 1]  == '0')
       str.erase(str.length() - 1);
 
