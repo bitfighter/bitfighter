@@ -74,7 +74,11 @@ string extractFilename(const string &path )
 
 string extractExtension(const string &path )
 {
-  return path.substr( path.find_last_of( '.' ) + 1 );
+  string::size_type pos = path.find_last_of('.');
+  if (pos == string::npos)
+     return "";
+
+  return path.substr( pos + 1 );
 }
 
 

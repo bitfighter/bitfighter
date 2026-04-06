@@ -104,6 +104,14 @@ TEST(StringUtilsTest, extractDirectory)
 }
 
 
+TEST(StringUtilsTest, extractExtension)
+{
+   EXPECT_EQ("txt", extractExtension("file.txt"));
+   EXPECT_EQ("txt", extractExtension("path/to/file.txt"));
+   EXPECT_EQ("", extractExtension("file_no_extension"));
+}
+
+
 TEST(StringUtilsTest, sanitizeForSqlLeavesSafeStrings)
 {
    EXPECT_EQ("plain", sanitizeForSql("plain"));
