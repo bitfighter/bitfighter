@@ -93,15 +93,15 @@ string itos(U32 i)
 string itos(U64 i)
 {
    char outString[U64_MAX_DIGITS + 1];  // + 1 for the null
-   dSprintf(outString, sizeof(outString), "%u", i);
+   dSprintf(outString, sizeof(outString), "%llu", i);
    return outString;
 }
 
 
 string itos(S64 i)
 {
-   char outString[ + 1];  // + 1 for the null
-   dSprintf(outString, sizeof(outString), "%d", i);
+   char outString[S64_MAX_DIGITS + 1];  // + 1 for the null
+   dSprintf(outString, sizeof(outString), "%lld", i);
    return outString;
 }
 
