@@ -124,6 +124,8 @@ TEST(StringUtilsTest, extractExtension)
    EXPECT_EQ("txt", extractExtension("path/to/file.txt"));
    EXPECT_EQ("gz", extractExtension("file.tar.gz"));
    EXPECT_EQ("", extractExtension("file_with_no_extension"));
+   EXPECT_EQ("", extractExtension("path.to/file"));
+   EXPECT_EQ("", extractExtension("file"));
 }
 
 
@@ -136,6 +138,17 @@ TEST(StringUtilsTest, isInteger)
    EXPECT_FALSE(isInteger(NULL));
    EXPECT_FALSE(isInteger("-123"));
    EXPECT_FALSE(isInteger(" "));
+}
+
+
+TEST(StringUtilsTest, stripExtension)
+{
+   EXPECT_EQ("file", stripExtension("file.txt"));
+   EXPECT_EQ("path/to/file", stripExtension("path/to/file.txt"));
+   EXPECT_EQ("file.tar", stripExtension("file.tar.gz"));
+   EXPECT_EQ("file_with_no_extension", stripExtension("file_with_no_extension"));
+   EXPECT_EQ("path.to/file", stripExtension("path.to/file"));
+   EXPECT_EQ("file", stripExtension("file"));
 }
 
 
