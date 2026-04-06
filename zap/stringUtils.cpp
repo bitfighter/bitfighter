@@ -74,7 +74,12 @@ string extractFilename(const string &path )
 
 string extractExtension(const string &path )
 {
-  return path.substr( path.find_last_of( '.' ) + 1 );
+  string filename = extractFilename(path);
+  string::size_type pos = filename.find_last_of( '.' );
+  if (pos == string::npos)
+     return "";
+
+  return filename.substr( pos + 1 );
 }
 
 
@@ -169,7 +174,16 @@ string replaceString(const string &strString, const string &from, const string &
 // Remove any extension from filename
 string stripExtension(string filename)
 {
-   return filename.substr(0, filename.find_last_of('.'));
+   string::size_type pos = filename.find_last_of('.');
+   if (pos == string::npos)
+      return filename;
+
+   // If the dot is before the last slash, it's not an extension
+   string::size_type slashPos = filename.find_last_of("\\/");
+   if (slashPos != string::npos && pos < slashPos)
+      return filename;
+
+   return filename.substr(0, pos);
 }
 
 
@@ -208,6 +222,9 @@ string ucase(string strToConvert)
 // Return true if str looks like an int
 bool isInteger(const char *str)
 {
+   if (str == NULL || str[0] == 0)
+      return false;
+
    S32 i = 0;
    while(str[i])
    {
