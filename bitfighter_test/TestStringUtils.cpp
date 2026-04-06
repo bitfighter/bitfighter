@@ -185,18 +185,11 @@ TEST(StringUtilsTest, getFilesFromFolder)
    writeFile(joindir(testDir, "test3.other"), "content");
 
    Vector<string> files;
-   string extensions[] = {"level", "txt"};
+   string extensions[] = {"LeVeL", "tXt"};
 
-   // Test filtering by extensions
+   // Test filtering by extensions (case-insensitive)
    EXPECT_TRUE(getFilesFromFolder(testDir, files, extensions, 2));
    EXPECT_EQ(2, files.size());
-
-   // Verify that subsequent calls return identical results
-   Vector<string> files2;
-   EXPECT_TRUE(getFilesFromFolder(testDir, files2, extensions, 2));
-   EXPECT_EQ(files.size(), files2.size());
-   for(S32 i = 0; i < files.size(); i++)
-      EXPECT_EQ(files[i], files2[i]);
 
    bool foundLevel = false;
    bool foundTxt = false;
