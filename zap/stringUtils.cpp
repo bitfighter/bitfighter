@@ -975,14 +975,14 @@ bool isHex(const string &str)
    return true;
 }
 
-// Sorts alphanumerically, ignoring case
+// Sorts alphanumerically, case insensitive; strict ASCII order, i.e. digits come before letters
 bool alphaSort(const string &a, const string &b)
 {
    return (stricmp(a.c_str(), b.c_str()) < 0);
 }
 
 
-// Sort with numbers coming before letters, but not just digits; 2xxx comes before 10xxx
+// Sort with numbers coming before letters, but if the strings are just numbers, will sort numerically
 bool alphaNumberSort(const string &a, const string &b)
 {
    bool aIsNum = isPositiveInteger(a.c_str());

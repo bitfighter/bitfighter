@@ -444,15 +444,25 @@ TEST(StringUtilsTest, fileUtils)
 
 TEST(StringUtilsTest, joinDir)
 {
+#if defined(TNL_OS_WIN32)
+   EXPECT_EQ("path\\file", joindir("path", "file"));
+   EXPECT_EQ("path\\file", joindir("path\\", "file"));
+   EXPECT_EQ("\\path\\file", joindir("\\path\\", "file"));
+   EXPECT_EQ("file", joindir("", "file"));
+
+   EXPECT_EQ("path\\file", strictjoindir("path", "file"));
+   EXPECT_EQ("path\\file", strictjoindir("path\\", "file"));
+   EXPECT_EQ("path\\sub\\file", strictjoindir("path", "sub", "file"));
+#else
    EXPECT_EQ("path/file", joindir("path", "file"));
    EXPECT_EQ("path/file", joindir("path/", "file"));
    EXPECT_EQ("/path/file", joindir("/path/", "file"));
-   EXPECT_EQ("path/file", joindir("path/", "/file"));
    EXPECT_EQ("file", joindir("", "file"));
 
    EXPECT_EQ("path/file", strictjoindir("path", "file"));
    EXPECT_EQ("path/file", strictjoindir("path/", "file"));
    EXPECT_EQ("path/sub/file", strictjoindir("path", "sub", "file"));
+#endif
 }
 
 
@@ -505,6 +515,8 @@ TEST(StringUtilsTest, sorting)
 {
    EXPECT_TRUE(alphaSort("a", "b"));
    EXPECT_TRUE(alphaSort("A", "b"));
+   EXPECT_TRUE(alphaSort("a", "B"));
+   EXPECT_TRUE(alphaSort("A", "B"));
    EXPECT_FALSE(alphaSort("b", "a"));
 
    EXPECT_TRUE(alphaNumberSort("2", "10"));
@@ -514,8 +526,11 @@ TEST(StringUtilsTest, sorting)
    EXPECT_TRUE(alphaNumberSort("0", "abc"));
    EXPECT_TRUE(alphaNumberSort("abc", "def"));
    EXPECT_FALSE(alphaNumberSort("abc", "10"));
-   EXPECT_TRUE(alphaNumberSort("2xyz", "11xyz"));
    EXPECT_FALSE(alphaNumberSort("2xyz", "1xyz"));
+
+   // Positive itegers sort numerically
+   EXPECT_TRUE(alphaNumberSort("2", "11"));
+   EXPECT_FALSE(alphaNumberSort("2", "1"));
 }
 
 
