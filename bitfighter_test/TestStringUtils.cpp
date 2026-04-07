@@ -539,6 +539,12 @@ TEST(StringUtilsTest, sorting)
    // Positive itegers sort numerically
    EXPECT_TRUE(alphaNumberSort("2", "11"));
    EXPECT_FALSE(alphaNumberSort("2", "1"));
+
+   // Mixed strings: leading numeric portion determines order
+   EXPECT_TRUE(alphaNumberSort("2xyz", "11xyz"));   // 2 < 11
+   EXPECT_TRUE(alphaNumberSort("1abc", "2abc"));    // 1 < 2
+   EXPECT_FALSE(alphaNumberSort("10foo", "9foo"));  // 10 > 9
+   EXPECT_FALSE(alphaNumberSort("2xyz", "2xyz"));   // equal -> alphaSort tie-break (false: not strictly less)
 }
 
 

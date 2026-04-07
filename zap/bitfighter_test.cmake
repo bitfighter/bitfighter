@@ -37,6 +37,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSettings.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestShip.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSpawnDelay.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestStatistics.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestStringUtils.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSymbolStrings.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestTimer.cpp
