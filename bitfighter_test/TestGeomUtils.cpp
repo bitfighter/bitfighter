@@ -1178,9 +1178,10 @@ TEST(GeomUtilsTest, triangulatedFillContainsInside)
    triangles.push_back(Point(10, 10));
    triangles.push_back(Point(0, 10));
 
-   EXPECT_TRUE(triangulatedFillContains(&triangles, Point(5, 5)));
-   EXPECT_TRUE(triangulatedFillContains(&triangles, Point(1, 1)));
-   EXPECT_TRUE(triangulatedFillContains(&triangles, Point(9, 9)));
+   // These are all on the edge of one of the triangles, but inside the square described by the geometry
+   EXPECT_TRUE(triangulatedFillContains(&triangles, Point(5, 5)));	 
+   EXPECT_TRUE(triangulatedFillContains(&triangles, Point(1, 1)));	 
+   EXPECT_TRUE(triangulatedFillContains(&triangles, Point(9, 9)));	 
 }
 
 TEST(GeomUtilsTest, triangulatedFillContainsOutside)
