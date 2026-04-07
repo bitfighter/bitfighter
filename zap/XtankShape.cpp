@@ -277,4 +277,57 @@ ShipShapeInfo xtankBodyInfos[XtankBody::Count] =
 
 #undef NO_FLAMES
 
+
+// ---------------------------------------------------------------------------
+// Turret mount positions for each xtank vehicle body.
+//
+// Coordinates are in body space using the same scale as the hull vertices
+// above (+Y = nose direction).  Positions are chosen to sit roughly in the
+// centre of each hull so the barrel is visually unobstructed.
+// ---------------------------------------------------------------------------
+XtankBodyTurrets xtankTurretInfos[XtankBody::Count] =
+{
+   // Lightcycle  – 1 central turret
+   { 1, { { 0,  0 } } },
+
+   // Trike       – 1 turret slightly toward the nose
+   { 1, { { 0, -2 } } },
+
+   // Hexo        – 1 central turret
+   { 1, { { 0,  3 } } },
+
+   // Spider      – 1 central turret
+   { 1, { { 0,  0 } } },
+
+   // Psycho      – 1 turret near centre of mass
+   { 1, { { 1,  2 } } },
+
+   // Tornado     – 1 central turret
+   { 1, { { 0,  0 } } },
+
+   // Marauder    – 1 central turret
+   { 1, { { 0,  0 } } },
+
+   // Tiger       – 2 symmetric side turrets
+   { 2, { { -7, 0 }, { 7, 0 } } },
+
+   // Rhino       – 2 symmetric side turrets
+   { 2, { { -5, 0 }, { 5, 0 } } },
+
+   // Medusa      – 2 turrets spread across the wide nose
+   { 2, { { -7,  5 }, { 7,  5 } } },
+
+   // Delta       – 2 turrets on the swept wings
+   { 2, { { -6,  0 }, { 6,  0 } } },
+
+   // Disk        – 1 central turret (saucer style)
+   { 1, { { 0,  0 } } },
+
+   // Malice      – 1 turret near the forward point
+   { 1, { { 0,  3 } } },
+
+   // Panzy       – 4 corner turrets on the large square body
+   { 4, { { -14, -14 }, { 14, -14 }, { -14, 14 }, { 14, 14 } } },
+}; // xtankTurretInfos[]
+
 } /* namespace Zap */

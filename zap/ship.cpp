@@ -129,6 +129,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
    mSparkElapsed = 0;
    mShapeType = ShipShape::Normal;
    mXtankBodyIndex = XtankBody::None;
+   mXtankBodyAngle = FloatHalfPi;   // Default: nose pointing up (+Y)
 #endif
 
    mLoadout.setLoadout(DefaultLoadout);
@@ -2235,14 +2236,39 @@ void Ship::renderLayer(S32 layerIndex)
    const Color &healthBarColor = getGame()->getGameType()->getTeamHealthBarColor(this);
    F32 alpha = getShipVisibility(localShip);
 
-   F32 angle = getRenderAngle();
-   F32 deltaAngle = getAngleDiff(mLastProcessStateAngle, angle);     // Change in angle since we were last here
+   F32 angle = getRenderAngle();   // aim angle: where the mouse/reticle points
 
-   renderShip(layerIndex, getRenderPos(), getActualPos(), vel, angle, deltaAngle,
+   // For xtank vehicle bodies the hull always faces the direction of travel
+   // while the aim angle is kept for the turret(s).  For the standard BF
+   // ship (mXtankBodyIndex < 0) body and aim angle are the same.
+   if(mXtankBodyIndex >= 0)
+   {
+      // Use the actual ship velocity to determine travel direction.
+      // Only update when the ship is moving fast enough to give a stable angle;
+      // this prevents snapping back to zero when coasting to a stop.
+      static const F32 VEL_THRESHOLD_SQ = 50.0f * 50.0f;
+      Point rVel = getRenderVel();
+      if(rVel.lenSquared() > VEL_THRESHOLD_SQ)
+         mXtankBodyAngle = atan2(rVel.y, rVel.x);
+   }
+
+   // bodyAngle drives hull rotation; aimAngle drives turret rotation.
+   const F32 aimAngle  = angle;
+   const F32 bodyAngle = (mXtankBodyIndex >= 0) ? mXtankBodyAngle : angle;
+
+   F32 deltaAngle = getAngleDiff(mLastProcessStateAngle, bodyAngle);
+
+   renderShip(layerIndex, getRenderPos(), getActualPos(), vel, bodyAngle, deltaAngle,
               getActiveShipShapeInfo(), color, healthBarColor, alpha, clientGame->getCurrentTime(), shipName, warpInScale,
               isLocalShip, isBusy, isAuthenticated, showCoordinates, mHealth, mRadius, getTeam(),
               boostActive, shieldActive, repairActive, sensorActive, hasArmor, engineeringTeleport, killStreak,
               gamesPlayed);
+
+   // Draw xtank turrets on top of the hull, pointing at the aim direction.
+   // Only layer 1 is the visible pass; layer -1 is the cloaking shadow pass.
+   if(mXtankBodyIndex >= 0 && layerIndex == 1)
+      renderXtankTurrets(getRenderPos(), bodyAngle, aimAngle, alpha,
+                         xtankTurretInfos[mXtankBodyIndex], color, warpInScale);
 
    if(mSpawnShield.getCurrent() != 0)  // Add spawn shield -- has a period of being on solidly, then blinks yellow
       renderSpawnShield(getRenderPos(), mSpawnShield.getCurrent(), clientGame->getCurrentTime());

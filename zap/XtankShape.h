@@ -61,5 +61,30 @@ namespace XtankBody
 // compatible with the existing renderShip() rendering path.
 extern ShipShapeInfo xtankBodyInfos[XtankBody::Count];
 
+
+// ---------------------------------------------------------------------------
+// Turret data for xtank vehicles.
+//
+// Each vehicle carries one or more turrets that are rendered separately from
+// the hull.  Mount positions are in body space: +Y points toward the nose,
+// using the same coordinate scale as the hull vertex data above.
+// ---------------------------------------------------------------------------
+
+// A single turret mount point in body space.
+struct XtankTurret
+{
+   F32 x, y;
+};
+
+// All turret mount points for one vehicle body (up to 4).
+struct XtankBodyTurrets
+{
+   S32 count;
+   XtankTurret turrets[4];
+};
+
+// One entry per XtankBody::Type value.
+extern XtankBodyTurrets xtankTurretInfos[XtankBody::Count];
+
 } /* namespace Zap */
 #endif /* _XTANK_SHAPE_H_ */

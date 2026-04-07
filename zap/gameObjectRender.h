@@ -16,6 +16,7 @@
 #include "Color.h"
 #include "SharedConstants.h"     // For MeritBadges enum
 #include "ShipShape.h"
+#include "XtankShape.h"          // For XtankBodyTurrets (used by renderXtankTurrets)
 
 #include "BfObject.h"            // Need to use BfObject with SafePtr.  Whether this is really needed is a different question.
 
@@ -127,6 +128,10 @@ extern void renderShip(S32 layerIndex, const Point &renderPos, const Point &actu
                        bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed);
 
 extern void renderSpawnShield(const Point &pos, U32 shieldTime, U32 renderTime);
+
+// Render turrets for xtank vehicle bodies (pointing at the aim angle, independent of hull orientation)
+extern void renderXtankTurrets(const Point &pos, F32 bodyAngle, F32 aimAngle, F32 alpha,
+                                const XtankBodyTurrets &turrets, const Color *color, F32 warpInScale);
 
 // Render repair rays to all the repairing objects
 extern void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<BfObject> > &repairTargets, F32 alpha);   
