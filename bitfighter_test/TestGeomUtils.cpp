@@ -428,5 +428,1086 @@ TEST(GeomUtilsTest, pointInHexagon)
 }
 
 
+// ============================================================
+// polygonContainsPoint
+// ============================================================
 
-};
+TEST(GeomUtilsTest, polygonContainsPoint)
+{
+   // Square polygon
+   Vector<Point> square;
+   square.push_back(Point(0, 0));
+   square.push_back(Point(10, 0));
+   square.push_back(Point(10, 10));
+   square.push_back(Point(0, 10));
+
+   // Clearly inside
+   EXPECT_TRUE(polygonContainsPoint(square.address(), square.size(), Point(5, 5)));
+
+   // Clearly outside
+   EXPECT_FALSE(polygonContainsPoint(square.address(), square.size(), Point(15, 5)));
+   EXPECT_FALSE(polygonContainsPoint(square.address(), square.size(), Point(-1, 5)));
+   EXPECT_FALSE(polygonContainsPoint(square.address(), square.size(), Point(5, -1)));
+   EXPECT_FALSE(polygonContainsPoint(square.address(), square.size(), Point(5, 15)));
+
+   // Near corners
+   EXPECT_FALSE(polygonContainsPoint(square.address(), square.size(), Point(-0.1f, -0.1f)));
+   EXPECT_FALSE(polygonContainsPoint(square.address(), square.size(), Point(10.1f, 10.1f)));
+}
+
+TEST(GeomUtilsTest, polygonContainsPointTriangle)
+{
+   Vector<Point> tri;
+   tri.push_back(Point(0, 0));
+   tri.push_back(Point(10, 0));
+   tri.push_back(Point(5, 10));
+
+   EXPECT_TRUE(polygonContainsPoint(tri.address(), tri.size(), Point(5, 5)));
+   EXPECT_FALSE(polygonContainsPoint(tri.address(), tri.size(), Point(0.1f, 9.0f)));
+   EXPECT_FALSE(polygonContainsPoint(tri.address(), tri.size(), Point(9.9f, 9.0f)));
+}
+
+TEST(GeomUtilsTest, polygonContainsPointConcave)
+{
+   // L-shaped polygon
+   Vector<Point> lshape;
+   lshape.push_back(Point(0, 0));
+   lshape.push_back(Point(10, 0));
+   lshape.push_back(Point(10, 5));
+   lshape.push_back(Point(5, 5));
+   lshape.push_back(Point(5, 10));
+   lshape.push_back(Point(0, 10));
+
+   EXPECT_TRUE(polygonContainsPoint(lshape.address(), lshape.size(), Point(2, 2)));
+   EXPECT_TRUE(polygonContainsPoint(lshape.address(), lshape.size(), Point(2, 8)));
+   EXPECT_TRUE(polygonContainsPoint(lshape.address(), lshape.size(), Point(8, 2)));
+   // In the "missing" upper-right part
+   EXPECT_FALSE(polygonContainsPoint(lshape.address(), lshape.size(), Point(8, 8)));
+}
+
+
+// ============================================================
+// segmentsIntersect
+// ============================================================
+
+TEST(GeomUtilsTest, segmentsIntersectCrossing)
+{
+   F32 ct;
+   // Two crossing segments
+   EXPECT_TRUE(segmentsIntersect(Point(0, 0), Point(10, 10),
+                                 Point(0, 10), Point(10, 0), ct));
+   EXPECT_NEAR(0.5f, ct, 0.001f);
+}
+
+TEST(GeomUtilsTest, segmentsIntersectNonCrossing)
+{
+   F32 ct;
+   // Parallel segments
+   EXPECT_FALSE(segmentsIntersect(Point(0, 0), Point(10, 0),
+                                  Point(0, 5), Point(10, 5), ct));
+}
+
+TEST(GeomUtilsTest, segmentsIntersectCollinear)
+{
+   F32 ct;
+   // Collinear — parallel so returns false
+   EXPECT_FALSE(segmentsIntersect(Point(0, 0), Point(10, 0),
+                                  Point(5, 0), Point(15, 0), ct));
+}
+
+TEST(GeomUtilsTest, segmentsIntersectTShape)
+{
+   F32 ct;
+   // T-shaped intersection at midpoint of one segment
+   EXPECT_TRUE(segmentsIntersect(Point(0, 5), Point(10, 5),
+                                 Point(5, 0), Point(5, 10), ct));
+   EXPECT_NEAR(0.5f, ct, 0.001f);
+}
+
+TEST(GeomUtilsTest, segmentsIntersectSharedEndpoint)
+{
+   F32 ct;
+   // Segments sharing an endpoint
+   EXPECT_TRUE(segmentsIntersect(Point(0, 0), Point(5, 5),
+                                 Point(5, 5), Point(10, 0), ct));
+   EXPECT_NEAR(1.0f, ct, 0.001f);
+}
+
+TEST(GeomUtilsTest, segmentsIntersectNearButNotCrossing)
+{
+   F32 ct;
+   // Segments extend toward each other but do not overlap
+   EXPECT_FALSE(segmentsIntersect(Point(0, 0), Point(4, 4),
+                                  Point(6, 6), Point(10, 0), ct));
+}
+
+
+// ============================================================
+// findIntersection
+// ============================================================
+
+TEST(GeomUtilsTest, findIntersectionCrossing)
+{
+   Point intersection;
+   EXPECT_TRUE(findIntersection(Point(0, 0), Point(10, 10),
+                                Point(0, 10), Point(10, 0), intersection));
+   EXPECT_NEAR(5.0f, intersection.x, 0.001f);
+   EXPECT_NEAR(5.0f, intersection.y, 0.001f);
+}
+
+TEST(GeomUtilsTest, findIntersectionParallel)
+{
+   Point intersection;
+   EXPECT_FALSE(findIntersection(Point(0, 0), Point(10, 0),
+                                 Point(0, 5), Point(10, 5), intersection));
+}
+
+TEST(GeomUtilsTest, findIntersectionNoOverlap)
+{
+   Point intersection;
+   // Lines would intersect if extended, but segments don't
+   EXPECT_FALSE(findIntersection(Point(0, 0), Point(4, 4),
+                                 Point(6, 6), Point(10, 0), intersection));
+}
+
+TEST(GeomUtilsTest, findIntersectionAtEndpoint)
+{
+   Point intersection;
+   EXPECT_TRUE(findIntersection(Point(0, 0), Point(5, 5),
+                                Point(5, 5), Point(10, 0), intersection));
+   EXPECT_NEAR(5.0f, intersection.x, 0.001f);
+   EXPECT_NEAR(5.0f, intersection.y, 0.001f);
+}
+
+
+// ============================================================
+// findNormalPoint
+// ============================================================
+
+TEST(GeomUtilsTest, findNormalPointOnSegment)
+{
+   Point closest;
+   // Perpendicular from (5, 5) to segment (0,0)-(10,0) => should land at (5, 0)
+   EXPECT_TRUE(findNormalPoint(Point(5, 5), Point(0, 0), Point(10, 0), closest));
+   EXPECT_NEAR(5.0f, closest.x, 0.001f);
+   EXPECT_NEAR(0.0f, closest.y, 0.001f);
+}
+
+TEST(GeomUtilsTest, findNormalPointBeyondEndpoint)
+{
+   Point closest;
+   // Projection falls outside the segment
+   EXPECT_FALSE(findNormalPoint(Point(15, 5), Point(0, 0), Point(10, 0), closest));
+   EXPECT_FALSE(findNormalPoint(Point(-5, 5), Point(0, 0), Point(10, 0), closest));
+}
+
+TEST(GeomUtilsTest, findNormalPointMidVertical)
+{
+   Point closest;
+   EXPECT_TRUE(findNormalPoint(Point(0, 5), Point(0, 0), Point(0, 10), closest));
+   EXPECT_NEAR(0.0f, closest.x, 0.001f);
+   EXPECT_NEAR(5.0f, closest.y, 0.001f);
+}
+
+
+// ============================================================
+// pointOnSegment
+// ============================================================
+
+TEST(GeomUtilsTest, pointOnSegmentMidpoint)
+{
+   F32 closeEnough = 0.01f;
+   EXPECT_TRUE(pointOnSegment(Point(5, 0), Point(0, 0), Point(10, 0), closeEnough));
+}
+
+TEST(GeomUtilsTest, pointOnSegmentAtEndpoint)
+{
+   F32 closeEnough = 0.01f;
+   EXPECT_TRUE(pointOnSegment(Point(0, 0), Point(0, 0), Point(10, 0), closeEnough));
+   EXPECT_TRUE(pointOnSegment(Point(10, 0), Point(0, 0), Point(10, 0), closeEnough));
+}
+
+TEST(GeomUtilsTest, pointOnSegmentOff)
+{
+   F32 closeEnough = 0.0001f;
+   EXPECT_FALSE(pointOnSegment(Point(5, 5), Point(0, 0), Point(10, 0), closeEnough));
+   EXPECT_FALSE(pointOnSegment(Point(15, 0), Point(0, 0), Point(10, 0), closeEnough));
+}
+
+TEST(GeomUtilsTest, pointOnSegmentCloseEnough)
+{
+   F32 closeEnough = 1.0f;  // Within 1 unit
+   // Nearly on segment — distSq to endpoint = 0.25 < 1.0
+   EXPECT_TRUE(pointOnSegment(Point(0.5f, 0), Point(0, 0), Point(10, 0), closeEnough));
+}
+
+
+// ============================================================
+// circleCircleIntersect
+// ============================================================
+
+TEST(GeomUtilsTest, circleCircleIntersectOverlapping)
+{
+   EXPECT_TRUE(circleCircleIntersect(Point(0, 0), 5.0f, Point(8, 0), 5.0f));
+}
+
+TEST(GeomUtilsTest, circleCircleIntersectTouching)
+{
+   // Exactly touching — sum of radii equals distance
+   EXPECT_FALSE(circleCircleIntersect(Point(0, 0), 5.0f, Point(10, 0), 5.0f));
+}
+
+TEST(GeomUtilsTest, circleCircleIntersectSeparate)
+{
+   EXPECT_FALSE(circleCircleIntersect(Point(0, 0), 3.0f, Point(10, 0), 3.0f));
+}
+
+TEST(GeomUtilsTest, circleCircleIntersectContained)
+{
+   // One circle inside the other
+   EXPECT_TRUE(circleCircleIntersect(Point(0, 0), 10.0f, Point(1, 1), 2.0f));
+}
+
+TEST(GeomUtilsTest, circleCircleIntersectSameCenter)
+{
+   EXPECT_TRUE(circleCircleIntersect(Point(0, 0), 5.0f, Point(0, 0), 5.0f));
+}
+
+
+// ============================================================
+// polygonCircleIntersect
+// ============================================================
+
+TEST(GeomUtilsTest, polygonCircleIntersectCenterInside)
+{
+   Vector<Point> square;
+   square.push_back(Point(0, 0));
+   square.push_back(Point(10, 0));
+   square.push_back(Point(10, 10));
+   square.push_back(Point(0, 10));
+
+   Point outPoint;
+   // Center inside polygon — any radius (even 0) should return true
+   EXPECT_TRUE(polygonCircleIntersect(square.address(), square.size(),
+                                       Point(5, 5), 0.0f, outPoint));
+}
+
+TEST(GeomUtilsTest, polygonCircleIntersectTouchingEdge)
+{
+   Vector<Point> square;
+   square.push_back(Point(0, 0));
+   square.push_back(Point(10, 0));
+   square.push_back(Point(10, 10));
+   square.push_back(Point(0, 10));
+
+   Point outPoint;
+   // Circle center at (13, 5), radius^2 = 16 (radius=4): edge at x=10 is 3 units away, within radius
+   EXPECT_TRUE(polygonCircleIntersect(square.address(), square.size(),
+                                       Point(13, 5), 16.0f /* radius^2=16, r=4 */, outPoint));
+}
+
+TEST(GeomUtilsTest, polygonCircleIntersectFarAway)
+{
+   Vector<Point> square;
+   square.push_back(Point(0, 0));
+   square.push_back(Point(10, 0));
+   square.push_back(Point(10, 10));
+   square.push_back(Point(0, 10));
+
+   Point outPoint;
+   // Circle center at (30, 30), radius^2 = 4 (radius=2): nearest square corner is ~28 units away
+   EXPECT_FALSE(polygonCircleIntersect(square.address(), square.size(),
+                                        Point(30, 30), 4.0f, outPoint));
+}
+
+
+// ============================================================
+// circleIntersectsSegment
+// ============================================================
+
+TEST(GeomUtilsTest, circleIntersectsSegmentStartInside)
+{
+   float ct;
+   // Start point inside circle
+   EXPECT_TRUE(circleIntersectsSegment(Point(5, 5), 3.0f, Point(5, 5), Point(10, 5), ct));
+   EXPECT_FLOAT_EQ(0.0f, ct);
+}
+
+TEST(GeomUtilsTest, circleIntersectsSegmentCrossing)
+{
+   float ct;
+   EXPECT_TRUE(circleIntersectsSegment(Point(5, 0), 3.0f, Point(0, 0), Point(10, 0), ct));
+   EXPECT_GT(ct, 0.0f);
+   EXPECT_LE(ct, 1.0f);
+}
+
+TEST(GeomUtilsTest, circleIntersectsSegmentNoCrossing)
+{
+   float ct;
+   // Circle at (0, 10), segment along x-axis from (0, 0) to (10, 0)
+   EXPECT_FALSE(circleIntersectsSegment(Point(0, 10), 3.0f, Point(0, 0), Point(10, 0), ct));
+}
+
+TEST(GeomUtilsTest, circleIntersectsSegmentStartOnEdge)
+{
+   float ct;
+   // Start point exactly on circle boundary
+   EXPECT_TRUE(circleIntersectsSegment(Point(5, 0), 5.0f, Point(0, 0), Point(10, 0), ct));
+   EXPECT_FLOAT_EQ(0.0f, ct);
+}
+
+
+// ============================================================
+// polygonIntersectsSegment
+// ============================================================
+
+TEST(GeomUtilsTest, polygonIntersectsSegmentCrossing)
+{
+   Vector<Point> square;
+   square.push_back(Point(0, 0));
+   square.push_back(Point(10, 0));
+   square.push_back(Point(10, 10));
+   square.push_back(Point(0, 10));
+
+   EXPECT_TRUE(polygonIntersectsSegment(square, Point(-5, 5), Point(15, 5)));
+}
+
+TEST(GeomUtilsTest, polygonIntersectsSegmentInside)
+{
+   Vector<Point> square;
+   square.push_back(Point(0, 0));
+   square.push_back(Point(10, 0));
+   square.push_back(Point(10, 10));
+   square.push_back(Point(0, 10));
+
+   EXPECT_TRUE(polygonIntersectsSegment(square, Point(2, 2), Point(8, 8)));
+}
+
+TEST(GeomUtilsTest, polygonIntersectsSegmentOutside)
+{
+   Vector<Point> square;
+   square.push_back(Point(0, 0));
+   square.push_back(Point(10, 0));
+   square.push_back(Point(10, 10));
+   square.push_back(Point(0, 10));
+
+   EXPECT_FALSE(polygonIntersectsSegment(square, Point(20, 0), Point(30, 10)));
+}
+
+TEST(GeomUtilsTest, polygonIntersectsSegmentParallelEdge)
+{
+   Vector<Point> square;
+   square.push_back(Point(0, 0));
+   square.push_back(Point(10, 0));
+   square.push_back(Point(10, 10));
+   square.push_back(Point(0, 10));
+
+   // Segment parallel to and outside the edge
+   EXPECT_FALSE(polygonIntersectsSegment(square, Point(0, -5), Point(10, -5)));
+}
+
+
+// ============================================================
+// polygonsIntersect
+// ============================================================
+
+TEST(GeomUtilsTest, polygonsIntersectOverlapping)
+{
+   Vector<Point> p1, p2;
+   p1.push_back(Point(0, 0)); p1.push_back(Point(10, 0));
+   p1.push_back(Point(10, 10)); p1.push_back(Point(0, 10));
+   p2.push_back(Point(5, 5)); p2.push_back(Point(15, 5));
+   p2.push_back(Point(15, 15)); p2.push_back(Point(5, 15));
+
+   EXPECT_TRUE(polygonsIntersect(p1, p2));
+   EXPECT_TRUE(polygonsIntersect(p2, p1));
+}
+
+TEST(GeomUtilsTest, polygonsIntersectSeparate)
+{
+   Vector<Point> p1, p2;
+   p1.push_back(Point(0, 0)); p1.push_back(Point(5, 0));
+   p1.push_back(Point(5, 5)); p1.push_back(Point(0, 5));
+   p2.push_back(Point(10, 10)); p2.push_back(Point(15, 10));
+   p2.push_back(Point(15, 15)); p2.push_back(Point(10, 15));
+
+   EXPECT_FALSE(polygonsIntersect(p1, p2));
+}
+
+TEST(GeomUtilsTest, polygonsIntersectOneContained)
+{
+   Vector<Point> outer, inner;
+   outer.push_back(Point(0, 0)); outer.push_back(Point(20, 0));
+   outer.push_back(Point(20, 20)); outer.push_back(Point(0, 20));
+   inner.push_back(Point(5, 5)); inner.push_back(Point(10, 5));
+   inner.push_back(Point(10, 10)); inner.push_back(Point(5, 10));
+
+   EXPECT_TRUE(polygonsIntersect(outer, inner));
+   EXPECT_TRUE(polygonsIntersect(inner, outer));
+}
+
+
+// ============================================================
+// shortenSegment
+// ============================================================
+
+TEST(GeomUtilsTest, shortenSegmentBasic)
+{
+   // Segment of length 10 along x-axis, shorten by 2
+   Point end = shortenSegment(Point(0, 0), Point(10, 0), 2.0f);
+   EXPECT_NEAR(8.0f, end.x, 0.001f);
+   EXPECT_NEAR(0.0f, end.y, 0.001f);
+}
+
+TEST(GeomUtilsTest, shortenSegmentDiagonal)
+{
+   // Segment of length 5 (3-4-5 triangle), shorten by 5 (to zero length)
+   Point start(0, 0), endPt(3, 4);
+   Point result = shortenSegment(start, endPt, 5.0f);
+   EXPECT_NEAR(0.0f, result.x, 0.001f);
+   EXPECT_NEAR(0.0f, result.y, 0.001f);
+}
+
+TEST(GeomUtilsTest, shortenSegmentNoReduction)
+{
+   // Reduce by 0
+   Point end = shortenSegment(Point(0, 0), Point(10, 0), 0.0f);
+   EXPECT_NEAR(10.0f, end.x, 0.001f);
+   EXPECT_NEAR(0.0f, end.y, 0.001f);
+}
+
+
+// ============================================================
+// area
+// ============================================================
+
+TEST(GeomUtilsTest, areaSquare)
+{
+   Vector<Point> square;
+   square.push_back(Point(0, 0));
+   square.push_back(Point(10, 0));
+   square.push_back(Point(10, 10));
+   square.push_back(Point(0, 10));
+   // CCW winding => positive area
+   EXPECT_NEAR(100.0f, fabs(area(square)), 0.001f);
+}
+
+TEST(GeomUtilsTest, areaTriangle)
+{
+   Vector<Point> tri;
+   tri.push_back(Point(0, 0));
+   tri.push_back(Point(6, 0));
+   tri.push_back(Point(0, 4));
+   // Area = 0.5 * base * height = 12
+   EXPECT_NEAR(12.0f, fabs(area(tri)), 0.001f);
+}
+
+TEST(GeomUtilsTest, areaZeroForLine)
+{
+   Vector<Point> line;
+   line.push_back(Point(0, 0));
+   line.push_back(Point(5, 0));
+   line.push_back(Point(10, 0));
+   EXPECT_NEAR(0.0f, fabs(area(line)), 0.001f);
+}
+
+TEST(GeomUtilsTest, areaSignDependsOnWinding)
+{
+   Vector<Point> cw, ccw;
+   // CW: 
+   cw.push_back(Point(0, 0)); cw.push_back(Point(0, 10));
+   cw.push_back(Point(10, 10)); cw.push_back(Point(10, 0));
+   // CCW:
+   ccw.push_back(Point(0, 0)); ccw.push_back(Point(10, 0));
+   ccw.push_back(Point(10, 10)); ccw.push_back(Point(0, 10));
+
+   // One positive, one negative
+   EXPECT_TRUE(area(cw) * area(ccw) < 0.0f);
+}
+
+
+// ============================================================
+// mean2d
+// ============================================================
+
+TEST(GeomUtilsTest, mean2dSquare)
+{
+   Vector<Point> square;
+   square.push_back(Point(0, 0));
+   square.push_back(Point(10, 0));
+   square.push_back(Point(10, 10));
+   square.push_back(Point(0, 10));
+   Point m = mean2d(square);
+   EXPECT_NEAR(5.0f, m.x, 0.001f);
+   EXPECT_NEAR(5.0f, m.y, 0.001f);
+}
+
+TEST(GeomUtilsTest, mean2dSinglePoint)
+{
+   Vector<Point> pts;
+   pts.push_back(Point(3, 7));
+   Point m = mean2d(pts);
+   EXPECT_NEAR(3.0f, m.x, 0.001f);
+   EXPECT_NEAR(7.0f, m.y, 0.001f);
+}
+
+TEST(GeomUtilsTest, mean2dAsymmetric)
+{
+   Vector<Point> pts;
+   pts.push_back(Point(0, 0));
+   pts.push_back(Point(6, 0));
+   pts.push_back(Point(0, 6));
+   Point m = mean2d(pts);
+   EXPECT_NEAR(2.0f, m.x, 0.001f);
+   EXPECT_NEAR(2.0f, m.y, 0.001f);
+}
+
+
+// ============================================================
+// findCentroid
+// ============================================================
+
+TEST(GeomUtilsTest, findCentroidSquare)
+{
+   Vector<Point> square;
+   square.push_back(Point(0, 0));
+   square.push_back(Point(10, 0));
+   square.push_back(Point(10, 10));
+   square.push_back(Point(0, 10));
+   Point c = findCentroid(square);
+   EXPECT_NEAR(5.0f, c.x, 0.01f);
+   EXPECT_NEAR(5.0f, c.y, 0.01f);
+}
+
+TEST(GeomUtilsTest, findCentroidEmptyReturnOrigin)
+{
+   Vector<Point> empty;
+   Point c = findCentroid(empty);
+   EXPECT_FLOAT_EQ(0.0f, c.x);
+   EXPECT_FLOAT_EQ(0.0f, c.y);
+}
+
+TEST(GeomUtilsTest, findCentroidTriangle)
+{
+   Vector<Point> tri;
+   tri.push_back(Point(0, 0));
+   tri.push_back(Point(6, 0));
+   tri.push_back(Point(0, 6));
+   Point c = findCentroid(tri);
+   EXPECT_NEAR(2.0f, c.x, 0.01f);
+   EXPECT_NEAR(2.0f, c.y, 0.01f);
+}
+
+TEST(GeomUtilsTest, findCentroidOffCenterRect)
+{
+   Vector<Point> rect;
+   rect.push_back(Point(2, 3));
+   rect.push_back(Point(8, 3));
+   rect.push_back(Point(8, 7));
+   rect.push_back(Point(2, 7));
+   Point c = findCentroid(rect);
+   EXPECT_NEAR(5.0f, c.x, 0.01f);
+   EXPECT_NEAR(5.0f, c.y, 0.01f);
+}
+
+
+// ============================================================
+// angleOfLongestSide
+// ============================================================
+
+TEST(GeomUtilsTest, angleOfLongestSideHorizontal)
+{
+   // Wide rectangle: longest sides are horizontal
+   Vector<Point> rect;
+   rect.push_back(Point(0, 0));
+   rect.push_back(Point(20, 0));
+   rect.push_back(Point(20, 5));
+   rect.push_back(Point(0, 5));
+   F32 ang = angleOfLongestSide(rect);
+   // Should be near 0 (or FloatPi, adjusted to be right-side-up)
+   EXPECT_NEAR(0.0f, fabs(ang), 0.01f);
+}
+
+TEST(GeomUtilsTest, angleOfLongestSideOnlyOnePoint)
+{
+   Vector<Point> pts;
+   pts.push_back(Point(0, 0));
+   F32 ang = angleOfLongestSide(pts);
+   EXPECT_FLOAT_EQ(0.0f, ang);
+}
+
+
+// ============================================================
+// removeCollinearPoints
+// ============================================================
+
+TEST(GeomUtilsTest, removeCollinearPointsMiddle)
+{
+   // Three collinear points, middle should be removed
+   Vector<Point> pts;
+   pts.push_back(Point(0, 0));
+   pts.push_back(Point(5, 0));  // collinear middle
+   pts.push_back(Point(10, 0));
+   pts.push_back(Point(10, 5));
+   removeCollinearPoints(pts, false);
+   // Middle collinear point should be gone
+   EXPECT_EQ(3, pts.size());
+}
+
+TEST(GeomUtilsTest, removeCollinearPointsNoneToRemove)
+{
+   Vector<Point> pts;
+   pts.push_back(Point(0, 0));
+   pts.push_back(Point(10, 0));
+   pts.push_back(Point(10, 10));
+   pts.push_back(Point(0, 10));
+   S32 origSize = pts.size();
+   removeCollinearPoints(pts, false);
+   EXPECT_EQ(origSize, pts.size());
+}
+
+TEST(GeomUtilsTest, removeCollinearPointsDuplicates)
+{
+   Vector<Point> pts;
+   pts.push_back(Point(0, 0));
+   pts.push_back(Point(0, 0));  // duplicate
+   pts.push_back(Point(5, 0));
+   pts.push_back(Point(10, 0));
+   removeCollinearPoints(pts, false);
+   // The duplicate should be removed; then collinear check on remaining
+   EXPECT_LT(pts.size(), 4);
+}
+
+
+// ============================================================
+// createPolygon / calcPolygonVerts
+// ============================================================
+
+TEST(GeomUtilsTest, createPolygonSquare)
+{
+   // A 4-sided polygon with radius 1 at origin, angle 0
+   Vector<Point> poly = createPolygon(Point(0, 0), 1.0f, 4, FloatPi / 4.0f);
+   ASSERT_EQ(4, poly.size());
+   // Each vertex should be at distance 1 from origin
+   for(S32 i = 0; i < poly.size(); i++)
+      EXPECT_NEAR(1.0f, poly[i].len(), 0.001f);
+}
+
+TEST(GeomUtilsTest, createPolygonCentered)
+{
+   // Polygon centered at (5, 5)
+   Vector<Point> poly = createPolygon(Point(5, 5), 3.0f, 6, 0);
+   ASSERT_EQ(6, poly.size());
+   for(S32 i = 0; i < poly.size(); i++)
+      EXPECT_NEAR(3.0f, poly[i].distanceTo(Point(5, 5)), 0.001f);
+}
+
+TEST(GeomUtilsTest, createPolygonTriangle)
+{
+   Vector<Point> poly = createPolygon(Point(0, 0), 10.0f, 3, 0);
+   ASSERT_EQ(3, poly.size());
+}
+
+TEST(GeomUtilsTest, calcPolygonVerts)
+{
+   Vector<Point> pts;
+   calcPolygonVerts(Point(0, 0), 8, 5.0f, 0, pts);
+   ASSERT_EQ(8, pts.size());
+   for(S32 i = 0; i < pts.size(); i++)
+      EXPECT_NEAR(5.0f, pts[i].len(), 0.001f);
+}
+
+
+// ============================================================
+// isWoundClockwise
+// ============================================================
+
+TEST(GeomUtilsTest, isWoundClockwiseCW)
+{
+   Vector<Point> cw;
+   cw.push_back(Point(0, 0));
+   cw.push_back(Point(0, 10));
+   cw.push_back(Point(10, 10));
+   cw.push_back(Point(10, 0));
+   EXPECT_TRUE(isWoundClockwise(cw));
+}
+
+TEST(GeomUtilsTest, isWoundClockwiseCCW)
+{
+   Vector<Point> ccw;
+   ccw.push_back(Point(0, 0));
+   ccw.push_back(Point(10, 0));
+   ccw.push_back(Point(10, 10));
+   ccw.push_back(Point(0, 10));
+   EXPECT_FALSE(isWoundClockwise(ccw));
+}
+
+TEST(GeomUtilsTest, isWoundClockwiseTriangleCW)
+{
+   Vector<Point> cw;
+   cw.push_back(Point(0, 0));
+   cw.push_back(Point(0, 10));
+   cw.push_back(Point(10, 0));
+   EXPECT_TRUE(isWoundClockwise(cw));
+}
+
+TEST(GeomUtilsTest, isWoundClockwiseTriangleCCW)
+{
+   Vector<Point> ccw;
+   ccw.push_back(Point(0, 0));
+   ccw.push_back(Point(10, 0));
+   ccw.push_back(Point(0, 10));
+   EXPECT_FALSE(isWoundClockwise(ccw));
+}
+
+
+// ============================================================
+// triangulatedFillContains
+// ============================================================
+
+TEST(GeomUtilsTest, triangulatedFillContainsInside)
+{
+   // Two triangles forming a square
+   Vector<Point> triangles;
+   // Triangle 1: bottom-left
+   triangles.push_back(Point(0, 0));
+   triangles.push_back(Point(10, 0));
+   triangles.push_back(Point(10, 10));
+   // Triangle 2: top-right
+   triangles.push_back(Point(0, 0));
+   triangles.push_back(Point(10, 10));
+   triangles.push_back(Point(0, 10));
+
+   EXPECT_TRUE(triangulatedFillContains(&triangles, Point(5, 5)));
+   EXPECT_TRUE(triangulatedFillContains(&triangles, Point(1, 1)));
+   EXPECT_TRUE(triangulatedFillContains(&triangles, Point(9, 9)));
+}
+
+TEST(GeomUtilsTest, triangulatedFillContainsOutside)
+{
+   Vector<Point> triangles;
+   triangles.push_back(Point(0, 0));
+   triangles.push_back(Point(10, 0));
+   triangles.push_back(Point(10, 10));
+   triangles.push_back(Point(0, 0));
+   triangles.push_back(Point(10, 10));
+   triangles.push_back(Point(0, 10));
+
+   EXPECT_FALSE(triangulatedFillContains(&triangles, Point(15, 15)));
+   EXPECT_FALSE(triangulatedFillContains(&triangles, Point(-1, 5)));
+}
+
+
+// ============================================================
+// floatsToPoints
+// ============================================================
+
+TEST(GeomUtilsTest, floatsToPointsBasic)
+{
+   Vector<F32> floats;
+   floats.push_back(0.0f);  floats.push_back(0.0f);
+   floats.push_back(10.0f); floats.push_back(0.0f);
+   floats.push_back(10.0f); floats.push_back(10.0f);
+   floats.push_back(0.0f);  floats.push_back(10.0f);
+   Vector<Point> pts = floatsToPoints(floats);
+   ASSERT_EQ(4, pts.size());
+   EXPECT_FLOAT_EQ(0.0f,  pts[0].x); EXPECT_FLOAT_EQ(0.0f,  pts[0].y);
+   EXPECT_FLOAT_EQ(10.0f, pts[1].x); EXPECT_FLOAT_EQ(0.0f,  pts[1].y);
+   EXPECT_FLOAT_EQ(10.0f, pts[2].x); EXPECT_FLOAT_EQ(10.0f, pts[2].y);
+   EXPECT_FLOAT_EQ(0.0f,  pts[3].x); EXPECT_FLOAT_EQ(10.0f, pts[3].y);
+}
+
+TEST(GeomUtilsTest, floatsToPointsCollinearRemoved)
+{
+   // Collinear middle point should be removed
+   Vector<F32> floats;
+   floats.push_back(0.0f);  floats.push_back(0.0f);
+   floats.push_back(5.0f);  floats.push_back(0.0f);  // collinear middle
+   floats.push_back(10.0f); floats.push_back(0.0f);
+   floats.push_back(10.0f); floats.push_back(10.0f);
+   Vector<Point> pts = floatsToPoints(floats);
+   EXPECT_EQ(3, pts.size());
+}
+
+TEST(GeomUtilsTest, floatsToPointsEmpty)
+{
+   Vector<F32> floats;
+   Vector<Point> pts = floatsToPoints(floats);
+   EXPECT_EQ(0, pts.size());
+}
+
+
+// ============================================================
+// unpackPolygons
+// ============================================================
+
+TEST(GeomUtilsTest, unpackPolygonsSquare)
+{
+   Vector<Vector<Point> > solution;
+   Vector<Point> square;
+   square.push_back(Point(0, 0));
+   square.push_back(Point(10, 0));
+   square.push_back(Point(10, 10));
+   square.push_back(Point(0, 10));
+   solution.push_back(square);
+
+   Vector<Point> lineSegments;
+   unpackPolygons(solution, lineSegments);
+   // 4 edges, 2 points each = 8 points
+   EXPECT_EQ(8, lineSegments.size());
+}
+
+TEST(GeomUtilsTest, unpackPolygonsEmpty)
+{
+   Vector<Vector<Point> > solution;
+   Vector<Point> lineSegments;
+   unpackPolygons(solution, lineSegments);
+   EXPECT_EQ(0, lineSegments.size());
+}
+
+TEST(GeomUtilsTest, unpackPolygonsMultiplePolygons)
+{
+   Vector<Vector<Point> > solution;
+
+   Vector<Point> sq1;
+   sq1.push_back(Point(0, 0)); sq1.push_back(Point(5, 0));
+   sq1.push_back(Point(5, 5)); sq1.push_back(Point(0, 5));
+   solution.push_back(sq1);
+
+   Vector<Point> sq2;
+   sq2.push_back(Point(10, 0)); sq2.push_back(Point(15, 0));
+   sq2.push_back(Point(15, 5));
+   solution.push_back(sq2);
+
+   Vector<Point> lineSegments;
+   unpackPolygons(solution, lineSegments);
+   // 4 edges + 3 edges = 7 edges, 2 points each = 14
+   EXPECT_EQ(14, lineSegments.size());
+}
+
+
+// ============================================================
+// cornersToEdges
+// ============================================================
+
+TEST(GeomUtilsTest, cornersToEdgesSquare)
+{
+   Vector<Point> corners;
+   corners.push_back(Point(0, 0));
+   corners.push_back(Point(10, 0));
+   corners.push_back(Point(10, 10));
+   corners.push_back(Point(0, 10));
+
+   Vector<Point> edges;
+   cornersToEdges(corners, edges);
+   // 4 corners -> 4 edges, 2 points each = 8
+   EXPECT_EQ(8, edges.size());
+}
+
+TEST(GeomUtilsTest, cornersToEdgesTriangle)
+{
+   Vector<Point> corners;
+   corners.push_back(Point(0, 0));
+   corners.push_back(Point(5, 0));
+   corners.push_back(Point(5, 5));
+
+   Vector<Point> edges;
+   cornersToEdges(corners, edges);
+   EXPECT_EQ(6, edges.size());
+}
+
+TEST(GeomUtilsTest, cornersToEdgesClearsOutput)
+{
+   Vector<Point> corners;
+   corners.push_back(Point(0, 0));
+   corners.push_back(Point(5, 0));
+   corners.push_back(Point(5, 5));
+
+   Vector<Point> edges;
+   edges.push_back(Point(99, 99));  // pre-existing data
+   cornersToEdges(corners, edges);
+   EXPECT_EQ(6, edges.size());
+}
+
+
+// ============================================================
+// expandCenterlineToOutline
+// ============================================================
+
+TEST(GeomUtilsTest, expandCenterlineToOutlineHorizontal)
+{
+   Vector<Point> corners;
+   expandCenterlineToOutline(Point(0, 0), Point(10, 0), 4.0f, corners);
+   ASSERT_EQ(4, corners.size());
+   // Width is 4, so cross-vec is ±2 in y direction
+   // All x should be 0 or 10
+   for(S32 i = 0; i < corners.size(); i++)
+   {
+      EXPECT_NEAR(2.0f, fabs(corners[i].y), 0.001f);
+      EXPECT_TRUE(corners[i].x == 0.0f || corners[i].x == 10.0f);
+   }
+}
+
+TEST(GeomUtilsTest, expandCenterlineToOutlineVertical)
+{
+   Vector<Point> corners;
+   expandCenterlineToOutline(Point(5, 0), Point(5, 10), 4.0f, corners);
+   ASSERT_EQ(4, corners.size());
+   for(S32 i = 0; i < corners.size(); i++)
+   {
+      EXPECT_NEAR(2.0f, fabs(corners[i].x - 5.0f), 0.001f);
+      EXPECT_TRUE(corners[i].y == 0.0f || corners[i].y == 10.0f);
+   }
+}
+
+TEST(GeomUtilsTest, expandCenterlineToOutlineClearsCorners)
+{
+   Vector<Point> corners;
+   corners.push_back(Point(99, 99));  // pre-existing
+   expandCenterlineToOutline(Point(0, 0), Point(10, 0), 2.0f, corners);
+   EXPECT_EQ(4, corners.size());
+}
+
+
+// ============================================================
+// findClosestPoint
+// ============================================================
+
+TEST(GeomUtilsTest, findClosestPointBasic)
+{
+   Vector<Point> pts;
+   pts.push_back(Point(0, 0));
+   pts.push_back(Point(10, 0));
+   pts.push_back(Point(20, 0));
+   EXPECT_EQ(0, findClosestPoint(Point(-1, 0), pts));
+   EXPECT_EQ(2, findClosestPoint(Point(25, 0), pts));
+   EXPECT_EQ(1, findClosestPoint(Point(10, 1), pts));
+}
+
+TEST(GeomUtilsTest, findClosestPointSinglePoint)
+{
+   Vector<Point> pts;
+   pts.push_back(Point(5, 5));
+   EXPECT_EQ(0, findClosestPoint(Point(100, 100), pts));
+}
+
+TEST(GeomUtilsTest, findClosestPointEmptyReturnsNegative)
+{
+   Vector<Point> pts;
+   EXPECT_EQ(-1, findClosestPoint(Point(0, 0), pts));
+}
+
+
+// ============================================================
+// isConvex
+// ============================================================
+
+TEST(GeomUtilsTest, isConvexSquare)
+{
+   Vector<Point> square;
+   square.push_back(Point(0, 0));
+   square.push_back(Point(10, 0));
+   square.push_back(Point(10, 10));
+   square.push_back(Point(0, 10));
+   EXPECT_TRUE(isConvex(&square));
+}
+
+TEST(GeomUtilsTest, isConvexTriangle)
+{
+   Vector<Point> tri;
+   tri.push_back(Point(0, 0));
+   tri.push_back(Point(10, 0));
+   tri.push_back(Point(5, 10));
+   EXPECT_TRUE(isConvex(&tri));
+}
+
+TEST(GeomUtilsTest, isConvexConcave)
+{
+   // L-shaped polygon is concave
+   Vector<Point> lshape;
+   lshape.push_back(Point(0, 0));
+   lshape.push_back(Point(10, 0));
+   lshape.push_back(Point(10, 5));
+   lshape.push_back(Point(5, 5));
+   lshape.push_back(Point(5, 10));
+   lshape.push_back(Point(0, 10));
+   EXPECT_FALSE(isConvex(&lshape));
+}
+
+TEST(GeomUtilsTest, isConvexLessThanThreePoints)
+{
+   Vector<Point> line;
+   line.push_back(Point(0, 0));
+   line.push_back(Point(10, 0));
+   EXPECT_TRUE(isConvex(&line));
+
+   Vector<Point> single;
+   single.push_back(Point(5, 5));
+   EXPECT_TRUE(isConvex(&single));
+
+   Vector<Point> empty;
+   EXPECT_TRUE(isConvex(&empty));
+}
+
+
+// ============================================================
+// segsOverlap (public wrapper)
+// ============================================================
+
+TEST(GeomUtilsTest, segsOverlapCollinearOverlapping)
+{
+   Point overlapStart, overlapEnd;
+   // p1-p2 along x-axis [0,10], p3-p4 along x-axis [5,15]: should overlap [5,10]
+   EXPECT_TRUE(segsOverlap(Point(0, 0), Point(10, 0),
+                            Point(5, 0), Point(15, 0),
+                            overlapStart, overlapEnd));
+}
+
+TEST(GeomUtilsTest, segsOverlapNotCollinear)
+{
+   Point overlapStart, overlapEnd;
+   // Perpendicular segments
+   EXPECT_FALSE(segsOverlap(Point(0, 0), Point(10, 0),
+                             Point(5, -5), Point(5, 5),
+                             overlapStart, overlapEnd));
+}
+
+TEST(GeomUtilsTest, segsOverlapParallelNotOnSameLine)
+{
+   Point overlapStart, overlapEnd;
+   // Parallel but offset
+   EXPECT_FALSE(segsOverlap(Point(0, 0), Point(10, 0),
+                             Point(0, 1), Point(10, 1),
+                             overlapStart, overlapEnd));
+}
+
+
+// ============================================================
+// segmentsColinear (public wrapper)
+// ============================================================
+
+TEST(GeomUtilsTest, segmentsColinearOnSameLine)
+{
+   EXPECT_TRUE(segmentsColinear(Point(0, 0), Point(10, 0),
+                                 Point(5, 0), Point(15, 0), 1.0f));
+}
+
+TEST(GeomUtilsTest, segmentsColinearParallelOffset)
+{
+   EXPECT_FALSE(segmentsColinear(Point(0, 0), Point(10, 0),
+                                  Point(0, 1), Point(10, 1), 1.0f));
+}
+
+TEST(GeomUtilsTest, segmentsColinearDiagonal)
+{
+   EXPECT_TRUE(segmentsColinear(Point(0, 0), Point(5, 5),
+                                 Point(5, 5), Point(10, 10), 1.0f));
+}
+
+TEST(GeomUtilsTest, segmentsColinearPerpendicular)
+{
+   EXPECT_FALSE(segmentsColinear(Point(0, 0), Point(10, 0),
+                                  Point(5, 5), Point(5, -5), 1.0f));
+}
+
+}; // namespace Zap
