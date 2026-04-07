@@ -60,7 +60,11 @@ const char *SaveException::what() const throw ()
 string extractDirectory(const string &path )
 {
    // Works on Windows and Linux/Mac!  (just don't have a path with a backslash on Linux/Mac)
-  return path.substr( 0, path.find_last_of( "\\/" )); // Paths should never end with the slash
+  string::size_type pos = path.find_last_of("\\/");
+  if (pos == string::npos)
+     return "";
+
+  return path.substr( 0, pos ); // Paths should never end with the slash
 }
 
 string extractFilename(const string &path )
@@ -70,7 +74,12 @@ string extractFilename(const string &path )
 
 string extractExtension(const string &path )
 {
-  return path.substr( path.find_last_of( '.' ) + 1 );
+   string filename = extractFilename(path);
+   string::size_type dotPos = filename.find_last_of('.');
+   if (dotPos == string::npos)
+      return "";
+
+   return filename.substr(dotPos + 1);
 }
 
 
@@ -93,25 +102,28 @@ string itos(U32 i)
 string itos(U64 i)
 {
    char outString[U64_MAX_DIGITS + 1];  // + 1 for the null
-   dSprintf(outString, sizeof(outString), "%u", i);
+   dSprintf(outString, sizeof(outString), "%llu", i);
    return outString;
 }
 
 
 string itos(S64 i)
 {
-   char outString[ + 1];  // + 1 for the null
-   dSprintf(outString, sizeof(outString), "%d", i);
+   char outString[S64_MAX_DIGITS + 1];  // + 1 for the null
+   dSprintf(outString, sizeof(outString), "%lld", i);
    return outString;
 }
 
 
 string stripZeros(string str)
 {
-   while(str[str.length() - 1]  == '0')
+   if (str.find('.') == string::npos)
+      return str;
+
+   while(str.length() > 0 && str[str.length() - 1]  == '0')
       str.erase(str.length() - 1);
 
-   if(str[str.length() - 1] == '.')
+   if(str.length() > 0 && str[str.length() - 1] == '.')
       str.erase(str.length() - 1);
 
    return str;
@@ -162,7 +174,15 @@ string replaceString(const string &strString, const string &from, const string &
 // Remove any extension from filename
 string stripExtension(string filename)
 {
-   return filename.substr(0, filename.find_last_of('.'));
+   string::size_type dotPos = filename.find_last_of('.');
+   if (dotPos == string::npos)
+      return filename;
+
+   string::size_type slashPos = filename.find_last_of("\\/");
+   if (slashPos != string::npos && dotPos < slashPos)
+      return filename;
+
+   return filename.substr(0, dotPos);
 }
 
 
@@ -198,9 +218,12 @@ string ucase(string strToConvert)
 }
 
 
-// Return true if str looks like an int
-bool isInteger(const char *str)
+// Return true if str looks like a non-negative int
+bool isPositiveInteger(const char *str)
 {
+   if(!str || str[0] == 0)
+      return false;
+
    S32 i = 0;
    while(str[i])
    {
@@ -211,6 +234,8 @@ bool isInteger(const char *str)
 
    return true;
 }
+
+
 
 
 // Sanitize strings before inclusion into JSON
@@ -520,7 +545,7 @@ bool getFilesFromFolder(const string &dir, Vector<string> &files, const string e
          {
             if(name.length() > extensions[i].length() + 1)  // +1 -> include the dot '.'
             {
-               string ext = lcase(extractExtension(extensions[i]));
+               string ext = lcase(extensions[i]);
                if(ext == extension)
                   files.push_back(name);
             }
@@ -957,20 +982,30 @@ bool alphaSort(const string &a, const string &b)
 }
 
 
+// Sort with numbers coming before letters, but not just digits; 2xxx comes before 10xxx
 bool alphaNumberSort(const string &a, const string &b)
 {
-   int aNum = atoi(a.c_str());
-   int bNum = atoi(b.c_str());
+   bool aIsNum = isPositiveInteger(a.c_str());
+   bool bIsNum = isPositiveInteger(b.c_str());
 
-   if(aNum == bNum)
-      return alphaSort(a, b);
-   else
+   if(aIsNum && bIsNum)
    {
-      if(aNum == 0) return true;
-      if(bNum == 0) return false;
+      int aNum = atoi(a.c_str());
+      int bNum = atoi(b.c_str());
 
-      return (aNum < bNum);
+      if(aNum == bNum)
+         return alphaSort(a, b);
+
+      return aNum < bNum;
    }
+
+   if(aIsNum)
+      return true;
+
+   if(bIsNum)
+      return false;
+
+   return alphaSort(a, b);
 }
 
 };

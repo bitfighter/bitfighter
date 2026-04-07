@@ -46,6 +46,7 @@ string itos(S32 i);
 string itos(U32 i);
 string itos(U64 i);
 string itos(S64 i);
+string stripZeros(string str);
 string ftos(F32 f, int digits);
 string ftos(F32 f);
 
@@ -69,7 +70,7 @@ string concatenate(const Vector<string> &words, S32 startingWith = 0);
 string lcase(string strToConvert);
 string ucase(string strToConvert);
 
-bool isInteger(const char *str);
+bool isPositiveInteger(const char *str);
 
 bool isAlpha(char c);
 bool isDigit(char c);
