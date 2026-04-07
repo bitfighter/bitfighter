@@ -500,6 +500,7 @@ TEST(StringUtilsTest, charTypeChecks)
 }
 
 
+// These are comparitors for the actual sort function; they do not do sorting themselves.
 TEST(StringUtilsTest, sorting)
 {
    EXPECT_TRUE(alphaSort("a", "b"));
