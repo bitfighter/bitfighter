@@ -8,6 +8,8 @@
 
 #include "helperMenu.h"
 #include "XtankShape.h"    // for XtankDesign, XtankBody, XtankWeapon
+#include "tnlVector.h"
+
 
 namespace Zap
 {
