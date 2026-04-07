@@ -33,6 +33,7 @@ public:
    bool modulePrimary[ShipModuleCount];    // Is given module primary component active?
    bool moduleSecondary[ShipModuleCount];  // Is given module secondary component active?
    U32 time;
+   S8 bodyIndex;   // -1 = normal BF ship; 0..N = xtank body index (matches XtankBody::Type enum)
 
    static const S32 MaxMoveTime = 127;
 

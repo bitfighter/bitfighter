@@ -11,11 +11,11 @@
 #include "Colors.h"
 #include "Teleporter.h"
 #include "speedZone.h"
+#include "XtankShape.h"    // For xtankPhysicsInfos, XtankBody enum (used by both client and server)
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "UIManager.h"
-#  include "XtankShape.h"
 #endif
 
 #include "gameObjectRender.h"
@@ -128,9 +128,12 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
 #ifndef ZAP_DEDICATED
    mSparkElapsed = 0;
    mShapeType = ShipShape::Normal;
-   mXtankBodyIndex = XtankBody::None;
-   mXtankBodyAngle = FloatHalfPi;   // Default: nose pointing up (+Y)
 #endif
+
+   // Tank physics state — present in all builds (server runs tank physics)
+   mXtankBodyIndex  = XtankBody::None;
+   mTankHeadingAngle = -FloatHalfPi;  // Default: hull facing north (up on screen)
+   mTankSpeed        = 0;
 
    mLoadout.setLoadout(DefaultLoadout);
 
@@ -294,6 +297,31 @@ F32 Ship::processMove(U32 stateIndex)
    mLastProcessStateAngle = getAngle(stateIndex);
    setAngle(stateIndex, mCurrentMove.angle);
 
+   // Sync xtank body index from the move.  When the body changes, initialise
+   // the tank physics state so the new body starts from a clean heading/speed.
+   S32 newBodyIndex = (S32)mCurrentMove.bodyIndex;
+   if(newBodyIndex != mXtankBodyIndex)
+   {
+      bool wasXtankMode = (mXtankBodyIndex >= 0);
+      mXtankBodyIndex = newBodyIndex;
+
+      if(mXtankBodyIndex >= 0 && !wasXtankMode)
+      {
+         // Just switched into tank mode: set heading from current aim angle, start from rest
+         mTankHeadingAngle = getAngle(stateIndex);
+         mTankSpeed        = 0;
+      }
+      setMaskBits(XtankBodyMask);
+   }
+
+   // Route to the appropriate physics model
+   if(mXtankBodyIndex >= 0)
+      return processTankMove(stateIndex);
+
+   // -----------------------------------------------------------------------
+   // Standard Bitfighter ship physics below
+   // -----------------------------------------------------------------------
+
    // Nothing to do when ship is not moving, Continue to check for SpeedZones
    if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && getVel(stateIndex) == Point(0,0))
    {
@@ -344,6 +372,70 @@ F32 Ship::processMove(U32 stateIndex)
    return move(time, stateIndex, false);
 }
 
+
+// Tank driving physics for xtank vehicle bodies.
+//
+// Input mapping (same Move fields, new meaning):
+//   move.y: (BINDING_DOWN - BINDING_UP); W gives -1, S gives +1
+//           => throttle = -move.y   (W = forward = +1, S = backward = -1)
+//   move.x: (BINDING_RIGHT - BINDING_LEFT); D gives +1, A gives -1
+//           => steer    =  move.x   (D = turn right, A = turn left)
+//   move.angle: turret/aim direction (unchanged)
+//
+// The hull faces mTankHeadingAngle; the turret still tracks the aim angle.
+F32 Ship::processTankMove(U32 stateIndex)
+{
+   const TankPhysicsInfo &info = xtankPhysicsInfos[mXtankBodyIndex];
+   F32 dt = mCurrentMove.time * 0.001f;
+
+   // W (BINDING_UP) gives move.y = -1; negate so forward throttle is positive
+   F32 throttle = -mCurrentMove.y;   // +1 = full forward, -1 = full reverse
+   F32 steer    =  mCurrentMove.x;   // +1 = turn right (clockwise), -1 = turn left
+
+   // Early exit when completely idle (also check for SpeedZones like BF mode does)
+   if(throttle == 0 && steer == 0 && mTankSpeed == 0.0f)
+   {
+      if(!checkForSpeedzones(stateIndex))
+         return 0;
+   }
+
+   // --- Steering: rotate the hull ---
+   mTankHeadingAngle += steer * info.turnRate * dt;
+
+   // Keep heading in [-pi, pi] to avoid unbounded drift
+   while(mTankHeadingAngle >  FloatPi)  mTankHeadingAngle -= Float2Pi;
+   while(mTankHeadingAngle < -FloatPi)  mTankHeadingAngle += Float2Pi;
+
+   // --- Throttle: accelerate / decelerate ---
+   mTankSpeed += throttle * info.acceleration * dt;
+
+   // --- Passive friction (deceleration toward zero when not throttling) ---
+   F32 frictionDelta = info.friction * dt;
+   if(mTankSpeed > frictionDelta)
+      mTankSpeed -= frictionDelta;
+   else if(mTankSpeed < -frictionDelta)
+      mTankSpeed += frictionDelta;
+   else
+      mTankSpeed = 0;
+
+   // --- Clamp to body speed limits ---
+   mTankSpeed = CLAMP(mTankSpeed, -info.maxReverseSpeed, info.maxSpeed);
+
+   // --- Compute world-space velocity from heading + speed ---
+   setVel(stateIndex, Point(cos(mTankHeadingAngle) * mTankSpeed,
+                            sin(mTankHeadingAngle) * mTankSpeed));
+
+   // --- Run collision/movement simulation ---
+   F32 result = move(dt, stateIndex, false);
+
+   // --- After collision response, project resulting velocity back onto the
+   //     heading direction.  This discards lateral velocity (tank traction)
+   //     and updates mTankSpeed to reflect wall/collision impacts. ---
+   Point headingVec(cos(mTankHeadingAngle), sin(mTankHeadingAngle));
+   mTankSpeed = getVel(stateIndex).dot(headingVec);
+
+   return result;
+}
 
 // Returns the zone in question if this ship is in any zone.
 // If ship is in multiple zones, an aribtrary one will be returned, and the level designer will be flogged.
@@ -1309,6 +1401,15 @@ void Ship::writeControlState(BitStream *stream)
    stream->writeFlag(mCooldownNeeded);
 
    stream->writeRangedU32(mLoadout.getActiveWeaponIndex(), 0, ShipWeaponCount);
+
+   // Tank physics state: send body index, hull heading and current speed so
+   // the client can correct its prediction without jitter.
+   if(stream->writeFlag(mXtankBodyIndex >= 0))
+   {
+      stream->writeRangedU32((U32)mXtankBodyIndex, 0, XtankBody::Count - 1);
+      stream->write(mTankHeadingAngle);
+      stream->write(mTankSpeed);
+   }
 }
 
 
@@ -1330,6 +1431,18 @@ void Ship::readControlState(BitStream *stream)
    mCooldownNeeded = stream->readFlag();
 
    setActiveWeapon(stream->readRangedU32(0, ShipWeaponCount));
+
+   // Tank physics state
+   if(stream->readFlag())
+   {
+      mXtankBodyIndex   = (S32)stream->readRangedU32(0, XtankBody::Count - 1);
+      stream->read(&mTankHeadingAngle);
+      stream->read(&mTankSpeed);
+   }
+   else
+   {
+      mXtankBodyIndex = XtankBody::None;
+   }
 }
 
 
@@ -1377,6 +1490,18 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 
       for(S32 i = 0; i < ShipWeaponCount; i++)
          stream->writeEnum(mLoadout.getWeapon(i), WeaponCount);
+   }
+
+   // Xtank body index — needed by all clients so they render the correct hull
+   // and apply the correct physics model for other players' ships.
+   if(stream->writeFlag(updateMask & (XtankBodyMask | InitialMask)))
+   {
+      stream->writeRangedU32((U32)(mXtankBodyIndex + 1), 0, XtankBody::Count);
+      if(mXtankBodyIndex >= 0)
+      {
+         stream->write(mTankHeadingAngle);
+         stream->write(mTankSpeed);
+      }
    }
 
    if(!stream->writeFlag(mHasExploded))
@@ -1551,8 +1676,23 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       }
    }
 
-   if(stream->readFlag())  // mHasExploded
+   // Xtank body index (XtankBodyMask | InitialMask)
+   if(stream->readFlag())
    {
+      mXtankBodyIndex = (S32)stream->readRangedU32(0, XtankBody::Count) - 1;
+      if(mXtankBodyIndex >= 0)
+      {
+         stream->read(&mTankHeadingAngle);
+         stream->read(&mTankSpeed);
+      }
+      else
+      {
+         mTankHeadingAngle = -FloatHalfPi;
+         mTankSpeed = 0;
+      }
+   }
+
+   if(stream->readFlag())  // mHasExploded   {
       mHealth = 0;
       if(!mHasExploded)
       {
@@ -2005,18 +2145,27 @@ const ShipShapeInfo *Ship::getActiveShipShapeInfo() const
       return &xtankBodyInfos[mXtankBodyIndex];
    return &ShipShape::shipShapeInfos[mShapeType];
 }
+#endif
 
 
-// Cycle to the next xtank body shape.  After the last xtank body the player
-// returns to the regular Bitfighter ship.  The current body name is printed
-// to the game chat area so the player can see what they selected.
+// Cycle to the next xtank body.  After the last xtank body the player returns
+// to the regular Bitfighter ship.  When switching into a tank body the heading
+// is initialised to the current aim angle so the vehicle starts pointing in the
+// right direction.  The body change is propagated to the server via
+// Move::bodyIndex (set by UIGame.cpp after calling this function).
 void Ship::cycleXtankBody()
 {
    mXtankBodyIndex++;
    if(mXtankBodyIndex >= XtankBody::Count)
       mXtankBodyIndex = XtankBody::None;
+
+   if(mXtankBodyIndex >= 0)
+   {
+      // Initialise tank physics state for the newly selected body
+      mTankHeadingAngle = getAngle(ActualState);
+      mTankSpeed        = 0;
+   }
 }
-#endif
 
 
 // Client only
@@ -2238,23 +2387,11 @@ void Ship::renderLayer(S32 layerIndex)
 
    F32 angle = getRenderAngle();   // aim angle: where the mouse/reticle points
 
-   // For xtank vehicle bodies the hull always faces the direction of travel
-   // while the aim angle is kept for the turret(s).  For the standard BF
-   // ship (mXtankBodyIndex < 0) body and aim angle are the same.
-   if(mXtankBodyIndex >= 0)
-   {
-      // Use the actual ship velocity to determine travel direction.
-      // Only update when the ship is moving fast enough to give a stable angle;
-      // this prevents snapping back to zero when coasting to a stop.
-      static const F32 VEL_THRESHOLD_SQ = 50.0f * 50.0f;
-      Point rVel = getRenderVel();
-      if(rVel.lenSquared() > VEL_THRESHOLD_SQ)
-         mXtankBodyAngle = atan2(rVel.y, rVel.x);
-   }
-
-   // bodyAngle drives hull rotation; aimAngle drives turret rotation.
+   // For xtank vehicle bodies the hull faces mTankHeadingAngle (the authoritative
+   // physics heading) while the aim angle controls the turret(s).  For the
+   // standard BF ship body and aim angle are the same.
    const F32 aimAngle  = angle;
-   const F32 bodyAngle = (mXtankBodyIndex >= 0) ? mXtankBodyAngle : angle;
+   const F32 bodyAngle = (mXtankBodyIndex >= 0) ? mTankHeadingAngle : angle;
 
    F32 deltaAngle = getAngleDiff(mLastProcessStateAngle, bodyAngle);
 

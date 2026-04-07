@@ -330,4 +330,42 @@ XtankBodyTurrets xtankTurretInfos[XtankBody::Count] =
    { 4, { { -14, -14 }, { 14, -14 }, { -14, 14 }, { 14, 14 } } },
 }; // xtankTurretInfos[]
 
+
+// ---------------------------------------------------------------------------
+// Per-body tank driving physics parameters.
+//
+// Ordered to match XtankBody::Type enum values.
+//
+// Design intent:
+//   - Light/small bodies (Lightcycle, Trike) are fast and nimble.
+//   - Medium bodies (Hexo, Spider, Tornado, Delta) offer balanced handling.
+//   - Heavy bodies (Tiger, Rhino, Medusa, Malice, Panzy) are slow but
+//     hit hard and are hard to redirect.
+//   - Disk has unusually high turnRate (saucer can spin in place easily).
+//   - Marauder and Psycho are spirited "sports" tanks.
+//   - All reverse speeds are ~55-60 % of forward max.
+//
+// Units:  speed / reverseSpeed in units/sec  (BF ship MaxVelocity = 450)
+//         acceleration / friction in units/sec²  (BF ship Acceleration = 2500)
+//         turnRate in radians/sec
+// ---------------------------------------------------------------------------
+TankPhysicsInfo xtankPhysicsInfos[XtankBody::Count] =
+{
+   //                   maxSpd  maxRevSpd  accel   friction  turnRate
+   /* Lightcycle  */  {  600,    340,      3500,    180,      2.6f },
+   /* Trike       */  {  560,    320,      3200,    200,      2.3f },
+   /* Hexo        */  {  520,    290,      3000,    230,      2.0f },
+   /* Spider      */  {  490,    275,      2800,    240,      2.2f },
+   /* Psycho      */  {  545,    310,      3250,    210,      2.4f },
+   /* Tornado     */  {  510,    285,      2950,    235,      2.1f },
+   /* Marauder    */  {  475,    265,      2650,    260,      1.9f },
+   /* Tiger       */  {  450,    250,      2500,    280,      1.6f },
+   /* Rhino       */  {  400,    220,      2100,    310,      1.2f },
+   /* Medusa      */  {  420,    235,      2250,    295,      1.5f },
+   /* Delta       */  {  490,    275,      2750,    250,      1.9f },
+   /* Disk        */  {  515,    290,      3000,    190,      3.0f },
+   /* Malice      */  {  430,    240,      2300,    290,      1.4f },
+   /* Panzy       */  {  370,    205,      1900,    340,      1.0f },
+}; // xtankPhysicsInfos[]
+
 } /* namespace Zap */
