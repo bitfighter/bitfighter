@@ -55,7 +55,7 @@ public:
 
    F32 angleTo(const Point &p) const;
 
-   Point rotate(F32 ang);
+   Point rotate(F32 ang);     // Unused
 
    void setAngle(const F32 ang);
    void setPolar(const F32 l, const F32 ang);
