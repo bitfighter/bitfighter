@@ -273,10 +273,13 @@ TEST(StringUtilsTest, parseStringAndStripLeadingSlash)
 TEST(StringUtilsTest, findPointerOfArg)
 {
    const char *msg = "one two three four";
+   EXPECT_STREQ("one two three four", findPointerOfArg(msg, 0));
    EXPECT_STREQ("two three four", findPointerOfArg(msg, 1));
    EXPECT_STREQ("three four", findPointerOfArg(msg, 2));
    EXPECT_STREQ("four", findPointerOfArg(msg, 3));
    EXPECT_STREQ("", findPointerOfArg(msg, 4));
+   EXPECT_STREQ("", findPointerOfArg(msg, 40));
+   EXPECT_STREQ("", findPointerOfArg(msg, -1));
 }
 
 
@@ -293,6 +296,7 @@ TEST(StringUtilsTest, caseInsensitiveStringCompare)
 {
    EXPECT_TRUE(caseInsensitiveStringCompare("abc", "ABC"));
    EXPECT_TRUE(caseInsensitiveStringCompare("ABC", "abc"));
+   EXPECT_TRUE(caseInsensitiveStringCompare("AbC", "aBc"));
    EXPECT_FALSE(caseInsensitiveStringCompare("abc", "abcd"));
    EXPECT_FALSE(caseInsensitiveStringCompare("abc", "abd"));
 }
@@ -442,6 +446,8 @@ TEST(StringUtilsTest, joinDir)
 {
    EXPECT_EQ("path/file", joindir("path", "file"));
    EXPECT_EQ("path/file", joindir("path/", "file"));
+   EXPECT_EQ("/path/file", joindir("/path/", "file"));
+   EXPECT_EQ("path/file", joindir("path/", "/file"));
    EXPECT_EQ("file", joindir("", "file"));
 
    EXPECT_EQ("path/file", strictjoindir("path", "file"));
