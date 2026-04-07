@@ -1418,7 +1418,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    else if(inputCode == KEY_CLOSEBRACKET && InputCodeManager::checkModifier(KEY_CTRL))    // Ctrl+] advances bots by 10 steps if frozen
       EventManager::get()->addSteps(10);
 
-   // Ctrl+Alt+Shift+X cycles through xtank vehicle bodies (cosmetic only)
+   // Ctrl+Alt+Shift+X cycles through xtank vehicle bodies
    else if(inputCode == KEY_X &&
            InputCodeManager::checkModifier(KEY_CTRL, KEY_ALT, KEY_SHIFT))
    {
@@ -1429,6 +1429,11 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          S32 bodyIdx = ship->getXtankBodyIndex();
          const char *bodyName = (bodyIdx >= 0) ? xtankBodyNames[bodyIdx] : "Bitfighter Ship";
          getGame()->displayMessage(Colors::cyan, "Vehicle body: %s", bodyName);
+
+         // Propagate the new body choice to the server via the Move struct.
+         // mCurrentMove.bodyIndex is delta-compressed, so it will be sent
+         // in the next packet and every packet thereafter until it changes.
+         mCurrentMove.bodyIndex = (S8)bodyIdx;
       }
    }
 

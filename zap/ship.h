@@ -8,6 +8,7 @@
 
 #include "moveObject.h"
 #include "LoadoutTracker.h"
+#include "XtankShape.h"     // For XtankBody::Count, TankPhysicsInfo
 
 #include "Timer.h"
 
@@ -72,6 +73,9 @@ private:
 
    LoadoutTracker checkAndBuildLoadout(lua_State *L, S32 profile);
 
+   // Tank driving physics helper (xtank bodies only)
+   F32 processTankMove(U32 stateIndex);
+
 protected:
    SafePtr <ClientInfo> mClientInfo;
    StringTableEntry mPlayerName;
@@ -101,7 +105,8 @@ public:
       RespawnMask         = Parent::FirstFreeMask << 5, // For when robots respawn
       TeleportMask        = Parent::FirstFreeMask << 6, // Ship has just teleported
       SpawnShieldMask     = Parent::FirstFreeMask << 7, // Used for the spawn shield
-      FirstFreeMask       = Parent::FirstFreeMask << 8
+      XtankBodyMask       = Parent::FirstFreeMask << 8, // Xtank body index changed
+      FirstFreeMask       = Parent::FirstFreeMask << 9
    };
 
 
@@ -180,9 +185,13 @@ public:
    S32 mLastTrailPoint[TrailCount];  // TrailCount = 2
    UI::FxTrail mTrail[TrailCount];
    ShipShape::ShipShapeType mShapeType;
-   S32 mXtankBodyIndex;              // -1 = use normal BF shape; >=0 = use xtank body
-   F32 mXtankBodyAngle;              // Last-known direction-of-travel angle for xtank bodies
 #endif
+
+   // Xtank body index and tank physics state.  Present in all builds because
+   // the server must run tank driving physics when an xtank body is active.
+   S32 mXtankBodyIndex;       // -1 (XtankBody::None) = normal BF ship; >=0 = xtank body
+   F32 mTankHeadingAngle;     // Current hull heading for tank physics (radians)
+   F32 mTankSpeed;            // Current speed along mTankHeadingAngle (units/sec)
 
    F32 mass;            // Mass of ship, not used
    bool mHasExploded;
@@ -266,13 +275,14 @@ public:
    // Returns the ShipShapeInfo to use for rendering/spark emission:
    // either an xtank body or the standard BF shape, depending on mXtankBodyIndex.
    const ShipShapeInfo *getActiveShipShapeInfo() const;
+#endif
 
    // Returns the current xtank body index (-1 = normal BF ship, >=0 = xtank body).
    S32 getXtankBodyIndex() const { return mXtankBodyIndex; }
 
    // Cycle to the next xtank body (wraps around to the normal BF ship after the last).
+   // Also resets tank physics heading to current aim angle.
    void cycleXtankBody();
-#endif
 
    void controlMoveReplayComplete();
    void onAddedToGame(Game *game);

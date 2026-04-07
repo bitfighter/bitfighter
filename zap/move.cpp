@@ -5,6 +5,7 @@
 
 #include "move.h"
 #include "Point.h"
+#include "XtankShape.h"   // For XtankBody::Count
 
 #include "stringUtils.h"
 #include "MathUtils.h"     // For radiansToUnit() def
@@ -46,6 +47,7 @@ void Move::initialize()
    x = 0;
    y = 0;
    angle = 0;
+   bodyIndex = -1;   // -1 = normal BF ship (XtankBody::None)
 
    for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
    {
@@ -86,7 +88,8 @@ bool Move::isEqualMove(const Move *move) const
    return move->x == x &&
           move->y == y &&
           move->angle == angle &&
-          move->fire == fire;
+          move->fire == fire &&
+          move->bodyIndex == bodyIndex;
 }
 
 
@@ -116,6 +119,9 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
          stream->writeFlag(modulePrimary[i]);
          stream->writeFlag(moduleSecondary[i]);
       }
+
+      // Body index: -1 (BF ship) through XtankBody::Count-1; stored as 0..XtankBody::Count
+      stream->writeRangedU32((U32)(bodyIndex + 1), 0, XtankBody::Count);
    }
    if(packTime)
    {
@@ -151,6 +157,9 @@ void Move::unpack(BitStream *stream, bool unpackTime)
          modulePrimary[i] = stream->readFlag();
          moduleSecondary[i] = stream->readFlag();
       }
+
+      // Body index: stored as 0..XtankBody::Count, representing -1..XtankBody::Count-1
+      bodyIndex = (S8)(stream->readRangedU32(0, XtankBody::Count) - 1);
    }
 
    if(unpackTime)
@@ -187,7 +196,7 @@ string Move::toString()
       modsstr += moduleSecondary[i] ? "1" : "0";
    }
 
-   return "(" + p.toString() + ")" + sep + ftos(angle) + sep + firing + sep + modpstr + sep + modsstr;
+   return "(" + p.toString() + ")" + sep + ftos(angle) + sep + firing + sep + modpstr + sep + modsstr + sep + "body=" + itos(bodyIndex);
 }
 
 

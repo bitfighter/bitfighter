@@ -16,8 +16,9 @@
 //
 // Keep this file and its companion XtankShape.cpp cleanly separated from the
 // rest of the Bitfighter codebase.  The only integration points are:
-//   - ship.h / ship.cpp  (mXtankBodyIndex field + cycleXtankBody())
+//   - ship.h / ship.cpp  (mXtankBodyIndex field + cycleXtankBody() + tank physics)
 //   - UIGame.cpp         (Ctrl+Alt+Shift+X hotkey handler)
+//   - move.h / move.cpp  (Move::bodyIndex field)
 //------------------------------------------------------------------------------
 
 #ifndef _XTANK_SHAPE_H_
@@ -85,6 +86,29 @@ struct XtankBodyTurrets
 
 // One entry per XtankBody::Type value.
 extern XtankBodyTurrets xtankTurretInfos[XtankBody::Count];
+
+
+// ---------------------------------------------------------------------------
+// Tank driving physics parameters for xtank vehicle bodies.
+//
+// All speed/acceleration values are in game-units per second (or per second²).
+// turnRate is in radians per second.
+//
+// These represent a "middle-of-the-road" tuning for each body so they handle
+// distinctly (heavy Rhino vs. nimble Lightcycle) while remaining playable.
+// ---------------------------------------------------------------------------
+
+struct TankPhysicsInfo
+{
+   F32 maxSpeed;          // Maximum forward speed (units/sec)
+   F32 maxReverseSpeed;   // Maximum reverse speed (units/sec)
+   F32 acceleration;      // Throttle acceleration (units/sec²)
+   F32 friction;          // Passive deceleration when no throttle (units/sec²)
+   F32 turnRate;          // Rotation rate of the hull (radians/sec)
+};
+
+// One entry per XtankBody::Type value.
+extern TankPhysicsInfo xtankPhysicsInfos[XtankBody::Count];
 
 } /* namespace Zap */
 #endif /* _XTANK_SHAPE_H_ */

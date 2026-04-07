@@ -100,6 +100,7 @@ set(SHARED_SOURCES
 	Timer.cpp
 	WallSegmentManager.cpp
 	WeaponInfo.cpp
+	XtankShape.cpp
 	Zone.cpp
 	zoneControlGame.cpp
 	${CMAKE_SOURCE_DIR}/recast/RecastAlloc.cpp
@@ -161,7 +162,6 @@ set(CLIENT_SOURCES
 	ScoreboardRenderer.cpp
 	Shader.cpp
 	ShipShape.cpp
-	XtankShape.cpp
 	SlideOutWidget.cpp
 	sparkManager.cpp
 	SymbolShape.cpp
