@@ -235,6 +235,7 @@ endif()
 
 
 # Other internal-only sub-projects
+include_directories(tnl)
 add_subdirectory(tnl)
 add_subdirectory(tnlping)
 add_subdirectory(master)

@@ -5,6 +5,7 @@
 
 #include "Color.h"
 #include "stringUtils.h"
+#include "MathUtils.h"
 
 #include <cmath>
 
@@ -122,14 +123,22 @@ string Color::toRGBString() const
 string Color::toHexString() const
 {
    char c[7];
-   dSprintf(c, sizeof(c), "%.6X", U32(r * 0xFF) << 24 >> 8 | U32(g * 0xFF) << 24 >> 16 | (U32(b * 0xFF) & 0xFF));
+   U32 ir = (U32)(CLAMP(r, 0.0f, 1.0f) * 255.0f);
+   U32 ig = (U32)(CLAMP(g, 0.0f, 1.0f) * 255.0f);
+   U32 ib = (U32)(CLAMP(b, 0.0f, 1.0f) * 255.0f);
+
+   dSprintf(c, sizeof(c), "%.2X%.2X%.2X", ir, ig, ib);
    return c;
 }
 
 
 U32 Color::toU32() const
 {
-   return U32(r * 0xFF) | U32(g * 0xFF)<<8 | U32(b * 0xFF)<<16;
+   U32 ir = (U32)(CLAMP(r, 0.0f, 1.0f) * 255.0f);
+   U32 ig = (U32)(CLAMP(g, 0.0f, 1.0f) * 255.0f);
+   U32 ib = (U32)(CLAMP(b, 0.0f, 1.0f) * 255.0f);
+
+   return ir | ig << 8 | ib << 16;
 }
 
 
