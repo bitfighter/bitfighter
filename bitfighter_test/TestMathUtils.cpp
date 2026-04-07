@@ -59,6 +59,11 @@ TEST(MathUtilsTest, RoundUp)
    EXPECT_EQ(-5, roundUp(-7, 5));
    EXPECT_EQ(-10, roundUp(-12, 5));
    EXPECT_EQ(-10, roundUp(-10, 5));
+
+   // Test with negative multiple
+   EXPECT_EQ(10, roundUp(7, -5));
+   EXPECT_EQ(10, roundUp(10, -5));
+   EXPECT_EQ(-5, roundUp(-7, -5));
 }
 
 TEST(MathUtilsTest, FindLowestRootInInterval)
