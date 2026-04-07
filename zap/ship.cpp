@@ -1692,7 +1692,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       }
    }
 
-   if(stream->readFlag())  // mHasExploded   {
+   if(stream->readFlag()) {   // mHasExploded
       mHealth = 0;
       if(!mHasExploded)
       {
@@ -2562,8 +2562,8 @@ bool Ship::isRobot()
    METHOD(CLASS, setLoadoutNow,   ARRAYDEF({{ TABLE, END }, { INT, INT, INT, INT, INT, END }}), 2 ) \
 
 
-GENERATE_LUA_METHODS_TABLE(Ship, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(Ship, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(Ship, LUA_METHODS);
 
 #undef LUA_METHODS
 
