@@ -2001,7 +2001,7 @@ void Ship::emitExplosion()
 const ShipShapeInfo *Ship::getActiveShipShapeInfo() const
 {
    if(mXtankBodyIndex >= 0)
-      return &XtankShape::xtankBodyInfos[mXtankBodyIndex];
+      return &xtankBodyInfos[mXtankBodyIndex];
    return &ShipShape::shipShapeInfos[mShapeType];
 }
 

@@ -554,14 +554,14 @@ static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bo
 }
 
 
-static void renderShipFlame(ShipFlame *flames, S32 flameCount, F32 thrust, F32 alpha, bool yThruster)
+static void renderShipFlame(const ShipFlame *flames, S32 flameCount, F32 thrust, F32 alpha, bool yThruster)
 {
    Renderer& r = Renderer::get();
 
    for(S32 i = 0; i < flameCount; i++)
       for(S32 j = 0; j < flames[i].layerCount; j++)
       {
-         ShipFlameLayer *flameLayer = &flames[i].layers[j];
+         const ShipFlameLayer *flameLayer = &flames[i].layers[j];
          r.setColor(flameLayer->color, alpha);
 
          F32 yThrusterX;

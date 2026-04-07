@@ -1427,7 +1427,7 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       {
          ship->cycleXtankBody();
          S32 bodyIdx = ship->getXtankBodyIndex();
-         const char *bodyName = (bodyIdx >= 0) ? XtankShape::xtankBodyNames[bodyIdx] : "Bitfighter Ship";
+         const char *bodyName = (bodyIdx >= 0) ? xtankBodyNames[bodyIdx] : "Bitfighter Ship";
          getGame()->displayMessage(Colors::cyan, "Vehicle body: %s", bodyName);
       }
    }
