@@ -18,6 +18,7 @@
 #include "SparkTypesEnum.h"
 #include "gameConnection.h"
 #include "MasterTypes.h"
+#include "XtankShape.h"          // For XtankDesign
 
 #include "SDL_gamecontroller.h"
 
@@ -227,6 +228,7 @@ public:
    void quitEngineerHelper();
    void newLoadoutHasArrived(const LoadoutTracker &loadout);
    void setActiveWeapon(U32 weaponIndex);
+   void xtankDesignUpdated(const XtankDesign &design);
    bool isShowingDebugShipCoords();
 
    void requestSpawnDelayed(bool incursPenalty) const;

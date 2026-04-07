@@ -192,6 +192,7 @@ public:
    S32 mXtankBodyIndex;       // -1 (XtankBody::None) = normal BF ship; >=0 = xtank body
    F32 mTankHeadingAngle;     // Current hull heading for tank physics (radians)
    F32 mTankSpeed;            // Current speed along mTankHeadingAngle (units/sec)
+   XtankDesign mXtankDesign;  // Per-player vehicle configuration (body + per-slot weapons)
 
    F32 mass;            // Mass of ship, not used
    bool mHasExploded;

@@ -303,6 +303,10 @@ public:
    void setModulePrimary(ShipModule module, bool isActive);
    void setModuleSecondary(ShipModule module, bool isActive);
 
+   // Xtank design helpers
+   void xtankDesignUpdated(const XtankDesign &design);   // Updates the HUD indicator
+   void applyXtankDesign(const XtankDesign &design);     // Applies design to ship + mCurrentMove
+
    void toggleLevelRating();
    
    static string getPersonalRatingString(PersonalRating rating);

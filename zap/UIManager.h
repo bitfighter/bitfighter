@@ -15,6 +15,7 @@
 #include "game.h"
 #include "HelpItemManager.h"     // For HelpItem def
 #include "LoadoutTracker.h"
+#include "XtankShape.h"          // For XtankDesign
 
 #include "Color.h"
 #include "Point.h"
@@ -263,6 +264,7 @@ public:
    bool isInScoreboardMode();
    void newLoadoutHasArrived(const LoadoutTracker &loadout);
    void setActiveWeapon(U32 weaponIndex);
+   void xtankDesignUpdated(const XtankDesign &design);
    bool isShowingDebugShipCoords();
    Point worldToScreenPoint(const Point *point, S32 canvasWidth, S32 canvasHeight);
    void resetCommandersMap();

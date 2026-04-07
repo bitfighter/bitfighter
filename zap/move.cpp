@@ -54,6 +54,9 @@ void Move::initialize()
       modulePrimary[i]   = false;
       moduleSecondary[i] = false;
    }
+
+   for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
+      weaponSlot[i] = -1;   // -1 = XtankWeapon::None
 }
 
 
@@ -83,6 +86,10 @@ bool Move::isEqualMove(const Move *move) const
 {
    for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
       if(move->modulePrimary[i] != modulePrimary[i] || move->moduleSecondary[i] != moduleSecondary[i])
+         return false;
+
+   for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
+      if(move->weaponSlot[i] != weaponSlot[i])
          return false;
 
    return move->x == x &&
@@ -122,6 +129,12 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
 
       // Body index: -1 (BF ship) through XtankBody::Count-1; stored as 0..XtankBody::Count
       stream->writeRangedU32((U32)(bodyIndex + 1), 0, XtankBody::Count);
+
+      // Weapon slots: only present when an xtank body is active.
+      // Each slot value -1..XtankWeapon::Count-1 is stored as 0..XtankWeapon::Count.
+      if(bodyIndex >= 0)
+         for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
+            stream->writeRangedU32((U32)(weaponSlot[i] + 1), 0, XtankWeapon::Count);
    }
    if(packTime)
    {
@@ -160,6 +173,14 @@ void Move::unpack(BitStream *stream, bool unpackTime)
 
       // Body index: stored as 0..XtankBody::Count, representing -1..XtankBody::Count-1
       bodyIndex = (S8)(stream->readRangedU32(0, XtankBody::Count) - 1);
+
+      // Weapon slots: present only when an xtank body is active.
+      if(bodyIndex >= 0)
+         for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
+            weaponSlot[i] = (S8)(stream->readRangedU32(0, XtankWeapon::Count) - 1);
+      else
+         for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
+            weaponSlot[i] = -1;
    }
 
    if(unpackTime)
