@@ -181,6 +181,7 @@ public:
    UI::FxTrail mTrail[TrailCount];
    ShipShape::ShipShapeType mShapeType;
    S32 mXtankBodyIndex;              // -1 = use normal BF shape; >=0 = use xtank body
+   F32 mXtankBodyAngle;              // Last-known direction-of-travel angle for xtank bodies
 #endif
 
    F32 mass;            // Mass of ship, not used

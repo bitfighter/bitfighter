@@ -1045,6 +1045,64 @@ void renderSpawnShield(const Point &pos, U32 shieldTime, U32 renderTime)
 }
 
 
+// Render the turrets for an xtank vehicle body.
+//
+// The hull has already been drawn rotated by bodyAngle.  Each turret is an
+// independent barrel that always points toward the player's aim direction
+// (aimAngle), regardless of which way the hull is facing.
+//
+// Barrel geometry (model space, before turret rotation):
+//   - Points up the +Y axis (matching the ship drawing convention).
+//   - A filled rectangle from y = 0 to y = BARREL_LENGTH, half-width = BARREL_HALF_W.
+// Base geometry: a small polygon ring drawn around the mount point.
+void renderXtankTurrets(const Point &pos, F32 bodyAngle, F32 aimAngle, F32 alpha,
+                        const XtankBodyTurrets &turrets, const Color *color, F32 warpInScale)
+{
+   Renderer& r = Renderer::get();
+
+   // Rotation components for the body orientation: the hull is rotated by
+   // (bodyAngle - Pi/2) radians, same convention used in renderShip().
+   const F32 cosBody = cos(bodyAngle - FloatHalfPi);
+   const F32 sinBody = sin(bodyAngle - FloatHalfPi);
+
+   // Barrel outline vertices in local turret space (nose = +Y).
+   // Half-width = 2, length = 12, base-ring radius = 5.
+   static const F32 barrelPts[8] = {
+      -2.0f, 0.0f,
+       2.0f, 0.0f,
+       2.0f, 12.0f,
+      -2.0f, 12.0f,
+   };
+
+   for(S32 i = 0; i < turrets.count; i++)
+   {
+      // Transform the mount offset from body space into world space.
+      const F32 mx = turrets.turrets[i].x * warpInScale;
+      const F32 my = turrets.turrets[i].y * warpInScale;
+      const Point mountWorld(
+         pos.x + cosBody * mx - sinBody * my,
+         pos.y + sinBody * mx + cosBody * my
+      );
+
+      r.pushMatrix();
+      r.translate(mountWorld);
+      // Rotate so the barrel faces the aim direction.
+      r.rotate(radiansToDegrees(aimAngle) - 90, 0, 0, 1.0);
+      r.scale(warpInScale);
+
+      // Barrel rectangle
+      r.setColor(Colors::gray70, alpha);
+      r.renderVertexArray(barrelPts, 4, RenderType::LineLoop);
+
+      // Base ring around the mount pivot
+      r.setColor(*color, alpha);
+      drawPolygon(Point(0, 0), 8, 5.0f, 0);
+
+      r.popMatrix();
+   }
+}
+
+
 // Render repair rays to all the repairing objects
 void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<BfObject> > &repairTargets, F32 alpha)
 {
