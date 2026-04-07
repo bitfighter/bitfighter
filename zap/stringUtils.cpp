@@ -982,6 +982,7 @@ bool alphaSort(const string &a, const string &b)
 }
 
 
+// Sort with numbers coming before letters, but not just digits; 2xxx comes before 10xxx
 bool alphaNumberSort(const string &a, const string &b)
 {
    bool aIsNum = isPositiveInteger(a.c_str());
