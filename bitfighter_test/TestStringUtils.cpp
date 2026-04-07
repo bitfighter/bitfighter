@@ -231,6 +231,7 @@ TEST(StringUtilsTest, toString)
 {
    EXPECT_EQ("test", toString(string("test")));
    EXPECT_EQ("123", toString((S32)123));
+   EXPECT_EQ("-123", toString((S32)-123));
    EXPECT_EQ("Yes", toString(Yes));
    EXPECT_EQ("No", toString(No));
    EXPECT_EQ("Relative", toString(Relative));
