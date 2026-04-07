@@ -7,6 +7,7 @@
 #define _POINT_H_
 
 #include <string>
+#include "MathUtils.h
 
 // forward declarations
 namespace TNL {
@@ -160,12 +161,12 @@ public:
    {
       // Here we say that a point is less than another if its distance
       // from the origin is less than the other's
-      return (x * x) + (y * y) < (pt.x * pt.x) + (pt.y + pt.y);
+      return sq(x) + sq(y) < sq(pt.x) + sq(pt.y);
    }
 
    inline bool operator>(const Point& pt) const
    {
-      return (x * x) + (y * y) > (pt.x * pt.x) + (pt.y + pt.y);
+      return sq(x) + sq(y) > sq(pt.x) + sq(pt.y);
    }
 
    inline bool operator<=(const Point& pt) const
