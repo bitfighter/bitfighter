@@ -5,6 +5,7 @@
 
 #include "move.h"
 #include "Point.h"
+#include "XtankShape.h"   // For XtankBody::Count
 
 #include "stringUtils.h"
 #include "MathUtils.h"     // For radiansToUnit() def
@@ -46,12 +47,20 @@ void Move::initialize()
    x = 0;
    y = 0;
    angle = 0;
+   bodyIndex = -1;   // -1 = normal BF ship (XtankBody::None)
 
    for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
    {
       modulePrimary[i]   = false;
       moduleSecondary[i] = false;
    }
+
+   for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
+      weaponSlot[i] = -1;   // -1 = XtankWeapon::None
+
+   engineType    = (S8)XtankEngine::Default;
+   treadType     = (S8)XtankTread::Default;
+   heatSinkCount = (S8)XtankHeatSinkDefault;
 }
 
 
@@ -83,10 +92,18 @@ bool Move::isEqualMove(const Move *move) const
       if(move->modulePrimary[i] != modulePrimary[i] || move->moduleSecondary[i] != moduleSecondary[i])
          return false;
 
+   for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
+      if(move->weaponSlot[i] != weaponSlot[i])
+         return false;
+
    return move->x == x &&
           move->y == y &&
           move->angle == angle &&
-          move->fire == fire;
+          move->fire == fire &&
+          move->bodyIndex == bodyIndex &&
+          move->engineType == engineType &&
+          move->treadType == treadType &&
+          move->heatSinkCount == heatSinkCount;
 }
 
 
@@ -115,6 +132,26 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
       {
          stream->writeFlag(modulePrimary[i]);
          stream->writeFlag(moduleSecondary[i]);
+      }
+
+      // Body index: -1 (BF ship) through XtankBody::Count-1; stored as 0..XtankBody::Count
+      stream->writeRangedU32((U32)(bodyIndex + 1), 0, XtankBody::Count);
+
+      // Weapon slots: only present when an xtank body is active.
+      // Each slot value -1..XtankWeapon::Count-1 is stored as 0..XtankWeapon::Count.
+      if(bodyIndex >= 0)
+      {
+         for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
+            stream->writeRangedU32((U32)(weaponSlot[i] + 1), 0, XtankWeapon::Count);
+
+         // Engine type: 0..XtankEngine::Count-1
+         stream->writeRangedU32((U32)engineType, 0, XtankEngine::Count - 1);
+
+         // Tread type: 0..XtankTread::Count-1
+         stream->writeRangedU32((U32)treadType, 0, XtankTread::Count - 1);
+
+         // Heat sink count: 1..6, stored as 0..5
+         stream->writeRangedU32((U32)(heatSinkCount - 1), 0, XtankHeatSinkMax - XtankHeatSinkMin);
       }
    }
    if(packTime)
@@ -150,6 +187,28 @@ void Move::unpack(BitStream *stream, bool unpackTime)
       {
          modulePrimary[i] = stream->readFlag();
          moduleSecondary[i] = stream->readFlag();
+      }
+
+      // Body index: stored as 0..XtankBody::Count, representing -1..XtankBody::Count-1
+      bodyIndex = (S8)(stream->readRangedU32(0, XtankBody::Count) - 1);
+
+      // Weapon slots: present only when an xtank body is active.
+      if(bodyIndex >= 0)
+      {
+         for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
+            weaponSlot[i] = (S8)(stream->readRangedU32(0, XtankWeapon::Count) - 1);
+
+         engineType    = (S8)stream->readRangedU32(0, XtankEngine::Count - 1);
+         treadType     = (S8)stream->readRangedU32(0, XtankTread::Count - 1);
+         heatSinkCount = (S8)(stream->readRangedU32(0, XtankHeatSinkMax - XtankHeatSinkMin) + 1);
+      }
+      else
+      {
+         for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
+            weaponSlot[i] = -1;
+         engineType    = (S8)XtankEngine::Default;
+         treadType     = (S8)XtankTread::Default;
+         heatSinkCount = (S8)XtankHeatSinkDefault;
       }
    }
 
@@ -187,7 +246,7 @@ string Move::toString()
       modsstr += moduleSecondary[i] ? "1" : "0";
    }
 
-   return "(" + p.toString() + ")" + sep + ftos(angle) + sep + firing + sep + modpstr + sep + modsstr;
+   return "(" + p.toString() + ")" + sep + ftos(angle) + sep + firing + sep + modpstr + sep + modsstr + sep + "body=" + itos(bodyIndex);
 }
 
 

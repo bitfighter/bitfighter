@@ -7,6 +7,7 @@
 #define _GAMEWEAPONS_H_
 
 #include "WeaponInfo.h"
+#include "XtankShape.h"    // for XtankWeapon::Type, XtankWeaponInfo
 #include "SoundSystemEnums.h"
 #include "Color.h"
 #include "Point.h"
@@ -46,6 +47,13 @@ struct GameWeapon
 
    static void createWeaponProjectiles(WeaponType weapon, const Point &dir, const Point &shooterPos,
          const Point &shooterVel, S32 time, F32 shooterRadius, BfObject *shooter);
+
+   // Create an xtank projectile fired from barrelTip in direction dir.
+   // The projectile type and behavior are determined by the xtank weapon's
+   // mapped bfWeapon.  shooterRadius should be 0 when barrelTip is already
+   // the world-space muzzle position.
+   static void createXtankProjectile(XtankWeapon::Type weapon, const Point &dir,
+         const Point &barrelTip, const Point &shooterVel, S32 time, BfObject *shooter);
 };
 
 

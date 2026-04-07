@@ -554,14 +554,14 @@ static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bo
 }
 
 
-static void renderShipFlame(ShipFlame *flames, S32 flameCount, F32 thrust, F32 alpha, bool yThruster)
+static void renderShipFlame(const ShipFlame *flames, S32 flameCount, F32 thrust, F32 alpha, bool yThruster)
 {
    Renderer& r = Renderer::get();
 
    for(S32 i = 0; i < flameCount; i++)
       for(S32 j = 0; j < flames[i].layerCount; j++)
       {
-         ShipFlameLayer *flameLayer = &flames[i].layers[j];
+         const ShipFlameLayer *flameLayer = &flames[i].layers[j];
          r.setColor(flameLayer->color, alpha);
 
          F32 yThrusterX;
@@ -590,8 +590,18 @@ static void renderShipFlame(ShipFlame *flames, S32 flameCount, F32 thrust, F32 a
 void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, const Color &hbc, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                 bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
 {
+   renderShip(&ShipShape::shipShapeInfos[shapeType], shipColor, hbc, alpha, thrusts, health, radius, sensorTime,
+              shieldActive, sensorActive, repairActive, hasArmor);
+}
+
+
+// Core implementation that accepts a ShipShapeInfo pointer directly.
+// Called by both the ShipShapeType overload above and the full-featured
+// renderShip below.  Also used when rendering xtank vehicle bodies.
+void renderShip(const ShipShapeInfo *shipShapeInfo, const Color *shipColor, const Color &hbc, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
+                bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
+{
    Renderer& r = Renderer::get();
-   ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[shapeType];
 
    // First render the thruster flames
    if(thrusts[0] > 0) // forward thrust
@@ -950,7 +960,7 @@ static void renderShipName(const string &shipName, bool isAuthenticated, bool is
 
 
 void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
-                F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, const Color &hbc, F32 alpha, 
+                F32 angle, F32 deltaAngle, const ShipShapeInfo *shapeInfo, const Color *color, const Color &hbc, F32 alpha, 
                 U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
                 bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
                 bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
@@ -996,8 +1006,7 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
 
       r.disableBlending();
 
-      F32 vertices[] = { 20,-15,  0,25,  20,-15 };
-      r.renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::TriangleFan);
+      r.renderVertexArray(shapeInfo->outerHullPoints, shapeInfo->outerHullPointCount, RenderType::TriangleFan);
 
       r.enableBlending();
    }
@@ -1008,7 +1017,7 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
       static F32 thrusts[4];
       calcThrustComponents(vel, angle, deltaAngle, boostActive, thrusts);  
 
-      renderShip(shape, color, hbc, alpha, thrusts, health, radius, renderTime,
+      renderShip(shapeInfo, color, hbc, alpha, thrusts, health, radius, renderTime,
                  shieldActive, sensorActive, repairActive, hasArmor);
    }
 
@@ -1033,6 +1042,64 @@ void renderSpawnShield(const Point &pos, U32 shieldTime, U32 renderTime)
    const S32 BiggishNumber = 21988;
    F32 offset = F32(renderTime % BiggishNumber) * FloatTau / BiggishNumber;
    drawDashedHollowCircle(pos, Ship::CollisionRadius + 5, Ship::CollisionRadius + 10, 8, FloatTau / 24.0f, offset);
+}
+
+
+// Render the turrets for an xtank vehicle body.
+//
+// The hull has already been drawn rotated by bodyAngle.  Each turret is an
+// independent barrel that always points toward the player's aim direction
+// (aimAngle), regardless of which way the hull is facing.
+//
+// Barrel geometry (model space, before turret rotation):
+//   - Points up the +Y axis (matching the ship drawing convention).
+//   - A filled rectangle from y = 0 to y = BARREL_LENGTH, half-width = BARREL_HALF_W.
+// Base geometry: a small polygon ring drawn around the mount point.
+void renderXtankTurrets(const Point &pos, F32 bodyAngle, F32 aimAngle, F32 alpha,
+                        const XtankBodyTurrets &turrets, const Color *color, F32 warpInScale)
+{
+   Renderer& r = Renderer::get();
+
+   // Rotation components for the body orientation: the hull is rotated by
+   // (bodyAngle - Pi/2) radians, same convention used in renderShip().
+   const F32 cosBody = cos(bodyAngle - FloatHalfPi);
+   const F32 sinBody = sin(bodyAngle - FloatHalfPi);
+
+   // Barrel outline vertices in local turret space (nose = +Y).
+   // Half-width = 2, length = 12, base-ring radius = 5.
+   static const F32 barrelPts[8] = {
+      -2.0f, 0.0f,
+       2.0f, 0.0f,
+       2.0f, 12.0f,
+      -2.0f, 12.0f,
+   };
+
+   for(S32 i = 0; i < turrets.count; i++)
+   {
+      // Transform the mount offset from body space into world space.
+      const F32 mx = turrets.turrets[i].x * warpInScale;
+      const F32 my = turrets.turrets[i].y * warpInScale;
+      const Point mountWorld(
+         pos.x + cosBody * mx - sinBody * my,
+         pos.y + sinBody * mx + cosBody * my
+      );
+
+      r.pushMatrix();
+      r.translate(mountWorld);
+      // Rotate so the barrel faces the aim direction.
+      r.rotate(radiansToDegrees(aimAngle) - 90, 0, 0, 1.0);
+      r.scale(warpInScale);
+
+      // Barrel rectangle
+      r.setColor(Colors::gray70, alpha);
+      r.renderVertexArray(barrelPts, 4, RenderType::LineLoop);
+
+      // Base ring around the mount pivot
+      r.setColor(*color, alpha);
+      drawPolygon(Point(0, 0), 8, 5.0f, 0);
+
+      r.popMatrix();
+   }
 }
 
 

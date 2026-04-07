@@ -10,6 +10,7 @@
 
 #include "AToBScroller.h"     // Parent
 #include "LoadoutTracker.h"
+#include "XtankShape.h"       // For XtankDesign
 
 using namespace TNL;
 
@@ -28,6 +29,8 @@ private:
    LoadoutTracker mCurrLoadout;
    LoadoutTracker mPrevLoadout;
 
+   XtankDesign mXtankDesign;    // Current xtank design (bodyIndex < 0 = none)
+
 public:
    LoadoutIndicator();     // Constructor
    virtual ~LoadoutIndicator();
@@ -43,6 +46,8 @@ public:
 
    void setModulePrimary(ShipModule module, bool isActive);
    void setModuleSecondary(ShipModule module, bool isActive);
+
+   void setXtankDesign(const XtankDesign &design);   // Update xtank HUD panel
 
    const LoadoutTracker *getLoadout() const;
 

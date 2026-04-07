@@ -94,6 +94,21 @@ void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, co
    }
 }
 
+
+// Create a projectile for an xtank weapon.  The mapped BF weapon type
+// determines the projectile class and damage model; barrelTip is the
+// world-space muzzle position (shooterRadius is 0 since we already have
+// the exact muzzle position).
+void GameWeapon::createXtankProjectile(XtankWeapon::Type weapon, const Point &dir,
+      const Point &barrelTip, const Point &shooterVel, S32 time, BfObject *shooter)
+{
+   if((S32)weapon < 0 || (S32)weapon >= XtankWeapon::Count)
+      return;
+
+   WeaponType bfWeapon = xtankWeaponInfos[(S32)weapon].bfWeapon;
+   createWeaponProjectiles(bfWeapon, dir, barrelTip, shooterVel, time, 0, shooter);
+}
+
 };
 
 

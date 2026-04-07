@@ -8,6 +8,7 @@
 
 #include "moveObject.h"
 #include "LoadoutTracker.h"
+#include "XtankShape.h"     // For XtankBody::Count, TankPhysicsInfo
 
 #include "Timer.h"
 
@@ -66,17 +67,20 @@ private:
    // Idle helpers
    bool checkForSpeedzones(U32 stateIndex = ActualState); // Check to see if we collided with a GoFast
    bool isLocalPlayerShip(Game *game) const;       // Returns true if ship represents local player
-  
+
    bool doesShipActivateSensor(const Ship *ship);
    F32 getShipVisibility(const Ship *localShip);
 
    LoadoutTracker checkAndBuildLoadout(lua_State *L, S32 profile);
 
+   // Tank driving physics helper (xtank bodies only)
+   F32 processTankMove(U32 stateIndex);
+
 protected:
    SafePtr <ClientInfo> mClientInfo;
    StringTableEntry mPlayerName;
 
-   Vector<SafePtr<MountableItem> > mMountedItems;   
+   Vector<SafePtr<MountableItem> > mMountedItems;
 
    LoadoutTracker mLoadout;
 
@@ -101,7 +105,8 @@ public:
       RespawnMask         = Parent::FirstFreeMask << 5, // For when robots respawn
       TeleportMask        = Parent::FirstFreeMask << 6, // Ship has just teleported
       SpawnShieldMask     = Parent::FirstFreeMask << 7, // Used for the spawn shield
-      FirstFreeMask       = Parent::FirstFreeMask << 8
+      XtankBodyMask       = Parent::FirstFreeMask << 8, // Xtank body index changed
+      FirstFreeMask       = Parent::FirstFreeMask << 9
    };
 
 
@@ -156,7 +161,7 @@ public:
    virtual bool canAddToEditor();
    const char *getOnScreenName();
 
-   void selectNextWeapon();                   
+   void selectNextWeapon();
    void selectPrevWeapon();
    void selectWeapon(S32 weaponIndex);    // Select weapon by index
 
@@ -182,6 +187,13 @@ public:
    ShipShape::ShipShapeType mShapeType;
 #endif
 
+   // Xtank body index and tank physics state.  Present in all builds because
+   // the server must run tank driving physics when an xtank body is active.
+   S32 mXtankBodyIndex;       // -1 (XtankBody::None) = normal BF ship; >=0 = xtank body
+   F32 mTankHeadingAngle;     // Current hull heading for tank physics (radians)
+   F32 mTankSpeed;            // Current speed along mTankHeadingAngle (units/sec)
+   XtankDesign mXtankDesign;  // Per-player vehicle configuration (body + per-slot weapons)
+
    F32 mass;            // Mass of ship, not used
    bool mHasExploded;
 
@@ -191,10 +203,10 @@ public:
    bool shouldRender() const;
 
    // Constructor
-   Ship(ClientInfo *clientInfo, S32 team, const Point &p, bool isRobot = false);   // Standard constructor   
+   Ship(ClientInfo *clientInfo, S32 team, const Point &p, bool isRobot = false);   // Standard constructor
    explicit Ship(lua_State *L = NULL);                                             // Combined Lua / C++ default constructor
    virtual ~Ship();                                                                // Destructor
-                                             
+
    bool isServerCopyOf(const Ship &r) const; // Kind of like an equality comparitor, but accounting for differences btwn client and server
 
    F32 getHealth() const;
@@ -259,6 +271,19 @@ public:
    void updateTrails();
    void findRepairTargets();
    void repairTargets();
+
+#ifndef ZAP_DEDICATED
+   // Returns the ShipShapeInfo to use for rendering/spark emission:
+   // either an xtank body or the standard BF shape, depending on mXtankBodyIndex.
+   const ShipShapeInfo *getActiveShipShapeInfo() const;
+#endif
+
+   // Returns the current xtank body index (-1 = normal BF ship, >=0 = xtank body).
+   S32 getXtankBodyIndex() const { return mXtankBodyIndex; }
+
+   // Cycle to the next xtank body (wraps around to the normal BF ship after the last).
+   // Also resets tank physics heading to current aim angle.
+   void cycleXtankBody();
 
    void controlMoveReplayComplete();
    void onAddedToGame(Game *game);
