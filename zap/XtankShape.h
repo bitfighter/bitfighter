@@ -18,7 +18,8 @@
 // rest of the Bitfighter codebase.  The only integration points are:
 //   - ship.h / ship.cpp  (mXtankBodyIndex/mXtankDesign fields, cycleXtankBody(), tank physics)
 //   - UIGame.cpp         (Ctrl+Alt+Shift+X hotkey; BINDING_LOADOUT xtank design menu)
-//   - move.h / move.cpp  (Move::bodyIndex and Move::weaponSlot fields)
+//   - move.h / move.cpp  (Move::bodyIndex, Move::weaponSlot[], Move::engineType,
+//                         Move::treadType, Move::heatSinkCount fields)
 //   - gameWeapons.h/cpp  (GameWeapon::createXtankProjectile)
 //   - UIXtankHelper.h/cpp (vehicle design helper menu)
 //   - LoadoutIndicator.h/cpp (HUD panel)
@@ -161,6 +162,88 @@ extern XtankWeaponInfo xtankWeaponInfos[XtankWeapon::Count];
 
 
 // ---------------------------------------------------------------------------
+// Engine types: player-selectable power plant affecting top speed and
+// acceleration.  A heavier engine gives more power but adds bulk.
+// ---------------------------------------------------------------------------
+
+namespace XtankEngine
+{
+   enum Type
+   {
+      Light    = 0,  // Low mass, lower power
+      Standard = 1,  // Balanced
+      Heavy    = 2,  // High power, greater top speed and acceleration
+      Count,
+      Default  = Standard
+   };
+}
+
+// Names for on-screen display, one per XtankEngine::Type.
+extern const char *xtankEngineNames[];
+
+// Per-engine gameplay multipliers applied on top of the body's base physics.
+struct XtankEngineInfo
+{
+   const char *name;
+   F32 speedMult;   // Multiplier on maxSpeed and maxReverseSpeed
+   F32 accelMult;   // Multiplier on acceleration
+};
+
+// One entry per XtankEngine::Type value.
+extern XtankEngineInfo xtankEngineInfos[XtankEngine::Count];
+
+
+// ---------------------------------------------------------------------------
+// Tread types: player-selectable track system affecting maneuverability.
+// Rubber treads give nimble steering; heavy treads grip harder but turn slower.
+// ---------------------------------------------------------------------------
+
+namespace XtankTread
+{
+   enum Type
+   {
+      Rubber = 0,  // Light, nimble; faster turning, slightly less grip
+      Metal  = 1,  // Balanced standard
+      Heavy  = 2,  // Slow to turn, but high grip / rapid deceleration
+      Count,
+      Default = Metal
+   };
+}
+
+// Names for on-screen display, one per XtankTread::Type.
+extern const char *xtankTreadNames[];
+
+// Per-tread gameplay multipliers applied on top of the body's base physics.
+struct XtankTreadInfo
+{
+   const char *name;
+   F32 turnMult;     // Multiplier on turnRate
+   F32 frictionMult; // Multiplier on friction (passive deceleration)
+};
+
+// One entry per XtankTread::Type value.
+extern XtankTreadInfo xtankTreadInfos[XtankTread::Count];
+
+
+// ---------------------------------------------------------------------------
+// Heat sinks: player-selectable count (1-6) that reduces weapon fire delay.
+// More heat sinks allow the weapons to cycle faster.
+// ---------------------------------------------------------------------------
+
+static const S32 XtankHeatSinkMin = 1;
+static const S32 XtankHeatSinkMax = 6;
+static const S32 XtankHeatSinkDefault = 1;
+
+// Returns the fire-delay multiplier for a given heat-sink count.
+// 1 sink → 1.00x, each additional sink reduces delay by 8%.
+// 6 sinks → 0.60x (40% faster cycling).
+inline F32 xtankHeatSinkFireDelayMult(S32 count)
+{
+   return 1.0f - (count - 1) * 0.08f;
+}
+
+
+// ---------------------------------------------------------------------------
 // Vehicle design: per-player xtank configuration (body + weapon loadout).
 // ---------------------------------------------------------------------------
 
@@ -176,14 +259,17 @@ extern XtankBodyDefaultWeapons xtankDefaultWeapons[XtankBody::Count];
 
 
 // The player's active vehicle configuration.  Stored in Ship and communicated
-// via Move::weaponSlot[].
+// via Move (bodyIndex, weaponSlot[], engineType, treadType, heatSinkCount).
 struct XtankDesign
 {
    S8                bodyIndex;    // XtankBody::Type, -1 = normal BF ship
    XtankWeapon::Type weapons[4];  // active weapon per turret slot (extras = None)
+   XtankEngine::Type engineType;  // selected engine
+   XtankTread::Type  treadType;   // selected tread type
+   S8                heatSinkCount; // number of heat sinks (1-6)
 
-   XtankDesign();                        // All-None default constructor
-   void initForBody(S32 bodyIdx);        // Set body + reset weapons to defaults
+   XtankDesign();                        // Default constructor (bodyIndex = None)
+   void initForBody(S32 bodyIdx);        // Set body + reset all components to defaults
 };
 
 } /* namespace Zap */

@@ -371,7 +371,46 @@ TankPhysicsInfo xtankPhysicsInfos[XtankBody::Count] =
 
 
 // ---------------------------------------------------------------------------
-// Xtank weapon names and parameters.
+// Xtank engine types: multipliers applied on top of the per-body base physics.
+// ---------------------------------------------------------------------------
+
+const char *xtankEngineNames[XtankEngine::Count] =
+{
+   "Lt Engine",
+   "Std Engine",
+   "Hvy Engine",
+};
+
+XtankEngineInfo xtankEngineInfos[XtankEngine::Count] =
+{
+   //                 name           speedMult  accelMult
+   /* Light    */  { "Lt Engine",    0.80f,     0.85f },
+   /* Standard */  { "Std Engine",   1.00f,     1.00f },
+   /* Heavy    */  { "Hvy Engine",   1.25f,     1.20f },
+}; // xtankEngineInfos[]
+
+
+// ---------------------------------------------------------------------------
+// Xtank tread types: multipliers applied on top of the per-body base physics.
+// ---------------------------------------------------------------------------
+
+const char *xtankTreadNames[XtankTread::Count] =
+{
+   "Rubber Trd",
+   "Metal Trd",
+   "Heavy Trd",
+};
+
+XtankTreadInfo xtankTreadInfos[XtankTread::Count] =
+{
+   //                name           turnMult  frictionMult
+   /* Rubber */  { "Rubber Trd",   1.15f,    0.85f },
+   /* Metal  */  { "Metal Trd",    1.00f,    1.00f },
+   /* Heavy  */  { "Heavy Trd",    0.85f,    1.20f },
+}; // xtankTreadInfos[]
+
+
+
 //
 // Ordered to match XtankWeapon::Type enum values.
 //
@@ -478,6 +517,9 @@ XtankDesign::XtankDesign()
    bodyIndex = (S8)XtankBody::None;
    for(S32 i = 0; i < 4; i++)
       weapons[i] = XtankWeapon::None;
+   engineType    = XtankEngine::Default;
+   treadType     = XtankTread::Default;
+   heatSinkCount = (S8)XtankHeatSinkDefault;
 }
 
 
@@ -494,6 +536,9 @@ void XtankDesign::initForBody(S32 bodyIdx)
       for(S32 i = 0; i < 4; i++)
          weapons[i] = XtankWeapon::None;
    }
+   engineType    = XtankEngine::Default;
+   treadType     = XtankTread::Default;
+   heatSinkCount = (S8)XtankHeatSinkDefault;
 }
 
 } /* namespace Zap */

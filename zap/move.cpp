@@ -57,6 +57,10 @@ void Move::initialize()
 
    for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
       weaponSlot[i] = -1;   // -1 = XtankWeapon::None
+
+   engineType    = (S8)XtankEngine::Default;
+   treadType     = (S8)XtankTread::Default;
+   heatSinkCount = (S8)XtankHeatSinkDefault;
 }
 
 
@@ -96,7 +100,10 @@ bool Move::isEqualMove(const Move *move) const
           move->y == y &&
           move->angle == angle &&
           move->fire == fire &&
-          move->bodyIndex == bodyIndex;
+          move->bodyIndex == bodyIndex &&
+          move->engineType == engineType &&
+          move->treadType == treadType &&
+          move->heatSinkCount == heatSinkCount;
 }
 
 
@@ -133,8 +140,19 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
       // Weapon slots: only present when an xtank body is active.
       // Each slot value -1..XtankWeapon::Count-1 is stored as 0..XtankWeapon::Count.
       if(bodyIndex >= 0)
+      {
          for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
             stream->writeRangedU32((U32)(weaponSlot[i] + 1), 0, XtankWeapon::Count);
+
+         // Engine type: 0..XtankEngine::Count-1
+         stream->writeRangedU32((U32)engineType, 0, XtankEngine::Count - 1);
+
+         // Tread type: 0..XtankTread::Count-1
+         stream->writeRangedU32((U32)treadType, 0, XtankTread::Count - 1);
+
+         // Heat sink count: 1..6, stored as 0..5
+         stream->writeRangedU32((U32)(heatSinkCount - 1), 0, XtankHeatSinkMax - XtankHeatSinkMin);
+      }
    }
    if(packTime)
    {
@@ -176,11 +194,22 @@ void Move::unpack(BitStream *stream, bool unpackTime)
 
       // Weapon slots: present only when an xtank body is active.
       if(bodyIndex >= 0)
+      {
          for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
             weaponSlot[i] = (S8)(stream->readRangedU32(0, XtankWeapon::Count) - 1);
+
+         engineType    = (S8)stream->readRangedU32(0, XtankEngine::Count - 1);
+         treadType     = (S8)stream->readRangedU32(0, XtankTread::Count - 1);
+         heatSinkCount = (S8)(stream->readRangedU32(0, XtankHeatSinkMax - XtankHeatSinkMin) + 1);
+      }
       else
+      {
          for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
             weaponSlot[i] = -1;
+         engineType    = (S8)XtankEngine::Default;
+         treadType     = (S8)XtankTread::Default;
+         heatSinkCount = (S8)XtankHeatSinkDefault;
+      }
    }
 
    if(unpackTime)
