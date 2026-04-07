@@ -508,8 +508,14 @@ TEST(StringUtilsTest, sorting)
    EXPECT_FALSE(alphaSort("b", "a"));
 
    EXPECT_TRUE(alphaNumberSort("2", "10"));
-   EXPECT_FALSE(alphaNumberSort("10", "a"));
+   EXPECT_TRUE(alphaNumberSort("10", "a"));
    EXPECT_TRUE(alphaNumberSort("1", "2"));
+   EXPECT_TRUE(alphaNumberSort("0", "1"));
+   EXPECT_TRUE(alphaNumberSort("0", "abc"));
+   EXPECT_TRUE(alphaNumberSort("abc", "def"));
+   EXPECT_FALSE(alphaNumberSort("abc", "10"));
+   EXPECT_TRUE(alphaNumberSort("2xyz", "11xyz"));
+   EXPECT_FALSE(alphaNumberSort("2xyz", "1xyz"));
 }
 
 

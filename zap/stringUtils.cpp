@@ -982,20 +982,30 @@ bool alphaSort(const string &a, const string &b)
 }
 
 
+// Sort with numbers coming before letters, but not just digits; 2xxx comes before 10xxx
 bool alphaNumberSort(const string &a, const string &b)
 {
-   int aNum = atoi(a.c_str());
-   int bNum = atoi(b.c_str());
+   bool aIsNum = isPositiveInteger(a.c_str());
+   bool bIsNum = isPositiveInteger(b.c_str());
 
-   if(aNum == bNum)
-      return alphaSort(a, b);
-   else
+   if(aIsNum && bIsNum)
    {
-      if(aNum == 0) return true;
-      if(bNum == 0) return false;
+      int aNum = atoi(a.c_str());
+      int bNum = atoi(b.c_str());
 
-      return (aNum < bNum);
+      if(aNum == bNum)
+         return alphaSort(a, b);
+
+      return aNum < bNum;
    }
+
+   if(aIsNum)
+      return true;
+
+   if(bIsNum)
+      return false;
+
+   return alphaSort(a, b);
 }
 
 };
