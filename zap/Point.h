@@ -8,7 +8,6 @@
 
 #include <string>
 #include "MathUtils.h"
-#include "tnlTypes.h"
 
 // forward declarations
 namespace TNL {
