@@ -28,6 +28,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMove.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestObjects.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestPoint.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestPointCompare.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestPolylineGeometry.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestRect.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestRenderUtils.cpp
