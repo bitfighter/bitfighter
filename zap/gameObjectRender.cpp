@@ -590,8 +590,18 @@ static void renderShipFlame(ShipFlame *flames, S32 flameCount, F32 thrust, F32 a
 void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, const Color &hbc, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                 bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
 {
+   renderShip(&ShipShape::shipShapeInfos[shapeType], shipColor, hbc, alpha, thrusts, health, radius, sensorTime,
+              shieldActive, sensorActive, repairActive, hasArmor);
+}
+
+
+// Core implementation that accepts a ShipShapeInfo pointer directly.
+// Called by both the ShipShapeType overload above and the full-featured
+// renderShip below.  Also used when rendering xtank vehicle bodies.
+void renderShip(const ShipShapeInfo *shipShapeInfo, const Color *shipColor, const Color &hbc, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
+                bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
+{
    Renderer& r = Renderer::get();
-   ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[shapeType];
 
    // First render the thruster flames
    if(thrusts[0] > 0) // forward thrust
@@ -950,7 +960,7 @@ static void renderShipName(const string &shipName, bool isAuthenticated, bool is
 
 
 void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
-                F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, const Color &hbc, F32 alpha, 
+                F32 angle, F32 deltaAngle, const ShipShapeInfo *shapeInfo, const Color *color, const Color &hbc, F32 alpha, 
                 U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
                 bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
                 bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
@@ -996,8 +1006,7 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
 
       r.disableBlending();
 
-      F32 vertices[] = { 20,-15,  0,25,  20,-15 };
-      r.renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, RenderType::TriangleFan);
+      r.renderVertexArray(shapeInfo->outerHullPoints, shapeInfo->outerHullPointCount, RenderType::TriangleFan);
 
       r.enableBlending();
    }
@@ -1008,7 +1017,7 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
       static F32 thrusts[4];
       calcThrustComponents(vel, angle, deltaAngle, boostActive, thrusts);  
 
-      renderShip(shape, color, hbc, alpha, thrusts, health, radius, renderTime,
+      renderShip(shapeInfo, color, hbc, alpha, thrusts, health, radius, renderTime,
                  shieldActive, sensorActive, repairActive, hasArmor);
    }
 

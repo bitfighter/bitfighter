@@ -161,6 +161,7 @@ set(CLIENT_SOURCES
 	ScoreboardRenderer.cpp
 	Shader.cpp
 	ShipShape.cpp
+	XtankShape.cpp
 	SlideOutWidget.cpp
 	sparkManager.cpp
 	SymbolShape.cpp

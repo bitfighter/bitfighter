@@ -114,9 +114,13 @@ extern F32 renderCenteredString(const Point &pos, F32 size, const char *string);
 extern void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, const Color &hbc, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                        bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
 
+// Overload that accepts a ShipShapeInfo directly (used when rendering xtank bodies)
+extern void renderShip(const ShipShapeInfo *shapeInfo, const Color *shipColor, const Color &hbc, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
+                       bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
+
 // Renders the ship and all the fixins
 extern void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
-                       F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, const Color &hbc, F32 alpha, 
+                       F32 angle, F32 deltaAngle, const ShipShapeInfo *shapeInfo, const Color *color, const Color &hbc, F32 alpha, 
                        U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
                        bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
                        bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 

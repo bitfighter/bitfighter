@@ -15,6 +15,7 @@
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "UIManager.h"
+#  include "XtankShape.h"
 #endif
 
 #include "gameObjectRender.h"
@@ -127,6 +128,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
 #ifndef ZAP_DEDICATED
    mSparkElapsed = 0;
    mShapeType = ShipShape::Normal;
+   mXtankBodyIndex = XtankBody::None;
 #endif
 
    mLoadout.setLoadout(DefaultLoadout);
@@ -1992,6 +1994,30 @@ void Ship::emitExplosion()
 }
 
 
+#ifndef ZAP_DEDICATED
+// Returns the ShipShapeInfo to use for this ship's rendering and spark emission.
+// When an xtank body is active (mXtankBodyIndex >= 0) the xtank shape is used;
+// otherwise the standard BF shape determined by mShapeType is returned.
+const ShipShapeInfo *Ship::getActiveShipShapeInfo() const
+{
+   if(mXtankBodyIndex >= 0)
+      return &XtankShape::xtankBodyInfos[mXtankBodyIndex];
+   return &ShipShape::shipShapeInfos[mShapeType];
+}
+
+
+// Cycle to the next xtank body shape.  After the last xtank body the player
+// returns to the regular Bitfighter ship.  The current body name is printed
+// to the game chat area so the player can see what they selected.
+void Ship::cycleXtankBody()
+{
+   mXtankBodyIndex++;
+   if(mXtankBodyIndex >= XtankBody::Count)
+      mXtankBodyIndex = XtankBody::None;
+}
+#endif
+
+
 // Client only
 void Ship::emitMovementSparks()
 {
@@ -2000,7 +2026,7 @@ void Ship::emitMovementSparks()
    if(mHasExploded || getActualVel().lenSquared() < sq(TOO_SLOW_FOR_SPARKS))
       return;
 
-   ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[mShapeType];
+   const ShipShapeInfo *shipShapeInfo = getActiveShipShapeInfo();
    S32 cornerCount = shipShapeInfo->cornerCount;
 
    Vector<Point> corners;
@@ -2213,7 +2239,7 @@ void Ship::renderLayer(S32 layerIndex)
    F32 deltaAngle = getAngleDiff(mLastProcessStateAngle, angle);     // Change in angle since we were last here
 
    renderShip(layerIndex, getRenderPos(), getActualPos(), vel, angle, deltaAngle,
-              mShapeType, color, healthBarColor, alpha, clientGame->getCurrentTime(), shipName, warpInScale,
+              getActiveShipShapeInfo(), color, healthBarColor, alpha, clientGame->getCurrentTime(), shipName, warpInScale,
               isLocalShip, isBusy, isAuthenticated, showCoordinates, mHealth, mRadius, getTeam(),
               boostActive, shieldActive, repairActive, sensorActive, hasArmor, engineeringTeleport, killStreak,
               gamesPlayed);

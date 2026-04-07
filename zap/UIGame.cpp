@@ -39,6 +39,7 @@
 #include "GeomUtils.h"
 
 #include "GameRecorderPlayback.h"
+#include "XtankShape.h"     // For xtank vehicle body cycling (Ctrl+Alt+Shift+X)
 
 #include <cmath>     // Needed to compile under Linux, OSX
 
@@ -1416,6 +1417,20 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       EventManager::get()->addSteps(1);
    else if(inputCode == KEY_CLOSEBRACKET && InputCodeManager::checkModifier(KEY_CTRL))    // Ctrl+] advances bots by 10 steps if frozen
       EventManager::get()->addSteps(10);
+
+   // Ctrl+Alt+Shift+X cycles through xtank vehicle bodies (cosmetic only)
+   else if(inputCode == KEY_X &&
+           InputCodeManager::checkModifier(KEY_CTRL, KEY_ALT, KEY_SHIFT))
+   {
+      Ship *ship = getGame()->getLocalPlayerShip();
+      if(ship)
+      {
+         ship->cycleXtankBody();
+         S32 bodyIdx = ship->getXtankBodyIndex();
+         const char *bodyName = (bodyIdx >= 0) ? XtankShape::xtankBodyNames[bodyIdx] : "Bitfighter Ship";
+         getGame()->displayMessage(Colors::cyan, "Vehicle body: %s", bodyName);
+      }
+   }
 
    else if(checkInputCode(BINDING_LOAD_PRESET_1, inputCode))  // Loading loadout presets
       loadLoadoutPreset(getGame(), 0);

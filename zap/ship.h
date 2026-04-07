@@ -180,6 +180,7 @@ public:
    S32 mLastTrailPoint[TrailCount];  // TrailCount = 2
    UI::FxTrail mTrail[TrailCount];
    ShipShape::ShipShapeType mShapeType;
+   S32 mXtankBodyIndex;              // -1 = use normal BF shape; >=0 = use xtank body
 #endif
 
    F32 mass;            // Mass of ship, not used
@@ -259,6 +260,18 @@ public:
    void updateTrails();
    void findRepairTargets();
    void repairTargets();
+
+#ifndef ZAP_DEDICATED
+   // Returns the ShipShapeInfo to use for rendering/spark emission:
+   // either an xtank body or the standard BF shape, depending on mXtankBodyIndex.
+   const ShipShapeInfo *getActiveShipShapeInfo() const;
+
+   // Returns the current xtank body index (-1 = normal BF ship, >=0 = xtank body).
+   S32 getXtankBodyIndex() const { return mXtankBodyIndex; }
+
+   // Cycle to the next xtank body (wraps around to the normal BF ship after the last).
+   void cycleXtankBody();
+#endif
 
    void controlMoveReplayComplete();
    void onAddedToGame(Game *game);
