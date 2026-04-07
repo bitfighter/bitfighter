@@ -213,6 +213,8 @@ extern void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const
 
 extern void renderProjectile(const Point &pos, U32 style, U32 time);
 extern void renderProjectileRailgun(const Point &pos, const Point &velocity, U32 time);
+extern void renderProjectileXtankBullet(const Point &pos, U32 style);
+extern void renderProjectileXtankLaser(const Point &pos, const Point &velocity);
 extern void renderSeeker(const Point &pos, U32 style, F32 angleRadians, F32 speed, U32 timeRemaining);
 
 extern void renderMine(const Point &pos, bool armed, bool visible);
@@ -307,6 +309,8 @@ extern void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const 
 #define renderSlipZone
 #define renderProjectile
 #define renderProjectileRailgun
+#define renderProjectileXtankBullet
+#define renderProjectileXtankLaser
 #define renderGrenade
 #define renderMine
 #define renderSpyBug

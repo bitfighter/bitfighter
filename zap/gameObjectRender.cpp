@@ -2198,6 +2198,59 @@ void renderProjectileRailgun(const Point &pos, const Point &velocity, U32 time)
 }
 
 
+// Render an xtank-style bullet: a small filled square with a slightly lighter
+// outline, matching the appearance of bullets in the original xtank game.
+// The square is approximately 3×3 BF units (xtank bullets are 2-3 pixels on
+// a ~768-pixel display which maps to about 3 BF units).
+void renderProjectileXtankBullet(const Point &pos, U32 style)
+{
+   Renderer& r = Renderer::get();
+   const ProjectileInfo *pi = GameWeapon::projectileInfo + style;
+
+   r.pushMatrix();
+      r.translate(pos);
+
+      // Filled interior
+      r.setColor(pi->projColors[0]);
+      static S16 fill[] = { -2,-2,  2,-2,  2,2,  -2,2 };
+      r.renderVertexArray(fill, ARRAYSIZE(fill) / 2, RenderType::TriangleFan);
+
+      // Lighter outline
+      r.setColor(pi->projColors[1]);
+      r.renderVertexArray(fill, ARRAYSIZE(fill) / 2, RenderType::LineLoop);
+
+   r.popMatrix();
+}
+
+
+// Render an xtank-style laser bullet: a short bright line oriented along the
+// bullet's velocity direction, matching xtank's F_BEAM display mode.
+void renderProjectileXtankLaser(const Point &pos, const Point &velocity)
+{
+   Renderer& r = Renderer::get();
+   const ProjectileInfo *pi = GameWeapon::projectileInfo + ProjectileStyleXtankLaser;
+
+   // Draw a line segment 12 units long in the direction of travel.
+   const F32 BEAM_HALF = 6.0f;
+   Point dir = velocity;
+   if(dir.len() > 0.001f) dir.normalize();
+
+   Point tail = pos - dir * BEAM_HALF;
+   Point tip  = pos + dir * BEAM_HALF;
+
+   r.setColor(pi->projColors[0]);
+   F32 pts[] = { tail.x, tail.y,  tip.x, tip.y };
+   r.renderVertexArray(pts, 2, RenderType::LineStrip);
+
+   // Brighter core
+   tail = pos - dir * (BEAM_HALF * 0.5f);
+   tip  = pos + dir * (BEAM_HALF * 0.5f);
+   r.setColor(pi->projColors[1]);
+   F32 core[] = { tail.x, tail.y,  tip.x, tip.y };
+   r.renderVertexArray(core, 2, RenderType::LineStrip);
+}
+
+
 void renderSeeker(const Point &pos, U32 style, F32 angleRadians, F32 speed, U32 timeRemaining)
 {
    Renderer& r = Renderer::get();

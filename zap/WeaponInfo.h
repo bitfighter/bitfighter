@@ -79,6 +79,13 @@ enum ProjectileStyle
    ProjectileStyleTriple,
    ProjectileStyleTurret,
    ProjectileStyleRailgun,
+   // Xtank weapon styles -- rendered as small colored squares (xtank's native bullet look)
+   ProjectileStyleXtankBlue,    // Machine Gun, Tracer  (blue)
+   ProjectileStyleXtankOrange,  // Grenade              (orange)
+   ProjectileStyleXtankYellow,  // Rocket, Bomb         (yellow)
+   ProjectileStyleXtankGreen,   // Acid, Fire           (green)
+   ProjectileStyleXtankViolet,  // Missile              (violet)
+   ProjectileStyleXtankLaser,   // Laser                (white beam line)
    ProjectileStyleCount,
    ProjectileStyleNotAProjectile  // Need this so we can fit a non-ProjectileStyle (like mine) into a constructor intended for proper projectiles
 };

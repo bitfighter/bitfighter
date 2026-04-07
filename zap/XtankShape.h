@@ -29,7 +29,7 @@
 #define _XTANK_SHAPE_H_
 
 #include "ShipShape.h"     // for ShipShapeInfo
-#include "WeaponInfo.h"    // for WeaponType (used in XtankWeaponInfo::bfWeapon)
+#include "WeaponInfo.h"    // for WeaponType (used in XtankWeaponInfo::bfWeapon) and ProjectileStyle
 
 namespace Zap
 {
@@ -66,6 +66,11 @@ namespace XtankBody
 // Array of ShipShapeInfo descriptors for every xtank body.  Each entry is
 // compatible with the existing renderShip() rendering path.
 extern ShipShapeInfo xtankBodyInfos[XtankBody::Count];
+
+// Pre-computed bounding-circle radius for each xtank body (maximum distance
+// from origin to any hull vertex).  Used for collision detection so the
+// hitbox reflects the actual hull size rather than the BF default.
+extern F32 xtankBodyCollisionRadius[XtankBody::Count];
 
 
 // ---------------------------------------------------------------------------
@@ -151,10 +156,13 @@ extern const char *xtankWeaponNames[];
 // Per-weapon parameters.
 struct XtankWeaponInfo
 {
-   const char  *name;          // Display name
-   U32          fireDelay;     // Milliseconds between shots per turret
-   U32          energyDrain;   // Energy units consumed per shot
-   WeaponType   bfWeapon;      // Mapped BF weapon used to create the projectile
+   const char    *name;          // Display name
+   U32            fireDelay;     // Milliseconds between shots per turret
+   U32            energyDrain;   // Energy units consumed per shot
+   WeaponType     bfWeapon;      // Mapped BF weapon used to create the projectile
+   U32            projVelocity;  // Projectile speed in BF units/sec (from xtank: spd*20)
+   S32            projLiveTime;  // Projectile lifetime in ms  (from xtank: fr*50)
+   ProjectileStyle style;        // Rendering style (xtank-specific look)
 };
 
 // One entry per XtankWeapon::Type value.
