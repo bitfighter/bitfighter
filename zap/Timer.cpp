@@ -90,7 +90,7 @@ void Timer::extend(S32 time)
    if(time > 0)
    {
       if(U32time > (U32_MAX - mPeriod))            // Overflow protection
-         mPeriod = U32time;
+         mPeriod = U32_MAX;
       else
          mPeriod += U32time;
 

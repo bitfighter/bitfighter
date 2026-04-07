@@ -131,6 +131,18 @@ TEST(ColorTest, ConversionHelpers)
 }
 
 
+TEST(ColorTest, ClampingConversion)
+{
+   Color high(2.0f, 5.0f, 10.0f);
+   EXPECT_EQ(0x00FFFFFFu, high.toU32());
+   EXPECT_EQ("FFFFFF", high.toHexString());
+
+   Color low(-1.0f, -0.5f, -2.0f);
+   EXPECT_EQ(0x00000000u, low.toU32());
+   EXPECT_EQ("000000", low.toHexString());
+}
+
+
 TEST(ColorTest, EnsureMinimumBrightness)
 {
    Color dark(0.0f, 0.0f, 0.0f);
