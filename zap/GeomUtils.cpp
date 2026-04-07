@@ -605,8 +605,8 @@ static bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const
 }
 
 
-// Public wrapper for segmentsColinear that accepts a scaleFact parameter (unused by the current implementation)
-bool segmentsColinear(const Point &p1, const Point &p2, const Point &p3, const Point &p4, F32 /*scaleFact*/)
+// Public wrapper for segmentsCollinear that accepts a scaleFact parameter (unused by the current implementation)
+bool segmentsColinear(const Point &p1, const Point &p2, const Point &p3, const Point &p4, F32 /*unused_scaleFact*/)
 {
    return segmentsColinear(p1, p2, p3, p4);
 }
