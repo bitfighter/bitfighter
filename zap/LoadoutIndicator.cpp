@@ -148,7 +148,7 @@ static S32 doRender(const LoadoutTracker &loadout, const XtankDesign &xtankDesig
 {
    Renderer& r = Renderer::get();
 
-   // Xtank mode: show body name + per-slot weapon names.
+   // Xtank mode: show body name + engine + treads + heat sinks + per-slot weapon names.
    if(xtankDesign.bodyIndex >= 0)
    {
       FontManager::pushFontContext(LoadoutIndicatorContext);
@@ -159,6 +159,25 @@ static S32 doRender(const LoadoutTracker &loadout, const XtankDesign &xtankDesig
       // Body name box
       r.setColor(*INDICATOR_INACTIVE_COLOR);
       S32 width = renderComponentIndicator(xPos, top, xtankBodyNames[bodyIdx]);
+      xPos += width + IndicatorHorizPadding;
+
+      xPos += GapBetweenTheGroups;
+
+      // Engine
+      r.setColor(*INDICATOR_INACTIVE_COLOR);
+      width = renderComponentIndicator(xPos, top, xtankEngineInfos[(S32)xtankDesign.engineType].name);
+      xPos += width + IndicatorHorizPadding;
+
+      // Treads
+      r.setColor(*INDICATOR_INACTIVE_COLOR);
+      width = renderComponentIndicator(xPos, top, xtankTreadInfos[(S32)xtankDesign.treadType].name);
+      xPos += width + IndicatorHorizPadding;
+
+      // Heat sinks ("HSx N")
+      char hsBuf[16];
+      dSprintf(hsBuf, sizeof(hsBuf), "HS: %d", (S32)xtankDesign.heatSinkCount);
+      r.setColor(*INDICATOR_INACTIVE_COLOR);
+      width = renderComponentIndicator(xPos, top, hsBuf);
       xPos += width + IndicatorHorizPadding;
 
       xPos += GapBetweenTheGroups;
@@ -223,11 +242,19 @@ static S32 doRender(const LoadoutTracker &loadout, const XtankDesign &xtankDesig
 // This should return the same width as doRender()
 S32 LoadoutIndicator::getWidth() const
 {
-   // Xtank mode: body name + weapons
+   // Xtank mode: body name + engine + treads + heat sinks + weapons
    if(mXtankDesign.bodyIndex >= 0)
    {
       S32 bodyIdx = (S32)mXtankDesign.bodyIndex;
       S32 width = getComponentIndicatorWidth(xtankBodyNames[bodyIdx]) + IndicatorHorizPadding;
+      width += GapBetweenTheGroups;
+      width += getComponentIndicatorWidth(xtankEngineInfos[(S32)mXtankDesign.engineType].name) + IndicatorHorizPadding;
+      width += getComponentIndicatorWidth(xtankTreadInfos[(S32)mXtankDesign.treadType].name)   + IndicatorHorizPadding;
+
+      char hsBuf[16];
+      dSprintf(hsBuf, sizeof(hsBuf), "HS: %d", (S32)mXtankDesign.heatSinkCount);
+      width += getComponentIndicatorWidth(hsBuf) + IndicatorHorizPadding;
+
       width += GapBetweenTheGroups;
       S32 slotCount = xtankTurretInfos[bodyIdx].count;
       for(S32 i = 0; i < slotCount; i++)

@@ -1178,7 +1178,10 @@ void GameUserInterface::xtankDesignUpdated(const XtankDesign &design)
 void GameUserInterface::applyXtankDesign(const XtankDesign &design)
 {
    // Update the move so the server learns about the new design.
-   mCurrentMove.bodyIndex = design.bodyIndex;
+   mCurrentMove.bodyIndex    = design.bodyIndex;
+   mCurrentMove.engineType   = (S8)design.engineType;
+   mCurrentMove.treadType    = (S8)design.treadType;
+   mCurrentMove.heatSinkCount = design.heatSinkCount;
    for(S32 i = 0; i < 4; i++)
       mCurrentMove.weaponSlot[i] = (S8)(S32)design.weapons[i];
 

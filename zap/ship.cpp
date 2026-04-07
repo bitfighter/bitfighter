@@ -322,7 +322,7 @@ F32 Ship::processMove(U32 stateIndex)
    // Sync weapon slots from the move when in xtank mode.
    if(mXtankBodyIndex >= 0)
    {
-      bool weaponsChanged = false;
+      bool designChanged = false;
       S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
       for(S32 i = 0; i < slotCount; i++)
       {
@@ -330,10 +330,26 @@ F32 Ship::processMove(U32 stateIndex)
          if(newWeapon != mXtankDesign.weapons[i])
          {
             mXtankDesign.weapons[i] = newWeapon;
-            weaponsChanged = true;
+            designChanged = true;
          }
       }
-      if(weaponsChanged)
+
+      // Sync engine, tread and heat sink settings from the move.
+      XtankEngine::Type newEngine = (XtankEngine::Type)(S32)mCurrentMove.engineType;
+      XtankTread::Type  newTread  = (XtankTread::Type)(S32)mCurrentMove.treadType;
+      S8 newHS = mCurrentMove.heatSinkCount;
+
+      if(newEngine != mXtankDesign.engineType ||
+         newTread  != mXtankDesign.treadType  ||
+         newHS     != mXtankDesign.heatSinkCount)
+      {
+         mXtankDesign.engineType    = newEngine;
+         mXtankDesign.treadType     = newTread;
+         mXtankDesign.heatSinkCount = newHS;
+         designChanged = true;
+      }
+
+      if(designChanged)
          setMaskBits(XtankBodyMask);
    }
 
@@ -408,8 +424,17 @@ F32 Ship::processMove(U32 stateIndex)
 // The hull faces mTankHeadingAngle; the turret still tracks the aim angle.
 F32 Ship::processTankMove(U32 stateIndex)
 {
-   const TankPhysicsInfo &info = xtankPhysicsInfos[mXtankBodyIndex];
+   const TankPhysicsInfo &info   = xtankPhysicsInfos[mXtankBodyIndex];
+   const XtankEngineInfo &engine = xtankEngineInfos[(S32)mXtankDesign.engineType];
+   const XtankTreadInfo  &tread  = xtankTreadInfos[(S32)mXtankDesign.treadType];
    F32 dt = mCurrentMove.time * 0.001f;
+
+   // Effective physics parameters after applying engine and tread multipliers.
+   F32 effectiveMaxSpeed    = info.maxSpeed        * engine.speedMult;
+   F32 effectiveMaxRevSpeed = info.maxReverseSpeed * engine.speedMult;
+   F32 effectiveAccel       = info.acceleration    * engine.accelMult;
+   F32 effectiveFriction    = info.friction        * tread.frictionMult;
+   F32 effectiveTurnRate    = info.turnRate        * tread.turnMult;
 
    // W (BINDING_UP) gives move.y = -1; negate so forward throttle is positive
    F32 throttle = -mCurrentMove.y;   // +1 = full forward, -1 = full reverse
@@ -423,17 +448,17 @@ F32 Ship::processTankMove(U32 stateIndex)
    }
 
    // --- Steering: rotate the hull ---
-   mTankHeadingAngle += steer * info.turnRate * dt;
+   mTankHeadingAngle += steer * effectiveTurnRate * dt;
 
    // Keep heading in [-pi, pi] to avoid unbounded drift
    while(mTankHeadingAngle >  FloatPi)  mTankHeadingAngle -= Float2Pi;
    while(mTankHeadingAngle < -FloatPi)  mTankHeadingAngle += Float2Pi;
 
    // --- Throttle: accelerate / decelerate ---
-   mTankSpeed += throttle * info.acceleration * dt;
+   mTankSpeed += throttle * effectiveAccel * dt;
 
    // --- Passive friction (deceleration toward zero when not throttling) ---
-   F32 frictionDelta = info.friction * dt;
+   F32 frictionDelta = effectiveFriction * dt;
    if(mTankSpeed > frictionDelta)
       mTankSpeed -= frictionDelta;
    else if(mTankSpeed < -frictionDelta)
@@ -441,8 +466,8 @@ F32 Ship::processTankMove(U32 stateIndex)
    else
       mTankSpeed = 0;
 
-   // --- Clamp to body speed limits ---
-   mTankSpeed = CLAMP(mTankSpeed, -info.maxReverseSpeed, info.maxSpeed);
+   // --- Clamp to body speed limits (scaled by engine) ---
+   mTankSpeed = CLAMP(mTankSpeed, -effectiveMaxRevSpeed, effectiveMaxSpeed);
 
    // --- Compute world-space velocity from heading + speed ---
    setVel(stateIndex, Point(cos(mTankHeadingAngle) * mTankSpeed,
@@ -609,6 +634,13 @@ void Ship::processWeaponFire()
             const XtankWeaponInfo &wi = xtankWeaponInfos[(S32)wt];
             if(wi.fireDelay < minFireDelay) minFireDelay = wi.fireDelay;
             totalDrain += wi.energyDrain;
+         }
+
+         // Apply heat sink multiplier: more heat sinks → shorter fire delay.
+         {
+            F32 hsMult = xtankHeatSinkFireDelayMult((S32)mXtankDesign.heatSinkCount);
+            minFireDelay = (U32)((F32)minFireDelay * hsMult);
+            if(minFireDelay < 1) minFireDelay = 1;
          }
 
          if(hasAnyWeapon)

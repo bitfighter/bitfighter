@@ -35,6 +35,9 @@ public:
    U32 time;
    S8 bodyIndex;     // -1 = normal BF ship; 0..N = xtank body index (matches XtankBody::Type enum)
    S8 weaponSlot[4]; // active XtankWeapon::Type per turret slot (-1 = None); valid when bodyIndex >= 0
+   S8 engineType;    // XtankEngine::Type; valid when bodyIndex >= 0
+   S8 treadType;     // XtankTread::Type; valid when bodyIndex >= 0
+   S8 heatSinkCount; // heat sink count (1-6); valid when bodyIndex >= 0
 
    static const S32 MaxMoveTime = 127;
 
