@@ -49,11 +49,12 @@ static ChatHelper *enterCommandChat(GameUserInterface *gameUI)
 }
 
 
-// There has to be a better way, but this is good enough for now
+
 static void clearChat(ChatHelper *chatHelper)
 {
-   while(chatHelper->getChatMessage()[0] != '\0')
-      chatHelper->onTextInput(KEY_BACKSPACE);
+   S32 len = (S32)strlen(chatHelper->getChatMessage());
+   for(S32 i = 0; i < len; i++)
+      chatHelper->processInputCode(KEY_BACKSPACE);
 }
 
 
