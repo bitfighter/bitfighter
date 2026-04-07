@@ -6,6 +6,9 @@
 #include "stringUtils.h"
 #include "gtest/gtest.h"
 
+#include <algorithm>
+#include <vector>
+
 #ifdef TNL_OS_WIN32 
 #  include <windows.h>        // For ARRAYSIZE def
 #endif
@@ -539,6 +542,41 @@ TEST(StringUtilsTest, sorting)
    // Positive itegers sort numerically
    EXPECT_TRUE(alphaNumberSort("2", "11"));
    EXPECT_FALSE(alphaNumberSort("2", "1"));
+
+   // Mixed strings: leading numeric portion determines order
+   EXPECT_TRUE(alphaNumberSort("2xyz", "11xyz"));   // 2 < 11
+   EXPECT_TRUE(alphaNumberSort("1abc", "2abc"));    // 1 < 2
+   EXPECT_FALSE(alphaNumberSort("10foo", "9foo"));  // 10 > 9
+   EXPECT_FALSE(alphaNumberSort("2xyz", "2xyz"));   // equal -> alphaSort tie-break (false: not strictly less)
+}
+
+
+// Verify sort order of strings with numeric prefixes and varying alpha suffixes.
+// Sort order: by numeric prefix first, then alphabetically within ties.
+// "1BBB" "2AAA" "12AAA" "12BBB" "9BBB" "1ZZZ" -> "1BBB" "1ZZZ" "2AAA" "9BBB" "12AAA" "12BBB"
+TEST(StringUtilsTest, sortingNumericPrefixAlphaSuffix)
+{
+   vector<string> items = { "1BBB", "2AAA", "12AAA", "12BBB", "9BBB", "1ZZZ" };
+   std::sort(items.begin(), items.end(), alphaNumberSort);
+
+   EXPECT_EQ("1BBB",  items[0]);
+   EXPECT_EQ("1ZZZ",  items[1]);
+   EXPECT_EQ("2AAA",  items[2]);
+   EXPECT_EQ("9BBB",  items[3]);
+   EXPECT_EQ("12AAA", items[4]);
+   EXPECT_EQ("12BBB", items[5]);
+
+   // Pairwise: same numeric prefix, alpha suffix breaks ties
+   EXPECT_TRUE(alphaNumberSort("1BBB", "1ZZZ"));   // 1==1, "1BBB" < "1ZZZ"
+   EXPECT_FALSE(alphaNumberSort("1ZZZ", "1BBB"));  // 1==1, "1ZZZ" > "1BBB"
+   EXPECT_TRUE(alphaNumberSort("12AAA", "12BBB")); // 12==12, "12AAA" < "12BBB"
+   EXPECT_FALSE(alphaNumberSort("12BBB", "12AAA")); // 12==12, "12BBB" > "12AAA"
+
+   // Pairwise: different numeric prefixes always win regardless of alpha suffix
+   EXPECT_TRUE(alphaNumberSort("1ZZZ", "2AAA"));   // 1 < 2 even though Z > A
+   EXPECT_TRUE(alphaNumberSort("2AAA", "9BBB"));   // 2 < 9
+   EXPECT_TRUE(alphaNumberSort("9BBB", "12AAA"));  // 9 < 12
+   EXPECT_FALSE(alphaNumberSort("2AAA", "1BBB"));  // 2 > 1
 }
 
 

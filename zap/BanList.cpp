@@ -212,7 +212,7 @@ bool BanList::isBanned(const Address &address, const string &nickname, bool isAu
       int banDurationMinutes = atoi(serverBanList[i].durationMinutes.c_str());
 
       // See if ban has run out
-      if (timeDifference < banDurationMinutes)
+      if (timeDifference >= banDurationMinutes)
          continue;
 
       // If we get here, that means nickname and IP address matched and we are still in the

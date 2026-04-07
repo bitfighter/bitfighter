@@ -5,6 +5,7 @@ option(BITFIGHTER_COVERAGE "Add coverage information to the test executable and 
 
 set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/LevelFilesForTesting.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBanList.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBfObject.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestEditor.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameType.cpp
@@ -36,6 +37,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSettings.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestShip.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSpawnDelay.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestStatistics.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestStringUtils.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestSymbolStrings.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestTimer.cpp
