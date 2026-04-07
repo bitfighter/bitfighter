@@ -116,6 +116,7 @@ TEST(StringUtilsTest, extractDirectory)
    EXPECT_EQ("path\\to", extractDirectory("path\\to\\file.txt"));
    EXPECT_EQ("", extractDirectory("file.txt"));
    EXPECT_EQ("path/to", extractDirectory("path/to/"));
+   EXPECT_EQ("path/to", extractDirectory("path/to/this"));
 }
 
 
@@ -125,6 +126,7 @@ TEST(StringUtilsTest, extractFilename)
    EXPECT_EQ("file.txt", extractFilename("path\\to\\file.txt"));
    EXPECT_EQ("file.txt", extractFilename("file.txt"));
    EXPECT_EQ("", extractFilename("path/to/"));
+   EXPECT_EQ("this", extractFilename("path/to/this"));
 }
 
 
