@@ -1005,6 +1005,16 @@ bool alphaNumberSort(const string &a, const string &b)
    if(bIsNum)
       return false;
 
+   // Handle strings where both start with digits (e.g., "2xyz" vs "11xyz")
+   if(!a.empty() && !b.empty() && isdigit((unsigned char)a[0]) && isdigit((unsigned char)b[0]))
+   {
+      int aNum = atoi(a.c_str());
+      int bNum = atoi(b.c_str());
+
+      if(aNum != bNum)
+         return aNum < bNum;
+   }
+
    return alphaSort(a, b);
 }
 
