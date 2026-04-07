@@ -60,13 +60,6 @@ static const InputCode sWeaponKeys[XtankWeapon::Count + 1] =
    KEY_9,     // Fire
 };
 
-// Phase constants (must match those in UIXtankHelper.h)
-const S32 UIXtankHelper::PHASE_BODY;
-const S32 UIXtankHelper::PHASE_ENGINE;
-const S32 UIXtankHelper::PHASE_TREADS;
-const S32 UIXtankHelper::PHASE_HEATSINK;
-const S32 UIXtankHelper::PHASE_WEAPONS;
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -345,10 +338,10 @@ void UIXtankHelper::render()
    }
    else
    {
-      // Weapon slot selection: slot (mPhase - PHASE_WEAPONS).
-      S32 slot = mPhase - PHASE_WEAPONS + 1;
+      // Weapon slot selection: slot indices 0..mSlotCount-1.
+      S32 slot = mPhase - PHASE_WEAPONS;   // 0-based slot index
       char title[80];
-      dSprintf(title, sizeof(title), "Slot %d of %d — pick weapon:", slot, mSlotCount);
+      dSprintf(title, sizeof(title), "Slot %d of %d — pick weapon:", slot + 1, mSlotCount);
 
       drawItemMenu(title,
                    mWeaponItems.address(), mWeaponItems.size(),
