@@ -23,8 +23,10 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLoadoutTracker.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestLuaEnvironment.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMaster.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMathUtils.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestMove.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestObjects.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestPoint.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestPolylineGeometry.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestRenderUtils.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestRenderer.cpp
