@@ -70,19 +70,19 @@ public:
 
    string toString() const;
    string toLevelCode() const;
-   
+
    // inlines  need to be in header, too
 
    // Operators with one arguement mean the argument is the right-hand-side
    // Left-hand-side is implicitly 'this'
    inline Point operator+(const Point &pt) const
    {
-      return Point (x + pt.x, y + pt.y);
+      return Point(x + pt.x, y + pt.y);
    }
 
    inline Point operator-(const Point &pt) const
    {
-      return Point (x - pt.x, y - pt.y);
+      return Point(x - pt.x, y - pt.y);
    }
 
    inline Point operator-() const
