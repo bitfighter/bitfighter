@@ -15,8 +15,10 @@ namespace Zap {
 // Figure out the shortest path from a to b...   Returns between -FloatPi and FloatPi
 F32 getAngleDiff(F32 a, F32 b)
 {
-   a = fmod(b - a + FloatPi, Float2Pi);         // fmod may return negative
-   return a < 0 ? a + FloatPi : a - FloatPi;
+   a = fmod(b - a, Float2Pi);
+   if (a <= -FloatPi) a += Float2Pi;
+   if (a > FloatPi) a -= Float2Pi;
+   return a;
 }
 
 
@@ -70,15 +72,18 @@ bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &
 
 // Round numToRound up to the nearest mulitple of multiple
 // Source: http://stackoverflow.com/a/3407254/103252
-S32 roundUp(S32 numToRound, S32 multiple) 
-{ 
-   if(multiple == 0) 
-      return numToRound; 
+S32 roundUp(S32 numToRound, S32 multiple)
+{
+   if(multiple == 0)
+      return numToRound;
 
    S32 remainder = numToRound % multiple;
 
    if(remainder == 0)
       return numToRound;
+
+   if(numToRound < 0)
+      return numToRound - remainder;
 
    return numToRound + multiple - remainder;
 } 

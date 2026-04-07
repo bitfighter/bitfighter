@@ -7,7 +7,7 @@
 #define _POINT_H_
 
 #include <string>
-#include "MathUtils.h
+#include "MathUtils.h"
 
 // forward declarations
 namespace TNL {

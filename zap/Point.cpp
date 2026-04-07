@@ -121,7 +121,7 @@ Point Point::rotate(F32 ang)
    F32 sina = sin(ang);
    F32 cosa = cos(ang);
 
-   return Point(x * sina + y * cosa, y * sina - x * cosa);
+   return Point(x * cosa - y * sina, x * sina + y * cosa);
 }
 
 void Point::setAngle(const F32 ang)
