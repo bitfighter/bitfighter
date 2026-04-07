@@ -110,14 +110,20 @@ S32 Statistics::getHits(WeaponType weaponType)
 // Report overall hit rate
 F32 Statistics::getHitRate()
 {
-   return (F32)getHits() / (F32)getShots();
+   S32 shots = getShots();
+   if(shots == 0)
+      return 0.0f;
+   return (F32)getHits() / (F32)shots;
 }
 
 
 // Report hit rate for specified weapon
 F32 Statistics::getHitRate(WeaponType weaponType)
 {
-   return (F32)mHits[(S32)weaponType] / (F32)mShots[(S32)weaponType];
+   U32 shots = mShots[(S32)weaponType];
+   if(shots == 0)
+      return 0.0f;
+   return (F32)mHits[(S32)weaponType] / (F32)shots;
 }
 
 

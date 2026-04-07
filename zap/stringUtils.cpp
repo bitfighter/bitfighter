@@ -1011,6 +1011,21 @@ bool alphaNumberSort(const string &a, const string &b)
    if(bIsNum)
       return false;
 
+   // Both strings start with a digit but are not purely numeric (e.g. "2xyz" vs "11xyz").
+   // Compare the leading numeric portions numerically; atoi stops at the first non-digit,
+   // which is exactly the behavior we want here. Fall back to alphabetical on a tie.
+   bool aStartsWithDigit = !a.empty() && isDigit(a[0]);
+   bool bStartsWithDigit = !b.empty() && isDigit(b[0]);
+
+   if(aStartsWithDigit && bStartsWithDigit)
+   {
+      int aNum = atoi(a.c_str());
+      int bNum = atoi(b.c_str());
+
+      if(aNum != bNum)
+         return aNum < bNum;
+   }
+
    return alphaSort(a, b);
 }
 
