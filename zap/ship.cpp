@@ -431,8 +431,8 @@ F32 Ship::processTankMove(U32 stateIndex)
    // --- After collision response, project resulting velocity back onto the
    //     heading direction.  This discards lateral velocity (tank traction)
    //     and updates mTankSpeed to reflect wall/collision impacts. ---
-   Point newVel = getVel(stateIndex);
-   mTankSpeed = newVel.x * cos(mTankHeadingAngle) + newVel.y * sin(mTankHeadingAngle);
+   Point headingVec(cos(mTankHeadingAngle), sin(mTankHeadingAngle));
+   mTankSpeed = getVel(stateIndex).dot(headingVec);
 
    return result;
 }
