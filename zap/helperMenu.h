@@ -49,7 +49,8 @@ public:
       QuickChatHelperType,
       LoadoutHelperType,
       EngineerHelperType,
-      ShuffleTeamsHelperType
+      ShuffleTeamsHelperType,
+      XtankHelperType
    };
 
 private:

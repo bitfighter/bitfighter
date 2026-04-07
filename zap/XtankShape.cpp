@@ -20,7 +20,8 @@
 //
 // No thruster flames are defined for xtank bodies.
 //
-// See XtankShape.h for the XtankBody enum that indexes this array.
+// See XtankShape.h for the XtankBody and XtankWeapon enums that index the
+// arrays in this file.
 //------------------------------------------------------------------------------
 
 #include "XtankShape.h"
@@ -351,21 +352,148 @@ XtankBodyTurrets xtankTurretInfos[XtankBody::Count] =
 // ---------------------------------------------------------------------------
 TankPhysicsInfo xtankPhysicsInfos[XtankBody::Count] =
 {
-   //                   maxSpd  maxRevSpd  accel   friction  turnRate
-   /* Lightcycle  */  {  600,    340,      3500,    180,      2.6f },
-   /* Trike       */  {  560,    320,      3200,    200,      2.3f },
-   /* Hexo        */  {  520,    290,      3000,    230,      2.0f },
-   /* Spider      */  {  490,    275,      2800,    240,      2.2f },
-   /* Psycho      */  {  545,    310,      3250,    210,      2.4f },
-   /* Tornado     */  {  510,    285,      2950,    235,      2.1f },
-   /* Marauder    */  {  475,    265,      2650,    260,      1.9f },
-   /* Tiger       */  {  450,    250,      2500,    280,      1.6f },
-   /* Rhino       */  {  400,    220,      2100,    310,      1.2f },
-   /* Medusa      */  {  420,    235,      2250,    295,      1.5f },
-   /* Delta       */  {  490,    275,      2750,    250,      1.9f },
-   /* Disk        */  {  515,    290,      3000,    190,      3.0f },
-   /* Malice      */  {  430,    240,      2300,    290,      1.4f },
-   /* Panzy       */  {  370,    205,      1900,    340,      1.0f },
+   //                   maxSpd  maxRevSpd  accel   friction  turnRate  armor
+   /* Lightcycle  */  {  600,    340,      3500,    180,      2.6f,    1.10f },
+   /* Trike       */  {  560,    320,      3200,    200,      2.3f,    1.05f },
+   /* Hexo        */  {  520,    290,      3000,    230,      2.0f,    0.95f },
+   /* Spider      */  {  490,    275,      2800,    240,      2.2f,    0.90f },
+   /* Psycho      */  {  545,    310,      3250,    210,      2.4f,    1.00f },
+   /* Tornado     */  {  510,    285,      2950,    235,      2.1f,    0.90f },
+   /* Marauder    */  {  475,    265,      2650,    260,      1.9f,    0.85f },
+   /* Tiger       */  {  450,    250,      2500,    280,      1.6f,    0.80f },
+   /* Rhino       */  {  400,    220,      2100,    310,      1.2f,    0.60f },
+   /* Medusa      */  {  420,    235,      2250,    295,      1.5f,    0.70f },
+   /* Delta       */  {  490,    275,      2750,    250,      1.9f,    0.85f },
+   /* Disk        */  {  515,    290,      3000,    190,      3.0f,    0.95f },
+   /* Malice      */  {  430,    240,      2300,    290,      1.4f,    0.75f },
+   /* Panzy       */  {  370,    205,      1900,    340,      1.0f,    0.50f },
 }; // xtankPhysicsInfos[]
+
+
+// ---------------------------------------------------------------------------
+// Xtank weapon names and parameters.
+//
+// Ordered to match XtankWeapon::Type enum values.
+//
+// Design intent:
+//   - MachineGun / Tracer are rapid-fire, low-energy weapons.
+//   - Laser uses a railgun-style fast slug with high energy cost.
+//   - Missile / Rocket / Bomb are area weapons with high energy cost.
+//   - Acid bounces off walls (Bouncer).
+//   - Fire sprays a triple spread.
+//
+// fireDelay in milliseconds; energyDrain in the same energy units as BF
+// ships (EnergyMax = 100000, EnergyRechargeRate = 8/ms at rest).
+// bfWeapon maps to an existing BF weapon class for projectile behavior.
+// ---------------------------------------------------------------------------
+
+const char *xtankWeaponNames[XtankWeapon::Count] =
+{
+   "Machine Gun",
+   "Laser",
+   "Missile",
+   "Grenade",
+   "Rocket",
+   "Acid",
+   "Tracer",
+   "Bomb",
+   "Fire",
+};
+
+XtankWeaponInfo xtankWeaponInfos[XtankWeapon::Count] =
+{
+   //                  name            fireDelay  energyDrain  bfWeapon
+   /* MachineGun */  { "Machine Gun",   80,        300,         WeaponPhaser  },
+   /* Laser      */  { "Laser",         500,       8000,        WeaponRailgun },
+   /* Missile    */  { "Missile",       600,       8000,        WeaponSeeker  },
+   /* Grenade    */  { "Grenade",       400,       6000,        WeaponBurst   },
+   /* Rocket     */  { "Rocket",        350,       7000,        WeaponBurst   },
+   /* Acid       */  { "Acid",          120,        800,        WeaponBounce  },
+   /* Tracer     */  { "Tracer",        100,        400,        WeaponTurret  },
+   /* Bomb       */  { "Bomb",          700,       10000,       WeaponBurst   },
+   /* Fire       */  { "Fire",          200,       1500,        WeaponTriple  },
+}; // xtankWeaponInfos[]
+
+
+// ---------------------------------------------------------------------------
+// Default weapon loadout for each xtank vehicle body.
+//
+// The first xtankTurretInfos[bodyIdx].count entries are valid; extras are
+// XtankWeapon::None.
+// ---------------------------------------------------------------------------
+
+XtankBodyDefaultWeapons xtankDefaultWeapons[XtankBody::Count] =
+{
+   // Lightcycle  – 1 turret
+   { { XtankWeapon::MachineGun, XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
+
+   // Trike       – 1 turret
+   { { XtankWeapon::Tracer,     XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
+
+   // Hexo        – 1 turret
+   { { XtankWeapon::Acid,       XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
+
+   // Spider      – 1 turret
+   { { XtankWeapon::Fire,       XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
+
+   // Psycho      – 1 turret
+   { { XtankWeapon::Laser,      XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
+
+   // Tornado     – 1 turret
+   { { XtankWeapon::Grenade,    XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
+
+   // Marauder    – 1 turret
+   { { XtankWeapon::Rocket,     XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
+
+   // Tiger       – 2 turrets
+   { { XtankWeapon::MachineGun, XtankWeapon::MachineGun, XtankWeapon::None, XtankWeapon::None } },
+
+   // Rhino       – 2 turrets
+   { { XtankWeapon::Bomb,       XtankWeapon::Bomb, XtankWeapon::None, XtankWeapon::None } },
+
+   // Medusa      – 2 turrets
+   { { XtankWeapon::Missile,    XtankWeapon::Missile, XtankWeapon::None, XtankWeapon::None } },
+
+   // Delta       – 2 turrets
+   { { XtankWeapon::Laser,      XtankWeapon::Laser, XtankWeapon::None, XtankWeapon::None } },
+
+   // Disk        – 1 turret
+   { { XtankWeapon::Fire,       XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
+
+   // Malice      – 1 turret
+   { { XtankWeapon::Rocket,     XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
+
+   // Panzy       – 4 turrets
+   { { XtankWeapon::MachineGun, XtankWeapon::MachineGun,
+       XtankWeapon::MachineGun, XtankWeapon::MachineGun } },
+}; // xtankDefaultWeapons[]
+
+
+// ---------------------------------------------------------------------------
+// XtankDesign implementation
+// ---------------------------------------------------------------------------
+
+XtankDesign::XtankDesign()
+{
+   bodyIndex = (S8)XtankBody::None;
+   for(S32 i = 0; i < 4; i++)
+      weapons[i] = XtankWeapon::None;
+}
+
+
+void XtankDesign::initForBody(S32 bodyIdx)
+{
+   bodyIndex = (S8)bodyIdx;
+   if(bodyIdx >= 0 && bodyIdx < XtankBody::Count)
+   {
+      for(S32 i = 0; i < 4; i++)
+         weapons[i] = xtankDefaultWeapons[bodyIdx].weapons[i];
+   }
+   else
+   {
+      for(S32 i = 0; i < 4; i++)
+         weapons[i] = XtankWeapon::None;
+   }
+}
 
 } /* namespace Zap */

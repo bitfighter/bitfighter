@@ -16,15 +16,19 @@
 //
 // Keep this file and its companion XtankShape.cpp cleanly separated from the
 // rest of the Bitfighter codebase.  The only integration points are:
-//   - ship.h / ship.cpp  (mXtankBodyIndex field + cycleXtankBody() + tank physics)
-//   - UIGame.cpp         (Ctrl+Alt+Shift+X hotkey handler)
-//   - move.h / move.cpp  (Move::bodyIndex field)
+//   - ship.h / ship.cpp  (mXtankBodyIndex/mXtankDesign fields, cycleXtankBody(), tank physics)
+//   - UIGame.cpp         (Ctrl+Alt+Shift+X hotkey; BINDING_LOADOUT xtank design menu)
+//   - move.h / move.cpp  (Move::bodyIndex and Move::weaponSlot fields)
+//   - gameWeapons.h/cpp  (GameWeapon::createXtankProjectile)
+//   - UIXtankHelper.h/cpp (vehicle design helper menu)
+//   - LoadoutIndicator.h/cpp (HUD panel)
 //------------------------------------------------------------------------------
 
 #ifndef _XTANK_SHAPE_H_
 #define _XTANK_SHAPE_H_
 
-#include "ShipShape.h"   // for ShipShapeInfo
+#include "ShipShape.h"     // for ShipShapeInfo
+#include "WeaponInfo.h"    // for WeaponType (used in XtankWeaponInfo::bfWeapon)
 
 namespace Zap
 {
@@ -105,10 +109,82 @@ struct TankPhysicsInfo
    F32 acceleration;      // Throttle acceleration (units/sec²)
    F32 friction;          // Passive deceleration when no throttle (units/sec²)
    F32 turnRate;          // Rotation rate of the hull (radians/sec)
+   F32 armor;             // Incoming-damage multiplier (0 = immune, 1 = normal)
 };
 
 // One entry per XtankBody::Type value.
 extern TankPhysicsInfo xtankPhysicsInfos[XtankBody::Count];
+
+
+// ---------------------------------------------------------------------------
+// Xtank weapon catalogue.
+//
+// Each xtank weapon maps to an existing Bitfighter WeaponType for projectile
+// behavior and damage (so we reuse the well-tuned BF projectile system).
+// Fire delay and energy cost are xtank-specific and stored here.
+// ---------------------------------------------------------------------------
+
+// Enum of all xtank weapons, in the order they appear in the original xtank
+// game.  XtankWeapon::None represents "this turret slot carries no weapon".
+namespace XtankWeapon
+{
+   enum Type
+   {
+      MachineGun = 0,
+      Laser,
+      Missile,
+      Grenade,
+      Rocket,
+      Acid,
+      Tracer,
+      Bomb,
+      Fire,
+      Count,         // total number of xtank weapons
+      None = -1      // sentinel: slot carries no weapon
+   };
+}
+
+// Names for on-screen display, one per XtankWeapon::Type.
+extern const char *xtankWeaponNames[];
+
+// Per-weapon parameters.
+struct XtankWeaponInfo
+{
+   const char  *name;          // Display name
+   U32          fireDelay;     // Milliseconds between shots per turret
+   U32          energyDrain;   // Energy units consumed per shot
+   WeaponType   bfWeapon;      // Mapped BF weapon used to create the projectile
+};
+
+// One entry per XtankWeapon::Type value.
+extern XtankWeaponInfo xtankWeaponInfos[XtankWeapon::Count];
+
+
+// ---------------------------------------------------------------------------
+// Vehicle design: per-player xtank configuration (body + weapon loadout).
+// ---------------------------------------------------------------------------
+
+// Default weapons for each body (first slotCount entries are valid;
+// slotCount comes from xtankTurretInfos[bodyIdx].count).
+struct XtankBodyDefaultWeapons
+{
+   XtankWeapon::Type weapons[4];
+};
+
+// One entry per XtankBody::Type value.
+extern XtankBodyDefaultWeapons xtankDefaultWeapons[XtankBody::Count];
+
+
+// The player's active vehicle configuration.  Stored in Ship and communicated
+// via Move::weaponSlot[].
+struct XtankDesign
+{
+   S8                bodyIndex;    // XtankBody::Type, -1 = normal BF ship
+   XtankWeapon::Type weapons[4];  // active weapon per turret slot (extras = None)
+
+   XtankDesign();                        // All-None default constructor
+   void initForBody(S32 bodyIdx);        // Set body + reset weapons to defaults
+};
 
 } /* namespace Zap */
 #endif /* _XTANK_SHAPE_H_ */

@@ -11,6 +11,7 @@
 #include "loadoutHelper.h"
 #include "engineerHelper.h"
 #include "TeamShuffleHelper.h"
+#include "UIXtankHelper.h"
 
 
 namespace Zap
@@ -38,6 +39,7 @@ private:
    LoadoutHelper     mLoadoutHelper;
    EngineerHelper    mEngineerHelper;
    TeamShuffleHelper mTeamShuffleHelper;
+   UIXtankHelper     mXtankHelper;
 
    void doExitHelper(S32 index);
 
