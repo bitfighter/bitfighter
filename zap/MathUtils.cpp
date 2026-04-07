@@ -74,6 +74,8 @@ bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &
 // Source: http://stackoverflow.com/a/3407254/103252
 S32 roundUp(S32 numToRound, S32 multiple)
 {
+   multiple = abs(multiple);
+
    if(multiple == 0)
       return numToRound;
 

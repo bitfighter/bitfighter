@@ -191,6 +191,14 @@ TEST(StringUtilsTest, replaceString)
 }
 
 
+TEST(StringUtilsTest, replaceStringEmptyFrom)
+{
+   // These should return the original string and not hang
+   EXPECT_EQ("test", replaceString("test", "", "replacement"));
+   EXPECT_EQ("test", replaceString((const char *)"test", "", "replacement"));
+}
+
+
 TEST(StringUtilsTest, lcase_ucase)
 {
    EXPECT_EQ("abc", lcase("ABC"));

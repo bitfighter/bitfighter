@@ -158,6 +158,9 @@ F64 stof(const string &s)
 // From http://stackoverflow.com/questions/3418231/c-replace-part-of-a-string-with-another-string, replaceAll variant
 string replaceString(const string &strString, const string &from, const string &to) 
 {
+   if(from.empty())
+      return strString;
+
    string str = strString;    // Make working copy
 
    string::size_type start_pos = 0;
@@ -769,6 +772,9 @@ string ctos(char c)
 
 string replaceString(const char *in, const char *find, const char *replace)
 {
+   if(!find || find[0] == 0)
+      return in;
+
    string out;
    size_t n = 0;
    size_t findlen = strlen(find);
