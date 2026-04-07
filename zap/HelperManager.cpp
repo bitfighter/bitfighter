@@ -36,6 +36,7 @@ void HelperManager::initialize(ClientGame *game)
    mLoadoutHelper.initialize(game, this);
    mEngineerHelper.initialize(game, this);
    mTeamShuffleHelper.initialize(game, this);
+   mXtankHelper.initialize(game, this);
 }
 
 
@@ -193,6 +194,9 @@ void HelperManager::activateHelper(HelperMenu::HelperMenuType helperType, bool a
          break;
       case HelperMenu::ShuffleTeamsHelperType:
          mHelperStack.insert(index, &mTeamShuffleHelper);
+         break;
+      case HelperMenu::XtankHelperType:
+         mHelperStack.insert(index, &mXtankHelper);
          break;
       default:
          TNLAssert(false, "Unknown helperType!");

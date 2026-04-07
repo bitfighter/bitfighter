@@ -310,8 +310,31 @@ F32 Ship::processMove(U32 stateIndex)
          // Just switched into tank mode: set heading from current aim angle, start from rest
          mTankHeadingAngle = getAngle(stateIndex);
          mTankSpeed        = 0;
+         mXtankDesign.initForBody(mXtankBodyIndex);  // Load default weapons for this body
+      }
+      else if(mXtankBodyIndex < 0)
+      {
+         mXtankDesign = XtankDesign();  // Reset design when leaving xtank mode
       }
       setMaskBits(XtankBodyMask);
+   }
+
+   // Sync weapon slots from the move when in xtank mode.
+   if(mXtankBodyIndex >= 0)
+   {
+      bool weaponsChanged = false;
+      S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
+      for(S32 i = 0; i < slotCount; i++)
+      {
+         XtankWeapon::Type newWeapon = (XtankWeapon::Type)(S32)mCurrentMove.weaponSlot[i];
+         if(newWeapon != mXtankDesign.weapons[i])
+         {
+            mXtankDesign.weapons[i] = newWeapon;
+            weaponsChanged = true;
+         }
+      }
+      if(weaponsChanged)
+         setMaskBits(XtankBodyMask);
    }
 
    // Route to the appropriate physics model
@@ -560,9 +583,90 @@ void Ship::processWeaponFire()
 
    mWeaponFireDecloakTimer.update(mCurrentMove.time);
 
-   WeaponType curWeapon = mLoadout.getActiveWeapon();
-
    GameType *gameType = getGame()->getGameType();
+
+   // -----------------------------------------------------------------
+   // Xtank multi-turret weapon firing
+   // -----------------------------------------------------------------
+   if(mXtankBodyIndex >= 0)
+   {
+      if(gameType && mCurrentMove.fire && (!getClientInfo() || !getClientInfo()->isShipSystemsDisabled()))
+      {
+         S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
+
+         // Determine fire delay (use shortest among active weapon slots) and
+         // total energy drain (sum across all active slots).
+         U32 minFireDelay  = 200;   // fallback
+         U32 totalDrain    = 0;
+         bool hasAnyWeapon = false;
+
+         for(S32 i = 0; i < slotCount; i++)
+         {
+            XtankWeapon::Type wt = mXtankDesign.weapons[i];
+            if((S32)wt < 0 || (S32)wt >= XtankWeapon::Count)
+               continue;
+            hasAnyWeapon = true;
+            const XtankWeaponInfo &wi = xtankWeaponInfos[(S32)wt];
+            if(wi.fireDelay < minFireDelay) minFireDelay = wi.fireDelay;
+            totalDrain += wi.energyDrain;
+         }
+
+         if(hasAnyWeapon)
+         {
+            while(mFireTimer <= 0 && mEnergy >= (S32)totalDrain)
+            {
+               mEnergy -= (S32)totalDrain;
+               mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);
+
+               if(isServer())
+               {
+                  Point aimDir = getAimVector();
+
+                  // Body-to-world rotation matrix (same convention as renderXtankTurrets).
+                  const F32 cosBody = cos(mTankHeadingAngle - FloatHalfPi);
+                  const F32 sinBody = sin(mTankHeadingAngle - FloatHalfPi);
+
+                  static const F32 BARREL_LENGTH = 12.0f;
+
+                  for(S32 i = 0; i < slotCount; i++)
+                  {
+                     XtankWeapon::Type wt = mXtankDesign.weapons[i];
+                     if((S32)wt < 0 || (S32)wt >= XtankWeapon::Count)
+                        continue;
+
+                     // Transform turret mount from body space to world space.
+                     const XtankTurret &turret = xtankTurretInfos[mXtankBodyIndex].turrets[i];
+                     const F32 mx = turret.x;
+                     const F32 my = turret.y;
+                     Point mountWorld(
+                        getActualPos().x + cosBody * mx - sinBody * my,
+                        getActualPos().y + sinBody * mx + cosBody * my
+                     );
+
+                     // Barrel tip: advance from mount in the aim direction.
+                     Point barrelTip = mountWorld + aimDir * BARREL_LENGTH;
+
+                     GameWeapon::createXtankProjectile(wt, aimDir, barrelTip, getActualVel(), 0, this);
+                  }
+               }
+
+               mFireTimer += (S32)minFireDelay;
+
+               if(mSpawnShield.getCurrent() != 0)
+               {
+                  setMaskBits(SpawnShieldMask);
+                  mSpawnShield.clear();
+               }
+            }
+         }
+      }
+      return;
+   }
+
+   // -----------------------------------------------------------------
+   // Standard Bitfighter weapon firing
+   // -----------------------------------------------------------------
+   WeaponType curWeapon = mLoadout.getActiveWeapon();
 
    //             player is firing            player's ship is still largely functional
    if(gameType && mCurrentMove.fire && (!getClientInfo() || !getClientInfo()->isShipSystemsDisabled()))
@@ -1226,9 +1330,13 @@ void Ship::damageObject(DamageInfo *theInfo)
       // Having armor reduces damage
       if(hasArmor)
          damageAmount *= ARMOR_DAMAGE_REDUCTION_FACTOR;           // Any other damage, including asteroids
+
+      // Xtank body armor multiplier: heavy tanks absorb more damage
+      if(mXtankBodyIndex >= 0)
+         damageAmount *= xtankPhysicsInfos[mXtankBodyIndex].armor;
    }
 
-   // Healing (damageAmount > 0)
+   // Healing (damageAmount < 0)
    else
    {
       // Set healing rate to the same as the damage reduction rate.  Might be
@@ -1501,6 +1609,10 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       {
          stream->write(mTankHeadingAngle);
          stream->write(mTankSpeed);
+         // Weapon design: one slot per turret
+         S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
+         for(S32 i = 0; i < slotCount; i++)
+            stream->writeRangedU32((U32)((S32)mXtankDesign.weapons[i] + 1), 0, XtankWeapon::Count);
       }
    }
 
@@ -1684,12 +1796,24 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       {
          stream->read(&mTankHeadingAngle);
          stream->read(&mTankSpeed);
+         // Weapon design
+         S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
+         for(S32 i = 0; i < slotCount; i++)
+            mXtankDesign.weapons[i] = (XtankWeapon::Type)((S32)stream->readRangedU32(0, XtankWeapon::Count) - 1);
+         mXtankDesign.bodyIndex = (S8)mXtankBodyIndex;
       }
       else
       {
          mTankHeadingAngle = -FloatHalfPi;
          mTankSpeed = 0;
+         mXtankDesign = XtankDesign();
       }
+
+#ifndef ZAP_DEDICATED
+      // Notify the HUD so the xtank panel stays current for the local player.
+      if(isLocalPlayerShip(getGame()))
+         static_cast<ClientGame *>(getGame())->xtankDesignUpdated(mXtankDesign);
+#endif
    }
 
    if(stream->readFlag())  // mHasExploded   {
@@ -2164,6 +2288,11 @@ void Ship::cycleXtankBody()
       // Initialise tank physics state for the newly selected body
       mTankHeadingAngle = getAngle(ActualState);
       mTankSpeed        = 0;
+      mXtankDesign.initForBody(mXtankBodyIndex);  // Load default weapons
+   }
+   else
+   {
+      mXtankDesign = XtankDesign();  // Reset when returning to BF ship
    }
 }
 

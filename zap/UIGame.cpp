@@ -1165,6 +1165,36 @@ void GameUserInterface::setActiveWeapon(U32 weaponIndex)
 }
 
 
+// Notify the HUD that the server has sent an updated xtank design.
+void GameUserInterface::xtankDesignUpdated(const XtankDesign &design)
+{
+   mLoadoutIndicator.setXtankDesign(design);
+}
+
+
+// Apply an xtank design chosen by the player (via the UIXtankHelper).
+// Updates the local ship immediately for responsive rendering, and sets the
+// Move fields so the server will receive the new design on the next tick.
+void GameUserInterface::applyXtankDesign(const XtankDesign &design)
+{
+   // Update the move so the server learns about the new design.
+   mCurrentMove.bodyIndex = design.bodyIndex;
+   for(S32 i = 0; i < 4; i++)
+      mCurrentMove.weaponSlot[i] = (S8)(S32)design.weapons[i];
+
+   // Update the local ship immediately (client-side prediction).
+   Ship *ship = getGame()->getLocalPlayerShip();
+   if(ship)
+   {
+      ship->mXtankBodyIndex = design.bodyIndex;
+      ship->mXtankDesign    = design;
+   }
+
+   // Notify the HUD indicator.
+   mLoadoutIndicator.setXtankDesign(design);
+}
+
+
 // Used?
 void GameUserInterface::setModulePrimary(ShipModule module, bool isActive)
 {
@@ -1573,7 +1603,14 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          if(checkInputCode(BINDING_QUICKCHAT, inputCode))
             activateHelper(HelperMenu::QuickChatHelperType);
          else if(checkInputCode(BINDING_LOADOUT, inputCode))
-            activateHelper(HelperMenu::LoadoutHelperType);
+         {
+            // In xtank mode, open the vehicle design menu; otherwise the standard loadout menu.
+            Ship *localShip = getGame()->getLocalPlayerShip();
+            if(localShip && localShip->getXtankBodyIndex() >= 0)
+               activateHelper(HelperMenu::XtankHelperType);
+            else
+               activateHelper(HelperMenu::LoadoutHelperType);
+         }
          else if(checkInputCode(BINDING_DROPITEM, inputCode))
             dropItem();
          // Check if the user is trying to use keyboard to move when in joystick mode

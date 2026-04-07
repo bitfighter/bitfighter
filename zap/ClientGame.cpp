@@ -1187,6 +1187,12 @@ void ClientGame::setActiveWeapon(U32 weaponIndex)
 }
 
 
+void ClientGame::xtankDesignUpdated(const XtankDesign &design)
+{
+   getUIManager()->xtankDesignUpdated(design);
+}
+
+
 bool ClientGame::isShowingDebugShipCoords()
 {
    return getUIManager()->isShowingDebugShipCoords();

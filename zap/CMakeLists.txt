@@ -190,6 +190,7 @@ set(CLIENT_SOURCES
 	UINameEntry.cpp
 	UIQueryServers.cpp
 	UITeamDefMenu.cpp
+	UIXtankHelper.cpp
 	VideoSystem.cpp
 	voiceCodec.cpp
 	VoiceRecorder.cpp
