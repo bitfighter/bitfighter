@@ -286,6 +286,11 @@ ShipShapeInfo xtankBodyInfos[XtankBody::Count] =
 // vertex (i.e. the radius of the smallest enclosing circle centred at the
 // origin).  Derived from the vertex data above.  Used to give each body an
 // accurate collision hitbox.
+//
+// Note: Panzy (43.8) is much larger than the standard Ship::CollisionRadius=24
+// because it really is a giant body in xtank, nearly 3× the size of a normal
+// ship.  This is intentional and faithful to the original game.  Panzy players
+// should expect to fill narrow corridors.
 // ---------------------------------------------------------------------------
 F32 xtankBodyCollisionRadius[XtankBody::Count] =
 {
