@@ -2470,6 +2470,11 @@ void Ship::emitMovementSparks()
       shipDirs[2].set( shipDirs[0].y, -shipDirs[0].x);
       shipDirs[3].set(-shipDirs[0].y,  shipDirs[0].x);
 
+      // Heavy engine (boost) emits more and brighter sparks to signal its type
+      const S32 numSparks   = boostActive ? 3 : 1;
+      const F32 sparkSpeed  = boostActive ? 150.0f : 100.0f;
+      const S32 sparkMaxTTL = boostActive ? 800 : 1500;
+
       for(U32 i = 0; i < 4; i++)
       {
          F32 th = shipDirs[i].dot(velDir);
@@ -2479,21 +2484,33 @@ void Ship::emitMovementSparks()
              // shoot some sparks...
              if(th >= 0.2*velDir.len())
              {
-                Point chaos(TNL::Random::readF(),TNL::Random::readF());
-                chaos *= 5;
-
-                // interp give us some nice enginey colors...
-                Color dim(Colors::red);
-                Color light(1, 1, boostActive ? 1.f : 0.f);
-                Color thrust;
-
-                F32 t = TNL::Random::readF();
-                thrust.interp(t, dim, light);
-
                 TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
 
-                static_cast<ClientGame *>(getGame())->emitSpark(getRenderPos() - shipDirs[i] * 13,
-                                          -shipDirs[i] * 100 + chaos, thrust, TNL::Random::readI(0, 1500), UI::SparkTypePoint);
+                for(S32 s = 0; s < numSparks; s++)
+                {
+                   Point chaos(TNL::Random::readF(), TNL::Random::readF());
+                   chaos *= boostActive ? 8 : 5;
+
+                   Color thrust;
+                   if(boostActive)
+                   {
+                      // Heavy engine: hot orange-to-white sparks, more intense
+                      Color dim(Colors::orange50);
+                      Color light(Colors::white);
+                      thrust.interp(TNL::Random::readF(), dim, light);
+                   }
+                   else
+                   {
+                      // Standard engine: red-to-yellow sparks
+                      Color dim(Colors::red);
+                      Color light(Colors::yellow);
+                      thrust.interp(TNL::Random::readF(), dim, light);
+                   }
+
+                   static_cast<ClientGame *>(getGame())->emitSpark(getRenderPos() - shipDirs[i] * 13,
+                                             -shipDirs[i] * sparkSpeed + chaos, thrust,
+                                             TNL::Random::readI(0, sparkMaxTTL), UI::SparkTypePoint);
+                }
              }
           }
       }

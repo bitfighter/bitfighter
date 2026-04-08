@@ -588,7 +588,7 @@ static void renderShipFlame(const ShipFlame *flames, S32 flameCount, F32 thrust,
 
 
 void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, const Color &hbc, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
-                bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
+                bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor, bool boostActive)
 {
    renderShip(&ShipShape::shipShapeInfos[shapeType], shipColor, hbc, alpha, thrusts, health, radius, sensorTime,
               shieldActive, sensorActive, repairActive, hasArmor);
@@ -633,6 +633,54 @@ void renderShip(const ShipShapeInfo *shipShapeInfo, const Color *shipColor, cons
    // Grey outer hull drawn last, on top
    r.setColor(Colors::gray70, alpha);
    r.renderVertexArray(shipShapeInfo->outerHullPoints, shipShapeInfo->outerHullPointCount, RenderType::LineLoop);
+
+   // ---- Directional and bling indicators ----
+
+   // Nose indicator: a bright filled circle at the forward tip of the ship.
+   // This makes it unambiguous which end is "forward".
+   // Array indexed by ShipShapeType: [Normal, BirdOfPrey, Cube]
+   static const F32 noseTipX[] = {  0.0f,  0.0f,  0.0f };     // X of nose tip per shape
+   static const F32 noseTipY[] = { 25.0f, 25.0f, 23.75f };    // Y of nose tip per shape
+   const F32 noseDotRadius = 2.5f;
+   drawFilledCircle(Point(noseTipX[shapeType], noseTipY[shapeType]), noseDotRadius, shipColor);
+
+   // Engine bling: small "heat-sink" pips at the engine exhaust area.
+   // Each pip represents an active module/capability.  Pips glow in module colors so the
+   // vehicle is "readable" at a glance.
+   // Array indexed by ShipShapeType: [Normal, BirdOfPrey, Cube]
+   static const F32 pipRowY[] = { -19.0f, -25.0f, -28.0f };   // Engine pip Y per shape
+   const F32 pipSize    = 2.0f;
+   const F32 pipSpacing = 6.0f;
+
+   struct ModulePip { bool active; const Color *color; };
+   const ModulePip pipDefs[] = {
+      { shieldActive, &Colors::yellow   },
+      { boostActive,  &Colors::orange50 },
+      { sensorActive, &Colors::paleBlue },
+      { repairActive, &Colors::red      },
+      { hasArmor,     &Colors::gold     },
+   };
+   const S32 pipDefCount = S32(sizeof(pipDefs) / sizeof(pipDefs[0]));
+
+   // Count active pips so we can center the row
+   S32 activePipCount = 0;
+   for(S32 i = 0; i < pipDefCount; i++)
+      if(pipDefs[i].active) activePipCount++;
+
+   if(activePipCount > 0)
+   {
+      const F32 rowY     = pipRowY[shapeType];
+      const F32 startX   = -(activePipCount - 1) * pipSpacing * 0.5f;
+      S32 pipIdx = 0;
+      for(S32 i = 0; i < pipDefCount; i++)
+      {
+         if(pipDefs[i].active)
+         {
+            drawFilledSquare(Point(startX + pipIdx * pipSpacing, rowY), pipSize, pipDefs[i].color);
+            pipIdx++;
+         }
+      }
+   }
 
    // Now render any module states
    renderActiveModuleOverlays(alpha, radius, sensorTime, shieldActive, sensorActive, repairActive, hasArmor);
@@ -1017,6 +1065,8 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
       static F32 thrusts[4];
       calcThrustComponents(vel, angle, deltaAngle, boostActive, thrusts);  
 
+      renderShip(shape, color, hbc, alpha, thrusts, health, radius, renderTime,
+                 shieldActive, sensorActive, repairActive, hasArmor, boostActive);
       renderShip(shapeInfo, color, hbc, alpha, thrusts, health, radius, renderTime,
                  shieldActive, sensorActive, repairActive, hasArmor);
    }
