@@ -112,7 +112,7 @@ extern F32 renderCenteredString(const Point &pos, F32 size, const char *string);
 
 // Renders the core ship, good for instructions and such
 extern void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, const Color &hbc, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
-                       bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
+                       bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor, bool boostActive = false);
 
 // Renders the ship and all the fixins
 extern void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
