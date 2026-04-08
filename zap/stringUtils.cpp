@@ -342,29 +342,64 @@ Vector<string> parseString(const string &line)
 {
    Vector<string> result;
 
-   string          item;
-   stringstream    ss(line);
+   string item;
+   bool inQuotes = false;
+   bool hasContent = false;
+   U32 i = 0;
+   U32 len = (U32)line.length();
 
-   while(ss >> item)
+   while(i < len)
    {
-      if(item[0] == '"')
-      {
-         S32 lastItemPosition = (S32)item.length() - 1;
-         if(item[lastItemPosition] != '"') 
-         {
-            // read the rest of the double-quoted item
-            string restOfItem;
-            getline(ss, restOfItem, '"');
-            item += restOfItem;
-         }
-         // otherwise, we had a single word that was quoted. In any case, we now
-         // have the item in quotes; remove them
-         item = trim(item, "\"");
-      }
+      char c = line[i];
 
-      // item is "fully cooked" now
-      result.push_back(item);
+      if(inQuotes)
+      {
+         if(c == '"')
+         {
+            if(i + 1 < len && line[i + 1] == '"') // Escaped quote
+            {
+               item += '"';
+               hasContent = true;
+               i++;
+            }
+            else
+            {
+               inQuotes = false;
+            }
+         }
+         else
+         {
+            item += c;
+            hasContent = true;
+         }
+      }
+      else
+      {
+         if(c == '"')
+         {
+            inQuotes = true;
+            hasContent = true;
+         }
+         else if(isspace(static_cast<unsigned char>(c)))
+         {
+            if(hasContent)
+            {
+               result.push_back(item);
+               item.clear();
+               hasContent = false;
+            }
+         }
+         else
+         {
+            item += c;
+            hasContent = true;
+         }
+      }
+      i++;
    }
+
+   if(hasContent)
+      result.push_back(item);
 
    return result;
 }
@@ -379,9 +414,7 @@ void parseString(const string &inputString, Vector<string> &words, char seperato
 // Splits inputString into a series of words using the specified separator; does not consider quotes; trims words
 void parseString(const char *inputString, Vector<string> &words, char seperator)
 {
-   const S32 maxlen = 126;
-   char word[maxlen + 2];
-   S32 wn = 0;       // Where we are in the word we're creating
+   string word;
    S32 isn = 0;      // Where we are in the inputString we're parsing
 
    words.clear();
@@ -390,24 +423,16 @@ void parseString(const char *inputString, Vector<string> &words, char seperator)
    {
       if(inputString[isn] == seperator) 
       {
-         word[wn] = 0;    // Add terminating NULL
-
          words.push_back(trim(word));
-
-         wn = 0;
+         word.clear();
       }
       else
       {
-         if(wn < maxlen)   // Avoid overflows
-         {
-            word[wn] = inputString[isn]; 
-            wn++; 
-         }
+         word += inputString[isn];
       }
       isn++;
    }
    
-   word[wn] = 0;     // Add terminator
    words.push_back(trim(word));
 }
 
@@ -974,6 +999,9 @@ bool isAlNum(char c)
 // Return true if str contains only hex chars
 bool isHex(const string &str)
 {
+   if(str.empty())
+      return false;
+
    for(string::size_type i = 0; i < str.length(); i++)
       if(!isHex(str[i]))
          return false;

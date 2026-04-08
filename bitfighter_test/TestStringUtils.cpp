@@ -60,6 +60,47 @@ TEST(StringUtilsTest, isHex)
    EXPECT_FALSE(isHex("12:345"));   // ':' comes just after '9'
    EXPECT_FALSE(isHex("@bcdef"));   // '@' comes just before 'A'
    EXPECT_FALSE(isHex("c01`"));     // '`' comes just before 'a'
+   EXPECT_FALSE(isHex(""));
+}
+
+
+TEST(StringUtilsTest, parseStringSeparatorLongWord)
+{
+    string longWord(200, 'a');
+    string input = longWord + ";next";
+    Vector<string> result;
+    parseString(input.c_str(), result, ';');
+    ASSERT_EQ(2, result.size());
+    EXPECT_EQ(longWord, result[0]);
+}
+
+
+TEST(StringUtilsTest, parseStringQuotedAdvanced)
+{
+    // Escaped quotes: ""
+    Vector<string> result = parseString("one \"quoted \"\"word\"\"\" three");
+    // Current implementation:
+    // "one"
+    // "quoted "
+    // "word" (from ""word)
+    // "" (from "")
+    // "three"
+    // This is likely what will happen, which is wrong.
+    // It should be:
+    // "one"
+    // "quoted \"word\""
+    // "three"
+    ASSERT_EQ(3, result.size());
+    EXPECT_EQ("one", result[0]);
+    EXPECT_EQ("quoted \"word\"", result[1]);
+    EXPECT_EQ("three", result[2]);
+
+    // Empty quotes
+    result = parseString("one \"\" three");
+    ASSERT_EQ(3, result.size());
+    EXPECT_EQ("one", result[0]);
+    EXPECT_EQ("", result[1]);
+    EXPECT_EQ("three", result[2]);
 }
 
 
