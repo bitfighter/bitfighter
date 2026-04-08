@@ -1103,6 +1103,94 @@ void renderXtankTurrets(const Point &pos, F32 bodyAngle, F32 aimAngle, F32 alpha
 }
 
 
+// Render xtank vehicle "bling" overlay on top of the hull:
+//   - Heat-sink count indicators: small crosses along the right side
+//   - Engine type indicator: a diamond at the rear exhaust area
+//     (light = small blue, standard = medium orange-red, heavy = large bright orange)
+//
+// Must be called after the hull and turrets have been drawn.  pos is the
+// vehicle centre in world space; bodyAngle is the hull heading (same as used
+// in renderShip / renderXtankTurrets).
+void renderXtankVehicleOverlay(const Point &pos, F32 bodyAngle, F32 alpha,
+                                S32 bodyIdx, S32 heatSinkCount,
+                                XtankEngine::Type engineType,
+                                F32 warpInScale)
+{
+   Renderer& r = Renderer::get();
+
+   if(alpha <= 0 || bodyIdx < 0 || bodyIdx >= XtankBody::Count)
+      return;
+
+   const F32 noseY  = xtankBodyNoseY[bodyIdx];
+   const F32 rearY  = xtankBodyRearY[bodyIdx];
+   const F32 sideX  = xtankBodyCollisionRadius[bodyIdx] * 0.60f;  // right-side x
+
+   r.pushMatrix();
+   r.translate(pos);
+   // Apply same rotation as the hull renderer
+   r.rotate(radiansToDegrees(bodyAngle) - 90.0f, 0, 0, 1.0f);
+   r.scale(warpInScale);
+
+   // -------------------------------------------------------------------------
+   // Heat-sink count: N small cross (+) markers evenly spaced along the right
+   // side of the hull.  Cyan colour = cooling system.
+   // -------------------------------------------------------------------------
+   const F32 hullLen  = noseY - rearY;
+   const F32 hsStep   = hullLen / (F32)(heatSinkCount + 1);
+   const F32 armLen   = 2.5f;
+
+   r.setColor(Colors::cyan, alpha * 0.85f);
+   for(S32 i = 0; i < heatSinkCount; i++)
+   {
+      F32 sy = rearY + hsStep * (F32)(i + 1);
+
+      F32 hLine[] = { sideX - armLen, sy,   sideX + armLen, sy };
+      F32 vLine[] = { sideX, sy - armLen,   sideX, sy + armLen };
+
+      r.renderVertexArray(hLine, 2, RenderType::Lines);
+      r.renderVertexArray(vLine, 2, RenderType::Lines);
+   }
+
+   // -------------------------------------------------------------------------
+   // Engine type indicator: a diamond drawn just inward of the rear edge.
+   // Light  = small dim blue
+   // Standard = medium orange-red
+   // Heavy  = large bright yellow-orange
+   // -------------------------------------------------------------------------
+   F32 diamSize;
+   Color engColor;
+   switch(engineType)
+   {
+      case XtankEngine::Light:
+         diamSize = 3.5f;
+         engColor = Color(0.3f, 0.4f, 1.0f);  // dim blue
+         break;
+      case XtankEngine::Heavy:
+         diamSize = 7.5f;
+         engColor = Color(1.0f, 0.65f, 0.0f); // bright orange
+         break;
+      default: // Standard
+         diamSize = 5.5f;
+         engColor = Color(0.95f, 0.35f, 0.05f); // orange-red
+         break;
+   }
+
+   const F32 diamY = rearY + diamSize + 2.0f;  // slightly inside the rear edge
+
+   F32 diam[] = {
+       0.0f,     diamY + diamSize,
+       diamSize, diamY,
+       0.0f,     diamY - diamSize,
+      -diamSize, diamY,
+       0.0f,     diamY + diamSize,   // close
+   };
+   r.setColor(engColor, alpha * 0.9f);
+   r.renderVertexArray(diam, 5, RenderType::LineStrip);
+
+   r.popMatrix();
+}
+
+
 // Render repair rays to all the repairing objects
 void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<BfObject> > &repairTargets, F32 alpha)
 {
