@@ -2472,16 +2472,21 @@ void Ship::emitMovementSparks()
       //   Standard – 2 orange-red point sparks
       //   Heavy    – 3 bright orange/yellow line sparks, long life (most visible)
 
+      static const F32 MinExhaustSpeed      = 30.0f;   // below this, no visible exhaust
+      static const F32 ExhaustSpeedNorm     = 600.0f;  // max speed for speedFrac normalisation
+      static const F32 ExhaustDistRatio     = 0.65f;   // fraction of collision radius to exhaust exit
+      static const F32 SparkProbMultiplier  = 1.4f;    // scales emit probability (>1 = emit more at full speed)
+
       const F32 speed = mTankSpeed;
-      if(fabsf(speed) < 30.0f)
+      if(fabsf(speed) < MinExhaustSpeed)
          return;  // barely moving -- skip exhaust
 
-      const F32 speedFrac = MIN(fabsf(speed) / 600.0f, 1.0f);
+      const F32 speedFrac = MIN(fabsf(speed) / ExhaustSpeedNorm, 1.0f);
 
       // heading unit vector; exhaust exits the REAR (opposite to heading when
       // moving forward, but keep it consistent: always from the geometric rear)
       const Point headingDir(cos(mTankHeadingAngle), sin(mTankHeadingAngle));
-      const F32   exhaustDist = xtankBodyCollisionRadius[mXtankBodyIndex] * 0.65f;
+      const F32   exhaustDist = xtankBodyCollisionRadius[mXtankBodyIndex] * ExhaustDistRatio;
       // When moving forward the rear is behind (−heading); reversing → front
       const F32   rearSign  = (speed >= 0.0f) ? -1.0f : 1.0f;
       const Point exhaustPos = getRenderPos() + headingDir * (exhaustDist * rearSign);
@@ -2527,7 +2532,7 @@ void Ship::emitMovementSparks()
       for(S32 s = 0; s < sparkCount; s++)
       {
          // Probabilistically skip sparks at lower speeds
-         if(TNL::Random::readF() > speedFrac * 1.4f)
+         if(TNL::Random::readF() > speedFrac * SparkProbMultiplier)
             continue;
 
          Point jitter(TNL::Random::readF() * 8.0f - 4.0f,
