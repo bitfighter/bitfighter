@@ -628,6 +628,7 @@ void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, cons
 
    // Nose indicator: a bright filled circle at the forward tip of the ship.
    // This makes it unambiguous which end is "forward".
+   // Array indexed by ShipShapeType: [Normal, BirdOfPrey, Cube]
    static const F32 noseTipX[] = {  0.0f,  0.0f,  0.0f };     // X of nose tip per shape
    static const F32 noseTipY[] = { 25.0f, 25.0f, 23.75f };    // Y of nose tip per shape
    const F32 noseDotRadius = 2.5f;
@@ -636,6 +637,7 @@ void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, cons
    // Engine bling: small "heat-sink" pips at the engine exhaust area.
    // Each pip represents an active module/capability.  Pips glow in module colors so the
    // vehicle is "readable" at a glance.
+   // Array indexed by ShipShapeType: [Normal, BirdOfPrey, Cube]
    static const F32 pipRowY[] = { -19.0f, -25.0f, -28.0f };   // Engine pip Y per shape
    const F32 pipSize    = 2.0f;
    const F32 pipSpacing = 6.0f;
