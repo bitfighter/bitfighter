@@ -938,6 +938,14 @@ void UIManager::setActiveWeapon(U32 weaponIndex)
 }
 
 
+// Called by Ship::unpackUpdate() when an xtank design arrives from the server.
+// Data flow: Ship->ClientGame->UIManager->GameUserInterface->LoadoutIndicator
+void UIManager::xtankDesignUpdated(const XtankDesign &design)
+{
+   getUI<GameUserInterface>()->xtankDesignUpdated(design);
+}
+
+
 bool UIManager::isShowingDebugShipCoords()
 {
    return getUI<GameUserInterface>()->isShowingDebugShipCoords();

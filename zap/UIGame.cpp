@@ -39,6 +39,7 @@
 #include "GeomUtils.h"
 
 #include "GameRecorderPlayback.h"
+#include "XtankShape.h"     // For xtank vehicle body cycling (Ctrl+Alt+Shift+X)
 
 #include <cmath>     // Needed to compile under Linux, OSX
 
@@ -1164,6 +1165,39 @@ void GameUserInterface::setActiveWeapon(U32 weaponIndex)
 }
 
 
+// Notify the HUD that the server has sent an updated xtank design.
+void GameUserInterface::xtankDesignUpdated(const XtankDesign &design)
+{
+   mLoadoutIndicator.setXtankDesign(design);
+}
+
+
+// Apply an xtank design chosen by the player (via the UIXtankHelper).
+// Updates the local ship immediately for responsive rendering, and sets the
+// Move fields so the server will receive the new design on the next tick.
+void GameUserInterface::applyXtankDesign(const XtankDesign &design)
+{
+   // Update the move so the server learns about the new design.
+   mCurrentMove.bodyIndex    = design.bodyIndex;
+   mCurrentMove.engineType   = (S8)design.engineType;
+   mCurrentMove.treadType    = (S8)design.treadType;
+   mCurrentMove.heatSinkCount = design.heatSinkCount;
+   for(S32 i = 0; i < 4; i++)
+      mCurrentMove.weaponSlot[i] = (S8)(S32)design.weapons[i];
+
+   // Update the local ship immediately (client-side prediction).
+   Ship *ship = getGame()->getLocalPlayerShip();
+   if(ship)
+   {
+      ship->mXtankBodyIndex = design.bodyIndex;
+      ship->mXtankDesign    = design;
+   }
+
+   // Notify the HUD indicator.
+   mLoadoutIndicator.setXtankDesign(design);
+}
+
+
 // Used?
 void GameUserInterface::setModulePrimary(ShipModule module, bool isActive)
 {
@@ -1417,6 +1451,25 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    else if(inputCode == KEY_CLOSEBRACKET && InputCodeManager::checkModifier(KEY_CTRL))    // Ctrl+] advances bots by 10 steps if frozen
       EventManager::get()->addSteps(10);
 
+   // Ctrl+Alt+Shift+X cycles through xtank vehicle bodies
+   else if(inputCode == KEY_X &&
+           InputCodeManager::checkModifier(KEY_CTRL, KEY_ALT, KEY_SHIFT))
+   {
+      Ship *ship = getGame()->getLocalPlayerShip();
+      if(ship)
+      {
+         ship->cycleXtankBody();
+         S32 bodyIdx = ship->getXtankBodyIndex();
+         const char *bodyName = (bodyIdx >= 0) ? xtankBodyNames[bodyIdx] : "Bitfighter Ship";
+         getGame()->displayMessage(Colors::cyan, "Vehicle body: %s", bodyName);
+
+         // Propagate the new body choice to the server via the Move struct.
+         // mCurrentMove.bodyIndex is delta-compressed, so it will be sent
+         // in the next packet and every packet thereafter until it changes.
+         mCurrentMove.bodyIndex = (S8)bodyIdx;
+      }
+   }
+
    else if(checkInputCode(BINDING_LOAD_PRESET_1, inputCode))  // Loading loadout presets
       loadLoadoutPreset(getGame(), 0);
    else if(checkInputCode(BINDING_LOAD_PRESET_2, inputCode))
@@ -1553,7 +1606,14 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          if(checkInputCode(BINDING_QUICKCHAT, inputCode))
             activateHelper(HelperMenu::QuickChatHelperType);
          else if(checkInputCode(BINDING_LOADOUT, inputCode))
-            activateHelper(HelperMenu::LoadoutHelperType);
+         {
+            // In xtank mode, open the vehicle design menu; otherwise the standard loadout menu.
+            Ship *localShip = getGame()->getLocalPlayerShip();
+            if(localShip && localShip->getXtankBodyIndex() >= 0)
+               activateHelper(HelperMenu::XtankHelperType);
+            else
+               activateHelper(HelperMenu::LoadoutHelperType);
+         }
          else if(checkInputCode(BINDING_DROPITEM, inputCode))
             dropItem();
          // Check if the user is trying to use keyboard to move when in joystick mode

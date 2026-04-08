@@ -13,6 +13,7 @@
 #include "Renderer.h"
 #include "RenderUtils.h"
 #include "stringUtils.h"
+#include "XtankShape.h"     // For xtankBodyNames, XtankWeapon
 
 
 using namespace Zap;
@@ -38,6 +39,7 @@ void LoadoutIndicator::reset()
 {
    mCurrLoadout.resetLoadout();
    mPrevLoadout.resetLoadout();
+   mXtankDesign = XtankDesign();   // Reset to bodyIndex=-1 (no xtank)
    resetScrollTimer();
 }
 
@@ -70,6 +72,12 @@ void LoadoutIndicator::setModulePrimary(ShipModule module, bool isActive)
 void LoadoutIndicator::setModuleSecondary(ShipModule module, bool isActive)
 {
     mCurrLoadout.setModuleSecondary(module, isActive);
+}
+
+
+void LoadoutIndicator::setXtankDesign(const XtankDesign &design)
+{
+   mXtankDesign = design;
 }
 
 
@@ -135,9 +143,63 @@ void setModuleColor(Renderer &r, const ShipModule &module, bool isPrimaryActive,
 
 
 // Returns width
-static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
+static S32 doRender(const LoadoutTracker &loadout, const XtankDesign &xtankDesign,
+                    ClientGame *game, S32 top)
 {
    Renderer& r = Renderer::get();
+
+   // Xtank mode: show body name + engine + treads + heat sinks + per-slot weapon names.
+   if(xtankDesign.bodyIndex >= 0)
+   {
+      FontManager::pushFontContext(LoadoutIndicatorContext);
+
+      S32 xPos = LoadoutIndicator::LoadoutIndicatorLeftPos;
+      S32 bodyIdx = (S32)xtankDesign.bodyIndex;
+
+      // Body name box
+      r.setColor(*INDICATOR_INACTIVE_COLOR);
+      S32 width = renderComponentIndicator(xPos, top, xtankBodyNames[bodyIdx]);
+      xPos += width + IndicatorHorizPadding;
+
+      xPos += GapBetweenTheGroups;
+
+      // Engine
+      r.setColor(*INDICATOR_INACTIVE_COLOR);
+      width = renderComponentIndicator(xPos, top, xtankEngineInfos[(S32)xtankDesign.engineType].name);
+      xPos += width + IndicatorHorizPadding;
+
+      // Treads
+      r.setColor(*INDICATOR_INACTIVE_COLOR);
+      width = renderComponentIndicator(xPos, top, xtankTreadInfos[(S32)xtankDesign.treadType].name);
+      xPos += width + IndicatorHorizPadding;
+
+      // Heat sinks ("HSx N")
+      char hsBuf[16];
+      dSprintf(hsBuf, sizeof(hsBuf), "HS: %d", (S32)xtankDesign.heatSinkCount);
+      r.setColor(*INDICATOR_INACTIVE_COLOR);
+      width = renderComponentIndicator(xPos, top, hsBuf);
+      xPos += width + IndicatorHorizPadding;
+
+      xPos += GapBetweenTheGroups;
+
+      // One box per weapon slot
+      S32 slotCount = xtankTurretInfos[bodyIdx].count;
+      for(S32 i = 0; i < slotCount; i++)
+      {
+         XtankWeapon::Type wt = xtankDesign.weapons[i];
+         const char *weapName = ((S32)wt >= 0 && (S32)wt < XtankWeapon::Count)
+                                   ? xtankWeaponInfos[(S32)wt].name
+                                   : "---";
+         r.setColor(*INDICATOR_INACTIVE_COLOR);
+         width = renderComponentIndicator(xPos, top, weapName);
+         xPos += width + IndicatorHorizPadding;
+      }
+
+      FontManager::popFontContext();
+      return xPos - LoadoutIndicator::LoadoutIndicatorLeftPos - IndicatorHorizPadding;
+   }
+
+   // Standard BF mode: show weapons + modules.
 
    // If if we have no module, then this loadout has never been set, and there is nothing to render
    if(!loadout.isValid())  
@@ -180,6 +242,35 @@ static S32 doRender(const LoadoutTracker &loadout, ClientGame *game, S32 top)
 // This should return the same width as doRender()
 S32 LoadoutIndicator::getWidth() const
 {
+   // Xtank mode: body name + engine + treads + heat sinks + weapons
+   if(mXtankDesign.bodyIndex >= 0)
+   {
+      S32 bodyIdx = (S32)mXtankDesign.bodyIndex;
+      S32 width = getComponentIndicatorWidth(xtankBodyNames[bodyIdx]) + IndicatorHorizPadding;
+      width += GapBetweenTheGroups;
+      width += getComponentIndicatorWidth(xtankEngineInfos[(S32)mXtankDesign.engineType].name) + IndicatorHorizPadding;
+      width += getComponentIndicatorWidth(xtankTreadInfos[(S32)mXtankDesign.treadType].name)   + IndicatorHorizPadding;
+
+      char hsBuf[16];
+      dSprintf(hsBuf, sizeof(hsBuf), "HS: %d", (S32)mXtankDesign.heatSinkCount);
+      width += getComponentIndicatorWidth(hsBuf) + IndicatorHorizPadding;
+
+      width += GapBetweenTheGroups;
+      S32 slotCount = xtankTurretInfos[bodyIdx].count;
+      for(S32 i = 0; i < slotCount; i++)
+      {
+         XtankWeapon::Type wt = mXtankDesign.weapons[i];
+         const char *weapName = ((S32)wt >= 0 && (S32)wt < XtankWeapon::Count)
+                                   ? xtankWeaponInfos[(S32)wt].name
+                                   : "---";
+         width += getComponentIndicatorWidth(weapName) + IndicatorHorizPadding;
+      }
+      if(slotCount > 0)
+         width -= IndicatorHorizPadding;
+      return width;
+   }
+
+   // Standard BF mode
    S32 width = 0;
 
    for(auto i = 0; i < ShipWeaponCount; i++)
@@ -207,13 +298,14 @@ S32 LoadoutIndicator::render(ClientGame *game) const
    top = Parent::prepareToRenderFromDisplay(windowMode, LoadoutIndicatorTopPos - 1, LoadoutIndicatorHeight + 1);
    if(top != NO_RENDER)
    {
-      doRender(mPrevLoadout, game, top);
+      XtankDesign empty;  // For the previous-loadout slot we don't track a prev xtank design
+      doRender(mPrevLoadout, empty, game, top);
       doneRendering();
    }
 
    // Current loadout
    top = Parent::prepareToRenderToDisplay(windowMode, LoadoutIndicatorTopPos, LoadoutIndicatorHeight);
-   S32 width = doRender(mCurrLoadout, game, top);
+   S32 width = doRender(mCurrLoadout, mXtankDesign, game, top);
    doneRendering();
 
    return width;

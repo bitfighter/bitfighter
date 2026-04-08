@@ -506,6 +506,10 @@ void Projectile::renderItem(const Point &pos)
 
       if(mStyle == ProjectileStyleRailgun)
          renderProjectileRailgun(pos, mVelocity, time);
+      else if(mStyle == ProjectileStyleXtankLaser)
+         renderProjectileXtankLaser(pos, mVelocity);
+      else if(mStyle >= ProjectileStyleXtankBlue && mStyle < ProjectileStyleCount)
+         renderProjectileXtankBullet(pos, mStyle);
       else
          renderProjectile(pos, mStyle, time);
    }

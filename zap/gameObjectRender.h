@@ -16,6 +16,7 @@
 #include "Color.h"
 #include "SharedConstants.h"     // For MeritBadges enum
 #include "ShipShape.h"
+#include "XtankShape.h"          // For XtankBodyTurrets (used by renderXtankTurrets)
 
 #include "BfObject.h"            // Need to use BfObject with SafePtr.  Whether this is really needed is a different question.
 
@@ -114,15 +115,23 @@ extern F32 renderCenteredString(const Point &pos, F32 size, const char *string);
 extern void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, const Color &hbc, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                        bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor, bool boostActive = false);
 
+// Overload that accepts a ShipShapeInfo directly (used when rendering xtank bodies)
+extern void renderShip(const ShipShapeInfo *shapeInfo, const Color *shipColor, const Color &hbc, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
+                       bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
+
 // Renders the ship and all the fixins
 extern void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
-                       F32 angle, F32 deltaAngle, ShipShape::ShipShapeType shape, const Color *color, const Color &hbc, F32 alpha, 
+                       F32 angle, F32 deltaAngle, const ShipShapeInfo *shapeInfo, const Color *color, const Color &hbc, F32 alpha, 
                        U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
                        bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
                        bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
                        bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed);
 
 extern void renderSpawnShield(const Point &pos, U32 shieldTime, U32 renderTime);
+
+// Render turrets for xtank vehicle bodies (pointing at the aim angle, independent of hull orientation)
+extern void renderXtankTurrets(const Point &pos, F32 bodyAngle, F32 aimAngle, F32 alpha,
+                                const XtankBodyTurrets &turrets, const Color *color, F32 warpInScale);
 
 // Render repair rays to all the repairing objects
 extern void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<BfObject> > &repairTargets, F32 alpha);   
@@ -204,6 +213,8 @@ extern void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const
 
 extern void renderProjectile(const Point &pos, U32 style, U32 time);
 extern void renderProjectileRailgun(const Point &pos, const Point &velocity, U32 time);
+extern void renderProjectileXtankBullet(const Point &pos, U32 style);
+extern void renderProjectileXtankLaser(const Point &pos, const Point &velocity);
 extern void renderSeeker(const Point &pos, U32 style, F32 angleRadians, F32 speed, U32 timeRemaining);
 
 extern void renderMine(const Point &pos, bool armed, bool visible);
@@ -298,6 +309,8 @@ extern void renderFilledPolygon(const Point &pos, S32 points, S32 radius, const 
 #define renderSlipZone
 #define renderProjectile
 #define renderProjectileRailgun
+#define renderProjectileXtankBullet
+#define renderProjectileXtankLaser
 #define renderGrenade
 #define renderMine
 #define renderSpyBug
