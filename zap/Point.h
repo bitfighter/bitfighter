@@ -159,24 +159,26 @@ public:
 
    inline bool operator<(const Point& pt) const
    {
-      // Here we say that a point is less than another if its distance
-      // from the origin is less than the other's
-      return sq(x) + sq(y) < sq(pt.x) + sq(pt.y);
+      // Use lexicographical comparison to satisfy strict weak ordering requirements.
+      // This ensures that different points are always distinguishable in sorted containers.
+      if(x != pt.x)
+         return x < pt.x;
+      return y < pt.y;
    }
 
    inline bool operator>(const Point& pt) const
    {
-      return sq(x) + sq(y) > sq(pt.x) + sq(pt.y);
+      return pt < *this;
    }
 
    inline bool operator<=(const Point& pt) const
    {
-      return !operator>(pt);
+      return !(pt < *this);
    }
 
    inline bool operator>=(const Point& pt) const
    {
-      return !operator<(pt);
+      return !(*this < pt);
    }
 }; // class
 
