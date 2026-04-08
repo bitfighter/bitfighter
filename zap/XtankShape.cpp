@@ -280,6 +280,38 @@ ShipShapeInfo xtankBodyInfos[XtankBody::Count] =
 
 
 // ---------------------------------------------------------------------------
+// Pre-computed bounding-circle radius for each xtank body.
+//
+// Each value is the maximum Euclidean distance from the origin to any hull
+// vertex (i.e. the radius of the smallest enclosing circle centred at the
+// origin).  Derived from the vertex data above.  Used to give each body an
+// accurate collision hitbox.
+//
+// Note: Panzy (43.8) is much larger than the standard Ship::CollisionRadius=24
+// because it really is a giant body in xtank, nearly 3× the size of a normal
+// ship.  This is intentional and faithful to the original game.  Panzy players
+// should expect to fill narrow corridors.
+// ---------------------------------------------------------------------------
+F32 xtankBodyCollisionRadius[XtankBody::Count] =
+{
+   15.0f,  // Lightcycle  : farthest vertex (0,-15) → dist 15
+   13.6f,  // Trike       : farthest vertex (-8,-11) → sqrt(64+121)≈13.6
+   17.0f,  // Hexo        : farthest vertex (0,17)   → dist 17
+   17.0f,  // Spider      : farthest vertex (±17,0)  → dist 17
+   24.8f,  // Psycho      : farthest vertex (16,-19) → sqrt(256+361)≈24.8
+   22.2f,  // Tornado     : farthest vertex corners  → sqrt(169+324)≈22.2
+   25.8f,  // Marauder    : farthest vertex (15,-21) → sqrt(225+441)≈25.8
+   25.5f,  // Tiger       : farthest vertex corners  → sqrt(289+361)≈25.5
+   27.7f,  // Rhino       : farthest vertex (6,-27)  → sqrt(36+729)≈27.7
+   27.8f,  // Medusa      : farthest vertex (±22,-17)→ sqrt(484+289)≈27.8
+   21.9f,  // Delta       : farthest vertex (±19,-11)→ sqrt(361+121)≈21.9
+   17.0f,  // Disk        : farthest vertex (±17,0)  → dist 17
+   17.5f,  // Malice      : farthest vertex (7,-16)  → sqrt(49+256)≈17.5
+   43.8f,  // Panzy       : farthest vertex (±31,±31)→ sqrt(961+961)≈43.8
+}; // xtankBodyCollisionRadius[]
+
+
+// ---------------------------------------------------------------------------
 // Turret mount positions for each xtank vehicle body.
 //
 // Coordinates are in body space using the same scale as the hull vertices
@@ -441,16 +473,24 @@ const char *xtankWeaponNames[XtankWeapon::Count] =
 
 XtankWeaponInfo xtankWeaponInfos[XtankWeapon::Count] =
 {
-   //                  name            fireDelay  energyDrain  bfWeapon
-   /* MachineGun */  { "Machine Gun",   80,        300,         WeaponPhaser  },
-   /* Laser      */  { "Laser",         500,       8000,        WeaponRailgun },
-   /* Missile    */  { "Missile",       600,       8000,        WeaponSeeker  },
-   /* Grenade    */  { "Grenade",       400,       6000,        WeaponBurst   },
-   /* Rocket     */  { "Rocket",        350,       7000,        WeaponBurst   },
-   /* Acid       */  { "Acid",          120,        800,        WeaponBounce  },
-   /* Tracer     */  { "Tracer",        100,        400,        WeaponTurret  },
-   /* Bomb       */  { "Bomb",          700,       10000,       WeaponBurst   },
-   /* Fire       */  { "Fire",          200,       1500,        WeaponTriple  },
+   // Xtank weapon parameters are derived from the original xtank weapon-defs.h.
+   // Speed conversion: xtank px/frame × 20 fps = BF units/sec.
+   // Lifetime conversion: xtank frames × 50 ms/frame = BF ms.
+   // Reload conversion: xtank reload_frames × 50 ms/frame = BF ms.
+   //
+   // Colour mapping from xtank display flags:
+   //   F_BL=blue, F_OR=orange, F_YE=yellow, F_GR=green, F_VI=violet, F_BEAM=laser
+   //
+   //                  name            fireDelay energyDrain  bfWeapon      projVelocity  projLiveTime  style
+   /* MachineGun */  { "Machine Gun",   150,       300,        WeaponPhaser,  340,          1100,         ProjectileStyleXtankBlue   },  // MG:   spd=17,fr=22,tm=3
+   /* Laser      */  { "Laser",         150,       8000,       WeaponRailgun, 1200,         1000,         ProjectileStyleXtankLaser  },  // LASER:spd=60,fr=20,tm=3
+   /* Missile    */  { "Missile",       750,       8000,       WeaponSeeker,  500,          2550,         ProjectileStyleXtankViolet },  // SEEKER:spd=25,fr=51,tm=15
+   /* Grenade    */  { "Grenade",       150,       6000,       WeaponBurst,   440,           950,         ProjectileStyleXtankOrange },  // CANNON:spd=22,fr=19,tm=3
+   /* Rocket     */  { "Rocket",        400,       7000,       WeaponBurst,   800,           750,         ProjectileStyleXtankYellow },  // ROCKET:spd=40,fr=15,tm=8
+   /* Acid       */  { "Acid",          150,        800,       WeaponBounce,  200,           850,         ProjectileStyleXtankGreen  },  // ACID:  spd=10,fr=17,tm=3
+   /* Tracer     */  { "Tracer",        100,        400,       WeaponTurret,  340,          1100,         ProjectileStyleXtankBlue   },  // LMG:   spd=17,fr=22,tm=2
+   /* Bomb       */  { "Bomb",          400,       10000,      WeaponBurst,   500,          1000,         ProjectileStyleXtankYellow },  // HROCKET:spd=40,rng~500,tm=8
+   /* Fire       */  { "Fire",           50,       1500,       WeaponTriple,  240,           850,         ProjectileStyleXtankGreen  },  // FLAME: spd=12,fr=17,tm=1
 }; // xtankWeaponInfos[]
 
 

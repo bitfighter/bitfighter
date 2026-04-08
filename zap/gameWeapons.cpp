@@ -6,6 +6,7 @@
 #include "gameWeapons.h"
 #include "projectile.h"
 #include "game.h"
+#include "XtankShape.h"    // For XtankWeapon, xtankWeaponInfos
 
 #include "Colors.h"
 
@@ -45,6 +46,15 @@ ProjectileInfo GameWeapon::projectileInfo[ProjectileStyleCount] =
    ProjectileInfo( Colors::blue,    Colors::green,  Color(0,0.5,1),   Color(0,1,0.5), Color(0, 0.5, 1), Color(0, 1, 0.5), 0.7f, SFXTripleProjectile, SFXTripleImpact ), // Triple
    ProjectileInfo( Colors::cyan,    Colors::yellow, Color(0,1,0.5),   Color(0.5,1,0), Color(0.5, 1, 0), Color(0, 1, 0.5), 0.6f, SFXTurretProjectile, SFXTurretImpact ), // Turret
    ProjectileInfo( Colors::blue,    Colors::magenta,Colors::red,      Colors::cyan,   Colors::blue,     Colors::cyan,     3.0f, SFXRailgunProjectile,SFXRailgunImpact ), // Railgun
+   // Xtank weapon styles.  projColors[0] is the bullet fill colour; projColors[1] is the
+   // outline / highlight colour.  Spark colours match the bullet to give consistent sparks.
+   //                SparkColor1        SparkColor2         SparkColor3         SparkColor4           ProjColor1              ProjColor2            Scale  Fire sound           Impact sound
+   ProjectileInfo( Colors::blue,      Colors::cyan,       Colors::white,      Colors::blue,         Colors::blue,           Colors::cyan,         1.0f, SFXTurretProjectile,  SFXTurretImpact  ), // XtankBlue   (MachineGun, Tracer)
+   ProjectileInfo( Colors::orange50,  Colors::yellow,     Colors::red,        Colors::orange50,     Colors::orange50,       Colors::yellow,       1.0f, SFXPhaserProjectile,  SFXPhaserImpact  ), // XtankOrange (Grenade)
+   ProjectileInfo( Colors::yellow,    Colors::white,      Colors::orange50,   Colors::yellow,       Colors::yellow,         Colors::white,        1.0f, SFXBounceProjectile,  SFXBounceImpact  ), // XtankYellow (Rocket, Bomb)
+   ProjectileInfo( Colors::green,     Colors::yellow,     Colors::green,      Colors::cyan,         Colors::green,          Color(0,0.8f,0.2f),   1.0f, SFXTripleProjectile,  SFXTripleImpact  ), // XtankGreen  (Acid, Fire)
+   ProjectileInfo( Colors::magenta,   Color(0.5f,0,1),    Colors::blue,       Colors::magenta,      Colors::magenta,        Color(0.5f,0,1),      1.0f, SFXPhaserProjectile,  SFXPhaserImpact  ), // XtankViolet (Missile)
+   ProjectileInfo( Colors::white,     Colors::cyan,       Colors::white,      Colors::cyan,         Colors::white,          Colors::cyan,         1.0f, SFXRailgunProjectile, SFXRailgunImpact ), // XtankLaser  (Laser beam)
 };
 
 
@@ -95,18 +105,75 @@ void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, co
 }
 
 
-// Create a projectile for an xtank weapon.  The mapped BF weapon type
-// determines the projectile class and damage model; barrelTip is the
-// world-space muzzle position (shooterRadius is 0 since we already have
-// the exact muzzle position).
+// Create a projectile for an xtank weapon using xtank-derived speed and
+// lifetime, so it behaves like the original xtank game.  barrelTip is the
+// world-space muzzle position (shooterRadius is 0 since we already have the
+// exact muzzle position).  The xtank-specific ProjectileStyle is applied after
+// construction so the projectile is rendered with an xtank look.
 void GameWeapon::createXtankProjectile(XtankWeapon::Type weapon, const Point &dir,
       const Point &barrelTip, const Point &shooterVel, S32 time, BfObject *shooter)
 {
    if((S32)weapon < 0 || (S32)weapon >= XtankWeapon::Count)
       return;
 
-   WeaponType bfWeapon = xtankWeaponInfos[(S32)weapon].bfWeapon;
-   createWeaponProjectiles(bfWeapon, dir, barrelTip, shooterVel, time, 0, shooter);
+   const XtankWeaponInfo &wi = xtankWeaponInfos[(S32)weapon];
+   WeaponType bfWeapon = wi.bfWeapon;
+   Game *game = shooter->getGame();
+
+   // Compute projectile velocity using the xtank-derived speed, not the BF
+   // weapon default speed.  We still add the shooter's velocity component
+   // along the fire direction (relative shooting).
+   Point projVel = dir * F32(wi.projVelocity) + dir * shooterVel.dot(dir);
+
+   // Advance the spawn position for any latency the caller passes in.
+   Point firePos = barrelTip + projVel * F32(time) / 1000.0f;
+
+   switch(bfWeapon)
+   {
+      case WeaponTriple:   // Fire (spreads into 3 pellets)
+         {
+            const F32 SPREAD_FACTOR = 40.0f;
+            Point velPerp(projVel.y, -projVel.x);
+            velPerp.normalize(SPREAD_FACTOR);
+            for(S32 k = -1; k <= 1; k++)
+            {
+               Projectile *p = new Projectile(bfWeapon, firePos, projVel + velPerp * F32(k), shooter);
+               p->mTimeRemaining = wi.projLiveTime;
+               p->mStyle         = wi.style;
+               p->addToGame(game, game->getGameObjDatabase());
+            }
+         }
+         break;
+
+      case WeaponPhaser:
+      case WeaponBounce:
+      case WeaponTurret:
+      case WeaponRailgun:
+         {
+            Projectile *p = new Projectile(bfWeapon, firePos, projVel, shooter);
+            p->mTimeRemaining = wi.projLiveTime;
+            p->mStyle         = wi.style;
+            p->addToGame(game, game->getGameObjDatabase());
+         }
+         break;
+
+      case WeaponBurst:   // Grenade / Rocket / Bomb (area explosion)
+         {
+            Burst *b = new Burst(firePos, projVel, shooter);
+            b->addToGame(game, game->getGameObjDatabase());
+         }
+         break;
+
+      case WeaponSeeker:  // Missile (guided)
+         {
+            Seeker *s = new Seeker(firePos, projVel, dir.ATAN2(), shooter);
+            s->addToGame(game, game->getGameObjDatabase());
+         }
+         break;
+
+      default:
+         break;
+   }
 }
 
 };

@@ -182,74 +182,92 @@ void removeCollinearPoints(Vector<Point> &points, bool isPolygon)
 }
 
 
-// From http://www.blackpawn.com/texts/pointinpoly/default.html
-// Messy looking! Quick!
-static bool pointInTriangle(const Point &p, const Point &a, const Point &b, const Point &c)
+//// From http://www.blackpawn.com/texts/pointinpoly/default.html
+//// Messy looking! Quick!
+// Formerly only used by triangulatedFillContains()
+//static bool pointInTriangle(const Point &p, const Point &a, const Point &b, const Point &c)
+//{
+//   // Compute vectors
+//   Point v0(c - a);
+//   Point v1(b - a);
+//   Point v2(p - a);
+//
+//   // Compute dot products
+//   float dot00 = v0.dot(v0);
+//   float dot01 = v0.dot(v1);
+//   float dot02 = v0.dot(v2);
+//   float dot11 = v1.dot(v1);
+//   float dot12 = v1.dot(v2);
+//
+//   // Compute barycentric coordinates
+//   float invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+//   float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+//   float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+//
+//   // Check if point is in triangle
+//   return (u > 0) && (v > 0) && (u + v < 1);
+//}
+
+
+// Return true out if point is in polygon given a triangulated fill.  Points on edge are considered inside.
+// Only used in editor.
+bool triangulatedFillContains(const Vector<Point>* triangles, const Point& point)
 {
-   // Compute vectors
-   Point v0(c - a);
-   Point v1(b - a);
-   Point v2(p - a);
+   for (S32 i = 0; i + 2 < triangles->size(); i += 3)
+   {
+      const Point& p0 = (*triangles)[i];
+      const Point& p1 = (*triangles)[i + 1];
+      const Point& p2 = (*triangles)[i + 2];
 
-   // Compute dot products
-   float dot00 = v0.dot(v0);
-   float dot01 = v0.dot(v1);
-   float dot02 = v0.dot(v2);
-   float dot11 = v1.dot(v1);
-   float dot12 = v1.dot(v2);
+      // Cross-product sign test — zero means point is exactly on that edge,
+      // which we treat as inside (non-strict / inclusive boundary).
+      F32 d1 = (point.x - p1.x) * (p0.y - p1.y) - (p0.x - p1.x) * (point.y - p1.y);
+      F32 d2 = (point.x - p2.x) * (p1.y - p2.y) - (p1.x - p2.x) * (point.y - p2.y);
+      F32 d3 = (point.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (point.y - p0.y);
 
-   // Compute barycentric coordinates
-   float invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
-   float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-   float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+      bool has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+      bool has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
 
-   // Check if point is in triangle
-   return (u > 0) && (v > 0) && (u + v < 1);
-}
-
-
-// Return true out if point is in polygon given a triangulated fill
-bool triangulatedFillContains(const Vector<Point> *triangulatedFillPoints, const Point &point)
-{
-   for(S32 i = 0; i < triangulatedFillPoints->size(); i += 3)     // Using traingulated fill may be a little clumsy, but it should be fast!
-      if(pointInTriangle(point, triangulatedFillPoints->get(i), triangulatedFillPoints->get(i + 1), triangulatedFillPoints->get(i + 2)))
+      // Point is inside (or on the boundary of) this triangle
+      if (!(has_neg && has_pos))
          return true;
+   }
 
    return false;
 }
 
 
-//// Based on http://www.opengl.org/discussion_boards/ubbthreads.php?ubb=showflat&Number=248453
-//// No idea if this is optimal or not, but it is only used in the editor, and works fine for our purposes.
-//bool isConvex(const Vector<Point> *verts)
-//{
-//  Point v1, v2;
-//  double det_value, cur_det_value;
-//  int num_vertices = verts->size();
-//  
-//  if(num_vertices < 3)
-//     return true;
-//  
-//  v1 = verts->get(0) - verts->get(num_vertices-1);
-//  v2 = verts->get(1) - verts->get(0);
-//  det_value = v1.determinant(v2);
-//  
-//  for(S32 i = 1 ; i < num_vertices-1 ; i++)
-//  {
-//    v1 = v2;
-//    v2 = verts->get(i+1) - verts->get(i);
-//    cur_det_value = v1.determinant(v2);
-//    
-//    if( (cur_det_value * det_value) < 0.0 )
-//      return false;
-//  }
-//  
-//  v1 = v2;
-//  v2 = verts->get(0) - verts->get(num_vertices-1);
-//  cur_det_value = v1.determinant(v2);
-//  
-//  return  (cur_det_value * det_value) >= 0.0;
-//}
+// Based on http://www.opengl.org/discussion_boards/ubbthreads.php?ubb=showflat&Number=248453
+// No idea if this is optimal or not, but it is only used in the editor, and works fine for our purposes.
+bool isConvex(const Vector<Point> *verts)
+{
+  Point v1, v2;
+  double det_value, cur_det_value;
+  int num_vertices = verts->size();
+  
+  if(num_vertices < 3)
+     return true;
+  
+  v1 = verts->get(0) - verts->get(num_vertices-1);
+  v2 = verts->get(1) - verts->get(0);
+  det_value = v1.determinant(v2);
+  
+  for(S32 i = 1 ; i < num_vertices-1 ; i++)
+  {
+    v1 = v2;
+    v2 = verts->get(i+1) - verts->get(i);
+    cur_det_value = v1.determinant(v2);
+    
+    if( (cur_det_value * det_value) < 0.0 )
+      return false;
+  }
+  
+  v1 = v2;
+  v2 = verts->get(0) - verts->get(num_vertices-1);
+  cur_det_value = v1.determinant(v2);
+  
+  return  (cur_det_value * det_value) >= 0.0;
+}
 
 
 // If the sum of the radii is greater than the distance between the center points,
@@ -602,6 +620,20 @@ static bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const
    }
 
    return false;
+}
+
+
+// Public wrapper for segmentsCollinear that accepts a scaleFact parameter (unused by the current implementation)
+bool segmentsColinear(const Point &p1, const Point &p2, const Point &p3, const Point &p4, F32 /*unused_scaleFact*/)
+{
+   return segmentsColinear(p1, p2, p3, p4);
+}
+
+
+// Public wrapper for segsOverlap using a default scaleFact of 1.0
+bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &overlapStart, Point &overlapEnd)
+{
+   return segsOverlap(p1, p2, p3, p4, overlapStart, overlapEnd, 1.0f);
 }
 
 

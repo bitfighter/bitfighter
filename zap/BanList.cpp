@@ -197,10 +197,13 @@ bool BanList::isBanned(const Address &address, const string &nickname, bool isAu
          continue;
 
       // Check if authenticated
-      if (serverBanList[i].nickname.compare("*NonAuthenticated") == 0 && isAuthenticated)
-         continue;
-
-      // Check nickname
+      if (serverBanList[i].nickname.compare("*NonAuthenticated") == 0)
+      {
+         if (isAuthenticated)
+            continue;   // Ban is for non-authenticated users only; authenticated user is exempt
+         // else: unauthenticated user matches this ban entry -- fall through to time check
+      }
+      // Check nickname (only when this is not the *NonAuthenticated special case)
       else if (nickname.compare(serverBanList[i].nickname) != 0 && serverBanList[i].nickname.compare("*") != 0)
          continue;
 

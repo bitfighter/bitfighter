@@ -2329,6 +2329,20 @@ void Ship::cycleXtankBody()
 }
 
 
+// Override getCollisionCircle to return the hull-based radius for xtank bodies
+// so that large vehicles (e.g. Panzy, Rhino) have a proper hitbox instead of
+// the default CollisionRadius of 24.
+bool Ship::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const
+{
+   point = getPos(stateIndex);
+   if(mXtankBodyIndex >= 0 && mXtankBodyIndex < XtankBody::Count)
+      radius = xtankBodyCollisionRadius[mXtankBodyIndex];
+   else
+      radius = (F32)CollisionRadius;
+   return true;
+}
+
+
 // Client only
 void Ship::emitMovementSparks()
 {

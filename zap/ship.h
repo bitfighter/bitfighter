@@ -285,6 +285,8 @@ public:
    // Also resets tank physics heading to current aim angle.
    void cycleXtankBody();
 
+   bool getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const;
+
    void controlMoveReplayComplete();
    void onAddedToGame(Game *game);
 
