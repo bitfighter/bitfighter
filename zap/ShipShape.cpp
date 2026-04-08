@@ -22,16 +22,11 @@ ShipShapeInfo ShipShape::shipShapeInfos[ShapeTypeCount] =
 
       // Inner hull
       // uses GL_LINE_STRIP because it can come in pieces
-      2,
+      1,
       {
          {
             4,
             { -12, -13,   0, 22,   12, -13,   -12, -13 },
-         },
-         // Cockpit window near the nose: a diamond shape showing the canopy
-         {
-            5,
-            { -3, 14,   0, 20,   3, 14,   0, 9,   -3, 14 },
          },
       },
 
@@ -168,7 +163,7 @@ ShipShapeInfo ShipShape::shipShapeInfos[ShapeTypeCount] =
          -12.5, -21.25,   12.5, -21.25,   24.5, 0,   18.75, 16.25,   12.5, 16.25 },
 
       // Inner hull
-      3,
+      2,
       {
          {
             10,
@@ -178,11 +173,6 @@ ShipShapeInfo ShipShape::shipShapeInfos[ShapeTypeCount] =
          {
             6,
             { -3.75, 16.25,   -5, 18.75,   -1.25, 22.5,   1.25, 22.5,   5, 18.75,   3.75, 16.25 },
-         },
-         // Inner cockpit window: small rectangle inside the forward pod
-         {
-            5,
-            { -1.25, 18.75,   -1.25, 21.25,   1.25, 21.25,   1.25, 18.75,   -1.25, 18.75 },
          },
       },
 
@@ -316,7 +306,7 @@ ShipShapeInfo ShipShape::shipShapeInfos[ShapeTypeCount] =
       { -23.75, -23.75,   23.75, -23.75,   23.75, 23.75,   -23.75, 23.75, },
 
       // Inner hull
-      4,
+      3,
       {
          {
             5,
@@ -331,11 +321,6 @@ ShipShapeInfo ShipShape::shipShapeInfos[ShapeTypeCount] =
             10,
             { 16.25, 16.25,   8.75, 16.25,   8.75, 7.5,   16.25, 7.5,   16.25, 0,
                   8.75, 0,   8.75, -8.75,   16.25, -8.75,   16.25, -16.25,   8.75, -16.25, },
-         },
-         // Front viewport window on the leading face (top edge, y=+23.75 is forward)
-         {
-            5,
-            { -6, 18,   -6, 21.5,   6, 21.5,   6, 18,   -6, 18, },
          },
       },
 

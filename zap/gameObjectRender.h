@@ -113,7 +113,7 @@ extern F32 renderCenteredString(const Point &pos, F32 size, const char *string);
 
 // Renders the core ship, good for instructions and such
 extern void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, const Color &hbc, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
-                       bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor, bool boostActive = false);
+                       bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
 
 // Overload that accepts a ShipShapeInfo directly (used when rendering xtank bodies)
 extern void renderShip(const ShipShapeInfo *shapeInfo, const Color *shipColor, const Color &hbc, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
