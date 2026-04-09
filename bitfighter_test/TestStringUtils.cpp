@@ -79,14 +79,7 @@ TEST(StringUtilsTest, parseStringQuotedAdvanced)
 {
     // Escaped quotes: ""
     Vector<string> result = parseString("one \"quoted \"\"word\"\"\" three");
-    // Current implementation:
-    // "one"
-    // "quoted "
-    // "word" (from ""word)
-    // "" (from "")
-    // "three"
-    // This is likely what will happen, which is wrong.
-    // It should be:
+    // Should yield:
     // "one"
     // "quoted \"word\""
     // "three"
