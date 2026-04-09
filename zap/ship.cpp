@@ -856,8 +856,8 @@ void Ship::idle(IdleCallPath path)
       {
          // Update the render state on the server to match the actual updated state, and mark the object as having changed
          // Position state.  An optimization here would check the before and after positions so as to not update unmoving ships.
-         if(getRenderAngle() != getActualAngle() || getRenderPos() != getActualPos() || getRenderVel() != getActualVel() ||
-            (mXtankBodyIndex >= 0 && mCurrentMove.x != 0))
+         if (getRenderAngle() != getActualAngle() || getRenderPos() != getActualPos() || getRenderVel() != getActualVel() ||
+             (mXtankBodyIndex >= 0 && (mCurrentMove.x != 0 || mCurrentMove.y != 0)))
             setMaskBits(PositionMask);
 
          copyMoveState(ActualState, RenderState);
