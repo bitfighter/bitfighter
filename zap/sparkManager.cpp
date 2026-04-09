@@ -417,7 +417,7 @@ void FxManager::emitBurst(const Point &pos, const Point &scale, const Color &col
       F32 f = (TNL::Random::readF() * 0.1f + 0.9f) * 200 * size;
 
       Color color;
-      color.interp(TNL::Random::readF(), color2, color1);         // Random blend of color1 and color2
+      color.interp(TNL::Random::readF(), color1, color2);         // Random blend of color1 and color2
 
       emitSpark(
             pos + Point(cos(th)*scale.x, sin(th)*scale.y),        // pos
