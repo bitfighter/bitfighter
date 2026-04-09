@@ -1865,7 +1865,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 #ifndef ZAP_DEDICATED
       // Notify the HUD so the xtank panel stays current for the local player.
-      if(isLocalPlayerShip(getGame()))
+      if(getGame() && isLocalPlayerShip(getGame()))
          static_cast<ClientGame *>(getGame())->xtankDesignUpdated(mXtankDesign);
 #endif
    }
@@ -1881,7 +1881,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
             emitExplosion();     // Boom!
       }
 
-      if(isLocalPlayerShip(getGame()))   // If this ship is ours, quit engineer menu
+      if(getGame() && isLocalPlayerShip(getGame()))   // If this ship is ours, quit engineer menu
          getGame()->quitEngineerHelper();
    }
    else
