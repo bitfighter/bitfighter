@@ -1431,6 +1431,8 @@ void Ship::damageObject(DamageInfo *theInfo)
 // Returns true if ship represents local player -- client only
 bool Ship::isLocalPlayerShip(Game *game) const
 {
+   if(game == NULL)
+      return false;
    return getClientInfo() == game->getLocalRemoteClientInfo();
 }
 
@@ -1865,7 +1867,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 #ifndef ZAP_DEDICATED
       // Notify the HUD so the xtank panel stays current for the local player.
-      if(getGame() && isLocalPlayerShip(getGame()))
+      if(isLocalPlayerShip(getGame()))
          static_cast<ClientGame *>(getGame())->xtankDesignUpdated(mXtankDesign);
 #endif
    }
