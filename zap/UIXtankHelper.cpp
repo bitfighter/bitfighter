@@ -368,15 +368,18 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
 
    // UP/DOWN arrows cycle through the highlighted item in the current phase.
    S32 itemCount = currentPhaseItemCount();
-   if(inputCode == KEY_UP)
+   if(itemCount > 0)
    {
-      mHighlightedIndex = (mHighlightedIndex - 1 + itemCount) % itemCount;
-      return true;
-   }
-   if(inputCode == KEY_DOWN)
-   {
-      mHighlightedIndex = (mHighlightedIndex + 1) % itemCount;
-      return true;
+      if(inputCode == KEY_UP)
+      {
+         mHighlightedIndex = (mHighlightedIndex - 1 + itemCount) % itemCount;
+         return true;
+      }
+      if(inputCode == KEY_DOWN)
+      {
+         mHighlightedIndex = (mHighlightedIndex + 1) % itemCount;
+         return true;
+      }
    }
 
    if(mPhase == PHASE_BODY)
@@ -594,6 +597,7 @@ void UIXtankHelper::renderPreviewPanel() const
       static const F32 BODY_SCALE = 2.8f;
       static const S32 BODY_CY    = PNL_TOP + 150;  // vertical centre for body graphic
 
+      // Thrusts: [forward, reverse, port, starboard] — all zero for a static preview.
       static const F32 thrusts[4] = { 0, 0, 0, 0 };
 
       r.pushMatrix();
@@ -621,6 +625,8 @@ void UIXtankHelper::renderPreviewPanel() const
       const TankPhysicsInfo &phy = xtankPhysicsInfos[idx];
       S32 turrets = xtankTurretInfos[idx].count;
 
+      // Armor value < 1.0 means reduced damage taken (i.e. stronger/heavier armour).
+      // "Heavy" here denotes the most protective armour (lowest numeric value).
       const char *armClass = (phy.armor <= ARMOR_HEAVY_LIMIT) ? "Heavy" :
                              (phy.armor <= ARMOR_MED_LIMIT)   ? "Med"   : "Light";
 
@@ -655,13 +661,17 @@ void UIXtankHelper::renderPreviewPanel() const
       drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, divY);
 
       // Draw the engine diamond symbol, coloured to match the in-game overlay.
-      static const F32 DIAM_SZ = 30.0f;
+      static const F32    DIAM_SZ         = 30.0f;
+      // Colors mirror those used in renderXtankVehicleOverlay() in gameObjectRender.cpp.
+      static const Color  ENGINE_LIGHT_COLOR(0.3f, 0.4f, 1.0f);    // dim blue
+      static const Color  ENGINE_STD_COLOR  (0.95f, 0.35f, 0.05f); // orange-red
+      static const Color  ENGINE_HEAVY_COLOR(1.0f, 0.65f, 0.0f);   // bright orange
       Color engColor;
       switch((XtankEngine::Type)idx)
       {
-         case XtankEngine::Light:   engColor = Color(0.3f, 0.4f, 1.0f);   break;
-         case XtankEngine::Heavy:   engColor = Color(1.0f, 0.65f, 0.0f);  break;
-         default:                   engColor = Color(0.95f, 0.35f, 0.05f); break;
+         case XtankEngine::Light:   engColor = ENGINE_LIGHT_COLOR; break;
+         case XtankEngine::Heavy:   engColor = ENGINE_HEAVY_COLOR; break;
+         default:                   engColor = ENGINE_STD_COLOR;   break;
       }
       F32 gy = F32(GRAPHIC_Y);
       F32 diam[] = {
@@ -718,8 +728,8 @@ void UIXtankHelper::renderPreviewPanel() const
       static const F32 TR_SEP = 28.0f;  // distance from centre to each track
 
       F32 trCy = F32(GRAPHIC_Y);
-      Color trColor = (idx == 0) ? Colors::green65 :
-                      (idx == 1) ? Colors::gray67  : Colors::orange67;
+      Color trColor = (idx == (S32)XtankTread::Rubber) ? Colors::green65 :
+                      (idx == (S32)XtankTread::Metal)  ? Colors::gray67  : Colors::orange67;
       r.setColor(trColor);
       // Left track
       drawHollowRect(PNL_CX - TR_SEP - TR_W, trCy - TR_H * 0.5f,
