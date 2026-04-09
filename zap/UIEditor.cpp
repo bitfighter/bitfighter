@@ -2526,15 +2526,6 @@ bool EditorUserInterface::canRotate() const
 }
 
 
-struct PointCompare
-{
-   bool operator()( const Point& lhs, const Point& rhs ) const
-   {
-      if(lhs.x != rhs.x)
-         return lhs.x < rhs.x;
-      return lhs.y < rhs.y;
-   }
-};
 
 
 // Rotate selected objects around their center point by angle

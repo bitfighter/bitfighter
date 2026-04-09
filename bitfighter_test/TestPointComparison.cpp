@@ -4,17 +4,6 @@
 
 namespace Zap {
 
-// PointCompare logic copied from zap/UIEditor.cpp to verify it
-struct PointCompare
-{
-   bool operator()( const Point& lhs, const Point& rhs ) const
-   {
-      if(lhs.x != rhs.x)
-         return lhs.x < rhs.x;
-      return lhs.y < rhs.y;
-   }
-};
-
 TEST(PointComparisonTest, StrictWeakOrdering)
 {
    Point p1(1.0f, 2.0f);
