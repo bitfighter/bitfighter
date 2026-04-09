@@ -608,9 +608,17 @@ void UIXtankHelper::renderPreviewPanel() const
       // bottom.  A 180° rotation flips it so the nose points up.
       r.rotate(180.0f, 0, 0, 1.0f);
 
-      renderShip(&xtankBodyInfos[idx], &Colors::blue, Colors::blue, 1.0f,
-                 thrusts, 1.0f, F32(Ship::CollisionRadius), 0,
+
+      //// Overload that accepts a ShipShapeInfo directly (used when rendering xtank bodies)
+      // extern void renderShip(const ShipShapeInfo * shapeInfo, const Color * shipColor, const Color & hbc, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
+      //    bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
+
+      const ShipShapeInfo* shapeInfo = &xtankBodyInfos[idx];
+      const Color* shipColor = &Colors::blue;
+      renderShip(shapeInfo, shipColor, Colors::blue, 1.0f,
+                 const_cast<F32*>(thrusts), 1.0f, F32(Ship::CollisionRadius), 0,
                  false, false, false, false);
+
 
       // Draw turrets pointing straight up (aim = bodyAngle + Pi/2, but for a
       // static preview just aim upward: since we've already rotated 180°, pass
