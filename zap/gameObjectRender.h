@@ -133,11 +133,6 @@ extern void renderSpawnShield(const Point &pos, U32 shieldTime, U32 renderTime);
 extern void renderXtankTurrets(const Point &pos, F32 bodyAngle, F32 aimAngle, F32 alpha,
                                 const XtankBodyTurrets &turrets, const Color *color, F32 warpInScale);
 
-// Render xtank vehicle "bling" overlay: heat-sink count crosses and engine-type diamond
-extern void renderXtankVehicleOverlay(const Point &pos, F32 bodyAngle, F32 alpha,
-                                       S32 bodyIdx, S32 heatSinkCount,
-                                       XtankEngine::Type engineType, F32 warpInScale);
-
 // Render repair rays to all the repairing objects
 extern void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<BfObject> > &repairTargets, F32 alpha);   
 

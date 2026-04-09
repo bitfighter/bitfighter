@@ -72,14 +72,6 @@ extern ShipShapeInfo xtankBodyInfos[XtankBody::Count];
 // hitbox reflects the actual hull size rather than the BF default.
 extern F32 xtankBodyCollisionRadius[XtankBody::Count];
 
-// Y coordinate (in body space, +Y = forward/nose) of the foremost hull vertex.
-// Used by the vehicle overlay renderer to position the nose chevron and to
-// distribute heat-sink / engine indicators along the hull.
-extern F32 xtankBodyNoseY[XtankBody::Count];
-
-// Y coordinate of the rearmost hull vertex (always negative or small positive).
-extern F32 xtankBodyRearY[XtankBody::Count];
-
 
 // ---------------------------------------------------------------------------
 // Turret data for xtank vehicles.

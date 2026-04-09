@@ -102,17 +102,11 @@ ShipShapeInfo xtankBodyInfos[XtankBody::Count] =
 
    // -------------------------------------------------------------------------
    // XtankBody::Spider  (max extent: 17)
-   // Regular hexagon; wide and squat.  Inner forward chevron added for
-   // clear directionality (nose = top, +Y).
+   // Regular hexagon; wide and squat.
    // -------------------------------------------------------------------------
    {
       6,   { 8,-13,   17,0,   8,13,   -8,13,   -17,0,   -8,-13 },
-
-      1,
-      {
-         { 3, { -6,-3,   0,10,   6,-3 } },  // forward chevron pointing to y=+13 nose
-      },
-
+      0,   { },
       6,   { 8,-13,   17,0,   8,13,   -8,13,   -17,0,   -8,-13 },
       0,   { },
       NO_FLAMES,
@@ -132,16 +126,14 @@ ShipShapeInfo xtankBodyInfos[XtankBody::Count] =
 
    // -------------------------------------------------------------------------
    // XtankBody::Tornado  (max extent: 18)
-   // Rectangular body (width < height).  Inset rectangle kept; forward
-   // chevron added so the nose (y=+18) is unmistakeable.
+   // Rectangular body (width < height), with inset rectangle detail.
    // -------------------------------------------------------------------------
    {
       4,   { 13,-18,   13,18,   -13,18,   -13,-18 },
 
-      2,
+      1,
       {
-         { 5, { -10,-14,   10,-14,   10,14,   -10,14,   -10,-14 } },  // inset rect
-         { 3, { -7,2,   0,13,   7,2 } },                              // forward chevron
+         { 5, { -10,-14,   10,-14,   10,14,   -10,14,   -10,-14 } },
       },
 
       4,   { 13,-18,   13,18,   -13,18,   -13,-18 },
@@ -151,17 +143,11 @@ ShipShapeInfo xtankBodyInfos[XtankBody::Count] =
 
    // -------------------------------------------------------------------------
    // XtankBody::Marauder  (max extent: 21)
-   // Slightly tapered rectangle (wider at back than front).  Forward chevron
-   // added so the narrower nose end (y=+21) reads clearly as the front.
+   // Slightly tapered rectangle (wider at back than front).
    // -------------------------------------------------------------------------
    {
       4,   { 15,-21,   11,21,   -11,21,   -15,-21 },
-
-      1,
-      {
-         { 3, { -7,2,   0,17,   7,2 } },  // forward chevron pointing toward y=+21 nose
-      },
-
+      0,   { },
       4,   { 15,-21,   11,21,   -11,21,   -15,-21 },
       0,   { },
       NO_FLAMES,
@@ -169,16 +155,14 @@ ShipShapeInfo xtankBodyInfos[XtankBody::Count] =
 
    // -------------------------------------------------------------------------
    // XtankBody::Tiger  (max extent: 19)
-   // Wide rectangle -- one of the larger tanks.  Forward chevron added to the
-   // inset box detail so the nose end (y=+19) is clear.
+   // Wide rectangle -- one of the larger tanks, with inset box detail.
    // -------------------------------------------------------------------------
    {
       4,   { 17,-19,   17,19,   -17,19,   -17,-19 },
 
-      2,
+      1,
       {
-         { 5, { -13,-15,   13,-15,   13,15,   -13,15,   -13,-15 } },  // inset rect
-         { 3, { -8,2,   0,14,   8,2 } },                              // forward chevron
+         { 5, { -13,-15,   13,-15,   13,15,   -13,15,   -13,-15 } },
       },
 
       4,   { 17,-19,   17,19,   -17,19,   -17,-19 },
@@ -245,16 +229,14 @@ ShipShapeInfo xtankBodyInfos[XtankBody::Count] =
    // XtankBody::Disk  (max extent: ~17)
    // Circular "flying saucer" tank, approximated as an octagon.  The original
    // disk.obj stores only turret positions; sized to match the medium-sized
-   // vehicles (Hexo, Spider, Malice) at ~17 units.  Inner ring kept; a forward
-   // arrow added to indicate the nose direction (y=+17).
+   // vehicles (Hexo, Spider, Malice) at ~17 units.
    // -------------------------------------------------------------------------
    {
       8,   { 0,-17,   12,-12,   17,0,   12,12,   0,17,   -12,12,   -17,0,   -12,-12 },
 
-      2,
+      1,
       {
-         { 9, { 0,-12,   8,-8,   12,0,   8,8,   0,12,   -8,8,   -12,0,   -8,-8,   0,-12 } },  // inner ring
-         { 3, { -4,2,   0,11,   4,2 } },                                                      // forward arrow
+         { 9, { 0,-12,   8,-8,   12,0,   8,8,   0,12,   -8,8,   -12,0,   -8,-8,   0,-12 } },
       },
 
       8,   { 0,-17,   12,-12,   17,0,   12,12,   0,17,   -12,12,   -17,0,   -12,-12 },
@@ -276,17 +258,15 @@ ShipShapeInfo xtankBodyInfos[XtankBody::Count] =
 
    // -------------------------------------------------------------------------
    // XtankBody::Panzy  (max extent: 31)
-   // The largest body; a big square tank with two L-shaped interior details
-   // and a nose chevron pointing toward y=+31.
+   // The largest body; a big square tank with two L-shaped interior details.
    // -------------------------------------------------------------------------
    {
       4,   { -31,-31,   31,-31,   31,31,   -31,31 },
 
-      3,
+      2,
       {
-         { 10, { -11,20,  -20,20,  -20,11,  -11,11,  -11,0,  -20,0,  -20,-9,  -11,-9,  -11,-20,  -20,-20 } },  // left L
-         { 10, {  11,20,   20,20,   20,11,   11,11,   11,0,   20,0,   20,-9,   11,-9,   11,-20,   20,-20  } },  // right L
-         {  3, { -10,10,   0,26,   10,10 } },                                                                   // forward chevron at nose
+         { 10, { -11,20,  -20,20,  -20,11,  -11,11,  -11,0,  -20,0,  -20,-9,  -11,-9,  -11,-20,  -20,-20 } },
+         { 10, {  11,20,   20,20,   20,11,   11,11,   11,0,   20,0,   20,-9,   11,-9,   11,-20,   20,-20  } },
       },
 
       4,   { -31,-31,   31,-31,   31,31,   -31,31 },
@@ -329,50 +309,6 @@ F32 xtankBodyCollisionRadius[XtankBody::Count] =
    17.5f,  // Malice      : farthest vertex (7,-16)  → sqrt(49+256)≈17.5
    43.8f,  // Panzy       : farthest vertex (±31,±31)→ sqrt(961+961)≈43.8
 }; // xtankBodyCollisionRadius[]
-
-
-// ---------------------------------------------------------------------------
-// Per-body nose and rear Y extents (body space, +Y = forward).
-//
-// noseY: Y coordinate of the foremost hull vertex.
-// rearY: Y coordinate of the rearmost hull vertex (negative for most bodies).
-// Used by the overlay renderer to position bling and exhaust indicators.
-// ---------------------------------------------------------------------------
-F32 xtankBodyNoseY[XtankBody::Count] =
-{
-   14.0f,  // Lightcycle  : nose vertex (0,14)
-   11.0f,  // Trike       : nose vertex (0,11)
-   17.0f,  // Hexo        : nose vertex (0,17)
-   13.0f,  // Spider      : nose vertices (±8,13)
-   21.0f,  // Psycho      : nose vertex (-7,21)
-   18.0f,  // Tornado     : nose edge at y=18
-   21.0f,  // Marauder    : nose vertices (±11,21)
-   19.0f,  // Tiger       : nose edge at y=19
-   27.0f,  // Rhino       : nose vertex (6,27)
-   27.0f,  // Medusa      : nose vertex (0,27)
-   20.0f,  // Delta       : nose vertex (0,20)
-   17.0f,  // Disk        : nose vertex (0,17)
-   17.0f,  // Malice      : nose vertex (0,17)
-   31.0f,  // Panzy       : nose edge at y=31
-}; // xtankBodyNoseY[]
-
-F32 xtankBodyRearY[XtankBody::Count] =
-{
-  -15.0f,  // Lightcycle  : rear vertex (0,-15)
-  -11.0f,  // Trike       : rear edge at y=-11
-  -11.0f,  // Hexo        : rear vertices (±7,-11)
-  -13.0f,  // Spider      : rear vertices (±8,-13)
-  -19.0f,  // Psycho      : rear vertex (16,-19)
-  -18.0f,  // Tornado     : rear edge at y=-18
-  -21.0f,  // Marauder    : rear vertices (±15,-21)
-  -19.0f,  // Tiger       : rear edge at y=-19
-  -27.0f,  // Rhino       : rear vertex (6,-27)
-  -17.0f,  // Medusa      : rear edge at y=-17
-  -18.0f,  // Delta       : rear vertex (0,-18)
-  -17.0f,  // Disk        : rear vertex (0,-17)
-  -16.0f,  // Malice      : rear vertex (7,-16)
-  -31.0f,  // Panzy       : rear edge at y=-31
-}; // xtankBodyRearY[]
 
 
 // ---------------------------------------------------------------------------
