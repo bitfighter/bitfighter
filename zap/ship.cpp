@@ -2363,7 +2363,12 @@ void Ship::emitMovementSparks()
    for(S32 i = 0; i < cornerCount; i++)
       corners[i].set(shipShapeInfo->cornerPoints[i*2], shipShapeInfo->cornerPoints[i*2 + 1]);
 
-   F32 th = FloatHalfPi - getRenderAngle();
+   // For xtank vehicles the hull rotates by mTankHeadingAngle; aim angle drives
+   // only the turret.  Using the aim angle here would make the wake trail fan
+   // out in the wrong direction when the turret points sideways.
+   const F32 bodyAngle = (mXtankBodyIndex >= 0) ? mTankHeadingAngle : getRenderAngle();
+
+   F32 th = FloatHalfPi - bodyAngle;
 
    F32 sinTh = sin(th);
    F32 cosTh = cos(th);
@@ -2452,50 +2457,141 @@ void Ship::emitMovementSparks()
       mLastTrailPoint[1] = rightId;
    }
 
-   if(mLoadout.isModulePrimaryActive(ModuleCloak))
+   if(cloakActive)
       return;
 
-   // Finally, do some particles
-   Point velDir(mCurrentMove.x, mCurrentMove.y);
-   F32 len = velDir.len();
+   // -------------------------------------------------------------------------
+   // Particle exhaust
+   // -------------------------------------------------------------------------
 
-   if(len > 0)
+   if(mXtankBodyIndex >= 0)
    {
-      if(len > 1)
-         velDir *= 1 / len;
+      // Xtank tank exhaust: emit from the rear of the hull, directed backward.
+      // Characteristics vary by engine type:
+      //   Light    – 1 dim red-brown point spark, short life
+      //   Standard – 2 orange-red point sparks
+      //   Heavy    – 3 bright orange/yellow line sparks, long life (most visible)
 
-      static Point shipDirs[4];
-      shipDirs[0].set(cos(getRenderAngle()), sin(getRenderAngle()));
-      shipDirs[1].set(-shipDirs[0]);
-      shipDirs[2].set( shipDirs[0].y, -shipDirs[0].x);
-      shipDirs[3].set(-shipDirs[0].y,  shipDirs[0].x);
+      static const F32 MinExhaustSpeed      = 30.0f;   // below this, no visible exhaust
+      static const F32 ExhaustSpeedNorm     = 600.0f;  // max speed for speedFrac normalisation
+      static const F32 ExhaustDistRatio     = 0.65f;   // fraction of collision radius to exhaust exit
+      static const F32 SparkProbMultiplier  = 1.4f;    // scales emit probability (>1 = emit more at full speed)
 
-      for(U32 i = 0; i < 4; i++)
+      const F32 speed = mTankSpeed;
+      if(fabsf(speed) < MinExhaustSpeed)
+         return;  // barely moving -- skip exhaust
+
+      const F32 speedFrac = MIN(fabsf(speed) / ExhaustSpeedNorm, 1.0f);
+
+      // heading unit vector; exhaust exits the REAR (opposite to heading when
+      // moving forward, but keep it consistent: always from the geometric rear)
+      const Point headingDir(cos(mTankHeadingAngle), sin(mTankHeadingAngle));
+      const F32   exhaustDist = xtankBodyCollisionRadius[mXtankBodyIndex] * ExhaustDistRatio;
+      // When moving forward the rear is behind (−heading); reversing → front
+      const F32   rearSign  = (speed >= 0.0f) ? -1.0f : 1.0f;
+      const Point exhaustPos = getRenderPos() + headingDir * (exhaustDist * rearSign);
+
+      // Exhaust velocity direction (sparks fly backward)
+      const Point exhaustDir = headingDir * rearSign;
+
+      S32         sparkCount;
+      Color       colorDim, colorBright;
+      S32         maxTTL;
+      UI::SparkType sType;
+
+      switch(mXtankDesign.engineType)
       {
-         F32 th = shipDirs[i].dot(velDir);
+         case XtankEngine::Light:
+            sparkCount = 1;
+            colorDim    = Color(0.50f, 0.10f, 0.00f);  // dark red-brown
+            colorBright = Color(0.80f, 0.30f, 0.05f);  // dim orange-red
+            maxTTL      = 450;
+            sType       = UI::SparkTypePoint;
+            break;
 
-          if(th > 0.1)
-          {
-             // shoot some sparks...
-             if(th >= 0.2*velDir.len())
-             {
-                Point chaos(TNL::Random::readF(),TNL::Random::readF());
-                chaos *= 5;
+         case XtankEngine::Heavy:
+            sparkCount = 3;
+            colorDim    = Color(1.00f, 0.45f, 0.00f);  // orange
+            colorBright = Color(1.00f, 0.90f, 0.25f);  // bright yellow
+            maxTTL      = 900;
+            sType       = UI::SparkTypeLine;   // line sparks = distinct look
+            break;
 
-                // interp give us some nice enginey colors...
-                Color dim(Colors::red);
-                Color light(1, 1, boostActive ? 1.f : 0.f);
-                Color thrust;
+         default:   // Standard
+            sparkCount = 2;
+            colorDim    = Color(0.80f, 0.20f, 0.00f);  // red
+            colorBright = Color(1.00f, 0.60f, 0.10f);  // orange
+            maxTTL      = 650;
+            sType       = UI::SparkTypePoint;
+            break;
+      }
 
-                F32 t = TNL::Random::readF();
-                thrust.interp(t, dim, light);
+      TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+      ClientGame *cg = static_cast<ClientGame *>(getGame());
 
-                TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+      for(S32 s = 0; s < sparkCount; s++)
+      {
+         // Probabilistically skip sparks at lower speeds
+         if(TNL::Random::readF() > speedFrac * SparkProbMultiplier)
+            continue;
 
-                static_cast<ClientGame *>(getGame())->emitSpark(getRenderPos() - shipDirs[i] * 13,
-                                          -shipDirs[i] * 100 + chaos, thrust, TNL::Random::readI(0, 1500), UI::SparkTypePoint);
-             }
-          }
+         Point jitter(TNL::Random::readF() * 8.0f - 4.0f,
+                      TNL::Random::readF() * 8.0f - 4.0f);
+         const F32 sparkSpeed = 50.0f + speedFrac * 100.0f;
+         const Point sparkVel = exhaustDir * sparkSpeed + jitter * 15.0f;
+
+         Color sparkColor;
+         sparkColor.interp(TNL::Random::readF(), colorDim, colorBright);
+
+         cg->emitSpark(exhaustPos + jitter * 0.4f, sparkVel, sparkColor,
+                       TNL::Random::readI(0, maxTTL), sType);
+      }
+   }
+   else
+   {
+      // Standard BF ship: emit sparks in the direction matching each of the
+      // four compass points relative to the ship's heading.
+      Point velDir(mCurrentMove.x, mCurrentMove.y);
+      F32 len = velDir.len();
+
+      if(len > 0)
+      {
+         if(len > 1)
+            velDir *= 1 / len;
+
+         static Point sd[4];
+         sd[0].set(cos(getRenderAngle()), sin(getRenderAngle()));
+         sd[1].set(-sd[0]);
+         sd[2].set( sd[0].y, -sd[0].x);
+         sd[3].set(-sd[0].y,  sd[0].x);
+
+         for(U32 i = 0; i < 4; i++)
+         {
+            F32 dot = sd[i].dot(velDir);
+
+            if(dot > 0.1)
+            {
+               // shoot some sparks...
+               if(dot >= 0.2*velDir.len())
+               {
+                  Point chaos(TNL::Random::readF(), TNL::Random::readF());
+                  chaos *= 5;
+
+                  // interp give us some nice enginey colors...
+                  Color dim(Colors::red);
+                  Color light(1, 1, boostActive ? 1.f : 0.f);
+                  Color thrust;
+
+                  F32 t = TNL::Random::readF();
+                  thrust.interp(t, dim, light);
+
+                  TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+
+                  static_cast<ClientGame *>(getGame())->emitSpark(getRenderPos() - sd[i] * 13,
+                                            -sd[i] * 100 + chaos, thrust, TNL::Random::readI(0, 1500), UI::SparkTypePoint);
+               }
+            }
+         }
       }
    }
 #endif
@@ -2579,8 +2675,15 @@ void Ship::renderLayer(S32 layerIndex)
    // Draw xtank turrets on top of the hull, pointing at the aim direction.
    // Only layer 1 is the visible pass; layer -1 is the cloaking shadow pass.
    if(mXtankBodyIndex >= 0 && layerIndex == 1)
+   {
       renderXtankTurrets(getRenderPos(), bodyAngle, aimAngle, alpha,
                          xtankTurretInfos[mXtankBodyIndex], color, warpInScale);
+
+      // Draw heat-sink and engine-type bling overlaid on the hull.
+      renderXtankVehicleOverlay(getRenderPos(), bodyAngle, alpha,
+                                mXtankBodyIndex, (S32)mXtankDesign.heatSinkCount,
+                                mXtankDesign.engineType, warpInScale);
+   }
 
    if(mSpawnShield.getCurrent() != 0)  // Add spawn shield -- has a period of being on solidly, then blinks yellow
       renderSpawnShield(getRenderPos(), mSpawnShield.getCurrent(), clientGame->getCurrentTime());
