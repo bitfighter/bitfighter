@@ -554,15 +554,15 @@ Spawn 1  7  2
 - **Every level must have a game type line** (e.g., `GameType 10 8`) before any objects.
 - **Every level must have at least one `Spawn` per team.** Without spawns, players cannot join.
 - **Team games** (CTF, HTF, Core, Soccer, ZC, Retrieve) require at least two `Team` lines.
-- **Loadout zones** should be present in most levels so players can set up their ship.
+- **Loadout zones** should be present in most levels so players can set up their ship.  These also allow ships to recover faster.
 - **Flag-based games** need `FlagItem` and/or `FlagSpawn` entries.
   - CTF: one `FlagItem` per team at their base.
   - HTF/Retrieve/ZC: flags (`FlagItem -1`) placed neutrally around the map.
   - Nexus: use `FlagSpawn -1` (flags spawn at those locations) and one or more `NexusZone` polygons.
   - Rabbit: one neutral `FlagItem -1` at center, `FlagSpawn` locations for respawn.
-- **Core game**: each team needs one or more `CoreItem` objects; `NexusZone` is not used here.
-- **Soccer**: one `SoccerBallItem` and one `GoalZone` per team.
-- **Walls must enclose the play area** — ships that leave the play area are warped back, but a bounded level is more fun and intentional.
+- **Core game**: each team needs one or more `CoreItem` objects.
+- **Soccer**: Often levels will have one `SoccerBallItem` and one `GoalZone` per team, but sometimes multiples are fun.
+- **Walls should enclose the play area** — ships and objects that leave the play area can fly off to infinity, so a bounded level is usually fun and intentional.
 - **BarrierMaker width** of `50` is a good default. Use `100`–`200` for thick interior walls or cover.
 - **Teleporters** with matching origins create multi-destination teleporters (random exit).
 - **Neutral turrets** (`team = -1`) attack everyone; **team turrets** attack opposing teams only.
@@ -570,4 +570,8 @@ Spawn 1  7  2
 - **SpeedZone speed** of `2000` is the default and a good starting value. Direction is from point 1 → point 2.  Use snapping if a specific destination is desired.
 - **SlipZones** should be used sparingly.  They sound more fun than they are.
 - Coordinates in `LevelFormat 2` are raw world units. A square play area of 20×20 units is typical for small maps; 40×40 for large ones.
+- **Shape** -- Maps can be any shape; square and rectangle are common, but the best maps often have a distinctive or thematic shape.
+- **Symmetry** -- Levels are often symmetrical (2, 3, or 4 way symmetry, depending on the number of teams), but a well designed and balanced asymmetrical level can be great.
+- **Theme** -- Most levels don't have any inherent theme, but occasionally a designer will find a way to create one, through level naming, level shape, text, team names and colors, and other elements.
+- **Team count** -- Levels with more teams require more players (or bots), and player count can sometimes be a challenge.
 
