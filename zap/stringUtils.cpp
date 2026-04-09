@@ -12,9 +12,8 @@
 #include <stdarg.h>        // For va_args
 #include <streambuf>
 #include <string>          // For... everything.  This is stringUtils, after all!
-#include <sstream>
+#include <sstream>         // For parseString
 #include <sys/stat.h>      // For testing existence of folders
-#include <cctype>          // For isspace
 
 #ifdef TNL_OS_WIN32
 #  include "../other/dirent.h"        // Need local copy for Windows builds
@@ -337,28 +336,30 @@ bool containsControlCharacter(const char* str)
 // Based on http://www.gamedev.net/community/forums/topic.asp?topic_id=320087
 // Parses a string on whitespace, except when inside "s
 //
-// Parses a string on whitespace, except when inside "s.
-// Supports escaped quotes using "".
+// FIXME: This is using string streams which are an order of magnitude (or 2) too slow
+// rewrite without using streams if possible
 Vector<string> parseString(const string &line)
 {
    Vector<string> result;
-   string current;
-   bool inQuotes = false;
-   bool hasToken = false;
 
-   for(size_t i = 0; i < line.length(); ++i)
+   string item;
+   bool inQuotes = false;
+   bool hasContent = false;
+   U32 i = 0;
+   U32 len = (U32)line.length();
+
+   while(i < len)
    {
       char c = line[i];
 
       if(inQuotes)
       {
-         hasToken = true;
          if(c == '"')
          {
-            // Check for escaped quote ""
-            if(i + 1 < line.length() && line[i + 1] == '"')
+            if(i + 1 < len && line[i + 1] == '"') // Escaped quote
             {
-               current += '"';
+               item += '"';
+               hasContent = true;
                i++;
             }
             else
@@ -368,35 +369,37 @@ Vector<string> parseString(const string &line)
          }
          else
          {
-            current += c;
+            item += c;
+            hasContent = true;
          }
       }
       else
       {
-         if(isspace((unsigned char)c))
-         {
-            if(hasToken)
-            {
-               result.push_back(current);
-               current.clear();
-               hasToken = false;
-            }
-         }
-         else if(c == '"')
+         if(c == '"')
          {
             inQuotes = true;
-            hasToken = true;
+            hasContent = true;
+         }
+         else if(isspace(static_cast<unsigned char>(c)))
+         {
+            if(hasContent)
+            {
+               result.push_back(item);
+               item.clear();
+               hasContent = false;
+            }
          }
          else
          {
-            current += c;
-            hasToken = true;
+            item += c;
+            hasContent = true;
          }
       }
+      i++;
    }
 
-   if(hasToken)
-      result.push_back(current);
+   if(hasContent)
+      result.push_back(item);
 
    return result;
 }

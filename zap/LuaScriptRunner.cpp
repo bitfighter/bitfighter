@@ -172,8 +172,7 @@ bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, Sc
 
    if(err != 0)
    {
-      const char* errMsg = lua_tostring(L, -1);
-      logError("Failed to load startup functions %s: %s", key, errMsg ? errMsg : "<unknown error>");
+      logError("Failed to load startup functions %s: %s", key, lua_tostring(L, -1));
 
       TNLAssert(stackDepth == lua_gettop(L), "Stack not properly restored to the state it was in when we got here!");
       return false;
@@ -209,8 +208,7 @@ bool LuaScriptRunner::loadCompileRunEnvironmentScript(const string &scriptName) 
 
    if(err != 0)
    {
-      const char* errMsg = lua_tostring(L, -1);
-      logError("Failed to load script %s: %s", scriptName.c_str(), errMsg ? errMsg : "<unknown error>");
+      logError("Failed to load script %s: %s", scriptName.c_str(), lua_tostring(L, -1));
 
       clearStack(L);
       return false;
@@ -286,8 +284,7 @@ bool LuaScriptRunner::loadScript(bool cacheScript)
       if(lua_pcall(L, 0, 0, -2))      // Passing 0 args, expecting none back
       {
           // We can't load the script as requested.  Sorry!
-         const char* errMsg = lua_tostring(L, -1);
-         string msg = "Error starting script:\n" + string(errMsg ? errMsg : "<unknown error>");
+         string msg = "Error starting script:\n" + string(lua_tostring(L, -1));
          logError("%s", msg.c_str());         // Also calls clearStack(L)
          return false;
       }
@@ -452,17 +449,16 @@ bool LuaScriptRunner::runCmd(const char* function, S32 argCount, S32 returnValue
       // The only way this can get triggered is if the handler function has been deleted by the time 
       // we get here (we check for its existence when a script subscribes).  In practice, this has 
       // probably never happened.  
-      string text = "Cannot find Lua function " + string(function ? function : "<unknown>") + "()!\n";
+      string text = "Cannot find Lua function " + string(function) + "()!\n";
       logprintf(LogConsumer::LogError, "%s\n%s", getErrorMessagePrefix(), text.c_str());
    }
    else                    // A "normal" error occurred (i.e. error in the code)
    {
-      const char* errMsg = lua_tostring(L, -1);
-      string msg = errMsg ? errMsg : "<unknown error>";
+      string msg = lua_tostring(L, -1);
       lua_pop(L, 1);       // Remove the message from the stack, so it won't appear in our stack dump
 
       improveErrorMessages(msg);    // Modifies msg
-      string text = "In method " + string(function ? function : "<unknown>") + "():\n" + msg;
+      string text = "In method " + string(function) + "():\n" + msg;
 
       logprintf(LogConsumer::LogError, "%s\n%s", getErrorMessagePrefix(), text.c_str());
       logprintf(LogConsumer::LogError, "Dump of Lua/C++ stack:");
@@ -573,10 +569,7 @@ void LuaScriptRunner::loadCompileRunHelper(const string &scriptName)
 {
    loadCompileScript(joindir(mScriptingDir, scriptName).c_str());
    if(lua_pcall(L, 0, 0, 0))
-   {
-      const char* errMsg = lua_tostring(L, -1);
-      throw LuaException("Error running " + scriptName + ": " + string(errMsg ? errMsg : "<unknown error>"));
-   }
+      throw LuaException("Error running " + scriptName + ": " + string(lua_tostring(L, -1)));
 }
 
 
@@ -601,10 +594,7 @@ void LuaScriptRunner::loadCompileScript(const char *filename)
    // LUA_ERRMEM: memory allocation error.  [[ err == 4 ]]
 
    if(filename[0] != '\0' && luaL_loadfile(L, filename) != 0)
-   {
-      const char* errMsg = lua_tostring(L, -1);
-      throw LuaException("Error compiling script " + string(filename) + "\n" + string(errMsg ? errMsg : "<unknown error>"));
-   }
+      throw LuaException("Error compiling script " + string(filename) + "\n" + string(lua_tostring(L, -1)));
 }
 
 
@@ -758,8 +748,7 @@ void LuaScriptRunner::setModulePath()
 // a fatal error such as running out of memory.  Best just to shut the whole thing down.
 int LuaScriptRunner::luaPanicked(lua_State *L)
 {
-   const char* errMsg = lua_tostring(L, 1);
-   string msg = errMsg ? errMsg : "<unknown error>";
+   string msg = lua_tostring(L, 1);
 
    logprintf("Fatal error running Lua code: %s.  Possibly out of memory?  Shutting down Bitfighter.", msg.c_str());
 
@@ -893,8 +882,7 @@ bool add_enum_to_lua(lua_State* L, const char* tname, ...)
    // Execute lua code
    if( luaL_loadbuffer(L, code.str().c_str(), code.str().length(), 0) || lua_pcall(L, 0, 0, 0) )
    {
-      const char* errMsg = lua_tostring(L, -1);
-      fprintf(stderr, "%s\n\n%s\n", code.str().c_str(), errMsg ? errMsg : "<unknown error>");
+      fprintf(stderr, "%s\n\n%s\n", code.str().c_str(), lua_tostring(L, -1));
       lua_pop(L, 1);
       return false;
    }

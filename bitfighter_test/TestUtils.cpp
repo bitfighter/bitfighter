@@ -95,7 +95,7 @@ void GamePair::initialize(GameSettingsPtr settings, const string &levelCode, S32
    {
       const char *name = ::testing::UnitTest::GetInstance()->current_test_case()->name();
       const char *name2 = ::testing::UnitTest::GetInstance()->current_test_info()->name();
-      server->getSettings()->setHostName(string(name ? name : "UnknownTest") + "_" + (name2 ? name2 : "UnknownTest"), false);
+      server->getSettings()->setHostName(string(name) + "_" + name2, false);
    }
 
    server->startHosting();          // This will load levels and wipe out any teams
