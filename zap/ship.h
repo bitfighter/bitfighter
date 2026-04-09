@@ -281,6 +281,12 @@ public:
    // Returns the current xtank body index (-1 = normal BF ship, >=0 = xtank body).
    S32 getXtankBodyIndex() const { return mXtankBodyIndex; }
 
+   // Returns the current tank hull heading angle (radians).  Only meaningful when getXtankBodyIndex() >= 0.
+   F32 getTankHeadingAngle() const { return mTankHeadingAngle; }
+
+   // Returns the current tank speed along the hull heading direction.  Only meaningful when getXtankBodyIndex() >= 0.
+   F32 getTankSpeed() const { return mTankSpeed; }
+
    // Cycle to the next xtank body (wraps around to the normal BF ship after the last).
    // Also resets tank physics heading to current aim angle.
    void cycleXtankBody();
