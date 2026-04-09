@@ -174,6 +174,18 @@ bool Ship::isServerCopyOf(const Ship &clientShip) const
        if(mMountedItems[i]->getObjectTypeNumber() != clientShip.mMountedItems[i]->getObjectTypeNumber())
           return false;
 
+    // Compare xtank state so we can catch heading/speed sync failures in tests
+    if(mXtankBodyIndex != clientShip.mXtankBodyIndex)
+       return false;
+
+    if(mXtankBodyIndex >= 0)
+    {
+       if(fabsf(mTankHeadingAngle - clientShip.mTankHeadingAngle) > 0.01f)
+          return false;
+       if(fabsf(mTankSpeed - clientShip.mTankSpeed) > 1.0f)
+          return false;
+    }
+
     return true;
 }
 
@@ -792,7 +804,8 @@ void Ship::idle(IdleCallPath path)
       // piecewise stepping only when packets arrive from the client.
       processMove(RenderState);
 
-      if(getActualVel().lenSquared() != 0 || getActualPos() != getRenderPos())
+      if(getActualVel().lenSquared() != 0 || getActualPos() != getRenderPos() ||
+         (mXtankBodyIndex >= 0 && (mCurrentMove.x != 0 || mTankSpeed != 0)))
          setMaskBits(PositionMask);
 
       mSendSpawnEffectTimer.update(mCurrentMove.time);
@@ -843,7 +856,8 @@ void Ship::idle(IdleCallPath path)
       {
          // Update the render state on the server to match the actual updated state, and mark the object as having changed
          // Position state.  An optimization here would check the before and after positions so as to not update unmoving ships.
-         if(getRenderAngle() != getActualAngle() || getRenderPos() != getActualPos() || getRenderVel() != getActualVel())
+         if(getRenderAngle() != getActualAngle() || getRenderPos() != getActualPos() || getRenderVel() != getActualVel() ||
+            (mXtankBodyIndex >= 0 && mCurrentMove.x != 0))
             setMaskBits(PositionMask);
 
          copyMoveState(ActualState, RenderState);
@@ -1688,6 +1702,14 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
          //                              dseveral frames due to network delays.
          gameConnection->writeCompressedPoint(getRenderPos(), stream);
          writeCompressedVelocity(getRenderVel(), BoostMaxVelocity + 1, stream);
+
+         // For xtank vehicles also send the hull heading angle and speed so observer clients
+         // stay in sync during steering and coasting (these are NOT recoverable from pos/vel alone).
+         if(mXtankBodyIndex >= 0)
+         {
+            stream->write(mTankHeadingAngle);
+            stream->write(mTankSpeed);
+         }
       }
       if(stream->writeFlag(updateMask & MoveMask))             // <=== TWO
          mCurrentMove.pack(stream, NULL, false);               // Send current move
@@ -1899,6 +1921,16 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       readCompressedVelocity(p, BoostMaxVelocity + 1, stream);
       Parent::setActualVel(p);
+
+      // For xtank vehicles, also read the hull heading angle and speed that were
+      // packed alongside the position.  mXtankBodyIndex is already current because
+      // the XtankBodyMask block is processed earlier in this same unpackUpdate call.
+      if(mXtankBodyIndex >= 0)
+      {
+         stream->read(&mTankHeadingAngle);
+         stream->read(&mTankSpeed);
+      }
+
       positionChanged = true;
    }
 
