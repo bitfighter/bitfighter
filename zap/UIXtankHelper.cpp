@@ -550,6 +550,19 @@ void UIXtankHelper::renderPreviewPanel() const
    static const S32 STAT_SZ    = 13;
    static const S32 LINE_GAP   = STAT_SZ + 6;
 
+   // Vertical positions for graphic and text elements within the panel.
+   // All relative to PNL_TOP for clarity.
+   static const S32 TITLE_Y     = PNL_TOP + 10;
+   static const S32 GRAPHIC_Y   = PNL_TOP + 160;  // centre of engine/tread graphic
+   static const S32 HS_ROW1_Y   = PNL_TOP + 120;  // top row of heat-sink crosses
+   static const S32 ENG_TEXT_Y  = PNL_TOP + 210;  // first stat line for engine phase
+   static const S32 TRD_TEXT_Y  = PNL_TOP + 215;  // first stat line for tread phase
+   static const S32 HS_TEXT_Y   = PNL_TOP + 230;  // stat line for heat-sink phase
+
+   // Armor classification thresholds (body phase).
+   static const F32 ARMOR_HEAVY_LIMIT    = 0.70f;
+   static const F32 ARMOR_MED_LIMIT      = 0.95f;
+
    // Semi-transparent dark background, red border to match helper menus.
    drawFilledFancyBox(PNL_LEFT, PNL_TOP, PNL_RIGHT, PNL_BOT, CORNER,
                       Colors::black, 0.75f, Colors::red35);
@@ -568,20 +581,20 @@ void UIXtankHelper::renderPreviewPanel() const
 
       // Title: body name
       r.setColor(Colors::white);
-      drawCenteredString(PNL_CX, PNL_TOP + 10, TITLE_SZ, xtankBodyNames[idx]);
+      drawCenteredString(PNL_CX, TITLE_Y, TITLE_SZ, xtankBodyNames[idx]);
 
       // Horizontal divider
       r.setColor(Colors::gray40);
-      S32 divY = PNL_TOP + 10 + TITLE_SZ + 4;
+      S32 divY = TITLE_Y + TITLE_SZ + 4;
       drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, divY);
 
       // Render the vehicle body shape, centered in the upper portion of the
       // panel.  Scale so the largest bodies (~44 units) fit within ~130 px.
       // Use a fixed display scale that looks good across all 14 bodies.
       static const F32 BODY_SCALE = 2.8f;
-      static const S32 BODY_CY    = PNL_TOP + 50 + 100;  // y=305
+      static const S32 BODY_CY    = PNL_TOP + 150;  // vertical centre for body graphic
 
-      static F32 thrusts[4] = { 0, 0, 0, 0 };
+      static const F32 thrusts[4] = { 0, 0, 0, 0 };
 
       r.pushMatrix();
       r.translate(F32(PNL_CX), F32(BODY_CY), 0);
@@ -608,10 +621,8 @@ void UIXtankHelper::renderPreviewPanel() const
       const TankPhysicsInfo &phy = xtankPhysicsInfos[idx];
       S32 turrets = xtankTurretInfos[idx].count;
 
-      const char *spdClass = (phy.maxSpeed >= 550) ? "Fast" :
-                             (phy.maxSpeed >= 480) ? "Med"  : "Slow";
-      const char *armClass = (phy.armor <= 0.7f)   ? "Heavy" :
-                             (phy.armor <= 0.95f)  ? "Med"   : "Light";
+      const char *armClass = (phy.armor <= ARMOR_HEAVY_LIMIT) ? "Heavy" :
+                             (phy.armor <= ARMOR_MED_LIMIT)   ? "Med"   : "Light";
 
       S32 ty = BODY_CY + S32(xtankBodyCollisionRadius[idx] * BODY_SCALE) + 16;
 
@@ -637,14 +648,13 @@ void UIXtankHelper::renderPreviewPanel() const
       const XtankEngineInfo &ei = xtankEngineInfos[idx];
 
       r.setColor(Colors::white);
-      drawCenteredString(PNL_CX, PNL_TOP + 10, TITLE_SZ, ei.name);
+      drawCenteredString(PNL_CX, TITLE_Y, TITLE_SZ, ei.name);
 
       r.setColor(Colors::gray40);
-      S32 divY = PNL_TOP + 10 + TITLE_SZ + 4;
+      S32 divY = TITLE_Y + TITLE_SZ + 4;
       drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, divY);
 
       // Draw the engine diamond symbol, coloured to match the in-game overlay.
-      static const F32 ENG_Y = F32(PNL_TOP + 160);
       static const F32 DIAM_SZ = 30.0f;
       Color engColor;
       switch((XtankEngine::Type)idx)
@@ -653,17 +663,18 @@ void UIXtankHelper::renderPreviewPanel() const
          case XtankEngine::Heavy:   engColor = Color(1.0f, 0.65f, 0.0f);  break;
          default:                   engColor = Color(0.95f, 0.35f, 0.05f); break;
       }
+      F32 gy = F32(GRAPHIC_Y);
       F32 diam[] = {
-          F32(PNL_CX),           ENG_Y - DIAM_SZ,
-          F32(PNL_CX) + DIAM_SZ, ENG_Y,
-          F32(PNL_CX),           ENG_Y + DIAM_SZ,
-          F32(PNL_CX) - DIAM_SZ, ENG_Y,
-          F32(PNL_CX),           ENG_Y - DIAM_SZ,
+          F32(PNL_CX),           gy - DIAM_SZ,
+          F32(PNL_CX) + DIAM_SZ, gy,
+          F32(PNL_CX),           gy + DIAM_SZ,
+          F32(PNL_CX) - DIAM_SZ, gy,
+          F32(PNL_CX),           gy - DIAM_SZ,
       };
       r.setColor(engColor);
       r.renderVertexArray(diam, 5, RenderType::LineStrip);
 
-      S32 ty = PNL_TOP + 210;
+      S32 ty = ENG_TEXT_Y;
       r.setColor(Colors::cyan);
       S32 spdPct = S32((ei.speedMult - 1.0f) * 100.0f + 0.5f);
       S32 accPct = S32((ei.accelMult - 1.0f) * 100.0f + 0.5f);
@@ -695,29 +706,29 @@ void UIXtankHelper::renderPreviewPanel() const
       const XtankTreadInfo &ti = xtankTreadInfos[idx];
 
       r.setColor(Colors::white);
-      drawCenteredString(PNL_CX, PNL_TOP + 10, TITLE_SZ, ti.name);
+      drawCenteredString(PNL_CX, TITLE_Y, TITLE_SZ, ti.name);
 
       r.setColor(Colors::gray40);
-      S32 divY = PNL_TOP + 10 + TITLE_SZ + 4;
+      S32 divY = TITLE_Y + TITLE_SZ + 4;
       drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, divY);
 
       // Simple tread-track graphic: two parallel rectangles.
-      static const F32 TR_CY  = F32(PNL_TOP + 160);
       static const F32 TR_W   = 12.0f;
       static const F32 TR_H   = 60.0f;
       static const F32 TR_SEP = 28.0f;  // distance from centre to each track
 
+      F32 trCy = F32(GRAPHIC_Y);
       Color trColor = (idx == 0) ? Colors::green65 :
                       (idx == 1) ? Colors::gray67  : Colors::orange67;
       r.setColor(trColor);
       // Left track
-      drawHollowRect(PNL_CX - TR_SEP - TR_W, TR_CY - TR_H * 0.5f,
-                     PNL_CX - TR_SEP + TR_W, TR_CY + TR_H * 0.5f);
+      drawHollowRect(PNL_CX - TR_SEP - TR_W, trCy - TR_H * 0.5f,
+                     PNL_CX - TR_SEP + TR_W, trCy + TR_H * 0.5f);
       // Right track
-      drawHollowRect(PNL_CX + TR_SEP - TR_W, TR_CY - TR_H * 0.5f,
-                     PNL_CX + TR_SEP + TR_W, TR_CY + TR_H * 0.5f);
+      drawHollowRect(PNL_CX + TR_SEP - TR_W, trCy - TR_H * 0.5f,
+                     PNL_CX + TR_SEP + TR_W, trCy + TR_H * 0.5f);
 
-      S32 ty = PNL_TOP + 215;
+      S32 ty = TRD_TEXT_Y;
       r.setColor(Colors::cyan);
       S32 turnPct = S32((ti.turnMult - 1.0f) * 100.0f + 0.5f);
       S32 fricPct = S32((ti.frictionMult - 1.0f) * 100.0f + 0.5f);
@@ -750,23 +761,22 @@ void UIXtankHelper::renderPreviewPanel() const
       char titleBuf[32];
       dSprintf(titleBuf, sizeof(titleBuf), "Heat Sinks: %d", n);
       r.setColor(Colors::white);
-      drawCenteredString(PNL_CX, PNL_TOP + 10, TITLE_SZ, titleBuf);
+      drawCenteredString(PNL_CX, TITLE_Y, TITLE_SZ, titleBuf);
 
       r.setColor(Colors::gray40);
-      S32 divY = PNL_TOP + 10 + TITLE_SZ + 4;
+      S32 divY = TITLE_Y + TITLE_SZ + 4;
       drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, divY);
 
       // Draw N small cyan cross (+) symbols arranged in a 3-column grid.
       static const F32 HS_SPACING = 40.0f;
       static const F32 HS_ARM     = 10.0f;
-      static const F32 HS_ROW1_Y  = F32(PNL_TOP + 120);
       r.setColor(Colors::cyan);
       for(S32 i = 0; i < n; i++)
       {
          F32 col = F32(i % 3);
          F32 row = F32(i / 3);
          F32 cx  = F32(PNL_CX) - HS_SPACING + col * HS_SPACING;
-         F32 cy  = HS_ROW1_Y + row * HS_SPACING;
+         F32 cy  = F32(HS_ROW1_Y) + row * HS_SPACING;
          F32 h[] = { cx - HS_ARM, cy,   cx + HS_ARM, cy };
          F32 v[] = { cx, cy - HS_ARM,   cx, cy + HS_ARM };
          r.renderVertexArray(h, 2, RenderType::Lines);
@@ -776,7 +786,7 @@ void UIXtankHelper::renderPreviewPanel() const
       F32 mult = xtankHeatSinkFireDelayMult(n);
       S32 pct  = S32((1.0f - mult) * 100.0f + 0.5f);
 
-      S32 ty = PNL_TOP + 230;
+      S32 ty = HS_TEXT_Y;
       r.setColor(Colors::cyan);
       if(pct == 0)
          drawCenteredString(PNL_CX, ty, STAT_SZ, "No fire-rate bonus");
@@ -801,11 +811,11 @@ void UIXtankHelper::renderPreviewPanel() const
       if(idx == 0)
       {
          // "None" option
-         drawCenteredString(PNL_CX, PNL_TOP + 10, TITLE_SZ, "None");
+         drawCenteredString(PNL_CX, TITLE_Y, TITLE_SZ, "None");
          r.setColor(Colors::gray40);
-         drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, PNL_TOP + 10 + TITLE_SZ + 4);
+         drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, TITLE_Y + TITLE_SZ + 4);
          r.setColor(Colors::gray67);
-         drawCenteredString(PNL_CX, PNL_TOP + 120, STAT_SZ, "Empty turret slot");
+         drawCenteredString(PNL_CX, HS_ROW1_Y, STAT_SZ, "Empty turret slot");
       }
       else
       {
@@ -813,11 +823,11 @@ void UIXtankHelper::renderPreviewPanel() const
          if(w < 0 || w >= XtankWeapon::Count) w = 0;
          const XtankWeaponInfo &wi = xtankWeaponInfos[w];
 
-         drawCenteredString(PNL_CX, PNL_TOP + 10, TITLE_SZ, wi.name);
+         drawCenteredString(PNL_CX, TITLE_Y, TITLE_SZ, wi.name);
          r.setColor(Colors::gray40);
-         drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, PNL_TOP + 10 + TITLE_SZ + 4);
+         drawHorizLine(PNL_LEFT + 10, PNL_RIGHT - 10, TITLE_Y + TITLE_SZ + 4);
 
-         S32 ty = PNL_TOP + 90;
+         S32 ty = TITLE_Y + TITLE_SZ + 4 + 20;
          r.setColor(Colors::cyan);
          drawCenteredStringf(PNL_CX, ty, STAT_SZ,
                              "Fire delay:  %d ms", (S32)wi.fireDelay);
