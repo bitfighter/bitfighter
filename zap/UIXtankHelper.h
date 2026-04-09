@@ -66,6 +66,10 @@ private:
    S32 mWeaponButtonsWidth;
    S32 mWeaponItemsDisplayWidth;
 
+   // Index of the currently highlighted (preview) item in the active phase's
+   // item list.  Wraps within the valid range.  Cycled by UP/DOWN arrow keys.
+   S32 mHighlightedIndex;
+
    void buildBodyItems();
    void buildEngineItems();
    void buildTreadItems();
@@ -73,6 +77,12 @@ private:
    void buildWeaponItems();
    void advanceToNextPhaseOrFinish();  // Move to next phase, or finalise
    void applyDesign();                 // Finalise and propagate the chosen design
+
+   // Draw the floating preview panel on the right side of the screen.
+   void renderPreviewPanel() const;
+
+   // Returns the item count for the current phase (used by UP/DOWN cycling).
+   S32 currentPhaseItemCount() const;
 
 public:
    UIXtankHelper();
