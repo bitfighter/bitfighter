@@ -317,7 +317,7 @@ EnergyItem 3 3
 A pre-placed flag. Used in CTF, HTF, Retrieve, ZoneControl, Rabbit.
 
 - `team`: team index the flag belongs to, or `-1` for neutral.
-- `SpawnLock` (optional): locks the flag to its initial spawn point.
+- `SpawnLock` (optional): locks the flag to its initial spawn point.  Without this, items can respawn at any flag/ball spawn point.
 
 ```
 FlagItem 0 0.5 0.5
@@ -361,7 +361,7 @@ All zone polygons require at least 3 vertices, maximum 64.
 
 ### `LoadoutZone <team> <x1> <y1> <x2> <y2> <x3> <y3> [...]`
 
-An area where players configure their ship loadout. Each team should have at least one.
+An area where players configure their ship loadout. Each team should have at least one.  If there are no loadout zones, ship configuration will change when a ship respawns.
 
 - `team`: team index, `-1` for neutral (any team can use it), `-2` for hostile.
 
@@ -567,5 +567,7 @@ Spawn 1  7  2
 - **Teleporters** with matching origins create multi-destination teleporters (random exit).
 - **Neutral turrets** (`team = -1`) attack everyone; **team turrets** attack opposing teams only.
 - **Heal rate** on engineered items (Turrets, ForceFieldProjectors): `0` = server default, `1` = slow self-repair, higher = faster.
-- **SpeedZone speed** of `2000` is the default and a good starting value. Direction is from point 1 → point 2.
+- **SpeedZone speed** of `2000` is the default and a good starting value. Direction is from point 1 → point 2.  Use snapping if a specific destination is desired.
+- **SlipZones** should be used sparingly.  They sound more fun than they are.
 - Coordinates in `LevelFormat 2` are raw world units. A square play area of 20×20 units is typical for small maps; 40×40 for large ones.
+
