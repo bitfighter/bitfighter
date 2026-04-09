@@ -1182,6 +1182,8 @@ void Ship::damageObject(DamageInfo *theInfo)
 // Returns true if ship represents local player -- client only
 bool Ship::isLocalPlayerShip(Game *game) const
 {
+   if(game == NULL)
+      return false;
    return getClientInfo() == game->getLocalRemoteClientInfo();
 }
 
