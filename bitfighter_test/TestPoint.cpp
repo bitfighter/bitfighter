@@ -161,12 +161,12 @@ TEST(PointTest, Interpolation)
    Point res;
 
    res.interp(0.0f, p1, p2);
-   EXPECT_FLOAT_EQ(10.0f, res.x);
-   EXPECT_FLOAT_EQ(10.0f, res.y);
-
-   res.interp(1.0f, p1, p2);
    EXPECT_FLOAT_EQ(0.0f, res.x);
    EXPECT_FLOAT_EQ(0.0f, res.y);
+
+   res.interp(1.0f, p1, p2);
+   EXPECT_FLOAT_EQ(10.0f, res.x);
+   EXPECT_FLOAT_EQ(10.0f, res.y);
 
    res.interp(0.5f, p1, p2);
    EXPECT_FLOAT_EQ(5.0f, res.x);

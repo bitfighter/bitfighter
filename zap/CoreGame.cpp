@@ -955,7 +955,7 @@ void CoreItem::fillPanelGeom(const Point &pos, U32 time, PanelGeom &panelGeom)
       mid   = (start + end) * .5;
 
       panelGeom.mid[i].set(mid);
-      panelGeom.repair[i].interp(.6f, mid, pos);
+      panelGeom.repair[i].interp(.6f, pos, mid);
    }
 
    panelGeom.isValid = true;

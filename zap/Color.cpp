@@ -89,9 +89,9 @@ void Color::read(const char **argv)
 void Color::interp(float t, const Color &c1, const Color &c2)
 {
    float oneMinusT = 1.0f - t;
-   r = c1.r * t  +  c2.r * oneMinusT;
-   g = c1.g * t  +  c2.g * oneMinusT;
-   b = c1.b * t  +  c2.b * oneMinusT;
+   r = c1.r * oneMinusT  +  c2.r * t;
+   g = c1.g * oneMinusT  +  c2.g * t;
+   b = c1.b * oneMinusT  +  c2.b * t;
 }
 
 void Color::set(const Color &c) { r = c.r;  g = c.g;  b = c.b;  }

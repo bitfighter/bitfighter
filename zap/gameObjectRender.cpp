@@ -1253,14 +1253,14 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
    for(S32 i = 0; i < NumColors; i++)
    {
       Color c(colors[type][i][0], colors[type][i][1], colors[type][i][2]);
-      liveColors[i].interp(radiusFraction, c, Colors::white);
+      liveColors[i].interp(radiusFraction, Colors::white, c);
    }
 
    Color deadColors[NumColors];
    for(S32 i = 0; i < NumColors; i++)
    {
       Color c(colors[3][i][0], colors[3][i][1], colors[3][i][2]);
-      deadColors[i].interp(radiusFraction, c, Colors::white);
+      deadColors[i].interp(radiusFraction, Colors::white, c);
    }
 
 
@@ -1327,7 +1327,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
       else
       {
          Color c;
-         c.interp(0.75f * F32(MaxParticles - i) / F32(MaxParticles - trackerCount), Colors::black, deadColors[t.ci]);
+         c.interp(0.75f * F32(MaxParticles - i) / F32(MaxParticles - trackerCount), deadColors[t.ci], Colors::black);
          currentColor = &c;
       }
 
@@ -1363,7 +1363,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
          else
          {
             Color c;
-            c.interp(0.75f * F32(MaxParticles - i) / F32(MaxParticles - trackerCount), Colors::black, deadColors[t.ci]);
+            c.interp(0.75f * F32(MaxParticles - i) / F32(MaxParticles - trackerCount), deadColors[t.ci], Colors::black);
             currentColor = &c;
          }
 
@@ -1911,7 +1911,7 @@ static Color getNexusBaseColor(bool open, F32 glowFraction)
    Color color;
 
    if(open)
-      color.interp(glowFraction, Colors::yellow, Colors::NexusOpenColor);
+      color.interp(glowFraction, Colors::NexusOpenColor, Colors::yellow);
    else
       color = Colors::NexusClosedColor;
 

@@ -91,8 +91,8 @@ void Point::normalize(float newLen)
 void Point::interp(float t, const Point &p1, const Point &p2)
 {
    float oneMinusT = 1.0f - t;
-   x = p1.x * t + p2.x * oneMinusT;
-   y = p1.y * t + p2.y * oneMinusT;
+   x = p1.x * oneMinusT + p2.x * t;
+   y = p1.y * oneMinusT + p2.y * t;
 }
 
 

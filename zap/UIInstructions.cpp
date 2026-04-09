@@ -974,7 +974,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg) co
    Color secColor =   Colors::yellow;
 
    Color argColor;
-   argColor.interp(.5, Colors::cyan, Colors::black);
+   argColor.interp(.5, Colors::black, Colors::cyan);
 
    const S32 headerSize = 20;
    const S32 cmdSize = 16;

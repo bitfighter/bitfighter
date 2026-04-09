@@ -2139,7 +2139,7 @@ void Ship::emitMovementSparks()
                 Color thrust;
 
                 F32 t = TNL::Random::readF();
-                thrust.interp(t, dim, light);
+                thrust.interp(t, light, dim);
 
                 TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
 
