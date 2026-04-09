@@ -63,7 +63,7 @@ TEST(SyncTest, TankHeadingIncludedInPositionMaskPackUnpack)
 
    // processMove manually drives the server-side physics and body switch.
    // We use ActualState here because that is what the server normally advances.
-   serverShip.processMove(BfObject::ActualState);
+   serverShip.processMove(ActualState);
 
    ASSERT_EQ(0, serverShip.getXtankBodyIndex()) << "serverShip should be in xtank mode after processMove";
 
@@ -80,7 +80,7 @@ TEST(SyncTest, TankHeadingIncludedInPositionMaskPackUnpack)
    steerMove.time      = 100;    // 100 ms frame
 
    serverShip.setMove(steerMove);
-   serverShip.processMove(BfObject::ActualState);
+   serverShip.processMove(ActualState);
 
    F32 serverHeading = serverShip.getTankHeadingAngle();
    F32 serverSpeed   = serverShip.getTankSpeed();
@@ -94,7 +94,7 @@ TEST(SyncTest, TankHeadingIncludedInPositionMaskPackUnpack)
    // frame the ship is moving/steering) and verify the observer receives
    // the updated heading angle and speed.
    Ship observerShip;
-   packUnpack(serverShip, observerShip, Ship::PositionMask);
+   packUnpack(serverShip, observerShip, MoveObject::PositionMask);
 
    EXPECT_NEAR(serverHeading, observerShip.getTankHeadingAngle(), 0.001f)
       << "Observer should receive updated tank heading angle via PositionMask";
@@ -115,7 +115,7 @@ TEST(SyncTest, TankRotatingInPlaceSendsPositionMask)
    Move tankMove;
    tankMove.bodyIndex = 0;
    serverShip.setMove(tankMove);
-   serverShip.processMove(BfObject::ActualState);
+   serverShip.processMove(ActualState);
    packUnpack(serverShip, clientShip);
 
    F32 initialHeading = serverShip.getTankHeadingAngle();
@@ -128,13 +128,13 @@ TEST(SyncTest, TankRotatingInPlaceSendsPositionMask)
    rotateMove.time      = 200;
 
    serverShip.setMove(rotateMove);
-   serverShip.processMove(BfObject::ActualState);
+   serverShip.processMove(ActualState);
 
    F32 newHeading = serverShip.getTankHeadingAngle();
    EXPECT_NE(initialHeading, newHeading) << "Heading should have changed after steering";
 
    // Pack with PositionMask only and verify the observer gets the new heading.
-   packUnpack(serverShip, clientShip, Ship::PositionMask);
+   packUnpack(serverShip, clientShip, MoveObject::PositionMask);
 
    EXPECT_NEAR(newHeading, clientShip.getTankHeadingAngle(), 0.001f)
       << "Observer should receive updated tank heading when tank rotates in place";
@@ -153,8 +153,8 @@ TEST(SyncTest, TankCoastingSpeedSentViaPositionMask)
    driveMove.time      = 200;
 
    serverShip.setMove(driveMove);
-   serverShip.processMove(BfObject::ActualState);
-   serverShip.processMove(BfObject::ActualState); // Two frames to build speed
+   serverShip.processMove(ActualState);
+   serverShip.processMove(ActualState); // Two frames to build speed
 
    packUnpack(serverShip, clientShip);   // Initial sync
 
@@ -166,13 +166,13 @@ TEST(SyncTest, TankCoastingSpeedSentViaPositionMask)
    coastMove.time = 100;
 
    serverShip.setMove(coastMove);
-   serverShip.processMove(BfObject::ActualState);
+   serverShip.processMove(ActualState);
 
    F32 serverSpeed = serverShip.getTankSpeed();
    EXPECT_GT(serverSpeed, 0.0f) << "Tank should still be coasting (non-zero speed)";
 
    // Observer should receive the coasting speed via PositionMask.
-   packUnpack(serverShip, clientShip, Ship::PositionMask);
+   packUnpack(serverShip, clientShip, MoveObject::PositionMask);
 
    EXPECT_NEAR(serverSpeed, clientShip.getTankSpeed(), 0.5f)
       << "Observer should receive updated tank speed during coasting via PositionMask";
@@ -306,7 +306,7 @@ TEST(SyncTest, TankCoastingPropagatesAcrossTwoClients)
 }
 
 
-// Verifies that the regular ship aim angle (turret / reticle direction) is
+ // Verifies that the regular ship aim angle (turret / reticle direction) is
 // synchronised between clients.  This is a regression guard — the aim angle
 // has always been sent via MoveMask but this test makes it explicit.
 TEST(SyncTest, ShipAimAnglePropagatesAcrossTwoClients)

@@ -52,6 +52,8 @@ public:
 
 class MoveObject : public Item
 {
+   friend class SyncTest;     // Allow tests access to innards
+
    typedef Item Parent;
 
 private:
@@ -76,12 +78,14 @@ protected:
    F32 mMass = 0;
    bool mWaitingForMoveToUpdate = 0;  // client only
 
+public:
    enum MaskBits {
       PositionMask     = Parent::FirstFreeMask << 0,     // Position has changed and needs to be updated
       WarpPositionMask = Parent::FirstFreeMask << 1,     // A large change in position not requiring client-side "smoothing"
       FirstFreeMask    = Parent::FirstFreeMask << 2
    };
 
+protected:
    virtual void onEnteredZone(Zone *zone);
    virtual void onLeftZone(Zone *zone);
    void getZonesObjectIsIn(Vector<SafePtr<Zone> > &zoneList);

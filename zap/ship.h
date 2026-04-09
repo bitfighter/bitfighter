@@ -35,6 +35,8 @@ struct ControlObjectData;
 // class derived_class_name: public base_class_name
 class Ship : public MoveObject
 {
+   friend class TestSync;  // Allows tests access to innards
+
    typedef MoveObject Parent;
 
    bool mIsRobot;
