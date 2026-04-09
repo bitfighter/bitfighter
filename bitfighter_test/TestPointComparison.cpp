@@ -11,25 +11,13 @@
 
 namespace Zap {
 
-// This struct is a copy of the one in UIEditor.cpp
-// We want to test it specifically because it was broken
-struct PointCompareTest
-{
-   bool operator()( const Point& lhs, const Point& rhs ) const
-   {
-      if(lhs.x != rhs.x)
-         return lhs.x < rhs.x;
-      return lhs.y < rhs.y;
-   }
-};
-
 TEST(PointComparisonTest, StrictWeakOrdering)
 {
    Point p1(1.0f, 2.0f);
    Point p2(2.0f, 1.0f);
    Point p3(1.0f, 2.0f);
 
-   PointCompareTest cmp;
+   PointCompare cmp;
 
    // Asymmetry: if a < b then !(b < a)
    EXPECT_TRUE(cmp(p1, p2));
@@ -45,7 +33,7 @@ TEST(PointComparisonTest, StrictWeakOrdering)
 
 TEST(PointComparisonTest, SetDeDuplication)
 {
-   std::set<Point, PointCompareTest> pointSet;
+   std::set<Point, PointCompare> pointSet;
 
    pointSet.insert(Point(1.0f, 2.0f));
    pointSet.insert(Point(2.0f, 1.0f));
