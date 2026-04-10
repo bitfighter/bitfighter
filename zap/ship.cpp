@@ -1059,8 +1059,10 @@ void Ship::processModules()
       if(ModuleInfo::getModuleInfo(mLoadout.getModule(i))->getPrimaryUseType() == ModulePrimaryUsePassive)
          mLoadout.setModuleIndexPrimary(i, true);         // needs to be true to allow stats counting
 
-      // Set loaded module states to 'on' if detected as so, unless modules are disabled or we need to cooldown
-      if(!mCooldownNeeded && (!getClientInfo() || (getClientInfo() && !getClientInfo()->isShipSystemsDisabled())))
+      // Set loaded module states to 'on' if detected as so, unless modules are disabled or we need to cooldown.
+      // Modules are also disabled for xtank vehicles.
+      if(!mCooldownNeeded && (!getClientInfo() || (getClientInfo() && !getClientInfo()->isShipSystemsDisabled())) &&
+         getXtankBodyIndex() < 0)
       {
          if(mCurrentMove.modulePrimary[i])
             mLoadout.setModuleIndexPrimary(i, true);
@@ -2345,8 +2347,9 @@ const ShipShapeInfo *Ship::getActiveShipShapeInfo() const
 // Move::bodyIndex (set by UIGame.cpp after calling this function).
 void Ship::cycleXtankBody()
 {
-   mXtankBodyIndex++;
-   if(mXtankBodyIndex >= XtankBody::Count)
+   if(mXtankBodyIndex < 0)
+      mXtankBodyIndex = XtankBody::Lightcycle;
+   else
       mXtankBodyIndex = XtankBody::None;
 
    if(mXtankBodyIndex >= 0)
