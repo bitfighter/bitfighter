@@ -1451,7 +1451,9 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    else if(inputCode == KEY_CLOSEBRACKET && InputCodeManager::checkModifier(KEY_CTRL))    // Ctrl+] advances bots by 10 steps if frozen
       EventManager::get()->addSteps(10);
 
-   // Ctrl+Alt+Shift+X cycles through xtank vehicle bodies
+   // Ctrl+Alt+Shift+X toggles between the Lightcycle xtank body and the regular ship.
+   // Pressing once enters Lightcycle mode (modules are suppressed); pressing again returns
+   // to the normal Bitfighter ship (modules re-enabled).
    else if(inputCode == KEY_X &&
            InputCodeManager::checkModifier(KEY_CTRL, KEY_ALT, KEY_SHIFT))
    {
