@@ -60,6 +60,7 @@ TEST(StringUtilsTest, isHex)
    EXPECT_FALSE(isHex("12:345"));   // ':' comes just after '9'
    EXPECT_FALSE(isHex("@bcdef"));   // '@' comes just before 'A'
    EXPECT_FALSE(isHex("c01`"));     // '`' comes just before 'a'
+   EXPECT_FALSE(isHex(""));
 }
 
 
@@ -120,6 +121,9 @@ TEST(StringUtilsTest, extractDirectory)
    EXPECT_EQ("", extractDirectory("file.txt"));
    EXPECT_EQ("path/to", extractDirectory("path/to/"));
    EXPECT_EQ("path/to", extractDirectory("path/to/this"));
+#if !defined(TNL_OS_WIN32)
+   EXPECT_EQ("/", extractDirectory("/file.txt"));
+#endif
 }
 
 

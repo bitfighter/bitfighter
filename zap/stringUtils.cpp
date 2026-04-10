@@ -65,6 +65,9 @@ string extractDirectory(const string &path )
   if (pos == string::npos)
      return "";
 
+  if (pos == 0)
+     return path.substr(0, 1);
+
   return path.substr( 0, pos ); // Paths should never end with the slash
 }
 
@@ -1006,6 +1009,9 @@ bool isAlNum(char c)
 // Return true if str contains only hex chars
 bool isHex(const string &str)
 {
+   if(str.empty())
+      return false;
+
    for(string::size_type i = 0; i < str.length(); i++)
       if(!isHex(str[i]))
          return false;
