@@ -135,6 +135,9 @@ BF_TEAMS = [
 # SpeedZone direction table: (P1 offset from center, P2 offset from center)
 # Ships are boosted from P1 toward P2.
 # SCROLL_N means "ships move north" → P1 south of center, P2 north of center.
+# The 0.35 factor gives each SpeedZone a length of 70% of the cell width,
+# keeping it well clear of the cell walls (wall half-thickness ≈ 10% of cell)
+# while still covering the central travel path through the cell.
 _SZ_HALF = CELL_SIZE * 0.35
 SCROLL_DIR = {
     'N':  ( 0,  _SZ_HALF,  0, -_SZ_HALF),
@@ -164,7 +167,11 @@ def cell_center(ci, cj):
     return round(x, 1), round(y, 1)
 
 def xt2bf(xt_team):
-    """Convert xtank team (0=neutral, 1+=teams) to BF team (-1=neutral, 0+=teams)."""
+    """Convert xtank team (0=neutral, 1+=teams) to BF team (-1=neutral, 0+=teams).
+
+    255 is treated as neutral because some xtank maze files store 255 (0xFF) in
+    the team byte when no team was explicitly set (uninitialized / NO_TEAM).
+    """
     if xt_team == XTANK_NEUTRAL or xt_team == 255:
         return -1
     return xt_team - 1
