@@ -183,13 +183,18 @@ Recommended maximum number of players. Omit the number to leave unspecified.
 
 All coordinates in **LevelFormat 2** files are in **world units**:
 
-- A typical ship is approximately **1 unit** in diameter.
-- Most levels span roughly **10–30 units** in each dimension.
+- The **ship collision radius** is `24` world units (diameter ≈ 48 world units).
+- A standard `BarrierMaker` width of `50` is roughly one ship diameter — a good default wall thickness.
+- A typical corridor (gap between walls) is **150–300 world units** (3–6 ship diameters).
+- Most levels span **1 000–6 000 world units** in each dimension.
+  - A small arena: ~1 000 × 1 000 WU (about 20 ship-widths across)
+  - A large open level: 4 000–7 000 WU per side
 - Coordinates may be negative; the origin `(0, 0)` can be anywhere.
+  Levels are often centered at `(0, 0)` by convention.
 - The X axis increases to the right; Y increases downward.
-- Coordinates are stored as floats (usually 6 or fewer decimal places).
+- Coordinates are stored as floats (usually 1–4 decimal places suffice).
 
-**Legacy (LevelFormat 1 / GridSize):** If a file lacks `LevelFormat 2`, coordinates are in *grid units* and multiplied by the `GridSize` value (default 255) at load time. Modern levels should always use `LevelFormat 2` and real coordinates.
+**Legacy (LevelFormat 1 / GridSize):** If a file lacks `LevelFormat 2`, coordinates are in *grid units* and multiplied by the `GridSize` value (default 255) at load time.  A coordinate of `1.0` in legacy format equals `255` world units.  Modern levels should always use `LevelFormat 2` and explicit world-unit coordinates.
 
 ---
 
@@ -508,7 +513,9 @@ Robot -1 hunter.bot aggressive
 
 ## Complete Example
 
-The following is a minimal two-team CTF level:
+The following is a minimal two-team CTF level using proper world-unit coordinates
+(LevelFormat 2).  The play area is roughly 4 000 × 3 000 world units — about
+83 × 62 ship-widths.
 
 ```
 LevelFormat 2
@@ -522,29 +529,29 @@ Specials Engineer
 MinPlayers 2
 MaxPlayers 8
 
-# Outer walls
-BarrierMaker 50 -10 -8  10 -8  10 8  -10 8  -10 -8
+# Outer walls  (4080 wide × 3060 tall, centered at origin)
+BarrierMaker 50 -2040 -1530  2040 -1530  2040 1530  -2040 1530  -2040 -1530
 
 # Interior obstacles
-BarrierMaker 50 -4 -2  -4 2
-BarrierMaker 50  4 -2   4 2
-PolyWall -1 -1  1 -1  0 1
+BarrierMaker 50 -1020 -510  -1020 510
+BarrierMaker 50  1020 -510   1020 510
+PolyWall -255 -255  255 -255  0 255
 
 # Loadout zones
-LoadoutZone 0 -9 -1  -9 1  -8 1  -8 -1
-LoadoutZone 1  8 -1   9 -1  9 1  8 1
+LoadoutZone 0 -1990 -204  -1990 204  -1786 204  -1786 -204
+LoadoutZone 1  1786 -204   1990 -204  1990 204  1786 204
 
 # Flags
-FlagItem 0 -8 0
-FlagItem 1  8 0
+FlagItem 0 -1785 0
+FlagItem 1  1785 0
 
 # Spawns
-Spawn 0 -7 -2
-Spawn 0 -7  0
-Spawn 0 -7  2
-Spawn 1  7 -2
-Spawn 1  7  0
-Spawn 1  7  2
+Spawn 0 -1530 -510
+Spawn 0 -1530    0
+Spawn 0 -1530  510
+Spawn 1  1530 -510
+Spawn 1  1530    0
+Spawn 1  1530  510
 ```
 
 ---
@@ -569,7 +576,7 @@ Spawn 1  7  2
 - **Heal rate** on engineered items (Turrets, ForceFieldProjectors): `0` = server default, `1` = slow self-repair, higher = faster.
 - **SpeedZone speed** of `2000` is the default and a good starting value. Direction is from point 1 → point 2.  Use snapping if a specific destination is desired.
 - **SlipZones** should be used sparingly.  They sound more fun than they are.
-- Coordinates in `LevelFormat 2` are raw world units. A square play area of 20×20 units is typical for small maps; 40×40 for large ones.
+- Coordinates in `LevelFormat 2` are raw world units. The ship collision radius is 24 world units (diameter 48 WU). A corridor of 200 WU fits about 4 ships side-by-side, which is a comfortable default. A small play area is roughly 1 000 × 1 000 WU; large levels can be 4 000–7 000 WU per side.
 - **Shape** -- Maps can be any shape; square and rectangle are common, but the best maps often have a distinctive or thematic shape.
 - **Symmetry** -- Levels are often symmetrical (2, 3, or 4 way symmetry, depending on the number of teams), but a well designed and balanced asymmetrical level can be great.
 - **Theme** -- Most levels don't have any inherent theme, but occasionally a designer will find a way to create one, through level naming, level shape, text, team names and colors, and other elements.

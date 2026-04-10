@@ -1,0 +1,176 @@
+LevelFormat 2
+NexusGameType 8 1.0 30 5000
+LevelName Aztec
+LevelDescription "A Strange Maze requiring (same<->same) tele-flags"
+LevelCredits BoB
+Team Red 1 0 0
+Team Blue 0 0 1
+Specials
+MinPlayers
+MaxPlayers
+
+# Walls
+BarrierMaker 50 -765.0 -3315.0 -510.0 -3315.0
+BarrierMaker 50 510.0 -3315.0 765.0 -3315.0
+BarrierMaker 50 1275.0 -3315.0 1530.0 -3315.0
+BarrierMaker 50 -1020.0 -3060.0 -510.0 -3060.0
+BarrierMaker 50 0.0 -3060.0 1020.0 -3060.0
+BarrierMaker 50 1530.0 -3060.0 1785.0 -3060.0
+BarrierMaker 50 -510.0 -2805.0 -255.0 -2805.0
+BarrierMaker 50 765.0 -2805.0 1275.0 -2805.0
+BarrierMaker 50 -255.0 -2550.0 765.0 -2550.0
+BarrierMaker 50 1020.0 -2550.0 1530.0 -2550.0
+BarrierMaker 50 -1020.0 -2295.0 -765.0 -2295.0
+BarrierMaker 50 -510.0 -2295.0 -255.0 -2295.0
+BarrierMaker 50 0.0 -2295.0 765.0 -2295.0
+BarrierMaker 50 1020.0 -2295.0 1785.0 -2295.0
+BarrierMaker 50 -765.0 -2040.0 0.0 -2040.0
+BarrierMaker 50 -765.0 -1785.0 -510.0 -1785.0
+BarrierMaker 50 -255.0 -1785.0 0.0 -1785.0
+BarrierMaker 50 510.0 -1785.0 765.0 -1785.0
+BarrierMaker 50 1020.0 -1785.0 1785.0 -1785.0
+BarrierMaker 50 -510.0 -1530.0 -255.0 -1530.0
+BarrierMaker 50 0.0 -1530.0 255.0 -1530.0
+BarrierMaker 50 510.0 -1530.0 1020.0 -1530.0
+BarrierMaker 50 1275.0 -1530.0 1530.0 -1530.0
+BarrierMaker 50 -1275.0 -1275.0 -765.0 -1275.0
+BarrierMaker 50 -510.0 -1275.0 -255.0 -1275.0
+BarrierMaker 50 0.0 -1275.0 765.0 -1275.0
+BarrierMaker 50 1020.0 -1275.0 1275.0 -1275.0
+BarrierMaker 50 -1530.0 -1020.0 -1275.0 -1020.0
+BarrierMaker 50 -1020.0 -1020.0 -765.0 -1020.0
+BarrierMaker 50 1020.0 -1020.0 1275.0 -1020.0
+BarrierMaker 50 1530.0 -1020.0 1785.0 -1020.0
+BarrierMaker 50 -1020.0 -765.0 -765.0 -765.0
+BarrierMaker 50 -510.0 -765.0 255.0 -765.0
+BarrierMaker 50 510.0 -765.0 765.0 -765.0
+BarrierMaker 50 1020.0 -765.0 1530.0 -765.0
+BarrierMaker 50 -1275.0 -510.0 -1020.0 -510.0
+BarrierMaker 50 -765.0 -510.0 -255.0 -510.0
+BarrierMaker 50 0.0 -510.0 255.0 -510.0
+BarrierMaker 50 510.0 -510.0 765.0 -510.0
+BarrierMaker 50 -1530.0 -255.0 -765.0 -255.0
+BarrierMaker 50 -510.0 -255.0 -255.0 -255.0
+BarrierMaker 50 255.0 -255.0 510.0 -255.0
+BarrierMaker 50 765.0 -255.0 1020.0 -255.0
+BarrierMaker 50 255.0 0.0 1020.0 0.0
+BarrierMaker 50 -1530.0 255.0 -765.0 255.0
+BarrierMaker 50 -510.0 255.0 255.0 255.0
+BarrierMaker 50 510.0 255.0 765.0 255.0
+BarrierMaker 50 1020.0 255.0 1275.0 255.0
+BarrierMaker 50 -1275.0 510.0 -765.0 510.0
+BarrierMaker 50 -510.0 510.0 510.0 510.0
+BarrierMaker 50 -1020.0 765.0 -510.0 765.0
+BarrierMaker 50 510.0 765.0 765.0 765.0
+BarrierMaker 50 -1530.0 1020.0 -1275.0 1020.0
+BarrierMaker 50 -765.0 1020.0 255.0 1020.0
+BarrierMaker 50 765.0 1020.0 1275.0 1020.0
+BarrierMaker 50 -1275.0 1275.0 -1020.0 1275.0
+BarrierMaker 50 -510.0 1275.0 -255.0 1275.0
+BarrierMaker 50 765.0 1275.0 1020.0 1275.0
+BarrierMaker 50 510.0 1530.0 1020.0 1530.0
+BarrierMaker 50 -1020.0 1785.0 -765.0 1785.0
+BarrierMaker 50 -510.0 1785.0 -255.0 1785.0
+BarrierMaker 50 -765.0 2040.0 -510.0 2040.0
+BarrierMaker 50 -765.0 2295.0 -510.0 2295.0
+BarrierMaker 50 -1020.0 2550.0 -255.0 2550.0
+BarrierMaker 50 255.0 3060.0 1020.0 3060.0
+BarrierMaker 50 -1530.0 -1020.0 -1530.0 -255.0
+BarrierMaker 50 -1530.0 255.0 -1530.0 1020.0
+BarrierMaker 50 -1275.0 -1275.0 -1275.0 -1020.0
+BarrierMaker 50 -1275.0 -765.0 -1275.0 -510.0
+BarrierMaker 50 -1275.0 510.0 -1275.0 765.0
+BarrierMaker 50 -1275.0 1020.0 -1275.0 1275.0
+BarrierMaker 50 -1020.0 -3060.0 -1020.0 -2295.0
+BarrierMaker 50 -1020.0 -1020.0 -1020.0 -765.0
+BarrierMaker 50 -1020.0 -510.0 -1020.0 0.0
+BarrierMaker 50 -1020.0 510.0 -1020.0 765.0
+BarrierMaker 50 -1020.0 1785.0 -1020.0 2550.0
+BarrierMaker 50 -765.0 -3315.0 -765.0 -3060.0
+BarrierMaker 50 -765.0 -2805.0 -765.0 -2040.0
+BarrierMaker 50 -765.0 -1530.0 -765.0 -1275.0
+BarrierMaker 50 -765.0 -1020.0 -765.0 0.0
+BarrierMaker 50 -765.0 255.0 -765.0 510.0
+BarrierMaker 50 -765.0 1020.0 -765.0 1785.0
+BarrierMaker 50 -765.0 2040.0 -765.0 2295.0
+BarrierMaker 50 -510.0 -3315.0 -510.0 -3060.0
+BarrierMaker 50 -510.0 -2805.0 -510.0 -2295.0
+BarrierMaker 50 -510.0 -1785.0 -510.0 -1530.0
+BarrierMaker 50 -510.0 -1275.0 -510.0 -765.0
+BarrierMaker 50 -510.0 -255.0 -510.0 255.0
+BarrierMaker 50 -510.0 510.0 -510.0 765.0
+BarrierMaker 50 -510.0 1275.0 -510.0 1785.0
+BarrierMaker 50 -510.0 2040.0 -510.0 2295.0
+BarrierMaker 50 -255.0 -3315.0 -255.0 -2805.0
+BarrierMaker 50 -255.0 -2550.0 -255.0 -2040.0
+BarrierMaker 50 -255.0 -1530.0 -255.0 -1020.0
+BarrierMaker 50 -255.0 -510.0 -255.0 0.0
+BarrierMaker 50 -255.0 510.0 -255.0 765.0
+BarrierMaker 50 -255.0 1020.0 -255.0 2040.0
+BarrierMaker 50 0.0 -3060.0 0.0 -2805.0
+BarrierMaker 50 0.0 -2040.0 0.0 -1530.0
+BarrierMaker 50 0.0 -1275.0 0.0 -765.0
+BarrierMaker 50 0.0 -510.0 0.0 0.0
+BarrierMaker 50 0.0 765.0 0.0 1020.0
+BarrierMaker 50 255.0 -3060.0 255.0 -2805.0
+BarrierMaker 50 255.0 -2295.0 255.0 -1785.0
+BarrierMaker 50 255.0 -1530.0 255.0 -1020.0
+BarrierMaker 50 255.0 -765.0 255.0 -255.0
+BarrierMaker 50 255.0 510.0 255.0 765.0
+BarrierMaker 50 255.0 3060.0 255.0 3315.0
+BarrierMaker 50 510.0 -3060.0 510.0 -2805.0
+BarrierMaker 50 510.0 -2295.0 510.0 -1785.0
+BarrierMaker 50 510.0 -1275.0 510.0 -765.0
+BarrierMaker 50 510.0 -255.0 510.0 0.0
+BarrierMaker 50 510.0 255.0 510.0 510.0
+BarrierMaker 50 510.0 765.0 510.0 1530.0
+BarrierMaker 50 765.0 -2805.0 765.0 -2550.0
+BarrierMaker 50 765.0 -2295.0 765.0 -1785.0
+BarrierMaker 50 765.0 -1275.0 765.0 -765.0
+BarrierMaker 50 765.0 -510.0 765.0 -255.0
+BarrierMaker 50 765.0 255.0 765.0 765.0
+BarrierMaker 50 765.0 1020.0 765.0 1275.0
+BarrierMaker 50 1020.0 -3315.0 1020.0 -3060.0
+BarrierMaker 50 1020.0 -2550.0 1020.0 -1275.0
+BarrierMaker 50 1020.0 -1020.0 1020.0 -765.0
+BarrierMaker 50 1020.0 -510.0 1020.0 255.0
+BarrierMaker 50 1020.0 510.0 1020.0 765.0
+BarrierMaker 50 1020.0 2550.0 1020.0 3315.0
+BarrierMaker 50 1275.0 -3060.0 1275.0 -2805.0
+BarrierMaker 50 1275.0 -2295.0 1275.0 -1785.0
+BarrierMaker 50 1275.0 -1275.0 1275.0 -1020.0
+BarrierMaker 50 1275.0 255.0 1275.0 1020.0
+BarrierMaker 50 1530.0 -3315.0 1530.0 -3060.0
+BarrierMaker 50 1530.0 -2805.0 1530.0 -2550.0
+BarrierMaker 50 1530.0 -1530.0 1530.0 -1275.0
+BarrierMaker 50 1530.0 -1020.0 1530.0 -765.0
+BarrierMaker 50 1785.0 -3060.0 1785.0 -2295.0
+BarrierMaker 50 1785.0 -1785.0 1785.0 -1020.0
+
+# Objects
+GoalZone 1 -735.0 2070.0  -540.0 2070.0  -540.0 2265.0  -735.0 2265.0
+Teleporter -892.5 -892.5 382.5 -2932.5
+Teleporter 382.5 -2932.5 -892.5 -892.5
+Teleporter -127.5 -2422.5 1147.5 -2422.5
+Teleporter 1147.5 -2422.5 -127.5 -2422.5
+Teleporter -892.5 637.5 382.5 637.5
+Teleporter 382.5 637.5 -892.5 637.5
+Teleporter -127.5 1147.5 1147.5 -892.5
+Teleporter 1147.5 -892.5 -127.5 1147.5
+
+# Spawns
+Spawn 0 -892.5 -2932.5
+Spawn 0 -892.5 -2422.5
+Spawn 0 -382.5 -2932.5
+Spawn 1 637.5 892.5
+Spawn 1 637.5 1402.5
+Spawn 1 1147.5 382.5
+Spawn 1 1147.5 892.5
+
+# Loadout zones
+LoadoutZone 0 -994.5 -3034.5  -790.5 -3034.5  -790.5 -2830.5  -994.5 -2830.5
+LoadoutZone 1 535.5 790.5  739.5 790.5  739.5 994.5  535.5 994.5
+
+# Nexus zone (center of map)
+NexusZone -255 -255  255 -255  255 255  -255 255
+

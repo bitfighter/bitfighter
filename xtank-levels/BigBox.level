@@ -1,0 +1,129 @@
+LevelFormat 2
+GameType 10 0
+LevelName BigBox
+LevelDescription "Corridors from hell"
+LevelCredits Mr.BigNose
+Team Players 0.7 0.7 0.7
+Specials
+MinPlayers
+MaxPlayers
+
+# UNSUPPORTED: AMMO boxes: no ammo concept in BF; converted to EnergyItem
+
+# Walls
+BarrierMaker 50 -3060.0 -3315.0 3315.0 -3315.0
+BarrierMaker 50 -2550.0 -2805.0 0.0 -2805.0
+BarrierMaker 50 255.0 -2805.0 2805.0 -2805.0
+BarrierMaker 50 -2550.0 -2295.0 -2295.0 -2295.0
+BarrierMaker 50 -255.0 -2295.0 0.0 -2295.0
+BarrierMaker 50 255.0 -2295.0 510.0 -2295.0
+BarrierMaker 50 2550.0 -2295.0 2805.0 -2295.0
+BarrierMaker 50 -2550.0 -1785.0 -2295.0 -1785.0
+BarrierMaker 50 -255.0 -1785.0 0.0 -1785.0
+BarrierMaker 50 255.0 -1785.0 510.0 -1785.0
+BarrierMaker 50 2550.0 -1785.0 2805.0 -1785.0
+BarrierMaker 50 -2550.0 -1275.0 -2295.0 -1275.0
+BarrierMaker 50 -255.0 -1275.0 0.0 -1275.0
+BarrierMaker 50 255.0 -1275.0 510.0 -1275.0
+BarrierMaker 50 2550.0 -1275.0 2805.0 -1275.0
+BarrierMaker 50 -2550.0 -765.0 -2295.0 -765.0
+BarrierMaker 50 -510.0 -765.0 0.0 -765.0
+BarrierMaker 50 255.0 -765.0 765.0 -765.0
+BarrierMaker 50 2550.0 -765.0 2805.0 -765.0
+BarrierMaker 50 -2550.0 -255.0 -510.0 -255.0
+BarrierMaker 50 -255.0 -255.0 0.0 -255.0
+BarrierMaker 50 255.0 -255.0 510.0 -255.0
+BarrierMaker 50 765.0 -255.0 2805.0 -255.0
+BarrierMaker 50 -2550.0 0.0 -510.0 0.0
+BarrierMaker 50 -255.0 0.0 0.0 0.0
+BarrierMaker 50 255.0 0.0 510.0 0.0
+BarrierMaker 50 765.0 0.0 2805.0 0.0
+BarrierMaker 50 -2550.0 510.0 -2295.0 510.0
+BarrierMaker 50 -510.0 510.0 0.0 510.0
+BarrierMaker 50 255.0 510.0 765.0 510.0
+BarrierMaker 50 2550.0 510.0 2805.0 510.0
+BarrierMaker 50 -2550.0 1020.0 -2295.0 1020.0
+BarrierMaker 50 -255.0 1020.0 0.0 1020.0
+BarrierMaker 50 255.0 1020.0 510.0 1020.0
+BarrierMaker 50 2550.0 1020.0 2805.0 1020.0
+BarrierMaker 50 -2550.0 1530.0 -2295.0 1530.0
+BarrierMaker 50 -255.0 1530.0 0.0 1530.0
+BarrierMaker 50 255.0 1530.0 510.0 1530.0
+BarrierMaker 50 2550.0 1530.0 2805.0 1530.0
+BarrierMaker 50 -2550.0 2040.0 -2295.0 2040.0
+BarrierMaker 50 -255.0 2040.0 0.0 2040.0
+BarrierMaker 50 255.0 2040.0 510.0 2040.0
+BarrierMaker 50 2550.0 2040.0 2805.0 2040.0
+BarrierMaker 50 -2550.0 2550.0 0.0 2550.0
+BarrierMaker 50 255.0 2550.0 2805.0 2550.0
+BarrierMaker 50 -3060.0 3060.0 3315.0 3060.0
+BarrierMaker 50 -3060.0 -3315.0 -3060.0 3060.0
+BarrierMaker 50 -2550.0 -2805.0 -2550.0 -255.0
+BarrierMaker 50 -2550.0 0.0 -2550.0 2550.0
+BarrierMaker 50 -2040.0 -2805.0 -2040.0 -2550.0
+BarrierMaker 50 -2040.0 -510.0 -2040.0 -255.0
+BarrierMaker 50 -2040.0 0.0 -2040.0 255.0
+BarrierMaker 50 -2040.0 2295.0 -2040.0 2550.0
+BarrierMaker 50 -1530.0 -2805.0 -1530.0 -2550.0
+BarrierMaker 50 -1530.0 -510.0 -1530.0 -255.0
+BarrierMaker 50 -1530.0 0.0 -1530.0 255.0
+BarrierMaker 50 -1530.0 2295.0 -1530.0 2550.0
+BarrierMaker 50 -1020.0 -2805.0 -1020.0 -2550.0
+BarrierMaker 50 -1020.0 -510.0 -1020.0 -255.0
+BarrierMaker 50 -1020.0 0.0 -1020.0 255.0
+BarrierMaker 50 -1020.0 2295.0 -1020.0 2550.0
+BarrierMaker 50 -510.0 -2805.0 -510.0 -2550.0
+BarrierMaker 50 -510.0 -765.0 -510.0 -255.0
+BarrierMaker 50 -510.0 0.0 -510.0 510.0
+BarrierMaker 50 -510.0 2295.0 -510.0 2550.0
+BarrierMaker 50 0.0 -2805.0 0.0 -765.0
+BarrierMaker 50 0.0 -510.0 0.0 -255.0
+BarrierMaker 50 0.0 0.0 0.0 255.0
+BarrierMaker 50 0.0 510.0 0.0 2550.0
+BarrierMaker 50 255.0 -2805.0 255.0 -765.0
+BarrierMaker 50 255.0 -510.0 255.0 -255.0
+BarrierMaker 50 255.0 0.0 255.0 255.0
+BarrierMaker 50 255.0 510.0 255.0 2550.0
+BarrierMaker 50 765.0 -2805.0 765.0 -2550.0
+BarrierMaker 50 765.0 -765.0 765.0 -255.0
+BarrierMaker 50 765.0 0.0 765.0 510.0
+BarrierMaker 50 765.0 2295.0 765.0 2550.0
+BarrierMaker 50 1275.0 -2805.0 1275.0 -2550.0
+BarrierMaker 50 1275.0 -510.0 1275.0 -255.0
+BarrierMaker 50 1275.0 0.0 1275.0 255.0
+BarrierMaker 50 1275.0 2295.0 1275.0 2550.0
+BarrierMaker 50 1785.0 -2805.0 1785.0 -2550.0
+BarrierMaker 50 1785.0 -510.0 1785.0 -255.0
+BarrierMaker 50 1785.0 0.0 1785.0 255.0
+BarrierMaker 50 1785.0 2295.0 1785.0 2550.0
+BarrierMaker 50 2295.0 -2805.0 2295.0 -2550.0
+BarrierMaker 50 2295.0 -510.0 2295.0 -255.0
+BarrierMaker 50 2295.0 0.0 2295.0 255.0
+BarrierMaker 50 2295.0 2295.0 2295.0 2550.0
+BarrierMaker 50 2805.0 -2805.0 2805.0 -255.0
+BarrierMaker 50 2805.0 0.0 2805.0 2550.0
+
+# Objects
+EnergyItem -2932.5 -3187.5
+EnergyItem -2932.5 2932.5
+RepairItem -2677.5 -382.5 30
+RepairItem -2677.5 127.5 30
+EnergyItem -127.5 -2932.5
+EnergyItem -127.5 -382.5
+EnergyItem -127.5 127.5
+EnergyItem -127.5 2677.5
+EnergyItem 382.5 -2932.5
+RepairItem 382.5 -382.5 30
+EnergyItem 382.5 127.5
+EnergyItem 382.5 2677.5
+RepairItem 2932.5 -382.5 30
+RepairItem 2932.5 127.5 30
+EnergyItem 3187.5 -3187.5
+EnergyItem 3187.5 2932.5
+
+# Spawns
+Spawn 0 -1402.5 -1657.5
+Spawn 0 -1402.5 -1402.5
+Spawn 0 1657.5 1657.5
+Spawn 0 1657.5 1912.5
+

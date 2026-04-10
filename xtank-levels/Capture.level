@@ -1,0 +1,94 @@
+LevelFormat 2
+CTFGameType 10 3
+LevelName Capture
+LevelDescription "A good, generic capture maze."
+LevelCredits "Mr. BigNose"
+Team Red 1 0 0
+Team Blue 0 0 1
+Specials
+MinPlayers
+MaxPlayers
+
+# UNSUPPORTED: AMMO boxes: no ammo concept in BF; converted to EnergyItem
+
+# Walls
+BarrierMaker 50 -2550.0 -1275.0 -1275.0 -1275.0
+BarrierMaker 50 1020.0 -1275.0 2295.0 -1275.0
+BarrierMaker 50 -3315.0 -1020.0 -2040.0 -1020.0
+BarrierMaker 50 -1785.0 -1020.0 1530.0 -1020.0
+BarrierMaker 50 1785.0 -1020.0 3060.0 -1020.0
+BarrierMaker 50 -3315.0 -255.0 -2805.0 -255.0
+BarrierMaker 50 2550.0 -255.0 3060.0 -255.0
+BarrierMaker 50 -3315.0 510.0 -2805.0 510.0
+BarrierMaker 50 2550.0 510.0 3060.0 510.0
+BarrierMaker 50 -3315.0 1275.0 3060.0 1275.0
+BarrierMaker 50 -3315.0 -1020.0 -3315.0 1275.0
+BarrierMaker 50 -2550.0 -1275.0 -2550.0 -1020.0
+BarrierMaker 50 -1275.0 -1275.0 -1275.0 -1020.0
+BarrierMaker 50 -510.0 -765.0 -510.0 -510.0
+BarrierMaker 50 -510.0 -255.0 -510.0 0.0
+BarrierMaker 50 -510.0 255.0 -510.0 510.0
+BarrierMaker 50 -510.0 765.0 -510.0 1020.0
+BarrierMaker 50 -255.0 -1020.0 -255.0 -765.0
+BarrierMaker 50 -255.0 -510.0 -255.0 -255.0
+BarrierMaker 50 -255.0 0.0 -255.0 255.0
+BarrierMaker 50 -255.0 510.0 -255.0 765.0
+BarrierMaker 50 -255.0 1020.0 -255.0 1275.0
+BarrierMaker 50 0.0 -765.0 0.0 -510.0
+BarrierMaker 50 0.0 -255.0 0.0 0.0
+BarrierMaker 50 0.0 255.0 0.0 510.0
+BarrierMaker 50 0.0 765.0 0.0 1020.0
+BarrierMaker 50 1020.0 -1275.0 1020.0 -1020.0
+BarrierMaker 50 2295.0 -1275.0 2295.0 -1020.0
+BarrierMaker 50 3060.0 -1020.0 3060.0 1275.0
+
+# Objects
+SpeedZone -3187.5 -38.2 -3187.5 -216.8 2000
+FlagItem 0 -3187.5 127.5
+SpeedZone -3187.5 471.8 -3187.5 293.2 2000
+SpeedZone -2932.5 -38.2 -2932.5 -216.8 2000
+SpeedZone -2932.5 216.8 -2932.5 38.2 2000
+SpeedZone -2932.5 471.8 -2932.5 293.2 2000
+RepairItem -2422.5 -1147.5 30
+SpeedZone -2167.5 -1058.2 -2167.5 -1236.8 2000
+SpeedZone -1912.5 -1058.2 -1912.5 -1236.8 2000
+SpeedZone -1657.5 -1058.2 -1657.5 -1236.8 2000
+EnergyItem -1402.5 -1147.5
+EnergyItem 1147.5 -1147.5
+SpeedZone 1402.5 -1058.2 1402.5 -1236.8 2000
+SpeedZone 1657.5 -1058.2 1657.5 -1236.8 2000
+SpeedZone 1912.5 -1058.2 1912.5 -1236.8 2000
+RepairItem 2167.5 -1147.5 30
+SpeedZone 2677.5 -38.2 2677.5 -216.8 2000
+SpeedZone 2677.5 216.8 2677.5 38.2 2000
+SpeedZone 2677.5 471.8 2677.5 293.2 2000
+SpeedZone 2932.5 -38.2 2932.5 -216.8 2000
+FlagItem 1 2932.5 127.5
+SpeedZone 2932.5 471.8 2932.5 293.2 2000
+
+# Spawns
+Spawn 0 -382.5 -892.5
+Spawn 0 -382.5 -637.5
+Spawn 0 -382.5 -382.5
+Spawn 0 -382.5 -127.5
+Spawn 0 -382.5 127.5
+Spawn 0 -382.5 382.5
+Spawn 0 -382.5 637.5
+Spawn 0 -382.5 892.5
+Spawn 0 -382.5 1147.5
+Spawn 0 -127.5 -892.5
+Spawn 0 -127.5 -637.5
+Spawn 0 -127.5 -382.5
+Spawn 0 -127.5 -127.5
+Spawn 0 -127.5 127.5
+Spawn 0 -127.5 382.5
+Spawn 0 -127.5 637.5
+Spawn 0 -127.5 892.5
+Spawn 0 -127.5 1147.5
+Spawn 1 1657.5 892.5
+Spawn 1 1657.5 1147.5
+
+# Loadout zones
+LoadoutZone 0 -484.5 -994.5  -280.5 -994.5  -280.5 -790.5  -484.5 -790.5
+LoadoutZone 1 1555.5 790.5  1759.5 790.5  1759.5 994.5  1555.5 994.5
+
