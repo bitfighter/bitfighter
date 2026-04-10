@@ -1059,8 +1059,10 @@ void Ship::processModules()
       if(ModuleInfo::getModuleInfo(mLoadout.getModule(i))->getPrimaryUseType() == ModulePrimaryUsePassive)
          mLoadout.setModuleIndexPrimary(i, true);         // needs to be true to allow stats counting
 
-      // Set loaded module states to 'on' if detected as so, unless modules are disabled or we need to cooldown
-      if(!mCooldownNeeded && (!getClientInfo() || (getClientInfo() && !getClientInfo()->isShipSystemsDisabled())))
+      // Set loaded module states to 'on' if detected as so, unless modules are disabled,
+      // we need to cooldown, or we are in xtank (tank) mode where modules are suppressed.
+      if(!mCooldownNeeded && mXtankBodyIndex < 0 &&
+         (!getClientInfo() || (getClientInfo() && !getClientInfo()->isShipSystemsDisabled())))
       {
          if(mCurrentMove.modulePrimary[i])
             mLoadout.setModuleIndexPrimary(i, true);
@@ -2338,26 +2340,24 @@ const ShipShapeInfo *Ship::getActiveShipShapeInfo() const
 #endif
 
 
-// Cycle to the next xtank body.  After the last xtank body the player returns
-// to the regular Bitfighter ship.  When switching into a tank body the heading
-// is initialised to the current aim angle so the vehicle starts pointing in the
-// right direction.  The body change is propagated to the server via
-// Move::bodyIndex (set by UIGame.cpp after calling this function).
+// Toggle between the Lightcycle xtank body and the regular Bitfighter ship.
+// Pressing once enters the Lightcycle; pressing again returns to the normal ship.
+// The body change is propagated to the server via Move::bodyIndex (set by
+// UIGame.cpp after calling this function).
 void Ship::cycleXtankBody()
 {
-   mXtankBodyIndex++;
-   if(mXtankBodyIndex >= XtankBody::Count)
-      mXtankBodyIndex = XtankBody::None;
-
-   if(mXtankBodyIndex >= 0)
+   if(mXtankBodyIndex == XtankBody::None)
    {
-      // Initialise tank physics state for the newly selected body
+      // Switch to Lightcycle body
+      mXtankBodyIndex = XtankBody::Lightcycle;
       mTankHeadingAngle = getAngle(ActualState);
       mTankSpeed        = 0;
       mXtankDesign.initForBody(mXtankBodyIndex);  // Load default weapons
    }
    else
    {
+      // Return to regular ship
+      mXtankBodyIndex = XtankBody::None;
       mXtankDesign = XtankDesign();  // Reset when returning to BF ship
    }
 }
