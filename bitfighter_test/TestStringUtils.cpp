@@ -304,6 +304,21 @@ TEST(StringUtilsTest, parseString)
 }
 
 
+TEST(StringUtilsTest, parseStringTruncation)
+{
+   // Create a word longer than 126 characters (original buffer size was 126)
+   string longWord(130, 'a');
+   string input = longWord + ";short";
+
+   Vector<string> words;
+   parseString(input.c_str(), words, ';');
+
+   ASSERT_EQ(2, words.size());
+   EXPECT_EQ(longWord, words[0]);
+   EXPECT_EQ("short", words[1]);
+}
+
+
 TEST(StringUtilsTest, parseStringAndStripLeadingSlash)
 {
    Vector<string> result = parseStringAndStripLeadingSlash("/cmd arg1 arg2");
