@@ -48,7 +48,7 @@ void HttpRequest::setUrl(const string &url)
    mUrl = url;
 
    // hostname is anything before the first '/'
-   TNL::U32 index = mUrl.find('/');
+   size_t index = mUrl.find('/');
    string host = mUrl.substr(0, index);
    string addressString = "ip:" + host + ":80";
 
@@ -141,7 +141,7 @@ void HttpRequest::parseResponse(string response)
 
    mResponseHead = response.substr(0, seperatorIndex);
 
-   U32 bodyIndex = seperatorIndex + 4;
+   size_t bodyIndex = seperatorIndex + 4;
    mResponseBody = response.substr(bodyIndex, response.length());
 
    std::size_t responseCodeStart = mResponseHead.find(" ") + 1;
@@ -209,7 +209,7 @@ void HttpRequest::setMethod(const string& method)
 string HttpRequest::buildRequest()
 {
    // location is anything that comes after the first '/'
-   TNL::U32 index = mUrl.find('/');
+   size_t index = mUrl.find('/');
    string location = mUrl.substr(index, mUrl.length() - index);
 
    // request line

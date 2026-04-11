@@ -349,9 +349,9 @@ void BitStream::readNormalVector(Point3F *vec, U8 bitCount)
    F32 phi   = readSignedFloat(bitCount+1) * FloatPi;
    F32 theta = readSignedFloat(bitCount) * FloatHalfPi;
 
-   vec->x = sin(phi)*cos(theta);
-   vec->y = cos(phi)*cos(theta);
-   vec->z = sin(theta);
+   vec->x = F32(sin(phi) * cos(theta));
+   vec->y = F32(cos(phi) * cos(theta));
+   vec->z = F32(sin(theta));
 }
 
 Point3F BitStream::dumbDownNormal(const Point3F& vec, U8 bitCount)
@@ -380,7 +380,7 @@ void BitStream::writeNormalVector(const Point3F& vec, U8 angleBitCount, U8 zBitC
    {
       // write out the z value and the angle that x and y make around the z axis
       writeSignedFloat( vec.z, zBitCount );
-      writeSignedFloat( atan2(vec.x,vec.y) * FloatInverse2Pi, angleBitCount );
+      writeSignedFloat((F32) atan2(vec.x, vec.y) * FloatInverse2Pi, angleBitCount);
    }
 }
 
@@ -396,11 +396,11 @@ void BitStream::readNormalVector(Point3F * vec, U8 angleBitCount, U8 zBitCount)
    {
       vec->z = readSignedFloat(zBitCount);
 
-      F32 angle = Float2Pi * readSignedFloat(angleBitCount);
+      auto angle = Float2Pi * readSignedFloat(angleBitCount);
+      auto mult = sqrt(1.0f - vec->z * vec->z);
 
-      F32 mult = (F32) sqrt(1.0f - vec->z * vec->z);
-      vec->x = mult * cos(angle);
-      vec->y = mult * sin(angle);
+      vec->x = F32(mult * cos(angle));
+      vec->y = F32(mult * sin(angle));
    }
 }
 
