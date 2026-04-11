@@ -1113,12 +1113,12 @@ void renderXtankTurrets(const Point &pos, F32 bodyAngle, F32 aimAngle, F32 alpha
 // in renderShip / renderXtankTurrets).
 void renderXtankVehicleOverlay(const Point &pos, F32 bodyAngle, F32 alpha,
                                 S32 bodyIdx, S32 heatSinkCount,
-                                XtankEngine::Type engineType,
+                                XtankEngine engineType,
                                 F32 warpInScale)
 {
    Renderer& r = Renderer::get();
 
-   if(alpha <= 0 || bodyIdx < 0 || bodyIdx >= XtankBody::Count)
+   if(alpha <= 0 || bodyIdx < 0 || bodyIdx >= XtankBodyCount)
       return;
 
    const F32 noseY  = xtankBodyNoseY[bodyIdx];
@@ -1153,25 +1153,30 @@ void renderXtankVehicleOverlay(const Point &pos, F32 bodyAngle, F32 alpha,
 
    // -------------------------------------------------------------------------
    // Engine type indicator: a diamond drawn just inward of the rear edge.
-   // Light  = small dim blue
-   // Standard = medium orange-red
-   // Heavy  = large bright yellow-orange
+   // Small engines = small dim blue
+   // Medium engines = medium orange-red
+   // Large / advanced engines = large bright yellow-orange
    // -------------------------------------------------------------------------
    F32 diamSize;
    Color engColor;
    switch(engineType)
    {
-      case XtankEngine::Light:
+      case XtankEngine::Small_Electric:
+      case XtankEngine::Small_Combustion:
+      case XtankEngine::Small_Turbine:
          diamSize = 3.5f;
          engColor = Color(0.3f, 0.4f, 1.0f);  // dim blue
          break;
-      case XtankEngine::Heavy:
-         diamSize = 7.5f;
-         engColor = Color(1.0f, 0.65f, 0.0f); // bright orange
-         break;
-      default: // Standard
+      case XtankEngine::Medium_Electric:
+      case XtankEngine::Medium_Combustion:
+      case XtankEngine::Medium_Turbine:
+      case XtankEngine::Fuel_Cell:
          diamSize = 5.5f;
          engColor = Color(0.95f, 0.35f, 0.05f); // orange-red
+         break;
+      default:
+         diamSize = 7.5f;
+         engColor = Color(1.0f, 1.0f, 0.0f);    // bright yellow-orange
          break;
    }
 

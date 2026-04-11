@@ -110,10 +110,10 @@ void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, co
 // world-space muzzle position (shooterRadius is 0 since we already have the
 // exact muzzle position).  The xtank-specific ProjectileStyle is applied after
 // construction so the projectile is rendered with an xtank look.
-void GameWeapon::createXtankProjectile(XtankWeapon::Type weapon, const Point &dir,
+void GameWeapon::createXtankProjectile(XtankWeapon weapon, const Point &dir,
       const Point &barrelTip, const Point &shooterVel, S32 time, BfObject *shooter)
 {
-   if((S32)weapon < 0 || (S32)weapon >= XtankWeapon::Count)
+   if((S32)weapon < 0 || (S32)weapon >= XtankWeaponCount)
       return;
 
    const XtankWeaponInfo &wi = xtankWeaponInfos[(S32)weapon];

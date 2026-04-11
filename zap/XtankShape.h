@@ -40,45 +40,58 @@ extern const char *xtankBodyNames[];
 
 // Enum of all 14 xtank vehicle bodies (in the order they appear in xtank's
 // objects.c).  XtankBodyNone represents "show the normal BF ship".
-namespace XtankBody
+enum XtankBody
 {
-   enum Type
-   {
-      Lightcycle = 0,
-      Trike,
-      Hexo,
-      Spider,
-      Psycho,
-      Tornado,
-      Marauder,
-      Tiger,
-      Rhino,
-      Medusa,
-      Delta,
-      Disk,
-      Malice,
-      Panzy,
-      Count,        // total number of xtank bodies
-      None = -1     // sentinel: use the regular BF ship shape
-   };
-}
+   Lightcycle = 0,
+   Trike,
+   Hexo,
+   Spider,
+   Psycho,
+   Tornado,
+   Marauder,
+   Tiger,
+   Rhino,
+   Medusa,
+   Delta,
+   Disk,
+   Malice,
+   Panzy,
+   XtankBodyCount,    // total number of xtank bodies
+   XtankBodyNone = -1 // sentinel: use the regular BF ship shape
+};
+
+
+struct XtankBodyInfo
+{
+   const char *name;      // Display name
+   S32 size;
+   S32 weight;
+   S32 weightLimit;
+   S32 space;
+   F32 drag;
+   S32 handling;
+   S32 turrets;
+   S32 cost;
+};
+
+
 
 // Array of ShipShapeInfo descriptors for every xtank body.  Each entry is
 // compatible with the existing renderShip() rendering path.
-extern ShipShapeInfo xtankBodyInfos[XtankBody::Count];
+extern ShipShapeInfo xtankBodyInfos[XtankBodyCount];
 
 // Pre-computed bounding-circle radius for each xtank body (maximum distance
 // from origin to any hull vertex).  Used for collision detection so the
 // hitbox reflects the actual hull size rather than the BF default.
-extern F32 xtankBodyCollisionRadius[XtankBody::Count];
+extern F32 xtankBodyCollisionRadius[XtankBodyCount];
 
 // Y coordinate (in body space, +Y = forward/nose) of the foremost hull vertex.
 // Used by the vehicle overlay renderer to position the nose chevron and to
 // distribute heat-sink / engine indicators along the hull.
-extern F32 xtankBodyNoseY[XtankBody::Count];
+extern F32 xtankBodyNoseY[XtankBodyCount];
 
 // Y coordinate of the rearmost hull vertex (always negative or small positive).
-extern F32 xtankBodyRearY[XtankBody::Count];
+extern F32 xtankBodyRearY[XtankBodyCount];
 
 
 // ---------------------------------------------------------------------------
@@ -102,8 +115,8 @@ struct XtankBodyTurrets
    XtankTurret turrets[4];
 };
 
-// One entry per XtankBody::Type value.
-extern XtankBodyTurrets xtankTurretInfos[XtankBody::Count];
+// One entry per XtankBody value.
+extern XtankBodyTurrets xtankTurretInfos[XtankBodyCount];
 
 
 // ---------------------------------------------------------------------------
@@ -126,8 +139,8 @@ struct TankPhysicsInfo
    F32 armor;             // Incoming-damage multiplier (0 = immune, 1 = normal)
 };
 
-// One entry per XtankBody::Type value.
-extern TankPhysicsInfo xtankPhysicsInfos[XtankBody::Count];
+// One entry per XtankBody value.
+extern TankPhysicsInfo xtankPhysicsInfos[XtankBodyCount];
 
 
 // ---------------------------------------------------------------------------
@@ -135,36 +148,89 @@ extern TankPhysicsInfo xtankPhysicsInfos[XtankBody::Count];
 //
 // Each xtank weapon maps to an existing Bitfighter WeaponType for projectile
 // behavior and damage (so we reuse the well-tuned BF projectile system).
-// Fire delay and energy cost are xtank-specific and stored here.
+// Fire delay and energy cost are xtank-specific and storedype here.
 // ---------------------------------------------------------------------------
 
 // Enum of all xtank weapons, in the order they appear in the original xtank
-// game.  XtankWeapon::None represents "this turret slot carries no weapon".
-namespace XtankWeapon
+// game.  XtankWeaponNone represents "this turret slot carries no weapon".
+// These are AI inventions
+enum XtankWeapon
 {
-   enum Type
-   {
-      MachineGun = 0,
-      Laser,
-      Missile,
-      Grenade,
-      Rocket,
-      Acid,
-      Tracer,
-      Bomb,
-      Fire,
-      Count,         // total number of xtank weapons
-      None = -1      // sentinel: slot carries no weapon
-   };
-}
+   MachineGun = 0,
+   Laser,
+   Missile,
+   Grenade,
+   Rocket,
+   Acid,
+   Tracer,
+   Bomb,
+   Fire,
+   XtankWeaponCount,    // total number of xtank weapons
+   XtankWeaponNone = -1 // sentinel: slot carries no weapon
+};
 
-// Names for on-screen display, one per XtankWeapon::Type.
+
+// These are the actual xtank weapons
+enum XtankWeapon2
+{
+   LIGHT_MACHINE_GUN,
+   MACHINE_GUN,
+   HEAVY_MACHINE_GUN,
+   LIGHT_AUTOCANNON,
+   AUTOCANNON,
+   HEAVY_AUTOCANNON,
+   LIGHT_RKT_LAUNCHER,
+   RKT_LAUNCHER,
+   HEAVY_RKT_LAUNCHER,
+   ACID_SPRAYER,
+   FLAME_THROWER,
+   HEAT_SEEKER,
+   POCKET_ROCKET,
+   UNGUIDED_MISSLE,
+   TELEGUIDED,
+   TOW_MISSILE,
+   LAND_TORPEDO,
+   BLAST_CANNON,
+   PULSE_LASER,
+   MINE_LAYER,
+   OIL_SLICK,
+   HEAVY_MORTAR,
+   TACTICAL_NUKE,
+   ANTI_RADIATION,
+   DISC_SHOOTER,
+   XtankWeaponCount2,    // total number of xtank weapons
+   XtankWeaponNone2 = -1 // sentinel: slot carries no weapon
+};
+
+struct HeatSinkStat
+{
+   S32 weight;
+   S32 space;
+   S32 cost;
+};
+
+struct SuspensionStat
+{
+   const char *name;
+   F32 friction;
+   S32 cost;
+};
+
+struct BumperStat
+{
+   const char *name;
+   F32 elasticity;   // (0 = no bounce, 1 = perfect bounce)
+   S32 cost;
+};
+
+
+// Names for on-screen display, one per XtankWeapon.
 extern const char *xtankWeaponNames[];
 
 // Per-weapon parameters.
 struct XtankWeaponInfo
 {
-   const char    *name;          // Display name
+   const char     *name;         // Display name
    U32            fireDelay;     // Milliseconds between shots per turret
    U32            energyDrain;   // Energy units consumed per shot
    WeaponType     bfWeapon;      // Mapped BF weapon used to create the projectile
@@ -173,8 +239,8 @@ struct XtankWeaponInfo
    ProjectileStyle style;        // Rendering style (xtank-specific look)
 };
 
-// One entry per XtankWeapon::Type value.
-extern XtankWeaponInfo xtankWeaponInfos[XtankWeapon::Count];
+// One entry per XtankWeapon value.
+extern XtankWeaponInfo xtankWeaponInfos[XtankWeaponCount];
 
 
 // ---------------------------------------------------------------------------
@@ -182,20 +248,44 @@ extern XtankWeaponInfo xtankWeaponInfos[XtankWeapon::Count];
 // acceleration.  A heavier engine gives more power but adds bulk.
 // ---------------------------------------------------------------------------
 
-namespace XtankEngine
+enum XtankEngine
 {
-   enum Type
-   {
-      Light    = 0,  // Low mass, lower power
-      Standard = 1,  // Balanced
-      Heavy    = 2,  // High power, greater top speed and acceleration
-      Count,
-      Default  = Standard
-   };
-}
+   Small_Electric,
+   Medium_Electric,
+   Large_Electric,
+   Super_Electric,
+   Small_Combustion,
+   Medium_Combustion,
+   Large_Combustion,
+   Super_Combustion,
+   Small_Turbine,
+   Medium_Turbine,
+   Large_Turbine,
+   Turbojet_Turbine,
+   Fuel_Cell,
+   Fission,
+   Breeder_Fission,
+   Fusion,
+   XtankEngineCount,
+   XtankEngineDefault = Super_Combustion
+};
 
-// Names for on-screen display, one per XtankEngine::Type.
-extern const char *xtankEngineNames[];
+
+enum XtankArmor
+{
+   Steel,
+   Kevlar,
+   Hardened_Steel,
+   Composite,
+   Carapice,
+   Porcelain,
+   Compound_Steel,
+   Titanium,
+   Tungsten,
+   XtankArmorCount,
+   XtankArmorDefault = Steel
+};
+
 
 // Per-engine gameplay multipliers applied on top of the body's base physics.
 struct XtankEngineInfo
@@ -203,30 +293,53 @@ struct XtankEngineInfo
    const char *name;
    F32 speedMult;   // Multiplier on maxSpeed and maxReverseSpeed
    F32 accelMult;   // Multiplier on acceleration
+
+   S32 power;
+   S32 weight;
+   S32 space;
+   S32 fuel;
+   S32 fcap;
+   S32 cost;
+
 };
 
-// One entry per XtankEngine::Type value.
-extern XtankEngineInfo xtankEngineInfos[XtankEngine::Count];
 
+struct XtankArmorInfo
+{
+   const char *name;
+   S32 defense;
+   S32 weight;
+   S32 space;
+   S32 cost;
+};
+
+    // One entry per XtankEngine value.
+    extern XtankEngineInfo xtankEngineInfos[XtankEngineCount];
 
 // ---------------------------------------------------------------------------
 // Tread types: player-selectable track system affecting maneuverability.
 // Rubber treads give nimble steering; heavy treads grip harder but turn slower.
 // ---------------------------------------------------------------------------
 
-namespace XtankTread
+enum XtankTread
 {
-   enum Type
-   {
-      Rubber = 0,  // Light, nimble; faster turning, slightly less grip
-      Metal  = 1,  // Balanced standard
-      Heavy  = 2,  // Slow to turn, but high grip / rapid deceleration
-      Count,
-      Default = Metal
-   };
-}
+   // AI values
+   Rubber = 0,  // Light, nimble; faster turning, slightly less grip
+   Metal  = 1,  // Balanced standard
+   Heavy  = 2,  // Slow to turn, but high grip / rapid deceleration
 
-// Names for on-screen display, one per XtankTread::Type.
+   // Original values
+   Smooth,
+   Normal,
+   Chained,
+   Spiked,
+   Hover,
+
+   XtankTreadCount,
+   XtankTreadDefault = Metal
+};
+
+// Names for on-screen display, one per XtankTread.
 extern const char *xtankTreadNames[];
 
 // Per-tread gameplay multipliers applied on top of the body's base physics.
@@ -235,10 +348,11 @@ struct XtankTreadInfo
    const char *name;
    F32 turnMult;     // Multiplier on turnRate
    F32 frictionMult; // Multiplier on friction (passive deceleration)
+   S32 cost;
 };
 
-// One entry per XtankTread::Type value.
-extern XtankTreadInfo xtankTreadInfos[XtankTread::Count];
+// One entry per XtankTread value.
+extern XtankTreadInfo xtankTreadInfos[];
 
 
 // ---------------------------------------------------------------------------
@@ -267,26 +381,125 @@ inline F32 xtankHeatSinkFireDelayMult(S32 count)
 // slotCount comes from xtankTurretInfos[bodyIdx].count).
 struct XtankBodyDefaultWeapons
 {
-   XtankWeapon::Type weapons[4];
+   XtankWeapon weapons[4];
 };
 
-// One entry per XtankBody::Type value.
-extern XtankBodyDefaultWeapons xtankDefaultWeapons[XtankBody::Count];
+// One entry per XtankBody value.
+extern XtankBodyDefaultWeapons xtankDefaultWeapons[XtankBodyCount];
 
 
 // The player's active vehicle configuration.  Stored in Ship and communicated
 // via Move (bodyIndex, weaponSlot[], engineType, treadType, heatSinkCount).
 struct XtankDesign
 {
-   S8                bodyIndex;    // XtankBody::Type, -1 = normal BF ship
-   XtankWeapon::Type weapons[4];  // active weapon per turret slot (extras = None)
-   XtankEngine::Type engineType;  // selected engine
-   XtankTread::Type  treadType;   // selected tread type
-   S8                heatSinkCount; // number of heat sinks (1-6)
+   S8                bodyIndex;    // XtankBody, -1 = normal BF ship
+   XtankWeapon weapons[4];  // active weapon per turret slot (extras = None)
+   XtankEngine engineType;  // selected engine
+   XtankTread  treadType;   // selected tread type
+   S8          heatSinkCount; // number of heat sinks (1-6)
 
    XtankDesign();                        // Default constructor (bodyIndex = None)
    void initForBody(S32 bodyIdx);        // Set body + reset all components to defaults
 };
+
+/* Other options */
+#define F_OUTP 0x0F /* mask.  lower 4 bits specify which levels of */
+                    /* outposts can fire this weapon.  0 means the */
+                    /* outpost will never fire this weapon. Otherwise */
+                    /* should be set to 1..10 */
+
+#define F_CHO (1 << 4) /* the bullet can hurt owner after first 10 frames of it's life */
+
+/* Creation options */
+// Probably delete these
+#define F_CR3 (1 << 0)  /* create 3 in a fan (oil slicks) */
+#define F_MAP (1 << 1)  /* bullet is fired by clicking on map window */
+#define F_BOTH (1 << 2) /* bullet is fired from map or anim window */
+#define F_NREL (1 << 3) /* bullet is never fired w/relative velocity */
+
+/* Display options */   // Probably delete these
+#define F_BL 1          /* blue hud-line (default (0) is grey) */
+#define F_RE 2          /* red */
+#define F_OR 3          /* orange */
+#define F_YE 4          /* yellow */
+#define F_GR 5          /* green */
+#define F_VI 6          /* violet */
+#define F_CM 7          /* mask for above colors */
+#define F_NOHD (1 << 3) /* don't draw a hud-line for this weapon */
+#define F_TELE (1 << 4) /* shooter can swich to bullet view */
+#define F_ROT (1 << 5)  /* bitmap is a "movie", like mine */
+#define F_TRL (1 << 6)  /* bullet needs an exaust trail */
+#define F_BEAM (1 << 7) /* bullet is drawn as a line segment (laser) */
+#define F_NOPT (1 << 8) /* don't display this as a point */
+#define F_TAC (1 << 9)  /* show the bullet on tac-link */
+
+/* Movement options */
+#define F_KEYB (1 << 0) /* steer w/keyboard (i.e. tow missles) */
+#define F_MINE (1 << 1) /* move 5 frames, then stop */
+#define F_DET (1 << 2)  /* (for area weapons) explode at end of life */
+
+/* Hit options */
+#define AREA (1 << 0)    /* area explosion (damages all sides) */
+#define F_NOHIT (1 << 1) /* the bullet won't hit vehicles (e.g. nukes) */
+#define F_SLICK (1 << 2) /* oil slicks */
+#define F_HOVER (1 << 3) /* (for height=-1 bullets) random chance to hit hovers */
+
+/* one of these are passed to the special hit function */
+#define HIT_VEH 1
+#define HIT_OUTP 2
+#define HIT_WALL 3
+
+/* Mount flags */
+#define M_FRONT (1 << 0)
+#define M_BACK (1 << 1)
+#define M_LEFT (1 << 2)
+#define M_RIGHT (1 << 3)
+#define M_TURRET (1 << 4)
+#define M_SIDES M_FRONT | M_BACK | M_LEFT | M_RIGHT
+#define M_LR M_LEFT | M_RIGHT
+#define M_ALL M_SIDES | M_TURRET
+
+   /*
+    * Table of initial height values
+    */
+
+#define LOW -1
+#define NORM 0
+#define HIGH 1
+#define FLY 9
+
+#define BIG ((int) ((unsigned)(~0) >> 1))
+
+
+struct XtankWeaponInfo2
+{
+   const char *name; // Display name
+   S32 damage;
+   S32 range;
+   S32 max_ammo;
+   S32 reload_time;
+   S32 ammo_speed;
+   S32 weight;
+   S32 space;
+   S32 mount_space;
+   S32 frames;
+   S32 heat;
+   S32 ammo_cost;
+   S32 cost;
+   S32 refill_time;
+   S32 safety;
+   S32 height;
+
+   S32 mount;      // Where the weapon can be mounted
+   U64 other_flgs; // Misc. flags
+   U64 creat_flgs; // bullet creation
+   U64 disp_flgs;  // how the bullet is displayed
+   U64 move_flgs;  // how the bullet moves
+   U64 hit_flgs;   // damage type and side
+};
+
+
+
 
 } /* namespace Zap */
 #endif /* _XTANK_SHAPE_H_ */

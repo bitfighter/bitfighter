@@ -29,7 +29,7 @@
 namespace Zap
 {
 
-const char *xtankBodyNames[XtankBody::Count] =
+const char *xtankBodyNames[XtankBodyCount] =
 {
    "Lightcycle",
    "Trike",
@@ -55,23 +55,23 @@ const char *xtankBodyNames[XtankBody::Count] =
 
 // ---------------------------------------------------------------------------
 // ShipShapeInfo array for all xtank vehicles.
-// Array layout mirrors the order of XtankBody::Type enum values.
+// Array layout mirrors the order of XtankBodyType enum values.
 //
 // All shapes use the same coordinate scale to preserve relative sizes.
 // Raw extents (max coord from origin):
 //   Trike 11  Lightcycle 15  Hexo/Spider/Malice 17  Tornado 18
 //   Tiger 19  Psycho/Marauder 21  Delta ~21  Disk ~17  Medusa/Rhino 27  Panzy 31
 // ---------------------------------------------------------------------------
-ShipShapeInfo xtankBodyInfos[XtankBody::Count] =
+ShipShapeInfo xtankBodyInfos[XtankBodyCount] =
 {
    // -------------------------------------------------------------------------
    // XtankBody::Lightcycle  (max extent: 15)
    // Small pointed diamond -- the fastest, lightest vehicle.
    // -------------------------------------------------------------------------
    {
-      4,   { 0,-15,   7,7,   0,14,   -7,7 },      // outer hull
+      4,   { 0,-15,   7,7,   0,14,   -7,7 },        // outer hull
       0,   { },                                     // inner hull
-      4,   { 0,-15,   7,7,   0,14,   -7,7 },      // corners
+      4,   { 0,-15,   7,7,   0,14,   -7,7 },        // corners
       0,   { },                                     // flame ports
       NO_FLAMES,
    },
@@ -312,7 +312,7 @@ ShipShapeInfo xtankBodyInfos[XtankBody::Count] =
 // ship.  This is intentional and faithful to the original game.  Panzy players
 // should expect to fill narrow corridors.
 // ---------------------------------------------------------------------------
-F32 xtankBodyCollisionRadius[XtankBody::Count] =
+F32 xtankBodyCollisionRadius[] =
 {
    15.0f,  // Lightcycle  : farthest vertex (0,-15) → dist 15
    13.6f,  // Trike       : farthest vertex (-8,-11) → sqrt(64+121)≈13.6
@@ -338,7 +338,7 @@ F32 xtankBodyCollisionRadius[XtankBody::Count] =
 // rearY: Y coordinate of the rearmost hull vertex (negative for most bodies).
 // Used by the overlay renderer to position bling and exhaust indicators.
 // ---------------------------------------------------------------------------
-F32 xtankBodyNoseY[XtankBody::Count] =
+F32 xtankBodyNoseY[] =
 {
    14.0f,  // Lightcycle  : nose vertex (0,14)
    11.0f,  // Trike       : nose vertex (0,11)
@@ -356,7 +356,7 @@ F32 xtankBodyNoseY[XtankBody::Count] =
    31.0f,  // Panzy       : nose edge at y=31
 }; // xtankBodyNoseY[]
 
-F32 xtankBodyRearY[XtankBody::Count] =
+F32 xtankBodyRearY[] =
 {
   -15.0f,  // Lightcycle  : rear vertex (0,-15)
   -11.0f,  // Trike       : rear edge at y=-11
@@ -382,7 +382,7 @@ F32 xtankBodyRearY[XtankBody::Count] =
 // above (+Y = nose direction).  Positions are chosen to sit roughly in the
 // centre of each hull so the barrel is visually unobstructed.
 // ---------------------------------------------------------------------------
-XtankBodyTurrets xtankTurretInfos[XtankBody::Count] =
+XtankBodyTurrets xtankTurretInfos[] =
 {
    // Lightcycle  – 1 central turret
    { 1, { { 0,  0 } } },
@@ -431,7 +431,7 @@ XtankBodyTurrets xtankTurretInfos[XtankBody::Count] =
 // ---------------------------------------------------------------------------
 // Per-body tank driving physics parameters.
 //
-// Ordered to match XtankBody::Type enum values.
+// Ordered to match XtankBodyType enum values.
 //
 // Design intent:
 //   - Light/small bodies (Lightcycle, Trike) are fast and nimble.
@@ -446,69 +446,130 @@ XtankBodyTurrets xtankTurretInfos[XtankBody::Count] =
 //         acceleration / friction in units/sec²  (BF ship Acceleration = 2500)
 //         turnRate in radians/sec
 // ---------------------------------------------------------------------------
-TankPhysicsInfo xtankPhysicsInfos[XtankBody::Count] =
+TankPhysicsInfo xtankPhysicsInfos[] =
 {
-   //                   maxSpd  maxRevSpd  accel   friction  turnRate  armor
-   /* Lightcycle  */  {  600,    340,      3500,    180,      2.6f,    1.10f },
-   /* Trike       */  {  560,    320,      3200,    200,      2.3f,    1.05f },
-   /* Hexo        */  {  520,    290,      3000,    230,      2.0f,    0.95f },
-   /* Spider      */  {  490,    275,      2800,    240,      2.2f,    0.90f },
-   /* Psycho      */  {  545,    310,      3250,    210,      2.4f,    1.00f },
-   /* Tornado     */  {  510,    285,      2950,    235,      2.1f,    0.90f },
-   /* Marauder    */  {  475,    265,      2650,    260,      1.9f,    0.85f },
-   /* Tiger       */  {  450,    250,      2500,    280,      1.6f,    0.80f },
-   /* Rhino       */  {  400,    220,      2100,    310,      1.2f,    0.60f },
-   /* Medusa      */  {  420,    235,      2250,    295,      1.5f,    0.70f },
-   /* Delta       */  {  490,    275,      2750,    250,      1.9f,    0.85f },
-   /* Disk        */  {  515,    290,      3000,    190,      3.0f,    0.95f },
-   /* Malice      */  {  430,    240,      2300,    290,      1.4f,    0.75f },
-   /* Panzy       */  {  370,    205,      1900,    340,      1.0f,    0.50f },
-}; // xtankPhysicsInfos[]
+   // maxSpd  maxRevSpd  accel   friction  turnRate  armor
+   {  600,    340,      3500,    180,      2.6f,    1.10f },      // Lightcycle
+   {  560,    320,      3200,    200,      2.3f,    1.05f },      // Trike
+   {  520,    290,      3000,    230,      2.0f,    0.95f },      // Hexo
+   {  490,    275,      2800,    240,      2.2f,    0.90f },      // Spider
+   {  545,    310,      3250,    210,      2.4f,    1.00f },      // Psycho
+   {  510,    285,      2950,    235,      2.1f,    0.90f },      // Tornado
+   {  475,    265,      2650,    260,      1.9f,    0.85f },      // Marauder
+   {  450,    250,      2500,    280,      1.6f,    0.80f },      // Tiger
+   {  400,    220,      2100,    310,      1.2f,    0.60f },      // Rhino
+   {  420,    235,      2250,    295,      1.5f,    0.70f },      // Medusa
+   {  490,    275,      2750,    250,      1.9f,    0.85f },      // Delta
+   {  515,    290,      3000,    190,      3.0f,    0.95f },      // Disk
+   {  430,    240,      2300,    290,      1.4f,    0.75f },      // Malice
+   {  370,    205,      1900,    340,      1.0f,    0.50f },      // Panzy
+};
 
+XtankBodyInfo body_stat[] =
+{
+   /* type     size weight wghtlim space  drag hndl trts cost */
+   {"Lightcycle", 2,   200, 800,     600,  .10f, 8, 0,  3000 },
+   {"Trike",      2,   400, 1600,   1200,  .15f, 6, 0,  4000 },
+   {"Hexo",       3,  1500, 5000,   4000,  .25f, 6, 1,  4000 },
+   {"Spider",     3,  2500, 8000,   3000,  .40f, 7, 1,  5000 },
+   {"Psycho",     4,  5000, 18000,  8000,  .60f, 4, 1,  5000 },
+   {"Tornado",    4,  7000, 22000, 12000,  .80f, 4, 1,  7000 },
+   {"Marauder",   5,  9000, 28000, 18000, 1.00f, 3, 2, 10000 },
+   {"Tiger",      6, 11000, 35000, 22000, 1.50f, 5, 1, 12000 },
+   {"Rhino",      7, 15000, 55000, 35000, 2.00f, 3, 2, 10000 },
+   {"Medusa",     7, 14000, 40000, 25000, 1.20f, 4, 3, 15000 },
+   {"Delta",      6, 10000, 20000, 18000,  .15f, 6, 2, 14000 },
+   {"Disk",       7, 15000, 35000, 25000,  .15f, 6, 2, 15000 },
+   {"Malice",     5,  4000, 20000, 15000,  .40f, 7, 1, 17000 },
+   {"Panzy",      8, 22000, 80000, 50000, 3.00f, 3, 4, 25000 },
+};
 
 // ---------------------------------------------------------------------------
 // Xtank engine types: multipliers applied on top of the per-body base physics.
 // ---------------------------------------------------------------------------
 
-const char *xtankEngineNames[XtankEngine::Count] =
+
+XtankEngineInfo xtankEngineInfos[] =
 {
-   "Lt Engine",
-   "Std Engine",
-   "Hvy Engine",
+   //      name        speedMult  accelMult  power weight space  fuel fcap   cost
+   { "Small Electric",   0.80f,     0.85f,    50,   100,   20,    5,    50,  1500  },
+   { "Medium Electric",  1.00f,     1.00f,   100,   150,   30,    5,   100,  2200  },
+   { "Large Electric",   1.25f,     1.20f,   200,   200,   40,    5,   200,  3000  },
+   { "Super Electric",   1.35f,     1.25f,   300,   250,   50,    5,   300,  6000  },
+   { "Small Combustion", 1.00f,     1.05f,   300,   400,  200,    8,    50,  2000  },
+   { "Medium Combustion",1.10f,     1.10f,   400,   500,  300,    8,   100,  2500  },
+   { "Large Combustion", 1.25f,     1.20f,   500,   600,  400,    8,   200,  3000  },
+   { "Super Combustion", 1.40f,     1.25f,   600,  1000,  600,    8,   300,  4000  },
+   { "Small Turbine",    1.30f,     1.15f,   600,  1000,  800,   10,   350,  4000  },
+   { "Medium Turbine",   1.40f,     1.20f,   700,  1200, 1000,   10,   450,  5000  },
+   { "Large Turbine",    1.55f,     1.25f,   800,  1500, 1500,   10,   550,  7000  },
+   { "Turbojet Turbine", 1.75f,     1.30f,  1000,  2000, 2000,   10,   750, 10000  },
+   { "Fuel Cell",        1.50f,     1.10f,  1500,  1000,  400,   20,   400, 45000  },
+   { "Fission",          1.70f,     1.05f,  2000,  3000, 3500,   15,   800, 20000  },
+   { "Breeder Fission",  1.90f,     1.00f,  2500,  3500, 4000,   15,  1050, 25000  },
+   { "Fusion",           2.50f,     0.95f, 10000, 15000, 18000,   5,  1300, 100000 },
 };
 
-XtankEngineInfo xtankEngineInfos[XtankEngine::Count] =
+XtankArmorInfo xtankArmorInfos[] =
 {
-   //                 name           speedMult  accelMult
-   /* Light    */  { "Lt Engine",    0.80f,     0.85f },
-   /* Standard */  { "Std Engine",   1.00f,     1.00f },
-   /* Heavy    */  { "Hvy Engine",   1.25f,     1.20f },
-}; // xtankEngineInfos[]
-
+   /* name           def wgt spc cost */
+   {"Steel",          0, 5, 3, 10  },
+   {"Kevlar",         0, 3, 3, 20  },
+   {"Hardened Steel", 1, 8, 3, 20  },
+   {"Composite",      1, 4, 3, 30  },
+   {"Carapice",       1, 7, 2, 80  },
+   {"Porcelain",      1, 2, 5, 80  },
+   {"Compound Steel", 2, 8, 3, 40  },
+   {"Titanium",       2, 5, 3, 70  },
+   {"Tungsten",       3, 8, 3, 120 },
+};
 
 // ---------------------------------------------------------------------------
 // Xtank tread types: multipliers applied on top of the per-body base physics.
 // ---------------------------------------------------------------------------
 
-const char *xtankTreadNames[XtankTread::Count] =
-{
-   "Rubber Trd",
-   "Metal Trd",
-   "Heavy Trd",
+const char *xtankTreadNames[] =
+    {
+        "Rubber Trd",
+        "Metal Trd",
+        "Heavy Trd",
 };
 
-XtankTreadInfo xtankTreadInfos[XtankTread::Count] =
+XtankTreadInfo xtankTreadInfos[] =
 {
-   //                name           turnMult  frictionMult
-   /* Rubber */  { "Rubber Trd",   1.15f,    0.85f },
-   /* Metal  */  { "Metal Trd",    1.00f,    1.00f },
-   /* Heavy  */  { "Heavy Trd",    0.85f,    1.20f },
-}; // xtankTreadInfos[]
+   //    name           turnMult  frictionMult  cost
+   { "Rubber Tread",   1.15f,    0.85f, 0 },
+   { "Metal Tread",    1.00f,    1.00f, 0 },
+   { "Heavy Tread",    0.85f,    1.20f, 0 },
+};
 
 
+XtankTreadInfo xtankTreadInfos2[] =
+{
+//    name           friction  friction  cost
+   { "Smooth",       0.70f, 0.70f, 100  },
+   { "Normal",       0.80f, 0.80f, 200  },
+   { "Chained",      0.90f, 0.90f, 400  },
+   { "Spiked",       1.00f, 1.00f, 1000 },
+   { "Hover",        0.20f, 0.20f, 500  },
+};
+
+// int power = engine_stat[d->engine].power;
+// float drag = body_stat[d->body].drag;
+// float friction = tread_stat[d->treads].friction;
+
+// d->max_speed = pow(power / drag, 0.3333) / friction;
+// if (d->treads == HOVER_TREAD)
+//    d->max_speed /= 2;
+
+// d->engine_acc = 16.0 * power / d->weight;
+// d->tread_acc = friction * MAX_ACCEL; /* weight drops out because
+//              traction is proportional to
+//              weight */
+// d->acc = MIN(d->tread_acc, d->engine_acc);
 
 //
-// Ordered to match XtankWeapon::Type enum values.
+// Ordered to match XtankWeapon enum values.
 //
 // Design intent:
 //   - MachineGun / Tracer are rapid-fire, low-energy weapons.
@@ -522,7 +583,7 @@ XtankTreadInfo xtankTreadInfos[XtankTread::Count] =
 // bfWeapon maps to an existing BF weapon class for projectile behavior.
 // ---------------------------------------------------------------------------
 
-const char *xtankWeaponNames[XtankWeapon::Count] =
+const char *xtankWeaponNames[] =
 {
    "Machine Gun",
    "Laser",
@@ -535,7 +596,7 @@ const char *xtankWeaponNames[XtankWeapon::Count] =
    "Fire",
 };
 
-XtankWeaponInfo xtankWeaponInfos[XtankWeapon::Count] =
+XtankWeaponInfo xtankWeaponInfos[] =
 {
    // Xtank weapon parameters are derived from the original xtank weapon-defs.h.
    // Speed conversion: xtank px/frame × 20 fps = BF units/sec.
@@ -545,84 +606,118 @@ XtankWeaponInfo xtankWeaponInfos[XtankWeapon::Count] =
    // Colour mapping from xtank display flags:
    //   F_BL=blue, F_OR=orange, F_YE=yellow, F_GR=green, F_VI=violet, F_BEAM=laser
    //
-   //                  name            fireDelay energyDrain  bfWeapon      projVelocity  projLiveTime  style
-   /* MachineGun */  { "Machine Gun",   150,       300,        WeaponPhaser,  340,          1100,         ProjectileStyleXtankBlue   },  // MG:   spd=17,fr=22,tm=3
-   /* Laser      */  { "Laser",         150,       8000,       WeaponRailgun, 1200,         1000,         ProjectileStyleXtankLaser  },  // LASER:spd=60,fr=20,tm=3
-   /* Missile    */  { "Missile",       750,       8000,       WeaponSeeker,  500,          2550,         ProjectileStyleXtankViolet },  // SEEKER:spd=25,fr=51,tm=15
-   /* Grenade    */  { "Grenade",       150,       6000,       WeaponBurst,   440,           950,         ProjectileStyleXtankOrange },  // CANNON:spd=22,fr=19,tm=3
-   /* Rocket     */  { "Rocket",        400,       7000,       WeaponBurst,   800,           750,         ProjectileStyleXtankYellow },  // ROCKET:spd=40,fr=15,tm=8
-   /* Acid       */  { "Acid",          150,        800,       WeaponBounce,  200,           850,         ProjectileStyleXtankGreen  },  // ACID:  spd=10,fr=17,tm=3
-   /* Tracer     */  { "Tracer",        100,        400,       WeaponTurret,  340,          1100,         ProjectileStyleXtankBlue   },  // LMG:   spd=17,fr=22,tm=2
-   /* Bomb       */  { "Bomb",          400,       10000,      WeaponBurst,   500,          1000,         ProjectileStyleXtankYellow },  // HROCKET:spd=40,rng~500,tm=8
-   /* Fire       */  { "Fire",           50,       1500,       WeaponTriple,  240,           850,         ProjectileStyleXtankGreen  },  // FLAME: spd=12,fr=17,tm=1
+   //   name       fireDelay energyDrain     bfWeapon      projVelocity  projLiveTime       style
+   { "Machine Gun",   150,       300,        WeaponPhaser,  340,          1100,         ProjectileStyleXtankBlue   },  // MG:   spd=17,fr=22,tm=3
+   { "Laser",         150,       8000,       WeaponRailgun, 1200,         1000,         ProjectileStyleXtankLaser  },  // LASER:spd=60,fr=20,tm=3
+   { "Missile",       750,       8000,       WeaponSeeker,  500,          2550,         ProjectileStyleXtankViolet },  // SEEKER:spd=25,fr=51,tm=15
+   { "Grenade",       150,       6000,       WeaponBurst,   440,           950,         ProjectileStyleXtankOrange },  // CANNON:spd=22,fr=19,tm=3
+   { "Rocket",        400,       7000,       WeaponBurst,   800,           750,         ProjectileStyleXtankYellow },  // ROCKET:spd=40,fr=15,tm=8
+   { "Acid",          150,        800,       WeaponBounce,  200,           850,         ProjectileStyleXtankGreen  },  // ACID:  spd=10,fr=17,tm=3
+   { "Tracer",        100,        400,       WeaponTurret,  340,          1100,         ProjectileStyleXtankBlue   },  // LMG:   spd=17,fr=22,tm=2
+   { "Bomb",          400,       10000,      WeaponBurst,   500,          1000,         ProjectileStyleXtankYellow },  // HROCKET:spd=40,rng~500,tm=8
+   { "Fire",           50,       1500,       WeaponTriple,  240,           850,         ProjectileStyleXtankGreen  },  // FLAME: spd=12,fr=17,tm=1
 }; // xtankWeaponInfos[]
+
+
+XtankWeaponInfo2 xtankWeaponInfos2[] =
+{
+   /* name                 dam rng ammo tm  spd  wgt   spc  mspc  fr  ht  a$   cost  refl safety hgt */
+   /* mount o_flgs  creat_flgs      disp_flgs    move_flgs   hit_flgs cr_f di_f upd_f hit_f */
+   { "Light Machine Gun",  1, 360, 300, 2, 17,   20,  200,  200, 22,  0,  1,   1000,   1,   0, NORM,  M_ALL,  1,      NORM,           F_BL,         NORM,       NORM,   }, // LMG
+   { "Machine Gun",        2, 360, 250, 3, 17,   50,  225,  225, 22,  1,  2,   2200,   1,   0, NORM,  M_ALL,  1,      NORM,           F_BL,         NORM,       NORM,   }, // MG
+   { "Heavy Machine Gun",  3, 360, 200, 3, 17,  100,  250,  250, 22,  2,  3,   3000,   1,   0, NORM,  M_ALL,  2,      NORM,           F_BL,         NORM,       NORM,   }, // HMG
+   { "Light Autocannon",   3, 400, 250, 3, 22,  200,  300,  300, 19,  3,  4,   3000,   1,   3, NORM,  M_ALL,  2,      NORM,           F_OR,         NORM,       NORM,   }, // LCANNON
+   { "Autocannon",         4, 400, 225, 3, 22,  300,  350,  350, 19,  4,  5,   6000,   1,   3, NORM,  M_ALL,  3,      NORM,           F_OR,         NORM,       NORM,   }, // CANNON
+   { "Heavy Autocannon",   5, 400, 200, 3, 22,  500,  400,  400, 19,  5,  6,  10000,   1,   3, NORM,  M_ALL,  4,      NORM,           F_OR,         NORM,       NORM,   }, // HCANNON
+   { "Light Rkt Launcher", 6, 600, 150, 8, 40,  600,  800,  800, 15,  4,  8,   7000,   2,   3, NORM,  M_ALL,  5,      NORM,           F_YE,         NORM,       NORM,   }, // LROCKET
+   { "Rkt Launcher",       7, 600, 125, 8, 40,  900, 1200, 1200, 15,  6, 10,  10000,   2,   3, NORM,  M_ALL,  6,      NORM,           F_YE,         NORM,       NORM,   }, // ROCKET
+   { "Heavy Rkt Launcher", 8, 600, 100, 8, 40,  900, 1600, 1600, 15,  8, 12,  15000,   2,   3, NORM,  M_ALL,  7,      NORM,           F_YE,         NORM,       NORM,   }, // HROCKET
+   { "Acid Sprayer",       4, 160, 100, 3, 10,  600,  700,  700, 17,  0, 10,  10000,   1,   0, NORM,  M_ALL,  9,      NORM,           F_GR,         NORM,       NORM,   }, // ACID
+   { "Flame Thrower",      3, 200, 300, 1, 12,  700,  500,  500, 17,  1,  2,   4000,   1,   0, NORM,  M_ALL,  9,      NORM,           F_GR,         NORM,       NORM,   }, // FLAME
+   { "Heat Seeker",        8, 1250, 15,15, 25, 1000, 1800, 1800, 51,  9, 50,  20000,  12,   3, HIGH,  M_ALL, 10,    F_NREL,        F_TRL | F_VI,      NORM,       NORM,  }, // SEEKER
+   { "Pocket Rocket",      5, 1160, 24, 2, 40, 1200, 1900, 1900, 30,  9, 10,  17000,   2,   3, NORM,  M_ALL, 10,      NORM,          F_TRL,         NORM,       NORM,    }, // PROCKET
+   { "Unguided Missle",   10, 1960, 30, 8, 35, 1000, 1800, 1800, 57, 12, 25,  18000,   2,   3, NORM,  M_ALL,  0,      NORM,          F_TRL,         NORM,       NORM,    }, // UMISSLE
+   { "TeleGuided",        64, 6000, 1,  1, 15, 1500, 2000, 2000,400, 30,500,  30000, 200,   3, HIGH, M_ALL,F_CHO,  F_NREL, F_TELE | F_TRL | F_RE | F_TAC, F_KEYB,    NORM,               }, // TELE
+   { "TOW Missile",       64, 7500, 2,  1, 15, 1500, 2000, 2000,500, 30,100,  30000, 100,   3, HIGH, M_ALL,F_CHO,   F_NREL,    F_TRL | F_RE | F_TAC,  F_KEYB,       NORM,              }, // TOW
+   { "Land Torpedo",      20, 5000, 2,  1, 10, 1500, 2000, 2000,500, 30,100,  30000, 100,   3, LOW,  M_SIDES,F_CHO,   F_NREL,           F_RE,       F_KEYB,       NORM,            }, // LTORP
+   { "Blast Cannon",       1, 500,  20, 8, 25,  300,  350,  350, 20,  6, 20, 100000,   2,   3, NORM,  M_ALL,  0,      NORM,           F_RE,         NORM,       NORM,           }, // BLAST
+   { "Pulse Laser",        3,1200, 500, 3, 60,  300,  250,  250, 20,  3,  3,  30000,   1,   0, NORM,  M_ALL,  0,    F_NREL,       F_BEAM | F_NOPT,    NORM,       NORM,              }, // LASER
+   { "Mine Layer",         6,  50,  50, 2, 10, 1000, 1000, 1000, 70,  2, 10,   8000,   4,   0, LOW,   M_BACK,  0,      NORM, F_ROT | F_NOHD | F_NOPT,  F_MINE,    F_HOVER,             }, // MINE
+   { "Oil Slick",          0,  50,  50, 5, 10,  300,  500,  500, 70,  0, 10,   2000,   1,   0, LOW,   M_BACK,  0,     F_CR3,    F_NOHD | F_NOPT,     F_MINE,     F_SLICK,             }, // SLICK
+   { "Heavy Mortar",     170, 7500,  10,20, 50, 1400, 2000, 2000, 70, 30,500,  9000,  30,   0, FLY,  M_TURRET,0, F_MAP | F_NREL, F_NOHD | F_TAC | F_TRL, F_DET,       AREA,   }, // MORTAR
+   { "Tactical Nuke",    170,  50,  10,20, 10, 1600, 2200, 2200, 30,  6,500,  80000,  30,   0, NORM, M_BACK, 0,      NORM,         F_NOHD,   F_MINE | F_DET, AREA | F_NOHIT,              }, // NUKE
+   { "Anti-Radiation",    64, 2500, 2, 192,25, 2000, 3400, 3400,100, 24,1000,100000, 192,   0, FLY,  M_LR,F_CHO, F_MAP | F_NREL,F_TRL | F_NOHD | F_TAC,   NORM,       NORM,     }, // HARM
+   { "Disc Shooter",       0,  BIG, 1, BIG, 0,   0,     0,    0,BIG,  0,   0,     0,    0,  0, 0,  M_ALL,  0,             0,          0,        0,          0,              }, // DISC
+};
 
 
 // ---------------------------------------------------------------------------
 // Default weapon loadout for each xtank vehicle body.
 //
 // The first xtankTurretInfos[bodyIdx].count entries are valid; extras are
-// XtankWeapon::None.
+// XtankWeaponNone.
 // ---------------------------------------------------------------------------
 
-XtankBodyDefaultWeapons xtankDefaultWeapons[XtankBody::Count] =
+#define MG XtankWeapon::MachineGun
+#define NONE XtankWeaponNone
+
+XtankBodyDefaultWeapons xtankDefaultWeapons[] =
 {
-   // Lightcycle  – 1 turret
-   { { XtankWeapon::MachineGun, XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
+   { { MG, NONE, NONE, NONE } },                                      // Lightcycle  – 1 turret
+   { { XtankWeapon::Tracer,     NONE, NONE, NONE } },                 // Trike       – 1 turret
+   { { XtankWeapon::Acid,       NONE, NONE, NONE } },                 // Hexo        – 1 turret
+   { { XtankWeapon::Fire,       NONE, NONE, NONE } },                 // Spider      – 1 turret
+   { { XtankWeapon::Laser,      NONE, NONE, NONE } },                 // Psycho      – 1 turret
+   { { XtankWeapon::Grenade,    NONE, NONE, NONE } },                 // Tornado     – 1 turret
+   { { XtankWeapon::Rocket,     NONE, NONE, NONE } },                 // Marauder    – 1 turret
+   { { XtankWeapon::MachineGun, MG, NONE, NONE } },                   // Tiger       – 2 turrets
+   { { XtankWeapon::Bomb,       XtankWeapon::Bomb, NONE, NONE } },    // Rhino       – 2 turrets
+   { { XtankWeapon::Missile,    XtankWeapon::Missile, NONE, NONE } }, // Medusa      – 2 turrets
+   { { XtankWeapon::Laser,      XtankWeapon::Laser, NONE, NONE } },   // Delta       – 2 turrets
+   { { XtankWeapon::Fire,       NONE, NONE, NONE } },                 // Disk        – 1 turret
+   { { XtankWeapon::Rocket,     NONE, NONE, NONE } },                 // Malice      – 1 turret
+   { { MG,                      MG, MG, MG } },                       // Panzy       – 4 turrets
+};
 
-   // Trike       – 1 turret
-   { { XtankWeapon::Tracer,     XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
+#undef MG
+#undef NONE
 
-   // Hexo        – 1 turret
-   { { XtankWeapon::Acid,       XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
 
-   // Spider      – 1 turret
-   { { XtankWeapon::Fire,       XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
+// ---------------------------------------------------------------------------
+// Heatsink info
+// ---------------------------------------------------------------------------
+HeatSinkStat heatSinkStat = {500, 1000, 500}; // weight, space, cost
 
-   // Psycho      – 1 turret
-   { { XtankWeapon::Laser,      XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
+SuspensionStat suspensionStat[] =
+{
+   // name     hndl cost
+   { "Light",  -1,  100 },
+   { "Normal",  0,  200 },
+   { "Heavy",   1,  400 },
+   { "Active",  2, 1000 },
+};
 
-   // Tornado     – 1 turret
-   { { XtankWeapon::Grenade,    XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
 
-   // Marauder    – 1 turret
-   { { XtankWeapon::Rocket,     XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
-
-   // Tiger       – 2 turrets
-   { { XtankWeapon::MachineGun, XtankWeapon::MachineGun, XtankWeapon::None, XtankWeapon::None } },
-
-   // Rhino       – 2 turrets
-   { { XtankWeapon::Bomb,       XtankWeapon::Bomb, XtankWeapon::None, XtankWeapon::None } },
-
-   // Medusa      – 2 turrets
-   { { XtankWeapon::Missile,    XtankWeapon::Missile, XtankWeapon::None, XtankWeapon::None } },
-
-   // Delta       – 2 turrets
-   { { XtankWeapon::Laser,      XtankWeapon::Laser, XtankWeapon::None, XtankWeapon::None } },
-
-   // Disk        – 1 turret
-   { { XtankWeapon::Fire,       XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
-
-   // Malice      – 1 turret
-   { { XtankWeapon::Rocket,     XtankWeapon::None, XtankWeapon::None, XtankWeapon::None } },
-
-   // Panzy       – 4 turrets
-   { { XtankWeapon::MachineGun, XtankWeapon::MachineGun,
-       XtankWeapon::MachineGun, XtankWeapon::MachineGun } },
-}; // xtankDefaultWeapons[]
-
+BumperStat bumperStat[] =
+{
+   // name    elast   cost
+   {"None",   0.00f,    0 },
+   {"Normal", 0.07f,  200 },
+   {"Rubber", 0.15f,  400 },
+   {"Retro",  0.25f, 1000 }
+};
 
 // ---------------------------------------------------------------------------
 // XtankDesign implementation
 // ---------------------------------------------------------------------------
 
-XtankDesign::XtankDesign()
+    XtankDesign::XtankDesign()
 {
-   bodyIndex = (S8)XtankBody::None;
+   bodyIndex = (S8)XtankBodyNone;
    for(S32 i = 0; i < 4; i++)
-      weapons[i] = XtankWeapon::None;
-   engineType    = XtankEngine::Default;
-   treadType     = XtankTread::Default;
+      weapons[i] = XtankWeaponNone;
+   engineType    = XtankEngineDefault;
+   treadType     = XtankTreadDefault;
    heatSinkCount = (S8)XtankHeatSinkDefault;
 }
 
@@ -630,7 +725,7 @@ XtankDesign::XtankDesign()
 void XtankDesign::initForBody(S32 bodyIdx)
 {
    bodyIndex = (S8)bodyIdx;
-   if(bodyIdx >= 0 && bodyIdx < XtankBody::Count)
+   if(bodyIdx >= 0 && bodyIdx < XtankBodyCount)
    {
       for(S32 i = 0; i < 4; i++)
          weapons[i] = xtankDefaultWeapons[bodyIdx].weapons[i];
@@ -638,10 +733,10 @@ void XtankDesign::initForBody(S32 bodyIdx)
    else
    {
       for(S32 i = 0; i < 4; i++)
-         weapons[i] = XtankWeapon::None;
+         weapons[i] = XtankWeaponNone;
    }
-   engineType    = XtankEngine::Default;
-   treadType     = XtankTread::Default;
+   engineType    = XtankEngineDefault;
+   treadType     = XtankTreadDefault;
    heatSinkCount = (S8)XtankHeatSinkDefault;
 }
 

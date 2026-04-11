@@ -100,7 +100,7 @@ static S32 getComponentRectWidth(S32 textWidth)
 S32 renderComponentIndicator(S32 xPos, S32 yPos, const char *name)
 {
    // Draw the weapon or module name (n.b.: If you change the lcase, do the same in getComponentIndicatorWidth)
-   S32 textWidth = drawStringAndGetWidth(xPos + IndicatorHorizPadding, yPos + IndicatorVertPadding - 1, 
+   S32 textWidth = drawStringAndGetWidth(xPos + IndicatorHorizPadding, yPos + IndicatorVertPadding - 1,
                                          IndicatorFontSize, lcase(name).c_str());
 
    S32 rectWidth = getComponentRectWidth(textWidth);
@@ -186,8 +186,8 @@ static S32 doRender(const LoadoutTracker &loadout, const XtankDesign &xtankDesig
       S32 slotCount = xtankTurretInfos[bodyIdx].count;
       for(S32 i = 0; i < slotCount; i++)
       {
-         XtankWeapon::Type wt = xtankDesign.weapons[i];
-         const char *weapName = ((S32)wt >= 0 && (S32)wt < XtankWeapon::Count)
+         XtankWeapon wt = xtankDesign.weapons[i];
+         const char *weapName = ((S32)wt >= 0 && (S32)wt < XtankWeaponCount)
                                    ? xtankWeaponInfos[(S32)wt].name
                                    : "---";
          r.setColor(*INDICATOR_INACTIVE_COLOR);
@@ -202,13 +202,13 @@ static S32 doRender(const LoadoutTracker &loadout, const XtankDesign &xtankDesig
    // Standard BF mode: show weapons + modules.
 
    // If if we have no module, then this loadout has never been set, and there is nothing to render
-   if(!loadout.isValid())  
+   if(!loadout.isValid())
       return 0;
 
    S32 xPos = LoadoutIndicator::LoadoutIndicatorLeftPos;
 
    FontManager::pushFontContext(LoadoutIndicatorContext);
-   
+
    // First, the weapons
    for(auto i = 0; i < ShipWeaponCount; i++)
    {
@@ -259,8 +259,8 @@ S32 LoadoutIndicator::getWidth() const
       S32 slotCount = xtankTurretInfos[bodyIdx].count;
       for(S32 i = 0; i < slotCount; i++)
       {
-         XtankWeapon::Type wt = mXtankDesign.weapons[i];
-         const char *weapName = ((S32)wt >= 0 && (S32)wt < XtankWeapon::Count)
+         XtankWeapon wt = mXtankDesign.weapons[i];
+         const char *weapName = ((S32)wt >= 0 && (S32)wt < XtankWeaponCount)
                                    ? xtankWeaponInfos[(S32)wt].name
                                    : "---";
          width += getComponentIndicatorWidth(weapName) + IndicatorHorizPadding;

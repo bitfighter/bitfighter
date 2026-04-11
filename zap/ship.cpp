@@ -131,7 +131,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
 #endif
 
    // Tank physics state — present in all builds (server runs tank physics)
-   mXtankBodyIndex  = XtankBody::None;
+   mXtankBodyIndex  = XtankBodyNone;
    mTankHeadingAngle = -FloatHalfPi;  // Default: hull facing north (up on screen)
    mTankSpeed        = 0;
 
@@ -338,7 +338,7 @@ F32 Ship::processMove(U32 stateIndex)
       S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
       for(S32 i = 0; i < slotCount; i++)
       {
-         XtankWeapon::Type newWeapon = (XtankWeapon::Type)(S32)mCurrentMove.weaponSlot[i];
+         XtankWeapon newWeapon = (XtankWeapon)(S32)mCurrentMove.weaponSlot[i];
          if(newWeapon != mXtankDesign.weapons[i])
          {
             mXtankDesign.weapons[i] = newWeapon;
@@ -347,8 +347,8 @@ F32 Ship::processMove(U32 stateIndex)
       }
 
       // Sync engine, tread and heat sink settings from the move.
-      XtankEngine::Type newEngine = (XtankEngine::Type)(S32)mCurrentMove.engineType;
-      XtankTread::Type  newTread  = (XtankTread::Type)(S32)mCurrentMove.treadType;
+      XtankEngine newEngine = (XtankEngine)(S32)mCurrentMove.engineType;
+      XtankTread  newTread  = (XtankTread)(S32)mCurrentMove.treadType;
       S8 newHS = mCurrentMove.heatSinkCount;
 
       if(newEngine != mXtankDesign.engineType ||
@@ -439,6 +439,7 @@ F32 Ship::processTankMove(U32 stateIndex)
    const TankPhysicsInfo &info   = xtankPhysicsInfos[mXtankBodyIndex];
    const XtankEngineInfo &engine = xtankEngineInfos[(S32)mXtankDesign.engineType];
    const XtankTreadInfo  &tread  = xtankTreadInfos[(S32)mXtankDesign.treadType];
+
    F32 dt = mCurrentMove.time * 0.001f;
 
    // Effective physics parameters after applying engine and tread multipliers.
@@ -639,8 +640,8 @@ void Ship::processWeaponFire()
 
          for(S32 i = 0; i < slotCount; i++)
          {
-            XtankWeapon::Type wt = mXtankDesign.weapons[i];
-            if((S32)wt < 0 || (S32)wt >= XtankWeapon::Count)
+            XtankWeapon wt = mXtankDesign.weapons[i];
+            if((S32)wt < 0 || (S32)wt >= XtankWeaponCount)
                continue;
             hasAnyWeapon = true;
             const XtankWeaponInfo &wi = xtankWeaponInfos[(S32)wt];
@@ -674,8 +675,8 @@ void Ship::processWeaponFire()
 
                   for(S32 i = 0; i < slotCount; i++)
                   {
-                     XtankWeapon::Type wt = mXtankDesign.weapons[i];
-                     if((S32)wt < 0 || (S32)wt >= XtankWeapon::Count)
+                     XtankWeapon wt = mXtankDesign.weapons[i];
+                     if((S32)wt < 0 || (S32)wt >= XtankWeaponCount)
                         continue;
 
                      // Transform turret mount from body space to world space.
@@ -1564,7 +1565,7 @@ void Ship::writeControlState(BitStream *stream)
    // the client can correct its prediction without jitter.
    if(stream->writeFlag(mXtankBodyIndex >= 0))
    {
-      stream->writeRangedU32((U32)mXtankBodyIndex, 0, XtankBody::Count - 1);
+      stream->writeRangedU32((U32)mXtankBodyIndex, 0, XtankBodyCount - 1);
       stream->write(mTankHeadingAngle);
       stream->write(mTankSpeed);
    }
@@ -1593,13 +1594,13 @@ void Ship::readControlState(BitStream *stream)
    // Tank physics state
    if(stream->readFlag())
    {
-      mXtankBodyIndex   = (S32)stream->readRangedU32(0, XtankBody::Count - 1);
+      mXtankBodyIndex   = (S32)stream->readRangedU32(0, XtankBodyCount - 1);
       stream->read(&mTankHeadingAngle);
       stream->read(&mTankSpeed);
    }
    else
    {
-      mXtankBodyIndex = XtankBody::None;
+      mXtankBodyIndex = XtankBodyNone;
    }
 }
 
@@ -1654,7 +1655,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    // and apply the correct physics model for other players' ships.
    if(stream->writeFlag(updateMask & (XtankBodyMask | InitialMask)))
    {
-      stream->writeRangedU32((U32)(mXtankBodyIndex + 1), 0, XtankBody::Count);
+      stream->writeRangedU32((U32)(mXtankBodyIndex + 1), 0, XtankBodyCount);
       if(mXtankBodyIndex >= 0)
       {
          stream->write(mTankHeadingAngle);
@@ -1662,7 +1663,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
          // Weapon design: one slot per turret
          S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
          for(S32 i = 0; i < slotCount; i++)
-            stream->writeRangedU32((U32)((S32)mXtankDesign.weapons[i] + 1), 0, XtankWeapon::Count);
+            stream->writeRangedU32((U32)((S32)mXtankDesign.weapons[i] + 1), 0, XtankWeaponCount);
       }
    }
 
@@ -1849,7 +1850,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    // Xtank body index (XtankBodyMask | InitialMask)
    if(stream->readFlag())
    {
-      mXtankBodyIndex = (S32)stream->readRangedU32(0, XtankBody::Count) - 1;
+      mXtankBodyIndex = (S32)stream->readRangedU32(0, XtankBodyCount) - 1;
       if(mXtankBodyIndex >= 0)
       {
          stream->read(&mTankHeadingAngle);
@@ -1857,7 +1858,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          // Weapon design
          S32 slotCount = xtankTurretInfos[mXtankBodyIndex].count;
          for(S32 i = 0; i < slotCount; i++)
-            mXtankDesign.weapons[i] = (XtankWeapon::Type)((S32)stream->readRangedU32(0, XtankWeapon::Count) - 1);
+            mXtankDesign.weapons[i] = (XtankWeapon)((S32)stream->readRangedU32(0, XtankWeaponCount) - 1);
          mXtankDesign.bodyIndex = (S8)mXtankBodyIndex;
       }
       else
@@ -2346,7 +2347,7 @@ const ShipShapeInfo *Ship::getActiveShipShapeInfo() const
 // UIGame.cpp after calling this function).
 void Ship::cycleXtankBody()
 {
-   if(mXtankBodyIndex == XtankBody::None)
+   if(mXtankBodyIndex == XtankBodyNone)
    {
       // Switch to Lightcycle body
       mXtankBodyIndex = XtankBody::Lightcycle;
@@ -2357,7 +2358,7 @@ void Ship::cycleXtankBody()
    else
    {
       // Return to regular ship
-      mXtankBodyIndex = XtankBody::None;
+      mXtankBodyIndex = XtankBodyNone;
       mXtankDesign = XtankDesign();  // Reset when returning to BF ship
    }
 }
@@ -2369,7 +2370,7 @@ void Ship::cycleXtankBody()
 bool Ship::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const
 {
    point = getPos(stateIndex);
-   if(mXtankBodyIndex >= 0 && mXtankBodyIndex < XtankBody::Count)
+   if(mXtankBodyIndex >= 0 && mXtankBodyIndex < XtankBodyCount)
       radius = xtankBodyCollisionRadius[mXtankBodyIndex];
    else
       radius = (F32)CollisionRadius;
@@ -2535,7 +2536,9 @@ void Ship::emitMovementSparks()
 
       switch(mXtankDesign.engineType)
       {
-         case XtankEngine::Light:
+         case XtankEngine::Small_Electric:
+      case XtankEngine::Small_Combustion:
+      case XtankEngine::Small_Turbine:
             sparkCount = 1;
             colorDim    = Color(0.50f, 0.10f, 0.00f);  // dark red-brown
             colorBright = Color(0.80f, 0.30f, 0.05f);  // dim orange-red
@@ -2543,20 +2546,23 @@ void Ship::emitMovementSparks()
             sType       = UI::SparkTypePoint;
             break;
 
-         case XtankEngine::Heavy:
-            sparkCount = 3;
-            colorDim    = Color(1.00f, 0.45f, 0.00f);  // orange
-            colorBright = Color(1.00f, 0.90f, 0.25f);  // bright yellow
-            maxTTL      = 900;
-            sType       = UI::SparkTypeLine;   // line sparks = distinct look
-            break;
-
-         default:   // Standard
+         case XtankEngine::Medium_Electric:
+         case XtankEngine::Medium_Combustion:
+         case XtankEngine::Medium_Turbine:
+         case XtankEngine::Fuel_Cell:
             sparkCount = 2;
             colorDim    = Color(0.80f, 0.20f, 0.00f);  // red
             colorBright = Color(1.00f, 0.60f, 0.10f);  // orange
             maxTTL      = 650;
             sType       = UI::SparkTypePoint;
+            break;
+
+         default:
+            sparkCount = 3;
+            colorDim    = Color(1.00f, 0.45f, 0.00f);  // orange
+            colorBright = Color(1.00f, 0.90f, 0.25f);  // bright yellow
+            maxTTL      = 900;
+            sType       = UI::SparkTypeLine;   // line sparks = distinct look
             break;
       }
 

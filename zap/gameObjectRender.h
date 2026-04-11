@@ -136,7 +136,7 @@ extern void renderXtankTurrets(const Point &pos, F32 bodyAngle, F32 aimAngle, F3
 // Render xtank vehicle "bling" overlay: heat-sink count crosses and engine-type diamond
 extern void renderXtankVehicleOverlay(const Point &pos, F32 bodyAngle, F32 alpha,
                                        S32 bodyIdx, S32 heatSinkCount,
-                                       XtankEngine::Type engineType, F32 warpInScale);
+                                       XtankEngine engineType, F32 warpInScale);
 
 // Render repair rays to all the repairing objects
 extern void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<BfObject> > &repairTargets, F32 alpha);   

@@ -31,7 +31,7 @@ namespace Zap
 
 
 // Keys used for the 14 bodies: 1-9, 0, A-D.
-static const InputCode sBodyKeys[XtankBody::Count] =
+static const InputCode sBodyKeys[XtankBodyCount] =
 {
    KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7,
    KEY_8, KEY_9, KEY_0, KEY_A, KEY_B, KEY_C, KEY_D,
@@ -51,7 +51,7 @@ static const InputCode sHeatSinkKeys[XtankHeatSinkMax] =
 
 // Keys used for the 10 weapon options (None = 0, weapons 1-9).
 // None is placed at KEY_0 so number keys 1-9 map directly to weapon indices.
-static const InputCode sWeaponKeys[XtankWeapon::Count + 1] =
+static const InputCode sWeaponKeys[XtankWeaponCount + 1] =
 {
    KEY_0,     // None
    KEY_1,     // MachineGun
@@ -102,7 +102,7 @@ HelperMenu::HelperMenuType UIXtankHelper::getType() { return XtankHelperType; }
 void UIXtankHelper::buildBodyItems()
 {
    mBodyItems.clear();
-   for(S32 i = 0; i < XtankBody::Count; i++)
+   for(S32 i = 0; i < XtankBodyCount; i++)
    {
       const TankPhysicsInfo &physics = xtankPhysicsInfos[i];
       S32 turrets = xtankTurretInfos[i].count;
@@ -117,7 +117,7 @@ void UIXtankHelper::buildBodyItems()
 
       // We store per-item help text in persistent strings (one per body).
       // Use static storage so the c_str() pointers remain valid.
-      static string helpTexts[XtankBody::Count];
+      static string helpTexts[XtankBodyCount];
       helpTexts[i] = string("SPD:") + spdClass +
                      "  ARM:" + armClass +
                      "  TURR:" + itos(turrets);
@@ -142,14 +142,14 @@ void UIXtankHelper::buildBodyItems()
 void UIXtankHelper::buildEngineItems()
 {
    mEngineItems.clear();
-   static const char *engineHelp[XtankEngine::Count] =
+   static const char *engineHelp[XtankEngineCount] =
    {
       "Slower top speed and acceleration",
       "Balanced performance",
       "Higher top speed and acceleration",
    };
 
-   for(S32 e = 0; e < XtankEngine::Count; e++)
+   for(S32 e = 0; e < XtankEngineCount; e++)
    {
       OverlayMenuItem item;
       item.key                 = s3Keys[e];
@@ -170,14 +170,14 @@ void UIXtankHelper::buildEngineItems()
 void UIXtankHelper::buildTreadItems()
 {
    mTreadItems.clear();
-   static const char *treadHelp[XtankTread::Count] =
+   static const char *treadHelp[XtankTreadCount] =
    {
       "Nimble steering, slightly less traction",
       "Balanced handling",
       "Slower turning, higher grip and braking",
    };
 
-   for(S32 t = 0; t < XtankTread::Count; t++)
+   for(S32 t = 0; t < XtankTreadCount; t++)
    {
       OverlayMenuItem item;
       item.key                 = s3Keys[t];
@@ -242,7 +242,7 @@ void UIXtankHelper::buildWeaponItems()
       item.key                 = sWeaponKeys[0];
       item.button              = KEY_NONE;
       item.showOnMenu          = true;
-      item.itemIndex           = (U32)XtankWeapon::None + 1;  // offset so 0 = None stored safely
+      item.itemIndex           = (U32)XtankWeaponNone + 1;  // offset so 0 = None stored safely
       item.name                = "None";
       item.itemColor           = UNSEL_COLOR;
       item.help                = "Empty slot";
@@ -252,7 +252,7 @@ void UIXtankHelper::buildWeaponItems()
    }
 
    // One entry per weapon.
-   for(S32 w = 0; w < XtankWeapon::Count; w++)
+   for(S32 w = 0; w < XtankWeaponCount; w++)
    {
       OverlayMenuItem item;
       item.key                 = sWeaponKeys[w + 1];
@@ -406,11 +406,11 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
    else if(mPhase == PHASE_ENGINE)
    {
       // --- Engine selection ---
-      for(S32 e = 0; e < XtankEngine::Count; e++)
+      for(S32 e = 0; e < XtankEngineCount; e++)
       {
          if(inputCode == s3Keys[e])
          {
-            mDesignInProgress.engineType = (XtankEngine::Type)e;
+            mDesignInProgress.engineType = (XtankEngine)e;
             mPhase = PHASE_TREADS;
             mHighlightedIndex = 0;
 
@@ -424,11 +424,11 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
    else if(mPhase == PHASE_TREADS)
    {
       // --- Tread selection ---
-      for(S32 t = 0; t < XtankTread::Count; t++)
+      for(S32 t = 0; t < XtankTreadCount; t++)
       {
          if(inputCode == s3Keys[t])
          {
-            mDesignInProgress.treadType = (XtankTread::Type)t;
+            mDesignInProgress.treadType = (XtankTreadType)t;
             mPhase = PHASE_HEATSINK;
             mHighlightedIndex = 0;
 
@@ -461,17 +461,17 @@ bool UIXtankHelper::processInputCode(InputCode inputCode)
       // None (key 0)
       if(inputCode == sWeaponKeys[0])
       {
-         mDesignInProgress.weapons[slot] = XtankWeapon::None;
+         mDesignInProgress.weapons[slot] = XtankWeaponNone;
          mHighlightedIndex = 0;
          advanceToNextPhaseOrFinish();
          return true;
       }
 
-      for(S32 w = 0; w < XtankWeapon::Count; w++)
+      for(S32 w = 0; w < XtankWeaponCount; w++)
       {
          if(inputCode == sWeaponKeys[w + 1])
          {
-            mDesignInProgress.weapons[slot] = (XtankWeapon::Type)w;
+            mDesignInProgress.weapons[slot] = (XtankWeapon)w;
             mHighlightedIndex = 0;
             advanceToNextPhaseOrFinish();
             return true;
@@ -580,7 +580,7 @@ void UIXtankHelper::renderPreviewPanel() const
    if(mPhase == PHASE_BODY)
    {
       S32 idx = mHighlightedIndex;
-      if(idx < 0 || idx >= XtankBody::Count) idx = 0;
+      if(idx < 0 || idx >= XtankBodyCount) idx = 0;
 
       // Title: body name
       r.setColor(Colors::white);
@@ -657,7 +657,7 @@ void UIXtankHelper::renderPreviewPanel() const
    else if(mPhase == PHASE_ENGINE)
    {
       S32 idx = mHighlightedIndex;
-      if(idx < 0 || idx >= XtankEngine::Count) idx = 0;
+      if(idx < 0 || idx >= XtankEngineCount) idx = 0;
 
       const XtankEngineInfo &ei = xtankEngineInfos[idx];
 
@@ -675,11 +675,24 @@ void UIXtankHelper::renderPreviewPanel() const
       static const Color  ENGINE_STD_COLOR  (0.95f, 0.35f, 0.05f); // orange-red
       static const Color  ENGINE_HEAVY_COLOR(1.0f, 0.65f, 0.0f);   // bright orange
       Color engColor;
-      switch((XtankEngine::Type)idx)
+      switch((XtankEngine)idx)
       {
-         case XtankEngine::Light:   engColor = ENGINE_LIGHT_COLOR; break;
-         case XtankEngine::Heavy:   engColor = ENGINE_HEAVY_COLOR; break;
-         default:                   engColor = ENGINE_STD_COLOR;   break;
+         case XtankEngine::Small_Electric:
+         case XtankEngine::Small_Combustion:
+         case XtankEngine::Small_Turbine:
+            engColor = ENGINE_LIGHT_COLOR;
+            break;
+
+         case XtankEngine::Medium_Electric:
+         case XtankEngine::Medium_Combustion:
+         case XtankEngine::Medium_Turbine:
+         case XtankEngine::Fuel_Cell:
+            engColor = ENGINE_STD_COLOR;
+            break;
+
+         default:
+            engColor = ENGINE_HEAVY_COLOR;
+            break;
       }
       F32 gy = F32(GRAPHIC_Y);
       F32 diam[] = {
@@ -703,7 +716,7 @@ void UIXtankHelper::renderPreviewPanel() const
                           "Acceleration: %+d%%", accPct);
 
       // Flavour text
-      static const char *engDesc[XtankEngine::Count] = {
+      static const char *engDesc[XtankEngineCount] = {
          "Lighter plant, reduced power",
          "Balanced performance",
          "Heavy plant, maximum power",
@@ -719,7 +732,7 @@ void UIXtankHelper::renderPreviewPanel() const
    else if(mPhase == PHASE_TREADS)
    {
       S32 idx = mHighlightedIndex;
-      if(idx < 0 || idx >= XtankTread::Count) idx = 0;
+      if(idx < 0 || idx >= XtankTreadCount) idx = 0;
 
       const XtankTreadInfo &ti = xtankTreadInfos[idx];
 
@@ -756,7 +769,7 @@ void UIXtankHelper::renderPreviewPanel() const
       drawCenteredStringf(PNL_CX, ty, STAT_SZ,
                           "Braking:     %+d%%", fricPct);
 
-      static const char *trdDesc[XtankTread::Count] = {
+      static const char *trdDesc[XtankTreadCount] = {
          "Nimble steering, less grip",
          "Balanced handling",
          "Slower turns, heavy braking",
@@ -838,7 +851,7 @@ void UIXtankHelper::renderPreviewPanel() const
       else
       {
          S32 w = idx - 1;  // 0-based weapon index
-         if(w < 0 || w >= XtankWeapon::Count) w = 0;
+         if(w < 0 || w >= XtankWeaponCount) w = 0;
          const XtankWeaponInfo &wi = xtankWeaponInfos[w];
 
          drawCenteredString(PNL_CX, TITLE_Y, TITLE_SZ, wi.name);

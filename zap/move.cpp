@@ -5,7 +5,7 @@
 
 #include "move.h"
 #include "Point.h"
-#include "XtankShape.h"   // For XtankBody::Count
+#include "XtankShape.h"   // For XtankBodyCount
 
 #include "stringUtils.h"
 #include "MathUtils.h"     // For radiansToUnit() def
@@ -47,7 +47,7 @@ void Move::initialize()
    x = 0;
    y = 0;
    angle = 0;
-   bodyIndex = -1;   // -1 = normal BF ship (XtankBody::None)
+   bodyIndex = -1;   // -1 = normal BF ship (XtankBodyNone)
 
    for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
    {
@@ -56,10 +56,10 @@ void Move::initialize()
    }
 
    for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
-      weaponSlot[i] = -1;   // -1 = XtankWeapon::None
+      weaponSlot[i] = -1;   // -1 = XtankWeaponNone
 
-   engineType    = (S8)XtankEngine::Default;
-   treadType     = (S8)XtankTread::Default;
+   engineType    = (S8)XtankEngineDefault;
+   treadType     = (S8)XtankTreadDefault;
    heatSinkCount = (S8)XtankHeatSinkDefault;
 }
 
@@ -134,21 +134,21 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
          stream->writeFlag(moduleSecondary[i]);
       }
 
-      // Body index: -1 (BF ship) through XtankBody::Count-1; stored as 0..XtankBody::Count
-      stream->writeRangedU32((U32)(bodyIndex + 1), 0, XtankBody::Count);
+      // Body index: -1 (BF ship) through XtankBodyCount-1; stored as 0..XtankBodyCount
+      stream->writeRangedU32((U32)(bodyIndex + 1), 0, XtankBodyCount);
 
       // Weapon slots: only present when an xtank body is active.
-      // Each slot value -1..XtankWeapon::Count-1 is stored as 0..XtankWeapon::Count.
+      // Each slot value -1..XtankWeaponCount-1 is stored as 0..XtankWeaponCount.
       if(bodyIndex >= 0)
       {
          for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
-            stream->writeRangedU32((U32)(weaponSlot[i] + 1), 0, XtankWeapon::Count);
+            stream->writeRangedU32((U32)(weaponSlot[i] + 1), 0, XtankWeaponCount);
 
-         // Engine type: 0..XtankEngine::Count-1
-         stream->writeRangedU32((U32)engineType, 0, XtankEngine::Count - 1);
+         // Engine type: 0..XtankEngineCount-1
+         stream->writeRangedU32((U32)engineType, 0, XtankEngineCount - 1);
 
-         // Tread type: 0..XtankTread::Count-1
-         stream->writeRangedU32((U32)treadType, 0, XtankTread::Count - 1);
+         // Tread type: 0..XtankTreadCount-1
+         stream->writeRangedU32((U32)treadType, 0, XtankTreadCount - 1);
 
          // Heat sink count: 1..6, stored as 0..5
          stream->writeRangedU32((U32)(heatSinkCount - 1), 0, XtankHeatSinkMax - XtankHeatSinkMin);
@@ -189,25 +189,25 @@ void Move::unpack(BitStream *stream, bool unpackTime)
          moduleSecondary[i] = stream->readFlag();
       }
 
-      // Body index: stored as 0..XtankBody::Count, representing -1..XtankBody::Count-1
-      bodyIndex = (S8)(stream->readRangedU32(0, XtankBody::Count) - 1);
+      // Body index: stored as 0..XtankBodyCount, representing -1..XtankBodyCount-1
+      bodyIndex = (S8)(stream->readRangedU32(0, XtankBodyCount) - 1);
 
       // Weapon slots: present only when an xtank body is active.
       if(bodyIndex >= 0)
       {
          for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
-            weaponSlot[i] = (S8)(stream->readRangedU32(0, XtankWeapon::Count) - 1);
+            weaponSlot[i] = (S8)(stream->readRangedU32(0, XtankWeaponCount) - 1);
 
-         engineType    = (S8)stream->readRangedU32(0, XtankEngine::Count - 1);
-         treadType     = (S8)stream->readRangedU32(0, XtankTread::Count - 1);
+         engineType    = (S8)stream->readRangedU32(0, XtankEngineCount - 1);
+         treadType     = (S8)stream->readRangedU32(0, XtankTreadCount - 1);
          heatSinkCount = (S8)(stream->readRangedU32(0, XtankHeatSinkMax - XtankHeatSinkMin) + 1);
       }
       else
       {
          for(U32 i = 0; i < ARRAYSIZE(weaponSlot); i++)
             weaponSlot[i] = -1;
-         engineType    = (S8)XtankEngine::Default;
-         treadType     = (S8)XtankTread::Default;
+         engineType    = (S8)XtankEngineDefault;
+         treadType     = (S8)XtankTreadDefault;
          heatSinkCount = (S8)XtankHeatSinkDefault;
       }
    }

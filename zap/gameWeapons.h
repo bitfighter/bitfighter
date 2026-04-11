@@ -52,7 +52,7 @@ struct GameWeapon
    // The projectile type and behavior are determined by the xtank weapon's
    // mapped bfWeapon.  shooterRadius should be 0 when barrelTip is already
    // the world-space muzzle position.
-   static void createXtankProjectile(XtankWeapon::Type weapon, const Point &dir,
+   static void createXtankProjectile(XtankWeapon weapon, const Point &dir,
          const Point &barrelTip, const Point &shooterVel, S32 time, BfObject *shooter);
 };
 
