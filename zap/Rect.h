@@ -85,7 +85,7 @@ public:
    bool intersects(const Point &center, F32 radius) const;
 
    void expand(const Point &delta);
-   void expandToInt(const Point &delta);
+   void expandToInt(const Point &delta = Point(0, 0));
 
    void offset(const Point &offset);
 
