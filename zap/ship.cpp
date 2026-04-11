@@ -349,6 +349,7 @@ F32 Ship::processMove(U32 stateIndex)
       // Sync engine, tread and heat sink settings from the move.
       XtankEngine newEngine = (XtankEngine)(S32)mCurrentMove.engineType;
       XtankTread  newTread  = (XtankTread)(S32)mCurrentMove.treadType;
+
       S8 newHS = mCurrentMove.heatSinkCount;
 
       if(newEngine != mXtankDesign.engineType ||

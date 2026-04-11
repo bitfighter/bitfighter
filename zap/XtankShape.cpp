@@ -607,15 +607,15 @@ XtankWeaponInfo xtankWeaponInfos[] =
    //   F_BL=blue, F_OR=orange, F_YE=yellow, F_GR=green, F_VI=violet, F_BEAM=laser
    //
    //   name       fireDelay energyDrain     bfWeapon      projVelocity  projLiveTime       style
-   { "Machine Gun",   150,       300,        WeaponPhaser,  340,          1100,         ProjectileStyleXtankBlue   },  // MG:   spd=17,fr=22,tm=3
-   { "Laser",         150,       8000,       WeaponRailgun, 1200,         1000,         ProjectileStyleXtankLaser  },  // LASER:spd=60,fr=20,tm=3
-   { "Missile",       750,       8000,       WeaponSeeker,  500,          2550,         ProjectileStyleXtankViolet },  // SEEKER:spd=25,fr=51,tm=15
-   { "Grenade",       150,       6000,       WeaponBurst,   440,           950,         ProjectileStyleXtankOrange },  // CANNON:spd=22,fr=19,tm=3
-   { "Rocket",        400,       7000,       WeaponBurst,   800,           750,         ProjectileStyleXtankYellow },  // ROCKET:spd=40,fr=15,tm=8
-   { "Acid",          150,        800,       WeaponBounce,  200,           850,         ProjectileStyleXtankGreen  },  // ACID:  spd=10,fr=17,tm=3
-   { "Tracer",        100,        400,       WeaponTurret,  340,          1100,         ProjectileStyleXtankBlue   },  // LMG:   spd=17,fr=22,tm=2
-   { "Bomb",          400,       10000,      WeaponBurst,   500,          1000,         ProjectileStyleXtankYellow },  // HROCKET:spd=40,rng~500,tm=8
-   { "Fire",           50,       1500,       WeaponTriple,  240,           850,         ProjectileStyleXtankGreen  },  // FLAME: spd=12,fr=17,tm=1
+   { "Machine Gun",   150,        300,       WeaponPhaser,   340,          1100,         ProjectileStyleXtankBlue   },  // MG:   spd=17,fr=22,tm=3
+   { "Laser",         150,       8000,       WeaponRailgun, 1200,          1000,         ProjectileStyleXtankLaser  },  // LASER:spd=60,fr=20,tm=3
+   { "Missile",       750,       8000,       WeaponSeeker,   500,          2550,         ProjectileStyleXtankViolet },  // SEEKER:spd=25,fr=51,tm=15
+   { "Grenade",       150,       6000,       WeaponBurst,    440,           950,         ProjectileStyleXtankOrange },  // CANNON:spd=22,fr=19,tm=3
+   { "Rocket",        400,       7000,       WeaponBurst,    800,           750,         ProjectileStyleXtankYellow },  // ROCKET:spd=40,fr=15,tm=8
+   { "Acid",          150,        800,       WeaponBounce,   200,           850,         ProjectileStyleXtankGreen  },  // ACID:  spd=10,fr=17,tm=3
+   { "Tracer",        100,        400,       WeaponTurret,   340,          1100,         ProjectileStyleXtankBlue   },  // LMG:   spd=17,fr=22,tm=2
+   { "Bomb",          400,      10000,       WeaponBurst,    500,          1000,         ProjectileStyleXtankYellow },  // HROCKET:spd=40,rng~500,tm=8
+   { "Fire",           50,       1500,       WeaponTriple,   240,           850,         ProjectileStyleXtankGreen  },  // FLAME: spd=12,fr=17,tm=1
 }; // xtankWeaponInfos[]
 
 
