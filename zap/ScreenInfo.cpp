@@ -129,13 +129,13 @@ S32 ScreenInfo::getDrawAreaHeight() const
 // Dimensions of black bars in physical pixels in full-screen unstretched mode.  Does not reflect current window mode
 S32 ScreenInfo::getHorizPhysicalMargin() const
 {
-   return 0.5 * (mPhysicalScreenWidth - getDrawAreaWidth());
+   return (S32)(0.5 * (mPhysicalScreenWidth - getDrawAreaWidth()));
 }
 
 
 S32 ScreenInfo::getVertPhysicalMargin() const
 {
-   return 0.5 * (mPhysicalScreenHeight - getDrawAreaHeight());
+   return (S32)(0.5 * (mPhysicalScreenHeight - getDrawAreaHeight()));
 }
 
 
@@ -229,7 +229,7 @@ void ScreenInfo::setMousePos(S32 x, S32 y, DisplayMode mode)
 
 void ScreenInfo::setCanvasMousePos(S32 x, S32 y, DisplayMode mode)
 {
-   mWindowMousePos.set(convertCanvasToWindowCoord(x, y, mode));
+   mWindowMousePos.set(convertCanvasToWindowCoord((F32)x, (F32)y, mode));
    mCanvasMousePos.set(x, y);
 }
 

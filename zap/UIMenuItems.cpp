@@ -622,7 +622,7 @@ ToggleMenuItem::ToggleMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NONE, KE
    getStringVectorFromTable(L, 2, methodName, mOptions);    // Fills mOptions with elements in a table
 
    // Optional (but recommended) items
-   mIndex = clamp(getInt(L, 3, 1) - 1, 0,  mOptions.size() - 1);   // First - 1 for compatibility with Lua's 1-based array index
+   mIndex = clamp((S32)getInt(L, 3, 1) - 1, 0, (S32)mOptions.size() - 1);   // First - 1 for compatibility with Lua's 1-based array index
    mWrap = getCheckedBool(L, 4, methodName, false);
    mHelp = getString(L, 4, "");
 
@@ -654,7 +654,7 @@ YesNoMenuItem::YesNoMenuItem(lua_State *L) : Parent("", Vector<string>(), 0, tru
    mDisplayVal = getCheckedString(L, 1, methodName);
 
    // Optional (but recommended) items
-   setIndex(getInt(L, 2, 1) - 1);                // - 1 for compatibility with Lua's 1-based array index
+   setIndex((S32)getInt(L, 2, 1) - 1);                // - 1 for compatibility with Lua's 1-based array index
    mHelp = getString(L, 3, "");
 }
 
@@ -995,15 +995,15 @@ CounterMenuItem::CounterMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NONE, 
       // mValue =  getInt(L, 2, methodName);  ==> set this later, after we've determined mMinValue and mMaxValue
 
       // Optional (but recommended) items
-      mStep =     getInt(L, 3, 1);
-      mMinValue = getInt(L, 4, 0);
-      mMaxValue = getInt(L, 5, 100);
+      mStep =     (S32)getInt(L, 3, 1);
+      mMinValue = (S32)getInt(L, 4, 0);
+      mMaxValue = (S32)getInt(L, 5, 100);
       mUnits =    getString(L, 6, "");
       mMinMsg =   getString(L, 7, "");
       mHelp =     getString(L, 8, "");
 
       // Second required item
-      setIntValue(getCheckedInt(L, 2, methodName));    // Set this one last so we'll know mMinValue and mMaxValue
+      setIntValue((S32)getCheckedInt(L, 2, methodName));    // Set this one last so we'll know mMinValue and mMaxValue
    }
    catch(LuaException &e)
    {
@@ -1053,7 +1053,7 @@ void FloatCounterMenuItem::initialize()
 
 void FloatCounterMenuItem::setFloatValue(F32 val)
 {
-   F32 rounded = floor(val * mPrecision + 0.5) / mPrecision;
+   F32 rounded = floor(val * mPrecision + 0.5f) / mPrecision;
 
    mValue = clamp(rounded, mMinValue, mMaxValue);
 }
@@ -1061,7 +1061,7 @@ void FloatCounterMenuItem::setFloatValue(F32 val)
 
 void FloatCounterMenuItem::setValue(const string &val)
 {
-   setFloatValue(Zap::stof(val));
+   setFloatValue((F32)Zap::stof(val));
 }
 
 
@@ -1097,7 +1097,7 @@ bool FloatCounterMenuItem::handleKey(InputCode inputCode)
    {
       if(InputCodeManager::checkModifier(KEY_SHIFT))
       {
-         increment(getBigIncrement());
+         increment((S32)getBigIncrement());
          snap();
       }
       else
@@ -1109,7 +1109,7 @@ bool FloatCounterMenuItem::handleKey(InputCode inputCode)
    {
       if(InputCodeManager::checkModifier(KEY_SHIFT))
       {
-         decrement(getBigIncrement());
+         decrement((S32)getBigIncrement());
          snap();
       }
       else
@@ -1277,10 +1277,10 @@ FloatCounterMenuItem::FloatCounterMenuItem(lua_State *L) : Parent("", NULL, "", 
       // mValue =  getInt(L, 2, methodName);  ==> set this later, after we've determined mMinValue and mMaxValue
 
       // Optional (but recommended) items
-      mStep =     getFloat(L, 3, 0.1);
-      mMinValue = getFloat(L, 4, 0.1);
-      mMaxValue = getFloat(L, 5, 1000);
-      mDecimalPlaces = getInt(L, 6, 3);
+      mStep =     getFloat(L, 3, 0.1f);
+      mMinValue = getFloat(L, 4, 0.1f);
+      mMaxValue = getFloat(L, 5, 1000.0f);
+      mDecimalPlaces = (S32)getInt(L, 6, 3);
       mUnits =    getString(L, 7, "");
       mMinMsg =   getString(L, 8, "");
       mHelp =     getString(L, 9, "");
@@ -1758,7 +1758,7 @@ TextEntryMenuItem::TextEntryMenuItem(lua_State *L) : Parent("", NULL, "", KEY_NO
    // Optional (but recommended) items
    mLineEditor.setString(getString(L, 2, ""));
    mEmptyVal = getString(L, 3, "");
-   mLineEditor.mMaxLen = getInt(L, 4, 32);
+   mLineEditor.mMaxLen = (U32)getInt(L, 4, 32);
    mHelp = getString(L, 5, "");
 }
 

@@ -152,8 +152,8 @@ void init()
    mItemCount = 0;
 
    mNodeList = (Node **) malloc(InitialNodeListSize * sizeof(Node *));
-   for(S32 i = 1; i < InitialNodeListSize; i++)
-      mNodeList[i] = (Node *) (( (i + 1) << 1) | 1); // see the doco in stringTable.h for how free list entries are coded
+   for(U32 i = 1; i < InitialNodeListSize; i++)
+      mNodeList[i] = (Node *) (size_t) (( (i + 1) << 1) | 1); // see the doco in stringTable.h for how free list entries are coded
    
    mNodeList[InitialNodeListSize - 1] = NULL;
    mNodeList[0] = (Node *) mMemPool->alloc(sizeof(Node));
@@ -184,7 +184,7 @@ StringTableEntryId insert(const char* val, const bool caseSens)
 {
    if(!val)
       return 0;
-   return insertn(val, strlen(val), caseSens);
+   return insertn(val, (S32) strlen(val), caseSens);
 }
 
 //--------------------------------------
@@ -260,8 +260,8 @@ StringTableEntryId insertn(const char* val, S32 len, const bool caseSens)
       U32 oldNodeListSize = mNodeListSize;
       mNodeListSize += InitialNodeListSize;
       mNodeList = (Node **) realloc(mNodeList, mNodeListSize * sizeof(Node *));
-      for(S32 i = oldNodeListSize; i < mNodeListSize; i++)
-         mNodeList[i] = (Node *) (((i + 1) << 1) | 1);
+      for(U32 i = oldNodeListSize; i < mNodeListSize; i++)
+         mNodeList[i] = (Node *) (size_t) (((i + 1) << 1) | 1);
       mNodeList[mNodeListSize - 1] = 0;
       mNodeListFreeEntry = (oldNodeListSize << 1) | 1;
    }
