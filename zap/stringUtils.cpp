@@ -414,35 +414,25 @@ void parseString(const string &inputString, Vector<string> &words, char seperato
 // Splits inputString into a series of words using the specified separator; does not consider quotes; trims words
 void parseString(const char *inputString, Vector<string> &words, char seperator)
 {
-   const S32 maxlen = 126;
-   char word[maxlen + 2];
-   S32 wn = 0;       // Where we are in the word we're creating
+   string word;
    S32 isn = 0;      // Where we are in the inputString we're parsing
 
    words.clear();
 
    while(inputString[isn] != 0)
    {
-      if(inputString[isn] == seperator) 
+      if(inputString[isn] == seperator)
       {
-         word[wn] = 0;    // Add terminating NULL
-
          words.push_back(trim(word));
-
-         wn = 0;
+         word.clear();
       }
       else
       {
-         if(wn < maxlen)   // Avoid overflows
-         {
-            word[wn] = inputString[isn]; 
-            wn++; 
-         }
+         word += inputString[isn];
       }
       isn++;
    }
-   
-   word[wn] = 0;     // Add terminator
+
    words.push_back(trim(word));
 }
 
