@@ -348,13 +348,13 @@ void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color 
    drawFilledArc(Point(pos.x + width / 2 - radius, pos.y + height / 2 - radius), radius,            0, FloatHalfPi);
    drawFilledArc(Point(pos.x - width / 2 + radius, pos.y + height / 2 - radius), radius,  FloatHalfPi, FloatPi);
 
-   drawRect(pos.x - width / 2, pos.y - height / 2 + radius, 
+   drawRect(pos.x - width / 2, pos.y - height / 2 + radius,
             pos.x + width / 2, pos.y + height / 2 - radius, RenderType::TriangleFan);
 
-   drawRect(pos.x - width / 2 + radius, pos.y - height / 2, 
+   drawRect(pos.x - width / 2 + radius, pos.y - height / 2,
             pos.x + width / 2 - radius, pos.y - height / 2 + radius, RenderType::TriangleFan);
 
-   drawRect(pos.x - width / 2 + radius, pos.y + height / 2, 
+   drawRect(pos.x - width / 2 + radius, pos.y + height / 2,
             pos.x + width / 2 - radius, pos.y + height / 2 - radius, RenderType::TriangleFan);
 
    r.setColor(outlineColor, alpha);
@@ -464,7 +464,7 @@ void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end)
 
 
 void drawCentroidMark(const Point &pos, F32 radius)
-{  
+{
    drawPolygon(pos, 6, radius, 0);
 }
 
@@ -496,7 +496,7 @@ void renderHealthBar(F32 health, const Point &center, const Point &dir, F32 leng
 }
 
 
-static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bool shieldActive, 
+static void renderActiveModuleOverlays(F32 alpha, F32 radius, U32 sensorTime, bool shieldActive,
                                        bool sensorActive, bool repairActive, bool hasArmor)
 {
    Renderer& r = Renderer::get();
@@ -648,7 +648,7 @@ static void calcThrustComponents(const Point &velocity, F32 angle, F32 deltaAngl
 
    // Reset thrusts
    for(U32 i = 0; i < 4; i++)
-      thrusts[i] = 0;            
+      thrusts[i] = 0;
 
    if(len > 0)
    {
@@ -670,7 +670,7 @@ static void calcThrustComponents(const Point &velocity, F32 angle, F32 deltaAngl
       thrusts[3] += 0.25;
    else if(deltaAngle < -0.001)
       thrusts[2] += 0.25;
-   
+
    if(boostActive)
       for(U32 i = 0; i < 4; i++)
          thrusts[i] *= 1.3f;
@@ -840,7 +840,7 @@ void renderGamesPlayedMark(S32 x, S32 y, S32 height, U32 gamesPlayed)
    r.pushMatrix();
 
    r.translate(x - 10.0f, y - 6.0f, 0.0f);
-   
+
    r.setLineWidth(gLineWidth1);
 
    r.setColor(Colors::gray20);
@@ -937,10 +937,10 @@ static void renderShipName(const string &shipName, bool isAuthenticated, bool is
 
 
    // Set name color based on killStreak length
-   if(killStreak >= UserInterface::StreakingThreshold)      
-      r.setColor(Colors::streakPlayerNameColor, textAlpha);    
-   else                                      
-      r.setColor(Colors::idlePlayerNameColor, textAlpha);         // <=== Probably wrong, not sure how to fix...  
+   if(killStreak >= UserInterface::StreakingThreshold)
+      r.setColor(Colors::streakPlayerNameColor, textAlpha);
+   else
+      r.setColor(Colors::idlePlayerNameColor, textAlpha);         // <=== Probably wrong, not sure how to fix...
 
 
    S32 ypos = 30 + textSize;
@@ -959,11 +959,11 @@ static void renderShipName(const string &shipName, bool isAuthenticated, bool is
 }
 
 
-void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel, 
-                F32 angle, F32 deltaAngle, const ShipShapeInfo *shapeInfo, const Color *color, const Color &hbc, F32 alpha, 
-                U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy, 
-                bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team, 
-                bool boostActive, bool shieldActive, bool repairActive, bool sensorActive, 
+void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, const Point &vel,
+                F32 angle, F32 deltaAngle, const ShipShapeInfo *shapeInfo, const Color *color, const Color &hbc, F32 alpha,
+                U32 renderTime, const string &shipName, F32 warpInScale, bool isLocalShip, bool isBusy,
+                bool isAuthenticated, bool showCoordinates, F32 health, F32 radius, S32 team,
+                bool boostActive, bool shieldActive, bool repairActive, bool sensorActive,
                 bool hasArmor, bool engineeringTeleport, U32 killStreak, U32 gamesPlayed)
 {
    Renderer& r = Renderer::get();
@@ -973,7 +973,7 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
 
    // Draw the ship name, if there is one, before the glRotatef below, but only on layer 1...
    // Don't label the local ship.
-   if(!isLocalShip && layerIndex == 1 && shipName != "")  
+   if(!isLocalShip && layerIndex == 1 && shipName != "")
    {
       renderShipName(shipName, isAuthenticated, isBusy, killStreak, gamesPlayed, alpha);
 
@@ -986,18 +986,18 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
    if(showCoordinates && layerIndex == 1)
       renderShipCoords(actualPos, isLocalShip, alpha);
 
-   F32 rotAmount = 0;      
+   F32 rotAmount = 0;
    if(warpInScale < 0.8f)
       rotAmount = (0.8f - warpInScale) * 540;
 
-   // An angle of 0 means the ship is heading down the +X axis since we draw the ship 
+   // An angle of 0 means the ship is heading down the +X axis since we draw the ship
    // pointing up the Y axis, we should rotate by the ship's angle, - 90 degrees
    r.rotate(radiansToDegrees(angle) - 90 + rotAmount, 0, 0, 1.0);
    r.scale(warpInScale);
 
    // NOTE: Get rid of this if we stop sending location of cloaked ship to clients.  Also, we can stop
    //       coming here altogether when layerIndex is not 1, and strip out a bunch of ifs above.
-   if(layerIndex == -1)    
+   if(layerIndex == -1)
    {
       // Draw the outline of the ship in solid black -- this will block out any stars and give
       // a tantalizing hint of motion when the ship is cloaked.  Could also try some sort of star-twinkling or
@@ -1015,7 +1015,7 @@ void renderShip(S32 layerIndex, const Point &renderPos, const Point &actualPos, 
    {
       // Calculate the various thrust components for rendering purposes; fills thrusts
       static F32 thrusts[4];
-      calcThrustComponents(vel, angle, deltaAngle, boostActive, thrusts);  
+      calcThrustComponents(vel, angle, deltaAngle, boostActive, thrusts);
 
       renderShip(shapeInfo, color, hbc, alpha, thrusts, health, radius, renderTime,
                  shieldActive, sensorActive, repairActive, hasArmor);
@@ -1034,7 +1034,7 @@ void renderSpawnShield(const Point &pos, U32 shieldTime, U32 renderTime)
    static const U32 BlinkDuration = BlinkCycleDuration / 2;       // Time shield is yellow or green during
 
    if(shieldTime > BlinkStartTime || shieldTime % BlinkCycleDuration > BlinkDuration)
-      r.setColor(Colors::green65);  
+      r.setColor(Colors::green65);
    else
       r.setColor(Colors::yellow40);
 
@@ -1286,7 +1286,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
 
    // Different teleport color styles
    static float colors[][NumColors][3] = {
-      {  // 0 -> Our standard blue-styled teleporter                                               
+      {  // 0 -> Our standard blue-styled teleporter
          { 0, 0.25, 0.8f },
          { 0, 0.5, 1 },
          { 0, 0, 1 },
@@ -1408,14 +1408,14 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
    for(S32 i = 0; i < NumColors; i++)
    {
       Color c(colors[type][i][0], colors[type][i][1], colors[type][i][2]);
-      liveColors[i].interp(radiusFraction, c, Colors::white);
+      liveColors[i].interp(radiusFraction, Colors::white, c);
    }
 
    Color deadColors[NumColors];
    for(S32 i = 0; i < NumColors; i++)
    {
       Color c(colors[3][i][0], colors[3][i][1], colors[3][i][2]);
-      deadColors[i].interp(radiusFraction, c, Colors::white);
+      deadColors[i].interp(radiusFraction, Colors::white, c);
    }
 
 
@@ -1482,7 +1482,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
       else
       {
          Color c;
-         c.interp(0.75f * F32(MaxParticles - i) / F32(MaxParticles - trackerCount), Colors::black, deadColors[t.ci]);
+         c.interp(0.75f * F32(MaxParticles - i) / F32(MaxParticles - trackerCount), deadColors[t.ci], Colors::black);
          currentColor = &c;
       }
 
@@ -1518,7 +1518,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, U32 time, 
          else
          {
             Color c;
-            c.interp(0.75f * F32(MaxParticles - i) / F32(MaxParticles - trackerCount), Colors::black, deadColors[t.ci]);
+            c.interp(0.75f * F32(MaxParticles - i) / F32(MaxParticles - trackerCount), deadColors[t.ci], Colors::black);
             currentColor = &c;
          }
 
@@ -1754,7 +1754,7 @@ void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
 {
    Renderer& r = Renderer::get();
    F32 alpha = 0.75f * parentAlpha;
-   
+
    r.pushMatrix();
       r.translate(pos);
       r.scale(0.2f);
@@ -1849,7 +1849,7 @@ void renderPolygonOutline(const Vector<Point> *outlinePoints, const Color *outli
 }
 
 
-void renderPolygonFill(const Vector<Point> *triangulatedFillPoints, const Color *fillColor, F32 alpha)      
+void renderPolygonFill(const Vector<Point> *triangulatedFillPoints, const Color *fillColor, F32 alpha)
 {
    if(fillColor)
       Renderer::get().setColor(*fillColor, alpha);
@@ -1858,7 +1858,7 @@ void renderPolygonFill(const Vector<Point> *triangulatedFillPoints, const Color 
 }
 
 
-void renderPolygon(const Vector<Point> *fillPoints, const Vector<Point> *outlinePoints, 
+void renderPolygon(const Vector<Point> *fillPoints, const Vector<Point> *outlinePoints,
                    const Color *fillColor, const Color *outlineColor, F32 alpha)
 {
    renderPolygonFill(fillPoints, fillColor, alpha);
@@ -1951,7 +1951,7 @@ void renderZone(const Color *outlineColor, const Vector<Point> *outline, const V
 }
 
 
-void renderLoadoutZone(const Color *color, const Vector<Point> *outline, const Vector<Point> *fill, 
+void renderLoadoutZone(const Color *color, const Vector<Point> *outline, const Vector<Point> *fill,
                        const Point &centroid, F32 angle, F32 scaleFact)
 {
    renderZone(color, outline, fill);
@@ -2066,7 +2066,7 @@ static Color getNexusBaseColor(bool open, F32 glowFraction)
    Color color;
 
    if(open)
-      color.interp(glowFraction, Colors::yellow, Colors::NexusOpenColor);
+      color.interp(glowFraction, Colors::NexusOpenColor, Colors::yellow);
    else
       color = Colors::NexusClosedColor;
 
@@ -2158,7 +2158,7 @@ void renderSlipZoneIcon(const Point &center, S32 radius, F32 angleRadians)
 }
 
 
-void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill, const Point &centroid)     
+void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *boundsFill, const Point &centroid)
 {
    Renderer& r = Renderer::get();
    Color theColor (0, 0.5, 0);  // Go for a pale green, for now...
@@ -2181,7 +2181,7 @@ void renderProjectile(const Point &pos, U32 style, U32 time)
    S32 bultype = 1;
 
    if(bultype == 1)    // Default stars
-   { 
+   {
       r.setColor(pi->projColors[0]);
       r.pushMatrix();
          r.translate(pos);
@@ -2387,7 +2387,7 @@ void renderMine(const Point &pos, bool armed, bool visible)
    Renderer& r = Renderer::get();
 
    F32 mod;
-   F32 vis;   
+   F32 vis;
 
    if(visible)    // Friendly mine
    {
@@ -2794,7 +2794,7 @@ void renderSoccerBall(const Point &pos, F32 size)
 }
 
 
-void renderCore(const Point &pos, const Color *coreColor, const Color &hbc, U32 time, 
+void renderCore(const Point &pos, const Color *coreColor, const Color &hbc, U32 time,
                 PanelGeom *panelGeom, F32 panelHealth[], F32 panelStartingHealth)
 {
    Renderer& r = Renderer::get();
@@ -2803,7 +2803,7 @@ void renderCore(const Point &pos, const Color *coreColor, const Color &hbc, U32 
    Color baseColor = Colors::gray80;
 
    Point dir;   // Reusable container
-   
+
    for(S32 i = 0; i < CORE_PANELS; i++)
    {
       dir = (panelGeom->repair[i] - pos);
@@ -2904,7 +2904,7 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
    {
       r.setColor(Colors::green);
       // All factors in here determined experimentally, seem to work at a variety of sizes and approximate the width and height
-      // of ordinary text in cases tested.  What should happen is the Bitfighter logo should, as closely as possible, match the 
+      // of ordinary text in cases tested.  What should happen is the Bitfighter logo should, as closely as possible, match the
       // size and extent of the text "Bitfighter".
       F32 scaleFactor = size / 129.0f;
       r.pushMatrix();
@@ -2968,7 +2968,7 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Point &pos, cons
          r.renderVertexArray(symbol, ARRAYSIZE(symbol) / 2, RenderType::LineStrip);
       r.popMatrix();
    }
-   
+
    r.renderPointVector(geom, RenderType::LineLoop);
 }
 
@@ -3189,7 +3189,7 @@ void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask)
 {
    Renderer& r = Renderer::get();
    const F32 fact = 0.15f * scale;   // Scaling factor to make the coordinates below fit nicely on the screen (derived by trial and error)
-   
+
    // 3609 is the diff btwn the min and max x coords below, 594 is same for y
 
    r.pushMatrix();
@@ -3292,7 +3292,7 @@ void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F
       r.setColor(.25f);
       drawFilledSquare(v, size / scale);
    }
-      
+
    if(style == HighlightedVertex)
       r.setColor(Colors::EDITOR_HIGHLIGHT_COLOR, alpha);
    else if(style == SelectedVertex)
@@ -3300,7 +3300,7 @@ void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F
    else if(style == SnappingVertex)
       r.setColor(Colors::magenta, alpha);
    else     // SelectedItemVertex
-      r.setColor(Colors::red, alpha);     
+      r.setColor(Colors::red, alpha);
 
    drawSquare(v, (F32)size / scale, !hollow);
 
@@ -3415,7 +3415,7 @@ void drawCircle(const Point &pos, F32 radius, const Color *color, F32 alpha)
 }
 
 
-void drawDivetedTriangle(F32 height, F32 len) 
+void drawDivetedTriangle(F32 height, F32 len)
 {
    Renderer& r = Renderer::get();
    static const F32 t30 = tan(degreesToRadians(30.0f));
@@ -3442,7 +3442,7 @@ void drawDivetedTriangle(F32 height, F32 len)
    pts.push_back(Point(.5 * len - 2 * (ht30 - len) * c60, 2 * h3 - lc30 - 2 * (ht30 - len) * s60));   // K
    pts.push_back(Point(.5 * len, 2 * h3 - lc30));   // L
 
-   
+
    r.pushMatrix();
       r.translate(200, 200, 0);
       r.rotate(F32(Platform::getRealMilliseconds() / 10 % 360), 0, 0, 1);
@@ -3512,7 +3512,7 @@ void render25FlagsBadge(F32 x, F32 y, F32 rad)
    F32 ty = y + rad - .40f * rad;
 
    r.setColor(Colors::yellow);
-   drawFilledRect(F32(tx - width / 2.0 - 1.0), F32(ty - (ts + 2.0) / 2.0), 
+   drawFilledRect(F32(tx - width / 2.0 - 1.0), F32(ty - (ts + 2.0) / 2.0),
                   F32(tx + width / 2.0 + 0.5), F32(ty + (ts + 2.0) / 2.0));
 
    r.setColor(Colors::gray20);
@@ -3539,7 +3539,7 @@ void renderDeveloperBadge(F32 x, F32 y, F32 rad)
    r.setColor(Colors::gray20);
 
    r.setLineWidth(1);
-   
+
    drawHorizLine(x - rad, x + rad, y - rad);
    drawHorizLine(x - rad, x + rad, y - r3);
    drawHorizLine(x - rad, x + rad, y + r3);
@@ -3870,9 +3870,9 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
    // When zooming out to commander's view, visibleExtent will grow larger and larger.  At some point, drawing all the stars
    // needed to fill the zoomed out screen becomes overwhelming, and bogs the computer down.  So we really need to set some
    // rational limit on where we stop showing stars during the zoom process (recall that stars are hidden when we are done zooming,
-   // so this effect should be transparent to the user except at the most extreme of scales, and then, the alternative is slowing 
+   // so this effect should be transparent to the user except at the most extreme of scales, and then, the alternative is slowing
    // the computer greatly).  Note that 10000 is probably irrationally high.
-   if(visibleExtent.x > 10000 || visibleExtent.y > 10000) 
+   if(visibleExtent.x > 10000 || visibleExtent.y > 10000)
       return;
 
    upperLeft  *= 1 / starChunkSize;
@@ -3910,8 +3910,8 @@ void renderStars(const Point *stars, const Color *colors, S32 numStars, F32 alph
 }
 
 
-void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &wallEdgePoints, 
-                 const Vector<Point> &selectedWallEdgePoints, const Color &outlineColor, 
+void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &wallEdgePoints,
+                 const Vector<Point> &selectedWallEdgePoints, const Color &outlineColor,
                  const Color &fillColor, F32 currentScale, bool dragMode, bool drawSelected,
                  const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha)
 {
@@ -3926,7 +3926,7 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
          for(S32 i = 0; i < count; i++)
          {
             WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
-            if(wallSegment->isSelected())     
+            if(wallSegment->isSelected())
                wallSegment->renderFill(Point(0,0), Color(.1));
          }
       }
@@ -3941,18 +3941,18 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
       for(S32 i = 0; i < count; i++)
       {
          WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
-         if(!moved || !wallSegment->isSelected())         
+         if(!moved || !wallSegment->isSelected())
             wallSegment->renderFill(selectedItemOffset, color);      // RenderFill ignores offset for unselected walls
       }
 
       renderWallEdges(wallEdgePoints, outlineColor);                 // Render wall outlines with unselected walls
    }
-   else  // Render selected/moving walls last so they appear on top; this is pass 2, 
+   else  // Render selected/moving walls last so they appear on top; this is pass 2,
    {
       for(S32 i = 0; i < count; i++)
       {
          WallSegment *wallSegment = static_cast<WallSegment *>(wallSegmentDatabase->getObjectByIndex(i));
-         if(wallSegment->isSelected())  
+         if(wallSegment->isSelected())
             wallSegment->renderFill(selectedItemOffset, fillColor * alpha);
       }
 
@@ -3974,7 +3974,7 @@ void renderWalls(const GridDatabase *wallSegmentDatabase, const Vector<Point> &w
 }
 
 
-void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const Color *color, 
+void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const Color *color,
                        F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)
 {
    Renderer& r = Renderer::get();
@@ -3988,7 +3988,7 @@ void renderWallOutline(WallItem *wallItem, const Vector<Point> *outline, const C
 }
 
 
-void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color *outlineColor, 
+void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color *outlineColor,
                         S32 canvasWidth, S32 canvasHeight, F32 alphaMod, F32 highlightAlpha)
 {
    Renderer& renderer = Renderer::get();
@@ -4044,7 +4044,7 @@ void drawObjectiveArrow(const Point &nearestPoint, F32 zoomFraction, const Color
       renderer.renderVertexArray((F32 *)(vertices), ARRAYSIZE(vertices), i == 1 ? RenderType::TriangleFan : RenderType::LineLoop);
    }
 
-   // Highlight the objective arrow, if need be.  This will be called rarely, so efficiency here is 
+   // Highlight the objective arrow, if need be.  This will be called rarely, so efficiency here is
    // not as important as above
    if(highlightAlpha > 0)
    {
@@ -4086,7 +4086,7 @@ void renderScoreboardOrnamentTeamFlags(S32 xpos, S32 ypos, const Color *color, b
 
 
 void renderSpawn(const Point &pos, F32 scale, const Color *color)
-{   
+{
    Renderer& r = Renderer::get();
 
    r.pushMatrix();
@@ -4123,7 +4123,7 @@ void renderHeavysetArrow(const Point &pos, const Point &dest, const Color &color
    for(S32 i = 1; i >= 0; i--)
    {
       // Draw heavy colored line with colored core
-      r.setLineWidth(i ? gLineWidth4 : gDefaultLineWidth);                
+      r.setLineWidth(i ? gLineWidth4 : gDefaultLineWidth);
       r.setColor(color, i ? .35f : 1);         // Get color from child class
 
       F32 ang = pos.angleTo(dest);
