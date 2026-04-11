@@ -92,8 +92,8 @@ public:
 
    void push_front(const T&);
    void push_back(const T&);
-   T& pop_front();
-   T& pop_back();
+   T pop_front();
+   T pop_back();
 
    T& operator[](U32 index);
    const T& operator[](U32 index) const;
@@ -347,18 +347,18 @@ template<class T> inline void Vector<T>::push_back(const T &x)
    this->innerVector.push_back(x);
 }
 
-template<class T> inline T& Vector<T>::pop_front()
+template<class T> inline T Vector<T>::pop_front()
 {
    TNLAssert(this->innerVector.size() != 0, "Vector is empty");
-   T& t = (T&)this->innerVector[0];
+   T t = this->innerVector[0];
    this->innerVector.erase(this->innerVector.begin());
    return t;
 }
 
-template<class T> inline T& Vector<T>::pop_back()
+template<class T> inline T Vector<T>::pop_back()
 {
    TNLAssert(this->innerVector.size() != 0, "Vector is empty");
-   T& t = (T&)*(this->innerVector.end() - 1);
+   T t = this->innerVector.back();
    this->innerVector.pop_back();
    return t;
 }

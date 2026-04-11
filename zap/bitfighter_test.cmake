@@ -7,6 +7,7 @@ set(TEST_SOURCES
 	${CMAKE_SOURCE_DIR}/bitfighter_test/LevelFilesForTesting.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBanList.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBfObject.cpp
+	${CMAKE_SOURCE_DIR}/bitfighter_test/TestBugs.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestEditor.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameType.cpp
 	${CMAKE_SOURCE_DIR}/bitfighter_test/TestGameUserInterface.cpp
