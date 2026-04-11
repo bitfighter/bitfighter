@@ -91,7 +91,7 @@ void CoreGameType::renderInterfaceOverlay(S32 canvasWidth, S32 canvasHeight) con
 
    Ship *ship = getGame()->getLocalPlayerShip();
 
-   if(!ship) 
+   if(!ship)
    {
       Parent::renderInterfaceOverlay(canvasWidth, canvasHeight);
       return;
@@ -161,7 +161,7 @@ Vector<string> CoreGameType::getGameParameterMenuKeys()
          items[i] = CoreGameTeamRedistKey;
          break;
       }
- 
+
    return items;
 }
 
@@ -567,7 +567,7 @@ const U32 CoreItem::CoreMaxRotationSpeed = 15;
  * @luafunc CoreItem::CoreItem(Geom geom, int team, num health)
  */
 // Combined Lua / C++ default constructor
-CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))    
+CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CoreTypeNumber;
@@ -682,9 +682,9 @@ void CoreGameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) c
    renderCoreSimple(center, getGame()->getTeam(teamIndex)->getColor(), 20);
 
    // Flash the ornament if the Core is being attacked
-   if(isTeamCoreBeingAttacked(teamIndex)) 
+   if(isTeamCoreBeingAttacked(teamIndex))
    {
-      const S32 flashCycleTime = 300;  
+      const S32 flashCycleTime = 300;
       const Color *color = &Colors::red80;
       F32 alpha = 1;
 
@@ -693,7 +693,7 @@ void CoreGameType::renderScoreboardOrnament(S32 teamIndex, S32 xpos, S32 ypos) c
          color = &Colors::yellow;
          alpha = 0.6f;
       }
-         
+
       drawCircle(center, 15, color, alpha);
    }
 }
@@ -864,7 +864,7 @@ void CoreItem::damageObject(DamageInfo *theInfo)
 
       mHasExploded = true;
       deleteObject(ExplosionCount * ExplosionInterval);  // Must wait for triggered explosions
-      setMaskBits(ExplodedMask);                         
+      setMaskBits(ExplodedMask);
       disableCollision();
 
       return;
@@ -955,7 +955,7 @@ void CoreItem::fillPanelGeom(const Point &pos, U32 time, PanelGeom &panelGeom)
       mid   = (start + end) * .5;
 
       panelGeom.mid[i].set(mid);
-      panelGeom.repair[i].interp(.6f, mid, pos);
+      panelGeom.repair[i].interp(.6f, pos, mid);
    }
 
    panelGeom.isValid = true;
@@ -970,7 +970,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
    Point pos = getPos();               // Center of core
 
    PanelGeom *panelGeom = getPanelGeom();
-   
+
    Point dir = panelGeom->mid[panelIndex] - pos;   // Line extending from the center of the core towards the center of the panel
    dir.normalize(100);
    Point cross(dir.y, -dir.x);         // Line parallel to the panel, perpendicular to dir
@@ -1107,7 +1107,7 @@ void CoreItem::setStartingHealth(F32 health)
 
    // Now that starting health has been set, divide it amongst the panels
    mStartingPanelHealth = mStartingHealth / CORE_PANELS;
-   
+
    // Core's total health is divided evenly amongst its panels
    for(S32 i = 0; i < 10; i++)
       mPanelHealth[i] = mStartingPanelHealth;
@@ -1277,7 +1277,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
             mPanelHealth[i] = mStartingPanelHealth * stream->readFloat(4);
 
             // Check if panel just died
-            if(hadHealth && mPanelHealth[i] == 0)  
+            if(hadHealth && mPanelHealth[i] == 0)
                doPanelDebris(i);
          }
       }
@@ -1367,7 +1367,7 @@ S32 CoreItem::lua_setTeam(lua_State *L)
          oldTeam->addScore(-1);
          getGame()->getGameType()->s2cSetTeamScore(oldTeamIndex, oldTeam->getScore());
       }
-   
+
       if(newTeamIndex >= 0)
       {
          Team* newTeam = dynamic_cast<Team *>(getGame()->getTeam(newTeamIndex));
@@ -1384,10 +1384,10 @@ S32 CoreItem::lua_setTeam(lua_State *L)
 // Lua interface
 /**
  * @luaclass CoreItem
- * 
+ *
  * @brief Objective items in Core games
  */
-//               Fn name    Param profiles         Profile count                           
+//               Fn name    Param profiles         Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getCurrentHealth, ARRAYDEF({{          END }}), 1 ) \
    METHOD(CLASS, getFullHealth,    ARRAYDEF({{          END }}), 1 ) \
@@ -1407,47 +1407,47 @@ REGISTER_LUA_SUBCLASS(CoreItem, Item);
 
 /**
  * @luafunc num CoreItem::getCurrentHealth()
- * 
+ *
  * @brief Returns the item's current health. This will be between 0 and the
  * result of getFullHealth().
- * 
+ *
  * @return The current health .
  */
-S32 CoreItem::lua_getCurrentHealth(lua_State *L) 
-{ 
+S32 CoreItem::lua_getCurrentHealth(lua_State *L)
+{
    return returnFloat(L, getTotalCurrentHealth() * DamageReductionRatio);
 }
 
 
 /**
  * @luafunc num CoreItem::getFullHealth()
- * 
+ *
  * @brief Returns the item's full health.
- * 
+ *
  * @return The total full health.
  */
-S32 CoreItem::lua_getFullHealth(lua_State *L) 
-{ 
+S32 CoreItem::lua_getFullHealth(lua_State *L)
+{
    return returnFloat(L, mStartingHealth * DamageReductionRatio);
 }
 
 
 /**
  * @luafunc CoreItem::setFullHealth(num health)
- * 
+ *
  * @brief Sets the item's full health. Has no effect on current health.
  *
  * @descr The maximum health of each panel is the full health of the core divided
  * by the number of panels.
- * 
- * @param health The item's new full health 
+ *
+ * @param health The item's new full health
  */
-S32 CoreItem::lua_setFullHealth(lua_State *L) 
-{ 
+S32 CoreItem::lua_setFullHealth(lua_State *L)
+{
    checkArgList(L, functionArgs, "CoreItem", "setFullHealth");
    setStartingHealth(getFloat(L, 1));
 
-   return 0;     
+   return 0;
 }
 /**
  * @luafunc CoreItem::getRotationSpeed()

@@ -105,20 +105,20 @@ TEST(ColorTest, Interpolation)
    Color c2(0.0f, 0.0f, 1.0f);
    Color out(0.0f);
 
-   out.interp(1.0f, c1, c2);
+   out.interp(0.0f, c1, c2);
    EXPECT_FLOAT_EQ(1.0f, out.r);
    EXPECT_FLOAT_EQ(0.0f, out.g);
    EXPECT_FLOAT_EQ(0.0f, out.b);
 
-   out.interp(0.0f, c1, c2);
+   out.interp(1.0f, c1, c2);
    EXPECT_FLOAT_EQ(0.0f, out.r);
    EXPECT_FLOAT_EQ(0.0f, out.g);
    EXPECT_FLOAT_EQ(1.0f, out.b);
 
    out.interp(0.25f, c1, c2);
-   EXPECT_FLOAT_EQ(0.25f, out.r);
+   EXPECT_FLOAT_EQ(0.75f, out.r);
    EXPECT_FLOAT_EQ(0.0f, out.g);
-   EXPECT_FLOAT_EQ(0.75f, out.b);
+   EXPECT_FLOAT_EQ(0.25f, out.b);
 }
 
 
