@@ -126,7 +126,7 @@ static bool init()
          logprintf(LogConsumer::LogNetInterface, "Winsock initialization succeeded.");
       else
          logprintf(LogConsumer::LogError, "Winsock initialization failed.");
-       
+
    }
 #elif defined( TNL_OS_XBOX )
       XNetStartupParams xnsp;

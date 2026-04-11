@@ -46,7 +46,7 @@ private:
 public:
    U32 mMaxLen;
    U32 mDisplayedCharacters;
-   U32 mCursorOffset;
+   size_t mCursorOffset;
 
    LineEditor(U32 maxLength = 256, string value = "", U32 displayedCharacters = 0xFFFF);   // Constructor
    virtual ~LineEditor();

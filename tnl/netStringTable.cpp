@@ -9,8 +9,8 @@
 //   the Free Software Foundation; either version 2 of the License, or
 //   (at your option) any later version.
 //
-//   For use in products that are not compatible with the terms of the GNU 
-//   General Public License, alternative licensing options are available 
+//   For use in products that are not compatible with the terms of the GNU
+//   General Public License, alternative licensing options are available
 //   from GarageGames.com.
 //
 //   This program is distributed in the hope that it will be useful,
@@ -80,7 +80,7 @@ U32 mFreeStringDataSize = 0; ///< number of bytes freed by deallocated strings. 
 // the low bit set is assumed to be a free list entry.
 
 
-/// Resize the StringTable to be able to hold newSize items. This 
+/// Resize the StringTable to be able to hold newSize items. This
 /// is called automatically by the StringTable when the table is
 /// full past a certain threshhold.
 ///
@@ -154,7 +154,7 @@ void init()
    mNodeList = (Node **) malloc(InitialNodeListSize * sizeof(Node *));
    for(U32 i = 1; i < InitialNodeListSize; i++)
       mNodeList[i] = (Node *) (size_t)(( (i + 1) << 1) | 1); // see the doco in stringTable.h for how free list entries are coded
-   
+
    mNodeList[InitialNodeListSize - 1] = NULL;
    mNodeList[0] = (Node *) mMemPool->alloc(sizeof(Node));
    mNodeList[0]->stringData[0] = 0;
@@ -194,7 +194,7 @@ void validate()
    U32 nodeCount = 0;
    for(U32 i = 0; i < mNodeListSize; i++)
    {
-      if(mNodeList[i] && !(StringTableEntryId(mNodeList[i]) & 1))        
+      if(mNodeList[i] && !(StringTableEntryId(mNodeList[i]) & 1))
         nodeCount++;
    }
    TNLAssert(nodeCount == mItemCount, "Error!!!");
@@ -202,7 +202,7 @@ void validate()
    StringTableEntryId walk = mNodeListFreeEntry;
    while(walk)
    {
-      walk = StringTableEntryId(mNodeList[walk >> 1]);   
+      walk = StringTableEntryId(mNodeList[walk >> 1]);
       if(!((walk >> 1) < mNodeListSize))
          TNLAssert((walk >> 1) < mNodeListSize, "Out of range node index!!!");
       freeListCount++;
@@ -251,7 +251,7 @@ StringTableEntryId insertn(const char* val, U32 len, const bool caseSens)
       // step to the next node in the hash bucket.
       walk = &(stringNode->nextIndex);
    }
-   
+
    // the string was not found in the table.  So allocate a new node for the string
 
    // first, make sure there is a free node pointer:
@@ -261,7 +261,7 @@ StringTableEntryId insertn(const char* val, U32 len, const bool caseSens)
       mNodeListSize += InitialNodeListSize;
       mNodeList = (Node **) realloc(mNodeList, mNodeListSize * sizeof(Node *));
       for(U32 i = oldNodeListSize; i < mNodeListSize; i++)
-         mNodeList[i] = (Node *) (((i + 1) << 1) | 1);
+         mNodeList[i] = (Node *) (size_t) (((i + 1) << 1) | 1);
       mNodeList[mNodeListSize - 1] = 0;
       mNodeListFreeEntry = (size_t) ((oldNodeListSize << 1) | 1);
    }
@@ -278,7 +278,7 @@ StringTableEntryId insertn(const char* val, U32 len, const bool caseSens)
    mNodeListFreeEntry = (StringTableEntryId) mNodeList[mNodeListFreeEntry >> 1];
    TNLAssert(!mNodeListFreeEntry || (mNodeListFreeEntry & 1), "Error in freeList!!");
    mNodeList[stringNode->masterIndex] = stringNode;
-   
+
    strncpy(stringNode->stringData, val, len);
    stringNode->stringData[len] = 0;    // Null terminate
    mItemCount++;
@@ -323,7 +323,7 @@ StringTableEntryId lookupn(const char* val, S32 len, const bool  caseSens)
          return *walk;
       walk = &(stringNode->nextIndex);
    }
-   return 0; 
+   return 0;
 }
 
 //--------------------------------------
@@ -359,7 +359,7 @@ void resizeHashTable(const U32 newSize)
    {
       U32 key;
       Node *temp = mNodeList[walk];
-      
+
       walk = temp->nextIndex;
       key = temp->hash;
       temp->nextIndex = mBuckets[key % newSize];
@@ -374,7 +374,7 @@ void compact()
    {
       Node *theNode, *newNode;
       theNode = mNodeList[i];
-      
+
       // if the low bit is set, it's an entry in the free list.
       // if it is NULL it is the last entry (see the constructor)
       // this *may* not be the best fix, but it was a crash -pw
@@ -387,7 +387,7 @@ void compact()
       newNode->nextIndex = theNode->nextIndex;
       newNode->hash = theNode->hash;
       strcpy(newNode->stringData, theNode->stringData);
-      mNodeList[i] = newNode; 
+      mNodeList[i] = newNode;
    }
    delete mMemPool;
    mMemPool = newData;

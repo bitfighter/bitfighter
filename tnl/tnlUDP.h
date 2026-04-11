@@ -147,7 +147,7 @@ enum NetError {
 /// The Socket class encapsulates a platform's network socket.
 class Socket
 {
-   S32 mPlatformSocket;    ///< The OS-level socket
+   U32 mPlatformSocket;    ///< The OS-level socket
    U32 mTransportProtocol; ///< The transport type this socket uses.
 public:
    enum {
