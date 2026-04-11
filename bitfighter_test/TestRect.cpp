@@ -670,11 +670,25 @@ TEST(RectTest, ExpandNegativeDelta)
 
 TEST(RectTest, ExpandToIntPositiveValues)
 {
-   Rect r(Point(0.2f, 0.3f), Point(9.7f, 9.6f));
-   r.expandToInt(Point(0.0f, 0.0f));
+   Rect r1(Point(0.2f, 0.3f), Point(9.7f, 9.6f));
+   r1.expandToInt(Point(0.1f, 0.1f));
+
    // Positive values: ceil => 10, 10; zero values may vary
-   EXPECT_LE(r.min.x, 0.2f);  // min should be <= original
-   EXPECT_GE(r.max.x, 9.7f);  // max should be >= original
+   EXPECT_FLOAT_EQ(0.0f, r1.min.x);
+   EXPECT_FLOAT_EQ(0.0f, r1.min.y);
+   EXPECT_FLOAT_EQ(10.0f, r1.max.x);
+   EXPECT_FLOAT_EQ(10.0f, r1.max.y);
+
+
+   Rect r2(Point(0.2f, 0.3f), Point(9.7f, 9.6f));
+   r2.expandToInt(Point(0.35f, 0.5f));
+
+   // Positive values: ceil => 10, 10; zero values may vary
+   EXPECT_FLOAT_EQ(-1.0f, r2.min.x);
+   EXPECT_FLOAT_EQ(-1.0f, r2.min.y);
+   EXPECT_FLOAT_EQ(11.0f, r2.max.x);
+   EXPECT_FLOAT_EQ(11.0f, r2.max.y);
+
 }
 
 TEST(RectTest, ExpandToIntNegativeMin)
@@ -686,6 +700,18 @@ TEST(RectTest, ExpandToIntNegativeMin)
    EXPECT_FLOAT_EQ(-5.0f, r.min.y);
    EXPECT_FLOAT_EQ(4.0f,  r.max.x);
    EXPECT_FLOAT_EQ(5.0f,  r.max.y);
+}
+
+
+TEST(RectTest, ExpandToIntDefault)
+{
+   Rect r(Point(0.2f, 0.3f), Point(9.7f, 9.6f));
+   r.expandToInt();		// Default expansion should be 0, 0
+
+   EXPECT_FLOAT_EQ(0.0f, r.min.x);
+   EXPECT_FLOAT_EQ(0.0f, r.min.y);
+   EXPECT_FLOAT_EQ(10.0f, r.max.x);
+   EXPECT_FLOAT_EQ(10.0f, r.max.y);
 }
 
 

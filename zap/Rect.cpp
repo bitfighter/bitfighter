@@ -244,19 +244,21 @@ bool Rect::intersects(const Point &center, F32 radius) const
 }
 
 
-#define INTIFY(a) (a) < 0 ? floor(a) : ceil(a) 
 
+// Expand rect by delta in all directions
 void Rect::expand(const Point &delta)
 {
    min -= delta;
    max += delta;
 }
 
+
+// Expand rect by delta in all directions, then "snap outward" out to integers 
 void Rect::expandToInt(const Point &delta)
 {
    expand(delta);
-   min.set(INTIFY(min.x), INTIFY(min.y));
-   max.set(INTIFY(max.x), INTIFY(max.y));
+   min.set(floor(min.x), floor(min.y));
+   max.set(ceil(max.x), ceil(max.y));
 }
 
 void Rect::offset(const Point &offset)

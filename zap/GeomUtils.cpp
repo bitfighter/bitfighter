@@ -46,7 +46,7 @@ using namespace TNL;
 using namespace ClipperLib;
 
 
-#ifdef TNL_OS_WIN32 
+#ifdef TNL_OS_WIN32
 #  define isnanf _isnanf
 #endif
 
@@ -58,8 +58,8 @@ using namespace LuaArgs;
 Vector<Point> createPolygon(const Point &center, F32 radius, U32 sideCount, F32 angle)
 {
    Vector<Point> outputPoly(sideCount);
- 
-   calcPolygonVerts(center, sideCount, radius, angle, outputPoly);   
+
+   calcPolygonVerts(center, sideCount, radius, angle, outputPoly);
    return outputPoly;
 }
 
@@ -244,28 +244,28 @@ bool isConvex(const Vector<Point> *verts)
   Point v1, v2;
   double det_value, cur_det_value;
   int num_vertices = verts->size();
-  
+
   if(num_vertices < 3)
      return true;
-  
+
   v1 = verts->get(0) - verts->get(num_vertices-1);
   v2 = verts->get(1) - verts->get(0);
   det_value = v1.determinant(v2);
-  
+
   for(S32 i = 1 ; i < num_vertices-1 ; i++)
   {
     v1 = v2;
     v2 = verts->get(i+1) - verts->get(i);
     cur_det_value = v1.determinant(v2);
-    
+
     if( (cur_det_value * det_value) < 0.0 )
       return false;
   }
-  
+
   v1 = v2;
   v2 = verts->get(0) - verts->get(num_vertices-1);
   cur_det_value = v1.determinant(v2);
-  
+
   return  (cur_det_value * det_value) >= 0.0;
 }
 
@@ -366,7 +366,7 @@ bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
    for(S32 i = 0; i < p1.size(); i++)
    {
       const Point *rp2 = &p1[i];
-      
+
       const Point *cp1 = &p2[p2.size() - 1];
 
       for(S32 j = 0; j < p2.size(); j++)
@@ -484,7 +484,7 @@ bool pointOnSegment(const Point &c, const Point &a, const Point &b, F32 closeEno
 {
    static Point closest;
 
-   return c.distSquared(a) < closeEnough || c.distSquared(b) < closeEnough || 
+   return c.distSquared(a) < closeEnough || c.distSquared(b) < closeEnough ||
          (findNormalPoint(c, a, b, closest) && c.distSquared(closest) < closeEnough);
 }
 
@@ -494,39 +494,39 @@ bool pointOnSegment(const Point &c, const Point &a, const Point &b, F32 closeEno
 //
 //    Let the point be C (Cx,Cy) and the line be AB (Ax,Ay) to (Bx,By).
 //    Let P be the point of perpendicular projection of C on AB.  The parameter
-//    r, which indicates P's position along AB, is computed by the dot product 
+//    r, which indicates P's position along AB, is computed by the dot product
 //    of AC and AB divided by the square of the length of AB:
-//    
+//
 //    (1)     AC dot AB
-//        r = ---------  
+//        r = ---------
 //            ||AB||^2
-//    
+//
 //    r has the following meaning:
-//    
+//
 //        r=0      P = A
 //        r=1      P = B
 //        r<0      P is on the backward extension of AB
 //        r>1      P is on the forward extension of AB
 //        0<r<1    P is interior to AB
-//    
+//
 //    The length of a line segment in d dimensions, AB is computed by:
-//    
+//
 //        L = sqrt( (Bx-Ax)^2 + (By-Ay)^2 + ... + (Bd-Ad)^2)
 //
-//    so in 2D:   
-//    
+//    so in 2D:
+//
 //        L = sqrt( (Bx-Ax)^2 + (By-Ay)^2 )
-//    
+//
 //    and the dot product of two vectors in d dimensions, U dot V is computed:
-//    
+//
 //        D = (Ux * Vx) + (Uy * Vy) + ... + (Ud * Vd)
-//    
-//    so in 2D:   
-//    
-//        D = (Ux * Vx) + (Uy * Vy) 
-//    
+//
+//    so in 2D:
+//
+//        D = (Ux * Vx) + (Uy * Vy)
+//
 //    So (1) expands to:
-//    
+//
 //            (Cx-Ax)(Bx-Ax) + (Cy-Ay)(By-Ay)
 //        r = -------------------------------
 //                          L^2
@@ -538,7 +538,7 @@ bool pointOnSegment(const Point &c, const Point &a, const Point &b, F32 closeEno
 //
 //    And the distance from A to P = r*L.
 //
-//    Use another parameter s to indicate the location along PC, with the 
+//    Use another parameter s to indicate the location along PC, with the
 //    following meaning:
 //           s<0      C is left of AB
 //           s>0      C is right of AB
@@ -558,9 +558,9 @@ bool pointOnSegment(const Point &c, const Point &a, const Point &b, F32 closeEno
 //
 //   F32 s = F32((a.y - c.y) * (b.x - a.x) - (a.x - c.x) * (b.y - a.y));
 //
-//   if ((r >= 0) && (r <= 1)) 
+//   if ((r >= 0) && (r <= 1))
 //   {
-//      return(fabs(s) < .0001);      
+//      return(fabs(s) < .0001);
 //   }
 //   else
 //      return false;
@@ -635,7 +635,6 @@ bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point 
 {
    return segsOverlap(p1, p2, p3, p4, overlapStart, overlapEnd, 1.0f);
 }
-
 
 // Returns index of points vector closest to point
 S32 findClosestPoint(const Point &point, const Vector<Point> &points)
@@ -838,7 +837,6 @@ bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n,
   return true;
 }
 
-
 // Takes points in contour, triangulates and put the results in result
 bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 {
@@ -846,7 +844,7 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
    /* allocate and initialize list of Vertices in polygon */
 
    int n = contour.size();
-   if(n < 3) 
+   if(n < 3)
       return false;
 
    int *V = new int[n];
@@ -854,10 +852,10 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
    /* we want a counter-clockwise polygon in V */
 
    if(area(contour) > 0)
-      for (int v=0; v < n; v++) 
+      for (int v=0; v < n; v++)
          V[v] = v;
    else
-      for(int v = 0; v < n; v++) 
+      for(int v = 0; v < n; v++)
          V[v] = (n-1)-v;
 
    int nv = n;
@@ -876,17 +874,17 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
       }
 
       /* Three consecutive vertices in current polygon, <u,v,w> */
-      int u = v; 
-      if (nv <= u) 
+      int u = v;
+      if (nv <= u)
          u = 0;     // previous
 
-      v = u + 1; 
-      if(nv <= v) 
-         v = 0;     // new v   
+      v = u + 1;
+      if(nv <= v)
+         v = 0;     // new v
 
-      int w = v+1; 
-      if(nv <= w) 
-         w = 0;     // next     
+      int w = v+1;
+      if(nv <= w)
+         w = 0;     // next
 
       if( Snip(contour,u,v,w,nv,V) )
       {
@@ -903,7 +901,7 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
          m++;
 
          /* remove v from remaining polygon */
-         for(s = v, t = v+1; t < nv; s++, t++) 
+         for(s = v, t = v+1; t < nv; s++, t++)
             V[s] = V[t];
 
          nv--;
@@ -928,7 +926,7 @@ Paths upscaleClipperPoints(const Vector<const Vector<Point> *> &inputPolygons)
 
    outputPolygons.resize(inputPolygons.size());
 
-   for(S32 i = 0; i < inputPolygons.size(); i++) 
+   for(S32 i = 0; i < inputPolygons.size(); i++)
    {
       outputPolygons[i].resize(inputPolygons[i]->size());
 
@@ -947,7 +945,7 @@ Paths upscaleClipperPoints(const Vector<Vector<Point> > &inputPolygons)
 
    outputPolygons.resize(inputPolygons.size());
 
-   for(S32 i = 0; i < inputPolygons.size(); i++) 
+   for(S32 i = 0; i < inputPolygons.size(); i++)
    {
       outputPolygons[i].resize(inputPolygons[i].size());
 
@@ -965,7 +963,7 @@ Vector<Vector<Point> > downscaleClipperPoints(const Paths &inputPolygons)
 
    outputPolygons.resize((U32)inputPolygons.size());
 
-   for(U32 i = 0; i < inputPolygons.size(); i++) 
+   for(U32 i = 0; i < inputPolygons.size(); i++)
    {
       outputPolygons[i].resize((U32)inputPolygons[i].size());
 
@@ -1309,7 +1307,6 @@ bool polyganize(const Vector<Vector<Point> > &input, Vector<Vector<Point> > &out
    return true;
 }
 
-
 // Use Clipper to merge inputPolygons, placing the result in outputPolygons
 bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vector<Point> > &outputPolygons)
 {
@@ -1337,7 +1334,6 @@ bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vecto
    return success;
 }
 
-
 // Use Clipper to merge inputPolygons, placing the result in outputPolygons
 // NOTE: this does NOT downscale the Clipper points.  You must do this afterwards
 bool mergePolysToPolyTree(const Vector<Vector<Point> > &inputPolygons, PolyTree &solution)
@@ -1359,7 +1355,6 @@ bool mergePolysToPolyTree(const Vector<Vector<Point> > &inputPolygons, PolyTree 
 
    return clipper.Execute(ctUnion, solution, pftNonZero, pftNonZero);
 }
-
 
 // Convert a Polygons to a list of points in a-b b-c c-d d-a format
 void unpackPolygons(const Vector<Vector<Point> > &solution, Vector<Point> &lineSegmentPoints)
@@ -1789,8 +1784,8 @@ F32 angleOfLongestSide(const Vector<Point> &polyPoints)
       Point p2 = polyPoints[(i < polyPoints.size() - 1) ? i + 1 : 0];
       F32 len = p1.distSquared(p2);
 
-      if(len > maxlen + .1)     // .1 helps in editor if two sides are essentially equal 
-      { 
+      if(len > maxlen + .1)     // .1 helps in editor if two sides are essentially equal
+      {
          start = p1;
          end = p2;
          maxlen = len;
@@ -1834,7 +1829,6 @@ bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &cl
 }
 
 
-// Based on http://www.gamedev.net/community/forums/topic.asp?topic_id=440350
 bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const Point &p4, F32 &collisionTime)
 {
     F32 denom = ((p4.y - p3.y) * (p2.x - p1.x)) - ((p4.x - p3.x) * (p2.y - p1.y));
@@ -1847,10 +1841,16 @@ bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const 
        //   return false;  //COINCIDENT;
     return false;  // PARALLEL;
 
-    collisionTime = numerator1 / denom;
+    F32 ua = numerator1 / denom;
     F32 ub = numerator2 / denom;
 
-    return (collisionTime >= 0.0 && collisionTime <= 1.0 && ub >= 0.0 && ub <= 1.0);
+    if (ua >= 0.0 && ua <= 1.0 && ub >= 0.0 && ub <= 1.0)
+    {
+        collisionTime = ua;
+        return true;
+    }
+
+    return false;
     // Point intersection(p1.x + collisionTime * (p2.x - p1.x), p1.y + collisionTime * (p2.y - p1.y));
 }
 
@@ -1906,11 +1906,11 @@ Point shortenSegment(const Point &startPoint, const Point &endPoint, F32 lengthR
 
 // Takes a list of vertices representing corners and converts them into a list of lines representing the edges of an object
 // Basically, taking a vector like A-B-C-D and converting it to A-B-B-C-C-D
-void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges)  
+void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges)
 {
    edges.clear();
 
-   S32 last = corners.size() - 1;             
+   S32 last = corners.size() - 1;
    for(S32 i = 0; i < corners.size(); i++)
    {
       edges.push_back(corners[last]);
@@ -1951,16 +1951,16 @@ void constructBarrierEndPoints(const Vector<Point> *points, F32 width, Vector<Po
       // Do some bounds checking.  Crazy, I know, but trust me, it's worth it!
       if (cosTheta > 1.0)
          cosTheta = 1.0;
-      else if(cosTheta < -1.0)  
+      else if(cosTheta < -1.0)
          cosTheta = -1.0;
 
       cosTheta = fabs(cosTheta);     // Seems to reduce "end gap" on acute junction angles
-      
+
       F32 extendAmt = width * 0.5f * F32(tan( acos(cosTheta) / 2 ));
       if(extendAmt > 0.01f)
          extendAmt -= 0.01f;
       extend.push_back(extendAmt);
-   
+
       lastEdge = curEdge;
    }
 
@@ -1986,7 +1986,7 @@ void constructBarrierEndPoints(const Vector<Point> *points, F32 width, Vector<Po
 
 
 // Takes a segment and "puffs its width out" to a rectangle of a specified width, filling cornerPoints.  Does not extend endpoints.
-void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &cornerPoints)  
+void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &cornerPoints)
 {
    cornerPoints.clear();
 
@@ -2275,7 +2275,7 @@ GENERATE_LUA_STATIC_METHODS_TABLE(Geom, LUA_STATIC_METHODS);
  * @note
  * This function is highly experimental, and potentially very resource
  * intensive. If the output must be triangulated (because you made a hole), then
- * there is a possibility that the program will **crash abruptly**. Please use
+ * there is a possibility that the program will crash abruptly. Please use
  * this function with great care, and make sure to constrain the inputs tightly
  * so that users can not induce crashes.
  *
@@ -2495,7 +2495,7 @@ S32 lua_polyganize(lua_State *L)
  * @descr Determines if and "when" the line segments a and b intersect. The
  * boolean return value is `true` if the segments intersect. The number return
  * value is a "time" `t` along the line a corresponding to where they intersect.
- * If the segments intersect, the first return value will `true` and the second 
+ * If the segments intersect, the first return value will `true` and the second
  * return value will be in the range [0, 1].  If they do not intersect, the first
  * return value will be false, and the second value should be discarded.
  *
@@ -2506,7 +2506,7 @@ S32 lua_polyganize(lua_State *L)
  *     local intersection = a1 + (a2 - a1) * t
  *   end
  * @endcode
- * 
+ *
  * @return ok,t Returns true if the segments intersect, and a time t
  * along a when the intersect.
  */
