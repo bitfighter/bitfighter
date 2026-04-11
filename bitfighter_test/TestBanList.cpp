@@ -21,10 +21,15 @@ using namespace TNL;
 namespace Zap
 {
 
+static auto cleanTimeNow() {
+   // Truncate to whole seconds first to ensure exact minute calculations
+   return chrono::system_clock::from_time_t(chrono::system_clock::to_time_t(chrono::system_clock::now()));
+}
+
 // Helper: generate an ISO timestamp that is 'minutesAgo' minutes in the past
 static string minutesAgoISO(int minutesAgo)
 {
-   auto now = chrono::system_clock::now();
+   auto now = cleanTimeNow();
    auto then = now - chrono::minutes(minutesAgo);
    time_t thenT = chrono::system_clock::to_time_t(then);
    char buf[sizeof "11111111T111111"];

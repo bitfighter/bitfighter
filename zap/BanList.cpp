@@ -75,6 +75,7 @@ time_t ISOStringToTime(const string &timeString)
    when.tm_hour = hh;
    when.tm_min = mm;
    when.tm_sec = ss;
+   when.tm_isdst = -1;  // Let mktime determine DST
 
    time_t converted = mktime(&when);
 
@@ -184,11 +185,17 @@ string BanList::banItemToString(BanItem *banItem)
          banItem->durationMinutes;
 }
 
+static auto cleanTimeNow()
+{
+   // Truncate to whole seconds first to ensure exact minute calculations
+   return chrono::system_clock::from_time_t(chrono::system_clock::to_time_t(chrono::system_clock::now()));
+}
+
 
 bool BanList::isBanned(const Address &address, const string &nickname, bool isAuthenticated)
 {
    string addressString = addressToString(address);
-   auto currentTime = system_clock::now();
+   auto currentTime = cleanTimeNow();
 
    for (S32 i = 0; i < serverBanList.size(); i++)
    {
