@@ -54,7 +54,7 @@ namespace StringTable
    /// @param  string   String to check in the table (and add).
    /// @param  len      Length of the string in bytes.
    /// @param  caseSens Determines whether case matters.
-   StringTableEntryId insertn(const char *string, S32 len, bool caseSens = true);
+   StringTableEntryId insertn(const char *string, SU2 len, bool caseSens = true);
 
    /// Determines if a string is in the string table, and returns the id of the string, or 0 if the string is not in the table.
    ///
@@ -73,7 +73,7 @@ namespace StringTable
    U32 hashString(const char* in_pString);
 
    /// Hash a string of given length into a U32.
-   U32 hashStringn(const char* in_pString, S32 len);
+   U32 hashStringn(const char* in_pString, U32 len);
 
    void incRef(StringTableEntryId index);   
    void decRef(StringTableEntryId index);
